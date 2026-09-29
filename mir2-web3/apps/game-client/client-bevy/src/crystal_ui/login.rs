@@ -155,7 +155,7 @@ pub fn spawn_login_screen(
         assets.new_account,
         CrystalLoginAction::RegisterAccount,
         matches!(model.login.focus, LoginFocus::NewAccountButton),
-        model.login.is_ready(),
+        true,
     );
     spawn_crystal_image_button(
         parent,

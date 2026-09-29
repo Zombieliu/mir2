@@ -127,8 +127,8 @@ async function testAssembleMode() {
   assert.equal(manifest.schemaVersion, 2);
   assert.equal(manifest.generatedAt, null, "manifest has no clock-dependent data");
   assert.equal(manifest.spell_effects.length, SPELL_EFFECTS.length);
-  assert.deepEqual(manifest.client_effects, CLIENT_EFFECTS);
-  assert.deepEqual(manifest.client_effects[0], {
+  assert.deepEqual(manifest.client_effects, [...CLIENT_EFFECTS].sort((a, b) => a.effect.localeCompare(b.effect)));
+  assert.deepEqual(manifest.client_effects.find((effect) => effect.effect === "LeftGuardRangeProjectile"), {
     effect: "LeftGuardRangeProjectile",
     library: "Magic",
     base: 10,
@@ -151,7 +151,7 @@ async function testAssembleMode() {
       symbol: "LeftGuardRangeProjectile",
     },
   });
-  assert.deepEqual(manifest.client_effects[1], {
+  assert.deepEqual(manifest.client_effects.find((effect) => effect.effect === "NewMoveDestination"), {
     effect: "NewMoveDestination",
     library: "Magic3",
     base: 500,
@@ -167,7 +167,7 @@ async function testAssembleMode() {
       symbol: "NewMoveDestination",
     },
   });
-  assert.deepEqual(manifest.client_effects[2], {
+  assert.deepEqual(manifest.client_effects.find((effect) => effect.effect === "PlayerRevive"), {
     effect: "PlayerRevive",
     library: "Magic2",
     base: 1220,
@@ -183,7 +183,7 @@ async function testAssembleMode() {
       symbol: "PlayerRevive",
     },
   });
-  assert.deepEqual(manifest.client_effects[3], {
+  assert.deepEqual(manifest.client_effects.find((effect) => effect.effect === "RightGuardRangeHit"), {
     effect: "RightGuardRangeHit",
     library: "Magic2",
     base: 10,
@@ -444,6 +444,17 @@ function testPackedAtlasCrop() {
 }
 
 async function main() {
+  for (const name of ["MassHiding", "SoulShield", "BlessedArmour", "Curse", "Plague", "PoisonCloud"]) {
+    const effect = SPELL_EFFECTS.find((entry) => entry.spell === name);
+    assert.equal(effect.kind, "projectile", `${name} has no invented caster bitmap`);
+    assert.equal(effect.projectile.base, 1160);
+    assert.equal(effect.projectile.count, 3);
+    assert.equal(effect.projectile.interval, 30);
+    assert.equal(effect.projectile.directionCount, 16);
+    assert.equal(effect.projectile.directionStride, 10);
+    if (name === "PoisonCloud") assert.equal(effect.impact, undefined);
+    else assert.equal(effect.impact.kind, "ground", `${name} completion belongs to fixed TargetPoint`);
+  }
   testAdditiveAlphaNormalization();
   testPackedAtlasCrop();
   await testAssembleMode();

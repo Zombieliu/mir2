@@ -5,8 +5,14 @@
 //! the renderer. A rollback-gated path may select its pose for rendering, but it
 //! never mutates authoritative movement state or sends a gameplay command.
 
+#[cfg(target_arch = "wasm32")]
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
+#[cfg(not(target_arch = "wasm32"))]
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    Mutex,
+};
 
 use bevy::prelude::*;
 use serde::Serialize;
@@ -22,11 +28,31 @@ const MAX_SMOOTH_TILE_DISTANCE: f32 = 3.0;
 const PIXEL_MATCH_EPSILON: f32 = 0.01;
 const PATH_MATCH_EPSILON_TILES: f32 = 0.001;
 
+#[cfg(target_arch = "wasm32")]
 thread_local! {
     static PENDING_EVENT_JSON: RefCell<VecDeque<String>> = const { RefCell::new(VecDeque::new()) };
     static PENDING_EVENT_DROP_COUNT: Cell<u64> = const { Cell::new(0) };
     static PENDING_PRESENTATION_ENABLED: Cell<Option<bool>> = const { Cell::new(None) };
     static LATEST_DIAGNOSTICS: RefCell<Option<LocalMotionDiagnostics>> = const { RefCell::new(None) };
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+static PENDING_EVENT_JSON: Mutex<VecDeque<String>> = Mutex::new(VecDeque::new());
+#[cfg(not(target_arch = "wasm32"))]
+static PENDING_EVENT_DROP_COUNT: AtomicU64 = AtomicU64::new(0);
+#[cfg(not(target_arch = "wasm32"))]
+static PENDING_PRESENTATION_ENABLED: Mutex<Option<bool>> = Mutex::new(None);
+#[cfg(not(target_arch = "wasm32"))]
+static LATEST_DIAGNOSTICS: Mutex<Option<LocalMotionDiagnostics>> = Mutex::new(None);
+
+#[cfg(test)]
+static BRIDGE_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
+#[cfg(test)]
+pub(crate) fn local_motion_test_guard() -> std::sync::MutexGuard<'static, ()> {
+    BRIDGE_TEST_LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -46,6 +72,10 @@ pub(crate) struct LocalMotionCommand {
 #[serde(rename_all = "camelCase")]
 pub(crate) struct LocalMotionSegment {
     pub(crate) command_at_ms: f64,
+    pub(crate) command_from_x: i32,
+    pub(crate) command_from_y: i32,
+    /// Exact prior command origin, valid only until the new center commits.
+    pub(crate) handoff_center: Option<(i32, i32)>,
     pub(crate) from_x: f32,
     pub(crate) from_y: f32,
     pub(crate) to_x: f32,
@@ -101,6 +131,15 @@ impl LocalMotionSegment {
             self.to_x + (self.from_x - self.to_x) * remaining,
             self.to_y + (self.from_y - self.to_y) * remaining,
         )
+    }
+
+    fn smooth_pose(&self, now_ms: f64) -> Vec2 {
+        // Display-only interpolation. Sprite phases and command readiness keep
+        // their Crystal clocks; never extend travel when a display pulse is late.
+        let duration = f64::from(self.phase_count.max(1)) * MOVE_PHASE_INTERVAL_MS;
+        let progress = ((now_ms - self.started_ms) / duration).clamp(0.0, 1.0) as f32;
+        Vec2::new(self.from_x, self.from_y)
+            .lerp(Vec2::new(self.to_x, self.to_y), progress)
     }
 
     fn current_offset(&self, cell_width: f32, cell_height: f32) -> Vec2 {
@@ -241,6 +280,7 @@ impl Default for LocalMotionDiagnostics {
 
 #[derive(Debug, Default, Resource)]
 pub(crate) struct LocalMotionPresentationShadow {
+    smooth_display: bool,
     now_ms: f64,
     move_clock_pulse_id: u64,
     move_clock_next_pulse_ms: f64,
@@ -280,7 +320,11 @@ pub(crate) struct LocalMotionPresentationShadow {
 impl LocalMotionPresentationShadow {
     fn set_presentation_enabled(&mut self, enabled: bool) {
         self.presentation_enabled = enabled;
+        #[cfg(not(target_arch = "wasm32"))]
+        { self.smooth_display = std::env::var("MIR2_NATIVE_SMOOTH_MOVEMENT").as_deref() == Ok("1"); }
     }
+
+    pub(crate) fn smooth_display_enabled(&self) -> bool { self.smooth_display }
 
     pub(crate) fn presentation_enabled(&self) -> bool {
         self.presentation_enabled
@@ -361,6 +405,79 @@ impl LocalMotionPresentationShadow {
         self.pending_commands.clear();
     }
 
+    /// Scene resets are consumed in `Update`, after native input has already
+    /// produced this frame's commands in `PreUpdate`. Drop only state from the
+    /// previous scene; a command stamped at the reset boundary belongs to the
+    /// newly arrived map and must remain available to presentation.
+    ///
+    /// A retained predecessor cannot cross that boundary. Even if the new map
+    /// reuses grid coordinates, its first command must not borrow an old-map
+    /// center for a one-shot handoff.
+    pub(crate) fn clear_stale_for_scene_reset(&mut self) -> bool {
+        let reset_at_ms = self.now_ms;
+        if !reset_at_ms.is_finite() {
+            self.clear_state();
+            return false;
+        }
+
+        let retained_command = self.segment.as_ref().and_then(|segment| {
+            (segment.started_ms >= reset_at_ms).then(|| {
+                (
+                    segment.command_at_ms,
+                    segment.command_from_x,
+                    segment.command_from_y,
+                    segment.to_x as i32,
+                    segment.to_y as i32,
+                )
+            })
+        });
+        if let Some((at_ms, from_x, from_y, to_x, to_y)) = retained_command {
+            // `atMs` is native input elapsed time while `started_ms` is the
+            // runtime wall clock. Use the latter for the scene boundary, then
+            // retain at most the exact new command needed for its ACK.
+            let current = self.pending_commands.pop_back().filter(|command| {
+                command.at_ms == at_ms
+                    && command.from_x == from_x
+                    && command.from_y == from_y
+                    && command.to_x == to_x
+                    && command.to_y == to_y
+            });
+            self.pending_commands.clear();
+            if let Some(command) = current {
+                self.pending_commands.push_back(command);
+            }
+            if let Some(segment) = self.segment.as_mut() {
+                // A same-frame successor may have adopted the old segment's
+                // fractional smooth pose before this Update-time boundary.
+                // Its command coordinates are the only valid origin on the
+                // new map.
+                segment.from_x = segment.command_from_x as f32;
+                segment.from_y = segment.command_from_y as f32;
+                segment.handoff_center = None;
+                segment.presentation_committed = false;
+                segment.authoritative_confirmed = false;
+            }
+            self.last_comparison = None;
+            self.first_mismatch = None;
+            self.last_mismatch = None;
+            return true;
+        }
+
+        self.segment = None;
+        self.pending_commands.clear();
+        self.last_comparison = None;
+        self.first_mismatch = None;
+        self.last_mismatch = None;
+        false
+    }
+
+    pub(crate) fn clear_for_session_reset(&mut self) {
+        self.clear_state();
+        self.last_comparison = None;
+        self.first_mismatch = None;
+        self.last_mismatch = None;
+    }
+
     fn reset(&mut self, object_id: String, _x: i32, _y: i32) {
         self.self_object_id = Some(object_id);
         self.segment = None;
@@ -389,10 +506,14 @@ impl LocalMotionPresentationShadow {
         let provided_from = Vec2::new(command.from_x as f32, command.from_y as f32);
         let mut effective_from = provided_from;
         let mut presentation_committed = false;
+        let mut handoff_center = None;
         if let Some(previous) = &self.segment {
             if previous.to_x == provided_from.x && previous.to_y == provided_from.y {
+                if previous.authoritative_confirmed {
+                    handoff_center = Some((previous.command_from_x, previous.command_from_y));
+                }
                 presentation_committed = previous.presentation_committed;
-                let current = previous.current_pose();
+                let current = if self.smooth_display { previous.smooth_pose(self.now_ms) } else { previous.current_pose() };
                 if chebyshev_distance(current, target) <= MAX_SMOOTH_TILE_DISTANCE {
                     effective_from = current;
                 }
@@ -404,6 +525,9 @@ impl LocalMotionPresentationShadow {
         let next_pulse_ms = self.now_ms + MOVE_PHASE_INTERVAL_MS;
         self.segment = moving.then(|| LocalMotionSegment {
             command_at_ms: command.at_ms,
+            command_from_x: command.from_x,
+            command_from_y: command.from_y,
+            handoff_center,
             from_x: effective_from.x,
             from_y: effective_from.y,
             to_x: target.x,
@@ -550,7 +674,7 @@ impl LocalMotionPresentationShadow {
         object_id: &str,
         center_x: i32,
         center_y: i32,
-        _now_ms: f64,
+        now_ms: f64,
         cell_width: f32,
         cell_height: f32,
     ) -> Option<Vec2> {
@@ -575,13 +699,21 @@ impl LocalMotionPresentationShadow {
             && center.x <= from.x.max(target.x).ceil()
             && center.y >= from.y.min(target.y).floor()
             && center.y <= from.y.max(target.y).ceil();
-        if !inside_path_bounds || chebyshev_distance(center, target) > MAX_SMOOTH_TILE_DISTANCE {
+        let normal_center = inside_path_bounds && chebyshev_distance(center, target) <= MAX_SMOOTH_TILE_DISTANCE;
+        let confirmed_handoff = segment.handoff_center == Some((center_x, center_y));
+        if !normal_center && !confirmed_handoff {
             self.target_mismatch_count = self.target_mismatch_count.saturating_add(1);
             return None;
         }
+        if normal_center {
+            segment.handoff_center = None;
+        }
 
         self.candidate_match_count = self.candidate_match_count.saturating_add(1);
-        let target_relative = segment.current_offset(cell_width, cell_height);
+        let target_relative = if self.smooth_display {
+            let pose = segment.smooth_pose(now_ms);
+            Vec2::new((pose.x - segment.to_x) * cell_width, (pose.y - segment.to_y) * cell_height)
+        } else { segment.current_offset(cell_width, cell_height) };
         Some(
             target_relative
                 + Vec2::new(
@@ -732,6 +864,7 @@ fn coordinates_match(left: f32, right: f32) -> bool {
 }
 
 pub(crate) fn enqueue_local_motion_event_json(json: String) {
+    #[cfg(target_arch = "wasm32")]
     PENDING_EVENT_JSON.with(|pending| {
         let mut pending = pending.borrow_mut();
         if pending.len() >= MAX_PENDING_EVENT_JSON {
@@ -740,31 +873,118 @@ pub(crate) fn enqueue_local_motion_event_json(json: String) {
         }
         pending.push_back(json);
     });
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        let mut pending = PENDING_EVENT_JSON
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        if pending.len() >= MAX_PENDING_EVENT_JSON {
+            pending.pop_front();
+            PENDING_EVENT_DROP_COUNT.fetch_add(1, Ordering::Relaxed);
+        }
+        pending.push_back(json);
+    }
 }
 
 pub(crate) fn get_local_motion_diagnostics_json() -> String {
+    #[cfg(target_arch = "wasm32")]
     let diagnostics = LATEST_DIAGNOSTICS
         .with(|latest| latest.borrow().clone())
         .unwrap_or_default();
+
+    #[cfg(not(target_arch = "wasm32"))]
+    let diagnostics = LATEST_DIAGNOSTICS
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .clone()
+        .unwrap_or_default();
+
     serde_json::to_string(&diagnostics).unwrap_or_else(|_| {
         r#"{"serializationError":"local motion diagnostics were not finite"}"#.to_owned()
     })
 }
 
 pub(crate) fn set_local_motion_presentation_enabled(enabled: bool) {
+    #[cfg(target_arch = "wasm32")]
     PENDING_PRESENTATION_ENABLED.with(|pending| pending.set(Some(enabled)));
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        *PENDING_PRESENTATION_ENABLED
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = Some(enabled);
+    }
 }
 
 fn take_pending_presentation_enabled() -> Option<bool> {
-    PENDING_PRESENTATION_ENABLED.with(|pending| pending.replace(None))
+    #[cfg(target_arch = "wasm32")]
+    {
+        PENDING_PRESENTATION_ENABLED.with(|pending| pending.replace(None))
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        PENDING_PRESENTATION_ENABLED
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .take()
+    }
 }
 
 fn drain_pending_event_json() -> Vec<String> {
-    PENDING_EVENT_JSON.with(|pending| pending.borrow_mut().drain(..).collect())
+    #[cfg(target_arch = "wasm32")]
+    {
+        PENDING_EVENT_JSON.with(|pending| pending.borrow_mut().drain(..).collect())
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        PENDING_EVENT_JSON
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .drain(..)
+            .collect()
+    }
 }
 
 fn take_pending_event_drop_count() -> u64 {
-    PENDING_EVENT_DROP_COUNT.with(|count| count.replace(0))
+    #[cfg(target_arch = "wasm32")]
+    {
+        PENDING_EVENT_DROP_COUNT.with(|count| count.replace(0))
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        PENDING_EVENT_DROP_COUNT.swap(0, Ordering::Relaxed)
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn reset_local_motion_bridge_for_test() {
+    #[cfg(target_arch = "wasm32")]
+    {
+        PENDING_EVENT_JSON.with(|pending| pending.borrow_mut().clear());
+        PENDING_EVENT_DROP_COUNT.with(|count| count.set(0));
+        PENDING_PRESENTATION_ENABLED.with(|pending| pending.set(None));
+        LATEST_DIAGNOSTICS.with(|latest| latest.borrow_mut().take());
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        PENDING_EVENT_JSON
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .clear();
+        PENDING_EVENT_DROP_COUNT.store(0, Ordering::Relaxed);
+        *PENDING_PRESENTATION_ENABLED
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = None;
+        LATEST_DIAGNOSTICS
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .take();
+    }
 }
 
 #[derive(Default)]
@@ -790,9 +1010,17 @@ fn publish_local_motion_diagnostics_system(
     _main_thread: NonSend<LocalMotionMainThread>,
 ) {
     let snapshot = shadow.diagnostics_snapshot();
+    #[cfg(target_arch = "wasm32")]
     LATEST_DIAGNOSTICS.with(|latest| {
         *latest.borrow_mut() = Some(snapshot);
     });
+
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        *LATEST_DIAGNOSTICS
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner) = Some(snapshot);
+    }
 }
 
 pub(crate) struct LocalMotionPresentationShadowPlugin;
@@ -803,7 +1031,7 @@ impl Plugin for LocalMotionPresentationShadowPlugin {
             .init_resource::<LocalMotionPresentationShadow>()
             .add_systems(
                 PreUpdate,
-                ingest_local_motion_system.after(motion::CrystalMoveClockSet),
+                ingest_local_motion_system.after(motion::CrystalMoveClockSet).after(super::NativeMotionProducerSet),
             )
             .add_systems(PostUpdate, publish_local_motion_diagnostics_system);
     }
@@ -982,7 +1210,10 @@ mod tests {
 
     #[test]
     fn presentation_takeover_is_disabled_by_default_and_applies_pending_toggle() {
-        PENDING_PRESENTATION_ENABLED.with(|pending| pending.set(None));
+        let _guard = BRIDGE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        reset_local_motion_bridge_for_test();
         let mut app = App::new();
         app.add_plugins((
             motion::CrystalMoveClockPlugin,
@@ -1287,6 +1518,34 @@ mod tests {
     }
 
     #[test]
+    fn smooth_display_advances_inside_phase_and_preserves_recenter_and_endpoint() {
+        let mut shadow = LocalMotionPresentationShadow::default();
+        shadow.smooth_display = true;
+        shadow.apply_event(reset_event());
+        shadow.apply_event(walk_command(0.0));
+        let at = |s: &mut LocalMotionPresentationShadow, t, center| s.candidate_offset_for_applied_center("self", center, 10, t, 48.0, 32.0).unwrap();
+        let start = at(&mut shadow, 0.0, 10);
+        let first = at(&mut shadow, 10.0, 10);
+        let second = at(&mut shadow, 20.0, 10);
+        assert_eq!(start, Vec2::ZERO);
+        assert!(first.x > 0.0 && second.x > first.x && second.x < 2.0);
+        let recentered = at(&mut shadow, 20.0, 11);
+        assert!((second.x - (recentered.x + 48.0)).abs() < 0.001);
+        assert_eq!(at(&mut shadow, 600.0, 11), Vec2::ZERO);
+        assert_eq!(at(&mut shadow, 900.0, 11), Vec2::ZERO);
+        assert_eq!(shadow.segment.as_ref().unwrap().phase_index, 0, "display reads must not advance sprite phases");
+        shadow.now_ms = 300.0;
+        let before_turn = at(&mut shadow, 300.0, 10);
+        shadow.apply_event(MovementShadowEvent::CommandSent {
+            at_ms:300.0, direction:"Right".to_owned(), mode:"run".to_owned(),
+            from_x:11, from_y:10, to_x:13, to_y:10, phase_count:None,
+        });
+        assert_eq!(at(&mut shadow, 300.0, 10), before_turn, "successor starts at the displayed pose");
+        shadow.clear_state();
+        assert!(shadow.candidate_offset_for_applied_center("self", 10, 10, 301.0, 48.0, 32.0).is_none());
+    }
+
+    #[test]
     fn applied_center_candidate_starts_on_the_command_frame_without_a_ts_window() {
         let mut shadow = LocalMotionPresentationShadow::default();
         shadow.apply_event(reset_event());
@@ -1342,11 +1601,117 @@ mod tests {
     }
 
     #[test]
+    fn confirmed_successor_rebases_once_against_the_previous_command_origin() {
+        let run = |at_ms, from_x, to_x| MovementShadowEvent::CommandSent {
+            at_ms, direction:"Right".to_owned(), mode:"run".to_owned(),
+            from_x, from_y:10, to_x, to_y:10, phase_count:Some(6),
+        };
+        let mut shadow = LocalMotionPresentationShadow::default();
+        shadow.smooth_display = true;
+        shadow.apply_event(reset_event());
+        shadow.apply_event(run(0.0,10,12));
+        let previous = shadow.candidate_offset_for_applied_center("self",10,10,650.0,48.0,32.0).unwrap();
+        shadow.apply_event(ack(650.0,12,"confirmed"));
+        shadow.now_ms = 650.0;
+        shadow.apply_event(run(650.0,12,14));
+        let pending = shadow.candidate_offset_for_applied_center("self",10,10,650.0,48.0,32.0).unwrap();
+        assert_eq!(pending,previous, "late ACK + successor must not reset the old-center camera to zero");
+        let committed = shadow.candidate_offset_for_applied_center("self",12,10,650.0,48.0,32.0).unwrap();
+        assert_eq!(10.0 * 48.0 + pending.x, 12.0 * 48.0 + committed.x);
+        assert!(shadow.candidate_offset_for_applied_center("self",10,10,651.0,48.0,32.0).is_none(), "old origin is retired after handoff");
+    }
+
+    #[test]
+    fn scene_reset_rebases_same_frame_successor_from_its_command_origin() {
+        let run = |at_ms, from_x, to_x| MovementShadowEvent::CommandSent {
+            at_ms,
+            direction: "Right".to_owned(),
+            mode: "run".to_owned(),
+            from_x,
+            from_y: 10,
+            to_x,
+            to_y: 10,
+            phase_count: Some(6),
+        };
+        let mut shadow = LocalMotionPresentationShadow::default();
+        let mut clock = motion::CrystalMoveClock::default();
+        shadow.smooth_display = true;
+        sync_clock_at(&mut shadow, &mut clock, 0.0);
+        shadow.apply_event(reset_event());
+        shadow.apply_event(run(0.0, 10, 12));
+        shadow.mark_presentation_committed();
+        sync_clock_at(&mut shadow, &mut clock, 300.0);
+        shadow.apply_event(ack(300.0, 12, "confirmed"));
+        shadow.apply_event(run(300.0, 12, 14));
+
+        let inherited = shadow.segment.as_ref().expect("successor segment");
+        assert_ne!(inherited.from_x, 12.0, "fixture must inherit an old fractional pose");
+        assert!(inherited.presentation_committed);
+        assert!(shadow.clear_stale_for_scene_reset());
+
+        let rebased = shadow.segment.as_ref().expect("same-frame command survives");
+        assert_eq!((rebased.from_x, rebased.from_y), (12.0, 10.0));
+        assert!(!rebased.presentation_committed);
+        assert!(!rebased.authoritative_confirmed);
+        assert_eq!(rebased.handoff_center, None);
+        assert_eq!(shadow.pending_commands.len(), 1);
+        assert!(shadow
+            .candidate_offset_for_applied_center("self", 10, 10, 300.0, 48.0, 32.0)
+            .is_none());
+        assert!(shadow
+            .candidate_offset_for_applied_center("self", 12, 10, 300.0, 48.0, 32.0)
+            .is_some());
+    }
+
+    #[test]
+    fn unconfirmed_corrected_or_reset_paths_never_grant_old_center_handoff() {
+        let run = |at_ms, from_x, to_x| MovementShadowEvent::CommandSent {
+            at_ms, direction:"Right".to_owned(), mode:"run".to_owned(),
+            from_x, from_y:10, to_x, to_y:10, phase_count:Some(6),
+        };
+        for disposition in [None, Some("correction"), Some("degraded")] {
+            let mut shadow = LocalMotionPresentationShadow::default();
+            shadow.smooth_display = true;
+            shadow.apply_event(reset_event());
+            shadow.apply_event(run(0.0,10,12));
+            if let Some(disposition) = disposition { shadow.apply_event(ack(650.0,12,disposition)); }
+            shadow.now_ms = 650.0;
+            shadow.apply_event(run(650.0,12,14));
+            assert!(shadow.candidate_offset_for_applied_center("self",10,10,650.0,48.0,32.0).is_none());
+        }
+        let mut shadow = LocalMotionPresentationShadow::default();
+        shadow.apply_event(reset_event());
+        shadow.apply_event(run(0.0,10,12));
+        shadow.apply_event(ack(650.0,12,"confirmed"));
+        shadow.apply_event(reset_event());
+        shadow.now_ms = 650.0;
+        shadow.apply_event(run(650.0,12,14));
+        assert!(shadow.candidate_offset_for_applied_center("self",10,10,650.0,48.0,32.0).is_none());
+    }
+
+    #[test]
+    fn native_producer_and_motion_consumer_share_the_same_preupdate() {
+        let _guard = BRIDGE_TEST_LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        reset_local_motion_bridge_for_test();
+        let mut app = App::new();
+        app.add_plugins((motion::CrystalMoveClockPlugin, LocalMotionPresentationShadowPlugin));
+        // Deliberately register the producer after the consumer. Only explicit
+        // system-set ordering, not registration order, makes this deterministic.
+        app.add_systems(PreUpdate, (|| {
+            enqueue_local_motion_event_json(serde_json::to_string(&reset_event()).unwrap());
+            enqueue_local_motion_event_json(serde_json::to_string(&walk_command(100.0)).unwrap());
+        }).in_set(super::super::NativeMotionProducerSet));
+        app.world_mut().run_schedule(PreUpdate);
+        assert_eq!(app.world().resource::<LocalMotionPresentationShadow>().command_event_count,1);
+        reset_local_motion_bridge_for_test();
+    }
+
+    #[test]
     fn plugin_ingests_and_publishes_serializable_diagnostics() {
-        PENDING_EVENT_JSON.with(|pending| pending.borrow_mut().clear());
-        PENDING_EVENT_DROP_COUNT.with(|count| count.set(0));
-        PENDING_PRESENTATION_ENABLED.with(|pending| pending.set(None));
-        LATEST_DIAGNOSTICS.with(|latest| latest.borrow_mut().take());
+        let _guard = BRIDGE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        reset_local_motion_bridge_for_test();
         enqueue_local_motion_event_json(serde_json::to_string(&reset_event()).expect("reset json"));
         enqueue_local_motion_event_json(
             serde_json::to_string(&walk_command(100.0)).expect("command json"),
@@ -1368,5 +1733,37 @@ mod tests {
             serde_json::from_str(&get_local_motion_diagnostics_json()).expect("diagnostics json");
         assert_eq!(value["commandEventCount"], 1);
         assert_eq!(value["pendingCommandCount"], 1);
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    #[test]
+    fn native_bridge_carries_input_and_toggle_across_threads() {
+        let _guard = BRIDGE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        reset_local_motion_bridge_for_test();
+
+        std::thread::spawn(|| {
+            set_local_motion_presentation_enabled(true);
+            enqueue_local_motion_event_json(
+                serde_json::to_string(&reset_event()).expect("reset json"),
+            );
+            enqueue_local_motion_event_json(
+                serde_json::to_string(&walk_command(100.0)).expect("command json"),
+            );
+        })
+        .join()
+        .expect("producer thread completes");
+
+        let mut app = App::new();
+        app.add_plugins((
+            motion::CrystalMoveClockPlugin,
+            LocalMotionPresentationShadowPlugin,
+        ));
+        app.world_mut().run_schedule(PreUpdate);
+        let shadow = app.world().resource::<LocalMotionPresentationShadow>();
+        assert!(shadow.presentation_enabled());
+        assert_eq!(shadow.command_event_count, 1);
+        assert_eq!(shadow.pending_commands.len(), 1);
     }
 }

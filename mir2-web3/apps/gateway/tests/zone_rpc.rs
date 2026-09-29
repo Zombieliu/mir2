@@ -8,7 +8,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use mir2_gateway::routing::PerMapSessionRouter;
+use mir2_gateway::routing::{PerMapSessionRouter, SharedZoneLiveOutboundSender};
 use mir2_gateway::{
     validate_zone_host_bind, GatewayConfig, GatewaySession, InMemoryZoneOwnerLeaseAuthority,
     SharedInProcessZoneRuntimeFactory, SharedSessionRouter, SharedZoneOwnerLeaseAuthority,
@@ -126,6 +126,7 @@ fn tcp_zone_rpc_player_attacks_finalized_world_event_monster() {
     ));
     let zone_id = ZoneId::primary();
     let spawn = ZoneMonsterSpawn {
+        crystal_drop_seed: None,
         object_id: 0x7000_0044,
         name: "WoomaSoldier".to_string(),
         name_colour_argb: -1,
@@ -516,7 +517,10 @@ fn tcp_zone_rpc_registration_bridges_live_outbounds_to_gateway_channel() {
         .expect("setup acknowledge");
 
     let (sender, mut receiver) = tokio::sync::mpsc::channel(16);
-    let registration = ZoneOwnerRpcTransport::register_live_outbound(&observer, sender)
+    let registration = ZoneOwnerRpcTransport::register_live_outbound(
+        &observer,
+        SharedZoneLiveOutboundSender::new(sender.clone(), sender),
+    )
         .expect("remote live outbound registration should succeed")
         .expect("TCP transport should provide a live registration");
     registration.activate();
@@ -2214,6 +2218,10 @@ fn gateway_session_uses_zone_host_from_environment() {
 #[test]
 fn gateway_session_handoffs_between_remote_map_zones_without_leaking_host_sessions() {
     let _environment_lock = ENVIRONMENT_TEST_LOCK.lock().expect("environment test lock");
+    // This integration fixture performs a cold real-map StartGame in a debug
+    // build. Its measured work exceeds the default 5 s RPC deadline; allow the
+    // handoff to finish without changing production limits or timeout tests.
+    let _timeout_environment = EnvironmentGuard::set("MIR2_ZONE_RPC_TIMEOUT_MS", "30000");
     let authority = Arc::new(InMemoryZoneOwnerLeaseAuthority::new());
     let (address, server, stop, handle) = start_server(authority);
     let _environment = EnvironmentGuard::set("MIR2_ZONE_HOST_ADDR", &address.to_string());

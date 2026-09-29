@@ -390,7 +390,7 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
         }
         UiAction::SetMailRecipient { recipient } => {
             if let Some(compose) = next.mail_compose.as_mut() {
-                compose.recipient = recipient.chars().take(32).collect();
+                compose.recipient = recipient.chars().take(20).collect();
             }
         }
         UiAction::SetMailMessage { message } => {

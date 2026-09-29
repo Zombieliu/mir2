@@ -571,6 +571,56 @@
       "shadowY": 0,
       "maskPath": null
     },
+    "570": {
+      "path": "/original-effects/Magic3/570.png",
+      "width": 152,
+      "height": 178,
+      "x": -45,
+      "y": -151,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "571": {
+      "path": "/original-effects/Magic3/571.png",
+      "width": 156,
+      "height": 171,
+      "x": -47,
+      "y": -144,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "572": {
+      "path": "/original-effects/Magic3/572.png",
+      "width": 124,
+      "height": 165,
+      "x": -35,
+      "y": -138,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "573": {
+      "path": "/original-effects/Magic3/573.png",
+      "width": 120,
+      "height": 158,
+      "x": -31,
+      "y": -132,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
+    "574": {
+      "path": "/original-effects/Magic3/574.png",
+      "width": 120,
+      "height": 163,
+      "x": -31,
+      "y": -137,
+      "shadowX": 0,
+      "shadowY": 0,
+      "maskPath": null
+    },
     "590": {
       "path": "/original-effects/Magic3/590.png",
       "width": 152,

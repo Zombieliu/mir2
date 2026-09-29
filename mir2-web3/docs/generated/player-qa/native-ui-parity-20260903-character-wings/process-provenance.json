@@ -1,0 +1,233 @@
+{
+  "schemaVersion": "mir2-character-wing-process-evidence-v1",
+  "evidenceKind": "local-development-observation-not-trusted-package-attestation",
+  "capturedOnLocalDate": "2026-09-03",
+  "workingTreeBaseRevision": "8cf9e2e4eb477f690ed4132e29cbfd609b9ee5e2",
+  "workingTreeDirtyAtBuild": true,
+  "crystalSourceRevision": "92b4ce4ab488b11e65f63d3ad22de2e1f25ec08d",
+  "relevantCrystalSourceFilesClean": true,
+  "sha256": "8BA170AA654FCE1EB911033203C22F018EAD2A4B973F04A4F80A8679E2FF6F20",
+  "bytes": 88405504,
+  "gatewaySha256": "5C268641095BD300AD7F720CAC8B3B3939FE2182E67DB8DB5E0C232F6AA497C3",
+  "processes": [
+    {
+      "pid": 241704,
+      "runId": "character-wings-20260903-r3",
+      "label": "wing-one-m-r3",
+      "character": "WingOneM",
+      "characterIndex": 0,
+      "effect": 1,
+      "gender": "Male",
+      "armourIndex": 375,
+      "frame": 1202
+    },
+    {
+      "pid": 241780,
+      "runId": "character-wings-20260903-r3",
+      "label": "wing-one-f-r3",
+      "character": "WingOneF",
+      "characterIndex": 1,
+      "effect": 1,
+      "gender": "Female",
+      "armourIndex": 379,
+      "frame": 1203
+    },
+    {
+      "pid": 229844,
+      "runId": "character-wings-20260903-r3",
+      "label": "wing-two-m-r3",
+      "character": "WingTwoM",
+      "characterIndex": 2,
+      "effect": 2,
+      "gender": "Male",
+      "armourIndex": 45,
+      "frame": 1204
+    },
+    {
+      "pid": 219860,
+      "runId": "character-wings-20260903-r3",
+      "label": "wing-two-f-r3",
+      "character": "WingTwoF",
+      "characterIndex": 3,
+      "effect": 2,
+      "gender": "Female",
+      "armourIndex": 51,
+      "frame": 1205
+    },
+    {
+      "pid": 231488,
+      "runId": "character-wings-20260903-r4",
+      "label": "wing-cycle-r4",
+      "character": "WingOneM",
+      "characterIndex": 0,
+      "effectSequence": [
+        1,
+        0,
+        0,
+        1
+      ],
+      "gender": "Male",
+      "armourIndex": 375,
+      "frame": 1202,
+      "manualInput": true,
+      "autoCapture": false
+    }
+  ],
+  "executableRelativePath": "apps/game-client/platform-windows/target/debug/mir2-platform-windows.exe",
+  "gatewayRelativePath": "target/debug/mir2-gateway.exe",
+  "gatewayPid": 203456,
+  "gatewayEndpoint": "ws://127.0.0.1:7410/ws",
+  "originalAssetManifestSha256": "FF44EB74CCA85C422533AF87FDD1EFE29443B984EF3C78364CA974ABAEC6F357",
+  "sourceHashes": {
+    "apps/game-client/client-bevy/src/crystal_ui/overlays.rs": "0F64FD2400AC07E3E3767AC13BED251B16C99371CD2997DF4384F2B3862D0A2D",
+    "apps/game-client/client-bevy/src/crystal_ui/crystal_additive_ui.wgsl": "7528835165FE6AEA1C6375DF8B87B310A04E5E50A23C7E99AC5DC5EC02E5A39C",
+    "apps/game-client/client-bevy/src/read_model.rs": "AF442C70A1AEB94A5F58C919EB19D2802EFC1E186D7F38F6A15DDDFB00EF801F",
+    "apps/game-client/platform-windows/src/gateway.rs": "6A6F7A9AECB2A94E0CD4309E62237986BA0E3590209C7550D2CEDFB0CC27B40D",
+    "apps/game-client/platform-windows/src/atlas.rs": "7F1688B9299571E0D15248B3A301DDB991A98B84E272AB4CA46B3A4B016F32BF",
+    "apps/simulation/src/runtime/packets.rs": "360023B621BF1A037FF62F5CD777FA87A5DD693520EE304370F537C6C4EA7E56",
+    "apps/gateway/src/routing.rs": "FA233777EF0C3CF883AF8C88E90B85C513C05F634C201E834E592E1B3DA9BD13",
+    "apps/simulation/src/config.rs": "DE1DBD74BFD3489AF97C987CF738D30C8A04D50B2FF979199824253C96D82B68"
+  },
+  "sourceAssets": [
+    {
+      "path": "original-ui/Prguse2/1202.png",
+      "sha256": "F071AB4B78E34E2E5FB11ED5E69F6B19A8A433D8D469102A0AF5A365EE698B4E",
+      "rect": [
+        64,
+        138,
+        148,
+        139
+      ]
+    },
+    {
+      "path": "original-ui/Prguse2/1203.png",
+      "sha256": "D7A3E6A83089FC586B5D994F7E783E47CF83B8FE1EC3B67E38A387BF032FCA4F",
+      "rect": [
+        64,
+        145,
+        148,
+        144
+      ]
+    },
+    {
+      "path": "original-ui/Prguse2/1204.png",
+      "sha256": "956B010C3C5ABB893A8134097E138E625D85180B04D0978D13F942608A3CC947",
+      "rect": [
+        55,
+        140,
+        156,
+        185
+      ]
+    },
+    {
+      "path": "original-ui/Prguse2/1205.png",
+      "sha256": "D79EDC797081849F6EE1B4376B63A8AAAF2FD353132D94A07802025DDA46374D",
+      "rect": [
+        56,
+        144,
+        156,
+        185
+      ]
+    },
+    {
+      "path": "original-ui/Prguse2/meta.json",
+      "sha256": "C4DEC25371E7517BBE2C3C19F593010A9A316BB9448C5646AD67514A0A722F0C"
+    }
+  ],
+  "captures": [
+    {
+      "image": "wing-one-m-r3-character-1788379280820-1.png",
+      "sha256": "87d403f1d002380f831b1e4255f1eb1becf1edfa60ffadc7728b9de56742f97d",
+      "state": "male-effect-1",
+      "position": [
+        290,
+        620
+      ]
+    },
+    {
+      "image": "wing-one-f-r3-character-1788379320171-1.png",
+      "sha256": "d551023350bc644a9e7590540bab4ff58d6cb143b91e66901ebcaaca9d5ff6c7",
+      "state": "female-effect-1",
+      "position": [
+        289,
+        619
+      ]
+    },
+    {
+      "image": "wing-two-m-r3-character-1788379365612-1.png",
+      "sha256": "a02a4a5b35129e096c677fd26c1d8db2448611bba66c61e39fe2e525cc859626",
+      "state": "male-effect-2",
+      "position": [
+        290,
+        620
+      ]
+    },
+    {
+      "image": "wing-two-f-r3-character-1788379435322-1.png",
+      "sha256": "fc70f966469b57a4bed0f86906c9b88ee637a871710707146667eafc8b75e3c5",
+      "state": "female-effect-2",
+      "position": [
+        289,
+        619
+      ]
+    },
+    {
+      "image": "wing-cycle-r4-in-game-1788379572616-1.png",
+      "sha256": "bd9292ce419100d161fff2aa237a64332b989550a62dec8db316996b6fb9936b",
+      "state": "cycle-equipped",
+      "position": [
+        290,
+        620
+      ]
+    },
+    {
+      "image": "wing-cycle-r4-in-game-1788379606156-2.png",
+      "sha256": "6645af9c42e2e8a0d9db427c6bbbc713d39b92fa25dddd6e341bfd8b90014641",
+      "state": "cycle-unequipped",
+      "position": [
+        290,
+        620
+      ]
+    },
+    {
+      "image": "wing-cycle-r4-in-game-1788379619484-3.png",
+      "sha256": "a1c7a178a24212e99f17ba8baabff273a3e72540badc51150c56645caa6b5b7b",
+      "state": "cycle-first-bag-cell",
+      "position": [
+        290,
+        620
+      ]
+    },
+    {
+      "image": "wing-cycle-r4-in-game-1788379659928-4.png",
+      "sha256": "05ef5fc4c9227987f879d8598d181dec7a3358342ee241f886eba315886741ae",
+      "state": "cycle-reequipped",
+      "position": [
+        290,
+        620
+      ]
+    }
+  ],
+  "logicalSize": {
+    "width": 1024,
+    "height": 768
+  },
+  "dpiScale": 1,
+  "acceptance": {
+    "visualAccepted": false,
+    "accepted": false,
+    "globalParityPercent": null,
+    "sameStateCrystalPair": false,
+    "trustedPackagedProvenance": false,
+    "authoritativeLightComplete": false,
+    "fullCharacterMatrix": false
+  },
+  "caveats": [
+    "F12 sidecars remain unchanged draft records; this separate manually collected process/hash ledger does not promote them to trusted acceptance.",
+    "The four gender/effect fixtures are separate catalogue QA characters, not the original Crystal 1231 state. Their observed coordinates differ; the r4 cycle alone fixes one character and one coordinate.",
+    "The generic item-operation popup, name-based equip slot inference and belt-first amulet removal/merging remain open.",
+    "MirArmour original icon exports Items/595.png and Items/605.png are absent; high-armour world actors still show missing body layers.",
+    "Automatic capture is used for r3 only; r4 disables it because completed auto capture currently keeps preparing its UI target.",
+    "Only documentation and a test-only RemoveItem serialization example were edited after the final executable build; no production-code edits followed that build."
+  ]
+}

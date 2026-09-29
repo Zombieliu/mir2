@@ -8,7 +8,8 @@
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::path::Path;
-use std::sync::{Mutex, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::atomic::{AtomicBool, Ordering as AtomicOrdering};
 
 use serde_json::{json, Value};
 
@@ -25,6 +26,22 @@ pub const MAX_NATIVE_LIGHTS: usize = 200;
 const LIGHT_TEXTURE_COUNT: usize = 10;
 const MAP_LIGHT_RANGE_X: i32 = 40;
 const MAP_LIGHT_RANGE_Y: i32 = 41;
+
+// Set once by native startup, before the WebSocket lighting producer starts.
+// Rendering never reads a file or changes the server's time/map state.
+static FORCE_DAYLIGHT: AtomicBool = AtomicBool::new(false);
+
+pub(crate) fn configure_force_daylight(enabled: bool) {
+    FORCE_DAYLIGHT.store(enabled, AtomicOrdering::Relaxed);
+}
+
+pub(crate) fn force_daylight_enabled() -> bool {
+    FORCE_DAYLIGHT.load(AtomicOrdering::Relaxed)
+}
+
+pub(crate) fn presentation_light_setting(setting: Option<u8>, force_daylight: bool) -> Option<u8> {
+    if force_daylight { Some(2) } else { setting }
+}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct NativeLightAssets {
@@ -70,6 +87,7 @@ pub struct NativeLightingMotion {
 
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct NativeLightingBridge {
+    force_daylight: bool,
     generation: Option<u64>,
     current_map_file_name: Option<String>,
     time_of_day_light_setting: Option<i32>,
@@ -121,20 +139,23 @@ fn retain_best_entity_candidate(
     }
 }
 
+// Both the immutable world context and its parsed map are shared. Cloning a
+// Bichon map here copied 700 * 700 * 24 bytes on every effect-light frame.
 #[derive(Debug, Clone)]
 struct EffectLightingContext {
     generation: Option<u64>,
     bridge: NativeLightingBridge,
     payload: Value,
-    map: Option<ParsedMap>,
+    map: Option<Arc<ParsedMap>>,
     map_frame_offsets: HashMap<(i32, i32), (i32, i32)>,
     motion: NativeLightingMotion,
     assets: NativeLightAssets,
 }
 
-static EFFECT_LIGHTING_CONTEXT: OnceLock<Mutex<Option<EffectLightingContext>>> = OnceLock::new();
+static EFFECT_LIGHTING_CONTEXT: OnceLock<Mutex<Option<Arc<EffectLightingContext>>>> =
+    OnceLock::new();
 
-fn effect_lighting_context() -> &'static Mutex<Option<EffectLightingContext>> {
+fn effect_lighting_context() -> &'static Mutex<Option<Arc<EffectLightingContext>>> {
     EFFECT_LIGHTING_CONTEXT.get_or_init(|| Mutex::new(None))
 }
 
@@ -160,6 +181,9 @@ fn capture_light_state_slug(
     if !same_map_file_name(current_map, map_file_name) {
         return None;
     }
+    if bridge.force_daylight {
+        return Some("setting=2;mapDarkLight=0;forceDaylight=true".to_owned());
+    }
     let setting = bridge
         .map_light_setting
         .or(bridge.time_of_day_light_setting)?;
@@ -172,7 +196,7 @@ fn capture_light_state_slug(
 fn remember_effect_lighting_context(
     bridge: &NativeLightingBridge,
     payload: &Value,
-    map: Option<&ParsedMap>,
+    map: Option<&Arc<ParsedMap>>,
     map_frame_offsets: &HashMap<(i32, i32), (i32, i32)>,
     motion: &NativeLightingMotion,
     assets: &NativeLightAssets,
@@ -189,7 +213,7 @@ fn remember_effect_lighting_context(
     let mut current = effect_lighting_context()
         .lock()
         .unwrap_or_else(std::sync::PoisonError::into_inner);
-    *current = Some(context);
+    *current = Some(Arc::new(context));
 }
 
 /// Rebuild and enqueue the current lighting state from the latest gateway
@@ -224,7 +248,7 @@ fn render_effect_lighting_frame(
     }
     Some(context.bridge.build_render_state_with_effects(
         &context.payload,
-        context.map.as_ref(),
+        context.map.as_deref(),
         &context.map_frame_offsets,
         &context.motion,
         &context.assets,
@@ -233,6 +257,10 @@ fn render_effect_lighting_frame(
 }
 
 impl NativeLightingBridge {
+    pub(crate) fn set_force_daylight(&mut self, enabled: bool) {
+        self.force_daylight = enabled;
+    }
+
     pub fn set_generation(&mut self, generation: u64) {
         if self.generation != Some(generation) {
             self.reset_session();
@@ -325,7 +353,7 @@ impl NativeLightingBridge {
     pub fn build_render_state(
         &self,
         payload: &Value,
-        map: Option<&ParsedMap>,
+        map: Option<&Arc<ParsedMap>>,
         map_frame_offsets: &HashMap<(i32, i32), (i32, i32)>,
         motion: &NativeLightingMotion,
         assets: &NativeLightAssets,
@@ -337,7 +365,7 @@ impl NativeLightingBridge {
         };
         let state = self.build_render_state_with_effects(
             payload,
-            map,
+            map.map(Arc::as_ref),
             map_frame_offsets,
             motion,
             assets,
@@ -363,6 +391,19 @@ impl NativeLightingBridge {
                 .as_deref()
                 .is_none_or(|current| same_map_file_name(current, payload))
         });
+        if self.force_daylight && map_matches && motion_is_finite(motion) {
+            return json!({
+                "enabled": true,
+                "mapFileName": self.current_map_file_name,
+                "stageWidth": STAGE_WIDTH,
+                "stageHeight": STAGE_HEIGHT,
+                "timeOfDayLightSetting": 2,
+                "mapLightSetting": 2,
+                "mapDarkLight": 0,
+                "mapLights": [],
+                "entityLights": [],
+            });
+        }
         let enabled = assets.complete()
             && self
                 .map_light_setting
@@ -543,6 +584,7 @@ impl NativeLightingBridge {
 
         json!({
             "enabled": true,
+            "mapFileName": self.current_map_file_name,
             "stageWidth": STAGE_WIDTH,
             "stageHeight": STAGE_HEIGHT,
             "timeOfDayLightSetting": self.time_of_day_light_setting,
@@ -649,6 +691,52 @@ mod tests {
     }
 
     #[test]
+    fn daylight_preference_survives_map_logout_and_generation_without_overwriting_source_lights() {
+        let mut bridge = NativeLightingBridge::default();
+        bridge.set_force_daylight(true);
+        let mut payload = world();
+        for generation in [1, 1, 2] {
+            bridge.reset_scene();
+            if generation == 2 {
+                bridge.observe_packet("LogOutSuccess", &Value::Null);
+            }
+            bridge.set_generation(generation);
+            payload["mapFileName"] = json!(if generation == 1 { "0" } else { "D401" });
+            bridge.observe_world_snapshot(&payload);
+            bridge.observe_packet("TimeOfDay", &json!({"lights": 4}));
+            bridge.observe_packet("MapInformation", &json!({
+                "fileName": payload["mapFileName"], "lights": 4, "mapDarkLight": 2
+            }));
+            let render = bridge.build_render_state_with_effects(
+                &payload, None, &HashMap::new(), &NativeLightingMotion::default(),
+                &NativeLightAssets::default(), &[],
+            );
+            assert_eq!(render["enabled"], true);
+            assert_eq!(render["timeOfDayLightSetting"], 2);
+            assert_eq!(render["mapLightSetting"], 2);
+            assert_eq!(render["mapDarkLight"], 0);
+            assert_eq!(render["entityLights"], json!([]));
+            assert_eq!(bridge.time_of_day_light_setting, Some(4));
+            assert_eq!(bridge.map_light_setting, Some(4));
+            assert_eq!(bridge.map_dark_light, 2);
+            assert_eq!(payload["lightSetting"], 4);
+            assert_eq!(capture_light_state_slug(Some(&bridge), payload["mapFileName"].as_str().unwrap()),
+                Some("setting=2;mapDarkLight=0;forceDaylight=true".to_owned()));
+        }
+        bridge.set_force_daylight(false);
+        let restored = bridge.build_render_state_with_effects(
+            &payload, None, &HashMap::new(), &NativeLightingMotion::default(),
+            &NativeLightAssets::complete_fixture(), &[],
+        );
+        assert_eq!(restored["timeOfDayLightSetting"], 4);
+        assert_eq!(restored["mapLightSetting"], 4);
+        assert_eq!(restored["mapDarkLight"], 2);
+        assert_eq!(presentation_light_setting(Some(4), true), Some(2));
+        assert_eq!(presentation_light_setting(Some(4), false), Some(4));
+        assert_eq!(presentation_light_setting(None, false), None);
+    }
+
+    #[test]
     fn capture_light_state_requires_matching_map_and_preserves_dark_override() {
         let bridge = NativeLightingBridge {
             current_map_file_name: Some("maps/0.map".to_owned()),
@@ -718,11 +806,11 @@ mod tests {
             "MapInformation",
             &json!({"lights": 4, "mapDarkLight": 1, "fileName": "0"}),
         );
-        let map = ParsedMap {
+        let map = Arc::new(ParsedMap {
             width: 1,
             height: 1,
             cells: vec![cell(1, true)],
-        };
+        });
         let motion = NativeLightingMotion {
             camera_offset_x: 8.0,
             camera_offset_y: -4.0,
@@ -744,6 +832,77 @@ mod tests {
         assert_eq!(state["mapLights"][0]["drawY"], -292.0);
         assert_eq!(state["mapLights"][0]["offsetX"], -50);
         assert_eq!(state["mapLights"][0]["offsetY"], -100);
+    }
+
+    #[test]
+    fn effect_context_arc_reuses_map_and_releases_old_map_on_replacement() {
+        assert_eq!(std::mem::size_of::<super::super::MapCell>(), 24);
+        let map = Arc::new(ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![cell(1, true)],
+        });
+        let old_map = Arc::downgrade(&map);
+        let mut bridge = NativeLightingBridge::default();
+        bridge.set_generation(81);
+        bridge.observe_world_snapshot(&world());
+        let make_context = |bridge: NativeLightingBridge, map: Option<Arc<ParsedMap>>, payload| {
+            Arc::new(EffectLightingContext {
+                generation: bridge.generation,
+                bridge,
+                payload,
+                map,
+                map_frame_offsets: HashMap::from([((0, 0), (-50, -100))]),
+                motion: NativeLightingMotion::default(),
+                assets: NativeLightAssets::complete_fixture(),
+            })
+        };
+        let render = |context: &EffectLightingContext| {
+            context.bridge.build_render_state_with_effects(
+                &context.payload,
+                context.map.as_deref(),
+                &context.map_frame_offsets,
+                &context.motion,
+                &context.assets,
+                &[],
+            )
+        };
+        let mut retained = make_context(bridge.clone(), Some(Arc::clone(&map)), world());
+        let expected = render(&retained);
+        assert_eq!(expected["mapLights"][0]["offsetX"], -50);
+        assert_eq!(expected["mapLights"][0]["offsetY"], -100);
+        for _ in 0..120 {
+            let frame = Arc::clone(&retained);
+            assert!(Arc::ptr_eq(&retained, &frame));
+            assert!(Arc::ptr_eq(frame.map.as_ref().unwrap(), &map));
+            assert_eq!(render(&frame), expected);
+        }
+        assert_eq!(Arc::strong_count(&map), 2);
+        drop(map);
+
+        // A new map can have identical dimensions. Its own cells, rather than
+        // dimensions or a stale context, determine the next light frame.
+        let replacement = Arc::new(ParsedMap {
+            width: 1,
+            height: 1,
+            cells: vec![cell(0, true)],
+        });
+        let replacement_weak = Arc::downgrade(&replacement);
+        bridge.observe_packet("MapChanged", &json!({"fileName": "1"}));
+        let mut next_world = world();
+        next_world["mapFileName"] = json!("1");
+        bridge.observe_world_snapshot(&next_world);
+        retained = make_context(bridge.clone(), Some(replacement), next_world);
+        assert!(old_map.upgrade().is_none());
+        assert!(render(&retained)["mapLights"]
+            .as_array()
+            .unwrap()
+            .is_empty());
+
+        bridge.reset_scene();
+        retained = make_context(bridge, None, Value::Null);
+        assert!(replacement_weak.upgrade().is_none());
+        assert_eq!(render(&retained)["enabled"], false);
     }
 
     #[test]

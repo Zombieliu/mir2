@@ -1,0 +1,777 @@
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7292:25
+     |
+7292 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:4946:10
+     |
+4946 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5028:10
+     |
+5028 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `tree_queen_ai::TreeQueenRoot::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\tree_queen_ai.rs:39:5
+   |
+39 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `tree_queen_ai::TreeQueenRoot::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `EvilMirState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:11:5
+   |
+11 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `EvilMirPendingSource::source`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:20:5
+   |
+20 |     pub source: ZoneCombatEntityRef,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirPendingSource::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `GreatFoxState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:15:5
+   |
+15 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `GreatFoxHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:42:5
+   |
+42 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `GreatFoxHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:44:5
+   |
+44 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedEncounterState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:12:5
+   |
+12 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:38:5
+   |
+38 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:41:5
+   |
+41 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedMapSpell::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:60:5
+   |
+60 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedMapSpell::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:14:5
+   |
+14 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:28:5
+   |
+28 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:30:5
+   |
+30 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HellState::explosion_source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:14:5
+   |
+14 |     pub explosion_source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HellState::explosion_source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `SpiderAiState::parent_ref`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:40:5
+   |
+40 |     pub parent_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `SpiderAiState::parent_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::source`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:52:5
+   |
+52 |     pub source: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::target`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:54:5
+   |
+54 |     pub target: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::target` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+ 7 | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:767:5
+    |
+760 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+767 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:308:15
+    |
+308 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:313:15
+    |
+313 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1813:15
+     |
+1813 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+   --> apps\simulation\src\runtime\quests.rs:814:15
+    |
+814 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+    |               ^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:818:15
+    |
+818 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hell_can_move` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:68:15
+   |
+68 | pub(super) fn hell_can_move(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^
+
+warning: function `hell_can_regen` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:74:15
+   |
+74 | pub(super) fn hell_can_regen(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^^
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:1671:5
+     |
+1671 |     sender.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+     = note: `#[warn(unused_must_use)]` (part of `#[warn(unused)]`) on by default
+help: use `let _ = ...` to ignore the resulting value
+     |
+1671 |     let _ = sender.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:2964:5
+     |
+2964 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2964 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:2987:5
+     |
+2987 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2987 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3077:5
+     |
+3077 |     first.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3077 |     let _ = first.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3141:5
+     |
+3141 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3141 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3208:5
+     |
+3208 |     first.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3208 |     let _ = first.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3431:5
+     |
+3431 |     alpha.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3431 |     let _ = alpha.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3432:5
+     |
+3432 |     beta.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3432 |     let _ = beta.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:6629:5
+     |
+6629 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+6629 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:28377:5
+      |
+28377 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+28377 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:29365:5
+      |
+29365 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+29365 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:30393:5
+      |
+30393 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+30393 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:32285:5
+      |
+32285 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+32285 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:35437:5
+      |
+35437 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+35437 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:42277:5
+      |
+42277 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+42277 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:42602:5
+      |
+42602 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+42602 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:56316:5
+      |
+56316 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+56316 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:57418:5
+      |
+57418 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+57418 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:58956:5
+      |
+58956 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+58956 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:60881:5
+      |
+60881 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+60881 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:62481:5
+      |
+62481 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+62481 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:62809:5
+      |
+62809 |     sender.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+62809 |     let _ = sender.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63243:5
+      |
+63243 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63243 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63442:5
+      |
+63442 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63442 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63560:5
+      |
+63560 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63560 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63961:5
+      |
+63961 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63961 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:64012:5
+      |
+64012 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+64012 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:64022:5
+      |
+64022 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+64022 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:65145:5
+      |
+65145 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+65145 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:66262:5
+      |
+66262 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+66262 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:69716:5
+      |
+69716 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+69716 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `Result` that must be used
+    --> apps\simulation\src\runtime\stage5.rs:2648:9
+     |
+2648 |         session_a.save_active_character();
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2648 |         let _ = session_a.save_active_character();
+     |         +++++++
+
+warning: `mir2-simulation` (lib test) generated 61 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.30s
+     Running unittests src\lib.rs (C:\Users\Administrator\AppData\Local\Temp\mir2-trade-gold-simulation-20260908\x86_64-pc-windows-msvc\debug\deps\mir2_simulation-6feae3919c1325a6.exe)
+
+running 98 tests
+test runtime::drops::ground_drop_identity_tests::ambiguous_legacy_display_name_fails_closed_without_inventory_mutation ... ok
+test runtime::drops::ground_drop_identity_tests::malformed_exact_payload_fails_preflight_without_inventory_mutation ... ok
+test runtime::inventory::stack_identity_tests::default_optional_rental_or_sealed_presence_rejects_merge ... ok
+test runtime::inventory::stack_identity_tests::equipped_root_uids_are_reserved_for_allocation_and_incoming_rekeys ... ok
+test runtime::inventory::stack_identity_tests::exact_item_index_difference_rejects_merge ... ok
+test runtime::inventory::stack_identity_tests::fresh_and_equipment_metadata_only_children_cannot_reuse_existing_uids ... ok
+test runtime::inventory::stack_identity_tests::fully_compatible_across_merge_succeeds ... ok
+test runtime::inventory::stack_identity_tests::fully_compatible_within_merge_succeeds ... ok
+test runtime::inventory::stack_identity_tests::known_healing_metadata_only_fills_legacy_missing_values ... ok
+test runtime::inventory::stack_identity_tests::known_healing_metadata_preserves_crystal_checkpoint_roundtrip ... ok
+test runtime::inventory::stack_identity_tests::live_socket_authority_difference_rejects_merge ... ok
+test runtime::inventory::stack_identity_tests::metadata_difference_rejects_across_merge_without_mutation ... ok
+test runtime::inventory::stack_identity_tests::metadata_difference_rejects_within_merge_without_mutation ... ok
+test runtime::inventory::stack_identity_tests::metadata_only_child_uids_participate_in_usage_high_water_and_normalization ... ok
+test runtime::inventory::stack_identity_tests::nested_item_uid_or_count_difference_rejects_merge ... ok
+test runtime::inventory::stack_identity_tests::normalization_preserves_metadata_exact_zero_and_rekeys_legacy_zero ... ok
+test runtime::inventory::stack_identity_tests::normalization_rekeys_cross_container_zero_and_nonzero_collisions_globally ... ok
+test runtime::inventory::stack_identity_tests::seeded_legacy_packet_items_remain_addressable_after_global_normalization ... ok
+test runtime::inventory::stack_identity_tests::split_conversion_error_preserves_inventory_and_storage_state ... ok
+test runtime::inventory::stack_identity_tests::split_rejects_nested_socket_identity_without_mutation ... ok
+test runtime::inventory::stack_identity_tests::storage_split_rejects_nested_socket_identity_without_mutation ... ok
+test runtime::save::character_save_item_validation_tests::crystal_inventory_capacity_controls_bag2_and_user_information_raw_slots ... ok
+test runtime::save::character_save_item_validation_tests::zero_quantity_live_inventory_rejects_active_save_without_mutation ... ok
+test runtime::save::character_save_item_validation_tests::zero_quantity_persisted_inventory_rejects_start_game_atomically ... ok
+test runtime::session::tests::abandon_crystal_quest_removes_item_task_inventory ... ok
+test runtime::session::tests::combine_item_packet_hero_inventory_grid_does_not_mutate_matching_player_items ... ok
+test runtime::session::tests::combine_item_packet_uses_inventory_unique_ids_instead_of_slots ... ok
+test runtime::session::tests::crystal_npc_giveitem_adds_reward_to_inventory ... ok
+test runtime::session::tests::crystal_npc_giveitem_full_bag_preserves_inventory ... ok
+test runtime::session::tests::crystal_quest_required_drop_does_not_fall_back_when_quest_inventory_is_full ... ok
+test runtime::session::tests::crystal_quest_required_drop_routes_to_active_quest_inventory ... ok
+test runtime::session::tests::crystal_use_item_packet_consumes_inventory_slot ... ok
+test runtime::session::tests::delete_item_packet_hero_inventory_flag_acknowledges_missing_item_without_mutation ... ok
+test runtime::session::tests::delete_item_packet_hero_inventory_flag_still_deletes_matching_player_item ... ok
+test runtime::session::tests::delete_item_packet_reduces_or_removes_inventory_stack ... ok
+test runtime::session::tests::drop_item_packet_hero_inventory_flag_does_not_mutate_matching_player_inventory_item ... ok
+test runtime::session::tests::drop_item_packet_missing_inventory_item_rejects_without_runtime_chat ... ok
+test runtime::session::tests::dropped_inventory_item_can_be_removed_from_bag_and_spawned_on_ground ... ok
+test runtime::session::tests::dropped_item_can_be_picked_up_into_inventory ... ok
+test runtime::session::tests::equip_item_packet_hero_inventory_grid_does_not_mutate_matching_player_item ... ok
+test runtime::session::tests::equip_item_packet_uses_inventory_unique_id_when_duplicate_keys_exist ... ok
+test runtime::session::tests::gm_make_creates_item_and_clearbag_empties_inventory ... ok
+test runtime::session::tests::hero_auto_pot_uses_matching_hero_inventory_potion_when_below_threshold ... ok
+test runtime::session::tests::hero_inventory_book_requirement_rejects_missing_required_stat ... ok
+test runtime::session::tests::hero_inventory_transfer_persists_across_save_reload ... ok
+test runtime::session::tests::hero_inventory_use_item_consumes_potion_and_restores_hero_health ... ok
+test runtime::session::tests::inventory_unique_ids_distinguish_bag_pages_for_same_slot ... ok
+test runtime::session::tests::inventory_use_item_equips_metadata_backed_exact_zero_from_nonzero_slot ... ok
+test runtime::session::tests::merge_item_packet_belt_to_inventory_grid_combines_quantities_for_crystal_belt_stackables ... ok
+test runtime::session::tests::merge_item_packet_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack ... ok
+test runtime::session::tests::merge_item_packet_inventory_to_belt_grid_combines_quantities_for_crystal_belt_stackables ... ok
+test runtime::session::tests::merge_item_packet_inventory_to_belt_grid_rejects_non_beltable_stack_ack_only ... ok
+test runtime::session::tests::merge_item_packet_inventory_to_equipment_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack ... ok
+test runtime::session::tests::merge_item_packet_inventory_to_fishing_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack ... ok
+test runtime::session::tests::merge_item_packet_inventory_to_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack ... ok
+test runtime::session::tests::merge_item_packet_inventory_to_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_items ... ok
+test runtime::session::tests::merge_item_packet_inventory_to_refine_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack ... ok
+test runtime::session::tests::merge_item_packet_inventory_to_storage_combines_quantities_when_storage_service_is_active ... ok
+test runtime::session::tests::merge_item_packet_inventory_to_storage_requires_active_storage_service_and_preserves_items ... ok
+test runtime::session::tests::merge_item_packet_inventory_to_trade_grid_does_not_emit_extra_chat_or_mutate_matching_player_stack ... ok
+test runtime::session::tests::merge_item_packet_mismatched_stack_is_ack_only_and_preserves_inventory ... ok
+test runtime::session::tests::merge_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_quest_item ... ok
+test runtime::session::tests::merge_item_packet_storage_to_inventory_combines_quantities_when_storage_service_is_active ... ok
+test runtime::session::tests::merge_item_packet_uses_inventory_unique_ids_instead_of_slots ... ok
+test runtime::session::tests::mount_bells_dont_store_rejects_storage_but_allows_inventory ... ok
+test runtime::session::tests::move_item_packet_hero_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_player_item ... ok
+test runtime::session::tests::move_item_packet_inventory_ignores_matching_quest_inventory_slot ... ok
+test runtime::session::tests::move_item_packet_inventory_invalid_source_slot_does_not_emit_extra_chat_or_mutate_matching_player_item ... ok
+test runtime::session::tests::move_item_packet_inventory_invalid_target_slot_does_not_emit_extra_chat_or_mutate_matching_player_item ... ok
+test runtime::session::tests::move_item_packet_inventory_missing_source_uses_crystal_move_error_report ... ok
+test runtime::session::tests::move_item_packet_inventory_success_is_ack_only_and_reorders_slot ... ok
+test runtime::session::tests::move_item_packet_inventory_uses_crystal_inventory_index_for_bag2_slots ... ok
+test runtime::session::tests::move_item_packet_quest_inventory_grid_does_not_emit_extra_chat_or_mutate_matching_quest_item ... ok
+test runtime::session::tests::pickup_can_stack_into_full_inventory_when_stack_has_room ... ok
+test runtime::session::tests::pickup_preserves_ground_drop_when_inventory_is_full ... ok
+test runtime::session::tests::remove_item_packet_hero_inventory_grid_does_not_mutate_matching_player_equipment ... ok
+test runtime::session::tests::remove_item_packet_inventory_requires_requested_slot_to_be_empty ... ok
+test runtime::session::tests::remove_slot_item_packet_returns_socketed_gem_to_inventory ... ok
+test runtime::session::tests::repair_item_packet_repairs_inventory_unique_id_with_cost_and_max_dura_loss ... ok
+test runtime::session::tests::sell_item_dead_player_only_acks_and_preserves_inventory_and_gold ... ok
+test runtime::session::tests::sell_item_invalid_slot_preserves_inventory_and_gold ... ok
+test runtime::session::tests::sell_item_without_active_sell_service_preserves_inventory_and_gold ... ok
+test runtime::session::tests::shared_item_rental_borrower_delivery_persists_rental_metadata_in_inventory ... ok
+test runtime::session::tests::shared_zone_kill_award_routes_original_q_drop_to_active_quest_inventory ... ok
+test runtime::session::tests::split_item_packet_hero_inventory_grid_does_not_mutate_matching_player_stack ... ok
+test runtime::session::tests::split_item_packet_inventory_can_place_bag2_split_into_earlier_bag1_slot ... ok
+test runtime::session::tests::split_item_packet_inventory_prefers_crystal_belt_slots_for_beltable_items ... ok
+test runtime::session::tests::split_item_packet_inventory_uses_crystal_inventory_slots_across_bag_pages ... ok
+test runtime::session::tests::storing_item_uses_crystal_inventory_index_for_bag2_slots ... ok
+test runtime::session::tests::taking_back_item_moves_storage_item_into_inventory_snapshot ... ok
+test runtime::session::tests::taking_back_item_rekeys_dirty_duplicate_inventory_unique_id ... ok
+test runtime::session::tests::taking_back_item_uses_crystal_inventory_index_for_bag2_slots ... ok
+test runtime::session::tests::transfer_hero_item_moves_player_bag_item_to_hero_inventory ... ok
+test runtime::session::tests::use_item_packet_hero_inventory_grid_does_not_mutate_matching_player_item ... ok
+test runtime::session::tests::use_item_packet_missing_inventory_item_rejects_without_runtime_chat ... ok
+test runtime::session::tests::use_item_packet_unusable_inventory_item_rejects_without_runtime_chat ... ok
+test runtime::session::tests::use_item_packet_uses_inventory_unique_id_when_duplicate_keys_exist ... ok
+test runtime::session::tests::world_snapshot_exposes_inventory_unique_ids_for_client_packets ... ok
+
+test result: ok. 98 passed; 0 failed; 0 ignored; 0 measured; 1447 filtered out; finished in 33.89s
+

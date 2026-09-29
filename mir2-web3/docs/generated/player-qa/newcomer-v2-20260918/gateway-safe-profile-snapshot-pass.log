@@ -1,0 +1,6 @@
+
+running 1 test
+test routing::tests::zone_journey_event_bridge_tests::public_v2_pending_safe_zone_snapshot_follows_zone_before_private_tick ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 796 filtered out; finished in 23.82s
+

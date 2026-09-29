@@ -48,8 +48,13 @@ fn unique_save_path() -> SaveFileGuard {
 }
 
 fn file_backed_gateway_config(path: PathBuf) -> GatewayConfig {
+    // The unique account file also identifies this test's dedicated recovery
+    // directory. A reconstructed session reuses it, while other tests never
+    // share the temporary directory's default recovery store.
+    let recovery_dir = path.with_extension("recovery");
     GatewayConfig::default()
         .with_account_store_path(path)
+        .with_save_recovery_dir(recovery_dir)
         .with_save_recovery_mac_key(TEST_RECOVERY_MAC_KEY)
         .expect("test-only file store must have a valid recovery MAC key")
 }
@@ -866,7 +871,11 @@ fn attack_monster_until_dead(
     (packets, None)
 }
 
-fn harvest_corpse(session: &mut GatewaySession, corpse_position: Point) -> Vec<ServerPacket> {
+fn harvest_corpse(
+    session: &mut GatewaySession,
+    corpse_object_id: u32,
+    corpse_position: Point,
+) -> Vec<ServerPacket> {
     assert!(
         try_walk_within_with_step_budget(session, &corpse_position, 1, 64),
         "ordinary Gateway player must reach the authoritative death coordinate before Harvest: player={:?}, corpse={corpse_position:?}",
@@ -891,18 +900,25 @@ fn harvest_corpse(session: &mut GatewaySession, corpse_position: Point) -> Vec<S
         let harvest = session.handle_packet(ClientPacket::Harvest { direction });
         let completed = harvest
             .iter()
-            .any(|packet| matches!(packet, ServerPacket::ObjectHarvested { .. }));
+            .any(|packet| matches!(packet, ServerPacket::ObjectHarvested { movement } if movement.object_id == corpse_object_id));
         packets.extend(harvest);
         if completed {
             break;
         }
         packets.extend(session.tick());
     }
+    let harvested_object_ids: Vec<_> = packets
+        .iter()
+        .filter_map(|packet| match packet {
+            ServerPacket::ObjectHarvested { movement } => Some(movement.object_id),
+            _ => None,
+        })
+        .collect();
     assert!(
         packets
             .iter()
-            .any(|packet| matches!(packet, ServerPacket::ObjectHarvested { .. })),
-        "ordinary Gateway Harvest must finish the shared corpse lifecycle: player={:?}, corpse={corpse_position:?}, harvest-passes={}, packets={packets:?}",
+            .any(|packet| matches!(packet, ServerPacket::ObjectHarvested { movement } if movement.object_id == corpse_object_id)),
+        "ordinary Gateway Harvest must finish the requested shared corpse lifecycle: target-id={corpse_object_id}, player={:?}, corpse={corpse_position:?}, harvested-ids={harvested_object_ids:?}, harvest-passes={}, packets={packets:?}",
         player(session),
         packets
             .iter()
@@ -1016,7 +1032,7 @@ fn progress_original_item_quest(
             attempts_since_player_kill = 0;
             if harvest && corpse_position.is_some() {
                 let corpse_position = corpse_position.expect("checked above");
-                packets.extend(harvest_corpse(session, corpse_position));
+                packets.extend(harvest_corpse(session, monster.object_id, corpse_position));
             }
             eprintln!(
                 "gateway original q{quest_id}: confirmed player kill {confirmed_player_kills}/{maximum_kills}, stage={:?}, quest-items={:?}",

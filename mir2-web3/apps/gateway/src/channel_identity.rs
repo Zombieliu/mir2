@@ -14,6 +14,8 @@ use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 
+use crate::zone_lease::SyncPostgresResource;
+
 const CHANNEL_IDENTITY_SCHEMA_VERSION: u32 = 1;
 const MAX_PROVIDER_SUBJECT_BYTES: usize = 4 * 1024;
 const CRAZYGAMES_PUBLIC_KEY_URL: &str = "https://sdk.crazygames.com/publicKey.json";
@@ -27,7 +29,7 @@ struct CrazyGamesPublicKeyCache {
 static CRAZYGAMES_PUBLIC_KEY_CACHE: OnceLock<tokio::sync::Mutex<Option<CrazyGamesPublicKeyCache>>> =
     OnceLock::new();
 
-type ChannelIdentityPostgresPool = Pool<PostgresConnectionManager<NoTls>>;
+type ChannelIdentityPostgresPool = SyncPostgresResource<Pool<PostgresConnectionManager<NoTls>>>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -256,6 +258,9 @@ impl ChannelIdentityRegistry {
             .max_size(max_size)
             .build(manager)
             .map_err(|error| format!("channel identity postgres pool failed: {error}"))?;
+        // Wrap immediately, including failures in the initialization below.
+        // Registry clones share this owner; only the final Arc destroys a pool.
+        let pool = SyncPostgresResource::new(pool);
         let mut client = pool
             .get()
             .map_err(|error| format!("channel identity postgres connect failed: {error}"))?;
@@ -920,6 +925,98 @@ fn hex_lower(bytes: &[u8]) -> String {
 #[cfg(test)]
 mod tests {
     use super::{ChannelIdentityProvider, ChannelIdentityRegistry};
+
+    #[test]
+    #[ignore = "requires isolated MIR2_GATEWAY_LIFECYCLE_TEST_DATABASE_URL"]
+    fn lifecycle_postgres_closes_actual_registry_pool() {
+        use crate::zone_lease::{lifecycle_test_runtime, LifecyclePostgresTest};
+
+        let mut database = LifecyclePostgresTest::new();
+        for multi_thread in [false, true] {
+            let outer = lifecycle_test_runtime(multi_thread);
+
+            let (url, tag) = database.tagged_url("registry-clone");
+            let registry = ChannelIdentityRegistry::from_postgres_url(&url)
+                .unwrap_or_else(|_| panic!("lifecycle registry initialization failed"));
+            let last = registry.clone();
+            outer.block_on(async move {
+                drop(registry);
+            });
+            assert!(
+                database.connections(&tag) > 0,
+                "a live registry clone must retain its pool"
+            );
+            outer.block_on(async move {
+                drop(last);
+            });
+            database.assert_connections_closed(&tag);
+
+            let (url, tag) = database.tagged_url("registry-cancel");
+            let registry = ChannelIdentityRegistry::from_postgres_url(&url)
+                .unwrap_or_else(|_| panic!("lifecycle registry initialization failed"));
+            assert!(database.connections(&tag) > 0);
+            outer.block_on(async move {
+                let (ready, started) = tokio::sync::oneshot::channel();
+                let worker = tokio::spawn(async move {
+                    ready.send(()).unwrap();
+                    std::future::pending::<()>().await;
+                    drop(registry);
+                });
+                started.await.unwrap();
+                worker.abort();
+                assert!(worker.await.unwrap_err().is_cancelled());
+            });
+            database.assert_connections_closed(&tag);
+
+            let (url, tag) = database.tagged_url("registry-error");
+            let result = outer.block_on(async move {
+                let registry = tokio::task::spawn_blocking(move || {
+                    ChannelIdentityRegistry::from_postgres_url(&url)
+                })
+                .await
+                .expect("registry initializer worker")
+                .unwrap_or_else(|_| panic!("lifecycle registry initialization failed"));
+                // Same ownership as web startup: channel identity succeeded,
+                // then a later initializer/bind returns an error without users.
+                let _registry = registry;
+                tokio::task::yield_now().await;
+                Err::<(), _>("later initializer failed")
+            });
+            assert!(result.is_err());
+            database.assert_connections_closed(&tag);
+
+            let (url, tag) = database.tagged_url("registry-result");
+            outer.block_on(async move {
+                let initializer = tokio::task::spawn_blocking(move || {
+                    ChannelIdentityRegistry::from_postgres_url(&url)
+                        .unwrap_or_else(|_| panic!("lifecycle registry initialization failed"))
+                });
+                while !initializer.is_finished() {
+                    tokio::task::yield_now().await;
+                }
+                // A completed initializer whose awaiting server future was
+                // cancelled still owns a real registry in its task result.
+                drop(initializer);
+            });
+            database.assert_connections_closed(&tag);
+
+            let (url, tag) = database.tagged_url("registry-migrate");
+            let mut readonly_url = reqwest::Url::parse(&url)
+                .unwrap_or_else(|_| panic!("validated lifecycle URL became invalid"));
+            readonly_url
+                .query_pairs_mut()
+                .append_pair("options", "-c default_transaction_read_only=on");
+            let result = outer.block_on(async move {
+                tokio::task::spawn_blocking(move || {
+                    ChannelIdentityRegistry::from_postgres_url(readonly_url.as_str())
+                })
+                .await
+            });
+            assert!(result.expect("read-only initializer worker").is_err());
+            database.assert_connections_closed(&tag);
+        }
+        eprintln!("actual registry pool closure verified: 5 lifecycle paths in both Tokio runtime flavours");
+    }
 
     #[test]
     fn same_provider_subject_resolves_to_stable_player_without_persisting_raw_subject() {

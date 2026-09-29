@@ -71,6 +71,136 @@ answers the current report about button/UI fidelity. Whole-game percentages,
 same-EXE, live WSS, real DPI, native soak and human visual/feel remain
 explicitly open.
 
+## 2026-09-02 user-reported dialog baseline
+
+The screenshots added on 2026-09-02 expose three source-bound families inside
+the existing Character (54), Inventory (141) and Quest (95) registries. These
+are subdivisions of the existing denominator, not permission to replace a
+family with one screenshot row or reduce its count.
+
+| Leaf | Crystal authority | Exact target | Candidate state / next gate |
+|---|---|---|---|
+| Character paper doll | `Client/MirScenes/Dialogs/CharacterDialog.cs:27-132,227-342,596-695`; `.Lib` offset draw at `Client/MirGraphics/MLibrary.cs:658-710` | `Title/504`, gender page `Prguse/340|341`, 14 cells, then wing -> resolved armour -> weapon -> helmet-or-hair with original frame offsets | Exact root/page/tabs/cells and armour -> weapon -> helmet-or-hair composition are implemented. Runtime/Gateway retain gender, hair, guild and `ItemInfo.Image`; exact `StateItem` metadata and gender/hair assets are packaged. Authoritative wing input, full secondary-tab content, trusted package evidence and human acceptance remain open. |
+| Inventory footer/window | `Client/MirScenes/Dialogs/InventoryDialog.cs:25-209,384-427,483-598`; generic movement at `Client/MirControls/MirControl.cs:852-935`; icon rules at `MirItemCell.cs:2511-2551`; amount geometry at `MirAmountBox.cs`; confirmation at `MirMessageBox.cs` | `Title/196` `316x236` movable root with child-owned hits and stage clamp; `(40,212)` numeric Gold; `(182,217)` 84x6 weight bar with `Prguse/24`, `UI_32bit/471|470`; `(268,212)` free count; `(291,212)` delete art and exact DeleteItem flow | Movable placement/Hide-Show retention, footer, true-sized centred icons, stack labels, QuestInventory read-only behavior, DeleteMode toggle/cursor/right-click, `204x109` amount dialog, `456x190` single-item confirmation, exact native command and receipt correlation are implemented/tested. Live stacked-item amount evidence, locked/sealed overlays, full tooltip, trusted package/light evidence and human acceptance remain open. |
+| Quest surface topology | `Client/MirScenes/Dialogs/QuestDialogs.cs:15-260,463-786,796-911,1743-1980`; confirmation at `Client/MirControls/MirMessageBox.cs` | NPC List=`Prguse/950`; Detail=`Prguse/960`; grouped Diary=`Prguse/961`; tracking is frameless. Diary left-click opens Detail and right-click toggles one of five tracked quests. CANCEL uses the source message box and requires YES before abandon. | Windows-native Diary, independent Detail, NPC Quest List, ordered five-slot right-click tracking and exact CANCEL confirmation are implemented and exercised against the real Gateway. Runtime `@quest:accept:` / `@quest:finish:` links retain exact current-NPC validation. Credit-reward/item-frame fidelity, generic NPC conversation layout, hover/pressed animation, tracker persistence and capture metadata remain open. |
+
+The submitted comparisons were not state-aligned: Candidate `demo/Scout` was a
+seeded Lv7 fixture with 1,280 Gold and starter panel data, while Crystal `1231`
+was a Lv1 Wizard/Male with Gold 0, empty bag, one belt potion, WoodenSword,
+BaseDress(M), one quest-inventory item and no magic. The redacted Crystal-state
+extractor/import contract now retains hair, quest progress/completed IDs, quest
+inventory and Crystal's six-slot belt offset, and the canonical visible state
+has been imported into an isolated Candidate account/character slot. The live
+Diary evidence below therefore uses `1231` and the authoritative completed
+`Assistant's Request` state instead of the unrelated `demo/Scout` fixture.
+
+The aligned Character checkpoint uses that same imported `1231` state. The
+current-tree linked EXE (SHA-256
+`996CF54AF6A2560EECFA03E87296EDFF797FE3B59C7400DCEB453B53A86C3656`)
+produced
+`docs/generated/player-qa/native-ui-parity-20260902-character/character-clean-character-1788359861663-1.png`
+(SHA-256
+`DED8B034522963FDDD68913F5A41B7F6E2DBF02FBCE7FCC3C7702BCB6062DE36`).
+The renderer-owned sidecar freezes `panel=Character`, `BichonProvince` and
+`(290,620)` only after name, map, max HP and self position are authoritative;
+the QA reducer also closes the login notice before capture. It remains a draft
+because authoritative light and trusted package provenance are absent. It is
+not final same-EXE or human acceptance.
+
+The aligned Inventory precision capture is
+`docs/generated/player-qa/native-ui-parity-20260902-inventory/inventory-final-inventory-1788360618712-1.png`
+(SHA-256
+`28FCCB8F7E7C0061823C9C3F494F489E04A7C4A79BC2FF5CA60A981498F087D3`).
+The DeleteMode auto-target then used a disposable real-Gateway character with
+four authoritative ordinary bag items and produced
+`docs/generated/player-qa/native-ui-parity-20260902-inventory-delete/inventory-delete-final-inventory-delete-1788362950757-1.png`
+(SHA-256
+`50F30B959365E5E2F4B2F6C1BA677118A683A4A7E91E47FEB4E5E6953F8761B1`)
+from current-tree EXE SHA-256
+`61F053C88FB4BCFF6C6BE0FB4A43C1AE8C807437986B3289D3A55536CC5EFF26`.
+Its renderer sidecar records `panel=Inventory`, page 0, DeleteMode and the
+single-item confirmation at Bichon `(288,616)`. YES was not pressed, so the QA
+run is non-destructive. Exact stacked-item amount behavior is automated but
+does not yet have a live authoritative stack capture. Both sidecars also lack
+authoritative light and trusted build provenance; therefore they are bounded
+implementation evidence and `visualAccepted=false` remains unchanged.
+
+The subsequent movable-window slice uses original `Title/196.png` (`316x236`,
+SHA-256
+`987ACE9AA582868FF589DD923C64109E8D883549C9B80FE72ED7AFD981A0CB3B`)
+and final current-tree r5 EXE SHA-256
+`F08FC69F744BC9D6895A7756CF98AAF5A69EEEF4CA8AF10F65BA78D8663B33D3`.
+One real Windows drag produced same-run/same-character/same-world captures
+`docs/generated/player-qa/native-ui-parity-20260903-inventory-drag-final/inventory-drag-inventory-1788365024393-1.png`
+(origin, SHA-256
+`64F8A6A4ECB500F40C508ED804FDA686DEEF11A4FDAF507601680202064A5B5C`)
+and
+`docs/generated/player-qa/native-ui-parity-20260903-inventory-drag-final/inventory-drag-in-game-1788365096792-2.png`
+(moved, SHA-256
+`AED8F77D8F8F6A43E80F985A13748ECFD11BA26C33B462A406F01F6185C8CFE3`).
+Their draft sidecars hold BichonProvince `(287,616)`, Bag1, and exact
+`inventoryLocation=0.00,0.00` / `275.00,208.00`; only window placement
+changes. Native-ui passes 496/496. Trusted package and light fields remain
+absent, so this is movable-leaf implementation evidence and
+`visualAccepted=false` remains unchanged.
+
+The renderer-owned 1024x768 evidence is
+`docs/generated/player-qa/native-ui-parity-20260902/quest-diary-in-game-1788348421931-1.png`
+(SHA-256 `29ACF7E67FBA7726441556C1AD07B054D386DD99C09D6870C4D453BDF49B9C8F`).
+Its sidecar is deliberately a draft because this current-tree Debug EXE has no
+trusted package provenance and the capture does not carry an authoritative
+lighting signature. It proves the bounded Diary implementation and aligned
+quest state, not same-EXE release acceptance or whole Quest-family parity.
+
+The subsequent source Detail slice is captured in
+`docs/generated/player-qa/native-ui-parity-20260902/quest-detail-final-in-game-1788351341163-1.png`
+(Diary + Detail, SHA-256
+`2F733E4EEC558B2C9D52B2D09A906AC6B56889ECA01A450258BBE0480B452B59`) and
+`docs/generated/player-qa/native-ui-parity-20260902/quest-detail-final-in-game-1788351355082-2.png`
+(Detail after Diary close, SHA-256
+`2B7F52B46F439F44B88AAB0F6A7C5700B244CC710FECBA7EB520B5DABAE00A01`).
+Both were produced by the rebuilt current-tree Windows EXE against an isolated
+import of Crystal character `1231`. Their sidecars bind BichonProvince
+`(290,620)` and safely freeze `questDetail=Some(1)`; the second also proves
+`panel=None`, so the independent-window behavior is machine-auditable. They
+remain draft implementation evidence because authoritative light and trusted
+package provenance are absent.
+
+The subsequent Quest interaction slice uses a fresh isolated QA character so
+quest 5 can traverse the real available -> current lifecycle. A current-tree
+Windows EXE with SHA-256
+`5A6D52FEB89949E23CA177D5A56FC24069D18CBD69C8BB6E2E7E55790BC2C099`
+opened Blacksmith Smith's source-shaped NPC Quest List, accepted the runtime
+`@quest:accept:5` link through the local Gateway, observed the marker change
+from `!` to `?`, opened Diary and independent Detail, toggled the frameless
+tracker with a real secondary click, and exercised CANCEL -> NO without
+abandoning or untracking the quest. Evidence under
+`docs/generated/player-qa/native-ui-parity-20260902/` is:
+
+- `quest-ui-q2-in-game-1788354007393-1.png`: NPC Quest List visual,
+  SHA-256 `F8401924BFED5AEF0764C287EEC30340D48EBD0063E0F32D0AE1213B96291679`;
+- `quest-ui-q3-in-game-1788354708271-1.png`: Diary plus two-line tracker,
+  SHA-256 `789449D4683A38DB272A1CB078279EF2172C4EBE114F420B3A762EC74D8DC4D9`;
+- `quest-ui-q3-in-game-1788354757568-2.png`: exact CANCEL confirmation,
+  SHA-256 `46FC9EDF6FB6A8706236900375B09B66FFB0421D6ADF6E2B2DBBB410C9BD68BE`;
+- `quest-ui-q3-in-game-1788354839986-3.png`: state preserved after NO,
+  SHA-256 `7D3EC23D6C17BC79BEEA595276C1D0E3C4A5AC8C5FD6D120CEDEA8EC6665F0B8`.
+
+Quest UI tests pass 52/52 and the source export now contains 40,877 assets
+with aggregate asset hash
+`3d6b7f125a91121ccde5b9a2db5dfa4faba5e29be2f27bc4bcfc62a086ec45e4`.
+The draft sidecars correctly remain ineligible, but currently encode neither
+NPC Quest List nor tracker/message-box visibility; that provenance/state
+coverage is an explicit open gate alongside generic NPC-dialog fidelity,
+credit-reward/item-frame fidelity, trusted same-EXE comparison and human
+acceptance.
+
+The first Inventory capture is a deliberately non-acceptance draft at
+`docs/generated/player-qa/windows-visual-parity/ui-gap-inventory-current-working-tree/`.
+Its sidecar records `eligible=false`; the worktree is dirty and the compared
+account/state is not aligned with Crystal, so it cannot satisfy the trusted
+same-EXE or same-state gates.
+
 ## Hallucination bounded automated checkpoint
 
 Revision `60eae9561c5b18bc79456105e455d6964c14fafe` closes one VIS-02
@@ -444,7 +574,7 @@ The current fixed/template UI scope contains 410 leaves:
 | Minimap | 22 | `MainDialogs.cs:1764-2112` | partial implementation, unaccepted |
 | Inventory | 141 | `InventoryDialog.cs:10-209` | 40-slot QuestGrid and other leaves open |
 | Character | 54 | `CharacterDialog.cs:8-342` | partial shell; content/typography open |
-| Quest family | 95 | `QuestDialogs.cs:15-1600` | source four-dialog structure open |
+| Quest family | 95 | `QuestDialogs.cs:15-1600` | Diary/Detail/NPC List, exact five-slot tracking and CANCEL confirmation landed; remaining content/animation/provenance leaves open |
 | Big map | 22 | `BigMapDialog.cs:12-590,800+` | partial implementation, unaccepted |
 
 Crystal initializes 14 equipment cells in `CharacterDialog.cs:227-342`, not

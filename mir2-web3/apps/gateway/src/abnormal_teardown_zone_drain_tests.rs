@@ -59,6 +59,8 @@ fn abrupt_tcp_and_web_teardown_drain_authoritative_state_and_economy_once() {
         state.queue_zone_monster_kill_award(
             key.clone(),
             ZoneMonsterKillAward {
+                source_receipt_key: None,
+                experience_selection: None,
                 monster_object_id: 0x7f00_0010,
                 killed_at_ms: 123_456,
                 monster_name: "Teardown Deer".to_string(),

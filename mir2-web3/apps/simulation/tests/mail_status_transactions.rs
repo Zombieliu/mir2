@@ -68,6 +68,21 @@ fn mail_flags(packets: &[ServerPacket], mail_id: u32) -> (bool, bool, bool) {
 }
 
 #[test]
+fn start_game_projects_the_persisted_mailbox_with_unchanged_status() {
+    let (config, mail_id) = prepared_mailbox("start-game-mail");
+    for _ in 0..2 {
+        let mut session = SimulationSession::new(config.clone());
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".to_string(),
+            password: "demo".to_string(),
+        });
+        let packets = session.handle_packet(ClientPacket::StartGame { character_index: 0 });
+        assert_eq!(packets.iter().filter(|packet| matches!(packet, ServerPacket::ReceiveMail { .. })).count(), 1);
+        assert_eq!(mail_flags(&packets, mail_id), (false, false, false));
+    }
+}
+
+#[test]
 fn read_and_lock_are_durable_and_reloadable() {
     let (config, mail_id) = prepared_mailbox("read-lock");
     let mut session = started_session(config.clone());

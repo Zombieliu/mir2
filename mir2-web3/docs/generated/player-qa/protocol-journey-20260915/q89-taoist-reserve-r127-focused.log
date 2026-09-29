@@ -1,0 +1,458 @@
+TAP version 13
+# Subtest: a healthy q98 finisher keeps enough held fuel for its last visible wounded soldier
+ok 1 - a healthy q98 finisher keeps enough held fuel for its last visible wounded soldier
+  ---
+  duration_ms: 1.6753
+  type: 'test'
+  ...
+# Subtest: evasive recovery stops on fresh full-health packets without another retreat
+ok 2 - evasive recovery stops on fresh full-health packets without another retreat
+  ---
+  duration_ms: 0.5141
+  type: 'test'
+  ...
+# Subtest: level-15 Taoist snake hunting does not require MP-only town trips
+ok 3 - level-15 Taoist snake hunting does not require MP-only town trips
+  ---
+  duration_ms: 0.107
+  type: 'test'
+  ...
+# Subtest: Taoist Wooma departure funds enough SoulFireBall casts for a full-health pull
+ok 4 - Taoist Wooma departure funds enough SoulFireBall casts for a full-health pull
+  ---
+  duration_ms: 0.152
+  type: 'test'
+  ...
+# Subtest: q89 Taoist reserves 100 Amulet while other class and quest policies stay unchanged
+ok 5 - q89 Taoist reserves 100 Amulet while other class and quest policies stay unchanged
+  ---
+  duration_ms: 0.3201
+  type: 'test'
+  ...
+# Subtest: caster expedition restock targets stay separate from their field triggers
+ok 6 - caster expedition restock targets stay separate from their field triggers
+  ---
+  duration_ms: 0.2545
+  type: 'test'
+  ...
+# Subtest: dangerous expedition escape remains armed for the completed cave return
+ok 7 - dangerous expedition escape remains armed for the completed cave return
+  ---
+  duration_ms: 0.1474
+  type: 'test'
+  ...
+# Subtest: dangerous Taoist expeditions restock missing equipped or carried Amulets
+ok 8 - dangerous Taoist expeditions restock missing equipped or carried Amulets
+  ---
+  duration_ms: 0.1244
+  type: 'test'
+  ...
+# Subtest: only a living exact evasive recovery timeout is retryable
+ok 9 - only a living exact evasive recovery timeout is retryable
+  ---
+  duration_ms: 0.2656
+  type: 'test'
+  ...
+# Subtest: only living dangerous expeditions replan transient no-walk-path failures
+ok 10 - only living dangerous expeditions replan transient no-walk-path failures
+  ---
+  duration_ms: 0.3897
+  type: 'test'
+  ...
+# Subtest: a living partial unsafe-pack retreat can replan without discarding field progress
+ok 11 - a living partial unsafe-pack retreat can replan without discarding field progress
+  ---
+  duration_ms: 0.1347
+  type: 'test'
+  ...
+# Subtest: a living target lost at the AOI edge is retryable but death and unrelated errors are not
+ok 12 - a living target lost at the AOI edge is retryable but death and unrelated errors are not
+  ---
+  duration_ms: 0.1914
+  type: 'test'
+  ...
+# Subtest: a resumed expedition preserves field progress while it still has a public escape reserve
+ok 13 - a resumed expedition preserves field progress while it still has a public escape reserve
+  ---
+  duration_ms: 0.1386
+  type: 'test'
+  ...
+# Subtest: a dangerous expedition keeps partial field scrolls but restocks once the reserve is empty
+ok 14 - a dangerous expedition keeps partial field scrolls but restocks once the reserve is empty
+  ---
+  duration_ms: 0.1332
+  type: 'test'
+  ...
+# Subtest: q89 Wizard TownTeleport reserve is departure-only and map-0 gated
+ok 15 - q89 Wizard TownTeleport reserve is departure-only and map-0 gated
+  ---
+  duration_ms: 0.0886
+  type: 'test'
+  ...
+# Subtest: TownTeleport departure proof triggers Scott reserve when map-0 stock is missing
+ok 16 - TownTeleport departure proof triggers Scott reserve when map-0 stock is missing
+  ---
+  duration_ms: 0.9271
+  type: 'test'
+  ...
+# Subtest: TownTeleport departure proof fails closed when Scott purchase did not increase stock
+ok 17 - TownTeleport departure proof fails closed when Scott purchase did not increase stock
+  ---
+  duration_ms: 0.357
+  type: 'test'
+  ...
+# Subtest: Wooma and Stone Tomb carry navigation plus combat escape reserves
+ok 18 - Wooma and Stone Tomb carry navigation plus combat escape reserves
+  ---
+  duration_ms: 0.0567
+  type: 'test'
+  ...
+# Subtest: completed expedition objectives stop requiring departure supplies before turn-in
+ok 19 - completed expedition objectives stop requiring departure supplies before turn-in
+  ---
+  duration_ms: 0.0525
+  type: 'test'
+  ...
+# Subtest: long expeditions accept a partial but still conservative funded departure stock
+ok 20 - long expeditions accept a partial but still conservative funded departure stock
+  ---
+  duration_ms: 0.071
+  type: 'test'
+  ...
+# Subtest: a stocked Warrior resumes q54 combat instead of attempting passive field recovery
+ok 21 - a stocked Warrior resumes q54 combat instead of attempting passive field recovery
+  ---
+  duration_ms: 0.1093
+  type: 'test'
+  ...
+# Subtest: a stocked q54 Taoist reaches the class-specific retreat loop without waiting in the old field
+ok 22 - a stocked q54 Taoist reaches the class-specific retreat loop without waiting in the old field
+  ---
+  duration_ms: 0.0973
+  type: 'test'
+  ...
+# Subtest: resumed field pressure evades while recoverable and waits for death only below one-hit survival
+ok 23 - resumed field pressure evades while recoverable and waits for death only below one-hit survival
+  ---
+  duration_ms: 0.1732
+  type: 'test'
+  ...
+# Subtest: active expedition quests raise HP stock without affecting completed quests
+ok 24 - active expedition quests raise HP stock without affecting completed quests
+  ---
+  duration_ms: 0.089
+  type: 'test'
+  ...
+# Subtest: q62 can request a full insect-cave departure stock independently of the field trigger
+ok 25 - q62 can request a full insect-cave departure stock independently of the field trigger
+  ---
+  duration_ms: 0.0435
+  type: 'test'
+  ...
+# Subtest: post-engagement gate leaves a stocked player in place
+ok 26 - post-engagement gate leaves a stocked player in place
+  ---
+  duration_ms: 0.0949
+  type: 'test'
+  ...
+# Subtest: post-engagement gate can force a town service pass for missing combat gear
+ok 27 - post-engagement gate can force a town service pass for missing combat gear
+  ---
+  duration_ms: 0.2256
+  type: 'test'
+  ...
+# Subtest: journey stock threshold proactively restocks before the last potion is consumed
+ok 28 - journey stock threshold proactively restocks before the last potion is consumed
+  ---
+  duration_ms: 0.2513
+  type: 'test'
+  ...
+# Subtest: an expedition refill can require a full departure stock without raising its field trigger
+ok 29 - an expedition refill can require a full departure stock without raising its field trigger
+  ---
+  duration_ms: 0.2301
+  type: 'test'
+  ...
+# Subtest: a field expedition does not turn around solely to replace one used escape scroll
+ok 30 - a field expedition does not turn around solely to replace one used escape scroll
+  ---
+  duration_ms: 0.1492
+  type: 'test'
+  ...
+# Subtest: an expedition refill fails closed when its emergency scroll reserve was not funded
+ok 31 - an expedition refill fails closed when its emergency scroll reserve was not funded
+  ---
+  duration_ms: 0.3221
+  type: 'test'
+  ...
+# Subtest: empty HP stock travels to village, proves restock, returns and refreshes quest state
+ok 32 - empty HP stock travels to village, proves restock, returns and refreshes quest state
+  ---
+  duration_ms: 0.1785
+  type: 'test'
+  ...
+# Subtest: expedition restock may return directly to a safer objective map
+ok 33 - expedition restock may return directly to a safer objective map
+  ---
+  duration_ms: 0.3064
+  type: 'test'
+  ...
+# Subtest: an explicit empty return leaves a dangerous expedition in town for its quest-aware traveler
+ok 34 - an explicit empty return leaves a dangerous expedition in town for its quest-aware traveler
+  ---
+  duration_ms: 0.2165
+  type: 'test'
+  ...
+# Subtest: needsFunds fails explicitly before returning to danger
+ok 35 - needsFunds fails explicitly before returning to danger
+  ---
+  duration_ms: 0.1612
+  type: 'test'
+  ...
+# Subtest: bounded restock count prevents endless supply travel
+ok 36 - bounded restock count prevents endless supply travel
+  ---
+  duration_ms: 0.1437
+  type: 'test'
+  ...
+# Subtest: HP stock matches supply use across Small, Medium and Large without counting MP drugs
+ok 37 - HP stock matches supply use across Small, Medium and Large without counting MP drugs
+  ---
+  duration_ms: 0.0643
+  type: 'test'
+  ...
+# Subtest: HP Medium departure reserve is an opt-in trigger and does not become a field invariant
+ok 38 - HP Medium departure reserve is an opt-in trigger and does not become a field invariant
+  ---
+  duration_ms: 0.1702
+  type: 'test'
+  ...
+# Subtest: a q89 field pass can keep Small HP without a standalone Medium town loop
+ok 39 - a q89 field pass can keep Small HP without a standalone Medium town loop
+  ---
+  duration_ms: 0.0947
+  type: 'test'
+  ...
+# Subtest: q89 Wizard fresh CursedShaman recovery is limited to an injured Medium-equipped Wizard
+ok 40 - q89 Wizard fresh CursedShaman recovery is limited to an injured Medium-equipped Wizard
+  ---
+  duration_ms: 0.1393
+  type: 'test'
+  ...
+# Subtest: caster supply gate requires MP independently while Warrior HP remains sufficient
+ok 41 - caster supply gate requires MP independently while Warrior HP remains sufficient
+  ---
+  duration_ms: 0.1479
+  type: 'test'
+  ...
+# Subtest: a caster expedition refills its departure MP stock without raising the field trigger
+ok 42 - a caster expedition refills its departure MP stock without raising the field trigger
+  ---
+  duration_ms: 0.1906
+  type: 'test'
+  ...
+# Subtest: a Taoist expedition refills a full Amulet reserve at its lower field trigger
+ok 43 - a Taoist expedition refills a full Amulet reserve at its lower field trigger
+  ---
+  duration_ms: 0.239
+  type: 'test'
+  ...
+# Subtest: a Taoist expedition rejects an underfilled Amulet departure reserve
+ok 44 - a Taoist expedition rejects an underfilled Amulet departure reserve
+  ---
+  duration_ms: 0.4538
+  type: 'test'
+  ...
+# Subtest: only a healthy near-complete kill quest may make a cash-poor no-stock finish attempt
+ok 45 - only a healthy near-complete kill quest may make a cash-poor no-stock finish attempt
+  ---
+  duration_ms: 0.1521
+  type: 'test'
+  ...
+# Subtest: a healthy q42-style hunt can finish two kills from measured reduced stock
+ok 46 - a healthy q42-style hunt can finish two kills from measured reduced stock
+  ---
+  duration_ms: 0.1161
+  type: 'test'
+  ...
+# Subtest: passive recovery proves exact HP through bounded fresh snapshots
+ok 47 - passive recovery proves exact HP through bounded fresh snapshots
+  ---
+  duration_ms: 0.2167
+  type: 'test'
+  ...
+# Subtest: evasive recovery moves away from a nearby follower before refreshing HP
+ok 48 - evasive recovery moves away from a nearby follower before refreshing HP
+  ---
+  duration_ms: 0.4112
+  type: 'test'
+  ...
+# Subtest: evasive recovery keeps sustaining after reaching a safe gap
+ok 49 - evasive recovery keeps sustaining after reaching a safe gap
+  ---
+  duration_ms: 0.3641
+  type: 'test'
+  ...
+# Subtest: expedition recovery budgets span cadence-limited doses beyond the short field timeout
+ok 50 - expedition recovery budgets span cadence-limited doses beyond the short field timeout
+  ---
+  duration_ms: 1.5262
+  type: 'test'
+  ...
+# Subtest: q62 leaves D2041 packs toward the real D2042 transfer
+ok 51 - q62 leaves D2041 packs toward the real D2042 transfer
+  ---
+  duration_ms: 0.2355
+  type: 'test'
+  ...
+# Subtest: q60 ranged classes admit the measured D2041 SpiderFrog spawn density
+ok 52 - q60 ranged classes admit the measured D2041 SpiderFrog spawn density
+  ---
+  duration_ms: 0.0834
+  type: 'test'
+  ...
+# Subtest: q65 preserves D421 progress toward its D422 Zombie1 field
+ok 53 - q65 preserves D421 progress toward its D422 Zombie1 field
+  ---
+  duration_ms: 0.2063
+  type: 'test'
+  ...
+# Subtest: q99 Warrior admits the measured final WoomaFighter spawn group
+ok 54 - q99 Warrior admits the measured final WoomaFighter spawn group
+  ---
+  duration_ms: 0.053
+  type: 'test'
+  ...
+# Subtest: q89 Wizard clears one entrance blocker while retaining its retreat gates
+ok 55 - q89 Wizard clears one entrance blocker while retaining its retreat gates
+  ---
+  duration_ms: 0.0557
+  type: 'test'
+  ...
+# Subtest: q89 focus relaxation is isolated from other ranged expeditions
+ok 56 - q89 focus relaxation is isolated from other ranged expeditions
+  ---
+  duration_ms: 0.0635
+  type: 'test'
+  ...
+# Subtest: q98 Wooma expedition keeps long wide recovery armed for ranged classes
+ok 57 - q98 Wooma expedition keeps long wide recovery armed for ranged classes
+  ---
+  duration_ms: 0.0556
+  type: 'test'
+  ...
+# Subtest: q99 keeps the same Wooma expedition recovery and supplies as q98
+ok 58 - q99 keeps the same Wooma expedition recovery and supplies as q98
+  ---
+  duration_ms: 0.0691
+  type: 'test'
+  ...
+# Subtest: ranged Wooma hunts finish a nearly dead target only while the caster is healthy
+ok 59 - ranged Wooma hunts finish a nearly dead target only while the caster is healthy
+  ---
+  duration_ms: 0.0486
+  type: 'test'
+  ...
+# Subtest: q122/q123 Warrior resumes a damaged live Prajna objective through the measured pack
+ok 60 - q122/q123 Warrior resumes a damaged live Prajna objective through the measured pack
+  ---
+  duration_ms: 0.0547
+  type: 'test'
+  ...
+# Subtest: q118 Warrior admits the measured Mineral Mine pack for ordinary aggressor clearing
+ok 61 - q118 Warrior admits the measured Mineral Mine pack for ordinary aggressor clearing
+  ---
+  duration_ms: 0.0333
+  type: 'test'
+  ...
+# Subtest: q113 deep Bug Cave hunt uses expedition recovery and ranged density limits
+ok 62 - q113 deep Bug Cave hunt uses expedition recovery and ranged density limits
+  ---
+  duration_ms: 0.0524
+  type: 'test'
+  ...
+# Subtest: q114 Stone Tomb boars keep expedition supplies and wide recovery armed
+ok 63 - q114 Stone Tomb boars keep expedition supplies and wide recovery armed
+  ---
+  duration_ms: 0.0441
+  type: 'test'
+  ...
+# Subtest: q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room
+ok 64 - q54 keeps Warrior mine thresholds and gives a trapped healing Taoist bounded breakout room
+  ---
+  duration_ms: 0.0535
+  type: 'test'
+  ...
+# Subtest: q54 finishes available D401 zombies before preferring the D406 source
+ok 65 - q54 finishes available D401 zombies before preferring the D406 source
+  ---
+  duration_ms: 0.0802
+  type: 'test'
+  ...
+# Subtest: a completed combat objective leaves for turn-in instead of recovering in its old field
+ok 66 - a completed combat objective leaves for turn-in instead of recovering in its old field
+  ---
+  duration_ms: 0.1284
+  type: 'test'
+  ...
+# Subtest: evasive recovery recomputes from a partial failed move and reaches clearance before sleeping
+ok 67 - evasive recovery recomputes from a partial failed move and reaches clearance before sleeping
+  ---
+  duration_ms: 0.3588
+  type: 'test'
+  ...
+# Subtest: evasive recovery keeps kiting a same-speed follower across bounded refresh batches
+ok 68 - evasive recovery keeps kiting a same-speed follower across bounded refresh batches
+  ---
+  duration_ms: 0.2355
+  type: 'test'
+  ...
+# Subtest: evasive recovery spends a remaining emergency scroll when a dense pack closes again
+ok 69 - evasive recovery spends a remaining emergency scroll when a dense pack closes again
+  ---
+  duration_ms: 0.1998
+  type: 'test'
+  ...
+# Subtest: safe-zone recovery ignores neutral residents and does not spend an escape
+ok 70 - safe-zone recovery ignores neutral residents and does not spend an escape
+  ---
+  duration_ms: 0.1405
+  type: 'test'
+  ...
+# Subtest: evasive recovery bias keeps a dungeon retreat moving toward its transfer
+ok 71 - evasive recovery bias keeps a dungeon retreat moving toward its transfer
+  ---
+  duration_ms: 0.2645
+  type: 'test'
+  ...
+# Subtest: blocked evasive poll refreshes authoritative recovery instead of failing immediately
+ok 72 - blocked evasive poll refreshes authoritative recovery instead of failing immediately
+  ---
+  duration_ms: 0.41
+  type: 'test'
+  ...
+# Subtest: evasive recovery can use an off-axis endpoint in a narrow corridor
+ok 73 - evasive recovery can use an off-axis endpoint in a narrow corridor
+  ---
+  duration_ms: 0.3167
+  type: 'test'
+  ...
+# Subtest: evasive recovery aborts a dead snapshot before navigation or sustain
+ok 74 - evasive recovery aborts a dead snapshot before navigation or sustain
+  ---
+  duration_ms: 0.1265
+  type: 'test'
+  ...
+1..74
+# tests 74
+# suites 0
+# pass 74
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 96.4161
+
+exitCode=0
+scope=protocol-survival.mjs,test-protocol-survival.mjs
+

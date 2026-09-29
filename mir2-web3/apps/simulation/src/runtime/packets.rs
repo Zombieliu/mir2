@@ -8,8 +8,8 @@ use mir2_game_data::{
     crystal_base_stats_info_packet_payload, crystal_game_shop_info_packet_payloads,
     crystal_guild_buff_list_packet_payload, crystal_item_by_index, crystal_magic_by_spell,
     crystal_map_respawns_by_file_name, crystal_monster_by_index, crystal_monster_by_name,
-    crystal_npc_info_manifest, crystal_recipe_bootstrap_packets, format_localized_text,
-    localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
+    crystal_npc_info_manifest, crystal_real_item_for_player, crystal_recipe_bootstrap_packets,
+    format_localized_text, localized_text_or_fallback, CrystalItemTemplate, LanguageCode,
 };
 use mir2_protocol::{
     decode_server_packet, encode_frame, ChatItem, ChatType, ClientAuction, ClientBuff,
@@ -29,7 +29,7 @@ use crate::config::{
     Stage5AuctionListing, Stage5HeroState, Stage5ItemRentalRecordSnapshot,
     Stage5ItemRentalSnapshot, Stage5MailMessage, Stage5SystemsState, Stage5TradeState,
     WorldEntityDisposition, WorldEntityKind, WorldEntitySnapshot, WorldEntitySpriteSnapshot,
-    WorldSnapshot,
+    WorldItemTooltipSource, WorldSnapshot,
 };
 
 use super::big_map::{
@@ -74,6 +74,7 @@ use super::inventory::*;
 use super::inventory::{
     current_weight, expand_storage_rental_impl, free_bag_slots, storage_password_required,
 };
+use super::item_custody;
 use super::items::*;
 use super::items::{
     crystal_item_template_for_item_key, item_info_from_crystal_template, user_item_from_item_state,
@@ -97,15 +98,20 @@ use super::monsters::{
 use super::movement::{current_location, town_revive_packets};
 use super::npc::{
     buy_item_impl, crystal_npc_object_in_data_range, crystal_npc_object_visible_in_world,
-    crystal_npc_visible_to_character, crystal_quest_ids_by_npc, dismiss_dialog, sell_item_impl,
+    crystal_npc_visible_to_character_for_profile, crystal_quest_ids_by_npc, dismiss_dialog,
+    sell_item_impl,
     CrystalNpcLocalTime, NpcFlagState,
 };
 use super::quests::{
     abandon_quest, begin_quest, can_accept_quest, complete_quest_with_selection,
     completed_quest_ids, crystal_npc_quest_icon, crystal_quest_finish_npc_matches,
     crystal_quest_info_by_id, crystal_quest_reward_selection_missing,
-    crystal_quest_start_npc_matches, crystal_quest_task_list, ensure_runtime_quest,
+    crystal_quest_start_npc_matches, crystal_quest_task_list, effective_crystal_quest_info_by_id,
+    effective_quest_ids_for_npc, ensure_runtime_quest, newcomer_daily_bonus_update_packet,
     quest_definition_exists, quest_log_snapshots, quest_template_by_id,
+};
+use super::quests::quest_recurrence::{
+    quest_completion_is_permanent, refresh_quest_recurrence,
 };
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
@@ -141,7 +147,9 @@ use super::stage5::{
 const CRYSTAL_NPC_NAME_COLOUR_ARGB: i32 = 0xFF00_FF00u32 as i32;
 const CRYSTAL_MAIL_CAPACITY: usize = 100;
 pub(super) const MAX_MAIL_RECIPIENT_CHARS: usize = 20;
-pub(super) const MAX_MAIL_MESSAGE_CHARS: usize = 1_000;
+/// Crystal validates `string.Length`, which counts UTF-16 code units rather
+/// than Unicode scalar values.
+pub(super) const MAX_MAIL_MESSAGE_CHARS: usize = 500;
 const MAIL_TARGET_DURABLE_IDENTITY_MISMATCH: &str = "mail target durable save identity mismatch";
 
 #[derive(Resource, Debug, Default)]
@@ -220,12 +228,85 @@ fn current_stage5_character_index(world: &World) -> i32 {
         .unwrap_or_default()
 }
 
-fn stage5_mail_cost(gold: u32, stamped: bool) -> u32 {
-    // `stamped` is client-controlled. Until a server-side stamp inventory and
-    // consume operation exists, it must never authorize free postage.
-    let _ = stamped;
-    (gold / 1_000) * 100
+// Crystal MailSystem.ini defaults: FreeWithStamp=True, CostPer1k=100,
+// InsurancePerItem=5. These are server policy, never supplied by the client.
+const MAIL_GOLD_COST_PER_1K: u32 = 100;
+const MAIL_INSURANCE_PERCENT: u32 = 5;
+const MAIL_BIND_NO_MAIL: i16 = 16_384;
+
+fn stage5_mail_item_allowed(item: &ItemState) -> bool {
+    exact_mail_item_state_is_valid(item)
+        && stage5_trade_item_can_enter(item)
+        && !item_has_crystal_or_rental_bind_flag(item, MAIL_BIND_NO_MAIL)
 }
+
+fn stage5_mail_cost(gold: u32, items: &[ItemState], has_stamp: bool) -> Option<u32> {
+    if has_stamp {
+        return Some(0);
+    }
+    items.iter().try_fold((gold / 1_000).checked_mul(MAIL_GOLD_COST_PER_1K)?, |cost, item| {
+        let template = crystal_item_template_for_item_key(&item.key)?;
+        let price = crystal_item_current_price(item, &template, crystal_item_added_stat_weight(item));
+        // Match PlayerObject.GetMailCost's double division and per-item floor.
+        let insurance = ((f64::from(price) / 100.0) * f64::from(MAIL_INSURANCE_PERCENT)).floor() as u32;
+        cost.checked_add(insurance)
+    })
+}
+
+struct Stage5MailParcelPlan {
+    cost: u32,
+    stamp: Option<ItemState>,
+    attachments: Vec<ItemState>,
+}
+
+fn stage5_mail_parcel_plan(
+    inventory: &[ItemState], gold: u32, items_idx: &[u64; 5], stamped: bool,
+) -> Option<Stage5MailParcelPlan> {
+    let ids = stage5_mail_attachment_ids(items_idx)?;
+    let stamp = stamped.then(|| inventory.iter().find(|item| {
+        matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+            && item.quantity > 0
+            && exact_mail_item_state_is_valid(item)
+            && crystal_item_template_for_item_key(&item.key)
+                .is_some_and(|template| template.item_type == 0 && template.shape == 1)
+    })).flatten().cloned();
+    if let Some(stamp) = &stamp {
+        let id = item_unique_id(stamp);
+        // A stamp cannot pay postage and also be mailed; reject the ambiguous
+        // request rather than relying on attachment ordering or stack counts.
+        if ids.contains(&id) || inventory.iter().filter(|item| item_unique_id(item) == id).count() != 1 {
+            return None;
+        }
+    } else if items_idx[1..].iter().any(|id| *id != 0) {
+        return None;
+    }
+    let attachments = ids.iter().map(|id| {
+        let matches = inventory.iter().filter(|item| item_matches_inventory_unique_id(item, *id)).collect::<Vec<_>>();
+        let [item] = matches.as_slice() else { return None; };
+        (matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+            && stage5_mail_item_allowed(item)).then(|| (*item).clone())
+    }).collect::<Option<Vec<_>>>()?;
+    let cost = stage5_mail_cost(gold, &attachments, stamp.is_some())?;
+    Some(Stage5MailParcelPlan { cost, stamp, attachments })
+}
+
+fn stage5_mail_quote(world: &World, gold: u32, items_idx: &[u64; 5], stamped: bool) -> Option<u32> {
+    let sender = stage5_mail_sender(world)?;
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let store = config.account_store.lock().ok()?;
+    let account = store.accounts.get(&sender.account_id)?;
+    let character = account.characters.iter().find(|character| character.index == sender.character_index && character.name == sender.character_name)?;
+    let save = account.saves.get(&character.index)?;
+    if save.character.index != character.index || save.character.name != character.name {
+        return None;
+    }
+    let inventory = save.inventory_items_json.iter().map(|state| serde_json::from_str::<ItemState>(state).ok()).collect::<Option<Vec<_>>>()?;
+    stage5_mail_parcel_plan(&inventory, gold, items_idx, stamped).map(|plan| plan.cost)
+}
+
+#[cfg(test)]
+#[path = "mail_parcel_tests.rs"]
+mod mail_parcel_tests;
 
 #[derive(Debug, Clone)]
 struct Stage5MailSender {
@@ -277,8 +358,15 @@ fn stage5_mail_recipient_is_valid(name: &str) -> bool {
 }
 
 fn stage5_mail_message_is_valid(message: &str) -> bool {
-    message.chars().count() <= MAX_MAIL_MESSAGE_CHARS && !message.chars().any(char::is_control)
+    message.encode_utf16().count() <= MAX_MAIL_MESSAGE_CHARS
+        && message
+            .chars()
+            .all(|character| matches!(character, '\r' | '\n') || !character.is_control())
 }
+
+#[cfg(test)]
+#[path = "mail_body_validation_tests.rs"]
+mod mail_body_validation_tests;
 
 #[derive(Debug, Clone)]
 struct Stage5MailTarget {
@@ -361,8 +449,7 @@ fn stage5_take_mail_attachments_from_save(
         if attachment_id_set.contains(&unique_id) {
             if !removed.insert(unique_id)
                 || !matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-                || !exact_mail_item_state_is_valid(&item)
-                || !stage5_trade_item_can_enter(&item)
+                || !stage5_mail_item_allowed(&item)
             {
                 return Err("mail attachment changed before commit".to_string());
             }
@@ -407,6 +494,9 @@ fn stage5_commit_mail_transaction(
     total: u32,
     attachment_ids: &[u64],
     expected_attachment_states_json: &[String],
+    items_idx: &[u64; 5],
+    stamped: bool,
+    expected_stamp_state_json: Option<&str>,
 ) -> Result<Stage5MailCommit, String> {
     let self_mail =
         sender.account_id == target.account_id && sender.character_index == target.character_index;
@@ -465,15 +555,41 @@ fn stage5_commit_mail_transaction(
             Some(target_save)
         };
         let sender_baseline_revision = sender_save.revision;
-        sender_save.gold = sender_save
-            .gold
-            .checked_sub(total)
-            .ok_or_else(|| "sender gold changed before mail commit".to_string())?;
+        let durable_inventory = sender_save.inventory_items_json.iter()
+            .map(|state| serde_json::from_str::<ItemState>(state))
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|error| format!("invalid parcel inventory: {error}"))?;
+        let durable_plan = stage5_mail_parcel_plan(&durable_inventory, mail.gold, items_idx, stamped)
+            .ok_or_else(|| "parcel ownership or postage changed before commit".to_string())?;
+        let durable_stamp_json = durable_plan.stamp.as_ref().map(serde_json::to_string).transpose()
+            .map_err(|error| format!("invalid parcel stamp: {error}"))?;
+        if durable_stamp_json.as_deref() != expected_stamp_state_json
+            || mail.gold.checked_add(durable_plan.cost) != Some(total)
+        {
+            return Err("parcel stamp or fee changed before commit".to_string());
+        }
         let removed_attachments = stage5_take_mail_attachments_from_save(
             &mut sender_save,
             attachment_ids,
             expected_attachment_states_json,
         )?;
+        sender_save.gold = sender_save
+            .gold
+            .checked_sub(total)
+            .ok_or_else(|| "sender gold changed before mail commit".to_string())?;
+        if let Some(mut stamp) = durable_plan.stamp {
+            let stamp_id = item_unique_id(&stamp);
+            let index = sender_save.inventory_items_json.iter().position(|state| {
+                serde_json::from_str::<ItemState>(state).is_ok_and(|item| item_unique_id(&item) == stamp_id)
+            }).ok_or_else(|| "parcel stamp disappeared before commit".to_string())?;
+            if stamp.quantity == 1 {
+                sender_save.inventory_items_json.remove(index);
+            } else {
+                stamp.quantity -= 1;
+                sender_save.inventory_items_json[index] = serde_json::to_string(&stamp)
+                    .map_err(|error| format!("failed to encode consumed stamp: {error}"))?;
+            }
+        }
         mail.items = removed_attachments
             .iter()
             .map(|item| item.key.clone())
@@ -557,30 +673,6 @@ fn stage5_mail_attachment_ids(items_idx: &[u64; 5]) -> Option<Vec<u64>> {
     Some(ids)
 }
 
-fn stage5_mail_attachment_states(world: &World, unique_ids: &[u64]) -> Option<Vec<ItemState>> {
-    let inventory = world.resource::<InventoryResource>();
-    let mut items = Vec::with_capacity(unique_ids.len());
-    for unique_id in unique_ids {
-        let matches = inventory
-            .inventory_items
-            .iter()
-            .filter(|item| item_matches_inventory_unique_id(item, *unique_id))
-            .collect::<Vec<_>>();
-        let [item] = matches.as_slice() else {
-            return None;
-        };
-        if !matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-            || !exact_mail_item_state_is_valid(item)
-            || !stage5_trade_item_can_enter(item)
-        {
-            return None;
-        }
-        let item = (*item).clone();
-        items.push(item);
-    }
-    Some(items)
-}
-
 fn stage5_mail_attachment_user_items(mail: &Stage5MailMessage) -> Vec<UserItem> {
     if !mail.item_states_json.is_empty() {
         let Ok(items) = mail
@@ -619,13 +711,16 @@ fn stage5_mail_to_client_mail(mail: &Stage5MailMessage) -> ClientMail {
         locked: mail.locked,
         can_reply: true,
         collected: mail.claimed,
-        date_sent_binary_datetime: current_binary_datetime(),
+        // Legacy Stage5 mail has no persisted send timestamp. Re-projecting
+        // the mailbox must not invent a new sent date on every refresh.
+        // Zero is an unknown date until durable creation metadata is supplied.
+        date_sent_binary_datetime: 0,
         gold: mail.gold,
         items: stage5_mail_attachment_user_items(mail),
     }
 }
 
-fn stage5_receive_mail_packet(world: &World) -> ServerPacket {
+pub(super) fn stage5_receive_mail_packet(world: &World) -> ServerPacket {
     let mail = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -670,11 +765,12 @@ fn stage5_send_mail_packet(
     let Some(target) = stage5_mail_target_for_name(&config, &name) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
-    let Some(attachment_states) = stage5_mail_attachment_states(world, &attachment_ids) else {
+    let Some(plan) = stage5_mail_parcel_plan(
+        &world.resource::<InventoryResource>().inventory_items, gold, &items_idx, stamped,
+    ) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
-    let cost = stage5_mail_cost(gold, stamped);
-    let Some(total) = gold.checked_add(cost) else {
+    let Some(total) = gold.checked_add(plan.cost) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
     if world.resource::<PlayerRuntimeResource>().gold < total {
@@ -684,12 +780,16 @@ fn stage5_send_mail_packet(
         return vec![ServerPacket::MailSent { result: -1 }];
     };
 
-    let item_states_json = match attachment_states
+    let item_states_json = match plan.attachments
         .iter()
         .map(serde_json::to_string)
         .collect::<Result<Vec<_>, _>>()
     {
         Ok(states) => states,
+        Err(_) => return vec![ServerPacket::MailSent { result: -1 }],
+    };
+    let stamp_state_json = match plan.stamp.as_ref().map(serde_json::to_string).transpose() {
+        Ok(state) => state,
         Err(_) => return vec![ServerPacket::MailSent { result: -1 }],
     };
     let mail = Stage5MailMessage {
@@ -715,6 +815,9 @@ fn stage5_send_mail_packet(
         total,
         &attachment_ids,
         &item_states_json,
+        &items_idx,
+        stamped,
+        stamp_state_json.as_deref(),
     ) {
         Ok(committed) => committed,
         Err(error) => {
@@ -738,17 +841,20 @@ fn stage5_send_mail_packet(
     // The durable sender image is authoritative. A stale same-account session
     // is fully synchronized for the fields this transaction can affect, so an
     // attachment removed by another session cannot remain in this World.
-    let committed_ids = committed
+    let committed_quantities = committed
         .sender_inventory_items
         .iter()
-        .map(item_unique_id)
-        .collect::<BTreeSet<_>>();
+        .map(|item| (item_unique_id(item), item.quantity))
+        .collect::<BTreeMap<_, _>>();
     let removed_from_live = world
         .resource::<InventoryResource>()
         .inventory_items
         .iter()
-        .filter(|item| !committed_ids.contains(&item_unique_id(item)))
-        .cloned()
+        .filter_map(|item| {
+            let remaining = committed_quantities.get(&item_unique_id(item)).copied().unwrap_or(0);
+            let removed = item.quantity.saturating_sub(remaining);
+            (removed > 0).then_some((item_unique_id(item), removed))
+        })
         .collect::<Vec<_>>();
     world.resource_mut::<PlayerRuntimeResource>().gold = committed.sender_gold;
     world.resource_mut::<InventoryResource>().inventory_items = committed.sender_inventory_items;
@@ -761,10 +867,10 @@ fn stage5_send_mail_packet(
     if total > 0 {
         packets.push(ServerPacket::LoseGold { gold: total });
     }
-    for item in removed_from_live {
+    for (unique_id, count) in removed_from_live {
         packets.push(ServerPacket::DeleteItem {
-            unique_id: item_unique_id(&item),
-            count: item.quantity.min(u32::from(u16::MAX)) as u16,
+            unique_id,
+            count: count.min(u32::from(u16::MAX)) as u16,
         });
     }
     packets.push(ServerPacket::MailSent { result: 1 });
@@ -988,6 +1094,81 @@ fn stage5_delete_mail_packet(world: &mut World, mail_id: u64) -> Vec<ServerPacke
     stage5_mail_status_packet(world, mail_id, Stage5MailStatusMutation::Delete)
 }
 
+fn stage5_refresh_friend_identities(world: &mut World) {
+    let social = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .social
+        .clone();
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let resolved = {
+        let Ok(store) = config.account_store.lock() else {
+            return;
+        };
+        social
+            .friends
+            .iter()
+            .map(|name| (name, false))
+            .chain(social.blocked.iter().map(|name| (name, true)))
+            .filter_map(|(old_name, blocked)| {
+                let found = if let Some(identity) = social.friend_identities.get(old_name) {
+                    store
+                        .accounts
+                        .get(&identity.account_id)
+                        .and_then(|account| {
+                            account
+                                .characters
+                                .iter()
+                                .find(|character| character.index == identity.character_index)
+                                .map(|character| (identity.account_id.clone(), character))
+                        })
+                } else {
+                    store.accounts.iter().find_map(|(account_id, account)| {
+                        account
+                            .characters
+                            .iter()
+                            .find(|character| character.name.eq_ignore_ascii_case(old_name))
+                            .map(|character| (account_id.clone(), character))
+                    })
+                }?;
+                Some((
+                    found.1.name.clone(),
+                    blocked,
+                    crate::config::Stage5FriendIdentity {
+                        account_id: found.0,
+                        character_index: found.1.index,
+                    },
+                    social.memos.get(old_name).cloned().unwrap_or_default(),
+                ))
+            })
+            .collect::<Vec<_>>()
+    };
+    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+    let social = &mut stage5.stage5_systems.social;
+    social.friends.clear();
+    social.blocked.clear();
+    social.friend_identities.clear();
+    social.memos.clear();
+    for (name, blocked, identity, memo) in resolved {
+        if social
+            .friend_identities
+            .values()
+            .any(|existing| existing == &identity)
+        {
+            continue;
+        }
+        if blocked {
+            social.blocked.push(name.clone());
+        } else {
+            social.friends.push(name.clone());
+        }
+        social.friend_identities.insert(name.clone(), identity);
+        if !memo.is_empty() {
+            social.memos.insert(name, memo);
+        }
+    }
+}
+
 fn stage5_friend_entries(world: &World) -> Vec<ClientFriend> {
     let social = &world
         .resource::<Stage5SystemsResource>()
@@ -998,13 +1179,26 @@ fn stage5_friend_entries(world: &World) -> Vec<ClientFriend> {
         .iter()
         .map(|name| (name, false))
         .chain(social.blocked.iter().map(|name| (name, true)))
-        .enumerate()
-        .map(|(index, (name, blocked))| ClientFriend {
-            index: index as i32,
-            name: name.clone(),
-            memo: social.memos.get(name).cloned().unwrap_or_default(),
-            blocked,
-            online: !blocked,
+        .filter_map(|(name, blocked)| {
+            let index = social.friend_identities.get(name)?.character_index;
+            // The ordinary protocol only carries the index, so ambiguous legacy
+            // identities must not be displayed or addressed by index-only mutations.
+            if social
+                .friend_identities
+                .values()
+                .filter(|id| id.character_index == index)
+                .count()
+                != 1
+            {
+                return None;
+            }
+            Some(ClientFriend {
+                index,
+                name: name.clone(),
+                memo: social.memos.get(name).cloned().unwrap_or_default(),
+                blocked,
+                online: false,
+            })
         })
         .collect()
 }
@@ -1016,49 +1210,83 @@ fn stage5_friend_update_packet(world: &World) -> ServerPacket {
 }
 
 fn stage5_add_friend_packet(world: &mut World, name: String, blocked: bool) -> Vec<ServerPacket> {
-    if name.trim().is_empty() {
-        return vec![stage5_friend_update_packet(world)];
+    let Some((self_identity, _)) = strict_active_account_authorization(world) else {
+        return Vec::new();
+    };
+    stage5_refresh_friend_identities(world);
+    let config = world.resource::<RuntimeConfigResource>().config.clone();
+    let target = {
+        let Ok(store) = config.account_store.lock() else {
+            return Vec::new();
+        };
+        store.accounts.iter().find_map(|(account_id, account)| {
+            account
+                .characters
+                .iter()
+                .find(|character| character.name.eq_ignore_ascii_case(&name))
+                .map(|character| {
+                    (
+                        character.name.clone(),
+                        crate::config::Stage5FriendIdentity {
+                            account_id: account_id.clone(),
+                            character_index: character.index,
+                        },
+                    )
+                })
+        })
+    };
+    let Some((name, identity)) = target else {
+        return vec![system_message_key(world, "server.PlayerDoesNotExist")];
+    };
+    if identity.account_id == self_identity.account_id
+        && identity.character_index == self_identity.character_index
+    {
+        return vec![system_message_key(world, "server.CannotAddYourself")];
+    }
+    if world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .social
+        .friend_identities
+        .values()
+        .any(|existing| {
+            existing == &identity || existing.character_index == identity.character_index
+        })
+    {
+        return vec![system_message_key(world, "server.PlayerAlreadyAdded")];
     }
     {
         let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let social = &mut stage5.stage5_systems.social;
         if blocked {
-            push_unique(&mut stage5.stage5_systems.social.blocked, name.clone());
-            stage5
-                .stage5_systems
-                .social
-                .friends
-                .retain(|friend| !friend.eq_ignore_ascii_case(&name));
+            social.blocked.push(name.clone());
         } else {
-            push_unique(&mut stage5.stage5_systems.social.friends, name.clone());
-            stage5
-                .stage5_systems
-                .social
-                .blocked
-                .retain(|blocked_name| !blocked_name.eq_ignore_ascii_case(&name));
+            social.friends.push(name.clone());
         }
+        social.friend_identities.insert(name, identity);
     }
     vec![stage5_friend_update_packet(world)]
 }
 
 fn stage5_remove_friend_packet(world: &mut World, character_index: i32) -> Vec<ServerPacket> {
-    let name = stage5_friend_entries(world)
+    if strict_active_account_authorization(world).is_none() {
+        return Vec::new();
+    }
+    stage5_refresh_friend_identities(world);
+    let Some(name) = stage5_friend_entries(world)
         .into_iter()
         .find(|friend| friend.index == character_index)
-        .map(|friend| friend.name);
-    if let Some(name) = name {
-        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        stage5
-            .stage5_systems
-            .social
-            .friends
-            .retain(|friend| !friend.eq_ignore_ascii_case(&name));
-        stage5
-            .stage5_systems
-            .social
-            .blocked
-            .retain(|blocked| !blocked.eq_ignore_ascii_case(&name));
-        stage5.stage5_systems.social.memos.remove(&name);
-    }
+        .map(|friend| friend.name)
+    else {
+        return Vec::new();
+    };
+    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+    let social = &mut stage5.stage5_systems.social;
+    social.friends.retain(|friend| friend != &name);
+    social.blocked.retain(|friend| friend != &name);
+    social.memos.remove(&name);
+    social.friend_identities.remove(&name);
+    drop(stage5);
     vec![stage5_friend_update_packet(world)]
 }
 
@@ -1067,21 +1295,28 @@ fn stage5_add_memo_packet(
     character_index: i32,
     memo: String,
 ) -> Vec<ServerPacket> {
-    let name = stage5_friend_entries(world)
+    if strict_active_account_authorization(world).is_none()
+        || memo.is_empty()
+        || memo.encode_utf16().count() > 200
+    {
+        return Vec::new();
+    }
+    stage5_refresh_friend_identities(world);
+    let Some(name) = stage5_friend_entries(world)
         .into_iter()
         .find(|friend| friend.index == character_index)
-        .map(|friend| friend.name);
-    if let Some(name) = name {
-        world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .social
-            .memos
-            .insert(name, memo);
-    }
+        .map(|friend| friend.name)
+    else {
+        return Vec::new();
+    };
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .social
+        .memos
+        .insert(name, memo);
     vec![stage5_friend_update_packet(world)]
 }
-
 fn stage5_hero_info(index: i32, hero: &Stage5HeroState) -> ClientHeroInformation {
     ClientHeroInformation {
         index,
@@ -1094,7 +1329,7 @@ fn stage5_hero_info(index: i32, hero: &Stage5HeroState) -> ClientHeroInformation
 
 fn stage5_hero_inventory_items(world: &World) -> Vec<Option<UserItem>> {
     let hero_inventory = world.resource::<HeroInventoryResource>();
-    let mut items = vec![None; 40];
+    let mut items = vec![None; usize::from(hero_inventory.capacity)];
     for item in &hero_inventory.items {
         let Some(slot) = items.get_mut(usize::from(item.slot)) else {
             continue;
@@ -1117,11 +1352,21 @@ fn stage5_hero_information_packet(world: &World) -> Option<ServerPacket> {
             .object_id
             .saturating_add(1)
     });
-    let level = hero.level.max(1);
-    let hp = (60 + i32::from(level) * 6)
-        .saturating_add(hero_inventory_crystal_stat_total(world, CRYSTAL_STAT_HP).max(0));
-    let mp = (30 + i32::from(level) * 4)
-        .saturating_add(hero_inventory_crystal_stat_total(world, CRYSTAL_STAT_MP).max(0));
+    let max_hp = super::hero_ai::hero_authoritative_stat(world, CRYSTAL_STAT_HP).max(0);
+    let max_mp = super::hero_ai::hero_authoritative_stat(world, CRYSTAL_STAT_MP).max(0);
+    let live = hero_entity(world).and_then(|entity| entity_player_vitals(world, entity));
+    let saved = world.resource::<HeroInventoryResource>().saved_vitals;
+    let hp = live.map(|v|v.hp).or_else(||saved.map(|v|v.hp)).unwrap_or(max_hp);
+    let mp = live.map(|v|v.mp).or_else(||saved.map(|v|v.mp)).unwrap_or(max_mp);
+    let magics = world.resource::<Stage5SystemsResource>().stage5_systems.hero_learned_magics.iter().filter_map(|learned| {
+        let template = crystal_magic_by_spell(&format!("{:?}", learned.spell))?;
+        Some(mir2_protocol::ClientMagic {
+            name:template.name.clone(),spell:learned.spell,base_cost:template.base_cost,level_cost:template.level_cost,icon:template.icon,
+            level1:template.level1,level2:template.level2,level3:template.level3,need1:template.need1,need2:template.need2,need3:template.need3,
+            level:learned.level,key:learned.key,experience:learned.experience,
+            delay:i64::from(template.delay_base.saturating_sub(template.delay_reduction.saturating_mul(u32::from(learned.level))).max(1)),range:template.range,cast_time:super::hero_ai::hero_cast::cast_offset(world,learned.spell,i64::from(template.delay_base.saturating_sub(template.delay_reduction.saturating_mul(u32::from(learned.level))).max(1))),
+        })
+    }).collect();
     Some(ServerPacket::HeroInformation {
         info: HeroUserInformation {
             object_id,
@@ -1133,10 +1378,10 @@ fn stage5_hero_information_packet(world: &World) -> Option<ServerPacket> {
             hp,
             mp,
             experience: i64::from(hero.experience),
-            max_experience: i64::from(level) * 1_000,
+            max_experience: mir2_game_data::crystal_hero_settings().max_experience(hero.level),
             inventory: Some(stage5_hero_inventory_items(world)),
             equipment: Some(hero_inventory_equipment_slots(world)),
-            magics: Vec::new(),
+            magics,
             auto_pot: hero.auto_pot,
             auto_hp_percent: hero.auto_hp_percent,
             auto_mp_percent: hero.auto_mp_percent,
@@ -1144,6 +1389,12 @@ fn stage5_hero_information_packet(world: &World) -> Option<ServerPacket> {
             mp_item_index: hero.mp_item_index,
         },
     })
+}
+
+pub(super) fn hero_bootstrap_packets(world: &World) -> Vec<ServerPacket> {
+    let Some(info)=stage5_hero_information_packet(world) else {return Vec::new();};
+    let class=world.resource::<Stage5SystemsResource>().stage5_systems.hero.as_ref().unwrap().class;
+    vec![ServerPacket::HeroBaseStatsInfo {stats:mir2_game_data::crystal_hero_settings().base_stats(class).clone()},info]
 }
 
 fn stage5_current_hero_info(world: &World) -> Option<ClientHeroInformation> {
@@ -1174,154 +1425,86 @@ fn stage5_hero_ready_for_inventory(world: &World) -> bool {
         && current_hero_object_id(world).is_some()
 }
 
-fn transfer_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
-    let failed_packet = ServerPacket::TransferHeroItem {
-        from,
-        to,
-        success: false,
-    };
-    if !stage5_hero_ready_for_inventory(world) {
-        return vec![failed_packet];
+fn transfer_hero_item_packet(world:&mut World,from:i32,to:i32)->Vec<ServerPacket> {
+    let failure=ServerPacket::TransferHeroItem {from,to,success:false};
+    if !stage5_hero_ready_for_inventory(world) {return vec![failure];}
+    let mut hero=world.resource::<HeroInventoryResource>().clone();
+    let Ok(hero_ids)=super::hero_inventory::validate_hero_custody(&hero) else {return vec![failure];};
+    let Some(from_slot)=u8::try_from(from).ok() else {return vec![failure];};
+    let Some(to_slot)=u8::try_from(to).ok().filter(|slot|*slot<hero.capacity) else {return vec![failure];};
+    let mut inventory=world.resource::<InventoryResource>().clone();
+    if !is_valid_inventory_slot(from_slot,inventory.inventory_capacity) || hero.items.iter().any(|item|item.slot==to_slot) {return vec![failure];}
+    let Some(index)=inventory.inventory_items.iter().position(|item|inventory_item_matches_index(item,from_slot)) else {return vec![failure];};
+    let mut item=inventory.inventory_items[index].clone();
+    if stage5_trade_reserves_item(world,&item) || item_has_crystal_or_rental_bind_flag(&item,CRYSTAL_BIND_NO_HERO) {return vec![failure];}
+    if item_unique_id(&item)==0 && item.user_item_metadata.is_none() && item.socketed.is_empty() {
+        // Legacy slot-zero roots have no global identity. Promote only this
+        // staged root before crossing custody; an exact sidecar UID is never
+        // rewritten, and failure leaves the old personal carrier untouched.
+        inventory.reserved_item_unique_ids.extend(hero_ids.iter().copied());
+        inventory.reserved_item_unique_ids.insert(0);
+        item.unique_id=super::inventory::allocate_item_unique_id(&inventory,item.container,item.slot);
+        let Ok(wire)=super::items::try_user_item_from_item_state(&item) else{return vec![failure];};
+        let Ok(promoted)=super::items::try_item_state_from_user_item(item,&wire) else{return vec![failure];};
+        item=promoted;inventory.inventory_items[index]=item.clone();
     }
-    let Some(from_slot) = u8::try_from(from).ok() else {
-        return vec![failed_packet];
-    };
-    let Some(to_slot) = u8::try_from(to).ok().filter(|slot| *slot < 40) else {
-        return vec![failed_packet];
-    };
-    if !is_valid_inventory_slot(from_slot) {
-        return vec![failed_packet];
+    if !super::item_custody::can_take(&inventory,&item) || super::hero_inventory::reject_cross_custody_ids(&item,&hero_ids).is_err() {return vec![failure];}
+    let weight=hero.items.iter().map(super::hero_inventory::item_weight).fold(0u32,u32::saturating_add).saturating_add(super::hero_inventory::item_weight(&item));
+    if weight>super::hero_ai::hero_authoritative_stat(world,super::crystal_compat::CRYSTAL_STAT_BAG_WEIGHT).max(0) as u32 {
+        return vec![system_message_key(world,"server.TooHeavyToTransfer"),failure];
     }
-    if world
-        .resource::<HeroInventoryResource>()
-        .items
-        .iter()
-        .any(|item| item.slot == to_slot)
-    {
-        return vec![failed_packet];
-    }
-
-    let Some(source_index) = world
-        .resource::<InventoryResource>()
-        .inventory_items
-        .iter()
-        .position(|item| inventory_item_matches_index(item, from_slot))
-    else {
-        return vec![failed_packet];
-    };
-    let item_weight = {
-        let inventory = world.resource::<InventoryResource>();
-        inventory.inventory_items[source_index].total_weight()
-    };
-    if {
-        let hero_inventory = world.resource::<HeroInventoryResource>();
-        hero_inventory
-            .items
-            .iter()
-            .map(ItemState::total_weight)
-            .sum::<u32>()
-            .saturating_add(item_weight)
-            > CRYSTAL_BAG_WEIGHT_LIMIT
-    } {
-        return vec![
-            system_message_key(world, "server.TooHeavyToTransfer"),
-            failed_packet,
-        ];
-    }
-    if {
-        let inventory = world.resource::<InventoryResource>();
-        let item = &inventory.inventory_items[source_index];
-        item_has_crystal_or_rental_bind_flag(item, CRYSTAL_BIND_NO_HERO)
-    } {
-        return vec![failed_packet];
-    }
-
-    let mut item = {
-        let mut inventory = world.resource_mut::<InventoryResource>();
-        inventory.inventory_items.remove(source_index)
-    };
-    item.slot = to_slot;
-    let mut hero_inventory = world.resource_mut::<HeroInventoryResource>();
-    hero_inventory.items.push(item);
-    vec![ServerPacket::TransferHeroItem {
-        from,
-        to,
-        success: true,
-    }]
+    inventory.inventory_items.remove(index);
+    item.slot=to_slot;item.container=ItemContainer::Bag1;
+    hero.items.push(item);
+    let Ok(ids)=super::hero_inventory::validate_hero_custody(&hero) else {return vec![failure];};
+    inventory.reserved_item_unique_ids.extend(ids);
+    *world.resource_mut::<InventoryResource>()=inventory;
+    *world.resource_mut::<HeroInventoryResource>()=hero;
+    let mut packets=vec![ServerPacket::TransferHeroItem {from,to,success:true}];
+    packets.extend(hero_bootstrap_packets(world));packets
+}
+fn take_back_hero_item_packet(world:&mut World,from:i32,to:i32)->Vec<ServerPacket> {
+    let failure=ServerPacket::TakeBackHeroItem {from,to,success:false};
+    if !stage5_hero_ready_for_inventory(world) {return vec![failure];}
+    let mut hero=world.resource::<HeroInventoryResource>().clone();
+    if super::hero_inventory::validate_hero_custody(&hero).is_err() {return vec![failure];}
+    let Some(from_slot)=u8::try_from(from).ok().filter(|slot|*slot<hero.capacity) else {return vec![failure];};
+    let Some(to_slot)=u8::try_from(to).ok() else {return vec![failure];};
+    let Some(index)=hero.items.iter().position(|item|item.slot==from_slot) else {return vec![failure];};
+    let item=hero.items.remove(index);
+    let Ok(held)=super::item_custody::reserved_ids(&world.resource::<Stage5SystemsResource>().stage5_systems) else {return vec![failure];};
+    if super::hero_inventory::reject_cross_custody_ids(&item,&held).is_err() {return vec![failure];}
+    let Some((mut inventory,_))=super::item_custody::plan_return(world.resource::<InventoryResource>(),&item,Some(to_slot),false) else {return vec![failure];};
+    let Ok(hero_ids)=super::hero_inventory::validate_hero_custody(&hero) else {return vec![failure];};
+    inventory.reserved_item_unique_ids=held;inventory.reserved_item_unique_ids.extend(hero_ids);
+    *world.resource_mut::<InventoryResource>()=inventory;
+    *world.resource_mut::<HeroInventoryResource>()=hero;
+    let mut packets=vec![ServerPacket::TakeBackHeroItem {from,to,success:true}];
+    packets.extend(hero_bootstrap_packets(world));packets
 }
 
-fn take_back_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
-    let failed_packet = ServerPacket::TakeBackHeroItem {
-        from,
-        to,
-        success: false,
+fn consume_hero_inventory_item_at_index(world:&mut World,item_index:usize) {
+    let removed={
+        let mut hero=world.resource_mut::<HeroInventoryResource>();
+        let Some(item)=hero.items.get_mut(item_index) else {return;};
+        if item.quantity>1 {item.quantity-=1;None} else {Some(hero.items.remove(item_index))}
     };
-    if !stage5_hero_ready_for_inventory(world) {
-        return vec![failed_packet];
+    if let Some(item)=removed {
+        if let Ok(carrier)=super::items::try_user_item_from_item_state(&item) {
+            let mut ids=BTreeSet::new();
+            if super::hero_inventory::collect_item_ids(&carrier,&mut ids).is_ok() {
+                let mut inventory=world.resource_mut::<InventoryResource>();
+                for id in ids {inventory.reserved_item_unique_ids.remove(&id);}
+            }
+        }
     }
-    let Some(from_slot) = u8::try_from(from).ok().filter(|slot| *slot < 40) else {
-        return vec![failed_packet];
-    };
-    let Some(to_slot) = u8::try_from(to).ok() else {
-        return vec![failed_packet];
-    };
-    let Some((to_container, to_inventory_slot)) = inventory_container_and_slot_for_index(to_slot)
-    else {
-        return vec![failed_packet];
-    };
-    if world
-        .resource::<InventoryResource>()
-        .inventory_items
-        .iter()
-        .any(|item| inventory_item_matches_index(item, to_slot))
-    {
-        return vec![failed_packet];
-    }
-    let Some(hero_index) = world
-        .resource::<HeroInventoryResource>()
-        .items
-        .iter()
-        .position(|item| item.slot == from_slot)
-    else {
-        return vec![failed_packet];
-    };
-
-    let mut item = world.resource::<HeroInventoryResource>().items[hero_index].clone();
-    if validate_committed_item_state_carrier(&item).is_err() {
-        return vec![failed_packet];
-    }
-    item.slot = to_inventory_slot;
-    item.container = to_container;
-    normalize_incoming_item_tree_unique_ids(world.resource::<InventoryResource>(), &mut item, &[]);
-    if validate_committed_item_state_carrier(&item).is_err() {
-        return vec![failed_packet];
-    }
-    world
-        .resource_mut::<HeroInventoryResource>()
-        .items
-        .remove(hero_index);
-    world
-        .resource_mut::<InventoryResource>()
-        .inventory_items
-        .push(item);
-
-    vec![ServerPacket::TakeBackHeroItem {
-        from,
-        to,
-        success: true,
-    }]
 }
-
-fn consume_hero_inventory_item_at_index(world: &mut World, item_index: usize) {
-    let mut hero_inventory = world.resource_mut::<HeroInventoryResource>();
-    let Some(item) = hero_inventory.items.get_mut(item_index) else {
-        return;
-    };
-    if item.quantity > 1 {
-        item.quantity -= 1;
-    } else {
-        hero_inventory.items.remove(item_index);
+fn hero_use_success(world:&World,unique_id:u64,mut packets:Vec<ServerPacket>)->Vec<ServerPacket> {
+    if let Some(vitals)=hero_entity(world).and_then(|entity|entity_player_vitals(world,entity)) {
+        packets.push(ServerPacket::HeroHealthChanged {hp:vitals.hp,mp:vitals.mp});
     }
+    packets.extend(hero_bootstrap_packets(world));
+    prepend_optional_packet(use_item_ack(Some((unique_id,MirGridType::HeroInventory)),true),packets)
 }
 
 fn hero_use_item_failed(unique_id: u64) -> Vec<ServerPacket> {
@@ -1350,12 +1533,31 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
     else {
         return hero_use_item_failed(unique_id);
     };
+    if super::item_custody::refresh(world).is_err() {return hero_use_item_failed(unique_id);}
     let item = world.resource::<HeroInventoryResource>().items[hero_item_index].clone();
     let ack = Some((unique_id, MirGridType::HeroInventory));
     let item_template = crystal_item_template_for_item_key(&item.key);
     let mut packets = Vec::new();
 
     if let Some(template) = item_template.as_ref() {
+        let hero=world.resource::<Stage5SystemsResource>().stage5_systems.hero.as_ref().unwrap();
+        if super::items::crystal_hero_item_requirement_rejected(world,hero.level,hero.class,hero.gender,template) || item.quantity==0 || super::items::validate_committed_item_state_carrier(&item).is_err() {
+            return hero_use_item_failed(unique_id);
+        }
+        if template.item_type==super::crystal_compat::CRYSTAL_ITEM_TYPE_SCROLL && template.shape==15 {
+            let capacity=world.resource::<HeroInventoryResource>().capacity;
+            if capacity>=42 {return vec![use_item_ack(ack,false).unwrap(),system_message_key(world,"server.HeroInventoryMax")];}
+            {
+                let mut hero=world.resource_mut::<HeroInventoryResource>();
+                super::hero_inventory::expand_capacity(&mut hero);
+            }
+            consume_hero_inventory_item_at_index(world,hero_item_index);
+            packets.push(system_message_key(world,"server.HeroInventoryIncreased"));
+            // Hero.Enqueue drops ResizeInventory and the client routes that packet
+            // to the player. Refresh this Hero's exact array instead.
+            return hero_use_success(world,unique_id,packets);
+        }
+
         if template.item_type == CRYSTAL_ITEM_TYPE_POTION && current_map_disallows_drug(world) {
             packets.push(system_message_key(world, "server.YouCannotUsePotionsHere"));
             return prepend_optional_packet(use_item_ack(ack, false), packets);
@@ -1370,7 +1572,7 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
                 return prepend_optional_packet(use_item_ack(ack, false), packets);
             }
             consume_hero_inventory_item_at_index(world, hero_item_index);
-            return prepend_optional_packet(use_item_ack(ack, true), packets);
+            return hero_use_success(world,unique_id,packets);
         }
 
         if template.item_type == CRYSTAL_ITEM_TYPE_POTION
@@ -1392,13 +1594,13 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
                     }
                 }
             }
-            return prepend_optional_packet(use_item_ack(ack, true), packets);
+            return hero_use_success(world,unique_id,packets);
         }
 
         if let Some(magic) = crystal_learn_hero_book_magic(world, template) {
             packets.push(ServerPacket::NewMagic { magic, hero: true });
             consume_hero_inventory_item_at_index(world, hero_item_index);
-            return prepend_optional_packet(use_item_ack(ack, true), packets);
+            return hero_use_success(world,unique_id,packets);
         }
     }
 
@@ -1415,7 +1617,7 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
             return prepend_optional_packet(use_item_ack(ack, false), packets);
         }
         consume_hero_inventory_item_at_index(world, hero_item_index);
-        return prepend_optional_packet(use_item_ack(ack, true), packets);
+        return hero_use_success(world,unique_id,packets);
     }
 
     prepend_optional_packet(use_item_ack(ack, false), packets)
@@ -1632,6 +1834,10 @@ fn stage5_spell_toggle_packet(
     };
     let can_use = toggle_state != 0;
 
+    if spell == Spell::TwinDrakeBlade {
+        return super::skills::prepare_twin_drake_blade(world);
+    }
+
     if crystal_toggle_spell_is_stateful(spell) {
         set_skill_toggle_state(world, spell, can_use);
         return vec![ServerPacket::SpellToggle {
@@ -1672,6 +1878,7 @@ fn stage5_spell_toggle_packet(
         }
         let stat_value = 11 + i32::from(level) * 3;
         let buff = super::buffs::BuffState {
+            real_time_duration: None,
             key: "counter-attack".to_string(),
             name: "Counter Attack".to_string(),
             description: "Crystal counter-attack stance is active.".to_string(),
@@ -1719,6 +1926,7 @@ fn stage5_spell_toggle_packet(
             skills.mental_state
         };
         let buff = super::buffs::BuffState {
+            real_time_duration: None,
             key: "mental-state".to_string(),
             name: "Mental State".to_string(),
             description: "Crystal mental state is active.".to_string(),
@@ -1781,9 +1989,6 @@ fn stage5_spell_toggle_packet(
 }
 
 const STAGE5_TRADE_SLOT_COUNT: usize = 10;
-const STAGE5_INTELLIGENT_CREATURE_FULLNESS_DECAY_TICKS: u64 = 10;
-const STAGE5_INTELLIGENT_CREATURE_BLACKSTONE_TICK_MS: i64 = 1_000;
-const STAGE5_INTELLIGENT_CREATURE_BLACKSTONE_CAP_MS: i64 = 24_000;
 
 fn stage5_trade_items(world: &World) -> Vec<Option<UserItem>> {
     let stage5 = world.resource::<Stage5SystemsResource>();
@@ -3178,7 +3383,10 @@ fn stage5_guild_storage_item_packet(
             let Some(to_slot) = u8::try_from(to).ok() else {
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             };
-            if !is_valid_inventory_slot(to_slot) {
+            if !is_valid_inventory_slot(
+                to_slot,
+                world.resource::<InventoryResource>().inventory_capacity,
+            ) {
                 return vec![stage5_guild_storage_failure(change_type, from, to)];
             }
             let occupied = world
@@ -3360,6 +3568,15 @@ fn active_npc_allows_quest_request(
     finish: bool,
     selected_item_index: Option<i32>,
 ) -> bool {
+    if newcomer_diary_allows_quest_request_without_npc(
+        world,
+        quest_id,
+        requested_npc_index,
+        finish,
+    ) {
+        return true;
+    }
+
     let Some(active_dialog) = world
         .resource::<NpcStateResource>()
         .active_npc_dialog
@@ -3374,24 +3591,66 @@ fn active_npc_allows_quest_request(
         return false;
     }
 
-    if !quest_npc_matches_request(quest_id, requested_npc_index, finish, npc_object_id) {
+    if !quest_npc_matches_request(
+        world,
+        quest_id,
+        requested_npc_index,
+        finish,
+        npc_object_id,
+    ) {
         return false;
     }
 
     crystal_npc_object_in_data_range(world, npc_object_id)
 }
 
+fn newcomer_diary_allows_quest_request_without_npc(
+    world: &World,
+    quest_id: i32,
+    requested_npc_index: Option<u32>,
+    finish: bool,
+) -> bool {
+    if !world
+        .get_resource::<QuestResource>()
+        .is_some_and(|quests| quests.newcomer_v1_cadence || quests.newcomer_v2_cadence)
+    {
+        return false;
+    }
+    let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) else {
+        return false;
+    };
+    newcomer_diary_template_allows_quest_request(
+        info.npc_index,
+        info.finish_npc_index,
+        requested_npc_index,
+        finish,
+    )
+}
+
+fn newcomer_diary_template_allows_quest_request(
+    start_npc_index: u32,
+    finish_npc_index: u32,
+    requested_npc_index: Option<u32>,
+    finish: bool,
+) -> bool {
+    if finish {
+        start_npc_index == 0 && finish_npc_index == 0
+    } else {
+        start_npc_index == 0 && requested_npc_index == Some(0)
+    }
+}
+
 fn quest_npc_matches_request(
+    world: &World,
     quest_id: i32,
     requested_npc_index: Option<u32>,
     finish: bool,
     npc_object_id: u32,
 ) -> bool {
-    if quest_template_by_id(quest_id).is_some() {
-        quest_id == GUIDE_QUEST_ID
-            && npc_object_id == GUIDE_NPC_ID
+    if quest_id == GUIDE_QUEST_ID {
+        npc_object_id == GUIDE_NPC_ID
             && requested_npc_index.is_none_or(|index| index == GUIDE_NPC_ID)
-    } else if let Some(info) = crystal_quest_info_by_id(quest_id) {
+    } else if let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) {
         let requested_matches = requested_npc_index
             .is_none_or(|index| index == npc_object_id || index == info.npc_index);
         requested_matches
@@ -3608,11 +3867,15 @@ mod quest_dialog_operation_link_tests {
     }
 }
 
+#[cfg(test)]
+#[path = "packets_diary_quest_tests.rs"]
+mod diary_quest_tests;
+
 pub(super) fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
     if !is_in_world(world) {
         return Vec::new();
     }
-    if !quest_definition_exists(quest_id) {
+    if !quest_definition_exists(world, quest_id) {
         return vec![system_message_key(world, "server.CouldNotAcceptQuest")];
     }
     if !can_accept_quest(world, quest_id)
@@ -3677,12 +3940,19 @@ pub(super) fn stage5_finish_quest_packet(
     if stage5_quest_stage(world, quest_id) != Some(QuestStage::Completed) {
         return vec![system_message_key(world, "server.CannotHandInQuestBagFull")];
     }
-    vec![
-        stage5_quest_remove_packet(quest_id, true),
+    let mut packets = vec![
+        stage5_quest_remove_packet(
+            quest_id,
+            quest_completion_is_permanent(world, quest_id),
+        ),
         ServerPacket::CompleteQuest {
             completed_quests: completed_quest_ids(world),
         },
-    ]
+    ];
+    if let Some(packet) = newcomer_daily_bonus_update_packet(world, quest_id) {
+        packets.push(packet);
+    }
+    packets
 }
 
 fn stage5_abandon_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
@@ -3699,7 +3969,7 @@ fn stage5_share_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPack
     if !is_in_world(world) {
         return Vec::new();
     }
-    if !quest_definition_exists(quest_id) {
+    if !quest_definition_exists(world, quest_id) {
         return vec![system_message_key(world, "server.CouldNotAcceptQuest")];
     }
     let sharer_name = stage5_player_name(world);
@@ -3763,7 +4033,12 @@ fn stage5_market_listing_matches(listing: &Stage5AuctionListing, normalized_quer
 /// consignments, so `ItemType` is `Consign` (1) and the consignment date is left
 /// at `0` (Crystal `DateTime.MinValue.ToBinary()`), which the gateway omits.
 fn stage5_client_auction(listing: &Stage5AuctionListing) -> ClientAuction {
-    let item = stage5_market_user_item(&listing.item_key);
+    let item = listing
+        .item_state_json
+        .as_deref()
+        .and_then(|encoded| item_custody::decode(&listing.item_key, encoded).ok())
+        .and_then(|item| try_user_item_from_item_state(&item).ok())
+        .unwrap_or_else(|| stage5_market_user_item(&listing.item_key));
     ClientAuction {
         auction_id: u64::from(listing.id),
         item,
@@ -3776,10 +4051,8 @@ fn stage5_client_auction(listing: &Stage5AuctionListing) -> ClientAuction {
     }
 }
 
-/// Builds a minimal `UserItem` for a market listing from its `item_key`. The
-/// market only needs identity (index/name/grade via the template) plus a count
-/// of 1, so durability / stats default to the template values the way a freshly
-/// created `UserItem` would (`Crystal` markets ship the stored `UserItem`).
+/// Legacy key-only listings remain displayable. This template preview is never
+/// used to return or sell an item: delivery requires the exact custody carrier.
 fn stage5_market_user_item(item_key: &str) -> UserItem {
     let template = crystal_item_template_for_item_key(item_key);
     let item_index = template
@@ -3893,6 +4166,35 @@ fn stage5_consign_item_packet(
             ServerPacket::MarketFail { reason: 1 },
         ];
     };
+    if item_custody::refresh(world).is_err() {
+        return vec![ServerPacket::ConsignItem {
+            unique_id,
+            success: false,
+        }];
+    }
+    let pending_refine_uid = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .refine
+        .pending_unique_id;
+    if pending_refine_uid != 0 && pending_refine_uid == unique_id {
+        return vec![ServerPacket::ConsignItem {
+            unique_id,
+            success: false,
+        }];
+    }
+    let Some(encoded) = item_custody::encode(&item) else {
+        return vec![ServerPacket::ConsignItem {
+            unique_id,
+            success: false,
+        }];
+    };
+    if !item_custody::can_take(world.resource::<InventoryResource>(), &item) {
+        return vec![ServerPacket::ConsignItem {
+            unique_id,
+            success: false,
+        }];
+    }
     let seller = stage5_player_name(world);
     let id = {
         let stage5 = world.resource::<Stage5SystemsResource>();
@@ -3903,7 +4205,13 @@ fn stage5_consign_item_packet(
             .map(|listing| listing.id)
             .max()
             .unwrap_or(0)
-            + 1
+            .checked_add(1)
+    };
+    let Some(id) = id else {
+        return vec![ServerPacket::ConsignItem {
+            unique_id,
+            success: false,
+        }];
     };
     world
         .resource_mut::<InventoryResource>()
@@ -3914,6 +4222,7 @@ fn stage5_consign_item_packet(
         .stage5_systems
         .auction
         .push(Stage5AuctionListing {
+            item_state_json: Some(encoded),
             id,
             seller,
             item_key: item.key.clone(),
@@ -3923,6 +4232,7 @@ fn stage5_consign_item_packet(
             cancelled: false,
             expired: false,
         });
+    item_custody::refresh(world).expect("validated custody transfer");
     vec![
         ServerPacket::ConsignItem {
             unique_id,
@@ -3934,7 +4244,7 @@ fn stage5_consign_item_packet(
     ]
 }
 
-fn stage5_market_buy_packet(
+pub(super) fn stage5_market_buy_packet(
     world: &mut World,
     auction_id: u64,
     bid_price: u32,
@@ -3975,12 +4285,24 @@ fn stage5_market_buy_packet(
     if world.resource::<PlayerRuntimeResource>().gold < price {
         return vec![ServerPacket::MarketFail { reason: 4 }];
     }
+    if listing.currency != crate::config::CurrencyKind::Gold
+        || item_custody::refresh(world).is_err()
     {
-        let inventory = world.resource::<InventoryResource>();
-        if !can_gain_item_quantity(&inventory, ItemContainer::Bag1, &listing.item_key, 1) {
-            return vec![ServerPacket::MarketFail { reason: 5 }];
-        }
+        return vec![ServerPacket::MarketFail { reason: 7 }];
     }
+    let Some(item) = listing
+        .item_state_json
+        .as_deref()
+        .and_then(|encoded| item_custody::decode(&listing.item_key, encoded).ok())
+    else {
+        return vec![ServerPacket::MarketFail { reason: 7 }];
+    };
+    let Some((inventory, changed)) =
+        item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, true)
+    else {
+        return vec![ServerPacket::MarketFail { reason: 5 }];
+    };
+    let updates = item_custody::returned_packets(world.resource::<InventoryResource>(), &changed);
     world.resource_mut::<PlayerRuntimeResource>().gold -= price;
     {
         let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
@@ -3988,27 +4310,19 @@ fn stage5_market_buy_packet(
         listing.price = price;
         listing.sold = true;
     }
-    add_or_increment_item(
+    *world.resource_mut::<InventoryResource>() = inventory;
+    item_custody::refresh(world).expect("validated custody transfer");
+    let mut packets = vec![ServerPacket::LoseGold { gold: price }];
+    packets.extend(updates);
+    packets.extend(vec![stage5_market_success_key_args(
         world,
-        ItemContainer::Bag1,
-        &listing.item_key,
-        &stage5_item_name(&listing.item_key),
-        "Stage 5 market purchase.",
-        21,
-        1,
-        1,
-    );
-    vec![
-        ServerPacket::LoseGold { gold: price },
-        stage5_market_success_key_args(
-            world,
-            "server.BoughtItemForGold",
-            [stage5_item_name(&listing.item_key), price.to_string()],
-        ),
-    ]
+        "server.BoughtItemForGold",
+        [stage5_item_name(&listing.item_key), price.to_string()],
+    )]);
+    packets
 }
 
-fn stage5_market_get_back_packet(
+pub(super) fn stage5_market_get_back_packet(
     world: &mut World,
     _mode: u8,
     auction_id: u64,
@@ -4017,35 +4331,39 @@ fn stage5_market_get_back_packet(
         return Vec::new();
     }
     let seller = stage5_player_name(world);
-    let listing_index = {
-        let stage5 = world.resource::<Stage5SystemsResource>();
-        if auction_id == 0 {
-            stage5
-                .stage5_systems
-                .auction
-                .iter()
-                .position(|listing| listing.seller.eq_ignore_ascii_case(&seller))
-        } else {
-            let Ok(listing_id) = u32::try_from(auction_id) else {
-                return vec![ServerPacket::MarketFail { reason: 7 }];
-            };
-            stage5.stage5_systems.auction.iter().position(|listing| {
-                listing.id == listing_id && listing.seller.eq_ignore_ascii_case(&seller)
-            })
-        }
-    };
-    let Some(index) = listing_index else {
+    let Some(index) = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction
+        .iter()
+        .position(|l| {
+            (auction_id == 0 || u64::from(l.id) == auction_id)
+                && l.seller.eq_ignore_ascii_case(&seller)
+        })
+    else {
         return vec![ServerPacket::MarketFail { reason: 7 }];
     };
     let listing = world
-        .resource_mut::<Stage5SystemsResource>()
+        .resource::<Stage5SystemsResource>()
         .stage5_systems
-        .auction
-        .remove(index);
-    if listing.sold {
+        .auction[index]
+        .clone();
+    if listing.currency != crate::config::CurrencyKind::Gold
+        || item_custody::refresh(world).is_err()
+    {
+        return vec![ServerPacket::MarketFail { reason: 7 }];
+    }
+    let packets = if listing.sold {
         let settlement = stage5_market_settlement(listing.price);
-        world.resource_mut::<PlayerRuntimeResource>().gold += settlement.earnings;
-        return vec![
+        let Some(gold) = world
+            .resource::<PlayerRuntimeResource>()
+            .gold
+            .checked_add(settlement.earnings)
+        else {
+            return vec![ServerPacket::MarketFail { reason: 4 }];
+        };
+        world.resource_mut::<PlayerRuntimeResource>().gold = gold;
+        vec![
             ServerPacket::GainedGold {
                 gold: settlement.earnings,
             },
@@ -4059,35 +4377,35 @@ fn stage5_market_get_back_packet(
                     settlement.commission.to_string(),
                 ],
             ),
-        ];
-    }
-    {
-        let inventory = world.resource::<InventoryResource>();
-        if !can_gain_item_quantity(&inventory, ItemContainer::Bag1, &listing.item_key, 1) {
-            world
-                .resource_mut::<Stage5SystemsResource>()
-                .stage5_systems
-                .auction
-                .push(listing);
+        ]
+    } else {
+        let Some(item) = listing
+            .item_state_json
+            .as_deref()
+            .and_then(|encoded| item_custody::decode(&listing.item_key, encoded).ok())
+        else {
+            return vec![ServerPacket::MarketFail { reason: 7 }];
+        };
+        let Some((inventory, changed)) =
+            item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, true)
+        else {
             return vec![ServerPacket::MarketFail { reason: 5 }];
-        }
-    }
-    add_or_increment_item(
-        world,
-        ItemContainer::Bag1,
-        &listing.item_key,
-        &stage5_item_name(&listing.item_key),
-        "Stage 5 market return.",
-        21,
-        1,
-        1,
-    );
-    vec![ServerPacket::MarketSuccess {
-        message: format!(
-            "Returned {} from market.",
-            stage5_item_name(&listing.item_key)
-        ),
-    }]
+        };
+        let mut packets =
+            item_custody::returned_packets(world.resource::<InventoryResource>(), &changed);
+        *world.resource_mut::<InventoryResource>() = inventory;
+        packets.push(ServerPacket::MarketSuccess {
+            message: format!("Returned {} from market.", item.name),
+        });
+        packets
+    };
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .auction
+        .remove(index);
+    item_custody::refresh(world).expect("validated custody transfer");
+    packets
 }
 
 fn stage5_market_sell_now_packet(world: &mut World, auction_id: u64) -> Vec<ServerPacket> {
@@ -4117,53 +4435,60 @@ fn stage5_deposit_refine_item_packet(world: &mut World, from: i32, to: i32) -> V
     if !is_in_world(world) {
         return Vec::new();
     }
-    let Some(from_slot) = stage5_refine_slot(from) else {
-        return vec![ServerPacket::DepositRefineItem {
+    let failure = || {
+        vec![ServerPacket::DepositRefineItem {
             from,
             to,
             success: false,
-        }];
+        }]
     };
-    let Some(to_slot) = stage5_refine_slot(to) else {
-        return vec![ServerPacket::DepositRefineItem {
-            from,
-            to,
-            success: false,
-        }];
+    if !super::refine_oven::service(world, "REFINE") {
+        return failure();
+    }
+    let (Ok(from_slot), Some(to_slot)) = (u8::try_from(from), stage5_refine_slot(to)) else {
+        return failure();
     };
-    if world
+    let refine = &world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
-        .refine
-        .slots
-        .contains_key(&to_slot)
-    {
-        return vec![ServerPacket::DepositRefineItem {
-            from,
-            to,
-            success: false,
-        }];
+        .refine;
+    if refine.pending_unique_id != 0 || refine.refining || refine.slots.contains_key(&to_slot) {
+        return failure();
     }
-    let Some(item) = ({
-        let mut inventory = world.resource_mut::<InventoryResource>();
-        inventory
-            .inventory_items
-            .iter()
-            .position(|item| inventory_item_matches_index(item, from_slot))
-            .map(|index| inventory.inventory_items.remove(index))
-    }) else {
-        return vec![ServerPacket::DepositRefineItem {
-            from,
-            to,
-            success: false,
-        }];
+    if item_custody::refresh(world).is_err() {
+        return failure();
+    }
+    let inventory = world.resource::<InventoryResource>();
+    if !is_valid_inventory_slot(from_slot, inventory.inventory_capacity) {
+        return failure();
+    }
+    let Some(index) = inventory
+        .inventory_items
+        .iter()
+        .position(|i| inventory_item_matches_index(i, from_slot))
+    else {
+        return failure();
     };
+    let item = inventory.inventory_items[index].clone();
+    let Some(encoded) = item_custody::encode(&item) else {
+        return failure();
+    };
+    if !item_custody::can_take(inventory, &item) {
+        return failure();
+    }
     world
-        .resource_mut::<Stage5SystemsResource>()
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .remove(index);
+    let mut state = world.resource_mut::<Stage5SystemsResource>();
+    state.stage5_systems.refine.slots.insert(to_slot, item.key);
+    state
         .stage5_systems
         .refine
-        .slots
-        .insert(to_slot, item.key);
+        .item_states
+        .insert(to_slot, encoded);
+    drop(state);
+    item_custody::refresh(world).expect("validated custody transfer");
     vec![ServerPacket::DepositRefineItem {
         from,
         to,
@@ -4175,37 +4500,45 @@ fn stage5_retrieve_refine_item_packet(world: &mut World, from: i32, to: i32) -> 
     if !is_in_world(world) {
         return Vec::new();
     }
-    let Some(from_slot) = stage5_refine_slot(from) else {
-        return vec![ServerPacket::RetrieveRefineItem {
+    let failure = || {
+        vec![ServerPacket::RetrieveRefineItem {
             from,
             to,
             success: false,
-        }];
+        }]
     };
-    let Some(item_key) = world
-        .resource_mut::<Stage5SystemsResource>()
+    let (Some(from_slot), Ok(to_slot)) = (stage5_refine_slot(from), u8::try_from(to)) else {
+        return failure();
+    };
+    if item_custody::refresh(world).is_err() {
+        return failure();
+    }
+    let refine = &world
+        .resource::<Stage5SystemsResource>()
         .stage5_systems
-        .refine
+        .refine;
+    let Some(item) = refine
         .slots
-        .remove(&from_slot)
+        .get(&from_slot)
+        .zip(refine.item_states.get(&from_slot))
+        .and_then(|(key, encoded)| item_custody::decode(key, encoded).ok())
     else {
-        return vec![ServerPacket::RetrieveRefineItem {
-            from,
-            to,
-            success: false,
-        }];
+        return failure();
     };
-    let preferred_slot = u8::try_from(to).unwrap_or(0);
-    add_or_increment_item(
-        world,
-        ItemContainer::Bag1,
-        &item_key,
-        &stage5_item_name(&item_key),
-        "Stage 5 refine return.",
-        preferred_slot,
-        1,
-        1,
-    );
+    let Some((inventory, _)) = item_custody::plan_return(
+        world.resource::<InventoryResource>(),
+        &item,
+        Some(to_slot),
+        false,
+    ) else {
+        return failure();
+    };
+    *world.resource_mut::<InventoryResource>() = inventory;
+    let mut state = world.resource_mut::<Stage5SystemsResource>();
+    state.stage5_systems.refine.slots.remove(&from_slot);
+    state.stage5_systems.refine.item_states.remove(&from_slot);
+    drop(state);
+    item_custody::refresh(world).expect("validated custody transfer");
     vec![ServerPacket::RetrieveRefineItem {
         from,
         to,
@@ -4214,33 +4547,55 @@ fn stage5_retrieve_refine_item_packet(world: &mut World, from: i32, to: i32) -> 
 }
 
 fn stage5_refine_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
-    if !is_in_world(world) {
+    if !is_in_world(world) || item_custody::refresh(world).is_err() {
         return Vec::new();
     }
-    let returned = {
-        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        stage5.stage5_systems.refine.refining = false;
-        stage5.stage5_systems.refine.ready = false;
-        stage5.stage5_systems.refine.current_item = None;
-        std::mem::take(&mut stage5.stage5_systems.refine.slots)
-    };
-    let mut packets = vec![ServerPacket::RefineCancel];
-    for (slot, item_key) in returned {
-        add_or_increment_item(
-            world,
-            ItemContainer::Bag1,
-            &item_key,
-            &stage5_item_name(&item_key),
-            "Stage 5 refine cancel return.",
-            slot,
-            1,
-            1,
-        );
+    let slots = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .refine
+        .slots
+        .clone();
+    let mut packets = Vec::new();
+    for (slot, key) in slots {
+        let encoded = world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .refine
+            .item_states
+            .get(&slot)
+            .cloned();
+        let Some(item) = encoded
+            .as_deref()
+            .and_then(|v| item_custody::decode(&key, v).ok())
+        else {
+            continue;
+        };
+        let Some((inventory, changed)) =
+            item_custody::plan_return(world.resource::<InventoryResource>(), &item, None, false)
+        else {
+            continue;
+        };
+        let destination = inventory_index_for_item(&changed[0]).expect("bag destination");
+        *world.resource_mut::<InventoryResource>() = inventory;
+        let mut state = world.resource_mut::<Stage5SystemsResource>();
+        state.stage5_systems.refine.slots.remove(&slot);
+        state.stage5_systems.refine.item_states.remove(&slot);
         packets.push(ServerPacket::RetrieveRefineItem {
             from: i32::from(slot),
-            to: i32::from(slot),
+            to: i32::from(destination),
             success: true,
         });
+    }
+    item_custody::refresh(world).expect("validated custody transfer");
+    if world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .refine
+        .slots
+        .is_empty()
+    {
+        packets.push(ServerPacket::RefineCancel);
     }
     packets
 }
@@ -4252,22 +4607,15 @@ fn stage5_refine_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
 // the C# reference; these are sane defaults that make refine real (success/
 // fail/material cost/soft cap) instead of an unconditional +1.
 // --- Crystal weapon refine (Server/Settings.cs + PlayerObject.RefineItem/CheckRefine) ---
-// Constants mirror Crystal `Settings.Refine*`; the chance formula and outcome
-// mirror `PlayerObject.RefineItem` / `CheckRefine`. The shared refine slots only
-// retain item identity, so per-instance ingredient durability/added-stats are
-// taken from the item templates at full durability — everything else is exact.
+// Ingredients retain actual durability and added stats; refine_oven owns the
+// target lifecycle. The deterministic RNG remains a documented source deviation.
 const REFINE_BASE_CHANCE: i32 = 20;
-const REFINE_INCREASE: i32 = 1;
-const REFINE_CRIT_CHANCE: i32 = 10;
-const REFINE_CRIT_INCREASE: i32 = 2;
 const REFINE_WEP_STAT_REDUCE: i32 = 6;
 const REFINE_ITEM_STAT_REDUCE: i32 = 15;
 const REFINE_ORE_NAME: &str = "BlackIronOre";
 
 fn refine_template_for_key(key: &str) -> Option<CrystalItemTemplate> {
-    key.strip_prefix("crystal-item-")
-        .and_then(|index| index.parse::<i32>().ok())
-        .and_then(crystal_item_by_index)
+    crystal_item_template_for_item_key(key)
 }
 
 /// Aggregated ingredient contributions, mirroring the loop in Crystal
@@ -4285,36 +4633,43 @@ pub(super) struct RefineComponents {
     pub ore_purity: i32,
 }
 
-fn refine_components(slots: &BTreeMap<u8, String>) -> RefineComponents {
+pub(super) fn refine_components(items: &[ItemState]) -> RefineComponents {
     let mut c = RefineComponents::default();
-    for key in slots.values() {
-        let Some(template) = refine_template_for_key(key) else {
+    for item in items {
+        let Some(template) = refine_template_for_key(&item.key) else {
             continue;
         };
+        if template.item_type == CRYSTAL_ITEM_TYPE_WEAPON {
+            continue;
+        }
+        let wire = try_user_item_from_item_state(item).expect("validated ingredient");
         let max_dc = crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_DC);
         let max_mc = crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_MC);
         let max_sc = crystal_item_stat_value(&template, CRYSTAL_STAT_MAX_SC);
         if max_dc > 0 || max_mc > 0 || max_sc > 0 {
-            c.total_dc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_DC) + max_dc;
-            c.total_mc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_MC) + max_mc;
-            c.total_sc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_SC) + max_sc;
+            c.total_dc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_DC)
+                + max_dc
+                + user_item_stat_total(&wire.added_stats, CRYSTAL_STAT_MAX_DC);
+            c.total_mc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_MC)
+                + max_mc
+                + user_item_stat_total(&wire.added_stats, CRYSTAL_STAT_MAX_MC);
+            c.total_sc += crystal_item_stat_value(&template, CRYSTAL_STAT_MIN_SC)
+                + max_sc
+                + user_item_stat_total(&wire.added_stats, CRYSTAL_STAT_MAX_SC);
             c.required_level += i32::from(template.required_amount);
-            // Templates are at full durability, so both Crystal dura checks pass.
-            c.durability += 1;
-            c.current_dura += 1;
+            c.durability += i32::from(wire.max_dura / 1000 == template.durability / 1000);
+            c.current_dura += i32::from(wire.current_dura / 1000 == wire.max_dura / 1000);
             c.item_amount += 1;
         }
         if template.name == REFINE_ORE_NAME {
-            c.ore_purity += i32::from(template.durability) / 1000;
+            c.ore_purity += i32::from(wire.current_dura) / 1000;
             c.ore_amount += 1;
         }
     }
     c
 }
 
-/// Crystal `RefinedValue` selection: the strictly-highest of DC/MC/SC totals.
-/// A tie (or all zero) yields `None`, which Crystal smashes on test.
-fn refine_target_stat(c: &RefineComponents) -> (Option<u8>, i32) {
+pub(super) fn refine_target_stat(c: &RefineComponents) -> (Option<u8>, i32) {
     if c.total_dc > c.total_mc && c.total_dc > c.total_sc {
         (Some(CRYSTAL_STAT_MAX_DC), c.total_dc)
     } else if c.total_mc > c.total_dc && c.total_mc > c.total_sc {
@@ -4381,13 +4736,13 @@ pub(super) fn refine_deterministic_1_99(tick: u64, unique_id: u64, salt: u64) ->
     (value % 99) as i32 + 1
 }
 
-fn refine_weapon_required(item: &ItemState) -> i32 {
+pub(super) fn refine_weapon_required(item: &ItemState) -> i32 {
     refine_template_for_key(&item.key)
         .map(|template| i32::from(template.required_amount))
         .unwrap_or(0)
 }
 
-fn refine_weapon_added_stat_sum(item: &ItemState) -> i32 {
+pub(super) fn refine_weapon_added_stat_sum(item: &ItemState) -> i32 {
     let added = |stat: u8| -> i32 {
         item.added_stats
             .iter()
@@ -4401,7 +4756,7 @@ fn refine_weapon_added_stat_sum(item: &ItemState) -> i32 {
         + added(CRYSTAL_STAT_MAX_SC)
 }
 
-fn refine_weapon_luck(item: &ItemState) -> i32 {
+pub(super) fn refine_weapon_luck(item: &ItemState) -> i32 {
     item.added_stats
         .iter()
         .filter(|entry| entry.stat == CRYSTAL_STAT_LUCK)
@@ -4409,13 +4764,13 @@ fn refine_weapon_luck(item: &ItemState) -> i32 {
         .sum()
 }
 
-fn refine_is_weapon(item: &ItemState) -> bool {
+pub(super) fn refine_is_weapon(item: &ItemState) -> bool {
     refine_template_for_key(&item.key)
         .map(|template| template.item_type == CRYSTAL_ITEM_TYPE_WEAPON)
         .unwrap_or(item.attack > 0 || item.added_attack > 0)
 }
 
-fn apply_refine_success(item: &mut ItemState, stat: u8, amount: i32) {
+pub(super) fn apply_refine_success(item: &mut ItemState, stat: u8, amount: i32) {
     if stat == CRYSTAL_STAT_MAX_DC {
         item.added_attack = item.added_attack.saturating_add(amount);
     } else if let Some(existing) = item.added_stats.iter_mut().find(|entry| entry.stat == stat) {
@@ -4428,144 +4783,11 @@ fn apply_refine_success(item: &mut ItemState, stat: u8, amount: i32) {
     }
 }
 
-fn stage5_refine_return_deposited_materials(world: &mut World) -> Vec<ServerPacket> {
-    let returned = std::mem::take(
-        &mut world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .refine
-            .slots,
-    );
-    for (slot, item_key) in returned {
-        add_or_increment_item(
-            world,
-            ItemContainer::Bag1,
-            &item_key,
-            &stage5_item_name(&item_key),
-            "Stage 5 refine return.",
-            slot,
-            1,
-            1,
-        );
-    }
-    vec![ServerPacket::NPCCollectRefine { success: false }]
-}
-
 fn stage5_refine_item_packet(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
-    if !is_in_world(world) {
-        return Vec::new();
-    }
-    let Some(item) = world
-        .resource::<InventoryResource>()
-        .inventory_items
-        .iter()
-        .find(|item| item_matches_inventory_unique_id(item, unique_id))
-        .cloned()
-    else {
-        return vec![ServerPacket::NPCCollectRefine { success: false }];
-    };
-    // Crystal Settings.OnlyRefineWeapon: only weapons can be refined.
-    if !refine_is_weapon(&item) {
-        return stage5_refine_return_deposited_materials(world);
-    }
-    let slots = world
-        .resource::<Stage5SystemsResource>()
-        .stage5_systems
-        .refine
-        .slots
-        .clone();
-    let components = refine_components(&slots);
-    let (target, refine_stat) = refine_target_stat(&components);
-    let chance = refine_success_chance_crystal(
-        &components,
-        refine_stat,
-        refine_weapon_required(&item),
-        refine_weapon_added_stat_sum(&item),
-        refine_weapon_luck(&item),
-        true,
-    )
-    .clamp(0, 100) as u8;
-    {
-        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        let refine = &mut stage5.stage5_systems.refine;
-        refine.current_item = Some(item.key.clone());
-        refine.refining = true;
-        refine.ready = true;
-        refine.pending_unique_id = unique_id;
-        refine.pending_chance = chance;
-        // 0 == RefinedValue::None -> the weapon is smashed when checked.
-        refine.pending_stat = target.unwrap_or(0);
-        refine.slots.clear(); // ingredients consumed by the attempt
-    }
-    vec![ServerPacket::RefineItem { unique_id }]
+    super::refine_oven::start(world, unique_id)
 }
-
 fn stage5_check_refine_packet(world: &mut World, unique_id: u64) -> Vec<ServerPacket> {
-    if !is_in_world(world) {
-        return Vec::new();
-    }
-    let (chance, mut target, pending_unique_id) = {
-        let refine = &world
-            .resource::<Stage5SystemsResource>()
-            .stage5_systems
-            .refine;
-        (
-            refine.pending_chance,
-            refine.pending_stat,
-            refine.pending_unique_id,
-        )
-    };
-    if pending_unique_id != unique_id {
-        return vec![ServerPacket::NPCCollectRefine { success: false }];
-    }
-    let tick = super::session::runtime_tick(world);
-    // Crystal CheckRefine: a failed roll sets RefinedValue::None (-> smashed);
-    // a separate crit roll multiplies the gain.
-    if refine_deterministic_1_99(tick, unique_id, 0x05A1) > i32::from(chance) {
-        target = 0;
-    }
-    let mut refine_added = REFINE_INCREASE;
-    if refine_deterministic_1_99(tick, unique_id, 0xC817) < REFINE_CRIT_CHANCE {
-        refine_added *= REFINE_CRIT_INCREASE;
-    }
-    let mut smashed = false;
-    let found = {
-        let mut inventory = world.resource_mut::<InventoryResource>();
-        if let Some(position) = inventory
-            .inventory_items
-            .iter()
-            .position(|item| item_matches_inventory_unique_id(item, unique_id))
-        {
-            if target == 0 {
-                inventory.inventory_items.remove(position); // item smashed on test
-                smashed = true;
-            } else {
-                apply_refine_success(
-                    &mut inventory.inventory_items[position],
-                    target,
-                    refine_added,
-                );
-            }
-            true
-        } else {
-            false
-        }
-    };
-    world
-        .resource_mut::<Stage5SystemsResource>()
-        .stage5_systems
-        .refine = Default::default();
-    if !found {
-        return vec![ServerPacket::NPCCollectRefine { success: false }];
-    }
-    vec![
-        ServerPacket::RefineItem { unique_id },
-        system_message(if smashed {
-            "Item smashed on test."
-        } else {
-            "Refine succeeded."
-        }),
-    ]
+    super::refine_oven::check(world, unique_id)
 }
 
 fn stage5_open_door_packet(world: &mut World, door_index: u8) -> Vec<ServerPacket> {
@@ -4703,7 +4925,7 @@ fn request_monster_info_packet(monster_index: i32) -> Vec<ServerPacket> {
     }]
 }
 
-fn request_npc_info_packet(npc_index: i32) -> Vec<ServerPacket> {
+fn request_npc_info_packet(world: &World, npc_index: i32) -> Vec<ServerPacket> {
     let Some(npc) = crystal_npc_info_manifest()
         .npcs
         .into_iter()
@@ -4717,6 +4939,11 @@ fn request_npc_info_packet(npc_index: i32) -> Vec<ServerPacket> {
             quest_ids.push(quest_id);
         }
     }
+    quest_ids = effective_quest_ids_for_npc(
+        world,
+        npc.loaded_object_id.unwrap_or(npc.npc_index.max(0) as u32),
+        &quest_ids,
+    );
     vec![ServerPacket::NewNpcInfo {
         info: NpcInfo {
             object_id: npc.loaded_object_id.unwrap_or(npc.npc_index.max(0) as u32),
@@ -5009,9 +5236,11 @@ pub(super) fn stage5_trade_request_packet(
         offered_slots: BTreeMap::new(),
         offered_unique_ids: BTreeMap::new(),
         offered_gold: 0,
+        held_gold: Some(0),
         offered_currency: crate::config::CurrencyKind::Gold,
         accepted: false,
         locked: false,
+        escrow_prepared: false,
         completed: false,
     });
     vec![ServerPacket::TradeRequest { name: partner }]
@@ -5021,12 +5250,18 @@ fn stage5_trade_reply_packet(world: &mut World, accept_invite: bool) -> Vec<Serv
     if !is_in_world(world) {
         return Vec::new();
     }
+    if world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade
+        .as_ref()
+        .is_some_and(Stage5TradeState::outgoing_escrow_debited)
+    {
+        // Only the shared settlement/rollback owner may release held assets.
+        return Vec::new();
+    }
     if !accept_invite {
-        world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .trade = None;
-        return vec![ServerPacket::TradeCancel { unlock: false }];
+        return stage5_trade_cancel_packet(world);
     }
     let partner = {
         let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
@@ -5040,9 +5275,11 @@ fn stage5_trade_reply_packet(world: &mut World, accept_invite: bool) -> Vec<Serv
                 offered_slots: BTreeMap::new(),
                 offered_unique_ids: BTreeMap::new(),
                 offered_gold: 0,
+                held_gold: Some(0),
                 offered_currency: crate::config::CurrencyKind::Gold,
                 accepted: false,
                 locked: false,
+                escrow_prepared: false,
                 completed: false,
             });
         trade.partner.clone()
@@ -5051,20 +5288,43 @@ fn stage5_trade_reply_packet(world: &mut World, accept_invite: bool) -> Vec<Serv
 }
 
 fn stage5_trade_gold_packet(world: &mut World, amount: u32) -> Vec<ServerPacket> {
-    if world.resource::<PlayerRuntimeResource>().gold < amount {
-        return Vec::new();
-    }
-    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-    let Some(trade) = stage5.stage5_systems.trade.as_mut() else {
-        return Vec::new();
+    let available = world.resource::<PlayerRuntimeResource>().gold;
+    let next = {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let Some(trade) = stage5.stage5_systems.trade.as_mut() else {
+            return Vec::new();
+        };
+        if trade.outgoing_escrow_debited() {
+            return Vec::new();
+        }
+        // Crystal unlocks before validating even an invalid amount. Shared
+        // coordination clears the partner's confirmation separately.
+        trade.accepted = false;
+        trade.locked = false;
+        let Some(held) = trade.validated_held_gold() else {
+            return Vec::new();
+        };
+        if trade.offered_currency != crate::config::CurrencyKind::Gold
+            || amount == 0
+            || available < amount
+        {
+            return Vec::new();
+        }
+        let (Some(offered), Some(held)) = (
+            trade.offered_gold.checked_add(amount),
+            held.checked_add(amount),
+        ) else {
+            return Vec::new();
+        };
+        trade.offered_gold = offered;
+        trade.held_gold = Some(held);
+        offered
     };
-    if trade.completed || trade.locked {
-        return Vec::new();
-    }
-    trade.offered_gold = amount;
-    trade.accepted = false;
-    trade.locked = false;
-    vec![ServerPacket::TradeGold { amount }]
+    world.resource_mut::<PlayerRuntimeResource>().gold = available - amount;
+    vec![
+        ServerPacket::LoseGold { gold: amount },
+        ServerPacket::TradeGold { amount: next },
+    ]
 }
 
 fn stage5_deposit_trade_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
@@ -5106,7 +5366,7 @@ fn stage5_deposit_trade_item_packet(world: &mut World, from: i32, to: i32) -> Ve
                 success: false,
             }];
         };
-        if trade.completed
+        if trade.outgoing_escrow_debited()
             || trade.locked
             || usize::from(to_slot) >= STAGE5_TRADE_SLOT_COUNT
             || trade.offered_slots.contains_key(&to_slot)
@@ -5135,41 +5395,321 @@ fn stage5_deposit_trade_item_packet(world: &mut World, from: i32, to: i32) -> Ve
     ]
 }
 
-fn stage5_retrieve_trade_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
-    let Some(from_slot) = u8::try_from(from).ok() else {
-        return vec![ServerPacket::RetrieveTradeItem {
+/// Retained bag offers must never be addressable as ordinary inventory edits.
+pub(super) fn stage5_trade_reserves_item(world: &World, item: &ItemState) -> bool {
+    world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade
+        .as_ref()
+        .is_some_and(|trade| {
+            trade
+                .offered_slots
+                .values()
+                .any(|slot| inventory_item_matches_index(item, *slot))
+                || trade
+                    .offered_unique_ids
+                    .values()
+                    .any(|id| *id == item_unique_id(item))
+        })
+}
+
+fn stage5_valid_editable_trade(world: &World) -> Option<Stage5TradeState> {
+    let trade = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade
+        .as_ref()?;
+    if trade.locked
+        || trade.outgoing_escrow_debited()
+        || trade.offered_slots.len() != trade.offered_unique_ids.len()
+    {
+        return None;
+    }
+    let inventory = world.resource::<InventoryResource>();
+    let mut seen_slots = BTreeSet::new();
+    let mut seen_ids = BTreeSet::new();
+    for (trade_slot, bag_slot) in &trade.offered_slots {
+        let id = *trade.offered_unique_ids.get(trade_slot)?;
+        if usize::from(*trade_slot) >= STAGE5_TRADE_SLOT_COUNT
+            || !is_valid_inventory_slot(*bag_slot, inventory.inventory_capacity)
+            || !seen_slots.insert(*bag_slot)
+            || !seen_ids.insert(id)
+        {
+            return None;
+        }
+        let mut matches = inventory
+            .inventory_items
+            .iter()
+            .filter(|item| item_unique_id(item) == id);
+        let item = matches.next()?;
+        if matches.next().is_some() || !inventory_item_matches_index(item, *bag_slot) {
+            return None;
+        }
+    }
+    Some(trade.clone())
+}
+
+pub(super) fn stage5_move_trade_item_packet(
+    world: &mut World,
+    from: i32,
+    to: i32,
+) -> Vec<ServerPacket> {
+    let failed = ServerPacket::MoveItem {
+        grid: MirGridType::Trade,
+        from,
+        to,
+        success: false,
+    };
+    let (Ok(from_slot), Ok(to_slot)) = (u8::try_from(from), u8::try_from(to)) else {
+        return vec![failed];
+    };
+    if usize::from(from_slot) >= STAGE5_TRADE_SLOT_COUNT
+        || usize::from(to_slot) >= STAGE5_TRADE_SLOT_COUNT
+    {
+        return vec![failed];
+    }
+    let Some(mut trade) = stage5_valid_editable_trade(world) else {
+        return vec![failed];
+    };
+    let Some(source) = trade.offered_slots.get(&from_slot).copied() else {
+        return vec![failed];
+    };
+    let source_id = trade.offered_unique_ids[&from_slot];
+    if from_slot != to_slot {
+        let target = trade.offered_slots.remove(&to_slot);
+        let target_id = trade.offered_unique_ids.remove(&to_slot);
+        trade.offered_slots.remove(&from_slot);
+        trade.offered_unique_ids.remove(&from_slot);
+        trade.offered_slots.insert(to_slot, source);
+        trade.offered_unique_ids.insert(to_slot, source_id);
+        if let (Some(target), Some(target_id)) = (target, target_id) {
+            trade.offered_slots.insert(from_slot, target);
+            trade.offered_unique_ids.insert(from_slot, target_id);
+        }
+    }
+    trade.accepted = false;
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade = Some(trade);
+    vec![
+        ServerPacket::MoveItem {
+            grid: MirGridType::Trade,
             from,
             to,
-            success: false,
-        }];
+            success: true,
+        },
+        ServerPacket::TradeItem {
+            trade_items: stage5_trade_items(world),
+        },
+    ]
+}
+
+/// Trade stack merging is an explicit extension: Crystal's client exposes the
+/// intent, while its original server rejects Trade grids in MergeItem.
+pub(super) fn stage5_merge_trade_item_packet(
+    world: &mut World,
+    grid_from: MirGridType,
+    grid_to: MirGridType,
+    id_from: u64,
+    id_to: u64,
+) -> Vec<ServerPacket> {
+    let failed = ServerPacket::MergeItem {
+        grid_from,
+        grid_to,
+        id_from,
+        id_to,
+        success: false,
     };
+    if id_from == id_to
+        || !matches!(grid_from, MirGridType::Inventory | MirGridType::Trade)
+        || !matches!(grid_to, MirGridType::Inventory | MirGridType::Trade)
+    {
+        return vec![failed];
+    }
+    let Some(mut trade) = stage5_valid_editable_trade(world) else {
+        return vec![failed];
+    };
+    let inventory = world.resource::<InventoryResource>();
+    let resolve = |id, grid| {
+        let mut matching = inventory
+            .inventory_items
+            .iter()
+            .enumerate()
+            .filter(|(_, item)| item_unique_id(item) == id);
+        let (index, item) = matching.next()?;
+        if matching.next().is_some() {
+            return None;
+        }
+        let bag_slot = inventory_index_for_item(item)?;
+        if !is_valid_inventory_slot(bag_slot, inventory.inventory_capacity) {
+            return None;
+        }
+        let offered = trade
+            .offered_unique_ids
+            .iter()
+            .find_map(|(slot, offered)| (*offered == id).then_some(*slot));
+        if (grid == MirGridType::Trade) != offered.is_some() {
+            return None;
+        }
+        Some((index, offered))
+    };
+    let (Some((from_index, source_offer)), Some((to_index, _))) =
+        (resolve(id_from, grid_from), resolve(id_to, grid_to))
+    else {
+        return vec![failed];
+    };
+    let source = &inventory.inventory_items[from_index];
+    let target = &inventory.inventory_items[to_index];
+    if !stage5_trade_item_can_enter(source)
+        || !stage5_trade_item_can_enter(target)
+        || !item_stack_identity_compatible(source, target)
+    {
+        return vec![failed];
+    }
+    let max = crystal_stack_size_for_item_key(&target.key);
+    if max <= 1 || target.quantity >= max || source.quantity == 0 {
+        return vec![failed];
+    }
+    let moved = source.quantity.min(max - target.quantity);
+    let consumed = moved == source.quantity;
+    let mut items = inventory.inventory_items.clone();
+    items[to_index].quantity += moved;
+    if consumed {
+        items.remove(from_index);
+    } else {
+        items[from_index].quantity -= moved;
+    }
+    if consumed {
+        if let Some(slot) = source_offer {
+            trade.offered_slots.remove(&slot);
+            trade.offered_unique_ids.remove(&slot);
+        }
+    }
+    trade.accepted = false;
+    trade.offered_items = trade
+        .offered_slots
+        .values()
+        .filter_map(|slot| {
+            items
+                .iter()
+                .find(|item| inventory_item_matches_index(item, *slot))
+                .map(|item| item.key.clone())
+        })
+        .collect::<BTreeSet<_>>()
+        .into_iter()
+        .collect();
+    world.resource_mut::<InventoryResource>().inventory_items = items;
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade = Some(trade);
+    vec![
+        ServerPacket::MergeItem {
+            grid_from,
+            grid_to,
+            id_from,
+            id_to,
+            success: true,
+        },
+        ServerPacket::TradeItem {
+            trade_items: stage5_trade_items(world),
+        },
+    ]
+}
+
+fn stage5_retrieve_trade_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
+    let failed = ServerPacket::RetrieveTradeItem {
+        from,
+        to,
+        success: false,
+    };
+    let (Ok(from_slot), Ok(to_slot)) = (u8::try_from(from), u8::try_from(to)) else {
+        return vec![failed];
+    };
+    let (source_slot, source_unique_id) = {
+        let stage5 = world.resource::<Stage5SystemsResource>();
+        let Some(trade) = stage5.stage5_systems.trade.as_ref() else {
+            return vec![failed];
+        };
+        if trade.outgoing_escrow_debited()
+            || trade.locked
+            || usize::from(from_slot) >= STAGE5_TRADE_SLOT_COUNT
+        {
+            return vec![failed];
+        }
+        let (Some(source_slot), Some(source_unique_id)) = (
+            trade.offered_slots.get(&from_slot),
+            trade.offered_unique_ids.get(&from_slot),
+        ) else {
+            return vec![failed];
+        };
+        (*source_slot, *source_unique_id)
+    };
+    // Offers retain their inventory instance until preparation. Validate both
+    // its identity and the normalized bag destination before releasing it.
+    let source_index = {
+        let inventory = world.resource::<InventoryResource>();
+        if !is_valid_inventory_slot(to_slot, inventory.inventory_capacity) {
+            return vec![failed];
+        }
+        let Some(source_index) = inventory.inventory_items.iter().position(|item| {
+            inventory_item_matches_index(item, source_slot)
+                && item_unique_id(item) == source_unique_id
+        }) else {
+            return vec![failed];
+        };
+        if inventory
+            .inventory_items
+            .iter()
+            .enumerate()
+            .any(|(index, item)| {
+                index != source_index && inventory_item_matches_index(item, to_slot)
+            })
+        {
+            return vec![failed];
+        }
+        source_index
+    };
+    let (container, slot) = inventory_container_and_slot_for_index(to_slot)
+        .expect("validated normalized bag destination");
+    let mut item = world.resource::<InventoryResource>().inventory_items[source_index].clone();
+    // Legacy zero IDs fall back to the current slot. Capture the existing wire
+    // identity before moving, including a real zero ID from bag slot zero.
+    if item.unique_id == 0 && item.user_item_metadata.is_none() {
+        let Ok(wire) = try_user_item_from_item_state(&item) else {
+            return vec![failed];
+        };
+        let Ok(captured) = super::items::try_item_state_from_user_item(item.clone(), &wire) else {
+            return vec![failed];
+        };
+        item.unique_id = source_unique_id;
+        item.user_item_metadata = captured.user_item_metadata;
+    }
+    item.container = container;
+    item.slot = slot;
+    world.resource_mut::<InventoryResource>().inventory_items[source_index] = item;
     let offered_slots = {
         let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        let Some(trade) = stage5.stage5_systems.trade.as_mut() else {
-            return vec![ServerPacket::RetrieveTradeItem {
-                from,
-                to,
-                success: false,
-            }];
-        };
-        if trade.completed || trade.locked || trade.offered_slots.remove(&from_slot).is_none() {
-            return vec![ServerPacket::RetrieveTradeItem {
-                from,
-                to,
-                success: false,
-            }];
-        }
+        let trade = stage5
+            .stage5_systems
+            .trade
+            .as_mut()
+            .expect("validated trade");
+        trade.offered_slots.remove(&from_slot);
         trade.offered_unique_ids.remove(&from_slot);
         trade.accepted = false;
         trade.offered_slots.clone()
     };
     let offered_items = stage5_trade_item_keys_for_slots(world, &offered_slots);
-    {
-        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        if let Some(trade) = stage5.stage5_systems.trade.as_mut() {
-            trade.offered_items = offered_items;
-        }
-    }
+    world
+        .resource_mut::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade
+        .as_mut()
+        .expect("validated trade")
+        .offered_items = offered_items;
     vec![
         ServerPacket::RetrieveTradeItem {
             from,
@@ -5183,6 +5723,15 @@ fn stage5_retrieve_trade_item_packet(world: &mut World, from: i32, to: i32) -> V
 }
 
 pub(super) fn stage5_trade_confirm_packet(world: &mut World, locked: bool) -> Vec<ServerPacket> {
+    if world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .trade
+        .as_ref()
+        .is_some_and(Stage5TradeState::outgoing_escrow_debited)
+    {
+        return Vec::new();
+    }
     if !locked {
         if let Some(trade) = world
             .resource_mut::<Stage5SystemsResource>()
@@ -5196,22 +5745,111 @@ pub(super) fn stage5_trade_confirm_packet(world: &mut World, locked: bool) -> Ve
         return vec![ServerPacket::TradeCancel { unlock: true }];
     }
 
+    if let Err(packets) = validate_trade_confirmation(world) {
+        return packets;
+    }
+    let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+    if let Some(trade) = stage5.stage5_systems.trade.as_mut() {
+        trade.accepted = true;
+        trade.locked = true;
+    }
+    // Crystal PlayerObject.TradeConfirm: one participant's lock is not a
+    // completed exchange. Only the shared settlement owner can finish it.
+    Vec::new()
+}
+
+pub(super) enum SharedTradePreparation {
+    Prepared(Vec<ServerPacket>),
+    Rejected(Vec<ServerPacket>),
+}
+
+/// Reserve an already identified offer for the shared settlement coordinator.
+/// The typed outcome is internal; S.TradeConfirm is never a preparation ACK.
+pub(super) fn prepare_shared_trade_escrow(world: &mut World) -> SharedTradePreparation {
+    if let Err(packets) = validate_trade_confirmation(world) {
+        return SharedTradePreparation::Rejected(packets);
+    }
+    let (offered_gold, offered_indices) = {
+        let stage5 = world.resource::<Stage5SystemsResource>();
+        let trade = stage5
+            .stage5_systems
+            .trade
+            .as_ref()
+            .expect("validated trade");
+        (
+            trade.offered_gold - trade.validated_held_gold().expect("validated gold custody"),
+            trade
+                .offered_slots
+                .values()
+                .copied()
+                .collect::<BTreeSet<_>>(),
+        )
+    };
+    if offered_gold > 0 {
+        world.resource_mut::<PlayerRuntimeResource>().gold -= offered_gold;
+    }
+    world
+        .resource_mut::<InventoryResource>()
+        .inventory_items
+        .retain(|item| {
+            inventory_index_for_item(item).is_none_or(|index| !offered_indices.contains(&index))
+        });
+    {
+        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
+        let trade = stage5
+            .stage5_systems
+            .trade
+            .as_mut()
+            .expect("validated trade");
+        trade.accepted = true;
+        trade.locked = true;
+        trade.held_gold = Some(trade.offered_gold);
+        trade.escrow_prepared = true;
+        trade.completed = false;
+    }
+    let packets = if offered_gold > 0 {
+        vec![ServerPacket::LoseGold { gold: offered_gold }]
+    } else {
+        Vec::new()
+    };
+    SharedTradePreparation::Prepared(packets)
+}
+
+pub(super) fn validate_trade_confirmation(world: &mut World) -> Result<(), Vec<ServerPacket>> {
     let (offered_gold, offered_slots, offered_unique_ids) = {
         let stage5 = world.resource::<Stage5SystemsResource>();
         let Some(trade) = stage5.stage5_systems.trade.as_ref() else {
-            return Vec::new();
+            return Err(Vec::new());
         };
-        if trade.completed {
-            return Vec::new();
+        if trade.outgoing_escrow_debited()
+            || trade.offered_currency != crate::config::CurrencyKind::Gold
+            || trade.offered_slots.len() > STAGE5_TRADE_SLOT_COUNT
+            || trade.offered_unique_ids.len() != trade.offered_slots.len()
+            || trade
+                .offered_slots
+                .keys()
+                .any(|slot| usize::from(*slot) >= STAGE5_TRADE_SLOT_COUNT)
+            || trade
+                .offered_slots
+                .values()
+                .copied()
+                .collect::<BTreeSet<_>>()
+                .len()
+                != trade.offered_slots.len()
+        {
+            return Err(Vec::new());
         }
         (
-            trade.offered_gold,
+            match trade.validated_held_gold() {
+                Some(held) => trade.offered_gold - held,
+                None => return Err(Vec::new()),
+            },
             trade.offered_slots.clone(),
             trade.offered_unique_ids.clone(),
         )
     };
     if world.resource::<PlayerRuntimeResource>().gold < offered_gold {
-        return Vec::new();
+        return Err(Vec::new());
     }
     let offer_tampered = {
         let inventory = world.resource::<InventoryResource>();
@@ -5222,10 +5860,10 @@ pub(super) fn stage5_trade_confirm_packet(world: &mut World, locked: bool) -> Ve
                 .iter()
                 .find(|item| inventory_item_matches_index(item, *inventory_index))
             else {
-                return Vec::new();
+                return Err(Vec::new());
             };
             if !stage5_trade_item_can_enter(item) {
-                return Vec::new();
+                return Err(Vec::new());
             }
             // Integrity check (F-07): the item still occupying the offered slot's
             // inventory index must be the exact item deposited there. If a
@@ -5239,33 +5877,9 @@ pub(super) fn stage5_trade_confirm_packet(world: &mut World, locked: bool) -> Ve
         tampered
     };
     if offer_tampered {
-        return stage5_trade_abort_on_tampered_offer(world);
+        return Err(stage5_trade_abort_on_tampered_offer(world));
     }
-    if offered_gold > 0 {
-        world.resource_mut::<PlayerRuntimeResource>().gold -= offered_gold;
-    }
-    let offered_indices = offered_slots.values().copied().collect::<BTreeSet<_>>();
-    world
-        .resource_mut::<InventoryResource>()
-        .inventory_items
-        .retain(|item| {
-            inventory_index_for_item(item).is_none_or(|index| !offered_indices.contains(&index))
-        });
-    {
-        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        if let Some(trade) = stage5.stage5_systems.trade.as_mut() {
-            trade.accepted = true;
-            trade.locked = true;
-            trade.completed = true;
-        }
-    }
-
-    let mut packets = Vec::new();
-    if offered_gold > 0 {
-        packets.push(ServerPacket::LoseGold { gold: offered_gold });
-    }
-    packets.push(ServerPacket::TradeConfirm);
-    packets
+    Ok(())
 }
 
 /// Abort a trade whose offered items were tampered with after deposit (F-07).
@@ -5281,17 +5895,37 @@ fn stage5_trade_abort_on_tampered_offer(world: &mut World) -> Vec<ServerPacket> 
 }
 
 pub(super) fn stage5_trade_cancel_packet(world: &mut World) -> Vec<ServerPacket> {
-    let had_trade = world
+    let held = {
+        let stage5 = world.resource::<Stage5SystemsResource>();
+        let Some(trade) = stage5.stage5_systems.trade.as_ref() else {
+            return Vec::new();
+        };
+        if trade.outgoing_escrow_debited() {
+            return Vec::new();
+        }
+        let Some(held) = trade.validated_held_gold() else {
+            return Vec::new();
+        };
+        held
+    };
+    let Some(refunded) = world
+        .resource::<PlayerRuntimeResource>()
+        .gold
+        .checked_add(held)
+    else {
+        return Vec::new();
+    };
+    world.resource_mut::<PlayerRuntimeResource>().gold = refunded;
+    world
         .resource_mut::<Stage5SystemsResource>()
         .stage5_systems
-        .trade
-        .take()
-        .is_some();
-    if had_trade {
-        vec![ServerPacket::TradeCancel { unlock: false }]
-    } else {
-        Vec::new()
+        .trade = None;
+    let mut packets = Vec::new();
+    if held > 0 {
+        packets.push(ServerPacket::GainedGold { gold: held });
     }
+    packets.push(ServerPacket::TradeCancel { unlock: false });
+    packets
 }
 
 pub(super) fn stage5_intelligent_creature_list_packet(world: &World) -> ServerPacket {
@@ -5300,64 +5934,97 @@ pub(super) fn stage5_intelligent_creature_list_packet(world: &World) -> ServerPa
         .stage5_systems
         .intelligent_creatures
         .clone();
-    let summoned_creature_type = creatures
-        .iter()
-        .find(|creature| creature.pet_mode != 0)
+    let summoned_creature_type = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .active_intelligent_creature()
         .map(|creature| creature.pet_type)
-        .unwrap_or(0);
+        .unwrap_or(99);
     ServerPacket::UpdateIntelligentCreatureList {
         creature_list: creatures,
-        creature_summoned: summoned_creature_type != 0,
+        creature_summoned: summoned_creature_type != 99,
         summoned_creature_type,
-        pearl_count: 0,
+        pearl_count: world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .intelligent_creature_pearls,
     }
 }
 
 fn stage5_update_intelligent_creature_packet(
     world: &mut World,
-    mut creature: ClientIntelligentCreature,
+    creature: ClientIntelligentCreature,
     summon_me: bool,
     unsummon_me: bool,
     release_me: bool,
 ) -> Vec<ServerPacket> {
-    if release_me {
-        world
-            .resource_mut::<Stage5SystemsResource>()
-            .stage5_systems
-            .intelligent_creatures
-            .retain(|existing| existing.slot_index != creature.slot_index);
-        return vec![stage5_intelligent_creature_list_packet(world)];
+    if strict_active_account_authorization(world).is_none() {
+        return Vec::new();
     }
-    if summon_me {
-        creature.pet_mode = creature.pet_mode.max(1);
-    }
-    if unsummon_me {
-        creature.pet_mode = 0;
-    }
-    creature.creature_rules = intelligent_creature_default_rules(creature.pet_type);
-    let was_new = {
+    let dead = current_player_is_dead(world);
+    let summon_prohibited = super::map::current_map_disallows_intelligent_creatures(world);
+    {
         let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        let creatures = &mut stage5.stage5_systems.intelligent_creatures;
-        if let Some(existing) = creatures
-            .iter_mut()
-            .find(|existing| existing.slot_index == creature.slot_index)
-        {
-            *existing = creature.clone();
-            false
-        } else {
-            creatures.push(creature.clone());
-            creatures.sort_by_key(|creature| creature.slot_index);
-            true
+        let systems = &mut stage5.stage5_systems;
+        // PetType identifies ownership in Crystal; SlotIndex is an editable
+        // position in the client's ten-slot creature panel, never identity.
+        let Some(index) = systems
+            .intelligent_creatures
+            .iter()
+            .position(|owned| owned.pet_type <= 14 && owned.pet_type == creature.pet_type)
+        else {
+            drop(stage5);
+            return vec![stage5_intelligent_creature_list_packet(world)];
+        };
+        if !(0..10).contains(&creature.slot_index) {
+            drop(stage5);
+            return vec![stage5_intelligent_creature_list_packet(world)];
         }
-    };
-    let mut packets = Vec::new();
-    if was_new {
-        packets.push(ServerPacket::NewIntelligentCreature { creature });
+        systems.migrate_legacy_intelligent_creature_state();
+        // Crystal's action flags have precedence over preference edits.
+        if release_me {
+            systems.intelligent_creatures.remove(index);
+            if systems.summoned_intelligent_creature_type == Some(creature.pet_type) {
+                systems.summoned_intelligent_creature_type = Some(99);
+            }
+            for (slot, owned) in systems.intelligent_creatures.iter_mut().enumerate() {
+                owned.slot_index = slot as i32;
+            }
+        } else if summon_me {
+            if !dead && !summon_prohibited && systems.active_intelligent_creature().is_none() {
+                systems.summoned_intelligent_creature_type = Some(creature.pet_type);
+            }
+        } else if unsummon_me {
+            if systems.summoned_intelligent_creature_type == Some(creature.pet_type) {
+                systems.summoned_intelligent_creature_type = Some(99);
+            }
+        } else {
+            // Crystal updates only the addressed PetType. Do not implicitly
+            // swap another pet: paired layout packets may have a shared-slot
+            // intermediate state before the second update arrives.
+            let owned = &mut systems.intelligent_creatures[index];
+            owned.slot_index = creature.slot_index;
+            if (3..=15).contains(&creature.custom_name.len())
+                && creature
+                    .custom_name
+                    .bytes()
+                    .all(|byte| byte.is_ascii_alphanumeric())
+            {
+                owned.custom_name = creature.custom_name;
+            }
+            owned.filter = creature.filter;
+            if creature.pet_mode <= 1 {
+                owned.pet_mode = creature.pet_mode;
+            }
+            if creature.pickup_grade <= 5 {
+                owned.pickup_grade = creature.pickup_grade;
+            }
+            // Type/icon, fullness, expiry, production/food timers and rules
+            // remain exclusively server-owned.
+        }
     }
-    packets.push(stage5_intelligent_creature_list_packet(world));
-    packets
+    vec![stage5_intelligent_creature_list_packet(world)]
 }
-
 #[allow(deprecated)]
 pub(super) fn stage5_intelligent_creature_pickup_packet(
     world: &mut World,
@@ -5367,9 +6034,7 @@ pub(super) fn stage5_intelligent_creature_pickup_packet(
     let Some(active_creature) = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
-        .intelligent_creatures
-        .iter()
-        .find(|creature| creature.pet_mode != 0)
+        .active_intelligent_creature()
     else {
         return Vec::new();
     };
@@ -5384,6 +6049,18 @@ pub(super) fn stage5_intelligent_creature_pickup_packet(
     let target_location = match mouse_mode {
         Some(true) => {
             if !active_creature.creature_rules.mouse_pickup_enabled {
+                return Vec::new();
+            }
+            let max_range = active_creature
+                .creature_rules
+                .mouse_pickup_range
+                .clamp(0, 16) as u32;
+            if player_position
+                .x
+                .abs_diff(location.x)
+                .max(player_position.y.abs_diff(location.y))
+                > max_range
+            {
                 return Vec::new();
             }
             location
@@ -5488,36 +6165,7 @@ pub(super) fn tick_stage5_intelligent_creature_maintenance(
         return;
     }
     tick_stage5_guild_wars(world, tick, packets);
-    let mut changed = false;
-    {
-        let mut stage5 = world.resource_mut::<Stage5SystemsResource>();
-        for creature in &mut stage5.stage5_systems.intelligent_creatures {
-            if creature.pet_mode == 0 {
-                continue;
-            }
-            if creature.creature_rules.can_produce_blackstone {
-                let next_blackstone_time = creature
-                    .blackstone_time
-                    .saturating_add(STAGE5_INTELLIGENT_CREATURE_BLACKSTONE_TICK_MS)
-                    .min(STAGE5_INTELLIGENT_CREATURE_BLACKSTONE_CAP_MS);
-                if next_blackstone_time != creature.blackstone_time {
-                    creature.blackstone_time = next_blackstone_time;
-                    changed = true;
-                }
-            }
-            if tick % STAGE5_INTELLIGENT_CREATURE_FULLNESS_DECAY_TICKS == 0 && creature.fullness > 0
-            {
-                creature.fullness -= 1;
-                creature.maintain_food_time = creature
-                    .maintain_food_time
-                    .saturating_sub(STAGE5_INTELLIGENT_CREATURE_BLACKSTONE_TICK_MS);
-                changed = true;
-            }
-        }
-    }
-    if changed {
-        packets.push(stage5_intelligent_creature_list_packet(world));
-    }
+    super::intelligent_creatures::maintenance(world, packets);
 }
 
 pub(super) fn tick_stage5_intelligent_creatures(
@@ -5538,10 +6186,9 @@ fn stage5_intelligent_creature_auto_pickup_location(world: &World) -> Option<Poi
     let creature = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
-        .intelligent_creatures
-        .iter()
-        .find(|creature| {
-            creature.pet_mode != 0
+        .active_intelligent_creature()
+        .filter(|creature| {
+            creature.pet_mode == 0
                 && creature.creature_rules.auto_pickup_enabled
                 && creature.fullness >= creature.creature_rules.minimal_fullness.max(0)
                 && creature.creature_rules.auto_pickup_range > 0
@@ -6040,6 +6687,74 @@ pub(super) fn object_struck_packet(
     })
 }
 
+fn resolve_item_tooltip_source_for_viewer(
+    source: &mut Option<WorldItemTooltipSource>,
+    viewer: Option<(u16, MirClass)>,
+) {
+    let (Some(source), Some((level, class))) = (source.as_mut(), viewer) else {
+        return;
+    };
+    source.real_info = Some(crystal_real_item_for_player(&source.info, level, class));
+    source.real_socket_infos = source
+        .socket_infos
+        .iter()
+        .map(|info| {
+            info.as_ref()
+                .map(|info| crystal_real_item_for_player(info, level, class))
+        })
+        .collect();
+}
+
+#[cfg(test)]
+mod item_tooltip_source_tests {
+    use super::*;
+
+    #[test]
+    fn tooltip_source_resolves_item_and_socket_rows_for_the_active_viewer() {
+        let origin = crystal_item_by_index(1).expect("class-based SpiritBlade origin");
+        let mut source = Some(WorldItemTooltipSource {
+            info: origin.clone(),
+            real_info: None,
+            user_item: None,
+            socket_infos: vec![None, Some(origin)],
+            real_socket_infos: Vec::new(),
+        });
+
+        resolve_item_tooltip_source_for_viewer(&mut source, Some((20, MirClass::Wizard)));
+
+        let source = source.expect("tooltip source remains present");
+        assert_eq!(
+            source.real_info.as_ref().map(|info| info.item_index),
+            Some(3)
+        );
+        assert_eq!(source.real_socket_infos.len(), 2);
+        assert_eq!(source.real_socket_infos[0], None);
+        assert_eq!(
+            source.real_socket_infos[1]
+                .as_ref()
+                .map(|info| info.item_index),
+            Some(3)
+        );
+    }
+
+    #[test]
+    fn tooltip_source_without_viewer_never_manufactures_real_rows() {
+        let mut source = Some(WorldItemTooltipSource {
+            info: crystal_item_by_index(1).expect("class-based SpiritBlade origin"),
+            real_info: None,
+            user_item: None,
+            socket_infos: Vec::new(),
+            real_socket_infos: Vec::new(),
+        });
+
+        resolve_item_tooltip_source_for_viewer(&mut source, None);
+
+        let source = source.expect("tooltip source remains present");
+        assert_eq!(source.real_info, None);
+        assert!(source.real_socket_infos.is_empty());
+    }
+}
+
 pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
     let resources = world.resource::<InventoryResource>();
     let hero_inventory = world.resource::<HeroInventoryResource>();
@@ -6052,6 +6767,21 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
     let npc_state = world.resource::<NpcStateResource>();
     let stage5 = world.resource::<Stage5SystemsResource>();
     let language = session.language;
+    let tooltip_viewer = session
+        .selected_character
+        .as_ref()
+        .map(|character| (character.level, character.class));
+    let hero_viewer=stage5.stage5_systems.hero.as_ref().map(|hero|(hero.level,hero.class));
+    let hero_stats=super::hero_stats::compute(world);
+    let hero_vitals=stage5.stage5_systems.hero.as_ref().map(|_| {
+        let live=hero_entity(world).and_then(|entity|entity_player_vitals(world,entity));
+        let saved=hero_inventory.saved_vitals;
+        crate::config::HeroVitalsSnapshot {
+            hp:live.map(|v|v.hp).or_else(||saved.map(|v|v.hp)).unwrap_or(hero_stats.get(12)),
+            mp:live.map(|v|v.mp).or_else(||saved.map(|v|v.mp)).unwrap_or(hero_stats.get(13)),
+            max_hp:hero_stats.get(12),max_mp:hero_stats.get(13),
+        }
+    });
     let tick = super::session::runtime_tick(world);
     let scene_view = active_scene_view(world);
     let mut entities = collect_world_entities(
@@ -6065,7 +6795,11 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
     let player_object_id = current_player_object_id(world);
     let player_vitals = player_entity(world).and_then(|entity| entity_player_vitals(world, entity));
     let mut stage5_systems = stage5.stage5_systems.clone();
+    if let Some(guild) = super::shared_guilds::project_legacy_shape(world) {
+        stage5_systems.guild = guild;
+    }
     stage5_systems.item_rental = item_rental_snapshot(world);
+    super::refine_oven::snapshot_timer(&mut stage5_systems.refine, false);
 
     // Seed every known city to 0 so the HUD renders a stable row set, then
     // overlay the player's actual balances.
@@ -6099,6 +6833,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
         player_mp: player_vitals.map(|vitals| vitals.mp),
         player_max_mp: player_vitals.map(|vitals| vitals.max_mp),
+        player_crystal_stats: player_stats.snapshot_entries(),
         player_pk_points: player_runtime.pk_points,
         player_experience: player_runtime.experience,
         player_max_experience: player_runtime.max_experience,
@@ -6106,9 +6841,11 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         credit: player_runtime.credit,
         city_currencies,
         current_weight: current_weight(resources),
+        player_weights: tooltip_viewer.and_then(|(level,class)| super::player_weights::compute(resources,level,class,world.resource::<MountResource>().riding_mount)),
         max_weight,
         free_bag_slots: free_bag_slots(resources),
-        max_bag_slots: 80,
+        max_bag_slots: crate::config::crystal_bag_slot_capacity(resources.inventory_capacity),
+        inventory_capacity: resources.inventory_capacity,
         storage_size: resources.storage_size,
         has_expanded_storage: resources.has_expanded_storage,
         has_storage_password: resources.storage_has_password,
@@ -6129,27 +6866,71 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         belt_items: resources
             .belt_items
             .iter()
-            .map(|item| item.snapshot(language))
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(
+                    &mut snapshot.tooltip_source,
+                    tooltip_viewer,
+                );
+                snapshot
+            })
             .collect(),
         inventory_items: resources
             .inventory_items
             .iter()
-            .map(|item| item.snapshot(language))
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(
+                    &mut snapshot.tooltip_source,
+                    tooltip_viewer,
+                );
+                snapshot
+            })
             .collect(),
         hero_inventory_items: hero_inventory
             .items
             .iter()
-            .map(|item| item.snapshot(language))
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(
+                    &mut snapshot.tooltip_source,
+                    hero_viewer,
+                );
+                snapshot
+            })
             .collect(),
+        hero_equipment_items:hero_inventory.equipment.iter().map(|item| {
+            let mut snapshot=item.snapshot(language);
+            resolve_item_tooltip_source_for_viewer(&mut snapshot.tooltip_source,hero_viewer);
+            snapshot
+        }).collect(),
+        hero_inventory_capacity:hero_inventory.capacity,
+        hero_stats:hero_stats.snapshot(),
+        hero_vitals,
+        hero_weights:crate::config::HeroWeightsSnapshot {bag:hero_stats.bag,wear:hero_stats.wear,hand:hero_stats.hand},
         storage_items: resources
             .storage_items
             .iter()
-            .map(|item| item.snapshot(language))
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(
+                    &mut snapshot.tooltip_source,
+                    tooltip_viewer,
+                );
+                snapshot
+            })
             .collect(),
         equipment_items: resources
             .equipment_items
             .iter()
-            .map(|item| item.snapshot(language))
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(
+                    &mut snapshot.tooltip_source,
+                    tooltip_viewer,
+                );
+                snapshot
+            })
             .collect(),
         quest_log: quest_log_snapshots(world, language),
         active_npc_dialog: npc_state
@@ -6175,7 +6956,7 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         active_buffs: buffs
             .buffs
             .iter()
-            .filter(|buff| buff.expires_at_tick > tick)
+            .filter(|buff| !buff.expired(tick))
             .map(|buff| buff.snapshot(tick, language))
             .collect(),
         stage5_systems,
@@ -6548,7 +7329,7 @@ pub(super) fn start_game_account_social_and_shop_packets() -> Vec<ServerPacket> 
     packets
 }
 
-fn apply_start_game_dynamic_game_shop_stock(world: &World, packets: &mut [ServerPacket]) {
+pub(super) fn apply_start_game_dynamic_game_shop_stock(world: &World, packets: &mut [ServerPacket]) {
     let individual_purchases = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -6677,9 +7458,9 @@ pub(super) fn current_crystal_time_of_day_lights() -> u8 {
             crystal_time_of_day_lights_for_utc_hour(utc_hour)
         }
         Some(value) => crystal_time_of_day_lights_with_override(Some(value), utc_hour),
-        // Local debug builds stay readable by default. Production Release builds
-        // preserve Crystal's UTC-driven 12-hour day/night cycle.
-        None if cfg!(debug_assertions) => 2,
+        // Crystal uses the same UTC-driven cycle in local and production
+        // servers. QA that needs a stable daytime capture must opt in with the
+        // explicit `day` override instead of silently changing debug visuals.
         None => crystal_time_of_day_lights_for_utc_hour(utc_hour),
     }
 }
@@ -6715,16 +7496,29 @@ pub(super) fn start_game_static_visible_object_packets(
         if !point_in_data_range(&npc.location, player_position) {
             continue;
         }
-        if !crystal_npc_visible_to_character(&npc, character, npc_flags, local_time) {
+        if !crystal_npc_visible_to_character_for_profile(
+            &npc,
+            character,
+            npc_flags,
+            local_time,
+            super::quests::quest_recurrence::server_newcomer_v1_enabled(),
+        ) {
             continue;
         }
         let Some(object_id) = npc.loaded_object_id else {
             continue;
         };
-        let quest_ids = quest_ids_by_npc
+        let mut quest_ids: Vec<i32> = quest_ids_by_npc
             .get(&object_id)
             .map(|ids| ids.iter().copied().collect())
             .unwrap_or_default();
+        for quest_id in super::quests::newcomer_progression::configured_quest_ids_for_npc(object_id).into_iter()
+            .chain(super::quests::newcomer_v2::configured_quest_ids_for_npc(object_id))
+        {
+            if !quest_ids.contains(&quest_id) {
+                quest_ids.push(quest_id);
+            }
+        }
         objects.push((
             npc.location.y,
             npc.location.x,
@@ -6820,6 +7614,8 @@ pub(super) fn build_user_information(
     storage_password_last_set_binary_datetime: i64,
     expanded_storage_expiry_time_binary_datetime: i64,
     hair: u8,
+    inventory_capacity: u16,
+    belt_items: &[ItemState],
     inventory_items: &[ItemState],
     equipment_items: &[EquipmentState],
     hero: Option<&Stage5HeroState>,
@@ -6850,7 +7646,11 @@ pub(super) fn build_user_information(
         has_hero: hero.is_some(),
         hero_behaviour: hero.map(|hero| hero.behaviour).unwrap_or(0),
         inventory_section_present: true,
-        inventory: Some(user_inventory_slots(inventory_items)),
+        inventory: Some(user_inventory_slots(
+            inventory_capacity,
+            belt_items,
+            inventory_items,
+        )),
         equipment_section_present: true,
         equipment: Some(user_equipment_slots(equipment_items)),
         quest_inventory_section_present: true,
@@ -6878,12 +7678,24 @@ pub(super) fn build_user_information(
     }
 }
 
-pub(super) fn user_inventory_slots(items: &[ItemState]) -> Vec<Option<UserItem>> {
-    let mut slots = vec![None; 46];
+pub(super) fn user_inventory_slots(
+    inventory_capacity: u16,
+    belt_items: &[ItemState],
+    items: &[ItemState],
+) -> Vec<Option<UserItem>> {
+    let mut slots = vec![None; usize::from(inventory_capacity)];
+    for item in belt_items
+        .iter()
+        .filter(|item| item.container == ItemContainer::Belt)
+    {
+        if let Some(slot) = slots.get_mut(usize::from(item.slot)) {
+            *slot = Some(user_item_from_item_state(item));
+        }
+    }
     for item in items {
         let index = match item.container {
-            ItemContainer::Bag1 => usize::from(item.slot),
-            ItemContainer::Bag2 => 40 + usize::from(item.slot),
+            ItemContainer::Bag1 => 6 + usize::from(item.slot),
+            ItemContainer::Bag2 => 46 + usize::from(item.slot),
             _ => continue,
         };
         if let Some(slot) = slots.get_mut(index) {
@@ -6968,6 +7780,35 @@ pub(super) fn collect_map_transfer_snapshots(world: &World) -> Vec<MapTransferSn
     transfers
 }
 
+/// Crystal `HumanObject.RefreshEquipmentStats`: reset Looks_Wings, select
+/// GetRealItem for the wearer's class/level, skip broken base ItemInfo, and
+/// take Effect only from armour. An instance MaxDura of zero does not make
+/// a normally durable item unbreakable.
+fn crystal_player_wing_effect(body: &CharacterBody, items: &[EquipmentState]) -> u8 {
+    let mut effect = 0;
+    for item in items {
+        let info = match item
+            .user_item_metadata
+            .as_ref()
+            .and_then(|metadata| metadata.item_index)
+        {
+            Some(index) => crystal_item_by_index(index),
+            None => crystal_item_template_for_item_key(&item.key),
+        };
+        let Some(info) = info else {
+            continue;
+        };
+        if item.durability_current == 0 && info.durability > 0 {
+            continue;
+        }
+        let real_info = crystal_real_item_for_player(&info, body.level, body.class);
+        if real_info.item_type == CRYSTAL_ITEM_TYPE_ARMOUR {
+            effect = real_info.effect;
+        }
+    }
+    effect
+}
+
 #[allow(deprecated)]
 /// Crystal `GetUpdateInfo()` for `@SETLIGHT`: the self player's `S.PlayerUpdate`
 /// carrying the new personal light alongside the real weapon/armour shapes, so the
@@ -6995,7 +7836,9 @@ pub(super) fn self_player_update_packet(world: &World, light: u8) -> Option<Serv
         weapon,
         weapon_effect: 0,
         armour,
-        wing_effect: 0,
+        wing_effect: body.map_or(0, |body| {
+            crystal_player_wing_effect(&body, &equipment_items)
+        }),
     })
 }
 
@@ -7007,6 +7850,9 @@ pub(super) fn collect_world_entities(
 ) -> Vec<WorldEntitySnapshot> {
     let mut result = Vec::new();
     let self_light = crystal_self_player_light(world, self_equipment_items);
+    let self_wing_effect = player_entity(world)
+        .and_then(|player| world.entity(player).get::<CharacterBody>())
+        .map(|body| crystal_player_wing_effect(body, self_equipment_items));
     // The local player's mount state lives in `MountResource` (Crystal sends
     // `MountType`/`RidingMount` per player object); carry it only while riding so the
     // self-entity sprite renders the mount and hides weapons, matching `entity_sprite_snapshot`.
@@ -7144,9 +7990,10 @@ pub(super) fn collect_world_entities(
                 None
             },
         );
-        let quest_ids = npc_agent
+        let source_quest_ids = npc_agent
             .map(|agent| agent.quest_ids.clone())
             .unwrap_or_default();
+        let quest_ids = effective_quest_ids_for_npc(world, object_id.0, &source_quest_ids);
         let quest_icon =
             npc_agent.and_then(|_| crystal_npc_quest_icon(world, object_id.0, &quest_ids));
         let name_colour_argb = match kind {
@@ -7183,6 +8030,7 @@ pub(super) fn collect_world_entities(
             hp,
             max_hp,
             light,
+            wing_effect: self_marker.is_some().then_some(self_wing_effect).flatten(),
             name_colour_argb,
             dead,
             riding_mount: self_marker.is_some().then_some(self_riding_mount).flatten(),
@@ -7363,7 +8211,7 @@ pub(super) fn entity_sprite_snapshot(
 
     if let Some(monster) = monster_agent {
         return Some(WorldEntitySpriteSnapshot {
-            body_library: format!("Monster/{:03}", monster.image),
+            body_library: monster_body_library(monster.image),
             hair_library: None,
             weapon_library: None,
             weapon_library_secondary: None,
@@ -7401,6 +8249,21 @@ pub(super) fn entity_sprite_snapshot(
         mount_frame_offset: None,
     })
 }
+
+// Crystal MonsterObject.Load selects Libraries.Gates[BaseImage - 950];
+// MLibrary.Initialize uses Settings.GatePath and the two-digit "00" format.
+// Keep this correction bounded to the four gates in platinum_176. Their
+// animation descriptors come from each Gate library, with no extra base offset.
+fn monster_body_library(image: u16) -> String {
+    match image {
+        950..=953 => format!("Gate/{:02}", image - 950),
+        _ => format!("Monster/{image:03}"),
+    }
+}
+
+#[cfg(test)]
+#[path = "special_monster_sprite_tests.rs"]
+mod special_monster_sprite_tests;
 
 #[allow(deprecated)]
 pub(super) fn collect_ground_drops(
@@ -7598,6 +8461,7 @@ pub(super) fn visible_object_bundle_for_entity(
         let position = entry.get::<Position>()?.0.clone();
         let facing = entry.get::<Facing>()?.0;
         let body = entry.get::<CharacterBody>()?;
+        let looks=super::hero_inventory::appearance(world);
         return Some((
             object_id,
             VisibleObjectBundle {
@@ -7614,18 +8478,18 @@ pub(super) fn visible_object_bundle_for_entity(
                         location: position,
                         direction: facing,
                         hair: 0,
-                        light: 0,
-                        weapon: 0,
-                        weapon_effect: 0,
-                        armour: 0,
+                        light: looks.light,
+                        weapon: looks.weapon,
+                        weapon_effect: looks.weapon_effect,
+                        armour: looks.armour,
                         poison: 0,
-                        dead: false,
+                        dead: entry.get::<PlayerVitals>().is_some_and(|v|v.hp<=0),
                         hidden: false,
                         effect: 0,
-                        wing_effect: 0,
+                        wing_effect: looks.wing_effect,
                         extra: false,
-                        mount_type: 0,
-                        riding_mount: false,
+                        mount_type: looks.mount_type,
+                        riding_mount: super::hero_ai::hero_mount::riding(world),
                         fishing: false,
                         transform_type: 0,
                         element_orb_effect: 0,
@@ -7728,7 +8592,7 @@ pub(super) fn visible_object_bundle_for_entity(
                         colour_argb: npc.colour_argb,
                         location: position,
                         direction: facing,
-                        quest_ids: npc.quest_ids.clone(),
+                        quest_ids: effective_quest_ids_for_npc(world, object_id, &npc.quest_ids),
                     },
                 },
                 health_packet: None,
@@ -7863,6 +8727,7 @@ fn stage5_get_ranking_packet(
     rank_type: u8,
     rank_index: i32,
     online_only: bool,
+    online_characters: Option<&BTreeSet<(String, i32)>>,
 ) -> Vec<ServerPacket> {
     let Some(class_filter) = ranking_class_filter(rank_type) else {
         return Vec::new();
@@ -7893,12 +8758,16 @@ fn stage5_get_ranking_packet(
         };
         for (account_id, account) in &store.accounts {
             for character in &account.characters {
-                let online = active_key
-                    .as_ref()
-                    .is_some_and(|(active_account, active_index)| {
-                        active_account == account_id && *active_index == character.index
-                    });
-                let save = if online {
+                let is_active =
+                    active_key
+                        .as_ref()
+                        .is_some_and(|(active_account, active_index)| {
+                            active_account == account_id && *active_index == character.index
+                        });
+                let online = online_characters
+                    .map(|characters| characters.contains(&(account_id.clone(), character.index)))
+                    .unwrap_or(is_active);
+                let save = if is_active {
                     active_seen = true;
                     active_save
                         .as_ref()
@@ -7925,7 +8794,9 @@ fn stage5_get_ranking_packet(
                 level: i32::from(save.character.level),
                 class: save.character.class,
                 experience: save.experience,
-                online: true,
+                online: online_characters
+                    .map(|characters| characters.contains(&(account_id.clone(), *character_index)))
+                    .unwrap_or(true),
             });
         }
     }
@@ -7992,6 +8863,46 @@ fn stage5_get_ranking_packet(
 }
 
 impl SimulationSession {
+    pub fn friends_with_online_characters(
+        &mut self,
+        online_characters: &BTreeSet<(String, i32)>,
+    ) -> Option<ServerPacket> {
+        strict_active_account_authorization(self.app.world())?;
+        stage5_refresh_friend_identities(self.app.world_mut());
+        let mut friends = stage5_friend_entries(self.app.world());
+        let social = &self
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .social;
+        for friend in &mut friends {
+            if let Some(identity) = social.friend_identities.get(&friend.name) {
+                friend.online = online_characters
+                    .contains(&(identity.account_id.clone(), identity.character_index));
+            }
+        }
+        Some(ServerPacket::FriendUpdate { friends })
+    }
+
+    /// Server-owned presence supplied by the shared world. This is not a client
+    /// packet field and does not alter persisted character state.
+    pub fn ranking_with_online_characters(
+        &self,
+        rank_type: u8,
+        rank_index: i32,
+        online_only: bool,
+        online_characters: &BTreeSet<(String, i32)>,
+    ) -> Vec<ServerPacket> {
+        stage5_get_ranking_packet(
+            self.app.world(),
+            rank_type,
+            rank_index,
+            online_only,
+            Some(online_characters),
+        )
+    }
+
     pub fn handle_packet(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
         match self.try_handle_packet(packet) {
             Ok(packets) => packets,
@@ -8003,20 +8914,63 @@ impl SimulationSession {
     }
 
     pub fn try_handle_packet(&mut self, packet: ClientPacket) -> Result<Vec<ServerPacket>, String> {
+        if matches!(
+            packet,
+            ClientPacket::Disconnect | ClientPacket::LogOut | ClientPacket::StartGame { .. }
+        ) {
+            self.clear_shared_guild_grant();
+        }
+        if super::shared_guilds::enabled(self.app.world()) {
+            if let ClientPacket::GuildNameReturn { ref name } = packet {
+                return self.submit_shared_guild_name(name);
+            }
+        }
+        let mut recurrence_packets = if matches!(packet, ClientPacket::StartGame { .. }) {
+            Vec::new()
+        } else {
+            refresh_quest_recurrence(self.app.world_mut())
+        };
         if matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
-            if let Err(error) = persist_active_character_save(self.app.world()) {
+            if let Err(error) = persist_active_character_save_for_logout(self.app.world()) {
                 clear_account_derived_gm_permissions(self.app.world_mut());
                 return Err(error);
             }
         }
         if let ClientPacket::StartGame { character_index } = packet {
             let mut packets = self.start_game(character_index);
+            let _ = refresh_quest_recurrence(self.app.world_mut());
+            let completed_quests = completed_quest_ids(self.app.world());
+            for packet in &mut packets {
+                if let ServerPacket::CompleteQuest {
+                    completed_quests: packet_ids,
+                } = packet
+                {
+                    *packet_ids = completed_quests.clone();
+                }
+            }
             apply_start_game_dynamic_game_shop_stock(self.app.world(), &mut packets);
+            if let Some(friends) = self.friends_with_online_characters(&BTreeSet::new()) {
+                for packet in &mut packets {
+                    if matches!(packet, ServerPacket::FriendUpdate { .. }) {
+                        *packet = friends.clone();
+                    }
+                }
+            }
             return Ok(packets);
         }
 
-        let packets = self.handle_packet_impl(packet);
-        Ok(self.finalize_packets(packets))
+        let xp_source = matches!(&packet,
+            ClientPacket::Attack{..}|ClientPacket::RangeAttack{..}|ClientPacket::Magic{..}
+            |ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}|ClientPacket::FinishQuest{..});
+        let before = if xp_source { self.begin_guild_experience_command(false)? } else { None };
+        let journey_context = super::quests::newcomer_v2_events::command_context(&packet);
+        let mut packets = self.handle_packet_impl(packet);
+        let mut journey_packets = super::quests::newcomer_v2_events::observe_committed_command(
+            self.app.world_mut(), journey_context, &packets);
+        packets.append(&mut journey_packets);
+        recurrence_packets.append(&mut packets);
+        let packets = self.finalize_packets(recurrence_packets);
+        self.finish_guild_experience_command(before,packets)
     }
 
     fn handle_packet_impl(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
@@ -8094,6 +9048,7 @@ impl SimulationSession {
                 stage5_check_refine_packet(self.app.world_mut(), unique_id)
             }
             ClientPacket::SetAutoPotValue { stat, value } => {
+                if !matches!(stat, 12 | 13) { return Vec::new(); }
                 let mut resources = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
                 let Some(hero) = resources.stage5_systems.hero.as_mut() else {
                     return Vec::new();
@@ -8102,7 +9057,7 @@ impl SimulationSession {
                     return Vec::new();
                 }
                 let percent = value.min(99) as u8;
-                if stat == 0 {
+                if stat == 12 {
                     hero.auto_hp_percent = percent;
                 } else {
                     hero.auto_mp_percent = percent;
@@ -8110,6 +9065,14 @@ impl SimulationSession {
                 vec![ServerPacket::SetAutoPotValue { stat, value }]
             }
             ClientPacket::SetAutoPotItem { grid, item_index } => {
+                if !matches!(grid, MirGridType::HeroHpItem | MirGridType::HeroMpItem) {
+                    return Vec::new();
+                }
+                // The Crystal dialog admits only normal/sun potions. Enforce
+                // that same restriction at the authoritative packet boundary.
+                if item_index != 0 && !crystal_item_by_index(item_index).is_some_and(|item|
+                    item.item_type == CRYSTAL_ITEM_TYPE_POTION && item.shape <= 1
+                ) { return Vec::new(); }
                 let mut resources = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
                 let Some(hero) = resources.stage5_systems.hero.as_mut() else {
                     return Vec::new();
@@ -8182,7 +9145,13 @@ impl SimulationSession {
                 rank_type,
                 rank_index,
                 online_only,
-            } => stage5_get_ranking_packet(self.app.world(), rank_type, rank_index, online_only),
+            } => stage5_get_ranking_packet(
+                self.app.world(),
+                rank_type,
+                rank_index,
+                online_only,
+                None,
+            ),
             ClientPacket::GuildWarReturn { name } => {
                 stage5_guild_war_return_packet(self.app.world_mut(), name)
             }
@@ -8284,7 +9253,9 @@ impl SimulationSession {
             ClientPacket::RequestMonsterInfo { monster_index } => {
                 request_monster_info_packet(monster_index)
             }
-            ClientPacket::RequestNpcInfo { npc_index } => request_npc_info_packet(npc_index),
+            ClientPacket::RequestNpcInfo { npc_index } => {
+                request_npc_info_packet(self.app.world(), npc_index)
+            }
             ClientPacket::MarriageRequest => stage5_marriage_request_packet(self.app.world_mut()),
             ClientPacket::MarriageReply { accept_invite } => {
                 stage5_marriage_reply_packet(self.app.world_mut(), accept_invite)
@@ -8375,8 +9346,12 @@ impl SimulationSession {
                     if packets.iter().any(|packet| {
                         matches!(
                             packet,
-                            ServerPacket::CompleteQuest { completed_quests }
-                                if completed_quests.contains(&quest_index)
+                            ServerPacket::ChangeQuest {
+                                quest_id,
+                                taken: false,
+                                quest_state: CRYSTAL_QUEST_STATE_REMOVE,
+                                ..
+                            } if *quest_id == quest_index
                         )
                     }) {
                         dismiss_dialog(self.app.world_mut());
@@ -8425,13 +9400,15 @@ impl SimulationSession {
             ClientPacket::MailLockedItem { unique_id, locked } => {
                 vec![ServerPacket::MailLockedItem { unique_id, locked }]
             }
-            ClientPacket::MailCost { gold, stamped, .. } => {
+            ClientPacket::MailCost { gold, stamped, items_idx } => {
                 vec![ServerPacket::MailCost {
-                    cost: stage5_mail_cost(gold, stamped),
+                    // This packet has no error field. An invalid quote must
+                    // clear any old cheap/free quote, never authorize delivery.
+                    cost: stage5_mail_quote(self.app.world(), gold, &items_idx, stamped).unwrap_or(u32::MAX),
                 }]
             }
-            ClientPacket::RequestIntelligentCreatureUpdates { .. } => {
-                vec![stage5_intelligent_creature_list_packet(self.app.world())]
+            ClientPacket::RequestIntelligentCreatureUpdates { update } => {
+                super::intelligent_creatures::request_updates(self.app.world_mut(), update)
             }
             ClientPacket::UpdateIntelligentCreature {
                 creature,
@@ -8459,7 +9436,10 @@ impl SimulationSession {
             ClientPacket::RemoveFriend { character_index } => {
                 stage5_remove_friend_packet(self.app.world_mut(), character_index)
             }
-            ClientPacket::RefreshFriends => vec![stage5_friend_update_packet(self.app.world())],
+            ClientPacket::RefreshFriends => self
+                .friends_with_online_characters(&BTreeSet::new())
+                .into_iter()
+                .collect(),
             ClientPacket::AddMemo {
                 character_index,
                 memo,
@@ -8505,6 +9485,7 @@ impl SimulationSession {
                         return vec![ServerPacket::Login { result: 4 }];
                     }
                 };
+                let select_infos = account_select_infos(&config, &account_id);
                 clear_account_derived_gm_permissions(self.app.world_mut());
                 let mut session = self.app.world_mut().resource_mut::<SessionResource>();
                 session.account_id = Some(account_id);
@@ -8512,11 +9493,7 @@ impl SimulationSession {
                 session.selected_character = None;
                 session.clear_active_save_revision();
                 vec![ServerPacket::LoginSuccess {
-                    characters: session
-                        .characters
-                        .iter()
-                        .map(CharacterRecord::to_select_info)
-                        .collect(),
+                    characters: select_infos,
                 }]
             }
             ClientPacket::NewCharacter {
@@ -8617,13 +9594,13 @@ impl SimulationSession {
                 self.app
                     .world_mut()
                     .remove_resource::<BigMapConnectionState>();
+                let config = self
+                    .app
+                    .world()
+                    .resource::<RuntimeConfigResource>()
+                    .config
+                    .clone();
                 {
-                    let config = self
-                        .app
-                        .world()
-                        .resource::<RuntimeConfigResource>()
-                        .config
-                        .clone();
                     {
                         let mut session = self.app.world_mut().resource_mut::<SessionResource>();
                         session.selected_character = None;
@@ -8653,13 +9630,8 @@ impl SimulationSession {
                 }
                 clear_account_derived_gm_permissions(self.app.world_mut());
                 rebuild_world(self.app.world_mut());
-                let session = self.app.world().resource::<SessionResource>();
                 vec![ServerPacket::LogOutSuccess {
-                    characters: session
-                        .characters
-                        .iter()
-                        .map(CharacterRecord::to_select_info)
-                        .collect(),
+                    characters: account_select_infos(&config, &account_id),
                 }]
             }
             ClientPacket::Turn { direction } => {
@@ -9011,6 +9983,7 @@ impl SimulationSession {
                 Vec::new()
             }
             ClientPacket::Magic {
+                object_id,
                 spell,
                 direction,
                 target_id,
@@ -9018,6 +9991,12 @@ impl SimulationSession {
                 ..
             } => {
                 if !is_in_world(self.app.world()) {
+                    return Vec::new();
+                }
+                if Some(object_id) == current_hero_object_id(self.app.world()) {
+                    return super::hero_ai::hero_cast::manual_magic(self.app.world_mut(),object_id,spell,direction,target_id,location);
+                }
+                if object_id != 0 && Some(object_id) != current_player_object_id(self.app.world()) {
                     return Vec::new();
                 }
                 if current_player_is_dead(self.app.world())
@@ -9302,6 +10281,18 @@ mod game_shop_start_stock_tests {
 #[cfg(test)]
 mod mail_status_transaction_tests {
     use super::*;
+    #[test]
+    fn legacy_mail_projection_does_not_invent_a_send_timestamp() {
+        let mail: Stage5MailMessage = serde_json::from_value(serde_json::json!({
+            "id": 42, "from": "System", "to": "Scout", "subject": "Old mail",
+            "body": "No persisted date", "gold": 0, "claimed": false, "deleted": false
+        })).unwrap();
+        let first = stage5_mail_to_client_mail(&mail);
+        let again = stage5_mail_to_client_mail(&mail);
+        assert_eq!(first.date_sent_binary_datetime, 0);
+        assert_eq!(again.date_sent_binary_datetime, first.date_sent_binary_datetime);
+        assert_eq!(again.mail_id, 42);
+    }
     use crate::config::{
         deliver_stage5_system_mail, AccountStoreTransactionFault, Stage5MailDelivery,
         Stage5MailTargetKind,
@@ -9348,6 +10339,61 @@ mod mail_status_transaction_tests {
             .iter()
             .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
         session
+    }
+
+    #[test]
+    fn ordinary_multiline_mail_is_durable_and_preserves_the_body_verbatim() {
+        let suffix = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system clock should be after unix epoch")
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!(
+            "mir2-mail-multiline-unit-{}-{suffix}",
+            std::process::id()
+        ));
+        let path = dir.join("accounts.json");
+        let config = SimulationConfig::default().with_account_store_path(path.clone());
+        deliver_stage5_system_mail(
+            &config,
+            Stage5MailDelivery {
+                target_kind: Stage5MailTargetKind::Character,
+                target_id: "Scout".to_string(),
+                from: "System".to_string(),
+                subject: "Fixture".to_string(),
+                body: "fixture".to_string(),
+                gold: 0,
+                items: Vec::new(),
+            },
+        )
+        .expect("temporary mail fixture should persist");
+
+        let message = "first line\r\nsecond line\nthird line".to_string();
+        let mut session = start_test_session(config);
+        let packets = session.handle_packet(ClientPacket::SendMail {
+            name: "Scout".to_string(),
+            message: message.clone(),
+            gold: 0,
+            items_idx: [0; 5],
+            stamped: false,
+        });
+        assert!(packets.iter().any(
+            |packet| matches!(packet, ServerPacket::MailSent { result: 1 })
+        ));
+        assert!(packets.iter().any(|packet| {
+            matches!(packet, ServerPacket::ReceiveMail { mail }
+                if mail.iter().any(|entry| entry.sender_name == "Scout" && entry.message == message))
+        }));
+        drop(session);
+
+        let reloaded = start_test_session(SimulationConfig::default().with_account_store_path(path));
+        assert!(reloaded
+            .world_snapshot()
+            .stage5_systems
+            .mail
+            .iter()
+            .any(|mail| mail.from == "Scout" && mail.body == message));
+        drop(reloaded);
+        let _ = std::fs::remove_dir_all(dir);
     }
 
     #[test]

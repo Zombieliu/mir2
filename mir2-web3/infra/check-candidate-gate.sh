@@ -31,6 +31,10 @@ run_web_resource_loading_tests() {
   run npm run test:resource-loading --prefix apps/web
 }
 
+run_catalogue_item_icon_tests() {
+  run npm run test:item-icons --prefix apps/web
+}
+
 run_player_web_build_if_available() {
   if command -v pwsh >/dev/null 2>&1 || command -v powershell >/dev/null 2>&1; then
     run npm run build --prefix apps/web
@@ -77,6 +81,7 @@ run cargo +1.89.0 test --locked -p mir2-gateway --bin packet_trace -- --test-thr
 run_web_typecheck
 run_web_movement_controller_tests
 run_web_minimap_transform_tests
+run_catalogue_item_icon_tests
 run_web_resource_loading_tests
 
 if [ "$SCOPE" = "full" ] || [ "$SCOPE" = "live" ]; then

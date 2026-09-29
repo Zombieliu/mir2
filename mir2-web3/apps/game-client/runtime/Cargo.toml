@@ -15,6 +15,7 @@ crate-type = ["cdylib", "rlib"]
 default = ["webgl2"]
 webgl2 = ["bevy/webgl2"]
 webgpu = ["bevy/webgpu"]
+native-font-atlas-telemetry = ["bevy/bevy_text"]
 
 [dependencies]
 bevy = { version = "0.19.0", default-features = false, features = [

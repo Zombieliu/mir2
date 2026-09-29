@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "mir2-native-visual-capture-draft-v1",
+  "producer": "windows-native",
+  "runId": "character-wings-20260903-r4",
+  "scene": "in-game",
+  "capturedAt": "2026-09-02T20:06:59.484Z",
+  "imagePath": "wing-cycle-r4-in-game-1788379619484-3.png",
+  "imageSha256": "a1c7a178a24212e99f17ba8baabff273a3e72540badc51150c56645caa6b5b7b",
+  "logicalSize": {
+    "width": 1024,
+    "height": 768
+  },
+  "dpiScale": 1.0,
+  "uiState": "shell=in-game;screen=InGame;panel=Inventory;inventoryPage=0;inventoryLocation=0.00,0.00;questDetail=None;minimap=true;chatFocused=false;security=None;inspect=false;inventoryOperation=false;dropConfirm=false;inventoryDeleteMode=false;inventoryDeletePrompt=false",
+  "world": {
+    "map": "BichonProvince",
+    "x": 290,
+    "y": 620,
+    "light": null
+  },
+  "build": {
+    "sourceRevision": null,
+    "executableSha256": null,
+    "assetManifestSha256": null
+  },
+  "acceptance": {
+    "eligible": false,
+    "blockers": [
+      "authoritative-world-state-incomplete",
+      "trusted-build-provenance-unavailable"
+    ]
+  }
+}

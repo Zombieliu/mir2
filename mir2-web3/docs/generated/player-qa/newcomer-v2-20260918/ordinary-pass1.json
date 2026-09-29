@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "profile": "newcomer-v2",
+  "checkedAt": "2026-09-17T18:01:12.257Z",
+  "denominator": 78,
+  "completedUnits": 6,
+  "allClassesCompleted": false,
+  "visualAccepted": false,
+  "globalParityPercent": null,
+  "classes": [
+    {
+      "className": "Warrior",
+      "name": "JW1afa9aab",
+      "runId": "2026-09-17T17-57-15-576Z",
+      "status": "paused",
+      "level": 3,
+      "completedUnits": 2,
+      "snapshotCompletedIds": [
+        2110001,
+        2110002
+      ],
+      "savedCompletedIds": [
+        2110001,
+        2110002
+      ],
+      "verifiedCompletedIds": [
+        2110001,
+        2110002
+      ],
+      "logoutCommitted": true,
+      "transformMatches": true,
+      "saveRevision": 8,
+      "ordinaryStartedAt": "2026-09-17T17:57:15.577Z",
+      "ordinaryElapsedMs": 31573,
+      "pause": {
+        "reason": "operationFailed",
+        "questId": 2110003,
+        "message": "q2110003 RakingCat has no reachable monster source among maps none",
+        "at": "2026-09-17T17:57:47.150Z"
+      },
+      "firstOwnedAttackMs": 5766,
+      "firstOwnedStruckMs": null,
+      "firstLearnedSkillMs": null,
+      "completed": false,
+      "visualAccepted": false
+    },
+    {
+      "className": "Wizard",
+      "name": "JWe9994c9a",
+      "runId": "2026-09-17T17-58-00-448Z",
+      "status": "paused",
+      "level": 3,
+      "completedUnits": 2,
+      "snapshotCompletedIds": [
+        2110001,
+        2110002
+      ],
+      "savedCompletedIds": [
+        2110001,
+        2110002
+      ],
+      "verifiedCompletedIds": [
+        2110001,
+        2110002
+      ],
+      "logoutCommitted": true,
+      "transformMatches": true,
+      "saveRevision": 7,
+      "ordinaryStartedAt": "2026-09-17T17:58:00.449Z",
+      "ordinaryElapsedMs": 36127,
+      "pause": {
+        "reason": "operationFailed",
+        "questId": 2110003,
+        "message": "q2110003 RakingCat has no reachable monster source among maps none",
+        "at": "2026-09-17T17:58:36.576Z"
+      },
+      "firstOwnedAttackMs": 7031,
+      "firstOwnedStruckMs": null,
+      "firstLearnedSkillMs": null,
+      "completed": false,
+      "visualAccepted": false
+    },
+    {
+      "className": "Taoist",
+      "name": "JT1c61008c",
+      "runId": "2026-09-17T17-58-10-643Z",
+      "status": "paused",
+      "level": 3,
+      "completedUnits": 2,
+      "snapshotCompletedIds": [
+        2110001,
+        2110002
+      ],
+      "savedCompletedIds": [
+        2110001,
+        2110002
+      ],
+      "verifiedCompletedIds": [
+        2110001,
+        2110002
+      ],
+      "logoutCommitted": true,
+      "transformMatches": true,
+      "saveRevision": 3,
+      "ordinaryStartedAt": "2026-09-17T17:58:10.644Z",
+      "ordinaryElapsedMs": 58685,
+      "pause": {
+        "reason": "operationFailed",
+        "questId": 2110003,
+        "message": "Timeout waiting for q2110003 Scarecrow kill progress",
+        "at": "2026-09-17T17:59:09.329Z"
+      },
+      "firstOwnedAttackMs": null,
+      "firstOwnedStruckMs": null,
+      "firstLearnedSkillMs": null,
+      "completed": false,
+      "visualAccepted": false
+    }
+  ]
+}

@@ -25,9 +25,15 @@ function loadTypeScriptModule(url, requireMap = {}) {
 const contentLocalization = loadTypeScriptModule(
   new URL("../lib/crystal-content-localization.ts", import.meta.url),
 );
+const newcomerV2Journey = loadTypeScriptModule(
+  new URL("../lib/newcomer-v2-journey.ts", import.meta.url),
+);
 const { localizeQuestEntry, localizeQuestLog } = loadTypeScriptModule(
   new URL("../lib/quest-localization.ts", import.meta.url),
-  { "./crystal-content-localization": contentLocalization },
+  {
+    "./crystal-content-localization": contentLocalization,
+    "./newcomer-v2-journey": newcomerV2Journey,
+  },
 );
 const texts = {
   "content.quest.smithFirstTest.title": "铁匠的第一次考验",

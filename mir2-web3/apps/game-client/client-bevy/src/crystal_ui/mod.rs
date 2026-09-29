@@ -3,18 +3,26 @@
 //! These modules contain presentation data and coordinate transforms only.
 //! They do not own login, character, quest, inventory, or gameplay authority.
 
+pub mod amount_input;
 pub mod assets;
 pub mod chat;
+pub(crate) mod change_password;
+pub mod guild_storage;
 pub mod hud;
+mod item_image;
+pub mod item_tooltip;
 pub mod login;
 pub mod metrics;
 pub mod minimap;
 pub mod notice;
+pub(crate) mod npc_item_quote;
 pub mod overlays;
 pub mod panel_layouts;
 pub mod preview_data;
+pub mod quest_targets;
 pub mod select;
 pub mod spec;
+pub(crate) mod storage_password;
 pub mod typography;
 pub mod widget;
 

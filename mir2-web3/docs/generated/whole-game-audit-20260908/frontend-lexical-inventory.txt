@@ -1,0 +1,39 @@
+
+Frontend completeness coverage  (mir2-web3 / apps/web)
+page.tsx : apps\web\app\page.tsx
+protocol : packages\protocol\src\packets.rs
+measured : 2026-09-08T12:27:22.238Z
+
++------------------------------+-------------------------+-------+
+| Signal                       | Numerator / Denominator | %     |
++------------------------------+-------------------------+-------+
+| ServerPacket handlers        | 280 / 284               | 98.6% |
+| ClientPacket senders         | 74 / 155                | 47.7% |
+| UI dialog/window components  | 34 / 51                 | 66.7% |
+| UI components (total .tsx)   | 51 components           |       |
+| original-ui asset libraries  | 25 dirs                 |       |
+| original-ui PNG frames       | 32,991 png              |       |
+| original-map asset libraries | 3 dirs                  |       |
+| original-map PNG frames      | 12,015 png              |       |
+| crystal map pack             | 1,620 .map.gz           |       |
++------------------------------+-------------------------+-------+
+
+Summary
+  ServerPacket coverage : 280/284 (98.6%) variants handled by a case branch in page.tsx
+  ClientPacket coverage : 74/155 (47.7%) variants emitted from page.tsx (110 distinct outbound tokens total)
+  UI components         : 51 .tsx files, 34 dialog/window/panel surfaces
+  original-ui assets    : 25 libraries, 32,991 committed PNG frames
+  original-map assets   : 3 libraries, 12,015 committed PNG frames
+  crystal map pack      : 1,620 committed .map.gz tiles
+
+Notes
+  - Protocol counts are parsed from `pub enum ServerPacket` / `pub enum ClientPacket`.
+  - ServerPacket numerator = distinct PascalCase `case "X"` kinds in page.tsx
+    that name a defined variant (direction/chat-channel cases are excluded).
+  - ClientPacket numerator = distinct outbound `command.type === "X"` / `type: "X"`
+    tokens whose name matches a variant (case-insensitive). Non-protocol UI/transport
+    tokens (moveTo, castSkill, error, packet, tick, ...) are excluded from the numerator.
+  - Asset counts use committed files only (`git ls-files`).
+
+Re-run: npm run measure:frontend-coverage   (from apps/web)
+

@@ -1,0 +1,6 @@
+
+running 1 test
+test routing::tests::delayed_old_death_receipt_is_not_lost_after_new_life_receipts_are_acknowledged ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 702 filtered out; finished in 2.91s
+

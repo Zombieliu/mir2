@@ -83,6 +83,14 @@ pub struct UiOptions {
     pub skill_mode: bool,
     #[serde(default = "default_true")]
     pub skill_bar: bool,
+    #[serde(default = "default_skill_bar_positions")]
+    pub skill_bar_positions: [[i32; 2]; 2],
+    #[serde(default)]
+    pub dura_view: bool,
+    #[serde(default = "default_true")]
+    pub expanded_buff_window: bool,
+    #[serde(default = "default_true")]
+    pub expanded_hero_buff_window: bool,
     #[serde(default = "default_true")]
     pub effect: bool,
     #[serde(default = "default_true")]
@@ -183,6 +191,10 @@ impl Default for UiOptions {
         Self {
             skill_mode: false,
             skill_bar: true,
+            skill_bar_positions: default_skill_bar_positions(),
+            dura_view: false,
+            expanded_buff_window: true,
+            expanded_hero_buff_window: true,
             effect: true,
             drop_view: true,
             name_view: true,
@@ -735,4 +747,8 @@ impl UiState {
     pub fn safe_key_open(&self) -> bool {
         self.security.panel == UiSecurityPanel::SafeKey
     }
+}
+
+pub fn default_skill_bar_positions() -> [[i32; 2]; 2] {
+    [[0, 0], [216, 0]]
 }

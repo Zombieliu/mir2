@@ -1,0 +1,179 @@
+{
+  "generatedAtUtc": "2026-09-09T00:11:09.261885+00:00",
+  "scope": "47 existing personal dedicated modules into shared Zone; not whole Crystal parity",
+  "evidence": [
+    {
+      "log": "mir2-shared-final-full-simulation.log",
+      "sha256": "c7382d6fb143b520d302a37cdf3d6d2850267cfeffb947f977b514d07bbcffbe",
+      "passed": 2193,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 77
+    },
+    {
+      "log": "mir2-shared-final-full-gateway.log",
+      "sha256": "f5a460749cd5e6bbeec9dd7c892d4c7a352c4f289f2dff4c48aa4449aabbe7b9",
+      "passed": 785,
+      "failed": 7,
+      "ignored": 1,
+      "suites": 52
+    },
+    {
+      "log": "mir2-shared-postguard-zone.log",
+      "sha256": "db3ec2cc6604053413e7d2df88a7f575ab91ab30b4658457aa194038861d9c1c",
+      "passed": 102,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 1
+    },
+    {
+      "log": "mir2-shared-postguard-integration.log",
+      "sha256": "44a3a1a6f09da40c71cbc4b693d34b6cd928df51922ec95abc63ebc725ba924f",
+      "passed": 221,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 2
+    },
+    {
+      "log": "mir2-shared-inventory-restoration.log",
+      "sha256": "c9d03c397ddcf4990483536b963f01f014b97b00847d51b6609b61b024c4c446",
+      "passed": 98,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 1
+    },
+    {
+      "log": "mir2-shared-handoff-persistence-resolved.log",
+      "sha256": "7424967cab575e0b5fa8ae9b68800f8ec0b41b90cf6191475c07e934770633de",
+      "passed": 5,
+      "failed": 2,
+      "ignored": 0,
+      "suites": 2
+    },
+    {
+      "log": "mir2-shared-zone-rpc-final-source.log",
+      "sha256": "1ef44d93c92212182920d3ba37096a5ace2a7ef58396f4bcaa3ff29e15892130",
+      "passed": 30,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 1
+    },
+    {
+      "log": "mir2-shared-receipt-scope-final.log",
+      "sha256": "19b7970fa943a4417d672a50e9d001b468dc7552499620729027557d1be518d7",
+      "passed": 4,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 1
+    },
+    {
+      "log": "mir2-shared-gateway-drop-resolved.log",
+      "sha256": "05913bff8c8837b515a7842742bb6ad7ab572dc896ce530a7f0f3c68cb72bbae",
+      "passed": 47,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 1
+    },
+    {
+      "log": "mir2-shared-economy-replay-resolved.log",
+      "sha256": "3f60f33d66fbcead2b5afa12896428a106badde28c239f96865a4bd059f3917a",
+      "passed": 39,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 1
+    },
+    {
+      "log": "mir2-shared-gate11-final.log",
+      "sha256": "5c3b1c8017c4ef0aaa2347e111a8eb4471497783e99b2bca6964744511753383",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 1
+    },
+    {
+      "log": "mir2-shared-respawn-expiry.log",
+      "sha256": "bd4269809f4f89e2a1ba618ca3e6345d4b1eabdce3ead4029b126866f9f8bdf4",
+      "passed": 10,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 1
+    },
+    {
+      "log": "mir2-shared-vertical-corpse-final.log",
+      "sha256": "6b63e5a977a86dea2007eeb549c1b5c03ed521cc82fa5c863f19dcabb394eb08",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 1
+    },
+    {
+      "log": "mir2-shared-corpse-final-full-simulation.log",
+      "sha256": "14d514cb8c3f987506fbb5b4b107845d31825d1a8a92e055af9d2652f65c863b",
+      "passed": 2197,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 77
+    },
+    {
+      "log": "mir2-shared-gateway-corpse-expiry-resolved.log",
+      "sha256": "cf32fcb56e51b4fb7b7558fffebbd7d55dfe4b2feb429fed052205de2a4089b7",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 1
+    },
+    {
+      "log": "mir2-shared-corpse-final-drop-regression.log",
+      "sha256": "66c54287fb2bf8b91924044ba04d9e25a990f48db8c9ace2e2e003f8bcee5d64",
+      "passed": 47,
+      "failed": 0,
+      "ignored": 0,
+      "suites": 1
+    }
+  ],
+  "gatewayResolvedBaselineCoverage": {
+    "passed": 792,
+    "ignored": 1,
+    "initialFailedTests": [
+      "gateway_assistant_jane_survives_ordinary_walk_aoi_round_trip",
+      "gateway_fresh_account_bichon_logout_and_new_session_reload_are_authoritative",
+      "gateway_ordinary_bichon_starter_loop_uses_client_packets_and_reloads",
+      "gateway_original_bichon_q1_to_q4_uses_client_packets_and_reloads",
+      "gateway_session_handoffs_between_remote_map_zones_without_leaking_host_sessions",
+      "gateway_session_uses_zone_host_from_environment",
+      "real_mir2_map_workload_survives_remote_zone_handoff_and_failover"
+    ],
+    "allInitialFailuresResolved": true,
+    "notAFreshFullRun": true
+  },
+  "verticalPersistenceSuite": {
+    "passed": 5,
+    "logs": [
+      "mir2-shared-handoff-persistence-resolved.log",
+      "mir2-shared-vertical-corpse-final.log"
+    ],
+    "mixedLogContainsEarlierGate11Failure": true,
+    "versionNote": "Four passing tests in mixed log predate later Gateway fixes. Q1-Q4 passed separately on final corpse-expiry source; earlier Q1-Q4 failure is preserved."
+  },
+  "changesAfterFullGateway": [
+    "apps/gateway/src/mir2_workload.rs",
+    "apps/gateway/src/session.rs",
+    "apps/simulation/src/runtime/zone/runtime.rs",
+    "apps/gateway/tests/vertical_slice_gateway_persistence.rs",
+    "apps/simulation/src/runtime/inventory.rs",
+    "apps/simulation/tests/shared_zone.rs",
+    "apps/gateway/src/routing.rs",
+    "apps/gateway/tests/zone_rpc.rs"
+  ],
+  "finalSimulationCoverage": {
+    "passed": 2197,
+    "failed": 0,
+    "ignored": 0,
+    "log": "mir2-shared-corpse-final-full-simulation.log"
+  },
+  "versionNote": "Initial full simulation predates HellKnight guard; the later final-source simulation rerun passes2197 with0failures. full Gateway initially785 passed7failed1ignored. Follow-ups cover inventory normalization, isolated recovery fixtures, RPC test deadline, AOI item retention, Zone receipt namespace and authority-separated replay ordering. Results overlap and are not a fresh all-tests run on final source. Mixed persistence log retains earlier failing Gate11 and Q1-Q4; respective final logs supersede them. Respawn expiry and precise Harvest fixture were added afterward and separately verified.",
+  "globalComplete": false,
+  "accepted": false,
+  "visualAccepted": false,
+  "fullyCertifiedCrystalFamilies": 0
+}

@@ -1,0 +1,6 @@
+[native-game-shop-input] key_code=Numpad7 logical_nav=Some("Home") state=Pressed caret=Some(0)->Some(0)
+[native-game-shop-input] key_code=Numpad7 logical_nav=Some("Home") state=Released caret=Some(0)->Some(0)
+[native-game-shop-input] key_code=Numpad1 logical_nav=Some("End") state=Pressed caret=Some(0)->Some(0)
+[native-game-shop-input] key_code=Numpad1 logical_nav=Some("End") state=Released caret=Some(0)->Some(0)
+[native-game-shop-input] key_code=Numpad4 logical_nav=Some("ArrowLeft") state=Pressed caret=Some(0)->Some(0)
+[native-game-shop-input] key_code=Numpad4 logical_nav=Some("ArrowLeft") state=Released caret=Some(0)->Some(0)

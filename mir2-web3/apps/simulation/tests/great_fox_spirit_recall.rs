@@ -67,6 +67,7 @@ fn monster_snapshot(
         hp: Some(if dead { 0 } else { 100 }),
         max_hp: Some(100),
         light: 0,
+        wing_effect: None,
         name_colour_argb: -1,
         dead,
         riding_mount: None,

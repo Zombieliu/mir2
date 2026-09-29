@@ -1,0 +1,11 @@
+# Wizard R153 q113 completed
+
+Ordinary route completion is now **158/177**: Warrior55/55 mandatory +4/4 milestones, Wizard47/55 +3/4, Taoist46/55 +3/4. Wizard and Taoist remain level26. This checkpoint proves one additional public-player functional quest completion; final route/logout/store acceptance and separate native UI, animation and Crystal visual comparison remain open.
+
+Wizard trace `Wizard.2026-09-17T12-18-15-467Z.trace.jsonl` proves q113 Insomnia ready at snapshot45595 (2026-09-17T14:08:39.768Z), with BlackMaggot3/3 and WedgeMoth3/3. The ordinary `finishQuest` request45596 uses questIndex113 and selectedItemIndex-1. Server ChangeQuest45597 marks completion, CompleteQuest45598 includes113, and full snapshot45599 at14:08:40.521 UTC confirms stage`completed`.
+
+At unchanged level26, mapD711(216,177), gold172→12672 (+12500), EXP73650→618094 (+544444). Both reward deltas exactly match the consumed Wizard1-30 route definition:12500 gold and544444 EXP, no fixed/selectable reward item. Mandatory47 and milestones3 are checked against the public CompleteQuest list and newcomer guidance IDs. The same healthy Wizard runner PID42024 continues q114 BlackBoar/RedBoar; q114 is not counted completed.
+
+Taoist earned its first q113 Wedge credit before its R153 recovery episode ended through normal LogOutSuccess26111 at14:23:31 UTC, with926 gold, HP-small76, MP-small11, Amulet100, Random4 and Town1. The final error was inability to fund the second TownTeleport. Only the terminated Taoist was publicly resumed at14:31:34 UTC after identity/listener checks, using unchanged R153 code, existing account/character and saved credit. New PID51068 is live; at14:32:17 UTC it held Town2 and gold175 and later resumed travel. No grant, target/cap change, account-store write, duplicate Gateway or foreground-client operation occurred.
+
+Filtered finish receipts, ready/completed owner snapshots and configured reward data are in [wizard-r153-q113-completed-proof.json](wizard-r153-q113-completed-proof.json). Trace fingerprints identify the captured byte prefix of the still-appending source. Authentication/private raw events are excluded. No repository source changed this checkpoint; the existing719/719 controller regression remains applicable. This is not final normal logout/store proof for either caster or full visual acceptance.
