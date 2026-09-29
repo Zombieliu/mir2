@@ -3,8 +3,9 @@
 > 2026-09-29 创建/选角预览：男女五职业共192张源帧逐像素与原版一致。
 > 修正法师特效混合方式、名字/焦点变化重置动画；离线实际GPU检查320帧、
 > 64张截图，16组法师叠加对照均未压暗底图。共享1108/原生768项通过。
-> Windows发布版改用GUI子系统并保留有上限的启动日志；最终安装包与用户
-> 创建角色操作验收仍需另记。刺客/弓手仅检查既有绘制能力，未开放创建。
+> Windows发布版GUI子系统与有上限的启动日志已验证，Candidate03完整性及
+> x64 r3安装包编译通过；实际安装升级与用户创建角色操作仍未验收。
+> 刺客/弓手仅检查既有绘制能力，未开放创建。
 > [证据与限制](generated/player-qa/invited-playtest-20260929/character-preview-startup.md)。
 
 > 2026-09-03 relocated-launch map repair: the native map locator resolves a

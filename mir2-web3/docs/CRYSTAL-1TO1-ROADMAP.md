@@ -4,8 +4,9 @@
 > additive blend; name/focus redraws retain the animation clock. All192 original
 > frames match. Actual offline GPU verification covers ten class/gender sets,
 > both screens,320 frames and16 no-darkening comparisons. Shared1108/native768
-> regressions pass. Release console removal includes bounded startup diagnostics;
-> packaging/installed acceptance remain pending. Capacity stays paused.
+> regressions pass. Clean c3828af30 Release has GUI subsystem2 and bounded startup
+> diagnostics; signed123,029-file Candidate03 and x64 r3 Setup are verified.
+> Installed/player acceptance remains open. Capacity stays paused.
 > [Evidence](generated/player-qa/invited-playtest-20260929/character-preview-startup.md).
 
 > 2026-09-29 native registration feedback correction: preserve canonical and

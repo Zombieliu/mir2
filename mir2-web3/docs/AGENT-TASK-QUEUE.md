@@ -3,8 +3,10 @@
 > 2026-09-29 preview/startup follow-up: ten class/gender asset sets and both
 > creation/selection screens pass source and offline GPU checks. Wizard additive
 > effects and retained redraw clocks are fixed. Shared1108/native768 pass;
-> clean Release build/package and installed human checks are next. Multilingual
-> scope is exactly zh-TW/en/pt-BR; native migration is not delivered yet.
+> clean c3828af30 Release/GUI subsystem and signed Candidate03 pass verification,
+> with compiled x64 r3 Setup. Installed human checks remain open. Multilingual
+> scope is exactly zh-TW/en/pt-BR; the implementation design is committed,
+> while native migration and the three-language game are not delivered yet.
 > Capacity remains paused; preserve the user's running F-drive client.
 > [Evidence](generated/player-qa/invited-playtest-20260929/character-preview-startup.md).
 

@@ -64,7 +64,7 @@ separate documented work item, not a completed translation claim.
   64 PNGs. Every name/focus redraw preserved the current frame and half-frame
   clock; every sequence wrapped to frame zero.
 - Sixteen Wizard effect/body-only GPU comparisons found zero darkened pixels
-  (two-channel-value tolerance), and 12,828–23,498 brightened pixels each.
+  (tolerance of two values per channel), and 12,828–23,498 brightened pixels each.
   Representative creation PNGs for all ten class/gender combinations and
   additional Wizard selection/body-only PNGs were visually inspected.
 - Full native host regression with the complete asset fixture: 768 passed,
@@ -86,10 +86,34 @@ character or save. The user's active F-drive game was not closed or replaced.
 
 ## Delivery and open acceptance
 
-Release EXE/installer verification is recorded below after building the clean
-source. Until then, the existing r2 installer does not contain these fixes.
+Source fix `4642971f7` and the separate multilingual design were pushed on
+`codex/playtest-registration`. Clean attested source
+`c3828af30e80600547999eca375b6b86cb700c6b` built successfully with locked Rust
+1.95.0 Release, SHA-256
+`546BB79CCD867336BE492D5ED72D12C1FE725D14AE2CB4410058FBCD94D54FD3`.
+Read-only PE checks confirm AMD64 PE32+ and `IMAGE_SUBSYSTEM_WINDOWS_GUI=2`,
+bound to that attestation; no game process was launched for this check.
+
+Candidate `WN-CANDIDATE-20260929-invited-03` passes the strict nonvisual verifier
+with `sourceRepoCheck=checked`, valid detached CMS signature and no failures.
+The installer input verifier independently checked all 123,029 files and
+741,631,686 bytes against the signed package. No runtime logs were included.
+Inno Setup compilation exits zero; numeric version is 2026.9.29.3 and the actual
+Setup PE machine is AMD64. The compiler and bundled Microsoft runtime have
+valid publisher signatures; Setup itself has no public Authenticode signature.
+
+Delivered artifact (594,799,887 bytes):
+`C:/mir2-playtest-releases/20260929-preview/Mir2-Invite-20260929-r3-Setup.exe`.
+SHA-256: `455B68EF0E22E5BD526295C9277967DFB5B32F97B82446784E95E3061C5AD455`.
+Its sibling `preview-release.json` records the completed and open checks;
+`installer-build` retains the recipe, exact source allowlist and verification
+logs. Previous releases and the user's F-drive game remain unchanged.
+
 Actual installed upgrade, fatal-dialog interaction and player creation/selection
 acceptance remain open; automated source/GPU evidence does not close them.
+This r3 retains the existing Chinese installer and mixed game text. The requested
+`zh-TW` / `en` / `pt-BR` game release is not delivered: its audited implementation
+plan is [NATIVE-MULTILINGUAL-DESIGN.md](../../../NATIVE-MULTILINGUAL-DESIGN.md).
 
 Capacity work remains paused at the user's request. There is no server change,
 50–100-player stability claim or whole-game parity acceptance in this round.

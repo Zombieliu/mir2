@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "sourceRevision": "c3828af30e80600547999eca375b6b86cb700c6b",
+  "exe": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\target-attested-windows-candidate\\x86_64-pc-windows-msvc\\release\\mir2-platform-windows.exe",
+  "exeSha256": "546BB79CCD867336BE492D5ED72D12C1FE725D14AE2CB4410058FBCD94D54FD3",
+  "exeSizeBytes": 87693312,
+  "machine": "AMD64",
+  "peFormat": "PE32+",
+  "subsystem": 2,
+  "subsystemName": "IMAGE_SUBSYSTEM_WINDOWS_GUI",
+  "launched": false,
+  "liveAcceptance": false,
+  "limitation": "Confirms release PE requests no console. Does not exercise a desktop shortcut, fatal dialog or installed upgrade. External launchers may create a terminal themselves."
+}
