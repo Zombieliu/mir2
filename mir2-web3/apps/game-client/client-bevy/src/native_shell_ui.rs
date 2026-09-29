@@ -16,7 +16,8 @@ use bevy::{
 use crate::crystal_ui::assets::{safe_key_assets, CrystalButtonAssetSet};
 use crate::crystal_ui::login::{blink_login_caret, spawn_login_screen, CrystalLoginAction};
 use crate::crystal_ui::select::{
-    animate_character_previews, spawn_character_preview_at, spawn_character_select_screen,
+    animate_character_previews, load_character_preview_materials, spawn_character_preview_at,
+    spawn_character_select_screen,
     CrystalSelectAction,
 };
 use crate::crystal_ui::spec::{self, CrystalButtonSpec};
@@ -406,10 +407,11 @@ fn animate_login_door(
 
 impl Plugin for Mir2NativeShellUiPlugin {
     fn build(&self, app: &mut App) {
+        crate::crystal_ui::overlays::register_crystal_additive_ui(app);
         app.init_resource::<NativeUiIntentQueue>()
             .init_resource::<NativeShellAuxFocus>()
             .init_resource::<NativeShellTextModifiers>()
-            .add_systems(Startup, spawn_shell_ui)
+            .add_systems(Startup, (spawn_shell_ui, load_character_preview_materials))
             .add_systems(
                 Update,
                 (
@@ -2227,6 +2229,10 @@ fn body_font(size: f32) -> TextFont {
         ..default()
     }
 }
+
+#[cfg(test)]
+#[path = "native_shell_preview_visual_tests.rs"]
+mod preview_visual_tests;
 
 #[cfg(test)]
 mod tests {

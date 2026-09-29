@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-29 character-preview correction: Wizard effects now use Crystal's
+> additive blend; name/focus redraws retain the animation clock. All192 original
+> frames match. Actual offline GPU verification covers ten class/gender sets,
+> both screens,320 frames and16 no-darkening comparisons. Shared1108/native768
+> regressions pass. Release console removal includes bounded startup diagnostics;
+> packaging/installed acceptance remain pending. Capacity stays paused.
+> [Evidence](generated/player-qa/invited-playtest-20260929/character-preview-startup.md).
+
 > 2026-09-29 native registration feedback correction: preserve canonical and
 > legacy Gateway errors, explain server retry windows, and reject unsupported
 > new-account credentials before sending. Existing login remains compatible.

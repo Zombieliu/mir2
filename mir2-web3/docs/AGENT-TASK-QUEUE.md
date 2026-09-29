@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-09-29 preview/startup follow-up: ten class/gender asset sets and both
+> creation/selection screens pass source and offline GPU checks. Wizard additive
+> effects and retained redraw clocks are fixed. Shared1108/native768 pass;
+> clean Release build/package and installed human checks are next. Multilingual
+> scope is exactly zh-TW/en/pt-BR; native migration is not delivered yet.
+> Capacity remains paused; preserve the user's running F-drive client.
+> [Evidence](generated/player-qa/invited-playtest-20260929/character-preview-startup.md).
+
 > 2026-09-29 registration correction: public flat Gateway errors now reach the
 > native dialog with their actual retry interval; new-account validation, field
 > colors and keyboard/paste paths agree with the commercial password minimum.

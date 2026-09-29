@@ -6,6 +6,11 @@
 //! the Gateway; this crate only owns window/lifecycle/input hosting and forwards
 //! world snapshots into the shared runtime.
 
+#![cfg_attr(
+    all(target_os = "windows", not(debug_assertions), not(test)),
+    windows_subsystem = "windows"
+)]
+
 use bevy::prelude::IntoScheduleConfigs;
 use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
 
@@ -34,6 +39,7 @@ mod native_protocol;
 mod session_config;
 mod shell_bridge;
 mod social_bond_wire;
+mod startup_diagnostics;
 mod timing;
 
 /// Whether an effect frame PNG (a web path like /original-effects/Magic/0.png)
@@ -113,15 +119,31 @@ fn report_r2_progress_via_chat(
 }
 
 fn main() -> bevy::app::AppExit {
+    startup_diagnostics::initialize();
+    console_error_panic_hook::set_once();
+    startup_diagnostics::install_panic_hook();
+    match std::panic::catch_unwind(run_native_client) {
+        Ok(exit) => exit,
+        Err(_) => {
+            startup_diagnostics::report_failure(startup_diagnostics::Failure::Panic, 101);
+            bevy::app::AppExit::Error(
+                std::num::NonZeroU8::new(101).expect("nonzero panic exit code"),
+            )
+        }
+    }
+}
+
+fn run_native_client() -> bevy::app::AppExit {
     timing::initialize();
     let config_started = std::time::Instant::now();
-    console_error_panic_hook::set_once();
     movement_trace::initialize();
 
     let session = session_config::NativeSessionConfig::load(gateway::LOCAL_GATEWAY_WS_URL)
         .unwrap_or_else(|error| {
-            eprintln!("[platform-windows] configuration error: {error}");
-            std::process::exit(2);
+            // Keep the diagnostic launcher's failure marker without echoing a
+            // TOML parser excerpt or credential value to redirected output.
+            eprintln!("[platform-windows] configuration error: startup validation failed");
+            startup_diagnostics::fatal_exit(startup_diagnostics::configuration_failure(&error), 2);
         });
 
     timing::report("configuration", config_started);
@@ -142,7 +164,7 @@ fn main() -> bevy::app::AppExit {
     // `bevy-entity-atlases/...` live).
     let asset_root = assets::require_asset_root().unwrap_or_else(|error| {
         eprintln!("[platform-windows] FATAL: {error}");
-        std::process::exit(1);
+        startup_diagnostics::fatal_exit(startup_diagnostics::Failure::Assets, 1);
     });
     let diag = assets::diagnose_asset_root(&asset_root);
     eprintln!(
@@ -162,7 +184,7 @@ fn main() -> bevy::app::AppExit {
             "[platform-windows] FATAL: Bichon map layout 0.map.gz could not be decoded under {}. Repair the map pack before launching.",
             asset_root.display()
         );
-        std::process::exit(1);
+        startup_diagnostics::fatal_exit(startup_diagnostics::Failure::MapLayout, 1);
     }
     if let Some(map_path) = assets::crystal_map_path(&asset_root, "0") {
         eprintln!("[platform-windows] map_layout={}", map_path.display());
@@ -374,7 +396,10 @@ fn main() -> bevy::app::AppExit {
         },
     );
 
-    let gateway_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
+    let gateway_runtime = tokio::runtime::Runtime::new().unwrap_or_else(|error| {
+        eprintln!("[platform-windows] network runtime initialization failed: {error}");
+        startup_diagnostics::fatal_exit(startup_diagnostics::Failure::NetworkRuntime, 1);
+    });
     let gateway_url = session.gateway_url;
     let gateway_task = gateway_runtime.spawn(async move {
         match gateway::run_gateway_client(
@@ -397,10 +422,17 @@ fn main() -> bevy::app::AppExit {
     timing::milestone("enter_event_loop");
     let exit = app.run();
     eprintln!("[native-lifecycle] event_loop_returned exit={exit:?}");
-
+    let exit_code = match &exit {
+        bevy::app::AppExit::Success => 0,
+        bevy::app::AppExit::Error(code) => code.get(),
+    };
+    startup_diagnostics::record_exit(exit_code);
     // Best-effort: drop the gateway task after the window closes.
     let _ = command_tx.send(gateway::GatewayCommand::Shutdown);
     let _ = gateway_task.abort();
+    if exit_code != 0 {
+        startup_diagnostics::report_failure(startup_diagnostics::Failure::EventLoop, exit_code);
+    }
     // Preserve renderer/event-loop failures for the diagnostic launcher.
     // Returning unit previously reported OS success even for AppExit::Error.
     exit

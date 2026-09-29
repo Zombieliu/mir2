@@ -25,6 +25,11 @@ pub fn report(stage: &str, started: Instant) {
         }));
     }
     if let Some(origin) = ORIGIN.get() {
+        crate::startup_diagnostics::record_timing(
+            stage,
+            started.elapsed().as_secs_f64() * 1000.0,
+            origin.elapsed().as_secs_f64() * 1000.0,
+        );
         eprintln!(
             "[timing] stage={stage} duration_ms={:.3} since_launch_ms={:.3}",
             started.elapsed().as_secs_f64() * 1000.0,

@@ -186,10 +186,10 @@ const CRYSTAL_ADDITIVE_UI_SHADER_HANDLE: Handle<Shader> =
 /// material keeps CharacterDialog's `Prguse2.DrawBlend` wing layer distinct
 /// from the ordinary alpha-blended armour, weapon and hair images.
 #[derive(AsBindGroup, Asset, TypePath, Debug, Clone)]
-struct CrystalAdditiveUiMaterial {
+pub(crate) struct CrystalAdditiveUiMaterial {
     #[texture(0)]
     #[sampler(1)]
-    image: Handle<Image>,
+    pub(crate) image: Handle<Image>,
 }
 
 /// Hold the four immutable material handles across per-frame overlay rebuilds
@@ -240,6 +240,23 @@ impl UiMaterial for CrystalAdditiveUiMaterial {
         {
             target.blend = Some(CRYSTAL_DRAW_BLEND_STATE);
         }
+    }
+}
+
+/// Both the login shell and in-game overlays use Crystal's DrawBlend path.
+/// Register it once even when a renderer uses only the character preview UI.
+pub(crate) fn register_crystal_additive_ui(app: &mut App) {
+    if app.world().contains_resource::<AssetServer>()
+        && app.world().contains_resource::<Assets<Shader>>()
+        && !app.is_plugin_added::<UiMaterialPlugin<CrystalAdditiveUiMaterial>>()
+    {
+        load_internal_asset!(
+            app,
+            CRYSTAL_ADDITIVE_UI_SHADER_HANDLE,
+            "crystal_additive_ui.wgsl",
+            Shader::from_wgsl
+        );
+        app.add_plugins(UiMaterialPlugin::<CrystalAdditiveUiMaterial>::default());
     }
 }
 
@@ -3509,14 +3526,8 @@ impl Plugin for Mir2CrystalOverlayPlugin {
         if app.world().contains_resource::<AssetServer>()
             && app.world().contains_resource::<Assets<Shader>>()
         {
-            load_internal_asset!(
-                app,
-                CRYSTAL_ADDITIVE_UI_SHADER_HANDLE,
-                "crystal_additive_ui.wgsl",
-                Shader::from_wgsl
-            );
-            app.add_plugins(UiMaterialPlugin::<CrystalAdditiveUiMaterial>::default())
-                .add_systems(Startup, load_character_wing_materials);
+            register_crystal_additive_ui(app);
+            app.add_systems(Startup, load_character_wing_materials);
         }
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<keyboard_dialog::host::KeyboardHost>()
