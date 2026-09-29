@@ -24872,12 +24872,25 @@ mod tests {
         let first_packets = first.handle_packet(ClientPacket::Walk {
             direction: MirDirection::Right,
         });
-        assert!(first_packets.iter().any(|packet| matches!(
-            packet,
-            ServerPacket::UserLocation { location }
-                if location.position.x == 4 && location.position.y == 7
-        )));
-        while owner_receiver.try_recv().is_ok() {}
+        assert!(
+            !first_packets
+                .iter()
+                .any(|packet| matches!(packet, ServerPacket::UserLocation { .. })),
+            "registered owner acknowledgements must use the priority FIFO"
+        );
+        let mut first_owner_packets = Vec::new();
+        while let Ok(outbound) = owner_receiver.try_recv() {
+            first_owner_packets.push(outbound.into_packet());
+        }
+        assert!(
+            first_owner_packets.iter().any(|packet| matches!(
+                packet,
+                ServerPacket::UserLocation { location }
+                    if location.position == Point { x: 4, y: 7 }
+                        && location.direction == MirDirection::Right
+            )),
+            "first walk must be acknowledged by the live owner channel: {first_owner_packets:?}"
+        );
         while observer_receiver.try_recv().is_ok() {}
 
         let queued_packets = first.handle_packet(ClientPacket::Run {

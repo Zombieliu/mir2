@@ -473,3 +473,31 @@ occupancy, hostile monsters and increasing damage can still invalidate the
 workload. This distributed scene does not establish50 players fighting on one
 screen. All latency, activity, positive-hit, resume, save and hour-soak gates
 remain unchanged; no50/100 capacity pass is claimed.
+
+The final full run records844 passes, one failed old delivery-path assertion
+and18 ignored cases in816.44 seconds. The failing cadence fixture registered a
+live owner channel but still expected its first ACK in the direct response.
+Its test-only correction asserts no direct ACK and the actual live(4,7)/Right
+ACK; the subsequent queued Run(6,7), observer broadcast and time limits remain
+unchanged. Fifteen focused cadence/owner checks then pass. Production code and
+the verified9ac artifact are unchanged; a second complete serial run is active.
+
+The three-player wide calibration `1790642427645-2fc62b81` passes60-second
+stage and60-second soak on664. AOI is304/304 and330/330, movement P95 at most
+171ms, with real peer chat and no cleanup errors. It deliberately has no
+combat, resume or save sample and is not a capacity acceptance. Scene v2
+reorders only the first group's noncombat anchors to provide four nearby
+patrol pairs among the first10 admissions. Fighter positions and all group
+footprints/supply remain unchanged; ordinary paths were revalidated.
+
+There is an execution/monitoring gap from00:46 UTC until the user's04:22 UTC
+status message. No continuous-work or stability time is credited for this gap;
+its cause is unconfirmed. The old realm was drained beforehand. After fresh
+preflight,9ac3c17ec is deployed with a verified PostgreSQL/state backup; old and
+candidate normal stops exit0, original production remains unchanged. The new
+monitor writes independently to files. First new50-target attempt
+`1790656391279-2be7363c` stops before its first stage: the fourth character
+receives StartGame success but times out awaiting authoritative bootstrap and
+later refresh/logout. The other three continue valid movement at P95<=104ms;
+no memory/restart protection fires. Preserve this failure and inspect the
+ordinary bootstrap before attributing it to processing capacity.
