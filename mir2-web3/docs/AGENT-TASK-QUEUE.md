@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-09-29 capacity ordering follow-up: deterministic player-AOI and owner
+> acknowledgement races now have fixes and focused regressions. WSS viewport
+> overflow cancels the affected transport through the normal save/resume path;
+> stale player-ID cleanup stays bounded. Hydration selects active monster IDs
+> without constructing full entity presentation. The earlier integrated build
+> passes829 Gateway tests/18 ignored; the final combined full run, deployment
+> and50/100 hour-long workloads are still required. A captured stale self-Struck
+> overwrite was a test-runner defect; native XY was already protected. Retained
+> two-player failures are not capacity limits. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 continued capacity work: calibrated650/750ms real movement/combat
 > probes on664 pass with resume/save checks, but are only short probes. The first
 > 50-target forest run stops at10 admitted actors on AOI membership validation;

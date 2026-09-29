@@ -459,6 +459,10 @@ impl InProcessWorldRuntime {
         self.session.current_map_file_name()
     }
 
+    pub fn current_map_active_monster_ids(&self) -> Vec<u32> {
+        self.session.current_map_active_monster_ids()
+    }
+
     pub fn local_player_position(&self) -> Option<Point> {
         self.session.local_player_position()
     }

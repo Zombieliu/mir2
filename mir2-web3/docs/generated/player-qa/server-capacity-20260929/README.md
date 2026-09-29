@@ -352,3 +352,124 @@ personal Bichon world (about1.696 MiB); this describes requested allocation,
 not measured Linux RSS or capacity. Live deployment and capacity verification
 remain separate. Logs, source hashes and the retained first failure are recorded
 in the external `collision-memory-audit/IMPLEMENTATION.md` evidence file.
+
+## Follow-up AOI, movement evidence and hydration
+
+The first50-target failure has668 expected/666 received AOI observations at10
+admissions. Three deterministic regressions independently reproduce crossed
+direct/live player lifecycle delivery and a full-channel backlog overtaken by
+new packets. The live report did not retain the original lifecycle packets, so
+these tests establish a real code defect without proving that particular live
+interleaving. A proposed unified player lifecycle/transform FIFO preserves the
+separate owner acknowledgement path. Review also found offline identity-cache
+cleanup and pending-queue overflow edges; their final validation remains open.
+
+Two retained2-actor boundary probes on664 fail workload coverage, not latency:
+`1790636922461-a2607ebc` has38 blocked movement opportunities while attempting
+to return to one corner. With reachable alternate corners,
+`1790637820559-355c22b8` has zero blocked opportunities and107 traversed cells
+in60.10 seconds, but only32/75 successful moves are Run (42.67%, below50%).
+Three corrections are retained; movement P95=177ms and AOI checks pass. Several
+pre-command positions disagree with earlier movement acknowledgements; the
+available evidence cannot identify the intervening packet. Bounded lifecycle,
+owner-transform and navigation diagnostics are being added before attribution.
+
+The five original forest combat homes also lack demonstrated hour-long target
+supply. An independent source/collision/entry-protection calculation finds15
+Deer plus1 Hen within their combined16-cell home radius,380 starting HP and
+98.47 HP/min ideal respawn supply. At the prior probes'3.621 average positive
+damage, that is about27 positive hits/min against a required60. Chasing can
+leave those home regions, so this is a scenario limitation, not a whole-map or
+server capacity ceiling. No spawn, HP, reward or respawn data was changed.
+
+A narrow active-monster-ID getter preserves the prior full snapshot's entity
+precedence, missing-HP behavior, dead filtering, NPC visibility and ID order.
+Its five regressions plus12 adjacent tests pass; Release revalidation and an
+explicit15-session function benchmark also pass. Across five375-query trials,
+median elapsed time is2,068,079 microseconds for full shared presentation versus
+724 for ID selection. This is a function benchmark, not a capacity estimate.
+Gateway hydration now calls the getter, while bootstrap still builds its full
+presentation and owner-dead/retained-object filtering remains unchanged.
+Integrated Gateway and real50/100 long-soak acceptance remain open.
+
+The first integrated AOI/getter Gateway run completes829 passes, zero failures
+and18 ignored environment/explicit-benchmark cases in769.03 seconds. This is
+the build before the later overload/owner-ACK additions, not their full-suite
+result. The WSS overload candidate separately passes four real socket/lifecycle
+tests,20 live AOI/chat checks,22 native-resume cases, six explicit-leave cases
+and the existing pending-bound test. It closes a registration whose player
+viewport backlog would be truncated, even when the socket writer is stalled;
+ordinary abnormal teardown saves authority before retaining a resume ticket.
+It adds no protocol LogOut, global Zone fence, larger queue or authentication
+bypass. The legacy non-WSS fallback is outside this overload-close change.
+
+New raw owner-transform diagnostics identify the prior coordinate anomaly:
+`1790639402175-1db7c477` contains159 UserLocation changes and three ObjectStruck
+changes. Two captured ACK→late-Struck→next-command sequences prove that the
+test runner replaced a new owner position with a hit's historical position.
+Crystal ignores owner ObjectStruck; the native adapter's final authoritative
+overlay already protects owner XY. This is a runner defect, not proof of a
+native player/camera regression. The narrow observation fix retains remote
+Struck, independent HP/death and real push/dash movement. Its two captured red
+tests turn green; all19 observation tests and11 related capacity checks pass.
+
+Reprobe `1790640207383-9b7245c4` has164 transform changes, all UserLocation,
+and no late-Struck overwrite. Corrections fall to1/78, completion is98.75%,
+and movement P95=155ms. It remains failed:36 Run/77 successful movements is
+46.75%, below the unchanged50% requirement. The single correction is a genuine
+unchanged-coordinate ACK with no intervening overwrite; occupancy/action-lock
+attribution is unproven. Legal detours around the small patrol's occupied edges
+still under-offer Run load. A wider explicit patrol scenario is being validated,
+without changing collision, cadence or acceptance thresholds.
+
+Independently, four deterministic real-Zone tests reproduce owner UserLocation
+reordering between direct responses, the live priority queue and pending flush.
+The owner-FIFO candidate makes all four pass, with eight focused checks covering
+replacement registrations, bootstrap, correction replies and movement-grace
+bookkeeping. This is a separate server ordering defect; it is not attributed
+to the captured ObjectStruck failures. The final combined full suite and public
+deployment remain required before the next capacity claim.
+
+The unchanged extracted native client was normally closed after63.19 minutes
+on664. Its380 asset samples retain five font atlas pages/5 MiB after initial
+allocation, zero sampled pending native messages and no retained effect images.
+The CPU main-world loop records443,606 frame intervals, mean8.554ms, with two
+intervals at least100ms and maximum219.14ms; diagnostic loss is zero. These are
+low-load/mostly-idle CPU and asset observations, not GPU/present FPS, a process
+RSS leak verdict or50-player visual acceptance. Final file-prefix hashes and
+counts are in external `native-664-health-final-20260928T2338Z.json`. The server
+monitor confirms zero connections, active sessions and reconnect leases after
+the normal exit, with original production still ready.
+
+The final ordering candidate passes67 unique focused Gateway regressions,
+including eight owner-FIFO cases,20 AOI/chat, seven hot-path, four cadence,
+22 native-resume and six real-Web overflow/bootstrap cases. A real loopback
+test first reproduces a prepared registration's ACK being dropped while its
+active epoch is still zero. The sender now checks the epoch after acquiring
+the execution read gate. Ordinary map transfers emit MapInformation; action,
+injection and Tick now rebuild live registration before flushing that bootstrap.
+Tick holds the same execution write gate through execute/register/flush. A real
+two-account MageHouse portal test verifies the new-map owner ACK and observer
+ObjectWalk, and that ordinary idle ticks do not continually rebuild the epoch.
+Independent production review finds no remaining blocker in these changes.
+The final full Gateway run is in progress with the repository's serial-test
+setting; the map fixture uses a process-global full-collision switch.
+
+The complete frozen Node runner/observation suite passes80/80 with no skips in
+257.48 seconds. Explicit native scenarios can validate complete, disjoint5x5
+patrol footprints against real terrain, NPCs and map entries using a bounded
+full-map reachability proof. Runtime movement still uses the original4000-node
+path budget and ordinary Walk/Run. Default and baseline placement remain intact.
+Declared combat groups constrain hunting to their actual observer footprints;
+all-player AOI and movement/chat fanout denominators remain unchanged.
+
+Two reproducible scene files are retained in `scenarios/`: a two-player AOI-edge
+calibration and a50-actor three-group mixed workload (20/20/10 actors,2/2/1
+fighters). Its1250 patrol cells are statically clear and disjoint; ordinary
+start-to-home paths are at most111 cells. The unique canonical passive supply
+is92 Deer/Hen slots,2120 starting HP and561.25 HP/min ideal respawn supply.
+These are planning bounds, not live harvesting or survival evidence. Dynamic
+occupancy, hostile monsters and increasing damage can still invalidate the
+workload. This distributed scene does not establish50 players fighting on one
+screen. All latency, activity, positive-hit, resume, save and hour-soak gates
+remain unchanged; no50/100 capacity pass is claimed.

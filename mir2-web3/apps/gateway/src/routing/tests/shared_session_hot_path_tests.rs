@@ -110,22 +110,27 @@ fn owner_location_uses_its_priority_channel_when_observer_backlog_is_full() {
 
 #[test]
 fn activating_live_registration_retries_a_location_queued_during_the_registration_gap() {
-    let mut state = SharedInProcessZoneState::new();
-    let key = ZonePresenceKey {
-        account_id: "registration-gap".to_string(),
-        character_index: 0,
-    };
-    state.queue_zone_packets(
+    let zone_state = Arc::new(Mutex::new(SharedInProcessZoneState::new()));
+    let mut runtime = shared_session_runtime(zone_state.clone());
+    start_demo_runtime(&mut runtime);
+    let key = runtime.current_presence_key().unwrap();
+    let session_id = runtime.current_zone_session_id().unwrap();
+    let (position, direction) = zone_state
+        .lock()
+        .unwrap()
+        .zone_manager
+        .player_transform(&session_id)
+        .unwrap();
+    zone_state.lock().unwrap().queue_zone_packets(
         key.clone(),
         vec![ServerPacket::UserLocation {
             location: mir2_protocol::UserLocation {
-                position: Point { x: 25, y: 23 },
-                direction: MirDirection::Up,
+                position: position.clone(),
+                direction,
             },
         }],
     );
 
-    let zone_state = Arc::new(Mutex::new(state));
     let (sender, mut receiver) = tokio::sync::mpsc::channel(1);
     let registration_id = zone_state
         .lock()
@@ -148,7 +153,7 @@ fn activating_live_registration_retries_a_location_queued_during_the_registratio
             .expect("activation should immediately retry the pending owner location")
             .into_packet(),
         ServerPacket::UserLocation { location }
-            if location.position == Point { x: 25, y: 23 }
+            if location.position == position && location.direction == direction
     ));
 }
 

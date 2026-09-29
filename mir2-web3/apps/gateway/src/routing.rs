@@ -2112,6 +2112,7 @@ impl Ord for ZonePresenceKey {
 pub struct SharedZoneLiveOutbound {
     registration_id: u64,
     packet: ServerPacket,
+    overloaded: Option<Arc<AtomicBool>>,
 }
 
 impl SharedZoneLiveOutbound {
@@ -2119,6 +2120,7 @@ impl SharedZoneLiveOutbound {
         Self {
             registration_id,
             packet,
+            overloaded: None,
         }
     }
 
@@ -2133,6 +2135,12 @@ impl SharedZoneLiveOutbound {
     pub(crate) fn is_owner_location(&self) -> bool {
         matches!(&self.packet, ServerPacket::UserLocation { .. })
     }
+
+    pub(crate) fn is_overloaded(&self) -> bool {
+        self.overloaded
+            .as_ref()
+            .is_some_and(|flag| flag.load(Ordering::Acquire))
+    }
 }
 
 #[doc(hidden)]
@@ -2141,6 +2149,7 @@ impl SharedZoneLiveOutbound {
 pub struct SharedZoneLiveOutboundSender {
     normal: TokioMpscSender<SharedZoneLiveOutbound>,
     owner_location: TokioMpscSender<SharedZoneLiveOutbound>,
+    overload_signal: Option<tokio::sync::watch::Sender<u64>>,
 }
 
 impl SharedZoneLiveOutboundSender {
@@ -2151,7 +2160,13 @@ impl SharedZoneLiveOutboundSender {
         Self {
             normal,
             owner_location,
+            overload_signal: None,
         }
+    }
+
+    pub(crate) fn with_overload_signal(mut self, signal: tokio::sync::watch::Sender<u64>) -> Self {
+        self.overload_signal = Some(signal);
+        self
     }
 
     pub(crate) fn single(sender: TokioMpscSender<SharedZoneLiveOutbound>) -> Self {
@@ -2185,6 +2200,7 @@ impl SharedZoneLiveOutboundSender {
 struct SharedZoneLiveOutboundRecord {
     registration_id: u64,
     sender: SharedZoneLiveOutboundSender,
+    overloaded: Arc<AtomicBool>,
 }
 
 pub(crate) struct SharedZoneLiveOutboundRegistration {
@@ -2548,6 +2564,10 @@ struct SharedInProcessZoneState {
     journey_event_progress: BTreeMap<ZonePresenceKey, ZoneJourneyEventProgress>,
     teardown_fences: BTreeSet<ZonePresenceKey>,
     live_zone_outbounds: BTreeMap<ZonePresenceKey, SharedZoneLiveOutboundRecord>,
+    // Ephemeral recipient identity cache; not part of any wire/checkpoint schema.
+    // It keeps a departed player's queued Remove distinguishable from monsters.
+    live_zone_player_ids: BTreeMap<ZonePresenceKey, BTreeSet<u32>>,
+    departed_live_zone_player_ids: BTreeSet<u32>,
     players: BTreeMap<ZonePresenceKey, ZonePlayerPresence>,
     maps: BTreeMap<String, ZoneMapSnapshotLayer>,
     trade_links: SharedTradeLinks,
@@ -2850,6 +2870,8 @@ impl SharedInProcessZoneState {
             journey_event_progress: BTreeMap::new(),
             teardown_fences: BTreeSet::new(),
             live_zone_outbounds: BTreeMap::new(),
+            live_zone_player_ids: BTreeMap::new(),
+            departed_live_zone_player_ids: BTreeSet::new(),
             players: BTreeMap::new(),
             maps: BTreeMap::new(),
             trade_links: SharedTradeLinks::default(),
@@ -3263,6 +3285,8 @@ impl SharedInProcessZoneState {
             journey_event_progress: checkpoint.journey_event_progress.into_iter().collect(),
             teardown_fences: checkpoint.teardown_fences.into_iter().collect(),
             live_zone_outbounds: BTreeMap::new(),
+            live_zone_player_ids: BTreeMap::new(),
+            departed_live_zone_player_ids: BTreeSet::new(),
             players,
             maps: checkpoint.maps,
             trade_links: checkpoint.trade_links,
@@ -3360,7 +3384,10 @@ impl SharedInProcessZoneState {
                 Some(key),
             );
         }
-        self.players.remove(key);
+        if let Some(player) = self.players.remove(key) {
+            self.departed_live_zone_player_ids
+                .insert(player.zone_object_id);
+        }
         let Some(session_id) = self.zone_sessions.get(key).cloned() else {
             return Vec::new();
         };
@@ -3426,6 +3453,7 @@ impl SharedInProcessZoneState {
         self.journey_event_progress.remove(key);
         self.teardown_fences.remove(key);
         self.live_zone_outbounds.remove(key);
+        self.live_zone_player_ids.remove(key);
     }
 
     fn begin_teardown_fence(&mut self, key: &ZonePresenceKey) -> Result<(), String> {
@@ -3545,38 +3573,79 @@ impl SharedInProcessZoneState {
         if packets.is_empty() {
             return;
         }
+        let mut delivered_removes = Vec::new();
         for packet in packets {
-            // Once speech is queued behind a full socket, later speech must
-            // not overtake it if a channel slot opens before the next retry.
-            // Movement keeps its existing coalescing/owner priority rules.
-            let queued_chat = matches!(
-                &packet,
-                ServerPacket::ObjectChat { .. } | ServerPacket::Chat { .. }
-            ) && self.pending_zone_packets.get(&key).is_some_and(|pending| {
-                pending.iter().any(|queued| {
-                    matches!(
-                        queued,
-                        ServerPacket::ObjectChat { .. } | ServerPacket::Chat { .. }
-                    )
-                })
-            });
-            let packet = if queued_chat {
+            if self
+                .live_zone_outbounds
+                .get(&key)
+                .is_some_and(|record| record.overloaded.load(Ordering::Acquire))
+                && self.is_ordered_player_packet(&key, &packet)
+            {
+                // This viewport will be rebuilt by ordinary transport resume.
+                // Keep personal settlement notifications on their normal path.
+                continue;
+            }
+            if let ServerPacket::ObjectPlayer { info } = &packet {
+                if self.live_zone_outbounds.contains_key(&key) {
+                    self.live_zone_player_ids
+                        .entry(key.clone())
+                        .or_default()
+                        .insert(info.object_id);
+                }
+            }
+            // A new authoritative ACK supersedes an unsent older ACK even if
+            // a channel slot opened before the cadence retried that backlog.
+            // Already enqueued ACKs remain ordered by the priority FIFO.
+            if matches!(&packet, ServerPacket::UserLocation { .. }) {
+                if let Some(pending) = self.pending_zone_packets.get_mut(&key) {
+                    pending.retain(|queued| !matches!(queued, ServerPacket::UserLocation { .. }));
+                }
+            }
+            // A free channel slot is not permission to overtake a backlog.
+            // In particular Remove -> Player reentry must remain ordered even
+            // when these packets originate from different players' actions.
+            // UserLocation retains its separate owner-priority channel.
+            let queued_normal = is_normal_realtime_zone_live_packet(&packet)
+                && self.pending_zone_packets.get(&key).is_some_and(|pending| {
+                    pending.iter().any(is_normal_realtime_zone_live_packet)
+                });
+            let packet = if queued_normal {
                 packet
             } else {
+                let removed_id = match &packet {
+                    ServerPacket::ObjectRemove { object_id } => Some(*object_id),
+                    _ => None,
+                };
                 match self.try_push_live_zone_outbound(&key, packet) {
-                    Ok(()) => continue,
+                    Ok(()) => {
+                        delivered_removes.extend(removed_id);
+                        continue;
+                    }
                     Err(packet) => packet,
                 }
             };
             let pending = self.pending_zone_packets.entry(key.clone()).or_default();
-            if matches!(packet, ServerPacket::UserLocation { .. }) {
-                pending.retain(|queued| !matches!(queued, ServerPacket::UserLocation { .. }));
-            }
             if let Some(object_id) = coalesced_zone_movement_object_id(&packet) {
-                pending
-                    .retain(|queued| coalesced_zone_movement_object_id(queued) != Some(object_id));
+                let boundary = pending.iter().rposition(|queued| match queued {
+                    ServerPacket::ObjectPlayer { info } => info.object_id == object_id,
+                    ServerPacket::ObjectRemove { object_id: removed } => *removed == object_id,
+                    _ => false,
+                });
+                let mut index = 0;
+                pending.retain(|queued| {
+                    let keep = boundary.is_some_and(|boundary| index <= boundary)
+                        || coalesced_zone_movement_object_id(queued) != Some(object_id);
+                    index += 1;
+                    keep
+                });
             }
             pending.push(packet);
+            if pending.len() > MAX_PENDING_ZONE_PACKETS_PER_PLAYER
+                && self.fail_overloaded_live_viewport(&key)
+            {
+                continue;
+            }
+            let pending = self.pending_zone_packets.entry(key.clone()).or_default();
             while pending.len() > MAX_PENDING_ZONE_PACKETS_PER_PLAYER {
                 let removable = pending
                     .iter()
@@ -3585,6 +3654,51 @@ impl SharedInProcessZoneState {
                 pending.remove(removable);
             }
         }
+        self.forget_delivered_player_removals(&key, delivered_removes);
+    }
+
+    fn fail_overloaded_live_viewport(&mut self, key: &ZonePresenceKey) -> bool {
+        let Some((registration_id, signal, overloaded)) = self
+            .live_zone_outbounds
+            .get(key)
+            .and_then(|record| {
+                record.sender.overload_signal.clone().map(|signal| {
+                    (
+                        record.registration_id,
+                        signal,
+                        Arc::clone(&record.overloaded),
+                    )
+                })
+            })
+        else {
+            // Synchronous/TCP integrations do not have the WSS transport
+            // cancellation hook and retain their existing bounded fallback.
+            return false;
+        };
+        if !self.pending_zone_packets.get(key).is_some_and(|pending| {
+            pending
+                .iter()
+                .any(|packet| self.is_ordered_player_packet(key, packet))
+        }) {
+            return false;
+        }
+        overloaded.store(true, Ordering::Release);
+        let pending = self.pending_zone_packets.remove(key).unwrap_or_default();
+        let personal = pending
+            .into_iter()
+            .filter(|packet| !self.is_ordered_player_packet(key, packet))
+            .collect::<Vec<_>>();
+        if !personal.is_empty() {
+            self.pending_zone_packets.insert(key.clone(), personal);
+        }
+        // This one-slot control signal bypasses the full data channel. The
+        // WebSocket drops only this registration's transport; the existing
+        // abnormal-teardown save/resume path retains all authoritative state.
+        signal.send_replace(registration_id);
+        eprintln!(
+            "[gateway-zone-live] viewport_overload registration_id={registration_id} action=close_transport"
+        );
+        true
     }
 
     /// Retry realtime packets that could not enter a socket's bounded live
@@ -3625,10 +3739,18 @@ impl SharedInProcessZoneState {
 
             let mut retained = Vec::new();
             let mut live_channel_full = false;
+            let mut delivered_removes = Vec::new();
             for packet in ordered {
                 if !live_channel_full && is_realtime_zone_live_packet(&packet) {
+                    let removed_id = match &packet {
+                        ServerPacket::ObjectRemove { object_id } => Some(*object_id),
+                        _ => None,
+                    };
                     match self.try_push_live_zone_outbound(&key, packet) {
-                        Ok(()) => continue,
+                        Ok(()) => {
+                            delivered_removes.extend(removed_id);
+                            continue;
+                        }
                         Err(packet) => {
                             live_channel_full = true;
                             retained.push(packet);
@@ -3639,8 +3761,9 @@ impl SharedInProcessZoneState {
                 }
             }
             if !retained.is_empty() {
-                self.pending_zone_packets.insert(key, retained);
+                self.pending_zone_packets.insert(key.clone(), retained);
             }
+            self.forget_delivered_player_removals(&key, delivered_removes);
         }
     }
 
@@ -3649,6 +3772,48 @@ impl SharedInProcessZoneState {
         key: ZonePresenceKey,
         sender: SharedZoneLiveOutboundSender,
     ) -> u64 {
+        // A restored same-map session may already have a newer bootstrap
+        // snapshot than the old registration's pending ACK. Only refresh an
+        // existing ACK; registration itself must not manufacture a movement.
+        if let Some((position, direction)) = self
+            .zone_sessions
+            .get(&key)
+            .and_then(|session| self.zone_manager.player_transform(session))
+        {
+            if let Some(pending) = self.pending_zone_packets.get_mut(&key) {
+                for packet in pending {
+                    if let ServerPacket::UserLocation { location } = packet {
+                        location.position = position.clone();
+                        location.direction = direction;
+                    }
+                }
+            }
+        } else if let Some(pending) = self.pending_zone_packets.get_mut(&key) {
+            // Failed joins/left worlds have no authoritative owner transform.
+            // Do not replay a coordinate belonging to their previous epoch.
+            pending.retain(|packet| !matches!(packet, ServerPacket::UserLocation { .. }));
+        }
+        let active_ids = self
+            .players
+            .values()
+            .map(|presence| presence.zone_object_id)
+            .collect::<BTreeSet<_>>();
+        let pending = self
+            .pending_zone_packets
+            .get(&key)
+            .map(Vec::as_slice)
+            .unwrap_or_default();
+        let pending_ids = pending
+            .iter()
+            .filter_map(ordered_zone_object_id)
+            .collect::<BTreeSet<_>>();
+        let known = self.live_zone_player_ids.entry(key.clone()).or_default();
+        known.retain(|id| active_ids.contains(id) || pending_ids.contains(id));
+        known.extend(active_ids);
+        known.extend(pending.iter().filter_map(|packet| match packet {
+            ServerPacket::ObjectPlayer { info } => Some(info.object_id),
+            _ => None,
+        }));
         self.next_live_outbound_registration_id = self
             .next_live_outbound_registration_id
             .saturating_add(1)
@@ -3659,6 +3824,7 @@ impl SharedInProcessZoneState {
             SharedZoneLiveOutboundRecord {
                 registration_id,
                 sender,
+                overloaded: Arc::new(AtomicBool::new(false)),
             },
         );
         registration_id
@@ -3682,10 +3848,16 @@ impl SharedInProcessZoneState {
         if !is_realtime_zone_live_packet(&packet) {
             return Err(packet);
         }
-        let Some((registration_id, sender)) = self
+        let Some((registration_id, sender, overloaded)) = self
             .live_zone_outbounds
             .get(key)
-            .map(|record| (record.registration_id, record.sender.clone()))
+            .map(|record| {
+                (
+                    record.registration_id,
+                    record.sender.clone(),
+                    Arc::clone(&record.overloaded),
+                )
+            })
         else {
             if matches!(&packet, ServerPacket::UserLocation { .. }) {
                 eprintln!(
@@ -3695,12 +3867,28 @@ impl SharedInProcessZoneState {
             }
             return Err(packet);
         };
+        if overloaded.load(Ordering::Acquire) {
+            return Err(packet);
+        }
         let outbound = SharedZoneLiveOutbound {
             registration_id,
             packet,
+            overloaded: Some(overloaded),
+        };
+        let created_player = match &outbound.packet {
+            ServerPacket::ObjectPlayer { info } => Some(info.object_id),
+            _ => None,
         };
         match sender.try_send(outbound) {
-            Ok(()) => Ok(()),
+            Ok(()) => {
+                if let Some(object_id) = created_player {
+                    self.live_zone_player_ids
+                        .entry(key.clone())
+                        .or_default()
+                        .insert(object_id);
+                }
+                Ok(())
+            }
             Err(TokioTrySendError::Full(outbound)) => {
                 if matches!(&outbound.packet, ServerPacket::UserLocation { .. }) {
                     eprintln!(
@@ -3748,7 +3936,97 @@ impl SharedInProcessZoneState {
     }
 
     fn take_pending_zone_packets(&mut self, key: &ZonePresenceKey) -> Vec<ServerPacket> {
-        self.pending_zone_packets.remove(key).unwrap_or_default()
+        let packets = self.pending_zone_packets.remove(key).unwrap_or_default();
+        if !self.live_zone_outbounds.contains_key(key) {
+            return packets;
+        }
+        // A personal-session flush is another socket writer. Keep the ordered
+        // live backlog in its original FIFO instead of letting this writer
+        // deliver it ahead of packets already waiting in the live channel.
+        let (ordered, personal): (Vec<_>, Vec<_>) = packets.into_iter().partition(|packet| {
+            matches!(packet, ServerPacket::UserLocation { .. })
+                || self.is_ordered_player_packet(key, packet)
+        });
+        if !ordered.is_empty() {
+            self.pending_zone_packets.insert(key.clone(), ordered);
+        }
+        personal
+    }
+
+    fn collect_current_zone_packets(
+        &mut self,
+        key: &ZonePresenceKey,
+        packets: Vec<ServerPacket>,
+        current_packets: &mut Vec<ServerPacket>,
+    ) {
+        let ordered_live = self.live_zone_outbounds.contains_key(key);
+        for packet in packets {
+            if ordered_live
+                && (matches!(&packet, ServerPacket::UserLocation { .. })
+                    || self.is_ordered_player_packet(key, &packet))
+            {
+                self.queue_zone_packets(key.clone(), vec![packet]);
+            } else {
+                current_packets.push(packet);
+            }
+        }
+    }
+
+    fn begin_zone_bootstrap(&mut self, key: &ZonePresenceKey) {
+        // Map/StartGame bootstrap must be delivered before the next live
+        // registration is activated. Old-map AOI packets cannot be replayed
+        // into that new viewport; other personal notifications stay intact.
+        self.live_zone_outbounds.remove(key);
+        if let Some(pending) = self.pending_zone_packets.remove(key) {
+            let retained = pending
+                .into_iter()
+                .filter(|packet| {
+                    !matches!(packet, ServerPacket::UserLocation { .. })
+                        && !self.is_ordered_player_packet(key, packet)
+                })
+                .collect::<Vec<_>>();
+            if !retained.is_empty() {
+                self.pending_zone_packets.insert(key.clone(), retained);
+            }
+        }
+        self.live_zone_player_ids.remove(key);
+    }
+
+    fn is_ordered_player_packet(&self, key: &ZonePresenceKey, packet: &ServerPacket) -> bool {
+        if matches!(packet, ServerPacket::ObjectPlayer { .. }) {
+            return true;
+        }
+        ordered_zone_object_id(packet).is_some_and(|object_id| {
+            self.players
+                .values()
+                .any(|presence| presence.zone_object_id == object_id)
+                || self
+                    .live_zone_player_ids
+                    .get(key)
+                    .is_some_and(|known| known.contains(&object_id))
+        })
+    }
+
+    fn forget_delivered_player_removals(&mut self, key: &ZonePresenceKey, ids: Vec<u32>) {
+        for object_id in ids {
+            // A Remove can precede a queued reentry. Do not forget its player
+            // identity until this complete batch is accounted for, including
+            // a peer that logs out while that reentry is still channel-full.
+            let online = self
+                .players
+                .values()
+                .any(|presence| presence.zone_object_id == object_id);
+            let pending = self.pending_zone_packets.get(key).is_some_and(|packets| {
+                packets
+                    .iter()
+                    .any(|packet| ordered_zone_object_id(packet) == Some(object_id))
+            });
+            if !online && !pending {
+                if let Some(known) = self.live_zone_player_ids.get_mut(key) {
+                    known.remove(&object_id);
+                }
+            }
+        }
     }
 
     fn take_pending_zone_transform(
@@ -4073,7 +4351,7 @@ impl SharedInProcessZoneState {
                     }
                     self.apply_zone_packets_to_map_layer(&key, &packets);
                     if current_key == Some(&key) {
-                        current_packets.extend(packets);
+                        self.collect_current_zone_packets(&key, packets, &mut current_packets);
                     } else {
                         self.queue_zone_packets(key, packets);
                     }
@@ -4093,7 +4371,11 @@ impl SharedInProcessZoneState {
                         }
                         self.apply_zone_packets_to_map_layer(&key, &packets);
                         if current_key == Some(&key) {
-                            current_packets.extend(packets.clone());
+                            self.collect_current_zone_packets(
+                                &key,
+                                packets.clone(),
+                                &mut current_packets,
+                            );
                         } else {
                             self.queue_zone_packets(key, packets.clone());
                         }
@@ -4108,7 +4390,11 @@ impl SharedInProcessZoneState {
                         }
                         self.apply_zone_packets_to_map_layer(&key, &packets);
                         if current_key == Some(&key) {
-                            current_packets.extend(packets.clone());
+                            self.collect_current_zone_packets(
+                                &key,
+                                packets.clone(),
+                                &mut current_packets,
+                            );
                         } else {
                             self.queue_zone_packets(key, packets.clone());
                         }
@@ -4285,6 +4571,20 @@ impl SharedInProcessZoneState {
                         self.queue_zone_player_vital_delta(key, delta);
                     }
                 }
+            }
+        }
+        // A peer can leave after its AOI Remove was already delivered. The
+        // final Leave then has no packet for that observer, but its cached
+        // identity still needs pruning. Wait until this dispatch has queued
+        // all Leave packets so a channel-full recipient keeps its classifier.
+        for object_id in std::mem::take(&mut self.departed_live_zone_player_ids) {
+            let recipients = self
+                .live_zone_player_ids
+                .keys()
+                .cloned()
+                .collect::<Vec<_>>();
+            for key in recipients {
+                self.forget_delivered_player_removals(&key, vec![object_id]);
             }
         }
         (
@@ -7566,10 +7866,44 @@ fn is_realtime_zone_live_packet(packet: &ServerPacket) -> bool {
     )
 }
 
+fn is_normal_realtime_zone_live_packet(packet: &ServerPacket) -> bool {
+    is_realtime_zone_live_packet(packet) && !matches!(packet, ServerPacket::UserLocation { .. })
+}
+
+fn ordered_zone_object_id(packet: &ServerPacket) -> Option<u32> {
+    match packet {
+        ServerPacket::ObjectPlayer { info } => Some(info.object_id),
+        ServerPacket::ObjectTurn { movement }
+        | ServerPacket::ObjectWalk { movement }
+        | ServerPacket::ObjectRun { movement } => Some(movement.object_id),
+        ServerPacket::ObjectRemove { object_id } => Some(*object_id),
+        _ => None,
+    }
+}
+
 fn packets_include_user_location(packets: &[ServerPacket]) -> bool {
     packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::UserLocation { .. }))
+}
+
+fn zone_outbounds_include_owner_location(outbounds: &[ZoneOutbound], owner: &SessionId) -> bool {
+    outbounds.iter().any(|outbound| match outbound {
+        ZoneOutbound::ToSession {
+            session_id,
+            packets,
+        } if session_id == owner => {
+            packets_include_user_location(packets)
+        }
+        ZoneOutbound::ToMany {
+            session_ids,
+            packets,
+        } if session_ids.contains(owner) => {
+            packets_include_user_location(packets)
+        }
+        ZoneOutbound::ToAll { packets } => packets_include_user_location(packets),
+        _ => false,
+    })
 }
 
 fn shared_entity_target_result_packet_object_id(packet: &ServerPacket) -> Option<u32> {
@@ -7832,8 +8166,12 @@ impl SharedZoneMovementSessionState {
         key
     }
 
+    #[cfg(test)]
     fn note_player_movement_packets(&mut self, packets: &[ServerPacket], now_ms: u64) -> bool {
-        let includes_user_location = packets_include_user_location(packets);
+        self.note_player_movement_ack(packets_include_user_location(packets), now_ms)
+    }
+
+    fn note_player_movement_ack(&mut self, includes_user_location: bool, now_ms: u64) -> bool {
         self.pending_zone_player_movement = !includes_user_location;
         if includes_user_location {
             self.recent_zone_player_movement_until_ms =
@@ -8360,8 +8698,14 @@ fn execute_shared_zone_movement(
     outbounds.extend(
         zone_state
             .zone_manager
-            .handle(ZoneCommand::TickPlayerMovement { session_id, now_ms }),
+            .handle(ZoneCommand::TickPlayerMovement {
+                session_id: session_id.clone(),
+                now_ms,
+            }),
     );
+    // Delivery may use the live FIFO rather than the returned personal Vec.
+    // Internal movement/grace bookkeeping follows the actual Zone decision.
+    let owner_ack = zone_outbounds_include_owner_location(&outbounds, &session_id);
     let (packets, transform, _, _, _, _, _) =
         zone_state.dispatch_zone_outbounds(outbounds, Some(&key));
     if defer_owner_transform {
@@ -8371,7 +8715,7 @@ fn execute_shared_zone_movement(
                 .insert(key, (position.clone(), *direction));
         }
     }
-    session_state.note_player_movement_packets(&packets, now_ms);
+    session_state.note_player_movement_ack(owner_ack, now_ms);
 
     let outcome = WorldCommandOutcome {
         command_kind: WorldCommand::ClientPacket(packet.clone()).kind(),
@@ -8683,7 +9027,6 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(session_id) = self.current_zone_session_id() else {
             return Vec::new();
         };
-        let now_ms = Self::zone_now_ms();
         let packets = self
             .dispatch_zone_player_command(ZoneCommand::CancelPendingMovement { session_id }, false);
         let mut movement = self
@@ -8692,10 +9035,6 @@ impl SharedInProcessZoneSessionRuntime {
             .lock()
             .expect("shared zone movement session mutex should not be poisoned");
         movement.pending_zone_player_movement = false;
-        if packets_include_user_location(&packets) {
-            movement.recent_zone_player_movement_until_ms =
-                now_ms.saturating_add(SHARED_ZONE_POST_MOVEMENT_INPUT_GRACE_MS);
-        }
         packets
     }
 
@@ -9142,6 +9481,7 @@ impl SharedInProcessZoneSessionRuntime {
         let should_join_zone = zone_state.zone_sessions.get(&key).is_none()
             || previous_map.as_deref() != Some(map_file_name.as_str());
         if should_join_zone {
+            zone_state.begin_zone_bootstrap(&key);
             if let Some(join) = join_snapshot.as_mut() {
                 join.object_id = zone_object_id;
                 join.map_file_name = map_file_name.clone();
@@ -9394,14 +9734,9 @@ impl SharedInProcessZoneSessionRuntime {
             let _stage =
                 GatewaySlowStage::start("shared_session.predrain.shared_entity_projection");
             self.inner
-                .current_map_shared_entity_snapshots()
+                .current_map_active_monster_ids()
                 .into_iter()
-                .filter(|entity| {
-                    entity.kind == WorldEntityKind::Monster
-                        && !entity.dead
-                        && !entity.hp.is_some_and(|hp| hp <= 0)
-                        && !self.owner_dead_entity_ids.contains(&entity.object_id)
-                })
+                .filter(|object_id| !self.owner_dead_entity_ids.contains(object_id))
                 .collect::<Vec<_>>()
         };
         let zone_key = ZoneKey::for_map(map_file_name);
@@ -9412,13 +9747,13 @@ impl SharedInProcessZoneSessionRuntime {
                 .expect("shared zone presence mutex should not be poisoned");
             active_monsters
                 .iter()
-                .filter(|entity| {
+                .filter(|object_id| {
                     !zone_state
                         .zone_manager
                         .zone(&zone_key)
-                        .is_some_and(|zone| zone.retains_object_id(entity.object_id))
+                        .is_some_and(|zone| zone.retains_object_id(**object_id))
                 })
-                .map(|entity| entity.object_id)
+                .copied()
                 .collect::<Vec<_>>()
         };
         let monsters = missing_object_ids
@@ -9469,6 +9804,27 @@ impl SharedInProcessZoneSessionRuntime {
 
     fn authoritative_zone_owner_correction(&self) -> Vec<ServerPacket> {
         let snapshot = self.inner.world_snapshot();
+        if let Some(key) = self.current_presence_key() {
+            let mut state = self
+                .zone_state
+                .lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            if let Some((position, direction)) = state
+                .zone_sessions
+                .get(&key)
+                .and_then(|session| state.zone_manager.player_transform(session))
+            {
+                let mut current = Vec::new();
+                state.collect_current_zone_packets(
+                    &key,
+                    vec![ServerPacket::UserLocation {
+                        location: UserLocation { position, direction },
+                    }],
+                    &mut current,
+                );
+                return current;
+            }
+        }
         let Some(self_entity) = self.authoritative_self_entity_for_snapshot(&snapshot) else {
             return Vec::new();
         };
@@ -9879,6 +10235,9 @@ impl SharedInProcessZoneSessionRuntime {
                 .lock()
                 .expect("shared zone presence mutex should not be poisoned");
             let mut outbounds = Vec::new();
+            let canceling_movement = commands
+                .iter()
+                .any(|command| matches!(command, ZoneCommand::CancelPendingMovement { .. }));
             for command in commands {
                 if zone_state.command_mutates_teardown_fence(&command) {
                     continue;
@@ -9893,6 +10252,17 @@ impl SharedInProcessZoneSessionRuntime {
                 if let Some((session_id, actor, drop_id)) = creature_settlement {
                     zone_state.zone_manager.settle_intelligent_creature_pickup(&session_id, actor, drop_id);
                 }
+            }
+            if canceling_movement
+                && zone_state.zone_sessions.get(&key).is_some_and(|session_id| {
+                    zone_outbounds_include_owner_location(&outbounds, session_id)
+                })
+            {
+                self.movement_ingress
+                    .session_state
+                    .lock()
+                    .expect("shared zone movement session mutex should not be poisoned")
+                    .note_player_movement_ack(true, Self::zone_now_ms());
             }
             zone_state.dispatch_zone_outbounds(outbounds, Some(&key))
         };
@@ -15061,6 +15431,10 @@ mod tests {
     mod predrain_performance_tests;
     #[path = "live_chat_tests.rs"]
     mod live_chat_tests;
+    #[path = "live_aoi_order_tests.rs"]
+    mod live_aoi_order_tests;
+    #[path = "owner_location_order_tests.rs"]
+    mod owner_location_order_tests;
 
     use super::{
         coalesced_zone_movement_object_id, delayed_player_action_packets,

@@ -256,8 +256,14 @@ export function applyProtocolObservation(snapshot, message) {
     case 'ObjectAttack':
     case 'ObjectRangeAttack':
     case 'ObjectMagic':
-    case 'ObjectStruck':
       updateEntity(snapshot, payload.objectId, payload);
+      break;
+    case 'ObjectStruck':
+      // Crystal GameScene.ObjectStruck ignores the local user: a delayed hit
+      // pose carries its old location, not an authoritative movement correction.
+      if (objectIdOf(payload.objectId) !== objectIdOf(snapshot.playerObjectId)) {
+        updateEntity(snapshot, payload.objectId, payload);
+      }
       break;
     case 'ObjectMonster':
     case 'NewMonsterInfo':

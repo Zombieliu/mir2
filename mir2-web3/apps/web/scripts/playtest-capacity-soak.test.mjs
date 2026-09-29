@@ -6,9 +6,9 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
   assessMeasurements, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
-import { CapacityClient, FixedPlan, chooseHomes, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments } from './playtest-capacity-soak.mjs';
+import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
-import { loadProtocolCollisionMap, protocolMapCellIsWalkable } from './quest-agent/protocol-navigation.mjs';
+import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 
 const WebSocketServer = createRequire(import.meta.url)('next/dist/compiled/ws').Server;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -177,6 +177,217 @@ test('native continuous running starts with Walk, validates both Run cells, and 
   assert.notDeepEqual(selectNativeAction(client, context, 0)?.target, { x: 7, y: 5 });
   map.blocked[5 * 20 + 7] = 0; client.nativeRunPrimedUntil = 0;
   assert.equal(selectNativeAction(client, context, 0).command.type, 'walk');
+});
+
+test('explicit native anchors prove full-map reachability without widening automatic or baseline placement', () => {
+  const map = { width: 300, height: 30, blocked: new Uint8Array(9000) }, origin = { x: 5, y: 5 };
+  const anchors = [{ x: 210, y: 5 }, { x: 240, y: 5 }];
+  assert.throws(() => chooseHomes(map, origin, 2, 'hotspot', [], anchors, 3), /reachable patrol anchors/);
+  const proof = validateNativeExplicitHomes(map, origin, 2, anchors, 4);
+  assert.deepEqual(proof.homes, anchors); assert.notEqual(proof.homes[0], anchors[0]);
+  assert.equal(proof.footprintCells, 50); assert.ok(proof.visitedCells <= 9000);
+  assert.deepEqual(chooseHomes(map, origin, 1, 'hotspot'), [origin], 'automatic selection keeps its old scope');
+  for (const bad of [anchors.slice(0, 1), [{ x: 210.5, y: 5 }, anchors[1]], [{ x: 298, y: 5 }, anchors[1]], [anchors[0], { x: 214, y: 5 }]]) {
+    assert.throws(() => validateNativeExplicitHomes(map, origin, 2, bad, 4));
+  }
+  assert.throws(() => validateNativeExplicitHomes(map, origin, 2, anchors, 3), /patrolSpan/);
+  assert.throws(() => validateNativeExplicitHomes(map, origin, 2, anchors, 4, [], [{ x: 212, y: 7 }]), /footprint/);
+  assert.throws(() => validateNativeExplicitHomes(map, origin, 2, anchors, 4, [{ bounds: { minX: 212, maxX: 212, minY: 7, maxY: 7 } }]), /footprint/);
+  map.blocked[7 * map.width + 212] = 1;
+  assert.throws(() => validateNativeExplicitHomes(map, origin, 2, anchors, 4), /footprint/);
+  map.blocked[7 * map.width + 212] = 0;
+  for (let y = 0; y < map.height; y++) map.blocked[y * map.width + 100] = 1;
+  assert.throws(() => validateNativeExplicitHomes(map, origin, 2, anchors, 4), /unreachable/);
+  map.blocked.fill(0);
+  assert.throws(() => validateNativeExplicitHomes(map, origin, 2, anchors, 4, [{ bounds: { minX: 100, maxX: 100, minY: 0, maxY: 29 } }]), /unreachable/);
+});
+
+test('explicit wide native patrol uses two lawful steps toward a four-cell corner and preserves all collision checks', () => {
+  const map = { width: 30, height: 30, blocked: new Uint8Array(900) }, policy = capacityPolicy({ profile: 'probe', activityMode: 'native' });
+  const context = { map, policy, patrolSpan: 4 }, owner = { ...nativeSnapshot().entities[0], x: 5, y: 5 };
+  const client = { snapshot: { ...nativeSnapshot(), entities: [owner] }, context, home: { x: 5, y: 5 }, role: 'movement',
+    targetCursor: 0, movementCount: 0, nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity, plan: new NativePlan(0), nativeRunPrimedUntil: 0 };
+  assert.equal(selectNativeAction(client, context, 0).command.type, 'walk');
+  client.nativeRunPrimedUntil = Infinity;
+  const first = selectNativeAction(client, context, 0);
+  assert.deepEqual(first.first, { x: 6, y: 5 }); assert.deepEqual(first.target, { x: 7, y: 5 });
+  Object.assign(owner, first.target);
+  const second = selectNativeAction(client, context, 0);
+  assert.deepEqual(second.target, { x: 9, y: 5 }); assert.equal(second.command.type, 'run');
+  const corners = new Set(); Object.assign(owner, { x: 5, y: 5 }); client.targetCursor = 0;
+  for (let i = 0; i < 24; i++) {
+    const step = selectNativeAction(client, context, 0); assert.equal(step.command.type, 'run');
+    assert.equal(Math.max(Math.abs(step.target.x - owner.x), Math.abs(step.target.y - owner.y)), 2);
+    for (const cell of [step.first, step.target]) assert.ok(cell.x >= 5 && cell.x <= 9 && cell.y >= 5 && cell.y <= 9);
+    Object.assign(owner, step.target); corners.add(`${owner.x},${owner.y}`);
+  }
+  for (const point of ['5,5', '9,5', '9,9', '5,9']) assert.ok(corners.has(point));
+  for (const block of [{ x: 6, y: 5 }, { x: 7, y: 5 }]) {
+    Object.assign(owner, { x: 5, y: 5 }); client.targetCursor = 0;
+    client.snapshot.entities = [owner, { objectId: 900, kind: 'monster', ...block }];
+    const step = selectNativeAction(client, context, 0); assert.ok(step);
+    for (const cell of [step.first, step.target]) assert.notDeepEqual(cell, block);
+  }
+  client.snapshot.entities = [owner]; client.targetCursor = 0;
+  client.snapshot.mapTransfers = [{ bounds: { minX: 6, maxX: 6, minY: 5, maxY: 5 } }];
+  assert.notDeepEqual(selectNativeAction(client, context, 0).first, { x: 6, y: 5 });
+  client.snapshot.mapTransfers = []; map.blocked[5 * map.width + 6] = 1; client.targetCursor = 0;
+  assert.notDeepEqual(selectNativeAction(client, context, 0).first, { x: 6, y: 5 });
+  map.blocked.fill(1); map.blocked[5 * map.width + 5] = 0;
+  assert.equal(selectNativeAction(client, context, 0), null, 'all blocked remains a counted navigation failure');
+});
+
+test('native combat clusters cover the exact cohort and contain hunting inside declared observer footprints', () => {
+  const homes = [{ x: 5, y: 5 }, { x: 10, y: 10 }, { x: 21, y: 5 }], indices = new Set([1]);
+  const definitions = [{ combatActorIndices: [1], movementActorIndices: [0, 2] }];
+  const [cluster] = validateNativeCombatClusters(definitions, homes, indices, 4);
+  assert.equal(insideCombatCoverage(cluster, { x: 35, y: 10 }), true);
+  assert.equal(insideCombatCoverage(cluster, { x: 36, y: 10 }), false);
+  for (const bad of [[], [{ combatActorIndices: [0], movementActorIndices: [1, 2] }], [{ combatActorIndices: [1], movementActorIndices: [0, 0, 2] }],
+    [{ combatActorIndices: [1], movementActorIndices: [0] }], [{ combatActorIndices: [1], movementActorIndices: [] }]]) {
+    assert.throws(() => validateNativeCombatClusters(bad, homes, indices, 4));
+  }
+  const map = { width: 70, height: 40, blocked: new Uint8Array(2800) }, policy = capacityPolicy({ profile: 'probe', activityMode: 'native', stages: '3', combatActors: 1 });
+  const owner = { objectId: 1000, kind: 'player', x: 21, y: 10, direction: 'Right' };
+  const hidden = { objectId: 900, kind: 'monster', name: 'Deer', x: 22, y: 10, hp: 25 };
+  const visible = { objectId: 901, kind: 'monster', name: 'Deer', x: 24, y: 10, hp: 25 };
+  const outside = { objectId: 902, kind: 'monster', name: 'Deer', x: 36, y: 10, hp: 25 };
+  const peer = { label: 'observer', inGame: true, snapshot: { mapFileName: '0', playerObjectId: 50001,
+    entities: [{ objectId: 50001, kind: 'player', x: 21, y: 5 }, visible, outside] } };
+  cluster.observerNames.add(peer.label);
+  const context = { policy, map, patrolSpan: 4, clients: [peer], monsterNames: ['Deer'], targetClaims: new Map() };
+  const client = { snapshot: { mapFileName: '0', playerObjectId: 1000, entities: [owner, hidden, visible, outside] }, context, home: homes[1],
+    combatCluster: cluster, combatArrival: { at: 1 }, role: 'combat', failedTargets: new Map(), targetCursor: 0, movementCount: 0,
+    nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity, nativeRunPrimedUntil: Infinity };
+  assert.deepEqual(combatCandidates(client, context).map(entity => entity.objectId), [901, 900], 'prefer a target with a real observer and exclude the outside target');
+  let step = selectNativeAction(client, context, 0); assert.ok(step); assert.equal(step.hunting, 'Deer');
+  assert.ok(insideCombatCoverage(cluster, step.first)); assert.ok(insideCombatCoverage(cluster, step.target));
+  client.snapshot.entities = [owner, outside];
+  step = selectNativeAction(client, context, 0); assert.ok(step); assert.equal(step.hunting, undefined);
+  assert.ok(insideCombatCoverage(cluster, step.first)); assert.ok(insideCombatCoverage(cluster, step.target));
+  Object.assign(owner, { x: 50, y: 10 });
+  step = selectNativeAction(client, context, 0); assert.ok(step); assert.equal(step.command.type, 'run'); assert.equal(step.target.x, 48);
+  assert.equal(step.hunting, undefined, 'an externally pushed actor returns ordinarily instead of chasing outside coverage');
+});
+
+test('native patrol returns from the captured detour to a reachable declared corner when home is occupied', () => {
+  const policy = capacityPolicy({ profile: 'probe', activityMode: 'native' }), map = { width: 300, height: 570, blocked: new Uint8Array(300 * 570) };
+  const context = { policy, map, runId: 'captured-detour' }, owner = { ...nativeSnapshot().entities[0], x: 292, y: 560 };
+  const obstacle = { objectId: 900, kind: 'monster', name: 'HookingCat', x: 289, y: 560 };
+  const client = { snapshot: { ...nativeSnapshot(), entities: [owner, obstacle] }, context, home: { x: 289, y: 560 }, role: 'movement',
+    targetCursor: 3, movementCount: 0, nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity,
+    plan: new NativePlan(0), nativeRunPrimedUntil: Infinity };
+  // The old return-home-only branch is still the baseline comparator. The
+  // live probe did not log its monster positions; this fixture proves the
+  // captured position plus an occupied home, not that the live cause is known.
+  const baseline = { ...context, policy: capacityPolicy({ profile: 'probe' }) };
+  assert.equal(selectNativeAction(client, baseline, 0), null);
+  const returned = selectNativeAction(client, context, 0);
+  assert.deepEqual(returned.target, { x: 291, y: 560 }); assert.equal(client.targetCursor, 0);
+  assert.equal(client.navigationAttempts[0].targetOccupied, true);
+  assert.deepEqual(client.home, { x: 289, y: 560 }, 'recovery must not silently relocate the declared scene');
+  Object.assign(owner, returned.target);
+  for (let step = 0; step < 12; step++) {
+    const plan = selectNativeAction(client, context, 0); assert.ok(plan);
+    for (const cell of [plan.first, plan.target]) {
+      assert.ok(cell.x >= 289 && cell.x <= 291 && cell.y >= 560 && cell.y <= 562);
+      assert.equal(protocolMapCellIsWalkable(map, cell, [obstacle]), true);
+    }
+    Object.assign(owner, plan.target);
+  }
+  Object.assign(owner, { x: 292, y: 560 }); client.targetCursor = 3;
+  map.blocked[560 * map.width + 291] = 1;
+  const aroundWall = selectNativeAction(client, context, 0); assert.ok(aroundWall); assert.equal(client.targetCursor, 1);
+  for (const cell of [aroundWall.first, aroundWall.target]) assert.equal(protocolMapCellIsWalkable(map, cell, [obstacle]), true);
+  assert.equal(client.navigationAttempts.some(attempt => !attempt.staticWalkable), true);
+  map.blocked[560 * map.width + 291] = 0; client.targetCursor = 3;
+  client.snapshot.mapTransfers = [{ bounds: { minX: 291, maxX: 291, minY: 560, maxY: 560 } }];
+  const aroundPortal = selectNativeAction(client, context, 0); assert.ok(aroundPortal); assert.equal(client.targetCursor, 1);
+  assert.ok([aroundPortal.first, aroundPortal.target].every(cell => !(cell.x === 291 && cell.y === 560)));
+  assert.equal(client.navigationAttempts.some(attempt => attempt.reason === 'next-step-transfer'), true);
+});
+
+test('primed native patrol chooses a lawful clear two-cell corner before an avoidable edge detour', () => {
+  const policy = capacityPolicy({ profile: 'probe', activityMode: 'native' }), map = { width: 20, height: 20, blocked: new Uint8Array(400) };
+  const context = { policy, map }, owner = { ...nativeSnapshot().entities[0], x: 7, y: 7 };
+  const obstacle = { objectId: 900, kind: 'monster', x: 6, y: 7 };
+  const client = { snapshot: { ...nativeSnapshot(), entities: [owner, obstacle] }, context, home: { x: 5, y: 5 }, role: 'movement',
+    targetCursor: 2, movementCount: 0, nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity,
+    plan: new NativePlan(0), nativeRunPrimedUntil: Infinity };
+  const baseline = { ...context, policy: capacityPolicy({ profile: 'probe' }) };
+  assert.equal(selectNativeAction(client, baseline, 0).command.type, 'walk');
+  client.targetCursor = 2;
+  const direct = selectNativeAction(client, context, 0);
+  assert.equal(direct.command.type, 'run'); assert.deepEqual(direct.target, { x: 7, y: 5 });
+  assert.deepEqual(findProtocolWalkPath({ map, start: owner, target: direct.target, dynamicObstacles: [obstacle] }),
+    [{ x: 7, y: 7 }, direct.first, direct.target], 'fast preference still describes the ordinary collision-aware path');
+  client.nativeRunPrimedUntil = 0; client.targetCursor = 2;
+  assert.equal(selectNativeAction(client, context, 0).command.type, 'walk', 'standing still does not gain a forced Run');
+
+  client.nativeRunPrimedUntil = Infinity;
+  for (const cell of [{ x: 6, y: 7 }, { x: 7, y: 6 }, { x: 5, y: 6 }, { x: 6, y: 5 }, { x: 6, y: 6 }, { x: 5, y: 5 }]) {
+    Object.assign(obstacle, cell); client.targetCursor = 3;
+    const plan = selectNativeAction(client, context, 0); assert.ok(plan);
+    assert.notDeepEqual(plan.target, { x: 5, y: 5 }, 'neither diagonal side pair, the intermediate cell nor the destination can be bypassed');
+    for (const step of [plan.first, plan.target]) assert.equal(protocolMapCellIsWalkable(map, step, [obstacle]), true);
+  }
+  client.snapshot.entities = [owner]; client.targetCursor = 3;
+  map.blocked[6 * map.width + 6] = 1;
+  assert.notDeepEqual(selectNativeAction(client, context, 0).target, { x: 5, y: 5 });
+  map.blocked[6 * map.width + 6] = 0; client.targetCursor = 3;
+  client.snapshot.mapTransfers = [{ bounds: { minX: 6, maxX: 6, minY: 6, maxY: 6 } }];
+  assert.notDeepEqual(selectNativeAction(client, context, 0).target, { x: 5, y: 5 }, 'intermediate transfer must not be entered');
+  client.snapshot.mapTransfers = [{ bounds: { minX: 5, maxX: 5, minY: 5, maxY: 5 } }]; client.targetCursor = 3;
+  assert.notDeepEqual(selectNativeAction(client, context, 0).target, { x: 5, y: 5 }, 'destination transfer must not be entered');
+});
+
+test('native navigation diagnostics retain the first blocked streak with bounded occupants while every failed opportunity still fails load gates', async () => {
+  const rows = [], actions = [], measurements = new Measurements();
+  const policy = capacityPolicy({ profile: 'probe', activityMode: 'native' }), map = { width: 20, height: 20, blocked: new Uint8Array(400) };
+  const context = { policy, map, mapName: '0', runId: 'blocked-fixture', phase: 'stage-2', pool: pool('ws://127.0.0.1:1/ws', 2),
+    clients: [], writer: { add: row => rows.push(row) }, add: row => { actions.push(row); measurements.add(row); },
+    guard: { assert() {}, stop(reason) { throw new Error(reason); } } };
+  const client = new CapacityClient(context.pool.endpoint, actor(0), context);
+  const owner = { ...nativeSnapshot().entities[0], name: client.label, x: 8, y: 5 };
+  const blockers = [[7, 5], [7, 7], [5, 7], [5, 5]].map(([x, y], index) => ({ objectId: 900 + index, x, y,
+    kind: index === 3 ? 'player' : 'monster', name: index === 3 ? 'private-non-cohort-player' : 'Hen',
+    password: 'do-not-copy-password', credential: 'do-not-copy-ticket', inventory: ['private-inventory'] }));
+  const nearby = Array.from({ length: 80 }, (_, index) => ({ objectId: 10000 + index, kind: 'monster', name: 'Deer', x: 9, y: 6 }));
+  client.snapshot = { ...nativeSnapshot(), entities: [owner, ...blockers, ...nearby,
+    { objectId: 88888, kind: 'monster', name: 'ignored-dead', x: 8, y: 6, dead: true }] };
+  Object.assign(client, { home: { x: 5, y: 5 }, role: 'movement', nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity });
+  const offer = async () => {
+    client.plan = new NativePlan(performance.now()); offerNativeAction(client, context, performance.now()); await client.pending;
+  };
+  for (let index = 0; index < 20; index++) await offer();
+  assert.equal(actions.length, 20); assert.ok(actions.every(row => row.status === 'navigation-blocked' && row.nativeOpportunity));
+  assert.equal(nativeActivityVerdict(measurements.actors.get(client.label), 'movement', 30, policy).passed, false);
+  assert.equal(rows.length, 1); assert.equal(client.navigationBlockedRows, 1);
+  const diagnostic = rows[0]; assert.equal(diagnostic.type, 'navigationBlocked');
+  assert.deepEqual(diagnostic.self, { x: 8, y: 5 }); assert.deepEqual(diagnostic.home, { x: 5, y: 5 });
+  assert.equal(diagnostic.maxExpanded, 4000); assert.equal(diagnostic.attemptCount, 4);
+  assert.ok(diagnostic.attempts.every(attempt => attempt.reason === 'no-path-or-expansion-limit' && attempt.targetOccupied));
+  assert.equal(diagnostic.nearbyOccupantCount, 84); assert.equal(diagnostic.nearbyOccupants.length, 32);
+  assert.equal(diagnostic.occupantsTruncated, true); assert.equal(diagnostic.attemptsTruncated, false);
+  assert.doesNotMatch(JSON.stringify(diagnostic), /private-non-cohort|do-not-copy|private-inventory|ignored-dead/);
+
+  // A turn or chat while stationary must not restart the diagnostic streak.
+  let planned;
+  client.send = command => {
+    if (['walk', 'run'].includes(command.type)) Object.assign(owner, planned.target);
+    owner.direction = command.direction;
+    client.events.push({ direction: 'received', type: 'packet', packet: 'UserLocation', sequence: ++client.sequence,
+      monotonicMs: performance.now(), payload: { x: owner.x, y: owner.y, direction: owner.direction } });
+  };
+  client.nextNativeTurnAt = 0; await offer();
+  assert.equal(actions.at(-1).kind, 'turn'); assert.equal(actions.at(-1).status, 'success'); assert.equal(client.navigationBlocked, true);
+  await offer(); assert.equal(actions.at(-1).status, 'navigation-blocked'); assert.equal(rows.length, 1);
+
+  client.snapshot.entities = [owner]; planned = selectNativeAction(client, context, performance.now());
+  await offer(); assert.equal(actions.at(-1).status, 'success'); assert.equal(client.navigationBlocked, false);
+  Object.assign(owner, { x: 8, y: 5 }); client.snapshot.entities = [owner, ...blockers];
+  await offer(); assert.equal(actions.at(-1).status, 'navigation-blocked'); assert.equal(rows.length, 2);
+  assert.equal(client.navigationBlockedRows, 2);
 });
 
 test('real Bichon collision map and BorderVillage NPCs produce a full four-corner native Run patrol', async () => {
@@ -467,6 +678,176 @@ test('a real rejection is not downgraded to a miss merely because a swing packet
   assert.equal(actionFailureStatus(new Error('timed out'), true, false), 'miss');
   assert.equal(actionFailureStatus(new Error('timed out'), false, false), 'timeout');
 });
+
+function lifecycleFixture(writer) {
+  const endpoint = 'ws://127.0.0.1:7111/ws';
+  const context = { writer, pool: pool(endpoint, 2), phase: 'ramp', guard: { assert() {} }, add() {} };
+  const client = new CapacityClient(endpoint, actor(0), context);
+  const owner = { objectId: 1000, kind: 'player', name: actor(0).name, x: 10, y: 10 };
+  const peer = { objectId: 50001, kind: 'player', name: actor(1).name, x: 11, y: 10 };
+  const snapshot = entities => ({ type: 'worldSnapshot', payload: { mapFileName: '0', playerObjectId: 1000,
+    entities, inventoryItems: [{ password: actor(0).password }], credential: 'do-not-persist-snapshot-ticket' } });
+  const packet = (name, payload) => ({ type: 'packet', packet: name, payload });
+  return { client, context, owner, peer, snapshot, packet };
+}
+
+test('player lifecycle diagnostics preserve remove and reentry wire order with projection before and after', () => {
+  const rows = [], { client, owner, peer, snapshot, packet } = lifecycleFixture({ add: row => rows.push(row) });
+  client.observe(snapshot([owner]));
+  client.observe(packet('ObjectPlayer', { ...peer, password: actor(0).password, arbitraryPrivateField: 'omit-this-field' }));
+  client.observe(packet('ObjectRemove', { objectId: peer.objectId }));
+  client.observe(packet('ObjectPlayer', peer));
+  client.observe(packet('ObjectRemove', { objectId: peer.objectId })); // an older direct remove delivered AFTER reentry
+  client.observe(packet('ObjectRun', { objectId: peer.objectId, location: { x: 12, y: 10 } }));
+  const lifecycle = rows.filter(row => row.source !== 'worldSnapshot');
+  assert.deepEqual(lifecycle.map(row => row.source), ['ObjectPlayer', 'ObjectRemove', 'ObjectPlayer', 'ObjectRemove', 'ObjectRun']);
+  assert.deepEqual(lifecycle.map(row => [row.beforePresent, row.afterPresent]), [[false, true], [true, false], [false, true], [true, false], [false, false]]);
+  assert.ok(lifecycle.every(row => row.peer.name === actor(1).name && row.peer.objectId === 50001));
+  assert.equal(lifecycle.at(-1).orphanMotion, true); assert.equal(lifecycle.at(-1).identitySource, 'bounded-identity-cache');
+  assert.deepEqual(lifecycle.at(-1).wire, { objectId: 50001, x: 12, y: 10 });
+  for (let i = 1; i < rows.length; i++) { assert.ok(rows[i].sequence > rows[i - 1].sequence); assert.ok(rows[i].monotonicMs >= rows[i - 1].monotonicMs); }
+  assert.ok(rows.every(row => row.connection === client.lifecycleConnection && (row.before.self?.name === actor(0).name || row.before.self === null)));
+  assert.equal(client.snapshot.entities.some(entity => entity.objectId === peer.objectId), false);
+  const text = JSON.stringify(rows);
+  for (const privateValue of [actor(0).password, 'do-not-persist-snapshot-ticket', 'omit-this-field', 'inventoryItems', 'arbitraryPrivateField']) assert.equal(text.includes(privateValue), false);
+});
+
+test('player lifecycle diagnostics retain same-membership owner coordinate replacements but omit ordinary peer movement', () => {
+  const rows = [], { client, context, owner, peer, snapshot, packet } = lifecycleFixture({ add: row => rows.push(row) });
+  client.observe(snapshot([owner, peer]));
+  const count = rows.length;
+  for (let i = 0; i < 1000; i++) client.observe(packet('ObjectRun', { objectId: peer.objectId, location: { x: 11 + i, y: 10 } }));
+  assert.equal(rows.length, count, 'ordinary peer motion is still omitted');
+  client.observe(snapshot([{ ...owner, x: 15 }, { ...peer, x: 20 }]));
+  assert.equal(rows.length, count + 1, 'an authoritative snapshot overwriting owner coordinates is causal evidence');
+  assert.equal(rows.at(-1).before.self.x, 10); assert.equal(rows.at(-1).after.self.x, 15);
+  client.observe(snapshot([{ ...owner, x: 15 }, { ...peer, x: 21 }]));
+  assert.equal(rows.length, count + 1, 'only peer coordinates changing does not copy another snapshot');
+  client.observe(snapshot([{ ...owner, x: 15 }]));
+  assert.equal(rows.at(-1).source, 'worldSnapshot');
+  assert.deepEqual(rows.at(-1).before.players.map(player => player.name), [actor(0).name, actor(1).name]);
+  assert.deepEqual(rows.at(-1).after.players.map(player => player.name), [actor(0).name]);
+  for (let i = 0; i < 1000; i++) client.observe(packet('ObjectRun', { objectId: peer.objectId, location: { x: 11 + i, y: 10 } }));
+  assert.equal(rows.filter(row => row.orphanMotion).length, 1, 'only the first orphan movement per absence is retained');
+  client.observe(snapshot([owner, { ...peer, objectId: 50002 }]));
+  assert.equal(rows.at(-1).after.players[1].objectId, 50002, 'replacement identity is visible even for the same character name');
+  const beforeNonCohort = rows.length;
+  client.observe(packet('ObjectPlayer', { ...peer, objectId: 90000, name: 'UnrelatedPerson' }));
+  client.observe(packet('ObjectRemove', { objectId: 90000 }));
+  assert.equal(rows.length, beforeNonCohort); assert.equal(JSON.stringify(rows).includes('UnrelatedPerson'), false);
+  const other = new CapacityClient(client.url, actor(0), context);
+  assert.notEqual(other.lifecycleConnection, client.lifecycleConnection, 'resume/relogin connection sequence resets cannot be confused');
+  assert.ok(client.events.length <= 2048);
+});
+
+test('self transform diagnostics preserve unsolicited public position changes with fixed fields and no peer or unchanged-coordinate traffic', () => {
+  const rows = [], { client, owner, peer, snapshot, packet } = lifecycleFixture({ add: row => rows.push(row) });
+  client.observe(snapshot([owner, peer]));
+  client.observe(packet('UserLocation', { x: 12, y: 10, direction: 'Right', password: 'never-log-password' }));
+  client.observe(packet('UserLocation', { x: 12, y: 10, direction: 'Up' }));
+  client.observe(packet('KeepAlive', { time: 99, x: 800, y: 800 }));
+  client.observe(packet('ObjectRun', { objectId: peer.objectId, location: { x: 15, y: 10 } }));
+  client.observe(packet('Pushed', { x: 11, y: 10, direction: 'Left', inventoryItems: ['private-item'] }));
+  client.observe(packet('ObjectStruck', { objectId: 1000, location: { x: 13, y: 11 }, attackerObjectId: 9999, token: 'never-log-token' }));
+  assert.deepEqual({ x: client.snapshot.entities[0].x, y: client.snapshot.entities[0].y }, { x: 11, y: 10 });
+  client.observe(packet('UserLocation', { x: 13, y: 11 }));
+  client.observe(packet('UserDash', { location: { x: 13, y: 13 }, direction: 'Down' }));
+  client.observe(packet('ObjectBackStep', { objectId: 1000, location: { x: 13, y: 12 }, direction: 'Up' }));
+  const changes = rows.filter(row => row.type === 'selfTransform');
+  assert.deepEqual(changes.map(row => row.source), ['UserLocation', 'Pushed', 'UserLocation', 'UserDash', 'ObjectBackStep']);
+  assert.deepEqual(changes.map(row => row.before.position), [{ x: 10, y: 10 }, { x: 12, y: 10 }, { x: 11, y: 10 }, { x: 13, y: 11 }, { x: 13, y: 13 }]);
+  assert.deepEqual(changes[2].wire, { x: 13, y: 11 });
+  assert.ok(changes.every(row => row.connection === client.lifecycleConnection && row.after.playerObjectId === 1000));
+  for (let index = 1; index < changes.length; index++) assert.ok(changes[index].sequence > changes[index - 1].sequence);
+  assert.doesNotMatch(JSON.stringify(changes), /never-log|private-item|inventoryItems|attackerObjectId|players|entities/);
+  client.observe(snapshot([owner, peer]));
+  assert.equal(rows.at(-1).type, 'playerLifecycle'); assert.deepEqual(rows.at(-1).before.self.x, 13); assert.deepEqual(rows.at(-1).after.self.x, 10);
+
+  let count = 0, maximumBytes = 0;
+  client.context.writer = { add: row => { count++; maximumBytes = Math.max(maximumBytes, Buffer.byteLength(JSON.stringify(row))); } };
+  for (let index = 0; index < 3000; index++) client.observe(packet('UserLocation', { x: 100 + index, y: 10, direction: 'Right' }));
+  assert.equal(count, 3000); assert.equal(client.selfTransformRows, 3005); assert.ok(maximumBytes < 700);
+  assert.ok(client.events.length <= 2048); assert.equal(client.lifecycleIdentities.size, 2, 'no per-move aggregate or growing identity table');
+});
+
+test('captured ACK then old self Struck leaves the next native Walk planned from the actual owner tile', () => {
+  for (const [ack, old] of [
+    [{ x: 289, y: 563, direction: 'Down' }, { x: 289, y: 562, direction: 'Right' }],
+    [{ x: 291, y: 560, direction: 'Right' }, { x: 289, y: 560, direction: 'Right' }],
+  ]) {
+    const rows = [], { client, context, owner, snapshot, packet } = lifecycleFixture({ add: row => rows.push(row) });
+    Object.assign(context, { policy: capacityPolicy({ profile: 'probe', activityMode: 'native' }),
+      map: { width: 600, height: 700, blocked: new Uint8Array(600 * 700) } });
+    client.observe(snapshot([{ ...owner, ...old }]));
+    client.observe(packet('UserLocation', ack));
+    client.observe(packet('ObjectStruck', { objectId: 1000, location: { x: old.x, y: old.y }, direction: old.direction, attackerId: 900 }));
+    Object.assign(client, { home: { x: ack.x, y: ack.y }, role: 'movement', targetCursor: 0, movementCount: 0,
+      nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity, plan: new NativePlan(0), nativeRunPrimedUntil: 0 });
+    const plan = selectNativeAction(client, context, 0);
+    assert.deepEqual(plan.command, { type: 'walk', direction: 'Right' });
+    assert.deepEqual(plan.target, { x: ack.x + 1, y: ack.y });
+    assert.ok(client.events.some(event => event.packet === 'ObjectStruck'), 'hit evidence remains observable');
+    assert.equal(rows.filter(row => row.type === 'selfTransform').length, 1, 'only the real movement ACK changes the owner position');
+    client.observe(packet('UserLocation', { ...plan.target, direction: plan.command.direction }));
+    assert.deepEqual({ x: client.snapshot.entities[0].x, y: client.snapshot.entities[0].y }, plan.target);
+  }
+});
+
+test('player lifecycle diagnostics keep a bounded remembered identity and projection footprint', () => {
+  const { client, owner, peer, snapshot, packet } = lifecycleFixture({ add() {} });
+  client.observe(snapshot([owner]));
+  for (let i = 0; i < 700; i++) {
+    client.observe(packet('ObjectPlayer', { ...peer, objectId: 50000 + i }));
+    client.observe(packet('ObjectRemove', { objectId: 50000 + i }));
+  }
+  assert.equal(client.lifecycleIdentities.size, 256); assert.ok(client.lifecycleIdentityEvictions > 0);
+  assert.ok(client.lifecycleMissing.size <= 256); assert.ok(client.lifecycleOrphans.size <= 256);
+  const rows = []; client.context.writer = { add: row => rows.push(row) };
+  client.observe(snapshot([owner, ...Array.from({ length: 500 }, (_, i) => ({ ...peer, objectId: 60000 + i }))]));
+  assert.equal(rows.at(-1).after.players.length, 256); assert.equal(rows.at(-1).after.count, 501); assert.equal(rows.at(-1).after.truncated, true);
+  client.observe(snapshot([owner]));
+  assert.ok(client.lifecycleIdentities.size <= 256); assert.ok(client.lifecycleMissing.size <= 256);
+});
+
+test('player lifecycle diagnostics persist real socket receive order through the existing bounded writer without secrets', async () => withDirectory(async directory => {
+  const server = new WebSocketServer({ host: '127.0.0.1', port: 0 }); await new Promise(resolve => server.once('listening', resolve));
+  const endpoint = `ws://127.0.0.1:${server.address().port}/ws`, evidenceFile = path.join(directory, 'lifecycle.jsonl');
+  const writer = new BoundedEvidence(evidenceFile), fixture = lifecycleFixture(writer);
+  const context = { ...fixture.context, pool: pool(endpoint, 2) }, client = new CapacityClient(endpoint, actor(0), context);
+  server.on('connection', socket => {
+    const send = value => socket.send(JSON.stringify(value));
+    send(fixture.packet('Connected', {}));
+    socket.on('message', data => {
+      const command = JSON.parse(data);
+      if (command.type === 'clientVersion') { send(fixture.packet('ClientVersion', {})); send(fixture.snapshot([fixture.owner])); }
+      if (command.type === 'clientCapabilities') {
+        send(fixture.packet('ObjectPlayer', { ...fixture.peer, password: actor(0).password }));
+        send(fixture.packet('UserLocation', { x: 12, y: 10, direction: 'Right', credential: 'never-log-owner-ticket' }));
+        send(fixture.packet('ObjectRemove', { objectId: fixture.peer.objectId }));
+        send(fixture.packet('ObjectPlayer', fixture.peer));
+        send(fixture.packet('ObjectRemove', { objectId: fixture.peer.objectId }));
+        send(fixture.packet('ObjectRun', { objectId: fixture.peer.objectId, location: { x: 12, y: 10 } }));
+        send(fixture.snapshot([fixture.owner, fixture.peer]));
+      }
+      if (command.type === 'logOut') send(fixture.packet('LogOutSuccess', {}));
+    });
+  });
+  try {
+    await client.connect(); await client.wait(() => client.lifecycleRows >= 7, 'real lifecycle diagnostic rows');
+    assert.equal(client.failure, undefined); await client.close(); await writer.close();
+    const text = await fs.readFile(evidenceFile, 'utf8'), rows = text.trim().split('\n').map(JSON.parse);
+    assert.deepEqual(rows.map(row => row.source), ['worldSnapshot', 'ObjectPlayer', 'UserLocation', 'ObjectRemove', 'ObjectPlayer', 'ObjectRemove', 'ObjectRun', 'worldSnapshot']);
+    assert.equal(rows[2].type, 'selfTransform'); assert.deepEqual(rows[2].after.position, { x: 12, y: 10 });
+    assert.equal(rows.at(-1).before.self.x, 12); assert.equal(rows.at(-1).after.self.x, 10);
+    assert.equal(rows.at(-1).after.players.length, 2); assert.equal(rows.at(-2).afterPresent, false);
+    assert.ok(rows.every(row => Number.isInteger(row.sequence) && Number.isFinite(row.monotonicMs) && Number.isFinite(row.at)));
+    for (const secret of [actor(0).password, 'do-not-persist-snapshot-ticket', 'inventoryItems', 'credential']) assert.equal(text.includes(secret), false);
+  } finally {
+    client.draining = true; await client.close().catch(() => {});
+    for (const socket of server.clients) socket.terminate(); await new Promise(resolve => server.close(resolve));
+    if (!writer.stream.writableEnded) await writer.close();
+  }
+}));
 
 test('guards, dead or disappeared targets and temporarily failed targets are never reused as ordinary combat load', () => {
   const client = observer('fighter', 10); client.failedTargets = new Map([[4, { until: 2000 }]]);
@@ -798,11 +1179,14 @@ test('a complete bounded socket probe produces real movement samples but cannot 
   } finally { await realm.close(); }
 }));
 
-for (const movementIntervalMs of [650, 750]) test(`native ${movementIntervalMs}ms real socket probe produces sustained two-cell Runs and honest offered load`, async () => withDirectory(async directory => {
+for (const { movementIntervalMs, patrolSpan } of [{ movementIntervalMs: 650 }, { movementIntervalMs: 750 }, { movementIntervalMs: 750, patrolSpan: 4 }]) test(`native ${movementIntervalMs}ms real socket probe produces sustained two-cell Runs and honest offered load${patrolSpan ? ' with explicit wide patrol' : ''}`, async () => withDirectory(async directory => {
   const realm = await fakeRealm(directory);
   try {
-    const report = await runCapacity({ ...runOptions(realm, directory), activityMode: 'native', movementIntervalMs });
+    const scenarioFile = patrolSpan ? path.join(directory, 'wide-patrol.json') : undefined;
+    if (scenarioFile) await fs.writeFile(scenarioFile, JSON.stringify({ mapFileName: 'capacityfixture', anchors: [{ x: 16, y: 16 }], patrolSpan }));
+    const report = await runCapacity({ ...runOptions(realm, directory), activityMode: 'native', movementIntervalMs, scenarioFile });
     assert.equal(report.error, undefined); assert.equal(report.ok, true);
+    if (patrolSpan) { assert.equal(report.scenario.patrolSpan, 4); assert.equal(report.scenario.explicitNativeHomes.footprintCells, 25); }
     const moves = realm.types.filter(item => ['walk', 'run'].includes(item.type));
     assert.equal(moves[0].type, 'walk'); assert.ok(moves.filter(item => item.type === 'run').length >= 30);
     for (let i = 1; i < moves.length; i++) assert.ok(moves[i].at - moves[i - 1].at >= 599, 'never overrun the authoritative 600ms movement floor');
@@ -882,6 +1266,10 @@ for (const { lateFirstHit, sparseStats } of [{ lateFirstHit: false, sparseStats:
       await client.request({ type: 'startGame', characterIndex: index }, 'StartGame');
       client.role = index ? 'combat' : 'movement'; client.home = { x: index ? 12 : 8, y: index ? 10 : 8 };
       client.nextNativeChatAt = Infinity; client.nextNativeTurnAt = Infinity;
+    }
+    if (!lateFirstHit && !sparseStats) {
+      const [cluster] = validateNativeCombatClusters([{ combatActorIndices: [1], movementActorIndices: [0] }], clients.map(client => client.home), new Set([1]), 2);
+      cluster.observerNames.add(clients[0].label); clients[1].combatCluster = cluster;
     }
     const start = performance.now() + 1200; for (const client of clients) client.plan = new NativePlan(start);
     if (lateFirstHit) {

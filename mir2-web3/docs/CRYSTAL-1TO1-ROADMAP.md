@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-29 capacity candidate now orders player viewport updates and owner
+> movement acknowledgements within their respective live queues, with focused
+> race/overflow/bootstrap/resume checks. The earlier integrated build passes
+>829 Gateway checks with18 ignored; final combined regression and public soak
+> remain open. A narrow monster-ID hydration getter preserves snapshot filtering
+> semantics without constructing full presentation. Test-runner self-Struck
+> handling now follows Crystal; native XY protection was already present.
+> No50/100 capacity or whole-game parity claim. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 static-map sharing candidate passes319 selected regressions and
 > explicit clone benchmarks. Immutable terrain/fishing collections are shared;
 > personal door state and Zone collision behavior remain independent. Calibrated

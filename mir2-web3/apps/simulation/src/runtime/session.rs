@@ -9,8 +9,8 @@ use super::combat::{
 };
 use super::components::{
     entity_by_object_id, entity_name, entity_object_id, entity_player_vitals, entity_position,
-    player_entity, Facing, Monster, MonsterAgent, MonsterVitals, PlayerVitals, Position,
-    SpawnSlotRef,
+    player_entity, DisplayName, Facing, Hero, Monster, MonsterAgent, MonsterVitals, Npc,
+    ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef,
 };
 use super::crystal_compat::*;
 use super::drops::{
@@ -28,6 +28,7 @@ use super::monsters::{
     reset_shared_monster_harvest_state, spawn_shared_monster_snapshot, MonsterRespawnSchedule,
     MonsterSpawnTable,
 };
+use super::npc::crystal_npc_object_visible_in_world;
 use super::npc_script::*;
 use super::packets::*;
 use super::quests::*;
@@ -743,6 +744,41 @@ impl SimulationSession {
 
     pub fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
         collect_current_map_shared_entity_snapshots(self.app.world())
+    }
+
+    /// The live-monster IDs from `current_map_shared_entity_snapshots`, without
+    /// constructing presentation fields that shared-Zone hydration discards.
+    /// Preserve its component requirements, classification precedence and NPC
+    /// visibility even for mixed-marker entities. Missing HP is not dead, and
+    /// duplicate object IDs retain their existing multiplicity.
+    pub fn current_map_active_monster_ids(&self) -> Vec<u32> {
+        let world = self.app.world();
+        let mut object_ids = world
+            .iter_entities()
+            .filter_map(|entity| {
+                let object_id = entity.get::<ObjectId>()?.0;
+                entity.get::<DisplayName>()?;
+                entity.get::<Position>()?;
+                entity.get::<Facing>()?;
+                if entity.contains::<SelfPlayer>()
+                    || entity.contains::<Hero>()
+                    || entity.contains::<RemotePlayer>()
+                    || (entity.contains::<Npc>()
+                        && !crystal_npc_object_visible_in_world(world, object_id))
+                {
+                    return None;
+                }
+                let agent = entity.get::<MonsterAgent>()?;
+                if agent.dead
+                    || entity.get::<MonsterVitals>().is_some_and(|vitals| vitals.hp <= 0)
+                {
+                    return None;
+                }
+                Some(object_id)
+            })
+            .collect::<Vec<_>>();
+        object_ids.sort();
+        object_ids
     }
 
     pub fn local_player_object_id(&self) -> Option<u32> {
@@ -2301,3 +2337,7 @@ fn preferred_or_empty_trade_delivery_slot_for_items(
 #[cfg(test)]
 #[path = "tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "session_active_monster_ids_tests.rs"]
+mod active_monster_ids_tests;

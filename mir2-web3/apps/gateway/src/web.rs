@@ -4831,15 +4831,9 @@ fn spawn_zone_outbound_sender(
                 },
             };
             let registration_id = outbound.registration_id();
-            if active_registration_id.load(Ordering::Acquire) != registration_id {
-                if outbound.is_owner_location() {
-                    eprintln!(
-                        "[gateway-zone-live] owner_location result=stale_before_gate registration_id={registration_id} active_registration_id={}",
-                        active_registration_id.load(Ordering::Acquire)
-                    );
-                }
-                continue;
-            }
+            // A cadence may enqueue the first new-epoch ACK between registration
+            // preparation and activation while bootstrap holds the write gate.
+            // Judge the epoch only after bootstrap/activation has completed.
             let serial_gate_wait = GatewaySlowStage::start("serial_gate.zone_outbound_wait");
             let _serial_execution = serial_execution_gate.read().await;
             drop(serial_gate_wait);
@@ -4851,6 +4845,9 @@ fn spawn_zone_outbound_sender(
                     );
                 }
                 continue;
+            }
+            if outbound.is_overloaded() {
+                return;
             }
             if send_server_packet(&sender, &outbound.into_packet())
                 .await
@@ -4894,6 +4891,39 @@ fn activate_zone_live_outbound(
     if let Some(registration) = registration {
         registration.activate();
     }
+}
+
+fn responses_begin_zone_bootstrap(responses: &[ServerPacket]) -> bool {
+    responses.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::MapInformation { .. } | ServerPacket::MapChanged { .. }
+        )
+    })
+}
+
+// Caller holds the serialized execution write gate until the bootstrap packets
+// are flushed. In particular a Tick can finish a previously queued portal step.
+fn refresh_zone_live_outbound(
+    session: &GatewaySession,
+    authenticated: bool,
+    force_registration: bool,
+    movement_ingress: &SharedZoneMovementIngressSlot,
+    sender: &SharedZoneLiveOutboundSender,
+    active_registration_id: &AtomicU64,
+    registration: &mut Option<Box<dyn ZoneLiveOutboundRegistration>>,
+) -> Result<(), String> {
+    *movement_ingress
+        .write()
+        .map_err(|_| "zone movement ingress slot was poisoned".to_string())? =
+        session.zone_movement_ingress();
+    if !authenticated || session.active_identity().is_none() {
+        active_registration_id.store(0, Ordering::Release);
+        *registration = None;
+    } else if registration.is_none() || force_registration {
+        *registration = register_zone_live_outbound(session, sender, active_registration_id)?;
+    }
+    Ok(())
 }
 
 fn invalid_browser_command_input(message: &str, error: &serde_json::Error) -> ParsedSocketInput {
@@ -5159,6 +5189,106 @@ async fn handle_socket_inner(
     peer_address: String,
     user_agent: String,
 ) {
+    let (overload_tx, overload_rx) = tokio::sync::watch::channel(0);
+    let active_registration_id = Arc::new(AtomicU64::new(0));
+    let work = handle_socket_work(
+        socket,
+        session,
+        session_cache,
+        reconnect_sessions,
+        capacity,
+        identity,
+        active_session_permit,
+        save_queue,
+        route_refresh,
+        native_resume,
+        explicit_world_leave,
+        injector,
+        realm_info,
+        chat_hub,
+        spectator,
+        ai_live,
+        tcp_peer_ip,
+        peer_address,
+        user_agent,
+        overload_tx,
+        Arc::clone(&active_registration_id),
+    );
+    if let Err(registration_id) =
+        run_until_zone_overload(work, overload_rx, active_registration_id).await
+    {
+        // Dropping work aborts both socket workers and releases every socket
+        // half, even when a network send is pending forever. No protocol
+        // LogOut/Disconnect is fabricated: handle_socket keeps its ordinary
+        // abnormal teardown, authoritative save and native resume credential.
+        eprintln!(
+            "web transport closed after Zone viewport overload registration_id={registration_id}"
+        );
+    }
+}
+
+async fn run_until_zone_overload<T>(
+    work: impl std::future::Future<Output = T>,
+    overloads: tokio::sync::watch::Receiver<u64>,
+    active_registration_id: Arc<AtomicU64>,
+) -> Result<T, u64> {
+    tokio::select! {
+        biased;
+        registration_id = wait_for_active_zone_overload(overloads, active_registration_id) => Err(registration_id),
+        result = work => Ok(result),
+    }
+}
+
+async fn wait_for_active_zone_overload(
+    mut overloads: tokio::sync::watch::Receiver<u64>,
+    active_registration_id: Arc<AtomicU64>,
+) -> u64 {
+    loop {
+        let reported = *overloads.borrow_and_update();
+        let active = active_registration_id.load(Ordering::Acquire);
+        if reported != 0 && reported == active {
+            return reported;
+        }
+        // A just-prepared registration can signal before activation. Only
+        // this short handoff needs polling; idle sockets await the watch.
+        let changed = if reported > active {
+            match tokio::time::timeout(Duration::from_millis(50), overloads.changed()).await {
+                Ok(result) => result,
+                Err(_) => continue,
+            }
+        } else {
+            overloads.changed().await
+        };
+        if changed.is_err() {
+            return std::future::pending().await;
+        }
+    }
+}
+
+#[allow(unused_assignments)]
+async fn handle_socket_work(
+    socket: WebSocket,
+    session: &mut GatewaySession,
+    session_cache: SharedGatewaySessionCache,
+    reconnect_sessions: Arc<ReconnectSessionStore>,
+    capacity: Arc<GatewayCapacityState>,
+    identity: Arc<IdentityService>,
+    active_session_permit: &mut Option<GatewayCapacityPermit>,
+    save_queue: &mut WebSessionSaveQueue,
+    route_refresh: &mut WebSessionRouteRefresh,
+    native_resume: &mut NativeResumeConnectionState,
+    explicit_world_leave: &mut ExplicitWorldLeaveState,
+    injector: crate::inject::LiveSessionInjector,
+    realm_info: Value,
+    chat_hub: ChatBroadcastHub,
+    spectator: SpectatorHub,
+    ai_live: AiLiveHub,
+    tcp_peer_ip: IpAddr,
+    peer_address: String,
+    user_agent: String,
+    overload_tx: tokio::sync::watch::Sender<u64>,
+    active_zone_outbound_registration_id: Arc<AtomicU64>,
+) {
     let (sender, receiver) = socket.split();
     let sender = Arc::new(AsyncMutex::new(sender));
     if sender
@@ -5237,8 +5367,8 @@ async fn handle_socket_inner(
     let zone_outbound_sender = SharedZoneLiveOutboundSender::new(
         zone_outbound_tx,
         owner_location_outbound_tx,
-    );
-    let active_zone_outbound_registration_id = Arc::new(AtomicU64::new(0));
+    )
+    .with_overload_signal(overload_tx);
     let _zone_outbound_sender_task = spawn_zone_outbound_sender(
         zone_outbound_rx,
         owner_location_outbound_rx,
@@ -6062,46 +6192,28 @@ async fn handle_socket_inner(
                 }
                 authenticated = next_authenticated;
                 socket_authenticated.store(authenticated, Ordering::Release);
-                let next_movement_ingress = session.zone_movement_ingress();
-                *movement_ingress
-                    .write()
-                    .expect("zone movement ingress slot should not be poisoned") =
-                    next_movement_ingress.clone();
                 // Keep the live registration stable for the lifetime of one
-                // in-world presence.  Re-registering after every ordinary
-                // action changed the registration id while cadence-delayed
-                // movement was waiting on the serial gate, so a valid
-                // UserLocation was discarded as stale.  StartGame and a real
-                // map change are the only in-world boundaries that need a new
-                // packet fence.
-                if !authenticated || active_identity.is_none() {
-                    active_zone_outbound_registration_id.store(0, Ordering::Release);
-                    _zone_live_outbound_registration = None;
-                } else if _zone_live_outbound_registration.is_none()
-                    || starts_game
-                    || map_changed
-                {
-                    let next_zone_live_outbound_registration =
-                        match tokio::task::block_in_place(|| {
-                            register_zone_live_outbound(
-                                session,
-                                &zone_outbound_sender,
-                                active_zone_outbound_registration_id.as_ref(),
-                            )
-                        }) {
-                            Ok(registration) => registration,
-                            Err(error) => {
-                                if native_game_shop_request.is_some() {
-                                    eprintln!(
-                                        "native GameShop post-execution Zone registration failed; closing without receipt: {error}"
-                                    );
-                                    return;
-                                }
-                                let _ = send_error_message(&sender, &error).await;
-                                return;
-                            }
-                        };
-                    _zone_live_outbound_registration = next_zone_live_outbound_registration;
+                // viewport. MapInformation is the ordinary portal/scroll
+                // bootstrap too; it invalidates the old routing registration.
+                if let Err(error) = tokio::task::block_in_place(|| {
+                    refresh_zone_live_outbound(
+                        session,
+                        authenticated,
+                        starts_game || responses_begin_zone_bootstrap(&responses),
+                        &movement_ingress,
+                        &zone_outbound_sender,
+                        active_zone_outbound_registration_id.as_ref(),
+                        &mut _zone_live_outbound_registration,
+                    )
+                }) {
+                    if native_game_shop_request.is_some() {
+                        eprintln!(
+                            "native GameShop post-execution Zone registration failed; closing without receipt: {error}"
+                        );
+                        return;
+                    }
+                    let _ = send_error_message(&sender, &error).await;
+                    return;
                 }
 
                 let flush_result = {
@@ -6224,6 +6336,22 @@ async fn handle_socket_inner(
                 };
                 let map_changed = responses_require_resume_rotation(&responses);
                 let packet_count = responses.len();
+                if responses_begin_zone_bootstrap(&responses) {
+                    if let Err(error) = tokio::task::block_in_place(|| {
+                        refresh_zone_live_outbound(
+                            session,
+                            authenticated,
+                            true,
+                            &movement_ingress,
+                            &zone_outbound_sender,
+                            active_zone_outbound_registration_id.as_ref(),
+                            &mut _zone_live_outbound_registration,
+                        )
+                    }) {
+                        let _ = send_error_message(&sender, &error).await;
+                        return;
+                    }
+                }
                 if let Err(error) = flush_session_updates(
                     &sender,
                     session,
@@ -6382,6 +6510,10 @@ async fn handle_socket_inner(
                 if now < runtime_tick_deferred_until {
                     continue;
                 }
+                // Tick can complete a queued portal movement and rebuild the
+                // viewport. Serialize its bootstrap/re-registration/flush just
+                // like a player action so live ACKs cannot precede the landing.
+                let _serial_execution = serial_execution_gate.write().await;
                 let responses = match catch_gateway_panic("web session tick", || {
                     let _slow_stage = GatewaySlowStage::start("runtime_tick.execute");
                     tokio::task::block_in_place(|| {
@@ -6404,6 +6536,22 @@ async fn handle_socket_inner(
                     }
                 };
                 let map_changed = responses_require_resume_rotation(&responses);
+                if responses_begin_zone_bootstrap(&responses) {
+                    if let Err(error) = tokio::task::block_in_place(|| {
+                        refresh_zone_live_outbound(
+                            session,
+                            authenticated,
+                            true,
+                            &movement_ingress,
+                            &zone_outbound_sender,
+                            active_zone_outbound_registration_id.as_ref(),
+                            &mut _zone_live_outbound_registration,
+                        )
+                    }) {
+                        let _ = send_error_message(&sender, &error).await;
+                        return;
+                    }
+                }
                 if responses.is_empty() {
                     let checkpoint_result = {
                         let _slow_stage = GatewaySlowStage::start("runtime_tick.save_checkpoint");
@@ -12367,6 +12515,10 @@ mod web_explicit_leave_route_tests;
 #[cfg(test)]
 #[path = "web_auth_peer_bucket_tests.rs"]
 mod web_auth_peer_bucket_tests;
+
+#[cfg(test)]
+#[path = "web_live_overflow_tests.rs"]
+mod web_live_overflow_tests;
 
 #[cfg(test)]
 mod tests {

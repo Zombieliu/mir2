@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> 2026-09-29 live ordering candidate addresses independently reproduced AOI and
+> owner-ACK races, including full queues, old registrations, bootstrap and
+> abnormal transport save/resume. The monster hydration getter preserves entity
+> precedence/dead/HP/visibility/ID ordering and passes17 relevant regressions.
+> The earlier combined Gateway run is829 passed/18 ignored; final ordering
+> additions still require full regression and deployment. Public50/100 stable
+> gameplay remains unaccepted. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 immutable map data now shares allocations across personal worlds;
 > mutable doors remain private and cold concurrent cache publication returns
 > one allocation.319 selected regressions and explicit Debug/Release benchmarks

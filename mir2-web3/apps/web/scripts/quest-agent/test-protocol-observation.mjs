@@ -46,6 +46,42 @@ test('real movement packet fields update self and remote entities', () => {
   );
 });
 
+test('late self ObjectStruck cannot roll back a newer acknowledged owner transform', () => {
+  const state = observedWorld(), owner = state.entities[0];
+  // Captured public ACK -> stale Struck pairs, 20.819ms and 141.963ms apart.
+  for (const [ack, struck] of [
+    [{ x: 289, y: 563, direction: 'Down' }, { x: 289, y: 562, direction: 'Right' }],
+    [{ x: 291, y: 560, direction: 'Right' }, { x: 289, y: 560, direction: 'Right' }],
+  ]) {
+    applyProtocolObservation(state, packet('UserLocation', ack));
+    const before = structuredClone(state);
+    const message = packet('ObjectStruck', { objectId: owner.objectId, location: { x: struck.x, y: struck.y }, direction: struck.direction, attackerId: 900 });
+    const original = structuredClone(message);
+    applyProtocolObservation(state, message);
+    assert.deepEqual(state, before, 'self Struck is an action notification, not a movement correction');
+    assert.deepEqual(message, original, 'the received hit evidence is not mutated');
+  }
+  applyProtocolObservation(state, packet('HealthChanged', { hp: 190 }));
+  assert.equal(observedPlayerHp(state), 190);
+  applyProtocolObservation(state, packet('Pushed', { x: 292, y: 560, direction: 'Right' }));
+  assert.equal(owner.x, 292);
+  applyProtocolObservation(state, packet('UserDash', { location: { x: 294, y: 560 }, direction: 'Right' }));
+  assert.equal(owner.x, 294);
+  applyProtocolObservation(state, packet('Death', { location: { x: 294, y: 560 }, direction: 'Down' }));
+  assert.equal(hasAuthoritativePlayerDeath(state), true);
+});
+
+test('remote ObjectStruck retains its public action position and direction', () => {
+  const state = observedWorld();
+  state.entities.push({ objectId: 50001, kind: 'player', name: 'Peer', x: 10, y: 10, hp: 100 });
+  for (const objectId of [2001, 50001]) {
+    const entity = state.entities.find(value => value.objectId === objectId), hp = entity.hp;
+    applyProtocolObservation(state, packet('ObjectStruck', { objectId, location: { x: 291, y: 563 }, direction: 'Left', attackerId: 1001 }));
+    assert.deepEqual({ x: entity.x, y: entity.y, direction: entity.direction }, { x: 291, y: 563, direction: 'Left' });
+    assert.equal(entity.hp, hp, 'damage remains in the ordinary health evidence packets');
+  }
+});
+
 test('ObjectMonster and NewMonsterInfo use their location payload to upsert monsters', () => {
   const state = observedWorld();
   const message = packet('ObjectMonster', {

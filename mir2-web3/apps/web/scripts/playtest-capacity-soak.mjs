@@ -22,6 +22,47 @@ const WEAK_MONSTERS = ['Scarecrow', 'Hen', 'Deer', 'HookingCat', 'RakingCat'];
 const fresh = (client, cursor, at) => client.events.filter(event => event.direction === 'received' && event.sequence > cursor && event.monotonicMs >= at);
 const packet = (client, after, name, predicate = () => true) => client.events.find(event => event.direction === 'received' && event.sequence > after && event.packet === name && predicate(event.payload));
 const inside = (point, bounds) => bounds && point.x >= bounds.minX && point.x <= bounds.maxX && point.y >= bounds.minY && point.y <= bounds.maxY;
+const PLAYER_LIFECYCLE_PACKETS = new Set(['ObjectPlayer', 'ObjectRemove', 'ObjectTeleportOut', 'MapChanged', 'MapInformation']);
+const PLAYER_MOTION_PACKETS = new Set(['ObjectWalk', 'ObjectRun', 'ObjectTurn']);
+const LIFECYCLE_IDENTITY_LIMIT = 256;
+const NAVIGATION_ATTEMPT_LIMIT = 40;
+const NAVIGATION_OCCUPANT_LIMIT = 32;
+
+// Deliberately select public identity/position fields. Never copy a packet or
+// snapshot wholesale into the persistent diagnostic stream.
+function lifecyclePoint(value) {
+  if (!value || !Number.isFinite(value.x) || !Number.isFinite(value.y)) return null;
+  return { x: value.x, y: value.y };
+}
+function lifecyclePlayer(entity, names) {
+  if (!entity || !names.has(entity.name) || !Number.isInteger(entity.objectId)) return null;
+  const point = lifecyclePoint(entity.location ?? entity);
+  return { objectId: entity.objectId, name: entity.name, ...(point ?? {}) };
+}
+function lifecycleProjection(snapshot, names) {
+  const players = []; let count = 0;
+  for (const entity of snapshot?.entities ?? []) {
+    if (!['player', 'remoteplayer', 'selfplayer'].includes(String(entity.kind).toLowerCase())) continue;
+    const player = lifecyclePlayer(entity, names);
+    if (player) { count++; if (players.length < LIFECYCLE_IDENTITY_LIMIT) players.push(player); }
+  }
+  players.sort((a, b) => a.objectId - b.objectId || a.name.localeCompare(b.name));
+  const owner = snapshot?.entities?.find(entity => entity.objectId === snapshot.playerObjectId);
+  return { mapFileName: typeof snapshot?.mapFileName === 'string' ? snapshot.mapFileName.slice(0, 80) : null,
+    playerObjectId: Number.isInteger(snapshot?.playerObjectId) ? snapshot.playerObjectId : null,
+    self: lifecyclePlayer(owner, names), players, count, truncated: count > players.length };
+}
+function lifecycleMembership(projection) {
+  return JSON.stringify([projection.mapFileName, projection.playerObjectId, projection.count,
+    lifecyclePoint(projection.self),
+    projection.players.map(player => [player.objectId, player.name])]);
+}
+
+function selfTransform(snapshot) {
+  const owner = snapshot?.entities?.find(entity => entity.objectId === snapshot.playerObjectId);
+  const direction = typeof owner?.direction === 'string' ? owner.direction.slice(0, 32) : Number.isFinite(owner?.direction) ? owner.direction : undefined;
+  return { playerObjectId: snapshot?.playerObjectId ?? null, position: lifecyclePoint(owner), ...(direction !== undefined ? { direction } : {}) };
+}
 
 async function privateFile(file) {
   const absolute = outsideRepository(file), directory = path.dirname(absolute);
@@ -65,6 +106,12 @@ export class CapacityClient extends NativeResumeClient {
     this.budget = context.accountBudgets.get(account.accountId);
     this.bytes = { sent: 0, received: 0 }; this.recentSecrets = []; this.movementCount = 0; this.targetCursor = 0; this.failedTargets = new Map();
     this.evidencePending = new Set(); this.nativeRunPrimedUntil = 0;
+    this.lifecycleConnection = context.nextLifecycleConnection = (context.nextLifecycleConnection ?? 0) + 1;
+    this.lifecycleNames = new Set([this.label, ...(context.pool?.accounts ?? []).slice(0, 100).map(item => item.name)].filter(name => typeof name === 'string'));
+    this.lifecycleIdentities = new Map(); this.lifecycleMissing = new Set(); this.lifecycleOrphans = new Set();
+    this.lifecycleRows = 0; this.lifecycleIdentityEvictions = 0; this.lifecycleUnchangedSnapshots = 0;
+    this.navigationBlocked = false; this.navigationBlockedRows = 0;
+    this.selfTransformRows = 0;
   }
   record(direction, value) {
     // Never retain worldSnapshot arrays in event history, nor an ever-growing
@@ -83,7 +130,72 @@ export class CapacityClient extends NativeResumeClient {
     if (message.type === 'resumeCredential' && typeof message.credential === 'string') {
       this.recentSecrets.push(message.credential); this.recentSecrets = this.recentSecrets.slice(-3);
     }
+    const objectId = message.payload?.objectId;
+    const orphanMotion = PLAYER_MOTION_PACKETS.has(message.packet) && this.lifecycleMissing.has(objectId) && !this.lifecycleOrphans.has(objectId);
+    const lifecycle = message.type === 'worldSnapshot' || PLAYER_LIFECYCLE_PACKETS.has(message.packet) || orphanMotion;
+    const before = lifecycle ? lifecycleProjection(this.snapshot, this.lifecycleNames) : null;
+    // Observe every public packet's actual effect, including combat packets
+    // such as ObjectStruck; never assume an RTT echo caused a nearby change.
+    const ownerTransform = message.type === 'packet' && typeof message.packet === 'string';
+    const beforeSelf = ownerTransform ? selfTransform(this.snapshot) : null;
     super.observe(message);
+    if (lifecycle) this.recordPlayerLifecycle(message, before, orphanMotion);
+    if (ownerTransform) {
+      const afterSelf = selfTransform(this.snapshot);
+      if (JSON.stringify(beforeSelf.position) !== JSON.stringify(afterSelf.position)) {
+        const receipt = this.events.at(-1), payload = message.payload ?? {};
+        const location = lifecyclePoint(payload.location), position = lifecyclePoint(payload);
+        const direction = typeof payload.direction === 'string' ? payload.direction.slice(0, 32) : Number.isFinite(payload.direction) ? payload.direction : undefined;
+        this.context.writer?.add({ type: 'selfTransform', actor: this.label, connection: this.lifecycleConnection,
+          at: Date.now(), sequence: receipt.sequence, monotonicMs: receipt.monotonicMs, phase: this.context.phase, source: message.packet.slice(0, 80),
+          mapFileName: typeof this.snapshot?.mapFileName === 'string' ? this.snapshot.mapFileName.slice(0, 80) : null,
+          wire: { ...(Number.isInteger(objectId) ? { objectId } : {}), ...(position ?? {}), ...(location ? { location } : {}),
+            ...(direction !== undefined ? { direction } : {}) }, before: beforeSelf, after: afterSelf });
+        this.selfTransformRows++;
+      }
+    }
+  }
+  recordPlayerLifecycle(message, before, orphanMotion) {
+    const after = lifecycleProjection(this.snapshot, this.lifecycleNames), receipt = this.events.at(-1);
+    const remember = player => {
+      if (!this.lifecycleIdentities.has(player.objectId) && this.lifecycleIdentities.size >= LIFECYCLE_IDENTITY_LIMIT) {
+        const oldest = this.lifecycleIdentities.keys().next().value;
+        this.lifecycleIdentities.delete(oldest); this.lifecycleMissing.delete(oldest); this.lifecycleOrphans.delete(oldest);
+        this.lifecycleIdentityEvictions++;
+      }
+      this.lifecycleIdentities.set(player.objectId, { ...player });
+    };
+    for (const player of before.players) remember(player);
+    const objectId = message.payload?.objectId;
+    const wirePlayer = message.packet === 'ObjectPlayer' ? lifecyclePlayer(message.payload, this.lifecycleNames) : null;
+    const projectedBefore = before.players.find(player => player.objectId === objectId);
+    const remembered = this.lifecycleIdentities.get(objectId);
+    const peer = wirePlayer ?? projectedBefore ?? remembered;
+    if (wirePlayer) remember(wirePlayer);
+    for (const player of after.players) {
+      remember(player); this.lifecycleMissing.delete(player.objectId); this.lifecycleOrphans.delete(player.objectId);
+    }
+    const present = new Set(after.players.map(player => player.objectId));
+    for (const player of before.players) if (!present.has(player.objectId) && this.lifecycleIdentities.has(player.objectId)) this.lifecycleMissing.add(player.objectId);
+    if (wirePlayer && !present.has(objectId) && this.lifecycleIdentities.has(objectId)) this.lifecycleMissing.add(objectId);
+    const snapshotReplacement = message.type === 'worldSnapshot';
+    const mapReplacement = ['MapChanged', 'MapInformation'].includes(message.packet);
+    if (snapshotReplacement || mapReplacement) {
+      if (lifecycleMembership(before) === lifecycleMembership(after)) { this.lifecycleUnchangedSnapshots++; return; }
+    } else if (!peer) return; // No arbitrary non-cohort player information.
+    if (orphanMotion) this.lifecycleOrphans.add(objectId);
+    const select = projection => ({ ...projection,
+      players: snapshotReplacement || mapReplacement ? projection.players : projection.players.filter(player => player.objectId === objectId || player.name === peer.name) });
+    const wirePoint = lifecyclePoint(message.payload?.location ?? message.payload);
+    this.context.writer?.add({ type: 'playerLifecycle', actor: this.label, connection: this.lifecycleConnection,
+      at: Date.now(), sequence: receipt.sequence, monotonicMs: receipt.monotonicMs, phase: this.context.phase,
+      source: snapshotReplacement ? 'worldSnapshot' : message.packet,
+      ...(snapshotReplacement || mapReplacement ? {} : { peer: { objectId, name: peer.name },
+        beforePresent: before.players.some(player => player.objectId === objectId), afterPresent: after.players.some(player => player.objectId === objectId),
+        identitySource: wirePlayer ? 'packet' : projectedBefore ? 'projection-before' : 'bounded-identity-cache',
+        wire: { objectId, ...(wirePlayer ? { name: wirePlayer.name } : {}), ...(wirePoint ?? {}) }, orphanMotion: Boolean(orphanMotion) }),
+      before: select(before), after: select(after) });
+    this.lifecycleRows++;
   }
   send(command) {
     if (!this.draining) this.context.guard.assert();
@@ -188,6 +300,76 @@ export function chooseHomes(map, origin, count, layout, transfers = [], explicit
   });
 }
 
+export function validateNativeExplicitHomes(map, origin, count, anchors, patrolSpan = 2, transfers = [], stationaryObstacles = []) {
+  const cells = map?.width * map?.height;
+  if (!Number.isInteger(map?.width) || !Number.isInteger(map?.height) || map.width < 1 || map.height < 1 ||
+      !Number.isInteger(cells) || cells < 1 || cells > 4_000_000 || map.blocked?.length !== cells ||
+      !Number.isInteger(count) || count < 1 || count > 100 || !Array.isArray(anchors) || anchors.length !== count || ![2, 4].includes(patrolSpan)) {
+    throw new Error('Native explicit scenario requires complete bounded anchors and patrolSpan 2 or 4');
+  }
+  const inMap = point => Number.isInteger(point?.x) && Number.isInteger(point?.y) && point.x >= 0 && point.y >= 0 && point.x < map.width && point.y < map.height;
+  if (!inMap(origin)) throw new Error('Native scenario origin is outside the real map');
+  const blocked = new Uint8Array(map.blocked), cellIndex = point => point.y * map.width + point.x;
+  for (const point of stationaryObstacles) if (inMap(point)) blocked[cellIndex(point)] = 1;
+  for (const transfer of transfers) {
+    const b = transfer.bounds;
+    if (!b || ![b.minX, b.maxX, b.minY, b.maxY].every(Number.isInteger) || b.minX > b.maxX || b.minY > b.maxY) throw new Error('Invalid scenario transfer bounds');
+    for (let y = Math.max(0, b.minY); y <= Math.min(map.height - 1, b.maxY); y++) {
+      for (let x = Math.max(0, b.minX); x <= Math.min(map.width - 1, b.maxX); x++) blocked[y * map.width + x] = 1;
+    }
+  }
+  const used = new Set(), wanted = new Set(), homes = anchors.map(point => {
+    if (!inMap(point)) throw new Error('Native scenario anchor is outside the real map');
+    const home = { x: point.x, y: point.y };
+    for (let dy = 0; dy <= patrolSpan; dy++) for (let dx = 0; dx <= patrolSpan; dx++) {
+      const cell = { x: home.x + dx, y: home.y + dy }, index = cellIndex(cell);
+      if (!inMap(cell) || blocked[index] || used.has(index)) throw new Error('Native patrol footprint overlaps terrain, an NPC, transfer or another actor');
+      used.add(index);
+    }
+    wanted.add(cellIndex(home)); return home;
+  });
+  if (blocked[cellIndex(origin)]) throw new Error('Native scenario origin is statically blocked');
+  // This one-time proof is bounded by the actual map, not an arbitrary radius.
+  // Runtime movement still uses ordinary intents and its unchanged 4000-node A*.
+  const seen = new Uint8Array(cells), queue = new Int32Array(cells); let head = 0, tail = 1;
+  queue[0] = cellIndex(origin); seen[queue[0]] = 1;
+  while (head < tail && wanted.size) {
+    const current = queue[head++], x = current % map.width, y = Math.floor(current / map.width); wanted.delete(current);
+    for (const [dx, dy] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+      const nx = x + dx, ny = y + dy, index = ny * map.width + nx;
+      if (nx < 0 || nx >= map.width || ny < 0 || ny >= map.height || blocked[index] || seen[index]) continue;
+      seen[index] = 1; queue[tail++] = index;
+    }
+  }
+  if (wanted.size) throw new Error('Native explicit scenario contains unreachable anchors');
+  return { homes, visitedCells: head, mapCells: cells, footprintCells: used.size };
+}
+
+export function validateNativeCombatClusters(definitions, homes, combatIndices, patrolSpan = 2) {
+  if (definitions == null) return [];
+  if (!Array.isArray(definitions) || !definitions.length || definitions.length > combatIndices.size) throw new Error('Native combat clusters must be bounded and nonempty');
+  const used = new Set(), fighters = new Set();
+  const clusters = definitions.map(definition => {
+    const combatActorIndices = definition.combatActorIndices, movementActorIndices = definition.movementActorIndices;
+    if (![combatActorIndices, movementActorIndices].every(values => Array.isArray(values) && values.length > 0)) throw new Error('Each cluster requires declared fighters and movement observers');
+    for (const [values, combat] of [[combatActorIndices, true], [movementActorIndices, false]]) for (const index of values) {
+      if (!Number.isInteger(index) || index < 0 || index >= homes.length || used.has(index) || combatIndices.has(index) !== combat) throw new Error('Invalid or repeated combat cluster actor index');
+      used.add(index); if (combat) fighters.add(index);
+    }
+    const cluster = { combatActorIndices: [...combatActorIndices], movementActorIndices: [...movementActorIndices], patrolSpan,
+      observerHomes: movementActorIndices.map(index => homes[index]), observerNames: new Set() };
+    if (combatActorIndices.some(index => !insideCombatCoverage(cluster, homes[index]))) throw new Error('Combat home lacks declared observer coverage');
+    return cluster;
+  });
+  if (used.size !== homes.length || fighters.size !== combatIndices.size) throw new Error('Combat clusters must cover the complete declared cohort');
+  return clusters;
+}
+
+export function insideCombatCoverage(cluster, point) {
+  return !cluster || cluster.observerHomes.some(home => Math.max(Math.abs(point.x - home.x), Math.abs(point.x - home.x - cluster.patrolSpan),
+    Math.abs(point.y - home.y), Math.abs(point.y - home.y - cluster.patrolSpan)) <= 14);
+}
+
 export function spacingFourScenario(map, origin, center, count, mapFileName, transfers = [], stationaryObstacles = []) {
   if (!Number.isInteger(count) || count < 1 || count > 100 || ![origin, center].every(point => Number.isInteger(point.x) && Number.isInteger(point.y))) throw new Error('Scenario requires integer coordinates and 1–100 actors');
   const width = Math.ceil(Math.sqrt(count));
@@ -226,11 +408,21 @@ export function directionOf(from, to) {
 }
 function movement(client, target, map) {
   const owner = self(client), occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead);
+  const blocked = (reason, nextStep) => {
+    if (client.navigationAttempts) {
+      client.navigationAttemptCount++;
+      if (client.navigationAttempts.length < NAVIGATION_ATTEMPT_LIMIT) client.navigationAttempts.push({ target: lifecyclePoint(target),
+        reason, staticWalkable: protocolMapCellIsWalkable(map, target),
+        targetOccupied: occupied.some(entity => entity.x === target.x && entity.y === target.y), ...(nextStep ? { nextStep } : {}) });
+    }
+    return null;
+  };
   const route = findProtocolWalkPath({ map, start: owner, target, dynamicObstacles: occupied, maxExpanded: 4000 });
-  if (!route || route.length < 2) return null;
+  if (!route) return blocked('no-path-or-expansion-limit');
+  if (route.length < 2) return blocked('already-at-target');
   const first = route[1];
-  if ((client.snapshot.mapTransfers ?? []).some(transfer => inside(first, transfer.bounds))) return null;
-  const direction = directionOf(owner, first); if (!direction) return null;
+  if ((client.snapshot.mapTransfers ?? []).some(transfer => inside(first, transfer.bounds))) return blocked('next-step-transfer', first);
+  const direction = directionOf(owner, first); if (!direction) return blocked('invalid-unit-step', first);
   const wantsRun = client.context?.policy.activityMode === 'native' ? performance.now() < client.nativeRunPrimedUntil : client.movementCount % 10 === 9;
   if (wantsRun && route.length > 2 && route[2].x - first.x === first.x - owner.x && route[2].y - first.y === first.y - owner.y &&
       !(client.snapshot.mapTransfers ?? []).some(transfer => inside(route[2], transfer.bounds))) {
@@ -238,35 +430,106 @@ function movement(client, target, map) {
   }
   return { command: { type: 'walk', direction }, target: first, first };
 }
-function patrol(client, context) {
+function patrol(client, context, home = client.home) {
   const owner = self(client), map = context.map;
-  if (distance(owner, client.home) > 2) return movement(client, client.home, map);
-  const points = context.policy?.activityMode === 'native' ? [[2, 0], [2, 2], [0, 2], [0, 0]] : [[2, 0], [2, 2], [0, 2], [0, 0], [-1, 0], [0, -1]];
+  // A live obstacle can push a native actor outside its 3x3 patrol. Returning
+  // only to home then traps it if that one corner is occupied; try the same
+  // four declared corners using ordinary collision-aware paths instead.
+  const native = context.policy?.activityMode === 'native', span = native ? context.patrolSpan ?? 2 : 2;
+  if (!native && distance(owner, home) > 2) return movement(client, home, map);
+  const points = native ? [[span, 0], [span, span], [0, span], [0, 0]] : [[2, 0], [2, 2], [0, 2], [0, 0], [-1, 0], [0, -1]];
   const initialCursor = client.targetCursor;
+  if (context.policy?.activityMode === 'native' && performance.now() < client.nativeRunPrimedUntil &&
+      owner.x >= home.x && owner.x <= home.x + span && owner.y >= home.y && owner.y <= home.y + span) {
+    // Prefer an ordinary clear two-cell corner over a one-two-one detour to a
+    // blocked edge. Check the exact same two steps and diagonal side cells as
+    // A*, without allocating another full-map search for each of four corners.
+    const occupied = new Set(client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead)
+      .map(entity => `${entity.x},${entity.y}`));
+    const clear = point => protocolMapCellIsWalkable(map, point) && !occupied.has(`${point.x},${point.y}`);
+    const doorway = point => (client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
+    for (let offset = 0; offset < points.length; offset++) {
+      const index = (initialCursor + offset) % points.length, [dx, dy] = points[index];
+      const corner = { x: home.x + dx, y: home.y + dy }, deltaX = corner.x - owner.x, deltaY = corner.y - owner.y;
+      const length = Math.max(Math.abs(deltaX), Math.abs(deltaY));
+      if (length < 2 || (deltaX && deltaY && Math.abs(deltaX) !== Math.abs(deltaY))) continue;
+      const x = Math.sign(deltaX), y = Math.sign(deltaY), target = { x: owner.x + 2 * x, y: owner.y + 2 * y };
+      const first = { x: owner.x + x, y: owner.y + y };
+      if (!clear(first) || !clear(target) || doorway(first) || doorway(target)) continue;
+      if (x && y && [{ x: owner.x + x, y: owner.y }, { x: owner.x, y: owner.y + y },
+        { x: first.x + x, y: first.y }, { x: first.x, y: first.y + y }].some(point => !clear(point))) continue;
+      client.targetCursor = index;
+      return { command: { type: 'run', direction: directionOf(owner, first) }, first, target };
+    }
+  }
   for (let offset = 0; offset < points.length; offset++) {
     // Native patrol advances exactly one corner. Mutating the starting cursor
     // inside this loop used to skip a corner and endlessly cut across NPCs.
     // Keep the old baseline traversal for comparisons with its prior reports.
     const index = ((context.policy?.activityMode === 'native' ? initialCursor : client.targetCursor) + offset) % points.length, [dx, dy] = points[index];
-    const target = { x: client.home.x + dx, y: client.home.y + dy };
+    const target = { x: home.x + dx, y: home.y + dy };
     if (distance(owner, target) === 0) { client.targetCursor = (index + 1) % points.length; continue; }
     const plan = movement(client, target, map);
     if (plan) { client.targetCursor = index; return plan; }
   }
   return null;
 }
+
+function recordNavigationBlocked(client, context, phase) {
+  if (client.navigationBlocked) return;
+  client.navigationBlocked = true;
+  const owner = self(client), names = client.lifecycleNames ?? new Set([client.label,
+    ...(context.pool?.accounts ?? []).slice(0, 100).map(account => account.name)]);
+  const occupants = []; let count = 0;
+  for (const entity of client.snapshot.entities) {
+    if (entity.objectId === owner.objectId || entity.dead || !lifecyclePoint(entity) ||
+        Math.min(distance(entity, owner), distance(entity, client.home)) > 6) continue;
+    count++;
+    const kind = String(entity.kind).toLowerCase(), publicName = ['monster', 'npc'].includes(kind) || names.has(entity.name);
+    occupants.push({ ...(Number.isInteger(entity.objectId) ? { objectId: entity.objectId } : {}),
+      kind: ['player', 'remoteplayer', 'selfplayer', 'monster', 'npc'].includes(kind) ? kind : 'other',
+      ...(publicName && typeof entity.name === 'string' ? { name: entity.name.slice(0, 80) } : {}), x: entity.x, y: entity.y });
+    occupants.sort((a, b) => Math.min(distance(a, owner), distance(a, client.home)) - Math.min(distance(b, owner), distance(b, client.home)) ||
+      (a.objectId ?? 0) - (b.objectId ?? 0));
+    if (occupants.length > NAVIGATION_OCCUPANT_LIMIT) occupants.pop();
+  }
+  context.writer?.add({ type: 'navigationBlocked', actor: client.label, connection: client.lifecycleConnection,
+    at: Date.now(), monotonicMs: performance.now(), sequence: client.sequence, phase, role: client.role,
+    mapFileName: typeof client.snapshot.mapFileName === 'string' ? client.snapshot.mapFileName.slice(0, 80) : null,
+    self: lifecyclePoint(owner), home: lifecyclePoint(client.home), targetCursor: client.targetCursor,
+    maxExpanded: 4000, attempts: client.navigationAttempts ?? [], attemptCount: client.navigationAttemptCount ?? 0,
+    attemptsTruncated: (client.navigationAttemptCount ?? 0) > (client.navigationAttempts?.length ?? 0),
+    nearbyOccupants: occupants, nearbyOccupantCount: count, occupantsTruncated: count > occupants.length });
+  client.navigationBlockedRows = (client.navigationBlockedRows ?? 0) + 1;
+}
 function nearbyObservers(client, context, margin = 16) {
   return context.clients.filter(other => other !== client && other.inGame && !other.closed && !other.paused &&
     other.snapshot?.mapFileName === client.snapshot.mapFileName && self(other) && distance(self(other), self(client)) <= margin);
 }
+function combatObservers(client, context) {
+  return nearbyObservers(client, context).filter(other => !client.combatCluster || client.combatCluster.observerNames.has(other.label));
+}
 export function combatCandidates(client, context, now = Date.now()) {
   const owner = self(client);
+  const observed = client.combatCluster ? new Set(combatObservers(client, context).flatMap(other => other.snapshot.entities.map(entity => entity.objectId))) : null;
   return client.snapshot.entities.filter(entity => entity.kind === 'monster' && !entity.dead && Number(entity.hp ?? 1) > 0 &&
     String(entity.disposition ?? '').trim().toLowerCase() !== 'friendly' && !String(entity.ownerName ?? '').trim() &&
     WEAK_MONSTERS.includes(entity.name) && context.monsterNames.includes(entity.name) && distance(entity, owner) <= 16 &&
+    insideCombatCoverage(client.combatCluster, entity) &&
     (client.failedTargets.get(entity.objectId)?.until ?? 0) <= now &&
     (!context.targetClaims.has(entity.objectId) || context.targetClaims.get(entity.objectId) === client.label))
-    .sort((a, b) => distance(a, owner) - distance(b, owner));
+    .sort((a, b) => (observed ? Number(observed.has(b.objectId)) - Number(observed.has(a.objectId)) : 0) || distance(a, owner) - distance(b, owner));
+}
+
+function returnToCombatCoverage(client, context) {
+  const owner = self(client), cluster = client.combatCluster;
+  if (!cluster) return patrol(client, context);
+  const recovering = !insideCombatCoverage(cluster, owner);
+  for (const home of [client.home, ...cluster.observerHomes].sort((a, b) => distance(a, owner) - distance(b, owner))) {
+    const plan = patrol(client, context, home);
+    if (plan && (recovering || (insideCombatCoverage(cluster, plan.first) && insideCombatCoverage(cluster, plan.target)))) return plan;
+  }
+  return null;
 }
 
 export function stableFanoutRange(kind, policy) {
@@ -288,10 +551,11 @@ function combatPlan(client, context) {
     }
     recordCombatArrival(client, context);
   }
+  if (!insideCombatCoverage(client.combatCluster, owner)) return returnToCombatCoverage(client, context);
   for (const [id, failure] of client.failedTargets) if (failure.until < Date.now() - 30000) client.failedTargets.delete(id);
   const candidates = combatCandidates(client, context);
   for (const target of candidates.slice(0, 4)) {
-    const observer = nearbyObservers(client, context).find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId));
+    const observer = combatObservers(client, context).find(other => other.snapshot.entities.some(entity => entity.objectId === target.objectId));
     if (distance(owner, target) === 1 && observer) {
       const facing = directionOf(owner, target);
       if (owner.direction !== facing) return { command: { type: 'turn', direction: facing }, hunting: target.name };
@@ -301,11 +565,12 @@ function combatPlan(client, context) {
     const adjacent = STEPS.map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy }))
       .sort((a, b) => distance(a, owner) - distance(b, owner));
     for (const destination of adjacent) {
+      if (!insideCombatCoverage(client.combatCluster, destination)) continue;
       const plan = movement(client, destination, context.map);
-      if (plan) return { ...plan, hunting: target.name };
+      if (plan && insideCombatCoverage(client.combatCluster, plan.first) && insideCombatCoverage(client.combatCluster, plan.target)) return { ...plan, hunting: target.name };
     }
   }
-  return patrol(client, context);
+  return returnToCombatCoverage(client, context);
 }
 
 function recordCombatArrival(client, context) {
@@ -332,7 +597,7 @@ function recordHuntAttempt(client, owner, target) {
 
 export function actorsReachedScenario(context) {
   return context.clients.filter(client => client.ready).every(client => client.role === 'movement'
-    ? distance(self(client), client.home) <= 3
+    ? distance(self(client), client.home) <= (context.policy.activityMode === 'native' ? (context.patrolSpan ?? 2) + 1 : 3)
     : context.policy.activityMode !== 'native' || Boolean(client.combatArrival));
 }
 
@@ -352,6 +617,7 @@ function checkOwner(client, context) {
   if (String(client.snapshot.mapFileName) !== context.mapName) throw new Error('Actor left the declared same-map scenario');
 }
 export function selectNativeAction(client, context, now = performance.now()) {
+  client.navigationAttempts = context.policy?.activityMode === 'native' ? [] : null; client.navigationAttemptCount = 0;
   if (now >= client.nextNativeChatAt) return { command: { type: 'chat', message: `capacity ${context.runId} ${client.label} ${client.plan.index + 1}` } };
   if (now >= client.nextNativeTurnAt && client.role !== 'combat') return { command: { type: 'turn', direction: self(client).direction === 'Up' ? 'Right' : 'Up' } };
   return client.role === 'combat' ? combatPlan(client, context) : patrol(client, context);
@@ -370,7 +636,10 @@ async function action(client, context, planned, preparedPlan) {
   else if (planned.index % 20 === 5) plan = { command: { type: 'chat', message: `capacity ${context.runId} ${client.label} ${planned.index}` } };
   else if (planned.index % 15 === 0) plan = { command: { type: 'turn', direction: owner.direction === 'Up' ? 'Right' : 'Up' } };
   else plan = client.role === 'combat' ? combatPlan(client, context) : patrol(client, context);
-  if (!plan) { context.add({ actor: client.label, phase, kind: 'walk', status: 'navigation-blocked', plannedGameplay: true, ...nativeMeta }); return; }
+  if (!plan) {
+    if (native) recordNavigationBlocked(client, context, phase);
+    context.add({ actor: client.label, phase, kind: 'walk', status: 'navigation-blocked', plannedGameplay: true, ...nativeMeta }); return;
+  }
   const command = plan.command, kind = command.type;
   if (client.budget.remainingWait()) { context.add({ actor: client.label, phase, kind, status: 'budget-gap', plannedGameplay: true, ...nativeMeta }); return; }
   const observers = nearbyObservers(client, context, stableFanoutRange(kind, context.policy)).map(peer => ({ peer, cursor: peer.sequence,
@@ -409,7 +678,7 @@ async function action(client, context, planned, preparedPlan) {
       const actual = receipt.payload;
       if (!(actual.x === plan.target.x && actual.y === plan.target.y) &&
           !(kind === 'run' && actual.x === plan.first.x && actual.y === plan.first.y)) status = 'corrected';
-      if (status === 'success') { client.movementCount++; client.nativeRunPrimedUntil = sentAt + 1200; }
+      if (status === 'success') { client.movementCount++; client.nativeRunPrimedUntil = sentAt + 1200; client.navigationBlocked = false; }
       row.actual = { x: actual.x, y: actual.y }; row.direction = actual.direction;
       row.movedCells = distance(owner, actual);
       recordCombatArrival(client, context);
@@ -725,11 +994,17 @@ export async function runCapacity(options) {
     report.initialLoginNotBefore = new Date(Math.max(Date.now(), notBefore)).toISOString();
     let scenario = {};
     if (options.scenarioFile) scenario = JSON.parse(await fs.readFile(options.scenarioFile, 'utf8'));
+    if ((scenario.patrolSpan != null || scenario.combatClusters != null) &&
+        (policy.activityMode !== 'native' || !Array.isArray(scenario.anchors) || scenario.anchors.length !== policy.stages.at(-1))) {
+      throw new Error('Patrol span and combat clusters require a complete explicit native scenario');
+    }
+    context.patrolSpan = scenario.patrolSpan ?? 2;
+    if (![2, 4].includes(context.patrolSpan)) throw new Error('Native patrolSpan must be 2 or 4');
     if (scenario.monsterNames) {
       if (!Array.isArray(scenario.monsterNames) || !scenario.monsterNames.length || scenario.monsterNames.some(name => !WEAK_MONSTERS.includes(name))) throw new Error('Combat scenario must use ordinary starter-monster whitelist; guards are never attack targets');
       context.monsterNames = scenario.monsterNames;
     }
-    report.scenario = { layout: policy.layout, monsterNames: context.monsterNames, combatActors: policy.combatActors };
+    report.scenario = { layout: policy.layout, monsterNames: context.monsterNames, combatActors: policy.combatActors, patrolSpan: context.patrolSpan };
     timer = setTimeout(() => guard.stop('Finite capacity wall-clock budget exhausted'), policy.wallSeconds * 1000);
     sampler = setInterval(() => {
       if (draining) return;
@@ -762,13 +1037,22 @@ export async function runCapacity(options) {
             ...await loadStationaryNpcObstacles(context.mapName),
             ...client.snapshot.entities.filter(entity => String(entity.kind).toLowerCase() === 'npc' && !entity.dead),
           ] : [];
-          context.homes = chooseHomes(context.map, self(client), policy.stages.at(-1), policy.layout, client.snapshot.mapTransfers ?? [], scenario.anchors ?? [], policy.activityMode === 'native' ? 3 : 1, stationaryObstacles);
+          if (policy.activityMode === 'native' && scenario.anchors?.length) {
+            const proof = validateNativeExplicitHomes(context.map, self(client), policy.stages.at(-1), scenario.anchors, context.patrolSpan, client.snapshot.mapTransfers ?? [], stationaryObstacles);
+            context.homes = proof.homes;
+            report.scenario.explicitNativeHomes = { visitedCells: proof.visitedCells, mapCells: proof.mapCells, footprintCells: proof.footprintCells };
+          } else context.homes = chooseHomes(context.map, self(client), policy.stages.at(-1), policy.layout, client.snapshot.mapTransfers ?? [], scenario.anchors ?? [], policy.activityMode === 'native' ? 3 : 1, stationaryObstacles);
+          context.combatClusters = validateNativeCombatClusters(scenario.combatClusters, context.homes, combatIndices, context.patrolSpan);
+          for (const cluster of context.combatClusters) cluster.observerNames = new Set(cluster.movementActorIndices.map(index => context.pool.accounts[index].name));
+          if (context.combatClusters.length) report.scenario.combatClusters = context.combatClusters.map(cluster => ({ combatActorIndices: cluster.combatActorIndices,
+            movementActorIndices: cluster.movementActorIndices, observerFootprintCoverageRadius: 14 }));
           report.scenario.mapFileName = context.mapName; report.scenario.anchors = context.homes;
           if (policy.activityMode === 'native') report.scenario.knownStationaryNpcCount = new Set(stationaryObstacles.map(point => `${point.x},${point.y}`)).size;
         }
         checkOwner(client, context);
         await equipStarterGear(client);
         client.role = combatIndices.has(index) ? 'combat' : 'movement'; client.home = context.homes[index]; client.ready = true;
+        client.combatCluster = context.combatClusters.find(cluster => cluster.combatActorIndices.includes(index));
         initializePlan(client, context, performance.now() + 500 + (index % 10) * 40);
         client.nextRtt = Date.now() + 5000; client.nextRefresh = Date.now() + 60000;
         context.clients.push(client);
@@ -858,7 +1142,17 @@ export async function runCapacity(options) {
         declaredHome: client.home, arrival: client.combatArrival ?? null, hunting: client.combatHunting ?? null })) };
     report.boundedStorage = { retainedMonitorSamples: guard.history.length, maximumMonitorSamples: guard.maximumHistory,
       monitorTimeBucketMs: guard.timeline.bucketMs, rawMonitorSamples: guard.timeline.rawSamples,
-      maximumEventsPerConnection: 2048, writerMaximumBufferedBytes: writer.maximumBufferedBytes, writerLimitBytes: writer.maxBufferedBytes };
+      maximumEventsPerConnection: 2048, writerMaximumBufferedBytes: writer.maximumBufferedBytes, writerLimitBytes: writer.maxBufferedBytes,
+      navigationBlocked: { maximumAttempts: NAVIGATION_ATTEMPT_LIMIT, maximumNearbyOccupants: NAVIGATION_OCCUPANT_LIMIT,
+        rows: context.allClients.reduce((sum, client) => sum + client.navigationBlockedRows, 0),
+        rule: 'First blocked action opportunity until a successful movement acknowledgement; ordinary blocked opportunities remain counted' },
+      selfTransform: { rows: context.allClients.reduce((sum, client) => sum + client.selfTransformRows, 0),
+        rule: 'Only public packets changing owner coordinates; fixed position/direction fields streamed through the existing writer, no retained aggregate' },
+      playerLifecycle: { maximumIdentitiesPerConnection: LIFECYCLE_IDENTITY_LIMIT, maximumProjectionPlayers: LIFECYCLE_IDENTITY_LIMIT,
+        rows: context.allClients.reduce((sum, client) => sum + client.lifecycleRows, 0),
+        identityEvictions: context.allClients.reduce((sum, client) => sum + client.lifecycleIdentityEvictions, 0),
+        unchangedSnapshotsOmitted: context.allClients.reduce((sum, client) => sum + client.lifecycleUnchangedSnapshots, 0),
+        movementRule: 'Ordinary movement is not copied; retain only the first known-player movement while its projection is absent, until reappearance' } };
     report.ok = !report.error && !guard.stopped && !context.cleanupErrors.length && !context.continuous.failed && Boolean(finalStage?.passed) &&
       report.savedVerification.length === policy.saveSamples && report.savedVerification.every(result => result.status === 'passed');
     report.movementCapacityAccepted = report.ok && policy.fullAcceptanceEligible;

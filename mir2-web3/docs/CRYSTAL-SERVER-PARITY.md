@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> 2026-09-29 ordering candidate preserves gameplay/collision/cadence/auth rules
+> while serializing viewport lifecycle and owner acknowledgements on their
+> existing live channels. Focused overflow, bootstrap and resume checks pass;
+> final combined full regression/public capacity remain open. The earlier
+> integrated build passes829 tests/18 ignored. Monster hydration now selects
+> IDs with the former snapshot semantics. Captured self-Struck coordinate
+> overwrite was in the runner; its narrow correction follows Crystal and does
+> not establish a native-client regression. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 static-map sharing preserves terrain/fishing contents, fallback
 > source selection, private doors and shared-Zone collision semantics;319
 > selected checks plus explicit clone benchmarks pass. Short650/750ms gameplay

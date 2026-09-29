@@ -1,0 +1,58 @@
+{
+  "mapFileName": "0",
+  "anchors": [
+    {
+      "x": 274,
+      "y": 561
+    },
+    {
+      "x": 290,
+      "y": 561
+    }
+  ],
+  "patrolSpan": 4,
+  "generated": {
+    "staticOnly": true,
+    "accepted": false,
+    "purpose": "Two native ordinary 5x5 patrols, zero combat, crossing the inclusive16-cell AOI edge",
+    "geometry": {
+      "separation": 16,
+      "minimumCornerDx": 12,
+      "maximumCornerDx": 20,
+      "twoStepIntermediateDx": [
+        14,
+        18
+      ]
+    },
+    "routeProofs": [
+      {
+        "origin": {
+          "x": 275,
+          "y": 560
+        },
+        "footprintCells": 50,
+        "routeCells": [
+          2,
+          16
+        ]
+      },
+      {
+        "origin": {
+          "x": 293,
+          "y": 616
+        },
+        "footprintCells": 50,
+        "routeCells": [
+          59,
+          59
+        ]
+      }
+    ],
+    "collisionSha256": "bbd02c7d0125fe78983e2dea5f4aecc73b53d4b91517bde6fdbee9853bb183a5",
+    "driverSha256": "3b0304d3f08eac672b5e8e1722eb48ef845f3c738b3636434e903a55bc91915e",
+    "limitations": [
+      "All50 footprint cells statically clear, disjoint and NPC/portal free; all footprint corner edges have four ordinary unit steps.",
+      "Live monster/player occupancy and combat damage remain authoritative. This is a route calibration, not capacity or survival acceptance."
+    ]
+  }
+}
