@@ -1,5 +1,12 @@
 # Agent Task Queue
 
+> 2026-09-29 registration correction: public flat Gateway errors now reach the
+> native dialog with their actual retry interval; new-account validation, field
+> colors and keyboard/paste paths agree with the commercial password minimum.
+> Shared64 and native762 pass (three existing native ignores). Clean installer
+> packaging follows; the capacity GOAL remains paused at the user's request.
+> [Evidence](generated/player-qa/invited-playtest-20260929/registration-fix.md).
+
 > 2026-09-29 capacity follow-up: second full Gateway regression passes845/0
 > with18 ignored; runner/observation passes80/80. Pushed9ac is deployed to the
 > backed-up isolated realm; original production is unchanged. The first new

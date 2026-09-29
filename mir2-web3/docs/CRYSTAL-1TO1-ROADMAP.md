@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-29 native registration feedback correction: preserve canonical and
+> legacy Gateway errors, explain server retry windows, and reject unsupported
+> new-account credentials before sending. Existing login remains compatible.
+> Shared64/native762 pass; three existing native ignores remain. Packaging and
+> player visual confirmation follow; no new whole-game or capacity acceptance.
+> [Evidence](generated/player-qa/invited-playtest-20260929/registration-fix.md).
+
 > 2026-09-29 capacity candidate9ac is live only on the isolated realm. Complete
 > serial Gateway revalidation passes845/0 with18 ignored; Node80/80 passes.
 > A new ordinary fourth-player bootstrap failure remains under investigation.

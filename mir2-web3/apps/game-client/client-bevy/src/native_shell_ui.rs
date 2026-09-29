@@ -25,7 +25,7 @@ use crate::crystal_ui::widget::{
     CrystalImageButtonSprite,
 };
 use crate::native_shell::{
-    parse_registration_birth_date, valid_registration_email, validate_registration_fields,
+    validate_registration_field, validate_registration_fields,
     ChangePasswordFocus, CharacterCreateFocus, LoginFocus, NativeShellModel, NativeShellScreen,
     NativeUiIntent, NativeUiIntentQueue, RegistrationFocus,
 };
@@ -300,12 +300,13 @@ fn change_password_submit_intent(model: &NativeShellModel) -> NativeUiIntent {
 }
 
 fn registration_submit_intent(model: &NativeShellModel) -> Result<NativeUiIntent, &'static str> {
+    let birth_date_binary = validate_registration_fields(&model.registration)?;
     Ok(NativeUiIntent::SubmitRegistration {
         account_id: model.registration.account_id.clone(),
         password: model.registration.password.clone(),
         confirm_password: model.registration.confirm_password.clone(),
         birth_date: model.registration.birth_date.clone(),
-        birth_date_binary: parse_registration_birth_date(&model.registration.birth_date)?,
+        birth_date_binary,
         user_name: model.registration.user_name.clone(),
         secret_question: model.registration.secret_question.clone(),
         secret_answer: model.registration.secret_answer.clone(),
@@ -711,12 +712,13 @@ fn shell_pointer_input(
                 let _ = shell.apply_ui_intent(NativeUiIntent::CancelChangePassword);
             }
             NativeShellButton::SubmitRegistration => {
-                if let Ok(intent) = registration_submit_intent(&shell) {
-                    apply_and_queue(&mut shell, &mut queue, intent);
-                } else {
-                    shell.notice = Some(crate::native_shell::ShellNotice::error(
-                        "birth date must use YYYY-MM-DD",
-                    ));
+                match registration_submit_intent(&shell) {
+                    Ok(intent) => {
+                        apply_and_queue(&mut shell, &mut queue, intent);
+                    }
+                    Err(message) => {
+                        shell.notice = Some(crate::native_shell::ShellNotice::error(message));
+                    }
                 }
             }
             NativeShellButton::CancelRegistration => {
@@ -920,6 +922,9 @@ fn shell_keyboard_input(
             if shell.register_request_in_flight {
                 return;
             }
+            let previous_form = (shell.notice.is_some()
+                && (edit_delete_count > 0 || !typed_text.is_empty()))
+                .then(|| shell.registration.clone());
             match shell.registration.focus {
                 RegistrationFocus::AccountId => {
                     pop_editable_tail(&mut shell.registration.account_id, edit_delete_count)
@@ -988,6 +993,9 @@ fn shell_keyboard_input(
                     }
                     RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => {}
                 }
+            }
+            if previous_form.is_some_and(|before| before != shell.registration) {
+                shell.notice = None;
             }
         }
 
@@ -1541,81 +1549,20 @@ fn registration_field_border_color(
     let neutral = Color::srgb_u8(128, 128, 128);
     let valid = Color::srgb(0.0, 0.5, 0.0);
     let invalid = Color::srgb(0.75, 0.0, 0.0);
-    let alphanumeric = |value: &str, min, max| {
-        let length = value.chars().count();
-        (min..=max).contains(&length) && value.chars().all(|character| character.is_ascii_alphanumeric())
+    let value = match focus {
+        RegistrationFocus::AccountId => &form.account_id,
+        RegistrationFocus::Password => &form.password,
+        RegistrationFocus::ConfirmPassword => &form.confirm_password,
+        RegistrationFocus::UserName => &form.user_name,
+        RegistrationFocus::BirthDate => &form.birth_date,
+        RegistrationFocus::SecretQuestion => &form.secret_question,
+        RegistrationFocus::SecretAnswer => &form.secret_answer,
+        RegistrationFocus::EmailAddress => &form.email_address,
+        RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => return neutral,
     };
-    match focus {
-        RegistrationFocus::AccountId => {
-            if form.account_id.is_empty() {
-                neutral
-            } else if alphanumeric(&form.account_id, 3, 15) {
-                valid
-            } else {
-                invalid
-            }
-        }
-        RegistrationFocus::Password => {
-            if form.password.is_empty() {
-                neutral
-            } else if alphanumeric(&form.password, 5, 15) {
-                valid
-            } else {
-                invalid
-            }
-        }
-        RegistrationFocus::ConfirmPassword => {
-            if form.confirm_password.is_empty() {
-                neutral
-            } else if alphanumeric(&form.confirm_password, 5, 15)
-                && form.confirm_password == form.password
-            {
-                valid
-            } else {
-                invalid
-            }
-        }
-        RegistrationFocus::UserName => optional_field_color(&form.user_name, 20, neutral, valid, invalid),
-        RegistrationFocus::BirthDate => {
-            if form.birth_date.is_empty() {
-                neutral
-            } else if parse_registration_birth_date(&form.birth_date).is_ok() {
-                valid
-            } else {
-                invalid
-            }
-        }
-        RegistrationFocus::SecretQuestion => {
-            optional_field_color(&form.secret_question, 30, neutral, valid, invalid)
-        }
-        RegistrationFocus::SecretAnswer => {
-            optional_field_color(&form.secret_answer, 30, neutral, valid, invalid)
-        }
-        RegistrationFocus::EmailAddress => {
-            if form.email_address.is_empty() {
-                neutral
-            } else if form.email_address.chars().count() <= 50
-                && valid_registration_email(&form.email_address)
-            {
-                valid
-            } else {
-                invalid
-            }
-        }
-        RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => neutral,
-    }
-}
-
-fn optional_field_color(
-    value: &str,
-    max_chars: usize,
-    neutral: Color,
-    valid: Color,
-    invalid: Color,
-) -> Color {
     if value.is_empty() {
         neutral
-    } else if value.chars().count() <= max_chars {
+    } else if validate_registration_field(form, focus).is_ok() {
         valid
     } else {
         invalid
@@ -1624,17 +1571,17 @@ fn optional_field_color(
 
 fn registration_description(focus: RegistrationFocus) -> &'static str {
     match focus {
-        RegistrationFocus::AccountId => "Account ID: 3-15 letters or numbers.",
+        RegistrationFocus::AccountId => "账号：3–15 位英文字母或数字。",
         RegistrationFocus::Password | RegistrationFocus::ConfirmPassword => {
-            "Password: 5-15 letters or numbers. Confirm it exactly."
+            "密码：10–15 位英文字母或数字。不能与账号相同，不能使用常见弱口令；两次输入须一致。"
         }
-        RegistrationFocus::UserName => "Optional user name: up to 20 characters.",
-        RegistrationFocus::BirthDate => "Optional birth date: YYYY-MM-DD.",
-        RegistrationFocus::SecretQuestion => "Optional secret question: up to 30 characters.",
-        RegistrationFocus::SecretAnswer => "Optional secret answer: up to 30 characters.",
-        RegistrationFocus::EmailAddress => "Optional email address: up to 50 characters.",
-        RegistrationFocus::SubmitButton => "Create the account with these details.",
-        RegistrationFocus::CancelButton => "Return to the login screen.",
+        RegistrationFocus::UserName => "姓名（选填）：最多 20 个字符。",
+        RegistrationFocus::BirthDate => "出生日期（选填）：格式为 YYYY-MM-DD。",
+        RegistrationFocus::SecretQuestion => "密保问题（选填）：最多 30 个字符。",
+        RegistrationFocus::SecretAnswer => "密保答案（选填）：最多 30 个字符。",
+        RegistrationFocus::EmailAddress => "邮箱（选填）：填写完整有效的邮箱地址，最多 50 个字符。",
+        RegistrationFocus::SubmitButton => "使用以上信息注册账号。",
+        RegistrationFocus::CancelButton => "返回登录界面。",
     }
 }
 
@@ -2283,6 +2230,7 @@ fn body_font(size: f32) -> TextFont {
 
 #[cfg(test)]
 mod tests {
+    use crate::native_shell::parse_registration_birth_date;
     #[test]
     fn door_waits_for_all_frames_then_updates_the_real_background_handle() {
         use super::*;
@@ -2708,8 +2656,8 @@ mod tests {
         assert!(model.apply_ui_intent(NativeUiIntent::OpenRegistration));
         let intent = NativeUiIntent::SubmitRegistration {
             account_id: "hero".to_owned(),
-            password: "secret".to_owned(),
-            confirm_password: "secret".to_owned(),
+            password: "ValidPass42".to_owned(),
+            confirm_password: "ValidPass42".to_owned(),
             birth_date: "2000-01-01".to_owned(),
             birth_date_binary: parse_registration_birth_date("2000-01-01").unwrap(),
             user_name: "Hero".to_owned(),
@@ -2759,8 +2707,8 @@ mod tests {
         let mut queue = NativeUiIntentQueue::default();
         let intent = NativeUiIntent::SubmitRegistration {
             account_id: "hero".to_owned(),
-            password: "secret".to_owned(),
-            confirm_password: "secret".to_owned(),
+            password: "ValidPass42".to_owned(),
+            confirm_password: "ValidPass42".to_owned(),
             birth_date: String::new(),
             birth_date_binary: 0,
             user_name: String::new(),
@@ -2862,8 +2810,8 @@ mod tests {
     fn registration_submit_intent_preserves_every_supported_new_account_field() {
         let mut model = NativeShellModel::default();
         model.registration.account_id = "newhero".to_owned();
-        model.registration.password = "Secret1".to_owned();
-        model.registration.confirm_password = "Secret1".to_owned();
+        model.registration.password = "ValidPass42".to_owned();
+        model.registration.confirm_password = "ValidPass42".to_owned();
         model.registration.birth_date = "2001-02-03".to_owned();
         model.registration.user_name = "New Hero".to_owned();
         model.registration.secret_question = "first pet?".to_owned();
@@ -2874,8 +2822,8 @@ mod tests {
             registration_submit_intent(&model),
             Ok(NativeUiIntent::SubmitRegistration {
                 account_id: "newhero".to_owned(),
-                password: "Secret1".to_owned(),
-                confirm_password: "Secret1".to_owned(),
+                password: "ValidPass42".to_owned(),
+                confirm_password: "ValidPass42".to_owned(),
                 birth_date: "2001-02-03".to_owned(),
                 birth_date_binary: parse_registration_birth_date("2001-02-03").unwrap(),
                 user_name: "New Hero".to_owned(),
@@ -2892,12 +2840,199 @@ mod tests {
         assert!(!registration_submit_enabled(&model));
 
         model.registration.account_id = "newhero".to_owned();
-        model.registration.password = "Secret1".to_owned();
-        model.registration.confirm_password = "Secret1".to_owned();
+        model.registration.password = "ValidPass42".to_owned();
+        model.registration.confirm_password = "ValidPass42".to_owned();
         assert!(registration_submit_enabled(&model));
 
         model.register_request_in_flight = true;
         assert!(!registration_submit_enabled(&model));
+    }
+
+    fn registration_model_for_test() -> NativeShellModel {
+        NativeShellModel {
+            screen: NativeShellScreen::Registration,
+            registration: crate::native_shell::RegistrationForm {
+                account_id: "newhero".to_owned(),
+                password: "ValidPass42".to_owned(),
+                confirm_password: "ValidPass42".to_owned(),
+                ..Default::default()
+            },
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn registration_password_colors_and_submit_agree_with_the_production_policy() {
+        let mut model = registration_model_for_test();
+        for password in [
+            "short",
+            "Alpha1234",
+            "1234567890",
+            "Password123",
+            "qwerty12345",
+            "mir2password",
+            "Alpha12345678901",
+        ] {
+            model.registration.password = password.to_owned();
+            model.registration.confirm_password = password.to_owned();
+            for focus in [
+                RegistrationFocus::Password,
+                RegistrationFocus::ConfirmPassword,
+            ] {
+                assert_eq!(
+                    registration_field_border_color(&model.registration, focus),
+                    Color::srgb(0.75, 0.0, 0.0)
+                );
+            }
+            assert!(!registration_submit_enabled(&model));
+            assert!(registration_submit_intent(&model).is_err());
+        }
+        for password in ["Alpha12345", "Alpha1234567890"] {
+            model.registration.password = password.to_owned();
+            model.registration.confirm_password = password.to_owned();
+            assert!(registration_submit_enabled(&model));
+            assert_eq!(
+                registration_field_border_color(&model.registration, RegistrationFocus::Password),
+                Color::srgb(0.0, 0.5, 0.0)
+            );
+        }
+        model.registration.account_id = "ALPHA1234567890".to_owned();
+        assert!(!registration_submit_enabled(&model));
+        assert_eq!(
+            registration_field_border_color(&model.registration, RegistrationFocus::Password),
+            Color::srgb(0.75, 0.0, 0.0)
+        );
+        assert!(registration_description(RegistrationFocus::Password).contains("10–15"));
+        assert!(registration_description(RegistrationFocus::EmailAddress).contains("选填"));
+    }
+
+    #[test]
+    fn registration_invalid_email_never_queues_even_when_a_raw_intent_bypasses_the_button() {
+        for email in ["1S", "hero@example", "hero!@example.test"] {
+            let mut model = registration_model_for_test();
+            let mut intent = registration_submit_intent(&model).unwrap();
+            model.registration.email_address = email.to_owned();
+            assert!(!registration_submit_enabled(&model));
+            assert!(registration_submit_intent(&model)
+                .unwrap_err()
+                .contains("邮箱"));
+            assert_eq!(
+                registration_field_border_color(&model.registration, RegistrationFocus::EmailAddress),
+                Color::srgb(0.75, 0.0, 0.0)
+            );
+            if let NativeUiIntent::SubmitRegistration { email_address, .. } = &mut intent {
+                *email_address = email.to_owned();
+            }
+            let mut queue = NativeUiIntentQueue::default();
+            assert!(!apply_and_queue(&mut model, &mut queue, intent));
+            assert!(queue.is_empty());
+            assert!(!model.register_request_in_flight);
+            assert!(model.notice.as_ref().unwrap().message.contains("邮箱"));
+        }
+        let model = registration_model_for_test();
+        assert!(registration_submit_enabled(&model));
+        assert_eq!(
+            registration_field_border_color(&model.registration, RegistrationFocus::EmailAddress),
+            Color::srgb_u8(128, 128, 128)
+        );
+    }
+
+    #[test]
+    fn registration_keyboard_validation_and_editing_clear_only_stale_notices() {
+        let mut shell = registration_model_for_test();
+        shell.registration.email_address = "1S".to_owned();
+        shell.registration.focus = RegistrationFocus::SubmitButton;
+        let mut app = App::new();
+        app.insert_resource(ButtonInput::<KeyCode>::default())
+            .insert_resource(shell)
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<NativeShellAuxFocus>()
+            .init_resource::<NativeShellTextModifiers>()
+            .add_message::<KeyboardInput>()
+            .add_systems(Update, shell_keyboard_input);
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .press(KeyCode::Enter);
+        app.update();
+        assert!(app.world().resource::<NativeUiIntentQueue>().is_empty());
+        assert!(app
+            .world()
+            .resource::<NativeShellModel>()
+            .notice
+            .as_ref()
+            .unwrap()
+            .message
+            .contains("邮箱"));
+        app.world_mut()
+            .resource_mut::<ButtonInput<KeyCode>>()
+            .reset_all();
+        app.world_mut()
+            .resource_mut::<NativeShellModel>()
+            .registration
+            .focus = RegistrationFocus::EmailAddress;
+        app.world_mut().write_message(keyboard_event(
+            KeyCode::KeyA,
+            Key::Character("a".into()),
+            ButtonState::Pressed,
+            Some("a"),
+        ));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .registration
+                .email_address,
+            "1Sa"
+        );
+        assert!(app.world().resource::<NativeShellModel>().notice.is_none());
+
+        {
+            let mut shell = app.world_mut().resource_mut::<NativeShellModel>();
+            shell.registration.focus = RegistrationFocus::Password;
+            shell.notice = Some(crate::native_shell::ShellNotice::error("旧的注册错误"));
+        }
+        app.world_mut().write_message(keyboard_event(
+            KeyCode::Digit1,
+            Key::Character("!".into()),
+            ButtonState::Pressed,
+            Some("!"),
+        ));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .registration
+                .password,
+            "ValidPass42"
+        );
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .notice
+                .as_ref()
+                .unwrap()
+                .message,
+            "旧的注册错误"
+        );
+        app.world_mut()
+            .resource_mut::<NativeShellModel>()
+            .register_request_in_flight = true;
+        app.world_mut().write_message(keyboard_event(
+            KeyCode::KeyA,
+            Key::Character("a".into()),
+            ButtonState::Pressed,
+            Some("a"),
+        ));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<NativeShellModel>()
+                .registration
+                .password,
+            "ValidPass42"
+        );
+        assert!(app.world().resource::<NativeShellModel>().notice.is_some());
+        assert!(app.world().resource::<NativeUiIntentQueue>().is_empty());
     }
 
     #[test]

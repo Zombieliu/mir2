@@ -836,6 +836,7 @@ pub struct Disconnect {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ErrorEvent {
+    pub code: Option<String>,
     pub message: Option<String>,
     pub packet: Option<String>,
     pub payload: Value,
@@ -1009,20 +1010,32 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
 
     match event_type.as_str() {
         "packet" => parse_packet(packet.as_deref(), payload),
-        "error" => Ok(InboundEvent::Error(ErrorEvent {
-            message: payload
-                .get("message")
+        "error" => {
+            // The public Gateway sends flat error envelopes. Keep the older
+            // nested shape readable, without hiding the authoritative reason.
+            let code = value
+                .get("code")
+                .or_else(|| payload.get("code"))
                 .and_then(Value::as_str)
-                .map(str::to_owned)
-                .or_else(|| {
-                    payload
-                        .get("error")
-                        .and_then(Value::as_str)
-                        .map(str::to_owned)
-                }),
-            packet: packet.clone(),
-            payload,
-        })),
+                .map(str::to_owned);
+            let message = [
+                value.get("message"),
+                value.get("error"),
+                payload.get("message"),
+                payload.get("error"),
+            ]
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .find(|message| !message.trim().is_empty())
+            .map(str::to_owned);
+            Ok(InboundEvent::Error(ErrorEvent {
+                code,
+                message,
+                packet: packet.clone(),
+                payload,
+            }))
+        }
         "worldSnapshot" => Ok(InboundEvent::Packet(PacketEvent::WorldSnapshot(
             WorldSnapshot { payload },
         ))),
@@ -2234,6 +2247,28 @@ mod tests {
                 assert_eq!(err.message.as_deref(), Some("invalid credentials"));
             }
             _ => panic!("expected error envelope"),
+        }
+    }
+
+    #[test]
+    fn inbound_flat_gateway_error_preserves_code_and_prefers_canonical_message() {
+        let InboundEvent::Error(error) = parse_inbound_event(
+            r#"{"type":"error","code":"authRateLimited","message":"public reason","payload":{"message":"legacy reason"}}"#,
+        ).unwrap() else { panic!("expected error envelope") };
+        assert_eq!(error.code.as_deref(), Some("authRateLimited"));
+        assert_eq!(error.message.as_deref(), Some("public reason"));
+    }
+
+    #[test]
+    fn inbound_gateway_error_uses_legacy_reason_when_flat_message_is_empty_or_invalid() {
+        for raw in [
+            r#"{"type":"error","message":"","payload":{"error":"legacy reason"}}"#,
+            r#"{"type":"error","message":false,"payload":{"message":"legacy reason"}}"#,
+        ] {
+            let InboundEvent::Error(error) = parse_inbound_event(raw).unwrap() else {
+                panic!("expected error envelope")
+            };
+            assert_eq!(error.message.as_deref(), Some("legacy reason"));
         }
     }
 

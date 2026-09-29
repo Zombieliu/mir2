@@ -42,6 +42,9 @@ use crate::session_config::NativeReconnectConfig;
 #[path = "trade_projection.rs"]
 mod trade_projection;
 
+#[path = "gateway_account_feedback.rs"]
+mod account_feedback;
+
 /// The gateway WebSocket endpoint for the local development gateway.
 pub const LOCAL_GATEWAY_WS_URL: &str = "ws://127.0.0.1:7110/ws";
 const NATIVE_RESUME_PROTOCOL: &str = "nativeResumeV1";
@@ -4633,14 +4636,8 @@ fn dispatch_shell_event(
     let shell_event = match event {
         InboundEvent::Packet(PacketEvent::NewAccountResult(result)) => match result.result {
             Some(8) => Some(ShellGatewayEvent::AccountCreated),
-            Some(7) => Some(ShellGatewayEvent::AccountCreationFailed {
-                message: "account already exists".to_owned(),
-            }),
-            Some(code) => Some(ShellGatewayEvent::AccountCreationFailed {
-                message: format!("account creation failed (result {code})"),
-            }),
-            None => Some(ShellGatewayEvent::AccountCreationFailed {
-                message: "account creation returned no result".to_owned(),
+            result => Some(ShellGatewayEvent::AccountCreationFailed {
+                message: account_feedback::registration_failure_message(result),
             }),
         },
         InboundEvent::Packet(PacketEvent::LoginSuccess(success)) => {
@@ -4773,10 +4770,7 @@ fn dispatch_shell_event(
             _ => None,
         },
         InboundEvent::Error(error) => Some(ShellGatewayEvent::OperationFailure {
-            message: error
-                .message
-                .clone()
-                .unwrap_or_else(|| "gateway error".to_owned()),
+            message: account_feedback::gateway_error_message(error),
         }),
         _ => None,
     };
@@ -11447,6 +11441,30 @@ mod tests {
             let actual = receiver.try_recv().expect("shell account event");
             assert_eq!(matches!(actual, ShellGatewayEvent::AccountCreated), created);
         }
+    }
+
+    #[test]
+    fn shell_dispatch_flat_registration_limit_releases_pending_request_and_explains_wait() {
+        use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
+
+        let context = GatewaySessionContext::default();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let event = parse_inbound_event(
+            r#"{"type":"error","message":"too many authentication attempts; retry after 2695 seconds"}"#,
+        ).expect("public registration limit");
+        let mut model = NativeShellModel {
+            screen: NativeShellScreen::Registration,
+            register_request_in_flight: true,
+            ..Default::default()
+        };
+        dispatch_shell_event(&event, &context, &sender);
+        assert!(model.apply_gateway_event(receiver.try_recv().expect("shell error")));
+        assert!(!model.register_request_in_flight);
+        assert_eq!(model.screen, NativeShellScreen::Registration);
+        assert_eq!(
+            model.notice.unwrap().message,
+            "尝试过于频繁，请等待 2695 秒后再试"
+        );
     }
 
     #[test]

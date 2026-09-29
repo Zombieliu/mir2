@@ -217,6 +217,7 @@ const MIN_ACCOUNT_ID_LENGTH: usize = 3;
 const MAX_ACCOUNT_ID_LENGTH: usize = 15;
 const MIN_PASSWORD_LENGTH: usize = 5;
 const MAX_PASSWORD_LENGTH: usize = 15;
+const MIN_REGISTRATION_PASSWORD_LENGTH: usize = 10;
 const SAFE_KEY_DEFAULT_SEED: u64 = 0x4D49_5232_5341_4645;
 const SAFE_KEY_ALPHABET: [char; 36] = [
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
@@ -337,12 +338,12 @@ pub fn parse_registration_birth_date(value: &str) -> Result<i64, &'static str> {
             .enumerate()
             .any(|(index, byte)| index != 4 && index != 7 && !byte.is_ascii_digit())
     {
-        return Err("birth date must use YYYY-MM-DD");
+        return Err("出生日期请填写有效的 YYYY-MM-DD 日期，也可以留空。");
     }
     let date = NaiveDate::parse_from_str(value, "%Y-%m-%d")
-        .map_err(|_| "birth date must use YYYY-MM-DD")?;
+        .map_err(|_| "出生日期请填写有效的 YYYY-MM-DD 日期，也可以留空。")?;
     if !(1..=9999).contains(&date.year()) {
-        return Err("birth date must use YYYY-MM-DD");
+        return Err("出生日期请填写有效的 YYYY-MM-DD 日期，也可以留空。");
     }
     Ok((i64::from(date.num_days_from_ce()) - 1) * DOTNET_TICKS_PER_DAY)
 }
@@ -420,34 +421,83 @@ fn source_email_group_ends(
     ends
 }
 
+/// Registration colors and submission share these rules. Login deliberately
+/// keeps accepting existing credentials; the new-account policy is stricter.
+pub(crate) fn validate_registration_field(
+    form: &RegistrationForm,
+    focus: RegistrationFocus,
+) -> Result<(), &'static str> {
+    match focus {
+        RegistrationFocus::AccountId => {
+            if !valid_alphanumeric(
+                &form.account_id,
+                MIN_ACCOUNT_ID_LENGTH,
+                MAX_ACCOUNT_ID_LENGTH,
+            ) {
+                return Err("账号需为 3–15 位英文字母或数字。");
+            }
+        }
+        RegistrationFocus::Password => {
+            if !valid_alphanumeric(
+                &form.password,
+                MIN_REGISTRATION_PASSWORD_LENGTH,
+                MAX_PASSWORD_LENGTH,
+            ) {
+                return Err("注册密码需为 10–15 位英文字母或数字。");
+            }
+            if form.password.eq_ignore_ascii_case(&form.account_id) {
+                return Err("密码不能与账号相同（不区分大小写）。");
+            }
+            // Same denylist as the production identity policy in save.rs.
+            if matches!(
+                form.password.to_ascii_lowercase().as_str(),
+                "1234567890" | "password123" | "qwerty12345" | "mir2password"
+            ) {
+                return Err("这个密码过于常见，请换一个密码。");
+            }
+        }
+        RegistrationFocus::ConfirmPassword => {
+            validate_registration_field(form, RegistrationFocus::Password)?;
+            if form.confirm_password != form.password {
+                return Err("两次输入的密码不一致。");
+            }
+        }
+        RegistrationFocus::UserName if form.user_name.chars().count() > 20 => {
+            return Err("姓名最多 20 个字符，也可以留空。");
+        }
+        RegistrationFocus::BirthDate => {
+            parse_registration_birth_date(&form.birth_date)?;
+        }
+        RegistrationFocus::SecretQuestion if form.secret_question.chars().count() > 30 => {
+            return Err("密保问题最多 30 个字符，也可以留空。");
+        }
+        RegistrationFocus::SecretAnswer if form.secret_answer.chars().count() > 30 => {
+            return Err("密保答案最多 30 个字符，也可以留空。");
+        }
+        RegistrationFocus::EmailAddress => {
+            if form.email_address.chars().count() > 50
+                || !valid_registration_email(&form.email_address)
+            {
+                return Err("请输入完整有效的邮箱地址（最多 50 个字符），也可以留空。");
+            }
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
 pub fn validate_registration_fields(form: &RegistrationForm) -> Result<i64, &'static str> {
-    if !valid_alphanumeric(&form.account_id, MIN_ACCOUNT_ID_LENGTH, MAX_ACCOUNT_ID_LENGTH) {
-        return Err("account ID must be 3-15 alphanumeric characters");
-    }
-    if !valid_alphanumeric(&form.password, MIN_PASSWORD_LENGTH, MAX_PASSWORD_LENGTH) {
-        return Err("password must be 5-15 alphanumeric characters");
-    }
-    if form.password != form.confirm_password {
-        return Err("password confirmation does not match");
-    }
-    if !valid_alphanumeric(
-        &form.confirm_password,
-        MIN_PASSWORD_LENGTH,
-        MAX_PASSWORD_LENGTH,
-    ) {
-        return Err("password confirmation must be 5-15 alphanumeric characters");
-    }
-    if form.user_name.chars().count() > 20 {
-        return Err("user name must be at most 20 characters");
-    }
-    if form.secret_question.chars().count() > 30 {
-        return Err("secret question must be at most 30 characters");
-    }
-    if form.secret_answer.chars().count() > 30 {
-        return Err("secret answer must be at most 30 characters");
-    }
-    if form.email_address.chars().count() > 50 || !valid_registration_email(&form.email_address) {
-        return Err("email address is not acceptable");
+    for focus in [
+        RegistrationFocus::AccountId,
+        RegistrationFocus::Password,
+        RegistrationFocus::ConfirmPassword,
+        RegistrationFocus::UserName,
+        RegistrationFocus::BirthDate,
+        RegistrationFocus::SecretQuestion,
+        RegistrationFocus::SecretAnswer,
+        RegistrationFocus::EmailAddress,
+    ] {
+        validate_registration_field(form, focus)?;
     }
     parse_registration_birth_date(&form.birth_date)
 }
@@ -962,7 +1012,7 @@ impl NativeShellModel {
             (NativeShellScreen::Login, NativeUiIntent::Login) => self.begin_login(),
             (NativeShellScreen::Login, NativeUiIntent::OpenRegistration) => {
                 if self.register_request_in_flight {
-                    self.set_error("account creation request is still pending");
+                    self.set_error("注册请求正在处理中，请稍候。");
                     return false;
                 }
                 self.registration = RegistrationForm::default();
@@ -972,7 +1022,7 @@ impl NativeShellModel {
             }
             (NativeShellScreen::Registration, NativeUiIntent::CancelRegistration) => {
                 if self.register_request_in_flight {
-                    self.set_error("account creation request is still pending");
+                    self.set_error("注册请求正在处理中，请稍候。");
                     return false;
                 }
                 self.registration = RegistrationForm::default();
@@ -1004,7 +1054,7 @@ impl NativeShellModel {
                 self.registration.email_address = email_address;
 
                 if self.register_request_in_flight {
-                    self.set_error("account creation request is still pending");
+                    self.set_error("注册请求正在处理中，请稍候。");
                     return false;
                 }
                 let expected_birth_date_binary =
@@ -1016,7 +1066,7 @@ impl NativeShellModel {
                         }
                     };
                 if expected_birth_date_binary != birth_date_binary {
-                    self.set_error("birth date is not acceptable");
+                    self.set_error("出生日期校验失败，请重新填写。");
                     return false;
                 }
                 self.register_request_in_flight = true;
@@ -1657,8 +1707,107 @@ mod tests {
         assert!(valid_registration_email(""));
         assert!(valid_registration_email("hero@example.test"));
         assert!(valid_registration_email("note hero@example.test."));
+        assert!(!valid_registration_email("1S"));
         assert!(!valid_registration_email("hero!@example.test"));
         assert!(!valid_registration_email("hero@example"));
+    }
+
+    fn valid_registration_form() -> RegistrationForm {
+        RegistrationForm {
+            account_id: "newhero".to_owned(),
+            password: "ValidPass42".to_owned(),
+            confirm_password: "ValidPass42".to_owned(),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn registration_password_boundaries_and_production_weak_passwords_are_rejected() {
+        for (password, accepted) in [
+            ("Alpha1234", false),
+            ("Alpha12345", true),
+            ("Alpha1234567890", true),
+            ("Alpha12345678901", false),
+            ("2468135790", true),
+            ("Alpha1234!", false),
+            ("Alpha1234 ", false),
+            ("Alpha1234\n", false),
+            ("密码Alpha12345", false),
+            ("1234567890", false),
+            ("PASSWORD123", false),
+            ("Qwerty12345", false),
+            ("Mir2Password", false),
+        ] {
+            let mut form = valid_registration_form();
+            form.password = password.to_owned();
+            form.confirm_password = password.to_owned();
+            assert_eq!(validate_registration_fields(&form).is_ok(), accepted);
+            assert_eq!(
+                validate_registration_field(&form, RegistrationFocus::Password).is_ok(),
+                accepted
+            );
+            assert_eq!(
+                validate_registration_field(&form, RegistrationFocus::ConfirmPassword).is_ok(),
+                accepted
+            );
+        }
+        let mut form = valid_registration_form();
+        form.account_id = "NewAccount9".to_owned();
+        form.password = "newaccount9".to_owned();
+        form.confirm_password = form.password.clone();
+        assert_eq!(
+            validate_registration_fields(&form),
+            Err("密码不能与账号相同（不区分大小写）。")
+        );
+        form.account_id = "different".to_owned();
+        assert!(validate_registration_fields(&form).is_ok());
+        form.confirm_password = "Newaccount9".to_owned();
+        assert_eq!(
+            validate_registration_fields(&form),
+            Err("两次输入的密码不一致。")
+        );
+    }
+
+    #[test]
+    fn registration_optional_fields_accept_empty_values_and_keep_their_bounds() {
+        let mut form = valid_registration_form();
+        assert_eq!(validate_registration_fields(&form), Ok(0));
+        for (account, accepted) in [
+            ("ab", false),
+            ("abc", true),
+            ("abcdefghijklmno", true),
+            ("abcdefghijklmnop", false),
+            ("bad id", false),
+        ] {
+            form.account_id = account.to_owned();
+            assert_eq!(validate_registration_fields(&form).is_ok(), accepted);
+        }
+        form.account_id = "newhero".to_owned();
+        form.user_name = "名".repeat(20);
+        form.secret_question = "问".repeat(30);
+        form.secret_answer = "答".repeat(30);
+        form.birth_date = "2000-02-29".to_owned();
+        form.email_address = "hero@example.test".to_owned();
+        assert!(validate_registration_fields(&form).is_ok());
+        form.user_name.push('名');
+        assert!(validate_registration_field(&form, RegistrationFocus::UserName).is_err());
+        form.secret_question.push('问');
+        assert!(validate_registration_field(&form, RegistrationFocus::SecretQuestion).is_err());
+        form.secret_answer.push('答');
+        assert!(validate_registration_field(&form, RegistrationFocus::SecretAnswer).is_err());
+        form.birth_date = "2001-02-29".to_owned();
+        assert!(validate_registration_field(&form, RegistrationFocus::BirthDate).is_err());
+        form.email_address = format!("{}@example.test", "a".repeat(40));
+        assert!(validate_registration_field(&form, RegistrationFocus::EmailAddress).is_err());
+    }
+
+    #[test]
+    fn registration_password_policy_does_not_block_legacy_login_credentials() {
+        let mut model = model_with_valid_login();
+        model.login.password = "short".to_owned();
+        assert!(model.apply_ui_intent(NativeUiIntent::Login));
+        assert_eq!(model.screen, NativeShellScreen::Authenticating);
+        assert!(model.login_request_in_flight);
     }
 
     #[test]
@@ -1713,8 +1862,8 @@ mod tests {
 
         let valid = NativeUiIntent::SubmitRegistration {
             account_id: "newhero".to_owned(),
-            password: "secret".to_owned(),
-            confirm_password: "secret".to_owned(),
+            password: "ValidPass42".to_owned(),
+            confirm_password: "ValidPass42".to_owned(),
             birth_date: "2001-02-03".to_owned(),
             birth_date_binary: parse_registration_birth_date("2001-02-03").unwrap(),
             user_name: "New Hero".to_owned(),
@@ -1748,8 +1897,8 @@ mod tests {
         let mut model = NativeShellModel::default();
         model.screen = NativeShellScreen::Registration;
         model.registration.account_id = "newhero".to_owned();
-        model.registration.password = "secret".to_owned();
-        model.registration.confirm_password = "secret".to_owned();
+        model.registration.password = "ValidPass42".to_owned();
+        model.registration.confirm_password = "ValidPass42".to_owned();
         assert!(model.apply_ui_intent(NativeUiIntent::SubmitRegistration {
             account_id: model.registration.account_id.clone(),
             password: model.registration.password.clone(),
