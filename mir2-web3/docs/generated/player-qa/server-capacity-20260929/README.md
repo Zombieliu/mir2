@@ -480,7 +480,9 @@ live owner channel but still expected its first ACK in the direct response.
 Its test-only correction asserts no direct ACK and the actual live(4,7)/Right
 ACK; the subsequent queued Run(6,7), observer broadcast and time limits remain
 unchanged. Fifteen focused cadence/owner checks then pass. Production code and
-the verified9ac artifact are unchanged; a second complete serial run is active.
+the verified9ac artifact are unchanged. The second complete serial run passes
+845 tests, zero failures and18 ignored cases in841.09 seconds. The test-only
+correction and v2 scene are pushed as a6b9571af.
 
 The three-player wide calibration `1790642427645-2fc62b81` passes60-second
 stage and60-second soak on664. AOI is304/304 and330/330, movement P95 at most
@@ -501,3 +503,28 @@ receives StartGame success but times out awaiting authoritative bootstrap and
 later refresh/logout. The other three continue valid movement at P95<=104ms;
 no memory/restart protection fires. Preserve this failure and inspect the
 ordinary bootstrap before attributing it to processing capacity.
+
+The isolated fourth-account diagnostic `1790658156811-314b6170` successfully
+bootstraps in9.36 seconds. Its40-second small-patrol run fails the retained Run
+coverage gate, not bootstrap or delivery. The next full50-target attempt
+`1790659192037-a5db6258` admits all10 initial actors, then stops before completing
+stage10. One actor repeats an unchanged-position rejection into(252,576)23
+times after a rejected Run, despite having traversed that cell less than one
+second earlier. Replies take60–64ms. The concrete blocking object is unknown;
+the old trace lacks monster positions. A separate combat timeout is retained.
+No capacity acceptance follows.
+
+The runner now remembers only a confirmed unchanged-position Walk destination
+for3 seconds (at most16 cells), tries ordinary alternate declared patrol corners,
+and records a bounded public nearby-entity diagnostic. A rejected Run does not
+guess which cell blocked it. All correction counts, activity denominators,
+collision rules and acceptance gates remain unchanged. Two new regressions
+first fail against the old implementation; eight focused navigation checks pass
+after the change. The next live50-target run remains required.
+
+Bounded wire evidence shows each ordinary entry downloads about0.8MiB. Static
+quest/item/recipe/shop definitions comprise603,847 bytes of a representative
+660,574-byte post-StartGame batch. Identical-size batches take171–181ms for four
+connections and4.8–7.1 seconds for six others; this does not establish a fixed
+bandwidth ceiling or prove the earlier timeout cause. The5-minute TCP sample
+started after the failed run and is retained strictly as an idle baseline.

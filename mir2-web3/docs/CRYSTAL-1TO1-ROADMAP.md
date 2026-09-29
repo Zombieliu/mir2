@@ -1,5 +1,10 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-29 capacity candidate9ac is live only on the isolated realm. Complete
+> serial Gateway revalidation passes845/0 with18 ignored; Node80/80 passes.
+> A new ordinary fourth-player bootstrap failure remains under investigation.
+> No50/100 or additional whole-game acceptance. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 capacity candidate now orders player viewport updates and owner
 > movement acknowledgements within their respective live queues, with focused
 > race/overflow/bootstrap/resume checks. The earlier integrated build passes

@@ -1,5 +1,11 @@
 # Backend 1:1 Progress
 
+> 2026-09-29 capacity candidate9ac is deployed after backup and clean normal
+> stops. Second complete Gateway regression passes845/0 with18 ignored;
+> the original failing delivery-path fixture and focused repair remain recorded.
+> The new public workload stops on its fourth bootstrap;50-player steady
+> acceptance remains open. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 live ordering candidate addresses independently reproduced AOI and
 > owner-ACK races, including full queues, old registrations, bootstrap and
 > abnormal transport save/resume. The monster hydration getter preserves entity

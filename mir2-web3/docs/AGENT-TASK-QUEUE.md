@@ -1,5 +1,12 @@
 # Agent Task Queue
 
+> 2026-09-29 capacity follow-up: second full Gateway regression passes845/0
+> with18 ignored; runner/observation passes80/80. Pushed9ac is deployed to the
+> backed-up isolated realm; original production is unchanged. The first new
+> 50-target attempt stops on the fourth ordinary bootstrap, before any stage.
+> Diagnose that retained failure; no50-player acceptance yet. The execution
+> gap00:46–04:22 UTC earns no stability time. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 capacity ordering follow-up: deterministic player-AOI and owner
 > acknowledgement races now have fixes and focused regressions. WSS viewport
 > overflow cancels the affected transport through the normal save/resume path;

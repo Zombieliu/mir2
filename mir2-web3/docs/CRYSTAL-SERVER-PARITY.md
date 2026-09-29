@@ -1,5 +1,11 @@
 # Crystal Server Parity
 
+> 2026-09-29 final ordering regression passes845/0 with18 ignored in a complete
+> second serial run. The one first-run failure was an old test expecting direct
+> owner ACK delivery; only its assertion changed. Candidate9ac is deployed with
+> original gameplay/auth settings; fourth-player bootstrap and50/100 long-soak
+> acceptance remain open. [Evidence](generated/player-qa/server-capacity-20260929/README.md).
+
 > 2026-09-29 ordering candidate preserves gameplay/collision/cadence/auth rules
 > while serializing viewport lifecycle and owner acknowledgements on their
 > existing live channels. Focused overflow, bootstrap and resume checks pass;

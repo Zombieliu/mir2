@@ -27,6 +27,8 @@ const PLAYER_MOTION_PACKETS = new Set(['ObjectWalk', 'ObjectRun', 'ObjectTurn'])
 const LIFECYCLE_IDENTITY_LIMIT = 256;
 const NAVIGATION_ATTEMPT_LIMIT = 40;
 const NAVIGATION_OCCUPANT_LIMIT = 32;
+const REJECTED_WALK_CELL_LIMIT = 16;
+const REJECTED_WALK_CELL_TTL_MS = 3000;
 
 // Deliberately select public identity/position fields. Never copy a packet or
 // snapshot wholesale into the persistent diagnostic stream.
@@ -111,6 +113,7 @@ export class CapacityClient extends NativeResumeClient {
     this.lifecycleIdentities = new Map(); this.lifecycleMissing = new Set(); this.lifecycleOrphans = new Set();
     this.lifecycleRows = 0; this.lifecycleIdentityEvictions = 0; this.lifecycleUnchangedSnapshots = 0;
     this.navigationBlocked = false; this.navigationBlockedRows = 0;
+    this.rejectedWalkCells = new Map(); this.movementCorrectionStreak = false; this.movementCorrectionRows = 0;
     this.selfTransformRows = 0;
   }
   record(direction, value) {
@@ -406,8 +409,56 @@ export function directionOf(from, to) {
   const dx = to.x - from.x, dy = to.y - from.y;
   return STEPS.find(([x, y]) => x === dx && y === dy)?.[2] ?? null;
 }
+function rejectedWalkObstacles(client) {
+  if (client.context?.policy.activityMode !== 'native' || !client.rejectedWalkCells) return [];
+  const now = performance.now(), mapFileName = String(client.snapshot.mapFileName);
+  for (const [key, cell] of client.rejectedWalkCells) {
+    if (cell.expiresAt <= now || cell.mapFileName !== mapFileName) client.rejectedWalkCells.delete(key);
+  }
+  return [...client.rejectedWalkCells.values()];
+}
+function recordMovementCorrection(client, context, owner, plan, actual, phase, receipt) {
+  let avoidance;
+  // A Run rejection cannot identify which of two cells failed. Only an
+  // unchanged-owner Walk identifies one refused destination to try avoiding;
+  // this is a temporary route choice, not a claim about the rejection cause.
+  if (plan.command.type === 'walk' && actual.x === owner.x && actual.y === owner.y && distance(owner, plan.first) === 1) {
+    rejectedWalkObstacles(client);
+    const cells = client.rejectedWalkCells, key = `${plan.first.x},${plan.first.y}`;
+    cells.delete(key);
+    if (cells.size >= REJECTED_WALK_CELL_LIMIT) cells.delete(cells.keys().next().value);
+    cells.set(key, { ...lifecyclePoint(plan.first), mapFileName: String(client.snapshot.mapFileName),
+      expiresAt: performance.now() + REJECTED_WALK_CELL_TTL_MS });
+    avoidance = { ...lifecyclePoint(plan.first), ttlMs: REJECTED_WALK_CELL_TTL_MS };
+    if (client.role === 'movement') client.targetCursor = (client.targetCursor + 1) % 4;
+  }
+  if (!client.movementCorrectionStreak) {
+    client.movementCorrectionStreak = true;
+    const occupants = []; let count = 0;
+    for (const entity of client.snapshot.entities) {
+      if (entity.objectId === owner.objectId || !lifecyclePoint(entity) || distance(entity, owner) > 6) continue;
+      count++;
+      const kind = String(entity.kind).toLowerCase();
+      occupants.push({ ...(Number.isInteger(entity.objectId) ? { objectId: entity.objectId } : {}),
+        kind: ['player', 'remoteplayer', 'selfplayer', 'monster', 'npc'].includes(kind) ? kind : 'other',
+        ...lifecyclePoint(entity), dead: Boolean(entity.dead), hidden: Boolean(entity.hidden) });
+      occupants.sort((a, b) => distance(a, owner) - distance(b, owner) || (a.objectId ?? 0) - (b.objectId ?? 0));
+      if (occupants.length > NAVIGATION_OCCUPANT_LIMIT) occupants.pop();
+    }
+    context.writer?.add({ type: 'movementCorrection', actor: client.label, connection: client.lifecycleConnection,
+      at: Date.now(), monotonicMs: receipt.monotonicMs, sequence: receipt.sequence, phase,
+      kind: plan.command.type, mapFileName: String(client.snapshot.mapFileName).slice(0, 80),
+      origin: lifecyclePoint(owner), first: lifecyclePoint(plan.first), target: lifecyclePoint(plan.target), actual: lifecyclePoint(actual),
+      ...(Number.isFinite(owner.hp) ? { ownHp: owner.hp } : {}), ...(Number.isFinite(owner.poison) ? { ownPoison: owner.poison } : {}),
+      ...(Number.isFinite(client.snapshot.playerPoison) ? { playerPoison: client.snapshot.playerPoison } : {}),
+      temporaryAvoidance: avoidance ?? null, nearbyOccupants: occupants, nearbyOccupantCount: count, occupantsTruncated: count > occupants.length });
+    client.movementCorrectionRows++;
+  }
+  return avoidance;
+}
 function movement(client, target, map) {
-  const owner = self(client), occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead);
+  const owner = self(client), occupied = client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead)
+    .concat(rejectedWalkObstacles(client));
   const blocked = (reason, nextStep) => {
     if (client.navigationAttempts) {
       client.navigationAttemptCount++;
@@ -444,7 +495,7 @@ function patrol(client, context, home = client.home) {
     // Prefer an ordinary clear two-cell corner over a one-two-one detour to a
     // blocked edge. Check the exact same two steps and diagonal side cells as
     // A*, without allocating another full-map search for each of four corners.
-    const occupied = new Set(client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead)
+    const occupied = new Set(client.snapshot.entities.filter(entity => entity.objectId !== owner.objectId && !entity.dead).concat(rejectedWalkObstacles(client))
       .map(entity => `${entity.x},${entity.y}`));
     const clear = point => protocolMapCellIsWalkable(map, point) && !occupied.has(`${point.x},${point.y}`);
     const doorway = point => (client.snapshot.mapTransfers ?? []).some(transfer => inside(point, transfer.bounds));
@@ -678,7 +729,8 @@ async function action(client, context, planned, preparedPlan) {
       const actual = receipt.payload;
       if (!(actual.x === plan.target.x && actual.y === plan.target.y) &&
           !(kind === 'run' && actual.x === plan.first.x && actual.y === plan.first.y)) status = 'corrected';
-      if (status === 'success') { client.movementCount++; client.nativeRunPrimedUntil = sentAt + 1200; client.navigationBlocked = false; }
+      if (status === 'success') { client.movementCount++; client.nativeRunPrimedUntil = sentAt + 1200; client.navigationBlocked = false; client.movementCorrectionStreak = false; }
+      else if (native) row.temporaryAvoidance = recordMovementCorrection(client, context, owner, plan, actual, phase, receipt);
       row.actual = { x: actual.x, y: actual.y }; row.direction = actual.direction;
       row.movedCells = distance(owner, actual);
       recordCombatArrival(client, context);
@@ -1143,6 +1195,9 @@ export async function runCapacity(options) {
     report.boundedStorage = { retainedMonitorSamples: guard.history.length, maximumMonitorSamples: guard.maximumHistory,
       monitorTimeBucketMs: guard.timeline.bucketMs, rawMonitorSamples: guard.timeline.rawSamples,
       maximumEventsPerConnection: 2048, writerMaximumBufferedBytes: writer.maximumBufferedBytes, writerLimitBytes: writer.maxBufferedBytes,
+      movementCorrection: { maximumRejectedWalkCells: REJECTED_WALK_CELL_LIMIT, rejectedWalkCellTtlMs: REJECTED_WALK_CELL_TTL_MS,
+        maximumNearbyOccupants: NAVIGATION_OCCUPANT_LIMIT, rows: context.allClients.reduce((sum, client) => sum + client.movementCorrectionRows, 0),
+        rule: 'First correction per uninterrupted movement streak; unchanged-owner Walk temporarily avoids its single refused cell without changing failure accounting' },
       navigationBlocked: { maximumAttempts: NAVIGATION_ATTEMPT_LIMIT, maximumNearbyOccupants: NAVIGATION_OCCUPANT_LIMIT,
         rows: context.allClients.reduce((sum, client) => sum + client.navigationBlockedRows, 0),
         rule: 'First blocked action opportunity until a successful movement acknowledgement; ordinary blocked opportunities remain counted' },

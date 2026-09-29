@@ -390,6 +390,67 @@ test('native navigation diagnostics retain the first blocked streak with bounded
   assert.equal(client.navigationBlockedRows, 2);
 });
 
+test('native corrected Walk detours around the refused first cell until expiry without hiding the correction', async () => {
+  const rows = [], actions = [], measurements = new Measurements();
+  const context = { policy: capacityPolicy({ profile: 'probe', activityMode: 'native' }),
+    map: { width: 80, height: 30, blocked: new Uint8Array(2400) }, mapName: '0', patrolSpan: 4,
+    phase: 'stage-2', clients: [], writer: { add: row => rows.push(row) },
+    add: row => { actions.push(row); measurements.add(row); }, guard: { assert() {}, stop(reason) { throw new Error(reason); } } };
+  const client = new CapacityClient('ws://127.0.0.1:1/ws', actor(0), context);
+  const owner = { ...nativeSnapshot().entities[0], name: client.label, x: 8, y: 5 };
+  client.snapshot = { ...nativeSnapshot(), entities: [owner] };
+  Object.assign(client, { home: { x: 5, y: 5 }, role: 'movement', targetCursor: 3, nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity });
+  client.send = command => client.events.push({ direction: 'received', type: 'packet', packet: 'UserLocation',
+    sequence: ++client.sequence, monotonicMs: performance.now(), payload: { x: owner.x, y: owner.y, direction: command.direction } });
+  const offer = async () => { client.plan = new NativePlan(performance.now()); offerNativeAction(client, context); await client.pending; };
+  assert.deepEqual(selectNativeAction(client, context).first, { x: 7, y: 5 });
+  await offer();
+  assert.equal(actions.length, 1); assert.equal(actions[0].status, 'corrected');
+  assert.equal(measurements.actors.get(client.label).nativeCompleted, 0);
+  const detour = selectNativeAction(client, context);
+  assert.notDeepEqual(detour.first, { x: 7, y: 5 });
+  assert.ok(detour.target.x >= 5 && detour.target.x <= 9 && detour.target.y >= 5 && detour.target.y <= 9);
+  assert.equal(client.rejectedWalkCells.size, 1);
+  const rejected = [...client.rejectedWalkCells.values()][0];
+  assert.ok(rejected.expiresAt > performance.now() && rejected.expiresAt <= performance.now() + 3000);
+  client.targetCursor = 3; rejected.expiresAt = 0;
+  assert.deepEqual(selectNativeAction(client, context).first, { x: 7, y: 5 }, 'a transient refused cell is retried after expiry');
+  assert.equal(client.rejectedWalkCells.size, 0);
+  assert.equal(rows.filter(row => row.type === 'movementCorrection').length, 1);
+});
+
+test('native correction avoidance never guesses a Run blocker and keeps a bounded private-safe diagnostic', async () => {
+  const rows = [], actions = [];
+  const context = { policy: capacityPolicy({ profile: 'probe', activityMode: 'native' }),
+    map: { width: 80, height: 30, blocked: new Uint8Array(2400) }, mapName: '0', patrolSpan: 4,
+    phase: 'stage-2', clients: [], writer: { add: row => rows.push(row) }, add: row => actions.push(row),
+    guard: { assert() {}, stop(reason) { throw new Error(reason); } } };
+  const client = new CapacityClient('ws://127.0.0.1:1/ws', actor(0), context);
+  const owner = { ...nativeSnapshot().entities[0], name: client.label, x: 8, y: 5 };
+  client.snapshot = { ...nativeSnapshot(), entities: [owner, ...Array.from({ length: 80 }, (_, index) => ({
+    objectId: 900 + index, kind: 'monster', name: 'never-copy-name', x: 10, y: 7, dead: Boolean(index % 2),
+    password: 'private-password', inventory: ['private-inventory'] }))] };
+  Object.assign(client, { home: { x: 5, y: 5 }, role: 'movement', targetCursor: 3, nativeRunPrimedUntil: Infinity,
+    nextNativeChatAt: Infinity, nextNativeTurnAt: Infinity });
+  client.send = command => client.events.push({ direction: 'received', type: 'packet', packet: 'UserLocation',
+    sequence: ++client.sequence, monotonicMs: performance.now(), payload: { x: owner.x, y: owner.y, direction: command.direction } });
+  const offer = async () => { client.plan = new NativePlan(performance.now()); offerNativeAction(client, context); await client.pending; };
+  await offer(); assert.equal(actions[0].kind, 'run'); assert.equal(actions[0].status, 'corrected');
+  assert.equal(client.rejectedWalkCells.size, 0, 'either Run cell could be occupied; do not invent a blocker');
+  const diagnostic = rows.find(row => row.type === 'movementCorrection');
+  assert.equal(diagnostic.nearbyOccupants.length, 32); assert.equal(diagnostic.nearbyOccupantCount, 80);
+  assert.ok(diagnostic.nearbyOccupants.some(entity => entity.dead));
+  assert.doesNotMatch(JSON.stringify(diagnostic), /never-copy-name|private-password|private-inventory/);
+  client.snapshot.entities = [owner]; client.nativeRunPrimedUntil = 0;
+  for (let index = 0; index < 20; index++) {
+    owner.x = 8 + index; client.home.x = owner.x - 3; client.targetCursor = 3;
+    await offer(); assert.ok(client.rejectedWalkCells.size <= 16);
+  }
+  assert.equal(client.rejectedWalkCells.size, 16);
+  assert.equal(rows.filter(row => row.type === 'movementCorrection').length, 1, 'one diagnostic per uninterrupted correction streak');
+  assert.equal(actions.filter(row => row.status === 'corrected').length, 21, 'every correction remains in the original action denominator');
+});
+
 test('real Bichon collision map and BorderVillage NPCs produce a full four-corner native Run patrol', async () => {
   const map = await loadProtocolCollisionMap('0'), npcs = await loadStationaryNpcObstacles('0');
   const origin = { x: 285, y: 617 }, board = npcs.find(npc => npc.name === 'BorderVillage_Board');
