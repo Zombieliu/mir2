@@ -16,6 +16,8 @@ mod skill_page;
 mod npc_item_service;
 #[path = "big_map_coordinates.rs"]
 mod big_map_coordinates;
+#[path = "localized_help.rs"]
+mod localized_help;
 
 use std::collections::VecDeque;
 
@@ -3530,6 +3532,9 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             app.add_systems(Startup, load_character_wing_materials);
         }
         app.init_resource::<NativePlayerUiState>()
+            .init_resource::<localized_help::HelpScrollState>()
+            .add_systems(Update, (localized_help::scroll_help, localized_help::capture_help_scroll).chain().before(render_overlays))
+            .add_systems(PostUpdate, localized_help::restore_help_scroll.before(bevy::ui::UiSystems::Layout))
             .init_resource::<keyboard_dialog::host::KeyboardHost>()
             .init_resource::<equipment_creature_host::MenuHost>()
             .init_resource::<social_bond_dialog::host::SocialHost>()
@@ -10450,7 +10455,7 @@ fn render_inventory_delete_modal(
                     }
                     overlay_text_at(
                         dialog,
-                        &format!("Delete how many '{name}'?", name = target.name),
+                        &crate::native_i18n::tr(&format!("Delete how many '{name}'?", name = target.name)),
                         CrystalRect::new(19.0, 8.0, 158.0, 14.0),
                         10.0,
                         TEXT,
@@ -10539,10 +10544,10 @@ fn render_inventory_delete_modal(
                     }
                     overlay_text_at(
                         dialog,
-                        &format!(
+                        &crate::native_i18n::tr(&format!(
                             "Permanently delete '{}'? This cannot be undone.",
                             target.name
-                        ),
+                        )),
                         CrystalRect::new(35.0, 35.0, 390.0, 110.0),
                         10.0,
                         TEXT,
@@ -10605,7 +10610,7 @@ fn render_mail_delete_modal(
             }
             overlay_text_at(
                 dialog,
-                "This parcel contains items or gold. Are you sure you want to delete it?",
+                &crate::native_i18n::tr("This parcel contains items or gold. Are you sure you want to delete it?"),
                 CrystalRect::new(35.0, 35.0, 390.0, 110.0),
                 10.0,
                 TEXT,
@@ -10710,7 +10715,7 @@ fn render_storage_password_modal(
             }
             overlay_centered_text_at(
                 dialog,
-                storage_password_caption(prompt.stage),
+                &crate::native_i18n::tr(storage_password_caption(prompt.stage)),
                 CrystalRect::new(25.0, 25.0, 235.0, 40.0),
                 10.0,
                 TEXT,
@@ -10743,7 +10748,7 @@ fn render_storage_password_modal(
             if prompt.mismatch {
                 overlay_centered_text_at(
                     dialog,
-                    "Passwords do not match.",
+                    &crate::native_i18n::tr("Passwords do not match."),
                     CrystalRect::new(25.0, 65.0, 235.0, 16.0),
                     9.0,
                     Color::srgb(0.95, 0.34, 0.28),
@@ -10773,14 +10778,14 @@ fn render_storage_password_modal(
             } else {
                 overlay_absolute_button(
                     dialog,
-                    "OK",
+                    &crate::native_i18n::tr("OK"),
                     CrystalRect::new(60.0, 123.0, 76.0, 25.0),
                     OverlayButton::StoragePasswordSubmit,
                     true,
                 );
                 overlay_absolute_button(
                     dialog,
-                    "Cancel",
+                    &crate::native_i18n::tr("Cancel"),
                     CrystalRect::new(160.0, 123.0, 76.0, 25.0),
                     OverlayButton::StoragePasswordCancel,
                     true,
@@ -10844,14 +10849,14 @@ fn render_storage_rental_confirmation(
             } else {
                 overlay_absolute_button(
                     dialog,
-                    "OK",
+                    &crate::native_i18n::tr("OK"),
                     CrystalRect::new(260.0, 157.0, 76.0, 25.0),
                     OverlayButton::StorageRentalConfirm,
                     true,
                 );
                 overlay_absolute_button(
                     dialog,
-                    "Cancel",
+                    &crate::native_i18n::tr("Cancel"),
                     CrystalRect::new(360.0, 157.0, 76.0, 25.0),
                     OverlayButton::StorageRentalCancel,
                     true,
@@ -10859,7 +10864,7 @@ fn render_storage_rental_confirmation(
             }
             overlay_text_at(
                 dialog,
-                confirmation.message(),
+                &crate::native_i18n::tr(confirmation.message()),
                 CrystalRect::new(35.0, 35.0, 390.0, 110.0),
                 10.0,
                 TEXT,
@@ -11050,7 +11055,14 @@ fn render_overlays(
     mut mail_cache: Local<MailRenderCache>,
     mut game_shop_cache: Local<GameShopRenderCache>,
     mut big_map_cache: Local<big_map_coordinates::RenderCache>,
+    mut last_locale_revision: Local<u64>,
 ) {
+    if *last_locale_revision != crate::native_i18n::revision() {
+        mail_cache.key = None;
+        game_shop_cache.key = None;
+        big_map_cache.reset();
+        *last_locale_revision = crate::native_i18n::revision();
+    }
     let OverlayRenderModels {
         asset_server,
         wing_materials,
@@ -11958,8 +11970,8 @@ fn render_inventory(
         return;
     }
 
-    title(parent, "Bag");
-    body(parent, &format!("{} Gold", inventory.gold));
+    title(parent, &crate::native_i18n::tr("Bag"));
+    body(parent, &crate::native_i18n::tr(&format!("{} Gold", inventory.gold)));
     if let Some(draft) = &state.inventory_operation {
         let instruction = match draft {
             InventoryOperationDraft::Move { source_slot, .. } => {
@@ -11974,7 +11986,7 @@ fn render_inventory(
     if let Some(ack) = &feedback.last {
         body(
             parent,
-            &format!(
+            &crate::native_i18n::tr(&format!(
                 "{}: {} (inventory remains server-authoritative)",
                 ack.label(),
                 if ack.success() {
@@ -11982,7 +11994,7 @@ fn render_inventory(
                 } else {
                     "rejected"
                 }
-            ),
+            )),
         );
     }
     parent
@@ -12022,7 +12034,7 @@ fn render_inventory(
                 overlay_button(grid, &label, OverlayButton::InspectBag(slot), enabled);
             }
         });
-    overlay_button(parent, "Close", OverlayButton::CloseWindows, true);
+    overlay_button(parent, &crate::native_i18n::tr("Close"), OverlayButton::CloseWindows, true);
 }
 
 fn format_crystal_gold(gold: u32) -> String {
@@ -12371,6 +12383,10 @@ fn render_equipment(
                     CrystalRect::new(left, 70.0, 64.0, 20.0),
                 );
             }
+            if crate::native_i18n::active() {
+                let caption = match page { CharacterPage::Character => "Equipment", CharacterPage::Stats1 => "Status", CharacterPage::Stats2 => "Statistics", CharacterPage::Spells => "Skills" };
+                localized_art_label(parent, caption, CrystalRect::new(left + 1.0, 71.0, 60.0, 18.0), 9.0);
+            }
         }
         spawn_overlay_crystal_button(
             parent,
@@ -12429,6 +12445,16 @@ fn render_equipment(
                 render_character_paper_doll(parent, asset_server, wing_materials, inventory, ui);
             }
             CharacterPage::Stats1 | CharacterPage::Stats2 => {
+                if crate::native_i18n::active() {
+                    let labels: &[&str] = if state.character_page == CharacterPage::Stats2 {
+                        &["Experience", "Bag weight", "Equipment weight", "Hand weight", "Magic resistance", "Poison resistance", "Health recovery", "Mana recovery", "Poison recovery", "Holy Power", "Frost Power", "Poison Power"]
+                    } else {
+                        &["HP", "MP", "AC", "MAC", "DC", "MC", "SC", "Critical chance", "Critical damage", "Attack speed", "Accuracy", "Agility", "Luck"]
+                    };
+                    for (row, label) in labels.iter().enumerate() {
+                        localized_art_label(parent, label, CrystalRect::new(14.0, 107.0 + row as f32 * 18.0, 115.0, 18.0), 9.0);
+                    }
+                }
                 let weights = ui
                     .player
                     .weights
@@ -12457,34 +12483,34 @@ fn render_equipment(
         return;
     }
 
-    title(parent, "Character / Equipment");
+    title(parent, &crate::native_i18n::tr("Character / Equipment"));
     let player = &ui.player;
     body(
         parent,
-        &format!(
+        &crate::native_i18n::tr(&format!(
             "{}  {}  Lv{}",
             player.name.as_deref().unwrap_or("-"),
             player.class_name.as_deref().unwrap_or("-"),
             player.level
-        ),
+        )),
     );
     body(
         parent,
-        &format!(
+        &crate::native_i18n::tr(&format!(
             "HP {}  MP {}  EXP {}",
             player.hp_label(),
             player.mp_label(),
             player.experience_percent_label()
-        ),
+        )),
     );
     body(
         parent,
-        &format!(
+        &crate::native_i18n::tr(&format!(
             "Weight {}/{}  Gold {}",
             player.current_weight,
             player.max_weight,
             player.gold_label()
-        ),
+        )),
     );
     for slot in 0..14 {
         let item = inventory
@@ -12507,7 +12533,7 @@ fn render_equipment(
             item.is_some(),
         );
     }
-    overlay_button(parent, "Close", OverlayButton::CloseWindows, true);
+    overlay_button(parent, &crate::native_i18n::tr("Close"), OverlayButton::CloseWindows, true);
 }
 
 fn spawn_overlay_frame(
@@ -12531,6 +12557,14 @@ fn spawn_overlay_frame(
             ..default()
         },
     ));
+    if crate::native_i18n::active() {
+        let caption = match path {
+            "original-ui/Prguse/920.png" => Some("Help"),
+            "original-ui/Title/670.png" | "original-ui/Title/671.png" => Some("Mail"),
+            _ => None,
+        };
+        if let Some(caption) = caption { localized_art_label(parent, caption, CrystalRect::new(8.0, 4.0, width - 40.0, 22.0), 12.0); }
+    }
 }
 
 fn spawn_inventory_tab(
@@ -12588,6 +12622,13 @@ fn overlay_text_at(
         TextColor(color),
         TextLayout::new(Justify::Left, LineBreak::NoWrap),
     ));
+}
+
+/// Replace only a baked label rectangle; never alter the surrounding frame or
+/// the independent button action. This prevents two languages being overpainted.
+pub(super) fn localized_art_label(parent: &mut ChildSpawnerCommands, source: &str, rect: CrystalRect, size: f32) {
+    parent.spawn((Node { position_type: PositionType::Absolute, left: Val::Px(rect.left), top: Val::Px(rect.top), width: Val::Px(rect.width), height: Val::Px(rect.height), align_items: AlignItems::Center, justify_content: JustifyContent::Center, overflow: Overflow::clip(), ..default() }, BackgroundColor(Color::srgb(0.055, 0.045, 0.03)), FocusPolicy::Pass))
+        .with_children(|label| { label.spawn((Text::new(crate::native_i18n::tr(source)), crate::crystal_ui::typography::crystal_text_font(size), TextColor(TEXT), TextLayout::new(Justify::Center, LineBreak::WordBoundary), FocusPolicy::Pass)); });
 }
 
 fn overlay_centered_text_at(
@@ -12819,6 +12860,49 @@ fn crystal_npc_goods_new_icon_visible(good: &ShopGood, goods: &[ShopGood]) -> bo
     !item.is_shop_item || multiple_available
 }
 
+fn localized_shop_price(good: &ShopGood) -> String {
+    if !crate::native_i18n::active() {
+        return crate::player_text::text(&good.price_label());
+    }
+    let key = if !good.use_pearls {
+        "game.shop.price_gold"
+    } else if good.price == 1 {
+        "game.shop.price_pearl"
+    } else {
+        "game.shop.price_pearls"
+    };
+    crate::native_i18n::format_key(
+        key,
+        &good.price_label(),
+        &[("amount", &good.price.to_string())],
+    )
+}
+
+#[test]
+fn localized_shop_currency_preserves_server_values_without_english_plural_suffix() {
+    use crate::native_i18n::{self, Locale};
+    let mut good = ShopGood {
+        price: 50,
+        count: 3,
+        use_pearls: true,
+        ..default()
+    };
+    let original = good.clone();
+    native_i18n::with_locale(Locale::TraditionalChinese, || {
+        assert_eq!(localized_shop_price(&good), "價格：50 顆珍珠");
+    });
+    native_i18n::with_locale(Locale::BrazilianPortuguese, || {
+        assert_eq!(localized_shop_price(&good), "Preço: 50 pérolas");
+    });
+    assert_eq!(good, original);
+    good.price = 1;
+    native_i18n::with_locale(Locale::BrazilianPortuguese, || {
+        assert_eq!(localized_shop_price(&good), "Preço: 1 pérola");
+        good.use_pearls = false;
+        assert_eq!(localized_shop_price(&good), "Preço: 1 de ouro");
+    });
+}
+
 /// Crystal MirGoodsCell: one 205x32 click/hover surface, with a 40x32 icon
 /// area and independent name/count/price labels at their source coordinates.
 fn overlay_absolute_shop_good_button(
@@ -12898,7 +12982,7 @@ fn overlay_absolute_shop_good_button(
                 top: Val::Px(14.0),
                 ..default()
             },
-            Text::new(crate::player_text::text(&good.price_label())),
+            Text::new(localized_shop_price(good)),
             crate::crystal_ui::typography::crystal_text_font(9.0),
             TextColor(Color::WHITE),
             TextLayout::new(Justify::Left, LineBreak::NoWrap),
@@ -13015,6 +13099,19 @@ fn spawn_static_overlay_sprite(
     path: String,
     rect: CrystalRect,
 ) {
+    if crate::native_i18n::active() {
+        let caption = match path.as_str() {
+            "original-ui/Title/57.png" => Some("Help"),
+            "original-ui/Title/25.png" => Some("Guild"),
+            "original-ui/Title/0.png" => Some("Storage"),
+            "original-ui/Title/7.png" => Some("Mail"),
+            "original-ui/Title/676.png" => Some("Obtain a stamp to unlock"),
+            "original-ui/Title/516.png" => Some("Lv."),
+            "original-ui/Title/517.png" => Some("Exp."),
+            _ => None,
+        };
+        if let Some(caption) = caption { localized_art_label(parent, caption, rect, 9.0); return; }
+    }
     parent.spawn((
         Node {
             position_type: PositionType::Absolute,
@@ -13107,6 +13204,10 @@ fn spawn_overlay_crystal_button_enabled_with_disabled(
     }
     spawn_crystal_image_button(parent, asset_server, spec, assets, action, false, enabled);
 }
+
+#[cfg(test)]
+#[path = "native_i18n_game_visual_tests.rs"]
+mod native_i18n_game_visual_tests;
 
 const HELP_PAGE_TITLES: [&str; HELP_PAGE_COUNT as usize] = [
     "Shortcut Information",
@@ -13383,14 +13484,14 @@ fn render_help(
     );
     overlay_text_at(
         parent,
-        &format!("{} / {}", page + 1, HELP_PAGE_COUNT),
+        &crate::native_i18n::tr(&format!("{} / {}", page + 1, HELP_PAGE_COUNT)),
         CrystalRect::new(230.0, 480.0, 80.0, 20.0),
         9.0,
         TEXT,
     );
     overlay_text_at(
         parent,
-        &format!("{}. {}", page + 1, HELP_PAGE_TITLES[usize::from(page)]),
+        &crate::native_i18n::tr(&format!("{}. {}", page + 1, crate::native_i18n::tr(HELP_PAGE_TITLES[usize::from(page)]))),
         CrystalRect::new(147.0, 39.0, 242.0, 30.0),
         10.0,
         TEXT,
@@ -13399,14 +13500,14 @@ fn render_help(
     if let Some(rows) = help_shortcut_rows(page) {
         overlay_text_at(
             parent,
-            "Shortcuts",
+            &crate::native_i18n::tr("Shortcuts"),
             CrystalRect::new(13.0, 75.0, 100.0, 30.0),
             10.0,
             TEXT,
         );
         overlay_text_at(
             parent,
-            "Information",
+            &crate::native_i18n::tr("Information"),
             CrystalRect::new(114.0, 75.0, 405.0, 30.0),
             10.0,
             TEXT,
@@ -13425,13 +13526,13 @@ fn render_help(
             );
             overlay_text_at(
                 parent,
-                information,
+                &crate::native_i18n::tr(information),
                 CrystalRect::new(119.0, top, 400.0, 23.0),
                 9.0,
                 TEXT,
             );
         }
-    } else {
+    } else if !localized_help::render(parent, page) {
         let image_index = page - 3;
         let (width, height) = help_image_dimensions(image_index);
         parent.spawn((
@@ -14076,7 +14177,7 @@ fn render_guild_members(
     }
     overlay_text_at(
         parent,
-        "Show Offline",
+        &crate::native_i18n::tr("Show Offline"),
         CrystalRect::new(rect.left + 245., rect.top + 369., 150., 12.),
         28. / 3.,
         Color::WHITE,
@@ -14356,7 +14457,7 @@ fn render_guild_ranks(
         }
         overlay_text_at(
             parent,
-            label,
+            &crate::native_i18n::tr(label),
             CrystalRect::new(bx + 17., by - 2., 135., 20.),
             10.6667,
             Color::WHITE,
@@ -14430,10 +14531,13 @@ fn render_guild_status(
         "original-ui/Prguse/1850.png".to_owned(),
         CrystalRect::new(rect.left + 365.0, rect.top + 62.0, 208.0, 316.0),
     );
+    if crate::native_i18n::active() {
+        localized_art_label(parent, "Guild Statistics", CrystalRect::new(rect.left + 373.0, rect.top + 66.0, 192.0, 26.0), 10.0);
+    }
     if social_has_permission(guild, "recruit") {
         overlay_text_at(
             parent,
-            "Recruit Member",
+            &crate::native_i18n::tr("Recruit Member"),
             CrystalRect::new(rect.left + 391., rect.top + 343., 150., 15.),
             10.6667,
             Color::WHITE,
@@ -14464,7 +14568,7 @@ fn render_guild_status(
     ] {
         overlay_text_at(
             parent,
-            label,
+            &crate::native_i18n::tr(label),
             CrystalRect::new(rect.left + 362.0, rect.top + top, 75.0, 14.0),
             9.0,
             Color::srgb(0.55, 0.55, 0.55),
@@ -14489,7 +14593,7 @@ fn render_guild_status(
         );
         overlay_text_at(
             parent,
-            &format!(
+            &crate::native_i18n::tr(&format!(
                 "{}{}",
                 guild.member_count,
                 if guild.max_members == 0 {
@@ -14497,7 +14601,7 @@ fn render_guild_status(
                 } else {
                     format!("/{}", guild.max_members)
                 }
-            ),
+            )),
             CrystalRect::new(rect.left + 437.0, rect.top + 159.0, 120.0, 14.0),
             9.0,
             TEXT,
@@ -14617,9 +14721,9 @@ fn render_trade_panel(
             BackgroundColor(PANEL_BG),
         ))
         .with_children(|dialog| {
-            title(dialog, "Trade");
-            overlay_button(dialog, "Request trade", OverlayButton::TradeRequest, true);
-            overlay_button(dialog, "Close", OverlayButton::CloseSocial, true);
+            title(dialog, &crate::native_i18n::tr("Trade"));
+            overlay_button(dialog, &crate::native_i18n::tr("Request trade"), OverlayButton::TradeRequest, true);
+            overlay_button(dialog, &crate::native_i18n::tr("Close"), OverlayButton::CloseSocial, true);
         });
 }
 
@@ -14629,11 +14733,11 @@ fn render_inspect(
     inventory: &InventoryModel,
     parcel: Option<&mail_parcel::MailParcelUi>,
 ) {
-    title(parent, "Item");
+    title(parent, &crate::native_i18n::tr("Item"));
     if let Some(inspect) = state.inspect.as_ref() {
         body(
             parent,
-            &format!(
+            &crate::native_i18n::tr(&format!(
                 "{}  x{}  {} slot {}",
                 if inspect.name.is_empty() {
                     inspect.key.as_str()
@@ -14643,24 +14747,24 @@ fn render_inspect(
                 inspect.quantity,
                 container_name(inspect.container),
                 inspect.slot
-            ),
+            )),
         );
         let mail_locked = parcel.is_some_and(|parcel| {
             inspected_bag_item_is_mail_locked(state, inventory, parcel)
         });
         let use_enabled = !mail_locked && inspected_use_intent(state, inventory).is_some();
-        overlay_button(parent, "Use (U)", OverlayButton::UseInspected, use_enabled);
+        overlay_button(parent, &crate::native_i18n::tr("Use (U)"), OverlayButton::UseInspected, use_enabled);
         if inspect.container == 2 {
             overlay_button(
                 parent,
-                "Unequip (G)",
+                &crate::native_i18n::tr("Unequip (G)"),
                 OverlayButton::UnequipInspected,
                 inspected_remove_intent(state, inventory).is_some(),
             );
         } else {
             overlay_button(
                 parent,
-                "Equip (G)",
+                &crate::native_i18n::tr("Equip (G)"),
                 OverlayButton::EquipInspected,
                 !mail_locked && inspected_equip_intent(state, inventory).is_some(),
             );
@@ -14678,10 +14782,10 @@ fn render_inspect(
                     ..default()
                 })
                 .with_children(|row| {
-                    overlay_button(row, "Drop all", OverlayButton::DropInspected, drop_enabled);
+                    overlay_button(row, &crate::native_i18n::tr("Drop all"), OverlayButton::DropInspected, drop_enabled);
                     overlay_button(
                         row,
-                        "Split",
+                        &crate::native_i18n::tr("Split"),
                         OverlayButton::SplitInspected,
                         valid_id && split_max > 0 && state.split_count <= split_max,
                     );
@@ -14696,14 +14800,14 @@ fn render_inspect(
                 .with_children(|row| {
                     overlay_button(
                         row,
-                        "Split -",
+                        &crate::native_i18n::tr("Split -"),
                         OverlayButton::SplitCountDec,
                         split_max > 0 && state.split_count > 1,
                     );
-                    body(row, &format!("{}", state.split_count));
+                    body(row, &crate::native_i18n::tr(&format!("{}", state.split_count)));
                     overlay_button(
                         row,
-                        "Split +",
+                        &crate::native_i18n::tr("Split +"),
                         OverlayButton::SplitCountInc,
                         split_max > 0 && state.split_count < split_max,
                     );
@@ -14712,55 +14816,55 @@ fn render_inspect(
                 let current = !mail_locked && drop_confirmation_is_current(confirmation, inventory);
                 body(
                     parent,
-                    &format!("Drop {} x{}?", confirmation.key, confirmation.count),
+                    &crate::native_i18n::tr(&format!("Drop {} x{}?", confirmation.key, confirmation.count)),
                 );
                 overlay_button(
                     parent,
-                    "Confirm drop",
+                    &crate::native_i18n::tr("Confirm drop"),
                     OverlayButton::ConfirmDropInspected,
                     current,
                 );
                 overlay_button(
                     parent,
-                    "Cancel drop",
+                    &crate::native_i18n::tr("Cancel drop"),
                     OverlayButton::CancelDropInspected,
                     true,
                 );
             }
             overlay_button(
                 parent,
-                "Move source",
+                &crate::native_i18n::tr("Move source"),
                 OverlayButton::ArmMoveInspected,
                 valid_id,
             );
             overlay_button(
                 parent,
-                "Merge source",
+                &crate::native_i18n::tr("Merge source"),
                 OverlayButton::ArmMergeInspected,
                 valid_id && item.quantity > 0,
             );
             if state.inventory_operation.is_some() {
                 overlay_button(
                     parent,
-                    "Cancel move/merge",
+                    &crate::native_i18n::tr("Cancel move/merge"),
                     OverlayButton::CancelInventoryOperation,
                     true,
                 );
             }
         }
-        overlay_button(parent, "Close", OverlayButton::CloseInspect, true);
+        overlay_button(parent, &crate::native_i18n::tr("Close"), OverlayButton::CloseInspect, true);
     }
 }
 
 fn render_death(parent: &mut ChildSpawnerCommands) {
-    title(parent, "You are dead");
-    body(parent, "Press V to revive in town");
+    title(parent, &crate::native_i18n::tr("You are dead"));
+    body(parent, &crate::native_i18n::tr("Press V to revive in town"));
 }
 
 fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
     body(
         parent,
-        &format!("Say: {}_", if draft.is_empty() { "" } else { draft }),
+        &crate::native_i18n::tr(&format!("Say: {}_", if draft.is_empty() { "" } else { draft })),
     );
 }
 
@@ -15142,7 +15246,7 @@ fn render_mail(
         spawn_static_overlay_sprite(parent, assets, "original-ui/Title/7.png".into(), CrystalRect::new(18.0, 9.0, 43.0, 14.0));
     }
     for (label, left, width) in [("Type", 8.0, 37.0), ("Sender", 47.0, 132.0), ("Message", 181.0, 122.0)] {
-        overlay_text_at(parent, label, CrystalRect::new(left, 34.0, width, 19.0), 10.0, TEXT);
+        overlay_text_at(parent, &crate::native_i18n::tr(label), CrystalRect::new(left, 34.0, width, 19.0), 10.0, TEXT);
     }
     for (row, msg) in page.entries.iter().enumerate() {
         mail_list::row(parent, asset_server, msg, row, mail.selected_id == Some(msg.id));
@@ -15174,7 +15278,7 @@ fn render_mail(
     }
     overlay_text_at(
         parent,
-        &format!("{}/{}", page.page + 1, page.page_count),
+        &crate::native_i18n::tr(&format!("{}/{}", page.page + 1, page.page_count)),
         CrystalRect::new(120.0, 389.0, 67.0, 15.0),
         9.0,
         TEXT,
@@ -15236,7 +15340,7 @@ fn render_mail(
     // MailSendRequest rather than a separate generic attachment form.
     overlay_button(
         parent,
-        "Send items and gold",
+        &crate::native_i18n::tr("Send items and gold"),
         OverlayButton::OpenMailParcelCompose,
         true,
     );
@@ -15247,7 +15351,7 @@ fn render_mail_compose(
     draft: &mir2_ui_core::state::MailComposeDraft,
     inventory: &InventoryModel,
 ) {
-    body(parent, "Write mail (Tab switches field; Esc cancels)");
+    body(parent, &crate::native_i18n::tr("Write mail (Tab switches field; Esc cancels)"));
     let message_label = if draft.message.is_empty() {
         "<type>".to_owned()
     } else {
@@ -15255,20 +15359,20 @@ fn render_mail_compose(
     };
     overlay_button(
         parent,
-        &format!(
+        &crate::native_i18n::tr(&format!(
             "Recipient: {}",
             if draft.recipient.is_empty() {
                 "<type>"
             } else {
                 &draft.recipient
             }
-        ),
+        )),
         OverlayButton::MailRecipientFocus,
         true,
     );
     overlay_button(
         parent,
-        &format!("Message: {message_label}"),
+        &crate::native_i18n::tr(&format!("Message: {message_label}")),
         OverlayButton::MailMessageFocus,
         true,
     );
@@ -15280,13 +15384,13 @@ fn render_mail_compose(
             ..default()
         })
         .with_children(|row| {
-            overlay_button(row, &format!("Gold: {}", draft.gold), OverlayButton::MailGoldFocus, true);
+            overlay_button(row, &crate::native_i18n::tr(&format!("Gold: {}", draft.gold)), OverlayButton::MailGoldFocus, true);
             overlay_button(row, "-100", OverlayButton::MailGoldDec, draft.gold >= 100);
             overlay_button(row, "+100", OverlayButton::MailGoldInc, true);
         });
     body(
         parent,
-        &format!("Attachments: {}/5", draft.attachment_unique_ids.len()),
+        &crate::native_i18n::tr(&format!("Attachments: {}/5", draft.attachment_unique_ids.len())),
     );
     for id in &draft.attachment_unique_ids {
         if let Some(item) = inventory
@@ -15302,10 +15406,10 @@ fn render_mail_compose(
                     ..default()
                 })
                 .with_children(|row| {
-                    body(row, &format!("{} ×{}", item.name, item.quantity));
+                    body(row, &crate::native_i18n::tr(&format!("{} ×{}", item.name, item.quantity)));
                     overlay_button(
                         row,
-                        "Remove",
+                        &crate::native_i18n::tr("Remove"),
                         OverlayButton::RemoveMailAttachment(*id),
                         true,
                     );
@@ -15322,17 +15426,17 @@ fn render_mail_compose(
         }
         overlay_button(
             parent,
-            &format!(
+            &crate::native_i18n::tr(&format!(
                 "Attach {} ×{} (Bag{} slot {})",
                 item.name, item.quantity, item.container + 1, item.slot
-            ),
+            )),
             OverlayButton::AddMailAttachment(id),
             true,
         );
     }
     overlay_button(
         parent,
-        "Send",
+        &crate::native_i18n::tr("Send"),
         OverlayButton::SubmitMail,
         !draft.recipient.trim().is_empty() && !draft.message.trim().is_empty(),
     );
@@ -15462,7 +15566,7 @@ fn render_mail_recipient_prompt(
             }
             overlay_centered_text_at(
                 dialog,
-                "Enter mail recipient name",
+                &crate::native_i18n::tr("Enter mail recipient name"),
                 CrystalRect::new(25.0, 25.0, 235.0, 40.0),
                 10.0,
                 TEXT,
@@ -15525,7 +15629,7 @@ fn render_bigmap(
             position_type: PositionType::Absolute,
             left: Val::Px(16.0), top: Val::Px(30.0),
             ..default()
-        }, Text::new("Cyan: current task · Amber: other tasks (possible spawn areas)"),
+        }, Text::new(crate::native_i18n::tr("Cyan: current task · Amber: other tasks (possible spawn areas)")),
            crate::crystal_ui::typography::crystal_text_font(10.0),
            TextColor(Color::srgb(1.0, 0.82, 0.2))));
     }
@@ -15538,7 +15642,7 @@ fn render_bigmap(
             height: Val::Px(20.0),
             ..default()
         },
-        Text::new(map_name.to_owned()),
+        Text::new(crate::player_text::name(map_name)),
         crate::crystal_ui::typography::crystal_text_font(12.0),
         TextColor(Color::WHITE),
         TextLayout::justify(Justify::Center),
@@ -15592,7 +15696,7 @@ fn render_bigmap(
                         height: Val::Px(16.0),
                         ..default()
                     },
-                    Text::new("Loading map..."),
+                    Text::new(crate::native_i18n::tr("Loading map...")),
                     crate::crystal_ui::typography::crystal_text_font(12.0),
                     TextColor(Color::srgb(0.82, 0.74, 0.55)),
                     TextLayout::justify(Justify::Center),
@@ -15661,7 +15765,7 @@ fn render_bigmap(
                         top: Val::Px(top.max(15.0) - 15.0 + index as f32 * 2.0),
                         ..default()
                     }, BackgroundColor(Color::srgba(0.02, 0.015, 0.0, 0.9)),
-                       Text::new(format!("{}{}: {} left ({},{})", if region.primary { "[Tracked] " } else { "" }, region.name, region.remaining, region.center.x, region.center.y)),
+                       Text::new(crate::native_i18n::tr(&format!("{}{}: {} left ({},{})", if region.primary { "[Tracked] " } else { "" }, region.name, region.remaining, region.center.x, region.center.y))),
                        crate::crystal_ui::typography::crystal_text_font(11.0),
                        TextColor(Color::srgb(1.0, 0.82, 0.2))));
                 }
@@ -15688,7 +15792,7 @@ fn render_bigmap(
                         left: Val::Px(left.min(geometry.width - 210.0).max(0.0)),
                         top: Val::Px((top - 22.0).max(0.0)), ..default()
                     }, BackgroundColor(Color::srgba(0.01, 0.03, 0.04, 0.95)),
-                        Text::new("比奇城安全区 (328,264)"),
+                        Text::new(crate::native_i18n::tr("比奇城安全区 (328,264)")),
                         TextFont { font: FontSource::Family("Microsoft YaHei".into()),
                             font_size: FontSize::Px(14.0), ..default() },
                         TextColor(Color::srgb(0.4, 0.95, 1.0))));
@@ -15851,7 +15955,7 @@ fn render_bigmap(
     }
 
     for (row, npc) in rendered.npcs.iter().enumerate() {
-        let label = format!("{} [{},{}]", npc.name, npc.location.x, npc.location.y);
+        let label = format!("{} [{},{}]", crate::player_text::name(&npc.name), npc.location.x, npc.location.y);
         overlay_absolute_button(
             parent,
             &label,
@@ -15955,7 +16059,7 @@ fn render_shop(
     } else {
         overlay_absolute_button(
             parent,
-            "Close",
+            &crate::native_i18n::tr("Close"),
             CrystalRect::new(217.0, 3.0, 24.0, 21.0),
             OverlayButton::CloseShop,
             true,
@@ -15976,7 +16080,7 @@ fn render_shop(
         );
         overlay_absolute_button(
             parent,
-            "Buy",
+            &crate::native_i18n::tr("Buy"),
             CrystalRect::new(77.0, 304.0, 80.0, 25.0),
             OverlayButton::ShopBuy,
             buy_enabled,
@@ -16007,7 +16111,7 @@ fn render_shop(
     if shop.goods.is_empty() {
         overlay_text_at(
             parent,
-            "No goods",
+            &crate::native_i18n::tr("No goods"),
             CrystalRect::new(12.0, 40.0, 195.0, 18.0),
             10.0,
             TEXT,
@@ -16029,7 +16133,7 @@ fn render_shop(
     );
     overlay_text_at(
         parent,
-        &format!("x{}", shop_quantity_clamped(state.shop_quantity)),
+        &crate::native_i18n::tr(&format!("x{}", shop_quantity_clamped(state.shop_quantity))),
         CrystalRect::new(34.0, 306.0, 36.0, 18.0),
         10.0,
         TEXT,
@@ -16044,7 +16148,7 @@ fn render_shop(
     if shop.allows_sell() {
         overlay_absolute_button(
             parent,
-            "Sell",
+            &crate::native_i18n::tr("Sell"),
             CrystalRect::new(162.0, 304.0, 52.0, 22.0),
             OverlayButton::ShopShowSell,
             true,
@@ -16159,7 +16263,7 @@ fn render_storage(
         );
         overlay_centered_text_at(
             parent,
-            "Expanded Storage Locked",
+            &crate::native_i18n::tr("Expanded Storage Locked"),
             CrystalRect::new(40.0, 322.0, 300.0, 16.0),
             10.0,
             Color::srgb(0.95, 0.20, 0.20),
@@ -16226,8 +16330,8 @@ fn render_storage(
         );
         if !page.rental_locked {
             let label = storage_expiry_label(page.expiry)
-                .map(|expiry| format!("Expanded Storage Expires On{expiry}"))
-                .unwrap_or_else(|| "Expanded Storage Expires On".to_owned());
+                .map(|expiry| format!("{}{expiry}", crate::native_i18n::tr("Expanded Storage Expires On")))
+                .unwrap_or_else(|| crate::native_i18n::tr("Expanded Storage Expires On"));
             overlay_centered_text_at(
                 parent,
                 &label,
@@ -16394,6 +16498,20 @@ fn render_options(
         259.0,
         354.0,
     );
+    if crate::native_i18n::active() {
+        // Cover the baked English wording, preserving the original borders and
+        // every source button/slider hit target. Locale preferences are separate
+        // from gameplay options and are never sent to the server.
+        localized_art_label(parent, "Options", CrystalRect::new(12.0, 7.0, 214.0, 25.0), 13.0);
+        for (label, top) in [("Skill mode",68.0),("Skill bar",93.0),("Effects",118.0),("Ground items",143.0),("Names",168.0),("Health bars",193.0),("Sound",220.0),("Music",244.0),("Allow observation",271.0),("New movement",296.0)] {
+            localized_art_label(parent, label, CrystalRect::new(12.0, top - 2.0, 138.0, 23.0), 10.0);
+        }
+        parent.spawn((Node { position_type: PositionType::Absolute, left: Val::Px(0.0), top: Val::Px(353.0), width: Val::Px(259.0), padding: UiRect::all(Val::Px(10.0)), row_gap: Val::Px(4.0), flex_direction: FlexDirection::Column, border: UiRect::all(Val::Px(1.0)), ..default() }, BackgroundColor(Color::srgb(0.055,0.045,0.03)), BorderColor::all(GOLD)))
+            .with_children(|languages| {
+                title(languages, &crate::native_i18n::tr("Language"));
+                crate::native_i18n::spawn_language_choices(languages, 12.0);
+            });
+    }
     spawn_overlay_crystal_button(
         parent,
         asset_server,

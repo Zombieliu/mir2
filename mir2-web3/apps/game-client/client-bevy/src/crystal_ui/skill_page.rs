@@ -151,7 +151,7 @@ fn render_rows(
         );
         overlay_text_at(
             parent,
-            &skill.name,
+            &crate::player_text::name(&skill.name),
             CrystalRect::new(x + 109., y + 2., 131., 14.),
             32. / 3.,
             Color::WHITE,

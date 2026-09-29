@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-09-30 native multilingual/DPI correction: exactly zh-TW/en/pt-BR,
+> embedded Traditional font, per-user locale, translated source widgets/NPC
+> content and bounded quest/help wrapping are implemented. Shared1147/native777,
+> tooling12 and47 actual offline GPU captures pass. Ninety locale switches keep
+> font atlases at16MiB. Fixed OS-logical constraints explain the reported150%-DPI
+> viewport/HUD mismatch; initial sizing and monitor-change regressions pass.
+> Actual Alienware, clean-install and human three-language acceptance remain
+> open. Capacity stays paused. Release packaging is recorded separately.
+> [Evidence](generated/player-qa/native-multilingual-20260930/README.md).
+
 > 2026-09-29 character-preview correction: Wizard effects now use Crystal's
 > additive blend; name/focus redraws retain the animation clock. All192 original
 > frames match. Actual offline GPU verification covers ten class/gender sets,

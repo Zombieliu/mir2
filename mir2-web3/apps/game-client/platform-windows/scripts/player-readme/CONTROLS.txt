@@ -1,0 +1,26 @@
+English
+
+Login: fill in your account and password. Tab / Shift+Tab changes fields; Enter confirms.
+Move: hold the left mouse button on open ground to walk, or the right button to run. WASD / arrow keys also move; hold Shift to run.
+Combat: click a monster to attack; click an NPC to talk. F1–F8 use assigned skills; 1–6 use belt items.
+I opens the bag, C opens equipment, Enter opens chat, and Q opens quests. Pick a quest to track.
+Click a quest's navigation button or a destination on the current large map or minimap to start pathfinding. Closing the map keeps the route; Esc stops it. At a hunting area, select monsters to fight.
+Change language on the login screen or in Options. Log out normally to save your character before closing the client.
+
+繁體中文
+
+登入：填寫帳號與密碼。Tab／Shift+Tab 切換欄位，Enter 確認。
+移動：在空地按住滑鼠左鍵行走、右鍵奔跑。WASD／方向鍵也可移動，按住 Shift 奔跑。
+戰鬥：點擊怪物攻擊、點擊 NPC 交談。F1–F8 使用已指定技能，1–6 使用快捷欄物品。
+I 開啟背包，C 開啟裝備，Enter 開啟聊天，Q 開啟任務。選取要追蹤的任務。
+點擊任務的前往按鈕，或在目前大地圖／小地圖點擊目的地，即可開始尋路。關閉地圖後路線繼續，Esc 停止尋路。抵達狩獵區域後自行選怪戰鬥。
+在登入畫面或設定中切換語言。關閉遊戲前請正常登出角色以儲存進度。
+
+Português (Brasil)
+
+Login: informe a conta e a senha. Tab / Shift+Tab alterna os campos; Enter confirma.
+Movimento: segure o botão esquerdo do mouse no chão livre para andar ou o direito para correr. WASD / setas também movem; segure Shift para correr.
+Combate: clique em um monstro para atacar ou em um NPC para conversar. F1–F8 usam as habilidades atribuídas; 1–6 usam os itens do cinto.
+I abre a mochila, C abre os equipamentos, Enter abre o chat e Q abre as missões. Escolha uma missão para acompanhar.
+Clique no botão de navegação da missão ou em um destino no mapa atual ou minimapa. Fechar o mapa mantém a rota; Esc a interrompe. Na área de caça, selecione os monstros para lutar.
+Troque o idioma na tela de login ou em Opções. Saia normalmente do personagem para salvar o progresso antes de fechar o cliente.

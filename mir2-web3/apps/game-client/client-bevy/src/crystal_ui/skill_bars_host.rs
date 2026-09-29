@@ -237,13 +237,13 @@ pub fn render(
                                 Button,
                                 OverlayButton::CastSkillBar(slot),
                                 SkillBarHit(bar),
-                                CrystalHint::new(format!(
+                                CrystalHint::new(crate::native_i18n::tr(&format!(
                                     "{}\nMP: {}\nCooldown: {}\nKey: {}",
-                                    skill.name,
+                                    crate::player_text::name(&skill.name),
                                     binding.mp_cost.unwrap_or(skill.mp_cost),
                                     duration(binding.delay_ms.unwrap_or(skill.cooldown_ms)),
                                     key
-                                )),
+                                ))),
                             ));
                             if let Some(frame) =
                                 state.skill_bars.cooldown_frame(skill.id, &skills, now)

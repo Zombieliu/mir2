@@ -105,6 +105,13 @@ const fn one_objective_group() -> usize {
     1
 }
 
+// Presentation models stay canonical for web/legacy clients. Native locale
+// selection is applied before their sentences are composed and measured.
+fn localized(source: &str) -> String {
+    if crate::native_i18n::active() { crate::player_text::text(source) }
+    else { source.to_owned() }
+}
+
 impl NewcomerJourneyCatalog {
     pub fn from_json(json: &str) -> Result<Self, String> {
         let document: JourneyDocument =
@@ -557,25 +564,25 @@ impl NewcomerGraduationCatalog {
                 GraduationOption {
                     direction: GraduationDirection::Equipment,
                     title: class.equipment.title.clone(),
-                    summary: format!("{} Equipment target.", class.equipment.requirements),
+                    summary: format!("{} {}", localized(&class.equipment.requirements), localized("Equipment target.")),
                     instruction: class.equipment.normal_acquisition.clone(),
                 },
                 GraduationOption {
                     direction: GraduationDirection::Skill,
                     title: class.skill.title.clone(),
-                    summary: format!("{} Next skill goal.", class.skill.requirements),
+                    summary: format!("{} {}", localized(&class.skill.requirements), localized("Next skill goal.")),
                     instruction: class.skill.normal_acquisition.clone(),
                 },
                 GraduationOption {
                     direction: GraduationDirection::Challenge,
                     title: self.challenge.title.clone(),
-                    summary: format!(
-                        "{} difficulty · {}",
-                        self.challenge.difficulty, self.challenge.map_title
-                    ),
+                    summary: if crate::native_i18n::active() {
+                        crate::player_text::text(&format!("{} difficulty · {}",
+                            localized(&self.challenge.difficulty), localized(&self.challenge.map_title)))
+                    } else { format!("{} difficulty · {}", self.challenge.difficulty, self.challenge.map_title) },
                     instruction: format!(
                         "{} {}",
-                        self.challenge.normal_travel, self.challenge.detail
+                        localized(&self.challenge.normal_travel), localized(&self.challenge.detail)
                     ),
                 },
             ],
@@ -694,7 +701,7 @@ impl JourneyStep {
             .map(|objective| {
                 format!(
                     "{} ({})",
-                    inline_text(&objective.text),
+                    inline_text(&localized(&objective.text)),
                     objective.progress_label()
                 )
             })
@@ -705,7 +712,7 @@ impl JourneyStep {
                 .rewards
                 .iter()
                 .filter(|reward| !matches!(reward, QuestReward::Item { quantity: 0, .. }))
-                .map(QuestReward::label)
+                .map(crate::player_text::quest_reward)
                 .collect::<Vec<_>>();
             (!visible.is_empty()).then(|| visible.join(", "))
         };
@@ -745,8 +752,8 @@ fn npc_action(
         location.map_name.as_str()
     };
     (
-        format!("{verb} {name}"),
-        Some(format!("{map} ({},{})", location.x, location.y)),
+        localized(&format!("{verb} {name}")),
+        Some(format!("{} ({},{})", localized(map), location.x, location.y)),
     )
 }
 

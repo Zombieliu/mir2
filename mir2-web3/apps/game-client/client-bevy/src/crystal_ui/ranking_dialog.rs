@@ -353,6 +353,21 @@ pub fn render(
         ))
         .with_children(|panel| {
             spawn_overlay_frame(panel, assets, "original-ui/Title/728.png", size.x, size.y);
+            if crate::native_i18n::active() {
+                for (caption, x, width) in [
+                    ("Rank", 12.0, 66.0),
+                    ("Name", 81.0, 93.0),
+                    ("Class", 178.0, 66.0),
+                    ("Level", 249.0, 46.0),
+                ] {
+                    localized_art_label(
+                        panel,
+                        caption,
+                        CrystalRect::new(x, 78.0, width, 19.0),
+                        10.0,
+                    );
+                }
+            }
             for &(library, normal, hover, pressed, x, y, action) in &controls {
                 let d = dimensions(library, normal).unwrap();
                 let spec = CrystalButtonSpec::new(
@@ -415,7 +430,7 @@ pub fn render(
             );
             overlay_text_at(
                 panel,
-                "Online Only",
+                &crate::native_i18n::tr("Online Only"),
                 CrystalRect::new(190.0 + d.x + 2.0, size.y - 20.0, 100.0, 16.0),
                 32.0 / 3.0,
                 Color::WHITE,
@@ -427,7 +442,7 @@ pub fn render(
             };
             overlay_centered_text_at(
                 panel,
-                &rank,
+                &crate::native_i18n::tr(&rank),
                 CrystalRect::new(229.0, 36.0, 82.0, 22.0),
                 40.0 / 3.0,
                 Color::srgb_u8(222, 184, 135),
@@ -460,7 +475,7 @@ pub fn render(
                         for (x, width, text) in [
                             (0.0, 55.0, rank.to_string()),
                             (55.0, 95.0, row.name.clone()),
-                            (150.0, 70.0, class.into()),
+                            (150.0, 70.0, crate::native_i18n::tr(class)),
                             (220.0, 50.0, row.level.to_string()),
                         ] {
                             overlay_text_at(

@@ -1,0 +1,3898 @@
+{
+  "entries": [
+    {
+      "key": "quest.2110001.title",
+      "en": "Your first patrol kit",
+      "zh-TW": "首套巡邏裝備",
+      "pt-BR": "Seu primeiro kit de patrulha",
+      "aliases": [
+        "Your first patrol kit",
+        "首套巡逻装备"
+      ]
+    },
+    {
+      "key": "quest.2110001.description",
+      "en": "Go to the Border Village in Bichon Province and report to Assistant Jane (284,606) to collect your patrol equipment.",
+      "zh-TW": "前往比奇省邊境村，向助理簡（284,606）報告，領取巡邏裝備。",
+      "pt-BR": "Vá à Vila da Fronteira, na Província de Bichon, e fale com a Assistente Jane (284,606) para receber seu equipamento de patrulha.",
+      "aliases": [
+        "前往比奇省边境村，向助理简（284,606）报告，领取巡逻装备。",
+        "Visit Assistant Jane in Bichon Province (map 0, 284,606) and complete the first ordinary NPC report."
+      ]
+    },
+    {
+      "key": "quest.2110002.title",
+      "en": "Equip your weapon",
+      "zh-TW": "裝備你的武器",
+      "pt-BR": "Equipe sua arma",
+      "aliases": [
+        "Equip your weapon",
+        "装备你的武器"
+      ]
+    },
+    {
+      "key": "quest.2110002.description",
+      "en": "Open your equipment panel and equip a weapon suitable for your class and level.",
+      "zh-TW": "打開裝備界面，裝備一把符合自身職業和等級要求的武器。",
+      "pt-BR": "Abra o painel de equipamentos e equipe uma arma adequada à sua classe e ao seu nível.",
+      "aliases": [
+        "打开装备界面，装备一把符合自身职业和等级要求的武器。",
+        "Open your equipment and equip a weapon your class and level can use."
+      ]
+    },
+    {
+      "key": "quest.2110003.title",
+      "en": "Protect the village",
+      "zh-TW": "保衛村莊",
+      "pt-BR": "Proteja a vila",
+      "aliases": [
+        "Protect the village",
+        "保卫村庄"
+      ]
+    },
+    {
+      "key": "quest.2110003.description",
+      "en": "Defeat 2 Scarecrows near the village, then defeat 2 Raking Cats northeast of the village near (340,550). Amber squares on the big map mark hunting areas, not live monster positions. Bring small HP potions before leaving.",
+      "zh-TW": "消滅村莊附近的 2 個稻草人，再前往村莊東北方（340,550）附近消滅 2 只釘耙貓。大地圖的琥珀色方框表示狩獵區域，不是怪物的實時位置；出發前準備小型紅藥。",
+      "pt-BR": "Derrote 2 Espantalhos perto da vila e 2 Gatos com Ancinho a nordeste, perto de (340,550). Os quadrados âmbar no mapa grande indicam áreas de caça, não a posição atual dos monstros. Leve poções pequenas de HP.",
+      "aliases": [
+        "消灭村庄附近的 2 个稻草人，再前往村庄东北方（340,550）附近消灭 2 只钉耙猫。大地图的琥珀色方框表示狩猎区域，不是怪物的实时位置；出发前准备小型红药。",
+        "Defeat 2 Scarecrows near the village. For 2 RakingCats, head northeast of the starter village toward (340,550). Open the big map: amber boxes mark hunting areas for unfinished targets, not exact live monster positions. Carry small HP medicine."
+      ]
+    },
+    {
+      "key": "quest.2110004.title",
+      "en": "Your first class skill",
+      "zh-TW": "第一項職業技能",
+      "pt-BR": "Sua primeira habilidade de classe",
+      "aliases": [
+        "Your first class skill",
+        "第一项职业技能"
+      ]
+    },
+    {
+      "key": "quest.2110004.description",
+      "en": "Defeat 2 Omas near the village and complete your class practice: Warriors use Fencing, Wizards use Fireball, and Taoists use Healing. See the class practice instructions for exact requirements.",
+      "zh-TW": "消滅村莊附近的 2 個半獸人，並完成職業練習：戰士使用基本劍術，法師使用火球術，道士使用治癒術。具體要求見職業練習說明。",
+      "pt-BR": "Derrote 2 Omas perto da vila e conclua o treino da sua classe: Guerreiro usa Esgrima, Mago usa Bola de Fogo e Taoísta usa Cura. Veja as instruções do treino para os requisitos exatos.",
+      "aliases": [
+        "消灭村庄附近的 2 个半兽人，并完成职业练习：战士使用基本剑术，法师使用火球术，道士使用治愈术。具体要求见职业练习说明。",
+        "Defeat 2 Omas near the village, then use your class's first skill: Fencing, FireBall, or Healing."
+      ]
+    },
+    {
+      "key": "quest.2110005.title",
+      "en": "Arrive safely in Bichon",
+      "zh-TW": "安全抵達比奇",
+      "pt-BR": "Chegue em segurança a Bichon",
+      "aliases": [
+        "Arrive safely in Bichon",
+        "安全抵达比奇"
+      ]
+    },
+    {
+      "key": "quest.2110005.description",
+      "en": "Travel north from the Border Village to the Bichon city safe area (328,264). Open the big map for the destination. Progress updates inside the city safe area; the Border Village safe area does not count. Bring HP potions.",
+      "zh-TW": "從邊境村向北前往比奇城安全區（328,264）。打開大地圖查看目的地；進入比奇城安全區后更新進度，邊境村安全區不計入此任務。路上準備紅藥。",
+      "pt-BR": "Siga ao norte da Vila da Fronteira até a zona segura da cidade de Bichon (328,264). Veja o destino no mapa grande. O progresso é atualizado dentro da zona segura da cidade; a zona da vila não conta. Leve poções de HP.",
+      "aliases": [
+        "从边境村向北前往比奇城安全区（328,264）。打开大地图查看目的地；进入比奇城安全区后更新进度，边境村安全区不计入此任务。路上准备红药。",
+        "Head north from the starter village to Bichon city safe area at (328,264), map 0. Open the big map for the marked destination. The starter village safe area does not count. Progress updates on entering the city safe area; carry HP medicine for the journey."
+      ]
+    },
+    {
+      "key": "quest.2110006.title",
+      "en": "Prepare your supplies",
+      "zh-TW": "做好補給",
+      "pt-BR": "Prepare seus suprimentos",
+      "aliases": [
+        "Prepare your supplies",
+        "做好补给"
+      ]
+    },
+    {
+      "key": "quest.2110006.description",
+      "en": "Before leaving town, buy a small HP or MP potion from an ordinary shop.",
+      "zh-TW": "離開城鎮前，從普通商店購買一瓶小型紅藥或小型藍藥。",
+      "pt-BR": "Antes de sair da cidade, compre uma poção pequena de HP ou MP em uma loja comum.",
+      "aliases": [
+        "离开城镇前，从普通商店购买一瓶小型红药或小型蓝药。",
+        "Buy one basic HP or MP potion from a legitimate town merchant before leaving for the forest."
+      ]
+    },
+    {
+      "key": "quest.2110007.title",
+      "en": "Clear the forest path",
+      "zh-TW": "清理森林道路",
+      "pt-BR": "Limpe o caminho da floresta",
+      "aliases": [
+        "Clear the forest path",
+        "清理森林道路"
+      ]
+    },
+    {
+      "key": "quest.2110007.description",
+      "en": "Defeat 4 Forest Yetis in Bichon Forest. Restock HP potions and bring MP potions or Amulets as needed for your class.",
+      "zh-TW": "在比奇森林消滅 4 只森林雪人。先補充紅藥，並根據職業準備藍藥或護身符。",
+      "pt-BR": "Derrote 4 Yetis da Floresta na Floresta de Bichon. Reponha poções de HP e leve poções de MP ou Amuletos conforme sua classe.",
+      "aliases": [
+        "在比奇森林消灭 4 只森林雪人。先补充红药，并根据职业准备蓝药或护身符。",
+        "In the Bichon forest, defeat 4 Forest Yetis. Restock HP and class MP or Amulets first."
+      ]
+    },
+    {
+      "key": "quest.2110008.title",
+      "en": "Show your class training",
+      "zh-TW": "展示職業訓練",
+      "pt-BR": "Demonstre seu treinamento de classe",
+      "aliases": [
+        "Show your class training",
+        "展示职业训练"
+      ]
+    },
+    {
+      "key": "quest.2110008.description",
+      "en": "Defeat 2 Omas and complete your class practice, then report to the Bichon Wall Board (334,259).",
+      "zh-TW": "消滅 2 個半獸人並完成職業練習，然后向比奇城牆公告板（334,259）報告。",
+      "pt-BR": "Derrote 2 Omas e conclua o treino da sua classe. Depois, volte ao Quadro da Muralha de Bichon (334,259).",
+      "aliases": [
+        "消灭 2 个半兽人并完成职业练习，然后向比奇城墙公告板（334,259）报告。",
+        "Defeat 2 Omas, practise your class skill, then report to the Board in Bichon Province (map 0, 334,259)."
+      ]
+    },
+    {
+      "key": "quest.2110009.title",
+      "en": "Enter Oma Cave",
+      "zh-TW": "進入半獸人洞穴",
+      "pt-BR": "Entre na Caverna dos Omas",
+      "aliases": [
+        "Enter Oma Cave",
+        "进入半兽人洞穴"
+      ]
+    },
+    {
+      "key": "quest.2110009.description",
+      "en": "Follow the map entrance route into Oma Cave 1F. Bring HP and MP potions; Taoists should carry Amulets for the skills they use.",
+      "zh-TW": "沿地圖入口路線進入半獸人洞穴一層。出發前準備紅藥、藍藥；道士按技能需要攜帶護身符。",
+      "pt-BR": "Siga as entradas dos mapas até o 1º andar da Caverna dos Omas. Leve poções de HP e MP; Taoístas devem levar Amuletos para suas habilidades.",
+      "aliases": [
+        "沿地图入口路线进入半兽人洞穴一层。出发前准备红药、蓝药；道士按技能需要携带护身符。",
+        "Use the legal entrance to the Cave Rescue area (D001); bring HP, MP, or Taoist Amulets."
+      ]
+    },
+    {
+      "key": "quest.2110010.title",
+      "en": "Push back the skeletons",
+      "zh-TW": "擊退骷髏",
+      "pt-BR": "Afaste os esqueletos",
+      "aliases": [
+        "Push back the skeletons",
+        "击退骷髅"
+      ]
+    },
+    {
+      "key": "quest.2110010.description",
+      "en": "Defeat 4 Skeletons in Oma Cave 1F. Keep enough potions for the rest of the rescue route.",
+      "zh-TW": "在半獸人洞穴一層消滅 4 只骷髏，為后續救援路線保留足夠的藥水。",
+      "pt-BR": "Derrote 4 Esqueletos no 1º andar da Caverna dos Omas. Reserve poções suficientes para o restante do resgate.",
+      "aliases": [
+        "在半兽人洞穴一层消灭 4 只骷髅，为后续救援路线保留足够的药水。",
+        "In D001, defeat 4 Skeletons and keep enough healing supplies for the rescue route."
+      ]
+    },
+    {
+      "key": "quest.2110011.title",
+      "en": "Practice against the undead",
+      "zh-TW": "對抗亡靈練習",
+      "pt-BR": "Treine contra os mortos-vivos",
+      "aliases": [
+        "Practice against the undead",
+        "对抗亡灵练习"
+      ]
+    },
+    {
+      "key": "quest.2110011.description",
+      "en": "Defeat 3 Skeletons in Oma Cave 1F and complete your class practice with Slaying, Great Fireball, or Soul Fireball.",
+      "zh-TW": "在半獸人洞穴一層消滅 3 只骷髏，並完成本職業的攻殺劍術、大火球或靈魂火符練習。",
+      "pt-BR": "Derrote 3 Esqueletos no 1º andar da Caverna dos Omas e conclua o treino com Golpe Mortal, Grande Bola de Fogo ou Talismã de Fogo, conforme sua classe.",
+      "aliases": [
+        "在半兽人洞穴一层消灭 3 只骷髅，并完成本职业的攻杀剑术、大火球或灵魂火符练习。",
+        "Defeat 3 Skeletons in D001 and practise Slaying, GreatFireBall, or SoulFireBall for your class."
+      ]
+    },
+    {
+      "key": "quest.2110012.title",
+      "en": "Complete the cave patrol",
+      "zh-TW": "完成洞穴巡邏",
+      "pt-BR": "Conclua a patrulha da caverna",
+      "aliases": [
+        "Complete the cave patrol",
+        "完成洞穴巡逻"
+      ]
+    },
+    {
+      "key": "quest.2110012.description",
+      "en": "Defeat 1 Skeleton in Oma Cave 1F and complete your class practice, then report to the Bichon Wall Board (334,259).",
+      "zh-TW": "在半獸人洞穴一層消滅 1 只骷髏並完成職業練習，然后返回比奇城牆公告板（334,259）報告。",
+      "pt-BR": "Derrote 1 Esqueleto no 1º andar da Caverna dos Omas e conclua seu treino de classe. Depois, volte ao Quadro da Muralha de Bichon (334,259).",
+      "aliases": [
+        "在半兽人洞穴一层消灭 1 只骷髅并完成职业练习，然后返回比奇城墙公告板（334,259）报告。",
+        "Defeat 1 Skeleton in D001, finish the class practice, then return to the Board at map 0 (334,259)."
+      ]
+    },
+    {
+      "key": "quest.2110013.title",
+      "en": "Enter the Dead Mine",
+      "zh-TW": "進入死亡礦區",
+      "pt-BR": "Entre na Mina Morta",
+      "aliases": [
+        "Enter the Dead Mine",
+        "进入死亡矿区"
+      ]
+    },
+    {
+      "key": "quest.2110013.description",
+      "en": "Follow the map entrance route into Dead Mine 1F. Bring HP and MP potions; Taoists should carry Amulets for the skills they use.",
+      "zh-TW": "沿地圖入口路線進入死亡礦區一層。進礦前準備紅藥、藍藥；道士按技能需要攜帶護身符。",
+      "pt-BR": "Siga as entradas dos mapas até o 1º andar da Mina Morta. Leve poções de HP e MP; Taoístas devem levar Amuletos para suas habilidades.",
+      "aliases": [
+        "沿地图入口路线进入死亡矿区一层。进矿前准备红药、蓝药；道士按技能需要携带护身符。",
+        "Enter the Dead Mine through its legal route to D401; pack HP and MP or Amulets before the mine."
+      ]
+    },
+    {
+      "key": "quest.2110014.title",
+      "en": "Clear the mine entrance",
+      "zh-TW": "清理礦區入口",
+      "pt-BR": "Limpe a entrada da mina",
+      "aliases": [
+        "Clear the mine entrance",
+        "清理矿区入口"
+      ]
+    },
+    {
+      "key": "quest.2110014.description",
+      "en": "Defeat 3 Zombies (Type 2) and 2 Zombies (Type 3) in Dead Mine 1F. Restock consumables before going deeper.",
+      "zh-TW": "在死亡礦區一層消滅 3 只殭屍（二型）和 2 只殭屍（三型），補足消耗品后再繼續深入。",
+      "pt-BR": "Derrote 3 Zumbis (Tipo 2) e 2 Zumbis (Tipo 3) no 1º andar da Mina Morta. Reponha os consumíveis antes de avançar.",
+      "aliases": [
+        "在死亡矿区一层消灭 3 只僵尸（二型）和 2 只僵尸（三型），补足消耗品后再继续深入。",
+        "At the D401 mine mouth, defeat 3 Zombie2 and 2 Zombie3; refresh supplies before continuing."
+      ]
+    },
+    {
+      "key": "quest.2110015.title",
+      "en": "Fight and reposition",
+      "zh-TW": "戰斗並重新站位",
+      "pt-BR": "Lute e reposicione-se",
+      "aliases": [
+        "Fight and reposition",
+        "战斗并重新站位"
+      ]
+    },
+    {
+      "key": "quest.2110015.description",
+      "en": "Defeat 1 Zombie (Type 2) in Dead Mine 1F and complete your class practice: Warriors use Thrusting, Wizards deal spell damage then move, and Taoists equip poison powder and use Poisoning.",
+      "zh-TW": "在死亡礦區一層消滅 1 只殭屍（二型），並完成職業練習：戰士使用刺殺劍術，法師造成法術傷害后移動，道士準備毒粉后施毒。",
+      "pt-BR": "Derrote 1 Zumbi (Tipo 2) no 1º andar da Mina Morta e conclua o treino: Guerreiro usa Estocada, Mago causa dano mágico e depois se move, e Taoísta equipa pó de veneno e usa Envenenamento.",
+      "aliases": [
+        "在死亡矿区一层消灭 1 只僵尸（二型），并完成职业练习：战士使用刺杀剑术，法师造成法术伤害后移动，道士准备毒粉后施毒。",
+        "Defeat 1 Zombie2 in D401 and practise Thrusting, repositioned spell damage, or Poisoning with legal materials."
+      ]
+    },
+    {
+      "key": "quest.2110016.title",
+      "en": "Complete the mine patrol",
+      "zh-TW": "完成礦區巡邏",
+      "pt-BR": "Conclua a patrulha da mina",
+      "aliases": [
+        "Complete the mine patrol",
+        "完成矿区巡逻"
+      ]
+    },
+    {
+      "key": "quest.2110016.description",
+      "en": "Defeat 3 Zombies (Type 2) in Dead Mine 1F and complete your class practice, then report to the Bichon Wall Board (334,259).",
+      "zh-TW": "在死亡礦區一層消滅 3 只殭屍（二型）並完成職業練習，然后向比奇城牆公告板（334,259）報告。",
+      "pt-BR": "Derrote 3 Zumbis (Tipo 2) no 1º andar da Mina Morta e conclua o treino da sua classe. Depois, volte ao Quadro da Muralha de Bichon (334,259).",
+      "aliases": [
+        "在死亡矿区一层消灭 3 只僵尸（二型）并完成职业练习，然后向比奇城墙公告板（334,259）报告。",
+        "Defeat 3 Zombie3 in D401, complete your class combat practice, then report to the Board (map 0, 334,259)."
+      ]
+    },
+    {
+      "key": "quest.2110017.title",
+      "en": "Prepare for the expedition",
+      "zh-TW": "準備遠征",
+      "pt-BR": "Prepare-se para a expedição",
+      "aliases": [
+        "Prepare for the expedition",
+        "准备远征"
+      ]
+    },
+    {
+      "key": "quest.2110017.description",
+      "en": "Equip armour suitable for your class and level, then report your expedition preparations to the Bichon Wall Board (334,259).",
+      "zh-TW": "裝備符合自身職業和等級要求的盔甲，並向比奇城牆公告板（334,259）報告遠征準備情況。",
+      "pt-BR": "Equipe uma armadura adequada à sua classe e ao seu nível. Depois, informe seus preparativos ao Quadro da Muralha de Bichon (334,259).",
+      "aliases": [
+        "装备符合自身职业和等级要求的盔甲，并向比奇城墙公告板（334,259）报告远征准备情况。",
+        "At the Board in Bichon Province (map 0, 334,259), equip eligible class armour and complete the expedition preparation report."
+      ]
+    },
+    {
+      "key": "quest.2110018.title",
+      "en": "Reach Wooma Temple",
+      "zh-TW": "抵達沃瑪寺廟",
+      "pt-BR": "Chegue ao Templo de Wooma",
+      "aliases": [
+        "Reach Wooma Temple",
+        "抵达沃玛寺庙"
+      ]
+    },
+    {
+      "key": "quest.2110018.description",
+      "en": "Follow the map entrance route to the Wooma Temple entrance and complete your class practice. Warriors need Half Moon, Wizards need Lightning, and Taoists need Summon Skeleton and its materials.",
+      "zh-TW": "沿地圖入口路線抵達沃瑪寺廟入口，並完成職業練習。戰士準備半月彎刀，法師準備疾光電影，道士準備召喚骷髏及所需材料。",
+      "pt-BR": "Siga as entradas dos mapas até a entrada do Templo de Wooma e conclua o treino. Guerreiro precisa de Meia-Lua, Mago de Relâmpago e Taoísta de Invocar Esqueleto e seus materiais.",
+      "aliases": [
+        "沿地图入口路线抵达沃玛寺庙入口，并完成职业练习。战士准备半月弯刀，法师准备雷电术，道士准备召唤骷髅及所需材料。",
+        "Reach the Wooma entrance by its legal route in D021 and prepare HalfMoon, Lightning, or Taoist spell materials."
+      ]
+    },
+    {
+      "key": "quest.2110019.title",
+      "en": "Clear a foothold",
+      "zh-TW": "清理前哨",
+      "pt-BR": "Garanta um ponto de apoio",
+      "aliases": [
+        "Clear a foothold",
+        "清理前哨"
+      ]
+    },
+    {
+      "key": "quest.2110019.description",
+      "en": "Defeat 3 Dung Worms in Wooma Temple 1F. Restock consumables before going deeper.",
+      "zh-TW": "在沃瑪寺廟一層消滅 3 只糞蟲，補足消耗品后再深入。",
+      "pt-BR": "Derrote 3 Vermes de Esterco no 1º andar do Templo de Wooma. Reponha os consumíveis antes de avançar.",
+      "aliases": [
+        "在沃玛寺庙一层消灭 3 只粪虫，补足消耗品后再深入。",
+        "In the D022 outpost, defeat 3 Dungs; restock before moving deeper into Wooma territory."
+      ]
+    },
+    {
+      "key": "quest.2110020.title",
+      "en": "Defeat Wooma Soldiers",
+      "zh-TW": "擊敗沃瑪戰士",
+      "pt-BR": "Derrote os Soldados de Wooma",
+      "aliases": [
+        "Defeat Wooma Soldiers",
+        "击败沃玛战士"
+      ]
+    },
+    {
+      "key": "quest.2110020.description",
+      "en": "Defeat 3 Wooma Soldiers in Wooma Temple 1F. Bring HP potions and your class combat consumables.",
+      "zh-TW": "在沃瑪寺廟一層消滅 3 名沃瑪戰士。準備好紅藥和本職業的戰斗消耗品。",
+      "pt-BR": "Derrote 3 Soldados de Wooma no 1º andar do Templo de Wooma. Leve poções de HP e os consumíveis de combate da sua classe.",
+      "aliases": [
+        "在沃玛寺庙一层消灭 3 名沃玛战士。准备好红药和本职业的战斗消耗品。",
+        "In D022, defeat 3 Wooma Soldiers. Keep healing and class combat supplies ready."
+      ]
+    },
+    {
+      "key": "quest.2110021.title",
+      "en": "Prove your class tactics",
+      "zh-TW": "證明職業戰術",
+      "pt-BR": "Demonstre suas táticas de classe",
+      "aliases": [
+        "Prove your class tactics",
+        "证明职业战术"
+      ]
+    },
+    {
+      "key": "quest.2110021.description",
+      "en": "Defeat 3 Wooma Fighters in Wooma Temple 1F and complete the final combat practice described for your class.",
+      "zh-TW": "在沃瑪寺廟一層消滅 3 名沃瑪勇士，並按職業練習說明完成最后的戰斗練習。",
+      "pt-BR": "Derrote 3 Combatentes de Wooma no 1º andar do Templo de Wooma e conclua o treino de combate final indicado para sua classe.",
+      "aliases": [
+        "在沃玛寺庙一层消灭 3 名沃玛勇士，并按职业练习说明完成最后的战斗练习。",
+        "Defeat 3 Wooma Fighters in D022 and complete the final class combat practice with your learned skills."
+      ]
+    },
+    {
+      "key": "quest.2110022.title",
+      "en": "Report the expedition",
+      "zh-TW": "報告遠征",
+      "pt-BR": "Entregue o relatório da expedição",
+      "aliases": [
+        "Report the expedition",
+        "报告远征"
+      ]
+    },
+    {
+      "key": "quest.2110022.description",
+      "en": "Return to Bichon Province by the normal route and deliver your expedition report to the Bichon Wall Board (334,259).",
+      "zh-TW": "沿正常路線返回比奇省，向比奇城牆公告板（334,259）提交遠征報告。",
+      "pt-BR": "Volte à Província de Bichon pelo caminho normal e entregue o relatório da expedição no Quadro da Muralha de Bichon (334,259).",
+      "aliases": [
+        "沿正常路线返回比奇省，向比奇城墙公告板（334,259）提交远征报告。",
+        "Return by the normal route and deliver the expedition report to the Board in Bichon Province (map 0, 334,259)."
+      ]
+    },
+    {
+      "key": "quest.2120015.title",
+      "en": "Level 15 growth reward",
+      "zh-TW": "15 級成長獎勵",
+      "pt-BR": "Recompensa de progresso do nível 15",
+      "aliases": [
+        "Level 15 growth reward",
+        "15 级成长奖励"
+      ]
+    },
+    {
+      "key": "quest.2120015.description",
+      "en": "Reach level 15 and complete Clear the forest path, then claim your growth reward in the Quest Diary and learn the class skill included.",
+      "zh-TW": "達到 15 級並完成清理森林道路任務后，在任務日志領取成長獎勵，學習獎勵中的職業技能。",
+      "pt-BR": "Chegue ao nível 15 e conclua Limpe o caminho da floresta. Resgate a recompensa no Diário de Missões e aprenda a habilidade de classe recebida.",
+      "aliases": [
+        "达到 15 级并完成清理森林道路任务后，在任务日志领取成长奖励，学习奖励中的职业技能。",
+        "After the forest report, open the Quest Diary for the level-15 growth reward and learn its class skill."
+      ]
+    },
+    {
+      "key": "quest.2120020.title",
+      "en": "Level 20 growth reward",
+      "zh-TW": "20 級成長獎勵",
+      "pt-BR": "Recompensa de progresso do nível 20",
+      "aliases": [
+        "Level 20 growth reward",
+        "20 级成长奖励"
+      ]
+    },
+    {
+      "key": "quest.2120020.description",
+      "en": "Reach level 20 and deliver the cave patrol report, then collect your growth weapon from the Bichon Wall Board (334,259).",
+      "zh-TW": "達到 20 級並完成洞穴巡邏報告后，向比奇城牆公告板（334,259）領取成長武器。",
+      "pt-BR": "Chegue ao nível 20 e entregue o relatório da patrulha da caverna. Receba sua arma de progresso no Quadro da Muralha de Bichon (334,259).",
+      "aliases": [
+        "达到 20 级并完成洞穴巡逻报告后，向比奇城墙公告板（334,259）领取成长武器。",
+        "After the rescue report, claim the level-20 growth weapon from the Board in Bichon Province (map 0, 334,259)."
+      ]
+    },
+    {
+      "key": "quest.2120025.title",
+      "en": "Level 25 growth reward",
+      "zh-TW": "25 級成長獎勵",
+      "pt-BR": "Recompensa de progresso do nível 25",
+      "aliases": [
+        "Level 25 growth reward",
+        "25 级成长奖励"
+      ]
+    },
+    {
+      "key": "quest.2120025.description",
+      "en": "Reach level 25 and deliver the mine patrol report, then collect your growth armour and weapon from the Bichon Wall Board (334,259).",
+      "zh-TW": "達到 25 級並完成礦區巡邏報告后，向比奇城牆公告板（334,259）領取成長盔甲和武器。",
+      "pt-BR": "Chegue ao nível 25 e entregue o relatório da patrulha da mina. Receba sua armadura e arma de progresso no Quadro da Muralha de Bichon (334,259).",
+      "aliases": [
+        "达到 25 级并完成矿区巡逻报告后，向比奇城墙公告板（334,259）领取成长盔甲和武器。",
+        "After the mine report, claim the level-25 armour and weapon growth reward from the Board at map 0 (334,259)."
+      ]
+    },
+    {
+      "key": "quest.2120030.title",
+      "en": "Level 30 growth reward",
+      "zh-TW": "30 級成長獎勵",
+      "pt-BR": "Recompensa de progresso do nível 30",
+      "aliases": [
+        "Level 30 growth reward",
+        "30 级成长奖励"
+      ]
+    },
+    {
+      "key": "quest.2120030.description",
+      "en": "Reach level 30 and deliver the expedition report, then collect your growth reward from the Bichon Wall Board (334,259).",
+      "zh-TW": "達到 30 級並提交遠征報告后，向比奇城牆公告板（334,259）領取成長獎勵。",
+      "pt-BR": "Chegue ao nível 30 e entregue o relatório da expedição. Receba sua recompensa de progresso no Quadro da Muralha de Bichon (334,259).",
+      "aliases": [
+        "达到 30 级并提交远征报告后，向比奇城墙公告板（334,259）领取成长奖励。",
+        "After the final report, claim the level-30 growth reward from the Board in Bichon Province (map 0, 334,259)."
+      ]
+    },
+    {
+      "key": "quest.practice.copy.1",
+      "en": "Learn Fencing",
+      "zh-TW": "學會基本劍術",
+      "pt-BR": "Aprenda Esgrima",
+      "aliases": [
+        "学会基本剑术"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.2",
+      "en": "Learn Fencing first. It is a passive skill.",
+      "zh-TW": "先學會基本劍術，這是被動技能。",
+      "pt-BR": "Aprenda Esgrima primeiro. É uma habilidade passiva.",
+      "aliases": [
+        "先学会基本剑术，这是被动技能。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.3",
+      "en": "Land a normal attack",
+      "zh-TW": "普攻命中",
+      "pt-BR": "Acerte um ataque normal",
+      "aliases": [
+        "普攻命中"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.4",
+      "en": "After learning Fencing, hit a monster with a normal attack.",
+      "zh-TW": "學會基本劍術后，普通攻擊命中怪物。",
+      "pt-BR": "Após aprender Esgrima, acerte um monstro com um ataque normal.",
+      "aliases": [
+        "学会基本剑术后，普通攻击命中怪物。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.5",
+      "en": "Learn Slaying",
+      "zh-TW": "學會攻殺劍術",
+      "pt-BR": "Aprenda Golpe Mortal",
+      "aliases": [
+        "学会攻杀剑术"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.6",
+      "en": "Learn Slaying first. It is a passive skill.",
+      "zh-TW": "先學會攻殺劍術，這是被動技能。",
+      "pt-BR": "Aprenda Golpe Mortal primeiro. É uma habilidade passiva.",
+      "aliases": [
+        "先学会攻杀剑术，这是被动技能。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.7",
+      "en": "Land a normal attack with Slaying learned",
+      "zh-TW": "普攻命中（已學攻殺）",
+      "pt-BR": "Acerte um ataque normal após aprender Golpe Mortal",
+      "aliases": [
+        "普攻命中（已学攻杀）"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.8",
+      "en": "After learning Slaying, hit a monster with a normal attack.",
+      "zh-TW": "學會攻殺劍術后，普通攻擊命中怪物。",
+      "pt-BR": "Após aprender Golpe Mortal, acerte um monstro com um ataque normal.",
+      "aliases": [
+        "学会攻杀剑术后，普通攻击命中怪物。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.9",
+      "en": "Learn Fireball",
+      "zh-TW": "學會火球術",
+      "pt-BR": "Aprenda Bola de Fogo",
+      "aliases": [
+        "学会火球术"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.10",
+      "en": "Learn Fireball first.",
+      "zh-TW": "先學會火球術。",
+      "pt-BR": "Aprenda Bola de Fogo primeiro.",
+      "aliases": [
+        "先学会火球术。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.11",
+      "en": "Deal damage with Fireball",
+      "zh-TW": "火球術造成傷害",
+      "pt-BR": "Cause dano com Bola de Fogo",
+      "aliases": [
+        "火球术造成伤害"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.12",
+      "en": "Damage a monster with Fireball. Casting without a hit does not count.",
+      "zh-TW": "用火球術對怪物造成傷害，空放不計。",
+      "pt-BR": "Cause dano a um monstro com Bola de Fogo. Conjurar sem acertar não conta.",
+      "aliases": [
+        "用火球术对怪物造成伤害，空放不计。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.13",
+      "en": "Learn Healing",
+      "zh-TW": "學會治癒術",
+      "pt-BR": "Aprenda Cura",
+      "aliases": [
+        "学会治愈术"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.14",
+      "en": "Learn Healing first.",
+      "zh-TW": "先學會治癒術。",
+      "pt-BR": "Aprenda Cura primeiro.",
+      "aliases": [
+        "先学会治愈术。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.15",
+      "en": "Cast Healing on yourself",
+      "zh-TW": "對自己施放治癒術",
+      "pt-BR": "Use Cura em si mesmo",
+      "aliases": [
+        "对自己施放治愈术"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.16",
+      "en": "Successfully cast Healing with yourself as the target.",
+      "zh-TW": "以自己為目標成功施放治癒術。",
+      "pt-BR": "Use Cura com sucesso, tendo você mesmo como alvo.",
+      "aliases": [
+        "以自己为目标成功施放治愈术。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.17",
+      "en": "Learn Great Fireball",
+      "zh-TW": "學會大火球",
+      "pt-BR": "Aprenda Grande Bola de Fogo",
+      "aliases": [
+        "学会大火球"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.18",
+      "en": "Learn Great Fireball first.",
+      "zh-TW": "先學會大火球。",
+      "pt-BR": "Aprenda Grande Bola de Fogo primeiro.",
+      "aliases": [
+        "先学会大火球。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.19",
+      "en": "Deal damage with Great Fireball",
+      "zh-TW": "大火球造成傷害",
+      "pt-BR": "Cause dano com Grande Bola de Fogo",
+      "aliases": [
+        "大火球造成伤害"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.20",
+      "en": "Damage a monster with Great Fireball.",
+      "zh-TW": "用大火球對怪物造成傷害。",
+      "pt-BR": "Cause dano a um monstro com Grande Bola de Fogo.",
+      "aliases": [
+        "用大火球对怪物造成伤害。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.21",
+      "en": "Learn Spirit Sword",
+      "zh-TW": "學會精神力戰法",
+      "pt-BR": "Aprenda Técnica Espiritual da Espada",
+      "aliases": [
+        "学会精神力战法"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.22",
+      "en": "Learn Spirit Sword first. It is a passive skill.",
+      "zh-TW": "先學會精神力戰法，這是被動技能。",
+      "pt-BR": "Aprenda Técnica Espiritual da Espada primeiro. É uma habilidade passiva.",
+      "aliases": [
+        "先学会精神力战法，这是被动技能。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.23",
+      "en": "Land a normal attack with Spirit Sword learned",
+      "zh-TW": "普攻命中（已學精神力戰法）",
+      "pt-BR": "Acerte um ataque normal após aprender Técnica Espiritual da Espada",
+      "aliases": [
+        "普攻命中（已学精神力战法）"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.24",
+      "en": "After learning Spirit Sword, hit a monster with a normal attack.",
+      "zh-TW": "學會精神力戰法后，普通攻擊命中怪物。",
+      "pt-BR": "Após aprender Técnica Espiritual da Espada, acerte um monstro com um ataque normal.",
+      "aliases": [
+        "学会精神力战法后，普通攻击命中怪物。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.25",
+      "en": "Learn Soul Fireball",
+      "zh-TW": "學會靈魂火符",
+      "pt-BR": "Aprenda Talismã de Fogo",
+      "aliases": [
+        "学会灵魂火符"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.26",
+      "en": "Learn Soul Fireball first and equip Amulets.",
+      "zh-TW": "先學會靈魂火符，裝備護身符。",
+      "pt-BR": "Aprenda Talismã de Fogo e equipe Amuletos.",
+      "aliases": [
+        "先学会灵魂火符，装备护身符。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.27",
+      "en": "Deal damage with Soul Fireball",
+      "zh-TW": "靈魂火符造成傷害",
+      "pt-BR": "Cause dano com Talismã de Fogo",
+      "aliases": [
+        "灵魂火符造成伤害"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.28",
+      "en": "Equip Amulets and damage a monster with Soul Fireball. This consumes Amulets.",
+      "zh-TW": "裝備護身符，用靈魂火符對怪物造成傷害；需消耗護身符。",
+      "pt-BR": "Equipe Amuletos e cause dano a um monstro com Talismã de Fogo. A habilidade consome Amuletos.",
+      "aliases": [
+        "装备护身符，用灵魂火符对怪物造成伤害；需消耗护身符。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.29",
+      "en": "Learn Summon Skeleton",
+      "zh-TW": "學會召喚骷髏",
+      "pt-BR": "Aprenda Invocar Esqueleto",
+      "aliases": [
+        "学会召唤骷髅"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.30",
+      "en": "Learn Summon Skeleton first.",
+      "zh-TW": "先學會召喚骷髏。",
+      "pt-BR": "Aprenda Invocar Esqueleto primeiro.",
+      "aliases": [
+        "先学会召唤骷髅。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.31",
+      "en": "Summon your own skeleton",
+      "zh-TW": "召出自己的骷髏",
+      "pt-BR": "Invoque seu próprio esqueleto",
+      "aliases": [
+        "召出自己的骷髅"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.32",
+      "en": "Equip Amulets and successfully summon your own skeleton.",
+      "zh-TW": "裝備護身符，成功召喚屬于自己的骷髏。",
+      "pt-BR": "Equipe Amuletos e invoque seu próprio esqueleto com sucesso.",
+      "aliases": [
+        "装备护身符，成功召唤属于自己的骷髅。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.33",
+      "en": "Have your own skeleton deal damage",
+      "zh-TW": "自己的骷髏造成傷害",
+      "pt-BR": "Faça seu próprio esqueleto causar dano",
+      "aliases": [
+        "自己的骷髅造成伤害"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.34",
+      "en": "Have the skeleton you summoned attack and damage a monster.",
+      "zh-TW": "讓自己召喚的骷髏攻擊怪物並造成傷害。",
+      "pt-BR": "Faça o esqueleto que você invocou atacar e causar dano a um monstro.",
+      "aliases": [
+        "让自己召唤的骷髅攻击怪物并造成伤害。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.35",
+      "en": "Learn Thrusting",
+      "zh-TW": "學會刺殺劍術",
+      "pt-BR": "Aprenda Estocada",
+      "aliases": [
+        "学会刺杀剑术"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.36",
+      "en": "Learn Thrusting first.",
+      "zh-TW": "先學會刺殺劍術。",
+      "pt-BR": "Aprenda Estocada primeiro.",
+      "aliases": [
+        "先学会刺杀剑术。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.37",
+      "en": "Deal damage with Thrusting",
+      "zh-TW": "刺殺劍術造成傷害",
+      "pt-BR": "Cause dano com Estocada",
+      "aliases": [
+        "刺杀剑术造成伤害"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.38",
+      "en": "Enable Thrusting, then use a normal attack to damage a monster.",
+      "zh-TW": "開啟刺殺劍術后普攻，對怪物造成傷害。",
+      "pt-BR": "Ative Estocada e use um ataque normal para causar dano a um monstro.",
+      "aliases": [
+        "开启刺杀剑术后普攻，对怪物造成伤害。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.39",
+      "en": "Move after dealing spell damage",
+      "zh-TW": "法術傷害后移動",
+      "pt-BR": "Mova-se após causar dano mágico",
+      "aliases": [
+        "法术伤害后移动"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.40",
+      "en": "Deal spell damage, then move to a walkable tile. Casting in place alone does not count.",
+      "zh-TW": "先用法術造成傷害，再走到可通行位置；只原地施法不計。",
+      "pt-BR": "Cause dano mágico e depois vá para uma casa acessível. Apenas conjurar parado não conta.",
+      "aliases": [
+        "先用法术造成伤害，再走到可通行位置；只原地施法不计。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.41",
+      "en": "Learn Poisoning",
+      "zh-TW": "學會施毒術",
+      "pt-BR": "Aprenda Envenenamento",
+      "aliases": [
+        "学会施毒术"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.42",
+      "en": "Learn Poisoning first and prepare poison powder.",
+      "zh-TW": "先學會施毒術，準備毒粉。",
+      "pt-BR": "Aprenda Envenenamento e prepare pó de veneno.",
+      "aliases": [
+        "先学会施毒术，准备毒粉。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.43",
+      "en": "Apply poison successfully",
+      "zh-TW": "成功施毒",
+      "pt-BR": "Aplique veneno com sucesso",
+      "aliases": [
+        "成功施毒"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.44",
+      "en": "Equip poison powder and poison a monster with Poisoning. This consumes powder.",
+      "zh-TW": "裝備毒粉，用施毒術使怪物中毒；需消耗毒粉。",
+      "pt-BR": "Equipe pó de veneno e envenene um monstro com Envenenamento. A habilidade consome o pó.",
+      "aliases": [
+        "装备毒粉，用施毒术使怪物中毒；需消耗毒粉。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.45",
+      "en": "Learn Fire Wall",
+      "zh-TW": "學會火牆",
+      "pt-BR": "Aprenda Muralha de Fogo",
+      "aliases": [
+        "学会火墙"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.46",
+      "en": "Learn Fire Wall first.",
+      "zh-TW": "先學會火牆。",
+      "pt-BR": "Aprenda Muralha de Fogo primeiro.",
+      "aliases": [
+        "先学会火墙。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.47",
+      "en": "Deal damage with your own Fire Wall",
+      "zh-TW": "自己的火牆造成傷害",
+      "pt-BR": "Cause dano com sua própria Muralha de Fogo",
+      "aliases": [
+        "自己的火墙造成伤害"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.48",
+      "en": "Burn a monster with your own Fire Wall. Casting on empty ground does not count.",
+      "zh-TW": "用自己施放的火牆灼傷怪物；只放空地不計。",
+      "pt-BR": "Queime um monstro com sua própria Muralha de Fogo. Conjurar em terreno vazio não conta.",
+      "aliases": [
+        "用自己施放的火墙灼伤怪物；只放空地不计。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.49",
+      "en": "Learn Half Moon",
+      "zh-TW": "學會半月彎刀",
+      "pt-BR": "Aprenda Meia-Lua",
+      "aliases": [
+        "学会半月弯刀"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.50",
+      "en": "Learn Half Moon first.",
+      "zh-TW": "先學會半月彎刀。",
+      "pt-BR": "Aprenda Meia-Lua primeiro.",
+      "aliases": [
+        "先学会半月弯刀。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.51",
+      "en": "Deal damage with Half Moon",
+      "zh-TW": "半月彎刀造成傷害",
+      "pt-BR": "Cause dano com Meia-Lua",
+      "aliases": [
+        "半月弯刀造成伤害"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.52",
+      "en": "Enable Half Moon, then use a normal attack to damage a monster.",
+      "zh-TW": "開啟半月彎刀后普攻，對怪物造成傷害。",
+      "pt-BR": "Ative Meia-Lua e use um ataque normal para causar dano a um monstro.",
+      "aliases": [
+        "开启半月弯刀后普攻，对怪物造成伤害。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.53",
+      "en": "Learn Lightning",
+      "zh-TW": "學會疾光電影",
+      "pt-BR": "Aprenda Relâmpago",
+      "aliases": [
+        "学会雷电术"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.54",
+      "en": "Learn Lightning first.",
+      "zh-TW": "先學會疾光電影。",
+      "pt-BR": "Aprenda Relâmpago primeiro.",
+      "aliases": [
+        "先学会雷电术。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.55",
+      "en": "Deal damage with Lightning",
+      "zh-TW": "疾光電影造成傷害",
+      "pt-BR": "Cause dano com Relâmpago",
+      "aliases": [
+        "雷电术造成伤害"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.56",
+      "en": "Damage a monster with Lightning.",
+      "zh-TW": "用疾光電影對怪物造成傷害。",
+      "pt-BR": "Cause dano a um monstro com Relâmpago.",
+      "aliases": [
+        "用雷电术对怪物造成伤害。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.57",
+      "en": "Move between attacks",
+      "zh-TW": "攻擊之間移動",
+      "pt-BR": "Mova-se entre os ataques",
+      "aliases": [
+        "攻击之间移动"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.58",
+      "en": "Move to a walkable tile between two attacks.",
+      "zh-TW": "兩次攻擊之間移動到可通行位置。",
+      "pt-BR": "Vá para uma casa acessível entre dois ataques.",
+      "aliases": [
+        "两次攻击之间移动到可通行位置。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.59",
+      "en": "Equip an eligible weapon",
+      "zh-TW": "裝備可用武器",
+      "pt-BR": "Equipe uma arma permitida",
+      "aliases": [
+        "装备可用武器"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.60",
+      "en": "Equip a weapon whose level requirement you meet.",
+      "zh-TW": "裝備一把符合自身等級要求的武器。",
+      "pt-BR": "Equipe uma arma cujo requisito de nível você atenda.",
+      "aliases": [
+        "装备一把符合自身等级要求的武器。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.61",
+      "en": "Equip Amulets and carry poison powder",
+      "zh-TW": "裝備護身符並攜帶毒粉",
+      "pt-BR": "Equipe Amuletos e leve pó de veneno",
+      "aliases": [
+        "装备护身符并携带毒粉"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.62",
+      "en": "Equip eligible Amulets and carry eligible poison powder. Switch the equipped material between Poisoning and Soul Fireball.",
+      "zh-TW": "裝備可用護身符，背包攜帶可用毒粉；施毒與火符之間切換材料。",
+      "pt-BR": "Equipe Amuletos permitidos e leve pó de veneno adequado na bolsa. Troque o material equipado ao alternar entre Envenenamento e Talismã de Fogo.",
+      "aliases": [
+        "装备可用护身符，背包携带可用毒粉；施毒与火符之间切换材料。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.63",
+      "en": "Enable Half Moon and Thrusting separately before normal attacks. Disable the other skill when switching. Misses and zero-damage attacks do not count.",
+      "zh-TW": "半月與刺殺請分開開啟后普攻；切換時先關閉另一個，空揮或未造成傷害不計。",
+      "pt-BR": "Ative Meia-Lua e Estocada separadamente antes dos ataques normais. Desative a outra habilidade ao trocar. Golpes que erram ou não causam dano não contam.",
+      "aliases": [
+        "半月与刺杀请分开开启后普攻；切换时先关闭另一个，空挥或未造成伤害不计。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.64",
+      "en": "Bichon Alchemist Samuel (324,291): HP and MP potions.",
+      "zh-TW": "比奇城藥劑師·塞繆爾（324,291）：紅藥和藍藥。",
+      "pt-BR": "Alquimista Samuel, em Bichon (324,291): poções de HP e MP.",
+      "aliases": [
+        "比奇城药剂师·塞缪尔（324,291）：红药和蓝药。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.65",
+      "en": "Bichon Merchant Bull (374,296): Town Teleport, Random Teleport, Dungeon Escape, and Amulets.",
+      "zh-TW": "比奇城雜貨商·布爾（374,296）：回城卷、隨機卷、地牢逃脫卷和護身符。",
+      "pt-BR": "Mercador Bull, em Bichon (374,296): pergaminhos de retorno, teleporte aleatório, fuga da masmorra e Amuletos.",
+      "aliases": [
+        "比奇城杂货商·布尔（374,296）：回城卷、随机卷、地牢逃脱卷和护身符。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.66",
+      "en": "Wizards use MP continuously while casting. Restock MP potions when low and reserve HP potions and a return scroll.",
+      "zh-TW": "法師持續施法消耗魔法值，藍藥不足時先補給，預留紅藥和返程卷。",
+      "pt-BR": "Magos gastam MP ao conjurar. Reponha poções de MP quando estiverem acabando e reserve poções de HP e um pergaminho de retorno.",
+      "aliases": [
+        "法师持续施法消耗魔法值，蓝药不足时先补给，预留红药和返程卷。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.67",
+      "en": "Taoists should prepare MP potions. Soul Fireball and Summon Skeleton consume Amulets; Poisoning consumes poison powder.",
+      "zh-TW": "道士施法前準備藍藥；火符和召喚骷髏消耗護身符，施毒消耗毒粉。",
+      "pt-BR": "Taoístas devem preparar poções de MP. Talismã de Fogo e Invocar Esqueleto consomem Amuletos; Envenenamento consome pó de veneno.",
+      "aliases": [
+        "道士施法前准备蓝药；火符和召唤骷髅消耗护身符，施毒消耗毒粉。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.68",
+      "en": "Poison Specialist Travis is in the Medicine Room (4,9). Choose poison in Supply Check to follow the shop entrances one map at a time.",
+      "zh-TW": "毒粉商·特拉維斯在制藥室（4,9）；點補給檢查選擇毒粉，會逐段標出店鋪入口。",
+      "pt-BR": "O Especialista em Venenos Travis fica na Sala de Preparação (4,9). Escolha veneno em Verificar suprimentos para ver as entradas até a loja, mapa por mapa.",
+      "aliases": [
+        "毒粉商·特拉维斯在制药室（4,9）；点补给检查选择毒粉，会逐段标出店铺入口。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.69",
+      "en": "Switch equipped Amulets and poison powder for the skill you use. Materials in your bag are not necessarily equipped.",
+      "zh-TW": "護身符與毒粉需按技能切換裝備；背包里有材料不等于已裝備。",
+      "pt-BR": "Alterne entre Amuletos e pó de veneno equipados conforme a habilidade. Ter o material na bolsa não significa que ele esteja equipado.",
+      "aliases": [
+        "护身符与毒粉需按技能切换装备；背包里有材料不等于已装备。"
+      ]
+    },
+    {
+      "key": "quest.practice.copy.70",
+      "en": "Town Teleport returns you to the last safe area you visited. If scrolls are disabled on a map, walk back through the entrances. Check gold and weight before buying.",
+      "zh-TW": "回城卷回到最近經過的安全區；地圖禁用卷軸時，可按入口路線步行返回。購買前檢查金幣和負重。",
+      "pt-BR": "O pergaminho de retorno leva à última zona segura visitada. Se o mapa bloquear pergaminhos, volte a pé pelas entradas. Confira o ouro e o peso antes de comprar.",
+      "aliases": [
+        "回城卷回到最近经过的安全区；地图禁用卷轴时，可按入口路线步行返回。购买前检查金币和负重。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.1",
+      "en": "Village Beginnings",
+      "zh-TW": "村莊起步",
+      "pt-BR": "Primeiros passos na vila",
+      "aliases": [
+        "Village Beginnings",
+        "村庄起步"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.2",
+      "en": "Bichon Forest",
+      "zh-TW": "比奇森林",
+      "pt-BR": "Floresta de Bichon",
+      "aliases": [
+        "Bichon Forest",
+        "比奇森林"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.3",
+      "en": "Cave Rescue",
+      "zh-TW": "洞穴救援",
+      "pt-BR": "Resgate na caverna",
+      "aliases": [
+        "Cave Rescue",
+        "洞穴救援"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.4",
+      "en": "Dead Mine",
+      "zh-TW": "死亡礦區",
+      "pt-BR": "Mina Morta",
+      "aliases": [
+        "Dead Mine",
+        "死亡矿区"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.5",
+      "en": "Wooma Expedition",
+      "zh-TW": "沃瑪遠征",
+      "pt-BR": "Expedição a Wooma",
+      "aliases": [
+        "Wooma Expedition",
+        "沃玛远征"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.6",
+      "en": "Wooma Graduation",
+      "zh-TW": "沃瑪結業",
+      "pt-BR": "Conclusão em Wooma",
+      "aliases": [
+        "Wooma Graduation",
+        "沃玛结业"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.7",
+      "en": "Report to Assistant Jane",
+      "zh-TW": "向助理簡報告",
+      "pt-BR": "Apresente-se à Assistente Jane",
+      "aliases": [
+        "Report to Assistant Jane",
+        "向助理简报告"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.8",
+      "en": "Equip a weapon you can use",
+      "zh-TW": "裝備一把可用武器",
+      "pt-BR": "Equipe uma arma que você possa usar",
+      "aliases": [
+        "Equip a weapon you can use",
+        "装备一把可用武器"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.9",
+      "en": "Complete your class practice",
+      "zh-TW": "完成職業練習",
+      "pt-BR": "Conclua o treino da sua classe",
+      "aliases": [
+        "Complete your class practice",
+        "完成职业练习"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.10",
+      "en": "Reach a Bichon safe area",
+      "zh-TW": "抵達比奇城安全區",
+      "pt-BR": "Chegue à zona segura da cidade de Bichon",
+      "aliases": [
+        "Reach a Bichon safe area",
+        "抵达比奇城安全区"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.11",
+      "en": "Buy a small HP or MP potion from a normal shop",
+      "zh-TW": "從普通商店購買小型紅藥或小型藍藥",
+      "pt-BR": "Compre uma poção pequena de HP ou MP em uma loja comum",
+      "aliases": [
+        "Buy a small HP or MP potion from a normal shop",
+        "从普通商店购买小型红药或小型蓝药"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.12",
+      "en": "Reach the Oma Cave entrance",
+      "zh-TW": "抵達半獸人洞穴入口",
+      "pt-BR": "Chegue à entrada da Caverna dos Omas",
+      "aliases": [
+        "Reach the Oma Cave entrance",
+        "抵达半兽人洞穴入口"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.13",
+      "en": "Reach the Dead Mine entrance",
+      "zh-TW": "抵達死亡礦區入口",
+      "pt-BR": "Chegue à entrada da Mina Morta",
+      "aliases": [
+        "Reach the Dead Mine entrance",
+        "抵达死亡矿区入口"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.14",
+      "en": "Equip armour for your class and level",
+      "zh-TW": "裝備適合本職業與等級的盔甲",
+      "pt-BR": "Equipe uma armadura adequada à sua classe e ao seu nível",
+      "aliases": [
+        "Equip armour for your class and level",
+        "装备适合本职业与等级的盔甲"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.15",
+      "en": "Report to the Bichon Wall Board",
+      "zh-TW": "向比奇城牆公告板報告",
+      "pt-BR": "Apresente-se ao Quadro da Muralha de Bichon",
+      "aliases": [
+        "Report to the Bichon Wall Board",
+        "向比奇城墙公告板报告"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.16",
+      "en": "Reach the Wooma Temple entrance",
+      "zh-TW": "抵達沃瑪寺廟入口",
+      "pt-BR": "Chegue à entrada do Templo de Wooma",
+      "aliases": [
+        "Reach the Wooma Temple entrance",
+        "抵达沃玛寺庙入口"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.17",
+      "en": "Return to the Bichon Wall Board",
+      "zh-TW": "返回比奇城牆公告板報告",
+      "pt-BR": "Volte ao Quadro da Muralha de Bichon",
+      "aliases": [
+        "Return to the Bichon Wall Board",
+        "返回比奇城墙公告板报告"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.18",
+      "en": "Return to the Quest Diary",
+      "zh-TW": "在任務日志交付",
+      "pt-BR": "Entregue pelo Diário de Missões",
+      "aliases": [
+        "Return to the Quest Diary",
+        "在任务日志交付"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.19",
+      "en": "Prepare your weapon and first class skill outside Bichon Village.",
+      "zh-TW": "在邊境村外準備武器並學習第一項職業技能。",
+      "pt-BR": "Prepare sua arma e sua primeira habilidade de classe nos arredores da Vila da Fronteira.",
+      "aliases": [
+        "Prepare your weapon and first class skill outside Bichon Village.",
+        "在边境村外准备武器并学习第一项职业技能。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.20",
+      "en": "Starter weapon and first skill materials.",
+      "zh-TW": "新手武器和第一項技能所需材料。",
+      "pt-BR": "Arma inicial e materiais para a primeira habilidade.",
+      "aliases": [
+        "Starter weapon and first skill materials.",
+        "新手武器和第一项技能所需材料。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.21",
+      "en": "Use Fencing after learning it.",
+      "zh-TW": "學習基本劍術后，用普通攻擊命中怪物。",
+      "pt-BR": "Após aprender Esgrima, acerte um monstro com um ataque normal.",
+      "aliases": [
+        "Use Fencing after learning it.",
+        "学习基本剑术后，用普通攻击命中怪物。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.22",
+      "en": "Use FireBall after learning it.",
+      "zh-TW": "學習火球術后，對怪物施放。",
+      "pt-BR": "Após aprender Bola de Fogo, use-a contra um monstro.",
+      "aliases": [
+        "Use FireBall after learning it.",
+        "学习火球术后，对怪物施放。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.23",
+      "en": "Use Healing after learning it and carry MP medicine.",
+      "zh-TW": "學習並使用治癒術，攜帶藍藥。",
+      "pt-BR": "Aprenda e use Cura; leve poções de MP.",
+      "aliases": [
+        "Use Healing after learning it and carry MP medicine.",
+        "学习并使用治愈术，携带蓝药。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.24",
+      "en": "Travel safely, restock, and report the forest route.",
+      "zh-TW": "安全抵達城鎮，補充物資並報告森林路線。",
+      "pt-BR": "Chegue em segurança à cidade, reponha os suprimentos e informe sobre a rota da floresta.",
+      "aliases": [
+        "Travel safely, restock, and report the forest route.",
+        "安全抵达城镇，补充物资并报告森林路线。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.25",
+      "en": "Level-15 growth weapon and class skill.",
+      "zh-TW": "15 級成長武器和職業技能。",
+      "pt-BR": "Arma de progresso e habilidade de classe do nível 15.",
+      "aliases": [
+        "Level-15 growth weapon and class skill.",
+        "15 级成长武器和职业技能。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.26",
+      "en": "Restock HP before Forest Yetis.",
+      "zh-TW": "獵殺森林雪人前補充紅藥。",
+      "pt-BR": "Reponha poções de HP antes de caçar Yetis da Floresta.",
+      "aliases": [
+        "Restock HP before Forest Yetis.",
+        "猎杀森林雪人前补充红药。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.27",
+      "en": "Bring MP medicine for FireBall.",
+      "zh-TW": "準備藍藥，以便使用火球術。",
+      "pt-BR": "Leve poções de MP para usar Bola de Fogo.",
+      "aliases": [
+        "Bring MP medicine for FireBall.",
+        "准备蓝药，以便使用火球术。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.28",
+      "en": "Bring MP medicine and Amulets.",
+      "zh-TW": "攜帶藍藥和護身符。",
+      "pt-BR": "Leve poções de MP e Amuletos.",
+      "aliases": [
+        "Bring MP medicine and Amulets.",
+        "携带蓝药和护身符。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.29",
+      "en": "Clear the certified D001 rescue route and report to the Board.",
+      "zh-TW": "清理半獸人洞穴一層救援路線，並向公告板報告。",
+      "pt-BR": "Limpe a rota de resgate no 1º andar da Caverna dos Omas e informe ao Quadro.",
+      "aliases": [
+        "Clear the certified D001 rescue route and report to the Board.",
+        "清理半兽人洞穴一层救援路线，并向公告板报告。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.30",
+      "en": "Level-20 growth weapon.",
+      "zh-TW": "20 級成長武器。",
+      "pt-BR": "Arma de progresso do nível 20.",
+      "aliases": [
+        "Level-20 growth weapon.",
+        "20 级成长武器。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.31",
+      "en": "Practise Slaying on Skeletons.",
+      "zh-TW": "通過攻擊骷髏練習攻殺劍術。",
+      "pt-BR": "Pratique Golpe Mortal atacando Esqueletos.",
+      "aliases": [
+        "Practise Slaying on Skeletons.",
+        "通过攻击骷髅练习攻杀剑术。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.32",
+      "en": "Use GreatFireBall with MP supplies.",
+      "zh-TW": "補足藍藥后使用大火球。",
+      "pt-BR": "Reponha poções de MP e use Grande Bola de Fogo.",
+      "aliases": [
+        "Use GreatFireBall with MP supplies.",
+        "补足蓝药后使用大火球。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.33",
+      "en": "Use SoulFireBall and prepare Amulets.",
+      "zh-TW": "準備護身符並使用靈魂火符。",
+      "pt-BR": "Prepare Amuletos e use Talismã de Fogo.",
+      "aliases": [
+        "Use SoulFireBall and prepare Amulets.",
+        "准备护身符并使用灵魂火符。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.34",
+      "en": "Secure the D401 mine mouth and complete class combat practice.",
+      "zh-TW": "清理死亡礦區一層入口並完成職業戰斗練習。",
+      "pt-BR": "Limpe a entrada do 1º andar da Mina Morta e conclua o treino de combate da sua classe.",
+      "aliases": [
+        "Secure the D401 mine mouth and complete class combat practice.",
+        "清理死亡矿区一层入口并完成职业战斗练习。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.35",
+      "en": "Level-25 armour and weapon.",
+      "zh-TW": "25 級成長盔甲和武器。",
+      "pt-BR": "Armadura e arma de progresso do nível 25.",
+      "aliases": [
+        "Level-25 armour and weapon.",
+        "25 级成长盔甲和武器。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.36",
+      "en": "Practise Thrusting safely.",
+      "zh-TW": "在安全的位置練習刺殺劍術。",
+      "pt-BR": "Pratique Estocada em uma posição segura.",
+      "aliases": [
+        "Practise Thrusting safely.",
+        "在安全的位置练习刺杀剑术。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.37",
+      "en": "Use FireWall after learning it.",
+      "zh-TW": "學習火牆后，用火牆灼傷怪物。",
+      "pt-BR": "Após aprender Muralha de Fogo, queime um monstro com ela.",
+      "aliases": [
+        "Use FireWall after learning it.",
+        "学习火墙后，用火墙灼伤怪物。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.38",
+      "en": "Use Poisoning with legal poison supplies.",
+      "zh-TW": "裝備可用毒粉后使用施毒術。",
+      "pt-BR": "Equipe pó de veneno adequado e use Envenenamento.",
+      "aliases": [
+        "Use Poisoning with legal poison supplies.",
+        "装备可用毒粉后使用施毒术。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.39",
+      "en": "Prepare at the Board and scout the certified Wooma route.",
+      "zh-TW": "向公告板報告準備情況，並偵察沃瑪路線。",
+      "pt-BR": "Informe seus preparativos ao Quadro e explore a rota de Wooma.",
+      "aliases": [
+        "Prepare at the Board and scout the certified Wooma route.",
+        "向公告板报告准备情况，并侦察沃玛路线。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.40",
+      "en": "Expedition supplies and safe-route practice.",
+      "zh-TW": "遠征補給和安全路線練習。",
+      "pt-BR": "Suprimentos da expedição e prática de uma rota segura.",
+      "aliases": [
+        "Expedition supplies and safe-route practice.",
+        "远征补给和安全路线练习。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.41",
+      "en": "Prepare HalfMoon and healing supplies.",
+      "zh-TW": "準備半月彎刀和紅藥。",
+      "pt-BR": "Prepare Meia-Lua e poções de HP.",
+      "aliases": [
+        "Prepare HalfMoon and healing supplies.",
+        "准备半月弯刀和红药。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.42",
+      "en": "Prepare Lightning and MP medicine.",
+      "zh-TW": "準備疾光電影和藍藥。",
+      "pt-BR": "Prepare Relâmpago e poções de MP.",
+      "aliases": [
+        "Prepare Lightning and MP medicine.",
+        "准备雷电术和蓝药。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.43",
+      "en": "Prepare SummonSkeleton, Amulets, and poison.",
+      "zh-TW": "準備召喚骷髏、護身符和毒粉。",
+      "pt-BR": "Prepare Invocar Esqueleto, Amuletos e pó de veneno.",
+      "aliases": [
+        "Prepare SummonSkeleton, Amulets, and poison.",
+        "准备召唤骷髅、护身符和毒粉。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.44",
+      "en": "Finish the Wooma expedition and deliver its final report.",
+      "zh-TW": "完成沃瑪遠征並提交最終報告。",
+      "pt-BR": "Conclua a expedição a Wooma e entregue o relatório final.",
+      "aliases": [
+        "Finish the Wooma expedition and deliver its final report.",
+        "完成沃玛远征并提交最终报告。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.45",
+      "en": "Level-30 growth reward and next-adventure choice.",
+      "zh-TW": "30 級成長獎勵和下一階段冒險目標。",
+      "pt-BR": "Recompensa de progresso do nível 30 e escolha da próxima aventura.",
+      "aliases": [
+        "Level-30 growth reward and next-adventure choice.",
+        "30 级成长奖励和下一阶段冒险目标。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.46",
+      "en": "Complete Half Moon and Thrusting practice. Enable each separately before normal attacks.",
+      "zh-TW": "完成半月彎刀和刺殺劍術練習；分開開啟后普攻。",
+      "pt-BR": "Conclua o treino de Meia-Lua e Estocada; ative cada uma separadamente antes dos ataques normais.",
+      "aliases": [
+        "Use HalfMoon and Thrusting together.",
+        "完成半月弯刀和刺杀剑术练习；分开开启后普攻。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.47",
+      "en": "Use Lightning and FireWall with legal repositioning.",
+      "zh-TW": "使用疾光電影和火牆，並在攻擊之間移動。",
+      "pt-BR": "Use Relâmpago e Muralha de Fogo e mova-se entre os ataques.",
+      "aliases": [
+        "Use Lightning and FireWall with legal repositioning.",
+        "使用雷电术和火墙，并在攻击之间移动。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.48",
+      "en": "Use your skeleton, SoulFireBall, and poison.",
+      "zh-TW": "使用自己召喚的骷髏、靈魂火符和施毒術。",
+      "pt-BR": "Use seu esqueleto invocado, Talismã de Fogo e Envenenamento.",
+      "aliases": [
+        "Use your skeleton, SoulFireBall, and poison.",
+        "使用自己召唤的骷髅、灵魂火符和施毒术。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.49",
+      "en": "Level 30. Compatible with Warrior, Wizard, and Taoist.",
+      "zh-TW": "需要 30 級，戰士、法師和道士均可使用。",
+      "pt-BR": "Nível 30. Compatível com Guerreiro, Mago e Taoísta.",
+      "aliases": [
+        "Level 30. Compatible with Warrior, Wizard, and Taoist.",
+        "需要 30 级，战士、法师和道士均可使用。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.50",
+      "en": "Equipment target for your next hunt.",
+      "zh-TW": "下一階段狩獵的裝備目標。",
+      "pt-BR": "Objetivo de equipamento para sua próxima caçada.",
+      "aliases": [
+        "Equipment target for your next hunt.",
+        "下一阶段狩猎的装备目标。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.51",
+      "en": "Warrior, level 30. Skill levels: 30 / 32 / 34.",
+      "zh-TW": "戰士 30 級技能，技能等級要求：30 / 32 / 34。",
+      "pt-BR": "Guerreiro, nível 30. Níveis da habilidade: 30 / 32 / 34.",
+      "aliases": [
+        "Warrior, level 30. Skill levels: 30 / 32 / 34.",
+        "战士 30 级技能，技能等级要求：30 / 32 / 34。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.52",
+      "en": "Wizard, level 30. Skill levels: 30 / 32 / 34.",
+      "zh-TW": "法師 30 級技能，技能等級要求：30 / 32 / 34。",
+      "pt-BR": "Mago, nível 30. Níveis da habilidade: 30 / 32 / 34.",
+      "aliases": [
+        "Wizard, level 30. Skill levels: 30 / 32 / 34.",
+        "法师 30 级技能，技能等级要求：30 / 32 / 34。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.53",
+      "en": "Taoist, level 30. Skill levels: 30 / 32 / 35.",
+      "zh-TW": "道士 30 級技能，技能等級要求：30 / 32 / 35。",
+      "pt-BR": "Taoísta, nível 30. Níveis da habilidade: 30 / 32 / 35.",
+      "aliases": [
+        "Taoist, level 30. Skill levels: 30 / 32 / 35.",
+        "道士 30 级技能，技能等级要求：30 / 32 / 35。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.54",
+      "en": "Hunt EvilCentipede in Life Death Coffin for this book.",
+      "zh-TW": "前往生死棺獵殺觸龍神，獲取這本技能書。",
+      "pt-BR": "Cace a Centopeia Maligna no Caixão da Vida e da Morte para obter este livro.",
+      "aliases": [
+        "Hunt EvilCentipede in Life Death Coffin for this book.",
+        "前往生死棺猎杀触龙神，获取这本技能书。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.55",
+      "en": "Hunt WhiteBoar in Angled Stone Tomb B4 for this book.",
+      "zh-TW": "前往石墓四層獵殺白野豬，獲取這本技能書。",
+      "pt-BR": "Cace o Javali Branco no 4º subsolo da Tumba de Pedra para obter este livro.",
+      "aliases": [
+        "Hunt WhiteBoar in Angled Stone Tomb B4 for this book.",
+        "前往石墓四层猎杀白野猪，获取这本技能书。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.56",
+      "en": "Insect Cave N 2F sweep",
+      "zh-TW": "清剿昆蟲洞穴北二層",
+      "pt-BR": "Limpeza do 2º andar norte da Caverna dos Insetos",
+      "aliases": [
+        "Insect Cave N 2F sweep",
+        "清剿昆虫洞穴北二层"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.57",
+      "en": "Reach Insect Cave N 2F from Insect Cave W 1F or W 2F.",
+      "zh-TW": "從昆蟲洞穴西一層或西二層前往北二層。",
+      "pt-BR": "Vá ao 2º andar norte da Caverna dos Insetos pelo 1º ou 2º andar oeste.",
+      "aliases": [
+        "Reach Insect Cave N 2F from Insect Cave W 1F or W 2F.",
+        "从昆虫洞穴西一层或西二层前往北二层。"
+      ]
+    },
+    {
+      "key": "quest.journey.copy.58",
+      "en": "Fight Centipede and Tongs; stay alert for a medium challenge.",
+      "zh-TW": "獵殺蜈蚣和鉗蟲；本次挑戰難度中等，注意補給。",
+      "pt-BR": "Cace Centopeias e Insetos de Pinças. Desafio de dificuldade média: cuide dos suprimentos.",
+      "aliases": [
+        "Fight Centipede and Tongs; stay alert for a medium challenge.",
+        "猎杀蜈蚣和钳虫；本次挑战难度中等，注意补给。"
+      ]
+    },
+    {
+      "key": "quest.objective.defeat",
+      "en": "Defeat {count} {name}.",
+      "zh-TW": "消滅 {count} {name}",
+      "pt-BR": "Derrote {count} {name}.",
+      "aliases": [
+        "消灭 {count} {name}",
+        "Defeat {count} {name}."
+      ]
+    },
+    {
+      "key": "quest.objective.kill",
+      "en": "Kill {name}",
+      "zh-TW": "消滅{name}",
+      "pt-BR": "Derrote {name}",
+      "aliases": [
+        "消灭{name}",
+        "Kill {name}"
+      ]
+    },
+    {
+      "key": "quest.action.return",
+      "en": "Return to {name}",
+      "zh-TW": "返回{name}",
+      "pt-BR": "Volte para {name}",
+      "aliases": [
+        "返回{name}",
+        "Return to {name}"
+      ]
+    },
+    {
+      "key": "quest.action.report",
+      "en": "Report to {name}",
+      "zh-TW": "向{name}報告",
+      "pt-BR": "Apresente-se a {name}",
+      "aliases": [
+        "向{name}报告",
+        "Report to {name}"
+      ]
+    },
+    {
+      "key": "quest.action.talk",
+      "en": "Talk to {name}",
+      "zh-TW": "與{name}對話",
+      "pt-BR": "Fale com {name}",
+      "aliases": [
+        "与{name}对话",
+        "Talk to {name}"
+      ]
+    },
+    {
+      "key": "quest.status",
+      "en": "Status: {value}",
+      "zh-TW": "狀態：{value}",
+      "pt-BR": "Estado: {value}",
+      "aliases": [
+        "状态：{value}",
+        "Status: {value}"
+      ]
+    },
+    {
+      "key": "quest.category",
+      "en": "Category: {value}",
+      "zh-TW": "分類：{value}",
+      "pt-BR": "Categoria: {value}",
+      "aliases": [
+        "分类：{value}",
+        "Category: {value}"
+      ]
+    },
+    {
+      "key": "quest.chapter.progress",
+      "en": "Chapter {progress}",
+      "zh-TW": "章節 {progress}",
+      "pt-BR": "Capítulo {progress}",
+      "aliases": [
+        "章节 {progress}",
+        "Chapter {progress}"
+      ]
+    },
+    {
+      "key": "quest.chapter.short",
+      "en": "Ch {done}/{total}",
+      "zh-TW": "章節 {done}/{total}",
+      "pt-BR": "Cap. {done}/{total}",
+      "aliases": [
+        "章节 {done}/{total}",
+        "Ch {done}/{total}"
+      ]
+    },
+    {
+      "key": "quest.chapter.syncing",
+      "en": "Chapter progress syncing",
+      "zh-TW": "章節進度同步中",
+      "pt-BR": "Sincronizando progresso do capítulo",
+      "aliases": [
+        "章节进度同步中",
+        "Chapter progress syncing"
+      ]
+    },
+    {
+      "key": "quest.objective.growth",
+      "en": "Reach level {level} and claim the growth reward",
+      "zh-TW": "達到 {level} 級並領取成長獎勵",
+      "pt-BR": "Chegue ao nível {level} e resgate a recompensa de progresso",
+      "aliases": [
+        "达到 {level} 级并领取成长奖励",
+        "Reach level {level} and claim the growth reward"
+      ]
+    },
+    {
+      "key": "quest.objective.node",
+      "en": "Newcomer V2 main node {node}.",
+      "zh-TW": "新手主線 · 第 {node} 步",
+      "pt-BR": "Missão principal de iniciante · etapa {node}",
+      "aliases": [
+        "新手主线 · 第 {node} 步",
+        "Newcomer V2 main node {node}."
+      ]
+    },
+    {
+      "key": "quest.practice.completed",
+      "en": "Class practice complete  {current}/{total}",
+      "zh-TW": "職業練習已完成  {current}/{total}",
+      "pt-BR": "Treino de classe concluído  {current}/{total}",
+      "aliases": [
+        "职业练习已完成  {current}/{total}",
+        "Class practice complete  {current}/{total}"
+      ]
+    },
+    {
+      "key": "quest.practice.progress",
+      "en": "Class practice {current}/{total}: {summary}",
+      "zh-TW": "職業練習 {current}/{total}：{summary}",
+      "pt-BR": "Treino de classe {current}/{total}: {summary}",
+      "aliases": [
+        "职业练习 {current}/{total}：{summary}",
+        "Class practice {current}/{total}: {summary}"
+      ]
+    },
+    {
+      "key": "quest.practice.separator",
+      "en": "; ",
+      "zh-TW": "；",
+      "pt-BR": "; ",
+      "aliases": [
+        "；",
+        "; "
+      ]
+    },
+    {
+      "key": "quest.supply.instruction",
+      "en": "For this stage, buy {size} potions. Choose Supply Check on the quest card to view stock and shop routes.",
+      "zh-TW": "本階段建議購買{size}藥水；在任務卡點“補給檢查”查看庫存和商店路線。",
+      "pt-BR": "Nesta etapa, compre poções {size}. Selecione Verificar suprimentos no painel da missão para ver o estoque e as rotas até as lojas.",
+      "aliases": [
+        "本阶段建议购买{size}药水；在任务卡点“补给检查”查看库存和商店路线。",
+        "For this stage, buy {size} potions. Choose Supply Check on the quest card to view stock and shop routes."
+      ]
+    },
+    {
+      "key": "quest.supply.row",
+      "en": "{name}: {held} / suggested {target}{shortage}",
+      "zh-TW": "{name}：{held} / 建議 {target}{shortage}",
+      "pt-BR": "{name}: {held} / recomendado {target}{shortage}",
+      "aliases": [
+        "{name}：{held} / 建议 {target}{shortage}",
+        "{name}: {held} / suggested {target}{shortage}"
+      ]
+    },
+    {
+      "key": "quest.supply.shortage",
+      "en": " (low)",
+      "zh-TW": "（不足）",
+      "pt-BR": " (baixo)",
+      "aliases": [
+        "（不足）",
+        " (low)"
+      ]
+    },
+    {
+      "key": "quest.supply.low",
+      "en": "Low supplies · {items}",
+      "zh-TW": "補給不足 · {items}",
+      "pt-BR": "Poucos suprimentos · {items}",
+      "aliases": [
+        "补给不足 · {items}",
+        "Low supplies · {items}"
+      ]
+    },
+    {
+      "key": "quest.supply.ready",
+      "en": "Supply Check · stock and shops",
+      "zh-TW": "補給檢查 · 查看庫存與商店",
+      "pt-BR": "Verificar suprimentos · estoque e lojas",
+      "aliases": [
+        "补给检查 · 查看库存与商店",
+        "Supply Check · stock and shops"
+      ]
+    },
+    {
+      "key": "quest.tracker.distance",
+      "en": "{name} ({x},{y}) · {distance} tiles",
+      "zh-TW": "{name} ({x},{y}) · {distance} 格",
+      "pt-BR": "{name} ({x},{y}) · {distance} casas",
+      "aliases": [
+        "{name} ({x},{y}) · {distance} 格",
+        "{name} ({x},{y}) · {distance} tiles"
+      ]
+    },
+    {
+      "key": "quest.tracker.hunt",
+      "en": "Hunting area · {name} ({x},{y}) · {distance} tiles",
+      "zh-TW": "狩獵區域 · {name} ({x},{y}) · {distance} 格",
+      "pt-BR": "Área de caça · {name} ({x},{y}) · {distance} casas",
+      "aliases": [
+        "狩猎区域 · {name} ({x},{y}) · {distance} 格",
+        "Hunting area · {name} ({x},{y}) · {distance} tiles"
+      ]
+    },
+    {
+      "key": "quest.tracker.current",
+      "en": "Current quest · {name}",
+      "zh-TW": "當前任務 · {name}",
+      "pt-BR": "Missão atual · {name}",
+      "aliases": [
+        "当前任务 · {name}",
+        "Current quest · {name}"
+      ]
+    },
+    {
+      "key": "quest.tracker.return",
+      "en": "Return to {name} to deliver the quest",
+      "zh-TW": "返回 {name} 交付任務",
+      "pt-BR": "Volte para {name} para entregar a missão",
+      "aliases": [
+        "返回 {name} 交付任务",
+        "Return to {name} to deliver the quest"
+      ]
+    },
+    {
+      "key": "quest.tracker.delivery",
+      "en": "Open quest details for delivery instructions",
+      "zh-TW": "打開任務詳情查看交付方式",
+      "pt-BR": "Abra os detalhes da missão para ver como entregá-la",
+      "aliases": [
+        "打开任务详情查看交付方式",
+        "Open quest details for delivery instructions"
+      ]
+    },
+    {
+      "key": "quest.tracker.accept",
+      "en": "View details to accept the quest",
+      "zh-TW": "查看詳情領取任務",
+      "pt-BR": "Veja os detalhes para aceitar a missão",
+      "aliases": [
+        "查看详情领取任务",
+        "View details to accept the quest"
+      ]
+    },
+    {
+      "key": "quest.tracker.destination",
+      "en": "Destination: Bichon city safe area ({x},{y})",
+      "zh-TW": "目的地：比奇城安全區 ({x},{y})",
+      "pt-BR": "Destino: zona segura da cidade de Bichon ({x},{y})",
+      "aliases": [
+        "目的地：比奇城安全区 ({x},{y})",
+        "Destination: Bichon city safe area ({x},{y})"
+      ]
+    },
+    {
+      "key": "quest.tracker.north",
+      "en": "Travel north from the Border Village to the city. The village safe area does not count.",
+      "zh-TW": "從新手村向北前往大城；新手村安全區不算目標。",
+      "pt-BR": "Siga ao norte da Vila da Fronteira até a cidade. A zona segura da vila não conta.",
+      "aliases": [
+        "从新手村向北前往大城；新手村安全区不算目标。",
+        "Travel north from the Border Village to the city. The village safe area does not count."
+      ]
+    },
+    {
+      "key": "quest.tracker.map",
+      "en": "Current map · {name} · position ({x},{y})",
+      "zh-TW": "當前地圖 · {name} · 當前位置 ({x},{y})",
+      "pt-BR": "Mapa atual · {name} · posição ({x},{y})",
+      "aliases": [
+        "当前地图 · {name} · 当前位置 ({x},{y})",
+        "Current map · {name} · position ({x},{y})"
+      ]
+    },
+    {
+      "key": "quest.tracker.entrance",
+      "en": "Next · entrance ({x},{y}) · enter {name}",
+      "zh-TW": "下一步 · 入口 ({x},{y}) · 進入 {name}",
+      "pt-BR": "Próximo · entrada ({x},{y}) · entre em {name}",
+      "aliases": [
+        "下一步 · 入口 ({x},{y}) · 进入 {name}",
+        "Next · entrance ({x},{y}) · enter {name}"
+      ]
+    },
+    {
+      "key": "quest.tracker.hops",
+      "en": "{count} map entrances remain to the destination",
+      "zh-TW": "到目標仍需經過 {count} 個地圖入口",
+      "pt-BR": "Faltam {count} entradas de mapa até o destino",
+      "aliases": [
+        "到目标仍需经过 {count} 个地图入口",
+        "{count} map entrances remain to the destination"
+      ]
+    },
+    {
+      "key": "quest.tracker.other",
+      "en": "Other map · {name}",
+      "zh-TW": "其他地圖 · {name}",
+      "pt-BR": "Outro mapa · {name}",
+      "aliases": [
+        "其他地图 · {name}",
+        "Other map · {name}"
+      ]
+    },
+    {
+      "key": "quest.tracker.unknown",
+      "en": "Target location unknown · view details or map",
+      "zh-TW": "目標位置待發現 · 查看詳情或地圖",
+      "pt-BR": "Local do objetivo desconhecido · veja os detalhes ou o mapa",
+      "aliases": [
+        "目标位置待发现 · 查看详情或地图",
+        "Target location unknown · view details or map"
+      ]
+    },
+    {
+      "key": "quest.tracker.walkEntrance",
+      "en": "Go to entrance · auto-path",
+      "zh-TW": "前往入口 · 自動尋路",
+      "pt-BR": "Ir à entrada · rota automática",
+      "aliases": [
+        "前往入口 · 自动寻路",
+        "Go to entrance · auto-path"
+      ]
+    },
+    {
+      "key": "quest.tracker.walkHunt",
+      "en": "Go to hunting area · auto-path",
+      "zh-TW": "前往狩獵區域 · 自動尋路",
+      "pt-BR": "Ir à área de caça · rota automática",
+      "aliases": [
+        "前往狩猎区域 · 自动寻路",
+        "Go to hunting area · auto-path"
+      ]
+    },
+    {
+      "key": "quest.tracker.details",
+      "en": "View quest details",
+      "zh-TW": "查看任務詳情",
+      "pt-BR": "Ver detalhes da missão",
+      "aliases": [
+        "查看任务详情",
+        "View quest details"
+      ]
+    },
+    {
+      "key": "quest.tracker.bigMap",
+      "en": "Open big map",
+      "zh-TW": "打開大地圖",
+      "pt-BR": "Abrir mapa grande",
+      "aliases": [
+        "打开大地图",
+        "Open big map"
+      ]
+    },
+    {
+      "key": "quest.tracker.nearby",
+      "en": "Other nearby tasks",
+      "zh-TW": "附近可順便完成",
+      "pt-BR": "Outras tarefas próximas",
+      "aliases": [
+        "附近可顺便完成",
+        "Other nearby tasks"
+      ]
+    },
+    {
+      "key": "quest.tracker.switch",
+      "en": "Switch · {name} · {progress}",
+      "zh-TW": "切換 · {name} · {progress}",
+      "pt-BR": "Selecionar · {name} · {progress}",
+      "aliases": [
+        "切换 · {name} · {progress}",
+        "Switch · {name} · {progress}"
+      ]
+    },
+    {
+      "key": "quest.tracker.otherMaps",
+      "en": "Other maps",
+      "zh-TW": "其他地圖",
+      "pt-BR": "Outros mapas",
+      "aliases": [
+        "其他地图",
+        "Other maps"
+      ]
+    },
+    {
+      "key": "quest.tracker.remaining",
+      "en": "{remaining} more quests · press Q to choose the current quest",
+      "zh-TW": "另有 {remaining} 個任務 · 按 Q 查看並設為當前",
+      "pt-BR": "Mais {remaining} missões · pressione Q para escolher a missão atual",
+      "aliases": [
+        "另有 {remaining} 个任务 · 按 Q 查看并设为当前",
+        "{remaining} more quests · press Q to choose the current quest"
+      ]
+    },
+    {
+      "key": "quest.supply.heading",
+      "en": "Travel supplies · held / suggested",
+      "zh-TW": "出發補給 · 現有 / 建議",
+      "pt-BR": "Suprimentos de viagem · atual / recomendado",
+      "aliases": [
+        "出发补给 · 现有 / 建议",
+        "Travel supplies · held / suggested"
+      ]
+    },
+    {
+      "key": "quest.supply.recommended",
+      "en": "Recommended: {size} {medicines}",
+      "zh-TW": "當前推薦：{size}{medicines}",
+      "pt-BR": "Recomendado: {medicines} {size}",
+      "aliases": [
+        "当前推荐：{size}{medicines}",
+        "Recommended: {size} {medicines}"
+      ]
+    },
+    {
+      "key": "quest.supply.cost",
+      "en": "Gold {gold} · restock about {cost}",
+      "zh-TW": "金幣 {gold} · 補足約 {cost}",
+      "pt-BR": "Ouro {gold} · reposição aproximada {cost}",
+      "aliases": [
+        "金币 {gold} · 补足约 {cost}",
+        "Gold {gold} · restock about {cost}"
+      ]
+    },
+    {
+      "key": "quest.supply.poor",
+      "en": "Not enough gold: prioritize urgent supplies and a return scroll.",
+      "zh-TW": "金幣不足：優先急缺品和回城卷。",
+      "pt-BR": "Ouro insuficiente: priorize os itens urgentes e um pergaminho de retorno.",
+      "aliases": [
+        "金币不足：优先急缺品和回城卷。",
+        "Not enough gold: prioritize urgent supplies and a return scroll."
+      ]
+    },
+    {
+      "key": "quest.supply.weight",
+      "en": "Bag weight {weight}/{max}",
+      "zh-TW": "背包負重 {weight}/{max}",
+      "pt-BR": "Peso da bolsa {weight}/{max}",
+      "aliases": [
+        "背包负重 {weight}/{max}",
+        "Bag weight {weight}/{max}"
+      ]
+    },
+    {
+      "key": "quest.supply.full",
+      "en": "Your bag is full. Sell unused items first.",
+      "zh-TW": "背包已滿，可先出售閑置物品。",
+      "pt-BR": "Sua bolsa está cheia. Venda os itens que não usa primeiro.",
+      "aliases": [
+        "背包已满，可先出售闲置物品。",
+        "Your bag is full. Sell unused items first."
+      ]
+    },
+    {
+      "key": "quest.supply.materials",
+      "en": "Fireball/summoning use Amulets; Poisoning uses poison powder.",
+      "zh-TW": "火符/召喚用符；施毒用毒粉。",
+      "pt-BR": "Talismã de Fogo e invocações usam Amuletos; Envenenamento usa pó de veneno.",
+      "aliases": [
+        "火符/召唤用符；施毒用毒粉。",
+        "Fireball/summoning use Amulets; Poisoning uses poison powder."
+      ]
+    },
+    {
+      "key": "quest.supply.buy",
+      "en": "Buy · {goods}",
+      "zh-TW": "購買 · {goods}",
+      "pt-BR": "Comprar · {goods}",
+      "aliases": [
+        "购买 · {goods}",
+        "Buy · {goods}"
+      ]
+    },
+    {
+      "key": "quest.supply.next",
+      "en": "Next: {map} entrance ({x},{y})",
+      "zh-TW": "下一段：{map}入口 ({x},{y})",
+      "pt-BR": "Próximo: entrada de {map} ({x},{y})",
+      "aliases": [
+        "下一段：{map}入口 ({x},{y})",
+        "Next: {map} entrance ({x},{y})"
+      ]
+    },
+    {
+      "key": "quest.supply.shop",
+      "en": "At the shop, click the merchant to buy. The shop quote is authoritative.",
+      "zh-TW": "到店后點擊商人購買，以店內報價為準。",
+      "pt-BR": "Ao chegar, clique no mercador para comprar. Vale o preço informado na loja.",
+      "aliases": [
+        "到店后点击商人购买，以店内报价为准。",
+        "At the shop, click the merchant to buy. The shop quote is authoritative."
+      ]
+    },
+    {
+      "key": "quest.supply.walkEntrance",
+      "en": "Go to shop entrance · auto-path",
+      "zh-TW": "前往店鋪入口 · 自動尋路",
+      "pt-BR": "Ir à entrada da loja · rota automática",
+      "aliases": [
+        "前往店铺入口 · 自动寻路",
+        "Go to shop entrance · auto-path"
+      ]
+    },
+    {
+      "key": "quest.supply.walkMerchant",
+      "en": "Go to merchant · auto-path",
+      "zh-TW": "前往商人 · 自動尋路",
+      "pt-BR": "Ir ao mercador · rota automática",
+      "aliases": [
+        "前往商人 · 自动寻路",
+        "Go to merchant · auto-path"
+      ]
+    },
+    {
+      "key": "quest.supply.noRoute",
+      "en": "No route is available. Open the big map to view entrances.",
+      "zh-TW": "暫無可走路線，請打開大地圖查看入口。",
+      "pt-BR": "Nenhuma rota disponível. Abra o mapa grande para ver as entradas.",
+      "aliases": [
+        "暂无可走路线，请打开大地图查看入口。",
+        "No route is available. Open the big map to view entrances."
+      ]
+    },
+    {
+      "key": "quest.supply.all",
+      "en": "View all supplies",
+      "zh-TW": "查看全部補給",
+      "pt-BR": "Ver todos os suprimentos",
+      "aliases": [
+        "查看全部补给",
+        "View all supplies"
+      ]
+    },
+    {
+      "key": "quest.supply.back",
+      "en": "Return to quest guidance",
+      "zh-TW": "返回任務引導",
+      "pt-BR": "Voltar à orientação da missão",
+      "aliases": [
+        "返回任务引导",
+        "Return to quest guidance"
+      ]
+    },
+    {
+      "key": "quest.supply.potions",
+      "en": "HP and MP potions",
+      "zh-TW": "紅藥、藍藥",
+      "pt-BR": "poções de HP e MP",
+      "aliases": [
+        "红药、蓝药",
+        "HP and MP potions"
+      ]
+    },
+    {
+      "key": "quest.supply.general",
+      "en": "Amulets, Town Teleport, Random Teleport",
+      "zh-TW": "護身符、回城卷、隨機卷",
+      "pt-BR": "Amuletos, retorno, teleporte aleatório",
+      "aliases": [
+        "护身符、回城卷、随机卷",
+        "Amulets, Town Teleport, Random Teleport"
+      ]
+    },
+    {
+      "key": "quest.supply.poison",
+      "en": "Red and green poison",
+      "zh-TW": "紅毒、綠毒",
+      "pt-BR": "veneno vermelho e verde",
+      "aliases": [
+        "红毒、绿毒",
+        "Red and green poison"
+      ]
+    },
+    {
+      "key": "quest.ui.routeChanged",
+      "en": "Quest navigation changed. Choose the target again.",
+      "zh-TW": "任務導航已更新，請重新選擇目標",
+      "pt-BR": "A rota da missão mudou. Escolha o destino novamente.",
+      "aliases": [
+        "任务导航已更新，请重新选择目标",
+        "Quest navigation changed. Choose the target again."
+      ]
+    },
+    {
+      "key": "quest.ui.deliveryBlocked",
+      "en": "Cannot deliver now. Close other dialogs and make sure your character is alive.",
+      "zh-TW": "當前狀態無法交付，請關閉其他彈窗並確認角色存活",
+      "pt-BR": "Não é possível entregar agora. Feche outras janelas e confirme que seu personagem está vivo.",
+      "aliases": [
+        "当前状态无法交付，请关闭其他弹窗并确认角色存活",
+        "Cannot deliver now. Close other dialogs and make sure your character is alive."
+      ]
+    },
+    {
+      "key": "quest.ui.primary",
+      "en": "Set as the current guided quest",
+      "zh-TW": "已設為當前引導任務",
+      "pt-BR": "Definida como missão guiada atual",
+      "aliases": [
+        "已设为当前引导任务",
+        "Set as the current guided quest"
+      ]
+    },
+    {
+      "key": "quest.ui.routeUpdated",
+      "en": "{type} guidance changed. Use the current quest route.",
+      "zh-TW": "{type}引導已更新，請使用當前任務路線",
+      "pt-BR": "A orientação de {type} mudou. Use a rota atual da missão.",
+      "aliases": [
+        "{type}引导已更新，请使用当前任务路线",
+        "{type} guidance changed. Use the current quest route."
+      ]
+    },
+    {
+      "key": "quest.ui.goto",
+      "en": "Go to {type} ({x},{y})",
+      "zh-TW": "前往{type} ({x},{y})",
+      "pt-BR": "Ir para {type} ({x},{y})",
+      "aliases": [
+        "前往{type} ({x},{y})",
+        "Go to {type} ({x},{y})"
+      ]
+    },
+    {
+      "key": "quest.ui.navigationPending",
+      "en": "A navigation request is already pending",
+      "zh-TW": "已有尋路指令等待處理",
+      "pt-BR": "Uma solicitação de rota já está pendente",
+      "aliases": [
+        "已有寻路指令等待处理",
+        "A navigation request is already pending"
+      ]
+    },
+    {
+      "key": "quest.ui.navigationUnavailable",
+      "en": "Quest navigation is unavailable",
+      "zh-TW": "任務導航暫不可用",
+      "pt-BR": "A rota da missão está indisponível",
+      "aliases": [
+        "任务导航暂不可用",
+        "Quest navigation is unavailable"
+      ]
+    },
+    {
+      "key": "quest.ui.levelChapter",
+      "en": "Lv {level}  {chapter}",
+      "zh-TW": "{level}級  {chapter}",
+      "pt-BR": "Nv {level}  {chapter}",
+      "aliases": [
+        "{level}级  {chapter}",
+        "Lv {level}  {chapter}"
+      ]
+    },
+    {
+      "key": "quest.ui.next",
+      "en": "Next: {title}",
+      "zh-TW": "下一步：{title}",
+      "pt-BR": "Próximo: {title}",
+      "aliases": [
+        "下一步：{title}",
+        "Next: {title}"
+      ]
+    },
+    {
+      "key": "quest.ui.reward",
+      "en": "   Reward: {reward}",
+      "zh-TW": "   獎勵：{reward}",
+      "pt-BR": "   Recompensa: {reward}",
+      "aliases": [
+        "   奖励：{reward}",
+        "   Reward: {reward}"
+      ]
+    },
+    {
+      "key": "quest.ui.journeyDone",
+      "en": "Newcomer journey complete",
+      "zh-TW": "新手旅程已完成",
+      "pt-BR": "Jornada de iniciante concluída",
+      "aliases": [
+        "新手旅程已完成",
+        "Newcomer journey complete"
+      ]
+    },
+    {
+      "key": "quest.ui.nextGiver",
+      "en": "   Open the Quest Diary or visit the quest giver",
+      "zh-TW": "   請查看任務日志或前往任務人物處",
+      "pt-BR": "   Abra o Diário de Missões ou visite quem oferece a missão",
+      "aliases": [
+        "   请查看任务日志或前往任务人物处",
+        "   Open the Quest Diary or visit the quest giver"
+      ]
+    },
+    {
+      "key": "quest.ui.followup",
+      "en": "Next goal: {direction} · {title}",
+      "zh-TW": "后續目標：{direction} · {title}",
+      "pt-BR": "Próximo objetivo: {direction} · {title}",
+      "aliases": [
+        "后续目标：{direction} · {title}",
+        "Next goal: {direction} · {title}"
+      ]
+    },
+    {
+      "key": "quest.ui.chooseGoal",
+      "en": "Next goal: choose equipment, a skill, or a challenge in the Quest Diary",
+      "zh-TW": "后續目標：在任務日志選擇裝備、技能或挑戰",
+      "pt-BR": "Próximo objetivo: escolha equipamento, habilidade ou desafio no Diário de Missões",
+      "aliases": [
+        "后续目标：在任务日志选择装备、技能或挑战",
+        "Next goal: choose equipment, a skill, or a challenge in the Quest Diary"
+      ]
+    },
+    {
+      "key": "quest.ui.hint",
+      "en": "   Hint: {hint}",
+      "zh-TW": "   提示：{hint}",
+      "pt-BR": "   Dica: {hint}",
+      "aliases": [
+        "   提示：{hint}",
+        "   Hint: {hint}"
+      ]
+    },
+    {
+      "key": "quest.ui.optional",
+      "en": "Optional quest: {title}",
+      "zh-TW": "可選任務：{title}",
+      "pt-BR": "Missão opcional: {title}",
+      "aliases": [
+        "可选任务：{title}",
+        "Optional quest: {title}"
+      ]
+    },
+    {
+      "key": "quest.ui.supply",
+      "en": "Supply Check and shops",
+      "zh-TW": "補給檢查與購買地點",
+      "pt-BR": "Verificar suprimentos e lojas",
+      "aliases": [
+        "补给检查与购买地点",
+        "Supply Check and shops"
+      ]
+    },
+    {
+      "key": "quest.ui.bichonMain",
+      "en": "Main quest · travel to Bichon city",
+      "zh-TW": "主線 · 前往比奇城",
+      "pt-BR": "Missão principal · vá à cidade de Bichon",
+      "aliases": [
+        "主线 · 前往比奇城",
+        "Main quest · travel to Bichon city"
+      ]
+    },
+    {
+      "key": "quest.ui.bichonDest",
+      "en": "Destination: Bichon city safe area",
+      "zh-TW": "目的地：比奇城安全區",
+      "pt-BR": "Destino: zona segura da cidade de Bichon",
+      "aliases": [
+        "目的地：比奇城安全区",
+        "Destination: Bichon city safe area"
+      ]
+    },
+    {
+      "key": "quest.ui.bichonCoords",
+      "en": "Bichon Province · coordinates ({x},{y})",
+      "zh-TW": "比奇省 · 坐標 ({x},{y})",
+      "pt-BR": "Província de Bichon · coordenadas ({x},{y})",
+      "aliases": [
+        "比奇省 · 坐标 ({x},{y})",
+        "Bichon Province · coordinates ({x},{y})"
+      ]
+    },
+    {
+      "key": "quest.ui.bichonNorth",
+      "en": "Travel north from the Border Village to the city.",
+      "zh-TW": "從新手村向北，前往北部大城。",
+      "pt-BR": "Siga ao norte da Vila da Fronteira até a cidade.",
+      "aliases": [
+        "从新手村向北，前往北部大城。",
+        "Travel north from the Border Village to the city."
+      ]
+    },
+    {
+      "key": "quest.ui.bichonProgress",
+      "en": "Quest progress updates after entering the city safe area.",
+      "zh-TW": "進入城內安全區后，任務進度會更新。",
+      "pt-BR": "O progresso é atualizado ao entrar na zona segura da cidade.",
+      "aliases": [
+        "进入城内安全区后，任务进度会更新。",
+        "Quest progress updates after entering the city safe area."
+      ]
+    },
+    {
+      "key": "quest.ui.bichonWarning",
+      "en": "The Border Village safe area does not count for this quest.",
+      "zh-TW": "注意：新手村安全區不算此任務目標。",
+      "pt-BR": "A zona segura da Vila da Fronteira não conta para esta missão.",
+      "aliases": [
+        "注意：新手村安全区不算此任务目标。",
+        "The Border Village safe area does not count for this quest."
+      ]
+    },
+    {
+      "key": "quest.ui.position",
+      "en": "Current position: ({x},{y})",
+      "zh-TW": "當前位置：({x},{y})",
+      "pt-BR": "Posição atual: ({x},{y})",
+      "aliases": [
+        "当前位置：({x},{y})",
+        "Current position: ({x},{y})"
+      ]
+    },
+    {
+      "key": "quest.ui.longJourney",
+      "en": "It is a long journey. Restock HP potions before leaving.",
+      "zh-TW": "路途較長，出發前補充血藥。",
+      "pt-BR": "O caminho é longo. Reponha poções de HP antes de sair.",
+      "aliases": [
+        "路途较长，出发前补充血药。",
+        "It is a long journey. Restock HP potions before leaving."
+      ]
+    },
+    {
+      "key": "quest.ui.destinationMap",
+      "en": "Open big map · view destination",
+      "zh-TW": "打開大地圖 · 查看目的地",
+      "pt-BR": "Abrir mapa grande · ver destino",
+      "aliases": [
+        "打开大地图 · 查看目的地",
+        "Open big map · view destination"
+      ]
+    },
+    {
+      "key": "quest.ui.mainSyncing",
+      "en": "Main progress --/--",
+      "zh-TW": "主線進度 --/--",
+      "pt-BR": "Progresso principal --/--",
+      "aliases": [
+        "主线进度 --/--",
+        "Main progress --/--"
+      ]
+    },
+    {
+      "key": "quest.ui.chapterProgress",
+      "en": "This chapter {done}/{total}",
+      "zh-TW": "本章 {done}/{total}",
+      "pt-BR": "Este capítulo {done}/{total}",
+      "aliases": [
+        "本章 {done}/{total}",
+        "This chapter {done}/{total}"
+      ]
+    },
+    {
+      "key": "quest.ui.chapterSyncing",
+      "en": "This chapter --/--",
+      "zh-TW": "本章 --/--",
+      "pt-BR": "Este capítulo --/--",
+      "aliases": [
+        "本章 --/--",
+        "This chapter --/--"
+      ]
+    },
+    {
+      "key": "quest.ui.chapter",
+      "en": "Current chapter · {chapter}",
+      "zh-TW": "當前章節 · {chapter}",
+      "pt-BR": "Capítulo atual · {chapter}",
+      "aliases": [
+        "当前章节 · {chapter}",
+        "Current chapter · {chapter}"
+      ]
+    },
+    {
+      "key": "quest.ui.main",
+      "en": "Current main quest",
+      "zh-TW": "當前主線",
+      "pt-BR": "Missão principal atual",
+      "aliases": [
+        "当前主线",
+        "Current main quest"
+      ]
+    },
+    {
+      "key": "quest.ui.deliverable",
+      "en": "Objectives complete · ready to deliver",
+      "zh-TW": "已完成目標 · 可前往交付",
+      "pt-BR": "Objetivos concluídos · pronta para entregar",
+      "aliases": [
+        "已完成目标 · 可前往交付",
+        "Objectives complete · ready to deliver"
+      ]
+    },
+    {
+      "key": "quest.ui.optionalTasks",
+      "en": "Other quests · choose freely",
+      "zh-TW": "其他任務 · 可自行選擇完成",
+      "pt-BR": "Outras missões · escolha livremente",
+      "aliases": [
+        "其他任务 · 可自行选择完成",
+        "Other quests · choose freely"
+      ]
+    },
+    {
+      "key": "quest.ui.clickHelp",
+      "en": "Left-click for details · right-click to track",
+      "zh-TW": "左鍵查看詳情 · 右鍵跟蹤任務",
+      "pt-BR": "Clique esquerdo: detalhes · direito: acompanhar",
+      "aliases": [
+        "左键查看详情 · 右键跟踪任务",
+        "Left-click for details · right-click to track"
+      ]
+    },
+    {
+      "key": "quest.ui.pendingClaim",
+      "en": "Awaiting claim",
+      "zh-TW": "待領取",
+      "pt-BR": "Aguardando resgate",
+      "aliases": [
+        "待领取",
+        "Awaiting claim"
+      ]
+    },
+    {
+      "key": "quest.ui.levelStatus",
+      "en": "Lv {level} · {status} · {area}",
+      "zh-TW": "{level}級 · {status} · {area}",
+      "pt-BR": "Nv {level} · {status} · {area}",
+      "aliases": [
+        "{level}级 · {status} · {area}",
+        "Lv {level} · {status} · {area}"
+      ]
+    },
+    {
+      "key": "quest.ui.current",
+      "en": "Current",
+      "zh-TW": "當前",
+      "pt-BR": "Atual",
+      "aliases": [
+        "当前",
+        "Current"
+      ]
+    },
+    {
+      "key": "quest.ui.noMain",
+      "en": "No main quest to show. Complete the prerequisites to update this list.",
+      "zh-TW": "暫無可顯示的主線，完成前置任務后刷新。",
+      "pt-BR": "Nenhuma missão principal disponível. Conclua os pré-requisitos para atualizar a lista.",
+      "aliases": [
+        "暂无可显示的主线，完成前置任务后刷新。",
+        "No main quest to show. Complete the prerequisites to update this list."
+      ]
+    },
+    {
+      "key": "quest.ui.levelTitle",
+      "en": "Lv {level} {title}",
+      "zh-TW": "{level}級 {title}",
+      "pt-BR": "Nv {level} {title}",
+      "aliases": [
+        "{level}级 {title}",
+        "Lv {level} {title}"
+      ]
+    },
+    {
+      "key": "quest.ui.practiceDone",
+      "en": "Class practice (complete)",
+      "zh-TW": "職業練習（已完成）",
+      "pt-BR": "Treino de classe (concluído)",
+      "aliases": [
+        "职业练习（已完成）",
+        "Class practice (complete)"
+      ]
+    },
+    {
+      "key": "quest.ui.practiceAll",
+      "en": "Class practice requirements (complete all)",
+      "zh-TW": "職業練習要求（全部完成）",
+      "pt-BR": "Requisitos do treino de classe (conclua todos)",
+      "aliases": [
+        "职业练习要求（全部完成）",
+        "Class practice requirements (complete all)"
+      ]
+    },
+    {
+      "key": "quest.ui.restock",
+      "en": "Town supplies",
+      "zh-TW": "回城補給",
+      "pt-BR": "Suprimentos na cidade",
+      "aliases": [
+        "回城补给",
+        "Town supplies"
+      ]
+    },
+    {
+      "key": "quest.ui.guidance",
+      "en": "Current guidance",
+      "zh-TW": "當前引導",
+      "pt-BR": "Orientação atual",
+      "aliases": [
+        "当前引导",
+        "Current guidance"
+      ]
+    },
+    {
+      "key": "quest.ui.makePrimary",
+      "en": "Make current",
+      "zh-TW": "設為當前",
+      "pt-BR": "Selecionar",
+      "aliases": [
+        "设为当前",
+        "Make current"
+      ]
+    },
+    {
+      "key": "quest.ui.diary",
+      "en": "Quest Diary",
+      "zh-TW": "任務日志",
+      "pt-BR": "Diário de Missões",
+      "aliases": [
+        "任务日志",
+        "Quest Diary"
+      ]
+    },
+    {
+      "key": "quest.ui.details",
+      "en": "Quest details",
+      "zh-TW": "任務詳情",
+      "pt-BR": "Detalhes da missão",
+      "aliases": [
+        "任务详情",
+        "Quest details"
+      ]
+    },
+    {
+      "key": "quest.ui.list",
+      "en": "Quest list",
+      "zh-TW": "任務列表",
+      "pt-BR": "Lista de missões",
+      "aliases": [
+        "任务列表",
+        "Quest list"
+      ]
+    },
+    {
+      "key": "quest.ui.selectReward",
+      "en": "Select reward",
+      "zh-TW": "選擇獎勵",
+      "pt-BR": "Escolher recompensa",
+      "aliases": [
+        "选择奖励",
+        "Select reward"
+      ]
+    },
+    {
+      "key": "quest.ui.scrollHint",
+      "en": "Scroll to view all content",
+      "zh-TW": "滾輪滾動查看全部內容",
+      "pt-BR": "Role para ver todo o conteúdo",
+      "aliases": [
+        "滚轮滚动查看全部内容",
+        "Scroll to view all content"
+      ]
+    },
+    {
+      "key": "quest.turnIn.pending",
+      "en": "Delivering the quest; waiting for the server",
+      "zh-TW": "正在交付任務，等待伺服器確認",
+      "pt-BR": "Entregando a missão; aguardando o servidor",
+      "aliases": [
+        "正在交付任务，等待服务器确认",
+        "Delivering the quest; waiting for the server"
+      ]
+    },
+    {
+      "key": "quest.turnIn.busy",
+      "en": "Delivery is pending or the connection is busy. Check quest status shortly.",
+      "zh-TW": "交付請求已在處理中或連接繁忙，請稍后查看任務狀態",
+      "pt-BR": "A entrega está pendente ou a conexão está ocupada. Confira o estado da missão em instantes.",
+      "aliases": [
+        "交付请求已在处理中或连接繁忙，请稍后查看任务状态",
+        "Delivery is pending or the connection is busy. Check quest status shortly."
+      ]
+    },
+    {
+      "key": "quest.turnIn.changed",
+      "en": "Quest status changed. Open the details again.",
+      "zh-TW": "任務狀態已更新，請重新查看詳情",
+      "pt-BR": "O estado da missão mudou. Abra os detalhes novamente.",
+      "aliases": [
+        "任务状态已更新，请重新查看详情",
+        "Quest status changed. Open the details again."
+      ]
+    },
+    {
+      "key": "quest.turnIn.missing",
+      "en": "Delivery NPC not found. Follow the quest instructions and speak to the required NPC.",
+      "zh-TW": "未找到交付 NPC，請按任務說明與交付 NPC 對話。",
+      "pt-BR": "NPC de entrega não encontrado. Siga as instruções e fale com o NPC indicado.",
+      "aliases": [
+        "未找到交付 NPC，请按任务说明与交付 NPC 对话。",
+        "Delivery NPC not found. Follow the quest instructions and speak to the required NPC."
+      ]
+    },
+    {
+      "key": "quest.turnIn.travel",
+      "en": "Go to {npc}, then choose Finish near the delivery NPC.",
+      "zh-TW": "請先前往 {npc}，靠近交付 NPC 后點擊 Finish。",
+      "pt-BR": "Vá até {npc} e selecione Concluir perto do NPC de entrega.",
+      "aliases": [
+        "请先前往 {npc}，靠近交付 NPC 后点击 Finish。",
+        "Go to {npc}, then choose Finish near the delivery NPC."
+      ]
+    },
+    {
+      "key": "quest.turnIn.confirm",
+      "en": "Confirming delivery with {npc}",
+      "zh-TW": "正在與 {npc} 確認交付",
+      "pt-BR": "Confirmando a entrega com {npc}",
+      "aliases": [
+        "正在与 {npc} 确认交付",
+        "Confirming delivery with {npc}"
+      ]
+    },
+    {
+      "key": "quest.turnIn.connectionBusy",
+      "en": "Connection busy. Try again shortly.",
+      "zh-TW": "連接繁忙，請稍后再試",
+      "pt-BR": "Conexão ocupada. Tente novamente em instantes.",
+      "aliases": [
+        "连接繁忙，请稍后再试",
+        "Connection busy. Try again shortly."
+      ]
+    },
+    {
+      "key": "quest.turnIn.conditions",
+      "en": "Delivery conditions changed. Check the quest and NPC again.",
+      "zh-TW": "交付條件已變化，請重新確認任務與 NPC",
+      "pt-BR": "As condições de entrega mudaram. Confira a missão e o NPC novamente.",
+      "aliases": [
+        "交付条件已变化，请重新确认任务与 NPC",
+        "Delivery conditions changed. Check the quest and NPC again."
+      ]
+    },
+    {
+      "key": "quest.turnIn.unconfirmed",
+      "en": "The NPC has not confirmed delivery. Choose Finish again or speak to the NPC.",
+      "zh-TW": "NPC 尚未確認交付，請重新點擊 Finish 或與 NPC 對話",
+      "pt-BR": "O NPC ainda não confirmou a entrega. Selecione Concluir novamente ou fale com o NPC.",
+      "aliases": [
+        "NPC 尚未确认交付，请重新点击 Finish 或与 NPC 对话",
+        "The NPC has not confirmed delivery. Choose Finish again or speak to the NPC."
+      ]
+    },
+    {
+      "key": "quest.feedback.1",
+      "en": "Are you sure you want to cancel this quest?",
+      "zh-TW": "確定要放棄此任務嗎？",
+      "pt-BR": "Tem certeza de que deseja abandonar esta missão?",
+      "aliases": [
+        "Are you sure you want to cancel this quest?",
+        "确定要放弃此任务吗？"
+      ]
+    },
+    {
+      "key": "quest.feedback.2",
+      "en": "You must select a reward item.",
+      "zh-TW": "請先選擇獎勵物品。",
+      "pt-BR": "Selecione um item de recompensa primeiro.",
+      "aliases": [
+        "You must select a reward item.",
+        "请先选择奖励物品。"
+      ]
+    },
+    {
+      "key": "quest.feedback.3",
+      "en": "return to the start NPC",
+      "zh-TW": "返回接取任務的 NPC",
+      "pt-BR": "volte ao NPC que ofereceu a missão",
+      "aliases": [
+        "return to the start NPC",
+        "返回接取任务的 NPC"
+      ]
+    },
+    {
+      "key": "quest.feedback.4",
+      "en": "Quest not found",
+      "zh-TW": "未找到任務",
+      "pt-BR": "Missão não encontrada",
+      "aliases": [
+        "Quest not found",
+        "未找到任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.5",
+      "en": "Cannot track this quest",
+      "zh-TW": "無法追蹤此任務",
+      "pt-BR": "Não é possível acompanhar esta missão",
+      "aliases": [
+        "Cannot track this quest",
+        "无法追踪此任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.6",
+      "en": "Tracking {title}",
+      "zh-TW": "正在追蹤 {title}",
+      "pt-BR": "Acompanhando {title}",
+      "aliases": [
+        "Tracking {title}",
+        "正在追踪 {title}"
+      ]
+    },
+    {
+      "key": "quest.feedback.7",
+      "en": "Stopped tracking {title}",
+      "zh-TW": "已停止追蹤 {title}",
+      "pt-BR": "Acompanhamento de {title} encerrado",
+      "aliases": [
+        "Stopped tracking {title}",
+        "已停止追踪 {title}"
+      ]
+    },
+    {
+      "key": "quest.feedback.8",
+      "en": "You can track up to five quests",
+      "zh-TW": "最多同時追蹤五個任務",
+      "pt-BR": "Você pode acompanhar até cinco missões",
+      "aliases": [
+        "You can track up to five quests",
+        "最多同时追踪五个任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.9",
+      "en": "Quest is no longer current",
+      "zh-TW": "此任務已不再是當前任務",
+      "pt-BR": "Esta missão não é mais a atual",
+      "aliases": [
+        "Quest is no longer current",
+        "此任务已不再是当前任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.10",
+      "en": "Abandoning {title}",
+      "zh-TW": "正在放棄 {title}",
+      "pt-BR": "Abandonando {title}",
+      "aliases": [
+        "Abandoning {title}",
+        "正在放弃 {title}"
+      ]
+    },
+    {
+      "key": "quest.feedback.11",
+      "en": "Connection busy; try again",
+      "zh-TW": "連接繁忙，請重試",
+      "pt-BR": "Conexão ocupada; tente novamente",
+      "aliases": [
+        "Connection busy; try again",
+        "连接繁忙，请重试"
+      ]
+    },
+    {
+      "key": "quest.feedback.12",
+      "en": "Quest request is already pending",
+      "zh-TW": "任務請求正在處理中",
+      "pt-BR": "Já há uma solicitação de missão pendente",
+      "aliases": [
+        "Quest request is already pending",
+        "任务请求正在处理中"
+      ]
+    },
+    {
+      "key": "quest.feedback.13",
+      "en": "Goal selected: {goal}",
+      "zh-TW": "已選擇目標：{goal}",
+      "pt-BR": "Objetivo selecionado: {goal}",
+      "aliases": [
+        "Goal selected: {goal}",
+        "已选择目标：{goal}"
+      ]
+    },
+    {
+      "key": "quest.feedback.14",
+      "en": "Goal cleared",
+      "zh-TW": "已清除目標",
+      "pt-BR": "Objetivo removido",
+      "aliases": [
+        "Goal cleared",
+        "已清除目标"
+      ]
+    },
+    {
+      "key": "quest.feedback.15",
+      "en": "Quest Log help is not available.",
+      "zh-TW": "任務日志幫助暫不可用。",
+      "pt-BR": "A ajuda do Diário de Missões está indisponível.",
+      "aliases": [
+        "Quest Log help is not available.",
+        "任务日志帮助暂不可用。"
+      ]
+    },
+    {
+      "key": "quest.feedback.16",
+      "en": "That dialog option is unavailable",
+      "zh-TW": "此對話選項不可用",
+      "pt-BR": "Esta opção de diálogo está indisponível",
+      "aliases": [
+        "That dialog option is unavailable",
+        "此对话选项不可用"
+      ]
+    },
+    {
+      "key": "quest.feedback.17",
+      "en": "That dialog option is no longer available",
+      "zh-TW": "此對話選項已失效",
+      "pt-BR": "Esta opção de diálogo não está mais disponível",
+      "aliases": [
+        "That dialog option is no longer available",
+        "此对话选项已失效"
+      ]
+    },
+    {
+      "key": "quest.feedback.18",
+      "en": "NPC dialog is closed",
+      "zh-TW": "NPC 對話已關閉",
+      "pt-BR": "O diálogo com o NPC foi fechado",
+      "aliases": [
+        "NPC dialog is closed",
+        "NPC 对话已关闭"
+      ]
+    },
+    {
+      "key": "quest.feedback.19",
+      "en": "Dialog closed",
+      "zh-TW": "對話已關閉",
+      "pt-BR": "Diálogo fechado",
+      "aliases": [
+        "Dialog closed",
+        "对话已关闭"
+      ]
+    },
+    {
+      "key": "quest.feedback.20",
+      "en": "This NPC has no available quests",
+      "zh-TW": "此 NPC 沒有可接取任務",
+      "pt-BR": "Este NPC não tem missões disponíveis",
+      "aliases": [
+        "This NPC has no available quests",
+        "此 NPC 没有可接取任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.21",
+      "en": "Quest is no longer available from this NPC",
+      "zh-TW": "此 NPC 已不再提供該任務",
+      "pt-BR": "Este NPC não oferece mais esta missão",
+      "aliases": [
+        "Quest is no longer available from this NPC",
+        "此 NPC 已不再提供该任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.22",
+      "en": "Quest help is not available.",
+      "zh-TW": "任務幫助暫不可用。",
+      "pt-BR": "A ajuda da missão está indisponível.",
+      "aliases": [
+        "Quest help is not available.",
+        "任务帮助暂不可用。"
+      ]
+    },
+    {
+      "key": "quest.feedback.23",
+      "en": "Returned to previous page",
+      "zh-TW": "已返回上一頁",
+      "pt-BR": "Voltou à página anterior",
+      "aliases": [
+        "Returned to previous page",
+        "已返回上一页"
+      ]
+    },
+    {
+      "key": "quest.feedback.24",
+      "en": "No previous page",
+      "zh-TW": "沒有上一頁",
+      "pt-BR": "Não há página anterior",
+      "aliases": [
+        "No previous page",
+        "没有上一页"
+      ]
+    },
+    {
+      "key": "quest.feedback.25",
+      "en": "Quest {quest_index} not found",
+      "zh-TW": "未找到任務 {quest_index}",
+      "pt-BR": "Missão {quest_index} não encontrada",
+      "aliases": [
+        "Quest {quest_index} not found",
+        "未找到任务 {quest_index}"
+      ]
+    },
+    {
+      "key": "quest.feedback.26",
+      "en": "Use the current NPC dialog to accept this quest",
+      "zh-TW": "請通過當前 NPC 對話接取任務",
+      "pt-BR": "Use o diálogo atual com o NPC para aceitar esta missão",
+      "aliases": [
+        "Use the current NPC dialog to accept this quest",
+        "请通过当前 NPC 对话接取任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.27",
+      "en": "Accepting {title}",
+      "zh-TW": "正在接取 {title}",
+      "pt-BR": "Aceitando {title}",
+      "aliases": [
+        "Accepting {title}",
+        "正在接取 {title}"
+      ]
+    },
+    {
+      "key": "quest.feedback.28",
+      "en": "Quest cannot be accepted",
+      "zh-TW": "無法接取此任務",
+      "pt-BR": "Não é possível aceitar esta missão",
+      "aliases": [
+        "Quest cannot be accepted",
+        "无法接取此任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.29",
+      "en": "Accepting quest",
+      "zh-TW": "正在接取任務",
+      "pt-BR": "Aceitando a missão",
+      "aliases": [
+        "Accepting quest",
+        "正在接取任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.30",
+      "en": "Return to the quest NPC to deliver this quest",
+      "zh-TW": "請返回任務 NPC 處交付",
+      "pt-BR": "Volte ao NPC da missão para entregá-la",
+      "aliases": [
+        "Return to the quest NPC to deliver this quest",
+        "请返回任务 NPC 处交付"
+      ]
+    },
+    {
+      "key": "quest.feedback.31",
+      "en": "Quest not ready to deliver",
+      "zh-TW": "任務尚未達到交付條件",
+      "pt-BR": "A missão ainda não pode ser entregue",
+      "aliases": [
+        "Quest not ready to deliver",
+        "任务尚未达到交付条件"
+      ]
+    },
+    {
+      "key": "quest.feedback.32",
+      "en": "Delivering {title}",
+      "zh-TW": "正在交付 {title}",
+      "pt-BR": "Entregando {title}",
+      "aliases": [
+        "Delivering {title}",
+        "正在交付 {title}"
+      ]
+    },
+    {
+      "key": "quest.feedback.33",
+      "en": "Only an in-progress quest can be abandoned",
+      "zh-TW": "只能放棄進行中的任務",
+      "pt-BR": "Só é possível abandonar uma missão em andamento",
+      "aliases": [
+        "Only an in-progress quest can be abandoned",
+        "只能放弃进行中的任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.34",
+      "en": "Invalid reward",
+      "zh-TW": "獎勵無效",
+      "pt-BR": "Recompensa inválida",
+      "aliases": [
+        "Invalid reward",
+        "奖励无效"
+      ]
+    },
+    {
+      "key": "quest.feedback.35",
+      "en": "Select the quest first",
+      "zh-TW": "請先選擇任務",
+      "pt-BR": "Selecione a missão primeiro",
+      "aliases": [
+        "Select the quest first",
+        "请先选择任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.36",
+      "en": "Attacking target",
+      "zh-TW": "正在攻擊目標",
+      "pt-BR": "Atacando o alvo",
+      "aliases": [
+        "Attacking target",
+        "正在攻击目标"
+      ]
+    },
+    {
+      "key": "quest.feedback.37",
+      "en": "Target is no longer attackable",
+      "zh-TW": "目標已無法攻擊",
+      "pt-BR": "O alvo não pode mais ser atacado",
+      "aliases": [
+        "Target is no longer attackable",
+        "目标已无法攻击"
+      ]
+    },
+    {
+      "key": "quest.feedback.38",
+      "en": "Finding quest target",
+      "zh-TW": "正在尋找任務目標",
+      "pt-BR": "Procurando o alvo da missão",
+      "aliases": [
+        "Finding quest target",
+        "正在寻找任务目标"
+      ]
+    },
+    {
+      "key": "quest.feedback.39",
+      "en": "Quest target is no longer nearby",
+      "zh-TW": "任務目標已不在附近",
+      "pt-BR": "O alvo da missão não está mais próximo",
+      "aliases": [
+        "Quest target is no longer nearby",
+        "任务目标已不在附近"
+      ]
+    },
+    {
+      "key": "quest.feedback.40",
+      "en": "Picking up {label}",
+      "zh-TW": "正在拾取 {label}",
+      "pt-BR": "Coletando {label}",
+      "aliases": [
+        "Picking up {label}",
+        "正在拾取 {label}"
+      ]
+    },
+    {
+      "key": "quest.feedback.41",
+      "en": "Connection busy; pickup not queued",
+      "zh-TW": "連接繁忙，拾取未排入隊列",
+      "pt-BR": "Conexão ocupada; coleta não enfileirada",
+      "aliases": [
+        "Connection busy; pickup not queued",
+        "连接繁忙，拾取未排入队列"
+      ]
+    },
+    {
+      "key": "quest.feedback.42",
+      "en": "That ground item is no longer available",
+      "zh-TW": "該地面物品已不存在",
+      "pt-BR": "O item no chão não está mais disponível",
+      "aliases": [
+        "That ground item is no longer available",
+        "该地面物品已不存在"
+      ]
+    },
+    {
+      "key": "quest.feedback.43",
+      "en": "Checking the current tile for ground items",
+      "zh-TW": "正在檢查腳下物品",
+      "pt-BR": "Procurando itens na casa atual",
+      "aliases": [
+        "Checking the current tile for ground items",
+        "正在检查脚下物品"
+      ]
+    },
+    {
+      "key": "quest.feedback.44",
+      "en": "That pickup is no longer available",
+      "zh-TW": "該拾取物已不存在",
+      "pt-BR": "Esse item não está mais disponível",
+      "aliases": [
+        "That pickup is no longer available",
+        "该拾取物已不存在"
+      ]
+    },
+    {
+      "key": "quest.feedback.45",
+      "en": "No quests. Talk to NPCs to begin.",
+      "zh-TW": "暫無任務。與 NPC 對話開始。",
+      "pt-BR": "Nenhuma missão. Fale com NPCs para começar.",
+      "aliases": [
+        "No quests. Talk to NPCs to begin.",
+        "暂无任务。与 NPC 对话开始。"
+      ]
+    },
+    {
+      "key": "quest.feedback.46",
+      "en": " [Tracking]",
+      "zh-TW": " [追蹤中]",
+      "pt-BR": " [Acompanhando]",
+      "aliases": [
+        " [Tracking]",
+        " [追踪中]"
+      ]
+    },
+    {
+      "key": "quest.feedback.47",
+      "en": "NPC: {npc}",
+      "zh-TW": "NPC：{npc}",
+      "pt-BR": "NPC: {npc}",
+      "aliases": [
+        "NPC: {npc}",
+        "NPC：{npc}"
+      ]
+    },
+    {
+      "key": "quest.feedback.48",
+      "en": "No objectives",
+      "zh-TW": "暫無目標",
+      "pt-BR": "Sem objetivos",
+      "aliases": [
+        "No objectives",
+        "暂无目标"
+      ]
+    },
+    {
+      "key": "quest.feedback.49",
+      "en": "Reward: No reward",
+      "zh-TW": "獎勵：無",
+      "pt-BR": "Recompensa: nenhuma",
+      "aliases": [
+        "Reward: No reward",
+        "奖励：无"
+      ]
+    },
+    {
+      "key": "quest.feedback.50",
+      "en": "Reward: {reward}",
+      "zh-TW": "獎勵：{reward}",
+      "pt-BR": "Recompensa: {reward}",
+      "aliases": [
+        "Reward: {reward}",
+        "奖励：{reward}"
+      ]
+    },
+    {
+      "key": "quest.feedback.51",
+      "en": "Choose reward:",
+      "zh-TW": "選擇獎勵：",
+      "pt-BR": "Escolha a recompensa:",
+      "aliases": [
+        "Choose reward:",
+        "选择奖励："
+      ]
+    },
+    {
+      "key": "quest.feedback.52",
+      "en": "Select a reward to deliver.",
+      "zh-TW": "請選擇獎勵后交付。",
+      "pt-BR": "Escolha uma recompensa para entregar.",
+      "aliases": [
+        "Select a reward to deliver.",
+        "请选择奖励后交付。"
+      ]
+    },
+    {
+      "key": "quest.feedback.53",
+      "en": "Select a quest to view details",
+      "zh-TW": "選擇任務查看詳情",
+      "pt-BR": "Selecione uma missão para ver os detalhes",
+      "aliases": [
+        "Select a quest to view details",
+        "选择任务查看详情"
+      ]
+    },
+    {
+      "key": "quest.feedback.54",
+      "en": "Select a quest to view details.",
+      "zh-TW": "選擇任務查看詳情。",
+      "pt-BR": "Selecione uma missão para ver os detalhes.",
+      "aliases": [
+        "Select a quest to view details.",
+        "选择任务查看详情。"
+      ]
+    },
+    {
+      "key": "quest.feedback.55",
+      "en": "Tip: Press Q to close, click a quest title.",
+      "zh-TW": "提示：按 Q 關閉，點擊任務標題查看。",
+      "pt-BR": "Dica: pressione Q para fechar; clique no título de uma missão.",
+      "aliases": [
+        "Tip: Press Q to close, click a quest title.",
+        "提示：按 Q 关闭，点击任务标题查看。"
+      ]
+    },
+    {
+      "key": "quest.feedback.56",
+      "en": "Close (Esc/Q)",
+      "zh-TW": "關閉 (Esc/Q)",
+      "pt-BR": "Fechar (Esc/Q)",
+      "aliases": [
+        "Close (Esc/Q)",
+        "关闭 (Esc/Q)"
+      ]
+    },
+    {
+      "key": "quest.feedback.57",
+      "en": "List: {count}/{max}",
+      "zh-TW": "列表：{count}/{max}",
+      "pt-BR": "Lista: {count}/{max}",
+      "aliases": [
+        "List: {count}/{max}",
+        "列表：{count}/{max}"
+      ]
+    },
+    {
+      "key": "quest.feedback.58",
+      "en": "List: {count}",
+      "zh-TW": "列表：{count}",
+      "pt-BR": "Lista: {count}",
+      "aliases": [
+        "List: {count}",
+        "列表：{count}"
+      ]
+    },
+    {
+      "key": "quest.feedback.59",
+      "en": "Ch --/--",
+      "zh-TW": "章節 --/--",
+      "pt-BR": "Cap. --/--",
+      "aliases": [
+        "Ch --/--",
+        "章节 --/--"
+      ]
+    },
+    {
+      "key": "quest.feedback.60",
+      "en": "{title} · Choose your next goal",
+      "zh-TW": "{title} · 選擇下一目標",
+      "pt-BR": "{title} · escolha seu próximo objetivo",
+      "aliases": [
+        "{title} · Choose your next goal",
+        "{title} · 选择下一目标"
+      ]
+    },
+    {
+      "key": "quest.feedback.61",
+      "en": "Newcomer Guide",
+      "zh-TW": "新手引導",
+      "pt-BR": "Guia de iniciantes",
+      "aliases": [
+        "Newcomer Guide",
+        "新手引导"
+      ]
+    },
+    {
+      "key": "quest.feedback.62",
+      "en": "Lv {level}",
+      "zh-TW": "等級 {level}",
+      "pt-BR": "Nv {level}",
+      "aliases": [
+        "Lv {level}",
+        "等级 {level}"
+      ]
+    },
+    {
+      "key": "quest.feedback.63",
+      "en": "Quest Log",
+      "zh-TW": "任務日志",
+      "pt-BR": "Diário de Missões",
+      "aliases": [
+        "Quest Log"
+      ]
+    },
+    {
+      "key": "quest.feedback.64",
+      "en": "No quests in this category.",
+      "zh-TW": "此分類沒有任務。",
+      "pt-BR": "Nenhuma missão nesta categoria.",
+      "aliases": [
+        "No quests in this category.",
+        "此分类没有任务。"
+      ]
+    },
+    {
+      "key": "quest.feedback.65",
+      "en": "Return to: {npc}",
+      "zh-TW": "交付地點：{npc}",
+      "pt-BR": "Entregar em: {npc}",
+      "aliases": [
+        "Return to: {npc}",
+        "交付地点：{npc}"
+      ]
+    },
+    {
+      "key": "quest.feedback.66",
+      "en": "HP unavailable",
+      "zh-TW": "生命值未知",
+      "pt-BR": "HP indisponível",
+      "aliases": [
+        "HP unavailable",
+        "生命值未知"
+      ]
+    },
+    {
+      "key": "quest.feedback.67",
+      "en": "Recent Ground Pickups",
+      "zh-TW": "最近拾取",
+      "pt-BR": "Coletas recentes",
+      "aliases": [
+        "Recent Ground Pickups",
+        "最近拾取"
+      ]
+    },
+    {
+      "key": "quest.feedback.68",
+      "en": "No recent pickups.",
+      "zh-TW": "暫無最近拾取。",
+      "pt-BR": "Nenhuma coleta recente.",
+      "aliases": [
+        "No recent pickups.",
+        "暂无最近拾取。"
+      ]
+    },
+    {
+      "key": "quest.feedback.69",
+      "en": "Unknown map",
+      "zh-TW": "未知地圖",
+      "pt-BR": "Mapa desconhecido",
+      "aliases": [
+        "Unknown map",
+        "未知地图"
+      ]
+    },
+    {
+      "key": "quest.feedback.70",
+      "en": "Windows Native Controls",
+      "zh-TW": "Windows 操作說明",
+      "pt-BR": "Controles no Windows",
+      "aliases": [
+        "Windows Native Controls",
+        "Windows 操作说明"
+      ]
+    },
+    {
+      "key": "quest.feedback.71",
+      "en": "WASD / Arrows Move / Shift Run",
+      "zh-TW": "WASD / 方向鍵移動 / Shift 奔跑",
+      "pt-BR": "WASD / setas: mover / Shift: correr",
+      "aliases": [
+        "WASD / Arrows Move / Shift Run",
+        "WASD / 方向键移动 / Shift 奔跑"
+      ]
+    },
+    {
+      "key": "quest.feedback.72",
+      "en": "Defeated: press V to revive in town",
+      "zh-TW": "已死亡：按 V 回城復活",
+      "pt-BR": "Você morreu: pressione V para reviver na cidade",
+      "aliases": [
+        "Defeated: press V to revive in town",
+        "已死亡：按 V 回城复活"
+      ]
+    },
+    {
+      "key": "quest.feedback.73",
+      "en": "Nearby: {name} ({distance} tiles)",
+      "zh-TW": "附近：{name}（{distance} 格）",
+      "pt-BR": "Próximo: {name} ({distance} casas)",
+      "aliases": [
+        "Nearby: {name} ({distance} tiles)",
+        "附近：{name}（{distance} 格）"
+      ]
+    },
+    {
+      "key": "quest.feedback.74",
+      "en": "Bag - {gold} Gold",
+      "zh-TW": "背包 - {gold} 金幣",
+      "pt-BR": "Bolsa - {gold} de ouro",
+      "aliases": [
+        "Bag - {gold} Gold",
+        "背包 - {gold} 金币"
+      ]
+    },
+    {
+      "key": "quest.feedback.75",
+      "en": "Bag is empty. Pick up nearby drops with R.",
+      "zh-TW": "背包為空。按 R 拾取附近掉落。",
+      "pt-BR": "A bolsa está vazia. Pressione R para coletar itens próximos.",
+      "aliases": [
+        "Bag is empty. Pick up nearby drops with R.",
+        "背包为空。按 R 拾取附近掉落。"
+      ]
+    },
+    {
+      "key": "quest.feedback.76",
+      "en": "Open Quest Diary to finish",
+      "zh-TW": "打開任務日志交付",
+      "pt-BR": "Abra o Diário de Missões para concluir",
+      "aliases": [
+        "Open Quest Diary to finish",
+        "打开任务日志交付"
+      ]
+    },
+    {
+      "key": "quest.feedback.77",
+      "en": "Turn in this quest",
+      "zh-TW": "交付此任務",
+      "pt-BR": "Entregue esta missão",
+      "aliases": [
+        "Turn in this quest",
+        "交付此任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.78",
+      "en": "Continue this quest",
+      "zh-TW": "繼續此任務",
+      "pt-BR": "Continue esta missão",
+      "aliases": [
+        "Continue this quest",
+        "继续此任务"
+      ]
+    },
+    {
+      "key": "quest.feedback.79",
+      "en": "Open Quest Diary to accept",
+      "zh-TW": "打開任務日志接取",
+      "pt-BR": "Abra o Diário de Missões para aceitar",
+      "aliases": [
+        "Open Quest Diary to accept",
+        "打开任务日志接取"
+      ]
+    },
+    {
+      "key": "quest.feedback.80",
+      "en": "Accept from its quest giver",
+      "zh-TW": "前往任務 NPC 處接取",
+      "pt-BR": "Aceite com o NPC que oferece a missão",
+      "aliases": [
+        "Accept from its quest giver",
+        "前往任务 NPC 处接取"
+      ]
+    },
+    {
+      "key": "quest.feedback.81",
+      "en": "Equipment target.",
+      "zh-TW": "裝備目標。",
+      "pt-BR": "Objetivo de equipamento.",
+      "aliases": [
+        "Equipment target.",
+        "装备目标。"
+      ]
+    },
+    {
+      "key": "quest.feedback.82",
+      "en": "Next skill goal.",
+      "zh-TW": "下一技能目標。",
+      "pt-BR": "Próximo objetivo de habilidade.",
+      "aliases": [
+        "Next skill goal.",
+        "下一技能目标。"
+      ]
+    },
+    {
+      "key": "quest.feedback.83",
+      "en": "{difficulty} difficulty · {map}",
+      "zh-TW": "{difficulty}難度 · {map}",
+      "pt-BR": "Dificuldade {difficulty} · {map}",
+      "aliases": [
+        "{difficulty} difficulty · {map}",
+        "{difficulty}难度 · {map}"
+      ]
+    },
+    {
+      "key": "quest.misc.entrance",
+      "en": "Entrance",
+      "zh-TW": "入口",
+      "pt-BR": "Entrada",
+      "aliases": [
+        "入口",
+        "Entrance"
+      ]
+    },
+    {
+      "key": "quest.misc.hunting",
+      "en": "Hunting area",
+      "zh-TW": "狩獵區域",
+      "pt-BR": "Área de caça",
+      "aliases": [
+        "狩猎区域",
+        "Hunting area"
+      ]
+    },
+    {
+      "key": "quest.misc.supplies",
+      "en": "Supply destination",
+      "zh-TW": "補給地點",
+      "pt-BR": "Local de suprimentos",
+      "aliases": [
+        "补给地点",
+        "Supply destination"
+      ]
+    },
+    {
+      "key": "quest.misc.nearTarget",
+      "en": "▶ {name} · {distance} tiles",
+      "zh-TW": "▶ {name} · {distance} 格",
+      "pt-BR": "▶ {name} · {distance} casas",
+      "aliases": [
+        "▶ {name} · {distance} 格",
+        "▶ {name} · {distance} tiles"
+      ]
+    },
+    {
+      "key": "quest.misc.talkNpc",
+      "en": "Talk to NPC",
+      "zh-TW": "與 NPC 對話",
+      "pt-BR": "Falar com NPC",
+      "aliases": [
+        "与 NPC 对话",
+        "Talk to NPC"
+      ]
+    },
+    {
+      "key": "quest.misc.returnNpc",
+      "en": "Return to NPC",
+      "zh-TW": "返回任務人物處",
+      "pt-BR": "Voltar ao NPC",
+      "aliases": [
+        "返回任务人物处",
+        "Return to NPC"
+      ]
+    },
+    {
+      "key": "quest.misc.leave",
+      "en": "Leave",
+      "zh-TW": "離開",
+      "pt-BR": "Sair",
+      "aliases": [
+        "离开",
+        "Leave"
+      ]
+    },
+    {
+      "key": "quest.misc.ok",
+      "en": "OK",
+      "zh-TW": "確定",
+      "pt-BR": "OK",
+      "aliases": [
+        "确定",
+        "OK"
+      ]
+    },
+    {
+      "key": "quest.misc.pickupObject",
+      "en": "{name}  (PickUpObject)",
+      "zh-TW": "{name}（拾取物品）",
+      "pt-BR": "{name} (coletar item)",
+      "aliases": [
+        "{name}（拾取物品）",
+        "{name}  (PickUpObject)"
+      ]
+    },
+    {
+      "key": "quest.misc.pickupTile",
+      "en": "{name}  (PickUpTile)",
+      "zh-TW": "{name}（拾取腳下物品）",
+      "pt-BR": "{name} (coletar nesta casa)",
+      "aliases": [
+        "{name}（拾取脚下物品）",
+        "{name}  (PickUpTile)"
+      ]
+    },
+    {
+      "key": "quest.misc.controlsMove",
+      "en": "WASD / Arrows Move | Shift Run | T Talk",
+      "zh-TW": "WASD / 方向鍵移動 | Shift 奔跑 | T 對話",
+      "pt-BR": "WASD / setas: mover | Shift: correr | T: conversar",
+      "aliases": [
+        "WASD / 方向键移动 | Shift 奔跑 | T 对话",
+        "WASD / Arrows Move | Shift Run | T Talk"
+      ]
+    },
+    {
+      "key": "quest.misc.controlsAction",
+      "en": "F Attack | R Pick up | F12 Screenshot",
+      "zh-TW": "F 攻擊 | R 拾取 | F12 截圖",
+      "pt-BR": "F: atacar | R: coletar | F12: captura",
+      "aliases": [
+        "F 攻击 | R 拾取 | F12 截图",
+        "F Attack | R Pick up | F12 Screenshot"
+      ]
+    },
+    {
+      "key": "quest.misc.controlsQuest",
+      "en": "Q Quest Log | Esc Close",
+      "zh-TW": "Q 任務日志 | Esc 關閉",
+      "pt-BR": "Q: Diário de Missões | Esc: fechar",
+      "aliases": [
+        "Q 任务日志 | Esc 关闭",
+        "Q Quest Log | Esc Close"
+      ]
+    },
+    {
+      "key": "quest.supply.size.small",
+      "en": "small",
+      "zh-TW": "小型",
+      "pt-BR": "pequenas",
+      "aliases": []
+    },
+    {
+      "key": "quest.supply.size.medium",
+      "en": "medium",
+      "zh-TW": "中型",
+      "pt-BR": "médias",
+      "aliases": []
+    },
+    {
+      "key": "quest.supply.size.large",
+      "en": "large",
+      "zh-TW": "大型",
+      "pt-BR": "grandes",
+      "aliases": []
+    },
+    {
+      "key": "quest.reward.gold",
+      "en": "{amount} Gold",
+      "zh-TW": "{amount} 金幣",
+      "pt-BR": "{amount} de ouro",
+      "aliases": []
+    },
+    {
+      "key": "quest.reward.experience",
+      "en": "{amount} Exp",
+      "zh-TW": "{amount} 經驗",
+      "pt-BR": "{amount} de EXP",
+      "aliases": []
+    }
+  ]
+}

@@ -159,12 +159,13 @@ impl SupplyRow {
         self.target.saturating_sub(self.held)
     }
     pub fn line(&self) -> String {
-        format!(
-            "{}：{} / 建议 {}{}",
-            self.label,
-            self.held,
-            self.target,
-            if self.is_low() { "（不足）" } else { "" }
+        crate::player_text::format_named(
+            "quest.supply.row", "{name}：{held} / 建议 {target}{shortage}",
+            &[("name", &crate::player_text::text(self.label)),
+              ("held", &self.held.to_string()), ("target", &self.target.to_string()),
+              ("shortage", &if self.is_low() {
+                  crate::player_text::format_named("quest.supply.shortage", "（不足）", &[])
+              } else { String::new() })],
         )
     }
 }
@@ -186,12 +187,12 @@ impl SupplyPlan {
             .rows
             .iter()
             .filter(|row| row.is_low())
-            .map(|row| row.label)
+            .map(|row| crate::player_text::text(row.label))
             .collect::<Vec<_>>();
         if missing.is_empty() {
-            "补给检查 · 查看库存与商店".into()
+            crate::player_text::text("补给检查 · 查看库存与商店")
         } else {
-            format!("补给不足 · {}", missing.join("、"))
+            crate::player_text::format_named("quest.supply.low", "补给不足 · {items}", &[("items", &missing.join(crate::player_text::list_separator()))])
         }
     }
 }

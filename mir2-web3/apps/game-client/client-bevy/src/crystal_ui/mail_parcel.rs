@@ -564,7 +564,7 @@ pub(super) fn render(
         overlay_text_at(parent, &draft.message, MAIL_PARCEL_BODY_RECT,
             crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX, TEXT);
     }
-    overlay_text_at(parent, &format!("Postage: {}", parcel.postage().map_or("…".to_owned(), |cost| cost.to_string())),
+    overlay_text_at(parent, &crate::native_i18n::tr(&format!("Postage: {}", parcel.postage().map_or("…".to_owned(), |cost| cost.to_string()))),
         CrystalRect::new(63.0, 269.0, 143.0, 15.0), 9.0, TEXT);
     overlay_absolute_button(
         parent,
@@ -573,9 +573,9 @@ pub(super) fn render(
         OverlayButton::MailGoldFocus,
         true,
     );
-    overlay_text_at(parent, &format!("Gold: {}", draft.gold), CrystalRect::new(63.0, 290.0, 143.0, 15.0), 9.0, TEXT);
+    overlay_text_at(parent, &crate::native_i18n::tr(&format!("Gold: {}", draft.gold)), CrystalRect::new(63.0, 290.0, 143.0, 15.0), 9.0, TEXT);
     if let Some(error) = parcel.quote_error() {
-        overlay_text_at(parent, error, CrystalRect::new(15.0, 78.0, 202.0, 15.0), 8.0, Color::srgb(0.95, 0.34, 0.28));
+        overlay_text_at(parent, &crate::native_i18n::tr(error), CrystalRect::new(15.0, 78.0, 202.0, 15.0), 8.0, Color::srgb(0.95, 0.34, 0.28));
     }
     if !parcel.stamped() {
         if let Some(asset_server) = asset_server {

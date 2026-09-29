@@ -7,11 +7,12 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy::text::LineBreak;
-use mir2_bevy_runtime::entity_animation::AnimationAction;
 use mir2_bevy_runtime::PresentationPoseBuffer;
+use mir2_bevy_runtime::entity_animation::AnimationAction;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::crystal_ui::quest_targets::tracker_targets_monster;
-use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
+use mir2_client_bevy::crystal_ui::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
+use mir2_client_bevy::native_i18n;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::quest_model::{QuestStatus, QuestTracker};
 use serde_json::Value;
@@ -58,6 +59,7 @@ pub struct NativeEntityOverlays {
     last_hovered_object_id: Option<String>,
     last_self_hovered: bool,
     last_self_anchor: Option<SelfOverlayAnchor>,
+    last_locale: Option<(u64, native_i18n::Locale)>,
     // Keep both animation frames alive across label rebuilds and frame swaps.
     quest_marker_assets: HashMap<u16, Handle<Image>>,
     ground_item_assets: HashMap<i64, Handle<Image>>,
@@ -313,6 +315,11 @@ pub fn sync_native_entity_overlays(
     presentation_poses: Res<PresentationPoseBuffer>,
     quest_tracker: Option<Res<QuestTracker>>,
 ) {
+    let locale = (native_i18n::revision(), native_i18n::locale());
+    if overlays.last_locale != Some(locale) {
+        overlays.last_locale = Some(locale);
+        overlays.dirty = true;
+    }
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
     let motion_now_ms = crate::entity_presentation::native_motion_clock_ms();
     let previous_floater_count = overlays.active_floaters.len();
@@ -703,7 +710,7 @@ pub fn sync_native_entity_overlays(
                             min_width: Val::Px(floater.width),
                             ..default()
                         },
-                        Text::new(floater.text),
+                        Text::new(native_i18n::tr(&floater.text)),
                         crystal_text_font(floater.font_size),
                         TextColor(floater.color),
                         TextLayout::justify(Justify::Center),
@@ -926,6 +933,27 @@ fn overlay_entries_with_motion(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn entity_display_name(entity: &Value, kind: &str, name: &str) -> String {
+    let owned = entity
+        .get("masterObjectId")
+        .and_then(value_i64)
+        .unwrap_or(0)
+        != 0
+        || entity
+            .get("ownerName")
+            .and_then(Value::as_str)
+            .is_some_and(|name| !name.is_empty());
+    // A pet's suffix may be an arbitrary player-chosen name. Only original
+    // unowned monster names and NPC catalog names are presentation vocabulary.
+    if native_i18n::active()
+        && (kind == "npc" || (kind == "monster" && !owned && !name.contains('_')))
+    {
+        native_i18n::tr(name)
+    } else {
+        name.to_owned()
+    }
+}
+
 fn overlay_entries_with_motion_at_center(
     payload: &Value,
     visibility: OverlayVisibility,
@@ -996,8 +1024,10 @@ fn overlay_entries_with_motion_at_center(
                     .flatten()
                     .map(str::trim)
                     .filter(|guild_name| !guild_name.is_empty());
+                let display_name = entity_display_name(entity, kind, name);
                 let lines = if matches!(kind, "npc" | "monster") {
-                    name.split('_')
+                    display_name
+                        .split('_')
                         .filter(|part| !part.is_empty())
                         .collect::<Vec<_>>()
                 } else {
@@ -1197,7 +1227,7 @@ fn overlay_entries_with_motion_at_center(
                     let x = drop.get("x").and_then(value_i64)?;
                     let y = drop.get("y").and_then(value_i64)?;
                     Some(OverlayEntry {
-                        name: Some(name.to_owned()),
+                        name: Some(native_i18n::tr(name)),
                         quest_marker: None,
                         marker_object_id: None,
                         color: Color::srgb_u8(0xff, 0xe6, 0x58),
@@ -1348,6 +1378,54 @@ fn argb_color(value: i64) -> Option<Color> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_nameplates_translate_catalog_entities_but_not_players_guilds_or_pets() {
+        use super::*;
+        use serde_json::json;
+        native_i18n::with_locale(native_i18n::Locale::TraditionalChinese, || {
+            assert_eq!(entity_display_name(&json!({}), "npc", "Warrior"), "戰士");
+            assert_eq!(
+                entity_display_name(&json!({}), "monster", "Warrior"),
+                "戰士"
+            );
+            for kind in ["selfPlayer", "player"] {
+                assert_eq!(entity_display_name(&json!({}), kind, "Warrior"), "Warrior");
+            }
+            for pet in [
+                json!({"masterObjectId": 42}),
+                json!({"ownerName": "Warrior"}),
+            ] {
+                assert_eq!(entity_display_name(&pet, "monster", "Warrior"), "Warrior");
+            }
+            assert_eq!(
+                entity_display_name(&json!({}), "monster", "Deer_Warrior"),
+                "Deer_Warrior"
+            );
+            let payload = json!({"sceneView":{"centerX":10,"centerY":20},"entities":[
+                {"kind":"player","objectId":1,"name":"Warrior","guildName":"Password","x":10,"y":20},
+                {"kind":"monster","objectId":2,"name":"Deer_Warrior","x":11,"y":20}
+            ]});
+            let before = payload.clone();
+            let entries = overlay_entries(
+                &payload,
+                OverlayVisibility {
+                    name_view: true,
+                    drop_view: true,
+                },
+                None,
+                false,
+                None,
+            );
+            let names = entries
+                .iter()
+                .filter_map(|entry| entry.name.as_deref())
+                .collect::<Vec<_>>();
+            assert!(names.contains(&"Password"));
+            assert!(names.contains(&"Warrior"));
+            assert!(names.contains(&"Deer"));
+            assert_eq!(payload, before);
+        });
+    }
     use super::*;
     use serde_json::json;
 
@@ -1659,17 +1737,19 @@ mod tests {
             ["Potion"]
         );
 
-        assert!(overlay_entries(
-            &payload,
-            OverlayVisibility {
-                name_view: false,
-                drop_view: false
-            },
-            None,
-            false,
-            None,
-        )
-        .is_empty());
+        assert!(
+            overlay_entries(
+                &payload,
+                OverlayVisibility {
+                    name_view: false,
+                    drop_view: false
+                },
+                None,
+                false,
+                None,
+            )
+            .is_empty()
+        );
     }
 
     #[test]
@@ -2258,10 +2338,12 @@ mod tests {
 
         assert_eq!(entry_names(&entries), ["◆", "Deer"]);
         assert!(quest_markers(&entries).is_empty());
-        assert!(entries
-            .iter()
-            .filter(|entry| entry.name.is_some())
-            .all(|entry| entry.color == Color::srgb_u8(0xff, 0xe6, 0x58)));
+        assert!(
+            entries
+                .iter()
+                .filter(|entry| entry.name.is_some())
+                .all(|entry| entry.color == Color::srgb_u8(0xff, 0xe6, 0x58))
+        );
     }
 
     #[test]

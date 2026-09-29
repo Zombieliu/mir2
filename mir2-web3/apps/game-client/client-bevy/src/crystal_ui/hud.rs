@@ -362,6 +362,7 @@ impl Plugin for Mir2CrystalHudPlugin {
                 Update,
                 update_hud_read_model.run_if(resource_changed::<UiReadModel>),
             )
+            .add_systems(Update, update_hud_map_locale.after(update_hud_read_model))
             .add_systems(
                 Update,
                 update_hud_hp_alternate_text.run_if(resource_changed::<UiReadModel>),
@@ -598,7 +599,7 @@ fn spawn_crystal_hud(
                 root,
                 CrystalHudMapTitleContainer,
                 CrystalHudMapTitle,
-                ui_model.player.map_name.as_deref().unwrap_or(""),
+                &crate::native_i18n::tr(ui_model.player.map_name.as_deref().unwrap_or("")),
                 MAP_TITLE_RECT,
                 CRYSTAL_DEFAULT_FONT_SIZE_PX,
                 WHITE,
@@ -1266,7 +1267,7 @@ fn update_hud_read_model(
     set_text(&mut text_queries.p4(), format_gold(model.player.gold));
     set_text(
         &mut text_queries.p5(),
-        model.player.map_name.as_deref().unwrap_or("").to_owned(),
+        crate::native_i18n::tr(model.player.map_name.as_deref().unwrap_or("")),
     );
     set_text(
         &mut text_queries.p6(),
@@ -1276,6 +1277,22 @@ fn update_hud_read_model(
         &mut text_queries.p7(),
         model.player.available_weight().to_string(),
     );
+}
+
+fn update_hud_map_locale(
+    model: Res<UiReadModel>,
+    mut last: Local<Option<(u64, crate::native_i18n::Locale)>>,
+    mut titles: Query<(&mut Text, &mut TextFont), With<CrystalHudMapTitle>>,
+) {
+    let locale = (crate::native_i18n::revision(), crate::native_i18n::locale());
+    if *last == Some(locale) {
+        return;
+    }
+    *last = Some(locale);
+    for (mut text, mut font) in &mut titles {
+        **text = crate::native_i18n::tr(model.player.map_name.as_deref().unwrap_or(""));
+        font.font = crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX).font;
+    }
 }
 
 /// Keep alternate HP/MP labels in a separate system because Bevy's `ParamSet`
@@ -1928,6 +1945,49 @@ pub fn bounded_belt_label(value: &str, max_chars: usize) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_map_title_locale_changes_without_changing_authoritative_model() {
+        use super::*;
+        use crate::native_i18n::{self, Locale};
+        let mut model = UiReadModel::default();
+        model.player.map_name = Some("Warrior".into());
+        model.player.name = Some("Password".into());
+        let mut app = App::new();
+        app.insert_resource(model)
+            .add_systems(Update, update_hud_map_locale);
+        app.edit_schedule(Update, |schedule| {
+            schedule.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::new());
+        });
+        let title = app
+            .world_mut()
+            .spawn((
+                CrystalHudMapTitle,
+                Text::new("Warrior"),
+                crystal_text_font(12.0),
+            ))
+            .id();
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                app.update();
+                assert_eq!(
+                    app.world().get::<Text>(title).unwrap().0,
+                    native_i18n::tr("Warrior")
+                );
+                assert_eq!(
+                    app.world()
+                        .resource::<UiReadModel>()
+                        .player
+                        .map_name
+                        .as_deref(),
+                    Some("Warrior")
+                );
+                assert_eq!(
+                    app.world().resource::<UiReadModel>().player.name.as_deref(),
+                    Some("Password")
+                );
+            });
+        }
+    }
     use super::*;
     use crate::inventory::{
         CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel, ItemModel,

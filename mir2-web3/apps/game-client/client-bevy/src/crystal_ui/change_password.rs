@@ -5,7 +5,8 @@ use super::{
     typography::crystal_text_font,
     widget::spawn_crystal_image_button,
 };
-use crate::native_shell::{validate_change_password_fields, ChangePasswordFocus, NativeShellModel};
+use crate::native_i18n;
+use crate::native_shell::{ChangePasswordFocus, NativeShellModel, validate_change_password_fields};
 use crate::native_shell_ui::{NativeShellButton, NativeShellField};
 use bevy::prelude::*;
 
@@ -28,10 +29,34 @@ pub(crate) fn spawn_change_password(
     assets: &AssetServer,
     model: &NativeShellModel,
 ) {
-    parent.spawn((
-        node(0.0, 0.0, 348.0, 268.0),
-        ImageNode::new(assets.load("original-ui/Prguse/50.png")),
-    ));
+    if native_i18n::active() {
+        let mut frame = node(0.0, 0.0, 348.0, 268.0);
+        frame.border = UiRect::all(Val::Px(1.0));
+        parent.spawn((
+            frame,
+            BackgroundColor(Color::srgb(0.035, 0.025, 0.02)),
+            BorderColor::all(Color::srgb(0.65, 0.5, 0.22)),
+        ));
+        for (label, x, y, width, size) in [
+            ("Change Password", 10.0, 15.0, 328.0, 19.0),
+            ("Account", 14.0, 75.0, 158.0, 12.0),
+            ("Current Password", 14.0, 113.0, 158.0, 12.0),
+            ("New Password", 14.0, 151.0, 158.0, 12.0),
+            ("Confirm Password", 14.0, 188.0, 158.0, 12.0),
+        ] {
+            parent.spawn((
+                node(x, y, width, 26.0),
+                Text::new(native_i18n::tr(label)),
+                crystal_text_font(size),
+                TextColor(Color::WHITE),
+            ));
+        }
+    } else {
+        parent.spawn((
+            node(0.0, 0.0, 348.0, 268.0),
+            ImageNode::new(assets.load("original-ui/Prguse/50.png")),
+        ));
+    }
     let form = &model.change_password;
     let fields = [
         (
@@ -130,7 +155,7 @@ pub(crate) fn spawn_change_password(
             ))
             .with_children(|p| {
                 p.spawn((
-                    Text::new(&notice.message),
+                    Text::new(native_i18n::tr(&notice.message)),
                     crystal_text_font(11.0),
                     TextColor(Color::WHITE),
                 ));

@@ -368,38 +368,49 @@ fn render_contents(
             service.is_some(),
         );
     } else if let Some((title, action)) = service {
-        overlay_absolute_button(parent, title, CONFIRM, action, enabled);
+        overlay_absolute_button(parent, &crate::native_i18n::tr(title), CONFIRM, action, enabled);
         overlay_absolute_button(
             parent,
-            "Hold",
+            &crate::native_i18n::tr("Hold"),
             CrystalRect::new(114.0, 36.0, 48.0, 25.0),
             OverlayButton::ShopToggleHold,
             true,
         );
     }
     let title = service.map_or("Unavailable", |(title, _)| title);
+    let quote_text = |amount: &str| crate::native_i18n::format_key(
+        "game.npc.service_quote", "{service}: {amount} gold",
+        &[("service", &crate::native_i18n::tr(title)), ("amount", amount)]);
     let info = if repair {
         repair_quote.map_or_else(
-            || "Quote unavailable".to_owned(),
-            |quote| format!("{title}: {} gold", quote.displayed_total),
+            || crate::native_i18n::tr("Quote unavailable"),
+            |quote| quote_text(&quote.displayed_total.to_string()),
         )
     } else if shop.allows_sell() {
         if selected.is_none() {
-            title.to_owned()
+            crate::native_i18n::tr(title)
         } else {
             sale_quote(shop, inventory, state).map_or_else(
-                || "Quote unavailable".to_owned(),
-                |price| format!("{title}: {price} gold"),
+                || crate::native_i18n::tr("Quote unavailable"),
+                |price| quote_text(&price.to_string()),
             )
         }
     } else {
-        title.to_owned()
+        crate::native_i18n::tr(title)
+    };
+    // Renderer-neutral hosts retain their existing presentation language until
+    // they explicitly activate native localization. Do not translate native
+    // output twice (the service and quote placeholders are already localized).
+    let info = if crate::native_i18n::active() {
+        info
+    } else {
+        crate::player_text::text(&info)
     };
     overlay_text_at(
         parent,
-        &crate::player_text::text(&info),
-        CrystalRect::new(30.0, 10.0, 140.0, 20.0),
-        10.0,
+        &info,
+        CrystalRect::new(30.0, 10.0, 140.0, 26.0),
+        if crate::native_i18n::active() { 9.0 } else { 10.0 },
         TEXT,
     );
     if let Some(item) = selected {
@@ -458,7 +469,7 @@ fn render_contents(
         // return from its Sell service frame to the separately rendered Buy list.
         overlay_absolute_button(
             parent,
-            "Buy",
+            &crate::native_i18n::tr("Buy"),
             CrystalRect::new(20.0, 112.0, 60.0, 22.0),
             OverlayButton::ShopShowBuy,
             true,

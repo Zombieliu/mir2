@@ -27,10 +27,10 @@ function readCrystalJson(rootRelative, fileName) {
 function readI18nOverrides() {
   if (!existsSync(overridesPath)) {
     console.warn(`i18n-overrides.json not found at ${overridesPath}; pt-BR + es overrides skipped`);
-    return { esES: {}, ptBR: {} };
+    return { esES: {}, ptBR: {}, zhTW: {} };
   }
   const doc = JSON.parse(readFileSync(overridesPath, "utf8"));
-  return { esES: doc.esES ?? {}, ptBR: doc.ptBR ?? {} };
+  return { esES: doc.esES ?? {}, ptBR: doc.ptBR ?? {}, zhTW: doc.zhTW ?? {} };
 }
 
 function prefixKeys(entries, prefix) {
@@ -1438,6 +1438,15 @@ const bundle = {
       locale: "pt-BR",
       texts: sortEntries(portugueseTexts),
     },
+    // Reproducible official OpenCC conversion and reviewed terminology are
+    // committed by generate-native-i18n-traditional.py; regeneration retains it.
+    ...(Object.keys(i18nOverrides.zhTW).length ? {
+      "zh-TW": {
+        nativeName: "繁體中文",
+        locale: "zh-TW",
+        texts: sortEntries({ ...englishTexts, ...i18nOverrides.zhTW }),
+      },
+    } : {}),
   },
 };
 

@@ -1,4 +1,4 @@
-﻿# Stage a Windows Candidate package from an explicitly attested Release EXE.
+# Stage a Windows Candidate package from an explicitly attested Release EXE.
 # The script never builds. -DryRun validates only and never writes dist/target.
 [CmdletBinding()]
 param(
@@ -593,7 +593,7 @@ function Test-PackageRelativeFileAllowed {
     if (Test-CandidateActorFileAllowed -RelativePath $RelativePath) { return $true }
     if ($RelativePath -ceq $ExeName) { return $true }
     if (Test-PathContainsDangerousDotToken -RelativePath $RelativePath) { return $false }
-    $rootFiles = @('mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s')
+    $rootFiles = @('mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'NotoSansTC-OFL.txt', 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s')
     if ($rootFiles -ccontains $RelativePath) { return $true }
     if ($RelativePath -ceq 'mir2-assets/original-ui/frame-sets.generated.json') { return $true }
     if ($RelativePath.StartsWith('mir2-assets/original-ui/Items/', [StringComparison]::Ordinal)) {
@@ -993,46 +993,25 @@ try {
     if ((Get-FileHash -LiteralPath $attestationFull -Algorithm SHA256).Hash.ToUpperInvariant() -ne $attested.attestationSha256) { throw 'build attestation changed before staging copy' }
     Copy-FileDefaultDataOnly -Source $releaseExeFull -Destination (Join-Path $staging $ExeName)
     Copy-FileDefaultDataOnly -Source $attestationFull -Destination (Join-Path $staging 'BUILD-ATTESTATION.json')
+    # The font is embedded in the executable; its license must travel with every
+    # signed ZIP as well as with the installer's outer documentation.
+    $fontLicense = Join-Path $PSScriptRoot '../assets/fonts/OFL.txt'
+    Assert-NoReparseTree -Path $fontLicense
+    Copy-FileDefaultDataOnly -Source $fontLicense -Destination (Join-Path $staging 'NotoSansTC-OFL.txt')
     Assert-NoReparseTree -Path $releaseExeFull; Assert-NoReparseTree -Path $attestationFull; Assert-NoReparseTree -Path $staging
     if ((Get-FileHash -LiteralPath $releaseExeFull -Algorithm SHA256).Hash.ToUpperInvariant() -ne $attested.exeSha256 -or (Get-FileHash -LiteralPath (Join-Path $staging $ExeName) -Algorithm SHA256).Hash.ToUpperInvariant() -ne $attested.exeSha256) { throw 'Release EXE changed during staging copy' }
     if ((Get-FileHash -LiteralPath $attestationFull -Algorithm SHA256).Hash.ToUpperInvariant() -ne $attested.attestationSha256 -or (Get-FileHash -LiteralPath (Join-Path $staging 'BUILD-ATTESTATION.json') -Algorithm SHA256).Hash.ToUpperInvariant() -ne $attested.attestationSha256) { throw 'build attestation changed during staging copy' }
     Assert-NoAlternateDataStreams -Path $staging
 
     Write-Utf8NoBom -Path (Join-Path $staging 'mir2-client.toml') -Text $candidateToml
-    Write-Utf8NoBom -Path (Join-Path $staging 'README-START.txt') -Text @"
-传奇 Windows 邀请内测版
-版本：$CandidateVersion
-服务器：$GatewayWsUrl
-
-1. 将 ZIP 完整解压到一个文件夹，双击 mir2-platform-windows.exe 启动。mir2-assets 文件夹须与程序放在一起，无需另装本地服务器。
-2. 每位玩家自行注册独立账号，密码至少 10 个字符。请勿共用同一账号同时登录。
-3. 创建角色后进入游戏，按 Q 查看任务并选择当前任务。路线、补给指引和操作方式见 CONTROLS.txt。
-4. 离开游戏时请先正常退出角色，回到角色或登录界面，再关闭窗口，让服务器保存进度。
-
-本次测试范围为 0–30 级。出现问题时请一并提供版本号、地图名称、坐标及复现操作；已知限制见 KNOWN-ISSUES.md。
-"@
-    Write-Utf8NoBom -Path (Join-Path $staging 'CONTROLS.txt') -Text @"
-常用操作
-
-登录：点击输入框填写账号与密码；Tab / Shift+Tab 切换输入框，Enter 确认。
-移动：按住场景空地上的鼠标左键走路，右键奔跑；也可使用 WASD / 方向键移动，配合 Shift 奔跑。
-战斗与交互：左键点击怪物攻击，点击 NPC 交谈；F1–F8 使用已设置的技能，1–6 使用快捷栏物品。
-角色与背包：I 打开背包，C 打开人物装备，Enter 打开聊天输入。
-任务：Q 打开任务列表，将需要的任务设为当前任务；任务引导中的“前往”按钮可开始寻路，补给指引可帮助寻找商店。
-地图：点击任务引导中的“打开大地图”；在当前地图上点击目标位置可寻路，小地图也可点击寻路。关闭地图后路线继续执行，Esc 停止寻路。
-狩猎：到达任务狩猎区域后，请自行选择怪物战斗。
-退出：使用游戏菜单正常退出角色，再关闭客户端窗口。
-"@
-    Write-Utf8NoBom -Path (Join-Path $staging 'KNOWN-ISSUES.md') -Text @"
-# 本次内测的已知限制
-
-- 测试范围为 0–30 级。战士路线已做人工体验，法师和道士尚未完成全程人工验收。
-- 部分旧 NPC、物品和任务仍有英文名称或文字，中文统一工作尚未完成。
-- 服务器限同时在线 15 人。这是本次内测人数限制，并非已通过 15 人压力测试。
-- 内测版尚未完成正式发行签名流程。
-
-如遇卡顿、黑块、任务无法推进或异常退出，请记录版本、地图、坐标及触发操作，交给测试负责人排查。
-"@
+    $readmeRoot = Join-Path $PSScriptRoot 'player-readme'
+    $readmeParts = foreach ($language in @('zh-TW', 'en', 'pt-BR')) {
+        Get-Content -LiteralPath (Join-Path $readmeRoot ("README." + $language + ".txt")) -Raw -Encoding UTF8
+    }
+    Write-Utf8NoBom -Path (Join-Path $staging 'README-START.txt') -Text ("$CandidateVersion`n$GatewayWsUrl`n`n" + ($readmeParts -join "`n`n"))
+    foreach ($document in @('CONTROLS.txt', 'KNOWN-ISSUES.md')) {
+        Copy-FileDefaultDataOnly -Source (Join-Path $readmeRoot $document) -Destination (Join-Path $staging $document)
+    }
     New-Item -ItemType Directory -Path (Join-Path $staging 'logs') | Out-Null
 
     Assert-NoReparseTree -Path $staging

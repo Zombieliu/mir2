@@ -11,6 +11,37 @@ use unicode_width::UnicodeWidthChar;
 const CARD_WRAP_COLUMNS: usize = 38;
 const CARD_LINE_HEIGHT: f32 = 18.0;
 
+#[derive(Component)]
+pub(super) struct GuidanceViewport;
+
+fn clamped_scroll(current: f32, delta: f32, maximum: f32) -> f32 {
+    (current - delta).clamp(0.0, maximum.max(0.0))
+}
+
+pub(super) fn scroll_tracker(
+    mut wheel: MessageReader<bevy::input::mouse::MouseWheel>,
+    mut state: ResMut<QuestUiState>,
+    shell: Option<Res<NativeShellModel>>,
+    ui: Res<NativePlayerUiState>,
+    mut viewports: Query<(&RelativeCursorPosition, &ComputedNode, &mut ScrollPosition), With<GuidanceViewport>>,
+) {
+    let delta: f32 = wheel.read().map(|event| match event.unit {
+        bevy::input::mouse::MouseScrollUnit::Line => event.y * CARD_LINE_HEIGHT * 3.0,
+        bevy::input::mouse::MouseScrollUnit::Pixel => event.y,
+    }).sum();
+    if delta == 0.0 || shell.is_none_or(|shell| shell.screen != NativeShellScreen::InGame)
+        || ui.menu_pointer_consumed || ui.amount_modal_open() { return; }
+    for (cursor, computed, mut position) in &mut viewports {
+        if !cursor.cursor_over() || computed.size().y <= 0.0 { continue; }
+        let maximum = (computed.content_size().y - computed.size().y) * computed.inverse_scale_factor;
+        let next = clamped_scroll(position.y, delta, maximum);
+        if next != state.guidance_scroll_y {
+            state.guidance_scroll_y = next;
+            position.y = next;
+        }
+    }
+}
+
 /// Manual active choice wins until authoritative completion/removal. Journey's
 /// recommended next step (including accept/turn-in) otherwise remains primary.
 pub fn primary_quest_index(
@@ -152,9 +183,9 @@ fn objective_lines(quest: &Quest, class_name: &str) -> Vec<String> {
     quest.objectives.iter().enumerate().map(|(index, o)| {
         if let Some(guide) = practice.as_ref().filter(|guide| guide.objective_index == index) {
             if o.target > 0 && o.current >= o.target {
-                format!("职业练习已完成  {}/{}", o.current, o.target)
+                crate::player_text::format_named("quest.practice.completed", "职业练习已完成  {current}/{total}", &[("current", &o.current.to_string()), ("total", &o.target.to_string())])
             } else {
-                format!("职业练习 {}/{}：{}", o.current, o.target, guide.summary)
+                crate::player_text::format_named("quest.practice.progress", "职业练习 {current}/{total}：{summary}", &[("current", &o.current.to_string()), ("total", &o.target.to_string()), ("summary", &guide.summary)])
             }
         } else {
             format!("{}  {}/{}", crate::player_text::quest_objective(&o.text), o.current, o.target)
@@ -252,9 +283,12 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
     let nearby = nearby_indices(primary, tracker, entities, map, big_map);
     parent.spawn((
         Node { position_type: PositionType::Absolute, left: Val::Px(8.0), top: Val::Px(16.0), width: Val::Px(304.0),
+            max_height: Val::Percent(95.0), overflow: Overflow::scroll_y(),
             flex_direction: FlexDirection::Column, row_gap: Val::Px(4.0), padding: UiRect::all(Val::Px(10.0)),
             border: UiRect::all(Val::Px(1.0)), ..default() },
         BackgroundColor(Color::srgba(0.035, 0.03, 0.02, 0.90)), BorderColor::all(PANEL_HIGHLIGHT),
+        GuidanceViewport, RelativeCursorPosition::default(),
+        ScrollPosition(Vec2::new(0.0, state.guidance_scroll_y)), FocusPolicy::Block,
     )).with_children(|card| {
         if let Some(journey) = journey {
             line(card, format!("{} · {}", crate::player_text::text(&journey.chapter_title), crate::player_text::text(&journey.progress_label())), PANEL_TEXT);
@@ -353,9 +387,12 @@ pub(super) fn render_supplies(parent: &mut ChildSpawnerCommands, state: &QuestUi
         .map(|row| row.shortage().saturating_mul(row.unit_price)).fold(0_u32, u32::saturating_add);
     parent.spawn((
         Node { position_type: PositionType::Absolute, left: Val::Px(8.0), top: Val::Px(16.0), width: Val::Px(304.0),
+            max_height: Val::Percent(95.0), overflow: Overflow::scroll_y(),
             flex_direction: FlexDirection::Column, row_gap: Val::Px(3.0), padding: UiRect::all(Val::Px(10.0)),
             border: UiRect::all(Val::Px(1.0)), ..default() },
         BackgroundColor(Color::srgba(0.035, 0.03, 0.02, 0.96)), BorderColor::all(PANEL_HIGHLIGHT),
+        GuidanceViewport, RelativeCursorPosition::default(),
+        ScrollPosition(Vec2::new(0.0, state.guidance_scroll_y)), FocusPolicy::Block,
     )).with_children(|card| {
         line(card, "出发补给 · 现有 / 建议", PANEL_HIGHLIGHT);
         for row in supplies.rows.iter().filter(|row| state.supply_vendor.is_none_or(|vendor| row.vendor == vendor)) {
@@ -363,7 +400,7 @@ pub(super) fn render_supplies(parent: &mut ChildSpawnerCommands, state: &QuestUi
         }
         if state.supply_vendor.is_none_or(|vendor| vendor == crate::quest_supplies::SupplyVendor::Potions) {
             let medicines = if supplies.rows.iter().any(|row| row.label == "蓝药") { "红药、蓝药" } else { "红药" };
-            line(card, format!("当前推荐：{}{medicines}", supplies.potion_size), PANEL_TEXT);
+            line(card, crate::player_text::format_named("quest.supply.recommended", "当前推荐：{size}{medicines}", &[("size", &crate::player_text::supply_size(supplies.potion_size)), ("medicines", &crate::player_text::text(medicines))]), PANEL_TEXT);
         }
         line(card, format!("金币 {} · 补足约 {}", supplies.gold, displayed_cost),
             if supplies.gold < displayed_cost { FEEDBACK_ERR } else { PANEL_TEXT });
@@ -379,11 +416,11 @@ pub(super) fn render_supplies(parent: &mut ChildSpawnerCommands, state: &QuestUi
             if state.supply_vendor.is_some() { break; }
             if vendor == crate::quest_supplies::SupplyVendor::Poison
                 && !supplies.rows.iter().any(|row| row.vendor == vendor) { continue; }
-            button(card, &format!("购买 · {}", vendor.goods()), QuestUiButton::SelectSupplyVendor(vendor));
+            button(card, &format!("购买 · {}", crate::player_text::text(vendor.goods())), QuestUiButton::SelectSupplyVendor(vendor));
         }
         if let Some(vendor) = state.supply_vendor {
             if let Some(destination) = vendor.destination() {
-                line(card, format!("{} ({},{})", vendor.label(), destination.x, destination.y), PANEL_HIGHLIGHT);
+                line(card, format!("{} ({},{})", crate::player_text::name(vendor.label()), destination.x, destination.y), PANEL_HIGHLIGHT);
             }
             if let Some((big_map, route)) = big_map.and_then(|model| vendor.route(model.current_map_index?).map(|route| (model, route))) {
                 if let Some(next) = &route.next_map_title {
@@ -412,6 +449,58 @@ pub(super) fn render_supplies(parent: &mut ChildSpawnerCommands, state: &QuestUi
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_portuguese_practice_wraps_before_height_and_keeps_controls_reachable() {
+        crate::native_i18n::with_locale(crate::native_i18n::Locale::BrazilianPortuguese, || {
+            let mut current = quest(2_110_021);
+            current.objectives = vec![
+                QuestObjective { objective_id: "kill".into(), text: "Defeat 3 WoomaFighter.".into(), current: 1, target: 3 },
+                QuestObjective { objective_id: "practice".into(), text: "Complete your class practice".into(), current: 0, target: 1 },
+            ];
+            let lines = objective_lines(&current, "Taoist");
+            assert!(lines[1].starts_with("Treino de classe 0/1:"));
+            assert!(lines[1].contains("Talismã de Fogo"));
+            for line in &lines {
+                let wrapped = wrap_card_text(line);
+                assert!(wrapped.iter().all(|row| card_columns(row) <= CARD_WRAP_COLUMNS));
+                assert_eq!(card_text_height(line), wrapped.len() as f32 * CARD_LINE_HEIGHT);
+            }
+            let mut world = World::new();
+            let mut queue = bevy::ecs::world::CommandQueue::default();
+            let state = QuestUiState { guidance_scroll_y: 90.0, ..default() };
+            Commands::new(&mut queue, &world).spawn_empty().with_children(|parent| {
+                render_supplies(parent, &state, None, &test_supplies());
+            });
+            queue.apply(&mut world);
+            let (node, scroll) = world.query_filtered::<(&Node, &ScrollPosition), With<GuidanceViewport>>().single(&world).unwrap();
+            assert_eq!(node.max_height, Val::Percent(95.0));
+            assert_eq!(node.overflow, Overflow::scroll_y());
+            assert_eq!(scroll.y, 90.0);
+            assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| matches!(button, QuestUiButton::ToggleSupplies)));
+        });
+    }
+
+    #[test]
+    fn native_tracker_wheel_only_scrolls_hovered_viewport_and_clamps_to_content() {
+        use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
+        let mut app = App::new();
+        app.add_message::<MouseWheel>().init_resource::<QuestUiState>().init_resource::<NativePlayerUiState>();
+        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() });
+        let viewport = app.world_mut().spawn((GuidanceViewport,
+            RelativeCursorPosition { cursor_over: false, ..default() },
+            ComputedNode { size: Vec2::new(304.0, 300.0), content_size: Vec2::new(304.0, 400.0), inverse_scale_factor: 1.0, ..default() },
+            ScrollPosition::default())).id();
+        app.add_systems(Update, scroll_tracker);
+        let wheel = MouseWheel { unit: MouseScrollUnit::Line, x: 0.0, y: -3.0,
+            window: Entity::PLACEHOLDER, phase: bevy::input::touch::TouchPhase::Moved };
+        app.world_mut().write_message(wheel.clone()); app.update();
+        assert_eq!(app.world().resource::<QuestUiState>().guidance_scroll_y, 0.0);
+        app.world_mut().get_mut::<RelativeCursorPosition>(viewport).unwrap().cursor_over = true;
+        app.world_mut().write_message(wheel); app.update();
+        assert_eq!(app.world().resource::<QuestUiState>().guidance_scroll_y, 100.0);
+        assert_eq!(app.world().get::<ScrollPosition>(viewport).unwrap().y, 100.0);
+    }
+
     fn test_supplies() -> crate::quest_supplies::SupplyPlan {
         crate::quest_supplies::plan(&crate::read_model::PlayerStats::default(), &crate::inventory::InventoryModel::default(), None, None)
     }

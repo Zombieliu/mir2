@@ -956,7 +956,7 @@ fn game_shop_friendly_name(name: &str) -> String {
             _ => {}
         }
     }
-    result.chars().take(17).collect()
+    crate::player_text::name(&result).chars().take(24).collect()
 }
 
 fn game_shop_grade_color(item: &GameShopEntry) -> Color {
@@ -1103,7 +1103,7 @@ pub(super) fn render(
         );
         text(
             parent,
-            category,
+            &crate::native_i18n::tr(category),
             rect,
             9.33,
             if shop.category.as_deref().unwrap_or("Show All") == category {
@@ -1215,7 +1215,7 @@ pub(super) fn render(
         );
         text(
             parent,
-            label,
+            &crate::native_i18n::tr(label),
             CrystalRect::new(x + 15.0, 449.0, 85.0, 18.0),
             9.33,
             TEXT,
@@ -1320,7 +1320,7 @@ fn product(
             );
             text(
                 cell,
-                "STOCK:",
+                &crate::native_i18n::tr("STOCK:"),
                 CrystalRect::new(53.0, 37.0, 40.0, 20.0),
                 9.33,
                 Color::srgb(0.5, 0.5, 0.5),
@@ -1527,17 +1527,14 @@ fn confirmation(
             }
             text(
                 dialog,
-                &format!(
-                    "Are you sure would you like to buy {} x\n{}({}) for {} {}?",
-                    prompt.quantity,
-                    prompt.name,
-                    prompt.count,
-                    format_number(u64::from(prompt.total)),
-                    if prompt.payment == GameShopPaymentType::Gold {
-                        "Gold"
-                    } else {
-                        "Credits"
-                    }
+                &crate::native_i18n::format_key(
+                    "game.shop.confirm",
+                    "Are you sure would you like to buy {quantity} x\n{item}({count}) for {total} {currency}?",
+                    &[("quantity", &prompt.quantity.to_string()),
+                      ("item", &crate::player_text::name(&prompt.name)),
+                      ("count", &prompt.count.to_string()),
+                      ("total", &format_number(u64::from(prompt.total))),
+                      ("currency", &crate::native_i18n::tr(if prompt.payment == GameShopPaymentType::Gold { "Gold" } else { "Credits" }))],
                 ),
                 CrystalRect::new(35.0, 35.0, 390.0, 110.0),
                 12.0,

@@ -506,6 +506,14 @@ pub(super) fn render_buff(
         "original-ui/Prguse/1853.png".into(),
         CrystalRect::new(x, y, 216., 332.),
     );
+    if crate::native_i18n::active() {
+        localized_art_label(
+            parent,
+            "Points Remaining",
+            CrystalRect::new(x + 3., y + 2., 112., 17.),
+            9.,
+        );
+    }
     parent.spawn((
         Node {
             position_type: PositionType::Absolute,
@@ -546,7 +554,7 @@ pub(super) fn render_buff(
                 }
                 overlay_text_at(
                     p,
-                    &row.name,
+                    &crate::native_i18n::tr(&row.name),
                     CrystalRect::new(35., 1., 153., 15.),
                     32. / 3.,
                     Color::WHITE,
@@ -560,7 +568,7 @@ pub(super) fn render_buff(
                 };
                 overlay_text_at(
                     p,
-                    label,
+                    &crate::native_i18n::tr(label),
                     CrystalRect::new(35., 17., 112., 15.),
                     32. / 3.,
                     if row.warning_red {
@@ -572,7 +580,7 @@ pub(super) fn render_buff(
                 if let Some(active) = row.active {
                     overlay_text_at(
                         p,
-                        if active { "Active" } else { "Inactive" },
+                        &crate::native_i18n::tr(if active { "Active" } else { "Inactive" }),
                         CrystalRect::new(140., 17., 60., 15.),
                         32. / 3.,
                         Color::WHITE,
@@ -613,38 +621,70 @@ fn buff_hint(model: &GuildBuffDialog, row: usize) -> String {
     let Some(info) = model.catalog.get(model.start_index + row) else {
         return String::new();
     };
-    let mut lines = vec![info.name.clone()];
+    let mut lines = vec![crate::native_i18n::tr(&info.name)];
     if info.level_requirement > 0 {
-        lines.push(format!("Minimum Guild Level: {}", info.level_requirement));
+        lines.push(crate::native_i18n::tr(&format!(
+            "Minimum Guild Level: {}",
+            info.level_requirement
+        )));
     }
     if info.points_requirement > 0 {
-        lines.push(format!("Points Required: {}", info.points_requirement));
+        lines.push(crate::native_i18n::tr(&format!(
+            "Points Required: {}",
+            info.points_requirement
+        )));
     }
     if info.activation_cost > 0 {
-        lines.push(format!("Activation Cost: {} gold.", info.activation_cost));
+        lines.push(crate::native_i18n::tr(&format!(
+            "Activation Cost: {} gold.",
+            info.activation_cost
+        )));
     }
     if info.time_limit > 0 {
-        lines.push(
-            if let Some(active) = model.enabled.iter().find(|b| b.id == info.id && b.active) {
-                format!("Time Remaining: {} minutes", active.active_time_remaining)
-            } else {
-                format!("Buff Length: {} minutes.", info.time_limit)
-            },
-        );
+        lines.push(crate::native_i18n::tr(&if let Some(active) =
+            model.enabled.iter().find(|b| b.id == info.id && b.active)
+        {
+            format!("Time Remaining: {} minutes", active.active_time_remaining)
+        } else {
+            format!("Buff Length: {} minutes.", info.time_limit)
+        }));
     }
     for stat in &info.stats {
         let name = mir2_protocol::crystal_stat_label(stat.stat);
-        lines.push(format!(
-            "{} {} by: {}{}.",
-            if stat.value < 0 {
-                "Decreases"
+        if crate::native_i18n::active() {
+            let (key, source) = if stat.value < 0 {
+                (
+                    "game.guild.buff_decreases",
+                    "Decreases {stat} by: {value}{suffix}.",
+                )
             } else {
-                "Increases"
-            },
-            name,
-            stat.value,
-            if name.contains("Percent") { "%" } else { "" }
-        ));
+                (
+                    "game.guild.buff_increases",
+                    "Increases {stat} by: {value}{suffix}.",
+                )
+            };
+            lines.push(crate::native_i18n::format_key(
+                key,
+                source,
+                &[
+                    ("stat", &crate::native_i18n::tr(&name)),
+                    ("value", &stat.value.to_string()),
+                    ("suffix", if name.contains("Percent") { "%" } else { "" }),
+                ],
+            ));
+        } else {
+            lines.push(format!(
+                "{} {} by: {}{}.",
+                if stat.value < 0 {
+                    "Decreases"
+                } else {
+                    "Increases"
+                },
+                name,
+                stat.value,
+                if name.contains("Percent") { "%" } else { "" }
+            ));
+        }
     }
     lines.join("\n")
 }
@@ -661,22 +701,30 @@ pub(super) fn render_error(
     let (Some(assets), Ok(root)) = (assets, roots.single()) else {
         return;
     };
-    let invite_text = state
-        .guild_panel
-        .invite
-        .as_ref()
-        .map(|(name, _)| format!("Do you want to join the {name} guild?"));
-    let kick_text = state
-        .guild_panel
-        .kick_member
-        .as_ref()
-        .map(|name| format!("Are you sure you want to kick {name}?"));
+    let invite_text = state.guild_panel.invite.as_ref().map(|(name, _)| {
+        crate::native_i18n::format_key(
+            "game.guild.confirm_join",
+            "Do you want to join the {name} guild?",
+            &[("name", name)],
+        )
+    });
+    let kick_text = state.guild_panel.kick_member.as_ref().map(|name| {
+        crate::native_i18n::format_key(
+            "game.guild.confirm_kick",
+            "Are you sure you want to kick {name}?",
+            &[("name", name)],
+        )
+    });
     let member_text = state
         .guild_panel
         .member_change
         .as_ref()
         .map(|(name, _, rank)| {
-            format!("Are you sure you want to change the rank of {name} to {rank}?")
+            crate::native_i18n::format_key(
+                "game.guild.confirm_rank",
+                "Are you sure you want to change the rank of {name} to {rank}?",
+                &[("name", name), ("rank", rank)],
+            )
         });
     let text = if let Some(text) = invite_text.as_deref() {
         text
@@ -718,7 +766,7 @@ pub(super) fn render_error(
             spawn_overlay_frame(p, &assets, "original-ui/Prguse/360.png", 456., 190.);
             friend_dialog::view::wrapped_text(
                 p,
-                text,
+                &crate::native_i18n::tr(text),
                 CrystalRect::new(35., 35., 390., 110.),
                 Color::WHITE,
             );
@@ -964,7 +1012,7 @@ pub(super) fn confirm_member_rank(
 
 pub(super) fn member_status(member: &crate::social::GuildMemberModel) -> String {
     if member.online {
-        return "Online".into();
+        return crate::native_i18n::tr("Online");
     }
     let ticks = (member.last_login_binary_datetime as u64 & 0x3fff_ffff_ffff_ffff) as i64;
     let seconds = ticks / 10_000_000 - 62_135_596_800;
@@ -974,11 +1022,11 @@ pub(super) fn member_status(member: &crate::social::GuildMemberModel) -> String 
     let days = (chrono::Local::now().naive_local()
         - last.with_timezone(&chrono::Local).naive_local())
     .num_days();
-    match days {
+    crate::native_i18n::tr(&match days {
         0 => "Today".into(),
         1 => "Yesterday".into(),
         n => format!("{n} days ago"),
-    }
+    })
 }
 
 pub(super) fn confirm_kick(

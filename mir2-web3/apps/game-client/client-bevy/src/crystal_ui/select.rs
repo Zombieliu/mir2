@@ -6,16 +6,17 @@
 
 use bevy::prelude::*;
 use bevy::text::LineBreak;
-use bevy::ui::{widget::NodeImageMode, Node, PositionType, Val};
+use bevy::ui::{Node, PositionType, Val, widget::NodeImageMode};
 use chrono::{DateTime, Local, Utc};
 
+use crate::native_i18n;
 use crate::native_shell::{CharacterSummary, NativeShellModel};
 
-use super::assets::{frame_asset_path, CrystalButtonAssetSet};
+use super::assets::{CrystalButtonAssetSet, frame_asset_path};
 use super::overlays::CrystalAdditiveUiMaterial;
-use super::preview_data::{preview_frames, preview_overlay_frames, PreviewFrame};
-use super::spec::{character_select as spec, CrystalFrameSpec, CrystalRect};
-use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
+use super::preview_data::{PreviewFrame, preview_frames, preview_overlay_frames};
+use super::spec::{CrystalFrameSpec, CrystalRect, character_select as spec};
+use super::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
 use super::widget::spawn_crystal_image_button;
 
 const WHITE: Color = Color::WHITE;
@@ -177,7 +178,18 @@ pub fn spawn_character_select_screen(
     model: &NativeShellModel,
 ) {
     spawn_frame(parent, asset_server, spec::BACKGROUND);
-    spawn_frame(parent, asset_server, spec::TITLE);
+    if native_i18n::active() {
+        spawn_text(
+            parent,
+            &native_i18n::tr("Select Character"),
+            CrystalRect::new(312.0, 16.0, 400.0, 34.0),
+            22.0,
+            WHITE,
+            Justify::Center,
+        );
+    } else {
+        spawn_frame(parent, asset_server, spec::TITLE);
+    }
     spawn_vertical_centered_text(
         parent,
         "Legend of Mir 2",
@@ -198,7 +210,7 @@ pub fn spawn_character_select_screen(
         spawn_character_preview(parent, asset_server, character);
         spawn_vertical_centered_text(
             parent,
-            "Last Online:",
+            &native_i18n::tr("Last Online:"),
             spec::LAST_ACCESS_LABEL,
             CRYSTAL_DEFAULT_FONT_SIZE_PX,
             WHITE,
@@ -206,7 +218,7 @@ pub fn spawn_character_select_screen(
         );
         spawn_vertical_centered_text(
             parent,
-            &format_last_access(character.last_access_binary_datetime),
+            &native_i18n::tr(&format_last_access(character.last_access_binary_datetime)),
             spec::LAST_ACCESS_VALUE,
             CRYSTAL_DEFAULT_FONT_SIZE_PX,
             WHITE,
@@ -268,7 +280,7 @@ pub fn spawn_character_select_screen(
     if let Some(notice) = &model.notice {
         spawn_text(
             parent,
-            &notice.message,
+            &native_i18n::tr(&notice.message),
             CrystalRect::new(262.0, 678.0, 500.0, 22.0),
             12.0,
             ERROR,
@@ -323,6 +335,58 @@ fn spawn_character_slot(
     }
 
     slot_entity.with_children(|contents| {
+        if native_i18n::active() {
+            // The source slot art contains English labels. Keep the same hit
+            // target while rendering labels separately from opaque player names.
+            contents.spawn((
+                Node {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    border: UiRect::all(Val::Px(1.0)),
+                    ..default()
+                },
+                BackgroundColor(if selected {
+                    Color::srgb(0.20, 0.16, 0.07)
+                } else {
+                    Color::srgb(0.055, 0.045, 0.03)
+                }),
+                BorderColor::all(Color::srgb(0.65, 0.5, 0.22)),
+            ));
+            if let Some(character) = character {
+                spawn_relative_text(
+                    contents,
+                    &character.name,
+                    CrystalRect::new(12.0, 6.0, 264.0, 20.0),
+                    14.0,
+                    WHITE,
+                );
+                spawn_relative_text(
+                    contents,
+                    &native_i18n::tr(&character.class_name),
+                    CrystalRect::new(12.0, 31.0, 174.0, 20.0),
+                    13.0,
+                    WHITE,
+                );
+                let level = native_i18n::key("shell.level", "Lv. {level}")
+                    .replace("{level}", &character.level.to_string());
+                spawn_relative_text(
+                    contents,
+                    &level,
+                    CrystalRect::new(194.0, 31.0, 80.0, 20.0),
+                    13.0,
+                    WHITE,
+                );
+            } else {
+                spawn_relative_text(
+                    contents,
+                    &native_i18n::tr("Empty Slot"),
+                    CrystalRect::new(12.0, 16.0, 264.0, 24.0),
+                    14.0,
+                    WHITE,
+                );
+            }
+            return;
+        }
         let image_path = character.map_or_else(
             || format!("original-ui/Prguse/{}.png", spec::EMPTY_SLOT_INDEX),
             |character| {
@@ -538,7 +602,10 @@ pub(crate) fn preview_render_state_for_tests(world: &mut World) -> Vec<serde_jso
         Option<&MaterialNode<CrystalAdditiveUiMaterial>>,
     )>();
     let asset_server = world.resource::<AssetServer>();
-    let materials = world.resource::<CrystalPreviewMaterials>();
+    let Some(materials) = world.get_resource::<CrystalPreviewMaterials>() else {
+        assert!(query.iter(world).next().is_none(), "preview entities require their material cache");
+        return Vec::new();
+    };
     let pixels = |value| match value {
         Val::Px(value) => value,
         _ => panic!("preview bounds must use Crystal pixel coordinates"),
@@ -824,12 +891,14 @@ mod tests {
             redrawn.animation.as_ref().unwrap().elapsed().as_millis(),
             110
         );
-        assert!(redrawn
-            .animation
-            .as_mut()
-            .unwrap()
-            .tick(std::time::Duration::from_millis(140))
-            .just_finished());
+        assert!(
+            redrawn
+                .animation
+                .as_mut()
+                .unwrap()
+                .tick(std::time::Duration::from_millis(140))
+                .just_finished()
+        );
         for (base, anchor) in [
             (320, (338.0, 404.0)),
             (20, (338.0, 404.0)),

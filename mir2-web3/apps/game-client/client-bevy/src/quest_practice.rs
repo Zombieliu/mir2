@@ -32,15 +32,28 @@ pub fn practice_guide(quest_index: i32, class_name: &str) -> Option<PracticeGuid
         let requirement = requirement.as_str()?;
         let (summary, instruction) = requirement_instruction(requirement)
             .unwrap_or((requirement, requirement));
-        summaries.push(summary);
-        instructions.push(instruction.to_owned());
+        // Crystal ThunderBolt (雷電術) and Lightning (疾光電影) are
+        // separate spells. Keep the old inactive-host copy intact, but resolve
+        // these canonical requirements through their precise native keys.
+        let native_keys = match requirement {
+            "Lightning learned" => Some(("quest.practice.copy.53", "quest.practice.copy.54")),
+            "Lightning damage committed" => Some(("quest.practice.copy.55", "quest.practice.copy.56")),
+            _ => None,
+        }.filter(|_| crate::native_i18n::active());
+        if let Some((summary_key, instruction_key)) = native_keys {
+            summaries.push(crate::native_i18n::key(summary_key, summary));
+            instructions.push(crate::native_i18n::key(instruction_key, instruction));
+        } else {
+            summaries.push(crate::player_text::text(summary));
+            instructions.push(crate::player_text::text(instruction));
+        }
     }
     if class == "warrior" && requirements.iter().any(|r| r.as_str() == Some("HalfMoon attack damage committed")) {
-        instructions.push("半月与刺杀请分开开启后普攻；切换时先关闭另一个，空挥或未造成伤害不计。".into());
+        instructions.push(crate::player_text::text("半月与刺杀请分开开启后普攻；切换时先关闭另一个，空挥或未造成伤害不计。"));
     }
     Some(PracticeGuide {
         objective_index: definition["kills"].as_array().map_or(0, Vec::len) + flag_index,
-        summary: summaries.join("；"),
+        summary: summaries.join(&crate::player_text::format_named("quest.practice.separator", "；", &[])),
         instructions,
     })
 }
@@ -93,7 +106,7 @@ pub fn supply_instructions(quest_index: i32, class_name: &str) -> Vec<String> {
     let level = quest["minLevel"].as_u64().unwrap_or(1);
     let size = if level >= 25 { "大型" } else if level >= 16 { "中型" } else { "小型" };
     let mut lines = vec![
-        format!("本阶段建议购买{size}药水；在任务卡点“补给检查”查看库存和商店路线。"),
+        crate::player_text::format_named("quest.supply.instruction", "本阶段建议购买{size}药水；在任务卡点“补给检查”查看库存和商店路线。", &[("size", &crate::player_text::supply_size(size))]),
         "比奇城药剂师·塞缪尔（324,291）：红药和蓝药。".into(),
         "比奇城杂货商·布尔（374,296）：回城卷、随机卷、地牢逃脱卷和护身符。".into(),
     ];
@@ -105,12 +118,61 @@ pub fn supply_instructions(quest_index: i32, class_name: &str) -> Vec<String> {
         lines.push("护身符与毒粉需按技能切换装备；背包里有材料不等于已装备。".into());
     }
     lines.push("回城卷回到最近经过的安全区；地图禁用卷轴时，可按入口路线步行返回。购买前检查金币和负重。".into());
-    lines
+    lines.into_iter().map(|line| crate::player_text::text(&line)).collect()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn native_lightning_practice_uses_its_own_spell_name_and_keeps_legacy_copy() {
+        use crate::native_i18n::{with_locale, Locale};
+        assert_eq!(requirement_instruction("Lightning learned"), Some(("学会雷电术", "先学会雷电术。")));
+        for (locale, spell) in [(Locale::English, "Lightning"),
+            (Locale::TraditionalChinese, "疾光電影"),
+            (Locale::BrazilianPortuguese, "Relâmpago")] {
+            with_locale(locale, || {
+                for id in [2_110_018, 2_110_021] {
+                    let guide = practice_guide(id, "Wizard").unwrap();
+                    assert!(guide.summary.contains(spell));
+                    assert!(guide.instructions.iter().any(|line| line.contains(spell)));
+                    if locale == Locale::TraditionalChinese {
+                        assert!(!guide.summary.contains("雷電術"));
+                    }
+                }
+            });
+        }
+    }
+
+    #[test]
+    fn native_practice_and_supplies_cover_every_class_without_mutating_requirements() {
+        use crate::native_i18n::{with_locale, Locale};
+        let original = newcomer_config().clone();
+        for locale in Locale::ALL {
+            with_locale(locale, || {
+                for definition in newcomer_config()["quests"].as_array().unwrap() {
+                    let id = definition["id"].as_i64().unwrap() as i32;
+                    for class in ["Warrior", "Wizard", "Taoist"] {
+                        if let Some(guide) = practice_guide(id, class) {
+                            assert!(!guide.instructions.is_empty());
+                            assert!(!guide.summary.contains("committed") && !guide.summary.contains('{'));
+                            if locale != Locale::TraditionalChinese {
+                                assert!(!guide.instructions.iter().any(|line| line.chars().any(|c| ('\u{4e00}'..='\u{9fff}').contains(&c))));
+                            }
+                        }
+                        let supplies = supply_instructions(id, class);
+                        assert!(!supplies.is_empty());
+                        assert!(!supplies.iter().any(|line| line.contains('{')));
+                        if locale != Locale::TraditionalChinese {
+                            assert!(!supplies.iter().any(|line| line.chars().any(|c| ('\u{4e00}'..='\u{9fff}').contains(&c))));
+                        }
+                    }
+                }
+            });
+        }
+        assert_eq!(newcomer_config(), &original);
+    }
 
     #[test]
     fn every_authored_class_requirement_has_player_instructions() {

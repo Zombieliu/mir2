@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-09-30 native multilingual implementation is verified for exactly
+> zh-TW/en/pt-BR: shared1147/native777/tooling12 and47 offline GPU screenshots
+> pass, with bounded90-switch font state. The reported external-laptop DPI
+> sizing conflict is corrected and regression-tested. Source and three-language
+> r4 installer recipe are ready for the clean attested Release/strict signed
+> package build; final artifact provenance is a separate handoff record.
+> Do not repeat completed suites without a new change or failure. Clean-PC,
+> Alienware and human gameplay checks remain open; capacity remains paused.
+> [Evidence](generated/player-qa/native-multilingual-20260930/README.md).
+
 > 2026-09-29 preview/startup follow-up: ten class/gender asset sets and both
 > creation/selection screens pass source and offline GPU checks. Wizard additive
 > effects and retained redraw clocks are fixed. Shared1108/native768 pass;

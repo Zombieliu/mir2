@@ -12,7 +12,7 @@
 )]
 
 use bevy::prelude::IntoScheduleConfigs;
-use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
+use mir2_bevy_runtime::{RuntimeWindowSpec, build_runtime_app};
 
 mod assets;
 mod atlas;
@@ -35,12 +35,14 @@ mod lifecycle;
 mod map_parser;
 mod movement_trace;
 mod native_fonts;
+mod native_locale;
 mod native_protocol;
 mod session_config;
 mod shell_bridge;
 mod social_bond_wire;
 mod startup_diagnostics;
 mod timing;
+mod window_sizing;
 
 /// Whether an effect frame PNG (a web path like /original-effects/Magic/0.png)
 /// exists under the native asset root. Used by effects.rs so a missing asset
@@ -86,15 +88,21 @@ fn report_r2_progress_via_chat(
     let has_full = assets::has_local_full();
     let is_remote_active = r2 > 0 || cached_files > 0;
     let msg = if has_full {
-        format!("[Assets] Local {local} / Remote {r2} -- Full index + local map pack found (cache {cached_files} entries)")
+        format!(
+            "[Assets] Local {local} / Remote {r2} -- Full index + local map pack found (cache {cached_files} entries)"
+        )
     } else if !is_remote_active {
-        format!("[Assets] Local {local} / Remote 0 -- Starter only, Bichon town needs full/R2 (cache {cached_files} files)")
+        format!(
+            "[Assets] Local {local} / Remote 0 -- Starter only, Bichon town needs full/R2 (cache {cached_files} files)"
+        )
     } else if r2 == 0 && cached_files > 0 {
         format!(
             "[Assets] Local {local} / Remote 0 (cache {cached_files} files ready, no new R2 fetch)"
         )
     } else if r2 > 0 && local > 0 {
-        format!("[Assets] Local {local} / Remote {r2} (cache {cached_files} files) -- town tiles streaming from R2, first flash then local")
+        format!(
+            "[Assets] Local {local} / Remote {r2} (cache {cached_files} files) -- town tiles streaming from R2, first flash then local"
+        )
     } else {
         format!(
             "[Assets] Remote {r2} / Local {local}, cache {cached_files} files -- streaming town"
@@ -119,6 +127,7 @@ fn report_r2_progress_via_chat(
 }
 
 fn main() -> bevy::app::AppExit {
+    native_locale::initialize();
     startup_diagnostics::initialize();
     console_error_panic_hook::set_once();
     startup_diagnostics::install_panic_hook();
@@ -191,7 +200,9 @@ fn run_native_client() -> bevy::app::AppExit {
     }
     eprintln!(
         "[platform-windows] gateway_url={} window={}x{}",
-        session.gateway_url, session_config::DEFAULT_WINDOW_WIDTH, session_config::DEFAULT_WINDOW_HEIGHT
+        session.gateway_url,
+        session_config::DEFAULT_WINDOW_WIDTH,
+        session_config::DEFAULT_WINDOW_HEIGHT
     );
     timing::report("asset_validation_and_map_decode", assets_started);
     let app_started = std::time::Instant::now();
@@ -202,23 +213,19 @@ fn run_native_client() -> bevy::app::AppExit {
         close_when_requested: false,
         ..RuntimeWindowSpec::native(branding::PRODUCT_NAME)
     });
-    // Native Crystal panels currently have a fixed pixel layout. Configure the
-    // Window before Winit creates it; resizing is not a supported layout mode.
+    // Apply the physical-pixel policy before Winit creates the window; logical
+    // min/max constraints would otherwise be multiplied by the OS DPI scale.
     let world = app.world_mut();
     for mut window in world.query::<&mut bevy::window::Window>().iter_mut(world) {
-        window.resizable = false;
-        window.enabled_buttons.maximize = false;
-        window.resolution.set_scale_factor_override(Some(1.0));
-        window.resize_constraints = bevy::window::WindowResizeConstraints {
-            min_width: session_config::DEFAULT_WINDOW_WIDTH as f32,
-            max_width: session_config::DEFAULT_WINDOW_WIDTH as f32,
-            min_height: session_config::DEFAULT_WINDOW_HEIGHT as f32,
-            max_height: session_config::DEFAULT_WINDOW_HEIGHT as f32,
-        };
+        window_sizing::configure(&mut window);
     }
     app.add_systems(bevy::app::Update, branding::apply_window_icon);
+        app.add_systems(bevy::app::Update, window_sizing::keep_pixel_viewport);
     app.add_systems(bevy::app::PostUpdate, lifecycle::handle_close_requests);
-    app.add_systems(bevy::app::Last, lifecycle::record_exit_events.after(bevy::window::ExitSystems));
+    app.add_systems(
+        bevy::app::Last,
+        lifecycle::record_exit_events.after(bevy::window::ExitSystems),
+    );
     // Persist the matching server's presentation profile in the package, so
     // opening the EXE directly also enables Diary accept/finish actions.
     let guidance = session.quest_guidance.as_deref().map_or_else(
@@ -231,6 +238,8 @@ fn run_native_client() -> bevy::app::AppExit {
     app.insert_resource(guidance);
     timing::report("build_runtime_app", app_started);
     native_fonts::install(&mut app);
+    native_locale::install(&mut app);
+    app.add_plugins(mir2_client_bevy::native_i18n::NativeI18nPlugin);
     app.world_mut()
         .resource_mut::<mir2_bevy_runtime::PresentationPoseBuffer>()
         .set_native_consumer_enabled(true);
@@ -262,16 +271,20 @@ fn run_native_client() -> bevy::app::AppExit {
     // character creation, connection errors, and the transition into the game.
     app.insert_resource(mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::host::KeyboardHost::from_environment());
     app.insert_resource(hero_pointer_settings::load());
-    app.insert_resource(mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::PreviewGeometry(
-        |library, frame| atlas::native_frame_geometry(library, i64::from(frame)).map(|frame| {
-            mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::PreviewFrame {
-                width: frame.width as f32,
-                height: frame.height as f32,
-                x: frame.offset_x as f32,
-                y: frame.offset_y as f32,
-            }
-        }),
-    ));
+    app.insert_resource(
+        mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::PreviewGeometry(
+            |library, frame| {
+                atlas::native_frame_geometry(library, i64::from(frame)).map(|frame| {
+                    mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::PreviewFrame {
+                        width: frame.width as f32,
+                        height: frame.height as f32,
+                        x: frame.offset_x as f32,
+                        y: frame.offset_y as f32,
+                    }
+                })
+            },
+        ),
+    );
     app.add_plugins(mir2_client_bevy::native_shell_ui::Mir2NativeShellUiPlugin);
     // Native-only Crystal presentation consumes the existing authoritative
     // read models. It is registered only by this Windows host; Web/WASM keeps

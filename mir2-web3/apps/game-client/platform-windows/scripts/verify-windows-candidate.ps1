@@ -234,7 +234,7 @@ function Test-PackageRelativeFileAllowed {
     if (Test-CandidateActorFileAllowed -RelativePath $RelativePath) { return $true }
     if($RelativePath -ceq $ExeName){return $true}
     if(Test-PathContainsDangerousDotToken -RelativePath $RelativePath){return $false}
-    $rootFiles=@('mir2-client.toml','README-START.txt','CONTROLS.txt','KNOWN-ISSUES.md','BUILD-ATTESTATION.json','PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s')
+    $rootFiles=@('mir2-client.toml','README-START.txt','CONTROLS.txt','KNOWN-ISSUES.md','NotoSansTC-OFL.txt','BUILD-ATTESTATION.json','PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s')
     if($rootFiles -ccontains $RelativePath){return $true};if($RelativePath -ceq 'mir2-assets/original-ui/frame-sets.generated.json'){return $true}
     if($RelativePath.StartsWith('mir2-assets/original-ui/Items/',[StringComparison]::Ordinal)){return $RelativePath.EndsWith('.json',[StringComparison]::OrdinalIgnoreCase)-or$RelativePath.EndsWith('.png',[StringComparison]::OrdinalIgnoreCase)}
     if(@('mir2-assets/original-ui/Sound/005-1.wav','mir2-assets/original-ui/Sound/005-2.wav','mir2-assets/original-ui/Sound/005-3.wav','mir2-assets/original-ui/Sound/60.wav','mir2-assets/original-ui/Sound/61.wav','mir2-assets/original-ui/Sound/62.wav','mir2-assets/original-ui/Sound/63.wav','mir2-assets/original-ui/Sound/64.wav','mir2-assets/original-ui/Sound/65.wav') -ccontains $RelativePath){return $true}

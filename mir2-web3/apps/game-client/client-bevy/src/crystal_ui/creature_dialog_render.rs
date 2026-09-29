@@ -133,6 +133,42 @@ fn label(
         overlay_text_at(p, text, rect, 32.0 / 3.0, color);
     }
 }
+
+fn pickup_items_text(semi: &str, mouse: &str) -> String {
+    // Both fragments are constructed from typed pickup rules. Their boundary
+    // is known here and must not be guessed from a flattened {0}{1} string.
+    crate::native_i18n::format_key(
+        "client.CanPickupItems",
+        "Can pickup items ({0}{1}).",
+        &[("0", semi), ("1", mouse)],
+    )
+}
+
+#[cfg(test)]
+mod pickup_text_tests {
+    use super::pickup_items_text;
+    use crate::native_i18n::{Locale, with_locale};
+
+    #[test]
+    fn native_pickup_caption_preserves_both_explicit_fragments_in_all_locales() {
+        for (language, expected) in [
+            (Locale::English, "Can pickup items (Gold {1} {0} 3x3)."),
+            (
+                Locale::TraditionalChinese,
+                "可以拾取物品（Gold {1} {0} 3x3）。",
+            ),
+            (
+                Locale::BrazilianPortuguese,
+                "Pode pegar itens (Gold {1} {0} 3x3).",
+            ),
+        ] {
+            with_locale(language, || {
+                assert_eq!(pickup_items_text("Gold {1}", " {0} 3x3"), expected);
+                assert!(!pickup_items_text("", "").contains("{0}"));
+            });
+        }
+    }
+}
 fn clip(
     p: &mut ChildSpawnerCommands,
     a: &AssetServer,
@@ -408,14 +444,18 @@ pub fn render(
                 };
                 label(p, &expire, 140.0, 85.0, 350.0, 21.0, false, TEXT);
                 let rules = &pet.creature_rules;
+                let auto_label = crate::native_i18n::key("game.creature.pickup.auto", "auto");
+                let semi_label =
+                    crate::native_i18n::key("game.creature.pickup.semi_auto", "semi-auto");
+                let mouse_label = crate::native_i18n::key("game.creature.pickup.mouse", "mouse");
                 let semi = if rules.semi_auto_pickup_enabled {
                     format!(
-                        "{0}x{0} {1}semi-auto{2}",
+                        "{0}x{0} {1}{semi_label}{2}",
                         rules.auto_pickup_range,
                         if rules.auto_pickup_enabled {
-                            "auto/"
+                            format!("{auto_label}/")
                         } else {
-                            ""
+                            String::new()
                         },
                         if rules.mouse_pickup_enabled { ", " } else { "" }
                     )
@@ -423,13 +463,13 @@ pub fn render(
                     String::new()
                 };
                 let mouse = if rules.semi_auto_pickup_enabled {
-                    format!("{0}x{0} mouse", rules.mouse_pickup_range)
+                    format!("{0}x{0} {mouse_label}", rules.mouse_pickup_range)
                 } else {
                     String::new()
                 };
                 label(
                     p,
-                    &format!("Can pickup items ({semi}{mouse})."),
+                    &pickup_items_text(&semi, &mouse),
                     19.0,
                     161.0,
                     350.0,

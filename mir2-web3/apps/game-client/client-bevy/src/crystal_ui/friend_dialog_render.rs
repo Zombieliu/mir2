@@ -162,7 +162,7 @@ pub fn render_memo(
             if let Some(notice) = &model.edit_notice {
                 wrapped_text(
                     panel,
-                    notice,
+                    &crate::native_i18n::tr(notice),
                     CrystalRect::new(15., 158., 170., 40.),
                     Color::srgb_u8(255, 90, 70),
                 );
@@ -270,7 +270,7 @@ pub fn render(
             }
             overlay_centered_text_at(
                 panel,
-                &format!("{} / {}", model.page + 1, model.page_count()),
+                &crate::native_i18n::tr(&format!("{} / {}", model.page + 1, model.page_count())),
                 CrystalRect::new(87., 216., 83., 17.),
                 32. / 3.,
                 Color::WHITE,

@@ -6,7 +6,7 @@
 //! to a persisted record. Existing redirected stderr and opt-in traces remain
 //! independent of this small always-on log.
 
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 use std::fs::{self, OpenOptions};
 use std::io::{self, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
@@ -221,11 +221,13 @@ fn panic_record(location: Option<(&str, u32, u32)>) -> Value {
         // A compile-time file basename is enough to find the source; retain no
         // build-machine path and never inspect PanicHookInfo::payload().
         let basename = file.rsplit(['/', '\\']).next().unwrap_or("unknown");
-        value["sourceFile"] = json!(basename
-            .chars()
-            .filter(|c| c.is_ascii_alphanumeric() || matches!(*c, '.' | '_' | '-'))
-            .take(96)
-            .collect::<String>());
+        value["sourceFile"] = json!(
+            basename
+                .chars()
+                .filter(|c| c.is_ascii_alphanumeric() || matches!(*c, '.' | '_' | '-'))
+                .take(96)
+                .collect::<String>()
+        );
         value["sourceLine"] = json!(line);
         value["sourceColumn"] = json!(column);
     }
@@ -253,20 +255,21 @@ fn failure_record(failure: Failure, exit_code: u8) -> Value {
 }
 
 fn failure_dialog(failure: Failure, exit_code: u8, log_path: Option<&Path>, saved: bool) -> String {
+    use mir2_client_bevy::native_i18n::{key, tr};
     let diagnostic = match (log_path, saved) {
-        (Some(path), true) => format!("诊断日志：{}", path.display()),
-        (Some(path), false) => {
-            format!("诊断日志未能更新，请检查磁盘空间或权限：{}", path.display())
-        }
-        (None, _) => "无法写入本地诊断日志，请记录错误代码并检查磁盘空间或权限。".to_owned(),
+        (Some(path), true) => key("shell.startup.log", "诊断日志：{path}")
+            .replace("{path}", &path.display().to_string()),
+        (Some(path), false) => key(
+            "shell.startup.log_failed",
+            "诊断日志未能更新，请检查磁盘空间或权限：{path}",
+        )
+        .replace("{path}", &path.display().to_string()),
+        (None, _) => tr("无法写入本地诊断日志，请记录错误代码并检查磁盘空间或权限。"),
     };
-    format!(
-        "{}\n\n错误代码：{}（{}）\n\n{}",
-        failure.guidance(),
-        failure.code(),
-        exit_code,
-        diagnostic
-    )
+    let code = key("shell.startup.code", "错误代码：{code}（{exit}）")
+        .replace("{code}", failure.code())
+        .replace("{exit}", &exit_code.to_string());
+    format!("{}\n\n{}\n\n{}", tr(failure.guidance()), code, diagnostic)
 }
 
 fn show_error_dialog(message: &str) {
@@ -282,7 +285,10 @@ fn show_error_dialog(message: &str) {
             ) -> i32;
         }
         let text: Vec<u16> = message.encode_utf16().chain(Some(0)).collect();
-        let title: Vec<u16> = "游戏运行错误".encode_utf16().chain(Some(0)).collect();
+        let title: Vec<u16> = mir2_client_bevy::native_i18n::tr("游戏运行错误")
+            .encode_utf16()
+            .chain(Some(0))
+            .collect();
         // SAFETY: both buffers stay alive for this synchronous call, are NUL
         // terminated, and a null owner is valid before a game window exists.
         let result = unsafe {
@@ -330,6 +336,29 @@ pub(crate) fn record_exit(exit_code: u8) {
 mod tests {
     use super::*;
     use std::sync::atomic::{AtomicU64, Ordering};
+
+    #[test]
+    fn fatal_dialog_uses_selected_locale_and_keeps_codes_and_paths_literal() {
+        use mir2_client_bevy::native_i18n::{self, Locale};
+        for (language, expected) in [
+            (Locale::English, "Error code:"),
+            (Locale::TraditionalChinese, "錯誤代碼："),
+            (Locale::BrazilianPortuguese, "Código de erro:"),
+        ] {
+            native_i18n::with_locale(language, || {
+                let text = failure_dialog(
+                    Failure::Assets,
+                    7,
+                    Some(Path::new("C:/logs/Password.jsonl")),
+                    true,
+                );
+                assert!(text.contains(expected));
+                assert!(text.contains("required_assets_unavailable"));
+                assert!(text.contains("C:/logs/Password.jsonl"));
+                assert!(!text.contains("找不到完整的游戏资源"));
+            });
+        }
+    }
 
     fn test_log() -> PathBuf {
         static NEXT: AtomicU64 = AtomicU64::new(0);
