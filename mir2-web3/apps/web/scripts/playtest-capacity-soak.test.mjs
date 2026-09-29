@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { createRequire } from 'node:module';
 import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Histogram, Measurements,
-  assessMeasurements, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
+  assessMeasurements, movementDiagnosticMayContinue, ContinuousAcceptance, NativePlan, nativeCadence, nativeActivityVerdict, AoiCoverage, verifiedCombatHit, BoundedEvidence, memoryTrend, TimeBucketSamples, sanitize } from './playtest-capacity-soak-core.mjs';
 import { CapacityClient, FixedPlan, chooseHomes, validateNativeExplicitHomes, validateNativeCombatClusters, insideCombatCoverage, loadStationaryNpcObstacles, spacingFourScenario, selectNativeAction, offerNativeAction, combatCandidates, stableFanoutRange, matchesFanoutReceipt, actionFailureStatus, awaitPendingActions, actorsReachedScenario, runCapacity, parseArguments } from './playtest-capacity-soak.mjs';
 import { observedPlayerId } from './playtest-multiplayer-smoke.mjs';
 import { loadProtocolCollisionMap, protocolMapCellIsWalkable, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
@@ -39,6 +39,43 @@ test('capacity policy has finite ceilings and never quietly relaxes fixed gates'
   assert.equal(capacityPolicy({ profile: 'probe' }).fullAcceptanceEligible, false);
   assert.throws(() => parseArguments(['--password', 'secret']), /Unknown/);
   assert.throws(() => parseArguments(['--stages', '10', '--stages', '100']), /repeated/);
+});
+
+test('movement diagnostic can measure 50 active actors but never qualifies as mixed gameplay acceptance', () => {
+  const options = { profile: 'movement', activityMode: 'native', stages: '10,20,30,40,50', combatActors: 0 };
+  const diagnostic = capacityPolicy(options), standard = capacityPolicy({ activityMode: 'native' });
+  assert.equal(diagnostic.fullAcceptanceEligible, false);
+  assert.equal(diagnostic.stages.at(-1), 50);
+  for (const field of ['movementP95Ms', 'chatP95Ms', 'actionTimeoutMs', 'timeoutExclusive', 'maximumCorrectionRatio',
+    'minimumNativeRunRatio', 'minimumNativeCellsPerMinute', 'commandsPerSecond', 'maximumMemorySlopeMiBPerHour',
+    'memoryWarmupSeconds', 'maximumDriverLagP99Ms', 'soakSeconds', 'resumeSamples', 'saveSamples']) {
+    assert.equal(diagnostic[field], standard[field], field);
+  }
+  for (const changes of [{ combatActors: 1 }, { activityMode: 'baseline' }, { stages: '101' }, { soakSeconds: 300 },
+    { stageSeconds: 60 }, { resumeSamples: 0 }, { saveSamples: 0 }]) assert.throws(() => capacityPolicy({ ...options, ...changes }));
+  assert.throws(() => capacityPolicy({ ...options, profile: 'standard' }), /combat actors/);
+});
+
+test('movement diagnostic retains collision failures but never continues transport, AOI or idle-load failures', () => {
+  const policy = capacityPolicy({ profile: 'movement', activityMode: 'native' });
+  const verdict = { passed: false, seconds: 60, activity: { moves: 74, plans: 80, gaps: 0, offeredDurationMs: 60000, unknownPacing: 0 },
+    latencyPassed: true, fanoutPassed: true, timeoutRatio: 0, correctionRatio: 4 / 78, metrics: {} };
+  assert.equal(movementDiagnosticMayContinue(policy, verdict), true);
+  assert.equal(verdict.passed, false); assert.equal(verdict.correctionRatio, 4 / 78);
+  assert.equal(movementDiagnosticMayContinue(capacityPolicy({ activityMode: 'native' }), verdict), false);
+  for (const change of [{ latencyPassed: false }, { fanoutPassed: false }, { timeoutRatio: .01 },
+    { activity: { ...verdict.activity, moves: 29 } }, { activity: { ...verdict.activity, offeredDurationMs: 100 } },
+    { metrics: { run: { status: { rejected: 1 } } } }, { aoi: { persistentMissing: 1, ghosts: 0, duplicates: 0 } }]) {
+    assert.equal(movementDiagnosticMayContinue(policy, { ...verdict, ...change }), false);
+  }
+  const events = [], stopped = [], gate = new ContinuousAcceptance(policy, { emit: event => {
+    events.push(event); if (event.type === 'continuousFailure' && !movementDiagnosticMayContinue(policy, event.evidence)) stopped.push(event.reason);
+  }});
+  gate.fail('collision window', verdict);
+  gate.fail('later transport failure', { status: 'transportError' });
+  assert.equal(gate.summary().passed, false); assert.equal(gate.failureCount, 2);
+  assert.deepEqual(stopped, ['later transport failure']);
+  assert.equal(events.length, 2);
 });
 
 test('one real peer admits at most 25 within an entire 15-minute window and reserves only 5 verification logins', () => {

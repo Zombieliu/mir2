@@ -13,7 +13,7 @@ import { loadProtocolCollisionMap, findProtocolWalkPath, protocolMapCellIsWalkab
 import { hasAuthoritativePlayerDeath } from './quest-agent/protocol-observation.mjs';
 import { selfActionBlockMask } from './quest-agent/protocol-status.mjs';
 import { equipStarterGear } from './quest-agent/protocol-play.mjs';
-import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Measurements, assessMeasurements,
+import { capacityPolicy, validateCapacityPool, LoginBudget, LOGIN_WINDOW_MS, Measurements, assessMeasurements, movementDiagnosticMayContinue,
   AoiCoverage, ContinuousAcceptance, NativePlan, nativeCadence, verifiedCombatHit, BoundedEvidence, CapacityMonitor, memoryTrend, self, distance, sleep, sanitize, fingerprint } from './playtest-capacity-soak-core.mjs';
 
 const STEPS = [[0, -1, 'Up'], [1, -1, 'UpRight'], [1, 0, 'Right'], [1, 1, 'DownRight'],
@@ -1014,8 +1014,11 @@ export async function runCapacity(options) {
       if (row.evidence !== false) writer.add({ type: 'action', ...row });
     } };
   context.continuous = new ContinuousAcceptance(policy, {
-    emit: event => writer.add({ ...event, at: Date.now() }),
-    onFailure: reason => guard.stop(reason),
+    emit: event => {
+      writer.add({ ...event, at: Date.now() });
+      if (policy.profile === 'movement' && event.type === 'continuousFailure' && !movementDiagnosticMayContinue(policy, event.evidence)) guard.stop(event.reason);
+    },
+    onFailure: reason => { if (policy.profile !== 'movement') guard.stop(reason); },
   });
   const report = { schemaVersion: 1, runId, endpoint, policy, startedAt: new Date().toISOString(), stages: [], nativeResume: [], savedVerification: [],
     ordinaryAccountsOnly: true, visualAccepted: false, capacityUpperBound: null, acceptanceScope: 'One real egress, ordinary same-map movement/AOI and the explicitly declared combat subgroup' };
@@ -1116,13 +1119,14 @@ export async function runCapacity(options) {
       await settleClients(context);
       const stage = await measure(context, `stage-${count}`, policy.stageSeconds); report.stages.push(stage);
       options.onProgress?.({ stage: stage.name, passed: stage.passed });
-      if (!stage.passed) throw new Error(`Stage ${count} did not satisfy the fixed activity, latency or coverage gates`);
-      report.highestPassedStage = count;
+      report.highestMeasuredStage = count;
+      if (!stage.passed && !movementDiagnosticMayContinue(policy, stage)) throw new Error(`Stage ${count} did not satisfy the fixed activity, latency or coverage gates`);
+      if (stage.passed) report.highestPassedStage = count;
     }
     initialMemoryAt = Date.now(); finalStage = await measure(context, 'soak', policy.soakSeconds); report.stages.push(finalStage);
     report.memoryTrend = memoryTrend(guard.history.filter(sample => sample.sampledAtMs >= initialMemoryAt + policy.memoryWarmupSeconds * 1000));
-    if (!finalStage.passed) throw new Error('Soak failed fixed rolling activity or delivery gates');
-    if (policy.profile === 'standard' && (report.memoryTrend.seconds < 1800 || report.memoryTrend.slopeMiBPerHour > policy.maximumMemorySlopeMiBPerHour)) throw new Error('Insufficient stable-memory duration or continuing memory growth above the declared threshold');
+    if (!finalStage.passed && !movementDiagnosticMayContinue(policy, finalStage)) throw new Error('Soak failed fixed rolling activity or delivery gates');
+    if (policy.profile !== 'probe' && (report.memoryTrend.slopeMiBPerHour == null || report.memoryTrend.seconds < 1800 || report.memoryTrend.slopeMiBPerHour > policy.maximumMemorySlopeMiBPerHour)) throw new Error('Insufficient stable-memory duration or continuing memory growth above the declared threshold');
     context.phase = 'native-resume-under-load';
     for (const original of context.clients.filter(client => client.role === 'movement').slice(0, policy.resumeSamples)) {
       guard.assert(); const result = await resumeActor(original, context); report.nativeResume.push(result);
@@ -1132,7 +1136,7 @@ export async function runCapacity(options) {
     if (policy.resumeSamples) {
       const observation = await measure(context, 'post-resume-observation', policy.profile === 'probe' ? 20 : 60);
       report.stages.push(observation);
-      if (!observation.passed) throw new Error('The restored cohort did not preserve gameplay and AOI under continued load');
+      if (!observation.passed && !movementDiagnosticMayContinue(policy, observation)) throw new Error('The restored cohort did not preserve gameplay and AOI under continued load');
     }
   } catch (error) { report.error = sanitize(error.message, context.pool?.accounts.map(account => account.password) ?? []); }
   finally {
@@ -1208,14 +1212,18 @@ export async function runCapacity(options) {
         identityEvictions: context.allClients.reduce((sum, client) => sum + client.lifecycleIdentityEvictions, 0),
         unchangedSnapshotsOmitted: context.allClients.reduce((sum, client) => sum + client.lifecycleUnchangedSnapshots, 0),
         movementRule: 'Ordinary movement is not copied; retain only the first known-player movement while its projection is absent, until reappearance' } };
-    report.ok = !report.error && !guard.stopped && !context.cleanupErrors.length && !context.continuous.failed && Boolean(finalStage?.passed) &&
+    report.diagnosticCompleted = policy.profile === 'movement' && !report.error && !guard.stopped && !context.cleanupErrors.length &&
+      Boolean(finalStage?.completed) && report.nativeResume.length === policy.resumeSamples &&
+      report.savedVerification.length === policy.saveSamples && report.savedVerification.every(result => result.status === 'passed');
+    report.ok = policy.profile !== 'movement' && !report.error && !guard.stopped && !context.cleanupErrors.length && !context.continuous.failed &&
+      report.stages.every(stage => stage.passed) && Boolean(finalStage?.passed) &&
       report.savedVerification.length === policy.saveSamples && report.savedVerification.every(result => result.status === 'passed');
     report.movementCapacityAccepted = report.ok && policy.fullAcceptanceEligible;
     report.combatCapacityAccepted = report.movementCapacityAccepted && finalStage?.combatCoverage === 'shared-positive-damage';
     report.playableCapacityAccepted = report.movementCapacityAccepted && report.combatCapacityAccepted;
     report.acceptedControlledActors = report.playableCapacityAccepted ? policy.stages.at(-1) : null;
     writer.add({ type: 'finished', ok: report.ok, playableCapacityAccepted: report.playableCapacityAccepted });
-    try { await writer.close(); } catch (error) { report.ok = false; report.movementCapacityAccepted = false; report.combatCapacityAccepted = false; report.playableCapacityAccepted = false; report.acceptedControlledActors = null; report.evidenceError = error.message; }
+    try { await writer.close(); } catch (error) { report.ok = false; report.diagnosticCompleted = false; report.movementCapacityAccepted = false; report.combatCapacityAccepted = false; report.playableCapacityAccepted = false; report.acceptedControlledActors = null; report.evidenceError = error.message; }
     report.reportPath = path.join(output, `${runId}.report.json`);
     await fs.writeFile(report.reportPath, JSON.stringify(sanitize(report, context.pool?.accounts.map(account => account.password) ?? []), null, 2) + '\n');
   }

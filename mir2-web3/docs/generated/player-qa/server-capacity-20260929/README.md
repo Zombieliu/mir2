@@ -528,3 +528,26 @@ quest/item/recipe/shop definitions comprise603,847 bytes of a representative
 connections and4.8–7.1 seconds for six others; this does not establish a fixed
 bandwidth ceiling or prove the earlier timeout cause. The5-minute TCP sample
 started after the failed run and is retained strictly as an idle baseline.
+
+The detour follow-up `1790661057874-0e62159b` again admits10 actors and retains
+a failed combat window: the fighter spends most opportunities chasing, with
+one swing lacking bilateral positive-damage evidence and four corrected moves.
+The added diagnostics actually observe live monsters entering refused cells;
+the prior17-second same-cell loop no longer occurs. During117 seconds with at
+least8 active sessions, test-service CPU median is5.37% of one core (maximum
+88.69% during admission), cgroup memory at most269.36MiB, and peak sessions11
+including the native observer. This is not a steady capacity pass.
+
+A separate `movement` diagnostic profile now measures up to100 ordinary moving
+actors with zero declared fighters, hour-long soak and real resume/save checks.
+It can continue collecting after failed collision/activity windows only while
+latency, delivery, AOI and at least30 successful moves/min remain valid; every
+original failed verdict and count remains retained. Later delivery errors still
+stop even after the first diagnostic failure. External memory/lag/service guards
+and the32MiB/hour memory-trend gate remain enforced. `ok` and all capacity
+acceptance flags are always false for this profile; `diagnosticCompleted` only
+describes completion of measurement and save checks. Highest measured and highest
+passed stages are distinct. Sixteen focused checks pass, including preservation
+of the standard mixed-workload gates and stopping on a later transport failure.
+The ordinary standard profile still requires10–25% fighters and real positive
+damage; this component run cannot complete the user's stable-playability goal.

@@ -21,7 +21,7 @@ export function sanitize(value, secrets = []) {
 
 export function capacityPolicy(options = {}) {
   const profile = options.profile ?? 'standard';
-  if (!['standard', 'probe'].includes(profile)) throw new Error('Profile must be standard or probe');
+  if (!['standard', 'probe', 'movement'].includes(profile)) throw new Error('Profile must be standard, probe or movement');
   const activityMode = options.activityMode ?? 'baseline';
   if (!['baseline', 'native'].includes(activityMode)) throw new Error('Activity mode must be baseline or native');
   const native = activityMode === 'native';
@@ -40,7 +40,8 @@ export function capacityPolicy(options = {}) {
       !Number.isInteger(combatActors) || combatActors < 0 || combatActors > Math.min(25, stages.at(-1)) ||
       !Number.isInteger(resumeSamples) || resumeSamples < 0 || resumeSamples > 5 ||
       !Number.isInteger(saveSamples) || saveSamples < 0 || saveSamples > 5) throw new Error('Invalid finite scenario or duration bounds');
-  if (profile === 'standard' && (resumeSamples < 1 || saveSamples < 1)) throw new Error('Standard acceptance requires native resume and save samples');
+  if (profile !== 'probe' && (resumeSamples < 1 || saveSamples < 1)) throw new Error('Full-length workloads require native resume and save samples');
+  if (profile === 'movement' && (!native || combatActors !== 0)) throw new Error('Movement diagnostics require native movement and zero combat actors');
   const movementIntervalMs = Number(options.movementIntervalMs ?? (native ? 750 : 1000));
   if (native ? ![650, 750].includes(movementIntervalMs) : movementIntervalMs !== 1000) throw new Error('Native movement interval must be 650 or 750ms; baseline stays 1000ms');
   if (native && profile === 'standard' && (combatActors < Math.ceil(stages.at(-1) * .1) || combatActors > Math.floor(stages.at(-1) * .25))) throw new Error('Native standard scenario requires 10–25 percent declared combat actors');
@@ -233,6 +234,26 @@ export function assessMeasurements(measurements, actors, seconds, policy, { requ
     !['error', 'rejected', 'transportError'].some(status => counts[status]) && (aoi == null || (aoi.samples > 0 && aoi.persistentMissing === 0 && aoi.ghosts === 0 && aoi.duplicates === 0)),
   seconds, activity, timeoutRatio, correctionRatio: corrections / Math.max(1, moveCount), movementPassed, chatPassed,
   combatCoverage: combatCovered ? 'shared-positive-damage' : combatExpected ? 'scenario-insufficient' : 'not-requested', metrics, aoi };
+}
+
+// A component diagnostic may continue collecting measurements after ordinary
+// collision/activity gates fail. The original verdict remains failed. Keep
+// delivery, AOI, real movement volume and all external safety stops enforced.
+export function movementDiagnosticMayContinue(policy, verdict) {
+  if (policy.profile !== 'movement' || !verdict) return false;
+  if (verdict.passed) return true;
+  const activity = Array.isArray(verdict.activity) ? verdict.activity : [verdict.activity];
+  const latencyPassed = verdict.latencyPassed ?? (verdict.movementPassed && verdict.chatPassed);
+  const fanoutPassed = verdict.fanoutPassed ?? Object.entries(verdict.metrics ?? {}).filter(([kind]) => kind.startsWith('fanout-'))
+    .every(([, metric]) => (metric.status.timeout ?? 0) / Math.max(1, metric.count) < policy.timeoutExclusive && metric.fromSend.p95Ms <= policy.chatP95Ms);
+  const deliveryError = Object.values(verdict.metrics ?? {}).some(metric => ['error', 'rejected', 'transportError'].some(status => metric.status?.[status]));
+  const aoi = verdict.aoi;
+  return latencyPassed === true && fanoutPassed === true && !deliveryError && verdict.timeoutRatio < policy.timeoutExclusive &&
+    (!aoi || (aoi.persistentMissing === 0 && aoi.ghosts === 0 && aoi.duplicates === 0)) &&
+    verdict.seconds >= 20 && activity.length > 0 && activity.every(actor => actor &&
+      actor.moves * 60 / verdict.seconds >= policy.minimumMovesPerMinute && actor.offeredDurationMs >= verdict.seconds * 800 &&
+      actor.gaps / Math.max(1, actor.plans) <= policy.maximumMissedPlanRatio && actor.unknownPacing === 0) &&
+    (verdict.rollingWindows ?? []).every(window => movementDiagnosticMayContinue(policy, window));
 }
 
 // This gate has its own clock and buffers: switching measured stages, waiting
