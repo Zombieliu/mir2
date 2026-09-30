@@ -1,0 +1,6 @@
+
+running 1 test
+test quest_ui::multi_guidance::tests::native_supply_vendor_names_match_the_routed_npc_in_every_locale ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1164 filtered out; finished in 0.30s
+

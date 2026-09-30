@@ -8,6 +8,58 @@ use crate::native_shell_ui::i18n_visual_tests::{
 use serde_json::json;
 use std::{fs, path::PathBuf};
 
+#[test]
+#[ignore = "explicit offline GPU fixture; real service request, packaged assets and fresh output"]
+fn nine_locale_medicine_shop_opens_beside_inventory_offscreen() {
+    use bevy::ui::UiGlobalTransform;
+    let asset_root = PathBuf::from(std::env::var_os("MIR2_I18N_VISUAL_ASSET_ROOT").unwrap());
+    let output = PathBuf::from(std::env::var_os("MIR2_GAME_I18N_VISUAL_OUTPUT").unwrap());
+    assert!(output.is_absolute());
+    fs::create_dir_all(&output).unwrap();
+    assert!(!output.join("medicine-shop-layouts.json").exists());
+    let previous_locale = native_i18n::locale();
+    let (mut app, target, _) = i18n_offscreen_app(&asset_root, false);
+    app.add_systems(Update, layout_original_item_images.after(render_overlays));
+    npc_shop_layout_tests::install_fixture(&mut app);
+    let mut evidence = Vec::new();
+    let mut failures = Vec::new();
+    for locale in Locale::ALL {
+        native_i18n::activate(locale);
+        npc_shop_layout_tests::request_medicine_shop(&mut app, false);
+        warm_i18n_images(&mut app);
+        let bounds = |node: &ComputedNode, transform: &UiGlobalTransform| {
+            let min = transform.translation - node.size / 2.0;
+            [min.x, min.y, min.x + node.size.x, min.y + node.size.y]
+        };
+        let world = app.world_mut();
+        let bag = world.query_filtered::<(&ComputedNode, &UiGlobalTransform), With<OverlayInventory>>()
+            .single(world).map(|(node, transform)| bounds(node, transform)).unwrap();
+        let shop = world.query_filtered::<(&ComputedNode, &UiGlobalTransform), With<OverlayShop>>()
+            .single(world).map(|(node, transform)| bounds(node, transform)).unwrap();
+        assert_eq!(bag, [445.0, 0.0, 761.0, 236.0]);
+        assert_eq!(shop, [0.0, 224.0, 440.0, 558.0]);
+        assert!(shop[2] < bag[0], "real service open must leave both windows usable");
+        assert!(world.query_filtered::<&Node, With<OriginalItemImage>>().iter(world)
+            .filter(|node| node.display == Display::Flex).count() >= 2,
+            "the medicine icon must render in both the shop and bag");
+        let rows = i18n_text_layouts(&mut app);
+        assert!(rows.len() >= 5);
+        failures.extend(rows.iter().filter(|row| row["glyphs"] == 0 || row["missingGlyphs"] != 0
+            || row["layoutExceedsNode"] != false || row["nodeOutsideViewport"] != false)
+            .map(|row| json!({"locale":locale.code(),"row":row})));
+        let file = format!("{}-medicine-shop.png", locale.code());
+        capture_i18n(&mut app, &target, &output.join(&file));
+        evidence.push(json!({"file":file,"locale":locale.code(),"bagBounds":bag,"shopBounds":shop,"textRows":rows}));
+    }
+    native_i18n::activate(previous_locale);
+    fs::write(output.join("medicine-shop-layouts.json"), serde_json::to_vec_pretty(&json!({
+        "kind":"offline_production_npc_service_open","liveAcceptance":false,"systemFonts":false,
+        "class":"Warrior","level":9,"gold":700,"hpPotions":11,
+        "passed":failures.is_empty(),"layoutFailures":failures,"screenshots":evidence,
+    })).unwrap()).unwrap();
+    assert!(failures.is_empty(), "production shop text failures: {failures:?}");
+}
+
 fn fixture_node(left: f32, top: f32, width: f32, height: f32) -> Node {
     Node {
         position_type: PositionType::Absolute,

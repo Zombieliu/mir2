@@ -1,5 +1,5 @@
 ﻿#define AppName "Numeron - Legend of Rebirth"
-#define AppVersion "2026.09.30.5"
+#define AppVersion "2026.09.30.6"
 #define AppExe "mir2-platform-windows.exe"
 
 [Setup]
@@ -17,8 +17,8 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0
 OutputDir=..
-OutputBaseFilename=Numeron-Legend-of-Rebirth-20260930-r5-Setup
-VersionInfoVersion=2026.9.30.5
+OutputBaseFilename=Numeron-Legend-of-Rebirth-20260930-r6-Setup
+VersionInfoVersion=2026.9.30.6
 VersionInfoDescription=Numeron - Legend of Rebirth multilingual playtest installer
 UninstallDisplayName={#AppName}
 UninstallDisplayIcon={app}\game\{#AppExe}

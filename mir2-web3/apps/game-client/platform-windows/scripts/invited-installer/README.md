@@ -1,9 +1,11 @@
-# Numeron - Legend of Rebirth: nine-language r5 installer
+# Numeron - Legend of Rebirth: nine-language r6 installer
 
 This recipe consumes an already attested, strictly CMS-verified client-only
 Candidate. It neither builds the game nor changes player saves or servers.
-The r4 artifact is immutable. Output for this version is
-`Numeron-Legend-of-Rebirth-20260930-r5-Setup.exe`, version `2026.09.30.5`.
+The r4 and r5 artifacts are immutable. Output for this version is
+`Numeron-Legend-of-Rebirth-20260930-r6-Setup.exe`, version `2026.09.30.6`.
+This revision corrects native NPC-shop inventory placement and selected supply
+vendor names; the nine-language scope is unchanged.
 AppId, per-user installation directory and shortcut identity remain unchanged.
 
 ## Inputs and ordinary internal Candidate build
@@ -22,7 +24,7 @@ python prepare-installer-input.py <verified-package-root> <exact-40-hex-source-c
 ISCC.exe /Qp Mir2-Invite.iss
 ```
 
-The preparation tool requires `WN-CANDIDATE-20260930-invited-05`, exact clean
+The preparation tool requires `WN-CANDIDATE-20260930-invited-06`, exact clean
 source provenance, recursive file closure and matching hashes. It rejects logs,
 links, extra files and output overwrite. There is no default source revision.
 Its literal input list is supplementary byte evidence, not CMS verification.

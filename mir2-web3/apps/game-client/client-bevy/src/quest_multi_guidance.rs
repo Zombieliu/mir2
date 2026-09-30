@@ -421,7 +421,7 @@ pub(super) fn render_supplies(parent: &mut ChildSpawnerCommands, state: &QuestUi
         }
         if let Some(vendor) = state.supply_vendor {
             if let Some(destination) = vendor.destination() {
-                line(card, format!("{} ({},{})", crate::player_text::name(vendor.label()), destination.x, destination.y), PANEL_HIGHLIGHT);
+                line(card, format!("{} ({},{})", crate::player_text::name(vendor.npc_name()), destination.x, destination.y), PANEL_HIGHLIGHT);
             }
             if let Some((big_map, route)) = big_map.and_then(|model| vendor.route(model.current_map_index?).map(|route| (model, route))) {
                 if let Some(next) = &route.next_map_title {
@@ -450,6 +450,44 @@ pub(super) fn render_supplies(parent: &mut ChildSpawnerCommands, state: &QuestUi
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_supply_vendor_names_match_the_routed_npc_in_every_locale() {
+        use crate::{native_i18n::{self, Locale}, quest_supplies::SupplyVendor};
+        for locale in Locale::ALL {
+            native_i18n::with_locale(locale, || {
+                for vendor in SupplyVendor::ALL {
+                    let destination = vendor.destination().unwrap();
+                    let big_map = BigMapModel { current_map_index: Some(destination.map_index), ..default() };
+                    let translated = crate::player_text::name(vendor.npc_name());
+                    assert_ne!(translated, vendor.npc_name(), "catalog must cover the actual NPC");
+                    if locale == Locale::TraditionalChinese {
+                        assert_eq!(translated, match vendor {
+                            SupplyVendor::Potions => "鍊金師 Samuel",
+                            SupplyVendor::General => "商人 Bull",
+                            SupplyVendor::Poison => "專家 Travis",
+                        });
+                    }
+                    let mut world = World::new();
+                    let mut queue = bevy::ecs::world::CommandQueue::default();
+                    Commands::new(&mut queue, &world).spawn_empty().with_children(|parent| {
+                        render_supplies(parent, &QuestUiState { supply_open: true, supply_vendor: Some(vendor), ..default() }, Some(&big_map), &test_supplies());
+                    });
+                    queue.apply(&mut world);
+                    let expected = format!("{} ({},{})", translated, destination.x, destination.y);
+                    let compact = |text: &str| text.chars().filter(|ch| !ch.is_whitespace()).collect::<String>();
+                    assert!(world.query::<&Text>().iter(&world).any(|text| compact(&text.0) == compact(&expected)));
+                    assert!(world.query::<&QuestUiButton>().iter(&world).any(|button| match button {
+                        QuestUiButton::NavigateQuestRoute(intent) => {
+                            matches!(intent.target, QuestRouteTarget::Supply { vendor: actual } if actual == vendor)
+                                && (intent.map_index, intent.x, intent.y) == (destination.map_index, destination.x, destination.y)
+                        }
+                        _ => false,
+                    }), "localized display must keep the original route action");
+                }
+            });
+        }
+    }
+
     #[test]
     fn native_portuguese_practice_wraps_before_height_and_keeps_controls_reachable() {
         crate::native_i18n::with_locale(crate::native_i18n::Locale::BrazilianPortuguese, || {

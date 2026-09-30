@@ -117,7 +117,9 @@ use super::panel_layouts::{
     INVENTORY_FREE_SLOT_LABEL_ORIGIN, INVENTORY_FREE_SLOT_LABEL_SIZE, INVENTORY_GOLD_LABEL_ORIGIN,
     INVENTORY_GOLD_LABEL_SIZE, INVENTORY_GRID_ORIGIN, INVENTORY_GRID_STEP, INVENTORY_PAGE_COLUMNS,
     INVENTORY_PAGE_SIZE, INVENTORY_PANEL_ORIGIN, INVENTORY_PANEL_SIZE, INVENTORY_WEIGHT_BAR_ORIGIN,
-    INVENTORY_WEIGHT_BAR_SIZE, SKILL_PAGE_SIZE, SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE,
+    INVENTORY_WEIGHT_BAR_SIZE, NPC_DIALOG_PANEL_SIZE, NPC_DROP_PANEL_ORIGIN, NPC_DROP_PANEL_SIZE,
+    NPC_GOODS_PANEL_ORIGIN, NPC_GOODS_PANEL_SIZE, NPC_SERVICE_INVENTORY_ORIGIN,
+    SKILL_PAGE_SIZE, SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE,
     SKILL_ROW_STEP_Y,
 };
 use super::storage_password::{Command as StoragePasswordCommand, Prompt as StoragePasswordPrompt, Stage as StoragePasswordStage};
@@ -3694,6 +3696,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     (process_overlay_keyboard, options_volume::process).chain(),
                     (
                         process_overlay_buttons,
+                        sync_npc_shop_inventory_location,
                         keyboard_dialog::host::sync_skill_mode,
                     )
                         .chain(),
@@ -4573,10 +4576,10 @@ fn spawn_overlay_root(mut commands: Commands) {
                 OverlayShop,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(0.0),
-                    top: Val::Px(224.0),
-                    width: Val::Px(620.0),
-                    height: Val::Px(346.0),
+                    left: Val::Px(NPC_GOODS_PANEL_ORIGIN.x as f32),
+                    top: Val::Px(NPC_GOODS_PANEL_ORIGIN.y as f32),
+                    width: Val::Px(NPC_DIALOG_PANEL_SIZE.width as f32),
+                    height: Val::Px(NPC_GOODS_PANEL_SIZE.height as f32),
                     display: Display::None,
                     ..default()
                 },
@@ -6530,8 +6533,8 @@ fn sync_npc_dialog_inventory_location(
     state.inventory_item_drag = None;
     state.inventory_item_pointer_consumed = false;
     if is_open {
-        state.inventory_window.left = 445.0;
-        state.inventory_window.top = 0.0;
+        state.inventory_window.left = NPC_SERVICE_INVENTORY_ORIGIN.x as f32;
+        state.inventory_window.top = NPC_SERVICE_INVENTORY_ORIGIN.y as f32;
         return;
     }
 
@@ -6563,6 +6566,65 @@ fn sync_npc_dialog_inventory_location(
         shop.selected_bag_slot_for_repair = None;
         let _ = shop.apply_service_signal(NpcShopServiceSignal::default());
     }
+}
+
+/// Native NPCGoods/NPCSell packets can open their service without a preceding
+/// NPCDialog transition. Place the newly exposed bag after service input and
+/// before rendering; watching only the parent dialogue leaves it at (0,0).
+/// Run only on open/reopen or a Buy/Drop tab transition, not on ordinary frames,
+/// so the player can still deliberately drag overlapping windows afterwards.
+fn sync_npc_shop_inventory_location(
+    mut state: ResMut<NativePlayerUiState>,
+    shop: Res<ShopModel>,
+    mut previous_surface: Local<Option<bool>>,
+) {
+    let surface = (state.npc_shop_open() && state.inventory_open())
+        .then(|| shop.allows_buy() && (!shop.allows_sell() || state.npc_shop_buy_tab));
+    if surface == *previous_surface {
+        return;
+    }
+    *previous_surface = surface;
+    let Some(buy) = surface else {
+        return;
+    };
+    let bag = CrystalRect::new(
+        state.inventory_window.left,
+        state.inventory_window.top,
+        INVENTORY_PANEL_SIZE.width as f32,
+        INVENTORY_PANEL_SIZE.height as f32,
+    );
+    let dialog = CrystalRect::new(
+        0.0, 0.0,
+        NPC_DIALOG_PANEL_SIZE.width as f32, NPC_DIALOG_PANEL_SIZE.height as f32,
+    );
+    let service = if buy {
+        CrystalRect::new(
+            NPC_GOODS_PANEL_ORIGIN.x as f32, NPC_GOODS_PANEL_ORIGIN.y as f32,
+            NPC_GOODS_PANEL_SIZE.width as f32, NPC_GOODS_PANEL_SIZE.height as f32,
+        )
+    } else {
+        CrystalRect::new(
+            NPC_DROP_PANEL_ORIGIN.x as f32, NPC_DROP_PANEL_ORIGIN.y as f32,
+            NPC_DROP_PANEL_SIZE.width as f32, NPC_DROP_PANEL_SIZE.height as f32,
+        )
+    };
+    let overlaps = |other: CrystalRect| {
+        bag.left < other.left + other.width && bag.left + bag.width > other.left
+            && bag.top < other.top + other.height && bag.top + bag.height > other.top
+    };
+    if bag.is_valid_hit_target()
+        && (0.0..=INVENTORY_MAX_LEFT).contains(&bag.left)
+        && (0.0..=INVENTORY_MAX_TOP).contains(&bag.top)
+        && !overlaps(dialog) && !overlaps(service)
+    {
+        return;
+    }
+    state.inventory_window.left = NPC_SERVICE_INVENTORY_ORIGIN.x as f32;
+    state.inventory_window.top = NPC_SERVICE_INVENTORY_ORIGIN.y as f32;
+    state.inventory_window.end_drag();
+    state.inventory_window.clear_cursor();
+    state.inventory_item_drag = None;
+    state.inventory_item_pointer_consumed = false;
 }
 
 pub(crate) fn process_overlay_keyboard(
@@ -15998,8 +16060,8 @@ fn render_shop(
             parent,
             asset_server,
             "original-ui/Prguse/1000.png",
-            244.0,
-            334.0,
+            NPC_GOODS_PANEL_SIZE.width as f32,
+            NPC_GOODS_PANEL_SIZE.height as f32,
         );
         spawn_overlay_crystal_button(
             parent,
@@ -16766,6 +16828,10 @@ fn overlay_button(
 #[cfg(test)]
 #[path = "storage_drag_tests.rs"]
 mod storage_drag_tests;
+
+#[cfg(test)]
+#[path = "npc_shop_layout_tests.rs"]
+pub(crate) mod npc_shop_layout_tests;
 
 #[cfg(test)]
 #[path = "equipment_storage_tests.rs"]

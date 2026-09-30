@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-30 NPC-shop/supply regression: independent service-open now places an
+> overlapping bag beside the actual shop; selected supply vendor names use the
+> canonical nine-language NPC catalogue. Shared1158/0 and36 targeted offline GPU
+> captures pass with bundled fonts. Installed human acceptance and automatic
+> updating remain open; no server change and capacity stays paused.
+> [Evidence](generated/player-qa/shop-supply-r6-20260930/README.md).
+
 > 2026-09-30 nine-language native expansion: en/zh-TW/pt-BR plus ru/hi/id/vi/th/ar;
 > six complete 9,385-key overlays, bundled script fonts, grapheme-safe labels,
 > fixed language popup/search and measured quest/help layout. Shared 1,153,

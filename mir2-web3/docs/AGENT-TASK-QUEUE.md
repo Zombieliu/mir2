@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-09-30 NPC-shop/supply regression: code and focused/full shared checks pass
+> (1158/0);36 targeted GPU captures verify actual service-open placement and
+> selected vendor names across nine locales without system fonts. r6 build and
+> package delivery are next. The running F-drive client remains untouched.
+> Native automatic updating is an identified distribution gap, not implemented
+> by this hotfix. Capacity remains paused.
+> [Evidence](generated/player-qa/shop-supply-r6-20260930/README.md).
+
 > 2026-09-30 nine-language r5 internal installer delivered from clean `c7eacee12`:
 > strict 123,035-file Candidate and independent installer-input checks pass;
 > Inno exits 0, setup is 602,942,741 bytes. Setup/game remain `NotSigned`.

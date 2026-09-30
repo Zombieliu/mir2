@@ -60,12 +60,13 @@ impl SupplyVendor {
         }
     }
 
-    pub fn label(self) -> &'static str {
-        match self {
-            Self::Potions => "药剂师·塞缪尔",
-            Self::General => "杂货商·布尔",
-            Self::Poison => "毒粉商·特拉维斯",
-        }
+    /// Use the same canonical NPC identity for routing and display lookup.
+    /// A pretranslated Simplified Chinese label bypasses the native catalogs
+    /// and contains glyphs absent from the bundled Traditional Chinese font.
+    pub fn npc_name(self) -> &'static str {
+        policy()["merchants"][self.key()]["name"]
+            .as_str()
+            .expect("bundled supply merchant name")
     }
 
     pub fn goods(self) -> &'static str {
@@ -79,7 +80,7 @@ impl SupplyVendor {
     pub fn destination(self) -> Option<SupplyDestination> {
         let merchant = &policy()["merchants"][self.key()];
         let file = merchant["mapFileName"].as_str()?;
-        let name = merchant["name"].as_str()?;
+        let name = self.npc_name();
         static NPCS: OnceLock<mir2_game_data::CrystalNpcInfoManifest> = OnceLock::new();
         let npc = NPCS
             .get_or_init(mir2_game_data::crystal_npc_info_manifest)
