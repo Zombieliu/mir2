@@ -1394,6 +1394,11 @@ fn canonical_cross_account_send_mail_commits_sender_and_exact_target() {
     assert!(durable_mailbox(&config, SEND_MAIL_TARGET_ACCOUNT, 0).is_empty());
     assert!(durable_mailbox(&config, SEND_MAIL_TARGET_ACCOUNT, 1).is_empty());
 
+    // Source Dagger price500/durability5000 with the unmodified seed's
+    // current=max20 gives Price=floor(0.5+0.5+250)=251. Insurance is
+    // floor(251*5/100)=12, in addition to the100 gold transfer fee.
+    let expected_debit = 1_000 + 100 + 12;
+
     let packets = sender.handle_packet(ClientPacket::SendMail {
         name: SEND_MAIL_TARGET_CHARACTER.to_string(),
         message: "canonical cross-account delivery".to_string(),
@@ -1407,7 +1412,7 @@ fn canonical_cross_account_send_mail_commits_sender_and_exact_target() {
         .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
     assert!(packets
         .iter()
-        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 1_100 })));
+        .any(|packet| matches!(packet, ServerPacket::LoseGold { gold } if *gold == expected_debit)));
     assert!(packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::DeleteItem {
@@ -1416,7 +1421,7 @@ fn canonical_cross_account_send_mail_commits_sender_and_exact_target() {
         } if *unique_id == attachment_id
     )));
     let after_world = sender.world_snapshot();
-    assert_eq!(after_world.gold, before_world.gold - 1_100);
+    assert_eq!(after_world.gold, before_world.gold - expected_debit);
     assert!(!after_world
         .inventory_items
         .iter()
@@ -1426,7 +1431,7 @@ fn canonical_cross_account_send_mail_commits_sender_and_exact_target() {
         durable_revision_and_gold(&config, SEND_MAIL_SENDER_ACCOUNT, 0);
     let (after_target_revision, _) =
         durable_revision_and_gold(&config, SEND_MAIL_TARGET_ACCOUNT, 0);
-    assert_eq!(after_sender_gold, before_sender_gold - 1_100);
+    assert_eq!(after_sender_gold, before_sender_gold - expected_debit);
     assert_eq!(
         after_sender_revision,
         before_sender_revision

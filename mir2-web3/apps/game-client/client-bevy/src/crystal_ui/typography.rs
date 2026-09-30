@@ -17,7 +17,14 @@ pub const CRYSTAL_DEFAULT_FONT_SIZE_PX: f32 = 8.0 * 96.0 / 72.0;
 
 pub fn crystal_text_font(font_size_px: f32) -> TextFont {
     TextFont {
-        font: FontSource::Family(CRYSTAL_DEFAULT_FONT_FAMILY.into()),
+        font: FontSource::Family(
+            if crate::native_i18n::active() {
+                crate::native_i18n::locale().font_family()
+            } else {
+                CRYSTAL_DEFAULT_FONT_FAMILY
+            }
+            .into(),
+        ),
         font_size: FontSize::Px(font_size_px),
         ..Default::default()
     }

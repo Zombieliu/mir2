@@ -1,5 +1,187 @@
 # Frontend 1:1 Gaps
 
+> Checkpoint provenance: the dated Android and Windows source histories below
+> are retained independently. Windows build/live-player evidence does not
+> establish Android APK, real-network, or physical-device acceptance; Android
+> open gates remain open. These are source checkpoints, not verification of
+> this integration worktree.
+
+> 2026-09-30 NPC-shop/supply regression: independent service-open now places an
+> overlapping bag beside the actual shop; selected supply vendor names use the
+> canonical nine-language NPC catalogue. Shared1158/0 and36 targeted offline GPU
+> captures pass with bundled fonts. Installed human acceptance and automatic
+> updating remain open; no server change and capacity stays paused.
+> [Evidence](generated/player-qa/shop-supply-r6-20260930/README.md).
+
+> 2026-09-30 nine-language native expansion: en/zh-TW/pt-BR plus ru/hi/id/vi/th/ar;
+> six complete 9,385-key overlays, bundled script fonts, grapheme-safe labels,
+> fixed language popup/search and measured quest/help layout. Shared 1,153,
+> native 784 and Node 14 checks pass; 148 offline GPU captures cover nine locales.
+> Remaining legacy prose includes machine drafts, so native-speaker acceptance
+> is open. Error 4551 on another Windows laptop is a separate public-signing /
+> application-control blocker. Capacity stays paused; no server change.
+> [Evidence and limits](generated/player-qa/native-nine-languages-20260930/README.md).
+
+> 2026-09-28 Chinese newcomer/supply flow: 22 main quests, four growth claims,
+> chapter/practice text, quest controls and related shop/item labels display
+> Chinese without changing source IDs. Stock, price estimates, capacity and
+> ordinary vendor routes are visible. Shared 1100/native 749/Node 166 tests and
+> an explicit offline GPU fixture pass; three screenshots/nine cases check
+> actual bounds and row separation. Legacy prose, world labels and older UI
+> can still be English. Live caster 0–30/native player acceptance remain open.
+> [Screenshots and limits](generated/player-qa/ui-goal-20260921/caster-supplies-chinese-20260928.md).
+
+> 2026-09-21 multi-task guidance: one manually overridable primary task,
+> full counters, nearby/other-map grouping and primary-colored map hunt areas
+> are implemented using source/read-model destinations. Full UI tests 883/883;
+> live visual acceptance and cross-map exit routing remain open.
+> [Evidence](generated/player-qa/multi-quest-guidance-20260921.md).
+
+> 2026-09-21 whole native UI repair pass: 2,361 drawable configured/static UI
+> frames are source-pixel verified; 82 original empty slots are recorded separately.
+> Five keyboard-required and seven NPC-service sprites are restored. NPC sell,
+> repair and special-repair now use original drop-frame geometry and controls,
+> with a complete native inventory picker, Hold and shared guarded submission.
+> Full client library tests pass 876/876. Original drag/drop, reliable repair
+> quoting, dynamic UI states and whole-client visual acceptance remain open.
+> See [scope and remaining work](generated/player-qa/whole-ui-20260921.md).
+
+> 2026-09-21 N5 destination guidance: pending arrival now uses a Chinese,
+> flow-layout tracker card with Microsoft YaHei, readable spacing, explicit
+> Bichon city (328,264), northbound direction and the exclusion of the starter
+> village safe zone. A local map button opens the existing big map; a cyan
+> destination square follows the imported safe-zone extent and disappears
+> after completion. Three focused UI/source tests pass. This is map guidance,
+> not an automatic-path or authenticated visual acceptance claim.
+
+> 2026-09-21 unexpected window disappearance: no panic or matching Windows
+> Application 1000/1001 record was found; teardown save succeeded, but the
+> original process exit code was not retained. A separate real-timing regression
+> reproduces stale Enter confirming a newly opened quit prompt without new
+> input; this is fixed (leave tests 4/4). Native OS close now uses in-game
+> confirmation (lifecycle test 1/1). Exit-source, event-loop result and launcher
+> exit-code/memory diagnostics are added. The reported incident itself is not
+> attributed conclusively and live stability remains open.
+
+> 2026-09-21 profile asset repair: 139 original libraries / 60,556 drawable
+> frames now cover 174 profile monsters plus BoneFamiliar and all 54 direct
+> weapon/armour shapes (both genders). Source RGBA, masks, geometry and hashes
+> pass. Native Monster/Gate standalone frames now use the existing strict
+> metadata/path handling; atlas regressions pass 32/32. Profile and V2 valid
+> source-frame closure has zero missing/unknown entries. Original blank Gate
+> slots and Sheep harvested-Skeleton out-of-range behavior are separate, not
+> manufactured frames. Client/Gateway release builds pass; new package awaits
+> normal logout before switching. Visual and full imported-content gates are
+> still open. [Repair evidence](generated/player-qa/profile-assets-repair-20260921/README.md).
+
+> 2026-09-21 full workspace asset audit supersedes subset-closure assumptions:
+> 555 monster definitions / 6,341 respawn rows examined; 164 of 174 profile
+> monster definitions fail current native animation reachability. Nine of 11
+> V2 targets plus BoneFamiliar fail. All 1,628 item rows' 924 Items frames and
+> 214 equipment StateItem frames match original pixels, but 34 DNItems frames
+> are source-empty/transparent (one invalid zero-size PNG). Current profile
+> 195 item icons/ground frames pass; map-worn weapon/armour libraries exist
+> for only 5 of 54 profile items. These counts describe the workspace assets
+> targeted by the latest package junctions, not historical external QA packs
+> or live visual acceptance. Full missing lists and limitations:
+> [audit summary](generated/player-qa/all-assets-20260921/README.md).
+
+> 2026-09-21 reported potion/missing-monster repairs: inventory was blocking
+> every world click while open. Native mouse movement now uses its moved panel
+> bounds, keeping drag, item-operation and modal capture. UI boundary test
+> passes; native input suite passes 72/72, including an actual Walk intent
+> outside the bag and no Walk inside. HookingCat image 6 was absent from both
+> original PNG exports and starter atlas. All 224 original frames are restored
+> in an appended atlas page, preserving the prior seven pages. Monster frame
+> closure passes 8/8; native atlas test resolves all 224 frames. These are
+> functional/resource results; live potion use, walking and visible HookingCat
+> acceptance remain pending. [Evidence](generated/player-qa/inventory-hookingcat-20260921.md).
+
+> 2026-09-20 Windows fixed-size policy: the native host now creates a
+> 1024x768 client area with scale override 1, equal minimum/maximum size,
+> resizing disabled and the maximize button disabled. Move, minimize and
+> close retain their defaults. Legacy display width/height are no longer
+> applied by this host while the pixel layout is fixed. The Web host is
+> unchanged. Release compilation and interactive acceptance are recorded
+> separately; desktop drag/DPI acceptance remains pending.
+
+> 2026-09-20 V2 hunting-area guidance: the big map now overlays up to three
+> unfinished quest targets using the nearest imported respawn area's center
+> and spread, with monster name, remaining count and coordinates. Completed
+> targets disappear; other-map and missing-progress targets are omitted.
+> N3 guidance names RakingCat near (340,550), northeast of the starter village.
+> These are possible spawn areas, not live monster positions or a new auto-path
+> implementation. Two focused tests and 19 big-map regressions pass; Windows
+> release package is built. Authenticated visual acceptance remains pending.
+> Evidence: [hunt-map QA](generated/player-qa/numeron-hunt-map-20260920.md).
+
+> 2026-09-20 blank Diary deployment diagnosis: after the client profile repair,
+> the running Gateway was independently verified to have no MIR2_QUEST_CADENCE.
+> It therefore filtered out a1's persisted V2 quests, yielding an empty list and
+> 0/4 chapter progress. After user logout, the same store/EXE was restarted via
+> the dedicated V2 launcher on 19900/19910. Saved level 3, N1/N2 completed and
+> N3 2/4 are unchanged. Authenticated visual confirmation remains pending.
+
+> 2026-09-20 direct-launch V2 guidance repair: the branded client was opened
+> without the QA launcher's temporary guidance environment, hiding V2 Diary
+> actions despite intact server progress. The Windows config now persists
+> `[gameplay] quest_guidance = "newcomer-v2"` and installs both native guidance
+> resources. Session-config tests pass 11/11. Saved `a1` remains Warrior level 3,
+> two completed main quests and N3 at 2/4 (two Scarecrows); two RakingCats remain.
+> Authenticated Diary visual verification is still pending.
+
+> 2026-09-20 Windows map/branding follow-up: Bichon sand Back and grass Middle
+> tiles shared a depth, allowing rectangular sand patches to cover grass.
+> Floor depth now preserves Back/Middle/Front pass order; 39/39 map-parser
+> tests pass, including the reported market cell (290,600). Dead-player V
+> revival no longer also folds the minimap; the dead/alive V regression passes.
+> User-requested branding is `numeron-legend of rebirth`, with the existing
+> launcher gold-diamond art embedded in the EXE and applied to the native
+> window/taskbar. Updated in-game visual acceptance remains open after the
+> user stopped Computer Use with Escape. See
+> [repair notes](generated/player-qa/numeron-branding-20260920/README.md).
+
+> 2026-09-20 Windows fast-run self-label candidate: a player capture at
+> `(232,607)` shows the body roughly one run step ahead of its `a1` name and
+> self HP bar. The native renderer can accept a corrected/predicted self tile
+> while the raw gameplay snapshot remains unchanged; the overlay's early
+> return previously ignored that tile change. The overlay now invalidates on
+> the renderer payload's self object/tile or scene-center change. A no-new-raw-
+> snapshot two-cell run regression and the full 18/18 entity-overlay suite
+> pass. The Release EXE at `C:/mir2-fast-run-anchor-20260920/native-client`
+> (SHA-256 `75F94CED5B728B30D2F5C65849F496A5F7DC9C84ABA3A2BF009C66E836D83834`)
+> started and connected to the local V2 Gateway; the visible login screen was
+> captured. Authenticated sustained-running capture and original Crystal
+> comparison remain open; `visualAccepted=false`.
+
+> 2026-09-20 live follow-up after reboot: the rebuilt EXE connected to the
+> isolated V2 Gateway at `127.0.0.1:19910`; the user manually logged in as
+> `a1`. With AutoRun enabled, sampled outdoor frames near `(230,609)` and
+> `(342,496)` kept the body, `a1` name, and self HP bar on the same screen
+> anchor. The character died near the eastern shore, then revived in town via
+> the normal `V` action; AutoRun was turned off. The interval between samples
+> included operator analysis time, so the coordinate delta is **not** a
+> measured speed result. A subsequent run reached `(315,642)` behind a castle
+> roof, where the character sprite is occluded while the name/HP remain
+> visible. Normal movement back to `(309,636)` produced a readable stopped
+> frame with the self sprite, name, and HP bar horizontally aligned and full
+> 30/30 HP; AutoRun remains off. Continuous right-button-hold timing and
+> original-client comparison remain open; `visualAccepted=false`.
+
+> 2026-09-20 Windows ground-drop visibility candidate: a live player screenshot
+> showed `WoodenSword` text over a Bichon roof with no discernible item sprite.
+> The authoritative drop has image 30 and the original `DNItems/30.png` is
+> present (36x25). The native world pass now draws an item after its own cell's
+> front map image, matching Crystal's row order. When DropView is on, its
+> post-world name layer also displays that same DNItems frame at the exact
+> ground-item position, so later-row roofs cannot leave only a floating name.
+> Missing/empty frames are skipped, and pickup state is unchanged. The focused
+> item test and 17/17 entity-overlay tests pass; the Release EXE was built and
+> opened at the login screen from `C:/mir2-ground-drop-20260920/native-client`
+> (SHA-256 `349EB41DCF998325753D348C47DC87B62A940106736646F139BA471EDB4683F7`).
+> An authenticated in-world capture, roof/drop pickup check, and Crystal
+> same-scene comparison are still pending. `visualAccepted=false`.
+
 > 2026-09-14 Android current change: native Android now retains a distinct
 > authoritative `hero` object from `ObjectHero`, including bounded owner/class/
 > level identity, and applies `ObjectMana` without creating unknown or removed
@@ -84,6 +266,26 @@
 > Local-player `Pushed`, mounted push artwork, remaining dash/deco/effect depth,
 > approved-WSS real login, online StartGame/map transition, public asset
 > alignment, physical-device and final human acceptance remain open.
+
+> 2026-09-14 Windows-native R15 minimap/attack-facing repair: the Bichon
+> minimap source and the `(252,520)` crop were both non-black, locating the
+> reported dark-scene failure in UI composition rather than asset export or
+> coordinate mapping. The 120x108 minimap content is now rendered immediately
+> above the HUD skin and below chat/dialog layers, so the HUD's transparent map
+> opening remains readable while the retained darkness/light pass is active.
+> Four focused native-UI minimap tests and the 87-test gameplay-bridge suite
+> pass; the optimized Release build is packaged as
+> `mir2-platform-windows-facing-minimap-r15.exe` (SHA-256
+> `2964731EDE4C06698694A02BCDD3DEB5EF7695F31AEA0BCA477218A54348EC07`).
+> A 1024x768 GPU capture at Bichon `(285,585)` with darkness active
+> (`setting=1`, `mapDarkLight=0`) shows the terrain and entity markers inside
+> the minimap; image SHA-256 is
+> `7fe91c637c2edf3d19ae5cda8b41f006e56333181bbfcb2e26687ec3838e4383`.
+> The same running build acquired the adjacent Deer target and faced the actor
+> toward it without moving the authoritative camera centre. This closes these
+> two reported rendering leaves; package-wide Crystal parity and final human
+> acceptance remain open. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`.
 
 > 2026-09-13 Android current change: `ObjectHidden` now remains an actor status,
 > not a lifecycle delete. The post-`IN_GAME` packet updates the exact cached
@@ -724,6 +926,115 @@
 > sources/other maps, physical-device touch/IME/network/soak and human visual
 > acceptance remain open. Evidence:
 > `docs/generated/player-qa/native-android-world-render-20260911/README.md`.
+
+> 2026-09-11 natural-journey J17 Ground Harvest checkpoint: installed r9
+> Native SHA
+> `B9E01520D6AFED67546EA60E897395FA95917CDBDCA85430E70DAC5211C477BA`
+> passes the final harvest set 8/8, Crystal Alt-click 2/2, Alt+NPC 1/1 and
+> same/empty-tile Alt 1/1. Its first launcher attempt referenced r8 metadata;
+> the hash guard rejected it before process start, and the corrected r9
+> reference launched successfully. Live relog restored Warrior level 5, EXP
+> 38%, HP 44/44, gold 230 at (289,584), closing only the level-5 persistence
+> checkpoint. Same-tile/empty-ground Harvest remains under live review. Far
+> angles still use tile approximation and 2500ms is a conservative retry bound,
+> so full input/timing parity remains open. `formalCandidate=false`,
+> `accepted=false`, `visualAccepted=false`; evidence:
+> NATURAL-THREE-CLASS-JOURNEY-20260911.md.
+
+> 2026-09-11 natural-journey J11 sprite/input checkpoint: q6 HookingCat appears
+> as a name without a monster sprite, blocking ordinary play. The isolated
+> Monster/006 replacement contains 224 unique atlas rects with zero missing or
+> out-of-bounds frames and the expected source Lib hash, but it is not installed
+> or visually accepted. A Deer corpse highlighted blue under r5, yet three real
+> harvest attempts still yielded no reward. The default-off native input trace
+> work remains in progress. Computer Use stopped when the user pressed Esc and
+> no further UI interaction occurred. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`; evidence:
+> NATURAL-THREE-CLASS-JOURNEY-20260911.md.
+
+> 2026-09-11 natural-journey J09 UI checkpoint: the `groundDrops`-driven Recent
+> Ground Pickups panel is identified as a QA helper and hidden from the ordinary
+> Crystal player HUD. Two focused tests and the optimized-code `dev` Native
+> build pass; SHA
+> `E5FFCEB42AE0DB28E26E883F755B373B3A55A0EC35DB6C717342B1981DC09BD8`
+> is not installed and has no live acceptance yet. q5 completion exposed a
+> separate stale Back-page issue: q6 Accept worked after fully reopening the
+> NPC, while the source fix awaits build/retest. Six equipped items persist,
+> but CopperRing may be missing from the character page and remains under
+> investigation. `formalCandidate=false`, `accepted=false`,
+> `visualAccepted=false`; evidence: NATURAL-THREE-CLASS-JOURNEY-20260911.md.
+
+> 2026-09-11 NPC-dialog partial visual checkpoint: Board text no longer leaks
+> raw markup; Create Hero labels correctly, down-page reveals ReviveHero,
+> SealHero and Use, Use opens the server shop list, and its last page exposes
+> Hairdresser/Close. The separate QUEST control opens five tasks; top-right X
+> closes both dialog and task list. The feature-enabled native pagination test
+> passes 1/1 with 805 filtered; the related native UI selection passes 4/4 and
+> includes that same case. The native build passes. This is a usability
+> repair within 440x224, not full Crystal layout parity: inline coloured links,
+> large buttons and duplicate fallback footer entries such as Use/Weapon shop
+> remain. Hero business actions were not live-tested. `formalCandidate=false`,
+> `accepted=false`, `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 combat-fix partial visual checkpoint: V revived a persisted HP=0
+> character to Bichon (288,616), showing 224/224. A position-only continuation
+> at map 1 (278,180), with quest counts unseeded, recorded one natural
+> ForestYeti kill (0/8→1/8; EXP 14.29%→14.31%). On a respawned Yeti, the HUD
+> showed 137/224→106→63→27→0 instead of full health followed by immediate death.
+> Relog returned to Bichon (288,616) at 224/224 with Yeti 1/8 and 14.31%
+> retained; the persisted experience value is 20036.
+> Gateway owner-health ID and native dead-V regressions pass 1/1 each; both builds
+> pass. Trees and night lighting obscured parts of combat and attack operation
+> remained awkward, so animation is not visually accepted. Eight Yeti kills,
+> natural Oma, full route/balance and three-class coverage remain open.
+> `formalCandidate=false`, `accepted=false`, `visualAccepted=false`. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 partial native quest visual checkpoint: the Board UI verified the
+> two-choice cap and abandon/replace path. After live-found fixes, the objective
+> renders `Defeat OmaFighter (0 / 10)` without duplicate progress and the
+> abandoned Skeleton row remains hidden once Forest Yeti fills the second slot.
+> Level-15/20 milestone gold persisted across relog with no duplicate entry.
+> An explicitly `QA-progress-seeded` continuation verified native hand-in and
+> bonus 0/2→1/2→2/2/claim/relog, but natural kills remain unverified. Focused
+> newcomer tests pass 8/8. `base-dress-equipped-fixed.png` also records the
+> separate BaseDress slot fix working in the running native package. This is
+> partial evidence; `formalCandidate=false`, `accepted=false`, and
+> `visualAccepted=false`. Details and PNGs:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 internal QA package ready: fresh optimized-dev client/Gateway, 50,400
+> asset hashes verified. Isolated level-20 Board fixture and protocol smoke pass
+> (10 definitions, 6 eligible quests). Desktop takeover awaits user pause while
+> DeltaForce runs. No native visual acceptance or signed Release claim. Evidence:
+> generated/player-qa/quest-progression-20260911/README.md.
+
+> 2026-09-11 newcomer progression follow-up implemented: 1–40 guidance (138
+> quests per class / 144 source IDs), three daily choices with a two-quest cap,
+> current-day 2/2 claimable bonus, and one-time gold milestones at 15/20/25/30/35/40.
+> Ten independent IDs are server newcomer-v1 only; default Crystal is preserved.
+> Exact Board binding, distinct claims, persistence/profile isolation and daily
+> high-watermark checks pass. Gateway now sends changed quest snapshots even on
+> Tick/KeepAlive without expanding ordinary movement snapshots. Verification:
+> Node193, Bevy88, Windows1, simulation68, store6, Gateway29 pass. No package or
+> live visual/three-class balance acceptance. This is optional content, not a
+> new Crystal parity percentage. Next: matched package and live Board/Diary/
+> reward/relogin acceptance. Details: QUEST-PROGRESSION-CADENCE.md.
+
+> 2026-09-11 newcomer follow-up: 1–25 guidance (110 distinct quest IDs), server
+> Daily/Weekly/Repeatable groups preserved over static optional categories.
+> Native88 and Node193 pass; Gateway28 verifies repeatable Finish ACK compatibility.
+> New package/screenshots/normal progression remain open. Optional guidance is
+> product UX, not an increase in accepted Crystal parity. QUEST-PROGRESSION-CADENCE.md.
+
+> 2026-09-11 user-authorized optional quest UX: startup newcomer-v1 profile
+> groups the native diary, orders NPC tasks ready-first, and adds scrollable
+> guidance for the first 15 levels. Fixed zero item rewards are hidden in this
+> mode, selectable rewards retain protocol indices and display zero explicitly.
+> Crystal default remains unchanged. Rust quest 87 / Node 192 pass; current
+> Windows package and visual acceptance remain open. This intentional optional
+> UX is not counted as Crystal 1:1 acceptance. See QUEST-NEWCOMER-ACCEPTANCE.md.
 
 > 2026-09-10 native Keyboard menu: Crystal Title119 editor is connected to
 > actual key capture, strict/relaxed modifiers, Delete unbind, full reset,

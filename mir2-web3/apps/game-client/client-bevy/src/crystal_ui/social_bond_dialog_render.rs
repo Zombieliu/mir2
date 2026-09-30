@@ -202,7 +202,9 @@ pub fn render(
                 .with_children(|p| {
                     p.spawn((
                         Text::new(label.text),
-                        crate::crystal_ui::typography::crystal_text_font(label.font_points as f32 * 4. / 3.),
+                        crate::crystal_ui::typography::crystal_text_font(
+                            label.font_points as f32 * 4. / 3.,
+                        ),
                         TextColor(match label.tone {
                             BondTone::DimGray => Color::srgb_u8(105, 105, 105),
                             BondTone::LightGray => Color::srgb_u8(211, 211, 211),

@@ -62,6 +62,28 @@ pub fn crystal_default_keybinds() -> Vec<CrystalKeyBind> {
         .expect("source-controlled Crystal key binding defaults")
 }
 
+fn is_source_skill_bar_binding(function: &str) -> bool {
+    matches!(
+        function,
+        "Bar1Skill1"
+            | "Bar1Skill2"
+            | "Bar1Skill3"
+            | "Bar1Skill4"
+            | "Bar1Skill5"
+            | "Bar1Skill6"
+            | "Bar1Skill7"
+            | "Bar1Skill8"
+            | "Bar2Skill1"
+            | "Bar2Skill2"
+            | "Bar2Skill3"
+            | "Bar2Skill4"
+            | "Bar2Skill5"
+            | "Bar2Skill6"
+            | "Bar2Skill7"
+            | "Bar2Skill8"
+    )
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum KeyboardRow {
     Heading { label: String, y: i32 },
@@ -151,6 +173,35 @@ impl KeyboardDialogUi {
         self.open = false;
         self.waiting = None;
         self.drag_offset = None;
+    }
+
+    /// Mirror Crystal's OptionDialog.ToggleSkillButtons.
+    ///
+    /// Crystal changes only enabled Bar1/Bar2 skill rows that already have an
+    /// explicit Ctrl or tilde requirement. The other modifier families, the
+    /// chosen key, unconstrained/disabled skill bindings, and every non-skill
+    /// binding remain intact.
+    /// skill_mode == false selects Ctrl; true selects tilde.
+    pub fn apply_skill_mode(&mut self, skill_mode: bool) -> bool {
+        let (ctrl, tilde) = if skill_mode { (0, 1) } else { (1, 0) };
+        let mut changed = false;
+        for binding in &mut self.bindings {
+            if binding.key == "None"
+                || !is_source_skill_bar_binding(&binding.function)
+                || (binding.ctrl != 1 && binding.tilde != 1)
+            {
+                continue;
+            }
+            if binding.ctrl != ctrl || binding.tilde != tilde {
+                binding.ctrl = ctrl;
+                binding.tilde = tilde;
+                changed = true;
+            }
+        }
+        if changed {
+            self.dirty = true;
+        }
+        changed
     }
 
     /// Returns true when Close requests persistence. Reset also requires the

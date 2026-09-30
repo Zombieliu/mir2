@@ -1,0 +1,27 @@
+{
+  "trace": "C:\\mir2-protocol-journey-20260911\\Taoist.2026-09-15T19-57-11-682Z.trace.jsonl",
+  "character": "JT3f4a4e1f",
+  "playerObjectId": 1000,
+  "window": {
+    "fromSequence": 16840,
+    "toSequence": 16848,
+    "from": "2026-09-15T20:29:58.040Z",
+    "to": "2026-09-15T20:29:58.546Z"
+  },
+  "events": [
+    {"sequence":16840,"at":"2026-09-15T20:29:58.040Z","kind":"worldSnapshot","map":"D2031","selfHp":4,"selfMaxHp":180,"selfDead":false,"x":242,"y":107},
+    {"sequence":16841,"at":"2026-09-15T20:29:58.530Z","packet":"Death","objectId":1000,"location":{"x":242,"y":107}},
+    {"sequence":16842,"at":"2026-09-15T20:29:58.530Z","packet":"ObjectStruck","objectId":1000,"attackerId":339300},
+    {"sequence":16843,"at":"2026-09-15T20:29:58.530Z","packet":"DamageIndicator","objectId":1000,"damage":4},
+    {"sequence":16845,"at":"2026-09-15T20:29:58.530Z","packet":"ObjectHealth","objectId":1000,"percent":0},
+    {"sequence":16846,"at":"2026-09-15T20:29:58.530Z","packet":"ObjectDied","objectId":1000,"location":{"x":242,"y":107}},
+    {"sequence":16848,"at":"2026-09-15T20:29:58.546Z","outbound":"townRevive"}
+  ],
+  "interpretation": {
+    "authoritativeDeathBeforeRevive": true,
+    "deathReceiptSequence": 16841,
+    "deathReceiptOrder": [16841,16842,16843,16845,16846],
+    "snapshotWasStaleForDeathDecision": true,
+    "falseRevivalFromLastSnapshot": false
+  }
+}

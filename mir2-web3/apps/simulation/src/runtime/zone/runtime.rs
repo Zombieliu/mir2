@@ -26,7 +26,8 @@ use std::collections::{BTreeMap, BTreeSet};
 use crate::config::{GroundDropLootSnapshot, GroundDropSnapshot};
 
 use mir2_game_data::{
-    crystal_magic_by_spell, crystal_monster_by_name, platinum_176_monster_is_boss,
+    crystal_magic_by_spell, crystal_map_respawns_ref, crystal_monster_by_name,
+    platinum_176_monster_is_boss,
 };
 use mir2_protocol::{
     ChatItem, ChatType, ClientBuff, MirClass, MirDirection, MonsterInfo, ObjectAttackInfo,
@@ -109,6 +110,10 @@ use super::types::{
     ZoneNativeMonster, ZoneNativeMonsterRespawn, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig,
     ZoneObject, ZoneOutbound, ZonePlayer, ZonePlayerCombatState, ZoneReincarnationOffer,
 };
+use super::types::{
+    ZoneJourneyEventKind, ZoneJourneyEventReceipt, ZoneJourneyPhysicalTechnique,
+    ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell,
+};
 
 const SHOUT_COOLDOWN_MS: u64 = 10_000;
 const ZONE_MOVEMENT_ACTION_QUEUE_LIMIT: usize = 8;
@@ -162,6 +167,34 @@ fn zone_hex_lower(bytes: &[u8]) -> String {
 }
 const ZONE_NATIVE_MONSTER_AGGRO_X: i32 = 8;
 const ZONE_NATIVE_MONSTER_AGGRO_Y: i32 = 6;
+
+fn zone_outbounds_contain_accepted_player_action(
+    outbounds: &[ZoneOutbound],
+    session_id: &SessionId,
+    actor_id: u32,
+) -> bool {
+    outbounds.iter().any(|outbound| {
+        let (packets, owner) = match outbound {
+            ZoneOutbound::ToSession {
+                session_id: recipient,
+                packets,
+            } => (packets, recipient == session_id),
+            ZoneOutbound::ToMany { packets, .. } | ZoneOutbound::ToAll { packets } => {
+                (packets, false)
+            }
+            _ => return false,
+        };
+        packets.iter().any(|packet| match packet {
+            ServerPacket::ObjectAttack { info } => info.object_id == actor_id,
+            ServerPacket::ObjectRangeAttack { info } => info.object_id == actor_id,
+            ServerPacket::ObjectMagic { object_id, .. } => *object_id == actor_id,
+            // A relocation spell can address the owner without a same-zone
+            // observer action; its accepted owner packet is still decisive.
+            ServerPacket::Magic { .. } | ServerPacket::RangeAttack { .. } => owner,
+            _ => false,
+        })
+    })
+}
 
 fn zone_native_monster_is_authoritatively_hostile(monster: &ZoneNativeMonster) -> bool {
     monster.hostile_to_player
@@ -231,6 +264,7 @@ const CRYSTAL_MAGIC_SHIELD_BUFF_TYPE: u8 = 24;
 const CRYSTAL_COUNTER_ATTACK_BUFF_TYPE: u8 = 18;
 const CRYSTAL_SPELL_EFFECT_HEALING: u8 = 3;
 const CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP: u8 = 6;
+const CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_DOWN: u8 = 7;
 const CRYSTAL_SPELL_EFFECT_TELEPORT: u8 = 2;
 const CRYSTAL_SPELL_EFFECT_TWIN_DRAKE_BLADE: u8 = 5;
 const CRYSTAL_SPELL_EFFECT_BLEEDING: u8 = 18;
@@ -245,6 +279,9 @@ pub struct ZoneRuntime {
     intelligent_creature_operations: Vec<super::intelligent_creatures::CreatureOperation>,
     key: ZoneKey,
     collision: ZoneCollision,
+    /// The Zone snapshots the trusted server cadence at construction. Ordinary
+    /// Crystal/V1 zones must not produce unbounded newcomer-V2 receipt traffic.
+    journey_evidence_enabled: bool,
     players: BTreeMap<SessionId, ZonePlayer>,
     objects: BTreeMap<u32, ZoneObject>,
     dead_object_ids: BTreeMap<u32, ZoneObjectDeadState>,
@@ -328,6 +365,15 @@ struct PendingNativeMonsterHit {
     damage: i32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     fire_bounce: Option<PendingNativeFireBounce>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    // Retain the existing internal checkpoint field label; the typed payload
+    // now also covers FireBall and GreatFireBall, never other spell families.
+    soulfire_practice: Option<ZoneMagicPracticeReceipt>,
+    /// A Zone-owned outcome draft. It carries the accepting incarnation across
+    /// delayed resolution; the receipt sequence is assigned only at a positive
+    /// committed HP mutation.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    journey_event: Option<ZoneJourneyEventReceipt>,
 }
 
 type NativeMonsterDamageResult = (
@@ -377,6 +423,8 @@ struct PendingNativePlayerHeal {
     ready_at_ms: u64,
     session_id: SessionId,
     amount: i32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    journey_event: Option<ZoneJourneyEventReceipt>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -391,6 +439,8 @@ struct PendingNativeSummon {
     skill_level: u8,
     position: Point,
     direction: MirDirection,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    journey_event: Option<ZoneJourneyEventReceipt>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -410,6 +460,8 @@ struct PendingNativeGroundSpellAction {
     next_damage_at_ms: u64,
     expires_at_ms: u64,
     tick_interval_ms: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    journey_event: Option<ZoneJourneyEventReceipt>,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize)]
@@ -507,6 +559,8 @@ impl ZoneRuntime {
         Self {
             key,
             collision,
+            journey_evidence_enabled:
+                crate::runtime::quests::quest_recurrence::server_newcomer_v2_enabled(),
             players: BTreeMap::new(),
             objects: BTreeMap::new(),
             dead_object_ids: BTreeMap::new(),
@@ -558,6 +612,7 @@ impl ZoneRuntime {
             self.npc_teleport_config.clone(),
         );
         fork.players = self.players.clone();
+        fork.journey_evidence_enabled = self.journey_evidence_enabled;
         fork.objects = self.objects.clone();
         fork.dead_object_ids = self.dead_object_ids.clone();
         fork.revived_object_ids = self.revived_object_ids.clone();
@@ -603,6 +658,11 @@ impl ZoneRuntime {
 
     pub fn key(&self) -> &ZoneKey {
         &self.key
+    }
+
+    #[cfg(test)]
+    pub(crate) fn set_journey_evidence_enabled_for_test(&mut self, enabled: bool) {
+        self.journey_evidence_enabled = enabled;
     }
 
     pub fn player_count(&self) -> usize {
@@ -753,6 +813,15 @@ impl ZoneRuntime {
         self.native_monsters.contains_key(&object_id)
     }
 
+    /// The current lifecycle of one retained native monster. Gateway packet
+    /// dequeue uses this narrow query to fence stale AOI projections without
+    /// cloning every monster snapshot on an ordinary pending-packet drain.
+    pub fn native_monster_is_alive(&self, object_id: u32) -> Option<bool> {
+        self.native_monsters
+            .get(&object_id)
+            .map(|monster| !monster.dead && monster.hp > 0)
+    }
+
     pub fn native_monster_snapshots(&self) -> Vec<ZoneNativeMonsterSnapshot> {
         self.native_monsters
             .iter()
@@ -790,6 +859,62 @@ impl ZoneRuntime {
             .map(|player| PlayerId(player.object_id))
     }
 
+    /// Capture this before dispatch, then use it only if the swing is accepted:
+    /// an immediate lethal hit can remove the primary target before progression
+    /// is committed. Mirror the same legal targets as melee resolution rather
+    /// than treating an arbitrary visible front-cell occupant as an attack.
+    pub fn melee_primary_target_present(
+        &self,
+        session_id: &SessionId,
+        direction: MirDirection,
+        materialized: Option<&ZoneMonsterSpawn>,
+    ) -> bool {
+        let Some(player) = self.players.get(session_id) else {
+            return false;
+        };
+        if player.dead || player.hp <= 0 {
+            return false;
+        }
+        let front = offset_point(&player.position, direction, 1);
+        if self.native_monsters.values().any(|target| {
+            target.position == front
+                && !target.dead
+                && target.hp > 0
+                && zone_native_monster_is_authoritatively_melee_attackable(target)
+        }) || self.players.values().any(|target| {
+            target.position == front && zone_player_can_attack_player(player, target)
+        }) {
+            return true;
+        }
+        // A trusted not-yet-materialized target must obey the same initial
+        // visibility/disposition rules. An existing ID always wins over stale
+        // personal metadata, including a corpse or another type of object.
+        materialized.is_some_and(|spawn| {
+            spawn.position == front
+                && !self.object_id_in_use(spawn.object_id)
+                && {
+                    let target = ZoneNativeMonster::from_spawn(spawn, spawn.object_id);
+                    !target.dead
+                        && target.hp > 0
+                        && zone_native_monster_is_authoritatively_melee_attackable(&target)
+                }
+        })
+    }
+
+    /// Reports the authoritative AOI bookkeeping for one retained world object.
+    /// `None` distinguishes an unknown player/object from a retained object that
+    /// is currently outside the player's viewport.
+    pub fn player_has_visible_object(
+        &self,
+        session_id: &SessionId,
+        object_id: u32,
+    ) -> Option<bool> {
+        let player = self.players.get(session_id)?;
+        self.objects
+            .contains_key(&object_id)
+            .then(|| player.visible_object_ids.contains(&object_id))
+    }
+
     pub fn player_position(&self, session_id: &SessionId) -> Option<Point> {
         self.players
             .get(session_id)
@@ -804,6 +929,31 @@ impl ZoneRuntime {
         self.players
             .get(session_id)
             .map(|player| player.chat_profile.clone())
+    }
+
+    /// Returns the remaining authoritative shared-Zone cooldown for one spell.
+    ///
+    /// A spell has both its own Crystal delay and the short global spell-action
+    /// delay. The public observer must wait for whichever becomes ready last.
+    /// `None` keeps an unknown session distinct from a known player whose spell
+    /// is ready now.
+    pub fn player_magic_cooldown_remaining_ms(
+        &self,
+        session_id: &SessionId,
+        spell: Spell,
+        now_ms: u64,
+    ) -> Option<u64> {
+        let player = self.players.get(session_id)?;
+        let spell_ready_at_ms = player
+            .magic_ready_at_ms
+            .get(&(spell as u8))
+            .copied()
+            .unwrap_or_default();
+        Some(
+            spell_ready_at_ms
+                .max(player.next_spell_ready_at_ms)
+                .saturating_sub(now_ms),
+        )
     }
 
     pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {
@@ -1034,7 +1184,32 @@ impl ZoneRuntime {
     }
 
     pub fn handle(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
+        // An accepted combat action supersedes movement that reached the Zone
+        // before it. Otherwise the buffered step can run on the next movement
+        // tick after the attack has already launched, pulling the player out of
+        // range. Inspect the authoritative action packet after admission so a
+        // rejected attack leaves movement untouched; a new movement command
+        // arriving after this handle call can still queue normally.
+        let combat_actor = match &command {
+            ZoneCommand::PlayerAttackObject { session_id, .. }
+            | ZoneCommand::PlayerAttackMaterializedObject { session_id, .. }
+            | ZoneCommand::PlayerRangeAttackObject { session_id, .. }
+            | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, .. }
+            | ZoneCommand::PlayerCastMagic { session_id, .. }
+            | ZoneCommand::PlayerCastMagicWithItem { session_id, .. } => self
+                .players
+                .get(session_id)
+                .map(|player| (session_id.clone(), player.object_id)),
+            _ => None,
+        };
         let mut out = self.handle_inner(command);
+        if let Some((session_id, actor_id)) = combat_actor {
+            if zone_outbounds_contain_accepted_player_action(&out, &session_id, actor_id) {
+                let mut correction = self.cancel_pending_movement(&session_id);
+                correction.append(&mut out);
+                out = correction;
+            }
+        }
         out.extend(self.flush_vampire_deaths());
         out.extend(self.sync_native_poison_masks());
         out
@@ -1416,7 +1591,12 @@ impl ZoneRuntime {
                 now_ms,
             );
         }
-        if zone_magic_targets_friendly_player(spell) && object_id != 0 {
+        if zone_magic_targets_friendly_player(spell)
+            && object_id != 0
+            && !(zone_magic_targets_self(spell)
+                && self.players.get(session_id)
+                    .is_some_and(|player| player.object_id == object_id))
+        {
             let Some(target_session_id) =
                 self.players
                     .iter()
@@ -1500,9 +1680,19 @@ impl ZoneRuntime {
                 .is_none()
     }
 
-    pub fn tick(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
-        let mut outbounds = self.tick_native_periodic_player_poisons(now_ms);
-        outbounds.extend(self.expire_zone_player_status_poisons(now_ms));
+    /// Deadline inspection is read-only. Empty/cancelled/left sessions never
+    /// keep the gateway owner awake; execution still uses normal validation.
+    pub fn next_pending_movement_deadline_ms(&self) -> Option<u64> {
+        self.players
+            .values()
+            .filter(|player| !player.movement_actions.is_empty())
+            .map(|player| player.movement_ready_at_ms)
+            .min()
+    }
+
+    /// Movement-only owner wake: do not advance AI, regen or maintenance clocks.
+    pub fn tick_pending_movement(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let mut outbounds = Vec::new();
         let ready_sessions = self
             .players
             .iter()
@@ -1514,6 +1704,13 @@ impl ZoneRuntime {
         for session_id in ready_sessions {
             outbounds.extend(self.tick_player_movement(&session_id, now_ms));
         }
+        outbounds
+    }
+
+    pub fn tick(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        let mut outbounds = self.tick_native_periodic_player_poisons(now_ms);
+        outbounds.extend(self.expire_zone_player_status_poisons(now_ms));
+        outbounds.extend(self.tick_pending_movement(now_ms));
         outbounds.extend(self.resolve_pending_native_projectiles(now_ms));
         outbounds.extend(self.tick_town_archer_arrows(now_ms));
         outbounds.extend(self.tick_shinsu_hits(now_ms));
@@ -1878,6 +2075,11 @@ impl ZoneRuntime {
                 player.vital_settlement(hp_before),
             )
         };
+        let shield_end_packets = if killed {
+            self.remove_native_player_magic_shield(session_id)
+        } else {
+            Vec::new()
+        };
         let recipients = self.native_monster_visible_recipients(object_id, &position);
         let mut outbounds = Vec::new();
         if killed {
@@ -1901,6 +2103,7 @@ impl ZoneRuntime {
                             expire: 0,
                         },
                     }];
+                    packets.extend(shield_end_packets);
                     if killed {
                         packets.push(ServerPacket::ObjectDied {
                             info: ObjectDiedInfo {
@@ -2310,6 +2513,7 @@ impl ZoneRuntime {
             self.player_grid.moved(session_id, &moved_position);
             self.ecs.move_player(session_id, &moved_position);
         }
+        self.refresh_crystal_safe_zone_profile_after_accepted_step(session_id);
 
         let mut outbounds = Vec::new();
         outbounds.extend(self.diff_visibility_for(session_id));
@@ -2351,6 +2555,26 @@ impl ZoneRuntime {
             direction: player.direction,
         });
         outbounds
+    }
+
+    /// Crystal maps carry their safe-area geometry in the generated respawn
+    /// manifest. A shared-Zone walk/run owns the accepted destination, so it
+    /// must immediately project that geometry into the combat-facing profile.
+    /// Custom maps have no imported geometry and retain their trusted profile.
+    fn refresh_crystal_safe_zone_profile_after_accepted_step(&mut self, session_id: &SessionId) {
+        let Some(map) = crystal_map_respawns_ref(&self.key.map_file_name) else {
+            return;
+        };
+        let Some(player) = self.players.get_mut(session_id) else {
+            return;
+        };
+        player.chat_profile.in_safe_zone = map.safe_zones.iter().any(|safe_zone| {
+            let size = i32::from(safe_zone.size);
+            player.position.x >= safe_zone.location.x - size
+                && player.position.x <= safe_zone.location.x + size
+                && player.position.y >= safe_zone.location.y - size
+                && player.position.y <= safe_zone.location.y + size
+        });
     }
 
     fn consume_turn_action(
@@ -3516,12 +3740,25 @@ impl ZoneRuntime {
             return self.owner_location_correction(session_id);
         }
         let attack_spell = Spell::try_from(spell).unwrap_or(Spell::None);
+        let is_area_skill = matches!(
+            attack_spell,
+            Spell::Thrusting | Spell::HalfMoon | Spell::CrossHalfMoon
+        );
+        let area_hit = zone_melee_area_hit(
+            &player.position,
+            direction,
+            &monster.position,
+            attack_spell,
+            level,
+        );
         let max_range = if attack_spell == Spell::Thrusting {
             2
         } else {
             1
         };
-        if !points_within_action_range(&player.position, &monster.position, max_range) {
+        if !points_within_action_range(&player.position, &monster.position, max_range)
+            || (is_area_skill && area_hit.is_none())
+        {
             return self.correct_player_location(session_id, now_ms);
         }
         let Some(live_player) = self.players.get_mut(session_id) else {
@@ -3553,17 +3790,17 @@ impl ZoneRuntime {
             out.extend(kick);
             return out;
         }
-        if let Some(resolved_damage) =
-            zone_resolve_player_physical_attack(&player, &monster, object_id, damage, now_ms)
-        {
-            // The legacy fallback supplied by the personal session is already
-            // skill-scaled.  Only the authoritative Zone stat roll still needs
-            // the Crystal UserMagic multiplier applied here.
-            let resolved_damage = if player.combat_stats.has_authoritative_damage() {
-                zone_apply_melee_skill_damage(attack_spell, level, resolved_damage)
-            } else {
-                resolved_damage
-            };
+        if let Some(resolved_damage) = zone_resolve_player_melee_area_attack(
+            &player, &monster, object_id, damage, now_ms, area_hit,
+        ) {
+            // Ordinary skill fallbacks are already scaled. The area techniques
+            // resolve their front/secondary formula before armour above.
+            let resolved_damage =
+                if player.combat_stats.has_authoritative_damage() && !is_area_skill {
+                    zone_apply_melee_skill_damage(attack_spell, level, resolved_damage)
+                } else {
+                    resolved_damage
+                };
             self.pending_native_hits.push(PendingNativeMonsterHit {
                 ready_at_ms: if attack_spell == Spell::TwinDrakeBlade {
                     now_ms.saturating_add(300)
@@ -3574,6 +3811,19 @@ impl ZoneRuntime {
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: resolved_damage,
+                soulfire_practice: None,
+                journey_event: zone_journey_physical_technique(attack_spell).map(|technique| {
+                    self.journey_event_draft(
+                        &player,
+                        ZoneJourneyEventKind::PhysicalDamage { technique },
+                        now_ms,
+                        player.object_id,
+                        Some(object_id),
+                        Some(monster.position.clone()),
+                        None,
+                        false,
+                    )
+                }),
                 fire_bounce: None,
             });
             if attack_spell == Spell::TwinDrakeBlade {
@@ -3583,6 +3833,8 @@ impl ZoneRuntime {
                     attacker_object_id: player.object_id,
                     object_id,
                     damage: resolved_damage,
+                    soulfire_practice: None,
+                    journey_event: None,
                     fire_bounce: None,
                 });
                 if let Some(target) = self.native_monsters.get_mut(&object_id) {
@@ -3609,54 +3861,15 @@ impl ZoneRuntime {
                 poison: CRYSTAL_POISON_STUN,
             });
         }
-        if matches!(attack_spell, Spell::HalfMoon | Spell::CrossHalfMoon) {
-            let offsets: &[i8] = if attack_spell == Spell::CrossHalfMoon {
-                &[-4, -3, -2, -1, 1, 2, 3]
-            } else {
-                &[-1, 1, 2, 3]
-            };
-            let secondary_ids = offsets
-                .iter()
-                .flat_map(|offset| {
-                    let point = offset_point(
-                        &player.position,
-                        zone_rotated_direction(direction, *offset),
-                        1,
-                    );
-                    self.native_monsters
-                        .iter()
-                        .filter_map(move |(target_id, target)| {
-                            (*target_id != object_id
-                                && !target.dead
-                                && target.hp > 0
-                                && target.hostile_to_player
-                                && target.position == point)
-                                .then_some(*target_id)
-                        })
-                })
-                .collect::<BTreeSet<_>>();
-            for target_id in secondary_ids {
-                let Some(target) = self.native_monsters.get(&target_id) else {
-                    continue;
-                };
-                if let Some(hit_damage) =
-                    zone_resolve_player_physical_attack(&player, target, target_id, damage, now_ms)
-                {
-                    self.pending_native_hits.push(PendingNativeMonsterHit {
-                        ready_at_ms: now_ms.saturating_add(300),
-                        session_id: session_id.clone(),
-                        attacker_object_id: player.object_id,
-                        object_id: target_id,
-                        damage: if player.combat_stats.has_authoritative_damage() {
-                            zone_apply_melee_skill_damage(attack_spell, level, hit_damage)
-                        } else {
-                            hit_damage
-                        },
-                        fire_bounce: None,
-                    });
-                }
-            }
-        }
+        let mut extra_hits = self.apply_melee_area_other_targets(
+            &player,
+            object_id,
+            direction,
+            attack_spell,
+            level,
+            damage,
+            now_ms,
+        );
         self.apply_zone_object_packets(std::slice::from_ref(&attack_packet), now_ms);
         let recipients = self.native_monster_action_recipients(
             session_id,
@@ -3667,12 +3880,130 @@ impl ZoneRuntime {
         if recipients.is_empty() {
             return Vec::new();
         }
-        vec![ZoneOutbound::ToMany {
+        let mut outbounds = vec![ZoneOutbound::ToMany {
             session_ids: recipients,
             packets: std::iter::once(attack_packet)
                 .chain(skill_packets)
                 .collect(),
-        }]
+        }];
+        outbounds.append(&mut extra_hits);
+        outbounds
+    }
+
+    /// Resolve the other cells of one accepted swing. Target selection must not
+    /// change the front/secondary formula or cause the selected target to be hit
+    /// twice, including when a player and monster occupy the two thrust cells.
+    fn apply_melee_area_other_targets(
+        &mut self,
+        attacker: &ZonePlayer,
+        selected_id: u32,
+        direction: MirDirection,
+        spell: Spell,
+        level: u8,
+        fallback_damage: i32,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let cells = zone_melee_area_cells(&attacker.position, direction, spell);
+        if cells.is_empty() {
+            return Vec::new();
+        }
+        let selected_position = self
+            .native_monsters
+            .get(&selected_id)
+            .map(|target| target.position.clone())
+            .or_else(|| {
+                self.players
+                    .values()
+                    .find(|target| target.object_id == selected_id)
+                    .map(|target| target.position.clone())
+            });
+        let mut outbounds = Vec::new();
+        for (point, secondary) in cells {
+            if selected_position.as_ref() == Some(&point) {
+                continue;
+            }
+            let hit = Some((spell, level, secondary));
+            let target = self
+                .native_monsters
+                .iter()
+                .find(|(id, target)| {
+                    **id != selected_id
+                        && !target.dead
+                        && target.hp > 0
+                        && target.position == point
+                        && zone_native_monster_is_authoritatively_melee_attackable(target)
+                })
+                .map(|(id, target)| (*id, target.clone()));
+            if let Some((target_id, target)) = target {
+                if let Some(damage) = zone_resolve_player_melee_area_attack(
+                    attacker,
+                    &target,
+                    target_id,
+                    fallback_damage,
+                    now_ms,
+                    hit,
+                ) {
+                    self.pending_native_hits.push(PendingNativeMonsterHit {
+                        ready_at_ms: if secondary
+                            && matches!(spell, Spell::HalfMoon | Spell::CrossHalfMoon)
+                        {
+                            now_ms.saturating_add(300)
+                        } else {
+                            now_ms
+                        },
+                        session_id: attacker.session_id.clone(),
+                        attacker_object_id: attacker.object_id,
+                        object_id: target_id,
+                        damage,
+                        soulfire_practice: None,
+                        journey_event: zone_journey_physical_technique(spell).map(|technique| {
+                            self.journey_event_draft(
+                                attacker,
+                                ZoneJourneyEventKind::PhysicalDamage { technique },
+                                now_ms,
+                                attacker.object_id,
+                                Some(target_id),
+                                Some(target.position.clone()),
+                                None,
+                                false,
+                            )
+                        }),
+                        fire_bounce: None,
+                    });
+                }
+                continue;
+            }
+            let target = self
+                .players
+                .values()
+                .find(|target| {
+                    target.object_id != selected_id
+                        && target.position == point
+                        && zone_player_can_attack_player(attacker, target)
+                })
+                .cloned();
+            if let Some(target) = target {
+                if let Some(damage) = zone_resolve_player_pvp_melee_area_attack(
+                    attacker,
+                    &target,
+                    fallback_damage,
+                    now_ms,
+                    hit,
+                ) {
+                    if let Some((packets, settlements)) = self.apply_native_player_pvp_damage(
+                        &target.session_id,
+                        attacker.object_id,
+                        damage,
+                        0,
+                        now_ms,
+                    ) {
+                        outbounds.push(ZoneOutbound::ToAll { packets });
+                        outbounds.extend(settlements);
+                    }
+                }
+            }
+        }
+        outbounds
     }
 
     fn player_attack_native_player(
@@ -3698,16 +4029,34 @@ impl ZoneRuntime {
         } else {
             1
         };
+        let is_area_skill = matches!(
+            attack_spell,
+            Spell::Thrusting | Spell::HalfMoon | Spell::CrossHalfMoon
+        );
+        let area_hit = zone_melee_area_hit(
+            &attacker.position,
+            direction,
+            &target.position,
+            attack_spell,
+            level,
+        );
         if !zone_player_can_attack_player(&attacker, &target)
             || !points_within_action_range(&attacker.position, &target.position, max_range)
+            || (is_area_skill && area_hit.is_none())
         {
             return self.correct_player_location(session_id, now_ms);
         }
 
-        let resolved_damage =
-            zone_resolve_player_pvp_physical_attack(&attacker, &target, fallback_damage, now_ms)
-                .unwrap_or_default();
-        let resolved_damage = if attacker.combat_stats.has_authoritative_damage() {
+        let resolved_damage = zone_resolve_player_pvp_melee_area_attack(
+            &attacker,
+            &target,
+            fallback_damage,
+            now_ms,
+            area_hit,
+        )
+        .unwrap_or_default();
+        let resolved_damage = if attacker.combat_stats.has_authoritative_damage() && !is_area_skill
+        {
             zone_apply_melee_skill_damage(attack_spell, level, resolved_damage)
         } else {
             resolved_damage
@@ -3740,6 +4089,11 @@ impl ZoneRuntime {
         if killed {
             self.clear_native_player_life_actions(target.object_id);
         }
+        let shield_end_packets = if killed {
+            self.remove_native_player_magic_shield(target_session_id)
+        } else {
+            Vec::new()
+        };
         if let Some(attacker) = self.players.get_mut(session_id) {
             attacker.direction = direction;
             attacker.next_attack_ready_at_ms =
@@ -3778,6 +4132,7 @@ impl ZoneRuntime {
                 },
             },
         ];
+        packets.extend(shield_end_packets);
         if killed {
             packets.push(ServerPacket::ObjectDied {
                 info: ObjectDiedInfo {
@@ -3807,6 +4162,15 @@ impl ZoneRuntime {
                 settlement,
             });
         }
+        outbounds.extend(self.apply_melee_area_other_targets(
+            &attacker,
+            target.object_id,
+            direction,
+            attack_spell,
+            level,
+            fallback_damage,
+            now_ms,
+        ));
         outbounds
     }
 
@@ -3859,6 +4223,11 @@ impl ZoneRuntime {
         if killed {
             self.clear_native_player_life_actions(target.object_id);
         }
+        let shield_end_packets = if killed {
+            self.remove_native_player_magic_shield(target_session_id)
+        } else {
+            Vec::new()
+        };
         let mut packets = vec![
             ServerPacket::ObjectStruck {
                 info: ObjectStruckInfo {
@@ -3881,6 +4250,7 @@ impl ZoneRuntime {
                 },
             },
         ];
+        packets.extend(shield_end_packets);
         if killed {
             packets.push(ServerPacket::ObjectDied {
                 info: ObjectDiedInfo {
@@ -4053,6 +4423,8 @@ impl ZoneRuntime {
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: resolved_damage,
+                soulfire_practice: None,
+                journey_event: None,
                 fire_bounce: None,
             });
         }
@@ -4290,7 +4662,12 @@ impl ZoneRuntime {
                 now_ms,
             );
         }
-        if zone_magic_targets_friendly_player(spell) && object_id != 0 {
+        if zone_magic_targets_friendly_player(spell)
+            && object_id != 0
+            && !(zone_magic_targets_self(spell)
+                && self.players.get(session_id)
+                    .is_some_and(|player| player.object_id == object_id))
+        {
             let Some(target_session_id) =
                 self.players
                     .iter()
@@ -4363,7 +4740,10 @@ impl ZoneRuntime {
         else {
             return Vec::new();
         };
-        if target != monster.position
+        // The object id is authoritative. A monster can step once between the
+        // client's rendered snapshot and this packet; accept that small stale
+        // cursor offset while still checking range against its live position.
+        if !points_within_action_range(&target, &monster.position, 1)
             || !points_within_action_range(
                 &player.position,
                 &monster.position,
@@ -4372,6 +4752,7 @@ impl ZoneRuntime {
         {
             return self.correct_player_location(session_id, now_ms);
         }
+        let target = monster.position.clone();
         let Some(live_player) = self.players.get_mut(session_id) else {
             return Vec::new();
         };
@@ -4440,11 +4821,12 @@ impl ZoneRuntime {
                 destination_id: object_id,
             });
         }
+        let mut poisoning_applied = false;
         if cast {
             action_packets.extend(self.apply_native_monster_magic_control(
                 session_id, object_id, spell, level, damage, now_ms,
             ));
-            action_packets.extend(self.apply_native_monster_magic_damage_poison(
+            let (poison_packets, applied) = self.apply_native_monster_magic_damage_poison(
                 object_id,
                 session_id,
                 player.object_id,
@@ -4453,7 +4835,9 @@ impl ZoneRuntime {
                 damage,
                 item_param,
                 now_ms,
-            ));
+            );
+            action_packets.extend(poison_packets);
+            poisoning_applied = applied;
             // FireBang/IceStorm keep their original immediate primary-target
             // path when cast on a monster. Their object_id=0 ground-target
             // form is handled earlier by player_cast_native_ground_magic.
@@ -4530,6 +4914,33 @@ impl ZoneRuntime {
                     attacker_object_id: player.object_id,
                     object_id: hit_object_id,
                     damage: hit_damage,
+                    soulfire_practice: ZoneMagicPracticeSpell::from_spell(spell)
+                        .filter(|_| hit_object_id == object_id)
+                        .map(|spell| ZoneMagicPracticeReceipt {
+                            spell,
+                            session_id: session_id.clone(),
+                            account_id: player.account_id.clone(),
+                            character_index: player.character_index,
+                            object_id: player.object_id,
+                            life_generation: player.life_generation,
+                            zone_key: self.key.clone(),
+                            cast_at_ms: now_ms,
+                            target_object_id: hit_object_id,
+                            target_location: hit_monster.position.clone(),
+                            damage: 0,
+                        }),
+                    journey_event: (spell == Spell::Lightning).then(|| {
+                        self.journey_event_draft(
+                            &player,
+                            ZoneJourneyEventKind::LightningDamage,
+                            now_ms,
+                            player.object_id,
+                            Some(hit_object_id),
+                            Some(hit_monster.position.clone()),
+                            None,
+                            false,
+                        )
+                    }),
                     fire_bounce: None,
                 });
             }
@@ -4539,6 +4950,7 @@ impl ZoneRuntime {
                         ready_at_ms: now_ms,
                         session_id: session_id.clone(),
                         amount: zone_vampire_shot_heal_amount(native_damage, level),
+                        journey_event: None,
                     });
             }
             if spell == Spell::Vampirism {
@@ -4550,6 +4962,7 @@ impl ZoneRuntime {
                             .saturating_mul(i32::from(level).saturating_add(1))
                             .saturating_div(3)
                             .max(1),
+                        journey_event: None,
                     });
             }
         }
@@ -4570,6 +4983,23 @@ impl ZoneRuntime {
                 session_ids: recipients,
                 packets: action_packets,
             });
+        }
+        if poisoning_applied {
+            let draft = self.journey_event_draft(
+                &player,
+                ZoneJourneyEventKind::PoisoningApplied,
+                now_ms,
+                player.object_id,
+                Some(object_id),
+                Some(monster.position),
+                None,
+                true,
+            );
+            if let Some(receipt) =
+                self.commit_journey_event(&draft, now_ms, Some(object_id), None, None, None)
+            {
+                outbounds.push(ZoneOutbound::JourneyEvent { receipt });
+            }
         }
         outbounds
     }
@@ -4806,6 +5236,7 @@ impl ZoneRuntime {
                         ready_at_ms: now_ms,
                         session_id: session_id.clone(),
                         amount: zone_vampire_shot_heal_amount(resolved_damage, level),
+                        journey_event: None,
                     });
             }
         } else if cast && spell == Spell::Poisoning {
@@ -5217,6 +5648,18 @@ impl ZoneRuntime {
                         skill_level: level,
                         position: summon_position,
                         direction,
+                        journey_event: (spell == Spell::SummonSkeleton).then(|| {
+                            self.journey_event_draft(
+                                &player,
+                                ZoneJourneyEventKind::SummonSkeletonSpawn,
+                                now_ms,
+                                player.object_id,
+                                None,
+                                None,
+                                None,
+                                false,
+                            )
+                        }),
                     });
                 }
             }
@@ -5470,6 +5913,7 @@ impl ZoneRuntime {
         }
 
         let player = self.players.get(session_id).cloned().unwrap_or(player);
+        let healing_was_full_hp = spell == Spell::Healing && player.hp >= player.max_hp;
         let moved = player.position != original_position;
         if moved {
             owner_packets.push(user_location_packet(&player));
@@ -5489,9 +5933,33 @@ impl ZoneRuntime {
         if moved {
             outbounds.push(ZoneOutbound::SaveTransform {
                 session_id: session_id.clone(),
-                position: player.position,
+                position: player.position.clone(),
                 direction: player.direction,
             });
+        }
+        if cast && spell == Spell::Healing {
+            let draft = self.journey_event_draft(
+                &player,
+                ZoneJourneyEventKind::HealingAccepted {
+                    full_hp_exercise: healing_was_full_hp,
+                },
+                now_ms,
+                player.object_id,
+                Some(player.object_id),
+                Some(player.position.clone()),
+                Some(player.object_id),
+                false,
+            );
+            if let Some(receipt) = self.commit_journey_event(
+                &draft,
+                now_ms,
+                Some(player.object_id),
+                Some(player.position.clone()),
+                Some(player.object_id),
+                None,
+            ) {
+                outbounds.push(ZoneOutbound::JourneyEvent { receipt });
+            }
         }
         outbounds
     }
@@ -5693,7 +6161,10 @@ impl ZoneRuntime {
             }
         }
         match spell {
-            Spell::Healing => player.hp < player.max_hp,
+            // Crystal accepts a self Healing cast at full HP. The Zone records
+            // the action, and the session bridge alone decides whether the
+            // V2 first-exercise objective may use that full-HP receipt.
+            Spell::Healing => true,
             Spell::MassHealing | Spell::HealingCircle => !self
                 .native_area_heal_target_session_ids(session_id, target)
                 .is_empty(),
@@ -5944,9 +6415,9 @@ impl ZoneRuntime {
         damage: i32,
         item_param: u8,
         now_ms: u64,
-    ) -> Vec<ServerPacket> {
+    ) -> (Vec<ServerPacket>, bool) {
         if spell == Spell::Poisoning {
-            return self.apply_native_monster_taoist_poison(
+            let packets = self.apply_native_monster_taoist_poison(
                 object_id,
                 owner_session_id,
                 owner_object_id,
@@ -5955,17 +6426,21 @@ impl ZoneRuntime {
                 zone_taoist_poison_from_item_param(item_param),
                 now_ms,
             );
+            return (packets.clone(), !packets.is_empty());
         }
         if spell != Spell::PoisonShot {
-            return Vec::new();
+            return (Vec::new(), false);
         }
-        self.apply_native_monster_green_damage_poison(
-            object_id,
-            owner_session_id,
-            owner_object_id,
-            level,
-            damage,
-            now_ms,
+        (
+            self.apply_native_monster_green_damage_poison(
+                object_id,
+                owner_session_id,
+                owner_object_id,
+                level,
+                damage,
+                now_ms,
+            ),
+            false,
         )
     }
 
@@ -6149,6 +6624,22 @@ impl ZoneRuntime {
                 next_damage_at_ms,
                 expires_at_ms,
                 tick_interval_ms,
+                journey_event: (spell == Spell::FireWall)
+                    .then(|| {
+                        self.players.get(session_id).map(|player| {
+                            self.journey_event_draft(
+                                player,
+                                ZoneJourneyEventKind::FireWallDamage,
+                                now_ms,
+                                player_object_id,
+                                None,
+                                Some(target.clone()),
+                                None,
+                                false,
+                            )
+                        })
+                    })
+                    .flatten(),
             });
         Vec::new()
     }
@@ -6339,6 +6830,8 @@ impl ZoneRuntime {
             attacker_object_id: player_object_id,
             object_id: primary_object_id,
             damage,
+            soulfire_practice: None,
+            journey_event: None,
             fire_bounce: Some(PendingNativeFireBounce {
                 remaining_bounces: level.saturating_add(2),
                 target_location: primary_monster.position,
@@ -6383,6 +6876,7 @@ impl ZoneRuntime {
                         ready_at_ms: now_ms.saturating_add(500),
                         session_id: target_session_id.clone(),
                         amount: heal,
+                        journey_event: None,
                     });
                 vec![ServerPacket::ObjectEffect {
                     info: ObjectEffectInfo {
@@ -7057,12 +7551,30 @@ impl ZoneRuntime {
             }
         }
         for (object_id, hit_damage) in hit_damages {
+            let journey_event = (spell == Spell::Lightning)
+                .then(|| {
+                    self.native_monsters.get(&object_id).map(|monster| {
+                        self.journey_event_draft(
+                            &player,
+                            ZoneJourneyEventKind::LightningDamage,
+                            now_ms,
+                            player.object_id,
+                            Some(object_id),
+                            Some(monster.position.clone()),
+                            None,
+                            false,
+                        )
+                    })
+                })
+                .flatten();
             self.pending_native_hits.push(PendingNativeMonsterHit {
                 ready_at_ms: now_ms.saturating_add(500),
                 session_id: session_id.clone(),
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: hit_damage,
+                soulfire_practice: None,
+                journey_event,
                 fire_bounce: None,
             });
         }
@@ -7166,6 +7678,8 @@ impl ZoneRuntime {
                 attacker_object_id: player.object_id,
                 object_id,
                 damage: damage.max(1),
+                soulfire_practice: None,
+                journey_event: None,
                 fire_bounce: None,
             });
         }
@@ -7353,6 +7867,7 @@ impl ZoneRuntime {
                 ready_at_ms: now_ms.saturating_add(500),
                 session_id: session_id.clone(),
                 amount: heal,
+                journey_event: None,
             });
         vec![ServerPacket::ObjectEffect {
             info: ObjectEffectInfo {
@@ -7413,6 +7928,7 @@ impl ZoneRuntime {
                 next_damage_at_ms: due_ms,
                 expires_at_ms: due_ms.saturating_add(expires_after_ms),
                 tick_interval_ms,
+                journey_event: None,
             });
         Vec::new()
     }
@@ -7493,6 +8009,7 @@ impl ZoneRuntime {
                 next_damage_at_ms: due_ms,
                 expires_at_ms: due_ms.saturating_add(1),
                 tick_interval_ms: 1,
+                journey_event: None,
             });
     }
 
@@ -7763,6 +8280,8 @@ impl ZoneRuntime {
                         attacker_object_id: caster.object_id,
                         object_id,
                         damage: hit_damage,
+                        soulfire_practice: None,
+                        journey_event: None,
                         fire_bounce: None,
                     },
                     now_ms,
@@ -8053,6 +8572,8 @@ impl ZoneRuntime {
                     attacker_object_id: caster.object_id,
                     object_id,
                     damage: hit_damage,
+                    soulfire_practice: None,
+                    journey_event: None,
                     fire_bounce: None,
                 },
                 now_ms,
@@ -8171,6 +8692,40 @@ impl ZoneRuntime {
                 info: ObjectEffectInfo {
                     object_id: player.object_id,
                     effect: CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP,
+                    effect_type: 0,
+                    delay_time: 0,
+                    time: 0,
+                },
+            },
+        ]
+    }
+
+    fn remove_native_player_magic_shield(
+        &mut self,
+        session_id: &SessionId,
+    ) -> Vec<ServerPacket> {
+        let Some(player) = self.players.get_mut(session_id) else {
+            return Vec::new();
+        };
+        if player
+            .buffs
+            .remove(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE)
+            .is_none()
+        {
+            return Vec::new();
+        }
+        if player.effect == CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP {
+            player.effect = 0;
+        }
+        vec![
+            ServerPacket::RemoveBuff {
+                buff_type: CRYSTAL_MAGIC_SHIELD_BUFF_TYPE,
+                object_id: player.object_id,
+            },
+            ServerPacket::ObjectEffect {
+                info: ObjectEffectInfo {
+                    object_id: player.object_id,
+                    effect: CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_DOWN,
                     effect_type: 0,
                     delay_time: 0,
                     time: 0,
@@ -8369,6 +8924,7 @@ impl ZoneRuntime {
                     ready_at_ms: now_ms,
                     session_id: session_id.clone(),
                     amount: zone_vampire_shot_heal_amount(damage, level),
+                    journey_event: None,
                 });
         }
         packets
@@ -8737,6 +9293,14 @@ impl ZoneRuntime {
                             ),
                             None => action.damage,
                         };
+                        let effect_object_id =
+                            self.native_monsters.get(&object_id).and_then(|monster| {
+                                action
+                                    .locations
+                                    .iter()
+                                    .position(|location| *location == monster.position)
+                                    .and_then(|index| action.spell_object_ids.get(index).copied())
+                            });
                         outbounds.extend(self.resolve_pending_native_monster_hit(
                             PendingNativeMonsterHit {
                                 ready_at_ms: now_ms,
@@ -8744,6 +9308,12 @@ impl ZoneRuntime {
                                 attacker_object_id: action.caster_object_id,
                                 object_id,
                                 damage: hit_damage,
+                                soulfire_practice: None,
+                                journey_event: action.journey_event.as_ref().map(|draft| {
+                                    let mut draft = draft.clone();
+                                    draft.effect_object_id = effect_object_id;
+                                    draft
+                                }),
                                 fire_bounce: None,
                             },
                             now_ms,
@@ -8856,6 +9426,24 @@ impl ZoneRuntime {
         if !self.players.contains_key(&hit.session_id) {
             return Vec::new();
         }
+
+        let practice_owner_is_current = hit.soulfire_practice.as_ref().is_some_and(|receipt| {
+            self.players.get(&hit.session_id).is_some_and(|player| {
+                receipt.session_id == hit.session_id
+                    && receipt.account_id == player.account_id
+                    && receipt.character_index == player.character_index
+                    && receipt.object_id == player.object_id
+                    && receipt.object_id == hit.attacker_object_id
+                    && receipt.life_generation == player.life_generation
+                    && receipt.zone_key == self.key
+                    && receipt.target_object_id == hit.object_id
+            }) && self.native_monsters.get(&hit.object_id).is_some_and(|target| {
+                !target.dead
+                    && target.hp > 0
+                    && monster_visibility_is_attackable(target)
+                    && zone_tile_distance(&target.position, &receipt.target_location) <= 2
+            })
+        });
 
         if self.native_monsters.contains_key(&hit.attacker_object_id)
             && self
@@ -8987,6 +9575,29 @@ impl ZoneRuntime {
         }
         let (should_bleed, mut outbounds) =
             self.apply_native_vampire_spider_master_vampire(hit.attacker_object_id, damage, now_ms);
+        // Crystal levels these three spells on a positive resolved primary hit,
+        // including lawful projectiles whose caster died after launch. A changed online
+        // incarnation or revived life must never receive an old projectile's XP.
+        if damage > 0 && practice_owner_is_current {
+            if let Some(mut receipt) = hit.soulfire_practice.clone() {
+                receipt.damage = damage;
+                outbounds.push(ZoneOutbound::MagicPractice { receipt });
+            }
+        }
+        if damage > 0 {
+            if let Some(receipt) = hit.journey_event.as_ref().and_then(|draft| {
+                self.commit_journey_event(
+                    draft,
+                    now_ms,
+                    Some(hit.object_id),
+                    Some(position.clone()),
+                    None,
+                    Some(damage),
+                )
+            }) {
+                outbounds.push(ZoneOutbound::JourneyEvent { receipt });
+            }
+        }
         if should_bleed {
             packets.push(ServerPacket::ObjectEffect {
                 info: ObjectEffectInfo {
@@ -9068,6 +9679,76 @@ impl ZoneRuntime {
         outbounds
     }
 
+    /// Keep V2 journey proof creation in the Zone, alongside the authoritative
+    /// outcome it names. The draft is stored with delayed actions so a later
+    /// leave/rejoin cannot attribute an old projectile or pet strike to a new
+    /// owner incarnation.
+    fn journey_event_draft(
+        &self,
+        player: &super::types::ZonePlayer,
+        kind: ZoneJourneyEventKind,
+        source_action_at_ms: u64,
+        source_object_id: u32,
+        target_object_id: Option<u32>,
+        target_location: Option<Point>,
+        effect_object_id: Option<u32>,
+        material_consumed: bool,
+    ) -> ZoneJourneyEventReceipt {
+        ZoneJourneyEventReceipt {
+            kind,
+            session_id: player.session_id.clone(),
+            account_id: player.account_id.clone(),
+            character_index: player.character_index,
+            object_id: player.object_id,
+            life_generation: player.life_generation,
+            zone_key: self.key.clone(),
+            source_action_at_ms,
+            committed_at_ms: 0,
+            event_sequence: 0,
+            source_object_id,
+            target_object_id,
+            target_location,
+            effect_object_id,
+            damage: None,
+            material_consumed,
+        }
+    }
+
+    fn commit_journey_event(
+        &mut self,
+        draft: &ZoneJourneyEventReceipt,
+        committed_at_ms: u64,
+        target_object_id: Option<u32>,
+        target_location: Option<Point>,
+        effect_object_id: Option<u32>,
+        damage: Option<i32>,
+    ) -> Option<ZoneJourneyEventReceipt> {
+        if !self.journey_evidence_enabled {
+            return None;
+        }
+        let owner = self.players.get_mut(&draft.session_id)?;
+        if owner.account_id != draft.account_id
+            || owner.character_index != draft.character_index
+            || owner.object_id != draft.object_id
+            || owner.life_generation != draft.life_generation
+            || draft.zone_key != self.key
+        {
+            return None;
+        }
+        owner.journey_event_sequence = owner
+            .journey_event_sequence
+            .checked_add(1)
+            .expect("Zone journey event sequence exhausted");
+        let mut receipt = draft.clone();
+        receipt.committed_at_ms = committed_at_ms;
+        receipt.event_sequence = owner.journey_event_sequence;
+        receipt.target_object_id = target_object_id.or(receipt.target_object_id);
+        receipt.target_location = target_location.or(receipt.target_location);
+        receipt.effect_object_id = effect_object_id.or(receipt.effect_object_id);
+        receipt.damage = damage;
+        Some(receipt)
+    }
+
     fn continue_native_fire_bounce(
         &mut self,
         hit: &PendingNativeMonsterHit,
@@ -9128,6 +9809,8 @@ impl ZoneRuntime {
             attacker_object_id: hit.attacker_object_id,
             object_id: target_object_id,
             damage: hit.damage,
+            soulfire_practice: None,
+            journey_event: None,
             fire_bounce: Some(PendingNativeFireBounce {
                 remaining_bounces: fire_bounce.remaining_bounces.saturating_sub(1),
                 target_location: target_position,
@@ -9335,6 +10018,11 @@ impl ZoneRuntime {
         if killed {
             self.clear_native_player_life_actions(target_object_id);
         }
+        let shield_end_packets = if killed {
+            self.remove_native_player_magic_shield(&hit.target_session_id)
+        } else {
+            Vec::new()
+        };
         // An absorbed hit can still activate EnergyShield healing. Commit
         // that real HP mutation even when there is no damage event to emit.
         if damage == 0 {
@@ -9408,6 +10096,7 @@ impl ZoneRuntime {
             return Vec::new();
         }
         let mut outbounds = Vec::new();
+        packets.extend(shield_end_packets);
         if killed {
             outbounds.push(ZoneOutbound::ToSession {
                 session_id: hit.target_session_id.clone(),
@@ -9505,6 +10194,8 @@ impl ZoneRuntime {
                     attacker_object_id: player.object_id,
                     object_id: attacker_object_id,
                     damage,
+                    soulfire_practice: None,
+                    journey_event: None,
                     fire_bounce: None,
                 });
             }
@@ -9746,7 +10437,7 @@ impl ZoneRuntime {
             attack_speed_ms: u64::from(template.attack_speed),
             friendly_guild: None,
             defense: super::types::ZoneMonsterDefense::from_crystal_template(&template),
-            position,
+            position: position.clone(),
             direction: summon.direction,
             respawn: None,
             drops: Vec::new(),
@@ -9799,7 +10490,20 @@ impl ZoneRuntime {
                 object.expires_at_ms = Some(expires_at_ms);
             }
         }
-        self.diff_all_zone_object_visibility()
+        let mut outbounds = self.diff_all_zone_object_visibility();
+        if let Some(receipt) = summon.journey_event.as_ref().and_then(|draft| {
+            self.commit_journey_event(
+                draft,
+                now_ms,
+                None,
+                Some(position.clone()),
+                Some(object_id),
+                None,
+            )
+        }) {
+            outbounds.push(ZoneOutbound::JourneyEvent { receipt });
+        }
+        outbounds
     }
 
     fn active_native_summon_count_for_profile(
@@ -10139,6 +10843,8 @@ impl ZoneRuntime {
                     attacker_object_id: object_id,
                     object_id: target_object_id,
                     damage,
+                    soulfire_practice: None,
+                    journey_event: None,
                     fire_bounce: None,
                 },
                 now_ms,
@@ -10842,12 +11548,31 @@ impl ZoneRuntime {
         monster.next_attack_ready_at_ms = now_ms.saturating_add(monster.attack_speed_ms);
         let monster_position = monster.position.clone();
         let damage = zone_native_summon_monster_attack_damage(monster, &target.position);
+        let is_skeleton = monster.name == "BoneFamiliar";
+        let journey_event = is_skeleton
+            .then(|| {
+                self.players.get(owner_session_id).map(|owner| {
+                    self.journey_event_draft(
+                        owner,
+                        ZoneJourneyEventKind::SummonSkeletonDamage,
+                        now_ms,
+                        object_id,
+                        Some(target.object_id),
+                        Some(target.position.clone()),
+                        None,
+                        false,
+                    )
+                })
+            })
+            .flatten();
         self.pending_native_hits.push(PendingNativeMonsterHit {
             ready_at_ms: now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS),
             session_id: owner_session_id.clone(),
             attacker_object_id: object_id,
             object_id: target.object_id,
             damage,
+            soulfire_practice: None,
+            journey_event,
             fire_bounce: None,
         });
         let packet = ServerPacket::ObjectAttack {
@@ -10892,7 +11617,7 @@ impl ZoneRuntime {
             return Vec::new();
         }
 
-        let Some((monster_position, attack_type, damage, hit_delay_ms)) = ({
+        let Some((monster_position, attack_type, damage, hit_delay_ms, is_skeleton)) = ({
             let Some(monster) = self.native_monsters.get_mut(&object_id) else {
                 return Vec::new();
             };
@@ -10911,17 +11636,36 @@ impl ZoneRuntime {
                 ),
                 zone_native_summon_monster_attack_damage(monster, &target.position),
                 zone_native_summon_hit_delay_ms(monster, &target.position),
+                monster.name == "BoneFamiliar",
             ))
         }) else {
             return Vec::new();
         };
         if damage > 0 {
+            let journey_event = is_skeleton
+                .then(|| {
+                    self.players.get(owner_session_id).map(|owner| {
+                        self.journey_event_draft(
+                            owner,
+                            ZoneJourneyEventKind::SummonSkeletonDamage,
+                            now_ms,
+                            object_id,
+                            Some(target.object_id),
+                            Some(target.position.clone()),
+                            None,
+                            false,
+                        )
+                    })
+                })
+                .flatten();
             self.pending_native_hits.push(PendingNativeMonsterHit {
                 ready_at_ms: now_ms.saturating_add(hit_delay_ms),
                 session_id: owner_session_id.clone(),
                 attacker_object_id: object_id,
                 object_id: target.object_id,
                 damage,
+                soulfire_practice: None,
+                journey_event,
                 fire_bounce: None,
             });
         }
@@ -10991,12 +11735,25 @@ impl ZoneRuntime {
         source_object_id: u32,
         position: &Point,
     ) -> Option<NativeMonsterDecoyTarget> {
-        self.native_monsters
-            .iter()
+        // StoneTrap eligibility already requires a retained live monster. The
+        // retained-object grid therefore supplies a complete candidate set;
+        // stale object ids are discarded by the native lookup and exact gates.
+        self.object_grid
+            .candidates_in_rect(
+                position,
+                ZONE_NATIVE_MONSTER_AGGRO_X,
+                ZONE_NATIVE_MONSTER_AGGRO_Y,
+            )
+            .into_iter()
+            .filter_map(|object_id| {
+                self.native_monsters
+                    .get(&object_id)
+                    .map(|monster| (object_id, monster))
+            })
             .filter(|(object_id, monster)| {
-                **object_id != source_object_id
+                *object_id != source_object_id
                     && monster.name == "StoneTrap"
-                    && self.stone_trap_decoy_eligible(source_object_id, **object_id)
+                    && self.stone_trap_decoy_eligible(source_object_id, *object_id)
                     && !monster.hostile_to_player
                     && !monster.dead
                     && monster.hp > 0
@@ -11006,10 +11763,10 @@ impl ZoneRuntime {
                     && (monster.position.y - position.y).abs() <= ZONE_NATIVE_MONSTER_AGGRO_Y
             })
             .min_by_key(|(object_id, monster)| {
-                (zone_tile_distance(&monster.position, position), **object_id)
+                (zone_tile_distance(&monster.position, position), *object_id)
             })
             .map(|(object_id, monster)| NativeMonsterDecoyTarget {
-                object_id: *object_id,
+                object_id,
                 position: monster.position.clone(),
             })
     }
@@ -12637,6 +13394,17 @@ impl ZoneRuntime {
                     buff_type,
                     object_id,
                 })
+                .chain((buff_type == CRYSTAL_MAGIC_SHIELD_BUFF_TYPE).then_some(
+                    ServerPacket::ObjectEffect {
+                        info: ObjectEffectInfo {
+                            object_id,
+                            effect: CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_DOWN,
+                            effect_type: 0,
+                            delay_time: 0,
+                            time: 0,
+                        },
+                    },
+                ))
                 .chain((buff_type == CRYSTAL_HIDING_BUFF_TYPE).then_some(
                     ServerPacket::ObjectHidden {
                         object_id,
@@ -13394,11 +14162,39 @@ fn zone_native_summon_hit_delay_ms(monster: &ZoneNativeMonster, target: &Point) 
 
 fn zone_native_summon_monster_attack_damage(monster: &ZoneNativeMonster, target: &Point) -> i32 {
     let dc_bonus = zone_native_monster_buff_stat_total(monster, CRYSTAL_STAT_MAX_DC).max(0);
-    match monster.ai {
-        38 | 60 | 61 | 63 if zone_tile_distance(&monster.position, target) > 0 => {
-            zone_crystal_monster_attack_damage(&monster.name).saturating_add(dc_bonus)
-        }
-        _ => 1_i32.saturating_add(dc_bonus),
+    zone_native_summon_base_attack_damage(
+        &monster.name,
+        monster.ai,
+        zone_tile_distance(&monster.position, target),
+    )
+    .saturating_add(dc_bonus)
+}
+
+fn zone_native_summon_base_attack_damage(name: &str, ai: u8, distance: i32) -> i32 {
+    // Crystal's summoned BoneFamiliar has 12–23 DC in the imported monster
+    // template. The old generic pet fallback dealt exactly one damage and
+    // made its class-defining summon ineffective against Wooma enemies.
+    if name == "BoneFamiliar" || (matches!(ai, 38 | 60 | 61 | 63) && distance > 0) {
+        zone_crystal_monster_attack_damage(name)
+    } else {
+        1
+    }
+}
+
+#[cfg(test)]
+mod summon_damage_tests {
+    use super::*;
+
+    #[test]
+    fn bone_familiar_uses_imported_crystal_dc_instead_of_one_damage() {
+        let template = crystal_monster_by_name("BoneFamiliar").expect("Crystal familiar template");
+        assert_eq!(template.min_dc, 12);
+        assert_eq!(template.max_dc, 23);
+        assert_eq!(
+            zone_native_summon_base_attack_damage("BoneFamiliar", template.ai, 1),
+            i32::from(template.max_dc),
+        );
+        assert_eq!(zone_native_summon_base_attack_damage("UnknownPet", 0, 1), 1);
     }
 }
 
@@ -13460,6 +14256,72 @@ fn zone_apply_melee_skill_damage(spell: Spell, level: u8, base_damage: i32) -> i
                 .max(0)
         })
         .unwrap_or(base_damage)
+}
+
+/// The front cell is always an ordinary weapon blow for these techniques.
+/// Only the extra cells use UserMagic.GetDamage (HumanObject.Attack).
+fn zone_melee_area_damage_base(base: i32, hit: Option<(Spell, u8, bool)>) -> i32 {
+    match hit {
+        Some((spell, level, true)) => crystal_magic_by_spell(&format!("{spell:?}"))
+            .map(|magic| crate::runtime::skills::crystal_magic_get_damage(&magic, level, base))
+            .unwrap_or(base),
+        _ => base,
+    }
+}
+
+fn zone_melee_area_cells(
+    position: &Point,
+    direction: MirDirection,
+    spell: Spell,
+) -> Vec<(Point, bool)> {
+    if !matches!(
+        spell,
+        Spell::Thrusting | Spell::HalfMoon | Spell::CrossHalfMoon
+    ) {
+        return Vec::new();
+    }
+    let mut cells = vec![(offset_point(position, direction, 1), false)];
+    match spell {
+        Spell::Thrusting => cells.push((offset_point(position, direction, 2), true)),
+        Spell::HalfMoon | Spell::CrossHalfMoon => {
+            let offsets: &[i8] = if spell == Spell::HalfMoon {
+                &[-1, 1, 2]
+            } else {
+                &[-4, -3, -2, -1, 1, 2, 3]
+            };
+            cells.extend(offsets.iter().map(|offset| {
+                (
+                    offset_point(position, zone_rotated_direction(direction, *offset), 1),
+                    true,
+                )
+            }));
+        }
+        _ => return Vec::new(),
+    }
+    cells
+}
+
+fn zone_melee_area_hit(
+    position: &Point,
+    direction: MirDirection,
+    target: &Point,
+    spell: Spell,
+    level: u8,
+) -> Option<(Spell, u8, bool)> {
+    zone_melee_area_cells(position, direction, spell)
+        .into_iter()
+        .find_map(|(cell, secondary)| (cell == *target).then_some((spell, level, secondary)))
+}
+
+fn zone_journey_physical_technique(spell: Spell) -> Option<ZoneJourneyPhysicalTechnique> {
+    match spell {
+        Spell::None => Some(ZoneJourneyPhysicalTechnique::Normal),
+        Spell::Fencing => Some(ZoneJourneyPhysicalTechnique::Fencing),
+        Spell::Slaying => Some(ZoneJourneyPhysicalTechnique::Slaying),
+        Spell::Thrusting => Some(ZoneJourneyPhysicalTechnique::Thrusting),
+        Spell::HalfMoon => Some(ZoneJourneyPhysicalTechnique::HalfMoon),
+        _ => None,
+    }
 }
 
 fn zone_apply_rate_percent(value: i32, rate_percent: i32) -> i32 {
@@ -13552,6 +14414,24 @@ fn zone_resolve_player_physical_attack(
     fallback_damage: i32,
     now_ms: u64,
 ) -> Option<i32> {
+    zone_resolve_player_melee_area_attack(
+        player,
+        monster,
+        monster_object_id,
+        fallback_damage,
+        now_ms,
+        None,
+    )
+}
+
+fn zone_resolve_player_melee_area_attack(
+    player: &ZonePlayer,
+    monster: &ZoneNativeMonster,
+    monster_object_id: u32,
+    fallback_damage: i32,
+    now_ms: u64,
+    area_hit: Option<(Spell, u8, bool)>,
+) -> Option<i32> {
     // The browser acceptance gate accelerates the real authoritative hit
     // result. Applying this after accuracy, attack-power, and armour
     // resolution is important: characters with authoritative combat stats do
@@ -13560,9 +14440,9 @@ fn zone_resolve_player_physical_attack(
     let qa_damage_multiplier = qa_natural_kill_damage_multiplier();
     let stats = player.combat_stats;
     if !stats.has_authoritative_damage() {
-        return Some(
-            zone_player_native_damage(player, fallback_damage).saturating_mul(qa_damage_multiplier),
-        );
+        let base = zone_player_native_damage(player, fallback_damage);
+        let base = zone_melee_area_damage_base(base, area_hit);
+        return Some(base.saturating_mul(qa_damage_multiplier));
     }
 
     let agility = monster.defense.agility.max(0);
@@ -13591,7 +14471,13 @@ fn zone_resolve_player_physical_attack(
         base,
         zone_player_buff_stat_total(player, CRYSTAL_STAT_MAX_DC_RATE_PERCENT),
     );
+    let base = zone_melee_area_damage_base(base, area_hit);
     let base = zone_apply_player_critical(base, &stats, player.object_id, now_ms);
+    // Crystal's second thrust tile and the non-front HalfMoon tiles use
+    // DefenceType.Agility: dodge is still checked, but AC is not subtracted.
+    if area_hit.is_some_and(|(_, _, secondary)| secondary) {
+        return Some(base.max(0).saturating_mul(qa_damage_multiplier));
+    }
     let (min_ac, max_ac) = horned_stat_range(
         monster,
         HornedStat::Ac,
@@ -13633,6 +14519,10 @@ fn qa_natural_kill_damage_multiplier() -> i32 {
             .as_deref(),
     )
 }
+
+#[cfg(test)]
+#[path = "runtime/journey_events.rs"]
+mod journey_events;
 
 #[cfg(test)]
 mod player_vital_regen_tests {
@@ -13840,6 +14730,16 @@ fn zone_resolve_player_pvp_physical_attack(
     fallback_damage: i32,
     now_ms: u64,
 ) -> Option<i32> {
+    zone_resolve_player_pvp_melee_area_attack(attacker, target, fallback_damage, now_ms, None)
+}
+
+fn zone_resolve_player_pvp_melee_area_attack(
+    attacker: &ZonePlayer,
+    target: &ZonePlayer,
+    fallback_damage: i32,
+    now_ms: u64,
+    area_hit: Option<(Spell, u8, bool)>,
+) -> Option<i32> {
     let stats = attacker.combat_stats;
     if stats.has_authoritative_damage() && target.combat_stats.agility > 0 {
         let roll = crate::runtime::combat::crystal_accuracy_roll(
@@ -13867,17 +14767,27 @@ fn zone_resolve_player_pvp_physical_attack(
             base,
             zone_player_buff_stat_total(attacker, CRYSTAL_STAT_MAX_DC_RATE_PERCENT),
         );
+        let base = zone_melee_area_damage_base(base, area_hit);
         zone_apply_player_critical(base, &stats, attacker.object_id, now_ms)
     } else {
-        zone_player_native_damage(attacker, fallback_damage)
+        zone_melee_area_damage_base(
+            zone_player_native_damage(attacker, fallback_damage),
+            area_hit,
+        )
     };
     // Keep the browser acceptance accelerator consistent for native monsters
     // and PvP. Production remains exact because the explicit QA environment
     // variable defaults to one; accuracy and armour are still resolved before
     // the accepted hit is amplified.
     Some(
-        zone_player_native_incoming_damage(target, base, false, now_ms)
-            .saturating_mul(qa_natural_kill_damage_multiplier()),
+        zone_player_native_incoming_damage_with_armour(
+            target,
+            base,
+            false,
+            now_ms,
+            !area_hit.is_some_and(|(_, _, secondary)| secondary),
+        )
+        .saturating_mul(qa_natural_kill_damage_multiplier()),
     )
 }
 
@@ -14072,6 +14982,16 @@ fn zone_player_native_incoming_damage(
     magic: bool,
     now_ms: u64,
 ) -> i32 {
+    zone_player_native_incoming_damage_with_armour(player, base_damage, magic, now_ms, true)
+}
+
+fn zone_player_native_incoming_damage_with_armour(
+    player: &ZonePlayer,
+    base_damage: i32,
+    magic: bool,
+    now_ms: u64,
+    subtract_armour: bool,
+) -> i32 {
     let buff_armour = zone_player_buff_stat_total(
         player,
         if magic {
@@ -14096,10 +15016,14 @@ fn zone_player_native_incoming_damage(
         player.object_id,
         if magic { 0x3AC } else { 0x4AC },
     );
-    let mitigated = base_damage
-        .max(0)
-        .saturating_sub(buff_armour)
-        .saturating_sub(base_armour);
+    let mitigated = if subtract_armour {
+        base_damage
+            .max(0)
+            .saturating_sub(buff_armour)
+            .saturating_sub(base_armour)
+    } else {
+        base_damage.max(0)
+    };
     let reduction_percent =
         zone_player_buff_stat_total(player, CRYSTAL_STAT_DAMAGE_REDUCTION_PERCENT).clamp(0, 100);
     mitigated
@@ -15071,6 +15995,7 @@ fn shared_object_actor_id(packet: &ServerPacket) -> Option<u32> {
 
 fn shared_object_result_id(packet: &ServerPacket) -> Option<u32> {
     match packet {
+        ServerPacket::ObjectHarvested { movement } => Some(movement.object_id),
         ServerPacket::ObjectHealth { info } => Some(info.object_id),
         ServerPacket::ObjectMana { info } => Some(info.object_id),
         ServerPacket::DamageIndicator { object_id, .. } => Some(*object_id),
@@ -15259,6 +16184,10 @@ fn zone_hazard_hash(a: u64, b: u64) -> u64 {
 fn zone_hazard_interval_ms(strike_index: u64, salt: u64) -> u64 {
     3_000 + zone_hazard_hash(strike_index, salt) % 12_000
 }
+
+#[cfg(test)]
+#[path = "movement_deadline_tests.rs"]
+mod movement_deadline_tests;
 
 #[cfg(test)]
 mod door_tests {
@@ -16099,6 +17028,123 @@ mod pvp_tests {
 }
 
 #[cfg(test)]
+mod magic_shield_lifecycle_tests {
+    use super::*;
+    use crate::runtime::zone::types::{ZoneChatProfile, ZonePlayerCombatStats};
+    use mir2_protocol::{MirClass, MirGender};
+
+    fn join_player(zone: &mut ZoneRuntime, id: &str, object_id: u32) -> SessionId {
+        let session_id = SessionId::new(id);
+        zone.handle(ZoneCommand::Join(ZoneJoin {
+            session_id: session_id.clone(),
+            account_id: format!("acct-{id}"),
+            character_index: 0,
+            object_id,
+            name: id.to_owned(),
+            class: MirClass::Wizard,
+            gender: MirGender::Male,
+            level: 30,
+            hp: 500,
+            max_hp: 500,
+            mp: 100,
+            map_file_name: "0".to_owned(),
+            position: Point { x: 50, y: 50 },
+            direction: MirDirection::Down,
+            chat_profile: ZoneChatProfile::default(),
+            combat_stats: ZonePlayerCombatStats::default(),
+        }));
+        session_id
+    }
+
+    fn has_packet(
+        outbounds: &[ZoneOutbound],
+        predicate: impl Fn(&ServerPacket) -> bool,
+    ) -> bool {
+        outbounds.iter().any(|outbound| {
+            let packets = match outbound {
+                ZoneOutbound::ToSession { packets, .. }
+                | ZoneOutbound::ToMany { packets, .. }
+                | ZoneOutbound::ToAll { packets } => packets,
+                _ => return false,
+            };
+            packets.iter().any(&predicate)
+        })
+    }
+
+    #[test]
+    fn magic_shield_expiry_emits_down_and_late_join_packet_restores_up() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let session_id = join_player(&mut zone, "shielded", 101);
+        let packets = zone.apply_native_player_magic_shield(&session_id, 2, 0, 10);
+        assert!(packets.iter().any(|packet| matches!(
+            packet,
+            ServerPacket::ObjectEffect { info }
+                if info.object_id == 101 && info.effect == CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP
+        )));
+
+        let late_join_packet = crate::runtime::zone::packets::object_player_packet(
+            zone.players.get(&session_id).expect("shielded player"),
+        );
+        assert!(matches!(
+            late_join_packet,
+            ServerPacket::ObjectPlayer { info }
+                if info.effect == CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_UP
+                    && info.buffs.contains(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE)
+        ));
+
+        let expired = zone.expire_buffs(15_010);
+        assert!(has_packet(&expired, |packet| matches!(
+            packet,
+            ServerPacket::RemoveBuff {
+                object_id: 101,
+                buff_type: CRYSTAL_MAGIC_SHIELD_BUFF_TYPE
+            }
+        )));
+        assert!(has_packet(&expired, |packet| matches!(
+            packet,
+            ServerPacket::ObjectEffect { info }
+                if info.object_id == 101
+                    && info.effect == CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_DOWN
+        )));
+        assert!(!zone.players[&session_id]
+            .buffs
+            .contains_key(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE));
+    }
+
+    #[test]
+    fn magic_shield_is_removed_with_down_when_player_dies() {
+        let mut zone =
+            ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+        let session_id = join_player(&mut zone, "shielded", 101);
+        zone.apply_native_player_magic_shield(&session_id, 2, 0, 10);
+        zone.sync_player_vitals(&session_id, 2, 500, 100);
+        let strike = (0..100)
+            .find(|&index| zone_hazard_hash(index, 7) % 100 > 2)
+            .expect("bounded lethal hazard seed");
+
+        let outbounds = zone.apply_hazard_damage(&session_id, 101, 100, strike, 7, 1_000);
+
+        assert!(has_packet(&outbounds, |packet| matches!(
+            packet,
+            ServerPacket::RemoveBuff {
+                object_id: 101,
+                buff_type: CRYSTAL_MAGIC_SHIELD_BUFF_TYPE
+            }
+        )));
+        assert!(has_packet(&outbounds, |packet| matches!(
+            packet,
+            ServerPacket::ObjectEffect { info }
+                if info.object_id == 101
+                    && info.effect == CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_DOWN
+        )));
+        assert!(!zone.players[&session_id]
+            .buffs
+            .contains_key(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE));
+    }
+}
+
+#[cfg(test)]
 mod hazard_tests {
     use super::*;
     use crate::runtime::zone::collision::ZoneBounds;
@@ -16426,3 +17472,15 @@ mod shared_world_transaction_state_tests {
 
 #[cfg(test)]
 mod reward_rate_tests;
+
+#[cfg(test)]
+mod shared_harvest_tests;
+
+#[cfg(test)]
+mod soulfire_practice_tests;
+
+#[cfg(test)]
+mod safe_zone_profile_tests;
+
+#[cfg(test)]
+mod player_magic_cooldown_tests;

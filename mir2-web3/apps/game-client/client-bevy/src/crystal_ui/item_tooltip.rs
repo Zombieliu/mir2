@@ -56,7 +56,7 @@ pub struct CrystalItemTooltipLine {
 impl CrystalItemTooltipLine {
     fn new(text: impl Into<String>, colour: CrystalItemTooltipColour) -> Self {
         Self {
-            text: text.into(),
+            text: crate::native_i18n::tr(&text.into()),
             colour,
         }
     }
@@ -86,6 +86,21 @@ impl CrystalItemTooltipSection {
 
     fn push_white(&mut self, text: impl Into<String>) {
         self.lines.push(CrystalItemTooltipLine::white(text));
+    }
+
+    fn push_formatted(
+        &mut self,
+        key: &str,
+        fallback: &str,
+        args: &[(&str, &str)],
+        colour: CrystalItemTooltipColour,
+    ) {
+        // These values already have explicit source slots. Do not flatten and
+        // then try to recover adjacent sign/value arguments from visible text.
+        self.lines.push(CrystalItemTooltipLine {
+            text: crate::native_i18n::format_key(key, fallback, args),
+            colour,
+        });
     }
 }
 
@@ -468,18 +483,30 @@ fn attack_section(
     let added_luck = total_added_stat(user, source, 15, hide_added_stats);
     if luck != 0 || added_luck != 0 {
         let total = luck + added_luck;
-        let text = if info.item_type == 36 && info.shape == 28 {
-            format!("BagWeight + {total}%")
+        let percentage = if info.item_type == 36 && info.shape == 28 {
+            Some(("client.BagWeightPercent", "BagWeight + {0}%"))
         } else if info.item_type == 13 && info.shape == 4 {
-            format!("Exp + {total}%")
+            Some(("client.ExpPercent", "Exp + {0}%"))
         } else if info.item_type == 13 && info.shape == 5 {
-            format!("Drop + {total}%")
-        } else if total > 0 {
-            format!("Luck + {total}")
+            Some(("client.DropPercent", "Drop + {0}%"))
         } else {
-            format!("Curse + {}", total.unsigned_abs())
+            None
         };
-        section.push(text, added_colour(added_luck));
+        if let Some((key, fallback)) = percentage {
+            section.push_formatted(
+                key,
+                fallback,
+                &[("0", &total.to_string())],
+                added_colour(added_luck),
+            );
+        } else {
+            let text = if total > 0 {
+                format!("Luck + {total}")
+            } else {
+                format!("Curse + {}", total.unsigned_abs())
+            };
+            section.push(text, added_colour(added_luck));
+        }
     }
     push_single_stat_variant(
         &mut section,
@@ -500,16 +527,25 @@ fn attack_section(
     let added_attack_speed = total_added_stat(user, source, 14, hide_added_stats);
     if attack_speed != 0 || added_attack_speed != 0 {
         let total = attack_speed + added_attack_speed;
-        let text = if gem {
-            format!("Adds +{total} A.Speed")
+        if gem {
+            section.push(
+                format!("Adds +{total} A.Speed"),
+                added_colour(added_attack_speed),
+            );
         } else {
-            format!(
-                "A.Speed: {}{total}{}",
-                if total < 0 { "" } else { "+" },
-                signed_added_suffix(added_attack_speed)
-            )
-        };
-        section.push(text, added_colour(added_attack_speed));
+            section.push_formatted(
+                "client.AttackSpeedValue",
+                "A.Speed: {0}{1}",
+                &[
+                    ("0", if total < 0 { "" } else { "+" }),
+                    (
+                        "1",
+                        &format!("{total}{}", signed_added_suffix(added_attack_speed)),
+                    ),
+                ],
+                added_colour(added_attack_speed),
+            );
+        }
     }
 
     push_single_stat_variant(
@@ -1250,18 +1286,27 @@ fn push_rate_stat(
     let added = total_added_stat(user, source, stat, hide_added_stats);
     if base != 0 || added != 0 {
         let total = base + added;
-        section.push(
-            format!(
-                "{label}{}{total}%{}",
-                if total >= 0 { "+" } else { "" },
-                if added == 0 {
-                    String::new()
-                } else {
-                    format!(" ({added:+}%)")
-                }
-            ),
-            added_colour(added),
+        let key = match stat {
+            100 => "client.ExpRate",
+            101 => "client.DropRate",
+            102 => "client.GoldRate",
+            _ => "", // Preserve the caller's explicit fallback for other source stats.
+        };
+        let mut text = crate::native_i18n::format_key(
+            key,
+            &format!("{label}{{0}}{{1}}%"),
+            &[
+                ("0", if total >= 0 { "+" } else { "" }),
+                ("1", &total.to_string()),
+            ],
         );
+        if added != 0 {
+            text.push_str(&format!(" ({added:+}%)"));
+        }
+        section.lines.push(CrystalItemTooltipLine {
+            text,
+            colour: added_colour(added),
+        });
     }
 }
 
@@ -1363,19 +1408,20 @@ fn added_colour(value: i32) -> CrystalItemTooltipColour {
     }
 }
 
-fn display_name(item: &ItemModel) -> &str {
-    if item.name.is_empty() {
+fn display_name(item: &ItemModel) -> String {
+    let source = if item.name.is_empty() {
         item.key.as_str()
     } else {
         item.name.as_str()
-    }
+    };
+    crate::player_text::name(source)
 }
 
 fn user_item_friendly_name(item: &ItemModel, user: Option<&CrystalUserItemModel>) -> String {
     let name = display_name(item);
     match user.map(|user| user.count).filter(|count| *count > 1) {
         Some(count) => format!("{name} ({count})"),
-        None => name.to_owned(),
+        None => name,
     }
 }
 
@@ -1389,7 +1435,7 @@ fn user_item_weight(info: &CrystalItemInfoModel, user: Option<&CrystalUserItemMo
 }
 
 fn socket_friendly_name(info: &CrystalItemInfoModel, count: u16) -> String {
-    let name = crystal_info_friendly_name(&info.name);
+    let name = crate::player_text::name(&crystal_info_friendly_name(&info.name));
     if count > 1 {
         format!("{name} ({count})")
     } else {
@@ -1688,6 +1734,131 @@ mod tests {
     }
 
     #[test]
+    fn native_percentage_item_tooltips_use_complete_source_keys() {
+        use crate::native_i18n::{self, Locale};
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                for (item_type, shape, key) in [
+                    (36, 28, "client.BagWeightPercent"),
+                    (13, 4, "client.ExpPercent"),
+                    (13, 5, "client.DropPercent"),
+                ] {
+                    let mut item = potion();
+                    let source = item.tooltip_source.as_mut().unwrap();
+                    source.info.item_type = item_type;
+                    source.info.shape = shape;
+                    source.info.stats = vec![CrystalItemStatModel {
+                        stat: 15,
+                        value: 12,
+                    }];
+                    let before = item.clone();
+                    let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
+                    let expected = native_i18n::format_key(key, "", &[("0", "12")]);
+                    assert!(
+                        document
+                            .sections
+                            .iter()
+                            .flat_map(|s| &s.lines)
+                            .any(|line| line.text == expected)
+                    );
+                    assert_eq!(item, before, "display must not rewrite source stats");
+                }
+            });
+        }
+    }
+
+    #[test]
+    fn native_signed_rates_preserve_separate_sign_value_and_added_stats() {
+        use crate::native_i18n::{self, Locale};
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                let mut item = potion();
+                let source = item.tooltip_source.as_mut().unwrap();
+                source.info.item_type = 1;
+                source.info.stats = vec![
+                    CrystalItemStatModel {
+                        stat: 100,
+                        value: 12,
+                    },
+                    CrystalItemStatModel {
+                        stat: 101,
+                        value: -12,
+                    },
+                    CrystalItemStatModel {
+                        stat: 102,
+                        value: 7,
+                    },
+                    CrystalItemStatModel { stat: 14, value: 2 },
+                ];
+                source.user_item.as_mut().unwrap().added_stats = vec![CrystalItemStatModel {
+                    stat: 100,
+                    value: 3,
+                }];
+                let before = item.clone();
+                let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
+                let lines = document
+                    .sections
+                    .iter()
+                    .flat_map(|s| &s.lines)
+                    .map(|line| line.text.as_str())
+                    .collect::<Vec<_>>();
+                for (key, sign, value, suffix) in [
+                    ("client.ExpRate", "+", "15", " (+3%)"),
+                    ("client.DropRate", "", "-12", ""),
+                    ("client.GoldRate", "+", "7", ""),
+                    ("client.AttackSpeedValue", "+", "2", ""),
+                ] {
+                    let expected =
+                        native_i18n::format_key(key, "", &[("0", sign), ("1", value)]) + suffix;
+                    assert!(
+                        lines.contains(&expected.as_str()),
+                        "missing {expected:?} in {lines:?}"
+                    );
+                }
+                assert_eq!(item, before);
+            });
+        }
+    }
+
+    #[test]
+    fn localized_item_names_keep_instance_count_refine_prefix_and_source_identity() {
+        let mut item = potion();
+        item.name = "(MP)DrugSmall".to_owned();
+        item.tooltip_source
+            .as_mut()
+            .unwrap()
+            .user_item
+            .as_mut()
+            .unwrap()
+            .refine_added = 1;
+        let before = item.clone();
+        let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
+        assert_eq!(document.sections[0].lines[0].text, "(*)小型蓝药 (5)");
+        assert_eq!(
+            item, before,
+            "display translation cannot rewrite carried item data"
+        );
+
+        let mut socket = CrystalItemInfoModel {
+            name: "Amulet[Practice]12".to_owned(),
+            ..Default::default()
+        };
+        assert_eq!(socket_friendly_name(&socket, 100), "护身符 (100)");
+        assert_eq!(socket_friendly_name(&socket, 1), "护身符");
+        assert_eq!(socket.name, "Amulet[Practice]12");
+        socket.name = "CustomItem".to_owned();
+        assert_eq!(socket_friendly_name(&socket, 2), "CustomItem (2)");
+
+        item.tooltip_source = None;
+        item.name.clear();
+        item.key = "GreenPoison".to_owned();
+        assert_eq!(
+            crystal_item_tooltip_document(&item, &PlayerStats::default()).sections[0].lines[0].text,
+            "绿毒粉"
+        );
+    }
+
+    #[test]
     fn common_potion_follows_crystal_section_order_and_instance_count_weight() {
         let document = crystal_item_tooltip_document(&potion(), &PlayerStats::default());
         assert!(document.source_complete);
@@ -1706,7 +1877,7 @@ mod tests {
         );
         assert_eq!(
             document.plain_text(),
-            "Small HP Drug (5)\nPotion\nW: 5\nMax HP + 30\nSelling Price : 100 Gold\nMax Combine Count : 20\nShift + Left click to split the stack"
+            "小型红药 (5)\nPotion\nW: 5\nMax HP + 30\nSelling Price : 100 Gold\nMax Combine Count : 20\nShift + Left click to split the stack"
         );
         assert!(!document.plain_text().contains("Quantity"));
     }
@@ -1836,7 +2007,7 @@ mod tests {
         let document = crystal_item_tooltip_document(&item, &player);
         assert_eq!(
             document.plain_text(),
-            "Wooden Sword\nCommon\nWeapon\nW: 4  Durability: 3/4\nDC + 2~5 (+1)\nRequired Level : 5\nSelling Price : 25 Gold"
+            "木剑\nCommon\nWeapon\nW: 4  Durability: 3/4\nDC + 2~5 (+1)\nRequired Level : 5\nSelling Price : 25 Gold"
         );
         let required = document
             .sections
@@ -2048,11 +2219,13 @@ mod tests {
         };
         let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
         assert!(!document.source_complete);
-        assert!(!document
-            .sections
-            .iter()
-            .flat_map(|section| section.lines.iter())
-            .any(|line| line.text == "Potion"));
+        assert!(
+            !document
+                .sections
+                .iter()
+                .flat_map(|section| section.lines.iter())
+                .any(|line| line.text == "Potion")
+        );
         assert!(document.plain_text().contains("Item Description"));
     }
 }

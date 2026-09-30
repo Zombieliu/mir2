@@ -1,0 +1,16 @@
+{
+  "family": "Noto Sans TC",
+  "file": "NotoSansTC.ttf",
+  "source": "https://github.com/google/fonts/tree/main/ofl/notosanstc",
+  "downloadUrl": "https://raw.githubusercontent.com/google/fonts/main/ofl/notosanstc/NotoSansTC%5Bwght%5D.ttf",
+  "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+  "bytes": 11941968,
+  "license": "SIL Open Font License 1.1",
+  "licenseFile": "OFL.txt",
+  "licenseSha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9",
+  "sfntFamilies": [
+    "Noto Sans TC",
+    "Noto Sans TC Thin"
+  ],
+  "embedding": "Unmodified variable font embedded in the native executable; OFL accompanies redistribution."
+}

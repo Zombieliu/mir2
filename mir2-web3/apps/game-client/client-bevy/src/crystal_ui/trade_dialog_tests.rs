@@ -224,6 +224,13 @@ fn app() -> App {
 fn rect(node: &Node) -> (Val, Val, Val, Val) {
     (node.left, node.top, node.width, node.height)
 }
+fn px_value(value: Val) -> f32 {
+    match value {
+        Val::Px(value) => value,
+        Val::Auto => 0.0,
+        other => panic!("Unexpected stage-coordinate unit: {other:?}"),
+    }
+}
 fn values(r: CrystalRect) -> (Val, Val, Val, Val) {
     (
         Val::Px(r.left),
@@ -250,9 +257,21 @@ fn trade_dialog_ecs_has_original_pair_positions_and_twenty_uncompacted_cells() {
     app.update();
     let world = app.world_mut();
     let windows = world
-        .query::<(&TradeSide, &Node)>()
+        .query::<(Entity, &TradeSide, &Node)>()
         .iter(world)
-        .map(|(s, n)| (*s, rect(n)))
+        .map(|(entity, side, node)| {
+            // The Android focus adapter wraps the pair in a movable shared
+            // parent. Verify authored stage positions, not child-local offsets.
+            let mut position = Vec2::new(px_value(node.left), px_value(node.top));
+            let mut child = entity;
+            while let Some(parent) = world.get::<ChildOf>(child) {
+                child = parent.parent();
+                if let Some(ancestor) = world.get::<Node>(child) {
+                    position += Vec2::new(px_value(ancestor.left), px_value(ancestor.top));
+                }
+            }
+            (*side, (Val::Px(position.x), Val::Px(position.y), node.width, node.height))
+        })
         .collect::<Vec<_>>();
     assert_eq!(windows.len(), 2);
     assert!(windows.contains(&(TradeSide::Own, values(OWN_RECT))));

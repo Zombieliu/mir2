@@ -1,5 +1,23 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-09-30 原生三语与 DPI 修复：zh-TW/en/pt-BR 的登录、创建角色、
+> 任务/NPC、商店/背包、选项、帮助等界面已接入翻译及内置字体。
+> 共享1147、Windows777、词库工具12项通过；47张实际离线GPU截图通过，
+> 90次语言切换字体图集稳定在16MiB。移除高DPI下放大客户区的逻辑尺寸约束，
+> 并测试跨显示器尺寸恢复。外星人笔记本复测、全新安装及真人三语流程仍待验证；
+> 不等同全游戏验收。干净97144d6a0发布版、123030文件签名校验通过，
+> 三语x64安装包已构建，名称统一为 Numeron - Legend of Rebirth。
+> [安装包与校验值](generated/player-qa/native-multilingual-20260930/release/README.md)。
+> [证据与复现](generated/player-qa/native-multilingual-20260930/README.md)。
+
+> 2026-09-29 创建/选角预览：男女五职业共192张源帧逐像素与原版一致。
+> 修正法师特效混合方式、名字/焦点变化重置动画；离线实际GPU检查320帧、
+> 64张截图，16组法师叠加对照均未压暗底图。共享1108/原生768项通过。
+> Windows发布版GUI子系统与有上限的启动日志已验证，Candidate03完整性及
+> x64 r3安装包编译通过；实际安装升级与用户创建角色操作仍未验收。
+> 刺客/弓手仅检查既有绘制能力，未开放创建。
+> [证据与限制](generated/player-qa/invited-playtest-20260929/character-preview-startup.md)。
+
 > 2026-09-03 relocated-launch map repair: the native map locator resolves a
 > junction's physical asset root before looking for the development map pack.
 > Startup now requires/decodes map 0 and no longer labels an index alone as

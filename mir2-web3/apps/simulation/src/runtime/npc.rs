@@ -26,7 +26,7 @@ use super::crystal_compat::{
     CRYSTAL_GOODS_MAX_STORED_PER_ITEM, CRYSTAL_PANEL_BUY, CRYSTAL_PANEL_BUY_SUB,
     CRYSTAL_PANEL_CRAFT, GUIDE_NPC_ID,
 };
-use super::equipment::crystal_item_current_price;
+use super::equipment::{crystal_item_added_stat_weight, crystal_item_current_price};
 use super::inventory::{
     add_or_increment_item_with_durability_and_stats, binary_datetime_ticks, can_gain_item_quantity,
     current_binary_datetime, future_binary_datetime_minutes, item_matches_inventory_unique_id,
@@ -207,32 +207,33 @@ pub(super) fn localized_npc_dialog_base_key(npc_object_id: u32) -> String {
     }
 }
 
+pub(super) fn canonical_crystal_quest_npc_info(npc_index: u32) -> Option<CrystalNpcInfoTemplate> {
+    let npcs = crystal_npc_info_manifest().npcs;
+    npcs.iter()
+        .find(|npc| npc.loaded_object_id == Some(npc_index))
+        .cloned()
+        .or_else(|| {
+            let database_index = i32::try_from(npc_index).ok()?;
+            npcs.into_iter().find(|npc| npc.npc_index == database_index)
+        })
+}
+
+pub(super) fn canonical_crystal_quest_npc_object_id(npc_index: u32) -> u32 {
+    canonical_crystal_quest_npc_info(npc_index)
+        .and_then(|npc| npc.loaded_object_id)
+        .unwrap_or(npc_index)
+}
+
 pub(super) fn crystal_quest_ids_by_npc() -> BTreeMap<u32, BTreeSet<i32>> {
-    let npc_loaded_ids = crystal_npc_info_manifest()
-        .npcs
-        .into_iter()
-        .filter_map(|npc| Some((u32::try_from(npc.npc_index).ok()?, npc.loaded_object_id?)))
-        .collect::<BTreeMap<_, _>>();
     crystal_quest_packet_manifest().quests.into_iter().fold(
         BTreeMap::<u32, BTreeSet<i32>>::new(),
         |mut by_npc, quest| {
-            by_npc
-                .entry(quest.npc_index)
-                .or_default()
-                .insert(quest.index);
-            if let Some(loaded_object_id) = npc_loaded_ids.get(&quest.npc_index) {
+            for npc_index in [quest.npc_index, quest.finish_npc_index] {
+                if npc_index == 0 {
+                    continue;
+                }
                 by_npc
-                    .entry(*loaded_object_id)
-                    .or_default()
-                    .insert(quest.index);
-            }
-            by_npc
-                .entry(quest.finish_npc_index)
-                .or_default()
-                .insert(quest.index);
-            if let Some(loaded_object_id) = npc_loaded_ids.get(&quest.finish_npc_index) {
-                by_npc
-                    .entry(*loaded_object_id)
+                    .entry(canonical_crystal_quest_npc_object_id(npc_index))
                     .or_default()
                     .insert(quest.index);
             }
@@ -246,6 +247,16 @@ pub(super) fn crystal_npc_visible_to_character(
     character: &CharacterRecord,
     npc_flags: &[NpcFlagState],
     local_time: CrystalNpcLocalTime,
+) -> bool {
+    crystal_npc_visible_to_character_for_profile(npc, character, npc_flags, local_time, false)
+}
+
+pub(super) fn crystal_npc_visible_to_character_for_profile(
+    npc: &CrystalNpcInfoTemplate,
+    character: &CharacterRecord,
+    npc_flags: &[NpcFlagState],
+    local_time: CrystalNpcLocalTime,
+    newcomer_v1: bool,
 ) -> bool {
     if npc.flag_needed != 0 {
         let Ok(flag_index) = u32::try_from(npc.flag_needed) else {
@@ -278,7 +289,11 @@ pub(super) fn crystal_npc_visible_to_character(
     {
         return false;
     }
-    if npc.time_visible {
+    let ignores_time_window = newcomer_v1
+        && super::quests::newcomer_progression::keeps_npc_available_outside_time_window(
+            npc.loaded_object_id,
+        );
+    if npc.time_visible && !ignores_time_window {
         let start = u16::from(npc.hour_start) * 60 + u16::from(npc.minute_start);
         let finish = u16::from(npc.hour_end) * 60 + u16::from(npc.minute_end);
         if start > local_time.minute_of_day || finish <= local_time.minute_of_day {
@@ -301,11 +316,12 @@ pub(super) fn crystal_npc_visible_in_world(world: &World, npc: &CrystalNpcInfoTe
     } else {
         CrystalNpcLocalTime::new(0, 0, 0)
     };
-    crystal_npc_visible_to_character(
+    crystal_npc_visible_to_character_for_profile(
         npc,
         character,
         &world.resource::<NpcStateResource>().npc_flags,
         local_time,
+        super::quests::newcomer_progression::enabled(world),
     )
 }
 
@@ -1256,13 +1272,7 @@ pub(super) fn sell_item_impl(world: &mut World, unique_id: u64, count: u16) -> V
 pub(super) fn crystal_sell_value_for_item(item: &ItemState) -> u32 {
     crystal_item_template_for_item_key(&item.key)
         .map(|template| {
-            let added_stat_count = merged_user_item_stats(
-                &item.added_stats,
-                item.added_defence,
-                item.added_attack,
-                None,
-            )
-            .len();
+            let added_stat_count = crystal_item_added_stat_weight(item);
             crystal_item_current_price(item, &template, added_stat_count) / 2
         })
         .unwrap_or_else(|| u32::from(item.weight.max(1)) * item.quantity.max(1))
@@ -1271,3 +1281,7 @@ pub(super) fn crystal_sell_value_for_item(item: &ItemState) -> u32 {
 #[cfg(test)]
 #[path = "npc_pearl_tests.rs"]
 mod pearl_tests;
+
+#[cfg(test)]
+#[path = "newcomer_npc_visibility_tests.rs"]
+mod newcomer_npc_visibility_tests;

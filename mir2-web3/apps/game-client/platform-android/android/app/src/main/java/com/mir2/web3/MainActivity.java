@@ -43,6 +43,7 @@ public final class MainActivity extends GameActivity {
     private OkHttpClient client;
     private EditText ime;
     private String editing = "";
+    private long editorEpoch;
     private boolean updating, foreground, sensitiveEditor, imeWasVisible, multilineEditor;
     private Boolean networkReportedAvailable;
 
@@ -56,7 +57,7 @@ public final class MainActivity extends GameActivity {
             // A newline in a long-form shared draft is text, not SubmitMail or
             // a guild operation. Leave it to the normal EditText connection.
             if (multilineEditor && (action == EditorInfo.IME_NULL || action == EditorInfo.IME_ACTION_NONE)) return false;
-            nativeEvent(GatewaySession.object("type", "submit", "field", editing).toString());
+            nativeEvent(GatewaySession.object("type", "submit", "field", editing, "editorEpoch", editorEpoch).toString());
             hideKeyboard();
             return true;
         });
@@ -84,7 +85,7 @@ public final class MainActivity extends GameActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 if (!updating && !editing.isEmpty()) {
                     if (sensitiveEditor) getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
-                    nativeEvent(GatewaySession.object("type", "edit", "field", editing, "text", s.toString()).toString());
+                    nativeEvent(GatewaySession.object("type", "edit", "field", editing, "editorEpoch", editorEpoch, "text", s.toString()).toString());
                 }
             }
             public void afterTextChanged(Editable s) {}
@@ -182,6 +183,7 @@ public final class MainActivity extends GameActivity {
                         case "disconnect": session.disconnect("Disconnected. Reconnect to refresh server state."); break;
                         case "keyboard":
                             editing = command.getString("field");
+                            editorEpoch = command.getLong("editorEpoch");
                             sensitiveEditor = command.optBoolean("password") || editing.contains("account");
                             multilineEditor = command.optBoolean("multiline") && !sensitiveEditor && !command.optBoolean("numeric");
                             updating = true;
@@ -236,6 +238,7 @@ public final class MainActivity extends GameActivity {
 
     private void hideKeyboard() {
         editing = "";
+        editorEpoch = 0;
         updating = true;
         ime.setText("");
         updating = false;

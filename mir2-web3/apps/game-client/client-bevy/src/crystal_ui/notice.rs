@@ -42,6 +42,9 @@ pub struct NoticeDialogState {
     generation: u64,
     sequence: u64,
     title: String,
+    source_title: String,
+    source_message: String,
+    locale_stamp: Option<(u64, crate::native_i18n::Locale)>,
     lines: Vec<String>,
     scroll_line: usize,
     has_update: bool,
@@ -92,8 +95,9 @@ impl NoticeDialogState {
             return false;
         }
 
-        self.title = update.title;
-        self.lines = normalize_notice_lines(&update.message);
+        self.source_title = update.title;
+        self.source_message = update.message;
+        self.refresh_locale();
         self.scroll_line = 0;
         self.visible = true;
         true
@@ -158,6 +162,34 @@ impl NoticeDialogState {
 
     fn maximum_scroll_line(&self) -> usize {
         self.lines.len().saturating_sub(NOTICE_MAXIMUM_LINES)
+    }
+
+    fn refresh_locale(&mut self) {
+        let (title, message) = notice_display_text(&self.source_title, &self.source_message);
+        self.title = title;
+        self.lines = normalize_notice_lines(&message);
+        self.scroll_line = self.scroll_line.min(self.maximum_scroll_line());
+        self.locale_stamp = Some((crate::native_i18n::revision(), crate::native_i18n::locale()));
+    }
+}
+
+const DEFAULT_NOTICE_TITLE: &str = "Welcome to Legend of Mir 2";
+const DEFAULT_NOTICE_MESSAGE: &str = "Welcome to the Legend of Mir 2 Server.\n\nThis is a development Candidate build.\nGameplay, data, and presentation may\nchange during development.\nPlease include the build identifier\nwhen reporting a problem.";
+
+fn notice_display_text(title: &str, message: &str) -> (String, String) {
+    // UpdateNotice can contain operator/player-authored prose. Only this exact
+    // source-authored login notice is system copy; never translate arbitrary
+    // notice text merely because it resembles a catalog word.
+    if crate::native_i18n::active()
+        && title == DEFAULT_NOTICE_TITLE
+        && message.replace("\r\n", "\n") == DEFAULT_NOTICE_MESSAGE
+    {
+        (
+            crate::native_i18n::key("shell.notice.default.title", title),
+            crate::native_i18n::key("shell.notice.default.message", message),
+        )
+    } else {
+        (title.to_owned(), message.to_owned())
     }
 }
 
@@ -338,9 +370,12 @@ fn spawn_notice_root(mut commands: Commands) {
 fn render_notice_dialog(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    state: Res<NoticeDialogState>,
+    mut state: ResMut<NoticeDialogState>,
     mut roots: Query<(Entity, &mut Node), With<CrystalNoticeRoot>>,
 ) {
+    if state.locale_stamp != Some((crate::native_i18n::revision(), crate::native_i18n::locale())) {
+        state.refresh_locale();
+    }
     if !state.is_changed() {
         return;
     }
@@ -492,6 +527,27 @@ fn spawn_notice_button(
     frames: CrystalNoticeButtonFrames,
     rect: (f32, f32, f32, f32),
 ) {
+    if crate::native_i18n::active() && action == CrystalNoticeAction::Ok {
+        parent.spawn((
+            Button,
+            action,
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(rect.0),
+                top: Val::Px(rect.1),
+                width: Val::Px(rect.2),
+                height: Val::Px(rect.3),
+                align_items: AlignItems::Center,
+                justify_content: JustifyContent::Center,
+                ..default()
+            },
+            BackgroundColor(Color::srgb(0.20, 0.14, 0.08)),
+            Text::new(crate::native_i18n::tr("OK")),
+            crystal_text_font(NOTICE_BODY_FONT_PX),
+            TextColor(Color::WHITE),
+        ));
+        return;
+    }
     parent.spawn((
         Button,
         action,
@@ -575,6 +631,50 @@ fn notice_asset(library: &str, index: u16) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn native_notice_localizes_only_the_exact_system_notice_before_wrapping() {
+        use crate::native_i18n::{self, Locale};
+        let mut state = NoticeDialogState::default();
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                if !state.has_update {
+                    state.observe(NoticePacketUpdate {
+                        generation: 1,
+                        sequence: 1,
+                        title: DEFAULT_NOTICE_TITLE.into(),
+                        message: DEFAULT_NOTICE_MESSAGE.replace('\n', "\r\n"),
+                    });
+                } else {
+                    state.refresh_locale();
+                }
+                assert_eq!(state.source_title, DEFAULT_NOTICE_TITLE);
+                assert_eq!(
+                    state.source_message.replace("\r\n", "\n"),
+                    DEFAULT_NOTICE_MESSAGE
+                );
+                assert_eq!(
+                    state.title(),
+                    native_i18n::key("shell.notice.default.title", DEFAULT_NOTICE_TITLE)
+                );
+                assert!(
+                    state
+                        .lines()
+                        .iter()
+                        .all(|line| UnicodeWidthStr::width(line.as_str())
+                            <= NOTICE_BODY_WRAP_COLUMNS)
+                );
+                assert_eq!(
+                    notice_display_text("Password", "Warrior"),
+                    ("Password".into(), "Warrior".into())
+                );
+                assert_eq!(
+                    notice_display_text(DEFAULT_NOTICE_TITLE, "Warrior"),
+                    (DEFAULT_NOTICE_TITLE.into(), "Warrior".into())
+                );
+            });
+        }
+    }
 
     fn update(generation: u64, sequence: u64, message: impl Into<String>) -> NoticePacketUpdate {
         NoticePacketUpdate {
@@ -665,9 +765,11 @@ mod tests {
             "By clicking close and continuing to play the game you are agreeing to the terms of service above.",
         );
         assert!(lines.len() > 1, "expected notice body to wrap");
-        assert!(lines
-            .iter()
-            .all(|line| UnicodeWidthStr::width(line.as_str()) <= NOTICE_BODY_WRAP_COLUMNS));
+        assert!(
+            lines
+                .iter()
+                .all(|line| UnicodeWidthStr::width(line.as_str()) <= NOTICE_BODY_WRAP_COLUMNS)
+        );
     }
 
     #[test]
@@ -675,8 +777,10 @@ mod tests {
         let lines = normalize_notice_lines("Line one\r\n\r\nSUPERCODESUPERCODESUPERCODESUPERCODE");
         assert_eq!(lines[0], "Line one");
         assert_eq!(lines[1], "");
-        assert!(lines[2..]
-            .iter()
-            .all(|line| UnicodeWidthStr::width(line.as_str()) <= NOTICE_BODY_WRAP_COLUMNS));
+        assert!(
+            lines[2..]
+                .iter()
+                .all(|line| UnicodeWidthStr::width(line.as_str()) <= NOTICE_BODY_WRAP_COLUMNS)
+        );
     }
 }

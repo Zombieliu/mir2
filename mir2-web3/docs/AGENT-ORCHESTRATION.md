@@ -1,5 +1,128 @@
 # Agent Orchestration
 
+> 2026-09-29 invited playtest delivered: fixed native d33708e1f/Gateway20aeb345f
+> pair, standalone signed-manifest ZIP, isolated public PostgreSQL/Redis realm,
+> ordinary two-account11/11 and native-resume protocol9/9. Exact extracted EXE
+> logged in over WSS and rendered scene/quest/map/bag. Original production and
+> accepted Warrior save are preserved. Gateway813 unique passes/8 unexecuted
+> environment checks are resolved across documented runs, not a clean second
+> full pass. Clean-PC/DPI/soak, GUI reconnect, server restart, capacity, casters,
+> full Chinese text and panel-click consumption remain follow-ups. No 100% claim.
+> [Evidence](generated/player-qa/invited-playtest-20260929/README.md).
+
+> 2026-09-28 caster-supply candidate: Chinese newcomer quest/supply UI now
+> checks eligible carried stock and offers class-aware ordinary vendor routes.
+> V2 departure checks cover MP/poison and receipted minimum-first purchases.
+> Shared 1100/native 749/Node 166, the native release build and an explicit
+> offline GPU fixture pass. Three screenshots verify layout, not authenticated
+> gameplay. Warrior acceptance is retained; fresh caster 0–30/save/supply gates
+> and legacy English prose/UI remain open. No save edits or global parity claim.
+> Source `dee30a74d` is pushed and deployed to the local development package
+> (client52320/Gateway33580), with the original backed-up store and diagnostics.
+> [Evidence](generated/player-qa/ui-goal-20260921/caster-supplies-chinese-20260928.md).
+
+> 2026-09-24 player acceptance: the user reports Warrior 0–30 gameplay passed
+> on the current practice/combat candidate. Wizard and Taoist remain open.
+> Before their independent routes, close class-specific supply guidance and
+> V2 departure checks for MP/poison; one-time small medicine rewards do not
+> prove sustainable supplies. Preserve historical timing/death ledgers and
+> the accepted Warrior save. No whole-game or three-class acceptance follows.
+> [Class/supply audit](generated/player-qa/ui-goal-20260921/caster-acceptance-supplies-20260924.md).
+
+> 2026-09-24 latest candidate supersedes the earlier V2 nine-actor training
+> setup: nine separated D022 points now have three actors each (spread3),
+> with the same training HP and respawn cadence. All nine points are reachable
+> and have space for the groups; new three-class survival is not yet accepted.
+> Exact skill requirements and training-point navigation are visible in native
+> UI. Thrusting primary/secondary damage, accepted weapon progression and
+> native animation/motion clock alignment are tested. Matched release package
+> `20260924-practice-combat`, source `abee09b21`, was deployed after confirmed
+> normal logout on September 24 at 06:02 +08:00. Client55648 connects to
+> Gateway61900 with the original store/keys and a verified save backup.
+> Movement/render/soak diagnostics are active. D021 performance still
+> requires same-scene replay after measured resource-lookup and render changes.
+> [Evidence](generated/player-qa/ui-goal-20260921/practice-combat-render-20260924.md).
+
+> 2026-09-19 latest V2 handoff: strict cohort B ended 66/78, levels 28/26/27,
+> with matching normal logout saves; Wizard's fourth death invalidates its
+> two-hour/three-revival gate. The separate functional recheck retains old
+> clocks/deaths. Warrior N21 HalfMoon now has public spell-4/positive-damage
+> receipts after shared-Zone directional repair, but its next Thrusting swing
+> arrived during the server's 600 ms action lock; a 650 ms class-practice
+> spacing regression passes. Warrior later dealt only 144 damage to a 285-HP
+> imported WoomaFighter in the fixed 20-attack budget. Taoist N20 bought real
+> Amulets, used an owned BoneFamiliar, and suffered one ordinary death before
+> a blocked D021→D022 transfer paused its run. The familiar's one-damage
+> generic fallback contradicts its imported 12–23 DC; focused correction
+> passes. Candidate V2 content now has nine separated training actors (three
+> per quest target) and 120 HP on training Wooma only, preserving full-strength
+> imported actors and normal respawn timing. V2 runner targets only those
+> authored IDs; Node V2/combat tests pass 59/59 and 161/161, focused Rust
+> spawn integration 1/1. Rebuilt deployment and fresh live proof remain open. No 78/78 or visual
+> acceptance claim follows yet.
+
+> 2026-09-19 D022 safety correction: cohort B's Wizard completed N12 and
+> N16, then died a fourth time during N19 at (248,284). Six nearby Wooma
+> were present, including the three tightly grouped V2 WoomaSoldier spawns.
+> Its three lawful revivals were already spent, so strict cohort B 78/78 is
+> impossible. The next candidate separates one V2 monster per foothold at
+> (335,360), (320,345), and (300,335), with ordinary respawn waits. Static
+> collision paths and Node 57/57 pass; live safety and saved completion are
+> still unverified. Preserve the original 120-minute clocks and all deaths.
+
+> 2026-09-19 14:39 UTC strict saved cohort B check: 66/78, Warrior 23/26
+> level 28, Wizard 21/26 level 26, Taoist 22/26 level 27. All three had
+> normal logout and matching saved transforms. Warrior paused on N21 search;
+> Taoist consumed its real Amulets during N20, fell back to melee, and hit the
+> unchanged 20-action cap. A V2-only ordinary shop preflight for 100 Amulets
+> is coded and Node-tested, but live revalidation remains open. This cohort's
+> 78/78 within the original clock is impossible after Wizard's fourth death.
+
+> 2026-09-19 independent newcomer V2 cohort B keeps three original
+> 12:45:19–14:45:19 UTC ordinary clocks and the three-revival ceiling.
+> Wizard N12 and Warrior N16 now pass with public combat receipts after
+> bounded stale-cursor magic handling and a V2 N16 Zombie2 objective;
+> Taoist and Warrior reached N19, where the imported D022 Dung spread
+> exhausted the unchanged 30-second search. V2-only three-monster Dung,
+> WoomaSoldier, and WoomaFighter footholds are built; deployment and
+> strict three-class 78/78, level-30, save, timing, and visual gates remain open.
+> Cohort A's final 51/78 and paused V1 evidence are independent.
+
+> 2026-09-19 V2 same-clock update: Wizard N19 suffered a real fourth death
+> with its cumulative three revivals already spent; 78/78 is impossible under
+> the retained rules. Warrior and Taoist can continue lawful functional
+> checks. The verified saved tally remains 40/78; see newcomer V2 QA evidence.
+
+> 2026-09-18 optional newcomer V2 runtime: 22 new main quests plus four growth
+> claims, six chapters and trusted committed server/Zone evidence are implemented.
+> Simulation V2 15/15, Zone 7/7, Gateway bridge 4/4, movement 4/4,
+> V1 progression 11/11, native journey 20/20 and local goal selection 1/1 pass.
+> Web guidance/goal and localization plus TypeScript pass; earlier controller checkpoint 288/288.
+> Latest affected V2/supply controller regressions pass 105/105; ordinary revalidation remains open.
+> Gateway pending-Zone monster lifecycle regressions pass 2/2 after a real
+> Zone kill and respawn; no ordinary Wizard N12 completion is claimed.
+> Separate functional recheck clock and recovery-ledger checks pass 62/62;
+> original two-hour route evidence and revival caps remain unchanged.
+> Active combat wakes the post-StartGame Gateway tick at the existing 75 ms
+> input grace (focused 1/1); release `3e5a29924` is deployed and prompt hits are live-proven.
+> Additional ordinary functional recheck verifies 40/78 after normal logout;
+> levels 24/19/18, with Warrior N15 and Taoist N10 newly completed.
+> All three pass N5/N6; saves match normal logout. Original two-hour clocks have expired.
+> Recovery ledgers retain 0/3/1; no clock or revival allowance has been reset.
+> Earlier 33/78 and paused V1 evidence remain independent; clean human time is unverified.
+> Actual Gateway N4 self-Healing 1/1 and N5 arrival/autosave/rejection 4/4 pass;
+> movement map-transfer 4/4 and Simulation V2 15/15 plus Zone 7/7 reruns pass.
+> N5 release is deployed; safe-profile Zone 4/4, Gateway snapshot 1/1 and arrival 4/4 pass.
+> Safe-profile release is deployed; legacy safe-area/PvP plus profile reruns 9/9 pass.
+> Shared spell cooldown getter 3/3 and fresh Gateway journey bridge 11/11 pass.
+> Public owner readiness follows the Zone clock; the 6e1778957 release is deployed.
+> Fresh ordinary three-class accounts started on isolated ports 19800/19810, with unextended 120-minute ledgers.
+> Native clean-source release build and unauthenticated startup diagnostic pass; visual capture remains unaccepted.
+> Remaining ordinary route, timing, survival,
+> suitable equipment, exact native package and visual acceptance remain open.
+> This adds custom onboarding, no Crystal parity percentage. V1 evidence stays
+> separate. [Implementation evidence](generated/player-qa/newcomer-v2-20260918/runtime.md).
+
 > 2026-09-08 Windows repackaging checkpoint: clean snapshot `4264b9149`
 > builds and passes the signed Candidate verifier (37,534 files). Sound104
 > package/allowlist mismatch and malformed-Unicode PE scan false positive are

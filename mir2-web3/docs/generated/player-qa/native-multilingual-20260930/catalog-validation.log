@@ -1,0 +1,17 @@
+{
+  "counts": {
+    "common.json": 2417,
+    "content.json": 3913,
+    "shell.json": 165,
+    "quest.json": 398,
+    "game.json": 282,
+    "help.json": 124,
+    "npc-menus.json": 607,
+    "npc-prose.json": 1479
+  },
+  "errors": [],
+  "pendingFiles": [],
+  "aliasConflicts": 1163,
+  "equivalentAliasCount": 1612,
+  "unclassifiedIdenticalValues": []
+}

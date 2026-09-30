@@ -3,6 +3,7 @@
 use bevy::prelude::*;
 use bevy::ui::{AlignItems, BackgroundColor, JustifyContent, Node, PositionType, UiRect, Val};
 
+use crate::native_i18n;
 use crate::native_shell::{LoginFocus, NativeShellModel};
 
 use super::assets::login_assets;
@@ -120,9 +121,33 @@ pub fn spawn_login_screen(
 ) {
     let assets = login_assets();
     spawn_stage_frame(parent, asset_server, spec::login::PANEL);
-    spawn_stage_frame(parent, asset_server, spec::login::TITLE);
-    spawn_stage_frame(parent, asset_server, spec::login::ACCOUNT_LABEL);
-    spawn_stage_frame(parent, asset_server, spec::login::PASSWORD_LABEL);
+    if native_i18n::active() {
+        spawn_label(
+            parent,
+            "Login",
+            CrystalRect::new(368.0, 286.0, 288.0, 28.0),
+            20.0,
+            Justify::Center,
+        );
+        spawn_label(
+            parent,
+            "Account",
+            CrystalRect::new(352.0, 355.0, 77.0, 21.0),
+            12.0,
+            Justify::Right,
+        );
+        spawn_label(
+            parent,
+            "Password",
+            CrystalRect::new(352.0, 378.0, 77.0, 21.0),
+            12.0,
+            Justify::Right,
+        );
+    } else {
+        spawn_stage_frame(parent, asset_server, spec::login::TITLE);
+        spawn_stage_frame(parent, asset_server, spec::login::ACCOUNT_LABEL);
+        spawn_stage_frame(parent, asset_server, spec::login::PASSWORD_LABEL);
+    }
 
     spawn_login_field(
         parent,
@@ -155,7 +180,7 @@ pub fn spawn_login_screen(
         assets.new_account,
         CrystalLoginAction::RegisterAccount,
         matches!(model.login.focus, LoginFocus::NewAccountButton),
-        model.login.is_ready(),
+        true,
     );
     spawn_crystal_image_button(
         parent,
@@ -215,6 +240,40 @@ fn spawn_stage_frame(
     ));
 }
 
+fn spawn_label(
+    parent: &mut ChildSpawnerCommands,
+    label: &str,
+    rect: CrystalRect,
+    size: f32,
+    justify: Justify,
+) {
+    parent.spawn((
+        Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            ..default()
+        },
+        Text::new(native_i18n::tr(label)),
+        super::typography::crystal_text_font(size),
+        TextColor(FIELD_TEXT),
+        TextLayout::justify(justify),
+    ));
+}
+
+fn login_font(size: f32) -> TextFont {
+    if native_i18n::active() {
+        super::typography::crystal_text_font(size)
+    } else {
+        TextFont {
+            font_size: FontSize::Px(size),
+            ..default()
+        }
+    }
+}
+
 fn spawn_login_field(
     parent: &mut ChildSpawnerCommands,
     rect: CrystalRect,
@@ -241,20 +300,14 @@ fn spawn_login_field(
         .with_children(|field| {
             field.spawn((
                 Text::new(text.to_owned()),
-                TextFont {
-                    font_size: FontSize::Px(10.0),
-                    ..default()
-                },
+                login_font(10.0),
                 TextColor(FIELD_TEXT),
             ));
             if focused {
                 field.spawn((
                     CrystalLoginCaret::default(),
                     Text::new("|"),
-                    TextFont {
-                        font_size: FontSize::Px(10.0),
-                        ..default()
-                    },
+                    login_font(10.0),
                     TextColor(FIELD_TEXT),
                     Visibility::Visible,
                 ));
@@ -289,11 +342,8 @@ fn spawn_notice(parent: &mut ChildSpawnerCommands, text: &str, is_error: bool) {
         },))
         .with_children(|notice| {
             notice.spawn((
-                Text::new(text.to_owned()),
-                TextFont {
-                    font_size: FontSize::Px(15.0),
-                    ..default()
-                },
+                Text::new(native_i18n::tr(text)),
+                login_font(15.0),
                 TextColor(if is_error { NOTICE_ERROR } else { NOTICE_INFO }),
             ));
         });
@@ -311,10 +361,12 @@ mod tests {
             LOGIN_ELEMENT_SPECS[1].rect,
             CrystalRect::new(348.0, 274.0, 328.0, 220.0)
         );
-        assert!(LOGIN_ELEMENT_SPECS
-            .iter()
-            .any(|element| element.kind == LoginElementKind::CancelButton
-                && element.rect == spec::login::CANCEL.rect));
+        assert!(
+            LOGIN_ELEMENT_SPECS
+                .iter()
+                .any(|element| element.kind == LoginElementKind::CancelButton
+                    && element.rect == spec::login::CANCEL.rect)
+        );
     }
 
     #[test]

@@ -78,11 +78,34 @@ fn image(
 fn button(
     parent: &mut ChildSpawnerCommands,
     assets: &AssetServer,
-    library: &str,
+    library: &'static str,
     index: u16,
     rect: CrystalRect,
     action: HeroAction,
 ) {
+    let spec = CrystalButtonSpec::new(
+        library,
+        index,
+        index + 1,
+        index + 2,
+        rect,
+        rect.width,
+        rect.height,
+    );
+    if crate::native_i18n::active()
+        && crate::crystal_ui::widget::crystal_button_caption(spec).is_some()
+    {
+        spawn_crystal_image_button(
+            parent,
+            assets,
+            spec,
+            CrystalButtonAssetSet::from_spec(spec),
+            action,
+            false,
+            true,
+        );
+        return;
+    }
     parent.spawn((
         Node {
             position_type: PositionType::Absolute,
@@ -386,14 +409,14 @@ pub fn render(
                         );
                         overlay_centered_text_at(
                             parent,
-                            &format!("{}%", info.auto_hp_percent),
+                            &crate::native_i18n::tr(&format!("{}%", info.auto_hp_percent)),
                             CrystalRect::new(58., 233., 60., 25.),
                             (32. / 3.),
                             Color::WHITE,
                         );
                         overlay_centered_text_at(
                             parent,
-                            &format!("{}%", info.auto_mp_percent),
+                            &crate::native_i18n::tr(&format!("{}%", info.auto_mp_percent)),
                             CrystalRect::new(206., 233., 60., 25.),
                             (32. / 3.),
                             Color::WHITE,
@@ -494,6 +517,20 @@ pub fn render(
                                 HeroAction::Page(page),
                             ));
                         }
+                        if crate::native_i18n::active() {
+                            let label = match page {
+                                HeroPage::Equipment => "Equipment",
+                                HeroPage::Status => "Status",
+                                HeroPage::State => "Statistics",
+                                HeroPage::Skills => "Skills",
+                            };
+                            localized_art_label(
+                                parent,
+                                label,
+                                CrystalRect::new(rect.left + 1., rect.top + 1., 60., 18.),
+                                9.,
+                            );
+                        }
                     }
                     let (library, index) = match ui.page {
                         HeroPage::Equipment => (
@@ -538,6 +575,48 @@ pub fn render(
                         );
                     }
                     if matches!(ui.page, HeroPage::Status | HeroPage::State) {
+                        if crate::native_i18n::active() {
+                            let labels: &[&str] = if ui.page == HeroPage::State {
+                                &[
+                                    "Experience",
+                                    "Bag weight",
+                                    "Equipment weight",
+                                    "Hand weight",
+                                    "Magic resistance",
+                                    "Poison resistance",
+                                    "Health recovery",
+                                    "Mana recovery",
+                                    "Poison recovery",
+                                    "Holy Power",
+                                    "Frost Power",
+                                    "Poison Power",
+                                ]
+                            } else {
+                                &[
+                                    "HP",
+                                    "MP",
+                                    "AC",
+                                    "MAC",
+                                    "DC",
+                                    "MC",
+                                    "SC",
+                                    "Critical chance",
+                                    "Critical damage",
+                                    "Attack speed",
+                                    "Accuracy",
+                                    "Agility",
+                                    "Luck",
+                                ]
+                            };
+                            for (row, label) in labels.iter().enumerate() {
+                                localized_art_label(
+                                    parent,
+                                    label,
+                                    CrystalRect::new(14., 107. + row as f32 * 18., 115., 18.),
+                                    9.,
+                                );
+                            }
+                        }
                         let mut actor = actor_ui(info);
                         actor.player.crystal_stats = model.stats.clone();
                         let weights = model
@@ -618,7 +697,7 @@ pub fn render(
                             );
                             overlay_text_at(
                                 parent,
-                                &magic.name,
+                                &crate::native_i18n::tr(&magic.name),
                                 CrystalRect::new(125., y + 2., 125., 14.),
                                 (32. / 3.),
                                 Color::WHITE,
@@ -821,7 +900,7 @@ fn render_assign(
                 );
                 overlay_centered_text_at(
                     p,
-                    &format!("Select the Key for: {}", magic.name),
+                    &crate::native_i18n::tr(&format!("Select the Key for: {}", magic.name)),
                     CrystalRect::new(49., 17., 230., 32.),
                     32. / 3.,
                     Color::WHITE,
@@ -869,7 +948,7 @@ fn render_assign(
                 if let Some(notice) = assign.notice.as_deref() {
                     overlay_text_at(
                         p,
-                        notice,
+                        &crate::native_i18n::tr(notice),
                         CrystalRect::new(16., 130., 260., 14.),
                         8.,
                         Color::WHITE,
@@ -904,7 +983,7 @@ fn render_amount(
                 spawn_overlay_frame(p, assets, "original-ui/Prguse/238.png", 204., 109.);
                 overlay_text_at(
                     p,
-                    "Enter Value",
+                    &crate::native_i18n::tr("Enter Value"),
                     CrystalRect::new(19., 8., 158., 14.),
                     32. / 3.,
                     Color::WHITE,

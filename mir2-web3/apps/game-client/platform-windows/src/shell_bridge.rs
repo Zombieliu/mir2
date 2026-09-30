@@ -74,6 +74,7 @@ pub fn drain_gateway_events(
     mut auto_login: ResMut<NativeAutoLoginFlow>,
 ) {
     for event in inbox.drain() {
+        let previous_screen = shell.screen;
         // A password response is correlated to the one in-flight request in
         // NativeShellModel.  Never let a delayed response mutate a later
         // Login/Character/InGame state after the request was already closed.
@@ -118,6 +119,9 @@ pub fn drain_gateway_events(
         } else {
             shell.apply_gateway_event(event);
         }
+        if shell.screen != previous_screen && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
+            eprintln!("[native-shell] transition {previous_screen:?} -> {:?}", shell.screen);
+        }
 
         if connected
             && auto_login.enabled
@@ -141,6 +145,9 @@ pub fn drain_gateway_events(
     // including frames with no new Gateway event, before starting a character.
     if shell.screen == NativeShellScreen::CharacterSelect {
         if let Some(character_index) = auto_login.desired_character_index.take() {
+            if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
+                eprintln!("[native-shell] auto_start_attempt character_index={character_index}");
+            }
             if shell.apply_ui_intent(NativeUiIntent::SelectCharacter { character_index })
                 && shell.apply_ui_intent(NativeUiIntent::StartGame)
             {
@@ -177,20 +184,28 @@ pub fn forward_native_ui_intents(
                     password: shell.login.password.clone(),
                 })
             }
-            NativeUiIntent::RegisterAccount
+            NativeUiIntent::SubmitRegistration {
+                account_id,
+                password,
+                birth_date_binary,
+                user_name,
+                secret_question,
+                secret_answer,
+                email_address,
+                ..
+            }
                 if shell.register_request_in_flight && !register_command_sent =>
             {
                 register_command_sent = true;
-                let account_id = shell.login.account.trim().to_owned();
                 commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::ClientVersion));
                 Some(NativeOutboundCommand::NewAccount {
-                    account_id: account_id.clone(),
-                    password: shell.login.password.clone(),
-                    birth_date_binary: 0,
-                    user_name: account_id,
-                    secret_question: String::new(),
-                    secret_answer: String::new(),
-                    email_address: String::new(),
+                    account_id,
+                    password,
+                    birth_date_binary,
+                    user_name,
+                    secret_question,
+                    secret_answer,
+                    email_address,
                 })
             }
             NativeUiIntent::CreateCharacter {
@@ -248,7 +263,9 @@ pub fn forward_native_ui_intents(
             | NativeUiIntent::CancelCharacterCreate
             | NativeUiIntent::SelectCharacter { .. }
             | NativeUiIntent::Login
-            | NativeUiIntent::RegisterAccount
+            | NativeUiIntent::OpenRegistration
+            | NativeUiIntent::CancelRegistration
+            | NativeUiIntent::SubmitRegistration { .. }
             | NativeUiIntent::CreateCharacter { .. }
             | NativeUiIntent::DeleteCharacter { .. }
             | NativeUiIntent::StartGame
@@ -371,38 +388,38 @@ mod tests {
     }
 
     #[test]
-    fn distinct_register_and_login_commands_are_not_dropped_by_final_screen_state() {
+    fn registration_forwards_the_submitted_crystal_packet_fields() {
         let mut shell = NativeShellModel::default();
-        shell.screen = NativeShellScreen::Authenticating;
-        shell.login.account = "player".to_owned();
-        shell.login.password = "secret".to_owned();
+        shell.screen = NativeShellScreen::Registration;
         shell.register_request_in_flight = true;
-        shell.login_request_in_flight = true;
-
-        let (commands, _) = forward(
-            shell,
-            [NativeUiIntent::RegisterAccount, NativeUiIntent::Login],
-        );
-        assert_eq!(
-            commands
-                .iter()
-                .filter(|command| matches!(
-                    command,
-                    GatewayCommand::Wire(NativeOutboundCommand::NewAccount { .. })
-                ))
-                .count(),
-            1
-        );
-        assert_eq!(
-            commands
-                .iter()
-                .filter(|command| matches!(
-                    command,
-                    GatewayCommand::Wire(NativeOutboundCommand::Login { .. })
-                ))
-                .count(),
-            1
-        );
+        let (commands, _) = forward(shell, [NativeUiIntent::SubmitRegistration {
+            account_id: "player".to_owned(),
+            password: "secret".to_owned(),
+            confirm_password: "secret".to_owned(),
+            birth_date: "2000-01-01".to_owned(),
+            birth_date_binary: 630_822_816_000_000_000,
+            user_name: "Player Name".to_owned(),
+            secret_question: "pet?".to_owned(),
+            secret_answer: "cat".to_owned(),
+            email_address: "player@example.test".to_owned(),
+        }]);
+        assert!(commands.iter().any(|command| matches!(
+            command,
+            GatewayCommand::Wire(NativeOutboundCommand::NewAccount {
+                account_id,
+                password,
+                birth_date_binary: 630_822_816_000_000_000,
+                user_name,
+                secret_question,
+                secret_answer,
+                email_address,
+            }) if account_id == "player"
+                && password == "secret"
+                && user_name == "Player Name"
+                && secret_question == "pet?"
+                && secret_answer == "cat"
+                && email_address == "player@example.test"
+        )));
         assert_eq!(
             commands
                 .iter()
@@ -411,7 +428,7 @@ mod tests {
                     GatewayCommand::Wire(NativeOutboundCommand::ClientVersion)
                 ))
                 .count(),
-            2
+            1
         );
     }
 

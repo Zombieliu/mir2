@@ -2,7 +2,11 @@
 # attestation consumed by package-windows-candidate.ps1.
 [CmdletBinding()]
 param(
-    [switch]$SelfTest
+    [switch]$SelfTest,
+    [switch]$PublicRelease,
+    [string]$PublisherThumbprint = '',
+    [string]$PublisherSignToolPath = '',
+    [string]$PublisherTimestampUrl = ''
 )
 
 Set-StrictMode -Version Latest
@@ -141,6 +145,16 @@ if ($SelfTest) {
     exit 0
 }
 
+if ($PublicRelease) {
+    if ([string]::IsNullOrWhiteSpace($PublisherThumbprint) -or [string]::IsNullOrWhiteSpace($PublisherSignToolPath) -or [string]::IsNullOrWhiteSpace($PublisherTimestampUrl)) {
+        throw 'public release requires an explicit trusted publisher certificate, SignTool path, and HTTPS timestamp service'
+    }
+    Import-Module (Join-Path $ScriptDir 'publisher-signing.psm1') -Force
+    Get-ExplicitPublisherCertificate -Thumbprint $PublisherThumbprint | Out-Null
+} elseif ($PublisherThumbprint -or $PublisherSignToolPath -or $PublisherTimestampUrl) {
+    throw 'publisher signing inputs require -PublicRelease; internal Candidate CMS cannot substitute for public signing'
+}
+
 $before = Get-CleanWorktreeState -Root $RepoRoot
 $cargoHome = if ($env:CARGO_HOME) {
     [IO.Path]::GetFullPath($env:CARGO_HOME).TrimEnd('\', '/')
@@ -197,6 +211,11 @@ $exePath = Join-Path $TargetDir 'x86_64-pc-windows-msvc\release\mir2-platform-wi
 if (-not (Test-Path -LiteralPath $exePath -PathType Leaf)) {
     throw "attested Release EXE missing: $exePath"
 }
+# Sign before hashing or packaging: any later signature changes the exact EXE
+# bytes and would invalidate the attestation / Candidate package manifest.
+$publisher = if ($PublicRelease) {
+    Invoke-WindowsPublisherSigning -Path $exePath -Thumbprint $PublisherThumbprint -SignToolPath $PublisherSignToolPath -TimestampUrl ([uri]$PublisherTimestampUrl)
+} else { $null }
 $exe = Get-Item -LiteralPath $exePath
 $attestationPath = Join-Path $TargetDir 'BUILD-ATTESTATION.json'
 $attestation = [ordered]@{
@@ -232,6 +251,11 @@ $attestation = [ordered]@{
         )
     }
     buildCompletedUtc = [DateTimeOffset]::UtcNow.ToString('o')
+    publisherAuthenticode = if ($null -ne $publisher) {
+        [ordered]@{ required = $true; status = $publisher.Status; thumbprint = $publisher.PublisherThumbprint; timestampRequired = $true }
+    } else {
+        [ordered]@{ required = $false; status = 'internal-candidate-only'; thumbprint = $null; timestampRequired = $false }
+    }
 }
 $json = ($attestation | ConvertTo-Json -Depth 8) + "`n"
 [IO.Directory]::CreateDirectory($TargetDir) | Out-Null

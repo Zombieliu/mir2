@@ -1,0 +1,4812 @@
+{
+  "kind": "offline_production_quest_widgets",
+  "liveAcceptance": false,
+  "locales": [
+    "en",
+    "zh-TW",
+    "pt-BR"
+  ],
+  "screenshots": [
+    {
+      "file": "zh-TW-tracker-top.png",
+      "metadata": {
+        "authoredCandidateCount": 78,
+        "class": "Taoist",
+        "questId": 2110018,
+        "viewport": {
+          "contentSize": [
+            303.0,
+            358.0
+          ],
+          "max": [
+            312.0,
+            475.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        },
+        "wrappedRows": 15
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            167.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            273.0,
+            282.0,
+            36.0
+          ],
+          "text": "下一步 · 入口 (324,41) · 進入\n沃瑪森林（南）"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            157.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            313.0,
+            282.0,
+            18.0
+          ],
+          "text": "到目標仍需經過 2 個地圖入口"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            114.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            339.0,
+            270.0,
+            18.0
+          ],
+          "text": "前往入口 · 自動尋路"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            60.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            397.0,
+            270.0,
+            18.0
+          ],
+          "text": "打開大地圖"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            120.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            171.0,
+            282.0,
+            18.0
+          ],
+          "text": "抵達沃瑪寺廟入口  0/1"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            368.0,
+            270.0,
+            18.0
+          ],
+          "text": "查看任務詳情"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            150.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "沃瑪遠征 · 章節進度同步中"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            138.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            149.0,
+            282.0,
+            18.0
+          ],
+          "text": "當前任務 · 抵達沃瑪寺廟"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            221.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            251.0,
+            282.0,
+            18.0
+          ],
+          "text": "當前地圖 · 比奇省 · 當前位置 (328,264)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            223.0,
+            44.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            193.0,
+            282.0,
+            54.0
+          ],
+          "text": "職業練習\n0/1：學會召喚骷髏；裝備可用武器；裝備\n護身符並攜帶毒粉"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            192.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            425.0,
+            270.0,
+            36.0
+          ],
+          "text": "補給不足 ·\n生命藥水、魔力藥水、護身符、毒粉"
+        }
+      ]
+    },
+    {
+      "file": "zh-TW-tracker-bottom.png",
+      "metadata": {
+        "scroll": 0.0,
+        "viewport": {
+          "contentSize": [
+            303.0,
+            358.0
+          ],
+          "max": [
+            312.0,
+            475.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            167.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            273.0,
+            282.0,
+            36.0
+          ],
+          "text": "下一步 · 入口 (324,41) · 進入\n沃瑪森林（南）"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            157.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            313.0,
+            282.0,
+            18.0
+          ],
+          "text": "到目標仍需經過 2 個地圖入口"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            114.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            339.0,
+            270.0,
+            18.0
+          ],
+          "text": "前往入口 · 自動尋路"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            60.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            397.0,
+            270.0,
+            18.0
+          ],
+          "text": "打開大地圖"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            120.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            171.0,
+            282.0,
+            18.0
+          ],
+          "text": "抵達沃瑪寺廟入口  0/1"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            368.0,
+            270.0,
+            18.0
+          ],
+          "text": "查看任務詳情"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            150.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "沃瑪遠征 · 章節進度同步中"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            138.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            149.0,
+            282.0,
+            18.0
+          ],
+          "text": "當前任務 · 抵達沃瑪寺廟"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            221.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            251.0,
+            282.0,
+            18.0
+          ],
+          "text": "當前地圖 · 比奇省 · 當前位置 (328,264)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            223.0,
+            44.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            193.0,
+            282.0,
+            54.0
+          ],
+          "text": "職業練習\n0/1：學會召喚骷髏；裝備可用武器；裝備\n護身符並攜帶毒粉"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            192.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            425.0,
+            270.0,
+            36.0
+          ],
+          "text": "補給不足 ·\n生命藥水、魔力藥水、護身符、毒粉"
+        }
+      ]
+    },
+    {
+      "file": "zh-TW-detail-top.png",
+      "metadata": {
+        "authoredCandidateCount": 78,
+        "class": "Taoist",
+        "questId": 2110021,
+        "top": 0,
+        "totalRows": 39
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            399.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "1400000"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            479.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "3500"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            372.0,
+            69.0,
+            55.0,
+            17.0
+          ],
+          "text": "任務詳情"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            397.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "分享"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            91.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            305.0,
+            280.0,
+            20.0
+          ],
+          "text": "分類：Recommended"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            171.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            240.0,
+            280.0,
+            20.0
+          ],
+          "text": "名沃瑪勇士，並按職業練習說明完成最后的"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            89.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            225.0,
+            280.0,
+            20.0
+          ],
+          "text": "在沃瑪寺廟一層消滅 3"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            255.0,
+            280.0,
+            20.0
+          ],
+          "text": "戰斗練習。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            285.0,
+            260.0,
+            20.0
+          ],
+          "text": "新手引導"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            335.0,
+            260.0,
+            20.0
+          ],
+          "text": "目標"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            18.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            210.0,
+            280.0,
+            20.0
+          ],
+          "text": "粉。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            120.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            130.0,
+            260.0,
+            20.0
+          ],
+          "text": "職業練習要求（全部完成）"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            171.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            195.0,
+            280.0,
+            20.0
+          ],
+          "text": "裝備毒粉，用施毒術使怪物中毒；需消耗毒"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            171.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            165.0,
+            280.0,
+            20.0
+          ],
+          "text": "裝備護身符，用靈魂火符對怪物造成傷害；"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            482.0,
+            503.0,
+            64.0,
+            12.0
+          ],
+          "text": "設為當前"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            60.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            95.0,
+            260.0,
+            20.0
+          ],
+          "text": "證明職業戰術"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            162.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            150.0,
+            280.0,
+            20.0
+          ],
+          "text": "讓自己召喚的骷髏攻擊怪物並造成傷害。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            433.0,
+            68.0,
+            16.0
+          ],
+          "text": "選擇獎勵"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            557.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "關閉"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            63.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            180.0,
+            280.0,
+            20.0
+          ],
+          "text": "需消耗護身符。"
+        }
+      ]
+    },
+    {
+      "file": "zh-TW-detail-bottom.png",
+      "metadata": {
+        "authoredCandidateCount": 78,
+        "class": "Taoist",
+        "questId": 2110021,
+        "top": 23,
+        "totalRows": 39
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            399.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "1400000"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            479.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "3500"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            372.0,
+            69.0,
+            55.0,
+            17.0
+          ],
+          "text": "任務詳情"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            397.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "分享"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            171.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            295.0,
+            280.0,
+            20.0
+          ],
+          "text": "回城卷回到最近經過的安全區；地圖禁用卷"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            95.0,
+            260.0,
+            20.0
+          ],
+          "text": "回城補給"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            171.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            115.0,
+            280.0,
+            20.0
+          ],
+          "text": "本階段建議購買大型藥水；在任務卡點“補"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            81.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            280.0,
+            280.0,
+            20.0
+          ],
+          "text": "材料不等于已裝備。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            153.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            250.0,
+            280.0,
+            20.0
+          ],
+          "text": "檢查選擇毒粉，會逐段標出店鋪入口。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            175.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            235.0,
+            280.0,
+            20.0
+          ],
+          "text": "毒粉商·特拉維斯在制藥室（4,9）；點補給"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            177.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            145.0,
+            280.0,
+            20.0
+          ],
+          "text": "比奇城藥劑師·塞繆爾（324,291）：紅藥和"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            177.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            175.0,
+            280.0,
+            20.0
+          ],
+          "text": "比奇城雜貨商·布爾（374,296）：回城卷、"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            126.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            130.0,
+            280.0,
+            20.0
+          ],
+          "text": "給檢查”查看庫存和商店路線。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            27.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            160.0,
+            280.0,
+            20.0
+          ],
+          "text": "藍藥。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            482.0,
+            503.0,
+            64.0,
+            12.0
+          ],
+          "text": "設為當前"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            171.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            265.0,
+            280.0,
+            20.0
+          ],
+          "text": "護身符與毒粉需按技能切換裝備；背包里有"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            220.0,
+            280.0,
+            20.0
+          ],
+          "text": "護身符，施毒消耗毒粉。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            171.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            310.0,
+            280.0,
+            20.0
+          ],
+          "text": "軸時，可按入口路線步行返回。購買前檢查"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            171.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            205.0,
+            280.0,
+            20.0
+          ],
+          "text": "道士施法前準備藍藥；火符和召喚骷髏消耗"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            44.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            433.0,
+            68.0,
+            16.0
+          ],
+          "text": "選擇獎勵"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            325.0,
+            280.0,
+            20.0
+          ],
+          "text": "金幣和負重。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            20.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            557.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "關閉"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            126.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            190.0,
+            280.0,
+            20.0
+          ],
+          "text": "隨機卷、地牢逃脫卷和護身符。"
+        }
+      ]
+    },
+    {
+      "file": "zh-TW-npc-player-name.png",
+      "metadata": {
+        "opaquePlayerName": "Gold",
+        "script": "BichonProvince/BorderVillage/Jane",
+        "section": "@Main-1"
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            207.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            231.0,
+            390.0,
+            17.0
+          ],
+          "text": "你好，Gold，你是這個遊戲的新手嗎？"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            54.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            207.0,
+            390.0,
+            18.0
+          ],
+          "text": "助理 Jane"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            123.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            248.0,
+            390.0,
+            17.0
+          ],
+          "text": "請按 H 開啟說明選單。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            265.0,
+            390.0,
+            17.0
+          ],
+          "text": "關閉"
+        }
+      ]
+    },
+    {
+      "file": "zh-TW-npc-menu-top.png",
+      "metadata": {
+        "exactCommandTargets": [
+          "@Tao1",
+          "@War1",
+          "@Wiz1"
+        ],
+        "script": "BichonProvince/BichonWall/BookStore",
+        "section": "@helpbooks",
+        "top": 0,
+        "totalRows": 11
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            237.0,
+            12.0,
+            12.0
+          ],
+          "text": "^"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            369.0,
+            12.0,
+            12.0
+          ],
+          "text": "v"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            120.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            231.0,
+            390.0,
+            17.0
+          ],
+          "text": "你對哪類書籍有興趣？"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            36.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            299.0,
+            390.0,
+            17.0
+          ],
+          "text": "刺客："
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            316.0,
+            390.0,
+            17.0
+          ],
+          "text": "弓箭手："
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            36.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            248.0,
+            390.0,
+            17.0
+          ],
+          "text": "戰士："
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            333.0,
+            390.0,
+            17.0
+          ],
+          "text": "技能清單"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            350.0,
+            390.0,
+            17.0
+          ],
+          "text": "技能清單"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            367.0,
+            390.0,
+            17.0
+          ],
+          "text": "技能清單"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            207.0,
+            390.0,
+            18.0
+          ],
+          "text": "書店"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            36.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            265.0,
+            390.0,
+            17.0
+          ],
+          "text": "法師："
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 3,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            36.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            282.0,
+            390.0,
+            17.0
+          ],
+          "text": "道士："
+        }
+      ]
+    },
+    {
+      "file": "zh-TW-npc-menu-bottom.png",
+      "metadata": {
+        "exactCommandTargets": [
+          "@Arc1",
+          "@Assa1"
+        ],
+        "script": "BichonProvince/BichonWall/BookStore",
+        "section": "@helpbooks",
+        "top": 9,
+        "totalRows": 11
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            237.0,
+            12.0,
+            12.0
+          ],
+          "text": "^"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            369.0,
+            12.0,
+            12.0
+          ],
+          "text": "v"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            231.0,
+            390.0,
+            17.0
+          ],
+          "text": "技能清單"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            248.0,
+            390.0,
+            17.0
+          ],
+          "text": "技能清單"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 2,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            24.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            207.0,
+            390.0,
+            18.0
+          ],
+          "text": "書店"
+        }
+      ]
+    },
+    {
+      "file": "en-tracker-top.png",
+      "metadata": {
+        "authoredCandidateCount": 78,
+        "class": "Taoist",
+        "questId": 2110018,
+        "viewport": {
+          "contentSize": [
+            303.0,
+            466.0
+          ],
+          "max": [
+            312.0,
+            583.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        },
+        "wrappedRows": 21
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 40,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            163.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            403.0,
+            282.0,
+            36.0
+          ],
+          "text": "2 map entrances remain to the\ndestination"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 103,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            191.0,
+            58.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            247.0,
+            282.0,
+            72.0
+          ],
+          "text": "Class practice 0/1: Learn Summon\nSkeleton; Equip an eligible weapon;\nEquip Amulets and carry poison\npowder"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 49,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            172.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            323.0,
+            282.0,
+            36.0
+          ],
+          "text": "Current map · Bichon Province ·\nposition (328,264)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            163.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            167.0,
+            282.0,
+            36.0
+          ],
+          "text": "Current quest · Reach Wooma\nTemple"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            141.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            447.0,
+            270.0,
+            18.0
+          ],
+          "text": "Go to entrance · auto-path"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 57,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            163.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            533.0,
+            270.0,
+            36.0
+          ],
+          "text": "Low supplies · HP potion, MP\npotion, Amulet, Poison powder"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 49,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            169.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            363.0,
+            282.0,
+            36.0
+          ],
+          "text": "Next · entrance (324,41) · enter\nWoomyon Woods (S)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            76.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            505.0,
+            270.0,
+            18.0
+          ],
+          "text": "Open big map"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            191.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            207.0,
+            282.0,
+            36.0
+          ],
+          "text": "Reach the Wooma Temple entrance\n0/1"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            97.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            476.0,
+            270.0,
+            18.0
+          ],
+          "text": "View quest details"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 42,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            154.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Wooma Expedition · Chapter\nprogress syncing"
+        }
+      ]
+    },
+    {
+      "file": "en-tracker-bottom.png",
+      "metadata": {
+        "scroll": 0.0,
+        "viewport": {
+          "contentSize": [
+            303.0,
+            466.0
+          ],
+          "max": [
+            312.0,
+            583.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 40,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            163.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            403.0,
+            282.0,
+            36.0
+          ],
+          "text": "2 map entrances remain to the\ndestination"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 103,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            191.0,
+            58.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            247.0,
+            282.0,
+            72.0
+          ],
+          "text": "Class practice 0/1: Learn Summon\nSkeleton; Equip an eligible weapon;\nEquip Amulets and carry poison\npowder"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 49,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            172.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            323.0,
+            282.0,
+            36.0
+          ],
+          "text": "Current map · Bichon Province ·\nposition (328,264)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            163.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            167.0,
+            282.0,
+            36.0
+          ],
+          "text": "Current quest · Reach Wooma\nTemple"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            141.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            447.0,
+            270.0,
+            18.0
+          ],
+          "text": "Go to entrance · auto-path"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 57,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            163.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            533.0,
+            270.0,
+            36.0
+          ],
+          "text": "Low supplies · HP potion, MP\npotion, Amulet, Poison powder"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 49,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            169.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            363.0,
+            282.0,
+            36.0
+          ],
+          "text": "Next · entrance (324,41) · enter\nWoomyon Woods (S)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            76.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            505.0,
+            270.0,
+            18.0
+          ],
+          "text": "Open big map"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            191.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            207.0,
+            282.0,
+            36.0
+          ],
+          "text": "Reach the Wooma Temple entrance\n0/1"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            97.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            476.0,
+            270.0,
+            18.0
+          ],
+          "text": "View quest details"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 42,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            154.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Wooma Expedition · Chapter\nprogress syncing"
+        }
+      ]
+    },
+    {
+      "file": "en-detail-top.png",
+      "metadata": {
+        "authoredCandidateCount": 78,
+        "class": "Taoist",
+        "questId": 2110018,
+        "top": 0,
+        "totalRows": 57
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            61.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            150.0,
+            260.0,
+            20.0
+          ],
+          "text": "(complete all)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            399.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "0"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            21.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            479.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "1500"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            124.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            130.0,
+            260.0,
+            20.0
+          ],
+          "text": "Class practice requirements"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            26.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            557.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "Close"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            115.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            185.0,
+            280.0,
+            20.0
+          ],
+          "text": "Equip a weapon whose level"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            129.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            215.0,
+            280.0,
+            20.0
+          ],
+          "text": "Equip eligible Amulets and carry"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            132.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            275.0,
+            280.0,
+            20.0
+          ],
+          "text": "Follow the map entrance route to"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            119.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            170.0,
+            280.0,
+            20.0
+          ],
+          "text": "Learn Summon Skeleton first."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            59.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            482.0,
+            503.0,
+            64.0,
+            12.0
+          ],
+          "text": "Make current"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            50.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            372.0,
+            69.0,
+            55.0,
+            17.0
+          ],
+          "text": "Quest d…"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            101.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            95.0,
+            260.0,
+            20.0
+          ],
+          "text": "Reach Wooma Temple"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            55.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            433.0,
+            68.0,
+            16.0
+          ],
+          "text": "Select re…"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            27.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            397.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "Share"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            138.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            320.0,
+            280.0,
+            20.0
+          ],
+          "text": "Warriors need Half Moon, Wizards"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            71.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            260.0,
+            280.0,
+            20.0
+          ],
+          "text": "and Soul Fireball."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            117.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            305.0,
+            280.0,
+            20.0
+          ],
+          "text": "complete your class practice."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            136.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            230.0,
+            280.0,
+            20.0
+          ],
+          "text": "eligible poison powder. Switch the"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            151.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            245.0,
+            280.0,
+            20.0
+          ],
+          "text": "equipped material between Poisoning"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            132.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            335.0,
+            280.0,
+            20.0
+          ],
+          "text": "need Lightning, and Taoists need"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            91.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            200.0,
+            280.0,
+            20.0
+          ],
+          "text": "requirement you meet."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            133.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            290.0,
+            280.0,
+            20.0
+          ],
+          "text": "the Wooma Temple entrance and"
+        }
+      ]
+    },
+    {
+      "file": "en-detail-bottom.png",
+      "metadata": {
+        "authoredCandidateCount": 78,
+        "class": "Taoist",
+        "questId": 2110018,
+        "top": 41,
+        "totalRows": 57
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            399.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "0"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            21.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            479.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "1500"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            26.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            557.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "Close"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            59.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            482.0,
+            503.0,
+            64.0,
+            12.0
+          ],
+          "text": "Make current"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            115.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            230.0,
+            280.0,
+            20.0
+          ],
+          "text": "Materials in your bag are not"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            149.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            155.0,
+            280.0,
+            20.0
+          ],
+          "text": "Medicine Room (4,9). Choose poison"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            129.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            140.0,
+            280.0,
+            20.0
+          ],
+          "text": "Poison Specialist Travis is in the"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            147.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            125.0,
+            280.0,
+            20.0
+          ],
+          "text": "Poisoning consumes poison powder."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            50.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            372.0,
+            69.0,
+            55.0,
+            17.0
+          ],
+          "text": "Quest d…"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            55.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            433.0,
+            68.0,
+            16.0
+          ],
+          "text": "Select re…"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            27.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            397.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "Share"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 25,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            112.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            110.0,
+            280.0,
+            20.0
+          ],
+          "text": "Skeleton consume Amulets;"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            107.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            95.0,
+            280.0,
+            20.0
+          ],
+          "text": "Soul Fireball and Summon"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            148.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            200.0,
+            280.0,
+            20.0
+          ],
+          "text": "Switch equipped Amulets and poison"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            128.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            260.0,
+            280.0,
+            20.0
+          ],
+          "text": "Town Teleport returns you to the"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            140.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            305.0,
+            280.0,
+            20.0
+          ],
+          "text": "back through the entrances. Check"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            117.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            185.0,
+            280.0,
+            20.0
+          ],
+          "text": "entrances one map at a time."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            123.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            320.0,
+            280.0,
+            20.0
+          ],
+          "text": "gold and weight before buying."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            138.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            170.0,
+            280.0,
+            20.0
+          ],
+          "text": "in Supply Check to follow the shop"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            110.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            275.0,
+            280.0,
+            20.0
+          ],
+          "text": "last safe area you visited. If"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            88.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            245.0,
+            280.0,
+            20.0
+          ],
+          "text": "necessarily equipped."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            112.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            215.0,
+            280.0,
+            20.0
+          ],
+          "text": "powder for the skill you use."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            141.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            290.0,
+            280.0,
+            20.0
+          ],
+          "text": "scrolls are disabled on a map, walk"
+        }
+      ]
+    },
+    {
+      "file": "en-npc-player-name.png",
+      "metadata": {
+        "opaquePlayerName": "Gold",
+        "script": "BichonProvince/BorderVillage/Jane",
+        "section": "@Main-1"
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            79.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            207.0,
+            390.0,
+            18.0
+          ],
+          "text": "Assistant Jane"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            31.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            265.0,
+            390.0,
+            17.0
+          ],
+          "text": "Close"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 44,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            239.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            231.0,
+            390.0,
+            17.0
+          ],
+          "text": "Hello Gold, Are you a beginner in this game?"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 45,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            237.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            248.0,
+            390.0,
+            17.0
+          ],
+          "text": "Please press ('H') to bring up the help menu."
+        }
+      ]
+    },
+    {
+      "file": "en-npc-menu-top.png",
+      "metadata": {
+        "exactCommandTargets": [
+          "@Tao1",
+          "@War1",
+          "@Wiz1"
+        ],
+        "script": "BichonProvince/BichonWall/BookStore",
+        "section": "@helpbooks",
+        "top": 0,
+        "totalRows": 11
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            39.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            316.0,
+            390.0,
+            17.0
+          ],
+          "text": "Archer:"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            52.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            299.0,
+            390.0,
+            17.0
+          ],
+          "text": "Assassin:"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            60.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            207.0,
+            390.0,
+            18.0
+          ],
+          "text": "Book Store"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            333.0,
+            390.0,
+            17.0
+          ],
+          "text": "Skill List"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            350.0,
+            390.0,
+            17.0
+          ],
+          "text": "Skill List"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            367.0,
+            390.0,
+            17.0
+          ],
+          "text": "Skill List"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            35.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            282.0,
+            390.0,
+            17.0
+          ],
+          "text": "Taoist:"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            43.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            248.0,
+            390.0,
+            17.0
+          ],
+          "text": "Warrior:"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 41,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            223.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            231.0,
+            390.0,
+            17.0
+          ],
+          "text": "What kind of Books are you interested in?"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 7,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            41.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            265.0,
+            390.0,
+            17.0
+          ],
+          "text": "Wizard:"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            237.0,
+            12.0,
+            12.0
+          ],
+          "text": "^"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            369.0,
+            12.0,
+            12.0
+          ],
+          "text": "v"
+        }
+      ]
+    },
+    {
+      "file": "en-npc-menu-bottom.png",
+      "metadata": {
+        "exactCommandTargets": [
+          "@Arc1",
+          "@Assa1"
+        ],
+        "script": "BichonProvince/BichonWall/BookStore",
+        "section": "@helpbooks",
+        "top": 9,
+        "totalRows": 11
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            60.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            207.0,
+            390.0,
+            18.0
+          ],
+          "text": "Book Store"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            231.0,
+            390.0,
+            17.0
+          ],
+          "text": "Skill List"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            45.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            248.0,
+            390.0,
+            17.0
+          ],
+          "text": "Skill List"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            237.0,
+            12.0,
+            12.0
+          ],
+          "text": "^"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            369.0,
+            12.0,
+            12.0
+          ],
+          "text": "v"
+        }
+      ]
+    },
+    {
+      "file": "pt-BR-tracker-top.png",
+      "metadata": {
+        "authoredCandidateCount": 78,
+        "class": "Taoist",
+        "questId": 2110018,
+        "viewport": {
+          "contentSize": [
+            303.0,
+            484.0
+          ],
+          "max": [
+            312.0,
+            601.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        },
+        "wrappedRows": 22
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            100.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            505.0,
+            270.0,
+            18.0
+          ],
+          "text": "Abrir mapa grande"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            172.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            207.0,
+            282.0,
+            36.0
+          ],
+          "text": "Chegue à entrada do Templo de\nWooma 0/1"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 54,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            198.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Expedição a Wooma · Sincronizando\nprogresso do capítulo"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            177.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            403.0,
+            282.0,
+            36.0
+          ],
+          "text": "Faltam 2 entradas de mapa até o\ndestino"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            155.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            447.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ir à entrada · rota automática"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 51,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            185.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            323.0,
+            282.0,
+            36.0
+          ],
+          "text": "Mapa atual · Província de Bichon ·\nposição (328,264)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 39,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            196.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            167.0,
+            282.0,
+            36.0
+          ],
+          "text": "Missão atual · Chegue ao Templo de\nWooma"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 69,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            199.0,
+            44.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            533.0,
+            270.0,
+            54.0
+          ],
+          "text": "Poucos suprimentos · Poção de vida,\nPoção de mana, Amuleto, Pó\nvenenoso"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 62,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            182.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            363.0,
+            282.0,
+            36.0
+          ],
+          "text": "Próximo · entrada (324,41) · entre\nem Floresta de Woomyon (sul)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 108,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            187.0,
+            58.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            247.0,
+            282.0,
+            72.0
+          ],
+          "text": "Treino de classe 0/1: Aprenda\nInvocar Esqueleto; Equipe uma\narma permitida; Equipe Amuletos e\nleve pó de veneno"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            125.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            476.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ver detalhes da missão"
+        }
+      ]
+    },
+    {
+      "file": "pt-BR-tracker-bottom.png",
+      "metadata": {
+        "scroll": 0.0,
+        "viewport": {
+          "contentSize": [
+            303.0,
+            484.0
+          ],
+          "max": [
+            312.0,
+            601.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            100.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            505.0,
+            270.0,
+            18.0
+          ],
+          "text": "Abrir mapa grande"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            172.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            207.0,
+            282.0,
+            36.0
+          ],
+          "text": "Chegue à entrada do Templo de\nWooma 0/1"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 54,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            198.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Expedição a Wooma · Sincronizando\nprogresso do capítulo"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            177.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            403.0,
+            282.0,
+            36.0
+          ],
+          "text": "Faltam 2 entradas de mapa até o\ndestino"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            155.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            447.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ir à entrada · rota automática"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 51,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            185.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            323.0,
+            282.0,
+            36.0
+          ],
+          "text": "Mapa atual · Província de Bichon ·\nposição (328,264)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 39,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            196.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            167.0,
+            282.0,
+            36.0
+          ],
+          "text": "Missão atual · Chegue ao Templo de\nWooma"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 69,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            199.0,
+            44.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            533.0,
+            270.0,
+            54.0
+          ],
+          "text": "Poucos suprimentos · Poção de vida,\nPoção de mana, Amuleto, Pó\nvenenoso"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 62,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            182.0,
+            29.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            363.0,
+            282.0,
+            36.0
+          ],
+          "text": "Próximo · entrada (324,41) · entre\nem Floresta de Woomyon (sul)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 108,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            187.0,
+            58.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            247.0,
+            282.0,
+            72.0
+          ],
+          "text": "Treino de classe 0/1: Aprenda\nInvocar Esqueleto; Equipe uma\narma permitida; Equipe Amuletos e\nleve pó de veneno"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            125.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            476.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ver detalhes da missão"
+        }
+      ]
+    },
+    {
+      "file": "pt-BR-detail-top.png",
+      "metadata": {
+        "authoredCandidateCount": 78,
+        "class": "Taoist",
+        "questId": 2110018,
+        "top": 0,
+        "totalRows": 63
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            69.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            150.0,
+            260.0,
+            20.0
+          ],
+          "text": "(conclua todos)"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            399.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "0"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            21.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            479.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "1500"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 25,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            109.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            170.0,
+            280.0,
+            20.0
+          ],
+          "text": "Aprenda Invocar Esqueleto"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 25,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            135.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            95.0,
+            260.0,
+            20.0
+          ],
+          "text": "Chegue ao Templo de Wooma"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            397.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "Compartilhar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            49.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            372.0,
+            69.0,
+            55.0,
+            17.0
+          ],
+          "text": "Detalhe…"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            139.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            230.0,
+            280.0,
+            20.0
+          ],
+          "text": "Equipe Amuletos permitidos e leve"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            140.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            200.0,
+            280.0,
+            20.0
+          ],
+          "text": "Equipe uma arma cujo requisito de"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            57.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            433.0,
+            68.0,
+            16.0
+          ],
+          "text": "Escolher …"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            32.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            557.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "Fechar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            134.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            130.0,
+            260.0,
+            20.0
+          ],
+          "text": "Requisitos do treino de classe"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            482.0,
+            503.0,
+            64.0,
+            12.0
+          ],
+          "text": "Selecionar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            137.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            305.0,
+            280.0,
+            20.0
+          ],
+          "text": "Siga as entradas dos mapas até a"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            69.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            290.0,
+            280.0,
+            20.0
+          ],
+          "text": "Talismã de Fogo."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            123.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            260.0,
+            280.0,
+            20.0
+          ],
+          "text": "Troque o material equipado ao"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            130.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            275.0,
+            280.0,
+            20.0
+          ],
+          "text": "alternar entre Envenenamento e"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            139.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            335.0,
+            280.0,
+            20.0
+          ],
+          "text": "conclua o treino. Guerreiro precisa"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            128.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            320.0,
+            280.0,
+            20.0
+          ],
+          "text": "entrada do Templo de Wooma e"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            74.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            215.0,
+            280.0,
+            20.0
+          ],
+          "text": "nível você atenda."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            36.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            185.0,
+            280.0,
+            20.0
+          ],
+          "text": "primeiro."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            137.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            245.0,
+            280.0,
+            20.0
+          ],
+          "text": "pó de veneno adequado na bolsa."
+        }
+      ]
+    },
+    {
+      "file": "pt-BR-detail-bottom.png",
+      "metadata": {
+        "authoredCandidateCount": 78,
+        "class": "Taoist",
+        "questId": 2110018,
+        "top": 47,
+        "totalRows": 63
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            6.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            399.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "0"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 4,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            21.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            479.0,
+            367.0,
+            75.0,
+            20.0
+          ],
+          "text": "1500"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            124.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            200.0,
+            280.0,
+            20.0
+          ],
+          "text": "Alterne entre Amuletos e pó de"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            58.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            397.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "Compartilhar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            49.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            372.0,
+            69.0,
+            55.0,
+            17.0
+          ],
+          "text": "Detalhe…"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            165.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            110.0,
+            280.0,
+            20.0
+          ],
+          "text": "Envenenamento consome pó de veneno."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            115.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            155.0,
+            280.0,
+            20.0
+          ],
+          "text": "Escolha veneno em Verificar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            57.0,
+            14.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            379.0,
+            433.0,
+            68.0,
+            16.0
+          ],
+          "text": "Escolher …"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            129.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            95.0,
+            280.0,
+            20.0
+          ],
+          "text": "Esqueleto consomem Amuletos;"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            32.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            557.0,
+            503.0,
+            70.0,
+            12.0
+          ],
+          "text": "Fechar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            137.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            125.0,
+            280.0,
+            20.0
+          ],
+          "text": "O Especialista em Venenos Travis"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            128.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            260.0,
+            280.0,
+            20.0
+          ],
+          "text": "O pergaminho de retorno leva à"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            48.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            482.0,
+            503.0,
+            64.0,
+            12.0
+          ],
+          "text": "Selecionar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            93.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            185.0,
+            280.0,
+            20.0
+          ],
+          "text": "a loja, mapa por mapa."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            133.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            140.0,
+            280.0,
+            20.0
+          ],
+          "text": "fica na Sala de Preparação (4,9)."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            137.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            230.0,
+            280.0,
+            20.0
+          ],
+          "text": "habilidade. Ter o material na bolsa"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            147.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            290.0,
+            280.0,
+            20.0
+          ],
+          "text": "mapa bloquear pergaminhos, volte a"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            151.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            245.0,
+            280.0,
+            20.0
+          ],
+          "text": "não significa que ele esteja equipado."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            95.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            320.0,
+            280.0,
+            20.0
+          ],
+          "text": "peso antes de comprar."
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            149.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            305.0,
+            280.0,
+            20.0
+          ],
+          "text": "pé pelas entradas. Confira o ouro e o"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 36,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            150.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            170.0,
+            280.0,
+            20.0
+          ],
+          "text": "suprimentos para ver as entradas até"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            122.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            215.0,
+            280.0,
+            20.0
+          ],
+          "text": "veneno equipados conforme a"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            133.0,
+            11.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            364.0,
+            275.0,
+            280.0,
+            20.0
+          ],
+          "text": "última zona segura visitada. Se o"
+        }
+      ]
+    },
+    {
+      "file": "pt-BR-npc-player-name.png",
+      "metadata": {
+        "opaquePlayerName": "Gold",
+        "script": "BichonProvince/BorderVillage/Jane",
+        "section": "@Main-1"
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            85.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            207.0,
+            390.0,
+            18.0
+          ],
+          "text": "Assistente Jane"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            38.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            265.0,
+            390.0,
+            17.0
+          ],
+          "text": "Fechar"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 42,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            241.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            231.0,
+            390.0,
+            17.0
+          ],
+          "text": "Olá, Gold. Você está começando neste jogo?"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 39,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            217.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            248.0,
+            390.0,
+            17.0
+          ],
+          "text": "Pressione H para abrir o menu de ajuda."
+        }
+      ]
+    },
+    {
+      "file": "pt-BR-npc-menu-top.png",
+      "metadata": {
+        "exactCommandTargets": [
+          "@Tao1",
+          "@War1",
+          "@Wiz1"
+        ],
+        "script": "BichonProvince/BichonWall/BookStore",
+        "section": "@helpbooks",
+        "top": 0,
+        "totalRows": 11
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 9,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            49.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            316.0,
+            390.0,
+            17.0
+          ],
+          "text": "Arqueiro:"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            59.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            299.0,
+            390.0,
+            17.0
+          ],
+          "text": "Assassino:"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 43,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            233.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            231.0,
+            390.0,
+            17.0
+          ],
+          "text": "Em que tipo de livro você está interessado?"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            55.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            248.0,
+            390.0,
+            17.0
+          ],
+          "text": "Guerreiro:"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 20,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            107.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            333.0,
+            390.0,
+            17.0
+          ],
+          "text": "Lista de habilidades"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 20,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            107.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            350.0,
+            390.0,
+            17.0
+          ],
+          "text": "Lista de habilidades"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 20,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            107.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            367.0,
+            390.0,
+            17.0
+          ],
+          "text": "Lista de habilidades"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            207.0,
+            390.0,
+            18.0
+          ],
+          "text": "Livraria"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 5,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            34.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            265.0,
+            390.0,
+            17.0
+          ],
+          "text": "Mago:"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            43.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            282.0,
+            390.0,
+            17.0
+          ],
+          "text": "Taoísta:"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            237.0,
+            12.0,
+            12.0
+          ],
+          "text": "^"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            369.0,
+            12.0,
+            12.0
+          ],
+          "text": "v"
+        }
+      ]
+    },
+    {
+      "file": "pt-BR-npc-menu-bottom.png",
+      "metadata": {
+        "exactCommandTargets": [
+          "@Arc1",
+          "@Assa1"
+        ],
+        "script": "BichonProvince/BichonWall/BookStore",
+        "section": "@helpbooks",
+        "top": 9,
+        "totalRows": 11
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 20,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            107.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            231.0,
+            390.0,
+            17.0
+          ],
+          "text": "Lista de habilidades"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 20,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            107.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            248.0,
+            390.0,
+            17.0
+          ],
+          "text": "Lista de habilidades"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 8,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            40.0,
+            15.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            310.0,
+            207.0,
+            390.0,
+            18.0
+          ],
+          "text": "Livraria"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            237.0,
+            12.0,
+            12.0
+          ],
+          "text": "^"
+        },
+        {
+          "font": "Family(\"Arial\")",
+          "glyphs": 1,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            5.0,
+            12.0
+          ],
+          "nodeOutsideViewport": false,
+          "rect": [
+            707.0,
+            369.0,
+            12.0,
+            12.0
+          ],
+          "text": "v"
+        }
+      ]
+    }
+  ],
+  "selection": "maximum wrapped rows among 26 authored quests × 3 classes per locale",
+  "viewport": [
+    1024.0,
+    768.0
+  ]
+}

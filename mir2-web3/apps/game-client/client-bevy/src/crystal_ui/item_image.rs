@@ -43,12 +43,27 @@ pub(super) fn spawn_original_item_image(
     cell_width: i32,
     cell_height: i32,
 ) {
-    parent.spawn(original_item_image_bundle(
+    spawn_original_item_image_tinted(parent, asset_server, index, cell_width, cell_height, Color::WHITE);
+}
+
+/// Crystal applies locked-cell colour and opacity to the bitmap itself;
+/// transparent padding must remain transparent and keep its original layout.
+pub(super) fn spawn_original_item_image_tinted(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    index: u16,
+    cell_width: i32,
+    cell_height: i32,
+    color: Color,
+) {
+    let (cell, node, mut image) = original_item_image_bundle(
         asset_server,
         Some(index),
         cell_width,
         cell_height,
-    ));
+    );
+    image.color = color;
+    parent.spawn((cell, node, image));
 }
 
 pub(super) fn layout_original_item_images(

@@ -1,0 +1,93 @@
+{
+  "kind": "mir2-shared-fireball-practice-verification",
+  "schemaVersion": 1,
+  "recordedAt": "2026-09-15T06:51:46.002Z",
+  "tests": [
+    {
+      "file": "simulation-tests.log",
+      "passed": 9,
+      "failed": 0,
+      "sha256": "c9278ef64aba6d0532772e7114e6f4b083c463267ed1960e20839a4b27fac4fe"
+    },
+    {
+      "file": "gateway-tests.log",
+      "passed": 13,
+      "failed": 0,
+      "sha256": "4f2cf7a0465ad3b9b963a59e6c8841f1c5a8bb267f47d17e79679d929d7f9048"
+    },
+    {
+      "file": "multiplier-regression.log",
+      "passed": 1,
+      "failed": 0,
+      "sha256": "f5ba654859a228ad5c2081b086b5bda85536bd8ea9040d9ef3c8bbbf0ca2c841"
+    }
+  ],
+  "totalPassed": 23,
+  "libraryCheck": {
+    "file": "check.log",
+    "passed": true,
+    "sha256": "7edf2bb4b8027adcff97ae1f00e5bfa17e460530ede54b63ebab910cfc86b8b3"
+  },
+  "focusedTestRustfmtCheck": true,
+  "ownedDiffCheck": true,
+  "environment": {
+    "toolchain": "1.95.0",
+    "CARGO_TARGET_DIR": "C:/mir2-shared-fireball-practice-20260915/target",
+    "CARGO_PROFILE_TEST_DEBUG": "0",
+    "CARGO_INCREMENTAL": "0"
+  },
+  "initialFailure": {
+    "file": "simulation-tests.initial-disk-full.log",
+    "exitCode": 101,
+    "reason": "rustc-LLVM ERROR: IO failure on output stream: no space on device (E: full)",
+    "sha256": "4812147a855c7dfc6d2f1e95fa2e03cfa4bdc2bf70e9b4132c2da553f7174456"
+  },
+  "sourceFiles": [
+    {
+      "path": "apps/simulation/src/runtime/zone/types.rs",
+      "sha256": "87b176ce4c27b45d3add7cb98b02a466366f1cc88697cb370c532c1f2d64158b"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/mod.rs",
+      "sha256": "25bf97cd4809476bae4218e4f903683d08d45f6e31a13699a4a20e4a17d66129"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "13db355c28121050c1283bd8bf3276ca88e70d08ff2388d0b45377db0307d24c"
+    },
+    {
+      "path": "apps/simulation/src/runtime/session.rs",
+      "sha256": "3f7c962cc819ce8a136f15d3e83205c7da6836eb4f9cc7490dd7e0859b71e065"
+    },
+    {
+      "path": "apps/simulation/src/world_runtime.rs",
+      "sha256": "1840170f5bb268822dc119d6378d0dc665d7c7e238e9280c6995d7fc7ed400ea"
+    },
+    {
+      "path": "apps/simulation/src/lib.rs",
+      "sha256": "f78f1d4f83a9dfab19960a6dab7ba2ac75a46bf4ed44a4afef5a1bc03f0bd423"
+    },
+    {
+      "path": "apps/simulation/src/runtime/mod.rs",
+      "sha256": "3430228d76d2623f703b16ad457715d08baf9ccf78ff7f21ac921595fd13f7c0"
+    },
+    {
+      "path": "apps/gateway/src/routing.rs",
+      "sha256": "5c6f6191dae5d561eeebf7481a2381114cb5c01771d72c463a797d5135ac226e"
+    },
+    {
+      "path": "apps/simulation/src/runtime/zone/runtime/soulfire_practice_tests.rs",
+      "sha256": "0529d74b49e6a4167cc1c695b96e2df195b4f010b7a36845eb97e2ed5a43ef45"
+    },
+    {
+      "path": "apps/gateway/src/routing/tests/zone_soulfire_practice_tests.rs",
+      "sha256": "0e91d63ef5f3a7622f0eaf57ac39a8a8218163f77171db25b437feb191186013"
+    }
+  ],
+  "scope": [
+    "Closed resolved native-monster primary-hit practice: SoulFireBall, FireBall, GreatFireBall only.",
+    "No other spell/launch practice, account schema change, historical XP, damage buff, controller change or live deployment.",
+    "Projectile timing remains unchanged and is not certified as Crystal parity."
+  ],
+  "integrationPending": true
+}

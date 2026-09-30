@@ -183,10 +183,7 @@ pub(in super::super) fn process(
                             BondEffect::Packet(packet) => enqueue(&mut state, &mut intents, packet),
                             BondEffect::SystemChat(text) => state.social_bonds.notice = Some(text),
                             BondEffect::ComposeMail(recipient) => {
-                                state.apply(mir2_ui_core::action::UiAction::OpenMailCompose);
-                                state.apply(mir2_ui_core::action::UiAction::SetMailRecipient {
-                                    recipient,
-                                });
+                                state.request_mail_letter(recipient);
                             }
                             BondEffect::Whisper(text) => {
                                 state.chat_draft = text;

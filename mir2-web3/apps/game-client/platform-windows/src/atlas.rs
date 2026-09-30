@@ -28,6 +28,9 @@ const ENTITY_BODY_ORDER: f32 = 5.0;
 const ENTITY_HAIR_ORDER: f32 = 6.0;
 const ENTITY_FRONT_WEAPON_ORDER: f32 = 7.0;
 const MAP_FRONT_ORDER: f32 = crate::map_parser::MAP_FRONT_DEPTH_ORDER * ENTITY_DEPTH_GAIN;
+// Crystal draws each cell's front map image before its ItemObject. Keep the
+// floor item just above that front image while leaving later rows in front.
+const GROUND_ITEM_ORDER: f32 = MAP_FRONT_ORDER + 1.0;
 const POST_WORLD_BAND_GAP: f32 = 20.0;
 const TARGET_HIGHLIGHT_OPACITY: f64 = 0.3;
 const ORIGINAL_FRAME_PIXEL_CACHE_LIMIT: usize = 256;
@@ -76,6 +79,131 @@ static ORIGINAL_FRAME_GEOMETRY_CACHE: OnceLock<
 > = OnceLock::new();
 static ORIGINAL_FRAME_PIXEL_CACHE: OnceLock<Mutex<OriginalFramePixelCache>> = OnceLock::new();
 static RENDER_TRACE_STATE_LOGS: AtomicUsize = AtomicUsize::new(0);
+
+const NATIVE_SOAK_METRICS_INTERVAL_MS: u64 = 10_000;
+
+/// Native atlas ownership counters used by the opt-in soak diagnostics. These
+/// values describe CPU-side retained state; Bevy's asset registry count alone
+/// cannot show how much decoded pixel memory is held by atlas caches.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct NativeAtlasSoakMetrics {
+    pub starter_atlas_pages: usize,
+    pub starter_atlas_rects: usize,
+    pub starter_atlas_cpu_pixel_bytes: usize,
+    pub geometry_cache_libraries: usize,
+    pub geometry_cache_frames: usize,
+    pub pixel_cache_entries: usize,
+    pub pixel_cache_rgba_bytes: usize,
+}
+
+fn starter_atlas_manifest_counts(index: Option<&StarterAtlasIndex>) -> (usize, usize) {
+    index
+        .map(|index| {
+            (
+                index.pages.len(),
+                index.pages.iter().map(|page| page.rects.len()).sum(),
+            )
+        })
+        .unwrap_or_default()
+}
+
+fn native_atlas_soak_metrics() -> NativeAtlasSoakMetrics {
+    let (starter_atlas_pages, starter_atlas_rects) =
+        starter_atlas_manifest_counts(starter_atlas_index());
+    let starter_atlas_cpu_pixel_bytes = STARTER_ATLAS_PIXELS
+        .get()
+        .and_then(Option::as_ref)
+        .map(|pages| pages.values().map(|page| page.rgba.len()).sum::<usize>())
+        .unwrap_or_default();
+    let (geometry_cache_libraries, geometry_cache_frames) = ORIGINAL_FRAME_GEOMETRY_CACHE
+        .get()
+        .and_then(|cache| cache.lock().ok())
+        .map(|cache| {
+            (
+                cache.len(),
+                cache
+                    .values()
+                    .filter_map(Option::as_ref)
+                    .map(HashMap::len)
+                    .sum(),
+            )
+        })
+        .unwrap_or_default();
+    let (pixel_cache_entries, pixel_cache_rgba_bytes) = ORIGINAL_FRAME_PIXEL_CACHE
+        .get()
+        .and_then(|cache| cache.lock().ok())
+        .map(|cache| {
+            (
+                cache.frames.len(),
+                cache
+                    .frames
+                    .values()
+                    .filter_map(Option::as_ref)
+                    .map(|page| page.rgba.len())
+                    .sum(),
+            )
+        })
+        .unwrap_or_default();
+
+    NativeAtlasSoakMetrics {
+        starter_atlas_pages,
+        starter_atlas_rects,
+        starter_atlas_cpu_pixel_bytes,
+        geometry_cache_libraries,
+        geometry_cache_frames,
+        pixel_cache_entries,
+        pixel_cache_rgba_bytes,
+    }
+}
+
+#[derive(Default)]
+pub(crate) struct NativeAtlasSoakMetricsClock {
+    initialized: bool,
+    enabled: bool,
+    last_sample_ms: Option<u64>,
+}
+
+/// Emit atlas CPU ownership counters at the same opt-in 10-second cadence as
+/// the shared runtime sampler. Cache locks and full byte summation happen only
+/// when a line is due, never on the normal per-frame path.
+pub fn emit_native_atlas_soak_metrics(
+    time: bevy::prelude::Res<bevy::prelude::Time>,
+    mut clock: bevy::prelude::Local<NativeAtlasSoakMetricsClock>,
+) {
+    if !clock.initialized {
+        clock.enabled = std::env::var("MIR2_NATIVE_SOAK_METRICS")
+            .map(|value| value.trim() == "1")
+            .unwrap_or(false);
+        clock.initialized = true;
+    }
+    if !clock.enabled {
+        return;
+    }
+
+    let elapsed_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
+    if clock
+        .last_sample_ms
+        .is_some_and(|last| elapsed_ms.saturating_sub(last) < NATIVE_SOAK_METRICS_INTERVAL_MS)
+    {
+        return;
+    }
+    clock.last_sample_ms = Some(elapsed_ms);
+
+    let metrics = native_atlas_soak_metrics();
+    let line = json!({
+        "processId": std::process::id(),
+        "timestampMs": elapsed_ms,
+        "starterAtlasPages": metrics.starter_atlas_pages,
+        "starterAtlasRects": metrics.starter_atlas_rects,
+        "starterAtlasCpuPixelBytes": metrics.starter_atlas_cpu_pixel_bytes,
+        "geometryCacheLibraries": metrics.geometry_cache_libraries,
+        "geometryCacheFrames": metrics.geometry_cache_frames,
+        "pixelCacheEntries": metrics.pixel_cache_entries,
+        "pixelCacheRgbaBytes": metrics.pixel_cache_rgba_bytes,
+        "pixelCacheLimit": ORIGINAL_FRAME_PIXEL_CACHE_LIMIT,
+    });
+    eprintln!("[native-soak-atlas] {line}");
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) struct OriginalFrameGeometry {
@@ -244,6 +372,7 @@ fn parse_starter_atlas_manifest(manifest: &Value) -> Option<StarterAtlasIndex> {
 
 /// Decode a generated PNG into raw RGBA pixels.
 fn decode_png_rgba(bytes: &[u8]) -> Option<(u32, u32, Vec<u8>)> {
+    let _diagnostic = crate::timing::DiagnosticSpan::new("entityPngDecode");
     let decoder = png::Decoder::new(std::io::Cursor::new(bytes));
     let mut reader = decoder.read_info().ok()?;
     let output_size = reader.output_buffer_size().unwrap_or(0);
@@ -406,6 +535,18 @@ pub fn starter_frame(
     (library.to_owned(), frame)
 }
 
+/// Crystal's `NPCObject.LoadLibrary` selects ordinary NPC libraries below
+/// 1000 and the separate flag table for 1000..=1099. Keep this conversion
+/// close to native sprite resolution so packet-only ObjectNpc updates can
+/// retain the same visual identity as a complete world snapshot.
+pub(crate) fn crystal_npc_library_from_image(image: u32) -> Option<String> {
+    match image {
+        0..=999 => Some(format!("NPC/{image:02}")),
+        1000..=1099 => Some(format!("Flag/{:02}", image - 1000)),
+        _ => None,
+    }
+}
+
 fn sprite_library(sprite: Option<&Value>, field: &str) -> Option<String> {
     let raw = sprite?.get(field)?.as_str()?.trim();
     if raw.is_empty() || raw.contains("..") || raw.contains(['\\', ':']) {
@@ -492,7 +633,15 @@ fn player_frame_path_parts(frame_path: &str) -> Option<(String, i64, String)> {
     let relative = frame_path.trim().trim_start_matches('/').replace('\\', "/");
     let source_path = relative.strip_prefix("original-ui/")?;
     let (library, file_name) = source_path.rsplit_once('/')?;
+    // Complete content packs keep large monster libraries as individual PNGs.
+    // Apply the same metadata/file checks as character frames, without forcing
+    // every monster texture into the always-resident starter atlas.
+    let monster_library = library.strip_prefix("Monster/").is_some_and(|index| {
+        index.len() == 3 && index.bytes().all(|b| b.is_ascii_digit())
+    });
+    let gate_library = matches!(library, "Gate/00" | "Gate/01" | "Gate/02" | "Gate/03");
     if library != "DNItems" && !is_player_sprite_library(library) && !is_pet_sprite_library(library)
+        && !monster_library && !gate_library
     {
         return None;
     }
@@ -1215,11 +1364,21 @@ fn build_entity_render_state_with_index(
                             layer["opacity"] = json!(0.5);
                         }
                     }
+                    if kind == "selfPlayer" {
+                        append_self_occlusion_redraw(
+                            &mut layers,
+                            actor_layer_count,
+                            &object_id,
+                            direction,
+                            payload,
+                        );
+                    }
                     let mut rendered_entity = json!({
                         "objectId": object_id,
                         "kind": kind,
                         "isSelf": kind == "selfPlayer",
                         "dead": entity.get("dead").and_then(Value::as_bool).unwrap_or(false),
+                        "harvestable": native_entity_is_harvestable(entity),
                         "gridX": x,
                         "gridY": y,
                         "_nativeTargetable": entity
@@ -1325,10 +1484,7 @@ fn build_entity_render_state_with_index(
             continue;
         };
         let path = format!("/original-ui/DNItems/{frame}.png");
-        let Some(pixels) = original_frame_pixels(&path) else {
-            continue;
-        };
-        let Some((true_width, true_height)) = visible_pixel_size(&pixels) else {
+        let Some((width, height, true_width, true_height)) = ground_item_frame_size(frame) else {
             continue;
         };
         entities.push(json!({
@@ -1338,8 +1494,8 @@ fn build_entity_render_state_with_index(
                 "key": format!("{object_id}:ground-item"), "path": path,
                 "left": entity_origin_x + (x-center_x) as f32 * CELL_WIDTH + ((CELL_WIDTH as i32 - true_width as i32) / 2) as f32,
                 "top": entity_origin_y + (y-center_y) as f32 * CELL_HEIGHT + ((CELL_HEIGHT as i32 - true_height as i32) / 2) as f32,
-                "width": pixels.width, "height": pixels.height,
-                "z": entity_z_base(x,y),
+                "width": width, "height": height,
+                "z": entity_z_base(x,y) + GROUND_ITEM_ORDER,
             }]
         }));
     }
@@ -1493,6 +1649,15 @@ fn visible_pixel_size(pixels: &StarterAtlasPixelPage) -> Option<(u32, u32)> {
     (bounds.2 > bounds.0 && bounds.3 > bounds.1).then(|| (bounds.2 - bounds.0, bounds.3 - bounds.1))
 }
 
+/// The DropView overlay uses the same source image and tile centering as the
+/// world item. This also rejects empty/missing DNItems frames before loading a
+/// UI image, so a label cannot acquire a placeholder rectangle.
+pub(crate) fn ground_item_frame_size(frame: i64) -> Option<(u32, u32, u32, u32)> {
+    let pixels = original_frame_pixels(&format!("/original-ui/DNItems/{frame}.png"))?;
+    let (true_width, true_height) = visible_pixel_size(&pixels)?;
+    Some((pixels.width, pixels.height, true_width, true_height))
+}
+
 fn normalized_object_id(value: Option<&Value>) -> Option<String> {
     match value? {
         Value::Number(number) => Some(number.to_string()),
@@ -1505,6 +1670,48 @@ fn normalized_object_id(value: Option<&Value>) -> Option<String> {
 enum HighlightBand {
     Hover,
     Selected,
+}
+
+// Crystal GameScene redraws only the user's body/head/wings at opacity 0.4
+// after the map, before target blends and effects. Body/head use ordinary
+// alpha; DrawWings retains its additive blend. Independent of HighlightTarget;
+// weapons, mounts and shadows stay occluded.
+fn append_self_occlusion_redraw(
+    layers: &mut Vec<Value>,
+    actor_layer_count: usize,
+    object_id: &str,
+    direction: &str,
+    payload: &Value,
+) {
+    let prefix = format!("{object_id}:");
+    let head_before_wings = matches!(direction_index(direction), 0 | 1 | 2 | 6 | 7);
+    let roles = if head_before_wings {
+        ["body", "hair", "wings"]
+    } else {
+        ["body", "wings", "hair"]
+    };
+    let (_, max_world_z) = post_world_depth_bounds(payload);
+    // Reserve the existing gap below the first hover band, without changing
+    // any actor/effect depth contracts. The three source draws fit inside it.
+    let base_z = max_world_z + POST_WORLD_BAND_GAP * 0.5;
+    let source = &layers[..actor_layer_count.min(layers.len())];
+    let redraws = roles
+        .iter()
+        .enumerate()
+        .filter_map(|(order, role)| {
+            let key = format!("{prefix}{role}");
+            let layer = source.iter().find(|layer| layer["key"] == key)?;
+            let mut redraw = layer.clone();
+            redraw["key"] = json!(format!("{object_id}:self-occlusion:{role}"));
+            redraw["z"] = json!(base_z + order as f32);
+            // Hidden's 0.5 applies only inside PlayerObject.Draw and is
+            // restored before GameScene's explicit 0.4 redraw pass.
+            redraw["opacity"] = json!(0.4);
+            redraw["additive"] = json!(*role == "wings");
+            Some(redraw)
+        })
+        .collect::<Vec<_>>();
+    layers.extend(redraws);
 }
 
 fn append_actor_highlight(
@@ -1577,28 +1784,55 @@ fn hovered_object_at_cursor(
 
     // Crystal scans the cursor tile's 5x5 neighbourhood from bottom-right to
     // top-left and each cell's object list in reverse insertion order.
-    for y in ((cursor_grid_y - 2)..=(cursor_grid_y + 2)).rev() {
-        for x in ((cursor_grid_x - 2)..=(cursor_grid_x + 2)).rev() {
-            for entity in entities.iter().rev() {
-                if entity.get("gridX").and_then(Value::as_i64) != Some(x)
-                    || entity.get("gridY").and_then(Value::as_i64) != Some(y)
-                    || entity.get("isSelf").and_then(Value::as_bool) == Some(true)
-                    || entity.get("dead").and_then(Value::as_bool) == Some(true)
-                    || entity.get("_nativeTargetable").and_then(Value::as_bool) != Some(true)
-                {
-                    continue;
-                }
-                let object_id = entity.get("objectId").and_then(Value::as_str)?;
-                if (x == cursor_grid_x && y == cursor_grid_y)
-                    || body_visible_pixel(entity, object_id, cursor_x, cursor_y, index, pixels)
-                    || npc_body_bounds_fallback_hit(entity, cursor_x, cursor_y, index, pixels)
-                {
-                    return Some(object_id.to_owned());
+    // Prefer living actors so a harvestable corpse on the same tile cannot
+    // hide a current combat/NPC target. The second pass admits only an
+    // authoritative harvestable monster corpse; ordinary dead actors remain
+    // non-interactive.
+    for corpse_pass in [false, true] {
+        for y in ((cursor_grid_y - 2)..=(cursor_grid_y + 2)).rev() {
+            for x in ((cursor_grid_x - 2)..=(cursor_grid_x + 2)).rev() {
+                for entity in entities.iter().rev() {
+                    let dead = entity.get("dead").and_then(Value::as_bool) == Some(true);
+                    let harvestable_corpse = dead
+                        && entity.get("kind").and_then(Value::as_str) == Some("monster")
+                        && entity.get("harvestable").and_then(Value::as_bool) == Some(true);
+                    if entity.get("gridX").and_then(Value::as_i64) != Some(x)
+                        || entity.get("gridY").and_then(Value::as_i64) != Some(y)
+                        || entity.get("isSelf").and_then(Value::as_bool) == Some(true)
+                        || (corpse_pass && !harvestable_corpse)
+                        || (!corpse_pass && dead)
+                        || entity.get("_nativeTargetable").and_then(Value::as_bool) != Some(true)
+                    {
+                        continue;
+                    }
+                    let object_id = entity.get("objectId").and_then(Value::as_str)?;
+                    if (x == cursor_grid_x && y == cursor_grid_y)
+                        || body_visible_pixel(entity, object_id, cursor_x, cursor_y, index, pixels)
+                        || npc_body_bounds_fallback_hit(entity, cursor_x, cursor_y, index, pixels)
+                    {
+                        return Some(object_id.to_owned());
+                    }
                 }
             }
         }
     }
     None
+}
+
+fn native_entity_is_harvestable(entity: &Value) -> bool {
+    entity
+        .get("harvestable")
+        .and_then(Value::as_bool)
+        .unwrap_or_else(|| {
+            // Keep this fallback aligned with
+            // simulation::runtime::monsters::monster_ai_requires_harvest,
+            // which mirrors Crystal's HarvestMonster subclasses. A future
+            // explicit payload field remains authoritative over this set.
+            matches!(
+                entity.get("ai").and_then(Value::as_u64),
+                Some(1 | 2 | 4 | 5 | 7 | 9 | 28 | 35 | 153)
+            )
+        })
 }
 
 fn npc_body_bounds_fallback_hit(
@@ -1931,6 +2165,10 @@ pub(crate) fn routing_atlas_manifest_fixture(frame_paths: &[&str]) -> Value {
 }
 
 #[cfg(test)]
+#[path = "self_occlusion_redraw_tests.rs"]
+mod self_occlusion_redraw_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -1949,6 +2187,21 @@ mod tests {
         assert!(starter_frame("monster", "x", "down", None, None)
             .0
             .contains("Monster"));
+    }
+
+    #[test]
+    fn crystal_npc_image_libraries_keep_npcs_and_flags_separate() {
+        assert_eq!(crystal_npc_library_from_image(8).as_deref(), Some("NPC/08"));
+        assert_eq!(crystal_npc_library_from_image(45).as_deref(), Some("NPC/45"));
+        assert_eq!(
+            crystal_npc_library_from_image(1000).as_deref(),
+            Some("Flag/00")
+        );
+        assert_eq!(
+            crystal_npc_library_from_image(1099).as_deref(),
+            Some("Flag/99")
+        );
+        assert_eq!(crystal_npc_library_from_image(1100), None);
     }
 
     #[test]
@@ -1997,6 +2250,29 @@ mod tests {
         assert_eq!(index.rect_by_path["/original-ui/Monster/004/0.png"], (1, 0));
         assert_eq!(index.pages[0].rects[0].offset_x, Some(3));
         assert_eq!(index.pages[0].rects[0].offset_y, Some(-4));
+    }
+
+    #[test]
+    fn atlas_soak_manifest_counts_include_all_pages_and_rects() {
+        let manifest = json!({
+            "atlases": [{
+                "key": "starter",
+                "width": 32,
+                "height": 32,
+                "imageUrl": "/atlas.png",
+                "rects": [
+                    { "key": "/original-ui/Monster/003/0.png|8x9", "x": 0, "y": 0, "width": 8, "height": 9 },
+                    { "key": "/original-ui/Monster/004/0.png|8x9", "x": 8, "y": 0, "width": 8, "height": 9, "pageIndex": 1 }
+                ],
+                "pages": [
+                    { "width": 32, "height": 32, "imageUrl": "/atlas.png" },
+                    { "width": 64, "height": 64, "imageUrl": "/atlas-p1.png" }
+                ]
+            }]
+        });
+        let index = parse_starter_atlas_manifest(&manifest).expect("atlas fixture");
+
+        assert_eq!(starter_atlas_manifest_counts(Some(&index)), (2, 2));
     }
 
     #[test]
@@ -2129,6 +2405,52 @@ mod tests {
     }
 
     #[test]
+    fn monster_standalone_paths_remain_strict() {
+        for path in ["/original-ui/Monster/009/80.png", "/original-ui/Gate/00/33.png"] {
+            assert!(player_frame_path_parts(path).is_some(), "{path}");
+        }
+        for path in [
+            "/original-ui/Monster/../009/80.png", "/original-ui/Monster/9/80.png",
+            "/original-ui/Monster/009/-1.png", "/original-ui/Monster/009/080.png",
+            "/original-ui/Monster/009/80.png/extra", "/original-ui/Gate/04/0.png",
+        ] {
+            assert!(player_frame_path_parts(path).is_none(), "{path}");
+        }
+    }
+
+    #[test]
+    fn newcomer_monster_standalone_frames_retain_original_geometry() {
+        let index = starter_atlas_index().expect("starter atlas index");
+        for library in ["Monster/009", "Monster/011", "Monster/022", "Monster/027",
+            "Monster/029", "Monster/030", "Monster/069", "Monster/070", "Monster/078", "Gate/00"] {
+            let frames = load_original_frame_geometry(library).expect(library);
+            for (frame, geometry) in frames {
+                let layer = build_entity_layer(index, &mut HashMap::new(), "1:body".to_owned(),
+                    &format!("/original-ui/{library}"), frame, 100.0, 200.0, 5.0)
+                    .unwrap_or_else(|| panic!("missing native {library}/{frame}"));
+                assert_eq!(layer["width"], json!(geometry.width as f32));
+                assert_eq!(layer["height"], json!(geometry.height as f32));
+                assert_eq!(layer["left"], json!(100.0 + geometry.offset_x as f32));
+                assert_eq!(layer["top"], json!(200.0 + geometry.offset_y as f32));
+            }
+        }
+    }
+
+    #[test]
+    fn hooking_cat_all_exported_frames_resolve_to_native_atlas_layers() {
+        let index = starter_atlas_index().expect("starter atlas index");
+        for frame in 0..224 {
+            let layer = build_entity_layer(
+                index, &mut HashMap::new(), "42:body".to_owned(),
+                "/original-ui/Monster/006", frame, 100.0, 200.0, 5.0,
+            ).unwrap_or_else(|| panic!("HookingCat missing native frame {frame}"));
+            assert_eq!(layer["atlasKey"], "hooking-cat");
+            assert!(layer["width"].as_f64().unwrap() > 0.0);
+            assert!(layer["height"].as_f64().unwrap() > 0.0);
+        }
+    }
+
+    #[test]
     fn high_armour_exports_keep_every_original_frame_and_exact_geometry() {
         let index = starter_atlas_index().expect("starter atlas index");
         // Crystal PlayerObject.SetLibraries selects Shape 9/10 independently
@@ -2228,8 +2550,20 @@ mod tests {
                                 build_entity_render_state_with_poses(&payload, &poses).unwrap();
                             let entity = &state["entities"][0];
                             let layers = entity["layers"].as_array().unwrap();
-                            assert_eq!(layers.len(), 3,
+                            let actor_layers = layers.iter().filter(|layer| !layer["key"].as_str().unwrap().contains(":self-occlusion:")).collect::<Vec<_>>();
+                            assert_eq!(actor_layers.len(), 3,
                                 "{library} offset {body_offset}, {direction}, {action:?}, phase {phase}");
+                            assert_eq!(layers.len(), 5, "three actor parts plus body/hair redraw");
+                            for role in ["body", "hair"] {
+                                let original = actor_layers.iter().find(|v| v["key"] == format!("1000:{role}")).unwrap();
+                                let redraw = layers.iter().find(|v| v["key"] == format!("1000:self-occlusion:{role}")).unwrap();
+                                for field in ["path", "atlasRectKey", "left", "top", "width", "height"] {
+                                    assert_eq!(original[field], redraw[field]);
+                                }
+                                assert_eq!(redraw["opacity"], json!(0.4));
+                                assert_eq!(redraw["additive"], json!(false));
+                                assert!(redraw["z"].as_f64().unwrap() > original["z"].as_f64().unwrap());
+                            }
                             let body = layers
                                 .iter()
                                 .find(|layer| layer["key"] == "1000:body")
@@ -2261,12 +2595,15 @@ mod tests {
     #[test]
     fn ground_item_renders_without_actor_or_name_and_disappears_when_removed() {
         let mut payload = json!({"sceneView":{"center":{"x":10,"y":20}},
-            "entities":[], "groundDrops":[{"objectId":99,"image":0,"x":11,"y":20}]});
+            "entities":[], "groundDrops":[{"objectId":99,"image":30,"x":11,"y":20}]});
         let render = build_entity_render_state_with_frames(&payload, &HashMap::new()).unwrap();
         let item = &render["entities"][0];
         assert_eq!(item["kind"], "item");
-        assert_eq!(item["layers"][0]["path"], "/original-ui/DNItems/0.png");
+        assert_eq!(item["layers"][0]["path"], "/original-ui/DNItems/30.png");
         assert!(item["layers"][0]["width"].as_u64().unwrap() > 0);
+        let item_z = item["layers"][0]["z"].as_f64().unwrap() as f32;
+        assert!(item_z > entity_z_base(11, 20) + MAP_FRONT_ORDER);
+        assert!(item_z < entity_z_base(11, 21));
         assert!(render["hoveredObjectId"].is_null());
         payload["groundDrops"] = json!([]);
         assert!(
@@ -3165,6 +3502,7 @@ mod tests {
             "y": 10,
             "direction": "up",
             "dead": dead,
+            "ai": if kind == "monster" { 2 } else { 0 },
             "sprite": {"bodyLibrary": body_library, "frameBaseOffset": 0}
         })
     }
@@ -3232,7 +3570,7 @@ mod tests {
     }
 
     #[test]
-    fn hover_scan_allows_npc_excludes_self_and_dead_and_uses_reverse_cell_order() {
+    fn hover_scan_prefers_live_actor_then_allows_only_harvestable_monster_corpse() {
         let manifest = hover_fixture_manifest();
         let pixels = hover_fixture_pixels(1, 1);
         let poses = HashMap::from([
@@ -3261,6 +3599,46 @@ mod tests {
         assert!(!has_layer(&state, "1000:hover-highlight:body"));
         assert_eq!(state["hoveredObjectId"], json!("3002"));
         assert_eq!(state["selfHovered"], json!(true));
+
+        let corpse_payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 10}},
+            "_nativeHoverCursor": {"x": 482.2, "y": 353.2},
+            "entities": [hover_fixture_entity(2001, "monster", 11, true)]
+        });
+        let corpse = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &corpse_payload,
+            &poses,
+            true,
+            &manifest,
+            &pixels,
+        )
+        .expect("harvestable corpse hover state");
+        assert_eq!(corpse["hoveredObjectId"], json!("2001"));
+
+        let mut ordinary_dead = corpse_payload.clone();
+        ordinary_dead["entities"][0]["ai"] = json!(0);
+        let ordinary_dead = build_entity_render_state_with_manifest_and_pixels_for_test(
+            &ordinary_dead,
+            &poses,
+            true,
+            &manifest,
+            &pixels,
+        )
+        .expect("ordinary dead actor hover state");
+        assert!(ordinary_dead["hoveredObjectId"].is_null());
+
+        let mut explicitly_not_harvestable = corpse_payload;
+        explicitly_not_harvestable["entities"][0]["harvestable"] = json!(false);
+        let explicitly_not_harvestable =
+            build_entity_render_state_with_manifest_and_pixels_for_test(
+                &explicitly_not_harvestable,
+                &poses,
+                true,
+                &manifest,
+                &pixels,
+            )
+            .expect("explicitly non-harvestable corpse hover state");
+        assert!(explicitly_not_harvestable["hoveredObjectId"].is_null());
     }
 
     #[test]

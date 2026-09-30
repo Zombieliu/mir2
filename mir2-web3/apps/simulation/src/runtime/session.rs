@@ -8,8 +8,9 @@ use super::combat::{
     apply_settled_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state,
 };
 use super::components::{
-    entity_by_object_id, entity_name, entity_object_id, player_entity, Facing, Monster,
-    MonsterAgent, MonsterVitals, PlayerVitals, Position, SpawnSlotRef,
+    entity_by_object_id, entity_name, entity_object_id, entity_player_vitals, entity_position,
+    player_entity, DisplayName, Facing, Hero, Monster, MonsterAgent, MonsterVitals, Npc,
+    ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef,
 };
 use super::crystal_compat::*;
 use super::drops::{
@@ -27,6 +28,7 @@ use super::monsters::{
     reset_shared_monster_harvest_state, spawn_shared_monster_snapshot, MonsterRespawnSchedule,
     MonsterSpawnTable,
 };
+use super::npc::crystal_npc_object_visible_in_world;
 use super::npc_script::*;
 use super::packets::*;
 use super::quests::*;
@@ -53,7 +55,7 @@ use crate::runtime::zone::{
 };
 use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate, LanguageCode};
 use mir2_protocol::{
-    ChatItem, ClientBuff, ItemRentalInformation, Point, ServerPacket, Spell,
+    ChatItem, ClientBuff, ClientIntelligentCreature, ItemRentalInformation, Point, ServerPacket, Spell,
     UserItemRentalInformation,
 };
 
@@ -117,6 +119,17 @@ pub struct ActiveSessionIdentity {
     pub account_id: String,
     pub character_index: i32,
     pub character_name: String,
+}
+
+/// Minimal authoritative player projection for shared-Zone reconciliation.
+/// Values intentionally match the corresponding `WorldSnapshot` fields while
+/// avoiding construction of inventory, quest, entity, and UI projections.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct LocalPlayerVitalsSnapshot {
+    pub player_object_id: Option<u32>,
+    pub player_hp: Option<i32>,
+    pub player_max_hp: Option<i32>,
+    pub player_mp: Option<i32>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -686,8 +699,86 @@ impl SimulationSession {
         build_world_snapshot(self.app.world())
     }
 
+    pub fn local_player_vitals_snapshot(&self) -> LocalPlayerVitalsSnapshot {
+        let world = self.app.world();
+        let player = player_entity(world);
+        let player_vitals = player.and_then(|entity| entity_player_vitals(world, entity));
+        LocalPlayerVitalsSnapshot {
+            player_object_id: player.and_then(|entity| entity_object_id(world, entity)),
+            player_hp: player_vitals.map(|vitals| vitals.hp),
+            player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
+            player_mp: player_vitals.map(|vitals| vitals.mp),
+        }
+    }
+
+    pub fn current_map_file_name(&self) -> Option<String> {
+        let world = self.app.world();
+        is_in_world(world).then(|| {
+            world
+                .resource::<MapRuntimeResource>()
+                .current_map
+                .file_name
+                .clone()
+        })
+    }
+
+    /// Read the active player's ECS position without building a full world or
+    /// Zone-join snapshot. The in-world gate prevents the demo fixture's
+    /// default position from leaking before a character is selected.
+    pub fn local_player_position(&self) -> Option<Point> {
+        let world = self.app.world();
+        if !is_in_world(world) {
+            return None;
+        }
+        player_entity(world).and_then(|entity| entity_position(world, entity))
+    }
+
+    pub fn active_intelligent_creature_snapshot(&self) -> Option<ClientIntelligentCreature> {
+        self.app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .active_intelligent_creature()
+            .cloned()
+    }
+
     pub fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
         collect_current_map_shared_entity_snapshots(self.app.world())
+    }
+
+    /// The live-monster IDs from `current_map_shared_entity_snapshots`, without
+    /// constructing presentation fields that shared-Zone hydration discards.
+    /// Preserve its component requirements, classification precedence and NPC
+    /// visibility even for mixed-marker entities. Missing HP is not dead, and
+    /// duplicate object IDs retain their existing multiplicity.
+    pub fn current_map_active_monster_ids(&self) -> Vec<u32> {
+        let world = self.app.world();
+        let mut object_ids = world
+            .iter_entities()
+            .filter_map(|entity| {
+                let object_id = entity.get::<ObjectId>()?.0;
+                entity.get::<DisplayName>()?;
+                entity.get::<Position>()?;
+                entity.get::<Facing>()?;
+                if entity.contains::<SelfPlayer>()
+                    || entity.contains::<Hero>()
+                    || entity.contains::<RemotePlayer>()
+                    || (entity.contains::<Npc>()
+                        && !crystal_npc_object_visible_in_world(world, object_id))
+                {
+                    return None;
+                }
+                let agent = entity.get::<MonsterAgent>()?;
+                if agent.dead
+                    || entity.get::<MonsterVitals>().is_some_and(|vitals| vitals.hp <= 0)
+                {
+                    return None;
+                }
+                Some(object_id)
+            })
+            .collect::<Vec<_>>();
+        object_ids.sort();
+        object_ids
     }
 
     pub fn local_player_object_id(&self) -> Option<u32> {
@@ -853,9 +944,10 @@ impl SimulationSession {
         }
         {
             let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
-            runtime.player_position = position;
+            runtime.player_position = position.clone();
             runtime.player_direction = direction;
         }
+        super::map::refresh_player_bind_at_position(world, &position);
         advance_runtime_tick(world);
     }
 
@@ -877,6 +969,45 @@ impl SimulationSession {
         let updated_vitals = {
             let mut entity = world.entity_mut(player);
             entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+                if let Some(hp) = hp {
+                    vitals.hp = hp.clamp(0, vitals.max_hp);
+                }
+                if let Some(mp) = mp {
+                    vitals.mp = mp.clamp(0, vitals.max_mp);
+                }
+                *vitals
+            })
+        };
+        if let Some(vitals) = updated_vitals {
+            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+            advance_runtime_tick(world);
+        }
+    }
+
+    /// Reconcile shared-Zone vitals when the Zone also owns the current HP
+    /// pool size. The legacy method above intentionally updates only current
+    /// HP/MP; this variant must update the maximum before clamping the current
+    /// values so a level-up cannot leave the personal snapshot on its old HP
+    /// ceiling.
+    pub fn force_authoritative_player_vitals_with_max_hp(
+        &mut self,
+        hp: Option<i32>,
+        max_hp: Option<i32>,
+        mp: Option<i32>,
+    ) {
+        if (hp.is_none() && max_hp.is_none() && mp.is_none()) || !is_in_world(self.app.world()) {
+            return;
+        }
+        let world = self.app.world_mut();
+        let Some(player) = player_entity(world) else {
+            return;
+        };
+        let updated_vitals = {
+            let mut entity = world.entity_mut(player);
+            entity.get_mut::<PlayerVitals>().map(|mut vitals| {
+                if let Some(max_hp) = max_hp {
+                    vitals.max_hp = max_hp.max(1);
+                }
                 if let Some(hp) = hp {
                     vitals.hp = hp.clamp(0, vitals.max_hp);
                 }
@@ -1037,6 +1168,82 @@ impl SimulationSession {
             }
         }
         advance_runtime_tick(world);
+    }
+
+    /// Trusted owner bridge; the gateway validates the Zone incarnation and
+    /// deduplicates resolved receipts before entering personal progression.
+    pub fn commit_zone_magic_practice(
+        &mut self,
+        receipt: &super::zone::ZoneMagicPracticeReceipt,
+    ) -> Vec<ServerPacket> {
+        if receipt.damage <= 0 || receipt.target_object_id == 0 || !is_in_world(self.app.world()) {
+            return Vec::new();
+        }
+        let Some(identity) = self.active_identity() else {
+            return Vec::new();
+        };
+        if identity.account_id != receipt.account_id
+            || identity.character_index != receipt.character_index
+        {
+            return Vec::new();
+        }
+        let skill_key = receipt.spell.skill_key();
+        let Some(magic) = crystal_magic_for_skill_key(skill_key) else {
+            return Vec::new();
+        };
+        let world = self.app.world_mut();
+        let Some(index) = world
+            .resource::<SkillResource>()
+            .skills
+            .iter()
+            .position(|skill| skill.key == skill_key)
+        else {
+            return Vec::new();
+        };
+        let tick = runtime_tick(world);
+        let mut packets = advance_magic_progression(world, index, receipt.spell.spell(), &magic, tick);
+        packets.extend(super::quests::newcomer_v2_events::record_spell_damage(
+            world, &magic.spell, receipt.cast_at_ms));
+        if !packets.is_empty() {
+            advance_runtime_tick(world);
+        }
+        packets
+    }
+
+    /// Trusted Gateway-only outcome bridge. The Gateway fences owner incarnation
+    /// and duplicate receipts; Session additionally binds the personal identity.
+    pub fn commit_zone_journey_event(
+        &mut self,
+        receipt: super::zone::ZoneJourneyEventReceipt,
+    ) -> Vec<ServerPacket> {
+        if !is_in_world(self.app.world()) { return Vec::new(); }
+        let Some(identity) = self.active_identity() else { return Vec::new(); };
+        if identity.account_id != receipt.account_id || identity.character_index != receipt.character_index
+            || !self.app.world().resource::<MapRuntimeResource>().current_map.file_name
+                .eq_ignore_ascii_case(&receipt.zone_key.map_file_name) {
+            return Vec::new();
+        }
+        let packets = super::quests::newcomer_v2_events::record_zone_event(self.app.world_mut(), &receipt);
+        self.finalize_packets(packets)
+    }
+
+    pub fn needs_zone_journey_evidence(&self) -> bool {
+        let world = self.app.world();
+        super::quests::newcomer_v2::enabled(world) && is_in_world(world)
+            && world.resource::<QuestResource>().quests.iter().any(|quest|
+                quest.stage == crate::QuestStage::InProgress
+                    && super::quests::newcomer_v2::flag_objectives(world, quest.quest_id).iter().any(|flag|
+                        quest.task_progress.get(&format!("flag:{}", flag.number)).copied().unwrap_or(0) < 1))
+    }
+
+    pub fn commit_zone_journey_reposition(&mut self) -> Vec<ServerPacket> {
+        let packets = super::quests::newcomer_v2_events::record_legal_reposition(self.app.world_mut());
+        self.finalize_packets(packets)
+    }
+
+    pub fn commit_zone_journey_state(&mut self) -> Vec<ServerPacket> {
+        let packets = super::quests::newcomer_v2_events::refresh_state_conditions(self.app.world_mut());
+        self.finalize_packets(packets)
     }
 
     pub fn apply_zone_player_buff_packets(
@@ -2130,3 +2337,7 @@ fn preferred_or_empty_trade_delivery_slot_for_items(
 #[cfg(test)]
 #[path = "tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "session_active_monster_ids_tests.rs"]
+mod active_monster_ids_tests;

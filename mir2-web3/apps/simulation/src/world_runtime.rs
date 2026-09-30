@@ -3,7 +3,8 @@ use std::any::Any;
 use crate::runtime::{
     GameShopPurchaseOutcome, SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery,
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
-    SharedSkillItemConsumptionComponent, SharedTradeOffer, ZoneMonsterSpawn,
+    SharedSkillItemConsumptionComponent, SharedTradeOffer, ZoneMonsterSpawn, ZonePlayerCombatStats,
+    LocalPlayerVitalsSnapshot,
 };
 use crate::{
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
@@ -11,7 +12,8 @@ use crate::{
     WorldSnapshot,
 };
 use mir2_protocol::{
-    client_packet_name, ChatItem, ClientPacket, MirDirection, Point, ServerPacket, Spell,
+    client_packet_name, ChatItem, ClientIntelligentCreature, ClientPacket, MirDirection, Point,
+    ServerPacket, Spell,
 };
 use serde::{Deserialize, Serialize};
 
@@ -40,6 +42,8 @@ pub struct NativeGameShopPurchaseRequest {
 #[derive(Debug, Clone)]
 pub enum WorldCommand {
     ClientPacket(ClientPacket),
+    /// Gateway-only bootstrap after taking custody of an authenticated retained session.
+    ReplayRetainedStartGameBootstrap { character_index: i32 },
     /// Trusted native receipt purchase. Raw clients cannot construct this
     /// command; Gateway binds the server idempotency key to authenticated
     /// identity before the Zone/Simulation path sees it.
@@ -125,6 +129,9 @@ pub fn validate_production_player_command(
     command: &WorldCommand,
 ) -> Result<(), String> {
     match command {
+        WorldCommand::ReplayRetainedStartGameBootstrap { .. } => {
+            Err("retained bootstrap replay is not allowed on the production player path".to_string())
+        }
         WorldCommand::PasskeyLogin { .. } => {
             Err("raw passkey login is not allowed on the production player path".to_string())
         }
@@ -198,6 +205,7 @@ pub(crate) fn parse_debug_crystal_transfer_key(
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WorldCommandKind {
     ClientPacket(&'static str),
+    ReplayRetainedStartGameBootstrap,
     PasskeyLogin,
     MoveTo,
     Attack,
@@ -226,6 +234,7 @@ impl WorldCommand {
                 WorldCommandKind::ClientPacket(client_packet_name(packet))
             }
             Self::NativeGameShopPurchase(_) => WorldCommandKind::ClientPacket("GameShopBuy"),
+            Self::ReplayRetainedStartGameBootstrap { .. } => WorldCommandKind::ReplayRetainedStartGameBootstrap,
             Self::PasskeyLogin { .. } => WorldCommandKind::PasskeyLogin,
             Self::MoveTo { .. } => WorldCommandKind::MoveTo,
             Self::Attack { .. } => WorldCommandKind::Attack,
@@ -253,6 +262,7 @@ impl WorldCommand {
             self,
             Self::ClientPacket(
                 ClientPacket::KeepAlive { .. }
+                    | ClientPacket::ClientVersion { .. }
                     | ClientPacket::Turn { .. }
                     | ClientPacket::Walk { .. }
                     | ClientPacket::Run { .. }
@@ -439,6 +449,26 @@ impl InProcessWorldRuntime {
 
     pub fn local_player_object_id(&self) -> Option<u32> {
         self.session.local_player_object_id()
+    }
+
+    pub fn local_player_vitals_snapshot(&self) -> LocalPlayerVitalsSnapshot {
+        self.session.local_player_vitals_snapshot()
+    }
+
+    pub fn current_map_file_name(&self) -> Option<String> {
+        self.session.current_map_file_name()
+    }
+
+    pub fn current_map_active_monster_ids(&self) -> Vec<u32> {
+        self.session.current_map_active_monster_ids()
+    }
+
+    pub fn local_player_position(&self) -> Option<Point> {
+        self.session.local_player_position()
+    }
+
+    pub fn active_intelligent_creature_snapshot(&self) -> Option<ClientIntelligentCreature> {
+        self.session.active_intelligent_creature_snapshot()
     }
 
     pub fn shared_intelligent_creature_map_allowed(&self) -> bool {
@@ -680,6 +710,15 @@ impl InProcessWorldRuntime {
         self.session.commit_zone_melee_attack_spell(spell)
     }
 
+    pub fn commit_zone_melee_attack_spell_with_primary(
+        &mut self,
+        spell: Spell,
+        primary_target_present: bool,
+    ) -> Vec<ServerPacket> {
+        self.session
+            .commit_zone_melee_attack_spell_with_primary(spell, primary_target_present)
+    }
+
     pub fn zone_range_attack_profile(&self) -> (Spell, u8, i32) {
         self.session.zone_range_attack_profile()
     }
@@ -736,6 +775,12 @@ impl InProcessWorldRuntime {
         self.session.active_zone_join_snapshot(session_id)
     }
 
+    /// Read the trusted combat projection without building the much broader
+    /// world/quest/UI snapshot used by a full Zone join.
+    pub fn zone_player_combat_stats(&self) -> ZonePlayerCombatStats {
+        self.session.zone_player_combat_stats()
+    }
+
     pub fn force_authoritative_player_transform(
         &mut self,
         position: Point,
@@ -751,6 +796,16 @@ impl InProcessWorldRuntime {
 
     pub fn force_authoritative_player_vitals(&mut self, hp: Option<i32>, mp: Option<i32>) {
         self.session.force_authoritative_player_vitals(hp, mp);
+    }
+
+    pub fn force_authoritative_player_vitals_with_max_hp(
+        &mut self,
+        hp: Option<i32>,
+        max_hp: Option<i32>,
+        mp: Option<i32>,
+    ) {
+        self.session
+            .force_authoritative_player_vitals_with_max_hp(hp, max_hp, mp);
     }
 
     pub fn apply_zone_player_damage(&mut self, damage: i32) -> bool {
@@ -776,6 +831,32 @@ impl InProcessWorldRuntime {
     pub fn apply_zone_player_magic_spend(&mut self, spell: Spell, mp_cost: i32, cooldown_ms: u64) {
         self.session
             .apply_zone_player_magic_spend(spell, mp_cost, cooldown_ms);
+    }
+
+    pub fn commit_zone_magic_practice(
+        &mut self,
+        receipt: &crate::ZoneMagicPracticeReceipt,
+    ) -> Vec<ServerPacket> {
+        self.session.commit_zone_magic_practice(receipt)
+    }
+
+    pub fn commit_zone_journey_event(
+        &mut self,
+        receipt: crate::ZoneJourneyEventReceipt,
+    ) -> Vec<ServerPacket> {
+        self.session.commit_zone_journey_event(receipt)
+    }
+
+    pub fn needs_zone_journey_evidence(&self) -> bool {
+        self.session.needs_zone_journey_evidence()
+    }
+
+    pub fn commit_zone_journey_reposition(&mut self) -> Vec<ServerPacket> {
+        self.session.commit_zone_journey_reposition()
+    }
+
+    pub fn commit_zone_journey_state(&mut self) -> Vec<ServerPacket> {
+        self.session.commit_zone_journey_state()
     }
 
     pub fn apply_zone_player_buff_packets(
@@ -921,6 +1002,9 @@ impl WorldRuntime for InProcessWorldRuntime {
         let before = if xp_source { self.session.begin_guild_experience_command(false)? } else { None };
         let packets = match command {
             WorldCommand::ClientPacket(packet) => self.session.try_handle_packet(packet)?,
+            WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => {
+                self.session.replay_active_character_bootstrap(character_index)
+            }
             WorldCommand::NativeGameShopPurchase(request) => {
                 self.session
                     .game_shop_buy_packet_idempotent(request)?

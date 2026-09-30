@@ -1,0 +1,2624 @@
+{
+  "schema": 1,
+  "locales": [
+    "ru",
+    "hi",
+    "id",
+    "vi",
+    "th",
+    "ar"
+  ],
+  "entriesPerLocale": 9385,
+  "sourceSha256": {
+    "common.json": "cf8fa0dfa4fd81797316a83c35646873bf0ae3cf5db1641af826b1841cb8e171",
+    "content.json": "142e05e9e628be47c45eec257c8616f6e7f5c485588de8a0b25f36fc406222d1",
+    "shell.json": "a2d9ca9278b6fb8b69960ab06ec985fc7b125e4b14256f3d12325fdf0a2143aa",
+    "quest.json": "f7d53600e97f31b8305198bdd07bf24752b142a5ed392dead9859cd39a97fa34",
+    "game.json": "cc70dfd7457968867e3690b6e0712bc0e2dcf44763ab161e36bffe87224c1557",
+    "help.json": "5ce6fa52b935f528424c3963dc16c5e430387d3be2dac6d70d0701cf834b3b9e",
+    "npc-menus.json": "fa9de6316a85177479bddf4f01c4010524f172f542df336b379548dd8f62f0d3",
+    "npc-prose.json": "f54665c416efe58b6dd40b7a657b0522da07b52ba0c208f2783b98c1a22a6bb0"
+  },
+  "reviewedOverrideSha256": {
+    "ui-overrides.json": "ece851a475d9165bc068349151c9729f6cf1ecbf548232db8a298bcc1a9fa1a6",
+    "content-overrides.json": "6e9ae9c7d0d910b848900cc7dc8ffcb2f34cac3f30b7b61f27b8e10ba87447d9",
+    "review-overrides.json": "a7764c7a9e76bca45a25b47596c2e981a48517d8299b807d61a1c434ea89f93c",
+    "npc-overrides.json": "5b38cf3f504db069d092113dbd5ce6382fee9bf0d45f54e41a6e8e7ec734a7f2",
+    "names-overrides.json": "bf613189a4a071bf8405c08e08aec59bcb36386b766c8374583a195db9f9ef20",
+    "other-names-overrides.json": "a874d4e07574880ec07043f3517c32cf8639206a47919ac1d72af8f44dd15076",
+    "runtime-overrides.json": "c52f2d4d3f723302a62c921b48bf1a2b3f0fa9b1957608d0f6a939c6857e6166"
+  },
+  "methods": {
+    "ru": {
+      "keyedReview": 3138,
+      "exactSourceReview": 230,
+      "offlineDraft": 5972,
+      "offlineNameDraft": 45
+    },
+    "hi": {
+      "keyedReview": 3184,
+      "exactSourceReview": 230,
+      "offlineDraft": 5804,
+      "offlineNameDraft": 167
+    },
+    "id": {
+      "keyedReview": 3299,
+      "exactSourceReview": 230,
+      "offlineDraft": 5106,
+      "offlineNameDraft": 750
+    },
+    "vi": {
+      "keyedReview": 3168,
+      "exactSourceReview": 230,
+      "offlineDraft": 5836,
+      "offlineNameDraft": 151
+    },
+    "th": {
+      "keyedReview": 3109,
+      "exactSourceReview": 230,
+      "offlineDraft": 5978,
+      "offlineNameDraft": 68
+    },
+    "ar": {
+      "keyedReview": 3348,
+      "exactSourceReview": 230,
+      "offlineDraft": 5014,
+      "offlineNameDraft": 793
+    }
+  },
+  "errors": [],
+  "identicalValues": [
+    {
+      "key": "client.AC",
+      "locale": "ru",
+      "source": "AC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEnter",
+      "locale": "ru",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEsc",
+      "locale": "ru",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.DC",
+      "locale": "ru",
+      "source": "DC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MAC",
+      "locale": "ru",
+      "source": "MAC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MC",
+      "locale": "ru",
+      "source": "MC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipAC",
+      "locale": "ru",
+      "source": "AC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipDC",
+      "locale": "ru",
+      "source": "DC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMAC",
+      "locale": "ru",
+      "source": "MAC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMC",
+      "locale": "ru",
+      "source": "MC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.SC",
+      "locale": "ru",
+      "source": "SC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.entity.oma.name",
+      "locale": "ru",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "server.MonsterInfo3",
+      "locale": "ru",
+      "source": "HP : {0}, MinDC : {1}, MaxDC : {2}",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "server.NpcInfo2",
+      "locale": "ru",
+      "source": "X : {0}, Y : {1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "ui.lastAccessValue",
+      "locale": "ru",
+      "source": "{0}",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "ui.npc",
+      "locale": "ru",
+      "source": "NPC",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.questRewardExp",
+      "locale": "ru",
+      "source": "EXP {0}",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.ws",
+      "locale": "ru",
+      "source": "WS",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "content.item.1614.name",
+      "locale": "ru",
+      "source": "Hwayoung Okhwan 1",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1615.name",
+      "locale": "ru",
+      "source": "Hwayoung Okhwan 2",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1616.name",
+      "locale": "ru",
+      "source": "Hwayoung Okhwan 3",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1617.name",
+      "locale": "ru",
+      "source": "Hwayoung Okhwan 4",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1618.name",
+      "locale": "ru",
+      "source": "Hwayoung Okhwan 5",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1620.name",
+      "locale": "ru",
+      "source": "Nokyoungokhwan 1",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1621.name",
+      "locale": "ru",
+      "source": "Nokyoungokhwan 2",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1622.name",
+      "locale": "ru",
+      "source": "Nokyoungokhwan 3",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1623.name",
+      "locale": "ru",
+      "source": "Nokyoungokhwan 4",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1624.name",
+      "locale": "ru",
+      "source": "Nokyoungokhwan 5",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.10.name",
+      "locale": "ru",
+      "source": "Shinsu",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.11.name",
+      "locale": "ru",
+      "source": "Shinsu 1",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.143.name",
+      "locale": "ru",
+      "source": "Yimoogi",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.393.name",
+      "locale": "ru",
+      "source": "00",
+      "reason": "original authored placeholder name; not translated prose"
+    },
+    {
+      "key": "content.monster.48.name",
+      "locale": "ru",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.49.name",
+      "locale": "ru",
+      "source": "Oma 0",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.esc",
+      "locale": "ru",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.enter",
+      "locale": "ru",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.practice.separator",
+      "locale": "ru",
+      "source": "; ",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.feedback.47",
+      "locale": "ru",
+      "source": "NPC: {npc}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupObject",
+      "locale": "ru",
+      "source": "{name}  (PickUpObject)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupTile",
+      "locale": "ru",
+      "source": "{name}  (PickUpTile)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.006",
+      "locale": "ru",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.041",
+      "locale": "ru",
+      "source": "MP: {n}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.580ce9e8774306d7",
+      "locale": "ru",
+      "source": "HwanMaJin2",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.d179bb77a0f6f16d",
+      "locale": "ru",
+      "source": "HwanMaJin",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.dc8659db6d416dc3",
+      "locale": "ru",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.0839dfaa5145dad0",
+      "locale": "ru",
+      "source": "OldManInfinity.",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.2e38e77b22c314a4",
+      "locale": "ru",
+      "source": "()",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.3973e022e93220f9",
+      "locale": "ru",
+      "source": "-",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.565d240f5343e625",
+      "locale": "ru",
+      "source": "||",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.596ecb8e1b5e7dba",
+      "locale": "ru",
+      "source": "-Liam Thompson",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.9263fdd602313131",
+      "locale": "ru",
+      "source": "(KR)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.a5e7075a435058c8",
+      "locale": "ru",
+      "source": ", , , ,",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.a9253dc8529dd214",
+      "locale": "ru",
+      "source": "\\",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.cbe5cfdf7c2118a9",
+      "locale": "ru",
+      "source": "|",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.cdb4ee2aea69cc6a",
+      "locale": "ru",
+      "source": ".",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.d03502c43d74a30b",
+      "locale": "ru",
+      "source": ",",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.e76d0bc0e98b2ad5",
+      "locale": "ru",
+      "source": "‎",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.f34a570db4e09470",
+      "locale": "ru",
+      "source": "SET [526] 1",
+      "reason": "original command mistakenly authored inside SAY; kept exact as text, never executed by catalogue"
+    },
+    {
+      "key": "npc.prose.f6a16e6570270f61",
+      "locale": "ru",
+      "source": "|  |",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.fd088b833d31eca6",
+      "locale": "ru",
+      "source": "{npc_arg0}",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "client.AC",
+      "locale": "hi",
+      "source": "AC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEnter",
+      "locale": "hi",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEsc",
+      "locale": "hi",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.DC",
+      "locale": "hi",
+      "source": "DC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MAC",
+      "locale": "hi",
+      "source": "MAC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MC",
+      "locale": "hi",
+      "source": "MC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipAC",
+      "locale": "hi",
+      "source": "AC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipDC",
+      "locale": "hi",
+      "source": "DC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMAC",
+      "locale": "hi",
+      "source": "MAC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMC",
+      "locale": "hi",
+      "source": "MC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.SC",
+      "locale": "hi",
+      "source": "SC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.entity.oma.name",
+      "locale": "hi",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "server.NpcInfo2",
+      "locale": "hi",
+      "source": "X : {0}, Y : {1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "ui.lastAccessValue",
+      "locale": "hi",
+      "source": "{0}",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "ui.npc",
+      "locale": "hi",
+      "source": "NPC",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.questRewardExp",
+      "locale": "hi",
+      "source": "EXP {0}",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.ws",
+      "locale": "hi",
+      "source": "WS",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "content.item.1613.name",
+      "locale": "hi",
+      "source": "Hwayoung Okhwan",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1619.name",
+      "locale": "hi",
+      "source": "Nokyoungokhwan",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1620.name",
+      "locale": "hi",
+      "source": "Nokyoungokhwan 1",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1621.name",
+      "locale": "hi",
+      "source": "Nokyoungokhwan 2",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1622.name",
+      "locale": "hi",
+      "source": "Nokyoungokhwan 3",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1623.name",
+      "locale": "hi",
+      "source": "Nokyoungokhwan 4",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1624.name",
+      "locale": "hi",
+      "source": "Nokyoungokhwan 5",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.10.name",
+      "locale": "hi",
+      "source": "Shinsu",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.11.name",
+      "locale": "hi",
+      "source": "Shinsu 1",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.143.name",
+      "locale": "hi",
+      "source": "Yimoogi",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.235.name",
+      "locale": "hi",
+      "source": "Kek Tal",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.393.name",
+      "locale": "hi",
+      "source": "00",
+      "reason": "original authored placeholder name; not translated prose"
+    },
+    {
+      "key": "content.monster.48.name",
+      "locale": "hi",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.49.name",
+      "locale": "hi",
+      "source": "Oma 0",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.esc",
+      "locale": "hi",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.enter",
+      "locale": "hi",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.practice.separator",
+      "locale": "hi",
+      "source": "; ",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.feedback.47",
+      "locale": "hi",
+      "source": "NPC: {npc}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupObject",
+      "locale": "hi",
+      "source": "{name}  (PickUpObject)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupTile",
+      "locale": "hi",
+      "source": "{name}  (PickUpTile)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.006",
+      "locale": "hi",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.041",
+      "locale": "hi",
+      "source": "MP: {n}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.580ce9e8774306d7",
+      "locale": "hi",
+      "source": "HwanMaJin2",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.d179bb77a0f6f16d",
+      "locale": "hi",
+      "source": "HwanMaJin",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.dc8659db6d416dc3",
+      "locale": "hi",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.0839dfaa5145dad0",
+      "locale": "hi",
+      "source": "OldManInfinity.",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.3973e022e93220f9",
+      "locale": "hi",
+      "source": "-",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.565d240f5343e625",
+      "locale": "hi",
+      "source": "||",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.596ecb8e1b5e7dba",
+      "locale": "hi",
+      "source": "-Liam Thompson",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.8a30a8fdeadb9b8d",
+      "locale": "hi",
+      "source": "[@before1>",
+      "reason": "malformed original script marker emitted as body text; retained source defect, not English prose"
+    },
+    {
+      "key": "npc.prose.9263fdd602313131",
+      "locale": "hi",
+      "source": "(KR)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.cbe5cfdf7c2118a9",
+      "locale": "hi",
+      "source": "|",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.d03502c43d74a30b",
+      "locale": "hi",
+      "source": ",",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.e76d0bc0e98b2ad5",
+      "locale": "hi",
+      "source": "‎",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.f6a16e6570270f61",
+      "locale": "hi",
+      "source": "|  |",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.fd088b833d31eca6",
+      "locale": "hi",
+      "source": "{npc_arg0}",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "client.AC",
+      "locale": "id",
+      "source": "AC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.AttackMode_Guild",
+      "locale": "id",
+      "source": "[Mode: Guild]",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEnter",
+      "locale": "id",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEsc",
+      "locale": "id",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.Chat_Guild",
+      "locale": "id",
+      "source": "Guild",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.Chat_Mentor",
+      "locale": "id",
+      "source": "Mentor",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.DC",
+      "locale": "id",
+      "source": "DC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.GameName",
+      "locale": "id",
+      "source": "Legend of Mir 2",
+      "reason": "product proper name"
+    },
+    {
+      "key": "client.Guild",
+      "locale": "id",
+      "source": "Guild",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.GuildKey",
+      "locale": "id",
+      "source": "Guild ({0})",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MAC",
+      "locale": "id",
+      "source": "MAC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MC",
+      "locale": "id",
+      "source": "MC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.Menu",
+      "locale": "id",
+      "source": "Menu",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipAC",
+      "locale": "id",
+      "source": "AC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipDC",
+      "locale": "id",
+      "source": "DC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMAC",
+      "locale": "id",
+      "source": "MAC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMC",
+      "locale": "id",
+      "source": "MC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.Online",
+      "locale": "id",
+      "source": "Online",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.SC",
+      "locale": "id",
+      "source": "SC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.entity.oma.name",
+      "locale": "id",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.visiblePlayer.mentor.name",
+      "locale": "id",
+      "source": "Mentor",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "server.GameName",
+      "locale": "id",
+      "source": "Legend of Mir 2",
+      "reason": "product proper name"
+    },
+    {
+      "key": "server.NpcInfo2",
+      "locale": "id",
+      "source": "X : {0}, Y : {1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "ui.languageSpanish",
+      "locale": "id",
+      "source": "Español",
+      "reason": "language autonym in retained legacy catalogue; not a selectable native locale"
+    },
+    {
+      "key": "ui.lastAccessValue",
+      "locale": "id",
+      "source": "{0}",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "ui.menu",
+      "locale": "id",
+      "source": "Menu",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "ui.monster",
+      "locale": "id",
+      "source": "Monster",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "ui.npc",
+      "locale": "id",
+      "source": "NPC",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.questRewardExp",
+      "locale": "id",
+      "source": "EXP {0}",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.ws",
+      "locale": "id",
+      "source": "WS",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "common.920e413c7d41",
+      "locale": "id",
+      "source": "Status",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "common.565339bc4d33",
+      "locale": "id",
+      "source": "OK",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "common.1709305c9fa9",
+      "locale": "id",
+      "source": "Level",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "common.a1794783aab7",
+      "locale": "id",
+      "source": "Offline",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "common.a7248eeb45eb",
+      "locale": "id",
+      "source": "Normal",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.item.1084.description",
+      "locale": "id",
+      "source": "Jack Sparrow",
+      "reason": "authored fictional character proper name"
+    },
+    {
+      "key": "content.item.1085.name",
+      "locale": "id",
+      "source": "Ninja (M)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.item.1086.name",
+      "locale": "id",
+      "source": "Ninja (F)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.item.1087.name",
+      "locale": "id",
+      "source": "Santa",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.item.1088.name",
+      "locale": "id",
+      "source": "Rudolph",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.item.1360.description",
+      "locale": "id",
+      "source": "Yizhili",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1360.name",
+      "locale": "id",
+      "source": "Yizhili",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1613.name",
+      "locale": "id",
+      "source": "Hwayoung Okhwan",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1614.name",
+      "locale": "id",
+      "source": "Hwayoung Okhwan 1",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1615.name",
+      "locale": "id",
+      "source": "Hwayoung Okhwan 2",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1616.name",
+      "locale": "id",
+      "source": "Hwayoung Okhwan 3",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1617.name",
+      "locale": "id",
+      "source": "Hwayoung Okhwan 4",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1618.name",
+      "locale": "id",
+      "source": "Hwayoung Okhwan 5",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1619.name",
+      "locale": "id",
+      "source": "Nokyoungokhwan",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.672.name",
+      "locale": "id",
+      "source": "Ginseng",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.map.91.name",
+      "locale": "id",
+      "source": "Hwan Ma Jin",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.map.94.name",
+      "locale": "id",
+      "source": "Hwan Ma Jin",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.10.name",
+      "locale": "id",
+      "source": "Shinsu",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.11.name",
+      "locale": "id",
+      "source": "Shinsu 1",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.143.name",
+      "locale": "id",
+      "source": "Yimoogi",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.23.name",
+      "locale": "id",
+      "source": "Baekdon",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.235.name",
+      "locale": "id",
+      "source": "Kek Tal",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.236.name",
+      "locale": "id",
+      "source": "Kek Tal 0",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.239.name",
+      "locale": "id",
+      "source": "Khazard",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.24.name",
+      "locale": "id",
+      "source": "Wimaen",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.361.name",
+      "locale": "id",
+      "source": "Minotaur",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.362.name",
+      "locale": "id",
+      "source": "Minotaur 0",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.37.name",
+      "locale": "id",
+      "source": "Yob",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.38.name",
+      "locale": "id",
+      "source": "Yob 0",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.393.name",
+      "locale": "id",
+      "source": "00",
+      "reason": "original authored placeholder name; not translated prose"
+    },
+    {
+      "key": "content.monster.438.name",
+      "locale": "id",
+      "source": "Lamia",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.473.name",
+      "locale": "id",
+      "source": "Tucson",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.48.name",
+      "locale": "id",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.49.name",
+      "locale": "id",
+      "source": "Oma 0",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.537.name",
+      "locale": "id",
+      "source": "Hydrax",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.554.name",
+      "locale": "id",
+      "source": "Michelangelo",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.555.name",
+      "locale": "id",
+      "source": "Raphael",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.556.name",
+      "locale": "id",
+      "source": "Donatello",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.70.name",
+      "locale": "id",
+      "source": "Keratoid",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.71.name",
+      "locale": "id",
+      "source": "Keratoid 0",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.npc.303.name",
+      "locale": "id",
+      "source": "Luke Thompson",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.npc.386.name",
+      "locale": "id",
+      "source": "John Schwartz",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.quest.113.name",
+      "locale": "id",
+      "source": "Insomnia",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.ok",
+      "locale": "id",
+      "source": "OK",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.esc",
+      "locale": "id",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.enter",
+      "locale": "id",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.level",
+      "locale": "id",
+      "source": "Lv. {level}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.chat.normal",
+      "locale": "id",
+      "source": "Normal",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.chat.mentor",
+      "locale": "id",
+      "source": "Mentor",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.chat.guild",
+      "locale": "id",
+      "source": "Guild",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.chat.chat",
+      "locale": "id",
+      "source": "Chat",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.status",
+      "locale": "id",
+      "source": "Status: {value}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.practice.separator",
+      "locale": "id",
+      "source": "; ",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.ui.levelChapter",
+      "locale": "id",
+      "source": "Lv {level}  {chapter}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.ui.levelStatus",
+      "locale": "id",
+      "source": "Lv {level} · {status} · {area}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.ui.levelTitle",
+      "locale": "id",
+      "source": "Lv {level} {title}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.feedback.47",
+      "locale": "id",
+      "source": "NPC: {npc}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.feedback.62",
+      "locale": "id",
+      "source": "Lv {level}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.ok",
+      "locale": "id",
+      "source": "OK",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupObject",
+      "locale": "id",
+      "source": "{name}  (PickUpObject)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupTile",
+      "locale": "id",
+      "source": "{name}  (PickUpTile)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.008",
+      "locale": "id",
+      "source": "Status",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.022",
+      "locale": "id",
+      "source": "Mana",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.051",
+      "locale": "id",
+      "source": "OK",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.111",
+      "locale": "id",
+      "source": "Guild",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.117",
+      "locale": "id",
+      "source": "Online",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.118",
+      "locale": "id",
+      "source": "Offline",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.126",
+      "locale": "id",
+      "source": "Normal",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.141",
+      "locale": "id",
+      "source": "Level",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.006",
+      "locale": "id",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.039",
+      "locale": "id",
+      "source": "Level: {n}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.041",
+      "locale": "id",
+      "source": "MP: {n}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.creature.pickup.mouse",
+      "locale": "id",
+      "source": "mouse",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.298ffc494f6348d8",
+      "locale": "id",
+      "source": "Guild",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.460b3a7da007b7af",
+      "locale": "id",
+      "source": "Chat",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.580ce9e8774306d7",
+      "locale": "id",
+      "source": "HwanMaJin2",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.d179bb77a0f6f16d",
+      "locale": "id",
+      "source": "HwanMaJin",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.dc8659db6d416dc3",
+      "locale": "id",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.0839dfaa5145dad0",
+      "locale": "id",
+      "source": "OldManInfinity.",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.2e38e77b22c314a4",
+      "locale": "id",
+      "source": "()",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.3973e022e93220f9",
+      "locale": "id",
+      "source": "-",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.565d240f5343e625",
+      "locale": "id",
+      "source": "||",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.596ecb8e1b5e7dba",
+      "locale": "id",
+      "source": "-Liam Thompson",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.9263fdd602313131",
+      "locale": "id",
+      "source": "(KR)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.a9253dc8529dd214",
+      "locale": "id",
+      "source": "\\",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.b4c54a0402b89cff",
+      "locale": "id",
+      "source": "Level 48: CelestalShield",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.cbe5cfdf7c2118a9",
+      "locale": "id",
+      "source": "|",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.cdb4ee2aea69cc6a",
+      "locale": "id",
+      "source": ".",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.d03502c43d74a30b",
+      "locale": "id",
+      "source": ",",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.e76d0bc0e98b2ad5",
+      "locale": "id",
+      "source": "‎",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.f34a570db4e09470",
+      "locale": "id",
+      "source": "SET [526] 1",
+      "reason": "original command mistakenly authored inside SAY; kept exact as text, never executed by catalogue"
+    },
+    {
+      "key": "npc.prose.f6a16e6570270f61",
+      "locale": "id",
+      "source": "|  |",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.fd088b833d31eca6",
+      "locale": "id",
+      "source": "{npc_arg0}",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "client.AC",
+      "locale": "vi",
+      "source": "AC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEnter",
+      "locale": "vi",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEsc",
+      "locale": "vi",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.DC",
+      "locale": "vi",
+      "source": "DC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MAC",
+      "locale": "vi",
+      "source": "MAC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MC",
+      "locale": "vi",
+      "source": "MC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipAC",
+      "locale": "vi",
+      "source": "AC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipDC",
+      "locale": "vi",
+      "source": "DC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMAC",
+      "locale": "vi",
+      "source": "MAC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMC",
+      "locale": "vi",
+      "source": "MC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.SC",
+      "locale": "vi",
+      "source": "SC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.entity.oma.name",
+      "locale": "vi",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "server.NpcInfo2",
+      "locale": "vi",
+      "source": "X : {0}, Y : {1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "ui.lastAccessValue",
+      "locale": "vi",
+      "source": "{0}",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "ui.npc",
+      "locale": "vi",
+      "source": "NPC",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.questRewardExp",
+      "locale": "vi",
+      "source": "EXP {0}",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.ws",
+      "locale": "vi",
+      "source": "WS",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "content.item.1084.description",
+      "locale": "vi",
+      "source": "Jack Sparrow",
+      "reason": "authored fictional character proper name"
+    },
+    {
+      "key": "content.item.1088.name",
+      "locale": "vi",
+      "source": "Rudolph",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.item.1619.name",
+      "locale": "vi",
+      "source": "Nokyoungokhwan",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1620.name",
+      "locale": "vi",
+      "source": "Nokyoungokhwan 1",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1621.name",
+      "locale": "vi",
+      "source": "Nokyoungokhwan 2",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1622.name",
+      "locale": "vi",
+      "source": "Nokyoungokhwan 3",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1623.name",
+      "locale": "vi",
+      "source": "Nokyoungokhwan 4",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1624.name",
+      "locale": "vi",
+      "source": "Nokyoungokhwan 5",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.10.name",
+      "locale": "vi",
+      "source": "Shinsu",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.11.name",
+      "locale": "vi",
+      "source": "Shinsu 1",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.143.name",
+      "locale": "vi",
+      "source": "Yimoogi",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.23.name",
+      "locale": "vi",
+      "source": "Baekdon",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.235.name",
+      "locale": "vi",
+      "source": "Kek Tal",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.236.name",
+      "locale": "vi",
+      "source": "Kek Tal 0",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.239.name",
+      "locale": "vi",
+      "source": "Khazard",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.24.name",
+      "locale": "vi",
+      "source": "Wimaen",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.393.name",
+      "locale": "vi",
+      "source": "00",
+      "reason": "original authored placeholder name; not translated prose"
+    },
+    {
+      "key": "content.monster.432.name",
+      "locale": "vi",
+      "source": "Hydra",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.438.name",
+      "locale": "vi",
+      "source": "Lamia",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.48.name",
+      "locale": "vi",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.49.name",
+      "locale": "vi",
+      "source": "Oma 0",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.537.name",
+      "locale": "vi",
+      "source": "Hydrax",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.554.name",
+      "locale": "vi",
+      "source": "Michelangelo",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.555.name",
+      "locale": "vi",
+      "source": "Raphael",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.556.name",
+      "locale": "vi",
+      "source": "Donatello",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.npc.303.name",
+      "locale": "vi",
+      "source": "Luke Thompson",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.npc.386.name",
+      "locale": "vi",
+      "source": "John Schwartz",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "shell.esc",
+      "locale": "vi",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.enter",
+      "locale": "vi",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.practice.separator",
+      "locale": "vi",
+      "source": "; ",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.feedback.47",
+      "locale": "vi",
+      "source": "NPC: {npc}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupObject",
+      "locale": "vi",
+      "source": "{name}  (PickUpObject)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupTile",
+      "locale": "vi",
+      "source": "{name}  (PickUpTile)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.006",
+      "locale": "vi",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.041",
+      "locale": "vi",
+      "source": "MP: {n}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.580ce9e8774306d7",
+      "locale": "vi",
+      "source": "HwanMaJin2",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.d179bb77a0f6f16d",
+      "locale": "vi",
+      "source": "HwanMaJin",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.dc8659db6d416dc3",
+      "locale": "vi",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.0839dfaa5145dad0",
+      "locale": "vi",
+      "source": "OldManInfinity.",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.2e38e77b22c314a4",
+      "locale": "vi",
+      "source": "()",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.3973e022e93220f9",
+      "locale": "vi",
+      "source": "-",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.565d240f5343e625",
+      "locale": "vi",
+      "source": "||",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.596ecb8e1b5e7dba",
+      "locale": "vi",
+      "source": "-Liam Thompson",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.9263fdd602313131",
+      "locale": "vi",
+      "source": "(KR)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.cbe5cfdf7c2118a9",
+      "locale": "vi",
+      "source": "|",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.e76d0bc0e98b2ad5",
+      "locale": "vi",
+      "source": "‎",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.f6a16e6570270f61",
+      "locale": "vi",
+      "source": "|  |",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.fd088b833d31eca6",
+      "locale": "vi",
+      "source": "{npc_arg0}",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "client.AC",
+      "locale": "th",
+      "source": "AC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEnter",
+      "locale": "th",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEsc",
+      "locale": "th",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.DC",
+      "locale": "th",
+      "source": "DC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MAC",
+      "locale": "th",
+      "source": "MAC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MC",
+      "locale": "th",
+      "source": "MC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipAC",
+      "locale": "th",
+      "source": "AC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipDC",
+      "locale": "th",
+      "source": "DC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMAC",
+      "locale": "th",
+      "source": "MAC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMC",
+      "locale": "th",
+      "source": "MC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.SC",
+      "locale": "th",
+      "source": "SC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.entity.oma.name",
+      "locale": "th",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "server.NpcInfo2",
+      "locale": "th",
+      "source": "X : {0}, Y : {1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "ui.lastAccessValue",
+      "locale": "th",
+      "source": "{0}",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "ui.npc",
+      "locale": "th",
+      "source": "NPC",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.questRewardExp",
+      "locale": "th",
+      "source": "EXP {0}",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.ws",
+      "locale": "th",
+      "source": "WS",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "content.monster.10.name",
+      "locale": "th",
+      "source": "Shinsu",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.11.name",
+      "locale": "th",
+      "source": "Shinsu 1",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.143.name",
+      "locale": "th",
+      "source": "Yimoogi",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.393.name",
+      "locale": "th",
+      "source": "00",
+      "reason": "original authored placeholder name; not translated prose"
+    },
+    {
+      "key": "content.monster.48.name",
+      "locale": "th",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.49.name",
+      "locale": "th",
+      "source": "Oma 0",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.esc",
+      "locale": "th",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.enter",
+      "locale": "th",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.practice.separator",
+      "locale": "th",
+      "source": "; ",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.feedback.47",
+      "locale": "th",
+      "source": "NPC: {npc}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupObject",
+      "locale": "th",
+      "source": "{name}  (PickUpObject)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupTile",
+      "locale": "th",
+      "source": "{name}  (PickUpTile)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.006",
+      "locale": "th",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.041",
+      "locale": "th",
+      "source": "MP: {n}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.580ce9e8774306d7",
+      "locale": "th",
+      "source": "HwanMaJin2",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.d179bb77a0f6f16d",
+      "locale": "th",
+      "source": "HwanMaJin",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.dc8659db6d416dc3",
+      "locale": "th",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.0839dfaa5145dad0",
+      "locale": "th",
+      "source": "OldManInfinity.",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.3973e022e93220f9",
+      "locale": "th",
+      "source": "-",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.565d240f5343e625",
+      "locale": "th",
+      "source": "||",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.596ecb8e1b5e7dba",
+      "locale": "th",
+      "source": "-Liam Thompson",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.9263fdd602313131",
+      "locale": "th",
+      "source": "(KR)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.cbe5cfdf7c2118a9",
+      "locale": "th",
+      "source": "|",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.cdb4ee2aea69cc6a",
+      "locale": "th",
+      "source": ".",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.e76d0bc0e98b2ad5",
+      "locale": "th",
+      "source": "‎",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.f6a16e6570270f61",
+      "locale": "th",
+      "source": "|  |",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.fd088b833d31eca6",
+      "locale": "th",
+      "source": "{npc_arg0}",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "client.AC",
+      "locale": "ar",
+      "source": "AC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEnter",
+      "locale": "ar",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.BtnEsc",
+      "locale": "ar",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.DC",
+      "locale": "ar",
+      "source": "DC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.GameName",
+      "locale": "ar",
+      "source": "Legend of Mir 2",
+      "reason": "product proper name"
+    },
+    {
+      "key": "client.MAC",
+      "locale": "ar",
+      "source": "MAC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MC",
+      "locale": "ar",
+      "source": "MC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipAC",
+      "locale": "ar",
+      "source": "AC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipDC",
+      "locale": "ar",
+      "source": "DC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMAC",
+      "locale": "ar",
+      "source": "MAC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.MonsterTooltipMC",
+      "locale": "ar",
+      "source": "MC: {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "client.SC",
+      "locale": "ar",
+      "source": "SC + {0}~{1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.entity.oma.name",
+      "locale": "ar",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "server.GameName",
+      "locale": "ar",
+      "source": "Legend of Mir 2",
+      "reason": "product proper name"
+    },
+    {
+      "key": "server.MonsterInfo3",
+      "locale": "ar",
+      "source": "HP : {0}, MinDC : {1}, MaxDC : {2}",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "server.NpcInfo2",
+      "locale": "ar",
+      "source": "X : {0}, Y : {1}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "server.PetHmmm",
+      "locale": "ar",
+      "source": "*Hmmm*",
+      "reason": "nonverbal sound"
+    },
+    {
+      "key": "ui.languageSpanish",
+      "locale": "ar",
+      "source": "Español",
+      "reason": "language autonym in retained legacy catalogue; not a selectable native locale"
+    },
+    {
+      "key": "ui.lastAccessValue",
+      "locale": "ar",
+      "source": "{0}",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "ui.npc",
+      "locale": "ar",
+      "source": "NPC",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.questRewardExp",
+      "locale": "ar",
+      "source": "EXP {0}",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "ui.ws",
+      "locale": "ar",
+      "source": "WS",
+      "reason": "standard key/stat/protocol abbreviation with opaque parameters"
+    },
+    {
+      "key": "content.item.1360.description",
+      "locale": "ar",
+      "source": "Yizhili",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1360.name",
+      "locale": "ar",
+      "source": "Yizhili",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1613.name",
+      "locale": "ar",
+      "source": "Hwayoung Okhwan",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1614.name",
+      "locale": "ar",
+      "source": "Hwayoung Okhwan 1",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1615.name",
+      "locale": "ar",
+      "source": "Hwayoung Okhwan 2",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1616.name",
+      "locale": "ar",
+      "source": "Hwayoung Okhwan 3",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1617.name",
+      "locale": "ar",
+      "source": "Hwayoung Okhwan 4",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1618.name",
+      "locale": "ar",
+      "source": "Hwayoung Okhwan 5",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1619.name",
+      "locale": "ar",
+      "source": "Nokyoungokhwan",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1620.name",
+      "locale": "ar",
+      "source": "Nokyoungokhwan 1",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1621.name",
+      "locale": "ar",
+      "source": "Nokyoungokhwan 2",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1622.name",
+      "locale": "ar",
+      "source": "Nokyoungokhwan 3",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1623.name",
+      "locale": "ar",
+      "source": "Nokyoungokhwan 4",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.item.1624.name",
+      "locale": "ar",
+      "source": "Nokyoungokhwan 5",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.10.name",
+      "locale": "ar",
+      "source": "Shinsu",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.11.name",
+      "locale": "ar",
+      "source": "Shinsu 1",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.143.name",
+      "locale": "ar",
+      "source": "Yimoogi",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.23.name",
+      "locale": "ar",
+      "source": "Baekdon",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.235.name",
+      "locale": "ar",
+      "source": "Kek Tal",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.236.name",
+      "locale": "ar",
+      "source": "Kek Tal 0",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.24.name",
+      "locale": "ar",
+      "source": "Wimaen",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.393.name",
+      "locale": "ar",
+      "source": "00",
+      "reason": "original authored placeholder name; not translated prose"
+    },
+    {
+      "key": "content.monster.473.name",
+      "locale": "ar",
+      "source": "Tucson",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.48.name",
+      "locale": "ar",
+      "source": "Oma",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.49.name",
+      "locale": "ar",
+      "source": "Oma 0",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "content.monster.537.name",
+      "locale": "ar",
+      "source": "Hydrax",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.554.name",
+      "locale": "ar",
+      "source": "Michelangelo",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.555.name",
+      "locale": "ar",
+      "source": "Raphael",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "content.monster.556.name",
+      "locale": "ar",
+      "source": "Donatello",
+      "reason": "explicit authored proper name"
+    },
+    {
+      "key": "shell.esc",
+      "locale": "ar",
+      "source": "Esc",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "shell.enter",
+      "locale": "ar",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.feedback.47",
+      "locale": "ar",
+      "source": "NPC: {npc}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupObject",
+      "locale": "ar",
+      "source": "{name}  (PickUpObject)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "quest.misc.pickupTile",
+      "locale": "ar",
+      "source": "{name}  (PickUpTile)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.006",
+      "locale": "ar",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "game.extra.041",
+      "locale": "ar",
+      "source": "MP: {n}",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.580ce9e8774306d7",
+      "locale": "ar",
+      "source": "HwanMaJin2",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.d179bb77a0f6f16d",
+      "locale": "ar",
+      "source": "HwanMaJin",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.menu.dc8659db6d416dc3",
+      "locale": "ar",
+      "source": "Enter",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.0839dfaa5145dad0",
+      "locale": "ar",
+      "source": "OldManInfinity.",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.3973e022e93220f9",
+      "locale": "ar",
+      "source": "-",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.565d240f5343e625",
+      "locale": "ar",
+      "source": "||",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.596ecb8e1b5e7dba",
+      "locale": "ar",
+      "source": "-Liam Thompson",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.9263fdd602313131",
+      "locale": "ar",
+      "source": "(KR)",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.cbe5cfdf7c2118a9",
+      "locale": "ar",
+      "source": "|",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.cdb4ee2aea69cc6a",
+      "locale": "ar",
+      "source": ".",
+      "reason": "parameters, numerals or punctuation only"
+    },
+    {
+      "key": "npc.prose.e76d0bc0e98b2ad5",
+      "locale": "ar",
+      "source": "‎",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.f34a570db4e09470",
+      "locale": "ar",
+      "source": "SET [526] 1",
+      "reason": "original command mistakenly authored inside SAY; kept exact as text, never executed by catalogue"
+    },
+    {
+      "key": "npc.prose.f6a16e6570270f61",
+      "locale": "ar",
+      "source": "|  |",
+      "reason": "explicit keyed/exact-source review"
+    },
+    {
+      "key": "npc.prose.fd088b833d31eca6",
+      "locale": "ar",
+      "source": "{npc_arg0}",
+      "reason": "parameters, numerals or punctuation only"
+    }
+  ],
+  "draftSha256": {
+    "ru": "e414f89eb8cb2ff4cd4fc46a7952830a6a9c4ba0eac6cc4165489c831f3b7921",
+    "hi": "0c991e712915f8eac910c825b1cb21ea63d3b0429a1cd0cca4e661042958658f",
+    "id": "f7cc28c9d9901f82c75051f5921bdbf995f121bc799501c323de7e95198d7424",
+    "vi": "3ae13d136ca1539bcffba639a11e60f60f44c49c0ed04e59a7c1dcdd7abba21c",
+    "th": "849a2d43599562638d13e970befefd87b7376760a80a441332eac6913bce7235",
+    "ar": "1f5d24641f7597da1616caf8b632119abfd5d93c2e127ec2bf4ebb863966f66f"
+  },
+  "outputSha256": {
+    "ru": "601e7ed35b8f155732d50f5254454392a37abdae3cb1c0659783f34dbd224984",
+    "hi": "ae02158e4f2f5231385a53cc4a5320d04614c4a2b70ee52b92cb190f129904cb",
+    "id": "25bfb3a0f23e11e3c6e548affc83494634d6ad4f44808a40408e91037a60fac1",
+    "vi": "b0a5b25f5b47e5bdd008433f2693d418f49562b13cd0174255db63c6dfc71054",
+    "th": "033fc1e2f26e67b1f0160eb33074f8d4bcb53a7d6fceee23f61ca25beadcb68b",
+    "ar": "3bbac613cdf002267ec1bf2715c8a1f97e7574901ada29c4c80fa0150a76b482"
+  },
+  "review": "Keyed overrides were authored/reviewed by the development team. Remaining prose uses offline translation drafts and requires native-speaker acceptance; no full linguistic acceptance is claimed.",
+  "textHashNormalization": "UTF-8, CRLF normalized to LF for source and reviewed JSON",
+  "identicalNeedsReview": [],
+  "nameDraftSha256": "87f0be6598da217f3dfa1c09cdacf89234ab0fad5ac881b3f220938f65b6a994"
+}

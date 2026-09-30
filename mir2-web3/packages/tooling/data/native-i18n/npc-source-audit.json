@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "manifestSha256": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93",
+  "npcInfoSha256": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105",
+  "rootScripts": 364,
+  "reachableScripts": 364,
+  "matchedScripts": 364,
+  "referencedGmScripts": 24,
+  "excludedUnreferencedScripts": 270,
+  "sayLineOccurrences": 7832,
+  "uniqueSaySourceLines": 1962,
+  "uniqueBodyLines": 1461,
+  "uniqueMenuLabels": 607,
+  "runtimeBodyVariants": 18,
+  "runtimeMenuVariants": 0,
+  "notes": [
+    "Scripts referenced by the 375 NPC records and their INSERT closure are included; this includes gated GM-prefixed scripts and does not authorize their execution.",
+    "SAY/ELSESAY text is counted, never IF/ACT commands or label/node counts.",
+    "Menu targets and script parameters are evidence only; translated catalogues contain visible labels and opaque captures.",
+    "Raw colour aliases match authored markup literally; no runtime operation strips colour-like text from interpolated player values.",
+    "Statically unsupported named-token variants mirror current server removal, with only those missing values omitted from translated copy.",
+    "The 270 unreferenced scripts are outside this NPC-record corpus; source coverage is not proof that every script page is reachable during ordinary gameplay."
+  ]
+}

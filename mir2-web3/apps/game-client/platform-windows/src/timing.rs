@@ -17,7 +17,19 @@ pub fn initialize() {
     let _ = ORIGIN.set(Instant::now());
 }
 pub fn report(stage: &str, started: Instant) {
+    if mir2_bevy_runtime::native_render_diagnostics_enabled() {
+        mir2_bevy_runtime::record_native_render_marker("cpuStage", serde_json::json!({
+            "stage": stage,
+            "durationMs": started.elapsed().as_secs_f64() * 1000.0,
+            "measurement": "cpuElapsedNotGpuPresent",
+        }));
+    }
     if let Some(origin) = ORIGIN.get() {
+        crate::startup_diagnostics::record_timing(
+            stage,
+            started.elapsed().as_secs_f64() * 1000.0,
+            origin.elapsed().as_secs_f64() * 1000.0,
+        );
         eprintln!(
             "[timing] stage={stage} duration_ms={:.3} since_launch_ms={:.3}",
             started.elapsed().as_secs_f64() * 1000.0,
@@ -33,6 +45,32 @@ pub fn milestone(stage: &str) {
 pub struct Span {
     stage: &'static str,
     started: Instant,
+}
+
+/// Diagnostic-only cost attribution, including early failures. No logging or
+/// clock read when render diagnostics are disabled.
+pub struct DiagnosticSpan {
+    stage: &'static str,
+    started: Option<Instant>,
+}
+impl DiagnosticSpan {
+    pub fn new(stage: &'static str) -> Self {
+        Self {
+            stage,
+            started: mir2_bevy_runtime::native_render_diagnostics_enabled().then(Instant::now),
+        }
+    }
+}
+impl Drop for DiagnosticSpan {
+    fn drop(&mut self) {
+        if let Some(started) = self.started {
+            mir2_bevy_runtime::record_native_render_marker("cpuStage", serde_json::json!({
+                "stage": self.stage,
+                "durationMs": started.elapsed().as_secs_f64() * 1000.0,
+                "measurement": "cpuElapsedNotGpuPresent",
+            }));
+        }
+    }
 }
 impl Span {
     pub fn new(stage: &'static str) -> Self {

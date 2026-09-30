@@ -9,6 +9,10 @@ use mir2_protocol::{
 
 use super::types::{ZoneObject, ZonePlayer, ZonePlayerBuff};
 
+const CRYSTAL_MAGIC_SHIELD_BUFF_TYPE: u8 = 24;
+const CRYSTAL_MAGIC_SHIELD_UP_EFFECT: u8 = 6;
+const CRYSTAL_MAGIC_SHIELD_DOWN_EFFECT: u8 = 7;
+
 pub(crate) fn object_player_packet(player: &ZonePlayer) -> ServerPacket {
     ServerPacket::ObjectPlayer {
         info: ObjectPlayerInfo {
@@ -30,7 +34,15 @@ pub(crate) fn object_player_packet(player: &ZonePlayer) -> ServerPacket {
             poison: player.poison,
             dead: player.dead,
             hidden: player.hidden,
-            effect: player.effect,
+            effect: if !player.dead
+                && player
+                    .buffs
+                    .contains_key(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE)
+            {
+                CRYSTAL_MAGIC_SHIELD_UP_EFFECT
+            } else {
+                player.effect
+            },
             wing_effect: player.wing_effect,
             extra: false,
             mount_type: player.mount_type,
@@ -95,6 +107,11 @@ pub(crate) fn apply_observer_action_state(
             object_id,
         } if *object_id == owner_local_object_id => {
             player.buffs.remove(buff_type);
+            if *buff_type == CRYSTAL_MAGIC_SHIELD_BUFF_TYPE
+                && player.effect == CRYSTAL_MAGIC_SHIELD_UP_EFFECT
+            {
+                player.effect = 0;
+            }
         }
         ServerPacket::PauseBuff {
             buff_type,
@@ -183,6 +200,8 @@ pub(crate) fn apply_observer_action_state(
         ServerPacket::ObjectDied { info } if info.object_id == owner_local_object_id => {
             player.dead = true;
             player.clear_status_poisons();
+            player.buffs.remove(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE);
+            player.effect = 0;
         }
         ServerPacket::ObjectRevived { info } if info.object_id == owner_local_object_id => {
             if player.dead { player.life_generation = player.life_generation.saturating_add(1); }
@@ -190,7 +209,15 @@ pub(crate) fn apply_observer_action_state(
             player.clear_status_poisons();
         }
         ServerPacket::ObjectEffect { info } if info.object_id == owner_local_object_id => {
-            player.effect = info.effect;
+            player.effect = if info.effect == CRYSTAL_MAGIC_SHIELD_DOWN_EFFECT {
+                if player.effect == CRYSTAL_MAGIC_SHIELD_UP_EFFECT {
+                    0
+                } else {
+                    player.effect
+                }
+            } else {
+                info.effect
+            };
         }
         _ => {}
     }
@@ -942,6 +969,12 @@ pub(crate) fn shared_object_action_packet(
                 position: player.position.clone(),
                 direction: movement.direction,
             },
+        }),
+        // This is the personal inventory transaction's acknowledgement for
+        // the corpse it consumed. Keep the corpse id intact; the Zone
+        // canonicalizes its transform and validates the target lifecycle.
+        ServerPacket::ObjectHarvested { movement } => Some(ServerPacket::ObjectHarvested {
+            movement: movement.clone(),
         }),
         ServerPacket::ObjectSpell { info } => Some(ServerPacket::ObjectSpell {
             info: ObjectSpellInfo {

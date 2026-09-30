@@ -7,10 +7,12 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy::text::LineBreak;
-use mir2_bevy_runtime::entity_animation::AnimationAction;
 use mir2_bevy_runtime::PresentationPoseBuffer;
+use mir2_bevy_runtime::entity_animation::AnimationAction;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
-use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
+use mir2_client_bevy::crystal_ui::quest_targets::tracker_targets_monster;
+use mir2_client_bevy::crystal_ui::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
+use mir2_client_bevy::native_i18n;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::quest_model::{QuestStatus, QuestTracker};
 use serde_json::Value;
@@ -43,6 +45,7 @@ const CRYSTAL_QUEST_MARKER_FALLBACK_TOP_PX: f32 = -58.0;
 #[derive(Component)]
 pub(crate) struct NativeEntityOverlayRoot {
     follows_camera: bool,
+    self_object_id: Option<String>,
 }
 
 #[derive(Resource, Debug, Default)]
@@ -55,8 +58,11 @@ pub struct NativeEntityOverlays {
     last_visibility: Option<OverlayVisibility>,
     last_hovered_object_id: Option<String>,
     last_self_hovered: bool,
+    last_self_anchor: Option<SelfOverlayAnchor>,
+    last_locale: Option<(u64, native_i18n::Locale)>,
     // Keep both animation frames alive across label rebuilds and frame swaps.
     quest_marker_assets: HashMap<u16, Handle<Image>>,
+    ground_item_assets: HashMap<i64, Handle<Image>>,
 }
 
 /// Local Crystal name/drop presentation flags. They only select which labels
@@ -92,6 +98,7 @@ impl NativeEntityOverlays {
         self.last_in_game = false;
         self.last_hovered_object_id = None;
         self.last_self_hovered = false;
+        self.last_self_anchor = None;
     }
 
     pub fn replace_payload(&mut self, payload: Value) {
@@ -207,6 +214,24 @@ struct OverlayEntry {
     follows_camera: bool,
 }
 
+#[derive(Debug, Clone, PartialEq)]
+struct GroundItemImageEntry {
+    frame: i64,
+    left: f32,
+    top: f32,
+    width: f32,
+    height: f32,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct SelfOverlayAnchor {
+    object_id: String,
+    center_x: i64,
+    center_y: i64,
+    x: i64,
+    y: i64,
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 #[repr(u8)]
 enum QuestMarkerKind {
@@ -290,6 +315,11 @@ pub fn sync_native_entity_overlays(
     presentation_poses: Res<PresentationPoseBuffer>,
     quest_tracker: Option<Res<QuestTracker>>,
 ) {
+    let locale = (native_i18n::revision(), native_i18n::locale());
+    if overlays.last_locale != Some(locale) {
+        overlays.last_locale = Some(locale);
+        overlays.dirty = true;
+    }
     let now_ms = u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX);
     let motion_now_ms = crate::entity_presentation::native_motion_clock_ms();
     let previous_floater_count = overlays.active_floaters.len();
@@ -310,12 +340,45 @@ pub fn sync_native_entity_overlays(
     } else {
         fallback_camera_offset
     };
-    // World labels live in a retained camera root. Moving the local player now
-    // changes this one Node instead of deleting and recreating every glyph on
-    // every 100 ms movement phase. Self labels remain screen locked.
+    // Before the first presentation frame only, retain a local fallback copy
+    // so later overlay bookkeeping can mutate its resource independently.
+    let fallback_payload = presentation
+        .overlay_payload()
+        .is_none()
+        .then(|| overlays.latest_payload.clone())
+        .flatten();
+    let payload = presentation.overlay_payload().or(fallback_payload.as_ref());
+    let self_anchor = payload.and_then(self_overlay_anchor);
+    // Local run prediction and stale-ACK reconciliation can advance the
+    // renderer's self tile without replacing the raw gameplay snapshot. The
+    // fixed self name/HP root must rebuild its tile anchor even when the usual
+    // packet/hover/visibility dirty flags are unchanged.
+    if overlays.last_self_anchor != self_anchor {
+        overlays.dirty = true;
+    }
+    let self_object_id = payload.and_then(payload_self_object_id);
+    let self_screen_offset = self_object_id
+        .as_deref()
+        .and_then(|object_id| {
+            presentation_poses
+                .native_overlay_entity_offset(object_id)
+                .map(|entity| (entity.0 + camera_offset.0, entity.1 + camera_offset.1))
+        })
+        .unwrap_or_else(|| {
+            self_object_id
+                .as_deref()
+                .map(|object_id| presentation.entity_screen_offset(object_id, motion_now_ms))
+                .unwrap_or((0.0, 0.0))
+        });
+    // World labels live in a retained camera root. The self root follows the
+    // exact renderer-owned entity+camera composition, which normally cancels
+    // to zero but also remains correct while a long run is rebased between
+    // source and destination centers.
     for (_, root, mut node) in &mut roots {
         let (left, top) = if root.follows_camera {
             camera_offset
+        } else if root.self_object_id.is_some() {
+            self_screen_offset
         } else {
             (0.0, 0.0)
         };
@@ -365,10 +428,7 @@ pub fn sync_native_entity_overlays(
     // complete overlay tree until the shared renderer commits the same center;
     // rebuilding from the newest packet center here would expose a one-cell
     // mixed frame during every movement acknowledgement.
-    let payload_center = overlays
-        .latest_payload
-        .as_ref()
-        .and_then(payload_scene_center);
+    let payload_center = payload.and_then(payload_scene_center);
     if in_game
         && shared_pose_active
         && (shared_center.is_none()
@@ -385,6 +445,7 @@ pub fn sync_native_entity_overlays(
     overlays.last_visibility = Some(visibility);
     overlays.last_hovered_object_id = hovered_object_id.map(str::to_owned);
     overlays.last_self_hovered = self_hovered;
+    overlays.last_self_anchor = self_anchor;
     overlays.dirty = false;
     for (root, _, _) in &mut roots {
         commands.entity(root).despawn();
@@ -395,7 +456,7 @@ pub fn sync_native_entity_overlays(
         }
         return;
     }
-    let Some(payload) = overlays.latest_payload.as_ref() else {
+    let Some(payload) = payload else {
         for (entity, _, _, _) in &mut quest_marker_images {
             commands.entity(entity).despawn();
         }
@@ -431,6 +492,24 @@ pub fn sync_native_entity_overlays(
         (0.0, 0.0),
         center_override,
     );
+    // DropView names are drawn after the world in Crystal. Draw a second copy
+    // of the *same* DNItems frame at its ground coordinate in that UI pass:
+    // later-row roof fronts can otherwise cover every pixel while leaving a
+    // floating yellow item name. The underlying world sprite and pickup state
+    // remain unchanged, including when DropView is disabled.
+    let ground_items = if visibility.drop_view {
+        ground_item_image_entries(payload, center_override)
+    } else {
+        Vec::new()
+    };
+    for item in &ground_items {
+        overlays
+            .ground_item_assets
+            .entry(item.frame)
+            .or_insert_with(|| {
+                asset_server.load(format!("original-ui/DNItems/{}.png", item.frame))
+            });
+    }
     let floaters = damage_floater_entries_with_motion_at_center(
         payload,
         &overlays.active_floaters,
@@ -502,7 +581,7 @@ pub fn sync_native_entity_overlays(
             ),
         ));
     }
-    if entries.is_empty() && floaters.is_empty() {
+    if entries.is_empty() && floaters.is_empty() && ground_items.is_empty() {
         return;
     }
 
@@ -515,17 +594,24 @@ pub fn sync_native_entity_overlays(
         (true, world_entries, world_floaters),
         (false, fixed_entries, fixed_floaters),
     ] {
-        if entries.is_empty() && floaters.is_empty() {
+        if entries.is_empty() && floaters.is_empty() && (!follows_camera || ground_items.is_empty())
+        {
             continue;
         }
+        let tracked_self_object_id = (!follows_camera).then(|| self_object_id.clone()).flatten();
         let (root_left, root_top) = if follows_camera {
             camera_offset
+        } else if tracked_self_object_id.is_some() {
+            self_screen_offset
         } else {
             (0.0, 0.0)
         };
         commands
             .spawn((
-                NativeEntityOverlayRoot { follows_camera },
+                NativeEntityOverlayRoot {
+                    follows_camera,
+                    self_object_id: tracked_self_object_id,
+                },
                 Node {
                     position_type: PositionType::Absolute,
                     left: Val::Px(root_left),
@@ -537,6 +623,23 @@ pub fn sync_native_entity_overlays(
                 GlobalZIndex(OVERLAY_Z_INDEX),
             ))
             .with_children(|root| {
+                if follows_camera {
+                    for item in &ground_items {
+                        root.spawn((
+                            Name::new(format!("NativeGroundDropImage:{}", item.frame)),
+                            Node {
+                                position_type: PositionType::Absolute,
+                                left: Val::Px(item.left),
+                                top: Val::Px(item.top),
+                                width: Val::Px(item.width),
+                                height: Val::Px(item.height),
+                                ..default()
+                            },
+                            ImageNode::new(overlays.ground_item_assets[&item.frame].clone()),
+                            bevy::ui::FocusPolicy::Pass,
+                        ));
+                    }
+                }
                 for entry in entries {
                     if let Some(ratio) = entry.self_health_ratio {
                         root.spawn((
@@ -607,7 +710,7 @@ pub fn sync_native_entity_overlays(
                             min_width: Val::Px(floater.width),
                             ..default()
                         },
-                        Text::new(floater.text),
+                        Text::new(native_i18n::tr(&floater.text)),
                         crystal_text_font(floater.font_size),
                         TextColor(floater.color),
                         TextLayout::justify(Justify::Center),
@@ -772,6 +875,42 @@ fn overlay_entries(
     )
 }
 
+fn ground_item_image_entries(
+    payload: &Value,
+    center_override: Option<(i64, i64)>,
+) -> Vec<GroundItemImageEntry> {
+    let (center_x, center_y) = center_override
+        .or_else(|| payload_scene_center(payload))
+        .unwrap_or((0, 0));
+    let origin_x = (STAGE_WIDTH / 2.0 / CELL_WIDTH).floor() * CELL_WIDTH;
+    let origin_y = ((STAGE_HEIGHT / 2.0 / CELL_HEIGHT).floor() - 1.0) * CELL_HEIGHT;
+    payload
+        .get("groundDrops")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .take(256)
+        .filter_map(|drop| {
+            let x = drop.get("x").and_then(value_i64)?;
+            let y = drop.get("y").and_then(value_i64)?;
+            let frame = drop.get("image").and_then(value_i64)?;
+            let (width, height, true_width, true_height) =
+                crate::atlas::ground_item_frame_size(frame)?;
+            Some(GroundItemImageEntry {
+                frame,
+                left: origin_x
+                    + (x - center_x) as f32 * CELL_WIDTH
+                    + ((CELL_WIDTH as i32 - true_width as i32) / 2) as f32,
+                top: origin_y
+                    + (y - center_y) as f32 * CELL_HEIGHT
+                    + ((CELL_HEIGHT as i32 - true_height as i32) / 2) as f32,
+                width: width as f32,
+                height: height as f32,
+            })
+        })
+        .collect()
+}
+
 fn overlay_entries_with_motion(
     payload: &Value,
     visibility: OverlayVisibility,
@@ -794,6 +933,27 @@ fn overlay_entries_with_motion(
 }
 
 #[allow(clippy::too_many_arguments)]
+fn entity_display_name(entity: &Value, kind: &str, name: &str) -> String {
+    let owned = entity
+        .get("masterObjectId")
+        .and_then(value_i64)
+        .unwrap_or(0)
+        != 0
+        || entity
+            .get("ownerName")
+            .and_then(Value::as_str)
+            .is_some_and(|name| !name.is_empty());
+    // A pet's suffix may be an arbitrary player-chosen name. Only original
+    // unowned monster names and NPC catalog names are presentation vocabulary.
+    if native_i18n::active()
+        && (kind == "npc" || (kind == "monster" && !owned && !name.contains('_')))
+    {
+        native_i18n::tr(name)
+    } else {
+        name.to_owned()
+    }
+}
+
 fn overlay_entries_with_motion_at_center(
     payload: &Value,
     visibility: OverlayVisibility,
@@ -855,14 +1015,19 @@ fn overlay_entries_with_motion_at_center(
                         .as_deref()
                         .is_some_and(|object_id| hovered_object_id == Some(object_id))
                 };
-                let show_name = visibility.name_view || hovered;
+                let quest_target = kind == "monster"
+                    && !dead
+                    && quest_tracker.is_some_and(|tracker| tracker_targets_monster(tracker, name));
+                let show_name = visibility.name_view || hovered || quest_target;
                 let guild_name = matches!(kind, "selfPlayer" | "player")
                     .then(|| entity.get("guildName").and_then(Value::as_str))
                     .flatten()
                     .map(str::trim)
                     .filter(|guild_name| !guild_name.is_empty());
+                let display_name = entity_display_name(entity, kind, name);
                 let lines = if matches!(kind, "npc" | "monster") {
-                    name.split('_')
+                    display_name
+                        .split('_')
                         .filter(|part| !part.is_empty())
                         .collect::<Vec<_>>()
                 } else {
@@ -887,17 +1052,21 @@ fn overlay_entries_with_motion_at_center(
                 } else {
                     0.0
                 };
-                let color = entity
-                    .get("nameColourArgb")
-                    .and_then(value_i64)
-                    .and_then(argb_color)
-                    .unwrap_or_else(|| {
-                        if kind == "npc" {
-                            Color::srgb_u8(0x00, 0xff, 0x00)
-                        } else {
-                            Color::WHITE
-                        }
-                    });
+                let color = if quest_target {
+                    Color::srgb_u8(0xff, 0xe6, 0x58)
+                } else {
+                    entity
+                        .get("nameColourArgb")
+                        .and_then(value_i64)
+                        .and_then(argb_color)
+                        .unwrap_or_else(|| {
+                            if kind == "npc" {
+                                Color::srgb_u8(0x00, 0xff, 0x00)
+                            } else {
+                                Color::WHITE
+                            }
+                        })
+                };
                 let left = origin_x + (x - center_x) as f32 * CELL_WIDTH + motion_x;
                 let top = origin_y + (y - center_y) as f32 * CELL_HEIGHT + motion_y;
                 let width = if matches!(kind, "npc" | "monster") {
@@ -906,6 +1075,23 @@ fn overlay_entries_with_motion_at_center(
                     50.0
                 };
                 let mut entity_entries = Vec::with_capacity(lines.len().saturating_add(2));
+                if quest_target {
+                    // Keep the marker static. It remains readable with NameView
+                    // disabled and avoids the rapid flashing reported for the
+                    // animated NPC question/exclamation assets.
+                    entity_entries.push(OverlayEntry {
+                        name: Some("◆".to_owned()),
+                        quest_marker: None,
+                        marker_object_id: None,
+                        color: Color::srgb_u8(0xff, 0xe6, 0x58),
+                        left,
+                        top: top + CRYSTAL_NPC_MONSTER_NAME_TOP_OFFSET_PX - 13.0,
+                        width,
+                        font_size: CRYSTAL_DEFAULT_FONT_SIZE_PX,
+                        self_health_ratio: None,
+                        follows_camera: true,
+                    });
+                }
                 if kind == "npc" {
                     if let Some(marker) = quest_marker_for_entity(entity, quest_tracker) {
                         let (marker_left, marker_top) =
@@ -1041,7 +1227,7 @@ fn overlay_entries_with_motion_at_center(
                     let x = drop.get("x").and_then(value_i64)?;
                     let y = drop.get("y").and_then(value_i64)?;
                     Some(OverlayEntry {
-                        name: Some(name.to_owned()),
+                        name: Some(native_i18n::tr(name)),
                         quest_marker: None,
                         marker_object_id: None,
                         color: Color::srgb_u8(0xff, 0xe6, 0x58),
@@ -1064,6 +1250,33 @@ fn payload_scene_center(payload: &Value) -> Option<(i64, i64)> {
         center.get("x").and_then(value_i64)?,
         center.get("y").and_then(value_i64)?,
     ))
+}
+
+fn self_overlay_anchor(payload: &Value) -> Option<SelfOverlayAnchor> {
+    let (center_x, center_y) = payload_scene_center(payload)?;
+    let entity = payload
+        .get("entities")?
+        .as_array()?
+        .iter()
+        .find(|entity| entity.get("kind").and_then(Value::as_str) == Some("selfPlayer"))?;
+    Some(SelfOverlayAnchor {
+        object_id: normalized_object_id(entity.get("objectId")?)?,
+        center_x,
+        center_y,
+        x: entity.get("x").and_then(value_i64)?,
+        y: entity.get("y").and_then(value_i64)?,
+    })
+}
+
+fn payload_self_object_id(payload: &Value) -> Option<String> {
+    payload
+        .get("entities")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .find(|entity| entity.get("kind").and_then(Value::as_str) == Some("selfPlayer"))
+        .and_then(|entity| entity.get("objectId"))
+        .and_then(normalized_object_id)
 }
 
 fn quest_marker_for_entity(
@@ -1165,6 +1378,54 @@ fn argb_color(value: i64) -> Option<Color> {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_nameplates_translate_catalog_entities_but_not_players_guilds_or_pets() {
+        use super::*;
+        use serde_json::json;
+        native_i18n::with_locale(native_i18n::Locale::TraditionalChinese, || {
+            assert_eq!(entity_display_name(&json!({}), "npc", "Warrior"), "戰士");
+            assert_eq!(
+                entity_display_name(&json!({}), "monster", "Warrior"),
+                "戰士"
+            );
+            for kind in ["selfPlayer", "player"] {
+                assert_eq!(entity_display_name(&json!({}), kind, "Warrior"), "Warrior");
+            }
+            for pet in [
+                json!({"masterObjectId": 42}),
+                json!({"ownerName": "Warrior"}),
+            ] {
+                assert_eq!(entity_display_name(&pet, "monster", "Warrior"), "Warrior");
+            }
+            assert_eq!(
+                entity_display_name(&json!({}), "monster", "Deer_Warrior"),
+                "Deer_Warrior"
+            );
+            let payload = json!({"sceneView":{"centerX":10,"centerY":20},"entities":[
+                {"kind":"player","objectId":1,"name":"Warrior","guildName":"Password","x":10,"y":20},
+                {"kind":"monster","objectId":2,"name":"Deer_Warrior","x":11,"y":20}
+            ]});
+            let before = payload.clone();
+            let entries = overlay_entries(
+                &payload,
+                OverlayVisibility {
+                    name_view: true,
+                    drop_view: true,
+                },
+                None,
+                false,
+                None,
+            );
+            let names = entries
+                .iter()
+                .filter_map(|entry| entry.name.as_deref())
+                .collect::<Vec<_>>();
+            assert!(names.contains(&"Password"));
+            assert!(names.contains(&"Warrior"));
+            assert!(names.contains(&"Deer"));
+            assert_eq!(payload, before);
+        });
+    }
     use super::*;
     use serde_json::json;
 
@@ -1476,17 +1737,165 @@ mod tests {
             ["Potion"]
         );
 
-        assert!(overlay_entries(
-            &payload,
-            OverlayVisibility {
-                name_view: false,
-                drop_view: false
-            },
-            None,
-            false,
-            None,
-        )
-        .is_empty());
+        assert!(
+            overlay_entries(
+                &payload,
+                OverlayVisibility {
+                    name_view: false,
+                    drop_view: false
+                },
+                None,
+                false,
+                None,
+            )
+            .is_empty()
+        );
+    }
+
+    #[test]
+    fn drop_view_image_uses_the_world_items_actual_dnitems_frame_and_position() {
+        let payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "entities": [],
+            "groundDrops": [
+                {"objectId": 9, "name": "WoodenSword", "image": 30, "x": 11, "y": 20},
+                {"objectId": 10, "name": "Missing", "image": 999999, "x": 10, "y": 20}
+            ]
+        });
+        let images = ground_item_image_entries(&payload, None);
+        assert_eq!(images.len(), 1);
+        assert_eq!(images[0].frame, 30);
+        let world = crate::atlas::build_entity_render_state_with_frames(&payload, &HashMap::new())
+            .expect("world render state");
+        let layer = &world["entities"][0]["layers"][0];
+        assert_eq!(layer["path"], "/original-ui/DNItems/30.png");
+        assert_eq!(images[0].left as f64, layer["left"].as_f64().unwrap());
+        assert_eq!(images[0].top as f64, layer["top"].as_f64().unwrap());
+        assert_eq!(images[0].width as f64, layer["width"].as_f64().unwrap());
+        assert_eq!(images[0].height as f64, layer["height"].as_f64().unwrap());
+    }
+
+    #[test]
+    fn drop_view_spawns_a_pickup_image_and_removes_it_with_the_drop() {
+        let mut app = App::new();
+        app.add_plugins((
+            bevy::app::TaskPoolPlugin::default(),
+            bevy::asset::AssetPlugin::default(),
+        ));
+        app.init_asset::<Image>();
+        app.insert_resource(Time::<()>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        app.init_resource::<NativeEntityPresentation>();
+        app.init_resource::<PresentationPoseBuffer>();
+        let mut overlays = NativeEntityOverlays::default();
+        overlays.replace_payload(json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "groundDrops": [{"objectId": 9, "name": "WoodenSword", "image": 30, "x": 11, "y": 20}]
+        }));
+        app.insert_resource(overlays);
+        app.add_systems(Update, sync_native_entity_overlays);
+        app.update();
+
+        let image_count = |app: &mut App| {
+            app.world_mut()
+                .query::<(&Name, &ImageNode)>()
+                .iter(app.world())
+                .filter(|(name, _)| name.as_str() == "NativeGroundDropImage:30")
+                .count()
+        };
+        assert_eq!(image_count(&mut app), 1);
+        app.world_mut()
+            .resource_mut::<NativeEntityOverlays>()
+            .replace_payload(
+                json!({"sceneView": {"center": {"x": 10, "y": 20}}, "groundDrops": []}),
+            );
+        app.update();
+        assert_eq!(image_count(&mut app), 0);
+    }
+
+    #[test]
+    fn self_name_and_health_reanchor_when_render_payload_moves_without_raw_snapshot() {
+        let initial = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "playerHp": 9,
+            "playerMaxHp": 18,
+            "entities": [{"objectId": 1, "kind": "selfPlayer", "name": "Runner", "x": 10, "y": 20}]
+        });
+        let mut app = App::new();
+        app.add_plugins((
+            bevy::app::TaskPoolPlugin::default(),
+            bevy::asset::AssetPlugin::default(),
+        ));
+        app.init_asset::<Image>();
+        app.insert_resource(Time::<()>::default());
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        });
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.observe_packet_payload(initial.clone(), 0);
+        app.insert_resource(presentation);
+        app.init_resource::<PresentationPoseBuffer>();
+        let mut overlays = NativeEntityOverlays::default();
+        overlays.replace_payload(initial.clone());
+        app.insert_resource(overlays);
+        app.add_systems(Update, sync_native_entity_overlays);
+
+        let self_overlay_left = |app: &mut App| {
+            let root = {
+                let world = app.world_mut();
+                let mut query = world.query::<(Entity, &NativeEntityOverlayRoot)>();
+                query
+                    .iter(world)
+                    .find(|(_, overlay)| overlay.self_object_id.as_deref() == Some("1"))
+                    .expect("self overlay root")
+                    .0
+            };
+            app.world()
+                .get::<Children>(root)
+                .expect("self overlay children")
+                .iter()
+                .filter_map(|child| app.world().get::<Node>(child))
+                .filter_map(|node| match node.left {
+                    Val::Px(left) => Some(left),
+                    _ => None,
+                })
+                .reduce(f32::min)
+                .expect("self name or health node")
+        };
+        app.update();
+        let initial_left = self_overlay_left(&mut app);
+        assert_eq!(
+            app.world()
+                .resource::<NativeEntityOverlays>()
+                .last_self_anchor
+                .as_ref()
+                .unwrap()
+                .x,
+            10
+        );
+
+        let mut predicted = initial;
+        predicted["entities"][0]["x"] = json!(12);
+        app.world_mut()
+            .resource_mut::<NativeEntityPresentation>()
+            .observe_packet_payload(predicted, 100);
+        // Raw gameplay snapshot stays unchanged, as during local run/ACK
+        // reconciliation. The renderer payload alone must invalidate the UI.
+        app.update();
+        assert_eq!(self_overlay_left(&mut app) - initial_left, 96.0);
+        assert_eq!(
+            app.world()
+                .resource::<NativeEntityOverlays>()
+                .last_self_anchor
+                .as_ref()
+                .unwrap()
+                .x,
+            12
+        );
     }
 
     #[test]
@@ -1881,6 +2290,59 @@ mod tests {
             quest_marker_for_entity(&json!({"questIcon": 53}), None),
             Some(QuestMarkerKind::QuestionGreen),
             "authoritative questIcon must not depend on a client tracker"
+        );
+    }
+
+    #[test]
+    fn active_quest_monster_keeps_a_stable_marker_when_names_are_hidden() {
+        let payload = json!({
+            "sceneView": {"center": {"x": 10, "y": 20}},
+            "entities": [
+                {"objectId": 10, "kind": "monster", "name": "Deer", "x": 11, "y": 20, "dead": false},
+                {"objectId": 11, "kind": "monster", "name": "Scarecrow", "x": 12, "y": 20, "dead": false},
+                {"objectId": 12, "kind": "monster", "name": "Deer", "x": 13, "y": 20, "dead": true}
+            ]
+        });
+        let tracker = QuestTracker {
+            active_quests: vec![mir2_client_bevy::quest_model::Quest {
+                quest_index: 5,
+                accept_npc_index: Some(5),
+                finish_npc_index: Some(5),
+                title: "The Smith's Test".to_owned(),
+                npc_name: Some("Smith".to_owned()),
+                group: Some("BichonProvince".to_owned()),
+                min_level_needed: 1,
+                detail: Default::default(),
+                status: QuestStatus::InProgress,
+                objectives: vec![mir2_client_bevy::quest_model::QuestObjective {
+                    objective_id: "5:0".to_owned(),
+                    text: "Kill Deer".to_owned(),
+                    current: 0,
+                    target: 3,
+                }],
+                rewards: vec![],
+                unknown_text: None,
+            }],
+        };
+
+        let entries = overlay_entries(
+            &payload,
+            OverlayVisibility {
+                name_view: false,
+                drop_view: false,
+            },
+            None,
+            false,
+            Some(&tracker),
+        );
+
+        assert_eq!(entry_names(&entries), ["◆", "Deer"]);
+        assert!(quest_markers(&entries).is_empty());
+        assert!(
+            entries
+                .iter()
+                .filter(|entry| entry.name.is_some())
+                .all(|entry| entry.color == Color::srgb_u8(0xff, 0xe6, 0x58))
         );
     }
 

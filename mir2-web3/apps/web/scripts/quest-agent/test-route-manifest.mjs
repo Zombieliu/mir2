@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   QUEST_CLASS_MASKS,
   buildAuthoritativeClassQuestRoute,
+  buildClassQuestRoute,
   buildProgressionSkillBookCatalog,
   buildSafeSupplyLootCatalog,
   decodeCrystalQuestHeader,
@@ -17,6 +18,23 @@ const quest = (questId) => {
   assert.ok(value, `expected q${questId} in Warrior route`);
   return value;
 };
+
+test("level-15 routes bound every segment and preserve each class instructor branch", () => {
+  for (const [className, instructorId, otherIds] of [
+    ["Warrior", 7, [10, 13]],
+    ["Wizard", 10, [7, 13]],
+    ["Taoist", 13, [7, 10]],
+  ]) {
+    const bounded = buildClassQuestRoute(sources, { className, maxLevel: 15 });
+    assert.deepEqual(bounded.segments.map(({ label }) => label), ["1-7", "8-15"]);
+    const ids = bounded.quests.map(({ questId }) => questId);
+    assert.ok(ids.includes(instructorId));
+    assert.ok(otherIds.every((id) => !ids.includes(id)));
+    assert.ok(bounded.quests.every((q) => q.eligibility.minLevel <= 15));
+    assert.deepEqual(bounded.segments.flatMap((s) => s.questIds).sort((a, b) => a - b),
+      [...ids].sort((a, b) => a - b));
+  }
+});
 
 test("decodes authoritative Crystal ClientQuestInfo headers", () => {
   const q1 = sources.questManifest.quests.find((candidate) => candidate.index === 1);
@@ -47,6 +65,70 @@ test("binds kill tasks to real respawns", () => {
   for (const objective of q5.objectives.kill) {
     assert.ok(objective.spawnCandidates.length > 0, `${objective.monsterName} needs a respawn`);
     assert.ok(objective.spawnCandidates.every((spawn) => Number.isFinite(spawn.position.x)));
+  }
+});
+
+test("q113 casters retain Crystal D711's shared BlackMaggot and WedgeMoth rows", async () => {
+  const routes = await Promise.all(
+    ["Wizard", "Taoist", "Warrior"].map((className) =>
+      buildAuthoritativeClassQuestRoute({ className, maxLevel: 30 })
+    ),
+  );
+  const quest113 = (className) => routes
+    .find((route) => route.className === className)
+    .quests.find((candidate) => candidate.questId === 113);
+  const objective = (className, monsterName) => quest113(className).objectives.kill
+    .find((candidate) => candidate.monsterName === monsterName);
+
+  for (const className of ["Wizard", "Taoist"]) {
+    const blackMaggot = objective(className, "BlackMaggot").spawnCandidates
+      .filter((spawn) => spawn.mapFileName === "D711");
+    assert.deepEqual(blackMaggot.map((spawn) => ({
+      count: spawn.count,
+      spread: spawn.spread,
+      respawnIndex: spawn.respawnIndex,
+      position: spawn.position,
+    })), [
+      [251, 41], [321, 72], [363, 146], [172, 59], [210, 93], [262, 140],
+      [309, 19], [350, 303], [111, 105], [158, 149], [200, 200], [255, 306],
+      [287, 286], [56, 158], [153, 237], [112, 250], [114, 314], [304, 340],
+    ].map(([x, y], offset) => ({
+      count: 8,
+      spread: 30,
+      respawnIndex: 2543 + offset,
+      position: { x, y },
+    })));
+    assert.deepEqual(objective(className, "WedgeMoth").spawnCandidates
+      .filter((spawn) => spawn.mapFileName === "D711")
+      .map((spawn) => ({
+        count: spawn.count,
+        spread: spawn.spread,
+        respawnIndex: spawn.respawnIndex,
+        position: spawn.position,
+      })), [{
+      count: 25,
+      spread: 200,
+      respawnIndex: 2561,
+      position: { x: 200, y: 200 },
+    }]);
+  }
+
+  for (const monsterName of ["BlackMaggot", "WedgeMoth"]) {
+    assert.equal(objective("Warrior", monsterName).spawnCandidates.length, 16);
+    assert.equal(objective("Warrior", monsterName).spawnCandidates.some(
+      (spawn) => spawn.mapFileName === "D711"
+    ), false);
+  }
+  for (const route of routes) {
+    const nonQ113Candidates = route.quests
+      .filter((candidate) => candidate.questId !== 113)
+      .flatMap((candidate) => candidate.objectives.kill)
+      .flatMap((candidate) => candidate.spawnCandidates);
+    assert.ok(nonQ113Candidates.length > 0);
+    assert.ok(route.quests
+      .filter((candidate) => candidate.questId !== 113)
+      .flatMap((candidate) => candidate.objectives.kill)
+      .every((candidate) => candidate.spawnCandidates.length <= 16));
   }
 });
 

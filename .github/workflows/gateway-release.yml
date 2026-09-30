@@ -19,20 +19,32 @@ permissions:
 jobs:
   build-linux-x64:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Install Rust 1.89
         run: rustup toolchain install 1.89.0 --profile minimal
+
+      - name: Verify Linux release and save-recovery boundary
+        working-directory: mir2-web3
+        env:
+          MIR2_REQUIRE_LINUX_SECURITY_GATE: "1"
+        run: bash scripts/selftest-gateway-save-recovery.sh
 
       - name: Package Gateway
         working-directory: mir2-web3
         env:
           INPUT_RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
+          set -euo pipefail
+          # This dedicated ephemeral runner is the package publisher. The
+          # packager verifies the effective non-root UID; it has no default.
+          export MIR2_RELEASE_PUBLISHER_UID="$(id -u)"
           if [ -n "$INPUT_RELEASE_TAG" ]; then
             export MIR2_RELEASE_TAG="$INPUT_RELEASE_TAG"
           else
@@ -65,7 +77,7 @@ jobs:
           npx wrangler@4.112.0 r2 object put "$MIR2_R2_RELEASE_BUCKET/gateway/releases/latest-mir2-gateway-release.json" --file "$meta"
 
       - name: Upload Gateway package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: mir2-gateway-linux-x64
           path: |

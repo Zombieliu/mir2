@@ -6,15 +6,17 @@
 
 use bevy::prelude::*;
 use bevy::text::LineBreak;
-use bevy::ui::{widget::NodeImageMode, Node, PositionType, Val};
+use bevy::ui::{Node, PositionType, Val, widget::NodeImageMode};
 use chrono::{DateTime, Local, Utc};
 
+use crate::native_i18n;
 use crate::native_shell::{CharacterSummary, NativeShellModel};
 
-use super::assets::{frame_asset_path, CrystalButtonAssetSet};
-use super::preview_data::{preview_frames, preview_overlay_frames, PreviewFrame};
-use super::spec::{character_select as spec, CrystalFrameSpec, CrystalRect};
-use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
+use super::assets::{CrystalButtonAssetSet, frame_asset_path};
+use super::additive_ui::CrystalAdditiveUiMaterial;
+use super::preview_data::{PreviewFrame, preview_frames, preview_overlay_frames};
+use super::spec::{CrystalFrameSpec, CrystalRect, character_select as spec};
+use super::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
 use super::widget::spawn_crystal_image_button;
 
 const WHITE: Color = Color::WHITE;
@@ -25,6 +27,42 @@ const DOTNET_KIND_UTC: u64 = 0x4000_0000_0000_0000;
 const DOTNET_KIND_LOCAL: u64 = 0x8000_0000_0000_0000;
 const DOTNET_UNIX_EPOCH_TICKS: i128 = 621_355_968_000_000_000;
 const DOTNET_TICKS_PER_SECOND: i128 = 10_000_000;
+
+/// Fixed materials keep the Wizard's additive frames resident across animation
+/// ticks and name-field redraws. Creating a new material each tick can expose a
+/// frame before the GPU has prepared its effect layer.
+#[derive(Resource)]
+pub(crate) struct CrystalPreviewMaterials {
+    male_wizard: [Handle<CrystalAdditiveUiMaterial>; spec::PREVIEW_FRAME_COUNT],
+    female_wizard: [Handle<CrystalAdditiveUiMaterial>; spec::PREVIEW_FRAME_COUNT],
+}
+
+impl CrystalPreviewMaterials {
+    fn get(&self, frame_set_base: u16, frame: usize) -> Option<&Handle<CrystalAdditiveUiMaterial>> {
+        match frame_set_base {
+            600 => self.male_wizard.get(frame),
+            880 => self.female_wizard.get(frame),
+            _ => None,
+        }
+    }
+}
+
+pub(crate) fn load_character_preview_materials(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+) {
+    let load_set = |base| {
+        std::array::from_fn(|frame| {
+            asset_server.add(CrystalAdditiveUiMaterial {
+                image: asset_server.load(preview_frame_asset_path(base, frame)),
+            })
+        })
+    };
+    commands.insert_resource(CrystalPreviewMaterials {
+        male_wizard: load_set(600),
+        female_wizard: load_set(880),
+    });
+}
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub enum CrystalSelectAction {
@@ -38,8 +76,8 @@ pub enum CrystalSelectAction {
 
 #[derive(Component, Debug)]
 pub struct CrystalCharacterPreview {
-    anchor: (f32, f32),
     frame_set_base: u16,
+    anchor: (f32, f32),
     frame: usize,
     /// Only the base layer owns the clock. Optional Crystal overlays follow
     /// the same committed frame so a slower-loading weapon/effect layer cannot
@@ -51,11 +89,39 @@ pub struct CrystalCharacterPreview {
     frame_images: Vec<Handle<Image>>,
 }
 
+/// Keep the control's clock when name/focus edits rebuild its surrounding UI.
+/// Changing class, gender or the create/select anchor starts a fresh sequence.
+#[derive(Clone)]
+pub(crate) struct PreviewAnimationState {
+    frame_set_base: u16,
+    anchor: (f32, f32),
+    frame: usize,
+    timer: Timer,
+}
+
+impl PreviewAnimationState {
+    fn applies_to(&self, preview: &CrystalCharacterPreview) -> bool {
+        self.frame_set_base == preview.frame_set_base && self.anchor == preview.anchor
+    }
+
+    fn restore(&self, preview: &mut CrystalCharacterPreview) {
+        if self.applies_to(preview) {
+            preview.frame = self.frame;
+            preview.animation = Some(self.timer.clone());
+        }
+    }
+}
+
 impl CrystalCharacterPreview {
-    fn new(asset_server: &AssetServer, frame_set_base: u16, drives_clock: bool) -> Self {
+    fn new(
+        asset_server: &AssetServer,
+        frame_set_base: u16,
+        anchor: (f32, f32),
+        drives_clock: bool,
+    ) -> Self {
         Self {
-            anchor: spec::PREVIEW_ANCHOR,
             frame_set_base,
+            anchor,
             frame: 0,
             animation: drives_clock.then(|| {
                 Timer::from_seconds(spec::PREVIEW_FRAME_DELAY_SECONDS, TimerMode::Repeating)
@@ -112,7 +178,18 @@ pub fn spawn_character_select_screen(
     model: &NativeShellModel,
 ) {
     spawn_frame(parent, asset_server, spec::BACKGROUND);
-    spawn_frame(parent, asset_server, spec::TITLE);
+    if native_i18n::active() {
+        spawn_text(
+            parent,
+            &native_i18n::tr("Select Character"),
+            CrystalRect::new(312.0, 16.0, 400.0, 34.0),
+            22.0,
+            WHITE,
+            Justify::Center,
+        );
+    } else {
+        spawn_frame(parent, asset_server, spec::TITLE);
+    }
     spawn_vertical_centered_text(
         parent,
         "Legend of Mir 2",
@@ -133,7 +210,7 @@ pub fn spawn_character_select_screen(
         spawn_character_preview(parent, asset_server, character);
         spawn_vertical_centered_text(
             parent,
-            "Last Online:",
+            &native_i18n::tr("Last Online:"),
             spec::LAST_ACCESS_LABEL,
             CRYSTAL_DEFAULT_FONT_SIZE_PX,
             WHITE,
@@ -141,7 +218,7 @@ pub fn spawn_character_select_screen(
         );
         spawn_vertical_centered_text(
             parent,
-            &format_last_access(character.last_access_binary_datetime),
+            &native_i18n::tr(&format_last_access(character.last_access_binary_datetime)),
             spec::LAST_ACCESS_VALUE,
             CRYSTAL_DEFAULT_FONT_SIZE_PX,
             WHITE,
@@ -203,7 +280,7 @@ pub fn spawn_character_select_screen(
     if let Some(notice) = &model.notice {
         spawn_text(
             parent,
-            &notice.message,
+            &native_i18n::tr(&notice.message),
             CrystalRect::new(262.0, 678.0, 500.0, 22.0),
             12.0,
             ERROR,
@@ -258,6 +335,58 @@ fn spawn_character_slot(
     }
 
     slot_entity.with_children(|contents| {
+        if native_i18n::active() {
+            // The source slot art contains English labels. Keep the same hit
+            // target while rendering labels separately from opaque player names.
+            contents.spawn((
+                Node {
+                    width: Val::Percent(100.0),
+                    height: Val::Percent(100.0),
+                    border: UiRect::all(Val::Px(1.0)),
+                    ..default()
+                },
+                BackgroundColor(if selected {
+                    Color::srgb(0.20, 0.16, 0.07)
+                } else {
+                    Color::srgb(0.055, 0.045, 0.03)
+                }),
+                BorderColor::all(Color::srgb(0.65, 0.5, 0.22)),
+            ));
+            if let Some(character) = character {
+                spawn_relative_text(
+                    contents,
+                    &character.name,
+                    CrystalRect::new(12.0, 6.0, 264.0, 20.0),
+                    14.0,
+                    WHITE,
+                );
+                spawn_relative_text(
+                    contents,
+                    &native_i18n::tr(&character.class_name),
+                    CrystalRect::new(12.0, 31.0, 174.0, 20.0),
+                    13.0,
+                    WHITE,
+                );
+                let level = native_i18n::key("shell.level", "Lv. {level}")
+                    .replace("{level}", &character.level.to_string());
+                spawn_relative_text(
+                    contents,
+                    &level,
+                    CrystalRect::new(194.0, 31.0, 80.0, 20.0),
+                    13.0,
+                    WHITE,
+                );
+            } else {
+                spawn_relative_text(
+                    contents,
+                    &native_i18n::tr("Empty Slot"),
+                    CrystalRect::new(12.0, 16.0, 264.0, 24.0),
+                    14.0,
+                    WHITE,
+                );
+            }
+            return;
+        }
         let image_path = character.map_or_else(
             || format!("original-ui/Prguse/{}.png", spec::EMPTY_SLOT_INDEX),
             |character| {
@@ -314,29 +443,35 @@ fn spawn_character_preview(
     asset_server: &AssetServer,
     character: &CharacterSummary,
 ) {
-    let base = preview_base_index(&character.class_name, &character.gender_name);
+    spawn_character_preview_at(
+        parent,
+        asset_server,
+        &character.class_name,
+        &character.gender_name,
+        spec::PREVIEW_ANCHOR,
+    );
+}
+
+/// Spawns Crystal's offset-aware animated character preview at a control
+/// anchor. `MirAnimatedControl.UseOffSet` treats the source location as an
+/// anchor; the individual `ChrSel` frame offset determines its top-left.
+pub fn spawn_character_preview_at(
+    parent: &mut ChildSpawnerCommands,
+    asset_server: &AssetServer,
+    class_name: &str,
+    gender_name: &str,
+    anchor: (f32, f32),
+) {
+    let base = preview_base_index(class_name, gender_name);
     for (frame_set_base, frame, drives_clock) in preview_layer_specs(base) {
         spawn_preview_layer(
             parent,
             asset_server,
             frame_set_base,
             frame,
+            anchor,
             drives_clock,
-            spec::PREVIEW_ANCHOR,
         );
-    }
-}
-
-/// NewCharacterDialog uses the same 16-frame, offset-aware renderer.
-pub fn spawn_creation_preview(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: &AssetServer,
-    class: &str,
-    gender: &str,
-    anchor: (f32, f32),
-) {
-    for (base, frame, drives_clock) in preview_layer_specs(preview_base_index(class, gender)) {
-        spawn_preview_layer(parent, asset_server, base, frame, drives_clock, anchor);
     }
 }
 
@@ -356,38 +491,52 @@ fn spawn_preview_layer(
     asset_server: &AssetServer,
     frame_set_base: u16,
     frame: PreviewFrame,
-    drives_clock: bool,
     anchor: (f32, f32),
+    drives_clock: bool,
 ) {
-    let rect = preview_rect_at(frame, anchor);
-    let mut preview = CrystalCharacterPreview::new(asset_server, frame_set_base, drives_clock);
-    preview.anchor = anchor;
+    let rect = preview_rect_at(anchor, frame);
+    let preview = CrystalCharacterPreview::new(asset_server, frame_set_base, anchor, drives_clock);
     let first_frame = preview.frame_images[0].clone();
-    parent.spawn((
-        preview,
-        absolute_node(rect),
-        ImageNode {
+    let mut layer = parent.spawn((preview, absolute_node(rect)));
+    if drives_clock {
+        layer.insert(ImageNode {
             image: first_frame,
             ..default()
-        },
-    ));
+        });
+    }
+    // Wizard overlays are attached as MaterialNodes before UI extraction by
+    // animate_character_previews. They must never use ordinary ImageNode
+    // alpha blending: opaque dark glow pixels would cover the weapon itself.
 }
 
-pub fn animate_character_previews(
+pub(crate) fn animate_character_previews(
+    mut commands: Commands,
     time: Res<Time>,
     asset_server: Res<AssetServer>,
-    mut previews: Query<(&mut CrystalCharacterPreview, &mut Node, &mut ImageNode)>,
+    materials: Res<CrystalPreviewMaterials>,
+    mut retained: bevy::prelude::Local<Option<PreviewAnimationState>>,
+    mut previews: Query<(
+        Entity,
+        &mut CrystalCharacterPreview,
+        &mut Node,
+        Option<&mut ImageNode>,
+        Option<&mut MaterialNode<CrystalAdditiveUiMaterial>>,
+    )>,
 ) {
     let mut layers = previews.iter_mut().collect::<Vec<_>>();
     let Some(driver_index) = layers
         .iter()
-        .position(|(preview, _, _)| preview.animation.is_some())
+        .position(|(_, preview, _, _, _)| preview.animation.is_some())
     else {
+        *retained = None;
         return;
     };
 
     let (finished, current_frame) = {
-        let (preview, _, _) = &mut layers[driver_index];
+        let (_, preview, _, _, _) = &mut layers[driver_index];
+        if let Some(previous) = retained.as_ref() {
+            previous.restore(preview);
+        }
         let finished = preview
             .animation
             .as_mut()
@@ -399,25 +548,91 @@ pub fn animate_character_previews(
 
     if finished > 0 {
         let next_frame = (current_frame + finished as usize) % spec::PREVIEW_FRAME_COUNT;
-        let all_layers_ready = layers.iter().all(|(preview, _, _)| {
+        let all_layers_ready = layers.iter().all(|(_, preview, _, _, _)| {
             asset_server.is_loaded_with_dependencies(preview.frame_images[next_frame].id())
+                && materials
+                    .get(preview.frame_set_base, next_frame)
+                    .is_none_or(|material| asset_server.is_loaded_with_dependencies(material.id()))
         });
         if all_layers_ready {
-            for (preview, _, image) in &mut layers {
+            for (_, preview, _, _, _) in &mut layers {
                 preview.frame = next_frame;
-                image.image = preview.frame_images[next_frame].clone();
             }
         }
     }
 
-    for (preview, mut node, _) in layers {
+    let committed_frame = layers[driver_index].1.frame;
+    *retained = Some(PreviewAnimationState {
+        frame_set_base: layers[driver_index].1.frame_set_base,
+        anchor: layers[driver_index].1.anchor,
+        frame: committed_frame,
+        timer: layers[driver_index].1.animation.clone().unwrap(),
+    });
+    for (entity, mut preview, mut node, image, material_node) in layers {
+        preview.frame = committed_frame;
+        if let Some(mut image) = image {
+            if image.image != preview.frame_images[committed_frame] {
+                image.image = preview.frame_images[committed_frame].clone();
+            }
+        }
+        if let Some(handle) = materials.get(preview.frame_set_base, preview.frame) {
+            if let Some(mut material_node) = material_node {
+                if material_node.0 != *handle {
+                    material_node.0 = handle.clone();
+                }
+            } else {
+                commands.entity(entity).insert(MaterialNode(handle.clone()));
+            }
+        }
         let frame = frame_for_set(preview.frame_set_base, preview.frame);
-        let rect = preview_rect_at(frame, preview.anchor);
+        let rect = preview_rect_at(preview.anchor, frame);
         node.left = Val::Px(rect.left);
         node.top = Val::Px(rect.top);
         node.width = Val::Px(rect.width);
         node.height = Val::Px(rect.height);
     }
+}
+
+#[cfg(test)]
+pub(crate) fn preview_render_state_for_tests(world: &mut World) -> Vec<serde_json::Value> {
+    let mut query = world.query::<(
+        &CrystalCharacterPreview,
+        &Node,
+        Option<&ImageNode>,
+        Option<&MaterialNode<CrystalAdditiveUiMaterial>>,
+    )>();
+    let asset_server = world.resource::<AssetServer>();
+    let Some(materials) = world.get_resource::<CrystalPreviewMaterials>() else {
+        assert!(query.iter(world).next().is_none(), "preview entities require their material cache");
+        return Vec::new();
+    };
+    let pixels = |value| match value {
+        Val::Px(value) => value,
+        _ => panic!("preview bounds must use Crystal pixel coordinates"),
+    };
+    let mut layers: Vec<_> = query
+        .iter(world)
+        .map(|(preview, node, image, material)| {
+            let ready = preview.frame_images.iter().enumerate().all(|(frame, image)| {
+                asset_server.is_loaded_with_dependencies(image.id())
+                    && materials.get(preview.frame_set_base, frame).is_none_or(|handle| {
+                        asset_server.is_loaded_with_dependencies(handle.id())
+                    })
+            });
+            serde_json::json!({
+                "base": preview.frame_set_base,
+                "frame": preview.frame,
+                "anchor": [preview.anchor.0, preview.anchor.1],
+                "rect": [pixels(node.left), pixels(node.top), pixels(node.width), pixels(node.height)],
+                "drivesClock": preview.animation.is_some(),
+                "imageNode": image.is_some(),
+                "additiveNode": material.is_some(),
+                "allImagesReady": ready,
+            })
+        })
+        .collect();
+    layers.sort_by_key(|layer| layer["base"].as_u64());
+    layers
 }
 
 fn frame_for_set(frame_set_base: u16, frame: usize) -> PreviewFrame {
@@ -430,11 +645,12 @@ fn frame_for_set(frame_set_base: u16, frame: usize) -> PreviewFrame {
         .expect("spawned Crystal preview frame set must have source metadata")[frame]
 }
 
+#[cfg(test)]
 fn preview_rect(frame: PreviewFrame) -> CrystalRect {
-    preview_rect_at(frame, spec::PREVIEW_ANCHOR)
+    preview_rect_at(spec::PREVIEW_ANCHOR, frame)
 }
 
-fn preview_rect_at(frame: PreviewFrame, anchor: (f32, f32)) -> CrystalRect {
+fn preview_rect_at(anchor: (f32, f32), frame: PreviewFrame) -> CrystalRect {
     CrystalRect::new(
         anchor.0 + frame.x,
         anchor.1 + frame.y,
@@ -448,7 +664,7 @@ fn preview_rect_at(frame: PreviewFrame, anchor: (f32, f32)) -> CrystalRect {
 fn creation_preview_uses_source_offset_and_stays_above_buttons() {
     for base in [20, 300, 40, 320, 60, 340] {
         for frame in preview_frames(base).unwrap() {
-            let rect = preview_rect_at(*frame, (338.0, 404.0));
+            let rect = preview_rect_at((338.0, 404.0), *frame);
             assert!(
                 rect.top + rect.height <= 579.0,
                 "base {base} covers Create button"
@@ -602,12 +818,16 @@ mod tests {
     fn first_preview_frame_applies_crystal_use_offset_anchor() {
         let warrior = preview_frames(20).unwrap()[0];
         assert_eq!(
-            preview_rect(warrior),
+            preview_rect_at(spec::PREVIEW_ANCHOR, warrior),
             CrystalRect::new(177.0, 270.0, 196.0, 302.0)
+        );
+        assert_eq!(
+            preview_rect_at((338.0, 404.0), warrior),
+            CrystalRect::new(255.0, 254.0, 196.0, 302.0)
         );
         let wizard_overlay = preview_overlay_frames(40).unwrap().1[0];
         assert_eq!(
-            preview_rect(wizard_overlay),
+            preview_rect_at(spec::PREVIEW_ANCHOR, wizard_overlay),
             CrystalRect::new(170.0, 176.0, 164.0, 392.0)
         );
     }
@@ -639,6 +859,76 @@ mod tests {
         );
         assert_eq!(layers[0].0, 40);
         assert_eq!(layers[1].0, 600);
+    }
+
+    #[test]
+    fn create_and_select_share_all_ten_source_body_sequences() {
+        for (class, male, female) in [
+            ("Warrior", 20, 300),
+            ("Wizard", 40, 320),
+            ("Taoist", 60, 340),
+            ("Assassin", 80, 360),
+            ("Archer", 100, 140),
+        ] {
+            for (gender, expected) in [("Male", male), ("Female", female)] {
+                let base = preview_base_index(class, gender);
+                assert_eq!(base, expected);
+                let layers = preview_layer_specs(base);
+                assert_eq!(layers.len(), if class == "Wizard" { 2 } else { 1 });
+                assert_eq!(layers.iter().filter(|(_, _, driver)| *driver).count(), 1);
+                assert_eq!(preview_frames(base).unwrap().len(), 16);
+                for frame in 0..16 {
+                    assert_eq!(
+                        frame_for_set(base, frame),
+                        preview_frames(base).unwrap()[frame]
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn redraw_preserves_frame_and_partial_clock_but_choice_change_restarts() {
+        let mut timer = Timer::from_seconds(0.25, TimerMode::Repeating);
+        timer.tick(std::time::Duration::from_millis(110));
+        let previous = PreviewAnimationState {
+            frame_set_base: 40,
+            anchor: (338.0, 404.0),
+            frame: 7,
+            timer,
+        };
+        let make_preview = |base, anchor| CrystalCharacterPreview {
+            frame_set_base: base,
+            anchor,
+            frame: 0,
+            animation: Some(Timer::from_seconds(0.25, TimerMode::Repeating)),
+            frame_images: Vec::new(),
+        };
+        let mut redrawn = make_preview(40, (338.0, 404.0));
+        previous.restore(&mut redrawn);
+        assert_eq!(redrawn.frame, 7);
+        assert_eq!(
+            redrawn.animation.as_ref().unwrap().elapsed().as_millis(),
+            110
+        );
+        assert!(
+            redrawn
+                .animation
+                .as_mut()
+                .unwrap()
+                .tick(std::time::Duration::from_millis(140))
+                .just_finished()
+        );
+        for (base, anchor) in [
+            (320, (338.0, 404.0)),
+            (20, (338.0, 404.0)),
+            (40, spec::PREVIEW_ANCHOR),
+        ] {
+            let mut changed = make_preview(base, anchor);
+            previous.restore(&mut changed);
+            assert_eq!(changed.frame, 0);
+            assert!(changed.animation.unwrap().elapsed().is_zero());
+        }
     }
 
     #[test]

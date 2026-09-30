@@ -141,10 +141,7 @@ pub(super) fn process(
                     }
                 }
                 InspectAction::Mail => {
-                    state.apply(mir2_ui_core::action::UiAction::OpenMailCompose);
-                    state.apply(mir2_ui_core::action::UiAction::SetMailRecipient {
-                        recipient: info.name,
-                    });
+                    state.request_mail_letter(info.name);
                     state.ranking.player_inspect.close();
                 }
                 InspectAction::Whisper => {
@@ -270,7 +267,7 @@ pub(super) fn render(
             );
             overlay_centered_text_at(
                 panel,
-                &format!("{} {}", data.info.guild_name, data.info.guild_rank),
+                &crate::native_i18n::tr(&format!("{} {}", data.info.guild_name, data.info.guild_rank)),
                 CrystalRect::new(50.0, 33.0, 190.0, 30.0),
                 32.0 / 3.0,
                 TEXT,

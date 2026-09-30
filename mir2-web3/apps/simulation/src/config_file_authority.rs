@@ -158,7 +158,18 @@ impl FileAuthority {
                 .map_err(|e| format!("file authority marker read failed: {e}"))?;
             bytes
         };
-        let write_state = if marker.is_empty() {
+        let mut reconciliation_name = path.as_os_str().to_os_string();
+        reconciliation_name.push(".reconciliation.pending");
+        let reconciliation_pending = match fs::symlink_metadata(PathBuf::from(reconciliation_name)) {
+            Ok(_) => true,
+            Err(error) if error.kind() == io::ErrorKind::NotFound => false,
+            Err(error) => return Err(format!("reconciliation guard inspection failed: {error}")),
+        };
+        let write_state = if reconciliation_pending {
+            AccountStoreWriteState::Frozen {
+                reason: "interrupted operator reconciliation requires explicit review".into(),
+            }
+        } else if marker.is_empty() {
             AccountStoreWriteState::Writable
         } else {
             AccountStoreWriteState::Frozen {
@@ -257,6 +268,18 @@ mod tests {
                     .as_nanos()
             ))
             .join("accounts.json")
+    }
+    #[test]
+    fn interrupted_operator_reconciliation_blocks_an_empty_publication_marker() {
+        let path = path();
+        let authority = FileAuthority::acquire(&path, SimulationConfig::default().default_character).unwrap();
+        drop(authority);
+        let mut guard = path.as_os_str().to_os_string();
+        guard.push(".reconciliation.pending");
+        fs::write(PathBuf::from(guard), b"durable pending operator decision").unwrap();
+        let reopened = FileAuthority::acquire(&path, SimulationConfig::default().default_character).unwrap();
+        assert!(matches!(*reopened.write_state.lock().unwrap(), AccountStoreWriteState::Frozen { .. }));
+        assert!(reopened.begin_publication().is_err());
     }
     #[test]
     fn pending_publication_requires_explicit_settlement() {

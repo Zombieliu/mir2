@@ -159,6 +159,20 @@ function sha256(bytes) {
 }
 
 {
+  for (const index of [210,225,240,255,270,310,325,340,355,370]) {
+    const library = mapLibraryKeyForIndex(index);
+    assert.equal(mapAtlasPathRequiresAlphaKey(`/original-map/${library}/2766.png`), true, library);
+    const map = { width:1, height:1, cells:[{backIndex:-1,backImage:0,
+      middleIndex:index,middleImage:2767,middleAnimationFrame:0,
+      frontIndex:-1,frontImage:0,frontAnimationFrame:0}] };
+    assert.ok(collectStandaloneMapReferences(map).some(r => r.key === `${library}#2766`));
+  }
+  for (const name of ["SmObjectsbad", "SmObjectsc2", "SmObjectscwoods"]) {
+    assert.equal(mapAtlasPathRequiresAlphaKey(`/original-map/WemadeMir3/${name}/1.png`),false);
+  }
+}
+
+{
   assert.equal(decodeCrystalMiddleAnimationCount(0), 0);
   assert.equal(decodeCrystalMiddleAnimationCount(8), 8);
   assert.equal(decodeCrystalMiddleAnimationCount(0x88), 8);

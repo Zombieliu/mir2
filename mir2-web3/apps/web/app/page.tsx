@@ -14210,6 +14210,7 @@ export default function HomePage() {
         onClose: () => setShowQuestLog(false),
         quests: localizedQuestLog,
         playerClass: self?.classKey ?? null,
+        playerLevel: self?.level,
         onTrackQuest: trackQuest,
         onAbandonQuest: abandonQuest,
         onShareQuest: shareQuest,

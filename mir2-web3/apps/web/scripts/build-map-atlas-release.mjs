@@ -17,12 +17,14 @@ const outputPath = path.resolve(
   args.output ?? path.join(atlasRoot, "map-atlas-release.generated.json"),
 );
 
-await main();
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  await main();
+}
 
 async function main() {
   const manifestPath = args.manifest
     ? path.resolve(args.manifest)
-    : await findContentAddressedManifest(atlasRoot);
+    : await resolveCurrentContentAddressedManifest(atlasRoot);
   const manifestBytes = await fs.readFile(manifestPath);
   const manifestHash = sha256(manifestBytes);
   const expectedManifestName = `manifest.${manifestHash}.json`;
@@ -99,16 +101,18 @@ async function releaseFile(relativePath, contentType) {
   };
 }
 
-async function findContentAddressedManifest(root) {
-  const names = (await fs.readdir(root))
-    .filter((name) => /^manifest\.[0-9a-f]{64}\.json$/.test(name))
-    .sort();
-  if (names.length !== 1) {
+export async function resolveCurrentContentAddressedManifest(root) {
+  const pointerPath = path.join(root, "manifest.json");
+  const pointerBytes = await fs.readFile(pointerPath);
+  const hash = sha256(pointerBytes);
+  const contentAddressedPath = path.join(root, `manifest.${hash}.json`);
+  const contentAddressedBytes = await fs.readFile(contentAddressedPath);
+  if (!contentAddressedBytes.equals(pointerBytes)) {
     throw new Error(
-      `Expected exactly one content-addressed map-atlas manifest in ${root}; found ${names.length}.`,
+      `Current map-atlas manifest does not match its content-addressed version: ${contentAddressedPath}`,
     );
   }
-  return path.join(root, names[0]);
+  return contentAddressedPath;
 }
 
 function normalizePublicPath(value) {

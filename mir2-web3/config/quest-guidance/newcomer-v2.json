@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "profile": "newcomer-v2",
+  "quests": [
+    {"id":2110001,"category":"recommended","order":1,"hint":"Visit Assistant Jane in Bichon Province (map 0, 284,606) and complete the first ordinary NPC report."},
+    {"id":2110002,"category":"recommended","order":2,"hint":"Open your equipment and equip a weapon your class and level can use."},
+    {"id":2110003,"category":"recommended","order":3,"hint":"Defeat 2 Scarecrows near the village. For 2 RakingCats, head northeast of the starter village toward (340,550). Open the big map: amber boxes mark hunting areas for unfinished targets, not exact live monster positions. Carry small HP medicine."},
+    {"id":2110004,"category":"recommended","order":4,"hint":"Defeat 2 Omas near the village, then use your class's first skill: Fencing, FireBall, or Healing."},
+    {"id":2110005,"category":"recommended","order":5,"hint":"Head north from the starter village to Bichon city safe area at (328,264), map 0. Open the big map for the marked destination. The starter village safe area does not count. Progress updates on entering the city safe area; carry HP medicine for the journey."},
+    {"id":2110006,"category":"recommended","order":6,"hint":"Buy one basic HP or MP potion from a legitimate town merchant before leaving for the forest."},
+    {"id":2110007,"category":"recommended","order":7,"hint":"In the Bichon forest, defeat 4 Forest Yetis. Restock HP and class MP or Amulets first."},
+    {"id":2110008,"category":"recommended","order":8,"hint":"Defeat 2 Omas, practise your class skill, then report to the Board in Bichon Province (map 0, 334,259)."},
+    {"id":2120015,"category":"recommended","order":85,"hint":"After the forest report, open the Quest Diary for the level-15 growth reward and learn its class skill."},
+    {"id":2110009,"category":"recommended","order":9,"hint":"Use the legal entrance to the Cave Rescue area (D001); bring HP, MP, or Taoist Amulets."},
+    {"id":2110010,"category":"recommended","order":10,"hint":"In D001, defeat 4 Skeletons and keep enough healing supplies for the rescue route."},
+    {"id":2110011,"category":"recommended","order":11,"hint":"Defeat 3 Skeletons in D001 and practise Slaying, GreatFireBall, or SoulFireBall for your class."},
+    {"id":2110012,"category":"recommended","order":12,"hint":"Defeat 1 Skeleton in D001, finish the class practice, then return to the Board at map 0 (334,259)."},
+    {"id":2120020,"category":"recommended","order":125,"hint":"After the rescue report, claim the level-20 growth weapon from the Board in Bichon Province (map 0, 334,259)."},
+    {"id":2110013,"category":"recommended","order":13,"hint":"Enter the Dead Mine through its legal route to D401; pack HP and MP or Amulets before the mine."},
+    {"id":2110014,"category":"recommended","order":14,"hint":"At the D401 mine mouth, defeat 3 Zombie2 and 2 Zombie3; refresh supplies before continuing."},
+    {"id":2110015,"category":"recommended","order":15,"hint":"Defeat 1 Zombie2 in D401 and practise Thrusting, repositioned spell damage, or Poisoning with legal materials."},
+    {"id":2110016,"category":"recommended","order":16,"hint":"Defeat 3 Zombie3 in D401, complete your class combat practice, then report to the Board (map 0, 334,259)."},
+    {"id":2120025,"category":"recommended","order":165,"hint":"After the mine report, claim the level-25 armour and weapon growth reward from the Board at map 0 (334,259)."},
+    {"id":2110017,"category":"recommended","order":17,"hint":"At the Board in Bichon Province (map 0, 334,259), equip eligible class armour and complete the expedition preparation report."},
+    {"id":2110018,"category":"recommended","order":18,"hint":"Reach the Wooma entrance by its legal route in D021 and prepare HalfMoon, Lightning, or Taoist spell materials."},
+    {"id":2110019,"category":"recommended","order":19,"hint":"In the D022 outpost, defeat 3 Dungs; restock before moving deeper into Wooma territory."},
+    {"id":2110020,"category":"recommended","order":20,"hint":"In D022, defeat 3 Wooma Soldiers. Keep healing and class combat supplies ready."},
+    {"id":2110021,"category":"recommended","order":21,"hint":"Defeat 3 Wooma Fighters in D022 and complete the final class combat practice with your learned skills."},
+    {"id":2110022,"category":"recommended","order":22,"hint":"Return by the normal route and deliver the expedition report to the Board in Bichon Province (map 0, 334,259)."},
+    {"id":2120030,"category":"recommended","order":225,"hint":"After the final report, claim the level-30 growth reward from the Board in Bichon Province (map 0, 334,259)."}
+  ]
+}

@@ -488,6 +488,7 @@ impl SessionResource {
 pub(super) struct PlayerRuntimeResource {
     pub(super) player_position: Point,
     pub(super) player_direction: MirDirection,
+    pub(super) bind_point: Option<crate::config::CharacterBindPoint>,
     pub(super) player_vitals: PlayerVitals,
     pub(super) experience: i64,
     pub(super) max_experience: i64,
@@ -517,6 +518,10 @@ impl PlayerRuntimeResource {
         Self {
             player_position: config.spawn.clone(),
             player_direction: MirDirection::Down,
+            bind_point: Some(crate::config::CharacterBindPoint {
+                map_file_name: config.map.file_name.clone(),
+                position: config.spawn.clone(),
+            }),
             player_vitals: PlayerVitals {
                 hp: default_max_hp,
                 max_hp: default_max_hp,
@@ -625,11 +630,11 @@ impl DoorRegistry {
 pub(super) struct MapRuntimeResource {
     pub(super) current_map: MapInformation,
     pub(super) map_region_bounds: MapBounds,
-    pub(super) blocked_cells: BTreeSet<(i32, i32)>,
+    pub(super) blocked_cells: Arc<BTreeSet<(i32, i32)>>,
     pub(super) closed_door_cells: BTreeSet<(i32, i32)>,
     pub(super) doors: DoorRegistry,
     /// Cells flagged fishable in the `.map` file → their fishing attribute.
-    pub(super) fishing_cells: BTreeMap<(i32, i32), i8>,
+    pub(super) fishing_cells: Arc<BTreeMap<(i32, i32), i8>>,
     pub(super) conquest_wars: BTreeMap<i32, bool>,
     /// Conquest index → owning guild name (gates conquest movements).
     pub(super) conquest_owners: BTreeMap<i32, String>,
@@ -639,10 +644,10 @@ impl MapRuntimeResource {
     pub(super) fn new(
         config: &SimulationConfig,
         map_region_bounds: MapBounds,
-        blocked_cells: BTreeSet<(i32, i32)>,
+        blocked_cells: Arc<BTreeSet<(i32, i32)>>,
         closed_door_cells: BTreeSet<(i32, i32)>,
         doors: DoorRegistry,
-        fishing_cells: BTreeMap<(i32, i32), i8>,
+        fishing_cells: Arc<BTreeMap<(i32, i32), i8>>,
     ) -> Self {
         Self {
             current_map: config.map.clone(),
@@ -785,11 +790,23 @@ impl FishingResource {
 #[derive(Resource, Debug, Clone)]
 pub(super) struct QuestResource {
     pub(super) quests: Vec<QuestState>,
+    /// Cached once per simulation session. Environment changes never alter an
+    /// already running character's quest cadence/profile presentation.
+    pub(super) newcomer_v1_cadence: bool,
+    pub(super) newcomer_v2_cadence: bool,
 }
 
 impl QuestResource {
     pub(super) fn new() -> Self {
-        Self { quests: Vec::new() }
+        let newcomer_v1_cadence =
+            super::quests::quest_recurrence::server_newcomer_v1_enabled();
+        let newcomer_v2_cadence =
+            super::quests::quest_recurrence::server_newcomer_v2_enabled();
+        Self {
+            quests: Vec::new(),
+            newcomer_v1_cadence,
+            newcomer_v2_cadence,
+        }
     }
 }
 

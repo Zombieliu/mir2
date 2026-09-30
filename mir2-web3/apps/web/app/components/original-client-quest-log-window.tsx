@@ -12,6 +12,15 @@ import {
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
 import { classAwareObjectiveLine } from "../../lib/onboarding-guidance";
+import {
+  localizeNewcomerV2Text,
+  newcomerV2ChapterForQuest,
+  newcomerV2GraduationFor,
+  newcomerV2JourneyProgress,
+  type NewcomerV2ChapterProgress,
+  type NewcomerV2GraduationGoalKey,
+  type NewcomerV2JourneyProgress,
+} from "../../lib/newcomer-v2-journey";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import { SpriteButton } from "./original-client-overlays";
 
@@ -107,6 +116,8 @@ export type QuestLogWindowProps = {
    * aren't told to melee. Optional + defensive: absent → objective shown verbatim.
    */
   playerClass?: string | null;
+  /** Actual server-reported self level. Missing values deliberately hide graduation. */
+  playerLevel?: number | null;
 };
 
 type QuestStageFilter = "all" | QuestStage;
@@ -183,11 +194,14 @@ export function QuestLogWindow({
   canFinishQuest,
   onClose,
   playerClass,
+  playerLevel,
 }: QuestLogWindowProps) {
   const [stageFilter, setStageFilter] = useState<QuestStageFilter>("all");
   const [page, setPage] = useState(0);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [selectedRewards, setSelectedRewards] = useState<Record<number, number>>({});
+  const [selectedGraduationGoal, setSelectedGraduationGoal] =
+    useState<NewcomerV2GraduationGoalKey>("equipment");
   const [position, setPosition] = useState<QuestWindowPosition | null>(null);
   const windowRef = useRef<HTMLElement | null>(null);
   const dragRef = useRef<{
@@ -209,6 +223,11 @@ export function QuestLogWindow({
     currentPage * QUEST_LOG_ROWS_PER_PAGE,
     currentPage * QUEST_LOG_ROWS_PER_PAGE + QUEST_LOG_ROWS_PER_PAGE,
   );
+  const newcomerV2Journey = useMemo(() => newcomerV2JourneyProgress(quests), [quests]);
+  const newcomerV2Graduation = useMemo(
+    () => newcomerV2GraduationFor(quests, playerLevel, playerClass),
+    [playerClass, playerLevel, quests],
+  );
 
   const selected = useMemo(() => {
     if (selectedId !== null) {
@@ -219,6 +238,10 @@ export function QuestLogWindow({
     }
     return visible[0] ?? filtered[0] ?? null;
   }, [filtered, quests, selectedId, stageFilter, visible]);
+  const selectedNewcomerV2Chapter = selected ? newcomerV2ChapterForQuest(selected.questId) : null;
+  const selectedNewcomerV2Progress = selectedNewcomerV2Chapter && newcomerV2Journey
+    ? newcomerV2Journey.chapters.find((chapter) => chapter.id === selectedNewcomerV2Chapter.id) ?? null
+    : null;
   const selectedRewardIndex = selected ? selectedRewards[selected.questId] : undefined;
   const needsRewardSelection = Boolean(selected?.rewards?.selectItems?.length);
   const canAcceptSelected = Boolean(
@@ -235,9 +258,17 @@ export function QuestLogWindow({
       && (!canFinishQuest || canFinishQuest(selected.questId, selectedRewardIndex)),
   );
 
+  const graduationGoal = newcomerV2Graduation?.goals.find(
+    (goal) => goal.key === selectedGraduationGoal,
+  ) ?? null;
+
   useEffect(() => {
     setPage(0);
   }, [stageFilter]);
+
+  useEffect(() => {
+    setSelectedGraduationGoal("equipment");
+  }, [playerClass, playerLevel]);
 
   useEffect(() => {
     if (page > pageCount - 1) {
@@ -381,7 +412,14 @@ export function QuestLogWindow({
         <span style={style.titleText}>{t("ui.quest", [], "Quest Log")}</span>
       </div>
       <div style={style.close}>
-        <SpriteButton sprite={FRAME.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
+        <SpriteButton
+          sprite={FRAME.closeButton}
+          label={t("ui.close", [], "Close")}
+          onClick={() => {
+            setSelectedGraduationGoal("equipment");
+            onClose();
+          }}
+        />
       </div>
       <div style={style.help}>
         <SpriteButton sprite={FRAME.helpButton} label={t("ui.help", [], "Help")} onClick={() => undefined} />
@@ -452,10 +490,29 @@ export function QuestLogWindow({
         />
       </div>
 
+      {newcomerV2Journey ? (
+        <div
+          style={style.newcomerV2Journey}
+          data-testid="newcomer-v2-journey-progress"
+          data-newcomer-v2-current-chapter={newcomerV2Journey.currentChapter?.id ?? ""}
+          title={newcomerV2JourneyTooltip(newcomerV2Journey, t)}
+        >
+          {newcomerV2JourneyLabel(newcomerV2Journey, t)}
+        </div>
+      ) : null}
+
       <div style={style.detail} data-quest-detail={selected?.questId ?? ""}>
         {selected ? (
           <>
             <div style={style.detailTitle}>{selected.title}</div>
+            {selectedNewcomerV2Chapter && selectedNewcomerV2Progress ? (
+              <div
+                style={style.newcomerV2Chapter}
+                data-newcomer-v2-chapter={selectedNewcomerV2Chapter.id}
+              >
+                {newcomerV2ChapterLabel(selectedNewcomerV2Progress, t)}
+              </div>
+            ) : null}
             <div style={style.detailStageRow}>
               <span style={{ ...style.detailStageTag, color: stageColor(selected.stage) }}>
                 {stageLabel(t, selected.stage)}
@@ -542,6 +599,33 @@ export function QuestLogWindow({
         ) : (
           <div style={style.empty}>{t("ui.questSelectHint", [], "Select a quest to view details.")}</div>
         )}
+        {newcomerV2Graduation && graduationGoal ? (
+          <div style={style.graduation} data-testid="newcomer-graduation">
+            <div style={style.graduationTitle}>{newcomerV2Graduation.title}</div>
+            <div style={style.graduationChoices} role="group" aria-label={newcomerV2Graduation.title}>
+              {newcomerV2Graduation.goals.map((goal) => {
+                const selectedGoal = goal.key === selectedGraduationGoal;
+                return (
+                  <button
+                    key={goal.key}
+                    type="button"
+                    data-testid={`newcomer-graduation-${goal.key}`}
+                    aria-pressed={selectedGoal}
+                    onClick={() => setSelectedGraduationGoal(goal.key)}
+                    style={{ ...style.graduationButton, ...(selectedGoal ? style.graduationButtonSelected : null) }}
+                  >
+                    {goal.label}
+                  </button>
+                );
+              })}
+            </div>
+            <div style={style.graduationGoal} data-testid="newcomer-graduation-goal">
+              <strong>{graduationGoal.title}</strong>
+              <span>{graduationGoal.requirements}</span>
+              <span>{graduationGoal.normalAcquisition}</span>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div style={style.actions}>
@@ -621,6 +705,54 @@ export function QuestLogWindow({
       </div>
     </section>
   );
+}
+
+function newcomerV2JourneyLabel(
+  journey: NewcomerV2JourneyProgress,
+  t: TranslateFn,
+): string {
+  const label = localizeNewcomerV2Text({ en: "Journey", zhCN: "旅程" }, t);
+  const total = journey.chapters.reduce((count, chapter) => count + chapter.questIds.length, 0);
+  if (journey.currentChapter) {
+    const chapter = journey.currentChapter;
+    return `${label} ${chapter.number}/6 · ${journey.completedRecordedQuestCount}/${total}`;
+  }
+  return `${label} ${journey.completedRecordedQuestCount}/${total}`;
+}
+
+function newcomerV2JourneyTooltip(
+  journey: NewcomerV2JourneyProgress,
+  t: TranslateFn,
+): string {
+  const journeyTitle = localizeNewcomerV2Text(
+    { en: "Newcomer Journey", zhCN: "新手旅程" },
+    t,
+  );
+  const total = journey.chapters.reduce((count, chapter) => count + chapter.questIds.length, 0);
+  const progress = localizeNewcomerV2Text({
+    en: `${journey.completedRecordedQuestCount}/${total} quests completed`,
+    zhCN: `已完成 ${journey.completedRecordedQuestCount}/${total} 项任务`,
+  }, t);
+  if (journey.currentChapter) {
+    const chapter = journey.currentChapter;
+    return `${journeyTitle}: ${localizeNewcomerV2Text({ en: "Chapter", zhCN: "章节" }, t)} ${chapter.number}/6 · ${localizeNewcomerV2Text(chapter.title, t)} · ${progress}`;
+  }
+  return `${journeyTitle}: ${progress}`;
+}
+
+function newcomerV2ChapterLabel(
+  chapter: NewcomerV2ChapterProgress,
+  t: TranslateFn,
+): string {
+  const chapterTitle = localizeNewcomerV2Text(chapter.title, t);
+  const recordLabel = localizeNewcomerV2Text(
+    {
+      en: `${chapter.completedRecordedQuestCount}/${chapter.questIds.length} completed`,
+      zhCN: `已完成 ${chapter.completedRecordedQuestCount}/${chapter.questIds.length}`,
+    },
+    t,
+  );
+  return `${localizeNewcomerV2Text({ en: "Chapter", zhCN: "章节" }, t)} ${chapter.number}/6 · ${chapterTitle} · ${recordLabel}`;
 }
 
 function QuestRewardView({
@@ -899,6 +1031,18 @@ const style: Record<string, CSSProperties> = {
     lineHeight: "16px",
   },
   pageNext: { position: "absolute", left: 214, top: 256 },
+  newcomerV2Journey: {
+    position: "absolute",
+    left: 10,
+    top: 256,
+    width: 116,
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+    color: "#d7bd7a",
+    fontSize: 9,
+    lineHeight: "16px",
+  },
   detail: {
     position: "absolute",
     left: 10,
@@ -913,6 +1057,7 @@ const style: Record<string, CSSProperties> = {
     padding: "6px 8px",
   },
   detailTitle: { color: "#f8e6bb", fontSize: 12, fontWeight: 700, marginBottom: 2 },
+  newcomerV2Chapter: { color: "#d7bd7a", fontSize: 9, marginBottom: 3, lineHeight: "12px" },
   detailStageRow: { display: "flex", gap: 8, alignItems: "baseline", marginBottom: 3, flexWrap: "wrap" },
   detailStageTag: { fontSize: 10, fontWeight: 700 },
   detailTracker: { fontSize: 10, color: "#b7a884" },
@@ -927,6 +1072,25 @@ const style: Record<string, CSSProperties> = {
   objectiveTextDone: { color: "#9c8d6f", textDecoration: "line-through" },
   objectiveCount: { flex: "0 0 auto", fontSize: 10, color: "#cbb38a" },
   detailReturn: { fontSize: 10, color: "#b7a884", marginBottom: 4 },
+  graduation: {
+    margin: "4px 0",
+    padding: "4px",
+    border: "1px solid rgba(214, 180, 110, 0.38)",
+    background: "rgba(49, 32, 13, 0.36)",
+  },
+  graduationTitle: { color: "#e6c979", fontSize: 10, fontWeight: 700, marginBottom: 3 },
+  graduationChoices: { display: "flex", gap: 3, marginBottom: 3 },
+  graduationButton: {
+    flex: 1,
+    border: "1px solid rgba(190, 157, 99, 0.5)",
+    background: "rgba(21, 13, 6, 0.65)",
+    color: "#d6c6a5",
+    fontSize: 9,
+    padding: "2px 1px",
+    cursor: "pointer",
+  },
+  graduationButtonSelected: { borderColor: "#f2d278", color: "#f8e6bb" },
+  graduationGoal: { display: "flex", flexDirection: "column", gap: 1, fontSize: 9, lineHeight: 1.25, color: "#cbb38a" },
   progressRow: { display: "flex", justifyContent: "space-between", fontSize: 10, color: "#cbb38a", marginBottom: 2 },
   progressTrack: {
     position: "relative",

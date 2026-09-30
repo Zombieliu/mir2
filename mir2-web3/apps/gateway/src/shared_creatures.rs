@@ -8,11 +8,24 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(key) = self.current_presence_key() else {
             return vec![];
         };
+        let creature = self.inner.active_intelligent_creature_snapshot();
+        if creature.is_none() {
+            // The common no-pet path must still synchronize `None`: a prior
+            // actor can remain in the Zone after unsummon/logout state changes.
+            // The Zone ignores candidates, group and map policy when the
+            // creature is absent, so avoid constructing their full snapshots.
+            let mut state = self.zone_state.lock().expect("shared zone presence mutex");
+            let outbounds = state.zone_manager.sync_intelligent_creature(
+                &session_id,
+                None,
+                BTreeSet::new(),
+                Vec::new(),
+                true,
+                Self::zone_now_ms(),
+            );
+            return state.dispatch_zone_outbounds(outbounds, Some(&key)).0;
+        }
         let snapshot = self.inner.world_snapshot();
-        let creature = snapshot
-            .stage5_systems
-            .active_intelligent_creature()
-            .cloned();
         self.sync_current_shared_ground_drops_to_zone(&session_id);
         let map_allows = self.inner.shared_intelligent_creature_map_allowed();
         let candidates = self

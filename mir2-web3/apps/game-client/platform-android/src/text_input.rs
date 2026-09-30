@@ -1,7 +1,7 @@
 //! OS input edits target only the currently focused shared draft.
 use mir2_client_bevy::native_shell::{
     ChangePasswordFocus, CharacterCreateFocus, LoginFocus, NativeShellModel,
-    NativeShellScreen as Screen,
+    NativeShellScreen as Screen, RegistrationFocus,
 };
 
 pub fn is_multiline_editor(field: &str) -> bool {
@@ -17,6 +17,24 @@ pub fn shell_field(model: &NativeShellModel) -> Option<(&'static str, &str, bool
         },
         Screen::CharacterCreate if model.character_create.focus == CharacterCreateFocus::Name => {
             Some(("character-name", &model.character_create.name, false))
+        }
+        Screen::Registration if !model.register_request_in_flight => {
+            let form = &model.registration;
+            match form.focus {
+                RegistrationFocus::AccountId => Some(("register-account", &form.account_id, false)),
+                RegistrationFocus::Password => Some(("register-password", &form.password, true)),
+                RegistrationFocus::ConfirmPassword => {
+                    Some(("register-confirm", &form.confirm_password, true))
+                }
+                RegistrationFocus::UserName => Some(("register-name", &form.user_name, false)),
+                RegistrationFocus::BirthDate => Some(("register-date", &form.birth_date, false)),
+                RegistrationFocus::SecretQuestion => {
+                    Some(("register-question", &form.secret_question, true))
+                }
+                RegistrationFocus::SecretAnswer => Some(("register-answer", &form.secret_answer, true)),
+                RegistrationFocus::EmailAddress => Some(("register-email", &form.email_address, false)),
+                RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => None,
+            }
         }
         Screen::ChangePassword => match model.change_password.focus {
             ChangePasswordFocus::AccountId => {
@@ -51,6 +69,14 @@ pub fn edit_shell(model: &mut NativeShellModel, field: &str, text: &str) {
         "old-password" => (&mut model.change_password.old_password, 15, true),
         "new-password" => (&mut model.change_password.new_password, 15, true),
         "confirm-password" => (&mut model.change_password.confirm_password, 15, true),
+        "register-account" => (&mut model.registration.account_id, 15, true),
+        "register-password" => (&mut model.registration.password, 15, true),
+        "register-confirm" => (&mut model.registration.confirm_password, 15, true),
+        "register-name" => (&mut model.registration.user_name, 20, false),
+        "register-date" => (&mut model.registration.birth_date, 10, false),
+        "register-question" => (&mut model.registration.secret_question, 30, false),
+        "register-answer" => (&mut model.registration.secret_answer, 30, false),
+        "register-email" => (&mut model.registration.email_address, 50, false),
         _ => return,
     };
     target.clear();
@@ -58,7 +84,9 @@ pub fn edit_shell(model: &mut NativeShellModel, field: &str, text: &str) {
         use mir2_client_bevy::native_shell_ui::{
             append_alphanumeric_field, append_editable_field, append_name_field,
         };
-        if field == "character-name" {
+        if field == "register-date" && !(c.is_ascii_digit() || c == '-') {
+            continue;
+        } else if field == "character-name" {
             append_name_field(target, c, max);
         } else if alphanumeric {
             append_alphanumeric_field(target, c, max);
@@ -106,6 +134,24 @@ mod tests {
         assert_eq!(shell_field(&model).unwrap().2, true);
         edit_shell(&mut model, "new-password", "12345678901234567890@");
         assert_eq!(model.change_password.new_password, "123456789012345");
+    }
+
+    #[test]
+    fn registration_ime_is_bounded_private_and_rejects_stale_edits() {
+        let mut model = NativeShellModel::default();
+        model.screen = Screen::Registration;
+        model.registration.focus = RegistrationFocus::Password;
+        assert!(shell_field(&model).unwrap().2);
+        edit_shell(&mut model, "register-password", "12345678901234567890@");
+        assert_eq!(model.registration.password, "123456789012345");
+        model.registration.focus = RegistrationFocus::BirthDate;
+        edit_shell(&mut model, "register-password", "stale");
+        edit_shell(&mut model, "register-date", "2026-10-01xxx");
+        assert_eq!(model.registration.birth_date, "2026-10-01");
+        assert_eq!(model.registration.password, "123456789012345");
+        model.register_request_in_flight = true;
+        edit_shell(&mut model, "register-date", "1990-01-01");
+        assert_eq!(model.registration.birth_date, "2026-10-01");
     }
 
     #[test]

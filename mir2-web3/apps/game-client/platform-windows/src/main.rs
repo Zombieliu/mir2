@@ -6,11 +6,17 @@
 //! the Gateway; this crate only owns window/lifecycle/input hosting and forwards
 //! world snapshots into the shared runtime.
 
+#![cfg_attr(
+    all(target_os = "windows", not(debug_assertions), not(test)),
+    windows_subsystem = "windows"
+)]
+
 use bevy::prelude::IntoScheduleConfigs;
-use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
+use mir2_bevy_runtime::{RuntimeWindowSpec, build_runtime_app};
 
 mod assets;
 mod atlas;
+mod branding;
 mod capture;
 mod clipboard;
 mod cursor;
@@ -25,13 +31,18 @@ mod gateway;
 mod hero_pointer_settings;
 mod hero_wire;
 mod input;
+mod lifecycle;
 mod map_parser;
 mod movement_trace;
+mod native_fonts;
+mod native_locale;
 mod native_protocol;
 mod session_config;
 mod shell_bridge;
 mod social_bond_wire;
+mod startup_diagnostics;
 mod timing;
+mod window_sizing;
 
 /// Whether an effect frame PNG (a web path like /original-effects/Magic/0.png)
 /// exists under the native asset root. Used by effects.rs so a missing asset
@@ -77,15 +88,21 @@ fn report_r2_progress_via_chat(
     let has_full = assets::has_local_full();
     let is_remote_active = r2 > 0 || cached_files > 0;
     let msg = if has_full {
-        format!("[Assets] Local {local} / Remote {r2} -- Full index + local map pack found (cache {cached_files} entries)")
+        format!(
+            "[Assets] Local {local} / Remote {r2} -- Full index + local map pack found (cache {cached_files} entries)"
+        )
     } else if !is_remote_active {
-        format!("[Assets] Local {local} / Remote 0 -- Starter only, Bichon town needs full/R2 (cache {cached_files} files)")
+        format!(
+            "[Assets] Local {local} / Remote 0 -- Starter only, Bichon town needs full/R2 (cache {cached_files} files)"
+        )
     } else if r2 == 0 && cached_files > 0 {
         format!(
             "[Assets] Local {local} / Remote 0 (cache {cached_files} files ready, no new R2 fetch)"
         )
     } else if r2 > 0 && local > 0 {
-        format!("[Assets] Local {local} / Remote {r2} (cache {cached_files} files) -- town tiles streaming from R2, first flash then local")
+        format!(
+            "[Assets] Local {local} / Remote {r2} (cache {cached_files} files) -- town tiles streaming from R2, first flash then local"
+        )
     } else {
         format!(
             "[Assets] Remote {r2} / Local {local}, cache {cached_files} files -- streaming town"
@@ -109,19 +126,38 @@ fn report_r2_progress_via_chat(
     reporter.last_r2 = r2;
 }
 
-fn main() {
+fn main() -> bevy::app::AppExit {
+    native_locale::initialize();
+    startup_diagnostics::initialize();
+    console_error_panic_hook::set_once();
+    startup_diagnostics::install_panic_hook();
+    match std::panic::catch_unwind(run_native_client) {
+        Ok(exit) => exit,
+        Err(_) => {
+            startup_diagnostics::report_failure(startup_diagnostics::Failure::Panic, 101);
+            bevy::app::AppExit::Error(
+                std::num::NonZeroU8::new(101).expect("nonzero panic exit code"),
+            )
+        }
+    }
+}
+
+fn run_native_client() -> bevy::app::AppExit {
     timing::initialize();
     let config_started = std::time::Instant::now();
-    console_error_panic_hook::set_once();
     movement_trace::initialize();
 
     let session = session_config::NativeSessionConfig::load(gateway::LOCAL_GATEWAY_WS_URL)
         .unwrap_or_else(|error| {
-            eprintln!("[platform-windows] configuration error: {error}");
-            std::process::exit(2);
+            // Keep the diagnostic launcher's failure marker without echoing a
+            // TOML parser excerpt or credential value to redirected output.
+            eprintln!("[platform-windows] configuration error: startup validation failed");
+            startup_diagnostics::fatal_exit(startup_diagnostics::configuration_failure(&error), 2);
         });
 
     timing::report("configuration", config_started);
+    map_parser::lighting::configure_force_daylight(session.force_daylight);
+    eprintln!("[display] force_daylight={}", session.force_daylight);
     let assets_started = std::time::Instant::now();
     // Cross-thread channels: Bevy owns visible UI state on the main thread; one
     // async task exclusively owns the WebSocket.
@@ -137,7 +173,7 @@ fn main() {
     // `bevy-entity-atlases/...` live).
     let asset_root = assets::require_asset_root().unwrap_or_else(|error| {
         eprintln!("[platform-windows] FATAL: {error}");
-        std::process::exit(1);
+        startup_diagnostics::fatal_exit(startup_diagnostics::Failure::Assets, 1);
     });
     let diag = assets::diagnose_asset_root(&asset_root);
     eprintln!(
@@ -157,24 +193,53 @@ fn main() {
             "[platform-windows] FATAL: Bichon map layout 0.map.gz could not be decoded under {}. Repair the map pack before launching.",
             asset_root.display()
         );
-        std::process::exit(1);
+        startup_diagnostics::fatal_exit(startup_diagnostics::Failure::MapLayout, 1);
     }
     if let Some(map_path) = assets::crystal_map_path(&asset_root, "0") {
         eprintln!("[platform-windows] map_layout={}", map_path.display());
     }
     eprintln!(
         "[platform-windows] gateway_url={} window={}x{}",
-        session.gateway_url, session.window_width, session.window_height
+        session.gateway_url,
+        session_config::DEFAULT_WINDOW_WIDTH,
+        session_config::DEFAULT_WINDOW_HEIGHT
     );
     timing::report("asset_validation_and_map_decode", assets_started);
     let app_started = std::time::Instant::now();
     let mut app = build_runtime_app(RuntimeWindowSpec {
         asset_root: asset_root.to_string_lossy().into_owned(),
-        width: session.window_width,
-        height: session.window_height,
-        ..RuntimeWindowSpec::native("mir2-web3 (native)")
+        width: session_config::DEFAULT_WINDOW_WIDTH,
+        height: session_config::DEFAULT_WINDOW_HEIGHT,
+        close_when_requested: false,
+        ..RuntimeWindowSpec::native(branding::PRODUCT_NAME)
     });
+    // Apply the physical-pixel policy before Winit creates the window; logical
+    // min/max constraints would otherwise be multiplied by the OS DPI scale.
+    let world = app.world_mut();
+    for mut window in world.query::<&mut bevy::window::Window>().iter_mut(world) {
+        window_sizing::configure(&mut window);
+    }
+    app.add_systems(bevy::app::Update, branding::apply_window_icon);
+        app.add_systems(bevy::app::Update, window_sizing::keep_pixel_viewport);
+    app.add_systems(bevy::app::PostUpdate, lifecycle::handle_close_requests);
+    app.add_systems(
+        bevy::app::Last,
+        lifecycle::record_exit_events.after(bevy::window::ExitSystems),
+    );
+    // Persist the matching server's presentation profile in the package, so
+    // opening the EXE directly also enables Diary accept/finish actions.
+    let guidance = session.quest_guidance.as_deref().map_or_else(
+        mir2_client_bevy::quest_guidance::QuestGuidance::from_environment,
+        mir2_client_bevy::quest_guidance::QuestGuidance::from_profile_name,
+    );
+    app.insert_resource(
+        mir2_client_bevy::quest_journey::NewcomerJourneyCatalog::from_guidance(&guidance),
+    );
+    app.insert_resource(guidance);
     timing::report("build_runtime_app", app_started);
+    native_fonts::install(&mut app);
+    native_locale::install(&mut app);
+    app.add_plugins(mir2_client_bevy::native_i18n::NativeI18nPlugin);
     app.world_mut()
         .resource_mut::<mir2_bevy_runtime::PresentationPoseBuffer>()
         .set_native_consumer_enabled(true);
@@ -189,6 +254,12 @@ fn main() {
     // built so the runtime's native ingestion channel is registered; the runtime
     // drains it once `app.run()` starts.
     let _ = atlas::load_starter_entity_atlas();
+    if std::env::var("MIR2_NATIVE_SOAK_METRICS")
+        .map(|value| value.trim() == "1")
+        .unwrap_or(false)
+    {
+        app.add_systems(bevy::app::Update, atlas::emit_native_atlas_soak_metrics);
+    }
     if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
         app.init_resource::<atlas::NativeRenderTrace>();
         app.add_systems(bevy::app::Update, atlas::trace_rendered_entity_sprites);
@@ -200,6 +271,20 @@ fn main() {
     // character creation, connection errors, and the transition into the game.
     app.insert_resource(mir2_client_bevy::crystal_ui::overlays::keyboard_dialog::host::KeyboardHost::from_environment());
     app.insert_resource(hero_pointer_settings::load());
+    app.insert_resource(
+        mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::PreviewGeometry(
+            |library, frame| {
+                atlas::native_frame_geometry(library, i64::from(frame)).map(|frame| {
+                    mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::PreviewFrame {
+                        width: frame.width as f32,
+                        height: frame.height as f32,
+                        x: frame.offset_x as f32,
+                        y: frame.offset_y as f32,
+                    }
+                })
+            },
+        ),
+    );
     app.add_plugins(mir2_client_bevy::native_shell_ui::Mir2NativeShellUiPlugin);
     // Native-only Crystal presentation consumes the existing authoritative
     // read models. It is registered only by this Windows host; Web/WASM keeps
@@ -232,6 +317,7 @@ fn main() {
     app.init_resource::<entity_health::MonsterHealthState>();
     app.init_resource::<effects::NativeEffects>();
     app.init_resource::<input::WorldPointerMovementState>();
+    app.init_resource::<input::NativeModifierState>();
     app.insert_resource(shell_bridge::NativeAutoLoginFlow::from_config(
         session.auto_login.as_ref(),
     ));
@@ -246,6 +332,7 @@ fn main() {
     app.add_systems(
         bevy::app::PreUpdate,
         (
+            input::sync_native_modifier_state,
             shell_bridge::drain_gateway_events,
             gameplay_bridge::drain_gameplay_events,
             entity_presentation::tick_native_entity_presentation,
@@ -254,6 +341,7 @@ fn main() {
             input::keyboard_movement_system,
         )
             .chain()
+            .in_set(mir2_bevy_runtime::NativeMotionProducerSet)
             .after(bevy::input::InputSystems),
     );
     app.add_systems(
@@ -321,7 +409,10 @@ fn main() {
         },
     );
 
-    let gateway_runtime = tokio::runtime::Runtime::new().expect("tokio runtime");
+    let gateway_runtime = tokio::runtime::Runtime::new().unwrap_or_else(|error| {
+        eprintln!("[platform-windows] network runtime initialization failed: {error}");
+        startup_diagnostics::fatal_exit(startup_diagnostics::Failure::NetworkRuntime, 1);
+    });
     let gateway_url = session.gateway_url;
     let gateway_task = gateway_runtime.spawn(async move {
         match gateway::run_gateway_client(
@@ -342,9 +433,20 @@ fn main() {
     // tokio runtime in the background and pushes snapshots into the runtime
     // channel. The runtime handle stays alive until the window closes.
     timing::milestone("enter_event_loop");
-    app.run();
-
+    let exit = app.run();
+    eprintln!("[native-lifecycle] event_loop_returned exit={exit:?}");
+    let exit_code = match &exit {
+        bevy::app::AppExit::Success => 0,
+        bevy::app::AppExit::Error(code) => code.get(),
+    };
+    startup_diagnostics::record_exit(exit_code);
     // Best-effort: drop the gateway task after the window closes.
     let _ = command_tx.send(gateway::GatewayCommand::Shutdown);
     let _ = gateway_task.abort();
+    if exit_code != 0 {
+        startup_diagnostics::report_failure(startup_diagnostics::Failure::EventLoop, exit_code);
+    }
+    // Preserve renderer/event-loop failures for the diagnostic launcher.
+    // Returning unit previously reported OS success even for AppExit::Error.
+    exit
 }

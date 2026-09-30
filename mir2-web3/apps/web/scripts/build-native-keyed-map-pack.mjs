@@ -177,7 +177,7 @@ export function mapAtlasPathRequiresAlphaKey(value) {
     const normalized = new URL(value, "https://mir2.invalid/").pathname;
     return (
       normalized.startsWith("/original-map/") &&
-      /\/(?:objects(?:_32bit|\d*)?|smobjects\d*|furnitures?c?|walls?c?|animations?c?|houses?c?|cliffs?c?|dungeons?c?|inners?c?|object[12]c)\//i.test(
+      /\/(?:objects(?:_32bit|\d*)?|smobjects(?:\d*|c(?:wood|sand|snow|forest)?)|furnitures?c?|walls?c?|animations?c?|houses?c?|cliffs?c?|dungeons?c?|inners?c?|object[12]c)\//i.test(
         normalized,
       )
     );

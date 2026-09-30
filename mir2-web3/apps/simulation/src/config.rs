@@ -15,6 +15,7 @@ use std::os::windows::ffi::OsStrExt;
 use mir2_game_data::{
     content_profile_experience_required, content_profile_monster_is_boss,
     content_profile_respawn_overrides_for_map, crystal_map_respawns_by_file_name,
+    crystal_monster_by_name,
     crystal_respawn_manifest, platinum_176_profile, platinum_176_profile_bundle,
     starter_map_collision, starter_scene, validate_content_profile, ContentProfile,
     ContentSkillRule, CrystalItemTemplate, CrystalRespawnTemplate, DecorObjectTemplate, MapBounds,
@@ -28,6 +29,99 @@ use postgres::{Client, Config as PostgresClientConfig, NoTls, Transaction};
 use rand_core::{OsRng, RngCore};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+
+const NEWCOMER_V2_CONFIG_JSON: &str =
+    include_str!("../../../config/quest-guidance/newcomer-journey-v2.json");
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct NewcomerV2TrainingSpawn {
+    map_file_name: String,
+    monster: String,
+    #[serde(default)]
+    monster_index: Option<i32>,
+    position: Point,
+    count: u16,
+    spread: u16,
+    delay_minutes: u16,
+    respawn_index: i32,
+    #[serde(default)]
+    max_hp: Option<i32>,
+}
+
+#[derive(Debug, Clone, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+struct NewcomerV2TrainingConfig {
+    #[serde(default)]
+    training_spawns: Vec<NewcomerV2TrainingSpawn>,
+}
+
+fn newcomer_v2_training_respawns_for_map(map_file_name: &str) -> Vec<CrystalRespawnTemplate> {
+    if !env::var("MIR2_QUEST_CADENCE")
+        .is_ok_and(|value| value.trim().eq_ignore_ascii_case("newcomer-v2"))
+    {
+        return Vec::new();
+    }
+    static TRAINING_SPAWNS: OnceLock<Vec<CrystalRespawnTemplate>> = OnceLock::new();
+    TRAINING_SPAWNS
+        .get_or_init(|| {
+            let Ok(config) = serde_json::from_str::<NewcomerV2TrainingConfig>(NEWCOMER_V2_CONFIG_JSON)
+            else {
+                return Vec::new();
+            };
+            let mut ids = BTreeSet::new();
+            config
+                .training_spawns
+                .into_iter()
+                .filter(|spawn| {
+                    spawn.map_file_name.eq_ignore_ascii_case("D022")
+                        && (1..=3).contains(&spawn.count)
+                        && spawn.spread <= 8
+                        && spawn.respawn_index > 0
+                        && ids.insert(spawn.respawn_index)
+                })
+                .filter_map(|spawn| {
+                    let monster = crystal_monster_by_name(&spawn.monster)?;
+                    if spawn.monster_index.is_some_and(|index| index != monster.monster_index) {
+                        return None;
+                    }
+                    Some(CrystalRespawnTemplate {
+                        monster_index: monster.monster_index,
+                        location: spawn.position,
+                        count: spawn.count,
+                        spread: spawn.spread,
+                        delay_minutes: spawn.delay_minutes,
+                        direction: MirDirection::Up,
+                        route_path: None,
+                        random_delay_minutes: 0,
+                        respawn_index: spawn.respawn_index,
+                        save_respawn_time: false,
+                        respawn_ticks: 0,
+                        monster_name: monster.name,
+                        monster_image: monster.image,
+                        monster_ai: monster.ai,
+                        monster_view_range: monster.view_range,
+                        monster_hp: spawn
+                            .max_hp
+                            .filter(|hp| *hp > 0 && *hp <= monster.hp)
+                            .unwrap_or(monster.hp),
+                        monster_attack_speed: monster.attack_speed,
+                        monster_move_speed: monster.move_speed,
+                        monster_can_push: monster.can_push,
+                        monster_can_tame: monster.can_tame,
+                        monster_auto_rev: monster.auto_rev,
+                        monster_undead: monster.undead,
+                        monster_agility: monster.agility,
+                        route: Vec::new(),
+                    })
+                })
+                .collect()
+        })
+        .iter()
+        .filter(|spawn| map_file_name.eq_ignore_ascii_case("D022") && spawn.location.x >= 0 && spawn.location.y >= 0)
+        .cloned()
+        .collect()
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
@@ -1672,6 +1766,10 @@ pub struct CharacterSaveRecord {
     pub map_title: String,
     pub position: Point,
     pub direction: MirDirection,
+    /// Crystal `BindMapIndex`/`BindLocation`: updated on entering a safe zone.
+    /// Legacy saves fall back to the configured starting safe zone.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bind_point: Option<CharacterBindPoint>,
     pub hp: i32,
     pub max_hp: i32,
     pub mp: i32,
@@ -1740,6 +1838,12 @@ pub struct CharacterSaveRecord {
     pub stage5_systems_json: Option<String>,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CharacterBindPoint {
+    pub map_file_name: String,
+    pub position: Point,
+}
+
 pub fn crystal_base_vitals(class: MirClass, level: u16) -> (i32, i32) {
     let level = f32::from(level);
     let hp = match class {
@@ -1769,6 +1873,7 @@ impl CharacterSaveRecord {
             map_title: String::new(),
             position: Point { x: 0, y: 0 },
             direction: MirDirection::Down,
+            bind_point: None,
             hp: max_hp,
             max_hp,
             mp,
@@ -3448,10 +3553,24 @@ impl ContentProfileRuntime {
         let mut respawns = crystal_map_respawns_by_file_name(map_file_name)
             .map(|map| map.respawns)
             .unwrap_or_default();
+        // The V2 newcomer route enters D022 at level 26. Its authored
+        // small practice groups are not usable when each imported
+        // wide-spread Crystal group contributes dozens of roaming hostiles to
+        // the same entrance. Keep every original group and its stats/timing,
+        // but use one actor per group only in this opt-in onboarding profile.
+        if map_file_name.eq_ignore_ascii_case("D022")
+            && env::var("MIR2_QUEST_CADENCE")
+                .is_ok_and(|value| value.trim().eq_ignore_ascii_case("newcomer-v2"))
+        {
+            for spawn in &mut respawns {
+                spawn.count = spawn.count.min(1);
+            }
+        }
         respawns.extend(content_profile_respawn_overrides_for_map(
             &self.profile,
             map_file_name,
         ));
+        respawns.extend(newcomer_v2_training_respawns_for_map(map_file_name));
         respawns
     }
 

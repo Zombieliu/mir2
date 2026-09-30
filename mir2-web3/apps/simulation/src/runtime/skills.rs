@@ -901,7 +901,7 @@ fn crystal_spell_map_restrictions_allow(world: &World, spell: Spell) -> bool {
     }
 }
 
-fn crystal_spell_required_items_available(world: &World, spell: Spell) -> bool {
+pub(super) fn crystal_spell_required_items_available(world: &World, spell: Spell) -> bool {
     match spell {
         Spell::SoulFireBall
         | Spell::Hiding

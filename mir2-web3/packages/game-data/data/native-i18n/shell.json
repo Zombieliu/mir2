@@ -1,0 +1,1335 @@
+{
+  "entries": [
+    {
+      "key": "shell.login",
+      "en": "Login",
+      "zh-TW": "登入",
+      "pt-BR": "Entrar",
+      "aliases": []
+    },
+    {
+      "key": "shell.new_account",
+      "en": "New Account",
+      "zh-TW": "建立帳號",
+      "pt-BR": "Criar conta",
+      "aliases": []
+    },
+    {
+      "key": "shell.change_password",
+      "en": "Change Password",
+      "zh-TW": "變更密碼",
+      "pt-BR": "Alterar senha",
+      "aliases": []
+    },
+    {
+      "key": "shell.safe_key",
+      "en": "Safe Key",
+      "zh-TW": "安全鍵盤",
+      "pt-BR": "Teclado seguro",
+      "aliases": []
+    },
+    {
+      "key": "shell.cancel",
+      "en": "Cancel",
+      "zh-TW": "取消",
+      "pt-BR": "Cancelar",
+      "aliases": []
+    },
+    {
+      "key": "shell.ok",
+      "en": "OK",
+      "zh-TW": "確定",
+      "pt-BR": "OK",
+      "aliases": []
+    },
+    {
+      "key": "shell.start",
+      "en": "Start",
+      "zh-TW": "開始",
+      "pt-BR": "Iniciar",
+      "aliases": []
+    },
+    {
+      "key": "shell.create",
+      "en": "Create",
+      "zh-TW": "建立",
+      "pt-BR": "Criar",
+      "aliases": []
+    },
+    {
+      "key": "shell.delete",
+      "en": "Delete",
+      "zh-TW": "刪除",
+      "pt-BR": "Excluir",
+      "aliases": []
+    },
+    {
+      "key": "shell.exit",
+      "en": "Exit",
+      "zh-TW": "離開",
+      "pt-BR": "Sair",
+      "aliases": []
+    },
+    {
+      "key": "shell.credits",
+      "en": "Credits",
+      "zh-TW": "製作名單",
+      "pt-BR": "Créditos",
+      "aliases": []
+    },
+    {
+      "key": "shell.retry",
+      "en": "Retry",
+      "zh-TW": "重試",
+      "pt-BR": "Tentar novamente",
+      "aliases": []
+    },
+    {
+      "key": "shell.esc",
+      "en": "Esc",
+      "zh-TW": "返回",
+      "pt-BR": "Voltar",
+      "aliases": []
+    },
+    {
+      "key": "shell.enter",
+      "en": "Enter",
+      "zh-TW": "確認",
+      "pt-BR": "Confirmar",
+      "aliases": []
+    },
+    {
+      "key": "shell.random",
+      "en": "Random",
+      "zh-TW": "重排",
+      "pt-BR": "Embaralhar",
+      "aliases": []
+    },
+    {
+      "key": "shell.account",
+      "en": "Account",
+      "zh-TW": "帳號",
+      "pt-BR": "Conta",
+      "aliases": []
+    },
+    {
+      "key": "shell.password",
+      "en": "Password",
+      "zh-TW": "密碼",
+      "pt-BR": "Senha",
+      "aliases": []
+    },
+    {
+      "key": "shell.current_password",
+      "en": "Current Password",
+      "zh-TW": "目前密碼",
+      "pt-BR": "Senha atual",
+      "aliases": []
+    },
+    {
+      "key": "shell.new_password",
+      "en": "New Password",
+      "zh-TW": "新密碼",
+      "pt-BR": "Nova senha",
+      "aliases": []
+    },
+    {
+      "key": "shell.confirm_password",
+      "en": "Confirm Password",
+      "zh-TW": "確認密碼",
+      "pt-BR": "Confirmar senha",
+      "aliases": []
+    },
+    {
+      "key": "shell.user_name",
+      "en": "Name (optional)",
+      "zh-TW": "姓名（選填）",
+      "pt-BR": "Nome (opcional)",
+      "aliases": []
+    },
+    {
+      "key": "shell.birth_date",
+      "en": "Birth Date (optional)",
+      "zh-TW": "出生日期（選填）",
+      "pt-BR": "Nascimento (opcional)",
+      "aliases": []
+    },
+    {
+      "key": "shell.secret_question",
+      "en": "Security Question (optional)",
+      "zh-TW": "安全問題（選填）",
+      "pt-BR": "Pergunta secreta (opcional)",
+      "aliases": []
+    },
+    {
+      "key": "shell.secret_answer",
+      "en": "Security Answer (optional)",
+      "zh-TW": "安全答案（選填）",
+      "pt-BR": "Resposta secreta (opcional)",
+      "aliases": []
+    },
+    {
+      "key": "shell.email",
+      "en": "Email (optional)",
+      "zh-TW": "電子郵件（選填）",
+      "pt-BR": "E-mail (opcional)",
+      "aliases": []
+    },
+    {
+      "key": "shell.character_select",
+      "en": "Select Character",
+      "zh-TW": "選擇角色",
+      "pt-BR": "Selecionar personagem",
+      "aliases": []
+    },
+    {
+      "key": "shell.character_create",
+      "en": "Create Character",
+      "zh-TW": "建立角色",
+      "pt-BR": "Criar personagem",
+      "aliases": []
+    },
+    {
+      "key": "shell.character_name",
+      "en": "Character Name",
+      "zh-TW": "角色名稱",
+      "pt-BR": "Nome do personagem",
+      "aliases": []
+    },
+    {
+      "key": "shell.class",
+      "en": "Class",
+      "zh-TW": "職業",
+      "pt-BR": "Classe",
+      "aliases": []
+    },
+    {
+      "key": "shell.gender",
+      "en": "Gender",
+      "zh-TW": "性別",
+      "pt-BR": "Gênero",
+      "aliases": []
+    },
+    {
+      "key": "shell.warrior",
+      "en": "Warrior",
+      "zh-TW": "戰士",
+      "pt-BR": "Guerreiro",
+      "aliases": []
+    },
+    {
+      "key": "shell.wizard",
+      "en": "Wizard",
+      "zh-TW": "法師",
+      "pt-BR": "Mago",
+      "aliases": []
+    },
+    {
+      "key": "shell.taoist",
+      "en": "Taoist",
+      "zh-TW": "道士",
+      "pt-BR": "Taoísta",
+      "aliases": []
+    },
+    {
+      "key": "shell.assassin",
+      "en": "Assassin",
+      "zh-TW": "刺客",
+      "pt-BR": "Assassino",
+      "aliases": []
+    },
+    {
+      "key": "shell.archer",
+      "en": "Archer",
+      "zh-TW": "弓箭手",
+      "pt-BR": "Arqueiro",
+      "aliases": []
+    },
+    {
+      "key": "shell.male",
+      "en": "Male",
+      "zh-TW": "男",
+      "pt-BR": "Masculino",
+      "aliases": []
+    },
+    {
+      "key": "shell.female",
+      "en": "Female",
+      "zh-TW": "女",
+      "pt-BR": "Feminino",
+      "aliases": []
+    },
+    {
+      "key": "shell.last_online",
+      "en": "Last Online:",
+      "zh-TW": "上次上線：",
+      "pt-BR": "Último acesso:",
+      "aliases": []
+    },
+    {
+      "key": "shell.never",
+      "en": "Never",
+      "zh-TW": "尚未登入",
+      "pt-BR": "Nunca",
+      "aliases": []
+    },
+    {
+      "key": "shell.empty_slot",
+      "en": "Empty Slot",
+      "zh-TW": "空角色欄位",
+      "pt-BR": "Espaço vazio",
+      "aliases": []
+    },
+    {
+      "key": "shell.level",
+      "en": "Lv. {level}",
+      "zh-TW": "等級 {level}",
+      "pt-BR": "Nv. {level}",
+      "aliases": []
+    },
+    {
+      "key": "shell.delete_character",
+      "en": "Delete Character",
+      "zh-TW": "刪除角色",
+      "pt-BR": "Excluir personagem",
+      "aliases": []
+    },
+    {
+      "key": "shell.delete.prompt",
+      "en": "Delete '{name}' (slot {slot})?",
+      "zh-TW": "刪除「{name}」（欄位 {slot}）？",
+      "pt-BR": "Excluir '{name}' (espaço {slot})?",
+      "aliases": []
+    },
+    {
+      "key": "shell.deleting",
+      "en": "Deleting...",
+      "zh-TW": "刪除中…",
+      "pt-BR": "Excluindo...",
+      "aliases": []
+    },
+    {
+      "key": "shell.connecting",
+      "en": "Connecting",
+      "zh-TW": "連線中",
+      "pt-BR": "Conectando",
+      "aliases": []
+    },
+    {
+      "key": "shell.connecting_detail",
+      "en": "Connecting to gateway...",
+      "zh-TW": "正在連線至伺服器…",
+      "pt-BR": "Conectando ao servidor...",
+      "aliases": []
+    },
+    {
+      "key": "shell.authenticating",
+      "en": "Authenticating",
+      "zh-TW": "正在驗證",
+      "pt-BR": "Autenticando",
+      "aliases": []
+    },
+    {
+      "key": "shell.authenticating_detail",
+      "en": "Authenticating account...",
+      "zh-TW": "正在驗證帳號…",
+      "pt-BR": "Autenticando a conta...",
+      "aliases": []
+    },
+    {
+      "key": "shell.starting",
+      "en": "Starting",
+      "zh-TW": "正在啟動",
+      "pt-BR": "Iniciando",
+      "aliases": []
+    },
+    {
+      "key": "shell.starting_detail",
+      "en": "Entering game world...",
+      "zh-TW": "正在進入遊戲世界…",
+      "pt-BR": "Entrando no mundo do jogo...",
+      "aliases": []
+    },
+    {
+      "key": "shell.connection_lost",
+      "en": "Connection Lost",
+      "zh-TW": "連線中斷",
+      "pt-BR": "Conexão perdida",
+      "aliases": []
+    },
+    {
+      "key": "shell.reconnect_hint",
+      "en": "Press Enter, Escape, or Retry to reconnect.",
+      "zh-TW": "按 Enter、Esc 或「重試」重新連線。",
+      "pt-BR": "Pressione Enter, Esc ou Tentar novamente para reconectar.",
+      "aliases": []
+    },
+    {
+      "key": "shell.gateway_unreachable",
+      "en": "Cannot reach the local Gateway.",
+      "zh-TW": "無法連線至伺服器。",
+      "pt-BR": "Não foi possível conectar ao servidor.",
+      "aliases": []
+    },
+    {
+      "key": "shell.warrior_description",
+      "en": "Warriors are resilient frontline fighters.\nThey favor close combat and heavy weapons.",
+      "zh-TW": "戰士是堅韌的前線戰鬥者。\n擅長近身戰鬥與重型武器。",
+      "pt-BR": "Guerreiros são resistentes na linha de frente.\nPreferem combate corpo a corpo e armas pesadas.",
+      "aliases": []
+    },
+    {
+      "key": "shell.wizard_description",
+      "en": "Wizards command powerful elemental magic.\nThey favor ranged spells and careful positioning.",
+      "zh-TW": "法師掌握強大的元素魔法。\n擅長遠距法術，需留意站位。",
+      "pt-BR": "Magos dominam a magia elemental.\nUsam feitiços à distância e precisam se posicionar bem.",
+      "aliases": []
+    },
+    {
+      "key": "shell.taoist_description",
+      "en": "Taoists support allies and master spiritual arts.\nThey balance healing, buffs, and combat.",
+      "zh-TW": "道士精通靈術，能支援隊友。\n兼顧治療、輔助與戰鬥。",
+      "pt-BR": "Taoístas apoiam aliados com artes espirituais.\nEquilibram cura, melhorias e combate.",
+      "aliases": []
+    },
+    {
+      "key": "shell.registration.account_hint",
+      "en": "Account: 3–15 letters or digits.",
+      "zh-TW": "帳號：3–15 位英文字母或數字。",
+      "pt-BR": "Conta: 3–15 letras ou números.",
+      "aliases": [
+        "账号：3–15 位英文字母或数字。"
+      ]
+    },
+    {
+      "key": "shell.registration.password_hint",
+      "en": "Password: 10–15 letters or digits. Must differ from the account and avoid common passwords. Both entries must match.",
+      "zh-TW": "密碼：10–15 位英文字母或數字。不可與帳號相同，也不可使用常見弱密碼；兩次輸入須一致。",
+      "pt-BR": "Senha: 10–15 letras ou números. Não use a conta nem senhas comuns. As duas entradas devem ser iguais.",
+      "aliases": [
+        "密码：10–15 位英文字母或数字。不能与账号相同，不能使用常见弱口令；两次输入须一致。"
+      ]
+    },
+    {
+      "key": "shell.registration.name_hint",
+      "en": "Name (optional): up to 20 characters.",
+      "zh-TW": "姓名（選填）：最多 20 個字元。",
+      "pt-BR": "Nome (opcional): até 20 caracteres.",
+      "aliases": [
+        "姓名（选填）：最多 20 个字符。"
+      ]
+    },
+    {
+      "key": "shell.registration.birth_hint",
+      "en": "Birth date (optional): YYYY-MM-DD.",
+      "zh-TW": "出生日期（選填）：格式為 YYYY-MM-DD。",
+      "pt-BR": "Nascimento (opcional): formato AAAA-MM-DD.",
+      "aliases": [
+        "出生日期（选填）：格式为 YYYY-MM-DD。"
+      ]
+    },
+    {
+      "key": "shell.registration.question_hint",
+      "en": "Security question (optional): up to 30 characters.",
+      "zh-TW": "安全問題（選填）：最多 30 個字元。",
+      "pt-BR": "Pergunta secreta (opcional): até 30 caracteres.",
+      "aliases": [
+        "密保问题（选填）：最多 30 个字符。"
+      ]
+    },
+    {
+      "key": "shell.registration.answer_hint",
+      "en": "Security answer (optional): up to 30 characters.",
+      "zh-TW": "安全答案（選填）：最多 30 個字元。",
+      "pt-BR": "Resposta secreta (opcional): até 30 caracteres.",
+      "aliases": [
+        "密保答案（选填）：最多 30 个字符。"
+      ]
+    },
+    {
+      "key": "shell.registration.email_hint",
+      "en": "Email (optional): a valid full address, up to 50 characters.",
+      "zh-TW": "電子郵件（選填）：填寫完整有效的信箱地址，最多 50 個字元。",
+      "pt-BR": "E-mail (opcional): endereço completo e válido, até 50 caracteres.",
+      "aliases": [
+        "邮箱（选填）：填写完整有效的邮箱地址，最多 50 个字符。"
+      ]
+    },
+    {
+      "key": "shell.registration.submit_hint",
+      "en": "Create an account using the information above.",
+      "zh-TW": "使用以上資料建立帳號。",
+      "pt-BR": "Criar uma conta com os dados acima.",
+      "aliases": [
+        "使用以上信息注册账号。"
+      ]
+    },
+    {
+      "key": "shell.registration.cancel_hint",
+      "en": "Return to Login.",
+      "zh-TW": "返回登入畫面。",
+      "pt-BR": "Voltar à tela de login.",
+      "aliases": [
+        "返回登录界面。"
+      ]
+    },
+    {
+      "key": "shell.validation.account",
+      "en": "Account must be 3–15 letters or digits.",
+      "zh-TW": "帳號須為 3–15 位英文字母或數字。",
+      "pt-BR": "A conta deve ter 3–15 letras ou números.",
+      "aliases": [
+        "账号需为 3–15 位英文字母或数字。",
+        "account ID must be 3-15 alphanumeric characters"
+      ]
+    },
+    {
+      "key": "shell.validation.password",
+      "en": "Registration password must be 10–15 letters or digits.",
+      "zh-TW": "註冊密碼須為 10–15 位英文字母或數字。",
+      "pt-BR": "A senha de cadastro deve ter 10–15 letras ou números.",
+      "aliases": [
+        "注册密码需为 10–15 位英文字母或数字。"
+      ]
+    },
+    {
+      "key": "shell.validation.same_password",
+      "en": "Password must differ from the account (case-insensitive).",
+      "zh-TW": "密碼不可與帳號相同（不區分大小寫）。",
+      "pt-BR": "A senha deve ser diferente da conta, ignorando maiúsculas.",
+      "aliases": [
+        "密码不能与账号相同（不区分大小写）。"
+      ]
+    },
+    {
+      "key": "shell.validation.common_password",
+      "en": "This password is too common. Choose another.",
+      "zh-TW": "這個密碼過於常見，請換一個密碼。",
+      "pt-BR": "Esta senha é muito comum. Escolha outra.",
+      "aliases": [
+        "这个密码过于常见，请换一个密码。"
+      ]
+    },
+    {
+      "key": "shell.validation.confirm",
+      "en": "The passwords do not match.",
+      "zh-TW": "兩次輸入的密碼不一致。",
+      "pt-BR": "As senhas não coincidem.",
+      "aliases": [
+        "两次输入的密码不一致。",
+        "new password confirmation does not match"
+      ]
+    },
+    {
+      "key": "shell.validation.name",
+      "en": "Name may be empty or up to 20 characters.",
+      "zh-TW": "姓名最多 20 個字元，也可以留空。",
+      "pt-BR": "O nome pode ficar vazio ou ter até 20 caracteres.",
+      "aliases": [
+        "姓名最多 20 个字符，也可以留空。"
+      ]
+    },
+    {
+      "key": "shell.validation.birth",
+      "en": "Enter a valid YYYY-MM-DD date, or leave it empty.",
+      "zh-TW": "請填寫有效的 YYYY-MM-DD 日期，也可以留空。",
+      "pt-BR": "Informe uma data válida em AAAA-MM-DD ou deixe em branco.",
+      "aliases": [
+        "出生日期请填写有效的 YYYY-MM-DD 日期，也可以留空。",
+        "出生日期校验失败，请重新填写。"
+      ]
+    },
+    {
+      "key": "shell.validation.question",
+      "en": "Security question may be empty or up to 30 characters.",
+      "zh-TW": "安全問題最多 30 個字元，也可以留空。",
+      "pt-BR": "A pergunta secreta pode ficar vazia ou ter até 30 caracteres.",
+      "aliases": [
+        "密保问题最多 30 个字符，也可以留空。"
+      ]
+    },
+    {
+      "key": "shell.validation.answer",
+      "en": "Security answer may be empty or up to 30 characters.",
+      "zh-TW": "安全答案最多 30 個字元，也可以留空。",
+      "pt-BR": "A resposta secreta pode ficar vazia ou ter até 30 caracteres.",
+      "aliases": [
+        "密保答案最多 30 个字符，也可以留空。"
+      ]
+    },
+    {
+      "key": "shell.validation.email",
+      "en": "Enter a valid email address (up to 50 characters), or leave it empty.",
+      "zh-TW": "請填寫有效的信箱地址（最多 50 個字元），也可以留空。",
+      "pt-BR": "Informe um e-mail válido (até 50 caracteres) ou deixe em branco.",
+      "aliases": [
+        "请输入完整有效的邮箱地址（最多 50 个字符），也可以留空。"
+      ]
+    },
+    {
+      "key": "shell.validation.old_password",
+      "en": "Current password must be 5–15 letters or digits.",
+      "zh-TW": "目前密碼須為 5–15 位英文字母或數字。",
+      "pt-BR": "A senha atual deve ter 5–15 letras ou números.",
+      "aliases": [
+        "current password must be 5-15 alphanumeric characters"
+      ]
+    },
+    {
+      "key": "shell.validation.new_password",
+      "en": "New password must be 5–15 letters or digits.",
+      "zh-TW": "新密碼須為 5–15 位英文字母或數字。",
+      "pt-BR": "A nova senha deve ter 5–15 letras ou números.",
+      "aliases": [
+        "new password must be 5-15 alphanumeric characters",
+        "new password confirmation must be 5-15 alphanumeric characters"
+      ]
+    },
+    {
+      "key": "shell.notice.register_pending",
+      "en": "Registration is pending. Please wait.",
+      "zh-TW": "註冊請求正在處理中，請稍候。",
+      "pt-BR": "O cadastro está sendo processado. Aguarde.",
+      "aliases": [
+        "注册请求正在处理中，请稍候。"
+      ]
+    },
+    {
+      "key": "shell.notice.login_pending",
+      "en": "A login request is already pending.",
+      "zh-TW": "登入請求正在處理中。",
+      "pt-BR": "Uma solicitação de login já está em andamento.",
+      "aliases": [
+        "login request is still pending"
+      ]
+    },
+    {
+      "key": "shell.notice.credentials_required",
+      "en": "Account and password are required.",
+      "zh-TW": "請輸入帳號與密碼。",
+      "pt-BR": "Informe a conta e a senha.",
+      "aliases": [
+        "account and password are required"
+      ]
+    },
+    {
+      "key": "shell.notice.invalid_character",
+      "en": "Select a valid character.",
+      "zh-TW": "請選擇有效的角色。",
+      "pt-BR": "Selecione um personagem válido.",
+      "aliases": [
+        "invalid character index",
+        "a valid character must be selected"
+      ]
+    },
+    {
+      "key": "shell.notice.character_name",
+      "en": "A character name is required.",
+      "zh-TW": "請輸入角色名稱。",
+      "pt-BR": "Informe o nome do personagem.",
+      "aliases": [
+        "character name is required"
+      ]
+    },
+    {
+      "key": "shell.notice.create_pending",
+      "en": "Character creation is pending.",
+      "zh-TW": "角色正在建立中。",
+      "pt-BR": "O personagem está sendo criado.",
+      "aliases": [
+        "character creation request is still pending"
+      ]
+    },
+    {
+      "key": "shell.notice.start_pending",
+      "en": "The game is still starting.",
+      "zh-TW": "遊戲正在啟動中。",
+      "pt-BR": "O jogo ainda está iniciando.",
+      "aliases": [
+        "start game request is still pending"
+      ]
+    },
+    {
+      "key": "shell.notice.change_pending",
+      "en": "Password change is pending.",
+      "zh-TW": "密碼變更正在處理中。",
+      "pt-BR": "A alteração de senha está em andamento.",
+      "aliases": [
+        "change password request is still pending",
+        "change password requested"
+      ]
+    },
+    {
+      "key": "shell.notice.safe_key",
+      "en": "Invalid keyboard key.",
+      "zh-TW": "無效的鍵盤按鍵。",
+      "pt-BR": "Tecla inválida.",
+      "aliases": [
+        "invalid safe key"
+      ]
+    },
+    {
+      "key": "shell.notice.delete_confirm",
+      "en": "Invalid deletion confirmation.",
+      "zh-TW": "刪除確認無效。",
+      "pt-BR": "Confirmação de exclusão inválida.",
+      "aliases": [
+        "invalid delete confirmation"
+      ]
+    },
+    {
+      "key": "shell.notice.delete_pending",
+      "en": "Character deletion is pending.",
+      "zh-TW": "角色刪除正在處理中。",
+      "pt-BR": "A exclusão do personagem está em andamento.",
+      "aliases": [
+        "delete-character request is still pending"
+      ]
+    },
+    {
+      "key": "shell.notice.retry_pending",
+      "en": "Reconnection is pending.",
+      "zh-TW": "正在重新連線。",
+      "pt-BR": "A reconexão está em andamento.",
+      "aliases": [
+        "retry request is still pending"
+      ]
+    },
+    {
+      "key": "shell.notice.logout_pending",
+      "en": "Logout and character saving are pending.",
+      "zh-TW": "正在登出並儲存角色。",
+      "pt-BR": "Saindo e salvando o personagem.",
+      "aliases": [
+        "logout request is still pending"
+      ]
+    },
+    {
+      "key": "shell.notice.invalid_action",
+      "en": "This action is not available on this screen.",
+      "zh-TW": "此畫面無法執行這項操作。",
+      "pt-BR": "Esta ação não está disponível nesta tela.",
+      "aliases": [
+        "intent is not valid for this screen",
+        "gateway event is ignored for this screen",
+        "delete result is ignored in this screen"
+      ]
+    },
+    {
+      "key": "shell.notice.closed",
+      "en": "Connection closed.",
+      "zh-TW": "連線已關閉。",
+      "pt-BR": "Conexão encerrada.",
+      "aliases": [
+        "connection closed"
+      ]
+    },
+    {
+      "key": "shell.notice.account_created",
+      "en": "Account created. Log in to continue.",
+      "zh-TW": "帳號已建立，請登入以繼續。",
+      "pt-BR": "Conta criada. Entre para continuar.",
+      "aliases": [
+        "account created; use Login to continue"
+      ]
+    },
+    {
+      "key": "shell.notice.start_rejected",
+      "en": "Unable to enter the game.",
+      "zh-TW": "無法進入遊戲。",
+      "pt-BR": "Não foi possível entrar no jogo.",
+      "aliases": [
+        "start game rejected"
+      ]
+    },
+    {
+      "key": "shell.notice.start_ack",
+      "en": "Game entry accepted.",
+      "zh-TW": "已允許進入遊戲。",
+      "pt-BR": "Entrada no jogo aceita.",
+      "aliases": [
+        "start game acknowledged"
+      ]
+    },
+    {
+      "key": "shell.notice.entered",
+      "en": "Entered the game.",
+      "zh-TW": "已進入遊戲。",
+      "pt-BR": "Você entrou no jogo.",
+      "aliases": [
+        "entered game"
+      ]
+    },
+    {
+      "key": "shell.notice.change_disabled",
+      "en": "Password changes are currently disabled.",
+      "zh-TW": "目前暫停變更密碼。",
+      "pt-BR": "A alteração de senha está desativada.",
+      "aliases": [
+        "password changing is disabled"
+      ]
+    },
+    {
+      "key": "shell.notice.account_invalid",
+      "en": "Invalid account ID.",
+      "zh-TW": "帳號格式無效。",
+      "pt-BR": "Conta inválida.",
+      "aliases": [
+        "account ID is invalid"
+      ]
+    },
+    {
+      "key": "shell.notice.password_invalid",
+      "en": "Invalid password.",
+      "zh-TW": "密碼格式無效。",
+      "pt-BR": "Senha inválida.",
+      "aliases": [
+        "password is invalid"
+      ]
+    },
+    {
+      "key": "shell.notice.current_invalid",
+      "en": "Invalid current password.",
+      "zh-TW": "目前密碼格式無效。",
+      "pt-BR": "Senha atual inválida.",
+      "aliases": [
+        "current password is invalid"
+      ]
+    },
+    {
+      "key": "shell.notice.new_invalid",
+      "en": "Invalid new password.",
+      "zh-TW": "新密碼格式無效。",
+      "pt-BR": "Nova senha inválida.",
+      "aliases": [
+        "new password is invalid"
+      ]
+    },
+    {
+      "key": "shell.notice.no_account",
+      "en": "Account does not exist.",
+      "zh-TW": "帳號不存在。",
+      "pt-BR": "A conta não existe.",
+      "aliases": [
+        "account does not exist"
+      ]
+    },
+    {
+      "key": "shell.notice.wrong_password",
+      "en": "Current password is incorrect.",
+      "zh-TW": "目前密碼不正確。",
+      "pt-BR": "A senha atual está incorreta.",
+      "aliases": [
+        "current password is incorrect"
+      ]
+    },
+    {
+      "key": "shell.notice.changed",
+      "en": "Password changed successfully.",
+      "zh-TW": "密碼已成功變更。",
+      "pt-BR": "Senha alterada com sucesso.",
+      "aliases": [
+        "password changed successfully"
+      ]
+    },
+    {
+      "key": "shell.notice.login_disabled",
+      "en": "Login is currently disabled.",
+      "zh-TW": "目前暫停登入。",
+      "pt-BR": "O login está desativado no momento.",
+      "aliases": [
+        "login is currently disabled"
+      ]
+    },
+    {
+      "key": "shell.notice.bad_credentials",
+      "en": "Invalid account or password.",
+      "zh-TW": "帳號或密碼不正確。",
+      "pt-BR": "Conta ou senha incorreta.",
+      "aliases": [
+        "invalid credentials"
+      ]
+    },
+    {
+      "key": "shell.notice.change_required",
+      "en": "Change your password before logging in.",
+      "zh-TW": "請先變更密碼再登入。",
+      "pt-BR": "Altere sua senha antes de entrar.",
+      "aliases": [
+        "password change required before login"
+      ]
+    },
+    {
+      "key": "shell.notice.login_failed",
+      "en": "Login failed.",
+      "zh-TW": "登入失敗。",
+      "pt-BR": "Falha no login.",
+      "aliases": [
+        "login failed"
+      ]
+    },
+    {
+      "key": "shell.notice.login_result",
+      "en": "Login failed (result {result}).",
+      "zh-TW": "登入失敗（代碼 {result}）。",
+      "pt-BR": "Falha no login (código {result}).",
+      "aliases": [
+        "login failed (result {result})"
+      ]
+    },
+    {
+      "key": "shell.notice.start_result",
+      "en": "Unable to enter the game (result {result}).",
+      "zh-TW": "無法進入遊戲（代碼 {result}）。",
+      "pt-BR": "Não foi possível entrar no jogo (código {result}).",
+      "aliases": [
+        "start game rejected (result {result})"
+      ]
+    },
+    {
+      "key": "shell.notice.change_result",
+      "en": "Password change failed (result {other}).",
+      "zh-TW": "變更密碼失敗（代碼 {other}）。",
+      "pt-BR": "Falha ao alterar senha (código {other}).",
+      "aliases": [
+        "change password failed (result {other})"
+      ]
+    },
+    {
+      "key": "shell.notice.create_requested",
+      "en": "Creating {name} ({class_name}, {gender_name})...",
+      "zh-TW": "正在建立 {name}（{class_name}，{gender_name}）…",
+      "pt-BR": "Criando {name} ({class_name}, {gender_name})...",
+      "aliases": [
+        "create character requested name={name} class={class_name} gender={gender_name}"
+      ]
+    },
+    {
+      "key": "shell.notice.delete_requested",
+      "en": "Deleting character (slot {index})...",
+      "zh-TW": "正在刪除角色（欄位 {index}）…",
+      "pt-BR": "Excluindo personagem (espaço {index})...",
+      "aliases": [
+        "delete-character requested index={index}"
+      ]
+    },
+    {
+      "key": "shell.notice.deleted",
+      "en": "Character deleted (slot {character_index}).",
+      "zh-TW": "角色已刪除（欄位 {character_index}）。",
+      "pt-BR": "Personagem excluído (espaço {character_index}).",
+      "aliases": [
+        "character deleted index={character_index}"
+      ]
+    },
+    {
+      "key": "shell.notice.register_disabled",
+      "en": "Unable to create an account now. Try again later.",
+      "zh-TW": "目前無法建立帳號，請稍後重試。",
+      "pt-BR": "Não é possível criar uma conta agora. Tente mais tarde.",
+      "aliases": [
+        "暂时无法创建账号，请稍后重试"
+      ]
+    },
+    {
+      "key": "shell.notice.register_account",
+      "en": "Invalid account. Use 3–15 letters or digits.",
+      "zh-TW": "帳號格式無效，請使用 3–15 位英文字母或數字。",
+      "pt-BR": "Conta inválida. Use 3–15 letras ou números.",
+      "aliases": [
+        "账号格式无效，请使用3–15位字母或数字"
+      ]
+    },
+    {
+      "key": "shell.notice.register_password",
+      "en": "Use 10–15 letters or digits. Avoid the account name and common passwords.",
+      "zh-TW": "請使用 10–15 位英文字母或數字，避開帳號同名及常見弱密碼。",
+      "pt-BR": "Use 10–15 letras ou números. Evite o nome da conta e senhas comuns.",
+      "aliases": [
+        "密码不符合要求：请用10–15位字母或数字，避开账号同名和常见弱密码"
+      ]
+    },
+    {
+      "key": "shell.notice.register_exists",
+      "en": "Account already exists. Log in or choose another account.",
+      "zh-TW": "帳號已存在，請登入或使用其他帳號。",
+      "pt-BR": "A conta já existe. Entre ou escolha outra conta.",
+      "aliases": [
+        "账号已存在，请登录或选择其他账号",
+        "account already exists"
+      ]
+    },
+    {
+      "key": "shell.notice.register_failed",
+      "en": "Account creation failed (code {code}).",
+      "zh-TW": "建立帳號失敗（代碼 {code}）。",
+      "pt-BR": "Falha ao criar conta (código {code}).",
+      "aliases": [
+        "创建账号失败（错误码 {code}）"
+      ]
+    },
+    {
+      "key": "shell.notice.register_no_result",
+      "en": "The server has not returned a registration result. Check again later.",
+      "zh-TW": "伺服器尚未回傳註冊結果，請稍後確認。",
+      "pt-BR": "O servidor não retornou o resultado do cadastro. Verifique mais tarde.",
+      "aliases": [
+        "服务器未返回注册结果，请稍后确认"
+      ]
+    },
+    {
+      "key": "shell.notice.rate_limit",
+      "en": "Too many attempts. Try again in {seconds} seconds.",
+      "zh-TW": "嘗試過於頻繁，請等待 {seconds} 秒後重試。",
+      "pt-BR": "Muitas tentativas. Tente novamente em {seconds} segundos.",
+      "aliases": [
+        "尝试过于频繁，请等待 {seconds} 秒后再试"
+      ]
+    },
+    {
+      "key": "shell.notice.account_request",
+      "en": "Invalid account request. Check the entered information.",
+      "zh-TW": "帳號請求格式無效，請檢查填寫內容。",
+      "pt-BR": "Solicitação de conta inválida. Confira os dados.",
+      "aliases": [
+        "账号请求格式无效，请检查填写内容"
+      ]
+    },
+    {
+      "key": "shell.notice.account_unavailable",
+      "en": "Account service is temporarily unavailable. Try later.",
+      "zh-TW": "帳號服務暫時無法使用，請稍後重試。",
+      "pt-BR": "O serviço de contas está indisponível. Tente mais tarde.",
+      "aliases": [
+        "账号服务暂时不可用，请稍后重试"
+      ]
+    },
+    {
+      "key": "shell.notice.request_failed",
+      "en": "Request failed (code {code}). Try later.",
+      "zh-TW": "請求失敗（代碼 {code}），請稍後重試。",
+      "pt-BR": "Falha na solicitação (código {code}). Tente mais tarde.",
+      "aliases": [
+        "请求失败（错误码 {code}），请稍后重试"
+      ]
+    },
+    {
+      "key": "shell.notice.no_reason",
+      "en": "Request failed. The server provided no details.",
+      "zh-TW": "請求失敗，伺服器未提供具體原因。",
+      "pt-BR": "Falha na solicitação. O servidor não informou o motivo.",
+      "aliases": [
+        "请求失败，服务器未提供具体原因"
+      ]
+    },
+    {
+      "key": "shell.notice.bad_character_reply",
+      "en": "The server returned invalid character data.",
+      "zh-TW": "伺服器回傳的角色資料無效。",
+      "pt-BR": "O servidor retornou dados de personagem inválidos.",
+      "aliases": [
+        "character creation returned an invalid character",
+        "character deletion returned no character index"
+      ]
+    },
+    {
+      "key": "shell.startup.config",
+      "en": "Client configuration is invalid. Check mir2-client.toml or reinstall the complete package.",
+      "zh-TW": "客戶端設定無效。請檢查 mir2-client.toml，或重新安裝完整套件。",
+      "pt-BR": "Configuração inválida. Verifique mir2-client.toml ou reinstale o pacote completo.",
+      "aliases": [
+        "客户端配置无效。请检查游戏目录内的 mir2-client.toml，或重新解压完整安装包。"
+      ]
+    },
+    {
+      "key": "shell.startup.credentials",
+      "en": "Automatic login configuration is invalid. Remove saved credentials and log in inside the game window.",
+      "zh-TW": "自動登入設定無效。請移除設定檔內的帳號密碼，並在遊戲視窗內登入。",
+      "pt-BR": "Login automático inválido. Remova credenciais salvas e entre pela janela do jogo.",
+      "aliases": [
+        "自动登录配置无效。配置文件不能保存账号密码；请移除自动登录配置后在游戏窗口内登录。"
+      ]
+    },
+    {
+      "key": "shell.startup.gateway",
+      "en": "The server address is invalid. Use the mir2-client.toml supplied with the package.",
+      "zh-TW": "伺服器位址設定無效。請使用套件附帶的 mir2-client.toml。",
+      "pt-BR": "Endereço do servidor inválido. Use o mir2-client.toml fornecido com o pacote.",
+      "aliases": [
+        "服务器连接地址配置无效。请使用安装包附带的 mir2-client.toml。"
+      ]
+    },
+    {
+      "key": "shell.startup.assets",
+      "en": "Required game assets are missing. Reinstall the complete package with mir2-assets beside the executable.",
+      "zh-TW": "找不到完整遊戲資源。請重新安裝，確保 mir2-assets 與遊戲程式位於同一目錄。",
+      "pt-BR": "Faltam recursos do jogo. Reinstale o pacote completo, com mir2-assets junto ao executável.",
+      "aliases": [
+        "找不到完整的游戏资源。请重新解压安装包，确保 mir2-assets 与游戏程序位于同一目录。"
+      ]
+    },
+    {
+      "key": "shell.startup.map",
+      "en": "The initial map 0.map.gz could not be read. Reinstall or repair the game assets.",
+      "zh-TW": "無法讀取初始地圖 0.map.gz。請重新安裝或修復遊戲資源。",
+      "pt-BR": "Não foi possível ler o mapa inicial 0.map.gz. Reinstale ou repare os recursos.",
+      "aliases": [
+        "初始地图资源 0.map.gz 无法读取。请重新解压或修复游戏资源包。"
+      ]
+    },
+    {
+      "key": "shell.startup.network",
+      "en": "The network runtime could not start. Restart the game; if it persists, share the error code and log below.",
+      "zh-TW": "無法啟動網路環境。請重新啟動遊戲；若問題持續，請提供下方錯誤代碼及記錄。",
+      "pt-BR": "Falha ao iniciar a rede. Reinicie o jogo; se persistir, envie o código e o log abaixo.",
+      "aliases": [
+        "无法初始化网络运行环境。请重新启动游戏；若问题持续，请提供下面的错误代码和日志。"
+      ]
+    },
+    {
+      "key": "shell.startup.window",
+      "en": "The game window or graphics system failed. Check your graphics driver and share the error code and log below.",
+      "zh-TW": "遊戲視窗或繪圖環境發生異常。請檢查顯示卡驅動程式，並提供下方錯誤代碼及記錄。",
+      "pt-BR": "Falha na janela ou nos gráficos. Confira o driver de vídeo e envie o código e o log abaixo.",
+      "aliases": [
+        "游戏窗口或图形运行环境异常。请检查显卡驱动，并提供下面的错误代码和日志。"
+      ]
+    },
+    {
+      "key": "shell.startup.panic",
+      "en": "The game encountered an error. Share the error code and log below to help locate the problem.",
+      "zh-TW": "遊戲發生異常。請提供下方錯誤代碼及記錄，以便定位問題。",
+      "pt-BR": "O jogo encontrou um erro. Envie o código e o log abaixo para ajudar a localizar o problema.",
+      "aliases": [
+        "游戏遇到了异常。请提供下面的错误代码和日志，以便定位发生异常的程序位置。"
+      ]
+    },
+    {
+      "key": "shell.startup.log",
+      "en": "Diagnostic log: {path}",
+      "zh-TW": "診斷記錄：{path}",
+      "pt-BR": "Log de diagnóstico: {path}",
+      "aliases": [
+        "诊断日志：{path}"
+      ]
+    },
+    {
+      "key": "shell.startup.log_failed",
+      "en": "Unable to update the log. Check disk space or permissions: {path}",
+      "zh-TW": "無法更新診斷記錄，請檢查磁碟空間或權限：{path}",
+      "pt-BR": "Não foi possível atualizar o log. Verifique espaço e permissões: {path}",
+      "aliases": [
+        "诊断日志未能更新，请检查磁盘空间或权限：{path}"
+      ]
+    },
+    {
+      "key": "shell.startup.no_log",
+      "en": "Unable to write a local diagnostic log. Save the error code and check disk space or permissions.",
+      "zh-TW": "無法寫入本機診斷記錄，請記下錯誤代碼並檢查磁碟空間或權限。",
+      "pt-BR": "Não foi possível gravar o log local. Anote o código e verifique espaço e permissões.",
+      "aliases": [
+        "无法写入本地诊断日志，请记录错误代码并检查磁盘空间或权限。"
+      ]
+    },
+    {
+      "key": "shell.startup.code",
+      "en": "Error code: {code} ({exit})",
+      "zh-TW": "錯誤代碼：{code}（{exit}）",
+      "pt-BR": "Código de erro: {code} ({exit})",
+      "aliases": [
+        "错误代码：{code}（{exit}）"
+      ]
+    },
+    {
+      "key": "shell.startup.title",
+      "en": "Game Error",
+      "zh-TW": "遊戲執行錯誤",
+      "pt-BR": "Erro do jogo",
+      "aliases": [
+        "游戏运行错误"
+      ]
+    },
+    {
+      "key": "shell.notice.default.title",
+      "en": "Welcome to Legend of Mir 2",
+      "zh-TW": "歡迎來到傳奇 2",
+      "pt-BR": "Bem-vindo ao Legend of Mir 2",
+      "aliases": []
+    },
+    {
+      "key": "shell.notice.default.message",
+      "en": "Welcome to the Legend of Mir 2 Server.\n\nThis is a development Candidate build.\nGameplay, data, and presentation may change during development.\nPlease include the build identifier when reporting a problem.",
+      "zh-TW": "歡迎來到傳奇 2 伺服器。\n\n這是開發中的候選版本。\n遊戲玩法、資料及畫面可能隨開發調整。\n回報問題時請附上版本識別碼。",
+      "pt-BR": "Bem-vindo ao servidor Legend of Mir 2.\n\nEsta é uma versão candidata em desenvolvimento.\nA jogabilidade, os dados e a apresentação podem mudar durante o desenvolvimento.\nInclua a identificação da versão ao relatar um problema.",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.all",
+      "en": "All",
+      "zh-TW": "全部",
+      "pt-BR": "Todos",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.normal",
+      "en": "Normal",
+      "zh-TW": "一般",
+      "pt-BR": "Normal",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.shout",
+      "en": "Shout",
+      "zh-TW": "喊話",
+      "pt-BR": "Grito",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.whisper",
+      "en": "Whisper",
+      "zh-TW": "密語",
+      "pt-BR": "Sussurro",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.lover",
+      "en": "Lover",
+      "zh-TW": "伴侶",
+      "pt-BR": "Par",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.mentor",
+      "en": "Mentor",
+      "zh-TW": "師徒",
+      "pt-BR": "Mentor",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.group",
+      "en": "Group",
+      "zh-TW": "隊伍",
+      "pt-BR": "Grupo",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.guild",
+      "en": "Guild",
+      "zh-TW": "行會",
+      "pt-BR": "Guilda",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.trade",
+      "en": "Trade",
+      "zh-TW": "交易",
+      "pt-BR": "Troca",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.settings",
+      "en": "Chat Settings",
+      "zh-TW": "聊天設定",
+      "pt-BR": "Opções de chat",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.size",
+      "en": "Size",
+      "zh-TW": "大小",
+      "pt-BR": "Tamanho",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.filters",
+      "en": "Filters",
+      "zh-TW": "篩選",
+      "pt-BR": "Filtros",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.chat",
+      "en": "Chat",
+      "zh-TW": "聊天",
+      "pt-BR": "Chat",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.system",
+      "en": "System",
+      "zh-TW": "系統",
+      "pt-BR": "Sistema",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.on",
+      "en": "On",
+      "zh-TW": "開啟",
+      "pt-BR": "Ativado",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.off",
+      "en": "Off",
+      "zh-TW": "關閉",
+      "pt-BR": "Desativado",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.defaults",
+      "en": "Defaults",
+      "zh-TW": "預設值",
+      "pt-BR": "Padrões",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.apply",
+      "en": "Apply",
+      "zh-TW": "套用",
+      "pt-BR": "Aplicar",
+      "aliases": []
+    },
+    {
+      "key": "shell.chat.transparent",
+      "en": "Transparency",
+      "zh-TW": "透明度",
+      "pt-BR": "Transparência",
+      "aliases": []
+    },
+    {
+      "key": "shell.system.welcome",
+      "en": "Welcome to the Legend of Mir 2 Server.",
+      "zh-TW": "歡迎來到傳奇 2 伺服器。",
+      "pt-BR": "Bem-vindo ao servidor Legend of Mir 2.",
+      "aliases": []
+    },
+    {
+      "key": "shell.system.online",
+      "en": "Online Players: {count}",
+      "zh-TW": "線上玩家：{count}",
+      "pt-BR": "Jogadores online: {count}",
+      "aliases": []
+    },
+    {
+      "key": "shell.system.build_id",
+      "en": "Please include the build identifier when reporting a problem.",
+      "zh-TW": "回報問題時請附上版本識別碼。",
+      "pt-BR": "Inclua a identificação da versão ao relatar um problema.",
+      "aliases": []
+    },
+    {
+      "key": "shell.system.miss",
+      "en": "Miss",
+      "zh-TW": "未命中",
+      "pt-BR": "Errou",
+      "aliases": []
+    },
+    {
+      "key": "shell.system.crit",
+      "en": "Crit",
+      "zh-TW": "暴擊",
+      "pt-BR": "Crítico",
+      "aliases": []
+    }
+  ]
+}

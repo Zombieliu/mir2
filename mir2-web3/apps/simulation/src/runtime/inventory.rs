@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{
-    crystal_bag_slot_capacity, AccountRecord, CharacterRecord, EquipmentSlot,
-    GroundDropItemPayload, ItemContainer, ItemGrade, SimulationConfig,
+    AccountRecord, CharacterRecord, EquipmentSlot, GroundDropItemPayload, ItemContainer, ItemGrade,
+    SimulationConfig, crystal_bag_slot_capacity,
 };
 use bevy_ecs::prelude::World;
 use mir2_game_data::{crystal_item_by_index, crystal_item_manifest, localized_text_or_fallback};
@@ -13,21 +13,27 @@ use mir2_protocol::{
 
 use super::components::current_player_is_dead;
 use super::crystal_compat::{
-    BASE_STORAGE_SLOTS, CRYSTAL_BIND_DONT_STORE, CRYSTAL_STAT_MAX_AC, CRYSTAL_STAT_MAX_DC,
-    DOTNET_DATETIME_KIND_LOCAL, DOTNET_TICKS_AT_UNIX_EPOCH, EXPANDED_STORAGE_SLOTS,
+    BASE_STORAGE_SLOTS, CRYSTAL_BIND_DONT_STORE, CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_STAT_MAX_AC,
+    CRYSTAL_STAT_MAX_DC, DOTNET_DATETIME_KIND_LOCAL, DOTNET_TICKS_AT_UNIX_EPOCH,
+    EXPANDED_STORAGE_SLOTS,
 };
 use super::items::{
-    crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
-    crystal_equipment_slot_for_template, crystal_item_has_bind_flag, crystal_item_key_for_template,
-    crystal_item_stat_value, crystal_item_template_for_item_key, crystal_stack_size_for_item_key,
-    default_item_unique_id, embedded_item_state_from_template, item_has_rental_bind_flag,
-    item_icon_for_key, item_unique_id, try_item_state_from_user_item,
-    try_user_item_from_item_state, user_item_from_item_state,
-    validate_committed_item_state_carrier, validate_committed_user_item_carrier, ItemState,
-    ItemStateUserItemMetadata,
+    ItemState, ItemStateUserItemMetadata, crystal_belt_slot_range_for_item_key,
+    crystal_equipment_slot_for_item_key, crystal_equipment_slot_for_template,
+    crystal_item_has_bind_flag, crystal_item_key_for_template, crystal_item_stat_value,
+    crystal_item_template_for_item_key, crystal_stack_size_for_item_key, default_item_unique_id,
+    embedded_item_state_from_template, item_has_rental_bind_flag, item_icon_for_key,
+    item_unique_id, try_item_state_from_user_item, try_user_item_from_item_state,
+    user_item_from_item_state, validate_committed_item_state_carrier,
+    validate_committed_user_item_carrier,
 };
 use super::npc::active_crystal_storage_service;
-use super::resources::{InventoryResource, RuntimeConfigResource, SessionResource};
+use super::resources::{
+    InventoryResource, PlayerRuntimeResource, RuntimeConfigResource, SessionResource,
+};
+
+const STORAGE_RENTAL_PRICE_GOLD: u32 = 1_000_000;
+const STORAGE_RENTAL_DAYS: u64 = 10;
 
 #[allow(clippy::too_many_arguments)]
 fn seed_item(
@@ -583,38 +589,78 @@ pub(super) fn extend_binary_datetime(base_binary_datetime: i64, days: u64) -> i6
 }
 
 pub(super) fn expand_storage_rental_impl(world: &mut World) -> Vec<ServerPacket> {
-    let (config, account_id) = {
+    let (config, account_id, mut save) = {
         let config = world.resource::<RuntimeConfigResource>().config.clone();
         let session = world.resource::<SessionResource>();
-        (
-            config,
-            session
-                .account_id
-                .clone()
-                .unwrap_or_else(|| "demo".to_string()),
-        )
+        let Some(account_id) = super::save::active_session_mutating_account_id(session) else {
+            return Vec::new();
+        };
+        let Some(save) = super::save::snapshot_active_character_save(world) else {
+            return Vec::new();
+        };
+        (config, account_id, save)
     };
 
-    let expiry_time_binary_datetime = {
-        let mut store = config
-            .account_store
-            .lock()
-            .expect("account store mutex should not be poisoned");
-        let account = store
-            .accounts
-            .entry(account_id)
-            .or_insert_with(|| AccountRecord::new(config.default_character.clone()));
-        let expiry =
-            extend_binary_datetime(account.expanded_storage_expiry_time_binary_datetime, 30);
-        account.storage_size = EXPANDED_STORAGE_SLOTS;
-        account.has_expanded_storage = true;
-        account.expanded_storage_expiry_time_binary_datetime = expiry;
-        expiry
-    };
-
-    if let Err(error) = config.save_account_store() {
-        eprintln!("failed to persist account store: {error}");
+    if save.gold < STORAGE_RENTAL_PRICE_GOLD {
+        return vec![super::packets::system_message_key(world, "server.LowGold")];
     }
+    save.gold -= STORAGE_RENTAL_PRICE_GOLD;
+    let expected_revision = save.revision;
+    let remaining_gold = save.gold;
+
+    // Crystal's PlayerObject3663 charges before extending the rental.  Stage
+    // the active character's gold snapshot and the account-scoped capacity in
+    // one account-store transaction; the live ECS mirror changes only after
+    // that durable commit succeeds.
+    let expiry_time_binary_datetime = match super::shared_guild_experience::commit_source(
+        world,
+        &config,
+        std::slice::from_ref(&account_id),
+        |store| {
+            let expiry = {
+                let account = store
+                    .accounts
+                    .get(&account_id)
+                    .ok_or_else(|| "storage rental account changed before commit".to_string())?;
+                extend_binary_datetime(
+                    account.expanded_storage_expiry_time_binary_datetime,
+                    STORAGE_RENTAL_DAYS,
+                )
+            };
+            super::save::stage_prepared_character_save(world, store, save)?;
+            let account = store
+                .accounts
+                .get_mut(&account_id)
+                .expect("validated storage rental account should exist");
+            account.storage_size = EXPANDED_STORAGE_SLOTS;
+            account.has_expanded_storage = true;
+            account.expanded_storage_expiry_time_binary_datetime = expiry;
+            Ok(expiry)
+        },
+    ) {
+        Ok(expiry) => expiry,
+        Err(error) => {
+            eprintln!("storage rental transaction failed: {error}");
+            return vec![super::packets::system_message_key(
+                world,
+                "server.InvalidPacketReceived",
+            )];
+        }
+    };
+
+    // `stage_prepared_character_save` performed the sole durable revision
+    // increment. Advance the session's CAS cursor to that receipt exactly
+    // once before exposing the committed values to the World.
+    let committed_revision = expected_revision
+        .checked_add(1)
+        .expect("successful storage rental save revision should not overflow");
+    let advanced = world
+        .resource::<SessionResource>()
+        .advance_active_save_revision(expected_revision, committed_revision);
+    debug_assert!(
+        advanced,
+        "active storage rental revision changed during commit"
+    );
 
     {
         let mut resources = world.resource_mut::<InventoryResource>();
@@ -623,12 +669,18 @@ pub(super) fn expand_storage_rental_impl(world: &mut World) -> Vec<ServerPacket>
         resources.expanded_storage_expiry_time_binary_datetime = expiry_time_binary_datetime;
         resources.expanded_storage_expiry_notice_pending = false;
     }
+    world.resource_mut::<PlayerRuntimeResource>().gold = remaining_gold;
 
-    vec![ServerPacket::ResizeStorage {
-        size: i32::from(EXPANDED_STORAGE_SLOTS),
-        has_expanded_storage: true,
-        expiry_time_binary_datetime,
-    }]
+    vec![
+        ServerPacket::LoseGold {
+            gold: STORAGE_RENTAL_PRICE_GOLD,
+        },
+        ServerPacket::ResizeStorage {
+            size: i32::from(EXPANDED_STORAGE_SLOTS),
+            has_expanded_storage: true,
+            expiry_time_binary_datetime,
+        },
+    ]
 }
 
 pub(super) fn storage_password_required(
@@ -2421,6 +2473,109 @@ pub(super) fn is_valid_inventory_slot(slot: u8, inventory_capacity: u16) -> bool
         && inventory_container_and_slot_for_index(slot).is_some()
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum CrystalInventoryMoveSlot {
+    Belt(u8),
+    Bag(ItemContainer, u8),
+}
+
+/// Decode Crystal's original unified player-inventory array for the explicit
+/// `Belt` compatibility move path. Slots 0..5 are the belt; bag cells begin at
+/// six even though snapshots keep belt and bag items in separate collections.
+fn crystal_inventory_move_slot(
+    raw_slot: u8,
+    inventory_capacity: u16,
+) -> Option<CrystalInventoryMoveSlot> {
+    if u16::from(raw_slot) >= inventory_capacity {
+        return None;
+    }
+    if raw_slot < crate::config::CRYSTAL_BELT_SLOT_COUNT as u8 {
+        return Some(CrystalInventoryMoveSlot::Belt(raw_slot));
+    }
+    let bag_index = raw_slot - crate::config::CRYSTAL_BELT_SLOT_COUNT as u8;
+    let (container, slot) = inventory_container_and_slot_for_index(bag_index)?;
+    Some(CrystalInventoryMoveSlot::Bag(container, slot))
+}
+
+fn item_matches_crystal_inventory_move_slot(
+    item: &ItemState,
+    slot: CrystalInventoryMoveSlot,
+) -> bool {
+    match slot {
+        CrystalInventoryMoveSlot::Belt(belt_slot) => {
+            item.container == ItemContainer::Belt && item.slot == belt_slot
+        }
+        CrystalInventoryMoveSlot::Bag(container, bag_slot) => {
+            item.container == container && item.slot == bag_slot
+        }
+    }
+}
+
+fn take_crystal_inventory_move_item(
+    resources: &mut InventoryResource,
+    slot: CrystalInventoryMoveSlot,
+) -> Option<ItemState> {
+    let items = match slot {
+        CrystalInventoryMoveSlot::Belt(_) => &mut resources.belt_items,
+        CrystalInventoryMoveSlot::Bag(_, _) => &mut resources.inventory_items,
+    };
+    let index = items
+        .iter()
+        .position(|item| item_matches_crystal_inventory_move_slot(item, slot))?;
+    Some(items.remove(index))
+}
+
+fn put_crystal_inventory_move_item(
+    resources: &mut InventoryResource,
+    slot: CrystalInventoryMoveSlot,
+    mut item: ItemState,
+) {
+    match slot {
+        CrystalInventoryMoveSlot::Belt(belt_slot) => {
+            item.container = ItemContainer::Belt;
+            item.slot = belt_slot;
+            resources.belt_items.push(item);
+        }
+        CrystalInventoryMoveSlot::Bag(container, bag_slot) => {
+            item.container = container;
+            item.slot = bag_slot;
+            resources.inventory_items.push(item);
+        }
+    }
+}
+
+/// Move one item using Crystal's raw player-inventory indices. The operation
+/// removes both endpoints before inserting their swapped values, so a failed
+/// lookup cannot duplicate or discard an item.
+fn move_crystal_inventory_items(
+    resources: &mut InventoryResource,
+    from: CrystalInventoryMoveSlot,
+    to: CrystalInventoryMoveSlot,
+) -> bool {
+    if from == to {
+        return match from {
+            CrystalInventoryMoveSlot::Belt(_) => resources
+                .belt_items
+                .iter()
+                .any(|item| item_matches_crystal_inventory_move_slot(item, from)),
+            CrystalInventoryMoveSlot::Bag(_, _) => resources
+                .inventory_items
+                .iter()
+                .any(|item| item_matches_crystal_inventory_move_slot(item, from)),
+        };
+    }
+
+    let Some(source) = take_crystal_inventory_move_item(resources, from) else {
+        return false;
+    };
+    let destination = take_crystal_inventory_move_item(resources, to);
+    if let Some(destination) = destination {
+        put_crystal_inventory_move_item(resources, from, destination);
+    }
+    put_crystal_inventory_move_item(resources, to, source);
+    true
+}
+
 pub(super) fn move_item_slot_matches_grid(item: &ItemState, grid: MirGridType, slot: u8) -> bool {
     if item.slot != slot && !matches!(grid, MirGridType::Inventory) {
         return false;
@@ -2658,6 +2813,7 @@ pub(super) fn move_item_impl(
     if !matches!(
         grid,
         MirGridType::Inventory
+            | MirGridType::Belt
             | MirGridType::Storage
             | MirGridType::Trade
             | MirGridType::Refine
@@ -2677,6 +2833,68 @@ pub(super) fn move_item_impl(
     let Some(from_slot) = u8::try_from(from).ok() else {
         return vec![failed_packet];
     };
+
+    if grid == MirGridType::Belt {
+        let (from_location, to_location) = {
+            let resources = world.resource::<InventoryResource>();
+            let Some(from_location) =
+                crystal_inventory_move_slot(from_slot, resources.inventory_capacity)
+            else {
+                return vec![failed_packet];
+            };
+            let Some(to_location) =
+                crystal_inventory_move_slot(to_slot, resources.inventory_capacity)
+            else {
+                return vec![failed_packet];
+            };
+            (from_location, to_location)
+        };
+        if matches!(
+            (from_location, to_location),
+            (
+                CrystalInventoryMoveSlot::Belt(_),
+                CrystalInventoryMoveSlot::Belt(_)
+            ) | (
+                CrystalInventoryMoveSlot::Bag(_, _),
+                CrystalInventoryMoveSlot::Bag(_, _)
+            )
+        ) {
+            return vec![failed_packet];
+        }
+
+        let touches_reserved_item = {
+            let resources = world.resource::<InventoryResource>();
+            resources
+                .inventory_items
+                .iter()
+                .chain(resources.belt_items.iter())
+                .any(|item| {
+                    (item_matches_crystal_inventory_move_slot(item, from_location)
+                        || item_matches_crystal_inventory_move_slot(item, to_location))
+                        && super::packets::stage5_trade_reserves_item(world, item)
+                })
+        };
+        if touches_reserved_item {
+            return vec![failed_packet];
+        }
+
+        if !move_crystal_inventory_items(
+            &mut world.resource_mut::<InventoryResource>(),
+            from_location,
+            to_location,
+        ) {
+            return vec![
+                super::session::system_message_key(world, "server.ItemMoveErrorReport"),
+                failed_packet,
+            ];
+        }
+        return vec![ServerPacket::MoveItem {
+            grid,
+            from,
+            to,
+            success: true,
+        }];
+    }
 
     if matches!(grid, MirGridType::Inventory) {
         let resources = world.resource::<InventoryResource>();
@@ -2776,8 +2994,13 @@ pub(super) fn merge_item_impl(
     id_from: u64,
     id_to: u64,
 ) -> Vec<ServerPacket> {
-    if matches!(grid_from, MirGridType::HeroInventory | MirGridType::HeroEquipment)
-        || matches!(grid_to, MirGridType::HeroInventory | MirGridType::HeroEquipment) {
+    if matches!(
+        grid_from,
+        MirGridType::HeroInventory | MirGridType::HeroEquipment
+    ) || matches!(
+        grid_to,
+        MirGridType::HeroInventory | MirGridType::HeroEquipment
+    ) {
         return super::hero_inventory::merge_item(world, grid_from, grid_to, id_from, id_to);
     }
     if grid_from == MirGridType::Trade || grid_to == MirGridType::Trade {
@@ -2792,11 +3015,20 @@ pub(super) fn merge_item_impl(
         id_to,
         success: false,
     };
+    let equipment_amulet_merge = matches!(
+        (grid_from, grid_to),
+        (
+            MirGridType::Equipment,
+            MirGridType::Inventory | MirGridType::Storage
+        ) | (
+            MirGridType::Inventory | MirGridType::Storage,
+            MirGridType::Equipment
+        )
+    );
     if matches!(
         grid_from,
         MirGridType::HeroInventory
             | MirGridType::HeroEquipment
-            | MirGridType::Equipment
             | MirGridType::Fishing
             | MirGridType::QuestInventory
             | MirGridType::Trade
@@ -2805,12 +3037,13 @@ pub(super) fn merge_item_impl(
         grid_to,
         MirGridType::HeroInventory
             | MirGridType::HeroEquipment
-            | MirGridType::Equipment
             | MirGridType::Fishing
             | MirGridType::QuestInventory
             | MirGridType::Trade
             | MirGridType::Refine
-    ) {
+    ) || (!equipment_amulet_merge
+        && (grid_from == MirGridType::Equipment || grid_to == MirGridType::Equipment))
+    {
         return vec![failed_packet];
     }
     if (matches!(grid_from, MirGridType::Storage) || matches!(grid_to, MirGridType::Storage))
@@ -2836,6 +3069,20 @@ pub(super) fn merge_item_impl(
     {
         return vec![failed_packet];
     }
+
+    if equipment_amulet_merge {
+        if !merge_equipped_amulet_item(world, grid_from, grid_to, id_from, id_to) {
+            return vec![failed_packet];
+        }
+        return vec![ServerPacket::MergeItem {
+            grid_from,
+            grid_to,
+            id_from,
+            id_to,
+            success: true,
+        }];
+    }
+
     let mut resources = world.resource_mut::<InventoryResource>();
     let storage_slot_limit = accessible_storage_size(&resources);
     let success = match (grid_from, grid_to) {
@@ -2959,6 +3206,240 @@ pub(super) fn merge_item_impl(
         id_to,
         success: true,
     }]
+}
+
+/// Crystal `PlayerObject.MergeItem` permits an equipped stack only for real
+/// `ItemType.Amulet` instances. Keep the equipment carrier in place for a
+/// partial merge; a full merge retires just that worn carrier.
+fn merge_equipped_amulet_item(
+    world: &mut World,
+    grid_from: MirGridType,
+    grid_to: MirGridType,
+    id_from: u64,
+    id_to: u64,
+) -> bool {
+    let allow_cursed_removal = world
+        .resource::<super::resources::PlayerPermissionResource>()
+        .unlock_curse;
+    let removed_cursed_equipment = {
+        let mut resources = world.resource_mut::<InventoryResource>();
+        let storage_slot_limit = accessible_storage_size(&resources);
+        match (grid_from, grid_to) {
+            (MirGridType::Equipment, MirGridType::Inventory) => {
+                let InventoryResource {
+                    equipment_items,
+                    inventory_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_from,
+                    inventory_items,
+                    grid_to,
+                    id_to,
+                    true,
+                    None,
+                    allow_cursed_removal,
+                )
+            }
+            (MirGridType::Equipment, MirGridType::Storage) => {
+                let InventoryResource {
+                    equipment_items,
+                    storage_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_from,
+                    storage_items,
+                    grid_to,
+                    id_to,
+                    true,
+                    Some(storage_slot_limit),
+                    allow_cursed_removal,
+                )
+            }
+            (MirGridType::Inventory, MirGridType::Equipment) => {
+                let InventoryResource {
+                    equipment_items,
+                    inventory_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_to,
+                    inventory_items,
+                    grid_from,
+                    id_from,
+                    false,
+                    None,
+                    allow_cursed_removal,
+                )
+            }
+            (MirGridType::Storage, MirGridType::Equipment) => {
+                let InventoryResource {
+                    equipment_items,
+                    storage_items,
+                    reserved_item_unique_ids,
+                    ..
+                } = &mut *resources;
+                merge_equipped_amulet_with_collection(
+                    equipment_items,
+                    reserved_item_unique_ids,
+                    id_to,
+                    storage_items,
+                    grid_from,
+                    id_from,
+                    false,
+                    Some(storage_slot_limit),
+                    allow_cursed_removal,
+                )
+            }
+            _ => return false,
+        }
+    };
+
+    let Some(removed_cursed_equipment) = removed_cursed_equipment else {
+        return false;
+    };
+    if removed_cursed_equipment {
+        world
+            .resource_mut::<super::resources::PlayerPermissionResource>()
+            .unlock_curse = false;
+    }
+    super::stats::refresh_player_stats(world);
+    true
+}
+
+#[allow(clippy::too_many_arguments)]
+fn merge_equipped_amulet_with_collection(
+    equipment_items: &mut Vec<super::equipment::EquipmentState>,
+    reserved_item_unique_ids: &BTreeSet<u64>,
+    equipment_unique_id: u64,
+    collection: &mut Vec<ItemState>,
+    collection_grid: MirGridType,
+    collection_unique_id: u64,
+    equipment_is_source: bool,
+    storage_slot_limit: Option<u16>,
+    allow_cursed_removal: bool,
+) -> Option<bool> {
+    let equipment_index =
+        exact_equipment_index_for_client_reference(equipment_items, equipment_unique_id)?;
+    let collection_index =
+        item_index_for_client_reference(collection, collection_grid, collection_unique_id)?;
+    if storage_slot_limit
+        .is_some_and(|limit| !storage_slot_within_limit(collection[collection_index].slot, limit))
+    {
+        return None;
+    }
+
+    let equipment = &equipment_items[equipment_index];
+    if !crystal_item_template_for_item_key(&equipment.key)
+        .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_AMULET)
+    {
+        return None;
+    }
+    // The temporary ItemState is only a strict identity carrier. Its exact root
+    // UID and every nested UserItem field are retained by the conversion.
+    let equipment_carrier = super::equipment::item_state_from_equipment_state(
+        equipment.clone(),
+        collection[collection_index].container,
+        collection[collection_index].slot,
+    );
+    if !equipped_amulet_stack_identity_compatible(&equipment_carrier, &collection[collection_index])
+    {
+        return None;
+    }
+    if reserved_item_unique_ids.contains(&equipment_carrier.unique_id)
+        || reserved_item_unique_ids.contains(&collection[collection_index].unique_id)
+    {
+        return None;
+    }
+    if equipment_is_source && equipment.cursed && !allow_cursed_removal {
+        return None;
+    }
+    if equipment_is_source
+        && collection_grid == MirGridType::Storage
+        && (crystal_item_has_bind_flag(&equipment.key, CRYSTAL_BIND_DONT_STORE)
+            || item_has_rental_bind_flag(&equipment_carrier, CRYSTAL_BIND_DONT_STORE))
+    {
+        return None;
+    }
+
+    let max_stack = crystal_stack_size_for_item_key(&collection[collection_index].key);
+    let target_quantity = if equipment_is_source {
+        collection[collection_index].quantity
+    } else {
+        equipment.quantity
+    };
+    let source_quantity = if equipment_is_source {
+        equipment.quantity
+    } else {
+        collection[collection_index].quantity
+    };
+    if source_quantity == 0 || max_stack <= 1 || target_quantity >= max_stack {
+        return None;
+    }
+    let transferred = source_quantity.min(max_stack.saturating_sub(target_quantity));
+    if transferred == 0 {
+        return None;
+    }
+
+    if equipment_is_source {
+        collection[collection_index].quantity += transferred;
+        if transferred == source_quantity {
+            let removed = equipment_items.remove(equipment_index);
+            return Some(removed.cursed);
+        }
+        equipment_items[equipment_index].quantity -= transferred;
+    } else {
+        equipment_items[equipment_index].quantity += transferred;
+        if transferred == source_quantity {
+            collection.remove(collection_index);
+        } else {
+            collection[collection_index].quantity -= transferred;
+        }
+    }
+    Some(false)
+}
+
+fn equipped_amulet_stack_identity_compatible(
+    equipment_carrier: &ItemState,
+    collection_item: &ItemState,
+) -> bool {
+    let mut equipment_carrier = equipment_carrier.clone();
+    let mut collection_item = collection_item.clone();
+    // Amulets do not use durability (`equipment_uses_durability` explicitly
+    // excludes their slot), but the legacy equipment carrier supplies 10 when
+    // an ordinary zero-durability ItemState is worn. Canonicalize only that
+    // inert field for merge comparison; the retained carriers are unchanged.
+    equipment_carrier.durability_current = None;
+    equipment_carrier.durability_max = None;
+    collection_item.durability_current = None;
+    collection_item.durability_max = None;
+    item_stack_identity_compatible(&equipment_carrier, &collection_item)
+}
+
+fn exact_equipment_index_for_client_reference(
+    equipment_items: &[super::equipment::EquipmentState],
+    unique_id: u64,
+) -> Option<usize> {
+    let mut matches = equipment_items
+        .iter()
+        .enumerate()
+        .filter_map(|(index, item)| {
+            super::equipment::user_item_from_equipment_state(item)
+                .is_some_and(|user_item| user_item.unique_id == unique_id)
+                .then_some(index)
+        });
+    let index = matches.next()?;
+    matches.next().is_none().then_some(index)
 }
 
 pub(super) fn item_stack_identity_compatible(left: &ItemState, right: &ItemState) -> bool {
@@ -3316,7 +3797,136 @@ mod stack_identity_tests {
     use super::super::components::{Npc, ObjectId, Position, SelfPlayer};
     use super::super::equipment::EquipmentState;
     use super::super::npc::ActiveNpcServiceState;
-    use super::super::resources::NpcStateResource;
+    use super::super::resources::{NpcStateResource, Stage5SystemsResource};
+
+    #[test]
+    fn belt_move_grid_decodes_crystal_raw_slots_without_changing_normalized_bag_slots() {
+        assert_eq!(
+            crystal_inventory_move_slot(0, 46),
+            Some(CrystalInventoryMoveSlot::Belt(0))
+        );
+        assert_eq!(
+            crystal_inventory_move_slot(8, 46),
+            Some(CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2))
+        );
+        assert_eq!(crystal_inventory_move_slot(46, 46), None);
+        assert_eq!(
+            crystal_inventory_move_slot(46, 86),
+            Some(CrystalInventoryMoveSlot::Bag(ItemContainer::Bag2, 0))
+        );
+        assert_eq!(
+            inventory_container_and_slot_for_index(8),
+            Some((ItemContainer::Bag1, 8)),
+            "the existing Inventory grid keeps its normalized bag contract"
+        );
+    }
+
+    #[test]
+    fn belt_move_grid_moves_bag_item_to_empty_belt_without_changing_identity_or_quantity() {
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .inventory_items
+            .push(identity_stack(701, 2, ItemContainer::Bag1, 7));
+
+        assert!(move_crystal_inventory_items(
+            &mut resources,
+            CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2),
+            CrystalInventoryMoveSlot::Belt(0),
+        ));
+        assert!(resources.inventory_items.is_empty());
+        assert!(resources.belt_items.iter().any(|item| {
+            item.unique_id == 701
+                && item.quantity == 7
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+        }));
+    }
+
+    #[test]
+    fn move_item_packet_belt_grid_moves_raw_bag_slot_to_belt() {
+        let mut world = World::new();
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .inventory_items
+            .push(identity_stack(705, 2, ItemContainer::Bag1, 4));
+        world.insert_resource(resources);
+        world.insert_resource(Stage5SystemsResource {
+            stage5_systems: Default::default(),
+        });
+
+        assert_eq!(
+            move_item_impl(&mut world, MirGridType::Belt, 8, 0),
+            vec![ServerPacket::MoveItem {
+                grid: MirGridType::Belt,
+                from: 8,
+                to: 0,
+                success: true,
+            }]
+        );
+        let resources = world.resource::<InventoryResource>();
+        assert!(resources.inventory_items.is_empty());
+        assert!(resources.belt_items.iter().any(|item| {
+            item.unique_id == 705
+                && item.quantity == 4
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+        }));
+    }
+
+    #[test]
+    fn belt_move_grid_swaps_occupied_belt_and_bag_slots_without_loss_or_duplication() {
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .inventory_items
+            .push(identity_stack(702, 2, ItemContainer::Bag1, 3));
+        resources
+            .belt_items
+            .push(identity_stack(703, 0, ItemContainer::Belt, 5));
+
+        assert!(move_crystal_inventory_items(
+            &mut resources,
+            CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2),
+            CrystalInventoryMoveSlot::Belt(0),
+        ));
+        assert_eq!(resources.inventory_items.len(), 1);
+        assert_eq!(resources.belt_items.len(), 1);
+        assert!(resources.inventory_items.iter().any(|item| {
+            item.unique_id == 703
+                && item.quantity == 5
+                && item.container == ItemContainer::Bag1
+                && item.slot == 2
+        }));
+        assert!(resources.belt_items.iter().any(|item| {
+            item.unique_id == 702
+                && item.quantity == 3
+                && item.container == ItemContainer::Belt
+                && item.slot == 0
+        }));
+    }
+
+    #[test]
+    fn belt_move_grid_missing_source_is_transactional() {
+        let mut resources = InventoryResource::new(BASE_STORAGE_SLOTS);
+        resources
+            .belt_items
+            .push(identity_stack(704, 0, ItemContainer::Belt, 2));
+        let before_inventory = resources.inventory_items.clone();
+        let before_belt = resources.belt_items.clone();
+
+        assert!(!move_crystal_inventory_items(
+            &mut resources,
+            CrystalInventoryMoveSlot::Bag(ItemContainer::Bag1, 2),
+            CrystalInventoryMoveSlot::Belt(0),
+        ));
+        assert_eq!(
+            format!("{:?}", resources.inventory_items),
+            format!("{before_inventory:?}")
+        );
+        assert_eq!(
+            format!("{:?}", resources.belt_items),
+            format!("{before_belt:?}")
+        );
+    }
 
     #[test]
     fn known_healing_metadata_preserves_crystal_checkpoint_roundtrip() {
@@ -3591,12 +4201,14 @@ mod stack_identity_tests {
         resources.inventory_items = seed_inventory_items();
         resources.storage_items = seed_storage_items();
         resources.equipment_items = super::super::equipment::seed_equipment_items();
-        assert!(resources
-            .belt_items
-            .iter()
-            .chain(resources.inventory_items.iter())
-            .chain(resources.storage_items.iter())
-            .all(|item| item.user_item_metadata.is_none()));
+        assert!(
+            resources
+                .belt_items
+                .iter()
+                .chain(resources.inventory_items.iter())
+                .chain(resources.storage_items.iter())
+                .all(|item| item.user_item_metadata.is_none())
+        );
 
         let expected_belt = resources
             .belt_items

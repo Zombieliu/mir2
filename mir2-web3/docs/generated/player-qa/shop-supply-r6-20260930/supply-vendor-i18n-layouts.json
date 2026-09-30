@@ -1,0 +1,6207 @@
+{
+  "kind": "offline_production_supply_vendor_widgets",
+  "layoutFailures": [],
+  "liveAcceptance": false,
+  "locales": [
+    "zh-TW",
+    "en",
+    "pt-BR",
+    "ru",
+    "hi",
+    "id",
+    "vi",
+    "th",
+    "ar"
+  ],
+  "passed": true,
+  "screenshots": [
+    {
+      "file": "zh-TW-supply-Alchemist_Samuel.png",
+      "metadata": {
+        "class": "Warrior",
+        "level": 9,
+        "vendor": "Alchemist_Samuel",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            249.0
+          ],
+          "max": [
+            312.0,
+            366.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            124.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "出發補給 · 現有 / 建議"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            216.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            253.0,
+            282.0,
+            18.0
+          ],
+          "text": "到店后點擊商人購買，以店內報價為準。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            114.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            278.0,
+            270.0,
+            18.0
+          ],
+          "text": "前往商人 · 自動尋路"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            306.0,
+            270.0,
+            18.0
+          ],
+          "text": "查看全部補給"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            124.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "生命藥水：11 / 建議 24"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            132.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "當前推薦：小型生命藥水"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            83.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            211.0,
+            282.0,
+            18.0
+          ],
+          "text": "背包負重 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            334.0,
+            270.0,
+            18.0
+          ],
+          "text": "返回任務引導"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            123.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            18.0
+          ],
+          "text": "金幣 700 · 補足約 520"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 20,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            136.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            232.0,
+            282.0,
+            18.0
+          ],
+          "text": "鍊金師 Samuel (324,291)"
+        }
+      ]
+    },
+    {
+      "file": "zh-TW-supply-Merchant_Bull.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Merchant_Bull",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            312.0
+          ],
+          "max": [
+            312.0,
+            429.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            124.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "出發補給 · 現有 / 建議"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            216.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            316.0,
+            282.0,
+            18.0
+          ],
+          "text": "到店后點擊商人購買，以店內報價為準。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 11,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            114.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            341.0,
+            270.0,
+            18.0
+          ],
+          "text": "前往商人 · 自動尋路"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            103.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            295.0,
+            282.0,
+            18.0
+          ],
+          "text": "商人 Bull (374,296)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "回城卷：0 / 建議 1"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            369.0,
+            270.0,
+            18.0
+          ],
+          "text": "查看全部補給"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            161.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            274.0,
+            282.0,
+            18.0
+          ],
+          "text": "火符/召喚用符；施毒用毒粉。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            83.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            253.0,
+            282.0,
+            18.0
+          ],
+          "text": "背包負重 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 18,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            160.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "護身符：0 / 建議 100（不足）"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            397.0,
+            270.0,
+            18.0
+          ],
+          "text": "返回任務引導"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            130.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            211.0,
+            282.0,
+            18.0
+          ],
+          "text": "金幣 700 · 補足約 3700"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            180.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            232.0,
+            282.0,
+            18.0
+          ],
+          "text": "金幣不足：優先急缺品和回城卷。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 12,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            18.0
+          ],
+          "text": "隨機卷：0 / 建議 2"
+        }
+      ]
+    },
+    {
+      "file": "zh-TW-supply-Specialist_Travis.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Specialist_Travis",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            270.0
+          ],
+          "max": [
+            312.0,
+            387.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            163.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            274.0,
+            282.0,
+            18.0
+          ],
+          "text": "下一段：試劑店入口 (326,288)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            124.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "出發補給 · 現有 / 建議"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            138.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            299.0,
+            270.0,
+            18.0
+          ],
+          "text": "前往店鋪入口 · 自動尋路"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            87.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            253.0,
+            282.0,
+            18.0
+          ],
+          "text": "專家 Travis (4,9)"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            327.0,
+            270.0,
+            18.0
+          ],
+          "text": "查看全部補給"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            141.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "毒粉：0 / 建議 20（不足）"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 14,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            161.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            232.0,
+            282.0,
+            18.0
+          ],
+          "text": "火符/召喚用符；施毒用毒粉。"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            83.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            211.0,
+            282.0,
+            18.0
+          ],
+          "text": "背包負重 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 6,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            72.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            355.0,
+            270.0,
+            18.0
+          ],
+          "text": "返回任務引導"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            123.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "金幣 700 · 補足約 800"
+        },
+        {
+          "font": "Family(\"Noto Sans TC\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            180.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            18.0
+          ],
+          "text": "金幣不足：優先急缺品和回城卷。"
+        }
+      ]
+    },
+    {
+      "file": "en-supply-Alchemist_Samuel.png",
+      "metadata": {
+        "class": "Warrior",
+        "level": 9,
+        "vendor": "Alchemist_Samuel",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            267.0
+          ],
+          "max": [
+            312.0,
+            384.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            155.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            232.0,
+            282.0,
+            18.0
+          ],
+          "text": "Alchemist Samuel (324,291)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 71,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            206.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            253.0,
+            282.0,
+            36.0
+          ],
+          "text": "At the shop, click the merchant to\nbuy. The shop quote is authoritative."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            211.0,
+            282.0,
+            18.0
+          ],
+          "text": "Bag weight 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            154.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            296.0,
+            270.0,
+            18.0
+          ],
+          "text": "Go to merchant · auto-path"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            161.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            18.0
+          ],
+          "text": "Gold 700 · restock about 520"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            163.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "HP potion: 11 / suggested 24"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            181.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "Recommended: small HP potion"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            143.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            352.0,
+            270.0,
+            18.0
+          ],
+          "text": "Return to quest guidance"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            187.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "Travel supplies · held / suggested"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            93.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            324.0,
+            270.0,
+            18.0
+          ],
+          "text": "View all supplies"
+        }
+      ]
+    },
+    {
+      "file": "en-supply-Merchant_Bull.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Merchant_Bull",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            366.0
+          ],
+          "max": [
+            312.0,
+            483.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            177.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "Amulet: 0 / suggested 100 (low)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 71,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            206.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            352.0,
+            282.0,
+            36.0
+          ],
+          "text": "At the shop, click the merchant to\nbuy. The shop quote is authoritative."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            271.0,
+            282.0,
+            18.0
+          ],
+          "text": "Bag weight 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 60,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            190.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            292.0,
+            282.0,
+            36.0
+          ],
+          "text": "Fireball/summoning use Amulets;\nPoisoning uses poison powder."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            154.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            395.0,
+            270.0,
+            18.0
+          ],
+          "text": "Go to merchant · auto-path"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            168.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            211.0,
+            282.0,
+            18.0
+          ],
+          "text": "Gold 700 · restock about 3700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            134.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            331.0,
+            282.0,
+            18.0
+          ],
+          "text": "Merchant Bull (374,296)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 63,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            194.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            232.0,
+            282.0,
+            36.0
+          ],
+          "text": "Not enough gold: prioritize urgent\nsupplies and a return scroll."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            174.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            18.0
+          ],
+          "text": "Random scroll: 0 / suggested 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            143.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            451.0,
+            270.0,
+            18.0
+          ],
+          "text": "Return to quest guidance"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            173.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "Town Teleport: 0 / suggested 1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            187.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "Travel supplies · held / suggested"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            93.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            423.0,
+            270.0,
+            18.0
+          ],
+          "text": "View all supplies"
+        }
+      ]
+    },
+    {
+      "file": "en-supply-Specialist_Travis.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Specialist_Travis",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            342.0
+          ],
+          "max": [
+            312.0,
+            459.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 16,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            247.0,
+            282.0,
+            18.0
+          ],
+          "text": "Bag weight 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 60,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            190.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            268.0,
+            282.0,
+            36.0
+          ],
+          "text": "Fireball/summoning use Amulets;\nPoisoning uses poison powder."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            180.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            371.0,
+            270.0,
+            18.0
+          ],
+          "text": "Go to shop entrance · auto-path"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            161.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            187.0,
+            282.0,
+            18.0
+          ],
+          "text": "Gold 700 · restock about 800"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            166.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            328.0,
+            282.0,
+            36.0
+          ],
+          "text": "Next: Reagent Store entrance\n(326,288)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 63,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            194.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            208.0,
+            282.0,
+            36.0
+          ],
+          "text": "Not enough gold: prioritize urgent\nsupplies and a return scroll."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 36,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            184.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            36.0
+          ],
+          "text": "Poison powder: 0 / suggested 20\n(low)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            143.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            427.0,
+            270.0,
+            18.0
+          ],
+          "text": "Return to quest guidance"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            116.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            307.0,
+            282.0,
+            18.0
+          ],
+          "text": "Specialist Travis (4,9)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            187.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "Travel supplies · held / suggested"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            93.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            399.0,
+            270.0,
+            18.0
+          ],
+          "text": "View all supplies"
+        }
+      ]
+    },
+    {
+      "file": "pt-BR-supply-Alchemist_Samuel.png",
+      "metadata": {
+        "class": "Warrior",
+        "level": 9,
+        "vendor": "Alchemist_Samuel",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            303.0
+          ],
+          "max": [
+            312.0,
+            420.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            160.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            250.0,
+            282.0,
+            18.0
+          ],
+          "text": "Alquimista Samuel (324,291)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 73,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            202.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            271.0,
+            282.0,
+            54.0
+          ],
+          "text": "Ao chegar, clique no mercador para\ncomprar. Vale o preço informado na\nloja."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            184.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            332.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ir ao mercador · rota automática"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            211.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            208.0,
+            282.0,
+            18.0
+          ],
+          "text": "Ouro 700 · reposição aproximada 520"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            113.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            229.0,
+            282.0,
+            18.0
+          ],
+          "text": "Peso da bolsa 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            205.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            166.0,
+            282.0,
+            18.0
+          ],
+          "text": "Poção de vida: 11 / recomendado 24"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            225.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            187.0,
+            282.0,
+            18.0
+          ],
+          "text": "Recomendado: Poção de vida pequenas"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 42,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            180.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Suprimentos de viagem · atual /\nrecomendado"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            145.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            360.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ver todos os suprimentos"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            167.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            388.0,
+            270.0,
+            18.0
+          ],
+          "text": "Voltar à orientação da missão"
+        }
+      ]
+    },
+    {
+      "file": "pt-BR-supply-Merchant_Bull.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Merchant_Bull",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            474.0
+          ],
+          "max": [
+            312.0,
+            591.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            175.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            166.0,
+            282.0,
+            36.0
+          ],
+          "text": "Amuleto: 0 / recomendado 100\n(baixo)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 73,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            202.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            442.0,
+            282.0,
+            54.0
+          ],
+          "text": "Ao chegar, clique no mercador para\ncomprar. Vale o preço informado na\nloja."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            151.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            421.0,
+            282.0,
+            18.0
+          ],
+          "text": "Comerciante Bull (374,296)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            184.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            503.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ir ao mercador · rota automática"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 36,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            218.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            283.0,
+            282.0,
+            18.0
+          ],
+          "text": "Ouro 700 · reposição aproximada 3700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 71,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            222.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            304.0,
+            282.0,
+            36.0
+          ],
+          "text": "Ouro insuficiente: priorize os itens\nurgentes e um pergaminho de retorno."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 39,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            154.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            205.0,
+            282.0,
+            36.0
+          ],
+          "text": "Pergaminho de retorno: 0 /\nrecomendado 1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 51,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            208.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            244.0,
+            282.0,
+            36.0
+          ],
+          "text": "Pergaminho de teleporte aleatório: 0\n/ recomendado 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            113.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            343.0,
+            282.0,
+            18.0
+          ],
+          "text": "Peso da bolsa 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 42,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            180.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Suprimentos de viagem · atual /\nrecomendado"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 73,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            211.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            364.0,
+            282.0,
+            54.0
+          ],
+          "text": "Talismã de Fogo e invocações usam\nAmuletos; Envenenamento usa pó de\nveneno."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            145.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            531.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ver todos os suprimentos"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            167.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            559.0,
+            270.0,
+            18.0
+          ],
+          "text": "Voltar à orientação da missão"
+        }
+      ]
+    },
+    {
+      "file": "pt-BR-supply-Specialist_Travis.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Specialist_Travis",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            395.0
+          ],
+          "max": [
+            312.0,
+            512.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 25,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            129.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            343.0,
+            282.0,
+            18.0
+          ],
+          "text": "Especialista Travis (4,9)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            140.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            406.0,
+            270.0,
+            36.0
+          ],
+          "text": "Ir à entrada da loja · rota\nautomática"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            211.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            205.0,
+            282.0,
+            18.0
+          ],
+          "text": "Ouro 700 · reposição aproximada 800"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 71,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            222.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            226.0,
+            282.0,
+            36.0
+          ],
+          "text": "Ouro insuficiente: priorize os itens\nurgentes e um pergaminho de retorno."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            113.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            265.0,
+            282.0,
+            18.0
+          ],
+          "text": "Peso da bolsa 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 46,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            159.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            364.0,
+            282.0,
+            36.0
+          ],
+          "text": "Próximo: entrada de Loja de\nreagentes (326,288)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            192.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            166.0,
+            282.0,
+            36.0
+          ],
+          "text": "Pó venenoso: 0 / recomendado 20\n(baixo)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 42,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            180.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Suprimentos de viagem · atual /\nrecomendado"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 73,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            211.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            286.0,
+            282.0,
+            54.0
+          ],
+          "text": "Talismã de Fogo e invocações usam\nAmuletos; Envenenamento usa pó de\nveneno."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            145.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            452.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ver todos os suprimentos"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            167.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            480.0,
+            270.0,
+            18.0
+          ],
+          "text": "Voltar à orientação da missão"
+        }
+      ]
+    },
+    {
+      "file": "ru-supply-Alchemist_Samuel.png",
+      "metadata": {
+        "class": "Warrior",
+        "level": 9,
+        "vendor": "Alchemist_Samuel",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            285.0
+          ],
+          "max": [
+            312.0,
+            402.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            151.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            232.0,
+            282.0,
+            18.0
+          ],
+          "text": "Алхимик Samuel (324,291)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 78,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            219.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            253.0,
+            282.0,
+            54.0
+          ],
+          "text": "В магазине нажмите на торговца для\nпокупки. Действует цена, указанная\nмагазином."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            94.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            211.0,
+            282.0,
+            18.0
+          ],
+          "text": "Вес сумки 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            65.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            342.0,
+            270.0,
+            18.0
+          ],
+          "text": "Все запасы"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            228.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "Зелье здоровья: 11 / рекомендуется 24"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            188.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            18.0
+          ],
+          "text": "Золото: 700 · пополнение ≈ 520"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            124.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            314.0,
+            270.0,
+            18.0
+          ],
+          "text": "К торговцу · автопуть"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            370.0,
+            270.0,
+            18.0
+          ],
+          "text": "Назад к заданию"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            237.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "Походные запасы · есть / рекомендуется"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            236.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "Рекомендуется: Зелье здоровья (малый)"
+        }
+      ]
+    },
+    {
+      "file": "ru-supply-Merchant_Bull.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Merchant_Bull",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            438.0
+          ],
+          "max": [
+            312.0,
+            555.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 78,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            219.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            406.0,
+            282.0,
+            54.0
+          ],
+          "text": "В магазине нажмите на торговца для\nпокупки. Действует цена, указанная\nмагазином."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            94.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            307.0,
+            282.0,
+            18.0
+          ],
+          "text": "Вес сумки 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            65.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            495.0,
+            270.0,
+            18.0
+          ],
+          "text": "Все запасы"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 88,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            207.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            328.0,
+            282.0,
+            54.0
+          ],
+          "text": "Духовный огненный шар и призыв\nрасходуют талисманы; Отравление\nрасходует ядовитый порошок."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            195.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            247.0,
+            282.0,
+            18.0
+          ],
+          "text": "Золото: 700 · пополнение ≈ 3700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            124.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            467.0,
+            270.0,
+            18.0
+          ],
+          "text": "К торговцу · автопуть"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 61,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            209.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            268.0,
+            282.0,
+            36.0
+          ],
+          "text": "Мало золота: сначала купите самое\nнужное и свиток возвращения."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            523.0,
+            270.0,
+            18.0
+          ],
+          "text": "Назад к заданию"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            237.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "Походные запасы · есть / рекомендуется"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 46,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            192.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            36.0
+          ],
+          "text": "Свиток возвращения в город: 0 /\nрекомендуется 1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 47,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            195.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            208.0,
+            282.0,
+            36.0
+          ],
+          "text": "Свиток случайного телепорта: 0 /\nрекомендуется 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            233.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "Талисман: 0 / рекомендуется 100 (мало)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            133.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            385.0,
+            282.0,
+            18.0
+          ],
+          "text": "Торговец Bull (374,296)"
+        }
+      ]
+    },
+    {
+      "file": "ru-supply-Specialist_Travis.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Specialist_Travis",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            342.0
+          ],
+          "max": [
+            312.0,
+            459.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            94.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            247.0,
+            282.0,
+            18.0
+          ],
+          "text": "Вес сумки 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 10,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            65.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            399.0,
+            270.0,
+            18.0
+          ],
+          "text": "Все запасы"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            227.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            346.0,
+            282.0,
+            18.0
+          ],
+          "text": "Далее: Лавка реагентов, вход (326,288)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 88,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            207.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            268.0,
+            282.0,
+            54.0
+          ],
+          "text": "Духовный огненный шар и призыв\nрасходуют талисманы; Отравление\nрасходует ядовитый порошок."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            188.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            187.0,
+            282.0,
+            18.0
+          ],
+          "text": "Золото: 700 · пополнение ≈ 800"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            166.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            371.0,
+            270.0,
+            18.0
+          ],
+          "text": "К входу в магазин · автопуть"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 61,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            209.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            208.0,
+            282.0,
+            36.0
+          ],
+          "text": "Мало золота: сначала купите самое\nнужное и свиток возвращения."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            427.0,
+            270.0,
+            18.0
+          ],
+          "text": "Назад к заданию"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            237.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "Походные запасы · есть / рекомендуется"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            132.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            325.0,
+            282.0,
+            18.0
+          ],
+          "text": "Специалист Travis (4,9)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 44,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            244.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            36.0
+          ],
+          "text": "Ядовитый порошок: 0 / рекомендуется 20\n(мало)"
+        }
+      ]
+    },
+    {
+      "file": "hi-supply-Alchemist_Samuel.png",
+      "metadata": {
+        "class": "Warrior",
+        "level": 9,
+        "vendor": "Alchemist_Samuel",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            267.0
+          ],
+          "max": [
+            312.0,
+            384.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            96.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            352.0,
+            270.0,
+            18.0
+          ],
+          "text": "कार्य मार्गदर्शन पर लौटें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            92.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            211.0,
+            282.0,
+            18.0
+          ],
+          "text": "थैले का वज़न 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 68,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            203.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            253.0,
+            282.0,
+            36.0
+          ],
+          "text": "दुकान में व्यापारी पर क्लिक करके खरीदें। दुकान\nद्वारा बताई कीमत ही लागू होगी।"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            158.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "यात्रा की रसद · पास में / सुझाई गई"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            146.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            232.0,
+            282.0,
+            18.0
+          ],
+          "text": "रसायनविद् Samuel (324,291)"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            152.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            296.0,
+            270.0,
+            18.0
+          ],
+          "text": "व्यापारी के पास जाएँ · स्वतः रास्ता"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            62.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            324.0,
+            270.0,
+            18.0
+          ],
+          "text": "सारी रसद देखें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 25,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            130.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "सुझाव: स्वास्थ्य औषधि (छोटा)"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            182.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            18.0
+          ],
+          "text": "सोना 700 · रसद की लागत लगभग 520"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 36,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            176.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "स्वास्थ्य औषधि: 11 / सुझाई गई मात्रा 24"
+        }
+      ]
+    },
+    {
+      "file": "hi-supply-Merchant_Bull.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Merchant_Bull",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            384.0
+          ],
+          "max": [
+            312.0,
+            501.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 68,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            215.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            310.0,
+            282.0,
+            36.0
+          ],
+          "text": "आत्मिक अग्निगोला और आह्वान में ताबीज़ लगते हैं;\nविषप्रयोग में विष चूर्ण लगता है।"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            96.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            469.0,
+            270.0,
+            18.0
+          ],
+          "text": "कार्य मार्गदर्शन पर लौटें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            170.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "ताबीज़: 0 / सुझाई गई मात्रा 100 (कम)"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            92.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            289.0,
+            282.0,
+            18.0
+          ],
+          "text": "थैले का वज़न 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 68,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            203.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            370.0,
+            282.0,
+            36.0
+          ],
+          "text": "दुकान में व्यापारी पर क्लिक करके खरीदें। दुकान\nद्वारा बताई कीमत ही लागू होगी।"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            166.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "नगर वापसी पत्र: 0 / सुझाई गई मात्रा 1"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            158.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "यात्रा की रसद · पास में / सुझाई गई"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 41,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            174.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            36.0
+          ],
+          "text": "यादृच्छिक स्थानांतरण पत्र: 0 / सुझाई गई\nमात्रा 2"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            112.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            349.0,
+            282.0,
+            18.0
+          ],
+          "text": "व्यापारी Bull (374,296)"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            152.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            413.0,
+            270.0,
+            18.0
+          ],
+          "text": "व्यापारी के पास जाएँ · स्वतः रास्ता"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            62.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            441.0,
+            270.0,
+            18.0
+          ],
+          "text": "सारी रसद देखें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            188.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            229.0,
+            282.0,
+            18.0
+          ],
+          "text": "सोना 700 · रसद की लागत लगभग 3700"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 43,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            198.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            250.0,
+            282.0,
+            36.0
+          ],
+          "text": "सोना कम है: पहले ज़रूरी रसद और वापसी पत्र\nखरीदें।"
+        }
+      ]
+    },
+    {
+      "file": "hi-supply-Specialist_Travis.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Specialist_Travis",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            306.0
+          ],
+          "max": [
+            312.0,
+            423.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            188.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            310.0,
+            282.0,
+            18.0
+          ],
+          "text": "अगला: अभिकर्मक दुकान प्रवेश (326,288)"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 68,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            215.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            250.0,
+            282.0,
+            36.0
+          ],
+          "text": "आत्मिक अग्निगोला और आह्वान में ताबीज़ लगते हैं;\nविषप्रयोग में विष चूर्ण लगता है।"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            96.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            391.0,
+            270.0,
+            18.0
+          ],
+          "text": "कार्य मार्गदर्शन पर लौटें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 17,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            92.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            229.0,
+            282.0,
+            18.0
+          ],
+          "text": "थैले का वज़न 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            169.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            335.0,
+            270.0,
+            18.0
+          ],
+          "text": "दुकान के प्रवेश तक जाएँ · स्वतः रास्ता"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            158.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "यात्रा की रसद · पास में / सुझाई गई"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            97.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            289.0,
+            282.0,
+            18.0
+          ],
+          "text": "विशेषज्ञ Travis (4,9)"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            171.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "विष चूर्ण: 0 / सुझाई गई मात्रा 20 (कम)"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 13,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            62.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            363.0,
+            270.0,
+            18.0
+          ],
+          "text": "सारी रसद देखें"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            182.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "सोना 700 · रसद की लागत लगभग 800"
+        },
+        {
+          "font": "Family(\"Noto Sans Devanagari\")",
+          "glyphs": 43,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            198.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            36.0
+          ],
+          "text": "सोना कम है: पहले ज़रूरी रसद और वापसी पत्र\nखरीदें।"
+        }
+      ]
+    },
+    {
+      "file": "id-supply-Alchemist_Samuel.png",
+      "metadata": {
+        "class": "Warrior",
+        "level": 9,
+        "vendor": "Alchemist_Samuel",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            303.0
+          ],
+          "max": [
+            312.0,
+            420.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            144.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            250.0,
+            282.0,
+            18.0
+          ],
+          "text": "Alkemis Samuel (324,291)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            86.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            229.0,
+            282.0,
+            18.0
+          ],
+          "text": "Berat tas 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 78,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            209.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            271.0,
+            282.0,
+            54.0
+          ],
+          "text": "Di toko, klik pedagang untuk\nmembeli. Harga yang berlaku adalah\nharga dari toko."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            172.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            187.0,
+            282.0,
+            18.0
+          ],
+          "text": "Disarankan: Ramuan HP (kecil)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            176.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            208.0,
+            282.0,
+            18.0
+          ],
+          "text": "Emas 700 · isi ulang sekitar 520"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            161.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            332.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ke pedagang · rute otomatis"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            142.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            388.0,
+            270.0,
+            18.0
+          ],
+          "text": "Kembali ke panduan misi"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            136.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            360.0,
+            270.0,
+            18.0
+          ],
+          "text": "Lihat semua perbekalan"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 44,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            185.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Perbekalan perjalanan · dimiliki /\ndisarankan"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            177.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            166.0,
+            282.0,
+            18.0
+          ],
+          "text": "Ramuan HP: 11 / disarankan 24"
+        }
+      ]
+    },
+    {
+      "file": "id-supply-Merchant_Bull.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Merchant_Bull",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            474.0
+          ],
+          "max": [
+            312.0,
+            591.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            86.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            343.0,
+            282.0,
+            18.0
+          ],
+          "text": "Berat tas 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 72,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            174.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            364.0,
+            282.0,
+            54.0
+          ],
+          "text": "Bola Api Roh dan pemanggilan\nmemakai Jimat; Peracunan\nmemakai Bubuk Racun."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 78,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            209.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            442.0,
+            282.0,
+            54.0
+          ],
+          "text": "Di toko, klik pedagang untuk\nmembeli. Harga yang berlaku adalah\nharga dari toko."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            183.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            265.0,
+            282.0,
+            18.0
+          ],
+          "text": "Emas 700 · isi ulang sekitar 3700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 65,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            208.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            286.0,
+            282.0,
+            54.0
+          ],
+          "text": "Emas tidak cukup: utamakan\nperbekalan mendesak dan gulungan\npulang."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            148.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            187.0,
+            282.0,
+            36.0
+          ],
+          "text": "Gulungan Pulang Kota: 0 /\ndisarankan 1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 42,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            172.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            226.0,
+            282.0,
+            36.0
+          ],
+          "text": "Gulungan Teleportasi Acak: 0 /\ndisarankan 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 35,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            194.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            166.0,
+            282.0,
+            18.0
+          ],
+          "text": "Jimat: 0 / disarankan 100 (menipis)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            161.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            503.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ke pedagang · rute otomatis"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            142.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            559.0,
+            270.0,
+            18.0
+          ],
+          "text": "Kembali ke panduan misi"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            136.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            531.0,
+            270.0,
+            18.0
+          ],
+          "text": "Lihat semua perbekalan"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            137.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            421.0,
+            282.0,
+            18.0
+          ],
+          "text": "Pedagang Bull (374,296)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 44,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            185.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Perbekalan perjalanan · dimiliki /\ndisarankan"
+        }
+      ]
+    },
+    {
+      "file": "id-supply-Specialist_Travis.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Specialist_Travis",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            396.0
+          ],
+          "max": [
+            312.0,
+            513.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            86.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            283.0,
+            282.0,
+            18.0
+          ],
+          "text": "Berat tas 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 44,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            168.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            382.0,
+            282.0,
+            36.0
+          ],
+          "text": "Berikutnya: pintu masuk Toko\nReagen (326,288)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 72,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            174.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            304.0,
+            282.0,
+            54.0
+          ],
+          "text": "Bola Api Roh dan pemanggilan\nmemakai Jimat; Peracunan\nmemakai Bubuk Racun."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 39,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            178.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            166.0,
+            282.0,
+            36.0
+          ],
+          "text": "Bubuk Racun: 0 / disarankan 20\n(menipis)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            176.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            205.0,
+            282.0,
+            18.0
+          ],
+          "text": "Emas 700 · isi ulang sekitar 800"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 65,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            208.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            226.0,
+            282.0,
+            54.0
+          ],
+          "text": "Emas tidak cukup: utamakan\nperbekalan mendesak dan gulungan\npulang."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            162.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            425.0,
+            270.0,
+            18.0
+          ],
+          "text": "Ke pintu toko · rute otomatis"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            142.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            481.0,
+            270.0,
+            18.0
+          ],
+          "text": "Kembali ke panduan misi"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            136.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            453.0,
+            270.0,
+            18.0
+          ],
+          "text": "Lihat semua perbekalan"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 44,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            185.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Perbekalan perjalanan · dimiliki /\ndisarankan"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            112.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            361.0,
+            282.0,
+            18.0
+          ],
+          "text": "Spesialis Travis (4,9)"
+        }
+      ]
+    },
+    {
+      "file": "vi-supply-Alchemist_Samuel.png",
+      "metadata": {
+        "class": "Warrior",
+        "level": 9,
+        "vendor": "Alchemist_Samuel",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            303.0
+          ],
+          "max": [
+            312.0,
+            420.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            135.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            166.0,
+            282.0,
+            18.0
+          ],
+          "text": "Bình HP: 11 / đề xuất 24"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            168.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            250.0,
+            282.0,
+            18.0
+          ],
+          "text": "Nhà giả kim Samuel (324,291)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            176.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Tiếp tế hành trình · hiện có / đề\nxuất"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            123.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            229.0,
+            282.0,
+            18.0
+          ],
+          "text": "Trọng lượng túi 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 81,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            225.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            271.0,
+            282.0,
+            54.0
+          ],
+          "text": "Tại cửa hàng, nhấp vào thương nhân để\nmua. Giá do cửa hàng báo mới là giá\náp dụng."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            177.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            208.0,
+            282.0,
+            18.0
+          ],
+          "text": "Vàng 700 · bổ sung khoảng 520"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            135.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            388.0,
+            270.0,
+            18.0
+          ],
+          "text": "Về hướng dẫn nhiệm vụ"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            111.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            360.0,
+            270.0,
+            18.0
+          ],
+          "text": "Xem toàn bộ tiếp tế"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            185.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            332.0,
+            270.0,
+            18.0
+          ],
+          "text": "Đến thương nhân · tự tìm đường"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            128.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            187.0,
+            282.0,
+            18.0
+          ],
+          "text": "Đề xuất: Bình HP (nhỏ)"
+        }
+      ]
+    },
+    {
+      "file": "vi-supply-Merchant_Bull.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Merchant_Bull",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            420.0
+          ],
+          "max": [
+            312.0,
+            537.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            164.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            166.0,
+            282.0,
+            18.0
+          ],
+          "text": "Bùa: 0 / đề xuất 100 (sắp hết)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 42,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            206.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            208.0,
+            282.0,
+            36.0
+          ],
+          "text": "Cuộn dịch chuyển ngẫu nhiên: 0 / đề\nxuất 2"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 28,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            159.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            187.0,
+            282.0,
+            18.0
+          ],
+          "text": "Cuộn về thành: 0 / đề xuất 1"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 56,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            203.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            268.0,
+            282.0,
+            36.0
+          ],
+          "text": "Không đủ vàng: ưu tiên đồ thiết yếu\nvà một cuộn về thành."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 65,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            198.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            328.0,
+            282.0,
+            36.0
+          ],
+          "text": "Linh hồn hỏa phù và phép triệu hồi\ndùng Bùa; Thi độc dùng Bột độc."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            156.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            367.0,
+            282.0,
+            18.0
+          ],
+          "text": "Thương nhân Bull (374,296)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            176.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Tiếp tế hành trình · hiện có / đề\nxuất"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            123.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            307.0,
+            282.0,
+            18.0
+          ],
+          "text": "Trọng lượng túi 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 81,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            225.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            388.0,
+            282.0,
+            54.0
+          ],
+          "text": "Tại cửa hàng, nhấp vào thương nhân để\nmua. Giá do cửa hàng báo mới là giá\náp dụng."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            184.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            247.0,
+            282.0,
+            18.0
+          ],
+          "text": "Vàng 700 · bổ sung khoảng 3700"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            135.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            505.0,
+            270.0,
+            18.0
+          ],
+          "text": "Về hướng dẫn nhiệm vụ"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            111.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            477.0,
+            270.0,
+            18.0
+          ],
+          "text": "Xem toàn bộ tiếp tế"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            185.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            449.0,
+            270.0,
+            18.0
+          ],
+          "text": "Đến thương nhân · tự tìm đường"
+        }
+      ]
+    },
+    {
+      "file": "vi-supply-Specialist_Travis.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Specialist_Travis",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            342.0
+          ],
+          "max": [
+            312.0,
+            459.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 33,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            178.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            166.0,
+            282.0,
+            18.0
+          ],
+          "text": "Bột độc: 0 / đề xuất 20 (sắp hết)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            126.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            307.0,
+            282.0,
+            18.0
+          ],
+          "text": "Chuyên gia Travis (4,9)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 56,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            203.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            208.0,
+            282.0,
+            36.0
+          ],
+          "text": "Không đủ vàng: ưu tiên đồ thiết yếu\nvà một cuộn về thành."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 65,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            198.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            268.0,
+            282.0,
+            36.0
+          ],
+          "text": "Linh hồn hỏa phù và phép triệu hồi\ndùng Bùa; Thi độc dùng Bột độc."
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 42,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            183.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            328.0,
+            282.0,
+            36.0
+          ],
+          "text": "Tiếp theo: lối vào Tiệm pháp liệu\n(326,288)"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            176.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            36.0
+          ],
+          "text": "Tiếp tế hành trình · hiện có / đề\nxuất"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            123.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            247.0,
+            282.0,
+            18.0
+          ],
+          "text": "Trọng lượng túi 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            177.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            187.0,
+            282.0,
+            18.0
+          ],
+          "text": "Vàng 700 · bổ sung khoảng 800"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 22,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            135.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            427.0,
+            270.0,
+            18.0
+          ],
+          "text": "Về hướng dẫn nhiệm vụ"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            111.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            399.0,
+            270.0,
+            18.0
+          ],
+          "text": "Xem toàn bộ tiếp tế"
+        },
+        {
+          "font": "Family(\"Noto Sans\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            164.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            371.0,
+            270.0,
+            18.0
+          ],
+          "text": "Đến cửa hàng · tự tìm đường"
+        }
+      ]
+    },
+    {
+      "file": "th-supply-Alchemist_Samuel.png",
+      "metadata": {
+        "class": "Warrior",
+        "level": 9,
+        "vendor": "Alchemist_Samuel",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            267.0
+          ],
+          "max": [
+            312.0,
+            384.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            114.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            352.0,
+            270.0,
+            18.0
+          ],
+          "text": "กลับไปที่คำแนะนำภารกิจ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            75.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            324.0,
+            270.0,
+            18.0
+          ],
+          "text": "ดูเสบียงทั้งหมด"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            175.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            18.0
+          ],
+          "text": "ทอง 700 · เติมเสบียงประมาณ 520"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 34,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            184.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            232.0,
+            282.0,
+            18.0
+          ],
+          "text": "นักเล่นแร่แปรธาตุ Samuel (324,291)"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            101.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            211.0,
+            282.0,
+            18.0
+          ],
+          "text": "น้ำหนักกระเป๋า 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 27,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            133.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "ยาฟื้นฟู HP: 11 / แนะนำ 24"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 58,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            134.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            253.0,
+            282.0,
+            36.0
+          ],
+          "text": "เมื่อถึงร้าน คลิกพ่อค้าเพื่อซื้อ\nใช้ราคาที่ร้านแจ้งเป็นหลัก"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            143.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "เสบียงเดินทาง · ที่มี / แนะนำ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            121.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "แนะนำ: ยาฟื้นฟู HP (เล็ก)"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            128.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            296.0,
+            270.0,
+            18.0
+          ],
+          "text": "ไปหาพ่อค้า · เดินอัตโนมัติ"
+        }
+      ]
+    },
+    {
+      "file": "th-supply-Merchant_Bull.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Merchant_Bull",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            348.0
+          ],
+          "max": [
+            312.0,
+            465.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            114.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            433.0,
+            270.0,
+            18.0
+          ],
+          "text": "กลับไปที่คำแนะนำภารกิจ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            138.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "คัมภีร์กลับเมือง: 0 / แนะนำ 1"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            131.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            18.0
+          ],
+          "text": "คัมภีร์วาร์ปสุ่ม: 0 / แนะนำ 2"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            75.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            405.0,
+            270.0,
+            18.0
+          ],
+          "text": "ดูเสบียงทั้งหมด"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            182.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            211.0,
+            282.0,
+            18.0
+          ],
+          "text": "ทอง 700 · เติมเสบียงประมาณ 3700"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 50,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            238.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            232.0,
+            282.0,
+            18.0
+          ],
+          "text": "ทองไม่พอ: ซื้อเสบียงจำเป็นและคัมภีร์กลับเมืองก่อน"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            101.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            253.0,
+            282.0,
+            18.0
+          ],
+          "text": "น้ำหนักกระเป๋า 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            107.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            313.0,
+            282.0,
+            18.0
+          ],
+          "text": "พ่อค้า Bull (374,296)"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 60,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            201.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            274.0,
+            282.0,
+            36.0
+          ],
+          "text": "ลูกไฟวิญญาณและการอัญเชิญใช้เครื่องราง\nส่วนการวางยาพิษใช้ผงพิษ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 38,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            182.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "เครื่องราง: 0 / แนะนำ 100 (เหลือน้อย)"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 58,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            134.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            334.0,
+            282.0,
+            36.0
+          ],
+          "text": "เมื่อถึงร้าน คลิกพ่อค้าเพื่อซื้อ\nใช้ราคาที่ร้านแจ้งเป็นหลัก"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            143.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "เสบียงเดินทาง · ที่มี / แนะนำ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 26,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            128.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            377.0,
+            270.0,
+            18.0
+          ],
+          "text": "ไปหาพ่อค้า · เดินอัตโนมัติ"
+        }
+      ]
+    },
+    {
+      "file": "th-supply-Specialist_Travis.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Specialist_Travis",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            288.0
+          ],
+          "max": [
+            312.0,
+            405.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 24,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            114.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            373.0,
+            270.0,
+            18.0
+          ],
+          "text": "กลับไปที่คำแนะนำภารกิจ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 15,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            75.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            345.0,
+            270.0,
+            18.0
+          ],
+          "text": "ดูเสบียงทั้งหมด"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 40,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            194.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            292.0,
+            282.0,
+            18.0
+          ],
+          "text": "ถัดไป: ทางเข้า ร้านวัตถุดิบเวท (326,288)"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            175.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "ทอง 700 · เติมเสบียงประมาณ 800"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 50,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            238.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            18.0
+          ],
+          "text": "ทองไม่พอ: ซื้อเสบียงจำเป็นและคัมภีร์กลับเมืองก่อน"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            101.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            211.0,
+            282.0,
+            18.0
+          ],
+          "text": "น้ำหนักกระเป๋า 17/77"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 32,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            159.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "ผงพิษ: 0 / แนะนำ 20 (เหลือน้อย)"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 25,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            117.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            271.0,
+            282.0,
+            18.0
+          ],
+          "text": "ผู้เชี่ยวชาญ Travis (4,9)"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 60,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            201.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            232.0,
+            282.0,
+            36.0
+          ],
+          "text": "ลูกไฟวิญญาณและการอัญเชิญใช้เครื่องราง\nส่วนการวางยาพิษใช้ผงพิษ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            143.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "เสบียงเดินทาง · ที่มี / แนะนำ"
+        },
+        {
+          "font": "Family(\"Noto Sans Thai\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            140.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            317.0,
+            270.0,
+            18.0
+          ],
+          "text": "ไปทางเข้าร้าน · เดินอัตโนมัติ"
+        }
+      ]
+    },
+    {
+      "file": "ar-supply-Alchemist_Samuel.png",
+      "metadata": {
+        "class": "Warrior",
+        "level": 9,
+        "vendor": "Alchemist_Samuel",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            285.0
+          ],
+          "max": [
+            312.0,
+            402.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            119.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            314.0,
+            270.0,
+            18.0
+          ],
+          "text": "إلى التاجر · مسار تلقائي"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 41,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            173.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            18.0
+          ],
+          "text": "الذهب 700 · تكلفة التزوّد نحو 520"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            125.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            370.0,
+            270.0,
+            18.0
+          ],
+          "text": "العودة إلى إرشادات المهمة"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            131.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "المقترح: جرعة صحة (صغير)"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 30,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            135.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "جرعة صحة: 11 / المقترح 24"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 29,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            139.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            232.0,
+            282.0,
+            18.0
+          ],
+          "text": "خيميائي Samuel (324,291)"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            84.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            342.0,
+            270.0,
+            18.0
+          ],
+          "text": "عرض جميع المؤن"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 90,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            172.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            253.0,
+            282.0,
+            54.0
+          ],
+          "text": "في المتجر، انقر على التاجر للشراء.\nالسعر المعتمد هو السعر الذي يعرضه\nالمتجر."
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            149.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "مؤن الرحلة · المتوفر / المقترح"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            91.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            211.0,
+            282.0,
+            18.0
+          ],
+          "text": "وزن الحقيبة 17/77"
+        }
+      ]
+    },
+    {
+      "file": "ar-supply-Merchant_Bull.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Merchant_Bull",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            402.0
+          ],
+          "max": [
+            312.0,
+            519.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            119.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            431.0,
+            270.0,
+            18.0
+          ],
+          "text": "إلى التاجر · مسار تلقائي"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 42,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            180.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            229.0,
+            282.0,
+            18.0
+          ],
+          "text": "الذهب 700 · تكلفة التزوّد نحو 3700"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 74,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            167.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            250.0,
+            282.0,
+            36.0
+          ],
+          "text": "الذهب غير كافٍ: أعطِ الأولوية للمؤن\nالضرورية ولفافة عودة."
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            125.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            487.0,
+            270.0,
+            18.0
+          ],
+          "text": "العودة إلى إرشادات المهمة"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 21,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            99.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            349.0,
+            282.0,
+            18.0
+          ],
+          "text": "تاجر Bull (374,296)"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 85,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            213.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            310.0,
+            282.0,
+            36.0
+          ],
+          "text": "تستهلك كرة نار الروح والاستدعاء\nالتعويذات؛ ويستهلك التسميم مسحوق السم."
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 41,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            166.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "تعويذة: 0 / المقترح 100 (منخفض)"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            84.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            459.0,
+            270.0,
+            18.0
+          ],
+          "text": "عرض جميع المؤن"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 90,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            172.0,
+            44.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            370.0,
+            282.0,
+            54.0
+          ],
+          "text": "في المتجر، انقر على التاجر للشراء.\nالسعر المعتمد هو السعر الذي يعرضه\nالمتجر."
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 48,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            170.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            36.0
+          ],
+          "text": "لفافة العودة إلى المدينة: 0 / المقترح\n1"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 45,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            166.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            208.0,
+            282.0,
+            18.0
+          ],
+          "text": "لفافة انتقال عشوائي: 0 / المقترح 2"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            149.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "مؤن الرحلة · المتوفر / المقترح"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            91.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            289.0,
+            282.0,
+            18.0
+          ],
+          "text": "وزن الحقيبة 17/77"
+        }
+      ]
+    },
+    {
+      "file": "ar-supply-Specialist_Travis.png",
+      "metadata": {
+        "class": "Taoist",
+        "level": 28,
+        "vendor": "Specialist_Travis",
+        "viewport": {
+          "contentSize": [
+            303.0,
+            306.0
+          ],
+          "max": [
+            312.0,
+            423.0
+          ],
+          "maxScroll": 0.0,
+          "min": [
+            8.0,
+            116.0
+          ]
+        }
+      },
+      "textRows": [
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            154.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            335.0,
+            270.0,
+            18.0
+          ],
+          "text": "إلى مدخل المتجر · مسار تلقائي"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            112.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            289.0,
+            282.0,
+            18.0
+          ],
+          "text": "اختصاصي Travis (4,9)"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 42,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            189.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            310.0,
+            282.0,
+            18.0
+          ],
+          "text": "التالي: مدخل متجر الكواشف (326,288)"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 41,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            173.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            169.0,
+            282.0,
+            18.0
+          ],
+          "text": "الذهب 700 · تكلفة التزوّد نحو 800"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 74,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            167.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            190.0,
+            282.0,
+            36.0
+          ],
+          "text": "الذهب غير كافٍ: أعطِ الأولوية للمؤن\nالضرورية ولفافة عودة."
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 31,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            125.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            391.0,
+            270.0,
+            18.0
+          ],
+          "text": "العودة إلى إرشادات المهمة"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 85,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            213.0,
+            29.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            250.0,
+            282.0,
+            36.0
+          ],
+          "text": "تستهلك كرة نار الروح والاستدعاء\nالتعويذات؛ ويستهلك التسميم مسحوق السم."
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 19,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            84.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            25.0,
+            363.0,
+            270.0,
+            18.0
+          ],
+          "text": "عرض جميع المؤن"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 37,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            149.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            127.0,
+            282.0,
+            18.0
+          ],
+          "text": "مؤن الرحلة · المتوفر / المقترح"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 39,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            187.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            148.0,
+            282.0,
+            18.0
+          ],
+          "text": "مسحوق سم: 0 / المقترح 20 (منخفض)"
+        },
+        {
+          "font": "Family(\"Noto Sans Arabic\")",
+          "glyphs": 23,
+          "layoutExceedsNode": false,
+          "layoutSize": [
+            91.0,
+            15.0
+          ],
+          "missingGlyphs": 0,
+          "nodeOutsideViewport": false,
+          "rect": [
+            19.0,
+            229.0,
+            282.0,
+            18.0
+          ],
+          "text": "وزن الحقيبة 17/77"
+        }
+      ]
+    }
+  ],
+  "systemFonts": false,
+  "viewport": [
+    1024.0,
+    768.0
+  ]
+}

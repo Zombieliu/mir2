@@ -450,6 +450,11 @@ pub enum NativeOutboundCommand {
         #[serde(rename = "mailId")]
         mail_id: u64,
     },
+    LockMail {
+        #[serde(rename = "mailId")]
+        mail_id: u64,
+        lock: bool,
+    },
     CollectParcel {
         #[serde(rename = "mailId")]
         mail_id: u64,
@@ -457,6 +462,17 @@ pub enum NativeOutboundCommand {
     DeleteMail {
         #[serde(rename = "mailId")]
         mail_id: u64,
+    },
+    MailCost {
+        gold: u32,
+        #[serde(rename = "itemsIdx")]
+        items_idx: [u64; 5],
+        stamped: bool,
+    },
+    MailLockedItem {
+        #[serde(rename = "uniqueId")]
+        unique_id: u64,
+        locked: bool,
     },
     SendMail {
         name: String,
@@ -677,8 +693,11 @@ impl NativeOutboundCommand {
             Self::SetStoragePassword { .. } => "setStoragePassword",
             Self::RemoveStoragePassword { .. } => "removeStoragePassword",
             Self::ReadMail { .. } => "readMail",
+            Self::LockMail { .. } => "lockMail",
             Self::CollectParcel { .. } => "collectParcel",
             Self::DeleteMail { .. } => "deleteMail",
+            Self::MailCost { .. } => "mailCost",
+            Self::MailLockedItem { .. } => "mailLockedItem",
             Self::SendMail { .. } => "sendMail",
             Self::SwitchGroup { .. } => "switchGroup",
             Self::AddMember { .. } => "addMember",
@@ -817,6 +836,7 @@ pub struct Disconnect {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct ErrorEvent {
+    pub code: Option<String>,
     pub message: Option<String>,
     pub packet: Option<String>,
     pub payload: Value,
@@ -990,20 +1010,32 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
 
     match event_type.as_str() {
         "packet" => parse_packet(packet.as_deref(), payload),
-        "error" => Ok(InboundEvent::Error(ErrorEvent {
-            message: payload
-                .get("message")
+        "error" => {
+            // The public Gateway sends flat error envelopes. Keep the older
+            // nested shape readable, without hiding the authoritative reason.
+            let code = value
+                .get("code")
+                .or_else(|| payload.get("code"))
                 .and_then(Value::as_str)
-                .map(str::to_owned)
-                .or_else(|| {
-                    payload
-                        .get("error")
-                        .and_then(Value::as_str)
-                        .map(str::to_owned)
-                }),
-            packet: packet.clone(),
-            payload,
-        })),
+                .map(str::to_owned);
+            let message = [
+                value.get("message"),
+                value.get("error"),
+                payload.get("message"),
+                payload.get("error"),
+            ]
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .find(|message| !message.trim().is_empty())
+            .map(str::to_owned);
+            Ok(InboundEvent::Error(ErrorEvent {
+                code,
+                message,
+                packet: packet.clone(),
+                payload,
+            }))
+        }
         "worldSnapshot" => Ok(InboundEvent::Packet(PacketEvent::WorldSnapshot(
             WorldSnapshot { payload },
         ))),
@@ -1557,6 +1589,26 @@ mod tests {
                 to: 3,
             },
             json!({"type":"takeBackItemV2","requestId":"st-0000000000000002","from":9,"to":3}),
+        );
+        assert_serialized(
+            NativeOutboundCommand::MailCost {
+                gold: 100,
+                items_idx: [11, 22, 0, 0, 0],
+                stamped: true,
+            },
+            json!({
+                "type":"mailCost",
+                "gold":100,
+                "itemsIdx":[11,22,0,0,0],
+                "stamped":true
+            }),
+        );
+        assert_serialized(
+            NativeOutboundCommand::MailLockedItem {
+                unique_id: 22,
+                locked: false,
+            },
+            json!({"type":"mailLockedItem","uniqueId":22,"locked":false}),
         );
         assert_serialized(
             NativeOutboundCommand::SendMail {
@@ -2195,6 +2247,28 @@ mod tests {
                 assert_eq!(err.message.as_deref(), Some("invalid credentials"));
             }
             _ => panic!("expected error envelope"),
+        }
+    }
+
+    #[test]
+    fn inbound_flat_gateway_error_preserves_code_and_prefers_canonical_message() {
+        let InboundEvent::Error(error) = parse_inbound_event(
+            r#"{"type":"error","code":"authRateLimited","message":"public reason","payload":{"message":"legacy reason"}}"#,
+        ).unwrap() else { panic!("expected error envelope") };
+        assert_eq!(error.code.as_deref(), Some("authRateLimited"));
+        assert_eq!(error.message.as_deref(), Some("public reason"));
+    }
+
+    #[test]
+    fn inbound_gateway_error_uses_legacy_reason_when_flat_message_is_empty_or_invalid() {
+        for raw in [
+            r#"{"type":"error","message":"","payload":{"error":"legacy reason"}}"#,
+            r#"{"type":"error","message":false,"payload":{"message":"legacy reason"}}"#,
+        ] {
+            let InboundEvent::Error(error) = parse_inbound_event(raw).unwrap() else {
+                panic!("expected error envelope")
+            };
+            assert_eq!(error.message.as_deref(), Some("legacy reason"));
         }
     }
 

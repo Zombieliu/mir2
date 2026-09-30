@@ -452,6 +452,8 @@ impl ZoneRuntime {
                         attacker_object_id: id,
                         object_id: h.target,
                         damage: h.damage.saturating_sub(armour).max(0),
+                        soulfire_practice: None,
+                        journey_event: None,
                         fire_bounce: None,
                     },
                     now,

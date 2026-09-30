@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "type": "static-design-validation",
+  "status": "passed",
+  "candidateSha256": "d889636e7e3808e4934dc751d967493d400de2f05d06cd481c0763e31570211f",
+  "mainQuests": 22,
+  "growthClaims": 4,
+  "fixedMainExperience": 7296900,
+  "mandatoryKills": 38,
+  "coreMinutes": 90,
+  "totalTargetMinutes": 120,
+  "measuredTime": false,
+  "mainGold": 25000,
+  "growthGold": 55000,
+  "consumableTotals": {
+    "Warrior": {
+      "(HP)DrugSmall": 60,
+      "(MP)DrugSmall": 0,
+      "RandomTeleport": 4,
+      "TownTeleport": 6,
+      "Amulet": 0,
+      "GreenPoison": 0,
+      "RedPoison": 0
+    },
+    "Wizard": {
+      "(HP)DrugSmall": 60,
+      "(MP)DrugSmall": 100,
+      "RandomTeleport": 4,
+      "TownTeleport": 6,
+      "Amulet": 0,
+      "GreenPoison": 0,
+      "RedPoison": 0
+    },
+    "Taoist": {
+      "(HP)DrugSmall": 60,
+      "(MP)DrugSmall": 80,
+      "RandomTeleport": 4,
+      "TownTeleport": 6,
+      "Amulet": 300,
+      "GreenPoison": 50,
+      "RedPoison": 50
+    }
+  },
+  "checks": [
+    "unique reserved IDs",
+    "acyclic prerequisite and growth graph",
+    "all nodes level-reachable with fixed XP alone",
+    "runtime and content-profile first-29 experience values match",
+    "chapter budgets and order partition",
+    "real monster templates and positive spawn rows in candidate maps",
+    "no mandatory boss templates",
+    "all reward item templates exist",
+    "all 13 skill and book initial levels match",
+    "one book per core skill per class",
+    "consumable count reconciliation",
+    "no more than three displayed objective groups per node"
+  ],
+  "notValidated": [
+    "region collision/path certification",
+    "actual enemy density and survivability",
+    "event bridge implementation",
+    "reward atomicity for new definitions",
+    "ordinary three-class end-to-end",
+    "human timing",
+    "native/Web UI and animation"
+  ]
+}

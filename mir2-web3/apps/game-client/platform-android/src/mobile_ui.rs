@@ -685,6 +685,7 @@ fn visibility(
     shell: Res<NativeShellModel>,
     state: Res<NativePlayerUiState>,
     ui: Option<Res<UiReadModel>>,
+    map: Option<Res<mir2_client_bevy::map::MapModel>>,
     pickups: Option<Res<GroundPickupModel>>,
     scale: Res<UiScale>,
     host: Option<Res<crate::shared_shell::HostState>>,
@@ -736,7 +737,9 @@ fn visibility(
         .unwrap_or(0.0);
     let expanded_map = mir2_client_bevy::crystal_ui::hud::minimap_is_expanded(
         state.minimap_visible(),
-        ui.as_ref().and_then(|ui| ui.player.map_name.as_deref()),
+        map.as_ref().and_then(|map| map.mini_map_index),
+        map.as_ref().and_then(|map| map.map_width),
+        map.as_ref().and_then(|map| map.map_height),
     );
     let pickup_available = pickups
         .as_deref()

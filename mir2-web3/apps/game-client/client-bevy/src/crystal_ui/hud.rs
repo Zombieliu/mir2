@@ -371,6 +371,7 @@ impl Plugin for Mir2CrystalHudPlugin {
                 Update,
                 update_hud_read_model.run_if(resource_changed::<UiReadModel>),
             )
+            .add_systems(Update, update_hud_map_locale.after(update_hud_read_model))
             .add_systems(
                 Update,
                 update_hud_hp_alternate_text.run_if(resource_changed::<UiReadModel>),
@@ -621,7 +622,7 @@ fn spawn_crystal_hud(
                     root,
                     CrystalHudMapTitleContainer,
                     CrystalHudMapTitle,
-                    ui_model.player.map_name.as_deref().unwrap_or(""),
+                    &crate::native_i18n::tr(ui_model.player.map_name.as_deref().unwrap_or("")),
                     MAP_TITLE_RECT,
                     CRYSTAL_DEFAULT_FONT_SIZE_PX,
                     WHITE,
@@ -930,6 +931,8 @@ fn spawn_belt_slot(
     // A stale or legacy stack without its server instance id may be displayed,
     // but cannot issue an ambiguous use command.
     let mut hit_target = parent.spawn((
+        Button,
+        Interaction::None,
         {
             let mut node =
                 absolute_node(CrystalRect::new(slot_rect.left, slot_rect.top, 32.0, 32.0));
@@ -1291,7 +1294,7 @@ fn update_hud_read_model(
     set_text(&mut text_queries.p4(), format_gold(model.player.gold));
     set_text(
         &mut text_queries.p5(),
-        model.player.map_name.as_deref().unwrap_or("").to_owned(),
+        crate::native_i18n::tr(model.player.map_name.as_deref().unwrap_or("")),
     );
     set_text(
         &mut text_queries.p6(),
@@ -1301,6 +1304,22 @@ fn update_hud_read_model(
         &mut text_queries.p7(),
         model.player.available_weight().to_string(),
     );
+}
+
+fn update_hud_map_locale(
+    model: Res<UiReadModel>,
+    mut last: Local<Option<(u64, crate::native_i18n::Locale)>>,
+    mut titles: Query<(&mut Text, &mut TextFont), With<CrystalHudMapTitle>>,
+) {
+    let locale = (crate::native_i18n::revision(), crate::native_i18n::locale());
+    if *last == Some(locale) {
+        return;
+    }
+    *last = Some(locale);
+    for (mut text, mut font) in &mut titles {
+        **text = crate::native_i18n::tr(model.player.map_name.as_deref().unwrap_or(""));
+        font.font = crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX).font;
+    }
 }
 
 /// Keep alternate HP/MP labels in a separate system because Bevy's `ParamSet`
@@ -1510,8 +1529,8 @@ fn update_hud_inventory(
     }
 }
 
-/// Add/remove the actual UI hit component from the live authoritative belt
-/// model. Dropping `Button` also removes the stale interaction state.
+/// Keep every belt cell clickable so an empty destination can receive an
+/// inventory move. Empty clicks remain inert in the HUD action consumer.
 fn sync_belt_hit_targets(
     mut commands: Commands,
     inventory: Res<InventoryModel>,
@@ -1520,7 +1539,6 @@ fn sync_belt_hit_targets(
 ) {
     for (entity, marker, button) in &targets {
         let item = belt_slot_item(&inventory, marker.slot).filter(|item| item.unique_id.is_some());
-        let enabled = item.is_some();
         if let Some(item) = item {
             commands
                 .entity(entity)
@@ -1530,15 +1548,8 @@ fn sync_belt_hit_targets(
         } else {
             commands.entity(entity).remove::<CrystalItemHint>();
         }
-        match (enabled, button.is_some()) {
-            (true, false) => {
-                commands.entity(entity).insert((Button, Interaction::None));
-            }
-            (false, true) => {
-                commands.entity(entity).remove::<Button>();
-                commands.entity(entity).remove::<Interaction>();
-            }
-            _ => {}
+        if button.is_none() {
+            commands.entity(entity).insert((Button, Interaction::None));
         }
     }
 }
@@ -1801,7 +1812,7 @@ fn update_hud_map_model(
 fn update_hud_minimap_visibility(
     shell: Res<NativeShellModel>,
     state: Option<Res<NativePlayerUiState>>,
-    ui_model: Res<UiReadModel>,
+    map_model: Res<MapModel>,
     mut node_queries: ParamSet<(
         Query<&mut Node, With<CrystalHudMinimap>>,
         Query<&mut Node, With<CrystalHudMinimapCollapsed>>,
@@ -1817,7 +1828,12 @@ fn update_hud_minimap_visibility(
         .as_deref()
         .map(|s| s.minimap_visible())
         .unwrap_or(true);
-    let expanded = minimap_is_expanded(preferred_expanded, ui_model.player.map_name.as_deref());
+    let expanded = minimap_is_expanded(
+        preferred_expanded,
+        map_model.mini_map_index,
+        map_model.map_width,
+        map_model.map_height,
+    );
     let expanded_display = if in_game && expanded {
         Display::Flex
     } else {
@@ -1868,8 +1884,16 @@ pub const fn minimap_footer_top(expanded: bool) -> f32 {
     }
 }
 
-pub fn minimap_is_expanded(preferred_expanded: bool, map_name: Option<&str>) -> bool {
-    preferred_expanded && super::minimap::mini_map_profile(map_name).is_some()
+pub fn minimap_is_expanded(
+    preferred_expanded: bool,
+    mini_map_index: Option<u16>,
+    map_width: Option<u16>,
+    map_height: Option<u16>,
+) -> bool {
+    preferred_expanded
+        && mini_map_index.is_some_and(|index| index > 0)
+        && map_width.is_some_and(|width| width > 0)
+        && map_height.is_some_and(|height| height > 0)
 }
 
 fn set_text<T>(texts: &mut Query<&mut Text, With<T>>, value: String)
@@ -1948,6 +1972,49 @@ pub fn bounded_belt_label(value: &str, max_chars: usize) -> String {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_map_title_locale_changes_without_changing_authoritative_model() {
+        use super::*;
+        use crate::native_i18n::{self, Locale};
+        let mut model = UiReadModel::default();
+        model.player.map_name = Some("Warrior".into());
+        model.player.name = Some("Password".into());
+        let mut app = App::new();
+        app.insert_resource(model)
+            .add_systems(Update, update_hud_map_locale);
+        app.edit_schedule(Update, |schedule| {
+            schedule.set_executor(bevy::ecs::schedule::SingleThreadedExecutor::new());
+        });
+        let title = app
+            .world_mut()
+            .spawn((
+                CrystalHudMapTitle,
+                Text::new("Warrior"),
+                crystal_text_font(12.0),
+            ))
+            .id();
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                app.update();
+                assert_eq!(
+                    app.world().get::<Text>(title).unwrap().0,
+                    native_i18n::tr("Warrior")
+                );
+                assert_eq!(
+                    app.world()
+                        .resource::<UiReadModel>()
+                        .player
+                        .map_name
+                        .as_deref(),
+                    Some("Warrior")
+                );
+                assert_eq!(
+                    app.world().resource::<UiReadModel>().player.name.as_deref(),
+                    Some("Password")
+                );
+            });
+        }
+    }
     use super::*;
 
     #[test]
@@ -2174,7 +2241,8 @@ mod tests {
             screen: NativeShellScreen::InGame,
             ..Default::default()
         })
-        .init_resource::<UiReadModel>();
+        .init_resource::<UiReadModel>()
+        .init_resource::<MapModel>();
         app.add_systems(Update, update_hud_minimap_visibility);
         app.world_mut().spawn((
             Node::default(),
@@ -2265,7 +2333,7 @@ mod tests {
             .id();
 
         app.update();
-        assert!(!app.world().entity(target).contains::<Button>());
+        assert!(app.world().entity(target).contains::<Button>());
 
         app.world_mut().resource_mut::<InventoryModel>().items = vec![ItemModel {
             unique_id: Some(77),
@@ -2332,7 +2400,7 @@ mod tests {
             .items
             .clear();
         app.update();
-        assert!(!app.world().entity(target).contains::<Button>());
+        assert!(app.world().entity(target).contains::<Button>());
         assert!(!app.world().entity(target).contains::<CrystalItemHint>());
     }
 
@@ -2582,10 +2650,11 @@ mod tests {
     }
 
     #[test]
-    fn missing_minimap_profile_forces_small_frame_without_losing_preference() {
-        assert!(minimap_is_expanded(true, Some("BichonProvince")));
-        assert!(!minimap_is_expanded(true, Some("UnknownMap")));
-        assert!(!minimap_is_expanded(false, Some("BichonProvince")));
+    fn missing_minimap_index_or_dimensions_forces_small_frame_without_losing_preference() {
+        assert!(minimap_is_expanded(true, Some(8), Some(200), Some(200)));
+        assert!(!minimap_is_expanded(true, None, Some(200), Some(200)));
+        assert!(!minimap_is_expanded(true, Some(8), None, Some(200)));
+        assert!(!minimap_is_expanded(false, Some(8), Some(200), Some(200)));
     }
 
     #[test]

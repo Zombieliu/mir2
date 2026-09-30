@@ -75,9 +75,14 @@ fn only_recipient_receives_invitation_and_decline_notifies_only_inviter() {
 fn invitation_requires_mutual_facing() {
     let (mut first, mut second) = started_shared_zone_sessions();
     face_shared_trade_pair(&mut first, &mut second);
-    second.handle_packet(ClientPacket::Turn {
+    // The helper's Left turn starts Crystal's normal 350 ms turn cadence.
+    // Test the opposite facing after it is eligible, not a queued turn intent.
+    std::thread::sleep(std::time::Duration::from_millis(400));
+    let turn_packets = second.handle_packet(ClientPacket::Turn {
         direction: MirDirection::Right,
     });
+    let facing = second.world_snapshot().entities.into_iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer).expect("recipient must remain active").direction;
+    assert_eq!(facing, MirDirection::Right, "fixture turn must reach authoritative state: {turn_packets:?}");
     first.handle_packet(ClientPacket::TradeRequest);
     assert!(!second
         .handle_packet(ClientPacket::KeepAlive { time: 1 })

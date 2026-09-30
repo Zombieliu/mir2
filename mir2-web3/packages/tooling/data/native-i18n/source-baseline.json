@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "reason": "Translation source snapshot. A changed manifest requires reviewing affected display copy before updating these hashes.",
+  "sha256": {
+    "crystal_item_manifest.json": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7",
+    "crystal_monster_manifest.json": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec",
+    "crystal_npc_info_manifest.json": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105",
+    "crystal_magic_manifest.json": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d",
+    "crystal_respawn_manifest.json": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3",
+    "crystal_quest_packet_manifest.json": "13d6f3fd94fd9e865ab60c9f2ea50585053bd2050bff021a0379f1ed0948e0d6",
+    "crystal_npc_manifest.json": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93"
+  }
+}

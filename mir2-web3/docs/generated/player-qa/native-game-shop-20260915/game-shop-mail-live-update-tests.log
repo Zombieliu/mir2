@@ -1,0 +1,1876 @@
+warning: unused import: `super::skills::crystal_magic_damage`
+  --> apps\simulation\src\runtime\hero_ai.rs:53:5
+   |
+53 | use super::skills::crystal_magic_damage;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `hero_registry_scan::validate_shared_hero_physical_custody`
+  --> apps\simulation\src\runtime\mod.rs:22:16
+   |
+22 | pub(crate) use hero_registry_scan::validate_shared_hero_physical_custody;
+   |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `HeroInventoryResource`
+  --> apps\simulation\src\runtime\items.rs:58:19
+   |
+58 |     BuffResource, HeroInventoryResource, InventoryResource, PlayerPermissionResource,
+   |                   ^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `hero_inventory_crystal_stat_total`
+  --> apps\simulation\src\runtime\packets.rs:72:22
+   |
+72 | use super::hero_ai::{hero_inventory_crystal_stat_total, hero_inventory_equipment_slots};
+   |                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crystal_quest_info_by_id`
+   --> apps\simulation\src\runtime\packets.rs:108:5
+    |
+108 |     crystal_quest_info_by_id, crystal_quest_reward_selection_missing,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `intelligent_creature_default_rules`
+   --> apps\simulation\src\runtime\packets.rs:125:5
+    |
+125 |     intelligent_creature_default_rules, is_in_world, mark_crystal_packet_action,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `ZoneExperienceProfile` and `ZoneGuildExperienceMembership`
+ --> apps\simulation\src\runtime\zone\mod.rs:6:22
+  |
+6 | pub use experience::{ZoneExperienceProfile,ZoneExperienceSelection,ZoneGuildExperienceMembership};
+  |                      ^^^^^^^^^^^^^^^^^^^^^                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+  --> apps\simulation\src\runtime\hero_cast.rs:61:22
+   |
+61 |     let target=world.iter_entities().find_map(|entry| {
+   |                      ^^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+   --> apps\simulation\src\runtime\monster_ai\great_fox_spirit.rs:163:28
+    |
+163 |     for candidate in world.iter_entities() {
+    |                            ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\packets.rs:7786:25
+     |
+7786 |     for entity in world.iter_entities() {
+     |                         ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5013:10
+     |
+5013 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+    --> apps\simulation\src\runtime\skills.rs:5096:10
+     |
+5096 |         .iter_entities()
+     |          ^^^^^^^^^^^^^
+
+warning: type `HeroSourceVersions` is more private than the item `config::AccountStoreRepositorySave::heroes`
+   --> apps\simulation\src\config.rs:777:5
+    |
+777 |     pub(crate) heroes: hero_registry::HeroSourceVersions,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `config::AccountStoreRepositorySave::heroes` is reachable at visibility `pub(crate)`
+    |
+note: but type `HeroSourceVersions` is only usable at visibility `pub(in crate::config)`
+   --> apps\simulation\src\config_hero_registry.rs:93:1
+    |
+93  | pub(super) struct HeroSourceVersions {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `ZoneCombatEntityRef` is more private than the item `tree_queen_ai::TreeQueenRoot::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\tree_queen_ai.rs:39:5
+   |
+39 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `tree_queen_ai::TreeQueenRoot::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `EvilMirState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:11:5
+   |
+11 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `EvilMirPendingSource::source`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:20:5
+   |
+20 |     pub source: ZoneCombatEntityRef,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirPendingSource::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:15:5
+   |
+15 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:42:5
+   |
+42 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `GreatFoxHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:44:5
+   |
+44 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:12:5
+   |
+12 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:38:5
+   |
+38 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:41:5
+   |
+41 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedMapSpell::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:60:5
+   |
+60 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedMapSpell::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:14:5
+   |
+14 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:28:5
+   |
+28 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HornedHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:30:5
+   |
+30 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `HellState::explosion_source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:14:5
+   |
+14 |     pub explosion_source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HellState::explosion_source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `SpiderAiState::parent_ref`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:40:5
+   |
+40 |     pub parent_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `SpiderAiState::parent_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::source`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:52:5
+   |
+52 |     pub source: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::target`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:54:5
+   |
+54 |     pub target: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::target` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `scoped_to_account` and `scoped_to_accounts` are never used
+   --> apps\simulation\src\config.rs:292:8
+    |
+159 | impl AccountStore {
+    | ----------------- methods in this implementation
+...
+292 |     fn scoped_to_account(&self, account_id: &str) -> Self {
+    |        ^^^^^^^^^^^^^^^^^
+...
+296 |     fn scoped_to_accounts(&self, account_ids: &[&str]) -> Self {
+    |        ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: variant `AccountsWithHeroes` is never constructed
+   --> apps\simulation\src\config.rs:373:5
+    |
+370 | enum AccountStoreMutationScope<'a> {
+    |      ------------------------- variant in this enum
+...
+373 |     AccountsWithHeroes { account_ids: &'a [String], hero_ids: &'a [i32], allocate: bool },
+    |     ^^^^^^^^^^^^^^^^^^
+    |
+    = note: `AccountStoreMutationScope` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: field `admitted_minutes` is never read
+  --> apps\simulation\src\config_guild_clock_transactions.rs:13:9
+   |
+6  | pub(in crate::config) struct GuildClockCommitReceipt {
+   |                              ----------------------- field in this struct
+...
+13 |     pub admitted_minutes: u64,
+   |         ^^^^^^^^^^^^^^^^
+   |
+   = note: `GuildClockCommitReceipt` has derived impls for the traits `Clone` and `Debug`, but these are intentionally ignored during dead code analysis
+
+warning: function `commit_postgres_tick` is never used
+  --> apps\simulation\src\config_guild_clock_transactions.rs:17:26
+   |
+17 | pub(in crate::config) fn commit_postgres_tick(
+   |                          ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `commit_postgres_tick_checked` is never used
+  --> apps\simulation\src\config_guild_clock_transactions.rs:24:26
+   |
+24 | pub(in crate::config) fn commit_postgres_tick_checked(
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `item_identity_path` is never used
+   --> apps\simulation\src\config_file_authority.rs:102:19
+    |
+99  | impl FileAuthority {
+    | ------------------ method in this implementation
+...
+102 |     pub(super) fn item_identity_path(&self, config: &SimulationConfig) -> Result<PathBuf, String> {
+    |                   ^^^^^^^^^^^^^^^^^^
+
+warning: method `refresh_shared_hero_authority` is never used
+ --> apps\simulation\src\config_hero_authority.rs:8:19
+  |
+7 | impl SimulationConfig {
+  | --------------------- method in this implementation
+8 |     pub(crate) fn refresh_shared_hero_authority(&self)->Result<(),String>{
+  |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `shared_guild_authority_snapshot` is never used
+   --> apps\simulation\src\config_shared_guilds.rs:845:19
+    |
+844 | impl SimulationConfig {
+    | --------------------- method in this implementation
+845 |     pub(crate) fn shared_guild_authority_snapshot(
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variant `MacAgility` is never constructed
+   --> apps\simulation\src\runtime\combat.rs:776:5
+    |
+769 | pub(super) enum CrystalDefence {
+    |                 -------------- variant in this enum
+...
+776 |     MacAgility,
+    |     ^^^^^^^^^^
+    |
+    = note: `CrystalDefence` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: constant `CRYSTAL_BAG_WEIGHT_LIMIT` is never used
+  --> apps\simulation\src\runtime\drops.rs:70:18
+   |
+70 | pub(super) const CRYSTAL_BAG_WEIGHT_LIMIT: u32 = 100;
+   |                  ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `resolved_monster_drop_templates_at_tick` is never used
+   --> apps\simulation\src\runtime\drops.rs:464:15
+    |
+464 | pub(super) fn resolved_monster_drop_templates_at_tick(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `crystal_monster_drop_templates` is never used
+   --> apps\simulation\src\runtime\drops.rs:535:15
+    |
+535 | pub(super) fn crystal_monster_drop_templates(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `crystal_resolve_group_drop` is never used
+   --> apps\simulation\src\runtime\drops.rs:610:15
+    |
+610 | pub(super) fn crystal_resolve_group_drop(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `crystal_drop_entry_should_drop` is never used
+   --> apps\simulation\src\runtime\drops.rs:665:15
+    |
+665 | pub(super) fn crystal_drop_entry_should_drop(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `socketed_count` is never used
+   --> apps\simulation\src\runtime\equipment.rs:303:19
+    |
+119 | impl EquipmentState {
+    | ------------------- method in this implementation
+...
+303 |     pub(super) fn socketed_count(&self) -> usize {
+    |                   ^^^^^^^^^^^^^^
+
+warning: function `equipment_state_identified` is never used
+   --> apps\simulation\src\runtime\equipment.rs:308:15
+    |
+308 | pub(super) fn equipment_state_identified(item: &EquipmentState) -> bool {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `equipment_state_soul_bound_id` is never used
+   --> apps\simulation\src\runtime\equipment.rs:313:15
+    |
+313 | pub(super) fn equipment_state_soul_bound_id(item: &EquipmentState) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_equipment_slot` is never used
+   --> apps\simulation\src\runtime\hero_ai.rs:180:4
+    |
+180 | fn hero_inventory_equipment_slot(item: &ItemState) -> Option<EquipmentSlot> {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_item_is_broken` is never used
+   --> apps\simulation\src\runtime\hero_ai.rs:185:4
+    |
+185 | fn hero_inventory_item_is_broken(item: &ItemState) -> bool {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_item_modeled_base_stat` is never used
+   --> apps\simulation\src\runtime\hero_ai.rs:189:4
+    |
+189 | fn hero_inventory_item_modeled_base_stat(item: &ItemState, stat: u8) -> i32 {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_item_crystal_stat` is never used
+   --> apps\simulation\src\runtime\hero_ai.rs:197:4
+    |
+197 | fn hero_inventory_item_crystal_stat(item: &ItemState, stat: u8) -> i32 {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_crystal_stat_total` is never used
+   --> apps\simulation\src\runtime\hero_ai.rs:214:15
+    |
+214 | pub(super) fn hero_inventory_crystal_stat_total(world: &World, stat: u8) -> i32 {
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: enum `CarrierOrigin` is never used
+ --> apps\simulation\src\runtime\hero_registry_carriers.rs:8:17
+  |
+8 | pub(super) enum CarrierOrigin { External, Hero(i32) }
+  |                 ^^^^^^^^^^^^^
+
+warning: struct `HeroCarrierCensus` is never constructed
+  --> apps\simulation\src\runtime\hero_registry_carriers.rs:10:19
+   |
+10 | pub(super) struct HeroCarrierCensus {
+   |                   ^^^^^^^^^^^^^^^^^
+
+warning: methods `node`, `record`, `record_unresolved_legacy`, and `validate` are never used
+  --> apps\simulation\src\runtime\hero_registry_carriers.rs:15:8
+   |
+14 | impl HeroCarrierCensus {
+   | ---------------------- methods in this implementation
+15 |     fn node(&mut self,item:&UserItem,origin:CarrierOrigin)->Result<(),String>{
+   |        ^^^^
+...
+27 |     pub fn record(&mut self,item:&UserItem,origin:CarrierOrigin)->Result<(),String>{
+   |            ^^^^^^
+...
+42 |     pub fn record_unresolved_legacy(&mut self,root:&super::items::ItemState)->Result<(),String>{
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^
+...
+70 |     pub fn validate(&self,heroes:&BTreeMap<i32,SharedHeroRecord>,owned_ids:&BTreeSet<u64>)->Result<(),String>{
+   |            ^^^^^^^^
+
+warning: function `decode` is never used
+ --> apps\simulation\src\runtime\hero_registry_scan.rs:8:4
+  |
+8 | fn decode<T:DeserializeOwned>(value:&str)->Result<T,String>{serde_json::from_str(value).map_err(|error|format!("invalid Hero custody carr...
+  |    ^^^^^^
+
+warning: function `add_wire` is never used
+ --> apps\simulation\src\runtime\hero_registry_scan.rs:9:4
+  |
+9 | fn add_wire(census:&mut HeroCarrierCensus,item:&UserItem,origin:CarrierOrigin,forbidden_bind:u16)->Result<(),String>{
+  |    ^^^^^^^^
+
+warning: function `add_items` is never used
+  --> apps\simulation\src\runtime\hero_registry_scan.rs:21:4
+   |
+21 | fn add_items(census:&mut HeroCarrierCensus,encoded:&[String],origin:CarrierOrigin,forbidden:u16)->Result<(),String>{
+   |    ^^^^^^^^^
+
+warning: function `add_character` is never used
+  --> apps\simulation\src\runtime\hero_registry_scan.rs:32:4
+   |
+32 | fn add_character(census:&mut HeroCarrierCensus,save:&CharacterSaveRecord,mirrored:bool)->Result<(),String>{
+   |    ^^^^^^^^^^^^^
+
+warning: function `validate_shared_hero_physical_custody` is never used
+  --> apps\simulation\src\runtime\hero_registry_scan.rs:86:15
+   |
+86 | pub(crate) fn validate_shared_hero_physical_custody(store:&AccountStore)->Result<(),String>{
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_item_is_broken` is never used
+    --> apps\simulation\src\runtime\items.rs:3452:4
+     |
+3452 | fn hero_inventory_item_is_broken(item: &ItemState) -> bool {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `hero_inventory_requirement_stat` is never used
+    --> apps\simulation\src\runtime\items.rs:3456:4
+     |
+3456 | fn hero_inventory_requirement_stat(item: &ItemState, stat: u8) -> i32 {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `repair_conquest_asset` is never used
+    --> apps\simulation\src\runtime\monsters.rs:1878:15
+     |
+1878 | pub(super) fn repair_conquest_asset(world: &mut World, ai: u8, asset_id: u8) -> bool {
+     |               ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `crystal_npc_visible_to_character` is never used
+   --> apps\simulation\src\runtime\npc.rs:245:15
+    |
+245 | pub(super) fn crystal_npc_visible_to_character(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `complete_quest` is never used
+    --> apps\simulation\src\runtime\quests.rs:1030:15
+     |
+1030 | pub(super) fn complete_quest(world: &mut World, quest_id: i32) {
+     |               ^^^^^^^^^^^^^^
+
+warning: function `default_save_for_character` is never used
+  --> apps\simulation\src\runtime\save.rs:76:15
+   |
+76 | pub(super) fn default_save_for_character(
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `persist_character_save` is never used
+   --> apps\simulation\src\runtime\save.rs:921:15
+    |
+921 | pub(super) fn persist_character_save(
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `bank_mentor_gain` is never used
+   --> apps\simulation\src\runtime\shared_relationships.rs:321:15
+    |
+321 | pub(super) fn bank_mentor_gain(
+    |               ^^^^^^^^^^^^^^^^
+
+warning: method `game_shop_buy_product` is never used
+    --> apps\simulation\src\runtime\stage5.rs:4304:8
+     |
+3234 | impl SimulationSession {
+     | ---------------------- method in this implementation
+...
+4304 |     fn game_shop_buy_product(
+     |        ^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `select` is never used
+  --> apps\simulation\src\runtime\zone\experience.rs:41:19
+   |
+40 | impl ZoneExperienceProfile {
+   | -------------------------- method in this implementation
+41 |     pub(super) fn select(
+   |                   ^^^^^^
+
+warning: function `hell_can_move` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:68:15
+   |
+68 | pub(super) fn hell_can_move(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^
+
+warning: function `hell_can_regen` is never used
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:74:15
+   |
+74 | pub(super) fn hell_can_regen(m: &ZoneNativeMonster) -> bool {
+   |               ^^^^^^^^^^^^^^
+
+warning: methods `blocking` and `set_replay_seed` are never used
+   --> apps\simulation\src\runtime\zone\intelligent_creatures.rs:183:12
+    |
+112 | impl ZoneIntelligentCreature {
+    | ---------------------------- methods in this implementation
+...
+183 |     pub fn blocking(&self) -> bool {
+    |            ^^^^^^^^
+...
+187 |     pub fn set_replay_seed(&mut self, seed: u64) {
+    |            ^^^^^^^^^^^^^^^
+
+   Compiling mir2-simulation v0.1.0 (E:\mir2-player-journey\mir2-web3\apps\simulation)
+warning: `mir2-simulation` (lib) generated 73 warnings (run `cargo fix --lib -p mir2-simulation` to apply 7 suggestions)
+warning: function `fixture` is never used
+  --> apps\simulation\tests\shared_monster_pet_special_ai.rs:68:4
+   |
+68 | fn fixture(id: u32, ai: u8, hp: i32, name: &str) -> ZoneRuntime {
+   |    ^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `join` is never used
+  --> apps\simulation\tests\shared_monster_snake_totem_ai.rs:10:4
+   |
+10 | fn join(z: &mut ZoneRuntime, name: &str, id: u32, pos: Point, dc: i32) {
+   |    ^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `fixture` is never used
+  --> apps\simulation\tests\shared_monster_snake_totem_ai.rs:68:4
+   |
+68 | fn fixture(id: u32, ai: u8, hp: i32, name: &str) -> ZoneRuntime {
+   |    ^^^^^^^
+
+warning: unused `Result` that must be used
+    --> apps\simulation\tests\hero_ai.rs:1010:5
+     |
+1010 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+     = note: `#[warn(unused_must_use)]` on by default
+help: use `let _ = ...` to ignore the resulting value
+     |
+1010 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: `mir2-simulation` (test "shared_monster_pet_special_ai") generated 1 warning
+warning: `mir2-simulation` (test "shared_monster_snake_totem_ai") generated 2 warnings
+warning: `mir2-simulation` (test "hero_ai") generated 1 warning
+warning: unused `Result` that must be used
+   --> apps\simulation\tests\platinum_176_progression.rs:898:5
+    |
+898 |     first.save_active_character();
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: this `Result` may be an `Err` variant, which should be handled
+    = note: `#[warn(unused_must_use)]` on by default
+help: use `let _ = ...` to ignore the resulting value
+    |
+898 |     let _ = first.save_active_character();
+    |     +++++++
+
+warning: `mir2-simulation` (test "platinum_176_progression") generated 1 warning
+warning: unused import: `ZoneExperienceProfile`
+ --> apps\simulation\src\runtime\zone\mod.rs:6:22
+  |
+6 | pub use experience::{ZoneExperienceProfile,ZoneExperienceSelection,ZoneGuildExperienceMembership};
+  |                      ^^^^^^^^^^^^^^^^^^^^^
+
+warning: use of deprecated method `bevy_ecs::world::World::iter_entities`: use world.query::<EntityRef>()` instead
+  --> apps\simulation\src\runtime\hero_cast.rs:99:27
+   |
+99 |         let monster=world.iter_entities().find(|e|e.get::<Monster>().is_some()).unwrap().id();
+   |                           ^^^^^^^^^^^^^
+
+warning: type `hero_registry::HeroSourceVersions` is more private than the item `config::AccountStoreRepositorySave::heroes`
+   --> apps\simulation\src\config.rs:777:5
+    |
+777 |     pub(crate) heroes: hero_registry::HeroSourceVersions,
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `config::AccountStoreRepositorySave::heroes` is reachable at visibility `pub(crate)`
+    |
+note: but type `hero_registry::HeroSourceVersions` is only usable at visibility `pub(in crate::config)`
+   --> apps\simulation\src\config_hero_registry.rs:93:1
+    |
+93  | pub(super) struct HeroSourceVersions {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `tree_queen_ai::TreeQueenRoot::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\tree_queen_ai.rs:39:5
+   |
+39 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `tree_queen_ai::TreeQueenRoot::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `EvilMirState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:11:5
+   |
+11 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `EvilMirPendingSource::source`
+  --> apps\simulation\src\runtime\zone\runtime\evil_mir_ai.rs:20:5
+   |
+20 |     pub source: ZoneCombatEntityRef,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `EvilMirPendingSource::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `GreatFoxState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:15:5
+   |
+15 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `GreatFoxHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:42:5
+   |
+42 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `GreatFoxHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\great_fox_ai.rs:44:5
+   |
+44 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `GreatFoxHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedEncounterState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:12:5
+   |
+12 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:38:5
+   |
+38 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedEncounterHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:41:5
+   |
+41 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedEncounterHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedMapSpell::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_encounter_ai.rs:60:5
+   |
+60 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedMapSpell::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedState::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:14:5
+   |
+14 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedState::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedHit::source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:28:5
+   |
+28 |     pub source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HornedHit::target_ref`
+  --> apps\simulation\src\runtime\zone\runtime\horned_ai.rs:30:5
+   |
+30 |     pub target_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HornedHit::target_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `HellState::explosion_source_ref`
+  --> apps\simulation\src\runtime\zone\runtime\hell_ai.rs:14:5
+   |
+14 |     pub explosion_source_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `HellState::explosion_source_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `SpiderAiState::parent_ref`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:40:5
+   |
+40 |     pub parent_ref: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `SpiderAiState::parent_ref` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::source`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:52:5
+   |
+52 |     pub source: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::source` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: type `entity_combat::ZoneCombatEntityRef` is more private than the item `PendingRootSpiderSpawn::target`
+  --> apps\simulation\src\runtime\zone\runtime\spider_ai.rs:54:5
+   |
+54 |     pub target: Option<ZoneCombatEntityRef>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ field `PendingRootSpiderSpawn::target` is reachable at visibility `pub(in crate::runtime::zone)`
+   |
+note: but type `entity_combat::ZoneCombatEntityRef` is only usable at visibility `pub(in crate::runtime::zone::runtime)`
+  --> apps\simulation\src\runtime\zone\runtime\entity_combat.rs:7:1
+   |
+7  | pub(super) enum ZoneCombatEntityRef {
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `bootstrap_mirror` is never used
+   --> apps\simulation\src\config_item_identity.rs:143:15
+    |
+143 | pub(super) fn bootstrap_mirror(
+    |               ^^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` on by default
+
+warning: function `mirror_client` is never used
+   --> apps\simulation\src\config_item_identity.rs:187:4
+    |
+187 | fn mirror_client(config: &SimulationConfig) -> Result<postgres::Client, String> {
+    |    ^^^^^^^^^^^^^
+
+warning: function `reserve_mirror` is never used
+   --> apps\simulation\src\config_item_identity.rs:203:15
+    |
+203 | pub(super) fn reserve_mirror(
+    |               ^^^^^^^^^^^^^^
+
+warning: method `record_unresolved_legacy` is never used
+  --> apps\simulation\src\runtime\hero_registry_carriers.rs:42:12
+   |
+14 | impl HeroCarrierCensus {
+   | ---------------------- method in this implementation
+...
+42 |     pub fn record_unresolved_legacy(&mut self,root:&super::items::ItemState)->Result<(),String>{
+   |            ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused `std::result::Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:1697:5
+     |
+1697 |     sender.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+     = note: `#[warn(unused_must_use)]` on by default
+help: use `let _ = ...` to ignore the resulting value
+     |
+1697 |     let _ = sender.save_active_character();
+     |     +++++++
+
+warning: unused `std::result::Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:2990:5
+     |
+2990 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2990 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `std::result::Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3013:5
+     |
+3013 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3013 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `std::result::Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3103:5
+     |
+3103 |     first.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3103 |     let _ = first.save_active_character();
+     |     +++++++
+
+warning: unused `std::result::Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3167:5
+     |
+3167 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3167 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `std::result::Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3234:5
+     |
+3234 |     first.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3234 |     let _ = first.save_active_character();
+     |     +++++++
+
+warning: unused `std::result::Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3457:5
+     |
+3457 |     alpha.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3457 |     let _ = alpha.save_active_character();
+     |     +++++++
+
+warning: unused `std::result::Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:3458:5
+     |
+3458 |     beta.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+3458 |     let _ = beta.save_active_character();
+     |     +++++++
+
+warning: unused `std::result::Result` that must be used
+    --> apps\simulation\src\runtime\tests.rs:6656:5
+     |
+6656 |     session.save_active_character();
+     |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+6656 |     let _ = session.save_active_character();
+     |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:28407:5
+      |
+28407 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+28407 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:29395:5
+      |
+29395 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+29395 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:30423:5
+      |
+30423 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+30423 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:32315:5
+      |
+32315 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+32315 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:35470:5
+      |
+35470 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+35470 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:42325:5
+      |
+42325 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+42325 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:42650:5
+      |
+42650 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+42650 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:56372:5
+      |
+56372 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+56372 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:57474:5
+      |
+57474 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+57474 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:59026:5
+      |
+59026 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+59026 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:60951:5
+      |
+60951 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+60951 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:62581:5
+      |
+62581 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+62581 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:62925:5
+      |
+62925 |     sender.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+62925 |     let _ = sender.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63359:5
+      |
+63359 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63359 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63558:5
+      |
+63558 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63558 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:63676:5
+      |
+63676 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+63676 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:64077:5
+      |
+64077 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+64077 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:64128:5
+      |
+64128 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+64128 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:64138:5
+      |
+64138 |     recipient.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+64138 |     let _ = recipient.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:65303:5
+      |
+65303 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+65303 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:66427:5
+      |
+66427 |     session.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+66427 |     let _ = session.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+     --> apps\simulation\src\runtime\tests.rs:69884:5
+      |
+69884 |     first.save_active_character();
+      |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |
+      = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+      |
+69884 |     let _ = first.save_active_character();
+      |     +++++++
+
+warning: unused `std::result::Result` that must be used
+    --> apps\simulation\src\runtime\stage5.rs:2694:9
+     |
+2694 |         session_a.save_active_character();
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: this `Result` may be an `Err` variant, which should be handled
+help: use `let _ = ...` to ignore the resulting value
+     |
+2694 |         let _ = session_a.save_active_character();
+     |         +++++++
+
+warning: `mir2-simulation` (lib test) generated 85 warnings (29 duplicates) (run `cargo fix --lib -p mir2-simulation --tests` to apply 1 suggestion)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 14.34s
+     Running unittests src\lib.rs (C:/mir2-build/gateway-r48-tests\debug\deps\mir2_simulation-bdbff7061c8b6ab1.exe)
+
+running 38 tests
+test config::tests::account_store_scoping_and_source_merge_preserve_shared_game_shop_state ... ok
+test runtime::packets::game_shop_start_stock_tests::checked_in_unlimited_start_packets_remain_byte_identical ... ok
+test runtime::packets::game_shop_start_stock_tests::reloaded_start_world_projects_individual_and_global_finite_stock ... ok
+test runtime::session::tests::crystal_game_shop_credit_buy_uses_manifest_and_mail_delivery ... ok
+test runtime::session::tests::game_shop_balance_mail_capacity_and_world_phase_rejections_are_atomic ... ok
+test runtime::session::tests::game_shop_dedicated_and_legacy_stage5_paths_are_state_equivalent ... ok
+test runtime::session::tests::game_shop_disabled_authoritative_payment_flags_have_zero_side_effects ... ok
+mail claim transaction failed: mail claim rejected: AlreadyClaimed
+test runtime::session::tests::game_shop_five_stack_boundary_claims_exact_total_and_sixth_stack_rejects ... ok
+test runtime::session::tests::game_shop_invalid_packet_and_stage5_quantities_have_zero_side_effects ... ok
+test runtime::session::tests::game_shop_packet_credit_and_gold_mail_product_count_times_quantity ... ok
+game-shop transaction failed: injected account-store persistence failure
+mail transaction failed: injected account-store persistence failure
+test runtime::session::tests::online_game_shop_mail_and_external_send_mail_keep_unique_ids_and_local_status ... ok
+simulation packet execution rejected; details suppressed
+test runtime::session::tests::stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting_item ... ok
+game-shop transaction failed: game-shop stock unavailable at commit:0
+test runtime::stage5::game_shop_validation_tests::concurrent_accounts_do_not_oversell_global_stock ... ok
+game-shop transaction failed: game-shop stock unavailable at commit:0
+test runtime::stage5::game_shop_validation_tests::concurrent_same_character_sessions_do_not_oversell_individual_stock ... ok
+game-shop transaction failed: injected account-store persistence failure
+game-shop transaction failed: game-shop stock unavailable at commit:0
+test runtime::stage5::game_shop_validation_tests::finite_stock_persist_failure_and_counter_overflow_are_atomic ... ok
+test runtime::stage5::game_shop_validation_tests::finite_stock_uses_purchase_quantity_and_handles_overflow ... ok
+test runtime::stage5::game_shop_validation_tests::game_shop_class_filter_is_explicit_and_unknown_values_fail_closed ... ok
+test runtime::stage5::game_shop_validation_tests::game_shop_payment_flags_are_enforced_for_the_selected_currency ... ok
+test runtime::stage5::game_shop_validation_tests::generated_game_shop_manifest_matches_all_authoritative_payloads ... ok
+game-shop transaction failed: game-shop stock unavailable at commit:1
+test runtime::stage5::game_shop_validation_tests::individual_finite_stock_consumes_purchase_quantity_and_survives_reload ... ok
+test runtime::stage5::game_shop_validation_tests::legacy_packet_wrapper_matches_typed_execution_packets ... ok
+test runtime::stage5::game_shop_validation_tests::legacy_store_and_character_systems_default_stock_counters_to_empty ... ok
+test runtime::stage5::game_shop_validation_tests::native_game_shop_business_failure_is_durable_and_not_re_evaluated ... ok
+test runtime::stage5::game_shop_validation_tests::native_game_shop_duplicate_key_returns_original_outcome_without_second_mutation ... ok
+mail status transaction rejected: mail status request targets deleted mail
+mail claim transaction failed: mail claim rejected: NotFound
+mail status transaction rejected: mail status request targets deleted mail
+test runtime::stage5::game_shop_validation_tests::native_game_shop_hidden_ledger_is_not_player_mail_or_mutable ... ok
+game-shop transaction failed: native GameShop idempotency key was reused with another request
+test runtime::stage5::game_shop_validation_tests::native_game_shop_key_binding_and_new_connection_scope_are_exact ... ok
+game-shop transaction failed: native GameShop durable ledger is full for this character
+game-shop transaction failed: native GameShop durable ledger is full for this character
+test runtime::stage5::game_shop_validation_tests::native_game_shop_ledger_capacity_blocks_complete_purchase_transaction ... ok
+test runtime::stage5::game_shop_validation_tests::native_game_shop_ledger_capacity_fails_closed_without_evicting_old_keys ... ok
+test runtime::stage5::game_shop_validation_tests::native_game_shop_ledger_merge_conflict_fails_closed ... ok
+test runtime::stage5::game_shop_validation_tests::native_game_shop_stale_session_mail_merge_preserves_all_replay_keys ... ok
+test runtime::stage5::game_shop_validation_tests::production_game_shop_path_selects_exact_transaction_scope_and_preserves_behavior ... ok
+game-shop transaction failed: injected account-store persistence failure
+test runtime::stage5::game_shop_validation_tests::typed_failures_cover_currency_mail_capacity_and_persist_failure ... ok
+test runtime::stage5::game_shop_validation_tests::typed_failures_cover_request_and_authoritative_product_validation ... ok
+test runtime::stage5::game_shop_validation_tests::typed_outcome_constructors_enforce_success_failure_shape_and_stable_codes ... ok
+game-shop transaction failed: game-shop stock unavailable at commit:0
+test runtime::stage5::game_shop_validation_tests::typed_stock_outcomes_report_post_commit_and_current_levels ... ok
+test runtime::stage5::game_shop_validation_tests::typed_success_uses_the_committed_mail_id_for_gold_and_credit ... ok
+test runtime::stage5::game_shop_validation_tests::unlimited_catalog_purchase_does_not_create_stock_counters_or_patch ... ok
+test world_runtime::tests::in_process_world_runtime_propagates_typed_game_shop_outcome_only_for_purchase ... ok
+
+test result: ok. 38 passed; 0 failed; 0 ignored; 0 measured; 1795 filtered out; finished in 29.36s
+
+     Running unittests src\bin\zone_replay.rs (C:/mir2-build/gateway-r48-tests\debug\deps\zone_replay-cca5687525709eb5.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests\big_map.rs (C:/mir2-build/gateway-r48-tests\debug\deps\big_map-a5a827a90cab0479.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s
+
+     Running tests\character_wings.rs (C:/mir2-build/gateway-r48-tests\debug\deps\character_wings-9a83e3c37db90806.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests\crystal_map_events.rs (C:/mir2-build/gateway-r48-tests\debug\deps\crystal_map_events-844dc7e546cd5b86.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests\crystal_map_hazards.rs (C:/mir2-build/gateway-r48-tests\debug\deps\crystal_map_hazards-fa060b38b8cc2698.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\crystal_scroll_teleport.rs (C:/mir2-build/gateway-r48-tests\debug\deps\crystal_scroll_teleport-dbc3ec3695ac98d6.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests\friends_authority.rs (C:/mir2-build/gateway-r48-tests\debug\deps\friends_authority-754033e0db3cb921.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests\great_fox_spirit_recall.rs (C:/mir2-build/gateway-r48-tests\debug\deps\great_fox_spirit_recall-caebc46537e9a8df.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests\hero_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\hero_ai-3a8f13684598fd6e.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 28 filtered out; finished in 0.00s
+
+     Running tests\intelligent_creature_authority.rs (C:/mir2-build/gateway-r48-tests\debug\deps\intelligent_creature_authority-2e24b33ef0548bd6.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+     Running tests\item_stack_images.rs (C:/mir2-build/gateway-r48-tests\debug\deps\item_stack_images-73f027198b72d854.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\login_notice.rs (C:/mir2-build/gateway-r48-tests\debug\deps\login_notice-b3762ccec7dde5ff.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\mail_status_transactions.rs (C:/mir2-build/gateway-r48-tests\debug\deps\mail_status_transactions-b6806eccbd3ff514.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\map_coordinate_events.rs (C:/mir2-build/gateway-r48-tests\debug\deps\map_coordinate_events-0cf7a6aa7825c071.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\map_event_binding_e1.rs (C:/mir2-build/gateway-r48-tests\debug\deps\map_event_binding_e1-704f5a5922ac168f.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\market_refine_custody.rs (C:/mir2-build/gateway-r48-tests\debug\deps\market_refine_custody-91e2fcd86cedce77.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+     Running tests\marriage_authority.rs (C:/mir2-build/gateway-r48-tests\debug\deps\marriage_authority-8b10045c4c38738c.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests\mentor_authority.rs (C:/mir2-build/gateway-r48-tests\debug\deps\mentor_authority-7abee9b6f4b7db5f.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests\native_startup_contract.rs (C:/mir2-build/gateway-r48-tests\debug\deps\native_startup_contract-775b066777ee5dde.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests\newcomer_progression_persistence.rs (C:/mir2-build/gateway-r48-tests\debug\deps\newcomer_progression_persistence-a60dff6e450bd568.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\ordinary_candidate_loop.rs (C:/mir2-build/gateway-r48-tests\debug\deps\ordinary_candidate_loop-dafe682ccf9364c3.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests\platinum_176_combat_milestones.rs (C:/mir2-build/gateway-r48-tests\debug\deps\platinum_176_combat_milestones-ab35ed50de87eaac.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests\platinum_176_party_boss.rs (C:/mir2-build/gateway-r48-tests\debug\deps\platinum_176_party_boss-66f0fbf4d567793a.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests\platinum_176_progression.rs (C:/mir2-build/gateway-r48-tests\debug\deps\platinum_176_progression-7c55367f339c02c7.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+     Running tests\quest_agent_respawns.rs (C:/mir2-build/gateway-r48-tests\debug\deps\quest_agent_respawns-75c730f014338b87.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\quest_agent_special_scripts.rs (C:/mir2-build/gateway-r48-tests\debug\deps\quest_agent_special_scripts-38cc4d77e17a2b04.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests\quest_icons.rs (C:/mir2-build/gateway-r48-tests\debug\deps\quest_icons-994b149eecf5d956.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests\quest_recurrence_persistence.rs (C:/mir2-build/gateway-r48-tests\debug\deps\quest_recurrence_persistence-81a0c19e949b45f8.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\ranking.rs (C:/mir2-build/gateway-r48-tests\debug\deps\ranking-e77236ab5d247bfc.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests\ranking_shared_presence.rs (C:/mir2-build/gateway-r48-tests\debug\deps\ranking_shared_presence-246bb58a68114f84.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests\refine_oven_custody.rs (C:/mir2-build/gateway-r48-tests\debug\deps\refine_oven_custody-6d266f57bc348215.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 10 filtered out; finished in 0.00s
+
+     Running tests\replica_recovery_config.rs (C:/mir2-build/gateway-r48-tests\debug\deps\replica_recovery_config-69b28e76138b1c85.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests\retained_bootstrap.rs (C:/mir2-build/gateway-r48-tests\debug\deps\retained_bootstrap-3298a293a0b22c5e.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\save_failure_propagation.rs (C:/mir2-build/gateway-r48-tests\debug\deps\save_failure_propagation-9663bf5cd7cf6808.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests\security_lifecycle.rs (C:/mir2-build/gateway-r48-tests\debug\deps\security_lifecycle-34b8928818129336.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 20 filtered out; finished in 0.00s
+
+     Running tests\shared_entity_combat.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_entity_combat-7370978f1d057818.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_armadillo_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_armadillo_ai-8eed041d134b8bc5.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_evil_mir_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_evil_mir_ai-47c3c2b4b9d0cd0d.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_football_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_football_ai-07d1cc43ecf6c92d.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_gate_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_gate_ai-3e6dab26c44ab0ad.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_great_fox_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_great_fox_ai-604c99ab2c9f7a37.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 15 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_hell_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_hell_ai-5cd96bb78b6c35e7.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_horned_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_horned_ai-5e023aa1e9130bb7.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_horned_encounter_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_horned_encounter_ai-8d7660f74935d700.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_hugger_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_hugger_ai-fb129ee750ce799b.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_kirin_snow_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_kirin_snow_ai-8c7107406053c390.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 9 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_meow_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_meow_ai-e4afe1001d5b9e76.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_mud_boulder_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_mud_boulder_ai-37dd2a91f14a91a7.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_node_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_node_ai-d0943bf0803327cb.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_passive_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_passive_ai-380a340c4a00363c.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_pet_special_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_pet_special_ai-71ac0c25a2ea220a.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_reactive_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_reactive_ai-3045413c0cfefb07.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_revival_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_revival_ai-a4734a1e07a7075c.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_shinsu_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_shinsu_ai-1de4de90af83e9a8.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_sleep_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_sleep_ai-965342c0d6bfb1da.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_snake_totem_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_snake_totem_ai-3171e5badba3d777.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_special_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_special_ai-c7b9a906dddee89e.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_spider_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_spider_ai-c1067a8ed25ebddb.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_stage_summons.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_stage_summons-51b9609c80cdeb2e.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_statue_centipede_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_statue_centipede_ai-49c900502ca28b93.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_stone_trap_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_stone_trap_ai-72b75b26e19b0c7f.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_thunder_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_thunder_ai-b85ca49da2d960aa.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_town_archer_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_town_archer_ai-70ff24f562f9704f.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_trap_rock_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_trap_rock_ai-cfd06976c084cd11.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_tree_queen_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_tree_queen_ai-fbaaa83fe98b1b4c.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_tucson_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_tucson_ai-bf734af64b4993fb.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 7 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_vampire_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_vampire_ai-a8393fd4a343e5a8.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_visibility_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_visibility_ai-e165a9bef1c406cb.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+     Running tests\shared_monster_yimoogi_ai.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_monster_yimoogi_ai-fcb918c86b9d9f80.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+     Running tests\shared_player_damage_settlement.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_player_damage_settlement-0b8d898a2520f1e8.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 11 filtered out; finished in 0.00s
+
+     Running tests\shared_player_death_zone.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_player_death_zone-8e353ab895abdeee.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\shared_player_vital_transfer.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_player_vital_transfer-6a4207138f59b77e.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\shared_trade_completion.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_trade_completion-7277d38683be582a.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 6 filtered out; finished in 0.00s
+
+     Running tests\shared_trade_gold.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_trade_gold-b79b3b1333fbabe9.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 12 filtered out; finished in 0.00s
+
+     Running tests\shared_zone.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_zone-fc477e78dd9a6921.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 205 filtered out; finished in 0.00s
+
+     Running tests\shared_zone_melee_mana.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_zone_melee_mana-b95c12fd28fcadae.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\shared_zone_self_magic.rs (C:/mir2-build/gateway-r48-tests\debug\deps\shared_zone_self_magic-e2891c4db01d07c4.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 4 filtered out; finished in 0.00s
+
+     Running tests\social_economy_integration.rs (C:/mir2-build/gateway-r48-tests\debug\deps\social_economy_integration-3a5985bce6302543.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 3 filtered out; finished in 0.00s
+
+     Running tests\storage_request_id.rs (C:/mir2-build/gateway-r48-tests\debug\deps\storage_request_id-0cc8893eefd6fae9.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests\trade_item_destinations.rs (C:/mir2-build/gateway-r48-tests\debug\deps\trade_item_destinations-851d3ffe3fd478d7.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+
+     Running tests\trade_item_merges.rs (C:/mir2-build/gateway-r48-tests\debug\deps\trade_item_merges-df08d05b5e637534.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 5 filtered out; finished in 0.00s
+
+     Running tests\user_item_uid_file.rs (C:/mir2-build/gateway-r48-tests\debug\deps\user_item_uid_file-f5f9f433ad925c44.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.00s
+
+     Running tests\vertical_slice.rs (C:/mir2-build/gateway-r48-tests\debug\deps\vertical_slice-408d8f5264975df7.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 13 filtered out; finished in 0.00s
+
+     Running tests\yin_devil_node.rs (C:/mir2-build/gateway-r48-tests\debug\deps\yin_devil_node-ec7660da1ef1baac.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 0.00s
+
+     Running tests\zone_replay.rs (C:/mir2-build/gateway-r48-tests\debug\deps\zone_replay-a957fc7a5e312ad1.exe)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 8 filtered out; finished in 0.00s
+

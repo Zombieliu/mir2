@@ -10,8 +10,8 @@ use bevy::ui::{BackgroundColor, Node, PositionType, Val};
 
 use crate::chat::{ChatChannel, ChatLine, ChatModel};
 use crate::crystal_ui::overlays::{
-    dispatch_ui_action, NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
-    UiEffectQueue,
+    NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState, UiEffectQueue,
+    dispatch_ui_action,
 };
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_ui_core::action::UiAction;
@@ -19,7 +19,7 @@ use mir2_ui_core::state::{UiChatChannel, UiChatSettings};
 
 use super::spec;
 use super::spec::CrystalRect;
-use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
+use super::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
 use super::widget::CrystalHint;
 
 /// The Crystal 1024x768 chat panel's screen-space origin.
@@ -439,6 +439,62 @@ pub fn filtered_lines<'a>(model: &'a ChatModel, state: &CrystalChatState) -> Vec
         .collect()
 }
 
+fn chat_display_text(line: &ChatLine) -> String {
+    // Player, guild, whisper and announcement text must remain opaque even
+    // when it happens to equal a system catalog key.
+    if matches!(
+        line.canonical_channel(),
+        ChatChannel::System | ChatChannel::Hint
+    ) {
+        crate::native_i18n::tr(&line.text)
+    } else {
+        line.text.clone()
+    }
+}
+
+fn display_chat_rows(model: &ChatModel, state: &CrystalChatState) -> Vec<ChatLine> {
+    use unicode_width::UnicodeWidthChar;
+    let mut rows = std::collections::VecDeque::new();
+    for source in filtered_lines(model, state) {
+        let display = chat_display_text(source);
+        if display == source.text {
+            rows.push_back(source.clone());
+        } else {
+            // Wrap translated system copy before slicing the visible rows.
+            // Cap the projection independently of the canonical 200 messages.
+            let mut line = String::new();
+            let mut columns = 0;
+            for ch in display.chars().take(4096) {
+                let width = ch.width().unwrap_or(0);
+                if ch == '\n' || columns + width > 90 {
+                    rows.push_back(ChatLine {
+                        text: std::mem::take(&mut line),
+                        channel: source.channel.clone(),
+                    });
+                    columns = 0;
+                    while rows.len() > 800 {
+                        rows.pop_front();
+                    }
+                }
+                if ch != '\n' {
+                    line.push(ch);
+                    columns += width;
+                }
+            }
+            if !line.is_empty() {
+                rows.push_back(ChatLine {
+                    text: line,
+                    channel: source.channel.clone(),
+                });
+            }
+        }
+        while rows.len() > 800 {
+            rows.pop_front();
+        }
+    }
+    rows.into_iter().collect()
+}
+
 /// Direct filter by outbound filter only (for display content tests).
 pub fn filter_lines_by_filter<'a>(
     lines: &'a [ChatLine],
@@ -598,7 +654,7 @@ fn consume_chat_actions(
         // Apply to temp to compute new filtered len if filter changed
         let filtered_len_before = chat
             .as_ref()
-            .map(|m| filtered_lines(m, &temp_state).len())
+            .map(|m| display_chat_rows(m, &temp_state).len())
             .unwrap_or(0);
         // Apply action to real state with appropriate length
         // For filter actions, we need length after filter – we can compute after setting filter.
@@ -608,7 +664,7 @@ fn consume_chat_actions(
             temp_state.filter = filter;
             let new_len = chat
                 .as_ref()
-                .map(|m| filtered_lines(m, &temp_state).len())
+                .map(|m| display_chat_rows(m, &temp_state).len())
                 .unwrap_or(0);
             apply_chat_action(&mut state, action, new_len);
             // Ensure scroll clamped to new max
@@ -618,7 +674,7 @@ fn consume_chat_actions(
             // Re-clamp after resize etc
             let new_len = chat
                 .as_ref()
-                .map(|m| filtered_lines(m, &state).len())
+                .map(|m| display_chat_rows(m, &state).len())
                 .unwrap_or(0);
             state.clamp_scroll(new_len);
         }
@@ -674,7 +730,7 @@ fn handle_chat_scroll_keys(
     // For native, we allow scroll regardless of focus to satisfy Goal 4.8.
     let filtered_len = chat
         .as_ref()
-        .map(|m| filtered_lines(m, &state).len())
+        .map(|m| display_chat_rows(m, &state).len())
         .unwrap_or(0);
     if keys.just_pressed(KeyCode::Home) {
         state.home();
@@ -707,11 +763,21 @@ fn auto_scroll_on_new_message(
     mut state: ResMut<CrystalChatState>,
     mut last_filtered_len: Local<Option<usize>>,
     mut was_at_bottom: Local<bool>,
+    mut last_locale: Local<Option<(u64, crate::native_i18n::Locale)>>,
 ) {
     let Some(chat) = chat else {
         return;
     };
-    let filtered_len = filtered_lines(&chat, &state).len();
+    let locale = (crate::native_i18n::revision(), crate::native_i18n::locale());
+    if last_filtered_len.is_some()
+        && !chat.is_changed()
+        && !state.is_changed()
+        && *last_locale == Some(locale)
+    {
+        return;
+    }
+    *last_locale = Some(locale);
+    let filtered_len = display_chat_rows(&chat, &state).len();
     let line_count = state.line_count();
     let max = max_scroll_offset(filtered_len, line_count);
     let follow = filtered_len.saturating_sub(line_count);
@@ -749,7 +815,11 @@ fn render_crystal_chat(
     shell: Option<Res<NativeShellModel>>,
     mut roots: Query<(Entity, &mut Visibility, Option<&Children>), With<CrystalChatRoot>>,
     added_roots: Query<Entity, Added<CrystalChatRoot>>,
+    mut last_locale: Local<Option<(u64, crate::native_i18n::Locale)>>,
 ) {
+    let locale = (crate::native_i18n::revision(), crate::native_i18n::locale());
+    let locale_changed = *last_locale != Some(locale);
+    *last_locale = Some(locale);
     let chat_changed = chat.as_ref().is_some_and(|resource| resource.is_changed());
     let state_changed = chat_state
         .as_ref()
@@ -759,7 +829,13 @@ fn render_crystal_chat(
         .is_some_and(|resource| resource.is_changed());
     let shell_changed = shell.as_ref().is_some_and(|resource| resource.is_changed());
     let first_render = !added_roots.is_empty();
-    if !first_render && !chat_changed && !shell_changed && !state_changed && !player_ui_changed {
+    if !first_render
+        && !chat_changed
+        && !shell_changed
+        && !state_changed
+        && !player_ui_changed
+        && !locale_changed
+    {
         return;
     }
 
@@ -801,7 +877,8 @@ fn render_crystal_chat(
         .as_deref()
         .filter(|ui| ui.core.chat_focused())
         .map(|ui| ui.chat_draft.clone());
-    let filtered = filtered_lines(chat, &state);
+    let projected = display_chat_rows(chat, &state);
+    let filtered = projected.iter().collect::<Vec<_>>();
     let line_count = state.line_count();
     let visible = visible_chat_slice(&filtered, state.scroll, line_count);
     let frame_spec = match state.window_size {
@@ -969,6 +1046,19 @@ fn spawn_chat_settings_panel(
             },
         ))
         .with_children(|panel| {
+            if crate::native_i18n::active() {
+                panel.spawn((
+                    Node {
+                        position_type: PositionType::Absolute,
+                        width: Val::Percent(100.0),
+                        height: Val::Percent(100.0),
+                        border: UiRect::all(Val::Px(1.0)),
+                        ..default()
+                    },
+                    BackgroundColor(Color::srgb(0.04, 0.03, 0.02)),
+                    BorderColor::all(Color::srgb(0.65, 0.5, 0.22)),
+                ));
+            }
             // This asset pack labels 464/465 FILTER and 462/463 CHAT BOX;
             // keep the label and action paired, unlike the legacy C# indices.
             spawn_chat_settings_button(
@@ -1086,6 +1176,22 @@ fn spawn_chat_transparency_settings(
     asset_server: &AssetServer,
     settings: UiChatSettings,
 ) {
+    if crate::native_i18n::active() {
+        parent.spawn((
+            Node {
+                position_type: PositionType::Absolute,
+                left: Val::Px(12.0),
+                top: Val::Px(53.0),
+                width: Val::Px(200.0),
+                height: Val::Px(24.0),
+                ..default()
+            },
+            Text::new(crate::native_i18n::tr("Transparency")),
+            crystal_text_font(12.0),
+            TextColor(Color::WHITE),
+            TextLayout::justify(Justify::Center),
+        ));
+    }
     let (off_normal, off_hover, off_pressed) = if settings.transparent {
         (470, 470, 470)
     } else {
@@ -1144,7 +1250,7 @@ fn spawn_chat_settings_footer(parent: &mut ChildSpawnerCommands, asset_server: &
                 ..default()
             },
             BackgroundColor(Color::srgba(0.20, 0.14, 0.08, 0.96)),
-            Text::new(label),
+            Text::new(crate::native_i18n::tr(label)),
             crystal_text_font(CRYSTAL_DEFAULT_FONT_SIZE_PX),
             TextColor(Color::WHITE),
         ));
@@ -1162,6 +1268,77 @@ fn spawn_chat_settings_button(
     relative_origin: (f32, f32),
     action: CrystalChatAction,
 ) {
+    if crate::native_i18n::active() {
+        let label = match action {
+            CrystalChatAction::SettingsTab(CrystalChatSettingsTab::Filters) => {
+                Some(crate::native_i18n::tr("Filters"))
+            }
+            CrystalChatAction::SettingsTab(CrystalChatSettingsTab::Chat) => {
+                Some(crate::native_i18n::tr("Chat"))
+            }
+            CrystalChatAction::SettingsFilterAll => Some(format!(
+                "{} {}",
+                if normal == 2087 { "☑" } else { "☐" },
+                crate::native_i18n::tr("All")
+            )),
+            CrystalChatAction::SettingsFilter(channel) => {
+                let name = match channel {
+                    UiChatChannel::Normal => "Normal",
+                    UiChatChannel::Shout => "Shout",
+                    UiChatChannel::Whisper => "Whisper",
+                    UiChatChannel::Lover => "Lover",
+                    UiChatChannel::Mentor => "Mentor",
+                    UiChatChannel::Group => "Group",
+                    UiChatChannel::Guild => "Guild",
+                    UiChatChannel::System => "System",
+                    _ => "Chat",
+                };
+                Some(format!(
+                    "{} {}",
+                    if normal % 2 == 1 { "☑" } else { "☐" },
+                    crate::native_i18n::tr(name)
+                ))
+            }
+            CrystalChatAction::SettingsTransparency(on) => {
+                Some(crate::native_i18n::tr(if on { "On" } else { "Off" }))
+            }
+            _ => None,
+        };
+        if let Some(label) = label {
+            let width = if matches!(
+                action,
+                CrystalChatAction::SettingsTab(_) | CrystalChatAction::SettingsTransparency(_)
+            ) {
+                65.0
+            } else {
+                84.0
+            };
+            parent.spawn((
+                CrystalChatElement,
+                Button,
+                action,
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: Val::Px(relative_origin.0),
+                    top: Val::Px(relative_origin.1),
+                    width: Val::Px(width),
+                    height: Val::Px(19.0),
+                    align_items: AlignItems::Center,
+                    justify_content: JustifyContent::Center,
+                    ..default()
+                },
+                BackgroundColor(if matches!(normal, 463 | 465 | 471 | 474) {
+                    Color::srgb(0.42, 0.31, 0.10)
+                } else {
+                    Color::srgb(0.20, 0.14, 0.08)
+                }),
+                Text::new(label),
+                crystal_text_font(10.0),
+                TextColor(Color::WHITE),
+            ));
+            return;
+        }
+    }
     parent.spawn((
         CrystalChatElement,
         CrystalChatSettingsButton {
@@ -1364,7 +1541,7 @@ fn spawn_chat_button(
         },
     ));
     if let Some(hint) = chat_hint(action) {
-        entity.insert(CrystalHint::new(hint));
+        entity.insert(CrystalHint::new(crate::native_i18n::tr(hint)));
     }
 }
 
@@ -1676,6 +1853,44 @@ pub fn is_z_order_correct() -> bool {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn native_chat_translation_preserves_player_channels_and_canonical_messages() {
+        use super::*;
+        use crate::native_i18n::{self, Locale};
+        native_i18n::with_locale(Locale::TraditionalChinese, || {
+            for channel in ChatChannel::ALL {
+                let line = ChatLine {
+                    text: "Password".into(),
+                    channel: format!("{channel:?}"),
+                };
+                let display = chat_display_text(&line);
+                if matches!(channel, ChatChannel::System | ChatChannel::Hint) {
+                    assert_eq!(display, "密碼");
+                } else {
+                    assert_eq!(display, "Password");
+                }
+                assert_eq!(line.text, "Password");
+            }
+        });
+        native_i18n::with_locale(Locale::BrazilianPortuguese, || {
+            let model = ChatModel { lines: vec![ChatLine {
+                text: "密码：10–15 位英文字母或数字。不能与账号相同，不能使用常见弱口令；两次输入须一致。".into(), channel: "System".into(),
+            }] };
+            let before = model.lines.clone();
+            let translated = native_i18n::tr(&model.lines[0].text);
+            let rows = display_chat_rows(&model, &CrystalChatState::default());
+            assert!(rows.len() > 1);
+            assert_eq!(
+                rows.iter().map(|row| row.text.as_str()).collect::<String>(),
+                translated
+            );
+            assert!(
+                rows.iter()
+                    .all(|row| unicode_width::UnicodeWidthStr::width(row.text.as_str()) <= 90)
+            );
+            assert_eq!(model.lines, before);
+        });
+    }
     use super::*;
     use bevy::asset::{AssetApp, AssetPlugin};
 
@@ -2207,9 +2422,11 @@ mod tests {
         // Shout shows shout variants only
         let shout = filter_lines_by_filter(&lines, CrystalChatFilter::Shout);
         assert_eq!(shout.len(), 3);
-        assert!(shout
-            .iter()
-            .all(|l| channel_matches_filter(&l.channel, CrystalChatFilter::Shout)));
+        assert!(
+            shout
+                .iter()
+                .all(|l| channel_matches_filter(&l.channel, CrystalChatFilter::Shout))
+        );
         // Whisper
         let whisper = filter_lines_by_filter(&lines, CrystalChatFilter::Whisper);
         assert_eq!(whisper.len(), 1);
@@ -2573,11 +2790,12 @@ mod tests {
                 .drain_intents(),
             vec![NativePlayerUiIntent::TradeRequest]
         );
-        assert!(app
-            .world()
-            .resource::<crate::social::SocialModel>()
-            .pending
-            .is_empty());
+        assert!(
+            app.world()
+                .resource::<crate::social::SocialModel>()
+                .pending
+                .is_empty()
+        );
 
         app.world_mut()
             .resource_mut::<CrystalChatActionQueue>()
@@ -2632,11 +2850,12 @@ mod tests {
         app.update();
         assert_eq!(app.world().resource::<CrystalChatState>().scroll, 5);
         assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
-        assert!(app
-            .world_mut()
-            .resource_mut::<NativePlayerUiIntentQueue>()
-            .drain_intents()
-            .is_empty());
+        assert!(
+            app.world_mut()
+                .resource_mut::<NativePlayerUiIntentQueue>()
+                .drain_intents()
+                .is_empty()
+        );
     }
 
     #[test]
@@ -2789,6 +3008,7 @@ fn handle_chat_pointer_scroll(
     };
     if !window.focused
         || shell.is_none_or(|s| s.screen != NativeShellScreen::InGame)
+        || ui.menu_pointer_consumed
         || ui.amount_modal_open()
         || ui.core.chat_settings_open()
     {
@@ -2805,7 +3025,7 @@ fn handle_chat_pointer_scroll(
     let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
     let panel = state.window_size.spec_rect();
     let local = Vec2::new(x - panel.left, y - panel.top);
-    let count = filtered_lines(&chat, &state).len();
+    let count = display_chat_rows(&chat, &state).len();
     let origin = position_bar_origin(state.window_size, state.scroll, count);
     let size = prguse_frame_size(2015);
     if mouse.just_pressed(MouseButton::Left)
@@ -2835,6 +3055,71 @@ fn handle_chat_pointer_scroll(
 #[cfg(test)]
 mod pointer_scroll_tests {
     use super::*;
+    #[test]
+    fn foreground_wheel_consumption_prevents_chat_scroll_and_does_not_replay() {
+        use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
+        let mut app = App::new();
+        app.init_resource::<CrystalChatState>()
+            .init_resource::<NativePlayerUiState>()
+            .init_resource::<ButtonInput<MouseButton>>()
+            .insert_resource(ChatModel {
+                lines: (0..20)
+                    .map(|i| crate::chat::ChatLine {
+                        text: i.to_string(),
+                        channel: "normal".into(),
+                    })
+                    .collect(),
+            })
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_message::<MouseWheel>()
+            .add_systems(Update, handle_chat_pointer_scroll);
+        let panel = app
+            .world()
+            .resource::<CrystalChatState>()
+            .window_size
+            .spec_rect();
+        let mut window = Window {
+            resolution: (1024, 768).into(),
+            focused: true,
+            ..default()
+        };
+        window.set_cursor_position(Some(Vec2::new(panel.left + 20.0, panel.top + 20.0)));
+        let window = app
+            .world_mut()
+            .spawn((window, bevy::window::PrimaryWindow))
+            .id();
+        app.world_mut().resource_mut::<CrystalChatState>().scroll = 10;
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .menu_pointer_consumed = true;
+        app.world_mut().write_message(MouseWheel {
+            unit: MouseScrollUnit::Line,
+            x: 0.0,
+            y: 1.0,
+            window,
+            phase: bevy::input::touch::TouchPhase::Moved,
+        });
+        app.update();
+        assert_eq!(app.world().resource::<CrystalChatState>().scroll, 10);
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .menu_pointer_consumed = false;
+        app.update();
+        assert_eq!(app.world().resource::<CrystalChatState>().scroll, 10);
+        app.world_mut().write_message(MouseWheel {
+            unit: MouseScrollUnit::Line,
+            x: 0.0,
+            y: 1.0,
+            window,
+            phase: bevy::input::touch::TouchPhase::Moved,
+        });
+        app.update();
+        assert_eq!(app.world().resource::<CrystalChatState>().scroll, 9);
+    }
+
     #[test]
     fn original_track_reaches_last_history_index() {
         assert_eq!(chat_index_at_track(16., 0., 30., 100), 0);

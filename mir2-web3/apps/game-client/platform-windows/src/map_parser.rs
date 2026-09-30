@@ -172,6 +172,95 @@ impl ParsedMap {
         };
         (cell.back_image & 0x2000_0000) != 0 || (cell.front_image as u16 & 0x8000) != 0
     }
+
+    /// Reuse the manifest lookup across a full-map route search. The raw map
+    /// stays immutable; only an ordinary player entrance can exempt its cell.
+    pub(crate) fn player_movement_collision(&self, map_file_name: &str) -> PlayerMovementCollision<'_> {
+        let entrances = map_cache_key(map_file_name)
+            .and_then(|key| ordinary_player_entrances().get(&key));
+        PlayerMovementCollision { map: self, entrances }
+    }
+}
+
+struct OrdinaryEntranceDestination {
+    map_file_name: String,
+    x: i32,
+    y: i32,
+    // Map geometry and the bundled movement manifest are immutable. A missing
+    // local map is not cached, so a subsequently available pack can be retried.
+    valid_landing: OnceLock<bool>,
+}
+
+impl OrdinaryEntranceDestination {
+    fn has_valid_landing(&self) -> bool {
+        if let Some(valid) = self.valid_landing.get() {
+            return *valid;
+        }
+        let Some(map) = load_map(&self.map_file_name) else {
+            return false;
+        };
+        let valid = !map.cell_blocks_movement(self.x, self.y);
+        let _ = self.valid_landing.set(valid);
+        valid
+    }
+}
+
+type OrdinaryEntranceCells = HashMap<(i32, i32), Vec<OrdinaryEntranceDestination>>;
+
+/// Static collision for a player's ordinary Walk/Run, with the same source-cell
+/// exemption used by the server. It does not authorize a transfer or bypass
+/// occupancy; the input controller and the Zone retain those checks.
+pub(crate) struct PlayerMovementCollision<'a> {
+    map: &'a ParsedMap,
+    entrances: Option<&'a OrdinaryEntranceCells>,
+}
+
+impl PlayerMovementCollision<'_> {
+    pub(crate) fn cell_blocks_movement(&self, x: i32, y: i32) -> bool {
+        if !self.map.cell_blocks_movement(x, y) {
+            return false;
+        }
+        if x < 0 || y < 0 || x >= i32::from(self.map.width) || y >= i32::from(self.map.height) {
+            return true;
+        }
+        !self.entrances
+            .and_then(|entrances| entrances.get(&(x, y)))
+            .is_some_and(|destinations| destinations.iter().any(OrdinaryEntranceDestination::has_valid_landing))
+    }
+}
+
+fn build_ordinary_player_entrances(
+    maps: &[mir2_game_data::CrystalRespawnMap],
+) -> HashMap<String, OrdinaryEntranceCells> {
+    let by_index = maps.iter().map(|map| (map.map_index, map)).collect::<HashMap<_, _>>();
+    let mut result = HashMap::<String, OrdinaryEntranceCells>::new();
+    for map in maps {
+        let Some(source_key) = map_cache_key(&map.map_file_name) else { continue; };
+        for movement in &map.movements {
+            // Mirror valid direct server movements, while refusing conditional
+            // conquest edges because the client has no authority to grant them.
+            if movement.need_hole || movement.need_move || movement.conquest_index != 0
+                || (movement.destination.x == 0 && movement.destination.y == 0)
+            {
+                continue;
+            }
+            let Some(target) = by_index.get(&movement.map_index) else { continue; };
+            result.entry(source_key.clone()).or_default()
+                .entry((movement.source.x, movement.source.y)).or_default()
+                .push(OrdinaryEntranceDestination {
+                    map_file_name: target.map_file_name.clone(),
+                    x: movement.destination.x,
+                    y: movement.destination.y,
+                    valid_landing: OnceLock::new(),
+                });
+        }
+    }
+    result
+}
+
+fn ordinary_player_entrances() -> &'static HashMap<String, OrdinaryEntranceCells> {
+    static ENTRANCES: OnceLock<HashMap<String, OrdinaryEntranceCells>> = OnceLock::new();
+    ENTRANCES.get_or_init(|| build_ordinary_player_entrances(&mir2_game_data::crystal_respawn_manifest_ref().maps))
 }
 
 fn parsed_map_cache() -> &'static Mutex<ParsedMapCache> {
@@ -730,7 +819,7 @@ fn map_draw_is_floor(layer: TileLayer, animated: bool, width: u32, height: u32) 
     layer == TileLayer::Back || (!animated && floor_sized_frame(width, height))
 }
 
-fn map_floor_depth(map: &ParsedMap, x: i32, y: i32) -> f32 {
+fn map_floor_depth(map: &ParsedMap, x: i32, y: i32, layer: TileLayer) -> f32 {
     let width = u64::from(map.width);
     let height = u64::from(map.height);
     let cell_count = width.saturating_mul(height);
@@ -747,7 +836,20 @@ fn map_floor_depth(map: &ParsedMap, x: i32, y: i32) -> f32 {
         .saturating_mul(width)
         .saturating_add(x)
         .min(cell_count.saturating_sub(1));
-    (f64::from(MAP_FLOOR_DEPTH_MIN) + rank as f64 / cell_count as f64 * MAP_FLOOR_DEPTH_SPAN) as f32
+    // Crystal composites the complete Back pass before Middle and Front.
+    // Sorting only by cell gave an even/even Back and its Middle the same Z;
+    // Bevy could then draw the 96x64 sand Back over a 48x32 grass Middle,
+    // producing square ground holes as the camera moved through Bichon.
+    let layer_order = match layer {
+        TileLayer::Back => 0,
+        TileLayer::Middle => 1,
+        TileLayer::Front => 2,
+        TileLayer::TileAnimation => 3,
+    };
+    let layer_span = MAP_FLOOR_DEPTH_SPAN / 4.0;
+    (f64::from(MAP_FLOOR_DEPTH_MIN)
+        + f64::from(layer_order) * layer_span
+        + rank as f64 / cell_count as f64 * layer_span) as f32
 }
 
 fn build_original_map_frame_path(library: &str, frame_index: i32) -> String {
@@ -775,7 +877,9 @@ fn map_library_segment_requires_alpha_key(segment: &str) -> bool {
             || rest.chars().all(|character| character.is_ascii_digit());
     }
     if let Some(rest) = segment.strip_prefix("smobjects") {
-        return rest.is_empty() || rest.chars().all(|character| character.is_ascii_digit());
+        return rest.is_empty()
+            || rest.chars().all(|character| character.is_ascii_digit())
+            || matches!(rest, "c" | "cwood" | "csand" | "csnow" | "cforest");
     }
 
     fn matches_optional_plural_c(segment: &str, stem: &str) -> bool {
@@ -1299,7 +1403,7 @@ fn build_map_render_state_with_indexes(
                     let draw_as_floor =
                         map_draw_is_floor(draw.layer, animated, asset.width, asset.height);
                     let depth = if draw_as_floor {
-                        map_floor_depth(map, draw.x, draw.y)
+                        map_floor_depth(map, draw.x, draw.y, draw.layer)
                     } else {
                         cell_depth
                     };
@@ -1336,7 +1440,7 @@ fn build_map_render_state_with_indexes(
                     let draw_as_floor =
                         map_draw_is_floor(draw.layer, animated, rect.width, rect.height);
                     let depth = if draw_as_floor {
-                        map_floor_depth(map, draw.x, draw.y)
+                        map_floor_depth(map, draw.x, draw.y, draw.layer)
                     } else {
                         cell_depth
                     };
@@ -1434,6 +1538,7 @@ pub fn load_map(map_file_name: &str) -> Option<Arc<ParsedMap>> {
             return Some(map);
         }
     }
+    let _diagnostic = crate::timing::DiagnosticSpan::new("mapCacheMissReadDecompressParse");
     let path = find_map_file(map_file_name)?;
     let compressed = fs::read(&path).ok()?;
     let mut decoder = flate2::read::GzDecoder::new(&compressed[..]);
@@ -1460,6 +1565,15 @@ pub fn map_cell_blocks_movement(map_file_name: &str, x: i32, y: i32) -> Option<b
     Some(map.cell_blocks_movement(x, y))
 }
 
+/// Player movement must be able to enter an authored ordinary doorway even
+/// when its art cell is flagged as a wall (for example Bichon 399,225).
+/// Out-of-bounds cells, arbitrary walls, conditional entrances and invalid
+/// landing cells remain blocked. This never returns a teleport instruction.
+pub fn map_cell_blocks_player_movement(map_file_name: &str, x: i32, y: i32) -> Option<bool> {
+    let map = load_map(map_file_name)?;
+    Some(map.player_movement_collision(map_file_name).cell_blocks_movement(x, y))
+}
+
 /// Validate and normalize the map cache key before touching the filesystem.
 /// This mirrors `find_map_file`'s path policy, but turns equivalent `0`,
 /// `0.map`, and `0.map.gz` payload spellings into one retained parse.
@@ -1481,6 +1595,10 @@ pub fn has_local_map_atlas() -> bool {
         && find_map_atlas_manifest().is_some()
         && find_native_keyed_manifest().is_some()
 }
+
+#[cfg(test)]
+#[path = "map_player_movement_tests.rs"]
+mod player_movement_tests;
 
 #[cfg(test)]
 mod tests {
@@ -1524,6 +1642,41 @@ mod tests {
         eprintln!(
             "[map-relocation-regression] Bichon (302,634): {} atlas tiles, {} standalone tiles, {} local images",
             atlas_tiles.len(), standalone_tiles.len(), images.len()
+        );
+    }
+
+    #[test]
+    fn bichon_market_grass_middle_renders_above_its_sand_back() {
+        let map = load_map("0").expect("Bichon map layout");
+        let state = build_map_render_state_for_file(
+            &map,
+            MapViewport {
+                center_x: 287,
+                center_y: 607,
+                width: 22,
+                height: 18,
+            },
+            "0",
+        )
+        .expect("Bichon market render state");
+        let tiles = state["tiles"].as_array().expect("map tiles");
+        let tile = |key: &str| {
+            tiles
+                .iter()
+                .find(|tile| tile["key"] == key)
+                .unwrap_or_else(|| panic!("missing {key}"))
+        };
+        let back = tile("back:290:600");
+        let middle = tile("mid:290:600");
+        assert_eq!(back["rectKey"], "WemadeMir2/Tiles#3");
+        assert_eq!(middle["rectKey"], "WemadeMir2/SmTiles#123");
+        assert!(
+            middle["z"].as_f64().unwrap() > back["z"].as_f64().unwrap(),
+            "a sand Back must never cover the same cell's grass Middle"
+        );
+        assert!(
+            tile("mid:290:601")["z"].as_f64().unwrap() > back["z"].as_f64().unwrap(),
+            "the 96x64 Back also covers the next row's grass Middle"
         );
     }
 
@@ -2472,6 +2625,24 @@ mod tests {
             .as_f64()
             .expect("standalone floor z");
         assert!((-2.0..-1.0).contains(&z), "got {z}");
+    }
+
+    #[test]
+    fn mir3_small_objects_use_standalone_source_images() {
+        for index in [210, 225, 240, 255, 270, 310, 325, 340, 355, 370] {
+            let library = library_key_for_index(index);
+            assert!(map_path_requires_alpha_key(&build_original_map_frame_path(&library, 2766)));
+        }
+        for name in ["smobjectsbad", "smobjectsc2", "smobjectscwoods"] {
+            assert!(!map_library_segment_requires_alpha_key(name));
+        }
+        let map = ParsedMap { width: 1, height: 1, cells: vec![middle_cell(255, 2766)] };
+        let key = atlas_rect_key("WemadeMir3/Snow/SmObjectsc", 2766);
+        let atlas = atlas_index_for(&key, 48, 32);
+        let standalone = standalone_index_for(&key, "/generated/native-map-keyed/pages/snow.png", 48, 32);
+        let state = build_map_render_state_with_indexes(&map, viewport(), &atlas, Some(&standalone)).unwrap();
+        assert_eq!(state["tiles"].as_array().unwrap().len(), 0);
+        assert_eq!(state["standaloneTiles"].as_array().unwrap().len(), 1);
     }
 
     #[test]

@@ -126,6 +126,32 @@ pub(crate) struct HostState {
     safe_bottom: f32,
     render_load_active: bool,
     deferred_render_load: Option<DeferredRenderLoad>,
+    editor: HostEditorSession,
+}
+
+/// OS callbacks belong to one activation, not merely a reusable field name.
+#[derive(Default)]
+struct HostEditorSession {
+    epoch: u64,
+    field: Option<String>,
+}
+
+impl HostEditorSession {
+    fn open(&mut self, field: &str) -> u64 {
+        self.epoch = self.epoch.checked_add(1).unwrap_or(1);
+        self.field = Some(field.to_owned());
+        self.epoch
+    }
+
+    fn close(&mut self) {
+        self.field = None;
+    }
+
+    fn accepts(&self, event: &Value) -> bool {
+        self.field.is_some()
+            && event["editorEpoch"].as_u64() == Some(self.epoch)
+            && event["field"].as_str() == self.field.as_deref()
+    }
 }
 
 #[derive(Debug)]
@@ -470,7 +496,6 @@ impl Plugin for AndroidSharedShellPlugin {
                     observe_render_receipt,
                     fit_shell_bleed,
                     fit_stage.in_set(AndroidStageFit),
-                    fit_mail_composer,
                     forward_intents,
                     forward_quest_ui_intents,
                     discard_inactive_player_commands,
@@ -560,7 +585,10 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
-            Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+            (
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayMailWindow>,
+            ),
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlaySocial>,
@@ -579,7 +607,10 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
-            Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+            (
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayMailWindow>,
+            ),
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlaySocial>,
@@ -597,7 +628,10 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
-            Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+            (
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayMailWindow>,
+            ),
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlaySocial>,
@@ -616,6 +650,8 @@ fn fit_stage(
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+            Has<mir2_client_bevy::crystal_ui::overlays::OverlayMailWindow>,
+            Has<mir2_client_bevy::crystal_ui::overlays::OverlayMailComposer>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlaySocialFocus>,
@@ -629,6 +665,7 @@ fn fit_stage(
             With<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayMail>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayMailWindow>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayGameShop>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayBigMap>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlaySocialFocus>,
@@ -738,6 +775,8 @@ fn fit_stage(
         is_options,
         is_npc_shop,
         is_mail,
+        is_mail_window,
+        is_mail_composer,
         is_game_shop,
         is_bigmap,
         is_social,
@@ -756,6 +795,7 @@ fn fit_stage(
             || (is_options && player.options_open())
             || (is_npc_shop && player.npc_shop_open())
             || (is_mail && player.mail_open())
+            || (is_mail_window && node.display != Display::None)
             || (is_game_shop && player.shop_open())
             || (is_bigmap && player.bigmap_open())
             || (is_social && (player.group_open() || player.guild_open()))
@@ -770,21 +810,24 @@ fn fit_stage(
                 } else {
                     3.2
                 };
-            let focus_size = mail_editor_focus_size(
-                size,
-                is_mail && host.ime_bottom > 0.0 && player.core.mail_compose.is_some(),
-                fit.scale,
-            );
             let focused = mobile_focus_transform(
                 fit,
                 origin,
-                focus_size,
+                size,
                 Vec2::new(window.width(), window.height()),
                 safe_edges,
                 top,
                 max_scale,
             );
-            if is_bigmap && host.ime_bottom > 0.0 && focused_field == Some("map-search") {
+            if is_mail_composer && host.ime_bottom > 0.0 && focused_field == Some("mail-message") {
+                let caret_bottom = forms.mail_body_top()
+                    + forms.mail_caret().map(|caret| caret.y).unwrap_or(165.0).clamp(0.0, 165.0)
+                    + 4.0;
+                keep_local_y_above_ime(
+                    focused, origin, size, caret_bottom, fit,
+                    Vec2::new(window.width(), window.height()), safe_edges, top,
+                )
+            } else if is_bigmap && host.ime_bottom > 0.0 && focused_field == Some("map-search") {
                 keep_local_y_above_ime(
                     focused,
                     origin,
@@ -855,14 +898,6 @@ fn focus_panel_rect(node: &Node) -> Option<(Vec2, Vec2)> {
     (width > 0.0 && height > 0.0).then_some((Vec2::new(left, top), Vec2::new(width, height)))
 }
 
-fn mail_editor_focus_size(panel_size: Vec2, editing: bool, scale: f32) -> Vec2 {
-    if !editing {
-        return panel_size;
-    }
-    let scale = scale.max(0.01);
-    Vec2::new(panel_size.x, 110.0 + (44.0 / scale).max(28.0) + 8.0 / scale)
-}
-
 fn mobile_focus_transform(
     fit: CrystalStageTransform,
     origin: Vec2,
@@ -929,56 +964,6 @@ fn keep_local_y_above_ime(
     transform
 }
 
-// Keep the two text fields visible while IME is open. Temporarily collapse
-// attachment/gold controls and move the SAME shared footer under the fields;
-// do not pan the entire 444px panel and push the recipient off screen.
-fn fit_mail_composer(
-    host: Res<HostState>,
-    scale: Res<UiScale>,
-    mut details: Query<
-        &mut Node,
-        (
-            With<mir2_client_bevy::crystal_ui::overlays::MailComposeDetails>,
-            Without<mir2_client_bevy::crystal_ui::overlays::MailComposeFooter>,
-            Without<Button>,
-        ),
-    >,
-    mut footers: Query<
-        (&mut Node, &Children),
-        (
-            With<mir2_client_bevy::crystal_ui::overlays::MailComposeFooter>,
-            Without<Button>,
-        ),
-    >,
-    mut buttons: Query<
-        &mut Node,
-        (
-            Without<mir2_client_bevy::crystal_ui::overlays::MailComposeDetails>,
-            Without<mir2_client_bevy::crystal_ui::overlays::MailComposeFooter>,
-        ),
-    >,
-) {
-    let editing = host.ime_bottom > 0.0;
-    for mut node in &mut details {
-        node.display = if editing {
-            Display::None
-        } else {
-            Display::Flex
-        };
-    }
-    for (mut node, children) in &mut footers {
-        node.top = px(if editing { 110.0 - 408.0 } else { 0.0 });
-        for child in children.iter() {
-            if let Ok(mut button) = buttons.get_mut(child) {
-                button.height = px(if editing {
-                    (44.0 / scale.0.max(0.01)).max(28.0)
-                } else {
-                    28.0
-                });
-            }
-        }
-    }
-}
 
 fn belt_edge_origin(
     fit: CrystalStageTransform,
@@ -1005,7 +990,7 @@ fn minimap_edge_origin(width: f32, dpi: f32, scale: f32, safe_right: f32, safe_t
     )
 }
 
-fn player_editor_bottom(field: Option<&str>, scale: f32) -> f32 {
+fn player_editor_bottom(field: Option<&str>, _scale: f32) -> f32 {
     match field {
         Some("guild-notice") => {
             // Shared notice text starts at panel +61, in 9px type. Keep the
@@ -1020,10 +1005,10 @@ fn player_editor_bottom(field: Option<&str>, scale: f32) -> f32 {
             let rect = mir2_client_bevy::crystal_ui::overlays::CRYSTAL_DELETE_AMOUNT_RECT;
             rect.top + rect.height + 8.0
         }
-        // Mail panel top + compact footer top + touch target + IME gutter.
-        Some("mail-recipient" | "mail-message") => {
-            5.0 + 110.0 + (44.0 / scale.max(0.01)).max(28.0) + 8.0 / scale.max(0.01)
-        }
+        // Recipient is a preceding shared modal. Standalone letter/parcel
+        // windows now fit their complete source geometry above the IME.
+        Some("mail-recipient") => 411.0 + 8.0,
+        Some("mail-message") => 750.0,
         Some("storage-password") => {
             let rect = mir2_client_bevy::crystal_ui::overlays::CRYSTAL_STORAGE_PANEL_RECT;
             rect.top + rect.height + 8.0
@@ -1280,6 +1265,9 @@ fn receive(
             continue;
         }
         if value["type"] == "lifecycle" {
+            if matches!(value["state"].as_str(), Some("pause" | "destroy")) {
+                host.editor.close();
+            }
             let event = match value["state"].as_str() {
                 Some("resume") => Some(crate::android_input::AndroidLifecycleEvent::Resume),
                 Some("pause") => Some(crate::android_input::AndroidLifecycleEvent::Pause),
@@ -1298,6 +1286,9 @@ fn receive(
             continue;
         }
         if value["type"] == "submit" {
+            if !host.editor.accepts(&value) {
+                continue;
+            }
             let active = crate::text_input::shell_field(&model)
                 .map(|v| v.0)
                 .or_else(|| {
@@ -1346,6 +1337,9 @@ fn receive(
                 Screen::ChangePassword => {
                     model.apply_ui_intent(Intent::CancelChangePassword);
                 }
+                Screen::Registration => {
+                    model.apply_ui_intent(Intent::CancelRegistration);
+                }
                 Screen::SafeKey => {
                     model.apply_ui_intent(Intent::CloseSafeKey);
                 }
@@ -1375,6 +1369,9 @@ fn receive(
             continue;
         }
         if value["type"] == "edit" {
+            if !host.editor.accepts(&value) {
+                continue;
+            }
             crate::text_input::edit_shell(
                 &mut model,
                 value["field"].as_str().unwrap_or(""),
@@ -1900,8 +1897,19 @@ fn forward_intents(
                 }
                 send(json!({"type":"disconnect"}));
             }
-            Intent::RegisterAccount
-            | Intent::SubmitChangePassword { .. }
+            Intent::SubmitRegistration { .. } => {
+                // The legacy Android transport has no full Crystal NewAccount
+                // exchange. Never send a reduced account/password surrogate or
+                // leave the shared modal locked waiting for a nonexistent reply.
+                model.apply_gateway_event(Event::AccountCreationFailed {
+                    message: "Account registration is not yet wired in the Android host.".into(),
+                });
+                model.registration.password.clear();
+                model.registration.confirm_password.clear();
+                model.registration.secret_question.clear();
+                model.registration.secret_answer.clear();
+            }
+            Intent::SubmitChangePassword { .. }
             | Intent::CreateCharacter { .. }
             | Intent::ConfirmDeleteCharacter => {
                 model.apply_gateway_event(Event::OperationFailure {
@@ -1911,6 +1919,8 @@ fn forward_intents(
             }
             Intent::OpenChangePassword
             | Intent::CancelChangePassword
+            | Intent::OpenRegistration
+            | Intent::CancelRegistration
             | Intent::OpenSafeKey
             | Intent::CloseSafeKey
             | Intent::SafeKeyFocusAccount
@@ -2019,7 +2029,10 @@ fn forward_quest_ui_intents(
             QuestUiIntent::InteractNpc { .. }
             | QuestUiIntent::AttackTarget { .. }
             | QuestUiIntent::PickUpObject { .. } => None,
-            QuestUiIntent::ShareQuest { .. } | QuestUiIntent::PickUpTile => {
+            QuestUiIntent::InteractQuestNpc { .. }
+            | QuestUiIntent::HarvestDirection { .. }
+            | QuestUiIntent::ShareQuest { .. }
+            | QuestUiIntent::PickUpTile => {
                 if let Some(quest_state) = quest_state.as_deref_mut() {
                     quest_state.set_feedback(
                         "This Android host action has no authenticated Gateway command yet",
@@ -2089,6 +2102,7 @@ fn discard_inactive_player_commands(
 
 fn keyboard(
     model: Res<NativeShellModel>,
+    mut host: ResMut<HostState>,
     player: Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
     forms: crate::form_input::FormInput,
     editor_touch: Res<EditorTouch>,
@@ -2103,11 +2117,12 @@ fn keyboard(
     mut was_editing: Local<bool>,
     mut privacy: Local<bool>,
     mut last_field: Local<Option<String>>,
+    mut last_document: Local<Option<u64>>,
 ) {
     let sensitive = !model.login.account.is_empty()
         || !model.login.password.is_empty()
         || (model.screen == Screen::InGame && forms.field(&player).is_some_and(|v| v.2))
-        || matches!(model.screen, Screen::ChangePassword | Screen::SafeKey);
+        || matches!(model.screen, Screen::ChangePassword | Screen::SafeKey | Screen::Registration);
     if *privacy != sensitive {
         send(json!({"type":"privacy","secure":sensitive}));
         *privacy = sensitive;
@@ -2122,6 +2137,9 @@ fn keyboard(
             .flatten()
     });
     let field_name = field.map(|v| v.0.to_owned());
+    let document = field
+        .filter(|v| v.0.starts_with("mail-"))
+        .and_then(|_| forms.mail_draft_epoch());
     let pressed = editor_touch.0
         || interactions.iter().any(|(interaction, action)| {
             *interaction == Interaction::Pressed
@@ -2133,26 +2151,47 @@ fn keyboard(
         || extra_fields
             .iter()
             .any(|(interaction, _)| *interaction == Interaction::Pressed)
-        || (model.screen == Screen::InGame && field_name.is_some() && field_name != *last_field);
+        || (model.screen == Screen::InGame && field_name.is_some()
+            && (field_name != *last_field || document != *last_document));
     if pressed {
         if let Some((field, text, password)) = field {
+            let epoch = host.editor.open(field);
             send(
-                json!({"type":"keyboard","field":field,"text":text,"password":password,"numeric":field.ends_with("amount"),"multiline":crate::text_input::is_multiline_editor(field)}),
+                json!({"type":"keyboard","field":field,"editorEpoch":epoch,"text":text,"password":password,"numeric":field.ends_with("amount"),"multiline":crate::text_input::is_multiline_editor(field)}),
             );
             *was_editing = true;
         } else if *was_editing {
+            host.editor.close();
             send(json!({"type":"hideKeyboard"}));
             *was_editing = false;
         }
     } else if field.is_none() && *was_editing {
+        host.editor.close();
         send(json!({"type":"hideKeyboard"}));
         *was_editing = false;
     }
     *last_field = field_name;
+    *last_document = document;
 }
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn editor_epoch_rejects_old_callbacks_when_the_same_mail_field_reopens() {
+        let mut editor = HostEditorSession::default();
+        let first = editor.open("mail-message");
+        let old = json!({"field":"mail-message", "editorEpoch":first});
+        assert!(editor.accepts(&old));
+        editor.close();
+        assert!(!editor.accepts(&old));
+        let second = editor.open("mail-message");
+        assert_ne!(first, second);
+        assert!(!editor.accepts(&old));
+        assert!(editor.accepts(&json!({"field":"mail-message", "editorEpoch":second})));
+        assert!(!editor.accepts(&json!({"field":"password", "editorEpoch":second})));
+        assert!(!editor.accepts(&json!({"field":"mail-message"})));
+    }
+
     #[test]
     fn gateway_receipt_bridge_accepts_only_supported_authoritative_results() {
         let mut inbound = crate::gateway_bridge::AndroidGatewayInboundQueue::default();
@@ -2593,17 +2632,9 @@ mod tests {
     }
 
     #[test]
-    fn mail_ime_focus_uses_only_visible_fields_and_reflowed_footer() {
-        let panel = Vec2::new(312.0, 444.0);
-        assert_eq!(mail_editor_focus_size(panel, false, 1.0), panel);
-        assert_eq!(
-            mail_editor_focus_size(panel, true, 1.0),
-            Vec2::new(312.0, 162.0)
-        );
-        assert_eq!(
-            mail_editor_focus_size(panel, true, 0.5),
-            Vec2::new(312.0, 214.0)
-        );
+    fn mail_recipient_ime_uses_the_shared_prompt_coordinates() {
+        assert_eq!(player_editor_bottom(Some("mail-recipient"), 1.0), 419.0);
+        assert_eq!(player_editor_bottom(Some("mail-recipient"), 0.5), 419.0);
     }
 
     #[test]
@@ -2932,77 +2963,34 @@ mod tests {
     }
 
     #[test]
-    fn mail_ime_footer_reflows_and_restores_without_replacing_shared_buttons() {
-        use mir2_client_bevy::crystal_ui::overlays::{MailComposeDetails, MailComposeFooter};
-        let mut app = App::new();
-        app.init_resource::<HostState>()
-            .init_resource::<UiScale>()
-            .add_systems(Update, fit_mail_composer);
-        let details = app
-            .world_mut()
-            .spawn((MailComposeDetails, Node::default()))
-            .id();
-        let button = app
-            .world_mut()
-            .spawn((
-                Button,
-                Node {
-                    top: px(408),
-                    height: px(28),
-                    ..default()
-                },
-            ))
-            .id();
-        let footer = app
-            .world_mut()
-            .spawn((MailComposeFooter, Node::default()))
-            .add_child(button)
-            .id();
-        // Disabled Send has no Button component, but must retain the same size.
-        let disabled = app
-            .world_mut()
-            .spawn(Node {
-                top: px(408),
-                height: px(28),
+    fn standalone_mail_windows_fit_above_ime_without_rewriting_shared_nodes() {
+        use mir2_client_bevy::crystal_ui::overlays::OverlayMailWindow;
+        for height in [300.0, 384.0] {
+            let mut app = App::new();
+            app.insert_resource(HostState { ime_bottom: 350.0, ..default() })
+                .insert_resource(NativeShellModel { screen: Screen::InGame, ..default() })
+                .init_resource::<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>()
+                .init_resource::<mir2_client_bevy::quest_model::NpcDialogModel>()
+                .init_resource::<UiScale>()
+                .init_resource::<mir2_client_bevy::crystal_ui::hud::CrystalBeltPresentation>()
+                .add_systems(Update, fit_stage);
+            app.world_mut().spawn(Window {
+                resolution: bevy::window::WindowResolution::new(2340, 1080),
                 ..default()
-            })
-            .id();
-        app.world_mut().entity_mut(footer).add_child(disabled);
-        for scale in [0.35, 0.535, 1.0, 2.0] {
-            app.world_mut().resource_mut::<UiScale>().0 = scale;
-            for editing in [true, false, true, false] {
-                app.world_mut().resource_mut::<HostState>().ime_bottom =
-                    if editing { 500.0 } else { 0.0 };
-                app.update();
-                let footer_node = app.world().get::<Node>(footer).unwrap();
-                let button_node = app.world().get::<Node>(button).unwrap();
-                assert_eq!(
-                    app.world().get::<Node>(details).unwrap().display,
-                    if editing {
-                        Display::None
-                    } else {
-                        Display::Flex
-                    }
-                );
-                assert_eq!(footer_node.top, px(if editing { -298.0 } else { 0.0 }));
-                let height = if editing {
-                    (44.0 / scale).max(28.0)
-                } else {
-                    28.0
-                };
-                assert_eq!(button_node.height, px(height));
-                assert_eq!(
-                    app.world().get::<Node>(disabled).unwrap().height,
-                    px(height)
-                );
-                assert_eq!(button_node.top, px(408));
-                if editing {
-                    assert!(height * scale >= 44.0);
-                    let bottom = player_editor_bottom(Some("mail-message"), scale);
-                    assert!(((bottom - 115.0 - height) * scale - 8.0).abs() < 0.001);
-                    assert_eq!(bottom, player_editor_bottom(Some("mail-recipient"), scale));
-                }
-            }
+            });
+            let original = Node {
+                position_type: PositionType::Absolute,
+                left: px(100), top: px(100), width: px(236), height: px(height),
+                ..default()
+            };
+            let panel = app.world_mut().spawn((OverlayMailWindow, original.clone(), UiTransform::default())).id();
+            app.update();
+            let node = app.world().get::<Node>(panel).unwrap();
+            assert_eq!(node.left, original.left);
+            assert_eq!(node.top, original.top);
+            assert_eq!(node.width, original.width);
+            assert_eq!(node.height, original.height);
+            assert_ne!(*app.world().get::<UiTransform>(panel).unwrap(), UiTransform::default());
         }
     }
 

@@ -20,7 +20,7 @@ pub use config::{
     AccountBanStatus, AccountRecord, AccountStore, AccountStoreDatabaseMode,
     SharedGuildRecord, SharedGuildMember, SharedGuildRank, SharedGuildStoredItem, SharedGuildBuff,
     AccountStoreRepository, AccountStoreRepositorySave, AccountStoreRepositoryStatus,
-    AccountStoreRuntimeBackend, BuffSnapshot, CharacterRecord, CharacterSaveRecord,
+    AccountStoreRuntimeBackend, BuffSnapshot, CharacterBindPoint, CharacterRecord, CharacterSaveRecord,
     EquipmentItemSnapshot, EquipmentSlot, FileAccountStoreRepository, GroundDropItemPayload,
     GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, MapTransferRecord,
     MonsterSpawnSource, NpcDialogLinkSnapshot, NpcDialogSnapshot, PostgresAccountStoreRepository,
@@ -42,6 +42,7 @@ pub use runtime::{
     set_crystal_full_world_zone_collision, validate_commercial_identity_credentials,
     validate_shared_marriage_request, validate_shared_mentor_request,
     zone_ground_drop_snapshots_for_monster_at_tick, zone_id_for_key, ActiveSessionIdentity,
+    LocalPlayerVitalsSnapshot,
     ChatPacketPreparation, GameShopPurchaseExecution, GameShopPurchaseFailure,
     GameShopPurchaseOutcome, GroundDropClaimTicket, PasskeyRecoveryPreflight, PlayerId,
     PreparedChatPacket, SessionId, SharedAccountInventoryTransactionKind,
@@ -57,7 +58,8 @@ pub use runtime::{
     ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput,
     ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
-    ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
+    ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
+    ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
 };
 pub use world_runtime::{
     validate_production_player_command, InProcessWorldRuntime, NativeGameShopPurchaseRequest,

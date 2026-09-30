@@ -42,6 +42,9 @@ use crate::session_config::NativeReconnectConfig;
 #[path = "trade_projection.rs"]
 mod trade_projection;
 
+#[path = "gateway_account_feedback.rs"]
+mod account_feedback;
+
 /// The gateway WebSocket endpoint for the local development gateway.
 pub const LOCAL_GATEWAY_WS_URL: &str = "ws://127.0.0.1:7110/ws";
 const NATIVE_RESUME_PROTOCOL: &str = "nativeResumeV1";
@@ -472,6 +475,7 @@ impl NativeLightingPublisher {
             .map(|root: std::path::PathBuf| NativeLightAssets::from_asset_root(root.as_path()))
             .unwrap_or_default();
         let mut bridge = NativeLightingBridge::default();
+        bridge.set_force_daylight(crate::map_parser::lighting::force_daylight_enabled());
         bridge.set_generation(generation);
         Self {
             bridge,
@@ -1503,8 +1507,11 @@ impl SkillPacketCursor {
             skills.truncate(MAX_LEARNED_SKILLS);
 
             for skill in skills.iter_mut() {
-                if let Some(name) = skill.get("spell").and_then(Value::as_str)
-                    .and_then(|spell| self.magic_names.get(&spell.to_ascii_lowercase())) {
+                if let Some(name) = skill
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .and_then(|spell| self.magic_names.get(&spell.to_ascii_lowercase()))
+                {
                     skill["magicName"] = json!(name);
                 }
 
@@ -1608,20 +1615,40 @@ impl SkillPacketCursor {
                 let Some(magic) = payload.get("magic") else {
                     return false;
                 };
-                let Some(spell) = magic.get("spell").and_then(Value::as_str).filter(|v| !v.is_empty()) else {
+                let Some(spell) = magic
+                    .get("spell")
+                    .and_then(Value::as_str)
+                    .filter(|v| !v.is_empty())
+                else {
                     return false;
                 };
-                let known = self.magic_icons.keys().chain(self.magic_names.keys()).chain(self.magic_needs.keys())
+                let known = self
+                    .magic_icons
+                    .keys()
+                    .chain(self.magic_names.keys())
+                    .chain(self.magic_needs.keys())
                     .any(|key| key.eq_ignore_ascii_case(spell));
-                let distinct = self.magic_icons.keys().chain(self.magic_names.keys()).chain(self.magic_needs.keys())
-                    .map(|key| key.to_ascii_lowercase()).collect::<std::collections::HashSet<_>>().len();
+                let distinct = self
+                    .magic_icons
+                    .keys()
+                    .chain(self.magic_names.keys())
+                    .chain(self.magic_needs.keys())
+                    .map(|key| key.to_ascii_lowercase())
+                    .collect::<std::collections::HashSet<_>>()
+                    .len();
                 if !known && distinct >= MAX_LEARNED_SKILLS {
                     return false;
                 }
-                if let Some(name) = magic.get("name").and_then(Value::as_str).filter(|v| !v.is_empty()) {
-                    self.magic_names.insert(spell.to_ascii_lowercase(), name.to_owned());
+                if let Some(name) = magic
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .filter(|v| !v.is_empty())
+                {
+                    self.magic_names
+                        .insert(spell.to_ascii_lowercase(), name.to_owned());
                 }
-                if let Some(icon) = value_u32(magic.get("icon")).and_then(|v| u8::try_from(v).ok()) {
+                if let Some(icon) = value_u32(magic.get("icon")).and_then(|v| u8::try_from(v).ok())
+                {
                     self.magic_icons.insert(spell.to_ascii_lowercase(), icon);
                 }
                 self.magic_needs.insert(
@@ -2537,14 +2564,18 @@ async fn connect_gateway_with_resume_controls<R: CommandSource>(
     batch_limit: usize,
     game_shop_receipt_gate: &mut GameShopReceiptGate,
 ) -> ResumeLifecycle<GatewaySocket> {
+    let request = match gateway_handshake_request(base_url) {
+        Ok(request) => request,
+        Err(error) => return ResumeLifecycle::Failed(error),
+    };
     if !attempting_resume {
-        return tokio_tungstenite::connect_async(base_url)
+        return tokio_tungstenite::connect_async(request)
             .await
             .map(|(socket, _)| ResumeLifecycle::Complete(socket))
             .unwrap_or_else(|error| ResumeLifecycle::Failed(error.to_string()));
     }
 
-    let connect = tokio_tungstenite::connect_async(base_url);
+    let connect = tokio_tungstenite::connect_async(request);
     tokio::pin!(connect);
     let resume_timeout = async {
         if let Some(deadline) = resume_deadline {
@@ -2575,6 +2606,62 @@ async fn connect_gateway_with_resume_controls<R: CommandSource>(
             },
         }
     }
+}
+
+/// The staging Gateway applies its exact Origin allowlist to native clients as
+/// well as browsers. Derive the HTTP origin from the configured endpoint on
+/// every connection, including resume. Paths and query values stay in the
+/// WebSocket request and never enter this header. The normal TLS connector checks
+/// the server certificate and hostname against the operating system roots.
+fn gateway_handshake_request(
+    base_url: &str,
+) -> Result<tokio_tungstenite::tungstenite::http::Request<()>, String> {
+    use tokio_tungstenite::tungstenite::{
+        client::IntoClientRequest,
+        http::{header::ORIGIN, HeaderValue, Uri},
+    };
+
+    let uri = base_url
+        .parse::<Uri>()
+        .map_err(|_| "gateway URL must be a valid WebSocket URL".to_owned())?;
+    let authority = uri
+        .authority()
+        .ok_or_else(|| "gateway URL must include a host".to_owned())?;
+    if authority.as_str().contains('@') {
+        return Err("gateway URL must not contain credentials".to_owned());
+    }
+    let host = uri
+        .host()
+        .ok_or_else(|| "gateway URL must include a host".to_owned())?
+        .trim_matches(['[', ']']);
+    let is_loopback = host.eq_ignore_ascii_case("localhost")
+        || host
+            .parse::<std::net::IpAddr>()
+            .is_ok_and(|address| address.is_loopback());
+    let (scheme, default_port) = match uri.scheme_str() {
+        Some("wss") => ("https", 443),
+        Some("ws") if is_loopback => ("http", 80),
+        Some("ws") => return Err("gateway URL must use wss:// outside loopback".to_owned()),
+        _ => return Err("gateway URL must use ws:// or wss://".to_owned()),
+    };
+    let host = if host.contains(':') {
+        format!("[{}]", host.to_ascii_lowercase())
+    } else {
+        host.to_ascii_lowercase()
+    };
+    let origin = match uri.port_u16() {
+        Some(port) if port != default_port => format!("{scheme}://{host}:{port}"),
+        _ => format!("{scheme}://{host}"),
+    };
+    let mut request = base_url
+        .into_client_request()
+        .map_err(|_| "gateway WebSocket handshake URL is invalid".to_owned())?;
+    request.headers_mut().insert(
+        ORIGIN,
+        HeaderValue::from_str(&origin)
+            .map_err(|_| "gateway WebSocket origin is invalid".to_owned())?,
+    );
+    Ok(request)
 }
 
 async fn send_resume_frame_with_controls<R: CommandSource>(
@@ -2810,6 +2897,7 @@ where
     lighting_publisher.push_clear_state();
     let mut last_world_payload: Option<Value> = None;
     let mut last_wallet: Option<WalletState> = None;
+    let mut map_packet_cursor = NativeMapPacketCursor::default();
     let mut ui_cursor = NativeUiPlayerCursor::default();
     let mut skill_cursor = SkillPacketCursor::default();
     let mut social_cursor = SocialModel::default();
@@ -2993,6 +3081,7 @@ where
                                     gameplay_events,
                                     &mut last_world_payload,
                                     &mut last_wallet,
+                                    &mut map_packet_cursor,
                                     &mut ui_cursor,
                                     &mut in_flight_claim_mail_id,
                                     &mut send_mail_in_flight,
@@ -3211,6 +3300,7 @@ fn handle_gateway_text_for_connection<F>(
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    map_packet_cursor: &mut NativeMapPacketCursor,
     ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
@@ -3315,6 +3405,7 @@ where
         gameplay_events,
         last_world_payload,
         last_wallet,
+        map_packet_cursor,
         ui_cursor,
         in_flight_claim_mail_id,
         send_mail_in_flight,
@@ -3413,6 +3504,7 @@ fn handle_gateway_text(
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    map_packet_cursor: &mut NativeMapPacketCursor,
     ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
@@ -3429,6 +3521,7 @@ fn handle_gateway_text(
         gameplay_events,
         last_world_payload,
         last_wallet,
+        map_packet_cursor,
         ui_cursor,
         in_flight_claim_mail_id,
         send_mail_in_flight,
@@ -3448,6 +3541,7 @@ fn handle_gateway_text_with_world_ingest<F>(
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
     last_wallet: &mut Option<WalletState>,
+    map_packet_cursor: &mut NativeMapPacketCursor,
     ui_cursor: &mut NativeUiPlayerCursor,
     in_flight_claim_mail_id: &mut Option<u64>,
     send_mail_in_flight: &mut bool,
@@ -3487,6 +3581,7 @@ where
         // world/map/entity/effect registry in the same frame. Never re-emit
         // the previous map's personal snapshot.
         *last_world_payload = None;
+        map_packet_cursor.reset();
         if scope == NativeResetScope::Session {
             ui_cursor.reset();
             *last_wallet = None;
@@ -3644,6 +3739,19 @@ where
                 .ok_or_else(|| "worldSnapshot missing payload".to_owned())?;
             let mut payload = payload;
             validate_quest_operation_ack(&payload)?;
+            map_packet_cursor.trace_snapshot_identity(&payload);
+            if map_packet_cursor.snapshot_is_from_previous_map(&payload) {
+                // An explicitly named source-map snapshot cannot supersede a
+                // newer transfer packet or repopulate destination UI/actors.
+                forward_stale_map_receipts(
+                    &mut payload,
+                    gameplay_adapter,
+                    gameplay_events,
+                    skill_cursor,
+                )?;
+                return Ok(WorldSnapshotIngestOutcome::NotSnapshot);
+            }
+            map_packet_cursor.merge_into_same_map_snapshot(&mut payload);
             gameplay_adapter.observe_world_snapshot_dispositions(&payload);
             gameplay_adapter.apply_authoritative_overlay(&mut payload);
             gameplay_adapter.observe_world_snapshot(&payload);
@@ -3766,7 +3874,11 @@ where
                 }
                 "MapInformation" => {
                     eprintln!("[gateway-client] packet {packet}");
+                    if mir2_bevy_runtime::native_render_diagnostics_enabled() {
+                        mir2_bevy_runtime::record_native_render_marker("mapBoundary", json!({"packet":packet}));
+                    }
                     if let Some(payload) = event.payload.as_ref() {
+                        map_packet_cursor.observe_map_information(payload);
                         if let Some(world) = last_world_payload.as_mut() {
                             apply_map_information_to_world_payload(world, payload);
                         }
@@ -3778,7 +3890,11 @@ where
                 }
                 "MapChanged" => {
                     eprintln!("[gateway-client] packet {packet}");
+                    if mir2_bevy_runtime::native_render_diagnostics_enabled() {
+                        mir2_bevy_runtime::record_native_render_marker("mapBoundary", json!({"packet":packet}));
+                    }
                     if let Some(payload) = event.payload.as_ref() {
+                        map_packet_cursor.observe_map_information_kind(payload, "MapChanged");
                         ui_cursor.observe_map_identity(payload);
                         let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(
                             ui_cursor.to_read_model_json().to_string(),
@@ -3845,7 +3961,8 @@ where
                     };
                     push_native_npc_shop_service(signal)?;
                 }
-                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem" => {
+                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem"
+                | "EquipItem" | "RemoveItem" => {
                     if let Some(payload) = event.payload.as_ref() {
                         if let Some(ack) = transform_inventory_operation_ack(packet, payload) {
                             if let Ok(json) = serde_json::to_string(&ack) {
@@ -3863,8 +3980,12 @@ where
                         if let Some(item) = transform_game_shop_info_from_packet(payload, ui_cursor)
                         {
                             let json = serde_json::to_string(&item).map_err(|e| e.to_string())?;
-                            let _ =
-                                mir2_bevy_runtime::native_ingest::push_native_game_shop_info(json);
+                            let enqueued = mir2_bevy_runtime::native_ingest::push_native_game_shop_info(json);
+                            if item.get("gameShopIndex").and_then(Value::as_i64) == Some(31)
+                                && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some()
+                            {
+                                eprintln!("[native-game-shop] catalog_sample g_index=31 enqueued={enqueued}");
+                            }
                         }
                     }
                 }
@@ -3907,11 +4028,31 @@ where
                         }
                     }
                 }
+                "MailSendRequest" | "MailCost" | "MailLockedItem" => {
+                    let payload = event.payload.as_ref().unwrap_or(&Value::Null);
+                    if !push_native_mail_service_event(packet, payload)? {
+                        eprintln!("[gateway-client] ignored malformed {packet} parcel service packet");
+                    }
+                }
                 "ReceiveMail" => {
                     if let Some(payload) = event.payload.as_ref() {
+                        let row_count = payload
+                            .get("mail")
+                            .and_then(Value::as_array)
+                            .map_or(0, Vec::len);
+                        let mut converted = false;
+                        let mut enqueued = false;
                         if let Some(mut model) = try_transform_mail_model_from_packet(payload) {
-                            let _ =
-                                push_mail_model_with_feedback(&mut model, pending_mail_feedback)?;
+                            converted = true;
+                            enqueued = push_mail_model_with_feedback(
+                                &mut model,
+                                pending_mail_feedback,
+                            )?;
+                        }
+                        if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
+                            eprintln!(
+                                "[native-mail] receive_rows={row_count} converted={converted} enqueued={enqueued}"
+                            );
                         }
                     }
                 }
@@ -4012,13 +4153,42 @@ where
     }
 }
 
-/// Fold the authoritative MapInformation identity into the retained personal
-/// snapshot before the destination UserLocation arrives.
-///
-/// The Web client applies this packet immediately. The native packet-first
-/// path used to overlay only the new coordinates onto the retained snapshot,
-/// leaving `mapFileName`, title and source-map population untouched. Entering
-/// `0141` therefore rendered map `0` at `(2, 11)` and kept the Bichon title.
+/// Preserve session-scoped operation receipts without restoring the old scene.
+fn forward_stale_map_receipts(
+    payload: &mut Value,
+    gameplay_adapter: &NativeGameplayAdapter,
+    gameplay_events: &std::sync::mpsc::Sender<crate::gameplay_bridge::NativeGameplaySnapshot>,
+    skill_cursor: &mut SkillPacketCursor,
+) -> Result<(), String> {
+    validate_quest_operation_ack(payload)?;
+    if let Some(ack) = payload.get("questOperationAck").filter(|value| !value.is_null()) {
+        // ACKs are applied before full gameplay projections; this envelope
+        // carries the current big map and no old actors or scene metadata.
+        let mut receipt = gameplay_adapter.big_map_snapshot();
+        receipt.quest_operation_ack = Some(serde_json::from_value(ack.clone()).map_err(|e| e.to_string())?);
+        let _ = gameplay_events.send(receipt);
+    }
+    if payload.get("skillKeyAck").is_some_and(|value| !value.is_null()) {
+        // Skill authority is session-scoped. Retain its full model with the
+        // receipt, independently of the rejected world/map projection.
+        skill_cursor.observe_snapshot(payload);
+        if skill_cursor.hero.observe_snapshot(payload) {
+            skill_cursor.hero.session_epoch = skill_cursor.session_epoch;
+            if skill_cursor.hero.skill_key_ack.is_some() {
+                skill_cursor.pending_hero_receipts.push_back(
+                    serde_json::to_string(&skill_cursor.hero).map_err(|e| e.to_string())?,
+                );
+                skill_cursor.pending_hero_model = None;
+            }
+        }
+        skill_cursor.flush_hero_model();
+        let _ = skill_cursor.queue_skill_model(payload)?;
+    }
+    Ok(())
+}
+
+/// Fold MapInformation into the retained snapshot before UserLocation. A
+/// transfer must not put destination coordinates onto source-map metadata.
 fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> bool {
     let next_file_name = packet
         .get("fileName")
@@ -4040,11 +4210,16 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
     let Some(object) = world.as_object_mut() else {
         return false;
     };
+    if map_changed {
+        for key in ["mapTitle", "miniMapIndex", "bigMapIndex", "mapLightSetting",
+            "mapDarkLight", "weatherParticles", "mapMusic"] {
+            object.remove(key);
+        }
+    }
     for (source, destination) in [
         ("mapIndex", "mapIndex"),
         ("fileName", "mapFileName"),
         ("title", "mapTitle"),
-        ("miniMapIndex", "miniMapIndex"),
         ("bigMapIndex", "bigMapIndex"),
         ("lights", "mapLightSetting"),
         ("mapDarkLight", "mapDarkLight"),
@@ -4054,6 +4229,9 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
         if let Some(value) = packet.get(source).filter(|value| !value.is_null()) {
             object.insert(destination.to_owned(), value.clone());
         }
+    }
+    if let Some(value) = packet_minimap_value(packet) {
+        object.insert("miniMapIndex".to_owned(), value.clone());
     }
     if !map_changed {
         return false;
@@ -4084,6 +4262,141 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
         });
     }
     true
+}
+
+/// Retains authoritative packet map identity across schema/partial snapshots.
+/// An absent snapshot identity inherits the latest map packet; an explicitly
+/// different identity is stale and must not replace destination projections.
+/// Scene/session reset clears this cursor before adopting the new packet.
+#[derive(Debug, Default)]
+struct NativeMapPacketCursor {
+    map_file_name: Option<String>,
+    mini_map_index: Option<u16>,
+    identity_metadata: serde_json::Map<String, Value>,
+    trace_pending_snapshot: bool,
+    trace_rejected_file: Option<String>,
+}
+
+impl NativeMapPacketCursor {
+    fn reset(&mut self) {
+        *self = Self::default();
+    }
+
+    fn observe_map_information(&mut self, packet: &Value) {
+        self.observe_map_information_kind(packet, "MapInformation");
+    }
+
+    fn observe_map_information_kind(&mut self, packet: &Value, packet_kind: &str) {
+        let Some(map_file_name) = map_file_name(packet) else {
+            return;
+        };
+        let changed = self.map_file_name.as_deref().is_some_and(|current| {
+            normalize_map_file_name(current) != normalize_map_file_name(map_file_name)
+        });
+        if changed || self.map_file_name.is_none() {
+            if mir2_bevy_runtime::native_render_diagnostics_enabled() {
+                mir2_bevy_runtime::record_native_render_marker("mapIdentity", json!({
+                    "event":"packet", "packet":packet_kind,
+                    "sourceFile":self.map_file_name, "sourceTitle":self.identity_metadata.get("mapTitle"),
+                    "sourceMiniMap":self.mini_map_index, "destinationFile":map_file_name,
+                    "destinationTitle":packet.get("title"), "destinationMiniMap":packet_minimap_value(packet),
+                }));
+            }
+            self.trace_pending_snapshot = true;
+            self.trace_rejected_file = None;
+        }
+        if changed {
+            self.mini_map_index = None;
+            self.identity_metadata.clear();
+        }
+        self.map_file_name = Some(map_file_name.to_owned());
+        for (source, destination) in [
+            ("mapIndex", "mapIndex"), ("title", "mapTitle"),
+            ("bigMapIndex", "bigMapIndex"), ("lights", "mapLightSetting"),
+            ("mapDarkLight", "mapDarkLight"), ("weatherParticles", "weatherParticles"),
+            ("music", "mapMusic"),
+        ] {
+            if let Some(value) = packet.get(source).filter(|value| !value.is_null()) {
+                self.identity_metadata.insert(destination.to_owned(), value.clone());
+            }
+        }
+
+        // A present zero is authoritative: it means the destination has no
+        // minimap and must clear a prior map's positive index.
+        if packet_minimap_value(packet).is_some() {
+            self.mini_map_index = map_minimap_index(packet);
+        }
+    }
+
+    fn snapshot_is_from_previous_map(&self, snapshot: &Value) -> bool {
+        self.map_file_name.as_deref().zip(map_file_name(snapshot))
+            .is_some_and(|(current, incoming)| {
+                normalize_map_file_name(current) != normalize_map_file_name(incoming)
+            })
+    }
+
+    fn trace_snapshot_identity(&mut self, snapshot: &Value) {
+        if !mir2_bevy_runtime::native_render_diagnostics_enabled() { return; }
+        let rejected = self.snapshot_is_from_previous_map(snapshot);
+        let incoming = map_file_name(snapshot).unwrap_or("<partial>");
+        if rejected && self.trace_rejected_file.as_deref() == Some(incoming) { return; }
+        if !rejected && !self.trace_pending_snapshot && self.trace_rejected_file.is_none() { return; }
+        mir2_bevy_runtime::record_native_render_marker("mapIdentity", json!({
+            "event":"snapshot", "accepted":!rejected, "snapshotFile":incoming,
+            "snapshotTitle":snapshot.get("mapTitle"), "snapshotMiniMap":packet_minimap_value(snapshot),
+            "authoritativeFile":self.map_file_name, "authoritativeTitle":self.identity_metadata.get("mapTitle"),
+            "authoritativeMiniMap":self.mini_map_index,
+        }));
+        if rejected { self.trace_rejected_file = Some(incoming.to_owned()); }
+        else { self.trace_pending_snapshot = false; self.trace_rejected_file = None; }
+    }
+
+    fn merge_into_same_map_snapshot(&mut self, snapshot: &mut Value) {
+        let Some(current_file_name) = self.map_file_name.as_ref() else {
+            return;
+        };
+        if self.snapshot_is_from_previous_map(snapshot) {
+            // Snapshots can be delayed across a transition. They may not use
+            // a packet cursor for another map, but must not erase the newer
+            // MapInformation/MapChanged identity that will receive its own
+            // periodic snapshot next.
+            return;
+        }
+        let Some(object) = snapshot.as_object_mut() else {
+            return;
+        };
+        object.insert("mapFileName".to_owned(), json!(current_file_name));
+        for (key, value) in &self.identity_metadata {
+            object.insert(key.clone(), value.clone());
+        }
+        if let Some(index) = self.mini_map_index {
+            object.insert("miniMapIndex".to_owned(), json!(index));
+        } else {
+            object.remove("miniMapIndex");
+        }
+    }
+}
+
+fn packet_minimap_value(packet: &Value) -> Option<&Value> {
+    packet
+        .get("miniMapIndex")
+        .filter(|value| !value.is_null())
+        .or_else(|| packet.get("miniMap").filter(|value| !value.is_null()))
+}
+
+fn map_minimap_index(packet: &Value) -> Option<u16> {
+    value_u64(packet_minimap_value(packet))
+        .and_then(|index| u16::try_from(index).ok())
+        .filter(|index| *index > 0)
+}
+
+fn map_file_name(value: &Value) -> Option<&str> {
+    value
+        .get("fileName")
+        .or_else(|| value.get("mapFileName"))
+        .and_then(Value::as_str)
+        .map(str::trim)
+        .filter(|name| !name.is_empty())
 }
 
 fn normalize_map_file_name(value: &str) -> String {
@@ -4323,14 +4636,8 @@ fn dispatch_shell_event(
     let shell_event = match event {
         InboundEvent::Packet(PacketEvent::NewAccountResult(result)) => match result.result {
             Some(8) => Some(ShellGatewayEvent::AccountCreated),
-            Some(7) => Some(ShellGatewayEvent::AccountCreationFailed {
-                message: "account already exists".to_owned(),
-            }),
-            Some(code) => Some(ShellGatewayEvent::AccountCreationFailed {
-                message: format!("account creation failed (result {code})"),
-            }),
-            None => Some(ShellGatewayEvent::AccountCreationFailed {
-                message: "account creation returned no result".to_owned(),
+            result => Some(ShellGatewayEvent::AccountCreationFailed {
+                message: account_feedback::registration_failure_message(result),
             }),
         },
         InboundEvent::Packet(PacketEvent::LoginSuccess(success)) => {
@@ -4463,10 +4770,7 @@ fn dispatch_shell_event(
             _ => None,
         },
         InboundEvent::Error(error) => Some(ShellGatewayEvent::OperationFailure {
-            message: error
-                .message
-                .clone()
-                .unwrap_or_else(|| "gateway error".to_owned()),
+            message: account_feedback::gateway_error_message(error),
         }),
         _ => None,
     };
@@ -4643,11 +4947,31 @@ fn transform_map_model(payload: &Value) -> Value {
     let time_of_day_light_setting = value_u64(payload.get("lightSetting"))
         .and_then(|value| u8::try_from(value).ok())
         .filter(|value| *value <= 4);
+    // MapModel is the HUD projection. Preserve the received source payload and
+    // light bridge state while making its icon agree with the displayed scene.
+    let time_of_day_light_setting = crate::map_parser::lighting::presentation_light_setting(
+        time_of_day_light_setting,
+        crate::map_parser::lighting::force_daylight_enabled(),
+    );
+    let mini_map_index = value_u64(payload.get("miniMapIndex"))
+        .and_then(|value| u16::try_from(value).ok())
+        .filter(|value| *value > 0);
+    // The map parser is cache-backed and already used for native scene
+    // rendering. Its dimensions are required to scale the authoritative MMap
+    // image without title-specific geometry guesses.
+    let map_dimensions = payload
+        .get("mapFileName")
+        .and_then(Value::as_str)
+        .and_then(crate::map_parser::load_map)
+        .map(|map| (map.width, map.height));
 
     json!({
         "centerX": center_x,
         "centerY": center_y,
         "timeOfDayLightSetting": time_of_day_light_setting,
+        "miniMapIndex": mini_map_index,
+        "mapWidth": map_dimensions.map(|(width, _)| width),
+        "mapHeight": map_dimensions.map(|(_, height)| height),
         "patches": payload.get("terrainPatches").cloned().unwrap_or(Value::Array(vec![])),
     })
 }
@@ -4753,6 +5077,18 @@ fn transform_inventory_operation_ack(
     }
     let success = payload.get("success")?.as_bool()?;
     match packet {
+        "EquipItem" => Some(InventoryOperationAck::Equip {
+            grid: payload.get("grid")?.as_str()?.to_owned(),
+            unique_id: value_u64(payload.get("uniqueId"))?,
+            to: value_i32(payload.get("to"))?,
+            success,
+        }),
+        "RemoveItem" => Some(InventoryOperationAck::Remove {
+            grid: payload.get("grid")?.as_str()?.to_owned(),
+            unique_id: value_u64(payload.get("uniqueId"))?,
+            to: value_i32(payload.get("to"))?,
+            success,
+        }),
         "DropItem" => Some(InventoryOperationAck::Drop {
             unique_id: value_u64(payload.get("uniqueId"))?,
             count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
@@ -5061,7 +5397,13 @@ fn mail_source(payload: &Value) -> Option<&Value> {
 }
 
 fn try_transform_mail_model_from_snapshot(payload: &Value) -> Option<Value> {
-    mail_model_from_entries(mail_source(payload)?.as_array()?)
+    let entries = mail_source(payload)?.as_array()?;
+    let visible = entries
+        .iter()
+        .filter(|mail| !mail.get("deleted").and_then(Value::as_bool).unwrap_or(false))
+        .cloned()
+        .collect::<Vec<_>>();
+    mail_model_from_entries(&visible)
 }
 
 fn try_transform_mail_model_from_packet(payload: &Value) -> Option<Value> {
@@ -5077,11 +5419,22 @@ fn mail_model_from_entries(entries: &[Value]) -> Option<Value> {
 }
 
 fn mail_message_json(mail: &Value) -> Option<Value> {
-    let id = value_u64(mail.get("mailId").or_else(|| mail.get("mail_id")))?;
-    let message = mail
-        .get("message")
-        .and_then(Value::as_str)
-        .unwrap_or_default();
+    let id = value_u64(
+        mail.get("mailId")
+            .or_else(|| mail.get("mail_id"))
+            .or_else(|| mail.get("id")),
+    )?;
+    let subject = value_string(mail.get("subject")).unwrap_or_default();
+    let body = value_string(mail.get("body")).unwrap_or_default();
+    let message = value_string(mail.get("message")).unwrap_or_else(|| {
+        if subject.is_empty() {
+            body.clone()
+        } else if body.is_empty() {
+            subject.clone()
+        } else {
+            format!("{subject}\n{body}")
+        }
+    });
     let items = mail
         .get("items")?
         .as_array()?
@@ -5090,8 +5443,12 @@ fn mail_message_json(mail: &Value) -> Option<Value> {
         .collect::<Option<Vec<_>>>()?;
     Some(json!({
         "id": id,
-        "sender": mail.get("senderName").or_else(|| mail.get("sender")).and_then(Value::as_str).unwrap_or("System"),
-        "subject": message.lines().next().unwrap_or("Mail"),
+        "sender": mail.get("senderName").or_else(|| mail.get("sender")).or_else(|| mail.get("from")).and_then(Value::as_str).unwrap_or("System"),
+        "can_reply": mail.get("canReply").or_else(|| mail.get("can_reply")).and_then(Value::as_bool).unwrap_or(false),
+        "date_sent_binary_datetime": value_i64(mail.get("dateSentBinaryDatetime").or_else(|| mail.get("date_sent_binary_datetime"))).unwrap_or_default(),
+        "metadata_known": mail.get("canReply").or_else(|| mail.get("can_reply")).and_then(Value::as_bool).is_some()
+            && value_i64(mail.get("dateSentBinaryDatetime").or_else(|| mail.get("date_sent_binary_datetime"))).is_some(),
+        "subject": if subject.is_empty() { message.lines().next().unwrap_or("Mail") } else { &subject },
         "body": message,
         "gold": value_u32(mail.get("gold")).unwrap_or_default(),
         "items": items,
@@ -5103,7 +5460,8 @@ fn mail_message_json(mail: &Value) -> Option<Value> {
 
 fn mail_attachment_json(item: &Value) -> Option<Value> {
     if let Some(name) = item.as_str().filter(|name| !name.is_empty()) {
-        return Some(json!({ "name": name, "count": 1 }));
+        return Some(json!({ "name": name, "count": 1,
+            "image": mir2_game_data::crystal_item_by_name(name).map(|template| template.image) }));
     }
     let item_index = value_i32(item.get("itemIndex").or_else(|| item.get("item_index")));
     let name = value_string(item.get("name"));
@@ -5114,6 +5472,9 @@ fn mail_attachment_json(item: &Value) -> Option<Value> {
     Some(json!({
         "uniqueId": value_u64(item.get("uniqueId").or_else(|| item.get("unique_id"))),
         "itemIndex": item_index,
+        "image": item_index.and_then(mir2_game_data::crystal_item_by_index)
+            .or_else(|| name.as_deref().and_then(mir2_game_data::crystal_item_by_name))
+            .map(|template| template.image),
         "key": key,
         "name": name,
         "count": value_u32(item.get("count")).and_then(|value| u16::try_from(value).ok()).unwrap_or(1),
@@ -5131,6 +5492,49 @@ fn mail_packet_body(payload: &Value) -> &Value {
         .get("data")
         .filter(|value| value.is_object())
         .unwrap_or(payload)
+}
+
+/// Convert the three Crystal parcel-service packets without inventing local
+/// request correlation. `MailCost` responses enter the native FIFO in packet
+/// order; the compose UI keeps its postage request single-flight.
+fn mail_service_event_from_packet(
+    packet: &str,
+    payload: &Value,
+) -> Option<mir2_client_bevy::mail_service::MailServiceEvent> {
+    use mir2_client_bevy::mail_service::MailServiceEvent;
+
+    let body = mail_packet_body(payload);
+    match packet {
+        "MailSendRequest" => Some(MailServiceEvent::OpenParcel),
+        "MailCost" => Some(MailServiceEvent::Cost {
+            cost: value_u32(body.get("cost"))?,
+        }),
+        "MailLockedItem" => Some(MailServiceEvent::LockedItem {
+            unique_id: value_u64(body.get("uniqueId").or_else(|| body.get("unique_id")))?,
+            locked: body.get("locked")?.as_bool()?,
+        }),
+        _ => None,
+    }
+}
+
+fn push_native_mail_service_event_with(
+    packet: &str,
+    payload: &Value,
+    deliver: impl FnOnce(String) -> bool,
+) -> Result<bool, String> {
+    let Some(event) = mail_service_event_from_packet(packet, payload) else {
+        return Ok(false);
+    };
+    let json = serde_json::to_string(&event).map_err(|error| error.to_string())?;
+    Ok(deliver(json))
+}
+
+fn push_native_mail_service_event(packet: &str, payload: &Value) -> Result<bool, String> {
+    push_native_mail_service_event_with(
+        packet,
+        payload,
+        mir2_bevy_runtime::native_ingest::push_native_mail_service,
+    )
 }
 
 fn mail_operation_feedback(
@@ -5219,13 +5623,22 @@ fn try_transform_storage_model_from_snapshot(payload: &Value) -> Option<Value> {
         .or_else(|| payload.get("storage_items"))?
         .as_array()?;
     let items = storage_items_json(source)?;
+    let unlocked = payload.get("storageUnlocked")
+        .or_else(|| payload.get("storage_unlocked"))
+        .and_then(Value::as_bool)
+        .unwrap_or_else(|| !payload.get("requireStoragePassword")
+            .or_else(|| payload.get("require_storage_password"))
+            .and_then(Value::as_bool).unwrap_or(false));
     Some(json!({
         "items": items,
-        "size": value_u32(payload.get("storageSize").or_else(|| payload.get("storage_size"))).and_then(|value| u16::try_from(value).ok()).unwrap_or(30),
+        "size": value_u32(payload.get("storageSize").or_else(|| payload.get("storage_size"))).and_then(|value| u16::try_from(value).ok()).unwrap_or(80),
         "has_password": payload.get("hasStoragePassword").or_else(|| payload.get("has_storage_password")).and_then(Value::as_bool).unwrap_or(false),
-        "unlocked": payload.get("storageUnlocked").or_else(|| payload.get("storage_unlocked")).and_then(Value::as_bool).unwrap_or(true),
+        "unlocked": unlocked,
         "has_expanded": payload.get("hasExpandedStorage").or_else(|| payload.get("has_expanded_storage")).and_then(Value::as_bool).unwrap_or(false),
-        "expiry": value_i64(payload.get("expiryTimeBinaryDatetime").or_else(|| payload.get("expiry_time_binary_datetime"))).unwrap_or_default(),
+        "expiry": value_i64(payload.get("expandedStorageExpiryTimeBinaryDatetime")
+            .or_else(|| payload.get("expanded_storage_expiry_time_binary_datetime"))
+            .or_else(|| payload.get("expiryTimeBinaryDatetime"))
+            .or_else(|| payload.get("expiry_time_binary_datetime"))).unwrap_or_default(),
         "selected_bag_slot": Value::Null,
         "selected_storage_slot": Value::Null,
         "password_draft": "",
@@ -5308,9 +5721,10 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
             let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
             let mut patch = json!({
                 "has_password": has_password,
-                "ack": { "operation": "unlock", "success": result == 0 }
+                "password_result": { "operation": "unlock", "result": result },
+                "ack": { "operation": "unlock", "success": result == 0 || result == 4 }
             });
-            if result == 0 || !has_password {
+            if result == 0 || result == 4 || !has_password {
                 patch["unlocked"] = json!(true);
             }
             Some(patch)
@@ -5321,7 +5735,7 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
             let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
             let mut patch = json!({
                 "has_password": has_password,
-                "expiry": value_i64(payload.get("lastSetBinaryDatetime"))?,
+                "password_result": { "operation": "password", "result": result, "removing": removing },
                 "ack": {
                     "operation": if removing { "removePassword" } else { "setPassword" },
                     "success": result == 4,
@@ -5516,10 +5930,10 @@ fn normalized_slot(value: Option<&Value>, fallback: u32) -> u32 {
         "helmet" => 2,
         "torch" => 3,
         "necklace" => 4,
-        "bracelet-left" | "braceletl" => 5,
-        "bracelet-right" | "braceletr" => 6,
-        "ring-left" | "ringl" => 7,
-        "ring-right" | "ringr" => 8,
+        "bracelet-left" | "braceletleft" | "braceletl" => 5,
+        "bracelet-right" | "braceletright" | "braceletr" => 6,
+        "ring-left" | "ringleft" | "ringl" => 7,
+        "ring-right" | "ringright" | "ringr" => 8,
         "amulet" => 9,
         "belt" => 10,
         "boots" => 11,
@@ -6177,6 +6591,14 @@ fn transform_ui_read_model_from_user_information(payload: &Value) -> Value {
 }
 
 #[cfg(test)]
+#[path = "gateway_map_identity_tests.rs"]
+mod map_identity_tests;
+
+#[cfg(test)]
+#[path = "gateway_handshake_tests.rs"]
+mod handshake_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -6476,6 +6898,80 @@ mod tests {
     }
 
     #[test]
+    fn parcel_service_packets_preserve_source_order_without_local_correlation() {
+        let mut delivered = Vec::new();
+        for (packet, payload) in [
+            ("MailSendRequest", json!({})),
+            ("MailCost", json!({"cost":125})),
+            ("MailLockedItem", json!({"uniqueId":77,"locked":true})),
+        ] {
+            assert!(push_native_mail_service_event_with(packet, &payload, |json| {
+                delivered.push(json);
+                true
+            })
+            .unwrap());
+        }
+        let events = delivered
+            .iter()
+            .map(|json| serde_json::from_str(json).unwrap())
+            .collect::<Vec<mir2_client_bevy::mail_service::MailServiceEvent>>();
+        assert_eq!(
+            events,
+            vec![
+                mir2_client_bevy::mail_service::MailServiceEvent::OpenParcel,
+                mir2_client_bevy::mail_service::MailServiceEvent::Cost { cost: 125 },
+                mir2_client_bevy::mail_service::MailServiceEvent::LockedItem {
+                    unique_id: 77,
+                    locked: true,
+                },
+            ]
+        );
+        assert!(!push_native_mail_service_event_with("MailCost", &json!({}), |_| true).unwrap());
+    }
+
+    #[test]
+    fn snapshot_mail_accepts_stage5_shape_and_hides_deleted_rows() {
+        let model = try_transform_mail_model_from_snapshot(&json!({
+            "stage5Systems": { "mail": [
+                { "id": 41, "from": "Gameshop", "subject": "Purchase", "body": "Parcel",
+                  "items": [{ "item_index": 1268, "count": 1 }], "deleted": false },
+                { "id": 42, "from": "ledger", "subject": "hidden", "body": "hidden",
+                  "items": [], "deleted": true }
+            ] }
+        }))
+        .expect("stage5 snapshot mail");
+        let mail = serde_json::from_value::<mir2_client_bevy::mail::MailModel>(model)
+            .expect("native mail model");
+        assert_eq!(mail.mails.len(), 1);
+        assert_eq!(mail.mails[0].id, 41);
+        assert_eq!(mail.mails[0].sender, "Gameshop");
+        assert_eq!(mail.mails[0].subject, "Purchase");
+        assert_eq!(mail.mails[0].body, "Purchase\nParcel");
+        assert_eq!(mail.mails[0].items.len(), 1);
+        assert_eq!(mail.mails[0].items[0].item_index, Some(1268));
+    }
+
+    #[test]
+    fn receive_mail_packet_accepts_concrete_client_mail_shape() {
+        let model = try_transform_mail_model_from_packet(&json!({
+            "mail": [{
+                "mailId": 77,
+                "senderName": "Gameshop",
+                "message": "Purchase\nParcel",
+                "opened": false,
+                "collected": false,
+                "items": [{ "item_index": 1268, "count": 1 }]
+            }]
+        }))
+        .expect("ReceiveMail payload");
+        let mail = serde_json::from_value::<mir2_client_bevy::mail::MailModel>(model)
+            .expect("native mail model");
+        assert_eq!(mail.mails.len(), 1);
+        assert_eq!(mail.mails[0].id, 77);
+        assert_eq!(mail.mails[0].items[0].item_index, Some(1268));
+    }
+
+    #[test]
     fn recovered_storage_packets_decode_only_correlatable_items_and_metadata() {
         let items = transform_storage_items_from_packet(&json!({
             "storage": [null, { "unique_id": 55, "item_index": 321, "count": 3, "slot": 1,
@@ -6570,6 +7066,27 @@ mod tests {
         )
         .is_none());
 
+        let locked_snapshot = try_transform_storage_model_from_snapshot(&json!({
+            "storage_items": [], "has_storage_password": true,
+            "require_storage_password": true,
+            "expanded_storage_expiry_time_binary_datetime": 987
+        })).expect("locked authoritative snapshot");
+        assert_eq!(locked_snapshot["unlocked"], false);
+        assert_eq!(locked_snapshot["size"], 80);
+        assert_eq!(locked_snapshot["expiry"], 987);
+        let unlocked_snapshot = try_transform_storage_model_from_snapshot(&json!({
+            "storageItems": [], "hasStoragePassword": true,
+            "requireStoragePassword": false,
+            "expandedStorageExpiryTimeBinaryDatetime": 654
+        })).expect("unlocked authoritative snapshot");
+        assert_eq!(unlocked_snapshot["unlocked"], true);
+        assert_eq!(unlocked_snapshot["expiry"], 654);
+        let explicit_unlock = try_transform_storage_model_from_snapshot(&json!({
+            "storageItems": [], "requireStoragePassword": true,
+            "storageUnlocked": true
+        })).expect("explicit unlock compatibility");
+        assert_eq!(explicit_unlock["unlocked"], true);
+
         let password_failure = transform_storage_patch_from_packet(
             "StoragePasswordResult",
             &json!({
@@ -6582,6 +7099,13 @@ mod tests {
         .expect("password failure acknowledgement");
         assert_eq!(password_failure["ack"]["operation"], "removePassword");
         assert_eq!(password_failure["ack"]["success"], false);
+        assert!(password_failure.get("expiry").is_none(),
+            "password last-set timestamp must not replace warehouse rental expiry");
+        let no_password = transform_storage_patch_from_packet(
+            "StorageUnlockResult", &json!({"result": 4, "hasPassword": false})
+        ).expect("no-password unlock result");
+        assert_eq!(no_password["ack"]["success"], true);
+        assert_eq!(no_password["unlocked"], true);
 
         let resize = transform_storage_patch_from_packet(
             "ResizeStorage",
@@ -7008,6 +7532,141 @@ mod tests {
         ] {
             assert!(world[key].as_array().unwrap().is_empty(), "{key}");
         }
+    }
+
+    #[test]
+    fn gateway_map_information_survives_schema_snapshots_until_the_map_changes() {
+        let context = GatewaySessionContext::default();
+        let (shell_sender, _shell_receiver) = std::sync::mpsc::channel();
+        let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
+        let mut snapshot_log_counter = 0;
+        let mut gameplay_adapter = NativeGameplayAdapter::default();
+        let mut last_world_payload = None;
+        let mut last_wallet = None;
+        let mut map_packet_cursor = NativeMapPacketCursor::default();
+        let mut ui_cursor = NativeUiPlayerCursor::default();
+        let mut in_flight_claim_mail_id = None;
+        let mut send_mail_in_flight = false;
+        let mut pending_mail_feedback = VecDeque::new();
+        let mut skill_cursor = SkillPacketCursor::default();
+        let mut social_cursor = SocialModel::default();
+        let mut push_world_state = |_: String| true;
+        macro_rules! ingest {
+            ($envelope:expr) => {{
+                handle_gateway_text_with_world_ingest(
+                    &$envelope.to_string(),
+                    &mut snapshot_log_counter,
+                    &context,
+                    &shell_sender,
+                    &mut gameplay_adapter,
+                    &gameplay_sender,
+                    &mut last_world_payload,
+                    &mut last_wallet,
+                    &mut map_packet_cursor,
+                    &mut ui_cursor,
+                    &mut in_flight_claim_mail_id,
+                    &mut send_mail_in_flight,
+                    &mut pending_mail_feedback,
+                    &mut skill_cursor,
+                    &mut social_cursor,
+                    &mut push_world_state,
+                )
+                .expect("gateway event")
+            }};
+        }
+
+        let d401_changed = json!({
+            "type": "packet",
+            "packet": "MapChanged",
+            "payload": {"mapIndex": 401, "fileName": "D401", "title": "DeadMineEntrance", "miniMap": 8},
+        });
+        assert_eq!(ingest!(d401_changed), WorldSnapshotIngestOutcome::NotSnapshot);
+        let partial_destination = json!({
+            "type": "worldSnapshot",
+            "payload": {"mapTitle": "BichonProvince", "miniMapIndex": 1,
+                "sceneView": {"center": {"x": 30, "y": 179}}},
+        });
+        assert_eq!(ingest!(partial_destination), WorldSnapshotIngestOutcome::Applied);
+        let destination = last_world_payload.as_ref().unwrap();
+        assert_eq!(destination["mapFileName"], json!("D401"));
+        assert_eq!(destination["mapTitle"], json!("DeadMineEntrance"));
+        assert_eq!(destination["miniMapIndex"], json!(8));
+        assert_eq!(transform_world_snapshot(destination)["playerStats"]["mapName"], json!("DeadMineEntrance"));
+        let d401_snapshot = json!({
+            "type": "worldSnapshot",
+            // The ordinary server snapshot deliberately lacks miniMapIndex.
+            "payload": {"mapFileName": "D401", "sceneView": {"center": {"x": 19, "y": 156}}},
+        });
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert_eq!(
+            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            Some(&json!(8))
+        );
+        let map_model: mir2_client_bevy::map::MapModel = serde_json::from_value(
+            transform_map_model(last_world_payload.as_ref().expect("cached snapshot")),
+        )
+        .expect("MapModel");
+        assert_eq!(
+            map_model.mini_map_index,
+            Some(8),
+            "the map model receives packet-only minimap metadata"
+        );
+
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert_eq!(
+            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            Some(&json!(8)),
+            "later same-map snapshots retain the cursor"
+        );
+
+        let d402_no_minimap = json!({
+            "type": "packet",
+            "packet": "MapChanged",
+            "payload": {"mapIndex": 402, "fileName": "D402", "miniMap": 0},
+        });
+        assert_eq!(
+            ingest!(d402_no_minimap),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
+        let d402_snapshot = json!({
+            "type": "worldSnapshot",
+            "payload": {"mapFileName": "D402", "sceneView": {"center": {"x": 1, "y": 2}}},
+        });
+        assert_eq!(ingest!(d402_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert!(last_world_payload
+            .as_ref()
+            .is_some_and(|world| world.get("miniMapIndex").is_none()));
+
+        let d401_information = json!({
+            "type": "packet",
+            "packet": "MapInformation",
+            "payload": {"mapIndex": 401, "fileName": "D401", "miniMapIndex": 8},
+        });
+        assert_eq!(
+            ingest!(d401_information),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
+        // This is a stale pre-transition payload. It cannot clear the newer
+        // D401 packet identity before the first fresh D401 snapshot arrives.
+        assert_eq!(ingest!(d402_snapshot), WorldSnapshotIngestOutcome::NotSnapshot);
+        assert_eq!(last_world_payload.as_ref().unwrap()["miniMapIndex"], json!(8));
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert_eq!(
+            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            Some(&json!(8)),
+            "the new D401 packet restores index 8 after the zero-index map"
+        );
+
+        assert_eq!(
+            ingest!(json!({"type": "packet", "packet": "LogOutSuccess", "payload": {}})),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
+        assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
+        assert!(last_world_payload
+            .as_ref()
+            .is_some_and(|world| world.get("miniMapIndex").is_none()),
+            "a session boundary must not reuse the prior map's packet cursor"
+        );
     }
 
     #[test]
@@ -8254,7 +8913,23 @@ mod tests {
         assert_eq!(model.center_x, 9);
         assert_eq!(model.center_y, 7);
         assert_eq!(model.time_of_day_light_setting, Some(4));
+        assert_eq!(model.mini_map_index, None);
+        assert_eq!(model.map_width, None);
+        assert_eq!(model.map_height, None);
         assert_eq!(model.patches.len(), 1);
+    }
+
+    #[test]
+    fn d401_minimap_transform_uses_authoritative_index_and_parsed_dimensions() {
+        let payload = json!({
+            "mapFileName": "D401",
+            "miniMapIndex": 8,
+            "sceneView": { "center": { "x": 19, "y": 156 } },
+        });
+        let model: mir2_client_bevy::map::MapModel =
+            serde_json::from_value(transform_map_model(&payload)).expect("MapModel");
+        assert_eq!(model.mini_map_index, Some(8));
+        assert_eq!((model.map_width, model.map_height), (Some(200), Some(200)));
     }
 
     #[test]
@@ -8598,7 +9273,11 @@ mod tests {
             "equipmentItems": [
                 { "key": "sword", "name": "WoodenSword", "quantity": 1, "slot": "weapon" },
                 { "key": "dress", "name": "BaseDress(M)", "quantity": 1, "slot": "armour" },
-                { "key": "mystery", "name": "Mystery", "quantity": 1, "slot": "future-slot" }
+                { "key": "mystery", "name": "Mystery", "quantity": 1, "slot": "future-slot" },
+                { "key": "ring-r", "name": "Ring R", "quantity": 1, "slot": "ringRight" },
+                { "key": "bracelet-l", "name": "Bracelet L", "quantity": 1, "slot": "braceletLeft" },
+                { "key": "ring-l", "name": "Ring L", "quantity": 1, "slot": "ringLeft" },
+                { "key": "bracelet-r", "name": "Bracelet R", "quantity": 1, "slot": "braceletRight" }
             ]
         });
 
@@ -8615,6 +9294,22 @@ mod tests {
         assert_eq!(model.items[1].slot, 0);
         assert_eq!(model.items[2].slot, 1);
         assert_eq!(model.items[3].slot, 2);
+        for (key, slot) in [
+            ("bracelet-l", 5),
+            ("bracelet-r", 6),
+            ("ring-l", 7),
+            ("ring-r", 8),
+        ] {
+            assert_eq!(
+                model
+                    .items
+                    .iter()
+                    .find(|item| item.key == key)
+                    .map(|item| item.slot),
+                Some(slot),
+                "camelCase equipment slot must not fall back to array order"
+            );
+        }
     }
 
     #[test]
@@ -8910,11 +9605,26 @@ mod tests {
     fn skill_name_metadata_cap_preserves_known_iconless_updates() {
         let mut cursor = SkillPacketCursor::default();
         for index in 0..MAX_LEARNED_SKILLS {
-            assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":format!("Spell{index}")}}),0));
+            assert!(cursor.apply_packet(
+                "NewMagic",
+                &json!({"hero":false,"magic":{"spell":format!("Spell{index}")}}),
+                0
+            ));
         }
-        assert!(!cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"overflow"}}),0));
-        assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"spell0","name":"Updated"}}),0));
-        assert_eq!(cursor.magic_names.get("spell0").map(String::as_str),Some("Updated"));
+        assert!(!cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"overflow"}}),
+            0
+        ));
+        assert!(cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"spell0","name":"Updated"}}),
+            0
+        ));
+        assert_eq!(
+            cursor.magic_names.get("spell0").map(String::as_str),
+            Some("Updated")
+        );
     }
 
     #[test]
@@ -8922,9 +9632,21 @@ mod tests {
         let mut cursor = SkillPacketCursor::default();
         let base = json!({"knownSkills":[{"spell":"Fury","name":"Battle Focus","magicName":"Fury"},
             {"spell":"Healing","name":"Minor Heal","magicName":"Healing"}]});
-        assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"Fury","name":"定制怒气"}}), 0));
-        assert!(!cursor.apply_packet("NewMagic", &json!({"hero":true,"magic":{"spell":"Fury","name":"Hero name"}}), 0));
-        assert!(cursor.apply_packet("NewMagic", &json!({"hero":false,"magic":{"spell":"Fury","name":""}}), 0));
+        assert!(cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"Fury","name":"定制怒气"}}),
+            0
+        ));
+        assert!(!cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":true,"magic":{"spell":"Fury","name":"Hero name"}}),
+            0
+        ));
+        assert!(cursor.apply_packet(
+            "NewMagic",
+            &json!({"hero":false,"magic":{"spell":"Fury","name":""}}),
+            0
+        ));
         for _ in 0..3 {
             let mut snapshot = base.clone();
             cursor.observe_snapshot(&mut snapshot);
@@ -8935,7 +9657,10 @@ mod tests {
         cursor.reset();
         let mut snapshot = base;
         cursor.observe_snapshot(&mut snapshot);
-        assert_eq!(transform_skill_model(&snapshot)["skills"][0]["name"], "Fury");
+        assert_eq!(
+            transform_skill_model(&snapshot)["skills"][0]["name"],
+            "Fury"
+        );
     }
 
     #[test]
@@ -9713,6 +10438,71 @@ mod tests {
     }
 
     #[test]
+    fn mail_reader_metadata_and_exact_source_icons_survive_wire_transform() {
+        let template = mir2_game_data::crystal_item_by_index(658).expect("potion template");
+        let mail = mail_message_json(&json!({"mailId":42,"canReply":true,"dateSentBinaryDatetime":"621355968000000000",
+            "items":[{"itemIndex":658,"uniqueId":777,"count":3}]})).unwrap();
+        assert_eq!(mail["can_reply"], true);
+        assert_eq!(mail["metadata_known"], true);
+        assert_eq!(mail["date_sent_binary_datetime"], 621_355_968_000_000_000i64);
+        assert_eq!(mail["items"][0]["image"], template.image);
+        assert_eq!(mail["items"][0]["uniqueId"], 777);
+        assert_eq!(mail["items"][0]["count"], 3);
+        assert_eq!(mail_attachment_json(&json!(template.name)).unwrap()["image"], template.image);
+        assert!(mail_attachment_json(&json!("unknown mail item 12345")).unwrap()["image"].is_null());
+        let snapshot = mail_message_json(&json!({"id":42,"items":[]})).unwrap();
+        assert_eq!(snapshot["metadata_known"], false);
+        let command = NativeOutboundCommand::LockMail { mail_id: 42, lock: true };
+        assert_eq!(command.command_type(), "lockMail");
+        let wire = serde_json::to_value(command).unwrap();
+        assert_eq!(wire["mailId"], 42);
+        assert_eq!(wire["lock"], true);
+    }
+
+    #[test]
+    fn storage_password_receipts_preserve_results_without_echoing_credentials() {
+        for result in 0..=6 {
+            let unlock = transform_storage_patch_from_packet("StorageUnlockResult",
+                &json!({"result":result,"hasPassword":true,"password":"private-input"})).unwrap();
+            assert_eq!(unlock["password_result"]["operation"], "unlock");
+            assert_eq!(unlock["password_result"]["result"], result);
+            assert_eq!(unlock["ack"]["success"], result == 0 || result == 4);
+            if result == 0 || result == 4 {
+                assert_eq!(unlock["unlocked"], true);
+            } else {
+                assert!(unlock.get("unlocked").is_none());
+            }
+            for removing in [false, true] {
+                let password = transform_storage_patch_from_packet("StoragePasswordResult",
+                    &json!({"result":result,"removing":removing,"hasPassword":true,"password":"private-input"})).unwrap();
+                assert_eq!(password["password_result"], json!({"operation":"password","result":result,"removing":removing}));
+                assert!(!password.to_string().contains("private-input"));
+            }
+            assert!(!unlock.to_string().contains("private-input"));
+        }
+        assert!(transform_storage_patch_from_packet("StorageUnlockResult", &json!({"hasPassword":true})).is_none());
+        assert!(transform_storage_patch_from_packet("StoragePasswordResult", &json!({"result":4,"hasPassword":true})).is_none());
+    }
+
+    #[test]
+    fn equipment_storage_ack_transform_preserves_identity_and_failure() {
+        for success in [false, true] {
+            let payload = json!({"grid":"Storage","uniqueId":"9007199254740993","to":17,"success":success});
+            assert_eq!(transform_inventory_operation_ack("EquipItem", &payload),
+                Some(InventoryOperationAck::Equip { grid: "Storage".into(), unique_id: 9007199254740993, to: 17, success }));
+            assert_eq!(transform_inventory_operation_ack("RemoveItem", &payload),
+                Some(InventoryOperationAck::Remove { grid: "Storage".into(), unique_id: 9007199254740993, to: 17, success }));
+            for field in ["grid", "uniqueId", "to", "success"] {
+                let mut malformed = payload.clone();
+                malformed.as_object_mut().unwrap().remove(field);
+                for packet in ["EquipItem", "RemoveItem"] {
+                    assert!(transform_inventory_operation_ack(packet, &malformed).is_none());
+                }
+            }
+        }
+    }
+
+    #[test]
     fn inventory_ack_transform_requires_complete_correlatable_fields() {
         assert_eq!(
             transform_inventory_operation_ack(
@@ -10137,6 +10927,7 @@ mod tests {
         let mut gameplay_adapter = NativeGameplayAdapter::default();
         let mut last_world_payload = None;
         let mut last_wallet = None;
+        let mut map_packet_cursor = NativeMapPacketCursor::default();
         let mut ui_cursor = NativeUiPlayerCursor::default();
         let mut in_flight_claim_mail_id = None;
         let mut send_mail_in_flight = false;
@@ -10162,6 +10953,7 @@ mod tests {
                 &gameplay_sender,
                 &mut last_world_payload,
                 &mut last_wallet,
+                &mut map_packet_cursor,
                 &mut ui_cursor,
                 &mut in_flight_claim_mail_id,
                 &mut send_mail_in_flight,
@@ -10191,6 +10983,7 @@ mod tests {
             &gameplay_sender,
             &mut last_world_payload,
             &mut last_wallet,
+            &mut map_packet_cursor,
             &mut ui_cursor,
             &mut in_flight_claim_mail_id,
             &mut send_mail_in_flight,
@@ -10227,6 +11020,7 @@ mod tests {
             &gameplay_sender,
             &mut last_world_payload,
             &mut last_wallet,
+            &mut map_packet_cursor,
             &mut ui_cursor,
             &mut in_flight_claim_mail_id,
             &mut send_mail_in_flight,
@@ -10255,6 +11049,7 @@ mod tests {
             &gameplay_sender,
             &mut last_world_payload,
             &mut last_wallet,
+            &mut map_packet_cursor,
             &mut ui_cursor,
             &mut in_flight_claim_mail_id,
             &mut send_mail_in_flight,
@@ -10282,6 +11077,7 @@ mod tests {
             &gameplay_sender,
             &mut last_world_payload,
             &mut last_wallet,
+            &mut map_packet_cursor,
             &mut ui_cursor,
             &mut in_flight_claim_mail_id,
             &mut send_mail_in_flight,
@@ -10645,6 +11441,30 @@ mod tests {
             let actual = receiver.try_recv().expect("shell account event");
             assert_eq!(matches!(actual, ShellGatewayEvent::AccountCreated), created);
         }
+    }
+
+    #[test]
+    fn shell_dispatch_flat_registration_limit_releases_pending_request_and_explains_wait() {
+        use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
+
+        let context = GatewaySessionContext::default();
+        let (sender, receiver) = std::sync::mpsc::channel();
+        let event = parse_inbound_event(
+            r#"{"type":"error","message":"too many authentication attempts; retry after 2695 seconds"}"#,
+        ).expect("public registration limit");
+        let mut model = NativeShellModel {
+            screen: NativeShellScreen::Registration,
+            register_request_in_flight: true,
+            ..Default::default()
+        };
+        dispatch_shell_event(&event, &context, &sender);
+        assert!(model.apply_gateway_event(receiver.try_recv().expect("shell error")));
+        assert!(!model.register_request_in_flight);
+        assert_eq!(model.screen, NativeShellScreen::Registration);
+        assert_eq!(
+            model.notice.unwrap().message,
+            "尝试过于频繁，请等待 2695 秒后再试"
+        );
     }
 
     #[test]

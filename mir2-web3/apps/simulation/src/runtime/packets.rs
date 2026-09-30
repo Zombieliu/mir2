@@ -98,15 +98,20 @@ use super::monsters::{
 use super::movement::{current_location, town_revive_packets};
 use super::npc::{
     buy_item_impl, crystal_npc_object_in_data_range, crystal_npc_object_visible_in_world,
-    crystal_npc_visible_to_character, crystal_quest_ids_by_npc, dismiss_dialog, sell_item_impl,
+    crystal_npc_visible_to_character_for_profile, crystal_quest_ids_by_npc, dismiss_dialog,
+    sell_item_impl,
     CrystalNpcLocalTime, NpcFlagState,
 };
 use super::quests::{
     abandon_quest, begin_quest, can_accept_quest, complete_quest_with_selection,
     completed_quest_ids, crystal_npc_quest_icon, crystal_quest_finish_npc_matches,
     crystal_quest_info_by_id, crystal_quest_reward_selection_missing,
-    crystal_quest_start_npc_matches, crystal_quest_task_list, ensure_runtime_quest,
+    crystal_quest_start_npc_matches, crystal_quest_task_list, effective_crystal_quest_info_by_id,
+    effective_quest_ids_for_npc, ensure_runtime_quest, newcomer_daily_bonus_update_packet,
     quest_definition_exists, quest_log_snapshots, quest_template_by_id,
+};
+use super::quests::quest_recurrence::{
+    quest_completion_is_permanent, refresh_quest_recurrence,
 };
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
@@ -142,7 +147,9 @@ use super::stage5::{
 const CRYSTAL_NPC_NAME_COLOUR_ARGB: i32 = 0xFF00_FF00u32 as i32;
 const CRYSTAL_MAIL_CAPACITY: usize = 100;
 pub(super) const MAX_MAIL_RECIPIENT_CHARS: usize = 20;
-pub(super) const MAX_MAIL_MESSAGE_CHARS: usize = 1_000;
+/// Crystal validates `string.Length`, which counts UTF-16 code units rather
+/// than Unicode scalar values.
+pub(super) const MAX_MAIL_MESSAGE_CHARS: usize = 500;
 const MAIL_TARGET_DURABLE_IDENTITY_MISMATCH: &str = "mail target durable save identity mismatch";
 
 #[derive(Resource, Debug, Default)]
@@ -221,12 +228,85 @@ fn current_stage5_character_index(world: &World) -> i32 {
         .unwrap_or_default()
 }
 
-fn stage5_mail_cost(gold: u32, stamped: bool) -> u32 {
-    // `stamped` is client-controlled. Until a server-side stamp inventory and
-    // consume operation exists, it must never authorize free postage.
-    let _ = stamped;
-    (gold / 1_000) * 100
+// Crystal MailSystem.ini defaults: FreeWithStamp=True, CostPer1k=100,
+// InsurancePerItem=5. These are server policy, never supplied by the client.
+const MAIL_GOLD_COST_PER_1K: u32 = 100;
+const MAIL_INSURANCE_PERCENT: u32 = 5;
+const MAIL_BIND_NO_MAIL: i16 = 16_384;
+
+fn stage5_mail_item_allowed(item: &ItemState) -> bool {
+    exact_mail_item_state_is_valid(item)
+        && stage5_trade_item_can_enter(item)
+        && !item_has_crystal_or_rental_bind_flag(item, MAIL_BIND_NO_MAIL)
 }
+
+fn stage5_mail_cost(gold: u32, items: &[ItemState], has_stamp: bool) -> Option<u32> {
+    if has_stamp {
+        return Some(0);
+    }
+    items.iter().try_fold((gold / 1_000).checked_mul(MAIL_GOLD_COST_PER_1K)?, |cost, item| {
+        let template = crystal_item_template_for_item_key(&item.key)?;
+        let price = crystal_item_current_price(item, &template, crystal_item_added_stat_weight(item));
+        // Match PlayerObject.GetMailCost's double division and per-item floor.
+        let insurance = ((f64::from(price) / 100.0) * f64::from(MAIL_INSURANCE_PERCENT)).floor() as u32;
+        cost.checked_add(insurance)
+    })
+}
+
+struct Stage5MailParcelPlan {
+    cost: u32,
+    stamp: Option<ItemState>,
+    attachments: Vec<ItemState>,
+}
+
+fn stage5_mail_parcel_plan(
+    inventory: &[ItemState], gold: u32, items_idx: &[u64; 5], stamped: bool,
+) -> Option<Stage5MailParcelPlan> {
+    let ids = stage5_mail_attachment_ids(items_idx)?;
+    let stamp = stamped.then(|| inventory.iter().find(|item| {
+        matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+            && item.quantity > 0
+            && exact_mail_item_state_is_valid(item)
+            && crystal_item_template_for_item_key(&item.key)
+                .is_some_and(|template| template.item_type == 0 && template.shape == 1)
+    })).flatten().cloned();
+    if let Some(stamp) = &stamp {
+        let id = item_unique_id(stamp);
+        // A stamp cannot pay postage and also be mailed; reject the ambiguous
+        // request rather than relying on attachment ordering or stack counts.
+        if ids.contains(&id) || inventory.iter().filter(|item| item_unique_id(item) == id).count() != 1 {
+            return None;
+        }
+    } else if items_idx[1..].iter().any(|id| *id != 0) {
+        return None;
+    }
+    let attachments = ids.iter().map(|id| {
+        let matches = inventory.iter().filter(|item| item_matches_inventory_unique_id(item, *id)).collect::<Vec<_>>();
+        let [item] = matches.as_slice() else { return None; };
+        (matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+            && stage5_mail_item_allowed(item)).then(|| (*item).clone())
+    }).collect::<Option<Vec<_>>>()?;
+    let cost = stage5_mail_cost(gold, &attachments, stamp.is_some())?;
+    Some(Stage5MailParcelPlan { cost, stamp, attachments })
+}
+
+fn stage5_mail_quote(world: &World, gold: u32, items_idx: &[u64; 5], stamped: bool) -> Option<u32> {
+    let sender = stage5_mail_sender(world)?;
+    let config = &world.resource::<RuntimeConfigResource>().config;
+    let store = config.account_store.lock().ok()?;
+    let account = store.accounts.get(&sender.account_id)?;
+    let character = account.characters.iter().find(|character| character.index == sender.character_index && character.name == sender.character_name)?;
+    let save = account.saves.get(&character.index)?;
+    if save.character.index != character.index || save.character.name != character.name {
+        return None;
+    }
+    let inventory = save.inventory_items_json.iter().map(|state| serde_json::from_str::<ItemState>(state).ok()).collect::<Option<Vec<_>>>()?;
+    stage5_mail_parcel_plan(&inventory, gold, items_idx, stamped).map(|plan| plan.cost)
+}
+
+#[cfg(test)]
+#[path = "mail_parcel_tests.rs"]
+mod mail_parcel_tests;
 
 #[derive(Debug, Clone)]
 struct Stage5MailSender {
@@ -278,8 +358,15 @@ fn stage5_mail_recipient_is_valid(name: &str) -> bool {
 }
 
 fn stage5_mail_message_is_valid(message: &str) -> bool {
-    message.chars().count() <= MAX_MAIL_MESSAGE_CHARS && !message.chars().any(char::is_control)
+    message.encode_utf16().count() <= MAX_MAIL_MESSAGE_CHARS
+        && message
+            .chars()
+            .all(|character| matches!(character, '\r' | '\n') || !character.is_control())
 }
+
+#[cfg(test)]
+#[path = "mail_body_validation_tests.rs"]
+mod mail_body_validation_tests;
 
 #[derive(Debug, Clone)]
 struct Stage5MailTarget {
@@ -362,8 +449,7 @@ fn stage5_take_mail_attachments_from_save(
         if attachment_id_set.contains(&unique_id) {
             if !removed.insert(unique_id)
                 || !matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-                || !exact_mail_item_state_is_valid(&item)
-                || !stage5_trade_item_can_enter(&item)
+                || !stage5_mail_item_allowed(&item)
             {
                 return Err("mail attachment changed before commit".to_string());
             }
@@ -408,6 +494,9 @@ fn stage5_commit_mail_transaction(
     total: u32,
     attachment_ids: &[u64],
     expected_attachment_states_json: &[String],
+    items_idx: &[u64; 5],
+    stamped: bool,
+    expected_stamp_state_json: Option<&str>,
 ) -> Result<Stage5MailCommit, String> {
     let self_mail =
         sender.account_id == target.account_id && sender.character_index == target.character_index;
@@ -466,15 +555,41 @@ fn stage5_commit_mail_transaction(
             Some(target_save)
         };
         let sender_baseline_revision = sender_save.revision;
-        sender_save.gold = sender_save
-            .gold
-            .checked_sub(total)
-            .ok_or_else(|| "sender gold changed before mail commit".to_string())?;
+        let durable_inventory = sender_save.inventory_items_json.iter()
+            .map(|state| serde_json::from_str::<ItemState>(state))
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(|error| format!("invalid parcel inventory: {error}"))?;
+        let durable_plan = stage5_mail_parcel_plan(&durable_inventory, mail.gold, items_idx, stamped)
+            .ok_or_else(|| "parcel ownership or postage changed before commit".to_string())?;
+        let durable_stamp_json = durable_plan.stamp.as_ref().map(serde_json::to_string).transpose()
+            .map_err(|error| format!("invalid parcel stamp: {error}"))?;
+        if durable_stamp_json.as_deref() != expected_stamp_state_json
+            || mail.gold.checked_add(durable_plan.cost) != Some(total)
+        {
+            return Err("parcel stamp or fee changed before commit".to_string());
+        }
         let removed_attachments = stage5_take_mail_attachments_from_save(
             &mut sender_save,
             attachment_ids,
             expected_attachment_states_json,
         )?;
+        sender_save.gold = sender_save
+            .gold
+            .checked_sub(total)
+            .ok_or_else(|| "sender gold changed before mail commit".to_string())?;
+        if let Some(mut stamp) = durable_plan.stamp {
+            let stamp_id = item_unique_id(&stamp);
+            let index = sender_save.inventory_items_json.iter().position(|state| {
+                serde_json::from_str::<ItemState>(state).is_ok_and(|item| item_unique_id(&item) == stamp_id)
+            }).ok_or_else(|| "parcel stamp disappeared before commit".to_string())?;
+            if stamp.quantity == 1 {
+                sender_save.inventory_items_json.remove(index);
+            } else {
+                stamp.quantity -= 1;
+                sender_save.inventory_items_json[index] = serde_json::to_string(&stamp)
+                    .map_err(|error| format!("failed to encode consumed stamp: {error}"))?;
+            }
+        }
         mail.items = removed_attachments
             .iter()
             .map(|item| item.key.clone())
@@ -558,30 +673,6 @@ fn stage5_mail_attachment_ids(items_idx: &[u64; 5]) -> Option<Vec<u64>> {
     Some(ids)
 }
 
-fn stage5_mail_attachment_states(world: &World, unique_ids: &[u64]) -> Option<Vec<ItemState>> {
-    let inventory = world.resource::<InventoryResource>();
-    let mut items = Vec::with_capacity(unique_ids.len());
-    for unique_id in unique_ids {
-        let matches = inventory
-            .inventory_items
-            .iter()
-            .filter(|item| item_matches_inventory_unique_id(item, *unique_id))
-            .collect::<Vec<_>>();
-        let [item] = matches.as_slice() else {
-            return None;
-        };
-        if !matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-            || !exact_mail_item_state_is_valid(item)
-            || !stage5_trade_item_can_enter(item)
-        {
-            return None;
-        }
-        let item = (*item).clone();
-        items.push(item);
-    }
-    Some(items)
-}
-
 fn stage5_mail_attachment_user_items(mail: &Stage5MailMessage) -> Vec<UserItem> {
     if !mail.item_states_json.is_empty() {
         let Ok(items) = mail
@@ -620,7 +711,10 @@ fn stage5_mail_to_client_mail(mail: &Stage5MailMessage) -> ClientMail {
         locked: mail.locked,
         can_reply: true,
         collected: mail.claimed,
-        date_sent_binary_datetime: current_binary_datetime(),
+        // Legacy Stage5 mail has no persisted send timestamp. Re-projecting
+        // the mailbox must not invent a new sent date on every refresh.
+        // Zero is an unknown date until durable creation metadata is supplied.
+        date_sent_binary_datetime: 0,
         gold: mail.gold,
         items: stage5_mail_attachment_user_items(mail),
     }
@@ -671,11 +765,12 @@ fn stage5_send_mail_packet(
     let Some(target) = stage5_mail_target_for_name(&config, &name) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
-    let Some(attachment_states) = stage5_mail_attachment_states(world, &attachment_ids) else {
+    let Some(plan) = stage5_mail_parcel_plan(
+        &world.resource::<InventoryResource>().inventory_items, gold, &items_idx, stamped,
+    ) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
-    let cost = stage5_mail_cost(gold, stamped);
-    let Some(total) = gold.checked_add(cost) else {
+    let Some(total) = gold.checked_add(plan.cost) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
     if world.resource::<PlayerRuntimeResource>().gold < total {
@@ -685,12 +780,16 @@ fn stage5_send_mail_packet(
         return vec![ServerPacket::MailSent { result: -1 }];
     };
 
-    let item_states_json = match attachment_states
+    let item_states_json = match plan.attachments
         .iter()
         .map(serde_json::to_string)
         .collect::<Result<Vec<_>, _>>()
     {
         Ok(states) => states,
+        Err(_) => return vec![ServerPacket::MailSent { result: -1 }],
+    };
+    let stamp_state_json = match plan.stamp.as_ref().map(serde_json::to_string).transpose() {
+        Ok(state) => state,
         Err(_) => return vec![ServerPacket::MailSent { result: -1 }],
     };
     let mail = Stage5MailMessage {
@@ -716,6 +815,9 @@ fn stage5_send_mail_packet(
         total,
         &attachment_ids,
         &item_states_json,
+        &items_idx,
+        stamped,
+        stamp_state_json.as_deref(),
     ) {
         Ok(committed) => committed,
         Err(error) => {
@@ -739,17 +841,20 @@ fn stage5_send_mail_packet(
     // The durable sender image is authoritative. A stale same-account session
     // is fully synchronized for the fields this transaction can affect, so an
     // attachment removed by another session cannot remain in this World.
-    let committed_ids = committed
+    let committed_quantities = committed
         .sender_inventory_items
         .iter()
-        .map(item_unique_id)
-        .collect::<BTreeSet<_>>();
+        .map(|item| (item_unique_id(item), item.quantity))
+        .collect::<BTreeMap<_, _>>();
     let removed_from_live = world
         .resource::<InventoryResource>()
         .inventory_items
         .iter()
-        .filter(|item| !committed_ids.contains(&item_unique_id(item)))
-        .cloned()
+        .filter_map(|item| {
+            let remaining = committed_quantities.get(&item_unique_id(item)).copied().unwrap_or(0);
+            let removed = item.quantity.saturating_sub(remaining);
+            (removed > 0).then_some((item_unique_id(item), removed))
+        })
         .collect::<Vec<_>>();
     world.resource_mut::<PlayerRuntimeResource>().gold = committed.sender_gold;
     world.resource_mut::<InventoryResource>().inventory_items = committed.sender_inventory_items;
@@ -762,10 +867,10 @@ fn stage5_send_mail_packet(
     if total > 0 {
         packets.push(ServerPacket::LoseGold { gold: total });
     }
-    for item in removed_from_live {
+    for (unique_id, count) in removed_from_live {
         packets.push(ServerPacket::DeleteItem {
-            unique_id: item_unique_id(&item),
-            count: item.quantity.min(u32::from(u16::MAX)) as u16,
+            unique_id,
+            count: count.min(u32::from(u16::MAX)) as u16,
         });
     }
     packets.push(ServerPacket::MailSent { result: 1 });
@@ -3463,6 +3568,15 @@ fn active_npc_allows_quest_request(
     finish: bool,
     selected_item_index: Option<i32>,
 ) -> bool {
+    if newcomer_diary_allows_quest_request_without_npc(
+        world,
+        quest_id,
+        requested_npc_index,
+        finish,
+    ) {
+        return true;
+    }
+
     let Some(active_dialog) = world
         .resource::<NpcStateResource>()
         .active_npc_dialog
@@ -3477,24 +3591,66 @@ fn active_npc_allows_quest_request(
         return false;
     }
 
-    if !quest_npc_matches_request(quest_id, requested_npc_index, finish, npc_object_id) {
+    if !quest_npc_matches_request(
+        world,
+        quest_id,
+        requested_npc_index,
+        finish,
+        npc_object_id,
+    ) {
         return false;
     }
 
     crystal_npc_object_in_data_range(world, npc_object_id)
 }
 
+fn newcomer_diary_allows_quest_request_without_npc(
+    world: &World,
+    quest_id: i32,
+    requested_npc_index: Option<u32>,
+    finish: bool,
+) -> bool {
+    if !world
+        .get_resource::<QuestResource>()
+        .is_some_and(|quests| quests.newcomer_v1_cadence || quests.newcomer_v2_cadence)
+    {
+        return false;
+    }
+    let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) else {
+        return false;
+    };
+    newcomer_diary_template_allows_quest_request(
+        info.npc_index,
+        info.finish_npc_index,
+        requested_npc_index,
+        finish,
+    )
+}
+
+fn newcomer_diary_template_allows_quest_request(
+    start_npc_index: u32,
+    finish_npc_index: u32,
+    requested_npc_index: Option<u32>,
+    finish: bool,
+) -> bool {
+    if finish {
+        start_npc_index == 0 && finish_npc_index == 0
+    } else {
+        start_npc_index == 0 && requested_npc_index == Some(0)
+    }
+}
+
 fn quest_npc_matches_request(
+    world: &World,
     quest_id: i32,
     requested_npc_index: Option<u32>,
     finish: bool,
     npc_object_id: u32,
 ) -> bool {
-    if quest_template_by_id(quest_id).is_some() {
-        quest_id == GUIDE_QUEST_ID
-            && npc_object_id == GUIDE_NPC_ID
+    if quest_id == GUIDE_QUEST_ID {
+        npc_object_id == GUIDE_NPC_ID
             && requested_npc_index.is_none_or(|index| index == GUIDE_NPC_ID)
-    } else if let Some(info) = crystal_quest_info_by_id(quest_id) {
+    } else if let Some(info) = effective_crystal_quest_info_by_id(world, quest_id) {
         let requested_matches = requested_npc_index
             .is_none_or(|index| index == npc_object_id || index == info.npc_index);
         requested_matches
@@ -3711,11 +3867,15 @@ mod quest_dialog_operation_link_tests {
     }
 }
 
+#[cfg(test)]
+#[path = "packets_diary_quest_tests.rs"]
+mod diary_quest_tests;
+
 pub(super) fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
     if !is_in_world(world) {
         return Vec::new();
     }
-    if !quest_definition_exists(quest_id) {
+    if !quest_definition_exists(world, quest_id) {
         return vec![system_message_key(world, "server.CouldNotAcceptQuest")];
     }
     if !can_accept_quest(world, quest_id)
@@ -3780,12 +3940,19 @@ pub(super) fn stage5_finish_quest_packet(
     if stage5_quest_stage(world, quest_id) != Some(QuestStage::Completed) {
         return vec![system_message_key(world, "server.CannotHandInQuestBagFull")];
     }
-    vec![
-        stage5_quest_remove_packet(quest_id, true),
+    let mut packets = vec![
+        stage5_quest_remove_packet(
+            quest_id,
+            quest_completion_is_permanent(world, quest_id),
+        ),
         ServerPacket::CompleteQuest {
             completed_quests: completed_quest_ids(world),
         },
-    ]
+    ];
+    if let Some(packet) = newcomer_daily_bonus_update_packet(world, quest_id) {
+        packets.push(packet);
+    }
+    packets
 }
 
 fn stage5_abandon_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPacket> {
@@ -3802,7 +3969,7 @@ fn stage5_share_quest_packet(world: &mut World, quest_id: i32) -> Vec<ServerPack
     if !is_in_world(world) {
         return Vec::new();
     }
-    if !quest_definition_exists(quest_id) {
+    if !quest_definition_exists(world, quest_id) {
         return vec![system_message_key(world, "server.CouldNotAcceptQuest")];
     }
     let sharer_name = stage5_player_name(world);
@@ -4758,7 +4925,7 @@ fn request_monster_info_packet(monster_index: i32) -> Vec<ServerPacket> {
     }]
 }
 
-fn request_npc_info_packet(npc_index: i32) -> Vec<ServerPacket> {
+fn request_npc_info_packet(world: &World, npc_index: i32) -> Vec<ServerPacket> {
     let Some(npc) = crystal_npc_info_manifest()
         .npcs
         .into_iter()
@@ -4772,6 +4939,11 @@ fn request_npc_info_packet(npc_index: i32) -> Vec<ServerPacket> {
             quest_ids.push(quest_id);
         }
     }
+    quest_ids = effective_quest_ids_for_npc(
+        world,
+        npc.loaded_object_id.unwrap_or(npc.npc_index.max(0) as u32),
+        &quest_ids,
+    );
     vec![ServerPacket::NewNpcInfo {
         info: NpcInfo {
             object_id: npc.loaded_object_id.unwrap_or(npc.npc_index.max(0) as u32),
@@ -7157,7 +7329,7 @@ pub(super) fn start_game_account_social_and_shop_packets() -> Vec<ServerPacket> 
     packets
 }
 
-fn apply_start_game_dynamic_game_shop_stock(world: &World, packets: &mut [ServerPacket]) {
+pub(super) fn apply_start_game_dynamic_game_shop_stock(world: &World, packets: &mut [ServerPacket]) {
     let individual_purchases = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -7324,16 +7496,29 @@ pub(super) fn start_game_static_visible_object_packets(
         if !point_in_data_range(&npc.location, player_position) {
             continue;
         }
-        if !crystal_npc_visible_to_character(&npc, character, npc_flags, local_time) {
+        if !crystal_npc_visible_to_character_for_profile(
+            &npc,
+            character,
+            npc_flags,
+            local_time,
+            super::quests::quest_recurrence::server_newcomer_v1_enabled(),
+        ) {
             continue;
         }
         let Some(object_id) = npc.loaded_object_id else {
             continue;
         };
-        let quest_ids = quest_ids_by_npc
+        let mut quest_ids: Vec<i32> = quest_ids_by_npc
             .get(&object_id)
             .map(|ids| ids.iter().copied().collect())
             .unwrap_or_default();
+        for quest_id in super::quests::newcomer_progression::configured_quest_ids_for_npc(object_id).into_iter()
+            .chain(super::quests::newcomer_v2::configured_quest_ids_for_npc(object_id))
+        {
+            if !quest_ids.contains(&quest_id) {
+                quest_ids.push(quest_id);
+            }
+        }
         objects.push((
             npc.location.y,
             npc.location.x,
@@ -7805,9 +7990,10 @@ pub(super) fn collect_world_entities(
                 None
             },
         );
-        let quest_ids = npc_agent
+        let source_quest_ids = npc_agent
             .map(|agent| agent.quest_ids.clone())
             .unwrap_or_default();
+        let quest_ids = effective_quest_ids_for_npc(world, object_id.0, &source_quest_ids);
         let quest_icon =
             npc_agent.and_then(|_| crystal_npc_quest_icon(world, object_id.0, &quest_ids));
         let name_colour_argb = match kind {
@@ -8025,7 +8211,7 @@ pub(super) fn entity_sprite_snapshot(
 
     if let Some(monster) = monster_agent {
         return Some(WorldEntitySpriteSnapshot {
-            body_library: format!("Monster/{:03}", monster.image),
+            body_library: monster_body_library(monster.image),
             hair_library: None,
             weapon_library: None,
             weapon_library_secondary: None,
@@ -8063,6 +8249,21 @@ pub(super) fn entity_sprite_snapshot(
         mount_frame_offset: None,
     })
 }
+
+// Crystal MonsterObject.Load selects Libraries.Gates[BaseImage - 950];
+// MLibrary.Initialize uses Settings.GatePath and the two-digit "00" format.
+// Keep this correction bounded to the four gates in platinum_176. Their
+// animation descriptors come from each Gate library, with no extra base offset.
+fn monster_body_library(image: u16) -> String {
+    match image {
+        950..=953 => format!("Gate/{:02}", image - 950),
+        _ => format!("Monster/{image:03}"),
+    }
+}
+
+#[cfg(test)]
+#[path = "special_monster_sprite_tests.rs"]
+mod special_monster_sprite_tests;
 
 #[allow(deprecated)]
 pub(super) fn collect_ground_drops(
@@ -8391,7 +8592,7 @@ pub(super) fn visible_object_bundle_for_entity(
                         colour_argb: npc.colour_argb,
                         location: position,
                         direction: facing,
-                        quest_ids: npc.quest_ids.clone(),
+                        quest_ids: effective_quest_ids_for_npc(world, object_id, &npc.quest_ids),
                     },
                 },
                 health_packet: None,
@@ -8724,6 +8925,11 @@ impl SimulationSession {
                 return self.submit_shared_guild_name(name);
             }
         }
+        let mut recurrence_packets = if matches!(packet, ClientPacket::StartGame { .. }) {
+            Vec::new()
+        } else {
+            refresh_quest_recurrence(self.app.world_mut())
+        };
         if matches!(packet, ClientPacket::Disconnect | ClientPacket::LogOut) {
             if let Err(error) = persist_active_character_save_for_logout(self.app.world()) {
                 clear_account_derived_gm_permissions(self.app.world_mut());
@@ -8732,6 +8938,16 @@ impl SimulationSession {
         }
         if let ClientPacket::StartGame { character_index } = packet {
             let mut packets = self.start_game(character_index);
+            let _ = refresh_quest_recurrence(self.app.world_mut());
+            let completed_quests = completed_quest_ids(self.app.world());
+            for packet in &mut packets {
+                if let ServerPacket::CompleteQuest {
+                    completed_quests: packet_ids,
+                } = packet
+                {
+                    *packet_ids = completed_quests.clone();
+                }
+            }
             apply_start_game_dynamic_game_shop_stock(self.app.world(), &mut packets);
             if let Some(friends) = self.friends_with_online_characters(&BTreeSet::new()) {
                 for packet in &mut packets {
@@ -8747,8 +8963,13 @@ impl SimulationSession {
             ClientPacket::Attack{..}|ClientPacket::RangeAttack{..}|ClientPacket::Magic{..}
             |ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}|ClientPacket::FinishQuest{..});
         let before = if xp_source { self.begin_guild_experience_command(false)? } else { None };
-        let packets = self.handle_packet_impl(packet);
-        let packets = self.finalize_packets(packets);
+        let journey_context = super::quests::newcomer_v2_events::command_context(&packet);
+        let mut packets = self.handle_packet_impl(packet);
+        let mut journey_packets = super::quests::newcomer_v2_events::observe_committed_command(
+            self.app.world_mut(), journey_context, &packets);
+        packets.append(&mut journey_packets);
+        recurrence_packets.append(&mut packets);
+        let packets = self.finalize_packets(recurrence_packets);
         self.finish_guild_experience_command(before,packets)
     }
 
@@ -9032,7 +9253,9 @@ impl SimulationSession {
             ClientPacket::RequestMonsterInfo { monster_index } => {
                 request_monster_info_packet(monster_index)
             }
-            ClientPacket::RequestNpcInfo { npc_index } => request_npc_info_packet(npc_index),
+            ClientPacket::RequestNpcInfo { npc_index } => {
+                request_npc_info_packet(self.app.world(), npc_index)
+            }
             ClientPacket::MarriageRequest => stage5_marriage_request_packet(self.app.world_mut()),
             ClientPacket::MarriageReply { accept_invite } => {
                 stage5_marriage_reply_packet(self.app.world_mut(), accept_invite)
@@ -9123,8 +9346,12 @@ impl SimulationSession {
                     if packets.iter().any(|packet| {
                         matches!(
                             packet,
-                            ServerPacket::CompleteQuest { completed_quests }
-                                if completed_quests.contains(&quest_index)
+                            ServerPacket::ChangeQuest {
+                                quest_id,
+                                taken: false,
+                                quest_state: CRYSTAL_QUEST_STATE_REMOVE,
+                                ..
+                            } if *quest_id == quest_index
                         )
                     }) {
                         dismiss_dialog(self.app.world_mut());
@@ -9173,9 +9400,11 @@ impl SimulationSession {
             ClientPacket::MailLockedItem { unique_id, locked } => {
                 vec![ServerPacket::MailLockedItem { unique_id, locked }]
             }
-            ClientPacket::MailCost { gold, stamped, .. } => {
+            ClientPacket::MailCost { gold, stamped, items_idx } => {
                 vec![ServerPacket::MailCost {
-                    cost: stage5_mail_cost(gold, stamped),
+                    // This packet has no error field. An invalid quote must
+                    // clear any old cheap/free quote, never authorize delivery.
+                    cost: stage5_mail_quote(self.app.world(), gold, &items_idx, stamped).unwrap_or(u32::MAX),
                 }]
             }
             ClientPacket::RequestIntelligentCreatureUpdates { update } => {
@@ -10052,6 +10281,18 @@ mod game_shop_start_stock_tests {
 #[cfg(test)]
 mod mail_status_transaction_tests {
     use super::*;
+    #[test]
+    fn legacy_mail_projection_does_not_invent_a_send_timestamp() {
+        let mail: Stage5MailMessage = serde_json::from_value(serde_json::json!({
+            "id": 42, "from": "System", "to": "Scout", "subject": "Old mail",
+            "body": "No persisted date", "gold": 0, "claimed": false, "deleted": false
+        })).unwrap();
+        let first = stage5_mail_to_client_mail(&mail);
+        let again = stage5_mail_to_client_mail(&mail);
+        assert_eq!(first.date_sent_binary_datetime, 0);
+        assert_eq!(again.date_sent_binary_datetime, first.date_sent_binary_datetime);
+        assert_eq!(again.mail_id, 42);
+    }
     use crate::config::{
         deliver_stage5_system_mail, AccountStoreTransactionFault, Stage5MailDelivery,
         Stage5MailTargetKind,
@@ -10098,6 +10339,61 @@ mod mail_status_transaction_tests {
             .iter()
             .any(|packet| matches!(packet, ServerPacket::StartGame { result: 4, .. })));
         session
+    }
+
+    #[test]
+    fn ordinary_multiline_mail_is_durable_and_preserves_the_body_verbatim() {
+        let suffix = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system clock should be after unix epoch")
+            .as_nanos();
+        let dir = std::env::temp_dir().join(format!(
+            "mir2-mail-multiline-unit-{}-{suffix}",
+            std::process::id()
+        ));
+        let path = dir.join("accounts.json");
+        let config = SimulationConfig::default().with_account_store_path(path.clone());
+        deliver_stage5_system_mail(
+            &config,
+            Stage5MailDelivery {
+                target_kind: Stage5MailTargetKind::Character,
+                target_id: "Scout".to_string(),
+                from: "System".to_string(),
+                subject: "Fixture".to_string(),
+                body: "fixture".to_string(),
+                gold: 0,
+                items: Vec::new(),
+            },
+        )
+        .expect("temporary mail fixture should persist");
+
+        let message = "first line\r\nsecond line\nthird line".to_string();
+        let mut session = start_test_session(config);
+        let packets = session.handle_packet(ClientPacket::SendMail {
+            name: "Scout".to_string(),
+            message: message.clone(),
+            gold: 0,
+            items_idx: [0; 5],
+            stamped: false,
+        });
+        assert!(packets.iter().any(
+            |packet| matches!(packet, ServerPacket::MailSent { result: 1 })
+        ));
+        assert!(packets.iter().any(|packet| {
+            matches!(packet, ServerPacket::ReceiveMail { mail }
+                if mail.iter().any(|entry| entry.sender_name == "Scout" && entry.message == message))
+        }));
+        drop(session);
+
+        let reloaded = start_test_session(SimulationConfig::default().with_account_store_path(path));
+        assert!(reloaded
+            .world_snapshot()
+            .stage5_systems
+            .mail
+            .iter()
+            .any(|mail| mail.from == "Scout" && mail.body == message));
+        drop(reloaded);
+        let _ = std::fs::remove_dir_all(dir);
     }
 
     #[test]

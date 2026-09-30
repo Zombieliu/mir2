@@ -1,0 +1,264 @@
+{
+  "traceFile": "C:\\mir2-protocol-journey-20260911\\Wizard.2026-09-15T21-34-23-672Z.trace.jsonl",
+  "sampleCutoff": {
+    "bytes": 10898339,
+    "lines": 8985,
+    "lastSequence": 8985,
+    "lastAt": "2026-09-15T21:52:12.049Z",
+    "sha256": "618967F80C6BB7020819784066119525B70C703ED5949911C58A651E20042A48"
+  },
+  "rawMpBeforeFirstUse": {
+    "snapshotSeq": 4325,
+    "at": "2026-09-15T21:42:38.176Z",
+    "mp": 115,
+    "maxMp": 398
+  },
+  "potionUseItem": [
+    {
+      "sentSeq": 4330,
+      "sentAt": "2026-09-15T21:42:38.885Z",
+      "uniqueId": 20,
+      "ackSeq": 4331,
+      "ackAt": "2026-09-15T21:42:39.169Z",
+      "ackPacket": "UseItem"
+    },
+    {
+      "sentSeq": 4348,
+      "sentAt": "2026-09-15T21:42:42.984Z",
+      "uniqueId": 20,
+      "ackSeq": 4349,
+      "ackAt": "2026-09-15T21:42:43.260Z",
+      "ackPacket": "UseItem"
+    },
+    {
+      "sentSeq": 4569,
+      "sentAt": "2026-09-15T21:43:01.645Z",
+      "uniqueId": 20,
+      "ackSeq": 4570,
+      "ackAt": "2026-09-15T21:43:01.979Z",
+      "ackPacket": "UseItem"
+    },
+    {
+      "sentSeq": 4678,
+      "sentAt": "2026-09-15T21:43:10.498Z",
+      "uniqueId": 20,
+      "ackSeq": 4679,
+      "ackAt": "2026-09-15T21:43:10.781Z",
+      "ackPacket": "UseItem"
+    },
+    {
+      "sentSeq": 4753,
+      "sentAt": "2026-09-15T21:43:20.155Z",
+      "uniqueId": 20,
+      "ackSeq": 4754,
+      "ackAt": "2026-09-15T21:43:20.556Z",
+      "ackPacket": "UseItem"
+    }
+  ],
+  "ownedManaPercentPackets": [
+    {
+      "seq": 4339,
+      "at": "2026-09-15T21:42:40.145Z",
+      "percent": 31
+    },
+    {
+      "seq": 4341,
+      "at": "2026-09-15T21:42:40.242Z",
+      "percent": 33
+    },
+    {
+      "seq": 4343,
+      "at": "2026-09-15T21:42:40.391Z",
+      "percent": 36
+    },
+    {
+      "seq": 4345,
+      "at": "2026-09-15T21:42:40.480Z",
+      "percent": 38
+    }
+  ],
+  "lastRelevantSnapshot": {
+    "seq": 5297,
+    "at": "2026-09-15T21:44:09.593Z",
+    "map": "11",
+    "x": 40,
+    "y": 314,
+    "hp": 100,
+    "mp": 190,
+    "maxMp": 398,
+    "mpItems": []
+  },
+  "snapshots": [
+    {
+      "seq": 4325,
+      "at": "2026-09-15T21:42:38.176Z",
+      "map": "D2031",
+      "x": 278,
+      "y": 279,
+      "hp": 100,
+      "mp": 115,
+      "maxMp": 398,
+      "mpItems": []
+    },
+    {
+      "seq": 4332,
+      "at": "2026-09-15T21:42:39.260Z",
+      "map": "D2031",
+      "x": 278,
+      "y": 279,
+      "hp": 100,
+      "mp": 115,
+      "maxMp": 398,
+      "mpItems": []
+    },
+    {
+      "seq": 4350,
+      "at": "2026-09-15T21:42:43.340Z",
+      "map": "D2031",
+      "x": 278,
+      "y": 279,
+      "hp": 100,
+      "mp": 155,
+      "maxMp": 398,
+      "mpItems": []
+    },
+    {
+      "seq": 4564,
+      "at": "2026-09-15T21:43:00.950Z",
+      "map": "D2031",
+      "x": 272,
+      "y": 279,
+      "hp": 100,
+      "mp": 115,
+      "maxMp": 398,
+      "mpItems": []
+    },
+    {
+      "seq": 4573,
+      "at": "2026-09-15T21:43:02.059Z",
+      "map": "D2031",
+      "x": 272,
+      "y": 279,
+      "hp": 100,
+      "mp": 115,
+      "maxMp": 398,
+      "mpItems": []
+    },
+    {
+      "seq": 4599,
+      "at": "2026-09-15T21:43:03.529Z",
+      "map": "D2031",
+      "x": 272,
+      "y": 279,
+      "hp": 100,
+      "mp": 145,
+      "maxMp": 398,
+      "mpItems": []
+    },
+    {
+      "seq": 4671,
+      "at": "2026-09-15T21:43:09.811Z",
+      "map": "D2031",
+      "x": 272,
+      "y": 279,
+      "hp": 100,
+      "mp": 115,
+      "maxMp": 398,
+      "mpItems": []
+    },
+    {
+      "seq": 4680,
+      "at": "2026-09-15T21:43:10.866Z",
+      "map": "D2031",
+      "x": 272,
+      "y": 279,
+      "hp": 100,
+      "mp": 115,
+      "maxMp": 398,
+      "mpItems": []
+    },
+    {
+      "seq": 4756,
+      "at": "2026-09-15T21:43:20.635Z",
+      "map": "D2031",
+      "x": 257,
+      "y": 259,
+      "hp": 100,
+      "mp": 150,
+      "maxMp": 398,
+      "mpItems": []
+    },
+    {
+      "seq": 5216,
+      "at": "2026-09-15T21:43:56.156Z",
+      "map": "D2031",
+      "x": 254,
+      "y": 254,
+      "hp": 100,
+      "mp": 190,
+      "maxMp": 398,
+      "mpItems": []
+    },
+    {
+      "seq": 5297,
+      "at": "2026-09-15T21:44:09.593Z",
+      "map": "11",
+      "x": 40,
+      "y": 314,
+      "hp": 100,
+      "mp": 190,
+      "maxMp": 398,
+      "mpItems": []
+    }
+  ],
+  "postExhaustionExit": {
+    "runSeq": 5217,
+    "runAt": "2026-09-15T21:43:56.184Z",
+    "mapTransitions": [
+      {
+        "seq": 5288,
+        "at": "2026-09-15T21:44:09.426Z",
+        "map": "11"
+      },
+      {
+        "seq": 5593,
+        "at": "2026-09-15T21:45:10.897Z",
+        "map": "1"
+      },
+      {
+        "seq": 7122,
+        "at": "2026-09-15T21:48:34.193Z",
+        "map": "0"
+      }
+    ]
+  },
+  "q89AtLastD2031Snapshot": {
+    "current": 8,
+    "stage": "inProgress",
+    "objectives": [
+      {
+        "current": 2,
+        "done": false,
+        "label": "Kill CursedPriest",
+        "required": 3
+      },
+      {
+        "current": 3,
+        "done": true,
+        "label": "Kill ShiZombie",
+        "required": 3
+      },
+      {
+        "current": 3,
+        "done": true,
+        "label": "Kill CursedZombie",
+        "required": 3
+      }
+    ]
+  },
+  "interpretation": {
+    "useItemSuccessEvidence": "Each sent useItem uniqueId20 has immediate received UseItem acknowledgement.",
+    "restockCause": "Not directly proven by this trace alone; only the observed resource depletion and subsequent map exit are factual.",
+    "cutoffIsNotFinal": true
+  }
+}

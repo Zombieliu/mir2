@@ -1,0 +1,84 @@
+{
+  "traceFile": "C:\\mir2-protocol-journey-20260911\\Wizard.2026-09-15T22-33-23-712Z.trace.jsonl",
+  "sampleCutoff": {
+    "bytes": 2692207,
+    "lines": 2832,
+    "lastSequence": 2832,
+    "lastAt": "2026-09-15T22:39:28.052Z",
+    "sha256": "9480386537A92E4FE9CA3B7DF9481AB104CAB1364C8B811A99C7C80EAD52C7EA",
+    "activeSample": true
+  },
+  "character": {
+    "name": "JWdebac6d4",
+    "class": "Wizard",
+    "level": 25
+  },
+  "readyState": {
+    "seq": 555,
+    "at": "2026-09-15T22:33:26.194Z",
+    "map": "D2031",
+    "position": {
+      "x": 271,
+      "y": 279
+    },
+    "gold": 221,
+    "quest": {
+      "id": 62,
+      "name": "Exterminate",
+      "stage": "readyToTurnIn",
+      "current": 2,
+      "required": 2,
+      "objectives": [
+        {
+          "label": "Kill KekTal",
+          "current": 1,
+          "required": 1
+        },
+        {
+          "label": "Kill VioletKekTal",
+          "current": 1,
+          "required": 1
+        }
+      ]
+    }
+  },
+  "normalTravel": [
+    {
+      "seq": 573,
+      "at": "2026-09-15T22:33:29.924Z",
+      "map": "11"
+    },
+    {
+      "seq": 888,
+      "at": "2026-09-15T22:34:32.617Z",
+      "map": "1"
+    }
+  ],
+  "finishNpc": {
+    "seq": 1438,
+    "at": "2026-09-15T22:36:02.284Z",
+    "name": "Master_Shok",
+    "objectId": 461,
+    "location": {
+      "x": 312,
+      "y": 73
+    }
+  },
+  "finish": {
+    "sentSeq": 1456,
+    "at": "2026-09-15T22:36:03.204Z",
+    "type": "finishQuest",
+    "changeQuestSeq": 1457,
+    "completeQuestAckSeq": 1458,
+    "postSnapshotSeq": 1459,
+    "postSnapshotAt": "2026-09-15T22:36:04.236Z",
+    "goldBefore": 221,
+    "goldAfter": 971,
+    "goldDelta": 750,
+    "stageAfter": "completed",
+    "questId": 62,
+    "current": 2,
+    "required": 2
+  },
+  "denominatorBoundary": "q62 funding turn-in is outside the 55 mandatory quest denominator and adds no new mandatory progress unit."
+}

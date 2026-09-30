@@ -1,0 +1,7 @@
+
+running 2 tests
+test routing::tests::owner_packet_normalization_tests::owner_combat_results_rebase_only_the_exact_owner_zone_identity ... ok
+test routing::tests::owner_packet_normalization_tests::owner_magic_packets_rebase_caster_and_self_targets_without_rewriting_remote_actors ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 790 filtered out; finished in 1.46s
+

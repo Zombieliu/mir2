@@ -23,6 +23,10 @@ pub(crate) use hero_registry_scan::validate_shared_hero_physical_custody;
 pub(crate) use hero_registry_validation::validate_shared_hero_carriers;
 mod hero_stats;
 mod inventory;
+#[cfg(test)]
+mod storage_rental_tests;
+#[cfg(test)]
+mod equipment_storage_merge_tests;
 mod item_custody;
 mod item_sets;
 mod items;
@@ -74,7 +78,8 @@ pub use npc_script::CrystalNpcSavedValue as SharedNpcSavedValue;
 pub use packets::{ChatPacketPreparation, PreparedChatPacket};
 pub use save::{reset_account_password_after_recovery, validate_commercial_identity_credentials};
 pub use session::{
-    ActiveSessionIdentity, PasskeyRecoveryPreflight, SharedItemRentalAgreement,
+    ActiveSessionIdentity, LocalPlayerVitalsSnapshot, PasskeyRecoveryPreflight,
+    SharedItemRentalAgreement,
     SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
     SharedSkillItemConsumptionComponent, SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
 };
@@ -88,7 +93,8 @@ pub use zone::{
     ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
     ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
-    ZoneVitalSettlement,
+    ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
+    ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(
@@ -150,6 +156,9 @@ mod intelligent_creatures;
 
 #[cfg(test)]
 mod intelligent_creature_item_tests;
+
+#[cfg(test)]
+mod session_lightweight_snapshot_tests;
 
 mod shared_guild_experience;
 pub use shared_guild_experience::SharedMonsterKillCommitFailure;

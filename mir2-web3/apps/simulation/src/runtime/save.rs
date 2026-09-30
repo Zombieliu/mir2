@@ -94,6 +94,10 @@ pub(super) fn default_save_for_character(
     save.map_file_name = config.map.file_name.clone();
     save.map_title = config.map.title.clone();
     save.direction = MirDirection::Down;
+    save.bind_point = Some(crate::config::CharacterBindPoint {
+        map_file_name: config.map.file_name.clone(),
+        position: config.spawn.clone(),
+    });
     save.hp = max_hp;
     save.max_hp = max_hp;
     save.mp = mp;
@@ -152,6 +156,78 @@ where
         .collect()
 }
 
+const DURABLE_SKILL_CLOCK_SCHEMA: u8 = 1;
+const SKILL_CLOCK_METADATA_KEY: &str = "_runtimeCooldownClock";
+
+#[derive(Debug, Clone, Copy, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct DurableSkillClock {
+    schema: u8,
+    saved_at_unix_ms: u64,
+    remaining_ms: u64,
+}
+
+fn encode_durable_skill_states(skills: &[SkillState], tick: u64, now_ms: u64) -> Vec<String> {
+    skills
+        .iter()
+        .map(|skill| {
+            let mut value = serde_json::to_value(skill).expect("skill state should serialize");
+            let remaining_ticks = skill
+                .cooldown_ends_at
+                .saturating_sub(tick)
+                .min(u64::from(skill.cooldown_ticks));
+            let saved_at_unix_ms = if remaining_ticks == 0 { 0 } else { now_ms };
+            value
+                .as_object_mut()
+                .expect("skill state should serialize as an object")
+                .insert(
+                    SKILL_CLOCK_METADATA_KEY.to_string(),
+                    serde_json::json!({
+                        "schema": DURABLE_SKILL_CLOCK_SCHEMA,
+                        "savedAtUnixMs": saved_at_unix_ms,
+                        "remainingMs": remaining_ticks.saturating_mul(1_000),
+                    }),
+                );
+            serde_json::to_string(&value).expect("skill state should serialize")
+        })
+        .collect()
+}
+
+fn decode_durable_skill_states(
+    items: &[String],
+) -> Option<Vec<(SkillState, Option<DurableSkillClock>)>> {
+    items
+        .iter()
+        .map(|item| {
+            let value = serde_json::from_str::<serde_json::Value>(item).ok()?;
+            let skill = serde_json::from_value::<SkillState>(value.clone()).ok()?;
+            let clock = match value.get(SKILL_CLOCK_METADATA_KEY) {
+                Some(metadata) => {
+                    let clock = serde_json::from_value::<DurableSkillClock>(metadata.clone()).ok()?;
+                    (clock.schema == DURABLE_SKILL_CLOCK_SCHEMA).then_some(clock)
+                }
+                None => None,
+            };
+            Some((skill, clock))
+        })
+        .collect()
+}
+
+fn rebased_durable_cooldown_ticks(
+    cooldown_ticks: u32,
+    clock: Option<DurableSkillClock>,
+    now_ms: u64,
+) -> u64 {
+    let Some(clock) = clock else {
+        return 0;
+    };
+    clock
+        .remaining_ms
+        .saturating_sub(now_ms.saturating_sub(clock.saved_at_unix_ms))
+        .div_ceil(1_000)
+        .min(u64::from(cooldown_ticks))
+}
+
 pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterSaveRecord> {
     let resources = world.resource::<InventoryResource>();
     let hero_inventory = world.resource::<HeroInventoryResource>();
@@ -181,6 +257,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         map_title: map.current_map.title.clone(),
         position,
         direction,
+        bind_point: player_runtime.bind_point.clone(),
         hp: vitals.hp,
         max_hp: vitals.max_hp,
         mp: vitals.mp,
@@ -209,7 +286,11 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         equipment_items_json: encode_state_vec(&resources.equipment_items),
         equipment_items_explicit_empty: resources.equipment_items.is_empty(),
         quest_states_json: encode_state_vec(&quests.quests),
-        skill_states_json: encode_state_vec(&skills.skills),
+        skill_states_json: encode_durable_skill_states(
+            &skills.skills,
+            runtime_tick(world),
+            unix_now_ms(),
+        ),
         buff_states_json: encode_state_vec(&buffs.buffs),
         npc_flag_states_json: encode_state_vec(&npc_state.npc_flags),
         npc_saved_values_json: encode_state_vec(&npc_state.npc_saved_values),
@@ -425,7 +506,17 @@ impl SimulationSession {
     /// Capture the exact durable private state for the active character without
     /// mutating the configured account store.
     pub fn active_character_checkpoint(&self) -> Option<CharacterSaveRecord> {
-        snapshot_active_character_save(self.app.world())
+        let mut save = snapshot_active_character_save(self.app.world())?;
+        // Transaction rollback remains in the same runtime clock domain. Keep
+        // its exact deadline instead of the wall-clock durable representation.
+        save.skill_states_json = encode_state_vec(
+            &self
+                .app
+                .world()
+                .resource::<SkillResource>()
+                .skills,
+        );
+        Some(save)
     }
 
     /// Restore the active character's durable private state after journal
@@ -451,7 +542,11 @@ impl SimulationSession {
         }
 
         let replay_tick = runtime_tick(self.app.world());
-        apply_character_save(self.app.world_mut(), save)?;
+        apply_character_save_with_timing(
+            self.app.world_mut(),
+            save,
+            SkillTimingRestore::PreserveSameSession,
+        )?;
         refresh_runtime_map_collision(self.app.world_mut());
         refresh_storage_password_state(self.app.world_mut());
         rebuild_world(self.app.world_mut());
@@ -473,6 +568,10 @@ impl SimulationSession {
 #[cfg(test)]
 #[path = "save_fail_closed_tests.rs"]
 mod save_fail_closed_tests;
+
+#[cfg(test)]
+#[path = "skill_cooldown_restore_tests.rs"]
+mod skill_cooldown_restore_tests;
 
 pub(super) fn refresh_active_external_mail(world: &mut World) -> bool {
     let (config, account_id, selected_character) = {
@@ -1748,6 +1847,10 @@ pub(super) fn crystal_new_character_save(
     };
     let mut save = CharacterSaveRecord::new(character);
     save.max_experience = config.experience_required_for_level(save.character.level);
+    save.bind_point = Some(crate::config::CharacterBindPoint {
+        map_file_name: config.map.file_name.clone(),
+        position: config.spawn.clone(),
+    });
     save.gold = 0;
     save.inventory_items_json = if crystal_starter_loadout {
         encode_state_vec(&crystal_start_inventory_items(&save.character))
@@ -2386,7 +2489,7 @@ struct DecodedCharacterSavePreflight {
     equipment_items: Vec<EquipmentState>,
     hero_inventory: HeroInventoryResource,
     quest_states: Vec<QuestState>,
-    skill_states: Vec<SkillState>,
+    skill_states: Vec<(SkillState, Option<DurableSkillClock>)>,
     buff_states: Vec<BuffState>,
     stage5_systems: Stage5SystemsState,
     npc_buy_back_items: Vec<NpcBuyBackState>,
@@ -2413,7 +2516,7 @@ fn decode_and_validate_character_save(
         .ok_or_else(|| "failed to decode buff state".to_string())?;
     let quest_states = decode_state_vec::<QuestState>(&save.quest_states_json)
         .ok_or_else(|| "failed to decode quest state".to_string())?;
-    let skill_states = decode_state_vec::<SkillState>(&save.skill_states_json)
+    let skill_states = decode_durable_skill_states(&save.skill_states_json)
         .ok_or_else(|| "failed to decode skill state".to_string())?;
     let mut stage5_systems = decode_and_validate_stage5_systems(save)?;
     if super::item_custody::reserved_ids(&stage5_systems)?.iter().any(|id|hero_ids.contains(id)) {
@@ -2447,6 +2550,20 @@ pub(super) fn apply_character_save(
     world: &mut World,
     save: &CharacterSaveRecord,
 ) -> Result<(), String> {
+    apply_character_save_with_timing(world, save, SkillTimingRestore::ResetForNewSession)
+}
+
+#[derive(Clone, Copy)]
+enum SkillTimingRestore {
+    ResetForNewSession,
+    PreserveSameSession,
+}
+
+fn apply_character_save_with_timing(
+    world: &mut World,
+    save: &CharacterSaveRecord,
+    skill_timing_restore: SkillTimingRestore,
+) -> Result<(), String> {
     let DecodedCharacterSavePreflight {
         inventory_items,
         belt_items,
@@ -2460,6 +2577,25 @@ pub(super) fn apply_character_save(
         npc_buy_back_items,
         npc_used_goods_items,
     } = decode_and_validate_character_save(save)?;
+    let now_ms = unix_now_ms();
+    let skill_states = skill_states
+        .into_iter()
+        .map(|(mut skill, durable_clock)| {
+            if matches!(skill_timing_restore, SkillTimingRestore::ResetForNewSession) {
+                // Crystal persists the remaining delay across a normal logout
+                // and rebases CastTime on login. Old saves have no clock marker;
+                // treating their absolute deadline as expired matches Crystal's
+                // database-load reset and prevents an uptime-sized cooldown.
+                skill.cooldown_ends_at = rebased_durable_cooldown_ticks(
+                    skill.cooldown_ticks,
+                    durable_clock,
+                    now_ms,
+                );
+                skill.cast_time_ms = 0;
+            }
+            skill
+        })
+        .collect();
     super::refine_oven::restore_timer(&mut stage5_systems.refine)?;
     let mut custody_ids = super::item_custody::reserved_ids(&stage5_systems)?;
     for id in super::hero_inventory::validate_hero_custody(&hero_inventory)? {
@@ -2565,6 +2701,12 @@ pub(super) fn apply_character_save(
             save.position.clone()
         };
         player_runtime.player_direction = save.direction;
+        player_runtime.bind_point = save.bind_point.clone().or_else(|| {
+            Some(crate::config::CharacterBindPoint {
+                map_file_name: config.map.file_name.clone(),
+                position: config.spawn.clone(),
+            })
+        });
         let restored_max_mp = if save.max_mp > 0 {
             save.max_mp
         } else {
@@ -2590,6 +2732,13 @@ pub(super) fn apply_character_save(
         player_runtime.chat_ban_until_ms = save.chat_ban_until_ms;
         player_runtime.chat_next_allowed_at_ms = 0;
         player_runtime.chat_spam_tick = 0;
+    }
+    // Old saves did not persist BindMapIndex/BindLocation. If the character
+    // logged out inside an imported safe area, recover the binding from that
+    // observed position instead of silently retaining the starter village.
+    if save.bind_point.is_none() {
+        let position = world.resource::<PlayerRuntimeResource>().player_position.clone();
+        super::map::refresh_player_bind_at_position(world, &position);
     }
     super::shared_guild_experience::restore(world, &save.guild_experience_journal);
     *world.resource_mut::<InventoryResource>() = restored_inventory;
@@ -2626,6 +2775,7 @@ pub(super) fn apply_character_save(
         queue.pending_movement_command = None;
     }
     world.resource_mut::<QuestResource>().quests = quest_states;
+    super::quests::reconcile_effective_quest_states(world);
     world.resource_mut::<SkillResource>().skills = skill_states;
     world.resource_mut::<BuffResource>().buffs = buff_states;
     {
@@ -3702,6 +3852,36 @@ impl SimulationSession {
             spawn_config_visible_npcs(self.app.world_mut());
         }
 
+        self.build_active_character_bootstrap(&character)
+    }
+
+    /// Internal gateway replay after an authenticated connection takes custody
+    /// of its retained character. Ordinary in-game StartGame stays rejected.
+    pub(crate) fn replay_active_character_bootstrap(
+        &mut self,
+        character_index: i32,
+    ) -> Vec<ServerPacket> {
+        let session = self.app.world().resource::<SessionResource>();
+        let Some(account_id) = active_session_mutating_account_id(session) else {
+            return vec![ServerPacket::StartGame { result: 1, resolution: 0 }];
+        };
+        let Some(character) = session.selected_character.clone()
+            .filter(|character| character.index == character_index) else {
+            return vec![ServerPacket::StartGame { result: 2, resolution: 0 }];
+        };
+        let config = &self.app.world().resource::<RuntimeConfigResource>().config;
+        if let Some(ban) = active_account_ban(config, &account_id) {
+            return vec![ServerPacket::StartGameBanned {
+                reason: ban.reason,
+                expiry_binary_datetime: ban.ban_until_ms.unwrap_or_default() as i64,
+            }];
+        }
+        let mut packets = self.build_active_character_bootstrap(&character);
+        super::packets::apply_start_game_dynamic_game_shop_stock(self.app.world(), &mut packets);
+        packets
+    }
+
+    fn build_active_character_bootstrap(&mut self, character: &CharacterRecord) -> Vec<ServerPacket> {
         let visible_objects = collect_visible_objects(self.app.world());
         self.visible_objects = visible_objects.keys().copied().collect();
 
@@ -3800,7 +3980,13 @@ impl SimulationSession {
         ]);
         packets.extend(effective_crystal_quest_info_packets(self.app.world()));
         packets.extend(start_game_recipe_info_packets(&mut sent_item_info_indices));
-        packets.extend(start_game_account_social_and_shop_packets());
+        packets.extend(start_game_account_social_and_shop_packets().into_iter().map(|packet| {
+            if matches!(packet, ServerPacket::ReceiveMail { .. }) {
+                super::packets::stage5_receive_mail_packet(self.app.world())
+            } else {
+                packet
+            }
+        }));
         packets.extend(start_game_base_stats_packet(character.class));
         let npc_flags = self
             .app
