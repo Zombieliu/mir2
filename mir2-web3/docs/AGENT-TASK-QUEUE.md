@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-10-01 Android integration CI repair: `e98a640c5` minimally synchronizes
+> Windows dependency lock after Android GLES wiring; existing package versions
+> remain pinned. `e95cef74c` applies exact CI Rust formats to200 files, with200
+> independent original-content formatter comparisons and zero mismatches.
+> Relevant format/locked-metadata checks and core12/shared-default171/runtime288
+> pass (one existing runtime ignore); WASM compile/shared-native1164/Android202
+> also pass, retaining7 native ignores and overlapping suite boundaries.
+> No workflow, Web audit, game rule, save,
+> deployment or UI redesign change. Existing APKs remain source `8d50cb8a3`;
+> phone HUD/chat/actions, approved online/device gates and remote rerun results
+> remain distinct. [CI scope/evidence](generated/player-qa/native-android-ci-sync-20261001/README.md).
+
 > 2026-10-01 Android integration lane: normal merge `007df76c9` retains Android
 > `5d417ca75` and Windows continuation `4b73525f3` in independent
 > `codex/android-shared-sync`; original dirty checkout/Android branch unchanged.
