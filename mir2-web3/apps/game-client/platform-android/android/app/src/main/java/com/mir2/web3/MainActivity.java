@@ -37,6 +37,7 @@ public final class MainActivity extends GameActivity {
     private final ForegroundRecoveryPolicy recoveryPolicy = new ForegroundRecoveryPolicy();
     private final GatewayHostPolicy gatewayHostPolicy = new GatewayHostPolicy();
     private final NetworkRecoveryPolicy networkRecoveryPolicy = new NetworkRecoveryPolicy();
+    private final EditorBackPolicy editorBackPolicy = new EditorBackPolicy();
     private ConnectivityManager connectivity;
     private ConnectivityManager.NetworkCallback networkCallback;
     private GatewaySession session;
@@ -251,6 +252,7 @@ public final class MainActivity extends GameActivity {
     // still gets first refusal; only a tracked, uncancelled key-up cancels UI.
     @Override public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            editorBackPolicy.onKeyDown(!editing.isEmpty() || imeWasVisible, event.getRepeatCount());
             if (event.getRepeatCount() == 0) event.startTracking();
             return true;
         }
@@ -259,14 +261,17 @@ public final class MainActivity extends GameActivity {
 
     @Override public boolean onKeyUp(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (event.isTracking() && !event.isCanceled()) onBackPressed();
+            EditorBackPolicy.Action action = editorBackPolicy.onKeyUp(
+                    event.isTracking(), event.isCanceled(), !editing.isEmpty() || imeWasVisible);
+            if (action == EditorBackPolicy.Action.DISMISS_EDITOR) hideKeyboard();
+            else if (action == EditorBackPolicy.Action.BACK_TO_SHARED_UI) onBackPressed();
             return true;
         }
         return super.onKeyUp(keyCode, event);
     }
 
     @Override public void onBackPressed() {
-        if (!editing.isEmpty()) { hideKeyboard(); return; }
+        if (!editing.isEmpty() || imeWasVisible) { hideKeyboard(); return; }
         nativeEvent(GatewaySession.object("type", "back").toString());
     }
 
@@ -280,6 +285,7 @@ public final class MainActivity extends GameActivity {
     }
     @Override protected void onStop() {
         foreground = false;
+        editorBackPolicy.reset();
         handler.removeCallbacks(pump);
         nativeEvent(GatewaySession.object("type", "lifecycle", "state", "pause").toString());
         hideKeyboard();
