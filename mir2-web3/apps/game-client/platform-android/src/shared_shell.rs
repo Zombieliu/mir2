@@ -499,6 +499,7 @@ impl Plugin for AndroidSharedShellPlugin {
                     forward_intents,
                     forward_quest_ui_intents,
                     discard_inactive_player_commands,
+                    keep_android_ime_owned_by_host,
                     keyboard,
                 )
                     .chain()
@@ -2100,6 +2101,18 @@ fn discard_inactive_player_commands(
     }
 }
 
+/// Shared desktop editors request Winit IME in Update. On Android that request
+/// focuses GameActivity's SurfaceView, stealing the input connection from our
+/// field/epoch-guarded Java EditText. Keep Winit IME disabled before its Last
+/// window sync; the existing Java host is the sole OS input connection owner.
+fn keep_android_ime_owned_by_host(mut windows: Query<&mut Window>) {
+    for mut window in &mut windows {
+        if window.ime_enabled {
+            window.ime_enabled = false;
+        }
+    }
+}
+
 fn keyboard(
     model: Res<NativeShellModel>,
     mut host: ResMut<HostState>,
@@ -2176,6 +2189,33 @@ fn keyboard(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn android_host_does_not_let_desktop_ime_steal_its_editor_connection() {
+        let mut app = App::new();
+        app.init_resource::<HostState>()
+            .add_systems(Update, |mut windows: Query<&mut Window>| {
+                for mut window in &mut windows {
+                    window.ime_enabled = true;
+                }
+            })
+            .add_systems(PostUpdate, super::keep_android_ime_owned_by_host);
+        let window = app.world_mut().spawn(Window::default()).id();
+        let epoch = app
+            .world_mut()
+            .resource_mut::<HostState>()
+            .editor
+            .open("mail-message");
+        for _ in 0..3 {
+            app.update();
+            assert!(!app.world().get::<Window>(window).unwrap().ime_enabled);
+            assert!(app
+                .world()
+                .resource::<HostState>()
+                .editor
+                .accepts(&json!({"field":"mail-message", "editorEpoch":epoch})));
+        }
+    }
+
     #[test]
     fn editor_epoch_rejects_old_callbacks_when_the_same_mail_field_reopens() {
         let mut editor = HostEditorSession::default();
