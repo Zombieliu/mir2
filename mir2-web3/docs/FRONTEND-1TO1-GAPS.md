@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-09-30 nine-language native expansion: en/zh-TW/pt-BR plus ru/hi/id/vi/th/ar;
+> six complete 9,385-key overlays, bundled script fonts, grapheme-safe labels,
+> fixed language popup/search and measured quest/help layout. Shared 1,153,
+> native 784 and Node 14 checks pass; 148 offline GPU captures cover nine locales.
+> Remaining legacy prose includes machine drafts, so native-speaker acceptance
+> is open. Error 4551 on another Windows laptop is a separate public-signing /
+> application-control blocker. Capacity stays paused; no server change.
+> [Evidence and limits](generated/player-qa/native-nine-languages-20260930/README.md).
+
+
 > 2026-09-28 Chinese newcomer/supply flow: 22 main quests, four growth claims,
 > chapter/practice text, quest controls and related shop/item labels display
 > Chinese without changing source IDs. Stock, price estimates, capacity and

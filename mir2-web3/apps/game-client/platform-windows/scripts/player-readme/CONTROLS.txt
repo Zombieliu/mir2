@@ -24,3 +24,57 @@ Combate: clique em um monstro para atacar ou em um NPC para conversar. F1–F8 u
 I abre a mochila, C abre os equipamentos, Enter abre o chat e Q abre as missões. Escolha uma missão para acompanhar.
 Clique no botão de navegação da missão ou em um destino no mapa atual ou minimapa. Fechar o mapa mantém a rota; Esc a interrompe. Na área de caça, selecione os monstros para lutar.
 Troque o idioma na tela de login ou em Opções. Saia normalmente do personagem para salvar o progresso antes de fechar o cliente.
+
+Русский
+
+Вход: введите аккаунт и пароль. Tab / Shift+Tab переключает поля; Enter подтверждает.
+Перемещение: удерживайте левую кнопку мыши на свободной земле для ходьбы, правую — для бега. Также работают WASD / стрелки; удерживайте Shift для бега.
+Бой: щёлкните монстра для атаки или NPC для разговора. F1–F8 применяют назначенные умения; 1–6 используют предметы пояса.
+I открывает сумку, C — снаряжение, Enter — чат, Q — задания. Выберите задание для отслеживания.
+Щёлкните кнопку маршрута в задании или точку на карте текущей области либо мини-карте. Закрытие карты не отменяет маршрут; Esc останавливает его. В области охоты выбирайте монстров для боя самостоятельно.
+Язык меняется на экране входа или в настройках. Перед закрытием клиента выйдите из персонажа обычным способом, чтобы сохранить прогресс.
+
+हिन्दी
+
+लॉगिन: खाता और पासवर्ड भरें। Tab / Shift+Tab से फ़ील्ड बदलें; Enter से पुष्टि करें।
+चलना: खाली जमीन पर बायाँ माउस बटन दबाए रखें; दौड़ने के लिए दायाँ बटन दबाए रखें। WASD / तीर कुंजियाँ भी चलाती हैं; दौड़ने के लिए Shift दबाए रखें।
+लड़ाई: हमला करने के लिए राक्षस पर, बात करने के लिए NPC पर क्लिक करें। F1–F8 निर्धारित कौशल चलाते हैं; 1–6 बेल्ट की वस्तुएँ उपयोग करते हैं।
+I से थैला, C से उपकरण, Enter से चैट और Q से कार्य खुलते हैं। ट्रैक करने के लिए कार्य चुनें।
+कार्य का मार्ग बटन या वर्तमान बड़े मानचित्र अथवा छोटे मानचित्र पर लक्ष्य क्लिक करें। मानचित्र बंद करने पर रास्ता जारी रहता है; Esc उसे रोकता है। शिकार क्षेत्र पहुँचने पर लड़ाई के लिए राक्षस चुनें।
+लॉगिन स्क्रीन या विकल्पों में भाषा बदलें। प्रगति सहेजने के लिए क्लाइंट बंद करने से पहले पात्र से सामान्य रूप से बाहर निकलें।
+
+Bahasa Indonesia
+
+Masuk: isi akun dan kata sandi. Tab / Shift+Tab memindahkan kolom; Enter mengonfirmasi.
+Bergerak: tahan tombol kiri di tanah kosong untuk berjalan, atau tombol kanan untuk berlari. WASD / tombol panah juga menggerakkan karakter; tahan Shift untuk berlari.
+Bertarung: klik monster untuk menyerang atau NPC untuk berbicara. F1–F8 memakai keterampilan yang ditetapkan; 1–6 memakai barang pada sabuk.
+I membuka tas, C membuka perlengkapan, Enter membuka chat, dan Q membuka misi. Pilih misi untuk dilacak.
+Klik tombol navigasi misi atau tujuan di peta area saat ini atau minimap. Menutup peta tidak membatalkan rute; Esc menghentikannya. Di area berburu, pilih monster untuk dilawan.
+Ganti bahasa di layar masuk atau Opsi. Keluar dari karakter secara normal sebelum menutup klien untuk menyimpan kemajuan.
+
+Tiếng Việt
+
+Đăng nhập: nhập tài khoản và mật khẩu. Tab / Shift+Tab đổi ô; Enter xác nhận.
+Di chuyển: giữ nút chuột trái trên đất trống để đi bộ hoặc nút phải để chạy. WASD / phím mũi tên cũng di chuyển; giữ Shift để chạy.
+Chiến đấu: nhấp quái vật để tấn công, nhấp NPC để trò chuyện. F1–F8 dùng kỹ năng đã gán; 1–6 dùng vật phẩm trên đai.
+I mở túi, C mở trang bị, Enter mở chat và Q mở nhiệm vụ. Chọn nhiệm vụ cần theo dõi.
+Nhấp nút tìm đường của nhiệm vụ hoặc đích trên bản đồ khu vực hiện tại hay bản đồ nhỏ. Đóng bản đồ không hủy đường đi; Esc dừng tìm đường. Đến khu săn, hãy chọn quái vật để chiến đấu.
+Đổi ngôn ngữ trên màn hình đăng nhập hoặc trong Tùy chọn. Thoát nhân vật bình thường để lưu tiến độ trước khi đóng máy khách.
+
+ไทย
+
+ลงชื่อเข้าใช้: กรอกบัญชีและรหัสผ่าน ใช้ Tab / Shift+Tab เปลี่ยนช่อง และ Enter ยืนยัน
+เคลื่อนที่: กดปุ่มเมาส์ซ้ายค้างบนพื้นที่ว่างเพื่อเดิน หรือปุ่มขวาเพื่อวิ่ง ใช้ WASD / ปุ่มลูกศรได้เช่นกัน กด Shift ค้างเพื่อวิ่ง
+ต่อสู้: คลิกมอนสเตอร์เพื่อโจมตี หรือคลิก NPC เพื่อคุย F1–F8 ใช้ทักษะที่กำหนดไว้ และ 1–6 ใช้ไอเทมบนเข็มขัด
+I เปิดกระเป๋า C เปิดอุปกรณ์ Enter เปิดแชต และ Q เปิดภารกิจ เลือกภารกิจที่ต้องการติดตาม
+คลิกปุ่มนำทางของภารกิจหรือปลายทางบนแผนที่พื้นที่ปัจจุบันหรือแผนที่ย่อ ปิดแผนที่แล้วยังเดินตามเส้นทางต่อ ใช้ Esc เพื่อหยุด เมื่อถึงพื้นที่ล่าให้เลือกมอนสเตอร์เพื่อต่อสู้
+เปลี่ยนภาษาที่หน้าลงชื่อเข้าใช้หรือเมนูตัวเลือก ออกจากตัวละครตามปกติก่อนปิดไคลเอนต์เพื่อบันทึกความคืบหน้า
+
+العربية
+
+الدخول: أدخل الحساب وكلمة المرور. ينقل Tab / Shift+Tab بين الحقول، ويؤكد Enter الإدخال.
+الحركة: اضغط مطولًا بزر الفأرة الأيسر على أرض خالية للمشي، أو بالزر الأيمن للركض. تعمل WASD / الأسهم أيضًا؛ اضغط Shift مطولًا للركض.
+القتال: انقر وحشًا للهجوم أو NPC للتحدث. تستخدم F1–F8 المهارات المعيّنة، وتستخدم 1–6 أغراض الحزام.
+يفتح I الحقيبة وC المعدات وEnter الدردشة وQ المهام. اختر مهمة لتتبعها.
+انقر زر التوجيه في المهمة أو الوجهة على خريطة المنطقة الحالية أو الخريطة المصغرة. لا يلغي إغلاق الخريطة المسار؛ يوقفه Esc. عند الوصول إلى منطقة الصيد، اختر الوحوش للقتال.
+غيّر اللغة في شاشة الدخول أو الخيارات. اخرج من الشخصية بالطريقة المعتادة لحفظ التقدم قبل إغلاق العميل.

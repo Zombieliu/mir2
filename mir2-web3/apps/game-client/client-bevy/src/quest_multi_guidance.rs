@@ -2,6 +2,7 @@
 use super::*;
 use crate::big_map::BigMapModel;
 use crate::quest_model::QuestStatus;
+use unicode_segmentation::UnicodeSegmentation;
 use unicode_width::UnicodeWidthChar;
 
 // The tracker is 304 px wide, with 282 px of usable content (270 px inside a
@@ -194,7 +195,7 @@ fn objective_lines(quest: &Quest, class_name: &str) -> Vec<String> {
 }
 
 fn card_char_columns(ch: char) -> usize {
-    let width = UnicodeWidthChar::width(ch).unwrap_or(0).max(1);
+    let width = UnicodeWidthChar::width(ch).unwrap_or(0);
     if ch.is_ascii_uppercase() || matches!(ch, 'm' | 'w' | '@' | '#' | '%' | '&') {
         width.max(2)
     } else {
@@ -226,13 +227,13 @@ pub(super) fn wrap_card_text(text: &str) -> Vec<String> {
                     lines.push(std::mem::take(&mut current));
                     width = 0;
                 }
-                for ch in word.chars() {
-                    let char_width = card_char_columns(ch);
+                for grapheme in word.graphemes(true) {
+                    let char_width = card_columns(grapheme);
                     if !current.is_empty() && width + char_width > CARD_WRAP_COLUMNS {
                         lines.push(std::mem::take(&mut current));
                         width = 0;
                     }
-                    current.push(ch);
+                    current.push_str(grapheme);
                     width += char_width;
                 }
             } else {
@@ -259,8 +260,8 @@ fn line(parent: &mut ChildSpawnerCommands, text: impl Into<String>, color: Color
         Node { width: Val::Percent(100.0), height: Val::Px(wrapped.len() as f32 * CARD_LINE_HEIGHT),
             flex_shrink: 0.0, ..default() },
         Text::new(wrapped.join("\n")),
-        TextFont { font: FontSource::Family("Microsoft YaHei".into()), font_size: FontSize::Px(12.0), ..default() },
-        TextColor(color), TextLayout::new(Justify::Left, LineBreak::NoWrap),
+        crate::crystal_ui::typography::crystal_text_font(12.0),
+        TextColor(color), TextLayout::new(Justify::Start, LineBreak::NoWrap),
     ));
 }
 
@@ -614,6 +615,33 @@ mod tests {
         let button_row = world.query::<(&QuestUiButton, &Node)>().iter(&world).next()
             .expect("other-map button");
         assert_eq!(button_row.1.height, Val::Px((card_text_height(other) + 6.0).max(25.0)));
+    }
+
+    #[test]
+    fn forced_line_breaks_preserve_indic_thai_and_combining_graphemes() {
+        for word in [
+            "क्षि".repeat(42),
+            "น้ำ".repeat(42),
+            "a\u{0301}".repeat(80),
+            "اللّغة".repeat(20),
+        ] {
+            let lines = wrap_card_text(&word);
+            assert!(lines.len() > 1);
+            assert_eq!(lines.concat(), word);
+            let valid_boundaries = word
+                .grapheme_indices(true)
+                .map(|(index, _)| index)
+                .chain(std::iter::once(word.len()))
+                .collect::<std::collections::HashSet<_>>();
+            let mut end = 0;
+            for line in &lines {
+                end += line.len();
+                assert!(
+                    valid_boundaries.contains(&end),
+                    "split a shaping cluster in {word:?}"
+                );
+            }
+        }
     }
 
     #[test]

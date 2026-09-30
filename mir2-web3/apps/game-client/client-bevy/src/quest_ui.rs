@@ -228,6 +228,21 @@ pub fn quest_detail_layout(scale: f32) -> QuestDetailLayout {
     }
 }
 
+fn quest_detail_rendered_title_rect(layout: QuestDetailLayout, localized: bool) -> QuestLogRect {
+    if !localized {
+        return layout.title;
+    }
+    // Title/16's 55 px is the original bitmap width, not the available
+    // heading space. This detail window has no diary count/chapter in its
+    // header. Use the empty strip up to the close button, keeping its
+    // hitbox and every body/reward rectangle in the Crystal layout intact.
+    let scale = layout.frame.width / QUEST_DETAIL_DESIGN_WIDTH;
+    QuestLogRect {
+        width: layout.top_close.left - layout.title.left - 8.0 * scale,
+        ..layout.title
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct QuestListLayout {
     pub frame: QuestLogRect,
@@ -4967,7 +4982,12 @@ fn render_quest_detail_panel(
     let max_top = lines.len().saturating_sub(QUEST_DETAIL_LINE_COUNT);
     let scroll_top = state.detail_scroll_top.min(max_top);
 
-    quest_log_image_at(parent, asset_server, QUEST_DETAIL_TITLE_ASSET, layout.title);
+    quest_log_image_at(
+        parent,
+        asset_server,
+        QUEST_DETAIL_TITLE_ASSET,
+        quest_detail_rendered_title_rect(layout, crate::native_i18n::active()),
+    );
     quest_log_image_button_at(
         parent,
         asset_server,
@@ -6191,16 +6211,19 @@ fn stat_bar(parent: &mut ChildSpawnerCommands, label: &str, ratio: f32, fill_col
 }
 
 fn truncate_display_columns(text: &str, columns: usize) -> String {
+    use unicode_segmentation::UnicodeSegmentation;
     use unicode_width::UnicodeWidthChar;
-    let width = |ch: char| UnicodeWidthChar::width(ch).unwrap_or(0);
-    if text.chars().map(width).sum::<usize>() <= columns { return text.to_owned(); }
+    let width = |grapheme: &str| {
+        grapheme.chars().map(|ch| UnicodeWidthChar::width(ch).unwrap_or(0)).sum::<usize>()
+    };
+    if text.graphemes(true).map(width).sum::<usize>() <= columns { return text.to_owned(); }
     let budget = columns.saturating_sub(1);
     let mut result = String::new();
     let mut used = 0;
-    for ch in text.chars() {
-        let next = width(ch);
+    for grapheme in text.graphemes(true) {
+        let next = width(grapheme);
         if used + next > budget { break; }
-        result.push(ch);
+        result.push_str(grapheme);
         used += next;
     }
     if columns > 0 { result.push('…'); }
@@ -6498,6 +6521,83 @@ mod tests {
                 assert!(short.chars().map(|c| unicode_width::UnicodeWidthChar::width(c).unwrap_or(0)).sum::<usize>() <= 12);
                 assert!(!full.contains("WRONG"));
             });
+        }
+    }
+
+    #[test]
+    fn localized_detail_title_uses_only_the_unused_header_strip() {
+        for scale in [1.0, 1.25, 1.5] {
+            let layout = quest_detail_layout(scale);
+            assert_eq!(quest_detail_rendered_title_rect(layout, false), layout.title);
+            let title = quest_detail_rendered_title_rect(layout, true);
+            assert_eq!(
+                title,
+                QuestLogRect::new(18.0 * scale, 9.0 * scale, 263.0 * scale, 17.0 * scale)
+            );
+            assert_eq!(title.left + title.width + 8.0 * scale, layout.top_close.left);
+            assert!(title.top + title.height < layout.message.top);
+            // The original source geometry remains available unchanged for
+            // non-native hosts and the Crystal parity geometry assertions.
+            assert_eq!(layout.title.width, 55.0 * scale);
+            assert_eq!(layout.top_close.left, 289.0 * scale);
+        }
+    }
+
+    #[test]
+    fn native_detail_title_renders_the_full_caption_in_all_nine_languages() {
+        for locale in crate::native_i18n::Locale::ALL {
+            crate::native_i18n::with_locale(locale, || {
+                let expected = crate::player_text::text("任务详情");
+                let mut world = World::new();
+                let mut queue = bevy::ecs::world::CommandQueue::default();
+                Commands::new(&mut queue, &world).spawn(Node::default()).with_children(|parent| {
+                    render_quest_detail_panel(
+                        parent,
+                        &quest(99, QuestStatus::InProgress),
+                        &QuestGuidance::from_profile_name(""),
+                        &QuestUiState::default(),
+                        &PendingOperations::default(),
+                        None,
+                        &crate::read_model::PlayerStats::default(),
+                    );
+                });
+                queue.apply(&mut world);
+                let mut query = world.query::<(&Text, &Node, &TextFont)>();
+                let titles: Vec<_> = query.iter(&world).filter(|(_, node, _)| {
+                    node.left == Val::Px(18.0) && node.top == Val::Px(9.0)
+                }).collect();
+                assert_eq!(titles.len(), 1, "{}", locale.code());
+                let (text, node, font) = titles[0];
+                assert_eq!(text.0, expected, "{}", locale.code());
+                assert_eq!(node.width, Val::Px(263.0));
+                assert_eq!(node.height, Val::Px(17.0));
+                assert_eq!(font.font_size, FontSize::Px(11.0));
+            });
+        }
+    }
+
+    #[test]
+    fn compact_quest_labels_never_truncate_inside_a_grapheme() {
+        use unicode_segmentation::UnicodeSegmentation;
+        use unicode_width::UnicodeWidthChar;
+        let columns = |text: &str| {
+            text.chars().map(|ch| UnicodeWidthChar::width(ch).unwrap_or(0)).sum::<usize>()
+        };
+        for cluster in ["क्षि", "กิ้", "a\u{0301}", "👩\u{200d}💻", "ن\u{0651}"] {
+            let text = format!("{cluster}{cluster}XYZ");
+            let boundaries: std::collections::HashSet<_> = text
+                .grapheme_indices(true)
+                .map(|(index, _)| index)
+                .chain(std::iter::once(text.len()))
+                .collect();
+            for budget in 0..=columns(&text) {
+                let shortened = truncate_display_columns(&text, budget);
+                let prefix = shortened.strip_suffix('…').unwrap_or(&shortened);
+                assert!(text.starts_with(prefix));
+                assert!(boundaries.contains(&prefix.len()), "split {cluster:?} at {budget}");
+                assert!(columns(&shortened) <= budget);
+            }
+            assert_eq!(truncate_display_columns(&text, columns(&text)), text);
         }
     }
 

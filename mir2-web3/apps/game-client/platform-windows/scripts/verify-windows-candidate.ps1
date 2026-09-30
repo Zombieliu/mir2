@@ -234,7 +234,7 @@ function Test-PackageRelativeFileAllowed {
     if (Test-CandidateActorFileAllowed -RelativePath $RelativePath) { return $true }
     if($RelativePath -ceq $ExeName){return $true}
     if(Test-PathContainsDangerousDotToken -RelativePath $RelativePath){return $false}
-    $rootFiles=@('mir2-client.toml','README-START.txt','CONTROLS.txt','KNOWN-ISSUES.md','NotoSansTC-OFL.txt','BUILD-ATTESTATION.json','PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s')
+    $rootFiles=@('mir2-client.toml','README-START.txt','CONTROLS.txt','KNOWN-ISSUES.md','NotoSansTC-OFL.txt','OFL-NotoSans.txt','OFL-NotoSansArabic.txt','OFL-NotoSansDevanagari.txt','OFL-NotoSansThai.txt','MULTILINGUAL-SOURCES.json','BUILD-ATTESTATION.json','PACKAGE-MANIFEST.json','VERSION.json','RELEASE-STATEMENT.json','RELEASE-STATEMENT.p7s')
     if($rootFiles -ccontains $RelativePath){return $true};if($RelativePath -ceq 'mir2-assets/original-ui/frame-sets.generated.json'){return $true}
     if($RelativePath.StartsWith('mir2-assets/original-ui/Items/',[StringComparison]::Ordinal)){return $RelativePath.EndsWith('.json',[StringComparison]::OrdinalIgnoreCase)-or$RelativePath.EndsWith('.png',[StringComparison]::OrdinalIgnoreCase)}
     if(@('mir2-assets/original-ui/Sound/005-1.wav','mir2-assets/original-ui/Sound/005-2.wav','mir2-assets/original-ui/Sound/005-3.wav','mir2-assets/original-ui/Sound/60.wav','mir2-assets/original-ui/Sound/61.wav','mir2-assets/original-ui/Sound/62.wav','mir2-assets/original-ui/Sound/63.wav','mir2-assets/original-ui/Sound/64.wav','mir2-assets/original-ui/Sound/65.wav') -ccontains $RelativePath){return $true}
@@ -664,15 +664,35 @@ if ($SelfTest) {
             }
         }
         $unicodeBlockedPath = 'C:\' + ([string][char]0x6784) + ([string][char]0x5EFA) + '\' + ([string][char]0x5BA2) + ([string][char]0x6237) + '.pdb'
+        # Windows PowerShell 5.1 reads a no-BOM script with the active ANSI
+        # code page. Keep these fixtures ASCII in source: on code page 936 a
+        # literal UTF-8 bullet became a '?' and made the test path invalid.
+        # Construct the intended text explicitly; do not relax path matching.
+        $localizedHelp = 'padr' + ([string][char]0x00E3) + 'o:\n' + ([string][char]0x2022) + ' Pac' + ([string][char]0x00ED) + 'fico'
+        $localizedRealPath = 'C:\n' + ([string][char]0x2022) + ' Pac' + ([string][char]0x00ED) + 'fico\client.exe'
+        $localizedHelpUtf8Hex = [BitConverter]::ToString([Text.Encoding]::UTF8.GetBytes($localizedHelp)).Replace('-', '')
+        if ($localizedHelpUtf8Hex -cne '70616472C3A36F3A5C6EE280A220506163C3AD6669636F') {
+            throw 'localized path-scan fixture did not preserve its exact UTF-8 characters and literal newline escape'
+        }
+        $localizedPathUtf8Hex = [BitConverter]::ToString([Text.Encoding]::UTF8.GetBytes($localizedRealPath)).Replace('-', '')
+        if ($localizedPathUtf8Hex -cne '433A5C6EE280A220506163C3AD6669636F5C636C69656E742E657865') {
+            throw 'localized real-path fixture was corrupted by source decoding'
+        }
         foreach ($encoding in @([Text.Encoding]::UTF8, [Text.Encoding]::Unicode)) {
-            $localizedHelp = 'padrão:\n• Pacífico'
             [IO.File]::WriteAllBytes($pathScanFile, $encoding.GetBytes($localizedHelp))
             Assert-NoBuildPathStrings -ExePath $pathScanFile
             # A literal n is also a valid path prefix; never exempt \n globally.
-            foreach ($realPath in @('C:\new-release\client.exe', 'C:\n• Pacífico\client.exe', $unicodeBlockedPath)) {
-                [IO.File]::WriteAllBytes($pathScanFile, $encoding.GetBytes($localizedHelp + [char]0 + $realPath))
-                $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }
-                if (-not $rejected) { throw 'localized prose hid an adjacent real machine path' }
+            foreach ($realPath in @('C:\new-release\client.exe', $localizedRealPath, $unicodeBlockedPath)) {
+                foreach ($pathFirst in @($false, $true)) {
+                    $adjacentText = if ($pathFirst) { $realPath + [char]0 + $localizedHelp } else { $localizedHelp + [char]0 + $realPath }
+                    foreach ($oddPrefix in @($false, $true)) {
+                        $adjacentBytes = $encoding.GetBytes($adjacentText)
+                        if ($oddPrefix) { $adjacentBytes = [byte[]](0) + $adjacentBytes }
+                        [IO.File]::WriteAllBytes($pathScanFile, $adjacentBytes)
+                        $rejected = $false; try { Assert-NoBuildPathStrings -ExePath $pathScanFile } catch { $rejected = $true }
+                        if (-not $rejected) { throw "localized prose hid an adjacent real machine path ($($encoding.WebName), pathFirst=$pathFirst, oddPrefix=$oddPrefix)" }
+                    }
+                }
             }
         }
         Write-Host 'UNICODE_PATH_BOUNDARY_SELFTEST=passed'

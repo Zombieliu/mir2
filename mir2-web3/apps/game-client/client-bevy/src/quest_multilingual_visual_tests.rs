@@ -12,7 +12,7 @@ use crate::quest_model::{
 };
 use crate::read_model::PlayerStats;
 use bevy::ui::UiGlobalTransform;
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use std::{collections::BTreeSet, fs, path::PathBuf};
 
 const WIDTH: f32 = 1024.0;
@@ -21,6 +21,9 @@ const TRACKER_BOTTOM: f32 = 620.0;
 
 #[derive(Component)]
 struct QuestI18nFixtureRoot;
+
+#[derive(Resource, Default)]
+struct QuestI18nLayoutFailures(Vec<Value>);
 
 fn quest_from_definition(definition: &Value) -> Quest {
     let id = definition["id"].as_i64().unwrap() as i32;
@@ -244,22 +247,23 @@ fn spawn_panel(
 fn verify_rows(app: &mut App, allow_scrolled_content: bool) -> Vec<Value> {
     let rows = i18n_text_layouts(app);
     assert!(rows.len() >= 3, "actual production text must be present");
-    for row in &rows {
-        assert!(
-            row["glyphs"].as_u64().unwrap() > 0,
-            "text was not rasterized: {row}"
-        );
-        assert_eq!(
-            row["layoutExceedsNode"], false,
-            "translated text exceeds its reserved row: {row}"
-        );
-        if !allow_scrolled_content {
-            assert_eq!(
-                row["nodeOutsideViewport"], false,
-                "visible text exceeds 1024x768: {row}"
-            );
-        }
-    }
+    // Keep every locale's evidence before failing, so one narrow title cannot
+    // prevent diagnosis of the remaining languages. All former gates remain.
+    let failures: Vec<_> = rows
+        .iter()
+        .filter(|row| {
+            row["glyphs"].as_u64().unwrap() == 0
+                || row["missingGlyphs"] != 0
+                || row["layoutExceedsNode"] != false
+                || (!allow_scrolled_content && row["nodeOutsideViewport"] != false)
+        })
+        .map(|row| json!({"locale": native_i18n::locale().code(), "row": row}))
+        .collect();
+    app.world_mut().init_resource::<QuestI18nLayoutFailures>();
+    app.world_mut()
+        .resource_mut::<QuestI18nLayoutFailures>()
+        .0
+        .extend(failures);
     assert_eq!(
         app.world_mut().query::<&Window>().iter(app.world()).count(),
         0
@@ -421,7 +425,7 @@ fn capture_record(
 
 #[test]
 #[ignore = "explicit offline GPU fixture; run alone with real packaged assets and fresh output"]
-fn three_locale_longest_quests_and_real_npc_menus_offscreen() {
+fn nine_locale_longest_quests_and_real_npc_menus_offscreen() {
     let asset_root = PathBuf::from(
         std::env::var_os("MIR2_I18N_VISUAL_ASSET_ROOT").expect("explicit real packaged asset root"),
     );
@@ -589,9 +593,14 @@ fn three_locale_longest_quests_and_real_npc_menus_offscreen() {
         }
     }
     native_i18n::activate(previous_locale);
+    let failures = &app.world().resource::<QuestI18nLayoutFailures>().0;
     fs::write(output.join("quest-i18n-layouts.json"), serde_json::to_vec_pretty(&json!({
-        "kind":"offline_production_quest_widgets","liveAcceptance":false,"viewport":[WIDTH,HEIGHT],
-        "locales":["en","zh-TW","pt-BR"],"selection":"maximum wrapped rows among 26 authored quests × 3 classes per locale",
+        "kind":"offline_production_quest_widgets","liveAcceptance":false,"passed":failures.is_empty(),"layoutFailures":failures,"viewport":[WIDTH,HEIGHT],
+        "locales":Locale::ALL.map(Locale::code),"selection":"maximum wrapped rows among 26 authored quests × 3 classes per locale",
         "screenshots":evidence,
     })).unwrap()).unwrap();
+    assert!(
+        failures.is_empty(),
+        "translated text layout failures: {failures:?}"
+    );
 }

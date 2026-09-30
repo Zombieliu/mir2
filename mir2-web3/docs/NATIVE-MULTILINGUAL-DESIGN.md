@@ -1,5 +1,7 @@
 # Native multilingual installer and game design
 
+Historical three-language proposal. See [Native nine-language implementation and acceptance](NATIVE-MULTILINGUAL-NINE-LANGUAGES.md) for the current allowlist, implemented behavior, translation provenance and remaining acceptance limits. The proposal and baseline below are retained as historical context.
+
 **Status: proposed design, not implemented or certified translation coverage.**
 Requested selectable locales: **繁體中文 (`zh-TW`), English (`en`), Português (Brasil) (`pt-BR`)**.
 Audit: 2026-09-29, checkout `96e6b4e29aca50fd18f9e7850866933318702d8c` with unrelated animation/startup work in progress.

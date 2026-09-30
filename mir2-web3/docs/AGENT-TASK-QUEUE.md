@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-09-30 nine-language native expansion: en/zh-TW/pt-BR plus ru/hi/id/vi/th/ar;
+> six complete 9,385-key overlays, bundled script fonts, grapheme-safe labels,
+> fixed language popup/search and measured quest/help layout. Shared 1,153,
+> native 784 and Node 14 checks pass; 148 offline GPU captures cover nine locales.
+> Remaining legacy prose includes machine drafts, so native-speaker acceptance
+> is open. Error 4551 on another Windows laptop is a separate public-signing /
+> application-control blocker. Capacity stays paused; no server change.
+> [Evidence and limits](generated/player-qa/native-nine-languages-20260930/README.md).
+
+
 > 2026-09-30 native multilingual implementation is verified for exactly
 > zh-TW/en/pt-BR: shared1147/native777/tooling12 and47 offline GPU screenshots
 > pass, with bounded90-switch font state. The reported external-laptop DPI

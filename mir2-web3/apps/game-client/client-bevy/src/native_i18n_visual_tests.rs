@@ -10,13 +10,13 @@ use bevy::{
     camera::RenderTarget,
     image::ImagePlugin,
     render::{
-        RenderApp, RenderPlugin,
         pipelined_rendering::PipelinedRenderingPlugin,
         render_asset::RenderAssets,
         render_resource::{PollType, TextureFormat, TextureUsages},
         renderer::RenderDevice,
         texture::GpuImage,
         view::screenshot::{Screenshot, ScreenshotCaptured},
+        RenderApp, RenderPlugin,
     },
     text::{ComputedTextBlock, Font, FontAtlasSet, FontCx, TextLayoutInfo},
     time::TimeUpdateStrategy,
@@ -24,7 +24,7 @@ use bevy::{
     window::{ExitCondition, WindowPlugin},
     winit::WinitPlugin,
 };
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use std::{
     collections::{BTreeSet, HashMap},
     fs::{self, OpenOptions},
@@ -64,17 +64,28 @@ fn retain_fixture_font_sources(
 }
 
 fn install_fixture_fonts(app: &mut App) {
-    let font_root = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../platform-windows/assets/fonts/NotoSansTC.ttf");
-    let system =
-        PathBuf::from(std::env::var_os("WINDIR").expect("Windows font directory")).join("Fonts");
+    let font_root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../platform-windows/assets/fonts");
+    // Use exactly the native host's bundled files. Deliberately disable system
+    // font discovery: this fixture must not pass because a developer installed
+    // a language pack that a clean player machine does not have.
+    app.world_mut().resource_mut::<FontCx>().collection =
+        fontique::Collection::new(fontique::CollectionOptions {
+            system_fonts: false,
+            ..default()
+        });
     let mut pinned = FixtureFonts::default();
-    for path in [
-        font_root,
-        system.join("arial.ttf"),
-        system.join("arialbd.ttf"),
+    for file in [
+        "NotoSansTC.ttf",
+        "NotoSans-Regular.ttf",
+        "NotoSans-Bold.ttf",
+        "NotoSansDevanagari-Regular.ttf",
+        "NotoSansDevanagari-Bold.ttf",
+        "NotoSansThai-Regular.ttf",
+        "NotoSansThai-Bold.ttf",
+        "NotoSansArabic-Regular.ttf",
+        "NotoSansArabic-Bold.ttf",
     ] {
-        let bytes = fs::read(&path).expect("real pinned font must exist");
+        let bytes = fs::read(font_root.join(file)).expect("real pinned font must exist");
         let handle = app
             .world_mut()
             .resource_mut::<Assets<Font>>()
@@ -85,10 +96,55 @@ fn install_fixture_fonts(app: &mut App) {
         .resource_mut::<FontCx>()
         .source_cache
         .make_shared();
-    app.insert_resource(pinned).add_systems(
-        PostUpdate,
-        retain_fixture_font_sources.after(bevy::ui::UiSystems::PostLayout),
-    );
+    app.insert_resource(pinned)
+        .add_systems(
+            PostUpdate,
+            configure_fixture_script_fallbacks
+                .after(bevy::text::load_font_assets_into_font_collection)
+                .before(bevy::ui::UiSystems::Content)
+                .before(bevy::sprite::update_text2d_layout),
+        )
+        .add_systems(
+            PostUpdate,
+            retain_fixture_font_sources.after(bevy::ui::UiSystems::PostLayout),
+        );
+}
+
+fn configure_fixture_script_fallbacks(mut cx: ResMut<FontCx>) {
+    // Match platform-windows/native_fonts.rs, including opaque names written in
+    // a script different from the current interface language.
+    for (tag, name) in [
+        (*b"Latn", "Noto Sans"),
+        (*b"Cyrl", "Noto Sans"),
+        (*b"Deva", "Noto Sans Devanagari"),
+        (*b"Thai", "Noto Sans Thai"),
+        (*b"Arab", "Noto Sans Arabic"),
+        (*b"Hani", "Noto Sans TC"),
+    ] {
+        let family = cx
+            .collection
+            .family_id(name)
+            .expect("bundled fixture family registered");
+        let script = fontique::Script::from_bytes(tag);
+        if cx.collection.fallback_families(script).next() != Some(family) {
+            assert!(cx.collection.set_fallbacks(script, std::iter::once(family)));
+        }
+        if tag == *b"Hani" {
+            for locale in ["zh-TW", "zh-HK", "zh-CN", "ja", "ko"] {
+                if cx.collection.fallback_families((script, locale)).next() != Some(family) {
+                    assert!(cx
+                        .collection
+                        .set_fallbacks((script, locale), std::iter::once(family)));
+                }
+            }
+        }
+    }
+    if cx.get_family(&FontSource::SansSerif) != Some("Noto Sans") {
+        cx.set_sans_serif_family("Noto Sans").unwrap();
+    }
+    if cx.get_family(&FontSource::SystemUi) != Some("Noto Sans") {
+        cx.set_system_ui_family("Noto Sans").unwrap();
+    }
 }
 
 /// Shared only by explicit cfg(test) GPU fixtures. `shell=false` lets an
@@ -238,7 +294,7 @@ pub(crate) fn capture_i18n(app: &mut App, target: &Handle<Image>, path: &Path) {
 /// snapshot, account secret, inventory or socket payload.
 pub(crate) fn i18n_text_layouts(app: &mut App) -> Vec<Value> {
     let mut rows = Vec::new();
-    for (text, layout, node, transform, font) in app
+    for (text, layout, node, transform, font, computed) in app
         .world_mut()
         .query::<(
             &Text,
@@ -246,6 +302,7 @@ pub(crate) fn i18n_text_layouts(app: &mut App) -> Vec<Value> {
             &ComputedNode,
             &UiGlobalTransform,
             &TextFont,
+            &ComputedTextBlock,
         )>()
         .iter(app.world())
     {
@@ -257,10 +314,19 @@ pub(crate) fn i18n_text_layouts(app: &mut App) -> Vec<Value> {
         let center = transform.translation;
         let left = center.x - node.size.x / 2.0;
         let top = center.y - node.size.y / 2.0;
+        let mut missing_glyphs = 0;
+        for line in computed.buffer().lines() {
+            for run in line.runs() {
+                for cluster in run.clusters() {
+                    missing_glyphs += cluster.glyphs().filter(|glyph| glyph.id == 0).count();
+                }
+            }
+        }
         rows.push(json!({
             "text": text.0, "rect": [left, top, node.size.x, node.size.y],
             "layoutSize": [layout.size.x, layout.size.y],
             "glyphs": layout.glyphs.len(), "font": format!("{:?}", font.font),
+            "missingGlyphs": missing_glyphs,
             "layoutExceedsNode": layout.size.x > node.size.x + 1.0 || layout.size.y > node.size.y + 1.0,
             "nodeOutsideViewport": left < -1.0 || top < -1.0
                 || left + node.size.x > WIDTH as f32 + 1.0
@@ -285,6 +351,44 @@ fn font_counts(app: &App) -> Value {
         "imageAssets": images.len(),
         "gpuImages": app.sub_app(RenderApp).world().resource::<RenderAssets<GpuImage>>().iter().count(),
     })
+}
+
+fn capture_nine_language_popups(
+    app: &mut App,
+    target: &Handle<Image>,
+    output: &Path,
+) -> Vec<Value> {
+    let mut cases = Vec::new();
+    for locale in [Locale::English, Locale::Arabic] {
+        set_screen(app, locale, NativeShellScreen::Login);
+        native_i18n::set_language_popup_for_tests(app.world_mut(), true);
+        warm_i18n_images(app);
+        let layouts = i18n_text_layouts(app);
+        for choice in Locale::ALL {
+            let row = layouts
+                .iter()
+                .find(|row| row["text"] == choice.label())
+                .expect("every language autonym must be visible in the open production popup");
+            assert_eq!(row["missingGlyphs"], 0, "missing autonym glyph: {row}");
+            assert!(row["glyphs"].as_u64().unwrap() > 0);
+            assert!(
+                !row["layoutExceedsNode"].as_bool().unwrap(),
+                "autonym overflow: {row}"
+            );
+            assert!(
+                !row["nodeOutsideViewport"].as_bool().unwrap(),
+                "autonym outside viewport: {row}"
+            );
+        }
+        let filename = format!("shell-{}-language-popup.png", locale.code());
+        capture_i18n(app, target, &output.join(&filename));
+        cases.push(
+            json!({"locale":locale.code(),"image":filename,"visibleAutonyms":9,"texts":layouts}),
+        );
+        native_i18n::set_language_popup_for_tests(app.world_mut(), false);
+        warm_i18n_images(app);
+    }
+    cases
 }
 
 fn fixture_model(screen: NativeShellScreen) -> NativeShellModel {
@@ -504,21 +608,25 @@ fn multilingual_shell_screens_and_font_switches_render_offscreen() {
             for (name, screen, title, opaque_name) in &screens {
                 set_screen(&mut app, language, *screen);
                 let layouts = i18n_text_layouts(&mut app);
-                assert!(
-                    layouts
-                        .iter()
-                        .any(|row| row["text"] == native_i18n::tr(title))
-                );
+                assert!(layouts
+                    .iter()
+                    .any(|row| row["text"] == native_i18n::tr(title)));
                 assert!(layouts.iter().any(|row| row["text"] == *opaque_name));
+                assert!(layouts
+                    .iter()
+                    .all(|row| !row["text"].as_str().unwrap().contains("OfflineP123")));
+                assert!(layouts
+                    .iter()
+                    .all(|row| row["glyphs"].as_u64().unwrap() > 0));
                 assert!(
+                    layouts.iter().all(|row| row["missingGlyphs"] == 0),
+                    "missing glyph in {}/{}: {:?}",
+                    language.code(),
+                    name,
                     layouts
                         .iter()
-                        .all(|row| !row["text"].as_str().unwrap().contains("OfflineP123"))
-                );
-                assert!(
-                    layouts
-                        .iter()
-                        .all(|row| row["glyphs"].as_u64().unwrap() > 0)
+                        .filter(|row| row["missingGlyphs"] != 0)
+                        .collect::<Vec<_>>()
                 );
                 if *screen == NativeShellScreen::CharacterSelect {
                     assert!(layouts.iter().any(|row| row["text"] == "Cancel"));
@@ -532,11 +640,12 @@ fn multilingual_shell_screens_and_font_switches_render_offscreen() {
             }
         }
     }
+    let popups = capture_nine_language_popups(&mut app, &target, &output);
     let baseline = font_counts(&app);
     assert!(baseline["atlasBytes"].as_u64().unwrap() > 0);
-    assert_eq!(baseline["pinnedHandles"], 3);
+    assert_eq!(baseline["pinnedHandles"], 9);
     let mut checkpoints = Vec::new();
-    // Thirty complete cycles: 90 language selections / 360 production screen
+    // Thirty complete cycles: 270 language selections / 1080 production screen
     // rebuilds. This is a bounded regression, not a long-duration leak claim.
     for cycle in 0..30 {
         for language in Locale::ALL {
@@ -565,9 +674,10 @@ fn multilingual_shell_screens_and_font_switches_render_offscreen() {
         "kind":"offline_production_native_i18n_shell_gpu_fixture",
         "passed":true,"complete":true,"liveAcceptance":false,
         "windowCreated":false,"serverConnected":false,"playerSaveModified":false,
-        "viewport":[WIDTH,HEIGHT],"screens":4,"locales":3,"captures":14,
+        "viewport":[WIDTH,HEIGHT],"screens":4,"locales":Locale::ALL.len(),
+        "captures":cases.len()+extra_panels.len()+popups.len(),"systemFonts":false,
         "boundedSwitchCycles":30,"fontBaseline":baseline,"fontCheckpoints":checkpoints,
-        "cases":cases, "extraPortuguesePanels":extra_panels,
+        "cases":cases, "extraPortuguesePanels":extra_panels,"languagePopups":popups,
         "limits":["Offline rendering does not validate live account or gameplay flows",
             "Bounded font identity and atlas checks do not replace a long-duration soak",
             "Text bounds are retained for independent screenshot review; input text remains literal"]

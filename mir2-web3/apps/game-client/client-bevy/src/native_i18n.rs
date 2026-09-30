@@ -5,8 +5,8 @@
 //! Call `tr` only for system-owned display text; form values/chat stay opaque.
 use std::cell::Cell;
 use std::collections::{HashMap, HashSet};
+use std::sync::atomic::{AtomicU64, AtomicU8, Ordering};
 use std::sync::OnceLock;
-use std::sync::atomic::{AtomicU8, AtomicU64, Ordering};
 
 use bevy::prelude::*;
 use bevy::ui::{FocusPolicy, UiSystems};
@@ -17,19 +17,38 @@ pub enum Locale {
     English,
     TraditionalChinese,
     BrazilianPortuguese,
+    Russian,
+    Hindi,
+    Indonesian,
+    Vietnamese,
+    Thai,
+    Arabic,
 }
 
 impl Locale {
-    pub const ALL: [Self; 3] = [
+    pub const COUNT: usize = 9;
+    pub const ALL: [Self; Self::COUNT] = [
         Self::TraditionalChinese,
         Self::English,
         Self::BrazilianPortuguese,
+        Self::Russian,
+        Self::Hindi,
+        Self::Indonesian,
+        Self::Vietnamese,
+        Self::Thai,
+        Self::Arabic,
     ];
     pub const fn code(self) -> &'static str {
         match self {
             Self::English => "en",
             Self::TraditionalChinese => "zh-TW",
             Self::BrazilianPortuguese => "pt-BR",
+            Self::Russian => "ru",
+            Self::Hindi => "hi",
+            Self::Indonesian => "id",
+            Self::Vietnamese => "vi",
+            Self::Thai => "th",
+            Self::Arabic => "ar",
         }
     }
     pub const fn label(self) -> &'static str {
@@ -37,6 +56,12 @@ impl Locale {
             Self::English => "English",
             Self::TraditionalChinese => "繁體中文",
             Self::BrazilianPortuguese => "Português (Brasil)",
+            Self::Russian => "Русский",
+            Self::Hindi => "हिन्दी",
+            Self::Indonesian => "Bahasa Indonesia",
+            Self::Vietnamese => "Tiếng Việt",
+            Self::Thai => "ไทย",
+            Self::Arabic => "العربية",
         }
     }
     pub fn from_code(code: &str) -> Option<Self> {
@@ -44,14 +69,41 @@ impl Locale {
             "en" => Some(Self::English),
             "zh-TW" => Some(Self::TraditionalChinese),
             "pt-BR" => Some(Self::BrazilianPortuguese),
+            "ru" => Some(Self::Russian),
+            "hi" => Some(Self::Hindi),
+            "id" => Some(Self::Indonesian),
+            "vi" => Some(Self::Vietnamese),
+            "th" => Some(Self::Thai),
+            "ar" => Some(Self::Arabic),
             _ => None,
         }
     }
-    const fn index(self) -> usize {
+    pub(crate) const fn index(self) -> usize {
         match self {
             Self::English => 0,
             Self::TraditionalChinese => 1,
             Self::BrazilianPortuguese => 2,
+            Self::Russian => 3,
+            Self::Hindi => 4,
+            Self::Indonesian => 5,
+            Self::Vietnamese => 6,
+            Self::Thai => 7,
+            Self::Arabic => 8,
+        }
+    }
+
+    pub const fn is_rtl(self) -> bool {
+        matches!(self, Self::Arabic)
+    }
+
+    /// All native families are bundled and pinned by the Windows host.
+    pub const fn font_family(self) -> &'static str {
+        match self {
+            Self::TraditionalChinese => "Noto Sans TC",
+            Self::Hindi => "Noto Sans Devanagari",
+            Self::Thai => "Noto Sans Thai",
+            Self::Arabic => "Noto Sans Arabic",
+            _ => "Noto Sans",
         }
     }
 }
@@ -71,6 +123,12 @@ pub fn locale() -> Locale {
         .unwrap_or_else(|| match ACTIVE.load(Ordering::Acquire) {
             2 => Locale::TraditionalChinese,
             3 => Locale::BrazilianPortuguese,
+            4 => Locale::Russian,
+            5 => Locale::Hindi,
+            6 => Locale::Indonesian,
+            7 => Locale::Vietnamese,
+            8 => Locale::Thai,
+            9 => Locale::Arabic,
             _ => Locale::English,
         })
 }
@@ -113,7 +171,7 @@ struct Entry {
     aliases: Vec<String>,
 }
 struct Catalog {
-    values: Vec<[String; 3]>,
+    values: Vec<[String; Locale::COUNT]>,
     keys: HashMap<String, usize>,
     exact: HashMap<String, usize>,
     templates: TemplateIndex,
@@ -132,6 +190,18 @@ fn catalog() -> &'static Catalog {
             npc_exact: HashMap::new(),
             npc_templates: TemplateIndex::default(),
         };
+        // Keyed overlays keep the original three-language source generators
+        // unchanged. Missing keys are release validation failures, never an
+        // implicit English translation for one of the six added languages.
+        let expansion: [HashMap<String, String>; 6] = [
+            include_str!("../../../../packages/game-data/data/native-i18n/extra/ru.json"),
+            include_str!("../../../../packages/game-data/data/native-i18n/extra/hi.json"),
+            include_str!("../../../../packages/game-data/data/native-i18n/extra/id.json"),
+            include_str!("../../../../packages/game-data/data/native-i18n/extra/vi.json"),
+            include_str!("../../../../packages/game-data/data/native-i18n/extra/th.json"),
+            include_str!("../../../../packages/game-data/data/native-i18n/extra/ar.json"),
+        ]
+        .map(|file| serde_json::from_str(file).expect("validated native locale overlay"));
         // Explicit native translations win over the broader legacy bundle.
         for file in [
             include_str!("../../../../packages/game-data/data/native-i18n/common.json"),
@@ -146,7 +216,14 @@ fn catalog() -> &'static Catalog {
             let file: CatalogFile = serde_json::from_str(file).expect("validated native catalog");
             for entry in file.entries {
                 let index = result.values.len();
-                let values = [entry.en, entry.zh_tw, entry.pt_br];
+                let extra = expansion.each_ref().map(|values| {
+                    values
+                        .get(&entry.key)
+                        .expect("validated native locale key")
+                        .clone()
+                });
+                let [ru, hi, id, vi, th, ar] = extra;
+                let values = [entry.en, entry.zh_tw, entry.pt_br, ru, hi, id, vi, th, ar];
                 // NPC "Return" means go back; a quest's "Return" describes
                 // the turn-in objective. Never let a script alias overwrite
                 // the ordinary UI vocabulary.
@@ -216,8 +293,13 @@ impl CompiledTemplate {
                 Part::Slot(_) => None,
             })
             .sum();
-        // A bare capture would treat arbitrary player text as system text.
-        if literal_bytes == 0 || !parts.iter().any(|part| matches!(part, Part::Slot(_))) {
+        // Bare captures or only separators would treat arbitrary player text as
+        // system text (for example a translated "{owner} {pet}" pattern).
+        let has_words = parts.iter().any(|part| match part {
+            Part::Literal(value) => value.chars().any(char::is_alphabetic),
+            Part::Slot(_) => false,
+        });
+        if !has_words || !parts.iter().any(|part| matches!(part, Part::Slot(_))) {
             return None;
         }
         let prefix = match parts.first() {
@@ -537,23 +619,62 @@ pub struct LocaleChoice(pub Locale);
 struct LocaleSelector;
 #[derive(Component)]
 struct KeepLanguageFont;
+#[derive(Component)]
+struct LocaleMenuToggle;
+#[derive(Component)]
+struct LocaleMenuPanel;
+#[derive(Component)]
+struct LocaleCurrentLabel;
+#[derive(Resource, Default)]
+struct LocaleMenuState {
+    open: bool,
+}
+
+#[cfg(test)]
+pub(crate) fn set_language_popup_for_tests(world: &mut World, open: bool) {
+    world.resource_mut::<LocaleMenuState>().open = open;
+}
 
 pub struct NativeI18nPlugin;
 impl Plugin for NativeI18nPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_language_selector)
+        app.init_resource::<LocaleMenuState>()
+            .add_systems(Startup, spawn_language_selector)
             .add_systems(
                 Update,
-                (choose_language, show_language_selector)
+                (
+                    toggle_language_menu,
+                    choose_language,
+                    show_language_selector,
+                )
                     .chain()
                     .before(crate::crystal_ui::overlays::NativePlayerUiSet::Mutate),
             )
             .add_systems(
                 PostUpdate,
-                (refresh_localized_text, refresh_native_fonts)
+                (
+                    show_language_menu,
+                    refresh_localized_text,
+                    refresh_native_fonts,
+                    refresh_native_alignment,
+                )
                     .chain()
                     .before(UiSystems::Content),
             );
+    }
+}
+
+fn refresh_native_alignment(mut layouts: Query<&mut TextLayout>) {
+    if !active() {
+        return;
+    }
+    for mut layout in &mut layouts {
+        // Parley resolves paragraph bidi and shapes connected scripts. Start
+        // follows the text direction while centered/right-aligned counters
+        // retain their explicit geometry. Never reverse text or map positions.
+        if layout.justify == Justify::Left {
+            layout.justify = Justify::Start;
+        }
     }
 }
 
@@ -595,6 +716,61 @@ fn refresh_localized_text(
 }
 
 pub fn spawn_language_choices(parent: &mut ChildSpawnerCommands, font_size: f32) {
+    parent
+        .spawn((Node {
+            width: percent(100.0),
+            min_width: px(220.0),
+            flex_direction: FlexDirection::Column,
+            ..default()
+        },))
+        .with_children(|root| {
+            root.spawn((
+                Button,
+                LocaleMenuToggle,
+                Node {
+                    min_height: px(29.0),
+                    padding: UiRect::all(px(5.0)),
+                    justify_content: JustifyContent::Center,
+                    align_items: AlignItems::Center,
+                    border: UiRect::all(px(1.0)),
+                    ..default()
+                },
+                BorderColor::all(Color::srgb(0.65, 0.50, 0.23)),
+                BackgroundColor(Color::srgb(0.10, 0.08, 0.04)),
+                FocusPolicy::Block,
+            ))
+            .with_children(|button| {
+                button.spawn((
+                    LocaleCurrentLabel,
+                    Text::new(format!("{}  ^", locale().label())),
+                    crate::crystal_ui::typography::crystal_text_font(font_size),
+                    TextColor(Color::srgb(0.95, 0.91, 0.77)),
+                ));
+            });
+            root.spawn((
+                LocaleMenuPanel,
+                Node {
+                    display: Display::None,
+                    position_type: PositionType::Absolute,
+                    bottom: px(33.0),
+                    left: px(0.0),
+                    width: percent(100.0),
+                    padding: UiRect::all(px(4.0)),
+                    row_gap: px(2.0),
+                    flex_direction: FlexDirection::Column,
+                    border: UiRect::all(px(1.0)),
+                    ..default()
+                },
+                GlobalZIndex(25001),
+                BorderColor::all(Color::srgb(0.65, 0.50, 0.23)),
+                BackgroundColor(Color::srgb(0.055, 0.045, 0.03)),
+                FocusPolicy::Block,
+            ))
+            .with_children(|choices| spawn_language_choice_buttons(choices, font_size));
+        });
+}
+
+fn spawn_language_choice_buttons(parent: &mut ChildSpawnerCommands, font_size: f32) {
     for language in Locale::ALL {
         parent
             .spawn((
@@ -617,7 +793,7 @@ pub fn spawn_language_choices(parent: &mut ChildSpawnerCommands, font_size: f32)
                     KeepLanguageFont,
                     Text::new(language.label()),
                     TextFont {
-                        font: FontSource::Family("Noto Sans TC".into()),
+                        font: FontSource::Family(language.font_family().into()),
                         font_size: FontSize::Px(font_size),
                         ..default()
                     },
@@ -633,8 +809,8 @@ fn spawn_language_selector(mut commands: Commands) {
             Node {
                 position_type: PositionType::Absolute,
                 bottom: px(12.0),
-                left: percent(0.0),
-                width: percent(100.0),
+                right: px(12.0),
+                width: px(240.0),
                 justify_content: JustifyContent::Center,
                 column_gap: px(6.0),
                 ..default()
@@ -659,10 +835,12 @@ fn show_language_selector(
 }
 fn choose_language(
     mut buttons: Query<(&Interaction, &LocaleChoice, &mut BackgroundColor), Changed<Interaction>>,
+    mut menu: ResMut<LocaleMenuState>,
 ) {
     for (interaction, choice, mut bg) in &mut buttons {
         if *interaction == Interaction::Pressed {
             activate(choice.0);
+            menu.open = false;
         }
         bg.0 = if *interaction == Interaction::Hovered {
             Color::srgb(0.28, 0.21, 0.08)
@@ -672,9 +850,100 @@ fn choose_language(
     }
 }
 
+fn toggle_language_menu(
+    toggles: Query<&Interaction, (With<LocaleMenuToggle>, Changed<Interaction>)>,
+    hovered: Query<&Interaction, Or<(With<LocaleMenuToggle>, With<LocaleChoice>)>>,
+    keys: Option<Res<ButtonInput<KeyCode>>>,
+    mouse: Option<Res<ButtonInput<MouseButton>>>,
+    mut menu: ResMut<LocaleMenuState>,
+) {
+    if keys.is_some_and(|keys| keys.just_pressed(KeyCode::Escape))
+        || (mouse.is_some_and(|mouse| mouse.just_pressed(MouseButton::Left))
+            && !hovered
+                .iter()
+                .any(|interaction| *interaction != Interaction::None))
+    {
+        menu.open = false;
+    }
+    for interaction in &toggles {
+        if *interaction == Interaction::Pressed {
+            menu.open = !menu.open;
+        }
+    }
+}
+
+fn show_language_menu(
+    menu: Res<LocaleMenuState>,
+    mut nodes: Query<(&mut Node, Ref<LocaleMenuPanel>)>,
+    mut labels: Query<&mut Text, With<LocaleCurrentLabel>>,
+    mut seen: Local<u64>,
+) {
+    // The Options panel rebuilds its children in Update. Restore the newly
+    // spawned menu after those commands, even when its open state is unchanged.
+    for (mut node, panel) in &mut nodes {
+        if menu.is_changed() || panel.is_added() {
+            node.display = if menu.open {
+                Display::Flex
+            } else {
+                Display::None
+            };
+        }
+    }
+    let changed = *seen != revision();
+    for mut label in &mut labels {
+        if changed || label.is_added() {
+            **label = format!("{}  ^", locale().label());
+        }
+    }
+    *seen = revision();
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn language_popup_survives_options_children_rebuilt_each_update() {
+        fn rebuild_options(mut commands: Commands, panels: Query<Entity, With<LocaleMenuPanel>>) {
+            for entity in &panels {
+                commands.entity(entity).despawn();
+            }
+            commands.spawn((
+                LocaleMenuPanel,
+                Node {
+                    display: Display::None,
+                    ..default()
+                },
+            ));
+        }
+        let mut app = App::new();
+        app.insert_resource(LocaleMenuState { open: true })
+            .add_systems(Update, rebuild_options)
+            .add_systems(PostUpdate, show_language_menu);
+        for _ in 0..4 {
+            app.update();
+            let world = app.world_mut();
+            assert_eq!(
+                world
+                    .query_filtered::<&Node, With<LocaleMenuPanel>>()
+                    .single(world)
+                    .unwrap()
+                    .display,
+                Display::Flex
+            );
+        }
+        app.world_mut().resource_mut::<LocaleMenuState>().open = false;
+        app.update();
+        let world = app.world_mut();
+        assert_eq!(
+            world
+                .query_filtered::<&Node, With<LocaleMenuPanel>>()
+                .single(world)
+                .unwrap()
+                .display,
+            Display::None
+        );
+    }
 
     #[test]
     fn catalogue_padding_is_normalized_without_removing_display_whitespace() {
@@ -696,6 +965,8 @@ mod tests {
 
     #[test]
     fn adjacent_capture_boundaries_are_explicit_and_values_remain_opaque() {
+        assert!(captures("{owner} {pet}", "a1 says hello").is_none());
+        assert!(captures("{x}/{y}", "player/name").is_none());
         for (pattern, source) in [
             ("Exp Rate: {0}{1}%", "Exp Rate: +10%"),
             (
@@ -860,8 +1131,15 @@ mod tests {
     }
 
     #[test]
-    fn locales_are_exactly_the_requested_three() {
-        assert_eq!(Locale::ALL.map(Locale::code), ["zh-TW", "en", "pt-BR"]);
+    fn locales_are_exactly_the_requested_nine() {
+        assert_eq!(
+            Locale::ALL.map(Locale::code),
+            ["zh-TW", "en", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"]
+        );
+        for language in Locale::ALL {
+            assert_eq!(Locale::from_code(language.code()), Some(language));
+            assert_eq!(language.is_rtl(), language == Locale::Arabic);
+        }
         for unsupported in ["zh-CN", "es", "pt-PT", "pt", "../../evil", ""] {
             assert_eq!(Locale::from_code(unsupported), None);
         }

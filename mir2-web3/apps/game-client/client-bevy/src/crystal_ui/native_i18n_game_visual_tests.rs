@@ -176,9 +176,15 @@ fn multilingual_game_widgets_render_offscreen() {
         }
     }
     // Save measurements before asserting so a failure stays independently inspectable.
-    fs::write(&report_path, serde_json::to_vec_pretty(&json!({
-        "passed": false, "complete": true, "render": "production widgets, offline GPU", "screens": reports,
-    })).unwrap()).unwrap();
+    fs::write(
+        &report_path,
+        serde_json::to_vec_pretty(&json!({
+            "passed": false, "complete": true, "render": "production widgets, offline GPU",
+            "locales":Locale::ALL.len(), "systemFonts":false, "screens": reports,
+        }))
+        .unwrap(),
+    )
+    .unwrap();
     for report in &reports {
         for row in report["text"].as_array().unwrap() {
             assert!(
@@ -193,9 +199,16 @@ fn multilingual_game_widgets_render_offscreen() {
                 row["glyphs"].as_u64().unwrap() > 0,
                 "missing glyph layout: {row}"
             );
+            assert_eq!(row["missingGlyphs"], 0, "missing bundled glyph: {row}");
         }
     }
-    fs::write(&report_path, serde_json::to_vec_pretty(&json!({
-        "passed": true, "complete": true, "render": "production widgets, offline GPU", "screens": reports,
-    })).unwrap()).unwrap();
+    fs::write(
+        &report_path,
+        serde_json::to_vec_pretty(&json!({
+            "passed": true, "complete": true, "render": "production widgets, offline GPU",
+            "locales":Locale::ALL.len(), "systemFonts":false, "screens": reports,
+        }))
+        .unwrap(),
+    )
+    .unwrap();
 }

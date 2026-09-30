@@ -34,25 +34,21 @@ pub(super) struct LocalizedHelpViewport {
 /// Each translated page keeps its own position; no account data is retained.
 #[derive(Resource)]
 pub(super) struct HelpScrollState {
-    offsets: [[f32; IMAGE_PAGE_COUNT as usize]; 2],
+    offsets: [[f32; IMAGE_PAGE_COUNT as usize]; Locale::COUNT],
 }
 
 impl Default for HelpScrollState {
     fn default() -> Self {
         Self {
-            offsets: [[0.0; IMAGE_PAGE_COUNT as usize]; 2],
+            offsets: [[0.0; IMAGE_PAGE_COUNT as usize]; Locale::COUNT],
         }
     }
 }
 
 impl LocalizedHelpViewport {
     fn key(&self) -> Option<(usize, usize)> {
-        let locale = match self.locale {
-            Locale::TraditionalChinese => 0,
-            Locale::BrazilianPortuguese => 1,
-            Locale::English => return None,
-        };
-        Some((locale, usize::from(image_page(self.page)?)))
+        (self.locale != Locale::English)
+            .then_some((self.locale.index(), usize::from(image_page(self.page)?)))
     }
 }
 
@@ -133,10 +129,9 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, page: u8) -> bool {
                         Text::new(title),
                         crystal_text_font(16.0),
                         TextColor(Color::srgb(1.0, 0.82, 0.2)),
-                        TextLayout::new(Justify::Left, LineBreak::WordBoundary),
+                        TextLayout::new(Justify::Start, LineBreak::WordOrCharacter),
                         Node {
-                            width: Val::Percent(100.0),
-                            padding: UiRect::right(Val::Px(4.0)),
+                            width: Val::Px(VIEWPORT_WIDTH - 28.0),
                             flex_shrink: 0.0,
                             ..default()
                         },
@@ -145,13 +140,13 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, page: u8) -> bool {
                         Text::new(body),
                         crystal_text_font(size),
                         TextColor(Color::srgb(0.94, 0.94, 0.88)),
-                        TextLayout::new(Justify::Left, LineBreak::WordBoundary),
+                        TextLayout::new(Justify::Start, LineBreak::WordOrCharacter),
                         LineHeight::Px(size * 1.45),
                         Node {
-                            width: Val::Percent(100.0),
-                            // Leave a small glyph/word-spacing guard within the
-                            // paragraph box at the scroll viewport's right edge.
-                            padding: UiRect::right(Val::Px(4.0)),
+                            // Reserve the four-pixel right guard outside the text
+                            // node so intrinsic measurement and wrapping use the
+                            // same width (padding can add an unmeasured line).
+                            width: Val::Px(VIEWPORT_WIDTH - 28.0),
                             flex_shrink: 0.0,
                             ..default()
                         },
@@ -308,15 +303,18 @@ mod tests {
     }
 
     #[test]
-    fn localized_help_catalog_is_integrated_for_both_translated_languages() {
-        for language in [Locale::TraditionalChinese, Locale::BrazilianPortuguese] {
+    fn localized_help_catalog_is_integrated_for_all_nine_languages() {
+        for language in Locale::ALL {
+            let mut unique_bodies = HashSet::new();
             for page in 0..IMAGE_PAGE_COUNT {
                 for suffix in ["title", "body"] {
                     let id = format!("help.page.{page:02}.{suffix}");
-                    assert!(
-                        !native_i18n::for_locale(language, &id, "").is_empty(),
-                        "{id}"
-                    );
+                    let text = native_i18n::for_locale(language, &id, "");
+                    assert!(!text.trim().is_empty(), "{}: {id}", language.code());
+                    if suffix == "body" {
+                        assert!(text.chars().count() > 60, "{}: {id}", language.code());
+                        assert!(unique_bodies.insert(text), "generic duplicate help: {id}");
+                    }
                 }
             }
             assert!(!native_i18n::for_locale(language, "help.scroll_hint", "").is_empty());

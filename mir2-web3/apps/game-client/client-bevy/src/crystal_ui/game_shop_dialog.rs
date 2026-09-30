@@ -3,6 +3,7 @@
 use super::*;
 use crate::game_shop::GameShopEntry;
 use std::collections::BTreeMap;
+use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum Section {
@@ -285,7 +286,14 @@ impl GameShopDialogUi {
         else {
             return false;
         };
-        let next: String = text.chars().take(23).collect();
+        let mut characters = 0;
+        let next: String = text
+            .graphemes(true)
+            .take_while(|grapheme| {
+                characters += grapheme.chars().count();
+                characters <= 23
+            })
+            .collect();
         if self.search == next {
             return false;
         }
@@ -354,11 +362,12 @@ impl GameShopDialogUi {
     fn matches(&self, item: &GameShopEntry, player: &str, now_ticks: i64) -> bool {
         let class = self.class_name(player);
         let ticks = (item.date_binary_datetime as u64 & 0x3fff_ffff_ffff_ffff) as i64;
+        let search = self.search.to_lowercase();
         (class == "Show All" || item.visible_for_class(class))
-            && item
-                .item_name
-                .to_lowercase()
-                .contains(&self.search.to_lowercase())
+            && (item.item_name.to_lowercase().contains(&search)
+                || game_shop_display_name(&item.item_name)
+                    .to_lowercase()
+                    .contains(&search))
             && match self.section {
                 Section::All => true,
                 Section::Top => item.top_item,
@@ -683,25 +692,19 @@ pub(super) fn keyboard(
                 state
                     .game_shop_dialog
                     .move_search_home_end(true, control, extend);
-            } else if normalized_key == KeyCode::ArrowLeft
-                && !keys.just_pressed(KeyCode::ArrowLeft)
+            } else if normalized_key == KeyCode::ArrowLeft && !keys.just_pressed(KeyCode::ArrowLeft)
             {
                 state.game_shop_dialog.move_search_caret(false, extend);
             } else if normalized_key == KeyCode::ArrowRight
                 && !keys.just_pressed(KeyCode::ArrowRight)
             {
                 state.game_shop_dialog.move_search_caret(true, extend);
-            } else if normalized_key == KeyCode::Backspace
-                && !keys.just_pressed(KeyCode::Backspace)
+            } else if normalized_key == KeyCode::Backspace && !keys.just_pressed(KeyCode::Backspace)
             {
                 changed |= state.game_shop_dialog.delete_search_backwards();
-            } else if normalized_key == KeyCode::Delete
-                && !keys.just_pressed(KeyCode::Delete)
-            {
+            } else if normalized_key == KeyCode::Delete && !keys.just_pressed(KeyCode::Delete) {
                 changed |= state.game_shop_dialog.delete_search_forwards();
-            } else if normalized_key == KeyCode::Escape
-                && !keys.just_pressed(KeyCode::Escape)
-            {
+            } else if normalized_key == KeyCode::Escape && !keys.just_pressed(KeyCode::Escape) {
                 state.game_shop_dialog.blur_search();
             } else if matches!(normalized_key, KeyCode::Enter | KeyCode::NumpadEnter)
                 && !keys.just_pressed(KeyCode::Enter)
@@ -920,20 +923,18 @@ fn text(
         Justify::Left | Justify::Start | Justify::Justified => JustifyContent::FlexStart,
     };
     parent
-        .spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(rect.left),
-                top: Val::Px(rect.top),
-                width: Val::Px(rect.width),
-                height: Val::Px(rect.height),
-                flex_direction: FlexDirection::Row,
-                align_items: AlignItems::Center,
-                justify_content,
-                overflow: Overflow::clip(),
-                ..default()
-            },
-        ))
+        .spawn((Node {
+            position_type: PositionType::Absolute,
+            left: Val::Px(rect.left),
+            top: Val::Px(rect.top),
+            width: Val::Px(rect.width),
+            height: Val::Px(rect.height),
+            flex_direction: FlexDirection::Row,
+            align_items: AlignItems::Center,
+            justify_content,
+            overflow: Overflow::clip(),
+            ..default()
+        },))
         .with_children(|label| {
             label.spawn((
                 Text::new(value),
@@ -944,7 +945,7 @@ fn text(
         });
 }
 
-fn game_shop_friendly_name(name: &str) -> String {
+fn game_shop_display_name(name: &str) -> String {
     let name = name.trim_end_matches(|character: char| character.is_ascii_digit());
     let mut result = String::new();
     let mut bracketed = false;
@@ -956,7 +957,14 @@ fn game_shop_friendly_name(name: &str) -> String {
             _ => {}
         }
     }
-    crate::player_text::name(&result).chars().take(24).collect()
+    crate::player_text::name(&result)
+}
+
+fn game_shop_friendly_name(name: &str) -> String {
+    game_shop_display_name(name)
+        .graphemes(true)
+        .take(24)
+        .collect()
 }
 
 fn game_shop_grade_color(item: &GameShopEntry) -> Color {
@@ -1584,8 +1592,41 @@ mod tests {
     use crate::inventory::CrystalItemTooltipSourceModel;
 
     #[test]
+    fn shop_search_accepts_raw_and_localized_names_without_rewriting_item_identity() {
+        for locale in crate::native_i18n::Locale::ALL {
+            crate::native_i18n::with_locale(locale, || {
+                let item = GameShopEntry {
+                    game_shop_index: 37,
+                    item_name: "TownTeleport".into(),
+                    ..default()
+                };
+                let mut shop = GameShopDialogUi {
+                    class: Some(0),
+                    ..default()
+                };
+                shop.search = "TownTeleport".into();
+                assert!(shop.matches(&item, "Warrior", now_ticks()));
+                let display = game_shop_display_name(&item.item_name);
+                shop.search = display.graphemes(true).take(4).collect();
+                assert!(
+                    shop.matches(&item, "Warrior", now_ticks()),
+                    "{}: {display}",
+                    locale.code()
+                );
+                shop.search = "no-such-product".into();
+                assert!(!shop.matches(&item, "Warrior", now_ticks()));
+                assert_eq!(item.item_name, "TownTeleport");
+                assert_eq!(item.game_shop_index, 37);
+            });
+        }
+    }
+
+    #[test]
     fn game_shop_names_match_crystal_friendly_name_and_grade_color() {
-        assert_eq!(game_shop_friendly_name("AncientBanga[Green]"), "AncientBanga");
+        assert_eq!(
+            game_shop_friendly_name("AncientBanga[Green]"),
+            "AncientBanga"
+        );
         assert_eq!(game_shop_friendly_name("Item[Green]2"), "Item");
         assert_eq!(game_shop_friendly_name("1234567890123456789"), "");
         assert_eq!(game_shop_friendly_name("Potion2Plus"), "Potion2Plus");

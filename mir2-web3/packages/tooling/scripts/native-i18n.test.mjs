@@ -9,9 +9,26 @@ import * as vocabulary from "./native-i18n-translations.mjs";
 import { menuRows } from "./native-i18n-menu-translations.mjs";
 import { questRows } from "./native-i18n-quest-translations.mjs";
 import { assertReviewedSources } from "./native-i18n-source-guard.mjs";
+import { validateValue, verifyExpansionFiles } from "./native-i18n-expansion.mjs";
 
 const read = (file) => JSON.parse(readFileSync(resolve(root, file), "utf8"));
 const valid = (key = "sample") => ({ key, en: "Give {amount} to {player}", "zh-TW": "將 {amount} 交給 {player}", "pt-BR": "Entregue {amount} a {player}", aliases: ["Give {amount} to {player}"] });
+
+test("six additional locales preserve gameplay numbers, opaque arguments and displayed commands", () => {
+  const entry = { key: "numeric", en: "Pay 50 gold for {0:N2} charges; use @Buy" };
+  assert.deepEqual(validateValue(entry, "ar", "ادفع ٥٠ ذهب مقابل {0:N2} شحنة؛ استخدم @Buy"), []);
+  assert.ok(validateValue({ key: "pet", en: "{0}_{1} Pet" }, "ar", "{0} {1}").includes("authored words disappeared around parameters"));
+  for (const text of ["ادفع 60 ذهب مقابل {0}؛ @Buy", "ادفع 50 ذهب؛ @Buy", "ادفع 50 ذهب مقابل {0} {0}؛ @Buy", "ادفع 50 ذهب مقابل {0}؛ @Sell", "ادفع 50 ذهب مقابل [X1]؛ @Buy"]) {
+    assert.ok(validateValue(entry, "ar", text).length, text);
+  }
+});
+
+test("every additional native locale has the exact source key closure and safe substitutions", () => {
+  const report = verifyExpansionFiles();
+  assert.deepEqual(report.locales, ["ru", "hi", "id", "vi", "th", "ar"]);
+  assert.equal(report.entriesPerLocale, 9385);
+  assert.deepEqual(report.errors, []);
+});
 
 test("three-language validation preserves named/numbered parameters and rejects dropped/repeated parameters", () => {
   assert.deepEqual(placeholders("{player} {0:N2} {player} {Red/Color}"), ["0", "player", "player"]);

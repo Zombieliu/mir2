@@ -3343,6 +3343,7 @@ dependencies = [
  "console_error_panic_hook",
  "embed-resource",
  "flate2",
+ "fontique",
  "futures-util",
  "mir2-bevy-runtime",
  "mir2-client-bevy",

@@ -12,6 +12,7 @@ use bevy::{
     },
     prelude::*,
 };
+use unicode_segmentation::UnicodeSegmentation;
 
 use crate::crystal_ui::assets::{safe_key_assets, CrystalButtonAssetSet};
 use crate::crystal_ui::login::{blink_login_caret, spawn_login_screen, CrystalLoginAction};
@@ -2051,8 +2052,8 @@ fn connection_notice_summary(message: &str) -> String {
         .split_whitespace()
         .collect::<Vec<_>>()
         .join(" ");
-    if summary.chars().count() > MAX_NOTICE_CHARS {
-        summary = summary.chars().take(MAX_NOTICE_CHARS - 1).collect();
+    if summary.graphemes(true).count() > MAX_NOTICE_CHARS {
+        summary = summary.graphemes(true).take(MAX_NOTICE_CHARS - 1).collect();
         summary.push('…');
     }
     summary

@@ -7,6 +7,8 @@ param(
     [string]$CandidateVersion = '',
     [string]$SourceRevision = '',
     [string]$SignerThumbprint = '',
+    [switch]$PublicRelease,
+    [string]$PublisherThumbprint = '',
     [string]$GatewayWsUrl = $env:MIR2_CANDIDATE_GATEWAY_WS_URL,
     [ValidateSet('crystal', 'newcomer-v1', 'newcomer-v2')][string]$QuestGuidance = 'newcomer-v2',
     [bool]$ForceDaylight = $true,
@@ -593,7 +595,7 @@ function Test-PackageRelativeFileAllowed {
     if (Test-CandidateActorFileAllowed -RelativePath $RelativePath) { return $true }
     if ($RelativePath -ceq $ExeName) { return $true }
     if (Test-PathContainsDangerousDotToken -RelativePath $RelativePath) { return $false }
-    $rootFiles = @('mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'NotoSansTC-OFL.txt', 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s')
+    $rootFiles = @('mir2-client.toml', 'README-START.txt', 'CONTROLS.txt', 'KNOWN-ISSUES.md', 'NotoSansTC-OFL.txt', 'OFL-NotoSans.txt', 'OFL-NotoSansArabic.txt', 'OFL-NotoSansDevanagari.txt', 'OFL-NotoSansThai.txt', 'MULTILINGUAL-SOURCES.json', 'BUILD-ATTESTATION.json', 'PACKAGE-MANIFEST.json', 'VERSION.json', 'RELEASE-STATEMENT.json', 'RELEASE-STATEMENT.p7s')
     if ($rootFiles -ccontains $RelativePath) { return $true }
     if ($RelativePath -ceq 'mir2-assets/original-ui/frame-sets.generated.json') { return $true }
     if ($RelativePath.StartsWith('mir2-assets/original-ui/Items/', [StringComparison]::Ordinal)) {
@@ -779,6 +781,19 @@ $worktree = Get-WorktreeState -Root $RepoRoot
 if ($worktree.revision -ne $SourceRevision.ToLowerInvariant()) { throw 'SourceRevision differs from current repository HEAD' }
 $attestation = Read-BuildAttestation -Path $attestationFull
 $attested = Assert-Attestation -Attestation $attestation -AttestationPath $attestationFull -Exe $exe -Worktree $worktree -DirtyAllowed:$AllowDirtyWorktree
+
+if ($PublicRelease) {
+    if ([string]::IsNullOrWhiteSpace($PublisherThumbprint)) { throw 'public packaging requires an explicit Windows publisher identity in addition to Candidate CMS signing' }
+    $publisherProperty = $attestation.PSObject.Properties['publisherAuthenticode']
+    if ($null -eq $publisherProperty -or -not $publisherProperty.Value.required -or $publisherProperty.Value.thumbprint -ine $PublisherThumbprint.Replace(' ', '')) {
+        throw 'public packaging requires the EXE to be publisher-signed before the attestation is generated'
+    }
+    Import-Module (Join-Path $ScriptDir 'publisher-signing.psm1') -Force
+    $publisherResult = Test-WindowsPublisherSignature -Path $releaseExeFull -ExpectedThumbprint $PublisherThumbprint
+    if (-not $publisherResult.Ready) { throw ('public packaging rejected the game EXE: ' + ($publisherResult.Issues -join '; ')) }
+} elseif ($PublisherThumbprint) {
+    throw 'PublisherThumbprint requires -PublicRelease'
+}
 
 $webRoot = Join-Path $RepoRoot 'apps\web'
 $nativeKeyedTemporaryRoot = $null
@@ -998,6 +1013,11 @@ try {
     $fontLicense = Join-Path $PSScriptRoot '../assets/fonts/OFL.txt'
     Assert-NoReparseTree -Path $fontLicense
     Copy-FileDefaultDataOnly -Source $fontLicense -Destination (Join-Path $staging 'NotoSansTC-OFL.txt')
+    foreach ($fontDocument in @('OFL-NotoSans.txt', 'OFL-NotoSansArabic.txt', 'OFL-NotoSansDevanagari.txt', 'OFL-NotoSansThai.txt', 'MULTILINGUAL-SOURCES.json')) {
+        $fontDocumentSource = Join-Path $PSScriptRoot ('../assets/fonts/' + $fontDocument)
+        Assert-NoReparseTree -Path $fontDocumentSource
+        Copy-FileDefaultDataOnly -Source $fontDocumentSource -Destination (Join-Path $staging $fontDocument)
+    }
     Assert-NoReparseTree -Path $releaseExeFull; Assert-NoReparseTree -Path $attestationFull; Assert-NoReparseTree -Path $staging
     if ((Get-FileHash -LiteralPath $releaseExeFull -Algorithm SHA256).Hash.ToUpperInvariant() -ne $attested.exeSha256 -or (Get-FileHash -LiteralPath (Join-Path $staging $ExeName) -Algorithm SHA256).Hash.ToUpperInvariant() -ne $attested.exeSha256) { throw 'Release EXE changed during staging copy' }
     if ((Get-FileHash -LiteralPath $attestationFull -Algorithm SHA256).Hash.ToUpperInvariant() -ne $attested.attestationSha256 -or (Get-FileHash -LiteralPath (Join-Path $staging 'BUILD-ATTESTATION.json') -Algorithm SHA256).Hash.ToUpperInvariant() -ne $attested.attestationSha256) { throw 'build attestation changed during staging copy' }
@@ -1005,7 +1025,7 @@ try {
 
     Write-Utf8NoBom -Path (Join-Path $staging 'mir2-client.toml') -Text $candidateToml
     $readmeRoot = Join-Path $PSScriptRoot 'player-readme'
-    $readmeParts = foreach ($language in @('zh-TW', 'en', 'pt-BR')) {
+    $readmeParts = foreach ($language in @('zh-TW', 'en', 'pt-BR', 'ru', 'hi', 'id', 'vi', 'th', 'ar')) {
         Get-Content -LiteralPath (Join-Path $readmeRoot ("README." + $language + ".txt")) -Raw -Encoding UTF8
     }
     Write-Utf8NoBom -Path (Join-Path $staging 'README-START.txt') -Text ("$CandidateVersion`n$GatewayWsUrl`n`n" + ($readmeParts -join "`n`n"))
