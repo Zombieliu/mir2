@@ -1,0 +1,40 @@
+[package]
+name = "mir2-windows-updater"
+version = "1.0.0"
+edition = "2021"
+publish = false
+license = "MIT"
+
+[workspace]
+
+[lib]
+name = "mir2_windows_updater"
+
+[[bin]]
+name = "Mir2Launcher"
+path = "src/bin/launcher.rs"
+
+[[bin]]
+name = "Mir2Updater"
+path = "src/bin/updater.rs"
+
+[dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+ureq = { version = "2.12", default-features = false, features = ["tls"] }
+url = "2"
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61.2", features = ["Win32_Foundation", "Win32_Security", "Win32_Security_Cryptography", "Win32_System_Threading", "Win32_System_Diagnostics_ToolHelp", "Win32_Storage_FileSystem", "Win32_System_LibraryLoader", "Win32_UI_WindowsAndMessaging", "Win32_UI_Controls", "Win32_UI_HiDpi", "Win32_Graphics_Gdi", "Win32_Globalization"] }
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"

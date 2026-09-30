@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-01 native automatic updating is now implemented in a separate small
+> launcher/engine crate, with pinned CMS, per-file delta downloads, journaled
+> recovery and first-launch rollback. Updater18/18, archive28/3platform skips,
+> nine-language installer input closure and syntax-only Inno checks pass.
+> Clean build, real r5→r6 delta, r7 setup and public feed gates remain active.
+> Capacity stays paused; no game/save deployment by this change.
+> [Evidence](generated/player-qa/native-updater-20261001/README.md).
+
 > 2026-09-30 NPC-shop/supply regression: code and focused/full shared checks pass
 > (1158/0);36 targeted GPU captures verify actual service-open placement and
 > selected vendor names across nine locales without system fonts. Clean f8800b9a0
