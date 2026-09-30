@@ -2,6 +2,8 @@
 
 Status on 2026-09-30: the native client implements nine selectable presentation languages and has complete generated key sets for the six additions. **Key coverage and passing structural tests do not certify fluent translation or final Windows/GPU acceptance.** The previous [three-language proposal](NATIVE-MULTILINGUAL-DESIGN.md) is a historical design, not the current allowlist or implementation status.
 
+The nine-language r5 internal installer is now built, with a clean-source attestation, a passing 123,035-file package verification and a passing Inno build. [Exact version, hashes, evidence and limits](generated/player-qa/native-nine-languages-20260930/r5-installer-handoff.md) are retained. It is not publicly Authenticode-signed; clean-laptop launch and the reported error 4551 remain unaccepted.
+
 ## Language selection and persistence
 
 The exact persisted/runtime allowlist in [native_i18n.rs](../apps/game-client/client-bevy/src/native_i18n.rs) is:

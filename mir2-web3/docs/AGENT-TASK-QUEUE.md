@@ -1,5 +1,12 @@
 # Agent Task Queue
 
+> 2026-09-30 nine-language r5 internal installer delivered from clean `c7eacee12`:
+> strict 123,035-file Candidate and independent installer-input checks pass;
+> Inno exits 0, setup is 602,942,741 bytes. Setup/game remain `NotSigned`.
+> Public signing identity, affected-laptop policy evidence and clean-PC/human
+> acceptance remain open. No server or saved-player change; capacity stays paused.
+> [Exact release handoff](generated/player-qa/native-nine-languages-20260930/r5-installer-handoff.md).
+
 > 2026-09-30 nine-language native expansion: en/zh-TW/pt-BR plus ru/hi/id/vi/th/ar;
 > six complete 9,385-key overlays, bundled script fonts, grapheme-safe labels,
 > fixed language popup/search and measured quest/help layout. Shared 1,153,

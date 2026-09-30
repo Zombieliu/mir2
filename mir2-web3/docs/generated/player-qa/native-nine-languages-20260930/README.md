@@ -2,6 +2,8 @@
 
 The native client supports selecting en, zh-TW, pt-BR, ru, hi, id, vi, th and ar in one binary. These are implementation and automated visual results, not native-speaker acceptance or clean-PC launch acceptance. Public signing is still an external release blocker for the reported application-control failure.
 
+The **r5 internal installer is built** from clean source `c7eacee12599a535065ddfe81c0539450f65a5bb`: strict 123,035-file package verification and independent installer-input verification pass, and Inno exits 0. Setup and game EXE remain `NotSigned`. See the [exact installer handoff](r5-installer-handoff.md) and [machine-readable receipt](r5-installer-receipt.json); this does not resolve the other laptop's error 4551.
+
 ## Verification
 
 | Check | Result |
