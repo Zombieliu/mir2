@@ -2,8 +2,9 @@
 
 > 2026-09-30 NPC-shop/supply regression: code and focused/full shared checks pass
 > (1158/0);36 targeted GPU captures verify actual service-open placement and
-> selected vendor names across nine locales without system fonts. r6 build and
-> package delivery are next. The running F-drive client remains untouched.
+> selected vendor names across nine locales without system fonts. Clean f8800b9a0
+> Release, strict123035-file Candidate and r6 installer are built and verified.
+> The installed F-drive client remains untouched.
 > Native automatic updating is an identified distribution gap, not implemented
 > by this hotfix. Capacity remains paused.
 > [Evidence](generated/player-qa/shop-supply-r6-20260930/README.md).

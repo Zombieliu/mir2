@@ -50,8 +50,9 @@ production ordering and asserts visible medicine icons.
 
 ## Distribution
 
-The r6 recipe retains all nine languages and the existing installation identity.
-Its full build/package receipt is recorded separately after release checks.
+The r6 installer is built and retains all nine languages and the existing
+installation identity. Its strict package and installer-input checks pass;
+Inno exits 0. See [the exact build/package handoff](r6-installer-handoff.md).
 The running F-drive client is preserved; these tests create no native window or
 network connection. Public publisher signing and the other laptop's 4551 policy
 failure remain separate open issues from r5.

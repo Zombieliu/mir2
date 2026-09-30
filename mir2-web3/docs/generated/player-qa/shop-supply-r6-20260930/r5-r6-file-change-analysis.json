@@ -1,0 +1,28 @@
+{
+  "kind": "file-change-analysis-only-not-an-updater",
+  "old": "WN-CANDIDATE-20260930-invited-05",
+  "new": "WN-CANDIDATE-20260930-invited-06",
+  "changedPayloadFiles": [
+    {
+      "path": "BUILD-ATTESTATION.json",
+      "bytes": 1493
+    },
+    {
+      "path": "README-START.txt",
+      "bytes": 36350
+    },
+    {
+      "path": "mir2-platform-windows.exe",
+      "bytes": 110327808
+    }
+  ],
+  "removedPayloadFiles": [],
+  "unchangedPayloadFileCount": 123028,
+  "changedPayloadBytes": 110365651,
+  "metadataFilesRequiredSeparately": [
+    "PACKAGE-MANIFEST.json",
+    "VERSION.json",
+    "RELEASE-STATEMENT.json",
+    "RELEASE-STATEMENT.p7s"
+  ]
+}
