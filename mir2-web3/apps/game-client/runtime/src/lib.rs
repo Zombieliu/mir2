@@ -1,4 +1,6 @@
 mod additive_material;
+#[cfg(any(target_os = "android", test))]
+mod android_schedule_cleanup;
 pub mod capture_context;
 pub mod entity_animation;
 mod entity_animation_bridge;
@@ -1772,33 +1774,20 @@ fn gate_android_camera_while_surface_rebuilds(
 fn remove_unsupported_android_oit_systems(app: &mut App) {
     use bevy::{
         core_pipeline::oit::{init_oit_buffers, prepare_oit_buffers},
-        ecs::schedule::{ScheduleCleanupPolicy, Schedules},
         render::{Render, RenderApp, RenderStartup},
     };
 
     let render_app = app
         .get_sub_app_mut(RenderApp)
         .expect("Android renderer must initialize the RenderApp");
-    render_app
-        .world_mut()
-        .resource_scope(|world, mut schedules: Mut<Schedules>| {
-            schedules
-                .remove_systems_in_set(
-                    RenderStartup,
-                    init_oit_buffers,
-                    world,
-                    ScheduleCleanupPolicy::RemoveSystemsOnly,
-                )
-                .expect("Bevy OIT startup system must be present");
-            schedules
-                .remove_systems_in_set(
-                    Render,
-                    prepare_oit_buffers,
-                    world,
-                    ScheduleCleanupPolicy::RemoveSystemsOnly,
-                )
-                .expect("Bevy OIT prepare system must be present");
-        });
+    android_schedule_cleanup::remove_systems(
+        render_app.world_mut(),
+        RenderStartup,
+        init_oit_buffers,
+    )
+    .expect("Bevy OIT startup system must be present");
+    android_schedule_cleanup::remove_systems(render_app.world_mut(), Render, prepare_oit_buffers)
+        .expect("Bevy OIT prepare system must be present");
 }
 
 #[cfg(target_os = "android")]
