@@ -99,9 +99,9 @@ use super::movement::{current_location, town_revive_packets};
 use super::npc::{
     buy_item_impl, crystal_npc_object_in_data_range, crystal_npc_object_visible_in_world,
     crystal_npc_visible_to_character_for_profile, crystal_quest_ids_by_npc, dismiss_dialog,
-    sell_item_impl,
-    CrystalNpcLocalTime, NpcFlagState,
+    sell_item_impl, CrystalNpcLocalTime, NpcFlagState,
 };
+use super::quests::quest_recurrence::{quest_completion_is_permanent, refresh_quest_recurrence};
 use super::quests::{
     abandon_quest, begin_quest, can_accept_quest, complete_quest_with_selection,
     completed_quest_ids, crystal_npc_quest_icon, crystal_quest_finish_npc_matches,
@@ -109,9 +109,6 @@ use super::quests::{
     crystal_quest_start_npc_matches, crystal_quest_task_list, effective_crystal_quest_info_by_id,
     effective_quest_ids_for_npc, ensure_runtime_quest, newcomer_daily_bonus_update_packet,
     quest_definition_exists, quest_log_snapshots, quest_template_by_id,
-};
-use super::quests::quest_recurrence::{
-    quest_completion_is_permanent, refresh_quest_recurrence,
 };
 use super::rental::{
     cancel_item_rental_impl, confirm_item_rental_impl, deposit_rental_item_impl,
@@ -244,13 +241,18 @@ fn stage5_mail_cost(gold: u32, items: &[ItemState], has_stamp: bool) -> Option<u
     if has_stamp {
         return Some(0);
     }
-    items.iter().try_fold((gold / 1_000).checked_mul(MAIL_GOLD_COST_PER_1K)?, |cost, item| {
-        let template = crystal_item_template_for_item_key(&item.key)?;
-        let price = crystal_item_current_price(item, &template, crystal_item_added_stat_weight(item));
-        // Match PlayerObject.GetMailCost's double division and per-item floor.
-        let insurance = ((f64::from(price) / 100.0) * f64::from(MAIL_INSURANCE_PERCENT)).floor() as u32;
-        cost.checked_add(insurance)
-    })
+    items.iter().try_fold(
+        (gold / 1_000).checked_mul(MAIL_GOLD_COST_PER_1K)?,
+        |cost, item| {
+            let template = crystal_item_template_for_item_key(&item.key)?;
+            let price =
+                crystal_item_current_price(item, &template, crystal_item_added_stat_weight(item));
+            // Match PlayerObject.GetMailCost's double division and per-item floor.
+            let insurance =
+                ((f64::from(price) / 100.0) * f64::from(MAIL_INSURANCE_PERCENT)).floor() as u32;
+            cost.checked_add(insurance)
+        },
+    )
 }
 
 struct Stage5MailParcelPlan {
@@ -260,34 +262,61 @@ struct Stage5MailParcelPlan {
 }
 
 fn stage5_mail_parcel_plan(
-    inventory: &[ItemState], gold: u32, items_idx: &[u64; 5], stamped: bool,
+    inventory: &[ItemState],
+    gold: u32,
+    items_idx: &[u64; 5],
+    stamped: bool,
 ) -> Option<Stage5MailParcelPlan> {
     let ids = stage5_mail_attachment_ids(items_idx)?;
-    let stamp = stamped.then(|| inventory.iter().find(|item| {
-        matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-            && item.quantity > 0
-            && exact_mail_item_state_is_valid(item)
-            && crystal_item_template_for_item_key(&item.key)
-                .is_some_and(|template| template.item_type == 0 && template.shape == 1)
-    })).flatten().cloned();
+    let stamp = stamped
+        .then(|| {
+            inventory.iter().find(|item| {
+                matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+                    && item.quantity > 0
+                    && exact_mail_item_state_is_valid(item)
+                    && crystal_item_template_for_item_key(&item.key)
+                        .is_some_and(|template| template.item_type == 0 && template.shape == 1)
+            })
+        })
+        .flatten()
+        .cloned();
     if let Some(stamp) = &stamp {
         let id = item_unique_id(stamp);
         // A stamp cannot pay postage and also be mailed; reject the ambiguous
         // request rather than relying on attachment ordering or stack counts.
-        if ids.contains(&id) || inventory.iter().filter(|item| item_unique_id(item) == id).count() != 1 {
+        if ids.contains(&id)
+            || inventory
+                .iter()
+                .filter(|item| item_unique_id(item) == id)
+                .count()
+                != 1
+        {
             return None;
         }
     } else if items_idx[1..].iter().any(|id| *id != 0) {
         return None;
     }
-    let attachments = ids.iter().map(|id| {
-        let matches = inventory.iter().filter(|item| item_matches_inventory_unique_id(item, *id)).collect::<Vec<_>>();
-        let [item] = matches.as_slice() else { return None; };
-        (matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
-            && stage5_mail_item_allowed(item)).then(|| (*item).clone())
-    }).collect::<Option<Vec<_>>>()?;
+    let attachments = ids
+        .iter()
+        .map(|id| {
+            let matches = inventory
+                .iter()
+                .filter(|item| item_matches_inventory_unique_id(item, *id))
+                .collect::<Vec<_>>();
+            let [item] = matches.as_slice() else {
+                return None;
+            };
+            (matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+                && stage5_mail_item_allowed(item))
+            .then(|| (*item).clone())
+        })
+        .collect::<Option<Vec<_>>>()?;
     let cost = stage5_mail_cost(gold, &attachments, stamp.is_some())?;
-    Some(Stage5MailParcelPlan { cost, stamp, attachments })
+    Some(Stage5MailParcelPlan {
+        cost,
+        stamp,
+        attachments,
+    })
 }
 
 fn stage5_mail_quote(world: &World, gold: u32, items_idx: &[u64; 5], stamped: bool) -> Option<u32> {
@@ -295,12 +324,18 @@ fn stage5_mail_quote(world: &World, gold: u32, items_idx: &[u64; 5], stamped: bo
     let config = &world.resource::<RuntimeConfigResource>().config;
     let store = config.account_store.lock().ok()?;
     let account = store.accounts.get(&sender.account_id)?;
-    let character = account.characters.iter().find(|character| character.index == sender.character_index && character.name == sender.character_name)?;
+    let character = account.characters.iter().find(|character| {
+        character.index == sender.character_index && character.name == sender.character_name
+    })?;
     let save = account.saves.get(&character.index)?;
     if save.character.index != character.index || save.character.name != character.name {
         return None;
     }
-    let inventory = save.inventory_items_json.iter().map(|state| serde_json::from_str::<ItemState>(state).ok()).collect::<Option<Vec<_>>>()?;
+    let inventory = save
+        .inventory_items_json
+        .iter()
+        .map(|state| serde_json::from_str::<ItemState>(state).ok())
+        .collect::<Option<Vec<_>>>()?;
     stage5_mail_parcel_plan(&inventory, gold, items_idx, stamped).map(|plan| plan.cost)
 }
 
@@ -555,13 +590,20 @@ fn stage5_commit_mail_transaction(
             Some(target_save)
         };
         let sender_baseline_revision = sender_save.revision;
-        let durable_inventory = sender_save.inventory_items_json.iter()
+        let durable_inventory = sender_save
+            .inventory_items_json
+            .iter()
             .map(|state| serde_json::from_str::<ItemState>(state))
             .collect::<Result<Vec<_>, _>>()
             .map_err(|error| format!("invalid parcel inventory: {error}"))?;
-        let durable_plan = stage5_mail_parcel_plan(&durable_inventory, mail.gold, items_idx, stamped)
-            .ok_or_else(|| "parcel ownership or postage changed before commit".to_string())?;
-        let durable_stamp_json = durable_plan.stamp.as_ref().map(serde_json::to_string).transpose()
+        let durable_plan =
+            stage5_mail_parcel_plan(&durable_inventory, mail.gold, items_idx, stamped)
+                .ok_or_else(|| "parcel ownership or postage changed before commit".to_string())?;
+        let durable_stamp_json = durable_plan
+            .stamp
+            .as_ref()
+            .map(serde_json::to_string)
+            .transpose()
             .map_err(|error| format!("invalid parcel stamp: {error}"))?;
         if durable_stamp_json.as_deref() != expected_stamp_state_json
             || mail.gold.checked_add(durable_plan.cost) != Some(total)
@@ -579,9 +621,14 @@ fn stage5_commit_mail_transaction(
             .ok_or_else(|| "sender gold changed before mail commit".to_string())?;
         if let Some(mut stamp) = durable_plan.stamp {
             let stamp_id = item_unique_id(&stamp);
-            let index = sender_save.inventory_items_json.iter().position(|state| {
-                serde_json::from_str::<ItemState>(state).is_ok_and(|item| item_unique_id(&item) == stamp_id)
-            }).ok_or_else(|| "parcel stamp disappeared before commit".to_string())?;
+            let index = sender_save
+                .inventory_items_json
+                .iter()
+                .position(|state| {
+                    serde_json::from_str::<ItemState>(state)
+                        .is_ok_and(|item| item_unique_id(&item) == stamp_id)
+                })
+                .ok_or_else(|| "parcel stamp disappeared before commit".to_string())?;
             if stamp.quantity == 1 {
                 sender_save.inventory_items_json.remove(index);
             } else {
@@ -766,7 +813,10 @@ fn stage5_send_mail_packet(
         return vec![ServerPacket::MailSent { result: -1 }];
     };
     let Some(plan) = stage5_mail_parcel_plan(
-        &world.resource::<InventoryResource>().inventory_items, gold, &items_idx, stamped,
+        &world.resource::<InventoryResource>().inventory_items,
+        gold,
+        &items_idx,
+        stamped,
     ) else {
         return vec![ServerPacket::MailSent { result: -1 }];
     };
@@ -780,7 +830,8 @@ fn stage5_send_mail_packet(
         return vec![ServerPacket::MailSent { result: -1 }];
     };
 
-    let item_states_json = match plan.attachments
+    let item_states_json = match plan
+        .attachments
         .iter()
         .map(serde_json::to_string)
         .collect::<Result<Vec<_>, _>>()
@@ -851,7 +902,10 @@ fn stage5_send_mail_packet(
         .inventory_items
         .iter()
         .filter_map(|item| {
-            let remaining = committed_quantities.get(&item_unique_id(item)).copied().unwrap_or(0);
+            let remaining = committed_quantities
+                .get(&item_unique_id(item))
+                .copied()
+                .unwrap_or(0);
             let removed = item.quantity.saturating_sub(remaining);
             (removed > 0).then_some((item_unique_id(item), removed))
         })
@@ -1356,17 +1410,64 @@ fn stage5_hero_information_packet(world: &World) -> Option<ServerPacket> {
     let max_mp = super::hero_ai::hero_authoritative_stat(world, CRYSTAL_STAT_MP).max(0);
     let live = hero_entity(world).and_then(|entity| entity_player_vitals(world, entity));
     let saved = world.resource::<HeroInventoryResource>().saved_vitals;
-    let hp = live.map(|v|v.hp).or_else(||saved.map(|v|v.hp)).unwrap_or(max_hp);
-    let mp = live.map(|v|v.mp).or_else(||saved.map(|v|v.mp)).unwrap_or(max_mp);
-    let magics = world.resource::<Stage5SystemsResource>().stage5_systems.hero_learned_magics.iter().filter_map(|learned| {
-        let template = crystal_magic_by_spell(&format!("{:?}", learned.spell))?;
-        Some(mir2_protocol::ClientMagic {
-            name:template.name.clone(),spell:learned.spell,base_cost:template.base_cost,level_cost:template.level_cost,icon:template.icon,
-            level1:template.level1,level2:template.level2,level3:template.level3,need1:template.need1,need2:template.need2,need3:template.need3,
-            level:learned.level,key:learned.key,experience:learned.experience,
-            delay:i64::from(template.delay_base.saturating_sub(template.delay_reduction.saturating_mul(u32::from(learned.level))).max(1)),range:template.range,cast_time:super::hero_ai::hero_cast::cast_offset(world,learned.spell,i64::from(template.delay_base.saturating_sub(template.delay_reduction.saturating_mul(u32::from(learned.level))).max(1))),
+    let hp = live
+        .map(|v| v.hp)
+        .or_else(|| saved.map(|v| v.hp))
+        .unwrap_or(max_hp);
+    let mp = live
+        .map(|v| v.mp)
+        .or_else(|| saved.map(|v| v.mp))
+        .unwrap_or(max_mp);
+    let magics = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .hero_learned_magics
+        .iter()
+        .filter_map(|learned| {
+            let template = crystal_magic_by_spell(&format!("{:?}", learned.spell))?;
+            Some(mir2_protocol::ClientMagic {
+                name: template.name.clone(),
+                spell: learned.spell,
+                base_cost: template.base_cost,
+                level_cost: template.level_cost,
+                icon: template.icon,
+                level1: template.level1,
+                level2: template.level2,
+                level3: template.level3,
+                need1: template.need1,
+                need2: template.need2,
+                need3: template.need3,
+                level: learned.level,
+                key: learned.key,
+                experience: learned.experience,
+                delay: i64::from(
+                    template
+                        .delay_base
+                        .saturating_sub(
+                            template
+                                .delay_reduction
+                                .saturating_mul(u32::from(learned.level)),
+                        )
+                        .max(1),
+                ),
+                range: template.range,
+                cast_time: super::hero_ai::hero_cast::cast_offset(
+                    world,
+                    learned.spell,
+                    i64::from(
+                        template
+                            .delay_base
+                            .saturating_sub(
+                                template
+                                    .delay_reduction
+                                    .saturating_mul(u32::from(learned.level)),
+                            )
+                            .max(1),
+                    ),
+                ),
+            })
         })
-    }).collect();
+        .collect();
     Some(ServerPacket::HeroInformation {
         info: HeroUserInformation {
             object_id,
@@ -1392,9 +1493,24 @@ fn stage5_hero_information_packet(world: &World) -> Option<ServerPacket> {
 }
 
 pub(super) fn hero_bootstrap_packets(world: &World) -> Vec<ServerPacket> {
-    let Some(info)=stage5_hero_information_packet(world) else {return Vec::new();};
-    let class=world.resource::<Stage5SystemsResource>().stage5_systems.hero.as_ref().unwrap().class;
-    vec![ServerPacket::HeroBaseStatsInfo {stats:mir2_game_data::crystal_hero_settings().base_stats(class).clone()},info]
+    let Some(info) = stage5_hero_information_packet(world) else {
+        return Vec::new();
+    };
+    let class = world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .hero
+        .as_ref()
+        .unwrap()
+        .class;
+    vec![
+        ServerPacket::HeroBaseStatsInfo {
+            stats: mir2_game_data::crystal_hero_settings()
+                .base_stats(class)
+                .clone(),
+        },
+        info,
+    ]
 }
 
 fn stage5_current_hero_info(world: &World) -> Option<ClientHeroInformation> {
@@ -1425,86 +1541,201 @@ fn stage5_hero_ready_for_inventory(world: &World) -> bool {
         && current_hero_object_id(world).is_some()
 }
 
-fn transfer_hero_item_packet(world:&mut World,from:i32,to:i32)->Vec<ServerPacket> {
-    let failure=ServerPacket::TransferHeroItem {from,to,success:false};
-    if !stage5_hero_ready_for_inventory(world) {return vec![failure];}
-    let mut hero=world.resource::<HeroInventoryResource>().clone();
-    let Ok(hero_ids)=super::hero_inventory::validate_hero_custody(&hero) else {return vec![failure];};
-    let Some(from_slot)=u8::try_from(from).ok() else {return vec![failure];};
-    let Some(to_slot)=u8::try_from(to).ok().filter(|slot|*slot<hero.capacity) else {return vec![failure];};
-    let mut inventory=world.resource::<InventoryResource>().clone();
-    if !is_valid_inventory_slot(from_slot,inventory.inventory_capacity) || hero.items.iter().any(|item|item.slot==to_slot) {return vec![failure];}
-    let Some(index)=inventory.inventory_items.iter().position(|item|inventory_item_matches_index(item,from_slot)) else {return vec![failure];};
-    let mut item=inventory.inventory_items[index].clone();
-    if stage5_trade_reserves_item(world,&item) || item_has_crystal_or_rental_bind_flag(&item,CRYSTAL_BIND_NO_HERO) {return vec![failure];}
-    if item_unique_id(&item)==0 && item.user_item_metadata.is_none() && item.socketed.is_empty() {
+fn transfer_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
+    let failure = ServerPacket::TransferHeroItem {
+        from,
+        to,
+        success: false,
+    };
+    if !stage5_hero_ready_for_inventory(world) {
+        return vec![failure];
+    }
+    let mut hero = world.resource::<HeroInventoryResource>().clone();
+    let Ok(hero_ids) = super::hero_inventory::validate_hero_custody(&hero) else {
+        return vec![failure];
+    };
+    let Some(from_slot) = u8::try_from(from).ok() else {
+        return vec![failure];
+    };
+    let Some(to_slot) = u8::try_from(to).ok().filter(|slot| *slot < hero.capacity) else {
+        return vec![failure];
+    };
+    let mut inventory = world.resource::<InventoryResource>().clone();
+    if !is_valid_inventory_slot(from_slot, inventory.inventory_capacity)
+        || hero.items.iter().any(|item| item.slot == to_slot)
+    {
+        return vec![failure];
+    }
+    let Some(index) = inventory
+        .inventory_items
+        .iter()
+        .position(|item| inventory_item_matches_index(item, from_slot))
+    else {
+        return vec![failure];
+    };
+    let mut item = inventory.inventory_items[index].clone();
+    if stage5_trade_reserves_item(world, &item)
+        || item_has_crystal_or_rental_bind_flag(&item, CRYSTAL_BIND_NO_HERO)
+    {
+        return vec![failure];
+    }
+    if item_unique_id(&item) == 0 && item.user_item_metadata.is_none() && item.socketed.is_empty() {
         // Legacy slot-zero roots have no global identity. Promote only this
         // staged root before crossing custody; an exact sidecar UID is never
         // rewritten, and failure leaves the old personal carrier untouched.
-        inventory.reserved_item_unique_ids.extend(hero_ids.iter().copied());
+        inventory
+            .reserved_item_unique_ids
+            .extend(hero_ids.iter().copied());
         inventory.reserved_item_unique_ids.insert(0);
-        item.unique_id=super::inventory::allocate_item_unique_id(&inventory,item.container,item.slot);
-        let Ok(wire)=super::items::try_user_item_from_item_state(&item) else{return vec![failure];};
-        let Ok(promoted)=super::items::try_item_state_from_user_item(item,&wire) else{return vec![failure];};
-        item=promoted;inventory.inventory_items[index]=item.clone();
+        item.unique_id =
+            super::inventory::allocate_item_unique_id(&inventory, item.container, item.slot);
+        let Ok(wire) = super::items::try_user_item_from_item_state(&item) else {
+            return vec![failure];
+        };
+        let Ok(promoted) = super::items::try_item_state_from_user_item(item, &wire) else {
+            return vec![failure];
+        };
+        item = promoted;
+        inventory.inventory_items[index] = item.clone();
     }
-    if !super::item_custody::can_take(&inventory,&item) || super::hero_inventory::reject_cross_custody_ids(&item,&hero_ids).is_err() {return vec![failure];}
-    let weight=hero.items.iter().map(super::hero_inventory::item_weight).fold(0u32,u32::saturating_add).saturating_add(super::hero_inventory::item_weight(&item));
-    if weight>super::hero_ai::hero_authoritative_stat(world,super::crystal_compat::CRYSTAL_STAT_BAG_WEIGHT).max(0) as u32 {
-        return vec![system_message_key(world,"server.TooHeavyToTransfer"),failure];
+    if !super::item_custody::can_take(&inventory, &item)
+        || super::hero_inventory::reject_cross_custody_ids(&item, &hero_ids).is_err()
+    {
+        return vec![failure];
+    }
+    let weight = hero
+        .items
+        .iter()
+        .map(super::hero_inventory::item_weight)
+        .fold(0u32, u32::saturating_add)
+        .saturating_add(super::hero_inventory::item_weight(&item));
+    if weight
+        > super::hero_ai::hero_authoritative_stat(
+            world,
+            super::crystal_compat::CRYSTAL_STAT_BAG_WEIGHT,
+        )
+        .max(0) as u32
+    {
+        return vec![
+            system_message_key(world, "server.TooHeavyToTransfer"),
+            failure,
+        ];
     }
     inventory.inventory_items.remove(index);
-    item.slot=to_slot;item.container=ItemContainer::Bag1;
+    item.slot = to_slot;
+    item.container = ItemContainer::Bag1;
     hero.items.push(item);
-    let Ok(ids)=super::hero_inventory::validate_hero_custody(&hero) else {return vec![failure];};
+    let Ok(ids) = super::hero_inventory::validate_hero_custody(&hero) else {
+        return vec![failure];
+    };
     inventory.reserved_item_unique_ids.extend(ids);
-    *world.resource_mut::<InventoryResource>()=inventory;
-    *world.resource_mut::<HeroInventoryResource>()=hero;
-    let mut packets=vec![ServerPacket::TransferHeroItem {from,to,success:true}];
-    packets.extend(hero_bootstrap_packets(world));packets
+    *world.resource_mut::<InventoryResource>() = inventory;
+    *world.resource_mut::<HeroInventoryResource>() = hero;
+    let mut packets = vec![ServerPacket::TransferHeroItem {
+        from,
+        to,
+        success: true,
+    }];
+    packets.extend(hero_bootstrap_packets(world));
+    packets
 }
-fn take_back_hero_item_packet(world:&mut World,from:i32,to:i32)->Vec<ServerPacket> {
-    let failure=ServerPacket::TakeBackHeroItem {from,to,success:false};
-    if !stage5_hero_ready_for_inventory(world) {return vec![failure];}
-    let mut hero=world.resource::<HeroInventoryResource>().clone();
-    if super::hero_inventory::validate_hero_custody(&hero).is_err() {return vec![failure];}
-    let Some(from_slot)=u8::try_from(from).ok().filter(|slot|*slot<hero.capacity) else {return vec![failure];};
-    let Some(to_slot)=u8::try_from(to).ok() else {return vec![failure];};
-    let Some(index)=hero.items.iter().position(|item|item.slot==from_slot) else {return vec![failure];};
-    let item=hero.items.remove(index);
-    let Ok(held)=super::item_custody::reserved_ids(&world.resource::<Stage5SystemsResource>().stage5_systems) else {return vec![failure];};
-    if super::hero_inventory::reject_cross_custody_ids(&item,&held).is_err() {return vec![failure];}
-    let Some((mut inventory,_))=super::item_custody::plan_return(world.resource::<InventoryResource>(),&item,Some(to_slot),false) else {return vec![failure];};
-    let Ok(hero_ids)=super::hero_inventory::validate_hero_custody(&hero) else {return vec![failure];};
-    inventory.reserved_item_unique_ids=held;inventory.reserved_item_unique_ids.extend(hero_ids);
-    *world.resource_mut::<InventoryResource>()=inventory;
-    *world.resource_mut::<HeroInventoryResource>()=hero;
-    let mut packets=vec![ServerPacket::TakeBackHeroItem {from,to,success:true}];
-    packets.extend(hero_bootstrap_packets(world));packets
+fn take_back_hero_item_packet(world: &mut World, from: i32, to: i32) -> Vec<ServerPacket> {
+    let failure = ServerPacket::TakeBackHeroItem {
+        from,
+        to,
+        success: false,
+    };
+    if !stage5_hero_ready_for_inventory(world) {
+        return vec![failure];
+    }
+    let mut hero = world.resource::<HeroInventoryResource>().clone();
+    if super::hero_inventory::validate_hero_custody(&hero).is_err() {
+        return vec![failure];
+    }
+    let Some(from_slot) = u8::try_from(from).ok().filter(|slot| *slot < hero.capacity) else {
+        return vec![failure];
+    };
+    let Some(to_slot) = u8::try_from(to).ok() else {
+        return vec![failure];
+    };
+    let Some(index) = hero.items.iter().position(|item| item.slot == from_slot) else {
+        return vec![failure];
+    };
+    let item = hero.items.remove(index);
+    let Ok(held) = super::item_custody::reserved_ids(
+        &world.resource::<Stage5SystemsResource>().stage5_systems,
+    ) else {
+        return vec![failure];
+    };
+    if super::hero_inventory::reject_cross_custody_ids(&item, &held).is_err() {
+        return vec![failure];
+    }
+    let Some((mut inventory, _)) = super::item_custody::plan_return(
+        world.resource::<InventoryResource>(),
+        &item,
+        Some(to_slot),
+        false,
+    ) else {
+        return vec![failure];
+    };
+    let Ok(hero_ids) = super::hero_inventory::validate_hero_custody(&hero) else {
+        return vec![failure];
+    };
+    inventory.reserved_item_unique_ids = held;
+    inventory.reserved_item_unique_ids.extend(hero_ids);
+    *world.resource_mut::<InventoryResource>() = inventory;
+    *world.resource_mut::<HeroInventoryResource>() = hero;
+    let mut packets = vec![ServerPacket::TakeBackHeroItem {
+        from,
+        to,
+        success: true,
+    }];
+    packets.extend(hero_bootstrap_packets(world));
+    packets
 }
 
-fn consume_hero_inventory_item_at_index(world:&mut World,item_index:usize) {
-    let removed={
-        let mut hero=world.resource_mut::<HeroInventoryResource>();
-        let Some(item)=hero.items.get_mut(item_index) else {return;};
-        if item.quantity>1 {item.quantity-=1;None} else {Some(hero.items.remove(item_index))}
+fn consume_hero_inventory_item_at_index(world: &mut World, item_index: usize) {
+    let removed = {
+        let mut hero = world.resource_mut::<HeroInventoryResource>();
+        let Some(item) = hero.items.get_mut(item_index) else {
+            return;
+        };
+        if item.quantity > 1 {
+            item.quantity -= 1;
+            None
+        } else {
+            Some(hero.items.remove(item_index))
+        }
     };
-    if let Some(item)=removed {
-        if let Ok(carrier)=super::items::try_user_item_from_item_state(&item) {
-            let mut ids=BTreeSet::new();
-            if super::hero_inventory::collect_item_ids(&carrier,&mut ids).is_ok() {
-                let mut inventory=world.resource_mut::<InventoryResource>();
-                for id in ids {inventory.reserved_item_unique_ids.remove(&id);}
+    if let Some(item) = removed {
+        if let Ok(carrier) = super::items::try_user_item_from_item_state(&item) {
+            let mut ids = BTreeSet::new();
+            if super::hero_inventory::collect_item_ids(&carrier, &mut ids).is_ok() {
+                let mut inventory = world.resource_mut::<InventoryResource>();
+                for id in ids {
+                    inventory.reserved_item_unique_ids.remove(&id);
+                }
             }
         }
     }
 }
-fn hero_use_success(world:&World,unique_id:u64,mut packets:Vec<ServerPacket>)->Vec<ServerPacket> {
-    if let Some(vitals)=hero_entity(world).and_then(|entity|entity_player_vitals(world,entity)) {
-        packets.push(ServerPacket::HeroHealthChanged {hp:vitals.hp,mp:vitals.mp});
+fn hero_use_success(
+    world: &World,
+    unique_id: u64,
+    mut packets: Vec<ServerPacket>,
+) -> Vec<ServerPacket> {
+    if let Some(vitals) = hero_entity(world).and_then(|entity| entity_player_vitals(world, entity))
+    {
+        packets.push(ServerPacket::HeroHealthChanged {
+            hp: vitals.hp,
+            mp: vitals.mp,
+        });
     }
     packets.extend(hero_bootstrap_packets(world));
-    prepend_optional_packet(use_item_ack(Some((unique_id,MirGridType::HeroInventory)),true),packets)
+    prepend_optional_packet(
+        use_item_ack(Some((unique_id, MirGridType::HeroInventory)), true),
+        packets,
+    )
 }
 
 fn hero_use_item_failed(unique_id: u64) -> Vec<ServerPacket> {
@@ -1533,29 +1764,51 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
     else {
         return hero_use_item_failed(unique_id);
     };
-    if super::item_custody::refresh(world).is_err() {return hero_use_item_failed(unique_id);}
+    if super::item_custody::refresh(world).is_err() {
+        return hero_use_item_failed(unique_id);
+    }
     let item = world.resource::<HeroInventoryResource>().items[hero_item_index].clone();
     let ack = Some((unique_id, MirGridType::HeroInventory));
     let item_template = crystal_item_template_for_item_key(&item.key);
     let mut packets = Vec::new();
 
     if let Some(template) = item_template.as_ref() {
-        let hero=world.resource::<Stage5SystemsResource>().stage5_systems.hero.as_ref().unwrap();
-        if super::items::crystal_hero_item_requirement_rejected(world,hero.level,hero.class,hero.gender,template) || item.quantity==0 || super::items::validate_committed_item_state_carrier(&item).is_err() {
+        let hero = world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .unwrap();
+        if super::items::crystal_hero_item_requirement_rejected(
+            world,
+            hero.level,
+            hero.class,
+            hero.gender,
+            template,
+        ) || item.quantity == 0
+            || super::items::validate_committed_item_state_carrier(&item).is_err()
+        {
             return hero_use_item_failed(unique_id);
         }
-        if template.item_type==super::crystal_compat::CRYSTAL_ITEM_TYPE_SCROLL && template.shape==15 {
-            let capacity=world.resource::<HeroInventoryResource>().capacity;
-            if capacity>=42 {return vec![use_item_ack(ack,false).unwrap(),system_message_key(world,"server.HeroInventoryMax")];}
+        if template.item_type == super::crystal_compat::CRYSTAL_ITEM_TYPE_SCROLL
+            && template.shape == 15
+        {
+            let capacity = world.resource::<HeroInventoryResource>().capacity;
+            if capacity >= 42 {
+                return vec![
+                    use_item_ack(ack, false).unwrap(),
+                    system_message_key(world, "server.HeroInventoryMax"),
+                ];
+            }
             {
-                let mut hero=world.resource_mut::<HeroInventoryResource>();
+                let mut hero = world.resource_mut::<HeroInventoryResource>();
                 super::hero_inventory::expand_capacity(&mut hero);
             }
-            consume_hero_inventory_item_at_index(world,hero_item_index);
-            packets.push(system_message_key(world,"server.HeroInventoryIncreased"));
+            consume_hero_inventory_item_at_index(world, hero_item_index);
+            packets.push(system_message_key(world, "server.HeroInventoryIncreased"));
             // Hero.Enqueue drops ResizeInventory and the client routes that packet
             // to the player. Refresh this Hero's exact array instead.
-            return hero_use_success(world,unique_id,packets);
+            return hero_use_success(world, unique_id, packets);
         }
 
         if template.item_type == CRYSTAL_ITEM_TYPE_POTION && current_map_disallows_drug(world) {
@@ -1572,7 +1825,7 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
                 return prepend_optional_packet(use_item_ack(ack, false), packets);
             }
             consume_hero_inventory_item_at_index(world, hero_item_index);
-            return hero_use_success(world,unique_id,packets);
+            return hero_use_success(world, unique_id, packets);
         }
 
         if template.item_type == CRYSTAL_ITEM_TYPE_POTION
@@ -1594,13 +1847,13 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
                     }
                 }
             }
-            return hero_use_success(world,unique_id,packets);
+            return hero_use_success(world, unique_id, packets);
         }
 
         if let Some(magic) = crystal_learn_hero_book_magic(world, template) {
             packets.push(ServerPacket::NewMagic { magic, hero: true });
             consume_hero_inventory_item_at_index(world, hero_item_index);
-            return hero_use_success(world,unique_id,packets);
+            return hero_use_success(world, unique_id, packets);
         }
     }
 
@@ -1617,7 +1870,7 @@ fn use_hero_inventory_item_packet(world: &mut World, unique_id: u64) -> Vec<Serv
             return prepend_optional_packet(use_item_ack(ack, false), packets);
         }
         consume_hero_inventory_item_at_index(world, hero_item_index);
-        return hero_use_success(world,unique_id,packets);
+        return hero_use_success(world, unique_id, packets);
     }
 
     prepend_optional_packet(use_item_ack(ack, false), packets)
@@ -3568,12 +3821,8 @@ fn active_npc_allows_quest_request(
     finish: bool,
     selected_item_index: Option<i32>,
 ) -> bool {
-    if newcomer_diary_allows_quest_request_without_npc(
-        world,
-        quest_id,
-        requested_npc_index,
-        finish,
-    ) {
+    if newcomer_diary_allows_quest_request_without_npc(world, quest_id, requested_npc_index, finish)
+    {
         return true;
     }
 
@@ -3591,13 +3840,7 @@ fn active_npc_allows_quest_request(
         return false;
     }
 
-    if !quest_npc_matches_request(
-        world,
-        quest_id,
-        requested_npc_index,
-        finish,
-        npc_object_id,
-    ) {
+    if !quest_npc_matches_request(world, quest_id, requested_npc_index, finish, npc_object_id) {
         return false;
     }
 
@@ -3941,10 +4184,7 @@ pub(super) fn stage5_finish_quest_packet(
         return vec![system_message_key(world, "server.CannotHandInQuestBagFull")];
     }
     let mut packets = vec![
-        stage5_quest_remove_packet(
-            quest_id,
-            quest_completion_is_permanent(world, quest_id),
-        ),
+        stage5_quest_remove_packet(quest_id, quest_completion_is_permanent(world, quest_id)),
         ServerPacket::CompleteQuest {
             completed_quests: completed_quest_ids(world),
         },
@@ -6771,15 +7011,26 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         .selected_character
         .as_ref()
         .map(|character| (character.level, character.class));
-    let hero_viewer=stage5.stage5_systems.hero.as_ref().map(|hero|(hero.level,hero.class));
-    let hero_stats=super::hero_stats::compute(world);
-    let hero_vitals=stage5.stage5_systems.hero.as_ref().map(|_| {
-        let live=hero_entity(world).and_then(|entity|entity_player_vitals(world,entity));
-        let saved=hero_inventory.saved_vitals;
+    let hero_viewer = stage5
+        .stage5_systems
+        .hero
+        .as_ref()
+        .map(|hero| (hero.level, hero.class));
+    let hero_stats = super::hero_stats::compute(world);
+    let hero_vitals = stage5.stage5_systems.hero.as_ref().map(|_| {
+        let live = hero_entity(world).and_then(|entity| entity_player_vitals(world, entity));
+        let saved = hero_inventory.saved_vitals;
         crate::config::HeroVitalsSnapshot {
-            hp:live.map(|v|v.hp).or_else(||saved.map(|v|v.hp)).unwrap_or(hero_stats.get(12)),
-            mp:live.map(|v|v.mp).or_else(||saved.map(|v|v.mp)).unwrap_or(hero_stats.get(13)),
-            max_hp:hero_stats.get(12),max_mp:hero_stats.get(13),
+            hp: live
+                .map(|v| v.hp)
+                .or_else(|| saved.map(|v| v.hp))
+                .unwrap_or(hero_stats.get(12)),
+            mp: live
+                .map(|v| v.mp)
+                .or_else(|| saved.map(|v| v.mp))
+                .unwrap_or(hero_stats.get(13)),
+            max_hp: hero_stats.get(12),
+            max_mp: hero_stats.get(13),
         }
     });
     let tick = super::session::runtime_tick(world);
@@ -6841,7 +7092,14 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
         credit: player_runtime.credit,
         city_currencies,
         current_weight: current_weight(resources),
-        player_weights: tooltip_viewer.and_then(|(level,class)| super::player_weights::compute(resources,level,class,world.resource::<MountResource>().riding_mount)),
+        player_weights: tooltip_viewer.and_then(|(level, class)| {
+            super::player_weights::compute(
+                resources,
+                level,
+                class,
+                world.resource::<MountResource>().riding_mount,
+            )
+        }),
         max_weight,
         free_bag_slots: free_bag_slots(resources),
         max_bag_slots: crate::config::crystal_bag_slot_capacity(resources.inventory_capacity),
@@ -6892,22 +7150,27 @@ pub(super) fn build_world_snapshot(world: &World) -> WorldSnapshot {
             .iter()
             .map(|item| {
                 let mut snapshot = item.snapshot(language);
-                resolve_item_tooltip_source_for_viewer(
-                    &mut snapshot.tooltip_source,
-                    hero_viewer,
-                );
+                resolve_item_tooltip_source_for_viewer(&mut snapshot.tooltip_source, hero_viewer);
                 snapshot
             })
             .collect(),
-        hero_equipment_items:hero_inventory.equipment.iter().map(|item| {
-            let mut snapshot=item.snapshot(language);
-            resolve_item_tooltip_source_for_viewer(&mut snapshot.tooltip_source,hero_viewer);
-            snapshot
-        }).collect(),
-        hero_inventory_capacity:hero_inventory.capacity,
-        hero_stats:hero_stats.snapshot(),
+        hero_equipment_items: hero_inventory
+            .equipment
+            .iter()
+            .map(|item| {
+                let mut snapshot = item.snapshot(language);
+                resolve_item_tooltip_source_for_viewer(&mut snapshot.tooltip_source, hero_viewer);
+                snapshot
+            })
+            .collect(),
+        hero_inventory_capacity: hero_inventory.capacity,
+        hero_stats: hero_stats.snapshot(),
         hero_vitals,
-        hero_weights:crate::config::HeroWeightsSnapshot {bag:hero_stats.bag,wear:hero_stats.wear,hand:hero_stats.hand},
+        hero_weights: crate::config::HeroWeightsSnapshot {
+            bag: hero_stats.bag,
+            wear: hero_stats.wear,
+            hand: hero_stats.hand,
+        },
         storage_items: resources
             .storage_items
             .iter()
@@ -7329,7 +7592,10 @@ pub(super) fn start_game_account_social_and_shop_packets() -> Vec<ServerPacket> 
     packets
 }
 
-pub(super) fn apply_start_game_dynamic_game_shop_stock(world: &World, packets: &mut [ServerPacket]) {
+pub(super) fn apply_start_game_dynamic_game_shop_stock(
+    world: &World,
+    packets: &mut [ServerPacket],
+) {
     let individual_purchases = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -7512,8 +7778,11 @@ pub(super) fn start_game_static_visible_object_packets(
             .get(&object_id)
             .map(|ids| ids.iter().copied().collect())
             .unwrap_or_default();
-        for quest_id in super::quests::newcomer_progression::configured_quest_ids_for_npc(object_id).into_iter()
-            .chain(super::quests::newcomer_v2::configured_quest_ids_for_npc(object_id))
+        for quest_id in super::quests::newcomer_progression::configured_quest_ids_for_npc(object_id)
+            .into_iter()
+            .chain(super::quests::newcomer_v2::configured_quest_ids_for_npc(
+                object_id,
+            ))
         {
             if !quest_ids.contains(&quest_id) {
                 quest_ids.push(quest_id);
@@ -8461,7 +8730,7 @@ pub(super) fn visible_object_bundle_for_entity(
         let position = entry.get::<Position>()?.0.clone();
         let facing = entry.get::<Facing>()?.0;
         let body = entry.get::<CharacterBody>()?;
-        let looks=super::hero_inventory::appearance(world);
+        let looks = super::hero_inventory::appearance(world);
         return Some((
             object_id,
             VisibleObjectBundle {
@@ -8483,7 +8752,7 @@ pub(super) fn visible_object_bundle_for_entity(
                         weapon_effect: looks.weapon_effect,
                         armour: looks.armour,
                         poison: 0,
-                        dead: entry.get::<PlayerVitals>().is_some_and(|v|v.hp<=0),
+                        dead: entry.get::<PlayerVitals>().is_some_and(|v| v.hp <= 0),
                         hidden: false,
                         effect: 0,
                         wing_effect: looks.wing_effect,
@@ -8959,18 +9228,31 @@ impl SimulationSession {
             return Ok(packets);
         }
 
-        let xp_source = matches!(&packet,
-            ClientPacket::Attack{..}|ClientPacket::RangeAttack{..}|ClientPacket::Magic{..}
-            |ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}|ClientPacket::FinishQuest{..});
-        let before = if xp_source { self.begin_guild_experience_command(false)? } else { None };
+        let xp_source = matches!(
+            &packet,
+            ClientPacket::Attack { .. }
+                | ClientPacket::RangeAttack { .. }
+                | ClientPacket::Magic { .. }
+                | ClientPacket::CallNpc { .. }
+                | ClientPacket::NpcConfirmInput { .. }
+                | ClientPacket::FinishQuest { .. }
+        );
+        let before = if xp_source {
+            self.begin_guild_experience_command(false)?
+        } else {
+            None
+        };
         let journey_context = super::quests::newcomer_v2_events::command_context(&packet);
         let mut packets = self.handle_packet_impl(packet);
         let mut journey_packets = super::quests::newcomer_v2_events::observe_committed_command(
-            self.app.world_mut(), journey_context, &packets);
+            self.app.world_mut(),
+            journey_context,
+            &packets,
+        );
         packets.append(&mut journey_packets);
         recurrence_packets.append(&mut packets);
         let packets = self.finalize_packets(recurrence_packets);
-        self.finish_guild_experience_command(before,packets)
+        self.finish_guild_experience_command(before, packets)
     }
 
     fn handle_packet_impl(&mut self, packet: ClientPacket) -> Vec<ServerPacket> {
@@ -9048,7 +9330,9 @@ impl SimulationSession {
                 stage5_check_refine_packet(self.app.world_mut(), unique_id)
             }
             ClientPacket::SetAutoPotValue { stat, value } => {
-                if !matches!(stat, 12 | 13) { return Vec::new(); }
+                if !matches!(stat, 12 | 13) {
+                    return Vec::new();
+                }
                 let mut resources = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
                 let Some(hero) = resources.stage5_systems.hero.as_mut() else {
                     return Vec::new();
@@ -9070,9 +9354,13 @@ impl SimulationSession {
                 }
                 // The Crystal dialog admits only normal/sun potions. Enforce
                 // that same restriction at the authoritative packet boundary.
-                if item_index != 0 && !crystal_item_by_index(item_index).is_some_and(|item|
-                    item.item_type == CRYSTAL_ITEM_TYPE_POTION && item.shape <= 1
-                ) { return Vec::new(); }
+                if item_index != 0
+                    && !crystal_item_by_index(item_index).is_some_and(|item| {
+                        item.item_type == CRYSTAL_ITEM_TYPE_POTION && item.shape <= 1
+                    })
+                {
+                    return Vec::new();
+                }
                 let mut resources = self.app.world_mut().resource_mut::<Stage5SystemsResource>();
                 let Some(hero) = resources.stage5_systems.hero.as_mut() else {
                     return Vec::new();
@@ -9400,11 +9688,16 @@ impl SimulationSession {
             ClientPacket::MailLockedItem { unique_id, locked } => {
                 vec![ServerPacket::MailLockedItem { unique_id, locked }]
             }
-            ClientPacket::MailCost { gold, stamped, items_idx } => {
+            ClientPacket::MailCost {
+                gold,
+                stamped,
+                items_idx,
+            } => {
                 vec![ServerPacket::MailCost {
                     // This packet has no error field. An invalid quote must
                     // clear any old cheap/free quote, never authorize delivery.
-                    cost: stage5_mail_quote(self.app.world(), gold, &items_idx, stamped).unwrap_or(u32::MAX),
+                    cost: stage5_mail_quote(self.app.world(), gold, &items_idx, stamped)
+                        .unwrap_or(u32::MAX),
                 }]
             }
             ClientPacket::RequestIntelligentCreatureUpdates { update } => {
@@ -9994,7 +10287,14 @@ impl SimulationSession {
                     return Vec::new();
                 }
                 if Some(object_id) == current_hero_object_id(self.app.world()) {
-                    return super::hero_ai::hero_cast::manual_magic(self.app.world_mut(),object_id,spell,direction,target_id,location);
+                    return super::hero_ai::hero_cast::manual_magic(
+                        self.app.world_mut(),
+                        object_id,
+                        spell,
+                        direction,
+                        target_id,
+                        location,
+                    );
                 }
                 if object_id != 0 && Some(object_id) != current_player_object_id(self.app.world()) {
                     return Vec::new();
@@ -10286,11 +10586,15 @@ mod mail_status_transaction_tests {
         let mail: Stage5MailMessage = serde_json::from_value(serde_json::json!({
             "id": 42, "from": "System", "to": "Scout", "subject": "Old mail",
             "body": "No persisted date", "gold": 0, "claimed": false, "deleted": false
-        })).unwrap();
+        }))
+        .unwrap();
         let first = stage5_mail_to_client_mail(&mail);
         let again = stage5_mail_to_client_mail(&mail);
         assert_eq!(first.date_sent_binary_datetime, 0);
-        assert_eq!(again.date_sent_binary_datetime, first.date_sent_binary_datetime);
+        assert_eq!(
+            again.date_sent_binary_datetime,
+            first.date_sent_binary_datetime
+        );
         assert_eq!(again.mail_id, 42);
     }
     use crate::config::{
@@ -10376,16 +10680,17 @@ mod mail_status_transaction_tests {
             items_idx: [0; 5],
             stamped: false,
         });
-        assert!(packets.iter().any(
-            |packet| matches!(packet, ServerPacket::MailSent { result: 1 })
-        ));
+        assert!(packets
+            .iter()
+            .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
         assert!(packets.iter().any(|packet| {
             matches!(packet, ServerPacket::ReceiveMail { mail }
                 if mail.iter().any(|entry| entry.sender_name == "Scout" && entry.message == message))
         }));
         drop(session);
 
-        let reloaded = start_test_session(SimulationConfig::default().with_account_store_path(path));
+        let reloaded =
+            start_test_session(SimulationConfig::default().with_account_store_path(path));
         assert!(reloaded
             .world_snapshot()
             .stage5_systems

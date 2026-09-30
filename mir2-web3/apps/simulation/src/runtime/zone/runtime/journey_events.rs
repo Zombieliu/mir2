@@ -250,13 +250,25 @@ fn journey_public_healing_with_explicit_self_id_uses_self_route_at_full_and_part
             now_ms: 10,
         });
         let receipts = journey_receipts(&accepted);
-        assert_eq!(receipts.len(), 1, "explicit self target at {hp} HP must retain journey evidence");
-        assert_eq!(receipts[0].kind, ZoneJourneyEventKind::HealingAccepted { full_hp_exercise: hp == 100 });
+        assert_eq!(
+            receipts.len(),
+            1,
+            "explicit self target at {hp} HP must retain journey evidence"
+        );
+        assert_eq!(
+            receipts[0].kind,
+            ZoneJourneyEventKind::HealingAccepted {
+                full_hp_exercise: hp == 100
+            }
+        );
         assert_eq!(receipts[0].target_object_id, Some(101));
         assert_eq!(zone.players[&owner].mp, 9);
         zone.tick(510);
         if hp < 100 {
-            assert!(zone.players[&owner].hp > hp, "normal self healing still restores damaged HP");
+            assert!(
+                zone.players[&owner].hp > hp,
+                "normal self healing still restores damaged HP"
+            );
         } else {
             assert_eq!(zone.players[&owner].hp, 100);
         }

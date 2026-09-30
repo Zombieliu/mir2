@@ -31,12 +31,12 @@ use mir2_client_bevy::quest_model::{
     NearbyNpcModel, NpcDialogModel, NpcDialogOption, NpcDialogUpdate, Quest, QuestDetailText,
     QuestObjective, QuestReward, QuestStatus, QuestTracker, RecentPickup,
 };
-use mir2_client_bevy::quest_ui::{
-    pending_quest_turn_in_allows_interaction, quest_turn_in_ui_allows_interaction,
-    QuestUiIntent, QuestUiIntentQueue, QuestUiState,
-};
 #[cfg(test)]
 use mir2_client_bevy::quest_ui::begin_detail_quest_turn_in;
+use mir2_client_bevy::quest_ui::{
+    pending_quest_turn_in_allows_interaction, quest_turn_in_ui_allows_interaction, QuestUiIntent,
+    QuestUiIntentQueue, QuestUiState,
+};
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::social::{SocialModel, SocialPendingOperation};
 use serde_json::Value;
@@ -2512,18 +2512,17 @@ pub fn forward_quest_ui_intents(
                 let ongoing_target = movement
                     .as_deref()
                     .is_some_and(|state| state.attack_target() == Some(object_id));
-                let attack_actions_blocked = notice
-                    .as_deref()
-                    .is_some_and(NoticeDialogState::is_open)
-                    || dialog_open
-                    || dead
-                    || player_ui_state.as_deref().is_some_and(|ui| {
-                        if ongoing_target {
-                            ui.blocks_route_navigation()
-                        } else {
-                            ui.blocks_world_action(false, false)
-                        }
-                    });
+                let attack_actions_blocked =
+                    notice.as_deref().is_some_and(NoticeDialogState::is_open)
+                        || dialog_open
+                        || dead
+                        || player_ui_state.as_deref().is_some_and(|ui| {
+                            if ongoing_target {
+                                ui.blocks_route_navigation()
+                            } else {
+                                ui.blocks_world_action(false, false)
+                            }
+                        });
                 if attack_actions_blocked {
                     crate::movement_trace::record(serde_json::json!({
                         "type": "attackForwardBlocked",
@@ -4874,7 +4873,8 @@ mod tests {
     }
 
     fn ready_detail_turn_in_app() -> (App, std::sync::mpsc::Receiver<GatewayCommand>) {
-        let (mut app, receiver) = quest_gate_app(NativePlayerUiState::default(), NpcDialogModel::default());
+        let (mut app, receiver) =
+            quest_gate_app(NativePlayerUiState::default(), NpcDialogModel::default());
         let tracker = QuestTracker {
             active_quests: vec![Quest {
                 quest_index: 2110012,
@@ -4935,8 +4935,10 @@ mod tests {
             .insert_resource(state)
             .insert_resource(queue)
             .insert_resource(pending);
-        app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
-            mir2_ui_core::state::UiPanel::QuestLog;
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::QuestLog;
         (app, receiver)
     }
 
@@ -4951,9 +4953,17 @@ mod tests {
         app.update();
         assert!(matches!(
             receiver.try_command(),
-            Ok(GatewayCommand::Wire(NativeOutboundCommand::Interact { object_id: 24 }))
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::Interact {
+                object_id: 24
+            }))
         ));
-        assert!(matches!(receiver.try_command(), Err(std::sync::mpsc::TryRecvError::Empty)), "ordinary world interaction stays blocked");
+        assert!(
+            matches!(
+                receiver.try_command(),
+                Err(std::sync::mpsc::TryRecvError::Empty)
+            ),
+            "ordinary world interaction stays blocked"
+        );
     }
 
     #[test]
@@ -4995,7 +5005,10 @@ mod tests {
             }
             app.update();
             assert!(
-                matches!(receiver.try_command(), Err(std::sync::mpsc::TryRecvError::Empty)),
+                matches!(
+                    receiver.try_command(),
+                    Err(std::sync::mpsc::TryRecvError::Empty)
+                ),
                 "{rejection} must not send an NPC interaction"
             );
         }
@@ -5736,16 +5749,22 @@ mod tests {
         let mut movement = WorldPointerMovementState::default();
         movement.pursue_attack_target(42);
         app.insert_resource(movement);
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         app.update();
         assert!(matches!(
             receiver.try_recv(),
-            Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 42 }))
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack {
+                object_id: 42
+            }))
         ));
 
-        app.world_mut().resource_mut::<NativePlayerUiState>().toggle_options();
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_options();
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         app.update();
         assert!(receiver.try_recv().is_err(), "a modal still blocks combat");
@@ -5754,15 +5773,16 @@ mod tests {
     #[test]
     fn combat_batch_keeps_latest_target_and_saturated_lane_never_replays_old_attack() {
         let (sender, mut receiver) = crate::gateway::command_channel(8);
-        let (mut app, _unused_receiver) = quest_gate_app(
-            NativePlayerUiState::default(), NpcDialogModel::default(),
-        );
+        let (mut app, _unused_receiver) =
+            quest_gate_app(NativePlayerUiState::default(), NpcDialogModel::default());
         app.insert_resource(GatewayCommands::new(sender.clone()));
         app.insert_resource(WorldPointerMovementState::default());
         for _ in 0..8 {
-            assert!(sender.send(GatewayCommand::Player(crate::gateway::PlayerIntent::Walk {
-                direction: "up".to_owned(),
-            })).is_ok());
+            assert!(sender
+                .send(GatewayCommand::Player(crate::gateway::PlayerIntent::Walk {
+                    direction: "up".to_owned(),
+                }))
+                .is_ok());
         }
         {
             let mut queue = app.world_mut().resource_mut::<QuestUiIntentQueue>();
@@ -5770,21 +5790,42 @@ mod tests {
             queue.push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         }
         app.update();
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target(), Some(42));
-        assert!(app.world().resource::<QuestUiIntentQueue>().is_empty(),
-            "failed attacks must not remain ahead of the next target");
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target(),
+            Some(42)
+        );
+        assert!(
+            app.world().resource::<QuestUiIntentQueue>().is_empty(),
+            "failed attacks must not remain ahead of the next target"
+        );
         assert_eq!(app.world().resource::<QuestUiIntentQueue>().retry_len(), 0);
 
         assert!(receiver.try_command().is_ok());
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 43 });
         app.update();
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target(), Some(43));
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target(),
+            Some(43)
+        );
         let forwarded: Vec<_> = std::iter::from_fn(|| receiver.try_command().ok()).collect();
-        assert_eq!(forwarded.iter().filter(|command| matches!(command,
-            GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 43 })
-        )).count(), 1);
-        assert!(!forwarded.iter().any(|command| matches!(command,
+        assert_eq!(
+            forwarded
+                .iter()
+                .filter(|command| matches!(
+                    command,
+                    GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 43 })
+                ))
+                .count(),
+            1
+        );
+        assert!(!forwarded.iter().any(|command| matches!(
+            command,
             GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 41 | 42 })
         )));
     }
@@ -7638,12 +7679,14 @@ mod tests {
         );
         assert_eq!(
             crate::atlas::native_frame_geometry("/original-ui/NPC/45", 0)
-                .expect("Board geometry").width,
+                .expect("Board geometry")
+                .width,
             140
         );
         assert_eq!(
             crate::atlas::native_frame_geometry("/original-ui/NPC/08", 0)
-                .expect("Peter geometry").width,
+                .expect("Peter geometry")
+                .width,
             60
         );
     }
@@ -7665,7 +7708,10 @@ mod tests {
             "sprite": {"bodyLibrary": "NPC/08"}
         }]});
         adapter.apply_authoritative_overlay(&mut snapshot);
-        assert_eq!(snapshot["entities"][0]["sprite"]["bodyLibrary"], json!("NPC/08"));
+        assert_eq!(
+            snapshot["entities"][0]["sprite"]["bodyLibrary"],
+            json!("NPC/08")
+        );
 
         assert!(adapter.observe_packet(&PacketEvent::Other {
             packet: "NewNpcInfo".to_owned(),

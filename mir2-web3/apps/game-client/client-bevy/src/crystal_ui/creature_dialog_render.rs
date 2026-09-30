@@ -147,7 +147,7 @@ fn pickup_items_text(semi: &str, mouse: &str) -> String {
 #[cfg(test)]
 mod pickup_text_tests {
     use super::pickup_items_text;
-    use crate::native_i18n::{Locale, with_locale};
+    use crate::native_i18n::{with_locale, Locale};
 
     #[test]
     fn native_pickup_caption_preserves_both_explicit_fragments_in_all_locales() {

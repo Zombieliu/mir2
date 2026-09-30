@@ -9,8 +9,8 @@ use super::combat::{
 };
 use super::components::{
     entity_by_object_id, entity_name, entity_object_id, entity_player_vitals, entity_position,
-    player_entity, DisplayName, Facing, Hero, Monster, MonsterAgent, MonsterVitals, Npc,
-    ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef,
+    player_entity, DisplayName, Facing, Hero, Monster, MonsterAgent, MonsterVitals, Npc, ObjectId,
+    PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef,
 };
 use super::crystal_compat::*;
 use super::drops::{
@@ -55,8 +55,8 @@ use crate::runtime::zone::{
 };
 use mir2_game_data::{crystal_monster_by_name, CrystalMonsterTemplate, LanguageCode};
 use mir2_protocol::{
-    ChatItem, ClientBuff, ClientIntelligentCreature, ItemRentalInformation, Point, ServerPacket, Spell,
-    UserItemRentalInformation,
+    ChatItem, ClientBuff, ClientIntelligentCreature, ItemRentalInformation, Point, ServerPacket,
+    Spell, UserItemRentalInformation,
 };
 
 #[cfg(test)]
@@ -202,8 +202,13 @@ pub enum SharedItemRentalDelivery {
 }
 
 impl SimulationSession {
-    pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
-        super::skills::supports_magic_key_assignment(self.app.world(),spell,key,old_key)
+    pub fn supports_magic_key_assignment(
+        &self,
+        spell: mir2_protocol::Spell,
+        key: u8,
+        old_key: u8,
+    ) -> bool {
+        super::skills::supports_magic_key_assignment(self.app.world(), spell, key, old_key)
     }
     pub fn new(config: SimulationConfig) -> Self {
         let mut app = HeadlessRuntime::new();
@@ -770,7 +775,9 @@ impl SimulationSession {
                 }
                 let agent = entity.get::<MonsterAgent>()?;
                 if agent.dead
-                    || entity.get::<MonsterVitals>().is_some_and(|vitals| vitals.hp <= 0)
+                    || entity
+                        .get::<MonsterVitals>()
+                        .is_some_and(|vitals| vitals.hp <= 0)
                 {
                     return None;
                 }
@@ -1201,9 +1208,13 @@ impl SimulationSession {
             return Vec::new();
         };
         let tick = runtime_tick(world);
-        let mut packets = advance_magic_progression(world, index, receipt.spell.spell(), &magic, tick);
+        let mut packets =
+            advance_magic_progression(world, index, receipt.spell.spell(), &magic, tick);
         packets.extend(super::quests::newcomer_v2_events::record_spell_damage(
-            world, &magic.spell, receipt.cast_at_ms));
+            world,
+            &magic.spell,
+            receipt.cast_at_ms,
+        ));
         if !packets.is_empty() {
             advance_runtime_tick(world);
         }
@@ -1216,33 +1227,61 @@ impl SimulationSession {
         &mut self,
         receipt: super::zone::ZoneJourneyEventReceipt,
     ) -> Vec<ServerPacket> {
-        if !is_in_world(self.app.world()) { return Vec::new(); }
-        let Some(identity) = self.active_identity() else { return Vec::new(); };
-        if identity.account_id != receipt.account_id || identity.character_index != receipt.character_index
-            || !self.app.world().resource::<MapRuntimeResource>().current_map.file_name
-                .eq_ignore_ascii_case(&receipt.zone_key.map_file_name) {
+        if !is_in_world(self.app.world()) {
             return Vec::new();
         }
-        let packets = super::quests::newcomer_v2_events::record_zone_event(self.app.world_mut(), &receipt);
+        let Some(identity) = self.active_identity() else {
+            return Vec::new();
+        };
+        if identity.account_id != receipt.account_id
+            || identity.character_index != receipt.character_index
+            || !self
+                .app
+                .world()
+                .resource::<MapRuntimeResource>()
+                .current_map
+                .file_name
+                .eq_ignore_ascii_case(&receipt.zone_key.map_file_name)
+        {
+            return Vec::new();
+        }
+        let packets =
+            super::quests::newcomer_v2_events::record_zone_event(self.app.world_mut(), &receipt);
         self.finalize_packets(packets)
     }
 
     pub fn needs_zone_journey_evidence(&self) -> bool {
         let world = self.app.world();
-        super::quests::newcomer_v2::enabled(world) && is_in_world(world)
-            && world.resource::<QuestResource>().quests.iter().any(|quest|
-                quest.stage == crate::QuestStage::InProgress
-                    && super::quests::newcomer_v2::flag_objectives(world, quest.quest_id).iter().any(|flag|
-                        quest.task_progress.get(&format!("flag:{}", flag.number)).copied().unwrap_or(0) < 1))
+        super::quests::newcomer_v2::enabled(world)
+            && is_in_world(world)
+            && world
+                .resource::<QuestResource>()
+                .quests
+                .iter()
+                .any(|quest| {
+                    quest.stage == crate::QuestStage::InProgress
+                        && super::quests::newcomer_v2::flag_objectives(world, quest.quest_id)
+                            .iter()
+                            .any(|flag| {
+                                quest
+                                    .task_progress
+                                    .get(&format!("flag:{}", flag.number))
+                                    .copied()
+                                    .unwrap_or(0)
+                                    < 1
+                            })
+                })
     }
 
     pub fn commit_zone_journey_reposition(&mut self) -> Vec<ServerPacket> {
-        let packets = super::quests::newcomer_v2_events::record_legal_reposition(self.app.world_mut());
+        let packets =
+            super::quests::newcomer_v2_events::record_legal_reposition(self.app.world_mut());
         self.finalize_packets(packets)
     }
 
     pub fn commit_zone_journey_state(&mut self) -> Vec<ServerPacket> {
-        let packets = super::quests::newcomer_v2_events::refresh_state_conditions(self.app.world_mut());
+        let packets =
+            super::quests::newcomer_v2_events::refresh_state_conditions(self.app.world_mut());
         self.finalize_packets(packets)
     }
 

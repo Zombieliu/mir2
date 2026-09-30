@@ -32,32 +32,62 @@ fn nine_locale_medicine_shop_opens_beside_inventory_offscreen() {
             [min.x, min.y, min.x + node.size.x, min.y + node.size.y]
         };
         let world = app.world_mut();
-        let bag = world.query_filtered::<(&ComputedNode, &UiGlobalTransform), With<OverlayInventory>>()
-            .single(world).map(|(node, transform)| bounds(node, transform)).unwrap();
-        let shop = world.query_filtered::<(&ComputedNode, &UiGlobalTransform), With<OverlayShop>>()
-            .single(world).map(|(node, transform)| bounds(node, transform)).unwrap();
+        let bag = world
+            .query_filtered::<(&ComputedNode, &UiGlobalTransform), With<OverlayInventory>>()
+            .single(world)
+            .map(|(node, transform)| bounds(node, transform))
+            .unwrap();
+        let shop = world
+            .query_filtered::<(&ComputedNode, &UiGlobalTransform), With<OverlayShop>>()
+            .single(world)
+            .map(|(node, transform)| bounds(node, transform))
+            .unwrap();
         assert_eq!(bag, [445.0, 0.0, 761.0, 236.0]);
         assert_eq!(shop, [0.0, 224.0, 440.0, 558.0]);
-        assert!(shop[2] < bag[0], "real service open must leave both windows usable");
-        assert!(world.query_filtered::<&Node, With<OriginalItemImage>>().iter(world)
-            .filter(|node| node.display == Display::Flex).count() >= 2,
-            "the medicine icon must render in both the shop and bag");
+        assert!(
+            shop[2] < bag[0],
+            "real service open must leave both windows usable"
+        );
+        assert!(
+            world
+                .query_filtered::<&Node, With<OriginalItemImage>>()
+                .iter(world)
+                .filter(|node| node.display == Display::Flex)
+                .count()
+                >= 2,
+            "the medicine icon must render in both the shop and bag"
+        );
         let rows = i18n_text_layouts(&mut app);
         assert!(rows.len() >= 5);
-        failures.extend(rows.iter().filter(|row| row["glyphs"] == 0 || row["missingGlyphs"] != 0
-            || row["layoutExceedsNode"] != false || row["nodeOutsideViewport"] != false)
-            .map(|row| json!({"locale":locale.code(),"row":row})));
+        failures.extend(
+            rows.iter()
+                .filter(|row| {
+                    row["glyphs"] == 0
+                        || row["missingGlyphs"] != 0
+                        || row["layoutExceedsNode"] != false
+                        || row["nodeOutsideViewport"] != false
+                })
+                .map(|row| json!({"locale":locale.code(),"row":row})),
+        );
         let file = format!("{}-medicine-shop.png", locale.code());
         capture_i18n(&mut app, &target, &output.join(&file));
         evidence.push(json!({"file":file,"locale":locale.code(),"bagBounds":bag,"shopBounds":shop,"textRows":rows}));
     }
     native_i18n::activate(previous_locale);
-    fs::write(output.join("medicine-shop-layouts.json"), serde_json::to_vec_pretty(&json!({
-        "kind":"offline_production_npc_service_open","liveAcceptance":false,"systemFonts":false,
-        "class":"Warrior","level":9,"gold":700,"hpPotions":11,
-        "passed":failures.is_empty(),"layoutFailures":failures,"screenshots":evidence,
-    })).unwrap()).unwrap();
-    assert!(failures.is_empty(), "production shop text failures: {failures:?}");
+    fs::write(
+        output.join("medicine-shop-layouts.json"),
+        serde_json::to_vec_pretty(&json!({
+            "kind":"offline_production_npc_service_open","liveAcceptance":false,"systemFonts":false,
+            "class":"Warrior","level":9,"gold":700,"hpPotions":11,
+            "passed":failures.is_empty(),"layoutFailures":failures,"screenshots":evidence,
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+    assert!(
+        failures.is_empty(),
+        "production shop text failures: {failures:?}"
+    );
 }
 
 fn fixture_node(left: f32, top: f32, width: f32, height: f32) -> Node {

@@ -622,9 +622,7 @@ mod tests {
                 ))
             })
             .collect::<Vec<_>>();
-        targets.sort_by_key(|(id, position, distance)| {
-            (*distance, position.y, position.x, *id)
-        });
+        targets.sort_by_key(|(id, position, distance)| (*distance, position.y, position.x, *id));
         targets.into_iter().map(|(id, _, _)| id).collect()
     }
 

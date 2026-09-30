@@ -6,17 +6,17 @@
 
 use bevy::prelude::*;
 use bevy::text::LineBreak;
-use bevy::ui::{Node, PositionType, Val, widget::NodeImageMode};
+use bevy::ui::{widget::NodeImageMode, Node, PositionType, Val};
 use chrono::{DateTime, Local, Utc};
 
 use crate::native_i18n;
 use crate::native_shell::{CharacterSummary, NativeShellModel};
 
-use super::assets::{CrystalButtonAssetSet, frame_asset_path};
 use super::additive_ui::CrystalAdditiveUiMaterial;
-use super::preview_data::{PreviewFrame, preview_frames, preview_overlay_frames};
-use super::spec::{CrystalFrameSpec, CrystalRect, character_select as spec};
-use super::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
+use super::assets::{frame_asset_path, CrystalButtonAssetSet};
+use super::preview_data::{preview_frames, preview_overlay_frames, PreviewFrame};
+use super::spec::{character_select as spec, CrystalFrameSpec, CrystalRect};
+use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use super::widget::spawn_crystal_image_button;
 
 const WHITE: Color = Color::WHITE;
@@ -603,7 +603,10 @@ pub(crate) fn preview_render_state_for_tests(world: &mut World) -> Vec<serde_jso
     )>();
     let asset_server = world.resource::<AssetServer>();
     let Some(materials) = world.get_resource::<CrystalPreviewMaterials>() else {
-        assert!(query.iter(world).next().is_none(), "preview entities require their material cache");
+        assert!(
+            query.iter(world).next().is_none(),
+            "preview entities require their material cache"
+        );
         return Vec::new();
     };
     let pixels = |value| match value {
@@ -911,14 +914,12 @@ mod tests {
             redrawn.animation.as_ref().unwrap().elapsed().as_millis(),
             110
         );
-        assert!(
-            redrawn
-                .animation
-                .as_mut()
-                .unwrap()
-                .tick(std::time::Duration::from_millis(140))
-                .just_finished()
-        );
+        assert!(redrawn
+            .animation
+            .as_mut()
+            .unwrap()
+            .tick(std::time::Duration::from_millis(140))
+            .just_finished());
         for (base, anchor) in [
             (320, (338.0, 404.0)),
             (20, (338.0, 404.0)),

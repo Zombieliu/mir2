@@ -91,7 +91,14 @@ fn pearl_npc_purchase_uses_only_pearl_wallet_and_rejects_insufficient_funds() {
     );
     s.handle_packet(ClientPacket::LogOut);
     s.handle_packet(ClientPacket::StartGame { character_index: 0 });
-    assert_eq!(s.app.world().resource::<Stage5SystemsResource>().stage5_systems.intelligent_creature_pearls, 80);
+    assert_eq!(
+        s.app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .intelligent_creature_pearls,
+        80
+    );
     assert_eq!(s.app.world().resource::<PlayerRuntimeResource>().gold, gold);
 }
 

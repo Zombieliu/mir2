@@ -713,7 +713,14 @@ pub(super) struct HeroInventoryResource {
 
 impl HeroInventoryResource {
     pub(super) fn new() -> Self {
-        Self { items: Vec::new(), equipment: Vec::new(), capacity: 10, legacy_40: false, saved_vitals: None, registry_attachment: None }
+        Self {
+            items: Vec::new(),
+            equipment: Vec::new(),
+            capacity: 10,
+            legacy_40: false,
+            saved_vitals: None,
+            registry_attachment: None,
+        }
     }
 }
 
@@ -798,10 +805,8 @@ pub(super) struct QuestResource {
 
 impl QuestResource {
     pub(super) fn new() -> Self {
-        let newcomer_v1_cadence =
-            super::quests::quest_recurrence::server_newcomer_v1_enabled();
-        let newcomer_v2_cadence =
-            super::quests::quest_recurrence::server_newcomer_v2_enabled();
+        let newcomer_v1_cadence = super::quests::quest_recurrence::server_newcomer_v1_enabled();
+        let newcomer_v2_cadence = super::quests::quest_recurrence::server_newcomer_v2_enabled();
         Self {
             quests: Vec::new(),
             newcomer_v1_cadence,

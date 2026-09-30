@@ -270,7 +270,15 @@ fn trade_dialog_ecs_has_original_pair_positions_and_twenty_uncompacted_cells() {
                     position += Vec2::new(px_value(ancestor.left), px_value(ancestor.top));
                 }
             }
-            (*side, (Val::Px(position.x), Val::Px(position.y), node.width, node.height))
+            (
+                *side,
+                (
+                    Val::Px(position.x),
+                    Val::Px(position.y),
+                    node.width,
+                    node.height,
+                ),
+            )
         })
         .collect::<Vec<_>>();
     assert_eq!(windows.len(), 2);

@@ -849,35 +849,88 @@ fn creature_real_duration_relogin_keeps_remaining_not_full_duration() {
     assert!(packet.expire_time as u64 <= before && before - (packet.expire_time as u64) < 2000);
 }
 
-
 #[test]
 fn reward_rate_wonder_drug_changes_shared_experience_award_and_authoritative_drop_stats() {
-    let mut session=session();
+    let mut session = session();
     super::leveling::apply_level_change(session.app.world_mut(), 20);
-    let base=session.shared_monster_kill_experience_balance_delta(100);
-    assert!(base>0);
-    let (uid,_)=give_pet_item(&mut session,26);
+    let base = session.shared_monster_kill_experience_balance_delta(100);
+    assert!(base > 0);
+    let (uid, _) = give_pet_item(&mut session, 26);
     {
-        let mut inv=session.app.world_mut().resource_mut::<InventoryResource>();
-        inv.inventory_items.iter_mut().find(|i|i.unique_id==uid).unwrap().added_stats =
-            vec![mir2_protocol::UserItemStat{stat:100,value:20},mir2_protocol::UserItemStat{stat:101,value:50}];
+        let mut inv = session.app.world_mut().resource_mut::<InventoryResource>();
+        inv.inventory_items
+            .iter_mut()
+            .find(|i| i.unique_id == uid)
+            .unwrap()
+            .added_stats = vec![
+            mir2_protocol::UserItemStat {
+                stat: 100,
+                value: 20,
+            },
+            mir2_protocol::UserItemStat {
+                stat: 101,
+                value: 50,
+            },
+        ];
     }
-    assert!(use_uid(&mut session,uid).iter().any(|p|matches!(p,ServerPacket::UseItem{success:true,..})));
-    assert_eq!(session.shared_monster_kill_experience_balance_delta(100),base+base/5);
-    assert_eq!(session.zone_player_combat_stats().item_drop_rate_percent,50);
-    let award=session.commit_shared_monster_kill_award_transaction(990001,"Scarecrow",100);
+    assert!(use_uid(&mut session, uid)
+        .iter()
+        .any(|p| matches!(p, ServerPacket::UseItem { success: true, .. })));
+    assert_eq!(
+        session.shared_monster_kill_experience_balance_delta(100),
+        base + base / 5
+    );
+    assert_eq!(
+        session.zone_player_combat_stats().item_drop_rate_percent,
+        50
+    );
+    let award = session.commit_shared_monster_kill_award_transaction(990001, "Scarecrow", 100);
     assert!(award.committed);
-    let gained=award.packets.iter().find_map(|p|if let ServerPacket::GainExperience{amount}=p{Some(*amount)}else{None}).unwrap();
-    assert_eq!(i64::from(gained),base+base/5);
-    let before = session.app.world().resource::<super::resources::PlayerRuntimeResource>().experience;
+    let gained = award
+        .packets
+        .iter()
+        .find_map(|p| {
+            if let ServerPacket::GainExperience { amount } = p {
+                Some(*amount)
+            } else {
+                None
+            }
+        })
+        .unwrap();
+    assert_eq!(i64::from(gained), base + base / 5);
+    let before = session
+        .app
+        .world()
+        .resource::<super::resources::PlayerRuntimeResource>()
+        .experience;
     super::npc_script::crystal_npc_give_exp(session.app.world_mut(), &["100"]);
-    let after = session.app.world().resource::<super::resources::PlayerRuntimeResource>().experience;
-    assert_eq!(after - before, 120, "ordinary NPC XP uses the same active rate");
-    session.app.world_mut().resource_mut::<super::resources::BuffResource>().buffs.iter_mut()
-        .find(|buff| buff.key == "wonder-drug").unwrap().real_time_duration.as_mut().unwrap()
+    let after = session
+        .app
+        .world()
+        .resource::<super::resources::PlayerRuntimeResource>()
+        .experience;
+    assert_eq!(
+        after - before,
+        120,
+        "ordinary NPC XP uses the same active rate"
+    );
+    session
+        .app
+        .world_mut()
+        .resource_mut::<super::resources::BuffResource>()
+        .buffs
+        .iter_mut()
+        .find(|buff| buff.key == "wonder-drug")
+        .unwrap()
+        .real_time_duration
+        .as_mut()
+        .unwrap()
         .elapse_for_test(60_000);
     assert_eq!(session.zone_player_combat_stats().item_drop_rate_percent, 0);
-    assert_eq!(session.shared_monster_kill_experience_balance_delta(100), base);
+    assert_eq!(
+        session.shared_monster_kill_experience_balance_delta(100),
+        base
+    );
 }
 
 #[test]
@@ -886,16 +939,41 @@ fn creature_real_duration_world_snapshot_uses_clock_not_legacy_tick_deadline() {
     let (uid, _) = give_pet_item(&mut session, 26);
     use_uid(&mut session, uid);
     {
-        let mut buffs=session.app.world_mut().resource_mut::<super::resources::BuffResource>();
-        let buff=buffs.buffs.iter_mut().find(|buff|buff.key=="wonder-drug").unwrap();
-        buff.expires_at_tick=0;
+        let mut buffs = session
+            .app
+            .world_mut()
+            .resource_mut::<super::resources::BuffResource>();
+        let buff = buffs
+            .buffs
+            .iter_mut()
+            .find(|buff| buff.key == "wonder-drug")
+            .unwrap();
+        buff.expires_at_tick = 0;
     }
-    assert!(session.world_snapshot().active_buffs.iter().any(|buff|buff.key=="wonder-drug"));
+    assert!(session
+        .world_snapshot()
+        .active_buffs
+        .iter()
+        .any(|buff| buff.key == "wonder-drug"));
     {
-        let mut buffs=session.app.world_mut().resource_mut::<super::resources::BuffResource>();
-        let buff=buffs.buffs.iter_mut().find(|buff|buff.key=="wonder-drug").unwrap();
-        buff.expires_at_tick=u64::MAX;
-        buff.real_time_duration.as_mut().unwrap().elapse_for_test(60_000);
+        let mut buffs = session
+            .app
+            .world_mut()
+            .resource_mut::<super::resources::BuffResource>();
+        let buff = buffs
+            .buffs
+            .iter_mut()
+            .find(|buff| buff.key == "wonder-drug")
+            .unwrap();
+        buff.expires_at_tick = u64::MAX;
+        buff.real_time_duration
+            .as_mut()
+            .unwrap()
+            .elapse_for_test(60_000);
     }
-    assert!(!session.world_snapshot().active_buffs.iter().any(|buff|buff.key=="wonder-drug"));
+    assert!(!session
+        .world_snapshot()
+        .active_buffs
+        .iter()
+        .any(|buff| buff.key == "wonder-drug"));
 }

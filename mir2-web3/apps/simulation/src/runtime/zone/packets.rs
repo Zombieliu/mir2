@@ -34,11 +34,7 @@ pub(crate) fn object_player_packet(player: &ZonePlayer) -> ServerPacket {
             poison: player.poison,
             dead: player.dead,
             hidden: player.hidden,
-            effect: if !player.dead
-                && player
-                    .buffs
-                    .contains_key(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE)
-            {
+            effect: if !player.dead && player.buffs.contains_key(&CRYSTAL_MAGIC_SHIELD_BUFF_TYPE) {
                 CRYSTAL_MAGIC_SHIELD_UP_EFFECT
             } else {
                 player.effect
@@ -204,7 +200,9 @@ pub(crate) fn apply_observer_action_state(
             player.effect = 0;
         }
         ServerPacket::ObjectRevived { info } if info.object_id == owner_local_object_id => {
-            if player.dead { player.life_generation = player.life_generation.saturating_add(1); }
+            if player.dead {
+                player.life_generation = player.life_generation.saturating_add(1);
+            }
             player.dead = false;
             player.clear_status_poisons();
         }

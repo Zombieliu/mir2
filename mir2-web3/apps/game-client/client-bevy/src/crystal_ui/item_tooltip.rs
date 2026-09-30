@@ -1754,13 +1754,11 @@ mod tests {
                     let before = item.clone();
                     let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
                     let expected = native_i18n::format_key(key, "", &[("0", "12")]);
-                    assert!(
-                        document
-                            .sections
-                            .iter()
-                            .flat_map(|s| &s.lines)
-                            .any(|line| line.text == expected)
-                    );
+                    assert!(document
+                        .sections
+                        .iter()
+                        .flat_map(|s| &s.lines)
+                        .any(|line| line.text == expected));
                     assert_eq!(item, before, "display must not rewrite source stats");
                 }
             });
@@ -2219,13 +2217,11 @@ mod tests {
         };
         let document = crystal_item_tooltip_document(&item, &PlayerStats::default());
         assert!(!document.source_complete);
-        assert!(
-            !document
-                .sections
-                .iter()
-                .flat_map(|section| section.lines.iter())
-                .any(|line| line.text == "Potion")
-        );
+        assert!(!document
+            .sections
+            .iter()
+            .flat_map(|section| section.lines.iter())
+            .any(|line| line.text == "Potion"));
         assert!(document.plain_text().contains("Item Description"));
     }
 }

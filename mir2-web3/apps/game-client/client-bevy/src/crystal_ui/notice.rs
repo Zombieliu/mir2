@@ -657,13 +657,10 @@ mod tests {
                     state.title(),
                     native_i18n::key("shell.notice.default.title", DEFAULT_NOTICE_TITLE)
                 );
-                assert!(
-                    state
-                        .lines()
-                        .iter()
-                        .all(|line| UnicodeWidthStr::width(line.as_str())
-                            <= NOTICE_BODY_WRAP_COLUMNS)
-                );
+                assert!(state
+                    .lines()
+                    .iter()
+                    .all(|line| UnicodeWidthStr::width(line.as_str()) <= NOTICE_BODY_WRAP_COLUMNS));
                 assert_eq!(
                     notice_display_text("Password", "Warrior"),
                     ("Password".into(), "Warrior".into())
@@ -765,11 +762,9 @@ mod tests {
             "By clicking close and continuing to play the game you are agreeing to the terms of service above.",
         );
         assert!(lines.len() > 1, "expected notice body to wrap");
-        assert!(
-            lines
-                .iter()
-                .all(|line| UnicodeWidthStr::width(line.as_str()) <= NOTICE_BODY_WRAP_COLUMNS)
-        );
+        assert!(lines
+            .iter()
+            .all(|line| UnicodeWidthStr::width(line.as_str()) <= NOTICE_BODY_WRAP_COLUMNS));
     }
 
     #[test]
@@ -777,10 +772,8 @@ mod tests {
         let lines = normalize_notice_lines("Line one\r\n\r\nSUPERCODESUPERCODESUPERCODESUPERCODE");
         assert_eq!(lines[0], "Line one");
         assert_eq!(lines[1], "");
-        assert!(
-            lines[2..]
-                .iter()
-                .all(|line| UnicodeWidthStr::width(line.as_str()) <= NOTICE_BODY_WRAP_COLUMNS)
-        );
+        assert!(lines[2..]
+            .iter()
+            .all(|line| UnicodeWidthStr::width(line.as_str()) <= NOTICE_BODY_WRAP_COLUMNS));
     }
 }

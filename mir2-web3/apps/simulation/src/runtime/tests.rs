@@ -37819,12 +37819,10 @@ fn use_item_packet_dynamic_crystal_dungeon_escape_teleports_same_map() {
     config.map_collision.region_bounds.max_y = 700;
     config.map_collision.play_bounds = config.map_collision.region_bounds;
     config.map_collision.blocked_cells.clear();
-    config.spawn.x = (config.map_collision.region_bounds.min_x
-        + config.map_collision.region_bounds.max_x)
-        / 2;
-    config.spawn.y = (config.map_collision.region_bounds.min_y
-        + config.map_collision.region_bounds.max_y)
-        / 2;
+    config.spawn.x =
+        (config.map_collision.region_bounds.min_x + config.map_collision.region_bounds.max_x) / 2;
+    config.spawn.y =
+        (config.map_collision.region_bounds.min_y + config.map_collision.region_bounds.max_y) / 2;
     let mut session = SimulationSession::new(config);
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -40667,7 +40665,10 @@ fn return_incoming_item_tree_through_path(
                         .any(|item| i32::from(item.slot) == *slot)
                 })
                 .expect("hero take-back fixture should expose an empty bag slot");
-            let hero_packets = session.handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: to_slot });
+            let hero_packets = session.handle_packet(ClientPacket::TakeBackHeroItem {
+                from: 3,
+                to: to_slot,
+            });
             assert!(hero_packets.iter().any(|packet| matches!(
                 packet,
                 ServerPacket::TakeBackHeroItem { success: true, .. }
@@ -40968,7 +40969,10 @@ fn incoming_item_tree_paths_reject_invalid_recursive_carrier_without_mutation() 
                     .expect("malformed hero fixture should expose an empty bag slot");
                 assert!(matches!(
                     session
-                        .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: to_slot })
+                        .handle_packet(ClientPacket::TakeBackHeroItem {
+                            from: 3,
+                            to: to_slot
+                        })
                         .as_slice(),
                     [ServerPacket::TakeBackHeroItem { success: false, .. }]
                 ));
@@ -41243,7 +41247,9 @@ fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() 
                         gender: MirGender::Female,
                         class: MirClass::Warrior,
                     });
-                    assert!(super::super::map::spawn_stage5_hero(session.app.world_mut()).is_some());
+                    assert!(
+                        super::super::map::spawn_stage5_hero(session.app.world_mut()).is_some()
+                    );
                     let mut hero_item = item;
                     hero_item.slot = 3;
                     session
@@ -41279,7 +41285,10 @@ fn incoming_commit_paths_reject_zero_quantity_root_and_child_without_mutation() 
                         .expect("zero hero fixture should expose an empty bag slot");
                     assert!(matches!(
                         session
-                            .handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: to_slot })
+                            .handle_packet(ClientPacket::TakeBackHeroItem {
+                                from: 3,
+                                to: to_slot
+                            })
                             .as_slice(),
                         [ServerPacket::TakeBackHeroItem { success: false, .. }]
                     ));
@@ -58557,15 +58566,26 @@ fn game_shop_dedicated_and_legacy_stage5_paths_are_state_equivalent() {
         "gameShop.buyCredit",
         vec!["31".to_string(), "2".to_string()],
     );
-    let mail_key = |packets: &[ServerPacket]| packets.iter().find_map(|packet| match packet {
-        ServerPacket::ReceiveMail { mail } => mail.first().map(|m| (m.mail_id, m.items.len())),
-        _ => None,
-    });
-    assert_eq!(mail_key(&packet_credit_packets), mail_key(&stage5_credit_packets));
+    let mail_key = |packets: &[ServerPacket]| {
+        packets.iter().find_map(|packet| match packet {
+            ServerPacket::ReceiveMail { mail } => mail.first().map(|m| (m.mail_id, m.items.len())),
+            _ => None,
+        })
+    };
+    assert_eq!(
+        mail_key(&packet_credit_packets),
+        mail_key(&stage5_credit_packets)
+    );
     assert!(mail_key(&packet_credit_packets).is_some());
     assert_eq!(
-        packet_credit_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>(),
-        stage5_credit_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>()
+        packet_credit_packets
+            .iter()
+            .filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. }))
+            .collect::<Vec<_>>(),
+        stage5_credit_packets
+            .iter()
+            .filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. }))
+            .collect::<Vec<_>>()
     );
     let mut packet_credit_snapshot = packet_credit.world_snapshot();
     let mut stage5_credit_snapshot = stage5_credit.world_snapshot();
@@ -58586,11 +58606,20 @@ fn game_shop_dedicated_and_legacy_stage5_paths_are_state_equivalent() {
     });
     let stage5_gold_packets =
         stage5_gold.stage5_command("gameShop.buyGold", vec!["31".to_string(), "2".to_string()]);
-    assert_eq!(mail_key(&packet_gold_packets), mail_key(&stage5_gold_packets));
+    assert_eq!(
+        mail_key(&packet_gold_packets),
+        mail_key(&stage5_gold_packets)
+    );
     assert!(mail_key(&packet_gold_packets).is_some());
     assert_eq!(
-        packet_gold_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>(),
-        stage5_gold_packets.iter().filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. })).collect::<Vec<_>>()
+        packet_gold_packets
+            .iter()
+            .filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. }))
+            .collect::<Vec<_>>(),
+        stage5_gold_packets
+            .iter()
+            .filter(|p| !matches!(p, ServerPacket::ReceiveMail { .. }))
+            .collect::<Vec<_>>()
     );
     let mut packet_gold_snapshot = packet_gold.world_snapshot();
     let mut stage5_gold_snapshot = stage5_gold.world_snapshot();
@@ -62467,10 +62496,7 @@ fn trade_confirm_rejects_offered_item_swapped_after_deposit() {
     // The normal packet path must reject moving a reserved item. Exercise the
     // confirm-time custody guard with an explicit test-only custody tamper.
     {
-        let mut inventory = session
-            .app
-            .world_mut()
-            .resource_mut::<InventoryResource>();
+        let mut inventory = session.app.world_mut().resource_mut::<InventoryResource>();
         let offered = inventory
             .inventory_items
             .iter()
@@ -63074,7 +63100,10 @@ fn mail_send_with_item_state_attachment_removes_sender_and_recipient_claims_exac
         .iter()
         .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
     let sender_snapshot = sender.world_snapshot();
-    assert_eq!(sender_snapshot.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
+    assert_eq!(
+        sender_snapshot.gold,
+        3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE
+    );
     assert!(!sender_snapshot
         .inventory_items
         .iter()
@@ -63239,7 +63268,10 @@ fn cross_account_send_mail_commits_sender_recipient_and_reload_once() {
     assert!(packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::MailSent { result: 1 })));
-    assert_eq!(sender.world_snapshot().gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
+    assert_eq!(
+        sender.world_snapshot().gold,
+        3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE
+    );
     assert!(!sender
         .world_snapshot()
         .inventory_items
@@ -63259,7 +63291,10 @@ fn cross_account_send_mail_commits_sender_recipient_and_reload_once() {
             .get("demo")
             .and_then(|account| account.saves.get(&0))
             .expect("sender save should exist");
-        assert_eq!(sender_save.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
+        assert_eq!(
+            sender_save.gold,
+            3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE
+        );
         assert!(!sender_save.inventory_items_json.iter().any(|state| {
             serde_json::from_str::<ItemState>(state)
                 .ok()
@@ -63381,7 +63416,11 @@ fn stale_same_account_session_cannot_resurrect_sent_attachment_or_sender_balance
             .and_then(|account| account.saves.get(&0))
             .expect("sender save should remain durable");
         assert_eq!(sender_save.revision, 3);
-        assert_eq!(sender_save.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE, "stale balance must not win");
+        assert_eq!(
+            sender_save.gold,
+            3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE,
+            "stale balance must not win"
+        );
         assert!(
             !sender_save.inventory_items_json.iter().any(|state| {
                 serde_json::from_str::<ItemState>(state)
@@ -63513,7 +63552,10 @@ fn stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting
         })
         .iter()
         .any(|packet| matches!(packet, ServerPacket::LoseGold { gold: 165_000 })));
-    assert_eq!(stale.world_snapshot().gold, 500_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE - 165_000);
+    assert_eq!(
+        stale.world_snapshot().gold,
+        500_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE - 165_000
+    );
     assert!(!stale
         .world_snapshot()
         .inventory_items
@@ -63532,7 +63574,10 @@ fn stale_same_account_game_shop_uses_latest_durable_balance_without_resurrecting
         .and_then(|account| account.saves.get(&0))
         .expect("sender save should remain durable");
     assert_eq!(sender_save.revision, 4);
-    assert_eq!(sender_save.gold, 500_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE - 165_000);
+    assert_eq!(
+        sender_save.gold,
+        500_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE - 165_000
+    );
     assert!(!sender_save.inventory_items_json.iter().any(|state| {
         serde_json::from_str::<ItemState>(state)
             .ok()
@@ -63620,7 +63665,10 @@ fn concurrent_same_account_mail_transactions_have_no_lost_update() {
         .and_then(|account| account.saves.get(&0))
         .expect("sender save should remain durable");
     assert_eq!(sender_save.revision, 3);
-    assert_eq!(sender_save.gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
+    assert_eq!(
+        sender_save.gold,
+        3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE
+    );
     assert!(!sender_save.inventory_items_json.iter().any(|state| {
         serde_json::from_str::<ItemState>(state)
             .ok()
@@ -63836,7 +63884,10 @@ fn online_game_shop_mail_and_external_send_mail_keep_unique_ids_and_local_status
     let attachment = serde_json::from_str::<ItemState>(&external_mail.item_states_json[0])
         .expect("external exact attachment should decode");
     assert_eq!(super::item_unique_id(&attachment), dagger_unique_id);
-    assert_eq!(sender.world_snapshot().gold, 3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE);
+    assert_eq!(
+        sender.world_snapshot().gold,
+        3_000 - 1_500 - 100 - MAIL_TEST_MODIFIED_DAGGER_INSURANCE
+    );
 
     let _ = std::fs::remove_dir_all(dir);
 }
@@ -64853,10 +64904,23 @@ fn intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone() {
 
     session.handle_packet(ClientPacket::RequestIntelligentCreatureUpdates { update: true });
     let mut tick_packets = session.tick();
-    session.app.world_mut().remove_resource::<crate::runtime::intelligent_creatures::CreatureClock>();
+    session
+        .app
+        .world_mut()
+        .remove_resource::<crate::runtime::intelligent_creatures::CreatureClock>();
     let now = crate::runtime::inventory::current_binary_datetime();
-    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 0, now, &mut tick_packets);
-    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 1000, now, &mut tick_packets);
+    crate::runtime::intelligent_creatures::maintenance_at(
+        session.app.world_mut(),
+        0,
+        now,
+        &mut tick_packets,
+    );
+    crate::runtime::intelligent_creatures::maintenance_at(
+        session.app.world_mut(),
+        1000,
+        now,
+        &mut tick_packets,
+    );
     assert!(tick_packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::UpdateIntelligentCreatureList { creature_list, .. }
@@ -64873,7 +64937,12 @@ fn intelligent_creature_tick_auto_picks_and_advances_fullness_blackstone() {
     assert_eq!(session.world_snapshot().gold, starting_gold);
 
     for second in 2..=25 {
-        crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), second * 1000, now, &mut Vec::new());
+        crate::runtime::intelligent_creatures::maintenance_at(
+            session.app.world_mut(),
+            second * 1000,
+            now,
+            &mut Vec::new(),
+        );
     }
     assert!(matches!(
         session
@@ -64947,10 +65016,23 @@ fn intelligent_creature_hungry_blocks_auto_pickup_but_blackstone_progresses() {
     let starting_gold = session.world_snapshot().gold;
     session.handle_packet(ClientPacket::DropGold { amount: 75 });
     let mut tick_packets = session.tick();
-    session.app.world_mut().remove_resource::<crate::runtime::intelligent_creatures::CreatureClock>();
+    session
+        .app
+        .world_mut()
+        .remove_resource::<crate::runtime::intelligent_creatures::CreatureClock>();
     let now = crate::runtime::inventory::current_binary_datetime();
-    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 0, now, &mut tick_packets);
-    crate::runtime::intelligent_creatures::maintenance_at(session.app.world_mut(), 1000, now, &mut tick_packets);
+    crate::runtime::intelligent_creatures::maintenance_at(
+        session.app.world_mut(),
+        0,
+        now,
+        &mut tick_packets,
+    );
+    crate::runtime::intelligent_creatures::maintenance_at(
+        session.app.world_mut(),
+        1000,
+        now,
+        &mut tick_packets,
+    );
     assert!(!tick_packets
         .iter()
         .any(|packet| matches!(packet, ServerPacket::IntelligentCreaturePickup { .. })));
@@ -65297,8 +65379,14 @@ fn hero_auto_pot_packets_update_stage5_hero_state_and_echo_crystal_ack() {
     });
 
     assert_eq!(
-        session.handle_packet(ClientPacket::SetAutoPotValue { stat: 12, value: 75 }),
-        vec![ServerPacket::SetAutoPotValue { stat: 12, value: 75 }]
+        session.handle_packet(ClientPacket::SetAutoPotValue {
+            stat: 12,
+            value: 75
+        }),
+        vec![ServerPacket::SetAutoPotValue {
+            stat: 12,
+            value: 75
+        }]
     );
     assert_eq!(
         session.handle_packet(ClientPacket::SetAutoPotValue {
@@ -65430,21 +65518,24 @@ fn valid_hero_transfer_takeback_roundtrip_preserves_uid_across_save_load() {
         .iter()
         .any(|packet| matches!(packet, ServerPacket::TransferHeroItem { success: true, .. })));
     let packets = first.handle_packet(ClientPacket::TakeBackHeroItem { from: 3, to: 10 });
-    assert!(packets.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::TakeBackHeroItem { success: true, .. }
-    )));
-    assert!(first.world_snapshot().inventory_items.iter().any(|item| {
-        item.slot == 10 && item.unique_id == 4 && item.key == "dagger"
-    }));
+    assert!(packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::TakeBackHeroItem { success: true, .. })));
+    assert!(first
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| { item.slot == 10 && item.unique_id == 4 && item.key == "dagger" }));
     assert!(first.save_active_character().is_ok());
 
     let mut reloaded = SimulationSession::new(config);
     login_demo_account_for_persistence_test(&mut reloaded);
     assert_start_game_success(&mut reloaded, 0);
-    assert!(reloaded.world_snapshot().inventory_items.iter().any(|item| {
-        item.slot == 10 && item.unique_id == 4 && item.key == "dagger"
-    }));
+    assert!(reloaded
+        .world_snapshot()
+        .inventory_items
+        .iter()
+        .any(|item| { item.slot == 10 && item.unique_id == 4 && item.key == "dagger" }));
 }
 
 #[test]
@@ -65523,7 +65614,10 @@ fn hero_inventory_use_item_consumes_potion_and_restores_hero_health() {
         class: MirClass::Warrior,
     });
     assert_eq!(
-        session.handle_packet(ClientPacket::TransferHeroItem { from: 0, to: 0 }).first().cloned(),
+        session
+            .handle_packet(ClientPacket::TransferHeroItem { from: 0, to: 0 })
+            .first()
+            .cloned(),
         Some(ServerPacket::TransferHeroItem {
             from: 0,
             to: 0,
@@ -65600,7 +65694,10 @@ fn hero_auto_pot_uses_matching_hero_inventory_potion_when_below_threshold() {
         .find(|item| item.key == "red-potion")
         .cloned()
         .expect("red potion should be in hero inventory");
-    session.handle_packet(ClientPacket::SetAutoPotValue { stat: 12, value: 90 });
+    session.handle_packet(ClientPacket::SetAutoPotValue {
+        stat: 12,
+        value: 90,
+    });
     session.handle_packet(ClientPacket::SetAutoPotItem {
         grid: MirGridType::HeroHpItem,
         item_index: 658,
@@ -69880,7 +69977,10 @@ fn set_auto_pot_value_packet_clamps_percent_and_targets_hero() {
         Some(99)
     );
 
-    session.handle_packet(ClientPacket::SetAutoPotValue { stat: 13, value: 40 });
+    session.handle_packet(ClientPacket::SetAutoPotValue {
+        stat: 13,
+        value: 40,
+    });
     assert_eq!(
         session
             .world_snapshot()

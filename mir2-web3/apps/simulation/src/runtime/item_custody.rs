@@ -93,9 +93,13 @@ pub(super) fn reserved_ids(systems: &Stage5SystemsState) -> Result<BTreeSet<u64>
 }
 pub(super) fn refresh(world: &mut World) -> Result<(), String> {
     let mut ids = reserved_ids(&world.resource::<Stage5SystemsResource>().stage5_systems)?;
-    let hero_ids = super::hero_inventory::validate_hero_custody(world.resource::<super::resources::HeroInventoryResource>())?;
+    let hero_ids = super::hero_inventory::validate_hero_custody(
+        world.resource::<super::resources::HeroInventoryResource>(),
+    )?;
     for id in hero_ids {
-        if !ids.insert(id) {return Err("Hero UID collides with market/refine custody".into());}
+        if !ids.insert(id) {
+            return Err("Hero UID collides with market/refine custody".into());
+        }
     }
     world
         .resource_mut::<InventoryResource>()

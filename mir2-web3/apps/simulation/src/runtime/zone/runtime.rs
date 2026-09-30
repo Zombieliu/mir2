@@ -881,23 +881,23 @@ impl ZoneRuntime {
                 && !target.dead
                 && target.hp > 0
                 && zone_native_monster_is_authoritatively_melee_attackable(target)
-        }) || self.players.values().any(|target| {
-            target.position == front && zone_player_can_attack_player(player, target)
-        }) {
+        }) || self
+            .players
+            .values()
+            .any(|target| target.position == front && zone_player_can_attack_player(player, target))
+        {
             return true;
         }
         // A trusted not-yet-materialized target must obey the same initial
         // visibility/disposition rules. An existing ID always wins over stale
         // personal metadata, including a corpse or another type of object.
         materialized.is_some_and(|spawn| {
-            spawn.position == front
-                && !self.object_id_in_use(spawn.object_id)
-                && {
-                    let target = ZoneNativeMonster::from_spawn(spawn, spawn.object_id);
-                    !target.dead
-                        && target.hp > 0
-                        && zone_native_monster_is_authoritatively_melee_attackable(&target)
-                }
+            spawn.position == front && !self.object_id_in_use(spawn.object_id) && {
+                let target = ZoneNativeMonster::from_spawn(spawn, spawn.object_id);
+                !target.dead
+                    && target.hp > 0
+                    && zone_native_monster_is_authoritatively_melee_attackable(&target)
+            }
         })
     }
 
@@ -1594,7 +1594,9 @@ impl ZoneRuntime {
         if zone_magic_targets_friendly_player(spell)
             && object_id != 0
             && !(zone_magic_targets_self(spell)
-                && self.players.get(session_id)
+                && self
+                    .players
+                    .get(session_id)
                     .is_some_and(|player| player.object_id == object_id))
         {
             let Some(target_session_id) =
@@ -1823,7 +1825,10 @@ impl ZoneRuntime {
             if spawn.crystal_drop_seed.is_some() {
                 spawn.crystal_drop_seed = Some(now_ms);
                 spawn.drops = crate::runtime::drops::zone_ground_drop_snapshots_for_monster_at_tick(
-                    object_id, &spawn.name, now_ms);
+                    object_id,
+                    &spawn.name,
+                    now_ms,
+                );
             }
             let (changed, respawn_outbounds) =
                 self.spawn_authoritative_monster_internal(&spawn, now_ms, true, true);
@@ -3506,7 +3511,9 @@ impl ZoneRuntime {
         damage: i32,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
-        if self.is_intelligent_creature_object(object_id) { return self.owner_location_correction(session_id); }
+        if self.is_intelligent_creature_object(object_id) {
+            return self.owner_location_correction(session_id);
+        }
         let Some(player) = self.players.get(session_id) else {
             return Vec::new();
         };
@@ -3574,7 +3581,9 @@ impl ZoneRuntime {
         damage: i32,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
-        if self.is_intelligent_creature_object(object_id) { return self.owner_location_correction(session_id); }
+        if self.is_intelligent_creature_object(object_id) {
+            return self.owner_location_correction(session_id);
+        }
         let Some(player) = self.players.get(session_id) else {
             return Vec::new();
         };
@@ -3656,7 +3665,14 @@ impl ZoneRuntime {
         }
         let actor_id = player.object_id;
         let outbounds = self.player_attack_native_object_admitted(
-            session_id, object_id, direction, spell, level, attack_type, damage, now_ms,
+            session_id,
+            object_id,
+            direction,
+            spell,
+            level,
+            attack_type,
+            damage,
+            now_ms,
         );
         let accepted = outbounds.iter().any(|outbound| {
             let packets = match outbound {
@@ -3665,9 +3681,11 @@ impl ZoneRuntime {
                 | ZoneOutbound::ToAll { packets } => packets,
                 _ => return false,
             };
-            packets.iter().any(|packet| matches!(packet,
+            packets.iter().any(|packet| {
+                matches!(packet,
                 ServerPacket::ObjectAttack { info }
-                    if info.object_id == actor_id && info.spell == spell))
+                    if info.object_id == actor_id && info.spell == spell)
+            })
         });
         if accepted && mp_cost > 0 {
             if let Some(player) = self.players.get_mut(session_id) {
@@ -4665,7 +4683,9 @@ impl ZoneRuntime {
         if zone_magic_targets_friendly_player(spell)
             && object_id != 0
             && !(zone_magic_targets_self(spell)
-                && self.players.get(session_id)
+                && self
+                    .players
+                    .get(session_id)
                     .is_some_and(|player| player.object_id == object_id))
         {
             let Some(target_session_id) =
@@ -8700,10 +8720,7 @@ impl ZoneRuntime {
         ]
     }
 
-    fn remove_native_player_magic_shield(
-        &mut self,
-        session_id: &SessionId,
-    ) -> Vec<ServerPacket> {
+    fn remove_native_player_magic_shield(&mut self, session_id: &SessionId) -> Vec<ServerPacket> {
         let Some(player) = self.players.get_mut(session_id) else {
             return Vec::new();
         };
@@ -9437,12 +9454,15 @@ impl ZoneRuntime {
                     && receipt.life_generation == player.life_generation
                     && receipt.zone_key == self.key
                     && receipt.target_object_id == hit.object_id
-            }) && self.native_monsters.get(&hit.object_id).is_some_and(|target| {
-                !target.dead
-                    && target.hp > 0
-                    && monster_visibility_is_attackable(target)
-                    && zone_tile_distance(&target.position, &receipt.target_location) <= 2
-            })
+            }) && self
+                .native_monsters
+                .get(&hit.object_id)
+                .is_some_and(|target| {
+                    !target.dead
+                        && target.hp > 0
+                        && monster_visibility_is_attackable(target)
+                        && zone_tile_distance(&target.position, &receipt.target_location) <= 2
+                })
         });
 
         if self.native_monsters.contains_key(&hit.attacker_object_id)
@@ -11809,7 +11829,9 @@ impl ZoneRuntime {
             return false;
         }
         if self.objects.values().any(|object| {
-            object.object_id != object_id && !self.is_intelligent_creature_object(object.object_id) && retained_zone_object_blocks_tile(object, point)
+            object.object_id != object_id
+                && !self.is_intelligent_creature_object(object.object_id)
+                && retained_zone_object_blocks_tile(object, point)
         }) {
             return false;
         }
@@ -12085,18 +12107,24 @@ impl ZoneRuntime {
                     }
                 });
         if killed {
-            let bonus = reward_owner_session_id.as_ref()
+            let bonus = reward_owner_session_id
+                .as_ref()
                 .and_then(|owner| self.players.get(owner))
                 .map_or(0, |owner| owner.combat_stats.item_drop_rate_percent.max(0));
             if bonus > 0 {
-                if let Some(seed) = self.native_monsters.get(&object_id).and_then(|monster| monster.crystal_drop_seed) {
+                if let Some(seed) = self
+                    .native_monsters
+                    .get(&object_id)
+                    .and_then(|monster| monster.crystal_drop_seed)
+                {
                     drops = crate::runtime::drops::zone_ground_drop_snapshots_for_monster_at_tick_with_rate(
                         object_id, &monster_name, seed, bonus);
                 }
             }
             if !self.yimoogi_allows_drop(object_id)
                 || mir2_game_data::crystal_map_respawns_ref(&self.key.map_file_name)
-                    .is_some_and(|map| map.no_drop_monster) {
+                    .is_some_and(|map| map.no_drop_monster)
+            {
                 drops.clear();
             }
         }
@@ -12536,9 +12564,13 @@ impl ZoneRuntime {
 
     fn canonical_observer_zone_object_packet(&self, packet: ServerPacket) -> Option<ServerPacket> {
         // Personal projections cannot mutate the controlled shared pickup actor.
-        if retained_zone_object_from_packet(&packet).is_some_and(|o| self.is_intelligent_creature_object(o.object_id))
-            || retained_zone_object_remove_id(&packet).is_some_and(|id| self.is_intelligent_creature_object(id))
-            || retained_zone_object_update_id(&packet).is_some_and(|id| self.is_intelligent_creature_object(id)) {
+        if retained_zone_object_from_packet(&packet)
+            .is_some_and(|o| self.is_intelligent_creature_object(o.object_id))
+            || retained_zone_object_remove_id(&packet)
+                .is_some_and(|id| self.is_intelligent_creature_object(id))
+            || retained_zone_object_update_id(&packet)
+                .is_some_and(|id| self.is_intelligent_creature_object(id))
+        {
             return None;
         }
         let packet = match packet {
@@ -13899,11 +13931,10 @@ impl ZoneRuntime {
         if self.gate_blocks_tile(point) || self.collision.is_blocked(point) {
             return false;
         }
-        if self
-            .objects
-            .values()
-            .any(|object| !self.is_intelligent_creature_object(object.object_id) && retained_zone_object_blocks_tile(object, point))
-        {
+        if self.objects.values().any(|object| {
+            !self.is_intelligent_creature_object(object.object_id)
+                && retained_zone_object_blocks_tile(object, point)
+        }) {
             return false;
         }
         if self.native_monsters.values().any(|monster| {
@@ -13928,11 +13959,10 @@ impl ZoneRuntime {
         if self.gate_blocks_tile(point) || self.collision.is_player_movement_blocked(point) {
             return false;
         }
-        if self
-            .objects
-            .values()
-            .any(|object| !self.is_intelligent_creature_object(object.object_id) && retained_zone_object_blocks_tile(object, point))
-        {
+        if self.objects.values().any(|object| {
+            !self.is_intelligent_creature_object(object.object_id)
+                && retained_zone_object_blocks_tile(object, point)
+        }) {
             return false;
         }
         if self.native_monsters.values().any(|monster| {
@@ -17056,10 +17086,7 @@ mod magic_shield_lifecycle_tests {
         session_id
     }
 
-    fn has_packet(
-        outbounds: &[ZoneOutbound],
-        predicate: impl Fn(&ServerPacket) -> bool,
-    ) -> bool {
+    fn has_packet(outbounds: &[ZoneOutbound], predicate: impl Fn(&ServerPacket) -> bool) -> bool {
         outbounds.iter().any(|outbound| {
             let packets = match outbound {
                 ZoneOutbound::ToSession { packets, .. }

@@ -116,19 +116,18 @@ fn search_region(
     if !inside(origin) || !inside(destination) || radius < 0 || radius > width.max(height) {
         return Err("目标不在当前地图范围内。");
     }
-    let distance = |point| chebyshev_distance(point, destination).saturating_sub(radius).max(0);
+    let distance = |point| {
+        chebyshev_distance(point, destination)
+            .saturating_sub(radius)
+            .max(0)
+    };
     if distance(origin) == 0 {
         return Ok(Vec::new());
     }
     let mut open = BinaryHeap::new();
     let mut costs = HashMap::from([(origin, 0)]);
     let mut previous = HashMap::new();
-    open.push(Reverse((
-        distance(origin),
-        0,
-        0_u64,
-        origin,
-    )));
+    open.push(Reverse((distance(origin), 0, 0_u64, origin)));
     let mut expanded = 0;
     let mut sequence = 0_u64;
     while let Some(Reverse((_, negative_cost, _, current))) = open.pop() {
@@ -233,9 +232,25 @@ pub(super) fn plan_hunt_region(
     {
         return Err("当前位置被占用，无法确认到达狩猎区域。");
     }
-    search_region(i32::from(map.width), i32::from(map.height), origin, area.center, area.radius,
-        |from, to| collision.cell_blocks_movement(to.0, to.1)
-            || auto_path_step_blocked(movement, entities, Some(presentation), self_id, None, from, to))
+    search_region(
+        i32::from(map.width),
+        i32::from(map.height),
+        origin,
+        area.center,
+        area.radius,
+        |from, to| {
+            collision.cell_blocks_movement(to.0, to.1)
+                || auto_path_step_blocked(
+                    movement,
+                    entities,
+                    Some(presentation),
+                    self_id,
+                    None,
+                    from,
+                    to,
+                )
+        },
+    )
 }
 
 pub(super) fn advance(
@@ -279,9 +294,25 @@ pub(super) fn advance(
     let map_file = route.map_file.clone();
     let destination = route.destination;
     let steps = if let Some(area) = route.hunt_area.or(route.supply_area) {
-        plan_hunt_region(movement, entities, presentation, self_id, &map_file, origin, area)?
+        plan_hunt_region(
+            movement,
+            entities,
+            presentation,
+            self_id,
+            &map_file,
+            origin,
+            area,
+        )?
     } else {
-        plan(movement, entities, presentation, self_id, &map_file, origin, destination)?
+        plan(
+            movement,
+            entities,
+            presentation,
+            self_id,
+            &map_file,
+            origin,
+            destination,
+        )?
     };
     let destination = steps.last().copied().unwrap_or(origin);
     let next = steps.iter().take(3).copied().collect();
@@ -299,16 +330,29 @@ mod tests {
 
     #[test]
     fn hunt_navigation_region_search_avoids_occupied_goal_tiles_and_reports_unreachable_areas() {
-        let steps = search_region(80, 80, (10, 30), (50, 30), 4,
-            |_, to| to.0 == 46 && to.1 == 30).unwrap();
+        let steps = search_region(80, 80, (10, 30), (50, 30), 4, |_, to| {
+            to.0 == 46 && to.1 == 30
+        })
+        .unwrap();
         let destination = *steps.last().unwrap();
         assert!(chebyshev_distance(destination, (50, 30)) <= 4);
         assert_ne!(destination, (46, 30));
         assert!(!steps.contains(&(46, 30)));
-        assert_eq!(steps.len(), 36, "shortest route to the square, not to its occupied center");
-        assert!(search_region(80, 80, (50, 30), (50, 30), 4, |_, _| false).unwrap().is_empty());
-        assert!(search_region(80, 80, (10, 30), (50, 30), 4,
-            |_, to| chebyshev_distance(to, (50, 30)) <= 4).is_err());
+        assert_eq!(
+            steps.len(),
+            36,
+            "shortest route to the square, not to its occupied center"
+        );
+        assert!(search_region(80, 80, (50, 30), (50, 30), 4, |_, _| false)
+            .unwrap()
+            .is_empty());
+        assert!(
+            search_region(80, 80, (10, 30), (50, 30), 4, |_, to| chebyshev_distance(
+                to,
+                (50, 30)
+            ) <= 4)
+            .is_err()
+        );
         assert!(search_region(80, 80, (10, 30), (50, 30), -1, |_, _| false).is_err());
     }
 

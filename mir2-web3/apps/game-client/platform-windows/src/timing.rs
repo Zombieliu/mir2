@@ -18,11 +18,14 @@ pub fn initialize() {
 }
 pub fn report(stage: &str, started: Instant) {
     if mir2_bevy_runtime::native_render_diagnostics_enabled() {
-        mir2_bevy_runtime::record_native_render_marker("cpuStage", serde_json::json!({
-            "stage": stage,
-            "durationMs": started.elapsed().as_secs_f64() * 1000.0,
-            "measurement": "cpuElapsedNotGpuPresent",
-        }));
+        mir2_bevy_runtime::record_native_render_marker(
+            "cpuStage",
+            serde_json::json!({
+                "stage": stage,
+                "durationMs": started.elapsed().as_secs_f64() * 1000.0,
+                "measurement": "cpuElapsedNotGpuPresent",
+            }),
+        );
     }
     if let Some(origin) = ORIGIN.get() {
         crate::startup_diagnostics::record_timing(
@@ -64,11 +67,14 @@ impl DiagnosticSpan {
 impl Drop for DiagnosticSpan {
     fn drop(&mut self) {
         if let Some(started) = self.started {
-            mir2_bevy_runtime::record_native_render_marker("cpuStage", serde_json::json!({
-                "stage": self.stage,
-                "durationMs": started.elapsed().as_secs_f64() * 1000.0,
-                "measurement": "cpuElapsedNotGpuPresent",
-            }));
+            mir2_bevy_runtime::record_native_render_marker(
+                "cpuStage",
+                serde_json::json!({
+                    "stage": self.stage,
+                    "durationMs": started.elapsed().as_secs_f64() * 1000.0,
+                    "measurement": "cpuElapsedNotGpuPresent",
+                }),
+            );
         }
     }
 }

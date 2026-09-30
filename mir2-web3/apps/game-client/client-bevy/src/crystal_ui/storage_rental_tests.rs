@@ -44,16 +44,22 @@ fn press(app: &mut App, action: OverlayButton) {
 }
 
 fn press_key(app: &mut App, key: KeyCode) {
-    app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(key);
+    app.world_mut()
+        .resource_mut::<ButtonInput<KeyCode>>()
+        .press(key);
     app.update();
-    app.world_mut().resource_mut::<ButtonInput<KeyCode>>().release(key);
+    app.world_mut()
+        .resource_mut::<ButtonInput<KeyCode>>()
+        .release(key);
 }
 
 #[test]
 fn second_storage_tab_remains_selectable_and_unrented_page_is_a_rental_cover() {
     let mut app = rental_test_app();
-    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
-        mir2_ui_core::state::UiPanel::Storage;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::Storage;
     {
         let mut storage = app.world_mut().resource_mut::<StorageModel>();
         storage.size = STORAGE_BASE_SIZE;
@@ -65,15 +71,20 @@ fn second_storage_tab_remains_selectable_and_unrented_page_is_a_rental_cover() {
     assert_eq!(app.world().resource::<StorageUiState>().cursor.page, 1);
     let page = app.world().resource::<StorageModel>().page(1);
     assert!(!page.locked, "password state cannot disable the tab");
-    assert!(page.rental_locked, "RefreshStorage2 must show the rent cover");
+    assert!(
+        page.rental_locked,
+        "RefreshStorage2 must show the rent cover"
+    );
     assert!(page.slots.iter().all(|slot| slot.locked));
 }
 
 #[test]
 fn rent_only_queues_after_ok_and_renewal_uses_the_source_confirmation() {
     let mut app = rental_test_app();
-    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
-        mir2_ui_core::state::UiPanel::Storage;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::Storage;
 
     // Source does not locally disable Rent for gold; it asks and lets the
     // server produce the authoritative low-gold result.
@@ -131,8 +142,10 @@ fn rent_only_queues_after_ok_and_renewal_uses_the_source_confirmation() {
 #[test]
 fn rental_modal_consumes_close_frame() {
     let mut app = rental_test_app();
-    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
-        mir2_ui_core::state::UiPanel::Storage;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::Storage;
     press(&mut app, OverlayButton::StorageExpand);
     assert!(app
         .world()
@@ -145,32 +158,38 @@ fn rental_modal_consumes_close_frame() {
 
     // Escape and a covered tab click arrive in one input frame. Cancel owns
     // that frame, so the tab cannot switch under the just-dismissed modal.
-    app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::Escape);
+    app.world_mut()
+        .resource_mut::<ButtonInput<KeyCode>>()
+        .press(KeyCode::Escape);
     let covered = app
         .world_mut()
         .spawn((Interaction::Pressed, OverlayButton::StoragePage(1), Button))
         .id();
     app.update();
-    app.world_mut().resource_mut::<ButtonInput<KeyCode>>().release(KeyCode::Escape);
+    app.world_mut()
+        .resource_mut::<ButtonInput<KeyCode>>()
+        .release(KeyCode::Escape);
     app.world_mut().despawn(covered);
     assert!(app
         .world()
         .resource::<NativePlayerUiState>()
         .storage_rental_confirmation
         .is_none());
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .storage_rental_input_consumed);
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .storage_rental_input_consumed
+    );
     assert_eq!(app.world().resource::<StorageUiState>().cursor.page, 0);
-
 }
 
 #[test]
 fn low_gold_rental_can_retry_after_an_unchanged_snapshot_and_double_enter_queues_once() {
     let mut app = rental_test_app();
-    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
-        mir2_ui_core::state::UiPanel::Storage;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::Storage;
 
     press(&mut app, OverlayButton::StorageExpand);
     press(&mut app, OverlayButton::StorageRentalConfirm);
@@ -189,7 +208,9 @@ fn low_gold_rental_can_retry_after_an_unchanged_snapshot_and_double_enter_queues
     // a later funded retry.
     app.update();
     press(&mut app, OverlayButton::StorageExpand);
-    app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::Enter);
+    app.world_mut()
+        .resource_mut::<ButtonInput<KeyCode>>()
+        .press(KeyCode::Enter);
     app.world_mut()
         .resource_mut::<ButtonInput<KeyCode>>()
         .press(KeyCode::NumpadEnter);
@@ -206,10 +227,11 @@ fn low_gold_rental_can_retry_after_an_unchanged_snapshot_and_double_enter_queues
         .resource::<NativePlayerUiState>()
         .storage_rental_confirmation
         .is_none());
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .storage_rental_input_consumed);
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .storage_rental_input_consumed
+    );
     assert_eq!(
         app.world_mut()
             .resource_mut::<NativePlayerUiIntentQueue>()

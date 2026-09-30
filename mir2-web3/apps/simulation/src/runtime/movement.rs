@@ -212,13 +212,13 @@ fn bound_town_destination(world: &World) -> (mir2_protocol::MapInformation, Poin
         .resource::<PlayerRuntimeResource>()
         .bind_point
         .as_ref()
-        .filter(|bind| !bind.map_file_name.is_empty() && config.map_is_allowed(&bind.map_file_name));
+        .filter(|bind| {
+            !bind.map_file_name.is_empty() && config.map_is_allowed(&bind.map_file_name)
+        });
     match bind {
         Some(bind) => {
-            let mut map = super::npc_script::crystal_npc_move_map_information(
-                world,
-                &bind.map_file_name,
-            );
+            let mut map =
+                super::npc_script::crystal_npc_move_map_information(world, &bind.map_file_name);
             crate::config::apply_crystal_map_metadata(&mut map);
             (map, bind.position.clone())
         }
@@ -362,11 +362,7 @@ pub(super) fn town_revive_packets(world: &mut World) -> Vec<ServerPacket> {
     let (bind_map, bind_position, current_map_file_name) = {
         let (bind_map, bind_position) = bound_town_destination(world);
         let current_map = &world.resource::<MapRuntimeResource>().current_map;
-        (
-            bind_map,
-            bind_position,
-            current_map.file_name.clone(),
-        )
+        (bind_map, bind_position, current_map.file_name.clone())
     };
     world.resource_mut::<PlayerRuntimeResource>().player_vitals = revived_vitals;
 
@@ -689,7 +685,9 @@ pub(super) fn step_player(world: &mut World, amount: i32) -> bool {
         if let Some(destination) =
             player_directional_destination(world, &position, direction, amount, Some(player))
         {
-            world.entity_mut(player).insert(Position(destination.clone()));
+            world
+                .entity_mut(player)
+                .insert(Position(destination.clone()));
             refresh_player_bind_at_position(world, &destination);
             return true;
         }

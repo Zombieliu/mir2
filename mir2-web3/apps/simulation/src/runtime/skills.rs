@@ -625,7 +625,9 @@ pub(super) fn skill_key_for_crystal_spell(spell: Spell) -> Option<String> {
 }
 
 pub(super) fn assign_magic_key(world: &mut World, spell: Spell, key: u8, old_key: u8) {
-    if !supports_magic_key_assignment(world,spell,key,old_key){return;}
+    if !supports_magic_key_assignment(world, spell, key, old_key) {
+        return;
+    }
     if key > 16 || old_key > 16 {
         assign_hero_magic_key(world, spell, key);
         return;
@@ -644,18 +646,43 @@ pub(super) fn assign_magic_key(world: &mut World, spell: Spell, key: u8, old_key
     }
 }
 
-pub(super) fn supports_magic_key_assignment(world:&World,spell:Spell,key:u8,old_key:u8)->bool{
-    if !super::resources::is_in_world(world){return false;}
-    if key>16 || old_key>16 {
-        return world.resource::<Stage5SystemsResource>().stage5_systems.hero.as_ref().is_some_and(|hero|hero.spawned)
-            && hero_entity(world).and_then(|entity|world.entity(entity).get::<PlayerVitals>()).is_some_and(|vitals|vitals.hp>0)
-            && world.resource::<Stage5SystemsResource>().stage5_systems.hero_learned_magics.iter().any(|learned|learned.spell==spell);
+pub(super) fn supports_magic_key_assignment(
+    world: &World,
+    spell: Spell,
+    key: u8,
+    old_key: u8,
+) -> bool {
+    if !super::resources::is_in_world(world) {
+        return false;
     }
-    skill_key_for_crystal_spell(spell).is_some_and(|key|world.resource::<SkillResource>().skills.iter().any(|skill|skill.key==key))
+    if key > 16 || old_key > 16 {
+        return world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .is_some_and(|hero| hero.spawned)
+            && hero_entity(world)
+                .and_then(|entity| world.entity(entity).get::<PlayerVitals>())
+                .is_some_and(|vitals| vitals.hp > 0)
+            && world
+                .resource::<Stage5SystemsResource>()
+                .stage5_systems
+                .hero_learned_magics
+                .iter()
+                .any(|learned| learned.spell == spell);
+    }
+    skill_key_for_crystal_spell(spell).is_some_and(|key| {
+        world
+            .resource::<SkillResource>()
+            .skills
+            .iter()
+            .any(|skill| skill.key == key)
+    })
 }
 
 #[cfg(test)]
-#[path="magic_key_preflight_tests.rs"]
+#[path = "magic_key_preflight_tests.rs"]
 mod magic_key_preflight_tests;
 
 #[cfg(test)]
@@ -1795,12 +1822,22 @@ pub(super) fn prepare_twin_drake_blade(world: &mut World) -> Vec<ServerPacket> {
     let Some((magic, level)) = super::combat::crystal_skill_magic(world, "TwinDrakeBlade") else {
         return Vec::new();
     };
-    let Some(player) = player_entity(world) else { return Vec::new(); };
+    let Some(player) = player_entity(world) else {
+        return Vec::new();
+    };
     let cost = i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
-    if entity_player_vitals(world, player).map(|v| v.mp).unwrap_or_default() <= cost {
+    if entity_player_vitals(world, player)
+        .map(|v| v.mp)
+        .unwrap_or_default()
+        <= cost
+    {
         return Vec::new();
     }
-    world.entity_mut(player).get_mut::<PlayerVitals>().expect("player vitals").mp -= cost;
+    world
+        .entity_mut(player)
+        .get_mut::<PlayerVitals>()
+        .expect("player vitals")
+        .mp -= cost;
     super::combat::set_skill_toggle_state(world, Spell::TwinDrakeBlade, true);
     let location = super::movement::current_location(world);
     let mut packets = vec![ServerPacket::ObjectMagic {

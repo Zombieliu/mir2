@@ -173,8 +173,14 @@ impl fmt::Debug for GatewaySession {
 }
 
 impl GatewaySession {
-    pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
-        self.runtime.supports_magic_key_assignment(spell,key,old_key)
+    pub fn supports_magic_key_assignment(
+        &self,
+        spell: mir2_protocol::Spell,
+        key: u8,
+        old_key: u8,
+    ) -> bool {
+        self.runtime
+            .supports_magic_key_assignment(spell, key, old_key)
     }
     pub fn new(config: GatewayConfig) -> Self {
         Self::new_with_zone_registry(config, &ZoneRegistry::in_process())
@@ -482,13 +488,18 @@ impl GatewaySession {
         if !restored_from_reconnect || authenticated_account_id.is_empty() {
             return Err("retained bootstrap requires authenticated reconnect custody".to_string());
         }
-        let identity = self.active_identity()
+        let identity = self
+            .active_identity()
             .ok_or_else(|| "retained bootstrap requires an active character".to_string())?;
-        if identity.account_id != authenticated_account_id || identity.character_index != character_index {
+        if identity.account_id != authenticated_account_id
+            || identity.character_index != character_index
+        {
             return Err("retained bootstrap identity mismatch".to_string());
         }
-        self.execute_world_command(WorldCommand::ReplayRetainedStartGameBootstrap { character_index })
-            .map(|execution| execution.packets)
+        self.execute_world_command(WorldCommand::ReplayRetainedStartGameBootstrap {
+            character_index,
+        })
+        .map(|execution| execution.packets)
     }
 
     pub fn passkey_login(&mut self, account_id: &str) -> Vec<ServerPacket> {
@@ -1371,17 +1382,43 @@ mod tests {
     #[test]
     fn retained_bootstrap_requires_exact_authenticated_custody() {
         let mut session = super::GatewaySession::new(crate::GatewayConfig::default());
-        assert!(session.replay_retained_start_game_bootstrap("demo", 0, true).is_err());
-        session.handle_packet(mir2_protocol::ClientPacket::Login { account_id: "demo".into(), password: "demo".into() });
+        assert!(session
+            .replay_retained_start_game_bootstrap("demo", 0, true)
+            .is_err());
+        session.handle_packet(mir2_protocol::ClientPacket::Login {
+            account_id: "demo".into(),
+            password: "demo".into(),
+        });
         session.handle_packet(mir2_protocol::ClientPacket::StartGame { character_index: 0 });
         let before = serde_json::to_value(session.world_snapshot()).unwrap();
-        for (account, index, restored) in [("demo", 0, false), ("", 0, true), ("other", 0, true), ("demo", 1, true)] {
-            assert!(session.replay_retained_start_game_bootstrap(account, index, restored).is_err());
+        for (account, index, restored) in [
+            ("demo", 0, false),
+            ("", 0, true),
+            ("other", 0, true),
+            ("demo", 1, true),
+        ] {
+            assert!(session
+                .replay_retained_start_game_bootstrap(account, index, restored)
+                .is_err());
         }
-        let packets = session.replay_retained_start_game_bootstrap("demo", 0, true).unwrap();
-        assert!(matches!(packets.first(), Some(mir2_protocol::ServerPacket::StartGame { result: 4, .. })));
-        assert_eq!(packets.iter().filter(|p| matches!(p, mir2_protocol::ServerPacket::GameShopInfo { .. })).count(), 105);
-        assert_eq!(serde_json::to_value(session.world_snapshot()).unwrap(), before);
+        let packets = session
+            .replay_retained_start_game_bootstrap("demo", 0, true)
+            .unwrap();
+        assert!(matches!(
+            packets.first(),
+            Some(mir2_protocol::ServerPacket::StartGame { result: 4, .. })
+        ));
+        assert_eq!(
+            packets
+                .iter()
+                .filter(|p| matches!(p, mir2_protocol::ServerPacket::GameShopInfo { .. }))
+                .count(),
+            105
+        );
+        assert_eq!(
+            serde_json::to_value(session.world_snapshot()).unwrap(),
+            before
+        );
     }
 
     use super::{GatewayConfig, GatewaySession};

@@ -320,20 +320,48 @@ pub fn spawn_crystal_image_button<T: Bundle>(
             if let Some(caption) = crystal_button_caption(spec) {
                 let caption = match (spec.library, spec.normal) {
                     ("Title", 774 | 775) => crate::native_i18n::key("game.extra.035", caption),
-                    ("Title", 851..=853) => crate::native_i18n::key("game.option.new_movement", caption),
-                    ("Title", 848..=850) => crate::native_i18n::key("game.option.old_movement", caption),
+                    ("Title", 851..=853) => {
+                        crate::native_i18n::key("game.option.new_movement", caption)
+                    }
+                    ("Title", 848..=850) => {
+                        crate::native_i18n::key("game.option.old_movement", caption)
+                    }
                     _ => crate::native_i18n::tr(caption),
                 };
                 // Keep the hit rectangle exact; allow two lines for Portuguese
                 // on the narrow original buttons, instead of clipping letters.
-                button.spawn((
-                    LocalizedButtonFace,
-                    Node { width: Val::Percent(100.0), height: Val::Percent(100.0), border: UiRect::all(Val::Px(1.0)), padding: UiRect::axes(Val::Px(2.0), Val::Px(1.0)), align_items: AlignItems::Center, justify_content: JustifyContent::Center, overflow: Overflow::clip(), ..default() },
-                    BackgroundColor(localized_button_colour(resolve_button_visual_state(None, focused, enabled))),
-                    BorderColor::all(Color::srgb(0.61, 0.49, 0.28)), FocusPolicy::Pass,
-                )).with_children(|face| {
-                    face.spawn((Text::new(caption), crystal_text_font(if spec.rect.height < 21.0 { 9.0 } else { 10.0 }), TextColor(if enabled { CRYSTAL_HINT_TEXT } else { Color::srgb(0.48,0.45,0.37) }), TextLayout::new(Justify::Center, LineBreak::WordBoundary), FocusPolicy::Pass));
-                });
+                button
+                    .spawn((
+                        LocalizedButtonFace,
+                        Node {
+                            width: Val::Percent(100.0),
+                            height: Val::Percent(100.0),
+                            border: UiRect::all(Val::Px(1.0)),
+                            padding: UiRect::axes(Val::Px(2.0), Val::Px(1.0)),
+                            align_items: AlignItems::Center,
+                            justify_content: JustifyContent::Center,
+                            overflow: Overflow::clip(),
+                            ..default()
+                        },
+                        BackgroundColor(localized_button_colour(resolve_button_visual_state(
+                            None, focused, enabled,
+                        ))),
+                        BorderColor::all(Color::srgb(0.61, 0.49, 0.28)),
+                        FocusPolicy::Pass,
+                    ))
+                    .with_children(|face| {
+                        face.spawn((
+                            Text::new(caption),
+                            crystal_text_font(if spec.rect.height < 21.0 { 9.0 } else { 10.0 }),
+                            TextColor(if enabled {
+                                CRYSTAL_HINT_TEXT
+                            } else {
+                                Color::srgb(0.48, 0.45, 0.37)
+                            }),
+                            TextLayout::new(Justify::Center, LineBreak::WordBoundary),
+                            FocusPolicy::Pass,
+                        ));
+                    });
                 return;
             }
         }
@@ -954,7 +982,9 @@ fn paint_rebuilt_crystal_buttons(
         let state = resolve_button_visual_state(Some(interaction), button.focused, button.enabled);
         let image = assets.load(state.asset_path(&button.assets).to_owned());
         for child in children.iter() {
-            if let Ok(mut face) = faces.get_mut(child) { face.0 = localized_button_colour(state); }
+            if let Ok(mut face) = faces.get_mut(child) {
+                face.0 = localized_button_colour(state);
+            }
             if let Ok(mut sprite) = sprites.get_mut(child) {
                 if sprite.image != image {
                     sprite.image = image.clone();

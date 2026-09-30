@@ -302,7 +302,8 @@ impl NativeEntityPresentation {
     }
 
     pub(crate) fn self_motion_remaining_ms(&self, now_ms: u64) -> u64 {
-        self.self_object_id.as_deref()
+        self.self_object_id
+            .as_deref()
             .and_then(|object_id| self.motion_windows.get(object_id))
             .map_or(0, |window| window.expires_ms.saturating_sub(now_ms))
     }
@@ -829,7 +830,10 @@ impl NativeEntityPresentation {
                 })
                 .is_some();
             let previous = if stale_self_source_echo_applied
-                && self.motion_windows.get(&object_id).is_some_and(|window| window.locally_settled)
+                && self
+                    .motion_windows
+                    .get(&object_id)
+                    .is_some_and(|window| window.locally_settled)
             {
                 self.last_positions.get(&object_id).copied()
             } else {
@@ -966,9 +970,8 @@ impl NativeEntityPresentation {
 
         // An animation deadline is not an authoritative ACK. Retain one local
         // receipt until confirmation/correction, while settling its pixels once.
-        self.motion_windows.retain(|object_id, window| {
-            !expired.contains(object_id) || window.locally_predicted
-        });
+        self.motion_windows
+            .retain(|object_id, window| !expired.contains(object_id) || window.locally_predicted);
         if let Some(entities) = self
             .latest_payload
             .as_mut()
@@ -1008,14 +1011,13 @@ impl NativeEntityPresentation {
                 }
             }
         }
-        if self
-            .self_object_id
-            .as_ref()
-            .is_some_and(|object_id| {
-                expired.contains(object_id)
-                    && !self.motion_windows.get(object_id).is_some_and(|window| window.locally_predicted)
-            })
-        {
+        if self.self_object_id.as_ref().is_some_and(|object_id| {
+            expired.contains(object_id)
+                && !self
+                    .motion_windows
+                    .get(object_id)
+                    .is_some_and(|window| window.locally_predicted)
+        }) {
             mir2_bevy_runtime::clear_mir2_self_camera_motion();
         }
         self.payload_dirty = true;
@@ -1130,7 +1132,9 @@ impl NativeEntityPresentation {
                 .then_some((object_id, *window, action))
         });
         if let Some((object_id, window, action)) = overlap {
-            let action_sequence = self.world.active_state(object_id)
+            let action_sequence = self
+                .world
+                .active_state(object_id)
                 .and_then(|state| state.pose().last_started_event_sequence)
                 .unwrap_or(0);
             let overlap_key = (window.started_ms, action_sequence);
@@ -2087,18 +2091,31 @@ mod tests {
     #[test]
     fn late_self_run_ack_never_replays_completed_prediction_or_blocks_correction() {
         let render = |p: &mut NativeEntityPresentation, time| {
-            p.render_state_if_changed_with_clocks(time - 1000, time, true, |payload, _, _| Some(payload.clone()));
+            p.render_state_if_changed_with_clocks(time - 1000, time, true, |payload, _, _| {
+                Some(payload.clone())
+            });
         };
         let mut p = NativeEntityPresentation::default();
         let mut initial = player_payload(7);
         initial["entities"][0]["_nativeAnimationAction"] = json!("standing");
         p.replace_payload(initial.clone());
         render(&mut p, 1000);
-        assert!(p.begin_local_self_motion("1", (10,10), (12,10), "right", true, 100, 1100));
+        assert!(p.begin_local_self_motion("1", (10, 10), (12, 10), "right", true, 100, 1100));
         render(&mut p, 1700);
-        assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(10), "unacknowledged render coordinates must remain coherent with the source map");
-        assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(10));
-        assert_eq!(p.last_positions["1"], (12,10), "receipt remembers the already-played endpoint");
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["entities"][0]["x"],
+            json!(10),
+            "unacknowledged render coordinates must remain coherent with the source map"
+        );
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"],
+            json!(10)
+        );
+        assert_eq!(
+            p.last_positions["1"],
+            (12, 10),
+            "receipt remembers the already-played endpoint"
+        );
         assert!(p.motion_windows["1"].locally_settled);
         let mut ack = player_payload(9);
         ack["entities"][0]["x"] = json!(12);
@@ -2107,29 +2124,57 @@ mod tests {
         ack["sceneView"]["center"]["x"] = json!(12);
         p.replace_payload(ack.clone());
         render(&mut p, 1850);
-        assert!(!p.has_active_motion(1850), "late ACK cannot restart movement");
-        assert_eq!(p.world.active_state("1").unwrap().pose().action, AnimationAction::Standing);
-        assert_eq!(p.last_positions["1"], (12,10));
-        assert!(p.begin_local_self_motion("1", (12,10), (14,10), "right", true, 900, 1900));
-        for time in [2000,2100,2300] {
+        assert!(
+            !p.has_active_motion(1850),
+            "late ACK cannot restart movement"
+        );
+        assert_eq!(
+            p.world.active_state("1").unwrap().pose().action,
+            AnimationAction::Standing
+        );
+        assert_eq!(p.last_positions["1"], (12, 10));
+        assert!(p.begin_local_self_motion("1", (12, 10), (14, 10), "right", true, 900, 1900));
+        for time in [2000, 2100, 2300] {
             p.replace_payload(ack.clone());
             render(&mut p, time);
-            assert_eq!(p.motion_windows["1"].started_ms,1900,"source echoes cannot restart second run");
-            assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(12));
-            assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(12));
+            assert_eq!(
+                p.motion_windows["1"].started_ms, 1900,
+                "source echoes cannot restart second run"
+            );
+            assert_eq!(
+                p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"],
+                json!(12)
+            );
+            assert_eq!(
+                p.latest_payload.as_ref().unwrap()["entities"][0]["x"],
+                json!(12)
+            );
         }
         render(&mut p, 2500);
         p.replace_payload(ack.clone());
         render(&mut p, 2600);
-        assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(12), "render center stays source until ACK");
-        assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(12));
-        assert_eq!(p.last_positions["1"], (14,10));
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["entities"][0]["x"],
+            json!(12),
+            "render center stays source until ACK"
+        );
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"],
+            json!(12)
+        );
+        assert_eq!(p.last_positions["1"], (14, 10));
         assert!(p.motion_windows["1"].locally_predicted);
-        p.cancel_local_self_prediction("1", (12,10), "left");
+        p.cancel_local_self_prediction("1", (12, 10), "left");
         assert!(!p.motion_windows.contains_key("1"));
-        assert_eq!(p.latest_payload.as_ref().unwrap()["entities"][0]["x"], json!(12));
-        assert_eq!(p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"], json!(12));
-        assert_eq!(p.last_positions["1"], (12,10));
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["entities"][0]["x"],
+            json!(12)
+        );
+        assert_eq!(
+            p.latest_payload.as_ref().unwrap()["sceneView"]["center"]["x"],
+            json!(12)
+        );
+        assert_eq!(p.last_positions["1"], (12, 10));
     }
 
     #[test]
@@ -2205,11 +2250,19 @@ mod tests {
         let mut initial = player_payload(7);
         initial["entities"][0]["_nativeAnimationAction"] = json!("standing");
         presentation.replace_payload(initial);
-        presentation.render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
-            Some(payload.clone())
-        }).expect("initial player");
+        presentation
+            .render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("initial player");
         assert!(presentation.begin_local_self_motion(
-            "1", (10, 10), (12, 10), "right", true, 100, 1_100,
+            "1",
+            (10, 10),
+            (12, 10),
+            "right",
+            true,
+            100,
+            1_100,
         ));
 
         let mut attack = player_payload(9);
@@ -2218,18 +2271,22 @@ mod tests {
         attack["entities"][0]["direction"] = json!("right");
         attack["entities"][0]["_nativeAnimationAction"] = json!("attack1");
         presentation.replace_payload(attack);
-        presentation.render_state_if_changed_with_clocks(200, 1_200, true, |payload, frames, _| {
-            assert_eq!(frames["1"].1, AnimationAction::Running);
-            assert!(payload["entities"][0].get("motionStartedMs").is_some());
-            Some(payload.clone())
-        }).expect("run still visible while early attack is queued");
+        presentation
+            .render_state_if_changed_with_clocks(200, 1_200, true, |payload, frames, _| {
+                assert_eq!(frames["1"].1, AnimationAction::Running);
+                assert!(payload["entities"][0].get("motionStartedMs").is_some());
+                Some(payload.clone())
+            })
+            .expect("run still visible while early attack is queued");
         assert!(presentation.last_attack_motion_overlap.is_none());
 
-        presentation.render_state_if_changed_with_clocks(700, 1_700, true, |payload, frames, _| {
-            assert_eq!(frames["1"].1, AnimationAction::Attack1);
-            assert!(payload["entities"][0].get("motionStartedMs").is_none());
-            Some(payload.clone())
-        }).expect("attack starts only after run pixels settle");
+        presentation
+            .render_state_if_changed_with_clocks(700, 1_700, true, |payload, frames, _| {
+                assert_eq!(frames["1"].1, AnimationAction::Attack1);
+                assert!(payload["entities"][0].get("motionStartedMs").is_none());
+                Some(payload.clone())
+            })
+            .expect("attack starts only after run pixels settle");
         assert!(presentation.last_attack_motion_overlap.is_none());
     }
 
@@ -2237,30 +2294,44 @@ mod tests {
     fn mismatched_animation_and_motion_clocks_detect_attack_motion_overlap_once() {
         let mut presentation = NativeEntityPresentation::default();
         presentation.replace_payload(player_payload(7));
-        presentation.render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
-            Some(payload.clone())
-        }).expect("initial player");
+        presentation
+            .render_state_if_changed_with_clocks(0, 1_000, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("initial player");
         assert!(presentation.begin_local_self_motion(
-            "1", (10, 10), (12, 10), "right", true, 100, 1_100,
+            "1",
+            (10, 10),
+            (12, 10),
+            "right",
+            true,
+            100,
+            1_100,
         ));
         let mut attack = player_payload(9);
         attack["entities"][0]["x"] = json!(12);
         attack["sceneView"]["center"]["x"] = json!(12);
         attack["entities"][0]["_nativeAnimationAction"] = json!("attack1");
         presentation.replace_payload(attack);
-        presentation.render_state_if_changed_with_clocks(200, 1_200, true, |payload, _, _| {
-            Some(payload.clone())
-        }).expect("attack queued behind run");
+        presentation
+            .render_state_if_changed_with_clocks(200, 1_200, true, |payload, _, _| {
+                Some(payload.clone())
+            })
+            .expect("attack queued behind run");
 
         // Deliberately advance the animation clock ahead of the wall-clock
         // motion window: this is the exact visual anomaly the sparse trace
         // must distinguish from a harmless delayed network ACK.
-        presentation.render_state_if_changed_with_clocks(700, 1_300, true, |payload, frames, _| {
-            assert_eq!(frames["1"].1, AnimationAction::Attack1);
-            assert!(payload["entities"][0].get("motionStartedMs").is_some());
-            Some(payload.clone())
-        }).expect("skewed attack pose overlaps active motion");
-        let first = presentation.last_attack_motion_overlap.expect("overlap recorded");
+        presentation
+            .render_state_if_changed_with_clocks(700, 1_300, true, |payload, frames, _| {
+                assert_eq!(frames["1"].1, AnimationAction::Attack1);
+                assert!(payload["entities"][0].get("motionStartedMs").is_some());
+                Some(payload.clone())
+            })
+            .expect("skewed attack pose overlaps active motion");
+        let first = presentation
+            .last_attack_motion_overlap
+            .expect("overlap recorded");
         presentation.render_state_if_changed_with_clocks(750, 1_350, true, |payload, _, _| {
             Some(payload.clone())
         });
@@ -3402,18 +3473,26 @@ mod tests {
         assert!(!layers.is_empty());
         for layer in layers {
             assert_eq!(layer["path"], "/original-ui/Monster/005/136.png");
-            assert_eq!((layer["width"].as_f64(), layer["height"].as_f64()),
-                (Some(96.0), Some(76.0)), "fallback retains real source geometry");
+            assert_eq!(
+                (layer["width"].as_f64(), layer["height"].as_f64()),
+                (Some(96.0), Some(76.0)),
+                "fallback retains real source geometry"
+            );
         }
 
         // A missing atlas rect alone is no longer missing source geometry:
         // complete packs can supply individual monster PNGs. This frame is
         // outside the source library, so neither valid source can resolve it.
-        assert!(crate::assets::asset_path("original-ui/Monster/005/2147483647.png")
-            .is_none_or(|path| !path.is_file()));
+        assert!(
+            crate::assets::asset_path("original-ui/Monster/005/2147483647.png")
+                .is_none_or(|path| !path.is_file())
+        );
         let missing_rect = crate::atlas::build_entity_render_state_with_manifest_for_test(
             &payload,
-            &HashMap::from([("2005".to_owned(), (i64::from(i32::MAX), AnimationAction::Struck))]),
+            &HashMap::from([(
+                "2005".to_owned(),
+                (i64::from(i32::MAX), AnimationAction::Struck),
+            )]),
             true,
             &crate::atlas::routing_atlas_manifest_fixture(&[]),
         )
@@ -3502,20 +3581,37 @@ mod tests {
         };
         let layers = rendered["layers"].as_array().expect("rendered layers");
         let expected_layers = checkpoint["layers"].as_array().expect("checkpoint layers");
-        let redraws = layers.iter().filter(|layer| layer["key"].as_str().unwrap().contains(":self-occlusion:")).collect::<Vec<_>>();
+        let redraws = layers
+            .iter()
+            .filter(|layer| layer["key"].as_str().unwrap().contains(":self-occlusion:"))
+            .collect::<Vec<_>>();
         let expected_redraw_roles = if rendered["isSelf"] == true {
-            expected_layers.iter().filter_map(|layer| {
-                let key = layer["key"].as_str()?;
-                let role = key.rsplit(':').next()?;
-                matches!(role, "body" | "hair" | "wings").then_some(role)
-            }).collect::<Vec<_>>()
-        } else { Vec::new() };
+            expected_layers
+                .iter()
+                .filter_map(|layer| {
+                    let key = layer["key"].as_str()?;
+                    let role = key.rsplit(':').next()?;
+                    matches!(role, "body" | "hair" | "wings").then_some(role)
+                })
+                .collect::<Vec<_>>()
+        } else {
+            Vec::new()
+        };
         assert_eq!(redraws.len(), expected_redraw_roles.len());
         for role in expected_redraw_roles {
-            let source = layers.iter().find(|v| v["key"] == format!("{object_id}:{role}")).unwrap();
-            let redraw = redraws.iter().find(|v| v["key"] == format!("{object_id}:self-occlusion:{role}")).unwrap();
+            let source = layers
+                .iter()
+                .find(|v| v["key"] == format!("{object_id}:{role}"))
+                .unwrap();
+            let redraw = redraws
+                .iter()
+                .find(|v| v["key"] == format!("{object_id}:self-occlusion:{role}"))
+                .unwrap();
             for field in ["path", "atlasRectKey", "left", "top", "width", "height"] {
-                assert_eq!(source[field], redraw[field], "redraw preserves {role} {field}");
+                assert_eq!(
+                    source[field], redraw[field],
+                    "redraw preserves {role} {field}"
+                );
             }
             assert_eq!(redraw["opacity"], json!(0.4));
             assert_eq!(redraw["additive"], json!(role == "wings"));

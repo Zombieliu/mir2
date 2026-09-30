@@ -1,10 +1,11 @@
 use super::*;
 
 fn priced_item() -> (ItemState, CrystalItemTemplate) {
-    let mut item = item_state_from_equipment_state(
-        seed_equipment_items()[0].clone(), ItemContainer::Bag1, 0,
-    );
-    let mut template = crystal_item_template_for_item_key(&item.key).unwrap().clone();
+    let mut item =
+        item_state_from_equipment_state(seed_equipment_items()[0].clone(), ItemContainer::Bag1, 0);
+    let mut template = crystal_item_template_for_item_key(&item.key)
+        .unwrap()
+        .clone();
     template.price = 1000;
     template.durability = 1000;
     item.quantity = 1;
@@ -44,8 +45,10 @@ fn crystal_repair_rental_multiplier_follows_wire_presence() {
     // Preserve Some(default), which is distinct from absent rental metadata.
     let mut wire = user_item_from_item_state(&item);
     wire.rental_information = Some(mir2_protocol::UserItemRentalInformation {
-        owner_name: String::new(), binding_flags: 0,
-        expiry_binary_datetime: 0, rental_locked: false,
+        owner_name: String::new(),
+        binding_flags: 0,
+        expiry_binary_datetime: 0,
+        rental_locked: false,
     });
     item = try_item_state_from_user_item(item, &wire).unwrap();
     assert_eq!(crystal_item_repair_price(&item, &template), 376);
@@ -71,6 +74,9 @@ fn crystal_sale_divides_after_multiplying_selected_stack() {
     // Crystal NPC sale is Price()/2, where Price has already multiplied Count.
     for (count, expected) in [(1, 50), (2, 101), (3, 151)] {
         item.quantity = count;
-        assert_eq!(crystal_item_current_price(&item, &template, 0) / 2, expected);
+        assert_eq!(
+            crystal_item_current_price(&item, &template, 0) / 2,
+            expected
+        );
     }
 }

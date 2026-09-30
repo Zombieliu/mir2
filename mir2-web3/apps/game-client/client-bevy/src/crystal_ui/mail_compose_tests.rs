@@ -34,7 +34,10 @@ fn input_app() -> App {
 }
 
 fn press(app: &mut App, button: OverlayButton) {
-    let entity = app.world_mut().spawn((Interaction::Pressed, button, Button)).id();
+    let entity = app
+        .world_mut()
+        .spawn((Interaction::Pressed, button, Button))
+        .id();
     app.update();
     app.world_mut().despawn(entity);
 }
@@ -62,27 +65,45 @@ fn mail_body_utf16_budget_matches_with_and_without_native_editor() {
             ] {
                 let mut app = input_app();
                 if !native_editor {
-                    app.world_mut().remove_resource::<mail_editor::MailLetterEditor>();
+                    app.world_mut()
+                        .remove_resource::<mail_editor::MailLetterEditor>();
                 }
-                app.world_mut().resource_mut::<NativePlayerUiState>().core.mail_compose =
-                    Some(mir2_ui_core::state::MailComposeDraft {
-                        recipient: "Receiver".into(), ..default()
-                    });
+                app.world_mut()
+                    .resource_mut::<NativePlayerUiState>()
+                    .core
+                    .mail_compose = Some(mir2_ui_core::state::MailComposeDraft {
+                    recipient: "Receiver".into(),
+                    ..default()
+                });
                 {
                     let mut compose = app.world_mut().resource_mut::<MailComposeUi>();
                     compose.kind = kind;
                     compose.focus = MailComposeFocus::Message;
                 }
                 type_text(&mut app, KeyCode::KeyA, &input);
-                let message = &app.world().resource::<NativePlayerUiState>()
-                    .core.mail_compose.as_ref().unwrap().message;
+                let message = &app
+                    .world()
+                    .resource::<NativePlayerUiState>()
+                    .core
+                    .mail_compose
+                    .as_ref()
+                    .unwrap()
+                    .message;
                 assert_eq!(message, &expected, "native editor={native_editor}");
                 type_text(&mut app, KeyCode::Enter, "");
-                let message = &app.world().resource::<NativePlayerUiState>()
-                    .core.mail_compose.as_ref().unwrap().message;
+                let message = &app
+                    .world()
+                    .resource::<NativePlayerUiState>()
+                    .core
+                    .mail_compose
+                    .as_ref()
+                    .unwrap()
+                    .message;
                 let expected = if expected.encode_utf16().count() < 500 {
                     format!("{expected}\n")
-                } else { expected };
+                } else {
+                    expected
+                };
                 assert_eq!(message, &expected);
             }
         }
@@ -113,13 +134,28 @@ fn letter_renderer_uses_source_root_full_multiline_text_and_visible_focus() {
         .single(world)
         .expect("letter compose root");
     assert_eq!(node.display, Display::Flex);
-    assert_eq!((node.left, node.top, node.width, node.height), (
-        Val::Px(100.0), Val::Px(100.0), Val::Px(236.0), Val::Px(300.0),
-    ));
-    assert!(world.query::<&Text>().iter(world).any(|text| text.0 == "first line\nsecond line"));
-    assert!(world.query::<&ImageNode>().iter(world).any(|image| {
-        image.image.path().is_some_and(|path| path.to_string() == "original-ui/Title/671.png")
-    }), "the source Letter frame must be present");
+    assert_eq!(
+        (node.left, node.top, node.width, node.height),
+        (
+            Val::Px(100.0),
+            Val::Px(100.0),
+            Val::Px(236.0),
+            Val::Px(300.0),
+        )
+    );
+    assert!(world
+        .query::<&Text>()
+        .iter(world)
+        .any(|text| text.0 == "first line\nsecond line"));
+    assert!(
+        world.query::<&ImageNode>().iter(world).any(|image| {
+            image
+                .image
+                .path()
+                .is_some_and(|path| path.to_string() == "original-ui/Title/671.png")
+        }),
+        "the source Letter frame must be present"
+    );
     let mut buttons = world.query::<(&OverlayButton, &Node)>();
     let (_, send) = buttons
         .iter(world)
@@ -131,7 +167,9 @@ fn letter_renderer_uses_source_root_full_multiline_text_and_visible_focus() {
     );
     let (_, cancel) = buttons
         .iter(world)
-        .find(|(button, node)| matches!(button, OverlayButton::CancelMailCompose) && node.top == Val::Px(265.0))
+        .find(|(button, node)| {
+            matches!(button, OverlayButton::CancelMailCompose) && node.top == Val::Px(265.0)
+        })
         .expect("source cancel control");
     assert_eq!(
         (cancel.left, cancel.top, cancel.width, cancel.height),
@@ -186,23 +224,56 @@ fn write_recipient_prompt_confirms_exact_recipient_and_consumes_covered_parcel_a
         state.core.panel = mir2_ui_core::state::UiPanel::Mail;
     }
     press(&mut app, OverlayButton::OpenMailCompose);
-    assert!(app.world().resource::<MailComposeUi>().recipient_prompt.is_some());
-    assert!(app.world().resource::<NativePlayerUiState>().mail_recipient_prompt_active);
+    assert!(app
+        .world()
+        .resource::<MailComposeUi>()
+        .recipient_prompt
+        .is_some());
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_recipient_prompt_active
+    );
     type_text(&mut app, KeyCode::KeyR, "Receiver");
     assert_eq!(
-        app.world().resource::<MailComposeUi>().recipient_prompt.as_ref().map(|prompt| prompt.recipient.as_str()),
+        app.world()
+            .resource::<MailComposeUi>()
+            .recipient_prompt
+            .as_ref()
+            .map(|prompt| prompt.recipient.as_str()),
         Some("Receiver"),
         "the visible Prguse660 field receives the keyboard text",
     );
-    let submit = app.world_mut().spawn((Interaction::Pressed, OverlayButton::MailRecipientSubmit, Button)).id();
-    let covered = app.world_mut().spawn((Interaction::Pressed, OverlayButton::OpenMailParcelCompose, Button)).id();
+    let submit = app
+        .world_mut()
+        .spawn((
+            Interaction::Pressed,
+            OverlayButton::MailRecipientSubmit,
+            Button,
+        ))
+        .id();
+    let covered = app
+        .world_mut()
+        .spawn((
+            Interaction::Pressed,
+            OverlayButton::OpenMailParcelCompose,
+            Button,
+        ))
+        .id();
     app.update();
     app.world_mut().despawn(submit);
     app.world_mut().despawn(covered);
     {
         let state = app.world().resource::<NativePlayerUiState>();
         let compose = app.world().resource::<MailComposeUi>();
-        assert_eq!(state.core.mail_compose.as_ref().map(|draft| draft.recipient.as_str()), Some("Receiver"));
+        assert_eq!(
+            state
+                .core
+                .mail_compose
+                .as_ref()
+                .map(|draft| draft.recipient.as_str()),
+            Some("Receiver")
+        );
         assert_eq!(compose.kind, MailComposeKind::Letter);
         assert_eq!(compose.focus, MailComposeFocus::Message);
         assert!(compose.recipient_prompt.is_none());
@@ -211,11 +282,18 @@ fn write_recipient_prompt_confirms_exact_recipient_and_consumes_covered_parcel_a
 
     // The following physical frame edits the source Letter body directly;
     // it never cycles back into a hidden recipient or gold adapter field.
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_recipient_input_consumed = false;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_recipient_input_consumed = false;
     type_text(&mut app, KeyCode::KeyM, "Line one");
     type_text(&mut app, KeyCode::Enter, "");
     assert_eq!(
-        app.world().resource::<NativePlayerUiState>().core.mail_compose.as_ref().map(|draft| draft.message.as_str()),
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .as_ref()
+            .map(|draft| draft.message.as_str()),
         Some("Line one\n"),
     );
 }
@@ -229,11 +307,21 @@ fn recipient_cancel_and_letter_send_keep_input_isolated_and_draft_authoritative(
     }
     press(&mut app, OverlayButton::OpenMailCompose);
     press(&mut app, OverlayButton::MailRecipientCancel);
-    assert!(app.world().resource::<MailComposeUi>().recipient_prompt.is_none());
-    assert!(app.world().resource::<NativePlayerUiState>().mail_recipient_input_consumed);
+    assert!(app
+        .world()
+        .resource::<MailComposeUi>()
+        .recipient_prompt
+        .is_none());
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_recipient_input_consumed
+    );
 
     // A later physical input frame permits another source Write action.
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_recipient_input_consumed = false;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_recipient_input_consumed = false;
     {
         let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
         state.core.mail_compose = Some(mir2_ui_core::state::MailComposeDraft {
@@ -244,10 +332,25 @@ fn recipient_cancel_and_letter_send_keep_input_isolated_and_draft_authoritative(
     }
     app.world_mut().resource_mut::<MailComposeUi>().kind = MailComposeKind::Letter;
     press(&mut app, OverlayButton::SubmitMail);
-    assert_eq!(app.world().resource::<MailComposeUi>().last_notice.as_deref(), Some("Sending mail…"));
-    assert!(app.world().resource::<NativePlayerUiState>().core.mail_compose.is_some(), "only a successful receipt closes the draft");
     assert_eq!(
-        app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(),
+        app.world()
+            .resource::<MailComposeUi>()
+            .last_notice
+            .as_deref(),
+        Some("Sending mail…")
+    );
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .is_some(),
+        "only a successful receipt closes the draft"
+    );
+    assert_eq!(
+        app.world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents(),
         vec![NativePlayerUiIntent::SendMail {
             recipient: "Receiver".into(),
             message: "first\nsecond".into(),
@@ -277,10 +380,16 @@ fn parcel_to_letter_or_reply_never_sends_hidden_gold_or_items_and_keeps_parcel_d
     press(&mut app, OverlayButton::OpenMailCompose);
     {
         let mut compose = app.world_mut().resource_mut::<MailComposeUi>();
-        compose.recipient_prompt.as_mut().expect("letter recipient prompt").recipient = "Letter recipient".into();
+        compose
+            .recipient_prompt
+            .as_mut()
+            .expect("letter recipient prompt")
+            .recipient = "Letter recipient".into();
     }
     press(&mut app, OverlayButton::MailRecipientSubmit);
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_recipient_input_consumed = false;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_recipient_input_consumed = false;
     {
         let state = app.world().resource::<NativePlayerUiState>();
         let compose = app.world().resource::<MailComposeUi>();
@@ -290,10 +399,18 @@ fn parcel_to_letter_or_reply_never_sends_hidden_gold_or_items_and_keeps_parcel_d
         assert!(letter.attachment_unique_ids.is_empty());
         assert_eq!(compose.parcel_draft.as_ref(), Some(&parcel));
     }
-    app.world_mut().resource_mut::<NativePlayerUiState>().core.mail_compose.as_mut().expect("letter").message = "Letter message".into();
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .mail_compose
+        .as_mut()
+        .expect("letter")
+        .message = "Letter message".into();
     press(&mut app, OverlayButton::SubmitMail);
     assert_eq!(
-        app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(),
+        app.world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents(),
         vec![NativePlayerUiIntent::SendMail {
             recipient: "Letter recipient".into(),
             message: "Letter message".into(),
@@ -305,16 +422,27 @@ fn parcel_to_letter_or_reply_never_sends_hidden_gold_or_items_and_keeps_parcel_d
 
     // A non-correlated Send receipt can close only the active surface, so do
     // not let a Reply replace the submitted Letter while that request waits.
-    app.world_mut().resource_mut::<MailModel>().mails.push(MailMessage {
-        id: 99,
-        sender: "Reply sender".into(),
-        can_reply: true,
-        ..default()
-    });
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(MailMessage {
+            id: 99,
+            sender: "Reply sender".into(),
+            can_reply: true,
+            ..default()
+        });
     press(&mut app, OverlayButton::MailReply(99));
-    assert_eq!(app.world().resource::<MailComposeUi>().kind, MailComposeKind::Letter);
     assert_eq!(
-        app.world().resource::<NativePlayerUiState>().core.mail_compose.as_ref().map(|draft| draft.recipient.as_str()),
+        app.world().resource::<MailComposeUi>().kind,
+        MailComposeKind::Letter
+    );
+    assert_eq!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .as_ref()
+            .map(|draft| draft.recipient.as_str()),
         Some("Letter recipient"),
         "Reply is blocked until the uncorrelated Send result resolves",
     );
@@ -336,10 +464,21 @@ fn submitted_letter_body_is_frozen_until_the_uncorrelated_send_receipt() {
     press(&mut app, OverlayButton::SubmitMail);
     type_text(&mut app, KeyCode::KeyX, " later edit");
     assert_eq!(
-        app.world().resource::<NativePlayerUiState>().core.mail_compose.as_ref().map(|draft| draft.message.as_str()),
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .as_ref()
+            .map(|draft| draft.message.as_str()),
         Some("submitted body"),
     );
-    assert_eq!(app.world().resource::<MailComposeUi>().last_notice.as_deref(), Some("Sending mail…"));
+    assert_eq!(
+        app.world()
+            .resource::<MailComposeUi>()
+            .last_notice
+            .as_deref(),
+        Some("Sending mail…")
+    );
 }
 
 #[test]
@@ -387,7 +526,10 @@ fn mail_wheel_layout(text: &str) -> Vec<friend_dialog::text_editor::VisualLine> 
                 y: index as f32 * 20.0,
                 height: 20.0,
                 stops: vec![
-                    friend_dialog::text_editor::CaretStop { byte: start, x: 0.0 },
+                    friend_dialog::text_editor::CaretStop {
+                        byte: start,
+                        x: 0.0,
+                    },
                     friend_dialog::text_editor::CaretStop { byte: end, x: 20.0 },
                 ],
             }
@@ -421,18 +563,25 @@ fn mail_wheel_app(kind: MailComposeKind) -> (App, Entity) {
     }
     app.world_mut().resource_mut::<MailComposeUi>().kind = kind;
     {
-        let mut editor = app.world_mut().resource_mut::<mail_editor::MailLetterEditor>();
+        let mut editor = app
+            .world_mut()
+            .resource_mut::<mail_editor::MailLetterEditor>();
         editor.sync(true, Some(&body));
         editor.install_layout(mail_wheel_layout(&body));
     }
     let (origin, body_rect) = if kind == MailComposeKind::Parcel {
         (
-            app.world().resource::<mail_parcel::MailParcelUi>().window.position,
+            app.world()
+                .resource::<mail_parcel::MailParcelUi>()
+                .window
+                .position,
             mail_parcel::MAIL_PARCEL_BODY_RECT,
         )
     } else {
         (
-            app.world().resource::<mail_compose_drag::MailLetterWindow>().position,
+            app.world()
+                .resource::<mail_compose_drag::MailLetterWindow>()
+                .position,
             mail_editor::MAIL_LETTER_BODY_RECT,
         )
     };
@@ -471,7 +620,10 @@ fn scaled_mail_body_wheel_routes_letter_and_parcel_without_leaking_past_guards()
             .selection();
         wheel(&mut app, window, -400.0, MouseScrollUnit::Pixel);
         assert_eq!(
-            app.world().resource::<mail_editor::MailLetterEditor>().scroll().y,
+            app.world()
+                .resource::<mail_editor::MailLetterEditor>()
+                .scroll()
+                .y,
             200.0,
             "{kind:?} converts physical pixel wheel delta through the 2x stage scale"
         );
@@ -480,7 +632,10 @@ fn scaled_mail_body_wheel_routes_letter_and_parcel_without_leaking_past_guards()
             .menu_pointer_consumed = false;
         wheel(&mut app, window, -100.0, MouseScrollUnit::Line);
         assert_eq!(
-            app.world().resource::<mail_editor::MailLetterEditor>().scroll().y,
+            app.world()
+                .resource::<mail_editor::MailLetterEditor>()
+                .scroll()
+                .y,
             259.0,
             "{kind:?} consumes a scaled in-viewport line wheel"
         );
@@ -503,10 +658,15 @@ fn scaled_mail_body_wheel_routes_letter_and_parcel_without_leaking_past_guards()
             .get_mut::<Window>(window)
             .expect("window")
             .set_cursor_position(Some(Vec2::new(2.0, 2.0)));
-        let before_outside = app.world().resource::<mail_editor::MailLetterEditor>().scroll();
+        let before_outside = app
+            .world()
+            .resource::<mail_editor::MailLetterEditor>()
+            .scroll();
         wheel(&mut app, window, 1.0, MouseScrollUnit::Line);
         assert_eq!(
-            app.world().resource::<mail_editor::MailLetterEditor>().scroll(),
+            app.world()
+                .resource::<mail_editor::MailLetterEditor>()
+                .scroll(),
             before_outside,
             "wheel outside the body is not routed to mail"
         );
@@ -514,10 +674,15 @@ fn scaled_mail_body_wheel_routes_letter_and_parcel_without_leaking_past_guards()
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .mail_feedback_prompt = Some("covered".into());
-        let before_covered = app.world().resource::<mail_editor::MailLetterEditor>().scroll();
+        let before_covered = app
+            .world()
+            .resource::<mail_editor::MailLetterEditor>()
+            .scroll();
         wheel(&mut app, window, -1.0, MouseScrollUnit::Line);
         assert_eq!(
-            app.world().resource::<mail_editor::MailLetterEditor>().scroll(),
+            app.world()
+                .resource::<mail_editor::MailLetterEditor>()
+                .scroll(),
             before_covered,
             "covered compose ignores queued wheel input"
         );
@@ -527,15 +692,21 @@ fn scaled_mail_body_wheel_routes_letter_and_parcel_without_leaking_past_guards()
 #[test]
 fn mail_body_wheel_ignores_pending_send_and_focus_loss() {
     let (mut pending_app, pending_window) = mail_wheel_app(MailComposeKind::Letter);
-    assert!(pending_app.world_mut().resource_mut::<PendingOperations>().try_begin(
-        crate::pending_operations::PendingOperationKey::SendMail {
+    assert!(pending_app
+        .world_mut()
+        .resource_mut::<PendingOperations>()
+        .try_begin(crate::pending_operations::PendingOperationKey::SendMail {
             recipient: "Receiver".into(),
             message: "body".into(),
             gold: 0,
             attachment_unique_ids: vec![],
-        },
-    ));
-    wheel(&mut pending_app, pending_window, -1.0, MouseScrollUnit::Line);
+        },));
+    wheel(
+        &mut pending_app,
+        pending_window,
+        -1.0,
+        MouseScrollUnit::Line,
+    );
     assert_eq!(
         pending_app
             .world()
@@ -552,7 +723,12 @@ fn mail_body_wheel_ignores_pending_send_and_focus_loss() {
         .get_mut::<Window>(unfocused_window)
         .expect("window")
         .focused = false;
-    wheel(&mut unfocused_app, unfocused_window, -1.0, MouseScrollUnit::Line);
+    wheel(
+        &mut unfocused_app,
+        unfocused_window,
+        -1.0,
+        MouseScrollUnit::Line,
+    );
     assert_eq!(
         unfocused_app
             .world()

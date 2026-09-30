@@ -10,8 +10,8 @@ use bevy::ui::{BackgroundColor, Node, PositionType, Val};
 
 use crate::chat::{ChatChannel, ChatLine, ChatModel};
 use crate::crystal_ui::overlays::{
-    NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState, UiEffectQueue,
-    dispatch_ui_action,
+    dispatch_ui_action, NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
+    UiEffectQueue,
 };
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_ui_core::action::UiAction;
@@ -19,7 +19,7 @@ use mir2_ui_core::state::{UiChatChannel, UiChatSettings};
 
 use super::spec;
 use super::spec::CrystalRect;
-use super::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
+use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use super::widget::CrystalHint;
 
 /// The Crystal 1024x768 chat panel's screen-space origin.
@@ -1884,10 +1884,9 @@ mod tests {
                 rows.iter().map(|row| row.text.as_str()).collect::<String>(),
                 translated
             );
-            assert!(
-                rows.iter()
-                    .all(|row| unicode_width::UnicodeWidthStr::width(row.text.as_str()) <= 90)
-            );
+            assert!(rows
+                .iter()
+                .all(|row| unicode_width::UnicodeWidthStr::width(row.text.as_str()) <= 90));
             assert_eq!(model.lines, before);
         });
     }
@@ -2422,11 +2421,9 @@ mod tests {
         // Shout shows shout variants only
         let shout = filter_lines_by_filter(&lines, CrystalChatFilter::Shout);
         assert_eq!(shout.len(), 3);
-        assert!(
-            shout
-                .iter()
-                .all(|l| channel_matches_filter(&l.channel, CrystalChatFilter::Shout))
-        );
+        assert!(shout
+            .iter()
+            .all(|l| channel_matches_filter(&l.channel, CrystalChatFilter::Shout)));
         // Whisper
         let whisper = filter_lines_by_filter(&lines, CrystalChatFilter::Whisper);
         assert_eq!(whisper.len(), 1);
@@ -2790,12 +2787,11 @@ mod tests {
                 .drain_intents(),
             vec![NativePlayerUiIntent::TradeRequest]
         );
-        assert!(
-            app.world()
-                .resource::<crate::social::SocialModel>()
-                .pending
-                .is_empty()
-        );
+        assert!(app
+            .world()
+            .resource::<crate::social::SocialModel>()
+            .pending
+            .is_empty());
 
         app.world_mut()
             .resource_mut::<CrystalChatActionQueue>()
@@ -2850,12 +2846,11 @@ mod tests {
         app.update();
         assert_eq!(app.world().resource::<CrystalChatState>().scroll, 5);
         assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
-        assert!(
-            app.world_mut()
-                .resource_mut::<NativePlayerUiIntentQueue>()
-                .drain_intents()
-                .is_empty()
-        );
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
     }
 
     #[test]

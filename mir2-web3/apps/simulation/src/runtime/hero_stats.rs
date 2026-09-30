@@ -1,5 +1,6 @@
 //! Hero-specific stats, following HumanObject.RefreshStats (1729..2330).
 //! Base values use HeroBaseStats; final caps deliberately use ClassBaseStats.
+use super::item_sets::apply_sets;
 use super::{
     hero_inventory::item_weight,
     items::try_user_item_from_item_state,
@@ -8,7 +9,6 @@ use super::{
 use bevy_ecs::world::World;
 use mir2_protocol::{ServerPacket, ServerPacketId, Spell, UserItemStat};
 use std::collections::BTreeMap;
-use super::item_sets::apply_sets;
 #[derive(Default, Debug, Clone)]
 pub(super) struct HeroStats {
     pub values: BTreeMap<u8, i32>,
@@ -83,7 +83,11 @@ fn add_awake(stats: &mut HeroStats, item: &mir2_protocol::UserItem) {
     }
 }
 pub(super) fn compute(world: &World) -> HeroStats {
-    compute_with_status(world, super::hero_ai::hero_mount::riding(world), &super::hero_ai::hero_buffs::stats(world))
+    compute_with_status(
+        world,
+        super::hero_ai::hero_mount::riding(world),
+        &super::hero_ai::hero_buffs::stats(world),
+    )
 }
 pub(super) fn compute_with_status(
     world: &World,
@@ -220,7 +224,10 @@ mod tests {
         let mut stats = HeroStats::default();
         apply_sets(&mut stats.values, &[(7, 9, 7), (8, 9, 7)]);
         assert_eq!(stats.get(12), 0);
-        apply_sets(&mut stats.values, &[(7, 9, 7), (8, 9, 7), (4, 9, 5), (3, 9, 5)]);
+        apply_sets(
+            &mut stats.values,
+            &[(7, 9, 7), (8, 9, 7), (4, 9, 5), (3, 9, 5)],
+        );
         assert_eq!(stats.get(12), 100);
         let mut smash = HeroStats::default();
         apply_sets(

@@ -7,9 +7,9 @@ pub(crate) mod additive_ui;
 #[cfg(feature = "native-player-ui")]
 pub mod amount_input;
 pub mod assets;
+pub(crate) mod change_password;
 #[cfg(feature = "native-player-ui")]
 pub mod chat;
-pub(crate) mod change_password;
 #[cfg(feature = "native-player-ui")]
 pub mod guild_storage;
 #[cfg(feature = "native-player-ui")]

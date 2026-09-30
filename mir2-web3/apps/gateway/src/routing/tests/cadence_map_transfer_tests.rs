@@ -44,7 +44,9 @@ fn third_request_can_complete_previous_step_and_leave_newer_step_queued_at_sourc
             key: "crystal:0115:17:18".to_string(),
         })
         .expect("fixture transfer should execute");
-    let key = runtime.current_presence_key().expect("presence should exist");
+    let key = runtime
+        .current_presence_key()
+        .expect("presence should exist");
     let session_id = runtime
         .current_zone_session_id()
         .expect("Zone session should exist");
@@ -117,7 +119,9 @@ fn third_request_can_complete_previous_step_and_leave_newer_step_queued_at_sourc
         });
         let (packets, transform, ..) = state.dispatch_zone_outbounds(outbounds, Some(&key));
         if let Some(transform) = transform.as_ref() {
-            state.pending_zone_transforms.insert(key.clone(), transform.clone());
+            state
+                .pending_zone_transforms
+                .insert(key.clone(), transform.clone());
         }
         (packets, transform)
     };
@@ -167,14 +171,16 @@ fn third_request_can_complete_previous_step_and_leave_newer_step_queued_at_sourc
         packet,
         ServerPacket::MapInformation { info } if info.file_name == "0"
     )));
-    assert_eq!(runtime.inner.world_snapshot().map_file_name.as_deref(), Some("0"));
+    assert_eq!(
+        runtime.inner.world_snapshot().map_file_name.as_deref(),
+        Some("0")
+    );
 }
 
 #[test]
 fn deferred_zone_movement_onto_mage_house_source_transfers_on_session_tick_once() {
     let registry = ZoneRegistry::in_process();
-    let mut session =
-        GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+    let mut session = GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
     start_demo_character(&mut session);
     session.transfer_map("crystal:0115:17:19");
 
@@ -194,7 +200,10 @@ fn deferred_zone_movement_onto_mage_house_source_transfers_on_session_tick_once(
         direction: MirDirection::Down,
     });
     assert_eq!(map_information_count(&queued), 0, "{queued:?}");
-    assert_eq!(session.world_snapshot().map_file_name.as_deref(), Some("0115"));
+    assert_eq!(
+        session.world_snapshot().map_file_name.as_deref(),
+        Some("0115")
+    );
 
     wait_for_zone_position(&session, Point { x: 17, y: 21 });
     let tick = session.tick();
@@ -214,8 +223,7 @@ fn deferred_zone_movement_onto_mage_house_source_transfers_on_session_tick_once(
 #[test]
 fn deferred_zone_movement_away_from_a_source_does_not_transfer() {
     let registry = ZoneRegistry::in_process();
-    let mut session =
-        GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+    let mut session = GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
     start_demo_character(&mut session);
     session.transfer_map("crystal:0102:3:7");
 
@@ -235,15 +243,17 @@ fn deferred_zone_movement_away_from_a_source_does_not_transfer() {
     wait_for_zone_position(&session, Point { x: 5, y: 7 });
     let tick = session.tick();
     assert_eq!(map_information_count(&tick), 0, "{tick:?}");
-    assert_eq!(session.world_snapshot().map_file_name.as_deref(), Some("0102"));
+    assert_eq!(
+        session.world_snapshot().map_file_name.as_deref(),
+        Some("0102")
+    );
     assert_eq!(self_position(&session), Point { x: 5, y: 7 });
 }
 
 #[test]
 fn idle_tick_on_a_transfer_source_does_not_transfer_spawned_player() {
     let registry = ZoneRegistry::in_process();
-    let mut session =
-        GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
+    let mut session = GatewaySession::new_with_zone_registry(GatewayConfig::default(), &registry);
     start_demo_character(&mut session);
     session.transfer_map("crystal:0115:17:21");
 
@@ -251,6 +261,9 @@ fn idle_tick_on_a_transfer_source_does_not_transfer_spawned_player() {
     let tick = session.tick();
 
     assert_eq!(map_information_count(&tick), 0, "{tick:?}");
-    assert_eq!(session.world_snapshot().map_file_name.as_deref(), Some("0115"));
+    assert_eq!(
+        session.world_snapshot().map_file_name.as_deref(),
+        Some("0115")
+    );
     assert_eq!(self_position(&session), Point { x: 17, y: 21 });
 }

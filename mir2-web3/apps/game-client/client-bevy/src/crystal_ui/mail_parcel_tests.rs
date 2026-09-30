@@ -41,7 +41,8 @@ fn parcel_renderer_uses_independent_source_frame_cells_and_bag_offset() {
         });
     }
     app.world_mut().resource_mut::<MailComposeUi>().kind = MailComposeKind::Parcel;
-    app.world_mut().resource_mut::<InventoryModel>().items = vec![source_item(41, 0), source_item(42, 1)];
+    app.world_mut().resource_mut::<InventoryModel>().items =
+        vec![source_item(41, 0), source_item(42, 1)];
     app.update();
 
     let world = app.world_mut();
@@ -55,7 +56,10 @@ fn parcel_renderer_uses_independent_source_frame_cells_and_bag_offset() {
         (Val::Px(326.0), Val::Px(0.0), Val::Px(236.0), Val::Px(384.0)),
     );
     assert!(world.query::<&ImageNode>().iter(world).any(|image| {
-        image.image.path().is_some_and(|path| path.to_string() == "original-ui/Title/674.png")
+        image
+            .image
+            .path()
+            .is_some_and(|path| path.to_string() == "original-ui/Title/674.png")
     }));
     let mut buttons = world.query::<(&OverlayButton, &Node)>();
     let (_, send) = buttons
@@ -97,7 +101,10 @@ fn open_parcel_uses_recipient_prompt_without_overwriting_a_saved_draft() {
     app.update();
     let state = app.world().resource::<NativePlayerUiState>();
     let compose = app.world().resource::<MailComposeUi>();
-    let prompt = compose.recipient_prompt.as_ref().expect("source recipient prompt");
+    let prompt = compose
+        .recipient_prompt
+        .as_ref()
+        .expect("source recipient prompt");
     assert_eq!(prompt.target_kind, MailComposeKind::Parcel);
     assert!(state.mail_recipient_prompt_active);
 
@@ -116,9 +123,16 @@ fn open_parcel_uses_recipient_prompt_without_overwriting_a_saved_draft() {
         .resource_mut::<MailServiceInbox>()
         .push(MailServiceEvent::OpenParcel);
     app.update();
-    assert!(app.world().resource::<MailComposeUi>().recipient_prompt.is_none());
+    assert!(app
+        .world()
+        .resource::<MailComposeUi>()
+        .recipient_prompt
+        .is_none());
     assert_eq!(
-        app.world().resource::<MailComposeUi>().last_notice.as_deref(),
+        app.world()
+            .resource::<MailComposeUi>()
+            .last_notice
+            .as_deref(),
         Some("Finish or cancel the current parcel first"),
     );
 }
@@ -126,7 +140,10 @@ fn open_parcel_uses_recipient_prompt_without_overwriting_a_saved_draft() {
 #[test]
 fn quote_singleflight_ignores_stale_cost_and_requires_current_live_ids() {
     let mut ui = mail_parcel::MailParcelUi::default();
-    let inventory = InventoryModel { items: vec![source_item(41, 0)], ..default() };
+    let inventory = InventoryModel {
+        items: vec![source_item(41, 0)],
+        ..default()
+    };
     let mut draft = mir2_ui_core::state::MailComposeDraft {
         gold: 100,
         attachment_unique_ids: vec![41],
@@ -150,8 +167,15 @@ fn quote_singleflight_ignores_stale_cost_and_requires_current_live_ids() {
 fn quote_is_invalidated_by_live_attachment_pricing_changes() {
     let mut ui = mail_parcel::MailParcelUi::default();
     let mut item = source_item(41, 0);
-    item.tooltip_source.as_mut().expect("concrete source").info.price = 1_000;
-    let mut inventory = InventoryModel { items: vec![item], ..default() };
+    item.tooltip_source
+        .as_mut()
+        .expect("concrete source")
+        .info
+        .price = 1_000;
+    let mut inventory = InventoryModel {
+        items: vec![item],
+        ..default()
+    };
     let draft = mir2_ui_core::state::MailComposeDraft {
         attachment_unique_ids: vec![41],
         ..default()
@@ -184,17 +208,29 @@ fn parcel_lock_is_exact_and_local_cancel_recovers_if_echoes_are_dropped() {
     ui.apply_lock_receipt(41, true);
     ui.apply_lock_receipt(9_999, true);
     assert!(ui.blocks_item(41));
-    assert!(!ui.blocks_item(9_999), "unknown echoed IDs cannot create a permanent lock");
+    assert!(
+        !ui.blocks_item(9_999),
+        "unknown echoed IDs cannot create a permanent lock"
+    );
 
     assert_eq!(ui.detach_at(&mut draft, 0), Some(41));
-    assert!(!ui.blocks_item(41), "cancel is locally authoritative when false echo is lost");
+    assert!(
+        !ui.blocks_item(41),
+        "cancel is locally authoritative when false echo is lost"
+    );
     ui.apply_lock_receipt(41, true);
     ui.apply_lock_receipt(41, false);
-    assert!(!ui.blocks_item(41), "late cancel echoes stay harmless after release");
+    assert!(
+        !ui.blocks_item(41),
+        "late cancel echoes stay harmless after release"
+    );
 
     assert!(ui.attach(&mut draft, &inventory, 41));
     ui.apply_lock_receipt(41, false);
-    assert!(ui.blocks_item(41), "a delayed old false cannot unlock a reselected item");
+    assert!(
+        ui.blocks_item(41),
+        "a delayed old false cannot unlock a reselected item"
+    );
     ui.complete_send();
     assert!(!ui.blocks_item(41));
     draft.attachment_unique_ids.clear();
@@ -203,12 +239,18 @@ fn parcel_lock_is_exact_and_local_cancel_recovers_if_echoes_are_dropped() {
     assert!(ui.session_reset(1).is_none());
     assert!(ui.session_reset(2).is_some());
     ui.apply_lock_receipt(41, true);
-    assert!(!ui.blocks_item(41), "reset rejects a previous session's true echo");
+    assert!(
+        !ui.blocks_item(41),
+        "reset rejects a previous session's true echo"
+    );
 }
 
 #[test]
 fn parcel_locked_bag_item_is_dimmed_and_cannot_start_a_drag() {
-    let inventory = InventoryModel { items: vec![source_item(41, 0)], ..default() };
+    let inventory = InventoryModel {
+        items: vec![source_item(41, 0)],
+        ..default()
+    };
     let mut state = NativePlayerUiState::default();
     let mut parcel = mail_parcel::MailParcelUi::default();
     let mut draft = mir2_ui_core::state::MailComposeDraft::default();
@@ -280,17 +322,26 @@ fn parcel_selected_uid_blocks_the_overlay_action_chain() {
     }
 
     fn press(app: &mut App, button: OverlayButton) {
-        let entity = app.world_mut().spawn((Interaction::Pressed, button, Button)).id();
+        let entity = app
+            .world_mut()
+            .spawn((Interaction::Pressed, button, Button))
+            .id();
         app.update();
         app.world_mut().despawn(entity);
     }
 
     press(&mut app, OverlayButton::InspectBag(0));
-    assert!(app.world().resource::<NativePlayerUiState>().inspect.is_none());
+    assert!(app
+        .world()
+        .resource::<NativePlayerUiState>()
+        .inspect
+        .is_none());
 
     {
         let item = app.world().resource::<InventoryModel>().items[0].clone();
-        app.world_mut().resource_mut::<NativePlayerUiState>().inspect = Some(inspect_from_item(&item));
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .inspect = Some(inspect_from_item(&item));
     }
     press(&mut app, OverlayButton::UseInspected);
     press(&mut app, OverlayButton::EquipInspected);
@@ -309,7 +360,9 @@ fn parcel_selected_uid_blocks_the_overlay_action_chain() {
         .drain_intents()
         .is_empty());
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().inventory_delete_mode = true;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .inventory_delete_mode = true;
     press(&mut app, OverlayButton::InspectBag(0));
     assert!(app
         .world()
@@ -317,16 +370,18 @@ fn parcel_selected_uid_blocks_the_overlay_action_chain() {
         .inventory_delete_prompt
         .is_none());
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().inventory_operation = Some(
-        InventoryOperationDraft::Move {
-            source_slot: 1,
-            unique_id: 42,
-        },
-    );
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .inventory_operation = Some(InventoryOperationDraft::Move {
+        source_slot: 1,
+        unique_id: 42,
+    });
     press(&mut app, OverlayButton::InspectBag(0));
-    assert!(app
-        .world_mut()
-        .resource_mut::<NativePlayerUiIntentQueue>()
-        .drain_intents()
-        .is_empty(), "a non-mail source cannot swap into a locked attachment cell");
+    assert!(
+        app.world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty(),
+        "a non-mail source cannot swap into a locked attachment cell"
+    );
 }

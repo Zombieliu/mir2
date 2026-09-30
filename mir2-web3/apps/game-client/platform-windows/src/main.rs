@@ -12,7 +12,7 @@
 )]
 
 use bevy::prelude::IntoScheduleConfigs;
-use mir2_bevy_runtime::{RuntimeWindowSpec, build_runtime_app};
+use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
 
 mod assets;
 mod atlas;
@@ -220,7 +220,7 @@ fn run_native_client() -> bevy::app::AppExit {
         window_sizing::configure(&mut window);
     }
     app.add_systems(bevy::app::Update, branding::apply_window_icon);
-        app.add_systems(bevy::app::Update, window_sizing::keep_pixel_viewport);
+    app.add_systems(bevy::app::Update, window_sizing::keep_pixel_viewport);
     app.add_systems(bevy::app::PostUpdate, lifecycle::handle_close_requests);
     app.add_systems(
         bevy::app::Last,

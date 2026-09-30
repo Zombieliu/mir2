@@ -20,7 +20,8 @@ fn guild_shared_bank_ordinary_packets_cross_zone_broadcast_and_atomic_failure() 
             name: "Banker".into(),
             options: 24,
         });
-        guild.members.push(SharedGuildMember { membership_epoch: 0,
+        guild.members.push(SharedGuildMember {
+            membership_epoch: 0,
             identity: id("peer", 1),
             name: "Peer".into(),
             rank_index: 1,
@@ -287,7 +288,8 @@ fn fixture(seed_guild: bool) -> GatewayConfig {
                         name: "Leader".into(),
                         options: 255,
                     }],
-                    members: vec![SharedGuildMember { membership_epoch: 0,
+                    members: vec![SharedGuildMember {
+                        membership_epoch: 0,
                         identity: id("demo", 0),
                         name: "Scout".into(),
                         rank_index: 0,
@@ -296,7 +298,8 @@ fn fixture(seed_guild: bool) -> GatewayConfig {
                     storage: BTreeMap::new(),
                     buffs: BTreeMap::new(),
                     last_buff_tick_ms: 0,
-                    experience_receipts: BTreeSet::new(), experience_receipt_payloads: Default::default(),
+                    experience_receipts: BTreeSet::new(),
+                    experience_receipt_payloads: Default::default(),
                 },
             );
         }

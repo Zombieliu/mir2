@@ -6,7 +6,7 @@
 //! to a persisted record. Existing redirected stderr and opt-in traces remain
 //! independent of this small always-on log.
 
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use std::fs::{self, OpenOptions};
 use std::io::{self, Seek, SeekFrom, Write};
 use std::path::{Path, PathBuf};
@@ -221,13 +221,11 @@ fn panic_record(location: Option<(&str, u32, u32)>) -> Value {
         // A compile-time file basename is enough to find the source; retain no
         // build-machine path and never inspect PanicHookInfo::payload().
         let basename = file.rsplit(['/', '\\']).next().unwrap_or("unknown");
-        value["sourceFile"] = json!(
-            basename
-                .chars()
-                .filter(|c| c.is_ascii_alphanumeric() || matches!(*c, '.' | '_' | '-'))
-                .take(96)
-                .collect::<String>()
-        );
+        value["sourceFile"] = json!(basename
+            .chars()
+            .filter(|c| c.is_ascii_alphanumeric() || matches!(*c, '.' | '_' | '-'))
+            .take(96)
+            .collect::<String>());
         value["sourceLine"] = json!(line);
         value["sourceColumn"] = json!(column);
     }

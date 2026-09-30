@@ -3875,7 +3875,10 @@ where
                 "MapInformation" => {
                     eprintln!("[gateway-client] packet {packet}");
                     if mir2_bevy_runtime::native_render_diagnostics_enabled() {
-                        mir2_bevy_runtime::record_native_render_marker("mapBoundary", json!({"packet":packet}));
+                        mir2_bevy_runtime::record_native_render_marker(
+                            "mapBoundary",
+                            json!({"packet":packet}),
+                        );
                     }
                     if let Some(payload) = event.payload.as_ref() {
                         map_packet_cursor.observe_map_information(payload);
@@ -3891,7 +3894,10 @@ where
                 "MapChanged" => {
                     eprintln!("[gateway-client] packet {packet}");
                     if mir2_bevy_runtime::native_render_diagnostics_enabled() {
-                        mir2_bevy_runtime::record_native_render_marker("mapBoundary", json!({"packet":packet}));
+                        mir2_bevy_runtime::record_native_render_marker(
+                            "mapBoundary",
+                            json!({"packet":packet}),
+                        );
                     }
                     if let Some(payload) = event.payload.as_ref() {
                         map_packet_cursor.observe_map_information_kind(payload, "MapChanged");
@@ -3961,8 +3967,8 @@ where
                     };
                     push_native_npc_shop_service(signal)?;
                 }
-                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem"
-                | "EquipItem" | "RemoveItem" => {
+                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem" | "EquipItem"
+                | "RemoveItem" => {
                     if let Some(payload) = event.payload.as_ref() {
                         if let Some(ack) = transform_inventory_operation_ack(packet, payload) {
                             if let Ok(json) = serde_json::to_string(&ack) {
@@ -3980,7 +3986,8 @@ where
                         if let Some(item) = transform_game_shop_info_from_packet(payload, ui_cursor)
                         {
                             let json = serde_json::to_string(&item).map_err(|e| e.to_string())?;
-                            let enqueued = mir2_bevy_runtime::native_ingest::push_native_game_shop_info(json);
+                            let enqueued =
+                                mir2_bevy_runtime::native_ingest::push_native_game_shop_info(json);
                             if item.get("gameShopIndex").and_then(Value::as_i64) == Some(31)
                                 && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some()
                             {
@@ -4031,7 +4038,9 @@ where
                 "MailSendRequest" | "MailCost" | "MailLockedItem" => {
                     let payload = event.payload.as_ref().unwrap_or(&Value::Null);
                     if !push_native_mail_service_event(packet, payload)? {
-                        eprintln!("[gateway-client] ignored malformed {packet} parcel service packet");
+                        eprintln!(
+                            "[gateway-client] ignored malformed {packet} parcel service packet"
+                        );
                     }
                 }
                 "ReceiveMail" => {
@@ -4044,10 +4053,8 @@ where
                         let mut enqueued = false;
                         if let Some(mut model) = try_transform_mail_model_from_packet(payload) {
                             converted = true;
-                            enqueued = push_mail_model_with_feedback(
-                                &mut model,
-                                pending_mail_feedback,
-                            )?;
+                            enqueued =
+                                push_mail_model_with_feedback(&mut model, pending_mail_feedback)?;
                         }
                         if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
                             eprintln!(
@@ -4161,14 +4168,21 @@ fn forward_stale_map_receipts(
     skill_cursor: &mut SkillPacketCursor,
 ) -> Result<(), String> {
     validate_quest_operation_ack(payload)?;
-    if let Some(ack) = payload.get("questOperationAck").filter(|value| !value.is_null()) {
+    if let Some(ack) = payload
+        .get("questOperationAck")
+        .filter(|value| !value.is_null())
+    {
         // ACKs are applied before full gameplay projections; this envelope
         // carries the current big map and no old actors or scene metadata.
         let mut receipt = gameplay_adapter.big_map_snapshot();
-        receipt.quest_operation_ack = Some(serde_json::from_value(ack.clone()).map_err(|e| e.to_string())?);
+        receipt.quest_operation_ack =
+            Some(serde_json::from_value(ack.clone()).map_err(|e| e.to_string())?);
         let _ = gameplay_events.send(receipt);
     }
-    if payload.get("skillKeyAck").is_some_and(|value| !value.is_null()) {
+    if payload
+        .get("skillKeyAck")
+        .is_some_and(|value| !value.is_null())
+    {
         // Skill authority is session-scoped. Retain its full model with the
         // receipt, independently of the rejected world/map projection.
         skill_cursor.observe_snapshot(payload);
@@ -4211,8 +4225,15 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
         return false;
     };
     if map_changed {
-        for key in ["mapTitle", "miniMapIndex", "bigMapIndex", "mapLightSetting",
-            "mapDarkLight", "weatherParticles", "mapMusic"] {
+        for key in [
+            "mapTitle",
+            "miniMapIndex",
+            "bigMapIndex",
+            "mapLightSetting",
+            "mapDarkLight",
+            "weatherParticles",
+            "mapMusic",
+        ] {
             object.remove(key);
         }
     }
@@ -4295,12 +4316,15 @@ impl NativeMapPacketCursor {
         });
         if changed || self.map_file_name.is_none() {
             if mir2_bevy_runtime::native_render_diagnostics_enabled() {
-                mir2_bevy_runtime::record_native_render_marker("mapIdentity", json!({
-                    "event":"packet", "packet":packet_kind,
-                    "sourceFile":self.map_file_name, "sourceTitle":self.identity_metadata.get("mapTitle"),
-                    "sourceMiniMap":self.mini_map_index, "destinationFile":map_file_name,
-                    "destinationTitle":packet.get("title"), "destinationMiniMap":packet_minimap_value(packet),
-                }));
+                mir2_bevy_runtime::record_native_render_marker(
+                    "mapIdentity",
+                    json!({
+                        "event":"packet", "packet":packet_kind,
+                        "sourceFile":self.map_file_name, "sourceTitle":self.identity_metadata.get("mapTitle"),
+                        "sourceMiniMap":self.mini_map_index, "destinationFile":map_file_name,
+                        "destinationTitle":packet.get("title"), "destinationMiniMap":packet_minimap_value(packet),
+                    }),
+                );
             }
             self.trace_pending_snapshot = true;
             self.trace_rejected_file = None;
@@ -4311,13 +4335,17 @@ impl NativeMapPacketCursor {
         }
         self.map_file_name = Some(map_file_name.to_owned());
         for (source, destination) in [
-            ("mapIndex", "mapIndex"), ("title", "mapTitle"),
-            ("bigMapIndex", "bigMapIndex"), ("lights", "mapLightSetting"),
-            ("mapDarkLight", "mapDarkLight"), ("weatherParticles", "weatherParticles"),
+            ("mapIndex", "mapIndex"),
+            ("title", "mapTitle"),
+            ("bigMapIndex", "bigMapIndex"),
+            ("lights", "mapLightSetting"),
+            ("mapDarkLight", "mapDarkLight"),
+            ("weatherParticles", "weatherParticles"),
             ("music", "mapMusic"),
         ] {
             if let Some(value) = packet.get(source).filter(|value| !value.is_null()) {
-                self.identity_metadata.insert(destination.to_owned(), value.clone());
+                self.identity_metadata
+                    .insert(destination.to_owned(), value.clone());
             }
         }
 
@@ -4329,26 +4357,41 @@ impl NativeMapPacketCursor {
     }
 
     fn snapshot_is_from_previous_map(&self, snapshot: &Value) -> bool {
-        self.map_file_name.as_deref().zip(map_file_name(snapshot))
+        self.map_file_name
+            .as_deref()
+            .zip(map_file_name(snapshot))
             .is_some_and(|(current, incoming)| {
                 normalize_map_file_name(current) != normalize_map_file_name(incoming)
             })
     }
 
     fn trace_snapshot_identity(&mut self, snapshot: &Value) {
-        if !mir2_bevy_runtime::native_render_diagnostics_enabled() { return; }
+        if !mir2_bevy_runtime::native_render_diagnostics_enabled() {
+            return;
+        }
         let rejected = self.snapshot_is_from_previous_map(snapshot);
         let incoming = map_file_name(snapshot).unwrap_or("<partial>");
-        if rejected && self.trace_rejected_file.as_deref() == Some(incoming) { return; }
-        if !rejected && !self.trace_pending_snapshot && self.trace_rejected_file.is_none() { return; }
-        mir2_bevy_runtime::record_native_render_marker("mapIdentity", json!({
-            "event":"snapshot", "accepted":!rejected, "snapshotFile":incoming,
-            "snapshotTitle":snapshot.get("mapTitle"), "snapshotMiniMap":packet_minimap_value(snapshot),
-            "authoritativeFile":self.map_file_name, "authoritativeTitle":self.identity_metadata.get("mapTitle"),
-            "authoritativeMiniMap":self.mini_map_index,
-        }));
-        if rejected { self.trace_rejected_file = Some(incoming.to_owned()); }
-        else { self.trace_pending_snapshot = false; self.trace_rejected_file = None; }
+        if rejected && self.trace_rejected_file.as_deref() == Some(incoming) {
+            return;
+        }
+        if !rejected && !self.trace_pending_snapshot && self.trace_rejected_file.is_none() {
+            return;
+        }
+        mir2_bevy_runtime::record_native_render_marker(
+            "mapIdentity",
+            json!({
+                "event":"snapshot", "accepted":!rejected, "snapshotFile":incoming,
+                "snapshotTitle":snapshot.get("mapTitle"), "snapshotMiniMap":packet_minimap_value(snapshot),
+                "authoritativeFile":self.map_file_name, "authoritativeTitle":self.identity_metadata.get("mapTitle"),
+                "authoritativeMiniMap":self.mini_map_index,
+            }),
+        );
+        if rejected {
+            self.trace_rejected_file = Some(incoming.to_owned());
+        } else {
+            self.trace_pending_snapshot = false;
+            self.trace_rejected_file = None;
+        }
     }
 
     fn merge_into_same_map_snapshot(&mut self, snapshot: &mut Value) {
@@ -5400,7 +5443,12 @@ fn try_transform_mail_model_from_snapshot(payload: &Value) -> Option<Value> {
     let entries = mail_source(payload)?.as_array()?;
     let visible = entries
         .iter()
-        .filter(|mail| !mail.get("deleted").and_then(Value::as_bool).unwrap_or(false))
+        .filter(|mail| {
+            !mail
+                .get("deleted")
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+        })
         .cloned()
         .collect::<Vec<_>>();
     mail_model_from_entries(&visible)
@@ -5623,12 +5671,17 @@ fn try_transform_storage_model_from_snapshot(payload: &Value) -> Option<Value> {
         .or_else(|| payload.get("storage_items"))?
         .as_array()?;
     let items = storage_items_json(source)?;
-    let unlocked = payload.get("storageUnlocked")
+    let unlocked = payload
+        .get("storageUnlocked")
         .or_else(|| payload.get("storage_unlocked"))
         .and_then(Value::as_bool)
-        .unwrap_or_else(|| !payload.get("requireStoragePassword")
-            .or_else(|| payload.get("require_storage_password"))
-            .and_then(Value::as_bool).unwrap_or(false));
+        .unwrap_or_else(|| {
+            !payload
+                .get("requireStoragePassword")
+                .or_else(|| payload.get("require_storage_password"))
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+        });
     Some(json!({
         "items": items,
         "size": value_u32(payload.get("storageSize").or_else(|| payload.get("storage_size"))).and_then(|value| u16::try_from(value).ok()).unwrap_or(80),
@@ -6905,11 +6958,13 @@ mod tests {
             ("MailCost", json!({"cost":125})),
             ("MailLockedItem", json!({"uniqueId":77,"locked":true})),
         ] {
-            assert!(push_native_mail_service_event_with(packet, &payload, |json| {
-                delivered.push(json);
-                true
-            })
-            .unwrap());
+            assert!(
+                push_native_mail_service_event_with(packet, &payload, |json| {
+                    delivered.push(json);
+                    true
+                })
+                .unwrap()
+            );
         }
         let events = delivered
             .iter()
@@ -7070,7 +7125,8 @@ mod tests {
             "storage_items": [], "has_storage_password": true,
             "require_storage_password": true,
             "expanded_storage_expiry_time_binary_datetime": 987
-        })).expect("locked authoritative snapshot");
+        }))
+        .expect("locked authoritative snapshot");
         assert_eq!(locked_snapshot["unlocked"], false);
         assert_eq!(locked_snapshot["size"], 80);
         assert_eq!(locked_snapshot["expiry"], 987);
@@ -7078,13 +7134,15 @@ mod tests {
             "storageItems": [], "hasStoragePassword": true,
             "requireStoragePassword": false,
             "expandedStorageExpiryTimeBinaryDatetime": 654
-        })).expect("unlocked authoritative snapshot");
+        }))
+        .expect("unlocked authoritative snapshot");
         assert_eq!(unlocked_snapshot["unlocked"], true);
         assert_eq!(unlocked_snapshot["expiry"], 654);
         let explicit_unlock = try_transform_storage_model_from_snapshot(&json!({
             "storageItems": [], "requireStoragePassword": true,
             "storageUnlocked": true
-        })).expect("explicit unlock compatibility");
+        }))
+        .expect("explicit unlock compatibility");
         assert_eq!(explicit_unlock["unlocked"], true);
 
         let password_failure = transform_storage_patch_from_packet(
@@ -7099,11 +7157,15 @@ mod tests {
         .expect("password failure acknowledgement");
         assert_eq!(password_failure["ack"]["operation"], "removePassword");
         assert_eq!(password_failure["ack"]["success"], false);
-        assert!(password_failure.get("expiry").is_none(),
-            "password last-set timestamp must not replace warehouse rental expiry");
+        assert!(
+            password_failure.get("expiry").is_none(),
+            "password last-set timestamp must not replace warehouse rental expiry"
+        );
         let no_password = transform_storage_patch_from_packet(
-            "StorageUnlockResult", &json!({"result": 4, "hasPassword": false})
-        ).expect("no-password unlock result");
+            "StorageUnlockResult",
+            &json!({"result": 4, "hasPassword": false}),
+        )
+        .expect("no-password unlock result");
         assert_eq!(no_password["ack"]["success"], true);
         assert_eq!(no_password["unlocked"], true);
 
@@ -7580,18 +7642,27 @@ mod tests {
             "packet": "MapChanged",
             "payload": {"mapIndex": 401, "fileName": "D401", "title": "DeadMineEntrance", "miniMap": 8},
         });
-        assert_eq!(ingest!(d401_changed), WorldSnapshotIngestOutcome::NotSnapshot);
+        assert_eq!(
+            ingest!(d401_changed),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
         let partial_destination = json!({
             "type": "worldSnapshot",
             "payload": {"mapTitle": "BichonProvince", "miniMapIndex": 1,
                 "sceneView": {"center": {"x": 30, "y": 179}}},
         });
-        assert_eq!(ingest!(partial_destination), WorldSnapshotIngestOutcome::Applied);
+        assert_eq!(
+            ingest!(partial_destination),
+            WorldSnapshotIngestOutcome::Applied
+        );
         let destination = last_world_payload.as_ref().unwrap();
         assert_eq!(destination["mapFileName"], json!("D401"));
         assert_eq!(destination["mapTitle"], json!("DeadMineEntrance"));
         assert_eq!(destination["miniMapIndex"], json!(8));
-        assert_eq!(transform_world_snapshot(destination)["playerStats"]["mapName"], json!("DeadMineEntrance"));
+        assert_eq!(
+            transform_world_snapshot(destination)["playerStats"]["mapName"],
+            json!("DeadMineEntrance")
+        );
         let d401_snapshot = json!({
             "type": "worldSnapshot",
             // The ordinary server snapshot deliberately lacks miniMapIndex.
@@ -7599,7 +7670,9 @@ mod tests {
         });
         assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
         assert_eq!(
-            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            last_world_payload
+                .as_ref()
+                .and_then(|world| world.get("miniMapIndex")),
             Some(&json!(8))
         );
         let map_model: mir2_client_bevy::map::MapModel = serde_json::from_value(
@@ -7614,7 +7687,9 @@ mod tests {
 
         assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
         assert_eq!(
-            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            last_world_payload
+                .as_ref()
+                .and_then(|world| world.get("miniMapIndex")),
             Some(&json!(8)),
             "later same-map snapshots retain the cursor"
         );
@@ -7648,11 +7723,19 @@ mod tests {
         );
         // This is a stale pre-transition payload. It cannot clear the newer
         // D401 packet identity before the first fresh D401 snapshot arrives.
-        assert_eq!(ingest!(d402_snapshot), WorldSnapshotIngestOutcome::NotSnapshot);
-        assert_eq!(last_world_payload.as_ref().unwrap()["miniMapIndex"], json!(8));
+        assert_eq!(
+            ingest!(d402_snapshot),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
+        assert_eq!(
+            last_world_payload.as_ref().unwrap()["miniMapIndex"],
+            json!(8)
+        );
         assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
         assert_eq!(
-            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            last_world_payload
+                .as_ref()
+                .and_then(|world| world.get("miniMapIndex")),
             Some(&json!(8)),
             "the new D401 packet restores index 8 after the zero-index map"
         );
@@ -7662,9 +7745,10 @@ mod tests {
             WorldSnapshotIngestOutcome::NotSnapshot
         );
         assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
-        assert!(last_world_payload
-            .as_ref()
-            .is_some_and(|world| world.get("miniMapIndex").is_none()),
+        assert!(
+            last_world_payload
+                .as_ref()
+                .is_some_and(|world| world.get("miniMapIndex").is_none()),
             "a session boundary must not reuse the prior map's packet cursor"
         );
     }
@@ -10440,19 +10524,33 @@ mod tests {
     #[test]
     fn mail_reader_metadata_and_exact_source_icons_survive_wire_transform() {
         let template = mir2_game_data::crystal_item_by_index(658).expect("potion template");
-        let mail = mail_message_json(&json!({"mailId":42,"canReply":true,"dateSentBinaryDatetime":"621355968000000000",
-            "items":[{"itemIndex":658,"uniqueId":777,"count":3}]})).unwrap();
+        let mail = mail_message_json(
+            &json!({"mailId":42,"canReply":true,"dateSentBinaryDatetime":"621355968000000000",
+            "items":[{"itemIndex":658,"uniqueId":777,"count":3}]}),
+        )
+        .unwrap();
         assert_eq!(mail["can_reply"], true);
         assert_eq!(mail["metadata_known"], true);
-        assert_eq!(mail["date_sent_binary_datetime"], 621_355_968_000_000_000i64);
+        assert_eq!(
+            mail["date_sent_binary_datetime"],
+            621_355_968_000_000_000i64
+        );
         assert_eq!(mail["items"][0]["image"], template.image);
         assert_eq!(mail["items"][0]["uniqueId"], 777);
         assert_eq!(mail["items"][0]["count"], 3);
-        assert_eq!(mail_attachment_json(&json!(template.name)).unwrap()["image"], template.image);
-        assert!(mail_attachment_json(&json!("unknown mail item 12345")).unwrap()["image"].is_null());
+        assert_eq!(
+            mail_attachment_json(&json!(template.name)).unwrap()["image"],
+            template.image
+        );
+        assert!(
+            mail_attachment_json(&json!("unknown mail item 12345")).unwrap()["image"].is_null()
+        );
         let snapshot = mail_message_json(&json!({"id":42,"items":[]})).unwrap();
         assert_eq!(snapshot["metadata_known"], false);
-        let command = NativeOutboundCommand::LockMail { mail_id: 42, lock: true };
+        let command = NativeOutboundCommand::LockMail {
+            mail_id: 42,
+            lock: true,
+        };
         assert_eq!(command.command_type(), "lockMail");
         let wire = serde_json::to_value(command).unwrap();
         assert_eq!(wire["mailId"], 42);
@@ -10462,8 +10560,11 @@ mod tests {
     #[test]
     fn storage_password_receipts_preserve_results_without_echoing_credentials() {
         for result in 0..=6 {
-            let unlock = transform_storage_patch_from_packet("StorageUnlockResult",
-                &json!({"result":result,"hasPassword":true,"password":"private-input"})).unwrap();
+            let unlock = transform_storage_patch_from_packet(
+                "StorageUnlockResult",
+                &json!({"result":result,"hasPassword":true,"password":"private-input"}),
+            )
+            .unwrap();
             assert_eq!(unlock["password_result"]["operation"], "unlock");
             assert_eq!(unlock["password_result"]["result"], result);
             assert_eq!(unlock["ack"]["success"], result == 0 || result == 4);
@@ -10475,23 +10576,49 @@ mod tests {
             for removing in [false, true] {
                 let password = transform_storage_patch_from_packet("StoragePasswordResult",
                     &json!({"result":result,"removing":removing,"hasPassword":true,"password":"private-input"})).unwrap();
-                assert_eq!(password["password_result"], json!({"operation":"password","result":result,"removing":removing}));
+                assert_eq!(
+                    password["password_result"],
+                    json!({"operation":"password","result":result,"removing":removing})
+                );
                 assert!(!password.to_string().contains("private-input"));
             }
             assert!(!unlock.to_string().contains("private-input"));
         }
-        assert!(transform_storage_patch_from_packet("StorageUnlockResult", &json!({"hasPassword":true})).is_none());
-        assert!(transform_storage_patch_from_packet("StoragePasswordResult", &json!({"result":4,"hasPassword":true})).is_none());
+        assert!(transform_storage_patch_from_packet(
+            "StorageUnlockResult",
+            &json!({"hasPassword":true})
+        )
+        .is_none());
+        assert!(transform_storage_patch_from_packet(
+            "StoragePasswordResult",
+            &json!({"result":4,"hasPassword":true})
+        )
+        .is_none());
     }
 
     #[test]
     fn equipment_storage_ack_transform_preserves_identity_and_failure() {
         for success in [false, true] {
-            let payload = json!({"grid":"Storage","uniqueId":"9007199254740993","to":17,"success":success});
-            assert_eq!(transform_inventory_operation_ack("EquipItem", &payload),
-                Some(InventoryOperationAck::Equip { grid: "Storage".into(), unique_id: 9007199254740993, to: 17, success }));
-            assert_eq!(transform_inventory_operation_ack("RemoveItem", &payload),
-                Some(InventoryOperationAck::Remove { grid: "Storage".into(), unique_id: 9007199254740993, to: 17, success }));
+            let payload =
+                json!({"grid":"Storage","uniqueId":"9007199254740993","to":17,"success":success});
+            assert_eq!(
+                transform_inventory_operation_ack("EquipItem", &payload),
+                Some(InventoryOperationAck::Equip {
+                    grid: "Storage".into(),
+                    unique_id: 9007199254740993,
+                    to: 17,
+                    success
+                })
+            );
+            assert_eq!(
+                transform_inventory_operation_ack("RemoveItem", &payload),
+                Some(InventoryOperationAck::Remove {
+                    grid: "Storage".into(),
+                    unique_id: 9007199254740993,
+                    to: 17,
+                    success
+                })
+            );
             for field in ["grid", "uniqueId", "to", "success"] {
                 let mut malformed = payload.clone();
                 malformed.as_object_mut().unwrap().remove(field);

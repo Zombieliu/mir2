@@ -248,7 +248,9 @@ pub(super) fn render(
                     height: Val::Px(32.),
                     ..default()
                 },
-                Text::new(crate::native_i18n::tr(&format!("Select the Key for: {name}"))),
+                Text::new(crate::native_i18n::tr(&format!(
+                    "Select the Key for: {name}"
+                ))),
                 crate::crystal_ui::typography::crystal_text_font(32. / 3.),
                 TextColor(Color::WHITE),
                 TextLayout::new(Justify::Center, LineBreak::WordBoundary),
