@@ -460,7 +460,7 @@ pub(super) fn process_pointer(
         return;
     };
     let transform =
-        super::super::metrics::CrystalStageTransform::fit(window.width(), window.height());
+        super::super::metrics::CrystalStageTransform::fit_native(window.width(), window.height());
     let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
     let cursor = Vec2::new(x, y);
     let shop = &mut state.game_shop_dialog;

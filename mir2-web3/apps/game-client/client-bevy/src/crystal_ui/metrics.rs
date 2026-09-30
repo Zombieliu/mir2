@@ -2,11 +2,10 @@
 
 use super::spec::{STAGE_HEIGHT, STAGE_WIDTH};
 
-/// Live OS scale-factor changes (moving the window onto a monitor with a
-/// different DPI) are not applied in-process. Restart the client so window
-/// creation picks up the new scale. A normal resize still refits letterbox
-/// from the current physical viewport.
-pub const LIVE_CROSS_MONITOR_DPI_REQUIRES_RESTART: bool = true;
+/// Native Windows keeps this logical stage fixed while its display host
+/// responds to the current monitor's work area/DPI and the saved resolution.
+/// The physical viewport and UI scale change together without a restart.
+pub const LIVE_CROSS_MONITOR_DPI_REQUIRES_RESTART: bool = false;
 
 /// Uniform fit from Crystal's fixed 1024x768 logical stage into a client area.
 ///
@@ -47,6 +46,29 @@ impl CrystalStageTransform {
             viewport_width,
             viewport_height,
         }
+    }
+
+    /// Match the native Windows camera's integer 4:3 viewport exactly.
+    /// Other hosts retain their existing floating-point presentation contract.
+    pub fn fit_native(viewport_width: f32, viewport_height: f32) -> Self {
+        #[cfg(target_os = "windows")]
+        {
+            let width = viewport_width.max(1.0).round() as u32;
+            let height = viewport_height.max(1.0).round() as u32;
+            let (origin, size) = crate::native_display::stage_viewport(
+                bevy::math::UVec2::new(width, height),
+            );
+            if size.x != 0 && size.y != 0 {
+                return Self {
+                    scale: size.x as f32 / STAGE_WIDTH,
+                    offset_x: origin.x as f32,
+                    offset_y: origin.y as f32,
+                    viewport_width: width as f32,
+                    viewport_height: height as f32,
+                };
+            }
+        }
+        Self::fit(viewport_width, viewport_height)
     }
 
     pub fn logical_to_physical(self, x: f32, y: f32) -> (f32, f32) {
@@ -233,7 +255,6 @@ mod tests {
             (doubled.0 - 288.0).abs() > 2.0,
             "applying the stage transform twice would offset world clicks"
         );
-        assert!(LIVE_CROSS_MONITOR_DPI_REQUIRES_RESTART);
     }
 
     #[test]
@@ -254,4 +275,30 @@ mod tests {
             assert!(rect.top + rect.height <= STAGE_HEIGHT + 2.0, "{rect:?}");
         }
     }
+
+    #[test]
+    #[cfg(target_os = "windows")]
+    fn native_pointer_matches_integer_camera_viewport_on_unusual_monitors() {
+        for physical in [
+            bevy::math::UVec2::new(2560, 1600),
+            bevy::math::UVec2::new(2256, 1504),
+            bevy::math::UVec2::new(1365, 767),
+            bevy::math::UVec2::new(1080, 1920),
+        ] {
+            let (origin, size) = crate::native_display::stage_viewport(physical);
+            let transform = CrystalStageTransform::fit_native(physical.x as f32, physical.y as f32);
+            assert_eq!(transform.offset_x, origin.x as f32);
+            assert_eq!(transform.offset_y, origin.y as f32);
+            assert_eq!(transform.scale, size.x as f32 / STAGE_WIDTH);
+            for logical in [(0.0, 0.0), (512.0, 384.0), (1024.0, 768.0)] {
+                let pixel = transform.logical_to_physical(logical.0, logical.1);
+                assert_close(pixel.0, origin.x as f32 + logical.0 * transform.scale);
+                assert_close(pixel.1, origin.y as f32 + logical.1 * transform.scale);
+                let back = transform.physical_to_logical(pixel.0, pixel.1);
+                assert_close(back.0, logical.0);
+                assert_close(back.1, logical.1);
+            }
+        }
+    }
+
 }

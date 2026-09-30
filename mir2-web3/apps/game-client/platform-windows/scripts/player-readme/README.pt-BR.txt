@@ -1,4 +1,4 @@
-﻿Numeron - Legend of Rebirth — Teste por convite
+Numeron - Legend of Rebirth — Teste por convite
 
 Instale no Windows 10/11 x64. O instalador usa a pasta local de programas do seu usuário do Windows e pode criar um atalho na área de trabalho. Se o runtime Microsoft Visual C++ x64 estiver ausente, o Windows solicitará permissão de administrador para esse componente da Microsoft. Reinicie o Windows se solicitado antes de abrir o jogo.
 
@@ -19,3 +19,5 @@ Desinstale em Configurações do Windows > Aplicativos ou pelo atalho instalado.
 
 Atualizações automáticas
 Instale o r7 uma vez e use o atalho da área de trabalho. O iniciador verifica a lista assinada e baixa apenas os arquivos alterados. Salve e feche o jogo antes de atualizar. Se a ativação falhar ou for interrompida, os arquivos anteriores são restaurados antes de iniciar; uma falha no primeiro início também reverte a atualização. Downloads concluídos são reutilizados; arquivos parciais são baixados novamente. O idioma e os personagens no servidor são preservados. Sem acesso ao serviço de atualização, a versão instalada e verificada ainda pode iniciar.
+Tamanho da tela
+Na tela de login, use Tamanho da janela no canto inferior esquerdo. O modo Automático é recomendado, ou escolha um tamanho de janela 4:3 disponível. O cenário, os textos, os botões e as áreas de clique aumentam juntos. Tamanhos que não cabem na tela ficam indisponíveis. A escolha é salva para a próxima abertura e preservada nas atualizações. Essas opções valem para o modo janela; a tela cheia mantém a proporção original.

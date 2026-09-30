@@ -6,7 +6,7 @@ use mir2_client_bevy::map::MapModel;
 
 fn logical_cursor(window: &Window) -> Option<bevy::prelude::Vec2> {
     let cursor = window.cursor_position()?;
-    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit(
+    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),
     );

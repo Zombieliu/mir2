@@ -150,6 +150,16 @@ fn configure_fixture_script_fallbacks(mut cx: ResMut<FontCx>) {
 /// Shared only by explicit cfg(test) GPU fixtures. `shell=false` lets an
 /// in-game fixture spawn production widgets without a shell covering them.
 pub(crate) fn i18n_offscreen_app(root: &Path, shell: bool) -> (App, Handle<Image>, Entity) {
+    i18n_offscreen_app_configured(root, shell, |_| {})
+}
+
+/// Register additional production widgets before the render plugins finish.
+/// The default fixture retains the exact original initialization behavior.
+pub(crate) fn i18n_offscreen_app_configured(
+    root: &Path,
+    shell: bool,
+    configure: impl FnOnce(&mut App),
+) -> (App, Handle<Image>, Entity) {
     assert!(root.is_absolute() && root.is_dir());
     assert!(root.join("original-ui/ChrSel/meta.json").is_file());
     let mut app = App::new();
@@ -184,6 +194,7 @@ pub(crate) fn i18n_offscreen_app(root: &Path, shell: bool) -> (App, Handle<Image
     app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::ZERO))
         .insert_resource(ClearColor(Color::srgb(0.06, 0.05, 0.03)))
         .init_resource::<CapturedI18nImage>();
+    configure(&mut app);
     install_fixture_fonts(&mut app);
     let started = Instant::now();
     while app.plugins_state() != bevy::app::PluginsState::Ready {

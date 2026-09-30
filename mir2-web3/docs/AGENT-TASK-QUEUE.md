@@ -1,12 +1,13 @@
 # Agent Task Queue
 
-> 2026-10-01 native automatic updating is now implemented in a separate small
-> launcher/engine crate, with pinned CMS, per-file delta downloads, journaled
-> recovery and first-launch rollback. Updater18/18, archive28/3platform skips,
-> nine-language installer input closure and syntax-only Inno checks pass.
-> Clean build, real r5→r6 delta, r7 setup and public feed gates remain active.
-> Capacity stays paused; no game/save deployment by this change.
-> [Evidence](generated/player-qa/native-updater-20261001/README.md).
+> 2026-10-01 native automatic updating and login display selection: updater24/24,
+> archive28/3platform skips, deployment tooling16/16 and signing/source guards
+>28/28 pass. Native display6/6, shared display7/7 and seven real Winit cases pass;
+> full serial shared1168/Windows790 and72 nine-language GPU captures pass. Candidate07,
+> r7 installer, actual r6→r7 delta and HTTPS publication remain pending. Existing
+> server/saves are separate; capacity stays paused.
+> [Updater evidence](generated/player-qa/native-updater-20261001/README.md).
+> [Display evidence](generated/player-qa/native-display-20261001/README.md).
 
 > 2026-09-30 NPC-shop/supply regression: code and focused/full shared checks pass
 > (1158/0);36 targeted GPU captures verify actual service-open placement and

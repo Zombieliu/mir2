@@ -1,11 +1,12 @@
-# Numeron - Legend of Rebirth: nine-language r6 installer
+# Numeron - Legend of Rebirth: nine-language r7 installer
 
 This recipe consumes an already attested, strictly CMS-verified client-only
 Candidate. It neither builds the game nor changes player saves or servers.
-The r4 and r5 artifacts are immutable. Output for this version is
-`Numeron-Legend-of-Rebirth-20260930-r6-Setup.exe`, version `2026.09.30.6`.
-This revision corrects native NPC-shop inventory placement and selected supply
-vendor names; the nine-language scope is unchanged.
+Earlier artifacts are immutable. Output for this version is
+`Numeron-Legend-of-Rebirth-20261001-r7-Setup.exe`, version `2026.10.01.7`.
+This revision adds the verified native launcher/updater and login resolution
+selection. The entire fixed Crystal stage scales uniformly; per-user display
+and language preferences survive ordinary updates.
 AppId, per-user installation directory and shortcut identity remain unchanged.
 
 ## Inputs and ordinary internal Candidate build
@@ -19,15 +20,30 @@ compiler and runtime publisher signatures. The pinned runtime used here is
 
 After `verify-windows-candidate.ps1` passes on the untouched Candidate:
 
+Build the separate updater from clean committed source using
+`windows-updater/scripts/build-updater-release.ps1`. Verify its signed bundle
+with `verify-updater-bundle.ps1`; generate the fresh literal
+`verified-updater-files.iss` using `prepare-updater-input.py`. Both literal file
+lists are required by this recipe. Use the same immutable game Candidate for
+the installer's game inputs and the authenticated update seed.
+
 ```text
 python prepare-installer-input.py <verified-package-root> <exact-40-hex-source-commit>
 ISCC.exe /Qp Mir2-Invite.iss
 ```
 
-The preparation tool requires `WN-CANDIDATE-20260930-invited-06`, exact clean
+The preparation tool requires `WN-CANDIDATE-20261001-invited-07`, exact clean
 source provenance, recursive file closure and matching hashes. It rejects logs,
 links, extra files and output overwrite. There is no default source revision.
 Its literal input list is supplementary byte evidence, not CMS verification.
+
+The installer holds the same exclusive per-install file lock as the launcher
+for fresh and existing installations. After all verified files are installed,
+an older update journal/backup/staging is preserved under
+`.update/installer-retired/`; signed highest-release receipts remain in place.
+The installer releases its lock before the finish page starts the launcher.
+An interrupted installer still requires repair; journaled automatic-update
+recovery is not a claim of whole-installer power-loss recovery.
 
 ## Public publisher signing is a separate release gate
 

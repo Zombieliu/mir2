@@ -137,7 +137,7 @@ impl PointerCoordinates {
 fn tile_under_cursor(window: &Window, model: &BigMapModel) -> Option<(i32, i32)> {
     let cursor = window.cursor_position()?;
     let transform =
-        CrystalStageTransform::fit(window.resolution.width(), window.resolution.height());
+        CrystalStageTransform::fit_native(window.resolution.width(), window.resolution.height());
     if !transform.contains_physical_point(cursor.x, cursor.y) {
         return None;
     }

@@ -650,6 +650,8 @@ fn sync_crystal_hint_overlay(
 
 fn position_crystal_hint_overlay(
     windows: Query<&Window, With<PrimaryWindow>>,
+    ui_scale: Option<Res<UiScale>>,
+    native_display: Option<Res<crate::native_display::NativeDisplaySettings>>,
     mut roots: Query<
         (
             &mut Node,
@@ -690,9 +692,12 @@ fn position_crystal_hint_overlay(
         *visibility = Visibility::Hidden;
         return;
     };
-    let bounds = Vec2::new(window.resolution.width(), window.resolution.height());
+    // UI nodes use pre-UiScale coordinates while the window cursor is in
+    // window coordinates. Scale both the cursor and bounds exactly once.
+    let ui_scale = ui_scale.as_deref().map_or(1.0, |scale| scale.0);
+    let (cursor, bounds) = hint_ui_coordinates(window, cursor, ui_scale, native_display.is_some());
     let bounds_changed = layout_state.last_window_bounds != Some(bounds);
-    let scale_factor = window.scale_factor();
+    let scale_factor = window.scale_factor() * ui_scale;
     let scale_factor_changed = layout_state.last_window_scale_factor != Some(scale_factor);
     if bounds_changed {
         layout_state.last_window_bounds = Some(bounds);
@@ -723,6 +728,8 @@ fn position_crystal_hint_overlay(
 
 fn position_crystal_item_hint_overlay(
     windows: Query<&Window, With<PrimaryWindow>>,
+    ui_scale: Option<Res<UiScale>>,
+    native_display: Option<Res<crate::native_display::NativeDisplaySettings>>,
     mut roots: Query<
         (
             &mut Node,
@@ -753,8 +760,9 @@ fn position_crystal_item_hint_overlay(
         return;
     };
 
-    let bounds = Vec2::new(window.resolution.width(), window.resolution.height());
-    let scale_factor = window.scale_factor();
+    let ui_scale = ui_scale.as_deref().map_or(1.0, |scale| scale.0);
+    let (cursor, bounds) = hint_ui_coordinates(window, cursor, ui_scale, native_display.is_some());
+    let scale_factor = window.scale_factor() * ui_scale;
     let bounds_changed = layout_state.last_window_bounds != Some(bounds);
     let scale_factor_changed = layout_state.last_window_scale_factor != Some(scale_factor);
     layout_state.last_window_bounds = Some(bounds);
@@ -776,6 +784,31 @@ fn position_crystal_item_hint_overlay(
     if *visibility != Visibility::Visible {
         *visibility = Visibility::Visible;
     }
+}
+
+fn hint_ui_coordinates(
+    window: &Window,
+    cursor: Vec2,
+    ui_scale: f32,
+    native_stage: bool,
+) -> (Vec2, Vec2) {
+    let scale = if ui_scale.is_finite() && ui_scale > 0.0 {
+        ui_scale
+    } else {
+        1.0
+    };
+    if native_stage {
+        // Fullscreen UI is drawn inside the same centered viewport as the world.
+        // Bevy hit testing subtracts this origin; self-positioned hints must too.
+        let (origin, size) = crate::native_display::stage_viewport(
+            window.resolution.physical_size(),
+        );
+        return ((cursor - origin.as_vec2()) / scale, size.as_vec2() / scale);
+    }
+    (
+        cursor / scale,
+        Vec2::new(window.width(), window.height()) / scale,
+    )
 }
 
 pub fn crystal_hint_position(cursor: Vec2, size: Vec2) -> Vec2 {
@@ -1415,4 +1448,59 @@ mod tests {
             Vec2::new(1159.0, 679.0)
         );
     }
+
+    #[test]
+    fn enlarged_display_hints_track_the_cursor_and_clamp_in_ui_coordinates() {
+        for scale in [1.0, 1.25, 1.5, 1.875, 2.0] {
+            let mut window = Window::default();
+            window.resolution.set_scale_factor_override(Some(1.0));
+            window
+                .resolution
+                .set_physical_resolution((1024.0 * scale) as u32, (768.0 * scale) as u32);
+            let (cursor, bounds) =
+                hint_ui_coordinates(&window, Vec2::new(1000.0, 750.0) * scale, scale, true);
+            assert_eq!(cursor, Vec2::new(1000.0, 750.0));
+            assert_eq!(bounds, Vec2::new(1024.0, 768.0));
+            let expected = crystal_hint_position(Vec2::new(1000.0, 750.0), Vec2::new(120.0, 40.0));
+            assert_eq!(
+                crystal_hint_position_for_bounds(
+                    CrystalHintStyle::Control,
+                    cursor,
+                    Vec2::new(120.0, 40.0),
+                    bounds,
+                ),
+                expected
+            );
+            let item =
+                crystal_item_hint_position_for_bounds(cursor, Vec2::new(120.0, 40.0), bounds);
+            assert!(item.x >= 0.0 && item.y >= 0.0);
+            assert!(item.x + 120.0 <= 1024.0 && item.y + 40.0 <= 768.0);
+        }
+    }
+
+    #[test]
+    fn fullscreen_hints_use_the_centered_stage_instead_of_letterbox_bars() {
+        for physical in [
+            UVec2::new(1920, 1080), UVec2::new(3840, 2160),
+            UVec2::new(2560, 1600), UVec2::new(1080, 1920),
+        ] {
+            let mut window = Window::default();
+            window.resolution.set_scale_factor_override(Some(1.0));
+            window.resolution.set_physical_resolution(physical.x, physical.y);
+            let (origin, size) = crate::native_display::stage_viewport(physical);
+            let scale = size.x as f32 / STAGE_WIDTH;
+            let physical_cursor = origin.as_vec2() + Vec2::new(1000.0, 750.0) * scale;
+            let (cursor, bounds) = hint_ui_coordinates(&window, physical_cursor, scale, true);
+            assert_eq!(cursor, Vec2::new(1000.0, 750.0));
+            assert_eq!(bounds, Vec2::new(STAGE_WIDTH, STAGE_HEIGHT));
+            let hint = crystal_item_hint_position_for_bounds(cursor, Vec2::new(140.0, 55.0), bounds);
+            assert!(hint.x >= 0.0 && hint.y >= 0.0);
+            assert!(hint.x + 140.0 <= STAGE_WIDTH && hint.y + 55.0 <= STAGE_HEIGHT);
+            let (generic_cursor, generic_bounds) =
+                hint_ui_coordinates(&window, physical_cursor, 1.0, false);
+            assert_eq!(generic_cursor, physical_cursor);
+            assert_eq!(generic_bounds, physical.as_vec2());
+        }
+    }
+
 }

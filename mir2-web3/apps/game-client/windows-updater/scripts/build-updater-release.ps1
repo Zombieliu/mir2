@@ -41,11 +41,31 @@ function Cms([byte[]]$Bytes) {
     $cms.ComputeSignature($signer,$false)
     return ,$cms.Encode()
 }
+function AssertCodeSigningCertificate([Security.Cryptography.X509Certificates.X509Certificate2]$Certificate) {
+    if(!$Certificate){throw 'CMS signer certificate missing'}
+    $eku=$Certificate.Extensions | Where-Object {$_.Oid.Value-eq'2.5.29.37'} | Select-Object -First 1
+    if(!$eku -or @($eku.EnhancedKeyUsages | ForEach-Object {$_.Value})-notcontains'1.3.6.1.5.5.7.3.3'){
+        throw 'CMS signer certificate requires the code-signing EKU'
+    }
+    $usage=$Certificate.Extensions | Where-Object {$_.Oid.Value-eq'2.5.29.15'} | Select-Object -First 1
+    if($usage -and ($usage.KeyUsages-band[Security.Cryptography.X509Certificates.X509KeyUsageFlags]::DigitalSignature)-eq0){
+        throw 'CMS signer key usage does not permit digital signatures'
+    }
+}
 function CheckCms([byte[]]$Bytes,[byte[]]$Signature) {
+    # Detached is constructor state in SignedCms, not an envelope inspection.
+    # Decode without supplied content first, matching the native CMS gate.
+    $envelope=[Security.Cryptography.Pkcs.SignedCms]::new()
+    $envelope.Decode($Signature)
+    if($envelope.ContentInfo.Content.Length-ne0){throw 'Detached CMS signature required'}
     $cms=[Security.Cryptography.Pkcs.SignedCms]::new([Security.Cryptography.Pkcs.ContentInfo]::new($Bytes),$true)
-    $cms.Decode($Signature);$cms.CheckSignature($true)
+    $cms.Decode($Signature)
     if($cms.SignerInfos.Count-ne1){throw 'Exactly one CMS signer required'}
-    $rsa=[Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPublicKey($cms.SignerInfos[0].Certificate)
+    if($cms.SignerInfos[0].DigestAlgorithm.Value-cne'2.16.840.1.101.3.4.2.1'){throw 'CMS signer digest must be SHA256'}
+    $cms.CheckSignature($true)
+    $signingCertificate=$cms.SignerInfos[0].Certificate
+    AssertCodeSigningCertificate $signingCertificate
+    $rsa=[Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPublicKey($signingCertificate)
     if(!$rsa -or (Sha $rsa.ExportRSAPublicKey())-cne$pin){throw 'Publisher key pin mismatch'}
 }
 function Entry([string]$Path,[byte[]]$Bytes) {
@@ -54,17 +74,20 @@ function Entry([string]$Path,[byte[]]$Bytes) {
 Add-Type -AssemblyName System.Security.Cryptography.Pkcs
 if((& git -C $project rev-parse HEAD).Trim()-cne$SourceRevision.ToLowerInvariant() -or $LASTEXITCODE-ne0) {throw 'Exact source revision required'}
 if(@(& git -C $project status --porcelain=v1 --untracked-files=all).Count-ne0 -or $LASTEXITCODE-ne0) {throw 'Clean source required'}
-# The parent repository ignores **/bin/. Do not let an ignored Rust entry point
-# produce a clean-looking but unreproducible attestation.
-$sources=@(Get-ChildItem -LiteralPath (Join-Path $crate 'src') -Recurse -File)
-$sources+=Get-Item -LiteralPath (Join-Path $crate 'Cargo.toml'),(Join-Path $crate 'Cargo.lock')
-if(Test-Path -LiteralPath (Join-Path $crate 'build.rs')){$sources+=Get-Item -LiteralPath (Join-Path $crate 'build.rs')}
-foreach($source in $sources){
-    NoLinks $source.FullName
-    $relative=[IO.Path]::GetRelativePath($project,$source.FullName).Replace('\','/')
-    & git -C $project ls-files --error-unmatch -- $relative | Out-Null
-    if($LASTEXITCODE-ne0){throw 'Every compiled source must be committed, including ignored entry points'}
+function AssertSourceTracked {
+    # The parent repository ignores **/bin/. Repeat after compilation: a newly
+    # created ignored input must not produce a clean-looking attestation either.
+    $sources=@(Get-ChildItem -LiteralPath (Join-Path $crate 'src') -Recurse -Force -File)
+    $sources+=Get-Item -LiteralPath (Join-Path $crate 'Cargo.toml'),(Join-Path $crate 'Cargo.lock') -Force
+    if(Test-Path -LiteralPath (Join-Path $crate 'build.rs')){$sources+=Get-Item -LiteralPath (Join-Path $crate 'build.rs') -Force}
+    foreach($source in $sources){
+        NoLinks $source.FullName
+        $relative=[IO.Path]::GetRelativePath($project,$source.FullName).Replace('\','/')
+        & git -C $project --literal-pathspecs ls-files --error-unmatch -- $relative | Out-Null
+        if($LASTEXITCODE-ne0){throw 'Every compiled source must be committed, including ignored entry points'}
+    }
 }
+AssertSourceTracked
 $certificate=Get-Item -LiteralPath ("Cert:/CurrentUser/My/"+$SignerThumbprint.ToUpperInvariant())
 if(!$certificate.HasPrivateKey -or (Get-Date)-lt$certificate.NotBefore -or (Get-Date)-gt$certificate.NotAfter){throw 'Current valid signing identity required'}
 $rsa=[Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPublicKey($certificate)
@@ -87,6 +110,7 @@ $TargetDir=[IO.Path]::GetFullPath($TargetDir);NoLinks $TargetDir
 $release=Join-Path $TargetDir 'x86_64-pc-windows-msvc/release'
 $launcher=[IO.File]::ReadAllBytes((Join-Path $release 'Mir2Launcher.exe'))
 $engineExe=[IO.File]::ReadAllBytes((Join-Path $release 'Mir2Updater.exe'))
+AssertSourceTracked
 if((& git -C $project rev-parse HEAD).Trim()-cne$SourceRevision.ToLowerInvariant() -or @(& git -C $project status --porcelain=v1 --untracked-files=all).Count-ne0){throw 'Source changed during build'}
 $now=[DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $engineHash=Sha $engineExe

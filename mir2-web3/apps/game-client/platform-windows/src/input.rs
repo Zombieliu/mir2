@@ -670,7 +670,7 @@ fn cursor_over_native_hud_button(window: &Window, minimap_expanded: bool) -> boo
     let Some(cursor) = window.cursor_position() else {
         return false;
     };
-    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit(
+    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),
     );
@@ -706,7 +706,7 @@ fn cursor_over_big_map_hud_button(window: &Window, minimap_expanded: bool) -> bo
     let Some(cursor) = window.cursor_position() else {
         return false;
     };
-    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit(
+    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),
     );
@@ -1864,7 +1864,7 @@ pub fn mouse_world_interaction_system(
             && windows.iter().any(|window| {
                 window.cursor_position().is_some_and(|cursor| {
                     let transform =
-                        mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
+                        mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
                             window.resolution.width(),
                             window.resolution.height(),
                         );
@@ -1885,7 +1885,7 @@ pub fn mouse_world_interaction_system(
     let over_hero_window = player_ui.as_deref().is_some_and(|ui| {
         ui.hero.interactive
             && window.cursor_position().is_some_and(|cursor| {
-                let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
+                let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
                     window.resolution.width(),
                     window.resolution.height(),
                 );
@@ -2020,7 +2020,7 @@ pub fn mouse_world_interaction_system(
                 || ui.blocks_world_click(),
                 |cursor| {
                     let transform =
-                        mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
+                        mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
                             window.resolution.width(),
                             window.resolution.height(),
                         );

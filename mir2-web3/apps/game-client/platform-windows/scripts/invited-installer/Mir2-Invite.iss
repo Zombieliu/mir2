@@ -256,7 +256,6 @@ begin
     CloseHandle(InstallLockHandle);
     InstallLockHandle := 0;
   end;
-  if not FileExists(AddBackslash(Directory) + 'game\{#AppExe}') then exit;
   Directory := AddBackslash(Directory) + '.update';
   Result := False;
   if not SafeLocalePath(Directory) or not ForceDirectories(Directory) then exit;
@@ -272,9 +271,19 @@ begin
   end;
 end;
 
+procedure ReleaseInstallLock;
+begin
+  if InstallLockHandle <> 0 then
+  begin
+    CloseHandle(InstallLockHandle);
+    InstallLockHandle := 0;
+    InstallLockRoot := '';
+  end;
+end;
+
 procedure DeinitializeSetup;
 begin
-  if InstallLockHandle <> 0 then CloseHandle(InstallLockHandle);
+  ReleaseInstallLock;
 end;
 
 function CanReplaceInstalledGame: Boolean;
@@ -500,8 +509,54 @@ begin
   end;
 end;
 
+procedure RetirePreviousUpdateTransaction;
+var
+  Directory, Journal, ArchiveRoot, Archive, Source, Destination: String;
+  I: Integer;
+begin
+  Directory := ExpandConstant('{app}\.update');
+  Journal := AddBackslash(Directory) + 'transaction.json';
+  if not FileExists(Journal) then exit;
+  ArchiveRoot := AddBackslash(Directory) + 'installer-retired';
+  if not SafeLocalePath(Journal) or not SafeLocalePath(ArchiveRoot) or
+     not ForceDirectories(ArchiveRoot) then
+    RaiseException('Cannot safely retire the previous update transaction.');
+  Archive := GenerateUniqueName(ArchiveRoot, '.rollback');
+  if (Archive = '') or not SafeLocalePath(Archive) or
+     FileExists(Archive) or DirExists(Archive) or not ForceDirectories(Archive) then
+    RaiseException('Cannot preserve the previous update transaction.');
+  { The complete verified installer payload has now replaced the game. Retire
+    the old journal first, so it cannot roll back this installation. Preserve
+    its backup/staging and all monotonic receipts for recovery/diagnostics. }
+  if not MoveFileExW(Journal, AddBackslash(Archive) + 'transaction.json', 8) then
+    RaiseException('Cannot retire the previous update journal.');
+  for I := 0 to 1 do
+  begin
+    if I = 0 then Source := AddBackslash(Directory) + 'backup'
+      else Source := AddBackslash(Directory) + 'staging';
+    if FileExists(Source) or DirExists(Source) then
+    begin
+      if I = 0 then Destination := AddBackslash(Archive) + 'backup'
+        else Destination := AddBackslash(Archive) + 'staging';
+      if not SafeLocalePath(Source) or not SafeLocalePath(Destination) or
+         not MoveFileExW(Source, Destination, 8) then
+        RaiseException('Cannot preserve previous update recovery files.');
+    end;
+  end;
+  Log('Previous update transaction preserved under ' + Archive);
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
-  if CurStep = ssPostInstall then SeedInitialLocale;
-  if CurStep = ssDone then RunFinishChoices;
+  if CurStep = ssPostInstall then
+  begin
+    RetirePreviousUpdateTransaction;
+    SeedInitialLocale;
+  end;
+  if CurStep = ssDone then
+  begin
+    { All installation writes have finished. The launcher takes the same lock. }
+    ReleaseInstallLock;
+    RunFinishChoices;
+  end;
 end;

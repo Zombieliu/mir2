@@ -1,4 +1,4 @@
-"""Verify an already strictly verified r6 Candidate and generate literal Inno inputs.
+"""Verify an already strictly verified r7 Candidate and generate literal Inno inputs.
 
 First run the repository CMS/package verifier against this immutable package.
 This independent byte/closure check does not replace signature verification.
@@ -14,7 +14,7 @@ import re
 import stat
 
 BASE = pathlib.Path(__file__).resolve().parent
-CANDIDATE = "WN-CANDIDATE-20260930-invited-06"
+CANDIDATE = "WN-CANDIDATE-20261001-invited-07"
 METADATA = {"PACKAGE-MANIFEST.json", "VERSION.json", "RELEASE-STATEMENT.json",
             "RELEASE-STATEMENT.p7s"}
 
@@ -156,7 +156,7 @@ def prepare(package_root, expected_revision):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("package_root", help="immutable r6 package already passing the strict CMS verifier")
+    parser.add_argument("package_root", help="immutable r7 package already passing the strict CMS verifier")
     parser.add_argument("expected_source_revision", type=revision_argument,
                         help="required exact 40-hex source commit; no default")
     args = parser.parse_args()

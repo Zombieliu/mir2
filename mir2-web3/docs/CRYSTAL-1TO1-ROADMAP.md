@@ -1,11 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> 2026-10-01 native updater implementation: independent signed bootstrap and
-> scratch engine, immutable engine generations, per-file changes, interrupted
-> activation recovery and retained first-launch rollback. Updater18/18 and
-> archive28/3platform skips pass; release/live integration gates are pending.
-> This distribution slice does not change server/game parity or restart capacity.
-> [Evidence](generated/player-qa/native-updater-20261001/README.md).
+> 2026-10-01 native automatic updating and login display selection: updater24/24,
+> archive28/3platform skips, deployment tooling16/16 and signing/source guards
+>28/28 pass. Native display6/6, shared display7/7 and seven real Winit cases pass;
+> full serial shared1168/Windows790 and72 nine-language GPU captures pass. Candidate07,
+> r7 installer, actual r6→r7 delta and HTTPS publication remain pending. Existing
+> server/saves are separate; capacity stays paused.
+> [Updater evidence](generated/player-qa/native-updater-20261001/README.md).
+> [Display evidence](generated/player-qa/native-display-20261001/README.md).
 
 > 2026-09-30 NPC-shop/supply regression: independent service-open now places an
 > overlapping bag beside the actual shop; selected supply vendor names use the

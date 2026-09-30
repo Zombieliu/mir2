@@ -41,6 +41,8 @@ pub mod native_shell_ui;
 #[cfg(feature = "native-ui")]
 pub mod native_i18n;
 #[cfg(feature = "native-ui")]
+pub mod native_display;
+#[cfg(feature = "native-ui")]
 pub mod options_effects;
 pub mod pending_operations;
 #[cfg(feature = "native-ui")]

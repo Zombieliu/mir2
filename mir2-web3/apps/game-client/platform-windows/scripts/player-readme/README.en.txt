@@ -1,4 +1,4 @@
-﻿Numeron - Legend of Rebirth — Invited Playtest
+Numeron - Legend of Rebirth — Invited Playtest
 
 Install on Windows 10/11 x64. The installer uses your Windows account's local program folder and can create a desktop shortcut. If the Microsoft Visual C++ x64 runtime is missing, Windows will request administrator permission for that Microsoft component. Restart Windows if requested before launching the game.
 
@@ -19,3 +19,5 @@ Uninstall from Windows Settings > Apps or the installed uninstall shortcut. Lang
 
 Automatic updates
 Install r7 once and start the game through its desktop shortcut. The launcher checks the signed update feed and downloads only changed files. Save and close the game before updating. Failed or interrupted activation restores the previous files before launch; a failed first start rolls back. Completed downloads are reused; partial files are retried. Language preferences and server-side characters are preserved. If the update service is unavailable, a verified installed version can still start.
+Display size
+On the login screen, use the Window size button at the lower left. Automatic is recommended, or choose a supported 4:3 window size. The scene, text, buttons and pointer targets scale together. Sizes that do not fit the screen are unavailable. Your selection is saved for the next launch and retained by updates. These choices apply to windowed mode; fullscreen keeps the original aspect ratio.

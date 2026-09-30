@@ -637,7 +637,7 @@ fn help_cursor_logical(window: &Window) -> Option<Vec2> {
 }
 
 fn cursor_logical(window: &Window, cursor: Vec2) -> Vec2 {
-    let transform = super::metrics::CrystalStageTransform::fit(
+    let transform = super::metrics::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),
     );
@@ -5052,7 +5052,7 @@ fn process_mail_letter_editor_wheel(
         wheel.clear();
         return;
     }
-    let stage_scale = super::metrics::CrystalStageTransform::fit(
+    let stage_scale = super::metrics::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),
     )

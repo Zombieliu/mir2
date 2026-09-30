@@ -28,7 +28,7 @@ pub(super) struct MapRoute {
 
 pub(super) fn image_position(window: &Window, model: &BigMapModel) -> Option<(f32, f32)> {
     let cursor = window.cursor_position()?;
-    let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
+    let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),
     );
@@ -46,7 +46,7 @@ pub(super) fn cursor_over_panel(window: &Window) -> bool {
     let Some(cursor) = window.cursor_position() else {
         return false;
     };
-    let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit(
+    let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),
     );

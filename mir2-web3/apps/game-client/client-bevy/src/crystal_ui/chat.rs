@@ -2861,7 +2861,7 @@ fn handle_chat_pointer_scroll(
     let Some(cursor) = window.cursor_position() else {
         return;
     };
-    let transform = super::metrics::CrystalStageTransform::fit(
+    let transform = super::metrics::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),
     );

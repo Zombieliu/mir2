@@ -34,6 +34,7 @@ mod input;
 mod lifecycle;
 mod map_parser;
 mod movement_trace;
+mod native_display;
 mod native_fonts;
 mod native_locale;
 mod native_protocol;
@@ -213,14 +214,14 @@ fn run_native_client() -> bevy::app::AppExit {
         close_when_requested: false,
         ..RuntimeWindowSpec::native(branding::PRODUCT_NAME)
     });
-    // Apply the physical-pixel policy before Winit creates the window; logical
-    // min/max constraints would otherwise be multiplied by the OS DPI scale.
+    // Keep OS-DPI sizing constraints separate from the chosen physical client
+    // area. The display plugin scales the fixed Crystal stage as one unit.
     let world = app.world_mut();
     for mut window in world.query::<&mut bevy::window::Window>().iter_mut(world) {
         window_sizing::configure(&mut window);
     }
     app.add_systems(bevy::app::Update, branding::apply_window_icon);
-        app.add_systems(bevy::app::Update, window_sizing::keep_pixel_viewport);
+    native_display::install(&mut app);
     app.add_systems(bevy::app::PostUpdate, lifecycle::handle_close_requests);
     app.add_systems(
         bevy::app::Last,
