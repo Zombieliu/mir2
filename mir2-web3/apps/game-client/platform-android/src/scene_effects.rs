@@ -974,6 +974,46 @@ pub(crate) fn install(app: &mut App) {
 mod tests {
     use super::*;
 
+    #[test]
+    fn tracked_effect_export_matches_metadata_without_a_stale_fixed_frame_count() {
+        let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../web/public/original-effects");
+        for library in ["Effect", "Magic", "Magic2", "Magic3"] {
+            let metadata: Value = serde_json::from_slice(
+                &std::fs::read(root.join(library).join("meta.json")).unwrap(),
+            )
+            .unwrap();
+            let frames = metadata["frames"].as_object().unwrap();
+            assert!(!frames.is_empty());
+            let png_count = std::fs::read_dir(root.join(library))
+                .unwrap()
+                .map(Result::unwrap)
+                .filter(|entry| entry.path().extension().is_some_and(|ext| ext == "png"))
+                .count();
+            assert_eq!(png_count, frames.len(), "{library}");
+            for (index, frame) in frames {
+                assert!(index.parse::<u64>().unwrap() < metadata["count"].as_u64().unwrap());
+                assert_eq!(
+                    frame["path"],
+                    format!("/original-effects/{library}/{index}.png")
+                );
+                let file =
+                    std::fs::File::open(root.join(library).join(format!("{index}.png"))).unwrap();
+                let reader = png::Decoder::new(std::io::BufReader::new(file))
+                    .read_info()
+                    .unwrap();
+                assert_eq!(
+                    u64::from(reader.info().width),
+                    frame["width"].as_u64().unwrap()
+                );
+                assert_eq!(
+                    u64::from(reader.info().height),
+                    frame["height"].as_u64().unwrap()
+                );
+            }
+        }
+    }
+
     fn positions() -> HashMap<u32, (i32, i32)> {
         HashMap::from([(42, (302, 634)), (77, (299, 629))])
     }

@@ -264,15 +264,42 @@ def prepareEffectAssets = tasks.register('prepareEffectAssets', Sync) {
     }
     into layout.buildDirectory.dir('generated/effect-assets')
     doFirst {
-        def coreFrameCount = ['Effect', 'Magic', 'Magic2', 'Magic3'].sum { library ->
+        def coreLibraries = ['Effect', 'Magic', 'Magic2', 'Magic3']
+        def catalogFile = file("${effectAssetsRoot}/effects.generated.json")
+        if (!catalogFile.isFile()) {
+            throw new GradleException('The tracked Crystal scene-effect catalogue is missing')
+        }
+        def catalog = new groovy.json.JsonSlurper().parse(catalogFile)
+        if (catalog.schemaVersion != 2 || !(catalog.available instanceof List)
+                || (catalog.available as Set) != (coreLibraries as Set)) {
+            throw new GradleException('The tracked Crystal scene-effect catalogue is unsupported')
+        }
+        coreLibraries.each { library ->
             def meta = file("${effectAssetsRoot}/${library}/meta.json")
             if (!meta.isFile()) {
                 throw new GradleException("The tracked Crystal ${library} effect metadata is missing")
             }
-            fileTree(file("${effectAssetsRoot}/${library}")).matching { include '*.png' }.files.size()
-        }
-        if (!file("${effectAssetsRoot}/effects.generated.json").isFile() || coreFrameCount != 2067) {
-            throw new GradleException('The tracked Crystal scene-effect export is incomplete')
+            def metadata = new groovy.json.JsonSlurper().parse(meta)
+            if (!(metadata.count instanceof Number) || metadata.count <= 0
+                    || !(metadata.frames instanceof Map) || metadata.frames.isEmpty()
+                    || metadata.frames.size() > metadata.count) {
+                throw new GradleException("The tracked Crystal ${library} effect metadata is invalid")
+            }
+            def pngCount = fileTree(file("${effectAssetsRoot}/${library}")).matching { include '*.png' }.files.size()
+            if (pngCount != metadata.frames.size()) {
+                throw new GradleException("The tracked Crystal ${library} effect export does not match its metadata")
+            }
+            metadata.frames.each { index, frame ->
+                def safeIndex = index instanceof String && index ==~ /0|[1-9][0-9]{0,4}/
+                def expectedPath = "/original-effects/${library}/${index}.png"
+                if (!safeIndex || index.toInteger() >= metadata.count
+                        || frame.path != expectedPath || !(frame.width instanceof Number)
+                        || !(frame.height instanceof Number) || frame.width <= 0 || frame.height <= 0
+                        || frame.width > 4096 || frame.height > 4096
+                        || !file("${effectAssetsRoot}/${library}/${index}.png").isFile()) {
+                    throw new GradleException("The tracked Crystal ${library} effect frame is missing or invalid")
+                }
+            }
         }
     }
 }
