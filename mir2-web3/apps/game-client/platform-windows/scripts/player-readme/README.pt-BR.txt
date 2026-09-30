@@ -16,3 +16,6 @@ Se o Windows bloquear a inicialização, inclusive com o erro 4551, mantenha a p
 Este é um teste por convite. O percurso do Guerreiro do nível 0 ao 30 foi testado; Mago e Taoista ainda precisam de validação completa por jogadores. O limite de entrada depende da configuração atual do servidor; não há alegação de capacidade estável para 50 ou 100 jogadores. Alguns nomes próprios e textos enviados pelo servidor podem manter o idioma original.
 
 Desinstale em Configurações do Windows > Aplicativos ou pelo atalho instalado. A preferência de idioma é preservada. Nenhuma conta ou personagem do servidor é removido. Este guia tem prioridade sobre notas antigas de arquivos mantidas para rastreabilidade.
+
+Atualizações automáticas
+Instale o r7 uma vez e use o atalho da área de trabalho. O iniciador verifica a lista assinada e baixa apenas os arquivos alterados. Salve e feche o jogo antes de atualizar. Se a ativação falhar ou for interrompida, os arquivos anteriores são restaurados antes de iniciar; uma falha no primeiro início também reverte a atualização. Downloads concluídos são reutilizados; arquivos parciais são baixados novamente. O idioma e os personagens no servidor são preservados. Sem acesso ao serviço de atualização, a versão instalada e verificada ainda pode iniciar.

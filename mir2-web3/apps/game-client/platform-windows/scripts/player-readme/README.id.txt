@@ -16,3 +16,6 @@ Jika Windows memblokir peluncuran, termasuk kesalahan 4551, biarkan perlindungan
 Ini adalah versi uji coba dengan undangan. Alur Prajurit level 0–30 telah diuji pemain; alur lengkap Penyihir dan Taois masih perlu divalidasi. Batas masuk mengikuti konfigurasi server saat ini; tidak ada klaim kapasitas stabil untuk 50 atau 100 pemain. Beberapa nama khusus dan teks dari server dapat tetap dalam bahasa aslinya.
 
 Hapus klien melalui Pengaturan Windows > Aplikasi atau pintasan penghapusan yang terpasang. Preferensi bahasa dipertahankan. Menghapus klien tidak menghapus akun atau karakter server. Panduan ini lebih diutamakan daripada catatan arsip lama yang disimpan untuk penelusuran.
+
+Pembaruan otomatis
+Pasang r7 sekali dan jalankan game melalui pintasan desktop. Peluncur memeriksa daftar yang ditandatangani dan hanya mengunduh berkas yang berubah. Simpan progres dan tutup game sebelum memperbarui. Aktivasi yang gagal atau terputus dipulihkan sebelum game dimulai; kegagalan awal pada versi baru juga memulihkan versi lama. Unduhan lengkap digunakan kembali, berkas yang belum lengkap diunduh ulang. Bahasa dan karakter di server tetap tersimpan. Jika layanan pembaruan tidak tersedia, versi terpasang yang telah diverifikasi tetap dapat dijalankan.

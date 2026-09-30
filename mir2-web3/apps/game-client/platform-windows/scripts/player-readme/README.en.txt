@@ -16,3 +16,6 @@ If Windows blocks launch, including error 4551, keep application protection enab
 This is an invited test build. The Warrior 0–30 path was playtested; complete Wizard and Taoist routes still require player acceptance. Admission is limited by current server configuration; no stable 50- or 100-player capacity is claimed. Some proper names and server-provided text may retain their original language.
 
 Uninstall from Windows Settings > Apps or the installed uninstall shortcut. Language preferences are preserved. Uninstalling the client deletes no server account or character. This guide takes precedence over older archive notes retained for provenance.
+
+Automatic updates
+Install r7 once and start the game through its desktop shortcut. The launcher checks the signed update feed and downloads only changed files. Save and close the game before updating. Failed or interrupted activation restores the previous files before launch; a failed first start rolls back. Completed downloads are reused; partial files are retried. Language preferences and server-side characters are preserved. If the update service is unavailable, a verified installed version can still start.

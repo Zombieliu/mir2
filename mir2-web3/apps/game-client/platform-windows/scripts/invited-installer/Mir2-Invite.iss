@@ -1,6 +1,7 @@
-﻿#define AppName "Numeron - Legend of Rebirth"
-#define AppVersion "2026.09.30.6"
+#define AppName "Numeron - Legend of Rebirth"
+#define AppVersion "2026.10.01.7"
 #define AppExe "mir2-platform-windows.exe"
+#define LauncherExe "Mir2Launcher.exe"
 
 [Setup]
 AppId={{DC4E7701-25AD-4E48-9970-5C1983CBC77F}
@@ -17,8 +18,8 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 MinVersion=10.0
 OutputDir=..
-OutputBaseFilename=Numeron-Legend-of-Rebirth-20260930-r6-Setup
-VersionInfoVersion=2026.9.30.6
+OutputBaseFilename=Numeron-Legend-of-Rebirth-20261001-r7-Setup
+VersionInfoVersion=2026.10.1.7
 VersionInfoDescription=Numeron - Legend of Rebirth multilingual playtest installer
 UninstallDisplayName={#AppName}
 UninstallDisplayIcon={app}\game\{#AppExe}
@@ -185,12 +186,22 @@ arabic.LaunchLog=سجل تشخيص التشغيل: %1
 arabic.ReadmeFailed=تعذر فتح الدليل (خطأ Windows %1). افتح ملف README المثبّت يدويًا.
 arabic.ReadmeFile=README.ar.txt
 
+english.GameBusy=Save your character and close the game and updater before installing. The installed game is busy or cannot be replaced.
+chinesetraditional.GameBusy=請先儲存角色進度，關閉遊戲與更新程式後再安裝。目前遊戲檔案正在使用或無法替換。
+brazilianportuguese.GameBusy=Salve seu personagem e feche o jogo e o atualizador antes de instalar. O jogo está em uso ou não pode ser substituído.
+russian.GameBusy=Сохраните персонажа и закройте игру и программу обновления перед установкой. Файлы игры заняты или недоступны для замены.
+hindi.GameBusy=स्थापना से पहले पात्र की प्रगति सहेजें और खेल तथा अपडेटर बंद करें। खेल उपयोग में है या बदला नहीं जा सकता।
+indonesian.GameBusy=Simpan karakter dan tutup game serta pembaru sebelum memasang. Game sedang digunakan atau tidak dapat diganti.
+vietnamese.GameBusy=Hãy lưu nhân vật và đóng trò chơi cùng trình cập nhật trước khi cài đặt. Tệp trò chơi đang được sử dụng hoặc không thể thay thế.
+thai.GameBusy=บันทึกตัวละครและปิดเกมกับโปรแกรมอัปเดตก่อนติดตั้ง ไฟล์เกมกำลังใช้งานหรือไม่สามารถแทนที่ได้
+arabic.GameBusy=احفظ تقدم الشخصية وأغلق اللعبة وبرنامج التحديث قبل التثبيت. ملفات اللعبة قيد الاستخدام أو لا يمكن استبدالها.
 [Tasks]
 Name: "desktopicon"; Description: "{cm:DesktopIcon}"; GroupDescription: "{cm:ShortcutGroup}"
 
 [Files]
 Source: "tools\vc_redist.x64.exe"; Flags: dontcopy
 #include "verified-payload-files.iss"
+#include "verified-updater-files.iss"
 Source: "README.en.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.zh-TW.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.pt-BR.txt"; DestDir: "{app}"; Flags: ignoreversion
@@ -206,10 +217,10 @@ Source: "README.ar.txt"; DestDir: "{app}"; Flags: ignoreversion
 Name: "{app}\game\logs"
 
 [Icons]
-Name: "{group}\{#AppName}"; Filename: "{app}\game\{#AppExe}"; WorkingDir: "{app}\game"
+Name: "{group}\{#AppName}"; Filename: "{app}\{#LauncherExe}"; WorkingDir: "{app}"
 Name: "{group}\{cm:ReadmeTitle}"; Filename: "{app}\{cm:ReadmeFile}"
 Name: "{group}\{cm:UninstallTitle}"; Filename: "{uninstallexe}"
-Name: "{userdesktop}\{#AppName}"; Filename: "{app}\game\{#AppExe}"; WorkingDir: "{app}\game"; Tasks: desktopicon
+Name: "{userdesktop}\{#AppName}"; Filename: "{app}\{#LauncherExe}"; WorkingDir: "{app}"; Tasks: desktopicon
 
 ; Finish-page choices are executed in Pascal code so Windows launch errors
 ; can be reported without security-policy workarounds. Silent installs never launch.
@@ -219,11 +230,69 @@ var
   RuntimeRestartRequired: Boolean;
   FinishChoices: TNewCheckListBox;
   FinishActionsDone: Boolean;
+  InstallLockHandle: NativeUInt;
+  InstallLockRoot: String;
 
 function GetFileAttributesW(FileName: String): Cardinal;
   external 'GetFileAttributesW@kernel32.dll stdcall';
 function MoveFileExW(ExistingName: String; NewName: String; Flags: Cardinal): Boolean;
   external 'MoveFileExW@kernel32.dll stdcall';
+function CreateFileW(FileName: String; Access, ShareMode: Cardinal; Security: NativeUInt;
+  Creation, Flags: Cardinal; Template: NativeUInt): NativeUInt;
+  external 'CreateFileW@kernel32.dll stdcall';
+function CloseHandle(Handle: NativeUInt): Boolean;
+  external 'CloseHandle@kernel32.dll stdcall';
+function SafeLocalePath(Path: String): Boolean; forward;
+
+function HoldInstallLock: Boolean;
+var
+  Directory, LockPath: String;
+begin
+  Result := True;
+  Directory := ExpandConstant('{app}');
+  if (InstallLockHandle <> 0) and (InstallLockRoot = Directory) then exit;
+  if InstallLockHandle <> 0 then
+  begin
+    CloseHandle(InstallLockHandle);
+    InstallLockHandle := 0;
+  end;
+  if not FileExists(AddBackslash(Directory) + 'game\{#AppExe}') then exit;
+  Directory := AddBackslash(Directory) + '.update';
+  Result := False;
+  if not SafeLocalePath(Directory) or not ForceDirectories(Directory) then exit;
+  LockPath := AddBackslash(Directory) + 'install.lock';
+  if not SafeLocalePath(LockPath) then exit;
+  InstallLockHandle := CreateFileW(LockPath, $C0000000, 0, 0, 4, $80, 0);
+  if InstallLockHandle = NativeUInt(-1) then
+    InstallLockHandle := 0
+  else
+  begin
+    InstallLockRoot := ExpandConstant('{app}');
+    Result := True;
+  end;
+end;
+
+procedure DeinitializeSetup;
+begin
+  if InstallLockHandle <> 0 then CloseHandle(InstallLockHandle);
+end;
+
+function CanReplaceInstalledGame: Boolean;
+var
+  Handle: NativeUInt;
+  GamePath: String;
+begin
+  Result := True;
+  GamePath := ExpandConstant('{app}\game\{#AppExe}');
+  if not FileExists(GamePath) then exit;
+  { Probe exclusive WRITE access: a running old client must save and close.
+    Never ask Restart Manager to force-terminate the user's character. }
+  Handle := CreateFileW(GamePath, $40000000, 0, 0, 3, $80, 0);
+  if Handle = NativeUInt(-1) then
+    Result := False
+  else
+    CloseHandle(Handle);
+end;
 
 function VCRuntimeReady: Boolean;
 var
@@ -240,6 +309,11 @@ var
   ResultCode: Integer;
 begin
   Result := '';
+  if not HoldInstallLock or not CanReplaceInstalledGame then
+  begin
+    Result := CustomMessage('GameBusy');
+    exit;
+  end;
   if VCRuntimeReady then
   begin
     Log('Microsoft Visual C++ x64 runtime meets 14.44.35211.0 minimum; no runtime changes.');
@@ -358,8 +432,8 @@ begin
   begin
     { Original-user execution is the same privilege boundary as Inno's normal
       postinstall entry. Do not retry elevated or disable application control. }
-    if not ExecAsOriginalUser(ExpandConstant('{app}\game\{#AppExe}'), '',
-      ExpandConstant('{app}\game'), SW_SHOWNORMAL, ewNoWait, ResultCode) then
+    if not ExecAsOriginalUser(ExpandConstant('{app}\{#LauncherExe}'), '',
+      ExpandConstant('{app}'), SW_SHOWNORMAL, ewNoWait, ResultCode) then
     begin
       Log('Game launch failed; Windows error ' + IntToStr(ResultCode));
       DiagnosticPath := SaveLaunchFailure(ResultCode);

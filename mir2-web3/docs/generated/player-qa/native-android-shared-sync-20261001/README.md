@@ -26,6 +26,12 @@ was rewritten; this is not a force push, PR merge or production deployment.
 The two source histories and their platform-specific acceptance limits remain
 separate in the merged progress documents.
 
+After APK freeze, a second normal source merge imports Windows tip `9476f3845`
+(signed Windows updater/launcher distribution only). Android/shared/runtime,
+resource and third-party build inputs compare unchanged against APK source
+`8d50cb8a3`. Its Windows updater checkpoints are retained as imported source
+reports; this Android round does not execute or accept the Windows updater.
+
 The final implementation includes **uiPreview-only** editor ownership and
 mail-layout diagnostics. They log only activity/state/layout, not draft text or
 credentials. Later documentation/screenshot commits do not change APK source.

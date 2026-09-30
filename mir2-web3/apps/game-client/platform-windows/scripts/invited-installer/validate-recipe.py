@@ -75,7 +75,7 @@ def validate(compiler, readme):
         require((name, key) not in custom, "duplicate custom message")
         custom[(name, key)] = value
     english = {key: value for (name, key), value in custom.items() if name == "english"}
-    require(len(english) == 14, "unexpected installer message closure")
+    require(len(english) == 15, "unexpected installer message closure")
     for name in LANGUAGES:
         translations = {key: value for (language, key), value in custom.items() if language == name}
         require(translations.keys() == english.keys(), f"missing custom message: {name}")

@@ -19,6 +19,13 @@
 > open gates remain open. These are source checkpoints, not verification of
 > this integration worktree.
 
+> 2026-10-01 native updater implementation: independent signed bootstrap and
+> scratch engine, immutable engine generations, per-file changes, interrupted
+> activation recovery and retained first-launch rollback. Updater18/18 and
+> archive28/3platform skips pass; release/live integration gates are pending.
+> This distribution slice does not change server/game parity or restart capacity.
+> [Evidence](generated/player-qa/native-updater-20261001/README.md).
+
 > 2026-09-30 NPC-shop/supply regression: independent service-open now places an
 > overlapping bag beside the actual shop; selected supply vendor names use the
 > canonical nine-language NPC catalogue. Shared1158/0 and36 targeted offline GPU

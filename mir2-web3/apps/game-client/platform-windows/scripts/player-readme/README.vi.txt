@@ -16,3 +16,6 @@ Nếu Windows chặn khởi chạy, kể cả lỗi 4551, hãy giữ tính năng
 Đây là bản chơi thử theo lời mời. Lộ trình Chiến sĩ cấp 0–30 đã được người chơi kiểm thử; Pháp sư và Đạo sĩ vẫn cần nghiệm thu trọn lộ trình. Giới hạn đăng nhập phụ thuộc cấu hình máy chủ hiện tại; không khẳng định khả năng chơi ổn định với 50 hay 100 người. Một số tên riêng và văn bản do máy chủ gửi có thể giữ ngôn ngữ gốc.
 
 Gỡ máy khách qua Cài đặt Windows > Ứng dụng hoặc lối tắt gỡ cài đặt đã tạo. Tùy chọn ngôn ngữ được giữ lại. Gỡ máy khách không xóa tài khoản hay nhân vật trên máy chủ. Hướng dẫn này được ưu tiên hơn các ghi chú lưu trữ cũ được giữ để truy nguyên.
+
+Cập nhật tự động
+Cài r7 một lần và mở trò chơi bằng lối tắt trên màn hình. Trình khởi chạy kiểm tra danh sách có chữ ký và chỉ tải các tệp đã thay đổi. Lưu tiến độ và đóng trò chơi trước khi cập nhật. Nếu thay tệp bị lỗi hoặc gián đoạn, các tệp cũ được khôi phục trước khi mở; lần mở đầu tiên bị lỗi cũng sẽ quay lại bản cũ. Các tệp đã tải xong được dùng lại, tệp chưa xong được tải lại. Ngôn ngữ và nhân vật trên máy chủ được giữ nguyên. Khi dịch vụ cập nhật không khả dụng, vẫn có thể mở bản đã cài và được xác minh.
