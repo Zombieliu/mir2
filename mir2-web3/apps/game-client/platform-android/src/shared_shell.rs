@@ -504,18 +504,69 @@ impl Plugin for AndroidSharedShellPlugin {
                 )
                     .chain()
                     .before(bevy::ui::UiSystems::Layout),
+            )
+            .add_systems(
+                PostUpdate,
+                crate::android_ui_clipping::update_android_clipping
+                    .after(bevy::ui::UiSystems::PostLayout),
             );
         #[cfg(feature = "ui-preview")]
         crate::ui_preview::install(app);
         #[cfg(feature = "ui-preview")]
         app.add_systems(
             PostUpdate,
-            report_preview_social_layout.after(bevy::ui::UiSystems::Layout),
+            (report_preview_social_layout, report_preview_mail_layout)
+                .after(bevy::ui::UiSystems::Layout),
         );
         crate::entity_overlays::install(app);
         crate::ground_labels::install(app);
         crate::mobile_ui::install(app);
         crate::scene_effects::install(app);
+    }
+}
+
+#[cfg(feature = "ui-preview")]
+fn report_preview_mail_layout(
+    host: Res<HostState>,
+    player: Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
+    windows: Query<&Window>,
+    roots: Query<
+        (&Node, &ComputedNode, &UiTransform, &UiGlobalTransform),
+        With<mir2_client_bevy::crystal_ui::overlays::OverlayMailComposer>,
+    >,
+    mut previous: Local<String>,
+) {
+    if !player.mail_open() {
+        return;
+    }
+    let layout = format!(
+        "compose={} ime={} editor={} window={:?} roots={:?}",
+        player.core.mail_compose.is_some(),
+        host.ime_bottom,
+        host.editor.field.is_some(),
+        windows
+            .single()
+            .ok()
+            .map(|window| (window.width(), window.height(), window.focused)),
+        roots
+            .iter()
+            .map(|(node, computed, transform, global)| {
+                (
+                    node.display,
+                    node.left,
+                    node.top,
+                    node.width,
+                    node.height,
+                    computed.size(),
+                    transform,
+                    global,
+                )
+            })
+            .collect::<Vec<_>>()
+    );
+    if *previous != layout {
+        info!("ANDROID_MAIL_LAYOUT {layout}");
+        *previous = layout;
     }
 }
 
@@ -822,11 +873,21 @@ fn fit_stage(
             );
             if is_mail_composer && host.ime_bottom > 0.0 && focused_field == Some("mail-message") {
                 let caret_bottom = forms.mail_body_top()
-                    + forms.mail_caret().map(|caret| caret.y).unwrap_or(165.0).clamp(0.0, 165.0)
+                    + forms
+                        .mail_caret()
+                        .map(|caret| caret.y)
+                        .unwrap_or(165.0)
+                        .clamp(0.0, 165.0)
                     + 4.0;
                 keep_local_y_above_ime(
-                    focused, origin, size, caret_bottom, fit,
-                    Vec2::new(window.width(), window.height()), safe_edges, top,
+                    focused,
+                    origin,
+                    size,
+                    caret_bottom,
+                    fit,
+                    Vec2::new(window.width(), window.height()),
+                    safe_edges,
+                    top,
                 )
             } else if is_bigmap && host.ime_bottom > 0.0 && focused_field == Some("map-search") {
                 keep_local_y_above_ime(
@@ -964,7 +1025,6 @@ fn keep_local_y_above_ime(
     }
     transform
 }
-
 
 fn belt_edge_origin(
     fit: CrystalStageTransform,
@@ -2135,7 +2195,10 @@ fn keyboard(
     let sensitive = !model.login.account.is_empty()
         || !model.login.password.is_empty()
         || (model.screen == Screen::InGame && forms.field(&player).is_some_and(|v| v.2))
-        || matches!(model.screen, Screen::ChangePassword | Screen::SafeKey | Screen::Registration);
+        || matches!(
+            model.screen,
+            Screen::ChangePassword | Screen::SafeKey | Screen::Registration
+        );
     if *privacy != sensitive {
         send(json!({"type":"privacy","secure":sensitive}));
         *privacy = sensitive;
@@ -2164,7 +2227,8 @@ fn keyboard(
         || extra_fields
             .iter()
             .any(|(interaction, _)| *interaction == Interaction::Pressed)
-        || (model.screen == Screen::InGame && field_name.is_some()
+        || (model.screen == Screen::InGame
+            && field_name.is_some()
             && (field_name != *last_field || document != *last_document));
     if pressed {
         if let Some((field, text, password)) = field {
@@ -3007,30 +3071,45 @@ mod tests {
         use mir2_client_bevy::crystal_ui::overlays::OverlayMailWindow;
         for height in [300.0, 384.0] {
             let mut app = App::new();
-            app.insert_resource(HostState { ime_bottom: 350.0, ..default() })
-                .insert_resource(NativeShellModel { screen: Screen::InGame, ..default() })
-                .init_resource::<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>()
-                .init_resource::<mir2_client_bevy::quest_model::NpcDialogModel>()
-                .init_resource::<UiScale>()
-                .init_resource::<mir2_client_bevy::crystal_ui::hud::CrystalBeltPresentation>()
-                .add_systems(Update, fit_stage);
+            app.insert_resource(HostState {
+                ime_bottom: 350.0,
+                ..default()
+            })
+            .insert_resource(NativeShellModel {
+                screen: Screen::InGame,
+                ..default()
+            })
+            .init_resource::<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>()
+            .init_resource::<mir2_client_bevy::quest_model::NpcDialogModel>()
+            .init_resource::<UiScale>()
+            .init_resource::<mir2_client_bevy::crystal_ui::hud::CrystalBeltPresentation>()
+            .add_systems(Update, fit_stage);
             app.world_mut().spawn(Window {
                 resolution: bevy::window::WindowResolution::new(2340, 1080),
                 ..default()
             });
             let original = Node {
                 position_type: PositionType::Absolute,
-                left: px(100), top: px(100), width: px(236), height: px(height),
+                left: px(100),
+                top: px(100),
+                width: px(236),
+                height: px(height),
                 ..default()
             };
-            let panel = app.world_mut().spawn((OverlayMailWindow, original.clone(), UiTransform::default())).id();
+            let panel = app
+                .world_mut()
+                .spawn((OverlayMailWindow, original.clone(), UiTransform::default()))
+                .id();
             app.update();
             let node = app.world().get::<Node>(panel).unwrap();
             assert_eq!(node.left, original.left);
             assert_eq!(node.top, original.top);
             assert_eq!(node.width, original.width);
             assert_eq!(node.height, original.height);
-            assert_ne!(*app.world().get::<UiTransform>(panel).unwrap(), UiTransform::default());
+            assert_ne!(
+                *app.world().get::<UiTransform>(panel).unwrap(),
+                UiTransform::default()
+            );
         }
     }
 

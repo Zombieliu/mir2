@@ -58,6 +58,8 @@ public final class MainActivity extends GameActivity {
                 // never also deliver that same gesture to the shared dialog.
                 if (keyCode == KeyEvent.KEYCODE_BACK) {
                     boolean active = !editing.isEmpty() || imeWasVisible;
+                    if (BuildConfig.UI_PREVIEW) android.util.Log.i("Mir2UiPreview",
+                            "EDITOR_BACK preIme action=" + event.getAction() + " active=" + active);
                     if (event.getAction() == KeyEvent.ACTION_DOWN) {
                         editorBackPolicy.onKeyDown(active, event.getRepeatCount());
                         if (active) return true;
@@ -293,6 +295,8 @@ public final class MainActivity extends GameActivity {
     }
 
     @Override public void onBackPressed() {
+        if (BuildConfig.UI_PREVIEW) android.util.Log.i("Mir2UiPreview",
+                "EDITOR_BACK activity active=" + (!editing.isEmpty() || imeWasVisible));
         if (!editing.isEmpty() || imeWasVisible) { hideKeyboard(); return; }
         nativeEvent(GatewaySession.object("type", "back").toString());
     }

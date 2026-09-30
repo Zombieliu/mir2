@@ -31,8 +31,12 @@ pub fn shell_field(model: &NativeShellModel) -> Option<(&'static str, &str, bool
                 RegistrationFocus::SecretQuestion => {
                     Some(("register-question", &form.secret_question, true))
                 }
-                RegistrationFocus::SecretAnswer => Some(("register-answer", &form.secret_answer, true)),
-                RegistrationFocus::EmailAddress => Some(("register-email", &form.email_address, false)),
+                RegistrationFocus::SecretAnswer => {
+                    Some(("register-answer", &form.secret_answer, true))
+                }
+                RegistrationFocus::EmailAddress => {
+                    Some(("register-email", &form.email_address, false))
+                }
                 RegistrationFocus::SubmitButton | RegistrationFocus::CancelButton => None,
             }
         }

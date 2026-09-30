@@ -3,8 +3,8 @@ use bevy::{ecs::system::SystemParam, prelude::*};
 use mir2_client_bevy::{
     big_map::BigMapModel,
     crystal_ui::overlays::{
-        mail_editor::MailLetterEditor,
-        BigMapUiState, InventoryDeletePrompt, MailComposeFocus, MailComposeUi, NativePlayerUiState,
+        mail_editor::MailLetterEditor, BigMapUiState, InventoryDeletePrompt, MailComposeFocus,
+        MailComposeUi, NativePlayerUiState,
     },
     storage::StorageModel,
 };
@@ -34,7 +34,11 @@ impl FormInput<'_> {
         if state.amount_modal_open() {
             return None;
         }
-        if let Some(recipient) = self.mail_ui.as_deref().and_then(MailComposeUi::recipient_prompt_draft) {
+        if let Some(recipient) = self
+            .mail_ui
+            .as_deref()
+            .and_then(MailComposeUi::recipient_prompt_draft)
+        {
             return Some(("mail-recipient", recipient, false));
         }
         if let (Some(draft), Some(ui)) = (&state.core.mail_compose, &self.mail_ui) {
@@ -61,7 +65,9 @@ impl FormInput<'_> {
 
     /// Real shaped body caret; absent while the shared layout is stale.
     pub fn mail_caret(&self) -> Option<Vec2> {
-        self.mail_editor.as_deref().and_then(MailLetterEditor::ime_caret)
+        self.mail_editor
+            .as_deref()
+            .and_then(MailLetterEditor::ime_caret)
     }
 
     pub fn mail_body_top(&self) -> f32 {
@@ -201,10 +207,7 @@ mod tests {
             .get_mut(&mut world)
             .unwrap()
             .edit(&mut state, "mail-recipient", "UIRecipient");
-        assert_eq!(
-            state.core.mail_compose.as_ref().unwrap().recipient,
-            ""
-        );
+        assert_eq!(state.core.mail_compose.as_ref().unwrap().recipient, "");
         assert!(state
             .core
             .mail_compose
@@ -270,7 +273,10 @@ mod tests {
         let draft = state.core.mail_compose.as_ref().unwrap();
         assert_eq!(draft.message, "😀".repeat(250));
         assert_eq!(draft.message.encode_utf16().count(), 500);
-        let editor = world.resource::<MailLetterEditor>().active_editor().unwrap();
+        let editor = world
+            .resource::<MailLetterEditor>()
+            .active_editor()
+            .unwrap();
         assert_eq!(editor.caret(), draft.message.len());
         assert!(editor.selection().is_empty());
         assert!(editor.is_boundary(editor.caret()));
@@ -280,8 +286,17 @@ mod tests {
             "mail-message",
             &format!("{}👩‍👩‍👧‍👦tail", "x".repeat(499)),
         );
-        assert_eq!(state.core.mail_compose.as_ref().unwrap().message, "x".repeat(499));
-        assert!(state.core.mail_compose.as_ref().unwrap().attachment_unique_ids.is_empty());
+        assert_eq!(
+            state.core.mail_compose.as_ref().unwrap().message,
+            "x".repeat(499)
+        );
+        assert!(state
+            .core
+            .mail_compose
+            .as_ref()
+            .unwrap()
+            .attachment_unique_ids
+            .is_empty());
     }
 
     #[test]
@@ -303,7 +318,9 @@ mod tests {
             .unwrap()
             .edit(&mut state, "mail-message", "new");
         assert_eq!(state.core.mail_compose.as_ref().unwrap().message, "new");
-        world.resource_mut::<MailLetterEditor>().set_composition("preview".into(), None);
+        world
+            .resource_mut::<MailLetterEditor>()
+            .set_composition("preview".into(), None);
         system
             .get_mut(&mut world)
             .unwrap()
@@ -337,13 +354,27 @@ mod tests {
             .unwrap()
             .edit(&mut state, "mail-message", "stale field");
         assert_eq!(state.core.mail_compose.as_ref().unwrap().message, "current");
-        assert_eq!(world.resource::<MailLetterEditor>().active_editor().unwrap().text(), "current");
+        assert_eq!(
+            world
+                .resource::<MailLetterEditor>()
+                .active_editor()
+                .unwrap()
+                .text(),
+            "current"
+        );
         state.core.mail_compose = None;
         system
             .get_mut(&mut world)
             .unwrap()
             .edit(&mut state, "mail-message", "stale window");
         assert!(state.core.mail_compose.is_none());
-        assert_eq!(world.resource::<MailLetterEditor>().active_editor().unwrap().text(), "current");
+        assert_eq!(
+            world
+                .resource::<MailLetterEditor>()
+                .active_editor()
+                .unwrap()
+                .text(),
+            "current"
+        );
     }
 }
