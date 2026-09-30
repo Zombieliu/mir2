@@ -1,5 +1,18 @@
 # Android native UI coverage — 2026-09-08
 
+> 2026-10-01 independent Android/shared sync: merge `007df76c9` imports latest
+> verified Windows continuation `4b73525f3` without changing the original dirty
+> checkout or Android branch. Shared NPC/mail/chat semantics, IME editor epochs,
+> 500 UTF-16 full-document mail editing and process-lifetime EntityAtlas are
+> integrated; actual two-line mail input exposed and repaired Android-only
+> Winit/Java keyboard ownership. Android affine clipping now fixes the restored
+> magnified mail window: actual multiline input, first Back and Close pass.
+> Android202/preview210/shared1164/runtime288 and Java60 pass; macOS native-ui
+> check and API31 packaging pass, not Windows tests. Source `8d50cb8a3` has34
+> refreshed offline captures and both APK hashes. Phone-first HUD/touch, approved
+> online login, public pack alignment and device gates remain open.
+> [Current scope and evidence](generated/player-qa/native-android-shared-sync-20261001/README.md).
+
 Status: shared player UI assembly and offline Android UI baseline, **not whole
 Android UI acceptance or a completed online client**. Work is isolated on
 `codex/android-player-journey`; the original checkout and Windows backend

@@ -1,5 +1,18 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 independent Android sync retains current shared NPC/mail/chat
+> layout semantics and connects whole-field mail IME to the500 UTF-16 shared
+> grapheme/caret editor. Epoch ownership rejects delayed field/window events;
+> actual emulator input exposed desktop Winit stealing Java EditText focus,
+> repaired only on Android in PostUpdate. Android affine clipping fixes the
+> magnified mail frame: actual two-line input/first Back/Close and chat settings
+> pass offline. Android202/preview210/shared1164/runtime288/Java60 pass;
+> native-ui macOS compile is not Windows testing. Final `8d50cb8a3` has34
+> refreshed offline captures and both APK hashes. Phone-first HUD/touch, live
+> login/player loop, public resource alignment and physical-device/human UI
+> acceptance remain open.
+> [Source-bound scope and screenshots](generated/player-qa/native-android-shared-sync-20261001/README.md).
+
 > Checkpoint provenance: the dated Android and Windows source histories below
 > are retained independently. Windows build/live-player evidence does not
 > establish Android APK, real-network, or physical-device acceptance; Android

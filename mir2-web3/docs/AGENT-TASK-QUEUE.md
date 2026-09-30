@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> 2026-10-01 Android integration lane: normal merge `007df76c9` retains Android
+> `5d417ca75` and Windows continuation `4b73525f3` in independent
+> `codex/android-shared-sync`; original dirty checkout/Android branch unchanged.
+> Android feature/API, shared NPC/mail/chat, epoch-owned IME, 500 UTF-16 whole
+> mail replacement, retained EntityAtlas and metadata-bound2744 effect PNGs
+> are integrated. Android affine clipping repairs magnified shared mail bounds;
+> actual multiline input/first Back/Close and Chat Box/Two/Apply pass offline.
+> Android202/preview210/shared1164/runtime288/Java60 pass; final source
+> `8d50cb8a3` binds both APK hashes and34 refreshed offline captures. macOS
+> native-ui check/API31 package are not Windows tests. Next leaf: phone-first
+> HUD/touch and approved real Gateway/online loop. Unsupported Android-host
+> registration/quest NPC/Harvest and physical-device gates remain open.
+> [Evidence and limits](generated/player-qa/native-android-shared-sync-20261001/README.md).
+
 > Checkpoint provenance: the dated Android and Windows source histories below
 > are retained independently. Windows build/live-player evidence does not
 > establish Android APK, real-network, or physical-device acceptance; Android

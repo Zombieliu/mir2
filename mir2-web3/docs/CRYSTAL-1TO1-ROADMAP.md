@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 native Android/shared integration: merge `007df76c9` preserves
+> Android `5d417ca75` while importing Windows continuation `4b73525f3`.
+> Android keeps `native-player-ui` without desktop audio; shared NPC/mail/chat
+> semantics, epoch-bound full-field IME and500 UTF-16 grapheme-safe mail rules
+> are retained. EntityAtlas survives scene resets; effect PNG checks follow
+> exact metadata, not the old2067 count. Android202/preview210/shared1164/
+> runtime288/Java60 pass, plus macOS native-ui check/API31 packaging. Android
+> affine clipping fixes mail restoration; input/Back/Close and chat settings
+> pass offline. Source `8d50cb8a3` binds APK hashes and34 refreshed captures.
+> Phone-first HUD/touch remain open. The849-draw
+> viewport is not complete Bichon; no real login, online loop, device, Windows
+> test or whole-game parity claim. [Evidence](generated/player-qa/native-android-shared-sync-20261001/README.md).
+
 > Checkpoint provenance: the dated Android and Windows source histories below
 > are retained independently. Windows build/live-player evidence does not
 > establish Android APK, real-network, or physical-device acceptance; Android
