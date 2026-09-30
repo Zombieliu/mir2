@@ -54,6 +54,17 @@ function Entry([string]$Path,[byte[]]$Bytes) {
 Add-Type -AssemblyName System.Security.Cryptography.Pkcs
 if((& git -C $project rev-parse HEAD).Trim()-cne$SourceRevision.ToLowerInvariant() -or $LASTEXITCODE-ne0) {throw 'Exact source revision required'}
 if(@(& git -C $project status --porcelain=v1 --untracked-files=all).Count-ne0 -or $LASTEXITCODE-ne0) {throw 'Clean source required'}
+# The parent repository ignores **/bin/. Do not let an ignored Rust entry point
+# produce a clean-looking but unreproducible attestation.
+$sources=@(Get-ChildItem -LiteralPath (Join-Path $crate 'src') -Recurse -File)
+$sources+=Get-Item -LiteralPath (Join-Path $crate 'Cargo.toml'),(Join-Path $crate 'Cargo.lock')
+if(Test-Path -LiteralPath (Join-Path $crate 'build.rs')){$sources+=Get-Item -LiteralPath (Join-Path $crate 'build.rs')}
+foreach($source in $sources){
+    NoLinks $source.FullName
+    $relative=[IO.Path]::GetRelativePath($project,$source.FullName).Replace('\','/')
+    & git -C $project ls-files --error-unmatch -- $relative | Out-Null
+    if($LASTEXITCODE-ne0){throw 'Every compiled source must be committed, including ignored entry points'}
+}
 $certificate=Get-Item -LiteralPath ("Cert:/CurrentUser/My/"+$SignerThumbprint.ToUpperInvariant())
 if(!$certificate.HasPrivateKey -or (Get-Date)-lt$certificate.NotBefore -or (Get-Date)-gt$certificate.NotAfter){throw 'Current valid signing identity required'}
 $rsa=[Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPublicKey($certificate)
