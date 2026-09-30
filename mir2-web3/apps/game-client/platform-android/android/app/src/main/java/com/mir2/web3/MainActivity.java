@@ -51,7 +51,29 @@ public final class MainActivity extends GameActivity {
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
         // Transparent OS input connection, not a second player-facing form.
-        ime = new EditText(this);
+        ime = new EditText(this) {
+            @Override public boolean onKeyPreIme(int keyCode, KeyEvent event) {
+                // Back may be consumed by the IME before Activity.onKeyDown.
+                // Own the whole editor gesture before insets clear editing;
+                // never also deliver that same gesture to the shared dialog.
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    boolean active = !editing.isEmpty() || imeWasVisible;
+                    if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                        editorBackPolicy.onKeyDown(active, event.getRepeatCount());
+                        if (active) return true;
+                    } else if (event.getAction() == KeyEvent.ACTION_UP) {
+                        EditorBackPolicy.Action action = editorBackPolicy.onKeyUp(
+                                true, event.isCanceled(), active);
+                        if (action == EditorBackPolicy.Action.DISMISS_EDITOR) {
+                            hideKeyboard();
+                            return true;
+                        }
+                        if (action == EditorBackPolicy.Action.NONE) return true;
+                    }
+                }
+                return super.onKeyPreIme(keyCode, event);
+            }
+        };
         ime.setSingleLine(true);
         ime.setImeOptions(EditorInfo.IME_FLAG_NO_EXTRACT_UI | EditorInfo.IME_FLAG_NO_FULLSCREEN | EditorInfo.IME_ACTION_DONE);
         ime.setOnEditorActionListener((view, action, event) -> {
