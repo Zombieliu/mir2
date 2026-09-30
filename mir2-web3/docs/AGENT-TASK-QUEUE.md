@@ -3,9 +3,12 @@
 > 2026-10-01 native automatic updating and login display selection: updater24/24,
 > archive28/3platform skips, deployment tooling16/16 and signing/source guards
 >28/28 pass. Native display6/6, shared display7/7 and seven real Winit cases pass;
-> full serial shared1168/Windows790 and72 nine-language GPU captures pass. Candidate07,
-> r7 installer, actual r6→r7 delta and HTTPS publication remain pending. Existing
-> server/saves are separate; capacity stays paused.
+> full serial shared1168/Windows790 and72 nine-language GPU captures pass. Clean
+> fefd18370 Candidate07, strict123035-file package and actual r7 installer are built.
+> Actual r6→r7 delta/rollback and native launcher HTTPS update pass: three game
+> files plus engine (~107MiB), repeat check0bytes. Signed sequence3 is published.
+> Both game services/saves remain unchanged; capacity stays paused. Public
+> Authenticode signing/affected-laptop/full-installer human acceptance remain open.
 > [Updater evidence](generated/player-qa/native-updater-20261001/README.md).
 > [Display evidence](generated/player-qa/native-display-20261001/README.md).
 

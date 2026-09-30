@@ -34,6 +34,8 @@ r6 UI assets. Missing glyphs, layout overflow and control-hit failures are zero.
 All36 HUD reference positions/sizes scale consistently (physical rounding ≤1px).
 Selected Login/HUD captures accompany the report; this fixture deliberately
 uses a reference rectangle and does not load a gameplay map or saved character.
-Attested build, Candidate07/r7 installer and actual affected-laptop acceptance
-remain gates.
+Clean attested Candidate07 and actual r7 installer are built from
+`fefd18370a947848d4f2f86ee3468ea4251fe011`; the strict package verifier passes.
+See the [updater and installer handoff](../native-updater-20261001/README.md).
+Actual affected-laptop and full-installer human acceptance remain open.
 This changes presentation only, not protocol, server saves or capacity.
