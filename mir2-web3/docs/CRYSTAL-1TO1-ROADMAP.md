@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 Android exactv15/d009f2402: phone focused history now shows the
+> newest fitting suffix; failure-first4 then6/6, Android273/preview287/Java37+37/
+> API31 checks pass. Clean dual packages/source/hash/resource/install verified.
+> Actual both rows/keyboard and Back/Set/CHAT BOX/Cancel respond. Keyboard reopen
+> FAIL and six startup GL0x506 entries/zero-error gate FAIL remain. Next these IME
+> gaps, HUD weight/NPC/services; full frozen denominator/UI/online/device/stability
+> OPEN. [Source, packages and original frames](generated/player-qa/native-android-phone-chat-layout-20261002/README.md).
+
+> Entries below retain historical source/package/publication checkpoints and failures.
+
 > 2026-10-01 Android exactv14/253b6682f: both APK/hash/install/source binding
 > and6647 PNG/three metadata byte audit each pass. Actual offline system chat/
 > keyboard visible, peer row hidden by phone geometry: visual FAIL retained.

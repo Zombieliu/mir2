@@ -1,0 +1,235 @@
+{
+  "source": "d009f240247261146c1053b5ec8cdd934724cad8",
+  "versionCode": 15,
+  "deviceApi": 31,
+  "density": 440,
+  "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys",
+  "captures": [
+    {
+      "name": "debug-login.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "name": "preview-chat.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 113055,
+      "sha256": "b28521eb6f45146bd337efddd249622e4468f088c674a141130a28203e59e9e0"
+    },
+    {
+      "name": "preview-chat-keyboard-hidden.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 59588,
+      "sha256": "f8dc0b1e855d0346411d35c49ff2449d1127987f42d52722df851e4b2ab572bb"
+    },
+    {
+      "name": "preview-chat-reopen-attempt.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 59588,
+      "sha256": "f8dc0b1e855d0346411d35c49ff2449d1127987f42d52722df851e4b2ab572bb"
+    },
+    {
+      "name": "preview-chat-settings-tap.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 78981,
+      "sha256": "7e289de80ed4538bfb2f1991cb5c29875258b9e0391ef894b8415cbc1e79a0c2"
+    },
+    {
+      "name": "preview-chat-settings-tab.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 73715,
+      "sha256": "26a8a063349b7de5c71f6785eed464b0dcc28d8d5c7b09f0d4a47231a7c58f20"
+    },
+    {
+      "name": "preview-chat-settings-cancel.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 59588,
+      "sha256": "f8dc0b1e855d0346411d35c49ff2449d1127987f42d52722df851e4b2ab572bb"
+    }
+  ],
+  "logs": [
+    {
+      "name": "debug-login-pid6671.log",
+      "capturedLineEntries": 149,
+      "errorFatalPanicSignalEntries": 0,
+      "fatalPanicSignalEntries": 0,
+      "errorFreeGatePass": true,
+      "errorLines": [],
+      "warningsNotErased": true
+    },
+    {
+      "name": "preview-chat-pid6769.log",
+      "capturedLineEntries": 223,
+      "errorFatalPanicSignalEntries": 6,
+      "fatalPanicSignalEntries": 0,
+      "errorFreeGatePass": false,
+      "errorLines": [
+        "10-02 00:15:10.320  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.397  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]"
+      ],
+      "warningsNotErased": true
+    },
+    {
+      "name": "preview-chat-keyboard-hidden-pid6769.log",
+      "capturedLineEntries": 417,
+      "errorFatalPanicSignalEntries": 6,
+      "fatalPanicSignalEntries": 0,
+      "errorFreeGatePass": false,
+      "errorLines": [
+        "10-02 00:15:10.320  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.397  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]"
+      ],
+      "warningsNotErased": true
+    },
+    {
+      "name": "preview-chat-reopen-attempt-pid6769.log",
+      "capturedLineEntries": 498,
+      "errorFatalPanicSignalEntries": 6,
+      "fatalPanicSignalEntries": 0,
+      "errorFreeGatePass": false,
+      "errorLines": [
+        "10-02 00:15:10.320  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.397  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]"
+      ],
+      "warningsNotErased": true
+    },
+    {
+      "name": "preview-chat-settings-tap-pid6769.log",
+      "capturedLineEntries": 628,
+      "errorFatalPanicSignalEntries": 6,
+      "fatalPanicSignalEntries": 0,
+      "errorFreeGatePass": false,
+      "errorLines": [
+        "10-02 00:15:10.320  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.397  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]"
+      ],
+      "warningsNotErased": true
+    },
+    {
+      "name": "preview-chat-settings-tab-pid6769.log",
+      "capturedLineEntries": 749,
+      "errorFatalPanicSignalEntries": 6,
+      "fatalPanicSignalEntries": 0,
+      "errorFreeGatePass": false,
+      "errorLines": [
+        "10-02 00:15:10.320  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.397  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]"
+      ],
+      "warningsNotErased": true
+    },
+    {
+      "name": "preview-chat-settings-cancel-pid6769.log",
+      "capturedLineEntries": 870,
+      "errorFatalPanicSignalEntries": 6,
+      "fatalPanicSignalEntries": 0,
+      "errorFreeGatePass": false,
+      "errorLines": [
+        "10-02 00:15:10.320  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.397  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+        "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]"
+      ],
+      "warningsNotErased": true
+    }
+  ],
+  "starts": [
+    {
+      "name": "start-debug.log",
+      "status": "ok",
+      "waitTimeMs": 402
+    },
+    {
+      "name": "start-preview-chat.log",
+      "status": "ok",
+      "waitTimeMs": 383
+    }
+  ],
+  "before": {
+    "source": "253b6682f73715b896745ca85a6923be98d0b892",
+    "versionCode": 14,
+    "existingPath": "mir2-web3/docs/generated/player-qa/native-android-received-chat-20261001/preview-chat.png",
+    "sha256": "5e50b9315593d76aabf484e3384502019e24d15d9b183ded48735ba62f091caa",
+    "newestPeerRowVisible": false,
+    "oldFailureNotEditedOrRecaptured": true
+  },
+  "observations": {
+    "method": "Manually viewed all seven original SDK captures; screenshot integrity script is not semantic OCR.",
+    "ordinaryEmptyLoginFailsClosedWithoutGateway": true,
+    "offlineSystemAndLatestPeerRowsBothVisibleAboveKeyboard": true,
+    "actualAndroidBackDismissesKeyboardAndRetainsBothRows": true,
+    "focusedDraftTapReopensKeyboard": false,
+    "actualSetTapOpensOriginalFilterSettings": true,
+    "actualChatBoxTabTapSelectsTransparencyOptions": true,
+    "actualCancelTapClosesModalAndRestoresBothRows": true,
+    "actions": [
+      {
+        "action": "Android BACK keyevent4",
+        "result": "keyboard disappears, both received rows remain"
+      },
+      {
+        "action": "tap draft at original screenshot physical1000,978",
+        "result": "FAIL: keyboard remains hidden"
+      },
+      {
+        "action": "tap Set physical1955,970",
+        "result": "original FILTER modal opens"
+      },
+      {
+        "action": "tap CHAT BOX physical1180,229",
+        "result": "transparency page appears"
+      },
+      {
+        "action": "tap Cancel physical1105,874",
+        "result": "modal closes, both rows remain"
+      }
+    ],
+    "noTypingSendEchoApplyTogglesTradeScrollSoakOrRealNetworkClaim": true
+  },
+  "ownedAppsStoppedDataRetainedSameAvdRunning": true,
+  "existingExtremeImeControlOverflowOpen": true,
+  "sharedRuntimeChatEvictionUnchangedAndOpen": true,
+  "priorV14ClippedRowAndV13HostCrashTimeoutFailuresNotErased": true,
+  "errorFreeLogGatePass": false,
+  "uniqueCapturedErrorLines": [
+    "10-02 00:15:10.320  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+    "10-02 00:15:10.397  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]",
+    "10-02 00:15:10.398  6769  6792 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]"
+  ],
+  "rendererErrors": "Six emuglGLESv2_enc GL0x506 framebuffer-completeness error line entries in the first preview PID capture; three unique timestamp/message strings. Cumulative later captures repeat those six entries, not36 new reported entries. Root cause unverified.",
+  "firstZeroErrorAuditFailureRetained": true,
+  "fullPhoneUiAccepted": false,
+  "fullChatInteractionAccepted": false,
+  "startupStabilityAccepted": false,
+  "authenticatedGameplayAccepted": false,
+  "physicalDeviceAccepted": false
+}

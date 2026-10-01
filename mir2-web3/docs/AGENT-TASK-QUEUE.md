@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-10-02 exactv15/d009f2402: focused newest-row/available-height repair,
+> failure-first4 failures then6/6; Android273/preview287/Java37+37/API31 pass.
+> Clean dual APK/hash/install and6647 PNG/three metadata/source hash binding each
+> pass. Actual both received rows/keyboard, Back/Set/CHAT BOX/Cancel respond;
+> draft keyboard reopen FAIL, six startup GL0x506 entries/zero-error gate FAIL.
+> Next keyboard reactivation/extreme IME, HUD weight, NPC/services/full frozen
+> Windows denominator. Full UI/online/device/stability OPEN; goal Active.
+> [Exact evidence and retained failures](generated/player-qa/native-android-phone-chat-layout-20261002/README.md).
+
+> Below are historical checkpoints, including then-unbuilt/unpublished statuses;
+> current results are above. Older failures are not retrospectively made passes.
+
 > Publication checkpoint: ordinary non-force push f04a74399..11eca43c4 succeeded;
 > GitHub ref/PR253 head verified equal, Open/Draft/base unchanged. Earlier local
 > v12/v13 and current v14 source/evidence now published; no Windows push/merge/

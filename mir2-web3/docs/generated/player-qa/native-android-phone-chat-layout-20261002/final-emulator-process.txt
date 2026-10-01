@@ -1,0 +1,1 @@
+22274 02:28:06 /Users/henryliu/Library/Android/sdk/emulator/qemu/darwin-aarch64/qemu-system-aarch64

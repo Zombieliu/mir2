@@ -9,6 +9,13 @@ denominator and not a completion percentage. A shared window, an outbound comman
 serializer or an offline specimen does not prove its authoritative inbound model.
 All real-online and physical-device gates below remain OPEN / EXTERNAL.
 
+2026-10-02 phone-only follow-up: exactd009f2402 v15 displays both received chat
+rows above the actual keyboard after failure-first regression/repair. Actual Back,
+Set/CHAT BOX/Cancel respond, but tapping the draft after dismissal cannot reopen
+the keyboard. Six startup GL0x506 entries fail the zero-error log gate. This adds
+bounded presentation evidence, not new ingress, online or stability coverage.
+[Exact v15 evidence](generated/player-qa/native-android-phone-chat-layout-20261002/README.md).
+
 ## Audited boundaries
 
 - Windows `platform-windows/src/gateway.rs` produces typed shared ingress;
@@ -42,7 +49,7 @@ still missing. Neither label is an online acceptance result.
 | NI-06 | `push_native_inventory_operation_ack` | PARTIAL: frozen seven Drop/Move/Merge/SplitItem1/Sell/Equip/Remove receipts pass owner/phase/FIFO/backpressure/shared pending regressions. Legacy Move is coordinate-correlated, not an echoed request ID; DeleteItem/SplitItem stay closed. Complete action/unknown-result and actual JNI/online acceptance remain OPEN. [Source evidence](generated/player-qa/native-android-inventory-ingress-20261001/README.md) |
 | NI-07 | `push_native_skill_model` / `SkillPacketCursor` | PARTIAL: Android and Windows share the extracted cursor/projector; exact ms, owner metadata/casts, key ACK and character/map/backpressure regressions pass (Android227/preview236/shared1196+8ignored/Java32+32/API31). Exact-source8eb1a7d34 v8 APKs build/install; actual offline SPELLS shows FireBall/F1 but MagIcon/54 is missing repeatedly, so imagery FAILS. Actual JNI/live outbound/input, approved online combat and physical acceptance remain OPEN. [Evidence](generated/player-qa/native-android-skill-ingress-20261001/README.md) |
 | NI-08 | `push_native_wallet_patch` | PARTIAL: public Gained/Lose Gold/Credit share Windows helpers after owner bootstrap; missing base errors, latest absolute UI/wallet retry preserves runtime ordering without delta replay. Numeric/foreign/Hero/character/map/reset regressions pass; exact v12 offline BAG/HUD gold12352 visible. Credit503 is a source marker, not a rendered credit control; Java-to-JNI live server wallet/action/settlement/device remain OPEN, not purchase success. [Evidence](generated/player-qa/native-android-player-ingress-20261001/README.md) |
-| NI-09 | `push_native_chat_line` | PARTIAL: shared frozen Chat.message/ObjectChat.text projector; public Java owner-bootstrap gate and Android32/128KiB FIFO. Source Android267/preview281/shared1205+8ignored/Java37+37/API31/Mac chat2 pass. Clean253b6682f v14 dual APK/hash/install/source/resource audit pass. Actual focused chat shows system line/keyboard but peer line clipped: visual FAIL, next phone-row regression/repair. Java-to-JNI/online outbound+echo/filter/IME/device OPEN; shared runtime critical/ACK eviction unchanged, not lossless acceptance. [Exact source/package/visual failure](generated/player-qa/native-android-received-chat-20261001/README.md) |
+| NI-09 | `push_native_chat_line` | PARTIAL: same frozen projector and Java owner-bootstrap/bounded FIFO; prior v14 peer-row FAIL retained. Clean d009f2402 v15 dual package/hash/resource/install binding; failure-first4 then6/6, Android273/preview287/Java37+37/API31 pass. Actual both received rows/keyboard plus Back/Set/CHAT BOX/Cancel respond. Draft keyboard reopen FAIL; extreme IME controls and startup GL errors remain. Java-to-JNI/online outbound+echo/filter/scroll/full settings/IME/device OPEN; shared runtime critical/ACK eviction unchanged, not lossless acceptance. [Exact v15 source/package/pass and failure](generated/player-qa/native-android-phone-chat-layout-20261002/README.md) |
 | NI-10 | Quest/NPC gameplay bridge | OPEN: audit the Windows bridge's tracker, dialog, detail/turn-in and authoritative events. Android intent forwarding/local fixtures do not prove those incoming states |
 | NI-11 | `push_native_shop_model` / `push_native_npc_shop_service` | OPEN: populate ordinary vendor stock, service context and Buy/Sell/Repair/SRepair results from public packets; an offline NPC shop is not a purchase |
 | NI-12 | `push_native_game_shop_info` / stock / receipt | PARTIAL: correlated reducer receipt exists; authoritative catalog/stock and model equivalence remain OPEN |

@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 exact Androidv15/d009f2402: focused latest peer-row clipping repaired;
+> actual original keyboard screenshot shows both system/peer rows. Back dismiss,
+> Set open, CHAT BOX tab and Cancel close respond via actual touches. Draft tap
+> fails to reopen keyboard; extreme short-window IME controls remain unguarded,
+> and six startup GL0x506 error entries fail the zero-error log gate. Source273/
+> preview287/Java37+37/API31 and clean exact dual APK/resource/hash/install pass
+> are bounded, not full mobile UI. Next reopen/short-IME/HUD weight and remaining
+> services/player denominator; online/device/stability OPEN.
+> [Actual frames, regression and failures](generated/player-qa/native-android-phone-chat-layout-20261002/README.md).
+
+> Below retain earlier checkpoints; later progress never erases their original failures.
+
 > 2026-10-01 actual v14 received-chat imagery FAIL: clean253b6682f two APKs
 > install/hash/source/resource audit pass, but only OFFLINE system chat is visible
 > with the actual keyboard; peer row is clipped. Original failure screenshot
