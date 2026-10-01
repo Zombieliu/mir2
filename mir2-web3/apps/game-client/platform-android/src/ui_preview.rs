@@ -656,7 +656,7 @@ fn apply(world: &mut World) {
     };
     let mut state = world.resource_mut::<NativePlayerUiState>();
     state.core.screen = UiScreen::InGame;
-    initialize_panel(&mut state.core, panel);
+    initialize_player_panel(&mut state, panel);
     if scene == "chat" {
         state.set_chat_focused(true);
     }
@@ -778,6 +778,17 @@ fn initialize_panel(state: &mut mir2_ui_core::state::UiState, panel: UiPanel) {
     }
 }
 
+fn initialize_player_panel(state: &mut NativePlayerUiState, panel: UiPanel) {
+    if panel == UiPanel::Skill {
+        // Use the shared Skills/F11 entry, not only the core panel enum (which
+        // otherwise leaves CharacterDialog on its default CHAR page).
+        state.core.panel = UiPanel::None;
+        state.toggle_skill();
+    } else {
+        initialize_panel(&mut state.core, panel);
+    }
+}
+
 /// Server-shaped offline data exercises the same personal skill projection as
 /// the network host. This is not an authenticated account or a learned skill.
 fn offline_skill_ingress_model() -> Result<String, &'static str> {
@@ -786,7 +797,7 @@ fn offline_skill_ingress_model() -> Result<String, &'static str> {
     ingress.snapshot(
         &json!({"tick":100,"playerObjectId":42,
             "entities":[{"objectId":42,"kind":"selfPlayer","name":"OFFLINE SKILL FIXTURE"}],
-            "knownSkills":[{"id":1,"spell":"FireBall","castKind":"target","hotkey":1,
+        "knownSkills":[{"id":1,"spell":"FireBall","level":1,"castKind":"target","hotkey":1,
                 "delayMs":2200,"cooldownRemainingMs":300,"cooldownRemainingTicks":1,"mpCost":7}]
         })
         .to_string(),
@@ -1189,6 +1200,18 @@ mod tests {
         assert_eq!(skills.binding_for(1).cooldown_remaining_ms, Some(300));
         assert_eq!(skills.binding_for(1).mp_cost, Some(7));
         assert!(skills.skill_key_ack.is_none());
+    }
+
+    #[test]
+    fn skills_specimen_opens_shared_spell_page_directly() {
+        let mut state = NativePlayerUiState::default();
+        state.core.screen = UiScreen::InGame;
+        initialize_player_panel(&mut state, UiPanel::Skill);
+        assert!(state.equipment_open());
+        assert_eq!(
+            state.character_page,
+            mir2_client_bevy::crystal_ui::overlays::CharacterPage::Spells
+        );
     }
 
     #[test]

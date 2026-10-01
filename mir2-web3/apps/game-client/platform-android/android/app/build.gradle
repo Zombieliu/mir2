@@ -10,6 +10,8 @@ def requiredSharedUiLibraries = [
         ChrSel: 1146,
         Help: 42,
         MMap: 450,
+        MagIcon: 224,
+        MagIcon2: 224,
         Prguse: 2447,
         Prguse2: 1602,
         StateItem: 5192,
@@ -36,6 +38,27 @@ def verifySharedUiRoot = {
                 || !(frames instanceof List) || frames.size() < minimumCount) {
             throw new GradleException("The approved shared Crystal UI ${library} export is incomplete")
         }
+        // A minimum entry count alone accepts repeated frame0 while omitting
+        // a referenced spell icon. Require the complete indexed export for
+        // these two libraries, without changing older UI-pack conventions.
+        if (library in ['MagIcon', 'MagIcon2']) {
+            def indices = new LinkedHashSet<Integer>()
+            frames.each { frame ->
+                def frameIndex = frame instanceof Map ? frame.index : null
+                if (!(frameIndex instanceof Number) || frameIndex < 0
+                        || frameIndex > Integer.MAX_VALUE || frameIndex != frameIndex.intValue()
+                        || !indices.add(frameIndex.intValue())) {
+                    throw new GradleException("The approved shared Crystal UI ${library} magic-icon frame coverage is invalid or duplicated")
+                }
+                def expectedPath = "/original-ui/${library}/${frameIndex.intValue()}.png"
+                if (frame.path != expectedPath) {
+                    throw new GradleException("The approved shared Crystal UI ${library} magic-icon frame path does not match its index")
+                }
+            }
+            if (!(0..<minimumCount).every { indices.contains(it) }) {
+                throw new GradleException("The approved shared Crystal UI ${library} magic-icon frame coverage is incomplete")
+            }
+        }
         frames.each { frame ->
             def assetPath = frame?.path
             def requiredPrefix = "/original-ui/${library}/"
@@ -61,7 +84,8 @@ def prepareSharedUi = tasks.register('prepareSharedUi', Sync) {
     dependsOn validateSharedUi
     if (uiRoot) from(uiRoot) {
         include 'original-ui/ChrSel/*.png', 'original-ui/Prguse/*.png', 'original-ui/Prguse2/*.png', 'original-ui/Title/*.png',
-                'original-ui/Items/*.png', 'original-ui/Help/*.png', 'original-ui/MMap/*.png', 'original-ui/StateItem/*.png'
+                'original-ui/Items/*.png', 'original-ui/Help/*.png', 'original-ui/MMap/*.png', 'original-ui/StateItem/*.png',
+                'original-ui/MagIcon/*.png', 'original-ui/MagIcon2/*.png'
     }
     into sharedUiOutput
 }
@@ -322,8 +346,8 @@ android {
         applicationId 'com.mir2.web3'
         minSdk 31
         targetSdk 35
-        versionCode 8
-        versionName '0.1.5-skill-ingress'
+        versionCode 9
+        versionName '0.1.6-skill-icons'
         buildConfigField 'String', 'MIR2_GATEWAY_URL', groovy.json.JsonOutput.toJson(System.getenv('MIR2_GATEWAY_WS_URL') ?: '')
 
         ndk {

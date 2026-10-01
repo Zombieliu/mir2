@@ -84,6 +84,13 @@ still missing. Neither label is an online acceptance result.
 
 ## Implementation order
 
+The v8 missing skill images have a bounded package-source repair: both original
+224-frame magic-icon libraries are required and staged, from a new pixel-checked
+diagnostic pack. Unique index/path/coverage checks close the reproduced count-only
+P2; seven real Gradle controls pass with unchanged source bytes.
+Preview237/Java32+32 and negative old-pack rejection pass; exact
+v9 APK/runtime are pending. [Source/resource evidence](generated/player-qa/native-android-skill-icons-20261001/README.md).
+
 Bounded G1 source/package/emulator gates and NI-07 source regressions are recorded.
 Bind NI-07 to a new diagnostic APK; v7 does not contain this implementation.
 Continue the G2 real login/list/StartGame gate when the user has

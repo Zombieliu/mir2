@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 Android skill-icon package-source closure: both original224-frame
+> libraries are required/staged from a new pixel-checked pack; old files/inputs
+> remain unchanged. Reproduced repeated-frame P2 is fixed; seven real Gradle
+> uniqueness/coverage/path controls and Preview237/Java32+32/old-pack rejection pass. Exact v9
+> runtime remains a separate next gate, with no whole-game/device acceptance.
+> [Evidence](generated/player-qa/native-android-skill-icons-20261001/README.md).
+
 > 2026-10-01 Android source8eb1a7d34 is bound to v8 diagnostic APKs, hashes and
 > API31 install/actual shared skill-row evidence. Missing magic-icon assets and
 > repeated retries remain an explicit imagery FAIL; no live/device acceptance

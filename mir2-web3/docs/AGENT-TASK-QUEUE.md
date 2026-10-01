@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-10-01 NI-07 icon closure source: existing approved MagIcon/MagIcon2 raw
+> libraries export448 pixel-matched frames to a new local pack; prior12789 files
+> and v8 failure stay intact. Android now requires/stages both libraries; the old
+> incomplete pack fails before packaging. Review's repeated-frame P2 is reproduced
+> and fixed with unique0..223/index-path checks; real Gradle controls7/7 pass,
+> preserving source bytes. Preview237/Java32+32 pass; exact v9
+> package/runtime is next, with online/full UI/device gates still open.
+> [Evidence](generated/player-qa/native-android-skill-icons-20261001/README.md).
+
 > 2026-10-01 NI-07 v8 package follow-up: exact clean source8eb1a7d34 produces
 > both version8 diagnostic APKs with verified hashes and API31 installation.
 > Offline adapter-to-shared SPELLS shows FireBall/F1, but MagIcon/54 is missing

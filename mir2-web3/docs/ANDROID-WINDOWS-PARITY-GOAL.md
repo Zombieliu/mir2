@@ -9,6 +9,11 @@ Java32+32/API31 通过。精确源码8eb1a7d34的v8包已构建/安装，离线S
 FireBall/F1，但技能图标缺失并重复加载，图像验收FAIL；v7不包含这次源码。
 真实在线、完整UI/资源和真机都未通过。[证据](generated/player-qa/native-android-skill-ingress-20261001/README.md)。
 
+随后补齐技能图标打包门：新本地包的448帧像素校验通过，旧12,789文件不变；
+不完整v8输入会被打包检查拒绝；复现并修复重复帧可过门的P2，唯一编号/完整
+覆盖/路径校验的真实Gradle正反例7/7通过，源资源不变。preview237/Java32+32通过，v9精确包和实际
+画面仍待验证。[资源修补](generated/player-qa/native-android-skill-icons-20261001/README.md)。
+
 本轮用户要求把 Android 完整度对齐当前 Windows，而不再把登录小切片或
 离线 UI 展示当作终点。目标是原生 Bevy/GameActivity Android；Capacitor
 或远程旧 Web 页面不替代本 goal 的交付。

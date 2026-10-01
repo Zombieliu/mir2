@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 Android-only icon package repair requires/stages the original
+>224-frame MagIcon and MagIcon2 libraries. A new diagnostic pack preserves all
+>prior files and matches448 source pixel hashes; the old input is now rejected.
+>Unique0..223/index-path checks fix the reproduced repeated-frame P2; seven real
+>Gradle controls pass without changing approved assets. Offline Skills uses the
+>existing shared SPELLS entry. Preview237/Java32+32
+>pass; actual v9 APK/image repair and complete phone UI remain unverified.
+> [Evidence](generated/player-qa/native-android-skill-icons-20261001/README.md).
+
 > 2026-10-01 NI-07 actual v8 emulator: clean source8eb1a7d34 builds/installs both
 > diagnostic APKs. Shared SPELLS displays the adapter's Offline FireBall/F1 row,
 > but absent MagIcon/54 produces repeated asset failures. This is bounded model
