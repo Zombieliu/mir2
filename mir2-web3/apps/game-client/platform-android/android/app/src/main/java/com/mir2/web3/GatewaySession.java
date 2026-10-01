@@ -83,6 +83,7 @@ final class GatewaySession implements AutoCloseable {
     private Integer x, y;
     private boolean startAccepted;
     private boolean hasOwnerSnapshot;
+    private long ownerObjectId;
     private String pendingSnapshot;
     private AccountOperation accountOperation = AccountOperation.NONE;
     private Integer pendingDeleteIndex;
@@ -244,18 +245,18 @@ final class GatewaySession implements AutoCloseable {
             JSONArray entities = world.getJSONArray("entities");
             if (entities.length() > 8192) throw new IllegalArgumentException("entity limit");
             // Match the server's self entity and object ID, never the first visible actor.
-            long owner = world.getLong("playerObjectId");
-            if (owner <= 0 || owner > 0xFFFFFFFFL) throw new IllegalArgumentException("owner ID");
+            long owner = objectId(world, "playerObjectId");
             for (int i = 0; i < entities.length(); i++) {
                 JSONObject entity = entities.getJSONObject(i);
                 if ("selfPlayer".equals(entity.optString("kind"))
-                        && owner == entity.getLong("objectId")) {
+                        && owner == objectId(entity, "objectId")) {
                     player = bounded(entity.getString("name"));
                     map = bounded(world.getString("mapFileName"));
                     readPosition(entity);
                     // Keep the complete immutable server payload until StartGame is accepted.
                     pendingSnapshot = world.toString();
                     hasOwnerSnapshot = true;
+                    ownerObjectId = owner;
                     publishWorld();
                     return;
                 }
@@ -266,7 +267,8 @@ final class GatewaySession implements AutoCloseable {
         String packet = envelope.getString("packet");
         boolean forwardEntity = phase == Phase.IN_GAME && isEntityGameplayPacket(packet);
         boolean forwardPersonal = personalGameplayPhase()
-                && (isPersonalSkillPacket(packet) || isInventoryOperationPacket(packet));
+                && (isPersonalSkillPacket(packet) || isInventoryOperationPacket(packet)
+                        || isPersonalPlayerPacket(packet));
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -360,7 +362,9 @@ final class GatewaySession implements AutoCloseable {
                 publishWorld();
                 break;
             case "UserInformation":
-                if (!worldPending()) return;
+                // Reject other actors before changing Java's published coordinates;
+                // a later Rust rejection cannot undo an already published View.
+                if (!worldPending() || !isOwnerInformation(payload)) return;
                 pendingSnapshot = null;
                 player = bounded(payload.getString("name"));
                 JSONObject location = payload.optJSONObject("location");
@@ -424,6 +428,13 @@ final class GatewaySession implements AutoCloseable {
                 || packet.equals("MergeItem") || packet.equals("SplitItem1")
                 || packet.equals("SellItem") || packet.equals("EquipItem")
                 || packet.equals("RemoveItem");
+    }
+
+    private static boolean isPersonalPlayerPacket(String packet) {
+        // Public received deltas only. Owner/bootstrap authentication is unchanged;
+        // Rust refuses a delta without this character's authoritative wallet base.
+        return packet.equals("GainedGold") || packet.equals("LoseGold")
+                || packet.equals("GainedCredit") || packet.equals("LoseCredit");
     }
 
     private static boolean isEntityGameplayPacket(String packet) {
@@ -491,6 +502,20 @@ final class GatewaySession implements AutoCloseable {
     private void resetWorld() {
         player = map = ""; x = y = null; startAccepted = false; pendingSnapshot = null;
         hasOwnerSnapshot = false;
+        ownerObjectId = 0;
+    }
+    private boolean isOwnerInformation(JSONObject payload) {
+        if (payload.has("hero") && !Boolean.FALSE.equals(payload.opt("hero"))) return false;
+        // The legacy position bootstrap can precede the complete owner snapshot.
+        // It cannot authorize personal gameplay packets: that still requires
+        // hasOwnerSnapshot, which only a validated worldSnapshot can establish.
+        if (!hasOwnerSnapshot) return true;
+        Object rawId = payload.opt("objectId");
+        // JSON integer tokens are Integer/Long on Android. Floating-point or
+        // decimal tokens can round a fractional ID to an existing owner.
+        if (!(rawId instanceof Integer) && !(rawId instanceof Long)) return false;
+        return ((Number) rawId).longValue() == ownerObjectId
+                && player.equals(payload.opt("name"));
     }
     private void resetAccountOperation() {
         accountOperation = AccountOperation.NONE;
@@ -567,6 +592,18 @@ final class GatewaySession implements AutoCloseable {
             throw new IllegalArgumentException("integer required");
         }
         return ((Number) raw).intValue();
+    }
+    private static long objectId(JSONObject value, String key) throws JSONException {
+        Object raw = value.get(key);
+        if (!(raw instanceof Integer) && !(raw instanceof Long)) {
+            throw new IllegalArgumentException("integer object ID required");
+        }
+        Number number = (Number) raw;
+        long id = number.longValue();
+        if (id <= 0 || id > 0xFFFFFFFFL) {
+            throw new IllegalArgumentException("owner ID");
+        }
+        return id;
     }
     static JSONObject object(Object... pairs) {
         JSONObject value = new JSONObject();

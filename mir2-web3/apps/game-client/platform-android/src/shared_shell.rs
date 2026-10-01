@@ -117,6 +117,7 @@ fn send(value: Value) {
 pub(crate) struct HostState {
     skills: crate::skill_ingress::AndroidSkillIngress,
     inventory: crate::inventory_ingress::AndroidInventoryIngress,
+    player: crate::player_ingress::AndroidPlayerIngress,
     phase: String,
     world: Option<HostWorldPosition>,
     pending_world_request: Option<u64>,
@@ -135,6 +136,17 @@ impl HostState {
     fn reset_personal(&mut self) {
         self.skills.reset();
         self.inventory.reset();
+        self.player.reset();
+    }
+
+    fn reset_gameplay(&mut self) {
+        self.reset_personal();
+        self.phase = "DISCONNECTED".into();
+        self.world = None;
+        self.pending_world_request = None;
+        self.pending_render_request = None;
+        self.render_load_active = false;
+        self.deferred_render_load = None;
     }
 
     fn flush_personal(&mut self) {
@@ -144,6 +156,19 @@ impl HostState {
             mir2_bevy_runtime::native_ingest::push_native_inventory_model,
             mir2_bevy_runtime::native_ingest::push_native_inventory_operation_ack,
         );
+        self.player.flush(
+            mir2_bevy_runtime::native_ingest::push_native_ui_read_model,
+            mir2_bevy_runtime::native_ingest::push_native_wallet_patch,
+        );
+    }
+
+    fn accept_player_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
+        if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
+            || !matches!(screen, Screen::StartingGame | Screen::InGame)
+        {
+            return Ok(false);
+        }
+        self.player.packet(raw)
     }
 
     fn accept_inventory_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
@@ -316,13 +341,7 @@ fn fail_current_render_load(
     if host.pending_render_request != Some(request_id) {
         return false;
     }
-    host.reset_personal();
-    host.world = None;
-    host.pending_world_request = None;
-    host.pending_render_request = None;
-    host.render_load_active = false;
-    host.deferred_render_load = None;
-    host.phase = "DISCONNECTED".into();
+    host.reset_gameplay();
     model.apply_gateway_event(Event::Disconnect {
         reason: Some(format!(
             "World assets could not be loaded: {message}; reconnect"
@@ -1309,8 +1328,26 @@ fn receive(
                 if let Some(raw) = value["envelope"].as_str() {
                     if host.accept_skill_packet(model.screen, raw).is_err()
                         || host.accept_inventory_packet(model.screen, raw).is_err()
+                        || host.accept_player_packet(model.screen, raw).is_err()
                     {
-                        host.reset_personal();
+                        host.reset_gameplay();
+                        #[cfg(target_os = "android")]
+                        crate::world_assets::cancel_packaged_map_atlas_load();
+                        if let Some(effects) = scene_effects.as_deref_mut() {
+                            effects.clear();
+                        }
+                        if let Some(overlays) = actor_overlays.as_deref_mut() {
+                            overlays.reset();
+                        }
+                        if let Some(labels) = ground_labels.as_deref_mut() {
+                            labels.reset();
+                        }
+                        if let Some(pickups) = ground_pickups.as_deref_mut() {
+                            pickups.reset();
+                        }
+                        if let Some(effects) = effects.as_deref_mut() {
+                            discard_player_commands(effects);
+                        }
                         mir2_bevy_runtime::native_ingest::push_native_data_reset();
                         model.apply_gateway_event(Event::Disconnect {
                             reason: Some("Invalid or overflowing personal data; reconnect".into()),
@@ -1324,10 +1361,10 @@ fn receive(
                 }
             }
             #[cfg(target_os = "android")]
-            if let Some(raw) = value["envelope"]
-                .as_str()
-                .filter(|_| host.phase == "IN_GAME")
-            {
+            if let Some(raw) = value["envelope"].as_str().filter(|_| {
+                host.phase == "IN_GAME"
+                    && matches!(model.screen, Screen::StartingGame | Screen::InGame)
+            }) {
                 let now_ms = time
                     .as_deref()
                     .map(|time| u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX))
@@ -1341,8 +1378,8 @@ fn receive(
                         == crate::scene_effects::EffectPacketOutcome::Rejected
                 });
                 if effect_rejected {
-                    host.reset_personal();
-                    crate::live_entity::clear_with_presentation_reset();
+                    host.reset_gameplay();
+                    crate::world_assets::cancel_packaged_map_atlas_load();
                     if let Some(effects) = scene_effects.as_deref_mut() {
                         effects.clear();
                     }
@@ -1415,8 +1452,8 @@ fn receive(
                     }
                     crate::live_entity::LiveEntityPacketOutcome::Ignored => {}
                     crate::live_entity::LiveEntityPacketOutcome::Rejected => {
-                        host.reset_personal();
-                        crate::live_entity::clear_with_presentation_reset();
+                        host.reset_gameplay();
+                        crate::world_assets::cancel_packaged_map_atlas_load();
                         if let Some(effects) = scene_effects.as_deref_mut() {
                             effects.clear();
                         }
@@ -1579,6 +1616,14 @@ fn receive(
             continue;
         }
         let phase = value["phase"].as_str().unwrap_or("");
+        // A stale Java world publication drained after a terminal decode error
+        // must not reopen the host or its entity gate. StartingGame remains a
+        // valid world phase while waiting for the exact NativeRenderReady.
+        if matches!(phase, "STARTING" | "IN_GAME")
+            && !matches!(model.screen, Screen::StartingGame | Screen::InGame)
+        {
+            continue;
+        }
         // Typed server data must not be recovered by parsing UI message text.
         // Reset on any non-world phase, including a map transition or reconnect.
         let next_world = host_world_position(&value, model.screen);
@@ -1611,6 +1656,7 @@ fn receive(
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
         } else if map_changed || (phase == "STARTING" && host.phase == "IN_GAME") {
             host.skills.clear_scene();
+            host.player.clear_scene();
             begin_render_ready_scene_transition(&mut model);
             host.pending_world_request = None;
             host.pending_render_request = None;
@@ -1640,10 +1686,14 @@ fn receive(
                 world.x,
                 world.y,
             );
-            if projected.is_some()
-                && (host.skills.snapshot(raw).is_err() || host.inventory.snapshot(raw).is_err())
-            {
-                projected = None;
+            if let Some(projection) = projected.as_mut() {
+                if host.skills.snapshot(raw).is_err() || host.inventory.snapshot(raw).is_err() {
+                    projected = None;
+                } else if let Ok(ui) = host.player.snapshot(raw) {
+                    projection.ui = ui;
+                } else {
+                    projected = None;
+                }
             }
             let mut projected_scene = None;
             let queued = projected.is_some_and(|projection| {
@@ -1696,7 +1746,7 @@ fn receive(
                 queued
             });
             if !queued {
-                host.reset_personal();
+                host.reset_gameplay();
                 #[cfg(target_os = "android")]
                 crate::world_assets::cancel_packaged_map_atlas_load();
                 if let Some(overlays) = actor_overlays.as_deref_mut() {
@@ -1712,12 +1762,6 @@ fn receive(
                     pickups.reset();
                 }
                 mir2_bevy_runtime::native_ingest::push_native_data_reset();
-                host.world = None;
-                host.pending_world_request = None;
-                host.pending_render_request = None;
-                host.render_load_active = false;
-                host.deferred_render_load = None;
-                host.phase = "DISCONNECTED".into();
                 model.apply_gateway_event(Event::Disconnect {
                     reason: Some("World snapshot rejected; reconnect".into()),
                 });
@@ -2689,6 +2733,130 @@ mod tests {
             Some(WorldApplyOutcome::DecodeRejected)
         );
         assert_eq!(super::matching_world_receipt(Some(43), &rejected), None);
+    }
+
+    #[test]
+    fn player_packets_require_host_game_phase_and_reset_on_render_failure() {
+        let mut host = HostState {
+            phase: "IN_GAME".into(),
+            ..default()
+        };
+        host.player
+            .snapshot(
+                &json!({"playerObjectId":42,"gold":100,
+            "entities":[{"objectId":42,"kind":"selfPlayer","name":"Fixture"}]})
+                .to_string(),
+            )
+            .unwrap();
+        let packet =
+            json!({"type":"packet","packet":"LoseGold","payload":{"objectId":42,"gold":1}})
+                .to_string();
+        for screen in [
+            Screen::Login,
+            Screen::OpeningLogin,
+            Screen::CharacterSelect,
+            Screen::ConnectionLost,
+        ] {
+            assert!(!host.accept_player_packet(screen, &packet).unwrap());
+        }
+        for phase in ["READY", "CHARACTERS", "DISCONNECTED"] {
+            host.phase = phase.into();
+            assert!(!host.accept_player_packet(Screen::InGame, &packet).unwrap());
+        }
+        host.phase = "STARTING".into();
+        host.player.clear_scene();
+        assert!(host
+            .accept_player_packet(Screen::StartingGame, &packet)
+            .unwrap());
+        host.pending_render_request = Some(7);
+        let mut model = NativeShellModel {
+            screen: Screen::StartingGame,
+            ..default()
+        };
+        assert!(fail_current_render_load(
+            &mut host,
+            &mut model,
+            7,
+            "fixture render failure"
+        ));
+        host.phase = "IN_GAME".into();
+        assert!(!host.accept_player_packet(Screen::InGame, &packet).unwrap());
+    }
+
+    #[test]
+    fn rejected_personal_batch_revokes_host_and_ignores_stale_world_publication() {
+        for stale_view in [false, true] {
+            INBOX.lock().unwrap().clear();
+            OUTBOX.lock().unwrap().clear();
+            let mut app = App::new();
+            #[cfg(feature = "ui-preview")]
+            app.init_resource::<crate::ui_preview::PreviewRequest>();
+            let mut host = HostState {
+                phase: "IN_GAME".into(),
+                world: Some(HostWorldPosition {
+                    player_name: "Fixture".into(),
+                    map_file_name: "0".into(),
+                    x: 302,
+                    y: 634,
+                }),
+                pending_world_request: Some(7),
+                pending_render_request: Some(7),
+                render_load_active: true,
+                ..default()
+            };
+            host.player
+                .snapshot(
+                    &json!({"playerObjectId":42,"gold":100,
+                "entities":[{"objectId":42,"kind":"selfPlayer","name":"Fixture"}]})
+                    .to_string(),
+                )
+                .unwrap();
+            app.insert_resource(NativeShellModel {
+                screen: Screen::InGame,
+                ..default()
+            })
+            .insert_resource(host)
+            .init_resource::<NativeUiIntentQueue>()
+            .add_systems(Update, receive);
+            let mut inbox = INBOX.lock().unwrap();
+            inbox.push_back(json!({"type":"gatewayGameplayPacket","envelope":
+                json!({"type":"packet","packet":"GainedGold","payload":{"amount":-1}}).to_string()}));
+            if stale_view {
+                inbox.push_back(json!({"phase":"IN_GAME","world":{
+                    "playerName":"Fixture","mapFileName":"0","x":302,"y":634}}));
+            }
+            inbox.push_back(json!({"type":"gatewayGameplayPacket","envelope":
+                json!({"type":"packet","packet":"ObjectWalk","payload":{"objectId":43,"direction":"Right"}}).to_string()}));
+            drop(inbox);
+            app.update();
+            assert_eq!(
+                app.world().resource::<NativeShellModel>().screen,
+                Screen::ConnectionLost
+            );
+            let mut host = app.world_mut().resource_mut::<HostState>();
+            assert_eq!(host.phase, "DISCONNECTED", "stale_view={stale_view}");
+            assert!(host.world.is_none());
+            assert!(host.pending_world_request.is_none());
+            assert!(host.pending_render_request.is_none());
+            assert!(host.deferred_render_load.is_none());
+            assert!(!host.render_load_active);
+            let (mut ui, mut wallet) = (0, 0);
+            assert!(host.player.flush(
+                |_| {
+                    ui += 1;
+                    true
+                },
+                |_| {
+                    wallet += 1;
+                    true
+                }
+            ));
+            assert_eq!((ui, wallet), (0, 0));
+            let command: Value =
+                serde_json::from_str(&OUTBOX.lock().unwrap().pop_front().unwrap()).unwrap();
+            assert_eq!(command["type"], "disconnect");
+            assert!(OUTBOX.lock().unwrap().is_empty());
+        }
     }
 
     #[test]

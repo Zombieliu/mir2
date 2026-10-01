@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-10-01 Android NI-02/08 source: same frozen-Windows player/wallet cursor,
+> exact weights/provenance and public deltas, owner/character/phase guards and
+> latest-absolute queue retry. Reproduced foreign/fractional-ID and post-rejection
+> host bugs fixed. Android257/preview270/shared1203+8ignored/Java36+36/scoped Mac6/
+> both actual API31 variants pass; bounded final source review clear. v12 remains
+> unbuilt here. Next clean APK and actual shared stat values, then NI-09/10/11 and
+> remaining whole goal; no authenticated/device/full-parity pass.
+> [Source and retained failures](generated/player-qa/native-android-player-ingress-20261001/README.md).
+
 > 2026-10-01 Android G4 exact v11: clean6fe6a17ac builds both installed diagnostics;
 > hashes/6643 PNGs/two metadata byte matches each. Actual BAG/CHAR clear HUD/thumbs,
 > six belt targets visible, character pages/close and BAG Quest/return/close respond.

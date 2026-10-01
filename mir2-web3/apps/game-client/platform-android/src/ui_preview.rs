@@ -828,9 +828,9 @@ fn offline_skill_ingress_model() -> Result<String, &'static str> {
     model.ok_or("Offline skill model missing")
 }
 
-/// The production personal inventory adapter, with server-shaped offline data.
-/// Android resolves geometry from the packaged originals; no live item custody.
-fn offline_inventory_ingress_model() -> Result<String, &'static str> {
+/// One server-shaped personal specimen for both inventory and player adapters.
+/// These diagnostic values are not an account, item custody or gameplay result.
+fn offline_personal_snapshot() -> String {
     use serde_json::json;
     let items: Vec<_> = (0..12)
         .map(|slot| {
@@ -839,15 +839,60 @@ fn offline_inventory_ingress_model() -> Result<String, &'static str> {
             "description":"Offline visual specimen. Not a server-owned item."})
         })
         .collect();
-    let raw = json!({"playerObjectId":42,
-        "entities":[{"objectId":42,"kind":"selfPlayer","name":"OFFLINE INVENTORY FIXTURE"}],
-        "gold":12345,"inventoryCapacity":46,"inventoryItems":items,
+    let stats: Vec<_> = [
+        (0, 2),
+        (1, 7),
+        (2, 1),
+        (3, 4),
+        (4, 12),
+        (5, 24),
+        (6, 3),
+        (7, 8),
+        (8, 1),
+        (9, 5),
+        (10, 4),
+        (11, 2),
+        (12, 200),
+        (13, 100),
+        (14, 7),
+        (15, 3),
+        (16, 100),
+        (17, 25),
+        (18, 50),
+        (21, 1),
+        (22, 2),
+        (23, 3),
+        (30, 1),
+        (31, 2),
+        (32, 3),
+        (33, 4),
+        (34, 5),
+        (35, 10),
+        (36, 2),
+    ]
+    .into_iter()
+    .map(|(stat, value)| json!({"stat":stat,"value":value}))
+    .collect();
+    json!({"playerObjectId":42,"mapFileName":"0","mapTitle":"OFFLINE Bichon fixture",
+        "entities":[{"objectId":42,"kind":"selfPlayer","name":"OFFLINE UI FIXTURE",
+            "x":300,"y":630,"direction":"Down","class":"Warrior","gender":"Male",
+            "level":22,"hair":0,"wingEffect":0}],
+        "playerHp":160,"playerMaxHp":200,"playerMp":60,"playerMaxMp":100,
+        "playerExperience":125,"playerMaxExperience":1000,"playerCrystalStats":stats,
+        "currentWeight":66,"maxWeight":100,"playerWeights":{"bag":66,"wear":25,"hand":9},
+        "gold":12345,"credit":500,"inventoryCapacity":46,"inventoryItems":items,
         "equipmentItems":[
             {"uniqueId":9100,"key":"ui-equipped-0","name":"Offline source frame30",
              "quantity":1,"slot":"Weapon","icon":100,"stateImage":30},
             {"uniqueId":9101,"key":"ui-equipped-1","name":"Offline equipment slot1",
              "quantity":1,"slot":"Armour","icon":101}]})
-    .to_string();
+    .to_string()
+}
+
+/// The production personal inventory adapter, with server-shaped offline data.
+/// Android resolves geometry from the packaged originals; no live item custody.
+fn offline_inventory_ingress_model() -> Result<String, &'static str> {
+    let raw = offline_personal_snapshot();
     let mut ingress = crate::inventory_ingress::AndroidInventoryIngress::default();
     ingress.snapshot(&raw)?;
     let mut model = None;
@@ -859,6 +904,48 @@ fn offline_inventory_ingress_model() -> Result<String, &'static str> {
         |_| true,
     );
     model.ok_or("Offline inventory model missing")
+}
+
+/// Exercises the same validated snapshot and public received-packet projection
+/// as the native host. This feature-only specimen never connects to a Gateway.
+fn offline_player_ingress_model() -> Result<(String, String), &'static str> {
+    let raw = offline_personal_snapshot();
+    crate::world_projection::project(&raw, "0", "OFFLINE UI FIXTURE", 300, 630)
+        .ok_or("Invalid offline personal snapshot")?;
+    let mut ingress = crate::player_ingress::AndroidPlayerIngress::default();
+    ingress.snapshot(&raw)?;
+    for (packet, payload) in [
+        (
+            "UserInformation",
+            serde_json::json!({"objectId":42,"name":"OFFLINE UI FIXTURE","hp":80,"mp":20}),
+        ),
+        ("GainedGold", serde_json::json!({"amount":10})),
+        ("LoseGold", serde_json::json!({"amount":3})),
+        ("GainedCredit", serde_json::json!({"amount":5})),
+        ("LoseCredit", serde_json::json!({"amount":2})),
+    ] {
+        if !ingress.packet(
+            &serde_json::json!({"type":"packet","packet":packet,"payload":payload}).to_string(),
+        )? {
+            return Err("Offline player packet not accepted");
+        }
+    }
+    let mut ui = None;
+    let mut wallet = None;
+    ingress.flush(
+        |raw| {
+            ui = Some(raw);
+            true
+        },
+        |raw| {
+            wallet = Some(raw);
+            true
+        },
+    );
+    Ok((
+        ui.ok_or("Offline player UI missing")?,
+        wallet.ok_or("Offline player wallet missing")?,
+    ))
 }
 
 fn populate_specimens(world: &mut World, scene: &str) {
@@ -1064,6 +1151,29 @@ fn populate_specimens(world: &mut World, scene: &str) {
         })
         .collect();
     world.insert_resource(inventory);
+    if matches!(scene, "inventory" | "character") {
+        match offline_player_ingress_model().and_then(|(ui, wallet)| {
+            serde_json::from_str::<UiReadModel>(&ui)
+                .map(|model| (model, ui, wallet))
+                .map_err(|_| "Invalid offline player model")
+        }) {
+            Ok((model, _ui, _wallet)) => {
+                // The returned value is an absolute server-presentation value;
+                // do not compute another wallet or item rule in the UI specimen.
+                world.resource_mut::<InventoryModel>().gold = model.player.gold;
+                world.insert_resource(model);
+                #[cfg(target_os = "android")]
+                if mir2_bevy_runtime::native_ingest::push_native_ui_read_model(_ui)
+                    && mir2_bevy_runtime::native_ingest::push_native_wallet_patch(_wallet)
+                {
+                    info!("ANDROID_PLAYER_INGRESS_OFFLINE queued owner42 hp80 mp20 gold12352 credit503 weights66/25/9 xp12.5%; NOT LIVE GAMEPLAY");
+                } else {
+                    warn!("offline personal presentation queue unavailable");
+                }
+            }
+            Err(error) => warn!("offline personal source model unavailable: {error}"),
+        }
+    }
     world.insert_resource(StorageModel {
         items: storage_items,
         size: 80,
@@ -1214,6 +1324,57 @@ mod tests {
                 && item.quantity == slot as u32 + 1));
         // CPU tests have no APK AssetManager; never fabricate source geometry.
         assert_eq!(sword.state_image_width, 0);
+    }
+    #[test]
+    fn character_specimen_uses_validated_shared_stats_and_absolute_wallet() {
+        let (ui, wallet) = offline_player_ingress_model().unwrap();
+        let model: UiReadModel = serde_json::from_str(&ui).unwrap();
+        let player = &model.player;
+        assert_eq!(
+            (player.hp, player.max_hp, player.mp, player.max_mp),
+            (80, 200, 20, 100)
+        );
+        assert_eq!((player.gold, player.credit), (12352, 503));
+        assert_eq!(player.experience_percent_label(), "12.5%");
+        assert_eq!(player.available_weight(), 34);
+        assert!(player.current_weight_known);
+        let weights = player.weights.unwrap();
+        assert_eq!((weights.bag, weights.wear, weights.hand), (66, 25, 9));
+        let stats = player.crystal_stats.as_ref().unwrap();
+        assert_eq!(stats.len(), 29);
+        for (id, value) in [(12, 200), (13, 100), (16, 100), (18, 50), (17, 25)] {
+            assert_eq!(
+                stats.iter().find(|stat| stat.stat == id).unwrap().value,
+                value
+            );
+        }
+        assert_eq!(
+            serde_json::from_str::<serde_json::Value>(&wallet).unwrap(),
+            serde_json::json!({"gold":12352,"credit":503})
+        );
+    }
+    #[test]
+    fn player_specimen_is_confined_to_character_and_bag_preview_scenes() {
+        for scene in ["character", "inventory", "hud"] {
+            let mut world = World::new();
+            world.init_resource::<mir2_client_bevy::social::SocialModel>();
+            world.init_resource::<UiReadModel>();
+            populate_specimens(&mut world, scene);
+            let player = &world.resource::<UiReadModel>().player;
+            if scene == "hud" {
+                assert!(player.crystal_stats.is_none());
+                assert_eq!(player.gold, 0);
+            } else {
+                assert!(player.crystal_stats.is_some());
+                assert_eq!(player.gold, 12352);
+                assert_eq!(
+                    world
+                        .resource::<mir2_client_bevy::inventory::InventoryModel>()
+                        .gold,
+                    12352
+                );
+            }
+        }
     }
     #[test]
     fn locked_storage_scene_exposes_only_a_secure_local_draft() {

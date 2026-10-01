@@ -2,6 +2,14 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
+最新 NI-02/08 有界源码：复用冻结Windows的同一人物属性/钱包游标，接通
+已知权重/完整u32显示、部分快照保留及四类公开余额增量；Java前置owner/Hero/
+精确整数门与同批拒绝后的宿主终止门复现并修复。Android257/preview270/
+shared1203+8ignored/Java36+36/相关Mac源码6项/API31双feature通过，最终有界
+源码复核无P0/P1/P2阻断。v12仅设置、尚未构建或显示验收；下一步精确包/模拟器
+属性数值，再继续聊天/服务/整套动作。完整分母、在线与真机仍OPEN。
+[源码及失败保留](generated/player-qa/native-android-player-ingress-20261001/README.md)。
+
 当前 G4 有界实测：干净6fe6a17ac双包v11/hash/安装与6643 PNG、两份metadata逐字节
 核验；模拟器背包／人物窗不再遮 HUD/摇杆，四个人物页和关闭实际点击有响应，
 保留六个快捷格。Android249/preview260/shared1203+8ignored/API31两种源码门通过。
@@ -9,7 +17,7 @@
 服务/在线/真机仍OPEN。下一叶子接真实属性/余额到共享UI，完整Windows分母不变。
 [精确v11、原始截图与失败保留](generated/player-qa/native-android-phone-panels-20261001/README.md)。
 
-发布检查点：此前积压的 goal 源码/证据已正常推送至 Android 分支 e18eeadf0，
+发布检查点：v11及此前积压的 goal 源码/证据已正常推送至 Android 分支 fa12beedb，
 远端引用和 PR253 同 head 已核验；PR仍Open/Draft、base不变。不回推Windows，
 不上传APK/原素材/密钥，不合并或部署；APK源码仍是各自记录的精确提交。
 

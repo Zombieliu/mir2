@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 Android player/wallet source: shared Windows cursor supplies exact
+> weights/known-zero, stats, XP and public balance updates without mobile rules.
+> Owner/Hero/exact-number and same-batch termination guards pass bounded tests:
+> Android257/preview270/shared1203+8ignored/Java36+36/Mac source6/API31 variants.
+> Feature-only BAG/CHAR now have typed OFFLINE numeric specimens; v12 not built,
+> so actual values/whole UI are unaccepted. Services/chat/phone controls/IME,
+> startup performance, approved online and physical device remain open.
+> [Source](generated/player-qa/native-android-player-ingress-20261001/README.md).
+
 > 2026-10-01 Android G4 actual v11 repair: clean6fe6a17ac dual APK/hash/install,
 >6643 PNGs/two metadata byte matches each. BAG/CHAR no longer cover HUD/thumbs;
 > six belt targets visible, character tabs/close and BAG Quest/return/close respond.

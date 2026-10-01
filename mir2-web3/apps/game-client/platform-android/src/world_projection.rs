@@ -163,7 +163,12 @@ pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Optio
         }
     }
     // Deserialize through the actual shared HUD type, including integer ranges.
-    let stats: PlayerStats = serde_json::from_value(Value::Object(stats)).ok()?;
+    let _stats: PlayerStats = serde_json::from_value(Value::Object(stats)).ok()?;
+    // Keep strict scalar validation, then use the same pure Windows cursor for
+    // exact weights, known-zero provenance and appearance aliases.
+    let mut player_cursor =
+        mir2_client_bevy::native_player_ingress::NativeUiPlayerCursor::default();
+    player_cursor.observe_world_snapshot(&world);
     world["playerObjectId"] = json!(owner.to_string());
     world["selectedObjectId"] = match world.get("selectedObjectId") {
         None | Some(Value::Null) => Value::Null,
@@ -243,7 +248,7 @@ pub(crate) fn project(raw: &str, map: &str, name: &str, x: u32, y: u32) -> Optio
     Some(Projection {
         request_id,
         world: world.to_string(),
-        ui: json!({"player": stats}).to_string(),
+        ui: player_cursor.to_read_model_json().to_string(),
         map: serde_json::to_string(&map_model).ok()?,
         entities: entity_models.to_string(),
         scene,
@@ -312,6 +317,30 @@ mod tests {
         assert_eq!(entities.entities.len(), 2);
         assert_eq!(entities.entities[1].object_id, "43");
         assert_eq!((entities.entities[1].x, entities.entities[1].y), (301, 630));
+    }
+
+    #[test]
+    fn source_stats_and_weight_provenance_reach_the_shared_character_page() {
+        let mut source = snapshot();
+        source["currentWeight"] = json!(0);
+        source["playerWeights"] = json!({"bag":70000,"wear":25,"hand":9});
+        source["playerCrystalStats"] = json!([{"stat":12,"value":50},{"stat":16,"value":80}]);
+        let projected = project(&source.to_string(), "0", "Fixture", 300, 630).unwrap();
+        let ui: mir2_client_bevy::read_model::UiReadModel =
+            serde_json::from_str(&projected.ui).unwrap();
+        assert!(
+            ui.player.current_weight_known,
+            "an explicit zero is authoritative"
+        );
+        assert_eq!(ui.player.weights.unwrap().bag, 70000);
+        assert_eq!(ui.player.crystal_stats.unwrap()[0].value, 50);
+        source.as_object_mut().unwrap().remove("currentWeight");
+        source["playerWeights"] = json!({"bag":1});
+        let projected = project(&source.to_string(), "0", "Fixture", 300, 630).unwrap();
+        let ui: mir2_client_bevy::read_model::UiReadModel =
+            serde_json::from_str(&projected.ui).unwrap();
+        assert!(!ui.player.current_weight_known);
+        assert!(ui.player.weights.is_none());
     }
 
     #[test]

@@ -377,6 +377,83 @@ public class GatewaySessionTest {
         assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
     }
 
+    @Test public void userInformationCannotMutatePublishedWorldBeforeOwnerValidation() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        GatewaySession.View original = phase(GatewaySession.Phase.IN_GAME);
+        views.clear(); gameplayPackets.clear();
+        for (JSONObject payload : new JSONObject[]{
+                GatewaySession.object("objectId",43,"name","Other","x",1,"y",2),
+                GatewaySession.object("objectId",42,"hero",true,"name","Fixture","x",1,"y",2),
+                GatewaySession.object("objectId",42,"hero",JSONObject.NULL,"name","Fixture","x",1,"y",2),
+                GatewaySession.object("objectId","42","name","Fixture","x",1,"y",2),
+                GatewaySession.object("objectId",JSONObject.NULL,"name","Fixture","x",1,"y",2),
+                GatewaySession.object("name","Fixture","x",1,"y",2),
+                GatewaySession.object("objectId",42.5,"name","Fixture","x",1,"y",2),
+                GatewaySession.object("objectId",new java.math.BigDecimal("42.000000000000000001"),"name","Fixture","x",1,"y",2),
+                GatewaySession.object("objectId",42,"name","Next character","x",1,"y",2)}) {
+            peer.send(GatewaySession.object("type","packet","packet","UserInformation","payload",payload).toString());
+            assertNull("Invalid owner must not publish a new world: " + payload, views.poll(200,TimeUnit.MILLISECONDS));
+            assertNull("Invalid owner must not reach JNI", gameplayPackets.poll(100,TimeUnit.MILLISECONDS));
+        }
+        assertEquals("Fixture", original.world.playerName);
+        assertEquals(302, original.world.x);
+        peer.send(GatewaySession.object("type","packet","packet","UserInformation","payload",
+                GatewaySession.object("objectId",42,"name","Fixture","x",303,"y",634,"hp",80)).toString());
+        assertEquals(303, phase(GatewaySession.Phase.IN_GAME).world.x);
+        assertEquals(80, new JSONObject(gameplayPackets.poll(3,TimeUnit.SECONDS)).getJSONObject("payload").getInt("hp"));
+    }
+
+    @Test public void playerWalletPacketsRequireOwnerBootstrapAndSurviveMapLoading() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        JSONObject delta = GatewaySession.object("gold", 23, "objectId", 42);
+        peer.send(GatewaySession.object("type", "packet", "packet", "GainedGold", "payload", delta).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(GatewaySession.object("type", "packet", "packet", "GainedGold", "payload", delta).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        assertNotNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        for (String packet : new String[]{"GainedGold", "LoseGold", "GainedCredit", "LoseCredit"}) {
+            JSONObject payload = GatewaySession.object("objectId", 42, "amount", 23);
+            peer.send(GatewaySession.object("type", "packet", "packet", packet, "payload", payload).toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Missing wallet packet " + packet, raw);
+            JSONObject forwarded = new JSONObject(raw);
+            assertEquals(packet, forwarded.getString("packet"));
+            assertEquals(23, forwarded.getJSONObject("payload").getInt("amount"));
+        }
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        assertNull(phase(GatewaySession.Phase.STARTING).worldSnapshot);
+        peer.send(GatewaySession.object("type", "packet", "packet", "LoseGold", "payload", delta).toString());
+        assertEquals("LoseGold", new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).getString("packet"));
+        peer.send("{\"type\":\"packet\",\"packet\":\"qa.giveItem\",\"payload\":{}}");
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.disconnect("Wallet fixture end"); phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void integerOwnerIdSupportsFullUnsignedRangeAcrossMapLoading() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":4294967295,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":4294967295,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        assertNotNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(GatewaySession.object("type","packet","packet","UserInformation","payload",
+                GatewaySession.object("objectId",4294967295L,"name","Fixture","x",303,"y",634,"hp",80)).toString());
+        GatewaySession.View view = phase(GatewaySession.Phase.IN_GAME);
+        assertEquals("1",view.world.mapFileName);
+        assertEquals(303,view.world.x);
+        assertEquals(4294967295L,new JSONObject(gameplayPackets.poll(3,TimeUnit.SECONDS))
+                .getJSONObject("payload").getLong("objectId"));
+    }
+
     @Test public void personalSkillPacketsForwardOnlyInsideAuthenticatedGameAndPreservePayload() throws Exception {
         connect();
         JSONObject cast = GatewaySession.object("type", "packet", "packet", "Magic",

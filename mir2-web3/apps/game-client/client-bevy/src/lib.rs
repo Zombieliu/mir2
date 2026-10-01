@@ -42,6 +42,8 @@ pub mod native_i18n;
 pub mod native_display;
 #[cfg(feature = "native-player-ui")]
 pub mod native_inventory_ingress;
+#[cfg(feature = "native-player-ui")]
+pub mod native_player_ingress;
 #[cfg(feature = "native-shell-ui")]
 pub mod native_shell;
 #[cfg(feature = "native-shell-ui")]

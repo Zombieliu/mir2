@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 Android NI-02/08 source leaf: exact shared Windows player/wallet
+> extraction, bounded owner ingress, weights/partial snapshots/public wallet
+> deltas and terminal same-batch cleanup. Java owner pollution and tiny-fraction
+> controls plus Rust stale-host failure reproduced/fixed. Android257/preview270/
+> shared1203+8ignored/Java36+36/Mac source6/API31 variants pass; review clear.
+> v12 is not yet built or visually accepted. Full mobile UI/services/resources,
+> real online and physical acceptance stay open; Windows denominator unchanged.
+> [Evidence](generated/player-qa/native-android-player-ingress-20261001/README.md).
+
 > 2026-10-01 Android G4 exact v11 from clean6fe6a17ac: both APK/hash/install and
 >6643 PNGs/two metadata byte matches each. Actual BAG/CHAR clear HUD/thumb lanes,
 > six belt targets and four character pages/close respond without Windows changes.
