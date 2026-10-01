@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-10-01 Android NI-07 source checkpoint: Windows/Android share one pure
+> skill cursor/projector; owner metadata/casts, exact ms and request ACK models
+> retain failure/character/map/backpressure boundaries. A reproduced Java/Rust
+> map-loading receipt loss is fixed without restoring old entities. Android227,
+> preview236, shared1196+8ignored, Java32+32 and API31 pass; read-only review has
+> no remaining P0/P1/P2. v8 packaging/offline rendering are next, not established
+> by v7 artifacts. Then NI-05/06 inventory and NI-10/11 services; online materials,
+> complete resources and device gates remain open. Goal remains Active.
+> [Evidence](generated/player-qa/native-android-skill-ingress-20261001/README.md).
+
 > 2026-10-01 Android G1 exact-package checkpoint: source10bf437f2 includes the
 > normal frozenWindows3f5e61533 merge; Android219/preview227/Java30+30 pass.
 > Both v7 native APKs install with exact versions/hashes. Actual expanded-menu

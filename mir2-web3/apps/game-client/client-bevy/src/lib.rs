@@ -45,6 +45,8 @@ pub mod native_shell;
 #[cfg(feature = "native-shell-ui")]
 pub mod native_shell_ui;
 #[cfg(feature = "native-player-ui")]
+pub mod native_skill_ingress;
+#[cfg(feature = "native-player-ui")]
 pub mod options_effects;
 pub mod pending_operations;
 #[cfg(feature = "native-shell-ui")]

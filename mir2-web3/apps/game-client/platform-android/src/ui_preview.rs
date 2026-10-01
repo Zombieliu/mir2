@@ -778,6 +778,45 @@ fn initialize_panel(state: &mut mir2_ui_core::state::UiState, panel: UiPanel) {
     }
 }
 
+/// Server-shaped offline data exercises the same personal skill projection as
+/// the network host. This is not an authenticated account or a learned skill.
+fn offline_skill_ingress_model() -> Result<String, &'static str> {
+    use serde_json::json;
+    let mut ingress = crate::skill_ingress::AndroidSkillIngress::default();
+    ingress.snapshot(
+        &json!({"tick":100,"playerObjectId":42,
+            "entities":[{"objectId":42,"kind":"selfPlayer","name":"OFFLINE SKILL FIXTURE"}],
+            "knownSkills":[{"id":1,"spell":"FireBall","castKind":"target","hotkey":1,
+                "delayMs":2200,"cooldownRemainingMs":300,"cooldownRemainingTicks":1,"mpCost":7}]
+        })
+        .to_string(),
+    )?;
+    ingress.packet(
+        &json!({"type":"packet","packet":"NewMagic","payload":{
+            "hero":false,"magic":{"spell":"FireBall","name":"Offline FireBall","icon":27}
+        }})
+        .to_string(),
+    )?;
+    ingress.packet(
+        &json!({"type":"packet","packet":"Magic","payload":{
+            "spell":"FireBall","cast":false
+        }})
+        .to_string(),
+    )?;
+    ingress.packet(
+        &json!({"type":"packet","packet":"MagicCast","payload":{
+            "spell":"FireBall"
+        }})
+        .to_string(),
+    )?;
+    let mut model = None;
+    ingress.flush(|raw| {
+        model = Some(raw);
+        true
+    });
+    model.ok_or("Offline skill model missing")
+}
+
 fn populate_specimens(world: &mut World, scene: &str) {
     use mir2_client_bevy::{
         big_map::{BigMapInfo, BigMapModel, BigMapNpc, BigMapPoint, BigMapWorldIcon},
@@ -802,6 +841,16 @@ fn populate_specimens(world: &mut World, scene: &str) {
             .collect(),
         ..default()
     });
+    if scene == "skills" {
+        match offline_skill_ingress_model()
+            .map(mir2_bevy_runtime::native_ingest::push_native_skill_model)
+        {
+            Ok(true) => {
+                info!("ANDROID_SKILL_INGRESS_OFFLINE queued owner42 FireBall castSequence1 remainingMs300");
+            }
+            _ => warn!("ANDROID_SKILL_INGRESS_OFFLINE rejected; not a live account"),
+        }
+    }
     world.insert_resource(QuestTracker {
         active_quests: vec![Quest {
             quest_index: 1,
@@ -1126,6 +1175,22 @@ mod tests {
         assert!(big_map.selected_teleport_intent().is_some());
         assert!(big_map.world.enabled);
     }
+    #[test]
+    fn skill_preview_uses_typed_owner_ingress_not_an_unbound_placeholder() {
+        let raw = offline_skill_ingress_model().unwrap();
+        let skills: mir2_client_bevy::skill_model::SkillModel = serde_json::from_str(&raw).unwrap();
+        assert_eq!(skills.authority.player_object_id, 42);
+        assert_ne!(skills.authority.session_epoch, 0);
+        assert_eq!(
+            skills.selection_for_shortcut(1).unwrap().spell.as_deref(),
+            Some("FireBall")
+        );
+        assert_eq!(skills.binding_for(1).cast_sequence, 1);
+        assert_eq!(skills.binding_for(1).cooldown_remaining_ms, Some(300));
+        assert_eq!(skills.binding_for(1).mp_cost, Some(7));
+        assert!(skills.skill_key_ack.is_none());
+    }
+
     #[test]
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();

@@ -1304,37 +1304,6 @@ struct PendingMailOperationFeedback {
 
 const MAX_PENDING_MAIL_FEEDBACK: usize = 1;
 
-const MAX_SKILL_PACKET_PATCHES: usize = MAX_LEARNED_SKILLS;
-
-#[derive(Debug, Clone, Default)]
-struct SkillPacketPatch {
-    identity: String,
-    base_snapshot_tick: u64,
-    /// Tick-less deltas may affect only one bounded snapshot serial. This
-    /// prevents an event without an ordering tick from living forever.
-    zero_tick_expires_at_snapshot_serial: Option<u64>,
-    delay_ms: Option<u32>,
-    level: Option<u8>,
-    experience: Option<u16>,
-    can_use: Option<bool>,
-    mp_cost: Option<u32>,
-}
-
-#[derive(Debug, Clone, Copy)]
-struct PlayerVitalsPatch {
-    base_snapshot_tick: u64,
-    zero_tick_expires_at_snapshot_serial: Option<u64>,
-    mp: Option<i32>,
-    max_mp: Option<i32>,
-}
-
-#[derive(Debug, Clone, Copy)]
-struct SkillRemovalPatch {
-    hotkey: u8,
-    base_snapshot_tick: u64,
-    zero_tick_expires_at_snapshot_serial: Option<u64>,
-}
-
 /// Packet-first cursor for personal skill/vital deltas. The gateway does not
 /// expose a server sequence on these browser events, so the last snapshot
 /// tick at packet arrival is used as a bounded stale-snapshot fence: snapshots
@@ -1347,39 +1316,18 @@ struct SkillPacketCursor {
     pending_hero_receipts: std::collections::VecDeque<String>,
     pending_receipt_model: Option<String>,
     pending_latest_model: Option<String>,
-    session_epoch: u64,
-    magic_icons: std::collections::HashMap<String, u8>,
-    magic_needs: std::collections::HashMap<String, [Option<u16>; 3]>,
-    magic_names: std::collections::HashMap<String, String>,
-    magic_casts: std::collections::HashMap<String, u64>,
-    next_magic_cast: u64,
-    snapshot_serial: u64,
-    patches: Vec<SkillPacketPatch>,
-    removals: Vec<SkillRemovalPatch>,
-    vitals: Option<PlayerVitalsPatch>,
-    player_object_id: Option<u32>,
+    core: mir2_client_bevy::native_skill_ingress::NativeSkillPacketCursor,
 }
 
 impl Default for SkillPacketCursor {
     fn default() -> Self {
-        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
         Self {
             hero: Default::default(),
             pending_hero_model: None,
             pending_hero_receipts: Default::default(),
             pending_receipt_model: None,
             pending_latest_model: None,
-            session_epoch: NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
-            snapshot_serial: 0,
-            magic_icons: Default::default(),
-            magic_needs: Default::default(),
-            magic_names: Default::default(),
-            magic_casts: Default::default(),
-            next_magic_cast: 0,
-            patches: vec![],
-            removals: vec![],
-            vitals: None,
-            player_object_id: None,
+            core: Default::default(),
         }
     }
 }
@@ -1391,7 +1339,7 @@ impl SkillPacketCursor {
         player: &NativeUiPlayerCursor,
     ) -> Result<(), String> {
         if self.hero.apply_packet(packet, payload) {
-            self.hero.session_epoch = self.session_epoch;
+            self.hero.session_epoch = self.core.authority().session_epoch;
             if let Some(info) = self.hero.info.as_ref() {
                 self.hero.inventory_view = hero_inventory_view(info, player);
                 self.hero.auto_pot_view = hero_auto_pot_view(info, player);
@@ -1471,439 +1419,19 @@ impl SkillPacketCursor {
     fn reset(&mut self) {
         *self = Self::default();
     }
-
     fn observe_snapshot(&mut self, payload: &mut Value) {
-        self.snapshot_serial = self.snapshot_serial.saturating_add(1);
-        self.player_object_id = value_u32(payload.get("playerObjectId"));
-        let snapshot_tick = world_payload_tick_from(Some(payload));
-        let snapshot_serial = self.snapshot_serial;
-        self.patches
-            .retain(|patch| Self::patch_is_active(patch, snapshot_tick, snapshot_serial));
-        self.removals
-            .retain(|patch| Self::removal_is_active(patch, snapshot_tick, snapshot_serial));
-        if self
-            .vitals
-            .is_some_and(|patch| !Self::vitals_is_active(&patch, snapshot_tick, snapshot_serial))
-        {
-            self.vitals = None;
-        }
-        self.apply_active_patches(payload, snapshot_tick);
-        // A tick-less patch is valid for the snapshot that is being observed,
-        // then retires even if future snapshots keep reporting tick=0.
-        self.patches
-            .retain(|patch| patch.zero_tick_expires_at_snapshot_serial != Some(snapshot_serial));
-        self.removals
-            .retain(|patch| patch.zero_tick_expires_at_snapshot_serial != Some(snapshot_serial));
-        if self.vitals.is_some_and(|patch| {
-            patch.zero_tick_expires_at_snapshot_serial == Some(snapshot_serial)
-        }) {
-            self.vitals = None;
-        }
+        self.core.observe_snapshot(payload);
     }
-
-    fn apply_active_patches(&self, payload: &mut Value, snapshot_tick: u64) {
-        payload["_nativeSkillAuthority"] = json!({"sessionEpoch":self.session_epoch,"snapshotSerial":self.snapshot_serial,"playerObjectId":self.player_object_id.unwrap_or(0)});
-        if let Some(skills) = skill_array_mut(payload) {
-            skills.truncate(MAX_LEARNED_SKILLS);
-
-            for skill in skills.iter_mut() {
-                if let Some(name) = skill
-                    .get("spell")
-                    .and_then(Value::as_str)
-                    .and_then(|spell| self.magic_names.get(&spell.to_ascii_lowercase()))
-                {
-                    skill["magicName"] = json!(name);
-                }
-
-                if let Some(sequence) = skill
-                    .get("spell")
-                    .and_then(Value::as_str)
-                    .and_then(|spell| self.magic_casts.get(&spell.to_ascii_lowercase()))
-                {
-                    skill["castSequence"] = json!(sequence);
-                }
-
-                if let Some(icon) = skill
-                    .get("spell")
-                    .and_then(Value::as_str)
-                    .and_then(|spell| self.magic_icons.get(&spell.to_ascii_lowercase()))
-                    .copied()
-                {
-                    skill["icon"] = json!(icon);
-                }
-                if let Some(needs) = skill
-                    .get("spell")
-                    .and_then(Value::as_str)
-                    .and_then(|spell| self.magic_needs.get(&spell.to_ascii_lowercase()))
-                {
-                    for (field, value) in ["need1", "need2", "need3"].into_iter().zip(needs) {
-                        if let Some(value) = value {
-                            skill[field] = json!(value);
-                        }
-                    }
-                }
-                if self.removals.iter().any(|removal| {
-                    skill_hotkey(skill) == Some(removal.hotkey)
-                        && Self::removal_is_active(removal, snapshot_tick, self.snapshot_serial)
-                }) {
-                    continue;
-                }
-                for patch in self.patches.iter().filter(|patch| {
-                    Self::patch_is_active(patch, snapshot_tick, self.snapshot_serial)
-                }) {
-                    if skill_matches_identity(skill, &patch.identity) {
-                        apply_skill_patch(skill, patch);
-                    }
-                }
-            }
-
-            skills.retain(|skill| {
-                !self.removals.iter().any(|removal| {
-                    skill_hotkey(skill) == Some(removal.hotkey)
-                        && Self::removal_is_active(removal, snapshot_tick, self.snapshot_serial)
-                })
-            });
-        }
-
-        if let Some(vitals) = self.vitals {
-            if Self::vitals_is_active(&vitals, snapshot_tick, self.snapshot_serial) {
-                if let Some(mp) = vitals.mp {
-                    payload["playerMp"] = json!(mp);
-                }
-                if let Some(max_mp) = vitals.max_mp {
-                    payload["playerMaxMp"] = json!(max_mp);
-                }
-            }
-        }
+    fn apply_active_patches(&self, payload: &mut Value, tick: u64) {
+        self.core.apply_active_patches(payload, tick);
     }
-
-    fn patch_is_active(patch: &SkillPacketPatch, snapshot_tick: u64, snapshot_serial: u64) -> bool {
-        patch
-            .zero_tick_expires_at_snapshot_serial
-            .map(|expires| snapshot_serial <= expires)
-            .unwrap_or(snapshot_tick == 0 || snapshot_tick <= patch.base_snapshot_tick)
+    fn apply_packet(&mut self, packet: &str, payload: &Value, tick: u64) -> bool {
+        self.core.apply_packet(packet, payload, tick)
     }
-
-    fn removal_is_active(
-        patch: &SkillRemovalPatch,
-        snapshot_tick: u64,
-        snapshot_serial: u64,
-    ) -> bool {
-        patch
-            .zero_tick_expires_at_snapshot_serial
-            .map(|expires| snapshot_serial <= expires)
-            .unwrap_or(snapshot_tick == 0 || snapshot_tick <= patch.base_snapshot_tick)
-    }
-
-    fn vitals_is_active(
-        patch: &PlayerVitalsPatch,
-        snapshot_tick: u64,
-        snapshot_serial: u64,
-    ) -> bool {
-        patch
-            .zero_tick_expires_at_snapshot_serial
-            .map(|expires| snapshot_serial <= expires)
-            .unwrap_or(snapshot_tick == 0 || snapshot_tick <= patch.base_snapshot_tick)
-    }
-
-    fn apply_packet(&mut self, packet: &str, payload: &Value, base_snapshot_tick: u64) -> bool {
-        match packet {
-            "NewMagic" => {
-                if payload.get("hero").and_then(Value::as_bool) != Some(false) {
-                    return false;
-                }
-                let Some(magic) = payload.get("magic") else {
-                    return false;
-                };
-                let Some(spell) = magic
-                    .get("spell")
-                    .and_then(Value::as_str)
-                    .filter(|v| !v.is_empty())
-                else {
-                    return false;
-                };
-                let known = self
-                    .magic_icons
-                    .keys()
-                    .chain(self.magic_names.keys())
-                    .chain(self.magic_needs.keys())
-                    .any(|key| key.eq_ignore_ascii_case(spell));
-                let distinct = self
-                    .magic_icons
-                    .keys()
-                    .chain(self.magic_names.keys())
-                    .chain(self.magic_needs.keys())
-                    .map(|key| key.to_ascii_lowercase())
-                    .collect::<std::collections::HashSet<_>>()
-                    .len();
-                if !known && distinct >= MAX_LEARNED_SKILLS {
-                    return false;
-                }
-                if let Some(name) = magic
-                    .get("name")
-                    .and_then(Value::as_str)
-                    .filter(|v| !v.is_empty())
-                {
-                    self.magic_names
-                        .insert(spell.to_ascii_lowercase(), name.to_owned());
-                }
-                if let Some(icon) = value_u32(magic.get("icon")).and_then(|v| u8::try_from(v).ok())
-                {
-                    self.magic_icons.insert(spell.to_ascii_lowercase(), icon);
-                }
-                self.magic_needs.insert(
-                    spell.to_ascii_lowercase(),
-                    ["need1", "need2", "need3"].map(|field| {
-                        value_u32(magic.get(field)).and_then(|v| u16::try_from(v).ok())
-                    }),
-                );
-                true
-            }
-
-            "UserInformation" => {
-                let Some(object_id) = value_u32(payload.get("objectId")) else {
-                    return false;
-                };
-                self.player_object_id = Some(object_id);
-                self.vitals = Some(PlayerVitalsPatch {
-                    base_snapshot_tick,
-                    zero_tick_expires_at_snapshot_serial: zero_tick_expiry_serial(
-                        self.snapshot_serial,
-                        base_snapshot_tick,
-                    ),
-                    mp: value_i32(payload.get("mp").or_else(|| payload.get("playerMp"))),
-                    max_mp: value_i32(payload.get("maxMp").or_else(|| payload.get("playerMaxMp"))),
-                });
-                if self
-                    .vitals
-                    .is_some_and(|patch| patch.mp.is_none() && patch.max_mp.is_none())
-                {
-                    self.vitals = None;
-                    return false;
-                }
-                true
-            }
-            "Magic" | "MagicCast" => self.observe_owner_cast(packet, payload),
-            "MagicDelay" => {
-                if !self.packet_targets_player(payload) {
-                    return false;
-                }
-                let Some(identity) = packet_spell_identity(payload) else {
-                    return false;
-                };
-                let Some(delay) = value_u32(payload.get("delay")) else {
-                    return false;
-                };
-                self.upsert_patch(identity, base_snapshot_tick, |patch| {
-                    patch.delay_ms = Some(delay);
-                    if let Some(mp_cost) =
-                        value_u32(payload.get("mpCost").or_else(|| payload.get("mp_cost")))
-                    {
-                        patch.mp_cost = Some(mp_cost);
-                    }
-                });
-                true
-            }
-            "MagicLeveled" => {
-                if !self.packet_targets_player(payload) {
-                    return false;
-                }
-                let Some(identity) = packet_spell_identity(payload) else {
-                    return false;
-                };
-                let Some(level) =
-                    value_u32(payload.get("level")).and_then(|value| u8::try_from(value).ok())
-                else {
-                    return false;
-                };
-                self.upsert_patch(identity, base_snapshot_tick, |patch| {
-                    patch.level = Some(level);
-                    patch.experience = value_u32(payload.get("experience"))
-                        .and_then(|value| u16::try_from(value).ok());
-                });
-                true
-            }
-            "SpellToggle" => {
-                if !self.packet_targets_player(payload) {
-                    return false;
-                }
-                let Some(identity) = packet_spell_identity(payload) else {
-                    return false;
-                };
-                let Some(can_use) = payload.get("canUse").and_then(Value::as_bool) else {
-                    return false;
-                };
-                self.upsert_patch(identity, base_snapshot_tick, |patch| {
-                    patch.can_use = Some(can_use);
-                });
-                true
-            }
-            "RemoveMagic" => {
-                let Some(hotkey) = value_u32(payload.get("placeId"))
-                    .and_then(|value| (1..=8).contains(&value).then_some(value as u8))
-                else {
-                    return false;
-                };
-                if self.removals.len() >= MAX_SKILL_PACKET_PATCHES {
-                    self.removals.remove(0);
-                }
-                self.removals.push(SkillRemovalPatch {
-                    hotkey,
-                    base_snapshot_tick,
-                    zero_tick_expires_at_snapshot_serial: zero_tick_expiry_serial(
-                        self.snapshot_serial,
-                        base_snapshot_tick,
-                    ),
-                });
-                true
-            }
-            _ => false,
-        }
-    }
-
-    fn observe_owner_cast(&mut self, packet: &str, payload: &Value) -> bool {
-        match packet {
-            "Magic" if payload.get("cast").and_then(Value::as_bool) == Some(true) => {}
-            "MagicCast"
-                if payload
-                    .get("cast")
-                    .is_none_or(|cast| cast.as_bool() == Some(true)) => {}
-            _ => return false,
-        }
-        let Some(player_id) = self.player_object_id.filter(|id| *id != 0) else {
-            return false;
-        };
-        // These are owner-only Crystal packets and normally omit objectId.
-        // Never let an explicit Hero/other actor identity override that owner.
-        if payload
-            .get("hero")
-            .is_some_and(|hero| hero.as_bool() != Some(false))
-            || payload
-                .get("objectId")
-                .is_some_and(|actor| value_u32(Some(actor)) != Some(player_id))
-        {
-            return false;
-        }
-        let Some(identity) = packet_spell_identity(payload) else {
-            return false;
-        };
-        if !self.magic_casts.contains_key(&identity) && self.magic_casts.len() >= MAX_LEARNED_SKILLS
-        {
-            return false;
-        }
-        self.next_magic_cast = self.next_magic_cast.saturating_add(1);
-        self.magic_casts.insert(identity, self.next_magic_cast);
-        true
-    }
-
-    fn packet_targets_player(&self, payload: &Value) -> bool {
-        // The authoritative SpellToggle packet always carries an object id.
-        // Treat a missing/malformed id as an invalid packet instead of letting
-        // it mutate the local player's skill state by default.
-        let Some(object_id) = value_u32(payload.get("objectId")) else {
-            return false;
-        };
-        object_id != 0
-            && self
-                .player_object_id
-                .map(|player_id| player_id != 0 && player_id == object_id)
-                .unwrap_or(false)
-    }
-
-    fn upsert_patch(
-        &mut self,
-        identity: String,
-        base_snapshot_tick: u64,
-        update: impl FnOnce(&mut SkillPacketPatch),
-    ) {
-        let zero_tick_expires_at_snapshot_serial =
-            zero_tick_expiry_serial(self.snapshot_serial, base_snapshot_tick);
-        if let Some(patch) = self
-            .patches
-            .iter_mut()
-            .find(|patch| patch.identity == identity)
-        {
-            patch.base_snapshot_tick = base_snapshot_tick;
-            patch.zero_tick_expires_at_snapshot_serial = zero_tick_expires_at_snapshot_serial;
-            update(patch);
-            return;
-        }
-        if self.patches.len() >= MAX_SKILL_PACKET_PATCHES {
-            self.patches.remove(0);
-        }
-        let mut patch = SkillPacketPatch {
-            identity,
-            base_snapshot_tick,
-            zero_tick_expires_at_snapshot_serial,
-            ..Default::default()
-        };
-        update(&mut patch);
-        self.patches.push(patch);
-    }
-}
-
-fn zero_tick_expiry_serial(snapshot_serial: u64, base_snapshot_tick: u64) -> Option<u64> {
-    (base_snapshot_tick == 0).then(|| snapshot_serial.saturating_add(1))
 }
 
 fn world_payload_tick_from(payload: Option<&Value>) -> u64 {
-    payload
-        .and_then(|payload| {
-            value_u64(payload.get("tick"))
-                .or_else(|| value_u64(payload.get("snapshotTick")))
-                .or_else(|| value_u64(payload.get("snapshot_tick")))
-        })
-        .unwrap_or(0)
-}
-
-fn skill_array_mut(payload: &mut Value) -> Option<&mut Vec<Value>> {
-    if payload.get("knownSkills").is_some() {
-        return payload.get_mut("knownSkills").and_then(Value::as_array_mut);
-    }
-    if payload.get("known_skills").is_some() {
-        return payload
-            .get_mut("known_skills")
-            .and_then(Value::as_array_mut);
-    }
-    payload.get_mut("skills").and_then(Value::as_array_mut)
-}
-
-fn packet_spell_identity(payload: &Value) -> Option<String> {
-    let spell = payload.get("spell").and_then(Value::as_str)?.trim();
-    (!spell.is_empty()).then(|| spell.to_ascii_lowercase())
-}
-
-fn skill_hotkey(skill: &Value) -> Option<u8> {
-    value_u32(skill.get("hotkey").or_else(|| skill.get("key")))
-        .and_then(|value| u8::try_from(value).ok())
-}
-
-fn skill_matches_identity(skill: &Value, identity: &str) -> bool {
-    // Packet spell ids may only patch a snapshot's authoritative spell field.
-    // Display names and local keys are not protocol identifiers.
-    skill
-        .get("spell")
-        .and_then(Value::as_str)
-        .map(|value| value.trim().eq_ignore_ascii_case(identity))
-        .unwrap_or(false)
-}
-
-fn apply_skill_patch(skill: &mut Value, patch: &SkillPacketPatch) {
-    if let Some(delay) = patch.delay_ms {
-        skill["delayMs"] = json!(delay);
-    }
-    if let Some(level) = patch.level {
-        skill["level"] = json!(level);
-    }
-    if let Some(experience) = patch.experience {
-        skill["experience"] = json!(experience);
-    }
-    if let Some(can_use) = patch.can_use {
-        skill["canUse"] = json!(can_use);
-    }
-    if let Some(mp_cost) = patch.mp_cost {
-        skill["mpCost"] = json!(mp_cost);
-    }
+    mir2_client_bevy::native_skill_ingress::world_payload_tick_from(payload)
 }
 
 /// Connect to the gateway, accept validated native UI/gameplay commands, and
@@ -3662,7 +3190,7 @@ where
                 snapshot.hero_buff_event = Some(
                     mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Event::Buff {
                         identity: mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Identity {
-                            session_epoch: skill_cursor.session_epoch,
+                            session_epoch: skill_cursor.core.authority().session_epoch,
                             hero_generation: skill_cursor.hero.hero_generation,
                             object_id: info.object_id,
                         },
@@ -3670,7 +3198,7 @@ where
                     },
                 );
             }
-            snapshot.status_buff_event = Some((skill_cursor.player_object_id, buff));
+            snapshot.status_buff_event = Some((skill_cursor.core.player_object_id(), buff));
             let _ = gameplay_events.send(snapshot);
         }
         if packet == "GuildBuffList" {
@@ -3724,7 +3252,7 @@ where
             skill_cursor.hero.info.as_ref().map(|info| {
                 mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Event::Information(
                     mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Identity {
-                        session_epoch: skill_cursor.session_epoch,
+                        session_epoch: skill_cursor.core.authority().session_epoch,
                         hero_generation: skill_cursor.hero.hero_generation,
                         object_id: info.object_id,
                     },
@@ -3780,7 +3308,7 @@ where
             gameplay_adapter.observe_world_snapshot(&payload);
             skill_cursor.observe_snapshot(&mut payload);
             if skill_cursor.hero.observe_snapshot(&payload) {
-                skill_cursor.hero.session_epoch = skill_cursor.session_epoch;
+                skill_cursor.hero.session_epoch = skill_cursor.core.authority().session_epoch;
                 let json = serde_json::to_string(&skill_cursor.hero).map_err(|e| e.to_string())?;
                 if skill_cursor.hero.skill_key_ack.is_some() {
                     skill_cursor.pending_hero_receipts.push_back(json);
@@ -4210,7 +3738,7 @@ fn forward_stale_map_receipts(
         // receipt, independently of the rejected world/map projection.
         skill_cursor.observe_snapshot(payload);
         if skill_cursor.hero.observe_snapshot(payload) {
-            skill_cursor.hero.session_epoch = skill_cursor.session_epoch;
+            skill_cursor.hero.session_epoch = skill_cursor.core.authority().session_epoch;
             if skill_cursor.hero.skill_key_ack.is_some() {
                 skill_cursor.pending_hero_receipts.push_back(
                     serde_json::to_string(&skill_cursor.hero).map_err(|e| e.to_string())?,
@@ -5838,141 +5366,7 @@ fn wallet_value(payload: &Value, field: &str) -> Option<u32> {
 }
 
 fn transform_skill_model(payload: &Value) -> Value {
-    let skills = payload
-        .get("knownSkills")
-        .or_else(|| payload.get("known_skills"))
-        .or_else(|| payload.get("skills"))
-        .and_then(Value::as_array)
-        .map(|skills| {
-            skills
-                .iter()
-                .take(MAX_LEARNED_SKILLS)
-                .enumerate()
-                .map(|(idx, skill)| {
-                    let id = value_u32(skill.get("id")).unwrap_or(idx as u32);
-                    let key = skill.get("key").and_then(Value::as_str).map(str::to_owned);
-                    let name = skill
-                        .get("magicName")
-                        .and_then(Value::as_str)
-                        .filter(|v| !v.is_empty())
-                        .or_else(|| skill.get("name").and_then(Value::as_str))
-                        .unwrap_or_default()
-                        .to_owned();
-                    let level = value_u32(skill.get("level"))
-                        .and_then(|value| u8::try_from(value).ok())
-                        .unwrap_or(0);
-                    let delay_ms = value_i64(
-                        skill
-                            .get("delayMs")
-                            .or_else(|| skill.get("delay_ms"))
-                            .or_else(|| skill.get("cooldownMs")),
-                    )
-                    .unwrap_or(0);
-                    let mut transformed = serde_json::Map::new();
-                    transformed.insert("id".to_owned(), json!(id));
-                    transformed.insert(
-                        "castSequence".to_owned(),
-                        skill.get("castSequence").cloned().unwrap_or(json!(0)),
-                    );
-                    transformed.insert(
-                        "icon".to_owned(),
-                        value_u32(skill.get("icon"))
-                            .and_then(|v| u8::try_from(v).ok())
-                            .map(|v| json!(v))
-                            .unwrap_or(Value::Null),
-                    );
-                    let definition = skill
-                        .get("spell")
-                        .and_then(Value::as_str)
-                        .and_then(mir2_game_data::crystal_magic_by_spell);
-                    for (field, fallback) in [
-                        ("experience", None),
-                        ("need1", definition.as_ref().map(|v| v.need1)),
-                        ("need2", definition.as_ref().map(|v| v.need2)),
-                        ("need3", definition.as_ref().map(|v| v.need3)),
-                    ] {
-                        let value = skill
-                            .get(field)
-                            .map(|v| value_u32(Some(v)).and_then(|n| u16::try_from(n).ok()))
-                            .unwrap_or(fallback);
-                        transformed.insert(
-                            field.to_owned(),
-                            value.map(|v| json!(v)).unwrap_or(Value::Null),
-                        );
-                    }
-                    transformed.insert("name".to_owned(), json!(name));
-                    transformed.insert("level".to_owned(), json!(level));
-                    transformed.insert("key".to_owned(), json!(key));
-                    transformed.insert("cooldown_ms".to_owned(), json!(delay_ms.max(0)));
-                    transformed.insert(
-                        "spell".to_owned(),
-                        optional_non_empty_string_value(skill.get("spell")),
-                    );
-                    transformed.insert(
-                        "castKind".to_owned(),
-                        optional_non_empty_string_value(skill.get("castKind")),
-                    );
-                    transformed.insert(
-                        "canUse".to_owned(),
-                        skill.get("canUse").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "offensive".to_owned(),
-                        skill.get("offensive").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "hotkey".to_owned(),
-                        skill.get("hotkey").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "cooldownRemainingTicks".to_owned(),
-                        value_u32(
-                            skill
-                                .get("cooldownRemainingTicks")
-                                .or_else(|| skill.get("cooldown_remaining_ticks")),
-                        )
-                        .map(|value| json!(value))
-                        .unwrap_or_else(|| json!(0)),
-                    );
-                    transformed.insert(
-                        "cooldownRemainingMs".to_owned(),
-                        value_u32(
-                            skill
-                                .get("cooldownRemainingMs")
-                                .or_else(|| skill.get("cooldown_remaining_ms")),
-                        )
-                        .map(|value| json!(value))
-                        .unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "mpCost".to_owned(),
-                        value_u32(skill.get("mpCost").or_else(|| skill.get("mp_cost")))
-                            .map(|value| json!(value))
-                            .unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "castTimeMs".to_owned(),
-                        value_i64(
-                            skill
-                                .get("castTimeMs")
-                                .or_else(|| skill.get("cast_time_ms")),
-                        )
-                        .map(|value| json!(value))
-                        .unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "experience".to_owned(),
-                        value_u32(skill.get("experience"))
-                            .and_then(|value| u16::try_from(value).ok())
-                            .map(|value| json!(value))
-                            .unwrap_or(Value::Null),
-                    );
-                    Value::Object(transformed)
-                })
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default();
-    json!({ "skills": skills,"skillKeyAck":payload.get("skillKeyAck").cloned().unwrap_or(Value::Null), "authority":payload.get("_nativeSkillAuthority").cloned().unwrap_or(json!({"sessionEpoch":0,"snapshotSerial":0,"playerObjectId":0})) })
+    mir2_client_bevy::native_skill_ingress::project_native_skill_model(payload)
 }
 
 fn push_native_skill_model_from_world(payload: &Value) -> Result<bool, String> {
@@ -6725,7 +6119,7 @@ mod tests {
             (Some(17), Some(0), Some(29))
         );
         cursor.reset();
-        assert!(cursor.magic_needs.is_empty());
+        assert!(cursor.core.diagnostics().magic_need_count == 0);
     }
     use tokio::net::TcpListener;
     use tokio::sync::oneshot;
@@ -9853,10 +9247,7 @@ mod tests {
             &json!({"hero":false,"magic":{"spell":"spell0","name":"Updated"}}),
             0
         ));
-        assert_eq!(
-            cursor.magic_names.get("spell0").map(String::as_str),
-            Some("Updated")
-        );
+        assert_eq!(cursor.core.magic_name("spell0"), Some("Updated"));
     }
 
     #[test]
@@ -9960,8 +9351,8 @@ mod tests {
         cursor.observe_snapshot(&mut fresh);
         assert_eq!(fresh["playerMp"], json!(35));
         assert_eq!(fresh["knownSkills"][0]["cooldownRemainingTicks"], json!(9));
-        assert!(cursor.patches.is_empty());
-        assert!(cursor.vitals.is_none());
+        assert!(cursor.core.diagnostics().patch_count == 0);
+        assert!(!cursor.core.diagnostics().has_vitals);
     }
 
     #[test]
@@ -9979,16 +9370,13 @@ mod tests {
             });
             cursor.observe_snapshot(&mut prior);
         }
-        assert_eq!(cursor.snapshot_serial, 2);
+        assert_eq!(cursor.core.authority().snapshot_serial, 2);
         assert!(cursor.apply_packet(
             "MagicDelay",
             &json!({"objectId":1001,"spell":"FireBall","delay":12}),
             0
         ));
-        assert_eq!(
-            cursor.patches[0].zero_tick_expires_at_snapshot_serial,
-            Some(3)
-        );
+        assert_eq!(cursor.core.diagnostics().first_patch_expiry_serial, Some(3));
         let mut next = json!({
             "tick": 0,
             "playerObjectId": 1001,
@@ -10001,7 +9389,7 @@ mod tests {
         cursor.observe_snapshot(&mut next);
         assert_eq!(next["knownSkills"][0]["delayMs"], json!(12));
         assert_eq!(next["knownSkills"][0]["cooldownRemainingTicks"], json!(3));
-        assert!(cursor.patches.is_empty());
+        assert!(cursor.core.diagnostics().patch_count == 0);
         let mut later = json!({
             "tick": 0,
             "playerObjectId": 1001,
@@ -10027,7 +9415,10 @@ mod tests {
         }
         assert!(removal_cursor.apply_packet("RemoveMagic", &json!({"placeId":1}), 0));
         assert_eq!(
-            removal_cursor.removals[0].zero_tick_expires_at_snapshot_serial,
+            removal_cursor
+                .core
+                .diagnostics()
+                .first_removal_expiry_serial,
             Some(3)
         );
         let mut next = json!({
@@ -10040,7 +9431,7 @@ mod tests {
         removal_cursor.observe_snapshot(&mut next);
         assert_eq!(next["knownSkills"].as_array().unwrap().len(), 1);
         assert_eq!(next["knownSkills"][0]["spell"], json!("Lightning"));
-        assert!(removal_cursor.removals.is_empty());
+        assert!(removal_cursor.core.diagnostics().removal_count == 0);
         let mut later = json!({
             "tick": 0,
             "knownSkills": [
@@ -10067,10 +9458,7 @@ mod tests {
             0
         ));
         assert_eq!(
-            vitals_cursor
-                .vitals
-                .unwrap()
-                .zero_tick_expires_at_snapshot_serial,
+            vitals_cursor.core.diagnostics().vitals_expiry_serial,
             Some(3)
         );
         let mut next = json!({
@@ -10081,7 +9469,7 @@ mod tests {
         });
         vitals_cursor.observe_snapshot(&mut next);
         assert_eq!(next["playerMp"], json!(40));
-        assert!(vitals_cursor.vitals.is_none());
+        assert!(!vitals_cursor.core.diagnostics().has_vitals);
         let mut later = json!({
             "tick": 0,
             "playerObjectId": 1001,
@@ -10113,7 +9501,7 @@ mod tests {
             &json!({"objectId":2002,"spell":"FlamingSword","canUse":true}),
             100
         ));
-        assert!(cursor.patches.is_empty());
+        assert!(cursor.core.diagnostics().patch_count == 0);
 
         assert!(cursor.apply_packet(
             "SpellToggle",
@@ -10188,7 +9576,7 @@ mod tests {
         ] {
             assert!(!cursor.apply_packet("SpellToggle", &payload, 100));
         }
-        assert!(cursor.patches.is_empty());
+        assert!(cursor.core.diagnostics().patch_count == 0);
 
         assert!(cursor.apply_packet(
             "MagicDelay",
@@ -10602,13 +9990,13 @@ mod tests {
         assert!(!cursor.apply_packet("RemoveMagic", &json!({"placeId":0}), 0));
         assert!(!cursor.apply_packet("RemoveMagic", &json!({"placeId":9}), 0));
         assert!(!cursor.apply_packet("UserInformation", &json!({}), 0));
-        assert!(cursor.patches.is_empty());
-        assert!(cursor.removals.is_empty());
-        assert!(cursor.vitals.is_none());
+        assert!(cursor.core.diagnostics().patch_count == 0);
+        assert!(cursor.core.diagnostics().removal_count == 0);
+        assert!(!cursor.core.diagnostics().has_vitals);
 
         // Personal skill deltas require the authoritative player object id;
         // establish it before testing the name-only snapshot rejection.
-        cursor.player_object_id = Some(1001);
+        cursor.observe_snapshot(&mut json!({"playerObjectId":1001}));
         let mut snapshot = json!({
             "tick": 0,
             "playerObjectId": 1001,
@@ -10628,7 +10016,7 @@ mod tests {
             snapshot["knownSkills"][0]["cooldownRemainingTicks"],
             json!(4)
         );
-        assert!(cursor.patches.is_empty());
+        assert!(cursor.core.diagnostics().patch_count == 0);
     }
 
     #[test]

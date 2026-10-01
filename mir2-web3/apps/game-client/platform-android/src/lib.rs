@@ -32,6 +32,8 @@ mod phone_hud;
 mod scene_effects;
 #[cfg(any(target_os = "android", test))]
 mod shared_shell;
+#[cfg(any(target_os = "android", test))]
+mod skill_ingress;
 mod text_input;
 #[cfg(all(feature = "ui-preview", any(target_os = "android", test)))]
 mod ui_preview;

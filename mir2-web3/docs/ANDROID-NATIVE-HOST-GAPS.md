@@ -40,7 +40,7 @@ still missing. Neither label is an online acceptance result.
 | NI-04 | `push_native_entity_model_set` / object packets | PARTIAL: shared Hero kind and selected actor/item/gold projection. Prove AOI add/remove, incarnation boundaries and all supported actor families |
 | NI-05 | `push_native_inventory_model` | OPEN: ordinary inventory/equipment/belt/tooltip data are not produced by Android's four-message snapshot adapter |
 | NI-06 | `push_native_inventory_operation_ack` | OPEN: preserve exact Drop/Move/Merge/Split acknowledgements, failures and unknown outcomes; never invent or replay success |
-| NI-07 | `push_native_skill_model` / `SkillPacketCursor` | OPEN: Java does not forward owner `Magic`, `MagicCast`, `MagicDelay`, `SpellToggle`; Android does not feed a typed skill model. Reuse shared definitions, exact remaining milliseconds and successful owner cast sequence |
+| NI-07 | `push_native_skill_model` / `SkillPacketCursor` | PARTIAL: Android and Windows now share the extracted cursor/projector. Typed learned skills, exact milliseconds, owner success/metadata and request-scoped key receipts have source regressions; same-character map loading retains personal receipts, not old rendering. Android227/preview236/shared1196+8ignored/Java32+32 and API31 pass. Exact v8 package, actual JNI/live outbound/input, approved online combat and physical acceptance remain OPEN. [Bounded evidence](generated/player-qa/native-android-skill-ingress-20261001/README.md) |
 | NI-08 | `push_native_wallet_patch` | OPEN: snapshot gold is not packet-first owner wallet/vitals coverage. Connect public deltas without optimistic balance rules |
 | NI-09 | `push_native_chat_line` | OPEN: `ObjectChat` is absent from Java's gameplay allowlist. Local chat draft/settings and sent-command tests are not received chat |
 | NI-10 | Quest/NPC gameplay bridge | OPEN: audit the Windows bridge's tracker, dialog, detail/turn-in and authoritative events. Android intent forwarding/local fixtures do not prove those incoming states |
@@ -84,9 +84,9 @@ still missing. Neither label is an online acceptance result.
 
 ## Implementation order
 
-Bounded G1 source/package/emulator gates are recorded; continue NI-07 with failure-first tests for
-owner identity, authoritative deadline, stale snapshots, unrelated actors and
-session resets. Continue the G2 real login/list/StartGame gate when the user has
+Bounded G1 source/package/emulator gates and NI-07 source regressions are recorded.
+Bind NI-07 to a new diagnostic APK; v7 does not contain this implementation.
+Continue the G2 real login/list/StartGame gate when the user has
 approved a test environment and can enter credentials locally. NI-05/06 and
 NI-10/11 follow to establish ordinary playable state rather than empty windows.
 The remaining model, window, resource and physical-device leaves stay in the goal;

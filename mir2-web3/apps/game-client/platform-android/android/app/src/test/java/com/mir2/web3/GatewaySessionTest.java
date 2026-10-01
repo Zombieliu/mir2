@@ -338,6 +338,71 @@ public class GatewaySessionTest {
         assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
     }
 
+    @Test public void personalSkillPacketsForwardOnlyInsideAuthenticatedGameAndPreservePayload() throws Exception {
+        connect();
+        JSONObject cast = GatewaySession.object("type", "packet", "packet", "Magic",
+                "payload", GatewaySession.object("spell", "FireBall", "cast", true));
+        peer.send(cast.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        assertNotNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        for (String packet : new String[]{"Magic", "MagicCast", "MagicDelay", "SpellToggle",
+                "NewMagic", "MagicLeveled", "RemoveMagic", "UserInformation"}) {
+            JSONObject payload = GatewaySession.object("objectId", 42, "spell", "FireBall",
+                    "cast", false, "delay", 2200, "canUse", false, "hero", false,
+                    "name", "Fixture", "mp", 10, "maxMp", 20);
+            peer.send(GatewaySession.object("type", "packet", "packet", packet,
+                    "payload", payload).toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Missing owner packet " + packet, raw);
+            JSONObject forwarded = new JSONObject(raw);
+            assertEquals(packet, forwarded.getString("packet"));
+            assertEquals(42, forwarded.getJSONObject("payload").getInt("objectId"));
+            assertFalse(forwarded.getJSONObject("payload").getBoolean("cast"));
+            assertEquals(2200, forwarded.getJSONObject("payload").getInt("delay"));
+        }
+        peer.send(GatewaySession.object("type", "packet", "packet", "Stage5Command",
+                "payload", GatewaySession.object("success", true)).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.disconnect("Skill test end");
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void personalSkillPacketsSurviveMapTransitionButNotInitialBootstrap() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        JSONObject cast = GatewaySession.object("type", "packet", "packet", "MagicCast",
+                "payload", GatewaySession.object("spell", "FireBall"));
+        peer.send(cast.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(cast.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        assertNotNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        GatewaySession.View transition = phase(GatewaySession.Phase.STARTING);
+        assertNull(transition.world);
+        assertNull(transition.worldSnapshot);
+        for (String packet : new String[]{"MagicCast", "MagicDelay", "NewMagic"}) {
+            peer.send(GatewaySession.object("type", "packet", "packet", packet,
+                    "payload", GatewaySession.object("objectId", 42, "spell", "FireBall")).toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Missing transition packet " + packet, raw);
+            assertEquals(packet, new JSONObject(raw).getString("packet"));
+        }
+        peer.send("{\"type\":\"packet\",\"packet\":\"ObjectWalk\",\"payload\":{\"objectId\":43,\"x\":4,\"y\":5}}");
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.disconnect("Transition test end");
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
     @Test public void entityPacketsForwardOnlyAfterAuthoritativeWorldEntry() throws Exception {
         connect();
         peer.send("{\"type\":\"packet\",\"packet\":\"ObjectWalk\",\"payload\":{\"objectId\":43,\"x\":302,\"y\":631,\"direction\":\"DownRight\"}}");

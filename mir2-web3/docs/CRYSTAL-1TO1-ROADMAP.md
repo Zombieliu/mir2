@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 Android NI-07 source leaf: extracted Windows pure skills ingress is
+> shared with Android, including exact remaining ms, successful owner casts and
+> exact key-result snapshots. Authenticated map-loading receipts are retained;
+> foreign/Hero identities and stale character state are rejected. Android227 /
+> preview236 / shared1196 with8existing ignores / Java32+32 / API31 pass; bounded
+> source review is clear. v8 package and online/device gates remain OPEN, and
+> this is neither a full player-loop result nor a global completion percentage.
+> [Evidence](generated/player-qa/native-android-skill-ingress-20261001/README.md).
+
 > 2026-10-01 Android completeness goal stays Active against frozenWindows
 > 3f5e61533. Its normal merge and Android nonmodal/menu guards are in source
 > 10bf437f2; Android219/preview227/Java60 pass and v7 APK/emulator evidence is

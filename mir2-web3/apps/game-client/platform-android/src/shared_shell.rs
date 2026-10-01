@@ -115,6 +115,7 @@ fn send(value: Value) {
 
 #[derive(Resource, Default)]
 pub(crate) struct HostState {
+    skills: crate::skill_ingress::AndroidSkillIngress,
     phase: String,
     world: Option<HostWorldPosition>,
     pending_world_request: Option<u64>,
@@ -127,6 +128,17 @@ pub(crate) struct HostState {
     render_load_active: bool,
     deferred_render_load: Option<DeferredRenderLoad>,
     editor: HostEditorSession,
+}
+
+impl HostState {
+    fn accept_skill_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
+        if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
+            || !matches!(screen, Screen::StartingGame | Screen::InGame)
+        {
+            return Ok(false);
+        }
+        self.skills.packet(raw)
+    }
 }
 
 /// OS callbacks belong to one activation, not merely a reusable field name.
@@ -280,6 +292,7 @@ fn fail_current_render_load(
     if host.pending_render_request != Some(request_id) {
         return false;
     }
+    host.skills.reset();
     host.world = None;
     host.pending_world_request = None;
     host.pending_render_request = None;
@@ -1121,6 +1134,10 @@ fn receive(
     mut ground_pickups: Option<ResMut<mir2_client_bevy::quest_model::GroundPickupModel>>,
     #[cfg(feature = "ui-preview")] mut preview: ResMut<crate::ui_preview::PreviewRequest>,
 ) {
+    if matches!(model.screen, Screen::StartingGame | Screen::InGame) {
+        host.skills
+            .flush(mir2_bevy_runtime::native_ingest::push_native_skill_model);
+    }
     #[cfg(target_os = "android")]
     if let Some(render) = crate::live_entity::poll_action_frame() {
         let _ = mir2_bevy_runtime::native_ingest::push_native_entity_render_state(render);
@@ -1205,8 +1222,30 @@ fn receive(
         .collect();
     for value in values {
         if value["type"] == "gatewayGameplayPacket" {
+            if matches!(host.phase.as_str(), "STARTING" | "IN_GAME")
+                && matches!(model.screen, Screen::StartingGame | Screen::InGame)
+            {
+                if let Some(raw) = value["envelope"].as_str() {
+                    if host.accept_skill_packet(model.screen, raw).is_err() {
+                        host.skills.reset();
+                        mir2_bevy_runtime::native_ingest::push_native_data_reset();
+                        model.apply_gateway_event(Event::Disconnect {
+                            reason: Some("Invalid or overflowing skill data; reconnect".into()),
+                        });
+                        intents.drain().for_each(drop);
+                        OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
+                        send(json!({"type":"disconnect"}));
+                        continue;
+                    }
+                    host.skills
+                        .flush(mir2_bevy_runtime::native_ingest::push_native_skill_model);
+                }
+            }
             #[cfg(target_os = "android")]
-            if let Some(raw) = value["envelope"].as_str() {
+            if let Some(raw) = value["envelope"]
+                .as_str()
+                .filter(|_| host.phase == "IN_GAME")
+            {
                 let now_ms = time
                     .as_deref()
                     .map(|time| u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX))
@@ -1220,6 +1259,7 @@ fn receive(
                         == crate::scene_effects::EffectPacketOutcome::Rejected
                 });
                 if effect_rejected {
+                    host.skills.reset();
                     crate::live_entity::clear_with_presentation_reset();
                     if let Some(effects) = scene_effects.as_deref_mut() {
                         effects.clear();
@@ -1293,6 +1333,7 @@ fn receive(
                     }
                     crate::live_entity::LiveEntityPacketOutcome::Ignored => {}
                     crate::live_entity::LiveEntityPacketOutcome::Rejected => {
+                        host.skills.reset();
                         crate::live_entity::clear_with_presentation_reset();
                         if let Some(effects) = scene_effects.as_deref_mut() {
                             effects.clear();
@@ -1466,6 +1507,7 @@ fn receive(
             .is_some_and(|(old, next)| old.map_file_name != next.map_file_name);
         host.world = next_world;
         if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
+            host.skills.reset();
             host.pending_world_request = None;
             host.pending_render_request = None;
             host.render_load_active = false;
@@ -1486,6 +1528,7 @@ fn receive(
             }
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
         } else if map_changed || (phase == "STARTING" && host.phase == "IN_GAME") {
+            host.skills.clear_scene();
             begin_render_ready_scene_transition(&mut model);
             host.pending_world_request = None;
             host.pending_render_request = None;
@@ -1508,13 +1551,16 @@ fn receive(
             mir2_bevy_runtime::native_ingest::push_native_scene_reset();
         }
         if let (Some(world), Some(raw)) = (&host.world, value["worldSnapshot"].as_str()) {
-            let projected = crate::world_projection::project(
+            let mut projected = crate::world_projection::project(
                 raw,
                 &world.map_file_name,
                 &world.player_name,
                 world.x,
                 world.y,
             );
+            if projected.is_some() && host.skills.snapshot(raw).is_err() {
+                projected = None;
+            }
             let mut projected_scene = None;
             let queued = projected.is_some_and(|projection| {
                 let crate::world_projection::Projection {
@@ -1566,6 +1612,7 @@ fn receive(
                 queued
             });
             if !queued {
+                host.skills.reset();
                 #[cfg(target_os = "android")]
                 crate::world_assets::cancel_packaged_map_atlas_load();
                 if let Some(overlays) = actor_overlays.as_deref_mut() {
@@ -1595,6 +1642,8 @@ fn receive(
                 send(json!({"type":"disconnect"}));
                 continue;
             }
+            host.skills
+                .flush(mir2_bevy_runtime::native_ingest::push_native_skill_model);
             #[cfg(target_os = "android")]
             if let Some((scene, world_snapshot, request_id)) = projected_scene {
                 // Keep only the newest authoritative frame while a previous
@@ -1861,6 +1910,7 @@ fn observe_world_receipt(
             }
         }
         WorldApplyOutcome::DecodeRejected => {
+            host.skills.reset();
             host.world = None;
             host.pending_render_request = None;
             host.render_load_active = false;
@@ -2581,6 +2631,56 @@ mod tests {
     }
 
     use super::*;
+
+    #[test]
+    fn skill_host_phase_guard_and_render_failure_cannot_republish_previous_character() {
+        let mut host = HostState {
+            phase: "IN_GAME".into(),
+            ..default()
+        };
+        host.skills.snapshot(&json!({"tick":100,"playerObjectId":42,
+            "entities":[{"objectId":42,"kind":"selfPlayer","name":"Fixture"}],
+            "knownSkills":[{"id":1,"spell":"FireBall","castKind":"target","hotkey":1,"delayMs":2200}]
+        }).to_string()).unwrap();
+        assert!(host.skills.flush(|_| true));
+        let packet =
+            json!({"type":"packet","packet":"Magic","payload":{"spell":"FireBall","cast":true}})
+                .to_string();
+        for screen in [Screen::Login, Screen::OpeningLogin, Screen::ConnectionLost] {
+            assert!(!host.accept_skill_packet(screen, &packet).unwrap());
+        }
+        host.phase = "DISCONNECTED".into();
+        assert!(!host.accept_skill_packet(Screen::InGame, &packet).unwrap());
+        host.phase = "IN_GAME".into();
+        assert!(host.accept_skill_packet(Screen::InGame, &packet).unwrap());
+        host.phase = "STARTING".into();
+        host.skills.clear_scene();
+        assert!(host
+            .accept_skill_packet(Screen::StartingGame, &packet)
+            .unwrap());
+        host.pending_render_request = Some(7);
+        let mut model = NativeShellModel {
+            screen: Screen::StartingGame,
+            ..default()
+        };
+        assert!(fail_current_render_load(
+            &mut host,
+            &mut model,
+            7,
+            "fixture render failure"
+        ));
+        let mut emitted = 0;
+        assert!(host.skills.flush(|_| {
+            emitted += 1;
+            true
+        }));
+        assert_eq!(emitted, 0);
+        assert!(!host.accept_skill_packet(Screen::InGame, &packet).unwrap());
+        host.phase = "STARTING".into();
+        assert!(!host
+            .accept_skill_packet(Screen::StartingGame, &packet)
+            .unwrap());
+    }
 
     #[test]
     fn structured_world_requires_active_start_and_never_parses_notice_text() {

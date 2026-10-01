@@ -413,6 +413,35 @@ mod tests {
         );
     }
     #[test]
+    fn duplicate_processed_ack_cannot_settle_a_new_key_request() {
+        let base = model();
+        let mut draft = SkillAssignUi::default();
+        draft.show(1, &base);
+        draft.key = 16;
+        draft.request_id = crate::skill_model::next_skill_key_request_id();
+        let mut pending = SkillAuthorityUi::default();
+        pending.begin(&base, draft.clone());
+        let mut received = base.clone();
+        received.skill_key_ack = Some(crate::skill_model::SkillKeyAck {
+            request_id: draft.request_id,
+            spell: draft.spell.clone(),
+            key: draft.key,
+            old_key: draft.old_key,
+            accepted: false,
+        });
+        assert!(pending.reconcile(&mut received).is_some());
+        assert!(pending.pending.is_none());
+        assert!(pending.reconcile(&mut received.clone()).is_none());
+        draft.request_id = crate::skill_model::next_skill_key_request_id();
+        pending.begin(&base, draft);
+        assert!(pending.reconcile(&mut received.clone()).is_none());
+        assert!(pending.pending.is_some());
+        received.skill_key_ack.as_mut().unwrap().request_id =
+            pending.pending.as_ref().unwrap().draft.request_id;
+        assert!(pending.reconcile(&mut received).is_some());
+        assert!(pending.pending.is_none());
+    }
+    #[test]
     fn rejected_receipt_restores_exact_draft_and_epoch_change_drops_old_request() {
         let base = model();
         let mut draft = SkillAssignUi::default();

@@ -1,5 +1,16 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 Android NI-07 typed skill source is connected through the extracted
+> Windows cursor/projector, not a copied cooldown or combat rule. Personal
+> packets survive authenticated same-character map loading; exact ACKs retain
+> their original keys through backpressure and cannot confirm a new request.
+> Android227/preview236/shared1196+8ignored/Java32+32/API31 pass. The compile-time
+> offline skills specimen now uses this adapter but its actual v8 APK/frame is
+> not yet verified. The local diagnostic UI pack lacks MagIcon/MagIcon2 entries;
+> do not claim complete skill imagery or all phone windows. Real WSS/skill input,
+> MP/HUD packet completeness, full assets and physical acceptance remain open.
+> [Source evidence](generated/player-qa/native-android-skill-ingress-20261001/README.md).
+
 > 2026-10-01 Android frozen-Windows G1: source10bf437f2 keeps ordinary panels
 > nonmodal on phones and fixes v6's hidden joystick/menu-pointer ownership.
 > Android219/preview227/Java60 and exact v7 packaging pass; actual menu/bag

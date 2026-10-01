@@ -82,6 +82,7 @@ final class GatewaySession implements AutoCloseable {
     private String player = "", map = "";
     private Integer x, y;
     private boolean startAccepted;
+    private boolean hasOwnerSnapshot;
     private String pendingSnapshot;
     private AccountOperation accountOperation = AccountOperation.NONE;
     private Integer pendingDeleteIndex;
@@ -254,6 +255,7 @@ final class GatewaySession implements AutoCloseable {
                     readPosition(entity);
                     // Keep the complete immutable server payload until StartGame is accepted.
                     pendingSnapshot = world.toString();
+                    hasOwnerSnapshot = true;
                     publishWorld();
                     return;
                 }
@@ -262,7 +264,8 @@ final class GatewaySession implements AutoCloseable {
         }
         if (!type.equals("packet")) return;
         String packet = envelope.getString("packet");
-        boolean forwardGameplay = phase == Phase.IN_GAME && isEntityGameplayPacket(packet);
+        boolean forwardEntity = phase == Phase.IN_GAME && isEntityGameplayPacket(packet);
+        boolean forwardSkill = personalSkillPhase() && isPersonalSkillPacket(packet);
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -387,7 +390,9 @@ final class GatewaySession implements AutoCloseable {
                 break;
             default: break;
         }
-        if (forwardGameplay && phase == Phase.IN_GAME) forwardBounded(envelope, gameplayObserver);
+        if ((forwardEntity && phase == Phase.IN_GAME) || (forwardSkill && personalSkillPhase())) {
+            forwardBounded(envelope, gameplayObserver);
+        }
     }
 
     private void forwardReceipt(JSONObject envelope) {
@@ -400,6 +405,15 @@ final class GatewaySession implements AutoCloseable {
             throw new IllegalArgumentException("inbound packet size limit");
         }
         target.accept(raw);
+    }
+
+    private static boolean isPersonalSkillPacket(String packet) {
+        // Public owner packets only. Rust shares the Windows identity/patch
+        // adapter; forwarding is not acceptance of a cast or client authority.
+        return packet.equals("Magic") || packet.equals("MagicCast")
+                || packet.equals("MagicDelay") || packet.equals("SpellToggle")
+                || packet.equals("NewMagic") || packet.equals("MagicLeveled")
+                || packet.equals("RemoveMagic") || packet.equals("UserInformation");
     }
 
     private static boolean isEntityGameplayPacket(String packet) {
@@ -436,6 +450,11 @@ final class GatewaySession implements AutoCloseable {
     }
 
     private boolean worldPending() { return phase == Phase.STARTING || phase == Phase.IN_GAME; }
+    private boolean personalSkillPhase() {
+        // Owner bootstrap must be accepted within this connection/character.
+        // Personal receipts survive map loading; entity packets do not.
+        return worldPending() && startAccepted && hasOwnerSnapshot;
+    }
     /** True while authentication has a position but the native render barrier still lacks a scene. */
     synchronized boolean awaitingRenderSnapshot() {
         return phase == Phase.IN_GAME && startAccepted && pendingSnapshot == null
@@ -461,6 +480,7 @@ final class GatewaySession implements AutoCloseable {
     }
     private void resetWorld() {
         player = map = ""; x = y = null; startAccepted = false; pendingSnapshot = null;
+        hasOwnerSnapshot = false;
     }
     private void resetAccountOperation() {
         accountOperation = AccountOperation.NONE;
