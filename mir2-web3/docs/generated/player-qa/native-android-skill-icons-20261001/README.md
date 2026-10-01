@@ -4,7 +4,8 @@ Bounded Android source/resource checkpoint; goal remains Active. Previous exact
 v8 source `8eb1a7d344e2240e1a499f42e37b454264ce3bc0` and its missing-icon
 runtime failure are preserved in the [NI-07 evidence](../native-android-skill-ingress-20261001/README.md).
 Parent of this repair is `6d9f024e1c7a71eeec04500ec6ef63439c5cde85`.
-No current v9 APK/runtime/human acceptance is claimed before a clean build.
+Exact v9 package/runtime checkpoint below binds to clean source
+`394307db8127837893c8101828534aeec7057200`. No full UI/online/human acceptance.
 
 ## Root cause and bounded repair
 
@@ -71,10 +72,53 @@ alignment, all-spell/art coverage or licensing acceptance follows from this leaf
   no remaining P0/P1/P2 was reported for this repair. The reviewer read source
   and retained logs, but did not rebuild or operate a device.
 
-Still OPEN: exact v9 Debug/preview packages, actual installed image repair and
-touch/assignment UI; all-phone-window layout, actual JNI/real WSS/casts/key ACK,
+Still OPEN: touch/assignment UI; all-phone-window layout, actual JNI/real WSS/casts/key ACK,
 inventory/services, complete maps/actors/audio, performance, device and human
 acceptance. A typed offline fixture is not an account or server-authoritative play.
+
+## Exact v9 packages and actual emulator image repair
+
+Both builds started and ended on clean source
+`394307db8127837893c8101828534aeec7057200`; no source was edited between them.
+Version9 / `0.1.6-skill-icons`, min31 / target35, arm64-v8a. Rust release profile
+is inside Gradle Debug diagnostic APKs; these are not signed store releases.
+Actual generated BuildConfig URL is empty for both, and `UI_PREVIEW` is true
+only in the preview package. No remote Web page is loaded.
+
+| Diagnostic artifact | Bytes | SHA-256 |
+| --- | --- | --- |
+| `target/skill-icons-v9-20261001/final-apks/mir2-native-skill-icons-debug-v9.apk` | 385894342 | `3f6c70b52e6bfb3056e369f5f2dbe4984eb6076676174e179b5acc82a6e833f0` |
+| `target/skill-icons-v9-20261001/final-apks/mir2-native-skill-icons-preview-v9.apk` | 389483202 | `66b9a329066a39d9fdec34c9f79e6d6cde9b063ef8c4937191a0d1986d15574d` |
+
+Paths are relative to `apps/game-client/platform-android/`, ignored local
+artifacts only. Each actual APK contains224 PNGs per magic library,448 hashes
+matched individually to the new approved diagnostic source pack. This is not
+an all-UI-art or all-world-resource gate. World/entity inputs stay the G1 proof
+inputs, not a full published resource release.
+
+`adb install -r` succeeded for both on emulator-5554, retaining existing data;
+Android12/API31 arm64, physical1080x2340, landscape2340x1080, density440. PID3989
+shows the shared login with empty credentials and **Test server not configured**.
+PID4167 launched with `ui_scene=skills`; the native typed adapter marker queued
+owner42 / FireBall / castSequence1 / remainingMs300. The actual frame opens
+SPELLS directly and shows the original icon, Lv1, Offline FireBall and F1.
+
+Bounded image repair **PASS**: captured PID logs have zero magic-icon asset
+errors, zero total `ERROR` lines and no fatal exception/panic/fatal signal.
+No live cast, key assignment, damage, cooldown progression or JNI network
+receipt was validated. The narrow desktop-shaped skill window is still a
+phone-layout gap; an icon visible in a screenshot does not close it.
+
+Both `am start -W` calls timed out (`WaitTime14359ms` Debug /19911ms preview).
+Later frames are visible, but these timeouts remain unresolved startup/
+performance evidence, not green launch latency/stability. Both apps were
+force-stopped after captures; no data wipe, server access or account mutation.
+
+![Exact v9 offline shared skill image](skills-v9.png)
+
+Raw builds, installs, starts, PID logs, BuildConfig/device outputs, both448-frame
+APK comparisons, `package-v9.json` and original login/skill screenshots are
+retained here. The v8 missing-icon failure remains in its original evidence.
 
 Reproduce the bounded asset gate with the approved local input:
 

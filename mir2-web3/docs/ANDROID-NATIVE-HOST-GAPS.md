@@ -89,10 +89,14 @@ The v8 missing skill images have a bounded package-source repair: both original
 diagnostic pack. Unique index/path/coverage checks close the reproduced count-only
 P2; seven real Gradle controls pass with unchanged source bytes.
 Preview237/Java32+32 and negative old-pack rejection pass; exact
-v9 APK/runtime are pending. [Source/resource evidence](generated/player-qa/native-android-skill-icons-20261001/README.md).
+v9 source394307db8 builds/installs both diagnostic variants with version/hash
+binding and448 byte-matched icons each. Actual offline SPELLS now shows the
+original icon/Lv1/F1 without captured asset errors. Both start waits timed out;
+phone-window, performance, real JNI/online and device gates remain open.
+[Source/resource/package evidence](generated/player-qa/native-android-skill-icons-20261001/README.md).
 
 Bounded G1 source/package/emulator gates and NI-07 source regressions are recorded.
-Bind NI-07 to a new diagnostic APK; v7 does not contain this implementation.
+NI-07 is bound to v8 source, with bounded v9 image repair; v7 lacks this implementation.
 Continue the G2 real login/list/StartGame gate when the user has
 approved a test environment and can enter credentials locally. NI-05/06 and
 NI-10/11 follow to establish ordinary playable state rather than empty windows.

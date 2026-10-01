@@ -11,8 +11,11 @@ FireBall/F1，但技能图标缺失并重复加载，图像验收FAIL；v7不包
 
 随后补齐技能图标打包门：新本地包的448帧像素校验通过，旧12,789文件不变；
 不完整v8输入会被打包检查拒绝；复现并修复重复帧可过门的P2，唯一编号/完整
-覆盖/路径校验的真实Gradle正反例7/7通过，源资源不变。preview237/Java32+32通过，v9精确包和实际
-画面仍待验证。[资源修补](generated/player-qa/native-android-skill-icons-20261001/README.md)。
+覆盖/路径校验的真实Gradle正反例7/7通过，源资源不变。preview237/Java32+32通过。
+干净源码394307db8的v9双包/版本/hash/安装已核验，各448帧实际APK字节一致；
+模拟器直接SPELLS显示原图标/Lv1/F1，捕获日志无图标错误。两次启动等待超时
+保留，完整手机窗/性能/联网/真机仍未通过。
+[资源与精确包](generated/player-qa/native-android-skill-icons-20261001/README.md)。
 
 本轮用户要求把 Android 完整度对齐当前 Windows，而不再把登录小切片或
 离线 UI 展示当作终点。目标是原生 Bevy/GameActivity Android；Capacitor

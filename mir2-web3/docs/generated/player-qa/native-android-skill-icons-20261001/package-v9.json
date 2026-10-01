@@ -1,0 +1,40 @@
+{
+  "sourceCommit": "394307db8127837893c8101828534aeec7057200",
+  "sourceCleanBeforeAndAfterBuilds": true,
+  "versionCode": 9,
+  "versionName": "0.1.6-skill-icons",
+  "minSdk": 31,
+  "targetSdk": 35,
+  "abi": "arm64-v8a",
+  "rustProfile": "release",
+  "gradleVariants": ["debug", "uiPreview"],
+  "gatewayUrl": "",
+  "uiManifestSha256": "e14940711b944e54baa41254fca3f4b8e0ca0ad3e5d92e76e12a366823ca7735",
+  "artifacts": [
+    {
+      "variant": "debug",
+      "pathUnderPlatformAndroid": "target/skill-icons-v9-20261001/final-apks/mir2-native-skill-icons-debug-v9.apk",
+      "bytes": 385894342,
+      "sha256": "3f6c70b52e6bfb3056e369f5f2dbe4984eb6076676174e179b5acc82a6e833f0",
+      "installedPackage": "com.mir2.web3",
+      "capturedPid": 3989,
+      "magicIconFramesByteMatched": 448
+    },
+    {
+      "variant": "uiPreview",
+      "pathUnderPlatformAndroid": "target/skill-icons-v9-20261001/final-apks/mir2-native-skill-icons-preview-v9.apk",
+      "bytes": 389483202,
+      "sha256": "66b9a329066a39d9fdec34c9f79e6d6cde9b063ef8c4937191a0d1986d15574d",
+      "installedPackage": "com.mir2.web3.uipreview",
+      "capturedPid": 4167,
+      "magicIconFramesByteMatched": 448
+    }
+  ],
+  "emulator": "emulator-5554 / Android12 API31 / sdk_gphone64_arm64",
+  "boundedSkillImageRepair": "PASS",
+  "activityStartWait": "TIMEOUT for both variants; later captured frames visible",
+  "fullPhoneUi": "OPEN",
+  "realGatewayPlayerLoop": "OPEN",
+  "physicalDevice": "EXTERNAL",
+  "globalAccepted": false
+}

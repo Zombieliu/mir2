@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 v9 bounded skill image repair PASS: exact clean source394307db8
+> produces both installed diagnostic APKs;448 actual packaged icons each match
+> source bytes. Emulator opens shared SPELLS with original icon/Lv1/F1 and no
+> captured asset errors. Both launch waits time out; narrow skill window,
+> all-phone UI/input/online/device/performance remain open. Historical v8 image
+> FAIL remains separate. [Evidence](generated/player-qa/native-android-skill-icons-20261001/README.md).
+
 > 2026-10-01 Android-only icon package repair requires/stages the original
 >224-frame MagIcon and MagIcon2 libraries. A new diagnostic pack preserves all
 >prior files and matches448 source pixel hashes; the old input is now rejected.

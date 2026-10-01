@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-10-01 v9 exact image checkpoint: clean source394307db8 builds/installs
+> both diagnostic variants with exact versions/hashes and448 byte-matched icons
+> each. Actual offline SPELLS shows original icon/Lv1/F1; captured PID logs have
+> no asset/fatal errors. Both start waits time out and narrow phone window stays
+> open, alongside real JNI/online/device/full-resource/performance gates. v8
+> image FAIL is retained. Next NI-05/06 ordinary inventory/models/receipts, then
+> services; G1 full action denominator and the overall goal remain incomplete.
+> [Exact evidence](generated/player-qa/native-android-skill-icons-20261001/README.md).
+
 > 2026-10-01 NI-07 icon closure source: existing approved MagIcon/MagIcon2 raw
 > libraries export448 pixel-matched frames to a new local pack; prior12789 files
 > and v8 failure stay intact. Android now requires/stages both libraries; the old

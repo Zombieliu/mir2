@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 clean Android source394307db8 binds both v9 diagnostic packages,
+> exact hashes/version/installation and448 actual icon byte matches each. Offline
+> shared SPELLS image repair passes; launch waits time out and full phone UI,
+> real JNI/player loop/resources/performance/device acceptance stay open. Retain
+> v8 image failure and continue inventory/services. Goal remains Active.
+> [Evidence](generated/player-qa/native-android-skill-icons-20261001/README.md).
+
 > 2026-10-01 Android skill-icon package-source closure: both original224-frame
 > libraries are required/staged from a new pixel-checked pack; old files/inputs
 > remain unchanged. Reproduced repeated-frame P2 is fixed; seven real Gradle
