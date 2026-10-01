@@ -114,7 +114,10 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
         recordFallback(client, targetId, 'retreatCellBudgetExceeded');
         return invokeBaseAction(target);
       }
-      throw new Error(`Wizard retreat cell budget exceeded for target ${targetId} (${maxRetreatCellsPerTarget})`);
+      throw new RangedSafetyBandUnavailable(
+        targetId, target, mapId,
+        `Wizard retreat cell budget exceeded for target ${targetId} (${maxRetreatCellsPerTarget})`,
+      );
     }
     const stepBudget = Math.min(
       safetyBandRequired ? rangedSafetyBand.maxRetreatSteps : maxRetreatSteps,

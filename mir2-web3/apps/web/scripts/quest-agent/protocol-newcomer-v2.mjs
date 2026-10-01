@@ -1531,7 +1531,7 @@ async function waitForV2MeleeReady(client, checkDeadline, questId) {
   }
 }
 
-async function castV2Spell(client, target, spell, checkDeadline = () => {}, questId = null) {
+async function castV2Spell(client, target, spell, checkDeadline = () => {}, questId = null, validateTarget = null) {
   const lastMovement = lastOwnerMovementReceipt(client);
   const lastSnapshot = [...(client.events ?? [])].reverse().find(event =>
     event.direction === 'received' && event.type === 'worldSnapshot');
@@ -1551,6 +1551,7 @@ async function castV2Spell(client, target, spell, checkDeadline = () => {}, ques
   if (!currentTarget || currentTarget.dead === true || Number(currentTarget.hp ?? 1) <= 0) {
     throw new V2Pause('practiceTargetLost', questId, `${spell} target is no longer live after cooldown`);
   }
+  if (validateTarget) validateTarget(actor, currentTarget);
   const after = Number(client.sequence ?? 0);
   const beforeHp = Number(currentTarget.hp);
   const poisonBefore = equippedPoisonQuantity(client.snapshot);
@@ -1785,7 +1786,13 @@ async function completeFireWallPractice(client, target, questId, checkDeadline) 
       }
       target = live;
     }
-    const cast = await castV2Spell(client, target, 'FireWall', checkWindow, questId);
+    const cast = await castV2Spell(client, target, 'FireWall', checkWindow, questId, (actor, live) => {
+      // Readiness itself can refresh AOI. Recheck the aim after that await,
+      // immediately before send, rather than trusting the earlier frame.
+      if (String(client.snapshot?.mapFileName ?? '') !== mapFileName || distance(actor, live) > 8) {
+        throw new V2Pause('practiceTargetLost', questId, 'FireWall retry lost its original live in-range target');
+      }
+    });
     firstCastAt ??= Date.now();
     const remaining = PRACTICE_TECHNIQUE_WINDOW_MS - (Date.now() - firstCastAt);
     checkWindow();
@@ -1808,8 +1815,12 @@ async function waitForSpellDamage(client, after, target, beforeHp, spell, questI
     : spell === 'FireWall'
       ? 0
       : target?.objectId;
+  const label = `q${questId} ${spell} damage`;
   await client.wait(() => magicAccepted(client, after, spell, actor, expectedTargetId) &&
-    targetTookDamage(client, target, beforeHp, after, actor?.objectId), `q${questId} ${spell} damage`, timeoutMs).catch(() => {
+    targetTookDamage(client, target, beforeHp, after, actor?.objectId), label, timeoutMs).catch(error => {
+    // Only a real receipt timeout is an accepted ground miss. Preserve
+    // connection, Gateway and predicate failures instead of authorizing retry.
+    if (spell === 'FireWall' && error?.message !== `Timeout waiting for ${label}`) throw error;
     throw new V2Pause('awaitingPracticeDamage', questId, `${spell} lacked a positive post-send target damage receipt`);
   });
 }

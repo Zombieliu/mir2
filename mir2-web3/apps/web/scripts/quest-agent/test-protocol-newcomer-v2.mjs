@@ -719,8 +719,8 @@ function practiceClient({ knownSkills, inventoryItems = [], beltItems = [], requ
       }
       return { payload: { success: true } };
     },
-    async wait(predicate) {
-      assert.equal(Boolean(predicate()), true, 'wait predicate must be backed by the updated authoritative snapshot');
+    async wait(predicate, label) {
+      if (!predicate()) throw new Error(`Timeout waiting for ${label}`);
       return true;
     },
   };
@@ -1250,7 +1250,7 @@ test('FireWall practice reaims the same moving target only after an accepted gro
   const timeouts = [];
   client.wait = async (predicate, label, timeoutMs) => {
     if (label.includes('FireWall damage')) timeouts.push(timeoutMs);
-    if (!predicate()) throw new Error('synthetic accepted ground miss');
+    if (!predicate()) throw new Error(`Timeout waiting for ${label}`);
     return true;
   };
   await executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [{ kind: 'spell', spell: 'FireWall' }] });
@@ -1276,8 +1276,8 @@ test('FireWall practice stops after three accepted misses without inventing dama
     client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
       payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
   };
-  client.wait = async predicate => {
-    if (!predicate()) throw new Error('synthetic accepted ground miss');
+  client.wait = async (predicate, label) => {
+    if (!predicate()) throw new Error(`Timeout waiting for ${label}`);
     return true;
   };
   let navigationCalls = 0;
@@ -1301,14 +1301,70 @@ test('FireWall practice never sends a retry after its original twelve-second win
       client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
         payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
     };
-    client.wait = async predicate => {
-      if (!predicate()) { elapsed = 12_000; throw new Error('expired accepted miss'); }
+    client.wait = async (predicate, label) => {
+      if (!predicate()) { elapsed = 12_000; throw new Error(`Timeout waiting for ${label}`); }
       return true;
     };
     await assert.rejects(executeV2PracticePlan({ client, quest, navigate: async () => {},
       plan: [{ kind: 'spell', spell: 'FireWall' }] }), error => error.reason === 'awaitingPracticeDamage');
     assert.equal(sent.filter(command => command.type === 'magic').length, 1);
   } finally { Date.now = originalNow; }
+});
+
+test('FireWall retry validates range again after authoritative readiness changes', async () => {
+  const { client, quest, sent } = practiceClient({ knownSkills: ['FireWall'], completeOn: 1,
+    requirements: { wizard: ['owned FireWall damage committed'] } });
+  client.snapshot.entities[0].class = 'Wizard';
+  let probes = 0;
+  client.send = command => {
+    if (command.type === 'clientVersion') {
+      probes += 1;
+      client.snapshot.knownSkills[0].cooldownRemainingTicks = probes === 1 ? 1 : 0;
+      if (probes === 2) client.snapshot.entities[1].x = 9;
+      client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
+        payload: structuredClone(client.snapshot) });
+      return;
+    }
+    sent.push(command);
+    client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
+      payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
+  };
+  client.wait = async (predicate, label) => {
+    if (!predicate()) throw new Error(`Timeout waiting for ${label}`);
+    return true;
+  };
+  await assert.rejects(executeV2PracticePlan({ client, quest, navigate: async () => {},
+    plan: [{ kind: 'spell', spell: 'FireWall' }] }), error => error.reason === 'practiceTargetLost');
+  assert.equal(sent.filter(command => command.type === 'magic').length, 1);
+  assert.equal(probes, 2);
+});
+
+test('FireWall never retries an accepted cast after a non-timeout observation failure', async () => {
+  const { client, quest, sent } = practiceClient({ knownSkills: ['FireWall'], completeOn: 1,
+    requirements: { wizard: ['owned FireWall damage committed'] } });
+  client.snapshot.entities[0].class = 'Wizard';
+  const failure = new Error('predicate arithmetic failed');
+  let probes = 0;
+  client.send = command => {
+    if (command.type === 'clientVersion') {
+      probes += 1;
+      client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
+        payload: structuredClone(client.snapshot) });
+      return;
+    }
+    sent.push(command);
+    client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
+      payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
+  };
+  client.wait = async (predicate, label) => {
+    if (label.includes('FireWall damage')) throw failure;
+    if (!predicate()) throw new Error(`Timeout waiting for ${label}`);
+    return true;
+  };
+  await assert.rejects(executeV2PracticePlan({ client, quest, navigate: async () => {},
+    plan: [{ kind: 'spell', spell: 'FireWall' }] }), error => error === failure);
+  assert.equal(sent.filter(command => command.type === 'magic').length, 1);
+  assert.equal(probes, 0);
 });
 
 test('practice plans execute every q21 class action rather than one priority spell', () => {

@@ -682,7 +682,14 @@ test('per-target retreat cell budget stops repeated kiting without another move'
 
   await wrapped(client, target);
   Object.assign(owner, { x: 5, y: 5 });
-  await assert.rejects(wrapped(client, target), /Wizard retreat cell budget exceeded/);
+  await assert.rejects(wrapped(client, target), error => {
+    assert.ok(error instanceof RangedSafetyBandUnavailable,
+      'the exhausted strict budget must enter bounded safety recovery');
+    assert.equal(error.objectId, target.objectId);
+    assert.deepEqual(error.target, { x: target.x, y: target.y });
+    assert.match(error.message, /Wizard retreat cell budget exceeded/);
+    return true;
+  });
   assert.equal(navigationCalls.length, 1);
 });
 

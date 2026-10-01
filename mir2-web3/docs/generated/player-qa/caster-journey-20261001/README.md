@@ -178,3 +178,13 @@ required. Non-FireWall practice and production spell rules are unchanged.
 New moving-target/budget controls fail 2/3 before; all seven FireWall controls
 pass after. The seven affected controller/evidence suites pass317/317 TAP
 cases, with the 54-case custom loadout script counted as one TAP subprocess.
+
+The live follow-up produced real FireWall damage and the N21 practice 1/1.
+It then reached the unchanged twelve-cell strict retreat limit during ordinary
+combat. This limit now reports the same typed safety failure, enabling existing
+deferral/recovery while still refusing an extra kite step or fallback cast.
+The focused exhaustion check fails before; the final seven suites pass319/319.
+An independent review also added fresh post-cooldown aim validation and
+non-timeout error propagation. Both new boundaries fail before; all nine
+FireWall controls pass after. Neither a moved-out-of-range actor nor a
+connection/predicate failure authorizes another cast.
