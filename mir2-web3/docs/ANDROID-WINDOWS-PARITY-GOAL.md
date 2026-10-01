@@ -2,7 +2,8 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
-2026-10-02 最新有界源码叶：NI-11 复用冻结Windows3d735745f的12个纯投影
+2026-10-02 最新有界源码叶，精确源码`4e35d3a34041f47370ba7f1338d4b5e0f8d7c0f8`：
+NI-11 复用冻结Windows3d735745f的12个纯投影
 helper，接通Android公共NPC六类包、owner/scene门及接受请求/有序Exit宿主。
 两处实际共享状态缺陷先红后修：Closed-only误撤销新请求，以及待回复时
 Escape/通用关闭未取消请求。最终Android290/preview304/shared1230+10ignored/

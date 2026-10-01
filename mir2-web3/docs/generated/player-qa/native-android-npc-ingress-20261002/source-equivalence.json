@@ -1,7 +1,7 @@
 {
   "scope": "12 frozen Windows pure projection bodies and thin host delegates only",
   "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
-  "selectedSource": null,
+  "selectedSource": "4e35d3a34041f47370ba7f1338d4b5e0f8d7c0f8",
   "sourceParent": "189e1714a92e3bba1102743659b03782f9e3bdb3",
   "permittedDifferences": [
     "helper names",

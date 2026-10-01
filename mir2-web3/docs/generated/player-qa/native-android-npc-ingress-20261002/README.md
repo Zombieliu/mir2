@@ -9,6 +9,10 @@ leaf; the raw directory's `v17` label is not a delivered version.
 
 - Execution: independent `codex/android-shared-sync`; source parent
   `189e1714a92e3bba1102743659b03782f9e3bdb3`.
+- Tested immutable NPC source:
+  `4e35d3a34041f47370ba7f1338d4b5e0f8d7c0f8`. Both auditors were rerun against
+  this commit and all 15 current source files matched its Git bytes. A later
+  evidence-only binding commit does not change that tested code or the logs.
 - Reviewed gameplay baseline: exact Windows
   `3d735745f1117d42a7859e87604a106351dca935`, already normally merged at
   `04ae04fc82badb8dd1a15d5dade108ade0fe586b`. All earlier proof retains its
