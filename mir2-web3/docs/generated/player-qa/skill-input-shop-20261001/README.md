@@ -4,12 +4,13 @@ The user reported three-class cooldown uncertainty, opening the skill page
 freezing the character, and the level-nine medicine shop covered by the bag.
 This is a bounded repair, not whole-game or human class acceptance.
 
-The installed F:/mir2/Mir2Invite game is still r5 (`c7eacee12`), with no updater.
+At diagnosis the installed F:/mir2/Mir2Invite game was r5 (`c7eacee12`), without an updater.
 The previous r6/r7 shop fix was in source/packages, not that installed copy.
 Its actual production service-open fixture keeps the Buy frame at (0,224)
 and the bag at (445,0). Four purchase/sell/reopen/viewport regressions and nine
 new GPU captures pass with bundled fonts. This repair preserves that working
-placement and must deliver it to the actual installation.
+placement. The actual r8 installer has now delivered it to that installation;
+exact source, hashes, upgrade and update evidence are in [release-r8](release-r8/README.md).
 
 Crystal reference is the original E:/mir2/Crystal checkout. HumanObject's
 CanCast/CanAttack/CanWalk share ActionTime. Magic establishes 1800ms SpellTime
@@ -72,6 +73,12 @@ unchanged exact Zone deadline and positive remaining time; deterministic
 backend finding. The complete simulation/Gateway runs described above predate
 the final Flame additions; they are not relabelled as final full green suites.
 
-Release/deployment and actual installed upgrade are pending final verification.
+Clean3f5e61533 Candidate08, strict123035-file package, signed updater supplement
+and actual r8 installer are built. The matched isolated server is deployed
+after backup and clean stops. Signed sequence4 and the real-package delta/
+rollback integration2/2 pass. Actual F-drive upgrade and native launch verifier
+pass, and its legacy desktop shortcut now goes through the launcher. Real
+native HTTPS delta/zero-download recheck and attested installed login startup
+also pass; exact final records are in [release-r8](release-r8/README.md).
 Capacity work remains paused. External-laptop application-control signing and
 human gameplay acceptance are separate existing open gates.

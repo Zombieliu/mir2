@@ -8,7 +8,9 @@
 > bypass rejection. Snapshot remainingMs is additive/backward-compatible.
 > Earlier complete runs' failures and before/focused evidence are retained;
 > the final Flame slice has focused/adjacent validation, not a relabelled full run.
-> Release/deployment is pending; saves/schema unchanged and capacity paused.
+> Clean3f5e61533 is deployed on isolated playtest7210 after verified backup and
+> normal stop/start checks. Original7110 and saves/schema/limits stay unchanged;
+> matched r8 is installed, signed feed4 published, and capacity remains paused.
 > [Evidence](generated/player-qa/skill-input-shop-20261001/README.md).
 
 > 2026-09-29 capacity candidate9ac is deployed after backup and clean normal

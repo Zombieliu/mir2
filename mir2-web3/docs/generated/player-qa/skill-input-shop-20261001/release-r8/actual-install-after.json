@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "source": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "candidate": "WN-CANDIDATE-20261001-invited-08",
+  "actualInstallation": "F:/mir2/Mir2Invite",
+  "exeSha256": "23356513E9F8DCE3B3E12A2FAD9F89BA5F775FBA643FBCE14763F2C7F6D88431",
+  "installerSha256": "F8E77CB5CDA1AF6438EA16C6F80AECB079B73AE23B10F38120E6CDF24B681012",
+  "installerExitCode": 0,
+  "nativeVerifyExitCode": 0,
+  "verification": {
+    "candidate": "WN-CANDIDATE-20261001-invited-08",
+    "engine": 1,
+    "passed": true
+  },
+  "seedSequence": 4,
+  "shortcutThroughLauncher": true,
+  "gameplayStarted": false,
+  "timestampUtc": "2026-10-01T02:59:56.4683761+00:00"
+}

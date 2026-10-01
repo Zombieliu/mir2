@@ -5,8 +5,10 @@
 > Ordinary Spells/Character/bag/options/menu/help and Diary/Detail capture only
 > their own surfaces; actual prompts/commerce/NPC/search/drags retain capture.
 > Owner cast ACKs start overlays; exact sampled readiness ages while idle.
-> Installed F-drive game was still r5 without updater, not the fixed r6/r7.
-> Matched server timing and actual installed release are being finalized;
+> F-drive was r5 without updater; actual r8 upgrade/native verification now pass.
+> Same clean3f5e61533 server/client are deployed; signed sequence4 is published.
+> Real delta/rollback2/2 and native HTTPS delta/recheck pass; actual desktop
+> launcher opens the attested login screen with empty credentials;
 > capacity remains paused and human gameplay acceptance stays separate.
 > [Evidence](generated/player-qa/skill-input-shop-20261001/README.md).
 
