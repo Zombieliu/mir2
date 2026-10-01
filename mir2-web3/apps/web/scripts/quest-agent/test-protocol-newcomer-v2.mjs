@@ -1504,7 +1504,7 @@ test('SummonSkeleton pauses before casting when no real Amulet can be equipped',
   assert.deepEqual(sent, []);
 });
 
-test('post-walk V2 practice waits for fresh shared readiness before a summon, target spell, or self-heal', async () => {
+test('real owner-only UserLocation makes V2 practice refresh shared readiness before a summon, target spell, or self-heal', async () => {
   for (const [spell, step] of [
     ['SummonSkeleton', { kind: 'summon' }],
     ['FireBall', { kind: 'spell', spell: 'FireBall' }],
@@ -1522,7 +1522,9 @@ test('post-walk V2 practice waits for fresh shared readiness before a summon, ta
     client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
       payload: structuredClone(client.snapshot) });
     client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'packet',
-      packet: 'UserLocation', payload: { objectId: 1, x: 0, y: 0 }, at: new Date().toISOString() });
+      // The real owner-only wire receipt has no objectId. ObjectWalk is the
+      // observer packet; inventing an id here hid the live post-walk failure.
+      packet: 'UserLocation', payload: { x: 0, y: 0 }, at: new Date().toISOString() });
     let probes = 0;
     client.send = command => {
       if (command.type === 'clientVersion') {

@@ -87,6 +87,22 @@ now check that center, as TownRevive already did. Production mana/binding rules
 were not rolled back. The clean full run is not relabelled as passing; these
 focused results resolve its five failures.
 
+## Second-cohort controller wire correction
+
+The r2 ordinary traces exposed a QA-only gap: Wizard N8 and Taoist N11 sent
+GreatFireBall/SoulFireBall 42–45 ms after the last movement, without a fresh
+shared readiness frame. No Magic ACK or mana debit followed; both targets
+remained stationary and unharmed. [Selected real receipts](practice-owner-wire-receipts.json)
+retain the unextended pauses.
+
+Crystal owner-only `UserLocation` serializes position and direction, without
+an `objectId` (`Shared/ServerPackets.cs:870`). The earlier test invented that
+field and therefore missed the live branch. The corrected real-wire test
+fails before the controller fix; the 386-case suite passes afterward. Owner
+receipts without an id now invalidate stale readiness; an explicitly foreign
+id remains excluded. No server cooldown or projectile rule changed. Both
+same accounts resumed through normal login within their original r2 clock.
+
 ## Limits
 
 - The native buried replay binds original packet/snapshot sequence numbers.

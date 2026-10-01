@@ -1516,9 +1516,7 @@ async function waitForV2MeleeReady(client, checkDeadline, questId) {
     await waitForV2SpellReady(client, readinessSpell.spell, checkDeadline, questId);
     return;
   }
-  const lastMovement = [...(client.events ?? [])].reverse().find(event =>
-    event.direction === 'received' && event.packet === 'UserLocation' &&
-    Number(event.payload?.objectId) === Number(selfPlayer(client)?.objectId));
+  const lastMovement = lastOwnerMovementReceipt(client);
   const receivedAt = Date.parse(lastMovement?.at ?? '');
   const remaining = Number.isFinite(receivedAt)
     ? PRACTICE_TECHNIQUE_ACTION_SPACING_MS - (Date.now() - receivedAt) : 0;
@@ -1529,10 +1527,7 @@ async function waitForV2MeleeReady(client, checkDeadline, questId) {
 }
 
 async function castV2Spell(client, target, spell, checkDeadline = () => {}, questId = null) {
-  const ownerId = Number(selfPlayer(client)?.objectId);
-  const lastMovement = [...(client.events ?? [])].reverse().find(event =>
-    event.direction === 'received' && event.packet === 'UserLocation' &&
-    Number(event.payload?.objectId) === ownerId);
+  const lastMovement = lastOwnerMovementReceipt(client);
   const lastSnapshot = [...(client.events ?? [])].reverse().find(event =>
     event.direction === 'received' && event.type === 'worldSnapshot');
   if (Number(lastMovement?.sequence ?? 0) > Number(lastSnapshot?.sequence ?? 0)) {
@@ -1584,6 +1579,15 @@ async function castV2Spell(client, target, spell, checkDeadline = () => {}, ques
       };
   client.send(command);
   return { kind: 'magic', spell, targetId: Number(currentTarget.objectId), command, after, target: currentTarget, beforeHp, poisonBefore };
+}
+
+function lastOwnerMovementReceipt(client) {
+  const ownerId = Number(selfPlayer(client)?.objectId);
+  return [...(client.events ?? [])].reverse().find(event =>
+    event.direction === 'received' && event.packet === 'UserLocation' &&
+    // Crystal UserLocation is an owner-only receipt without an objectId.
+    // Still reject an explicitly different id in compatibility traces.
+    (event.payload?.objectId == null || Number(event.payload.objectId) === ownerId));
 }
 
 async function attackDirectionTechnique(client, target, spell) {
