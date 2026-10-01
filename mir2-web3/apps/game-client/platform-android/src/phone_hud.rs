@@ -6,7 +6,12 @@ use bevy::prelude::*;
 #[cfg(feature = "ui-preview")]
 use bevy::text::TextLayoutInfo;
 use mir2_client_bevy::{
-    crystal_ui::{chat::*, hud::*, overlays::NativePlayerUiState, typography::crystal_text_font},
+    crystal_ui::{
+        chat::*,
+        hud::*,
+        overlays::{NativePlayerUiState, NativeTextInputTarget},
+        typography::crystal_text_font,
+    },
     native_shell::{NativeShellModel, NativeShellScreen},
     read_model::UiReadModel,
 };
@@ -275,6 +280,7 @@ fn decorate_belt(
     mut commands: Commands,
     targets: Query<Entity, Added<CrystalHudBeltHitTarget>>,
     backdrops: Query<Entity, Added<CrystalChatBackdrop>>,
+    inputs: Query<Entity, Added<CrystalChatInput>>,
     controls: Query<(Entity, &CrystalChatAction), Added<CrystalChatAction>>,
 ) {
     for entity in &targets {
@@ -285,6 +291,14 @@ fn decorate_belt(
     }
     for entity in &backdrops {
         commands.entity(entity).insert(BackgroundColor(Color::NONE));
+    }
+    for entity in &inputs {
+        // Android Back hides the IME without changing shared chat focus. Route
+        // a new press on the original draft child through the existing host
+        // editor path; held presses and received history are not editors.
+        commands
+            .entity(entity)
+            .insert((Button, NativeTextInputTarget));
     }
     for (entity, action) in &controls {
         if let Some(label) = phone_chat_label(*action) {

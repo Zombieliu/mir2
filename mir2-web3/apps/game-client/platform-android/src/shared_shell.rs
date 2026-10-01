@@ -2459,6 +2459,10 @@ fn keyboard(
 }
 
 #[cfg(test)]
+#[path = "chat_editor_tests.rs"]
+mod chat_editor_tests;
+
+#[cfg(test)]
 mod tests {
     #[test]
     fn android_host_does_not_let_desktop_ime_steal_its_editor_connection() {

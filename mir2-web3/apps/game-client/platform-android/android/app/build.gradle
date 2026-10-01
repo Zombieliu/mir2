@@ -473,8 +473,8 @@ android {
         applicationId 'com.mir2.web3'
         minSdk 31
         targetSdk 35
-        versionCode 15
-        versionName '0.1.12-chat-layout'
+        versionCode 16
+        versionName '0.1.13-chat-editor'
         buildConfigField 'String', 'MIR2_GATEWAY_URL', groovy.json.JsonOutput.toJson(System.getenv('MIR2_GATEWAY_WS_URL') ?: '')
 
         ndk {
