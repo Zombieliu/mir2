@@ -10,6 +10,8 @@ production deployment acceptance is supplied by this checkpoint.
 - Windows source: `3d735745f1117d42a7859e87604a106351dca935`.
 - Common ancestor / original goal baseline:
   `3f5e61533235921369bc13a7760b4a56b0e467e5`.
+- Reviewed normal integration merge / tested source:
+  `04ae04fc82badb8dd1a15d5dade108ade0fe586b`.
 - This explicitly adds the 14 Windows commits / 238 filenames recorded in
   [the original inventory](../native-android-chat-editor-20261002/windows-upstream-delta.json).
   The selected source includes NPC response/service lifetime, native aim,
@@ -100,7 +102,7 @@ used or changed here.
 From repository root with the pinned toolchain available on PATH:
 
 ```sh
-node mir2-web3/docs/generated/player-qa/native-android-windows-refresh-20261002/audit-merge.mjs <normal-integration-merge-sha>
+node mir2-web3/docs/generated/player-qa/native-android-windows-refresh-20261002/audit-merge.mjs 04ae04fc82badb8dd1a15d5dade108ade0fe586b
 ```
 
 Without an argument, this audit expects the resolved pending merge and examines
@@ -110,3 +112,10 @@ changes cannot silently rebind this checkpoint. `MIR2_AUDIT_RUSTFMT` and
 The curated files are exact copies of the ignored execution evidence under
 `apps/game-client/platform-android/target/windows-upstream-refresh-20261002`.
 The integrity manifest records byte SHA-256 for each original proof copy.
+
+After the normal merge was committed, immutable Git inspection verified all
+1081 tracked source-scope fingerprints and all 31 committed original proof copies.
+The post-commit exact-source audit also passes against both expected parents.
+See `committed-byte-verification.json` and `merged-source-audit.json`. These are
+identity checks, not a count of accepted gameplay capabilities. `curate.mjs`
+deliberately refuses later HEADs so the old logs cannot be paired with new source.
