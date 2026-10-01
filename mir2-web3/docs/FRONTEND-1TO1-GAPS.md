@@ -1,5 +1,13 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 actual Android v12 numeric seam: exact cleanf04a74399 dual APK/
+> versions/hashes/install and6643 source PNG/two metadata matches each. Shared
+> StatsI/II now show source-shaped values, XP/weights; BAG/HUD gold12352 and
+> available34, closes and unobscured phone lanes are visible. Weight-bar originals
+> UI_32bit/471/473 are missing: next stage/guard470..473, not fake colors. Startup
+> timeouts/Launcher ANR, all48dp/drag/IME/services/online/device/full UI stay open.
+> [Actual images and retained failures](generated/player-qa/native-android-player-ingress-20261001/README.md).
+
 > 2026-10-01 Android player/wallet source: shared Windows cursor supplies exact
 > weights/known-zero, stats, XP and public balance updates without mobile rules.
 > Owner/Hero/exact-number and same-batch termination guards pass bounded tests:

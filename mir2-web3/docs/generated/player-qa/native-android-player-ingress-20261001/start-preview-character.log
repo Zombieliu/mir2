@@ -1,0 +1,7 @@
+Stopping: com.mir2.web3.uipreview
+Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }
+Status: timeout
+LaunchState: UNKNOWN (-1)
+Activity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity
+WaitTime: 14099
+Complete

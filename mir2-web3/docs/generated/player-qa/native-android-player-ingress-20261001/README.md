@@ -1,10 +1,12 @@
 # Android shared player stats and wallet ingress — 2026-10-01
 
-Bounded NI-02/08 source checkpoint. The Windows-completeness goal remains Active.
+Bounded NI-02/08 source/package/emulator checkpoint. The goal remains Active.
 Frozen Windows source: `3f5e61533235921369bc13a7760b4a56b0e467e5`.
-The previous v11 APK does **not** contain this implementation. Diagnostic version
-12 / `0.1.9-player-ingress` is set, but this source checkpoint has not built or
-accepted that APK. Exact clean-source package/emulator evidence follows separately.
+Clean APK source: `f04a7439938579480b592b5d4e7381014a612dff`.
+The previous v11 APK does **not** contain this implementation. Actual version12 /
+`0.1.9-player-ingress` packages and offline stat values are now verified below,
+but missing weight-bar imagery, startup and full/live/device acceptance still fail
+or remain open. The source gates below were recorded before that clean build.
 
 ## Shared implementation and authority
 
@@ -87,11 +89,70 @@ Android entity/render or authenticated player-flow acceptance.
 
 ## Remaining acceptance
 
-Exact v12 APK/version/hash/resource bytes/installation and actual stat-page
-rendering are still unverified at this source checkpoint. Full phone controls,
+Exact v12 source/package/installation and bounded numeric pages are verified
+below; they do not close the missing-weight-bar or whole-interface gate. Full controls,
 48dp targets, dragging, compact/IME layouts, launch performance, services, incoming
 chat, quests, mail/storage/social/Hero models, complete resources/audio/resume,
 approved real HTTPS/WSS player flow and physical-device acceptance remain open.
 Only the emulator is connected; no test environment/account has been approved.
 No real credentials, saves, production deployment or APK/licensed image/key Git
 objects are part of this checkpoint.
+
+## Exact v12 APK and actual emulator follow-up
+
+Both builds have empty Git status before/after and the same full source ID above.
+They are Gradle Debug/uiPreview with an optimized Rust release library, **not** a
+store Release or production-signing acceptance. MinAPI31/target35/arm64, normal
+`UI_PREVIEW=false` and separate `com.mir2.web3.uipreview` true are verified in the
+actual APK/config and installed package. Both have `MIR2_GATEWAY_URL=""`.
+
+Local artifact root: `apps/game-client/platform-android/target/player-ingress-v12-20261001/final-apks`.
+
+| Artifact | Bytes | SHA-256 |
+| --- | --- | --- |
+| `mir2-native-player-ingress-debug-v12.apk` | 386297658 | `177e51d0b2381002cc215f39954e5c377ef02850dfaeee28f7d9a24f6e42848d` |
+| `mir2-native-player-ingress-preview-v12.apk` | 390019866 | `e7e8cbd831af05bf2786c0e046262ef23dc419bfa43b62ff692c4f5bdcd76862` |
+
+`package-v12.json`/`verify-package.mjs` check6195 original item/equipment PNGs,
+448 magic-icon PNGs and both Items/StateItem metadata byte-for-byte against the
+unchanged approved v9 diagnostic input. UI/world/entity inputs are unchanged;
+this bounded6643-frame check is not a complete resource-release claim.
+
+Actual test surface: only `emulator-5554`, `sdk_gphone64_arm64`, Android12/API31,
+physical1080x2340 landscape captures2340x1080, density440. Original fingerprint
+is retained in `device-fingerprint.txt`; no physical phone is connected.
+
+- `preview-character-stats1.png` visibly contains HP80/200, MP20/100, AC2-7,
+  AMC1-4, DC12-24 and the remaining shared diagnostic stat rows. StatsII shows
+  XP12.5%, bag66/100, wear25/50 and hand9/25 in its original row order.
+- `preview-inventory.png` visibly shows gold12,352, matching phone HUD12352,
+  and available weight34. Both closes respond and restore the normal phone HUD;
+  side status/chat/six belt targets and both thumb lanes are unobscured. These
+  are offline received-packet projection specimens, not account/custody receipts.
+- New gender/hair data makes the original male paper doll and source weapon
+  visible. The armour specimen has no StateImage: no full equipped appearance
+  or all-classes/skins acceptance. Credit503 is confirmed by the queued typed
+  marker, **not** by a rendered credit control in this capture set.
+- Actual preview logs expose `original-ui/UI_32bit/473.png` (HUD weight bar) and
+  `/471.png` (BAG weight bar) missing. All four frozen Windows frames470..473
+  are absent from both APKs; numeric rows do not hide this image failure.
+  The source Git contains these four originals and sparse metadata (extent474,
+  exported4). Next repair stages/guards the originals, not a recolored substitute.
+- Normal startup timed out12812ms; character timed out14099ms; BAG was OK4798ms.
+  A Pixel Launcher ANR is retained in one portrait and one post-start landscape
+  capture. Its **Wait** action was used, not a launcher kill/data wipe. A premature
+  character capture stopped at the no-preview-process guard before a tab tap;
+  it is retained as the launcher failure, not labelled a character pass.
+- Bounded PID logs: normal6221 has184 lines/0 error-or-fatal matches;
+  character6451 has814 lines/2 ERROR matches/4 missing-frame mentions;
+  inventory6653 has416 lines/3 ERROR matches/6 missing-frame mentions. These
+  are asset errors, not a reported app crash or whole-device performance proof.
+  Both diagnostic apps were stopped after capture; installed app/emulator data
+  were not cleared, no AVD wipe or global log clear was performed.
+
+Nine original PNG captures are retained and manually inspected.
+`runtime-v12.json`/`runtime-audit.mjs` bind their dimensions/hashes, actual installed
+versions, process logs, source markers and observed results. Full phone UI,
+original weight imagery, startup performance, real player flow and device
+acceptance remain false/open. The next source/resource version must not be
+mistaken for these exact v12 hashes or erase their failures.

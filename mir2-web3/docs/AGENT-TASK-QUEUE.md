@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-01 exact Android v12: cleanf04a74399 dual APK/hash/version/install,
+> each6643 source PNG/two metadata byte matches. Actual offline StatsI/II values,
+> XP/three weights and BAG/HUD gold12352/available34 plus closes respond. UI_32bit
+> weight471/473 missing, normal/character start timeouts and Launcher ANR retained.
+> Next stage/guard frozen original470..473 then NI-09/10/11 and full action leaves.
+> This is not full phone UI, real server flow or physical acceptance. Goal Active.
+> [Exact packages, images and failures](generated/player-qa/native-android-player-ingress-20261001/README.md).
+
 > 2026-10-01 Android NI-02/08 source: same frozen-Windows player/wallet cursor,
 > exact weights/provenance and public deltas, owner/character/phase guards and
 > latest-absolute queue retry. Reproduced foreign/fractional-ID and post-rejection

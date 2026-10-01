@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 Android exactv12 from cleanf04a74399: both package/hash/installed
+> versions and6643 original PNG/two metadata matches each; actual offline stats,
+> XP/weights and BAG/HUD wallet values are visible. Missing original weight bars
+>471/473 and start/Launcher failures retained. Next bounded470..473 staging/guard;
+> full UI/input/services/resources/online/device goal remains open, no percent change.
+> [Evidence](generated/player-qa/native-android-player-ingress-20261001/README.md).
+
 > 2026-10-01 Android NI-02/08 source leaf: exact shared Windows player/wallet
 > extraction, bounded owner ingress, weights/partial snapshots/public wallet
 > deltas and terminal same-batch cleanup. Java owner pollution and tiny-fraction
