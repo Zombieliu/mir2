@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-01 NI-09 source: exact shared Windows Chat/ObjectChat projector;
+> Java owner-bootstrap public allowlist, Android bounded FIFO/order/retry/reset.
+> Android267/preview281/shared1205+8ignored/Java37+37/API31 variants/Mac chat2 and
+> frozen extraction pass; bounded review clear. v14 unbuilt, actual UI/JNI/online/
+> input/device OPEN. Shared runtime chat eviction unchanged; next clean dual APK
+> and received lines, then phone HUD weight/NPC/services/full frozen denominator.
+> [Source and failure-first](generated/player-qa/native-android-received-chat-20261001/README.md).
+
 > 2026-10-01 exact Android v13: cleancfac6ecd4 both APK/hash/install; each6647
 > PNG/three metadata matches, all four weight originals match frozen Git bytes.
 > Actual offline BAG471 bar/available34/gold12352 visible; captured PID logs0 errors.

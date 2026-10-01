@@ -454,6 +454,53 @@ public class GatewaySessionTest {
                 .getJSONObject("payload").getLong("objectId"));
     }
 
+    @Test public void receivedChatRequiresOwnerBootstrapAndPreservesOrderedPeerAndSystemPayloads() throws Exception {
+        JSONObject object = GatewaySession.object("type", "packet", "packet", "ObjectChat",
+                "payload", GatewaySession.object("objectId", 99, "text", "邻居: hello 👋",
+                        "chatType", "Normal", "message", "wrong object field"));
+        JSONObject direct = GatewaySession.object("type", "packet", "packet", "Chat",
+                "payload", GatewaySession.object("message", "server.CannotPickupNotOwner",
+                        "chatType", "System", "text", "wrong direct field"));
+        connect();
+        peer.send(object.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        roster();
+        peer.send(direct.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send(object.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(direct.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        assertNotNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        peer.send(object.toString());
+        peer.send(direct.toString());
+        JSONObject first = new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS));
+        JSONObject second = new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS));
+        assertEquals("ObjectChat", first.getString("packet"));
+        assertEquals(99, first.getJSONObject("payload").getInt("objectId"));
+        assertEquals("邻居: hello 👋", first.getJSONObject("payload").getString("text"));
+        assertEquals("Normal", first.getJSONObject("payload").getString("chatType"));
+        assertEquals("Chat", second.getString("packet"));
+        assertEquals("server.CannotPickupNotOwner", second.getJSONObject("payload").getString("message"));
+        assertEquals("System", second.getJSONObject("payload").getString("chatType"));
+        assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(direct.toString());
+        assertEquals("Chat", new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).getString("packet"));
+        peer.send(GatewaySession.object("type", "packet", "packet", "AdminChat",
+                "payload", GatewaySession.object("message", "not public")).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.disconnect("Chat test end");
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
     @Test public void personalSkillPacketsForwardOnlyInsideAuthenticatedGameAndPreservePayload() throws Exception {
         connect();
         JSONObject cast = GatewaySession.object("type", "packet", "packet", "Magic",

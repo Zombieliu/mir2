@@ -23,6 +23,12 @@ pub(crate) struct AndroidPlayerIngress {
 }
 
 impl AndroidPlayerIngress {
+    pub(crate) fn identity(&self) -> Option<(u32, &str)> {
+        self.identity
+            .as_ref()
+            .map(|(owner, name)| (*owner, name.as_str()))
+    }
+
     pub(crate) fn reset(&mut self) {
         *self = Self::default();
     }

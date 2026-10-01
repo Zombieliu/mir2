@@ -6,6 +6,8 @@
 
 pub mod android_input;
 #[cfg(any(target_os = "android", test))]
+mod chat_ingress;
+#[cfg(any(target_os = "android", test))]
 mod android_ui_clipping;
 #[cfg(any(target_os = "android", test))]
 mod entity_overlays;

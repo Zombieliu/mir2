@@ -268,7 +268,7 @@ final class GatewaySession implements AutoCloseable {
         boolean forwardEntity = phase == Phase.IN_GAME && isEntityGameplayPacket(packet);
         boolean forwardPersonal = personalGameplayPhase()
                 && (isPersonalSkillPacket(packet) || isInventoryOperationPacket(packet)
-                        || isPersonalPlayerPacket(packet));
+                        || isPersonalPlayerPacket(packet) || isReceivedChatPacket(packet));
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -435,6 +435,12 @@ final class GatewaySession implements AutoCloseable {
         // Rust refuses a delta without this character's authoritative wallet base.
         return packet.equals("GainedGold") || packet.equals("LoseGold")
                 || packet.equals("GainedCredit") || packet.equals("LoseCredit");
+    }
+
+    private static boolean isReceivedChatPacket(String packet) {
+        // Public received chat, after this connection's accepted owner bootstrap.
+        // ObjectChat is a peer/AOI message, not a personal-owner stat packet.
+        return packet.equals("Chat") || packet.equals("ObjectChat");
     }
 
     private static boolean isEntityGameplayPacket(String packet) {

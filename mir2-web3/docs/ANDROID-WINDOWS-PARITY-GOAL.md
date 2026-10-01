@@ -2,6 +2,15 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
+本轮NI-09源码：提取冻结Windows相同Chat/ObjectChat转换，Java认证owner快照
+之后才转发公共聊天；Android有界FIFO32/128KiB、顺序/失败后缀重试/切图保留/
+终止清理通过。Android267/preview281/shared1205+8既有ignore/Java37+37/API31两
+变体/Mac聊天2及函数等价核验通过，独立只读复审无阻断。v14尚未构建、安装或
+画面验收；现有共享runtime在critical/ACK压力下仍可驱逐聊天，不宣称端到端无丢失。
+下一步干净提交双包与实际接收聊天画面，然后手机HUD负重、NPC/服务及剩余完整
+Windows分母；在线与真机仍OPEN，goal不结束。
+[本轮源码及失败先行](generated/player-qa/native-android-received-chat-20261001/README.md)。
+
 最新实际v13：干净cfac6ecd4双包/hash/安装、每包6647原图/三份metadata及
 四张冻结Windows原图字节核验通过；模拟器BAG原471重量条恢复，余重34/
 金币12352可见，三组采集进程日志无缺图或错误。手机HUD负重显示仍未验收，

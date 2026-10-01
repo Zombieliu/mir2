@@ -115,6 +115,7 @@ fn send(value: Value) {
 
 #[derive(Resource, Default)]
 pub(crate) struct HostState {
+    chat: crate::chat_ingress::AndroidChatIngress,
     skills: crate::skill_ingress::AndroidSkillIngress,
     inventory: crate::inventory_ingress::AndroidInventoryIngress,
     player: crate::player_ingress::AndroidPlayerIngress,
@@ -134,6 +135,7 @@ pub(crate) struct HostState {
 
 impl HostState {
     fn reset_personal(&mut self) {
+        self.chat.reset();
         self.skills.reset();
         self.inventory.reset();
         self.player.reset();
@@ -150,6 +152,8 @@ impl HostState {
     }
 
     fn flush_personal(&mut self) {
+        self.chat
+            .flush(mir2_bevy_runtime::native_ingest::push_native_chat_line);
         self.skills
             .flush(mir2_bevy_runtime::native_ingest::push_native_skill_model);
         self.inventory.flush(
@@ -169,6 +173,23 @@ impl HostState {
             return Ok(false);
         }
         self.player.packet(raw)
+    }
+
+    fn bind_chat_owner(&mut self) -> Result<(), &'static str> {
+        let (owner, name) = self
+            .player
+            .identity()
+            .ok_or("Missing chat owner bootstrap")?;
+        self.chat.bind(owner, name)
+    }
+
+    fn accept_chat_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
+        if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
+            || !matches!(screen, Screen::StartingGame | Screen::InGame)
+        {
+            return Ok(false);
+        }
+        self.chat.packet(raw)
     }
 
     fn accept_inventory_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
@@ -1329,6 +1350,7 @@ fn receive(
                     if host.accept_skill_packet(model.screen, raw).is_err()
                         || host.accept_inventory_packet(model.screen, raw).is_err()
                         || host.accept_player_packet(model.screen, raw).is_err()
+                        || host.accept_chat_packet(model.screen, raw).is_err()
                     {
                         host.reset_gameplay();
                         #[cfg(target_os = "android")]
@@ -1350,7 +1372,7 @@ fn receive(
                         }
                         mir2_bevy_runtime::native_ingest::push_native_data_reset();
                         model.apply_gateway_event(Event::Disconnect {
-                            reason: Some("Invalid or overflowing personal data; reconnect".into()),
+                            reason: Some("Invalid or overflowing gameplay data; reconnect".into()),
                         });
                         intents.drain().for_each(drop);
                         OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
@@ -1690,7 +1712,11 @@ fn receive(
                 if host.skills.snapshot(raw).is_err() || host.inventory.snapshot(raw).is_err() {
                     projected = None;
                 } else if let Ok(ui) = host.player.snapshot(raw) {
-                    projection.ui = ui;
+                    if host.bind_chat_owner().is_ok() {
+                        projection.ui = ui;
+                    } else {
+                        projected = None;
+                    }
                 } else {
                     projected = None;
                 }
@@ -2733,6 +2759,117 @@ mod tests {
             Some(WorldApplyOutcome::DecodeRejected)
         );
         assert_eq!(super::matching_world_receipt(Some(43), &rejected), None);
+    }
+
+    #[test]
+    fn chat_requires_game_phase_and_validated_owner_and_clears_on_render_failure() {
+        let mut host = HostState::default();
+        let raw = json!({"type":"packet","packet":"ObjectChat","payload":{
+            "objectId":99,"text":"peer message","chatType":"Normal"}})
+        .to_string();
+        host.phase = "IN_GAME".into();
+        assert!(!host.accept_chat_packet(Screen::InGame, &raw).unwrap());
+        assert!(host.bind_chat_owner().is_err());
+        host.player
+            .snapshot(
+                &json!({"playerObjectId":42,
+            "entities":[{"objectId":42,"kind":"selfPlayer","name":"Fixture"}]})
+                .to_string(),
+            )
+            .unwrap();
+        host.bind_chat_owner().unwrap();
+        for screen in [
+            Screen::Login,
+            Screen::OpeningLogin,
+            Screen::CharacterSelect,
+            Screen::ConnectionLost,
+        ] {
+            assert!(!host.accept_chat_packet(screen, &raw).unwrap());
+        }
+        for phase in ["READY", "CHARACTERS", "DISCONNECTED"] {
+            host.phase = phase.into();
+            assert!(!host.accept_chat_packet(Screen::InGame, &raw).unwrap());
+        }
+        host.phase = "STARTING".into();
+        host.player.clear_scene();
+        host.bind_chat_owner().unwrap();
+        assert!(host.accept_chat_packet(Screen::StartingGame, &raw).unwrap());
+        assert!(!host.chat.flush(|_| false));
+        host.pending_render_request = Some(7);
+        let mut model = NativeShellModel {
+            screen: Screen::StartingGame,
+            ..default()
+        };
+        assert!(fail_current_render_load(
+            &mut host,
+            &mut model,
+            7,
+            "fixture render failure"
+        ));
+        let mut lines = 0;
+        assert!(host.chat.flush(|_| {
+            lines += 1;
+            true
+        }));
+        assert_eq!(lines, 0);
+        host.phase = "IN_GAME".into();
+        assert!(!host.accept_chat_packet(Screen::InGame, &raw).unwrap());
+    }
+
+    #[test]
+    fn invalid_chat_batch_revokes_host_and_rejects_later_chat_or_stale_view() {
+        INBOX.lock().unwrap().clear();
+        OUTBOX.lock().unwrap().clear();
+        let mut app = App::new();
+        #[cfg(feature = "ui-preview")]
+        app.init_resource::<crate::ui_preview::PreviewRequest>();
+        let mut host = HostState {
+            phase: "IN_GAME".into(),
+            ..default()
+        };
+        host.player
+            .snapshot(
+                &json!({"playerObjectId":42,
+            "entities":[{"objectId":42,"kind":"selfPlayer","name":"Fixture"}]})
+                .to_string(),
+            )
+            .unwrap();
+        host.bind_chat_owner().unwrap();
+        app.insert_resource(NativeShellModel {
+            screen: Screen::InGame,
+            ..default()
+        })
+        .insert_resource(host)
+        .init_resource::<NativeUiIntentQueue>()
+        .add_systems(Update, receive);
+        let mut inbox = INBOX.lock().unwrap();
+        inbox.push_back(json!({"type":"gatewayGameplayPacket","envelope":
+            json!({"type":"packet","packet":"Chat","payload":{"text":"wrong field"}}).to_string()}));
+        inbox.push_back(json!({"phase":"IN_GAME","world":{
+            "playerName":"Fixture","mapFileName":"0","x":302,"y":634}}));
+        inbox.push_back(json!({"type":"gatewayGameplayPacket","envelope":
+            json!({"type":"packet","packet":"ObjectChat","payload":{"objectId":99,"text":"stale"}}).to_string()}));
+        drop(inbox);
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::ConnectionLost
+        );
+        let mut host = app.world_mut().resource_mut::<HostState>();
+        assert_eq!(host.phase, "DISCONNECTED");
+        assert!(host.world.is_none());
+        let mut lines = 0;
+        assert!(host.chat.flush(|_| {
+            lines += 1;
+            true
+        }));
+        assert_eq!(lines, 0);
+        assert_eq!(
+            serde_json::from_str::<Value>(&OUTBOX.lock().unwrap().pop_front().unwrap()).unwrap()
+                ["type"],
+            "disconnect"
+        );
+        assert!(OUTBOX.lock().unwrap().is_empty());
     }
 
     #[test]

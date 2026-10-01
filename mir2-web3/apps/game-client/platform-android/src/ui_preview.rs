@@ -948,7 +948,45 @@ fn offline_player_ingress_model() -> Result<(String, String), &'static str> {
     ))
 }
 
+fn offline_received_chat_lines() -> Result<Vec<String>, &'static str> {
+    let mut ingress = crate::chat_ingress::AndroidChatIngress::default();
+    ingress.bind(42, "OFFLINE UI FIXTURE")?;
+    for (packet, payload) in [
+        (
+            "Chat",
+            serde_json::json!({"message":"OFFLINE system chat", "chatType":"System"}),
+        ),
+        (
+            "ObjectChat",
+            serde_json::json!({"objectId":99,"text":"OFFLINE neighbor: hello", "chatType":"Normal"}),
+        ),
+    ] {
+        ingress.packet(
+            &serde_json::json!({"type":"packet","packet":packet,"payload":payload}).to_string(),
+        )?;
+    }
+    let mut lines = vec![];
+    ingress.flush(|raw| {
+        lines.push(raw);
+        true
+    });
+    Ok(lines)
+}
+
 fn populate_specimens(world: &mut World, scene: &str) {
+    if matches!(scene, "chat" | "chat-settings") {
+        if let Ok(lines) = offline_received_chat_lines() {
+            // Queue each server-shaped line once, never both prefill ChatModel
+            // and enqueue (which would duplicate messages next frame).
+            let mut queued = 0;
+            for raw in lines {
+                if mir2_bevy_runtime::native_ingest::push_native_chat_line(raw) {
+                    queued += 1;
+                }
+            }
+            info!(queued, "ANDROID_OFFLINE_RECEIVED_CHAT_QUEUED_NOT_LIVE");
+        }
+    }
     use mir2_client_bevy::{
         big_map::{BigMapInfo, BigMapModel, BigMapNpc, BigMapPoint, BigMapWorldIcon},
         game_shop::{GameShopEntry, GameShopModel},
@@ -1432,6 +1470,20 @@ mod tests {
             state.character_page,
             mir2_client_bevy::crystal_ui::overlays::CharacterPage::Spells
         );
+    }
+
+    #[test]
+    fn received_chat_specimen_uses_public_packet_adapter_and_shared_model() {
+        let lines = offline_received_chat_lines().unwrap();
+        let mut model = mir2_client_bevy::chat::ChatModel::default();
+        for raw in lines {
+            model.push(serde_json::from_str(&raw).unwrap());
+        }
+        assert_eq!(model.lines.len(), 2);
+        assert_eq!(model.lines[0].text, "OFFLINE system chat");
+        assert_eq!(model.lines[0].channel, "System");
+        assert_eq!(model.lines[1].text, "OFFLINE neighbor: hello");
+        assert_eq!(model.lines[1].channel, "Normal");
     }
 
     #[test]

@@ -1,5 +1,11 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 Android received chat source: shared Windows projector and owner-
+> bootstrap/FIFO/reset checks pass; the two OFFLINE specimens enqueue once through
+> that adapter. v14 unbuilt: no actual phone chat image/input/IME/filter/online/device
+> pass yet. Phone HUD weight/full services remain open; existing shared runtime
+> chat eviction is unchanged. [Source](generated/player-qa/native-android-received-chat-20261001/README.md).
+
 > 2026-10-01 Android exactv13/cfac6ecd4: both APKs install;6647 PNG/three metadata
 > match each, frozen four original weight bytes confirmed. Actual BAG471 bar and
 > available34/gold12352 pass; phone HUD weight not visibly accepted. No new touch/

@@ -16,6 +16,7 @@ use std::{
 };
 
 use futures_util::{SinkExt, StreamExt};
+use mir2_client_bevy::native_chat_ingress::transform_chat_line;
 use mir2_client_bevy::game_shop::{GameShopReceipt, GameShopRequest};
 use mir2_client_bevy::inventory::{
     CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel,
@@ -5054,28 +5055,6 @@ fn value_string(value: Option<&Value>) -> Option<String> {
 /// entries intentionally expose names such as `weapon` and `armour`.
 fn normalized_slot(value: Option<&Value>, fallback: u32) -> u32 {
     mir2_client_bevy::native_inventory_ingress::native_inventory_slot(value, fallback)
-}
-
-/// Transform gateway `Chat` and `ObjectChat` packet payloads into the shared
-/// renderer-neutral chat line. Crystal uses `message` for direct/system chat
-/// and `text` for object chat, so the packet kind selects the authoritative
-/// field instead of accepting an unrelated similarly named property.
-fn transform_chat_line(packet: &str, payload: &Value) -> Option<mir2_client_bevy::chat::ChatLine> {
-    let text_field = match packet {
-        "Chat" => "message",
-        "ObjectChat" => "text",
-        _ => return None,
-    };
-    let text = payload
-        .get(text_field)
-        .and_then(Value::as_str)
-        .map(str::to_owned)?;
-    let channel = payload
-        .get("chatType")
-        .and_then(Value::as_str)
-        .map(str::to_owned)
-        .unwrap_or_else(|| "normal".to_owned());
-    Some(mir2_client_bevy::chat::ChatLine { text, channel })
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
