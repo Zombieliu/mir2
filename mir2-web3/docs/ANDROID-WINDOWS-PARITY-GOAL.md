@@ -103,7 +103,7 @@ Win32 分辨率、Inno 安装器、EXE 更新器不原样搬到 Android：对应
     接入非模态手机操作保护并完成源码回归；详见下方本轮记录。
   - [x] G1-ingress — 已建立20项宿主接收子目录与5项输入集成检查；它不是完整
     玩家功能百分比分母，仍须逐项展开每个服务的动作/回执/窗口与失败验收。
-  - [ ] G1-package — 精确提交源码的 v6 API31 APK、安装与模拟器实测证据。
+  - [ ] G1-package — 精确提交源码的最终诊断 APK、安装与模拟器实测证据。
 - [ ] G2 — 真实登录 → 角色列表 → 创建/选择 → StartGame → 服务端地图/位置。
   审计 transport、认证和 render-ready，不发裸 account_id 冒充身份。
 - [ ] G3 — 完整资源和对象/地图生命周期、真实权威移动、战斗、拾取、背包、
@@ -198,3 +198,23 @@ Mac完整桌面源码测试为622通过/180失败/5ignore，含完整Candidate�
 v6版本号已区分旧包，但APK打包/安装/截图仍待下一步精确绑定本次源提交。
 没有配置真实Gateway、输入账号、写存档、部署服务或获得物理设备证据。
 Goal保持Active；G1整体和G2–G6仍未完成。
+
+## 9. v6 实测发现与 v7 手机菜单修复
+
+v6源码`b7caac732ac31a31353b69e8b0bb956ada3f583a`为正常merge，父提交
+`1e98c89b6`与冻结Windows`3f5e61533`。两个原生API31 APK构建/保数据安装成功，
+Gateway显式为空；uiPreview禁止联网。实际世界帧为849 draws/8 entities/
+13 entity layers/2 effects，仍只是此前局部proof pack，不是完整比奇或在线验收。
+
+首次截图被System UI无响应框遮挡；原图保留，`dumpsys activity lastanr`为
+`<no ANR has occurred since boot>`，不能据此宣称原因已确定。点击Wait后焦点和
+原生世界画面恢复。此后只串行运行一个测试variant，不清数据/重置AVD。
+菜单与背包已实际点开，背包打开后摇杆产生离线意图；另发现展开手机菜单时，
+视觉已隐藏的摇杆仍响应原区域滑动。v6因此只留作中间包/失败证据，不作为最终
+本阶段通过包。整个模拟器/性能稳定性并未因Wait恢复就获得接受。
+
+v7只修改Android手机控制与版本标识：展开rail时取消/拒绝隐藏摇杆，rail状态
+加入TouchContext以防旧手指误点新的菜单项。新失败回归先复现0/1；修复后
+普通Android219/219、uiPreview227/227通过，另有旧pointer释放与抬指恢复测试。
+共享/Zone/Gateway源码不变，前一阶段证据仍按其原范围保留。v7精确源码APK与
+实际重新验证仍待下一步，不把v6画面挪作v7证据。

@@ -72,6 +72,11 @@ still missing. Neither label is an online acceptance result.
   without enabling native-ui/audio. Existing offline visual ignores stay ignored.
 - GI-05: new API31 arm64 APKs and emulator interaction evidence must be bound to
   the exact merge source. v5 screenshots are not silently relabelled as new proof.
+- GI-06: v6 actual emulator input exposed movement from the **hidden** joystick
+  while the Android phone rail was expanded. A failing regression reproduces
+  this for a fresh touch; the subsequent phone-only fix blocks fresh/held motion
+  and includes rail changes in pointer ownership. Ordinary shared windows remain
+  nonmodal. v7 full Rust tests219/preview227 pass; v7 packaging/retest remains OPEN.
 
 ## Implementation order
 

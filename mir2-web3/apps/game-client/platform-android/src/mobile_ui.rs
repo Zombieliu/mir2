@@ -86,6 +86,7 @@ struct SecondaryTouchInteractions {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct TouchContext {
     shell_screen: NativeShellScreen,
+    rail_expanded: bool,
     panel: mir2_ui_core::state::UiPanel,
     security_panel: mir2_ui_core::state::UiSecurityPanel,
     chat_focused: bool,
@@ -172,6 +173,7 @@ fn joystick_touch(
     shell: Res<NativeShellModel>,
     state: Res<NativePlayerUiState>,
     world_input: crate::world_input::WorldInputContext,
+    rail: Option<Res<RailState>>,
     android: Option<Res<AndroidShellState>>,
     windows: Query<&Window>,
     mut joystick: ResMut<JoystickState>,
@@ -182,8 +184,10 @@ fn joystick_touch(
         joystick.release();
         return;
     };
+    let blocked =
+        world_input.blocks_actions(&state) || rail.as_deref().is_some_and(|rail| rail.expanded);
     if shell.screen != NativeShellScreen::InGame
-        || world_input.blocks_actions(&state)
+        || blocked
         || !window.focused
         || android
             .as_deref()
@@ -194,7 +198,7 @@ fn joystick_touch(
             info!(
                 owner,
                 screen = ?shell.screen,
-                blocked = world_input.blocks_actions(&state),
+                blocked,
                 focused = window.focused,
                 lifecycle = ?android.as_deref().map(|state| state.lifecycle),
                 "ANDROID_UI_PREVIEW_TOUCH_CANCEL joystick"
@@ -325,6 +329,7 @@ fn touch_pointer(
     joystick: Option<Res<JoystickState>>,
     shell: Option<Res<NativeShellModel>>,
     state: Option<Res<NativePlayerUiState>>,
+    rail: Option<Res<RailState>>,
     android: Option<Res<AndroidShellState>>,
     mut pointer: ResMut<TouchPointer>,
     mut windows: Query<(Entity, &mut Window)>,
@@ -337,6 +342,7 @@ fn touch_pointer(
         return;
     };
     let context = TouchContext {
+        rail_expanded: rail.as_deref().is_some_and(|rail| rail.expanded),
         shell_screen: shell
             .as_deref()
             .map(|shell| shell.screen)
@@ -1355,6 +1361,91 @@ mod tests {
             .resource::<crate::android_input::AndroidMotionQueue>()
             .0
             .is_empty());
+    }
+
+    #[test]
+    fn rail_transition_releases_the_old_pointer_without_a_ghost_menu_click() {
+        let (mut app, window) = joystick_app();
+        app.init_resource::<RailState>();
+        touch_at(
+            &mut app,
+            window,
+            11,
+            TouchPhase::Started,
+            Vec2::new(700.0, 120.0),
+        );
+        app.update();
+        assert_eq!(app.world().resource::<TouchPointer>().owner, Some(11));
+        assert!(app
+            .world()
+            .resource::<ButtonInput<MouseButton>>()
+            .pressed(MouseButton::Left));
+        app.world_mut().resource_mut::<RailState>().expanded = true;
+        app.update();
+        assert_eq!(app.world().resource::<TouchPointer>().owner, None);
+        assert!(app.world().resource::<TouchPointer>().wait_for_release);
+        assert!(!app
+            .world()
+            .resource::<ButtonInput<MouseButton>>()
+            .pressed(MouseButton::Left));
+        app.update();
+        assert_eq!(app.world().resource::<TouchPointer>().owner, None);
+        touch_at(
+            &mut app,
+            window,
+            11,
+            TouchPhase::Ended,
+            Vec2::new(700.0, 120.0),
+        );
+        app.update();
+        app.update();
+        assert!(!app.world().resource::<TouchPointer>().wait_for_release);
+        assert!(!app
+            .world()
+            .resource::<ButtonInput<MouseButton>>()
+            .just_pressed(MouseButton::Left));
+    }
+
+    #[test]
+    fn expanded_phone_rail_cancels_owned_and_rejects_fresh_hidden_joystick_motion() {
+        for owned in [false, true] {
+            let (mut app, window) = joystick_app();
+            app.init_resource::<RailState>();
+            let window_ref = app.world().get::<Window>(window).unwrap();
+            let center = joystick_center(
+                window_ref,
+                0.0,
+                0.0,
+                gameplay_control_metrics(window_ref.height()).joystick_scale,
+            );
+            let position = center + Vec2::new(30.0, 0.0);
+            if owned {
+                touch_at(&mut app, window, 9, TouchPhase::Started, position);
+                app.update();
+                assert_eq!(app.world().resource::<JoystickState>().owner, Some(9));
+                app.world_mut()
+                    .resource_mut::<crate::android_input::AndroidMotionQueue>()
+                    .0
+                    .clear();
+            }
+            app.world_mut().resource_mut::<RailState>().expanded = true;
+            if !owned {
+                touch_at(&mut app, window, 9, TouchPhase::Started, position);
+            }
+            app.update();
+            assert_eq!(
+                app.world().resource::<JoystickState>().owner,
+                None,
+                "owned={owned}"
+            );
+            assert!(
+                app.world()
+                    .resource::<crate::android_input::AndroidMotionQueue>()
+                    .0
+                    .is_empty(),
+                "a hidden phone joystick must not queue movement, owned={owned}"
+            );
+        }
     }
 
     #[test]
