@@ -2,6 +2,17 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
+2026-10-02 最新实际v18：干净源码`aa1f2c4ada37ed880b71da5168d0b080583524a3`
+双原生Debug诊断包/hash/资源/安装核验通过，实际包含Windows3d735745f刷新与
+4e35 NPC入站。四个离线共享NPC服务窗实际打开；849地图tiles/8实体/13层画面、
+两行接收聊天与Back后点按键盘重开烟测通过。v17消息入队却无窗口的失败包/原图
+保留；预览地图覆盖与旧窗口误报两项先红后修，最终Android290/preview309/
+fresh Java39+39与实际API31两变体通过。正常及NPC启动共45原始GL506条目、
+Buy图标658不存在、SpecialRepair一次关闭点按未生效均保留，零错误/完整UI门FAIL。
+NI-10完整对话/任务、NI-11回执/真实JNI/在线、手机触控与真机仍OPEN，不以预览
+或测试数替代完整Windows分母。下一叶子有效NPC图像/真实关闭与GL，再完整入站。
+[精确v17失败/v18包与模拟器证据](generated/player-qa/native-android-npc-package-20261002/README.md)。
+
 2026-10-02 最新有界源码叶，精确源码`4e35d3a34041f47370ba7f1338d4b5e0f8d7c0f8`：
 NI-11 复用冻结Windows3d735745f的12个纯投影
 helper，接通Android公共NPC六类包、owner/scene门及接受请求/有序Exit宿主。

@@ -1,0 +1,1 @@
+22274 /Users/henryliu/Library/Android/sdk/emulator/qemu/darwin-aarch64/qemu-system-aarch64 -avd Mir2_API_31_ARM64 -port 5554 -no-snapshot-load -no-snapshot-save -crash-report-mode never -no-metrics

@@ -1,5 +1,21 @@
 # Android native host ingress audit
 
+> 2026-10-02 v18 package / offline shared NPC follow-up
+>
+> Exact native diagnostic source`aa1f2c4ada37ed880b71da5168d0b080583524a3` includes
+> the Windows3d735745f refresh and4e35 NPC ingress. Both clean APKs, source/hash,
+> selected resource bytes and installs pass. Four actual offline shared NPC
+> windows and native map/object/chat smoke are recorded. Source290/preview309,
+> fresh Java39+39 and actual API31 variants pass. V17 no-window failure and two
+> red regressions remain preserved; Android-only preview map/observer lifetime
+> is repaired. This does not close NI-10, full NI-11, NI-19, real JNI/online/phone.
+> Zero-error gate FAILS:45 GL506 startup log entries, one nonexistent Buy fixture
+> icon, and an unresolved real close tap. Full phone UI/renderer/resources remain
+> OPEN. No production environment or human store was used; goal stays Active.
+> [Exact proof and next bounded leaf](generated/player-qa/native-android-npc-package-20261002/README.md).
+
+Following checkpoints retain their historical sources and acceptance scope.
+
 2026-10-02 latest NI-11 source leaf: shared Windows3d735745f catalog/service
 projection and Android public six-packet ingress/owner-scene/accepted-request
 hooks are connected. Failure-first actual host/Java/cross-frame/close paths are

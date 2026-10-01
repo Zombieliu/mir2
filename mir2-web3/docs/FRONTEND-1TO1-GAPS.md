@@ -1,5 +1,20 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 Android v18 bounded package/UI checkpoint
+>
+> Clean`aa1f2c4ad` native Debug/Preview packages actually include Windows3d735745f
+> and4e35 NPC source. Real offline shared Buy/Sell/Repair/SRepair windows, map849
+> tiles/8 entities/13 layers and chat/IME reopen smoke are recorded after two
+> failure-first Android preview lifetime fixes. Android290/preview309, fresh
+> Java39+39/API31 and selected6647 PNG/metadata byte checks pass. V17 failed
+> no-window original proof remains. GL45 startup entries, nonexistent Buy fixture
+> image and unresolved actual close tap keep error-free/full phone UI acceptance
+> OPEN/FAIL. No online/transaction/phone/global parity increment follows.
+> The entire Windows-alignment goal stays Active, not reduced to a preview.
+> [Original frames, errors and matrix](generated/player-qa/native-android-npc-package-20261002/README.md).
+
+Following checkpoints retain their historical sources and acceptance scope.
+
 > 2026-10-02 Android NI-11 source slice: frozen catalog/service/tooltip adapter
 > sharing and actual Java/Rust incoming hooks are wired. Two shared UI lifecycle
 > P2s are reproduced and repaired: accepted request survives Closed-only frame;

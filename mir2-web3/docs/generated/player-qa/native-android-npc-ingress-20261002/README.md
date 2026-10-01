@@ -1,5 +1,10 @@
 # Android NPC service/catalogue ingress — 2026-10-02
 
+Subsequent exact native package/emulator checkpoint is
+[v17 failure / v18 bounded window opening](../native-android-npc-package-20261002/README.md).
+The source-only scope below remains historical and is not retrospectively
+relabelled as complete JNI, transactions, live gameplay or physical-device proof.
+
 Status: **NI-11 PARTIAL, source-only**. The complete Windows-alignment goal is
 Active. NI-10 full quest/dialog incoming state, complete service receipts, actual
 JNI/online/physical-device acceptance remain OPEN. No new APK was built in this

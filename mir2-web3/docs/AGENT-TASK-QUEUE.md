@@ -1,5 +1,21 @@
 # Agent Task Queue
 
+> 2026-10-02 Android v18 follow-up queue, full goal still Active
+>
+> Exact clean`aa1f2c4ad` packages/installs and offline shared NPC four-window,
+> native scene and chat/IME smoke now recorded. Android290/preview309, Java39+39,
+> API31 and selected resource bytes pass; v17 no-window failure remains. Actual
+> GL45 startup entries, invalid Buy fixture icon and unresolved close tap are
+> not accepted. Next: valid received NPC item/image input and calibrated actual
+> mobile close/picking, bounded GL framebuffer diagnosis; preserve failures and
+> use fresh source-bound packages. Then NI-10 full quest/dialog producer and
+> remaining frozen Windows denominator. Complete receipts, downstream NI-19,
+> real HTTPS/WSS/Zone/save and physical device gates stay OPEN. Do not reuse
+> production/human stores or request the unanswered test environment repeatedly.
+> [Exact bounded evidence](generated/player-qa/native-android-npc-package-20261002/README.md).
+
+Following checkpoints retain their historical sources and acceptance scope.
+
 > 2026-10-02 latest Android NI-11 source leaf: twelve frozen Windows3d735745f
 > pure adapters are shared, six public Java packets and owner/scene/FIFO/
 > accepted-request/ordered Exit host hooks connected. Actual cross-frame and

@@ -1,0 +1,1018 @@
+{
+  "versions": [
+    "v17",
+    "v18"
+  ],
+  "originalBytesPreserved": true,
+  "apkAndAssetDirectoriesExcluded": true,
+  "files": [
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/Debug-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/Debug-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "a5fb697ddee31b5807e3801a09063b9ec2d7ea56f6f085f6519bdb3f38b9e1b5"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/Debug-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/Debug-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "20204d93217bc386147df465ae9cabe731bcbfeda886edad95699635432061cd"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/Debug-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/Debug-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 856,
+      "sha256": "3970862d205aa818744fc21a0152bc8e8a2ed821985d3e039262e4778ab9070d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/Debug-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/Debug-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3352,
+      "sha256": "f9f5f835e51e349ce12fd19f43f6d3962a3392e649ea22367f5f5f5e4a4c4b3d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/Debug-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/Debug-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "b21c7645da25aa5b43810e80cdba62395e2e9eecb58cb30d51eede7ad7279c7e"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/UiPreview-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/UiPreview-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "7d6b1d7a5eaa4118ff4305db8329f31dc48fd920ac343c8bea918c3ea2e99b9f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/UiPreview-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/UiPreview-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 871,
+      "sha256": "b333f36c56e25c2d5fb85a65978b4f85983bcf932661ab48749a621fba104186"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/UiPreview-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/UiPreview-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 854,
+      "sha256": "016fed29645288e6dec824ebef844456498236bd416a2fc96432a172a61ac8a8"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/UiPreview-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/UiPreview-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3355,
+      "sha256": "50db0a1fa5cc2f6846cbe1a3c3645343201940f06504c2b02fd6695097dc0259"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/UiPreview-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/UiPreview-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "abb185f8dc4d300a2753afe6e18cd2ddea9b58d5f9e6cf5b68a583e9f431f11a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/android-normal-full.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/android-normal-full.log",
+      "bytes": 68401,
+      "sha256": "bbc814db1cb33dba0ae6fbe5b15274841841c1b8b5b4bfc8605e34ff0adcc9fc"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/android-preview-full.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/android-preview-full.log",
+      "bytes": 72616,
+      "sha256": "9e8215acfc381b4b7c221976d1ede1be539c47c487f7eaa03aee70553d5e8a69"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/api31-debug.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/api31-debug.log",
+      "bytes": 33254,
+      "sha256": "fcbcf51dbbdf3f20bb6b1ec465d6d9323dfcf80d7ce958e14bc240308538f0c4"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/api31-uiPreview.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/api31-uiPreview.log",
+      "bytes": 33409,
+      "sha256": "32a117836da73dbdfe5ee52971ac8c1a0a7481f27c4b404101591af1024a1475"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/audit-v17.mjs",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/audit-v17.mjs",
+      "bytes": 9011,
+      "sha256": "8a59d4934e72c56ba6654d9b2e35739286c1c8ea24aa7f83b184cb5fe5f94c4e"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/debug-BuildConfig.java.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/debug-BuildConfig.java.txt",
+      "bytes": 575,
+      "sha256": "bb7fdab06297d54118d960155a699118ccbe474c4cc4239a9004b26c626d711d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/debug-badging.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/debug-badging.txt",
+      "bytes": 4626,
+      "sha256": "8d4e82f648617e399378fb6d922b9d4e8eaace3d5b51e26090f0d5a1c855b481"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/debug-build-end.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/debug-build-end.txt",
+      "bytes": 21,
+      "sha256": "f4f491db1dda7a831634db110546761ca3abd313b14ea5a2d54402998b981ccf"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/debug-build-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/debug-build-start.txt",
+      "bytes": 21,
+      "sha256": "d141f01993ba9e1b05302743530d12ebe4ac24136e1687526457097bb0325167"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/debug-build.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/debug-build.log",
+      "bytes": 36563,
+      "sha256": "65d46be3c0fa0dee13c1b8972a85c1bfe9197d8adab2dec235ae48610dc411cb"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/debug-source-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/debug-source-after.txt",
+      "bytes": 41,
+      "sha256": "ab261f9dcbdea28f474ee33d903ef78140e118a9dbe2e9d153318490b789fd6a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/debug-source-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/debug-source-before.txt",
+      "bytes": 41,
+      "sha256": "ab261f9dcbdea28f474ee33d903ef78140e118a9dbe2e9d153318490b789fd6a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/debug-status-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/debug-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/debug-status-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/debug-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/java-fresh.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/java-fresh.log",
+      "bytes": 3149,
+      "sha256": "e53c6e8820ba72bd910acbd4d96fcdd66ec062d32ac16ccd30641db064a137d9"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/package-audit.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/package-audit.log",
+      "bytes": 3578,
+      "sha256": "a11211008396af1a56ca93d4ba81694f86efb15cb571c4b74446e7ff6059f7de"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/package-v17.json",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/package-v17.json",
+      "bytes": 3578,
+      "sha256": "a11211008396af1a56ca93d4ba81694f86efb15cb571c4b74446e7ff6059f7de"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/preview-BuildConfig.java.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/preview-BuildConfig.java.txt",
+      "bytes": 592,
+      "sha256": "c39ec48147a85d752823eb95f745ff74462d627553293b4227952b95ef6300af"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/preview-badging.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/preview-badging.txt",
+      "bytes": 4646,
+      "sha256": "b7bb8f2bba7bf33cc41feb5a44b3835271ee5349fcf3f995b69991e8aa443035"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/preview-build-end.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/preview-build-end.txt",
+      "bytes": 21,
+      "sha256": "4786d772c1d2a38210fe9720c1c9387256b0f13160c45b3ab44910d36fca1af7"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/preview-build-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/preview-build-start.txt",
+      "bytes": 21,
+      "sha256": "0aed69e50d71394d3f14ba02ee794477a2af26986e8e6bb57d50f970bf80af72"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/preview-build.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/preview-build.log",
+      "bytes": 36782,
+      "sha256": "56c25c2451fc30535b5aea1b0062c4cc9189ddbfc37709ac66fd81a760d55bf7"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/preview-fixtures.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/preview-fixtures.log",
+      "bytes": 34367,
+      "sha256": "ab1677c8b9dca067b9224a013ef83c0f27b856db9dcaf812429b2e9196a38578"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/preview-source-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/preview-source-after.txt",
+      "bytes": 41,
+      "sha256": "ab261f9dcbdea28f474ee33d903ef78140e118a9dbe2e9d153318490b789fd6a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/preview-source-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/preview-source-before.txt",
+      "bytes": 41,
+      "sha256": "ab261f9dcbdea28f474ee33d903ef78140e118a9dbe2e9d153318490b789fd6a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/preview-status-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/preview-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/preview-status-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/preview-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/red-old-manual-shop.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/red-old-manual-shop.log",
+      "bytes": 44116,
+      "sha256": "e7de80da0fbc9f4ad9361472fe2656a98c27762a279256c21485b5bfb5f33a39"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/source-audit-final.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/source-audit-final.log",
+      "bytes": 7622,
+      "sha256": "c86eb127fd9b58fb59f7d40f8f9819fda0d328d6d9efa2ccff5ab7cb95744725"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/source-audit-setup-error.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/source-audit-setup-error.log",
+      "bytes": 957,
+      "sha256": "234999d41ff088f900a7a8c94b94beef6879a89b97c5bf662c7c09a5ff14a6fe"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/source-audit.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/source-audit.log",
+      "bytes": 957,
+      "sha256": "234999d41ff088f900a7a8c94b94beef6879a89b97c5bf662c7c09a5ff14a6fe"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/source-v17.json",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/source-v17.json",
+      "bytes": 7622,
+      "sha256": "c86eb127fd9b58fb59f7d40f8f9819fda0d328d6d9efa2ccff5ab7cb95744725"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/debug-install.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/debug-install.log",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/debug-installed-package.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/debug-installed-package.txt",
+      "bytes": 9276,
+      "sha256": "8e2ae40bd8a6900de990a7895a53be0cc0909cdb84e017ed0e0c4ed5613f1e3f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/debug-login-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/debug-login-pid.log",
+      "bytes": 29572,
+      "sha256": "c46520e21ec8c3e1ef68b56409f8b7a660bb34658a6503a7f0fc07d2c112c6bc"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/debug-login-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/debug-login-resumed.txt",
+      "bytes": 82,
+      "sha256": "77d9cb6b9d9fc74dbe5f2277236ea88f034fef58ad1c0dee335ab5261613d0c2"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/debug-login.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/debug-login.png",
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/debug-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/debug-pid.txt",
+      "bytes": 5,
+      "sha256": "762939e00a9cd0c57edf2714ed114d36e8620cdf79dd0b486cbbec666afb7f47"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/debug-start.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/debug-start.log",
+      "bytes": 158,
+      "sha256": "ce8db33c628ca70344592253548fa6e229742d5585fdceab62a81b02bd02b26a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/device-avd.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/device-avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/device-density.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/device-density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/device-fingerprint.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/device-fingerprint.txt",
+      "bytes": 89,
+      "sha256": "9e2f1f3d18da07932a4b18c12a1ec39c77234bf650bfd4f821ca991c4c0a90c8"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/device-inventory.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/device-inventory.txt",
+      "bytes": 147,
+      "sha256": "e8fe6f96c101382176c616dba8f9ce8e63405777dd1e7e953e586371e2a0e9e6"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/device-size.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/device-size.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/preview-install.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/preview-install.log",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/preview-installed-package.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/preview-installed-package.txt",
+      "bytes": 9573,
+      "sha256": "465ebf1a7bbbcf181501d250c55609f240c65cea114816a2d9707c502cb28b81"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/preview-npcshop-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/preview-npcshop-pid.log",
+      "bytes": 36972,
+      "sha256": "3dbd2beef219b9d3e595cc17f393f1bdd9017bb7dfff6becb0bbfbee7fdd9ea0"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/preview-npcshop-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/preview-npcshop-pid.txt",
+      "bytes": 5,
+      "sha256": "797a6d81c185857cda45a893a597af0d57e9ebc7365b93d4af79d878ffa610d9"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/preview-npcshop-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/preview-npcshop-resumed.txt",
+      "bytes": 105,
+      "sha256": "118508b01d3dd2977f11f2d6bd823a3331cc9f811b5ae59c7802267ba72fe6a6"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/preview-npcshop-start.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/preview-npcshop-start.log",
+      "bytes": 217,
+      "sha256": "eb119c2ba7b27c62e35d273e625fb25e46f633b9f31ec7d21d8c23d9feb23f17"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v17-20261002/device/preview-npcshop.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v17/device/preview-npcshop.png",
+      "bytes": 87129,
+      "sha256": "4720c1a2693dbb3c150753d1180489e47b2ffc7a3cc1ab54bfd3b72e279a280b"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/Debug-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/Debug-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "de9dd51c452e6c3916b2c8031a152c0a399832958352ce43579edb86f5843a7b"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/Debug-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/Debug-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "0f463dbc87199e8593cee2485bd2e469ce2da346f1e0e37de84394c4a8e13adb"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/Debug-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/Debug-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "0b72cd0b5fbd894e0546108de2b4eefb669a2a8fb09b0ef07f4c7ab846c7a3d7"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/Debug-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/Debug-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3353,
+      "sha256": "9d53ac64bef4a0a19e30db1346bcac97e3a4e40ba2ae59b4b34c2b624d34fbb4"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/Debug-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/Debug-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "de008c3f9318404d7aba7fe8818b72c2d4f9f9059b50c8133714288e2cd6ae21"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/UiPreview-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/UiPreview-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "5eb659b87466187a6b2c270e91933d8e9236654156a4a7db3d9409d9cc606a56"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/UiPreview-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/UiPreview-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 871,
+      "sha256": "1b7938413b63c920579d49cdbfcb376ca163bbf40909b014dca99d2be560f342"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/UiPreview-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/UiPreview-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "241a67a9c93ac14426bcdd53c013ef04e0f2b1b8287c266eb8d3868fd81572eb"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/UiPreview-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/UiPreview-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3354,
+      "sha256": "fa656a0cd4e72fbb38eae0012a42d30c37ad20565e3bca9b1b44110f7131e88f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/UiPreview-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/UiPreview-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "e5802631899534e8c63e890d9cf1bc1f47b7501c16185f28d016b49cd3c6f664"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/android-normal-final.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/android-normal-final.log",
+      "bytes": 68357,
+      "sha256": "dd8e318c53c7d2c2f7ce9b982bc5bfb17ab78b2587962a0100e1b19d82986150"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/android-preview-final.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/android-preview-final.log",
+      "bytes": 72398,
+      "sha256": "9dd050ad2812bb0760560534a185520845b8a72790bd4c5bd75edc59f7bcb9f9"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/android-preview-full.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/android-preview-full.log",
+      "bytes": 73016,
+      "sha256": "e5a028b0822e08efcfec6e078b67de8ab575122e80b17e0cc9554a63cb0458ec"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/api31-debug.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/api31-debug.log",
+      "bytes": 33254,
+      "sha256": "b12259d7f88eeeadf92c74c4297c63cad97792d64f793f585a2fee9b3a4b1bf3"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/api31-uiPreview.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/api31-uiPreview.log",
+      "bytes": 33408,
+      "sha256": "969fbc56d2cc87a4507ae93869f2c7d5fd5db2caf5879e6e67da43381f303681"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/audit-v18.mjs",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/audit-v18.mjs",
+      "bytes": 9217,
+      "sha256": "c6ac4fb0b7b0e8b4eb344e2e10210f1da23a97cdad4f029d93cfbde1729d3a20"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/debug-BuildConfig.java.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/debug-BuildConfig.java.txt",
+      "bytes": 576,
+      "sha256": "9570ee072d742e6790808ee51037ae36eeac2165b17922a53b73718778d6c916"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/debug-badging.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/debug-badging.txt",
+      "bytes": 4627,
+      "sha256": "faf0befccd43ae4090da236012dc53014d4a6589e13242070076fef7ce2a9e8c"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/debug-build-end.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/debug-build-end.txt",
+      "bytes": 21,
+      "sha256": "3d0a9dc4e51260cc4b5832f6e02a7e2aa85948105495d8cfa3956a1339df6a40"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/debug-build-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/debug-build-start.txt",
+      "bytes": 21,
+      "sha256": "1389a9552a2337b0e7dad617841ca8ad8e4b36919a849953f35be58fda91fffb"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/debug-build.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/debug-build.log",
+      "bytes": 36355,
+      "sha256": "64a304f4c5eb4458b8c64349e1fba07ac1ff535e71e117bf5b31f6cde5a90b3c"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/debug-source-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/debug-source-after.txt",
+      "bytes": 41,
+      "sha256": "0155773f9972df7d036e36e36f634f5abab8f71d0417d070482eb900da3a003a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/debug-source-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/debug-source-before.txt",
+      "bytes": 41,
+      "sha256": "0155773f9972df7d036e36e36f634f5abab8f71d0417d070482eb900da3a003a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/debug-status-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/debug-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/debug-status-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/debug-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/java-fresh.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/java-fresh.log",
+      "bytes": 3149,
+      "sha256": "ff64752d4bfc6dc2bf57e494cc52d4d8a08fd3500921303d8aa0e4c9601c1590"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/package-audit.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/package-audit.log",
+      "bytes": 3628,
+      "sha256": "edbbf482e22d1561080841219a2c4e7b115daee9913d44b43a60aa029d9460ab"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/package-v18.json",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/package-v18.json",
+      "bytes": 3628,
+      "sha256": "edbbf482e22d1561080841219a2c4e7b115daee9913d44b43a60aa029d9460ab"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/preview-BuildConfig.java.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/preview-BuildConfig.java.txt",
+      "bytes": 593,
+      "sha256": "2e345aa911b82d10d7e2d72a4c3efa20ed787c8bc829996bb3b31103ccbb4fd9"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/preview-badging.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/preview-badging.txt",
+      "bytes": 4647,
+      "sha256": "b2bdc0b7750d8a03e02fab613f354625c33f076cc3161adfd897f91613af30fa"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/preview-build-end.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/preview-build-end.txt",
+      "bytes": 21,
+      "sha256": "befb30ac1abeee47179e94360fb452eec5eef24fdba58149488e65834fce0416"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/preview-build-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/preview-build-start.txt",
+      "bytes": 21,
+      "sha256": "3d0a9dc4e51260cc4b5832f6e02a7e2aa85948105495d8cfa3956a1339df6a40"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/preview-build.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/preview-build.log",
+      "bytes": 36642,
+      "sha256": "dcaef675e3d871782b0958e3892b1e03f5aad6563f563f381ed6cd84c6ba9994"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/preview-fixtures.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/preview-fixtures.log",
+      "bytes": 34367,
+      "sha256": "ab1677c8b9dca067b9224a013ef83c0f27b856db9dcaf812429b2e9196a38578"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/preview-source-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/preview-source-after.txt",
+      "bytes": 41,
+      "sha256": "0155773f9972df7d036e36e36f634f5abab8f71d0417d070482eb900da3a003a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/preview-source-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/preview-source-before.txt",
+      "bytes": 41,
+      "sha256": "0155773f9972df7d036e36e36f634f5abab8f71d0417d070482eb900da3a003a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/preview-status-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/preview-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/preview-status-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/preview-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/red-map-boundary.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/red-map-boundary.log",
+      "bytes": 50390,
+      "sha256": "678ca25498aa7803332b794ec38d0255a0d9e5e2c9c5065fe907389cfce67c16"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/red-old-manual-shop.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/red-old-manual-shop.log",
+      "bytes": 44116,
+      "sha256": "e7de80da0fbc9f4ad9361472fe2656a98c27762a279256c21485b5bfb5f33a39"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/red-old-window-receipt.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/red-old-window-receipt.log",
+      "bytes": 43587,
+      "sha256": "b455f6064d2cdd04b983184eb6a39e0346c8f52827723d883e332a9c65167f04"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/runtime-audit.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/runtime-audit.log",
+      "bytes": 220,
+      "sha256": "167d8370bf43aef1f93df8d97696c28d0c5b9319e9c63f68381fda5d95f14987"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/source-audit-final.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/source-audit-final.log",
+      "bytes": 7624,
+      "sha256": "3c974c83fa8d5824c18ae5649c8e3a313d02e3494b62bbd98b071d7525a34911"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/source-audit-setup-error.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/source-audit-setup-error.log",
+      "bytes": 957,
+      "sha256": "234999d41ff088f900a7a8c94b94beef6879a89b97c5bf662c7c09a5ff14a6fe"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/source-v18.json",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/source-v18.json",
+      "bytes": 7624,
+      "sha256": "3c974c83fa8d5824c18ae5649c8e3a313d02e3494b62bbd98b071d7525a34911"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/debug-install.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/debug-install.log",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/debug-installed-package.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/debug-installed-package.txt",
+      "bytes": 9280,
+      "sha256": "558f96b11d3eb1ec49154fcbde7fbee929b86160acb70ce68bce7962a0b7c688"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/debug-login-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/debug-login-pid.log",
+      "bytes": 28126,
+      "sha256": "8d7bcc3058e22130c10001718e3ba8dbfdd58c282cc7fe0333b2c51ec1d1b104"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/debug-login-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/debug-login-resumed.txt",
+      "bytes": 82,
+      "sha256": "d8304a8de135be9f9d32bc3760918eba76c0bf5002a3707e3ca45365302dd7a1"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/debug-login.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/debug-login.png",
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/debug-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/debug-pid.txt",
+      "bytes": 5,
+      "sha256": "409072405bb25416db146eaa80f7b225794241362d59e136c38b21576b648619"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/debug-start.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/debug-start.log",
+      "bytes": 158,
+      "sha256": "03e18ba45b6257e3f42de9a6ca5c244decdc852e08e38ef18ab801324a847a03"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/device-avd.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/device-avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/device-density.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/device-density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/device-fingerprint.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/device-fingerprint.txt",
+      "bytes": 89,
+      "sha256": "9e2f1f3d18da07932a4b18c12a1ec39c77234bf650bfd4f821ca991c4c0a90c8"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/device-inventory.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/device-inventory.txt",
+      "bytes": 147,
+      "sha256": "e8fe6f96c101382176c616dba8f9ce8e63405777dd1e7e953e586371e2a0e9e6"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/device-process-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/device-process-after.txt",
+      "bytes": 198,
+      "sha256": "7f1d564ad8c528aa5fe96d345ce89d5361fe04c239c578d89e92c1486958dfdc"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/device-process-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/device-process-before.txt",
+      "bytes": 198,
+      "sha256": "7f1d564ad8c528aa5fe96d345ce89d5361fe04c239c578d89e92c1486958dfdc"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/device-size.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/device-size.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/device-state-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/device-state-after.txt",
+      "bytes": 7,
+      "sha256": "c98373c1abef78070f6beef6b4ae4fbf3de348dac280195c7f93441920584af9"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat-ime.txt",
+      "bytes": 305388,
+      "sha256": "20374f997cf2bc7d774390554b8563e1fd8ca32680247a9d07c9d69430ecee07"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat-keyboard-hidden-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat-keyboard-hidden-ime.txt",
+      "bytes": 305326,
+      "sha256": "ae3b4268cc8cbb0654839dd7c5a12b05366d1315bae7a2577863ccc636dfb879"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat-keyboard-hidden.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat-keyboard-hidden.png",
+      "bytes": 59588,
+      "sha256": "f8dc0b1e855d0346411d35c49ff2449d1127987f42d52722df851e4b2ab572bb"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat-keyboard-reopened-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat-keyboard-reopened-ime.txt",
+      "bytes": 304975,
+      "sha256": "c49424c2e7a78845a7325bc224324170231eadc4a33ec154119ae2e186b57bba"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat-keyboard-reopened-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat-keyboard-reopened-pid.log",
+      "bytes": 86594,
+      "sha256": "7da570d14dc6c50f4e9a3a72c31fd741a081f9deaf11c7fdf6c21a630d21d114"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat-keyboard-reopened-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat-keyboard-reopened-resumed.txt",
+      "bytes": 105,
+      "sha256": "09a5d6eb7ba704fdb6eab40852f4a033253a5308268f97c54c89056697ff65df"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat-keyboard-reopened.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat-keyboard-reopened.png",
+      "bytes": 113055,
+      "sha256": "b28521eb6f45146bd337efddd249622e4468f088c674a141130a28203e59e9e0"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat-pid.log",
+      "bytes": 46399,
+      "sha256": "e359165c8cbef79430dd43f6dd9bf01dbff8ad780c32f0ede35c2b3ef7a2c86b"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat-pid.txt",
+      "bytes": 6,
+      "sha256": "314ead76519e271becfd954adce01514c5726431e74c2449654d97bb9f2f56e1"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat-resumed.txt",
+      "bytes": 105,
+      "sha256": "09a5d6eb7ba704fdb6eab40852f4a033253a5308268f97c54c89056697ff65df"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat-start.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat-start.log",
+      "bytes": 217,
+      "sha256": "243e6f12271a734e42d8b6b3fb80de10f1830c7fe51b9ded0b922189ccf8b654"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-chat.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-chat.png",
+      "bytes": 113055,
+      "sha256": "b28521eb6f45146bd337efddd249622e4468f088c674a141130a28203e59e9e0"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-install.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-install.log",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-installed-package.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-installed-package.txt",
+      "bytes": 9572,
+      "sha256": "436931b09847c208cf5ebb8d178a808cdd5193a3b3f3c32bb79656dd6833a187"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-ime.txt",
+      "bytes": 289929,
+      "sha256": "ff00020cbd6e82294caaf0a5f05275d9e4a0f4893c74202b6f64992d341f09e5"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-pid.log",
+      "bytes": 42646,
+      "sha256": "437eb8121c71b9a445e860e8e0a06ea346547eefb29d044b99f7b6370cc09baa"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-pid.txt",
+      "bytes": 5,
+      "sha256": "2dd2038b42fef579be283c8c2fd60d05bc624de2731c14b3ffb1bcfc3cd8cb54"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-repair-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-repair-ime.txt",
+      "bytes": 288932,
+      "sha256": "2dd41b0fb4f7b3326735ddfc3fe3cb0b0259b85b24da9fcd0e8ac7a5efa5e628"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-repair-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-repair-pid.log",
+      "bytes": 31029,
+      "sha256": "5384e4efcc9aedeb57186d3ebd57dd463134390f2f0c3c6a92371d682b8891ad"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-repair-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-repair-pid.txt",
+      "bytes": 5,
+      "sha256": "95e3185799e2e74f8df88f1de469141f63f61e12ddf0b0746fc6e2dcba27507c"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-repair-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-repair-resumed.txt",
+      "bytes": 105,
+      "sha256": "653b0992df1ec77756a752c4fb9e7d288bc426aba67f19f64df9e6c6da36e1c6"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-repair-start.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-repair-start.log",
+      "bytes": 217,
+      "sha256": "0fd2f6c249d8a1143ac6e3bc074fb829b3b3756dc22e1073ea3653484abe9cb3"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-repair.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-repair.png",
+      "bytes": 142447,
+      "sha256": "1bfa47903d21f1cdce43c76d891673e2c40062760d72ce7c35d62af24b168a68"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-resumed.txt",
+      "bytes": 105,
+      "sha256": "98781ba2483bf412df026508a077d5523cc9944bd8c8043e370418b341bb23b1"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-sell-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-sell-ime.txt",
+      "bytes": 288934,
+      "sha256": "7ae8835d229a57a2537dbd51463c6c7ec5c05ab2705d3fcf5fc04e52b604e476"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-sell-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-sell-pid.log",
+      "bytes": 35944,
+      "sha256": "c7efb08c1ccb0550ed6a78587849a8f35731dab8580ed33900df61f261c4905f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-sell-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-sell-pid.txt",
+      "bytes": 5,
+      "sha256": "526ac5e4e9060d1622222942906dbca02ba75b7e9d7639e7e569cf9392a748ab"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-sell-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-sell-resumed.txt",
+      "bytes": 105,
+      "sha256": "be977eb32bbd34eb6aa838363b7d1e89ac02e459ea207f7995e72f9b98ecf1b1"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-sell-start.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-sell-start.log",
+      "bytes": 217,
+      "sha256": "0fd2f6c249d8a1143ac6e3bc074fb829b3b3756dc22e1073ea3653484abe9cb3"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-sell.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-sell.png",
+      "bytes": 140574,
+      "sha256": "24d3c496138044dbcf683ae7a3ebc204f3c160205b9e63a12f5561dec4dd34f4"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-srepair-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-srepair-ime.txt",
+      "bytes": 288921,
+      "sha256": "c9ce6f658a04860e687bc61299ceb75260455a5d74f8ea8ab13086c14c1a2c15"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-srepair-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-srepair-pid.log",
+      "bytes": 40121,
+      "sha256": "d41ae60833ffd8793c39b37c6349b5cf27365c3e886591b7ae8205fa299005bd"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-srepair-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-srepair-pid.txt",
+      "bytes": 5,
+      "sha256": "d12b258d99c6d8ecba1581f94ccecc96d5834855259fe200a55fdabf9b4b18f1"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-srepair-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-srepair-resumed.txt",
+      "bytes": 105,
+      "sha256": "43dbe7d66e1572d0f05990ae5835d2a369c157e69b3573cf252174de756123b4"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-srepair-start.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-srepair-start.log",
+      "bytes": 217,
+      "sha256": "212736006dbbbf39c577c366341c97edc859eae756095d049c6c30597275a4f9"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-srepair.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-srepair.png",
+      "bytes": 142492,
+      "sha256": "13eae57ea5a2c4d98e02440a93fc414f9294cba58d5f510fcd3ec5a550211f30"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop-start.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop-start.log",
+      "bytes": 217,
+      "sha256": "853b47492927d715a2e6797e8c667c5d27dbaf924832d45146ba9605d1ba10c1"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-npcshop.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-npcshop.png",
+      "bytes": 157642,
+      "sha256": "353d6ed38ac0b18a9721837e2b40047ea00bec1dbba5343dbf2aabdad0442d20"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-srepair-after-close-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-srepair-after-close-pid.log",
+      "bytes": 59501,
+      "sha256": "e901dbaa6398f0e1f7f2cc01ed8d4634ea534cbcb09d9f4ab1b8423852850255"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-srepair-after-close-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-srepair-after-close-resumed.txt",
+      "bytes": 105,
+      "sha256": "43dbe7d66e1572d0f05990ae5835d2a369c157e69b3573cf252174de756123b4"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-srepair-after-close.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-srepair-after-close.png",
+      "bytes": 142492,
+      "sha256": "13eae57ea5a2c4d98e02440a93fc414f9294cba58d5f510fcd3ec5a550211f30"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-world-render-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-world-render-pid.log",
+      "bytes": 68026,
+      "sha256": "eb431abc26d448fe4908ccd05d394276ebd6158e04d721237f63276f117548d4"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-world-render-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-world-render-pid.txt",
+      "bytes": 6,
+      "sha256": "6b8ead00428321cbb7d310f96bd801c216a8c2a3da66275d2973b26a9d1e9cd4"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-world-render-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-world-render-resumed.txt",
+      "bytes": 105,
+      "sha256": "478437c573347f0a57a5b2c728df131305b65985bda215d37773657945ec6f69"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-world-render-start.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-world-render-start.log",
+      "bytes": 217,
+      "sha256": "117b89fa73cd63d7ca3d747d1663528b4b7a7805f4d06da3bb8e9d26c11ce4b4"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/preview-world-render.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/preview-world-render.png",
+      "bytes": 1002722,
+      "sha256": "57adfc6af8381056ceb6fe1f502ed1e7fba1ef4207b34c57acfe24d717eabb17"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-preview-v18-20261002/device/task-app-pids-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-package-20261002/v18/device/task-app-pids-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

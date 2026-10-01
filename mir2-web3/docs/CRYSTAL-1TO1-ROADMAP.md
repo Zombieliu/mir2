@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 Android v18 native package checkpoint, not global parity acceptance
+>
+> Clean`aa1f2c4ad` contains the frozen Windows3d735745f refresh and4e35 NPC
+> ingress. Actual native APK/resource/install gates and four offline shared NPC
+> window openings, map/object and chat/IME smoke are recorded. Source290/preview309,
+> fresh Java39+39 and API31 pass. Two preview lifetime defects were reproduced
+> before repair; original v17 no-window proof remains. Actual GL45 startup entries,
+> missing synthetic Buy icon and unresolved close tap retain the full UI/render
+> gate as OPEN/FAIL. No new backend percentage, real player route, authenticated
+> JNI, phone or full Windows-completeness acceptance is claimed; goal stays Active.
+> [Exact source/packages and actual failures](generated/player-qa/native-android-npc-package-20261002/README.md).
+
+Following checkpoints retain their historical sources and acceptance scope.
+
 > 2026-10-02 bounded Android NI-11 source checkpoint: shared twelve frozen
 > Windows3d735745f pure adapters; public six-packet Java ingress, current scene
 > gate, Android catalog/service FIFO and accepted-request/Exit hooks connected.
