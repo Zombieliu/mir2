@@ -55,13 +55,54 @@ pub struct PreviewRequest {
     remaining: u8,
 }
 
+#[derive(Resource, Default)]
+struct OfflineNpcPreviewReceipt {
+    scene: Option<String>,
+    logged: bool,
+}
+
 pub fn install(app: &mut App) {
     app.init_resource::<PreviewRequest>()
+        .init_resource::<OfflineNpcPreviewReceipt>()
         .add_systems(Update, report_world_render_ready)
         .add_systems(Update, report_owned_hero_mana_visible)
         .add_systems(Update, start_world_render_motion_specimen)
         .add_systems(Update, report_world_render_motion_pose)
-        .add_systems(PostUpdate, apply);
+        .add_systems(PostUpdate, (apply, report_npc_preview_consumer).chain());
+}
+
+fn report_npc_preview_consumer(
+    mut receipt: ResMut<OfflineNpcPreviewReceipt>,
+    state: Res<NativePlayerUiState>,
+    shop: Res<mir2_client_bevy::shop::ShopModel>,
+    map: Res<mir2_client_bevy::big_map::BigMapModel>,
+) {
+    use mir2_client_bevy::shop::NpcShopServiceMode;
+    if receipt.logged || !state.npc_shop_open() {
+        return;
+    }
+    let Some(scene) = receipt.scene.clone() else {
+        return;
+    };
+    let expected = match scene.as_str() {
+        "npcshop" => NpcShopServiceMode::Buy,
+        "npcshop-sell" => NpcShopServiceMode::Sell,
+        "npcshop-repair" => NpcShopServiceMode::Repair,
+        "npcshop-srepair" => NpcShopServiceMode::SpecialRepair,
+        _ => return,
+    };
+    if shop.service_mode != expected {
+        return;
+    }
+    // This observes actual shared consumer/UI state, not a GPU frame, server
+    // receipt or live account. Original screenshots are a separate gate.
+    let first = shop.goods.first();
+    info!(scene, mode = ?shop.service_mode, goods = shop.goods.len(),
+        first_id = first.map(|good| good.unique_id).unwrap_or(0),
+        icon_width = first.map(|good| good.icon_width).unwrap_or(0),
+        icon_height = first.map(|good| good.icon_height).unwrap_or(0),
+        map_epoch = map.reset_epoch, "ANDROID_NPC_PREVIEW_SHARED_CONSUMER_OPEN_NOT_LIVE");
+    receipt.logged = true;
 }
 
 fn report_owned_hero_mana_visible(
@@ -588,6 +629,9 @@ fn apply(world: &mut World) {
         (scene, remaining)
     };
     if remaining == 0 {
+        let mut receipt = world.resource_mut::<OfflineNpcPreviewReceipt>();
+        receipt.scene = None;
+        receipt.logged = false;
         // UI fixtures are not Gateway events and do not invoke auth/StartGame.
         let mut shell = NativeShellModel::default();
         shell.screen = match scene.as_str() {
@@ -750,6 +794,11 @@ fn apply(world: &mut World) {
         }
     }
     populate_specimens(world, &scene);
+    // Arm only after the new request is begun, the old panel closed and new
+    // messages queued. A still-open old same-mode shop in frames0..2 cannot
+    // satisfy this request's observation.
+    world.resource_mut::<OfflineNpcPreviewReceipt>().scene =
+        is_npc_service_preview(&scene).then(|| scene.clone());
     if scene == "inventory-amount" {
         world.resource_scope(|world, mut state: Mut<NativePlayerUiState>| {
             state.open_inventory_delete_for_slot(
@@ -1244,7 +1293,12 @@ fn populate_specimens(world: &mut World, scene: &str) {
         },
     );
     let _ = big_map.select_npc(10_000);
-    world.insert_resource(big_map);
+    if !is_npc_service_preview(scene) {
+        world.insert_resource(big_map);
+    }
+    // NPC replies are queued against the existing scene. Replacing its map
+    // epoch here makes the production UI correctly close those replies as
+    // stale, before an actual service window can be shown.
     use mir2_client_bevy::{
         inventory::InventoryModel,
         mail::{MailMessage, MailModel},
@@ -1656,6 +1710,86 @@ mod tests {
                     NpcShopServiceMode::SpecialRepair => Some(2.0),
                     _ => None,
                 }
+            );
+        }
+    }
+
+    #[test]
+    fn npc_preview_receipt_cannot_report_an_old_same_mode_window_as_new() {
+        use bevy::ecs::system::RunSystemOnce;
+        let mut world = World::new();
+        world.init_resource::<mir2_client_bevy::social::SocialModel>();
+        world.init_resource::<mir2_client_bevy::big_map::BigMapModel>();
+        world.init_resource::<UiReadModel>();
+        world.init_resource::<OfflineNpcPreviewReceipt>();
+        world.insert_resource(PreviewRequest {
+            scene: Some("npcshop".into()),
+            remaining: 0,
+        });
+        let mut state = NativePlayerUiState::default();
+        state.core.screen = UiScreen::InGame;
+        state.core.panel = UiPanel::NpcShop;
+        assert!(state.npc_shop_open());
+        world.insert_resource(state);
+        let mut shop = ShopModel::default();
+        assert!(
+            shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal {
+                mode: NpcShopServiceMode::Buy,
+                repair_rate: None,
+            })
+        );
+        world.insert_resource(shop);
+        for frame in 0..=3 {
+            apply(&mut world);
+            world.run_system_once(report_npc_preview_consumer).unwrap();
+            assert!(
+                !world.resource::<OfflineNpcPreviewReceipt>().logged,
+                "frame {frame} cannot report the previous open shop as this request's reply"
+            );
+        }
+        assert_eq!(
+            world
+                .resource::<OfflineNpcPreviewReceipt>()
+                .scene
+                .as_deref(),
+            Some("npcshop")
+        );
+        // Only verify observer arming here. GPU/actual consumer completion is
+        // separately observed by the emulator, not simulated by this test.
+        world.resource_mut::<NativePlayerUiState>().core.panel = UiPanel::NpcShop;
+        world.resource_mut::<ShopModel>().apply_service_signal(
+            mir2_client_bevy::shop::NpcShopServiceSignal {
+                mode: NpcShopServiceMode::Buy,
+                repair_rate: None,
+            },
+        );
+        world.run_system_once(report_npc_preview_consumer).unwrap();
+        assert!(world.resource::<OfflineNpcPreviewReceipt>().logged);
+    }
+
+    #[test]
+    fn npc_preview_retains_current_map_after_an_accepted_request() {
+        for scene in [
+            "npcshop",
+            "npcshop-sell",
+            "npcshop-repair",
+            "npcshop-srepair",
+        ] {
+            let mut world = World::new();
+            world.init_resource::<mir2_client_bevy::social::SocialModel>();
+            let mut map = mir2_client_bevy::big_map::BigMapModel::default();
+            map.set_current_map(0);
+            map.set_player_location(
+                Some(0),
+                mir2_client_bevy::big_map::BigMapPoint { x: 300, y: 630 },
+            );
+            map.reset_epoch = 7;
+            world.insert_resource(map.clone());
+            populate_specimens(&mut world, scene);
+            assert_eq!(
+                world.resource::<mir2_client_bevy::big_map::BigMapModel>(),
+                &map,
+                "{scene} must not inject a map reset that closes its queued service reply"
             );
         }
     }

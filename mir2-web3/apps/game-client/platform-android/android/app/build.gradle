@@ -473,8 +473,8 @@ android {
         applicationId 'com.mir2.web3'
         minSdk 31
         targetSdk 35
-        versionCode 17
-        versionName '0.1.14-npc-ingress'
+        versionCode 18
+        versionName '0.1.15-npc-consumer'
         buildConfigField 'String', 'MIR2_GATEWAY_URL', groovy.json.JsonOutput.toJson(System.getenv('MIR2_GATEWAY_WS_URL') ?: '')
 
         ndk {
