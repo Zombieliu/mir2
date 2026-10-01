@@ -66,6 +66,8 @@ struct JoystickRoot;
 #[derive(Component)]
 struct JoystickKnob;
 #[derive(Component)]
+struct NpcServiceCloseTarget;
+#[derive(Component)]
 struct RailLabel;
 #[derive(Resource, Default)]
 struct RailState {
@@ -145,6 +147,12 @@ pub fn install(app: &mut App) {
                 .before(NativePlayerUiSet::Read),
         )
         .add_systems(
+            Update,
+            npc_service_close_buttons
+                .after(NativePlayerUiSet::Mutate)
+                .before(NativePlayerUiSet::Read),
+        )
+        .add_systems(
             PreUpdate,
             (joystick_touch, touch_pointer)
                 .chain()
@@ -161,7 +169,159 @@ pub fn install(app: &mut App) {
                 .chain()
                 .after(super::shared_shell::AndroidStageFit)
                 .before(bevy::ui::UiSystems::Layout),
+        )
+        .add_systems(
+            PostUpdate,
+            sync_npc_service_close_target
+                .after(super::shared_shell::AndroidStageFit)
+                .before(bevy::ui::UiSystems::Layout),
         );
+}
+
+fn spawn_npc_service_close_target(commands: &mut Commands, node: Node) -> Entity {
+    // NPCDrop's red X is baked into Prguse2/351, not a shared Button. Add a
+    // phone-sized transparent target over that same art, not another NPC rule.
+    commands
+        .spawn((
+            Name::new("AndroidNpcServiceCloseTarget"),
+            NpcServiceCloseTarget,
+            Button,
+            node,
+            BackgroundColor(Color::NONE),
+            ZIndex(50),
+        ))
+        .id()
+}
+
+fn npc_service_close_node(
+    shell: &NativeShellModel,
+    player: &NativePlayerUiState,
+    shop: &mir2_client_bevy::shop::ShopModel,
+    scale: f32,
+    transform: &UiTransform,
+) -> Option<Node> {
+    if shell.screen != NativeShellScreen::InGame
+        || player.core.screen != mir2_ui_core::state::UiScreen::InGame
+        || !player.npc_shop_open()
+        || player.amount_modal_open()
+        || player.keyboard.open
+        || player.trade_dialog.open
+    {
+        return None;
+    }
+    let rendered_scale = transform.scale.abs() * scale;
+    if !rendered_scale.is_finite() || rendered_scale.min_element() <= 0.0 {
+        return None;
+    }
+    let buy = shop.allows_buy() && (!shop.allows_sell() || player.npc_shop_buy_tab);
+    let (center, controls_top) = if buy {
+        // Shared NPCGoods close at (217,3),24x21; arrows start at y35.
+        (Vec2::new(229.0, 13.5), 33.0)
+    } else if shop.allows_sell() || shop.allows_repair() || shop.allows_special_repair() {
+        // NPCDrop is source-positioned at x264; its baked X is (161,12).
+        // Keep the larger target above the Hold control which starts at y36.
+        (Vec2::new(264.0 + 161.0, 12.0), 34.0)
+    } else {
+        return None;
+    };
+    let size = Vec2::splat(48.0) / rendered_scale;
+    Some(Node {
+        position_type: PositionType::Absolute,
+        left: px(center.x - size.x * 0.5),
+        top: px((center.y - size.y * 0.5).min(controls_top - size.y)),
+        width: px(size.x),
+        height: px(size.y),
+        ..default()
+    })
+}
+
+fn sync_npc_service_close_target(
+    mut commands: Commands,
+    shell: Res<NativeShellModel>,
+    player: Res<NativePlayerUiState>,
+    shop: Option<Res<mir2_client_bevy::shop::ShopModel>>,
+    scale: Res<UiScale>,
+    roots: Query<
+        (Entity, &Node, &UiTransform),
+        (
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
+            Without<NpcServiceCloseTarget>,
+        ),
+    >,
+    mut targets: Query<(Entity, &mut Node, Option<&ChildOf>), With<NpcServiceCloseTarget>>,
+) {
+    let root = roots.single().ok();
+    let active_node = root.and_then(|(_, node, transform)| {
+        (node.display != Display::None)
+            .then(|| shop.as_deref())
+            .flatten()
+            .and_then(|shop| npc_service_close_node(&shell, &player, shop, scale.0, transform))
+    });
+    if let Ok((entity, mut node, parent)) = targets.single_mut() {
+        if let Some(active) = active_node {
+            if *node != active {
+                *node = active;
+            }
+            if let Some((root, _, _)) = root {
+                if parent.map(ChildOf::parent) != Some(root) {
+                    commands.entity(entity).insert(ChildOf(root));
+                }
+            }
+        } else {
+            node.display = Display::None;
+        }
+    } else if targets.is_empty() {
+        if let (Some(node), Some((root, _, _))) = (active_node, root) {
+            // Shared rendering may replace the window's children. Recreate
+            // only this platform target after that rebuild, before UI layout.
+            let entity = spawn_npc_service_close_target(&mut commands, node);
+            commands.entity(entity).insert(ChildOf(root));
+        }
+    }
+}
+
+fn npc_service_close_buttons(
+    shell: Res<NativeShellModel>,
+    mut player: ResMut<NativePlayerUiState>,
+    roots: Query<
+        (Entity, &Node, Option<&InheritedVisibility>),
+        With<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
+    >,
+    targets: Query<
+        (&Interaction, &Node, &ChildOf, Option<&InheritedVisibility>),
+        (With<NpcServiceCloseTarget>, Changed<Interaction>),
+    >,
+) {
+    if shell.screen != NativeShellScreen::InGame
+        || player.core.screen != mir2_ui_core::state::UiScreen::InGame
+        || !player.npc_shop_open()
+        || player.amount_modal_open()
+        || player.keyboard.open
+        || player.trade_dialog.open
+    {
+        return;
+    }
+    let Ok((root, root_node, root_visibility)) = roots.single() else {
+        return;
+    };
+    if root_node.display == Display::None || root_visibility.is_some_and(|visible| !visible.get()) {
+        return;
+    }
+    if targets
+        .iter()
+        .any(|(interaction, node, parent, visibility)| {
+            *interaction == Interaction::Pressed
+                && node.display != Display::None
+                && parent.parent() == root
+                && visibility.is_none_or(|visible| visible.get())
+        })
+    {
+        // Existing shared lifecycle cancels the request and owns the Exit
+        // intent. No local NPC transaction, quote, currency or save mutation.
+        player.close_all_windows();
+        #[cfg(feature = "ui-preview")]
+        info!("ANDROID_NPC_CLOSE_SHARED_LOCAL_UI_EXIT_REQUEST_NOT_LIVE");
+    }
 }
 
 // Bevy UI already handles touch clicks. Source Crystal drag/scroll handlers
@@ -555,6 +715,16 @@ fn keep_drag_handles_reachable(
     }
 }
 fn spawn(mut commands: Commands) {
+    spawn_npc_service_close_target(
+        &mut commands,
+        Node {
+            position_type: PositionType::Absolute,
+            width: px(48.0),
+            height: px(48.0),
+            display: Display::None,
+            ..default()
+        },
+    );
     commands
         .spawn((
             TouchRail,
@@ -1884,6 +2054,316 @@ mod tests {
             app.world().get::<Window>(window).unwrap().cursor_position(),
             Some(Vec2::new(300.0, 100.0))
         );
+    }
+
+    #[test]
+    fn npc_service_art_close_has_an_android_touch_target() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins).add_systems(Startup, spawn);
+        app.update();
+        let world = app.world_mut();
+        let targets: Vec<_> = world
+            .query::<(&Name, &Node, &BackgroundColor, &Button)>()
+            .iter(world)
+            .filter(|(name, _, _, _)| name.as_str() == "AndroidNpcServiceCloseTarget")
+            .collect();
+        assert_eq!(
+            targets.len(),
+            1,
+            "The red X baked into NPCDrop art is not a Button"
+        );
+        let (_, node, background, _) = targets[0];
+        assert_eq!(
+            node.display,
+            Display::None,
+            "Hidden until the real shared service opens"
+        );
+        assert_eq!(background.0, Color::NONE, "Do not replace the shared art");
+        assert_eq!((node.width, node.height), (px(48.0), px(48.0)));
+    }
+
+    #[test]
+    fn npc_close_target_keeps_phone_size_without_covering_service_actions() {
+        use mir2_client_bevy::shop::{NpcShopServiceMode as Mode, NpcShopServiceSignal, ShopModel};
+        let shell = NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        };
+        let mut player = NativePlayerUiState::default();
+        player.core.screen = mir2_ui_core::state::UiScreen::InGame;
+        player.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+        for mode in [Mode::Buy, Mode::Sell, Mode::Repair, Mode::SpecialRepair] {
+            let mut shop = ShopModel::default();
+            assert!(shop.apply_service_signal(NpcShopServiceSignal {
+                mode,
+                repair_rate: matches!(mode, Mode::Repair | Mode::SpecialRepair).then_some(1.0),
+            }));
+            for (scale, panel_scale) in [(0.4, 0.7), (0.886, 1.0), (1.0, 1.0), (1.5, 0.8)] {
+                let transform = UiTransform::from_scale(Vec2::splat(panel_scale));
+                let node =
+                    npc_service_close_node(&shell, &player, &shop, scale, &transform).unwrap();
+                let (Val::Px(width), Val::Px(height), Val::Px(top)) =
+                    (node.width, node.height, node.top)
+                else {
+                    panic!("Use source-local pixel geometry");
+                };
+                assert!((width * scale * panel_scale - 48.0).abs() < 0.0001);
+                assert!((height * scale * panel_scale - 48.0).abs() < 0.0001);
+                assert!(top + height <= if mode == Mode::Buy { 33.001 } else { 34.001 });
+                let center_y = if mode == Mode::Buy { 13.5 } else { 12.0 };
+                assert!(
+                    top <= center_y && top + height >= center_y,
+                    "Include the visible X"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn npc_close_target_reappears_after_shared_children_are_rebuilt() {
+        use mir2_client_bevy::crystal_ui::overlays::OverlayShop;
+        use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal, ShopModel};
+        let mut app = App::new();
+        let mut player = NativePlayerUiState::default();
+        player.core.screen = mir2_ui_core::state::UiScreen::InGame;
+        player.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+        let mut shop = ShopModel::default();
+        shop.apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Sell,
+            repair_rate: None,
+        });
+        app.add_plugins(MinimalPlugins)
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .insert_resource(player)
+            .insert_resource(shop)
+            .insert_resource(UiScale(0.886))
+            .add_systems(Startup, spawn)
+            .add_systems(Update, sync_npc_service_close_target);
+        let root = app
+            .world_mut()
+            .spawn((OverlayShop, Node::default(), UiTransform::default()))
+            .id();
+        app.update();
+        let old = {
+            let world = app.world_mut();
+            let mut query =
+                world.query_filtered::<(Entity, &ChildOf, &Node), With<NpcServiceCloseTarget>>();
+            let (entity, parent, node) = query.single(world).unwrap();
+            assert_eq!(parent.parent(), root);
+            assert_eq!(node.display, Display::Flex);
+            entity
+        };
+        app.world_mut()
+            .entity_mut(root)
+            .despawn_related::<Children>();
+        app.update();
+        let world = app.world_mut();
+        let mut query =
+            world.query_filtered::<(Entity, &ChildOf, &Node), With<NpcServiceCloseTarget>>();
+        let (new, parent, node) = query.single(world).unwrap();
+        assert_ne!(new, old);
+        assert_eq!(parent.parent(), root);
+        assert_eq!(node.display, Display::Flex);
+        world
+            .resource_mut::<NativePlayerUiState>()
+            .close_all_windows();
+        app.update();
+        assert_eq!(app.world().get::<Node>(new).unwrap().display, Display::None);
+    }
+
+    #[test]
+    fn npc_close_touch_uses_shared_cancellation_without_transaction_mutation() {
+        use mir2_client_bevy::inventory::InventoryModel;
+        let mut app = App::new();
+        let mut player = NativePlayerUiState::default();
+        player.core.screen = mir2_ui_core::state::UiScreen::InGame;
+        player.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+        player.begin_npc_service_request();
+        let inventory = InventoryModel {
+            gold: 12345,
+            ..default()
+        };
+        app.insert_resource(NativeShellModel {
+            screen: NativeShellScreen::InGame,
+            ..default()
+        })
+        .insert_resource(player)
+        .insert_resource(inventory.clone())
+        .add_systems(Update, npc_service_close_buttons);
+        let root = app
+            .world_mut()
+            .spawn((
+                mir2_client_bevy::crystal_ui::overlays::OverlayShop,
+                Node::default(),
+                InheritedVisibility::VISIBLE,
+            ))
+            .id();
+        app.world_mut().spawn((
+            NpcServiceCloseTarget,
+            Interaction::Pressed,
+            Node::default(),
+            InheritedVisibility::VISIBLE,
+            ChildOf(root),
+        ));
+        app.update();
+        let player = app.world().resource::<NativePlayerUiState>();
+        assert!(!player.npc_shop_open());
+        assert!(!player.accepts_npc_service_reply());
+        assert_eq!(
+            serde_json::to_value(app.world().resource::<InventoryModel>()).unwrap(),
+            serde_json::to_value(&inventory).unwrap(),
+        );
+    }
+
+    #[test]
+    fn npc_close_cannot_consume_a_hidden_detached_or_old_parent_press() {
+        use mir2_client_bevy::crystal_ui::overlays::OverlayShop;
+        for context in 0..6 {
+            let mut app = App::new();
+            let mut player = NativePlayerUiState::default();
+            player.core.screen = mir2_ui_core::state::UiScreen::InGame;
+            player.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+            player.begin_npc_service_request();
+            app.insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .insert_resource(player)
+            .add_systems(Update, npc_service_close_buttons);
+            let root = app
+                .world_mut()
+                .spawn((
+                    OverlayShop,
+                    Node {
+                        display: if context == 3 {
+                            Display::None
+                        } else {
+                            Display::Flex
+                        },
+                        ..default()
+                    },
+                    if context == 5 {
+                        InheritedVisibility::HIDDEN
+                    } else {
+                        InheritedVisibility::VISIBLE
+                    },
+                ))
+                .id();
+            let target = app
+                .world_mut()
+                .spawn((
+                    NpcServiceCloseTarget,
+                    Interaction::Pressed,
+                    Node {
+                        display: if context == 0 {
+                            Display::None
+                        } else {
+                            Display::Flex
+                        },
+                        ..default()
+                    },
+                    if context == 4 {
+                        InheritedVisibility::HIDDEN
+                    } else {
+                        InheritedVisibility::VISIBLE
+                    },
+                ))
+                .id();
+            match context {
+                1 => {} // detached target
+                2 => {
+                    let old = app
+                        .world_mut()
+                        .spawn((Node::default(), InheritedVisibility::VISIBLE))
+                        .id();
+                    app.world_mut().entity_mut(target).insert(ChildOf(old));
+                }
+                _ => {
+                    app.world_mut().entity_mut(target).insert(ChildOf(root));
+                }
+            }
+            app.update();
+            let player = app.world().resource::<NativePlayerUiState>();
+            assert!(
+                player.npc_shop_open(),
+                "context {context} cannot close the current shared service"
+            );
+            assert!(
+                player.accepts_npc_service_reply(),
+                "context {context} cannot cancel the new request"
+            );
+        }
+    }
+
+    #[test]
+    fn npc_close_target_rejects_hidden_closed_and_modal_contexts() {
+        use mir2_client_bevy::inventory::{InventoryModel, ItemModel};
+        use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal, ShopModel};
+        let mut shop = ShopModel::default();
+        shop.apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Sell,
+            repair_rate: None,
+        });
+        for context in 0..5 {
+            let mut shell = NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            };
+            let mut player = NativePlayerUiState::default();
+            player.core.screen = mir2_ui_core::state::UiScreen::InGame;
+            player.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+            match context {
+                0 => shell.screen = NativeShellScreen::Login,
+                1 => player.close_all_windows(),
+                2 => player.keyboard.open = true,
+                3 => player.trade_dialog.open = true,
+                _ => {
+                    let inventory = InventoryModel {
+                        items: vec![ItemModel {
+                            unique_id: Some(1),
+                            quantity: 2,
+                            container: 0,
+                            slot: 0,
+                            ..default()
+                        }],
+                        ..default()
+                    };
+                    assert!(player.open_inventory_delete_for_slot(&inventory, 0));
+                }
+            }
+            assert!(
+                npc_service_close_node(&shell, &player, &shop, 1.0, &UiTransform::default())
+                    .is_none()
+            );
+            let before_panel = player.core.panel;
+            let before_pending = player.accepts_npc_service_reply();
+            let mut app = App::new();
+            app.insert_resource(shell)
+                .insert_resource(player)
+                .add_systems(Update, npc_service_close_buttons);
+            let root = app
+                .world_mut()
+                .spawn((
+                    mir2_client_bevy::crystal_ui::overlays::OverlayShop,
+                    Node::default(),
+                    InheritedVisibility::VISIBLE,
+                ))
+                .id();
+            app.world_mut().spawn((
+                NpcServiceCloseTarget,
+                Interaction::Pressed,
+                Node::default(),
+                InheritedVisibility::VISIBLE,
+                ChildOf(root),
+            ));
+            app.update();
+            let after = app.world().resource::<NativePlayerUiState>();
+            assert_eq!(after.core.panel, before_panel);
+            assert_eq!(after.accepts_npc_service_reply(), before_pending);
+        }
     }
 
     #[test]

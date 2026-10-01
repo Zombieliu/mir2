@@ -1052,8 +1052,8 @@ fn offline_npc_ingress_messages(scene: &str) -> Result<Vec<OfflineNpcMessage>, &
         "npcshop" => (
             "NPCGoods",
             serde_json::json!({"ownerObjectId":42,"mapFileName":"0","hideAddedStats":true,
-                "list":[{"uniqueId":"9007199254740993","name":"OFFLINE received potion",
-                    "icon":658,"price":50,"stock":20,"count":1,"panelType":0}]}),
+                "list":[{"uniqueId":"9007199254740993","name":"OFFLINE received item",
+                    "icon":7,"price":50,"stock":20,"count":1,"panelType":0}]}),
         ),
         "npcshop-sell" => ("NPCSell", serde_json::Value::Null),
         "npcshop-repair" => ("NPCRepair", serde_json::json!({"rate":1.25})),
@@ -1806,11 +1806,11 @@ mod tests {
         assert_eq!(shop.goods.len(), 1);
         let good = &shop.goods[0];
         assert_eq!(good.unique_id, 9_007_199_254_740_993);
-        assert_eq!(good.name, "OFFLINE received potion");
         assert_eq!(
             (good.icon, good.price, good.count, good.stock),
-            (658, 50, 1, 20)
+            (7, 50, 1, 20)
         );
+        assert_eq!(good.name, "OFFLINE received item");
         assert!(!good.use_pearls);
         assert!(shop.hide_added_stats);
         let OfflineNpcMessage::Service(raw) = &messages[1] else {
