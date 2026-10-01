@@ -3954,6 +3954,15 @@ where
                         }
                     }
                 }
+                "NPCResponse" => {
+                    if let Some(signal) = event
+                        .payload
+                        .as_ref()
+                        .and_then(|payload| npc_shop_service_from_packet(packet, payload))
+                    {
+                        push_native_npc_shop_service(signal)?;
+                    }
+                }
                 "NPCGoods" | "NPCPearlGoods" => {
                     if let Some(payload) = event.payload.as_ref() {
                         if let Some(shop) = transform_npc_catalog_packet(packet, payload, ui_cursor)
@@ -5222,13 +5231,22 @@ fn transform_game_shop_stock_from_packet(payload: &Value) -> Option<Value> {
 /// the separately correlated cash GameShop catalogue above. `NPCGoods` and
 /// `NPCSell` remain separate packet signals; the shared ShopModel folds that
 /// ordered pair into one BUYSELL capability set, while a lone NPCSell stays
-/// sell-only.
+/// sell-only. A real NPCResponse page retires the previous service children,
+/// even when the new page contains text; a passive snapshot is not that packet.
 fn npc_shop_service_from_packet(
     packet: &str,
     payload: &Value,
 ) -> Option<mir2_client_bevy::shop::NpcShopServiceSignal> {
     use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal};
     let signal = match packet {
+        "NPCResponse"
+            if payload
+                .get("page")
+                .and_then(Value::as_array)
+                .is_some_and(|page| page.iter().all(Value::is_string)) =>
+        {
+            NpcShopServiceSignal::default()
+        }
         "NPCGoods" | "NPCPearlGoods" => NpcShopServiceSignal {
             mode: NpcShopServiceMode::Buy,
             repair_rate: None,
@@ -6817,6 +6835,34 @@ mod tests {
             assert!(cursor.player_weights.is_none());
             assert!(cursor.to_read_model_json()["player"]["weights"].is_null());
         }
+    }
+
+    #[test]
+    fn actual_npc_response_retires_service_children_but_malformed_or_snapshot_text_does_not() {
+        for payload in [
+            json!({"page":[]}),
+            json!({"page":["Welcome", "<Back/@main>"]}),
+        ] {
+            assert_eq!(
+                npc_shop_service_from_packet("NPCResponse", &payload)
+                    .expect("real NPCResponse boundary")
+                    .mode,
+                mir2_client_bevy::shop::NpcShopServiceMode::Closed,
+            );
+        }
+        for payload in [
+            Value::Null,
+            json!({}),
+            json!({"page":null}),
+            json!({"page":""}),
+            json!({"page":[42]}),
+        ] {
+            assert!(npc_shop_service_from_packet("NPCResponse", &payload).is_none());
+        }
+        assert!(
+            npc_shop_service_from_packet("worldSnapshot", &json!({"activeNpcDialog":null}))
+                .is_none()
+        );
     }
 
     #[test]
