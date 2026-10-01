@@ -104,7 +104,7 @@ fn move_bag(app: &mut App, position: Vec2) {
     state.inventory_window.top = position.y;
 }
 
-fn press_real_button(app: &mut App, action: OverlayButton) {
+pub(crate) fn press_real_button(app: &mut App, action: OverlayButton) {
     let id = app
         .world_mut()
         .query::<(Entity, &OverlayButton)>()
@@ -113,6 +113,203 @@ fn press_real_button(app: &mut App, action: OverlayButton) {
         .expect("production overlay button");
     app.world_mut().entity_mut(id).insert(Interaction::Pressed);
     app.update();
+}
+
+/// Synthetic read-model cases using the real imported supply templates. These
+/// exercise ordinary production services/buttons, never a grant or live save.
+#[derive(Clone, Copy)]
+pub(crate) struct CasterShopCase {
+    pub slug: &'static str,
+    pub class: &'static str,
+    pub level: u32,
+    pub vendor: crate::quest_supplies::SupplyVendor,
+    pub catalog: &'static [i32],
+    pub selected: i32,
+}
+
+pub(crate) const CASTER_SHOP_CASES: [CasterShopCase; 7] = [
+    CasterShopCase {
+        slug: "wizard-9-medicine", class: "Wizard", level: 9,
+        vendor: crate::quest_supplies::SupplyVendor::Potions,
+        catalog: &[658, 659], selected: 659,
+    },
+    CasterShopCase {
+        slug: "wizard-28-medicine", class: "Wizard", level: 28,
+        vendor: crate::quest_supplies::SupplyVendor::Potions,
+        catalog: &[658, 659, 660, 661, 662, 663], selected: 663,
+    },
+    CasterShopCase {
+        slug: "wizard-28-scrolls", class: "Wizard", level: 28,
+        vendor: crate::quest_supplies::SupplyVendor::General,
+        catalog: &[717, 719], selected: 719,
+    },
+    CasterShopCase {
+        slug: "taoist-9-medicine", class: "Taoist", level: 9,
+        vendor: crate::quest_supplies::SupplyVendor::Potions,
+        catalog: &[658, 659], selected: 659,
+    },
+    CasterShopCase {
+        slug: "taoist-28-medicine", class: "Taoist", level: 28,
+        vendor: crate::quest_supplies::SupplyVendor::Potions,
+        catalog: &[658, 659, 660, 661, 662, 663], selected: 663,
+    },
+    CasterShopCase {
+        slug: "taoist-28-amulets", class: "Taoist", level: 28,
+        vendor: crate::quest_supplies::SupplyVendor::General,
+        catalog: &[712, 717, 719], selected: 712,
+    },
+    CasterShopCase {
+        slug: "taoist-28-poison", class: "Taoist", level: 28,
+        vendor: crate::quest_supplies::SupplyVendor::Poison,
+        catalog: &[710, 711], selected: 710,
+    },
+];
+
+fn source_item(index: i32, count: u16, container: u8, slot: u32) -> ItemModel {
+    let template = mir2_game_data::crystal_item_by_index(index).unwrap();
+    let unique_id = 10_000 + index as u64;
+    ItemModel {
+        unique_id: Some(unique_id), key: format!("crystal-item-{index}"),
+        name: template.name.clone(), quantity: u32::from(count), container, slot,
+        icon: template.image, shape: u16::try_from(template.shape).ok(),
+        durability_current: Some(template.durability), durability_max: Some(template.durability),
+        equip_slot: (template.item_type == 8).then(|| "Amulet".into()),
+        tooltip_source: Some(crate::inventory::CrystalItemTooltipSourceModel {
+            info: serde_json::from_value(serde_json::to_value(&template).unwrap()).unwrap(),
+            user_item: Some(crate::inventory::CrystalUserItemModel {
+                unique_id, item_index: index, count,
+                current_dura: template.durability, max_dura: template.durability,
+                ..default()
+            }),
+            ..default()
+        }),
+        ..default()
+    }
+}
+
+pub(crate) fn prepare_caster_case(app: &mut App, case: CasterShopCase) {
+    let mut state = NativePlayerUiState::default();
+    state.core.screen = mir2_ui_core::state::UiScreen::InGame;
+    app.insert_resource(state)
+        .insert_resource(ShopModel::default())
+        .insert_resource(NpcDialogModel::default())
+        .insert_resource(PendingOperations::default())
+        .insert_resource(UiSurfaceSignals::default());
+    app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().clear();
+    // Observe the closed surface before the next service signal, including
+    // when one offscreen application is reused for multiple independent cases.
+    app.update();
+    let gold = if case.level == 9 { 700 } else { 25_000 };
+    {
+        let mut ui = app.world_mut().resource_mut::<UiReadModel>();
+        ui.player.level = case.level;
+        ui.player.class_name = Some(case.class.into());
+        ui.player.gender = Some("Male".into());
+        ui.player.gold = gold;
+    }
+    let late = case.level >= 25;
+    let mut inventory = InventoryModel { gold, ..default() };
+    inventory.items = vec![
+        source_item(if late { 662 } else { 658 }, 11, 0, 0),
+        source_item(if late { 663 } else { 659 }, 8, 1, 0),
+        source_item(719, 2, 0, 1),
+        source_item(717, 2, 0, 2),
+    ];
+    if case.class == "Taoist" && case.level >= 18 {
+        inventory.items.push(source_item(712, 20, 2, 9));
+        inventory.items.push(source_item(710, 5, 0, 3));
+        inventory.items.push(source_item(711, 4, 0, 4));
+    }
+    app.insert_resource(inventory);
+}
+
+pub(crate) fn request_caster_shop(app: &mut App, case: CasterShopCase) {
+    let goods = case.catalog.iter().map(|&index| {
+        let item = source_item(index, 1, 0, 0);
+        let mut source = item.tooltip_source.unwrap();
+        let user_item = source.user_item.as_mut().unwrap();
+        user_item.unique_id = index as u64;
+        user_item.is_shop_item = true;
+        ShopGood {
+            unique_id: index as u64, name: item.name,
+            price: source.info.price, count: 1, stock: -1,
+            icon: item.icon, tooltip_source: Some(source), ..default()
+        }
+    }).collect();
+    let mut shop = app.world_mut().resource_mut::<ShopModel>();
+    shop.goods = goods;
+    assert!(shop.apply_service_signal(NpcShopServiceSignal {
+        mode: NpcShopServiceMode::Buy, repair_rate: None,
+    }));
+    assert!(shop.apply_service_signal(NpcShopServiceSignal {
+        mode: NpcShopServiceMode::Sell, repair_rate: None,
+    }));
+    app.world_mut().resource_mut::<UiSurfaceSignals>().npc_shop_open_requested = true;
+}
+
+fn assert_case_stock(app: &App, case: CasterShopCase) {
+    let inventory = app.world().resource::<InventoryModel>();
+    assert_eq!(app.world().resource::<UiReadModel>().player.class_name.as_deref(), Some(case.class));
+    assert!(inventory.items.iter().any(|item| item.container == 1 && item.slot == 0));
+    assert_eq!(inventory.items.iter().any(|item| item.container == 2 && item.slot == 9),
+        case.class == "Taoist" && case.level >= 18,
+        "only an eligible late Taoist fixture may have equipped materials");
+    let supplies = crate::quest_supplies::plan(
+        &app.world().resource::<UiReadModel>().player, inventory, None,
+        (case.level >= 25).then_some(2_110_021),
+    );
+    assert_eq!(supplies.rows.iter().find(|row| row.label == "蓝药").unwrap().held, 8);
+    if case.class == "Taoist" && case.level >= 18 {
+        assert_eq!(supplies.rows.iter().find(|row| row.label == "护身符").unwrap().held, 20);
+        assert_eq!(supplies.rows.iter().find(|row| row.label == "毒粉").unwrap().held, 9);
+    } else {
+        assert!(!supplies.rows.iter().any(|row| matches!(row.label, "护身符" | "毒粉")));
+    }
+}
+
+#[test]
+fn caster_medicine_and_material_services_keep_buy_sell_close_reopen_usable() {
+    for case in CASTER_SHOP_CASES {
+        let mut app = fixture_app();
+        prepare_caster_case(&mut app, case);
+        assert_case_stock(&app, case);
+        let stock_before = serde_json::to_value(app.world().resource::<InventoryModel>()).unwrap();
+        request_caster_shop(&mut app, case);
+        app.update();
+        assert_eq!(bag_position(&app), Vec2::new(445.0, 0.0), "{}", case.slug);
+        assert!(app.world().resource::<ShopModel>().selected_id.is_none());
+        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(), vec![]);
+        press_real_button(&mut app, OverlayButton::SelectShopGood(case.selected as u64));
+        press_real_button(&mut app, OverlayButton::ShopQuantityInc);
+        press_real_button(&mut app, OverlayButton::ShopBuy);
+        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(),
+            vec![NativePlayerUiIntent::BuyItem { item_index: case.selected as u64, count: 2 }],
+            "{} must emit the selected canonical goods request", case.slug);
+        // Sending a request must not optimistically grant stock or change gold.
+        assert_eq!(serde_json::to_value(app.world().resource::<InventoryModel>()).unwrap(), stock_before);
+        move_bag(&mut app, Vec2::new(300.0, 250.0));
+        press_real_button(&mut app, OverlayButton::ShopShowSell);
+        assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_buy_tab);
+        assert_eq!(bag_position(&app), Vec2::new(445.0, 0.0));
+        assert!(app.world_mut().query::<&OverlayButton>().iter(app.world())
+            .any(|action| *action == OverlayButton::InspectBag(0)), "sell must retain bag item input");
+        press_real_button(&mut app, OverlayButton::ShopShowBuy);
+        assert!(app.world().resource::<NativePlayerUiState>().npc_shop_buy_tab);
+        press_real_button(&mut app, OverlayButton::CloseShop);
+        assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+        assert!(!app.world().resource::<ShopModel>().allows_buy());
+        move_bag(&mut app, Vec2::ZERO);
+        request_caster_shop(&mut app, case);
+        app.update();
+        assert_eq!(bag_position(&app), Vec2::new(445.0, 0.0));
+        assert!(app.world().resource::<NativePlayerUiState>().npc_shop_buy_tab);
+        assert!(app.world().resource::<ShopModel>().selected_id.is_none());
+        press_real_button(&mut app, OverlayButton::SelectShopGood(case.selected as u64));
+        assert_eq!(app.world().resource::<ShopModel>().selected_id, Some(case.selected as u64));
+        assert_eq!(serde_json::to_value(app.world().resource::<InventoryModel>()).unwrap(), stock_before);
+        assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().is_empty(),
+            "tab switches/close/reopen/select must not replay an old purchase");
+    }
 }
 
 #[test]

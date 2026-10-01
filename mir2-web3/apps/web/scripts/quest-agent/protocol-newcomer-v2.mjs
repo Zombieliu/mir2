@@ -730,6 +730,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
         }
       },
       action: async (owner, target) => {
+        await revealV2BuriedTarget(owner, target, navigate, quest.questId, checkDeadline);
         if (className === 'Taoist' && [2110020, 2110021].includes(Number(quest.questId)) &&
             !ownedBoneFamiliar(owner.snapshot) && !woomaSummonsAttempted.has(Number(target.objectId))) {
           woomaSummonsAttempted.add(Number(target.objectId));
@@ -742,7 +743,10 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
         }
         return objectiveCombatAction(owner, target);
       },
-      approachRange: combatApproachRange,
+      approachRange: (owner, target) => {
+        const range = combatApproachRange(owner, target);
+        return v2BuriedTargetVisible(owner, target) ? range : Math.min(3, range);
+      },
       prepare: async owner => {
         checkDeadline();
         return v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.6, mpThreshold: 0.35 });
@@ -750,7 +754,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       // `prepare` runs once per engagement; sustain is also called from the
       // ordinary attack/search/retreat cadence so stocked restoratives are not
       // stranded while a live objective needs several public actions.
-      sustain: async owner => {
+      sustain: async (owner, context = {}) => {
         checkDeadline();
         const hpRatio = Number(owner.snapshot?.playerHp ?? 0) /
           Math.max(1, Number(owner.snapshot?.playerMaxHp ?? 1));
@@ -759,7 +763,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
           throw new V2Pause('awaitingSafeSupplies', quest.questId,
             `q${quest.questId} has no real HP medicine below half health; ordinary resupply is required`);
         }
-        return v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.75, mpThreshold: 0.35 });
+        return v2Sustain(owner, survival, checkDeadline, { hpThreshold: 0.75, mpThreshold: 0.35 }, context);
       },
       recoverAfterUnsafeRetreat: async (owner, navigateNear) => {
         checkDeadline();
@@ -785,15 +789,17 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       maxEngagements: 48,
       maxAttackAttempts: 20,
       ...([2110020, 2110021].includes(Number(quest.questId))
-        ? { maxTargetAdjacent: 0, maxTargetNearby: 0 }
+        ? { maxTargetAdjacent: 0, maxTargetNearby: 2 }
         : {}),
       // D401 has overlapping Zombies and D022 has roaming Wooma around its
-      // training actors. Never trade a low-armour Wizard into a nearby Temple
-      // pack just to clear a non-objective blocker.
+      // training actors. Each authored Temple foothold contains three spread
+      // actors: permit its two nearby companions while retaining the strict
+      // adjacency guard and ordinary retreat/supply budgets. Zero companions
+      // incorrectly rejects the entire quest's authored target population.
       ...(wizardCaveQuest
         ? {
           maxTargetAdjacent: 0,
-          maxTargetNearby: wizardTempleQuest ? 0 : 2,
+          maxTargetNearby: 2,
           spawnSearchHostileClearance: 1,
           combatHostileClearance: 1,
         }
@@ -807,7 +813,7 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
       preferredObjectiveMaps: quest.objectiveMaps,
       // At the Taoist Skeleton steps, a nearby BoneFighter can outlast the
       // fixed attack budget even though it is not a quest target. Keep the
-      // objective in focus and retreat from an unsafe pull instead. At
+      // objective in focus and retreat from an unsafe pull instead.
       // At Warrior N15/N16, an adjacent non-objective Zombie3 can exhaust
       // the cap while the required Zombie2 remains alive in the same pack.
       focusTargetThroughAggressors:
@@ -825,9 +831,9 @@ export async function completeV2Objectives(client, quest, { navigate, travel, cl
   }
 }
 
-async function v2Sustain(owner, survival, checkDeadline, thresholds) {
+async function v2Sustain(owner, survival, checkDeadline, thresholds, context = {}) {
   checkDeadline();
-  if (typeof survival.sustain === 'function') return survival.sustain(owner, thresholds);
+  if (typeof survival.sustain === 'function') return survival.sustain(owner, thresholds, context);
   return useSupplies(owner, thresholds);
 }
 
@@ -885,6 +891,40 @@ async function driveV2Practice(client, quest, navigate, className, checkDeadline
   return executeV2PracticePlan({ client, quest, navigate, checkDeadline, plan });
 }
 
+/** Snapshot coordinates do not prove that a buried monster is attackable. */
+export function v2BuriedTargetVisible(client, target) {
+  if (![5, 14, 24, 124, 125].includes(Number(target?.ai))) return true;
+  const mapEntry = [...(client.events ?? [])].reverse().find(event =>
+    event.direction === 'received' &&
+    ['MapChanged', 'MapInformation'].includes(String(event?.packet ?? '')) &&
+    String(event?.payload?.fileName ?? '') === String(client.snapshot?.mapFileName ?? ''))?.sequence ?? 0;
+  let shown = false;
+  for (const event of client.events ?? []) {
+    if (event.direction !== 'received' || Number(event?.sequence) <= mapEntry ||
+        Number(event?.payload?.objectId) !== Number(target.objectId)) continue;
+    if (event.packet === 'ObjectMonster') shown = event.payload.hidden === false && event.payload.dead !== true;
+    if (event.packet === 'ObjectShow') shown = true;
+    if (['ObjectHide', 'ObjectRemove', 'ObjectRevived', 'ObjectDied'].includes(event.packet)) shown = false;
+  }
+  return shown;
+}
+
+export async function revealV2BuriedTarget(client, target, navigate, questId, checkDeadline = () => {}) {
+  checkDeadline();
+  if (v2BuriedTargetVisible(client, target)) return;
+  // Crystal DigOutZombie reveals within three tiles and checks every 2000ms.
+  // Use an ordinary walk and wait for its public spawn/show receipt; never
+  // spend a ranged action on a snapshot-only underground incarnation.
+  if (distance(selfPlayer(client), target) > 3) {
+    await navigate({ x: Number(target.x), y: Number(target.y) }, 3);
+  }
+  await client.wait(() => v2BuriedTargetVisible(client, target), `q${questId} buried target reveal`, 7_000).catch(() => {
+    throw new V2Pause('awaitingTargetReveal', questId,
+      `q${questId} buried target lacked an authoritative ObjectShow/ObjectMonster receipt`);
+  });
+  checkDeadline();
+}
+
 /**
  * Execute a supplied plan through public packets. Exported for protocol
  * contract tests; the runner always obtains `plan` from `practicePlan`.
@@ -903,31 +943,7 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
     usedTargetIds.add(Number(target.objectId));
     return target;
   };
-  const revealBuriedTarget = async target => {
-    if (![5, 14, 24, 124, 125].includes(Number(target.ai))) return;
-    // Personal snapshots include buried monsters before the shared Zone lets
-    // spells hit them. Moving inside the reveal radius must produce a public
-    // visibility packet; an accepted cast alone is not a damage receipt.
-    const mapEntry = [...(client.events ?? [])].reverse().find(event =>
-      ['MapChanged', 'MapInformation'].includes(String(event?.packet ?? '')) &&
-      String(event?.payload?.fileName ?? '') === String(client.snapshot?.mapFileName ?? ''))?.sequence ?? 0;
-    const visible = () => {
-      let shown = false;
-      for (const event of client.events ?? []) {
-        if (Number(event?.sequence) <= mapEntry || Number(event?.payload?.objectId) !== Number(target.objectId)) continue;
-        if (event.packet === 'ObjectMonster') shown = event.payload.hidden === false && event.payload.dead !== true;
-        if (event.packet === 'ObjectShow') shown = true;
-        if (['ObjectHide', 'ObjectRemove', 'ObjectRevived'].includes(event.packet)) shown = false;
-      }
-      return shown;
-    };
-    if (visible()) return;
-    await navigate({ x: Number(target.x), y: Number(target.y) }, 3);
-    await client.wait(visible, `q${quest.questId} buried target reveal`, 7_000).catch(() => {
-      throw new V2Pause('awaitingTargetReveal', quest.questId,
-        `q${quest.questId} buried target lacked an authoritative ObjectShow/ObjectMonster receipt`);
-    });
-  };
+  const revealBuriedTarget = target => revealV2BuriedTarget(client, target, navigate, quest.questId, checkDeadline);
   for (const step of plan) {
     checkDeadline();
     if (step.kind === 'poison') {
@@ -937,11 +953,46 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
       const cast = await castV2Spell(client, target, 'Poisoning', checkDeadline, quest.questId);
       await waitForPoisonEvidence(client, cast.after, cast.target, cast.poisonBefore, quest.questId);
     } else if (step.kind === 'normal') {
-      const target = await acquireTarget(1);
-      const after = client.sequence;
-      const hp = Number(target.hp);
-      await meleeCombatAction(client, target);
-      await waitForTargetDamage(client, after, target, hp, quest.questId, 'normal attack');
+      let firstSwingAt = null;
+      for (let swing = 0; swing < PRACTICE_TECHNIQUE_MAX_SWINGS; swing += 1) {
+        checkDeadline();
+        const target = await acquireTarget(1);
+        // A successful movement receipt is not an expired ActionTime. N8's
+        // first SpiritSword swing was sent only 47ms after its walk ACK and
+        // correctly rejected; the passive skill's zero delay is not authority.
+        await waitForV2MeleeReady(client, checkDeadline, quest.questId);
+        const currentTarget = (client.snapshot?.entities ?? []).find(entity =>
+          Number(entity.objectId) === Number(target.objectId));
+        if (!currentTarget || currentTarget.dead === true || Number(currentTarget.hp ?? 1) <= 0 ||
+            distance(selfPlayer(client), currentTarget) > 1) {
+          throw new V2Pause('practiceTargetLost', quest.questId,
+            'normal practice target left melee range while settling ActionTime');
+        }
+        const after = client.sequence;
+        const hp = Number(currentTarget.hp);
+        const action = await meleeCombatAction(client, currentTarget);
+        if (action.kind !== 'attack') throw new V2Pause('awaitingPracticeAction', quest.questId,
+          'normal practice remained blocked by authoritative player status');
+        firstSwingAt ??= Date.now();
+        const remaining = PRACTICE_TECHNIQUE_WINDOW_MS - (Date.now() - firstSwingAt);
+        if (remaining <= 0) throw new V2Pause('awaitingPracticeDamage', quest.questId,
+          'normal practice exhausted its original receipt window');
+        try {
+          await waitForTargetDamage(client, after, currentTarget, hp, quest.questId, 'normal attack',
+            null, swing + 1 < PRACTICE_TECHNIQUE_MAX_SWINGS ? Math.min(2_500, remaining) : remaining);
+          break;
+        } catch (error) {
+          const accepted = receivedAfter(client, after, 'ObjectAttack', payload =>
+            Number(payload?.objectId) === Number(selfPlayer(client)?.objectId) &&
+            Number(payload?.spell ?? 0) === 0);
+          if (error?.reason !== 'awaitingPracticeDamage' || !accepted ||
+              swing + 1 >= PRACTICE_TECHNIQUE_MAX_SWINGS) throw error;
+          // Only an owner-accepted accuracy miss permits a retry. A rejected
+          // command or an observer monster's swing cannot manufacture progress.
+          usedTargetIds.delete(Number(target.objectId));
+          await new Promise(resolve => setTimeout(resolve, PRACTICE_TECHNIQUE_ACTION_SPACING_MS));
+        }
+      }
     } else if (step.kind === 'technique') {
       if (lastTechniqueDamageAtMs != null) {
         const remaining = PRACTICE_TECHNIQUE_ACTION_SPACING_MS - (Date.now() - lastTechniqueDamageAtMs);
@@ -1419,7 +1470,18 @@ function trainingTargetObjectIds(quest) {
   if (![2110019, 2110020, 2110021].includes(Number(quest?.questId))) return null;
   const ids = (quest?.objectives?.kill ?? []).flatMap(kill => kill.spawnCandidates ?? [])
     .filter(source => source.newcomerTraining === true)
-    .map(source => 200_000 + Number(source.respawnIndex));
+    .flatMap(source => {
+      const index = Number(source.respawnIndex);
+      const count = Number(source.count);
+      // Match crystal_respawn_object_id_for_slot. Expanded training groups
+      // use a hundred-ID block with one public actor ID per slot; the old
+      // single-actor ID made every real Dung/Wooma invisible to this filter.
+      if (count === 1 && Number(source.spread) === 0) return [200_000 + index];
+      if (!Number.isSafeInteger(count) || count < 1 || count > 100) {
+        throw new Error(`q${quest?.questId} has invalid V2 training actor count`);
+      }
+      return Array.from({ length: count }, (_, slot) => 200_000 + Math.max(0, index) * 100 + slot);
+    });
   if (ids.length === 0) return null;
   if (ids.some(id => !Number.isSafeInteger(id))) throw new Error(`q${quest?.questId} has invalid V2 training actor IDs`);
   return new Set(ids);
@@ -1443,7 +1505,42 @@ async function waitForV2SpellReady(client, spell, checkDeadline, questId) {
   }
 }
 
+async function waitForV2MeleeReady(client, checkDeadline, questId) {
+  const readinessSpell = (client.snapshot?.knownSkills ?? []).find(skill =>
+    ['Healing', 'FireBall', 'GreatFireBall', 'SoulFireBall'].includes(String(skill?.spell)));
+  if (readinessSpell) {
+    checkDeadline();
+    await refreshCombatWorldSnapshot(client);
+    // These active skills include the shared Zone ActionTime. A fresh zero
+    // receipt also covers post-Healing readiness without guessing a cast timer.
+    await waitForV2SpellReady(client, readinessSpell.spell, checkDeadline, questId);
+    return;
+  }
+  const lastMovement = [...(client.events ?? [])].reverse().find(event =>
+    event.direction === 'received' && event.packet === 'UserLocation' &&
+    Number(event.payload?.objectId) === Number(selfPlayer(client)?.objectId));
+  const receivedAt = Date.parse(lastMovement?.at ?? '');
+  const remaining = Number.isFinite(receivedAt)
+    ? PRACTICE_TECHNIQUE_ACTION_SPACING_MS - (Date.now() - receivedAt) : 0;
+  if (remaining > 0) {
+    await new Promise(resolve => setTimeout(resolve, remaining));
+    checkDeadline();
+  }
+}
+
 async function castV2Spell(client, target, spell, checkDeadline = () => {}, questId = null) {
+  const ownerId = Number(selfPlayer(client)?.objectId);
+  const lastMovement = [...(client.events ?? [])].reverse().find(event =>
+    event.direction === 'received' && event.packet === 'UserLocation' &&
+    Number(event.payload?.objectId) === ownerId);
+  const lastSnapshot = [...(client.events ?? [])].reverse().find(event =>
+    event.direction === 'received' && event.type === 'worldSnapshot');
+  if (Number(lastMovement?.sequence ?? 0) > Number(lastSnapshot?.sequence ?? 0)) {
+    checkDeadline();
+    // UserLocation acknowledges a step; the old snapshot's zero cannot
+    // acknowledge the shared ActionTime imposed by that same movement.
+    await refreshCombatWorldSnapshot(client);
+  }
   await waitForV2SpellReady(client, spell, checkDeadline, questId);
   const actor = selfPlayer(client);
   if (!actor) throw new Error('V2 combat actor is absent');

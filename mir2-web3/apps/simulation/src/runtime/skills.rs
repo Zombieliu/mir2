@@ -521,14 +521,16 @@ fn skill_mana_cost_from_authoritative_metadata(
     crystal_magic: Option<&CrystalMagicTemplate>,
     level: u8,
 ) -> Option<i32> {
-    let cost = definition
-        .map(|definition| definition.mana_cost)
-        .or_else(|| {
-            crystal_magic.map(|magic| {
-                i32::from(magic.base_cost)
-                    .saturating_add(i32::from(magic.level_cost).saturating_mul(i32::from(level)))
-            })
-        })?;
+    // Aliases such as minor-heal still resolve to Crystal Healing. Its wire
+    // ClientMagic and shared Zone already use the levelled Crystal cost; the
+    // same value must govern personal preflight, debit, and UI affordability.
+    // Retain generic costs only for skills without canonical magic metadata.
+    let cost = crystal_magic
+        .map(|magic| {
+            i32::from(magic.base_cost)
+                .saturating_add(i32::from(magic.level_cost).saturating_mul(i32::from(level)))
+        })
+        .or_else(|| definition.map(|definition| definition.mana_cost))?;
     (cost >= 0).then_some(cost)
 }
 
@@ -8281,6 +8283,59 @@ impl SimulationSession {
         }
 
         cast_skill(self.app.world_mut(), key)
+    }
+}
+
+#[cfg(test)]
+mod crystal_mana_metadata_tests {
+    use super::*;
+
+    #[test]
+    fn canonical_metadata_precedes_legacy_alias_for_every_supported_level() {
+        for (key, spell) in [("minor-heal", "Healing"), ("battle-focus", "Fury")] {
+            let definition = skill_definition(key).expect("legacy alias fixture");
+            let magic = crystal_magic_by_spell(spell).expect("canonical spell fixture");
+            for level in 0..=3 {
+                let expected = i32::from(magic.base_cost)
+                    + i32::from(magic.level_cost) * i32::from(level);
+                assert_eq!(
+                    skill_mana_cost_from_authoritative_metadata(
+                        Some(&definition),
+                        Some(&magic),
+                        level,
+                    ),
+                    Some(expected),
+                    "{key} level {level}",
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn genuinely_non_crystal_skill_preserves_legacy_cost_including_zero() {
+        let mut definition = skill_definition("minor-heal").expect("generic definition fixture");
+        definition.crystal_spell = None;
+        for cost in [0, 6, 19] {
+            definition.mana_cost = cost;
+            for level in 0..=3 {
+                assert_eq!(
+                    skill_mana_cost_from_authoritative_metadata(Some(&definition), None, level),
+                    Some(cost),
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn absent_or_negative_non_crystal_cost_fails_closed() {
+        let mut definition = skill_definition("minor-heal").expect("generic definition fixture");
+        definition.crystal_spell = None;
+        definition.mana_cost = -1;
+        assert_eq!(
+            skill_mana_cost_from_authoritative_metadata(Some(&definition), None, 0),
+            None,
+        );
+        assert_eq!(skill_mana_cost_from_authoritative_metadata(None, None, 3), None);
     }
 }
 

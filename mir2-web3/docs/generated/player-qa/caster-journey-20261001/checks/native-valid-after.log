@@ -1,0 +1,15 @@
+
+running 10 tests
+test input::tests::nonmodal_panel_input_tests::actual_skills_and_other_ordinary_panels_allow_outside_world_clicks_at_native_scales ... ok
+test input::tests::nonmodal_panel_input_tests::an_idle_positive_cooldown_snapshot_expires_for_real_keyboard_dispatch ... ok
+test input::tests::nonmodal_panel_input_tests::caster_ground_and_summon_shortcuts_keep_stage_aim_while_hovering_the_skills_panel ... ok
+test input::tests::nonmodal_panel_input_tests::hud_skills_press_consumes_the_pointer_without_dropping_selected_attack ... ok
+test input::tests::nonmodal_panel_input_tests::keyboard_ground_aim_still_requires_an_in_stage_cursor_and_nonmodal_input ... ok
+test input::tests::nonmodal_panel_input_tests::map_search_owns_keyboard_even_though_ordinary_map_is_nonmodal ... ok
+test input::tests::nonmodal_panel_input_tests::npc_service_dialog_owns_keyboard_independently_of_the_skills_panel ... ok
+test input::tests::nonmodal_panel_input_tests::ordinary_panels_do_not_disable_keyboard_walk ... ok
+test input::tests::nonmodal_panel_input_tests::potion_shortcut_works_in_the_skills_page_but_chat_keeps_the_key ... ok
+test input::tests::nonmodal_panel_input_tests::three_class_skill_shortcuts_still_send_with_the_real_skills_page_visible ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 798 filtered out; finished in 0.02s
+

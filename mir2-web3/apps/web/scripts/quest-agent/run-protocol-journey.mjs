@@ -24,6 +24,7 @@ import {
   hpMediumDrugCount,
 } from './protocol-supplies.mjs';
 import { createV2SupplyReadiness } from './newcomer-v2-supply-policy.mjs';
+import { createV2DefensiveRecovery } from './protocol-newcomer-v2-recovery.mjs';
 import { loadObservedMonsterLocations } from './protocol-memory.mjs';
 import { loadV2FunctionalRecheckLedger, loadV2RecoveryLedger, persistV2FunctionalRecheckLedger, primeV2RunReport } from './newcomer-v2-recovery-ledger.mjs';
 import { claimAvailableMilestones, JOURNEY_MILESTONES } from './protocol-milestones.mjs';
@@ -227,8 +228,7 @@ try {
           ? { ...result, success: true }
           : result;
       },
-      sustain: (owner, thresholds) => useSupplies(owner, thresholds),
-      recoverAfterUnsafeRetreat: owner => useSupplies(owner, { hpThreshold: 0.85, mpThreshold: 0.35 }),
+      ...createV2DefensiveRecovery(),
       ensureReady: createV2SupplyReadiness({
         className,
         restock: restockV2Supplies,

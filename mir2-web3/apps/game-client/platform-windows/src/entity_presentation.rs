@@ -16,6 +16,10 @@ use mir2_bevy_runtime::entity_animation::{
 };
 use serde_json::Value;
 
+#[cfg(test)]
+#[path = "buried_monster_replay_tests.rs"]
+mod buried_monster_replay_tests;
+
 const NATIVE_ANIMATION_WORLD_SEED: u64 = 0x4d49_5232_5749_4e44;
 const CRYSTAL_MOVE_PHASE_COUNT: u16 = 6;
 const CRYSTAL_MOVE_PHASE_MS: u64 = 100;

@@ -1,5 +1,18 @@
 # Agent Orchestration
 
+> 2026-10-01 caster follow-up: independent ordinary Wizard/Taoist saves verify
+> 33/52 newcomer-v2 nodes (21/26 level26 and12/26 level19); the original and
+> separate functional clocks expired. A new independent fresh cohort is running,
+> with no reset of old evidence or human saves. Native shared1187/Windows806,
+> controller386, 42 caster-shop GPU captures, finite status handoff and canonical
+> base/level mana checks pass. Final Gateway adjacent33 plus isolatedV2 7 pass;
+> earlier full Gateway857 predates the late status/mana slice. Complete Simulation
+> 1906 pass/5 old fixture failures is preserved; focused mana/bind preparations
+> resolve those failures. Full caster route/native human acceptance remain open.
+> Counted/periodic poison and dynamic mana penalties remain separate parity gaps.
+> Installed r8/public realm/updater feed are unchanged; capacity remains paused.
+> [Evidence](generated/player-qa/caster-journey-20261001/README.md).
+
 > 2026-09-29 invited playtest delivered: fixed native d33708e1f/Gateway20aeb345f
 > pair, standalone signed-manifest ZIP, isolated public PostgreSQL/Redis realm,
 > ordinary two-account11/11 and native-resume protocol9/9. Exact extracted EXE

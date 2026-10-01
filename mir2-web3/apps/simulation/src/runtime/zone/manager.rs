@@ -409,7 +409,11 @@ impl ZoneManager {
             let mut outbounds = Vec::new();
             let mut transferred_clock = None;
             let mut transferred_action_clock = None;
+            let mut transferred_poison_clock = None;
+            let online_map_transfer = previous_key.as_ref().is_some_and(|previous| previous != &key);
             if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
+                transferred_poison_clock = self.zones.get(&previous_key)
+                    .and_then(|zone| zone.player_finite_control_poison_clock(&session_id));
                 transferred_action_clock = self.zones.get(&previous_key)
                     .and_then(|zone| zone.player_action_clock(&session_id));
                 transferred_clock = self
@@ -428,13 +432,23 @@ impl ZoneManager {
                 .zones
                 .entry(key.clone())
                 .or_insert_with(|| ZoneRuntime::new(key));
-            outbounds.extend(zone.handle(ZoneCommand::Join(join)));
+            let mut joined = zone.handle(ZoneCommand::Join(join));
             if let Some(clock) = transferred_clock {
                 zone.restore_player_vital_clock(&session_id, clock);
             }
             if let Some(clock) = transferred_action_clock {
                 zone.restore_player_action_clock(&session_id, clock);
             }
+            if let Some(clock) = transferred_poison_clock {
+                zone.restore_player_finite_control_poison_clock(&session_id, clock);
+            }
+            if online_map_transfer {
+                // A same-character destination needs an explicit current mask,
+                // including zero; neither missing snapshot fields nor the old
+                // viewport's last ObjectPoisoned can establish that state.
+                zone.calibrate_online_join_poison(&session_id, &mut joined);
+            }
+            outbounds.extend(joined);
             return outbounds;
         }
         match &command {

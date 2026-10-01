@@ -3625,6 +3625,60 @@ test("interrupts spawn navigation for a proven aggressor, clears it within budge
   assert.equal(searchVisits, 2);
 });
 
+test("a focused Skeleton spawn search retreats from BoneFighter without spending its attack budget", async () => {
+  const quest = { questId: 2110010, stage: "InProgress", objectives: [objective("Kill Skeleton", 0, 1)] };
+  const client = new FakeClient(snapshot(quest, [
+    monster(61, "BoneFighter", 100, 100, { hp: 110, maxHp: 110, disposition: "hostile" }),
+  ]), (owner, command) => {
+    if (command.type !== "attack") return;
+    assert.equal(command.objectId, 60, "the non-objective aggressor must not consume attacks");
+    owner.receive("ObjectDied", state => {
+      Object.assign(state.entities.find(entry => entry.objectId === 60), { dead: true, hp: 0 });
+      state.questLog[0].objectives[0] = objective("Kill Skeleton", 1, 1);
+      state.questLog[0].stage = "ReadyToTurnIn";
+    }, { objectId: 60 });
+  });
+  const diagnostics = [];
+  client.record = (_direction, payload) => diagnostics.push(payload);
+  let searches = 0;
+  let recoveries = 0;
+  const navigate = async (target, range, stopWhen, options = {}) => {
+    const actor = client.snapshot.entities[0];
+    if (target.objectId != null) {
+      Object.assign(actor, { x: target.x - range, y: target.y });
+      return { reached: true };
+    }
+    if (options.maxSuccessfulSteps) {
+      Object.assign(actor, { x: 40, y: 40 });
+      return { reached: true, successfulSteps: 8 };
+    }
+    searches += 1;
+    Object.assign(actor, { x: target.x, y: target.y });
+    if (searches === 1) {
+      Object.assign(client.snapshot.entities.find(entry => entry.objectId === 61), { x: target.x, y: target.y - 1 });
+      client.receive("ObjectStruck", () => {}, { objectId: 1, attackerId: 61 });
+      assert.equal(stopWhen(), true);
+    } else {
+      client.snapshot.entities.find(entry => entry.objectId === 61).x = 100;
+      client.snapshot.entities.push(monster(60, "Skeleton", target.x, target.y, { disposition: "hostile" }));
+    }
+    return { reached: false };
+  };
+  const result = await completeQuestObjectives(client, {
+    questId: 2110010,
+    objectives: { kill: [{ monsterName: "Skeleton", spawnCandidates: [spawn("Skeleton", 30, 30)] }], item: [] },
+  }, navigate, {
+    ...settings, focusTargetThroughAggressors: true, maxEngagements: 4,
+    recoverAfterUnsafeRetreat: async () => { recoveries += 1; },
+  });
+  assert.equal(result.stage, "ReadyToTurnIn");
+  assert.equal(recoveries, 1);
+  assert.equal(searches, 2);
+  assert.equal(client.snapshot.entities.find(entry => entry.objectId === 61).hp, 110);
+  assert.deepEqual(client.sent.map(entry => entry.objectId), [60]);
+  assert.ok(diagnostics.some(entry => entry.type === "focusedSpawnSearchRetreat" && entry.objectId === 61));
+});
+
 test("a failed spawn route sustains the player and interrupts immediately for a proven aggressor", async () => {
   const quest = { questId: 62, stage: "InProgress", objectives: [objective("Kill KekTal", 0, 1)] };
   const client = new FakeClient(snapshot(quest, [
