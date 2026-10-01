@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 bounded Android NI-11 source checkpoint: shared twelve frozen
+> Windows3d735745f pure adapters; public six-packet Java ingress, current scene
+> gate, Android catalog/service FIFO and accepted-request/Exit hooks connected.
+> Actual cross-frame/close failures retained; Android290/304/shared1230+10ignored/
+> runtime292+1ignored/fresh Java39+39/API31 pass. Six focused Mac Windows checks
+> pass; broad NPC filter19/6 geometry/marker/map-fixture failures remains FAIL.
+> No backend rule, server rollout, new APK or live/physical acceptance. NI-10
+> full incoming dialogue/quests, NI-11 complete receipts and NI-19 downstream
+> eviction remain open; no full parity percentage/completion increment.
+> [Source, regressions and remaining acceptance](generated/player-qa/native-android-npc-ingress-20261002/README.md).
+
 > 2026-10-02 Android source-refresh: exact Windows3d735745f normal merge,
 > 14 commits/238 files, five conflicts preserve both histories. Three resolved
 > server files fully Rustfmt-normalize to upstream bytes. Android276/preview290/

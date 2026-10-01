@@ -887,6 +887,9 @@ pub struct NativePlayerUiState {
     pub(crate) npc_service_exit_requested: bool,
     /// Reject delayed service replies until a new NPC page/request begins.
     pub(crate) npc_service_exit_latched: bool,
+    /// A host-accepted new request can outlive the reply that closes the old
+    /// child. Only a service opening or a local/context exit retires it.
+    pub(crate) npc_service_request_pending: bool,
     /// Crystal Hold auto-submits the next selection in this service only.
     pub npc_service_hold: Option<NpcShopServiceMode>,
     /// A locally rejected NPC service attempt waits for the System chat
@@ -1451,6 +1454,7 @@ impl Default for NativePlayerUiState {
             npc_shop_buy_tab: true,
             npc_service_exit_requested: false,
             npc_service_exit_latched: false,
+            npc_service_request_pending: false,
             npc_service_hold: None,
             npc_service_notice: None,
             npc_service_notice_mode: None,
@@ -1599,10 +1603,12 @@ impl NativePlayerUiState {
     pub fn begin_npc_service_request(&mut self) {
         self.npc_service_exit_latched = false;
         self.npc_service_exit_requested = false;
+        self.npc_service_request_pending = true;
     }
     pub fn request_npc_service_exit(&mut self) {
         self.npc_service_exit_requested = true;
         self.npc_service_exit_latched = true;
+        self.npc_service_request_pending = false;
     }
     pub fn accepts_npc_service_reply(&self) -> bool {
         !self.npc_service_exit_latched
@@ -1944,7 +1950,7 @@ impl NativePlayerUiState {
         self.core.chat_focused()
     }
     pub fn close_windows(&mut self) {
-        if self.npc_shop_open() {
+        if self.npc_shop_open() || self.npc_service_request_pending {
             self.request_npc_service_exit();
         }
         self.skill_assign = Default::default();
@@ -6994,12 +7000,22 @@ fn sync_npc_dialog_inventory_location(
     let npc_id = npc_dialog.as_deref().filter(|dialog| dialog.is_open)
         .and_then(|dialog| dialog.npc_object_id);
     let npc_changed = matches!((*previous_npc, npc_id), (Some(old), Some(new)) if old != new);
-    let closed_service = state.npc_shop_open()
+    let opening_observed = signals.as_deref_mut().is_some_and(|signals| {
+        std::mem::take(&mut signals.npc_service_opening_observed)
+            || signals.npc_shop_open_requested
+    });
+    if opening_observed {
+        state.npc_service_request_pending = false;
+    }
+    let closed_service = (state.npc_shop_open() || opening_observed)
         && shop.as_deref().is_some_and(|shop| shop.service_mode == NpcShopServiceMode::Closed);
     let fresh_service = signals.as_deref().is_some_and(|signals| signals.npc_shop_open_requested);
     let discard_old_service = npc_changed && state.npc_shop_open() && !fresh_service;
     if explicit_exit || map_changed || closed_service || discard_old_service {
-        state.npc_service_exit_latched = !discard_old_service;
+        if explicit_exit || map_changed {
+            state.npc_service_request_pending = false;
+        }
+        state.npc_service_exit_latched = !state.npc_service_request_pending;
         if let Some(signals) = signals.as_deref_mut() {
             signals.npc_shop_open_requested = false;
         }
@@ -7010,9 +7026,8 @@ fn sync_npc_dialog_inventory_location(
     } else if is_open && npc_id.is_some() {
         *previous_npc = npc_id;
     }
-    if is_open && (!*was_open || npc_changed) {
-        state.npc_service_exit_latched = false;
-    }
+    // A stale parent page is not evidence of a new host-accepted request.
+    // In particular it must not undo Exit on the following frame.
     if is_open == *was_open && !explicit_exit && !map_changed && !closed_service && !discard_old_service {
         return;
     }
@@ -7080,7 +7095,9 @@ fn sync_npc_shop_inventory_location(
     mut previous_surface: Local<Option<bool>>,
 ) {
     if state.npc_service_exit_latched || (previous_surface.is_some() && !state.npc_shop_open()) {
-        if previous_surface.is_some() && !state.npc_shop_open() {
+        if previous_surface.is_some() && !state.npc_shop_open()
+            && !state.npc_service_request_pending
+        {
             state.npc_service_exit_latched = true;
         }
         close_npc_service(&mut state, Some(&mut shop));
@@ -8168,6 +8185,7 @@ pub(crate) fn process_overlay_keyboard(
     }
     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Closeall") {
         if state.core.panel != mir2_ui_core::state::UiPanel::None
+            || state.npc_service_request_pending
             || state.inspect.is_some()
             || state.help_open()
             || state.equipment_dialogs.mount_open
@@ -8760,7 +8778,7 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::CloseShop => {
-                state.npc_service_exit_latched = true;
+                state.request_npc_service_exit();
                 if state.npc_shop_open() {
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
@@ -20578,6 +20596,56 @@ mod tests {
             app.world().resource::<ShopModel>().service_mode,
             NpcShopServiceMode::Closed
         );
+    }
+
+    fn npc_reply_gate_consumer_app() -> App {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<ShopModel>()
+            .init_resource::<UiSurfaceSignals>()
+            .insert_resource(NpcDialogModel::default())
+            .add_systems(Update, (sync_npc_dialog_inventory_location, sync_npc_shop_inventory_location).chain());
+        app.world_mut().resource_mut::<NativePlayerUiState>().core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+        app.world_mut().resource_mut::<ShopModel>().apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Buy, repair_rate: None,
+        });
+        app.update();
+        app
+    }
+
+    #[test]
+    fn npc_service_reply_gate_keeps_accepted_request_across_a_closed_only_frame() {
+        let mut app = npc_reply_gate_consumer_app();
+        app.world_mut().resource_mut::<NativePlayerUiState>().begin_npc_service_request();
+        app.world_mut().resource_mut::<ShopModel>().apply_service_signal(NpcShopServiceSignal::default());
+        app.update();
+        assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+        assert!(app.world().resource::<NativePlayerUiState>().accepts_npc_service_reply(),
+            "NPCResponse closes the old child, not the already accepted new request");
+        app.world_mut().resource_mut::<ShopModel>().apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Buy, repair_rate: None,
+        });
+        app.world_mut().resource_mut::<UiSurfaceSignals>().npc_shop_open_requested = true;
+        app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().accepts_npc_service_reply());
+    }
+
+    #[test]
+    fn npc_service_reply_gate_never_unlocks_explicit_exit_on_a_delayed_opening() {
+        let mut app = npc_reply_gate_consumer_app();
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.begin_npc_service_request();
+            state.request_npc_service_exit();
+        }
+        app.world_mut().resource_mut::<ShopModel>().apply_service_signal(NpcShopServiceSignal {
+            mode: NpcShopServiceMode::Buy, repair_rate: None,
+        });
+        app.world_mut().resource_mut::<UiSurfaceSignals>().npc_shop_open_requested = true;
+        app.update();
+        assert!(!app.world().resource::<NativePlayerUiState>().accepts_npc_service_reply());
+        assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+        assert_eq!(app.world().resource::<ShopModel>().service_mode, NpcShopServiceMode::Closed);
     }
 
     #[test]

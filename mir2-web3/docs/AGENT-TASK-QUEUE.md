@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> 2026-10-02 latest Android NI-11 source leaf: twelve frozen Windows3d735745f
+> pure adapters are shared, six public Java packets and owner/scene/FIFO/
+> accepted-request/ordered Exit host hooks connected. Actual cross-frame and
+> pending-close red tests retained, final Android290/preview304/shared1230+
+> 10ignored/runtime292+1ignored/fresh Java39+39/API31 both variants pass.
+> Six focused Mac Windows checks pass; broader NPC filter19 pass/6 geometry/
+> marker/map-fixture failures remains a FAIL, not full Windows verification.
+> No new APK/JNI/live/device; v16/GL failure remains exact and unchanged.
+> Next exact refreshed packages/emulator, then NI-10 full incoming quest/dialog,
+> NI-11 complete receipts and remaining Windows denominator. NI-19 downstream
+> eviction remains open; whole Android goal Active, no server/prod/Windows push.
+> [Source leaf and retained failures](generated/player-qa/native-android-npc-ingress-20261002/README.md).
+
 > 2026-10-02 Android source-refresh leaf: normal merge of exact Windows3d735745f
 > (14 commits/238 filenames beyond original3f5), five conflicts preserve both
 > histories. Three server conflict files compare equal after full Rustfmt parse.

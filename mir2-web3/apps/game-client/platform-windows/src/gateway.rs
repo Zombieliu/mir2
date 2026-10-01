@@ -759,22 +759,7 @@ fn gateway_unix_ms() -> u64 {
 }
 
 fn crystal_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClass)> {
-    let level = u16::try_from(cursor.level?).ok()?;
-    let class = match cursor
-        .class_name
-        .as_deref()?
-        .trim()
-        .to_ascii_lowercase()
-        .as_str()
-    {
-        "warrior" => MirClass::Warrior,
-        "wizard" => MirClass::Wizard,
-        "taoist" => MirClass::Taoist,
-        "assassin" => MirClass::Assassin,
-        "archer" => MirClass::Archer,
-        _ => return None,
-    };
-    Some((level, class))
+    mir2_client_bevy::native_inventory_ingress::native_tooltip_viewer(cursor)
 }
 
 /// Crystal's `UserItem` wire carrier has only an item index. Resolve it only
@@ -785,8 +770,7 @@ fn unique_crystal_tooltip_template(item_index: i32) -> Option<CrystalItemTemplat
 }
 
 fn unique_crystal_tooltip_info(item_index: i32) -> Option<CrystalItemInfoModel> {
-    serde_json::from_value(serde_json::to_value(unique_crystal_tooltip_template(item_index)?).ok()?)
-        .ok()
+    mir2_client_bevy::native_inventory_ingress::native_tooltip_info(item_index)
 }
 
 fn crystal_wire_item_info(value: &Value) -> Option<CrystalItemInfoModel> {
@@ -804,56 +788,14 @@ fn crystal_real_tooltip_info(
     info: &CrystalItemInfoModel,
     viewer: Option<(u16, MirClass)>,
 ) -> Option<CrystalItemInfoModel> {
-    let (level, class) = viewer?;
-    if !info.class_based && !info.level_based {
-        return Some(info.clone());
-    }
-    let origin = unique_crystal_tooltip_template(info.item_index)?;
-    let origin_model =
-        serde_json::from_value::<CrystalItemInfoModel>(serde_json::to_value(&origin).ok()?).ok()?;
-    if origin_model != *info {
-        return None;
-    }
-    serde_json::from_value(
-        serde_json::to_value(crystal_real_item_for_player(&origin, level, class)).ok()?,
-    )
-    .ok()
+    mir2_client_bevy::native_inventory_ingress::native_real_tooltip_info(info, viewer)
 }
 
 fn crystal_tooltip_source_for_user_item(
     value: &Value,
     cursor: &NativeUiPlayerCursor,
 ) -> Option<CrystalItemTooltipSourceModel> {
-    let user_item = serde_json::from_value::<CrystalUserItemModel>(value.clone()).ok()?;
-    let info = unique_crystal_tooltip_info(user_item.item_index)?;
-    let viewer = crystal_tooltip_viewer(cursor);
-    let socket_infos = user_item
-        .slots
-        .iter()
-        .map(|slot| {
-            slot.as_ref()
-                .and_then(|socket| unique_crystal_tooltip_info(socket.item_index))
-        })
-        .collect::<Vec<_>>();
-    let real_socket_infos = if viewer.is_some() {
-        socket_infos
-            .iter()
-            .map(|socket| {
-                socket
-                    .as_ref()
-                    .and_then(|socket| crystal_real_tooltip_info(socket, viewer))
-            })
-            .collect()
-    } else {
-        Vec::new()
-    };
-    Some(CrystalItemTooltipSourceModel {
-        real_info: crystal_real_tooltip_info(&info, viewer),
-        info,
-        user_item: Some(user_item),
-        socket_infos,
-        real_socket_infos,
-    })
+    mir2_client_bevy::native_inventory_ingress::native_tooltip_source_for_user_item(value, cursor)
 }
 
 /// Mirrors `new UserItem(info)` at the two Crystal catalogue-only surfaces.
@@ -4471,39 +4413,7 @@ fn npc_shop_service_from_packet(
     packet: &str,
     payload: &Value,
 ) -> Option<mir2_client_bevy::shop::NpcShopServiceSignal> {
-    use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal};
-    let signal = match packet {
-        "NPCResponse"
-            if payload
-                .get("page")
-                .and_then(Value::as_array)
-                .is_some_and(|page| page.iter().all(Value::is_string)) =>
-        {
-            NpcShopServiceSignal::default()
-        }
-        "NPCGoods" | "NPCPearlGoods" => NpcShopServiceSignal {
-            mode: NpcShopServiceMode::Buy,
-            repair_rate: None,
-        },
-        "NPCSell" => NpcShopServiceSignal {
-            mode: NpcShopServiceMode::Sell,
-            repair_rate: None,
-        },
-        "NPCRepair" | "NPCSRepair" => NpcShopServiceSignal {
-            mode: if packet == "NPCRepair" {
-                NpcShopServiceMode::Repair
-            } else {
-                NpcShopServiceMode::SpecialRepair
-            },
-            repair_rate: payload
-                .get("rate")
-                .and_then(Value::as_f64)
-                .filter(|rate| rate.is_finite() && *rate >= 0.0)
-                .map(|rate| rate as f32),
-        },
-        _ => return None,
-    };
-    signal.is_valid().then_some(signal)
+    mir2_client_bevy::native_npc_ingress::npc_shop_service_from_packet(packet, payload)
 }
 
 fn push_native_npc_shop_service(
@@ -4518,95 +4428,19 @@ fn push_native_npc_shop_service(
 }
 
 fn transform_shop_model_from_packet(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value {
-    let goods: Vec<Value> = payload
-        .get("list")
-        .and_then(Value::as_array)
-        .map(|list| {
-            list.iter()
-                .enumerate()
-                .filter_map(|(slot, item)| shop_good_json(item, slot, cursor))
-                .collect()
-        })
-        .unwrap_or_default();
-    json!({
-        "goods": goods,
-        "selected_id": Value::Null,
-        "hide_added_stats": if ["hideAddedStats", "hide_added_stats", "shopHideAddedStats", "shop_hide_added_stats"].iter().any(|key| payload.get(*key).is_some()) { shop_hide_added_stats(payload) } else { cursor.npc_shop_hide_added_stats },
-        "selected_bag_slot_for_sell": Value::Null,
-        "selected_bag_slot_for_repair": Value::Null,
-    })
+    mir2_client_bevy::native_npc_ingress::transform_shop_model_from_packet(payload, cursor, native_inventory_frame_geometry)
 }
 
 fn transform_shop_model_from_snapshot(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value {
-    let list = ["shopGoods", "shop_goods", "npcGoods", "npc_goods"]
-        .iter()
-        .find_map(|key| payload.get(*key))
-        .and_then(Value::as_array);
-    let goods: Vec<Value> = list
-        .map(|list| {
-            list.iter()
-                .enumerate()
-                .filter_map(|(slot, item)| shop_good_json(item, slot, cursor))
-                .collect()
-        })
-        .unwrap_or_default();
-    json!({
-        "goods": goods,
-        "selected_id": Value::Null,
-        "hide_added_stats": shop_hide_added_stats(payload),
-        "selected_bag_slot_for_sell": Value::Null,
-        "selected_bag_slot_for_repair": Value::Null,
-    })
+    mir2_client_bevy::native_npc_ingress::transform_shop_model_from_snapshot(payload, cursor, native_inventory_frame_geometry)
 }
 
 fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) -> Option<Value> {
-    let id = value_u64(
-        item.get("uniqueId")
-            .or_else(|| item.get("unique_id"))
-            .or_else(|| item.get("id"))
-            .or_else(|| item.get("itemIndex"))
-            .or_else(|| item.get("item_index")),
-    )?;
-    let tooltip_source = item
-        .get("tooltipSource")
-        .cloned()
-        .or_else(|| crystal_tooltip_source_for_user_item(item, cursor).map(|source| json!(source)));
-    let count = value_u32(item.get("count").or_else(|| item.get("quantity"))).unwrap_or(1);
-    let icon = crystal_user_item_icon(item, count).or_else(|| {
-        value_u32(item.get("icon"))
-            .and_then(|value| u16::try_from(value).ok())
-            .filter(|value| *value != 0)
-    });
-    let icon_geometry = icon.and_then(item_frame_geometry);
-    Some(json!({
-        "unique_id": id,
-        "use_pearls": cursor.npc_shop_uses_pearls,
-        "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),
-        "price": value_u32(item.get("price")).unwrap_or_default(),
-        "count": u16::try_from(count).unwrap_or(1),
-        "stock": value_i32(item.get("stock")).unwrap_or(-1),
-        "panel_type": value_u32(item.get("panelType").or_else(|| item.get("panel_type")))
-            .and_then(|value| u8::try_from(value).ok())
-            .unwrap_or(u8::try_from(fallback).unwrap_or_default()),
-        "icon": icon.unwrap_or_default(),
-        "icon_width": icon_geometry.map(|frame| frame.width).unwrap_or_default(),
-        "icon_height": icon_geometry.map(|frame| frame.height).unwrap_or_default(),
-        "description": value_string(item.get("description")).unwrap_or_default(),
-        "tooltip_source": tooltip_source,
-    }))
+    mir2_client_bevy::native_npc_ingress::shop_good_json(item, fallback, cursor, native_inventory_frame_geometry)
 }
 
 fn shop_hide_added_stats(payload: &Value) -> bool {
-    [
-        "hideAddedStats",
-        "hide_added_stats",
-        "shopHideAddedStats",
-        "shop_hide_added_stats",
-    ]
-    .iter()
-    .find_map(|key| payload.get(*key))
-    .and_then(Value::as_bool)
-    .unwrap_or(false)
+    mir2_client_bevy::native_npc_ingress::shop_hide_added_stats(payload)
 }
 
 /// The ordinary catalogue packet changes both goods and their currency atomically.
@@ -4616,45 +4450,18 @@ fn transform_npc_catalog_packet(
     payload: &Value,
     cursor: &mut NativeUiPlayerCursor,
 ) -> Option<Value> {
-    if !matches!(packet, "NPCGoods" | "NPCPearlGoods") {
-        return None;
-    }
-    let previous = cursor.npc_shop_uses_pearls;
-    cursor.npc_shop_uses_pearls = packet == "NPCPearlGoods";
-    let mut model = try_transform_shop_model_from_packet(payload, cursor);
-    if let Some(model) = model.as_mut() {
-        if packet == "NPCPearlGoods" {
-            // Original Pearl packet has no HideAddedStats and does not assign it.
-            model["hide_added_stats"] = json!(cursor.npc_shop_hide_added_stats);
-        } else {
-            cursor.npc_shop_hide_added_stats = shop_hide_added_stats(payload);
-        }
-    } else {
-        cursor.npc_shop_uses_pearls = previous;
-    }
-    model
+    mir2_client_bevy::native_npc_ingress::transform_npc_catalog_packet(packet, payload, cursor, native_inventory_frame_geometry)
 }
 
 fn try_transform_shop_model_from_packet(
     payload: &Value,
     cursor: &NativeUiPlayerCursor,
 ) -> Option<Value> {
-    let list = payload.get("list")?.as_array()?;
-    if list
-        .iter()
-        .enumerate()
-        .any(|(slot, item)| shop_good_json(item, slot, cursor).is_none())
-    {
-        return None;
-    }
-    Some(transform_shop_model_from_packet(payload, cursor))
+    mir2_client_bevy::native_npc_ingress::try_transform_shop_model_from_packet(payload, cursor, native_inventory_frame_geometry)
 }
 
 fn payload_has_valid_shop_array(payload: &Value) -> bool {
-    ["shopGoods", "shop_goods", "npcGoods", "npc_goods"]
-        .iter()
-        .find_map(|key| payload.get(*key))
-        .is_some_and(Value::is_array)
+    mir2_client_bevy::native_npc_ingress::payload_has_valid_shop_array(payload)
 }
 
 fn mail_source(payload: &Value) -> Option<&Value> {

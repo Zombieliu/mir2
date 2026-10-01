@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 Android NI-11 source slice: frozen catalog/service/tooltip adapter
+> sharing and actual Java/Rust incoming hooks are wired. Two shared UI lifecycle
+> P2s are reproduced and repaired: accepted request survives Closed-only frame;
+> Escape/CloseWindows cancels pending even without a child panel. Stale parent
+> or delayed goods never undo Exit. Android290/304/shared1230+10ignored/runtime
+> 292+1ignored/fresh Java39+39/API31 and six affected Mac Windows checks pass.
+> Wider NPC Mac filter19/6 failures retained, not full Windows UI acceptance.
+> No new package or actual NPC image/touch/JNI/online/device pass; NI-10 full
+> quest/dialog, NI-11 receipts, all phone/resource/GL/physical gaps remain OPEN.
+> Whole goal Active; previous v16/GL evidence is not rebound.
+> [Exact source/test boundaries](generated/player-qa/native-android-npc-ingress-20261002/README.md).
+
 > 2026-10-02 Android source-refresh imports14 exact Windows3d735745f commits
 > with phone changes preserved. Shared1216/10ignored, runtime291/1ignored,
 > Android276/preview290 and both API31 target checks pass. This is not a new

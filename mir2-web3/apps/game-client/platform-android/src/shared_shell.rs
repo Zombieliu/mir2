@@ -118,6 +118,7 @@ pub(crate) struct HostState {
     chat: crate::chat_ingress::AndroidChatIngress,
     skills: crate::skill_ingress::AndroidSkillIngress,
     inventory: crate::inventory_ingress::AndroidInventoryIngress,
+    npc: crate::npc_ingress::AndroidNpcIngress,
     player: crate::player_ingress::AndroidPlayerIngress,
     phase: String,
     world: Option<HostWorldPosition>,
@@ -138,6 +139,7 @@ impl HostState {
         self.chat.reset();
         self.skills.reset();
         self.inventory.reset();
+        self.npc.reset();
         self.player.reset();
     }
 
@@ -173,6 +175,31 @@ impl HostState {
             return Ok(false);
         }
         self.player.packet(raw)
+    }
+
+    fn accept_npc_packet(
+        &mut self,
+        screen: Screen,
+        raw: &str,
+        accepts: bool,
+    ) -> Result<bool, &'static str> {
+        if self.phase != "IN_GAME" || screen != Screen::InGame {
+            return Ok(false);
+        }
+        self.npc
+            .packet(raw, accepts, self.player.presentation_cursor())
+    }
+
+    fn flush_npc(&mut self, screen: Screen, accepts: bool) {
+        self.npc.flush(
+            self.phase == "IN_GAME" && screen == Screen::InGame && accepts,
+            mir2_bevy_runtime::native_ingest::push_native_shop_model,
+            mir2_bevy_runtime::native_ingest::push_native_npc_shop_service,
+        );
+    }
+
+    fn bind_npc_snapshot(&mut self, raw: &str) -> Result<(), &'static str> {
+        self.npc.snapshot(raw, self.player.presentation_cursor())
     }
 
     fn bind_chat_owner(&mut self) -> Result<(), &'static str> {
@@ -1258,6 +1285,12 @@ fn receive(
 ) {
     if matches!(model.screen, Screen::StartingGame | Screen::InGame) {
         host.flush_personal();
+        host.flush_npc(
+            model.screen,
+            player
+                .as_deref()
+                .is_some_and(|player| player.accepts_npc_service_reply()),
+        );
     }
     #[cfg(target_os = "android")]
     if let Some(render) = crate::live_entity::poll_action_frame() {
@@ -1351,6 +1384,15 @@ fn receive(
                         || host.accept_inventory_packet(model.screen, raw).is_err()
                         || host.accept_player_packet(model.screen, raw).is_err()
                         || host.accept_chat_packet(model.screen, raw).is_err()
+                        || host
+                            .accept_npc_packet(
+                                model.screen,
+                                raw,
+                                player
+                                    .as_deref()
+                                    .is_some_and(|player| player.accepts_npc_service_reply()),
+                            )
+                            .is_err()
                     {
                         host.reset_gameplay();
                         #[cfg(target_os = "android")]
@@ -1380,6 +1422,12 @@ fn receive(
                         continue;
                     }
                     host.flush_personal();
+                    host.flush_npc(
+                        model.screen,
+                        player
+                            .as_deref()
+                            .is_some_and(|player| player.accepts_npc_service_reply()),
+                    );
                 }
             }
             #[cfg(target_os = "android")]
@@ -1679,6 +1727,10 @@ fn receive(
         } else if map_changed || (phase == "STARTING" && host.phase == "IN_GAME") {
             host.skills.clear_scene();
             host.player.clear_scene();
+            host.npc.clear_scene();
+            if let Some(player) = player.as_deref_mut() {
+                player.request_npc_service_exit();
+            }
             begin_render_ready_scene_transition(&mut model);
             host.pending_world_request = None;
             host.pending_render_request = None;
@@ -1712,7 +1764,7 @@ fn receive(
                 if host.skills.snapshot(raw).is_err() || host.inventory.snapshot(raw).is_err() {
                     projected = None;
                 } else if let Ok(ui) = host.player.snapshot(raw) {
-                    if host.bind_chat_owner().is_ok() {
+                    if host.bind_chat_owner().is_ok() && host.bind_npc_snapshot(raw).is_ok() {
                         projection.ui = ui;
                     } else {
                         projected = None;
@@ -1797,6 +1849,12 @@ fn receive(
                 continue;
             }
             host.flush_personal();
+            host.flush_npc(
+                model.screen,
+                player
+                    .as_deref()
+                    .is_some_and(|player| player.accepts_npc_service_reply()),
+            );
             #[cfg(target_os = "android")]
             if let Some((scene, world_snapshot, request_id)) = projected_scene {
                 // Keep only the newest authoritative frame while a previous
@@ -2208,7 +2266,7 @@ fn forward_intents(
 fn forward_quest_ui_intents(
     shell: Res<NativeShellModel>,
     windows: Query<&Window>,
-    player: Option<Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
+    mut player: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
     dialog: Option<Res<mir2_client_bevy::quest_model::NpcDialogModel>>,
     read_model: Option<Res<mir2_client_bevy::read_model::UiReadModel>>,
     notice: Option<Res<mir2_client_bevy::crystal_ui::notice::NoticeDialogState>>,
@@ -2320,7 +2378,25 @@ fn forward_quest_ui_intents(
         };
         let accepted = gateway
             .as_deref_mut()
-            .is_some_and(|gateway| gateway.enqueue(command).is_ok());
+            .is_some_and(|gateway| gateway.enqueue(command.clone()).is_ok());
+        if let Some(player) = player.as_deref_mut() {
+            // Match Windows FIFO semantics. Exit remains latched even when
+            // its transport queue is full; only an accepted new request may
+            // reopen it, never an older retry or a delayed service reply.
+            match &command {
+                GatewayCommand::SelectNpcDialog { target }
+                    if target.eq_ignore_ascii_case("@exit") =>
+                {
+                    player.request_npc_service_exit();
+                }
+                GatewayCommand::InteractNpc { .. } | GatewayCommand::SelectNpcDialog { .. }
+                    if accepted =>
+                {
+                    player.begin_npc_service_request();
+                }
+                _ => {}
+            }
+        }
         if !accepted {
             retry.push(intent);
         }
@@ -2461,6 +2537,10 @@ fn keyboard(
 #[cfg(test)]
 #[path = "chat_editor_tests.rs"]
 mod chat_editor_tests;
+
+#[cfg(test)]
+#[path = "npc_host_tests.rs"]
+mod npc_host_tests;
 
 #[cfg(test)]
 mod tests {

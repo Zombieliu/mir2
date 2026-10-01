@@ -2,6 +2,19 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
+2026-10-02 最新有界源码叶：NI-11 复用冻结Windows3d735745f的12个纯投影
+helper，接通Android公共NPC六类包、owner/scene门及接受请求/有序Exit宿主。
+两处实际共享状态缺陷先红后修：Closed-only误撤销新请求，以及待回复时
+Escape/通用关闭未取消请求。最终Android290/preview304/shared1230+10ignored/
+runtime292+1ignored、fresh Java39+39与实际API31两变体通过。受影响Windows
+Mac限定纯测试6项通过；较宽NPC过滤19通过/6项几何、标记、地图fixture失败
+原样保留，不算完整Windows门通过。本叶未构建新APK，v16及GL失败绑定不变。
+NI-10完整任务/对话、NI-11完整回执/JNI/在线/真机、NI-19后段驱逐仍OPEN；
+整体完整度没有百分比或完成宣称。下一叶子精确刷新包/模拟器，再继续完整分母。
+[原始失败、源码等价与验收矩阵](generated/player-qa/native-android-npc-ingress-20261002/README.md)。
+
+以下为此前源码刷新检查点；其当时缺项不覆盖上述后续有界实现。
+
 2026-10-02 当前源码对齐目标显式刷新到 Windows
 `3d735745f1117d42a7859e87604a106351dca935`，不是暗改旧证据分母。新增14个
 提交正常合并，源码`04ae04fc82badb8dd1a15d5dade108ade0fe586b`：5处冲突保留双方，

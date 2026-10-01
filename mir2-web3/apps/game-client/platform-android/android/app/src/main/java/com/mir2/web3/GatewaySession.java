@@ -83,6 +83,7 @@ final class GatewaySession implements AutoCloseable {
     private Integer x, y;
     private boolean startAccepted;
     private boolean hasOwnerSnapshot;
+    private boolean hasSceneSnapshot;
     private long ownerObjectId;
     private String pendingSnapshot;
     private AccountOperation accountOperation = AccountOperation.NONE;
@@ -256,6 +257,7 @@ final class GatewaySession implements AutoCloseable {
                     // Keep the complete immutable server payload until StartGame is accepted.
                     pendingSnapshot = world.toString();
                     hasOwnerSnapshot = true;
+                    hasSceneSnapshot = true;
                     ownerObjectId = owner;
                     publishWorld();
                     return;
@@ -269,6 +271,7 @@ final class GatewaySession implements AutoCloseable {
         boolean forwardPersonal = personalGameplayPhase()
                 && (isPersonalSkillPacket(packet) || isInventoryOperationPacket(packet)
                         || isPersonalPlayerPacket(packet) || isReceivedChatPacket(packet));
+        boolean forwardNpc = npcGameplayPhase() && isNpcServicePacket(packet);
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -374,6 +377,7 @@ final class GatewaySession implements AutoCloseable {
                 break;
             case "MapInformation": case "MapChanged":
                 if (!worldPending()) return;
+                hasSceneSnapshot = false;
                 pendingSnapshot = null;
                 if (phase == Phase.IN_GAME) {
                     phase = Phase.STARTING;
@@ -395,7 +399,8 @@ final class GatewaySession implements AutoCloseable {
                 break;
             default: break;
         }
-        if ((forwardEntity && phase == Phase.IN_GAME) || (forwardPersonal && personalGameplayPhase())) {
+        if ((forwardEntity && phase == Phase.IN_GAME) || (forwardPersonal && personalGameplayPhase())
+                || (forwardNpc && npcGameplayPhase())) {
             forwardBounded(envelope, gameplayObserver);
         }
     }
@@ -441,6 +446,19 @@ final class GatewaySession implements AutoCloseable {
         // Public received chat, after this connection's accepted owner bootstrap.
         // ObjectChat is a peer/AOI message, not a personal-owner stat packet.
         return packet.equals("Chat") || packet.equals("ObjectChat");
+    }
+
+    private static boolean isNpcServicePacket(String packet) {
+        // Public Windows NPC surface packets, not arbitrary service/admin JSON.
+        return packet.equals("NPCResponse") || packet.equals("NPCGoods")
+                || packet.equals("NPCPearlGoods") || packet.equals("NPCSell")
+                || packet.equals("NPCRepair") || packet.equals("NPCSRepair");
+    }
+
+    private boolean npcGameplayPhase() {
+        // Unlike personal item receipts, these replies belong to the current
+        // scene. Position alone after MapChanged cannot authorize old services.
+        return phase == Phase.IN_GAME && startAccepted && hasOwnerSnapshot && hasSceneSnapshot;
     }
 
     private static boolean isEntityGameplayPacket(String packet) {
@@ -508,6 +526,7 @@ final class GatewaySession implements AutoCloseable {
     private void resetWorld() {
         player = map = ""; x = y = null; startAccepted = false; pendingSnapshot = null;
         hasOwnerSnapshot = false;
+        hasSceneSnapshot = false;
         ownerObjectId = 0;
     }
     private boolean isOwnerInformation(JSONObject payload) {

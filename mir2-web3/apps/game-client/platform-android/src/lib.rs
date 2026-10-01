@@ -33,6 +33,8 @@ mod map_render;
 #[cfg(any(target_os = "android", test))]
 mod mobile_ui;
 #[cfg(any(target_os = "android", test))]
+mod npc_ingress;
+#[cfg(any(target_os = "android", test))]
 mod phone_hud;
 #[cfg(any(target_os = "android", test))]
 mod phone_panels;

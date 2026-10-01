@@ -566,6 +566,62 @@ public class GatewaySessionTest {
         assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
     }
 
+    @Test public void npcPacketsRequireAnAuthenticatedCurrentSceneAndKeepTheirPayload() throws Exception {
+        connect();
+        JSONObject page = GatewaySession.object("page", new org.json.JSONArray().put("Welcome").put("<Buy/@BuySell>"));
+        peer.send(GatewaySession.object("type", "packet", "packet", "NPCResponse", "payload", page).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(GatewaySession.object("type", "packet", "packet", "NPCResponse", "payload", page).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        String world = "{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}";
+        peer.send(world);
+        assertNotNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        String[] names = {"NPCResponse", "NPCGoods", "NPCPearlGoods", "NPCSell", "NPCRepair", "NPCSRepair"};
+        Object[] payloads = {page, GatewaySession.object("list", new org.json.JSONArray()),
+                GatewaySession.object("list", new org.json.JSONArray()), JSONObject.NULL,
+                GatewaySession.object("rate", 1.5), GatewaySession.object("rate", 2.0)};
+        for (int i = 0; i < names.length; i++) {
+            JSONObject envelope = GatewaySession.object("type", "packet", "packet", names[i], "payload", payloads[i]);
+            peer.send(envelope.toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Missing NPC packet " + names[i], raw);
+            assertEquals(envelope.toString(), new JSONObject(raw).toString());
+        }
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(GatewaySession.object("type", "packet", "packet", "NPCSell", "payload", JSONObject.NULL).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"packet\",\"packet\":\"UserLocation\",\"payload\":{\"x\":50,\"y\":60}}");
+        phase(GatewaySession.Phase.IN_GAME);
+        peer.send(GatewaySession.object("type", "packet", "packet", "NPCSell", "payload", JSONObject.NULL).toString());
+        assertNull("Coordinates alone cannot authorize the new scene", gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        peer.send(world.replace("\"mapFileName\":\"0\"", "\"mapFileName\":\"1\"")
+                .replace("\"x\":302", "\"x\":50").replace("\"y\":634", "\"y\":60"));
+        assertNotNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        peer.send(GatewaySession.object("type", "packet", "packet", "NPCSell", "payload", JSONObject.NULL).toString());
+        assertEquals("NPCSell", new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).getString("packet"));
+        for (String unsupported : new String[]{"qa.openStorage", "Stage5Command", "NPCStorage"}) {
+            peer.send(GatewaySession.object("type", "packet", "packet", unsupported, "payload", new JSONObject()).toString());
+            assertNull(gameplayPackets.poll(100, TimeUnit.MILLISECONDS));
+        }
+    }
+
+    @Test public void oversizedNpcPacketFailsClosedAtTheJniBoundary() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        phase(GatewaySession.Phase.IN_GAME);
+        peer.send(GatewaySession.object("type", "packet", "packet", "NPCResponse", "payload",
+                GatewaySession.object("page", new org.json.JSONArray().put("文".repeat(6000)))).toString());
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
     @Test public void entityPacketsForwardOnlyAfterAuthoritativeWorldEntry() throws Exception {
         connect();
         peer.send("{\"type\":\"packet\",\"packet\":\"ObjectWalk\",\"payload\":{\"objectId\":43,\"x\":302,\"y\":631,\"direction\":\"DownRight\"}}");

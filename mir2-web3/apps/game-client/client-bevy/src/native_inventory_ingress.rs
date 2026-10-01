@@ -1,8 +1,11 @@
 //! Shared Windows/Android inventory wire projection. No item mutations,
 //! gameplay rules, operation matching or filesystem/platform dependencies.
 //! Geometry is supplied by the host from the approved original asset pack.
+use crate::inventory::{CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel};
+use crate::native_player_ingress::NativeUiPlayerCursor;
 use crate::pending_operations::InventoryOperationAck;
-use mir2_game_data::{crystal_item_manifest, CrystalItemTemplate};
+use mir2_game_data::{crystal_item_manifest, crystal_real_item_for_player, CrystalItemTemplate};
+use mir2_protocol::MirClass;
 use serde_json::{json, Value};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -263,6 +266,88 @@ pub fn unique_crystal_item_template(item_index: i32) -> Option<CrystalItemTempla
         return None;
     }
     Some(item)
+}
+
+/// Pure viewer/item tooltip adapters extracted from Windows3d735745f.
+/// A missing/ambiguous database row stays partial; this never grants an item.
+pub fn native_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClass)> {
+    let level = u16::try_from(cursor.level?).ok()?;
+    let class = match cursor
+        .class_name
+        .as_deref()?
+        .trim()
+        .to_ascii_lowercase()
+        .as_str()
+    {
+        "warrior" => MirClass::Warrior,
+        "wizard" => MirClass::Wizard,
+        "taoist" => MirClass::Taoist,
+        "assassin" => MirClass::Assassin,
+        "archer" => MirClass::Archer,
+        _ => return None,
+    };
+    Some((level, class))
+}
+
+pub fn native_tooltip_info(item_index: i32) -> Option<CrystalItemInfoModel> {
+    serde_json::from_value(serde_json::to_value(unique_crystal_item_template(item_index)?).ok()?)
+        .ok()
+}
+
+pub fn native_real_tooltip_info(
+    info: &CrystalItemInfoModel,
+    viewer: Option<(u16, MirClass)>,
+) -> Option<CrystalItemInfoModel> {
+    let (level, class) = viewer?;
+    if !info.class_based && !info.level_based {
+        return Some(info.clone());
+    }
+    let origin = unique_crystal_item_template(info.item_index)?;
+    let origin_model =
+        serde_json::from_value::<CrystalItemInfoModel>(serde_json::to_value(&origin).ok()?).ok()?;
+    if origin_model != *info {
+        return None;
+    }
+    serde_json::from_value(
+        serde_json::to_value(crystal_real_item_for_player(&origin, level, class)).ok()?,
+    )
+    .ok()
+}
+
+pub fn native_tooltip_source_for_user_item(
+    value: &Value,
+    cursor: &NativeUiPlayerCursor,
+) -> Option<CrystalItemTooltipSourceModel> {
+    let user_item = serde_json::from_value::<CrystalUserItemModel>(value.clone()).ok()?;
+    let info = native_tooltip_info(user_item.item_index)?;
+    let viewer = native_tooltip_viewer(cursor);
+    let socket_infos = user_item
+        .slots
+        .iter()
+        .map(|slot| {
+            slot.as_ref()
+                .and_then(|socket| native_tooltip_info(socket.item_index))
+        })
+        .collect::<Vec<_>>();
+    let real_socket_infos = if viewer.is_some() {
+        socket_infos
+            .iter()
+            .map(|socket| {
+                socket
+                    .as_ref()
+                    .and_then(|socket| native_real_tooltip_info(socket, viewer))
+            })
+            .collect()
+    } else {
+        Vec::new()
+    };
+    Some(CrystalItemTooltipSourceModel {
+        real_info: native_real_tooltip_info(&info, viewer),
+        info,
+        user_item: Some(user_item),
+        socket_infos,
+        real_socket_infos,
+    })
 }
 
 pub fn native_inventory_slot(value: Option<&Value>, fallback: u32) -> u32 {

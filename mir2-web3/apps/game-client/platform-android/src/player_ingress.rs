@@ -23,6 +23,10 @@ pub(crate) struct AndroidPlayerIngress {
 }
 
 impl AndroidPlayerIngress {
+    pub(crate) fn presentation_cursor(&self) -> &NativeUiPlayerCursor {
+        &self.cursor
+    }
+
     pub(crate) fn identity(&self) -> Option<(u32, &str)> {
         self.identity
             .as_ref()

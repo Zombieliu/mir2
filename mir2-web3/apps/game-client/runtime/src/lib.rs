@@ -2530,6 +2530,7 @@ fn apply_scene_reset_to_scene_models(
     *entities = mir2_client_bevy::entities::EntityModelSet::default();
     social.clear_scene();
     surface_signals.npc_shop_open_requested = false;
+    surface_signals.npc_service_opening_observed = false;
     let _ = shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal::default());
 }
 
@@ -2573,6 +2574,7 @@ fn apply_session_reset_to_runtime_models(
     }
     *ui = mir2_client_bevy::read_model::UiReadModel::default();
     surface_signals.npc_shop_open_requested = false;
+    surface_signals.npc_service_opening_observed = false;
     *map = mir2_client_bevy::map::MapModel::default();
     *entities = mir2_client_bevy::entities::EntityModelSet::default();
     *inventory = mir2_client_bevy::inventory::InventoryModel::default();
@@ -2911,6 +2913,8 @@ fn ingest_pending_npc_shop_service(
                 // opening in this frame and must never open an empty shop.
                 surface_signals.npc_shop_open_requested =
                     signal.mode != mir2_client_bevy::shop::NpcShopServiceMode::Closed;
+                surface_signals.npc_service_opening_observed |=
+                    surface_signals.npc_shop_open_requested;
             } else {
                 publish_status("native-decode-error", "invalid native NPC service");
             }
@@ -10200,10 +10204,11 @@ mod native_data_path_tests {
         use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal, ShopModel};
 
         let _native_queue_guard = native_ingest::native_queue_test_guard();
-        for (modes, expected_mode, expected_open) in [
+        for (modes, expected_mode, expected_open, expected_observed) in [
             (
                 vec![NpcShopServiceMode::Closed],
                 NpcShopServiceMode::Closed,
+                false,
                 false,
             ),
             (
@@ -10214,10 +10219,12 @@ mod native_data_path_tests {
                 ],
                 NpcShopServiceMode::Closed,
                 false,
+                true,
             ),
             (
                 vec![NpcShopServiceMode::Closed, NpcShopServiceMode::Buy],
                 NpcShopServiceMode::Buy,
+                true,
                 true,
             ),
         ] {
@@ -10243,6 +10250,34 @@ mod native_data_path_tests {
                 expected_open,
                 "a close packet must cancel any earlier open request in the same frame"
             );
+            assert_eq!(app.world()
+                .resource::<mir2_client_bevy::read_model::UiSurfaceSignals>()
+                .npc_service_opening_observed, expected_observed,
+                "a valid opening retires a pending request even when Closed is last");
+        }
+    }
+
+    #[test]
+    fn native_npc_service_opening_observation_clears_on_scene_and_session_reset() {
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        let mut app = ingest_app();
+        for scene_only in [true, false] {
+            assert!(native_ingest::push_native_npc_shop_service(
+                r#"{"mode":"buy","repairRate":null}"#.to_owned()));
+            app.update();
+            assert!(app.world()
+                .resource::<mir2_client_bevy::read_model::UiSurfaceSignals>()
+                .npc_service_opening_observed);
+            assert!(if scene_only {
+                native_ingest::push_native_scene_reset()
+            } else {
+                native_ingest::push_native_data_reset()
+            });
+            app.update();
+            let signals = app.world()
+                .resource::<mir2_client_bevy::read_model::UiSurfaceSignals>();
+            assert!(!signals.npc_shop_open_requested);
+            assert!(!signals.npc_service_opening_observed);
         }
     }
 
