@@ -1,10 +1,12 @@
 # Frontend 1:1 Gaps
 
-> 2026-10-01 Android G4 source repair: ordinary BAG/CHAR now share the phone
-> HUD's center workspace, preserving six48dp belt actions and thumb lanes;
-> CHAR's four pages are no longer omitted from focus. Android249/preview260/
-> shared1203+8ignored/API31 pass. v11 actual images and clicking not yet accepted;
-> short screens, all controls/IME/login/services/online/device and full UI stay OPEN.
+> 2026-10-01 Android G4 actual v11 repair: clean6fe6a17ac dual APK/hash/install,
+>6643 PNGs/two metadata byte matches each. BAG/CHAR no longer cover HUD/thumbs;
+> six belt targets visible, character tabs/close and BAG Quest/return/close respond.
+> Android249/preview260/shared1203+8ignored/API31 source pass. Stats preview lacks
+>crystal_stats; actual all48dp, dragging, caption stability, compact/IME/login/
+> services/start performance/online/device remain OPEN. Next authoritative personal
+> stats/wallet ingress; no full phone UI or Windows-completeness acceptance.
 > [Source and failures](generated/player-qa/native-android-phone-panels-20261001/README.md).
 
 > 2026-10-01 v10 actual image checkpoint: clean452398d4c builds both installed

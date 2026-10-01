@@ -2,11 +2,12 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
-当前 G4 源码叶子：普通背包／人物窗与同一手机 HUD workspace 对齐，保留左右
-操作区及六个48dp快捷格；四个人物页不再遗漏 focus。Android249/preview260/
-shared1203+8ignored、两种实际API31检查通过。v11尚未构建／截图／触控签收，
-短屏、所有窗口触控、登录/IME、在线与真机仍OPEN，完整 Windows 分母不变。
-[手机面板源码与失败保留](generated/player-qa/native-android-phone-panels-20261001/README.md)。
+当前 G4 有界实测：干净6fe6a17ac双包v11/hash/安装与6643 PNG、两份metadata逐字节
+核验；模拟器背包／人物窗不再遮 HUD/摇杆，四个人物页和关闭实际点击有响应，
+保留六个快捷格。Android249/preview260/shared1203+8ignored/API31两种源码门通过。
+启动仍有15844/13174ms超时；属性预览缺crystal_stats、所有48dp/拖拽/短屏/登录IME/
+服务/在线/真机仍OPEN。下一叶子接真实属性/余额到共享UI，完整Windows分母不变。
+[精确v11、原始截图与失败保留](generated/player-qa/native-android-phone-panels-20261001/README.md)。
 
 发布检查点：此前积压的 goal 源码/证据已正常推送至 Android 分支 e18eeadf0，
 远端引用和 PR253 同 head 已核验；PR仍Open/Draft、base不变。不回推Windows，

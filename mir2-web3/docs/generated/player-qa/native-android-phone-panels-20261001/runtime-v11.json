@@ -1,0 +1,160 @@
+{
+  "source": "6fe6a17ac229e9ebf0181a1ce02062ae00db71f4",
+  "versionCode": 11,
+  "deviceApi": 31,
+  "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys",
+  "physicalSize": "Physical size: 1080x2340",
+  "density": 440,
+  "captures": [
+    {
+      "name": "debug-login.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 3178556,
+      "sha256": "d3d4b9339dfa3838341e2b10a360585463f58a549af4037e65fc6388e3c6d037"
+    },
+    {
+      "name": "preview-inventory.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 180283,
+      "sha256": "12cfd603b48a4c439feeab32b45c1f365c3ac427efce0531c6c1483988b34528"
+    },
+    {
+      "name": "preview-inventory-bag2.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 180283,
+      "sha256": "12cfd603b48a4c439feeab32b45c1f365c3ac427efce0531c6c1483988b34528"
+    },
+    {
+      "name": "preview-inventory-quest.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 151961,
+      "sha256": "c9a4e8cf7222ae647675c9b8b62269d939ccbb78b1fdb59026a6cf0c9e2544aa"
+    },
+    {
+      "name": "preview-inventory-bag2-held.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 152325,
+      "sha256": "ccff904c7908c7dfff76b3ab3dc529817715c2a0ae788db26c3fac91c5599e96"
+    },
+    {
+      "name": "preview-inventory-restored.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 180283,
+      "sha256": "12cfd603b48a4c439feeab32b45c1f365c3ac427efce0531c6c1483988b34528"
+    },
+    {
+      "name": "preview-inventory-closed.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 87434,
+      "sha256": "282f9ebd374434c8cbb3d84b51ee27bc8392b85e083a4a24cad854f0735a178a"
+    },
+    {
+      "name": "preview-character.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 163979,
+      "sha256": "c7f2c8604bfc1456b398db3cce8d76ace089df67b49cc07314c11ca097faa826"
+    },
+    {
+      "name": "preview-character-stats1.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 144047,
+      "sha256": "8c59bb48f7460d524ed5a19e57a49ce0fca362ce2c65fff8ad8d53940ea86d48"
+    },
+    {
+      "name": "preview-character-stats2.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 145178,
+      "sha256": "deb82663ac3ec3a367e2ea639f0ad811a9282ac53957563f1979a4dbcab98ca1"
+    },
+    {
+      "name": "preview-character-spells.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 146525,
+      "sha256": "e9db52958ab4fa040870872b7768880184deea2267a644b53be41f7e1e37132d"
+    },
+    {
+      "name": "preview-character-restored.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 163979,
+      "sha256": "c7f2c8604bfc1456b398db3cce8d76ace089df67b49cc07314c11ca097faa826"
+    },
+    {
+      "name": "preview-character-closed.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 87118,
+      "sha256": "2b756a6ab4bccd1c4f05b3ee4ce14454c76bac208b738d71097a6ecce0f44e2c"
+    }
+  ],
+  "logs": [
+    {
+      "name": "preview-inventory-final-pid5324.log",
+      "capturedLines": 647,
+      "errorFatalPanicSignalLines": 0
+    },
+    {
+      "name": "preview-character-final-pid5739.log",
+      "capturedLines": 336,
+      "errorFatalPanicSignalLines": 0
+    },
+    {
+      "name": "debug-login-pid5871.log",
+      "capturedLines": 498,
+      "errorFatalPanicSignalLines": 0
+    }
+  ],
+  "starts": [
+    {
+      "name": "start-preview-inventory.log",
+      "status": "timeout",
+      "waitTimeMs": 15844
+    },
+    {
+      "name": "start-preview-character.log",
+      "status": "ok",
+      "waitTimeMs": 8541
+    },
+    {
+      "name": "start-debug.log",
+      "status": "timeout",
+      "waitTimeMs": 13174
+    }
+  ],
+  "observationMethod": "Manual inspection of original ADB captures and actual tap sequence; geometry is not inferred from screenshot hashes.",
+  "observed": {
+    "ordinaryBagAndCharacterClearStatusChatAndThumbs": true,
+    "sixBeltTargetsVisibleInSidebar": true,
+    "bagQuestTabAndReturnRespond": true,
+    "bagCloseRestoresNormalHud": true,
+    "allFourCharacterPagesAndCloseRespond": true,
+    "disabledSecondBagUnlockAccepted": false,
+    "characterStatsValuesAccepted": false,
+    "allMinimum48DpControlsAccepted": false,
+    "realItemDragUseEquipReceiptsAccepted": false,
+    "launchPerformanceAccepted": false,
+    "fullPhoneUiAccepted": false,
+    "authenticatedGameplayAccepted": false,
+    "physicalDeviceAccepted": false
+  },
+  "retainedGaps": [
+    "Preview character fixture has no crystal_stats; shared values are intentionally absent until supplied, not fabricated.",
+    "Character scene SPELLS has generic fixtures, not the separate typed skills-scene icon evidence.",
+    "Quest-tab immediate capture has transient missing tab artwork; caption stability not accepted.",
+    "Second bag is disabled because this offline specimen is not expanded; tap and hold are not unlock evidence.",
+    "Normal login is small and says Test server not configured; neither credentials nor saves were used.",
+    "Inventory and normal launches timed out before later visible frames.",
+    "Compact/IME, all dialogs, frame and item drag geometry, live packets and physical device remain open."
+  ]
+}

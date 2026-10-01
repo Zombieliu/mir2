@@ -1,10 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> 2026-10-01 Android G4 phone workspace source: same BAG/CHAR render tree,
-> reserved HUD/thumb lanes and 3x2 original48dp belt targets. Four character
-> pages focus without rewriting authored nodes or Windows presentation.
-> Android249/preview260/shared1203+8ignored/API31 normal+preview pass; v11
-> APK/runtime and full UI/player-loop/device acceptance are separate OPEN gates.
+> 2026-10-01 Android G4 exact v11 from clean6fe6a17ac: both APK/hash/install and
+>6643 PNGs/two metadata byte matches each. Actual BAG/CHAR clear HUD/thumb lanes,
+> six belt targets and four character pages/close respond without Windows changes.
+> Android249/preview260/shared1203+8ignored/API31 variants pass. Startup timeouts,
+> missing preview stats, all48dp/drag/compact/IME/login/services/online/device stay
+> OPEN; next frozen-Windows authoritative player stat/wallet ingress. No whole goal pass.
 > [Evidence](generated/player-qa/native-android-phone-panels-20261001/README.md).
 
 > 2026-10-01 exact Android452398d4c v10: both APKs build/install with6195 frames
