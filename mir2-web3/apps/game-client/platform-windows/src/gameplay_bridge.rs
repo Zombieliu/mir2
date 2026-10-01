@@ -2232,6 +2232,7 @@ pub struct NativeQuestWorldInput<'w> {
     quest_ui_state: Option<Res<'w, QuestUiState>>,
     map: Option<Res<'w, MapModel>>,
     big_map: Option<Res<'w, BigMapModel>>,
+    big_map_ui: Option<Res<'w, mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
     movement: Option<ResMut<'w, WorldPointerMovementState>>,
 }
 
@@ -2287,6 +2288,7 @@ pub fn forward_quest_ui_intents(
         quest_ui_state,
         map,
         big_map,
+        big_map_ui,
         mut movement,
     } = world;
     let pending = intents.drain_intents();
@@ -2334,7 +2336,10 @@ pub fn forward_quest_ui_intents(
     let dead = read_model
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
-    let world_actions_blocked = notice.as_deref().is_some_and(NoticeDialogState::is_open)
+    let quest_modal = quest_ui_state.as_deref().is_some_and(QuestUiState::blocks_world_input);
+    let world_actions_blocked = quest_modal
+        || big_map_ui.as_deref().is_some_and(|map| map.search_focused)
+        || notice.as_deref().is_some_and(NoticeDialogState::is_open)
         || player_ui_state
             .as_deref()
             .map(|state| state.blocks_world_action(dialog_open, dead))
@@ -2515,6 +2520,7 @@ pub fn forward_quest_ui_intents(
                 let attack_actions_blocked = notice
                     .as_deref()
                     .is_some_and(NoticeDialogState::is_open)
+                    || quest_modal
                     || dialog_open
                     || dead
                     || player_ui_state.as_deref().is_some_and(|ui| {
@@ -5748,7 +5754,14 @@ mod tests {
         app.world_mut().resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         app.update();
-        assert!(receiver.try_recv().is_err(), "a modal still blocks combat");
+        assert!(matches!(receiver.try_recv(), Ok(GatewayCommand::Wire(
+            NativeOutboundCommand::Attack { object_id: 42 }
+        ))), "the ordinary options view must preserve combat");
+        app.world_mut().resource_mut::<NativePlayerUiState>().skill_assign.open = true;
+        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+            .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
+        app.update();
+        assert!(receiver.try_recv().is_err(), "a real assignment prompt still blocks combat");
     }
 
     #[test]

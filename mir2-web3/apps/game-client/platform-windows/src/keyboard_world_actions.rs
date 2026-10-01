@@ -25,6 +25,11 @@ pub fn keyboard_world_actions_system(
     shell: Option<Res<NativeShellModel>>,
     mut ui: Option<ResMut<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
+    (quest, big_map, npc_dialog): (
+        Option<Res<QuestUiState>>,
+        Option<Res<mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
+        Option<Res<NpcDialogModel>>,
+    ),
     windows: Query<&Window>,
     entities: Res<EntityModelSet>,
     presentation: Res<NativeEntityPresentation>,
@@ -61,7 +66,7 @@ pub fn keyboard_world_actions_system(
             ..Default::default()
         };
     }
-    if !gameplay_input_enabled(shell.as_deref(), ui.as_deref(), notice.as_deref(), &windows) {
+    if !gameplay_input_enabled(shell.as_deref(), ui.as_deref(), notice.as_deref(), quest.as_deref(), big_map.as_deref(), npc_dialog.as_deref(), &windows) {
         return;
     }
     let Some(ui) = ui.as_deref_mut() else {

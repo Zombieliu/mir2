@@ -706,14 +706,14 @@ fn bichon_route_reaches_oma_entrance_around_static_and_new_entity_obstacles() {
 
 #[test]
 fn bichon_route_keeps_modal_drag_and_manual_cancel_guards() {
-    for blocker in ["chat", "options", "storage", "npc_shop", "mail", "hero_modal", "hero_drag", "skill_drag", "menu_consumed", "npc", "dead", "escape", "ui_press", "ui_press_release", "middle_press", "unfocused"] {
+    for blocker in ["chat", "skill_assign", "storage", "npc_shop", "mail", "hero_modal", "hero_drag", "skill_drag", "menu_consumed", "npc", "dead", "escape", "ui_press", "ui_press_release", "middle_press", "unfocused"] {
         let (mut app, receiver) = bichon_entrance_app();
         {
             let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
             ui.status_hud.hovered = true;
             match blocker {
                 "chat" => ui.core.chat_focused = true,
-                "options" => ui.toggle_options(),
+                "skill_assign" => ui.skill_assign.open = true,
                 "storage" => ui.core.panel = mir2_ui_core::state::UiPanel::Storage,
                 "npc_shop" => ui.core.panel = mir2_ui_core::state::UiPanel::NpcShop,
                 "mail" => ui.core.panel = mir2_ui_core::state::UiPanel::Mail,

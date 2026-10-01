@@ -14,6 +14,7 @@ use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::quest_model::NpcDialogModel;
+use mir2_client_bevy::quest_ui::QuestUiState;
 use mir2_client_bevy::read_model::UiReadModel;
 
 use crate::entity_presentation::NativeEntityPresentation;
@@ -80,6 +81,7 @@ pub(crate) fn sync_native_crystal_cursor(
     shell: Option<Res<NativeShellModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
+    quest: Option<Res<QuestUiState>>,
     dialog: Option<Res<NpcDialogModel>>,
     ui_read_model: Option<Res<UiReadModel>>,
     entities: Option<Res<EntityModelSet>>,
@@ -103,7 +105,18 @@ pub(crate) fn sync_native_crystal_cursor(
             .as_deref()
             .is_some_and(|shell| shell.screen == NativeShellScreen::InGame)
         && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
-        && !is_world_click_blocked(player_ui.as_deref(), dialog_open, dead);
+        && !is_world_click_blocked(player_ui.as_deref(), dialog_open, dead)
+        && window.cursor_position().is_some_and(|cursor| {
+            let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
+                window.resolution.width(), window.resolution.height(),
+            );
+            if !transform.contains_physical_point(cursor.x, cursor.y) { return false; }
+            let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+            player_ui.as_deref().is_none_or(|ui| !ui.blocks_world_pointer_at(x, y))
+                && quest.as_deref().is_none_or(|quest| !quest.captures_world_pointer_at(
+                    x, y, player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
+                ))
+        });
 
     let hovered_kind = world_cursor_enabled
         .then(|| {

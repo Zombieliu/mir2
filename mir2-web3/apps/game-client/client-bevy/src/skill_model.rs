@@ -113,6 +113,9 @@ impl<'de> Deserialize<'de> for SkillModel {
                 cooldown_remaining_ticks: explicit
                     .map(|binding| binding.cooldown_remaining_ticks)
                     .unwrap_or(raw_skill.cooldown_remaining_ticks),
+                cooldown_remaining_ms: explicit
+                    .and_then(|binding| binding.cooldown_remaining_ms)
+                    .or(raw_skill.cooldown_remaining_ms),
                 mp_cost: explicit
                     .and_then(|binding| binding.mp_cost)
                     .or(raw_skill.mp_cost),
@@ -167,6 +170,11 @@ pub struct SkillBinding {
     pub offensive: Option<bool>,
     #[serde(default)]
     pub cooldown_remaining_ticks: u32,
+    /// Exact shared-Zone readiness at the authoritative snapshot. Legacy
+    /// producers keep the rounded tick value above; native UI ages either
+    /// sample on its monotonic clock rather than waiting for another snapshot.
+    #[serde(default, alias = "cooldown_remaining_ms")]
+    pub cooldown_remaining_ms: Option<u32>,
     #[serde(default)]
     pub cast_sequence: u64,
     #[serde(default)]
@@ -195,6 +203,7 @@ impl Default for SkillBinding {
             can_use: None,
             offensive: None,
             cooldown_remaining_ticks: 0,
+            cooldown_remaining_ms: None,
             cast_sequence: 0,
             mp_cost: None,
             delay_ms: None,
@@ -266,6 +275,8 @@ struct RawSkillEntry {
     offensive: Option<bool>,
     #[serde(default, alias = "cooldown_remaining_ticks")]
     cooldown_remaining_ticks: u32,
+    #[serde(default, alias = "cooldown_remaining_ms")]
+    cooldown_remaining_ms: Option<u32>,
     #[serde(default, alias = "cast_sequence")]
     cast_sequence: u64,
     #[serde(default, alias = "cast_time_ms")]
@@ -379,6 +390,26 @@ pub struct SkillEntry {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn exact_cooldown_readiness_is_additive_and_explicit_zero_is_preserved() {
+        let model: SkillModel = serde_json::from_value(serde_json::json!({
+            "skills":[
+                {"id":1,"cooldownRemainingTicks":1,"cooldownRemainingMs":299},
+                {"id":2,"cooldown_remaining_ticks":2,"cooldown_remaining_ms":0},
+                {"id":3,"cooldownRemainingTicks":3},
+                {"id":4,"cooldownRemainingMs":500}
+            ],
+            "bindings":[{"skillId":4,"cooldownRemainingMs":0}]
+        }))
+        .unwrap();
+        assert_eq!(model.binding_for(1).cooldown_remaining_ms, Some(299));
+        assert_eq!(model.binding_for(2).cooldown_remaining_ms, Some(0));
+        assert_eq!(model.binding_for(3).cooldown_remaining_ms, None);
+        assert_eq!(model.binding_for(4).cooldown_remaining_ms, Some(0));
+        assert_eq!(model.binding_for(1).cooldown_remaining_ticks, 1);
+        assert_eq!(model.binding_for(2).cooldown_remaining_ticks, 2);
+    }
 
     #[test]
     fn original_skill_experience_is_optional_and_round_trips_without_fabrication() {

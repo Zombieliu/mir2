@@ -1,12 +1,14 @@
-# Numeron - Legend of Rebirth: nine-language r7 installer
+# Numeron - Legend of Rebirth: nine-language r8 installer
 
 This recipe consumes an already attested, strictly CMS-verified client-only
 Candidate. It neither builds the game nor changes player saves or servers.
 Earlier artifacts are immutable. Output for this version is
-`Numeron-Legend-of-Rebirth-20261001-r7-Setup.exe`, version `2026.10.01.7`.
-This revision adds the verified native launcher/updater and login resolution
-selection. The entire fixed Crystal stage scales uniformly; per-user display
-and language preferences survive ordinary updates.
+`Numeron-Legend-of-Rebirth-20261001-r8-Setup.exe`, version `2026.10.01.8`.
+This revision fixes skill readiness, cooldown clocks and ordinary-window input
+capture, and includes the earlier medicine-shop/bag placement correction. It
+retains the verified launcher/updater and login resolution selection. Deploy
+its matching Gateway revision for authoritative action/FlamingSword timing.
+Per-user display and language preferences survive ordinary updates.
 AppId, per-user installation directory and shortcut identity remain unchanged.
 
 ## Inputs and ordinary internal Candidate build
@@ -32,7 +34,7 @@ python prepare-installer-input.py <verified-package-root> <exact-40-hex-source-c
 ISCC.exe /Qp Mir2-Invite.iss
 ```
 
-The preparation tool requires `WN-CANDIDATE-20261001-invited-07`, exact clean
+The preparation tool requires `WN-CANDIDATE-20261001-invited-08`, exact clean
 source provenance, recursive file closure and matching hashes. It rejects logs,
 links, extra files and output overwrite. There is no default source revision.
 Its literal input list is supplementary byte evidence, not CMS verification.

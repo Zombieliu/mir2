@@ -1683,19 +1683,7 @@ impl SkillPacketCursor {
                 }
                 true
             }
-            "MagicCast" => {
-                let Some(identity) = packet_spell_identity(payload) else {
-                    return false;
-                };
-                if !self.magic_casts.contains_key(&identity)
-                    && self.magic_casts.len() >= MAX_LEARNED_SKILLS
-                {
-                    return false;
-                }
-                self.next_magic_cast = self.next_magic_cast.saturating_add(1);
-                self.magic_casts.insert(identity, self.next_magic_cast);
-                true
-            }
+            "Magic" | "MagicCast" => self.observe_owner_cast(packet, payload),
             "MagicDelay" => {
                 if !self.packet_targets_player(payload) {
                     return false;
@@ -1771,6 +1759,41 @@ impl SkillPacketCursor {
             }
             _ => false,
         }
+    }
+
+    fn observe_owner_cast(&mut self, packet: &str, payload: &Value) -> bool {
+        match packet {
+            "Magic" if payload.get("cast").and_then(Value::as_bool) == Some(true) => {}
+            "MagicCast"
+                if payload
+                    .get("cast")
+                    .is_none_or(|cast| cast.as_bool() == Some(true)) => {}
+            _ => return false,
+        }
+        let Some(player_id) = self.player_object_id.filter(|id| *id != 0) else {
+            return false;
+        };
+        // These are owner-only Crystal packets and normally omit objectId.
+        // Never let an explicit Hero/other actor identity override that owner.
+        if payload
+            .get("hero")
+            .is_some_and(|hero| hero.as_bool() != Some(false))
+            || payload
+                .get("objectId")
+                .is_some_and(|actor| value_u32(Some(actor)) != Some(player_id))
+        {
+            return false;
+        }
+        let Some(identity) = packet_spell_identity(payload) else {
+            return false;
+        };
+        if !self.magic_casts.contains_key(&identity) && self.magic_casts.len() >= MAX_LEARNED_SKILLS
+        {
+            return false;
+        }
+        self.next_magic_cast = self.next_magic_cast.saturating_add(1);
+        self.magic_casts.insert(identity, self.next_magic_cast);
+        true
     }
 
     fn packet_targets_player(&self, payload: &Value) -> bool {
@@ -5859,6 +5882,16 @@ fn transform_skill_model(payload: &Value) -> Value {
                         .unwrap_or_else(|| json!(0)),
                     );
                     transformed.insert(
+                        "cooldownRemainingMs".to_owned(),
+                        value_u32(
+                            skill
+                                .get("cooldownRemainingMs")
+                                .or_else(|| skill.get("cooldown_remaining_ms")),
+                        )
+                        .map(|value| json!(value))
+                        .unwrap_or(Value::Null),
+                    );
+                    transformed.insert(
                         "mpCost".to_owned(),
                         value_u32(skill.get("mpCost").or_else(|| skill.get("mp_cost")))
                             .map(|value| json!(value))
@@ -9568,6 +9601,121 @@ mod tests {
                 .and_then(|skill| skill.spell),
             Some("Lightning".to_owned())
         );
+    }
+
+    #[test]
+    fn three_class_successful_magic_receipts_start_owner_cooldowns_once_per_event() {
+        use mir2_client_bevy::crystal_ui::overlays::skill_bars::SkillBarsUi;
+        let now = Instant::now();
+        for (spell, delay, cast_kind) in [
+            ("LionRoar", 22000, "direction"),
+            ("FireBall", 2000, "target"),
+            ("SoulFire", 1800, "target"),
+        ] {
+            let mut cursor = SkillPacketCursor::default();
+            let mut snapshot = json!({"tick":100,"playerObjectId":1001,"knownSkills":[{
+                "id":1,"spell":spell,"castKind":cast_kind,"hotkey":1,"delayMs":delay,
+                "cooldownRemainingTicks":0,"cooldownRemainingMs":0
+            }]});
+            cursor.observe_snapshot(&mut snapshot);
+            assert!(cursor.apply_packet("Magic", &json!({"spell":spell,"cast":true}), 100));
+            cursor.apply_active_patches(&mut snapshot, 100);
+            let model = serde_json::from_value::<mir2_client_bevy::skill_model::SkillModel>(
+                transform_skill_model(&snapshot),
+            )
+            .unwrap();
+            let mut bar = SkillBarsUi::default();
+            bar.observe(&model, now);
+            assert_eq!(bar.remaining_ms(1, &model, now), delay);
+            assert!(bar.cooldown_frame(1, &model, now).is_some());
+
+            cursor.observe_snapshot(&mut snapshot);
+            let repeated = serde_json::from_value::<mir2_client_bevy::skill_model::SkillModel>(
+                transform_skill_model(&snapshot),
+            )
+            .unwrap();
+            bar.observe(&repeated, now + Duration::from_millis(500));
+            assert_eq!(
+                bar.remaining_ms(1, &repeated, now + Duration::from_millis(500)),
+                delay - 500
+            );
+            assert_eq!(
+                repeated.bindings[0].cast_sequence,
+                model.bindings[0].cast_sequence
+            );
+        }
+    }
+
+    #[test]
+    fn failed_magic_and_foreign_actor_packets_never_start_owner_cooldowns() {
+        use mir2_client_bevy::crystal_ui::overlays::skill_bars::SkillBarsUi;
+        let mut cursor = SkillPacketCursor::default();
+        let mut snapshot = json!({"tick":100,"playerObjectId":1001,"knownSkills":[{
+            "id":1,"spell":"FireBall","hotkey":1,"delayMs":2200
+        }]});
+        cursor.observe_snapshot(&mut snapshot);
+        for payload in [
+            json!({"spell":"FireBall","cast":false}),
+            json!({"spell":"FireBall"}),
+            json!({"spell":"FireBall","cast":1}),
+            json!({"spell":"FireBall","cast":true,"hero":true}),
+            json!({"spell":"FireBall","cast":true,"hero":"false"}),
+            json!({"spell":"FireBall","cast":true,"objectId":2002}),
+            json!({"spell":"FireBall","cast":true,"objectId":0}),
+            json!({"spell":"FireBall","cast":true,"objectId":"invalid"}),
+        ] {
+            assert!(!cursor.apply_packet("Magic", &payload, 100), "{payload}");
+        }
+        for payload in [
+            json!({"spell":"FireBall","cast":false}),
+            json!({"spell":"FireBall","hero":true}),
+            json!({"spell":"FireBall","objectId":2002}),
+        ] {
+            assert!(
+                !cursor.apply_packet("MagicCast", &payload, 100),
+                "{payload}"
+            );
+        }
+        assert!(!cursor.apply_packet(
+            "ObjectMagic",
+            &json!({
+                "objectId":2002,"spell":"FireBall","cast":true
+            }),
+            100
+        ));
+        assert!(cursor.apply_packet(
+            "MagicDelay",
+            &json!({
+                "objectId":1001,"spell":"FireBall","delay":3000
+            }),
+            100
+        ));
+        cursor.apply_active_patches(&mut snapshot, 100);
+        let model = serde_json::from_value::<mir2_client_bevy::skill_model::SkillModel>(
+            transform_skill_model(&snapshot),
+        )
+        .unwrap();
+        let now = Instant::now();
+        let mut bar = SkillBarsUi::default();
+        bar.observe(&model, now);
+        assert_eq!(model.bindings[0].cast_sequence, 0);
+        assert_eq!(bar.remaining_ms(1, &model, now), 0);
+        assert_eq!(bar.cooldown_frame(1, &model, now), None);
+    }
+
+    #[test]
+    fn native_skill_transform_preserves_exact_readiness_including_zero_and_legacy_absence() {
+        let model = serde_json::from_value::<mir2_client_bevy::skill_model::SkillModel>(
+            transform_skill_model(&json!({"knownSkills":[
+                {"id":1,"spell":"FireBall","cooldownRemainingTicks":1,"cooldownRemainingMs":299},
+                {"id":2,"spell":"Healing","cooldown_remaining_ticks":1,"cooldown_remaining_ms":0},
+                {"id":3,"spell":"SoulFire","cooldownRemainingTicks":2}
+            ]})),
+        )
+        .unwrap();
+        assert_eq!(model.binding_for(1).cooldown_remaining_ms, Some(299));
+        assert_eq!(model.binding_for(2).cooldown_remaining_ms, Some(0));
+        assert_eq!(model.binding_for(3).cooldown_remaining_ms, None);
     }
 
     #[test]

@@ -6536,6 +6536,10 @@ pub struct SkillSnapshot {
     pub delay_ms: i64,
     pub cast_time_ms: i64,
     pub cooldown_remaining_ticks: u32,
+    /// Exact remaining shared-Zone time when that clock is authoritative.
+    /// Older/personal snapshots retain the rounded tick field as a fallback.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cooldown_remaining_ms: Option<u32>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

@@ -191,6 +191,7 @@ fn zone_outbounds_contain_accepted_player_action(
             // A relocation spell can address the owner without a same-zone
             // observer action; its accepted owner packet is still decisive.
             ServerPacket::Magic { .. } | ServerPacket::RangeAttack { .. } => owner,
+            ServerPacket::MagicCast { spell: Spell::ShoulderDash } => owner,
             _ => false,
         })
     })
@@ -211,7 +212,20 @@ const ZONE_NATIVE_MONSTER_RANGED_MAX: i32 = 8;
 const ZONE_NATIVE_PLAYER_RANGE_ATTACK_MAX: i32 = 9;
 const ZONE_NATIVE_PLAYER_MAGIC_MAX: i32 = 12;
 const ZONE_NATIVE_PLAYER_ATTACK_ACTION_MS: u64 = 600;
-const ZONE_NATIVE_PLAYER_SPELL_ACTION_MS: u64 = 300;
+const ZONE_NATIVE_PLAYER_MELEE_ACTION_MS: u64 = 550;
+const ZONE_NATIVE_PLAYER_FLAMING_SWORD_MS: u64 = 10_000;
+const ZONE_NATIVE_PLAYER_MAGIC_ACTION_MS: u64 = 600;
+const ZONE_NATIVE_PLAYER_SPELL_ACTION_MS: u64 = 1_800;
+
+// Crystal HumanObject.Magic uses one global SpellTime in addition to each
+// magic's DelayBase/DelayReduction. FlameField alone lengthens that gate.
+fn zone_native_player_spell_delay_ms(spell: Spell) -> u64 {
+    if spell == Spell::FlameField {
+        2_500
+    } else {
+        ZONE_NATIVE_PLAYER_SPELL_ACTION_MS
+    }
+}
 const ZONE_FIRE_BOUNCE_INITIAL_DELAY_MS: u64 = 500;
 const QA_NATURAL_KILL_DAMAGE_MULTIPLIER_ENV: &str = "MIR2_QA_NATURAL_KILL_DAMAGE_MULTIPLIER";
 const MAX_QA_NATURAL_KILL_DAMAGE_MULTIPLIER: i32 = 1_000;
@@ -268,6 +282,20 @@ const CRYSTAL_SPELL_EFFECT_MAGIC_SHIELD_DOWN: u8 = 7;
 const CRYSTAL_SPELL_EFFECT_TELEPORT: u8 = 2;
 const CRYSTAL_SPELL_EFFECT_TWIN_DRAKE_BLADE: u8 = 5;
 const CRYSTAL_SPELL_EFFECT_BLEEDING: u8 = 18;
+
+/// Online action state survives a map change of the same player, but is not
+/// part of the durable character save and is discarded on normal logout.
+pub(super) struct ZonePlayerActionClock {
+    account_id: String,
+    character_index: i32,
+    object_id: u32,
+    movement_ready_at_ms: u64,
+    next_attack_ready_at_ms: u64,
+    next_spell_ready_at_ms: u64,
+    magic_ready_at_ms: BTreeMap<u8, u64>,
+    flaming_sword_armed: bool,
+    flaming_sword_ready_at_ms: u64,
+}
 
 // Note: ZoneRuntime is intentionally not `Clone`. It owns a `bevy_ecs::World`
 // (see `ecs`), which is not cloneable, and nothing ever cloned a zone runtime
@@ -933,8 +961,8 @@ impl ZoneRuntime {
 
     /// Returns the remaining authoritative shared-Zone cooldown for one spell.
     ///
-    /// A spell has both its own Crystal delay and the short global spell-action
-    /// delay. The public observer must wait for whichever becomes ready last.
+    /// A spell has its own Crystal delay, the global SpellTime and the shared
+    /// movement/melee/magic ActionTime. Readiness follows the latest deadline.
     /// `None` keeps an unknown session distinct from a known player whose spell
     /// is ready now.
     pub fn player_magic_cooldown_remaining_ms(
@@ -944,6 +972,11 @@ impl ZoneRuntime {
         now_ms: u64,
     ) -> Option<u64> {
         let player = self.players.get(session_id)?;
+        if spell == Spell::FlamingSword {
+            // Preparation bypasses CanCast/ActionTime in Crystal. Only Flame's
+            // own ten-second deadline controls another preparation.
+            return Some(player.flaming_sword_ready_at_ms.saturating_sub(now_ms));
+        }
         let spell_ready_at_ms = player
             .magic_ready_at_ms
             .get(&(spell as u8))
@@ -952,6 +985,7 @@ impl ZoneRuntime {
         Some(
             spell_ready_at_ms
                 .max(player.next_spell_ready_at_ms)
+                .max(player.movement_ready_at_ms)
                 .saturating_sub(now_ms),
         )
     }
@@ -960,6 +994,87 @@ impl ZoneRuntime {
         self.players
             .get(session_id)
             .map(|player| player.last_seen_move_seq)
+    }
+
+    pub fn player_flaming_sword_armed(&self, session_id: &SessionId, now_ms: u64) -> bool {
+        self.players.get(session_id).is_some_and(|player| {
+            player.flaming_sword_armed && now_ms < player.flaming_sword_ready_at_ms
+        })
+    }
+
+    pub(super) fn player_action_clock(&self, session_id: &SessionId) -> Option<ZonePlayerActionClock> {
+        self.players.get(session_id).map(|player| ZonePlayerActionClock {
+            account_id: player.account_id.clone(),
+            character_index: player.character_index,
+            object_id: player.object_id,
+            movement_ready_at_ms: player.movement_ready_at_ms,
+            next_attack_ready_at_ms: player.next_attack_ready_at_ms,
+            next_spell_ready_at_ms: player.next_spell_ready_at_ms,
+            magic_ready_at_ms: player.magic_ready_at_ms.clone(),
+            flaming_sword_armed: player.flaming_sword_armed,
+            flaming_sword_ready_at_ms: player.flaming_sword_ready_at_ms,
+        })
+    }
+
+    pub(super) fn restore_player_action_clock(
+        &mut self, session_id: &SessionId, clock: ZonePlayerActionClock,
+    ) {
+        let Some(player) = self.players.get_mut(session_id) else { return; };
+        if (player.account_id.as_str(), player.character_index, player.object_id)
+            != (clock.account_id.as_str(), clock.character_index, clock.object_id)
+        {
+            return;
+        }
+        player.movement_ready_at_ms = clock.movement_ready_at_ms;
+        player.next_attack_ready_at_ms = clock.next_attack_ready_at_ms;
+        player.next_spell_ready_at_ms = clock.next_spell_ready_at_ms;
+        player.magic_ready_at_ms = clock.magic_ready_at_ms;
+        player.flaming_sword_armed = clock.flaming_sword_armed;
+        player.flaming_sword_ready_at_ms = clock.flaming_sword_ready_at_ms;
+    }
+
+    fn expire_player_flaming_sword(&mut self, session_id: &SessionId, now_ms: u64) -> Vec<ZoneOutbound> {
+        let Some(player) = self.players.get_mut(session_id) else { return Vec::new(); };
+        if !player.flaming_sword_armed || now_ms < player.flaming_sword_ready_at_ms {
+            return Vec::new();
+        }
+        player.flaming_sword_armed = false;
+        vec![ZoneOutbound::ToSession {
+            session_id: session_id.clone(),
+            packets: vec![ServerPacket::SpellToggle {
+                object_id: player.object_id, spell: Spell::FlamingSword, can_use: false,
+            }],
+        }]
+    }
+
+    fn prepare_player_flaming_sword(
+        &mut self, session_id: &SessionId, level: u8, now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let mut out = self.expire_player_flaming_sword(session_id, now_ms);
+        let Some(magic) = crystal_magic_by_spell("FlamingSword") else { return out; };
+        let cost = i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
+        let Some(player) = self.players.get_mut(session_id) else { return out; };
+        if player.class != MirClass::Warrior || player.dead || player.hp <= 0
+            || player.flaming_sword_armed || now_ms < player.flaming_sword_ready_at_ms
+            || player.mp <= cost
+        {
+            return out;
+        }
+        player.flaming_sword_armed = true;
+        player.flaming_sword_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_PLAYER_FLAMING_SWORD_MS);
+        player.mp -= cost;
+        out.push(ZoneOutbound::ToSession {
+            session_id: session_id.clone(),
+            packets: vec![
+                ServerPacket::SpellToggle {
+                    object_id: player.object_id, spell: Spell::FlamingSword, can_use: true,
+                },
+                ServerPacket::ObjectMana { info: ObjectManaInfo {
+                    object_id: player.object_id, percent: zone_mana_percent(player.mp),
+                }},
+            ],
+        });
+        out
     }
 
     pub(super) fn player_vital_clock(
@@ -1191,20 +1306,39 @@ impl ZoneRuntime {
         // rejected attack leaves movement untouched; a new movement command
         // arriving after this handle call can still queue normally.
         let combat_actor = match &command {
-            ZoneCommand::PlayerAttackObject { session_id, .. }
-            | ZoneCommand::PlayerAttackMaterializedObject { session_id, .. }
-            | ZoneCommand::PlayerRangeAttackObject { session_id, .. }
-            | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, .. }
-            | ZoneCommand::PlayerCastMagic { session_id, .. }
-            | ZoneCommand::PlayerCastMagicWithItem { session_id, .. } => self
+            ZoneCommand::PlayerAttackObject { session_id, now_ms, .. }
+            | ZoneCommand::PlayerAttackMaterializedObject { session_id, now_ms, .. }
+            | ZoneCommand::PlayerRangeAttackObject { session_id, now_ms, .. }
+            | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, now_ms, .. } => self
                 .players
                 .get(session_id)
-                .map(|player| (session_id.clone(), player.object_id)),
+                .map(|player| (session_id.clone(), player.object_id, *now_ms, false,
+                    Some(ZONE_NATIVE_PLAYER_MELEE_ACTION_MS))),
+            ZoneCommand::PlayerCastMagic { session_id, now_ms, cast, .. }
+            | ZoneCommand::PlayerCastMagicWithItem { session_id, now_ms, cast, .. } => self
+                .players
+                .get(session_id)
+                .map(|player| (session_id.clone(), player.object_id, *now_ms, true,
+                    cast.then_some(ZONE_NATIVE_PLAYER_MAGIC_ACTION_MS))),
             _ => None,
         };
+        let mut expired = combat_actor.as_ref().map_or_else(Vec::new,
+            |(session_id, _, now_ms, _, _)| self.expire_player_flaming_sword(session_id, *now_ms));
         let mut out = self.handle_inner(command);
-        if let Some((session_id, actor_id)) = combat_actor {
+        if let Some((session_id, actor_id, now_ms, magic, action_delay)) = combat_actor {
             if zone_outbounds_contain_accepted_player_action(&out, &session_id, actor_id) {
+                if let (Some(delay), Some(player)) =
+                    (action_delay, self.players.get_mut(&session_id))
+                {
+                    // movement_ready_at_ms is the shared Crystal ActionTime:
+                    // walking, melee and magic must not bypass one another.
+                    // Keep the independent swing/spell deadlines separate.
+                    player.movement_ready_at_ms = now_ms.saturating_add(delay);
+                    if magic {
+                        player.next_attack_ready_at_ms =
+                            now_ms.saturating_add(ZONE_NATIVE_PLAYER_MAGIC_ACTION_MS);
+                    }
+                }
                 let mut correction = self.cancel_pending_movement(&session_id);
                 correction.append(&mut out);
                 out = correction;
@@ -1212,6 +1346,8 @@ impl ZoneRuntime {
         }
         out.extend(self.flush_vampire_deaths());
         out.extend(self.sync_native_poison_masks());
+        expired.append(&mut out);
+        out = expired;
         out
     }
     fn handle_inner(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
@@ -1420,6 +1556,8 @@ impl ZoneRuntime {
                 damage,
                 now_ms,
             ),
+            ZoneCommand::PreparePlayerFlamingSword { session_id, level, now_ms } =>
+                self.prepare_player_flaming_sword(&session_id, level, now_ms),
             ZoneCommand::PlayerCastMagic {
                 session_id,
                 object_id,
@@ -1547,10 +1685,14 @@ impl ZoneRuntime {
         cooldown_ms: u64,
         now_ms: u64,
     ) -> bool {
+        if spell == Spell::FlamingSword {
+            return false;
+        }
         let Some(player) = self.players.get(session_id) else {
             return false;
         };
-        if cast && now_ms < player.next_spell_ready_at_ms {
+        if cast && (now_ms < player.next_spell_ready_at_ms
+            || now_ms < player.movement_ready_at_ms) {
             return false;
         }
         if object_id == 0 && zone_magic_targets_ground_point(spell) {
@@ -1708,7 +1850,12 @@ impl ZoneRuntime {
     }
 
     pub fn tick(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
-        let mut outbounds = self.tick_native_periodic_player_poisons(now_ms);
+        let sessions = self.players.keys().cloned().collect::<Vec<_>>();
+        let mut outbounds = Vec::new();
+        for session_id in sessions {
+            outbounds.extend(self.expire_player_flaming_sword(&session_id, now_ms));
+        }
+        outbounds.extend(self.tick_native_periodic_player_poisons(now_ms));
         outbounds.extend(self.expire_zone_player_status_poisons(now_ms));
         outbounds.extend(self.tick_pending_movement(now_ms));
         outbounds.extend(self.resolve_pending_native_projectiles(now_ms));
@@ -2152,6 +2299,7 @@ impl ZoneRuntime {
 
     fn join(&mut self, mut join: ZoneJoin) -> Vec<ZoneOutbound> {
         let previous_clock = self.player_vital_clock(&join.session_id);
+        let previous_action_clock = self.player_action_clock(&join.session_id);
         let mut outbounds = Vec::new();
         if self.players.contains_key(&join.session_id) {
             outbounds.extend(self.leave(&join.session_id));
@@ -2173,6 +2321,9 @@ impl ZoneRuntime {
         self.players.insert(session_id.clone(), player);
         if let Some(clock) = previous_clock {
             self.restore_player_vital_clock(&session_id, clock);
+        }
+        if let Some(clock) = previous_action_clock {
+            self.restore_player_action_clock(&session_id, clock);
         }
         outbounds.extend(self.diff_visibility_for(&session_id));
         outbounds.extend(self.diff_zone_object_visibility_for(&session_id));
@@ -3637,6 +3788,13 @@ impl ZoneRuntime {
         damage: i32,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
+        if spell == Spell::FlamingSword as u8
+            && !self.player_flaming_sword_armed(session_id, now_ms)
+        {
+            return self.owner_location_correction(session_id);
+        }
+        let consume_flame = spell == Spell::FlamingSword as u8
+            && self.melee_primary_target_present(session_id, direction, None);
         // TwinDrake pays once to prepare and again for the accepted swing.
         // Admission and the second debit share this Zone transaction, so a
         // poison tick cannot spend the same mana between checking and hitting.
@@ -3655,7 +3813,7 @@ impl ZoneRuntime {
             return self.owner_location_correction(session_id);
         }
         let actor_id = player.object_id;
-        let outbounds = self.player_attack_native_object_admitted(
+        let mut outbounds = self.player_attack_native_object_admitted(
             session_id, object_id, direction, spell, level, attack_type, damage, now_ms,
         );
         let accepted = outbounds.iter().any(|outbound| {
@@ -3672,6 +3830,17 @@ impl ZoneRuntime {
         if accepted && mp_cost > 0 {
             if let Some(player) = self.players.get_mut(session_id) {
                 player.mp -= mp_cost;
+            }
+        }
+        if accepted && consume_flame {
+            if let Some(player) = self.players.get_mut(session_id) {
+                player.flaming_sword_armed = false;
+                outbounds.push(ZoneOutbound::ToSession {
+                    session_id: session_id.clone(),
+                    packets: vec![ServerPacket::SpellToggle {
+                        object_id: player.object_id, spell: Spell::FlamingSword, can_use: false,
+                    }],
+                });
             }
         }
         outbounds
@@ -4589,10 +4758,16 @@ impl ZoneRuntime {
         item_param: u8,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
+        // Flame is prepared by SpellToggle and consumed by a front-cell swing.
+        // A client must not turn it into ranged magic or bypass its arm timer.
+        if spell == Spell::FlamingSword {
+            return self.owner_location_correction(session_id);
+        }
         let Some(player) = self.players.get(session_id) else {
             return Vec::new();
         };
-        if cast && now_ms < player.next_spell_ready_at_ms {
+        if cast && (now_ms < player.next_spell_ready_at_ms
+            || now_ms < player.movement_ready_at_ms) {
             return self.correct_player_location(session_id, now_ms);
         }
         // Authoritatively recompute the magic damage from the player's stat block
@@ -4772,7 +4947,7 @@ impl ZoneRuntime {
             if let Some(live_player) = self.players.get_mut(session_id) {
                 live_player.mp = live_player.mp.saturating_sub(mp_cost).max(0);
                 live_player.next_spell_ready_at_ms =
-                    now_ms.saturating_add(ZONE_NATIVE_PLAYER_SPELL_ACTION_MS);
+                    now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
                 live_player
                     .magic_ready_at_ms
                     .insert(spell_key, now_ms.saturating_add(cooldown_ms.max(1)));
@@ -5040,7 +5215,7 @@ impl ZoneRuntime {
             let spell_key = spell as u8;
             live_caster.mp = live_caster.mp.saturating_sub(mp_cost.max(0)).max(0);
             live_caster.next_spell_ready_at_ms =
-                now_ms.saturating_add(ZONE_NATIVE_PLAYER_SPELL_ACTION_MS);
+                now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_caster
                 .magic_ready_at_ms
                 .insert(spell_key, now_ms.saturating_add(cooldown_ms.max(1)));
@@ -5163,7 +5338,7 @@ impl ZoneRuntime {
             let spell_key = spell as u8;
             live_attacker.mp = live_attacker.mp.saturating_sub(mp_cost.max(0)).max(0);
             live_attacker.next_spell_ready_at_ms =
-                now_ms.saturating_add(ZONE_NATIVE_PLAYER_SPELL_ACTION_MS);
+                now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_attacker
                 .magic_ready_at_ms
                 .insert(spell_key, now_ms.saturating_add(cooldown_ms.max(1)));
@@ -5296,7 +5471,7 @@ impl ZoneRuntime {
             let spell_key = spell as u8;
             live_player.mp = live_player.mp.saturating_sub(mp_cost).max(0);
             live_player.next_spell_ready_at_ms =
-                now_ms.saturating_add(ZONE_NATIVE_PLAYER_SPELL_ACTION_MS);
+                now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_player
                 .magic_ready_at_ms
                 .insert(spell_key, now_ms.saturating_add(cooldown_ms.max(1)));
@@ -5416,7 +5591,7 @@ impl ZoneRuntime {
             if cast {
                 live_player.mp = live_player.mp.saturating_sub(mp_cost.max(0)).max(0);
                 live_player.next_spell_ready_at_ms =
-                    now_ms.saturating_add(ZONE_NATIVE_PLAYER_SPELL_ACTION_MS);
+                    now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
                 live_player
                     .magic_ready_at_ms
                     .insert(spell as u8, now_ms.saturating_add(cooldown_ms.max(1)));
@@ -5559,7 +5734,7 @@ impl ZoneRuntime {
             let spell_key = spell as u8;
             live_player.mp = live_player.mp.saturating_sub(mp_cost).max(0);
             live_player.next_spell_ready_at_ms =
-                now_ms.saturating_add(ZONE_NATIVE_PLAYER_SPELL_ACTION_MS);
+                now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_player
                 .magic_ready_at_ms
                 .insert(spell_key, now_ms.saturating_add(cooldown_ms.max(1)));
@@ -5777,7 +5952,7 @@ impl ZoneRuntime {
             let spell_key = spell as u8;
             live_player.mp = live_player.mp.saturating_sub(mp_cost).max(0);
             live_player.next_spell_ready_at_ms =
-                now_ms.saturating_add(ZONE_NATIVE_PLAYER_SPELL_ACTION_MS);
+                now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_player
                 .magic_ready_at_ms
                 .insert(spell_key, now_ms.saturating_add(cooldown_ms.max(1)));
@@ -5869,7 +6044,7 @@ impl ZoneRuntime {
             let spell_key = spell as u8;
             live_player.mp = live_player.mp.saturating_sub(mp_cost).max(0);
             live_player.next_spell_ready_at_ms =
-                now_ms.saturating_add(ZONE_NATIVE_PLAYER_SPELL_ACTION_MS);
+                now_ms.saturating_add(zone_native_player_spell_delay_ms(spell));
             live_player
                 .magic_ready_at_ms
                 .insert(spell_key, now_ms.saturating_add(cooldown_ms.max(1)));
@@ -5877,29 +6052,33 @@ impl ZoneRuntime {
         let player = live_player.clone();
         let original_position = player.position.clone();
 
-        let mut owner_packets = vec![
-            user_location_packet(&player),
-            ServerPacket::Magic {
+        let mut owner_packets = vec![user_location_packet(&player)];
+        let mut action_packets = Vec::new();
+        // Crystal returns from Magic after ShoulderDash and acknowledges it
+        // only with owner MagicCast. User/ObjectDash carry its presentation;
+        // a generic Magic/ObjectMagic would add a second cast/animation.
+        if spell != Spell::ShoulderDash {
+            owner_packets.push(ServerPacket::Magic {
                 spell,
                 target_id,
                 target: target.clone(),
                 cast,
                 level,
                 secondary_target_ids: Vec::new(),
-            },
-        ];
-        let mut action_packets = vec![ServerPacket::ObjectMagic {
-            object_id: player.object_id,
-            location: player.position.clone(),
-            direction,
-            spell,
-            target_id,
-            target: target.clone(),
-            cast,
-            level,
-            self_broadcast: false,
-            secondary_target_ids: Vec::new(),
-        }];
+            });
+            action_packets.push(ServerPacket::ObjectMagic {
+                object_id: player.object_id,
+                location: player.position.clone(),
+                direction,
+                spell,
+                target_id,
+                target: target.clone(),
+                cast,
+                level,
+                self_broadcast: false,
+                secondary_target_ids: Vec::new(),
+            });
+        }
         if cast {
             action_packets.push(ServerPacket::ObjectMana {
                 info: ObjectManaInfo {
@@ -5907,9 +6086,17 @@ impl ZoneRuntime {
                     percent: zone_mana_percent(player.mp),
                 },
             });
-            action_packets.extend(self.apply_native_player_self_magic(
+            for packet in self.apply_native_player_self_magic(
                 session_id, spell, direction, level, damage, &target, now_ms,
-            ));
+            ) {
+                // MagicCast has no actor ID: only its owner may advance the
+                // corresponding local cooldown (not nearby observers).
+                if matches!(packet, ServerPacket::MagicCast { .. }) {
+                    owner_packets.push(packet);
+                } else {
+                    action_packets.push(packet);
+                }
+            }
         }
 
         let player = self.players.get(session_id).cloned().unwrap_or(player);
@@ -15231,6 +15418,7 @@ fn zone_player_melee_attack_admitted(player: &ZonePlayer, now_ms: u64) -> bool {
         return false;
     };
     state.class == player.class
+        && now_ms >= player.movement_ready_at_ms
         && !state.dead
         && !state.attack_blocked
         && !state.fishing
@@ -17484,3 +17672,6 @@ mod safe_zone_profile_tests;
 
 #[cfg(test)]
 mod player_magic_cooldown_tests;
+
+#[cfg(test)]
+mod player_action_cadence_tests;

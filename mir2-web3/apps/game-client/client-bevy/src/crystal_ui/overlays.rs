@@ -1639,30 +1639,49 @@ impl NativePlayerUiState {
         self.blocks_world_click_with_panel(self.core.blocks_world_click())
     }
 
-    /// Inventory is non-modal: its visible bounds capture the pointer, not
-    /// the entire world. Item transactions and other dialogs remain guarded.
+    /// Crystal's ordinary windows capture their visible rectangle, not the
+    /// whole world (MirControl.IsMouseOver). Modals and item transactions keep
+    /// their independent capture even when an ordinary panel is underneath.
+    fn nonmodal_panel_rect(&self) -> Option<CrystalRect> {
+        use mir2_ui_core::state::UiPanel;
+        match self.core.panel {
+            UiPanel::Inventory => Some(CrystalRect::new(
+                self.inventory_window.left, self.inventory_window.top,
+                INVENTORY_PANEL_SIZE.width as f32, INVENTORY_PANEL_SIZE.height as f32,
+            )),
+            UiPanel::Character | UiPanel::Skill => Some(CRYSTAL_CHARACTER_PANEL_RECT),
+            UiPanel::Options => Some(CRYSTAL_OPTIONS_PANEL_RECT),
+            UiPanel::Menu => Some(CRYSTAL_MENU_PANEL_RECT),
+            UiPanel::QuestLog => Some(CrystalRect::new(
+                crate::quest_ui::QUEST_DIARY_DESIGN_LEFT, crate::quest_ui::QUEST_DIARY_DESIGN_TOP,
+                crate::quest_ui::QUEST_DIARY_DESIGN_WIDTH, crate::quest_ui::QUEST_DIARY_DESIGN_HEIGHT,
+            )),
+            _ => None,
+        }
+    }
+
+    pub fn captures_nonmodal_pointer_at(&self, x: f32, y: f32) -> bool {
+        x.is_finite() && y.is_finite() && (
+            self.nonmodal_panel_rect().is_some_and(|rect| rect.contains(x, y))
+            || (self.help.open && CrystalRect::new(
+                self.help.left, self.help.top,
+                CRYSTAL_HELP_PANEL_RECT.width, CRYSTAL_HELP_PANEL_RECT.height,
+            ).contains(x, y))
+        )
+    }
+
     pub fn blocks_world_pointer_at(&self, x: f32, y: f32) -> bool {
-        if !self.inventory_open() {
-            return self.blocks_world_click();
-        }
-        if self.storage_open()
-            && x >= 0.0
-            && x < 388.0
-            && y >= 0.0
-            && y < 346.0
-        {
-            return true;
-        }
-        let bag = &self.inventory_window;
-        let inside = x >= bag.left
-            && x < bag.left + INVENTORY_PANEL_SIZE.width as f32
-            && y >= bag.top
-            && y < bag.top + INVENTORY_PANEL_SIZE.height as f32;
-        self.blocks_world_click_with_panel(self.core.chat_focused())
-            || inside
-            || bag.dragging()
+        let rect = self.nonmodal_panel_rect();
+        let panel_blocks = if rect.is_some() { self.core.chat_focused() }
+            else { self.core.blocks_world_click() };
+        !x.is_finite() || !y.is_finite()
+            || self.blocks_world_click_with_panel(panel_blocks)
+            || self.captures_nonmodal_pointer_at(x, y)
+            || self.help.dragging
+            || self.inventory_window.dragging()
             || self.inventory_item_drag.is_some()
             || self.inventory_operation.is_some()
+            || self.equipment_item_drag.is_some()
     }
 
     fn blocks_world_click_with_panel(&self, panel_blocks: bool) -> bool {
@@ -1671,17 +1690,25 @@ impl NativePlayerUiState {
 
     /// An established route owns its destination independently of pointer
     /// hover. Keep every modal/transaction guard and active drag; only the
-    /// ordinary bag and Big Map may remain open without cancelling travel.
+    /// ordinary view windows may remain open without cancelling travel.
     /// Do not use inventory_open(): it also includes NPC/storage/mail service
     /// panels, which must retain their ordinary world-input protection.
     pub fn blocks_route_navigation(&self) -> bool {
         let panel_blocks = match self.core.panel {
-            mir2_ui_core::state::UiPanel::Inventory | mir2_ui_core::state::UiPanel::BigMap => {
+            mir2_ui_core::state::UiPanel::Inventory
+            | mir2_ui_core::state::UiPanel::Character
+            | mir2_ui_core::state::UiPanel::Skill
+            | mir2_ui_core::state::UiPanel::Options
+            | mir2_ui_core::state::UiPanel::Menu
+            | mir2_ui_core::state::UiPanel::QuestLog
+            | mir2_ui_core::state::UiPanel::BigMap => {
                 self.core.chat_focused()
             }
             _ => self.core.blocks_world_click(),
         };
         self.blocks_world_click_with_panel_and_hover(panel_blocks, false)
+            || self.blocks_gameplay_keys()
+            || self.help.dragging
             || self.skill_bars.dragging.is_some()
             || self.hero.dragging.is_some()
             || self.inventory_window.dragging()
@@ -1727,14 +1754,14 @@ impl NativePlayerUiState {
             || self.trade_dialog.open
             || self.trade_dialog.message.is_some()
             || self.trade_dialog.input_consumed
-            || self.help.open
+            || self.help.dragging
             || self.keyboard.open
             || self.friends.open
             || self.ranking.open
             || self.ranking.player_inspect.is_open()
     }
     pub fn blocks_world_action(&self, dialog_open: bool, dead: bool) -> bool {
-        self.blocks_world_click() || dialog_open || dead
+        self.blocks_route_navigation() || dialog_open || dead
     }
     pub fn captures_pointer(
         &self,
@@ -4421,9 +4448,9 @@ fn spawn_overlay_root(mut commands: Commands) {
                 OverlaySkill,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(16.0),
-                    top: Val::Px(80.0),
-                    width: Val::Px(650.0),
+                    left: Val::Px(CRYSTAL_CHARACTER_PANEL_RECT.left),
+                    top: Val::Px(CRYSTAL_CHARACTER_PANEL_RECT.top),
+                    width: Val::Px(SKILL_PANEL_SIZE.width as f32),
                     height: Val::Px(SKILL_PANEL_SIZE.height as f32),
                     display: Display::None,
                     overflow: Overflow::clip(),
@@ -16834,6 +16861,10 @@ mod storage_drag_tests;
 pub(crate) mod npc_shop_layout_tests;
 
 #[cfg(test)]
+#[path = "nonmodal_input_tests.rs"]
+mod nonmodal_input_tests;
+
+#[cfg(test)]
 #[path = "equipment_storage_tests.rs"]
 mod equipment_storage_tests;
 
@@ -23390,10 +23421,11 @@ mod tests {
     }
 
     #[test]
-    fn help_blocks_world_click_and_has_dialog_priority_without_chat_key_capture() {
+    fn help_captures_its_surface_and_has_dialog_priority_without_chat_key_capture() {
         let mut state = NativePlayerUiState::default();
         state.help.open = true;
-        assert!(state.blocks_world_click());
+        assert!(state.blocks_world_pointer_at(300.0, 200.0));
+        assert!(!state.blocks_world_pointer_at(900.0, 600.0));
         assert!(!state.blocks_gameplay_keys());
         assert_eq!(
             modal_priority_for_state(&state, false, false),

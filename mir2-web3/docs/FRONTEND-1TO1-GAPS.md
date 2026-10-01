@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 native skills/input/medicine-shop repair: final serial shared1186
+> and Windows801 checks pass, plus nine production service-open GPU captures.
+> Ordinary Spells/Character/bag/options/menu/help and Diary/Detail capture only
+> their own surfaces; actual prompts/commerce/NPC/search/drags retain capture.
+> Owner cast ACKs start overlays; exact sampled readiness ages while idle.
+> Installed F-drive game was still r5 without updater, not the fixed r6/r7.
+> Matched server timing and actual installed release are being finalized;
+> capacity remains paused and human gameplay acceptance stays separate.
+> [Evidence](generated/player-qa/skill-input-shop-20261001/README.md).
+
 > 2026-09-30 NPC-shop/supply regression: independent service-open now places an
 > overlapping bag beside the actual shop; selected supply vendor names use the
 > canonical nine-language NPC catalogue. Shared1158/0 and36 targeted offline GPU

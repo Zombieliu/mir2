@@ -1246,6 +1246,12 @@ impl SimulationSession {
         self.finalize_packets(packets)
     }
 
+    /// Trusted shared-world projection; no private tick or packet can extend
+    /// the Zone-owned Flame charge or spend its preparation mana again.
+    pub fn force_zone_flaming_sword_state(&mut self, armed: bool) {
+        set_skill_toggle_state(self.app.world_mut(), Spell::FlamingSword, armed);
+    }
+
     pub fn apply_zone_player_buff_packets(
         &mut self,
         packets: &[ServerPacket],
@@ -1308,6 +1314,13 @@ impl SimulationSession {
         let local_player_object_id = player_entity(self.app.world())
             .and_then(|player| entity_object_id(self.app.world(), player));
         match packet {
+            ServerPacket::SpellToggle { object_id, spell: Spell::FlamingSword, can_use }
+                if local_player_object_id.is_some_and(|local_object_id| {
+                    *object_id == local_object_id || *object_id == zone_object_id
+                }) =>
+            {
+                self.force_zone_flaming_sword_state(*can_use);
+            }
             ServerPacket::AddBuff { buff }
                 if local_player_object_id.is_some_and(|object_id| {
                     zone_player_buff_targets_self(buff, object_id, zone_object_id)

@@ -21,6 +21,9 @@ mod supply_visual_tests;
 #[cfg(test)]
 #[path = "quest_multilingual_visual_tests.rs"]
 mod multilingual_visual_tests;
+#[cfg(test)]
+#[path = "quest_nonmodal_input_tests.rs"]
+mod nonmodal_input_tests;
 pub use turn_in::{PendingQuestTurnIn, begin_detail_quest_turn_in, pending_quest_turn_in_allows_interaction,
     quest_turn_in_ui_allows_interaction};
 pub use multi_guidance::primary_quest_index;
@@ -763,6 +766,27 @@ impl QuestStageFilter {
 }
 
 impl QuestUiState {
+    /// Crystal's Diary and independent Detail are ordinary view windows.
+    /// Only their explicit `MirMessageBox` prompts own gameplay keys and an
+    /// established route; NPC services retain their separate input guard.
+    pub fn blocks_world_input(&self) -> bool {
+        self.abandon_confirmation_quest_index.is_some() || self.quest_alert_message.is_some()
+    }
+
+    /// Captures a pointer in the unscaled 1024x768 logical UI stage. Closing
+    /// the Diary does not hide its independently opened Detail window.
+    pub fn captures_world_pointer_at(&self, x: f32, y: f32, diary_open: bool) -> bool {
+        let contains = |rect: QuestLogRect| {
+            x >= rect.left && x < rect.left + rect.width
+                && y >= rect.top && y < rect.top + rect.height
+        };
+        !x.is_finite() || !y.is_finite()
+            || self.blocks_world_input()
+            || self.npc_quest_list_open
+            || (diary_open && contains(quest_diary_layout(1.0).frame))
+            || (self.detail_quest_index.is_some() && contains(quest_detail_layout(1.0).frame))
+    }
+
     pub fn select_quest(&mut self, quest_index: i32) {
         self.pending_turn_in = None;
         self.selected_quest_index = Some(quest_index);
@@ -958,6 +982,23 @@ impl QuestUiState {
     pub fn detail_quest<'a>(&self, tracker: &'a QuestTracker) -> Option<&'a Quest> {
         self.detail_quest_index
             .and_then(|idx| tracker.active_quests.iter().find(|q| q.quest_index == idx))
+    }
+
+    fn reconcile_quest_windows(&mut self, tracker: &QuestTracker) {
+        // Completion/abandon can remove a quest through an authoritative
+        // snapshot without a local Close click. Keep pointer capture aligned
+        // with the same presence check used by the Detail renderer.
+        if self.detail_quest_index.is_some() && self.detail_quest(tracker).is_none() {
+            self.close_detail();
+        }
+        if self.selected_quest_index.is_some() && self.selected_quest(tracker).is_none() {
+            self.clear_diary_selection();
+        }
+        if self.abandon_confirmation_quest_index.is_some_and(|index| {
+            !tracker.active_quests.iter().any(|quest| quest.quest_index == index)
+        }) {
+            self.close_abandon_confirmation();
+        }
     }
 
     pub fn reset(&mut self) {
@@ -1374,22 +1415,12 @@ pub fn blocks_gameplay_input(
     player_ui: Option<&NativePlayerUiState>,
     dialog: &NpcDialogModel,
 ) -> bool {
-    // Modal quest log or NPC dialog blocks world T/F/R shortcuts.
+    // Ordinary view windows keep keyboard actions and established travel.
+    // NPC services and native prompts/transactions retain their own guard.
     if dialog.is_open {
         return true;
     }
-    if is_quest_log_open_state(player_ui) {
-        return true;
-    }
-    if let Some(ui) = player_ui {
-        if ui.blocks_gameplay_keys() {
-            return true;
-        }
-        if ui.blocks_world_click() {
-            return true;
-        }
-    }
-    false
+    player_ui.is_some_and(|ui| ui.blocks_world_action(false, false))
 }
 
 pub fn is_world_click_blocked_for_quest(
@@ -1518,10 +1549,9 @@ fn spawn_quest_ui_panels(mut commands: Commands, asset_server: Option<Res<AssetS
                     display: Display::None,
                     ..default()
                 },
-                // Crystal's quest diary is a sorted movable window, not a
-                // modal screen. Keep world capture below the persistent HUD
-                // so every bottom-bar control remains reachable while the
-                // diary is open; the quest panels themselves stay at 980.
+                // Only NPC dialog services use this world capture. Keep it
+                // below the persistent HUD; ordinary Diary/Detail windows
+                // capture their own rectangles at the parent layer instead.
                 GlobalZIndex(HUD_Z_INDEX - 1),
                 BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.001)),
                 FocusPolicy::Block,
@@ -1853,6 +1883,8 @@ fn process_quest_ui_input(
         return;
     }
 
+    quest_state.reconcile_quest_windows(&models.tracker);
+
     if quest_state.supply_open {
         let epoch = models.big_map.as_deref().map(|map| map.reset_epoch);
         if quest_state.supply_epoch != epoch {
@@ -1871,7 +1903,6 @@ fn process_quest_ui_input(
 
     let quest_log_open = player_ui.quest_open();
     let dialog_open = dialog.is_open;
-    let blocks_gameplay_keys = player_ui.blocks_gameplay_keys();
     let turn_in_blocked = !quest_turn_in_ui_allows_interaction(Some(&player_ui))
         || models.notice.as_deref().is_some_and(crate::crystal_ui::notice::NoticeDialogState::is_open)
         || models.read_model.as_deref().is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
@@ -2522,28 +2553,28 @@ fn process_quest_ui_input(
         return;
     }
 
-    // Input blocking: when quest log or dialog is open, gameplay shortcuts are suppressed.
-    // Escape handling for those surfaces takes precedence.
-    let is_modal = quest_log_open || dialog_open || blocks_gameplay_keys;
+    // The Diary keeps its Escape/Q close binding without capturing unrelated
+    // keys. Its independent Detail remains visible when the Diary closes.
+    if quest_log_open && (keys.just_pressed(KeyCode::Escape)
+        || crate::crystal_ui::overlays::keyboard_dialog::host::triggered(
+            &player_ui.keyboard, &keys, "Quests",
+        ))
+    {
+        dispatch_ui_action(
+            &mut player_ui.core,
+            &mut effects,
+            mir2_ui_core::action::UiAction::ClosePanel,
+        );
+        quest_state.clear_diary_selection();
+        quest_state.clear_feedback();
+        return;
+    }
+
+    let is_modal = blocks_gameplay_input(Some(&player_ui), &dialog);
 
     if is_modal {
-        if keys.just_pressed(KeyCode::Escape)
-            || (quest_log_open
-                && crate::crystal_ui::overlays::keyboard_dialog::host::triggered(
-                    &player_ui.keyboard,
-                    &keys,
-                    "Quests",
-                ))
-        {
-            if quest_log_open {
-                dispatch_ui_action(
-                    &mut player_ui.core,
-                    &mut effects,
-                    mir2_ui_core::action::UiAction::ClosePanel,
-                );
-                quest_state.clear_diary_selection();
-                quest_state.clear_feedback();
-            } else if dialog_open {
+        if keys.just_pressed(KeyCode::Escape) {
+            if dialog_open {
                 if queue.push_intent(QuestUiIntent::SelectNpcDialog {
                     target: "@Exit".to_owned(),
                 }) {
@@ -2564,7 +2595,7 @@ fn process_quest_ui_input(
                 }
             }
         }
-        // Block T/F/R and other gameplay keys while modal is open.
+        // Keep gameplay shortcuts captured by NPC services and real prompts.
         return;
     }
 
@@ -2723,8 +2754,7 @@ fn render_quest_ui(
     let available_npc_quests =
         npc_available_quests(&dialog, &tracker, Some(&journey_models.guidance));
     let has_npc_quests = !available_npc_quests.is_empty();
-    let confirmation_open = quest_state.abandon_confirmation_quest_index.is_some()
-        || quest_state.quest_alert_message.is_some();
+    let confirmation_open = quest_state.blocks_world_input();
 
     for (
         panel_entity,
@@ -2740,7 +2770,7 @@ fn render_quest_ui(
     ) in all.p1().iter_mut()
     {
         let visible = if is_modal_blocker.is_some() {
-            quest_log_open || has_dialog_content
+            has_dialog_content
         } else if is_dialog.is_some() {
             has_dialog_content
         } else if is_tracker.is_some() {
@@ -7647,7 +7677,7 @@ mod tests {
         dialog.is_open = false;
         let mut native_open = NativePlayerUiState::default();
         native_open.core.panel = mir2_ui_core::state::UiPanel::QuestLog;
-        assert!(blocks_gameplay_input(Some(&native_open), &dialog,));
+        assert!(!blocks_gameplay_input(Some(&native_open), &dialog));
     }
 
     #[test]
@@ -8112,7 +8142,7 @@ mod tests {
             .resource_mut::<ButtonInput<KeyCode>>()
             .clear();
 
-        // Press Q again to close while the quest panel itself is modal.
+        // Press Q again to close the ordinary Diary window.
         app.world_mut()
             .resource_mut::<ButtonInput<KeyCode>>()
             .press(KeyCode::KeyQ);

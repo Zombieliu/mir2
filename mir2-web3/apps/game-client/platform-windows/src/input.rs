@@ -642,6 +642,9 @@ fn gameplay_input_enabled(
     shell: Option<&NativeShellModel>,
     player_ui: Option<&NativePlayerUiState>,
     notice: Option<&NoticeDialogState>,
+    quest: Option<&QuestUiState>,
+    big_map: Option<&mir2_client_bevy::crystal_ui::overlays::BigMapUiState>,
+    npc_dialog: Option<&NpcDialogModel>,
     windows: &Query<&Window>,
 ) -> bool {
     if !window_is_focused(windows) {
@@ -653,7 +656,13 @@ fn gameplay_input_enabled(
     if notice.is_some_and(NoticeDialogState::is_open) {
         return false;
     }
-    if is_world_click_blocked(player_ui, false, false) {
+    if big_map.is_some_and(|map| map.search_focused) {
+        return false;
+    }
+    if quest.is_some_and(QuestUiState::blocks_world_input) {
+        return false;
+    }
+    if is_world_click_blocked(player_ui, npc_dialog.is_some_and(|dialog| dialog.is_open), false) {
         return false;
     }
     true
@@ -719,25 +728,34 @@ fn cursor_over_big_map_hud_button(window: &Window, minimap_expanded: bool) -> bo
     rect.contains(x, y)
 }
 
+fn cursor_over_nonmodal_view_hud_button(window: &Window, minimap_expanded: bool) -> bool {
+    if cursor_over_big_map_hud_button(window, minimap_expanded) {
+        return true;
+    }
+    let Some(cursor) = window.cursor_position().filter(|_| window.focused) else {
+        return false;
+    };
+    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
+        window.resolution.width(), window.resolution.height(),
+    );
+    if !transform.contains_physical_point(cursor.x, cursor.y) {
+        return false;
+    }
+    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+    [spec::hud::CHARACTER.rect, spec::hud::INVENTORY.rect, spec::hud::SKILL.rect,
+        spec::hud::OPTION.rect, spec::hud::MENU.rect, spec::hud::QUEST.rect]
+        .into_iter().any(|rect| rect.contains(x, y))
+}
+
 pub fn is_world_click_blocked(
     player_ui: Option<&NativePlayerUiState>,
     dialog_open: bool,
     dead: bool,
 ) -> bool {
-    if let Some(ui) = player_ui {
-        if ui.blocks_world_click() {
-            return true;
-        }
-        if ui.captures_pointer(false, false, false) {
-            return true;
-        }
-        if ui.blocks_world_action(dialog_open, dead) {
-            return true;
-        }
-    } else if dialog_open || dead {
-        return true;
-    }
-    false
+    // This is the pointer-independent action gate. Visible nonmodal windows
+    // are hit-tested separately by the caller; they must not disable F-keys,
+    // belt items or keyboard movement everywhere on the screen.
+    player_ui.map_or(dialog_open || dead, |ui| ui.blocks_world_action(dialog_open, dead))
 }
 
 pub fn is_pointer_captured_for_movement(
@@ -1844,14 +1862,14 @@ pub fn mouse_world_interaction_system(
     });
     if (left_pressed || right_pressed) && cursor_over_native_hud_button(window, minimap_expanded) {
         movement.stop_hold(now_ms, "hudButtonPress");
-        movement.attack_target = None;
-        movement.harvest_target = None;
-        movement.harvest_direction = None;
-        movement.next_harvest_request_at_ms = 0.0;
-        // Toggling the Big Map is a view change, including the close path;
-        // it must not discard an already-planned ordinary route. Other HUD
-        // actions remain direct manual input and cancel it as before.
-        if !(movement.map_auto_path.is_some() && cursor_over_big_map_hud_button(window, minimap_expanded)) {
+        // Crystal view buttons consume their own pointer edge. Opening the
+        // Character/Spells/bag/options/menu view doesn't select a new world
+        // target or discard an established automatic action.
+        if !cursor_over_nonmodal_view_hud_button(window, minimap_expanded) {
+            movement.attack_target = None;
+            movement.harvest_target = None;
+            movement.harvest_direction = None;
+            movement.next_harvest_request_at_ms = 0.0;
             movement.stop_auto_path(now_ms, "hudButtonPress");
         }
         return;
@@ -1926,6 +1944,7 @@ pub fn mouse_world_interaction_system(
         && !over_skill_bar
         && !over_hero_window
         && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
+        && !quest_ui_state.as_deref().is_some_and(QuestUiState::blocks_world_input)
         && !dialog_open
         && !dead
         && !map_open
@@ -2009,7 +2028,14 @@ pub fn mouse_world_interaction_system(
         && !right_pressed
         && !mouse.pressed(MouseButton::Right);
     let continuing_auto_action = continuing_map_route || continuing_attack;
+    let keyboard_movement_requested = keys.is_some_and(|keys| {
+        walk_key_map().iter().any(|(key, _)| keys.pressed(*key)
+            && player_ui.as_deref().is_none_or(|ui| !key_owned_by_binding(&ui.keyboard, keys, *key)))
+    });
     let ui_state_blocks = player_ui.as_deref().is_some_and(|ui| {
+            if keyboard_movement_requested {
+                return ui.blocks_world_action(false, false);
+            }
             if continuing_auto_action {
                 return ui.blocks_route_navigation();
             }
@@ -2028,20 +2054,51 @@ pub fn mouse_world_interaction_system(
                     ui.blocks_world_pointer_at(x, y)
                 },
             )
-        });
+        }) || (!continuing_auto_action && !keyboard_movement_requested
+            && quest_ui_state.as_deref().is_some_and(|quest| {
+                window.cursor_position().is_some_and(|cursor| {
+                    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
+                        window.resolution.width(), window.resolution.height(),
+                    );
+                    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+                    quest.captures_world_pointer_at(x, y, player_ui.as_deref().is_some_and(|ui| ui.quest_open()))
+                })
+            }));
+    let quest_modal = quest_ui_state.as_deref().is_some_and(QuestUiState::blocks_world_input);
+    // A pointer edge in an ordinary view is consumed by that view. It isn't
+    // a new world destination and must not revoke an existing target/route.
+    let over_nonmodal_view = window.cursor_position().is_some_and(|cursor| {
+        let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
+            window.resolution.width(), window.resolution.height(),
+        );
+        let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+        player_ui.as_deref().is_some_and(|ui| ui.captures_nonmodal_pointer_at(x, y))
+            || quest_ui_state.as_deref().is_some_and(|quest| quest.captures_world_pointer_at(
+                x, y, player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
+            ))
+    });
+    if ui_state_blocks && over_nonmodal_view && !keyboard_movement_requested && !dead && !dialog_open && !quest_modal
+        && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
+        && player_ui.as_deref().is_some_and(|ui| !ui.blocks_world_action(false, false))
+    {
+        movement.stop_hold(now_ms, "nonmodalPanelPointer");
+        return;
+    }
     let blocker = if dead {
         Some("playerDead")
+    } else if quest_modal {
+        Some("questModal")
     } else if dialog_open {
         Some("npcDialog")
     } else if notice.as_deref().is_some_and(NoticeDialogState::is_open) {
         Some("noticeDialog")
     } else if map_open && big_map_ui.as_deref().is_some_and(|ui| ui.search_focused) {
         Some("mapSearch")
-    } else if !continuing_auto_action && over_hero_window {
+    } else if !continuing_auto_action && !keyboard_movement_requested && over_hero_window {
         Some("heroPointer")
-    } else if (!continuing_auto_action && over_skill_bar)
+    } else if (!continuing_auto_action && !keyboard_movement_requested && over_skill_bar)
         || player_ui.as_deref().is_some_and(|ui| {
-            (!continuing_auto_action && ui.skill_bars.hovered) || ui.skill_bars.dragging.is_some()
+            (!continuing_auto_action && !keyboard_movement_requested && ui.skill_bars.hovered) || ui.skill_bars.dragging.is_some()
         })
     {
         Some("skillPointer")
@@ -2857,6 +2914,11 @@ pub fn keyboard_movement_system(
     shell: Option<Res<NativeShellModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
+    (quest, big_map, npc_dialog): (
+        Option<Res<QuestUiState>>,
+        Option<Res<mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
+        Option<Res<NpcDialogModel>>,
+    ),
     entities: Option<Res<EntityModelSet>>,
     mut presentation: Option<ResMut<NativeEntityPresentation>>,
     (time, real_time): (Option<Res<Time>>, Option<Res<Time<bevy::time::Real>>>),
@@ -2867,6 +2929,9 @@ pub fn keyboard_movement_system(
         shell.as_deref(),
         player_ui.as_deref(),
         notice.as_deref(),
+        quest.as_deref(),
+        big_map.as_deref(),
+        npc_dialog.as_deref(),
         &windows,
     ) {
         return;
@@ -2968,12 +3033,20 @@ pub fn keyboard_turn_system(
     shell: Option<Res<NativeShellModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
+    (quest, big_map, npc_dialog): (
+        Option<Res<QuestUiState>>,
+        Option<Res<mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
+        Option<Res<NpcDialogModel>>,
+    ),
     windows: Query<&Window>,
 ) {
     if !gameplay_input_enabled(
         shell.as_deref(),
         player_ui.as_deref(),
         notice.as_deref(),
+        quest.as_deref(),
+        big_map.as_deref(),
+        npc_dialog.as_deref(),
         &windows,
     ) {
         return;
@@ -3015,12 +3088,20 @@ pub fn keyboard_town_revive_system(
     ui_read_model: Option<Res<UiReadModel>>,
     player_ui: Option<Res<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
+    (quest, big_map, npc_dialog): (
+        Option<Res<QuestUiState>>,
+        Option<Res<mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
+        Option<Res<NpcDialogModel>>,
+    ),
     windows: Query<&Window>,
 ) {
     if !gameplay_input_enabled(
         shell.as_deref(),
         player_ui.as_deref(),
         notice.as_deref(),
+        quest.as_deref(),
+        big_map.as_deref(),
+        npc_dialog.as_deref(),
         &windows,
     ) {
         return;
@@ -3053,6 +3134,11 @@ pub fn keyboard_hero_skill_system(
     hero: Option<Res<mir2_client_bevy::hero_model::HeroModel>>,
     ui: Option<Res<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
+    (quest, big_map, npc_dialog): (
+        Option<Res<QuestUiState>>,
+        Option<Res<mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
+        Option<Res<NpcDialogModel>>,
+    ),
     windows: Query<&Window>,
     presentation: Option<Res<NativeEntityPresentation>>,
     mut memory: Local<spell_targeting::SpellTargetMemory>,
@@ -3061,7 +3147,7 @@ pub fn keyboard_hero_skill_system(
     if !HERO_SHARED_MANUAL_CAST_VERIFIED {
         return;
     }
-    if !gameplay_input_enabled(shell.as_deref(), ui.as_deref(), notice.as_deref(), &windows) {
+    if !gameplay_input_enabled(shell.as_deref(), ui.as_deref(), notice.as_deref(), quest.as_deref(), big_map.as_deref(), npc_dialog.as_deref(), &windows) {
         return;
     }
     let (Some(hero), Some(ui), Some(presentation)) = (hero, ui, presentation) else {
@@ -3165,12 +3251,18 @@ pub fn keyboard_skill_system(
     inventory: Option<Res<InventoryModel>>,
     mut player_ui: Option<ResMut<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
+    (quest, big_map, npc_dialog): (
+        Option<Res<QuestUiState>>,
+        Option<Res<mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
+        Option<Res<NpcDialogModel>>,
+    ),
     windows: Query<&Window>,
     presentation: Option<Res<NativeEntityPresentation>>,
     mut item_intents: Option<
         ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>,
     >,
     mut magic_target: bevy::prelude::Local<spell_targeting::SpellTargetMemory>,
+    mut fallback_skill_clocks: bevy::prelude::Local<mir2_client_bevy::crystal_ui::overlays::skill_bars::SkillBarsUi>,
 ) {
     if !shell
         .as_deref()
@@ -3182,6 +3274,9 @@ pub fn keyboard_skill_system(
         shell.as_deref(),
         player_ui.as_deref(),
         notice.as_deref(),
+        quest.as_deref(),
+        big_map.as_deref(),
+        npc_dialog.as_deref(),
         &windows,
     ) {
         if let Some(ui) = player_ui.as_deref_mut() {
@@ -3271,6 +3366,12 @@ pub fn keyboard_skill_system(
     let Some(skills) = skills.as_deref() else {
         return;
     };
+    let now = std::time::Instant::now();
+    if let Some(ui) = player_ui.as_deref_mut() {
+        ui.skill_bars.observe(skills, now);
+    } else {
+        fallback_skill_clocks.observe(skills, now);
+    }
     // Crystal evaluates each matching key binding; an empty primary slot
     // must not swallow a bound second-bank action on the same physical key.
     for (skill_slot, cursor_stage, pointer_cast) in slots {
@@ -3280,15 +3381,10 @@ pub fn keyboard_skill_system(
         if selection.cast_kind.as_deref() == Some("passive") {
             continue;
         }
-        if selection.cooldown_remaining_ticks > 0
-            || player_ui.as_deref().is_some_and(|ui| {
-                skills.skill_for_shortcut(skill_slot).is_some_and(|skill| {
-                    ui.skill_bars
-                        .remaining_ms(skill.id, skills, std::time::Instant::now())
-                        > 0
-                })
-            })
-        {
+        let clocks = player_ui.as_deref().map_or(&*fallback_skill_clocks, |ui| &ui.skill_bars);
+        if skills.skill_for_shortcut(skill_slot).is_some_and(|skill| {
+            clocks.readiness_remaining_ms(skill.id, skills, now) > 0
+        }) {
             continue;
         }
         let Some(ui) = ui_read_model.as_deref() else {
@@ -3307,15 +3403,18 @@ pub fn keyboard_skill_system(
             continue;
         };
         if selection.cast_kind.as_deref() == Some("toggle") {
+            // Crystal always requests arming FlamingSword; its timed flag is
+            // consumed by the next hit, unlike persistent HalfMoon/Thrusting.
+            let toggle_state = if spell.eq_ignore_ascii_case("FlamingSword") {
+                1
+            } else if selection.can_use == Some(true) {
+                0
+            } else {
+                1
+            };
             commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::SpellToggle {
                 spell,
-                // `canUse` is the authoritative current toggle state. Unknown is
-                // not passive; the safe first request is an explicit enable.
-                toggle_state: if selection.can_use == Some(true) {
-                    0
-                } else {
-                    1
-                },
+                toggle_state,
             }));
             continue;
         }
@@ -3469,6 +3568,9 @@ fn walk_key_map() -> [(KeyCode, &'static str); 8] {
 
 #[cfg(test)]
 mod tests {
+    mod nonmodal_panel_input_tests {
+        include!("nonmodal_panel_input_tests.rs");
+    }
     mod big_map_input_tests {
         include!("big_map_input_tests.rs");
     }
@@ -3830,8 +3932,8 @@ mod tests {
 
     #[derive(Clone, Copy, Debug)]
     enum BlockedInputContext {
-        Inventory,
-        Options,
+        Storage,
+        SkillAssignment,
         DeleteConfirm,
         ChatFocus,
         Login,
@@ -3849,13 +3951,13 @@ mod tests {
 
     fn install_blocked_context(app: &mut bevy::prelude::App, context: BlockedInputContext) {
         match context {
-            BlockedInputContext::Inventory
-            | BlockedInputContext::Options
+            BlockedInputContext::Storage
+            | BlockedInputContext::SkillAssignment
             | BlockedInputContext::ChatFocus => {
                 let mut ui = NativePlayerUiState::default();
                 match context {
-                    BlockedInputContext::Inventory => ui.toggle_inventory(),
-                    BlockedInputContext::Options => ui.toggle_options(),
+                    BlockedInputContext::Storage => ui.toggle_storage(),
+                    BlockedInputContext::SkillAssignment => ui.skill_assign.open = true,
                     BlockedInputContext::ChatFocus => ui.core.chat_focused = true,
                     BlockedInputContext::DeleteConfirm
                     | BlockedInputContext::Login
@@ -3961,8 +4063,8 @@ mod tests {
     #[test]
     fn gameplay_gate_matrix_blocks_every_registered_world_action() {
         let contexts = [
-            BlockedInputContext::Inventory,
-            BlockedInputContext::Options,
+            BlockedInputContext::Storage,
+            BlockedInputContext::SkillAssignment,
             BlockedInputContext::DeleteConfirm,
             BlockedInputContext::ChatFocus,
             BlockedInputContext::Login,
@@ -6475,7 +6577,7 @@ mod tests {
 
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
-            .toggle_inventory();
+            .toggle_storage();
         press_world_action(&mut app, WorldAction::Walk);
         app.update();
         assert!(receiver.try_recv().is_err(), "open panel leaked walk");
@@ -7345,8 +7447,8 @@ mod tests {
     }
 
     #[test]
-    fn toggle_skill_f1_emits_the_next_authoritative_state() {
-        for (can_use, expected_state) in [(None, 1), (Some(false), 1), (Some(true), 0)] {
+    fn flaming_sword_f1_always_requests_arming_like_crystal() {
+        for (can_use, expected_state) in [(None, 1), (Some(false), 1), (Some(true), 1)] {
             let (mut app, receiver) = input_app();
             let mut shell = NativeShellModel::default();
             shell.screen = NativeShellScreen::InGame;

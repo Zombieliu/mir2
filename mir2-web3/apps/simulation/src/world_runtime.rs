@@ -859,6 +859,10 @@ impl InProcessWorldRuntime {
         self.session.commit_zone_journey_state()
     }
 
+    pub fn force_zone_flaming_sword_state(&mut self, armed: bool) {
+        self.session.force_zone_flaming_sword_state(armed);
+    }
+
     pub fn apply_zone_player_buff_packets(
         &mut self,
         packets: &[ServerPacket],

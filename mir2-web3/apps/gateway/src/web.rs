@@ -12739,6 +12739,7 @@ mod tests {
             delay_ms: 500,
             cast_time_ms: 0,
             cooldown_remaining_ticks: 0,
+            cooldown_remaining_ms: Some(275),
         };
 
         let frame = json!({
@@ -12749,6 +12750,11 @@ mod tests {
         });
         assert_eq!(frame["payload"]["knownSkills"][0]["mpCost"], 7);
         assert!(frame["payload"]["knownSkills"][0].get("mp_cost").is_none());
+        assert_eq!(frame["payload"]["knownSkills"][0]["cooldownRemainingMs"], 275);
+        let mut legacy = frame["payload"]["knownSkills"][0].clone();
+        legacy.as_object_mut().unwrap().remove("cooldownRemainingMs");
+        let decoded: mir2_simulation::SkillSnapshot = serde_json::from_value(legacy).unwrap();
+        assert_eq!(decoded.cooldown_remaining_ms, None);
     }
 
     #[test]

@@ -3508,6 +3508,7 @@ impl SharedInProcessZoneState {
             | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, .. }
             | ZoneCommand::PlayerCastMagic { session_id, .. }
             | ZoneCommand::PlayerCastMagicWithItem { session_id, .. }
+            | ZoneCommand::PreparePlayerFlamingSword { session_id, .. }
             | ZoneCommand::ResolveReincarnation { session_id, .. }
             | ZoneCommand::ClaimGroundDrop { session_id, .. }
             | ZoneCommand::ClaimNearestGroundDrop { session_id, .. }
@@ -7457,7 +7458,9 @@ fn zone_magic_launch_accepted(packets: &[ServerPacket], spell: Spell, object_id:
                 cast: true,
                 ..
             } if *packet_spell == spell && *target_id == object_id
-        )
+        ) || matches!(packet,
+            ServerPacket::MagicCast { spell: Spell::ShoulderDash }
+                if spell == Spell::ShoulderDash)
     })
 }
 
@@ -9643,6 +9646,11 @@ impl SharedInProcessZoneSessionRuntime {
             player_heals = zone_player_heals;
         }
         drop(zone_state);
+        if should_join_zone {
+            // New login starts unarmed; the same online player's map transfer
+            // restores the Zone timer. Never retain an old personal toggle.
+            self.sync_zone_flaming_sword_state();
+        }
         self.movement_ingress
             .session_state
             .lock()
@@ -10670,6 +10678,15 @@ impl SharedInProcessZoneSessionRuntime {
         }
     }
 
+    fn sync_zone_flaming_sword_state(&mut self) {
+        let armed = self.current_zone_session_id().is_some_and(|session_id| {
+            let state = self.zone_state.lock()
+                .expect("shared zone presence mutex should not be poisoned");
+            state.zone_manager.player_flaming_sword_armed(&session_id, Self::zone_now_ms())
+        });
+        self.inner.force_zone_flaming_sword_state(armed);
+    }
+
     fn apply_zone_player_buff_packets(&mut self, packets: &[ServerPacket]) {
         let Some(zone_object_id) = self.current_zone_player_object_id() else {
             return;
@@ -10732,6 +10749,7 @@ impl SharedInProcessZoneSessionRuntime {
                 }
                 ServerPacket::DamageIndicator { object_id, .. }
                 | ServerPacket::ObjectPoisoned { object_id, .. }
+                | ServerPacket::SpellToggle { object_id, spell: Spell::FlamingSword, .. }
                     if *object_id == zone_id =>
                 {
                     *object_id = local_id;
@@ -12622,6 +12640,36 @@ impl SharedInProcessZoneSessionRuntime {
     fn execute_zone_player_packet(&mut self, packet: &ClientPacket) -> Option<Vec<ServerPacket>> {
         let session_id = self.current_zone_session_id()?;
         match packet {
+            ClientPacket::SpellToggle { spell: Spell::FlamingSword, toggle_state } => {
+                // Original Flame ignores positive enable/disable arguments:
+                // each is a prepare request. Negative Hero packets are denied.
+                if *toggle_state < 0 { return Some(Vec::new()); }
+                let Some((level, _, _, _)) = self.inner.zone_magic_attack_profile(Spell::FlamingSword)
+                    else { return Some(Vec::new()); };
+                let mut packets = self.dispatch_zone_player_command(
+                    ZoneCommand::PreparePlayerFlamingSword {
+                        session_id: session_id.clone(), level, now_ms: Self::zone_now_ms(),
+                    }, false);
+                let mp = self.zone_state.lock()
+                    .expect("shared zone presence mutex should not be poisoned")
+                    .zone_manager.player_vitals(&session_id).map(|(_, _, mp)| mp);
+                if let Some(mp) = mp {
+                    self.inner.force_authoritative_player_vitals(None, Some(mp));
+                    let max_mp = self.inner.world_snapshot().player_max_mp.unwrap_or(1).max(1);
+                    let local_id = self.local_self_object_id();
+                    let zone_id = self.current_zone_player_object_id();
+                    for packet in &mut packets {
+                        if let ServerPacket::ObjectMana { info } = packet {
+                            if Some(info.object_id) == zone_id {
+                                info.object_id = local_id.unwrap_or(info.object_id);
+                                info.percent = ((i64::from(mp) * 100) / i64::from(max_mp)).clamp(0, 100) as u8;
+                            }
+                        }
+                    }
+                }
+                self.sync_zone_flaming_sword_state();
+                Some(packets)
+            }
             ClientPacket::Walk { .. } | ClientPacket::Run { .. } | ClientPacket::Turn { .. } => {
                 let execution = execute_shared_zone_movement(
                     &self.zone_state,
@@ -14282,6 +14330,11 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                     ClientPacket::CallNpc { .. } | ClientPacket::NpcConfirmInput { .. }
                 )
         );
+        if matches!(&command, WorldCommand::Attack { .. }
+            | WorldCommand::ClientPacket(ClientPacket::Attack { .. }))
+        {
+            self.sync_zone_flaming_sword_state();
+        }
         let zone_native_player_attack = self.prepare_zone_native_player_attack(&command);
         let routes_zone_native_player_attack = zone_native_player_attack.is_some();
         // Native Zone combat already updates the shared map through its
@@ -14914,19 +14967,23 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                     // their public readiness must use that same authority.
                     let now_ms = Self::zone_now_ms();
                     for skill in &mut snapshot.known_skills {
-                        if matches!(skill.cast_kind.as_str(), "passive" | "toggle") {
-                            continue;
-                        }
                         let Some(spell) = skill.spell.as_deref().and_then(|name| {
                             serde_json::from_value::<Spell>(serde_json::json!(name)).ok()
                         }) else {
                             continue;
                         };
+                        if spell != Spell::FlamingSword
+                            && matches!(skill.cast_kind.as_str(), "passive" | "toggle")
+                        {
+                            continue;
+                        }
                         if let Some(remaining_ms) =
                             zone.player_magic_cooldown_remaining_ms(session_id, spell, now_ms)
                         {
                             skill.cooldown_remaining_ticks =
                                 remaining_ms.div_ceil(1_000).min(u64::from(u32::MAX)) as u32;
+                            skill.cooldown_remaining_ms =
+                                Some(remaining_ms.min(u64::from(u32::MAX)) as u32);
                         }
                     }
                 }
@@ -15425,6 +15482,8 @@ mod tests {
     mod zone_soulfire_practice_tests;
     #[path = "zone_journey_event_bridge_tests.rs"]
     mod zone_journey_event_bridge_tests;
+    #[path = "zone_skill_cadence_tests.rs"]
+    mod zone_skill_cadence_tests;
     #[path = "shared_session_hot_path_tests.rs"]
     mod shared_session_hot_path_tests;
     #[path = "predrain_performance_tests.rs"]
@@ -20635,7 +20694,9 @@ mod tests {
             !runtime.zone_native_player_attack_requires_item_consumption(&zone_session_id, &attack),
             "recasting an active Zone summon should recall it without consuming another item"
         );
-        thread::sleep(Duration::from_millis(650));
+        // Summon recall is still a spell: it shares Crystal's 1800ms SpellTime,
+        // even though the fixture gives it a one-millisecond individual delay.
+        thread::sleep(Duration::from_millis(1_820));
         let recall_packets = runtime.execute_zone_native_player_attack(attack);
         assert_eq!(
             *skill_item_calls
@@ -24192,6 +24253,8 @@ mod tests {
                 MirDirection::Right
             };
             first.handle_packet(ClientPacket::Walk { direction });
+            // Walking establishes Crystal's 600ms ActionTime before melee.
+            thread::sleep(Duration::from_millis(620));
         }
         let player = first
             .world_snapshot()
