@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 Android exactv13/cfac6ecd4: dual APK/hash/install, each6647 PNG/
+> three metadata byte audit; four weight originals match frozen Git. Actual BAG471
+> fill restored, captured PID errors0. Phone HUD weight/full UI/resources/live/device
+> stay OPEN. First timeout/emulator-host crash and no-upload dump handling retained,
+> no stability pass. Push still unverified beyondf04a74399; next NI-09/HUD/NPC leaves.
+> [Evidence](generated/player-qa/native-android-weight-bars-20261001/README.md).
+
 > 2026-10-01 Android weight-bar staging: frozen original470..473, sparse20/20,
 > item13/13/magic7/7/Java36+36, staged6647 PNG/three metadata byte match; bounded
 > source review clear. v13 unbuilt; actual APK/image/performance/full resources/

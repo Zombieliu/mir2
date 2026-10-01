@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 Android exactv13/cfac6ecd4: both APKs install;6647 PNG/three metadata
+> match each, frozen four original weight bytes confirmed. Actual BAG471 bar and
+> available34/gold12352 pass; phone HUD weight not visibly accepted. No new touch/
+> drag/IME/alternate-weight-state claim. Host crash/first timeout retained despite
+> recovered starts. Next chat/HUD weight/NPC and full UI/input/resources/online/device.
+> [Actual original frames](generated/player-qa/native-android-weight-bars-20261001/README.md).
+
 > 2026-10-01 Android weight bars: frozen UI_32bit470..473 now staged/guarded,
 > without recoloring or changing shared UI rules. Sparse20/item13/magic7/Java36+36
 > and6647 PNG/three metadata byte checks pass; v13 still unbuilt. Actual original

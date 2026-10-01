@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-10-01 exact Android v13: cleancfac6ecd4 both APK/hash/install; each6647
+> PNG/three metadata matches, all four weight originals match frozen Git bytes.
+> Actual offline BAG471 bar/available34/gold12352 visible; captured PID logs0 errors.
+> Phone HUD weight still OPEN. Retain first startup timeout, emulator-host SIGABRT,
+> no-upload SDK temporary dump removal and later recovered starts as separate records.
+> Source/evidence remain local after transport failures; latest verified remote/PR
+> f04a74399 Open/Draft/base unchanged. Next NI-09/HUD weight then NPC/services/full
+> Windows denominator. Full UI/resources/stability/online/device remain OPEN.
+> [Actual package/frames/failures](generated/player-qa/native-android-weight-bars-20261001/README.md).
+
 > 2026-10-01 Android weight-bar source leaf: stage frozen Windows470..473;
 > prior13240 input files unchanged. Sparse gate20/20, item13/13, magic7/7, fresh
 > Java36+36 and staged6647 PNG/three metadata byte audit pass; read-only review clear.

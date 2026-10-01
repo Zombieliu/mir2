@@ -1,0 +1,148 @@
+Activity Resolver Table:
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        83245c9 com.mir2.web3/.MainActivity filter 12124ce
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      androidx.profileinstaller.action.SAVE_PROFILE:
+        9a79fef com.mir2.web3/androidx.profileinstaller.ProfileInstallReceiver filter baebfda
+          Action: "androidx.profileinstaller.action.SAVE_PROFILE"
+      androidx.profileinstaller.action.INSTALL_PROFILE:
+        9a79fef com.mir2.web3/androidx.profileinstaller.ProfileInstallReceiver filter f41afc
+          Action: "androidx.profileinstaller.action.INSTALL_PROFILE"
+      androidx.profileinstaller.action.SKIP_FILE:
+        9a79fef com.mir2.web3/androidx.profileinstaller.ProfileInstallReceiver filter 3107585
+          Action: "androidx.profileinstaller.action.SKIP_FILE"
+      androidx.profileinstaller.action.BENCHMARK_OPERATION:
+        9a79fef com.mir2.web3/androidx.profileinstaller.ProfileInstallReceiver filter 4784c0b
+          Action: "androidx.profileinstaller.action.BENCHMARK_OPERATION"
+
+Domain verification status:
+
+Permissions:
+  Permission [com.mir2.web3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (d06a9b9):
+    sourcePackage=com.mir2.web3
+    uid=10147 gids=[] type=0 prot=signature
+    perm=PermissionInfo{1a2d1fe com.mir2.web3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}
+
+Registered ContentProviders:
+  com.mir2.web3/androidx.startup.InitializationProvider:
+    Provider{6c2fd5f com.mir2.web3/androidx.startup.InitializationProvider}
+
+ContentProvider Authorities:
+  [com.mir2.web3.androidx-startup]:
+    Provider{6c2fd5f com.mir2.web3/androidx.startup.InitializationProvider}
+      applicationInfo=ApplicationInfo{b303ac com.mir2.web3}
+
+Key Set Manager:
+  [com.mir2.web3]
+      Signing KeySets: 36
+
+Packages:
+  Package [com.mir2.web3] (a5f2875):
+    userId=10147
+    pkg=Package{856100a com.mir2.web3}
+    codePath=/data/app/~~qqR_5moG0qKRS73RfpvOFQ==/com.mir2.web3-rUdN0kDDmseHNsjZUPF9Vg==
+    resourcePath=/data/app/~~qqR_5moG0qKRS73RfpvOFQ==/com.mir2.web3-rUdN0kDDmseHNsjZUPF9Vg==
+    legacyNativeLibraryDir=/data/app/~~qqR_5moG0qKRS73RfpvOFQ==/com.mir2.web3-rUdN0kDDmseHNsjZUPF9Vg==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+    cpuAbiOverride=null
+    versionCode=13 minSdk=31 targetSdk=35
+    minExtensionVersions=[]
+    versionName=0.1.10-weight-bars
+    usesNonSdkApi=false
+    splits=[base]
+    apkSigningVersion=2
+    applicationInfo=PackageImpl{856100a com.mir2.web3}
+    flags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    queriesPackages=[]
+    dataDir=/data/user/0/com.mir2.web3
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    timeStamp=2026-10-01 21:35:58
+    firstInstallTime=2026-09-14 06:31:04
+    lastUpdateTime=2026-10-01 21:36:01
+    signatures=PackageSignatures{744107b version:2, signatures:[a4a9828c], past signatures:[]}
+    installPermissionsFixed=true
+    pkgFlags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA ]
+    declared permissions:
+      com.mir2.web3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature, INSTALLED
+    requested permissions:
+      android.permission.INTERNET
+      android.permission.ACCESS_NETWORK_STATE
+      com.mir2.web3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+    install permissions:
+      android.permission.INTERNET: granted=true
+      com.mir2.web3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true
+      android.permission.ACCESS_NETWORK_STATE: granted=true
+    User 0: ceDataInode=147457 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      overlay paths:
+        /product/overlay/EmulationPixel5/EmulationPixel5Overlay.apk
+      legacy overlay paths:
+        /product/overlay/EmulationPixel5/EmulationPixel5Overlay.apk
+      gids=[3003]
+      runtime permissions:
+
+Queries:
+  system apps queryable: false
+  queries via package name:
+  queries via intent:
+    com.google.android.settings.intelligence:
+      com.mir2.web3
+  queryable via interaction:
+    User 0:
+  queryable via uses-library:
+
+Package Changes:
+  Sequence number=4
+  User 0:
+    seq=1, package=com.google.android.apps.docs
+    seq=3, package=com.google.android.gms
+
+
+Dexopt state:
+  [com.mir2.web3]
+    path: /data/app/~~qqR_5moG0qKRS73RfpvOFQ==/com.mir2.web3-rUdN0kDDmseHNsjZUPF9Vg==/base.apk
+      arm64: [status=run-from-apk] [reason=unknown]
+
+
+Compiler stats:
+  [com.mir2.web3]
+    (No recorded stats)
+
+APEX session state:
+
+Active APEX packages:
+
+
+Inactive APEX packages:
+
+
+Factory APEX packages:
+
+
+Snapshot statistics
+   Unrecorded-hits: 112  Cork-level: 0
+   Summary stats               TotBlds     TotUsed     TotCork     BigBlds    ShortLvd     TotTime     MaxTime
+          0:30         now           1         918           0           0           0           0           0
+          1:30        0:30           1        2926           0           0           0           0           0
+          2:30        1:30         135       54765           0           0          13          13           1
+          2:30         now         137       58609           0           0          13          13           1
+
+   Build times                  <= 1ms      <= 2ms      <= 5ms     <= 10ms     <= 20ms     <= 50ms    <= 100ms     > 100ms
+          0:30         now           1           0           0           0           0           0           0           0
+          1:30        0:30           1           0           0           0           0           0           0           0
+          2:30        1:30         135           0           0           0           0           0           0           0
+          2:30         now         137           0           0           0           0           0           0           0
+
+   Use counters                   <= 1        <= 2        <= 5       <= 10       <= 20       <= 50      <= 100       > 100
+          0:30         now           0           0           0           0           0           0           0           1
+          1:30        0:30           0           0           0           0           0           0           0           1
+          2:30        1:30           8           1           3           3          10          22          20          67
+          2:30         now           8           1           3           3          10          22          20          69

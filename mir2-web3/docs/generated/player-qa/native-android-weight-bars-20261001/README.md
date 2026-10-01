@@ -3,8 +3,10 @@
 Bounded NI-20 resource leaf; the Windows-completeness goal remains Active.
 Frozen Windows: `3f5e61533235921369bc13a7760b4a56b0e467e5`.
 Source parent: `9e29d7b67bead922ead99ae4179ae2e452f06e3e`.
-This is the source/staging checkpoint **before** clean v13 APK construction.
-Version13 /`0.1.10-weight-bars` is set, not yet an accepted artifact or display.
+The source/staging gates below precede the clean v13 package/runtime follow-up.
+Exact APK source: `cfac6ecd4bb66ac7c4b0a2625ff178f1703335a0`; version13 /
+`0.1.10-weight-bars`. Both actual packages install and the offline BAG weight
+bar is now visible. Phone HUD weight/full UI/live/device remain unaccepted.
 The exact v12 packages and missing471/473 images remain in the
 [previous evidence](../native-android-player-ingress-20261001/README.md).
 
@@ -84,3 +86,83 @@ SSH443 attempts failed in transport. Fresh GitHub ref/PR reads still confirm onl
 f04a74399; PR253 stays Open/Draft, basecodex/playtest-registration. No publication
 success, forced push, PR merge/base change, production deployment, save modification,
 APK/raw-image/key commit or original workspace mutation is claimed here.
+
+## Later exact v13 APK and actual original BAG image
+
+Both builds have the exact clean source above and empty Git status before/after,
+without source changes between them. They are Gradle Debug/uiPreview diagnostics
+with a release-profile Rust library, not store Release or production signing.
+Actual APK/config verifies arm64/min31/target35, normal UI_PREVIEW=false and
+isolated `com.mir2.web3.uipreview` true. Both use empty Gateway URLs, no Web page.
+
+Local root: `apps/game-client/platform-android/target/weight-bars-v13-20261001/final-apks`.
+
+| Artifact | Bytes | SHA-256 |
+| --- | --- | --- |
+| `mir2-native-weight-bars-debug-v13.apk` | 386299417 | `9b1bcb15e65b9d1737b5cbf30ef0df102e6a9bc6057ca2f770bab77f9f7c6437` |
+| `mir2-native-weight-bars-preview-v13.apk` | 390021621 | `7efead879a7a27f22279e702f3f414fea620e37fbbadec8d775daf2eb6ec99a1` |
+
+`verify-package.mjs`/`package-v13.json` compare6647 original PNGs and three
+metadata files per actual APK to the supplemented diagnostic input. All four
+weight PNGs **and metadata** additionally match frozen Windows Git blob bytes;
+all three tested source hashes match the committed APK build inputs. World/entity
+inputs remain the unchanged diagnostic packs, not a complete public resource release.
+
+Only emulator-5554 /sdk_gphone64_arm64 /Android12 API31 is connected, physical
+1080x2340 /landscape2340x1080 /density440. Both installs use `-r` and preserve data.
+Three original captured frames were manually inspected:
+
+- `preview-inventory.png`: original yellow BAG471 weight fill is restored for
+  the explicit offline66/100, with available34, BAG gold12,352 and phone HUD12352.
+  No weight resource error remains in the captured process log. Thumb/status/chat/
+  belt lanes are unobscured. Other ratios/colors/zero/overweight are not tested here.
+- `preview-character.png`: original male body and frame30 weapon remain visible,
+  with the same explicit HP80/200 and MP20/100 sidebar. No new stats-tab/close,
+  dragging or touch interaction was performed in this v13 capture set; v12's
+  earlier interactions remain their own source checkpoint. Armour has no StateImage.
+- `debug-login-recovered.png`: empty shared login, **Test server not configured**.
+  It remains small for the phone; no credentials, account login or server state.
+
+Phone HUD still has **no visually accepted weight row/bar** in these scenes.
+473 exists and no missing-resource error occurs, but that is not a displayed HUD
+weight acceptance. Only the original BAG471 image is accepted in this visual leaf.
+Credit503 is a diagnostic source marker, not a rendered credit or purchase result.
+
+### Simulator interruption and recovery remain failures
+
+The first normal start timed out13463ms; before any capture, the emulator left
+ADB and its host process disappeared. The original macOS report at21:39:21 records
+qemu-system-aarch64 SIGABRT in a gRPC callback. This proves a **host** exit, not
+an Android game crash, and does not establish its deeper root cause.
+`emulator-exit-summary.json` retains the bounded exception/stack summary; the
+original168352-byte `.ips` is still under macOS DiagnosticReports, not committed.
+
+The background recovery did not persist. A retained-session boot then waited
+at the SDK crash-upload consent dialog; CUA could not expose the standalone SDK
+application. After gracefully stopping only that new waiting process, the same
+Mir2_API_31_ARM64 AVD was launched with documented per-launch
+`-crash-report-mode never -no-metrics`, no snapshot load/save. No AVD/GPU/auth/global
+configuration edit, userdata wipe, Pixel5 launch or source/save cleanup occurred.
+Normal installed version13 survived the restart and was reverified. SDK no-upload
+handling automatically removed its queued temporary minidump; **no recoverable
+copy of that SDK dump is verified**. The original macOS report and retained boot/
+failure records remain; no crash upload was authorized.
+
+Recovered start waits are ok638ms normal,546ms BAG and433ms CHAR. These do not
+erase the earlier timeout/host exit or constitute first-frame latency/soak/stability
+acceptance. Captured own-PID logs4438/4622/4748 have219/375/220 line entries and0
+ERROR/fatal/panic/signal or missing-weight matches; this is a bounded capture only.
+Both diagnostic apps are stopped afterward; the same recovered test AVD remains
+running in its retained execution session. No global log clear/data wipe.
+
+`runtime-audit.mjs`/`runtime-v13.json` bind installed versions, source, device,
+capture dimensions/hashes, bounded logs, first/recovered starts and explicit
+manual observations. Full phone HUD/UI/input/resources/startup/online/device
+remain false/open. Next NI-09 incoming chat and HUD weight, then NPC/services and
+all remaining Windows leaves; the goal is not complete.
+
+Ordinary v13 source pushes also failed. The retained HTTPS1.1 attempt sent4.25MiB
+but received no successful result before timeout; **100% sent is not published**.
+Final observed ref/PR files distinguish this from a successful push, still f04a74399
+Open/Draft with the same base. Sourcecfac6ecd4 and v12 evidence9e29d7b67 remain
+local pending transport recovery. No forced push, branch cleanup, merge or deployment.

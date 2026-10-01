@@ -1,0 +1,98 @@
+{
+  "source": "cfac6ecd4bb66ac7c4b0a2625ff178f1703335a0",
+  "frozenWindows": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "sourceGateHashesMatchCommittedBuildInputs": true,
+  "cleanBeforeAfterBothBuilds": true,
+  "versionCode": 13,
+  "versionName": "0.1.10-weight-bars",
+  "gatewayUrl": "",
+  "minimumAndroidApi": 31,
+  "targetAndroidApi": 35,
+  "abi": "arm64-v8a",
+  "artifacts": [
+    {
+      "variant": "debug",
+      "source": "cfac6ecd4bb66ac7c4b0a2625ff178f1703335a0",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/weight-bars-v13-20261001/final-apks/mir2-native-weight-bars-debug-v13.apk",
+      "bytes": 386299417,
+      "sha256": "9b1bcb15e65b9d1737b5cbf30ef0df102e6a9bc6057ca2f770bab77f9f7c6437",
+      "pngCountCompared": 6647,
+      "libraries": [
+        {
+          "library": "Items",
+          "pngCount": 1003,
+          "allBytesMatch": true,
+          "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+        },
+        {
+          "library": "StateItem",
+          "pngCount": 5192,
+          "allBytesMatch": true,
+          "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a"
+        },
+        {
+          "library": "MagIcon",
+          "pngCount": 224,
+          "allBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "MagIcon2",
+          "pngCount": 224,
+          "allBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "UI_32bit",
+          "pngCount": 4,
+          "allBytesMatch": true,
+          "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9"
+        }
+      ]
+    },
+    {
+      "variant": "preview",
+      "source": "cfac6ecd4bb66ac7c4b0a2625ff178f1703335a0",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/weight-bars-v13-20261001/final-apks/mir2-native-weight-bars-preview-v13.apk",
+      "bytes": 390021621,
+      "sha256": "7efead879a7a27f22279e702f3f414fea620e37fbbadec8d775daf2eb6ec99a1",
+      "pngCountCompared": 6647,
+      "libraries": [
+        {
+          "library": "Items",
+          "pngCount": 1003,
+          "allBytesMatch": true,
+          "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+        },
+        {
+          "library": "StateItem",
+          "pngCount": 5192,
+          "allBytesMatch": true,
+          "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a"
+        },
+        {
+          "library": "MagIcon",
+          "pngCount": 224,
+          "allBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "MagIcon2",
+          "pngCount": 224,
+          "allBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "UI_32bit",
+          "pngCount": 4,
+          "allBytesMatch": true,
+          "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9"
+        }
+      ]
+    }
+  ],
+  "fourWeightPngsAndMetadataMatchFrozenGitBytesEachApk": true,
+  "fullResourceReleaseAccepted": false,
+  "authenticatedGameplayAccepted": false,
+  "physicalDeviceAccepted": false
+}
