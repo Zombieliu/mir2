@@ -1230,6 +1230,7 @@ pub fn tick_native_entity_presentation(
     movement: Option<Res<crate::input::WorldPointerMovementState>>,
     player_ui: Option<Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
     shell: Option<Res<mir2_client_bevy::native_shell::NativeShellModel>>,
+    quest: Option<Res<mir2_client_bevy::quest_ui::QuestUiState>>,
     windows: Query<&Window, With<PrimaryWindow>>,
 ) {
     let motion_now_ms = native_motion_clock_ms();
@@ -1256,6 +1257,7 @@ pub fn tick_native_entity_presentation(
         windows.iter().next(),
         shell.as_deref(),
         player_ui.as_deref(),
+        quest.as_deref(),
     );
     presentation.set_hover_presentation(hover_cursor_stage, highlight_target);
     let Some(state) = presentation.render_state_if_changed_at_clocks(
@@ -1281,12 +1283,11 @@ fn native_hover_cursor(
     window: Option<&Window>,
     shell: Option<&mir2_client_bevy::native_shell::NativeShellModel>,
     player_ui: Option<&mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
+    quest: Option<&mir2_client_bevy::quest_ui::QuestUiState>,
 ) -> Option<(f32, f32)> {
     use mir2_client_bevy::native_shell::NativeShellScreen;
 
-    if shell.is_none_or(|shell| shell.screen != NativeShellScreen::InGame)
-        || player_ui.is_some_and(|ui| ui.blocks_world_click())
-    {
+    if shell.is_none_or(|shell| shell.screen != NativeShellScreen::InGame) {
         return None;
     }
     let window = window?;
@@ -1294,14 +1295,26 @@ fn native_hover_cursor(
         return None;
     }
     let cursor = window.cursor_position()?;
-    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit(
+    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),
     );
     if !transform.contains_physical_point(cursor.x, cursor.y) {
         return None;
     }
-    Some(transform.physical_to_logical(cursor.x, cursor.y))
+    let point = transform.physical_to_logical(cursor.x, cursor.y);
+    if player_ui.is_some_and(|ui| ui.blocks_world_pointer_at(point.0, point.1))
+        || quest.is_some_and(|quest| {
+            quest.captures_world_pointer_at(
+                point.0,
+                point.1,
+                player_ui.is_some_and(|ui| ui.quest_open()),
+            )
+        })
+    {
+        return None;
+    }
+    Some(point)
 }
 
 fn parse_observed_entity(entity: &Value) -> Option<ObservedEntity> {
@@ -2721,18 +2734,27 @@ mod tests {
         window.set_cursor_position(Some(Vec2::new(100.0, 360.0)));
         let mut shell = NativeShellModel::default();
         shell.screen = NativeShellScreen::InGame;
-        assert_eq!(native_hover_cursor(Some(&window), Some(&shell), None), None);
+        assert_eq!(
+            native_hover_cursor(Some(&window), Some(&shell), None, None),
+            None
+        );
 
         window.set_cursor_position(Some(Vec2::new(640.0, 360.0)));
         assert_eq!(
-            native_hover_cursor(Some(&window), Some(&shell), None),
+            native_hover_cursor(Some(&window), Some(&shell), None, None),
             Some((512.0, 384.0))
         );
         shell.screen = NativeShellScreen::Login;
-        assert_eq!(native_hover_cursor(Some(&window), Some(&shell), None), None);
+        assert_eq!(
+            native_hover_cursor(Some(&window), Some(&shell), None, None),
+            None
+        );
         shell.screen = NativeShellScreen::InGame;
         window.focused = false;
-        assert_eq!(native_hover_cursor(Some(&window), Some(&shell), None), None);
+        assert_eq!(
+            native_hover_cursor(Some(&window), Some(&shell), None, None),
+            None
+        );
     }
 
     #[test]

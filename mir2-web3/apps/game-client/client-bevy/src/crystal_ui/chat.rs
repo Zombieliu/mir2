@@ -3053,7 +3053,7 @@ fn handle_chat_pointer_scroll(
         }
         return;
     }
-    let transform = super::metrics::CrystalStageTransform::fit(
+    let transform = super::metrics::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),
     );

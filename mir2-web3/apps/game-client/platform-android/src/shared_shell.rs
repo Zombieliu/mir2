@@ -2029,6 +2029,9 @@ fn forward_quest_ui_intents(
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
     let world_actions_blocked = notice.as_deref().is_some_and(|notice| notice.is_open())
+        || quest_state
+            .as_deref()
+            .is_some_and(mir2_client_bevy::quest_ui::QuestUiState::blocks_world_input)
         || player
             .as_deref()
             .map(|player| player.blocks_world_action(dialog_open, dead))

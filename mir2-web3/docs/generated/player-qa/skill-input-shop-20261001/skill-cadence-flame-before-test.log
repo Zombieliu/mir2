@@ -1,0 +1,20 @@
+
+running 1 test
+test routing::tests::zone_skill_cadence_tests::ordinary_flaming_sword_prepare_and_consumed_hit_retain_ten_second_cooldown ... FAILED
+
+failures:
+
+---- routing::tests::zone_skill_cadence_tests::ordinary_flaming_sword_prepare_and_consumed_hit_retain_ten_second_cooldown stdout ----
+
+thread 'routing::tests::zone_skill_cadence_tests::ordinary_flaming_sword_prepare_and_consumed_hit_retain_ten_second_cooldown' (91392) panicked at apps\gateway\src\routing\tests\zone_skill_cadence_tests.rs:309:5:
+assertion `left == right` failed: [GuildStatus { guild_name: "", guild_rank_name: "", level: 0, experience: 0, max_experience: 0, gold: 0, spare_points: 0, member_count: 0, max_members: 0, voting: false, item_count: 0, buff_count: 0, my_options: 0, my_rank_id: -1 }, GuildMemberChange { name: "", rank_index: 0, status: 255, ranks: [] }, GuildBuffList { remove: 0, active_buffs: [], guild_buffs: [] }]
+  left: 0
+ right: 1
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    routing::tests::zone_skill_cadence_tests::ordinary_flaming_sword_prepare_and_consumed_hit_retain_ten_second_cooldown
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 867 filtered out; finished in 1.45s
+

@@ -217,7 +217,58 @@ pub fn verify_launch(root: &Path) -> Result<String> {
         .context("missing candidate")?
         .to_owned())
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ReceiptSource {
+    Highest,
+    Accepted,
+    Seed,
+}
+struct LocalReceipt {
+    source: ReceiptSource,
+    feed: Feed,
+    bytes: Vec<u8>,
+}
+/// Each input has already passed CMS/key/schema verification. Installation seeds
+/// and retained history jointly define the floor; a new trusted installer must
+/// not be downgraded merely because it preserved an older highest pointer.
+fn select_previous(
+    mut receipts: Vec<LocalReceipt>,
+    installed_version: &[u8],
+) -> Result<Option<(Feed, Vec<u8>)>> {
+    ensure!(
+        !receipts.is_empty(),
+        "signed installer seed/release history is missing"
+    );
+    let mut sequences = BTreeMap::new();
+    let mut selected = 0;
+    let has_history = receipts.iter().any(|r| r.source != ReceiptSource::Seed);
+    for (index, receipt) in receipts.iter().enumerate() {
+        if let Some(existing) = sequences.insert(receipt.feed.sequence, receipt.bytes.as_slice()) {
+            ensure!(
+                existing == receipt.bytes,
+                "conflicting signed local release sequence"
+            );
+        }
+        if receipt.feed.sequence > receipts[selected].feed.sequence {
+            selected = index;
+        }
+        if !has_history && receipt.source == ReceiptSource::Seed {
+            ensure!(
+                receipt
+                    .feed
+                    .game
+                    .metadata
+                    .iter()
+                    .any(|e| { e.path == "VERSION.json" && e.sha256 == hash(installed_version) }),
+                "updated installation lost its authenticated release history"
+            );
+        }
+    }
+    let chosen = receipts.swap_remove(selected);
+    Ok(Some((chosen.feed, chosen.bytes)))
+}
 fn read_previous(root: &Path) -> Result<Option<(Feed, Vec<u8>)>> {
+    let mut receipts = Vec::new();
     let highest = root.join(".update/highest.txt");
     if highest.exists() {
         let pointer = safe::read_bounded(&highest, 64)?;
@@ -227,31 +278,37 @@ fn read_previous(root: &Path) -> Result<Option<(Feed, Vec<u8>)>> {
         let bytes = safe::read_bounded(&dir.join("FEED.json"), 32768)?;
         let sig = safe::read_bounded(&dir.join("FEED.p7s"), 32768)?;
         ensure!(hash(&bytes) == digest, "highest-release hash mismatch");
-        return Ok(Some((feed_auth(&bytes, &sig, false)?, bytes)));
+        receipts.push(LocalReceipt {
+            source: ReceiptSource::Highest,
+            feed: feed_auth(&bytes, &sig, false)?,
+            bytes,
+        });
     }
-    for (json, sig) in [
-        (".update/accepted-feed.json", ".update/accepted-feed.p7s"),
-        ("updater/seed-feed.json", "updater/seed-feed.p7s"),
+    for (source, json, sig) in [
+        (
+            ReceiptSource::Accepted,
+            ".update/accepted-feed.json",
+            ".update/accepted-feed.p7s",
+        ),
+        (
+            ReceiptSource::Seed,
+            "updater/seed-feed.json",
+            "updater/seed-feed.p7s",
+        ),
     ] {
         let p = root.join(json);
         if p.exists() {
             let bytes = safe::read_bounded(&p, 32768)?;
             let signature = safe::read_bounded(&root.join(sig), 32768)?;
-            let feed = feed_auth(&bytes, &signature, false)?;
-            if json == "updater/seed-feed.json" {
-                let version = safe::read_bounded(&root.join("game/VERSION.json"), MAX_META)?;
-                ensure!(
-                    feed.game
-                        .metadata
-                        .iter()
-                        .any(|e| e.path == "VERSION.json" && e.sha256 == hash(&version)),
-                    "updated installation lost its authenticated release history"
-                );
-            }
-            return Ok(Some((feed, bytes)));
+            receipts.push(LocalReceipt {
+                source,
+                feed: feed_auth(&bytes, &signature, false)?,
+                bytes,
+            });
         }
     }
-    anyhow::bail!("signed installer seed/release history is missing")
+    let version = safe::read_bounded(&root.join("game/VERSION.json"), MAX_META)?;
+    select_previous(receipts, &version)
 }
 fn remember_highest(root: &Path, bytes: &[u8], sig: &[u8]) -> Result<()> {
     let digest = hash(bytes);
@@ -642,3 +699,7 @@ pub fn log(root: &Path, event: &str, detail: impl serde::Serialize) {
     })();
     if result.is_err() {} // Logging cannot permit or block an unverified launch.
 }
+
+#[cfg(test)]
+#[path = "update_receipt_tests.rs"]
+mod receipt_tests;

@@ -260,9 +260,10 @@ fn chat_entry(
     interactions: Query<&Interaction, (With<ChatEntry>, Changed<Interaction>)>,
     shell: Res<NativeShellModel>,
     mut player: ResMut<NativePlayerUiState>,
+    world_input: crate::world_input::WorldInputContext,
 ) {
     if shell.screen == NativeShellScreen::InGame
-        && !player.blocks_world_click()
+        && !world_input.blocks_views(&player)
         && interactions.iter().any(|i| *i == Interaction::Pressed)
     {
         player.set_chat_focused(true);
@@ -403,6 +404,7 @@ fn fit_phone_hud(
     android: Res<AndroidShellState>,
     shell: Res<NativeShellModel>,
     player: Res<NativePlayerUiState>,
+    world_input: crate::world_input::WorldInputContext,
     model: Res<UiReadModel>,
     chat: Res<CrystalChatState>,
     belt: Res<CrystalBeltPresentation>,
@@ -447,7 +449,7 @@ fn fit_phone_hud(
     );
     let u = layout.unit;
     let in_game = shell.screen == NativeShellScreen::InGame && !player.local_keys.camera_hidden;
-    let playing = in_game && !player.blocks_world_click();
+    let playing = in_game && !world_input.blocks_views(&player);
     // The old desktop frame, status labels and tiny menu buttons are not a
     // second set of phone controls. Keep only the real belt and minimap layers.
     let mut hud_origin = Vec2::ZERO;
@@ -469,7 +471,7 @@ fn fit_phone_hud(
             *node = rect_node(layout.status, u);
             node.border = border;
             node.border_radius = BorderRadius::all(px(8.0 * u));
-            node.display = if in_game && !player.blocks_world_click() {
+            node.display = if playing {
                 Display::Flex
             } else {
                 Display::None

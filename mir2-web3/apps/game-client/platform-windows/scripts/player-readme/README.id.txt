@@ -1,4 +1,4 @@
-﻿Numeron - Legend of Rebirth — Uji coba dengan undangan
+Numeron - Legend of Rebirth — Uji coba dengan undangan
 
 Pasang di Windows 10/11 x64. Penginstal menggunakan folder program lokal pengguna Windows Anda dan dapat membuat pintasan desktop. Jika runtime Microsoft Visual C++ x64 belum tersedia, Windows akan meminta izin administrator untuk komponen Microsoft tersebut. Mulai ulang Windows jika diminta sebelum membuka game.
 
@@ -18,4 +18,6 @@ Ini adalah versi uji coba dengan undangan. Alur Prajurit level 0–30 telah diuj
 Hapus klien melalui Pengaturan Windows > Aplikasi atau pintasan penghapusan yang terpasang. Preferensi bahasa dipertahankan. Menghapus klien tidak menghapus akun atau karakter server. Panduan ini lebih diutamakan daripada catatan arsip lama yang disimpan untuk penelusuran.
 
 Pembaruan otomatis
-Pasang r7 sekali dan jalankan game melalui pintasan desktop. Peluncur memeriksa daftar yang ditandatangani dan hanya mengunduh berkas yang berubah. Simpan progres dan tutup game sebelum memperbarui. Aktivasi yang gagal atau terputus dipulihkan sebelum game dimulai; kegagalan awal pada versi baru juga memulihkan versi lama. Unduhan lengkap digunakan kembali, berkas yang belum lengkap diunduh ulang. Bahasa dan karakter di server tetap tersimpan. Jika layanan pembaruan tidak tersedia, versi terpasang yang telah diverifikasi tetap dapat dijalankan.
+Pasang r8 sekali dan jalankan game melalui pintasan desktop. Peluncur memeriksa daftar yang ditandatangani dan hanya mengunduh berkas yang berubah. Simpan progres dan tutup game sebelum memperbarui. Aktivasi yang gagal atau terputus dipulihkan sebelum game dimulai; kegagalan awal pada versi baru juga memulihkan versi lama. Unduhan lengkap digunakan kembali, berkas yang belum lengkap diunduh ulang. Bahasa dan karakter di server tetap tersimpan. Jika layanan pembaruan tidak tersedia, versi terpasang yang telah diverifikasi tetap dapat dijalankan.
+Ukuran tampilan
+Di layar login, gunakan Ukuran jendela di kiri bawah. Mode Otomatis disarankan, atau pilih ukuran jendela 4:3 yang tersedia. Adegan, teks, tombol, dan area klik diperbesar bersama. Ukuran yang tidak muat di layar tidak tersedia. Pilihan disimpan untuk peluncuran berikutnya dan tetap ada setelah pembaruan. Ukuran ini berlaku untuk mode jendela; layar penuh mempertahankan rasio asli.

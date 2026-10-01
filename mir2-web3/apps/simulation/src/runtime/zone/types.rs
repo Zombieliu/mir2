@@ -597,6 +597,13 @@ pub enum ZoneCommand {
         damage: i32,
         now_ms: u64,
     },
+    /// Trusted learned-skill preparation. Flame's ten-second charge is owned
+    /// by the shared world, independently of active spell/action clocks.
+    PreparePlayerFlamingSword {
+        session_id: SessionId,
+        level: u8,
+        now_ms: u64,
+    },
     PlayerCastMagic {
         session_id: SessionId,
         object_id: u32,
@@ -1224,6 +1231,10 @@ pub(crate) struct ZonePlayer {
     pub next_spell_ready_at_ms: u64,
     pub magic_ready_at_ms: BTreeMap<u8, u64>,
     #[serde(default)]
+    pub flaming_sword_armed: bool,
+    #[serde(default)]
+    pub flaming_sword_ready_at_ms: u64,
+    #[serde(default)]
     pub last_damaged_at_ms: u64,
     #[serde(default)]
     pub last_regen_at_ms: u64,
@@ -1334,6 +1345,8 @@ impl ZonePlayer {
             next_attack_ready_at_ms: 0,
             next_spell_ready_at_ms: 0,
             magic_ready_at_ms: BTreeMap::new(),
+            flaming_sword_armed: false,
+            flaming_sword_ready_at_ms: 0,
             last_damaged_at_ms: 0,
             last_regen_at_ms: 0,
             chat_profile: join.chat_profile,

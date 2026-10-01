@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> 2026-10-01 three-class shared skill/action readiness repair: final Zone178/178,
+> ordinary Gateway8/8 and adjacent13/13 pass. Magic1800ms (FlameField2500),
+> Magic ActionTime600/melee550 and exact per-skill gates match Crystal source.
+> Flame preparation has a Zone-owned10s deadline, one mana debit, synchronous
+> expiry, consumed-hit/map-transfer carry, normal-login reset and direct-Magic
+> bypass rejection. Snapshot remainingMs is additive/backward-compatible.
+> Earlier complete runs' failures and before/focused evidence are retained;
+> the final Flame slice has focused/adjacent validation, not a relabelled full run.
+> Release/deployment is pending; saves/schema unchanged and capacity paused.
+> [Evidence](generated/player-qa/skill-input-shop-20261001/README.md).
+
 > 2026-09-29 capacity candidate9ac is deployed after backup and clean normal
 > stops. Second complete Gateway regression passes845/0 with18 ignored;
 > the original failing delivery-path fixture and focused repair remain recorded.

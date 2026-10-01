@@ -280,6 +280,7 @@ impl ZoneManager {
             | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, .. }
             | ZoneCommand::PlayerCastMagic { session_id, .. }
             | ZoneCommand::PlayerCastMagicWithItem { session_id, .. }
+            | ZoneCommand::PreparePlayerFlamingSword { session_id, .. }
             | ZoneCommand::ResolveReincarnation { session_id, .. }
             | ZoneCommand::ClaimGroundDrop { session_id, .. }
             | ZoneCommand::ClaimNearestGroundDrop { session_id, .. }
@@ -407,7 +408,12 @@ impl ZoneManager {
             let previous_key = self.session_zones.get(&session_id).cloned();
             let mut outbounds = Vec::new();
             let mut transferred_clock = None;
+            let mut transferred_action_clock = None;
             if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
+                transferred_action_clock = self
+                    .zones
+                    .get(&previous_key)
+                    .and_then(|zone| zone.player_action_clock(&session_id));
                 transferred_clock = self
                     .zones
                     .get(&previous_key)
@@ -427,6 +433,9 @@ impl ZoneManager {
             outbounds.extend(zone.handle(ZoneCommand::Join(join)));
             if let Some(clock) = transferred_clock {
                 zone.restore_player_vital_clock(&session_id, clock);
+            }
+            if let Some(clock) = transferred_action_clock {
+                zone.restore_player_action_clock(&session_id, clock);
             }
             return outbounds;
         }
@@ -481,6 +490,13 @@ impl ZoneManager {
 
     pub fn zone(&self, key: &ZoneKey) -> Option<&ZoneRuntime> {
         self.zones.get(key)
+    }
+
+    pub fn player_flaming_sword_armed(&self, session_id: &SessionId, now_ms: u64) -> bool {
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| zone.player_flaming_sword_armed(session_id, now_ms))
     }
 
     /// Install caller-configured policy before any session joins the Zone.

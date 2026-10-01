@@ -99,6 +99,11 @@ Win32 分辨率、Inno 安装器、EXE 更新器不原样搬到 Android：对应
 - [ ] G1 — 将三个已冻结 Windows 更新集成进独立 Android 分支；逐文件处理
   shared chat / metrics / overlays / quest / skill 冲突，保留 Android HUD/IME
   与 GLES 适配；建立双方能力叶子清单并跑受影响共享、Android、Java 与构建门禁。
+  - [x] G1-source — 正常合并冻结来源，保留 Android native-player-ui/HUD/IME/GLES，
+    接入非模态手机操作保护并完成源码回归；详见下方本轮记录。
+  - [x] G1-ingress — 已建立20项宿主接收子目录与5项输入集成检查；它不是完整
+    玩家功能百分比分母，仍须逐项展开每个服务的动作/回执/窗口与失败验收。
+  - [ ] G1-package — 精确提交源码的 v6 API31 APK、安装与模拟器实测证据。
 - [ ] G2 — 真实登录 → 角色列表 → 创建/选择 → StartGame → 服务端地图/位置。
   审计 transport、认证和 render-ready，不发裸 account_id 冒充身份。
 - [ ] G3 — 完整资源和对象/地图生命周期、真实权威移动、战斗、拾取、背包、
@@ -162,3 +167,34 @@ PR #253 保持独立 Draft；不自动改 base、不合并 PR。分阶段验证�
 
 恢复时先读本文和 `AGENT-TASK-QUEUE.md` 顶部，再确认 goal 状态、工作区状态
 和实际待办。保留旧失败和独立 Windows/CI/三职业/容量门槛；容量 goal 不恢复。
+
+## 8. G1 源码集成记录（APK/在线门槛尚未通过）
+
+普通 merge 导入冻结 Windows 来源的三个提交，不改写 Android 或 Windows 历史。
+13处文本冲突已逐项合并；保留手机 HUD/chat/IME、native-player-ui 和 GLES 清理。
+共享显示纯类型允许手机 UI 编译，但 Android 不安装桌面分辨率设置资源或插件，
+不打开桌面音频特性。两个桌面 match 明确处理共享 Hero 类型，无新增攻击/NPC规则。
+
+Android 普通面板不再统一隐藏 HUD/摇杆；持续和新摇杆操作均有回归。真正的
+NPC服务、notice、任务确认、技能分配、聊天编辑和死亡仍保护动作；切换窗口
+释放旧 UI pointer，避免第二根手指误点新窗。死亡继续保留 Revive 入口。
+宿主真正未接通的数据列在 [ingress差距](ANDROID-NATIVE-HOST-GAPS.md)，其中
+技能/owner cast/精确冷却仍 OPEN，不能因 merge 共享技能 UI 就宣称已完成。
+
+本轮离线源码门禁：Android217/217、uiPreview225/225、shared native-player-ui
+1195通过/8既有ignore、runtime290通过/1既有ignore、Java两个variant各30/30、
+API31 arm64 target check、Zone178/178、Gateway技能focused8/8；计数相互重叠。
+Mac桌面宿主相关focused为非模态8/8、Hero cursor1/1、hover保护1/1。
+Mac完整桌面源码测试为622通过/180失败/5ignore，含完整Candidate素材、Windows
+字体与Mac临时路径祖先等环境失败。保留完整日志，不把focused替换成全量green，
+不宣称本轮Windows实机通过。服务端也只有上述focused/Zone范围，不称全后端green。
+
+失败证据保留在 Android `target/windows-goal-g1-20261001`：非模态先复现0/2，
+中间Android215/216；新增共享显示测试的桌面音频依赖错误；稀疏checkout缺少
+已有SQL/配置/编译fixture；Mac桌面全量结果。已有SQL只补出为编译输入，没有
+执行迁移或连接数据库。继承Windows的原始日志字节未修剪；它们的尾部空行
+使未过滤cached diff check非零，源文件/文档的scoped diff check和format check通过。
+
+v6版本号已区分旧包，但APK打包/安装/截图仍待下一步精确绑定本次源提交。
+没有配置真实Gateway、输入账号、写存档、部署服务或获得物理设备证据。
+Goal保持Active；G1整体和G2–G6仍未完成。

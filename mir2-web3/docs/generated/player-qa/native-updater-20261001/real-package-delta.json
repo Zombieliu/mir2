@@ -1,0 +1,25 @@
+{
+  "allNewPayloadHashesVerified": true,
+  "engineRollbackVerified": true,
+  "engineUpdated": true,
+  "failedReleaseQuarantined": true,
+  "gameLaunched": false,
+  "passed": true,
+  "pendingFirstLaunchRetained": true,
+  "requests": [
+    "releases/game-WN-CANDIDATE-20261001-invited-07/BUILD-ATTESTATION.json",
+    "releases/game-WN-CANDIDATE-20261001-invited-07/README-START.txt",
+    "releases/game-WN-CANDIDATE-20261001-invited-07/mir2-platform-windows.exe",
+    "releases/updater-61BEDB22789626F0-s3/Mir2Updater.exe"
+  ],
+  "result": {
+    "activated": true,
+    "candidate": "WN-CANDIDATE-20261001-invited-07",
+    "changedGameFiles": 3,
+    "downloadedBytes": 112319925,
+    "downloadedFiles": 4,
+    "sequence": 3
+  },
+  "rollback": "WN-CANDIDATE-20260930-invited-06",
+  "unchangedPayloadFiles": 123028
+}

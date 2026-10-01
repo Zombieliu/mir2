@@ -36,6 +36,10 @@ pub mod mail_service;
 pub mod map;
 #[cfg(feature = "native-shell-ui")]
 pub mod native_i18n;
+// Shared hint geometry references these pure display types even on hosts
+// that do not install the desktop resolution/plugin path.
+#[cfg(feature = "native-shell-ui")]
+pub mod native_display;
 #[cfg(feature = "native-shell-ui")]
 pub mod native_shell;
 #[cfg(feature = "native-shell-ui")]

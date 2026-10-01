@@ -171,6 +171,7 @@ fn joystick_touch(
     time: Option<Res<Time>>,
     shell: Res<NativeShellModel>,
     state: Res<NativePlayerUiState>,
+    world_input: crate::world_input::WorldInputContext,
     android: Option<Res<AndroidShellState>>,
     windows: Query<&Window>,
     mut joystick: ResMut<JoystickState>,
@@ -182,7 +183,7 @@ fn joystick_touch(
         return;
     };
     if shell.screen != NativeShellScreen::InGame
-        || state.blocks_world_click()
+        || world_input.blocks_actions(&state)
         || !window.focused
         || android
             .as_deref()
@@ -193,7 +194,7 @@ fn joystick_touch(
             info!(
                 owner,
                 screen = ?shell.screen,
-                blocked = state.blocks_world_click(),
+                blocked = world_input.blocks_actions(&state),
                 focused = window.focused,
                 lifecycle = ?android.as_deref().map(|state| state.lifecycle),
                 "ANDROID_UI_PREVIEW_TOUCH_CANCEL joystick"
@@ -689,7 +690,7 @@ fn spawn(mut commands: Commands) {
 fn visibility(
     shell: Res<NativeShellModel>,
     state: Res<NativePlayerUiState>,
-    ui: Option<Res<UiReadModel>>,
+    world_input: crate::world_input::WorldInputContext,
     map: Option<Res<mir2_client_bevy::map::MapModel>>,
     pickups: Option<Res<GroundPickupModel>>,
     scale: Res<UiScale>,
@@ -721,6 +722,7 @@ fn visibility(
     >,
     mut labels: Query<&mut TextFont, With<RailLabel>>,
 ) {
+    let ui = world_input.read_model();
     let unit = 1.0 / scale.0.max(0.01);
     let metrics = windows
         .single()
@@ -756,7 +758,9 @@ fn visibility(
         rail.expanded = false;
     }
     let in_game = shell.screen == NativeShellScreen::InGame;
-    let world_controls_visible = in_game && !state.blocks_world_click() && !rail.expanded;
+    // Death still exposes the existing Revive action; movement is rejected by
+    // joystick_touch and the authoritative shared action path separately.
+    let world_controls_visible = in_game && !world_input.blocks_views(&state) && !rail.expanded;
     for mut node in &mut rail_roots {
         node.width = px(if rail.expanded {
             metrics.rail_width
@@ -1329,12 +1333,12 @@ mod tests {
     }
 
     #[test]
-    fn blocking_shared_panel_disables_the_world_joystick_gesture() {
+    fn commerce_panel_disables_the_world_joystick_gesture() {
         let (mut app, window) = joystick_app();
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .core
-            .panel = mir2_ui_core::state::UiPanel::Inventory;
+            .panel = mir2_ui_core::state::UiPanel::NpcShop;
         let window_ref = app.world().get::<Window>(window).unwrap();
         let center = joystick_center(
             window_ref,
@@ -1351,6 +1355,59 @@ mod tests {
             .resource::<crate::android_input::AndroidMotionQueue>()
             .0
             .is_empty());
+    }
+
+    #[test]
+    fn nonmodal_views_keep_the_android_joystick_and_motion_intent_available() {
+        use mir2_ui_core::state::UiPanel;
+        for panel in [
+            UiPanel::Inventory,
+            UiPanel::Character,
+            UiPanel::Skill,
+            UiPanel::Options,
+            UiPanel::Menu,
+            UiPanel::QuestLog,
+        ] {
+            let (mut app, window) = joystick_app();
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .core
+                .panel = panel;
+            let window_ref = app.world().get::<Window>(window).unwrap();
+            let center = joystick_center(
+                window_ref,
+                0.0,
+                0.0,
+                gameplay_control_metrics(window_ref.height()).joystick_scale,
+            );
+            touch_at(
+                &mut app,
+                window,
+                17,
+                TouchPhase::Started,
+                center + Vec2::new(30.0, 0.0),
+            );
+            app.update();
+            assert_eq!(
+                app.world().resource::<JoystickState>().owner,
+                Some(17),
+                "{panel:?}"
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<crate::android_input::AndroidMotionQueue>()
+                    .0
+                    .len(),
+                1,
+                "{panel:?} suppressed ordinary movement"
+            );
+            assert!(
+                !app.world()
+                    .resource::<ButtonInput<MouseButton>>()
+                    .just_pressed(MouseButton::Left),
+                "joystick touch leaked through to the shared panel"
+            );
+        }
     }
 
     #[test]
@@ -1431,42 +1488,170 @@ mod tests {
     }
 
     #[test]
-    fn panel_transition_cancels_both_touch_owners_without_a_ghost_press() {
-        let (mut app, window) = joystick_app();
-        let window_ref = app.world().get::<Window>(window).unwrap();
-        let center = joystick_center(
-            window_ref,
-            0.0,
-            0.0,
-            gameplay_control_metrics(window_ref.height()).joystick_scale,
-        );
-        touch_at(&mut app, window, 1, TouchPhase::Started, center);
-        app.update();
-        touch_at(
-            &mut app,
-            window,
-            2,
-            TouchPhase::Started,
-            Vec2::new(700.0, 120.0),
-        );
-        app.update();
-        assert_eq!(app.world().resource::<JoystickState>().owner, Some(1));
-        assert_eq!(app.world().resource::<TouchPointer>().owner, Some(2));
+    fn panel_transition_keeps_nonmodal_motion_but_cancels_modal_and_pointer_owners() {
+        use mir2_ui_core::state::UiPanel;
+        for (panel, modal) in [(UiPanel::Inventory, false), (UiPanel::NpcShop, true)] {
+            let (mut app, window) = joystick_app();
+            let window_ref = app.world().get::<Window>(window).unwrap();
+            let center = joystick_center(
+                window_ref,
+                0.0,
+                0.0,
+                gameplay_control_metrics(window_ref.height()).joystick_scale,
+            );
+            touch_at(&mut app, window, 1, TouchPhase::Started, center);
+            app.update();
+            touch_at(
+                &mut app,
+                window,
+                2,
+                TouchPhase::Started,
+                Vec2::new(700.0, 120.0),
+            );
+            app.update();
+            assert_eq!(app.world().resource::<JoystickState>().owner, Some(1));
+            assert_eq!(app.world().resource::<TouchPointer>().owner, Some(2));
 
-        app.world_mut()
-            .resource_mut::<NativePlayerUiState>()
-            .core
-            .panel = mir2_ui_core::state::UiPanel::Inventory;
-        app.update();
+            app.world_mut()
+                .resource_mut::<NativePlayerUiState>()
+                .core
+                .panel = panel;
+            touch_at(
+                &mut app,
+                window,
+                1,
+                TouchPhase::Moved,
+                center + Vec2::new(30.0, 0.0),
+            );
+            app.update();
 
-        assert_eq!(app.world().resource::<JoystickState>().owner, None);
-        let pointer = app.world().resource::<TouchPointer>();
-        assert_eq!(pointer.owner, None);
-        assert!(pointer.wait_for_release);
-        assert!(!app
-            .world()
-            .resource::<ButtonInput<MouseButton>>()
-            .pressed(MouseButton::Left));
+            assert_eq!(
+                app.world().resource::<JoystickState>().owner,
+                if modal { None } else { Some(1) },
+                "{panel:?}"
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<crate::android_input::AndroidMotionQueue>()
+                    .0
+                    .len(),
+                if modal { 0 } else { 1 },
+                "{panel:?} must retain ordinary motion but stop service movement"
+            );
+            // A held panel finger must never become a click in the newly opened
+            // view. The dedicated joystick is independent of that pointer.
+            let pointer = app.world().resource::<TouchPointer>();
+            assert_eq!(pointer.owner, None);
+            assert!(pointer.wait_for_release);
+            assert!(!app
+                .world()
+                .resource::<ButtonInput<MouseButton>>()
+                .pressed(MouseButton::Left));
+        }
+    }
+
+    #[test]
+    fn true_modals_and_death_block_fresh_and_owned_joystick_over_an_ordinary_view() {
+        use mir2_client_bevy::{
+            crystal_ui::notice::{NoticeDialogState, NoticePacketUpdate},
+            quest_model::NpcDialogModel,
+            quest_ui::QuestUiState,
+        };
+        for owned in [false, true] {
+            for guard in [
+                "npc",
+                "notice",
+                "abandon",
+                "quest-alert",
+                "chat",
+                "skill-assign",
+                "dead",
+            ] {
+                let (mut app, window) = joystick_app();
+                app.world_mut()
+                    .resource_mut::<NativePlayerUiState>()
+                    .core
+                    .panel = mir2_ui_core::state::UiPanel::Inventory;
+                let window_ref = app.world().get::<Window>(window).unwrap();
+                let center = joystick_center(
+                    window_ref,
+                    0.0,
+                    0.0,
+                    gameplay_control_metrics(window_ref.height()).joystick_scale,
+                );
+                let position = center + Vec2::new(30.0, 0.0);
+                if owned {
+                    touch_at(&mut app, window, 9, TouchPhase::Started, position);
+                    app.update();
+                    assert_eq!(app.world().resource::<JoystickState>().owner, Some(9));
+                    app.world_mut()
+                        .resource_mut::<crate::android_input::AndroidMotionQueue>()
+                        .0
+                        .clear();
+                }
+                match guard {
+                    "npc" => {
+                        app.insert_resource(NpcDialogModel {
+                            is_open: true,
+                            ..default()
+                        });
+                    }
+                    "notice" => {
+                        let mut notice = NoticeDialogState::default();
+                        assert!(notice.observe(NoticePacketUpdate {
+                            generation: 1,
+                            sequence: 1,
+                            title: "Offline guard fixture".into(),
+                            message: "Modal fixture, not a server receipt".into(),
+                        }));
+                        app.insert_resource(notice);
+                    }
+                    "abandon" => {
+                        app.insert_resource(QuestUiState {
+                            abandon_confirmation_quest_index: Some(7),
+                            ..default()
+                        });
+                    }
+                    "quest-alert" => {
+                        app.insert_resource(QuestUiState {
+                            quest_alert_message: Some("Offline guard fixture".into()),
+                            ..default()
+                        });
+                    }
+                    "chat" => app
+                        .world_mut()
+                        .resource_mut::<NativePlayerUiState>()
+                        .set_chat_focused(true),
+                    "skill-assign" => {
+                        app.world_mut()
+                            .resource_mut::<NativePlayerUiState>()
+                            .skill_assign
+                            .open = true
+                    }
+                    "dead" => {
+                        let mut model = UiReadModel::default();
+                        model.player.max_hp = 30;
+                        model.player.hp = 0;
+                        app.insert_resource(model);
+                    }
+                    _ => unreachable!(),
+                }
+                if !owned {
+                    touch_at(&mut app, window, 9, TouchPhase::Started, position);
+                }
+                app.update();
+                let joystick = app.world().resource::<JoystickState>();
+                assert_eq!(joystick.owner, None, "{guard}, owned={owned}");
+                assert_eq!(joystick.vector, Vec2::ZERO, "{guard}, owned={owned}");
+                assert!(
+                    app.world()
+                        .resource::<crate::android_input::AndroidMotionQueue>()
+                        .0
+                        .is_empty(),
+                    "{guard}, owned={owned} leaked a movement intent"
+                );
+            }
+        }
     }
 
     #[test]
@@ -1712,12 +1897,12 @@ mod tests {
         {
             let world = app.world_mut();
             let mut pad = world.query_filtered::<&Node, With<ActionPad>>();
-            assert_eq!(pad.single(world).unwrap().display, Display::None);
+            assert_eq!(pad.single(world).unwrap().display, Display::Flex);
         }
         {
             let world = app.world_mut();
             let mut joystick = world.query_filtered::<&Node, With<JoystickRoot>>();
-            assert_eq!(joystick.single(world).unwrap().display, Display::None);
+            assert_eq!(joystick.single(world).unwrap().display, Display::Flex);
         }
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()

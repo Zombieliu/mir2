@@ -34,6 +34,27 @@
 > archive28/3platform skips pass; release/live integration gates are pending.
 > This distribution slice does not change server/game parity or restart capacity.
 > [Evidence](generated/player-qa/native-updater-20261001/README.md).
+> 2026-10-01 native skills/input/medicine-shop repair: final serial shared1186
+> and Windows801 checks pass, plus nine production service-open GPU captures.
+> Ordinary Spells/Character/bag/options/menu/help and Diary/Detail capture only
+> their own surfaces; actual prompts/commerce/NPC/search/drags retain capture.
+> Owner cast ACKs start overlays; exact sampled readiness ages while idle.
+> Installed F-drive game was still r5 without updater, not the fixed r6/r7.
+> Server Zone178/Gateway8+13 pass; matched actual release is being finalized;
+> capacity remains paused and human gameplay acceptance stays separate.
+> [Evidence](generated/player-qa/skill-input-shop-20261001/README.md).
+
+> 2026-10-01 native automatic updating and login display selection: updater24/24,
+> archive28/3platform skips, deployment tooling16/16 and signing/source guards
+>28/28 pass. Native display6/6, shared display7/7 and seven real Winit cases pass;
+> full serial shared1168/Windows790 and72 nine-language GPU captures pass. Clean
+> fefd18370 Candidate07, strict123035-file package and actual r7 installer are built.
+> Actual r6→r7 delta/rollback and native launcher HTTPS update pass: three game
+> files plus engine (~107MiB), repeat check0bytes. Signed sequence3 is published.
+> Both game services/saves remain unchanged; capacity stays paused. Public
+> Authenticode signing/affected-laptop/full-installer human acceptance remain open.
+> [Updater evidence](generated/player-qa/native-updater-20261001/README.md).
+> [Display evidence](generated/player-qa/native-display-20261001/README.md).
 
 > 2026-09-30 NPC-shop/supply regression: independent service-open now places an
 > overlapping bag beside the actual shop; selected supply vendor names use the

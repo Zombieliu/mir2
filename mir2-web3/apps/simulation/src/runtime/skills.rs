@@ -105,6 +105,7 @@ impl SkillState {
             delay_ms: self.delay_ms,
             cast_time_ms: self.cast_time_ms,
             cooldown_remaining_ticks: self.cooldown_ends_at.saturating_sub(tick) as u32,
+            cooldown_remaining_ms: None,
         }
     }
 }

@@ -1,0 +1,18 @@
+
+running 1 test
+test routing::tests::zone_skill_cadence_tests::ordinary_flaming_sword_cannot_bypass_preparation_as_ranged_magic ... FAILED
+
+failures:
+
+---- routing::tests::zone_skill_cadence_tests::ordinary_flaming_sword_cannot_bypass_preparation_as_ranged_magic stdout ----
+
+thread 'routing::tests::zone_skill_cadence_tests::ordinary_flaming_sword_cannot_bypass_preparation_as_ranged_magic' (98868) panicked at apps\gateway\src\routing\tests\zone_skill_cadence_tests.rs:118:5:
+[UserLocation { location: UserLocation { position: Point { x: 337, y: 273 }, direction: Right } }, Magic { spell: FlamingSword, target_id: 3001, target: Point { x: 338, y: 273 }, cast: true, level: 0, secondary_target_ids: [] }, ObjectMagic { object_id: 1000, location: Point { x: 337, y: 273 }, direction: Right, spell: FlamingSword, target_id: 3001, target: Point { x: 338, y: 273 }, cast: true, level: 0, self_broadcast: false, secondary_target_ids: [] }, ObjectMana { info: ObjectManaInfo { object_id: 50000, percent: 100 } }, GuildStatus { guild_name: "", guild_rank_name: "", level: 0, experience: 0, max_experience: 0, gold: 0, spare_points: 0, member_count: 0, max_members: 0, voting: false, item_count: 0, buff_count: 0, my_options: 0, my_rank_id: -1 }, GuildMemberChange { name: "", rank_index: 0, status: 255, ranks: [] }, GuildBuffList { remove: 0, active_buffs: [], guild_buffs: [] }]
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    routing::tests::zone_skill_cadence_tests::ordinary_flaming_sword_cannot_bypass_preparation_as_ranged_magic
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 870 filtered out; finished in 1.60s
+

@@ -1,7 +1,7 @@
 # Native Windows automatic updates
 
 This implements the native Windows distribution path independently of the old
-web-only Tauri shell. The installer installs the verified r6 game Candidate plus
+web-only Tauri shell. The installer installs the verified r7 game Candidate plus
 a separately attested launcher/updater bundle. It preserves the stable AppId.
 
 Desktop/start-menu shortcut -> app/Mir2Launcher.exe -> authenticated engine copy
@@ -28,7 +28,9 @@ Trust and activation:
 - Per-install named mutex plus exclusive file lock across Windows sessions.
   Exact process-path detection covers old/direct game shortcuts. Neither game
   nor installer force-terminates the player. Installer probes and holds the same
-  file lock before modifying an existing installation.
+  file lock for fresh and existing installations, releasing it before launch.
+  Successful full reinstalls retire an older journal without losing the signed
+  sequence history. A newer signed installer seed also raises that history floor.
 - Flush backups and bounded journal before mutation, activate metadata last.
   Recover applying transactions before launch. Retain committed first-launch
   obligation across check-only runs/power loss. A failed process creation or
@@ -38,10 +40,12 @@ Trust and activation:
 - Offline/unavailable/invalid feed can use the verified installed game; invalid
   recovery/installed signatures prevent launch. Closing the update window
   cancels before activation/game start. Logs and personal non-manifest files,
-  per-user locale preferences and server accounts/saves are preserved.
+  per-user language/display preferences and server accounts/saves are preserved.
 
 Nine native updater languages: en/zh-TW/pt-BR/ru/hi/id/vi/th/ar. The native dialog
 uses Windows font fallback and DPI scaling, separately from game font atlases.
+It reads the same roaming language preference as the installer/game, with a
+legacy local-preference fallback.
 
 Release workflow (PowerShell7.2+; known internal signing identity required):
 
@@ -57,8 +61,14 @@ Release workflow (PowerShell7.2+; known internal signing identity required):
 5. scripts/archive-update-release.py uses the emitted source-map.json and a
    fresh absolute tar.gz output. It validates all bytes/closure but explicitly
    does not replace the CMS gate. Upload to private staging; server validates
-   extraction, hashes and signatures before immutable release promotion.
-6. Publish latest.p7s then atomically latest.json last under
+   extraction and every hash before immutable release promotion. The workstation
+   CMS gate remains explicit, with all approved uploads SHA256 pinned.
+6. Use scripts/deploy-prepare-plan.py with the approved archive/feed, an explicit
+   fresh output directory and current Caddy configuration hash. Review the plan,
+   then execute its preflight, private staging/upload and apply commands through
+   the trusted SSH transport. The root-owned publisher keeps existing routes,
+   validates Caddy using only its existing service environment references, and
+   atomically publishes the signed discovery directory last under
    https://165.154.65.136.sslip.io/client-updates/. Discovery is no-store.
    Release paths are immutable. Gateway routes/binaries/save data are separate.
    Sequence must increase for every changed feed, including expiry renewal.

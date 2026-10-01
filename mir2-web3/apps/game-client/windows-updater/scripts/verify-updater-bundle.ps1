@@ -14,11 +14,32 @@ function NoLink([string]$Path) {
         $parent=Split-Path -Parent $cursor;if(!$parent -or $parent-eq$cursor){break};$cursor=$parent
     }
 }
+function AssertCodeSigningCertificate([Security.Cryptography.X509Certificates.X509Certificate2]$Certificate) {
+    if(!$Certificate){throw 'CMS signer certificate missing'}
+    $eku=$Certificate.Extensions | Where-Object {$_.Oid.Value-eq'2.5.29.37'} | Select-Object -First 1
+    if(!$eku -or @($eku.EnhancedKeyUsages | ForEach-Object {$_.Value})-notcontains'1.3.6.1.5.5.7.3.3'){
+        throw 'CMS signer certificate requires the code-signing EKU'
+    }
+    $usage=$Certificate.Extensions | Where-Object {$_.Oid.Value-eq'2.5.29.15'} | Select-Object -First 1
+    if($usage -and ($usage.KeyUsages-band[Security.Cryptography.X509Certificates.X509KeyUsageFlags]::DigitalSignature)-eq0){
+        throw 'CMS signer key usage does not permit digital signatures'
+    }
+}
 function Check([byte[]]$Bytes,[byte[]]$Signature){
+    # Detached is constructor state in SignedCms, not an envelope inspection.
+    # Decode without supplied content first, matching the native CMS gate.
+    $envelope=[Security.Cryptography.Pkcs.SignedCms]::new()
+    $envelope.Decode($Signature)
+    if($envelope.ContentInfo.Content.Length-ne0){throw 'Detached CMS signature required'}
     $cms=[Security.Cryptography.Pkcs.SignedCms]::new([Security.Cryptography.Pkcs.ContentInfo]::new($Bytes),$true)
-    $cms.Decode($Signature);$cms.CheckSignature($true)
+    $cms.Decode($Signature)
     if($cms.SignerInfos.Count-ne1){throw 'Exactly one detached signer required'}
-    $rsa=[Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPublicKey($cms.SignerInfos[0].Certificate)
+    if($cms.SignerInfos[0].DigestAlgorithm.Value-cne'2.16.840.1.101.3.4.2.1'){throw 'CMS signer digest must be SHA256'}
+    $cms.CheckSignature($true)
+    $signingCertificate=$cms.SignerInfos[0].Certificate
+    AssertCodeSigningCertificate $signingCertificate
+    $rsa=[Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPublicKey($signingCertificate)
+    if(!$rsa){throw 'CMS signer must use an RSA public key'}
     $hash=[Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($rsa.ExportRSAPublicKey()))
     if($hash-cne$pin){throw 'Publisher key pin mismatch'}
 }

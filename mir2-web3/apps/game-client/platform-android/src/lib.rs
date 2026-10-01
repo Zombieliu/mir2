@@ -38,6 +38,8 @@ mod ui_preview;
 #[cfg(any(target_os = "android", test))]
 mod world_assets;
 #[cfg(any(target_os = "android", test))]
+mod world_input;
+#[cfg(any(target_os = "android", test))]
 mod world_projection;
 
 use android_input::{

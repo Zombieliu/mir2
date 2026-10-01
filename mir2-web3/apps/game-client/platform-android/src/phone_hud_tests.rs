@@ -146,6 +146,49 @@ fn shared_controls_survive_adaptation_and_desktop_frame_is_hidden() {
 }
 
 #[test]
+fn nonmodal_views_keep_phone_status_and_chat_entry_without_desktop_display_resource() {
+    use mir2_ui_core::state::UiPanel;
+    for panel in [
+        UiPanel::Inventory,
+        UiPanel::Character,
+        UiPanel::Skill,
+        UiPanel::Options,
+        UiPanel::Menu,
+        UiPanel::QuestLog,
+    ] {
+        let mut app = app();
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = panel;
+        app.update();
+        assert!(app
+            .world()
+            .get_resource::<mir2_client_bevy::native_display::NativeDisplaySettings>()
+            .is_none());
+        let world = app.world_mut();
+        for display in [
+            world
+                .query_filtered::<&Node, With<PhoneStatus>>()
+                .single(world)
+                .unwrap()
+                .display,
+            world
+                .query_filtered::<&Node, With<ChatEntry>>()
+                .single(world)
+                .unwrap()
+                .display,
+        ] {
+            assert_eq!(
+                display,
+                Display::Flex,
+                "{panel:?} hid an ordinary phone affordance"
+            );
+        }
+    }
+}
+
+#[test]
 fn shared_rebuild_keeps_phone_nodes_and_does_not_change_chat_settings() {
     let mut app = app();
     app.world_mut().spawn((Node::default(), CrystalChatRoot));

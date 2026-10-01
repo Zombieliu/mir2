@@ -211,6 +211,9 @@ function New-DetachedCmsSignature {
     $cms = [Security.Cryptography.Pkcs.SignedCms]::new([Security.Cryptography.Pkcs.ContentInfo]::new($Content), $true)
     $signer = [Security.Cryptography.Pkcs.CmsSigner]::new([Security.Cryptography.Pkcs.SubjectIdentifierType]::IssuerAndSerialNumber, $Certificate)
     $signer.IncludeOption = [Security.Cryptography.X509Certificates.X509IncludeOption]::EndCertOnly
+    # .NET/PowerShell defaults differ; every update-compatible Candidate must
+    # explicitly use the SHA256 digest accepted by the native launcher.
+    $signer.DigestAlgorithm = [Security.Cryptography.Oid]::new('2.16.840.1.101.3.4.2.1')
     $cms.ComputeSignature($signer, $false)
     return $cms.Encode()
 }

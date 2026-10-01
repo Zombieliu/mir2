@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-10-01 Android completeness G1 source integration: the normal merge of
+> frozenWindows3f5e61533 retains phone HUD/IME/GLES and native-player-ui, with
+> fresh/held nonmodal joystick and true-modal guards. Android217/preview225/
+> shared1195/runtime290/Java30+30, Android target/Zone178/Gateway focused8 pass
+> (8/1 shared/runtime ignores). Mac desktop focused8+1+1 pass, but its full
+> run is622 passed/180 failed/5 ignored with resource/Windows environment gaps;
+> this is not Windows acceptance or full backend green. Next bind source to
+> v6 APK/emulator evidence, then owner skill/typed model ingress and approved
+> real login. [Host ingress leaves](ANDROID-NATIVE-HOST-GAPS.md). Goal is Active.
+
 > 2026-10-01 user-requested Android completeness goal is Active: align native
 > Android with frozen current Windows source `3f5e61533235921369bc13a7760b4a56b0e467e5`
 > (`codex/playtest-registration`), not only the old PR250 or the login slice.
@@ -62,6 +72,27 @@
 > Clean build, real r5→r6 delta, r7 setup and public feed gates remain active.
 > Capacity stays paused; no game/save deployment by this change.
 > [Evidence](generated/player-qa/native-updater-20261001/README.md).
+> 2026-10-01 native skills/input/medicine-shop repair: final serial shared1186
+> and Windows801 checks pass, plus nine production service-open GPU captures.
+> Ordinary Spells/Character/bag/options/menu/help and Diary/Detail capture only
+> their own surfaces; actual prompts/commerce/NPC/search/drags retain capture.
+> Owner cast ACKs start overlays; exact sampled readiness ages while idle.
+> Installed F-drive game was still r5 without updater, not the fixed r6/r7.
+> Server Zone178/Gateway8+13 pass; matched actual release is being finalized;
+> capacity remains paused and human gameplay acceptance stays separate.
+> [Evidence](generated/player-qa/skill-input-shop-20261001/README.md).
+
+> 2026-10-01 native automatic updating and login display selection: updater24/24,
+> archive28/3platform skips, deployment tooling16/16 and signing/source guards
+>28/28 pass. Native display6/6, shared display7/7 and seven real Winit cases pass;
+> full serial shared1168/Windows790 and72 nine-language GPU captures pass. Clean
+> fefd18370 Candidate07, strict123035-file package and actual r7 installer are built.
+> Actual r6→r7 delta/rollback and native launcher HTTPS update pass: three game
+> files plus engine (~107MiB), repeat check0bytes. Signed sequence3 is published.
+> Both game services/saves remain unchanged; capacity stays paused. Public
+> Authenticode signing/affected-laptop/full-installer human acceptance remain open.
+> [Updater evidence](generated/player-qa/native-updater-20261001/README.md).
+> [Display evidence](generated/player-qa/native-display-20261001/README.md).
 
 > 2026-09-30 NPC-shop/supply regression: code and focused/full shared checks pass
 > (1158/0);36 targeted GPU captures verify actual service-open placement and
