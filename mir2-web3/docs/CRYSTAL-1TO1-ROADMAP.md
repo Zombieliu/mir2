@@ -1,17 +1,28 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-> 2026-10-01 caster follow-up: independent ordinary Wizard/Taoist saves verify
-> 33/52 newcomer-v2 nodes (21/26 level26 and12/26 level19); the original and
-> separate functional clocks expired. A new independent fresh cohort is running,
-> with no reset of old evidence or human saves. Native shared1187/Windows806,
-> controller386, 42 caster-shop GPU captures, finite status handoff and canonical
-> base/level mana checks pass. Final Gateway adjacent33 plus isolatedV2 7 pass;
-> earlier full Gateway857 predates the late status/mana slice. Complete Simulation
-> 1906 pass/5 old fixture failures is preserved; focused mana/bind preparations
-> resolve those failures. Full caster route/native human acceptance remain open.
-> Counted/periodic poison and dynamic mana penalties remain separate parity gaps.
-> Installed r8/public realm/updater feed are unchanged; capacity remains paused.
+> 2026-10-01 caster follow-up: strict audit of independent frozen saves and
+> normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
+> Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52
+> cohort is retained. The original r2 ordinary clock ended 48/52: Wizard 22/26
+> at its 120-minute deadline; Taoist completed 26/26 within about 98 minutes.
+> Wizard's separate functional 26/26 inherits its ordinary nodes;
+> freshTimedCompletion=false.
+> Latest affected controller/evidence checks: 355 passed. Ordinary Lightning's
+> new loadout branch was not observed live; existing practice ACKs are separate.
+> Final shared UI checks: 1197 passed / 10 ignored; Windows 808 passed / 5
+> ignored. Ordered Exit/retry, late goods, map/scene and merchant lifecycle
+> regressions pass; six offline GPU captures (three classes, zh-TW, after
+> 560 ms) pass. Earlier failing stages and 42 caster captures remain recorded.
+> Finite control handoff, canonical mana and prior 6d498c080 server validations
+> retain their documented scopes and original failure records. No new full
+> server-suite, whole-game parity or public deployment acceptance follows.
+> Installed r8, public realm, updater feed and human stores are unchanged.
+> A client-only r9 shop hotfix is being built separately from the clean r8 base;
+> release and human acceptance are pending. Full native GUI / route timing,
+> counted/periodic poison, dynamic mana and unrelated parity gaps remain open;
+> capacity remains paused.
 > [Evidence](generated/player-qa/caster-journey-20261001/README.md).
+> [Shop lifecycle](generated/player-qa/caster-journey-20261001/shop-lifecycle-20261001.md).
 
 > 2026-10-01 native skills/input/medicine-shop repair: final serial shared1186
 > and Windows801 checks pass, plus nine production service-open GPU captures.

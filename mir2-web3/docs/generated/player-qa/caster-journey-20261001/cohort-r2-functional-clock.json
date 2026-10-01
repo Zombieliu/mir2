@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "className": "Wizard",
+  "scope": "separate-functional-recheck",
+  "ordinaryStartedAt": "2026-10-01T09:12:39.084Z",
+  "ordinaryDeadlineAt": "2026-10-01T11:12:39.084Z",
+  "originalCompletedUnits": 22,
+  "originalConfirmedDeaths": 0,
+  "functionalStartedAt": "2026-10-01T11:42:19.812Z",
+  "functionalDeadlineAt": "2026-10-01T13:42:19.812Z",
+  "controllerSourceCommit": "b4ab36af78826fae768b72e74677d3307ffd8ba5",
+  "serverEdited": false,
+  "humanSaveEdited": false
+}

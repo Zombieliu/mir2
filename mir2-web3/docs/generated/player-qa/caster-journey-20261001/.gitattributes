@@ -2,3 +2,6 @@
 *.jsonl -text whitespace=cr-at-eol,-blank-at-eof
 *.log -text whitespace=cr-at-eol,-blank-at-eof
 *.png -text
+*.mjs -text whitespace=cr-at-eol,-blank-at-eof
+*.py -text whitespace=cr-at-eol,-blank-at-eof
+*.ps1 -text whitespace=cr-at-eol,-blank-at-eof

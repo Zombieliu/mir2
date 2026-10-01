@@ -1,14 +1,28 @@
 # Windows 原生可玩闭环验收清单
 
-> 2026-10-01 法师/道士复验：独立正常账号第一轮保存核对为33/52，
-> 法师21/26、26级；道士12/26、19级。旧普通/功能复验时钟已过期，
-> 已保留原记录；新一轮使用独立新账号和存档继续测试完整路线。
-> 两职业9/28级七种买药、卷轴和道具补给服务，三语买/卖共42张GPU截图通过；
-> 共享1187、原生806、控制器386项通过。修复普通面板技能地面瞄准、
-> 埋地怪错误显示、换图旧状态通知及基本耗蓝提示一致性。
-> 图片为生产UI/ECS离线服务夹具；不等同真人完整路线验收。
-> 当前r8/公网服/更新源和真人存档未替换，完整职业验收仍待完成。
-> [证据](generated/player-qa/caster-journey-20261001/README.md)。
+> 2026-10-01 caster follow-up: strict audit of independent frozen saves and
+> normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
+> Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52
+> cohort is retained. The original r2 ordinary clock ended 48/52: Wizard 22/26
+> at its 120-minute deadline; Taoist completed 26/26 within about 98 minutes.
+> Wizard's separate functional 26/26 inherits its ordinary nodes;
+> freshTimedCompletion=false.
+> Latest affected controller/evidence checks: 355 passed. Ordinary Lightning's
+> new loadout branch was not observed live; existing practice ACKs are separate.
+> Final shared UI checks: 1197 passed / 10 ignored; Windows 808 passed / 5
+> ignored. Ordered Exit/retry, late goods, map/scene and merchant lifecycle
+> regressions pass; six offline GPU captures (three classes, zh-TW, after
+> 560 ms) pass. Earlier failing stages and 42 caster captures remain recorded.
+> Finite control handoff, canonical mana and prior 6d498c080 server validations
+> retain their documented scopes and original failure records. No new full
+> server-suite, whole-game parity or public deployment acceptance follows.
+> Installed r8, public realm, updater feed and human stores are unchanged.
+> A client-only r9 shop hotfix is being built separately from the clean r8 base;
+> release and human acceptance are pending. Full native GUI / route timing,
+> counted/periodic poison, dynamic mana and unrelated parity gaps remain open;
+> capacity remains paused.
+> [Evidence](generated/player-qa/caster-journey-20261001/README.md).
+> [Shop lifecycle](generated/player-qa/caster-journey-20261001/shop-lifecycle-20261001.md).
 
 > 2026-10-01 技能/界面输入修复：共享1186、Windows801项串行检查通过。
 > 技能、人物、背包、设置、菜单、帮助和任务日志/详情只拦截各自窗口区域；
