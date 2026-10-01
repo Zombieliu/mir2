@@ -643,7 +643,6 @@ fn apply(world: &mut World) {
         "platform" => UiPanel::PlatformSettings,
         "menu" => UiPanel::Menu,
         "gameshop" => UiPanel::GameShop,
-        "npcshop" | "npcshop-sell" | "npcshop-repair" | "npcshop-srepair" => UiPanel::NpcShop,
         "mail" | "mail-compose" => UiPanel::Mail,
         "bigmap" => UiPanel::BigMap,
         "storage" | "storage-locked" => UiPanel::Storage,
@@ -657,6 +656,9 @@ fn apply(world: &mut World) {
     let mut state = world.resource_mut::<NativePlayerUiState>();
     state.core.screen = UiScreen::InGame;
     initialize_player_panel(&mut state, panel);
+    if is_npc_service_preview(&scene) {
+        begin_offline_npc_preview_request(&mut state);
+    }
     if scene == "chat" {
         state.set_chat_focused(true);
     }
@@ -973,6 +975,75 @@ fn offline_received_chat_lines() -> Result<Vec<String>, &'static str> {
     Ok(lines)
 }
 
+fn is_npc_service_preview(scene: &str) -> bool {
+    matches!(
+        scene,
+        "npcshop" | "npcshop-sell" | "npcshop-repair" | "npcshop-srepair"
+    )
+}
+
+fn begin_offline_npc_preview_request(state: &mut NativePlayerUiState) {
+    // Only this feature-isolated fixture simulates an accepted request. It is
+    // not an outbound Gateway command, authenticated NPC interaction or ACK.
+    state.core.panel = UiPanel::None;
+    state.begin_npc_service_request();
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum OfflineNpcMessage {
+    Catalogue(String),
+    Service(String),
+}
+
+/// Exercise the actual Android scene-bound NPC adapter; do not hand-fill a
+/// ShopModel or force a service panel open. All inputs here remain synthetic,
+/// feature-isolated and marked OFFLINE. No transaction receipt is invented.
+fn offline_npc_ingress_messages(scene: &str) -> Result<Vec<OfflineNpcMessage>, &'static str> {
+    let (packet, payload) = match scene {
+        "npcshop" => (
+            "NPCGoods",
+            serde_json::json!({"ownerObjectId":42,"mapFileName":"0","hideAddedStats":true,
+                "list":[{"uniqueId":"9007199254740993","name":"OFFLINE received potion",
+                    "icon":658,"price":50,"stock":20,"count":1,"panelType":0}]}),
+        ),
+        "npcshop-sell" => ("NPCSell", serde_json::Value::Null),
+        "npcshop-repair" => ("NPCRepair", serde_json::json!({"rate":1.25})),
+        "npcshop-srepair" => ("NPCSRepair", serde_json::json!({"rate":2.0})),
+        _ => return Err("Not an offline NPC service scene"),
+    };
+    let snapshot = offline_personal_snapshot();
+    let mut player = crate::player_ingress::AndroidPlayerIngress::default();
+    player.snapshot(&snapshot)?;
+    let mut ingress = crate::npc_ingress::AndroidNpcIngress::default();
+    ingress.snapshot(&snapshot, player.presentation_cursor())?;
+    if !ingress.packet(
+        &serde_json::json!({"type":"packet","packet":packet,"payload":payload}).to_string(),
+        true,
+        player.presentation_cursor(),
+    )? {
+        return Err("Offline NPC packet not accepted");
+    }
+    // Both callbacks append to the same FIFO so the catalogue cannot be
+    // reordered behind its opening signal, even in this offline specimen.
+    let messages = std::cell::RefCell::new(Vec::new());
+    if !ingress.flush(
+        true,
+        |raw| {
+            messages
+                .borrow_mut()
+                .push(OfflineNpcMessage::Catalogue(raw));
+            true
+        },
+        |raw| {
+            messages.borrow_mut().push(OfflineNpcMessage::Service(raw));
+            true
+        },
+    ) {
+        return Err("Offline NPC messages not drained");
+    }
+    Ok(messages.into_inner())
+}
+
 fn populate_specimens(world: &mut World, scene: &str) {
     if matches!(scene, "chat" | "chat-settings") {
         if let Ok(lines) = offline_received_chat_lines() {
@@ -1056,38 +1127,61 @@ fn populate_specimens(world: &mut World, scene: &str) {
         });
         world.insert_resource(pickups);
     }
-    let service_mode = match scene {
-        "npcshop-sell" => NpcShopServiceMode::Sell,
-        "npcshop-repair" => NpcShopServiceMode::Repair,
-        "npcshop-srepair" => NpcShopServiceMode::SpecialRepair,
-        _ => NpcShopServiceMode::Buy,
-    };
-    world.insert_resource(ShopModel {
-        service_mode,
-        supports_buy: scene == "npcshop",
-        supports_sell: scene == "npcshop-sell",
-        repair_rate: matches!(
-            service_mode,
-            NpcShopServiceMode::Repair | NpcShopServiceMode::SpecialRepair
-        )
-        .then_some(if service_mode == NpcShopServiceMode::SpecialRepair {
-            2.0
-        } else {
-            1.0
-        }),
-        goods: (0..8)
-            .map(|index| ShopGood {
-                unique_id: 5000 + index,
-                name: format!("UI goods {index}"),
-                price: 10,
-                stock: 20,
-                count: 1,
-                icon: 100 + index as u16,
-                ..default()
-            })
-            .collect(),
-        ..default()
-    });
+    if is_npc_service_preview(scene) {
+        // The real runtime consumer, not this fixture, applies catalogue and
+        // service messages and opens the shared NPC surface on the next frame.
+        world.insert_resource(ShopModel::default());
+        match offline_npc_ingress_messages(scene) {
+            Ok(messages) => {
+                let mut catalogues = 0;
+                let mut services = 0;
+                let mut rejected = 0;
+                for message in messages {
+                    match message {
+                        OfflineNpcMessage::Catalogue(raw) => {
+                            if mir2_bevy_runtime::native_ingest::push_native_shop_model(raw) {
+                                catalogues += 1;
+                            } else {
+                                rejected += 1;
+                            }
+                        }
+                        OfflineNpcMessage::Service(raw) => {
+                            if mir2_bevy_runtime::native_ingest::push_native_npc_shop_service(raw) {
+                                services += 1;
+                            } else {
+                                rejected += 1;
+                            }
+                        }
+                    }
+                }
+                info!(
+                    scene,
+                    catalogues, services, rejected, "ANDROID_NPC_INGRESS_OFFLINE_NOT_LIVE"
+                );
+            }
+            Err(reason) => warn!(
+                scene,
+                reason, "ANDROID_NPC_INGRESS_OFFLINE_REJECTED_NOT_LIVE"
+            ),
+        }
+    } else {
+        // Unrelated legacy UI specimens are unchanged by the NPC ingress gate.
+        world.insert_resource(ShopModel {
+            service_mode: NpcShopServiceMode::Buy,
+            goods: (0..8)
+                .map(|index| ShopGood {
+                    unique_id: 5000 + index,
+                    name: format!("UI goods {index}"),
+                    price: 10,
+                    stock: 20,
+                    count: 1,
+                    icon: 100 + index as u16,
+                    ..default()
+                })
+                .collect(),
+            ..default()
+        });
+    }
     world.insert_resource(GameShopModel {
         items: (0..12)
             .map(|index| GameShopEntry {
@@ -1511,22 +1605,98 @@ mod tests {
     }
 
     #[test]
+    fn npc_preview_waits_for_received_messages_without_inventing_shop_state() {
+        for scene in [
+            "npcshop",
+            "npcshop-sell",
+            "npcshop-repair",
+            "npcshop-srepair",
+        ] {
+            let mut world = World::new();
+            world.init_resource::<mir2_client_bevy::social::SocialModel>();
+            populate_specimens(&mut world, scene);
+            let shop = world.resource::<ShopModel>();
+            assert!(
+                shop.goods.is_empty(),
+                "{scene} must wait for received catalogue"
+            );
+            assert_eq!(shop.service_mode, NpcShopServiceMode::Closed, "{scene}");
+            assert!(!shop.supports_buy && !shop.supports_sell, "{scene}");
+            assert!(shop.repair_rate.is_none(), "{scene}");
+        }
+    }
+
+    #[test]
     fn npc_service_preview_scenes_expose_each_authoritative_service_mode() {
         for (scene, expected) in [
             ("npcshop-sell", NpcShopServiceMode::Sell),
             ("npcshop-repair", NpcShopServiceMode::Repair),
             ("npcshop-srepair", NpcShopServiceMode::SpecialRepair),
         ] {
-            let mut world = World::new();
-            world.init_resource::<mir2_client_bevy::social::SocialModel>();
-            populate_specimens(&mut world, scene);
-            let shop = world.resource::<ShopModel>();
+            let messages = offline_npc_ingress_messages(scene).unwrap();
+            assert_eq!(messages.len(), 1, "no invented Buy catalogue for {scene}");
+            let OfflineNpcMessage::Service(raw) = &messages[0] else {
+                panic!("expected only a service signal for {scene}");
+            };
+            let signal = serde_json::from_str(raw).unwrap();
+            let mut shop = ShopModel::default();
+            assert!(shop.apply_service_signal(signal));
             assert_eq!(shop.service_mode, expected);
             assert_eq!(
                 shop.repair_rate.is_some(),
                 expected != NpcShopServiceMode::Sell
             );
+            assert!(shop.goods.is_empty());
+            assert!(!shop.supports_buy);
+            assert_eq!(shop.supports_sell, expected == NpcShopServiceMode::Sell);
+            assert_eq!(
+                shop.repair_rate,
+                match expected {
+                    NpcShopServiceMode::Repair => Some(1.25),
+                    NpcShopServiceMode::SpecialRepair => Some(2.0),
+                    _ => None,
+                }
+            );
         }
+    }
+
+    #[test]
+    fn npc_buy_preview_uses_exact_ingress_identity_currency_and_fifo() {
+        let messages = offline_npc_ingress_messages("npcshop").unwrap();
+        assert_eq!(messages.len(), 2);
+        let OfflineNpcMessage::Catalogue(raw) = &messages[0] else {
+            panic!("catalogue must precede service");
+        };
+        let mut shop: ShopModel = serde_json::from_str(raw).unwrap();
+        assert_eq!(shop.service_mode, NpcShopServiceMode::Closed);
+        assert_eq!(shop.goods.len(), 1);
+        let good = &shop.goods[0];
+        assert_eq!(good.unique_id, 9_007_199_254_740_993);
+        assert_eq!(good.name, "OFFLINE received potion");
+        assert_eq!(
+            (good.icon, good.price, good.count, good.stock),
+            (658, 50, 1, 20)
+        );
+        assert!(!good.use_pearls);
+        assert!(shop.hide_added_stats);
+        let OfflineNpcMessage::Service(raw) = &messages[1] else {
+            panic!("service must follow catalogue");
+        };
+        assert!(shop.apply_service_signal(serde_json::from_str(raw).unwrap()));
+        assert_eq!(shop.service_mode, NpcShopServiceMode::Buy);
+        assert!(shop.supports_buy && !shop.supports_sell);
+    }
+
+    #[test]
+    fn npc_preview_request_does_not_force_open_the_panel_or_connect() {
+        let mut state = NativePlayerUiState::default();
+        state.core.panel = UiPanel::Inventory;
+        state.request_npc_service_exit();
+        begin_offline_npc_preview_request(&mut state);
+        assert_eq!(state.core.panel, UiPanel::None);
+        assert!(!state.npc_shop_open());
+        assert!(state.accepts_npc_service_reply());
+        assert!(offline_npc_ingress_messages("login").is_err());
     }
 
     #[test]
