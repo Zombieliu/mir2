@@ -1,5 +1,15 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-10-01 client-only r9 hotfix: NPCGoods/NPCSell remain open when a later
+> snapshot clears NPC text. Explicit exit, Escape, scene/map changes and a new
+> merchant retire the previous service; late goods cannot reopen it until a
+> new accepted request. FIFO exit handling preserves a locally accepted close
+> through older retries and failed sends. Backported from efb92a220 to the clean
+> r8 base 3f5e61533; shared 1197/10 ignored, Windows 808/5 ignored and six
+> delayed-hide GPU captures passed on the integration source. Backport-specific
+> checks, attested package, updater delivery and human gameplay acceptance are
+> pending. Server protocol, public realm and human saves are unchanged.
+
 > 2026-10-01 技能/界面输入修复：共享1186、Windows801项串行检查通过。
 > 技能、人物、背包、设置、菜单、帮助和任务日志/详情只拦截各自窗口区域；
 > 窗口外移动、技能快捷键、药品快捷键及已建立的攻击/路线可继续。
