@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 Android G4 phone workspace source: same BAG/CHAR render tree,
+> reserved HUD/thumb lanes and 3x2 original48dp belt targets. Four character
+> pages focus without rewriting authored nodes or Windows presentation.
+> Android249/preview260/shared1203+8ignored/API31 normal+preview pass; v11
+> APK/runtime and full UI/player-loop/device acceptance are separate OPEN gates.
+> [Evidence](generated/player-qa/native-android-phone-panels-20261001/README.md).
+
 > 2026-10-01 exact Android452398d4c v10: both APKs build/install with6195 frames
 > and two metadata files byte-verified each, actual offline BAG/CHAR sword and
 > AssetManager identities visible. Phone layout not accepted (occlusion/small

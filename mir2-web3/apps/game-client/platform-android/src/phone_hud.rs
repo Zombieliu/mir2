@@ -447,6 +447,22 @@ fn fit_phone_hud(
         focused,
         row_count,
     );
+    let sidebar = crate::phone_panels::panel_sidebar(
+        Vec2::new(window.width(), window.height()),
+        Vec4::new(safe.left, safe.top, safe.right, safe.bottom) / dpi,
+        host.ime_bottom / dpi,
+        crate::phone_panels::sidebar_requested(&player),
+    );
+    let layout = if let Some(sidebar) = sidebar {
+        PhoneLayout {
+            status: sidebar.status,
+            belt: sidebar.belt,
+            chat: sidebar.chat,
+            ..layout
+        }
+    } else {
+        layout
+    };
     let u = layout.unit;
     let in_game = shell.screen == NativeShellScreen::InGame && !player.local_keys.camera_hidden;
     let playing = in_game && !world_input.blocks_views(&player);
@@ -479,7 +495,7 @@ fn fit_phone_hud(
         }
     }
     for (entity, label) in &labels {
-        let (top, text) = match label {
+        let (mut top, text) = match label {
             StatusLabel::Name => (
                 8.0,
                 format!(
@@ -499,6 +515,14 @@ fn fit_phone_hud(
                 ),
             ),
         };
+        if sidebar.is_some() {
+            top = match label {
+                StatusLabel::Name => 4.0,
+                StatusLabel::Hp => 22.0,
+                StatusLabel::Mp => 42.0,
+                StatusLabel::Footer => 60.0,
+            };
+        }
         if let Ok(mut node) = presentation.p0().get_mut(entity) {
             node.left = px(10.0 * u);
             node.top = px(top * u);
@@ -523,6 +547,16 @@ fn fit_phone_hud(
         let (top, ratio) = match bar {
             StatusBar::Hp => (46.0, model.player.normalized_hp()),
             StatusBar::Mp => (68.0, model.player.normalized_mp()),
+        };
+        let top = if sidebar.is_some() {
+            top - 9.0
+                - if matches!(bar, StatusBar::Mp) {
+                    2.0
+                } else {
+                    0.0
+                }
+        } else {
+            top
         };
         if let Ok(mut node) = presentation.p0().get_mut(entity) {
             node.left = px(10.0 * u);
@@ -549,22 +583,18 @@ fn fit_phone_hud(
     for (entity, target, key, count) in &belt_nodes {
         if let Ok(mut node) = presentation.p0().get_mut(entity) {
             if let Some(target) = target {
-                *node = rect_node(
-                    Rect::from_corners(
-                        Vec2::new(f32::from(target.slot) * TAP, 0.0),
-                        Vec2::new(f32::from(target.slot + 1) * TAP, TAP),
-                    ),
-                    u,
-                );
+                let slot = phone_belt_slot(target.slot, sidebar.is_some());
+                *node = rect_node(Rect::from_corners(slot, slot + Vec2::splat(TAP)), u);
                 node.align_items = AlignItems::Center;
                 node.justify_content = JustifyContent::Center;
                 node.border = UiRect::all(px(u));
                 node.border_radius = BorderRadius::all(px(6.0 * u));
             } else if let Some(count) = count {
+                let slot = phone_belt_slot(count.slot, sidebar.is_some());
                 *node = rect_node(
                     Rect::from_corners(
-                        Vec2::new(f32::from(count.slot) * TAP + 2.0, TAP - 14.0),
-                        Vec2::new(f32::from(count.slot + 1) * TAP - 4.0, TAP),
+                        slot + Vec2::new(2.0, TAP - 14.0),
+                        slot + Vec2::new(TAP - 4.0, TAP),
                     ),
                     u,
                 );
@@ -606,7 +636,11 @@ fn fit_phone_hud(
         && !player.amount_modal_open()
         && !player.core.chat_settings_open()
         && (playing || focused);
-    let first_row = row_count.saturating_sub(phone_history_rows(window.height(), focused));
+    let first_row = row_count.saturating_sub(if sidebar.is_some() {
+        1
+    } else {
+        phone_history_rows(window.height(), focused)
+    });
     let row_bottom = layout.chat.max.y - TAP - 4.0;
     let filter_top = row_bottom - TAP - 4.0;
     let lines_bottom = if focused {
@@ -763,6 +797,18 @@ fn val_px(val: Val) -> f32 {
     }
 }
 
+fn phone_belt_slot(slot: u8, sidebar: bool) -> Vec2 {
+    let columns = if sidebar { 3 } else { 6 };
+    Vec2::new(
+        f32::from(slot % columns) * TAP,
+        f32::from(slot / columns) * TAP,
+    )
+}
+
 #[cfg(test)]
 #[path = "phone_hud_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "phone_sidebar_tests.rs"]
+mod sidebar_tests;

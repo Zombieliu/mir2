@@ -638,6 +638,10 @@ fn report_preview_social_layout(
     }
 }
 
+#[cfg(test)]
+#[path = "phone_panel_tests.rs"]
+mod phone_panel_tests;
+
 fn fit_stage(
     windows: Query<&Window>,
     host: Res<HostState>,
@@ -671,7 +675,10 @@ fn fit_stage(
             Without<mir2_client_bevy::crystal_ui::hud::CrystalHudMiniMapLayer>,
             Without<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>,
             Without<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
-            Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+            (
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayEquipment>,
+            ),
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
@@ -693,7 +700,10 @@ fn fit_stage(
             With<mir2_client_bevy::crystal_ui::hud::CrystalHudMiniMapLayer>,
             Without<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>,
             Without<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
-            Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+            (
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayEquipment>,
+            ),
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
@@ -714,7 +724,10 @@ fn fit_stage(
         (
             With<mir2_client_bevy::crystal_ui::hud::CrystalHudBeltLayer>,
             Without<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
-            Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+            (
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+                Without<mir2_client_bevy::crystal_ui::overlays::OverlayEquipment>,
+            ),
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Without<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
@@ -735,7 +748,10 @@ fn fit_stage(
             &Node,
             &mut UiTransform,
             Has<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
-            Has<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+            (
+                Has<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+                Has<mir2_client_bevy::crystal_ui::overlays::OverlayEquipment>,
+            ),
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             Has<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
@@ -751,6 +767,7 @@ fn fit_stage(
         Or<(
             With<mir2_client_bevy::crystal_ui::chat::CrystalChatSettingsModal>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayInventory>,
+            With<mir2_client_bevy::crystal_ui::overlays::OverlayEquipment>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayStorage>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayOptions>,
             With<mir2_client_bevy::crystal_ui::overlays::OverlayShop>,
@@ -856,11 +873,22 @@ fn fit_stage(
         host.safe_right / window.scale_factor(),
         (host.safe_bottom + host.ime_bottom) / window.scale_factor(),
     );
+    let sidebar = crate::phone_panels::panel_sidebar(
+        Vec2::new(window.width(), window.height()),
+        Vec4::new(
+            host.safe_left,
+            host.safe_top,
+            host.safe_right,
+            host.safe_bottom,
+        ) / window.scale_factor(),
+        host.ime_bottom / window.scale_factor(),
+        crate::phone_panels::sidebar_requested(&player),
+    );
     for (
         node,
         mut transform,
         is_chat_settings,
-        is_inventory,
+        (is_inventory, is_equipment),
         is_storage,
         is_options,
         is_npc_shop,
@@ -881,6 +909,7 @@ fn fit_stage(
         };
         let enabled = is_chat_settings
             || (is_inventory && player.inventory_open() && !player.trade_dialog.open)
+            || (is_equipment && player.equipment_open() && !player.storage_open())
             || (is_storage && player.storage_open())
             || (is_options && player.options_open())
             || (is_npc_shop && player.npc_shop_open())
@@ -900,15 +929,19 @@ fn fit_stage(
                 } else {
                     3.2
                 };
-            let focused = mobile_focus_transform(
-                fit,
-                origin,
-                size,
-                Vec2::new(window.width(), window.height()),
-                safe_edges,
-                top,
-                max_scale,
-            );
+            let focused = if let Some(sidebar) = sidebar.filter(|_| is_inventory || is_equipment) {
+                mobile_workspace_transform(fit, origin, size, sidebar.workspace, top, max_scale)
+            } else {
+                mobile_focus_transform(
+                    fit,
+                    origin,
+                    size,
+                    Vec2::new(window.width(), window.height()),
+                    safe_edges,
+                    top,
+                    max_scale,
+                )
+            };
             if is_mail_composer && host.ime_bottom > 0.0 && focused_field == Some("mail-message") {
                 let caret_bottom = forms.mail_body_top()
                     + forms
@@ -1032,6 +1065,31 @@ fn mobile_focus_transform(
         clamp_center(center.x, min.x + half.x, max.x - half.x),
         clamp_center(center.y, min.y + half.y, max.y - half.y),
     );
+    UiTransform {
+        translation: Val2::px(target.x - center.x, target.y - center.y),
+        scale: Vec2::splat(scale),
+        ..default()
+    }
+}
+
+/// Center a shared panel in the SAME logical-pixel workspace that the phone
+/// HUD uses. Leave authored Node geometry intact for shared item/picking code.
+fn mobile_workspace_transform(
+    fit: CrystalStageTransform,
+    origin: Vec2,
+    size: Vec2,
+    workspace: Rect,
+    root_top: f32,
+    max_scale: f32,
+) -> UiTransform {
+    let scale = (workspace.width() / (size.x * fit.scale))
+        .min(workspace.height() / (size.y * fit.scale))
+        .clamp(0.01, max_scale.max(0.01));
+    let target = Vec2::new(
+        (workspace.center().x - fit.offset_x) / fit.scale,
+        workspace.center().y / fit.scale - root_top,
+    );
+    let center = origin + size * 0.5;
     UiTransform {
         translation: Val2::px(target.x - center.x, target.y - center.y),
         scale: Vec2::splat(scale),

@@ -33,6 +33,8 @@ mod mobile_ui;
 #[cfg(any(target_os = "android", test))]
 mod phone_hud;
 #[cfg(any(target_os = "android", test))]
+mod phone_panels;
+#[cfg(any(target_os = "android", test))]
 mod scene_effects;
 #[cfg(any(target_os = "android", test))]
 mod shared_shell;

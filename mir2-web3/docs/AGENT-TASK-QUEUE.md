@@ -1,5 +1,12 @@
 # Agent Task Queue
 
+> 2026-10-01 Android G4 source leaf: ordinary BAG/CHAR use a shared phone
+> workspace with left status/chat/six48dp belt targets and clear thumb footprints.
+> Android249/preview260/shared1203+8ignored and both API31 variants pass.
+> v11 package/runtime click proof follows; compact/IME/all-window touch, complete
+> online/device and full Windows-completeness goal remain OPEN, not a percentage.
+> [Evidence](generated/player-qa/native-android-phone-panels-20261001/README.md).
+
 > 2026-10-01 Android publication: ordinary fast-forward push e18eeadf0 verified
 > by remote ref and PR253 API; Open/Draft, unchanged base codex/playtest-registration.
 > Publishes pending goal source/evidence, no APK/licensed resource/cache/key Git

@@ -3201,7 +3201,7 @@ struct OverlayInventoryDeleteAmountInput;
 pub struct NativeTextInputTarget;
 
 #[derive(Component)]
-struct OverlayEquipment;
+pub struct OverlayEquipment;
 
 #[derive(Component)]
 struct OverlayMenu;
