@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 Android phone HUD/chat repair: source974110041 replaces desktop
+> bottom presentation with compact read-model status, shared48dp belt/chat
+> controls and keyboard/thumb-safe reflow. Android SystemUi resolution and
+> pre-stack decoration repair black/dark labels. Shared desktop behavior and
+> asset bytes are unchanged. Android214/preview222/shared1167/runtime290/Java60
+> pass, retaining7/1 existing ignores. Source-bound v5 APKs and34 offline
+> emulator captures support this bounded UI repair, not real login, every
+> window/gesture, full Bichon, Windows, online or physical-device acceptance.
+> [Before/after, APK hashes and limits](generated/player-qa/native-android-phone-ui-20261001/README.md).
+
 > 2026-10-01 independent Android sync retains current shared NPC/mail/chat
 > layout semantics and connects whole-field mail IME to the500 UTF-16 shared
 > grapheme/caret editor. Epoch ownership rejects delayed field/window events;

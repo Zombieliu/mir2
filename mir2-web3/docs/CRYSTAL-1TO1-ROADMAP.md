@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 native Android phone HUD/chat slice: source974110041 removes
+> desktop bottom presentation only on Android, retaining shared state/actions
+> and licensed image bytes. Readable status,48dp belt/chat, keyboard/thumb
+> reflow, actual settings/input/menu and compact landscape are bounded offline
+> evidence. Android214/preview222/shared1167/runtime290/Java60 pass with7/1
+> existing ignores; v5 APKs do not establish live login, full-player loop,
+> complete Bichon, physical-device or whole-game parity. Windows gates remain
+> separate. [Source, before/after and APK hashes](generated/player-qa/native-android-phone-ui-20261001/README.md).
+
 > 2026-10-01 native Android/shared integration: merge `007df76c9` preserves
 > Android `5d417ca75` while importing Windows continuation `4b73525f3`.
 > Android keeps `native-player-ui` without desktop audio; shared NPC/mail/chat

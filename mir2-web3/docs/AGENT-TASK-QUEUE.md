@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-10-01 Android phone UI checkpoint: committed974110041 has native phone
+> HUD/chat/belt presentation, preserved shared action queues, IME/thumb-safe
+> bounds and actual Android font resolution. Android-only schedule cleanup
+> fixes debug startup; missing external UI roots now fail before packaging.
+> Android214/preview222/shared1167/runtime290/Java60 pass (7/1 existing ignores).
+> v5 APK / offline emulator evidence is not live or physical acceptance. Next
+> Android leaf is approved login/list/StartGame and authoritative map position;
+> retain independent Windows/CI gates and all player-loop/device open items.
+> [Evidence](generated/player-qa/native-android-phone-ui-20261001/README.md).
+
 > 2026-10-01 Android integration CI repair: `e98a640c5` minimally synchronizes
 > Windows dependency lock after Android GLES wiring; existing package versions
 > remain pinned. `e95cef74c` applies exact CI Rust formats to200 files, with200
