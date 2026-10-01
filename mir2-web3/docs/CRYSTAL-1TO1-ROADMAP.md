@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 latest Androidv16/8cd2e7eae: shared draft Android tap adapter fixed,
+> failure-first3 then3/3, Android276/preview290/Java37+37/API31 and exact clean
+> dual APK/hash/resource/install pass. Actual qw, Back->retap/1500ms hold reopen
+> preserving draft and e->qwe pass; no send/online claim. Startup10 GL506 entries
+> keep zero-error/stability FAIL. Windows3d735745f now adds14 commits beyond
+> frozen3f5 (238 filenames); not in v16. Next reviewed normal integration plus
+> affected gates, then GL/short-IME/HUD/NPC/full UI/online/device denominator.
+> [Exact v16, original frames, failures and delta](generated/player-qa/native-android-chat-editor-20261002/README.md).
+
+> Entries below are retained historical checkpoints, not current completeness.
+
 > 2026-10-02 Android exactv15/d009f2402: phone focused history now shows the
 > newest fitting suffix; failure-first4 then6/6, Android273/preview287/Java37+37/
 > API31 checks pass. Clean dual packages/source/hash/resource/install verified.

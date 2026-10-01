@@ -1,5 +1,16 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 latest Androidv16/8cd2e7eae: original shared draft child now enters
+> existing host tap path; failure-first3 then3/3, Android276/preview290/Java37+37/
+> API31 and clean dual APK/hash/resource/install pass. Actual qw typing, Back,
+> retap/1500ms hold reopen preserving draft, then e->qwe pass. Old failures remain.
+> Startup10 GL506 entries/zero-error FAIL; full UI/short-IME/online/device OPEN.
+> Windows upstream3d735745f adds14 commits beyond original frozen3f5; v16 does
+> not contain them. Reviewed normal sync next, then remaining UI/services/gates.
+> [Exact source/package/frame/failure/delta](generated/player-qa/native-android-chat-editor-20261002/README.md).
+
+> Below are historical checkpoints, not superseded current acceptance claims.
+
 > 2026-10-02 exact Androidv15/d009f2402: focused latest peer-row clipping repaired;
 > actual original keyboard screenshot shows both system/peer rows. Back dismiss,
 > Set open, CHAT BOX tab and Cancel close respond via actual touches. Draft tap

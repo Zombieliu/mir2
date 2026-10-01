@@ -2,6 +2,22 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
+最新实际v16（2026-10-02）：干净8cd2e7eae双包/hash/安装、14源码门hash及每包
+6647原图/三份metadata字节核验通过。共享草稿框补Android点按标记，失败先行
+三项全红后3/3，Android276/preview290/Java37+37/API31两变体通过。实际软键盘
+输入qw、Back收起、同坐标再次点按/1.5秒按住重开并保留草稿，重开后输入e得到
+qwe；没有发送/服务端回显验收。v15旧失败原样保留。v16启动10条GL0x506错误，
+零错误门仍FAIL，没有GPU/runtime修补或稳定性接受。完整goal仍Active。
+[精确v16、键盘实测与渲染失败](generated/player-qa/native-android-chat-editor-20261002/README.md)。
+
+本轮新只读核验Windows来源已到3d735745f1117d42a7859e87604a106351dca935，
+相对原冻结3f5e61533为14 ahead/0 behind、238文件，含共享NPC服务/响应边界、
+caster/地图状态与QA变化。v16不含该delta；不重绑旧包、不暗改分母。下一叶子
+先读并正常集成精确新增差异、保留Android与原工作区，再受影响回归；同时继续
+GL/极短屏IME/HUD负重/NPC服务与整套能力。[准确提交/文件目录](generated/player-qa/native-android-chat-editor-20261002/windows-upstream-delta.json)。
+
+以下v15及更早均是历史检查点，不表示本轮最新状态；原失败证据不改记通过。
+
 最新实际v15（2026-10-02）：干净d009f2402双包/hash/安装及12源码门hash、每包
 6647原图/三份metadata字节核验通过。修复focused高度少4px与IME裁剪时挑错
 历史行；失败先行6项中4失败，修复后6/6、Android273/preview287/Java37+37/
@@ -216,6 +232,9 @@ Win32 分辨率、Inno 安装器、EXE 更新器不原样搬到 Android：对应
     玩家功能百分比分母，仍须逐项展开每个服务的动作/回执/窗口与失败验收。
   - [x] G1-package — 精确源码10bf437f2的v7诊断APK/版本/hash与模拟器离线
     菜单/隐藏摇杆/共享背包重新验证；在线、完整UI和稳定性不在此勾选中。
+  - [ ] G1-upstream-refresh — 本轮核验新增3d735745f相对原冻结14个提交；先审
+    新coordination/共享NPC/技能/地图与宿主改动，再正常merge和受影响回归。
+    v16仍绑定8cd2e7eae；新增基线验收单列，不把Windows证据当Android证据。
 - [ ] G2 — 真实登录 → 角色列表 → 创建/选择 → StartGame → 服务端地图/位置。
   审计 transport、认证和 render-ready，不发裸 account_id 冒充身份。
 - [ ] G3 — 完整资源和对象/地图生命周期、真实权威移动、战斗、拾取、背包、

@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-10-02 latestv16/8cd2e7eae: original draft's Android editor-touch marker
+> repair; failure-first3 then3/3, Android276/preview290/Java37+37/API31 and clean
+> dual APK/hash/resource/install/input binding pass. Actual qw typing, Back,
+> retap/1500ms hold reopens IME with draft retained, then e->qwe. Startup10 GL506
+> entries/zero-error gate FAIL; full UI/online/device/stability remain OPEN.
+> Fresh Windows3d735745f is14 ahead/0 behind frozen3f5,238 changed filenames;
+> v16 does not contain that delta. Next read new coordination/source, normal
+> integration and affected gates, then GL/short-IME/HUD/NPC/full denominator.
+> [Exact v16 and upstream inventory](generated/player-qa/native-android-chat-editor-20261002/README.md).
+
+> All entries below are historical checkpoints; original failures remain intact.
+
 > 2026-10-02 exactv15/d009f2402: focused newest-row/available-height repair,
 > failure-first4 failures then6/6; Android273/preview287/Java37+37/API31 pass.
 > Clean dual APK/hash/install and6647 PNG/three metadata/source hash binding each
