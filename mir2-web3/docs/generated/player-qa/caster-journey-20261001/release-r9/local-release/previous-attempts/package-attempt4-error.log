@@ -1,0 +1,7 @@
+Exception: C:\Users\Administrator\.codex\worktrees\native-shop-lifecycle-r9\mir2-player-journey\mir2-web3\apps\game-client\platform-windows\scripts\package-windows-candidate.ps1:384
+Line |
+ 384 |  … Root $dist)) { throw "output must be a strict child of dist: $full" }
+     |                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | output must be a strict child of dist: C:\mir2-playtest-releases\20261001-native-r9\candidate
+
+

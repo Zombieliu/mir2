@@ -1,0 +1,18 @@
+{
+  "source": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "candidateVersion": "WN-CANDIDATE-20261001-invited-09",
+  "startedUtc": "2026-10-01T17:33:26.4711099+00:00",
+  "complete": true,
+  "success": true,
+  "pid": 34932,
+  "phase": "complete",
+  "buildReused": false,
+  "attempt": 5,
+  "projectRoot": "C:/Users/Administrator/.codex/worktrees/r9/mir2-player-journey/mir2-web3",
+  "packageRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9",
+  "previousAttemptReceipt": "C:\\mir2-playtest-releases\\20261001-native-r9\\build-package-process-attempt4.json",
+  "publicPublished": false,
+  "buildCompletedUtc": "2026-10-01T17:38:14.0871504+00:00",
+  "exeSha256": "09E186B9F13F7F1E10D4857EFAE52EF940B4F43E2D7CE955F4FE1627C433A488",
+  "finishedUtc": "2026-10-01T18:13:48.0015944+00:00"
+}

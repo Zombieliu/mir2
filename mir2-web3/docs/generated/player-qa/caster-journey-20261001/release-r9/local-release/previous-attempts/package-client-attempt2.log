@@ -1,0 +1,128 @@
+{
+  "ok": true,
+  "mapCount": 15,
+  "referenceCount": 21560,
+  "emittedEntryCount": 20437,
+  "keyedEntryCount": 19617,
+  "additiveEntryCount": 820,
+  "fullPackEntryCount": 9842,
+  "noDrawReferenceCount": 332,
+  "missingSourceCount": 791,
+  "removedArtifacts": 0,
+  "imageBytes": 125820551,
+  "manifestHash": "00c973d4ce3f48b514e63d4d2bf12966c15e32f20bd954ac8fbe45ea11f784ad",
+  "manifestPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\native-keyed-map-candidate-58056a077eb748529db9efcf2f9a1da3\\manifest.json",
+  "releaseManifestPath": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\native-keyed-map-candidate-58056a077eb748529db9efcf2f9a1da3\\manifest.00c973d4ce3f48b514e63d4d2bf12966c15e32f20bd954ac8fbe45ea11f784ad.json"
+}
+{
+  "schema": "mir2.windows.candidate-map-coverage.v1",
+  "mapNames": [
+    "0",
+    "0108",
+    "0109",
+    "0141",
+    "1",
+    "2",
+    "3",
+    "d001",
+    "d021",
+    "d022",
+    "d401",
+    "d601",
+    "d602",
+    "d605",
+    "d607"
+  ],
+  "requiredMaps": [
+    "0",
+    "0108",
+    "0109",
+    "1",
+    "2",
+    "3",
+    "d001",
+    "d021",
+    "d022",
+    "d401",
+    "d601",
+    "d602",
+    "d605",
+    "d607"
+  ],
+  "omittedMaps": [],
+  "referenceCount": 24780,
+  "packagedReferenceCount": 22092,
+  "missingByReason": {
+    "source-out-of-range": 842,
+    "source-no-draw": 337,
+    "drawable-source-not-packaged": 1509
+  },
+  "blockingReferenceCount": 1509,
+  "manifestSha256": "00c973d4ce3f48b514e63d4d2bf12966c15e32f20bd954ac8fbe45ea11f784ad",
+  "mapAtlasManifestSha256": "5c20ccafe6a9b2be09f50c6b6b6dbee91715ccd321792acaafbce7f822812fe5",
+  "fullIndexSha256": "77a9050818df502f65a7b151976ee7d66bd01e94d87680cf0760b925dd10dbee",
+  "completedAtlas": {
+    "addedFrames": 1509,
+    "addedPages": 51,
+    "manifestSha256": "397c01eeaf43dad60da0cc6d67f4fcaed2a7190583bb53615b7a23c636ba7f7c",
+    "stats": {
+      "libraryCount": 13,
+      "atlasPageCount": 130,
+      "sourceCount": 4461,
+      "imageBytes": 41031723,
+      "maxPageBytes": 475728,
+      "maxPagePixels": 262144
+    }
+  },
+  "passed": true
+}
+{
+  "schema": "mir2.windows.candidate-map-coverage.v1",
+  "mapNames": [
+    "0",
+    "0108",
+    "0109",
+    "0141",
+    "1",
+    "2",
+    "3",
+    "d001",
+    "d021",
+    "d022",
+    "d401",
+    "d601",
+    "d602",
+    "d605",
+    "d607"
+  ],
+  "requiredMaps": [
+    "0",
+    "0108",
+    "0109",
+    "1",
+    "2",
+    "3",
+    "d001",
+    "d021",
+    "d022",
+    "d401",
+    "d601",
+    "d602",
+    "d605",
+    "d607"
+  ],
+  "omittedMaps": [],
+  "referenceCount": 24780,
+  "packagedReferenceCount": 23601,
+  "missingByReason": {
+    "source-out-of-range": 842,
+    "source-no-draw": 337
+  },
+  "blockingReferenceCount": 0,
+  "manifestSha256": "00c973d4ce3f48b514e63d4d2bf12966c15e32f20bd954ac8fbe45ea11f784ad",
+  "mapAtlasManifestSha256": "397c01eeaf43dad60da0cc6d67f4fcaed2a7190583bb53615b7a23c636ba7f7c",
+  "fullIndexSha256": "77a9050818df502f65a7b151976ee7d66bd01e94d87680cf0760b925dd10dbee",
+  "completedAtlas": null,
+  "passed": true
+}
+generatedMapClosure=maps:15,frames:20437,missing:791,sourceNoDraw:332

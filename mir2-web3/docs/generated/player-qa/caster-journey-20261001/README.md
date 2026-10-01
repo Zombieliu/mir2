@@ -135,8 +135,11 @@ The first native run's 169 failures, a premature unchanged-environment rerun's
 checkout initially lacked ignored map derivatives and local sound input; linking
 the existing derivative/dependency inputs and adding
 [15 absent WAV files](r9-missing-local-sound-inputs.json), without overwriting
-tracked content, resolves those input failures. The release and installed human
-GUI acceptance remain pending.
+tracked content, resolves those input failures. These 715078944 results retain
+that historical source. The final client-only release adds the actual
+NPCResponse boundary fix at clean 180b01d46; its verified installer, signed
+sequence5 publication and separate installed-client scope are documented in
+[r9 delivery evidence](release-r9/README.md). Human GUI acceptance remains open.
 
 | Validation | Result and scope |
 | --- | --- |
@@ -198,12 +201,14 @@ same accounts resumed through normal login within their original r2 clock.
 - Canonical base/level mana is covered; original dynamic mana penalties and
   special teleport surcharges are not claimed complete.
 - Native full-route visual play, laptop DPI and production soak remain open.
-  Public playtest, installed r8, updater feed and human stores were not changed
-  during this local caster round. Capacity work remains paused.
+  Public playtest and human stores were not changed during the local caster
+  round. The subsequent client-only r9 installer and sequence5 update release
+  are recorded separately; the game server remains on r8. Capacity stays paused.
 - Final FIFO Exit and combined client checks pass within the scopes above;
   a batch with mixed partial send failure was not measured. The separate
-  client-only r9 build/release and installed mouse/GUI checks remain pending.
-  Neither checkpoint nor final offscreen tests certify an installed user package.
+  client-only r9 build/release is verified and published; installed mouse/GUI
+  acceptance remains open. Neither checkpoint nor final offscreen tests certify
+  authenticated gameplay. Actual package/updater proof is separate.
 - The original Wizard fresh timed route did not pass. Separate functional
   completion and later supply purchases do not replace the original 48/52 result.
 

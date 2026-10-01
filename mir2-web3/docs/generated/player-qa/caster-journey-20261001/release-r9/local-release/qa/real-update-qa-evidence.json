@@ -1,0 +1,53 @@
+{
+  "schema": "mir2.r9.real-updater-qa-evidence.v1",
+  "source": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "candidateVersion": "WN-CANDIDATE-20261001-invited-09",
+  "feedSequence": 5,
+  "testsPassed": 2,
+  "gameLaunched": false,
+  "publicPublishedByThisTask": false,
+  "installedClientTouched": false,
+  "files": [
+    {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\prepare-real-fixtures-final.py",
+      "size": 17162,
+      "sha256": "ADAE1F93370619B19423274004C66FB45800CFA09080A9453294CD1BF8C038A3"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\real-integration-final-process.json",
+      "size": 2875,
+      "sha256": "C80963AC9BB1540E773C426533F440F087C3ACAEA961CC778CFE56E5A1991186"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\real-r8-r9-final-fixtures.json",
+      "size": 3542,
+      "sha256": "0AD06A7A87B585640DAB5A776C68042633B37790533D20E6BFB976768CC23728"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\real-package-integration-final.log",
+      "size": 275,
+      "sha256": "429E9DA38651093F307B7C62D718B94F431453E6BFC9FA72B05434365FB912CB"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\real-final-manifest-delta-preflight.json",
+      "size": 1950,
+      "sha256": "C3ADAEB6E21CE5D912A7ECFB43D2DAAB3331670734F041D5687B87082AC3B3F2"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\real-final-old-r8-preflight.json",
+      "size": 738,
+      "sha256": "09013B2006F8007289A0D633CCA59E091D400586570B4A44E7565A7AE1C52D85"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\real-final-helper-preflight-attempt1.json",
+      "size": 431,
+      "sha256": "1FD1E301D3819F40650ED971BBF1D54CF945F42A67A6D279219D45884B60024F"
+    },
+    {
+      "path": "C:\\mir2-updater-qa\\real-r8-r9-final-v1\\report.json",
+      "size": 1033,
+      "sha256": "8F532DEE245745282B68914EC3537418F20A2C03F52646574F2A0693C99D7422"
+    }
+  ],
+  "createdUtc": "2026-10-01T18:25:56.629689+00:00"
+}

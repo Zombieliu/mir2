@@ -1,0 +1,99 @@
+{
+  "destination": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3",
+  "source": "C:\\Users\\Administrator\\.codex\\worktrees\\native-shop-lifecycle-r9\\mir2-player-journey\\mir2-web3",
+  "directories": [
+    {
+      "path": "apps/web/public/generated/map-atlas",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\native-shop-lifecycle-r9\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\generated\\map-atlas",
+      "files": 80,
+      "bytes": 25094501,
+      "physicalCopy": true
+    },
+    {
+      "path": "apps/web/public/generated/native-map-keyed",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\native-shop-lifecycle-r9\\mir2-player-journey\\mir2-web3\\apps\\web\\public\\generated\\native-map-keyed",
+      "files": 20046,
+      "bytes": 135206163,
+      "physicalCopy": true
+    }
+  ],
+  "waves": [
+    {
+      "path": "apps/web/public/original-ui/Sound/103.wav",
+      "bytes": 26546,
+      "sha256": "7a55d27dea18f70eb4ff4f324b682efab4996406efae3e94467d3c39cccc674a"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/104.wav",
+      "bytes": 35394,
+      "sha256": "12543a6ae326313269166d59e76b9bb5c81348efbeb9c2f47a6841f20f430a17"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/105.wav",
+      "bytes": 39004,
+      "sha256": "7bf17d6d9aaaa71bfbe2fa5d449446bdfc1b07b9832ff40440e0098116e7f5f0"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/M69-0.wav",
+      "bytes": 152196,
+      "sha256": "9242c030f168d03d3a3c2d7d6048dc1ee98a85baf5117eef0124ab61e66e51eb"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/pet_blackdragon.wav",
+      "bytes": 118060,
+      "sha256": "8253e843bc25c3f66e545dc994a83ace223f539ee0f473b73e3aaba5cf88594f"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/pet_chick.wav",
+      "bytes": 51954,
+      "sha256": "72b1998c1796a42ee5cd41dd8c315630cec98a36f5c636b6671242d32202c603"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/pet_frog.wav",
+      "bytes": 1187928,
+      "sha256": "887ce5b02a615550926ff1c331f9908e0c05752f3e2a4e7f07ee67a63fc47beb"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/pet_kitty.wav",
+      "bytes": 79788,
+      "sha256": "c73bbf3e3b4fdf88904d4eeaef57b32ee9c14941c85c8695a673549719f15865"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/pet_monkey.wav",
+      "bytes": 113616,
+      "sha256": "7f7c65e56f1cd5d570e8dbf176a6de76c1de4e1aff4256fe3c94cc88e2c73fc4"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/pet_olympicmascot.wav",
+      "bytes": 44156,
+      "sha256": "6440636cb32bb15ab68b3761009e2358bcd17732f418c96d249c0967679d1866"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/pet_pickup.wav",
+      "bytes": 14030,
+      "sha256": "769f1e02c231fd1b31350dd79d83d6b9d7b103ffdd7b89ae941489959d49a777"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/pet_pig.wav",
+      "bytes": 62344,
+      "sha256": "34d22859920789e0ff33ea7df025d8985e79f294514caf40f9e452e2713b22c8"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/pet_pigman.wav",
+      "bytes": 46480,
+      "sha256": "66a188857ec3d8754a8537a6a6dabe706568d0c4ffa8a7ecefecb424d2308cde"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/pet_skeleton.wav",
+      "bytes": 57572,
+      "sha256": "824d270bbd3db0781cde41176620da7b99c6814f9cd3b0c5225f1dc105023aed"
+    },
+    {
+      "path": "apps/web/public/original-ui/Sound/pet_weman.wav",
+      "bytes": 37346,
+      "sha256": "e0cb7ec6e3ea6b91d4c744d78a93423f81d49b77b1534fac22b82f77a1fbab22"
+    }
+  ],
+  "existingFilesOverwritten": 0,
+  "trackedSourceUnmodified": true
+}

@@ -1,0 +1,77 @@
+{
+  "oldPackage": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\dist\\r8",
+  "newPackage": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9",
+  "bundle": "C:\\mir2-playtest-releases\\20261001-native-r8\\updater\\bundle",
+  "feed": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater\\feed",
+  "engine": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater\\engine-release",
+  "output": "C:\\mir2-updater-qa\\real-r8-r9-final-v1",
+  "oldSeed": "C:\\mir2-playtest-releases\\20261001-native-r8\\updater\\bundle\\updater\\seed-feed.json",
+  "oldSeedSignature": "C:\\mir2-playtest-releases\\20261001-native-r8\\updater\\bundle\\updater\\seed-feed.p7s",
+  "expectedChangedPayload": [
+    "BUILD-ATTESTATION.json",
+    "KNOWN-ISSUES.md",
+    "MULTILINGUAL-SOURCES.json",
+    "NotoSansTC-OFL.txt",
+    "README-START.txt",
+    "mir2-platform-windows.exe"
+  ],
+  "expectedUnchangedPayload": 123025,
+  "expectedOldCandidate": "WN-CANDIDATE-20261001-invited-08",
+  "expectedEngineChange": true,
+  "evidence": {
+    "oldSource": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+    "newSource": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+    "newCandidate": "WN-CANDIDATE-20261001-invited-09",
+    "feedSequence": 5,
+    "oldManifestSha256": "D8E0F3CE3518AB1C2D8F9B020DCF5957E5194CDC1ADAFFB848C9B09443CEF9E0",
+    "newManifestSha256": "E9797953F1F6A14CE7EE83EAD71CE94C5E22AEC75200624DCD97AA110E95201B",
+    "oldAggregateSha256": "5980BF3EA27A18B6D48806FB4D5963A462BE8E2CD6D7BD04A08813C29B3D4495",
+    "newAggregateSha256": "1ACE314B6D2D45A7570B88F907ECD3F945CC234CEF37E147195AE728CE176C8A",
+    "changedPayload": [
+      {
+        "path": "BUILD-ATTESTATION.json",
+        "size": 1493,
+        "sha256": "1FD9D1D881054D7BAFAA1B71A9E80816C8F54FD5BC62E77F06433CF24A92BA10"
+      },
+      {
+        "path": "KNOWN-ISSUES.md",
+        "size": 2152,
+        "sha256": "D2A2FFCA1D2170EE0A0F2E3D3FDF0EFF644F2FE4472C5BA7E6120CE12C4EADC9"
+      },
+      {
+        "path": "MULTILINGUAL-SOURCES.json",
+        "size": 8618,
+        "sha256": "1528B614DEDB07860E22AC2E1CF62528B0ED126230657DC008FB88D2F01F6D11"
+      },
+      {
+        "path": "NotoSansTC-OFL.txt",
+        "size": 4481,
+        "sha256": "E35FFDEBB2225B49814C31889CBB3CE69CB3509E6A9F431EDABA5E1A6DE8CD15"
+      },
+      {
+        "path": "README-START.txt",
+        "size": 49328,
+        "sha256": "AFB94862413D66D544E14075C10A5BA6EC899D394FA0D3CA5B884B9920034DE8"
+      },
+      {
+        "path": "mir2-platform-windows.exe",
+        "size": 110583296,
+        "sha256": "09E186B9F13F7F1E10D4857EFAE52EF940B4F43E2D7CE955F4FE1627C433A488"
+      }
+    ],
+    "changedPayloadBytes": 110649368,
+    "expectedDownloadedPayloadBytes": 112374808,
+    "newEngineBytes": 1725440,
+    "removedPayloadPaths": [],
+    "oldEngineSha256": "61BEDB22789626F08DE6826D4F46F128AE284661B877A0B7988E3F6E0E83D5C4",
+    "newEngineSha256": "00A898666E57DC0457968BEB667902C8CD3A4FCEFA74EB9BA2336A28BE21B902",
+    "oldPayloadFiles": 123031,
+    "newPayloadFiles": 123031,
+    "oldVerificationSha256": "965B6C6C729FB1372495D630E8C66F0432B074108D1133021B109E2E0B24041E",
+    "newVerificationSha256": "E7C8B0640893EE60996DD469BA5425C8A2A3FF9CCF612EFDF3E92B6486111794",
+    "tests": [
+      "real_package_delta_preserves_personal_files_and_first_launch_rollback",
+      "real_r6_metadata_matches_native_cms_key_pin_and_rejects_tampering"
+    ]
+  }
+}

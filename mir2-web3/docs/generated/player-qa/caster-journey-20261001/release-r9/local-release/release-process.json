@@ -1,0 +1,13 @@
+{
+  "source": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "candidateVersion": "WN-CANDIDATE-20261001-invited-09",
+  "sequence": 5,
+  "attempt": 5,
+  "startedUtc": "2026-10-01T18:15:04.5704239+00:00",
+  "complete": true,
+  "success": true,
+  "pid": 46440,
+  "phase": "complete",
+  "publicPublished": false,
+  "finishedUtc": "2026-10-01T18:19:12.1988691+00:00"
+}

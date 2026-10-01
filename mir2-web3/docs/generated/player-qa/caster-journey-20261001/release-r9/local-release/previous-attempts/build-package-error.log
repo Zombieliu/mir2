@@ -1,0 +1,7 @@
+Exception: C:\Users\Administrator\.codex\worktrees\native-shop-lifecycle-r9\mir2-player-journey\mir2-web3\apps\game-client\platform-windows\scripts\package-windows-candidate.ps1:810
+Line |
+ 810 |  … DE -ne 0) { throw "native keyed map generation failed with exit code  …
+     |                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+     | native keyed map generation failed with exit code 1
+
+

@@ -1,0 +1,83 @@
+   Compiling proc-macro2 v1.0.107
+   Compiling quote v1.0.47
+   Compiling unicode-ident v1.0.26
+   Compiling stable_deref_trait v1.2.1
+   Compiling writeable v0.6.4
+   Compiling shlex v2.0.1
+   Compiling find-msvc-tools v0.1.14
+   Compiling litemap v0.8.3
+   Compiling version_check v0.9.5
+   Compiling icu_normalizer_data v2.3.0
+   Compiling icu_properties_data v2.3.0
+   Compiling utf8_iter v1.0.4
+   Compiling zeroize v1.9.0
+   Compiling cfg-if v1.0.5
+   Compiling smallvec v1.16.2
+   Compiling typenum v1.20.1
+   Compiling serde_core v1.0.229
+   Compiling untrusted v0.9.0
+   Compiling percent-encoding v2.3.2
+   Compiling rustls v0.23.45
+   Compiling zmij v1.0.23
+   Compiling subtle v2.6.1
+   Compiling serde_json v1.0.151
+   Compiling anyhow v1.0.104
+   Compiling once_cell v1.21.4
+   Compiling log v0.4.34
+   Compiling serde v1.0.229
+   Compiling cpufeatures v0.2.17
+   Compiling memchr v2.8.3
+   Compiling itoa v1.0.18
+   Compiling windows-link v0.2.1
+   Compiling base64 v0.22.1
+   Compiling getrandom v0.2.17
+   Compiling windows-sys v0.61.2
+   Compiling rustls-pki-types v1.15.1
+   Compiling form_urlencoded v1.2.2
+   Compiling generic-array v0.14.7
+   Compiling cc v1.5.1
+   Compiling webpki-roots v1.0.9
+   Compiling webpki-roots v0.26.11
+   Compiling syn v3.0.6
+   Compiling block-buffer v0.10.4
+   Compiling crypto-common v0.1.7
+   Compiling digest v0.10.7
+   Compiling ring v0.17.14
+   Compiling sha2 v0.10.9
+   Compiling synstructure v0.14.0
+   Compiling zerovec-derive v0.11.6
+   Compiling displaydoc v0.2.7
+   Compiling serde_derive v1.0.229
+   Compiling zerofrom-derive v0.1.8
+   Compiling yoke-derive v0.8.4
+   Compiling zerofrom v0.1.8
+   Compiling yoke v0.8.3
+   Compiling zerovec v0.11.8
+   Compiling zerotrie v0.2.5
+   Compiling tinystr v0.8.4
+   Compiling potential_utf v0.1.6
+   Compiling icu_collections v2.3.0
+   Compiling icu_locale_core v2.3.0
+   Compiling rustls-webpki v0.103.15
+   Compiling icu_provider v2.3.1
+   Compiling icu_normalizer v2.3.0
+   Compiling icu_properties v2.3.0
+   Compiling idna_adapter v1.2.2
+   Compiling idna v1.1.0
+   Compiling url v2.5.8
+   Compiling ureq v2.12.1
+   Compiling mir2-windows-updater v1.0.0 (C:\Users\Administrator\.codex\worktrees\r9\mir2-player-journey\mir2-web3\apps\game-client\windows-updater)
+    Finished `release` profile [optimized] target(s) in 24.04s
+{
+  "schema": "mir2.windows.updater-build.v1",
+  "sourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "sourceClean": true,
+  "engineSha256": "00A898666E57DC0457968BEB667902C8CD3A4FCEFA74EB9BA2336A28BE21B902",
+  "launcherSha256": "57D9298D61A43F6DD412906DB88F54AC9C328DDCA361864EED3ED4878BC5BCDD",
+  "gameCandidate": "WN-CANDIDATE-20261001-invited-09",
+  "gameSourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "sequence": 5,
+  "builtUnix": 1790878531,
+  "command": "cargo +1.95.0 build --locked --release --target x86_64-pc-windows-msvc",
+  "publicAuthenticode": "not provided by detached CMS; public publisher signing remains separate"
+}

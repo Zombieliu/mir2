@@ -1,0 +1,34 @@
+{
+  "schema": "mir2.r9.installed-attempt.v1",
+  "passed": false,
+  "complete": true,
+  "sourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "failure": "Owned verification helper timed out its native check at 900 seconds; no native success receipt was observed",
+  "installedCandidate": "WN-CANDIDATE-20261001-invited-08",
+  "gameStartedByHelper": false,
+  "publicPublicationSucceeded": true,
+  "personalSavesEdited": false,
+  "files": [
+    {
+      "path": "actual-native-update-process.json",
+      "bytes": 421,
+      "sha256": "D642CFDD650604EE44543AD593DBB45B9523B94BCE2C1F32C66E2083AF5D70FC"
+    },
+    {
+      "path": "actual-native-update.log",
+      "bytes": 1402,
+      "sha256": "F021036AFBE6EA2E61056C5E08B09C7E1F2E7F2E7853A5837619C5677B750E7D"
+    },
+    {
+      "path": "native-installed-update-r9.py",
+      "bytes": 7410,
+      "sha256": "F416A3BC82FCF24B5CCD46F1EEC11AB7C375AEB1F624050A9CFBA87926E02EA1"
+    },
+    {
+      "path": "run-actual-native-update.ps1",
+      "bytes": 2191,
+      "sha256": "E3C2025F88772629E175C979C9BF908CC62F60C523CB2ED01D71FAED5C659548"
+    }
+  ],
+  "timestampUtc": "2026-10-01T19:21:11.772014+00:00"
+}

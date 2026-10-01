@@ -1,6 +1,6 @@
 # Level-9 NPC shop lifetime investigation — 2026-10-01
 
-Status: the passive snapshot text-clear cause is reproduced, and bounded production UI/ECS, final FIFO Exit, complete client regression and offscreen GPU checks pass. Earlier closing-boundary failures are retained. The client-only r9 build/release and installed human GUI acceptance remain pending; installed r8 is unchanged.
+Status: the passive snapshot text-clear cause is reproduced; bounded production UI/ECS, final FIFO Exit, explicit NPCResponse, complete client regression and offscreen GPU checks pass. Earlier closing-boundary failures are retained. Clean 180b01d46 r9 installer and signed sequence5 are verified and published. Actual installed-client proof and human GUI acceptance have separate scopes: [r9 delivery](release-r9/README.md).
 
 The user reports that, after choosing **View shop** at Alchemist Samuel at level 9, the shop appears for about half a second, then the inventory moves to the upper left and covers/replaces the goods. The two small user images and the reported time sequence are a bug report, not a measured animation capture. Static bounds alone cannot establish what happened between those moments.
 
@@ -128,9 +128,9 @@ Ordinary protocol purchases independently succeed for both casters, as linked
 in the [journey supply evidence](README.md#ordinary-purchases-and-supplies), but
 those receipts cannot verify how the native panels render or receive mouse input.
 
-## Remaining release and human gate
+## Backport checks and remaining human gate
 
-The exact client-only backport source is
+The initial client-only backport source was
 `715078944ac7a84a61b6d64901b80568a8e8d63b`, based on clean r8 `3f5e61533`.
 Its separate complete shared suite passes
 [1197/10 ignored](checks/r9-shared-backport-full.log), Windows host
@@ -150,10 +150,12 @@ integration branch's 808 native tests.
 - Bind the passing final checks to the exact source used by the package.
   Initial checkpoint totals must not be reused for a later changed source;
   mixed partial-send behavior has no measured acceptance claim.
-- Build and verify the separate client-only r9 package from the clean r8 base;
-  record source/package hashes and any actual installer/update handoff.
+- Final clean 180b01d46 package, installer and signed updater are verified;
+  the actual release receipts preserve source/package identity. Earlier 715078944
+  test totals are historical and are not reused as a full-suite run of 180b01d46.
 - Verify ordinary native login, Samuel Buy/Sell, one real mouse purchase and
   panel close/reopen on the installed client, including the affected laptop.
 
-No r9 release or human acceptance is claimed. Installed r8, public services,
-updater feed and human stores remain unchanged; capacity work remains paused.
+The r9 installer and sequence5 update publication are recorded in the separate
+[release evidence](release-r9/README.md). Native mouse/GUI acceptance remains
+open. Game services and human stores are preserved; capacity remains paused.

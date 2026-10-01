@@ -1,0 +1,40 @@
+{
+  "schema": "mir2.static-update-upload-plan.v1",
+  "serverMutated": false,
+  "sequence": 5,
+  "remoteStaging": "/home/ubuntu/mir2-native-upload-0f74c17b589e41f697be17b448bd403e",
+  "inputs": {
+    "release.tar.gz": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\releases-r9.tar.gz",
+      "sha256": "FB5697A89B2A652E793A790FA6DCCE0A88B4C1D057DD86DEADBB07CF6127AF52"
+    },
+    "release.tar.gz.receipt.json": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\releases-r9.tar.gz.receipt.json",
+      "sha256": "F8CD66058B7D8190B80B68EF7114FE96594BBA4B0DDCA757F1F0530E2B368F09"
+    },
+    "latest.json": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater\\feed\\latest.json",
+      "sha256": "BEBFB5193DE19DD4107C1E5CC4BAC89C092B83094D86FE49F4A10DD3A291E487"
+    },
+    "latest.p7s": {
+      "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\updater\\feed\\latest.p7s",
+      "sha256": "58507D93FDB2E2D903D01DB8072CBB6C4221FE5C6691B6DBD4388B5129E2E919"
+    },
+    "deploy-server-release.py": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\windows-updater\\scripts\\deploy-server-release.py",
+      "sha256": "34D36D30CBE0A85092AC877E4C5A6C78026FB0D2F5EDC767E8E93F26B2B2216B"
+    },
+    "archive-update-release.py": {
+      "path": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\game-client\\windows-updater\\scripts\\archive-update-release.py",
+      "sha256": "2FB281283D42C232307EA7E682DA8E9C4A46078DE396ABA233CC4037FAF68A3B"
+    }
+  },
+  "expectedCaddySha256": "C9EB1149DD23BED11B94B921E812FF111822410E487C4EF61B3C9BB351C649BD",
+  "externalCmsGateRequired": true,
+  "commands": [
+    "remote.py --command-file deploy-preflight.sh",
+    "remote.py --command-file deploy-create-stage.sh",
+    "remote.py --upload-batch deploy-upload.json",
+    "remote.py --command-file deploy-apply.sh --timeout 1800"
+  ]
+}

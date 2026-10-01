@@ -1,0 +1,47 @@
+{
+  "schema": "mir2.windows.candidate-verification-reuse.v1",
+  "passed": true,
+  "reused": true,
+  "sourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "candidate": "WN-CANDIDATE-20261001-invited-09",
+  "packageRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\r9",
+  "createdUtc": "2026-10-01T18:15:05.2836453+00:00",
+  "packagePostMoveCompleted": true,
+  "canonicalPackageProcess": {
+    "path": "C:\\mir2-playtest-releases\\20261001-native-r9\\build-package-process.json",
+    "sha256": "23BFC1834950382B7A9A5CD341864218225504DE1B924654D6E4F22E6AFB1107",
+    "complete": true,
+    "success": true
+  },
+  "originalVerifier": {
+    "path": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\windows-package-preflight\\WN-CANDIDATE-20261001-invited-09-verification.json",
+    "sha256": "4A8D968402ED8B7A8133538A38AE3286E95335FA4AA7AB787AC8A313840B53F6",
+    "passed": true,
+    "detachedSignatureValid": true,
+    "sourceRepoCheck": "checked",
+    "currentSourceRevision": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+    "trustedSignerThumbprint": "868B4EC92CCC3EE6031DBE38417FDD0E10305613",
+    "packageRoot": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\dist\\.r9.staging-54b96ea3a9714f0da11936c0a6346fff"
+  },
+  "actualFinalHashes": {
+    "VERSION.json": "533069F3BF09CE831F7D5D59F44F4E9BB84DC8651EB20AE5DF76B80DD555A02A",
+    "PACKAGE-MANIFEST.json": "E9797953F1F6A14CE7EE83EAD71CE94C5E22AEC75200624DCD97AA110E95201B",
+    "BUILD-ATTESTATION.json": "1FD9D1D881054D7BAFAA1B71A9E80816C8F54FD5BC62E77F06433CF24A92BA10",
+    "mir2-platform-windows.exe": "09E186B9F13F7F1E10D4857EFAE52EF940B4F43E2D7CE955F4FE1627C433A488",
+    "RELEASE-STATEMENT.json": "DB4861E04B58F6CFE20C0A2938C77920FCD9435636CBBED590611D0E7CE026B6",
+    "RELEASE-STATEMENT.p7s": "5859A1EEA8BBE0E56C46E13BBDA1EF52CF22840F6C03D62F969CB099ECD11249"
+  },
+  "nativeAttestation": {
+    "path": "C:\\Users\\Administrator\\.codex\\worktrees\\r9\\mir2-player-journey\\mir2-web3\\target-attested-windows-candidate\\BUILD-ATTESTATION.json",
+    "sha256": "1FD9D1D881054D7BAFAA1B71A9E80816C8F54FD5BC62E77F06433CF24A92BA10"
+  },
+  "signedVersionBindingRechecked": true,
+  "currentDetachedCmsSignatureRechecked": true,
+  "packageFileCount": 123035,
+  "packageManifestAggregateSha256": "1ACE314B6D2D45A7570B88F907ECD3F945CC234CEF37E147195AE728CE176C8A",
+  "duplicateFullVerifierSkipped": true,
+  "updaterBundleVerificationStillRequired": true,
+  "installerFullPayloadVerificationStillRequired": true,
+  "humanVisualAccepted": false,
+  "publicPublished": false
+}

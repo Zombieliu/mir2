@@ -18,12 +18,17 @@
 > [Packet boundary evidence](generated/player-qa/caster-journey-20261001/npc-response-service-boundary.json).
 > Finite control handoff, canonical mana and prior 6d498c080 server validations
 > retain their documented scopes and original failure records. No new full
-> server-suite, whole-game parity or public deployment acceptance follows.
-> Installed r8, public realm, updater feed and human stores are unchanged.
-> A client-only r9 shop hotfix is being built separately from the clean r8 base;
-> release and human acceptance are pending. Full native GUI / route timing,
-> counted/periodic poison, dynamic mana and unrelated parity gaps remain open;
-> capacity remains paused.
+> server-suite or whole-game parity acceptance follows. Client-only r9 source
+> 180b01d46, Candidate09 and installer are built and verified; signed sequence5
+> is published. Actual signed-package delta/rollback checks pass 2/2, six game
+> payloads plus the engine (107.17 MiB), and public HTTPS feed/signature bytes match.
+> The F-drive check timed out at 900s before an activation receipt; installed
+> r8 remains, the failure is preserved, and actual F-drive upgrade is not accepted.
+> Public game services remain unchanged on the existing r8 Gateway; human
+> stores are preserved. Installed mouse/GUI and affected-laptop acceptance,
+> full route timing, counted/periodic poison, dynamic mana and unrelated parity
+> gaps remain open; capacity remains paused.
+> [r9 delivery evidence](generated/player-qa/caster-journey-20261001/release-r9/README.md).
 > [Evidence](generated/player-qa/caster-journey-20261001/README.md).
 > [Shop lifecycle](generated/player-qa/caster-journey-20261001/shop-lifecycle-20261001.md).
 
