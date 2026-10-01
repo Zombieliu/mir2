@@ -155,6 +155,21 @@ export async function combatAction(client, target) {
     }
   }
 
+  if (className === 'wizard') {
+    const lightning = wizardLightningOpportunity(snapshot, actor, target);
+    if (lightning) {
+      const command = {
+        type: 'magic', objectId: Number(actor.objectId), spell: lightning.skill.spell,
+        direction: directionToward(actor, lightning.target),
+        targetId: Number(actor.objectId), x: Number(actor.x), y: Number(actor.y), spellTargetLock: false,
+      };
+      client.send(command);
+      // Crystal routes this directional offense through self. The ordinary
+      // combat controller must still count it and await the enemy's damage.
+      return { kind: 'magic', spell: lightning.skill.spell, targetId: Number(lightning.target.objectId), command };
+    }
+  }
+
   if (className === "wizard" && tileDistance(actor, target) <= 9) {
     const preferred = preferredWizardSkill(snapshot);
     if (preferred && Number(preferred.cooldownRemainingTicks ?? 0) > 0) {
@@ -601,6 +616,24 @@ function preferredWizardSkill(snapshot) {
   return [greatFireBall, fireBall].find(skill => Number(skill?.cooldownRemainingTicks ?? 0) <= 0)
     ?? greatFireBall
     ?? fireBall;
+}
+
+function wizardLightningOpportunity(snapshot, actor, target) {
+  const skill = (snapshot?.knownSkills ?? []).find(candidate => candidate.spell === 'Lightning');
+  if (!skill || [snapshot.playerMp, skill.mpCost, skill.cooldownRemainingTicks]
+    .some(value => value == null || !Number.isFinite(Number(value)))) return null;
+  if (Number(skill.mpCost) < 0 || Number(snapshot.playerMp) < Number(skill.mpCost) ||
+      Number(skill.cooldownRemainingTicks) !== 0) return null;
+  // Read the live public actor again; a captured target can predate the most
+  // recent ObjectWalk even when no additional owner movement probe is needed.
+  const live = (snapshot?.entities ?? []).find(entity => Number(entity?.objectId) === Number(target.objectId));
+  if (normalized(live?.kind) !== 'monster' || live.dead === true || !(Number(live.hp ?? 1) > 0)) return null;
+  if (![actor.x, actor.y, live.x, live.y].every(value => value != null && Number.isSafeInteger(Number(value)))) return null;
+  const dx = Number(live.x) - Number(actor.x);
+  const dy = Number(live.y) - Number(actor.y);
+  const distance = Math.max(Math.abs(dx), Math.abs(dy));
+  if (distance < 1 || distance > 6 || !(dx === 0 || dy === 0 || Math.abs(dx) === Math.abs(dy))) return null;
+  return { skill, target: live };
 }
 
 function equippedAmuletQuantity(snapshot) {
