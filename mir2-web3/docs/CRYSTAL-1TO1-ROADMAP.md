@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 exact Android452398d4c v10: both APKs build/install with6195 frames
+> and two metadata files byte-verified each, actual offline BAG/CHAR sword and
+> AssetManager identities visible. Phone layout not accepted (occlusion/small
+> CHAR/login) and normal start timeout retained; next phone presentation/input
+> repair, all services/action leaves/online/device remain OPEN. No global percent.
+> [Package/emulator evidence](generated/player-qa/native-android-item-geometry-20261001/README.md).
+
 > 2026-10-01 Android NI-05 original-geometry source leaf: bounded APK metadata,
 > sparse/zero-source behavior and shared typed projection pass244 normal /255
 > preview, both actual API31 feature checks and fresh Java33+33;13 metadata and7

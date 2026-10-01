@@ -91,3 +91,64 @@ complete all item surfaces, custody, ACK/outbound/use/buy/repair, complete resou
 real JNI/WSS/ordinary player flow, performance, physical-device or human acceptance.
 No live environment, real saves, Windows push, production deployment or successful
 remote push occurred. Original workspaces are preserved.
+
+## Exact v10 packages and actual emulator checkpoint
+
+The following **later** checkpoint builds both variants serially from clean
+`452398d4ca0aca3f426acff125b78994614365f5`, with unchanged HEAD and empty Git
+status before/after; no source edits between packages. v10 /0.1.7-inventory-ingress,
+arm64-v8a /min31 /target35. Rust release profile inside Gradle Debug diagnostics,
+not signed store releases. Actual generated BuildConfig has empty Gateway URL
+for both and UI_PREVIEW=true only for the isolated preview. No remote Web page.
+
+| Local diagnostic APK under platform-android | Bytes | SHA-256 |
+| --- | --- | --- |
+| `target/inventory-v10-20261001/final-apks/mir2-native-inventory-debug-v10.apk` | 386091014 | `5e51e2d26e2a28d491bef21f3455074467ba57a216ed2007f81a1a3f6acfc0b2` |
+| `target/inventory-v10-20261001/final-apks/mir2-native-inventory-preview-v10.apk` | 389933242 | `0aaea08a5212eb39088fbe600001640a0233c3551e5750bb2c86617931af43c7` |
+
+Each actual APK contains both byte-identical metadata files,1003 Items PNGs and
+5192 StateItem PNGs. All6195 declared original frames are individually compared
+byte-for-byte with the approved diagnostic pack, including zero-size source
+entries. `package-v10.json`, badging/build configuration and source/status files
+bind this to the exact packages, not a claim based solely on Gradle staging.
+Magic/world/entity input packs are unchanged from the v9 diagnostic proof;
+this is not full resource-release alignment or item-catalog completeness.
+
+Both `adb install -r` operations succeed, retaining app data. Only emulator-5554
+is connected: Android12/API31, sdk_gphone64_arm64,2340×1080 landscape,density440;
+fingerprint/device files are retained. No physical phone. Actual observed scenes:
+
+- Normal PID4894 shows the empty shared login and **Test server not configured**.
+  Its start wait is still **timeout**,12721ms; a later visible frame is not an
+  acceptable cold-start/latency result. The form also remains small on the phone.
+- Offline BAG PID4973 starts with status ok,9393ms wait. Actual AssetManager log
+  reports drawable Items1003/StateItem2380 and both exact metadata SHA-256 values.
+  The same typed adapter queues owner42/bag12/equipment2; original item images,
+  source counts and12345 offline gold are visible. This is not live owned inventory.
+- Offline CHAR PID5037 starts with status ok,8656ms wait. Both metadata identities
+  and typed adapter marker are present. The original frame30 sword is visibly
+  placed with the body. The fixture deliberately has no armour state image;
+  its nude body is not a claim of full equipment appearance/animation coverage.
+- Captured PID-scoped logs for all three contain zero ERROR/FATAL/panic/fatal-signal
+  lines. This is a bounded capture result, not a soak, global crash or GPU gate.
+  Both diagnostic apps are force-stopped afterward; no data clear/AVD wipe.
+
+### Phone layout is not accepted
+
+The source/resource/presence leaf passes, but the screenshots retain concrete
+G4 failures. The enlarged BAG covers part of status/chat and overlaps the left
+joystick; CHAR/SPELLS still use a small desktop stage-scaled window. The ordinary
+login form is also small. Merely making one inventory window large does not
+establish usable common phone layouts, thumb separation, minimum cell/tab targets,
+keyboard or multi-touch. No touch operation or transaction ACK is claimed here.
+
+Next repair the Android phone panel layout/presentation seams (including shared
+marker exposure where needed), with no copied gameplay rules, then reverify input
+and exact-source artifacts. NI-10/11/other services, full acceptance denominator,
+real authentication/online authoritative state, performance, device and human
+acceptance remain in the active goal. This checkpoint was saved locally; it is
+not a successful remote push or PR update.
+
+![Actual v10 offline BAG](preview-inventory.png)
+
+![Actual v10 offline CHAR](preview-character.png)

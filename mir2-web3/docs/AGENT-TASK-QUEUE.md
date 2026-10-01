@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-01 exact Android v10: clean452398d4c binds both diagnostic APKs,
+> versions/hashes/install and6195 PNGs plus both metadata byte matches each.
+> Actual API31 offline BAG and CHAR sword/digest markers present, no captured
+> PID errors. Normal start remains timeout12721ms. Phone layout FAILS: BAG covers
+> status/chat/joystick, CHAR/login small; next bounded phone panel/input repair,
+> then NI-10/11 and whole action denominator. Online/device goal stays OPEN.
+> [Exact artifacts and actual failures](generated/player-qa/native-android-item-geometry-20261001/README.md).
+
 > 2026-10-01 Android original Items/StateItem geometry source is connected to the
 > shared inventory projector, with bounded APK-only metadata and source offsets.
 > Android244/preview255, real normal/preview-feature API31 and fresh Java33+33 pass;

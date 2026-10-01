@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 v10 actual image checkpoint: clean452398d4c builds both installed
+> diagnostics with6195 original item frames/two metadata files byte-matched per
+> APK; API31 logs/digests and BAG/CHAR sword visible. G4 phone-layout FAIL retained:
+> BAG occludes status/chat/joystick, CHAR/login remain small. Normal start wait
+> times out12721ms. No complete UI, touch, online, performance or physical acceptance.
+> [Exact v10/source/layout failures](generated/player-qa/native-android-item-geometry-20261001/README.md).
+
 > 2026-10-01 Android NI-05 geometry source/staging leaf: both original metadata
 > files now supply shared item dimensions/equipment offsets, no guessed geometry.
 > Android244/preview255/API31 variants/fresh Java33+33 and13 Gradle controls pass.
