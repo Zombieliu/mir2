@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 Android weight bars: frozen UI_32bit470..473 now staged/guarded,
+> without recoloring or changing shared UI rules. Sparse20/item13/magic7/Java36+36
+> and6647 PNG/three metadata byte checks pass; v13 still unbuilt. Actual original
+> bars/full resources/start/input/phone layout/IME/online/device remain unaccepted.
+> Next exact package and emulator, then the full incoming-state/service leaves.
+> [Source evidence](generated/player-qa/native-android-weight-bars-20261001/README.md).
+
 > 2026-10-01 actual Android v12 numeric seam: exact cleanf04a74399 dual APK/
 > versions/hashes/install and6643 source PNG/two metadata matches each. Shared
 > StatsI/II now show source-shaped values, XP/weights; BAG/HUD gold12352 and
@@ -8,7 +15,7 @@
 > timeouts/Launcher ANR, all48dp/drag/IME/services/online/device/full UI stay open.
 > [Actual images and retained failures](generated/player-qa/native-android-player-ingress-20261001/README.md).
 
-> 2026-10-01 Android player/wallet source: shared Windows cursor supplies exact
+> 2026-10-01 prior player/wallet source checkpoint before v12 APK: shared Windows cursor supplies exact
 > weights/known-zero, stats, XP and public balance updates without mobile rules.
 > Owner/Hero/exact-number and same-batch termination guards pass bounded tests:
 > Android257/preview270/shared1203+8ignored/Java36+36/Mac source6/API31 variants.

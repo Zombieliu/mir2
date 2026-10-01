@@ -1,0 +1,55 @@
+{
+  "frozenWindows": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "approvedRoot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/skill-icons-v9-20261001/shared-ui-assets",
+  "output": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/weight-assets-KtITw2/shared-ui-assets",
+  "sourceUnchanged": true,
+  "priorFiles": 13240,
+  "priorCopiedFilesByteIdentical": 13239,
+  "originalManifestSha256": "e14940711b944e54baa41254fca3f4b8e0ca0ad3e5d92e76e12a366823ca7735",
+  "supplementedManifestSha256": "ea2a4cc8bf0a9e91f22213d4744587b0298d691021dcf405f51c553fd8632d3d",
+  "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9",
+  "libraryExtent": 474,
+  "exportedFrames": 4,
+  "frames": [
+    {
+      "index": 470,
+      "bytes": 159,
+      "sha256": "97ee73897bf18db4106c07fddd6a1daf91d274890196c3c6fa19b7dbd9aa7bd9",
+      "width": 84,
+      "height": 6,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "index": 471,
+      "bytes": 165,
+      "sha256": "a00321a6af8ec61f672e9b1f2555c1f4f66c5ade96147e1824f76c09877d2192",
+      "width": 84,
+      "height": 6,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "index": 472,
+      "bytes": 214,
+      "sha256": "a008c94bbdd8b72aee48db972aa4245861f3a9b98a56b708e6dd7d9f07a3f22f",
+      "width": 76,
+      "height": 12,
+      "x": 0,
+      "y": 0
+    },
+    {
+      "index": 473,
+      "bytes": 213,
+      "sha256": "18c357c4bd0556a2823a3213ef3825cbe63b300c96259a2be625ee909d7758a5",
+      "width": 76,
+      "height": 12,
+      "x": 0,
+      "y": 0
+    }
+  ],
+  "method": "Original Git blob bytes, not a fresh raw-library export or edited image",
+  "fullResourceReleaseAccepted": false,
+  "authenticatedGameplayAccepted": false,
+  "physicalDeviceAccepted": false
+}

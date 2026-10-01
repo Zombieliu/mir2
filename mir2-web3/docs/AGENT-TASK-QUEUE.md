@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-01 Android weight-bar source leaf: stage frozen Windows470..473;
+> prior13240 input files unchanged. Sparse gate20/20, item13/13, magic7/7, fresh
+> Java36+36 and staged6647 PNG/three metadata byte audit pass; read-only review clear.
+> v13 unbuilt. Next clean dual APK and actual original HUD/BAG bars, then NI-09/10/11
+> and full goal. v12 evidence9e29d7b67 still local after transport failures; actual
+> GitHub ref/PR remainsf04a74399 Open/Draft with unchanged base. Online/device OPEN.
+> [Bounded source evidence](generated/player-qa/native-android-weight-bars-20261001/README.md).
+
 > 2026-10-01 exact Android v12: cleanf04a74399 dual APK/hash/version/install,
 > each6643 source PNG/two metadata byte matches. Actual offline StatsI/II values,
 > XP/three weights and BAG/HUD gold12352/available34 plus closes respond. UI_32bit
@@ -8,7 +16,7 @@
 > This is not full phone UI, real server flow or physical acceptance. Goal Active.
 > [Exact packages, images and failures](generated/player-qa/native-android-player-ingress-20261001/README.md).
 
-> 2026-10-01 Android NI-02/08 source: same frozen-Windows player/wallet cursor,
+> 2026-10-01 prior NI-02/08 source checkpoint before v12 APK: same frozen-Windows player/wallet cursor,
 > exact weights/provenance and public deltas, owner/character/phase guards and
 > latest-absolute queue retry. Reproduced foreign/fractional-ID and post-rejection
 > host bugs fixed. Android257/preview270/shared1203+8ignored/Java36+36/scoped Mac6/

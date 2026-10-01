@@ -53,7 +53,7 @@ still missing. Neither label is an online acceptance result.
 | NI-17 | `push_native_lighting_render_state` and effects | PARTIAL: selected public object effects exist. Complete supported spell/light/action variants and Android audio/focus; do not silently enable the desktop audio backend |
 | NI-18 | native resume negotiation | OPEN: Rust helper advertises `nativeResumeV1`, but actual Java connection sends clientVersion/heartbeat and relogin behavior. Verify negotiation, token ownership and reconnect semantics before claiming resume |
 | NI-19 | data/scene reset and queue backpressure | PARTIAL: existing native resets and bounded JNI/receipt queues. Test every new domain through reconnect, logout, character switch, scene reset, stale receipt and overflow |
-| NI-20 | native atlas/version/cache delivery | PARTIAL: approved local diagnostic UI/world/entity inputs exist. Exact source/manifest/APK hashes are required; the proof pack is not a complete aligned public release |
+| NI-20 | native atlas/version/cache delivery | PARTIAL: frozen UI_32bit470..473 sparse staging/guard fixes the v12 omission. Source20/item13/magic7/Java36+36/staged6647 PNG+3metadata checks pass; v13 actual APK/image still OPEN. Approved local proof packs are not a complete aligned public release. [Evidence](generated/player-qa/native-android-weight-bars-20261001/README.md) |
 
 ## Input/presentation leaves of the integration stage
 

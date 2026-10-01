@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 Android weight-bar staging: frozen original470..473, sparse20/20,
+> item13/13/magic7/7/Java36+36, staged6647 PNG/three metadata byte match; bounded
+> source review clear. v13 unbuilt; actual APK/image/performance/full resources/
+> UI/input/services/online/device remain open. Transport failures retain local
+> v12 evidence9e29d7b67; latest verified remote f04a74399, no parity-percent change.
+> [Source and original failure](generated/player-qa/native-android-weight-bars-20261001/README.md).
+
 > 2026-10-01 Android exactv12 from cleanf04a74399: both package/hash/installed
 > versions and6643 original PNG/two metadata matches each; actual offline stats,
 > XP/weights and BAG/HUD wallet values are visible. Missing original weight bars
@@ -7,7 +14,7 @@
 > full UI/input/services/resources/online/device goal remains open, no percent change.
 > [Evidence](generated/player-qa/native-android-player-ingress-20261001/README.md).
 
-> 2026-10-01 Android NI-02/08 source leaf: exact shared Windows player/wallet
+> 2026-10-01 prior NI-02/08 source checkpoint before v12 APK: exact shared Windows player/wallet
 > extraction, bounded owner ingress, weights/partial snapshots/public wallet
 > deltas and terminal same-batch cleanup. Java owner pollution and tiny-fraction
 > controls plus Rust stale-host failure reproduced/fixed. Android257/preview270/

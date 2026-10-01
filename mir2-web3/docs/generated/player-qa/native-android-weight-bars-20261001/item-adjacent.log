@@ -1,0 +1,14 @@
+complete: accepted as expected
+missingMeta-Items: rejected as expected
+duplicate-Items: rejected as expected
+wrongPath-Items: rejected as expected
+invalidSize-Items: rejected as expected
+invalidOffset-Items: rejected as expected
+missingFrame-Items: rejected as expected
+missingMeta-StateItem: rejected as expected
+duplicate-StateItem: rejected as expected
+wrongPath-StateItem: rejected as expected
+invalidSize-StateItem: rejected as expected
+invalidOffset-StateItem: rejected as expected
+missingFrame-StateItem: rejected as expected
+{"passed":13,"total":13,"fixtureRoot":"/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/item-geometry-gate-aPqBnR","sourceUnchanged":true,"sourceIdentity":"535428fc03d0a32bf3798bfcd21dfda292bf6021c3a4e170ec6c5dd0043c0d26","apkBuilt":false,"gradleOffline":true,"gameplayNetworkUsed":false,"networkTrafficObserved":false}
