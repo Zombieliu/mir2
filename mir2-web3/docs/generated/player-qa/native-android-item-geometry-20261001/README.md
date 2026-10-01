@@ -149,6 +149,19 @@ real authentication/online authoritative state, performance, device and human
 acceptance remain in the active goal. This checkpoint was saved locally; it is
 not a successful remote push or PR update.
 
+### Subsequent publication verification
+
+A subsequent ordinary fast-forward HTTPS push succeeded for
+`codex/android-shared-sync` at
+`e18eeadf03003961a391693ac339f463fd784f5c`. GitHub's actual ref and PR API are
+re-read and retained in `published-ref-v10.json` /`published-pr-v10.json`: PR253
+is Open/Draft at the same head, base remains codex/playtest-registration. This
+publishes the inventory/geometry sources and all v7–v10 prior goal checkpoints
+previously held locally, not APK binaries/licensed assets/caches/keys. Historical
+failed transports remain historical; no forced push, Windows branch write or merge.
+Package source is still452398d4c; publication/documentation head is a different
+commit. Source/G4/online/device acceptance boundaries above remain unchanged.
+
 ![Actual v10 offline BAG](preview-inventory.png)
 
 ![Actual v10 offline CHAR](preview-character.png)

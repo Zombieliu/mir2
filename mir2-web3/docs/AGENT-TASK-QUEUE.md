@@ -1,5 +1,11 @@
 # Agent Task Queue
 
+> 2026-10-01 Android publication: ordinary fast-forward push e18eeadf0 verified
+> by remote ref and PR253 API; Open/Draft, unchanged base codex/playtest-registration.
+> Publishes pending goal source/evidence, no APK/licensed resource/cache/key Git
+> objects, Windows push, merge or deployment. Package source identity stays452398d4c.
+> Full goal remains Active; next phone window/layout/input then other service/action leaves.
+
 > 2026-10-01 exact Android v10: clean452398d4c binds both diagnostic APKs,
 > versions/hashes/install and6195 PNGs plus both metadata byte matches each.
 > Actual API31 offline BAG and CHAR sword/digest markers present, no captured
