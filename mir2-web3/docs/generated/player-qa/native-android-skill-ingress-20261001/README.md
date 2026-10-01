@@ -1,10 +1,11 @@
 # Native Android NI-07 — shared skill ingress, 2026-10-01
 
-This is a **source/compile checkpoint**, not full Android parity, online combat,
-physical-device acceptance or a package result. The completeness goal stays
+This records **source/compile gates and the subsequent v8 diagnostic package**,
+not full Android parity, online combat or physical-device acceptance. The completeness goal stays
 Active against frozen Windows `3f5e61533235921369bc13a7760b4a56b0e467e5`.
 The previous v7 APK source10bf437f2 does **not** contain these changes.
-Exact v8 package source/hash/version will be recorded after a clean commit/build.
+Exact v8 package source is `8eb1a7d344e2240e1a499f42e37b454264ce3bc0`, clean
+before and after both builds. Its actual skill imagery gate **FAILS** below.
 
 ## Scope and implementation
 
@@ -72,8 +73,9 @@ resource/Windows-font/environment limitations and historical emulator failures.
 
 ## Open gates and next work
 
-- Clean-source v8 Debug/uiPreview APK identity and actual offline rendering.
-  Never relabel v7 images/packages as this implementation.
+- Complete skill imagery: v8 builds/installs and displays the typed offline
+  FireBall/F1 row, but the icon is missing and retries repeatedly. Never relabel
+  v7 images/packages or a successful build as a passing v8 imagery result.
 - Approved real WSS/HTTPS and locally entered ordinary test credentials:
   login/list/StartGame/owner state, actual key/cast sends and authoritative returns,
   reconnect/map transfer/exit/save and an online player loop remain unverified.
@@ -89,3 +91,52 @@ resource/Windows-font/environment limitations and historical emulator failures.
 
 APK/cache/licensed files/passwords/signing keys stay outside Git. Build, source,
 offline emulator, online and human/device acceptance remain separate.
+
+## Exact v8 package and actual emulator evidence
+
+Both versionCode8 / `0.1.5-skill-ingress`, minSdk31/targetSdk35/arm64-v8a,
+Rust1.95.0 release-profile native library in debuggable/unstripped diagnostic
+containers, JDK17 and NDK26.1.10909125. They are not store releases. Debug has an
+explicitly empty Gateway URL; preview is separately network-disabled. Both
+reuse the unchanged approved local UI/world/entity inputs from the G1 checkpoint.
+
+| APK | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `mir2-native-skill-ingress-debug-v8.apk` | 385224106 | `c38def5aaa8d5e7792b9da34c0ebbae1a3d8ed92155e271d8e6de9f49c04cf4c` |
+| `mir2-native-skill-ingress-preview-v8.apk` | 388810598 | `1a5ce909fa8506e138a2d439c3bcb08c9855d109dd82dd240a484e48bf7dd345` |
+
+Retained outside Git in `apps/game-client/platform-android/target/skill-ingress-v8-20261001/final-apks/`.
+Selected build/install/start/PID logs and original screenshots are copied here.
+
+Only device: dedicated `Mir2_API_31_ARM64`, `emulator-5554`, Android12/API31,
+`sdk_gphone64_arm64`, fingerprint
+`google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys`.
+Landscape2340x1080, density440. Installation used replacement preserving app
+data; no clear, old AVD wipe, real account or physical-device test occurred.
+
+- Debug installed and launched as PID3432. Actual frame below shows shared
+  login and **Test server not configured**; no credential was entered.
+- Preview installed and launched as PID3589 with the `skills` specimen. Its
+  marker confirms owner42 / FireBall / castSequence1 / remainingMs300 went
+  through the Android adapter and native typed-model queue.
+- Initial frame shows the shared Character tab. A real press on SPELLS opens
+  a row labeled **Offline FireBall**, with F1. This proves a bounded offline
+  adapter-to-shared-window path, not authenticated learning/casting/key saving,
+  JNI transport, complete UI layout or authoritative network state.
+- PID-scoped logs record repeated `Path not found: original-ui/MagIcon/54.png`.
+  Source model passes while the image gate FAILS; no substitute icon is drawn.
+  Both observed PIDs have no fatal-exception/panic/fatal-signal marker, which
+  does not make the missing image, repeated work or performance acceptable.
+- Both test packages were force-stopped after capture to release emulator CPU.
+  v6 SystemUI, v7 foreground black frame/high intervals and earlier Mac failures
+  remain retained; they were not reclassified by this bounded v8 check.
+
+![Actual v8 Debug login](debug-login-v8.png)
+![Actual v8 initial offline skill scene](skills-v8.png)
+![Actual v8 SPELLS tab, missing icon](skills-tab-v8-missing-icons.png)
+
+The known UI manifest identifies an already-approved local Crystal source Data
+directory. Read-only inspection confirms MagIcon.Lib and MagIcon2.Lib exist
+there; the next bounded resource step will export them to a **new** local pack,
+preserving v8 inputs and evidence. No licensed PNG/cache/APK will enter Git or
+be deployed to an online resource release.

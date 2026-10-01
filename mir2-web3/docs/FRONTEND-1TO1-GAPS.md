@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 NI-07 actual v8 emulator: clean source8eb1a7d34 builds/installs both
+> diagnostic APKs. Shared SPELLS displays the adapter's Offline FireBall/F1 row,
+> but absent MagIcon/54 produces repeated asset failures. This is bounded model
+> evidence and an image FAIL, not full shared-window/phone/online acceptance.
+> Preserve v8 before extending the approved pack with existing raw libraries.
+> [Exact failure](generated/player-qa/native-android-skill-ingress-20261001/README.md).
+
 > 2026-10-01 Android NI-07 typed skill source is connected through the extracted
 > Windows cursor/projector, not a copied cooldown or combat rule. Personal
 > packets survive authenticated same-character map loading; exact ACKs retain

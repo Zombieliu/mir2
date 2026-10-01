@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 Android source8eb1a7d34 is bound to v8 diagnostic APKs, hashes and
+> API31 install/actual shared skill-row evidence. Missing magic-icon assets and
+> repeated retries remain an explicit imagery FAIL; no live/device acceptance
+> follows. Source/compile results below remain separate. Goal stays Active.
+> [Package and failure](generated/player-qa/native-android-skill-ingress-20261001/README.md).
+
 > 2026-10-01 Android NI-07 source leaf: extracted Windows pure skills ingress is
 > shared with Android, including exact remaining ms, successful owner casts and
 > exact key-result snapshots. Authenticated map-loading receipts are retained;

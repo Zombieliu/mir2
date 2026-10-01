@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-01 NI-07 v8 package follow-up: exact clean source8eb1a7d34 produces
+> both version8 diagnostic APKs with verified hashes and API31 installation.
+> Offline adapter-to-shared SPELLS shows FireBall/F1, but MagIcon/54 is missing
+> repeatedly: imagery FAIL, not a green player loop. Approved local raw source
+> contains both magic-icon libraries; export to a new pack and preserve v8
+> inputs/failures, then continue inventory/services. Goal remains Active.
+> [Exact source/APKs and raw failure](generated/player-qa/native-android-skill-ingress-20261001/README.md).
+
 > 2026-10-01 Android NI-07 source checkpoint: Windows/Android share one pure
 > skill cursor/projector; owner metadata/casts, exact ms and request ACK models
 > retain failure/character/map/backpressure boundaries. A reproduced Java/Rust

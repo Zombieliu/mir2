@@ -5,8 +5,9 @@
 最新有界源码进展：NI-07 复用 Windows 的同一技能游标/投影，接通 typed
 learned skills、精确毫秒、owner 成功回执和 exact-request 按键结果；同角色
 切图保留个人状态，不恢复旧地图。Android227/preview236/shared1196+8ignored/
-Java32+32/API31 通过。v8 诊断包待绑定，v7 不包含这次源码；真实在线、完整
-UI/资源和真机都未通过。[技能接线证据](generated/player-qa/native-android-skill-ingress-20261001/README.md)。
+Java32+32/API31 通过。精确源码8eb1a7d34的v8包已构建/安装，离线SPELLS显示
+FireBall/F1，但技能图标缺失并重复加载，图像验收FAIL；v7不包含这次源码。
+真实在线、完整UI/资源和真机都未通过。[证据](generated/player-qa/native-android-skill-ingress-20261001/README.md)。
 
 本轮用户要求把 Android 完整度对齐当前 Windows，而不再把登录小切片或
 离线 UI 展示当作终点。目标是原生 Bevy/GameActivity Android；Capacitor
