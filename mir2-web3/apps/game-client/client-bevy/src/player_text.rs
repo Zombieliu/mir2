@@ -80,6 +80,18 @@ pub fn quest_objective(source: &str) -> String {
     text(source)
 }
 
+/// Authored periodic objectives use canonical species independently of the
+/// server's display sentence or its embedded progress suffix. Counters remain
+/// the caller's authoritative QuestObjective current/target values.
+pub fn quest_objective_label(quest_index: i32, objective_index: usize, source: &str) -> String {
+    if let Some(kill) = mir2_game_data::periodic_quests::quest(quest_index)
+        .and_then(|definition| definition.kills.get(objective_index)) {
+        let display_name = crate::native_i18n::key(&format!("content.monster.{}.name",kill.monster_index), &name(&kill.monster));
+        return format_named("quest.objective.kill", "Kill {name}", &[("name", &display_name)]);
+    }
+    quest_objective(source)
+}
+
 /// Original Crystal paragraphs may be split in the middle of a sentence on
 /// the wire. Resolve the whole authored section by ID before wrapping it.
 pub fn quest_section(id: i32, field: &str, source: &[String]) -> Vec<String> {

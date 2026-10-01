@@ -1,5 +1,5 @@
 //! Display-only destinations for authoritative quest objectives.
-use crate::quest_model::{QuestStatus, QuestTracker};
+use crate::quest_model::{Quest, QuestStatus, QuestTracker};
 
 pub const BICHON_SAFE_X: i32 = 328;
 pub const BICHON_SAFE_Y: i32 = 264;
@@ -22,6 +22,7 @@ pub(crate) fn authored_quest_definition(quest_index: i32) -> Option<&'static ser
 
 /// V2 uses loaded NPC object IDs, including its separate growth claims.
 pub(crate) fn uses_loaded_npc_ids(quest_index: i32) -> bool {
+    if mir2_game_data::periodic_quests::is_periodic(quest_index) { return true; }
     ["quests", "growthRewards"].iter().any(|key| {
         authored_config()[key].as_array().is_some_and(|quests| quests.iter()
             .any(|quest| quest["id"].as_i64() == Some(i64::from(quest_index))))
@@ -31,6 +32,9 @@ pub(crate) fn uses_loaded_npc_ids(quest_index: i32) -> bool {
 /// Imported V2 task-map declarations resolved to Crystal map identities.
 /// Empty means the task has no authored cross-map destination.
 pub fn authored_target_map_indices(quest_index: i32) -> Vec<i32> {
+    if let Some(quest) = mir2_game_data::periodic_quests::quest(quest_index) {
+        return periodic_map_indices(quest.kills.iter().flat_map(|kill| kill.maps.iter()));
+    }
     let Some(files) = authored_quest_definition(quest_index)
         .and_then(|quest| quest["maps"].as_array()) else {
         return Vec::new();
@@ -39,6 +43,26 @@ pub fn authored_target_map_indices(quest_index: i32) -> Vec<i32> {
         .filter(|map| files.iter().any(|file| file.as_str() == Some(map.map_file_name.as_str())))
         .map(|map| map.map_index)
         .collect()
+}
+
+fn periodic_map_indices<'a>(files: impl Iterator<Item = &'a String>) -> Vec<i32> {
+    let files = files.map(String::as_str).collect::<std::collections::BTreeSet<_>>();
+    mir2_game_data::crystal_respawn_manifest_ref().maps.iter()
+        .filter(|map| files.contains(map.map_file_name.as_str()))
+        .map(|map| map.map_index).collect()
+}
+
+/// Navigate only to maps that can advance an authoritative unfinished kill.
+/// Completed objectives must not keep a weekly task pointing at the old area.
+pub fn active_target_map_indices(quest: &Quest) -> Vec<i32> {
+    if let Some(definition) = mir2_game_data::periodic_quests::quest(quest.quest_index) {
+        if quest.status != QuestStatus::InProgress { return Vec::new(); }
+        return periodic_map_indices(definition.kills.iter().enumerate()
+            .filter(|(index, _)| quest.objectives.get(*index)
+                .is_some_and(|objective| objective.target > 0 && !objective.is_complete()))
+            .flat_map(|(_, kill)| kill.maps.iter()));
+    }
+    authored_target_map_indices(quest.quest_index)
 }
 
 pub fn bichon_safe_arrival_pending(tracker: &QuestTracker) -> bool {

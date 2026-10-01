@@ -41,6 +41,25 @@ pub fn active_hunt_regions_for_primary(
         if quest.status != QuestStatus::InProgress {
             continue;
         }
+        if let Some(definition) = mir2_game_data::periodic_quests::quest(quest.quest_index) {
+            for (index, kill) in definition.kills.iter().enumerate() {
+                let Some(progress) = quest.objectives.get(index) else { continue; };
+                if progress.target == 0 || progress.is_complete()
+                    || !kill.maps.contains(&map.map_file_name)
+                    || regions.iter().any(|region: &QuestHuntRegion| region.monster_index == kill.monster_index) {
+                    continue;
+                }
+                // This catalog's point identifies an authored hunting foothold.
+                // A whole-map imported spread is not a useful arrival radius.
+                regions.push(QuestHuntRegion {
+                    primary: Some(quest.quest_index) == primary,
+                    monster_index: kill.monster_index, name: kill.monster.clone(),
+                    center: BigMapPoint { x: kill.x, y: kill.y }, radius: 8,
+                    remaining: progress.target.saturating_sub(progress.current),
+                });
+            }
+            continue;
+        }
         let Some(definition) = config["quests"].as_array().and_then(|quests| {
             quests
                 .iter()

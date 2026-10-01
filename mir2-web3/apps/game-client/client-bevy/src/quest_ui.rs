@@ -24,6 +24,9 @@ mod multilingual_visual_tests;
 #[cfg(test)]
 #[path = "quest_nonmodal_input_tests.rs"]
 mod nonmodal_input_tests;
+#[cfg(test)]
+#[path = "periodic_quest_ui_tests.rs"]
+mod periodic_quest_ui_tests;
 pub use turn_in::{PendingQuestTurnIn, begin_detail_quest_turn_in, pending_quest_turn_in_allows_interaction,
     quest_turn_in_ui_allows_interaction};
 pub use multi_guidance::primary_quest_index;
@@ -380,6 +383,7 @@ pub enum QuestUiIntent {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum QuestRouteTarget {
     Entrance,
+    TaskNpc { object_id: u32 },
     HuntRegion { monster_index: i32, radius: i32 },
     Supply { vendor: crate::quest_supplies::SupplyVendor },
 }
@@ -388,6 +392,7 @@ impl QuestRouteTarget {
     pub fn label(self) -> &'static str {
         match self {
             Self::Entrance => "入口",
+            Self::TaskNpc { .. } => "Task Steward",
             Self::HuntRegion { .. } => "狩猎区域",
             Self::Supply { .. } => "补给地点",
         }
@@ -410,6 +415,20 @@ pub struct QuestRouteNavigationIntent {
 }
 
 impl QuestRouteNavigationIntent {
+    /// A town approach is valid only for a displayed periodic task endpoint.
+    /// This never authorizes accepting or granting a reward remotely.
+    pub fn matches_task_npc_destination(self, tracker: &QuestTracker) -> bool {
+        let QuestRouteTarget::TaskNpc { object_id } = self.target else { return false; };
+        let Some(quest) = tracker.active_quests.iter().find(|quest| quest.quest_index == self.quest_index) else {
+            return false;
+        };
+        mir2_game_data::periodic_quests::is_periodic(quest.quest_index)
+            && turn_in::destination_on_map(quest, Some(self.map_index)).is_some_and(|npc| {
+                npc.object_id == object_id && npc.map_index == self.map_index
+                    && npc.x == self.x && npc.y == self.y
+            })
+    }
+
     pub fn matches_supply_destination(self) -> bool {
         let QuestRouteTarget::Supply { vendor } = self.target else { return false; };
         self.quest_index == 0 && vendor.route(self.map_index).is_some_and(|route| route.x == self.x && route.y == self.y)
@@ -481,7 +500,15 @@ fn quest_route_intent_is_current(
     if matches!(intent.target, QuestRouteTarget::HuntRegion { .. }) {
         return intent.matches_active_hunt_region(tracker);
     }
-    let targets = crate::quest_destination::authored_target_map_indices(intent.quest_index);
+    if matches!(intent.target, QuestRouteTarget::TaskNpc { .. }) {
+        return intent.matches_task_npc_destination(tracker);
+    }
+    let Some(quest) = tracker.active_quests.iter().find(|quest| quest.quest_index == intent.quest_index) else { return false; };
+    let targets = if mir2_game_data::periodic_quests::is_periodic(quest.quest_index)
+        && matches!(quest.status, crate::quest_model::QuestStatus::NotStarted | crate::quest_model::QuestStatus::ReadyToTurnIn) {
+        turn_in::destination_on_map(quest, big_map.current_map_index)
+            .map(|npc| vec![npc.map_index]).unwrap_or_default()
+    } else { crate::quest_destination::active_target_map_indices(quest) };
     let crate::quest_ui::route::QuestRoute::NextStep(step) =
         crate::quest_ui::route::resolve(big_map.current_map_index, &targets)
     else {
@@ -707,17 +734,32 @@ pub enum GuidedDiaryTab {
     Main,
     Ready,
     Side,
+    Daily,
+    Weekly,
 }
 
 impl GuidedDiaryTab {
-    const ALL: [Self; 3] = [Self::Main, Self::Ready, Self::Side];
+    const ALL: [Self; 5] = [Self::Main, Self::Ready, Self::Side, Self::Daily, Self::Weekly];
 
     const fn label(self) -> &'static str {
         match self {
             Self::Main => "主线",
             Self::Ready => "可交付",
             Self::Side => "支线",
+            Self::Daily => "Daily Tasks",
+            Self::Weekly => "Weekly Tasks",
         }
+    }
+
+    fn localized_label(self) -> String {
+        let fallback = crate::player_text::text(self.label());
+        let key = match self {
+            Self::Main => "periodic.diary.tab.main",
+            Self::Ready => "periodic.diary.tab.ready",
+            Self::Side => "periodic.diary.tab.side",
+            Self::Daily | Self::Weekly => return fallback,
+        };
+        crate::native_i18n::key(key, &fallback)
     }
 }
 
@@ -1311,6 +1353,18 @@ fn quest_belongs_to_current_npc(dialog: &NpcDialogModel, quest: &Quest) -> bool 
     let Some(npc_index) = dialog.npc_object_id else {
         return false;
     };
+    if mir2_game_data::periodic_quests::is_periodic(quest.quest_index)
+        && mir2_game_data::periodic_quests::npc(npc_index).is_some() {
+        return dialog.options.iter().any(|option| option.enabled && match quest.status {
+            crate::quest_model::QuestStatus::NotStarted => option.option_id.trim()
+                .eq_ignore_ascii_case(&format!("@quest:accept:{}", quest.quest_index)),
+            crate::quest_model::QuestStatus::InProgress => option.option_id.trim()
+                .eq_ignore_ascii_case(&format!("@quest:show:{}", quest.quest_index)),
+            crate::quest_model::QuestStatus::ReadyToTurnIn => option.option_id.trim()
+                .eq_ignore_ascii_case(&format!("@quest:finish:{}", quest.quest_index)),
+            _ => false,
+        });
+    }
     match &quest.status {
         crate::quest_model::QuestStatus::NotStarted => quest.accept_npc_index == Some(npc_index),
         crate::quest_model::QuestStatus::InProgress
@@ -1370,7 +1424,12 @@ fn npc_list_accept_is_current(
         && npc_quest_indices.contains(&quest_index)
         && tracker.active_quests.iter().any(|quest| {
             quest.quest_index == quest_index
-                && quest.accept_npc_index == Some(npc_index)
+                && if mir2_game_data::periodic_quests::is_periodic(quest_index) {
+                    mir2_game_data::periodic_quests::npc(npc_index).is_some()
+                        && dialog_exposes_quest_operation(dialog, Some(npc_index), quest_index, false, None)
+                } else {
+                    quest.accept_npc_index == Some(npc_index)
+                }
                 && can_accept_quest(quest)
         })
 }
@@ -3303,11 +3362,11 @@ fn render_quest_tracker_panel(
             Justify::Left,
         );
         let objective_limit = if compact_journey { 1 } else { usize::MAX };
-        for objective in quest.objectives.iter().take(objective_limit) {
+        for (index, objective) in quest.objectives.iter().take(objective_limit).enumerate() {
             y += 15.0;
             quest_log_text_at(
                 parent,
-                &quest_objective_detail_text(objective),
+                &quest_objective_detail_text(quest.quest_index, index, objective),
                 QuestLogRect::new(25.0, 20.0 + y, 290.0, 15.0),
                 8.0,
                 Color::WHITE,
@@ -3926,7 +3985,7 @@ fn quest_diary_group_name(quest: &Quest, guidance: Option<&QuestGuidance>) -> St
     // Cadence belongs to the server: the same quest can be a one-time task
     // in Crystal mode and a weekly task in an explicit content profile.
     if guidance.is_some_and(QuestGuidance::is_enabled) {
-        if let Some(group @ ("Daily" | "Weekly" | "Repeatable")) = quest.group.as_deref() {
+        if let Some(group @ ("Daily" | "Weekly" | "Repeatable" | "Daily Tasks" | "Weekly Tasks")) = quest.group.as_deref() {
             return group.to_owned();
         }
     }
@@ -3981,14 +4040,20 @@ fn guided_diary_quests<'a>(
             quest.status.is_active()
                 || (can_accept_quest(quest)
                     && (newcomer_diary_accept_authorized(quest, guidance)
-                        || next_id == Some(quest.quest_index)))
+                        || next_id == Some(quest.quest_index)
+                        || mir2_game_data::periodic_quests::is_periodic(quest.quest_index)))
         })
         .filter(|(_, quest)| match tab {
             GuidedDiaryTab::Main => guidance.and_then(|guide| guide.entry(quest.quest_index)).is_some(),
             GuidedDiaryTab::Ready => {
                 quest.status == crate::quest_model::QuestStatus::ReadyToTurnIn
             }
-            GuidedDiaryTab::Side => guidance.and_then(|guide| guide.entry(quest.quest_index)).is_none(),
+            GuidedDiaryTab::Side => guidance.and_then(|guide| guide.entry(quest.quest_index)).is_none()
+                && !mir2_game_data::periodic_quests::is_periodic(quest.quest_index),
+            GuidedDiaryTab::Daily => mir2_game_data::periodic_quests::quest(quest.quest_index)
+                .is_some_and(|quest| quest.cadence == mir2_game_data::periodic_quests::PeriodicCadence::Daily),
+            GuidedDiaryTab::Weekly => mir2_game_data::periodic_quests::quest(quest.quest_index)
+                .is_some_and(|quest| quest.cadence == mir2_game_data::periodic_quests::PeriodicCadence::Weekly),
         })
         .collect::<Vec<_>>();
     quests.sort_by_key(|(position, quest)| {
@@ -4001,7 +4066,7 @@ fn guided_diary_quests<'a>(
             GuidedDiaryTab::Main => guidance
                 .map(|guide| guide.sort_key(quest.quest_index, *position).1)
                 .unwrap_or(i32::MAX),
-            GuidedDiaryTab::Ready | GuidedDiaryTab::Side => {
+            GuidedDiaryTab::Ready | GuidedDiaryTab::Side | GuidedDiaryTab::Daily | GuidedDiaryTab::Weekly => {
                 -quest.min_level_needed.max(0)
             }
         };
@@ -4044,17 +4109,20 @@ fn render_guided_quest_diary_panel(
 
     for (index, tab) in GuidedDiaryTab::ALL.into_iter().enumerate() {
         let count = guided_diary_quests(tracker, Some(guidance), journey, tab).len();
-        let label = format!("{} {count}", crate::player_text::text(tab.label()));
+        let label = format!("{} {count}", tab.localized_label());
+        let (x, y, width) = if index < 3 {
+            (15.0 + index as f32 * 96.0, 37.0, 92.0)
+        } else { (15.0 + (index - 3) as f32 * 144.0, 63.0, 140.0) };
         quest_log_text_button_at(
             parent,
-            QuestLogRect::new(15.0 + index as f32 * 96.0, 37.0, 92.0, 23.0),
+            QuestLogRect::new(x, y, width, 23.0),
             &label,
             QuestUiButton::SelectGuidedDiaryTab(tab),
             true,
         );
         if state.diary_tab == tab {
             quest_log_text_at(
-                parent, "●", QuestLogRect::new(18.0 + index as f32 * 96.0, 42.0, 12.0, 12.0),
+                parent, "●", QuestLogRect::new(x + 3.0, y + 5.0, 12.0, 12.0),
                 8.0, PANEL_HIGHLIGHT, Justify::Left,
             );
         }
@@ -4066,13 +4134,15 @@ fn render_guided_quest_diary_panel(
             .unwrap_or_else(|| "当前主线".to_owned()),
         GuidedDiaryTab::Ready => "已完成目标 · 可前往交付".to_owned(),
         GuidedDiaryTab::Side => "其他任务 · 可自行选择完成".to_owned(),
+        GuidedDiaryTab::Daily => crate::native_i18n::key("periodic.diary.reset.daily", "Daily, 00:00 (UTC+8)"),
+        GuidedDiaryTab::Weekly => crate::native_i18n::key("periodic.diary.reset.weekly", "Monday, 00:00 (UTC+8)"),
     };
     quest_log_text_at(
-        parent, &heading, QuestLogRect::new(19.0, 68.0, 276.0, 15.0),
+        parent, &heading, QuestLogRect::new(19.0, 92.0, 276.0, 15.0),
         9.0, PANEL_HIGHLIGHT, Justify::Left,
     );
     quest_log_text_at(
-        parent, "左键查看详情 · 右键跟踪任务", QuestLogRect::new(19.0, 86.0, 276.0, 15.0),
+        parent, "左键查看详情 · 右键跟踪任务", QuestLogRect::new(19.0, 111.0, 276.0, 15.0),
         8.0, PANEL_TEXT, Justify::Left,
     );
 
@@ -4085,7 +4155,7 @@ fn render_guided_quest_diary_panel(
         .take(GUIDED_DIARY_PAGE_SIZE)
         .enumerate()
     {
-        let y = 108.0 + index as f32 * 36.0;
+        let y = 133.0 + index as f32 * 33.0;
         let quest_index = quest.quest_index;
         let current = journey.and_then(|view| view.next.as_ref())
             .is_some_and(|step| step.quest_id == quest_index);
@@ -4145,13 +4215,19 @@ fn render_guided_quest_diary_panel(
         });
     }
 
+    if matches!(state.diary_tab, GuidedDiaryTab::Daily | GuidedDiaryTab::Weekly)
+        && guided_diary_quests(tracker, Some(guidance), journey, state.diary_tab).is_empty() {
+        quest_log_text_at(parent, "Visit a Task Steward in Bichon or Mongchon to view available tasks.",
+            QuestLogRect::new(22.0, 133.0, 274.0, 54.0), 9.0, PANEL_TEXT, Justify::Left);
+    }
+
     if state.diary_tab == GuidedDiaryTab::Main {
         if let Some(graduation) = journey.and_then(|view| view.graduation.as_ref()) {
             for (index, option) in graduation.options.iter().enumerate() {
                 let selected = state.selected_graduation_direction == Some(option.direction);
                 quest_log_text_button_at(
                     parent,
-                    QuestLogRect::new(22.0, 114.0 + index as f32 * 72.0, 272.0, 27.0),
+                    QuestLogRect::new(22.0, 138.0 + index as f32 * 72.0, 272.0, 27.0),
                     &format!("{} {}", if selected { "●" } else { "+" },
                         truncate_chars(&crate::player_text::text(&option.title), 29)),
                     QuestUiButton::SelectGraduationDirection { direction: option.direction },
@@ -4159,7 +4235,7 @@ fn render_guided_quest_diary_panel(
                 );
                 quest_log_text_at(
                     parent, &truncate_chars(&crate::player_text::text(&option.summary), 42),
-                    QuestLogRect::new(27.0, 145.0 + index as f32 * 72.0, 264.0, 30.0),
+                    QuestLogRect::new(27.0, 169.0 + index as f32 * 72.0, 264.0, 30.0),
                     8.0, PANEL_TEXT, Justify::Left,
                 );
             }
@@ -4167,7 +4243,7 @@ fn render_guided_quest_diary_panel(
             GuidedDiaryTab::Main).is_empty() {
             quest_log_text_at(
                 parent, "暂无可显示的主线，完成前置任务后刷新。",
-                QuestLogRect::new(22.0, 119.0, 274.0, 32.0),
+                QuestLogRect::new(22.0, 133.0, 274.0, 32.0),
                 9.0, PANEL_TEXT, Justify::Left,
             );
         }
@@ -4467,16 +4543,21 @@ fn push_quest_guidance(
     push_quest_detail_section(lines, "Newcomer Guide", detail);
 }
 
-fn quest_objective_detail_text(objective: &crate::quest_model::QuestObjective) -> String {
+fn quest_objective_detail_text(quest_index: i32, objective_index: usize, objective: &crate::quest_model::QuestObjective) -> String {
     let compact = format!("{}/{}", objective.current, objective.target);
     let spaced = objective.progress_label();
+    let label = crate::player_text::quest_objective_label(quest_index, objective_index, &objective.text);
+    if mir2_game_data::periodic_quests::quest(quest_index)
+        .is_some_and(|definition| definition.kills.get(objective_index).is_some()) {
+        return format!("{label} ({spaced})");
+    }
     if objective.target == 0
         || objective.text.contains(&compact)
         || objective.text.contains(&spaced)
     {
-        crate::player_text::quest_objective(&objective.text)
+        label
     } else {
-        format!("{} ({spaced})", crate::player_text::quest_objective(&objective.text))
+        format!("{label} ({spaced})")
     }
 }
 
@@ -4567,7 +4648,8 @@ fn quest_detail_lines(quest: &Quest, guidance: Option<&QuestGuidance>, class_nam
             quest
                 .objectives
                 .iter()
-                .map(quest_objective_detail_text)
+                .enumerate()
+                .map(|(index, objective)| quest_objective_detail_text(quest.quest_index, index, objective))
                 .collect::<Vec<_>>(),
         );
     }
@@ -9139,7 +9221,7 @@ mod tests {
             }));
             assert_eq!(world.query::<&QuestUiButton>().iter(&world)
                 .filter(|button| matches!(button, QuestUiButton::SelectGuidedDiaryTab(_)))
-                .count(), 3);
+                .count(), GuidedDiaryTab::ALL.len());
         }
     }
 

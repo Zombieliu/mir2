@@ -170,6 +170,19 @@ struct Entry {
     #[serde(default)]
     aliases: Vec<String>,
 }
+
+/// New authored content supplies all nine locales together, independent of
+/// the generated legacy overlays. Missing languages fail catalog validation.
+#[derive(Deserialize)]
+struct FullLocaleCatalogFile { entries: Vec<FullLocaleEntry> }
+#[derive(Deserialize)]
+struct FullLocaleEntry {
+    key: String,
+    #[serde(default)]
+    aliases: Vec<String>,
+    #[serde(flatten)]
+    translations: HashMap<String, String>,
+}
 struct Catalog {
     values: Vec<[String; Locale::COUNT]>,
     keys: HashMap<String, usize>,
@@ -253,6 +266,29 @@ fn catalog() -> &'static Catalog {
                 }
                 result.values.push(values);
             }
+        }
+        let authored: FullLocaleCatalogFile = serde_json::from_str(include_str!(
+            "../../../../packages/game-data/data/native-i18n/periodic.json"
+        )).expect("validated periodic locale catalog");
+        for entry in authored.entries {
+            assert_eq!(entry.translations.len(), Locale::COUNT, "periodic entry must contain exactly nine locales");
+            let values: [String; Locale::COUNT] = ["en", "zh-TW", "pt-BR", "ru", "hi", "id", "vi", "th", "ar"]
+                .map(|code| entry.translations.get(code)
+                    .filter(|text| !text.trim().is_empty())
+                    .expect("periodic locale must be present and nonempty").clone());
+            let index = result.values.len();
+            let npc_caption = entry.key.starts_with("periodic.accept.") || entry.key.starts_with("periodic.complete.");
+            assert!(result.keys.insert(entry.key, index).is_none(), "periodic key must not replace existing vocabulary");
+            for source in values.iter().cloned().chain(entry.aliases) {
+                if source.is_empty() { continue; }
+                // These complete authored captions contain a known quest title,
+                // not an opaque NPC/player argument captured by a legacy template.
+                if npc_caption { result.npc_exact.insert(source.clone(),index); }
+                if template_parts(&source).iter().any(|part| matches!(part, Part::Slot(_))) {
+                    result.templates.insert(&source, index);
+                } else { result.exact.insert(source, index); }
+            }
+            result.values.push(values);
         }
         result.templates.finish();
         result.npc_templates.finish();

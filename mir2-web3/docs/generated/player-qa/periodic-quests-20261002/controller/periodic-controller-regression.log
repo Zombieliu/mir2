@@ -1,0 +1,174 @@
+✔ level 10 selects exact three-daily/two-weekly acceptance tier (1.4364ms)
+✔ level 14 selects exact three-daily/two-weekly acceptance tier (3.3166ms)
+✔ level 15 selects exact three-daily/two-weekly acceptance tier (0.0918ms)
+✔ level 24 selects exact three-daily/two-weekly acceptance tier (0.134ms)
+✔ level 25 selects exact three-daily/two-weekly acceptance tier (0.0742ms)
+✔ level 34 selects exact three-daily/two-weekly acceptance tier (0.0636ms)
+✔ level 35 selects exact three-daily/two-weekly acceptance tier (0.0913ms)
+✔ level 50 selects exact three-daily/two-weekly acceptance tier (0.0671ms)
+✔ outside levels, missing cadence slot and duplicate IDs fail closed (1.0156ms)
+✔ ordinary QA requires explicit owned fixture provenance and safe plain loopback endpoint (0.6797ms)
+✔ character identity uses server-owned class and initial level (1.7791ms)
+✔ all twenty tasks resolve real, indexed ordinary monster sources on authored allowed maps (3.0702ms)
+✔ offers must be unique and Available; claimed or resumed rows are not a fresh timing run (0.875ms)
+✔ merged farming picks visible pending daily targets and excludes weekly-only or completed objectives (1.8485ms)
+✔ same name with an explicit wrong monster index, dead actor or disallowed map is never a target (0.7337ms)
+✔ kill credit is exact-ID and exact-index, with daily and weekly increments independently recorded (0.8404ms)
+✔ accepted reward preview is bound to server ID, tier, gold and task counts (1.195ms)
+✔ reward proof survives level rollover and rejects unrelated ACK, missing removal or reward mismatch (0.3298ms)
+✔ private account, password, nested tokens and embedded rejection strings are redacted from disk projection (0.4336ms)
+✔ bounded wrapper preserves normal commands and forbids all runtime injection and account creation (0.2963ms)
+✔ public weapon toggle is permitted while QA commands remain forbidden (1.7719ms)
+✔ start-game bootstrap accepts the exact personal snapshot when UserInformation is omitted (0.1935ms)
+✔ trace append retries a transient Windows busy-file error (0.1723ms)
+✔ trace append tolerates sustained Windows scanner share violations (0.2387ms)
+✔ trace redacts incoming identity tokens and outgoing credentials (5.2778ms)
+✔ quest definitions survive event eviction and reset for a new character session (1208.4559ms)
+✔ self damage requests coalesced authoritative vitals snapshots through the public command allowlist (2.4376ms)
+✔ ordinary merchant sale is allowed while QA and direct-state commands remain forbidden (0.8719ms)
+✔ signal interruption still waits for LogOutSuccess before closing the socket (15.0774ms)
+ok - equips a strictly dominating eligible class upgrade
+ok - equips BronzeShortSword over SharpDagger by expected damage at zero Luck
+ok - Taoist without a learned offensive skill equips a held DC upgrade for melee
+ok - Taoist with a learned offensive skill keeps an SC-neutral weapon tradeoff
+ok - Wizard may improve held melee damage only while preserving MC
+ok - expected-damage weapon selection requires zero authoritative Luck and no other regression
+ok - keeps GoldenPendant because PrecisionPendant is an attack-versus-agility tradeoff
+ok - equips a left-labelled bracelet into the empty opposite wrist
+ok - does not replace either occupied wrist with an incomparable bracelet
+ok - does not replace gear for a tradeoff, wrong class, excess level, or missing metadata
+ok - honours a stat-based item requirement
+ok - reads real Gateway snake_case requirements and instance added_stats
+ok - learns only the class beginner book at its authoritative level
+ok - learns every held eligible approved progression book without inventing levels
+ok - approved later books still obey their authoritative required level
+ok - approved book sets cover the three newcomer class progressions
+ok - uses held HP and MP drugs only at conservative deficits
+ok - a fresh own ObjectMana refresh prevents a duplicate MP dose after the exact snapshot recovers
+ok - a fresh own ObjectMana still permits one MP dose when the refreshed exact MP remains low
+ok - MP reuse delay starts at the actual dose after a delayed exact snapshot probe
+ok - another player ObjectMana or a newer exact MP snapshot never probes before an ordinary MP dose
+ok - unknown or empty player object ids never classify ObjectMana as own
+ok - useSupplies accepts the real first-item uniqueId zero
+ok - useSupplies accepts a higher explicit HP recovery threshold
+ok - q89 opt-in prefers held HP Medium without rewriting inventory
+ok - emergency HP recovery sends immediately without awaiting an item acknowledgement
+ok - emergency HP recovery waits for the prior gradual potion dose before using another
+ok - opt-in restorative reuse cannot go below 2500ms
+ok - dead players emit no restorative item or Healing commands
+ok - a rejected restorative refreshes authoritative state without aborting the journey
+ok - Wizard casts exact known FireBall at a target in range
+ok - Wizard prefers ready GreatFireBall and falls back while it cools down
+ok - Wizard falls back to affordable FireBall when GreatFireBall lacks MP
+ok - ordinary Wizard Lightning uses the caster on the wire and the enemy for damage tracking
+ok - ordinary Wizard Lightning accepts all eight canonical rays within six cells
+ok - ordinary Wizard preserves GreatFireBall outside the actual Lightning ray
+ok - ordinary Wizard Lightning requires learned skill, exact MP cost and sampled readiness
+ok - ordinary Wizard preserves FireBall and cooldown waiting when Lightning is unavailable
+ok - ordinary Wizard Lightning uses the fresh owner and target after a movement receipt
+ok - ordinary Wizard never trusts a stale target ray or pre-movement Lightning readiness
+ok - combat approach keeps a ready Wizard FireBall at a safe ranged distance
+ok - Wizard holds spell range and waits without a command while FireBall cools down
+ok - combat approach closes to melee without enough authoritative MP
+ok - combat approach remains melee for other classes
+ok - Taoist Healing targets self when badly hurt
+ok - Taoist class recovery can heal during a non-combat interaction
+ok - opt-in Taoist recovery restores exact MP once, refreshes, then heals without an offense
+ok - MP restoration for class recovery remains opt-in and rejects unavailable Healing evidence
+ok - delayed MP restoration never claims Healing until a fresh exact snapshot can afford it
+ok - class recovery emits no action for Warrior or a Taoist without affordable Healing
+ok - Taoist uses SoulFireBall only with a real equipped standard Amulet
+ok - Taoist reloads a consumed equipped Amulet stack before the next SoulFireBall
+ok - Warrior passive and unknown skills never produce a magic cast
+ok - paralysis waits without spending an attack attempt and attacks after it clears
+ok - unavailable or out-of-range FireBall falls back to ordinary attack
+ok - Wizard ordinary combat refreshes owner-only movement before trusting ready magic
+ok - Taoist ordinary combat refreshes owner-only movement before trusting ready magic
+ok - ordinary combat rereads a moved target after the movement readiness probe
+ok - ordinary combat drops a target absent from the fresh movement readiness frame
+ok - ordinary combat excludes a foreign UserLocation from owner readiness
+ok - ordinary combat uses a ready frame newer than movement without another probe
+61/61 protocol loadout tests passed
+✔ apps\web\scripts\quest-agent\test-protocol-loadout.mjs (53.8621ms)
+✔ NPC accept navigates, opens the actual quest page, and proves ACK plus stage (1.8314ms)
+✔ NPC metadata alone cannot authorize an operation after range navigation (0.5471ms)
+✔ reward definition rejection prevents accepting an otherwise available NPC quest (0.4533ms)
+✔ NPC finish preserves the selected reward index and requires its actual dialog link (0.3253ms)
+✔ Diary metadata permits a no-NPC operation without navigation or interaction (0.3441ms)
+✔ missing NPC and Diary metadata fails closed (0.2096ms)
+✔ an unrelated or rejected acknowledgement cannot prove an operation (0.3057ms)
+✔ V2 shops choose medium/large MP by level while retaining real carried small medicine (4.6303ms)
+✔ V2 buys all minima before optional top-ups instead of spending MP/escape money on HP (1.3882ms)
+✔ V2 Taoist buys real charges at Bull and Travis using normal room travel and receipts (1.6412ms)
+✔ V2 optional HP top-up respects remaining bag weight without rejecting confirmed departure minima (1.3703ms)
+✔ V2 insufficient gold, excess weight and unconfirmed purchases return blocked (1.2116ms)
+✔ V2 return travel that consumes the final material never returns restocked (1.0251ms)
+✔ V2 optional top-up preserves money when shop travel consumes another material minimum (0.7993ms)
+✔ reports preferred weapon funding for an unarmed or under-geared Warrior (0.4498ms)
+✔ reports and buys the live class weapon when a caster lost every weapon (2.0965ms)
+✔ under-geared Warrior upgrades Dagger to the preferred BronzeAxe without a lower-tier fallback (0.7238ms)
+✔ unarmed Warrior buys the best affordable live Blacksmith weapon with exact proof (0.3989ms)
+✔ unarmed Warrior falls back to the strongest affordable exact catalog row (0.3373ms)
+✔ weapon purchase proves the live Blacksmith rate-adjusted price (0.2842ms)
+✔ q7 Taoist uses the live BronzeSword fallback at 960 only after its held survival floor is proven (0.6203ms)
+✔ q7 Taoist prefers the live IronSword when its ordinary account gold covers it (0.3525ms)
+✔ q7 Taoist forest upgrade fails before shopping when held survival supplies are insufficient (0.169ms)
+✔ q7 Taoist rechecks held survival supplies after Blacksmith travel before spending the reserve (0.2973ms)
+✔ q7 Taoist forest upgrade still requires a fresh exact purchase receipt (0.5473ms)
+✔ ordinary class weapon restocking retains its reserve and does not use the q7 exception (0.1561ms)
+✔ q7 Taoist leaves an existing non-Wooden weapon in place and never buys a weaker fallback (0.2154ms)
+✔ recomputes caster stock after service travel consumes the departure-floor MP bottle (0.8048ms)
+✔ does nothing outside map 0 or when relevant stock is sufficient (0.1915ms)
+✔ ordinary restock does not buy RandomTeleport unless explicitly requested (0.1321ms)
+✔ Wizard-only HP Medium opt-in buys the live Ruben row to target six (0.3101ms)
+✔ HP Medium opt-in skips safely when the fresh Ruben row is missing or unaffordable (0.5792ms)
+✔ ordinary restock does not buy TownTeleport unless explicitly requested (0.4748ms)
+✔ opt-in TownTeleport reserve uses Scott goods when Ruben lacks TownTeleport (0.4694ms)
+✔ TownTeleport restock refreshes a missing live Scott before opening his real goods (0.2898ms)
+✔ Scott travel refreshes a Taoist Amulet floor from one fresh Ruben receipt (0.9845ms)
+✔ post-Scott Amulet refresh fails closed from live gold without spending the reserve (0.6155ms)
+✔ Scott TownTeleport failures and unknown live gold do not fall through to Ruben (0.537ms)
+✔ fresh Ruben funding sells one live Venison before Amulet and TownTeleport purchases (1.3077ms)
+✔ fresh Ruben funding skips the material top-up when the live budget already covers both purchases (0.5069ms)
+✔ fresh Ruben funding preserves the reserve and fails closed when no eligible material can top up (1.1179ms)
+✔ fresh Ruben funding rejects a sale and ignores a recycled non-material item id (1.8493ms)
+✔ TownTeleport funding shortfall reports needsFunds after Ruben potions without visiting Scott (0.3324ms)
+✔ explicit eight-scroll route reserve buys exact Merchant Ruben rows and proves deltas (0.2888ms)
+✔ emergency reserve liquidates Venison until all requested RandomTeleport scrolls are affordable (0.4042ms)
+✔ emergency reserve is a target and does not repurchase an existing full stock (0.2721ms)
+✔ RandomTeleport use requires an ack, a fresh quantity decrease, and changed position (0.3764ms)
+✔ RandomTeleport use fails closed on a rejected ack (0.1331ms)
+✔ TownTeleport use proves consumption and accepts a map change with unchanged coordinates (0.3245ms)
+✔ TownTeleport UseItem rejection leaves the authoritative item unconsumed (0.1021ms)
+✔ TownTeleport false ack cannot be treated as consumption (0.0931ms)
+✔ shared emergency escape cooldown conserves scrolls across independent loops (0.2199ms)
+✔ insufficient funds preserves the 100 gold reserve and sends no command (0.09ms)
+✔ journey mode sells only provably superseded quest gear before buying survival stock (0.5808ms)
+✔ journey liquidation accepts Crystal Blacksmith combined BuySell service (0.3342ms)
+✔ journey recovery sells obsolete materials but preserves an active quest item (0.4491ms)
+✔ journey recovery sells harvested Venison to Butcher John before buying potions (0.3553ms)
+✔ Warrior buys HP only through the fresh Ruben row id and proves exact snapshot deltas (0.221ms)
+✔ V2 Basic Potion uses the live Bichon Wall Samuel object and its fresh row receipt (0.4067ms)
+✔ V2 Samuel purchase fails closed for a wrong goods row, absent receipt, or insufficient gold (0.4242ms)
+✔ restock clears an adjacent hostile that seals the supply service approach (0.4321ms)
+✔ restock clears a distant hostile that seals every final service approach (0.2978ms)
+✔ a distant village service receives a route budget derived from authoritative distance (0.2152ms)
+✔ large restock fills the partial potion stack before buying the overflow chunk (0.2994ms)
+✔ Taoist does not detour for Amulets before level 18 or without learned SoulFireBall (0.197ms)
+✔ caster stocks both HP and MP while preserving the fixed gold reserve (0.5324ms)
+✔ equips an eligible held Amulet into slot 9 even when total stock is already sufficient (0.7435ms)
+✔ moves a milestone Amulet stack from its authoritative belt slot before equipping slot 9 (0.4848ms)
+✔ belt Amulet movement remains fail closed for level, space, rejection, and stale snapshots (0.5464ms)
+✔ a tight caster budget buys a bounded HP partial and never spends the reserve (0.1895ms)
+✔ Wizard with 600 gold reaches both six-potion targets and preserves the reserve (0.2308ms)
+✔ requires a live exact Ruben and an enabled exact BuySell link (0.3524ms)
+✔ rejects stale, missing, or malformed goods instead of guessing a shop row (0.635ms)
+✔ silent rejection and incorrect authoritative deltas cannot prove purchase (0.5692ms)
+ℹ tests 104
+ℹ suites 0
+ℹ pass 104
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1298.6276

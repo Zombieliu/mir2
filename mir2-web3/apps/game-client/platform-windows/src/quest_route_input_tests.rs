@@ -4,6 +4,180 @@ use mir2_client_bevy::chat::ChatModel;
 use mir2_client_bevy::quest_ui::QuestUiState;
 use mir2_client_bevy::quest_supplies::SupplyVendor;
 
+fn task_steward_app(npc_id: u32, origin: (i32, i32)) -> (
+    bevy::prelude::App,
+    std::sync::mpsc::Receiver<GatewayCommand>,
+    QuestRouteNavigationIntent,
+) {
+    use mir2_client_bevy::quest_model::{Quest, QuestStatus};
+    let npc = mir2_game_data::periodic_quests::npc(npc_id).unwrap();
+    let definition = mir2_game_data::periodic_quests::quest(92010).unwrap();
+    let info = definition.info(12_345, definition.gold);
+    let (mut app, receiver, _) = d401_route_app();
+    app.world_mut().resource_mut::<BigMapModel>().set_current_map(npc.map_index);
+    let epoch = app.world().resource::<BigMapModel>().reset_epoch;
+    app.insert_resource(QuestTracker { active_quests: vec![Quest {
+        quest_index: definition.id, title: info.name, status: QuestStatus::ReadyToTurnIn,
+        accept_npc_index: Some(2180), finish_npc_index: Some(2180),
+        npc_name: Some("Bichon Task Steward".into()), group: Some(info.group),
+        min_level_needed: definition.min_level, detail: Default::default(),
+        objectives: vec![], rewards: vec![], unknown_text: None,
+    }] });
+    app.world_mut().resource_mut::<QuestUiState>().pinned_primary_quest_index = Some(definition.id);
+    {
+        let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+        entities.entities.retain(|entity| entity.kind == EntityKind::SelfPlayer);
+        entities.entities[0].x = origin.0;
+        entities.entities[0].y = origin.1;
+        entities.entities.push(EntityModel {
+            object_id: npc_id.to_string(), kind: EntityKind::Npc, name: npc.name.clone(),
+            x: npc.x, y: npc.y, level: None, direction: None,
+        });
+    }
+    app.world_mut().resource_mut::<NativeEntityPresentation>()
+        .observe_packet_payload(serde_json::json!({"mapFileName": npc.map}), 0);
+    let intent = QuestRouteNavigationIntent { target: QuestRouteTarget::TaskNpc { object_id: npc_id },
+        quest_index: definition.id, reset_epoch: epoch, map_index: npc.map_index, x: npc.x, y: npc.y };
+    (app, receiver, intent)
+}
+
+#[test]
+fn periodic_task_steward_navigation_reaches_both_towns_with_ordinary_acknowledged_moves() {
+    for (npc_id, origin) in [(2180, (335, 280)), (2181, (348, 330))] {
+        let npc = mir2_game_data::periodic_quests::npc(npc_id).unwrap();
+        let (mut app, receiver, intent) = task_steward_app(npc_id, origin);
+        assert_eq!(crate::map_parser::map_cell_blocks_player_movement(&npc.map, origin.0, origin.1), Some(false));
+        assert!(app.world().resource::<BigMapModel>().current_map().is_none(), "no Big Map cache is required");
+        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Left);
+        app.update();
+        assert!(receiver.try_recv().is_err(), "the card press cannot leak into the world");
+        assert!(!app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        {
+            let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+            mouse.clear_just_pressed(MouseButton::Left);
+            mouse.release(MouseButton::Left);
+        }
+        app.update();
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().clear();
+        let destination = app.world().resource::<WorldPointerMovementState>().auto_path_destination
+            .expect("fixture starts outside the NPC approach range");
+        assert_ne!(destination, (npc.x, npc.y));
+        assert!(chebyshev_distance(destination, (npc.x, npc.y)) <= 2);
+        let mut arrived = false;
+        for _ in 0..96 {
+            app.update();
+            let command = receiver.try_recv().expect("a Task Steward approach keeps advancing");
+            assert!(matches!(command, GatewayCommand::Player(PlayerIntent::Walk { .. } | PlayerIntent::Run { .. })),
+                "no map-change, teleport, interaction, attack or reward command: {command:?}");
+            let pending = app.world().resource::<WorldPointerMovementState>().pending.back().unwrap().clone();
+            let (dx, dy) = direction_to_delta(pending.direction);
+            for step in 1..=chebyshev_distance(pending.from, pending.to) {
+                let tile = (pending.from.0 + dx * step, pending.from.1 + dy * step);
+                assert_eq!(crate::map_parser::map_cell_blocks_player_movement(&npc.map, tile.0, tile.1), Some(false));
+                assert_ne!(tile, (npc.x, npc.y), "the NPC's occupied cell is never exempted");
+            }
+            app.update();
+            assert!(receiver.try_recv().is_err(), "wait for the authoritative movement ACK");
+            {
+                let mut entities = app.world_mut().resource_mut::<EntityModelSet>();
+                entities.entities[0].x = pending.to.0;
+                entities.entities[0].y = pending.to.1;
+            }
+            push_test_movement_ack(&app, pending.to.0, pending.to.1, pending.direction);
+            advance_movement_clock(&mut app, 600);
+            if pending.to == destination {
+                app.update();
+                assert!(receiver.try_recv().is_err());
+                let movement = app.world().resource::<WorldPointerMovementState>();
+                assert!(movement.map_auto_path.is_none() && movement.auto_path_destination.is_none());
+                assert!(movement.hunt_arrival.is_none() && movement.attack_target.is_none());
+                assert!(!app.world().resource::<NpcDialogModel>().is_open, "arrival does not remotely open a dialog");
+                assert_eq!(app.world().resource::<BigMapModel>().current_map_index, Some(npc.map_index));
+                assert_eq!(app.world().resource::<QuestTracker>().active_quests[0].status,
+                    mir2_client_bevy::quest_model::QuestStatus::ReadyToTurnIn,
+                    "navigation cannot finish a quest or grant rewards");
+                arrived = true;
+                break;
+            }
+        }
+        assert!(arrived, "NPC {npc_id} approach exceeded its bounded move budget");
+    }
+}
+
+#[test]
+fn periodic_task_steward_navigation_revalidates_held_click_before_starting() {
+    for changed in ["coordinate", "npc", "quest", "completed", "primary", "missing", "epoch", "map", "scene-map"] {
+        let (mut app, receiver, mut intent) = task_steward_app(2181, (348, 330));
+        if changed == "coordinate" { intent.x += 1; }
+        if changed == "npc" { intent.target = QuestRouteTarget::TaskNpc { object_id: 2180 }; }
+        if changed == "quest" { intent.quest_index = 42; }
+        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Left);
+        app.update();
+        assert!(receiver.try_recv().is_err());
+        assert!(!app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        match changed {
+            "completed" => app.world_mut().resource_mut::<QuestTracker>().active_quests[0].status =
+                mir2_client_bevy::quest_model::QuestStatus::Completed,
+            "primary" => app.world_mut().resource_mut::<QuestUiState>().pinned_primary_quest_index = Some(92001),
+            "missing" => { app.world_mut().remove_resource::<QuestTracker>(); },
+            "epoch" => app.world_mut().resource_mut::<BigMapModel>().reset_epoch += 1,
+            "map" => app.world_mut().resource_mut::<BigMapModel>().set_current_map(1),
+            "scene-map" => app.world_mut().resource_mut::<NativeEntityPresentation>()
+                .observe_packet_payload(serde_json::json!({"mapFileName":"0"}), 0),
+            _ => (),
+        }
+        {
+            let mut mouse = app.world_mut().resource_mut::<ButtonInput<MouseButton>>();
+            mouse.clear_just_pressed(MouseButton::Left);
+            mouse.release(MouseButton::Left);
+        }
+        app.update();
+        assert!(receiver.try_recv().is_err(), "{changed}: stale intent emitted a command");
+        assert!(app.world().resource::<QuestRouteNavigationIntentQueue>().is_empty());
+        assert!(app.world().resource::<WorldPointerMovementState>().map_auto_path.is_none(), "{changed}");
+        assert!(app.world().resource::<QuestUiState>().feedback.as_ref().is_some_and(|f| f.is_error), "{changed}");
+    }
+}
+
+#[test]
+fn periodic_task_steward_navigation_already_nearby_never_attacks_or_submits_a_quest() {
+    let (mut app, receiver, intent) = task_steward_app(2180, (335, 268));
+    app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+    app.update();
+    assert!(receiver.try_recv().is_err());
+    let movement = app.world().resource::<WorldPointerMovementState>();
+    assert!(movement.map_auto_path.is_none());
+    assert!(movement.attack_target.is_none() && movement.hunt_arrival.is_none());
+    assert!(!app.world().resource::<NpcDialogModel>().is_open);
+    assert!(!app.world().resource::<QuestUiState>().feedback.as_ref().unwrap().is_error);
+}
+
+#[test]
+fn periodic_task_steward_navigation_preserves_map_reset_and_manual_escape_cancellation() {
+    for changed in ["same-map-reset", "map", "scene-map", "escape"] {
+        let (mut app, receiver, intent) = task_steward_app(2181, (348, 330));
+        app.world_mut().resource_mut::<QuestRouteNavigationIntentQueue>().push(intent);
+        app.update();
+        assert!(receiver.try_recv().is_err());
+        assert!(app.world().resource::<WorldPointerMovementState>().map_auto_path.is_some());
+        match changed {
+            "same-map-reset" => app.world_mut().resource_mut::<BigMapModel>().reset_for_map(172, None),
+            "map" => app.world_mut().resource_mut::<BigMapModel>().set_current_map(1),
+            "scene-map" => app.world_mut().resource_mut::<NativeEntityPresentation>()
+                .observe_packet_payload(serde_json::json!({"mapFileName":"0"}), 0),
+            "escape" => app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::Escape),
+            _ => unreachable!(),
+        }
+        app.update();
+        assert!(receiver.try_recv().is_err(), "{changed}: canceled route emitted movement");
+        let movement = app.world().resource::<WorldPointerMovementState>();
+        assert!(movement.map_auto_path.is_none() && movement.auto_path_destination.is_none());
+        assert!(movement.attack_target.is_none() && movement.hunt_arrival.is_none());
+    }
+}
+
 fn poison_supply_app(file: &str, map_index: i32, origin: (i32, i32)) -> (
     bevy::prelude::App,
     std::sync::mpsc::Receiver<GatewayCommand>,

@@ -68,7 +68,7 @@ enum Place {
 
 fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: &MapModel, big_map: Option<&BigMapModel>) -> Place {
     if quest.status == QuestStatus::InProgress {
-        let targets = crate::quest_destination::authored_target_map_indices(quest.quest_index);
+        let targets = crate::quest_destination::active_target_map_indices(quest);
         if !targets.is_empty() {
             let Some(current_map) = big_map.and_then(|model| model.current_map_index) else {
                 return Place::Unknown;
@@ -81,7 +81,7 @@ fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: 
                 {
                     return Place::Route(step);
                 }
-                return authored_other_map(quest.quest_index, Some(current_map))
+                return authored_other_map(quest, Some(current_map))
                     .map_or(Place::Unknown, Place::Other);
             }
         }
@@ -92,9 +92,14 @@ fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: 
             distance: target.distance,
         };
     }
-    if let Some(npc) = super::turn_in::destination(quest) {
+    if let Some(npc) = super::turn_in::destination_on_map(quest, big_map.and_then(|map| map.current_map_index)) {
         return if big_map.and_then(|model| model.current_map_index) == Some(npc.map_index) {
             Place::Current { label: npc.label(), distance: map.center_x.abs_diff(npc.x).max(map.center_y.abs_diff(npc.y)) }
+        } else if mir2_game_data::periodic_quests::is_periodic(quest.quest_index) {
+            match super::route::resolve(big_map.and_then(|map| map.current_map_index), &[npc.map_index]) {
+                super::route::QuestRoute::NextStep(step) => Place::Route(step),
+                _ => Place::Other(npc.label()),
+            }
         } else { Place::Other(npc.label()) };
     }
     if quest.status == QuestStatus::InProgress {
@@ -136,9 +141,9 @@ fn place(quest: &Quest, tracker: &QuestTracker, entities: &EntityModelSet, map: 
     Place::Unknown
 }
 
-fn authored_other_map(quest_index: i32, current_map: Option<i32>) -> Option<String> {
+fn authored_other_map(quest: &Quest, current_map: Option<i32>) -> Option<String> {
     let current_map = current_map?;
-    let targets = crate::quest_destination::authored_target_map_indices(quest_index);
+    let targets = crate::quest_destination::active_target_map_indices(quest);
     if targets.contains(&current_map) {
         return None;
     }
@@ -168,6 +173,18 @@ fn hunt_navigation(quest: &Quest, map: &MapModel, big_map: Option<&BigMapModel>)
     })
 }
 
+fn task_npc_navigation(quest: &Quest, big_map: Option<&BigMapModel>) -> Option<QuestRouteNavigationIntent> {
+    if !mir2_game_data::periodic_quests::is_periodic(quest.quest_index) { return None; }
+    let big_map = big_map?;
+    let target = super::turn_in::destination_on_map(quest, big_map.current_map_index)?;
+    if big_map.current_map_index != Some(target.map_index) { return None; }
+    Some(QuestRouteNavigationIntent {
+        target: QuestRouteTarget::TaskNpc { object_id: target.object_id },
+        quest_index: quest.quest_index, reset_epoch: big_map.reset_epoch,
+        map_index: target.map_index, x: target.x, y: target.y,
+    })
+}
+
 fn nearby_indices(primary: i32, tracker: &QuestTracker, entities: &EntityModelSet, map: &MapModel, big_map: Option<&BigMapModel>) -> Vec<i32> {
     let mut candidates = tracker.active_quests.iter()
         .filter(|q| q.quest_index != primary && q.status.is_active())
@@ -189,7 +206,7 @@ fn objective_lines(quest: &Quest, class_name: &str) -> Vec<String> {
                 crate::player_text::format_named("quest.practice.progress", "职业练习 {current}/{total}：{summary}", &[("current", &o.current.to_string()), ("total", &o.target.to_string()), ("summary", &guide.summary)])
             }
         } else {
-            format!("{}  {}/{}", crate::player_text::quest_objective(&o.text), o.current, o.target)
+            format!("{}  {}/{}", crate::player_text::quest_objective_label(quest.quest_index, index, &o.text), o.current, o.target)
         }
     }).collect()
 }
@@ -281,6 +298,7 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
     supplies: &crate::quest_supplies::SupplyPlan) -> bool {
     let Some(primary) = primary_quest_index(tracker, state, journey) else { return false; };
     let Some(quest) = tracker.active_quests.iter().find(|q| q.quest_index == primary) else { return false; };
+    let periodic = mir2_game_data::periodic_quests::quest(quest.quest_index);
     let nearby = nearby_indices(primary, tracker, entities, map, big_map);
     parent.spawn((
         Node { position_type: PositionType::Absolute, left: Val::Px(8.0), top: Val::Px(16.0), width: Val::Px(304.0),
@@ -291,17 +309,28 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
         GuidanceViewport, RelativeCursorPosition::default(),
         ScrollPosition(Vec2::new(0.0, state.guidance_scroll_y)), FocusPolicy::Block,
     )).with_children(|card| {
-        if let Some(journey) = journey {
+        if let Some(journey) = journey.filter(|_| periodic.is_none()) {
             line(card, format!("{} · {}", crate::player_text::text(&journey.chapter_title), crate::player_text::text(&journey.progress_label())), PANEL_TEXT);
+        }
+        if let Some(definition) = periodic {
+            line(card, match definition.cadence {
+                mir2_game_data::periodic_quests::PeriodicCadence::Daily => "Daily Tasks",
+                mir2_game_data::periodic_quests::PeriodicCadence::Weekly => "Weekly Tasks",
+            }, PANEL_HIGHLIGHT);
         }
         line(card, format!("当前任务 · {}", crate::player_text::quest_title(quest.quest_index, &quest.title)), PANEL_HIGHLIGHT);
         for objective in objective_lines(quest, class_name) { line(card, objective, Color::WHITE); }
         let next = journey.and_then(|j| j.next.as_ref()).filter(|s| s.quest_id == primary);
         if quest.status == QuestStatus::ReadyToTurnIn {
-            line(card, next.map(|s| s.action.clone()).unwrap_or_else(|| quest.npc_name.as_ref()
-                .map(|n| format!("返回 {} 交付任务", crate::player_text::name(n))).unwrap_or_else(|| "打开任务详情查看交付方式".into())), FEEDBACK_OK);
+            let action = if periodic.is_some() { "Return to either town Task Steward.".into() }
+                else { next.map(|s| s.action.clone()).unwrap_or_else(|| quest.npc_name.as_ref()
+                    .map(|n| format!("返回 {} 交付任务", crate::player_text::name(n)))
+                    .unwrap_or_else(|| "打开任务详情查看交付方式".into())) };
+            line(card, action, FEEDBACK_OK);
         } else if quest.status == QuestStatus::NotStarted {
-            line(card, next.map(|s| s.action.as_str()).unwrap_or("查看详情领取任务"), FEEDBACK_OK);
+            line(card, if periodic.is_some() {
+                "Visit a Task Steward in Bichon or Mongchon to view available tasks."
+            } else { next.map(|s| s.action.as_str()).unwrap_or("查看详情领取任务") }, FEEDBACK_OK);
         }
         let route = if primary == 2_110_005 && crate::quest_destination::bichon_safe_arrival_pending(tracker) {
             line(card, format!("目的地：比奇城安全区 ({},{})", crate::quest_destination::BICHON_SAFE_X, crate::quest_destination::BICHON_SAFE_Y), FEEDBACK_OK);
@@ -345,6 +374,8 @@ pub(super) fn render(parent: &mut ChildSpawnerCommands, tracker: &QuestTracker, 
                     y: step.entrance_y,
                 },
             ));
+        } else if let Some(intent) = task_npc_navigation(quest, big_map) {
+            button(card, "Go to Task Steward · Auto-route", QuestUiButton::NavigateQuestRoute(intent));
         } else if let Some(intent) = hunt_navigation(quest, map, big_map) {
             // Keep this action independent of live monster visibility. A
             // nearby target hint must not hide the authored hunting area.
@@ -708,10 +739,10 @@ mod tests {
         let maps = &mir2_game_data::crystal_respawn_manifest_ref().maps;
         let bichon = maps.iter().find(|m| m.map_file_name == "0").unwrap();
         let wooma = maps.iter().find(|m| m.map_file_name == "D022").unwrap();
-        assert_eq!(authored_other_map(2_110_019, Some(wooma.map_index)), None);
-        assert!(authored_other_map(2_110_019, Some(bichon.map_index)).unwrap().contains(&crate::player_text::name(&wooma.map_title)));
-        assert_eq!(authored_other_map(2_110_019, None), None);
-        assert_eq!(authored_other_map(12345, Some(bichon.map_index)), None);
+        assert_eq!(authored_other_map(&quest(2_110_019), Some(wooma.map_index)), None);
+        assert!(authored_other_map(&quest(2_110_019), Some(bichon.map_index)).unwrap().contains(&crate::player_text::name(&wooma.map_title)));
+        assert_eq!(authored_other_map(&quest(2_110_019), None), None);
+        assert_eq!(authored_other_map(&quest(12345), Some(bichon.map_index)), None);
     }
 
     #[test]

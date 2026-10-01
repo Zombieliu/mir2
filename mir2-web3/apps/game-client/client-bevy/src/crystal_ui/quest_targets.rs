@@ -18,6 +18,13 @@ pub fn quest_targets_monster(quest: &Quest, monster_name: &str) -> bool {
     if quest.status != QuestStatus::InProgress {
         return false;
     }
+    if let Some(definition) = mir2_game_data::periodic_quests::quest(quest.quest_index) {
+        return definition.kills.iter().enumerate().any(|(index, kill)| {
+            quest.objectives.get(index).is_some_and(|objective| {
+                objective.target > 0 && !objective.is_complete()
+            }) && monster_name_matches(&kill.monster, monster_name)
+        });
+    }
     if let Some(definition) = crate::quest_destination::authored_quest_definition(quest.quest_index) {
         // V2 snapshots order kill objectives before flags. Arrival/equipment/
         // practice descriptions are not monster identities, even if their text
@@ -40,6 +47,13 @@ pub fn quest_targets_monster(quest: &Quest, monster_name: &str) -> bool {
             .iter()
             .filter(|objective| !objective.is_complete())
             .any(|objective| objective_mentions_monster(&objective.text, monster_name))
+}
+
+fn monster_name_matches(expected: &str, actual: &str) -> bool {
+    let expected = normalized_words(expected);
+    let actual = normalized_words(actual);
+    !expected.is_empty() && expected.len() == actual.len()
+        && expected.iter().zip(&actual).all(|(a, b)| equivalent_word(a, b))
 }
 
 /// Whether any current quest still needs this monster.

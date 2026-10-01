@@ -1379,6 +1379,7 @@ fn begin_quest_route_navigation(
     if !quest_route_matches_current_map(intent, big_map) {
         return Err(match intent.target {
             QuestRouteTarget::Entrance => "入口导航已过期；请按当前地图重新选择。",
+            QuestRouteTarget::TaskNpc { .. } => "Task Steward route expired. Select the task again.",
             QuestRouteTarget::Supply { .. } => "补给导航已过期；请按当前地图重新选择。",
             QuestRouteTarget::HuntRegion { .. } => "狩猎区域导航已过期；请按当前地图重新选择。",
         });
@@ -1391,6 +1392,11 @@ fn begin_quest_route_navigation(
             || !tracker.is_some_and(|tracker| intent.matches_active_hunt_region(tracker)))
     {
         return Err("狩猎目标已更新，请使用当前未完成任务的引导。");
+    }
+    if matches!(intent.target, QuestRouteTarget::TaskNpc { .. })
+        && (pinned_primary.is_some_and(|primary| primary != intent.quest_index)
+            || !tracker.is_some_and(|tracker| intent.matches_task_npc_destination(tracker))) {
+        return Err("Task Steward destination changed. Select the task again.");
     }
     let map_file = presentation
         .current_map_file_name()
@@ -1412,13 +1418,16 @@ fn begin_quest_route_navigation(
     );
     let destination = (intent.x, intent.y);
     let hunt_area = match intent.target {
-        QuestRouteTarget::Entrance | QuestRouteTarget::Supply { .. } => None,
+        QuestRouteTarget::Entrance | QuestRouteTarget::Supply { .. } | QuestRouteTarget::TaskNpc { .. } => None,
         QuestRouteTarget::HuntRegion { radius, .. } => Some(big_map_input::HuntArea { center: destination, radius }),
     };
-    let supply_area = if let QuestRouteTarget::Supply { vendor } = intent.target {
-        vendor.route(intent.map_index).filter(|route| !route.is_entrance)
-            .map(|_| big_map_input::HuntArea { center: destination, radius: 2 })
-    } else { None };
+    let supply_area = match intent.target {
+        QuestRouteTarget::Supply { vendor } => vendor.route(intent.map_index)
+            .filter(|route| !route.is_entrance)
+            .map(|_| big_map_input::HuntArea { center: destination, radius: 2 }),
+        QuestRouteTarget::TaskNpc { .. } => Some(big_map_input::HuntArea { center: destination, radius: 2 }),
+        _ => None,
+    };
     let steps = if let Some(area) = hunt_area.or(supply_area) {
         big_map_input::plan_hunt_region(movement, entities, presentation, self_id, map_file, origin, area)?
     } else {
@@ -1993,12 +2002,17 @@ pub fn mouse_world_interaction_system(
                         ui.core.panel = mir2_ui_core::state::UiPanel::None;
                     }
                     if let Some(state) = quest_ui_state.as_deref_mut() {
+                        let target_label = if matches!(intent.target, QuestRouteTarget::TaskNpc { .. }) {
+                            mir2_client_bevy::player_text::text(intent.target.label())
+                        } else {
+                            intent.target.label().to_owned()
+                        };
                         state.set_feedback(if movement.map_auto_path.is_none() {
-                            format!("已到达{}{}", intent.target.label(), if matches!(intent.target, QuestRouteTarget::HuntRegion { .. }) {
+                            format!("已到达{}{}", target_label, if matches!(intent.target, QuestRouteTarget::HuntRegion { .. }) {
                                 "，请选择怪物战斗"
                             } else { "" })
                         } else {
-                            format!("已设置{}路线 ({},{}) · 按 Esc 可停止", intent.target.label(), destination.0, destination.1)
+                            format!("已设置{}路线 ({},{}) · 按 Esc 可停止", target_label, destination.0, destination.1)
                         }, false);
                     }
                 }

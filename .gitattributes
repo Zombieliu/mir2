@@ -41,3 +41,7 @@
 mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt2/** -text -diff
 mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-first-launch/** -text -diff
 mir2-web3/docs/generated/player-qa/periodic-quests-20261002/default-entry/** -text -diff
+mir2-web3/docs/generated/player-qa/periodic-quests-20261002/frontend/** -text -diff
+mir2-web3/docs/generated/player-qa/periodic-quests-20261002/backend/** -text -diff
+mir2-web3/docs/generated/player-qa/periodic-quests-20261002/fixtures/** -text -diff
+mir2-web3/docs/generated/player-qa/periodic-quests-20261002/controller/** -text -diff

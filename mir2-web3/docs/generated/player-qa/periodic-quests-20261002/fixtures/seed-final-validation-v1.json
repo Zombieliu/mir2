@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "scope": "offline prepared equipment-level fixtures, not natural progression or timed kills",
+  "sourceSha256": "06336ad1a8a79067a5213b50d2a3f0771640712e3c1be104684bb9e0aa6fb6f0",
+  "fixtureCount": 27,
+  "storeSha256": "55a801711d130acbe1bfaddde9d845d69cc1792083bacc8a27030f23befe7e23",
+  "measurementCount": 24,
+  "smokeCount": 3,
+  "allInputsValid": true,
+  "scenarios": [
+    {
+      "scenarioId": "measure-Taoist-10",
+      "inputHash": "E7B8013DF6FA07DAAD932F5972D2E246674D29FD56828E5A57C1CB4E992B3D1A",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Taoist-14",
+      "inputHash": "B95F963F3AB37EFD229E0006B5DEDA9214582F2DAA50AE5BC37B76F202D0BFA0",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Taoist-15",
+      "inputHash": "6385F5236A2B672BEE025DFFDF3AD45C3BE63F0597E7DC91B0C6CDB0C481BB55",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Taoist-24",
+      "inputHash": "B433D3B6D37E7D92976A05D8D655857AF01794BD7221CF6463EF75B0433E3FFA",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Taoist-25",
+      "inputHash": "6A462590C48C04108831BB3D601092D04DA156F2FA8C7E9EC52AD40E16B6CFC9",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Taoist-34",
+      "inputHash": "21BCC11E0AD29D40926F90AA1E50145A52C372745F104A6A9E3F57D3B56ADF3D",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Taoist-35",
+      "inputHash": "126BE75B81327A15FAB70CA15371D257881A6B1423D08DB1ADE4AED75E82BB38",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Taoist-50",
+      "inputHash": "5945877BA7863D5BE8A1141520B67FA56F0883945A8EDFFC0242A59D78BAEC49",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Warrior-10",
+      "inputHash": "47EB7CDF592B683E97073FC3E8CDAF2EEE14061FD3C954F75B8AA9FF9CEA28B0",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Warrior-14",
+      "inputHash": "AABC16F82F3EAABD7F4AB65012BECB0974785955BDD4F9C8355A223074A5B5C0",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Warrior-15",
+      "inputHash": "435ADE76A8BF1E229BD803095E3F4889C25A57FC014D0D075399C7945DE268FF",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Warrior-24",
+      "inputHash": "011A79E6A4188EC142FD95E4BB3EA77EFDC2672A3F7891E0A2EAAD4BDC27DDB4",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Warrior-25",
+      "inputHash": "A2462209B2084F4F98A03F559F22994716DDE01DF2431CAA45F3444BA664AAA7",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Warrior-34",
+      "inputHash": "C31CDBC0017CDF4E1A481147B272B8C1E9FD127A80F3D30C4AFBAD4DA3C29596",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Warrior-35",
+      "inputHash": "0DBE5A260802E0C2059926726F3EFB86B1B7153C75031EDE3D16DE13CF54E700",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Warrior-50",
+      "inputHash": "904D96F4ECA39E1E8E58CA60B912A04FC8406AF322212EEFEFD86439FC9AD44E",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Wizard-10",
+      "inputHash": "7E0D41D93354B01C8E657117D726C08F1A6EB3B123E7DF60BC332A4316DFD45B",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Wizard-14",
+      "inputHash": "601F743F67FAD500758140C375E747C44AA7C30BA65BE3FF053E6AC7AE41564F",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Wizard-15",
+      "inputHash": "56FD3DAE3979652C95F3021F16882F2E2847426C37103B58A09D6633B43AAC18",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Wizard-24",
+      "inputHash": "E7EE88BBDEF56C5BBB8834F9410FEFC01AADA297D44257219C120558551FBD00",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Wizard-25",
+      "inputHash": "C99BD0B3D68D87879C4D41774C3BEA269C1381FDD843DB92B02A480518CA9D22",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Wizard-34",
+      "inputHash": "E4C8C371B27245656F2C42DBAF840154B80BA34B4AAC8C184ED031D374BF4428",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Wizard-35",
+      "inputHash": "3BB562848052CFAD242095F8881D3F1AB16CB35457F6158ED626912393AA0995",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "measure-Wizard-50",
+      "inputHash": "9A735F7F4EC4CFD63424C93E0C71169F93F5A7F850E664039259C56D2462E32F",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "smoke-Taoist-10",
+      "inputHash": "F2F3BBBD9A8A296F7BC7C3F1514BE75C2413C4FA3B34EF2A4F74BD2E46C6315D",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "smoke-Warrior-10",
+      "inputHash": "A579B64F315A8F529CD5BC93ACA8F47AD815DA5EDE93F1DA57DCE049704C7986",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    },
+    {
+      "scenarioId": "smoke-Wizard-10",
+      "inputHash": "463BCE30372F09F45E2AD174E8A27B5B3816759A349810D6D3391E0F612C438E",
+      "valid": true,
+      "redactedEvidenceContainsNoPassword": true
+    }
+  ],
+  "logs": [
+    {
+      "name": "seed-periodic-build-attempt-1.log",
+      "sha256": "9DCCA3D4D48224352AC530FB4C8D550B11B1E19F77E8DD8B31CFFC595C1BA697"
+    },
+    {
+      "name": "seed-periodic-build-attempt-5.log",
+      "sha256": "834F6A9D76EBD4B8CC3DDEA704EDBD4DA5F1E788B48BABD2CCF514D27DFB805D"
+    },
+    {
+      "name": "seed-periodic-run-attempt-1.log",
+      "sha256": "8B3FEAAC3A8261C6BA9FFBCCD6502E2AF4D2DBAA8B34ACE6DEF052C8DF8154F0"
+    },
+    {
+      "name": "seed-periodic-run-attempt-4.log",
+      "sha256": "890D93480BA85251602E949BD08FE737030EAD2EC8EAFF33B44C1D7D9FBB0266"
+    }
+  ]
+}

@@ -1,0 +1,3025 @@
+{
+  "schema": 1,
+  "entries": [
+    {
+      "key": "periodic.copy.0",
+      "en": "Daily Tasks",
+      "zh-TW": "日常任務",
+      "pt-BR": "Tarefas diárias",
+      "ru": "Ежедневные задания",
+      "hi": "दैनिक कार्य",
+      "id": "Tugas Harian",
+      "vi": "Nhiệm vụ hằng ngày",
+      "th": "ภารกิจรายวัน",
+      "ar": "المهام اليومية",
+      "aliases": [
+        "Daily Tasks"
+      ]
+    },
+    {
+      "key": "periodic.copy.1",
+      "en": "Weekly Tasks",
+      "zh-TW": "每週任務",
+      "pt-BR": "Tarefas semanais",
+      "ru": "Еженедельные задания",
+      "hi": "साप्ताहिक कार्य",
+      "id": "Tugas Mingguan",
+      "vi": "Nhiệm vụ hằng tuần",
+      "th": "ภารกิจรายสัปดาห์",
+      "ar": "المهام الأسبوعية",
+      "aliases": [
+        "Weekly Tasks"
+      ]
+    },
+    {
+      "key": "periodic.copy.2",
+      "en": "Daily and Weekly Tasks",
+      "zh-TW": "日常與每週任務",
+      "pt-BR": "Tarefas diárias e semanais",
+      "ru": "Ежедневные и еженедельные задания",
+      "hi": "दैनिक और साप्ताहिक कार्य",
+      "id": "Tugas Harian dan Mingguan",
+      "vi": "Nhiệm vụ hằng ngày và hằng tuần",
+      "th": "ภารกิจรายวันและรายสัปดาห์",
+      "ar": "المهام اليومية والأسبوعية",
+      "aliases": [
+        "Daily and Weekly Tasks"
+      ]
+    },
+    {
+      "key": "periodic.copy.3",
+      "en": "Daily reset: 00:00 server time (UTC+8).",
+      "zh-TW": "每日於伺服器時間 00:00（UTC+8）重置。",
+      "pt-BR": "Reinício diário: 00:00 no horário do servidor (UTC+8).",
+      "ru": "Ежедневный сброс: 00:00 по времени сервера (UTC+8).",
+      "hi": "दैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।",
+      "id": "Reset harian: pukul 00:00 waktu server (UTC+8).",
+      "vi": "Đặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).",
+      "th": "รีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)",
+      "ar": "إعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).",
+      "aliases": [
+        "Daily reset: 00:00 server time (UTC+8)."
+      ]
+    },
+    {
+      "key": "periodic.copy.4",
+      "en": "Weekly reset: Monday 00:00 server time (UTC+8).",
+      "zh-TW": "每週一於伺服器時間 00:00（UTC+8）重置。",
+      "pt-BR": "Reinício semanal: segunda-feira, 00:00 no horário do servidor (UTC+8).",
+      "ru": "Еженедельный сброс: понедельник, 00:00 по времени сервера (UTC+8).",
+      "hi": "साप्ताहिक रीसेट: सोमवार, सर्वर समय 00:00 (UTC+8)।",
+      "id": "Reset mingguan: Senin pukul 00:00 waktu server (UTC+8).",
+      "vi": "Đặt lại hằng tuần vào thứ Hai lúc 00:00 theo giờ máy chủ (UTC+8).",
+      "th": "รีเซ็ตรายสัปดาห์วันจันทร์เวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)",
+      "ar": "إعادة الضبط الأسبوعية: الاثنين، 00:00 بتوقيت الخادم (UTC+8).",
+      "aliases": [
+        "Weekly reset: Monday 00:00 server time (UTC+8)."
+      ]
+    },
+    {
+      "key": "periodic.copy.5",
+      "en": "Bichon and Mongchon share these tasks and rewards.",
+      "zh-TW": "比奇與盟重共用任務進度及獎勵記錄。",
+      "pt-BR": "Bichon e Mongchon compartilham o progresso e as recompensas destas tarefas.",
+      "ru": "Бичон и Монгчон используют общий прогресс и награды этих заданий.",
+      "hi": "बिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।",
+      "id": "Bichon dan Mongchon berbagi progres dan hadiah tugas ini.",
+      "vi": "Bichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.",
+      "th": "บิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน",
+      "ar": "تتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.",
+      "aliases": [
+        "Bichon and Mongchon share these tasks and rewards."
+      ]
+    },
+    {
+      "key": "periodic.copy.6",
+      "en": "Unfinished tasks keep their progress after reset.",
+      "zh-TW": "未完成的任務在重置後保留進度。",
+      "pt-BR": "Tarefas inacabadas mantêm o progresso após o reinício.",
+      "ru": "Незавершённые задания сохраняют прогресс после сброса.",
+      "hi": "अधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।",
+      "id": "Tugas yang belum selesai tetap menyimpan progres setelah reset.",
+      "vi": "Nhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.",
+      "th": "ภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต",
+      "ar": "تحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.",
+      "aliases": [
+        "Unfinished tasks keep their progress after reset."
+      ]
+    },
+    {
+      "key": "periodic.copy.7",
+      "en": "Rewards are fixed when you accept the task.",
+      "zh-TW": "獎勵數量在接受任務時確定。",
+      "pt-BR": "As recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Награды фиксируются при принятии задания.",
+      "hi": "कार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Hadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Phần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "รางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "تُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Rewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.copy.8",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Return to either town Task Steward."
+      ]
+    },
+    {
+      "key": "periodic.copy.9",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": [
+        "Task reward claimed for this period."
+      ]
+    },
+    {
+      "key": "periodic.copy.10",
+      "en": "Tasks unlock at level 10. Claimed tasks return after reset.",
+      "zh-TW": "任務於 10 級開放；已領獎的任務在重置後重新開放。",
+      "pt-BR": "As tarefas são liberadas no nível 10. Tarefas já premiadas voltam após o reinício.",
+      "ru": "Задания доступны с 10-го уровня. После сброса полученные задания доступны снова.",
+      "hi": "कार्य स्तर 10 पर खुलते हैं। पुरस्कार लिए गए कार्य रीसेट के बाद फिर मिलेंगे।",
+      "id": "Tugas terbuka pada level 10. Tugas yang hadiahnya telah diklaim tersedia lagi setelah reset.",
+      "vi": "Nhiệm vụ mở ở cấp 10. Nhiệm vụ đã nhận thưởng sẽ xuất hiện lại sau khi đặt lại.",
+      "th": "ภารกิจปลดล็อกเมื่อเลเวล 10 ภารกิจที่รับรางวัลแล้วจะเปิดอีกครั้งหลังรีเซ็ต",
+      "ar": "تُفتح المهام عند المستوى 10. تتاح المهام التي استُلمت مكافآتها مجددًا بعد إعادة الضبط.",
+      "aliases": [
+        "Tasks unlock at level 10. Claimed tasks return after reset."
+      ]
+    },
+    {
+      "key": "periodic.copy.11",
+      "en": "Task could not be saved. Reconnect and try again.",
+      "zh-TW": "任務無法儲存，請重新連線後再試。",
+      "pt-BR": "Não foi possível salvar a tarefa. Reconecte e tente novamente.",
+      "ru": "Не удалось сохранить задание. Переподключитесь и повторите попытку.",
+      "hi": "कार्य सहेजा नहीं जा सका। दोबारा जुड़कर फिर कोशिश करें।",
+      "id": "Tugas tidak dapat disimpan. Hubungkan kembali dan coba lagi.",
+      "vi": "Không thể lưu nhiệm vụ. Hãy kết nối lại và thử lại.",
+      "th": "ไม่สามารถบันทึกภารกิจได้ โปรดเชื่อมต่อใหม่แล้วลองอีกครั้ง",
+      "ar": "تعذر حفظ المهمة. أعد الاتصال وحاول مجددًا.",
+      "aliases": [
+        "Task could not be saved. Reconnect and try again."
+      ]
+    },
+    {
+      "key": "periodic.copy.12",
+      "en": "Visit a Task Steward in Bichon or Mongchon to view available tasks.",
+      "zh-TW": "前往比奇或盟重的任務總管，查看可領取的任務。",
+      "pt-BR": "Visite o responsável por tarefas em Bichon ou Mongchon para ver as tarefas disponíveis.",
+      "ru": "Посетите распорядителя заданий в Бичоне или Монгчоне, чтобы увидеть доступные задания.",
+      "hi": "उपलब्ध कार्य देखने के लिए बिचोन या मोंगचोन के कार्य प्रबंधक से मिलें।",
+      "id": "Kunjungi Pengurus Tugas di Bichon atau Mongchon untuk melihat tugas yang tersedia.",
+      "vi": "Gặp Người quản lý nhiệm vụ tại Bichon hoặc Mongchon để xem nhiệm vụ có thể nhận.",
+      "th": "พบผู้ดูแลภารกิจที่บิชอนหรือมงชอนเพื่อดูภารกิจที่รับได้",
+      "ar": "زُر مشرف المهام في بيشون أو مونغشون لعرض المهام المتاحة.",
+      "aliases": [
+        "Visit a Task Steward in Bichon or Mongchon to view available tasks."
+      ]
+    },
+    {
+      "key": "periodic.copy.13",
+      "en": "Go to Task Steward · Auto-route",
+      "zh-TW": "前往任務總管 · 自動尋路",
+      "pt-BR": "Ir ao responsável · Rota automática",
+      "ru": "К распорядителю · Автомаршрут",
+      "hi": "कार्य प्रबंधक तक · स्वतः मार्ग",
+      "id": "Ke Pengurus Tugas · Rute Otomatis",
+      "vi": "Đến người quản lý · Tự tìm đường",
+      "th": "ไปหาผู้ดูแลภารกิจ · เดินอัตโนมัติ",
+      "ar": "اذهب إلى مشرف المهام · مسار تلقائي",
+      "aliases": [
+        "Go to Task Steward · Auto-route"
+      ]
+    },
+    {
+      "key": "periodic.copy.14",
+      "en": "Task Steward",
+      "zh-TW": "任務總管",
+      "pt-BR": "Responsável por tarefas",
+      "ru": "Распорядитель заданий",
+      "hi": "कार्य प्रबंधक",
+      "id": "Pengurus Tugas",
+      "vi": "Người quản lý nhiệm vụ",
+      "th": "ผู้ดูแลภารกิจ",
+      "ar": "مشرف المهام",
+      "aliases": [
+        "Task Steward"
+      ]
+    },
+    {
+      "key": "periodic.copy.15",
+      "en": "Task Steward route expired. Select the task again.",
+      "zh-TW": "任務總管路線已過期，請重新選擇任務。",
+      "pt-BR": "A rota até o responsável expirou. Selecione a tarefa novamente.",
+      "ru": "Маршрут к распорядителю устарел. Выберите задание снова.",
+      "hi": "कार्य प्रबंधक का मार्ग समाप्त हो गया। कार्य फिर चुनें।",
+      "id": "Rute ke Pengurus Tugas kedaluwarsa. Pilih tugas lagi.",
+      "vi": "Đường đến người quản lý đã hết hiệu lực. Hãy chọn lại nhiệm vụ.",
+      "th": "เส้นทางไปผู้ดูแลภารกิจหมดอายุ โปรดเลือกภารกิจอีกครั้ง",
+      "ar": "انتهت صلاحية المسار إلى مشرف المهام. اختر المهمة مجددًا.",
+      "aliases": [
+        "Task Steward route expired. Select the task again."
+      ]
+    },
+    {
+      "key": "periodic.copy.16",
+      "en": "Task Steward destination changed. Select the task again.",
+      "zh-TW": "任務總管目的地已變更，請重新選擇任務。",
+      "pt-BR": "O destino do responsável mudou. Selecione a tarefa novamente.",
+      "ru": "Место назначения изменилось. Выберите задание снова.",
+      "hi": "कार्य प्रबंधक का गंतव्य बदल गया। कार्य फिर चुनें।",
+      "id": "Tujuan Pengurus Tugas berubah. Pilih tugas lagi.",
+      "vi": "Điểm đến người quản lý đã thay đổi. Hãy chọn lại nhiệm vụ.",
+      "th": "จุดหมายของผู้ดูแลภารกิจเปลี่ยนแล้ว โปรดเลือกภารกิจอีกครั้ง",
+      "ar": "تغيّرت وجهة مشرف المهام. اختر المهمة مجددًا.",
+      "aliases": [
+        "Task Steward destination changed. Select the task again."
+      ]
+    },
+    {
+      "key": "periodic.diary.tab.main",
+      "en": "Main",
+      "zh-TW": "主線",
+      "pt-BR": "Principal",
+      "ru": "Основные",
+      "hi": "मुख्य",
+      "id": "Utama",
+      "vi": "Chính",
+      "th": "เนื้อเรื่อง",
+      "ar": "الرئيسية",
+      "aliases": []
+    },
+    {
+      "key": "periodic.diary.tab.ready",
+      "en": "Ready",
+      "zh-TW": "可交付",
+      "pt-BR": "Concluídas",
+      "ru": "Готовые",
+      "hi": "पूरा हुआ",
+      "id": "Siap",
+      "vi": "Trả nhiệm vụ",
+      "th": "ส่งภารกิจ",
+      "ar": "جاهزة",
+      "aliases": []
+    },
+    {
+      "key": "periodic.diary.tab.side",
+      "en": "Side",
+      "zh-TW": "支線",
+      "pt-BR": "Secundárias",
+      "ru": "Побочные",
+      "hi": "वैकल्पिक",
+      "id": "Sampingan",
+      "vi": "Phụ",
+      "th": "เสริม",
+      "ar": "الجانبية",
+      "aliases": []
+    },
+    {
+      "key": "periodic.diary.reset.daily",
+      "en": "Daily, 00:00 (UTC+8)",
+      "zh-TW": "每日 00:00（UTC+8）重置",
+      "pt-BR": "Todo dia, 00:00 (UTC+8)",
+      "ru": "Ежедневно, 00:00 (UTC+8)",
+      "hi": "हर दिन 00:00 (UTC+8) रीसेट",
+      "id": "Harian, 00:00 (UTC+8)",
+      "vi": "Mỗi ngày, 00:00 (UTC+8)",
+      "th": "รีเซ็ตทุกวัน 00:00 (UTC+8)",
+      "ar": "يوميًا 00:00 (UTC+8)",
+      "aliases": []
+    },
+    {
+      "key": "periodic.diary.reset.weekly",
+      "en": "Monday, 00:00 (UTC+8)",
+      "zh-TW": "每週一 00:00（UTC+8）重置",
+      "pt-BR": "Segundas, 00:00 (UTC+8)",
+      "ru": "Понедельник, 00:00 (UTC+8)",
+      "hi": "सोमवार 00:00 (UTC+8) रीसेट",
+      "id": "Senin, 00:00 (UTC+8)",
+      "vi": "Thứ Hai, 00:00 (UTC+8)",
+      "th": "รีเซ็ตวันจันทร์ 00:00 (UTC+8)",
+      "ar": "الإثنين 00:00 (UTC+8)",
+      "aliases": []
+    },
+    {
+      "key": "periodic.npc.2180.name",
+      "en": "Bichon Task Steward",
+      "zh-TW": "比奇任務總管",
+      "pt-BR": "Responsável de Bichon",
+      "ru": "Распорядитель Бичона",
+      "hi": "बिचोन कार्य प्रबंधक",
+      "id": "Pengurus Tugas Bichon",
+      "vi": "Người quản lý Bichon",
+      "th": "ผู้ดูแลภารกิจบิชอน",
+      "ar": "مشرف مهام بيشون",
+      "aliases": [
+        "Bichon Task Steward"
+      ]
+    },
+    {
+      "key": "periodic.npc.2181.name",
+      "en": "Mongchon Task Steward",
+      "zh-TW": "盟重任務總管",
+      "pt-BR": "Responsável de Mongchon",
+      "ru": "Распорядитель Монгчона",
+      "hi": "मोंगचोन कार्य प्रबंधक",
+      "id": "Pengurus Tugas Mongchon",
+      "vi": "Người quản lý Mongchon",
+      "th": "ผู้ดูแลภารกิจมงชอน",
+      "ar": "مشرف مهام مونغشون",
+      "aliases": [
+        "Mongchon Task Steward"
+      ]
+    },
+    {
+      "key": "content.quest.92001.name",
+      "en": "Village Field Patrol",
+      "zh-TW": "村莊田野巡邏",
+      "pt-BR": "Patrulha dos campos",
+      "ru": "Дозор деревенских полей",
+      "hi": "गाँव के खेतों की गश्त",
+      "id": "Patroli Ladang Desa",
+      "vi": "Tuần tra đồng làng",
+      "th": "ลาดตระเวนทุ่งหมู่บ้าน",
+      "ar": "دورية حقول القرية",
+      "aliases": [
+        "Village Field Patrol"
+      ]
+    },
+    {
+      "key": "content.quest.92001.description",
+      "en": "Defeat 80 Scarecrows in Bichon Province. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：稻草人 × 80。區域：比奇省。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Espantalho × 80. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Пугало × 80. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: बिजूका × 80। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Orang-orangan Sawah × 80. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Bù nhìn × 80. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: หุ่นไล่กา × 80 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: فزاعة × 80. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 80 Scarecrows in Bichon Province. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92001",
+      "en": "Defeat 80 Scarecrows in Bichon Province. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：稻草人 × 80。區域：比奇省。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Espantalho × 80. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Пугало × 80. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: बिजूका × 80। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Orang-orangan Sawah × 80. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Bù nhìn × 80. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: หุ่นไล่กา × 80 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: فزاعة × 80. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 80 Scarecrows in Bichon Province. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92001.task",
+      "en": "Scarecrow × 80",
+      "zh-TW": "稻草人 × 80",
+      "pt-BR": "Espantalho × 80",
+      "ru": "Пугало × 80",
+      "hi": "बिजूका × 80",
+      "id": "Orang-orangan Sawah × 80",
+      "vi": "Bù nhìn × 80",
+      "th": "หุ่นไล่กา × 80",
+      "ar": "فزاعة × 80",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92001.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92001.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92001",
+      "en": "Accept Village Field Patrol",
+      "zh-TW": "接受 村莊田野巡邏",
+      "pt-BR": "Aceitar Patrulha dos campos",
+      "ru": "Принять: Дозор деревенских полей",
+      "hi": "स्वीकारें: गाँव के खेतों की गश्त",
+      "id": "Terima Patroli Ladang Desa",
+      "vi": "Nhận Tuần tra đồng làng",
+      "th": "รับ ลาดตระเวนทุ่งหมู่บ้าน",
+      "ar": "قبول دورية حقول القرية",
+      "aliases": [
+        "Accept Village Field Patrol"
+      ]
+    },
+    {
+      "key": "periodic.complete.92001",
+      "en": "Complete Village Field Patrol",
+      "zh-TW": "交付 村莊田野巡邏",
+      "pt-BR": "Concluir Patrulha dos campos",
+      "ru": "Сдать: Дозор деревенских полей",
+      "hi": "पूरा करें: गाँव के खेतों की गश्त",
+      "id": "Selesaikan Patroli Ladang Desa",
+      "vi": "Hoàn thành Tuần tra đồng làng",
+      "th": "ส่ง ลาดตระเวนทุ่งหมู่บ้าน",
+      "ar": "إكمال دورية حقول القرية",
+      "aliases": [
+        "Complete Village Field Patrol"
+      ]
+    },
+    {
+      "key": "periodic.kill.39.80",
+      "en": "Scarecrow × 80",
+      "zh-TW": "稻草人 × 80",
+      "pt-BR": "Espantalho × 80",
+      "ru": "Пугало × 80",
+      "hi": "बिजूका × 80",
+      "id": "Orang-orangan Sawah × 80",
+      "vi": "Bù nhìn × 80",
+      "th": "หุ่นไล่กา × 80",
+      "ar": "فزاعة × 80",
+      "aliases": [
+        "Kill 80 Scarecrow"
+      ]
+    },
+    {
+      "key": "content.quest.92002.name",
+      "en": "Village Raking Cats",
+      "zh-TW": "村莊釘耙貓清剿",
+      "pt-BR": "Caça aos gatos ancinho",
+      "ru": "Коты-грабли у деревни",
+      "hi": "गाँव के रेक कैट",
+      "id": "Kucing Garu Desa",
+      "vi": "Dẹp mèo cào quanh làng",
+      "th": "กำจัดแมวคราดในหมู่บ้าน",
+      "ar": "قطط المشط حول القرية",
+      "aliases": [
+        "Village Raking Cats"
+      ]
+    },
+    {
+      "key": "content.quest.92002.description",
+      "en": "Defeat 60 Raking Cats in Bichon Province. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：釘耙貓 × 60。區域：比奇省。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Gato com Ancinho × 60. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Кот с граблями × 60. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: रेक वाली बिल्ली × 60। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Kucing Bergaru × 60. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Mèo cào × 60. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: แมวคราด × 60 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: قط بمشط زراعي × 60. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 60 Raking Cats in Bichon Province. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92002",
+      "en": "Defeat 60 Raking Cats in Bichon Province. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：釘耙貓 × 60。區域：比奇省。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Gato com Ancinho × 60. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Кот с граблями × 60. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: रेक वाली बिल्ली × 60। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Kucing Bergaru × 60. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Mèo cào × 60. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: แมวคราด × 60 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: قط بمشط زراعي × 60. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 60 Raking Cats in Bichon Province. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92002.task",
+      "en": "Raking Cat × 60",
+      "zh-TW": "釘耙貓 × 60",
+      "pt-BR": "Gato com Ancinho × 60",
+      "ru": "Кот с граблями × 60",
+      "hi": "रेक वाली बिल्ली × 60",
+      "id": "Kucing Bergaru × 60",
+      "vi": "Mèo cào × 60",
+      "th": "แมวคราด × 60",
+      "ar": "قط بمشط زراعي × 60",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92002.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92002.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92002",
+      "en": "Accept Village Raking Cats",
+      "zh-TW": "接受 村莊釘耙貓清剿",
+      "pt-BR": "Aceitar Caça aos gatos ancinho",
+      "ru": "Принять: Коты-грабли у деревни",
+      "hi": "स्वीकारें: गाँव के रेक कैट",
+      "id": "Terima Kucing Garu Desa",
+      "vi": "Nhận Dẹp mèo cào quanh làng",
+      "th": "รับ กำจัดแมวคราดในหมู่บ้าน",
+      "ar": "قبول قطط المشط حول القرية",
+      "aliases": [
+        "Accept Village Raking Cats"
+      ]
+    },
+    {
+      "key": "periodic.complete.92002",
+      "en": "Complete Village Raking Cats",
+      "zh-TW": "交付 村莊釘耙貓清剿",
+      "pt-BR": "Concluir Caça aos gatos ancinho",
+      "ru": "Сдать: Коты-грабли у деревни",
+      "hi": "पूरा करें: गाँव के रेक कैट",
+      "id": "Selesaikan Kucing Garu Desa",
+      "vi": "Hoàn thành Dẹp mèo cào quanh làng",
+      "th": "ส่ง กำจัดแมวคราดในหมู่บ้าน",
+      "ar": "إكمال قطط المشط حول القرية",
+      "aliases": [
+        "Complete Village Raking Cats"
+      ]
+    },
+    {
+      "key": "periodic.kill.44.60",
+      "en": "Raking Cat × 60",
+      "zh-TW": "釘耙貓 × 60",
+      "pt-BR": "Gato com Ancinho × 60",
+      "ru": "Кот с граблями × 60",
+      "hi": "रेक वाली बिल्ली × 60",
+      "id": "Kucing Bergaru × 60",
+      "vi": "Mèo cào × 60",
+      "th": "แมวคราด × 60",
+      "ar": "قط بمشط زراعي × 60",
+      "aliases": [
+        "Kill 60 RakingCat"
+      ]
+    },
+    {
+      "key": "content.quest.92003.name",
+      "en": "Village Hooking Cats",
+      "zh-TW": "村莊多鉤貓清剿",
+      "pt-BR": "Caça aos gatos gancho",
+      "ru": "Коты-крюки у деревни",
+      "hi": "गाँव के हुक कैट",
+      "id": "Kucing Kait Desa",
+      "vi": "Dẹp mèo móc quanh làng",
+      "th": "กำจัดแมวตะขอในหมู่บ้าน",
+      "ar": "قطط الخطاف حول القرية",
+      "aliases": [
+        "Village Hooking Cats"
+      ]
+    },
+    {
+      "key": "content.quest.92003.description",
+      "en": "Defeat 60 Hooking Cats in Bichon Province. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：鉤貓 × 60。區域：比奇省。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Gato com Gancho × 60. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Кот с крюком × 60. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: हुक वाली बिल्ली × 60। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Kucing Berkait × 60. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Mèo móc × 60. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: แมวตะขอ × 60 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: قط الخطاف × 60. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 60 Hooking Cats in Bichon Province. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92003",
+      "en": "Defeat 60 Hooking Cats in Bichon Province. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：鉤貓 × 60。區域：比奇省。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Gato com Gancho × 60. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Кот с крюком × 60. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: हुक वाली बिल्ली × 60। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Kucing Berkait × 60. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Mèo móc × 60. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: แมวตะขอ × 60 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: قط الخطاف × 60. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 60 Hooking Cats in Bichon Province. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92003.task",
+      "en": "Hooking Cat × 60",
+      "zh-TW": "鉤貓 × 60",
+      "pt-BR": "Gato com Gancho × 60",
+      "ru": "Кот с крюком × 60",
+      "hi": "हुक वाली बिल्ली × 60",
+      "id": "Kucing Berkait × 60",
+      "vi": "Mèo móc × 60",
+      "th": "แมวตะขอ × 60",
+      "ar": "قط الخطاف × 60",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92003.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92003.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92003",
+      "en": "Accept Village Hooking Cats",
+      "zh-TW": "接受 村莊多鉤貓清剿",
+      "pt-BR": "Aceitar Caça aos gatos gancho",
+      "ru": "Принять: Коты-крюки у деревни",
+      "hi": "स्वीकारें: गाँव के हुक कैट",
+      "id": "Terima Kucing Kait Desa",
+      "vi": "Nhận Dẹp mèo móc quanh làng",
+      "th": "รับ กำจัดแมวตะขอในหมู่บ้าน",
+      "ar": "قبول قطط الخطاف حول القرية",
+      "aliases": [
+        "Accept Village Hooking Cats"
+      ]
+    },
+    {
+      "key": "periodic.complete.92003",
+      "en": "Complete Village Hooking Cats",
+      "zh-TW": "交付 村莊多鉤貓清剿",
+      "pt-BR": "Concluir Caça aos gatos gancho",
+      "ru": "Сдать: Коты-крюки у деревни",
+      "hi": "पूरा करें: गाँव के हुक कैट",
+      "id": "Selesaikan Kucing Kait Desa",
+      "vi": "Hoàn thành Dẹp mèo móc quanh làng",
+      "th": "ส่ง กำจัดแมวตะขอในหมู่บ้าน",
+      "ar": "إكمال قطط الخطاف حول القرية",
+      "aliases": [
+        "Complete Village Hooking Cats"
+      ]
+    },
+    {
+      "key": "periodic.kill.42.60",
+      "en": "Hooking Cat × 60",
+      "zh-TW": "鉤貓 × 60",
+      "pt-BR": "Gato com Gancho × 60",
+      "ru": "Кот с крюком × 60",
+      "hi": "हुक वाली बिल्ली × 60",
+      "id": "Kucing Berkait × 60",
+      "vi": "Mèo móc × 60",
+      "th": "แมวตะขอ × 60",
+      "ar": "قط الخطاف × 60",
+      "aliases": [
+        "Kill 60 HookingCat"
+      ]
+    },
+    {
+      "key": "content.quest.92004.name",
+      "en": "Village Field Watch",
+      "zh-TW": "村莊田野週巡",
+      "pt-BR": "Vigia semanal dos campos",
+      "ru": "Недельный дозор полей",
+      "hi": "गाँव के खेतों की साप्ताहिक निगरानी",
+      "id": "Pengawasan Ladang Desa",
+      "vi": "Canh giữ đồng làng tuần này",
+      "th": "เฝ้าทุ่งหมู่บ้านรายสัปดาห์",
+      "ar": "حراسة حقول القرية الأسبوعية",
+      "aliases": [
+        "Village Field Watch"
+      ]
+    },
+    {
+      "key": "content.quest.92004.description",
+      "en": "Defeat 200 Scarecrows in Bichon Province this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：稻草人 × 200。區域：比奇省。返回比奇或盟重的任務總管交付。\n每週一於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Espantalho × 200. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício semanal: segunda-feira, 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Пугало × 200. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕженедельный сброс: понедельник, 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: बिजूका × 200। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nसाप्ताहिक रीसेट: सोमवार, सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Orang-orangan Sawah × 200. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset mingguan: Senin pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Bù nhìn × 200. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng tuần vào thứ Hai lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: หุ่นไล่กา × 200 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายสัปดาห์วันจันทร์เวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: فزاعة × 200. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط الأسبوعية: الاثنين، 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 200 Scarecrows in Bichon Province this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92004",
+      "en": "Defeat 200 Scarecrows in Bichon Province this week. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：稻草人 × 200。區域：比奇省。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Espantalho × 200. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Пугало × 200. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: बिजूका × 200। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Orang-orangan Sawah × 200. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Bù nhìn × 200. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: หุ่นไล่กา × 200 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: فزاعة × 200. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 200 Scarecrows in Bichon Province this week. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92004.task",
+      "en": "Scarecrow × 200",
+      "zh-TW": "稻草人 × 200",
+      "pt-BR": "Espantalho × 200",
+      "ru": "Пугало × 200",
+      "hi": "बिजूका × 200",
+      "id": "Orang-orangan Sawah × 200",
+      "vi": "Bù nhìn × 200",
+      "th": "หุ่นไล่กา × 200",
+      "ar": "فزاعة × 200",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92004.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92004.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92004",
+      "en": "Accept Village Field Watch",
+      "zh-TW": "接受 村莊田野週巡",
+      "pt-BR": "Aceitar Vigia semanal dos campos",
+      "ru": "Принять: Недельный дозор полей",
+      "hi": "स्वीकारें: गाँव के खेतों की साप्ताहिक निगरानी",
+      "id": "Terima Pengawasan Ladang Desa",
+      "vi": "Nhận Canh giữ đồng làng tuần này",
+      "th": "รับ เฝ้าทุ่งหมู่บ้านรายสัปดาห์",
+      "ar": "قبول حراسة حقول القرية الأسبوعية",
+      "aliases": [
+        "Accept Village Field Watch"
+      ]
+    },
+    {
+      "key": "periodic.complete.92004",
+      "en": "Complete Village Field Watch",
+      "zh-TW": "交付 村莊田野週巡",
+      "pt-BR": "Concluir Vigia semanal dos campos",
+      "ru": "Сдать: Недельный дозор полей",
+      "hi": "पूरा करें: गाँव के खेतों की साप्ताहिक निगरानी",
+      "id": "Selesaikan Pengawasan Ladang Desa",
+      "vi": "Hoàn thành Canh giữ đồng làng tuần này",
+      "th": "ส่ง เฝ้าทุ่งหมู่บ้านรายสัปดาห์",
+      "ar": "إكمال حراسة حقول القرية الأسبوعية",
+      "aliases": [
+        "Complete Village Field Watch"
+      ]
+    },
+    {
+      "key": "periodic.kill.39.200",
+      "en": "Scarecrow × 200",
+      "zh-TW": "稻草人 × 200",
+      "pt-BR": "Espantalho × 200",
+      "ru": "Пугало × 200",
+      "hi": "बिजूका × 200",
+      "id": "Orang-orangan Sawah × 200",
+      "vi": "Bù nhìn × 200",
+      "th": "หุ่นไล่กา × 200",
+      "ar": "فزاعة × 200",
+      "aliases": [
+        "Kill 200 Scarecrow"
+      ]
+    },
+    {
+      "key": "content.quest.92005.name",
+      "en": "Village Cat Watch",
+      "zh-TW": "村莊貓患週巡",
+      "pt-BR": "Vigia semanal dos gatos",
+      "ru": "Недельный дозор котов",
+      "hi": "गाँव के कैट की साप्ताहिक निगरानी",
+      "id": "Pengawasan Kucing Desa",
+      "vi": "Canh giữ làng khỏi mèo",
+      "th": "เฝ้าระวังแมวรายสัปดาห์",
+      "ar": "حراسة القرية من القطط",
+      "aliases": [
+        "Village Cat Watch"
+      ]
+    },
+    {
+      "key": "content.quest.92005.description",
+      "en": "Defeat 160 Raking Cats and 160 Hooking Cats in Bichon Province this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：釘耙貓 × 160, 鉤貓 × 160。區域：比奇省。返回比奇或盟重的任務總管交付。\n每週一於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Gato com Ancinho × 160, Gato com Gancho × 160. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício semanal: segunda-feira, 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Кот с граблями × 160, Кот с крюком × 160. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕженедельный сброс: понедельник, 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: रेक वाली बिल्ली × 160, हुक वाली बिल्ली × 160। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nसाप्ताहिक रीसेट: सोमवार, सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Kucing Bergaru × 160, Kucing Berkait × 160. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset mingguan: Senin pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Mèo cào × 160, Mèo móc × 160. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng tuần vào thứ Hai lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: แมวคราด × 160, แมวตะขอ × 160 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายสัปดาห์วันจันทร์เวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: قط بمشط زراعي × 160, قط الخطاف × 160. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط الأسبوعية: الاثنين، 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 160 Raking Cats and 160 Hooking Cats in Bichon Province this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92005",
+      "en": "Defeat 160 Raking Cats and 160 Hooking Cats in Bichon Province this week. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：釘耙貓 × 160, 鉤貓 × 160。區域：比奇省。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Gato com Ancinho × 160, Gato com Gancho × 160. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Кот с граблями × 160, Кот с крюком × 160. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: रेक वाली बिल्ली × 160, हुक वाली बिल्ली × 160। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Kucing Bergaru × 160, Kucing Berkait × 160. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Mèo cào × 160, Mèo móc × 160. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: แมวคราด × 160, แมวตะขอ × 160 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: قط بمشط زراعي × 160, قط الخطاف × 160. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 160 Raking Cats and 160 Hooking Cats in Bichon Province this week. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92005.task",
+      "en": "Raking Cat × 160\nHooking Cat × 160",
+      "zh-TW": "釘耙貓 × 160\n鉤貓 × 160",
+      "pt-BR": "Gato com Ancinho × 160\nGato com Gancho × 160",
+      "ru": "Кот с граблями × 160\nКот с крюком × 160",
+      "hi": "रेक वाली बिल्ली × 160\nहुक वाली बिल्ली × 160",
+      "id": "Kucing Bergaru × 160\nKucing Berkait × 160",
+      "vi": "Mèo cào × 160\nMèo móc × 160",
+      "th": "แมวคราด × 160\nแมวตะขอ × 160",
+      "ar": "قط بمشط زراعي × 160\nقط الخطاف × 160",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92005.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92005.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92005",
+      "en": "Accept Village Cat Watch",
+      "zh-TW": "接受 村莊貓患週巡",
+      "pt-BR": "Aceitar Vigia semanal dos gatos",
+      "ru": "Принять: Недельный дозор котов",
+      "hi": "स्वीकारें: गाँव के कैट की साप्ताहिक निगरानी",
+      "id": "Terima Pengawasan Kucing Desa",
+      "vi": "Nhận Canh giữ làng khỏi mèo",
+      "th": "รับ เฝ้าระวังแมวรายสัปดาห์",
+      "ar": "قبول حراسة القرية من القطط",
+      "aliases": [
+        "Accept Village Cat Watch"
+      ]
+    },
+    {
+      "key": "periodic.complete.92005",
+      "en": "Complete Village Cat Watch",
+      "zh-TW": "交付 村莊貓患週巡",
+      "pt-BR": "Concluir Vigia semanal dos gatos",
+      "ru": "Сдать: Недельный дозор котов",
+      "hi": "पूरा करें: गाँव के कैट की साप्ताहिक निगरानी",
+      "id": "Selesaikan Pengawasan Kucing Desa",
+      "vi": "Hoàn thành Canh giữ làng khỏi mèo",
+      "th": "ส่ง เฝ้าระวังแมวรายสัปดาห์",
+      "ar": "إكمال حراسة القرية من القطط",
+      "aliases": [
+        "Complete Village Cat Watch"
+      ]
+    },
+    {
+      "key": "periodic.kill.44.160",
+      "en": "Raking Cat × 160",
+      "zh-TW": "釘耙貓 × 160",
+      "pt-BR": "Gato com Ancinho × 160",
+      "ru": "Кот с граблями × 160",
+      "hi": "रेक वाली बिल्ली × 160",
+      "id": "Kucing Bergaru × 160",
+      "vi": "Mèo cào × 160",
+      "th": "แมวคราด × 160",
+      "ar": "قط بمشط زراعي × 160",
+      "aliases": [
+        "Kill 160 RakingCat"
+      ]
+    },
+    {
+      "key": "periodic.kill.42.160",
+      "en": "Hooking Cat × 160",
+      "zh-TW": "鉤貓 × 160",
+      "pt-BR": "Gato com Gancho × 160",
+      "ru": "Кот с крюком × 160",
+      "hi": "हुक वाली बिल्ली × 160",
+      "id": "Kucing Berkait × 160",
+      "vi": "Mèo móc × 160",
+      "th": "แมวตะขอ × 160",
+      "ar": "قط الخطاف × 160",
+      "aliases": [
+        "Kill 160 HookingCat"
+      ]
+    },
+    {
+      "key": "content.quest.92006.name",
+      "en": "Bichon Oma Patrol",
+      "zh-TW": "比奇半獸人巡邏",
+      "pt-BR": "Patrulha de Omas",
+      "ru": "Дозор Ома в Бичоне",
+      "hi": "बिचोन ओमा गश्त",
+      "id": "Patroli Oma Bichon",
+      "vi": "Tuần tra Oma tại Bichon",
+      "th": "ลาดตระเวนโอม่าที่บิชอน",
+      "ar": "دورية أوما في بيشون",
+      "aliases": [
+        "Bichon Oma Patrol"
+      ]
+    },
+    {
+      "key": "content.quest.92006.description",
+      "en": "Defeat 70 Omas in Bichon Province. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：半獸人 × 70。區域：比奇省。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Oma × 70. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Oma × 70. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: Oma × 70। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Oma × 70. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Oma × 70. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: Oma × 70 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: Oma × 70. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 70 Omas in Bichon Province. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92006",
+      "en": "Defeat 70 Omas in Bichon Province. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：半獸人 × 70。區域：比奇省。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Oma × 70. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Oma × 70. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: Oma × 70। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Oma × 70. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Oma × 70. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: Oma × 70 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: Oma × 70. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 70 Omas in Bichon Province. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92006.task",
+      "en": "Oma × 70",
+      "zh-TW": "半獸人 × 70",
+      "pt-BR": "Oma × 70",
+      "ru": "Oma × 70",
+      "hi": "Oma × 70",
+      "id": "Oma × 70",
+      "vi": "Oma × 70",
+      "th": "Oma × 70",
+      "ar": "Oma × 70",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92006.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92006.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92006",
+      "en": "Accept Bichon Oma Patrol",
+      "zh-TW": "接受 比奇半獸人巡邏",
+      "pt-BR": "Aceitar Patrulha de Omas",
+      "ru": "Принять: Дозор Ома в Бичоне",
+      "hi": "स्वीकारें: बिचोन ओमा गश्त",
+      "id": "Terima Patroli Oma Bichon",
+      "vi": "Nhận Tuần tra Oma tại Bichon",
+      "th": "รับ ลาดตระเวนโอม่าที่บิชอน",
+      "ar": "قبول دورية أوما في بيشون",
+      "aliases": [
+        "Accept Bichon Oma Patrol"
+      ]
+    },
+    {
+      "key": "periodic.complete.92006",
+      "en": "Complete Bichon Oma Patrol",
+      "zh-TW": "交付 比奇半獸人巡邏",
+      "pt-BR": "Concluir Patrulha de Omas",
+      "ru": "Сдать: Дозор Ома в Бичоне",
+      "hi": "पूरा करें: बिचोन ओमा गश्त",
+      "id": "Selesaikan Patroli Oma Bichon",
+      "vi": "Hoàn thành Tuần tra Oma tại Bichon",
+      "th": "ส่ง ลาดตระเวนโอม่าที่บิชอน",
+      "ar": "إكمال دورية أوما في بيشون",
+      "aliases": [
+        "Complete Bichon Oma Patrol"
+      ]
+    },
+    {
+      "key": "periodic.kill.48.70",
+      "en": "Oma × 70",
+      "zh-TW": "半獸人 × 70",
+      "pt-BR": "Oma × 70",
+      "ru": "Oma × 70",
+      "hi": "Oma × 70",
+      "id": "Oma × 70",
+      "vi": "Oma × 70",
+      "th": "Oma × 70",
+      "ar": "Oma × 70",
+      "aliases": [
+        "Kill 70 Oma"
+      ]
+    },
+    {
+      "key": "content.quest.92007.name",
+      "en": "Bichon Skeleton Patrol",
+      "zh-TW": "比奇骷髏巡邏",
+      "pt-BR": "Patrulha de esqueletos",
+      "ru": "Дозор скелетов Бичона",
+      "hi": "बिचोन कंकाल गश्त",
+      "id": "Patroli Tengkorak Bichon",
+      "vi": "Tuần tra bộ xương Bichon",
+      "th": "ลาดตระเวนโครงกระดูกบิชอน",
+      "ar": "دورية الهياكل في بيشون",
+      "aliases": [
+        "Bichon Skeleton Patrol"
+      ]
+    },
+    {
+      "key": "content.quest.92007.description",
+      "en": "Defeat 60 Skeletons in Oma Cave 1F or Natural Cave. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：骷髏 × 60。區域：半獸人洞穴一層或天然洞穴。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Esqueleto × 60. Área: Caverna de Oma 1A ou Caverna Natural. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Скелет × 60. Область: первый этаж пещеры Ома или Природная пещера. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: कंकाल × 60। क्षेत्र: ओमा गुफा पहली मंज़िल या प्राकृतिक गुफा। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Kerangka × 60. Area: Gua Oma L1 atau Gua Alami. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Khô lâu × 60. Khu vực: Hang Oma tầng 1 hoặc Hang tự nhiên. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: โครงกระดูก × 60 พื้นที่: ถ้ำโอม่า ชั้น 1 หรือถ้ำธรรมชาติ กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: هيكل عظمي × 60. المنطقة: الطابق الأول من كهف أوما أو الكهف الطبيعي. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 60 Skeletons in Oma Cave 1F or Natural Cave. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92007",
+      "en": "Defeat 60 Skeletons in Oma Cave 1F or Natural Cave. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：骷髏 × 60。區域：半獸人洞穴一層或天然洞穴。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Esqueleto × 60. Área: Caverna de Oma 1A ou Caverna Natural. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Скелет × 60. Область: первый этаж пещеры Ома или Природная пещера. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: कंकाल × 60। क्षेत्र: ओमा गुफा पहली मंज़िल या प्राकृतिक गुफा। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Kerangka × 60. Area: Gua Oma L1 atau Gua Alami. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Khô lâu × 60. Khu vực: Hang Oma tầng 1 hoặc Hang tự nhiên. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: โครงกระดูก × 60 พื้นที่: ถ้ำโอม่า ชั้น 1 หรือถ้ำธรรมชาติ กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: هيكل عظمي × 60. المنطقة: الطابق الأول من كهف أوما أو الكهف الطبيعي. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 60 Skeletons in Oma Cave 1F or Natural Cave. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92007.task",
+      "en": "Skeleton × 60",
+      "zh-TW": "骷髏 × 60",
+      "pt-BR": "Esqueleto × 60",
+      "ru": "Скелет × 60",
+      "hi": "कंकाल × 60",
+      "id": "Kerangka × 60",
+      "vi": "Khô lâu × 60",
+      "th": "โครงกระดูก × 60",
+      "ar": "هيكل عظمي × 60",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92007.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92007.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92007",
+      "en": "Accept Bichon Skeleton Patrol",
+      "zh-TW": "接受 比奇骷髏巡邏",
+      "pt-BR": "Aceitar Patrulha de esqueletos",
+      "ru": "Принять: Дозор скелетов Бичона",
+      "hi": "स्वीकारें: बिचोन कंकाल गश्त",
+      "id": "Terima Patroli Tengkorak Bichon",
+      "vi": "Nhận Tuần tra bộ xương Bichon",
+      "th": "รับ ลาดตระเวนโครงกระดูกบิชอน",
+      "ar": "قبول دورية الهياكل في بيشون",
+      "aliases": [
+        "Accept Bichon Skeleton Patrol"
+      ]
+    },
+    {
+      "key": "periodic.complete.92007",
+      "en": "Complete Bichon Skeleton Patrol",
+      "zh-TW": "交付 比奇骷髏巡邏",
+      "pt-BR": "Concluir Patrulha de esqueletos",
+      "ru": "Сдать: Дозор скелетов Бичона",
+      "hi": "पूरा करें: बिचोन कंकाल गश्त",
+      "id": "Selesaikan Patroli Tengkorak Bichon",
+      "vi": "Hoàn thành Tuần tra bộ xương Bichon",
+      "th": "ส่ง ลาดตระเวนโครงกระดูกบิชอน",
+      "ar": "إكمال دورية الهياكل في بيشون",
+      "aliases": [
+        "Complete Bichon Skeleton Patrol"
+      ]
+    },
+    {
+      "key": "periodic.kill.85.60",
+      "en": "Skeleton × 60",
+      "zh-TW": "骷髏 × 60",
+      "pt-BR": "Esqueleto × 60",
+      "ru": "Скелет × 60",
+      "hi": "कंकाल × 60",
+      "id": "Kerangka × 60",
+      "vi": "Khô lâu × 60",
+      "th": "โครงกระดูก × 60",
+      "ar": "هيكل عظمي × 60",
+      "aliases": [
+        "Kill 60 Skeleton"
+      ]
+    },
+    {
+      "key": "content.quest.92008.name",
+      "en": "Bichon Scorpion Patrol",
+      "zh-TW": "比奇蠍子巡邏",
+      "pt-BR": "Patrulha de escorpiões",
+      "ru": "Дозор скорпионов Бичона",
+      "hi": "बिचोन बिच्छू गश्त",
+      "id": "Patroli Kalajengking Bichon",
+      "vi": "Tuần tra bọ cạp Bichon",
+      "th": "ลาดตระเวนแมงป่องบิชอน",
+      "ar": "دورية العقارب في بيشون",
+      "aliases": [
+        "Bichon Scorpion Patrol"
+      ]
+    },
+    {
+      "key": "content.quest.92008.description",
+      "en": "Defeat 60 Scorpions in Oma Cave 1F or Natural Cave. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：蠍子 × 60。區域：半獸人洞穴一層或天然洞穴。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Escorpião × 60. Área: Caverna de Oma 1A ou Caverna Natural. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Скорпион × 60. Область: первый этаж пещеры Ома или Природная пещера. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: वृश्चिक × 60। क्षेत्र: ओमा गुफा पहली मंज़िल या प्राकृतिक गुफा। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: kalajengking × 60. Area: Gua Oma L1 atau Gua Alami. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu:  Bọ cạp × 60. Khu vực: Hang Oma tầng 1 hoặc Hang tự nhiên. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: แมงป่อง × 60 พื้นที่: ถ้ำโอม่า ชั้น 1 หรือถ้ำธรรมชาติ กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: العقرب × 60. المنطقة: الطابق الأول من كهف أوما أو الكهف الطبيعي. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 60 Scorpions in Oma Cave 1F or Natural Cave. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92008",
+      "en": "Defeat 60 Scorpions in Oma Cave 1F or Natural Cave. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：蠍子 × 60。區域：半獸人洞穴一層或天然洞穴。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Escorpião × 60. Área: Caverna de Oma 1A ou Caverna Natural. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Скорпион × 60. Область: первый этаж пещеры Ома или Природная пещера. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: वृश्चिक × 60। क्षेत्र: ओमा गुफा पहली मंज़िल या प्राकृतिक गुफा। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: kalajengking × 60. Area: Gua Oma L1 atau Gua Alami. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu:  Bọ cạp × 60. Khu vực: Hang Oma tầng 1 hoặc Hang tự nhiên. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: แมงป่อง × 60 พื้นที่: ถ้ำโอม่า ชั้น 1 หรือถ้ำธรรมชาติ กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: العقرب × 60. المنطقة: الطابق الأول من كهف أوما أو الكهف الطبيعي. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 60 Scorpions in Oma Cave 1F or Natural Cave. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92008.task",
+      "en": "Scorpion × 60",
+      "zh-TW": "蠍子 × 60",
+      "pt-BR": "Escorpião × 60",
+      "ru": "Скорпион × 60",
+      "hi": "वृश्चिक × 60",
+      "id": "kalajengking × 60",
+      "vi": " Bọ cạp × 60",
+      "th": "แมงป่อง × 60",
+      "ar": "العقرب × 60",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92008.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92008.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92008",
+      "en": "Accept Bichon Scorpion Patrol",
+      "zh-TW": "接受 比奇蠍子巡邏",
+      "pt-BR": "Aceitar Patrulha de escorpiões",
+      "ru": "Принять: Дозор скорпионов Бичона",
+      "hi": "स्वीकारें: बिचोन बिच्छू गश्त",
+      "id": "Terima Patroli Kalajengking Bichon",
+      "vi": "Nhận Tuần tra bọ cạp Bichon",
+      "th": "รับ ลาดตระเวนแมงป่องบิชอน",
+      "ar": "قبول دورية العقارب في بيشون",
+      "aliases": [
+        "Accept Bichon Scorpion Patrol"
+      ]
+    },
+    {
+      "key": "periodic.complete.92008",
+      "en": "Complete Bichon Scorpion Patrol",
+      "zh-TW": "交付 比奇蠍子巡邏",
+      "pt-BR": "Concluir Patrulha de escorpiões",
+      "ru": "Сдать: Дозор скорпионов Бичона",
+      "hi": "पूरा करें: बिचोन बिच्छू गश्त",
+      "id": "Selesaikan Patroli Kalajengking Bichon",
+      "vi": "Hoàn thành Tuần tra bọ cạp Bichon",
+      "th": "ส่ง ลาดตระเวนแมงป่องบิชอน",
+      "ar": "إكمال دورية العقارب في بيشون",
+      "aliases": [
+        "Complete Bichon Scorpion Patrol"
+      ]
+    },
+    {
+      "key": "periodic.kill.84.60",
+      "en": "Scorpion × 60",
+      "zh-TW": "蠍子 × 60",
+      "pt-BR": "Escorpião × 60",
+      "ru": "Скорпион × 60",
+      "hi": "वृश्चिक × 60",
+      "id": "kalajengking × 60",
+      "vi": " Bọ cạp × 60",
+      "th": "แมงป่อง × 60",
+      "ar": "العقرب × 60",
+      "aliases": [
+        "Kill 60 Scorpion"
+      ]
+    },
+    {
+      "key": "content.quest.92009.name",
+      "en": "Bichon Oma Watch",
+      "zh-TW": "比奇半獸人週巡",
+      "pt-BR": "Vigia semanal de Omas",
+      "ru": "Недельный дозор Ома",
+      "hi": "बिचोन ओमा साप्ताहिक निगरानी",
+      "id": "Pengawasan Oma Bichon",
+      "vi": "Canh giữ Oma tuần này",
+      "th": "เฝ้าระวังโอม่าในบิชอน",
+      "ar": "حراسة بيشون من أوما",
+      "aliases": [
+        "Bichon Oma Watch"
+      ]
+    },
+    {
+      "key": "content.quest.92009.description",
+      "en": "Defeat 200 Omas in Bichon Province this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：半獸人 × 200。區域：比奇省。返回比奇或盟重的任務總管交付。\n每週一於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Oma × 200. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício semanal: segunda-feira, 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Oma × 200. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕженедельный сброс: понедельник, 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: Oma × 200। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nसाप्ताहिक रीसेट: सोमवार, सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Oma × 200. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset mingguan: Senin pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Oma × 200. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng tuần vào thứ Hai lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: Oma × 200 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายสัปดาห์วันจันทร์เวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: Oma × 200. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط الأسبوعية: الاثنين، 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 200 Omas in Bichon Province this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92009",
+      "en": "Defeat 200 Omas in Bichon Province this week. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：半獸人 × 200。區域：比奇省。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Oma × 200. Área: Província de Bichon. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Oma × 200. Область: провинция Бичон. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: Oma × 200। क्षेत्र: बिचोन प्रांत। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Oma × 200. Area: Provinsi Bichon. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Oma × 200. Khu vực: Tỉnh Bichon. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: Oma × 200 พื้นที่: มณฑลบิชอน กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: Oma × 200. المنطقة: مقاطعة بيشون. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 200 Omas in Bichon Province this week. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92009.task",
+      "en": "Oma × 200",
+      "zh-TW": "半獸人 × 200",
+      "pt-BR": "Oma × 200",
+      "ru": "Oma × 200",
+      "hi": "Oma × 200",
+      "id": "Oma × 200",
+      "vi": "Oma × 200",
+      "th": "Oma × 200",
+      "ar": "Oma × 200",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92009.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92009.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92009",
+      "en": "Accept Bichon Oma Watch",
+      "zh-TW": "接受 比奇半獸人週巡",
+      "pt-BR": "Aceitar Vigia semanal de Omas",
+      "ru": "Принять: Недельный дозор Ома",
+      "hi": "स्वीकारें: बिचोन ओमा साप्ताहिक निगरानी",
+      "id": "Terima Pengawasan Oma Bichon",
+      "vi": "Nhận Canh giữ Oma tuần này",
+      "th": "รับ เฝ้าระวังโอม่าในบิชอน",
+      "ar": "قبول حراسة بيشون من أوما",
+      "aliases": [
+        "Accept Bichon Oma Watch"
+      ]
+    },
+    {
+      "key": "periodic.complete.92009",
+      "en": "Complete Bichon Oma Watch",
+      "zh-TW": "交付 比奇半獸人週巡",
+      "pt-BR": "Concluir Vigia semanal de Omas",
+      "ru": "Сдать: Недельный дозор Ома",
+      "hi": "पूरा करें: बिचोन ओमा साप्ताहिक निगरानी",
+      "id": "Selesaikan Pengawasan Oma Bichon",
+      "vi": "Hoàn thành Canh giữ Oma tuần này",
+      "th": "ส่ง เฝ้าระวังโอม่าในบิชอน",
+      "ar": "إكمال حراسة بيشون من أوما",
+      "aliases": [
+        "Complete Bichon Oma Watch"
+      ]
+    },
+    {
+      "key": "periodic.kill.48.200",
+      "en": "Oma × 200",
+      "zh-TW": "半獸人 × 200",
+      "pt-BR": "Oma × 200",
+      "ru": "Oma × 200",
+      "hi": "Oma × 200",
+      "id": "Oma × 200",
+      "vi": "Oma × 200",
+      "th": "Oma × 200",
+      "ar": "Oma × 200",
+      "aliases": [
+        "Kill 200 Oma"
+      ]
+    },
+    {
+      "key": "content.quest.92010.name",
+      "en": "Bichon Cave Watch",
+      "zh-TW": "比奇洞穴週巡",
+      "pt-BR": "Vigia semanal da caverna",
+      "ru": "Недельный дозор пещер",
+      "hi": "बिचोन गुफा साप्ताहिक निगरानी",
+      "id": "Pengawasan Gua Bichon",
+      "vi": "Canh giữ hang Bichon",
+      "th": "เฝ้าถ้ำบิชอนรายสัปดาห์",
+      "ar": "حراسة كهوف بيشون الأسبوعية",
+      "aliases": [
+        "Bichon Cave Watch"
+      ]
+    },
+    {
+      "key": "content.quest.92010.description",
+      "en": "Defeat 150 Skeletons and 150 Scorpions in Oma Cave 1F or Natural Cave this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：骷髏 × 150, 蠍子 × 150。區域：半獸人洞穴一層或天然洞穴。返回比奇或盟重的任務總管交付。\n每週一於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Esqueleto × 150, Escorpião × 150. Área: Caverna de Oma 1A ou Caverna Natural. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício semanal: segunda-feira, 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Скелет × 150, Скорпион × 150. Область: первый этаж пещеры Ома или Природная пещера. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕженедельный сброс: понедельник, 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: कंकाल × 150, वृश्चिक × 150। क्षेत्र: ओमा गुफा पहली मंज़िल या प्राकृतिक गुफा। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nसाप्ताहिक रीसेट: सोमवार, सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Kerangka × 150, kalajengking × 150. Area: Gua Oma L1 atau Gua Alami. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset mingguan: Senin pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Khô lâu × 150,  Bọ cạp × 150. Khu vực: Hang Oma tầng 1 hoặc Hang tự nhiên. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng tuần vào thứ Hai lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: โครงกระดูก × 150, แมงป่อง × 150 พื้นที่: ถ้ำโอม่า ชั้น 1 หรือถ้ำธรรมชาติ กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายสัปดาห์วันจันทร์เวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: هيكل عظمي × 150, العقرب × 150. المنطقة: الطابق الأول من كهف أوما أو الكهف الطبيعي. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط الأسبوعية: الاثنين، 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 150 Skeletons and 150 Scorpions in Oma Cave 1F or Natural Cave this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92010",
+      "en": "Defeat 150 Skeletons and 150 Scorpions in Oma Cave 1F or Natural Cave this week. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：骷髏 × 150, 蠍子 × 150。區域：半獸人洞穴一層或天然洞穴。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Esqueleto × 150, Escorpião × 150. Área: Caverna de Oma 1A ou Caverna Natural. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Скелет × 150, Скорпион × 150. Область: первый этаж пещеры Ома или Природная пещера. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: कंकाल × 150, वृश्चिक × 150। क्षेत्र: ओमा गुफा पहली मंज़िल या प्राकृतिक गुफा। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Kerangka × 150, kalajengking × 150. Area: Gua Oma L1 atau Gua Alami. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Khô lâu × 150,  Bọ cạp × 150. Khu vực: Hang Oma tầng 1 hoặc Hang tự nhiên. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: โครงกระดูก × 150, แมงป่อง × 150 พื้นที่: ถ้ำโอม่า ชั้น 1 หรือถ้ำธรรมชาติ กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: هيكل عظمي × 150, العقرب × 150. المنطقة: الطابق الأول من كهف أوما أو الكهف الطبيعي. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 150 Skeletons and 150 Scorpions in Oma Cave 1F or Natural Cave this week. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92010.task",
+      "en": "Skeleton × 150\nScorpion × 150",
+      "zh-TW": "骷髏 × 150\n蠍子 × 150",
+      "pt-BR": "Esqueleto × 150\nEscorpião × 150",
+      "ru": "Скелет × 150\nСкорпион × 150",
+      "hi": "कंकाल × 150\nवृश्चिक × 150",
+      "id": "Kerangka × 150\nkalajengking × 150",
+      "vi": "Khô lâu × 150\n Bọ cạp × 150",
+      "th": "โครงกระดูก × 150\nแมงป่อง × 150",
+      "ar": "هيكل عظمي × 150\nالعقرب × 150",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92010.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92010.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92010",
+      "en": "Accept Bichon Cave Watch",
+      "zh-TW": "接受 比奇洞穴週巡",
+      "pt-BR": "Aceitar Vigia semanal da caverna",
+      "ru": "Принять: Недельный дозор пещер",
+      "hi": "स्वीकारें: बिचोन गुफा साप्ताहिक निगरानी",
+      "id": "Terima Pengawasan Gua Bichon",
+      "vi": "Nhận Canh giữ hang Bichon",
+      "th": "รับ เฝ้าถ้ำบิชอนรายสัปดาห์",
+      "ar": "قبول حراسة كهوف بيشون الأسبوعية",
+      "aliases": [
+        "Accept Bichon Cave Watch"
+      ]
+    },
+    {
+      "key": "periodic.complete.92010",
+      "en": "Complete Bichon Cave Watch",
+      "zh-TW": "交付 比奇洞穴週巡",
+      "pt-BR": "Concluir Vigia semanal da caverna",
+      "ru": "Сдать: Недельный дозор пещер",
+      "hi": "पूरा करें: बिचोन गुफा साप्ताहिक निगरानी",
+      "id": "Selesaikan Pengawasan Gua Bichon",
+      "vi": "Hoàn thành Canh giữ hang Bichon",
+      "th": "ส่ง เฝ้าถ้ำบิชอนรายสัปดาห์",
+      "ar": "إكمال حراسة كهوف بيشون الأسبوعية",
+      "aliases": [
+        "Complete Bichon Cave Watch"
+      ]
+    },
+    {
+      "key": "periodic.kill.85.150",
+      "en": "Skeleton × 150",
+      "zh-TW": "骷髏 × 150",
+      "pt-BR": "Esqueleto × 150",
+      "ru": "Скелет × 150",
+      "hi": "कंकाल × 150",
+      "id": "Kerangka × 150",
+      "vi": "Khô lâu × 150",
+      "th": "โครงกระดูก × 150",
+      "ar": "هيكل عظمي × 150",
+      "aliases": [
+        "Kill 150 Skeleton"
+      ]
+    },
+    {
+      "key": "periodic.kill.84.150",
+      "en": "Scorpion × 150",
+      "zh-TW": "蠍子 × 150",
+      "pt-BR": "Escorpião × 150",
+      "ru": "Скорпион × 150",
+      "hi": "वृश्चिक × 150",
+      "id": "kalajengking × 150",
+      "vi": " Bọ cạp × 150",
+      "th": "แมงป่อง × 150",
+      "ar": "العقرب × 150",
+      "aliases": [
+        "Kill 150 Scorpion"
+      ]
+    },
+    {
+      "key": "content.quest.92011.name",
+      "en": "Insect Centipede Patrol",
+      "zh-TW": "蟲洞蜈蚣巡邏",
+      "pt-BR": "Patrulha de centopeias",
+      "ru": "Дозор многоножек",
+      "hi": "कीट गुफा सेंटीपीड गश्त",
+      "id": "Patroli Kelabang Gua",
+      "vi": "Tuần tra rết trong hang",
+      "th": "ลาดตระเวนตะขาบในถ้ำ",
+      "ar": "دورية الحريش في الكهف",
+      "aliases": [
+        "Insect Centipede Patrol"
+      ]
+    },
+    {
+      "key": "content.quest.92011.description",
+      "en": "Defeat 50 Centipedes in the Southern Insect Cave 1F. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：蜈蚣 × 50。區域：南部蟲洞一層。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Centopeia × 50. Área: Caverna de Insetos do Sul 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Сороконожка × 50. Область: первый этаж Южной пещеры насекомых. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: कनखजूरा × 50। क्षेत्र: दक्षिणी कीट गुफा पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Kelabang × 50. Area: Gua Serangga Selatan L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Rết × 50. Khu vực: Hang côn trùng phía Nam tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: ตะขาบ × 50 พื้นที่: ถ้ำแมลงใต้ ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: حريش × 50. المنطقة: الطابق الأول من كهف الحشرات الجنوبي. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 50 Centipedes in the Southern Insect Cave 1F. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92011",
+      "en": "Defeat 50 Centipedes in the Southern Insect Cave 1F. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：蜈蚣 × 50。區域：南部蟲洞一層。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Centopeia × 50. Área: Caverna de Insetos do Sul 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Сороконожка × 50. Область: первый этаж Южной пещеры насекомых. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: कनखजूरा × 50। क्षेत्र: दक्षिणी कीट गुफा पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Kelabang × 50. Area: Gua Serangga Selatan L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Rết × 50. Khu vực: Hang côn trùng phía Nam tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: ตะขาบ × 50 พื้นที่: ถ้ำแมลงใต้ ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: حريش × 50. المنطقة: الطابق الأول من كهف الحشرات الجنوبي. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 50 Centipedes in the Southern Insect Cave 1F. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92011.task",
+      "en": "Centipede × 50",
+      "zh-TW": "蜈蚣 × 50",
+      "pt-BR": "Centopeia × 50",
+      "ru": "Сороконожка × 50",
+      "hi": "कनखजूरा × 50",
+      "id": "Kelabang × 50",
+      "vi": "Rết × 50",
+      "th": "ตะขาบ × 50",
+      "ar": "حريش × 50",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92011.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92011.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92011",
+      "en": "Accept Insect Centipede Patrol",
+      "zh-TW": "接受 蟲洞蜈蚣巡邏",
+      "pt-BR": "Aceitar Patrulha de centopeias",
+      "ru": "Принять: Дозор многоножек",
+      "hi": "स्वीकारें: कीट गुफा सेंटीपीड गश्त",
+      "id": "Terima Patroli Kelabang Gua",
+      "vi": "Nhận Tuần tra rết trong hang",
+      "th": "รับ ลาดตระเวนตะขาบในถ้ำ",
+      "ar": "قبول دورية الحريش في الكهف",
+      "aliases": [
+        "Accept Insect Centipede Patrol"
+      ]
+    },
+    {
+      "key": "periodic.complete.92011",
+      "en": "Complete Insect Centipede Patrol",
+      "zh-TW": "交付 蟲洞蜈蚣巡邏",
+      "pt-BR": "Concluir Patrulha de centopeias",
+      "ru": "Сдать: Дозор многоножек",
+      "hi": "पूरा करें: कीट गुफा सेंटीपीड गश्त",
+      "id": "Selesaikan Patroli Kelabang Gua",
+      "vi": "Hoàn thành Tuần tra rết trong hang",
+      "th": "ส่ง ลาดตระเวนตะขาบในถ้ำ",
+      "ar": "إكمال دورية الحريش في الكهف",
+      "aliases": [
+        "Complete Insect Centipede Patrol"
+      ]
+    },
+    {
+      "key": "periodic.kill.152.50",
+      "en": "Centipede × 50",
+      "zh-TW": "蜈蚣 × 50",
+      "pt-BR": "Centopeia × 50",
+      "ru": "Сороконожка × 50",
+      "hi": "कनखजूरा × 50",
+      "id": "Kelabang × 50",
+      "vi": "Rết × 50",
+      "th": "ตะขาบ × 50",
+      "ar": "حريش × 50",
+      "aliases": [
+        "Kill 50 Centipede"
+      ]
+    },
+    {
+      "key": "content.quest.92012.name",
+      "en": "Insect Maggot Patrol",
+      "zh-TW": "蟲洞黑蛆巡邏",
+      "pt-BR": "Patrulha de larvas negras",
+      "ru": "Дозор чёрных личинок",
+      "hi": "कीट गुफा काली इल्ली गश्त",
+      "id": "Patroli Belatung Hitam",
+      "vi": "Tuần tra ấu trùng đen",
+      "th": "ลาดตระเวนหนอนดำ",
+      "ar": "دورية اليرقات السوداء",
+      "aliases": [
+        "Insect Maggot Patrol"
+      ]
+    },
+    {
+      "key": "content.quest.92012.description",
+      "en": "Defeat 45 Black Maggots in the Southern Insect Cave 1F. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：黑蛆 × 45。區域：南部蟲洞一層。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Larva negra × 45. Área: Caverna de Insetos do Sul 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Чёрная личинка × 45. Область: первый этаж Южной пещеры насекомых. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: काला कीड़ा × 45। क्षेत्र: दक्षिणी कीट गुफा पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Belatung Hitam × 45. Area: Gua Serangga Selatan L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Giòi đen × 45. Khu vực: Hang côn trùng phía Nam tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: หนอนดำ × 45 พื้นที่: ถ้ำแมลงใต้ ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: يرقة سوداء × 45. المنطقة: الطابق الأول من كهف الحشرات الجنوبي. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 45 Black Maggots in the Southern Insect Cave 1F. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92012",
+      "en": "Defeat 45 Black Maggots in the Southern Insect Cave 1F. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：黑蛆 × 45。區域：南部蟲洞一層。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Larva negra × 45. Área: Caverna de Insetos do Sul 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Чёрная личинка × 45. Область: первый этаж Южной пещеры насекомых. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: काला कीड़ा × 45। क्षेत्र: दक्षिणी कीट गुफा पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Belatung Hitam × 45. Area: Gua Serangga Selatan L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Giòi đen × 45. Khu vực: Hang côn trùng phía Nam tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: หนอนดำ × 45 พื้นที่: ถ้ำแมลงใต้ ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: يرقة سوداء × 45. المنطقة: الطابق الأول من كهف الحشرات الجنوبي. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 45 Black Maggots in the Southern Insect Cave 1F. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92012.task",
+      "en": "Black Maggot × 45",
+      "zh-TW": "黑蛆 × 45",
+      "pt-BR": "Larva negra × 45",
+      "ru": "Чёрная личинка × 45",
+      "hi": "काला कीड़ा × 45",
+      "id": "Belatung Hitam × 45",
+      "vi": "Giòi đen × 45",
+      "th": "หนอนดำ × 45",
+      "ar": "يرقة سوداء × 45",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92012.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92012.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92012",
+      "en": "Accept Insect Maggot Patrol",
+      "zh-TW": "接受 蟲洞黑蛆巡邏",
+      "pt-BR": "Aceitar Patrulha de larvas negras",
+      "ru": "Принять: Дозор чёрных личинок",
+      "hi": "स्वीकारें: कीट गुफा काली इल्ली गश्त",
+      "id": "Terima Patroli Belatung Hitam",
+      "vi": "Nhận Tuần tra ấu trùng đen",
+      "th": "รับ ลาดตระเวนหนอนดำ",
+      "ar": "قبول دورية اليرقات السوداء",
+      "aliases": [
+        "Accept Insect Maggot Patrol"
+      ]
+    },
+    {
+      "key": "periodic.complete.92012",
+      "en": "Complete Insect Maggot Patrol",
+      "zh-TW": "交付 蟲洞黑蛆巡邏",
+      "pt-BR": "Concluir Patrulha de larvas negras",
+      "ru": "Сдать: Дозор чёрных личинок",
+      "hi": "पूरा करें: कीट गुफा काली इल्ली गश्त",
+      "id": "Selesaikan Patroli Belatung Hitam",
+      "vi": "Hoàn thành Tuần tra ấu trùng đen",
+      "th": "ส่ง ลาดตระเวนหนอนดำ",
+      "ar": "إكمال دورية اليرقات السوداء",
+      "aliases": [
+        "Complete Insect Maggot Patrol"
+      ]
+    },
+    {
+      "key": "periodic.kill.150.45",
+      "en": "Black Maggot × 45",
+      "zh-TW": "黑蛆 × 45",
+      "pt-BR": "Larva negra × 45",
+      "ru": "Чёрная личинка × 45",
+      "hi": "काला कीड़ा × 45",
+      "id": "Belatung Hitam × 45",
+      "vi": "Giòi đen × 45",
+      "th": "หนอนดำ × 45",
+      "ar": "يرقة سوداء × 45",
+      "aliases": [
+        "Kill 45 BlackMaggot"
+      ]
+    },
+    {
+      "key": "content.quest.92013.name",
+      "en": "Insect Bee Patrol",
+      "zh-TW": "蟲洞蜜蜂巡邏",
+      "pt-BR": "Patrulha de abelhas",
+      "ru": "Дозор пчёл",
+      "hi": "कीट गुफा मधुमक्खी गश्त",
+      "id": "Patroli Lebah Gua",
+      "vi": "Tuần tra ong trong hang",
+      "th": "ลาดตระเวนผึ้งในถ้ำ",
+      "ar": "دورية النحل في الكهف",
+      "aliases": [
+        "Insect Bee Patrol"
+      ]
+    },
+    {
+      "key": "content.quest.92013.description",
+      "en": "Defeat 45 Whimpering Bees in the Southern Insect Cave 1F. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：鳴叫蜂 × 45。區域：南部蟲洞一層。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Abelha lamentosa × 45. Área: Caverna de Insetos do Sul 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Пчелиная пчёлка × 45. Область: первый этаж Южной пещеры насекомых. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: व्हिम्परिंग मधुमक्खी × 45। क्षेत्र: दक्षिणी कीट गुफा पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Merintih Bee × 45. Area: Gua Serangga Selatan L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu:  Ong biết bay × 45. Khu vực: Hang côn trùng phía Nam tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย:  เสียง ผึ้ง ร้อง × 45 พื้นที่: ถ้ำแมลงใต้ ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: نحل العجلات × 45. المنطقة: الطابق الأول من كهف الحشرات الجنوبي. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 45 Whimpering Bees in the Southern Insect Cave 1F. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92013",
+      "en": "Defeat 45 Whimpering Bees in the Southern Insect Cave 1F. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：鳴叫蜂 × 45。區域：南部蟲洞一層。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Abelha lamentosa × 45. Área: Caverna de Insetos do Sul 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Пчелиная пчёлка × 45. Область: первый этаж Южной пещеры насекомых. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: व्हिम्परिंग मधुमक्खी × 45। क्षेत्र: दक्षिणी कीट गुफा पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Merintih Bee × 45. Area: Gua Serangga Selatan L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu:  Ong biết bay × 45. Khu vực: Hang côn trùng phía Nam tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย:  เสียง ผึ้ง ร้อง × 45 พื้นที่: ถ้ำแมลงใต้ ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: نحل العجلات × 45. المنطقة: الطابق الأول من كهف الحشرات الجنوبي. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 45 Whimpering Bees in the Southern Insect Cave 1F. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92013.task",
+      "en": "Whimpering Bee × 45",
+      "zh-TW": "鳴叫蜂 × 45",
+      "pt-BR": "Abelha lamentosa × 45",
+      "ru": "Пчелиная пчёлка × 45",
+      "hi": "व्हिम्परिंग मधुमक्खी × 45",
+      "id": "Merintih Bee × 45",
+      "vi": " Ong biết bay × 45",
+      "th": " เสียง ผึ้ง ร้อง × 45",
+      "ar": "نحل العجلات × 45",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92013.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92013.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92013",
+      "en": "Accept Insect Bee Patrol",
+      "zh-TW": "接受 蟲洞蜜蜂巡邏",
+      "pt-BR": "Aceitar Patrulha de abelhas",
+      "ru": "Принять: Дозор пчёл",
+      "hi": "स्वीकारें: कीट गुफा मधुमक्खी गश्त",
+      "id": "Terima Patroli Lebah Gua",
+      "vi": "Nhận Tuần tra ong trong hang",
+      "th": "รับ ลาดตระเวนผึ้งในถ้ำ",
+      "ar": "قبول دورية النحل في الكهف",
+      "aliases": [
+        "Accept Insect Bee Patrol"
+      ]
+    },
+    {
+      "key": "periodic.complete.92013",
+      "en": "Complete Insect Bee Patrol",
+      "zh-TW": "交付 蟲洞蜜蜂巡邏",
+      "pt-BR": "Concluir Patrulha de abelhas",
+      "ru": "Сдать: Дозор пчёл",
+      "hi": "पूरा करें: कीट गुफा मधुमक्खी गश्त",
+      "id": "Selesaikan Patroli Lebah Gua",
+      "vi": "Hoàn thành Tuần tra ong trong hang",
+      "th": "ส่ง ลาดตระเวนผึ้งในถ้ำ",
+      "ar": "إكمال دورية النحل في الكهف",
+      "aliases": [
+        "Complete Insect Bee Patrol"
+      ]
+    },
+    {
+      "key": "periodic.kill.156.45",
+      "en": "Whimpering Bee × 45",
+      "zh-TW": "鳴叫蜂 × 45",
+      "pt-BR": "Abelha lamentosa × 45",
+      "ru": "Пчелиная пчёлка × 45",
+      "hi": "व्हिम्परिंग मधुमक्खी × 45",
+      "id": "Merintih Bee × 45",
+      "vi": " Ong biết bay × 45",
+      "th": " เสียง ผึ้ง ร้อง × 45",
+      "ar": "نحل العجلات × 45",
+      "aliases": [
+        "Kill 45 WhimperingBee"
+      ]
+    },
+    {
+      "key": "content.quest.92014.name",
+      "en": "Insect Tunnel Watch",
+      "zh-TW": "蟲洞通道週巡",
+      "pt-BR": "Vigia semanal dos túneis",
+      "ru": "Недельный дозор туннелей",
+      "hi": "कीट सुरंग साप्ताहिक निगरानी",
+      "id": "Pengawasan Lorong Gua",
+      "vi": "Canh giữ đường hầm",
+      "th": "เฝ้าอุโมงค์รายสัปดาห์",
+      "ar": "حراسة الأنفاق الأسبوعية",
+      "aliases": [
+        "Insect Tunnel Watch"
+      ]
+    },
+    {
+      "key": "content.quest.92014.description",
+      "en": "Defeat 150 Centipedes and 100 Black Maggots in the Southern Insect Cave 1F this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：蜈蚣 × 150, 黑蛆 × 100。區域：南部蟲洞一層。返回比奇或盟重的任務總管交付。\n每週一於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Centopeia × 150, Larva negra × 100. Área: Caverna de Insetos do Sul 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício semanal: segunda-feira, 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Сороконожка × 150, Чёрная личинка × 100. Область: первый этаж Южной пещеры насекомых. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕженедельный сброс: понедельник, 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: कनखजूरा × 150, काला कीड़ा × 100। क्षेत्र: दक्षिणी कीट गुफा पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nसाप्ताहिक रीसेट: सोमवार, सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Kelabang × 150, Belatung Hitam × 100. Area: Gua Serangga Selatan L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset mingguan: Senin pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Rết × 150, Giòi đen × 100. Khu vực: Hang côn trùng phía Nam tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng tuần vào thứ Hai lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: ตะขาบ × 150, หนอนดำ × 100 พื้นที่: ถ้ำแมลงใต้ ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายสัปดาห์วันจันทร์เวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: حريش × 150, يرقة سوداء × 100. المنطقة: الطابق الأول من كهف الحشرات الجنوبي. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط الأسبوعية: الاثنين، 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 150 Centipedes and 100 Black Maggots in the Southern Insect Cave 1F this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92014",
+      "en": "Defeat 150 Centipedes and 100 Black Maggots in the Southern Insect Cave 1F this week. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：蜈蚣 × 150, 黑蛆 × 100。區域：南部蟲洞一層。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Centopeia × 150, Larva negra × 100. Área: Caverna de Insetos do Sul 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Сороконожка × 150, Чёрная личинка × 100. Область: первый этаж Южной пещеры насекомых. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: कनखजूरा × 150, काला कीड़ा × 100। क्षेत्र: दक्षिणी कीट गुफा पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Kelabang × 150, Belatung Hitam × 100. Area: Gua Serangga Selatan L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Rết × 150, Giòi đen × 100. Khu vực: Hang côn trùng phía Nam tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: ตะขาบ × 150, หนอนดำ × 100 พื้นที่: ถ้ำแมลงใต้ ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: حريش × 150, يرقة سوداء × 100. المنطقة: الطابق الأول من كهف الحشرات الجنوبي. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 150 Centipedes and 100 Black Maggots in the Southern Insect Cave 1F this week. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92014.task",
+      "en": "Centipede × 150\nBlack Maggot × 100",
+      "zh-TW": "蜈蚣 × 150\n黑蛆 × 100",
+      "pt-BR": "Centopeia × 150\nLarva negra × 100",
+      "ru": "Сороконожка × 150\nЧёрная личинка × 100",
+      "hi": "कनखजूरा × 150\nकाला कीड़ा × 100",
+      "id": "Kelabang × 150\nBelatung Hitam × 100",
+      "vi": "Rết × 150\nGiòi đen × 100",
+      "th": "ตะขาบ × 150\nหนอนดำ × 100",
+      "ar": "حريش × 150\nيرقة سوداء × 100",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92014.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92014.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92014",
+      "en": "Accept Insect Tunnel Watch",
+      "zh-TW": "接受 蟲洞通道週巡",
+      "pt-BR": "Aceitar Vigia semanal dos túneis",
+      "ru": "Принять: Недельный дозор туннелей",
+      "hi": "स्वीकारें: कीट सुरंग साप्ताहिक निगरानी",
+      "id": "Terima Pengawasan Lorong Gua",
+      "vi": "Nhận Canh giữ đường hầm",
+      "th": "รับ เฝ้าอุโมงค์รายสัปดาห์",
+      "ar": "قبول حراسة الأنفاق الأسبوعية",
+      "aliases": [
+        "Accept Insect Tunnel Watch"
+      ]
+    },
+    {
+      "key": "periodic.complete.92014",
+      "en": "Complete Insect Tunnel Watch",
+      "zh-TW": "交付 蟲洞通道週巡",
+      "pt-BR": "Concluir Vigia semanal dos túneis",
+      "ru": "Сдать: Недельный дозор туннелей",
+      "hi": "पूरा करें: कीट सुरंग साप्ताहिक निगरानी",
+      "id": "Selesaikan Pengawasan Lorong Gua",
+      "vi": "Hoàn thành Canh giữ đường hầm",
+      "th": "ส่ง เฝ้าอุโมงค์รายสัปดาห์",
+      "ar": "إكمال حراسة الأنفاق الأسبوعية",
+      "aliases": [
+        "Complete Insect Tunnel Watch"
+      ]
+    },
+    {
+      "key": "periodic.kill.152.150",
+      "en": "Centipede × 150",
+      "zh-TW": "蜈蚣 × 150",
+      "pt-BR": "Centopeia × 150",
+      "ru": "Сороконожка × 150",
+      "hi": "कनखजूरा × 150",
+      "id": "Kelabang × 150",
+      "vi": "Rết × 150",
+      "th": "ตะขาบ × 150",
+      "ar": "حريش × 150",
+      "aliases": [
+        "Kill 150 Centipede"
+      ]
+    },
+    {
+      "key": "periodic.kill.150.100",
+      "en": "Black Maggot × 100",
+      "zh-TW": "黑蛆 × 100",
+      "pt-BR": "Larva negra × 100",
+      "ru": "Чёрная личинка × 100",
+      "hi": "काला कीड़ा × 100",
+      "id": "Belatung Hitam × 100",
+      "vi": "Giòi đen × 100",
+      "th": "หนอนดำ × 100",
+      "ar": "يرقة سوداء × 100",
+      "aliases": [
+        "Kill 100 BlackMaggot"
+      ]
+    },
+    {
+      "key": "content.quest.92015.name",
+      "en": "Insect Nest Watch",
+      "zh-TW": "蟲洞巢穴週巡",
+      "pt-BR": "Vigia semanal dos ninhos",
+      "ru": "Недельный дозор гнёзд",
+      "hi": "कीट घोंसला साप्ताहिक निगरानी",
+      "id": "Pengawasan Sarang Gua",
+      "vi": "Canh giữ tổ côn trùng",
+      "th": "เฝ้ารังแมลงรายสัปดาห์",
+      "ar": "حراسة أعشاش الحشرات",
+      "aliases": [
+        "Insect Nest Watch"
+      ]
+    },
+    {
+      "key": "content.quest.92015.description",
+      "en": "Defeat 120 Whimpering Bees and 120 Giant Worms in the Southern Insect Cave 1F this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：鳴叫蜂 × 120, 巨型蠕蟲 × 120。區域：南部蟲洞一層。返回比奇或盟重的任務總管交付。\n每週一於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Abelha lamentosa × 120, Verme gigante × 120. Área: Caverna de Insetos do Sul 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício semanal: segunda-feira, 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Пчелиная пчёлка × 120, Гигантский червь × 120. Область: первый этаж Южной пещеры насекомых. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕженедельный сброс: понедельник, 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: व्हिम्परिंग मधुमक्खी × 120, विशाल कृमि × 120। क्षेत्र: दक्षिणी कीट गुफा पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nसाप्ताहिक रीसेट: सोमवार, सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Merintih Bee × 120, Cacing Raksasa × 120. Area: Gua Serangga Selatan L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset mingguan: Senin pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu:  Ong biết bay × 120, Giun khổng lồ × 120. Khu vực: Hang côn trùng phía Nam tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng tuần vào thứ Hai lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย:  เสียง ผึ้ง ร้อง × 120, หนอนยักษ์ × 120 พื้นที่: ถ้ำแมลงใต้ ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายสัปดาห์วันจันทร์เวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: نحل العجلات × 120, دودة عملاقة × 120. المنطقة: الطابق الأول من كهف الحشرات الجنوبي. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط الأسبوعية: الاثنين، 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 120 Whimpering Bees and 120 Giant Worms in the Southern Insect Cave 1F this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92015",
+      "en": "Defeat 120 Whimpering Bees and 120 Giant Worms in the Southern Insect Cave 1F this week. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：鳴叫蜂 × 120, 巨型蠕蟲 × 120。區域：南部蟲洞一層。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Abelha lamentosa × 120, Verme gigante × 120. Área: Caverna de Insetos do Sul 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Пчелиная пчёлка × 120, Гигантский червь × 120. Область: первый этаж Южной пещеры насекомых. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: व्हिम्परिंग मधुमक्खी × 120, विशाल कृमि × 120। क्षेत्र: दक्षिणी कीट गुफा पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Merintih Bee × 120, Cacing Raksasa × 120. Area: Gua Serangga Selatan L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu:  Ong biết bay × 120, Giun khổng lồ × 120. Khu vực: Hang côn trùng phía Nam tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย:  เสียง ผึ้ง ร้อง × 120, หนอนยักษ์ × 120 พื้นที่: ถ้ำแมลงใต้ ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: نحل العجلات × 120, دودة عملاقة × 120. المنطقة: الطابق الأول من كهف الحشرات الجنوبي. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 120 Whimpering Bees and 120 Giant Worms in the Southern Insect Cave 1F this week. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92015.task",
+      "en": "Whimpering Bee × 120\nGiant Worm × 120",
+      "zh-TW": "鳴叫蜂 × 120\n巨型蠕蟲 × 120",
+      "pt-BR": "Abelha lamentosa × 120\nVerme gigante × 120",
+      "ru": "Пчелиная пчёлка × 120\nГигантский червь × 120",
+      "hi": "व्हिम्परिंग मधुमक्खी × 120\nविशाल कृमि × 120",
+      "id": "Merintih Bee × 120\nCacing Raksasa × 120",
+      "vi": " Ong biết bay × 120\nGiun khổng lồ × 120",
+      "th": " เสียง ผึ้ง ร้อง × 120\nหนอนยักษ์ × 120",
+      "ar": "نحل العجلات × 120\nدودة عملاقة × 120",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92015.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92015.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92015",
+      "en": "Accept Insect Nest Watch",
+      "zh-TW": "接受 蟲洞巢穴週巡",
+      "pt-BR": "Aceitar Vigia semanal dos ninhos",
+      "ru": "Принять: Недельный дозор гнёзд",
+      "hi": "स्वीकारें: कीट घोंसला साप्ताहिक निगरानी",
+      "id": "Terima Pengawasan Sarang Gua",
+      "vi": "Nhận Canh giữ tổ côn trùng",
+      "th": "รับ เฝ้ารังแมลงรายสัปดาห์",
+      "ar": "قبول حراسة أعشاش الحشرات",
+      "aliases": [
+        "Accept Insect Nest Watch"
+      ]
+    },
+    {
+      "key": "periodic.complete.92015",
+      "en": "Complete Insect Nest Watch",
+      "zh-TW": "交付 蟲洞巢穴週巡",
+      "pt-BR": "Concluir Vigia semanal dos ninhos",
+      "ru": "Сдать: Недельный дозор гнёзд",
+      "hi": "पूरा करें: कीट घोंसला साप्ताहिक निगरानी",
+      "id": "Selesaikan Pengawasan Sarang Gua",
+      "vi": "Hoàn thành Canh giữ tổ côn trùng",
+      "th": "ส่ง เฝ้ารังแมลงรายสัปดาห์",
+      "ar": "إكمال حراسة أعشاش الحشرات",
+      "aliases": [
+        "Complete Insect Nest Watch"
+      ]
+    },
+    {
+      "key": "periodic.kill.156.120",
+      "en": "Whimpering Bee × 120",
+      "zh-TW": "鳴叫蜂 × 120",
+      "pt-BR": "Abelha lamentosa × 120",
+      "ru": "Пчелиная пчёлка × 120",
+      "hi": "व्हिम्परिंग मधुमक्खी × 120",
+      "id": "Merintih Bee × 120",
+      "vi": " Ong biết bay × 120",
+      "th": " เสียง ผึ้ง ร้อง × 120",
+      "ar": "نحل العجلات × 120",
+      "aliases": [
+        "Kill 120 WhimperingBee"
+      ]
+    },
+    {
+      "key": "periodic.kill.154.120",
+      "en": "Giant Worm × 120",
+      "zh-TW": "巨型蠕蟲 × 120",
+      "pt-BR": "Verme gigante × 120",
+      "ru": "Гигантский червь × 120",
+      "hi": "विशाल कृमि × 120",
+      "id": "Cacing Raksasa × 120",
+      "vi": "Giun khổng lồ × 120",
+      "th": "หนอนยักษ์ × 120",
+      "ar": "دودة عملاقة × 120",
+      "aliases": [
+        "Kill 120 GiantWorm"
+      ]
+    },
+    {
+      "key": "content.quest.92016.name",
+      "en": "Tomb Red Boar Patrol",
+      "zh-TW": "石墓紅野豬巡邏",
+      "pt-BR": "Patrulha de javalis vermelhos",
+      "ru": "Дозор красных кабанов",
+      "hi": "समाधि लाल बोअर गश्त",
+      "id": "Patroli Babi Hutan Merah",
+      "vi": "Tuần tra lợn rừng đỏ",
+      "th": "ลาดตระเวนหมูป่าแดง",
+      "ar": "دورية الخنازير الحمراء",
+      "aliases": [
+        "Tomb Red Boar Patrol"
+      ]
+    },
+    {
+      "key": "content.quest.92016.description",
+      "en": "Defeat 60 Red Boars in Angled Stone Tomb B1. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：紅野豬 × 60。區域：傾斜石墓地下一層。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Javali vermelho × 60. Área: Tumba de Pedra Inclinada S1. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Красный кабан × 60. Область: первый подвал Наклонной каменной гробницы. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: लाल वराह × 60। क्षेत्र: झुकी पत्थर समाधि पहला तहखाना। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Babi Hutan Merah × 60. Area: Makam Batu Miring B1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Lợn rừng đỏ × 60. Khu vực: Hầm mộ đá nghiêng B1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: หมูป่าแดง × 60 พื้นที่: สุสานหินเอียง ชั้นใต้ดิน 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: خنزير بري أحمر × 60. المنطقة: القبو الأول من المقبرة الحجرية المائلة. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 60 Red Boars in Angled Stone Tomb B1. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92016",
+      "en": "Defeat 60 Red Boars in Angled Stone Tomb B1. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：紅野豬 × 60。區域：傾斜石墓地下一層。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Javali vermelho × 60. Área: Tumba de Pedra Inclinada S1. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Красный кабан × 60. Область: первый подвал Наклонной каменной гробницы. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: लाल वराह × 60। क्षेत्र: झुकी पत्थर समाधि पहला तहखाना। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Babi Hutan Merah × 60. Area: Makam Batu Miring B1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Lợn rừng đỏ × 60. Khu vực: Hầm mộ đá nghiêng B1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: หมูป่าแดง × 60 พื้นที่: สุสานหินเอียง ชั้นใต้ดิน 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: خنزير بري أحمر × 60. المنطقة: القبو الأول من المقبرة الحجرية المائلة. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 60 Red Boars in Angled Stone Tomb B1. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92016.task",
+      "en": "Red Boar × 60",
+      "zh-TW": "紅野豬 × 60",
+      "pt-BR": "Javali vermelho × 60",
+      "ru": "Красный кабан × 60",
+      "hi": "लाल वराह × 60",
+      "id": "Babi Hutan Merah × 60",
+      "vi": "Lợn rừng đỏ × 60",
+      "th": "หมูป่าแดง × 60",
+      "ar": "خنزير بري أحمر × 60",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92016.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92016.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92016",
+      "en": "Accept Tomb Red Boar Patrol",
+      "zh-TW": "接受 石墓紅野豬巡邏",
+      "pt-BR": "Aceitar Patrulha de javalis vermelhos",
+      "ru": "Принять: Дозор красных кабанов",
+      "hi": "स्वीकारें: समाधि लाल बोअर गश्त",
+      "id": "Terima Patroli Babi Hutan Merah",
+      "vi": "Nhận Tuần tra lợn rừng đỏ",
+      "th": "รับ ลาดตระเวนหมูป่าแดง",
+      "ar": "قبول دورية الخنازير الحمراء",
+      "aliases": [
+        "Accept Tomb Red Boar Patrol"
+      ]
+    },
+    {
+      "key": "periodic.complete.92016",
+      "en": "Complete Tomb Red Boar Patrol",
+      "zh-TW": "交付 石墓紅野豬巡邏",
+      "pt-BR": "Concluir Patrulha de javalis vermelhos",
+      "ru": "Сдать: Дозор красных кабанов",
+      "hi": "पूरा करें: समाधि लाल बोअर गश्त",
+      "id": "Selesaikan Patroli Babi Hutan Merah",
+      "vi": "Hoàn thành Tuần tra lợn rừng đỏ",
+      "th": "ส่ง ลาดตระเวนหมูป่าแดง",
+      "ar": "إكمال دورية الخنازير الحمراء",
+      "aliases": [
+        "Complete Tomb Red Boar Patrol"
+      ]
+    },
+    {
+      "key": "periodic.kill.168.60",
+      "en": "Red Boar × 60",
+      "zh-TW": "紅野豬 × 60",
+      "pt-BR": "Javali vermelho × 60",
+      "ru": "Красный кабан × 60",
+      "hi": "लाल वराह × 60",
+      "id": "Babi Hutan Merah × 60",
+      "vi": "Lợn rừng đỏ × 60",
+      "th": "หมูป่าแดง × 60",
+      "ar": "خنزير بري أحمر × 60",
+      "aliases": [
+        "Kill 60 RedBoar"
+      ]
+    },
+    {
+      "key": "content.quest.92017.name",
+      "en": "Tomb Black Boar Patrol",
+      "zh-TW": "石墓黑野豬巡邏",
+      "pt-BR": "Patrulha de javalis negros",
+      "ru": "Дозор чёрных кабанов",
+      "hi": "समाधि काले बोअर गश्त",
+      "id": "Patroli Babi Hutan Hitam",
+      "vi": "Tuần tra lợn rừng đen",
+      "th": "ลาดตระเวนหมูป่าดำ",
+      "ar": "دورية الخنازير السوداء",
+      "aliases": [
+        "Tomb Black Boar Patrol"
+      ]
+    },
+    {
+      "key": "content.quest.92017.description",
+      "en": "Defeat 50 Black Boars in Angled Stone Tomb B1. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：黑野豬 × 50。區域：傾斜石墓地下一層。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Javali negro × 50. Área: Tumba de Pedra Inclinada S1. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Чёрный кабан × 50. Область: первый подвал Наклонной каменной гробницы. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: काला वराह × 50। क्षेत्र: झुकी पत्थर समाधि पहला तहखाना। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Babi Hutan Hitam × 50. Area: Makam Batu Miring B1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Lợn rừng đen × 50. Khu vực: Hầm mộ đá nghiêng B1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: หมูป่าดำ × 50 พื้นที่: สุสานหินเอียง ชั้นใต้ดิน 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: خنزير بري أسود × 50. المنطقة: القبو الأول من المقبرة الحجرية المائلة. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 50 Black Boars in Angled Stone Tomb B1. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92017",
+      "en": "Defeat 50 Black Boars in Angled Stone Tomb B1. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：黑野豬 × 50。區域：傾斜石墓地下一層。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Javali negro × 50. Área: Tumba de Pedra Inclinada S1. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Чёрный кабан × 50. Область: первый подвал Наклонной каменной гробницы. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: काला वराह × 50। क्षेत्र: झुकी पत्थर समाधि पहला तहखाना। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Babi Hutan Hitam × 50. Area: Makam Batu Miring B1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Lợn rừng đen × 50. Khu vực: Hầm mộ đá nghiêng B1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: หมูป่าดำ × 50 พื้นที่: สุสานหินเอียง ชั้นใต้ดิน 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: خنزير بري أسود × 50. المنطقة: القبو الأول من المقبرة الحجرية المائلة. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 50 Black Boars in Angled Stone Tomb B1. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92017.task",
+      "en": "Black Boar × 50",
+      "zh-TW": "黑野豬 × 50",
+      "pt-BR": "Javali negro × 50",
+      "ru": "Чёрный кабан × 50",
+      "hi": "काला वराह × 50",
+      "id": "Babi Hutan Hitam × 50",
+      "vi": "Lợn rừng đen × 50",
+      "th": "หมูป่าดำ × 50",
+      "ar": "خنزير بري أسود × 50",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92017.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92017.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92017",
+      "en": "Accept Tomb Black Boar Patrol",
+      "zh-TW": "接受 石墓黑野豬巡邏",
+      "pt-BR": "Aceitar Patrulha de javalis negros",
+      "ru": "Принять: Дозор чёрных кабанов",
+      "hi": "स्वीकारें: समाधि काले बोअर गश्त",
+      "id": "Terima Patroli Babi Hutan Hitam",
+      "vi": "Nhận Tuần tra lợn rừng đen",
+      "th": "รับ ลาดตระเวนหมูป่าดำ",
+      "ar": "قبول دورية الخنازير السوداء",
+      "aliases": [
+        "Accept Tomb Black Boar Patrol"
+      ]
+    },
+    {
+      "key": "periodic.complete.92017",
+      "en": "Complete Tomb Black Boar Patrol",
+      "zh-TW": "交付 石墓黑野豬巡邏",
+      "pt-BR": "Concluir Patrulha de javalis negros",
+      "ru": "Сдать: Дозор чёрных кабанов",
+      "hi": "पूरा करें: समाधि काले बोअर गश्त",
+      "id": "Selesaikan Patroli Babi Hutan Hitam",
+      "vi": "Hoàn thành Tuần tra lợn rừng đen",
+      "th": "ส่ง ลาดตระเวนหมูป่าดำ",
+      "ar": "إكمال دورية الخنازير السوداء",
+      "aliases": [
+        "Complete Tomb Black Boar Patrol"
+      ]
+    },
+    {
+      "key": "periodic.kill.171.50",
+      "en": "Black Boar × 50",
+      "zh-TW": "黑野豬 × 50",
+      "pt-BR": "Javali negro × 50",
+      "ru": "Чёрный кабан × 50",
+      "hi": "काला वराह × 50",
+      "id": "Babi Hutan Hitam × 50",
+      "vi": "Lợn rừng đen × 50",
+      "th": "หมูป่าดำ × 50",
+      "ar": "خنزير بري أسود × 50",
+      "aliases": [
+        "Kill 50 BlackBoar"
+      ]
+    },
+    {
+      "key": "content.quest.92018.name",
+      "en": "Zuma Rat Patrol",
+      "zh-TW": "祖瑪巨鼠巡邏",
+      "pt-BR": "Patrulha de ratos de Zuma",
+      "ru": "Дозор крыс Зумы",
+      "hi": "ज़ूमा रैट गश्त",
+      "id": "Patroli Tikus Zuma",
+      "vi": "Tuần tra chuột Zuma",
+      "th": "ลาดตระเวนหนูซูม่า",
+      "ar": "دورية جرذان زوما",
+      "aliases": [
+        "Zuma Rat Patrol"
+      ]
+    },
+    {
+      "key": "content.quest.92018.description",
+      "en": "Defeat 30 Giant Rats in Zuma Temple 1F. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：巨鼠 × 30。區域：祖瑪寺廟一層。返回比奇或盟重的任務總管交付。\n每日於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Rato gigante × 30. Área: Templo de Zuma 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício diário: 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Гигантская крыса × 30. Область: первый этаж храма Зумы. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕжедневный сброс: 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: विशाल चूहा × 30। क्षेत्र: ज़ूमा मंदिर पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nदैनिक रीसेट: सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Tikus Raksasa × 30. Area: Kuil Zuma L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset harian: pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Chuột khổng lồ × 30. Khu vực: Đền Zuma tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng ngày lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: หนูยักษ์ × 30 พื้นที่: วิหารซูม่า ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายวันเวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: جرذ عملاق × 30. المنطقة: الطابق الأول من معبد زوما. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط اليومية: 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 30 Giant Rats in Zuma Temple 1F. Return to either Task Steward.\nDaily reset: 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92018",
+      "en": "Defeat 30 Giant Rats in Zuma Temple 1F. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：巨鼠 × 30。區域：祖瑪寺廟一層。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Rato gigante × 30. Área: Templo de Zuma 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Гигантская крыса × 30. Область: первый этаж храма Зумы. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: विशाल चूहा × 30। क्षेत्र: ज़ूमा मंदिर पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Tikus Raksasa × 30. Area: Kuil Zuma L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Chuột khổng lồ × 30. Khu vực: Đền Zuma tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: หนูยักษ์ × 30 พื้นที่: วิหารซูม่า ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: جرذ عملاق × 30. المنطقة: الطابق الأول من معبد زوما. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 30 Giant Rats in Zuma Temple 1F. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92018.task",
+      "en": "Giant Rat × 30",
+      "zh-TW": "巨鼠 × 30",
+      "pt-BR": "Rato gigante × 30",
+      "ru": "Гигантская крыса × 30",
+      "hi": "विशाल चूहा × 30",
+      "id": "Tikus Raksasa × 30",
+      "vi": "Chuột khổng lồ × 30",
+      "th": "หนูยักษ์ × 30",
+      "ar": "جرذ عملاق × 30",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92018.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92018.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92018",
+      "en": "Accept Zuma Rat Patrol",
+      "zh-TW": "接受 祖瑪巨鼠巡邏",
+      "pt-BR": "Aceitar Patrulha de ratos de Zuma",
+      "ru": "Принять: Дозор крыс Зумы",
+      "hi": "स्वीकारें: ज़ूमा रैट गश्त",
+      "id": "Terima Patroli Tikus Zuma",
+      "vi": "Nhận Tuần tra chuột Zuma",
+      "th": "รับ ลาดตระเวนหนูซูม่า",
+      "ar": "قبول دورية جرذان زوما",
+      "aliases": [
+        "Accept Zuma Rat Patrol"
+      ]
+    },
+    {
+      "key": "periodic.complete.92018",
+      "en": "Complete Zuma Rat Patrol",
+      "zh-TW": "交付 祖瑪巨鼠巡邏",
+      "pt-BR": "Concluir Patrulha de ratos de Zuma",
+      "ru": "Сдать: Дозор крыс Зумы",
+      "hi": "पूरा करें: ज़ूमा रैट गश्त",
+      "id": "Selesaikan Patroli Tikus Zuma",
+      "vi": "Hoàn thành Tuần tra chuột Zuma",
+      "th": "ส่ง ลาดตระเวนหนูซูม่า",
+      "ar": "إكمال دورية جرذان زوما",
+      "aliases": [
+        "Complete Zuma Rat Patrol"
+      ]
+    },
+    {
+      "key": "periodic.kill.192.30",
+      "en": "Giant Rat × 30",
+      "zh-TW": "巨鼠 × 30",
+      "pt-BR": "Rato gigante × 30",
+      "ru": "Гигантская крыса × 30",
+      "hi": "विशाल चूहा × 30",
+      "id": "Tikus Raksasa × 30",
+      "vi": "Chuột khổng lồ × 30",
+      "th": "หนูยักษ์ × 30",
+      "ar": "جرذ عملاق × 30",
+      "aliases": [
+        "Kill 30 GiantRat"
+      ]
+    },
+    {
+      "key": "content.quest.92019.name",
+      "en": "Tomb Boar Watch",
+      "zh-TW": "石墓野豬週巡",
+      "pt-BR": "Vigia semanal dos javalis",
+      "ru": "Недельный дозор кабанов",
+      "hi": "समाधि बोअर साप्ताहिक निगरानी",
+      "id": "Pengawasan Babi Hutan",
+      "vi": "Canh giữ lợn rừng",
+      "th": "เฝ้าหมูป่ารายสัปดาห์",
+      "ar": "حراسة المقبرة من الخنازير",
+      "aliases": [
+        "Tomb Boar Watch"
+      ]
+    },
+    {
+      "key": "content.quest.92019.description",
+      "en": "Defeat 180 Red Boars and 150 Black Boars in Angled Stone Tomb B1 this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：紅野豬 × 180, 黑野豬 × 150。區域：傾斜石墓地下一層。返回比奇或盟重的任務總管交付。\n每週一於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Javali vermelho × 180, Javali negro × 150. Área: Tumba de Pedra Inclinada S1. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício semanal: segunda-feira, 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Красный кабан × 180, Чёрный кабан × 150. Область: первый подвал Наклонной каменной гробницы. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕженедельный сброс: понедельник, 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: लाल वराह × 180, काला वराह × 150। क्षेत्र: झुकी पत्थर समाधि पहला तहखाना। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nसाप्ताहिक रीसेट: सोमवार, सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Babi Hutan Merah × 180, Babi Hutan Hitam × 150. Area: Makam Batu Miring B1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset mingguan: Senin pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Lợn rừng đỏ × 180, Lợn rừng đen × 150. Khu vực: Hầm mộ đá nghiêng B1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng tuần vào thứ Hai lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: หมูป่าแดง × 180, หมูป่าดำ × 150 พื้นที่: สุสานหินเอียง ชั้นใต้ดิน 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายสัปดาห์วันจันทร์เวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: خنزير بري أحمر × 180, خنزير بري أسود × 150. المنطقة: القبو الأول من المقبرة الحجرية المائلة. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط الأسبوعية: الاثنين، 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 180 Red Boars and 150 Black Boars in Angled Stone Tomb B1 this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92019",
+      "en": "Defeat 180 Red Boars and 150 Black Boars in Angled Stone Tomb B1 this week. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：紅野豬 × 180, 黑野豬 × 150。區域：傾斜石墓地下一層。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Javali vermelho × 180, Javali negro × 150. Área: Tumba de Pedra Inclinada S1. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Красный кабан × 180, Чёрный кабан × 150. Область: первый подвал Наклонной каменной гробницы. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: लाल वराह × 180, काला वराह × 150। क्षेत्र: झुकी पत्थर समाधि पहला तहखाना। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Babi Hutan Merah × 180, Babi Hutan Hitam × 150. Area: Makam Batu Miring B1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Lợn rừng đỏ × 180, Lợn rừng đen × 150. Khu vực: Hầm mộ đá nghiêng B1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: หมูป่าแดง × 180, หมูป่าดำ × 150 พื้นที่: สุสานหินเอียง ชั้นใต้ดิน 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: خنزير بري أحمر × 180, خنزير بري أسود × 150. المنطقة: القبو الأول من المقبرة الحجرية المائلة. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 180 Red Boars and 150 Black Boars in Angled Stone Tomb B1 this week. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92019.task",
+      "en": "Red Boar × 180\nBlack Boar × 150",
+      "zh-TW": "紅野豬 × 180\n黑野豬 × 150",
+      "pt-BR": "Javali vermelho × 180\nJavali negro × 150",
+      "ru": "Красный кабан × 180\nЧёрный кабан × 150",
+      "hi": "लाल वराह × 180\nकाला वराह × 150",
+      "id": "Babi Hutan Merah × 180\nBabi Hutan Hitam × 150",
+      "vi": "Lợn rừng đỏ × 180\nLợn rừng đen × 150",
+      "th": "หมูป่าแดง × 180\nหมูป่าดำ × 150",
+      "ar": "خنزير بري أحمر × 180\nخنزير بري أسود × 150",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92019.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92019.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92019",
+      "en": "Accept Tomb Boar Watch",
+      "zh-TW": "接受 石墓野豬週巡",
+      "pt-BR": "Aceitar Vigia semanal dos javalis",
+      "ru": "Принять: Недельный дозор кабанов",
+      "hi": "स्वीकारें: समाधि बोअर साप्ताहिक निगरानी",
+      "id": "Terima Pengawasan Babi Hutan",
+      "vi": "Nhận Canh giữ lợn rừng",
+      "th": "รับ เฝ้าหมูป่ารายสัปดาห์",
+      "ar": "قبول حراسة المقبرة من الخنازير",
+      "aliases": [
+        "Accept Tomb Boar Watch"
+      ]
+    },
+    {
+      "key": "periodic.complete.92019",
+      "en": "Complete Tomb Boar Watch",
+      "zh-TW": "交付 石墓野豬週巡",
+      "pt-BR": "Concluir Vigia semanal dos javalis",
+      "ru": "Сдать: Недельный дозор кабанов",
+      "hi": "पूरा करें: समाधि बोअर साप्ताहिक निगरानी",
+      "id": "Selesaikan Pengawasan Babi Hutan",
+      "vi": "Hoàn thành Canh giữ lợn rừng",
+      "th": "ส่ง เฝ้าหมูป่ารายสัปดาห์",
+      "ar": "إكمال حراسة المقبرة من الخنازير",
+      "aliases": [
+        "Complete Tomb Boar Watch"
+      ]
+    },
+    {
+      "key": "periodic.kill.168.180",
+      "en": "Red Boar × 180",
+      "zh-TW": "紅野豬 × 180",
+      "pt-BR": "Javali vermelho × 180",
+      "ru": "Красный кабан × 180",
+      "hi": "लाल वराह × 180",
+      "id": "Babi Hutan Merah × 180",
+      "vi": "Lợn rừng đỏ × 180",
+      "th": "หมูป่าแดง × 180",
+      "ar": "خنزير بري أحمر × 180",
+      "aliases": [
+        "Kill 180 RedBoar"
+      ]
+    },
+    {
+      "key": "periodic.kill.171.150",
+      "en": "Black Boar × 150",
+      "zh-TW": "黑野豬 × 150",
+      "pt-BR": "Javali negro × 150",
+      "ru": "Чёрный кабан × 150",
+      "hi": "काला वराह × 150",
+      "id": "Babi Hutan Hitam × 150",
+      "vi": "Lợn rừng đen × 150",
+      "th": "หมูป่าดำ × 150",
+      "ar": "خنزير بري أسود × 150",
+      "aliases": [
+        "Kill 150 BlackBoar"
+      ]
+    },
+    {
+      "key": "content.quest.92020.name",
+      "en": "Zuma Entrance Watch",
+      "zh-TW": "祖瑪入口週巡",
+      "pt-BR": "Vigia semanal da entrada de Zuma",
+      "ru": "Недельный дозор входа в Зуму",
+      "hi": "ज़ूमा प्रवेश साप्ताहिक निगरानी",
+      "id": "Pengawasan Pintu Zuma",
+      "vi": "Canh giữ cửa vào Zuma",
+      "th": "เฝ้าทางเข้าซูม่ารายสัปดาห์",
+      "ar": "حراسة مدخل زوما الأسبوعية",
+      "aliases": [
+        "Zuma Entrance Watch"
+      ]
+    },
+    {
+      "key": "content.quest.92020.description",
+      "en": "Defeat 100 Giant Rats and 120 Wedge Moths in Zuma Temple 1F this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task.",
+      "zh-TW": "狩獵目標：巨鼠 × 100, 楔蛾 × 120。區域：祖瑪寺廟一層。返回比奇或盟重的任務總管交付。\n每週一於伺服器時間 00:00（UTC+8）重置。\n比奇與盟重共用任務進度及獎勵記錄。\n未完成的任務在重置後保留進度。\n獎勵數量在接受任務時確定。",
+      "pt-BR": "Alvos: Rato gigante × 100, Mariposa-cunha × 120. Área: Templo de Zuma 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.\nReinício semanal: segunda-feira, 00:00 no horário do servidor (UTC+8).\nBichon e Mongchon compartilham o progresso e as recompensas destas tarefas.\nTarefas inacabadas mantêm o progresso após o reinício.\nAs recompensas são fixadas ao aceitar a tarefa.",
+      "ru": "Цели: Гигантская крыса × 100, клиновая моль × 120. Область: первый этаж храма Зумы. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.\nЕженедельный сброс: понедельник, 00:00 по времени сервера (UTC+8).\nБичон и Монгчон используют общий прогресс и награды этих заданий.\nНезавершённые задания сохраняют прогресс после сброса.\nНаграды фиксируются при принятии задания.",
+      "hi": "लक्ष्य: विशाल चूहा × 100, वेज मोथ × 120। क्षेत्र: ज़ूमा मंदिर पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।\nसाप्ताहिक रीसेट: सोमवार, सर्वर समय 00:00 (UTC+8)।\nबिचोन और मोंगचोन में इन कार्यों की प्रगति और पुरस्कार साझा हैं।\nअधूरे कार्य रीसेट के बाद अपनी प्रगति बनाए रखते हैं।\nकार्य स्वीकार करते समय पुरस्कार तय हो जाते हैं।",
+      "id": "Target: Tikus Raksasa × 100, ngengat baji × 120. Area: Kuil Zuma L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.\nReset mingguan: Senin pukul 00:00 waktu server (UTC+8).\nBichon dan Mongchon berbagi progres dan hadiah tugas ini.\nTugas yang belum selesai tetap menyimpan progres setelah reset.\nHadiah ditetapkan saat Anda menerima tugas.",
+      "vi": "Mục tiêu: Chuột khổng lồ × 100,  Mô thẳng đứng × 120. Khu vực: Đền Zuma tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.\nĐặt lại hằng tuần vào thứ Hai lúc 00:00 theo giờ máy chủ (UTC+8).\nBichon và Mongchon dùng chung tiến độ và phần thưởng của các nhiệm vụ này.\nNhiệm vụ chưa hoàn thành vẫn giữ tiến độ sau khi đặt lại.\nPhần thưởng được cố định khi bạn nhận nhiệm vụ.",
+      "th": "เป้าหมาย: หนูยักษ์ × 100, ตาข่ายโมธ × 120 พื้นที่: วิหารซูม่า ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน\nรีเซ็ตรายสัปดาห์วันจันทร์เวลา 00:00 ตามเวลาเซิร์ฟเวอร์ (UTC+8)\nบิชอนและมงชอนใช้ความคืบหน้าและรางวัลของภารกิจร่วมกัน\nภารกิจที่ยังไม่เสร็จจะเก็บความคืบหน้าไว้หลังรีเซ็ต\nรางวัลจะถูกกำหนดเมื่อรับภารกิจ",
+      "ar": "الأهداف: جرذ عملاق × 100, عثة الوتد × 120. المنطقة: الطابق الأول من معبد زوما. عُد إلى مشرف المهام في بيشون أو مونغشون.\nإعادة الضبط الأسبوعية: الاثنين، 00:00 بتوقيت الخادم (UTC+8).\nتتشارك بيشون ومونغشون تقدم هذه المهام وسجلات مكافآتها.\nتحتفظ المهام غير المكتملة بتقدمها بعد إعادة الضبط.\nتُحدد المكافآت عند قبول المهمة.",
+      "aliases": [
+        "Defeat 100 Giant Rats and 120 Wedge Moths in Zuma Temple 1F this week. Return to either Task Steward.\nWeekly reset: Monday 00:00 server time (UTC+8).\nBichon and Mongchon share these tasks and rewards.\nUnfinished tasks keep their progress after reset.\nRewards are fixed when you accept the task."
+      ]
+    },
+    {
+      "key": "periodic.summary.92020",
+      "en": "Defeat 100 Giant Rats and 120 Wedge Moths in Zuma Temple 1F this week. Return to either Task Steward.",
+      "zh-TW": "狩獵目標：巨鼠 × 100, 楔蛾 × 120。區域：祖瑪寺廟一層。返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Alvos: Rato gigante × 100, Mariposa-cunha × 120. Área: Templo de Zuma 1A. Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Цели: Гигантская крыса × 100, клиновая моль × 120. Область: первый этаж храма Зумы. Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "लक्ष्य: विशाल चूहा × 100, वेज मोथ × 120। क्षेत्र: ज़ूमा मंदिर पहली मंज़िल। बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Target: Tikus Raksasa × 100, ngengat baji × 120. Area: Kuil Zuma L1. Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Mục tiêu: Chuột khổng lồ × 100,  Mô thẳng đứng × 120. Khu vực: Đền Zuma tầng 1. Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "เป้าหมาย: หนูยักษ์ × 100, ตาข่ายโมธ × 120 พื้นที่: วิหารซูม่า ชั้น 1 กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "الأهداف: جرذ عملاق × 100, عثة الوتد × 120. المنطقة: الطابق الأول من معبد زوما. عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": [
+        "Defeat 100 Giant Rats and 120 Wedge Moths in Zuma Temple 1F this week. Return to either Task Steward."
+      ]
+    },
+    {
+      "key": "content.quest.92020.task",
+      "en": "Giant Rat × 100\nWedge Moth × 120",
+      "zh-TW": "巨鼠 × 100\n楔蛾 × 120",
+      "pt-BR": "Rato gigante × 100\nMariposa-cunha × 120",
+      "ru": "Гигантская крыса × 100\nклиновая моль × 120",
+      "hi": "विशाल चूहा × 100\nवेज मोथ × 120",
+      "id": "Tikus Raksasa × 100\nngengat baji × 120",
+      "vi": "Chuột khổng lồ × 100\n Mô thẳng đứng × 120",
+      "th": "หนูยักษ์ × 100\nตาข่ายโมธ × 120",
+      "ar": "جرذ عملاق × 100\nعثة الوتد × 120",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92020.return",
+      "en": "Return to either town Task Steward.",
+      "zh-TW": "返回比奇或盟重的任務總管交付。",
+      "pt-BR": "Volte ao responsável por tarefas de Bichon ou Mongchon.",
+      "ru": "Вернитесь к распорядителю заданий в Бичоне или Монгчоне.",
+      "hi": "बिचोन या मोंगचोन के कार्य प्रबंधक के पास लौटें।",
+      "id": "Kembali ke Pengurus Tugas di Bichon atau Mongchon.",
+      "vi": "Trở về Người quản lý nhiệm vụ tại Bichon hoặc Mongchon.",
+      "th": "กลับไปหาผู้ดูแลภารกิจที่บิชอนหรือมงชอน",
+      "ar": "عُد إلى مشرف المهام في بيشون أو مونغشون.",
+      "aliases": []
+    },
+    {
+      "key": "content.quest.92020.completion",
+      "en": "Task reward claimed for this period.",
+      "zh-TW": "本期任務獎勵已領取。",
+      "pt-BR": "A recompensa desta tarefa já foi recebida neste período.",
+      "ru": "Награда за задание в этом периоде получена.",
+      "hi": "इस अवधि का कार्य पुरस्कार प्राप्त कर लिया गया है।",
+      "id": "Hadiah tugas untuk periode ini sudah diklaim.",
+      "vi": "Đã nhận phần thưởng nhiệm vụ trong kỳ này.",
+      "th": "รับรางวัลภารกิจของรอบนี้แล้ว",
+      "ar": "تم استلام مكافأة المهمة لهذه الفترة.",
+      "aliases": []
+    },
+    {
+      "key": "periodic.accept.92020",
+      "en": "Accept Zuma Entrance Watch",
+      "zh-TW": "接受 祖瑪入口週巡",
+      "pt-BR": "Aceitar Vigia semanal da entrada de Zuma",
+      "ru": "Принять: Недельный дозор входа в Зуму",
+      "hi": "स्वीकारें: ज़ूमा प्रवेश साप्ताहिक निगरानी",
+      "id": "Terima Pengawasan Pintu Zuma",
+      "vi": "Nhận Canh giữ cửa vào Zuma",
+      "th": "รับ เฝ้าทางเข้าซูม่ารายสัปดาห์",
+      "ar": "قبول حراسة مدخل زوما الأسبوعية",
+      "aliases": [
+        "Accept Zuma Entrance Watch"
+      ]
+    },
+    {
+      "key": "periodic.complete.92020",
+      "en": "Complete Zuma Entrance Watch",
+      "zh-TW": "交付 祖瑪入口週巡",
+      "pt-BR": "Concluir Vigia semanal da entrada de Zuma",
+      "ru": "Сдать: Недельный дозор входа в Зуму",
+      "hi": "पूरा करें: ज़ूमा प्रवेश साप्ताहिक निगरानी",
+      "id": "Selesaikan Pengawasan Pintu Zuma",
+      "vi": "Hoàn thành Canh giữ cửa vào Zuma",
+      "th": "ส่ง เฝ้าทางเข้าซูม่ารายสัปดาห์",
+      "ar": "إكمال حراسة مدخل زوما الأسبوعية",
+      "aliases": [
+        "Complete Zuma Entrance Watch"
+      ]
+    },
+    {
+      "key": "periodic.kill.192.100",
+      "en": "Giant Rat × 100",
+      "zh-TW": "巨鼠 × 100",
+      "pt-BR": "Rato gigante × 100",
+      "ru": "Гигантская крыса × 100",
+      "hi": "विशाल चूहा × 100",
+      "id": "Tikus Raksasa × 100",
+      "vi": "Chuột khổng lồ × 100",
+      "th": "หนูยักษ์ × 100",
+      "ar": "جرذ عملاق × 100",
+      "aliases": [
+        "Kill 100 GiantRat"
+      ]
+    },
+    {
+      "key": "periodic.kill.165.120",
+      "en": "Wedge Moth × 120",
+      "zh-TW": "楔蛾 × 120",
+      "pt-BR": "Mariposa-cunha × 120",
+      "ru": "клиновая моль × 120",
+      "hi": "वेज मोथ × 120",
+      "id": "ngengat baji × 120",
+      "vi": " Mô thẳng đứng × 120",
+      "th": "ตาข่ายโมธ × 120",
+      "ar": "عثة الوتد × 120",
+      "aliases": [
+        "Kill 120 WedgeMoth"
+      ]
+    }
+  ]
+}

@@ -40,6 +40,34 @@ impl QuestNpcDestination {
 /// Match the server's canonical endpoint lookup: loaded object ID first, with
 /// a static-index fallback for legacy imports only. V2 requires loaded IDs.
 pub(super) fn destination(quest: &Quest) -> Option<QuestNpcDestination> {
+    destination_on_map(quest, None)
+}
+
+/// Both task stewards share one server-owned record. Prefer the current town;
+/// otherwise choose the reachable town requiring the fewest ordinary entrances.
+pub(super) fn destination_on_map(quest: &Quest, current_map: Option<i32>) -> Option<QuestNpcDestination> {
+    if mir2_game_data::periodic_quests::is_periodic(quest.quest_index) {
+        if !matches!(quest.status, QuestStatus::NotStarted | QuestStatus::ReadyToTurnIn) {
+            return None;
+        }
+        let npc = mir2_game_data::periodic_quests::catalog().npcs.iter()
+            .filter_map(|npc| {
+                let hops = if current_map == Some(npc.map_index) { 0 }
+                    else if current_map.is_none() { usize::from(npc.object_id != 2180) }
+                    else { match route::resolve(current_map, &[npc.map_index]) {
+                        route::QuestRoute::AtDestination { .. } => 0,
+                        route::QuestRoute::NextStep(step) => step.remaining_hops,
+                        route::QuestRoute::Unavailable => return None,
+                    }};
+                Some((hops, npc.object_id, npc))
+            }).min_by_key(|(hops, id, _)| (*hops, *id))?.2;
+        let map = mir2_game_data::crystal_respawn_manifest_ref().maps.iter()
+            .find(|map| map.map_index == npc.map_index)?;
+        return Some(QuestNpcDestination {
+            object_id: npc.object_id, map_index: npc.map_index,
+            map_title: map.map_title.clone(), name: npc.name.clone(), x: npc.x, y: npc.y,
+        });
+    }
     let loaded_ids = crate::quest_destination::uses_loaded_npc_ids(quest.quest_index);
     let id = match quest.status {
         QuestStatus::ReadyToTurnIn => match quest.finish_npc_index {
@@ -116,7 +144,7 @@ pub(super) fn begin(quest_index: i32, context: &TurnInContext<'_>, state: &mut Q
         state.show_quest_alert(SELECT_REWARD_TEXT);
         return;
     }
-    let Some(target) = destination(quest) else {
+    let Some(target) = destination_on_map(quest, context.big_map.and_then(|map| map.current_map_index)) else {
         state.show_quest_alert("未找到交付 NPC，请按任务说明与交付 NPC 对话。");
         return;
     };
@@ -145,7 +173,7 @@ fn request_is_current(request: &PendingQuestTurnIn, context: &TurnInContext<'_>,
         && context.big_map.is_some_and(|map| map.reset_epoch == request.map_epoch)
         && current.is_some_and(|quest| can_finish_quest(quest)
             && is_valid_reward_selection(quest, Some(request.reward))
-            && destination(quest).as_ref() == Some(&request.target))
+            && destination_on_map(quest, context.big_map.and_then(|map| map.current_map_index)).as_ref() == Some(&request.target))
         && in_range(&request.target, context)
 }
 

@@ -1,5 +1,16 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 additive periodic tasks: separate Daily/Weekly diary pages, current
+> town Task Steward guidance, legal entrance/stop-near routing and complete
+> authored nine-language copy. Focused task regressions pass 211/4 ignored,
+> localization 11/0, shop 64/2 ignored and Windows routing 20/0. The explicit
+> production-widget GPU test passes with 90 captures and zero missing glyphs
+> or layout overflow. R1 failed legacy tab labels are retained; R3 also uses
+> real wire objective strings/counts and actual accept/finish NPC lists.
+> These are offline UI/route proofs. Live server quests, calibrated daily
+> timing, new installer delivery and human acceptance remain open.
+> [Evidence](generated/player-qa/periodic-quests-20261002/README.md).
+
 > 2026-10-01 native skills/input/medicine-shop repair: final serial shared1186
 > and Windows801 checks pass, plus nine production service-open GPU captures.
 > Ordinary Spells/Character/bag/options/menu/help and Diary/Detail capture only
