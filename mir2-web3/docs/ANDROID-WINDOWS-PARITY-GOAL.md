@@ -1,0 +1,164 @@
+# Android 对齐当前 Windows 完整度 goal
+
+建立：2026-10-01。状态：**Active，尚未完成**。
+
+本轮用户要求把 Android 完整度对齐当前 Windows，而不再把登录小切片或
+离线 UI 展示当作终点。目标是原生 Bevy/GameActivity Android；Capacitor
+或远程旧 Web 页面不替代本 goal 的交付。
+
+## 1. 冻结基线与隔离
+
+| 项目 | 本轮核验结果 |
+| --- | --- |
+| Windows 当前源码基线 | `codex/playtest-registration`，`3f5e61533235921369bc13a7760b4a56b0e467e5` |
+| Windows 基线提交 | 2026-10-01 09:54:27 +08:00，技能节奏和非模态窗口输入修复 |
+| 旧 Windows 来源 | `codex/windows-player-journey`，`6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4`，PR #250 仍 Draft；它是上述基线的祖先，不是当前终点 |
+| Android 执行分支 | 独立 `codex/android-shared-sync`，PR #253 仍 Draft，base 不变 |
+| Android 建立 goal 时 HEAD | `b8398db406b4d96d7d4f8381373e404fc0da9553`，当时工作区干净 |
+| 两端已共有的祖先 | `9476f3845e89b9ede164fe18e9c353c1e44f7626` |
+| 尚未进入 Android 的 Windows 提交 | `fefd18370`、`6226bccce`、`3f5e61533`；Git 两侧独有提交数 165 / 3，不是功能完成度 |
+| 最新已交付 Android APK 源码 | `97411004114903a21963e82e2790bdafd4578962`；v5，Debug 与离线 uiPreview 分开 |
+| 原工作区 | `codex/steam-main` / `31b2b396057d82aa80567a33a668907d5d41a432`，保留其已有修改 |
+| 原 Android 分支 | `codex/android-player-journey` / `5d417ca75a5fe845a7d6f6d9e16c720d55e19b36`，不改写 |
+| 当前连接设备 | 仅 `emulator-5554`，`sdk_gphone64_arm64`；没有已连接真机 |
+
+GitHub PR 与远端引用已只读核验，并 fetch 两个 Windows 来源引用。没有合并、
+切换原工作区、stash、reset、clean、force push、合并 PR 或部署。
+本文件路径相对仓库根；任何本机资源路径都不得照抄 Windows 盘符。
+
+Windows 的三个层级不能混用：当前源码是 `3f5e61533`；Windows 文档记录的
+r7 Candidate/安装包源码是 `fefd18370`；技能修复报告当时用户实际 F 盘安装
+仍为 r5 `c7eacee12`。这里选择最新源码能力作为 Android 对齐基线；这些
+Windows 安装状态是对应报告的观察，不是本轮在 Windows 机器上重新验收。
+
+若上游继续变化，先完成这个冻结快照；新增差异单独记录，不能悄悄变更分母。
+不得把 Windows 尚未验收的源码能力标成 Android 已验收，也不要求本 goal
+顺带修完 Windows 自己的全部遗留问题。
+
+## 2. 完成标准
+
+Android 必须具有 Windows 基线已有的玩家功能、共享状态和协议能力，且提供
+可在手机上操作的等价入口。共享 UI 指共享业务语义、状态、动作和素材来源，
+不是把桌面 1024×768 画布整体缩小到手机。
+
+- 完整共享 UI / 窗口能力、九语言呈现、手机布局与输入；不另写一套游戏规则。
+- 同版本资源覆盖、完整地图/对象层/人物装备动画/特效/音频能力；缺帧不补假图。
+- 真实认证、角色与地图流程，真实服务端数据接到每个已支持共享 read model。
+- 移动、战斗、拾取、背包、NPC、任务、保存与恢复达到 Windows 已有能力。
+- 当前 Windows 有的社交、邮件、仓库、交易等功能逐项审计，不仅打开空窗口。
+- Android 安装、版本/资源完整性、更新路径具备平台等价交付；正式签名/发布
+  在获得相应授权和材料后单独验收。
+- 构建、模拟器、真实在线流程、真机和人工接受分列，缺项不能计为通过。
+
+Win32 分辨率、Inno 安装器、EXE 更新器不原样搬到 Android：对应的是手机
+全屏/安全区、APK 安装、可信版本更新与资源缓存。需要本机或平台专用实现的
+部分必须保留同等能力，不借“平台差异”删减普通玩家功能。
+
+目标完成需要所有适用验收叶子有证据；仅有外部 blocker 时仍为未完成。
+真机或人工接受缺失不自动降级成完整交付。不能因为大部分测试通过就宣布
+100% Accepted，也不能把 Git 提交距离、截图数量或单测数量当成功能百分比。
+
+## 3. 初始能力差距表
+
+以下是本轮执行目录，不是已冻结的百分比分母。下一轮须逐项展开 Windows
+实际入口、Android 发送/接收路径、验收脚本和证据，再建立完整叶子清单。
+“已有共享/局部证据”均不表示 Android 真实联网通过。
+
+| ID | 对齐能力 | Android 当前边界与待办 |
+| --- | --- | --- |
+| AP-01 | 最新共享源码 / 依赖 / 协议 | Android 保有此前共享集成；上述三个 Windows 后续提交未集成。先正常 merge 并保留 Android 专属适配，不复制服务端规则 |
+| AP-02 | 登录、注册、改密、安全提示 | 共享表单已挂载；Java 有正常凭据 WSS 登录宿主。注册与其他账户动作逐入口审计，真实账号验收未做 |
+| AP-03 | 角色列表、创建/删除/选择、StartGame | 已有状态机与共享 UI；真实账号、角色和服务端初始位置尚未验收，不用离线角色冒充 |
+| AP-04 | 地图资源 / 加载 / render-ready 切场 | 仅有比奇局部 849-draw 证据；现有导出仍缺 2969 / 7672 源帧引用。审计源端 no-draw 与实际缺失，不能视为全图齐备 |
+| AP-05 | 角色/怪物/NPC/掉落完整对象层 | 已有 bounded packet/render 路径和本地 Archer/mount proof pack；全职业/性别/装备/坐骑/地图资源与正式 pack 版本仍需对齐 |
+| AP-06 | 世界/HUD/个人状态增量与回执 | 现有世界 snapshot、对象流和部分交易回执已接；其余普通玩家 packet 到共享 reducer/read model 逐项补齐，不能依靠周期快照掩盖遗漏 |
+| AP-07 | 普通移动、转向、走跑、门/地图转移 | 共享意图和对象位置已有；需真实 Zone 权威移动、碰撞/修正、保存后重进位置证据；不发送 MoveTo/debug teleport |
+| AP-08 | 三职业既有战斗/技能/冷却/死亡复活 | 已有部分表现与动作入口；补最新 owner ACK/单调时钟冷却与输入规则，验证真回执、目标选择和三职业入口，不算三职业完整成长验收 |
+| AP-09 | 掉落拾取 / 背包 / 穿脱 / 快捷栏 | 共享动作及 DNItems 来源已有；每种已支持移动/拆分/合并/丢弃/使用/穿脱操作需真状态与触屏证据 |
+| AP-10 | NPC 对话、商店、修理、仓库服务 | 有共享界面；服务上下文、任务 NPC 入口、购买/卖出/修理与货币/物品回执逐项核对，不能只证明空窗或本地按钮点击 |
+| AP-11 | 任务/日记/详情/寻路/既有新人流程 | 有共享 UI；绑定真实任务状态，保留非模态移动/战斗；以正常账号证明基线已有路线，保留 Windows 未接受的 caster 门槛 |
+| AP-12 | 仓库 / 锁定 / 密码 / 扩展 / 存取 | 有共享窗与部分 exact-request 收据；完整数据、IME、槽位触控和失败/未知结果行为需在线验收 |
+| AP-13 | 聊天 / 设置 / 邮件 / 组队 / 行会 / 交易等 | HUD/chat/设置/本地邮件草稿有实测；真实收发、目录/通知/金额/物品及其余 Windows 已支持动作仍需逐项核对 |
+| AP-14 | 手机整套窗口、最小地图/大地图/选项/帮助 | 当前 v5 仅完成 bounded HUD/chat/belt；其他窗仍有桌面 magnification。逐窗进行短屏/安全区/滚动/触控适配 |
+| AP-15 | 非模态窗口与输入捕获 | Windows 最新修复普通窗口不冻结行动；Android 还需审计面板、拖拽、IME、商务/NPC 模态与多指所有权，保留正确隔离 |
+| AP-16 | 九语言 / 字体 / 文本与输入 | 共享语言数据已有；Android 九语言真实渲染、RTL/复杂字形、长文本、软键盘及本地偏好尚未整端验收 |
+| AP-17 | 动画 / 特效 / 声音 / 光照 | 有 bounded atlas/action/effect 表现；完整源帧、专用 spell 分支、Android 音频与焦点需核对。native-player-ui 不等于 Windows 音频 backend 已接入 |
+| AP-18 | 断线/恢复/退出/保存/会话隔离 | 当前背景会关 socket 并要求重新登录；旧命令不得重放。须核对实际 nativeResumeV1 协商/宿主，不凭 Rust helper capability JSON 宣称已完成恢复 |
+| AP-19 | 资源按需缓存 / 内存 / GPU / 稳定性 | 局部页加载和预算已有；完整场景、反复编辑/切图、低内存/进程回收与持续运行证据尚缺；历史内存失败不能抹掉 |
+| AP-20 | 安装 / 升级 / 版本与资源完整性 | v5 是诊断 Debug/uiPreview APK，不是 store release；需可重复安装包、源码/Gateway/资源版本、SHA-256 与可信更新方案及验证 |
+| AP-21 | 在线跨端一致性与真机验收 | 当前仅模拟器连接；真实 Android 流程、Windows/Android 同服可见交互及物理设备触控/性能未做。不得把 Mac 或 Windows 测试当 Android 证据 |
+
+凡 AP-13 中 Windows 已支持但表中未单列的模块，都要在叶子审计中展开；不能
+因表格省略了名字就默认为不在范围。Windows 自己未支持的玩法不要求 Android
+独立实现。将读到的历史 README 说法与当前代码分开，发现过时条目后再修文档。
+
+## 4. 执行队列
+
+- [x] G0 — 正式 goal 建立；只读核验真实仓库、远端、隔离状态、当前 Windows
+  来源 SHA 与设备列表；形成此初始能力目录。不是完整代码/功能审计通过。
+- [ ] G1 — 将三个已冻结 Windows 更新集成进独立 Android 分支；逐文件处理
+  shared chat / metrics / overlays / quest / skill 冲突，保留 Android HUD/IME
+  与 GLES 适配；建立双方能力叶子清单并跑受影响共享、Android、Java 与构建门禁。
+- [ ] G2 — 真实登录 → 角色列表 → 创建/选择 → StartGame → 服务端地图/位置。
+  审计 transport、认证和 render-ready，不发裸 account_id 冒充身份。
+- [ ] G3 — 完整资源和对象/地图生命周期、真实权威移动、战斗、拾取、背包、
+  NPC/任务/仓库/社交等已支持 read model 与命令/回执闭环；按高依赖顺序小步完成。
+- [ ] G4 — 手机全套窗口/九语言/输入、普通面板非模态、IME、双指走跑战斗、
+  音频/缓存/性能；可在 G2 外部条件等待时先做不依赖在线账号的有界叶子。
+- [ ] G5 — 同一精确 APK 上完成 API31 真实在线回归、跨端交互、真实设备
+  触控/后台/断网/内存/渲染测量与可安装交付。人工接受和正式分发各有明确门槛。
+- [ ] G6 — 回查全部适用叶子；交付 APK+hash、版本、设备、证据和遗留限制。
+  未达到目标不得把 goal 标 Complete。
+
+每个叶子依次记录：源码接线、focused/shared regression、Android target/build、
+模拟器离线/在线、真机、人工接受。采用 `PASS / FAIL / OPEN / EXTERNAL`，
+其中 EXTERNAL 仍是未完成，不用虚假的完成百分比。测试重叠/ignore 分列。
+后续补出完整分母才可以报告“已通过叶子数 / 适用叶子数”，不得先拍百分比。
+
+## 5. 写集、权限与并发边界
+
+优先 `apps/game-client/platform-android/**` 与 Android 专用 QA/goal 文档。
+G1 是明确的跨分支集成，不向 Windows 分支回推；保留已有共享源实现，只处理
+Android 所需接线和兼容性。后续任何 shared client/runtime 改动前声明具体文件；
+`runtime.rs` 等高冲突文件每轮只允许一位 writer。
+
+建立 goal 本轮只写本文和 `docs/AGENT-TASK-QUEUE.md` 的 goal 指针，不修改
+游戏代码、Windows/Gateway/Simulation、现有运行服务、账号或资源库。
+PR #253 保持独立 Draft；不自动改 base、不合并 PR。分阶段验证后再提交推送；
+源码、证据与 APK 各自绑定完整 SHA。APK/缓存/密码/令牌/签名密钥不入 Git。
+
+共享 Zone 和个人 Session 保持职责分离；客户端只发普通玩家意图。不得复制
+手机端权威战斗/掉落/交易/存档规则，不暴露 QA/admin/debug 指令，不绕过认证，
+不启用 demo 回退，不重放未知结果的购买/交易等非幂等命令。
+
+## 6. 外部验收材料（不阻止其余安全代码工作）
+
+- Android 真实联网需获准的测试 Gateway（WSS/相关 HTTPS）、服务器版本和
+  普通测试账号。v5 Debug build 当前明确为空地址，uiPreview 禁止联网。
+  Windows 报告存在 `/playtest/ws` 不自动构成本轮访问/数据写入许可。
+- 凭据由用户在本地输入；不得从其他工作区、日志或旧文件搜密码/令牌。
+- 完整、获准的资源来源/版本仍需核对；现有 proof pack 不算正式完整共享包。
+  不未经许可下载/重发整套素材，不改线上 immutable release。
+- 当前无已连接真机；可继续模拟器/构建/代码，不声明物理设备通过。
+- 正式 APK 签名、可信更新发布和商店/公网分发需要额外授权与材料；不为了
+  此 goal 部署生产、修改真实存档、改服务器 auth/rate limits 或搬用 Windows 密钥。
+
+当一个叶子需要这些材料时列出最小缺项；其他有界离线叶子继续推进。
+本轮没有进入真实账号、买卖、战斗、保存、资源发布或物理设备流程。
+
+## 7. 已核验证据与恢复入口
+
+- [Android v5 exact-source/APK/UI evidence](generated/player-qa/native-android-phone-ui-20261001/README.md)
+- [Earlier Android/shared integration](generated/player-qa/native-android-shared-sync-20261001/README.md)
+- [Android UI coverage and historical failures](ANDROID-UI-COVERAGE.md)
+- Windows 冻结源 `3f5e61533` 下：
+  `docs/generated/player-qa/skill-input-shop-20261001/README.md`（shared1186 /
+  Windows801、Zone178、Gateway focused8+13；不冒充最终全后端 green）及
+  `docs/generated/player-qa/native-updater-20261001/README.md`、
+  `docs/generated/player-qa/native-display-20261001/README.md`。
+  这些上游文件在 G1 前以冻结 Git source 阅读，不假定尚未 merge 的本地副本是最新。
+- `git merge-base`、两侧 log/diff、GitHub PR state/head/base、`git ls-remote` 和
+  `adb devices -l` 支持本轮基线记录；本轮尚未重新运行游戏测试/构建。
+
+恢复时先读本文和 `AGENT-TASK-QUEUE.md` 顶部，再确认 goal 状态、工作区状态
+和实际待办。保留旧失败和独立 Windows/CI/三职业/容量门槛；容量 goal 不恢复。

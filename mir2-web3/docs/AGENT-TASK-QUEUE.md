@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> 2026-10-01 user-requested Android completeness goal is Active: align native
+> Android with frozen current Windows source `3f5e61533235921369bc13a7760b4a56b0e467e5`
+> (`codex/playtest-registration`), not only the old PR250 or the login slice.
+> Baseline provenance/worktree/device audit is complete; the initial21 capability
+> groups are an execution inventory, not a parity percentage. Android starts
+> at clean `b8398db40`; three newer Windows commits still need normal integration.
+> Next G1: integrate those shared changes, preserve phone HUD/IME/GLES adapters,
+> expand exact capability leaves and verify affected suites/builds. G2 remains
+> approved real login/list/StartGame/authoritative position, then the full baseline
+> UI/resource/gameplay/mobile-input loop. Live credentials/resources/device gates
+> stay separate; no Windows, capacity, production or accepted-save takeover.
+> [Goal, frozen baseline and acceptance queue](ANDROID-WINDOWS-PARITY-GOAL.md).
+
 > 2026-10-01 Android phone UI checkpoint: committed974110041 has native phone
 > HUD/chat/belt presentation, preserved shared action queues, IME/thumb-safe
 > bounds and actual Android font resolution. Android-only schedule cleanup
