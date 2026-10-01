@@ -71,7 +71,8 @@ fn phone_layout(
         bottom = (bottom - TAP - 14.0).max(safe.y + 1.0);
     }
     let chat_height = if focused {
-        ROW * rows.min(4) as f32 + TAP * 2.0 + 12.0
+        // Four 4px gaps: history top, history/filter, filter/input, bottom.
+        ROW * rows.min(4) as f32 + TAP * 2.0 + 16.0
     } else {
         ROW * rows.min(phone_history_rows(viewport.y, false)) as f32 + TAP + 8.0
     };
@@ -636,11 +637,6 @@ fn fit_phone_hud(
         && !player.amount_modal_open()
         && !player.core.chat_settings_open()
         && (playing || focused);
-    let first_row = row_count.saturating_sub(if sidebar.is_some() {
-        1
-    } else {
-        phone_history_rows(window.height(), focused)
-    });
     let row_bottom = layout.chat.max.y - TAP - 4.0;
     let filter_top = row_bottom - TAP - 4.0;
     let lines_bottom = if focused {
@@ -648,6 +644,16 @@ fn fit_phone_hud(
     } else {
         row_bottom
     };
+    // The IME/safe top can clamp the requested history height. Keep the most
+    // recent rows of the already-filtered shared slice that actually fit, not
+    // its oldest requested rows with the newest silently hidden underneath.
+    let available_rows = ((lines_bottom - layout.chat.min.y - 4.0).max(0.0) / ROW).floor() as usize;
+    let requested_rows = if sidebar.is_some() {
+        1
+    } else {
+        phone_history_rows(window.height(), focused)
+    };
+    let first_row = row_count.saturating_sub(requested_rows.min(available_rows));
     let local_rect =
         |min: Vec2, max: Vec2| Rect::from_corners(min * u - chat_origin, max * u - chat_origin);
     for (entity, row, action, input, backdrop, parent) in &chat_elements {
@@ -812,3 +818,7 @@ mod tests;
 #[cfg(test)]
 #[path = "phone_sidebar_tests.rs"]
 mod sidebar_tests;
+
+#[cfg(test)]
+#[path = "phone_chat_layout_tests.rs"]
+mod phone_chat_layout_tests;
