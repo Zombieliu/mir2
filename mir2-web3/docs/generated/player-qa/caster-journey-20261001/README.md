@@ -139,3 +139,21 @@ This is a QA-controller correction. The copied candidate server, production
 client rules, 20-action/48-engagement limits, ordinary clocks, character
 state and first-cohort results are unchanged. Final r2 completion remains
 pending at this checkpoint.
+
+## Strict retreat controller follow-up
+
+Wizard N20's captured pack left no collision-safe retreat. Strict kiting
+correctly refused offense, but its generic error bypassed the combat loop's
+existing held-scroll recovery. That branch now reports the existing typed
+safety failure, preserving strict no-offense behavior, target identity and
+all action, engagement and retreat limits. A synthetic blocked-map regression
+fails before the change; four focused controls pass after. A separate combat
+integration control reaches the held-scroll branch without any attack/cast.
+The six affected controller/evidence suites pass 303/303 TAP cases, including
+54 custom loadout cases represented by one TAP subprocess.
+
+This is a QA-controller correction, not a production collision/monster change.
+The original r2 ordinary clock expired with Wizard22/Taoist26 (48/52), zero
+confirmed deaths and normal saved logouts. Remaining Wizard work uses a
+separately labelled functional recheck; the original clock and result stay
+unchanged. Full saved functional completion remains pending.

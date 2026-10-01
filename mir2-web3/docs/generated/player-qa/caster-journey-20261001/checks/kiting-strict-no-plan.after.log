@@ -1,0 +1,12 @@
+✔ q89 Wizard never falls back to a close CursedShaman cast when no collision-safe ranged band exists (2.4828ms)
+✔ blocked Wizard retreat fails closed without calling navigation or combat (0.8597ms)
+✔ strict no-plan kite reports typed target metadata for the existing recovery path (14.8034ms)
+✔ journey mode fights the selected threat when every collision-safe retreat is blocked (0.4975ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 241.9228

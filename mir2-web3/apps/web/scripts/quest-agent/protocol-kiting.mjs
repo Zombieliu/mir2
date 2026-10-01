@@ -3,10 +3,10 @@ import { loadProtocolCollisionMap, planProtocolNavigation } from './protocol-nav
 import { combatApproachRange } from './protocol-loadout.mjs';
 import { distance, NavigationStepGuarded, selfPlayer } from './protocol-play.mjs';
 
-/** A safe ranged firing band could not be reached from authoritative state. */
+/** A safe firing band or strict retreat could not be reached from authoritative state. */
 export class RangedSafetyBandUnavailable extends Error {
-  constructor(objectId, target, mapFileName) {
-    super(`target ${objectId} has no collision-safe Wizard ranged band on ${mapFileName}`);
+  constructor(objectId, target, mapFileName, message = null) {
+    super(message ?? `target ${objectId} has no collision-safe Wizard ranged band on ${mapFileName}`);
     this.objectId = Number(objectId);
     this.target = validPoint(target) ? { x: Number(target.x), y: Number(target.y) } : null;
     this.mapFileName = String(mapFileName ?? '');
@@ -144,7 +144,12 @@ export function createWizardKitingAction(baseAction, navigateNear, options = {})
         recordFallback(client, targetId, 'noCollisionSafeRetreat');
         return invokeBaseAction(target);
       }
-      throw new Error(`No collision-safe Wizard retreat on ${mapId} from ${actor.x},${actor.y}`);
+      // Keep strict mode closed to offense, but let the owning combat loop use
+      // its existing bounded safety recovery instead of ending at this tile.
+      throw new RangedSafetyBandUnavailable(
+        targetId, target, mapId,
+        `No collision-safe Wizard retreat on ${mapId} from ${actor.x},${actor.y}`,
+      );
     }
 
     const before = { x: Number(actor.x), y: Number(actor.y) };
