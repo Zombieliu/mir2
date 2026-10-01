@@ -119,6 +119,16 @@ state/logs and false acceptance fields. [curation-integrity.json](curation-integ
 hashes168 raw proof files, including the separate runtime-audit log. APKs and unpacked/source asset
 directories are excluded. Original failed logs and screenshots are not rewritten.
 
+A separate Git-blob audit first found that commit `648b05d6f` had normalized
+the two SDK `device-avd.txt` files from23 to21 bytes, despite the working copies
+matching the raw manifest. Exact-path `-text` attributes now preserve their
+original CRLF bytes; neither the captured files nor their manifest hashes are
+normalized. The [Git integrity check](git-integrity.mjs) compares all168 working
+files and committed blobs to those original hashes. Run it from the repository
+root after committing; historical commit `648b05d6f` intentionally fails for
+those two Git blobs. This correction changes evidence storage only, not either
+APK, source binding, runtime failure or acceptance result.
+
 The [runtime auditor](runtime-audit.mjs) intentionally exits nonzero for the
 retained real error-free-log failure; this is not an auditor setup failure.
 Package/source auditors need the exact source checkout and original ignored
