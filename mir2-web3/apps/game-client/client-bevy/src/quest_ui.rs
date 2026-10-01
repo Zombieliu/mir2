@@ -2053,7 +2053,14 @@ fn process_quest_ui_input(
                         if queue.push_intent(QuestUiIntent::SelectNpcDialog {
                             target: target.clone(),
                         }) {
-                            npc_nav.push(dialog.clone());
+                            if target.eq_ignore_ascii_case("@exit") {
+                                dialog.close();
+                                player_ui.request_npc_service_exit();
+                                npc_nav.clear();
+                                quest_state.close_npc_quest_list();
+                            } else {
+                                npc_nav.push(dialog.clone());
+                            }
                             quest_state.dialog_scroll_top = 0;
                             quest_state.feedback = None;
                         } else {
@@ -2076,6 +2083,7 @@ fn process_quest_ui_input(
                     target: "@Exit".to_owned(),
                 }) {
                     dialog.close();
+                    player_ui.request_npc_service_exit();
                     npc_nav.clear();
                     quest_state.dialog_scroll_top = 0;
                     quest_state.close_npc_quest_list();
@@ -2093,6 +2101,7 @@ fn process_quest_ui_input(
                     }) {
                         quest_state.close_npc_quest_list();
                         dialog.close();
+                        player_ui.request_npc_service_exit();
                         npc_nav.clear();
                     } else {
                         quest_state.set_feedback("Connection busy; try again", true);
@@ -2109,6 +2118,7 @@ fn process_quest_ui_input(
                 }) {
                     quest_state.close_npc_quest_list();
                     dialog.close();
+                    player_ui.request_npc_service_exit();
                     npc_nav.clear();
                 } else {
                     quest_state.set_feedback("Connection busy; try again", true);
@@ -2579,6 +2589,7 @@ fn process_quest_ui_input(
                     target: "@Exit".to_owned(),
                 }) {
                     dialog.close();
+                    player_ui.request_npc_service_exit();
                     npc_nav.clear();
                     quest_state.close_npc_quest_list();
                     quest_state.set_feedback("Dialog closed", false);
@@ -8047,6 +8058,8 @@ mod tests {
         app.update();
         assert!(!app.world().resource::<NpcDialogModel>().is_open);
         assert!(!app.world().resource::<NpcDialogNav>().can_return());
+        assert!(app.world().resource::<NativePlayerUiState>().npc_service_exit_requested,
+            "an accepted explicit close must also exit an active NPC service");
         assert_eq!(
             app.world_mut()
                 .resource_mut::<QuestUiIntentQueue>()
@@ -8056,6 +8069,36 @@ mod tests {
             }]
         );
         app.world_mut().despawn(e3);
+    }
+
+    #[test]
+    fn npc_exit_link_requests_service_exit_only_after_its_intent_is_accepted() {
+        for target in ["@exit", "@Exit", "@EXIT"] {
+            let mut app = App::new();
+            app.insert_resource(ButtonInput::<KeyCode>::default())
+                .insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..default() })
+                .init_resource::<NativePlayerUiState>()
+                .init_resource::<QuestTracker>()
+                .init_resource::<NpcDialogNav>()
+                .init_resource::<QuestUiState>()
+                .init_resource::<QuestUiIntentQueue>()
+                .init_resource::<PendingOperations>()
+                .init_resource::<NearbyNpcModel>()
+                .init_resource::<CombatTargetModel>()
+                .init_resource::<GroundPickupModel>();
+            let mut dialog = dialog_with_option(99, target);
+            dialog.npc_name = Some("Alchemist Samuel".into());
+            app.insert_resource(dialog);
+            app.world_mut().spawn((Button,
+                QuestUiButton::SelectNpcDialog { target: target.into() }, Interaction::Pressed));
+            app.add_systems(Update, process_quest_ui_input);
+            app.update();
+            assert!(app.world().resource::<NativePlayerUiState>().npc_service_exit_requested);
+            assert!(!app.world().resource::<NpcDialogModel>().is_open);
+            assert!(!app.world().resource::<NpcDialogNav>().can_return());
+            assert_eq!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
+                vec![QuestUiIntent::SelectNpcDialog { target: target.into() }]);
+        }
     }
 
     #[test]

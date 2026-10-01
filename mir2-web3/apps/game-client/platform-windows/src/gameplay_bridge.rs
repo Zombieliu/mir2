@@ -2637,7 +2637,21 @@ pub fn forward_quest_ui_intents(
             }
         }
         let command_type = command.command_type();
+        let begins_npc_service = matches!(&command, NativeOutboundCommand::Interact { .. })
+            || matches!(&command, NativeOutboundCommand::SelectNpcDialog { target } if !target.eq_ignore_ascii_case("@exit"));
+        let exits_npc_service = matches!(&command,
+            NativeOutboundCommand::SelectNpcDialog { target } if target.eq_ignore_ascii_case("@exit"));
         let sent = commands.send_command(GatewayCommand::Wire(command));
+        if let Some(ui) = player_ui_state.as_deref_mut() {
+            if exits_npc_service {
+                // Exit was already accepted by the local FIFO. Preserve it
+                // after an older successful service retry, even if sending
+                // this exit fails. A later accepted request may reopen it.
+                ui.request_npc_service_exit();
+            } else if sent && begins_npc_service {
+                ui.begin_npc_service_request();
+            }
+        }
         if let Some(object_id) = traced_attack_target {
             crate::movement_trace::record(serde_json::json!({
                 "type": "attackForwarded",
@@ -4877,6 +4891,70 @@ mod tests {
         .insert_resource(GatewayCommands::new(sender))
         .add_systems(bevy::prelude::Update, forward_quest_ui_intents);
         (app, receiver)
+    }
+
+    #[test]
+    fn npc_service_request_batches_preserve_the_last_exit_even_when_sending_fails() {
+        for exit_last in [true, false] {
+            for send_succeeds in [true, false] {
+                let mut ui = NativePlayerUiState::default();
+                ui.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+                ui.close_windows();
+                // The UI has accepted an exit; the older service retry is
+                // still ahead of it in the same outbound FIFO batch.
+                ui.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+                let (mut app, receiver) = quest_gate_app(ui, NpcDialogModel::default());
+                let receiver = send_succeeds.then_some(receiver);
+                let targets = if exit_last {
+                    ["@BuySell", "@Exit"]
+                } else {
+                    ["@Exit", "@BuySell"]
+                };
+                for target in targets {
+                    app.world_mut().resource_mut::<QuestUiIntentQueue>().push_intent(
+                        QuestUiIntent::SelectNpcDialog { target: target.into() },
+                    );
+                }
+                app.update();
+                assert_eq!(
+                    app.world().resource::<NativePlayerUiState>().accepts_npc_service_reply(),
+                    send_succeeds && !exit_last,
+                    "exit_last={exit_last}, send_succeeds={send_succeeds}",
+                );
+                if let Some(receiver) = receiver {
+                    for expected in targets {
+                        assert!(matches!(receiver.try_recv(), Ok(GatewayCommand::Wire(
+                            NativeOutboundCommand::SelectNpcDialog { target }
+                        )) if target == expected));
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn npc_service_reopen_requires_an_accepted_new_outbound_request() {
+        for (intent, allows_reply) in [
+            (QuestUiIntent::InteractNpc { npc_object_id: 7 }, true),
+            (QuestUiIntent::SelectNpcDialog { target: "@BuySell".into() }, true),
+            (QuestUiIntent::SelectNpcDialog { target: "@Exit".into() }, false),
+        ] {
+            for send_succeeds in [true, false] {
+                let mut ui = NativePlayerUiState::default();
+                ui.core.panel = mir2_ui_core::state::UiPanel::NpcShop;
+                ui.close_windows();
+                assert!(!ui.accepts_npc_service_reply());
+                let (mut app, receiver) = quest_gate_app(ui, NpcDialogModel::default());
+                let receiver = send_succeeds.then_some(receiver);
+                app.world_mut().resource_mut::<QuestUiIntentQueue>().push_intent(intent.clone());
+                app.update();
+                assert_eq!(app.world().resource::<NativePlayerUiState>().accepts_npc_service_reply(),
+                    send_succeeds && allows_reply);
+                if let Some(receiver) = receiver {
+                    assert!(receiver.try_recv().is_ok());
+                }
+            }
+        }
     }
 
     fn ready_detail_turn_in_app() -> (App, std::sync::mpsc::Receiver<GatewayCommand>) {

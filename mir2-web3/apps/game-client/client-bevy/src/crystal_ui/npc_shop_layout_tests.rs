@@ -299,6 +299,8 @@ fn caster_medicine_and_material_services_keep_buy_sell_close_reopen_usable() {
         assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
         assert!(!app.world().resource::<ShopModel>().allows_buy());
         move_bag(&mut app, Vec2::ZERO);
+        // The native sender accepts a new service request before its reply.
+        app.world_mut().resource_mut::<NativePlayerUiState>().begin_npc_service_request();
         request_caster_shop(&mut app, case);
         app.update();
         assert_eq!(bag_position(&app), Vec2::new(445.0, 0.0));
@@ -364,6 +366,196 @@ fn direct_medicine_service_opens_separate_bag_and_usable_buy_controls_in_one_fra
 }
 
 #[test]
+fn medicine_service_survives_delayed_parent_text_hide_for_all_three_classes() {
+    for class in ["Warrior", "Wizard", "Taoist"] {
+        let mut app = fixture_app();
+        app.world_mut().resource_mut::<UiReadModel>().player.class_name = Some(class.into());
+        // Actual ordinary level-nine receipts: an open Samuel page is followed
+        // by NPCGoods/NPCSell and then activeNpcDialog:null in the next snapshot.
+        app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
+        app.update();
+        request_medicine_shop(&mut app, true);
+        app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open());
+        app.world_mut().resource_mut::<NpcDialogModel>().is_open = false;
+        for _ in 0..30 {
+            app.update();
+            assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open(), "{class}: hiding the text page must retain the receipted service");
+            assert_eq!(bag_position(&app), Vec2::new(445.0, 0.0), "{class}");
+            assert_eq!(app.world().resource::<ShopModel>().goods.len(), 1);
+            let node = app.world_mut().query_filtered::<&Node, With<OverlayShop>>()
+                .single(app.world()).unwrap();
+            assert_eq!(node.display, Display::Flex);
+        }
+        press_real_button(&mut app, OverlayButton::ShopBuy);
+        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(),
+            vec![NativePlayerUiIntent::BuyItem { item_index: 701, count: 1 }]);
+        press_real_button(&mut app, OverlayButton::CloseShop);
+        assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+        assert_eq!(app.world().resource::<ShopModel>().service_mode, NpcShopServiceMode::Closed);
+    }
+}
+
+#[test]
+fn medicine_service_opens_when_text_hide_and_goods_arrive_in_the_same_frame() {
+    let mut app = fixture_app();
+    app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
+    app.update();
+    request_medicine_shop(&mut app, true);
+    app.world_mut().resource_mut::<NpcDialogModel>().is_open = false;
+    app.update();
+    app.update();
+    assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open());
+    assert_eq!(bag_position(&app), Vec2::new(445.0, 0.0));
+    assert!(app.world().resource::<ShopModel>().allows_buy());
+}
+
+#[test]
+fn explicit_npc_exit_closes_service_with_an_already_hidden_text_page() {
+    let mut app = fixture_app();
+    request_medicine_shop(&mut app, true);
+    app.update();
+    assert!(!app.world().resource::<NpcDialogModel>().is_open);
+    app.world_mut().resource_mut::<NativePlayerUiState>().npc_service_exit_requested = true;
+    // A queued service-open signal must not reopen the service after exit.
+    app.world_mut().resource_mut::<UiSurfaceSignals>().npc_shop_open_requested = true;
+    app.update();
+    let state = app.world().resource::<NativePlayerUiState>();
+    assert!(!state.npc_shop_open());
+    assert_eq!(state.core.panel, mir2_ui_core::state::UiPanel::Inventory);
+    assert_eq!(bag_position(&app), Vec2::ZERO);
+    assert!(!state.npc_service_exit_requested);
+    assert_eq!(app.world().resource::<ShopModel>().service_mode, NpcShopServiceMode::Closed);
+}
+
+#[test]
+fn delayed_text_hide_does_not_leave_a_closed_service_modal_after_scene_reset() {
+    let mut app = fixture_app();
+    app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
+    app.update();
+    request_medicine_shop(&mut app, true);
+    app.update();
+    app.world_mut().resource_mut::<NpcDialogModel>().is_open = false;
+    app.update();
+    app.world_mut().resource_mut::<ShopModel>().apply_service_signal(NpcShopServiceSignal::default());
+    app.update();
+    assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+}
+
+#[test]
+fn escape_after_text_hide_drops_old_buy_capability_before_sell_only_service() {
+    let mut app = fixture_app();
+    request_medicine_shop(&mut app, true);
+    app.update();
+    app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::Escape);
+    app.update();
+    app.world_mut().resource_mut::<ButtonInput<KeyCode>>().clear();
+    app.update();
+    assert_eq!(app.world().resource::<ShopModel>().service_mode, NpcShopServiceMode::Closed);
+    // The next merchant opens a new text page before advertising Sell only.
+    let mut dialog = app.world_mut().resource_mut::<NpcDialogModel>();
+    dialog.is_open = true;
+    dialog.npc_object_id = Some(21);
+    drop(dialog);
+    app.update();
+    app.world_mut().resource_mut::<ShopModel>().apply_service_signal(NpcShopServiceSignal {
+        mode: NpcShopServiceMode::Sell, repair_rate: None,
+    });
+    app.world_mut().resource_mut::<UiSurfaceSignals>().npc_shop_open_requested = true;
+    app.update();
+    assert!(app.world().resource::<ShopModel>().allows_sell());
+    assert!(!app.world().resource::<ShopModel>().allows_buy());
+}
+
+#[test]
+fn new_npc_text_page_cannot_keep_the_previous_merchants_buy_service() {
+    let mut app = fixture_app();
+    {
+        let mut dialog = app.world_mut().resource_mut::<NpcDialogModel>();
+        dialog.is_open = true;
+        dialog.npc_object_id = Some(20);
+    }
+    app.update();
+    request_medicine_shop(&mut app, true);
+    app.update();
+    app.world_mut().resource_mut::<NpcDialogModel>().is_open = false;
+    app.update();
+    {
+        let mut dialog = app.world_mut().resource_mut::<NpcDialogModel>();
+        dialog.is_open = true;
+        dialog.npc_object_id = Some(21);
+    }
+    app.update();
+    assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+    assert!(!app.world().resource::<ShopModel>().allows_buy());
+}
+
+#[test]
+fn ordered_exit_closes_real_service_and_rejects_late_goods_but_a_new_request_can_reopen() {
+    for exit_last in [true, false] {
+        let mut app = fixture_app();
+        request_medicine_shop(&mut app, true);
+        app.update();
+        {
+            let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.request_npc_service_exit();
+            if exit_last {
+                state.begin_npc_service_request();
+                state.request_npc_service_exit();
+            } else {
+                state.begin_npc_service_request();
+            }
+        }
+        app.update();
+        assert_eq!(app.world().resource::<NativePlayerUiState>().npc_shop_open(), !exit_last);
+        if exit_last {
+            assert_eq!(app.world().resource::<ShopModel>().service_mode, NpcShopServiceMode::Closed);
+            assert_eq!(bag_position(&app), Vec2::ZERO);
+            request_medicine_shop(&mut app, true);
+            app.update();
+            assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+            app.world_mut().resource_mut::<NativePlayerUiState>().begin_npc_service_request();
+            request_medicine_shop(&mut app, true);
+            app.update();
+            assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open());
+            assert_eq!(bag_position(&app), Vec2::new(445.0, 0.0));
+        }
+    }
+}
+
+#[test]
+fn late_goods_after_explicit_exit_cannot_reopen_the_previous_service() {
+    let mut app = fixture_app();
+    request_medicine_shop(&mut app, true);
+    app.update();
+    app.world_mut().resource_mut::<NativePlayerUiState>().npc_service_exit_requested = true;
+    app.update();
+    app.update();
+    app.update();
+    request_medicine_shop(&mut app, true);
+    app.update();
+    assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+    assert_eq!(app.world().resource::<ShopModel>().service_mode, NpcShopServiceMode::Closed);
+}
+
+#[test]
+fn map_information_epoch_closes_an_old_service_without_a_scene_reset_packet() {
+    let mut app = fixture_app();
+    app.insert_resource(BigMapModel::default());
+    request_medicine_shop(&mut app, true);
+    app.update();
+    app.world_mut().resource_mut::<BigMapModel>().reset_epoch += 1;
+    app.update();
+    assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+    assert_eq!(app.world().resource::<ShopModel>().service_mode, NpcShopServiceMode::Closed);
+    app.world_mut().resource_mut::<NativePlayerUiState>().begin_npc_service_request();
+    request_medicine_shop(&mut app, true);
+    app.update();
+    assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open());
+    assert_eq!(bag_position(&app), Vec2::new(445.0, 0.0));
+}
+
+#[test]
 fn service_open_preserves_visible_bag_positions_and_repairs_collisions_or_offstage_state() {
     for (old, expected) in [
         (Vec2::new(520.0, 200.0), Vec2::new(520.0, 200.0)),
@@ -422,6 +614,7 @@ fn shop_tab_switch_and_bag_reopen_repair_overlap_but_idle_updates_preserve_manua
         .resource::<NativePlayerUiState>()
         .npc_shop_open());
     move_bag(&mut app, Vec2::ZERO);
+    app.world_mut().resource_mut::<NativePlayerUiState>().begin_npc_service_request();
     request_medicine_shop(&mut app, false);
     app.update();
     assert_eq!(bag_position(&app), Vec2::new(445.0, 0.0));

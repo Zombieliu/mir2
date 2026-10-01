@@ -60,6 +60,71 @@ fn nine_locale_medicine_shop_opens_beside_inventory_offscreen() {
     assert!(failures.is_empty(), "production shop text failures: {failures:?}");
 }
 
+#[test]
+#[ignore = "explicit delayed NPC snapshot GPU regression; original assets and fresh output"]
+fn three_class_medicine_shop_retains_goods_after_delayed_text_hide_offscreen() {
+    let asset_root = PathBuf::from(std::env::var_os("MIR2_I18N_VISUAL_ASSET_ROOT").unwrap());
+    let output = PathBuf::from(std::env::var_os("MIR2_SHOP_LIFECYCLE_VISUAL_OUTPUT").unwrap());
+    fs::create_dir_all(&output).unwrap();
+    let report = output.join("shop-lifecycle-layouts.json");
+    assert!(!report.exists(), "retain earlier regression evidence");
+    let previous_locale = native_i18n::locale();
+    native_i18n::activate(Locale::TraditionalChinese);
+    let (mut app, target, _) = i18n_offscreen_app(&asset_root, false);
+    app.init_resource::<CasterGpuPress>()
+        .add_systems(PreUpdate, inject_caster_gpu_press.after(bevy::ui::UiSystems::Focus))
+        .add_systems(Update, layout_original_item_images.after(render_overlays));
+    npc_shop_layout_tests::install_fixture(&mut app);
+    let mut captures = Vec::new();
+    for class in ["Warrior", "Wizard", "Taoist"] {
+        app.insert_resource(NativePlayerUiState::default())
+            .insert_resource(ShopModel::default())
+            .insert_resource(NpcDialogModel::default())
+            .insert_resource(PendingOperations::default())
+            .insert_resource(UiSurfaceSignals::default());
+        app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().clear();
+        app.world_mut().resource_mut::<UiReadModel>().player.class_name = Some(class.into());
+        app.update();
+        app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
+        app.update();
+        npc_shop_layout_tests::request_medicine_shop(&mut app, true);
+        warm_i18n_images(&mut app);
+        app.world_mut().resource_mut::<NpcDialogModel>().is_open = false;
+        for _ in 0..35 {
+            app.update();
+            std::thread::sleep(std::time::Duration::from_millis(16));
+            assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open());
+        }
+        press_caster_gpu_button(&mut app, OverlayButton::SelectShopGood(701));
+        warm_i18n_images(&mut app);
+        let buy_layout = caster_service_layout(&mut app);
+        let rows = i18n_text_layouts(&mut app);
+        assert!(rows.iter().all(|row| row["missingGlyphs"] == 0 && row["layoutExceedsNode"] == false));
+        let file = format!("{}-9-delayed-hide-buy.png", class.to_ascii_lowercase());
+        capture_i18n(&mut app, &target, &output.join(&file));
+        captures.push(json!({"file":file,"class":class,"phase":"buy-after-text-hide","layout":buy_layout,"textRows":rows}));
+        press_caster_gpu_button(&mut app, OverlayButton::ShopBuy);
+        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(),
+            vec![NativePlayerUiIntent::BuyItem { item_index: 701, count: 1 }]);
+        press_caster_gpu_button(&mut app, OverlayButton::ShopShowSell);
+        warm_i18n_images(&mut app);
+        let sell_layout = caster_service_layout(&mut app);
+        let file = format!("{}-9-delayed-hide-sell.png", class.to_ascii_lowercase());
+        capture_i18n(&mut app, &target, &output.join(&file));
+        captures.push(json!({"file":file,"class":class,"phase":"sell-after-text-hide","layout":sell_layout}));
+        press_caster_gpu_button(&mut app, OverlayButton::ShopShowBuy);
+        warm_i18n_images(&mut app);
+        press_caster_gpu_button(&mut app, OverlayButton::CloseShop);
+        assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+    }
+    native_i18n::activate(previous_locale);
+    fs::write(report, serde_json::to_vec_pretty(&json!({
+        "kind":"production_widgets_delayed_npc_text_hide","passed":true,"liveAcceptance":false,
+        "textHideAfterService":true,"waitAfterHideMs":560,"viewport":[1024,768],
+        "locale":"zh-TW","captures":captures,
+    })).unwrap()).unwrap();
+}
+
 fn caster_service_layout(app: &mut App) -> serde_json::Value {
     use bevy::ui::UiGlobalTransform;
     let show_buy = app.world().resource::<NativePlayerUiState>().npc_shop_buy_tab;
@@ -221,6 +286,7 @@ fn caster_medicine_amulet_poison_service_cycles_offscreen() {
                 let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
                 state.inventory_window.left = 0.0;
                 state.inventory_window.top = 0.0;
+                state.begin_npc_service_request();
             }
             request_caster_shop(&mut app, case);
             warm_i18n_images(&mut app);
