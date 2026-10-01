@@ -9,10 +9,13 @@
 > freshTimedCompletion=false.
 > Latest affected controller/evidence checks: 355 passed. Ordinary Lightning's
 > new loadout branch was not observed live; existing practice ACKs are separate.
-> Final shared UI checks: 1197 passed / 10 ignored; Windows 808 passed / 5
-> ignored. Ordered Exit/retry, late goods, map/scene and merchant lifecycle
-> regressions pass; six offline GPU captures (three classes, zh-TW, after
-> 560 ms) pass. Earlier failing stages and 42 caster captures remain recorded.
+> Shared UI checks: 1197 passed / 10 ignored. Explicit NPCResponse follow-up
+> passes Windows 809 / 5 ignored and runtime 276 / 1 ignored. Real empty or
+> nonempty response pages retire service children; ordered Closed/Buy signals
+> do not open a bootstrap shop. Passive snapshot text absence retains the service.
+> Ordered Exit/retry, late goods, map/scene and merchant regressions pass; six
+> offline GPU captures after 560 ms pass. Earlier failures/42 captures remain.
+> [Packet boundary evidence](generated/player-qa/caster-journey-20261001/npc-response-service-boundary.json).
 > Finite control handoff, canonical mana and prior 6d498c080 server validations
 > retain their documented scopes and original failure records. No new full
 > server-suite, whole-game parity or public deployment acceptance follows.

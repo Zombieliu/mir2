@@ -150,7 +150,8 @@ GUI acceptance remain pending.
 | Initial delayed-hide shop regression | 0/1 before; 8/8 after, with six three-class zh-TW GPU captures after 560 ms |
 | Shared client at delayed-hide checkpoint | 1191 passed / 10 ignored; predates final FIFO Exit review |
 | Final shared client including ordered service Exit | [1197 passed / 10 ignored](checks/shared-shop-lifecycle-fifo-final.log) |
-| Final native Windows client | [808 passed / 5 ignored](checks/native-shop-lifecycle-fifo-final.log) |
+| Native Windows FIFO checkpoint | [808 passed / 5 ignored](checks/native-shop-lifecycle-fifo-final.log) |
+| Explicit NPCResponse boundary follow-up | [Windows 809 / 5 ignored; runtime 276 / 1 ignored](npc-response-service-boundary.json) |
 | Final focused native FIFO checks | [3/3](checks/shop-lifecycle-fifo-after.log): two lifecycle tests plus one existing input guard; four batch cases cover all-success/all-failure, not mixed partial failure |
 | Final GPU03 delayed-hide replay | [1/1](checks/shop-lifecycle-gpu-after-03.log), six three-class level-9 Buy/Sell captures after 560 ms; actual frames inspected, no human GUI operation |
 | Private visibility | 0/4 before; 4/4 after |

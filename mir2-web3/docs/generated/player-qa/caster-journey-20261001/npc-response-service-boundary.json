@@ -1,0 +1,82 @@
+{
+  "schema": "mir2.npc-response-service-boundary.v1",
+  "timestampUtc": "2026-10-01T17:33:36.7102436+00:00",
+  "rootSource": "b369b07e7",
+  "clientReleaseSource": "180b01d46f35a5e97f4c60ee2ae033c7b53717e5",
+  "crystalReference": "Client/MirScenes/GameScene.cs:3891",
+  "before": {
+    "runtime": {
+      "passed": 0,
+      "failed": 1
+    },
+    "native": {
+      "passed": 0,
+      "failed": 1
+    }
+  },
+  "after": {
+    "runtime": {
+      "ignored": 1,
+      "failed": 0,
+      "passed": 276
+    },
+    "native": {
+      "ignored": 5,
+      "failed": 0,
+      "passed": 809
+    }
+  },
+  "cases": [
+    "Empty real NPCResponse closes service",
+    "Nonempty real NPCResponse closes service children",
+    "Malformed NPCResponse does not change service",
+    "Passive worldSnapshot null is not a service close",
+    "Closed bootstrap does not open an empty shop",
+    "Buy/Sell then Closed in one frame cancels opening",
+    "Closed then Buy in one frame reopens"
+  ],
+  "historicalCompileFailuresPreserved": true,
+  "liveAcceptance": false,
+  "files": [
+    {
+      "path": "checks/npc-response-service-boundary-before.log",
+      "sha256": "CB7E47DB2AE65A479A952EB380C0DDEDA735E9953BBA89BE174F0AC2CC4E50F9",
+      "bytes": 40820
+    },
+    {
+      "path": "checks/npc-response-service-boundary-before-fresh.log",
+      "sha256": "089B434B9F6D09538F225914DD8BADC108A93270AE66EFE9583C8D653ADEBC0A",
+      "bytes": 9282
+    },
+    {
+      "path": "checks/npc-response-service-boundary-before-fresh-resume.log",
+      "sha256": "1C85CEFAA0FB851DF7BAC430CE0E81F4485236F39C962BC37CEE3EDEF6ECDAAB",
+      "bytes": 12802
+    },
+    {
+      "path": "checks/npc-response-cache-recovery.log",
+      "sha256": "A011152A4E6BDE12A1F0E0CB36CA90756CB3C908C55A750B6E80B0010C3C398F",
+      "bytes": 41
+    },
+    {
+      "path": "checks/npc-response-service-boundary-before-recovered.log",
+      "sha256": "5C6FBC8CB81D07C83C946EC781F2BA39B34E78A065C8E8615557986A585A4BAB",
+      "bytes": 45102
+    },
+    {
+      "path": "checks/npc-response-runtime-before.log",
+      "sha256": "3C2F048405E0019F3DCB8CCD21ADFE7A0BAC764D65DD153D57D613808A16C07A",
+      "bytes": 39317
+    },
+    {
+      "path": "checks/npc-response-runtime-after-full.log",
+      "sha256": "9E9B8A3F51EB203379B0E42E67A48EE18B995677AD175A8ACDEE5CE15DDF62C8",
+      "bytes": 64063
+    },
+    {
+      "path": "checks/npc-response-native-after-full.log",
+      "sha256": "BF78198D73B6F1F13FE349540C055D0370B22C5E973840708B95A5F6B5E754A0",
+      "bytes": 123138
+    }
+  ]
+}

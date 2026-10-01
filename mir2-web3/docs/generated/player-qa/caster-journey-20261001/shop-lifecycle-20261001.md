@@ -33,7 +33,7 @@ Original local reference checkout: `E:/mir2/Crystal`.
 
 - `Client/MirScenes/GameScene.cs:4190–4208`: `NPCGoods` requires the parent dialogue to be visible, then opens the goods panel.
 - `Client/MirScenes/GameScene.cs:4240–4244`: `NPCSell` opens the drop/sell panel beneath the visible parent.
-- `Client/MirScenes/GameScene.cs:3891–3906`: an actual `NPCResponse` updates the page; an empty page calls `NPCDialog.Hide` and closes children.
+- `Client/MirScenes/GameScene.cs:3891–3912`: an actual `NPCResponse` updates the page; an empty page hides the parent, and both empty and nonempty pages close the previous service children.
 - `Client/MirScenes/Dialogs/NPCDialogs.cs:1023–1045`: `NPCDialog.Hide` closes service children and restores inventory to `(0,0)`; `Show` places it beside the 440-pixel parent at `(445,0)`.
 
 The Rust behavior copied the effect of a real `Hide` but used recurring snapshot text absence as its trigger. The service packet and its explicit lifetime must be distinguished from the optional dialogue-text projection.
@@ -96,6 +96,26 @@ operation; `liveAcceptance=false` is retained. The copied public logs preserve
 each before, intermediate and final result separately.
 
 ## Replay structure and remaining boundaries
+
+### Explicit server response follow-up — October 2 (+08:00)
+
+The final packet review identified a separate closing gap: native routing did not
+forward real `NPCResponse` pages as service boundaries. The
+[boundary evidence](npc-response-service-boundary.json) preserves two actual
+pre-fix assertion failures (native 0/1 and runtime 0/1), as well as earlier
+compile-cache failures without counting those as assertions.
+
+Native routing now accepts only an actual array of page strings and retires the
+old service for empty or nonempty pages. Malformed responses and passive snapshot
+text absence do not retire it. Runtime ingestion applies the ordered service
+signals: Closed cancels a previous opening in the same frame, never opens an
+empty bootstrap shop, and a later Buy legitimately requests opening again.
+
+Root source `b369b07e7` passes the complete Windows suite **809 / 5 ignored** and
+runtime suite **276 / 1 ignored**. The client-only release backport is
+`180b01d46f35a5e97f4c60ee2ae033c7b53717e5`; its clean attested package and updater
+validation are tracked separately. This packet/ECS verification does not create
+authenticated GUI or whole-game acceptance.
 
 1. Begin in game at level 9 with Samuel's open authoritative text, and update the real UI.
 2. Deliver real-template potion catalog plus Buy and Sell service signals, then update; assert goods, Buy input, and a separate bag at `(445,0)`.

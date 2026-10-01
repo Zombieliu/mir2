@@ -1,0 +1,73 @@
+   Compiling syn v2.0.119
+   Compiling syn v3.0.3
+   Compiling regex-automata v0.4.18
+   Compiling pxfm v0.1.30
+   Compiling ash v0.38.0+1.3.281
+   Compiling ring v0.17.14
+   Compiling moxcms v0.8.1
+   Compiling matchers v0.2.0
+   Compiling regex v1.13.1
+   Compiling rustls v0.23.43
+   Compiling bevy_macro_utils v0.19.0
+   Compiling encase_derive_impl v0.12.0
+   Compiling bevy_ecs_macro_logic v0.19.0
+   Compiling synstructure v0.13.2
+   Compiling rustls-webpki v0.103.15
+   Compiling wasm-bindgen-macro-support v0.2.127
+   Compiling bytemuck_derive v1.12.0
+   Compiling serde_derive v1.0.229
+   Compiling thiserror-impl v2.0.20
+   Compiling displaydoc v0.2.7
+   Compiling tokio-macros v2.7.2
+   Compiling encase_derive v0.12.0
+   Compiling derive_more-impl v2.1.1
+   Compiling variadics_please v1.1.0
+error: linking with `link.exe` failed: exit code: 1207
+  |
+  = note: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe" "/DEF:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcrpZ1LS\\lib.def" "/NOLOGO" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcrpZ1LS\\symbols.o" "<16 object files omitted>" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcrpZ1LS\\rmeta.o" "<1 object files omitted>" "C:\\mir2-build\\platform-windows-shop-final\\debug\\deps/{libsyn-6e4466572aafb04b,libquote-06bfced26de8c2c6,libproc_macro2-7bb53784900dbacf,libunicode_ident-c273c17368edbd68}.rlib" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libproc_macro-*,librustc_literal_escaper-*,libstd-*,libpanic_unwind-*,libcfg_if-*,libwindows_link-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libunwind-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "kernel32.lib" "kernel32.lib" "kernel32.lib" "ntdll.lib" "userenv.lib" "ws2_32.lib" "dbghelp.lib" "/defaultlib:msvcrt" "/NXCOMPAT" "/OUT:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\displaydoc-8895dba5cfc9a032.dll" "/OPT:REF,ICF" "/DLL" "/IMPLIB:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\displaydoc-8895dba5cfc9a032.dll.lib" "/DEBUG" "/PDBALTPATH:%_PDB%" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\intrinsic.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\liballoc.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libcore.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libstd.natvis"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: LINK : fatal error LNK1207: “C:\mir2-build\platform-windows-shop-final\debug\deps\displaydoc-8895dba5cfc9a032.pdb”中的 PDB 格式不兼容；请删除并重新生成
+          
+
+error: could not compile `displaydoc` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: linking with `link.exe` failed: exit code: 1207
+  |
+  = note: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe" "/DEF:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcX71I1l\\lib.def" "/NOLOGO" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcX71I1l\\symbols.o" "<16 object files omitted>" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcX71I1l\\rmeta.o" "<1 object files omitted>" "C:\\mir2-build\\platform-windows-shop-final\\debug\\deps/{libsyn-6e4466572aafb04b,libquote-06bfced26de8c2c6,libproc_macro2-7bb53784900dbacf,libunicode_ident-c273c17368edbd68}.rlib" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libproc_macro-*,librustc_literal_escaper-*,libstd-*,libpanic_unwind-*,libcfg_if-*,libwindows_link-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libunwind-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "kernel32.lib" "kernel32.lib" "kernel32.lib" "ntdll.lib" "userenv.lib" "ws2_32.lib" "dbghelp.lib" "/defaultlib:msvcrt" "/NXCOMPAT" "/OUT:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\bytemuck_derive-9cdda804964b7e89.dll" "/OPT:REF,ICF" "/DLL" "/IMPLIB:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\bytemuck_derive-9cdda804964b7e89.dll.lib" "/DEBUG" "/PDBALTPATH:%_PDB%" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\intrinsic.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\liballoc.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libcore.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libstd.natvis"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: LINK : fatal error LNK1207: “C:\mir2-build\platform-windows-shop-final\debug\deps\bytemuck_derive-9cdda804964b7e89.pdb”中的 PDB 格式不兼容；请删除并重新生成
+          
+
+error: could not compile `bytemuck_derive` (lib) due to 1 previous error
+error: linking with `link.exe` failed: exit code: 1207
+  |
+  = note: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe" "/DEF:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcM32P3d\\lib.def" "/NOLOGO" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcM32P3d\\symbols.o" "<16 object files omitted>" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcM32P3d\\rmeta.o" "<1 object files omitted>" "C:\\mir2-build\\platform-windows-shop-final\\debug\\deps/{libsyn-6e4466572aafb04b,libquote-06bfced26de8c2c6,libproc_macro2-7bb53784900dbacf,libunicode_ident-c273c17368edbd68}.rlib" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libproc_macro-*,librustc_literal_escaper-*,libstd-*,libpanic_unwind-*,libcfg_if-*,libwindows_link-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libunwind-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "kernel32.lib" "kernel32.lib" "kernel32.lib" "ntdll.lib" "userenv.lib" "ws2_32.lib" "dbghelp.lib" "/defaultlib:msvcrt" "/NXCOMPAT" "/OUT:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\tokio_macros-3b6c6ff03753f678.dll" "/OPT:REF,ICF" "/DLL" "/IMPLIB:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\tokio_macros-3b6c6ff03753f678.dll.lib" "/DEBUG" "/PDBALTPATH:%_PDB%" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\intrinsic.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\liballoc.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libcore.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libstd.natvis"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: LINK : fatal error LNK1207: “C:\mir2-build\platform-windows-shop-final\debug\deps\tokio_macros-3b6c6ff03753f678.pdb”中的 PDB 格式不兼容；请删除并重新生成
+          
+
+error: could not compile `tokio-macros` (lib) due to 1 previous error
+error: linking with `link.exe` failed: exit code: 1207
+  |
+  = note: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe" "/DEF:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcO7tUbb\\lib.def" "/NOLOGO" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcO7tUbb\\symbols.o" "<16 object files omitted>" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcO7tUbb\\rmeta.o" "<1 object files omitted>" "C:\\mir2-build\\platform-windows-shop-final\\debug\\deps/{libsyn-6e4466572aafb04b,libquote-06bfced26de8c2c6,libproc_macro2-7bb53784900dbacf,libunicode_ident-c273c17368edbd68}.rlib" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libproc_macro-*,librustc_literal_escaper-*,libstd-*,libpanic_unwind-*,libcfg_if-*,libwindows_link-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libunwind-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "kernel32.lib" "kernel32.lib" "kernel32.lib" "ntdll.lib" "userenv.lib" "ws2_32.lib" "dbghelp.lib" "/defaultlib:msvcrt" "/NXCOMPAT" "/OUT:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\thiserror_impl-7f213ff2da9a6e8f.dll" "/OPT:REF,ICF" "/DLL" "/IMPLIB:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\thiserror_impl-7f213ff2da9a6e8f.dll.lib" "/DEBUG" "/PDBALTPATH:%_PDB%" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\intrinsic.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\liballoc.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libcore.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libstd.natvis"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: LINK : fatal error LNK1207: “C:\mir2-build\platform-windows-shop-final\debug\deps\thiserror_impl-7f213ff2da9a6e8f.pdb”中的 PDB 格式不兼容；请删除并重新生成
+          
+
+error: could not compile `thiserror-impl` (lib) due to 1 previous error
+error: linking with `link.exe` failed: exit code: 1207
+  |
+  = note: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe" "/DEF:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcECwIpj\\lib.def" "/NOLOGO" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcECwIpj\\symbols.o" "<5 object files omitted>" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcECwIpj\\rmeta.o" "<1 object files omitted>" "C:\\mir2-build\\platform-windows-shop-final\\debug\\deps/{libencase_derive_impl-5964c43e7b0cb0b5,libsyn-a2d82e2375e192ed,libquote-06bfced26de8c2c6,libproc_macro2-7bb53784900dbacf,libunicode_ident-c273c17368edbd68}.rlib" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libproc_macro-*,librustc_literal_escaper-*,libstd-*,libpanic_unwind-*,libcfg_if-*,libwindows_link-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libunwind-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "kernel32.lib" "kernel32.lib" "kernel32.lib" "ntdll.lib" "userenv.lib" "ws2_32.lib" "dbghelp.lib" "/defaultlib:msvcrt" "/NXCOMPAT" "/OUT:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\encase_derive-146c5352d6ef709b.dll" "/OPT:REF,ICF" "/DLL" "/IMPLIB:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\encase_derive-146c5352d6ef709b.dll.lib" "/DEBUG" "/PDBALTPATH:%_PDB%" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\intrinsic.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\liballoc.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libcore.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libstd.natvis"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: LINK : fatal error LNK1207: “C:\mir2-build\platform-windows-shop-final\debug\deps\encase_derive-146c5352d6ef709b.pdb”中的 PDB 格式不兼容；请删除并重新生成
+          
+
+error: could not compile `encase_derive` (lib) due to 1 previous error
+error: linking with `link.exe` failed: exit code: 1207
+  |
+  = note: "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\HostX64\\x64\\link.exe" "/DEF:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcS60Jgq\\lib.def" "/NOLOGO" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcS60Jgq\\symbols.o" "<5 object files omitted>" "C:/mir2-build/platform-windows-shop-final\\debug\\deps\\rustcS60Jgq\\rmeta.o" "<1 object files omitted>" "C:\\mir2-build\\platform-windows-shop-final\\debug\\deps/{libsyn-a2d82e2375e192ed,libquote-06bfced26de8c2c6,libproc_macro2-7bb53784900dbacf,libunicode_ident-c273c17368edbd68}.rlib" "<sysroot>\\lib\\rustlib\\x86_64-pc-windows-msvc\\lib/{libproc_macro-*,librustc_literal_escaper-*,libstd-*,libpanic_unwind-*,libcfg_if-*,libwindows_link-*,librustc_demangle-*,libstd_detect-*,libhashbrown-*,librustc_std_workspace_alloc-*,libunwind-*,librustc_std_workspace_core-*,liballoc-*,libcore-*,libcompiler_builtins-*}.rlib" "kernel32.lib" "kernel32.lib" "kernel32.lib" "ntdll.lib" "userenv.lib" "ws2_32.lib" "dbghelp.lib" "/defaultlib:msvcrt" "/NXCOMPAT" "/OUT:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\variadics_please-9d2ce2ba9c92c08b.dll" "/OPT:REF,ICF" "/DLL" "/IMPLIB:C:/mir2-build/platform-windows-shop-final\\debug\\deps\\variadics_please-9d2ce2ba9c92c08b.dll.lib" "/DEBUG" "/PDBALTPATH:%_PDB%" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\intrinsic.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\liballoc.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libcore.natvis" "/NATVIS:<sysroot>\\lib\\rustlib\\etc\\libstd.natvis"
+  = note: some arguments are omitted. use `--verbose` to show all linker arguments
+  = note: LINK : fatal error LNK1207: “C:\mir2-build\platform-windows-shop-final\debug\deps\variadics_please-9d2ce2ba9c92c08b.pdb”中的 PDB 格式不兼容；请删除并重新生成
+          
+
+error: could not compile `variadics_please` (lib) due to 1 previous error
