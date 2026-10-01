@@ -1,0 +1,2 @@
+    versionCode=14 minSdk=31 targetSdk=35
+    versionName=0.1.11-received-chat

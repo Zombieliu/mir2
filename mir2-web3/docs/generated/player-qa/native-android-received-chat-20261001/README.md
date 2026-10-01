@@ -3,8 +3,10 @@
 NI-09 bounded progress, not complete Windows chat/UI/player acceptance.
 Frozen Windows: `3f5e61533235921369bc13a7760b4a56b0e467e5`.
 Parent: `c418c5ab12a887cb0aac8d8237360526657e1d67`.
-v14 / `0.1.11-received-chat` is prepared but **not built or installed at this
-source checkpoint**. The existing v13 APKs do not contain this chat change.
+The source checkpoint below preceded the exact v14 package follow-up at the end
+of this report. v14 / `0.1.11-received-chat` is now built/installed from clean
+`253b6682f73715b896745ca85a6923be98d0b892`, but focused chat imagery **fails**:
+only the system line is visible; the peer line is clipped. v13 lacks this source.
 
 ## Change and authority boundaries
 
@@ -76,3 +78,56 @@ denominator stay open. Existing startup timeouts/emulator host-crash evidence
 remains in the [v13 report](../native-android-weight-bars-20261001/README.md).
 Remote ref/PR publication must be freshly verified; prior verified head is
 f04a74399 and transport failures do not authorize force-push/production changes.
+
+## Exact v14 package and actual emulator follow-up
+
+`verify-package.mjs` /`package-v14.json` bind the12 tested source hashes to clean
+253b6682f, before/after status and both APKs. Each actual APK's6647 selected
+PNG files and Items/StateItem/UI_32bit metadata match the approved input bytes;
+the four weight frames and metadata also match frozen Git. This is not acceptance
+of the complete aligned resource release. Rust release cdylibs are inside Gradle
+Debug diagnostic variants, not store Release/production signing.
+
+APK directory (relative to repository root, ignored and **not committed**):
+`mir2-web3/apps/game-client/platform-android/target/chat-ingress-v14-20261001/final-apks/`.
+
+| APK | Bytes | SHA-256 |
+| --- | --- | --- |
+| `mir2-native-received-chat-debug-v14.apk` |386270237 |`0f89f4ad5d2d6e39f8385e4e8db027176b72b496ef5a46035d0cc93eed61136d` |
+| `mir2-native-received-chat-preview-v14.apk` |390043101 |`2f5eeff2e8871456f98bf9cb118f5d8c1020b682ce76aaa3a9c17916b2931a5d` |
+
+Both `install -r` report Success, installed version14 verified. No app/AVD data
+clear, emulator restart/GPU change or Pixel5 action. Only Mir2_API_31_ARM64 /
+emulator-5554, Android12 sdk_gphone64_arm64; physical2340x1080 landscape,
+density440 (2.75). Device fingerprint is in `device-fingerprint.txt`.
+SDK startup waits448/486/367ms report ok; these are not first-frame timings or
+startup/soak/stability acceptance. Earlier v12/v13 timeouts/Launcher/host crash
+remain distinct. Both owned diagnostic apps were force-stopped at the end;
+the same emulator remained running and its installed data was retained.
+
+Manually inspected all three original SDK captures; no screenshot edits:
+
+- `debug-login.png`: empty original login, `Test server not configured.`.
+  URL remains empty; no auth bypass, real login or ordinary-account claim.
+- `preview-chat.png`: actual soft keyboard and shared phone controls; only
+  `OFFLINE system chat` is visible. `OFFLINE neighbor: hello` is not visible.
+  **FAIL for full received-chat visual acceptance**, not a pass from queued2.
+- `preview-chat-settings.png`: original FILTER/CHAT BOX frame and source controls
+  are visible. The settings modal intentionally hides gameplay chat. No new
+  tab/toggle/Apply/scroll/typing/send/close/touch interaction was executed here.
+
+PID logs5356/5483/5562 contain205/211/194 line entries, respectively;0 captured
+ERROR/fatal/panic/signal matches. Existing Winit insets/GLES warnings are retained;
+this is a bounded capture, not a whole-app crash/performance gate. Preview queued2
+through the shared adapter in each scene; duplicate logger entries are not duplicate
+packets or proof of two visible messages. Runtime evidence and screenshot hashes
+are in `runtime-audit.mjs` /`runtime-v14.json`.
+
+The phone geometry diagnosis is narrow: focused height uses
+`ROW*rows +2*TAP +12`, but row placement needs at least `ROW*rows +2*TAP +16`.
+The last row exceeds `lines_bottom` by4 logical pixels and is hidden. Next create
+a failure-first actual-node regression for the latest row/keyboard bounds, repair
+the phone-only layout, then build a **new** exact APK and compare captures. v14 is
+not retrospectively marked fixed. Phone HUD weight, complete shared UI/actions/
+services/chat pressure/JNI/real HTTPS-WSS/device and full Windows denominator stay
+open; the completeness goal remains Active.

@@ -1,5 +1,12 @@
 # Agent Task Queue
 
+> 2026-10-01 exact v14/253b6682f: clean dual APK/hash/install; each6647 PNG/
+> three metadata/source-gate hashes match. Actual system chat and soft keyboard
+> visible, **peer row clipped: received-chat visual FAIL**. Source gate remains
+> bounded; next failure-first focused row/IME geometry repair then new exact APK,
+> HUD weight/NPC/services/full Windows denominator. No online/device/full UI pass.
+> [Actual failure retained](generated/player-qa/native-android-received-chat-20261001/README.md).
+
 > 2026-10-01 NI-09 source: exact shared Windows Chat/ObjectChat projector;
 > Java owner-bootstrap public allowlist, Android bounded FIFO/order/retry/reset.
 > Android267/preview281/shared1205+8ignored/Java37+37/API31 variants/Mac chat2 and

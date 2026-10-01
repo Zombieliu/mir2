@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 Android exactv14/253b6682f: both APK/hash/install/source binding
+> and6647 PNG/three metadata byte audit each pass. Actual offline system chat/
+> keyboard visible, peer row hidden by phone geometry: visual FAIL retained.
+> Next focused-row regression/repair/new package, then HUD/services/full frozen
+> Windows denominator; full UI/JNI/online/device/stability remain open.
+> [Package and original failure](generated/player-qa/native-android-received-chat-20261001/README.md).
+
 > 2026-10-01 Android NI-09 source leaf: exact Windows shared chat projector,
 > owner-bootstrap Java forwarding plus bounded FIFO/order/retry/reset regressions.
 > Android267/preview281/shared1205+8ignored/Java37+37/API31/Mac chat2/extraction

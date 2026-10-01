@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 actual v14 received-chat imagery FAIL: clean253b6682f two APKs
+> install/hash/source/resource audit pass, but only OFFLINE system chat is visible
+> with the actual keyboard; peer row is clipped. Original failure screenshot
+> retained. Next phone-only focused-height regression/repair/new exact APK; no
+> filter/Apply/scroll/type/send/full UI or real online/device acceptance.
+> [Actual frame](generated/player-qa/native-android-received-chat-20261001/README.md).
+
 > 2026-10-01 Android received chat source: shared Windows projector and owner-
 > bootstrap/FIFO/reset checks pass; the two OFFLINE specimens enqueue once through
 > that adapter. v14 unbuilt: no actual phone chat image/input/IME/filter/online/device

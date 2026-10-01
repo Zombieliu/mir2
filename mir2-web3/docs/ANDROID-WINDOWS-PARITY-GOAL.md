@@ -2,6 +2,13 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
+最新实际v14：干净253b6682f双包/hash/安装及12源码门hash、每包6647原图/三份
+metadata字节核验通过。模拟器系统聊天与软键盘可见，但普通邻近聊天行被裁掉，
+完整接收聊天画面验收FAIL，保留原截图。手机focused高度少4逻辑像素是源码几何
+诊断，尚需失败先行节点回归、新包与画面验证才可记修复；下一叶子优先这个问题，
+再继续HUD负重/NPC/服务/完整Windows分母。完整UI/JNI/在线/真机/稳定性仍OPEN。
+[精确v14与真实画面失败](generated/player-qa/native-android-received-chat-20261001/README.md)。
+
 本轮NI-09源码：提取冻结Windows相同Chat/ObjectChat转换，Java认证owner快照
 之后才转发公共聊天；Android有界FIFO32/128KiB、顺序/失败后缀重试/切图保留/
 终止清理通过。Android267/preview281/shared1205+8既有ignore/Java37+37/API31两
