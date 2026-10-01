@@ -332,6 +332,7 @@ fn catalog() -> &'static BigMapCatalog {
         maps.sort_by_key(|map| map.map_index);
 
         let mut npcs = crystal_npc_info_manifest().npcs;
+        npcs.extend(mir2_game_data::periodic_quests::npc_templates());
         npcs.sort_by_key(|npc| (npc.map_index, npc.big_map_icon, npc.npc_index));
 
         BigMapCatalog { maps, npcs }

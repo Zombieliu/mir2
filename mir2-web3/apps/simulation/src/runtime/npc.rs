@@ -208,7 +208,8 @@ pub(super) fn localized_npc_dialog_base_key(npc_object_id: u32) -> String {
 }
 
 pub(super) fn canonical_crystal_quest_npc_info(npc_index: u32) -> Option<CrystalNpcInfoTemplate> {
-    let npcs = crystal_npc_info_manifest().npcs;
+    let npcs = crystal_npc_info_manifest().npcs.into_iter()
+        .chain(mir2_game_data::periodic_quests::npc_templates()).collect::<Vec<_>>();
     npcs.iter()
         .find(|npc| npc.loaded_object_id == Some(npc_index))
         .cloned()

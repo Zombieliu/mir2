@@ -1003,7 +1003,12 @@ impl WorldRuntime for InProcessWorldRuntime {
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
         let xp_source = matches!(&command, WorldCommand::Attack{..}|WorldCommand::Interact{..}
             |WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}|WorldCommand::CastSkill{..});
-        let before = if xp_source { self.session.begin_guild_experience_command(false)? } else { None };
+        let force_periodic=match &command {
+            WorldCommand::SelectNpcDialog{target} => crate::runtime::periodic_quest_target(target),
+            WorldCommand::Interact{object_id} => mir2_game_data::periodic_quests::npc(*object_id).is_some(),
+            _ => false,
+        };
+        let before = if xp_source || force_periodic { self.session.begin_guild_experience_command(force_periodic)? } else { None };
         let packets = match command {
             WorldCommand::ClientPacket(packet) => self.session.try_handle_packet(packet)?,
             WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => {

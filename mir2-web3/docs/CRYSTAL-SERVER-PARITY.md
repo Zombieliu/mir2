@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> 2026-10-02 additive Task Stewards: periodic accept/claim/abandon mutations
+> use durable full-character saves before success ACK. Tests cover two towns,
+> class/level gates, duplicate and stale claims, rollback, unknown publication,
+> lock-at-accept rewards and saved-count reconciliation. Focused results:
+> 18 packet/persistence + 8 rule + 4 content + 9 existing recurrence passes.
+> Ordinary server combat/time and production deployment are pending; this
+> is additional content, not original Crystal parity acceptance.
+
 > 2026-10-01 caster follow-up: strict audit of independent frozen saves and
 > normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
 > Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52

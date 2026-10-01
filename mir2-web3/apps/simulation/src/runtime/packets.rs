@@ -3889,13 +3889,18 @@ pub(super) fn stage5_accept_quest_packet(world: &mut World, quest_id: i32) -> Ve
     match ensure_runtime_quest(world, quest_id) {
         QuestStage::Available => {
             begin_quest(world, quest_id);
-            vec![stage5_quest_change_packet(
+            let mut packets=vec![stage5_quest_change_packet(
                 world,
                 quest_id,
                 CRYSTAL_QUEST_STATE_ADD,
                 true,
                 true,
-            )]
+            )];
+            if mir2_game_data::periodic_quests::is_periodic(quest_id) {
+                if let Some(packet)=super::quests::periodic_quests::info_packet(world,quest_id) {packets.push(packet);}
+                packets.push(ServerPacket::CompleteQuest{completed_quests:completed_quest_ids(world)});
+            }
+            packets
         }
         QuestStage::InProgress | QuestStage::ReadyToTurnIn => vec![stage5_quest_change_packet(
             world,
@@ -4929,6 +4934,7 @@ fn request_npc_info_packet(world: &World, npc_index: i32) -> Vec<ServerPacket> {
     let Some(npc) = crystal_npc_info_manifest()
         .npcs
         .into_iter()
+        .chain(mir2_game_data::periodic_quests::npc_templates())
         .find(|npc| npc.npc_index == npc_index)
     else {
         return Vec::new();
@@ -7483,7 +7489,7 @@ pub(super) fn start_game_static_visible_object_packets(
     let quest_ids_by_npc = crystal_quest_ids_by_npc();
     let mut objects = Vec::<(i32, i32, u32, ServerPacket)>::new();
 
-    for npc in crystal_npc_info_manifest().npcs {
+    for npc in crystal_npc_info_manifest().npcs.into_iter().chain(mir2_game_data::periodic_quests::npc_templates()) {
         if npc
             .map_file_name
             .as_deref()
@@ -7514,6 +7520,7 @@ pub(super) fn start_game_static_visible_object_packets(
             .unwrap_or_default();
         for quest_id in super::quests::newcomer_progression::configured_quest_ids_for_npc(object_id).into_iter()
             .chain(super::quests::newcomer_v2::configured_quest_ids_for_npc(object_id))
+            .chain(super::quests::periodic_quests::ids_for_npc(object_id))
         {
             if !quest_ids.contains(&quest_id) {
                 quest_ids.push(quest_id);
@@ -8962,7 +8969,8 @@ impl SimulationSession {
         let xp_source = matches!(&packet,
             ClientPacket::Attack{..}|ClientPacket::RangeAttack{..}|ClientPacket::Magic{..}
             |ClientPacket::CallNpc{..}|ClientPacket::NpcConfirmInput{..}|ClientPacket::FinishQuest{..});
-        let before = if xp_source { self.begin_guild_experience_command(false)? } else { None };
+        let force_periodic=super::quests::periodic_quests::packet_requires_checkpoint(&packet);
+        let before = if xp_source || force_periodic { self.begin_guild_experience_command(force_periodic)? } else { None };
         let journey_context = super::quests::newcomer_v2_events::command_context(&packet);
         let mut packets = self.handle_packet_impl(packet);
         let mut journey_packets = super::quests::newcomer_v2_events::observe_committed_command(

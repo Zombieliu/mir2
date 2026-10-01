@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 additive task goal: two-city daily/weekly backend and durable
+> claim rules pass 18 packet/persistence, 8 rule, 4 content and 9 existing
+> recurrence checks. Ordinary server three-class timing, native captures and
+> release acceptance remain pending. This does not change Crystal parity or
+> the paused capacity goal. [Acceptance queue](DAILY-WEEKLY-GOAL.md).
+
 > 2026-10-01 caster follow-up: strict audit of independent frozen saves and
 > normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
 > Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52

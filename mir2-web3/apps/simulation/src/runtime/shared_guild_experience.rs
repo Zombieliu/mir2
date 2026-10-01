@@ -315,8 +315,10 @@ impl SimulationSession {
             .lock()
             .map_err(|_| "guild XP error state poisoned")?
             .take();
+        let force_save=super::quests::periodic_quests::successful_claim_since(self.app.world(),&before.save,&packets);
         let result = match source_error.map_or_else(|| has_uncommitted(self.app.world()), Err) {
-            Ok(false) => return Ok(packets),
+            Ok(false) if !force_save => return Ok(packets),
+            Ok(false) => super::save::persist_active_character_save(self.app.world()),
             Ok(true) => super::save::persist_active_character_save(self.app.world()),
             Err(error) => Err(error),
         };

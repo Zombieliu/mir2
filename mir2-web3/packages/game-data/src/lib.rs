@@ -11,6 +11,7 @@ pub use crystal_creature_settings::{crystal_creature_settings, CrystalCreatureSe
 #[cfg(test)]
 mod crystal_item_image;
 pub mod crystal_map_events;
+pub mod periodic_quests;
 pub use crystal_guild_settings::{
     crystal_guild_buff_definitions, crystal_guild_settings, CrystalGuildCreationCost,
     CrystalGuildSettings,

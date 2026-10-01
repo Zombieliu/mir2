@@ -1186,21 +1186,22 @@ pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
     let quest_ids_by_npc = super::npc::crystal_quest_ids_by_npc();
     let config = world.resource::<RuntimeConfigResource>().config.clone();
 
-    for npc in crystal_npc_info_manifest().npcs {
+    for npc in crystal_npc_info_manifest().npcs.into_iter().chain(mir2_game_data::periodic_quests::npc_templates()) {
         let npc_map_file_name = npc.map_file_name.as_deref().map(normalize_map_file_name);
         if npc_map_file_name.as_deref() != Some(map_file_name.as_str()) {
             continue;
         }
-        if !config.npc_script_is_allowed(&npc.script_key) {
+        if !npc.loaded_object_id.is_some_and(|id|mir2_game_data::periodic_quests::npc(id).is_some())
+            && !config.npc_script_is_allowed(&npc.script_key) {
             continue;
         }
         let Some(object_id) = npc.loaded_object_id else {
             continue;
         };
-        let quest_ids = quest_ids_by_npc
+        let quest_ids = super::quests::effective_quest_ids_for_npc(world,object_id,&quest_ids_by_npc
             .get(&object_id)
-            .map(|ids| ids.iter().copied().collect())
-            .unwrap_or_default();
+            .map(|ids| ids.iter().copied().collect::<Vec<_>>())
+            .unwrap_or_default());
 
         world.spawn((
             WorldObject,
@@ -1213,7 +1214,7 @@ pub(super) fn spawn_crystal_current_map_npcs(world: &mut World) {
                 image: npc.image,
                 colour_argb: 0,
                 quest_ids,
-                script_key: Some(npc.script_key),
+                script_key: (!npc.script_key.is_empty()).then_some(npc.script_key),
             },
         ));
     }

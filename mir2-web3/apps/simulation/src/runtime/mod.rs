@@ -43,6 +43,7 @@ mod onchain;
 mod packets;
 mod pathfind;
 mod quests;
+pub(crate) use quests::periodic_quests::target_is_periodic as periodic_quest_target;
 mod refine_oven;
 mod rental;
 mod resources;

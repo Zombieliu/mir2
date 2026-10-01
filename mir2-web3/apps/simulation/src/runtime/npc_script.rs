@@ -704,7 +704,8 @@ fn crystal_quest_link_dialog(
     context: &NpcInteractionContext,
 ) -> Option<ActiveNpcDialogState> {
     let mut links = quest_dialog_links_for_npc(world, context.object_id, &context.quest_ids);
-    if links.is_empty() {
+    let periodic=mir2_game_data::periodic_quests::npc(context.object_id).is_some();
+    if links.is_empty() && !periodic {
         return None;
     }
     links.push(NpcDialogLinkState {
@@ -723,7 +724,13 @@ fn crystal_quest_link_dialog(
         current: 0,
         required: 1,
         title: context.name.clone(),
-        body: vec!["How can I help you?".to_string()],
+        body: if periodic {vec![
+            "Daily and Weekly Tasks".into(),
+            "Bichon and Mongchon share these tasks and rewards.".into(),
+            "Daily reset: 00:00 server time (UTC+8).".into(),
+            "Weekly reset: Monday 00:00 server time (UTC+8).".into(),
+            "Tasks unlock at level 10. Claimed tasks return after reset.".into(),
+        ]} else {vec!["How can I help you?".to_string()]},
         footer,
         links,
         input: None,
@@ -734,6 +741,7 @@ fn crystal_npc_info_for_loaded_object_id(object_id: u32) -> Option<CrystalNpcInf
     crystal_npc_info_manifest()
         .npcs
         .into_iter()
+        .chain(mir2_game_data::periodic_quests::npc_templates())
         .find(|npc| npc.loaded_object_id == Some(object_id))
 }
 
@@ -3371,23 +3379,41 @@ impl SimulationSession {
         npc: &WorldEntitySnapshot,
         key: &str,
     ) -> Vec<ServerPacket> {
+        let before=match if mir2_game_data::periodic_quests::npc(npc.object_id).is_some() {self.begin_guild_experience_command(true)} else {Ok(None)} {
+            Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
+        };
         let packets = self.call_shared_npc_snapshot_impl(npc, key);
-        self.finalize_journey_npc_packets(npc.object_id, packets)
+        let packets=self.finalize_journey_npc_packets(npc.object_id, packets);
+        self.finish_guild_experience_command(before,packets).unwrap_or_else(|_|Self::periodic_save_failure_packets())
     }
 
     pub fn call_npc(&mut self, object_id: u32, key: &str) -> Vec<ServerPacket> {
+        let before=match if mir2_game_data::periodic_quests::npc(object_id).is_some() {self.begin_guild_experience_command(true)} else {Ok(None)} {
+            Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
+        };
         let packets = self.call_npc_impl(object_id, key);
-        self.finalize_journey_npc_packets(object_id, packets)
+        let packets=self.finalize_journey_npc_packets(object_id, packets);
+        self.finish_guild_experience_command(before,packets).unwrap_or_else(|_|Self::periodic_save_failure_packets())
     }
 
     pub fn select_npc_dialog_target(&mut self, target: &str) -> Vec<ServerPacket> {
         let object_id = self.app.world().resource::<NpcStateResource>().active_npc_dialog.as_ref()
             .map(|dialog| dialog.npc_object_id);
+        let force=object_id.is_some_and(|id|mir2_game_data::periodic_quests::npc(id).is_some())
+            || super::quests::periodic_quests::target_is_periodic(target);
+        let before=match if force {self.begin_guild_experience_command(true)} else {Ok(None)} {
+            Ok(before)=>before,Err(_)=>return Self::periodic_save_failure_packets(),
+        };
         let packets = self.select_npc_dialog_target_impl(target);
-        match object_id {
+        let packets=match object_id {
             Some(object_id) => self.finalize_journey_npc_packets(object_id, packets),
             None => self.finalize_packets(packets),
-        }
+        };
+        self.finish_guild_experience_command(before,packets).unwrap_or_else(|_|Self::periodic_save_failure_packets())
+    }
+
+    fn periodic_save_failure_packets() -> Vec<ServerPacket> {
+        vec![ServerPacket::Chat{message:"Task could not be saved. Reconnect and try again.".into(),chat_type:ChatType::System}]
     }
 
     fn finalize_journey_npc_packets(&mut self, object_id: u32, mut packets: Vec<ServerPacket>) -> Vec<ServerPacket> {

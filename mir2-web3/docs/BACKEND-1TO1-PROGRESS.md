@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> 2026-10-02 periodic-content checkpoint: two town Task Stewards and 20
+> additive daily/weekly quests are implemented with shared cross-city slots,
+> UTC+8 server periods and acceptance-time EXP/gold. Full-save CAS precedes
+> successful accept/finish/abandon responses. Focused tests pass 18 packet /
+> persistence cases, 8 recurrence rules, 4 canonical content checks and 9
+> existing recurrence regressions. Ready/save fixtures are not natural kill or
+> duration evidence. Server journeys and paired rollout remain pending.
+> [Goal queue](DAILY-WEEKLY-GOAL.md).
+
 > 2026-10-01 caster follow-up: strict audit of independent frozen saves and
 > normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
 > Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52
