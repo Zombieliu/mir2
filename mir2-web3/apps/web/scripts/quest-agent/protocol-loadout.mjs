@@ -125,10 +125,21 @@ export function combatApproachRange(client, _target) {
 
 /** Perform one conservative combat action from authoritative state. */
 export async function combatAction(client, target) {
+  if (!target || target.dead || !Number.isInteger(Number(target.objectId))) throw new Error("Combat target must be a live authoritative entity");
+  if (hasNewerOwnMovementReceipt(client)) {
+    // A zero sampled before Walk/Run cannot release the new shared ActionTime.
+    // UserLocation is owner-only and has no objectId in Crystal's real wire.
+    await refreshCombatWorldSnapshot(client);
+    const liveTarget = (client.snapshot?.entities ?? []).find(entity =>
+      Number(entity?.objectId) === Number(target.objectId));
+    if (!liveTarget || liveTarget.dead === true || Number(liveTarget.hp) <= 0) {
+      return { kind: 'wait', targetId: Number(target.objectId), delayMs: 1 };
+    }
+    target = liveTarget;
+  }
   const snapshot = client?.snapshot;
   const actor = player(snapshot);
   if (!actor) throw new Error("Cannot fight without the authoritative player entity");
-  if (!target || target.dead || !Number.isInteger(Number(target.objectId))) throw new Error("Combat target must be a live authoritative entity");
   const actionBlockMask = selfActionBlockMask(client);
   if (actionBlockMask) {
     return { kind: "wait", targetId: Number(target.objectId), delayMs: 650, actionBlockMask };
@@ -329,6 +340,25 @@ async function useRestorative(client, pool, consumed, threshold, options) {
     return nextValue > current || !remaining || Number(remaining.quantity ?? 0) < beforeQuantity;
   }, `${pool.toUpperCase()} restorative ${item.name}`);
   consumed.push(item.name);
+}
+
+function hasNewerOwnMovementReceipt(client) {
+  const ownerObjectId = knownObjectId(client?.snapshot?.playerObjectId);
+  if (ownerObjectId == null) return false;
+  let latestSnapshotSequence = -1;
+  let latestMovementSequence = -1;
+  for (const event of client?.events ?? []) {
+    if (event?.direction !== 'received') continue;
+    const sequence = Number(event?.sequence);
+    if (!Number.isSafeInteger(sequence) || sequence < 0) continue;
+    if (event.type === 'worldSnapshot') {
+      latestSnapshotSequence = Math.max(latestSnapshotSequence, sequence);
+    } else if (event.packet === 'UserLocation' &&
+        (event.payload?.objectId == null || knownObjectId(event.payload.objectId) === ownerObjectId)) {
+      latestMovementSequence = Math.max(latestMovementSequence, sequence);
+    }
+  }
+  return latestMovementSequence > latestSnapshotSequence;
 }
 
 function hasNewerOwnObjectManaReceipt(client) {

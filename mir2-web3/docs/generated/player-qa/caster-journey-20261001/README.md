@@ -116,3 +116,26 @@ same accounts resumed through normal login within their original r2 clock.
 - Native full-route visual play, laptop DPI and production soak remain open.
   Public playtest, installed r8, updater feed and human stores were not changed
   during this local caster round. Capacity work remains paused.
+
+## Ordinary combat readiness follow-up
+
+The same r2 run found the practice correction did not cover ordinary combat.
+N14 had 19 unacknowledged casts 0–52 ms after owner movement receipts.
+[Selected original packets](ordinary-combat-owner-wire-receipts.json) show a
+stationary public target, valid range and an expired independent spell delay;
+the new movement ActionTime still correctly prevented the cast. The same
+target later received accepted Magic and positive damage.
+
+The controller now probes a fresh public frame when owner movement is newer
+than its snapshot, respects its shared readiness and rereads the live target.
+Owner-only receipts without an id are recognized; foreign ids and already
+fresh frames do not create a redundant probe. The two real-wire class
+regressions fail before the fix (50/52 custom loadout cases); final loadout
+cases pass 54/54, including target movement/removal controls. The six affected
+controller/evidence suites pass 292/292 TAP cases (the custom loadout script
+is one TAP subprocess, so these totals must not be added).
+
+This is a QA-controller correction. The copied candidate server, production
+client rules, 20-action/48-engagement limits, ordinary clocks, character
+state and first-cohort results are unchanged. Final r2 completion remains
+pending at this checkpoint.
