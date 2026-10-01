@@ -2,6 +2,19 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
+2026-10-02 当前源码对齐目标显式刷新到 Windows
+`3d735745f1117d42a7859e87604a106351dca935`，不是暗改旧证据分母。新增14个
+提交正常合并：5处冲突保留双方，3个服务端冲突文件完整格式化源码与该来源
+相同。Android276/preview290/shared1216+10ignored/runtime291+1ignored、
+Zone179、法力3+5/毒切图5、Gateway4+3+4+2、控制器366与实际API31两变体
+源码门通过。前两次缺地图失败保留，三张输入均为准确跟踪Git原图。
+这是源码/回归刷新，尚无包含该delta的新APK或设备画面；最新实包仍为v16。
+NI-10/11的Android入站和服务重开宿主仍OPEN，下一叶子接线并做失败先行验证，
+随后精确新包/实测。旧GL失败、完整UI/在线/真机缺项不改记通过。
+[完整范围、原始失败及源码核验](generated/player-qa/native-android-windows-refresh-20261002/README.md)。
+
+以下v16及更早为各自精确源码检查点，不包含上述新Windows delta。
+
 最新实际v16（2026-10-02）：干净8cd2e7eae双包/hash/安装、14源码门hash及每包
 6647原图/三份metadata字节核验通过。共享草稿框补Android点按标记，失败先行
 三项全红后3/3，Android276/preview290/Java37+37/API31两变体通过。实际软键盘
@@ -133,11 +146,14 @@ inventory筛选6通过/2资源依赖失败，未宣称全绿。Android两类物�
 离线 UI 展示当作终点。目标是原生 Bevy/GameActivity Android；Capacitor
 或远程旧 Web 页面不替代本 goal 的交付。
 
-## 1. 冻结基线与隔离
+## 1. Goal 建立时的冻结基线与隔离（历史）
+
+本节保留建立goal时的准确状态；当前显式刷新来源及其未完成门槛见文首和
+本轮refresh证据。不能把下面旧APK、Windows安装状态重绑到新来源。
 
 | 项目 | 本轮核验结果 |
 | --- | --- |
-| Windows 当前源码基线 | `codex/playtest-registration`，`3f5e61533235921369bc13a7760b4a56b0e467e5` |
+| Windows 建立 goal 时源码基线 | `codex/playtest-registration`，`3f5e61533235921369bc13a7760b4a56b0e467e5` |
 | Windows 基线提交 | 2026-10-01 09:54:27 +08:00，技能节奏和非模态窗口输入修复 |
 | 旧 Windows 来源 | `codex/windows-player-journey`，`6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4`，PR #250 仍 Draft；它是上述基线的祖先，不是当前终点 |
 | Android 执行分支 | 独立 `codex/android-shared-sync`，PR #253 仍 Draft，base 不变 |
@@ -232,9 +248,11 @@ Win32 分辨率、Inno 安装器、EXE 更新器不原样搬到 Android：对应
     玩家功能百分比分母，仍须逐项展开每个服务的动作/回执/窗口与失败验收。
   - [x] G1-package — 精确源码10bf437f2的v7诊断APK/版本/hash与模拟器离线
     菜单/隐藏摇杆/共享背包重新验证；在线、完整UI和稳定性不在此勾选中。
-  - [ ] G1-upstream-refresh — 本轮核验新增3d735745f相对原冻结14个提交；先审
-    新coordination/共享NPC/技能/地图与宿主改动，再正常merge和受影响回归。
-    v16仍绑定8cd2e7eae；新增基线验收单列，不把Windows证据当Android证据。
+  - [x] G1-upstream-refresh-source — 显式导入3d735745f新增14个提交；正常merge
+    保留5处冲突双方，服务端3文件完整格式化源码与上游相同，受影响源码回归/
+    实际API31两变体通过。源码门不等于APK、NPC宿主或完整G1完成。
+  - [ ] G1-upstream-refresh-package — 新来源的精确APK/安装/设备画面仍需验证。
+    v16仍绑定8cd2e7eae；旧原图/GL失败不重绑，不把Windows证据当Android证据。
 - [ ] G2 — 真实登录 → 角色列表 → 创建/选择 → StartGame → 服务端地图/位置。
   审计 transport、认证和 render-ready，不发裸 account_id 冒充身份。
 - [ ] G3 — 完整资源和对象/地图生命周期、真实权威移动、战斗、拾取、背包、

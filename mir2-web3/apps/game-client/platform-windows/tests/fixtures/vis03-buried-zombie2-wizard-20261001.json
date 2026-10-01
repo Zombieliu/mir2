@@ -1,0 +1,596 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "traceFileName": "Wizard.2026-10-01T04-11-36-426Z.trace.jsonl",
+    "traceSha256": "4e92276ecbfcbfef66fbbf1d39ef221e2d772fe214e0632bdaca51ffff7ce9a9",
+    "scope": "Two distinct real Zombie2 actors. 248756 never has a public spawn/show in this trace; lifecycle replay uses 248713, whose original public packets are present. No packet or actor ID is relabeled. No UI screenshot/GPU acceptance is implied."
+  },
+  "atlasGeometry": "Test-only synthetic rectangle geometry routes production layers and grid hover; bitmap pixels and GPU rendering are not exercised.",
+  "rawSeq18577": {
+    "provenance": {
+      "kind": "sanitized_raw_snapshot_slice",
+      "sourceSequence": 18577,
+      "sourceAt": "2026-10-01T04:50:19.571Z",
+      "sanitization": "Self name replaced with FixtureWizard; unrelated actors, account/inventory/quest data and unrelated snapshot fields omitted. Retained positions, IDs, AI, HP and sprite fields are unchanged."
+    },
+    "payload": {
+      "mapFileName": "D401",
+      "mapTitle": "DeadMineEntrance",
+      "playerObjectId": 1000,
+      "playerHp": 81,
+      "playerMaxHp": 81,
+      "sceneView": {
+        "center": {
+          "x": 46,
+          "y": 144
+        },
+        "height": 18,
+        "width": 24
+      },
+      "entities": [
+        {
+          "objectId": 1000,
+          "kind": "selfPlayer",
+          "name": "FixtureWizard",
+          "x": 46,
+          "y": 144,
+          "direction": "Up",
+          "class": "Wizard",
+          "gender": "Male",
+          "hp": 81,
+          "maxHp": 81,
+          "dead": false,
+          "disposition": "friendly",
+          "ai": null,
+          "sprite": {
+            "altBodyLibrary": null,
+            "altFrameBaseOffset": null,
+            "altHairLibrary": null,
+            "altWeaponFrameOffset": null,
+            "altWeaponLibrary": null,
+            "altWeaponLibrarySecondary": null,
+            "bodyLibrary": "CArmour/01",
+            "directionStride": 4,
+            "frameBaseOffset": 0,
+            "frameCount": 4,
+            "hairLibrary": "CHair/00",
+            "mountFrameOffset": null,
+            "mountLibrary": null,
+            "weaponFrameOffset": 0,
+            "weaponLibrary": "CWeapon/10",
+            "weaponLibrarySecondary": null
+          }
+        },
+        {
+          "objectId": 248756,
+          "kind": "monster",
+          "name": "Zombie2",
+          "x": 40,
+          "y": 135,
+          "direction": "UpRight",
+          "class": null,
+          "gender": null,
+          "hp": 155,
+          "maxHp": 155,
+          "dead": false,
+          "disposition": "hostile",
+          "ai": 24,
+          "sprite": {
+            "altBodyLibrary": null,
+            "altFrameBaseOffset": null,
+            "altHairLibrary": null,
+            "altWeaponFrameOffset": null,
+            "altWeaponLibrary": null,
+            "altWeaponLibrarySecondary": null,
+            "bodyLibrary": "Monster/069",
+            "directionStride": 4,
+            "frameBaseOffset": 0,
+            "frameCount": 4,
+            "hairLibrary": null,
+            "mountFrameOffset": null,
+            "mountLibrary": null,
+            "weaponFrameOffset": null,
+            "weaponLibrary": null,
+            "weaponLibrarySecondary": null
+          }
+        }
+      ]
+    }
+  },
+  "projectedSeq18577": {
+    "provenance": {
+      "kind": "expected_public_projection_fixture",
+      "derivedFromSequence": 18577,
+      "removedObjectId": 248756,
+      "notice": "Synthesized expected public snapshot with the private underground actor omitted. This is NOT a raw server capture; all other retained fields are unchanged."
+    },
+    "payload": {
+      "mapFileName": "D401",
+      "mapTitle": "DeadMineEntrance",
+      "playerObjectId": 1000,
+      "playerHp": 81,
+      "playerMaxHp": 81,
+      "sceneView": {
+        "center": {
+          "x": 46,
+          "y": 144
+        },
+        "height": 18,
+        "width": 24
+      },
+      "entities": [
+        {
+          "objectId": 1000,
+          "kind": "selfPlayer",
+          "name": "FixtureWizard",
+          "x": 46,
+          "y": 144,
+          "direction": "Up",
+          "class": "Wizard",
+          "gender": "Male",
+          "hp": 81,
+          "maxHp": 81,
+          "dead": false,
+          "disposition": "friendly",
+          "ai": null,
+          "sprite": {
+            "altBodyLibrary": null,
+            "altFrameBaseOffset": null,
+            "altHairLibrary": null,
+            "altWeaponFrameOffset": null,
+            "altWeaponLibrary": null,
+            "altWeaponLibrarySecondary": null,
+            "bodyLibrary": "CArmour/01",
+            "directionStride": 4,
+            "frameBaseOffset": 0,
+            "frameCount": 4,
+            "hairLibrary": "CHair/00",
+            "mountFrameOffset": null,
+            "mountLibrary": null,
+            "weaponFrameOffset": 0,
+            "weaponLibrary": "CWeapon/10",
+            "weaponLibrarySecondary": null
+          }
+        }
+      ]
+    }
+  },
+  "rawBeforeRealReveal": {
+    "provenance": {
+      "kind": "sanitized_raw_snapshot_slice",
+      "sourceSequence": 18764,
+      "sourceAt": "2026-10-01T04:50:41.988Z",
+      "sanitization": "Self name replaced with FixtureWizard; unrelated actors, account/inventory/quest data and unrelated snapshot fields omitted. Retained positions, IDs, AI, HP and sprite fields are unchanged."
+    },
+    "payload": {
+      "mapFileName": "D401",
+      "mapTitle": "DeadMineEntrance",
+      "playerObjectId": 1000,
+      "playerHp": 73,
+      "playerMaxHp": 81,
+      "sceneView": {
+        "center": {
+          "x": 32,
+          "y": 146
+        },
+        "height": 18,
+        "width": 24
+      },
+      "entities": [
+        {
+          "objectId": 1000,
+          "kind": "selfPlayer",
+          "name": "FixtureWizard",
+          "x": 32,
+          "y": 146,
+          "direction": "DownLeft",
+          "class": "Wizard",
+          "gender": "Male",
+          "hp": 73,
+          "maxHp": 81,
+          "dead": false,
+          "disposition": "friendly",
+          "ai": null,
+          "sprite": {
+            "altBodyLibrary": null,
+            "altFrameBaseOffset": null,
+            "altHairLibrary": null,
+            "altWeaponFrameOffset": null,
+            "altWeaponLibrary": null,
+            "altWeaponLibrarySecondary": null,
+            "bodyLibrary": "CArmour/01",
+            "directionStride": 4,
+            "frameBaseOffset": 0,
+            "frameCount": 4,
+            "hairLibrary": "CHair/00",
+            "mountFrameOffset": null,
+            "mountLibrary": null,
+            "weaponFrameOffset": 0,
+            "weaponLibrary": "CWeapon/10",
+            "weaponLibrarySecondary": null
+          }
+        },
+        {
+          "objectId": 248713,
+          "kind": "monster",
+          "name": "Zombie2",
+          "x": 29,
+          "y": 146,
+          "direction": "Up",
+          "class": null,
+          "gender": null,
+          "hp": 155,
+          "maxHp": 155,
+          "dead": false,
+          "disposition": "hostile",
+          "ai": 24,
+          "sprite": {
+            "altBodyLibrary": null,
+            "altFrameBaseOffset": null,
+            "altHairLibrary": null,
+            "altWeaponFrameOffset": null,
+            "altWeaponLibrary": null,
+            "altWeaponLibrarySecondary": null,
+            "bodyLibrary": "Monster/069",
+            "directionStride": 4,
+            "frameBaseOffset": 0,
+            "frameCount": 4,
+            "hairLibrary": null,
+            "mountFrameOffset": null,
+            "mountLibrary": null,
+            "weaponFrameOffset": null,
+            "weaponLibrary": null,
+            "weaponLibrarySecondary": null
+          }
+        }
+      ]
+    }
+  },
+  "projectedBeforeRealReveal": {
+    "provenance": {
+      "kind": "expected_public_projection_fixture",
+      "derivedFromSequence": 18764,
+      "removedObjectId": 248713,
+      "notice": "Synthesized expected public snapshot with the private underground actor omitted. This is NOT a raw server capture; all other retained fields are unchanged."
+    },
+    "payload": {
+      "mapFileName": "D401",
+      "mapTitle": "DeadMineEntrance",
+      "playerObjectId": 1000,
+      "playerHp": 73,
+      "playerMaxHp": 81,
+      "sceneView": {
+        "center": {
+          "x": 32,
+          "y": 146
+        },
+        "height": 18,
+        "width": 24
+      },
+      "entities": [
+        {
+          "objectId": 1000,
+          "kind": "selfPlayer",
+          "name": "FixtureWizard",
+          "x": 32,
+          "y": 146,
+          "direction": "DownLeft",
+          "class": "Wizard",
+          "gender": "Male",
+          "hp": 73,
+          "maxHp": 81,
+          "dead": false,
+          "disposition": "friendly",
+          "ai": null,
+          "sprite": {
+            "altBodyLibrary": null,
+            "altFrameBaseOffset": null,
+            "altHairLibrary": null,
+            "altWeaponFrameOffset": null,
+            "altWeaponLibrary": null,
+            "altWeaponLibrarySecondary": null,
+            "bodyLibrary": "CArmour/01",
+            "directionStride": 4,
+            "frameBaseOffset": 0,
+            "frameCount": 4,
+            "hairLibrary": "CHair/00",
+            "mountFrameOffset": null,
+            "mountLibrary": null,
+            "weaponFrameOffset": 0,
+            "weaponLibrary": "CWeapon/10",
+            "weaponLibrarySecondary": null
+          }
+        }
+      ]
+    }
+  },
+  "realWithinThreeUserLocation": {
+    "provenance": {
+      "kind": "raw_received_packet",
+      "sourceSequence": 18766,
+      "sourceAt": "2026-10-01T04:50:42.539Z"
+    },
+    "event": {
+      "type": "packet",
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "UpLeft",
+        "x": 30,
+        "y": 144
+      }
+    }
+  },
+  "realObjectMonster": {
+    "provenance": {
+      "kind": "raw_received_packet",
+      "sourceSequence": 18777,
+      "sourceAt": "2026-10-01T04:50:43.061Z"
+    },
+    "event": {
+      "type": "packet",
+      "packet": "ObjectMonster",
+      "payload": {
+        "ai": 24,
+        "bindingShotCenter": false,
+        "buffs": [],
+        "dead": false,
+        "direction": "Up",
+        "effect": 0,
+        "extra": false,
+        "extraByte": 0,
+        "hidden": false,
+        "image": 69,
+        "light": 0,
+        "location": {
+          "x": 29,
+          "y": 146
+        },
+        "masterObjectId": 0,
+        "name": "Zombie2",
+        "nameColourArgb": -1,
+        "objectId": 248713,
+        "poison": 0,
+        "rarity": 0,
+        "shockTime": 0,
+        "skeleton": false,
+        "sprite": {
+          "altBodyLibrary": null,
+          "altFrameBaseOffset": null,
+          "altHairLibrary": null,
+          "altWeaponFrameOffset": null,
+          "altWeaponLibrary": null,
+          "altWeaponLibrarySecondary": null,
+          "bodyLibrary": "Monster/069",
+          "directionStride": 4,
+          "frameBaseOffset": 0,
+          "frameCount": 4,
+          "hairLibrary": null,
+          "mountFrameOffset": null,
+          "mountLibrary": null,
+          "weaponFrameOffset": null,
+          "weaponLibrary": null,
+          "weaponLibrarySecondary": null
+        }
+      }
+    }
+  },
+  "realObjectShow": {
+    "provenance": {
+      "kind": "raw_received_packet",
+      "sourceSequence": 18778,
+      "sourceAt": "2026-10-01T04:50:43.061Z"
+    },
+    "event": {
+      "type": "packet",
+      "packet": "ObjectShow",
+      "payload": {
+        "objectId": 248713
+      }
+    }
+  },
+  "rawAfterRealReveal": {
+    "provenance": {
+      "kind": "sanitized_raw_snapshot_slice",
+      "sourceSequence": 18809,
+      "sourceAt": "2026-10-01T04:50:43.995Z",
+      "sanitization": "Self name replaced with FixtureWizard; unrelated actors, account/inventory/quest data and unrelated snapshot fields omitted. Retained positions, IDs, AI, HP and sprite fields are unchanged."
+    },
+    "payload": {
+      "mapFileName": "D401",
+      "mapTitle": "DeadMineEntrance",
+      "playerObjectId": 1000,
+      "playerHp": 73,
+      "playerMaxHp": 81,
+      "sceneView": {
+        "center": {
+          "x": 26,
+          "y": 140
+        },
+        "height": 18,
+        "width": 24
+      },
+      "entities": [
+        {
+          "objectId": 1000,
+          "kind": "selfPlayer",
+          "name": "FixtureWizard",
+          "x": 26,
+          "y": 140,
+          "direction": "UpLeft",
+          "class": "Wizard",
+          "gender": "Male",
+          "hp": 73,
+          "maxHp": 81,
+          "dead": false,
+          "disposition": "friendly",
+          "ai": null,
+          "sprite": {
+            "altBodyLibrary": null,
+            "altFrameBaseOffset": null,
+            "altHairLibrary": null,
+            "altWeaponFrameOffset": null,
+            "altWeaponLibrary": null,
+            "altWeaponLibrarySecondary": null,
+            "bodyLibrary": "CArmour/01",
+            "directionStride": 4,
+            "frameBaseOffset": 0,
+            "frameCount": 4,
+            "hairLibrary": "CHair/00",
+            "mountFrameOffset": null,
+            "mountLibrary": null,
+            "weaponFrameOffset": 0,
+            "weaponLibrary": "CWeapon/10",
+            "weaponLibrarySecondary": null
+          }
+        },
+        {
+          "objectId": 248713,
+          "kind": "monster",
+          "name": "Zombie2",
+          "x": 29,
+          "y": 146,
+          "direction": "Up",
+          "class": null,
+          "gender": null,
+          "hp": 155,
+          "maxHp": 155,
+          "dead": false,
+          "disposition": "hostile",
+          "ai": 24,
+          "sprite": {
+            "altBodyLibrary": null,
+            "altFrameBaseOffset": null,
+            "altHairLibrary": null,
+            "altWeaponFrameOffset": null,
+            "altWeaponLibrary": null,
+            "altWeaponLibrarySecondary": null,
+            "bodyLibrary": "Monster/069",
+            "directionStride": 4,
+            "frameBaseOffset": 0,
+            "frameCount": 4,
+            "hairLibrary": null,
+            "mountFrameOffset": null,
+            "mountLibrary": null,
+            "weaponFrameOffset": null,
+            "weaponLibrary": null,
+            "weaponLibrarySecondary": null
+          }
+        }
+      ]
+    }
+  },
+  "syntheticRemoveControl": {
+    "provenance": {
+      "kind": "synthetic_lifecycle_control",
+      "notice": "ObjectRemove for this actor was not captured after the reveal. This deliberately synthesized control exercises removal of a present actor."
+    },
+    "event": {
+      "type": "packet",
+      "packet": "ObjectRemove",
+      "payload": {
+        "objectId": 248713
+      }
+    }
+  },
+  "syntheticMapTransitionControl": {
+    "provenance": {
+      "kind": "synthetic_lifecycle_control",
+      "notice": "This later map transition is a separate cleanup branch from the real revealed state; it is not a captured event or gameplay journey outcome."
+    },
+    "event": {
+      "type": "packet",
+      "packet": "MapChanged",
+      "payload": {
+        "mapIndex": 1,
+        "location": {
+          "x": 26,
+          "y": 140
+        }
+      }
+    },
+    "destinationPublicSnapshotFixture": {
+      "mapFileName": "0",
+      "mapTitle": "BichonProvince",
+      "playerObjectId": 1000,
+      "playerHp": 73,
+      "playerMaxHp": 81,
+      "sceneView": {
+        "center": {
+          "x": 26,
+          "y": 140
+        },
+        "height": 18,
+        "width": 24
+      },
+      "entities": [
+        {
+          "objectId": 1000,
+          "kind": "selfPlayer",
+          "name": "FixtureWizard",
+          "x": 26,
+          "y": 140,
+          "direction": "UpLeft",
+          "class": "Wizard",
+          "gender": "Male",
+          "hp": 73,
+          "maxHp": 81,
+          "dead": false,
+          "disposition": "friendly",
+          "ai": null,
+          "sprite": {
+            "altBodyLibrary": null,
+            "altFrameBaseOffset": null,
+            "altHairLibrary": null,
+            "altWeaponFrameOffset": null,
+            "altWeaponLibrary": null,
+            "altWeaponLibrarySecondary": null,
+            "bodyLibrary": "CArmour/01",
+            "directionStride": 4,
+            "frameBaseOffset": 0,
+            "frameCount": 4,
+            "hairLibrary": "CHair/00",
+            "mountFrameOffset": null,
+            "mountLibrary": null,
+            "weaponFrameOffset": 0,
+            "weaponLibrary": "CWeapon/10",
+            "weaponLibrarySecondary": null
+          }
+        }
+      ]
+    }
+  },
+  "realPostRevealOwnerLocations": [
+    {
+      "provenance": {
+        "kind": "raw_received_packet",
+        "sourceSequence": 18780,
+        "sourceAt": "2026-10-01T04:50:43.200Z"
+      },
+      "event": {
+        "type": "packet",
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpLeft",
+          "x": 28,
+          "y": 142
+        }
+      }
+    },
+    {
+      "provenance": {
+        "kind": "raw_received_packet",
+        "sourceSequence": 18795,
+        "sourceAt": "2026-10-01T04:50:43.914Z"
+      },
+      "event": {
+        "type": "packet",
+        "packet": "UserLocation",
+        "payload": {
+          "direction": "UpLeft",
+          "x": 26,
+          "y": 140
+        }
+      }
+    }
+  ]
+}

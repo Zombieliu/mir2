@@ -3580,14 +3580,43 @@ pub fn keyboard_skill_system(
             continue;
         };
         magic_target.session(skills.authority.session_epoch);
-        let Some(aim) = magic_target.aim_at(
-            &spell,
-            player,
-            &entities,
-            presentation,
-            combat_target.as_deref(),
-            cursor_stage,
-        ) else {
+        let aim = magic_target
+            .aim_at(
+                &spell,
+                player,
+                &entities,
+                presentation,
+                combat_target.as_deref(),
+                cursor_stage,
+            )
+            .or_else(|| {
+                if pointer_cast {
+                    return None;
+                }
+                // Crystal samples MapControl.MapLocation for a function key even
+                // when an ordinary panel suppresses MouseObject/world hover.
+                // Keep hover targeting first; only recover a missing ground aim
+                // from the current in-stage cursor, using the same native scale.
+                let window = windows.iter().next()?;
+                let cursor = window.cursor_position()?;
+                let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
+                    window.resolution.width(),
+                    window.resolution.height(),
+                );
+                if !transform.contains_physical_point(cursor.x, cursor.y) {
+                    return None;
+                }
+                let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+                magic_target.aim_at(
+                    &spell,
+                    player,
+                    &entities,
+                    presentation,
+                    combat_target.as_deref(),
+                    Some([x, y]),
+                )
+            });
+        let Some(aim) = aim else {
             continue;
         };
         let direction = aim.direction;

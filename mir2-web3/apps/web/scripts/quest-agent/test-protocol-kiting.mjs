@@ -604,6 +604,45 @@ test('blocked Wizard retreat fails closed without calling navigation or combat',
   assert.equal(acted, false);
 });
 
+test('strict no-plan kite reports typed target metadata for the existing recovery path', async () => {
+  // Actor positions mirror the captured D022 pack. The blocked neighbourhood
+  // is a synthetic control, not a replay of the Crystal map's collision data.
+  const owner = player({ x: 387, y: 332 });
+  const target = monster(1202001, 378, 327, { name: 'WoomaSoldier', hp: 102 });
+  const pack = [
+    monster(1202000, 386, 332, { name: 'WoomaSoldier', hp: 120 }),
+    monster(1202002, 386, 333, { name: 'WoomaSoldier', hp: 84 }),
+    monster(1202501, 387, 333, { name: 'WoomaSoldier', hp: 120 }),
+  ];
+  const client = clientFixture([owner, target, ...pack], { mapFileName: 'D022' });
+  const blocked = [];
+  for (let y = 331; y <= 333; y += 1) {
+    for (let x = 386; x <= 388; x += 1) {
+      if (x !== owner.x || y !== owner.y) blocked.push({ x, y });
+    }
+  }
+  let navigationCalls = 0;
+  let actionCalls = 0;
+  const wrapped = createWizardKitingAction(
+    async () => { actionCalls += 1; return { kind: 'magic', targetId: target.objectId }; },
+    async () => { navigationCalls += 1; },
+    { loadCollisionMap: async () => openMap(400, 350, blocked), fightWhenBlocked: false },
+  );
+
+  await assert.rejects(wrapped(client, target), error => {
+    assert.ok(error instanceof RangedSafetyBandUnavailable,
+      'strict no-plan failure must enter the combat loop\'s existing safety recovery');
+    assert.equal(error.objectId, target.objectId);
+    assert.deepEqual(error.target, { x: 378, y: 327 });
+    assert.equal(error.mapFileName, 'D022');
+    assert.equal(error.message, 'No collision-safe Wizard retreat on D022 from 387,332');
+    return true;
+  });
+  assert.equal(navigationCalls, 0);
+  assert.equal(actionCalls, 0, 'strict mode must not fall back to a cast inside the pack');
+  assert.deepEqual({ x: owner.x, y: owner.y }, { x: 387, y: 332 });
+});
+
 test('journey mode fights the selected threat when every collision-safe retreat is blocked', async () => {
   const owner = player({ x: 2, y: 2 });
   const target = monster(20, 3, 2);
@@ -643,7 +682,14 @@ test('per-target retreat cell budget stops repeated kiting without another move'
 
   await wrapped(client, target);
   Object.assign(owner, { x: 5, y: 5 });
-  await assert.rejects(wrapped(client, target), /Wizard retreat cell budget exceeded/);
+  await assert.rejects(wrapped(client, target), error => {
+    assert.ok(error instanceof RangedSafetyBandUnavailable,
+      'the exhausted strict budget must enter bounded safety recovery');
+    assert.equal(error.objectId, target.objectId);
+    assert.deepEqual(error.target, { x: target.x, y: target.y });
+    assert.match(error.message, /Wizard retreat cell budget exceeded/);
+    return true;
+  });
   assert.equal(navigationCalls.length, 1);
 });
 

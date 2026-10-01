@@ -1,11 +1,40 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-10-01 caster follow-up: strict audit of independent frozen saves and
+> normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
+> Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52
+> cohort is retained. The original r2 ordinary clock ended 48/52: Wizard 22/26
+> at its 120-minute deadline; Taoist completed 26/26 within about 98 minutes.
+> Wizard's separate functional 26/26 inherits its ordinary nodes;
+> freshTimedCompletion=false.
+> Latest affected controller/evidence checks: 355 passed. Ordinary Lightning's
+> new loadout branch was not observed live; existing practice ACKs are separate.
+> Shared UI checks: 1197 passed / 10 ignored. Explicit NPCResponse follow-up
+> passes Windows 809 / 5 ignored and runtime 276 / 1 ignored. Real empty or
+> nonempty response pages retire service children; ordered Closed/Buy signals
+> do not open a bootstrap shop. Passive snapshot text absence retains the service.
+> Ordered Exit/retry, late goods, map/scene and merchant regressions pass; six
+> offline GPU captures after 560 ms pass. Earlier failures/42 captures remain.
+> [Packet boundary evidence](generated/player-qa/caster-journey-20261001/npc-response-service-boundary.json).
+> Finite control handoff, canonical mana and prior 6d498c080 server validations
+> retain their documented scopes and original failure records. No new full
+> server-suite, whole-game parity or public deployment acceptance follows.
+> Installed r8, public realm, updater feed and human stores are unchanged.
+> A client-only r9 shop hotfix is being built separately from the clean r8 base;
+> release and human acceptance are pending. Full native GUI / route timing,
+> counted/periodic poison, dynamic mana and unrelated parity gaps remain open;
+> capacity remains paused.
+> [Evidence](generated/player-qa/caster-journey-20261001/README.md).
+> [Shop lifecycle](generated/player-qa/caster-journey-20261001/shop-lifecycle-20261001.md).
+
 > 2026-10-01 技能/界面输入修复：共享1186、Windows801项串行检查通过。
 > 技能、人物、背包、设置、菜单、帮助和任务日志/详情只拦截各自窗口区域；
 > 窗口外移动、技能快捷键、药品快捷键及已建立的攻击/路线可继续。
 > 确认、购买、NPC、拖动和搜索输入仍受保护；已移除的任务不会留下隐形拦截。
 > 9级买药实际打开流程的9种语言GPU截图通过，背包在购买列表旁边。
-> 本机F盘实际版本仍是未含修复的r5，正在完成配套服务器/客户端发布及升级。
+> 本机F盘已由r5升级到干净3f5e61533的r8，安装和本机启动校验通过。
+> 配套试玩服务器已部署；签名更新序号4、公网更新与重复检查零下载通过。
+> 已从本机桌面启动器打开新版繁体登录页并保存应用内截图，未输入账号密码。
 > [证据](generated/player-qa/skill-input-shop-20261001/README.md)。
 
 > 2026-09-30 原生三语与 DPI 修复：zh-TW/en/pt-BR 的登录、创建角色、

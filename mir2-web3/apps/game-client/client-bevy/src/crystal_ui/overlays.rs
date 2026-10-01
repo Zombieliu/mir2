@@ -882,6 +882,11 @@ pub struct NativePlayerUiState {
     /// Local presentation tab for an NPC service that advertises both Buy
     /// and Sell. Capabilities remain authoritative in `ShopModel`.
     pub npc_shop_buy_tab: bool,
+    /// An accepted local @Exit closes the NPC service even when its text page
+    /// was already hidden by a service-only server snapshot.
+    pub(crate) npc_service_exit_requested: bool,
+    /// Reject delayed service replies until a new NPC page/request begins.
+    pub(crate) npc_service_exit_latched: bool,
     /// Crystal Hold auto-submits the next selection in this service only.
     pub npc_service_hold: Option<NpcShopServiceMode>,
     /// A locally rejected NPC service attempt waits for the System chat
@@ -1444,6 +1449,8 @@ impl Default for NativePlayerUiState {
             npc_inventory_hidden: false,
             mail_inventory_visible: false,
             npc_shop_buy_tab: true,
+            npc_service_exit_requested: false,
+            npc_service_exit_latched: false,
             npc_service_hold: None,
             npc_service_notice: None,
             npc_service_notice_mode: None,
@@ -1588,6 +1595,17 @@ impl NativePlayerUiState {
     }
     pub fn npc_shop_open(&self) -> bool {
         self.core.npc_shop_open()
+    }
+    pub fn begin_npc_service_request(&mut self) {
+        self.npc_service_exit_latched = false;
+        self.npc_service_exit_requested = false;
+    }
+    pub fn request_npc_service_exit(&mut self) {
+        self.npc_service_exit_requested = true;
+        self.npc_service_exit_latched = true;
+    }
+    pub fn accepts_npc_service_reply(&self) -> bool {
+        !self.npc_service_exit_latched
     }
     pub fn storage_open(&self) -> bool {
         self.core.storage_open()
@@ -1926,6 +1944,9 @@ impl NativePlayerUiState {
         self.core.chat_focused()
     }
     pub fn close_windows(&mut self) {
+        if self.npc_shop_open() {
+            self.request_npc_service_exit();
+        }
         self.skill_assign = Default::default();
         self.core.panel = mir2_ui_core::state::UiPanel::None;
         self.core.options_draft = None;
@@ -6950,18 +6971,49 @@ fn submit_storage_password_prompt(
     true
 }
 
-/// Crystal's NPCDialog.Show moves InventoryDialog beside its 440px frame and
-/// NPCDialog.Hide restores the origin. Track the authoritative dialogue, not
-/// the narrower NPCDrop service panel, so closing a service tab cannot move a
-/// bag while its parent dialogue remains open.
+/// A service snapshot may omit the NPC text page immediately after NPCGoods.
+/// Its packet-authoritative service remains open until an explicit exit;
+/// absence of text alone is not Crystal's NPCResponse(empty)/NPCDialog.Hide.
 fn sync_npc_dialog_inventory_location(
     mut state: ResMut<NativePlayerUiState>,
     npc_dialog: Option<Res<NpcDialogModel>>,
     mut shop: Option<ResMut<ShopModel>>,
+    mut signals: Option<ResMut<UiSurfaceSignals>>,
+    big_map: Option<Res<BigMapModel>>,
     mut was_open: Local<bool>,
+    mut previous_npc: Local<Option<u32>>,
+    mut previous_map_epoch: Local<Option<u64>>,
 ) {
-    let is_open = npc_dialog.is_some_and(|dialog| dialog.is_open);
-    if is_open == *was_open {
+    let explicit_exit = std::mem::take(&mut state.npc_service_exit_requested);
+    let map_epoch = big_map.as_deref().map(|map| map.reset_epoch);
+    let map_changed = previous_map_epoch.is_some() && map_epoch.is_some()
+        && *previous_map_epoch != map_epoch;
+    *previous_map_epoch = map_epoch;
+    let is_open = !explicit_exit && !map_changed
+        && npc_dialog.as_deref().is_some_and(|dialog| dialog.is_open);
+    let npc_id = npc_dialog.as_deref().filter(|dialog| dialog.is_open)
+        .and_then(|dialog| dialog.npc_object_id);
+    let npc_changed = matches!((*previous_npc, npc_id), (Some(old), Some(new)) if old != new);
+    let closed_service = state.npc_shop_open()
+        && shop.as_deref().is_some_and(|shop| shop.service_mode == NpcShopServiceMode::Closed);
+    let fresh_service = signals.as_deref().is_some_and(|signals| signals.npc_shop_open_requested);
+    let discard_old_service = npc_changed && state.npc_shop_open() && !fresh_service;
+    if explicit_exit || map_changed || closed_service || discard_old_service {
+        state.npc_service_exit_latched = !discard_old_service;
+        if let Some(signals) = signals.as_deref_mut() {
+            signals.npc_shop_open_requested = false;
+        }
+        close_npc_service(&mut state, shop.as_deref_mut());
+    }
+    if map_changed {
+        *previous_npc = None;
+    } else if is_open && npc_id.is_some() {
+        *previous_npc = npc_id;
+    }
+    if is_open && (!*was_open || npc_changed) {
+        state.npc_service_exit_latched = false;
+    }
+    if is_open == *was_open && !explicit_exit && !map_changed && !closed_service && !discard_old_service {
         return;
     }
     let was_npc_shop_open = state.npc_shop_open();
@@ -6976,20 +7028,31 @@ fn sync_npc_dialog_inventory_location(
         return;
     }
 
-    state.inventory_window.left = INVENTORY_PANEL_ORIGIN.x as f32;
-    state.inventory_window.top = INVENTORY_PANEL_ORIGIN.y as f32;
-    if !was_npc_shop_open {
+    if !explicit_exit && was_npc_shop_open
+        && shop.as_deref().is_some_and(|shop| shop.service_mode != NpcShopServiceMode::Closed)
+    {
         return;
     }
 
-    // NPCDialog.Hide closes its child NPCGoods/NPCDrop panels. Its ordinary
-    // InventoryDialog stays visible unless the user had explicitly hidden it.
+    state.inventory_window.left = INVENTORY_PANEL_ORIGIN.x as f32;
+    state.inventory_window.top = INVENTORY_PANEL_ORIGIN.y as f32;
+    if !was_npc_shop_open && !explicit_exit {
+        return;
+    }
+
+    close_npc_service(&mut state, shop.as_deref_mut());
+}
+
+fn close_npc_service(state: &mut NativePlayerUiState, shop: Option<&mut ShopModel>) {
+    // An ordinary inventory/another panel is independent from the NPC child.
     let keep_inventory_open = !state.npc_inventory_hidden;
-    state.core.panel = if keep_inventory_open {
-        mir2_ui_core::state::UiPanel::Inventory
-    } else {
-        mir2_ui_core::state::UiPanel::None
-    };
+    if state.npc_shop_open() {
+        state.core.panel = if keep_inventory_open {
+            mir2_ui_core::state::UiPanel::Inventory
+        } else {
+            mir2_ui_core::state::UiPanel::None
+        };
+    }
     state.npc_inventory_hidden = false;
     state.shop_service_drag_count = None;
     state.shop_service_drag_unique_id = None;
@@ -6998,7 +7061,7 @@ fn sync_npc_dialog_inventory_location(
     state.npc_service_notice_mode = None;
     state.shop_repair_container = 0;
     state.shop_repair_slot = None;
-    if let Some(shop) = shop.as_deref_mut() {
+    if let Some(shop) = shop {
         shop.selected_id = None;
         shop.selected_bag_slot_for_sell = None;
         shop.selected_bag_slot_for_repair = None;
@@ -7013,9 +7076,15 @@ fn sync_npc_dialog_inventory_location(
 /// so the player can still deliberately drag overlapping windows afterwards.
 fn sync_npc_shop_inventory_location(
     mut state: ResMut<NativePlayerUiState>,
-    shop: Res<ShopModel>,
+    mut shop: ResMut<ShopModel>,
     mut previous_surface: Local<Option<bool>>,
 ) {
+    if state.npc_service_exit_latched || (previous_surface.is_some() && !state.npc_shop_open()) {
+        if previous_surface.is_some() && !state.npc_shop_open() {
+            state.npc_service_exit_latched = true;
+        }
+        close_npc_service(&mut state, Some(&mut shop));
+    }
     let surface = (state.npc_shop_open() && state.inventory_open())
         .then(|| shop.allows_buy() && (!shop.allows_sell() || state.npc_shop_buy_tab));
     if surface == *previous_surface {
@@ -7788,7 +7857,7 @@ pub(crate) fn process_overlay_keyboard(
         if signals.npc_shop_open_requested {
             state.npc_shop_buy_tab = true;
             state.npc_service_hold = None;
-            if !state.npc_shop_open() {
+            if !state.npc_shop_open() && !state.npc_service_exit_latched {
                 state.toggle_npc_shop();
             }
             signals.npc_shop_open_requested = false;
@@ -8691,6 +8760,7 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::CloseShop => {
+                state.npc_service_exit_latched = true;
                 if state.npc_shop_open() {
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
@@ -20433,7 +20503,7 @@ mod tests {
     }
 
     #[test]
-    fn npc_dialog_transition_moves_the_bag_and_closes_only_its_service_children() {
+    fn npc_dialog_explicit_exit_moves_the_bag_and_closes_only_its_service_children() {
         let mut app = App::new();
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<ShopModel>()
@@ -20492,6 +20562,7 @@ mod tests {
             shop.selected_bag_slot_for_repair = Some(2);
         }
         app.world_mut().resource_mut::<NpcDialogModel>().is_open = false;
+        app.world_mut().resource_mut::<NativePlayerUiState>().npc_service_exit_requested = true;
         app.update();
         let state = app.world().resource::<NativePlayerUiState>();
         assert_eq!(state.core.panel, mir2_ui_core::state::UiPanel::Inventory);

@@ -71,7 +71,7 @@ fn ordinary_panels_do_not_disable_keyboard_walk() {
 
 #[test]
 fn three_class_skill_shortcuts_still_send_with_the_real_skills_page_visible() {
-    for spell in ["FireBall", "SoulFire", "ShoulderDash"] {
+    for spell in ["FireBall", "SoulFireBall", "ShoulderDash"] {
         let (mut app, receiver) = input_app();
         app.insert_resource(panel_ui(mir2_ui_core::state::UiPanel::Skill));
         app.insert_resource(world_entities());
@@ -99,6 +99,83 @@ fn three_class_skill_shortcuts_still_send_with_the_real_skills_page_visible() {
         app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::F1);
         app.update();
         assert!(receiver.try_recv().is_err(), "NPC service leaked {spell}");
+    }
+}
+
+#[test]
+fn caster_ground_and_summon_shortcuts_keep_stage_aim_while_hovering_the_skills_panel() {
+    for (class, spell, spell_id, cast_kind) in [
+        ("Wizard", "FireWall", 39, "ground"),
+        ("Wizard", "Lightning", 40, "direction"),
+        ("Taoist", "SummonSkeleton", 65, "self"),
+    ] {
+        for scale in [1.0, 1.5, 2.0] {
+            let (mut app, receiver) = input_app();
+            app.insert_resource(panel_ui(mir2_ui_core::state::UiPanel::Skill));
+            app.insert_resource(world_entities());
+            let mut window = stage_window(Vec2::new(780.0, 120.0) * scale);
+            window.resolution.set(1024.0 * scale, 768.0 * scale);
+            app.world_mut().spawn(window);
+            // Production suppresses world hover over the panel, while the
+            // current scene/camera still defines a valid mouse map location.
+            let mut presentation = NativeEntityPresentation::default();
+            presentation.observe_packet_payload(serde_json::json!({
+                "sceneView":{"center":{"x":10,"y":10}},"entities":[]
+            }), 0);
+            assert!(presentation.hovered_grid_position().is_none());
+            let expected = presentation.grid_position_for_stage((780.0, 120.0)).unwrap();
+            app.insert_resource(presentation);
+            app.insert_resource(UiReadModel {
+                player: mir2_client_bevy::read_model::PlayerStats {
+                    class_name: Some(class.into()), level: 28, hp: 100, max_hp: 100,
+                    mp: 100, max_mp: 100, ..Default::default()
+                }, ..Default::default()
+            });
+            app.insert_resource(SkillModel {
+                skills: vec![SkillEntry { id: spell_id, name: spell.into(), key: Some(spell.into()),
+                    level: 1, cooldown_ms: 0, mp_cost: 0 }],
+                bindings: vec![SkillBinding { skill_id: spell_id, spell: Some(spell.into()),
+                    hotkey: Some(1), cast_kind: Some(cast_kind.into()), ..Default::default() }], ..Default::default()
+            });
+            app.add_systems(bevy::prelude::Update, keyboard_skill_system);
+            app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::F1);
+            app.update();
+            assert!(matches!(receiver.try_recv(),
+                Ok(GatewayCommand::Wire(NativeOutboundCommand::Magic {
+                    spell: sent, object_id: 1000, target_id: 0, x, y, ..
+                })) if sent == spell && (x, y) == expected),
+                "{class} {spell} scale={scale} lost keyboard aim over the ordinary panel");
+        }
+    }
+}
+
+#[test]
+fn keyboard_ground_aim_still_requires_an_in_stage_cursor_and_nonmodal_input() {
+    for (cursor, modal) in [(Vec2::new(1200.0, 900.0), false), (Vec2::new(780.0, 120.0), true)] {
+        let (mut app, receiver) = input_app();
+        app.insert_resource(panel_ui(mir2_ui_core::state::UiPanel::Skill));
+        app.insert_resource(world_entities());
+        app.world_mut().spawn(stage_window(cursor));
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.observe_packet_payload(serde_json::json!({
+            "sceneView":{"center":{"x":10,"y":10}},"entities":[]
+        }), 0);
+        app.insert_resource(presentation);
+        app.insert_resource(NpcDialogModel { is_open: modal, ..Default::default() });
+        app.insert_resource(UiReadModel {
+            player: mir2_client_bevy::read_model::PlayerStats { hp: 100, max_hp: 100, mp: 100,
+                ..Default::default() }, ..Default::default()
+        });
+        app.insert_resource(SkillModel {
+            skills: vec![SkillEntry { id: 39, name: "FireWall".into(), key: Some("FireWall".into()),
+                level: 1, cooldown_ms: 0, mp_cost: 0 }],
+            bindings: vec![SkillBinding { skill_id: 39, spell: Some("FireWall".into()), hotkey: Some(1),
+                cast_kind: Some("ground".into()), ..Default::default() }], ..Default::default()
+        });
+        app.add_systems(bevy::prelude::Update, keyboard_skill_system);
+        app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::F1);
+        app.update();
+        assert!(receiver.try_recv().is_err(), "cursor={cursor:?} modal={modal} leaked a ground spell");
     }
 }
 

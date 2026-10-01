@@ -1390,6 +1390,35 @@ fn set_current_player_mp(session: &mut SimulationSession, mp: i32) {
         .mp = mp;
 }
 
+// Seeded summon-behaviour fixtures use a level-three skill. Prepare its
+// canonical mana for the requested casts rather than relying on Scout's
+// 35-MP starter pool (SummonShinsu level three costs 40).
+fn prepare_shinsu_cast_mana(session: &mut SimulationSession, casts: i32) -> i32 {
+    let (_, _, cost, _) = session
+        .zone_magic_attack_profile(Spell::SummonShinsu)
+        .expect("seeded Shinsu skill has canonical mana");
+    let required = cost * casts;
+    let player = player_entity(session.app.world()).expect("player entity");
+    let current = *session
+        .app
+        .world()
+        .entity(player)
+        .get::<PlayerVitals>()
+        .expect("player vitals");
+    let prepared = PlayerVitals {
+        mp: required,
+        max_mp: current.max_mp.max(required),
+        ..current
+    };
+    session.app.world_mut().entity_mut(player).insert(prepared);
+    session
+        .app
+        .world_mut()
+        .resource_mut::<PlayerRuntimeResource>()
+        .player_vitals = prepared;
+    cost
+}
+
 /// Register an account directly in the store, seeded with the default character
 /// at index 0 and password "demo". Login no longer auto-creates accounts, so
 /// persistence tests that previously relied on login-as-register must register
@@ -37776,6 +37805,14 @@ fn use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll(
         .config
         .spawn
         .clone();
+    let bind = session
+        .app
+        .world()
+        .resource::<PlayerRuntimeResource>()
+        .bind_point
+        .clone()
+        .expect("StartGame inside Bichon safe area binds its center");
+    assert_eq!(bind.position, Point { x: 328, y: 264 });
     set_player_position(
         &mut session,
         Point {
@@ -37789,10 +37826,10 @@ fn use_item_packet_dynamic_crystal_town_teleport_routes_through_template_scroll(
         grid: MirGridType::Inventory,
     });
 
-    assert_eq!(player_position(&session), spawn);
+    assert_eq!(player_position(&session), bind.position);
     assert!(packets.iter().any(|packet| matches!(
         packet,
-        ServerPacket::UserLocation { location } if location.position == spawn
+        ServerPacket::UserLocation { location } if location.position == bind.position
     )));
     assert!(packets.iter().any(|packet| matches!(
         packet,
@@ -45836,7 +45873,7 @@ fn srepair_item_service_context_rejects_when_player_leaves_data_range() {
 }
 
 #[test]
-fn town_teleport_returns_player_to_spawn() {
+fn town_teleport_returns_player_to_latest_safe_area_center() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     login_demo_account_for_persistence_test(&mut session);
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
@@ -45850,8 +45887,10 @@ fn town_teleport_returns_player_to_spawn() {
         .find(|entity| entity.kind == crate::WorldEntityKind::SelfPlayer)
         .expect("self player");
 
-    assert_eq!(player.x, 330);
-    assert_eq!(player.y, 270);
+    // The configured spawn (330,270) is in Bichon's safe area; entering
+    // that area binds its center (328,264), as TownRevive does.
+    assert_eq!(player.x, 328);
+    assert_eq!(player.y, 264);
     assert_eq!(player.direction, MirDirection::Down);
     assert!(!packets
         .iter()
@@ -51417,7 +51456,7 @@ fn skill_snapshot_exposes_cast_kind_and_offensive_metadata() {
 }
 
 #[test]
-fn skill_snapshot_mp_cost_uses_the_same_starter_override_as_casting() {
+fn skill_snapshot_mp_cost_uses_the_same_crystal_formula_as_casting() {
     let healing = super::crystal_skill_state("Healing", 2).expect("Healing skill");
     let definition = super::skill_definition(&healing.key).expect("starter skill definition");
     let crystal_magic = super::crystal_magic_for_skill_key(&healing.key)
@@ -51426,16 +51465,13 @@ fn skill_snapshot_mp_cost_uses_the_same_starter_override_as_casting() {
         + i32::from(crystal_magic.level_cost) * i32::from(healing.level);
     let snapshot = healing.snapshot(0, mir2_game_data::LanguageCode::English);
 
-    assert_eq!(snapshot.mp_cost, u32::try_from(definition.mana_cost).ok());
+    assert_eq!(snapshot.mp_cost, u32::try_from(crystal_formula).ok());
     assert_ne!(
         definition.mana_cost, crystal_formula,
-        "fixture must prove starter metadata takes precedence over the Crystal fallback"
+        "fixture must expose the legacy alias disagreement with Crystal casting"
     );
     let json = serde_json::to_value(&snapshot).expect("serialize authoritative skill snapshot");
-    assert_eq!(
-        json["mpCost"].as_i64(),
-        Some(i64::from(definition.mana_cost))
-    );
+    assert_eq!(json["mpCost"].as_i64(), Some(i64::from(crystal_formula)));
     assert!(json.get("mp_cost").is_none());
 }
 
@@ -55452,9 +55488,15 @@ fn casting_summon_shinsu_spawns_friendly_player_pet() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
     equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
+    let mana_cost = prepare_shinsu_cast_mana(&mut session, 1);
     set_player_position(&mut session, Point { x: 333, y: 267 });
 
     let cast_packets = session.cast_skill("summon-shinsu");
+    assert!(cast_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Magic { .. })));
+    assert_eq!(session.world_snapshot().player_mp, Some(0));
+    assert_eq!(mana_cost, 40);
     assert!(!cast_packets.iter().any(
         |packet| matches!(packet, ServerPacket::Chat { message, .. } if message.contains("Summon"))
     ));
@@ -55494,11 +55536,16 @@ fn casting_summon_shinsu_recalls_existing_pet() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
     equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
+    let mana_cost = prepare_shinsu_cast_mana(&mut session, 2);
     let first_position = Point { x: 333, y: 267 };
     let second_position = Point { x: 360, y: 267 };
     set_player_position(&mut session, first_position.clone());
 
-    let _ = session.cast_skill("summon-shinsu");
+    let first_cast = session.cast_skill("summon-shinsu");
+    assert!(first_cast
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Magic { .. })));
+    assert_eq!(session.world_snapshot().player_mp, Some(mana_cost));
     let _ = session.tick();
     let shinsu = find_monster_entity_by(&session, |name, _, _| name == "Shinsu");
     let before_recall =
@@ -55520,7 +55567,15 @@ fn casting_summon_shinsu_recalls_existing_pet() {
         .cooldown_ends_at = 0;
 
     set_player_position(&mut session, second_position.clone());
-    let _ = session.cast_skill("summon-shinsu");
+    let before_mp = session.world_snapshot().player_mp.expect("player mana");
+    let recall_cast = session.cast_skill("summon-shinsu");
+    assert!(recall_cast
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Magic { .. })));
+    assert_eq!(
+        session.world_snapshot().player_mp,
+        Some(before_mp - mana_cost)
+    );
     let shinsu_position =
         entity_position(session.app.world(), shinsu).expect("recalled shinsu position");
 
@@ -55983,6 +56038,7 @@ fn friendly_shinsu_line_attack_hits_second_monster_in_front() {
     session.handle_packet(ClientPacket::StartGame { character_index: 0 });
     // SummonShinsu consumes an amulet (crystal_spell_required_items_available).
     equip_crystal_item_with_quantity(&mut session, "Amulet", EquipmentSlot::Amulet, 5);
+    prepare_shinsu_cast_mana(&mut session, 1);
     let origin = Point { x: 333, y: 267 };
     set_player_position(&mut session, origin.clone());
 
@@ -56034,7 +56090,11 @@ fn friendly_shinsu_line_attack_hits_second_monster_in_front() {
     ));
     sync_visible_objects(&mut session);
 
-    let _ = session.cast_skill("summon-shinsu");
+    let cast_packets = session.cast_skill("summon-shinsu");
+    assert!(cast_packets
+        .iter()
+        .any(|packet| matches!(packet, ServerPacket::Magic { .. })));
+    assert_eq!(session.world_snapshot().player_mp, Some(0));
     let _ = session.tick();
     let shinsu = find_monster_entity_by(&session, |name, _, _| name == "Shinsu");
     set_entity_position(&mut session, shinsu, origin.clone());

@@ -1,0 +1,5 @@
+{"detail":{"candidate":"WN-CANDIDATE-20261001-invited-07","engine":1,"passed":true},"event":"verification","time":1790824660}
+{"detail":{"activated":true,"candidate":"WN-CANDIDATE-20261001-invited-08","changedGameFiles":3,"downloadedBytes":110649477,"downloadedFiles":3,"sequence":4},"event":"update","time":1790825091}
+{"detail":{"candidate":"WN-CANDIDATE-20261001-invited-08","engine":1,"passed":true},"event":"verification","time":1790825093}
+{"detail":{"activated":true,"candidate":"WN-CANDIDATE-20261001-invited-08","changedGameFiles":0,"downloadedBytes":0,"downloadedFiles":0,"sequence":4},"event":"update","time":1790825094}
+{"detail":{"candidate":"WN-CANDIDATE-20261001-invited-08","engine":1,"passed":true},"event":"verification","time":1790825095}

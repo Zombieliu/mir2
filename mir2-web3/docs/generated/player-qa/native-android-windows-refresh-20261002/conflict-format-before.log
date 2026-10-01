@@ -1,0 +1,178 @@
+Diff in /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/gateway/src/routing.rs:15170:
+             }
+         }
+         let native_zone = snapshot.map_file_name.as_deref().and_then(|map_file_name| {
+-            zone_state.zone_manager.zone(&ZoneKey::for_map(map_file_name))
++            zone_state
++                .zone_manager
++                .zone(&ZoneKey::for_map(map_file_name))
+         });
+         let public_native_actor = |entity: &WorldEntitySnapshot| {
+             entity.kind != WorldEntityKind::Monster
+Diff in /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/simulation/src/runtime/zone/manager.rs:410:
+             let mut transferred_clock = None;
+             let mut transferred_action_clock = None;
+             let mut transferred_poison_clock = None;
+-            let online_map_transfer = previous_key.as_ref().is_some_and(|previous| previous != &key);
++            let online_map_transfer = previous_key
++                .as_ref()
++                .is_some_and(|previous| previous != &key);
+             if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
+                 transferred_poison_clock = self
+                     .zones
+Diff in /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:1073:
+     }
+ 
+     pub(super) fn player_finite_control_poison_clock(
+-        &self, session_id: &SessionId,
++        &self,
++        session_id: &SessionId,
+     ) -> Option<ZonePlayerFiniteControlPoisonClock> {
+-        let player = self.players.get(session_id).filter(|p| !p.dead && p.hp > 0)?;
+-        let control_mask = CRYSTAL_POISON_SLOW | CRYSTAL_POISON_FROZEN
+-            | CRYSTAL_POISON_STUN | CRYSTAL_POISON_PARALYSIS | CRYSTAL_POISON_LR_PARALYSIS;
+-        let deadlines = (0..16).filter_map(|shift| {
+-            let bit = 1_u16 << shift;
+-            if player.native_status_poison & control_mask & bit == 0
+-                || self.native_periodic_player_poisons.iter().any(|lease|
+-                    lease.target == player.object_id && lease.mask & bit != 0)
+-            {
+-                return None;
+-            }
+-            player.native_status_poison_deadlines.get(&bit).copied()
+-                .or(player.native_status_poison_expires_at_ms)
+-                .filter(|deadline| *deadline != u64::MAX)
+-                .map(|deadline| (bit, deadline))
+-        }).collect();
++        let player = self
++            .players
++            .get(session_id)
++            .filter(|p| !p.dead && p.hp > 0)?;
++        let control_mask = CRYSTAL_POISON_SLOW
++            | CRYSTAL_POISON_FROZEN
++            | CRYSTAL_POISON_STUN
++            | CRYSTAL_POISON_PARALYSIS
++            | CRYSTAL_POISON_LR_PARALYSIS;
++        let deadlines = (0..16)
++            .filter_map(|shift| {
++                let bit = 1_u16 << shift;
++                if player.native_status_poison & control_mask & bit == 0
++                    || self
++                        .native_periodic_player_poisons
++                        .iter()
++                        .any(|lease| lease.target == player.object_id && lease.mask & bit != 0)
++                {
++                    return None;
++                }
++                player
++                    .native_status_poison_deadlines
++                    .get(&bit)
++                    .copied()
++                    .or(player.native_status_poison_expires_at_ms)
++                    .filter(|deadline| *deadline != u64::MAX)
++                    .map(|deadline| (bit, deadline))
++            })
++            .collect();
+         Some(ZonePlayerFiniteControlPoisonClock {
+-            account_id: player.account_id.clone(), character_index: player.character_index,
+-            object_id: player.object_id, life_generation: player.life_generation, deadlines,
++            account_id: player.account_id.clone(),
++            character_index: player.character_index,
++            object_id: player.object_id,
++            life_generation: player.life_generation,
++            deadlines,
+         })
+     }
+ 
+Diff in /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:1100:
+     pub(super) fn restore_player_finite_control_poison_clock(
+-        &mut self, session_id: &SessionId, clock: ZonePlayerFiniteControlPoisonClock,
++        &mut self,
++        session_id: &SessionId,
++        clock: ZonePlayerFiniteControlPoisonClock,
+     ) {
+-        let Some(player) = self.players.get_mut(session_id).filter(|p| !p.dead && p.hp > 0) else { return; };
+-        if (player.account_id.as_str(), player.character_index, player.object_id, player.life_generation)
+-            != (clock.account_id.as_str(), clock.character_index, clock.object_id, clock.life_generation)
+-        {
++        let Some(player) = self
++            .players
++            .get_mut(session_id)
++            .filter(|p| !p.dead && p.hp > 0)
++        else {
+             return;
++        };
++        if (
++            player.account_id.as_str(),
++            player.character_index,
++            player.object_id,
++            player.life_generation,
++        ) != (
++            clock.account_id.as_str(),
++            clock.character_index,
++            clock.object_id,
++            clock.life_generation,
++        ) {
++            return;
+         }
+         // Retain absolute deadlines, not durations measured from the new Join.
+         let mask = clock.deadlines.keys().fold(0, |mask, bit| mask | *bit);
+Diff in /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:1111:
+-        player.native_status_poison_deadlines.extend(clock.deadlines);
++        player
++            .native_status_poison_deadlines
++            .extend(clock.deadlines);
+         player.native_status_poison |= mask;
+         player.poison |= mask;
+-        player.native_status_poison_expires_at_ms =
+-            player.native_status_poison_deadlines.values().copied().max();
++        player.native_status_poison_expires_at_ms = player
++            .native_status_poison_deadlines
++            .values()
++            .copied()
++            .max();
+     }
+ 
+     pub(super) fn calibrate_online_join_poison(
+Diff in /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:1119:
+-        &self, session_id: &SessionId, outbounds: &mut Vec<ZoneOutbound>,
++        &self,
++        session_id: &SessionId,
++        outbounds: &mut Vec<ZoneOutbound>,
+     ) {
+-        let Some(player) = self.players.get(session_id) else { return; };
++        let Some(player) = self.players.get(session_id) else {
++            return;
++        };
+         // Join's observer bootstrap was constructed before the transfer clocks
+         // were restored. Correct those unsent ObjectPlayer projections too.
+         for outbound in outbounds.iter_mut() {
+Diff in /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:1125:
+             let packets = match outbound {
+-                ZoneOutbound::ToSession { packets, .. } | ZoneOutbound::ToMany { packets, .. }
+-                    | ZoneOutbound::ToAll { packets } => packets,
++                ZoneOutbound::ToSession { packets, .. }
++                | ZoneOutbound::ToMany { packets, .. }
++                | ZoneOutbound::ToAll { packets } => packets,
+                 _ => continue,
+             };
+             for packet in packets {
+Diff in /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:1131:
+                 if let ServerPacket::ObjectPlayer { info } = packet {
+-                    if info.object_id == player.object_id { info.poison = player.poison; }
++                    if info.object_id == player.object_id {
++                        info.poison = player.poison;
++                    }
+                 }
+             }
+         }
+Diff in /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:1136:
+         outbounds.push(ZoneOutbound::ToSession {
+             session_id: session_id.clone(),
+             packets: vec![ServerPacket::ObjectPoisoned {
+-                object_id: player.object_id, poison: player.poison,
++                object_id: player.object_id,
++                poison: player.poison,
+             }],
+         });
+     }

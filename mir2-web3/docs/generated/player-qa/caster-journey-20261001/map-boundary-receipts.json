@@ -1,0 +1,105 @@
+{
+  "kind": "selected original ordinary trace receipts",
+  "sourceTrace": "wizard/Wizard.2026-10-01T07-06-15-677Z.trace.jsonl",
+  "rawTraceSha256": "38f5cb51043a3c8a17c858b681f316e0e682342bc585e31588230d4e3b2c0bf3",
+  "sequenceSelection": [
+    1791,
+    1792,
+    1793,
+    1809,
+    1813,
+    1814
+  ],
+  "sanitized": true,
+  "events": [
+    {
+      "at": "2026-10-01T07:08:48.582Z",
+      "sequence": 1791,
+      "direction": "received",
+      "type": "packet",
+      "packet": "UseItem",
+      "payload": {
+        "grid": "Inventory",
+        "success": true,
+        "uniqueId": 2
+      }
+    },
+    {
+      "at": "2026-10-01T07:08:48.582Z",
+      "sequence": 1792,
+      "direction": "received",
+      "type": "packet",
+      "packet": "MapInformation",
+      "payload": {
+        "bigMapIndex": 101,
+        "fileName": "0",
+        "lights": 0,
+        "mapDarkLight": 0,
+        "mapIndex": 1,
+        "miniMapIndex": 101,
+        "music": 0,
+        "spawnFlags": {
+          "fire": false,
+          "lightning": false
+        },
+        "title": "BichonProvince",
+        "weatherParticles": 0
+      }
+    },
+    {
+      "at": "2026-10-01T07:08:48.582Z",
+      "sequence": 1793,
+      "direction": "received",
+      "type": "packet",
+      "packet": "UserLocation",
+      "payload": {
+        "direction": "UpLeft",
+        "x": 328,
+        "y": 264
+      }
+    },
+    {
+      "at": "2026-10-01T07:08:48.790Z",
+      "sequence": 1809,
+      "direction": "received",
+      "type": "packet",
+      "packet": "ObjectStruck",
+      "payload": {
+        "attackerId": 1202201,
+        "direction": "UpLeft",
+        "location": {
+          "x": 345,
+          "y": 362
+        },
+        "objectId": 1000
+      }
+    },
+    {
+      "at": "2026-10-01T07:08:48.790Z",
+      "sequence": 1813,
+      "direction": "received",
+      "type": "packet",
+      "packet": "ObjectPoisoned",
+      "payload": {
+        "objectId": 1000,
+        "poison": 32
+      }
+    },
+    {
+      "at": "2026-10-01T07:08:48.790Z",
+      "sequence": 1814,
+      "direction": "received",
+      "type": "packet",
+      "packet": "ObjectStruck",
+      "payload": {
+        "attackerId": 295500,
+        "direction": "UpLeft",
+        "location": {
+          "x": 345,
+          "y": 362
+        },
+        "objectId": 1000
+      }
+    }
+  ]
+}

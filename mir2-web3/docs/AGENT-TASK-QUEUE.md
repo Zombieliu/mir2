@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> 2026-10-02 Android source-refresh leaf: normal merge of exact Windows3d735745f
+> (14 commits/238 filenames beyond original3f5), five conflicts preserve both
+> histories. Three server conflict files compare equal after full Rustfmt parse.
+> Fresh Android276/preview290/shared1216+10ignored/runtime291+1ignored/Zone179,
+> mana3+5/poison5/Gateway4+3+4+2/Node366 and actual API31 both variants pass.
+> Initial map-input failures remain; D022/D2031/D2032 match tracked Git blobs.
+> No new APK/online/device/full-server acceptance. Latest v16 still binds8cd2e7eae
+> and GL506 FAIL. Next NI-10/11 shared NPC producer/Java entry/request-Exit latch,
+> then exact new APK and actual interaction; full goal Active, capacity paused.
+> [Exact source-refresh scope](generated/player-qa/native-android-windows-refresh-20261002/README.md).
+
+> All following Android checkpoints retain their own exact source/acceptance scope.
+
 > 2026-10-02 latestv16/8cd2e7eae: original draft's Android editor-touch marker
 > repair; failure-first3 then3/3, Android276/preview290/Java37+37/API31 and clean
 > dual APK/hash/resource/install/input binding pass. Actual qw typing, Back,
@@ -238,13 +251,42 @@
 > Clean build, real r5→r6 delta, r7 setup and public feed gates remain active.
 > Capacity stays paused; no game/save deployment by this change.
 > [Evidence](generated/player-qa/native-updater-20261001/README.md).
+> 2026-10-01 caster follow-up: strict audit of independent frozen saves and
+> normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
+> Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52
+> cohort is retained. The original r2 ordinary clock ended 48/52: Wizard 22/26
+> at its 120-minute deadline; Taoist completed 26/26 within about 98 minutes.
+> Wizard's separate functional 26/26 inherits its ordinary nodes;
+> freshTimedCompletion=false.
+> Latest affected controller/evidence checks: 355 passed. Ordinary Lightning's
+> new loadout branch was not observed live; existing practice ACKs are separate.
+> Shared UI checks: 1197 passed / 10 ignored. Explicit NPCResponse follow-up
+> passes Windows 809 / 5 ignored and runtime 276 / 1 ignored. Real empty or
+> nonempty response pages retire service children; ordered Closed/Buy signals
+> do not open a bootstrap shop. Passive snapshot text absence retains the service.
+> Ordered Exit/retry, late goods, map/scene and merchant regressions pass; six
+> offline GPU captures after 560 ms pass. Earlier failures/42 captures remain.
+> [Packet boundary evidence](generated/player-qa/caster-journey-20261001/npc-response-service-boundary.json).
+> Finite control handoff, canonical mana and prior 6d498c080 server validations
+> retain their documented scopes and original failure records. No new full
+> server-suite, whole-game parity or public deployment acceptance follows.
+> Installed r8, public realm, updater feed and human stores are unchanged.
+> A client-only r9 shop hotfix is being built separately from the clean r8 base;
+> release and human acceptance are pending. Full native GUI / route timing,
+> counted/periodic poison, dynamic mana and unrelated parity gaps remain open;
+> capacity remains paused.
+> [Evidence](generated/player-qa/caster-journey-20261001/README.md).
+> [Shop lifecycle](generated/player-qa/caster-journey-20261001/shop-lifecycle-20261001.md).
+
 > 2026-10-01 native skills/input/medicine-shop repair: final serial shared1186
 > and Windows801 checks pass, plus nine production service-open GPU captures.
 > Ordinary Spells/Character/bag/options/menu/help and Diary/Detail capture only
 > their own surfaces; actual prompts/commerce/NPC/search/drags retain capture.
 > Owner cast ACKs start overlays; exact sampled readiness ages while idle.
-> Installed F-drive game was still r5 without updater, not the fixed r6/r7.
-> Server Zone178/Gateway8+13 pass; matched actual release is being finalized;
+> F-drive was r5 without updater; actual r8 upgrade/native verification now pass.
+> Zone178/Gateway8+13 pass; matched clean3f5e61533 server/client are deployed.
+> Signed sequence4, real delta/rollback2/2 and native HTTPS delta/recheck pass.
+> Actual desktop launcher opens the attested login screen with empty credentials;
 > capacity remains paused and human gameplay acceptance stays separate.
 > [Evidence](generated/player-qa/skill-input-shop-20261001/README.md).
 

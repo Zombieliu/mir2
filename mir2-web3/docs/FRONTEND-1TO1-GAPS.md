@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 Android source-refresh imports14 exact Windows3d735745f commits
+> with phone changes preserved. Shared1216/10ignored, runtime291/1ignored,
+> Android276/preview290 and both API31 target checks pass. This is not a new
+> APK/renderer or online/device pass. Android NI-10/11 public NPC ingress and
+> accepted request/ordered Exit host latch remain OPEN; implement next. Old v16
+> APK/source8cd2e7eae and10 GL506 errors stay bound and unrelabelled. Full UI,
+> short-IME/HUD/resources/online/device and whole Windows-alignment goal Active.
+> [Exact integration and retained failures](generated/player-qa/native-android-windows-refresh-20261002/README.md).
+
 > 2026-10-02 latest Androidv16/8cd2e7eae: original shared draft child now enters
 > existing host tap path; failure-first3 then3/3, Android276/preview290/Java37+37/
 > API31 and clean dual APK/hash/resource/install pass. Actual qw typing, Back,
@@ -174,8 +183,10 @@
 > Ordinary Spells/Character/bag/options/menu/help and Diary/Detail capture only
 > their own surfaces; actual prompts/commerce/NPC/search/drags retain capture.
 > Owner cast ACKs start overlays; exact sampled readiness ages while idle.
-> Installed F-drive game was still r5 without updater, not the fixed r6/r7.
-> Matched server timing and actual installed release are being finalized;
+> F-drive was r5 without updater; actual r8 upgrade/native verification now pass.
+> Same clean3f5e61533 server/client are deployed; signed sequence4 is published.
+> Real delta/rollback2/2 and native HTTPS delta/recheck pass; actual desktop
+> launcher opens the attested login screen with empty credentials;
 > capacity remains paused and human gameplay acceptance stays separate.
 > [Evidence](generated/player-qa/skill-input-shop-20261001/README.md).
 

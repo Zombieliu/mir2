@@ -299,6 +299,18 @@ pub(super) struct ZonePlayerActionClock {
     flaming_sword_ready_at_ms: u64,
 }
 
+/// An online map handoff carries only finite control-poison deadlines. Counted
+/// poison leases have separate source/tick ownership and must never be turned
+/// into an immortal mask by this transfer contract. This is not saved state.
+#[derive(Debug, Clone)]
+pub(super) struct ZonePlayerFiniteControlPoisonClock {
+    account_id: String,
+    character_index: i32,
+    object_id: u32,
+    life_generation: u64,
+    deadlines: BTreeMap<u16, u64>,
+}
+
 // Note: ZoneRuntime is intentionally not `Clone`. It owns a `bevy_ecs::World`
 // (see `ecs`), which is not cloneable, and nothing ever cloned a zone runtime
 // (the derive was vestigial). See docs/L2-ECS-ZONE-DESIGN.md.
@@ -852,6 +864,16 @@ impl ZoneRuntime {
             .map(|monster| !monster.dead && monster.hp > 0)
     }
 
+    /// Whether a retained native monster has Crystal's public GetInfo state.
+    /// This is separate from AOI and attackability: buried actors are private,
+    /// while stone Zuma and visible corpses can still be public. Lifecycle and
+    /// director snapshots intentionally retain both public and private actors.
+    pub fn native_monster_is_visible(&self, object_id: u32) -> Option<bool> {
+        self.native_monsters
+            .get(&object_id)
+            .map(monster_visibility_is_visible)
+    }
+
     pub fn native_monster_snapshots(&self) -> Vec<ZoneNativeMonsterSnapshot> {
         self.native_monsters
             .iter()
@@ -1048,6 +1070,121 @@ impl ZoneRuntime {
         player.magic_ready_at_ms = clock.magic_ready_at_ms;
         player.flaming_sword_armed = clock.flaming_sword_armed;
         player.flaming_sword_ready_at_ms = clock.flaming_sword_ready_at_ms;
+    }
+
+    pub(super) fn player_finite_control_poison_clock(
+        &self,
+        session_id: &SessionId,
+    ) -> Option<ZonePlayerFiniteControlPoisonClock> {
+        let player = self
+            .players
+            .get(session_id)
+            .filter(|p| !p.dead && p.hp > 0)?;
+        let control_mask = CRYSTAL_POISON_SLOW
+            | CRYSTAL_POISON_FROZEN
+            | CRYSTAL_POISON_STUN
+            | CRYSTAL_POISON_PARALYSIS
+            | CRYSTAL_POISON_LR_PARALYSIS;
+        let deadlines = (0..16)
+            .filter_map(|shift| {
+                let bit = 1_u16 << shift;
+                if player.native_status_poison & control_mask & bit == 0
+                    || self
+                        .native_periodic_player_poisons
+                        .iter()
+                        .any(|lease| lease.target == player.object_id && lease.mask & bit != 0)
+                {
+                    return None;
+                }
+                player
+                    .native_status_poison_deadlines
+                    .get(&bit)
+                    .copied()
+                    .or(player.native_status_poison_expires_at_ms)
+                    .filter(|deadline| *deadline != u64::MAX)
+                    .map(|deadline| (bit, deadline))
+            })
+            .collect();
+        Some(ZonePlayerFiniteControlPoisonClock {
+            account_id: player.account_id.clone(),
+            character_index: player.character_index,
+            object_id: player.object_id,
+            life_generation: player.life_generation,
+            deadlines,
+        })
+    }
+
+    pub(super) fn restore_player_finite_control_poison_clock(
+        &mut self,
+        session_id: &SessionId,
+        clock: ZonePlayerFiniteControlPoisonClock,
+    ) {
+        let Some(player) = self
+            .players
+            .get_mut(session_id)
+            .filter(|p| !p.dead && p.hp > 0)
+        else {
+            return;
+        };
+        if (
+            player.account_id.as_str(),
+            player.character_index,
+            player.object_id,
+            player.life_generation,
+        ) != (
+            clock.account_id.as_str(),
+            clock.character_index,
+            clock.object_id,
+            clock.life_generation,
+        ) {
+            return;
+        }
+        // Retain absolute deadlines, not durations measured from the new Join.
+        let mask = clock.deadlines.keys().fold(0, |mask, bit| mask | *bit);
+        player
+            .native_status_poison_deadlines
+            .extend(clock.deadlines);
+        player.native_status_poison |= mask;
+        player.poison |= mask;
+        player.native_status_poison_expires_at_ms = player
+            .native_status_poison_deadlines
+            .values()
+            .copied()
+            .max();
+    }
+
+    pub(super) fn calibrate_online_join_poison(
+        &self,
+        session_id: &SessionId,
+        outbounds: &mut Vec<ZoneOutbound>,
+    ) {
+        let Some(player) = self.players.get(session_id) else {
+            return;
+        };
+        // Join's observer bootstrap was constructed before the transfer clocks
+        // were restored. Correct those unsent ObjectPlayer projections too.
+        for outbound in outbounds.iter_mut() {
+            let packets = match outbound {
+                ZoneOutbound::ToSession { packets, .. }
+                | ZoneOutbound::ToMany { packets, .. }
+                | ZoneOutbound::ToAll { packets } => packets,
+                _ => continue,
+            };
+            for packet in packets {
+                if let ServerPacket::ObjectPlayer { info } = packet {
+                    if info.object_id == player.object_id {
+                        info.poison = player.poison;
+                    }
+                }
+            }
+        }
+        outbounds.push(ZoneOutbound::ToSession {
+            session_id: session_id.clone(),
+            packets: vec![ServerPacket::ObjectPoisoned {
+                object_id: player.object_id,
+                poison: player.poison,
+            }],
+        });
     }
 
     fn expire_player_flaming_sword(
@@ -16481,6 +16618,10 @@ fn zone_hazard_interval_ms(strike_index: u64, salt: u64) -> u64 {
 #[cfg(test)]
 #[path = "movement_deadline_tests.rs"]
 mod movement_deadline_tests;
+
+#[cfg(test)]
+#[path = "finite_control_poison_handoff_tests.rs"]
+mod finite_control_poison_handoff_tests;
 
 #[cfg(test)]
 mod door_tests {

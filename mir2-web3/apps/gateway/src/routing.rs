@@ -2329,7 +2329,11 @@ struct ZoneMapSnapshotLayer {
 }
 
 impl ZoneMapSnapshotLayer {
-    fn overlay_visible_snapshot(&self, snapshot: &mut WorldSnapshot) {
+    fn overlay_visible_snapshot(
+        &self,
+        snapshot: &mut WorldSnapshot,
+        public_native_actor: impl Fn(&WorldEntitySnapshot) -> bool,
+    ) {
         let self_position = snapshot
             .entities
             .iter()
@@ -2352,7 +2356,7 @@ impl ZoneMapSnapshotLayer {
         snapshot.entities.extend(
             self.entities
                 .values()
-                .filter(|entity| visible(entity.x, entity.y))
+                .filter(|entity| visible(entity.x, entity.y) && public_native_actor(entity))
                 .cloned(),
         );
         snapshot.ground_drops = self
@@ -4001,6 +4005,7 @@ impl SharedInProcessZoneState {
                 .filter(|packet| {
                     !matches!(packet, ServerPacket::UserLocation { .. })
                         && !self.is_ordered_player_packet(key, packet)
+                        && !packet_belongs_to_world_viewport(packet)
                 })
                 .collect::<Vec<_>>();
             if !retained.is_empty() {
@@ -7864,6 +7869,35 @@ fn packet_mutates_shared_map_layer(packet: &ServerPacket) -> bool {
             | ServerPacket::ObjectHero { .. }
             | ServerPacket::ObjectNpc { .. }
     )
+}
+
+/// Pending world notifications describe the viewport before a map bootstrap.
+/// Their authoritative mutations/settlements already belong to the Zone; do
+/// not replay an old Struck/Poisoned presentation into the destination. Quest,
+/// inventory, experience and other personal command receipts remain queued.
+fn packet_belongs_to_world_viewport(packet: &ServerPacket) -> bool {
+    packet_mutates_shared_map_layer(packet)
+        || matches!(
+            packet,
+            ServerPacket::ObjectAttack { .. }
+                | ServerPacket::ObjectRangeAttack { .. }
+                | ServerPacket::ObjectMagic { .. }
+                | ServerPacket::ObjectProjectile { .. }
+                | ServerPacket::ObjectStruck { .. }
+                | ServerPacket::Struck { .. }
+                | ServerPacket::DamageIndicator { .. }
+                | ServerPacket::ObjectMana { .. }
+                | ServerPacket::HealthChanged { .. }
+                | ServerPacket::ObjectPoisoned { .. }
+                | ServerPacket::Poisoned { .. }
+                | ServerPacket::Death { .. }
+                | ServerPacket::Revived
+                | ServerPacket::ObjectHide { .. }
+                | ServerPacket::ObjectShow { .. }
+                | ServerPacket::ObjectSpell { .. }
+                | ServerPacket::ObjectEffect { .. }
+                | ServerPacket::MapEffect { .. }
+        )
 }
 
 fn packets_may_commit_shared_death_drops(packets: &[ServerPacket]) -> bool {
@@ -15135,15 +15169,34 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 }
             }
         }
+        let native_zone = snapshot.map_file_name.as_deref().and_then(|map_file_name| {
+            zone_state
+                .zone_manager
+                .zone(&ZoneKey::for_map(map_file_name))
+        });
+        let public_native_actor = |entity: &WorldEntitySnapshot| {
+            entity.kind != WorldEntityKind::Monster
+                || native_zone
+                    .and_then(|zone| zone.native_monster_is_visible(entity.object_id))
+                    .unwrap_or(true)
+        };
         if let Some(shared_map) = snapshot
             .map_file_name
             .as_deref()
             .and_then(|name| zone_state.maps.get(name))
         {
-            shared_map.overlay_visible_snapshot(&mut snapshot);
+            // Personal metadata retains buried actors to hydrate their eventual
+            // reveal. Only the Zone owns Crystal's public GetInfo visibility;
+            // fence before cloning into this client's AOI without retiring the
+            // shared actor or altering stealth/stone/owned-object semantics.
+            shared_map.overlay_visible_snapshot(&mut snapshot, public_native_actor);
             for entity in &mut snapshot.entities {
                 entity.quest_icon = personal_quest_icons.get(&entity.object_id).copied();
             }
+        } else {
+            // Bootstrap/compatibility snapshots may precede the map index.
+            // Apply the same authoritative gate wherever a native Zone exists.
+            snapshot.entities.retain(public_native_actor);
         }
         if let (Some(key), Some(map_file_name)) =
             (current_key.as_ref(), snapshot.map_file_name.as_deref())
@@ -15656,6 +15709,8 @@ mod tests {
     mod live_aoi_order_tests;
     #[path = "live_chat_tests.rs"]
     mod live_chat_tests;
+    #[path = "map_transfer_poison_tests.rs"]
+    mod map_transfer_poison_tests;
     #[path = "movement_deadline_tests.rs"]
     mod movement_deadline_tests;
     #[path = "ordered_economy_replay_tests.rs"]
@@ -15672,6 +15727,8 @@ mod tests {
     mod personal_monster_projection_tests;
     #[path = "predrain_performance_tests.rs"]
     mod predrain_performance_tests;
+    #[path = "private_monster_snapshot_tests.rs"]
+    mod private_monster_snapshot_tests;
     #[path = "shared_drop_aoi_tests.rs"]
     mod shared_drop_aoi_tests;
     #[path = "shared_item_teleport_tests.rs"]
@@ -23793,7 +23850,8 @@ mod tests {
         map.entities.insert(entity.object_id, entity.clone());
         let drop = shared_gold_drop(99_302, entity.x, entity.y, None, None);
         map.ground_drops.insert(drop.object_id, drop.clone());
-        map.overlay_visible_snapshot(&mut snapshot);
+        // This AOI-only fixture has no authoritative native Zone.
+        map.overlay_visible_snapshot(&mut snapshot, |_| true);
         assert_eq!(snapshot.entities, vec![entity]);
         assert_eq!(snapshot.ground_drops, vec![drop]);
     }
@@ -23839,7 +23897,8 @@ mod tests {
         };
         let filtered_projection = || {
             let mut snapshot = personal.clone();
-            map.overlay_visible_snapshot(&mut snapshot);
+            // This compares AOI selection alone, with no native visibility gate.
+            map.overlay_visible_snapshot(&mut snapshot, |_| true);
             snapshot
         };
         let old = previous_projection();

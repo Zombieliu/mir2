@@ -1,0 +1,45 @@
+{
+  "scope": "Exact-source merge audit; not APK, online or device acceptance",
+  "selected": null,
+  "parent": "9c2a5428d77c6fd2a146b920474eba4b839fdab1",
+  "upstream": "3d735745f1117d42a7859e87604a106351dca935",
+  "base": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "current": "9c2a5428d77c6fd2a146b920474eba4b839fdab1",
+  "merging": "3d735745f1117d42a7859e87604a106351dca935",
+  "commonAncestor": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "upstreamCommitCount": 14,
+  "server": [
+    {
+      "file": "mir2-web3/apps/gateway/src/routing.rs",
+      "upstreamBlob": "862ea048658a68209d203707f64d97ad5201de96",
+      "upstreamSha256": "30bf7f5530b60017d201393f7f47e7ee1624863cc8bb57e6f8cc54131aea81c7",
+      "actualSha256": "9d2171b2755f5c0fae6744d68f12b8178a0517108995ee9c20bf2dba31f5d730",
+      "normalizedUpstreamSha256": "9d2171b2755f5c0fae6744d68f12b8178a0517108995ee9c20bf2dba31f5d730",
+      "normalizedActualSha256": "9d2171b2755f5c0fae6744d68f12b8178a0517108995ee9c20bf2dba31f5d730",
+      "normalizedEqual": true
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "upstreamBlob": "89a0bdca0a8da5c8dc8d8bdbe91a0ef25c1152d4",
+      "upstreamSha256": "87079a05da36dc3644623a6b64ed6b3834dbc8ce5acc4408604f109531f23a46",
+      "actualSha256": "945fe97decf4812577b24e4ae68a902fe2935a165487ca9ed191b8d302e3a93e",
+      "normalizedUpstreamSha256": "945fe97decf4812577b24e4ae68a902fe2935a165487ca9ed191b8d302e3a93e",
+      "normalizedActualSha256": "945fe97decf4812577b24e4ae68a902fe2935a165487ca9ed191b8d302e3a93e",
+      "normalizedEqual": true
+    },
+    {
+      "file": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "upstreamBlob": "8e2ebb19ef649c2a500a4bbb58c6e5c981aedab4",
+      "upstreamSha256": "addc6fd2a62ce3b26213397ee0cff8641dc10c4c1286f90c6916b92e70cc545f",
+      "actualSha256": "45d35c1cc52fdfa4dddcf609d716233cb36befd857471d960c3ed020bfc1524f",
+      "normalizedUpstreamSha256": "45d35c1cc52fdfa4dddcf609d716233cb36befd857471d960c3ed020bfc1524f",
+      "normalizedActualSha256": "45d35c1cc52fdfa4dddcf609d716233cb36befd857471d960c3ed020bfc1524f",
+      "normalizedEqual": true
+    }
+  ],
+  "androidSourceUnchanged": true,
+  "oldV16EvidenceUnchanged": true,
+  "noUnresolvedIndex": true,
+  "expectedMergeParents": true,
+  "pass": true
+}

@@ -2907,7 +2907,10 @@ fn ingest_pending_npc_shop_service(
                 return;
             };
             if shop.apply_service_signal(signal) {
-                surface_signals.npc_shop_open_requested = true;
+                // Preserve packet order: Closed cancels an earlier service
+                // opening in this frame and must never open an empty shop.
+                surface_signals.npc_shop_open_requested =
+                    signal.mode != mir2_client_bevy::shop::NpcShopServiceMode::Closed;
             } else {
                 publish_status("native-decode-error", "invalid native NPC service");
             }
@@ -10190,6 +10193,57 @@ mod native_data_path_tests {
         assert_eq!(receipts.0[0].bindings[0].hotkey, Some(16));
         assert_eq!(receipts.0[0].authority.snapshot_serial, 9);
         assert_eq!(receipts.0[0].skill_key_ack.as_ref().unwrap().request_id, 73);
+    }
+
+    #[test]
+    fn native_npc_service_queue_preserves_close_and_reopen_order() {
+        use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal, ShopModel};
+
+        let _native_queue_guard = native_ingest::native_queue_test_guard();
+        for (modes, expected_mode, expected_open) in [
+            (
+                vec![NpcShopServiceMode::Closed],
+                NpcShopServiceMode::Closed,
+                false,
+            ),
+            (
+                vec![
+                    NpcShopServiceMode::Buy,
+                    NpcShopServiceMode::Sell,
+                    NpcShopServiceMode::Closed,
+                ],
+                NpcShopServiceMode::Closed,
+                false,
+            ),
+            (
+                vec![NpcShopServiceMode::Closed, NpcShopServiceMode::Buy],
+                NpcShopServiceMode::Buy,
+                true,
+            ),
+        ] {
+            let mut app = ingest_app();
+            for mode in modes {
+                assert!(native_ingest::push_native_npc_shop_service(
+                    serde_json::to_string(&NpcShopServiceSignal {
+                        mode,
+                        repair_rate: None
+                    })
+                    .unwrap()
+                ));
+            }
+            app.update();
+            assert_eq!(
+                app.world().resource::<ShopModel>().service_mode,
+                expected_mode
+            );
+            assert_eq!(
+                app.world()
+                    .resource::<mir2_client_bevy::read_model::UiSurfaceSignals>()
+                    .npc_shop_open_requested,
+                expected_open,
+                "a close packet must cancel any earlier open request in the same frame"
+            );
+        }
     }
 
     #[test]

@@ -1,0 +1,160 @@
+{
+  "scope": "Exact original proof copies; README/scripts/this manifest are not self-hashed",
+  "copies": [
+    {
+      "name": "source-before.txt",
+      "bytes": 82,
+      "sha256": "ffda0f093cc1e18f5acf87dad164af4fb57fd11afaecbe70fe469e75cd000c43"
+    },
+    {
+      "name": "status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "upstream-files.txt",
+      "bytes": 22243,
+      "sha256": "46770f14e25efa4e8040c7d17582a0c6dd52286dc3a8aa029fd915ba6c69111e"
+    },
+    {
+      "name": "merge-start.log",
+      "bytes": 1544,
+      "sha256": "6e0923cacc09a6e40befafa5435da881b877b5c0e4faeec92645e4e6f0f2109a"
+    },
+    {
+      "name": "merge-source-audit.json",
+      "bytes": 2315,
+      "sha256": "78b50ff682643ad626e26c164a7dbdd33f92a5f776789a480b6226344ad09e17"
+    },
+    {
+      "name": "conflict-format-before.log",
+      "bytes": 8542,
+      "sha256": "4e28b043135a67db3d932cfe8acdc7ba4f3b4cc235c849a269e218c0583dc75d"
+    },
+    {
+      "name": "conflict-format-after.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "android-tests-first.log",
+      "bytes": 67138,
+      "sha256": "dd16b1cef44331c94a021611dfbb3c2020553c1e33dae2745ecae8a1524925d0"
+    },
+    {
+      "name": "android-preview-tests.log",
+      "bytes": 71205,
+      "sha256": "a7d585177ecd05021fbc16a5fa32796dc90019eb3e3d9ddffc4dc9bd7e7cbc2e"
+    },
+    {
+      "name": "shared-ui-tests.log",
+      "bytes": 151643,
+      "sha256": "b73340d306a8de09ebacdc44bd13f411b184a2e885b1d852275608d1070df376"
+    },
+    {
+      "name": "runtime-tests.log",
+      "bytes": 27314,
+      "sha256": "b80ee078ed5e41e7f3fe52f14a5ec1ebdc033ed989ba9f8bf777f17e5f7baa71"
+    },
+    {
+      "name": "shared-zone-tests.log",
+      "bytes": 58164,
+      "sha256": "88560b316a97951c441f55c27b2fffd10c3afb101fdaae77a5370aa8e61d6fbe"
+    },
+    {
+      "name": "server-mana-metadata-tests.log",
+      "bytes": 36359,
+      "sha256": "3ce87288b7744b9c8aafecadb633b4f1bb8950583c3743893c24dd448739eea6"
+    },
+    {
+      "name": "server-transfer-mana-tests.log",
+      "bytes": 28989,
+      "sha256": "69e99c784e04c0d770a962f3eec91a58d0f89af19a9f8e85df70a01dc83bb47e"
+    },
+    {
+      "name": "server-transfer-mana-tests-final.log",
+      "bytes": 28862,
+      "sha256": "97c29f42b012d5bb7050aaec96534a6723c0b5b672c957701881b04a696bfc16"
+    },
+    {
+      "name": "gateway-private-monster-tests.log",
+      "bytes": 28978,
+      "sha256": "124b654ceecc7daf24711fcb816e44197aa0ea3c649beb2b71707d4bfdab0484"
+    },
+    {
+      "name": "gateway-map-transfer-tests.log",
+      "bytes": 28577,
+      "sha256": "9b7be635d2ec80b9b912cb2b01591f963fb575c432c02c7f5a6537e776230770"
+    },
+    {
+      "name": "gateway-cadence_map_transfer_tests.log",
+      "bytes": 28691,
+      "sha256": "0fe33d7951b92b000a26bad60e2ef3dfe9deb0781566167f8009a79a9cf54184"
+    },
+    {
+      "name": "gateway-personal_monster_projection_tests.log",
+      "bytes": 28467,
+      "sha256": "ca1cc642bff3e04850a56965a8bb04399b7273a39da6861a2dc6d60a5fb98587"
+    },
+    {
+      "name": "quest-agent-tests.log",
+      "bytes": 49825,
+      "sha256": "e8b0bf09d4cfc9b0018b2b9d8e1775a5590c69e29b14d1a4e0c7847d69320e55"
+    },
+    {
+      "name": "quest-agent-tests-after-maps.log",
+      "bytes": 42883,
+      "sha256": "b78af554eae956077b5aaa7d9e2fd2acd2f9ee9b5821086da834d342fd9046b1"
+    },
+    {
+      "name": "quest-agent-tests-final.log",
+      "bytes": 40933,
+      "sha256": "ddbf3c5ab219728e7f38d40519128c4eba315cb9b70f0e6649b283ec809e098a"
+    },
+    {
+      "name": "api31-debug-check.log",
+      "bytes": 33682,
+      "sha256": "0c1e936b95642e722512ead435fd3dd74db7bdc5965f8287e2ca8d02485fd25c"
+    },
+    {
+      "name": "api31-preview-check.log",
+      "bytes": 33685,
+      "sha256": "65b4edef69608219f89abbd886fdee2cba137332152783baef578a87054c3669"
+    },
+    {
+      "name": "sparse-before.txt",
+      "bytes": 1213,
+      "sha256": "b8a63b0cb01e4471d5f738434a5977477f92fa7f680291bc1b1702397fff9b09"
+    },
+    {
+      "name": "sparse-after.txt",
+      "bytes": 1340,
+      "sha256": "733f455a03047907f26abe4a12cf3ce72fdaaad2bfd0c195719cdc2ac5a37069"
+    },
+    {
+      "name": "sparse-after-third-map.txt",
+      "bytes": 1404,
+      "sha256": "37d2d3c77a2276c6db85d8e1b59153f32d5f2e82194973cc8c14afc3eaaf9762"
+    },
+    {
+      "name": "sparse-add-maps.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "sparse-add-third-map.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "map-input-blobs.txt",
+      "bytes": 123,
+      "sha256": "8d17fdd049e8b93bd3a9045e30e902100a1932c9859a09204f63712427d4d780"
+    },
+    {
+      "name": "map-upstream-blobs.txt",
+      "bytes": 347,
+      "sha256": "dca03c5356847a25f53c4c5be3395927339b52888132cff04392765c62f61942"
+    }
+  ]
+}

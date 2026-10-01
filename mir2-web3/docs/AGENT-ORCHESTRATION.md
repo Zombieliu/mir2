@@ -1,5 +1,32 @@
 # Agent Orchestration
 
+> 2026-10-01 caster follow-up: strict audit of independent frozen saves and
+> normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
+> Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52
+> cohort is retained. The original r2 ordinary clock ended 48/52: Wizard 22/26
+> at its 120-minute deadline; Taoist completed 26/26 within about 98 minutes.
+> Wizard's separate functional 26/26 inherits its ordinary nodes;
+> freshTimedCompletion=false.
+> Latest affected controller/evidence checks: 355 passed. Ordinary Lightning's
+> new loadout branch was not observed live; existing practice ACKs are separate.
+> Shared UI checks: 1197 passed / 10 ignored. Explicit NPCResponse follow-up
+> passes Windows 809 / 5 ignored and runtime 276 / 1 ignored. Real empty or
+> nonempty response pages retire service children; ordered Closed/Buy signals
+> do not open a bootstrap shop. Passive snapshot text absence retains the service.
+> Ordered Exit/retry, late goods, map/scene and merchant regressions pass; six
+> offline GPU captures after 560 ms pass. Earlier failures/42 captures remain.
+> [Packet boundary evidence](generated/player-qa/caster-journey-20261001/npc-response-service-boundary.json).
+> Finite control handoff, canonical mana and prior 6d498c080 server validations
+> retain their documented scopes and original failure records. No new full
+> server-suite, whole-game parity or public deployment acceptance follows.
+> Installed r8, public realm, updater feed and human stores are unchanged.
+> A client-only r9 shop hotfix is being built separately from the clean r8 base;
+> release and human acceptance are pending. Full native GUI / route timing,
+> counted/periodic poison, dynamic mana and unrelated parity gaps remain open;
+> capacity remains paused.
+> [Evidence](generated/player-qa/caster-journey-20261001/README.md).
+> [Shop lifecycle](generated/player-qa/caster-journey-20261001/shop-lifecycle-20261001.md).
+
 > 2026-09-29 invited playtest delivered: fixed native d33708e1f/Gateway20aeb345f
 > pair, standalone signed-manifest ZIP, isolated public PostgreSQL/Redis realm,
 > ordinary two-account11/11 and native-resume protocol9/9. Exact extracted EXE
