@@ -70,17 +70,21 @@ still missing. Neither label is an online acceptance result.
   and UI-scale0.35/0.5/0.9. These are geometry tests, not actual device DPI proof.
 - GI-04: inherited desktop audio visual tests must compile under native-player-ui
   without enabling native-ui/audio. Existing offline visual ignores stay ignored.
-- GI-05: new API31 arm64 APKs and emulator interaction evidence must be bound to
-  the exact merge source. v5 screenshots are not silently relabelled as new proof.
+- GI-05: PASS for the bounded package gate. New API31 arm64 v7 Debug/uiPreview
+  APKs, versions/hashes and actual emulator frames bind to source10bf437f2, which
+  includes normal merge b7caac732 and frozenWindows3f5e61533. v5/v6 failure
+  artifacts remain distinct. [Exact evidence](generated/player-qa/native-android-windows-g1-20261001/README.md).
 - GI-06: v6 actual emulator input exposed movement from the **hidden** joystick
   while the Android phone rail was expanded. A failing regression reproduces
   this for a fresh touch; the subsequent phone-only fix blocks fresh/held motion
   and includes rail changes in pointer ownership. Ordinary shared windows remain
-  nonmodal. v7 full Rust tests219/preview227 pass; v7 packaging/retest remains OPEN.
+  nonmodal. v7 full Rust tests219/preview227 pass; actual menu-hidden swipe yields
+  no new moves, while the open shared bag retains two offline move intents.
+  This is not online authoritative movement or multi-finger/device acceptance.
 
 ## Implementation order
 
-Finish G1 merge/package/emulator gates, then NI-07 with failure-first tests for
+Bounded G1 source/package/emulator gates are recorded; continue NI-07 with failure-first tests for
 owner identity, authoritative deadline, stale snapshots, unrelated actors and
 session resets. Continue the G2 real login/list/StartGame gate when the user has
 approved a test environment and can enter credentials locally. NI-05/06 and

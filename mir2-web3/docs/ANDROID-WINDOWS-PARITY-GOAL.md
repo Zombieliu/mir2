@@ -101,9 +101,10 @@ Win32 分辨率、Inno 安装器、EXE 更新器不原样搬到 Android：对应
   与 GLES 适配；建立双方能力叶子清单并跑受影响共享、Android、Java 与构建门禁。
   - [x] G1-source — 正常合并冻结来源，保留 Android native-player-ui/HUD/IME/GLES，
     接入非模态手机操作保护并完成源码回归；详见下方本轮记录。
-  - [x] G1-ingress — 已建立20项宿主接收子目录与5项输入集成检查；它不是完整
+  - [x] G1-ingress — 已建立20项宿主接收子目录与6项输入集成检查；它不是完整
     玩家功能百分比分母，仍须逐项展开每个服务的动作/回执/窗口与失败验收。
-  - [ ] G1-package — 精确提交源码的最终诊断 APK、安装与模拟器实测证据。
+  - [x] G1-package — 精确源码10bf437f2的v7诊断APK/版本/hash与模拟器离线
+    菜单/隐藏摇杆/共享背包重新验证；在线、完整UI和稳定性不在此勾选中。
 - [ ] G2 — 真实登录 → 角色列表 → 创建/选择 → StartGame → 服务端地图/位置。
   审计 transport、认证和 render-ready，不发裸 account_id 冒充身份。
 - [ ] G3 — 完整资源和对象/地图生命周期、真实权威移动、战斗、拾取、背包、
@@ -218,3 +219,19 @@ v7只修改Android手机控制与版本标识：展开rail时取消/拒绝隐藏
 普通Android219/219、uiPreview227/227通过，另有旧pointer释放与抬指恢复测试。
 共享/Zone/Gateway源码不变，前一阶段证据仍按其原范围保留。v7精确源码APK与
 实际重新验证仍待下一步，不把v6画面挪作v7证据。
+
+## 10. v7 精确包与有界模拟器门禁
+
+源码`10bf437f2d99b09a850fc3359df5172658215681`干净提交后构建两个原生APK，
+versionCode7/versionName0.1.4-windows-g1。Debug385029150bytes/hash1cb092026a
+与uiPreview388672390bytes/hashec909e12cb的完整hash、资源/设备/日志详见
+[G1证据](generated/player-qa/native-android-windows-g1-20261001/README.md)。
+实际安装显示正确版本；Debug共享登录明确未配置测试服务，uiPreview世界帧
+重新采集。菜单展开时隐藏摇杆滑动0新增意图；打开共享背包后可发送两个离线
+移动意图，不冒充权威移动。两秒回前台黑帧保留，之后同PID世界恢复；模拟器
+帧间隔偏高，性能/稳定性/断线恢复并未通过。v6的SystemUI失败仍在证据中。
+
+G1-package仅按上述有界范围勾选；G1整体仍OPEN，因为完整功能/动作/回执
+验收叶子需要继续展开。技能、背包、NPC/任务/邮件/社交等typed ingress未接通
+的条目不因窗口共享而变成完成。下一步NI-07技能/owner ACK/精确冷却与隔离
+回归；获准线上地址/普通账号未提供时继续其他安全代码工作。Goal仍Active。

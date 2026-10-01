@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 Android frozen-Windows G1: source10bf437f2 keeps ordinary panels
+> nonmodal on phones and fixes v6's hidden joystick/menu-pointer ownership.
+> Android219/preview227/Java60 and exact v7 packaging pass; actual menu/bag
+> interactions are offline-only. Bag magnification/HUD overlap, nine-language
+> phone windows, typed models, complete assets and real-online/device/performance
+> remain open. Foreground black frame, v6 SystemUI and failed Mac full tests
+> are retained rather than converted into acceptance.
+> [Source-bound evidence](generated/player-qa/native-android-windows-g1-20261001/README.md).
+
 > 2026-10-01 Android phone HUD/chat repair: source974110041 replaces desktop
 > bottom presentation with compact read-model status, shared48dp belt/chat
 > controls and keyboard/thumb-safe reflow. Android SystemUi resolution and

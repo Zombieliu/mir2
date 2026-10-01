@@ -1,5 +1,16 @@
 # Agent Task Queue
 
+> 2026-10-01 Android G1 exact-package checkpoint: source10bf437f2 includes the
+> normal frozenWindows3f5e61533 merge; Android219/preview227/Java30+30 pass.
+> Both v7 native APKs install with exact versions/hashes. Actual expanded-menu
+> hidden swipe produces no moves; shared bag retains two offline move intents.
+> v6 hidden-joystick/SystemUI failures, full Mac desktop622/180/5 and foreground
+> black frame/high frame intervals are retained. No real Gateway, full window,
+> resource, stability or device acceptance. G1 package subgate is closed, not
+> the whole G1/action denominator or completeness goal. Continue NI-07 typed
+> skills/owner ACK/cooldown and approved online login; full goal remains Active.
+> [Evidence](generated/player-qa/native-android-windows-g1-20261001/README.md).
+
 > 2026-10-01 Android completeness G1 source integration: the normal merge of
 > frozenWindows3f5e61533 retains phone HUD/IME/GLES and native-player-ui, with
 > fresh/held nonmodal joystick and true-modal guards. Android217/preview225/
