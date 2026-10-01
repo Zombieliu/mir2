@@ -62,12 +62,30 @@ Configured admission ceilings are not capacity acceptance. Capacity remains paus
 ## Actual installation and acceptance scope
 
 The closed F-drive installation check **timed out after 900 seconds** before
-any native activation receipt. Installed metadata still reports Candidate08.
-This is an actual installation failure, distinct from the passing signed-package
-fixture tests and public discovery checks. The helper did not launch the game
-or edit saves. Its [retained failure and exact helper/log identities](installed-check-attempt1/report.json)
-remain available. Actual F-drive upgrade/recheck acceptance is open; a subsequent
-recovery must have its own receipt rather than overwriting this attempt.
+any native activation receipt. At that failed checkpoint, installed metadata
+still reported Candidate08.
+That actual installation failure is retained, distinct from the passing
+signed-package fixture tests and public discovery checks. Its
+[original helper and failure identities](installed-check-attempt1/report.json)
+are not overwritten. The pre-payload interval includes remote metadata retrieval
+and local verification; it is not measured as purely local hashing.
+
+A fresh [native HTTPS retry](installed-check-attempt2/actual-native-https-update-report-attempt2.json)
+**passes** and activates exact Candidate09 and the verified r9 engine. It reuses
+five independently hashed complete caches and downloads two remaining payloads
+(112,308,736 bytes); the partial EXE is discarded by the existing safe cache path.
+All six changed game files and all four metadata files match the verified package.
+Eight language/display/control preference files remain identical. A repeated
+check downloads zero payload bytes/files. Native launcher signature/engine
+verification passes before and after. The helper does not launch the game or
+edit saves. A subsequent normal launcher boot opens the blank login screen;
+the updater transaction becomes `accepted` through its actual first-launch
+health path. The obsolete Start Menu shortcut is backed up and redirected to
+the launcher, matching both desktop entries. The
+[boot receipt](installed-first-launch/native-launcher-boot-receipt.json) records
+the exact installed EXE, engine and zero-download native recheck.
+Authenticated mouse/GUI acceptance remains separate. Recovery identities are preserved in their
+[own inventory](installed-check-attempt2/inventory.json).
 
 The root client checks pass shared 1197 / 10 ignored, Windows 809 / 5 ignored
 and runtime 276 / 1 ignored. The earlier `715078944` backport checks remain
@@ -77,7 +95,7 @@ verification and actual signed-package tests cover the final release identity.
 Six delayed-hide offscreen GPU captures are synthetic production UI/ECS
 fixtures, not authenticated native mouse purchases or human gameplay acceptance.
 
-Native login, real Samuel Buy/Sell clicks and affected-laptop acceptance remain
+Authenticated native login, real Samuel Buy/Sell clicks and affected-laptop acceptance remain
 open. Internal pinned-key CMS signatures are separate from public Authenticode
 publisher signing and the other laptop's Windows application-control issue.
 No whole-game 1:1, fresh caster timed-route or 50–100-player acceptance follows.

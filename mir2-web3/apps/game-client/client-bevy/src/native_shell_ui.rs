@@ -2041,7 +2041,7 @@ fn connection_notice_summary(message: &str) -> String {
             let end = start + relative_end + 1;
             return format!(
                 "{}\n{}",
-                crate::native_i18n::tr("Cannot reach the local Gateway."),
+                crate::native_i18n::tr("Error Connecting to Server"),
                 &message[start..end]
             );
         }
@@ -3425,13 +3425,35 @@ mod tests {
     }
 
     #[test]
-    fn connection_notice_collapses_localized_socket_text_to_a_bounded_summary() {
-        assert_eq!(
-            connection_notice_summary(
-                "gateway connect failed: IO error: 由于目标计算机积极拒绝，无法连接。 (os error 10061)"
-            ),
-            "Cannot reach the local Gateway.\n(os error 10061)"
-        );
+    fn connection_notice_localizes_server_errors_without_assuming_a_local_gateway() {
+        use crate::native_i18n::{self, Locale};
+        for language in Locale::ALL {
+            native_i18n::with_locale(language, || {
+                let server_error = native_i18n::for_locale(
+                    language,
+                    "client.ErrorConnectingToServer",
+                    "",
+                );
+                assert!(!server_error.is_empty());
+                for (message, code) in [
+                    (
+                        "gateway connect failed: IO error: 由于目标计算机积极拒绝，无法连接。 (os error 10061)",
+                        "(os error 10061)",
+                    ),
+                    (
+                        "gateway connect failed: IO error: Connection refused (os error 111)",
+                        "(os error 111)",
+                    ),
+                ] {
+                    assert_eq!(
+                        connection_notice_summary(message),
+                        format!("{server_error}\n{code}"),
+                        "{} must use the existing server error translation",
+                        language.code(),
+                    );
+                }
+            });
+        }
     }
 
     #[test]

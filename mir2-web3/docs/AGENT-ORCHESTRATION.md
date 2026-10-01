@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+> 2026-10-02 active additive-content goal: implement two town Task Stewards,
+> three daily and two weekly slots in four level bands, server calendar,
+> durable exactly-once rewards and nine-language guidance. Root owns backend
+> and rollout, bounded workers own content, frontend and regression fixtures.
+> Player journeys default to an isolated server gateway; explicit local QA
+> remains supported. Ten-hour window ends around 13:11 Asia/Shanghai.
+> [Goal and acceptance queue](DAILY-WEEKLY-GOAL.md). Capacity remains paused.
+
 > 2026-10-01 caster follow-up: strict audit of independent frozen saves and
 > normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
 > Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52
@@ -22,8 +30,10 @@
 > 180b01d46, Candidate09 and installer are built and verified; signed sequence5
 > is published. Actual signed-package delta/rollback checks pass 2/2, six game
 > payloads plus the engine (107.17 MiB), and public HTTPS feed/signature bytes match.
-> The F-drive check timed out at 900s before an activation receipt; installed
-> r8 remains, the failure is preserved, and actual F-drive upgrade is not accepted.
+> F-drive native HTTPS retry now activates exact Candidate09 and engine, verifies
+> all six changed game files, preserves eight preferences, and rechecks at zero
+> downloads. Five verified cached payloads are reused; two remaining payloads
+> download 112,308,736 bytes. First 900s timeout is preserved, not relabelled.
 > Public game services remain unchanged on the existing r8 Gateway; human
 > stores are preserved. Installed mouse/GUI and affected-laptop acceptance,
 > full route timing, counted/periodic poison, dynamic mana and unrelated parity

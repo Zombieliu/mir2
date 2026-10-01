@@ -1,0 +1,86 @@
+{
+  "schema": 1,
+  "recordedAtUtc": "2026-10-01T20:56:42.6766993Z",
+  "sourceRepo": "C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3",
+  "headRevision": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+  "branch": "codex/daily-weekly-20261002",
+  "trackedSourceChangesUncommitted": true,
+  "productionGatewayDefault": "wss://165.154.65.136.sslip.io/playtest/ws",
+  "noticeTranslationKey": "client.ErrorConnectingToServer",
+  "meaningfulBefore": {
+    "osErrorNotice": "failed: previous wording instead of existing generic server key",
+    "nativeNoConfig": "failed: local default instead of invited WSS"
+  },
+  "preservedPrerequisiteFailures": [
+    "native-entry-before.log",
+    "connection-notice-before.log"
+  ],
+  "after": {
+    "nativeSessionConfigTests": 12,
+    "osCodes": [
+      "10061",
+      "111"
+    ],
+    "failed": 0,
+    "diffCheck": "passed",
+    "nativeShellUiTests": 35,
+    "osNoticeLocales": 9,
+    "realLoadScenarios": [
+      "no file/env",
+      "CWD config",
+      "EXE sibling overrides CWD",
+      "environment overrides both files"
+    ]
+  },
+  "limits": [
+    "headless config and UI model tests only",
+    "no game process or GUI launched",
+    "no server or installed-client changes",
+    "no authentication implementation changes",
+    "no live WSS connection or human visual acceptance claimed"
+  ],
+  "sourceFiles": [
+    {
+      "path": "apps/game-client/platform-windows/src/main.rs",
+      "sha256": "028e37fcea33bce482a9c2407056617a22014e9eaecbb3e71c767a04e9afa786"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gateway.rs",
+      "sha256": "b61625694be9d1e52ac44ad716e9ed88ad4e38a6933dec00d6e49202bc578867"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/session_config.rs",
+      "sha256": "a9e3e1d540953c916d2a690407b8f10caaccff3d7f32ac8f970ebba28b8ee69c"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "sha256": "702ad205686c09451502a92cd9b0928908f6304c9001e4ec9bcfd1969d9c14ca"
+    }
+  ],
+  "rawLogs": [
+    {
+      "path": "C:\\mir2-default-entry-20261002\\native-entry-before.log",
+      "sha256": "53cd3b20707c44c2348b8e508ac31949e60d9769d3cc2401df61d2daa6a9fcde"
+    },
+    {
+      "path": "C:\\mir2-default-entry-20261002\\connection-notice-before.log",
+      "sha256": "9df9f75b14d55c5e4fcc1d7161b5e57057a4e02140e8cb8ef2e01c7fa1c08486"
+    },
+    {
+      "path": "C:\\mir2-default-entry-20261002\\native-entry-before-attempt2.log",
+      "sha256": "ee0d83c22b486e008f54197f5f3db3929312a976fcb12f12dcf6e260a442e4fe"
+    },
+    {
+      "path": "C:\\mir2-default-entry-20261002\\connection-notice-before-attempt2.log",
+      "sha256": "4471071880111a1b32cb0abc400b7827bb838dbce127c622103e171e843bd4d7"
+    },
+    {
+      "path": "C:\\mir2-default-entry-20261002\\native-session-after.log",
+      "sha256": "2cedcd68081ac386ddf2a3512438fb68068378a38c133de7549f660464e763bb"
+    },
+    {
+      "path": "C:\\mir2-default-entry-20261002\\native-shell-ui-after.log",
+      "sha256": "53a4fa9fd45d66be7cf450d5ff5c072e130e3af36264758b67ff967e4a76e888"
+    }
+  ]
+}

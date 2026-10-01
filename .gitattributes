@@ -36,3 +36,8 @@
 *.pdb binary
 *.dat binary
 *.map binary
+
+# Original QA receipts/logs retain their measured bytes and inventory hashes.
+mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt2/** -text -diff
+mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-first-launch/** -text -diff
+mir2-web3/docs/generated/player-qa/periodic-quests-20261002/default-entry/** -text -diff

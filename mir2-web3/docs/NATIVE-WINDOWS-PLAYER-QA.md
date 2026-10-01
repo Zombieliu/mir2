@@ -22,8 +22,10 @@
 > 180b01d46, Candidate09 and installer are built and verified; signed sequence5
 > is published. Actual signed-package delta/rollback checks pass 2/2, six game
 > payloads plus the engine (107.17 MiB), and public HTTPS feed/signature bytes match.
-> The F-drive check timed out at 900s before an activation receipt; installed
-> r8 remains, the failure is preserved, and actual F-drive upgrade is not accepted.
+> F-drive native HTTPS retry now activates exact Candidate09 and engine, verifies
+> all six changed game files, preserves eight preferences, and rechecks at zero
+> downloads. Five verified cached payloads are reused; two remaining payloads
+> download 112,308,736 bytes. First 900s timeout is preserved, not relabelled.
 > Public game services remain unchanged on the existing r8 Gateway; human
 > stores are preserved. Installed mouse/GUI and affected-laptop acceptance,
 > full route timing, counted/periodic poison, dynamic mana and unrelated parity

@@ -148,7 +148,7 @@ fn run_native_client() -> bevy::app::AppExit {
     let config_started = std::time::Instant::now();
     movement_trace::initialize();
 
-    let session = session_config::NativeSessionConfig::load(gateway::LOCAL_GATEWAY_WS_URL)
+    let session = session_config::NativeSessionConfig::load(gateway::DEFAULT_GATEWAY_WS_URL)
         .unwrap_or_else(|error| {
             // Keep the diagnostic launcher's failure marker without echoing a
             // TOML parser excerpt or credential value to redirected output.

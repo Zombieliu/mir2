@@ -45,8 +45,8 @@ mod trade_projection;
 #[path = "gateway_account_feedback.rs"]
 mod account_feedback;
 
-/// The gateway WebSocket endpoint for the local development gateway.
-pub const LOCAL_GATEWAY_WS_URL: &str = "ws://127.0.0.1:7110/ws";
+/// Invited playtest endpoint when no explicit environment or client file overrides it.
+pub const DEFAULT_GATEWAY_WS_URL: &str = "wss://165.154.65.136.sslip.io/playtest/ws";
 const NATIVE_RESUME_PROTOCOL: &str = "nativeResumeV1";
 const NATIVE_GAME_SHOP_RECEIPT_PROTOCOL: &str = "nativeGameShopReceiptV1";
 const MAX_CREDENTIAL_LENGTH: usize = 43;
