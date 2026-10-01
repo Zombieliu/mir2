@@ -2,6 +2,13 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
+最新 NI-05 原图 geometry 源码：Android 从 APK 读取两份有界物品元数据，
+保留 Items 原尺寸与 StateItem 原偏移，失败不补假值；预览样本也通过同一背包
+适配器。Android244/preview255/Java33+33/普通与实际预览API31通过，13个真实
+打包正反例与7个技能图标旧门回归通过，源文件不变。v10版本已设置但尚未构建，
+实际背包/装备画面、手机操作和在线都未验收；此前源码与失败记录保持独立。
+[原图源码/暂存证据](generated/player-qa/native-android-item-geometry-20261001/README.md)。
+
 最新有界源码进展：NI-07 复用 Windows 的同一技能游标/投影，接通 typed
 learned skills、精确毫秒、owner 成功回执和 exact-request 按键结果；同角色
 切图保留个人状态，不恢复旧地图。Android227/preview236/shared1196+8ignored/

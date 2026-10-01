@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 Android NI-05 geometry source/staging leaf: both original metadata
+> files now supply shared item dimensions/equipment offsets, no guessed geometry.
+> Android244/preview255/API31 variants/fresh Java33+33 and13 Gradle controls pass.
+> Preview inventory now traverses its typed adapter; v10 actual APK/images, phone
+> surfaces/input, online custody and physical acceptance remain OPEN.
+> [Geometry evidence](generated/player-qa/native-android-item-geometry-20261001/README.md).
+
 > 2026-10-01 Android inventory source seam is PARTIAL: shared Windows projection
 > and seven legacy receipts now reach existing typed model/pending entries without
 > local custody or gold rules. Android236/preview246/shared1203+8ignored/Java33+33/

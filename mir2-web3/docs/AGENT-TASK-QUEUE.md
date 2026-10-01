@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-01 Android original Items/StateItem geometry source is connected to the
+> shared inventory projector, with bounded APK-only metadata and source offsets.
+> Android244/preview255, real normal/preview-feature API31 and fresh Java33+33 pass;
+> thirteen item-metadata and seven magic-icon real Gradle controls pass, source
+> bytes/staged metadata verified. v10 version set, not yet packaged or rendered.
+> Next clean-source APK/emulator BAG/equipment evidence, NI-10/11 and whole goal audit.
+> [Geometry source](generated/player-qa/native-android-item-geometry-20261001/README.md).
+
 > 2026-10-01 Android NI-05/06 source checkpoint: extracted Windows inventory
 > projection/seven receipts, unchanged rules, validated owner/map, character reset,
 > scene retention and16 FIFO backpressure. Android236/preview246/shared1203+8ignored/

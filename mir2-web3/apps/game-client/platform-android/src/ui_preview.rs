@@ -828,6 +828,39 @@ fn offline_skill_ingress_model() -> Result<String, &'static str> {
     model.ok_or("Offline skill model missing")
 }
 
+/// The production personal inventory adapter, with server-shaped offline data.
+/// Android resolves geometry from the packaged originals; no live item custody.
+fn offline_inventory_ingress_model() -> Result<String, &'static str> {
+    use serde_json::json;
+    let items: Vec<_> = (0..12)
+        .map(|slot| {
+            json!({"uniqueId":9000+slot,"key":format!("ui-only-{slot}"),
+            "name":format!("UI specimen {slot}"),"quantity":slot+1,"slot":slot,"icon":100+slot,
+            "description":"Offline visual specimen. Not a server-owned item."})
+        })
+        .collect();
+    let raw = json!({"playerObjectId":42,
+        "entities":[{"objectId":42,"kind":"selfPlayer","name":"OFFLINE INVENTORY FIXTURE"}],
+        "gold":12345,"inventoryCapacity":46,"inventoryItems":items,
+        "equipmentItems":[
+            {"uniqueId":9100,"key":"ui-equipped-0","name":"Offline source frame30",
+             "quantity":1,"slot":"Weapon","icon":100,"stateImage":30},
+            {"uniqueId":9101,"key":"ui-equipped-1","name":"Offline equipment slot1",
+             "quantity":1,"slot":"Armour","icon":101}]})
+    .to_string();
+    let mut ingress = crate::inventory_ingress::AndroidInventoryIngress::default();
+    ingress.snapshot(&raw)?;
+    let mut model = None;
+    ingress.flush(
+        |raw| {
+            model = Some(raw);
+            true
+        },
+        |_| true,
+    );
+    model.ok_or("Offline inventory model missing")
+}
+
 fn populate_specimens(world: &mut World, scene: &str) {
     use mir2_client_bevy::{
         big_map::{BigMapInfo, BigMapModel, BigMapNpc, BigMapPoint, BigMapWorldIcon},
@@ -994,32 +1027,35 @@ fn populate_specimens(world: &mut World, scene: &str) {
     let _ = big_map.select_npc(10_000);
     world.insert_resource(big_map);
     use mir2_client_bevy::{
-        inventory::{InventoryModel, ItemModel},
+        inventory::InventoryModel,
         mail::{MailMessage, MailModel},
         quest_model::{NpcDialogLine, NpcDialogModel, NpcDialogOption},
         social::SocialModel,
         storage::StorageModel,
     };
-    let mut items: Vec<ItemModel> = (0..12)
-        .map(|slot| {
-            serde_json::from_value(serde_json::json!({
-        "uniqueId":9000+slot, "key":format!("ui-only-{slot}"), "name":format!("UI specimen {slot}"),
-        "quantity":slot+1, "slot":slot, "container":0, "icon":100+slot,
-        "description":"Offline visual specimen. Not a server-owned item."
-    })).expect("static UI item specimen")
-        })
-        .collect();
-    for (slot, name) in [(0, "Equipped sword"), (1, "Equipped armour")] {
-        let mut item = items[slot as usize].clone();
-        item.unique_id = Some(9_100 + u64::from(slot));
-        item.key = format!("ui-equipped-{slot}");
-        item.name = name.into();
-        item.quantity = 1;
-        item.slot = slot;
-        item.container = 2;
-        items.push(item);
-    }
-    let storage_items = items
+    let inventory = match offline_inventory_ingress_model().and_then(|raw| {
+        serde_json::from_str::<InventoryModel>(&raw)
+            .map(|model| (raw, model))
+            .map_err(|_| "Invalid offline inventory model")
+    }) {
+        Ok((_raw, model)) => {
+            #[cfg(target_os = "android")]
+            if mir2_bevy_runtime::native_ingest::push_native_inventory_model(_raw) {
+                info!(
+                    "ANDROID_INVENTORY_INGRESS_OFFLINE queued owner42 bag12 equip2 sourceFrame30"
+                );
+            } else {
+                warn!("offline inventory model queue is unavailable");
+            }
+            model
+        }
+        Err(error) => {
+            warn!("offline inventory source model unavailable: {error}");
+            InventoryModel::default()
+        }
+    };
+    let storage_items = inventory
+        .items
         .iter()
         .cloned()
         .map(|mut item| {
@@ -1027,11 +1063,7 @@ fn populate_specimens(world: &mut World, scene: &str) {
             item
         })
         .collect();
-    world.insert_resource(InventoryModel {
-        items,
-        gold: 12345,
-        ..default()
-    });
+    world.insert_resource(inventory);
     world.insert_resource(StorageModel {
         items: storage_items,
         size: 80,
@@ -1155,6 +1187,33 @@ mod tests {
         assert!(storage.items.iter().all(|item| item.container == 4));
         let mut state = NativePlayerUiState::default();
         assert!(state.open_inventory_delete_for_slot(inventory, 11));
+    }
+
+    #[test]
+    fn inventory_specimen_uses_typed_owner_ingress_and_original_equipment_index() {
+        let raw = offline_inventory_ingress_model().unwrap();
+        let inventory: mir2_client_bevy::inventory::InventoryModel =
+            serde_json::from_str(&raw).unwrap();
+        assert_eq!(inventory.items.len(), 14);
+        assert_eq!(inventory.capacity, 46);
+        assert_eq!(inventory.gold, 12345);
+        let sword = &inventory.items[12];
+        assert_eq!(
+            (
+                sword.unique_id,
+                sword.container,
+                sword.slot,
+                sword.state_image
+            ),
+            (Some(9100), 2, 0, 30)
+        );
+        assert!(inventory.items[..12]
+            .iter()
+            .enumerate()
+            .all(|(slot, item)| item.unique_id == Some(9000 + slot as u64)
+                && item.quantity == slot as u32 + 1));
+        // CPU tests have no APK AssetManager; never fabricate source geometry.
+        assert_eq!(sword.state_image_width, 0);
     }
     #[test]
     fn locked_storage_scene_exposes_only_a_secure_local_draft() {

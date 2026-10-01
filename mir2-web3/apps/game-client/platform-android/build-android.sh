@@ -80,7 +80,7 @@ export ANDROID_NDK_HOME="${NDK_HOME}"
 
 cd "${SCRIPT_DIR}"
 
-echo "[platform-android] ${MODE} ${TARGET} with Rust ${TOOLCHAIN}, NDK ${NDK_HOME}, API ${API_LEVEL}"
+echo "[platform-android] ${MODE} ${VARIANT} ${TARGET} with Rust ${TOOLCHAIN}, NDK ${NDK_HOME}, API ${API_LEVEL}"
 
 ndk_args=(
   "+${TOOLCHAIN}"
@@ -90,7 +90,11 @@ ndk_args=(
 )
 
 if [[ "${MODE}" == "check" ]]; then
-  cargo "${ndk_args[@]}" --manifest-path "${MANIFEST}" check --lib --locked --offline
+  check_args=(check --lib --locked --offline)
+  if [[ "${VARIANT}" == "uiPreview" ]]; then
+    check_args+=(--features ui-preview)
+  fi
+  cargo "${ndk_args[@]}" --manifest-path "${MANIFEST}" "${check_args[@]}"
   echo "[platform-android] target check passed"
   exit 0
 fi

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mir2.web3.GatewaySessionTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-10-01T09:04:19" hostname="HenrydeMacBook-Pro-2.local" time="5.65">
+  <properties/>
+  <testcase name="rejectedLoginNeverEntersCharacterSelection" classname="com.mir2.web3.GatewaySessionTest" time="0.457"/>
+  <testcase name="personalSkillPacketsSurviveMapTransitionButNotInitialBootstrap" classname="com.mir2.web3.GatewaySessionTest" time="0.883"/>
+  <testcase name="gameplayWritesRequireAnAuthenticatedInGameSession" classname="com.mir2.web3.GatewaySessionTest" time="0.242"/>
+  <testcase name="inventoryReceiptsRequireOwnerBootstrapAndSurviveMapLoading" classname="com.mir2.web3.GatewaySessionTest" time="1.292"/>
+  <testcase name="rejectsCleartextAndCredentialBearingEndpoints" classname="com.mir2.web3.GatewaySessionTest" time="0.028"/>
+  <testcase name="untrustedTlsCertificateFailsClosed" classname="com.mir2.web3.GatewaySessionTest" time="0.052"/>
+  <testcase name="tlsLoginStartAndAuthoritativePosition" classname="com.mir2.web3.GatewaySessionTest" time="0.039"/>
+  <testcase name="unsolicitedLocationDoesNotProduceWorld" classname="com.mir2.web3.GatewaySessionTest" time="0.246"/>
+  <testcase name="personalSkillPacketsForwardOnlyInsideAuthenticatedGameAndPreservePayload" classname="com.mir2.web3.GatewaySessionTest" time="0.669"/>
+  <testcase name="renderDeadlineRemainsArmedUntilAWorldSnapshotIsDelivered" classname="com.mir2.web3.GatewaySessionTest" time="0.039"/>
+  <testcase name="malformedPositionInvalidatesSession" classname="com.mir2.web3.GatewaySessionTest" time="0.036"/>
+  <testcase name="characterCreateAndDeleteUseDedicatedRosterPhaseCommands" classname="com.mir2.web3.GatewaySessionTest" time="0.241"/>
+  <testcase name="entityPacketsForwardOnlyAfterAuthoritativeWorldEntry" classname="com.mir2.web3.GatewaySessionTest" time="0.462"/>
+  <testcase name="characterOperationFailuresAreBoundedAndRetryable" classname="com.mir2.web3.GatewaySessionTest" time="0.241"/>
+  <testcase name="forwardsOnlyBoundedAuthoritativeTransactionReceipts" classname="com.mir2.web3.GatewaySessionTest" time="0.238"/>
+  <testcase name="snapshotMustWaitForStartAckAndMatchSelfObject" classname="com.mir2.web3.GatewaySessionTest" time="0.036"/>
+  <testcase name="startCannotBypassLoginOrSelectUnlistedCharacter" classname="com.mir2.web3.GatewaySessionTest" time="0.447"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

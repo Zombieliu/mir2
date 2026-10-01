@@ -4,6 +4,7 @@ use mir2_client_bevy::{
     inventory::InventoryModel,
     native_inventory_ingress::{
         project_native_inventory_model, project_native_inventory_operation_ack,
+        NativeItemFrameGeometry, NativeItemLibrary,
     },
 };
 use serde_json::Value;
@@ -27,6 +28,20 @@ impl AndroidInventoryIngress {
     /// Called only after world_projection validates the authenticated self/map.
     /// Scene-only resets retain personal state; connection/character changes do not.
     pub(crate) fn snapshot(&mut self, raw: &str) -> Result<(), &'static str> {
+        #[cfg(target_os = "android")]
+        {
+            let geometry = crate::item_geometry::packaged()?;
+            self.snapshot_with_geometry(raw, |library, index| geometry.frame(library, index))
+        }
+        #[cfg(not(target_os = "android"))]
+        self.snapshot_with_geometry(raw, |_, _| None)
+    }
+
+    pub(crate) fn snapshot_with_geometry(
+        &mut self,
+        raw: &str,
+        geometry: impl FnMut(NativeItemLibrary, u16) -> Option<NativeItemFrameGeometry>,
+    ) -> Result<(), &'static str> {
         if raw.len() > 1024 * 1024 {
             return Err("Inventory snapshot too large");
         }
@@ -60,10 +75,7 @@ impl AndroidInventoryIngress {
                 Some(_) => return Err("Invalid inventory list"),
             }
         }
-        // The Android original-item geometry seam is not yet installed. Do not
-        // invent desktop offsets or infer them from an icon/name. This bounded
-        // leaf carries typed metadata; paper-doll geometry remains a separate gap.
-        let model = project_native_inventory_model(&world, |_, _| None);
+        let model = project_native_inventory_model(&world, geometry);
         let _: InventoryModel =
             serde_json::from_value(model.clone()).map_err(|_| "Invalid inventory model")?;
         let identity = (owner, name.to_owned());
@@ -189,6 +201,35 @@ mod tests {
         assert_eq!(model.items[0].quantity, 2);
         assert_eq!(model.gold, 23);
         assert_eq!(model.items[0].state_image_width, 0);
+    }
+
+    #[test]
+    fn source_geometry_reaches_typed_model_without_changing_identity_or_quantity() {
+        let mut ingress = AndroidInventoryIngress::default();
+        let geometry = crate::item_geometry::tests::fixture();
+        let mut world: Value = serde_json::from_str(&snapshot(42, "Fixture", 2)).unwrap();
+        world["inventoryItems"][0]["icon"] = json!(7);
+        world["equipmentItems"] = json!([{"uniqueId":44,"slot":"Weapon",
+            "name":"Offline source frame","quantity":1,"stateImage":30}]);
+        ingress
+            .snapshot_with_geometry(&world.to_string(), |library, index| {
+                geometry.frame(library, index)
+            })
+            .unwrap();
+        let model = take_model(&mut ingress);
+        assert_eq!(model.items[0].unique_id, Some(9007199254740993));
+        assert_eq!(model.items[0].quantity, 2);
+        assert_eq!(
+            (model.items[0].icon_width, model.items[0].icon_height),
+            (36, 26)
+        );
+        let equipped = &model.items[1];
+        assert_eq!(equipped.unique_id, Some(44));
+        assert_eq!((equipped.state_image_x, equipped.state_image_y), (75, 186));
+        assert_eq!(
+            (equipped.state_image_width, equipped.state_image_height),
+            (28, 57)
+        );
     }
 
     #[test]

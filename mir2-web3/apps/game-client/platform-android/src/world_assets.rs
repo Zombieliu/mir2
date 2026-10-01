@@ -462,7 +462,10 @@ fn wait_for_native_render_queue(generation: u64) -> bool {
 }
 
 #[cfg(target_os = "android")]
-fn read_packaged_asset(path: &str, max_bytes: usize) -> Result<Vec<u8>, WorldAssetError> {
+pub(crate) fn read_packaged_asset(
+    path: &str,
+    max_bytes: usize,
+) -> Result<Vec<u8>, WorldAssetError> {
     use std::{ffi::CString, io::Read};
 
     let app = bevy::android::ANDROID_APP

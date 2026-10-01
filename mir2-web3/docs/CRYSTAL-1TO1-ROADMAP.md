@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 Android NI-05 original-geometry source leaf: bounded APK metadata,
+> sparse/zero-source behavior and shared typed projection pass244 normal /255
+> preview, both actual API31 feature checks and fresh Java33+33;13 metadata and7
+> magic-icon Gradle controls pass with unchanged approved source bytes. v10 remains
+> unbuilt here; package/runtime/online/device and whole goal stay unaccepted.
+> [Source/staging evidence](generated/player-qa/native-android-item-geometry-20261001/README.md).
+
 > 2026-10-01 Android NI-05/06 bounded source: same Windows inventory projector and
 > frozen seven-receipt parser; exact extraction equivalence and Android lifetime /
 > FIFO tests pass. Android236/preview246/shared1203+8ignored/Java33+33/API31 pass,

@@ -31,6 +31,43 @@ def verifySharedUiRoot = {
         throw new GradleException('The approved shared Crystal UI asset root is missing original-ui/manifest.generated.json')
     }
     def manifest = new groovy.json.JsonSlurper().parse(manifestFile)
+    def integerInRange = { value, lower, upper ->
+        (value instanceof Integer || value instanceof Long || value instanceof BigInteger)
+                && value >= lower && value <= upper
+    }
+    // The shared inventory projection needs source bitmap geometry, not only
+    // PNG presence. Items is a sparse catalogue export; count is library extent,
+    // not exported frame count. Empty StateItem frames deliberately remain valid.
+    [Items: 1003, StateItem: 5192].each { library, minimumFrames ->
+        def metaFile = new File(sourceRoot, "original-ui/${library}/meta.json")
+        if (!metaFile.isFile() || metaFile.length() == 0 || metaFile.length() > 2 * 1024 * 1024) {
+            throw new GradleException("The approved shared Crystal UI ${library} item geometry metadata is missing or oversized")
+        }
+        def metadata
+        try {
+            metadata = new groovy.json.JsonSlurper().parse(metaFile)
+        } catch (Exception ignored) {
+            throw new GradleException("The approved shared Crystal UI ${library} item geometry metadata is invalid JSON")
+        }
+        def frames = metadata instanceof Map ? metadata.frames : null
+        if (!(metadata instanceof Map) || !integerInRange(metadata.version, 3, 3)
+                || !integerInRange(metadata?.count, 1, 65536)
+                || !(frames instanceof List) || frames.size() < minimumFrames
+                || frames.size() > metadata.count) {
+            throw new GradleException("The approved shared Crystal UI ${library} item geometry metadata schema is invalid or incomplete")
+        }
+        def indices = new LinkedHashSet<Integer>()
+        frames.each { frame ->
+            if (!(frame instanceof Map) || !integerInRange(frame.index, 0, metadata.count - 1)
+                    || !indices.add(frame.index.intValue())
+                    || !integerInRange(frame.width, 0, 2048) || !integerInRange(frame.height, 0, 2048)
+                    || !integerInRange(frame.x, -8192, 8192) || !integerInRange(frame.y, -8192, 8192)
+                    || frame.path != "/original-ui/${library}/${frame.index.intValue()}.png"
+                    || !new File(sourceRoot, frame.path.substring(1)).isFile()) {
+                throw new GradleException("The approved shared Crystal UI ${library} item geometry frame is invalid, duplicated or missing")
+            }
+        }
+    }
     requiredSharedUiLibraries.each { library, minimumCount ->
         def entry = manifest.libraries?."${library}"
         def frames = entry?.frames
@@ -85,7 +122,8 @@ def prepareSharedUi = tasks.register('prepareSharedUi', Sync) {
     if (uiRoot) from(uiRoot) {
         include 'original-ui/ChrSel/*.png', 'original-ui/Prguse/*.png', 'original-ui/Prguse2/*.png', 'original-ui/Title/*.png',
                 'original-ui/Items/*.png', 'original-ui/Help/*.png', 'original-ui/MMap/*.png', 'original-ui/StateItem/*.png',
-                'original-ui/MagIcon/*.png', 'original-ui/MagIcon2/*.png'
+                'original-ui/MagIcon/*.png', 'original-ui/MagIcon2/*.png',
+                'original-ui/Items/meta.json', 'original-ui/StateItem/meta.json'
     }
     into sharedUiOutput
 }
@@ -346,8 +384,8 @@ android {
         applicationId 'com.mir2.web3'
         minSdk 31
         targetSdk 35
-        versionCode 9
-        versionName '0.1.6-skill-icons'
+        versionCode 10
+        versionName '0.1.7-inventory-ingress'
         buildConfigField 'String', 'MIR2_GATEWAY_URL', groovy.json.JsonOutput.toJson(System.getenv('MIR2_GATEWAY_WS_URL') ?: '')
 
         ndk {
