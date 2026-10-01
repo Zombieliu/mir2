@@ -1,5 +1,10 @@
 # Agent Task Queue
 
+> Publication checkpoint: ordinary non-force push f04a74399..11eca43c4 succeeded;
+> GitHub ref/PR253 head verified equal, Open/Draft/base unchanged. Earlier local
+> v12/v13 and current v14 source/evidence now published; no Windows push/merge/
+> deployment/APK upload. Next focused peer-row repair; full denominator still OPEN.
+
 > 2026-10-01 exact v14/253b6682f: clean dual APK/hash/install; each6647 PNG/
 > three metadata/source-gate hashes match. Actual system chat and soft keyboard
 > visible, **peer row clipped: received-chat visual FAIL**. Source gate remains

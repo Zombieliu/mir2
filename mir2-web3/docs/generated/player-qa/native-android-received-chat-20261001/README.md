@@ -131,3 +131,15 @@ the phone-only layout, then build a **new** exact APK and compare captures. v14 
 not retrospectively marked fixed. Phone HUD weight, complete shared UI/actions/
 services/chat pressure/JNI/real HTTPS-WSS/device and full Windows denominator stay
 open; the completeness goal remains Active.
+
+## Verified publication checkpoint
+
+Ordinary non-force SSH fast-forward push succeeded from f04a74399 to
+`11eca43c4ec7c196be4a2c4b582b310f7978ac3e`. Fresh GitHub API ref and PR253
+both report that head; PR remains Open/Draft, base `codex/playtest-registration`.
+`push-attempt.log` and the two `remote-observed-*.json` files retain this exact
+observation. This publishes the earlier local v12/v13 source/evidence and the
+v14 source/package/failure evidence; it does not erase earlier transport failures
+or turn the clipped peer row into a visual pass. No Windows push/merge/production
+deployment or APK/raw-asset/key upload. A later publication-doc commit may follow
+this checkpoint; each APK's exact source remains253b6682f.
