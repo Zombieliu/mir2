@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-01 Android NI-05/06 bounded source: same Windows inventory projector and
+> frozen seven-receipt parser; exact extraction equivalence and Android lifetime /
+> FIFO tests pass. Android236/preview246/shared1203+8ignored/Java33+33/API31 pass,
+> Mac desktop inventory6pass/2 missing-resource failures retained. Both item geometry
+> seams, package/JNI/phone/online/device and whole-goal completion remain OPEN;
+> no server rule or global parity percentage changed.
+> [Source checkpoint](generated/player-qa/native-android-inventory-ingress-20261001/README.md).
+
 > 2026-10-01 clean Android source394307db8 binds both v9 diagnostic packages,
 > exact hashes/version/installation and448 actual icon byte matches each. Offline
 > shared SPELLS image repair passes; launch waits time out and full phone UI,

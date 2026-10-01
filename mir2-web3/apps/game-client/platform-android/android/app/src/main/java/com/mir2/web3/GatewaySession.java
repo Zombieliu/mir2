@@ -265,7 +265,8 @@ final class GatewaySession implements AutoCloseable {
         if (!type.equals("packet")) return;
         String packet = envelope.getString("packet");
         boolean forwardEntity = phase == Phase.IN_GAME && isEntityGameplayPacket(packet);
-        boolean forwardSkill = personalSkillPhase() && isPersonalSkillPacket(packet);
+        boolean forwardPersonal = personalGameplayPhase()
+                && (isPersonalSkillPacket(packet) || isInventoryOperationPacket(packet));
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -390,7 +391,7 @@ final class GatewaySession implements AutoCloseable {
                 break;
             default: break;
         }
-        if ((forwardEntity && phase == Phase.IN_GAME) || (forwardSkill && personalSkillPhase())) {
+        if ((forwardEntity && phase == Phase.IN_GAME) || (forwardPersonal && personalGameplayPhase())) {
             forwardBounded(envelope, gameplayObserver);
         }
     }
@@ -414,6 +415,15 @@ final class GatewaySession implements AutoCloseable {
                 || packet.equals("MagicDelay") || packet.equals("SpellToggle")
                 || packet.equals("NewMagic") || packet.equals("MagicLeveled")
                 || packet.equals("RemoveMagic") || packet.equals("UserInformation");
+    }
+
+    private static boolean isInventoryOperationPacket(String packet) {
+        // Exact frozen Windows route, not arbitrary transaction/admin packets.
+        // DeleteItem's helper exists upstream but its production route does not.
+        return packet.equals("DropItem") || packet.equals("MoveItem")
+                || packet.equals("MergeItem") || packet.equals("SplitItem1")
+                || packet.equals("SellItem") || packet.equals("EquipItem")
+                || packet.equals("RemoveItem");
     }
 
     private static boolean isEntityGameplayPacket(String packet) {
@@ -450,7 +460,7 @@ final class GatewaySession implements AutoCloseable {
     }
 
     private boolean worldPending() { return phase == Phase.STARTING || phase == Phase.IN_GAME; }
-    private boolean personalSkillPhase() {
+    private boolean personalGameplayPhase() {
         // Owner bootstrap must be accepted within this connection/character.
         // Personal receipts survive map loading; entity packets do not.
         return worldPending() && startAccepted && hasOwnerSnapshot;

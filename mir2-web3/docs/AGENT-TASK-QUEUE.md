@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-10-01 Android NI-05/06 source checkpoint: extracted Windows inventory
+> projection/seven receipts, unchanged rules, validated owner/map, character reset,
+> scene retention and16 FIFO backpressure. Android236/preview246/shared1203+8ignored/
+> Java33+33/API31 pass; corrected Mac desktop inventory filter6pass/2 asset-dependent
+> failures retained. Both Android Items/StateItem geometry remain None; no new APK,
+> actual JNI, touch or online acceptance. Next original geometry then package/emulator,
+> NI-10/11 services and the full goal leaf audit. No Windows push or deployment.
+> [Source evidence](generated/player-qa/native-android-inventory-ingress-20261001/README.md).
+
 > 2026-10-01 v9 exact image checkpoint: clean source394307db8 builds/installs
 > both diagnostic variants with exact versions/hashes and448 byte-matched icons
 > each. Actual offline SPELLS shows original icon/Lv1/F1; captured PID logs have

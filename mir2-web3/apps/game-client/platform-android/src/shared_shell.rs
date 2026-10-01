@@ -116,6 +116,7 @@ fn send(value: Value) {
 #[derive(Resource, Default)]
 pub(crate) struct HostState {
     skills: crate::skill_ingress::AndroidSkillIngress,
+    inventory: crate::inventory_ingress::AndroidInventoryIngress,
     phase: String,
     world: Option<HostWorldPosition>,
     pending_world_request: Option<u64>,
@@ -131,6 +132,29 @@ pub(crate) struct HostState {
 }
 
 impl HostState {
+    fn reset_personal(&mut self) {
+        self.skills.reset();
+        self.inventory.reset();
+    }
+
+    fn flush_personal(&mut self) {
+        self.skills
+            .flush(mir2_bevy_runtime::native_ingest::push_native_skill_model);
+        self.inventory.flush(
+            mir2_bevy_runtime::native_ingest::push_native_inventory_model,
+            mir2_bevy_runtime::native_ingest::push_native_inventory_operation_ack,
+        );
+    }
+
+    fn accept_inventory_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
+        if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
+            || !matches!(screen, Screen::StartingGame | Screen::InGame)
+        {
+            return Ok(false);
+        }
+        self.inventory.packet(raw)
+    }
+
     fn accept_skill_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
         if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
             || !matches!(screen, Screen::StartingGame | Screen::InGame)
@@ -292,7 +316,7 @@ fn fail_current_render_load(
     if host.pending_render_request != Some(request_id) {
         return false;
     }
-    host.skills.reset();
+    host.reset_personal();
     host.world = None;
     host.pending_world_request = None;
     host.pending_render_request = None;
@@ -1135,8 +1159,7 @@ fn receive(
     #[cfg(feature = "ui-preview")] mut preview: ResMut<crate::ui_preview::PreviewRequest>,
 ) {
     if matches!(model.screen, Screen::StartingGame | Screen::InGame) {
-        host.skills
-            .flush(mir2_bevy_runtime::native_ingest::push_native_skill_model);
+        host.flush_personal();
     }
     #[cfg(target_os = "android")]
     if let Some(render) = crate::live_entity::poll_action_frame() {
@@ -1226,19 +1249,20 @@ fn receive(
                 && matches!(model.screen, Screen::StartingGame | Screen::InGame)
             {
                 if let Some(raw) = value["envelope"].as_str() {
-                    if host.accept_skill_packet(model.screen, raw).is_err() {
-                        host.skills.reset();
+                    if host.accept_skill_packet(model.screen, raw).is_err()
+                        || host.accept_inventory_packet(model.screen, raw).is_err()
+                    {
+                        host.reset_personal();
                         mir2_bevy_runtime::native_ingest::push_native_data_reset();
                         model.apply_gateway_event(Event::Disconnect {
-                            reason: Some("Invalid or overflowing skill data; reconnect".into()),
+                            reason: Some("Invalid or overflowing personal data; reconnect".into()),
                         });
                         intents.drain().for_each(drop);
                         OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
                         send(json!({"type":"disconnect"}));
                         continue;
                     }
-                    host.skills
-                        .flush(mir2_bevy_runtime::native_ingest::push_native_skill_model);
+                    host.flush_personal();
                 }
             }
             #[cfg(target_os = "android")]
@@ -1259,7 +1283,7 @@ fn receive(
                         == crate::scene_effects::EffectPacketOutcome::Rejected
                 });
                 if effect_rejected {
-                    host.skills.reset();
+                    host.reset_personal();
                     crate::live_entity::clear_with_presentation_reset();
                     if let Some(effects) = scene_effects.as_deref_mut() {
                         effects.clear();
@@ -1333,7 +1357,7 @@ fn receive(
                     }
                     crate::live_entity::LiveEntityPacketOutcome::Ignored => {}
                     crate::live_entity::LiveEntityPacketOutcome::Rejected => {
-                        host.skills.reset();
+                        host.reset_personal();
                         crate::live_entity::clear_with_presentation_reset();
                         if let Some(effects) = scene_effects.as_deref_mut() {
                             effects.clear();
@@ -1507,7 +1531,7 @@ fn receive(
             .is_some_and(|(old, next)| old.map_file_name != next.map_file_name);
         host.world = next_world;
         if matches!(phase, "DISCONNECTED" | "UNCONFIGURED" | "CONNECTING") {
-            host.skills.reset();
+            host.reset_personal();
             host.pending_world_request = None;
             host.pending_render_request = None;
             host.render_load_active = false;
@@ -1558,7 +1582,9 @@ fn receive(
                 world.x,
                 world.y,
             );
-            if projected.is_some() && host.skills.snapshot(raw).is_err() {
+            if projected.is_some()
+                && (host.skills.snapshot(raw).is_err() || host.inventory.snapshot(raw).is_err())
+            {
                 projected = None;
             }
             let mut projected_scene = None;
@@ -1612,7 +1638,7 @@ fn receive(
                 queued
             });
             if !queued {
-                host.skills.reset();
+                host.reset_personal();
                 #[cfg(target_os = "android")]
                 crate::world_assets::cancel_packaged_map_atlas_load();
                 if let Some(overlays) = actor_overlays.as_deref_mut() {
@@ -1642,8 +1668,7 @@ fn receive(
                 send(json!({"type":"disconnect"}));
                 continue;
             }
-            host.skills
-                .flush(mir2_bevy_runtime::native_ingest::push_native_skill_model);
+            host.flush_personal();
             #[cfg(target_os = "android")]
             if let Some((scene, world_snapshot, request_id)) = projected_scene {
                 // Keep only the newest authoritative frame while a previous
@@ -1910,7 +1935,7 @@ fn observe_world_receipt(
             }
         }
         WorldApplyOutcome::DecodeRejected => {
-            host.skills.reset();
+            host.reset_personal();
             host.world = None;
             host.pending_render_request = None;
             host.render_load_active = false;
@@ -2631,6 +2656,49 @@ mod tests {
     }
 
     use super::*;
+
+    #[test]
+    fn inventory_receipts_survive_scene_loading_but_not_render_or_session_failure() {
+        let mut host = HostState {
+            phase: "IN_GAME".into(),
+            ..default()
+        };
+        let world=json!({"playerObjectId":42,"entities":[{"objectId":42,"kind":"selfPlayer","name":"Fixture"}],
+            "inventoryItems":[{"uniqueId":7,"slot":3,"quantity":2}]}).to_string();
+        host.inventory.snapshot(&world).unwrap();
+        let packet = json!({"type":"packet","packet":"DropItem","payload":{
+            "uniqueId":7,"count":2,"heroInventory":false,"success":false}})
+        .to_string();
+        for screen in [Screen::Login, Screen::OpeningLogin, Screen::ConnectionLost] {
+            assert!(!host.accept_inventory_packet(screen, &packet).unwrap());
+        }
+        host.phase = "DISCONNECTED".into();
+        assert!(!host
+            .accept_inventory_packet(Screen::InGame, &packet)
+            .unwrap());
+        host.phase = "STARTING".into();
+        assert!(host
+            .accept_inventory_packet(Screen::StartingGame, &packet)
+            .unwrap());
+        host.pending_render_request = Some(7);
+        let mut model = NativeShellModel {
+            screen: Screen::StartingGame,
+            ..default()
+        };
+        assert!(fail_current_render_load(
+            &mut host,
+            &mut model,
+            7,
+            "fixture render failure"
+        ));
+        assert!(host
+            .inventory
+            .flush(|_| panic!("Old inventory"), |_| panic!("Old receipt")));
+        host.phase = "IN_GAME".into();
+        assert!(!host
+            .accept_inventory_packet(Screen::InGame, &packet)
+            .unwrap());
+    }
 
     #[test]
     fn skill_host_phase_guard_and_render_failure_cannot_republish_previous_character() {

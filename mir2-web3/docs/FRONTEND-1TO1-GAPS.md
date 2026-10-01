@@ -1,5 +1,13 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-01 Android inventory source seam is PARTIAL: shared Windows projection
+> and seven legacy receipts now reach existing typed model/pending entries without
+> local custody or gold rules. Android236/preview246/shared1203+8ignored/Java33+33/
+> API31 pass; Mac desktop inventory6pass/2 resource failures remain. Items/StateItem
+> geometry is absent on Android, and no new APK/image/online/device evidence follows.
+> Next bind source geometry and test the actual inventory/equipment phone view.
+> [NI-05/06 evidence](generated/player-qa/native-android-inventory-ingress-20261001/README.md).
+
 > 2026-10-01 v9 bounded skill image repair PASS: exact clean source394307db8
 > produces both installed diagnostic APKs;448 actual packaged icons each match
 > source bytes. Emulator opens shared SPELLS with original icon/Lv1/F1 and no

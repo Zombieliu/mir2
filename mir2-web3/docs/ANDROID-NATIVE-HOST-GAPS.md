@@ -38,8 +38,8 @@ still missing. Neither label is an online acceptance result.
 | NI-02 | `push_native_ui_read_model` | PARTIAL: snapshot player stats. Audit all Windows fields, weight provenance, vitals, buffs and public owner packet updates; do not infer missing requirements |
 | NI-03 | `push_native_map_model` / map presentation | PARTIAL: selected center and bounded local pack. Prove server map transfer, render-ready and approved complete resources |
 | NI-04 | `push_native_entity_model_set` / object packets | PARTIAL: shared Hero kind and selected actor/item/gold projection. Prove AOI add/remove, incarnation boundaries and all supported actor families |
-| NI-05 | `push_native_inventory_model` | OPEN: ordinary inventory/equipment/belt/tooltip data are not produced by Android's four-message snapshot adapter |
-| NI-06 | `push_native_inventory_operation_ack` | OPEN: preserve exact Drop/Move/Merge/Split acknowledgements, failures and unknown outcomes; never invent or replay success |
+| NI-05 | `push_native_inventory_model` | PARTIAL: validated Android self/map now feeds the extracted Windows typed inventory/belt/equipment/tooltip projection; character/terminal reset and map retention pass. Items and StateItem geometry are still None on Android; actual APK/JNI/online custody and touch remain OPEN. [Source evidence](generated/player-qa/native-android-inventory-ingress-20261001/README.md) |
+| NI-06 | `push_native_inventory_operation_ack` | PARTIAL: frozen seven Drop/Move/Merge/SplitItem1/Sell/Equip/Remove receipts pass owner/phase/FIFO/backpressure/shared pending regressions. Legacy Move is coordinate-correlated, not an echoed request ID; DeleteItem/SplitItem stay closed. Complete action/unknown-result and actual JNI/online acceptance remain OPEN. [Source evidence](generated/player-qa/native-android-inventory-ingress-20261001/README.md) |
 | NI-07 | `push_native_skill_model` / `SkillPacketCursor` | PARTIAL: Android and Windows share the extracted cursor/projector; exact ms, owner metadata/casts, key ACK and character/map/backpressure regressions pass (Android227/preview236/shared1196+8ignored/Java32+32/API31). Exact-source8eb1a7d34 v8 APKs build/install; actual offline SPELLS shows FireBall/F1 but MagIcon/54 is missing repeatedly, so imagery FAILS. Actual JNI/live outbound/input, approved online combat and physical acceptance remain OPEN. [Evidence](generated/player-qa/native-android-skill-ingress-20261001/README.md) |
 | NI-08 | `push_native_wallet_patch` | OPEN: snapshot gold is not packet-first owner wallet/vitals coverage. Connect public deltas without optimistic balance rules |
 | NI-09 | `push_native_chat_line` | OPEN: `ObjectChat` is absent from Java's gameplay allowlist. Local chat draft/settings and sent-command tests are not received chat |
@@ -98,7 +98,10 @@ phone-window, performance, real JNI/online and device gates remain open.
 Bounded G1 source/package/emulator gates and NI-07 source regressions are recorded.
 NI-07 is bound to v8 source, with bounded v9 image repair; v7 lacks this implementation.
 Continue the G2 real login/list/StartGame gate when the user has
-approved a test environment and can enter credentials locally. NI-05/06 and
-NI-10/11 follow to establish ordinary playable state rather than empty windows.
+approved a test environment and can enter credentials locally. NI-05/06 now have
+a bounded typed-model/seven-receipt source path: Android236/preview246/shared1203
+plus8ignored/Java33+33/API31 pass. Correct Mac desktop inventory filter retains
+6pass/2 resource-dependent failures; no blanket desktop green. Next close both
+original item geometry seams and exact-source APK evidence, then NI-10/11 services.
 The remaining model, window, resource and physical-device leaves stay in the goal;
 this sub-inventory does not shrink its scope or mark the whole goal complete.

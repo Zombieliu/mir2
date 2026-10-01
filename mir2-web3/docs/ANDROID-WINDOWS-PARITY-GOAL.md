@@ -17,6 +17,13 @@ FireBall/F1，但技能图标缺失并重复加载，图像验收FAIL；v7不包
 保留，完整手机窗/性能/联网/真机仍未通过。
 [资源与精确包](generated/player-qa/native-android-skill-icons-20261001/README.md)。
 
+NI-05/06 源码接通：提取复用 Windows 的 typed 背包/装备/快捷栏/提示投影和
+冻结七类回执，保留同角色切图、终止清理与16条FIFO背压；12函数等价核对通过。
+Android236/preview246/shared1203+8既有ignore/Java33+33/API31通过；Mac桌面
+inventory筛选6通过/2资源依赖失败，未宣称全绿。Android两类物品geometry仍None，
+实际JNI/新APK/在线/触屏均未验收；v9不包含本轮背包源码。下一步补原图尺寸/偏移。
+[本轮源码与失败证据](generated/player-qa/native-android-inventory-ingress-20261001/README.md)。
+
 本轮用户要求把 Android 完整度对齐当前 Windows，而不再把登录小切片或
 离线 UI 展示当作终点。目标是原生 Bevy/GameActivity Android；Capacitor
 或远程旧 Web 页面不替代本 goal 的交付。

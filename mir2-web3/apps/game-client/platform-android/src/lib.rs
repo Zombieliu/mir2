@@ -19,6 +19,8 @@ mod ground_labels;
 #[cfg(any(target_os = "android", test))]
 mod ground_pickups;
 #[cfg(any(target_os = "android", test))]
+mod inventory_ingress;
+#[cfg(any(target_os = "android", test))]
 mod live_entity;
 #[cfg(any(target_os = "android", test))]
 mod map_objects;

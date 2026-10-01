@@ -338,6 +338,45 @@ public class GatewaySessionTest {
         assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
     }
 
+    @Test public void inventoryReceiptsRequireOwnerBootstrapAndSurviveMapLoading() throws Exception {
+        connect();
+        JSONObject payload = GatewaySession.object("objectId", 42, "grid", "Inventory",
+                "gridFrom", "Inventory", "gridTo", "Belt", "uniqueId", "9007199254740993",
+                "idFrom", "9007199254740993", "idTo", 99, "count", 2, "from", 6, "to", 7,
+                "heroInventory", false, "success", false);
+        peer.send(GatewaySession.object("type", "packet", "packet", "DropItem", "payload", payload).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(GatewaySession.object("type", "packet", "packet", "DropItem", "payload", payload).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        assertNotNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        for (String packet : new String[]{"DropItem", "MoveItem", "MergeItem", "SplitItem1",
+                "SellItem", "EquipItem", "RemoveItem"}) {
+            peer.send(GatewaySession.object("type", "packet", "packet", packet, "payload", payload).toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Missing inventory receipt " + packet, raw);
+            JSONObject forwarded = new JSONObject(raw);
+            assertEquals(packet, forwarded.getString("packet"));
+            assertEquals("9007199254740993", forwarded.getJSONObject("payload").getString("uniqueId"));
+            assertFalse(forwarded.getJSONObject("payload").getBoolean("success"));
+        }
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        assertNull(phase(GatewaySession.Phase.STARTING).worldSnapshot);
+        peer.send(GatewaySession.object("type", "packet", "packet", "EquipItem", "payload", payload).toString());
+        assertEquals("EquipItem", new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).getString("packet"));
+        for (String unsupported : new String[]{"SplitItem", "DeleteItem", "Stage5Command"}) {
+            peer.send(GatewaySession.object("type", "packet", "packet", unsupported, "payload", payload).toString());
+            assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        }
+        session.disconnect("Inventory fixture end");
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
     @Test public void personalSkillPacketsForwardOnlyInsideAuthenticatedGameAndPreservePayload() throws Exception {
         connect();
         JSONObject cast = GatewaySession.object("type", "packet", "packet", "Magic",

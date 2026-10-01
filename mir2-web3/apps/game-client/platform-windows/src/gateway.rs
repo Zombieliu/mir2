@@ -1057,15 +1057,7 @@ fn crystal_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClas
 /// when that index names exactly one row in the extracted Crystal database;
 /// an ambiguous or absent index must stay partial rather than choosing a row.
 fn unique_crystal_tooltip_template(item_index: i32) -> Option<CrystalItemTemplate> {
-    let mut matches = crystal_item_manifest()
-        .items
-        .into_iter()
-        .filter(|item| item.item_index == item_index);
-    let item = matches.next()?;
-    if matches.next().is_some() {
-        return None;
-    }
-    Some(item)
+    mir2_client_bevy::native_inventory_ingress::unique_crystal_item_template(item_index)
 }
 
 fn unique_crystal_tooltip_info(item_index: i32) -> Option<CrystalItemInfoModel> {
@@ -4659,62 +4651,9 @@ fn transform_inventory_operation_ack(
     packet: &str,
     payload: &Value,
 ) -> Option<InventoryOperationAck> {
-    if packet == "DeleteItem" {
-        // Crystal's S.DeleteItem receipt carries the exact instance/count but
-        // no Success field. Receiving the packet itself is the authoritative
-        // success acknowledgement.
-        return Some(InventoryOperationAck::Delete {
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
-            success: true,
-        });
-    }
-    let success = payload.get("success")?.as_bool()?;
-    match packet {
-        "EquipItem" => Some(InventoryOperationAck::Equip {
-            grid: payload.get("grid")?.as_str()?.to_owned(),
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            to: value_i32(payload.get("to"))?,
-            success,
-        }),
-        "RemoveItem" => Some(InventoryOperationAck::Remove {
-            grid: payload.get("grid")?.as_str()?.to_owned(),
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            to: value_i32(payload.get("to"))?,
-            success,
-        }),
-        "DropItem" => Some(InventoryOperationAck::Drop {
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
-            hero_inventory: payload.get("heroInventory")?.as_bool()?,
-            success,
-        }),
-        "MoveItem" => Some(InventoryOperationAck::Move {
-            grid: payload.get("grid")?.as_str()?.to_owned(),
-            from: value_i32(payload.get("from"))?,
-            to: value_i32(payload.get("to"))?,
-            success,
-        }),
-        "MergeItem" => Some(InventoryOperationAck::Merge {
-            grid_from: payload.get("gridFrom")?.as_str()?.to_owned(),
-            grid_to: payload.get("gridTo")?.as_str()?.to_owned(),
-            id_from: value_u64(payload.get("idFrom"))?,
-            id_to: value_u64(payload.get("idTo"))?,
-            success,
-        }),
-        "SplitItem1" => Some(InventoryOperationAck::Split {
-            grid: payload.get("grid")?.as_str()?.to_owned(),
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
-            success,
-        }),
-        "SellItem" => Some(InventoryOperationAck::Sell {
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
-            success,
-        }),
-        _ => None,
-    }
+    mir2_client_bevy::native_inventory_ingress::project_native_inventory_operation_ack(
+        packet, payload,
+    )
 }
 
 fn transform_game_shop_info_from_packet(
@@ -5397,30 +5336,7 @@ fn value_string(value: Option<&Value>) -> Option<String> {
 /// indices. Bag and belt entries already carry numeric slots, while equipment
 /// entries intentionally expose names such as `weapon` and `armour`.
 fn normalized_slot(value: Option<&Value>, fallback: u32) -> u32 {
-    if let Some(slot) = value_u32(value) {
-        return slot;
-    }
-
-    let Some(name) = value.and_then(Value::as_str) else {
-        return fallback;
-    };
-    match name.trim().to_ascii_lowercase().replace('_', "-").as_str() {
-        "weapon" => 0,
-        "armour" | "armor" => 1,
-        "helmet" => 2,
-        "torch" => 3,
-        "necklace" => 4,
-        "bracelet-left" | "braceletleft" | "braceletl" => 5,
-        "bracelet-right" | "braceletright" | "braceletr" => 6,
-        "ring-left" | "ringleft" | "ringl" => 7,
-        "ring-right" | "ringright" | "ringr" => 8,
-        "amulet" => 9,
-        "belt" => 10,
-        "boots" => 11,
-        "stone" => 12,
-        "mount" => 13,
-        _ => fallback,
-    }
+    mir2_client_bevy::native_inventory_ingress::native_inventory_slot(value, fallback)
 }
 
 /// Transform gateway `Chat` and `ObjectChat` packet payloads into the shared
@@ -5705,67 +5621,35 @@ mod ranking_projection_tests {
 }
 
 fn transform_inventory_model(payload: &Value) -> Value {
-    let gold = value_u32_or(payload.get("gold"), 0);
-    // Only an explicit Crystal-array length can unlock page two. Occupied
-    // item count and the runtime's broader maxBagSlots value are not evidence
-    // that this character purchased inventory expansion.
-    let capacity = value_u32(payload.get("inventoryCapacity"))
-        .and_then(|value| u16::try_from(value).ok())
-        .map(mir2_client_bevy::inventory::InventoryModel::canonical_capacity)
-        .unwrap_or(mir2_client_bevy::inventory::CRYSTAL_BASE_INVENTORY_CAPACITY);
+    mir2_client_bevy::native_inventory_ingress::project_native_inventory_model(
+        payload,
+        native_inventory_frame_geometry,
+    )
+}
 
-    let map_items = |items: Option<&Value>, default_container: u8| -> Vec<Value> {
-        items
-            .and_then(Value::as_array)
-            .map(|list| {
-                list.iter()
-                    .enumerate()
-                    .map(|(index, item)| {
-                        let fallback_slot = u32::try_from(index).unwrap_or(0);
-                        let unique_id = item
-                            .get("uniqueId")
-                            .or_else(|| item.get("unique_id"))
-                            .and_then(value_u64_ref);
-                        let key = value_string(item.get("key"))
-                            .or_else(|| value_string(item.get("itemIndex")))
-                            .or_else(|| value_string(item.get("item_index")))
-                            .or_else(|| unique_id.map(|id| id.to_string()))
-                            .unwrap_or_else(|| index.to_string());
-                        let local_slot = normalized_slot(item.get("slot"), fallback_slot);
-                        let source_container = value_string(item.get("container"))
-                            .unwrap_or_default()
-                            .to_ascii_lowercase();
-                        let (container, slot) = if default_container == 0 {
-                            match source_container.as_str() {
-                                "bag2" => (0, 40u32.saturating_add(local_slot)),
-                                "quest" => (3, local_slot),
-                                _ => (0, local_slot),
-                            }
-                        } else {
-                            (default_container, local_slot)
-                        };
-                        let mut mapped = json!({
-                            "uniqueId": unique_id,
-                            "key": key,
-                            "name": value_string(item.get("name")).unwrap_or_default(),
-                            "quantity": value_u32(item.get("quantity").or_else(|| item.get("count"))).unwrap_or(1),
-                            "slot": slot,
-                            "container": container,
-                        });
-                        extend_item_metadata(&mut mapped, item);
-                        mapped
-                    })
-                    .collect()
+fn native_inventory_frame_geometry(
+    library: mir2_client_bevy::native_inventory_ingress::NativeItemLibrary,
+    index: u16,
+) -> Option<mir2_client_bevy::native_inventory_ingress::NativeItemFrameGeometry> {
+    use mir2_client_bevy::native_inventory_ingress::{NativeItemFrameGeometry, NativeItemLibrary};
+    match library {
+        NativeItemLibrary::Items => {
+            item_frame_geometry(index).map(|frame| NativeItemFrameGeometry {
+                width: frame.width,
+                height: frame.height,
+                x: 0,
+                y: 0,
             })
-            .unwrap_or_default()
-    };
-
-    let mut items = Vec::new();
-    items.extend(map_items(payload.get("inventoryItems"), 0));
-    items.extend(map_items(payload.get("beltItems"), 1));
-    items.extend(map_items(payload.get("equipmentItems"), 2));
-
-    json!({ "capacity": capacity, "gold": gold, "items": items })
+        }
+        NativeItemLibrary::StateItem => {
+            state_item_frame_geometry(index).map(|frame| NativeItemFrameGeometry {
+                width: frame.width,
+                height: frame.height,
+                x: frame.x,
+                y: frame.y,
+            })
+        }
+    }
 }
 
 /// Copy the item fields that the simulation already exposes into the shared
@@ -5773,102 +5657,18 @@ fn transform_inventory_model(payload: &Value) -> Value {
 /// case and web snapshot camel case: native sessions can receive either while
 /// reconnecting or applying a storage patch.
 fn extend_item_metadata(mapped: &mut Value, item: &Value) {
-    let metadata = [
-        ("icon", &["icon"][..]),
-        ("stateImage", &["stateImage", "state_image"][..]),
-        ("description", &["description"][..]),
-        (
-            "durabilityCurrent",
-            &[
-                "durabilityCurrent",
-                "durability_current",
-                "currentDura",
-                "current_dura",
-            ][..],
-        ),
-        (
-            "durabilityMax",
-            &["durabilityMax", "durability_max", "maxDura", "max_dura"][..],
-        ),
-        ("sellValue", &["sellValue", "sell_value", "price"][..]),
-        ("equipSlot", &["equipSlot", "equip_slot"][..]),
-        ("grade", &["grade"][..]),
-        ("attack", &["attack"][..]),
-        ("defence", &["defence", "defense"][..]),
-        ("addedAttack", &["addedAttack", "added_attack"][..]),
-        (
-            "addedDefence",
-            &[
-                "addedDefence",
-                "added_defence",
-                "addedDefense",
-                "added_defense",
-            ][..],
-        ),
-        ("addedLuck", &["addedLuck", "added_luck"][..]),
-        ("shape", &["shape"][..]),
-        ("socketSlots", &["socketSlots", "socket_slots"][..]),
-        ("tooltipSource", &["tooltipSource", "tooltip_source"][..]),
-    ];
-    let Some(target) = mapped.as_object_mut() else {
-        return;
-    };
-    for (target_name, candidates) in metadata {
-        if let Some(value) = candidates.iter().find_map(|name| item.get(*name)).cloned() {
-            target.insert(target_name.to_owned(), value);
-        }
-    }
-    let source_icon = value_u32(target.get("quantity"))
-        .and_then(|quantity| crystal_user_item_icon(item, quantity));
-    if let Some(icon) = source_icon {
-        target.insert("icon".to_owned(), json!(icon));
-    }
-    let icon = source_icon.or_else(|| {
-        value_u32(target.get("icon"))
-            .and_then(|value| u16::try_from(value).ok())
-            .filter(|value| *value != 0)
-    });
-    if let Some(frame) = icon.and_then(item_frame_geometry) {
-        target.insert("iconWidth".to_owned(), json!(frame.width));
-        target.insert("iconHeight".to_owned(), json!(frame.height));
-    }
-    let state_image = value_u32(target.get("stateImage"))
-        .and_then(|value| u16::try_from(value).ok())
-        .filter(|value| *value != 0);
-    if let Some(frame) = state_image.and_then(state_item_frame_geometry) {
-        target.insert("stateImageX".to_owned(), json!(frame.x));
-        target.insert("stateImageY".to_owned(), json!(frame.y));
-        target.insert("stateImageWidth".to_owned(), json!(frame.width));
-        target.insert("stateImageHeight".to_owned(), json!(frame.height));
-    }
+    mir2_client_bevy::native_inventory_ingress::extend_native_item_metadata(
+        mapped,
+        item,
+        native_inventory_frame_geometry,
+    );
 }
 
 /// Resolve only concrete UserItem surfaces (bag/belt/equipment/storage/NPC
 /// goods). Catalogue previews never call this. The current quantity is the
 /// authority, not a stale tooltip UserItem count, icon, or viewer realInfo.
 fn crystal_user_item_icon(item: &Value, count: u32) -> Option<u16> {
-    if let Some(info) = item
-        .get("tooltipSource")
-        .or_else(|| item.get("tooltip_source"))
-        .and_then(|source| source.get("info"))
-    {
-        return Some(mir2_game_data::crystal_user_item_image(
-            u8::try_from(value_u32(info.get("item_type"))?).ok()?,
-            i16::try_from(value_i32(info.get("shape"))?).ok()?,
-            u16::try_from(value_u32(info.get("stack_size"))?).ok()?,
-            u16::try_from(value_u32(info.get("image"))?).ok()?,
-            count,
-        ));
-    }
-    let index = value_i32(item.get("item_index").or_else(|| item.get("itemIndex")))?;
-    let info = unique_crystal_tooltip_template(index)?;
-    Some(mir2_game_data::crystal_user_item_image(
-        info.item_type,
-        info.shape,
-        info.stack_size,
-        info.image,
-        count,
-    ))
+    mir2_client_bevy::native_inventory_ingress::native_user_item_icon(item, count)
 }
 
 /// Transform a gateway `worldSnapshot` payload into the shared
