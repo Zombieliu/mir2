@@ -253,6 +253,25 @@ pub struct CrystalChatElement;
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CrystalChatInput;
 
+/// Stable presentation hooks for native hosts; desktop geometry is unchanged.
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CrystalChatLine {
+    pub row: usize,
+}
+
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CrystalChatBackdrop;
+
+/// Optional host-owned physical pointer bounds. A compact host does not expose
+/// the desktop's draggable twelve-pixel scrollbar; semantic Up/Down still use
+/// the shared action queue. `None` preserves Crystal's desktop pointer path.
+#[derive(Resource, Debug, Default)]
+pub struct CrystalChatPointerBounds(pub Option<Rect>);
+
+#[cfg(test)]
+#[path = "chat_phone_tests.rs"]
+mod phone_presentation_tests;
+
 /// A typed, presentation-only result of pressing a Crystal chat control.
 ///
 /// The plugin places these in [`CrystalChatActionQueue`]. Presentation actions
@@ -347,6 +366,7 @@ pub struct Mir2CrystalChatPlugin;
 impl Plugin for Mir2CrystalChatPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ChatModel>()
+            .init_resource::<CrystalChatPointerBounds>()
             .init_resource::<CrystalChatActionQueue>()
             .init_resource::<CrystalChatState>()
             .init_resource::<NativePlayerUiState>()
@@ -990,6 +1010,7 @@ fn spawn_chat_frame_with_spec(
 ) {
     parent.spawn((
         CrystalChatElement,
+        CrystalChatBackdrop,
         Node {
             position_type: PositionType::Absolute,
             left: Val::Px(frame.rect.left),
@@ -1456,6 +1477,7 @@ fn spawn_chat_line(
 
     parent.spawn((
         CrystalChatElement,
+        CrystalChatLine { row },
         Node {
             position_type: PositionType::Absolute,
             left: Val::Px(left),
@@ -2995,6 +3017,7 @@ fn handle_chat_pointer_scroll(
     shell: Option<Res<NativeShellModel>>,
     ui: Res<NativePlayerUiState>,
     mut grab: Local<Option<f32>>,
+    bounds: Option<Res<CrystalChatPointerBounds>>,
 ) {
     let deltas: Vec<_> = wheel.read().map(|e| (e.y, e.unit)).collect();
     let (Some(mouse), Ok(window)) = (mouse, windows.single()) else {
@@ -3013,6 +3036,23 @@ fn handle_chat_pointer_scroll(
     let Some(cursor) = window.cursor_position() else {
         return;
     };
+    if let Some(bounds) = bounds.as_deref().and_then(|bounds| bounds.0) {
+        *grab = None;
+        if bounds.contains(cursor * window.scale_factor()) {
+            let count = display_chat_rows(&chat, &state).len();
+            for (delta, unit) in deltas {
+                let notches = match unit {
+                    bevy::input::mouse::MouseScrollUnit::Line => delta,
+                    bevy::input::mouse::MouseScrollUnit::Pixel => delta / 120.,
+                }
+                .trunc() as i64;
+                state.scroll = (state.scroll as i64 - notches)
+                    .clamp(0, count.saturating_sub(1) as i64)
+                    as usize;
+            }
+        }
+        return;
+    }
     let transform = super::metrics::CrystalStageTransform::fit(
         window.resolution.width(),
         window.resolution.height(),

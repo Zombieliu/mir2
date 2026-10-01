@@ -119,7 +119,7 @@ pub(crate) struct HostState {
     world: Option<HostWorldPosition>,
     pending_world_request: Option<u64>,
     pending_render_request: Option<u64>,
-    ime_bottom: f32,
+    pub(crate) ime_bottom: f32,
     pub(crate) safe_right: f32,
     pub(crate) safe_top: f32,
     safe_left: f32,
@@ -521,6 +521,7 @@ impl Plugin for AndroidSharedShellPlugin {
         crate::entity_overlays::install(app);
         crate::ground_labels::install(app);
         crate::mobile_ui::install(app);
+        crate::phone_hud::install(app);
         crate::scene_effects::install(app);
     }
 }

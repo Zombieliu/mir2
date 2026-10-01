@@ -52,8 +52,13 @@ def verifySharedUiRoot = {
         throw new GradleException('The approved shared Crystal UI Items export is incomplete')
     }
 }
+// Sync skips doFirst for NO-SOURCE. Validate separately so an invalid external
+// root cannot silently produce a successful APK with no licensed UI assets.
+def validateSharedUi = tasks.register('validateSharedUi') {
+    doLast { verifySharedUiRoot() }
+}
 def prepareSharedUi = tasks.register('prepareSharedUi', Sync) {
-    doFirst { verifySharedUiRoot() }
+    dependsOn validateSharedUi
     if (uiRoot) from(uiRoot) {
         include 'original-ui/ChrSel/*.png', 'original-ui/Prguse/*.png', 'original-ui/Prguse2/*.png', 'original-ui/Title/*.png',
                 'original-ui/Items/*.png', 'original-ui/Help/*.png', 'original-ui/MMap/*.png', 'original-ui/StateItem/*.png'
@@ -317,8 +322,8 @@ android {
         applicationId 'com.mir2.web3'
         minSdk 31
         targetSdk 35
-        versionCode 4
-        versionName '0.1.1-shared-sync'
+        versionCode 5
+        versionName '0.1.2-phone-ui'
         buildConfigField 'String', 'MIR2_GATEWAY_URL', groovy.json.JsonOutput.toJson(System.getenv('MIR2_GATEWAY_WS_URL') ?: '')
 
         ndk {

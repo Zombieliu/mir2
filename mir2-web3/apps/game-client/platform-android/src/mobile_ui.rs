@@ -18,7 +18,7 @@ const JOYSTICK_DIAMETER: f32 = 144.0;
 const JOYSTICK_KNOB_DIAMETER: f32 = 56.0;
 const JOYSTICK_TRAVEL: f32 = 42.0;
 const JOYSTICK_LEFT: f32 = 24.0;
-const JOYSTICK_BOTTOM: f32 = 88.0;
+const JOYSTICK_BOTTOM: f32 = 20.0;
 const JOYSTICK_EMIT_SECONDS: f64 = 0.1;
 const CONTROL_SHORT_EDGE_FRACTION: f32 = 0.16;
 const JOYSTICK_MIN_DIAMETER: f32 = 48.0;
@@ -298,6 +298,17 @@ fn gameplay_control_metrics(viewport_height: f32) -> GameplayControlMetrics {
             gap,
         }
     }
+}
+
+/// Left/right thumb footprints used by the phone chat layout. Keep this tied
+/// to the same metrics used for rendering and touch ownership, including the
+/// four-button compact row on short landscape screens.
+pub(crate) fn thumb_footprints(viewport_height: f32) -> Vec2 {
+    let metrics = gameplay_control_metrics(viewport_height);
+    Vec2::new(
+        JOYSTICK_LEFT + JOYSTICK_DIAMETER * metrics.joystick_scale + 16.0,
+        20.0 + metrics.action_pad_width + 16.0,
+    )
 }
 
 fn joystick_center(window: &Window, safe_left: f32, safe_bottom: f32, control_scale: f32) -> Vec2 {
@@ -586,10 +597,7 @@ fn spawn(mut commands: Commands) {
                     button.spawn((
                         RailLabel,
                         Text::new(label),
-                        TextFont {
-                            font_size: FontSize::Px(16.0),
-                            ..default()
-                        },
+                        mir2_client_bevy::crystal_ui::typography::crystal_text_font(16.0),
                         TextColor(Color::srgb(0.95, 0.85, 0.62)),
                     ));
                 });
@@ -661,20 +669,17 @@ fn spawn(mut commands: Commands) {
                         justify_content: JustifyContent::Center,
                         align_items: AlignItems::Center,
                         border: UiRect::all(px(1)),
-                        border_radius: BorderRadius::all(px(7)),
+                        border_radius: BorderRadius::MAX,
                         ..default()
                     },
-                    BackgroundColor(Color::srgba(0.10, 0.08, 0.04, 0.88)),
+                    BackgroundColor(Color::srgba(0.04, 0.05, 0.06, 0.72)),
                     BorderColor::all(Color::srgb(0.70, 0.53, 0.24)),
                 ))
                 .with_children(|button| {
                     button.spawn((
                         RailLabel,
                         Text::new(label),
-                        TextFont {
-                            font_size: FontSize::Px(15.0),
-                            ..default()
-                        },
+                        mir2_client_bevy::crystal_ui::typography::crystal_text_font(15.0),
                         TextColor(Color::srgb(0.98, 0.88, 0.64)),
                     ));
                 });
@@ -857,9 +862,9 @@ fn buttons(
         } else if matches!(action, Action::RunToggle)
             && joystick.as_deref().is_some_and(|state| state.run_lock)
         {
-            Color::srgba(0.42, 0.27, 0.08, 0.94)
+            Color::srgba(0.25, 0.19, 0.08, 0.80)
         } else {
-            Color::srgba(0.10, 0.08, 0.04, 0.95)
+            Color::srgba(0.04, 0.05, 0.06, 0.72)
         };
         if *interaction != Interaction::Pressed || shell.screen != NativeShellScreen::InGame {
             continue;
@@ -889,9 +894,9 @@ fn buttons(
                 if let Some(joystick) = joystick.as_deref_mut() {
                     joystick.run_lock = !joystick.run_lock;
                     background.0 = if joystick.run_lock {
-                        Color::srgba(0.42, 0.27, 0.08, 0.94)
+                        Color::srgba(0.25, 0.19, 0.08, 0.80)
                     } else {
-                        Color::srgba(0.10, 0.08, 0.04, 0.95)
+                        Color::srgba(0.04, 0.05, 0.06, 0.72)
                     };
                     #[cfg(feature = "ui-preview")]
                     info!(
