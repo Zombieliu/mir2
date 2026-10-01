@@ -1,5 +1,19 @@
 # Android native host ingress audit
 
+> 2026-10-02 exact78e7/v19 phone-only NPC touch leaf
+>
+> Both clean native packages,28 input hashes/selected6647 PNG+three metadata
+> and install gates pass. Approved Items/7 is actually visible; four shared NPC
+> close taps pass with eight original frames/canonical logs. V18 short/600ms
+> close failures and compiled reds remain. Android296/preview315/fresh Java39+39/
+> actual API31 variants pass after stale target P2 repair. Nine PID captures135
+> GL506 errors retain renderer FAIL; no full phone/NI-10/11/JNI/online/device
+> increment. Next full quest/dialog ingress and bounded renderer diagnosis.
+> Whole Windows-alignment goal stays Active; no rules or Windows source changed.
+> [Exact source/package/touch and remaining gates](generated/player-qa/native-android-npc-touch-20261002/README.md).
+
+Following entries retain their original historical source and acceptance scope.
+
 > 2026-10-02 v18 package / offline shared NPC follow-up
 >
 > Exact native diagnostic source`aa1f2c4ada37ed880b71da5168d0b080583524a3` includes

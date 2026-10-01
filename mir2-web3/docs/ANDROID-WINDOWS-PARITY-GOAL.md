@@ -2,6 +2,19 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
+2026-10-02 最新实际v19：干净源码`78e7d2309f6a6b92cea1737c76c5eedfd863e46e`
+双原生诊断包、28源码输入hash、每包6647原图/三metadata及安装核验通过。
+有效Items/7图标可见，Buy/Sell/Repair/SRepair四种真实模拟器关闭点按通过，
+8张未裁切前后原图与canonical日志保留；旧v18短点/600ms按住失败不抹除。
+仅Android透明触控目标/预览样本/版本改动，先红后修隐藏旧目标取消新请求P2；
+最终Android296/preview315/fresh Java39+39/API31两变体通过。9个独立PID仍135条
+GL506，零错误渲染门FAIL，不能算完整UI/稳定性。完整NI-10/11、真实认证/JNI/
+Zone/存档、手机极端布局/多指/语言/资源和真机仍OPEN。接下来完整任务/对话入站
+及有界framebuffer诊断；保持完整Windows分母和goal Active。
+[精确v19包、真实点按与旧失败](generated/player-qa/native-android-npc-touch-20261002/README.md)。
+
+下文v18及更早保留各自历史状态，不覆盖上述后续有界验收。
+
 2026-10-02 最新实际v18：干净源码`aa1f2c4ada37ed880b71da5168d0b080583524a3`
 双原生Debug诊断包/hash/资源/安装核验通过，实际包含Windows3d735745f刷新与
 4e35 NPC入站。四个离线共享NPC服务窗实际打开；849地图tiles/8实体/13层画面、

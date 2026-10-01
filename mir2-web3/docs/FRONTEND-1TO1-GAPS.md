@@ -1,5 +1,20 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 Android exact78e7/v19 bounded image/touch checkpoint
+>
+> Buy received specimen uses approved Items/7; actual icon visible. Shared
+> Buy/Sell/Repair/SRepair close taps pass in API31 with eight original frames.
+> Android-only transparent affordance follows actual shared root/visibility/
+> parent, invokes existing close lifecycle; stale hidden target P2 reproduced
+> then guarded. Source296/315/fresh Java39+39/API31, clean dual native APK/hash/
+> selected resources/install gates pass. V18 actual short/hold failures remain.
+> Nine PID captures135 GL506 retain error-free/stability FAIL. Full48dp/screens,
+> phone UI/multitouch/IME/languages/resources/JNI/online/physical and entire Windows
+> denominator remain OPEN/PARTIAL; no global parity or backend increment.
+> [Actual images/taps, source/package and retained failures](generated/player-qa/native-android-npc-touch-20261002/README.md).
+
+Earlier checkpoints retain their original historical sources and acceptance scope.
+
 > 2026-10-02 Android v18 bounded package/UI checkpoint
 >
 > Clean`aa1f2c4ad` native Debug/Preview packages actually include Windows3d735745f

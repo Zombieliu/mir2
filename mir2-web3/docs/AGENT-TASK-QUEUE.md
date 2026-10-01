@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> 2026-10-02 Android v19 queue, full goal still Active
+>
+> Clean78e7 packages/selected resources/install and four actual shared NPC close
+> taps pass; Items/7 visible. Eight original before/after frames/canonical events,
+> v18 short/hold failures and failure-first source gates retained. Final296/315,
+> fresh Java39+39/API31 pass. Nine distinct PID captures135 GL506 still FAIL;
+> no renderer fix or full phone/online/device completion. Next: full public
+> quest/dialog producer using shared Windows projection and bounded framebuffer
+> diagnosis. NI-11 complete receipts, downstream NI-19 and the remaining frozen
+> Windows denominator stay open. Approved test environment remains unanswered;
+> do not use production/human stores or repeatedly request credentials.
+> [Exact proof and bounded next leaf](generated/player-qa/native-android-npc-touch-20261002/README.md).
+
+Earlier checkpoints retain their original source and acceptance scope.
+
 > 2026-10-02 Android v18 follow-up queue, full goal still Active
 >
 > Exact clean`aa1f2c4ad` packages/installs and offline shared NPC four-window,

@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 Android exact78e7/v19 bounded native touch checkpoint
+>
+> Four actual shared NPC close taps and valid Items/7 imagery pass after
+> Android-only target/preview repair. Source296/315/fresh Java39+39/API31 and
+> clean exact dual package/hash/selected resource/install gates pass. Original
+> v18 short/hold failures and three compiled red regressions remain. Nine PID
+> captures135 GL506 retain renderer FAIL. No shared/Windows/server rule changes,
+> backend percentage, full phone/JNI/online/physical or Windows-completeness
+> acceptance follows. Next complete quest/dialog ingress and bounded renderer
+> diagnosis; whole Windows-alignment goal remains Active.
+> [Exact package/touch evidence and remaining denominator](generated/player-qa/native-android-npc-touch-20261002/README.md).
+
+Earlier checkpoints retain their original source and acceptance scope.
+
 > 2026-10-02 Android v18 native package checkpoint, not global parity acceptance
 >
 > Clean`aa1f2c4ad` contains the frozen Windows3d735745f refresh and4e35 NPC
