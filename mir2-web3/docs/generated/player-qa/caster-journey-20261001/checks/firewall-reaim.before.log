@@ -1,0 +1,55 @@
+TAP version 13
+# Subtest: FireWall practice reaims the same moving target only after an accepted ground miss
+not ok 1 - FireWall practice reaims the same moving target only after an accepted ground miss
+  ---
+  duration_ms: 2.8946
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\test-protocol-newcomer-v2.mjs:1224:1'
+  failureType: 'testCodeFailure'
+  error: 'FireWall lacked a positive post-send target damage receipt'
+  code: 'ERR_TEST_FAILURE'
+  stack: |-
+    file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-newcomer-v2.mjs:1766:11
+    async waitForSpellDamage (file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-newcomer-v2.mjs:1764:3)
+    async executeV2PracticePlan (file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/protocol-newcomer-v2.mjs:1070:7)
+    async TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-protocol-newcomer-v2.mjs:1256:3)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: FireWall practice stops after three accepted misses without inventing damage or navigation
+not ok 2 - FireWall practice stops after three accepted misses without inventing damage or navigation
+  ---
+  duration_ms: 0.9651
+  type: 'test'
+  location: 'C:\\Users\\Administrator\\.codex\\worktrees\\capacity-transport\\mir2-player-journey\\mir2-web3\\apps\\web\\scripts\\quest-agent\\test-protocol-newcomer-v2.mjs:1265:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    1 !== 3
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 3
+  actual: 1
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/Users/Administrator/.codex/worktrees/capacity-transport/mir2-player-journey/mir2-web3/apps/web/scripts/quest-agent/test-protocol-newcomer-v2.mjs:1286:10)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: FireWall practice never sends a retry after its original twelve-second window
+ok 3 - FireWall practice never sends a retry after its original twelve-second window
+  ---
+  duration_ms: 0.311
+  type: 'test'
+  ...
+1..3
+# tests 3
+# suites 0
+# pass 1
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 248.6275

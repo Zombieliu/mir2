@@ -31,6 +31,7 @@ const PRACTICE_SPAWN_ATTEMPT_BUDGET = 180;
 const PRACTICE_TECHNIQUE_WINDOW_MS = 12_000;
 const PRACTICE_TECHNIQUE_MAX_SWINGS = 3;
 const PRACTICE_TECHNIQUE_ACTION_SPACING_MS = 650; // Zone accepts one melee action per 600 ms.
+const PRACTICE_GROUND_MAX_CASTS = 3;
 // V2 quest templates address the live NPC object IDs. Crystal's database
 // manifest numbers Board as npc_index 35, while the public world object is
 // 24, so never reinterpret these object IDs as database row indexes.
@@ -1066,8 +1067,12 @@ export async function executeV2PracticePlan({ client, quest, navigate, checkDead
           : {});
       await revealBuriedTarget(target);
       if (step.spell === 'SoulFireBall') await equipHeldAmulet(client);
-      const cast = await castV2Spell(client, target, step.spell, checkDeadline, quest.questId);
-      await waitForSpellDamage(client, cast.after, cast.target, cast.beforeHp, step.spell, quest.questId);
+      if (step.spell === 'FireWall') {
+        await completeFireWallPractice(client, target, quest.questId, checkDeadline);
+      } else {
+        const cast = await castV2Spell(client, target, step.spell, checkDeadline, quest.questId);
+        await waitForSpellDamage(client, cast.after, cast.target, cast.beforeHp, step.spell, quest.questId);
+      }
     } else if (step.kind === 'reposition') {
       const target = await acquireTarget(8);
       const actor = selfPlayer(client);
@@ -1754,7 +1759,49 @@ async function waitForTargetDamage(client, after, target, beforeHp, questId, lab
   });
 }
 
-async function waitForSpellDamage(client, after, target, beforeHp, spell, questId) {
+async function completeFireWallPractice(client, target, questId, checkDeadline) {
+  const mapFileName = String(client.snapshot?.mapFileName ?? '');
+  let firstCastAt = null;
+  const checkWindow = () => {
+    checkDeadline();
+    if (firstCastAt != null && Date.now() - firstCastAt >= PRACTICE_TECHNIQUE_WINDOW_MS) {
+      throw new V2Pause('awaitingPracticeDamage', questId, 'FireWall missed within the original receipt window');
+    }
+  };
+  for (let attempt = 0; attempt < PRACTICE_GROUND_MAX_CASTS; attempt += 1) {
+    checkWindow();
+    if (attempt > 0) {
+      // A ground cast may be accepted while a chasing monster walks outside
+      // its delayed cross. Refresh once and reaim that same public actor;
+      // never add another navigation/search allowance or trust an old ACK.
+      await refreshCombatWorldSnapshot(client);
+      checkWindow();
+      await useSupplies(client);
+      checkWindow();
+      const live = (client.snapshot?.entities ?? []).find(entity => Number(entity?.objectId) === Number(target.objectId));
+      if (String(client.snapshot?.mapFileName ?? '') !== mapFileName || !live ||
+          live.dead === true || Number(live.hp ?? 1) <= 0 || distance(selfPlayer(client), live) > 8) {
+        throw new V2Pause('practiceTargetLost', questId, 'FireWall retry lost its original live in-range target');
+      }
+      target = live;
+    }
+    const cast = await castV2Spell(client, target, 'FireWall', checkWindow, questId);
+    firstCastAt ??= Date.now();
+    const remaining = PRACTICE_TECHNIQUE_WINDOW_MS - (Date.now() - firstCastAt);
+    checkWindow();
+    const timeoutMs = attempt + 1 < PRACTICE_GROUND_MAX_CASTS ? Math.min(2_500, remaining) : remaining;
+    try {
+      await waitForSpellDamage(client, cast.after, cast.target, cast.beforeHp, 'FireWall', questId, timeoutMs);
+      return;
+    } catch (error) {
+      const accepted = magicAccepted(client, cast.after, 'FireWall', selfPlayer(client), 0);
+      if (error?.reason !== 'awaitingPracticeDamage' || !accepted ||
+          attempt + 1 >= PRACTICE_GROUND_MAX_CASTS) throw error;
+    }
+  }
+}
+
+async function waitForSpellDamage(client, after, target, beforeHp, spell, questId, timeoutMs = 12_000) {
   const actor = selfPlayer(client);
   const expectedTargetId = spell === 'Lightning'
     ? actor?.objectId
@@ -1762,7 +1809,7 @@ async function waitForSpellDamage(client, after, target, beforeHp, spell, questI
       ? 0
       : target?.objectId;
   await client.wait(() => magicAccepted(client, after, spell, actor, expectedTargetId) &&
-    targetTookDamage(client, target, beforeHp, after, actor?.objectId), `q${questId} ${spell} damage`, 12_000).catch(() => {
+    targetTookDamage(client, target, beforeHp, after, actor?.objectId), `q${questId} ${spell} damage`, timeoutMs).catch(() => {
     throw new V2Pause('awaitingPracticeDamage', questId, `${spell} lacked a positive post-send target damage receipt`);
   });
 }

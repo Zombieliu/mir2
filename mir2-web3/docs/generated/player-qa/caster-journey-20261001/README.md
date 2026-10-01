@@ -157,3 +157,24 @@ The original r2 ordinary clock expired with Wizard22/Taoist26 (48/52), zero
 confirmed deaths and normal saved logouts. Remaining Wizard work uses a
 separately labelled functional recheck; the original clock and result stay
 unchanged. Full saved functional completion remains pending.
+
+## Moving-target FireWall practice
+
+The separate r2 Wizard functional run completed N20 normally, then paused N21
+on an accepted FireWall miss. Fresh snapshot4165 showed readiness zero;
+send4166/owner Magic4167 accepted target-zero ground aim (301,382), and the
+next personal frame showed the real 30-MP debit. Selected actor1202102 walked
+diagonally to (302,381) at4174, outside the five-cell cross later announced
+at4175–4179. No positive target damage followed. This conforms to Crystal's
+delayed ground effect; it is not a cooldown failure.
+
+Practice now permits at most three accepted ground attempts in the same
+original twelve-second receipt window. Before a retry it refreshes public
+readiness, uses only owned supplies, and reaims the same living in-range
+actor on the same map. No extra navigation/search budget is introduced.
+Missing/wrong cast ACKs, target loss, three misses or elapsed time still pause;
+positive target damage and final server-confirmed practice flags remain
+required. Non-FireWall practice and production spell rules are unchanged.
+New moving-target/budget controls fail 2/3 before; all seven FireWall controls
+pass after. The seven affected controller/evidence suites pass317/317 TAP
+cases, with the 54-case custom loadout script counted as one TAP subprocess.

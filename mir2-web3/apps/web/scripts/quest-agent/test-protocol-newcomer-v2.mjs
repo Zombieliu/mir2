@@ -1221,6 +1221,96 @@ test('FireWall rejects a monster-target or non-cast acknowledgement even when th
   }
 });
 
+test('FireWall practice reaims the same moving target only after an accepted ground miss', async () => {
+  const { client, quest, sent } = practiceClient({
+    questId: 2110021, knownSkills: ['FireWall'], completeOn: 1,
+    requirements: { wizard: ['owned FireWall damage committed'] },
+  });
+  client.snapshot.entities[0].class = 'Wizard';
+  let casts = 0;
+  let probes = 0;
+  const originalSend = client.send.bind(client);
+  client.send = command => {
+    if (command.type === 'clientVersion') {
+      probes += 1;
+      client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
+        payload: structuredClone(client.snapshot) });
+      return;
+    }
+    if (command.type === 'magic' && ++casts === 1) {
+      sent.push(command);
+      client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
+        payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
+      // A diagonal step leaves the five-cell cross before its first damage tick.
+      Object.assign(client.snapshot.entities[1], { x: 2, y: 1 });
+      return;
+    }
+    originalSend(command);
+  };
+  const timeouts = [];
+  client.wait = async (predicate, label, timeoutMs) => {
+    if (label.includes('FireWall damage')) timeouts.push(timeoutMs);
+    if (!predicate()) throw new Error('synthetic accepted ground miss');
+    return true;
+  };
+  await executeV2PracticePlan({ client, quest, navigate: async () => {}, plan: [{ kind: 'spell', spell: 'FireWall' }] });
+  assert.equal(casts, 2);
+  assert.equal(probes, 1, 'a public frame must refresh readiness and target before the second cast');
+  assert.deepEqual(sent.map(command => [command.x, command.y, command.targetId]), [[1,0,0],[2,1,0]]);
+  assert.ok(timeouts.every(timeout => timeout > 0 && timeout <= 12_000));
+  assert.equal(timeouts[0], 2_500);
+  assert.equal(client.events.filter(event => event.packet === 'ObjectStruck').length, 1);
+});
+
+test('FireWall practice stops after three accepted misses without inventing damage or navigation', async () => {
+  const { client, quest, sent } = practiceClient({ knownSkills: ['FireWall'], completeOn: 1,
+    requirements: { wizard: ['owned FireWall damage committed'] } });
+  client.snapshot.entities[0].class = 'Wizard';
+  client.send = command => {
+    if (command.type === 'clientVersion') {
+      client.events.push({ sequence: ++client.sequence, direction: 'received', type: 'worldSnapshot',
+        payload: structuredClone(client.snapshot) });
+      return;
+    }
+    sent.push(command);
+    client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
+      payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
+  };
+  client.wait = async predicate => {
+    if (!predicate()) throw new Error('synthetic accepted ground miss');
+    return true;
+  };
+  let navigationCalls = 0;
+  await assert.rejects(executeV2PracticePlan({ client, quest, navigate: async () => { navigationCalls += 1; },
+    plan: [{ kind: 'spell', spell: 'FireWall' }] }), error => error.reason === 'awaitingPracticeDamage');
+  assert.equal(sent.length, 3);
+  assert.equal(navigationCalls, 1, 'reaiming must not multiply the original navigation budget');
+  assert.equal(client.snapshot.questLog[0].objectives[0].done, false);
+});
+
+test('FireWall practice never sends a retry after its original twelve-second window', async () => {
+  const { client, quest, sent } = practiceClient({ knownSkills: ['FireWall'], completeOn: 1,
+    requirements: { wizard: ['owned FireWall damage committed'] } });
+  client.snapshot.entities[0].class = 'Wizard';
+  const originalNow = Date.now;
+  let elapsed = 0;
+  Date.now = () => 100_000 + elapsed;
+  try {
+    client.send = command => {
+      sent.push(command);
+      client.events.push({ sequence: ++client.sequence, direction: 'received', packet: 'ObjectMagic',
+        payload: { objectId: 1, spell: 'FireWall', targetId: 0, cast: true } });
+    };
+    client.wait = async predicate => {
+      if (!predicate()) { elapsed = 12_000; throw new Error('expired accepted miss'); }
+      return true;
+    };
+    await assert.rejects(executeV2PracticePlan({ client, quest, navigate: async () => {},
+      plan: [{ kind: 'spell', spell: 'FireWall' }] }), error => error.reason === 'awaitingPracticeDamage');
+    assert.equal(sent.filter(command => command.type === 'magic').length, 1);
+  } finally { Date.now = originalNow; }
+});
+
 test('practice plans execute every q21 class action rather than one priority spell', () => {
   const warrior = practiceQuest({ warrior: ['HalfMoon attack damage committed', 'Thrusting attack damage committed'] });
   const wizard = practiceQuest({ wizard: ['Lightning damage committed', 'owned FireWall damage committed', 'legal reposition between attacks'] });
