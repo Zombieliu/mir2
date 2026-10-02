@@ -1,0 +1,193 @@
+{
+  "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+  "versionCode": 30,
+  "oldVersionCode": 29,
+  "dataPreserving": true,
+  "commands": [
+    {
+      "name": "install-devices.txt",
+      "args": [
+        "devices",
+        "-l"
+      ],
+      "started": "2026-10-02T11:46:47.421Z",
+      "finished": "2026-10-02T11:46:47.433Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-api.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.version.sdk"
+      ],
+      "started": "2026-10-02T11:46:47.433Z",
+      "finished": "2026-10-02T11:46:47.449Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-path-before.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T11:46:47.659Z",
+      "finished": "2026-10-02T11:46:47.687Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-sha-before.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~wrCZQffI2p4lfcsgNFAGlA==/com.mir2.web3-GHFvLMs_FFbiR-RWH4aO7Q==/base.apk"
+      ],
+      "started": "2026-10-02T11:46:47.688Z",
+      "finished": "2026-10-02T11:46:47.918Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T11:46:47.918Z",
+      "finished": "2026-10-02T11:46:47.938Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-result.txt",
+      "args": [
+        "install",
+        "-r",
+        "-t",
+        "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-npc-v30-20261002-VVRFSM/final-apks/mir2-native-phone-npc-quests-debug-v30.apk"
+      ],
+      "started": "2026-10-02T11:46:47.939Z",
+      "finished": "2026-10-02T11:46:49.356Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-path-after.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T11:46:49.356Z",
+      "finished": "2026-10-02T11:46:49.381Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-sha-after.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~dJrh9cS3EpWkV2HdAvNMOA==/com.mir2.web3-yJjNYJaOXRz-1TswptVmjQ==/base.apk"
+      ],
+      "started": "2026-10-02T11:46:49.381Z",
+      "finished": "2026-10-02T11:46:49.643Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T11:46:49.643Z",
+      "finished": "2026-10-02T11:46:49.675Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-path-before.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T11:46:49.902Z",
+      "finished": "2026-10-02T11:46:49.927Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-sha-before.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~Tk3cdhukNvmovswrAxFOyQ==/com.mir2.web3.uipreview--WucrCpJploXa4YfpM3SIw==/base.apk"
+      ],
+      "started": "2026-10-02T11:46:49.927Z",
+      "finished": "2026-10-02T11:46:50.179Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T11:46:50.179Z",
+      "finished": "2026-10-02T11:46:50.202Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-result.txt",
+      "args": [
+        "install",
+        "-r",
+        "-t",
+        "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-npc-v30-20261002-VVRFSM/final-apks/mir2-native-phone-npc-quests-preview-v30.apk"
+      ],
+      "started": "2026-10-02T11:46:50.202Z",
+      "finished": "2026-10-02T11:46:51.609Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-path-after.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T11:46:51.610Z",
+      "finished": "2026-10-02T11:46:51.641Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-sha-after.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~zDKxWbitq4RCgArUm-KaAA==/com.mir2.web3.uipreview-iP9QCVnjwJrMhngTxecqIg==/base.apk"
+      ],
+      "started": "2026-10-02T11:46:51.641Z",
+      "finished": "2026-10-02T11:46:51.886Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T11:46:51.886Z",
+      "finished": "2026-10-02T11:46:51.906Z",
+      "exitCode": 0
+    }
+  ]
+}

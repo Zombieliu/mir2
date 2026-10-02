@@ -1,0 +1,23 @@
+{
+  "command": "cargo",
+  "args": [
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+    "--lib",
+    "--features",
+    "native-player-ui",
+    "--locked",
+    "--offline",
+    "phone_npc_",
+    "--",
+    "--test-threads=1"
+  ],
+  "started": "2026-10-02T11:20:32.215Z",
+  "finished": "2026-10-02T11:21:07.681Z",
+  "exitCode": 101,
+  "signal": null,
+  "phoneSourceSha256": "dd25c3c3208f0c41aacfc621c18fb36db3104c058138da2583c4c4b5090f221c",
+  "log": "npc-red.log"
+}
