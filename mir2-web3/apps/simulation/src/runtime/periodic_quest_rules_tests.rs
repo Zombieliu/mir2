@@ -102,7 +102,8 @@ fn legal_kill_updates_daily_and_weekly_but_same_monster_on_wrong_map_does_not() 
         .current_map
         .file_name = "0".into();
     assert!(advance_crystal_quest_kill(session.app.world_mut(), "Scarecrow0").is_empty());
-    for _ in 1..80 {
+    let target = mir2_game_data::periodic_quests::quest(92001).unwrap().kills[0].count;
+    for _ in 1..target {
         advance_crystal_quest_kill(session.app.world_mut(), "Scarecrow");
     }
     assert_eq!(
@@ -115,7 +116,81 @@ fn legal_kill_updates_daily_and_weekly_but_same_monster_on_wrong_map_does_not() 
     );
     assert_eq!(
         (current(&session, 92001), current(&session, 92004)),
-        (80, 80)
+        (target, target)
+    );
+}
+
+#[test]
+fn reaccepted_legacy_completed_periodic_row_uses_the_reduced_target_total() {
+    let mut session = session(20, MirClass::Warrior);
+    let definition = mir2_game_data::periodic_quests::quest(92006).unwrap();
+    let now = quest_recurrence::server_now_millis();
+    let previous_period = quest_recurrence::daily_period_at(now - DAY);
+    let mut legacy =
+        QuestState::from_crystal_info(&definition.info(14_000, 8_000), QuestStage::Completed);
+    legacy.required = 70;
+    legacy.current = 70;
+    legacy.summary =
+        "Defeat 70 Omas on the Bichon road, then return to either Task Steward.".into();
+    legacy.task_progress.insert("kill:48".into(), 70);
+    legacy.cadence_last_claimed_period = Some(previous_period);
+    legacy.cadence_high_watermark_period = Some(previous_period);
+    legacy.accepted_periodic_reward = Some(periodic_quests::AcceptedPeriodicReward {
+        level: 20,
+        experience: 14_000,
+        gold: 8_000,
+    });
+    session
+        .app
+        .world_mut()
+        .resource_mut::<QuestResource>()
+        .quests
+        .push(legacy);
+    reconcile_effective_quest_states(session.app.world_mut());
+    quest_recurrence::refresh_quest_recurrence_at(session.app.world_mut(), now);
+    assert_eq!(
+        quest_progress(session.app.world(), definition.id),
+        Some((0, 70))
+    );
+    let available = session
+        .app
+        .world()
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .find(|row| row.quest_id == definition.id)
+        .unwrap();
+    let snapshot = effective_quest_snapshot(session.app.world(), available, LanguageCode::English);
+    assert_eq!(snapshot.summary, definition.summary);
+    assert_eq!((snapshot.current, snapshot.required), (0, 7));
+    assert_eq!(
+        begin_quest(session.app.world_mut(), definition.id),
+        QuestStage::InProgress
+    );
+    assert_eq!(
+        quest_progress(session.app.world(), definition.id),
+        Some((0, 7))
+    );
+    for _ in 0..7 {
+        advance_crystal_quest_kill(session.app.world_mut(), "Oma");
+    }
+    assert_eq!(
+        quest_stage(session.app.world(), definition.id),
+        Some(QuestStage::ReadyToTurnIn)
+    );
+    let row = session
+        .app
+        .world()
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .find(|row| row.quest_id == definition.id)
+        .unwrap();
+    assert_eq!(row.cadence_last_claimed_period, Some(previous_period));
+    assert_eq!(row.summary, definition.summary);
+    assert_eq!(
+        row.accepted_periodic_reward.as_ref().unwrap().experience,
+        480_000
     );
 }
 

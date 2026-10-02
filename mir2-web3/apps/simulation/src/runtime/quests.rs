@@ -592,6 +592,17 @@ fn effective_quest_snapshot(
     let template = effective_crystal_quest_template_by_id(world, quest.quest_id);
     let mut snapshot = quest.snapshot_with_template(language, template.as_ref());
     if let Some(info) = effective_crystal_quest_info_by_id(world, quest.quest_id) {
+        if mir2_game_data::periodic_quests::is_periodic(quest.quest_id) {
+            // Completed legacy rows are reconciled only after reacceptance.
+            // A reset Available offer must already display the current count.
+            snapshot.summary = localized_quest_summary(
+                language,
+                quest.quest_id,
+                &crystal_quest_summary(&info),
+            );
+            snapshot.required = effective_crystal_quest_required_count(world, &info);
+            snapshot.current = quest.current.min(snapshot.required);
+        }
         let copy = crystal_stage_copy(quest, &info);
         snapshot.objective = copy.objective;
         snapshot.progress_label = copy.progress_label;
@@ -1046,6 +1057,15 @@ pub(super) fn begin_quest(world: &mut World, quest_id: i32) -> QuestStage {
         .iter_mut()
         .find(|quest| quest.quest_id == info.index)
     {
+        if mir2_game_data::periodic_quests::is_periodic(quest_id) {
+            // A completed saved row can retain the previous release's target
+            // total through a cadence reset. Reaccept with the current catalog
+            // requirement so reduced counters can actually reach Ready.
+            quest.required = crystal_quest_template_required_count(&template);
+            quest.title = info.name.clone();
+            quest.summary = crystal_quest_summary(&info);
+            quest.reward_preview = crystal_quest_reward_preview(&info);
+        }
         quest.stage = next_stage;
         if next_stage == QuestStage::ReadyToTurnIn {
             quest.current = quest.required;

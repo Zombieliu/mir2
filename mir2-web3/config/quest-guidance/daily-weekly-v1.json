@@ -30,11 +30,11 @@
       "cadence": "daily",
       "slot": 0,
       "title": "Village Field Patrol",
-      "summary": "Defeat 80 Scarecrows in Bichon Province. Return to either Task Steward.",
-      "rewardExpPercent": 10,
+      "summary": "Defeat 8 Scarecrows in Bichon Province. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 4000,
       "kills": [
-        { "monster": "Scarecrow", "monsterIndex": 39, "count": 80, "maps": ["0"], "x": 200, "y": 400 }
+        { "monster": "Scarecrow", "monsterIndex": 39, "count": 8, "maps": ["0"], "x": 200, "y": 400 }
       ]
     },
     {
@@ -44,11 +44,11 @@
       "cadence": "daily",
       "slot": 1,
       "title": "Village Raking Cats",
-      "summary": "Defeat 60 Raking Cats in Bichon Province. Return to either Task Steward.",
-      "rewardExpPercent": 14,
+      "summary": "Defeat 6 Raking Cats in Bichon Province. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 4000,
       "kills": [
-        { "monster": "RakingCat", "monsterIndex": 44, "count": 60, "maps": ["0"], "x": 340, "y": 550 }
+        { "monster": "RakingCat", "monsterIndex": 44, "count": 6, "maps": ["0"], "x": 340, "y": 550 }
       ]
     },
     {
@@ -58,11 +58,11 @@
       "cadence": "daily",
       "slot": 2,
       "title": "Village Hooking Cats",
-      "summary": "Defeat 60 Hooking Cats in Bichon Province. Return to either Task Steward.",
-      "rewardExpPercent": 16,
+      "summary": "Defeat 6 Hooking Cats in Bichon Province. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 4000,
       "kills": [
-        { "monster": "HookingCat", "monsterIndex": 42, "count": 60, "maps": ["0"], "x": 340, "y": 550 }
+        { "monster": "HookingCat", "monsterIndex": 42, "count": 6, "maps": ["0"], "x": 340, "y": 550 }
       ]
     },
     {
@@ -72,11 +72,11 @@
       "cadence": "weekly",
       "slot": 0,
       "title": "Village Field Watch",
-      "summary": "Defeat 200 Scarecrows in Bichon Province this week. Return to either Task Steward.",
-      "rewardExpPercent": 50,
+      "summary": "Defeat 20 Scarecrows in Bichon Province this week. Return to either Task Steward.",
+      "rewardLevelSpan": 10,
       "gold": 25000,
       "kills": [
-        { "monster": "Scarecrow", "monsterIndex": 39, "count": 200, "maps": ["0"], "x": 200, "y": 400 }
+        { "monster": "Scarecrow", "monsterIndex": 39, "count": 20, "maps": ["0"], "x": 200, "y": 400 }
       ]
     },
     {
@@ -86,12 +86,12 @@
       "cadence": "weekly",
       "slot": 1,
       "title": "Village Cat Watch",
-      "summary": "Defeat 160 Raking Cats and 160 Hooking Cats in Bichon Province this week. Return to either Task Steward.",
-      "rewardExpPercent": 60,
+      "summary": "Defeat 16 Raking Cats and 16 Hooking Cats in Bichon Province this week. Return to either Task Steward.",
+      "rewardLevelSpan": 10,
       "gold": 25000,
       "kills": [
-        { "monster": "RakingCat", "monsterIndex": 44, "count": 160, "maps": ["0"], "x": 340, "y": 550 },
-        { "monster": "HookingCat", "monsterIndex": 42, "count": 160, "maps": ["0"], "x": 340, "y": 550 }
+        { "monster": "RakingCat", "monsterIndex": 44, "count": 16, "maps": ["0"], "x": 340, "y": 550 },
+        { "monster": "HookingCat", "monsterIndex": 42, "count": 16, "maps": ["0"], "x": 340, "y": 550 }
       ]
     },
     {
@@ -101,11 +101,11 @@
       "cadence": "daily",
       "slot": 0,
       "title": "Bichon Oma Patrol",
-      "summary": "Defeat 70 Omas in Bichon Province. Return to either Task Steward.",
-      "rewardExpPercent": 10,
+      "summary": "Defeat 7 Omas in Bichon Province. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 8000,
       "kills": [
-        { "monster": "Oma", "monsterIndex": 48, "count": 70, "maps": ["0"], "x": 420, "y": 95 }
+        { "monster": "Oma", "monsterIndex": 48, "count": 7, "maps": ["0"], "x": 420, "y": 95 }
       ]
     },
     {
@@ -115,11 +115,11 @@
       "cadence": "daily",
       "slot": 1,
       "title": "Bichon Skeleton Patrol",
-      "summary": "Defeat 60 Skeletons in Oma Cave 1F or Natural Cave. Return to either Task Steward.",
-      "rewardExpPercent": 14,
+      "summary": "Defeat 6 Skeletons in Oma Cave 1F or Natural Cave. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 8000,
       "kills": [
-        { "monster": "Skeleton", "monsterIndex": 85, "count": 60, "maps": ["D001", "D011"], "x": 199, "y": 199 }
+        { "monster": "Skeleton", "monsterIndex": 85, "count": 6, "maps": ["D001", "D011"], "x": 199, "y": 199 }
       ]
     },
     {
@@ -129,11 +129,11 @@
       "cadence": "daily",
       "slot": 2,
       "title": "Bichon Scorpion Patrol",
-      "summary": "Defeat 60 Scorpions in Oma Cave 1F or Natural Cave. Return to either Task Steward.",
-      "rewardExpPercent": 16,
+      "summary": "Defeat 6 Scorpions in Oma Cave 1F or Natural Cave. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 8000,
       "kills": [
-        { "monster": "Scorpion", "monsterIndex": 84, "count": 60, "maps": ["D001", "D011"], "x": 199, "y": 199 }
+        { "monster": "Scorpion", "monsterIndex": 84, "count": 6, "maps": ["D001", "D011"], "x": 199, "y": 199 }
       ]
     },
     {
@@ -143,11 +143,11 @@
       "cadence": "weekly",
       "slot": 0,
       "title": "Bichon Oma Watch",
-      "summary": "Defeat 200 Omas in Bichon Province this week. Return to either Task Steward.",
-      "rewardExpPercent": 50,
+      "summary": "Defeat 20 Omas in Bichon Province this week. Return to either Task Steward.",
+      "rewardLevelSpan": 10,
       "gold": 60000,
       "kills": [
-        { "monster": "Oma", "monsterIndex": 48, "count": 200, "maps": ["0"], "x": 420, "y": 95 }
+        { "monster": "Oma", "monsterIndex": 48, "count": 20, "maps": ["0"], "x": 420, "y": 95 }
       ]
     },
     {
@@ -157,12 +157,12 @@
       "cadence": "weekly",
       "slot": 1,
       "title": "Bichon Cave Watch",
-      "summary": "Defeat 150 Skeletons and 150 Scorpions in Oma Cave 1F or Natural Cave this week. Return to either Task Steward.",
-      "rewardExpPercent": 60,
+      "summary": "Defeat 15 Skeletons and 15 Scorpions in Oma Cave 1F or Natural Cave this week. Return to either Task Steward.",
+      "rewardLevelSpan": 10,
       "gold": 60000,
       "kills": [
-        { "monster": "Skeleton", "monsterIndex": 85, "count": 150, "maps": ["D001", "D011"], "x": 199, "y": 199 },
-        { "monster": "Scorpion", "monsterIndex": 84, "count": 150, "maps": ["D001", "D011"], "x": 199, "y": 199 }
+        { "monster": "Skeleton", "monsterIndex": 85, "count": 15, "maps": ["D001", "D011"], "x": 199, "y": 199 },
+        { "monster": "Scorpion", "monsterIndex": 84, "count": 15, "maps": ["D001", "D011"], "x": 199, "y": 199 }
       ]
     },
     {
@@ -172,11 +172,11 @@
       "cadence": "daily",
       "slot": 0,
       "title": "Insect Centipede Patrol",
-      "summary": "Defeat 50 Centipedes in the Southern Insect Cave 1F. Return to either Task Steward.",
-      "rewardExpPercent": 10,
+      "summary": "Defeat 5 Centipedes in the Southern Insect Cave 1F. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 20000,
       "kills": [
-        { "monster": "Centipede", "monsterIndex": 152, "count": 50, "maps": ["D601"], "x": 40, "y": 27 }
+        { "monster": "Centipede", "monsterIndex": 152, "count": 5, "maps": ["D601"], "x": 40, "y": 27 }
       ]
     },
     {
@@ -186,11 +186,11 @@
       "cadence": "daily",
       "slot": 1,
       "title": "Insect Maggot Patrol",
-      "summary": "Defeat 45 Black Maggots in the Southern Insect Cave 1F. Return to either Task Steward.",
-      "rewardExpPercent": 14,
+      "summary": "Defeat 5 Black Maggots in the Southern Insect Cave 1F. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 20000,
       "kills": [
-        { "monster": "BlackMaggot", "monsterIndex": 150, "count": 45, "maps": ["D601"], "x": 40, "y": 27 }
+        { "monster": "BlackMaggot", "monsterIndex": 150, "count": 5, "maps": ["D601"], "x": 40, "y": 27 }
       ]
     },
     {
@@ -200,11 +200,11 @@
       "cadence": "daily",
       "slot": 2,
       "title": "Insect Bee Patrol",
-      "summary": "Defeat 45 Whimpering Bees in the Southern Insect Cave 1F. Return to either Task Steward.",
-      "rewardExpPercent": 16,
+      "summary": "Defeat 5 Whimpering Bees in the Southern Insect Cave 1F. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 20000,
       "kills": [
-        { "monster": "WhimperingBee", "monsterIndex": 156, "count": 45, "maps": ["D601"], "x": 40, "y": 27 }
+        { "monster": "WhimperingBee", "monsterIndex": 156, "count": 5, "maps": ["D601"], "x": 40, "y": 27 }
       ]
     },
     {
@@ -214,12 +214,12 @@
       "cadence": "weekly",
       "slot": 0,
       "title": "Insect Tunnel Watch",
-      "summary": "Defeat 150 Centipedes and 100 Black Maggots in the Southern Insect Cave 1F this week. Return to either Task Steward.",
-      "rewardExpPercent": 50,
+      "summary": "Defeat 15 Centipedes and 10 Black Maggots in the Southern Insect Cave 1F this week. Return to either Task Steward.",
+      "rewardLevelSpan": 10,
       "gold": 150000,
       "kills": [
-        { "monster": "Centipede", "monsterIndex": 152, "count": 150, "maps": ["D601"], "x": 40, "y": 27 },
-        { "monster": "BlackMaggot", "monsterIndex": 150, "count": 100, "maps": ["D601"], "x": 40, "y": 27 }
+        { "monster": "Centipede", "monsterIndex": 152, "count": 15, "maps": ["D601"], "x": 40, "y": 27 },
+        { "monster": "BlackMaggot", "monsterIndex": 150, "count": 10, "maps": ["D601"], "x": 40, "y": 27 }
       ]
     },
     {
@@ -229,12 +229,12 @@
       "cadence": "weekly",
       "slot": 1,
       "title": "Insect Nest Watch",
-      "summary": "Defeat 120 Whimpering Bees and 120 Giant Worms in the Southern Insect Cave 1F this week. Return to either Task Steward.",
-      "rewardExpPercent": 60,
+      "summary": "Defeat 12 Whimpering Bees and 12 Giant Worms in the Southern Insect Cave 1F this week. Return to either Task Steward.",
+      "rewardLevelSpan": 10,
       "gold": 150000,
       "kills": [
-        { "monster": "WhimperingBee", "monsterIndex": 156, "count": 120, "maps": ["D601"], "x": 40, "y": 27 },
-        { "monster": "GiantWorm", "monsterIndex": 154, "count": 120, "maps": ["D601"], "x": 84, "y": 104 }
+        { "monster": "WhimperingBee", "monsterIndex": 156, "count": 12, "maps": ["D601"], "x": 40, "y": 27 },
+        { "monster": "GiantWorm", "monsterIndex": 154, "count": 12, "maps": ["D601"], "x": 84, "y": 104 }
       ]
     },
     {
@@ -244,11 +244,11 @@
       "cadence": "daily",
       "slot": 0,
       "title": "Tomb Red Boar Patrol",
-      "summary": "Defeat 60 Red Boars in Angled Stone Tomb B1. Return to either Task Steward.",
-      "rewardExpPercent": 10,
+      "summary": "Defeat 6 Red Boars in Angled Stone Tomb B1. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 34000,
       "kills": [
-        { "monster": "RedBoar", "monsterIndex": 168, "count": 60, "maps": ["D711"], "x": 251, "y": 41 }
+        { "monster": "RedBoar", "monsterIndex": 168, "count": 6, "maps": ["D711"], "x": 251, "y": 41 }
       ]
     },
     {
@@ -258,11 +258,11 @@
       "cadence": "daily",
       "slot": 1,
       "title": "Tomb Black Boar Patrol",
-      "summary": "Defeat 50 Black Boars in Angled Stone Tomb B1. Return to either Task Steward.",
-      "rewardExpPercent": 14,
+      "summary": "Defeat 5 Black Boars in Angled Stone Tomb B1. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 34000,
       "kills": [
-        { "monster": "BlackBoar", "monsterIndex": 171, "count": 50, "maps": ["D711"], "x": 251, "y": 41 }
+        { "monster": "BlackBoar", "monsterIndex": 171, "count": 5, "maps": ["D711"], "x": 251, "y": 41 }
       ]
     },
     {
@@ -272,11 +272,11 @@
       "cadence": "daily",
       "slot": 2,
       "title": "Zuma Rat Patrol",
-      "summary": "Defeat 30 Giant Rats in Zuma Temple 1F. Return to either Task Steward.",
-      "rewardExpPercent": 16,
+      "summary": "Defeat 3 Giant Rats in Zuma Temple 1F. Return to either Task Steward.",
+      "rewardLevelSpan": 5,
       "gold": 34000,
       "kills": [
-        { "monster": "GiantRat", "monsterIndex": 192, "count": 30, "maps": ["D501"], "x": 200, "y": 200 }
+        { "monster": "GiantRat", "monsterIndex": 192, "count": 3, "maps": ["D501"], "x": 200, "y": 200 }
       ]
     },
     {
@@ -286,12 +286,12 @@
       "cadence": "weekly",
       "slot": 0,
       "title": "Tomb Boar Watch",
-      "summary": "Defeat 180 Red Boars and 150 Black Boars in Angled Stone Tomb B1 this week. Return to either Task Steward.",
-      "rewardExpPercent": 50,
+      "summary": "Defeat 18 Red Boars and 15 Black Boars in Angled Stone Tomb B1 this week. Return to either Task Steward.",
+      "rewardLevelSpan": 10,
       "gold": 250000,
       "kills": [
-        { "monster": "RedBoar", "monsterIndex": 168, "count": 180, "maps": ["D711"], "x": 251, "y": 41 },
-        { "monster": "BlackBoar", "monsterIndex": 171, "count": 150, "maps": ["D711"], "x": 251, "y": 41 }
+        { "monster": "RedBoar", "monsterIndex": 168, "count": 18, "maps": ["D711"], "x": 251, "y": 41 },
+        { "monster": "BlackBoar", "monsterIndex": 171, "count": 15, "maps": ["D711"], "x": 251, "y": 41 }
       ]
     },
     {
@@ -301,12 +301,12 @@
       "cadence": "weekly",
       "slot": 1,
       "title": "Zuma Entrance Watch",
-      "summary": "Defeat 100 Giant Rats and 120 Wedge Moths in Zuma Temple 1F this week. Return to either Task Steward.",
-      "rewardExpPercent": 60,
+      "summary": "Defeat 10 Giant Rats and 12 Wedge Moths in Zuma Temple 1F this week. Return to either Task Steward.",
+      "rewardLevelSpan": 10,
       "gold": 250000,
       "kills": [
-        { "monster": "GiantRat", "monsterIndex": 192, "count": 100, "maps": ["D501"], "x": 200, "y": 200 },
-        { "monster": "WedgeMoth", "monsterIndex": 165, "count": 120, "maps": ["D501"], "x": 200, "y": 200 }
+        { "monster": "GiantRat", "monsterIndex": 192, "count": 10, "maps": ["D501"], "x": 200, "y": 200 },
+        { "monster": "WedgeMoth", "monsterIndex": 165, "count": 12, "maps": ["D501"], "x": 200, "y": 200 }
       ]
     }
   ]

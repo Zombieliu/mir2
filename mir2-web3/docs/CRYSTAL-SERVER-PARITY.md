@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> 2026-10-03 explicit custom periodic economy: reduced hunt counts and five/ten
+> level daily/weekly totals replace the initial 40%/110% rewards. The normal
+> acceptance lock, EXP-rate rule, multilevel progression, full-save CAS and
+> server-period claim fences are retained. Already accepted old rewards are
+> honored. Restoring characters above the profile's last authored level now
+> uses Crystal's engine curve, matching LevelUp instead of repeating the last
+> profile entry. Mechanical tests are not natural hunt timing or a live rollout.
+> [Implementation and evidence](PERIODIC-SHORT-PLAY-20261003.md).
+
 > 2026-10-02 custom-rule boundary: the user requested Poisoning to use carried
 > poison without equipping. Equipped, then bag, then belt selection is shared
 > by admission, colour and debit; rejected casts preserve supplies. This

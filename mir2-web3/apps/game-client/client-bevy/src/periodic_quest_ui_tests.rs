@@ -246,6 +246,15 @@ fn periodic_nine_language_catalog_covers_actual_server_copy_without_losing_reset
     let catalog: serde_json::Value = serde_json::from_str(include_str!(
         "../../../../packages/game-data/data/native-i18n/periodic.json")).unwrap();
     assert_eq!(catalog["schema"], 1);
+    let entries = catalog["entries"].as_array().unwrap();
+    let actual_kill_keys = entries.iter().filter_map(|entry| entry["key"].as_str()
+        .filter(|key| key.starts_with("periodic.kill.")).map(str::to_owned))
+        .collect::<std::collections::BTreeSet<_>>();
+    let expected_kill_keys = mir2_game_data::periodic_quests::catalog().quests.iter()
+        .flat_map(|definition| definition.kills.iter())
+        .map(|kill| format!("periodic.kill.{}.{}", kill.monster_index, kill.count))
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(actual_kill_keys, expected_kill_keys, "kill aliases use only current authored counts");
     for locale in Locale::ALL {
         native_i18n::with_locale(locale, || {
             for definition in &mir2_game_data::periodic_quests::catalog().quests {
@@ -256,10 +265,24 @@ fn periodic_nine_language_catalog_covers_actual_server_copy_without_losing_reset
                 assert!(description.contains("UTC+8"), "{} {}", locale.code(), quest.quest_index);
                 assert_eq!(description.lines().count(), 5, "{} {}", locale.code(), quest.quest_index);
                 if locale == Locale::English { assert_eq!(description, quest.detail.description_lines.join("\n")); }
+                let summary = native_i18n::for_locale(locale, &format!("periodic.summary.{}", definition.id), "MISSING SUMMARY");
+                assert_eq!(description.lines().next(), Some(summary.as_str()));
+                assert_eq!(native_i18n::tr(&definition.summary), summary, "current server summary alias resolves");
+                assert_eq!(native_i18n::tr(&quest.detail.description_lines.join("\n")), description,
+                    "current full server description alias resolves");
                 let tasks = crate::player_text::quest_section(quest.quest_index, "task", &quest.detail.task_description_lines);
                 assert_eq!(tasks.len(), definition.kills.len());
                 for (kill, text) in definition.kills.iter().zip(&tasks) {
-                    assert!(text.contains(&kill.count.to_string()), "counts survive localization");
+                    let key = format!("periodic.kill.{}.{}", kill.monster_index, kill.count);
+                    let entry = entries.iter().find(|entry| entry["key"].as_str() == Some(key.as_str())).unwrap();
+                    let expected = entry[locale.code()].as_str().unwrap();
+                    assert_eq!(text, expected, "{} {} task and kill label agree", locale.code(), definition.id);
+                    let count = text.rsplit_once('\u{00d7}').expect("authored target count").1.trim().parse::<u32>().unwrap();
+                    assert_eq!(count, kill.count, "{} {} counts survive localization exactly", locale.code(), definition.id);
+                    let alias = format!("Kill {} {}", kill.count, kill.monster);
+                    assert_eq!(entry["aliases"].as_array().unwrap().len(), 1);
+                    assert_eq!(entry["aliases"][0].as_str(), Some(alias.as_str()), "current server task alias");
+                    assert_eq!(native_i18n::tr(&alias), expected, "{} {} task alias resolves", locale.code(), definition.id);
                 }
                 for (index,kill) in definition.kills.iter().enumerate() {
                     let localized_name=native_i18n::for_locale(locale,&format!("content.monster.{}.name",kill.monster_index),"MISSING SPECIES");
@@ -283,7 +306,7 @@ fn periodic_nine_language_catalog_covers_actual_server_copy_without_losing_reset
                     assert!(lines.iter().all(|line| !line.text.contains('\u{fffd}')));
                 }
             }
-            for entry in catalog["entries"].as_array().unwrap() {
+            for entry in entries {
                 let key = entry["key"].as_str().unwrap();
                 let expected = entry[locale.code()].as_str().unwrap();
                 assert!(!expected.trim().is_empty() && !expected.contains('\u{fffd}'));

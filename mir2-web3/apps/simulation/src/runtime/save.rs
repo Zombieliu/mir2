@@ -2719,10 +2719,19 @@ fn apply_character_save_with_timing(
             max_mp: restored_max_mp.max(save.mp.max(0)),
         };
         player_runtime.experience = save.experience.max(0);
-        player_runtime.max_experience = if config.content_profile.is_some() {
-            config.experience_required_for_level(save.character.level)
-        } else {
-            save.max_experience.max(1)
+        player_runtime.max_experience = match config.content_profile.as_ref() {
+            Some(profile)
+                if profile.profile.experience_curve.last().is_some_and(|entry| {
+                    save.character.level > entry.level
+                }) =>
+            {
+                // Rewards may advance beyond the authored content bands.
+                // Relogin must use the same Crystal threshold as LevelUp,
+                // rather than the profile accessor's final-entry fallback.
+                super::leveling::crystal_max_experience_for_level(save.character.level)
+            }
+            Some(_) => config.experience_required_for_level(save.character.level),
+            None => save.max_experience.max(1),
         };
         player_runtime.gold = save.gold;
         player_runtime.credit = save.credit;

@@ -6,12 +6,12 @@ It defines two Task Stewards and 20 quests for the current `platinum_176`
 level 10–50 content. It must work alongside `newcomer-v2` without changing
 the accepted main quest chain or existing imported quests.
 
-The initial kill quantities are a candidate workload. The intended complete
-daily set takes 30–60 minutes for Warrior, Wizard and Taoist; that duration
-has **not** been established by these static content checks. It needs natural
-gameplay through the default server playtest gateway, including travel,
-ordinary combat, buying supplies and returning to a steward. Headless
-progress injection or a quest-state test cannot establish play time.
+On 2026-10-03 the user replaced the initial workload/reward brief: reduce
+every kill target to one tenth, rounded up, and award about five levels for
+the complete daily set and ten levels for the complete weekly set. Gold,
+species, maps, routes and reset rules remain unchanged. Natural play time
+under these new quantities has not been measured; the original 30–60 minute
+target and its historical results are retained in the goal/evidence records.
 
 ## Player and reward rules
 
@@ -24,11 +24,15 @@ progress injection or a quest-state test cannot establish play time.
   time decides the period; client time and packet movement ticks do not.
 - In-progress and ready quests survive a reset. A successful hand-in consumes
   the period in which the hand-in commits, not the acceptance period.
-- Accepting locks that quest's band, targets, absolute EXP and gold. A later
+- Accepting locks that quest's band, absolute EXP and gold. A later
   level-up, reset or EXP-buff expiry cannot change an active quest's reward.
   Abandoning forfeits unclaimed progress and permits a fresh acceptance subject
   to the same slot limit. A new period clears a completed quest for another
   acceptance; its previous claim watermark is retained.
+- This content update reduces active saved targets to the current catalog
+  while retaining earned species counters and the original locked reward.
+  Old completed rows display the current offer after reset and refresh their
+  descriptions and required count when reaccepted. No old claim is repaid.
 - Rewards contain only EXP and gold. There are no item rewards, random drops,
   purchase requirements, profession-only practice objectives or boss kills.
 - A credited player or player-owned pet kill may advance an accepted daily and
@@ -40,35 +44,44 @@ progress injection or a quest-state test cannot establish play time.
   durable full-character save before a success packet is returned. Duplicate
   Finish, reconnect and stale sessions must not produce an additional award.
 
-For accepted level `L` and a quest's integer `rewardExpPercent`:
+For accepted level `L`, slot `s`, and configured `rewardLevelSpan`:
 
 ```text
-base_exp = floor(experience_required_for_level(L) * rewardExpPercent / 100)
+N = 5 for daily, 10 for weekly
+K = 3 daily slots, 2 weekly slots
+budget = sum(Crystal_ExperienceList[level - 1] for level in L..L+N)
+base_exp = floor(budget * (s + 1) / K) - floor(budget * s / K)
 locked_exp = apply_current_social_and_general_exp_rate(base_exp)
 locked_gold = configured_gold
 ```
 
-Use checked wide arithmetic for the percentage and the protocol's bounded
-EXP representation. The monster EXP multipliers are not applied again to
-these quest percentages. The runtime locks the final EXP after the accepted
+Use checked u64 arithmetic for the full budget and prefix shares before
+converting each quest's reward to the protocol's u32 representation. The
+monster EXP multipliers are not applied to this reward. The runtime locks
+the final EXP after the accepted
 social/general rate, displays that absolute value in quest details and pays
 it without applying a second rate at hand-in. Capturing that value is a
 server action, not a value submitted by the client.
 
-The daily percentages are 10%, 14% and 16%; weekly percentages are 50% and
-60%. If the entire set is accepted at the same level and with the same rate,
-the totals are approximately 40% and 110% of that level's EXP threshold,
-allowing integer rounding. Quests accepted at different levels retain their
-respective acceptance values. At level 30 without an EXP bonus the daily
-rewards are 200,000 / 280,000 / 320,000 EXP and the weekly rewards are
-1,000,000 / 1,200,000 EXP.
+If the complete set is accepted at the same level without an EXP bonus,
+its total exactly covers the consecutive five or ten level thresholds;
+integer remainders are retained across the slots. Kills grant extra EXP.
+Quests accepted at different levels retain their respective acceptance
+values, so the actual level gain varies with that timing and EXP buffs.
+At level 30 daily rewards are 4,666,666 / 4,666,667 / 4,666,667 EXP (14 million
+total); weekly rewards are 22,800,000 each (45.6 million total). At level 50
+the daily total is 2.43 billion and weekly total 7.16 billion; each weekly
+share is 3.58 billion and fits u32. Existing social/general rate saturation
+at u32::MAX is preserved per quest, rather than overflowing.
 
 The current profile thresholds include level 10: 6,000; 15: 40,000; 20:
 140,000; 25: 500,000; 30: 2,000,000; 35: 4,000,000; 40: 12,000,000; 45:
 120,000,000; 50: 350,000,000. This large variation is why reward EXP is locked
 from the acceptance level instead of using one fixed amount for a broad band.
-Level 35–50 is the final configured band; eligibility above level 50 is not
-part of this version.
+Level 35–50 is the final configured band; new acceptance above level 50 is
+not part of this version. Already accepted quests may be finished after
+leveling above that band. The engine's Crystal progression curve continues
+beyond the content profile's 50-level table and is used for these rewards.
 
 ## Stewards and verified placement
 
@@ -106,12 +119,12 @@ count. Guidance coordinates are not an artificial small kill-radius gate.
 
 | Levels | IDs | Daily slots 0 / 1 / 2 | Weekly slots 0 / 1 | Daily / weekly gold |
 | --- | --- | --- | --- | --- |
-| 10–14 | 92001–92005 | Scarecrow 80 / RakingCat 60 / HookingCat 60, `0` | Scarecrow 200 / RakingCat 160 + HookingCat 160, `0` | 12,000 total / 25,000 each |
-| 15–24 | 92006–92010 | Oma 70, `0` / Skeleton 60 / Scorpion 60, `D001` or `D011` | Oma 200, `0` / Skeleton 150 + Scorpion 150, `D001` or `D011` | 24,000 total / 60,000 each |
-| 25–34 | 92011–92015 | Centipede 50 / BlackMaggot 45 / WhimperingBee 45, `D601` | Centipede 150 + BlackMaggot 100 / WhimperingBee 120 + GiantWorm 120, `D601` | 60,000 total / 150,000 each |
-| 35–50 | 92016–92020 | RedBoar 60 / BlackBoar 50, `D711` / GiantRat 30, `D501` | RedBoar 180 + BlackBoar 150, `D711` / GiantRat 100 + WedgeMoth 120, `D501` | 102,000 total / 250,000 each |
+| 10–14 | 92001–92005 | Scarecrow 8 / RakingCat 6 / HookingCat 6, `0` | Scarecrow 20 / RakingCat 16 + HookingCat 16, `0` | 12,000 total / 25,000 each |
+| 15–24 | 92006–92010 | Oma 7, `0` / Skeleton 6 / Scorpion 6, `D001` or `D011` | Oma 20, `0` / Skeleton 15 + Scorpion 15, `D001` or `D011` | 24,000 total / 60,000 each |
+| 25–34 | 92011–92015 | Centipede 5 / BlackMaggot 5 / WhimperingBee 5, `D601` | Centipede 15 + BlackMaggot 10 / WhimperingBee 12 + GiantWorm 12, `D601` | 60,000 total / 150,000 each |
+| 35–50 | 92016–92020 | RedBoar 6 / BlackBoar 5, `D711` / GiantRat 3, `D501` | RedBoar 18 + BlackBoar 15, `D711` / GiantRat 10 + WedgeMoth 12, `D501` | 102,000 total / 250,000 each |
 
-The complete three-quest daily sets require 200, 190, 140 and 140 credited kills respectively
+The complete three-quest daily sets require 20, 19, 15 and 14 credited kills respectively
 for the four bands. These are workload counts, not measured durations. Weekly
 progress overlaps the corresponding daily hunts where species/maps match,
 so players do not need to redo identical kills just for the weekly counter.

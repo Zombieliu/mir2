@@ -1,5 +1,18 @@
 # Two-town daily and weekly task goal
 
+## User revision on 2026-10-03
+
+The original ten-hour window and acceptance records below remain historical;
+neither this content change nor its unit tests resumes or completes that goal.
+The user now requests all kill requirements divided by ten, rounded up,
+and the complete three-daily/two-weekly sets to award about five/ten levels
+respectively, calculated from acceptance level. Gold and server claim periods
+remain unchanged. This supersedes the original workload and 40%/110% reward
+targets for new acceptances; existing locked rewards are retained. The current
+rule is documented in [the design](DAILY-WEEKLY-QUEST-DESIGN.md).
+
+## Original brief and historical queue
+
 Human request: use the server gateway for player-flow verification and deliver
 two task NPCs, one in Bichon and one in Mongchon. Design daily play for about
 30–60 minutes and weekly tasks to overlap those sessions. Initial rewards are

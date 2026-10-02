@@ -1,5 +1,15 @@
 # Backend 1:1 Progress
 
+> 2026-10-03 user-directed periodic rebalance: all 26 hunt targets are
+> ceil(previous/10); the full daily/weekly sets lock consecutive five/ten-level
+> EXP budgets at acceptance, with gold unchanged. u64 slot allocation retains
+> integer remainders and the existing per-reward u32 EXP-rate saturation.
+> Legacy locks/claim watermarks survive; completed rows reaccept using current
+> targets/copy. Profile-out-of-range relogin now restores the engine threshold
+> after multilevel rewards. Focused settlement/save tests pass 21, periodic
+> rules/math 12, native UI 11, canonical data 4 and controller policy 29.
+> No new live rollout or natural timing claim. [Evidence](PERIODIC-SHORT-PLAY-20261003.md).
+
 > 2026-10-02 explicit custom Poisoning rule: one shared selector now admits and
 > consumes equipped/bag/belt poison, preserving equipped priority and matching
 > the authoritative Zone colour to the exact stack debit. Seven actual

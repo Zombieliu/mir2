@@ -371,7 +371,10 @@ mod postgres_periodic {
             // must already expose one committed EXP/gold/claim tuple.
             let (committed, committed_version) = db.snapshot(&owned.account_id);
             assert_eq!(committed.gold, before.gold + expected_gold);
-            assert_eq!(committed.experience, before.experience + expected_exp);
+            assert_eq!(
+                (committed.character.level, committed.experience),
+                expected_progress(&owned.config, &before, expected_exp)
+            );
             assert_eq!(committed.revision, before.revision + 1);
             assert_eq!(committed_version, before_version + 1);
             let claimed = row(&committed, id).unwrap();
@@ -625,6 +628,42 @@ fn locked_reward(save: &CharacterSaveRecord, id: i32) -> Value {
     row(save, id).unwrap()["accepted_periodic_reward"].clone()
 }
 
+fn expected_threshold(config: &SimulationConfig, level: u16) -> i64 {
+    if level <= 50 {
+        return config.experience_required_for_level(level);
+    }
+    // The content profile stops at 50 and its config accessor clamps there.
+    // The engine still uses Crystal ExpList.ini beyond the last content band;
+    // retain its independently specified tail for these multilevel fixtures.
+    const POST_50: [i64; 10] = [
+        400_000_000,
+        480_000_000,
+        560_000_000,
+        640_000_000,
+        740_000_000,
+        840_000_000,
+        950_000_000,
+        1_000_000_000,
+        1_200_000_000,
+        1_350_000_000,
+    ];
+    POST_50[usize::from(level - 51)]
+}
+
+fn expected_progress(
+    config: &SimulationConfig,
+    before: &CharacterSaveRecord,
+    gain: i64,
+) -> (u16, i64) {
+    let mut level = before.character.level;
+    let mut experience = before.experience + gain;
+    while experience >= expected_threshold(config, level) {
+        experience -= expected_threshold(config, level);
+        level += 1;
+    }
+    (level, experience)
+}
+
 // Explicitly seed owned fixture state between ordinary sessions. This is not a
 // gameplay path: only catalog counters, location/level or buffs under test change.
 fn rewrite_fixture(fixture: &Fixture, change: impl FnOnce(&mut CharacterSaveRecord)) {
@@ -876,7 +915,7 @@ fn ordinary_daily_and_weekly_acceptance_immediately_commits_locked_rewards() {
     let fixture = fixture("accept-memory", 20, MirClass::Taoist, BICHON, vec![]);
     let (mut runtime, _) = login(&fixture);
     let starting = saved(&fixture);
-    for (id, expected_exp) in [(DAILY, 14000), (WEEKLY, 70000)] {
+    for (id, expected_exp) in [(DAILY, 480000), (WEEKLY, 3420000)] {
         open_offer(&mut runtime, BICHON, id, false);
         let packets = accept(&mut runtime, BICHON, id);
         assert!(added(&packets, id), "{packets:?}");
@@ -1116,6 +1155,167 @@ fn cross_town_claim_and_upgrading_band_cannot_repeat_a_cadence_slot() {
 }
 
 #[test]
+fn complete_cadences_award_five_or_ten_levels_across_class_and_band_boundaries() {
+    let _lock = PROFILE_LOCK
+        .lock()
+        .unwrap_or_else(|poison| poison.into_inner());
+    let _profile = ProfileGuard::newcomer_v2();
+    for (class_index, class) in [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist]
+        .into_iter()
+        .enumerate()
+    {
+        for level in [14, 24, 34, 50] {
+            for (cadence_index, cadence, span) in [
+                (0, PeriodicCadence::Daily, 5),
+                (1, PeriodicCadence::Weekly, 10),
+            ] {
+                let quests = content::catalog()
+                    .quests
+                    .iter()
+                    .filter(|quest| {
+                        quest.cadence == cadence
+                            && (quest.min_level..=quest.max_level).contains(&i32::from(level))
+                    })
+                    .collect::<Vec<_>>();
+                let fixture = fixture(
+                    &format!("level-span-{class_index}-{level}-{cadence_index}"),
+                    level,
+                    class,
+                    BICHON,
+                    vec![],
+                );
+                rewrite_fixture(&fixture, |save| save.experience = 123);
+                let (mut runtime, _) = login(&fixture);
+                // Lock every slot before gaining levels, as the two town
+                // stewards offer the full cadence together. All Finish calls
+                // remain ordinary packets, including after crossing the tier.
+                for quest in &quests {
+                    open_offer(&mut runtime, BICHON, quest.id, false);
+                    assert!(added(&accept(&mut runtime, BICHON, quest.id), quest.id));
+                }
+                let accepted = saved(&fixture);
+                let expected_budget = (level..level + span)
+                    .map(|level| expected_threshold(&fixture.config, level))
+                    .sum::<i64>();
+                let locked_budget = quests
+                    .iter()
+                    .map(|quest| {
+                        locked_reward(&accepted, quest.id)["experience"]
+                            .as_i64()
+                            .unwrap()
+                    })
+                    .sum::<i64>();
+                assert_eq!(locked_budget, expected_budget);
+                drop(runtime);
+                for quest in &quests {
+                    seed_accepted_ready(&fixture, quest.id);
+                }
+                let (mut runtime, _) = login(&fixture);
+                for quest in &quests {
+                    open_offer(&mut runtime, BICHON, quest.id, true);
+                    let before = saved(&fixture);
+                    let gain = locked_reward(&before, quest.id)["experience"]
+                        .as_i64()
+                        .unwrap();
+                    assert!(removed(&finish(&mut runtime, quest.id), quest.id));
+                    let committed = saved(&fixture);
+                    assert_eq!(
+                        (committed.character.level, committed.experience),
+                        expected_progress(&fixture.config, &before, gain)
+                    );
+                    assert_eq!(committed.gold, before.gold + quest.gold);
+                    assert!(
+                        row(&committed, quest.id).unwrap()["cadence_last_claimed_period"].is_u64()
+                    );
+                    // Duplicate Finish cannot add a second multilevel reward.
+                    assert!(!removed(&finish(&mut runtime, quest.id), quest.id));
+                    assert_same_save(&saved(&fixture), &committed);
+                }
+                let committed = saved(&fixture);
+                assert_eq!(
+                    (committed.character.level, committed.experience),
+                    (level + span, 123)
+                );
+                drop(runtime);
+                let (runtime, _) = login(&fixture);
+                assert_same_save(&runtime.active_character_checkpoint().unwrap(), &committed);
+            }
+        }
+    }
+}
+
+#[test]
+fn legacy_active_target_is_reduced_without_replacing_its_locked_reward() {
+    let _lock = PROFILE_LOCK
+        .lock()
+        .unwrap_or_else(|poison| poison.into_inner());
+    let _profile = ProfileGuard::newcomer_v2();
+    let mut legacy = ready_row(DAILY, 20, 14000);
+    legacy["stage"] = json!("inProgress");
+    legacy["required"] = json!(70);
+    legacy["current"] = json!(10);
+    legacy["task_progress"] = json!({"kill:48": 10});
+    let fixture = fixture(
+        "legacy-short-target",
+        20,
+        MirClass::Taoist,
+        BICHON,
+        vec![legacy],
+    );
+    let (mut runtime, _) = login(&fixture);
+    let checkpoint = runtime.active_character_checkpoint().unwrap();
+    let migrated = row(&checkpoint, DAILY).unwrap();
+    assert_eq!(migrated["stage"], "readyToTurnIn");
+    assert_eq!(
+        (migrated["current"].as_u64(), migrated["required"].as_u64()),
+        (Some(7), Some(7))
+    );
+    assert_eq!(migrated["task_progress"]["kill:48"], 10);
+    assert_eq!(
+        locked_reward(&checkpoint, DAILY),
+        json!({"level": 20, "experience": 14000, "gold": 8000})
+    );
+    open_offer(&mut runtime, BICHON, DAILY, true);
+    let before = saved(&fixture);
+    assert!(removed(&finish(&mut runtime, DAILY), DAILY));
+    let durable = saved(&fixture);
+    assert_eq!(
+        (durable.character.level, durable.experience, durable.gold),
+        (20, before.experience + 14000, before.gold + 8000)
+    );
+}
+
+#[test]
+fn maximum_weekly_reward_keeps_existing_exp_bonus_saturation_and_claims_once() {
+    let _lock = PROFILE_LOCK
+        .lock()
+        .unwrap_or_else(|poison| poison.into_inner());
+    let _profile = ProfileGuard::newcomer_v2();
+    let id = 92019;
+    let fixture = fixture("maximum-short-weekly", 50, MirClass::Wizard, BICHON, vec![]);
+    rewrite_fixture(&fixture, |save| save.buff_states_json = vec![xp_buff(100)]);
+    let (mut runtime, _) = login(&fixture);
+    open_offer(&mut runtime, BICHON, id, false);
+    assert!(added(&accept(&mut runtime, BICHON, id), id));
+    let reward = locked_reward(&saved(&fixture), id);
+    assert_eq!(reward["experience"], u32::MAX);
+    drop(runtime);
+    seed_accepted_ready(&fixture, id);
+    let (mut runtime, _) = login(&fixture);
+    open_offer(&mut runtime, BICHON, id, true);
+    let before = saved(&fixture);
+    assert!(removed(&finish(&mut runtime, id), id));
+    let committed = saved(&fixture);
+    assert_eq!(
+        (committed.character.level, committed.experience),
+        expected_progress(&fixture.config, &before, i64::from(u32::MAX))
+    );
+    assert_eq!(locked_reward(&committed, id), reward);
+    assert!(!removed(&finish(&mut runtime, id), id));
+    assert_same_save(&saved(&fixture), &committed);
+}
+
+#[test]
 fn accepted_reward_survives_level_and_exp_rate_changes_without_a_second_multiplier() {
     let _lock = PROFILE_LOCK
         .lock()
@@ -1131,7 +1331,7 @@ fn accepted_reward_survives_level_and_exp_rate_changes_without_a_second_multipli
         .any(|stat| stat.stat == 100 && stat.value == 50));
     open_offer(&mut runtime, BICHON, DAILY, false);
     assert!(added(&accept(&mut runtime, BICHON, DAILY), DAILY));
-    assert_eq!(locked_reward(&saved(&fixture), DAILY)["experience"], 21000);
+    assert_eq!(locked_reward(&saved(&fixture), DAILY)["experience"], 720000);
     drop(runtime);
     seed_accepted_ready(&fixture, DAILY);
     rewrite_fixture(&fixture, |save| {
@@ -1150,7 +1350,7 @@ fn accepted_reward_survives_level_and_exp_rate_changes_without_a_second_multipli
         _ => None,
     }) {
         assert_eq!(
-            info.reward_exp, 21000,
+            info.reward_exp, 720000,
             "locked absolute reward must reach the client"
         );
     }
@@ -1158,15 +1358,15 @@ fn accepted_reward_survives_level_and_exp_rate_changes_without_a_second_multipli
     let before = saved(&fixture);
     assert!(removed(&finish(&mut runtime, DAILY), DAILY));
     let durable = saved(&fixture);
-    assert_eq!(durable.character.level, 25);
+    assert_eq!(durable.character.level, 26);
     assert_eq!(
-        durable.experience, 21000,
+        durable.experience, 220000,
         "neither level-25 recalculation nor 100% finish-time bonus applies"
     );
     assert_eq!(durable.gold, before.gold + 8000);
     assert_eq!(
         locked_reward(&durable, DAILY),
-        json!({"level": 20, "experience": 21000, "gold": 8000})
+        json!({"level": 20, "experience": 720000, "gold": 8000})
     );
 }
 
@@ -1221,7 +1421,7 @@ fn saved_ready_stage_without_catalog_kill_proof_is_downgraded_and_cannot_finish(
         .lock()
         .unwrap_or_else(|poison| poison.into_inner());
     let _profile = ProfileGuard::newcomer_v2();
-    for (index, progress) in [json!({}), json!({"kill:48": 69}), json!({"kill:85": 70})]
+    for (index, progress) in [json!({}), json!({"kill:48": 6}), json!({"kill:85": 70})]
         .into_iter()
         .enumerate()
     {
@@ -1322,7 +1522,7 @@ fn abandon_commits_cleared_lock_and_allows_ordinary_reacceptance() {
     let (mut runtime, _) = login(&fixture);
     open_offer(&mut runtime, BICHON, DAILY, false);
     assert!(added(&accept(&mut runtime, BICHON, DAILY), DAILY));
-    assert_eq!(locked_reward(&saved(&fixture), DAILY)["experience"], 14000);
+    assert_eq!(locked_reward(&saved(&fixture), DAILY)["experience"], 480000);
 }
 
 #[test]
@@ -1470,7 +1670,10 @@ fn accept_before_persist_failure_does_not_ack_or_leave_an_unsaved_lock() {
     ));
     open_offer(&mut runtime, BICHON, WEEKLY, false);
     assert!(added(&accept(&mut runtime, BICHON, WEEKLY), WEEKLY));
-    assert_eq!(locked_reward(&saved(&fixture), WEEKLY)["experience"], 70000);
+    assert_eq!(
+        locked_reward(&saved(&fixture), WEEKLY)["experience"],
+        3420000
+    );
 }
 
 #[cfg(feature = "test-support")]
@@ -1570,7 +1773,13 @@ fn file_acceptance_and_reward_are_durable_before_ack_and_survive_reopen() {
     let (mut runtime, _) = login(&fixture);
     for id in [DAILY, WEEKLY] {
         open_offer(&mut runtime, BICHON, id, true);
+        let before = saved(&fixture);
+        let gain = locked_reward(&before, id)["experience"].as_i64().unwrap();
         assert!(removed(&finish(&mut runtime, id), id));
+        assert_eq!(
+            (saved(&fixture).character.level, saved(&fixture).experience),
+            expected_progress(&fixture.config, &before, gain)
+        );
         let disk: mir2_simulation::AccountStore =
             serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
         assert_same_save(

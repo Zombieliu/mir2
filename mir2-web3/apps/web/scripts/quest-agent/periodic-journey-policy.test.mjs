@@ -95,7 +95,7 @@ test('merged farming picks visible pending daily targets and excludes weekly-onl
   world.entities.push({ objectId: 9, name: 'HookingCat', kind: 'monster', x: 301, y: 260, hp: 10 });
   assert.equal(selectPeriodicFarmPlan(world, routes).route.questId, 92003);
   world.questLog.find(quest => quest.questId === 92003).stage = 'ReadyToTurnIn';
-  world.questLog.find(quest => quest.questId === 92003).objectives[0].current = 60;
+  world.questLog.find(quest => quest.questId === 92003).objectives[0].current = 6;
   assert.notEqual(selectPeriodicFarmPlan(world, routes).route.questId, 92003);
   for (const route of routes.filter(route => route.cadence === 'daily')) {
     const quest = world.questLog.find(quest => quest.questId === route.questId);
@@ -194,10 +194,10 @@ test('lost target: actual quest or experience credit prevents retry classificati
 test('accepted reward preview is bound to server ID, tier, gold and task counts', () => {
   const route = buildPeriodicRoutes(catalog, 10, sources)[0];
   const info = { index: 92001, min_level_needed: 10, max_level_needed: 14, reward_gold: 4000, reward_exp: 600,
-    task_description: ['Defeat 80 Scarecrow.'] };
+    task_description: ['Defeat 8 Scarecrow.'] };
   assert.equal(periodicRewardPreview(info, route).experience, 600);
   assert.throws(() => periodicRewardPreview({ ...info, index: 92004 }, route), /definition/);
-  assert.throws(() => periodicRewardPreview({ ...info, task_description: ['Defeat 8 Scarecrow.'] }, route), /task definition/);
+  assert.throws(() => periodicRewardPreview({ ...info, task_description: ['Defeat 80 Scarecrow.'] }, route), /task definition/);
 });
 
 test('reward proof survives level rollover and rejects unrelated ACK, missing removal or reward mismatch', () => {

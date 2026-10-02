@@ -46,7 +46,7 @@ pub struct PeriodicQuest {
     pub slot: u8,
     pub title: String,
     pub summary: String,
-    pub reward_exp_percent: u32,
+    pub reward_level_span: u16,
     pub gold: u32,
     pub kills: Vec<PeriodicKill>,
 }
@@ -122,7 +122,11 @@ pub fn validate(value: &PeriodicQuestCatalog) -> Result<(), String> {
             || !slots.insert((quest.min_level, cadence, quest.slot))
             || quest.title.trim().is_empty()
             || quest.summary.trim().is_empty()
-            || !(1..=100).contains(&quest.reward_exp_percent)
+            || quest.reward_level_span
+                != match quest.cadence {
+                    PeriodicCadence::Daily => 5,
+                    PeriodicCadence::Weekly => 10,
+                }
             || quest.gold == 0
             || quest.kills.is_empty()
         {
@@ -351,20 +355,8 @@ mod tests {
                 .collect();
             assert_eq!(daily.len(), 3);
             assert_eq!(weekly.len(), 2);
-            assert_eq!(
-                daily
-                    .iter()
-                    .map(|quest| quest.reward_exp_percent)
-                    .sum::<u32>(),
-                40
-            );
-            assert_eq!(
-                weekly
-                    .iter()
-                    .map(|quest| quest.reward_exp_percent)
-                    .sum::<u32>(),
-                110
-            );
+            assert!(daily.iter().all(|quest| quest.reward_level_span == 5));
+            assert!(weekly.iter().all(|quest| quest.reward_level_span == 10));
             for quest in quests {
                 let info = quest.info(1, quest.gold);
                 assert!(info.rewards_fixed_item.is_empty() && info.rewards_select_item.is_empty());
@@ -387,5 +379,11 @@ mod tests {
         let mut duplicate_npc = decode();
         duplicate_npc.npcs[1].object_id = duplicate_npc.npcs[0].object_id;
         assert!(validate(&duplicate_npc).is_err());
+        let mut invalid_reward_span = decode();
+        invalid_reward_span.quests[0].reward_level_span = 10;
+        assert!(validate(&invalid_reward_span).is_err());
+        let mut invalid_weekly_span = decode();
+        invalid_weekly_span.quests[3].reward_level_span = 5;
+        assert!(validate(&invalid_weekly_span).is_err());
     }
 }

@@ -21,6 +21,24 @@ pub(super) fn cadence(id: i32) -> Option<QuestCadence> {
     })
 }
 
+fn base_reward_experience(level: u16, quest: &data::PeriodicQuest) -> Option<u32> {
+    // A cadence pays the actual consecutive-level curve, rather than a multiple
+    // of the first level's threshold. Keep the entire budget wide: at level 50
+    // the weekly total is 7.16 billion, while each of its two shares fits u32.
+    let end = level.checked_add(quest.reward_level_span)?;
+    let budget = (level..end).try_fold(0u64, |total, reward_level| {
+        let threshold = super::super::leveling::crystal_max_experience_for_level(reward_level);
+        total.checked_add(u64::try_from(threshold).ok()?)
+    })?;
+    let slots = match quest.cadence {
+        PeriodicCadence::Daily => 3,
+        PeriodicCadence::Weekly => 2,
+    };
+    let start = budget.checked_mul(u64::from(quest.slot))? / slots;
+    let finish = budget.checked_mul(u64::from(quest.slot) + 1)? / slots;
+    u32::try_from(finish.checked_sub(start)?).ok()
+}
+
 fn reward_at_acceptance(world: &World, id: i32) -> Option<AcceptedPeriodicReward> {
     let quest = data::quest(id)?;
     let level = world
@@ -28,9 +46,7 @@ fn reward_at_acceptance(world: &World, id: i32) -> Option<AcceptedPeriodicReward
         .selected_character
         .as_ref()?
         .level;
-    let threshold = super::super::leveling::crystal_max_experience_for_level(level).max(0) as u64;
-    let base = u32::try_from(threshold.saturating_mul(u64::from(quest.reward_exp_percent)) / 100)
-        .unwrap_or(u32::MAX);
+    let base = base_reward_experience(level, quest)?;
     Some(AcceptedPeriodicReward {
         level,
         experience: super::super::stats::crystal_apply_social_exp_rate(world, base),
@@ -223,4 +239,61 @@ pub(in crate::runtime) fn successful_claim_since(
 
 pub(in crate::runtime) fn info_packet(world: &World, id: i32) -> Option<ServerPacket> {
     info(world, id).map(|info| ServerPacket::NewQuestInfo { info })
+}
+
+#[cfg(test)]
+mod short_play_reward_tests {
+    use super::*;
+
+    #[test]
+    fn all_supported_levels_conserve_the_consecutive_level_budget_across_slots() {
+        for level in 10..=50 {
+            for (cadence, span) in [(PeriodicCadence::Daily, 5), (PeriodicCadence::Weekly, 10)] {
+                let quests = data::catalog().quests.iter().filter(|quest| {
+                    quest.cadence == cadence
+                        && (quest.min_level..=quest.max_level).contains(&i32::from(level))
+                });
+                let actual: u64 = quests
+                    .map(|quest| {
+                        u64::from(
+                            base_reward_experience(level, quest).expect("supported share fits u32"),
+                        )
+                    })
+                    .sum();
+                let curve = &super::super::super::leveling::CRYSTAL_EXPERIENCE_LIST;
+                let expected: i64 = curve[usize::from(level - 1)..usize::from(level - 1 + span)]
+                    .iter()
+                    .sum();
+                assert_eq!(actual, expected as u64, "level {level}, {cadence:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn level_fifty_weekly_budget_is_split_before_narrowing_to_protocol_amounts() {
+        assert_eq!(
+            base_reward_experience(50, data::quest(92019).unwrap()),
+            Some(3_580_000_000)
+        );
+        assert_eq!(
+            base_reward_experience(50, data::quest(92020).unwrap()),
+            Some(3_580_000_000)
+        );
+        assert_eq!(
+            base_reward_experience(50, data::quest(92016).unwrap()),
+            Some(810_000_000)
+        );
+        assert_eq!(
+            base_reward_experience(u16::MAX, data::quest(92019).unwrap()),
+            None
+        );
+    }
+
+    #[test]
+    fn fractional_slot_shares_pay_the_remaining_integer_experience() {
+        let actual: Vec<_> = [92011, 92012, 92013]
+            .map(|id| base_reward_experience(30, data::quest(id).unwrap()).unwrap())
+            .into();
+        assert_eq!(actual, vec![4_666_666, 4_666_667, 4_666_667]);
+    }
 }

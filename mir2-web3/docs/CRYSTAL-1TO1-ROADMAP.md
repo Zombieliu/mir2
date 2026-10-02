@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-03 revised custom daily/weekly brief: kill requirements are divided
+> by ten (ceiling), three dailies award about five levels and two weeklies about
+> ten levels from acceptance level. Counts and aliases match in nine native
+> locales. Ordinary packet Finish/save regressions cover all three classes,
+> band crossings, level-50 large rewards, duplicate claims and relogin through
+> level 60. Original timed goals/evidence remain historical; this additive
+> content does not change Crystal parity or claim human visual acceptance.
+> [Scoped validation](PERIODIC-SHORT-PLAY-20261003.md).
+
 > 2026-10-02 native full-pack fallback placement: ordinary images now retain
 > the existing bottom-left default instead of inheriting arbitrary `.Lib` X/Y.
 > Crystal's explicit front offset exceptions and image/blend/closure guards
