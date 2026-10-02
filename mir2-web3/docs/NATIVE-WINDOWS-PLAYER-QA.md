@@ -1,5 +1,12 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-10-02 用户自定义施毒规则：施毒术可直接消耗背包或腰带毒粉，
+> 已装备毒粉优先；火符和召唤仍需装备护身符。九种语言的任务描述、
+> 练习/材料提示和补给卡已统一，28项非视觉服务端/客户端检查通过，
+> 包含真实 Gateway 普通技能包的内存库存收据。尚未部署或切换；
+> 原生界面、实际游玩和人工视觉验收仍待后续验证，不计为 Crystal 1:1。
+> [规则与范围](POISONING-CARRIED-POISON-RULE-20261002.md)。
+
 > 2026-10-01 caster follow-up: strict audit of independent frozen saves and
 > normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
 > Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52
