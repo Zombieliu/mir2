@@ -26,6 +26,75 @@ pub mod screenshot;
 
 use screenshot::ScreenshotPlugin;
 
+// Temporary, Android-only first-surface investigation. This does not change
+// rendering, clear GL errors, or extend the existing camera startup delay.
+#[cfg(target_os = "android")]
+static ANDROID_SURFACE_PROBE_FRAME: core::sync::atomic::AtomicU32 =
+    core::sync::atomic::AtomicU32::new(0);
+
+#[cfg(target_os = "android")]
+fn trace_android_surface_configuration(configuration: &SurfaceConfiguration, reason: &str) {
+    ANDROID_SURFACE_PROBE_FRAME.store(0, core::sync::atomic::Ordering::Relaxed);
+    info!(
+        "MIR2_ANDROID_SURFACE_CONFIG_PROBE reason={reason} format={:?} size={}x{}",
+        configuration.format, configuration.width, configuration.height
+    );
+}
+
+#[cfg(target_os = "android")]
+fn trace_android_surface_attachment(frame: &wgpu::SurfaceTexture, render_device: &RenderDevice) {
+    use core::sync::atomic::Ordering;
+    let index = ANDROID_SURFACE_PROBE_FRAME.fetch_add(1, Ordering::Relaxed);
+    if index >= 64 {
+        return;
+    }
+    #[link(name = "GLESv3")]
+    unsafe extern "C" {
+        fn glIsRenderbuffer(renderbuffer: u32) -> u8;
+        fn glGetIntegerv(pname: u32, params: *mut i32);
+        fn glBindRenderbuffer(target: u32, renderbuffer: u32);
+        fn glGetRenderbufferParameteriv(target: u32, pname: u32, params: *mut i32);
+    }
+    // SAFETY: Both objects are owned by this render device and retained while
+    // their HAL guards are alive. The HAL context lock makes that exact EGL
+    // context current. Query only an existing renderbuffer; never materialize
+    // a deleted name, mutate its storage, or consume the driver's error state.
+    // The only touched binding is restored before the lock is released.
+    unsafe {
+        let Some(texture) = frame.texture.as_hal::<wgpu::hal::api::Gles>() else {
+            return;
+        };
+        let Some(device) = render_device.wgpu_device().as_hal::<wgpu::hal::api::Gles>() else {
+            return;
+        };
+        let _context = device.context().lock();
+        if let wgpu::hal::gles::TextureInner::Renderbuffer { raw } = texture.inner {
+            let raw = raw.0.get();
+            let live = glIsRenderbuffer(raw) != 0;
+            let mut binding = 0;
+            let (mut internal, mut width, mut height, mut samples) = (0, 0, 0, 0);
+            if live {
+                glGetIntegerv(0x8ca7, &mut binding); // RENDERBUFFER_BINDING
+                glBindRenderbuffer(0x8d41, raw); // RENDERBUFFER
+                glGetRenderbufferParameteriv(0x8d41, 0x8d44, &mut internal);
+                glGetRenderbufferParameteriv(0x8d41, 0x8d42, &mut width);
+                glGetRenderbufferParameteriv(0x8d41, 0x8d43, &mut height);
+                glGetRenderbufferParameteriv(0x8d41, 0x8cab, &mut samples);
+                glBindRenderbuffer(0x8d41, binding as u32);
+            }
+            info!(
+                "MIR2_ANDROID_SURFACE_ATTACHMENT_PROBE frame={index} raw={raw} live={live} internal=0x{internal:x} size={width}x{height} samples={samples} expected={:?}",
+                texture.format
+            );
+        } else {
+            info!(
+                "MIR2_ANDROID_SURFACE_ATTACHMENT_PROBE frame={index} non_renderbuffer={:?}",
+                texture.inner
+            );
+        }
+    }
+}
+
 pub struct WindowRenderPlugin;
 
 impl Plugin for WindowRenderPlugin {
@@ -376,6 +445,8 @@ pub fn prepare_windows(
         match surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(surface_texture)
             | wgpu::CurrentSurfaceTexture::Suboptimal(surface_texture) => {
+                #[cfg(target_os = "android")]
+                trace_android_surface_attachment(&surface_texture, &render_device);
                 window.set_swapchain_texture(surface_texture, surface_data.texture_view_format);
             }
             #[cfg(target_os = "linux")]
@@ -387,6 +458,8 @@ pub fn prepare_windows(
             }
             wgpu::CurrentSurfaceTexture::Outdated => {
                 render_device.configure_surface(surface, &surface_data.configuration);
+                #[cfg(target_os = "android")]
+                trace_android_surface_configuration(&surface_data.configuration, "outdated");
                 let frame = match surface.get_current_texture() {
                     wgpu::CurrentSurfaceTexture::Success(surface_texture)
                     | wgpu::CurrentSurfaceTexture::Suboptimal(surface_texture) => surface_texture,
@@ -399,6 +472,8 @@ pub fn prepare_windows(
                         continue;
                     }
                 };
+                #[cfg(target_os = "android")]
+                trace_android_surface_attachment(&frame, &render_device);
                 window.set_swapchain_texture(frame, surface_data.texture_view_format);
             }
             wgpu::CurrentSurfaceTexture::Occluded => {}
@@ -524,6 +599,8 @@ pub fn create_surfaces(
                 };
 
                 render_device.configure_surface(&surface, &configuration);
+                #[cfg(target_os = "android")]
+                trace_android_surface_configuration(&configuration, "initial");
 
                 SurfaceData {
                     surface: WgpuWrapper::new(surface),
@@ -557,6 +634,8 @@ pub fn create_surfaces(
             let caps = data.surface.get_capabilities(&render_adapter);
             data.configuration.present_mode = present_mode(window, &caps);
             render_device.configure_surface(&data.surface, &data.configuration);
+            #[cfg(target_os = "android")]
+            trace_android_surface_configuration(&data.configuration, "resize_or_present_mode");
         }
 
         window_surfaces.configured_windows.insert(window.entity);
@@ -604,7 +683,9 @@ fn present_mode(
             );
         });
     if new_present_mode != present_mode && fallbacks.contains(&present_mode) {
-        info!("PresentMode {present_mode:?} requested but not available. Falling back to {new_present_mode:?}");
+        info!(
+            "PresentMode {present_mode:?} requested but not available. Falling back to {new_present_mode:?}"
+        );
     }
     new_present_mode
 }
