@@ -473,8 +473,8 @@ android {
         applicationId 'com.mir2.web3'
         minSdk 31
         targetSdk 35
-        versionCode 22
-        versionName '0.1.19-quest-focus'
+        versionCode 23
+        versionName '0.1.20-quest-workspace'
         buildConfigField 'String', 'MIR2_GATEWAY_URL', groovy.json.JsonOutput.toJson(System.getenv('MIR2_GATEWAY_WS_URL') ?: '')
 
         ndk {

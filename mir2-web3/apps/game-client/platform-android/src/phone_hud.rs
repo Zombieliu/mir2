@@ -466,7 +466,8 @@ fn fit_phone_hud(
         Vec2::new(window.width(), window.height()),
         Vec4::new(safe.left, safe.top, safe.right, safe.bottom) / dpi,
         host.ime_bottom / dpi,
-        crate::phone_panels::sidebar_requested(&player),
+        crate::phone_panels::sidebar_requested(&player)
+            || world_input.quest_sidebar_requested(&player),
     );
     let layout = if let Some(sidebar) = sidebar {
         PhoneLayout {

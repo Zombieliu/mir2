@@ -1,9 +1,11 @@
 //! Fit the actual shared diary/detail pair as one Android presentation group.
 //! Authored geometry, children, button handlers and authoritative models stay
-//! owned by the shared renderer. This does not claim font/48dp acceptance.
+//! owned by the shared renderer. Wide phones reserve the same HUD/thumb lane
+//! as the Android HUD; compact/IME fallback does not claim font/48dp acceptance.
 use crate::shared_shell::{AndroidStageFit, HostState};
 use bevy::prelude::*;
 use mir2_client_bevy::{
+    crystal_ui::overlays::NativePlayerUiState,
     native_shell::{NativeShellModel, NativeShellScreen},
     quest_ui::{QuestDetailPanel, QuestLogPanel, QuestUiRoot},
 };
@@ -30,6 +32,8 @@ fn focus_group(
     safe: Vec4,
     stage_scale: f32,
     root_origin: Vec2,
+    ime: f32,
+    protect_chrome: bool,
 ) -> Option<GroupFocus> {
     if !viewport.is_finite()
         || !safe.is_finite()
@@ -37,6 +41,8 @@ fn focus_group(
         || !group.max.is_finite()
         || !root_origin.is_finite()
         || !stage_scale.is_finite()
+        || !ime.is_finite()
+        || ime < 0.0
         || stage_scale <= 0.0
         || viewport.min_element() <= 0.0
         || group.size().min_element() <= 0.0
@@ -52,13 +58,16 @@ fn focus_group(
         return None;
     }
     let gutter = Vec2::splat(16.0).min(available * 0.25);
-    let usable = (available - gutter * 2.0).max(Vec2::splat(0.001));
-    let scale = (usable / (group.size() * stage_scale))
+    let workspace =
+        crate::phone_panels::panel_sidebar(viewport, safe.max(Vec4::ZERO), ime, protect_chrome)
+            .map(|sidebar| sidebar.workspace)
+            .unwrap_or_else(|| Rect::from_corners(min + gutter, max - gutter));
+    let scale = (workspace.size() / (group.size() * stage_scale))
         .min_element()
         .min(3.2);
     Some(GroupFocus {
         group,
-        target_center: ((min + max) * 0.5) / stage_scale - root_origin,
+        target_center: workspace.center() / stage_scale - root_origin,
         scale,
     })
 }
@@ -92,6 +101,8 @@ fn fit_shared_quest_windows(
     windows: Query<&Window>,
     host: Res<HostState>,
     shell: Res<NativeShellModel>,
+    player: Res<NativePlayerUiState>,
+    world_input: crate::world_input::WorldInputContext,
     stage: Res<UiScale>,
     roots: Query<
         &Node,
@@ -138,6 +149,8 @@ fn fit_shared_quest_windows(
                     safe,
                     stage.0,
                     root,
+                    host.ime_bottom / density,
+                    world_input.quest_sidebar_requested(&player),
                 )
             })
     } else {
@@ -197,7 +210,7 @@ mod tests {
                 let fit = CrystalStageTransform::fit(viewport.x, viewport.y);
                 // Use an already IME-panned root, not an assumed centered stage.
                 let root = Vec2::new(fit.offset_x / fit.scale, -87.0);
-                let focus = focus_group(pair, viewport, safe, fit.scale, root).unwrap();
+                let focus = focus_group(pair, viewport, safe, fit.scale, root, 0.0, true).unwrap();
                 let a = screen_rect(diary(), focus.transform(diary()), root, fit.scale);
                 let b = screen_rect(detail(), focus.transform(detail()), root, fit.scale);
                 assert!(
@@ -217,8 +230,46 @@ mod tests {
     fn single_diary_is_larger_than_the_unfocused_desktop_canvas() {
         let viewport = Vec2::new(851.0, 393.0);
         let fit = CrystalStageTransform::fit(viewport.x, viewport.y);
-        let focus = focus_group(diary(), viewport, Vec4::ZERO, fit.scale, Vec2::ZERO).unwrap();
+        let focus = focus_group(
+            diary(),
+            viewport,
+            Vec4::ZERO,
+            fit.scale,
+            Vec2::ZERO,
+            0.0,
+            true,
+        )
+        .unwrap();
         assert!(focus.scale > 1.4 && focus.scale <= 3.2);
+    }
+
+    #[test]
+    fn shared_quest_pair_stays_in_the_same_protected_workspace_as_phone_hud() {
+        let pair = Rect::from_corners(diary().min.min(detail().min), diary().max.max(detail().max));
+        for (viewport, safe) in [
+            (Vec2::new(851.0, 393.0), Vec4::ZERO),
+            (Vec2::new(851.0, 393.0), Vec4::new(12.0, 8.0, 22.0, 12.0)),
+            (Vec2::new(960.0, 432.0), Vec4::new(24.0, 12.0, 24.0, 12.0)),
+        ] {
+            let sidebar = crate::phone_panels::panel_sidebar(viewport, safe, 0.0, true).unwrap();
+            let fit = CrystalStageTransform::fit(viewport.x, viewport.y);
+            let root = Vec2::new(fit.offset_x / fit.scale, fit.offset_y / fit.scale);
+            let focus = focus_group(pair, viewport, safe, fit.scale, root, 0.0, true).unwrap();
+            for panel in [diary(), detail()] {
+                let rect = screen_rect(panel, focus.transform(panel), root, fit.scale);
+                assert!(
+                    rect.min.x >= sidebar.workspace.min.x - 0.001
+                        && rect.min.y >= sidebar.workspace.min.y - 0.001
+                        && rect.max.x <= sidebar.workspace.max.x + 0.001
+                        && rect.max.y <= sidebar.workspace.max.y + 0.001,
+                    "Quest windows must leave the HUD, six belt targets, chat and thumbs unobscured: {rect:?} vs {:?}",
+                    sidebar.workspace
+                );
+                for chrome in [sidebar.status, sidebar.belt, sidebar.chat] {
+                    assert!(rect.intersect(chrome).is_empty());
+                }
+            }
+        }
     }
 
     #[test]
@@ -229,7 +280,9 @@ mod tests {
                 Vec2::new(851.0, 393.0),
                 Vec4::ZERO,
                 scale,
-                Vec2::ZERO
+                Vec2::ZERO,
+                0.0,
+                true
             )
             .is_none());
         }
@@ -238,10 +291,52 @@ mod tests {
             Vec2::new(851.0, 393.0),
             Vec4::new(900.0, 0.0, 0.0, 0.0),
             1.0,
-            Vec2::ZERO
+            Vec2::ZERO,
+            0.0,
+            true
         )
         .is_none());
         assert!(panel_rect(&Node::default()).is_none());
+    }
+
+    #[test]
+    fn compact_and_ime_are_safe_fallbacks_not_protected_chrome_acceptance() {
+        let pair = Rect::from_corners(diary().min.min(detail().min), diary().max.max(detail().max));
+        for (viewport, safe, ime) in [
+            (Vec2::new(568.0, 262.0), Vec4::ZERO, 0.0),
+            (
+                Vec2::new(851.0, 393.0),
+                Vec4::new(0.0, 0.0, 0.0, 170.0),
+                170.0,
+            ),
+        ] {
+            assert!(crate::phone_panels::panel_sidebar(viewport, safe, ime, true).is_none());
+            let fit = CrystalStageTransform::fit(viewport.x, viewport.y);
+            let fallback =
+                focus_group(pair, viewport, safe, fit.scale, Vec2::ZERO, ime, true).unwrap();
+            let unprotected =
+                focus_group(pair, viewport, safe, fit.scale, Vec2::ZERO, ime, false).unwrap();
+            assert_eq!(fallback.target_center, unprotected.target_center);
+            assert_eq!(fallback.scale, unprotected.scale);
+            for panel in [diary(), detail()] {
+                let rect = screen_rect(panel, fallback.transform(panel), Vec2::ZERO, fit.scale);
+                assert!(rect.min.x >= safe.x && rect.min.y >= safe.y);
+                assert!(rect.max.x <= viewport.x - safe.z + 0.001);
+                assert!(rect.max.y <= viewport.y - safe.w + 0.001);
+            }
+        }
+        for ime in [f32::NAN, f32::INFINITY, -1.0] {
+            assert!(focus_group(
+                diary(),
+                Vec2::new(851.0, 393.0),
+                Vec4::ZERO,
+                1.0,
+                Vec2::ZERO,
+                ime,
+                true
+            )
+            .is_none());
+        }
     }
 
     #[test]
@@ -249,8 +344,12 @@ mod tests {
         let mut app = App::new();
         let mut shell = NativeShellModel::default();
         shell.screen = NativeShellScreen::InGame;
+        let mut player = NativePlayerUiState::default();
+        player.core.screen = mir2_ui_core::state::UiScreen::InGame;
+        player.core.panel = mir2_ui_core::state::UiPanel::QuestLog;
         app.insert_resource(HostState::default())
             .insert_resource(shell)
+            .insert_resource(player)
             .insert_resource(UiScale(0.51))
             .add_systems(Update, fit_shared_quest_windows);
         app.world_mut().spawn(Window {
