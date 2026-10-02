@@ -1,0 +1,32 @@
+{
+  "previousEvidenceCommit": "3cd48e01397beee06d658b3e14c43a17e940eb4b",
+  "mismatches": [
+    {
+      "path": "raw/baseline/avd.txt",
+      "expected": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45",
+      "previousGitBlobSha256": "04ff5825bdc7c2d5b8c72f2ed67bb815d2636107d579ad18629e8df7a04aab9a"
+    },
+    {
+      "path": "raw/baseline-clean/avd.txt",
+      "expected": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45",
+      "previousGitBlobSha256": "04ff5825bdc7c2d5b8c72f2ed67bb815d2636107d579ad18629e8df7a04aab9a"
+    },
+    {
+      "path": "raw/probe/avd.txt",
+      "expected": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45",
+      "previousGitBlobSha256": "04ff5825bdc7c2d5b8c72f2ed67bb815d2636107d579ad18629e8df7a04aab9a"
+    },
+    {
+      "path": "raw/probe-transition/avd.txt",
+      "expected": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45",
+      "previousGitBlobSha256": "04ff5825bdc7c2d5b8c72f2ed67bb815d2636107d579ad18629e8df7a04aab9a"
+    },
+    {
+      "path": "raw/probe-view/avd.txt",
+      "expected": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45",
+      "previousGitBlobSha256": "04ff5825bdc7c2d5b8c72f2ed67bb815d2636107d579ad18629e8df7a04aab9a"
+    }
+  ],
+  "originalDiskBytesUnchanged": true,
+  "repair": "Scoped raw/** -text and restage original bytes; no trimming/normalizing originals"
+}

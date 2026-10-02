@@ -1573,6 +1573,11 @@
       "path": "diagnosis.json",
       "bytes": 14557,
       "sha256": "0c0eb49020bf49e3728d20fa3ea5d75443827f34dc9d2cdb995e118e93c11d77"
+    },
+    {
+      "path": "raw/builds/git-eol-before-repair.json",
+      "bytes": 1420,
+      "sha256": "1ab92b486fc0723329191e09b860b738804cf5e512f2af5a31e21bc5930681bb"
     }
   ]
 }

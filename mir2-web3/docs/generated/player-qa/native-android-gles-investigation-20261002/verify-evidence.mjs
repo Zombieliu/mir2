@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {join,dirname} from 'node:path';
+import {join,dirname,relative} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {execFileSync} from 'node:child_process';
@@ -18,6 +18,7 @@ for(const f of manifest.files){
   const bytes=read(f.path);
   assert.equal(bytes.length,f.bytes);
   assert.equal(sha(bytes),f.sha256);
+  assert.equal(sha(git('HEAD',relative(repo,root)+'/'+f.path)),f.sha256);
 }
 const versions=[
   ['baseline','package-v24.json','source-v24.json',24,22],

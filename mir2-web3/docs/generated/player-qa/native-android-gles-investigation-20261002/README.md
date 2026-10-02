@@ -100,3 +100,7 @@ Gradle Debug诊断构建，不是商店 Release、Web套壳或完整原生产品
 可在此独立worktree运行 `node mir2-web3/docs/generated/player-qa/native-android-gles-investigation-20261002/verify-evidence.mjs`。
 验证原始字节、历史Git源码hash、PNG尺寸、PID/安装绑定、所有计数与门禁；
 **不重新连接设备/服务器、不重新运行游戏，也不证明图形修复**。
+
+首次证据提交的Git默认换行转换影响5个avd.txt（磁盘原件未改）；后续有界证据
+修补仅在本目录raw/**关闭text转换，重存原始字节。保留初次5项hash差异记录，
+核验脚本逐项比较manifest、磁盘与HEAD blob，保证后续checkout也可核验。
