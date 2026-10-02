@@ -48,6 +48,8 @@ pub mod native_inventory_ingress;
 pub mod native_npc_ingress;
 #[cfg(feature = "native-player-ui")]
 pub mod native_player_ingress;
+#[cfg(feature = "native-player-ui")]
+pub mod native_quest_ingress;
 #[cfg(feature = "native-shell-ui")]
 pub mod native_shell;
 #[cfg(feature = "native-shell-ui")]

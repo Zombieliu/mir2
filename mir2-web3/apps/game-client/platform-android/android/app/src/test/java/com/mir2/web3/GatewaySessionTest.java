@@ -610,6 +610,43 @@ public class GatewaySessionTest {
         }
     }
 
+    @Test public void questMetadataStagesOnlyDuringAuthenticatedSelectedStart() throws Exception {
+        JSONObject definition = GatewaySession.object("type", "packet", "packet", "NewQuestInfo",
+                "payload", GatewaySession.object("id", 2100004, "name", "OFFLINE TLS quest"));
+        JSONObject completed = GatewaySession.object("type", "packet", "packet", "CompleteQuest",
+                "payload", GatewaySession.object("completedQuests", new org.json.JSONArray().put(1)));
+        connect();
+        peer.send(definition.toString()); peer.send(completed.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        roster();
+        peer.send(definition.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.start(7);
+        assertEquals("startGame", commands.poll(3, TimeUnit.SECONDS).getString("type"));
+        assertNull("Metadata is not world bootstrap", phase(GatewaySession.Phase.STARTING).world);
+        for (JSONObject envelope : new JSONObject[]{definition, completed}) {
+            peer.send(envelope.toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Selected Start must retain packet-first quest metadata", raw);
+            assertEquals(envelope.toString(), new JSONObject(raw).toString());
+        }
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":1}}");
+        phase(GatewaySession.Phase.CHARACTERS);
+        peer.send(definition.toString()); peer.send(completed.toString());
+        assertNull("Rejected Start must not keep accepting metadata", gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.disconnect("TLS fixture ended");
+        assertTrue(phase(GatewaySession.Phase.DISCONNECTED).characters.isEmpty());
+    }
+
+    @Test public void oversizedQuestMetadataFailsClosedBeforeOwnerBootstrap() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(GatewaySession.object("type", "packet", "packet", "NewQuestInfo", "payload",
+                GatewaySession.object("id", 1, "name", "文".repeat(6000))).toString());
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
     @Test public void oversizedNpcPacketFailsClosedAtTheJniBoundary() throws Exception {
         connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
         peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");

@@ -120,7 +120,8 @@ pub(crate) struct HostState {
     inventory: crate::inventory_ingress::AndroidInventoryIngress,
     npc: crate::npc_ingress::AndroidNpcIngress,
     player: crate::player_ingress::AndroidPlayerIngress,
-    phase: String,
+    pub(crate) quests: crate::quest_ingress::AndroidQuestIngress,
+    pub(crate) phase: String,
     world: Option<HostWorldPosition>,
     pending_world_request: Option<u64>,
     pending_render_request: Option<u64>,
@@ -141,6 +142,7 @@ impl HostState {
         self.inventory.reset();
         self.npc.reset();
         self.player.reset();
+        self.quests.reset();
     }
 
     fn reset_gameplay(&mut self) {
@@ -217,6 +219,18 @@ impl HostState {
             return Ok(false);
         }
         self.chat.packet(raw)
+    }
+
+    fn accept_quest_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
+        if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
+            || !matches!(screen, Screen::StartingGame | Screen::InGame) {
+            return Ok(false);
+        }
+        self.quests.packet(raw)
+    }
+
+    fn bind_quest_snapshot(&mut self, raw: &str) -> Result<(), &'static str> {
+        self.quests.snapshot(raw, self.player.presentation_cursor())
     }
 
     fn accept_inventory_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
@@ -622,6 +636,7 @@ impl Plugin for AndroidSharedShellPlugin {
             (report_preview_social_layout, report_preview_mail_layout)
                 .after(bevy::ui::UiSystems::Layout),
         );
+        crate::quest_ingress::install(app);
         crate::entity_overlays::install(app);
         crate::ground_labels::install(app);
         crate::mobile_ui::install(app);
@@ -1384,6 +1399,7 @@ fn receive(
                         || host.accept_inventory_packet(model.screen, raw).is_err()
                         || host.accept_player_packet(model.screen, raw).is_err()
                         || host.accept_chat_packet(model.screen, raw).is_err()
+                        || host.accept_quest_packet(model.screen, raw).is_err()
                         || host
                             .accept_npc_packet(
                                 model.screen,
@@ -1728,6 +1744,7 @@ fn receive(
             host.skills.clear_scene();
             host.player.clear_scene();
             host.npc.clear_scene();
+            host.quests.clear_scene();
             if let Some(player) = player.as_deref_mut() {
                 player.request_npc_service_exit();
             }
@@ -1764,7 +1781,10 @@ fn receive(
                 if host.skills.snapshot(raw).is_err() || host.inventory.snapshot(raw).is_err() {
                     projected = None;
                 } else if let Ok(ui) = host.player.snapshot(raw) {
-                    if host.bind_chat_owner().is_ok() && host.bind_npc_snapshot(raw).is_ok() {
+                    if host.bind_chat_owner().is_ok()
+                        && host.bind_npc_snapshot(raw).is_ok()
+                        && host.bind_quest_snapshot(raw).is_ok()
+                    {
                         projection.ui = ui;
                     } else {
                         projected = None;
@@ -2541,6 +2561,10 @@ mod chat_editor_tests;
 #[cfg(test)]
 #[path = "npc_host_tests.rs"]
 mod npc_host_tests;
+
+#[cfg(test)]
+#[path = "quest_host_tests.rs"]
+mod quest_host_tests;
 
 #[cfg(test)]
 mod tests {

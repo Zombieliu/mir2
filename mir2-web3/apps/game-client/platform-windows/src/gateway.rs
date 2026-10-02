@@ -26,6 +26,9 @@ use mir2_client_bevy::native_player_ingress::{
     update_wallet_from_snapshot, wallet_value, NativeUiPlayerCursor, WalletState,
 };
 use mir2_client_bevy::native_shell::{CharacterSummary, NativeGatewayEvent as ShellGatewayEvent};
+use mir2_client_bevy::native_quest_ingress::{
+    add_quest_reward_tooltip_sources, crystal_tooltip_source_for_preview, crystal_wire_item_info,
+};
 use mir2_client_bevy::pending_operations::{InventoryOperationAck, QuestOperationAck};
 use mir2_client_bevy::skill_model::MAX_LEARNED_SKILLS;
 use mir2_client_bevy::social::SocialModel;
@@ -773,16 +776,6 @@ fn unique_crystal_tooltip_info(item_index: i32) -> Option<CrystalItemInfoModel> 
     mir2_client_bevy::native_inventory_ingress::native_tooltip_info(item_index)
 }
 
-fn crystal_wire_item_info(value: &Value) -> Option<CrystalItemInfoModel> {
-    let mut object = value.as_object()?.clone();
-    if !object.contains_key("item_index") {
-        object.insert(
-            "item_index".to_owned(),
-            object.get("index").cloned().unwrap_or(Value::Null),
-        );
-    }
-    serde_json::from_value(Value::Object(object)).ok()
-}
 
 fn crystal_real_tooltip_info(
     info: &CrystalItemInfoModel,
@@ -798,74 +791,7 @@ fn crystal_tooltip_source_for_user_item(
     mir2_client_bevy::native_inventory_ingress::native_tooltip_source_for_user_item(value, cursor)
 }
 
-/// Mirrors `new UserItem(info)` at the two Crystal catalogue-only surfaces.
-/// GameShop supplies a count; QuestCell leaves the constructor's zero count
-/// alone and paints the reward quantity as a separate cell label.
-fn crystal_tooltip_source_for_preview(
-    info: CrystalItemInfoModel,
-    count: u16,
-    cursor: &NativeUiPlayerCursor,
-) -> CrystalItemTooltipSourceModel {
-    let user_item = CrystalUserItemModel {
-        item_index: info.item_index,
-        current_dura: info.durability,
-        max_dura: info.durability,
-        count,
-        identified: false,
-        slots: vec![None; usize::from(info.slots)],
-        ..Default::default()
-    };
-    let viewer = crystal_tooltip_viewer(cursor);
-    CrystalItemTooltipSourceModel {
-        real_info: crystal_real_tooltip_info(&info, viewer),
-        info,
-        user_item: Some(user_item),
-        socket_infos: Vec::new(),
-        real_socket_infos: Vec::new(),
-    }
-}
 
-fn add_quest_reward_tooltip_sources(payload: &mut Value, cursor: &NativeUiPlayerCursor) {
-    let Some(payload_object) = payload.as_object_mut() else {
-        return;
-    };
-    let raw_info = payload_object.get("info").cloned();
-    let Some(rewards) = payload_object
-        .get_mut("rewards")
-        .and_then(Value::as_object_mut)
-    else {
-        return;
-    };
-    for (rendered_key, raw_key) in [
-        ("items", "rewards_fixed_item"),
-        ("selectItems", "rewards_select_item"),
-    ] {
-        let raw_items = raw_info
-            .as_ref()
-            .and_then(|info| info.get(raw_key))
-            .and_then(Value::as_array);
-        let Some(rendered_items) = rewards.get_mut(rendered_key).and_then(Value::as_array_mut)
-        else {
-            continue;
-        };
-        for (index, rendered) in rendered_items.iter_mut().enumerate() {
-            let info = raw_items
-                .and_then(|items| items.get(index))
-                .and_then(|reward| reward.get("item"))
-                .and_then(crystal_wire_item_info)
-                .or_else(|| {
-                    value_i32(rendered.get("itemIndex")).and_then(unique_crystal_tooltip_info)
-                });
-            let (Some(info), Some(object)) = (info, rendered.as_object_mut()) else {
-                continue;
-            };
-            object.insert(
-                "tooltipSource".to_owned(),
-                json!(crystal_tooltip_source_for_preview(info, 0, cursor)),
-            );
-        }
-    }
-}
 
 fn enrich_guild_storage_item(value: &mut Value, cursor: &NativeUiPlayerCursor) {
     let Some(item) = value.get("item").cloned() else {

@@ -41,6 +41,8 @@ mod phone_panels;
 #[cfg(any(target_os = "android", test))]
 mod player_ingress;
 #[cfg(any(target_os = "android", test))]
+mod quest_ingress;
+#[cfg(any(target_os = "android", test))]
 mod scene_effects;
 #[cfg(any(target_os = "android", test))]
 mod shared_shell;

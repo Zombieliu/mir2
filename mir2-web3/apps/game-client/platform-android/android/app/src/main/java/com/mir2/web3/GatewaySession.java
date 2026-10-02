@@ -272,6 +272,9 @@ final class GatewaySession implements AutoCloseable {
                 && (isPersonalSkillPacket(packet) || isInventoryOperationPacket(packet)
                         || isPersonalPlayerPacket(packet) || isReceivedChatPacket(packet));
         boolean forwardNpc = npcGameplayPhase() && isNpcServicePacket(packet);
+        // Only public metadata for an authenticated, listed-character Start.
+        // Rust stages it until the accepted owner snapshot; it is not bootstrap.
+        boolean forwardQuestMetadata = worldPending() && isQuestMetadataPacket(packet);
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -400,7 +403,8 @@ final class GatewaySession implements AutoCloseable {
             default: break;
         }
         if ((forwardEntity && phase == Phase.IN_GAME) || (forwardPersonal && personalGameplayPhase())
-                || (forwardNpc && npcGameplayPhase())) {
+                || (forwardNpc && npcGameplayPhase())
+                || (forwardQuestMetadata && worldPending())) {
             forwardBounded(envelope, gameplayObserver);
         }
     }
@@ -453,6 +457,10 @@ final class GatewaySession implements AutoCloseable {
         return packet.equals("NPCResponse") || packet.equals("NPCGoods")
                 || packet.equals("NPCPearlGoods") || packet.equals("NPCSell")
                 || packet.equals("NPCRepair") || packet.equals("NPCSRepair");
+    }
+
+    private static boolean isQuestMetadataPacket(String packet) {
+        return packet.equals("NewQuestInfo") || packet.equals("CompleteQuest");
     }
 
     private boolean npcGameplayPhase() {

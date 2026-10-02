@@ -673,6 +673,14 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
     }
 }
 
+/// Install the existing native consumer without constructing a renderer/window.
+/// Headless host lifecycle tests use the same buffer as build_runtime_app.
+/// Like rebuilding a runtime app, this replaces the previous queue; callers
+/// must retain this app while publishing and must not install it mid-session.
+pub fn install_native_ingestion(app: &mut bevy::prelude::App) {
+    app.insert_resource(NativeInbound::new());
+}
+
 /// Native-host entry point: push a world-state snapshot JSON to the Bevy loop.
 ///
 /// Safe to call from any thread after the runtime app has been built. Returns
