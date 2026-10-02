@@ -18,7 +18,7 @@ import { loadCrystalQuestRouteSources } from './route-manifest.mjs';
 import {
   PERIODIC_COMMANDS, validateScenario, assertFixtureIdentity, buildPeriodicRoutes, assertPeriodicOffers,
   periodicQuestStates, periodicCreditDeltas, dailyReady, selectPeriodicFarmPlan, periodicRewardPreview,
-  playerBalance, validatePeriodicFinish, createPeriodicRedactor, periodicTraceProjection, lostPeriodicTarget, stageName, mapName, sha256,
+  playerBalance, validatePeriodicFinish, createPeriodicRedactor, periodicTraceProjection, lostPeriodicTarget, staleObservedPeriodicCorpse, stageName, mapName, sha256,
 } from './periodic-journey-policy.mjs';
 
 const CATALOG_URL = new URL('../../../../config/quest-guidance/daily-weekly-v1.json', import.meta.url);
@@ -89,7 +89,7 @@ export async function runPeriodicJourney({ input, output, mapPackRoot }) {
     weeklyIds: routes.filter(route => route.cadence === 'weekly').map(route => route.questId),
     status: 'running', completed: false, smokePassed: false, timingAccepted: false, visualAccepted: false,
     capacityAcceptance: false, phases: [], taskStages: [], killCredits: [], accepts: [], finishes: [],
-    travel: [], combat: [], merchants: [], supplies: [], deaths: [], revivals: [], lostTargets: [], actionReceipts: {}, actionCounts: {},
+    travel: [], combat: [], merchants: [], supplies: [], deaths: [], revivals: [], lostTargets: [], staleObservedCorpses: [], actionReceipts: {}, actionCounts: {},
   };
   const checkpoint = async () => {
     if (!report.finishedAt) report.elapsedMs = Date.now() - startedAtMs;
@@ -280,7 +280,18 @@ export async function runPeriodicJourney({ input, output, mapPackRoot }) {
           try {
             return await completeQuestObjectives(bounded, plan.route, trackedNavigate, { ...combatOptions, travel,
               afterEngagement: async () => { checkDeadline(); throw new FarmYield('re-evaluate merged daily targets'); } });
-          } catch (error) { if (error instanceof FarmYield) return { yieldedAfterEngagement: true }; throw error; }
+          } catch (error) {
+            if (error instanceof FarmYield) return { yieldedAfterEngagement: true };
+            if (error.message !== `Timeout waiting for q${plan.route.questId} ${plan.kill.monsterName} kill progress`) throw error;
+            // Probe through the ordinary protocol. A probe/network/cooldown
+            // failure remains a failure; it cannot become a corpse retry.
+            await refreshCombatWorldSnapshot(bounded);
+            const staleObservedCorpse = staleObservedPeriodicCorpse({ error, route: plan.route, kill: plan.kill,
+              beforeSnapshot, afterSnapshot: client.snapshot, beforeSequence, events: client.events,
+              credits: periodicCreditDeltas(beforeStates, periodicQuestStates(client.snapshot, routes)) });
+            if (!staleObservedCorpse) throw error;
+            return { staleObservedCorpse, originalFailure: { name: error.name, message: error.message } };
+          }
         });
       } catch (error) {
         if (hasAuthoritativePlayerDeath(client.snapshot)) { await recoverDeath(); await queueCheckpoint(); continue; }
@@ -289,6 +300,12 @@ export async function runPeriodicJourney({ input, output, mapPackRoot }) {
       const credits = periodicCreditDeltas(beforeStates, periodicQuestStates(client.snapshot, routes));
       if (engagementResult?.lostTarget) {
         report.lostTargets.push({ ...engagementResult.lostTarget, questId: plan.route.questId,
+          beforeSequence, afterSequence: client.sequence, at: new Date().toISOString() });
+        await queueCheckpoint();
+        continue;
+      }
+      if (engagementResult?.staleObservedCorpse) {
+        report.staleObservedCorpses.push({ ...engagementResult.staleObservedCorpse, questId: plan.route.questId,
           beforeSequence, afterSequence: client.sequence, at: new Date().toISOString() });
         await queueCheckpoint();
         continue;

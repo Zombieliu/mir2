@@ -237,6 +237,69 @@ export function lostPeriodicTarget({ beforeSnapshot, afterSnapshot, target, befo
     foreignAttackAt: foreign.at, terminal: { hp: terminal.hp, dead: terminal.dead }, ownCreditGranted: false };
 }
 
+/** A spawn search can briefly re-observe an old corpse as an alive packet. */
+export function staleObservedPeriodicCorpse({ error, route, kill, beforeSnapshot, afterSnapshot, beforeSequence, events, credits }) {
+  if (error?.name !== 'Error' || error?.code != null || error?.reason != null ||
+      !Number.isSafeInteger(route?.questId) || !kill?.monsterName || !Array.isArray(kill.allowedMaps) ||
+      error.message !== `Timeout waiting for q${route?.questId} ${kill?.monsterName} kill progress` ||
+      !route?.objectives?.kill?.some(entry => entry.monsterIndex === kill?.monsterIndex && entry.monsterName === kill?.monsterName) ||
+      !Number.isSafeInteger(beforeSequence) || beforeSequence < 0 || credits?.length) return null;
+  const currentMap = mapName(beforeSnapshot?.mapFileName), selfId = Number(beforeSnapshot?.playerObjectId);
+  if (!currentMap || currentMap !== mapName(afterSnapshot?.mapFileName) || !kill.allowedMaps.includes(currentMap) ||
+      !Number.isSafeInteger(selfId) || selfId <= 0 || Number(afterSnapshot?.playerObjectId) !== selfId ||
+      !actor(beforeSnapshot) || !actor(afterSnapshot) ||
+      !Number.isSafeInteger(beforeSnapshot.playerExperience) || beforeSnapshot.playerExperience < 0 ||
+      !Number.isSafeInteger(Number(actor(beforeSnapshot).level)) || Number(actor(beforeSnapshot).level) <= 0 ||
+      beforeSnapshot.playerExperience !== afterSnapshot.playerExperience || actor(beforeSnapshot).level !== actor(afterSnapshot).level) return null;
+  const recent = (events ?? []).filter(event => Number(event.sequence) > beforeSequence);
+  const worlds = [beforeSnapshot, afterSnapshot, ...recent.filter(event => event.type === 'worldSnapshot' && event.direction === 'received').map(event => event.payload)];
+  if (worlds.some(world => Number(world?.petCount ?? world?.playerPetCount ?? 0) > 0 ||
+      ['pets', 'ownedPets', 'playerPets'].some(key => Array.isArray(world?.[key]) && world[key].length > 0) ||
+      (world?.entities ?? []).some(entity => nameKey(entity.kind).includes('pet') || entity.isPet === true ||
+        nameKey(entity.kind) === 'monster' && [entity.ownerObjectId, entity.owner_object_id, entity.petOwnerObjectId, entity.ownerId, entity.masterObjectId]
+          .some(id => id != null && Number(id) === selfId)))) return null;
+  if (recent.some(event => event.direction === 'sent' &&
+      (['attack', 'attackDirection', 'magic'].includes(event.type) || /pet/i.test(event.type ?? '')) ||
+      event.direction === 'received' && (
+        ['ObjectAttack', 'ObjectMagic'].includes(event.packet) && Number(event.payload?.objectId) === selfId ||
+        event.packet === 'Magic' && event.payload?.cast === true ||
+        event.packet === 'ObjectStruck' && Number(event.payload?.attackerId) === selfId ||
+        event.packet === 'GainExperience' && Number(event.payload?.amount) > 0 ||
+        event.packet === 'ObjectMonster' && Number(event.payload?.masterObjectId) === selfId))) return null;
+  const observed = new Map();
+  for (const event of recent) {
+    const value = event.payload;
+    if (event.direction === 'received' && event.packet === 'ObjectMonster' && value?.dead === false &&
+        nameKey(value.name) === nameKey(kill.monsterName) && Number.isSafeInteger(Number(value.objectId)) && Number(value.objectId) > 0) {
+      observed.set(Number(value.objectId), event);
+    }
+  }
+  const proofs = [];
+  for (const [objectId, alive] of observed) {
+    const terminal = (afterSnapshot.entities ?? []).find(entity => Number(entity.objectId) === objectId);
+    const isCorpse = entity => entity && nameKey(entity.kind) === 'monster' && nameKey(entity.name) === nameKey(kill.monsterName) &&
+      (entity.monsterIndex == null && entity.monster_index == null || Number(entity.monsterIndex ?? entity.monster_index) === kill.monsterIndex) &&
+      (entity.dead === true || entity.hp != null && Number(entity.hp) <= 0);
+    if (!isCorpse(terminal)) continue;
+    const snapshot = recent.findLast(event => event.direction === 'received' && event.type === 'worldSnapshot' &&
+      Number(event.sequence) > Number(alive.sequence) && mapName(event.payload?.mapFileName) === currentMap &&
+      (event.payload?.entities ?? []).some(entity => Number(entity.objectId) === objectId && isCorpse(entity)));
+    if (!snapshot) continue;
+    const death = recent.findLast(event => event.direction === 'received' && Number(event.payload?.objectId) === objectId &&
+      (event.packet === 'ObjectDied' || event.packet === 'ObjectMonster' && event.payload?.dead === true ||
+       event.packet === 'ObjectHealth' && Number(event.payload?.percent) === 0));
+    const priorDeath = (events ?? []).findLast(event => Number(event.sequence) <= beforeSequence && event.direction === 'received' &&
+      event.packet === 'ObjectDied' && Number(event.payload?.objectId) === objectId);
+    proofs.push({ reason: 'unattacked-authoritative-stale-corpse', objectId, monsterName: kill.monsterName,
+      observedAliveSequence: alive.sequence, deathObservationSequence: death?.sequence ?? snapshot.sequence,
+      priorDeathSequence: priorDeath?.sequence ?? null, snapshotSequence: snapshot.sequence,
+      terminal: { hp: terminal.hp, dead: terminal.dead }, ownCreditGranted: false });
+  }
+  // The shared helper does not export its chosen target. Require one uniquely
+  // observed corpse instead of guessing among several possible targets.
+  return proofs.length === 1 ? proofs[0] : null;
+}
+
 export function periodicRewardPreview(info, route) {
   if (Number(info?.index) !== route.questId || Number(info?.min_level_needed) !== route.minLevel ||
       Number(info?.max_level_needed) !== route.maxLevel || Number(info?.reward_gold) !== route.gold) {

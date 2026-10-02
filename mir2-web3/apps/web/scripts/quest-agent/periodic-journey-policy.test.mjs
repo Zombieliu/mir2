@@ -191,6 +191,98 @@ test('lost target: actual quest or experience credit prevents retry classificati
   assert.equal(periodicPolicy.lostPeriodicTarget(experience), null);
 });
 
+const staleCorpseEvidence = () => {
+  const route = buildPeriodicRoutes(catalog, 15, sources).find(entry => entry.questId === 92006);
+  const beforeSnapshot = snapshot(buildPeriodicRoutes(catalog, 15, sources), 15);
+  beforeSnapshot.playerExperience = 420;
+  const afterSnapshot = structuredClone(beforeSnapshot);
+  afterSnapshot.entities.push({ objectId: 202101, kind: 'monster', name: 'Oma', x: 463, y: 122, hp: 0, dead: true });
+  return { error: new Error('Timeout waiting for q92006 Oma kill progress'), route, kill: route.objectives.kill[0],
+    beforeSnapshot, afterSnapshot, beforeSequence: 1567, credits: [], events: [
+      { sequence: 1376, direction: 'sent', type: 'magic', targetId: 202101 },
+      { sequence: 1386, direction: 'received', packet: 'ObjectDied', payload: { objectId: 202101 } },
+      { sequence: 1656, direction: 'received', packet: 'ObjectMonster', payload: { objectId: 202101, name: 'Oma', dead: true } },
+      { sequence: 1659, direction: 'received', packet: 'ObjectMonster', payload: { objectId: 202101, name: 'Oma', dead: false } },
+      { sequence: 1660, direction: 'received', packet: 'ObjectHealth', payload: { objectId: 202101, percent: 100 } },
+      { sequence: 1679, direction: 'received', type: 'worldSnapshot', payload: structuredClone(afterSnapshot) },
+    ] };
+};
+
+test('stale corpse: replay an earlier own Oma corpse without counting another kill', () => {
+  const evidence = staleCorpseEvidence(), original = structuredClone(evidence.afterSnapshot);
+  const proof = periodicPolicy.staleObservedPeriodicCorpse(evidence);
+  assert.equal(proof.objectId, 202101);
+  assert.equal(proof.reason, 'unattacked-authoritative-stale-corpse');
+  assert.equal(proof.observedAliveSequence, 1659);
+  assert.equal(proof.deathObservationSequence, 1656);
+  assert.equal(proof.snapshotSequence, 1679);
+  assert.equal(proof.priorDeathSequence, 1386);
+  assert.equal(proof.ownCreditGranted, false);
+  assert.deepEqual(evidence.afterSnapshot, original);
+});
+
+for (const type of ['attack', 'attackDirection', 'magic', 'petAttack']) {
+  test(`stale corpse: a new ${type} attempt keeps missing credit as an error`, () => {
+    const evidence = staleCorpseEvidence();
+    evidence.events.push({ sequence: 1661, direction: 'sent', type });
+    assert.equal(periodicPolicy.staleObservedPeriodicCorpse(evidence), null);
+  });
+}
+
+test('stale corpse: pets, accepted owner combat and real XP/quest credit remain errors', () => {
+  for (const mutate of [
+    e => e.afterSnapshot.entities.push({ objectId: 88, kind: 'monster', ownerObjectId: 1 }),
+    e => e.events.push({ sequence: 1661, direction: 'received', packet: 'Magic', payload: { cast: true, targetId: 202101 } }),
+    e => e.events.push({ sequence: 1661, direction: 'received', packet: 'ObjectAttack', payload: { objectId: 1 } }),
+    e => e.events.push({ sequence: 1661, direction: 'received', packet: 'ObjectStruck', payload: { attackerId: 1, objectId: 202101 } }),
+    e => { e.afterSnapshot.playerExperience += 1; },
+    e => { e.afterSnapshot.entities[0].level += 1; },
+    e => { e.credits = [{ questId: 92006, delta: 1 }]; },
+  ]) {
+    const evidence = staleCorpseEvidence(); mutate(evidence);
+    assert.equal(periodicPolicy.staleObservedPeriodicCorpse(evidence), null);
+  }
+});
+
+test('stale corpse: no fresh snapshot death, remove only, live target or changed map cannot retry', () => {
+  for (const mutate of [
+    e => e.events.pop(),
+    e => { e.events.at(-1).sequence = 1500; },
+    e => { e.events.at(-1).payload.entities.pop(); },
+    e => { e.afterSnapshot.entities.at(-1).hp = 30; e.afterSnapshot.entities.at(-1).dead = false; },
+    e => { e.afterSnapshot.mapFileName = 'D001'; },
+    e => { e.events.at(-1).payload.mapFileName = 'D001'; },
+    e => { e.afterSnapshot.entities.at(-1).monsterIndex = 999; },
+    e => { delete e.beforeSnapshot.playerExperience; delete e.afterSnapshot.playerExperience; },
+  ]) {
+    const evidence = staleCorpseEvidence(); mutate(evidence);
+    evidence.events.push({ sequence: 1680, direction: 'received', packet: 'ObjectRemove', payload: { objectId: 202101 } });
+    assert.equal(periodicPolicy.staleObservedPeriodicCorpse(evidence), null);
+  }
+});
+
+test('stale corpse: only the planned species exact kill-progress timeout can retry', () => {
+  for (const message of ['Timeout waiting for q92007 Oma kill progress', 'Timeout waiting for q92006 Skeleton kill progress',
+    'Timeout waiting for combat cooldown worldSnapshot', 'Timeout waiting for worldSnapshot',
+    'Connection closed waiting for q92006 Oma kill progress']) {
+    const evidence = staleCorpseEvidence(); evidence.error = new Error(message);
+    assert.equal(periodicPolicy.staleObservedPeriodicCorpse(evidence), null);
+  }
+  const wrongSpecies = staleCorpseEvidence(); wrongSpecies.events[3].payload.name = 'Skeleton';
+  assert.equal(periodicPolicy.staleObservedPeriodicCorpse(wrongSpecies), null);
+  const coded = staleCorpseEvidence(); coded.error.code = 'PERIODIC_DEADLINE';
+  assert.equal(periodicPolicy.staleObservedPeriodicCorpse(coded), null);
+});
+
+test('stale corpse: two possible observed corpse targets are ambiguous and remain errors', () => {
+  const evidence = staleCorpseEvidence();
+  const second = { ...evidence.afterSnapshot.entities.at(-1), objectId: 202102 };
+  evidence.afterSnapshot.entities.push(second);
+  evidence.events.splice(-1, 0, { sequence: 1662, direction: 'received', packet: 'ObjectMonster', payload: { objectId: 202102, name: 'Oma', dead: false } });
+  evidence.events.at(-1).payload.entities.push(structuredClone(second));
+  assert.equal(periodicPolicy.staleObservedPeriodicCorpse(evidence), null);
+});
+
 test('accepted reward preview is bound to server ID, tier, gold and task counts', () => {
   const route = buildPeriodicRoutes(catalog, 10, sources)[0];
   const info = { index: 92001, min_level_needed: 10, max_level_needed: 14, reward_gold: 4000, reward_exp: 600,
