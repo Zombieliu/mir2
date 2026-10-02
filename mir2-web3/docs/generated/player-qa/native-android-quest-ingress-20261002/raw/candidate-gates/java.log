@@ -1,0 +1,65 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig
+> Task :app:javaPreCompileDebug
+> Task :app:generateDebugResValues
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:parseDebugLocalResources
+> Task :app:mergeDebugResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :app:preUiPreviewBuild UP-TO-DATE
+> Task :app:generateUiPreviewBuildConfig
+> Task :app:javaPreCompileUiPreview
+> Task :app:generateUiPreviewResValues
+> Task :app:checkUiPreviewAarMetadata
+> Task :app:mapUiPreviewSourceSetPaths
+> Task :app:generateUiPreviewResources
+> Task :app:packageUiPreviewResources
+> Task :app:createUiPreviewCompatibleScreenManifests
+> Task :app:parseUiPreviewLocalResources
+> Task :app:extractDeepLinksUiPreview
+> Task :app:processUiPreviewMainManifest
+> Task :app:processUiPreviewManifest
+> Task :app:preUiPreviewUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileUiPreviewUnitTest
+> Task :app:processUiPreviewJavaRes NO-SOURCE
+> Task :app:processUiPreviewUnitTestJavaRes NO-SOURCE
+> Task :app:processDebugManifestForPackage
+> Task :app:mergeUiPreviewResources
+> Task :app:processUiPreviewManifestForPackage
+> Task :app:processDebugResources
+> Task :app:processUiPreviewResources
+
+> Task :app:compileDebugJavaWithJavac
+注: /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:bundleDebugClassesToRuntimeJar
+
+> Task :app:compileUiPreviewJavaWithJavac
+注: /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :app:compileDebugUnitTestJavaWithJavac
+> Task :app:testDebugUnitTest
+> Task :app:bundleUiPreviewClassesToRuntimeJar
+> Task :app:bundleUiPreviewClassesToCompileJar
+> Task :app:compileUiPreviewUnitTestJavaWithJavac
+> Task :app:testUiPreviewUnitTest
+[Incubating] Problems report is available at: file:///Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/build/reports/problems/problems-report.html
+
+BUILD SUCCESSFUL in 35s
+42 actionable tasks: 42 executed

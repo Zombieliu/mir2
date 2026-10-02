@@ -1,0 +1,90 @@
+{
+  "publishedBaseline": "2c2e5e214693859d7d56e414fb3ff9233e58409c",
+  "status": 101,
+  "currentOwnedFilesRestored": true,
+  "scope": "Same Mac filters with only the two affected Windows files substituted from the published parent, all other current source unchanged; not a full Windows gate",
+  "files": [
+    {
+      "file": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "baselineSha256": "3ad6e21e0986f688b139260da1ebb4aa4d2e7f7f31faac1795ce913451805bb3",
+      "restoredOwnedSha256": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0"
+    },
+    {
+      "file": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "baselineSha256": "afd6b4439d99ecb92d1ed1d9330b2730c120e995a1b61b5f1c45bb9f750d972d",
+      "restoredOwnedSha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705"
+    }
+  ],
+  "candidate": {
+    "counts": [
+      98,
+      1,
+      0,
+      0,
+      716
+    ],
+    "failures": [
+      "gameplay_bridge::tests::packet_only_npcs_derive_crystal_image_libraries_without_npc_zero_fallback"
+    ]
+  },
+  "publishedBaselineResults": {
+    "counts": [
+      98,
+      1,
+      0,
+      0,
+      716
+    ],
+    "failures": [
+      "gameplay_bridge::tests::packet_only_npcs_derive_crystal_image_libraries_without_npc_zero_fallback"
+    ]
+  },
+  "identicalResultSet": true,
+  "finalQuest": {
+    "counts": [
+      39,
+      12,
+      0,
+      0,
+      764
+    ],
+    "failures": [
+      "entity_overlays::tests::npc_quest_markers_follow_authoritative_quest_status",
+      "input::tests::quest_route_input_tests::active_supply_navigation_cancels_on_same_map_reset_map_change_or_escape",
+      "input::tests::quest_route_input_tests::bichon_route_keeps_modal_drag_and_manual_cancel_guards",
+      "input::tests::quest_route_input_tests::bichon_route_reaches_oma_entrance_around_static_and_new_entity_obstacles",
+      "input::tests::quest_route_input_tests::bichon_route_survives_passive_ui_hover_without_sending_extra_moves",
+      "input::tests::quest_route_input_tests::hunt_navigation_already_in_region_stops_without_attacking_or_claiming_progress",
+      "input::tests::quest_route_input_tests::hunt_navigation_d001_route_avoids_new_occupancy_and_stops_on_authoritative_arrival",
+      "input::tests::quest_route_input_tests::quest_route_card_without_diary_or_big_map_cache_reaches_d401_exit",
+      "input::tests::quest_route_input_tests::quest_route_uses_current_identity_even_when_a_remote_map_was_browsed",
+      "input::tests::quest_route_input_tests::supply_navigation_already_beside_travis_neither_attacks_nor_opens_a_shop_remotely",
+      "input::tests::quest_route_input_tests::supply_navigation_reaches_both_poison_shop_entrances_and_a_free_npc_neighbor",
+      "input::tests::quest_route_input_tests::supply_navigation_reselects_a_free_npc_neighbor_when_its_endpoint_becomes_occupied"
+    ]
+  },
+  "publishedQuestBaseline": {
+    "counts": [
+      39,
+      12,
+      0,
+      0,
+      764
+    ],
+    "failures": [
+      "entity_overlays::tests::npc_quest_markers_follow_authoritative_quest_status",
+      "input::tests::quest_route_input_tests::active_supply_navigation_cancels_on_same_map_reset_map_change_or_escape",
+      "input::tests::quest_route_input_tests::bichon_route_keeps_modal_drag_and_manual_cancel_guards",
+      "input::tests::quest_route_input_tests::bichon_route_reaches_oma_entrance_around_static_and_new_entity_obstacles",
+      "input::tests::quest_route_input_tests::bichon_route_survives_passive_ui_hover_without_sending_extra_moves",
+      "input::tests::quest_route_input_tests::hunt_navigation_already_in_region_stops_without_attacking_or_claiming_progress",
+      "input::tests::quest_route_input_tests::hunt_navigation_d001_route_avoids_new_occupancy_and_stops_on_authoritative_arrival",
+      "input::tests::quest_route_input_tests::quest_route_card_without_diary_or_big_map_cache_reaches_d401_exit",
+      "input::tests::quest_route_input_tests::quest_route_uses_current_identity_even_when_a_remote_map_was_browsed",
+      "input::tests::quest_route_input_tests::supply_navigation_already_beside_travis_neither_attacks_nor_opens_a_shop_remotely",
+      "input::tests::quest_route_input_tests::supply_navigation_reaches_both_poison_shop_entrances_and_a_free_npc_neighbor",
+      "input::tests::quest_route_input_tests::supply_navigation_reselects_a_free_npc_neighbor_when_its_endpoint_becomes_occupied"
+    ]
+  },
+  "finalQuestIdenticalResultSet": true
+}

@@ -2,6 +2,19 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
+2026-10-02 最新任务/对话源码叶：`ccdd51a90542d866a3b08096469c2d2819656ce4`。
+NI-10 从缺入站生产者推进为PARTIAL源码：Java公共任务元数据白名单、Android
+owner/scene绑定、共享tracker/history/dialog/nearby及精确ACK已接通；25项纯投影
+与冻结Windows3d735745f相同，不新增任务/奖励/存档规则。最终Android315/preview334/
+shared1230+10ignored/runtime292+1ignored、fresh Java41+41、实际API31检查通过。
+Mac较宽Windows bridge98/1失败与quest39/12失败原样保留，对照受影响两文件的
+已发布父源码结果集相同，不算完整Windows门通过。11个源码hash与Git精确绑定，
+两原工作区保留。此叶尚无新APK/JNI/任务画面/在线/真机通过，已安装v19不含本叶；
+135条GL506渲染FAIL不变。下一叶精确新包与离线接收任务/对话画面，再继续整个分母。
+[源码绑定、原始失败与未完成门](generated/player-qa/native-android-quest-ingress-20261002/README.md)。
+
+下文v19及更早保留各自历史源码和验收范围，不将旧包重绑到上述源码。
+
 2026-10-02 最新实际v19：干净源码`78e7d2309f6a6b92cea1737c76c5eedfd863e46e`
 双原生诊断包、28源码输入hash、每包6647原图/三metadata及安装核验通过。
 有效Items/7图标可见，Buy/Sell/Repair/SRepair四种真实模拟器关闭点按通过，
@@ -290,8 +303,9 @@ Win32 分辨率、Inno 安装器、EXE 更新器不原样搬到 Android：对应
   - [x] G1-upstream-refresh-source — 显式导入3d735745f新增14个提交；正常merge
     保留5处冲突双方，服务端3文件完整格式化源码与上游相同，受影响源码回归/
     实际API31两变体通过。源码门不等于APK、NPC宿主或完整G1完成。
-  - [ ] G1-upstream-refresh-package — 新来源的精确APK/安装/设备画面仍需验证。
-    v16仍绑定8cd2e7eae；旧原图/GL失败不重绑，不把Windows证据当Android证据。
+  - [x] G1-upstream-refresh-package — 精确78e7/v19诊断双APK实际包含冻结
+    3d735745f刷新，hash/安装/原生地图与NPC四窗画面已核验。只完成有界源码刷新
+    包门，135条GL506/完整渲染仍FAIL；不覆盖新ccdd任务源码包、JNI/在线或整个G1。
 - [ ] G2 — 真实登录 → 角色列表 → 创建/选择 → StartGame → 服务端地图/位置。
   审计 transport、认证和 render-ready，不发裸 account_id 冒充身份。
 - [ ] G3 — 完整资源和对象/地图生命周期、真实权威移动、战斗、拾取、背包、
@@ -327,7 +341,7 @@ PR #253 保持独立 Draft；不自动改 base、不合并 PR。分阶段验证�
 ## 6. 外部验收材料（不阻止其余安全代码工作）
 
 - Android 真实联网需获准的测试 Gateway（WSS/相关 HTTPS）、服务器版本和
-  普通测试账号。v5 Debug build 当前明确为空地址，uiPreview 禁止联网。
+  普通测试账号。最新已安装v19两种诊断包明确为空地址，uiPreview 禁止联网。
   Windows 报告存在 `/playtest/ws` 不自动构成本轮访问/数据写入许可。
 - 凭据由用户在本地输入；不得从其他工作区、日志或旧文件搜密码/令牌。
 - 完整、获准的资源来源/版本仍需核对；现有 proof pack 不算正式完整共享包。

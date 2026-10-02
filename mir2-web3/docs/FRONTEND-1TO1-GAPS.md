@@ -1,5 +1,18 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 Android exactccdd51a90 received quest/dialog source checkpoint
+>
+> Android now stages public metadata through authenticated selected Start and
+> binds the shared quest/detail/history/dialog/nearby models after authoritative
+> owner/map validation. Accepted Exit blocks stale reopen; exact NACK survives
+> same-frame plain snapshots.25 pure entries equal frozenWindows3d.315/334,
+> shared1230+10ignored/runtime292+1ignored/Java41+41/API31 pass. Broader Mac Windows
+> bridge98/1 and quest39/12 failures retained and baseline-equal, not green.
+> No new APK, rendered received dialogue, action/route/JNI/live/device acceptance
+> yet; oldv19 images cannot stand in for this source.135 GL506 renderer FAIL and
+> full phone/multitouch/IME/languages/resources/whole Windows denominator remain.
+> [Exact source gates and remaining leaf](generated/player-qa/native-android-quest-ingress-20261002/README.md).
+
 > 2026-10-02 Android exact78e7/v19 bounded image/touch checkpoint
 >
 > Buy received specimen uses approved Items/7; actual icon visible. Shared

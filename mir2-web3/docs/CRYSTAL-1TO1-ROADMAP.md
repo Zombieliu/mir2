@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 Android exactccdd51a90 bounded NI-10 source checkpoint
+>
+> Frozen Windows pure quest/dialog/history/nearby/tooltip projections are shared
+> unchanged; authenticated public metadata and bounded Android owner/scene/exact
+> ACK host lifetime now connected.25 normalized entries equal;315/334/shared1230
+> +10ignored/runtime292+1ignored/fresh Java41+41/API31 pass. Broader Mac Windows
+> bridge98/1 and quest39/12 remain FAILED, same affected-file parent result sets.
+> No backend rules/percentage, new APK, rendered quest/JNI/real session/physical
+> acceptance. Installedv19 lacks this source and135 GL506 renderer FAIL remains.
+> Next exact offline package/rendered models and all remaining Windows-completeness
+> leaves. Goal stays Active; original workspaces and all failures preserved.
+> [Exact source and acceptance boundaries](generated/player-qa/native-android-quest-ingress-20261002/README.md).
+
 > 2026-10-02 Android exact78e7/v19 bounded native touch checkpoint
 >
 > Four actual shared NPC close taps and valid Items/7 imagery pass after

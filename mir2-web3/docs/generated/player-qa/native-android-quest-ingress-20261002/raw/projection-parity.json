@@ -1,0 +1,134 @@
+{
+  "frozenWindowsCommit": "3d735745f1117d42a7859e87604a106351dca935",
+  "scope": "Pure presentation projections only; not live quest, rendering, reward or save acceptance",
+  "sharedProjectionSha256": "ca0d25fd5ce014ab0e8cdaacdf8334001df1f491299d417d18fc0ab32612d5a0",
+  "rows": [
+    {
+      "name": "parse_quest_definition",
+      "bodyIdentical": true,
+      "normalizedSha256": "ba08fcd006d70068d5f92ff2d93bfcea89134ccdc722b2c1cc172be5702052eb"
+    },
+    {
+      "name": "transform_quest_tracker",
+      "bodyIdentical": true,
+      "normalizedSha256": "d9f213e3aa1d7617f9d8485f3a17f758e2fdf53258e5ab11fdf5081b77a74ba7"
+    },
+    {
+      "name": "transform_quest_objectives",
+      "bodyIdentical": true,
+      "normalizedSha256": "b9bb86f9225aec6d15ef797673041d8c5052e9fbb2e173e918f08e67a8dd7269"
+    },
+    {
+      "name": "parse_quest_rewards",
+      "bodyIdentical": true,
+      "normalizedSha256": "8039a006fe7308fc07bc69b029bef75dbb4b6c7f76e1da84ad8d61a3e1c15feb"
+    },
+    {
+      "name": "transform_npc_dialog",
+      "bodyIdentical": true,
+      "normalizedSha256": "3c215f979550fbf4fb61e1d480978f244777fbf4267c32c89e96d64b2839c353"
+    },
+    {
+      "name": "transform_nearby_npcs",
+      "bodyIdentical": true,
+      "normalizedSha256": "815bf8326042b2d6ce3333f142a2eebedfa258c4e1f9b9c07d273e01ee363500"
+    },
+    {
+      "name": "quest_status",
+      "bodyIdentical": true,
+      "normalizedSha256": "90fa532f3c8095d9245e86a6689e6d7af34cb2ef765ba9417299991e9590a919"
+    },
+    {
+      "name": "completed_quest_ids",
+      "bodyIdentical": true,
+      "normalizedSha256": "78b84db0bc318980c30c136591e6713b4eb30b09dda8233af128d1f4153cdb03"
+    },
+    {
+      "name": "completed_quest_ids_from_snapshot",
+      "bodyIdentical": true,
+      "normalizedSha256": "67a9d9bca2350635012ab565c118bd0cb289b06567cfa9cbec40b3a48fcc6526"
+    },
+    {
+      "name": "value_u32",
+      "bodyIdentical": true,
+      "normalizedSha256": "0504bfc1a55ea1f31d5edae8020bdfd1f30e4479fe714b0795d775b7fd5db52f"
+    },
+    {
+      "name": "value_i32",
+      "bodyIdentical": true,
+      "normalizedSha256": "559127864b3cf1539c1bd40489e8cea47efa614b0260984d5f63859cd3be3ac8"
+    },
+    {
+      "name": "string_at",
+      "bodyIdentical": true,
+      "normalizedSha256": "970f631b54199c0af098d47d04b4316723ad1974df2e6d8b05aa5288867601c6"
+    },
+    {
+      "name": "string_array",
+      "bodyIdentical": true,
+      "normalizedSha256": "46ed66974eae8f9f52c6d0954859b410416219a65b25401c3d89ddb6d7c2a3e6"
+    },
+    {
+      "name": "tile_distance",
+      "bodyIdentical": true,
+      "normalizedSha256": "418f4624557b3bb0cce0a77d9351ca34f2b8d87baca5759dec059d0b2fab3b23"
+    },
+    {
+      "name": "display_npc_name",
+      "bodyIdentical": true,
+      "normalizedSha256": "5132fd6d815b97cb364aae1a8f218e0e9c9cef98d4eeae7709d18e3ee1cbd0de"
+    },
+    {
+      "name": "strip_crystal_markup",
+      "bodyIdentical": true,
+      "normalizedSha256": "68443698539c5d2d93292cb8aa1f55712cb80cb823e9c342560e3d7d9b87c11e"
+    },
+    {
+      "name": "crystal_wire_item_info",
+      "bodyIdentical": true,
+      "normalizedSha256": "c5b6ab4a9f17c78b5fe21f28c00b4d78b5d1ac8eca4d4611c5d6686ac3ef6420"
+    },
+    {
+      "name": "crystal_tooltip_source_for_preview",
+      "bodyIdentical": true,
+      "normalizedSha256": "421b18d463dd9a22b5c1f4181d61e1d338394fd7e6fbb091b08765df42b94909"
+    },
+    {
+      "name": "add_quest_reward_tooltip_sources",
+      "bodyIdentical": true,
+      "normalizedSha256": "cb8b2a8102f8b099d3860e7b74cf660190f5a237555316f73e2a3aa0a517f4cd"
+    },
+    {
+      "name": "gateway_value_i32",
+      "bodyIdentical": true,
+      "normalizedSha256": "de320495ec2e6dc31677b20b25479fff848eb01066d71f372ee64de24040be75"
+    },
+    {
+      "name": "QuestDefinition_fields",
+      "bodyIdentical": true,
+      "normalizedSha256": "f2e14604d299bc803ac767d71ff53147583911efd190c74f78ebaac446dd8b32"
+    },
+    {
+      "name": "transitive_native_tooltip_viewer",
+      "bodyIdentical": true,
+      "normalizedSha256": "ef0935a56d8034b37fcb3bf923628ffc26d4018dcb83adfcce596cf6191865cc"
+    },
+    {
+      "name": "transitive_native_tooltip_info",
+      "bodyIdentical": true,
+      "normalizedSha256": "1bc1544ade6cb6e548e47b833049b65409d0fc731893cc0df5c4cc134bfe110b"
+    },
+    {
+      "name": "transitive_native_real_tooltip_info",
+      "bodyIdentical": true,
+      "normalizedSha256": "9249d207147a7d55c526eebdaf546669aac6baad31458789a35e2d1f9d5cc657"
+    },
+    {
+      "name": "transitive_unique_crystal_item_template",
+      "bodyIdentical": true,
+      "normalizedSha256": "d9e6e9f6860cf8777ebf5fa636720f438eaca00e9c29a1fb7b172ccbb3a4d054"
+    }
+  ],
+  "allBodiesIdentical": true,
+  "WindowsOriginalCallSitesUseSharedExports": true
+}

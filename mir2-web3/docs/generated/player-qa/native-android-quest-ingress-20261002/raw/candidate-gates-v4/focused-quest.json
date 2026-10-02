@@ -1,0 +1,46 @@
+{
+  "name": "focused-quest",
+  "command": "cargo",
+  "args": [
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/Cargo.toml",
+    "--lib",
+    "--locked",
+    "--offline",
+    "quest_",
+    "--",
+    "--test-threads=1"
+  ],
+  "started": "2026-10-02T00:54:47.615Z",
+  "finished": "2026-10-02T00:54:56.082Z",
+  "status": 0,
+  "sourceHashesBefore": {
+    "client-bevy/src/lib.rs": "487cb9876fa41f01f9bf125ff630bd4bbff76d0635b35e01b83b142fcc2490bd",
+    "client-bevy/src/native_quest_ingress.rs": "493af7278cfce05166f76d869cd05c7d602e8536fe345c77aa1fb31f54fa782f",
+    "runtime/src/native_ingest.rs": "9928a30f444a757930b3cbf4cafab862b19a0f1fec508d3a208d4c86a5509a1b",
+    "platform-windows/src/gameplay_bridge.rs": "2e784221642948bc72efc60d3a0bb70b6e9df99a472592a63abfff371e9dfb4c",
+    "platform-windows/src/gateway.rs": "e5488448dcbe9825d46ce473e3ae53260ddbbdef5ef4f08c1939ac3671ea6ea0",
+    "platform-android/src/lib.rs": "ca9fe6cf9c7e7f644e0c63b3fef5b37b7ac73488fbffd77169a043c43075ff10",
+    "platform-android/src/shared_shell.rs": "1f1995408830b11e5509ecf96800a71955a639ba2164f24223619fdb9d22df24",
+    "platform-android/src/quest_ingress.rs": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc",
+    "platform-android/src/quest_host_tests.rs": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df",
+    "platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java": "9f7055624e4be0a529798e9a4ab6a71e9a8914bb5ce9091a072441306c42a768",
+    "platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java": "7a82f48c64124de335dec8b6fa391dd1af23f79f6c02c2305cc328330d9d0f9b"
+  },
+  "sourceHashesAfter": {
+    "client-bevy/src/lib.rs": "487cb9876fa41f01f9bf125ff630bd4bbff76d0635b35e01b83b142fcc2490bd",
+    "client-bevy/src/native_quest_ingress.rs": "493af7278cfce05166f76d869cd05c7d602e8536fe345c77aa1fb31f54fa782f",
+    "runtime/src/native_ingest.rs": "9928a30f444a757930b3cbf4cafab862b19a0f1fec508d3a208d4c86a5509a1b",
+    "platform-windows/src/gameplay_bridge.rs": "2e784221642948bc72efc60d3a0bb70b6e9df99a472592a63abfff371e9dfb4c",
+    "platform-windows/src/gateway.rs": "e5488448dcbe9825d46ce473e3ae53260ddbbdef5ef4f08c1939ac3671ea6ea0",
+    "platform-android/src/lib.rs": "ca9fe6cf9c7e7f644e0c63b3fef5b37b7ac73488fbffd77169a043c43075ff10",
+    "platform-android/src/shared_shell.rs": "1f1995408830b11e5509ecf96800a71955a639ba2164f24223619fdb9d22df24",
+    "platform-android/src/quest_ingress.rs": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc",
+    "platform-android/src/quest_host_tests.rs": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df",
+    "platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java": "9f7055624e4be0a529798e9a4ab6a71e9a8914bb5ce9091a072441306c42a768",
+    "platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java": "7a82f48c64124de335dec8b6fa391dd1af23f79f6c02c2305cc328330d9d0f9b"
+  },
+  "sourceUnchanged": true
+}

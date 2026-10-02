@@ -1,5 +1,19 @@
 # Android native host ingress audit
 
+> 2026-10-02 exactccdd51a90 authoritative quest/dialog source leaf
+>
+> NI-10 now PARTIAL source: frozen shared projections, authenticated Java public
+> metadata allowlist and bounded Android owner/map/history/dialog/exact-ACK host
+> lifetime are wired. Twenty-five bodies/fields/dependencies equal Windows3d.
+> Final315/334/shared1230+10ignored/runtime292+1ignored/fresh Java41+41/API31 pass.
+> Broader Mac Windows bridge98/1 and quest39/12 remain FAILED, equal the retained
+> two-affected-file parent comparisons; not full Windows acceptance. Eleven
+> committed source hashes bind all gates; original checkouts preserved. No new
+> APK/rendered quest/JNI/live/device pass; installedv19 lacks this leaf and135
+> GL506 renderer FAIL remains. Next exact package/offline received dialogue then
+> remaining full Windows denominator. Whole goal stays Active.
+> [Exact source and original failure evidence](generated/player-qa/native-android-quest-ingress-20261002/README.md).
+
 > 2026-10-02 exact78e7/v19 phone-only NPC touch leaf
 >
 > Both clean native packages,28 input hashes/selected6647 PNG+three metadata
@@ -110,7 +124,7 @@ still missing. Neither label is an online acceptance result.
 | NI-07 | `push_native_skill_model` / `SkillPacketCursor` | PARTIAL: Android and Windows share the extracted cursor/projector; exact ms, owner metadata/casts, key ACK and character/map/backpressure regressions pass (Android227/preview236/shared1196+8ignored/Java32+32/API31). Exact-source8eb1a7d34 v8 APKs build/install; actual offline SPELLS shows FireBall/F1 but MagIcon/54 is missing repeatedly, so imagery FAILS. Actual JNI/live outbound/input, approved online combat and physical acceptance remain OPEN. [Evidence](generated/player-qa/native-android-skill-ingress-20261001/README.md) |
 | NI-08 | `push_native_wallet_patch` | PARTIAL: public Gained/Lose Gold/Credit share Windows helpers after owner bootstrap; missing base errors, latest absolute UI/wallet retry preserves runtime ordering without delta replay. Numeric/foreign/Hero/character/map/reset regressions pass; exact v12 offline BAG/HUD gold12352 visible. Credit503 is a source marker, not a rendered credit control; Java-to-JNI live server wallet/action/settlement/device remain OPEN, not purchase success. [Evidence](generated/player-qa/native-android-player-ingress-20261001/README.md) |
 | NI-09 | `push_native_chat_line` | PARTIAL: frozen shared projector/owner-bootstrap/bounded FIFO; prior v14 clipped-row and v15 reopen FAIL retained. Clean8cd2e7eae v16 dual APK/hash/resource/install/input binding; failure-first3 then3/3, Android276/preview290/Java37+37/API31 pass. Actual soft keys qw, Back->retap/1500ms hold reopen preserving draft, then e updates qwe. Startup10 GL506 entries/zero-error FAIL; extreme IME controls and real Java-to-JNI online outbound+echo/filter/scroll/full settings/device OPEN. Shared runtime critical/ACK eviction unchanged, not lossless acceptance. [Exact v16, failures and upstream delta](generated/player-qa/native-android-chat-editor-20261002/README.md) |
-| NI-10 | Quest/NPC gameplay bridge | OPEN: accepted-request/ordered Exit host wiring now exists, but full tracker/dialog/detail/turn-in incoming producer remains missing. NPCResponse service-close projection and local fixtures do not prove rendered dialogue, real interaction or quest state |
+| NI-10 | Quest/NPC gameplay bridge | PARTIAL: exactccdd51a90 shares frozen tracker/detail/rewards/history/dialog/nearby projections, Java public metadata staging and Android owner/scene/terminal/ordered exact-ACK lifecycle. Final315/334/shared1230+10ignored/runtime292+1ignored/Java41+41/API31 and25-body equivalence pass. Broader Mac Windows98/1 and39/12 failures retained, same parent comparison. New APK/rendered received dialogue/actions/routes/actual JNI/online rewards and device remain OPEN; no client quest rules or completion claim. [Source evidence](generated/player-qa/native-android-quest-ingress-20261002/README.md) |
 | NI-11 | `push_native_shop_model` / `push_native_npc_shop_service` | PARTIAL: frozen3d735745f shared projection/Java six-packet owner+scene gate/Android FIFO are wired. Cross-frame pending, same-frame order, Exit/CloseWindows/map/terminal and byte/count bounds pass Android290/304/shared1230+10ignored/runtime292+1ignored/Java39+39/API31. Twelve extracted bodies equal; six focused Mac Windows checks pass; wide filter19/6 failures retained. No new APK/actual JNI/online/Buy-Sell-Repair-SRepair complete receipts/device pass. [Evidence](generated/player-qa/native-android-npc-ingress-20261002/README.md) |
 | NI-12 | `push_native_game_shop_info` / stock / receipt | PARTIAL: correlated reducer receipt exists; authoritative catalog/stock and model equivalence remain OPEN |
 | NI-13 | `push_native_storage_model` / items / patch | PARTIAL: exact StoreItemV2/TakeBackItemV2 request receipts exist; contents, lock/password/expansion transitions and model refresh remain OPEN |

@@ -1,0 +1,240 @@
+{
+  "sourceCommit": "ccdd51a90542d866a3b08096469c2d2819656ce4",
+  "publishedParent": "2c2e5e214693859d7d56e414fb3ff9233e58409c",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "frozenIsAncestor": true,
+  "ownedSourceFiles": {
+    "client-bevy/src/lib.rs": "487cb9876fa41f01f9bf125ff630bd4bbff76d0635b35e01b83b142fcc2490bd",
+    "client-bevy/src/native_quest_ingress.rs": "ca0d25fd5ce014ab0e8cdaacdf8334001df1f491299d417d18fc0ab32612d5a0",
+    "runtime/src/native_ingest.rs": "300263e1ae723fe79dc75f9e0a566e57e59cc463e1b5ea43ca981d370a3b7033",
+    "platform-windows/src/gameplay_bridge.rs": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0",
+    "platform-windows/src/gateway.rs": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705",
+    "platform-android/src/lib.rs": "ca9fe6cf9c7e7f644e0c63b3fef5b37b7ac73488fbffd77169a043c43075ff10",
+    "platform-android/src/shared_shell.rs": "1f1995408830b11e5509ecf96800a71955a639ba2164f24223619fdb9d22df24",
+    "platform-android/src/quest_ingress.rs": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc",
+    "platform-android/src/quest_host_tests.rs": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df",
+    "platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java": "9f7055624e4be0a529798e9a4ab6a71e9a8914bb5ce9091a072441306c42a768",
+    "platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java": "7a82f48c64124de335dec8b6fa391dd1af23f79f6c02c2305cc328330d9d0f9b"
+  },
+  "gates": [
+    {
+      "gate": "android-normal",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": {
+        "result": "ok",
+        "passed": 315,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0
+      },
+      "rawSha256": "36a7cd31c654f25d5ea9f0beca4aa134e632a49214ec60421079135609c4b6bc"
+    },
+    {
+      "gate": "android-preview",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": {
+        "result": "ok",
+        "passed": 334,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 0
+      },
+      "rawSha256": "1488473dd7da2c8e1e4d6f798358545ec1ede1f062970d316dc2fef88f134499"
+    },
+    {
+      "gate": "shared-bevy",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": {
+        "result": "ok",
+        "passed": 1230,
+        "failed": 0,
+        "ignored": 10,
+        "measured": 0,
+        "filtered": 0
+      },
+      "rawSha256": "7ac2ede1c61f1cb4641046d428942ac850d70133d60f48c6fd64f6bd5f339a44"
+    },
+    {
+      "gate": "shared-runtime",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": {
+        "result": "ok",
+        "passed": 292,
+        "failed": 0,
+        "ignored": 1,
+        "measured": 0,
+        "filtered": 0
+      },
+      "rawSha256": "dbc5b01f2ec53a6e5bd41992f4baeaf91614a68719017174ccd2d98267c269e6"
+    },
+    {
+      "gate": "windows-bridge",
+      "status": 101,
+      "sourceUnchanged": true,
+      "rustResult": {
+        "result": "FAILED",
+        "passed": 98,
+        "failed": 1,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 716
+      },
+      "rawSha256": "f91b737e3a1f48dda93814c4dd198f807d6b1f8c45ffd0479eda30bac566d102"
+    },
+    {
+      "gate": "windows-tooltip",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": {
+        "result": "ok",
+        "passed": 3,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 812
+      },
+      "rawSha256": "7913aa6b04e7767dc34173efa32e38a32eba4eef599dbe45d61e7db61b6cc2c6"
+    },
+    {
+      "gate": "windows-completed",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": {
+        "result": "ok",
+        "passed": 7,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 808
+      },
+      "rawSha256": "adfa5751bf74a59e503deeb9d4b088c21bcba8b4bd370a5db1e49ca562f653d6"
+    },
+    {
+      "gate": "windows-quest",
+      "status": 101,
+      "sourceUnchanged": true,
+      "rustResult": {
+        "result": "FAILED",
+        "passed": 39,
+        "failed": 12,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 764
+      },
+      "rawSha256": "6cb747947a3f748e04703743e6bddc1e98474417a9e7b81102e60878831fd9da"
+    },
+    {
+      "gate": "windows-projection",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": {
+        "result": "ok",
+        "passed": 4,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 811
+      },
+      "rawSha256": "561292080974292789ddf78bfd02c2c9d3c3b42f4b45890aada7e27fc8af4f64"
+    },
+    {
+      "gate": "windows-gateway-quest",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": {
+        "result": "ok",
+        "passed": 2,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 813
+      },
+      "rawSha256": "d158d073b0fb65fc108851711b1f3fa40e44a2a148cd35bbd7759382a46f354c"
+    },
+    {
+      "gate": "windows-exact-ack",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": {
+        "result": "ok",
+        "passed": 1,
+        "failed": 0,
+        "ignored": 0,
+        "measured": 0,
+        "filtered": 814
+      },
+      "rawSha256": "1eebb1de2361b346d1bb246c165f06f56ecfa6bb13c3140b2cad1d33b69cc146"
+    },
+    {
+      "gate": "java",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": null,
+      "rawSha256": "4bb05f77346138d2e5797f42b8c4682723ee283e1be49bcc5a1e4b8cf20d01ed"
+    },
+    {
+      "gate": "api31-debug",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": null,
+      "rawSha256": "c2e1553c7e6222b9234d8bdb0494f69a03c23b5e42c993b68c1c5c553699631c"
+    },
+    {
+      "gate": "api31-preview",
+      "status": 0,
+      "sourceUnchanged": true,
+      "rustResult": null,
+      "rawSha256": "abf67a50a630acf162906c5ee540f4645e152eb079055e0c6caf176fc957ebef"
+    }
+  ],
+  "javaTotals": [
+    {
+      "variant": "Debug",
+      "tests": 41,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "variant": "UiPreview",
+      "tests": 41,
+      "failed": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "pureProjectionEntries": 25,
+  "pureProjectionIdentical": true,
+  "windowsBroaderFiltersAccepted": false,
+  "windowsFailuresEqualRetainedParentFilters": true,
+  "originalCheckoutsPreserved": {
+    "originalHead": "31b2b396057d82aa80567a33a668907d5d41a432",
+    "originalStatus": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/",
+    "oldAndroidHead": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+    "oldAndroidClean": true
+  },
+  "acceptance": {
+    "sourceCheckpoint": true,
+    "actualJni": false,
+    "newApk": false,
+    "renderedQuest": false,
+    "realHttpsWss": false,
+    "actualQuestAction": false,
+    "zoneAndSave": false,
+    "physicalDevice": false,
+    "globalParity": false,
+    "goal": "Active"
+  },
+  "lastInstalledDiagnosticPackage": {
+    "version": 19,
+    "source": "78e7d2309f6a6b92cea1737c76c5eedfd863e46e",
+    "containsThisSource": false
+  },
+  "rendererGate": "FAIL: prior v19 135 GL0x506 across nine PID captures; no new renderer fix or capture"
+}

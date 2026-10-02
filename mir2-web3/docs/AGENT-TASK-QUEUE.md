@@ -1,5 +1,20 @@
 # Agent Task Queue
 
+> 2026-10-02 Android quest/dialog source checkpoint; full goal Active
+>
+> Exactccdd51a90 connects NI-10 public metadata and shared authoritative quest/
+> history/NPC dialogue/nearby projections without new rules. Source315/334,
+> shared1230+10ignored/runtime292+1ignored, fresh Java41+41/API31 pass;25 extracted
+> entries equal frozenWindows3d. Broader Mac Windows98/1 and39/12 remain FAILED
+> and equal retained affected-file parent comparisons. Eleven source hashes and
+> unchanged original workspaces verified. Next: exact new diagnostics and
+> explicitly offline received quest/dialogue rendering, then full actions/route,
+> bounded framebuffer diagnosis and remaining NI-11–20/Windows denominator.
+> Installedv19 does not contain this leaf;135 GL506 still renderer FAIL. Real
+> HTTPS/WSS/JNI/Zone/save/physical gates open; do not repeatedly ask credentials
+> or use production/human stores. No full-goal completion percentage.
+> [Bounded source and preserved failures](generated/player-qa/native-android-quest-ingress-20261002/README.md).
+
 > 2026-10-02 Android v19 queue, full goal still Active
 >
 > Clean78e7 packages/selected resources/install and four actual shared NPC close
