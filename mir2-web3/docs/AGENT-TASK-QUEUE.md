@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> 2026-10-02 Android exact545a34/v21 queue; complete Windows goal Active
+>
+> Two-file Android-only received-NPC fixture/version fix removes a hidden manual
+> panel pin; open dialogue protection and legacy fixture remain. Compiled0/1 red
+> then1/1 green;315/338/fresh Java41+41/API31,35 inputs/clean packages/installed
+> hashes pass. Two actual Exit taps restore HP/MP/belt/joystick/actions; restored
+> Menu tap opens rail. Seven original frames inspected. Four PIDs33 GL506 still
+> renderer FAIL; oldv20 HUD/73 GL andv19/135 retained at their sources. Phone quest
+> readability FAIL not repaired/rerun; no real JNI/online/Zone/save/device/global
+> acceptance or backend percentage. Next phone quest layout/actual picking,
+> bounded GPU diagnosis and full NI-11–20/Windows denominator. Original checkouts
+> preserved; approved environment unanswered, no production/human store reuse.
+> [Exact v21 and remaining gates](generated/player-qa/native-android-npc-exit-20261002/README.md).
+
 > 2026-10-02 Android exact7b62/v20 queue; full goal Active
 >
 > Diagnostics includeccdd NI-10 source;35 inputs/resource/installed-hash gates,
