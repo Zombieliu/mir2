@@ -1,0 +1,18 @@
+{
+  "started": "2026-10-02T13:21:07.212Z",
+  "ended": "2026-10-02T13:21:39.009Z",
+  "bin": "./gradlew",
+  "args": [
+    ":app:testDebugUnitTest",
+    ":app:testUiPreviewUnitTest",
+    "--rerun-tasks",
+    "--offline",
+    "--console=plain"
+  ],
+  "code": 0,
+  "signal": null,
+  "copied": [
+    "java-final-debug.xml",
+    "java-final-preview.xml"
+  ]
+}

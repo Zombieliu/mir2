@@ -1,0 +1,3 @@
+error: Failed to load Cargo.toml in current directory.
+error: `cargo metadata` exited with an error: error: could not find `Cargo.toml` in `/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync` or any parent directory
+

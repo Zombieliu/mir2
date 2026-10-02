@@ -1,0 +1,17 @@
+{
+  "label": "runtime-full",
+  "bin": "cargo",
+  "args": [
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "mir2-web3/apps/game-client/runtime/Cargo.toml",
+    "--lib",
+    "--",
+    "--test-threads=1"
+  ],
+  "started": "2026-10-02T13:21:53.873Z",
+  "ended": "2026-10-02T13:22:30.494Z",
+  "code": 0,
+  "signal": null
+}

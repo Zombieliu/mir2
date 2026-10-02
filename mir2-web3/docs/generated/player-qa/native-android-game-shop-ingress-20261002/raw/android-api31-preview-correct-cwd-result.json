@@ -1,0 +1,20 @@
+{
+  "label": "android-api31-preview-correct-cwd",
+  "args": [
+    "+1.95.0",
+    "ndk",
+    "-t",
+    "arm64-v8a",
+    "--platform",
+    "31",
+    "check",
+    "--lib",
+    "--features",
+    "ui-preview"
+  ],
+  "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android",
+  "started": "2026-10-02T13:24:58.479Z",
+  "ended": "2026-10-02T13:25:26.114Z",
+  "code": 0,
+  "signal": null
+}

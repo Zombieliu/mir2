@@ -1,6 +1,22 @@
 # Android native host ingress audit
 
-> 2026-10-02 最新实际 v30：精确干净源码`2c9ad6f96ebc47e07056abbf5a6117c278836083`。
+> 2026-10-02 最新源码叶 NI-12：`92033b910cc9ddd996c416ec4024af4625e78b31`。
+> 六个源文件接通 Java 公共商城元数据白名单、Android 角色绑定/有界 FIFO、共享
+> GameShopInfo/Stock 投影；两投影与四标量 helper 的函数体 token 和冻结 Windows
+> `3d735745f`一致，旧商城规则/原生队列/Windows/渲染未改。105行+105库存包夹具、
+> 先库存后目录、启动拒绝、身份/切场/背压/终止批次通过；2项编译后 Java 红已保留。
+> 最终343/368、shared1257+10原ignored、runtime292+1原ignored、fresh Java44+44、
+> 实际 API31 两变体检查通过；错误工作目录的检查准备失败单独保留，不称产品红绿。
+> 本叶没有新 APK、模拟器画面、实际 Java→JNI／线上购买／Mail 或真机验收；不重绑
+> v30旧包。渲染零错误门仍FAIL，Windows完整分母不变；远端提交前核验仍6ae080711。
+> NI-12整体仍PARTIAL；其他完整UI/NI-13–20/认证/Zone/存档/完整资源/音频/更新/真机
+> 继续OPEN，完整goal Active。原工作区Git HEAD/分支/status未变，未递归哈希未跟踪内容。
+> [NI-12精确源码、原始失败与剩余验收](generated/player-qa/native-android-game-shop-ingress-20261002/README.md)。
+> 下一源码叶为NI-13仓库内容/锁定/扩展模型；商城精确包/JNI/实测及此前证据上传仍待完成。
+>
+> 下文v30及更早仅为各自历史源码与验收，不覆盖本叶。
+>
+> 2026-10-02 历史实际 v30：精确干净源码`2c9ad6f96ebc47e07056abbf5a6117c278836083`。
 > 五个源文件完成可选共享手机 NPC 任务列表的有界重排，复用原控制器/奖励选择，
 > 不改认证、任务规则、Windows 宿主或渲染。八行可达，左右独立滑动/上下按钮，
 > 18 控件实测≥48dp、文字14/16dp；实际未选奖励提示/OK、选第2/8任务、选奖励B、
@@ -250,7 +266,7 @@ still missing. Neither label is an online acceptance result.
 | NI-09 | `push_native_chat_line` | PARTIAL: frozen shared projector/owner-bootstrap/bounded FIFO; prior v14 clipped-row and v15 reopen FAIL retained. Clean8cd2e7eae v16 dual APK/hash/resource/install/input binding; failure-first3 then3/3, Android276/preview290/Java37+37/API31 pass. Actual soft keys qw, Back->retap/1500ms hold reopen preserving draft, then e updates qwe. Startup10 GL506 entries/zero-error FAIL; extreme IME controls and real Java-to-JNI online outbound+echo/filter/scroll/full settings/device OPEN. Shared runtime critical/ACK eviction unchanged, not lossless acceptance. [Exact v16, failures and upstream delta](generated/player-qa/native-android-chat-editor-20261002/README.md) |
 | NI-10 | Quest/NPC gameplay bridge | PARTIAL: frozen tracker/detail/rewards/history/dialog/nearby and exact-ACK lifecycle from ccdd51a90 are included in v30. Historical twenty-five-body equivalence and wider Mac failures remain bound to their original inputs. V24 diary/detail reflow and v29 confirmation/alert are retained. Current source2c9ad6f96 v30 adds optional shared phone NPC list, eight reachable rows, independent list/message scroll, 14/16dp text and 18 controls≥48dp; 327/352/shared1254+10existing ignored/fresh Java41+41/API31 gates pass. Actual unselected Finish/alert/OK, quest2/8 selection, both viewport directions, reward B selection, same-PID resume and Leave stay-closed pass only offline; 26 original frames inspected. Separate received offline diary baseline is not authenticated receipt, and no reward grant is accepted. Compiled0/3 red, introduced23/1 modal regression and inventory-count maintenance failure are retained; final phone24/24. Five PIDs38 GL506 keep renderer FAIL. Full actions/routes/Help/localization/compact/IME/multitouch/authenticated JNI/online rewards/device remain OPEN. [Ingress](generated/player-qa/native-android-quest-ingress-20261002/README.md), [v20 failures](generated/player-qa/native-android-quest-preview-20261002/README.md), [v21 Exit](generated/player-qa/native-android-npc-exit-20261002/README.md), [v24 reflow](generated/player-qa/native-android-quest-reflow-20261002/README.md), [v29 modal scope](generated/player-qa/native-android-quest-modal-20261002/README.md), [v30 NPC scope](generated/player-qa/native-android-npc-quests-20261002/README.md) |
 | NI-11 | `push_native_shop_model` / `push_native_npc_shop_service` | PARTIAL: frozen3d735745f shared projection/Java six-packet owner+scene gate/Android FIFO are wired and included unchanged in v30. Twelve extracted bodies, cross-frame pending/order/Exit/CloseWindows/map/terminal/bounds source gates and six focused Mac Windows checks passed in their historical source leaf; wider19/6 failures remain, not a full Windows gate. V19 installed diagnostic evidence includes a visible approved item and actual Buy/Sell/Repair/SRepair close taps; v29/v30 did not retest those service taps. No actual authenticated JNI, online purchase/sale/repair complete receipts, physical-device or complete phone service acceptance. [Ingress/source](generated/player-qa/native-android-npc-ingress-20261002/README.md), [v19 bounded taps](generated/player-qa/native-android-npc-touch-20261002/README.md), [v30 package/current limits](generated/player-qa/native-android-npc-quests-20261002/README.md) |
-| NI-12 | `push_native_game_shop_info` / stock / receipt | PARTIAL: correlated reducer receipt exists; authoritative catalog/stock and model equivalence remain OPEN |
+| NI-12 | `push_native_game_shop_info` / stock / receipt | PARTIAL: source92033b910 adds exact frozen Windows public catalog/stock projections, selected-Start Java whitelist and bounded Android owner/FIFO producer. Six function bodies preserve token equivalence; 105-row+105-stock, stock-before-info, owner/scene/reset/terminal/backpressure fixtures and shared runtime catalog/receipt gates pass. Android343/368/shared1257+10existing ignored/runtime292+1existing ignored/fresh Java44+44/API31 pass; original two compiled Java failures and separate check-preparation failure retained. Legacy purchase rules and native critical/receipt queues unchanged. No new APK/UI/JNI/live catalog/price/image parity, purchase/Credit/Mail settlement or physical acceptance; do not relabel the installed v30 package. Full NI-12 stays PARTIAL. [Source evidence and open gates](generated/player-qa/native-android-game-shop-ingress-20261002/README.md) |
 | NI-13 | `push_native_storage_model` / items / patch | PARTIAL: exact StoreItemV2/TakeBackItemV2 request receipts exist; contents, lock/password/expansion transitions and model refresh remain OPEN |
 | NI-14 | `push_native_mail_model` / `push_native_mail_service` | OPEN: Android has local mail IME/drafts but no equivalent typed mailbox/service producer. Audit lists, costs, item/money delivery and failure ordering |
 | NI-15 | `push_native_social_model` | OPEN: audit Group/Guild/Trade independently, including membership, permissions, storage, invitation identity, offers, pending operations and authoritative settlement |

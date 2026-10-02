@@ -1,0 +1,85 @@
+{
+  "label": "bound-api31-normal",
+  "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android",
+  "bin": "cargo",
+  "args": [
+    "+1.95.0",
+    "ndk",
+    "-t",
+    "arm64-v8a",
+    "--platform",
+    "31",
+    "check",
+    "--lib"
+  ],
+  "source": "92033b910cc9ddd996c416ec4024af4625e78b31",
+  "started": "2026-10-02T13:36:22.087Z",
+  "ended": "2026-10-02T13:36:49.860Z",
+  "code": 0,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+      "bytes": 37415,
+      "sha256": "25becf5d258dba0c25f619ffecf818db997260a9439e295ddccd432df8bd9032"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+      "bytes": 22413,
+      "sha256": "031b9a406e0df4ac8bf588fb674a435d9cc4d8e4ad2505e3dc504cb354f18796"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 75431,
+      "sha256": "d552d3505ec2c0ad88866f642b54a9219655f0702c84ada7619a4d109b6c7136"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 173653,
+      "sha256": "4fc3aa86a366ec18c98b46d13d89b77fa55680840b8b53466a72ce864ae15f3a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 32654,
+      "sha256": "04106bfe069c5da4f6c05f7a13583d539074e099e7bad206bfdef0c9ecf21548"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 54550,
+      "sha256": "d0c790556820bf98f272ddfc1ef354b4444d8f3ed3b45acf1d48cd1d77ec6830"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+      "bytes": 37415,
+      "sha256": "25becf5d258dba0c25f619ffecf818db997260a9439e295ddccd432df8bd9032"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+      "bytes": 22413,
+      "sha256": "031b9a406e0df4ac8bf588fb674a435d9cc4d8e4ad2505e3dc504cb354f18796"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 75431,
+      "sha256": "d552d3505ec2c0ad88866f642b54a9219655f0702c84ada7619a4d109b6c7136"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 173653,
+      "sha256": "4fc3aa86a366ec18c98b46d13d89b77fa55680840b8b53466a72ce864ae15f3a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 32654,
+      "sha256": "04106bfe069c5da4f6c05f7a13583d539074e099e7bad206bfdef0c9ecf21548"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 54550,
+      "sha256": "d0c790556820bf98f272ddfc1ef354b4444d8f3ed3b45acf1d48cd1d77ec6830"
+    }
+  ],
+  "sourceUnchanged": true
+}

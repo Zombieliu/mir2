@@ -1,0 +1,18 @@
+{
+  "started": "2026-10-02T13:15:39.169Z",
+  "ended": "2026-10-02T13:16:11.223Z",
+  "bin": "./gradlew",
+  "args": [
+    ":app:testDebugUnitTest",
+    ":app:testUiPreviewUnitTest",
+    "--rerun-tasks",
+    "--offline",
+    "--console=plain"
+  ],
+  "code": 0,
+  "signal": null,
+  "copied": [
+    "java-green-debug.xml",
+    "java-green-preview.xml"
+  ]
+}
