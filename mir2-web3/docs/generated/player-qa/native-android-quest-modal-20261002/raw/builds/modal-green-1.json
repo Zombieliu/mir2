@@ -1,0 +1,23 @@
+{
+  "command": "cargo",
+  "args": [
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+    "--lib",
+    "--features",
+    "native-player-ui",
+    "--locked",
+    "--offline",
+    "phone_quest_confirmation",
+    "--",
+    "--test-threads=1"
+  ],
+  "started": "2026-10-02T09:40:02.581Z",
+  "finished": "2026-10-02T09:40:37.457Z",
+  "exitCode": 0,
+  "signal": null,
+  "phoneSourceSha256": "4a6928261d41a901f34b5ec78b41d5e8bb667f1b34746093b934d2ee857fc6a2",
+  "log": "modal-green-1.log"
+}

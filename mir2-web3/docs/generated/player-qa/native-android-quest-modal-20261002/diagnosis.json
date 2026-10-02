@@ -1,0 +1,286 @@
+{
+  "source": "2161a940ec7a59e966ed2638667f0c7b1a8e32b6",
+  "sourceParent": "340aea86bd533f4954ddd3b323c3fffe4de78516",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "versionCode": 29,
+  "sourceWriteSet": [
+    "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+    "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+    "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+    "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs"
+  ],
+  "goalStatus": "active",
+  "scope": "Optional shared phone quest confirmation and alert presentation/input only",
+  "failuresFirst": [
+    {
+      "input": "raw/builds/red-source-quest_phone.rs",
+      "inputSha256": "ae9533d1350487e6b1012933f08455cd9bbf98169873a4b9d797d3c51884a467",
+      "red": "raw/builds/modal-red.log",
+      "compiled": {
+        "passed": 0,
+        "failed": 3
+      },
+      "green": "raw/builds/modal-green-1.log",
+      "greenPassed": 3
+    },
+    {
+      "input": "raw/builds/message-replay-red-source-quest_phone.rs",
+      "inputSha256": "14bb927822436a2db931b7af18a6ad858db71bc56ec968ffa363c1c9659427fa",
+      "red": "raw/builds/message-replay-red.log",
+      "compiled": {
+        "passed": 0,
+        "failed": 1
+      },
+      "green": "raw/baseline-source-3/shared-bevy-final.log",
+      "sameSettledFixture": true
+    }
+  ],
+  "actualCaptures": [
+    {
+      "phase": "baseline-v29",
+      "scene": "login",
+      "pid": "18223",
+      "latestLog": "login-latest-pid.log",
+      "totals": {
+        "gl506": 9,
+        "uninitializedColor": 9,
+        "fatalOrPanic": 0
+      },
+      "frames": [
+        "login-cold.png",
+        "login-resumed.png"
+      ]
+    },
+    {
+      "phase": "baseline-v29",
+      "scene": "world",
+      "pid": "18316",
+      "latestLog": "world-latest-pid.log",
+      "totals": {
+        "gl506": 0,
+        "uninitializedColor": 0,
+        "fatalOrPanic": 0
+      },
+      "frames": [
+        "world-cold.png",
+        "world-resumed.png"
+      ]
+    },
+    {
+      "phase": "baseline-v29",
+      "scene": "quests",
+      "pid": "18404",
+      "latestLog": "quests-latest-pid.log",
+      "totals": {
+        "gl506": 8,
+        "uninitializedColor": 8,
+        "fatalOrPanic": 0
+      },
+      "frames": [
+        "quests-cold.png",
+        "quests-resumed.png"
+      ]
+    },
+    {
+      "phase": "ui-quest-confirmation",
+      "scene": "quest-confirmation",
+      "pid": "18537",
+      "latestLog": "16-home-pid.log",
+      "totals": {
+        "gl506": 0,
+        "uninitializedColor": 0,
+        "fatalOrPanic": 0
+      },
+      "frames": [
+        "0-cold.png",
+        "8-tap.png",
+        "16-home.png"
+      ]
+    },
+    {
+      "phase": "ui-quest-alert",
+      "scene": "quest-alert",
+      "pid": "18716",
+      "latestLog": "49-home-pid.log",
+      "totals": {
+        "gl506": 0,
+        "uninitializedColor": 0,
+        "fatalOrPanic": 0
+      },
+      "frames": [
+        "0-cold.png",
+        "8-swipe.png",
+        "16-tap.png",
+        "24-tap.png",
+        "32-home.png",
+        "41-tap.png",
+        "49-home.png"
+      ]
+    }
+  ],
+  "canonicalDistinctPidGl506": 17,
+  "rendererZeroErrorAccepted": false,
+  "rendererFixed": false,
+  "actualModalAcceptedScope": [
+    "No closes confirmation",
+    "body swipe",
+    "Down and Up scroll",
+    "OK closes message",
+    "same-PID background restoration"
+  ],
+  "manualUiSpecimensNotAuthenticatedPackets": true,
+  "noAbandonYesTap": true,
+  "allOriginalFramesInspected": true,
+  "originalFrames": [
+    {
+      "path": "raw/baseline-v29/login-cold.png",
+      "pid": "18223",
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Native normal login: empty credential fields, test server not configured. Not real authentication."
+    },
+    {
+      "path": "raw/baseline-v29/login-resumed.png",
+      "pid": "18223",
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Same PID normal login after HOME/resume; not authenticated."
+    },
+    {
+      "path": "raw/baseline-v29/world-cold.png",
+      "pid": "18316",
+      "sha256": "d04e5ed50ae89e76bb263a05902220074bf98e26d01f6b7e29e2a13482a3e06d",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Offline map/entities and shared phone HUD/belt/chat/thumb areas visible. Partial proof resources only."
+    },
+    {
+      "path": "raw/baseline-v29/world-resumed.png",
+      "pid": "18316",
+      "sha256": "6a36d7676af28b1528fd4563137d1582c6ece569ddf8e69cb122daededa8be66",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Same PID offline map after HOME/resume; not live Zone or a resource-completeness gate."
+    },
+    {
+      "path": "raw/baseline-v29/quests-cold.png",
+      "pid": "18404",
+      "sha256": "dce5a9600e7ab16b18a029e57fccd5a1a57626ffd9b748052cbfb2b9b6e69b06",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Offline wire-shape quest-ingress diary: Daily row, readable shared list. Not real JNI or server receipt."
+    },
+    {
+      "path": "raw/baseline-v29/quests-resumed.png",
+      "pid": "18404",
+      "sha256": "dce5a9600e7ab16b18a029e57fccd5a1a57626ffd9b748052cbfb2b9b6e69b06",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Same PID offline wire-shape diary restored."
+    },
+    {
+      "path": "raw/ui-quest-confirmation/0-cold.png",
+      "pid": "18537",
+      "sha256": "0b7b10383876ad5772e2494f3a9d2b7432b68da8726a61b643ca5f2af4679059",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Manual shared phone confirmation: visible question and Yes/No footer. No action to server."
+    },
+    {
+      "path": "raw/ui-quest-confirmation/8-tap.png",
+      "pid": "18537",
+      "sha256": "4dcdec0df143f71071b8816ea483b607244bb1260b3097b028ac7d3b5f141c46",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Actual No tap removed confirmation; one task remains; diary/detail/HUD/thumb controls restored."
+    },
+    {
+      "path": "raw/ui-quest-confirmation/16-home.png",
+      "pid": "18537",
+      "sha256": "4dcdec0df143f71071b8816ea483b607244bb1260b3097b028ac7d3b5f141c46",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Same PID after HOME/resume: confirmation remains closed; underlying task and shared controls retained."
+    },
+    {
+      "path": "raw/ui-quest-alert/0-cold.png",
+      "pid": "18716",
+      "sha256": "1480243d64101613da085797e9505dd39d6e2b2ee4c044c539b0b30022f9c17a",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Manual 30-line message: lines 0-10 visible, scroll and OK footer are not clipped."
+    },
+    {
+      "path": "raw/ui-quest-alert/8-swipe.png",
+      "pid": "18716",
+      "sha256": "d62d01289c82adf92f965a52bd60e8662ffeef707936a7c6ce3c2d03ab713dd6",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Actual body swipe advances visible text to around lines 7-15; partial boundary lines are clipped by the scroll viewport."
+    },
+    {
+      "path": "raw/ui-quest-alert/16-tap.png",
+      "pid": "18716",
+      "sha256": "59a06436e358a723ad38e8b1c15f44ccfe373ddf2a634a29a0e37c524063e082",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Actual Down tap advances visible text to around lines 13-19; same footer remains accessible."
+    },
+    {
+      "path": "raw/ui-quest-alert/24-tap.png",
+      "pid": "18716",
+      "sha256": "d62d01289c82adf92f965a52bd60e8662ffeef707936a7c6ce3c2d03ab713dd6",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Actual Up tap returns to around lines 7-15."
+    },
+    {
+      "path": "raw/ui-quest-alert/32-home.png",
+      "pid": "18716",
+      "sha256": "d62d01289c82adf92f965a52bd60e8662ffeef707936a7c6ce3c2d03ab713dd6",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Same PID after HOME/resume: message still open and visible scroll position retained."
+    },
+    {
+      "path": "raw/ui-quest-alert/41-tap.png",
+      "pid": "18716",
+      "sha256": "e2c70d08654a6772b5388c86299e23393e317479203374d6687bb0d8c87e3cc3",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Actual OK tap removed message; one task, diary/detail/HUD/thumb controls restored."
+    },
+    {
+      "path": "raw/ui-quest-alert/49-home.png",
+      "pid": "18716",
+      "sha256": "e2c70d08654a6772b5388c86299e23393e317479203374d6687bb0d8c87e3cc3",
+      "primaryInspectedOriginal": true,
+      "editedOrResized": false,
+      "observation": "Same PID after second HOME/resume: message stays closed; task and shared controls remain."
+    }
+  ],
+  "freshFinalGates": "raw/baseline-source-3",
+  "sharedPhoneModuleTests": 17,
+  "graphicsDependencyDecision": "pending user authorization",
+  "wholePhoneUiAccepted": false,
+  "fullResourcePackAccepted": false,
+  "realNetworkAccepted": false,
+  "physicalDeviceAccepted": false,
+  "noGameplayOrAuthOrServerRulesChanged": true,
+  "remaining": [
+    "phone NPC quest list",
+    "compact screens and IME",
+    "nine languages",
+    "multi-touch runtime acceptance",
+    "complete NI-11 through NI-20 ingress",
+    "real authentication/JNI/HTTPS/WSS",
+    "shared Zone and saved state",
+    "complete resources/audio/update",
+    "physical device and human acceptance"
+  ],
+  "setupFailuresClassifiedAt": "raw/builds/retained-setup-errors.json",
+  "versionAuditHelperFailure": "raw/builds/audit-version-check-failure.json"
+}
