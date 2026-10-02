@@ -45,3 +45,4 @@ mir2-web3/docs/generated/player-qa/periodic-quests-20261002/frontend/** -text -d
 mir2-web3/docs/generated/player-qa/periodic-quests-20261002/backend/** -text -diff
 mir2-web3/docs/generated/player-qa/periodic-quests-20261002/fixtures/** -text -diff
 mir2-web3/docs/generated/player-qa/periodic-quests-20261002/controller/** -text -diff
+mir2-web3/docs/generated/player-qa/periodic-quests-20261002/postgres/** -text -diff

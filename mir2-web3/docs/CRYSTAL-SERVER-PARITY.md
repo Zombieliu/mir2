@@ -1,5 +1,15 @@
 # Crystal Server Parity
 
+> 2026-10-02 live isolated PostgreSQL follow-up: one opt-in periodic test
+> passes both daily and weekly settlement barriers. No success is returned
+> before durable COMMIT; independent full-save/account/projection versions
+> agree, and stale CAS, retry and relogin cannot duplicate rewards. The
+> compiled Windows caller reaches server PostgreSQL16.13 through pinned
+> encrypted loopback, using a limited QA database and fresh retained schema.
+> Ready-count fixtures are mechanical reward proof, not natural hunt timing.
+> First remote compilation was resource-interrupted and is not counted.
+> [Scoped PostgreSQL evidence](generated/player-qa/periodic-quests-20261002/postgres/README.md).
+
 > 2026-10-02 additive Task Stewards: periodic accept/claim/abandon mutations
 > use durable full-character saves before success ACK. Tests cover two towns,
 > class/level gates, duplicate and stale claims, rollback, unknown publication,

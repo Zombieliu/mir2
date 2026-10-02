@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 live isolated PostgreSQL follow-up: one opt-in periodic test
+> passes both daily and weekly settlement barriers. No success is returned
+> before durable COMMIT; independent full-save/account/projection versions
+> agree, and stale CAS, retry and relogin cannot duplicate rewards. The
+> compiled Windows caller reaches server PostgreSQL16.13 through pinned
+> encrypted loopback, using a limited QA database and fresh retained schema.
+> Ready-count fixtures are mechanical reward proof, not natural hunt timing.
+> First remote compilation was resource-interrupted and is not counted.
+> [Scoped PostgreSQL evidence](generated/player-qa/periodic-quests-20261002/postgres/README.md).
+
 > 2026-10-02 additive task goal: two-city daily/weekly backend and durable
 > claim rules pass 18 packet/persistence, 8 rule, 4 content and 9 existing
 > recurrence checks. Ordinary server three-class timing, native captures and

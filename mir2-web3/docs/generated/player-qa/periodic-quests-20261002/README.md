@@ -81,3 +81,14 @@ stores, passwords and private scenario inputs are excluded from Git.
 The ordinary controller's policy/protocol regressions pass 104 tests.
 [Controller log](controller/periodic-controller-regression.log) establishes
 bounded commands, receipt matching and redaction rules, not live completion.
+
+## Live isolated PostgreSQL checkpoint
+
+A separate opt-in periodic PostgreSQL test now passes once. Its daily and
+weekly cases observe the actual row-lock commit barrier, require no success
+before COMMIT, compare the independent full-save/account/projection tuple,
+and reject stale CAS, repeated claim and relogin duplication. This is a
+Windows compiled caller over a pinned encrypted SSH loopback to the server,
+with a dedicated limited QA database; the invited human realm is untouched.
+The retained Ready-count fixtures do not prove natural kill completion.
+[Live proof and original interrupted compile](postgres/README.md).

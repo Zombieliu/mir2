@@ -2,6 +2,8 @@
 //!
 //! Every account and File store is created by this test. Ready fixtures contain
 //! real catalog task keys/counts but are NOT natural-kill or play-time evidence.
+//! The ignored PostgreSQL case requires an explicitly isolated QA database;
+//! neither its setup nor its Ready proof is an ordinary gameplay timing result.
 use std::{collections::BTreeSet, sync::Mutex};
 
 use mir2_game_data::periodic_quests::{self as content, PeriodicCadence};
@@ -24,6 +26,418 @@ impl ProfileGuard {
         let previous = std::env::var_os("MIR2_QUEST_CADENCE");
         std::env::set_var("MIR2_QUEST_CADENCE", "newcomer-v2");
         Self(previous)
+    }
+}
+
+/// Explicit opt-in only. No default URL, human account, public-schema fallback,
+/// production helper or runtime visibility change is used by this integration.
+mod postgres_periodic {
+    use super::*;
+    use postgres::{Client, Config, NoTls};
+    use std::{
+        sync::mpsc,
+        time::{Duration, Instant, SystemTime, UNIX_EPOCH},
+    };
+
+    struct Database {
+        base_url: String,
+        scoped_url: String,
+        name: String,
+        schema: String,
+        application: String,
+    }
+
+    fn pg<T>(result: Result<T, postgres::Error>, operation: &str) -> T {
+        result.unwrap_or_else(|_| panic!("isolated periodic PostgreSQL operation failed: {operation}; connection credentials suppressed"))
+    }
+
+    impl Database {
+        fn new() -> Self {
+            assert_eq!(
+                std::env::var("MIR2_PERIODIC_TEST_ISOLATED").ok().as_deref(),
+                Some("1"),
+                "explicit isolated periodic PostgreSQL permission is required"
+            );
+            let base_url = std::env::var("MIR2_PERIODIC_TEST_DATABASE_URL").expect(
+                "private dedicated periodic PostgreSQL URL is required; no fallback is used",
+            );
+            assert!(
+                base_url.starts_with("postgres://") || base_url.starts_with("postgresql://"),
+                "periodic QA requires a PostgreSQL URI; credentials suppressed"
+            );
+            let connection: Config = base_url.parse().unwrap_or_else(|_| {
+                panic!("invalid private periodic QA URI; credentials suppressed")
+            });
+            let name = connection.get_dbname().unwrap_or_default().to_string();
+            assert!(
+                name.starts_with("mir2_periodic_qa_")
+                    && name.len() >= 28
+                    && name.len() <= 63
+                    && name
+                        .bytes()
+                        .all(|ch| ch.is_ascii_alphanumeric() || ch == b'_'),
+                "database name must be a uniquely named mir2_periodic_qa_ database"
+            );
+            assert!(
+                connection.get_options().is_none(),
+                "base QA URI must not override search_path or PostgreSQL options"
+            );
+            let nonce = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos();
+            let schema = format!("periodic_qa_20261002_{}_{nonce:x}", std::process::id());
+            let application = format!("pq_claim_{nonce:x}");
+            let scoped_url = format!("{base_url}{}application_name={application}&options=-csearch_path%3D{schema}%20-clock_timeout%3D5000%20-cstatement_timeout%3D15000",
+                if base_url.contains('?') { "&" } else { "?" });
+            let db = Self {
+                base_url,
+                scoped_url,
+                name,
+                schema,
+                application,
+            };
+            let mut connection = pg(
+                Client::connect(&db.base_url, NoTls),
+                "connect dedicated QA database",
+            );
+            let actual_name: String = pg(
+                connection.query_one("SELECT current_database()", &[]),
+                "verify dedicated database",
+            )
+            .get(0);
+            assert_eq!(actual_name, db.name);
+            // Generated ASCII-only identifiers, absent schemas only. Never
+            // accept a user-provided schema and never add public to the path.
+            pg(
+                connection.batch_execute(&format!("CREATE SCHEMA {}", db.schema)),
+                "create absent owned schema",
+            );
+            let mut scoped = db.connect();
+            mir2_simulation::apply_migrations(&mut scoped).unwrap_or_else(|_| {
+                panic!("isolated periodic QA schema migration failed; credentials suppressed")
+            });
+            let account_count: i64 = pg(
+                scoped.query_one("SELECT COUNT(*) FROM accounts", &[]),
+                "verify empty isolated accounts",
+            )
+            .get(0);
+            assert_eq!(
+                account_count, 0,
+                "new periodic QA schema must contain no accounts"
+            );
+            db
+        }
+
+        fn connect(&self) -> Client {
+            let mut connection = pg(
+                Client::connect(&self.scoped_url, NoTls),
+                "connect scoped QA schema",
+            );
+            let scope = pg(
+                connection.query_one(
+                    "SELECT current_database(), current_schema(), current_setting('search_path')",
+                    &[],
+                ),
+                "verify schema isolation",
+            );
+            assert_eq!(scope.get::<_, String>(0), self.name);
+            assert_eq!(scope.get::<_, String>(1), self.schema);
+            assert_eq!(scope.get::<_, String>(2), self.schema);
+            connection
+        }
+
+        fn config(&self) -> SimulationConfig {
+            SimulationConfig::default()
+                .with_crystal_map_runtime()
+                .with_platinum_176_profile()
+                .with_postgres_account_store(self.scoped_url.clone())
+                .unwrap_or_else(|_| {
+                    panic!(
+                        "isolated periodic PostgreSQL config load failed; credentials suppressed"
+                    )
+                })
+        }
+
+        fn snapshot(&self, account_id: &str) -> (CharacterSaveRecord, i64) {
+            let mut observer = self.connect();
+            let value = pg(observer.query_one(
+                "SELECT s.snapshot_json,a.raw_json,s.save_version,s.gold,p.gold,p.experience,p.save_version,n.nspname \
+                 FROM character_saves s JOIN accounts a ON a.account_id=s.account_id \
+                 JOIN character_state p ON p.account_id=s.account_id AND p.character_index=s.character_index \
+                 JOIN pg_class c ON c.oid=s.tableoid JOIN pg_namespace n ON n.oid=c.relnamespace \
+                 WHERE s.account_id=$1 AND s.character_index=0", &[&account_id]), "read committed full save and projection");
+            let save: CharacterSaveRecord = serde_json::from_value(value.get::<_, Value>(0))
+                .expect("owned fixture full save must decode");
+            let account: AccountRecord = serde_json::from_value(value.get::<_, Value>(1))
+                .unwrap_or_else(|_| {
+                    panic!("owned QA account JSON decode failed; private data suppressed")
+                });
+            // Do not dump the account raw JSON, which includes its password.
+            assert_same_save(
+                &save,
+                account
+                    .saves
+                    .get(&0)
+                    .expect("owned character must exist in account blob"),
+            );
+            let version: i64 = value.get(2);
+            assert_eq!(value.get::<_, i64>(3), i64::from(save.gold));
+            assert_eq!(value.get::<_, i64>(4), i64::from(save.gold));
+            assert_eq!(value.get::<_, i64>(5), save.experience);
+            assert_eq!(value.get::<_, i64>(6), version);
+            assert_eq!(value.get::<_, String>(7), self.schema);
+            (save, version)
+        }
+    }
+
+    impl Drop for Database {
+        fn drop(&mut self) {
+            // Preserve failed schemas for root review. A successful run removes
+            // only its generated schema; the isolated QA database is retained.
+            if std::thread::panicking()
+                || std::env::var("MIR2_PERIODIC_PG_KEEP_SCHEMA")
+                    .ok()
+                    .as_deref()
+                    == Some("1")
+            {
+                eprintln!(
+                    "periodic PostgreSQL QA owned schema retained: {}",
+                    self.schema
+                );
+                return;
+            }
+            if let Ok(mut connection) = Client::connect(&self.base_url, NoTls) {
+                let _ = connection.batch_execute(&format!("DROP SCHEMA {} CASCADE", self.schema));
+            }
+        }
+    }
+
+    #[test]
+    #[ignore = "requires reviewed dedicated MIR2_PERIODIC_TEST_DATABASE_URL and MIR2_PERIODIC_TEST_ISOLATED=1; never uses the live store"]
+    fn postgres_periodic_claim_is_atomic_before_ack_and_cas_blocks_retries() {
+        let _lock = PROFILE_LOCK
+            .lock()
+            .unwrap_or_else(|poison| poison.into_inner());
+        let _profile = ProfileGuard::newcomer_v2();
+        let db = Database::new();
+        let mut cases = Vec::new();
+        for id in [DAILY, WEEKLY] {
+            let mut owned = fixture(
+                &format!("pg-{}-{id}", db.schema),
+                20,
+                MirClass::Warrior,
+                BICHON,
+                vec![],
+            );
+            let account =
+                owned.config.account_store.lock().unwrap().accounts[&owned.account_id].clone();
+            owned.config = db.config();
+            owned
+                .config
+                .account_store
+                .lock()
+                .unwrap()
+                .accounts
+                .insert(owned.account_id.clone(), account);
+            owned
+                .config
+                .save_account_store_account(&owned.account_id)
+                .unwrap_or_else(|_| {
+                    panic!("owned periodic QA fixture seed failed; credentials suppressed")
+                });
+            let (mut accepting, _) = login(&owned);
+            open_offer(&mut accepting, BICHON, id, false);
+            let acceptance_packets = accept(&mut accepting, BICHON, id);
+            let (accepted, _) = db.snapshot(&owned.account_id);
+            assert_eq!(row(&accepted, id).unwrap()["stage"], "inProgress");
+            let reward = locked_reward(&accepted, id);
+            let expected_exp = reward["experience"]
+                .as_i64()
+                .expect("ordinary acceptance locks EXP");
+            let expected_gold = reward["gold"]
+                .as_u64()
+                .expect("ordinary acceptance locks gold") as u32;
+            assert!(
+                added(&acceptance_packets, id),
+                "acceptance ACK follows durable locked reward"
+            );
+            drop(accepting);
+
+            // Declared rule fixture only: preserve the ordinary accepted lock
+            // and supply canonical counts between sessions. No kills/timing are
+            // claimed, and no production/test-support progression API is used.
+            seed_accepted_ready(&owned, id);
+            owned
+                .config
+                .save_account_store_account(&owned.account_id)
+                .unwrap_or_else(|_| {
+                    panic!("owned Ready proof persistence failed; credentials suppressed")
+                });
+            let (before, before_version) = db.snapshot(&owned.account_id);
+            assert_eq!(row(&before, id).unwrap()["stage"], "readyToTurnIn");
+            assert_eq!(locked_reward(&before, id), reward);
+
+            let stale_fixture = Fixture {
+                config: db.config(),
+                account_id: owned.account_id.clone(),
+            };
+            assert!(!std::sync::Arc::ptr_eq(
+                &owned.config.account_store,
+                &stale_fixture.config.account_store
+            ));
+            let (mut stale, _) = login(&stale_fixture);
+            open_offer(&mut stale, BICHON, id, true);
+
+            let (ready_tx, ready_rx) = mpsc::channel();
+            let (go_tx, go_rx) = mpsc::channel();
+            let (result_tx, result_rx) = mpsc::channel();
+            let url = db.scoped_url.clone();
+            let account_id = owned.account_id.clone();
+            let worker = std::thread::spawn(move || {
+                // Instantiate the ECS runtime on its own thread; only owned
+                // strings and protocol packets cross the thread boundary.
+                let worker_fixture = Fixture {
+                    config: SimulationConfig::default()
+                        .with_crystal_map_runtime()
+                        .with_platinum_176_profile()
+                        .with_postgres_account_store(url)
+                        .unwrap_or_else(|_| {
+                            panic!("worker QA PostgreSQL load failed; credentials suppressed")
+                        }),
+                    account_id,
+                };
+                let (mut runtime, _) = login(&worker_fixture);
+                open_offer(&mut runtime, BICHON, id, true);
+                ready_tx.send(()).unwrap();
+                go_rx.recv_timeout(Duration::from_secs(15)).unwrap();
+                let result =
+                    runtime.execute(WorldCommand::ClientPacket(ClientPacket::FinishQuest {
+                        quest_index: id,
+                        selected_item_index: -1,
+                    }));
+                result_tx.send(result).unwrap();
+            });
+            ready_rx
+                .recv_timeout(Duration::from_secs(15))
+                .expect("independent worker must display a lawful finish offer");
+
+            let mut barrier_client = db.connect();
+            let mut barrier = pg(
+                barrier_client.transaction(),
+                "begin owned account row barrier",
+            );
+            pg(
+                barrier.query_one(
+                    "SELECT store_version FROM accounts WHERE account_id=$1 FOR UPDATE",
+                    &[&owned.account_id],
+                ),
+                "hold owned account row barrier",
+            );
+            go_tx.send(()).unwrap();
+            let mut observer = db.connect();
+            let deadline = Instant::now() + Duration::from_secs(3);
+            loop {
+                assert!(
+                    matches!(result_rx.try_recv(), Err(mpsc::TryRecvError::Empty)),
+                    "Finish must not expose a result/ACK while its durable commit is blocked"
+                );
+                let waits: i64 = pg(observer.query_one(
+                    "SELECT COUNT(*) FROM pg_stat_activity WHERE datname=$1 AND application_name=$2 AND wait_event_type='Lock'",
+                    &[&db.name, &db.application]), "observe blocked PostgreSQL writer").get(0);
+                if waits > 0 {
+                    break;
+                }
+                assert!(
+                    Instant::now() < deadline,
+                    "ordinary Finish must reach the PostgreSQL commit barrier"
+                );
+                std::thread::sleep(Duration::from_millis(10));
+            }
+            let (blocked, blocked_version) = db.snapshot(&owned.account_id);
+            assert_same_save(&blocked, &before);
+            assert_eq!(blocked_version, before_version);
+            assert!(row(&blocked, id).unwrap()["cadence_last_claimed_period"].is_null());
+            assert!(matches!(
+                result_rx.try_recv(),
+                Err(mpsc::TryRecvError::Empty)
+            ));
+            pg(barrier.commit(), "release owned row barrier");
+            let result = result_rx
+                .recv_timeout(Duration::from_secs(15))
+                .expect("Finish must resolve after COMMIT barrier releases");
+            // Read from a separate connection before examining the buffered
+            // response vector. Both JSON sources and normalized projections
+            // must already expose one committed EXP/gold/claim tuple.
+            let (committed, committed_version) = db.snapshot(&owned.account_id);
+            assert_eq!(committed.gold, before.gold + expected_gold);
+            assert_eq!(committed.experience, before.experience + expected_exp);
+            assert_eq!(committed.revision, before.revision + 1);
+            assert_eq!(committed_version, before_version + 1);
+            let claimed = row(&committed, id).unwrap();
+            assert_eq!(claimed["stage"], "completed");
+            assert!(claimed["cadence_last_claimed_period"].is_u64());
+            assert_eq!(
+                claimed["cadence_last_claimed_period"],
+                claimed["cadence_high_watermark_period"]
+            );
+            let packets = result.unwrap_or_else(|_| {
+                panic!("ordinary committed periodic Finish failed; private error suppressed")
+            });
+            assert!(
+                removed(&packets, id),
+                "committed periodic Finish must emit the single REMOVE success"
+            );
+            worker.join().expect("owned finish worker must complete");
+
+            let rejected = stale
+                .execute(WorldCommand::ClientPacket(ClientPacket::FinishQuest {
+                    quest_index: id,
+                    selected_item_index: -1,
+                }))
+                .expect_err("independent stale PostgreSQL source must not return a success vector");
+            assert!(
+                rejected.contains("stale"),
+                "stale source CAS must reject the attempted second reward"
+            );
+            let (after_stale, after_stale_version) = db.snapshot(&owned.account_id);
+            assert_same_save(&after_stale, &committed);
+            assert_eq!(after_stale_version, committed_version);
+            match stale.execute(WorldCommand::ClientPacket(ClientPacket::FinishQuest {
+                quest_index: id,
+                selected_item_index: -1,
+            })) {
+                Ok(packets) => assert!(!removed(&packets, id)),
+                Err(error) => assert!(error.contains("stale"), "stale retry must remain fenced"),
+            }
+            let reloaded = Fixture {
+                config: db.config(),
+                account_id: owned.account_id.clone(),
+            };
+            let (mut relogged, _) = login(&reloaded);
+            packet(
+                &mut relogged,
+                ClientPacket::CallNpc {
+                    object_id: BICHON,
+                    key: "@Main".into(),
+                },
+            );
+            assert!(!removed(&finish(&mut relogged, id), id));
+            let (final_save, final_version) = db.snapshot(&owned.account_id);
+            assert_same_save(&final_save, &committed);
+            assert_eq!(final_version, committed_version);
+            cases.push(json!({"questId":id,"cadence":if id==DAILY {"daily"} else {"weekly"},
+                "acceptedLockPersistedBeforeAck":true,"commitBarrierObserved":true,"noAckBeforeCommit":true,
+                "rewardExp":expected_exp,"rewardGold":expected_gold,"claimedPeriod":claimed["cadence_last_claimed_period"],
+                "committedRevision":committed.revision,"postgresSaveVersion":committed_version,
+                "independentStaleCasRejected":true,"retryAndReloginNoDoubleReward":true}));
+        }
+        eprintln!(
+            "PERIODIC_POSTGRES_QA {}",
+            json!({"schema":1,"database":db.name,"ownedSchema":db.schema,
+            "isolatedSourceOfTruth":true,"publicSchemaUsed":false,"credentialsRedacted":true,
+            "naturalKills":false,"ordinaryTimedCompletion":false,"cases":cases})
+        );
     }
 }
 impl Drop for ProfileGuard {
