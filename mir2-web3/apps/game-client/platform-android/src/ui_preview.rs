@@ -73,6 +73,7 @@ struct OfflineNpcPreviewReceipt {
 struct OfflinePersonalJniReceipt {
     scene: Option<String>,
     logged: bool,
+    last_observation: String,
 }
 
 fn is_personal_jni_preview(scene: &str) -> bool {
@@ -124,20 +125,33 @@ fn personal_jni_models_received(
 fn report_personal_jni_consumer(
     mut receipt: ResMut<OfflinePersonalJniReceipt>,
     host: Res<crate::shared_shell::HostState>,
+    shell: Res<NativeShellModel>,
+    world_receipt: Option<Res<mir2_bevy_runtime::native_world_receipt::NativeWorldReceipt>>,
     state: Res<NativePlayerUiState>,
     ui: Res<UiReadModel>,
     shop: Res<mir2_client_bevy::game_shop::GameShopModel>,
     storage: Res<mir2_client_bevy::storage::StorageModel>,
 ) {
-    let Some(scene) = receipt.scene.as_deref() else { return; };
+    let Some(scene) = receipt.scene.clone() else { return; };
+    let data_receipt = world_receipt.as_deref().and_then(|receipt| receipt.last);
+    let observation = format!("{}:{:?}:{}:{}:{:?}", host.phase, shell.screen,
+        shop.items.len(), storage.items.len(), data_receipt);
+    if observation != receipt.last_observation {
+        info!(scene = scene.as_str(), phase = host.phase.as_str(), screen = ?shell.screen,
+            notice = ?shell.notice, data_receipt = ?data_receipt,
+            catalogue = shop.items.len(), storage_items = storage.items.len(),
+            storage_size = storage.size, unlocked = storage.unlocked,
+            "ANDROID_PERSONAL_JNI_HOST_OBSERVATION_NOT_LIVE");
+        receipt.last_observation = observation;
+    }
     if receipt.logged || host.phase != "IN_GAME"
-        || state.core.panel != preview_panel_for_scene(scene)
-        || !personal_jni_models_received(scene, &shop, &storage, &ui) {
+        || state.core.panel != preview_panel_for_scene(&scene)
+        || !personal_jni_models_received(&scene, &shop, &storage, &ui) {
         return;
     }
     // Exact Java-only sentinels observed after the production JNI inbox, owner
     // projection and shared consumers. Not TLS/auth, a GPU-frame or an operation.
-    info!(scene, catalogue = shop.items.len(), last_g_index = 2104,
+    info!(scene = scene.as_str(), catalogue = shop.items.len(), last_g_index = 2104,
         last_stock = 3, storage_items = storage.items.len(), storage_size = storage.size,
         last_slot = 159, unlocked = storage.unlocked, has_password = storage.has_password,
         icon_width = storage.items[0].icon_width, icon_height = storage.items[0].icon_height,
@@ -710,6 +724,7 @@ fn apply(world: &mut World) {
         let mut personal = world.resource_mut::<OfflinePersonalJniReceipt>();
         personal.scene = None;
         personal.logged = false;
+        personal.last_observation.clear();
         // UI fixtures are not Gateway events and do not invoke auth/StartGame.
         let mut shell = NativeShellModel::default();
         shell.screen = match scene.as_str() {
