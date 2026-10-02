@@ -1,4 +1,4 @@
-//! Optional phone presentation of the shared diary/detail, never quest rules.
+//! Optional phone presentation of shared quest windows, never quest rules.
 use super::*;
 
 /// Android supplies logical workspace dimensions and the inverse stage scale.
@@ -31,6 +31,8 @@ pub(super) struct RenderSnapshot {
     graduation: Option<GraduationDirection>,
     action: Option<(QuestUiButton, bool)>,
     abandon_pending: bool,
+    confirmation: Option<i32>,
+    alert: Option<String>,
 }
 
 impl RenderSnapshot {
@@ -57,6 +59,8 @@ impl RenderSnapshot {
             reward: state.selected_reward_index,
             tracked: state.tracked_quest_indices.clone(),
             primary: state.pinned_primary_quest_index,
+            confirmation: state.abandon_confirmation_quest_index,
+            alert: state.quest_alert_message.clone(),
             tab: state.diary_tab,
             page: state.diary_page,
             collapsed: state.collapsed_groups.clone(),
@@ -119,6 +123,53 @@ pub struct PhoneQuestScrollArea(ScrollKey);
 enum ScrollKey {
     Diary(GuidedDiaryTab, usize),
     Detail(i32),
+    Confirmation(InputSurface),
+}
+
+/// This is pointer ownership, not quest eligibility. The existing shared
+/// controller continues to validate and enqueue every quest decision.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum InputSurface {
+    Windows,
+    Abandon(i32),
+    Alert,
+}
+
+impl InputSurface {
+    fn current(state: &QuestUiState) -> Self {
+        if state.quest_alert_message.is_some() {
+            Self::Alert
+        } else if let Some(quest) = state.abandon_confirmation_quest_index {
+            Self::Abandon(quest)
+        } else {
+            Self::Windows
+        }
+    }
+
+    fn allows_action(self, action: Option<&QuestUiButton>) -> bool {
+        match self {
+            Self::Alert => matches!(action, Some(QuestUiButton::CloseQuestAlert)),
+            Self::Abandon(_) => matches!(
+                action,
+                Some(QuestUiButton::ConfirmAbandonQuest | QuestUiButton::CancelAbandonQuest)
+            ),
+            Self::Windows => !matches!(
+                action,
+                Some(
+                    QuestUiButton::ConfirmAbandonQuest
+                        | QuestUiButton::CancelAbandonQuest
+                        | QuestUiButton::CloseQuestAlert
+                )
+            ),
+        }
+    }
+
+    fn allows_scroll(self, key: ScrollKey) -> bool {
+        match key {
+            ScrollKey::Confirmation(owner) => owner == self && self != Self::Windows,
+            ScrollKey::Diary(..) | ScrollKey::Detail(..) => self == Self::Windows,
+        }
+    }
 }
 
 #[derive(Component)]
@@ -141,6 +192,7 @@ struct Gesture {
     last: Vec2,
     dragged: bool,
     presentation: PhoneQuestPresentation,
+    surface: InputSurface,
 }
 
 #[derive(Resource, Default)]
@@ -149,6 +201,8 @@ pub(super) struct PhoneInputState {
     gesture: Option<Gesture>,
     diary: Option<(ScrollKey, Vec2)>,
     detail: Option<(ScrollKey, Vec2)>,
+    confirmation: Option<(ScrollKey, Vec2)>,
+    alert_message: Option<String>,
     reset: Option<u64>,
 }
 
@@ -157,6 +211,7 @@ impl PhoneInputState {
         match key {
             ScrollKey::Diary(..) => self.diary,
             ScrollKey::Detail(..) => self.detail,
+            ScrollKey::Confirmation(..) => self.confirmation,
         }
         .filter(|(saved, _)| *saved == key)
         .map(|(_, offset)| offset)
@@ -166,6 +221,7 @@ impl PhoneInputState {
         let slot = match key {
             ScrollKey::Diary(..) => &mut self.diary,
             ScrollKey::Detail(..) => &mut self.detail,
+            ScrollKey::Confirmation(..) => &mut self.confirmation,
         };
         *slot = Some((key, offset));
     }
@@ -218,18 +274,31 @@ pub(super) fn pointer_input(
         state.gesture = None;
         state.diary = None;
         state.detail = None;
+        state.confirmation = None;
         return;
     }
+    let surface = InputSurface::current(&quest_state);
     if !window.focused
-        || quest_state.blocks_world_input()
-        || player.blocks_world_action(dialog.is_open, false)
+        || player.blocks_world_action(false, false)
+        || (dialog.is_open && surface == InputSurface::Windows)
     {
         state.gesture = None;
         return;
     }
     // Actual layout clamps offsets after content/viewport changes. Remember the
     // clamped value so subsequent model renders do not jump back to the top.
+    let alert_changed = state.alert_message != quest_state.quest_alert_message;
+    if alert_changed {
+        state.gesture = None;
+        state.confirmation = None;
+        state.alert_message = quest_state.quest_alert_message.clone();
+    }
     for (_, area, computed, _, _) in &areas {
+        // Old computed children remain until the shared renderer applies the
+        // new message. Do not re-import their previous viewport.
+        if alert_changed && matches!(area.0, ScrollKey::Confirmation(InputSurface::Alert)) {
+            continue;
+        }
         state.remember(
             area.0,
             computed.scroll_position * computed.inverse_scale_factor,
@@ -239,13 +308,17 @@ pub(super) fn pointer_input(
     let hit_button = |position: Vec2| {
         controls
             .iter()
-            .find_map(|(entity, node, transform, button, _, _)| {
+            .find_map(|(entity, node, transform, button, action, step)| {
+                let owned = step.map_or_else(
+                    || surface.allows_action(action),
+                    |step| surface.allows_scroll(step.key),
+                );
                 let in_clip = button.scroll.is_none_or(|key| {
                     areas.iter().any(|(_, area, clip, transform, _)| {
                         area.0 == key && clip.contains_point(*transform, position)
                     })
                 });
-                (in_clip && node.contains_point(*transform, position)).then_some(entity)
+                (owned && in_clip && node.contains_point(*transform, position)).then_some(entity)
             })
     };
     if state.gesture.is_none() {
@@ -254,8 +327,9 @@ pub(super) fn pointer_input(
             .and_then(|touches| {
                 touches.iter_just_pressed().find_map(|touch| {
                     let position = touch.start_position() * density;
-                    let scroll = areas.iter().find_map(|(entity, _, node, transform, _)| {
-                        node.contains_point(*transform, position).then_some(entity)
+                    let scroll = areas.iter().find_map(|(entity, area, node, transform, _)| {
+                        (surface.allows_scroll(area.0) && node.contains_point(*transform, position))
+                            .then_some(entity)
                     });
                     let button = hit_button(position);
                     (scroll.is_some() || button.is_some()).then_some((
@@ -278,8 +352,9 @@ pub(super) fn pointer_input(
                 }
                 let position = window.cursor_position()? * density;
                 let button = hit_button(position);
-                let scroll = areas.iter().find_map(|(entity, _, node, transform, _)| {
-                    node.contains_point(*transform, position).then_some(entity)
+                let scroll = areas.iter().find_map(|(entity, area, node, transform, _)| {
+                    (surface.allows_scroll(area.0) && node.contains_point(*transform, position))
+                        .then_some(entity)
                 });
                 (scroll.is_some() || button.is_some()).then_some((None, position, button, scroll))
             });
@@ -292,13 +367,14 @@ pub(super) fn pointer_input(
                 last: position,
                 dragged: false,
                 presentation: *presentation,
+                surface,
             });
         }
     }
     let Some(mut gesture) = state.gesture else {
         return;
     };
-    if gesture.presentation != *presentation {
+    if gesture.presentation != *presentation || gesture.surface != surface {
         state.gesture = None;
         return;
     }
@@ -636,6 +712,70 @@ fn graduation(
             );
         }
     }
+}
+
+pub(super) fn render_confirmation(
+    parent: &mut ChildSpawnerCommands,
+    state: &QuestUiState,
+    presentation: &PhoneQuestPresentation,
+    memory: Option<&PhoneInputState>,
+) {
+    let unit = presentation.authored_unit;
+    let surface = InputSurface::current(state);
+    let alert = state.quest_alert_message.as_deref();
+    text(
+        parent,
+        &crate::player_text::text(if alert.is_some() {
+            "提示"
+        } else {
+            "任务确认"
+        }),
+        unit,
+        true,
+    );
+    scroll_content(
+        parent,
+        ScrollKey::Confirmation(surface),
+        unit,
+        memory,
+        |parent| {
+            text(
+                parent,
+                &crate::player_text::text(alert.unwrap_or(ASK_CANCEL_QUEST_TEXT)),
+                unit,
+                false,
+            );
+        },
+    );
+    parent
+        .spawn(Node {
+            width: Val::Percent(100.0),
+            column_gap: Val::Px(8.0 * unit),
+            flex_shrink: 0.0,
+            ..default()
+        })
+        .with_children(|parent| {
+            let actions = if alert.is_some() {
+                vec![("OK", QuestUiButton::CloseQuestAlert)]
+            } else {
+                vec![
+                    ("Yes", QuestUiButton::ConfirmAbandonQuest),
+                    ("No", QuestUiButton::CancelAbandonQuest),
+                ]
+            };
+            for (label, action) in actions {
+                parent
+                    .spawn(Node {
+                        flex_grow: 1.0,
+                        flex_basis: Val::Px(0.0),
+                        min_width: Val::Px(0.0),
+                        ..default()
+                    })
+                    .with_children(|parent| {
+                        button(parent, label, action, true, None, unit);
+                    });
+            }
+        });
 }
 
 pub(super) fn render_diary(
@@ -984,10 +1124,12 @@ mod tests {
             assert!(matches!(font.font_size, FontSize::Px(value) if value / unit >= 14.0));
             assert!(matches!(font.font, FontSource::SystemUi));
         }
-        assert!(world
-            .query::<&Text>()
-            .iter(world)
-            .any(|text| text.0.contains("keep the full server title")));
+        assert!(
+            world
+                .query::<&Text>()
+                .iter(world)
+                .any(|text| text.0.contains("keep the full server title"))
+        );
         assert_eq!(
             world
                 .query_filtered::<&Node, With<PhoneQuestScrollArea>>()
@@ -995,10 +1137,12 @@ mod tests {
                 .count(),
             2
         );
-        assert!(world
-            .query_filtered::<&Node, With<PhoneQuestScrollArea>>()
-            .iter(world)
-            .all(|node| node.overflow == Overflow::scroll_y()));
+        assert!(
+            world
+                .query_filtered::<&Node, With<PhoneQuestScrollArea>>()
+                .iter(world)
+                .all(|node| node.overflow == Overflow::scroll_y())
+        );
     }
 
     #[test]
@@ -1019,6 +1163,331 @@ mod tests {
         assert_eq!(
             before, after,
             "Press/release ownership must survive no-op resource change ticks"
+        );
+    }
+
+    #[test]
+    fn phone_quest_confirmation_uses_readable_text_and_48dp_controls() {
+        let mut app = fixture();
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .request_abandon_confirmation(7);
+        app.update();
+        let world = app.world_mut();
+        let unit = world.resource::<PhoneQuestPresentation>().authored_unit;
+        for action in [
+            QuestUiButton::ConfirmAbandonQuest,
+            QuestUiButton::CancelAbandonQuest,
+        ] {
+            let (entity, node) = world
+                .query::<(Entity, &Node, &QuestUiButton)>()
+                .iter(world)
+                .find_map(|(entity, node, found)| (*found == action).then_some((entity, node)))
+                .unwrap();
+            assert!(
+                world.get::<PhoneQuestControl>(entity).is_some(),
+                "The real confirmation needs phone controls"
+            );
+            assert!(matches!(node.min_height, Val::Px(value) if value / unit >= 48.0));
+            assert!(matches!(node.min_width, Val::Px(value) if value / unit >= 48.0));
+        }
+        assert!(world.query::<(&PhoneQuestText, &TextFont)>().iter(world)
+            .any(|(_, font)| matches!(font.font_size, FontSize::Px(value) if value / unit >= 14.0)));
+    }
+
+    #[test]
+    fn phone_quest_confirmation_buttons_survive_unchanged_frames() {
+        let mut app = fixture();
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .request_abandon_confirmation(7);
+        app.update();
+        let action_entity = |app: &mut App| {
+            let world = app.world_mut();
+            world
+                .query::<(Entity, &QuestUiButton)>()
+                .iter(world)
+                .find_map(|(entity, action)| {
+                    matches!(action, QuestUiButton::CancelAbandonQuest).then_some(entity)
+                })
+                .unwrap()
+        };
+        let before = action_entity(&mut app);
+        app.update();
+        app.update();
+        assert_eq!(
+            before,
+            action_entity(&mut app),
+            "A phone press must retain the same release target"
+        );
+    }
+
+    fn modal_gesture_fixture(alert: bool) -> (App, Entity) {
+        let mut app = fixture();
+        app.add_plugins(bevy::input::InputPlugin);
+        {
+            let mut state = app.world_mut().resource_mut::<QuestUiState>();
+            if alert {
+                state.show_quest_alert("OFFLINE modal message: no server action");
+            } else {
+                state.request_abandon_confirmation(7);
+            }
+        }
+        app.update();
+        let world = app.world_mut();
+        let window = world.spawn(Window::default()).id();
+        let button = world
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(world)
+            .find_map(|(entity, action)| {
+                (if alert {
+                    matches!(action, QuestUiButton::CloseQuestAlert)
+                } else {
+                    matches!(action, QuestUiButton::CancelAbandonQuest)
+                })
+                .then_some(entity)
+            })
+            .unwrap();
+        // Bind native coordinates independently of a GPU layout. Tagging the
+        // old control also isolates the previous modal input rejection.
+        world.entity_mut(button).insert((
+            PhoneQuestButton { scroll: None },
+            ComputedNode {
+                size: Vec2::new(180.0, 60.0),
+                inverse_scale_factor: 1.0,
+                ..default()
+            },
+            bevy::ui::UiGlobalTransform::from_xy(200.0, 210.0),
+        ));
+        (app, window)
+    }
+
+    #[test]
+    fn phone_quest_confirmation_cancel_and_alert_close_use_shared_release_actions() {
+        use bevy::input::touch::TouchPhase::*;
+        for alert in [false, true] {
+            let (mut app, window) = modal_gesture_fixture(alert);
+            assert!(app.world().resource::<QuestUiState>().blocks_world_input());
+            touch(&mut app, window, 1, Started, Vec2::new(200.0, 210.0));
+            app.update();
+            assert!(app.world().resource::<QuestUiState>().blocks_world_input());
+            touch(&mut app, window, 1, Ended, Vec2::new(200.0, 210.0));
+            app.update();
+            assert!(
+                !app.world().resource::<QuestUiState>().blocks_world_input(),
+                "The modal must accept its own release without allowing the world"
+            );
+            assert!(
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .drain_intents()
+                    .is_empty()
+            );
+        }
+    }
+
+    #[test]
+    fn phone_modal_rejects_the_covered_diary_and_scroll_actions() {
+        let mut app = fixture();
+        app.add_plugins(bevy::input::InputPlugin);
+        let window = app.world_mut().spawn(Window::default()).id();
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .request_abandon_confirmation(7);
+        app.update();
+        let world = app.world_mut();
+        let covered = world
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(world)
+            .find_map(|(entity, action)| {
+                matches!(action, QuestUiButton::SelectQuest { quest_index: 7 }).then_some(entity)
+            })
+            .unwrap();
+        world.entity_mut(covered).insert((
+            ComputedNode {
+                size: Vec2::new(180.0, 60.0),
+                inverse_scale_factor: 1.0,
+                ..default()
+            },
+            bevy::ui::UiGlobalTransform::from_xy(400.0, 210.0),
+        ));
+        use bevy::input::touch::TouchPhase::*;
+        touch(&mut app, window, 1, Started, Vec2::new(400.0, 210.0));
+        app.update();
+        touch(&mut app, window, 1, Ended, Vec2::new(400.0, 210.0));
+        app.update();
+        let state = app.world().resource::<QuestUiState>();
+        assert!(state.blocks_world_input());
+        assert_eq!(state.detail_quest_index, None);
+        assert!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents()
+                .is_empty()
+        );
+        for surface in [InputSurface::Alert, InputSurface::Abandon(7)] {
+            assert!(!surface.allows_scroll(ScrollKey::Diary(GuidedDiaryTab::Main, 0)));
+            assert!(!surface.allows_scroll(ScrollKey::Detail(7)));
+            assert!(surface.allows_scroll(ScrollKey::Confirmation(surface)));
+        }
+    }
+
+    #[test]
+    fn phone_modal_still_accepts_its_own_close_with_an_open_npc_dialog() {
+        use bevy::input::touch::TouchPhase::*;
+        for alert in [false, true] {
+            let (mut app, window) = modal_gesture_fixture(alert);
+            app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
+            touch(&mut app, window, 1, Started, Vec2::new(200.0, 210.0));
+            app.update();
+            touch(&mut app, window, 1, Ended, Vec2::new(200.0, 210.0));
+            app.update();
+            assert!(!app.world().resource::<QuestUiState>().blocks_world_input());
+            assert!(app.world().resource::<NpcDialogModel>().is_open);
+            assert!(
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .drain_intents()
+                    .is_empty()
+            );
+        }
+    }
+
+    #[test]
+    fn phone_modal_reset_focus_and_other_modal_cancel_an_owned_press() {
+        use bevy::input::touch::TouchPhase::*;
+        for guard in ["reset", "focus", "other-modal"] {
+            let (mut app, window) = modal_gesture_fixture(false);
+            touch(&mut app, window, 1, Started, Vec2::new(200.0, 210.0));
+            app.update();
+            match guard {
+                "reset" => app.world_mut().resource_mut::<SessionResetRevision>().0 += 1,
+                "focus" => app.world_mut().get_mut::<Window>(window).unwrap().focused = false,
+                _ => {
+                    app.world_mut()
+                        .resource_mut::<NativePlayerUiState>()
+                        .skill_assign
+                        .open = true
+                }
+            }
+            touch(&mut app, window, 1, Ended, Vec2::new(200.0, 210.0));
+            app.update();
+            assert_eq!(
+                app.world()
+                    .resource::<QuestUiState>()
+                    .abandon_confirmation_quest_index,
+                if guard == "reset" { None } else { Some(7) },
+                "A session reset clears the UI; focus/other-modal guards keep the undecided confirmation"
+            );
+            assert!(
+                app.world_mut()
+                    .resource_mut::<QuestUiIntentQueue>()
+                    .drain_intents()
+                    .is_empty()
+            );
+            assert!(app.world().resource::<PhoneInputState>().gesture.is_none());
+        }
+    }
+
+    #[test]
+    fn phone_modal_opening_cancels_a_press_owned_by_the_previous_diary() {
+        use bevy::input::touch::TouchPhase::*;
+        let (mut app, window, _) = gesture_fixture();
+        touch(&mut app, window, 1, Started, Vec2::new(200.0, 210.0));
+        app.update();
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .request_abandon_confirmation(7);
+        app.update();
+        touch(&mut app, window, 1, Ended, Vec2::new(200.0, 210.0));
+        app.update();
+        let state = app.world().resource::<QuestUiState>();
+        assert_eq!(state.detail_quest_index, None);
+        assert_eq!(state.abandon_confirmation_quest_index, Some(7));
+        assert!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents()
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn default_desktop_confirmation_geometry_and_controls_remain_without_phone_opt_in() {
+        let mut app = fixture();
+        app.world_mut().remove_resource::<PhoneQuestPresentation>();
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .request_abandon_confirmation(7);
+        app.update();
+        let world = app.world_mut();
+        let panel = world
+            .query_filtered::<&Node, With<QuestConfirmationPanel>>()
+            .single(world)
+            .unwrap();
+        assert_eq!(panel.left, Val::Px(QUEST_CONFIRM_DESIGN_LEFT));
+        assert_eq!(panel.top, Val::Px(QUEST_CONFIRM_DESIGN_TOP));
+        assert_eq!(panel.width, Val::Px(QUEST_CONFIRM_DESIGN_WIDTH));
+        assert_eq!(panel.height, Val::Px(QUEST_CONFIRM_DESIGN_HEIGHT));
+        let controls = world
+            .query::<(Entity, &QuestUiButton)>()
+            .iter(world)
+            .filter_map(|(entity, action)| {
+                matches!(
+                    action,
+                    QuestUiButton::ConfirmAbandonQuest | QuestUiButton::CancelAbandonQuest
+                )
+                .then_some(entity)
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(controls.len(), 2);
+        assert!(
+            controls
+                .iter()
+                .all(|entity| world.get::<PhoneQuestButton>(*entity).is_none())
+        );
+    }
+
+    #[test]
+    fn phone_new_alert_does_not_inherit_the_previous_messages_scroll_position() {
+        let (mut app, _) = modal_gesture_fixture(true);
+        // Match an already running Android window before injecting the scroll.
+        app.update();
+        let key = ScrollKey::Confirmation(InputSurface::Alert);
+        let world = app.world_mut();
+        let area = world
+            .query::<(Entity, &PhoneQuestScrollArea)>()
+            .iter(world)
+            .find_map(|(entity, area)| (area.0 == key).then_some(entity))
+            .unwrap();
+        world.entity_mut(area).insert((
+            ComputedNode {
+                size: Vec2::new(300.0, 120.0),
+                content_size: Vec2::new(300.0, 500.0),
+                scroll_position: Vec2::new(0.0, 180.0),
+                inverse_scale_factor: 1.0,
+                ..default()
+            },
+            ScrollPosition(Vec2::new(0.0, 180.0)),
+        ));
+        app.update();
+        assert_eq!(
+            app.world().resource::<PhoneInputState>().offset(key).y,
+            180.0
+        );
+        app.world_mut()
+            .resource_mut::<QuestUiState>()
+            .show_quest_alert("Different message begins at its first line");
+        app.update();
+        let world = app.world_mut();
+        let offset = world
+            .query::<(&PhoneQuestScrollArea, &ScrollPosition)>()
+            .iter(world)
+            .find_map(|(area, position)| (area.0 == key).then_some(position.0.y))
+            .unwrap();
+        assert_eq!(
+            offset, 0.0,
+            "A new message is a new readable viewport, not the previous message's scroll"
         );
     }
 
@@ -1091,11 +1560,12 @@ mod tests {
             app.world().resource::<QuestUiState>().detail_quest_index,
             Some(7)
         );
-        assert!(app
-            .world_mut()
-            .resource_mut::<QuestUiIntentQueue>()
-            .drain_intents()
-            .is_empty());
+        assert!(
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents()
+                .is_empty()
+        );
     }
 
     #[test]
@@ -1170,13 +1640,17 @@ mod tests {
         }
         app.update();
         let world = app.world_mut();
-        assert!(!world
-            .query::<&QuestUiButton>()
-            .iter(world)
-            .any(|action| matches!(action, QuestUiButton::AcceptQuest { .. })));
-        assert!(world
-            .query_filtered::<&Text, With<PhoneQuestText>>()
-            .iter(world)
-            .any(|text| text.0.contains("paragraph 39")));
+        assert!(
+            !world
+                .query::<&QuestUiButton>()
+                .iter(world)
+                .any(|action| matches!(action, QuestUiButton::AcceptQuest { .. }))
+        );
+        assert!(
+            world
+                .query_filtered::<&Text, With<PhoneQuestText>>()
+                .iter(world)
+                .any(|text| text.0.contains("paragraph 39"))
+        );
     }
 }

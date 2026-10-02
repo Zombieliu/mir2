@@ -26,6 +26,8 @@ pub const SCENES: &[&str] = &[
     "skills",
     "quests",
     "quests-ingress",
+    "quest-confirmation",
+    "quest-alert",
     "options",
     "platform",
     "menu",
@@ -805,7 +807,7 @@ fn preview_panel_for_scene(scene: &str) -> UiPanel {
         "inventory" | "inventory-amount" => UiPanel::Inventory,
         "character" => UiPanel::Character,
         "skills" => UiPanel::Skill,
-        "quests" | "quests-ingress" => UiPanel::QuestLog,
+        "quests" | "quests-ingress" | "quest-confirmation" | "quest-alert" => UiPanel::QuestLog,
         "options" => UiPanel::Options,
         "platform" => UiPanel::PlatformSettings,
         "menu" => UiPanel::Menu,
@@ -1166,6 +1168,27 @@ fn populate_specimens(world: &mut World, scene: &str) {
             unknown_text: None,
         }],
     });
+    if matches!(scene, "quest-confirmation" | "quest-alert") {
+        use mir2_client_bevy::quest_ui::QuestUiState;
+        // This is a manual UI specimen, not a received packet/auth receipt.
+        // Java preview rejects network and the shared controller owns decisions.
+        world.init_resource::<QuestUiState>();
+        let mut state = world.resource_mut::<QuestUiState>();
+        state.select_quest(1);
+        if scene == "quest-confirmation" {
+            state.request_abandon_confirmation(1);
+        } else {
+            state.show_quest_alert(
+                (0..30)
+                    .map(|line| {
+                        format!("OFFLINE phone message line {line}: no quest or reward granted.")
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n"),
+            );
+        }
+        info!(scene, "ANDROID_QUEST_MODAL_MANUAL_UI_ONLY_NOT_LIVE");
+    }
     if matches!(scene, "quests-ingress" | "npc-ingress") {
         use mir2_client_bevy::quest_model::{CompletedQuestTracker, NearbyNpcModel, NpcDialogModel};
         // Clear the manual legacy specimen before producing received models.
@@ -1668,7 +1691,7 @@ mod tests {
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 41);
+        assert_eq!(SCENES.len(), 43);
     }
 
     #[test]
@@ -1704,6 +1727,32 @@ mod tests {
             assert_eq!(world.resource::<crate::shared_shell::HostState>().phase, "DISCONNECTED");
             assert_eq!(world.resource::<NativeShellModel>().screen, Screen::Login);
             assert!(!world.resource::<crate::AndroidGatewayTransportEnabled>().0);
+        }
+    }
+
+    #[test]
+    fn modal_specimens_only_change_offline_view_state_not_main_host_authorization() {
+        use mir2_client_bevy::quest_ui::QuestUiState;
+        for scene in ["quest-confirmation", "quest-alert"] {
+            let mut world = World::new();
+            world.init_resource::<mir2_client_bevy::social::SocialModel>();
+            let mut host = crate::shared_shell::HostState::default();
+            host.phase = "DISCONNECTED".into();
+            world.insert_resource(host);
+            world.insert_resource(NativeShellModel {
+                screen: Screen::Login,
+                ..default()
+            });
+            world.insert_resource(crate::AndroidGatewayTransportEnabled(false));
+            populate_specimens(&mut world, scene);
+            assert!(world.resource::<QuestUiState>().blocks_world_input());
+            assert_eq!(
+                world.resource::<crate::shared_shell::HostState>().phase,
+                "DISCONNECTED"
+            );
+            assert_eq!(world.resource::<NativeShellModel>().screen, Screen::Login);
+            assert!(!world.resource::<crate::AndroidGatewayTransportEnabled>().0);
+            assert_eq!(preview_panel_for_scene(scene), UiPanel::QuestLog);
         }
     }
 

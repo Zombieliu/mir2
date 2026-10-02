@@ -9,7 +9,9 @@ use bevy::text::TextLayoutInfo;
 use mir2_client_bevy::{
     crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState},
     native_shell::{NativeShellModel, NativeShellScreen},
-    quest_ui::{PhoneQuestPresentation, QuestDetailPanel, QuestLogPanel, QuestUiRoot},
+    quest_ui::{
+        PhoneQuestPresentation, QuestConfirmationPanel, QuestDetailPanel, QuestLogPanel, QuestUiRoot,
+    },
 };
 
 pub(crate) fn install(app: &mut App) {
@@ -209,12 +211,17 @@ fn fit_shared_quest_windows(
             With<QuestUiRoot>,
             Without<QuestLogPanel>,
             Without<QuestDetailPanel>,
+            Without<QuestConfirmationPanel>,
         ),
     >,
     mut panels: Query<
         (&Node, &mut UiTransform),
         (
-            Or<(With<QuestLogPanel>, With<QuestDetailPanel>)>,
+            Or<(
+                With<QuestLogPanel>,
+                With<QuestDetailPanel>,
+                With<QuestConfirmationPanel>,
+            )>,
             Without<QuestUiRoot>,
         ),
     >,

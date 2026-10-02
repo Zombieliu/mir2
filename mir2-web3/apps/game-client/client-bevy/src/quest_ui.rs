@@ -1123,7 +1123,7 @@ pub struct QuestDetailPanel;
 struct NpcQuestListPanel;
 
 #[derive(Component)]
-struct QuestConfirmationPanel;
+pub struct QuestConfirmationPanel;
 
 #[derive(Component)]
 struct QuestConfirmationBlocker;
@@ -3141,14 +3141,36 @@ fn render_quest_ui(
         node.top = Val::Px(QUEST_CONFIRM_DESIGN_TOP);
         node.width = Val::Px(QUEST_CONFIRM_DESIGN_WIDTH);
         node.height = Val::Px(QUEST_CONFIRM_DESIGN_HEIGHT);
+        node.min_width = node.width;
+        node.max_width = node.width;
+        node.min_height = node.height;
+        node.max_height = node.height;
+        node.padding = UiRect::all(Val::Px(0.0));
+        node.row_gap = Val::Px(0.0);
+        node.flex_direction = FlexDirection::Row;
+        if let Some(phone) = phone {
+            phone.apply_panel(&mut node, false, false);
+        }
         node.display = if confirmation_open {
             Display::Flex
         } else {
             Display::None
         };
+        if !phone_refresh {
+            continue;
+        }
         commands.entity(entity).despawn_children();
         if confirmation_open {
             commands.entity(entity).with_children(|panel| {
+                if let Some(phone) = phone {
+                    phone::render_confirmation(
+                        panel,
+                        &quest_state,
+                        phone,
+                        journey_models.phone_input.as_deref(),
+                    );
+                    return;
+                }
                 if let Some(message) = quest_state.quest_alert_message.as_deref() {
                     render_quest_alert(
                         panel,
