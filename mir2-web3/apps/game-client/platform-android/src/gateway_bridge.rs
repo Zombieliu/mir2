@@ -30,6 +30,8 @@ use crate::android_input::{
 };
 
 pub const ANDROID_GATEWAY_QUEUE_CAPACITY: usize = 256;
+/// Leave room for the lease wrapper in the existing 64-KiB JNI copy buffer.
+pub const ANDROID_NATIVE_MAIL_COMMAND_MAX_BYTES: usize = 48 * 1024;
 pub const ANDROID_GATEWAY_INBOUND_CAPACITY: usize = 32;
 /// A receipt is a small control message, not an arbitrary Android payload.
 /// Keep this comfortably above the shared request/code limits while bounding
@@ -322,6 +324,9 @@ pub enum AndroidGatewayEnqueueError {
     InvalidGuildStorage {
         command_type: &'static str,
         reason: &'static str,
+    },
+    OversizedNativeMail {
+        max_bytes: usize,
     },
 }
 
@@ -1485,6 +1490,37 @@ impl AndroidGatewayOutboundQueue {
             sequence,
             kind,
             json: serde_json::to_string(&value).expect("wire JSON values are serializable"),
+        });
+        Ok(())
+    }
+
+    /// Closed mail-only shared UI seam. Uses the same queue/sequence/leases;
+    /// no arbitrary JSON, authentication command, or optimistic result.
+    pub fn enqueue_native_mail(
+        &mut self,
+        command: &mir2_client_bevy::native_mail_egress::NativeMailCommand,
+    ) -> Result<(), AndroidGatewayEnqueueError> {
+        let json = serde_json::to_string(command).expect("typed mail command is serializable");
+        if json.len() > ANDROID_NATIVE_MAIL_COMMAND_MAX_BYTES {
+            return Err(AndroidGatewayEnqueueError::OversizedNativeMail {
+                max_bytes: ANDROID_NATIVE_MAIL_COMMAND_MAX_BYTES,
+            });
+        }
+        if self.entries.len() >= self.capacity {
+            let command_type = command.command_type().to_owned();
+            self.overflow_count = self.overflow_count.saturating_add(1);
+            self.last_overflow_type = Some(command_type.clone());
+            return Err(AndroidGatewayEnqueueError::Full {
+                capacity: self.capacity,
+                command_type,
+            });
+        }
+        let sequence = self.next_sequence;
+        self.next_sequence = self.next_sequence.saturating_add(1);
+        self.entries.push_back(AndroidGatewayOutbound {
+            sequence,
+            kind: AndroidGatewayOutboundKind::Wire,
+            json,
         });
         Ok(())
     }

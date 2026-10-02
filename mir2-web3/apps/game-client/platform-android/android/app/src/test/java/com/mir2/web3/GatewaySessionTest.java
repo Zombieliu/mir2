@@ -328,6 +328,71 @@ public class GatewaySessionTest {
         assertEquals(99, command.getInt("objectId"));
     }
 
+    @Test public void nativeMailWritesUseTheAuthenticatedSocketAndKeepAllSevenPublicShapes() throws Exception {
+        long uid = 9007199254740993L;
+        org.json.JSONArray indices = new org.json.JSONArray().put(uid).put(2).put(0).put(0).put(0);
+        JSONObject[] mail = new JSONObject[]{
+                GatewaySession.object("type","readMail","mailId",uid),
+                GatewaySession.object("type","lockMail","mailId",7,"lock",true),
+                GatewaySession.object("type","collectParcel","mailId",8),
+                GatewaySession.object("type","deleteMail","mailId",9),
+                GatewaySession.object("type","mailCost","gold",4294967295L,"itemsIdx",indices,"stamped",true),
+                GatewaySession.object("type","mailLockedItem","uniqueId",uid,"locked",false),
+                GatewaySession.object("type","sendMail","name","Friend","message","邮件\nhello 👋",
+                        "gold",23,"itemsIdx",indices,"stamped",true)
+        };
+        for (JSONObject command : mail) assertFalse(session.sendAuthenticated(command));
+        connect();
+        for (JSONObject command : mail) assertFalse(session.sendAuthenticated(command));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+        roster();
+        for (JSONObject command : mail) assertFalse(session.sendAuthenticated(command));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+        session.start(7);
+        assertEquals("startGame", commands.poll(3, TimeUnit.SECONDS).getString("type"));
+        for (JSONObject command : mail) assertFalse(session.sendAuthenticated(command));
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        assertNotNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        for (JSONObject expected : mail) {
+            assertTrue(session.sendAuthenticated(expected));
+            JSONObject actual = commands.poll(3, TimeUnit.SECONDS);
+            assertNotNull(actual);
+            assertEquals(expected.toString(), actual.toString());
+            assertFalse(actual.has("account_id"));
+            assertFalse(actual.has("accountId"));
+        }
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        phase(GatewaySession.Phase.STARTING);
+        for (JSONObject command : mail) assertFalse(session.sendAuthenticated(command));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+        session.disconnect("Mail egress fixture end");
+        phase(GatewaySession.Phase.DISCONNECTED);
+        for (JSONObject command : mail) assertFalse(session.sendAuthenticated(command));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void nativeParcelWriterPreservesBothStampChoicesAndAllFiveAttachments() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        assertNotNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        for (boolean stamped : new boolean[]{false,true}) {
+            JSONObject parcel = GatewaySession.object("type","sendMail","name","Recipient","message","body",
+                    "gold",0,"itemsIdx",new org.json.JSONArray().put(5).put(4).put(3).put(2).put(1),"stamped",stamped);
+            assertTrue(session.sendAuthenticated(parcel));
+            JSONObject actual = commands.poll(3, TimeUnit.SECONDS);
+            assertNotNull(actual);
+            assertEquals(stamped, actual.getBoolean("stamped"));
+            assertEquals("[5,4,3,2,1]", actual.getJSONArray("itemsIdx").toString());
+            assertEquals("Recipient", actual.getString("name"));
+            assertEquals(0, actual.getInt("gold"));
+            assertEquals(parcel.toString(), actual.toString());
+        }
+    }
+
     @Test public void forwardsOnlyBoundedAuthoritativeTransactionReceipts() throws Exception {
         connect();
         peer.send("{\"type\":\"packet\",\"packet\":\"StoreItemV2\",\"payload\":{\"requestId\":\"st-1\",\"from\":3,\"to\":9,\"success\":true}}");

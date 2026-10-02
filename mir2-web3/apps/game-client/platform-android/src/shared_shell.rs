@@ -709,6 +709,7 @@ impl Plugin for AndroidSharedShellPlugin {
                     fit_stage.in_set(AndroidStageFit),
                     forward_intents,
                     forward_quest_ui_intents,
+                    forward_native_mail_ui_intents,
                     discard_inactive_player_commands,
                     keep_android_ime_owned_by_host,
                     keyboard,
@@ -2610,6 +2611,84 @@ fn forward_quest_ui_intents(
     }
 }
 
+/// Forward only the seven shared native mail intents, after the existing
+/// authenticated owner and render barriers. Never consume another UI domain.
+fn forward_native_mail_ui_intents(
+    mut shell: ResMut<NativeShellModel>,
+    mut host: ResMut<HostState>,
+    windows: Query<&Window>,
+    lifecycle: Option<Res<crate::android_input::AndroidShellState>>,
+    inventory: Option<Res<mir2_client_bevy::inventory::InventoryModel>>,
+    mut intents: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>>,
+    mut pending: Option<ResMut<mir2_client_bevy::pending_operations::PendingOperations>>,
+    mut gateway: Option<ResMut<crate::gateway_bridge::AndroidGatewayOutboundQueue>>,
+) {
+    let Some(intents) = intents.as_deref_mut() else {
+        return;
+    };
+    if !matches!(shell.screen, Screen::StartingGame | Screen::InGame)
+        || !matches!(host.phase.as_str(), "STARTING" | "IN_GAME")
+    {
+        for intent in intents.drain_mail_intents_bounded(usize::MAX) {
+            if let (Some(pending), Some(key)) = (pending.as_deref_mut(), intent.pending_key()) {
+                pending.release(&key); // Definitely unsent, never a server success.
+            }
+        }
+        return;
+    }
+    // A same-owner scene load or a brief unfocused frame is not a new session.
+    // Keep this bounded UI queue until ready; DataReset clears it on logout.
+    let owner_ready = host.world.as_ref().is_some_and(|world| {
+        host.player.identity().is_some_and(|(_, name)| name == world.player_name)
+    });
+    let ready = shell.screen == Screen::InGame
+        && host.phase == "IN_GAME"
+        && owner_ready
+        && host.pending_world_request.is_none()
+        && host.pending_render_request.is_none()
+        && !host.render_load_active
+        && host.deferred_render_load.is_none()
+        && windows.single().is_ok_and(|window| window.focused)
+        && lifecycle.as_deref().is_some_and(|state| {
+            state.lifecycle == crate::android_input::AndroidLifecycle::Foreground
+                && state.network == crate::android_input::AndroidNetwork::Available
+        });
+    if !ready {
+        return;
+    }
+    for intent in intents.drain_mail_intents_bounded(16) {
+        let accepted = mir2_client_bevy::native_mail_egress::project_native_mail_intent(
+            &intent,
+            inventory.as_deref(),
+        )
+        .ok()
+        .is_some_and(|command| {
+            gateway
+                .as_deref_mut()
+                .is_some_and(|queue| queue.enqueue_native_mail(&command).is_ok())
+        });
+        if accepted {
+            continue;
+        }
+        // Quote/lock replies carry no request ID. Silently dropping an intent
+        // would strand that shared reservation and make a retry ambiguous.
+        // Use the existing connection/DataReset boundary, never invent an ACK.
+        host.reset_gameplay();
+        shell.apply_gateway_event(Event::Disconnect {
+            reason: Some("Mail command could not be sent; reconnect".into()),
+        });
+        intents.clear();
+        if let Some(queue) = gateway.as_deref_mut() {
+            queue.mark_terminal_reset();
+        }
+        crate::mir2_android_gateway_connection_lost();
+        mir2_bevy_runtime::native_ingest::push_native_data_reset();
+        OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
+        send(json!({"type":"disconnect"}));
+        return; // No later member of this drained batch can be sent.
+    }
+}
+
 // Only unsent shared Gateway effects are invalidated. Local option persistence
 // and application effects must survive; this is not a server rollback/receipt.
 fn discard_player_commands(effects: &mut mir2_client_bevy::crystal_ui::overlays::UiEffectQueue) {
@@ -2747,6 +2826,10 @@ mod quest_host_tests;
 #[cfg(test)]
 #[path = "mail_host_tests.rs"]
 mod mail_host_tests;
+
+#[cfg(test)]
+#[path = "mail_egress_tests.rs"]
+mod mail_egress_tests;
 
 #[cfg(test)]
 mod tests {
