@@ -54,14 +54,20 @@ fn enqueue_host_event(queue: &mut VecDeque<Value>, text: &str) {
         .flatten();
     let valid = parsed.as_ref().is_some_and(|value| {
         let snapshot_bytes = value["worldSnapshot"].as_str().map_or(0, str::len);
+        let mail_bytes = large_mail_host_payload_bytes(value);
         snapshot_bytes <= 1024 * 1024
-            && text.len() <= 65536 + 2 * snapshot_bytes
+            && text.len() <= 65536 + 2 * snapshot_bytes + 2 * mail_bytes
             && queue.len() < 32
             && queue
                 .iter()
-                .map(|event| 65536 + event["worldSnapshot"].as_str().map_or(0, str::len))
+                .map(|event| {
+                    65536
+                        + event["worldSnapshot"].as_str().map_or(0, str::len)
+                        + event["envelope"].as_str().map_or(0, str::len)
+                })
                 .sum::<usize>()
                 + snapshot_bytes
+                + value["envelope"].as_str().map_or(0, str::len)
                 + 65536
                 <= 8 * 1024 * 1024
     });
@@ -70,6 +76,29 @@ fn enqueue_host_event(queue: &mut VecDeque<Value>, text: &str) {
     } else {
         queue.clear();
         queue.push_back(json!({"phase":"DISCONNECTED","message":"Invalid or overflowing host event; reconnect"}));
+    }
+}
+
+/// A complete public mailbox gets its own hard byte cap. This only affects
+/// host-envelope residency; the authenticated phase/owner/model gates below
+/// still decide admission. Other event types keep their existing small cap.
+fn large_mail_host_payload_bytes(value: &Value) -> usize {
+    if value["type"] != "gatewayGameplayPacket" {
+        return 0;
+    }
+    let Some(raw) = value["envelope"]
+        .as_str()
+        .filter(|raw| raw.len() <= crate::mail_ingress::MAX_MAIL_PACKET_BYTES)
+    else {
+        return 0;
+    };
+    if serde_json::from_str::<Value>(raw)
+        .ok()
+        .is_some_and(|event| event["type"] == "packet" && event["packet"] == "ReceiveMail")
+    {
+        raw.len()
+    } else {
+        0
     }
 }
 
@@ -120,6 +149,7 @@ pub(crate) struct HostState {
     inventory: crate::inventory_ingress::AndroidInventoryIngress,
     game_shop: crate::game_shop_ingress::AndroidGameShopIngress,
     storage: crate::storage_ingress::AndroidStorageIngress,
+    mail: crate::mail_ingress::AndroidMailIngress,
     npc: crate::npc_ingress::AndroidNpcIngress,
     player: crate::player_ingress::AndroidPlayerIngress,
     pub(crate) quests: crate::quest_ingress::AndroidQuestIngress,
@@ -155,6 +185,7 @@ impl HostState {
         self.inventory.reset();
         self.game_shop.reset();
         self.storage.reset();
+        self.mail.reset();
         self.npc.reset();
         self.player.reset();
         self.quests.reset();
@@ -191,6 +222,10 @@ impl HostState {
             mir2_bevy_runtime::native_ingest::push_native_storage_model,
             mir2_bevy_runtime::native_ingest::push_native_storage_items,
             mir2_bevy_runtime::native_ingest::push_native_storage_patch,
+        );
+        self.mail.flush(
+            mir2_bevy_runtime::native_ingest::push_native_mail_model,
+            mir2_bevy_runtime::native_ingest::push_native_mail_service,
         );
     }
 
@@ -289,6 +324,15 @@ impl HostState {
             return Ok(false);
         }
         self.storage.packet(raw)
+    }
+
+    fn accept_mail_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
+        if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
+            || !matches!(screen, Screen::StartingGame | Screen::InGame)
+        {
+            return Ok(false);
+        }
+        self.mail.packet(raw)
     }
 
     fn accept_skill_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
@@ -1510,23 +1554,29 @@ fn receive(
                 && matches!(model.screen, Screen::StartingGame | Screen::InGame)
             {
                 if let Some(raw) = value["envelope"].as_str() {
-                    if host.accept_skill_packet(model.screen, raw).is_err()
-                        || host.accept_inventory_packet(model.screen, raw).is_err()
-                        || host.accept_player_packet(model.screen, raw).is_err()
-                        || host.accept_chat_packet(model.screen, raw).is_err()
-                        || host.accept_quest_packet(model.screen, raw).is_err()
-                        || host.accept_game_shop_packet(model.screen, raw).is_err()
-                        || host.accept_storage_packet(model.screen, raw).is_err()
-                        || host
-                            .accept_npc_packet(
-                                model.screen,
-                                raw,
-                                player
-                                    .as_deref()
-                                    .is_some_and(|player| player.accepts_npc_service_reply()),
-                            )
-                            .is_err()
-                    {
+                    // Full mailbox packets must not hit unrelated domains'
+                    // 16 KiB guards before the dedicated bounded mail decoder.
+                    let rejected = if crate::mail_ingress::is_mail_packet(raw) {
+                        host.accept_mail_packet(model.screen, raw).is_err()
+                    } else {
+                        host.accept_skill_packet(model.screen, raw).is_err()
+                            || host.accept_inventory_packet(model.screen, raw).is_err()
+                            || host.accept_player_packet(model.screen, raw).is_err()
+                            || host.accept_chat_packet(model.screen, raw).is_err()
+                            || host.accept_quest_packet(model.screen, raw).is_err()
+                            || host.accept_game_shop_packet(model.screen, raw).is_err()
+                            || host.accept_storage_packet(model.screen, raw).is_err()
+                            || host
+                                .accept_npc_packet(
+                                    model.screen,
+                                    raw,
+                                    player
+                                        .as_deref()
+                                        .is_some_and(|player| player.accepts_npc_service_reply()),
+                                )
+                                .is_err()
+                    };
+                    if rejected {
                         host.reset_gameplay();
                         #[cfg(target_os = "android")]
                         crate::world_assets::cancel_packaged_map_atlas_load();
@@ -1864,6 +1914,7 @@ fn receive(
             host.quests.clear_scene();
             host.game_shop.clear_scene();
             host.storage.clear_scene();
+            host.mail.clear_scene();
             if let Some(player) = player.as_deref_mut() {
                 player.request_npc_service_exit();
             }
@@ -1905,6 +1956,7 @@ fn receive(
                         && host.bind_quest_snapshot(raw).is_ok()
                         && host.bind_game_shop_snapshot(raw).is_ok()
                         && host.storage.snapshot(raw).is_ok()
+                        && host.mail.snapshot(raw).is_ok()
                     {
                         projection.ui = ui;
                     } else {
@@ -2063,6 +2115,7 @@ fn receive(
                 // metadata before another character can be selected.
                 host.game_shop.reset();
                 host.storage.reset();
+                host.mail.reset();
                 model.apply_gateway_event(Event::StartGameAck {
                     accepted: false,
                     reason: Some(message),
@@ -2690,6 +2743,10 @@ mod npc_host_tests;
 #[cfg(test)]
 #[path = "quest_host_tests.rs"]
 mod quest_host_tests;
+
+#[cfg(test)]
+#[path = "mail_host_tests.rs"]
+mod mail_host_tests;
 
 #[cfg(test)]
 mod tests {

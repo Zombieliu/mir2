@@ -638,6 +638,109 @@ public class GatewaySessionTest {
         assertTrue(phase(GatewaySession.Phase.DISCONNECTED).characters.isEmpty());
     }
 
+    @Test public void mailMetadataStagesOnlyDuringAuthenticatedSelectedStart() throws Exception {
+        connect();
+        JSONObject payload = GatewaySession.object("mail", new org.json.JSONArray(),
+                "cost", 125, "uniqueId", "77", "locked", true);
+        JSONObject incoming = GatewaySession.object("type", "packet", "packet", "ReceiveMail", "payload", payload);
+        peer.send(incoming.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        roster();
+        peer.send(incoming.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.start(7);
+        assertEquals("startGame", commands.poll(3, TimeUnit.SECONDS).getString("type"));
+        GatewaySession.View startingMail = phase(GatewaySession.Phase.STARTING);
+        assertNull(startingMail.worldSnapshot);
+        for (String packet : new String[]{"ReceiveMail", "MailSendRequest", "MailCost", "MailLockedItem"}) {
+            peer.send(GatewaySession.object("type", "packet", "packet", packet, "payload", payload).toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Missing mail metadata " + packet, raw);
+            JSONObject forwarded = new JSONObject(raw);
+            assertEquals(packet, forwarded.getString("packet"));
+            assertEquals(125, forwarded.getJSONObject("payload").getInt("cost"));
+            assertEquals("77", forwarded.getJSONObject("payload").getString("uniqueId"));
+        }
+        assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
+        for (String unsupported : new String[]{"MailSent", "ParcelCollected", "AdminMail", "Stage5Command"}) {
+            peer.send(GatewaySession.object("type", "packet", "packet", unsupported,
+                    "payload", GatewaySession.object("result", 1, "success", true)).toString());
+            assertNull("Unsupported mail receipt " + unsupported, gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        }
+        assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void mailMetadataSurvivesSameOwnerMapTransitionWithoutBootstrap() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        assertNotNull(phase(GatewaySession.Phase.IN_GAME).worldSnapshot);
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        GatewaySession.View transition = phase(GatewaySession.Phase.STARTING);
+        assertNull(transition.worldSnapshot);
+        for (String packet : new String[]{"ReceiveMail", "MailCost", "MailLockedItem"}) {
+            peer.send(GatewaySession.object("type", "packet", "packet", packet,
+                    "payload", GatewaySession.object("mail", new org.json.JSONArray(),
+                            "data", GatewaySession.object("cost", 321, "uniqueId", "88", "locked", false))).toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Missing transition mail " + packet, raw);
+            assertEquals(packet, new JSONObject(raw).getString("packet"));
+        }
+        assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
+        session.disconnect("Mail fixture end");
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void fullMailMetadataRetains256RowsAndAllFiveAttachments() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        org.json.JSONArray rows = new org.json.JSONArray();
+        for (int id = 1; id <= 256; id++) {
+            org.json.JSONArray items = new org.json.JSONArray();
+            for (int slot = 1; slot <= 5; slot++) {
+                items.put(GatewaySession.object("uniqueId", String.valueOf(id * 10 + slot),
+                        "name", "RedPotion", "count", slot));
+            }
+            rows.put(GatewaySession.object("mailId", String.valueOf(id), "senderName", "NPC",
+                    "message", "邮件正文".repeat(20), "items", items,
+                    "canReply", true, "dateSentBinaryDatetime", "638970336000000000"));
+        }
+        String incoming = GatewaySession.object("type", "packet", "packet", "ReceiveMail",
+                "payload", GatewaySession.object("mail", rows)).toString();
+        int bytes = incoming.getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+        assertTrue(bytes > 16 * 1024 && bytes <= 512 * 1024);
+        peer.send(incoming);
+        String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+        assertNotNull("A complete bounded mailbox must not be dropped", raw);
+        org.json.JSONArray forwarded = new JSONObject(raw).getJSONObject("payload").getJSONArray("mail");
+        assertEquals(256, forwarded.length());
+        assertEquals("256", forwarded.getJSONObject(255).getString("mailId"));
+        for (int i = 0; i < forwarded.length(); i++) {
+            assertEquals(5, forwarded.getJSONObject(i).getJSONArray("items").length());
+        }
+        assertEquals(incoming, raw);
+        assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void oversizedMailServiceKeepsTheExistingSmallPacketLimit() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send(GatewaySession.object("type", "packet", "packet", "MailCost",
+                "payload", GatewaySession.object("cost", 125, "unused", "x".repeat(16 * 1024 + 1))).toString());
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void oversizedMailMetadataTerminatesInsteadOfSilentlyDroppingInbox() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send(GatewaySession.object("type", "packet", "packet", "ReceiveMail",
+                "payload", GatewaySession.object("mail", new org.json.JSONArray(), "body", "x".repeat(512 * 1024 + 1))).toString());
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
+    }
+
     @Test public void storageMetadataStagesOnlyDuringAuthenticatedSelectedStart() throws Exception {
         JSONObject[] metadata = new JSONObject[]{
             GatewaySession.object("type", "packet", "packet", "UserStorage", "payload",

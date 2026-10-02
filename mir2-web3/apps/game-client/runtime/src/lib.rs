@@ -258,6 +258,24 @@ impl Plugin for Mir2NativeSessionBoundaryPlugin {
     }
 }
 
+/// Shared native mailbox/parcel consumers, factored for renderer-free host
+/// integration tests. Uses the same reducers and production lifecycle order;
+/// this plugin introduces no mail command, receipt, or settlement rule.
+pub struct Mir2NativeMailIngressPlugin;
+
+impl Plugin for Mir2NativeMailIngressPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(
+            Update,
+            (ingest_pending_mail_model, ingest_pending_mail_service)
+                .chain()
+                .after(ingest_pending_wallet_patch)
+                .before(ingest_pending_shop_model)
+                .in_set(PendingLifecycleSet::Ingest),
+        );
+    }
+}
+
 /// Map-tile atlas registry. Deliberately SEPARATE from
 /// `RuntimeEntityRenderAtlases` so the entity render path's atlas-layout
 /// retain logic (which evicts layouts not referenced by the entity snapshot)
@@ -1881,6 +1899,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .add_plugins(runtime_default_plugins(&spec))
         .add_plugins((
             Mir2NativeSessionBoundaryPlugin,
+            Mir2NativeMailIngressPlugin,
             additive_material::CrystalAdditiveMaterialPlugin,
             lighting::CrystalMultiplyMaterialPlugin,
             motion::CrystalMoveClockPlugin,
@@ -1946,8 +1965,6 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
             (
                 ingest_pending_inventory_operation_ack,
                 ingest_pending_wallet_patch,
-                ingest_pending_mail_model,
-                ingest_pending_mail_service,
                 ingest_pending_shop_model,
                 ingest_pending_game_shop_info,
                 ingest_pending_game_shop_stock,

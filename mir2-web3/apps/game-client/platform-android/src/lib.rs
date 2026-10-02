@@ -29,6 +29,8 @@ mod item_geometry;
 #[cfg(any(target_os = "android", test))]
 mod live_entity;
 #[cfg(any(target_os = "android", test))]
+mod mail_ingress;
+#[cfg(any(target_os = "android", test))]
 mod map_objects;
 #[cfg(any(target_os = "android", test))]
 mod map_render;

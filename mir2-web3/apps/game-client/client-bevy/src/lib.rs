@@ -45,6 +45,8 @@ pub mod native_chat_ingress;
 #[cfg(feature = "native-player-ui")]
 pub mod native_inventory_ingress;
 #[cfg(feature = "native-player-ui")]
+pub mod native_mail_ingress;
+#[cfg(feature = "native-player-ui")]
 pub mod native_npc_ingress;
 #[cfg(feature = "native-player-ui")]
 pub mod native_player_ingress;

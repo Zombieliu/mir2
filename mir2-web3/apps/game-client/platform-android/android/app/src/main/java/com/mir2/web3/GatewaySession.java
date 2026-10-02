@@ -277,6 +277,7 @@ final class GatewaySession implements AutoCloseable {
         boolean forwardQuestMetadata = worldPending() && isQuestMetadataPacket(packet);
         boolean forwardGameShopMetadata = worldPending() && isGameShopMetadataPacket(packet);
         boolean forwardStorageMetadata = worldPending() && isStorageMetadataPacket(packet);
+        boolean forwardMailMetadata = worldPending() && isMailMetadataPacket(packet);
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -408,7 +409,8 @@ final class GatewaySession implements AutoCloseable {
                 || (forwardNpc && npcGameplayPhase())
                 || (forwardQuestMetadata && worldPending())
                 || (forwardGameShopMetadata && worldPending())
-                || (forwardStorageMetadata && worldPending())) {
+                || (forwardStorageMetadata && worldPending())
+                || (forwardMailMetadata && worldPending())) {
             forwardBounded(envelope, gameplayObserver);
         }
     }
@@ -419,7 +421,11 @@ final class GatewaySession implements AutoCloseable {
 
     private static void forwardBounded(JSONObject envelope, Consumer<String> target) {
         String raw = envelope.toString();
-        if (raw.getBytes(StandardCharsets.UTF_8).length > 16 * 1024) {
+        // A full shared mailbox has up to 256 rows. Only its read-only packet
+        // gets the larger bound; services and every other packet retain 16 KiB.
+        int limit = "packet".equals(envelope.optString("type"))
+                && "ReceiveMail".equals(envelope.optString("packet")) ? 512 * 1024 : 16 * 1024;
+        if (raw.getBytes(StandardCharsets.UTF_8).length > limit) {
             throw new IllegalArgumentException("inbound packet size limit");
         }
         target.accept(raw);
@@ -483,6 +489,13 @@ final class GatewaySession implements AutoCloseable {
         // Public read-only metadata, not a second transfer-receipt channel.
         return packet.equals("UserStorage") || packet.equals("StorageUnlockResult")
                 || packet.equals("StoragePasswordResult") || packet.equals("ResizeStorage");
+    }
+
+    private static boolean isMailMetadataPacket(String packet) {
+        // Read-only lists/server quotes/locks. Anonymous MailSent and
+        // ParcelCollected cannot settle the existing exact receipt channel.
+        return packet.equals("ReceiveMail") || packet.equals("MailSendRequest")
+                || packet.equals("MailCost") || packet.equals("MailLockedItem");
     }
 
     private static boolean isEntityGameplayPacket(String packet) {
