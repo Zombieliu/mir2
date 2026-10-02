@@ -47,6 +47,7 @@ public final class MainActivity extends GameActivity {
     private long editorEpoch;
     private boolean updating, foreground, sensitiveEditor, imeWasVisible, multilineEditor;
     private Boolean networkReportedAvailable;
+    private Runnable previewIngress;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -158,8 +159,10 @@ public final class MainActivity extends GameActivity {
 
     private void connect() {
         if (BuildConfig.UI_PREVIEW) {
-            nativeEvent(GatewaySession.object("type", "uiPreview", "scene",
-                    getIntent().getStringExtra("ui_scene") == null ? "hud" : getIntent().getStringExtra("ui_scene")).toString());
+            String scene = getIntent().getStringExtra("ui_scene");
+            if (scene == null) scene = "hud";
+            nativeEvent(GatewaySession.object("type", "uiPreview", "scene", scene).toString());
+            prepareOfflinePersonalPreview(scene);
             return;
         }
         // Explicit build-time configuration; exported intents cannot override the URL.
@@ -261,6 +264,28 @@ public final class MainActivity extends GameActivity {
         }
     };
 
+    private void prepareOfflinePersonalPreview(String scene) {
+        java.util.List<String> events = OfflinePersonalIngressPreview.events(BuildConfig.UI_PREVIEW, scene);
+        if (events.isEmpty()) return;
+        previewIngress = new Runnable() {
+            private int next;
+            @Override public void run() {
+                if (!BuildConfig.UI_PREVIEW || !foreground) return;
+                if (next == 0) android.util.Log.i("Mir2UiPreview",
+                        "PERSONAL_JNI_OFFLINE_START scene=" + scene + " events=" + events.size());
+                // One bounded event at a time; do not overflow the real 32-entry
+                // JNI inbox with a synthetic 105-row catalogue burst.
+                nativeEvent(events.get(next++));
+                if (next < events.size()) handler.postDelayed(this, 75);
+                else {
+                    android.util.Log.i("Mir2UiPreview", "PERSONAL_JNI_OFFLINE_SENT scene="
+                            + scene + " events=" + next + " NOT_LIVE_NOT_AUTHENTICATED");
+                    previewIngress = null;
+                }
+            }
+        };
+    }
+
     private void hideKeyboard() {
         editing = "";
         editorEpoch = 0;
@@ -306,6 +331,10 @@ public final class MainActivity extends GameActivity {
         foreground = true;
         nativeEvent(GatewaySession.object("type", "lifecycle", "state", "resume").toString());
         handler.post(pump);
+        if (BuildConfig.UI_PREVIEW && previewIngress != null) {
+            handler.removeCallbacks(previewIngress);
+            handler.postDelayed(previewIngress, 1200);
+        }
         if (networkRecoveryPolicy.onForeground(recoveryPolicy.takeReconnectOnStart(),
                 BuildConfig.UI_PREVIEW) == NetworkRecoveryPolicy.Action.CONNECT) connect();
     }
@@ -313,6 +342,7 @@ public final class MainActivity extends GameActivity {
         foreground = false;
         editorBackPolicy.reset();
         handler.removeCallbacks(pump);
+        if (previewIngress != null) handler.removeCallbacks(previewIngress);
         nativeEvent(GatewaySession.object("type", "lifecycle", "state", "pause").toString());
         hideKeyboard();
         if (recoveryPolicy.markStoppedAndShouldDisconnect(BuildConfig.UI_PREVIEW)) {
@@ -324,6 +354,8 @@ public final class MainActivity extends GameActivity {
         super.onStop();
     }
     @Override protected void onDestroy() {
+        if (previewIngress != null) handler.removeCallbacks(previewIngress);
+        previewIngress = null;
         nativeEvent(GatewaySession.object("type", "lifecycle", "state", "destroy").toString());
         nativeGatewayHostStop();
         gatewayHostPolicy.reset();

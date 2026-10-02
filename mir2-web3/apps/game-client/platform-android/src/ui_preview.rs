@@ -33,6 +33,7 @@ pub const SCENES: &[&str] = &[
     "platform",
     "menu",
     "gameshop",
+    "gameshop-jni",
     "npcshop",
     "npcshop-sell",
     "npcshop-repair",
@@ -41,6 +42,8 @@ pub const SCENES: &[&str] = &[
     "bigmap",
     "storage",
     "storage-locked",
+    "storage-jni",
+    "storage-locked-jni",
     "group",
     "guild",
     "trade",
@@ -66,14 +69,80 @@ struct OfflineNpcPreviewReceipt {
     logged: bool,
 }
 
+#[derive(Resource, Default)]
+struct OfflinePersonalJniReceipt {
+    scene: Option<String>,
+    logged: bool,
+}
+
+fn is_personal_jni_preview(scene: &str) -> bool {
+    matches!(scene, "gameshop-jni" | "storage-jni" | "storage-locked-jni")
+}
+
 pub fn install(app: &mut App) {
     app.init_resource::<PreviewRequest>()
         .init_resource::<OfflineNpcPreviewReceipt>()
+        .init_resource::<OfflinePersonalJniReceipt>()
         .add_systems(Update, report_world_render_ready)
         .add_systems(Update, report_owned_hero_mana_visible)
         .add_systems(Update, start_world_render_motion_specimen)
         .add_systems(Update, report_world_render_motion_pose)
-        .add_systems(PostUpdate, (apply, report_npc_preview_consumer).chain());
+        .add_systems(
+            PostUpdate,
+            (apply, report_npc_preview_consumer, report_personal_jni_consumer).chain(),
+        );
+}
+
+fn personal_jni_models_received(
+    scene: &str,
+    shop: &mir2_client_bevy::game_shop::GameShopModel,
+    storage: &mir2_client_bevy::storage::StorageModel,
+    ui: &UiReadModel,
+) -> bool {
+    is_personal_jni_preview(scene)
+        && ui.player.name.as_deref() == Some("OFFLINE JAVA JNI")
+        && ui.player.gold == 777
+        && ui.player.credit == 33
+        && shop.items.len() == 105
+        && shop.items.first().is_some_and(|item| item.game_shop_index == 2000
+            && item.item_name == "JNI received 001")
+        && shop.items.last().is_some_and(|item| item.game_shop_index == 2104
+            && item.item_name == "JNI received 105" && item.stock_level == 3)
+        && storage.size == 160
+        && storage.has_expanded
+        && storage.has_password
+        && storage.unlocked == (scene != "storage-locked-jni")
+        && storage.expiry == 635000000000000000
+        && storage.items.len() == 160
+        && storage.items.first().is_some_and(|item| item.slot == 0
+            && item.unique_id == Some(90000) && item.name == "JNI storage 000")
+        && storage.items.last().is_some_and(|item| item.slot == 159
+            && item.unique_id == Some(90159) && item.name == "JNI storage 159"
+            && item.quantity == 5)
+}
+
+fn report_personal_jni_consumer(
+    mut receipt: ResMut<OfflinePersonalJniReceipt>,
+    host: Res<crate::shared_shell::HostState>,
+    state: Res<NativePlayerUiState>,
+    ui: Res<UiReadModel>,
+    shop: Res<mir2_client_bevy::game_shop::GameShopModel>,
+    storage: Res<mir2_client_bevy::storage::StorageModel>,
+) {
+    let Some(scene) = receipt.scene.as_deref() else { return; };
+    if receipt.logged || host.phase != "IN_GAME"
+        || state.core.panel != preview_panel_for_scene(scene)
+        || !personal_jni_models_received(scene, &shop, &storage, &ui) {
+        return;
+    }
+    // Exact Java-only sentinels observed after the production JNI inbox, owner
+    // projection and shared consumers. Not TLS/auth, a GPU-frame or an operation.
+    info!(scene, catalogue = shop.items.len(), last_g_index = 2104,
+        last_stock = 3, storage_items = storage.items.len(), storage_size = storage.size,
+        last_slot = 159, unlocked = storage.unlocked, has_password = storage.has_password,
+        icon_width = storage.items[0].icon_width, icon_height = storage.items[0].icon_height,
+        "ANDROID_PERSONAL_JNI_SHARED_CONSUMER_NOT_LIVE");
+    receipt.logged = true;
 }
 
 fn report_npc_preview_consumer(
@@ -637,6 +706,10 @@ fn apply(world: &mut World) {
         let mut receipt = world.resource_mut::<OfflineNpcPreviewReceipt>();
         receipt.scene = None;
         receipt.logged = false;
+        world.init_resource::<OfflinePersonalJniReceipt>();
+        let mut personal = world.resource_mut::<OfflinePersonalJniReceipt>();
+        personal.scene = None;
+        personal.logged = false;
         // UI fixtures are not Gateway events and do not invoke auth/StartGame.
         let mut shell = NativeShellModel::default();
         shell.screen = match scene.as_str() {
@@ -695,6 +768,16 @@ fn apply(world: &mut World) {
     }
     if scene == "help" {
         state.help.open = true;
+    }
+    if is_personal_jni_preview(&scene) {
+        // Do not seed catalogue, storage, wallet, inventory or world data.
+        // The separate Java preview sends bounded server-shaped inputs through
+        // nativeEvent; normal APK/network authorization remains unchanged.
+        let mut receipt = world.resource_mut::<OfflinePersonalJniReceipt>();
+        receipt.scene = Some(scene.clone());
+        receipt.logged = false;
+        info!("ANDROID_UI_PREVIEW_READY scene={scene} waiting_for_offline_java_jni");
+        return;
     }
     let mut model = world.resource_mut::<UiReadModel>();
     model.player.name = Some("OFFLINE UI FIXTURE".into());
@@ -812,10 +895,10 @@ fn preview_panel_for_scene(scene: &str) -> UiPanel {
         "options" => UiPanel::Options,
         "platform" => UiPanel::PlatformSettings,
         "menu" => UiPanel::Menu,
-        "gameshop" => UiPanel::GameShop,
+        "gameshop" | "gameshop-jni" => UiPanel::GameShop,
         "mail" | "mail-compose" => UiPanel::Mail,
         "bigmap" => UiPanel::BigMap,
-        "storage" | "storage-locked" => UiPanel::Storage,
+        "storage" | "storage-locked" | "storage-jni" | "storage-locked-jni" => UiPanel::Storage,
         "group" => UiPanel::Group,
         "guild" => UiPanel::Guild,
         "trade" => UiPanel::Trade,
@@ -1107,6 +1190,9 @@ fn offline_npc_ingress_messages(scene: &str) -> Result<Vec<OfflineNpcMessage>, &
 }
 
 fn populate_specimens(world: &mut World, scene: &str) {
+    if is_personal_jni_preview(scene) {
+        return; // never overwrite actual JNI-delivered shared models
+    }
     if matches!(scene, "chat" | "chat-settings") {
         if let Ok(lines) = offline_received_chat_lines() {
             // Queue each server-shaped line once, never both prefill ChatModel
@@ -1717,7 +1803,46 @@ mod tests {
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 44);
+        assert_eq!(SCENES.len(), 47);
+    }
+
+    #[test]
+    fn java_jni_personal_scenes_register_the_received_panel() {
+        for (scene, panel) in [
+            ("gameshop-jni", UiPanel::GameShop),
+            ("storage-jni", UiPanel::Storage),
+            ("storage-locked-jni", UiPanel::Storage),
+        ] {
+            assert!(SCENES.contains(&scene));
+            assert_eq!(preview_panel_for_scene(scene), panel);
+        }
+    }
+
+    #[test]
+    fn java_jni_personal_scenes_never_replace_received_models_with_manual_specimens() {
+        use mir2_client_bevy::{game_shop::{GameShopEntry, GameShopModel}, storage::StorageModel};
+        for scene in ["gameshop-jni", "storage-jni", "storage-locked-jni"] {
+            let mut world = World::new();
+            world.init_resource::<mir2_client_bevy::social::SocialModel>();
+            world.insert_resource(GameShopModel {
+                items: vec![GameShopEntry {game_shop_index:8801,item_name:"Received sentinel".into(),..default()}],
+                ..default()
+            });
+            world.insert_resource(StorageModel {size:160,has_password:true,unlocked:false,..default()});
+            let mut host = crate::shared_shell::HostState::default();
+            host.phase = "DISCONNECTED".into();
+            world.insert_resource(host);
+            world.insert_resource(crate::AndroidGatewayTransportEnabled(false));
+            populate_specimens(&mut world, scene);
+            let shop = world.resource::<GameShopModel>();
+            assert_eq!(shop.items.len(), 1, "JNI scene must not synthesize catalogue entries");
+            assert_eq!(shop.items[0].game_shop_index, 8801);
+            let storage = world.resource::<StorageModel>();
+            assert_eq!(storage.size, 160);
+            assert!(storage.has_password && !storage.unlocked);
+            assert_eq!(world.resource::<crate::shared_shell::HostState>().phase, "DISCONNECTED");
+            assert!(!world.resource::<crate::AndroidGatewayTransportEnabled>().0);
+        }
     }
 
     #[test]
