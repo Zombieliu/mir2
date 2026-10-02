@@ -1,5 +1,12 @@
 # Crystal Server Parity
 
+> 2026-10-02 custom-rule boundary: the user requested Poisoning to use carried
+> poison without equipping. Equipped, then bag, then belt selection is shared
+> by admission, colour and debit; rejected casts preserve supplies. This
+> explicitly differs from the previous Crystal equipped-only rule and does
+> not extend to other spells. Fourteen focused/adjacent server checks pass;
+> deployment remains pending. [Evidence](POISONING-CARRIED-POISON-RULE-20261002.md).
+
 > 2026-10-02 ordered combat handoff: earlier movement is canceled even when
 > combat admission rejects for cooldown; fresh later movement remains valid.
 > Owner transform receipts reconcile retired client prediction. Selected Zone

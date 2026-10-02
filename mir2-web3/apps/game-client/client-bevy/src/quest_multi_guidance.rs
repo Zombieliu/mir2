@@ -443,7 +443,7 @@ pub(super) fn render_supplies(parent: &mut ChildSpawnerCommands, state: &QuestUi
             line(card, format!("背包负重 {weight}/{max}"), if weight >= max { FEEDBACK_ERR } else { PANEL_TEXT });
         }
         if supplies.bag_full { line(card, "背包已满，可先出售闲置物品。", FEEDBACK_ERR); }
-        if supplies.needs_material_switch { line(card, "火符/召唤用符；施毒用毒粉。", PANEL_TEXT); }
+        if supplies.needs_taoist_material_guidance { line(card, "火符/召唤装备符；施毒可用携带毒粉。", PANEL_TEXT); }
         for vendor in crate::quest_supplies::SupplyVendor::ALL {
             if state.supply_vendor.is_some() { break; }
             if vendor == crate::quest_supplies::SupplyVendor::Poison

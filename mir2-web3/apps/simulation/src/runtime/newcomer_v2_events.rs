@@ -199,29 +199,18 @@ pub(in crate::runtime) fn refresh_state_conditions(world: &mut World) -> Vec<Ser
     if eligible_equipment(world, EquipmentSlot::Armour) {
         conditions.push("eligibleClassArmourEquipped".into());
     }
-    // Use the same material admission as actual casts; no bag-only substitute.
-    let inventory = world.resource::<InventoryResource>();
+    // Poisoning's custom bag/belt rule uses exactly the actual cast selector.
     let usable_poison = super::super::skills::crystal_spell_required_items_available(
         world,
         mir2_protocol::Spell::Poisoning,
-    ) || inventory.inventory_items.iter().any(|item| {
-        item.quantity > 0
-            && super::super::items::crystal_item_template_for_dynamic_key(&item.key).is_some_and(
-                |template| {
-                    template.item_type == super::super::crystal_compat::CRYSTAL_ITEM_TYPE_AMULET
-                        && matches!(template.shape, 1 | 2)
-                        && super::super::items::crystal_item_requirement_rejection_key(
-                            world, inventory, &template,
-                        )
-                        .is_none()
-                },
-            )
-    });
+    );
     if super::super::skills::crystal_spell_required_items_available(
         world,
         mir2_protocol::Spell::SoulFireBall,
     ) && usable_poison
     {
+        // Retain the authored condition key for existing quest saves. Player
+        // instructions now explain direct bag/belt Poisoning consumption.
         conditions.push(
             "eligible Amulet equipped and legal poison available in bag for re-equip between casts"
                 .into(),

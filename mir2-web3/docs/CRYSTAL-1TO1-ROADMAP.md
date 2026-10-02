@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 explicit custom Poisoning rule: bag/belt poison can be consumed
+> directly, with equipped poison retaining priority and the same deterministic
+> stack selecting colour and debit. Other spell materials remain unchanged.
+> 28 focused/adjacent server and client checks pass, including ordinary Gateway
+> inventory receipts and carried/equipped guidance in all nine languages. This is user-requested
+> customization, not Crystal parity or live acceptance. [Evidence](POISONING-CARRIED-POISON-RULE-20261002.md).
+
 > 2026-10-02 future native package default: retain the 15 journey maps and add
 > ten audited Bichon merchant interiors. Profile checks preserve explicit
 > custom lists and bind the reviewed 25-map identity. This is packaging input
