@@ -1,0 +1,106 @@
+{
+  "source": "ef5e56d1c8e51abd1fad3ee79be9a4ce1aa604e4",
+  "versionCode": 23,
+  "distinctPids": 6,
+  "entries": [
+    {
+      "directory": "device",
+      "scene": "debug-login",
+      "pid": 14109,
+      "log": "raw/v23/device/debug-login-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": []
+    },
+    {
+      "directory": "device",
+      "scene": "quests-ingress",
+      "pid": 14187,
+      "log": "raw/v23/device/quests-ingress-pid.log",
+      "gl506": 7,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 12:21:27.337 14187 14209 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"quests-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = false;"
+      ]
+    },
+    {
+      "directory": "device",
+      "scene": "npc-ingress",
+      "pid": 14258,
+      "log": "raw/v23/device/npc-ingress-pid.log",
+      "gl506": 20,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 12:21:32.126 14258 14281 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"npc-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = true;"
+      ]
+    },
+    {
+      "directory": "touch-device",
+      "scene": "quests-ingress",
+      "pid": 14369,
+      "log": "raw/v23/touch-device/quests-ingress-after-pid.log",
+      "gl506": 8,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 12:22:52.704 14369 14391 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"quests-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = false;"
+      ]
+    },
+    {
+      "directory": "touch-device",
+      "scene": "npc-ingress",
+      "pid": 14453,
+      "log": "raw/v23/touch-device/npc-ingress-after-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 12:22:58.804 14453 14476 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"npc-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = true;"
+      ]
+    },
+    {
+      "directory": "detail-device",
+      "scene": "detail-only",
+      "pid": 14582,
+      "log": "raw/v23/detail-device/detail-only-pid.log",
+      "gl506": 3,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 12:26:27.879 14582 14608 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"quests-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = false;"
+      ]
+    }
+  ],
+  "gl506": 38,
+  "logCounting": "One latest cumulative log per distinct PID, canonical event only; no before/after or diary/pair/detail double count",
+  "originalFramesInspectedByPrimary": 10,
+  "screenshotObservations": {
+    "normalLogin": "Empty credentials; Test server not configured",
+    "questRowTap": "PASS bounded actual row opens the shared detail at the new screen position",
+    "protectedWidePhoneChrome": "PASS bounded diary, pair and independent detail leave HP/MP, all six belt targets, chat and thumb controls visible and separate",
+    "independentDetailLifetime": "PASS bounded actual shared diary Close leaves detail visible and protected HUD lane retained",
+    "npcExit": "PASS bounded actual shared Exit hides dialogue and restores default HUD/control presentation",
+    "questPhoneReadability": "FAIL: diary/body/footer/rewards still too small or dark, targets below phone-size; common workspace fitting is not reflow"
+  },
+  "zeroErrorRendererGate": "FAIL",
+  "gpuRendererFixThisLeaf": false,
+  "fullPhoneUiGate": "FAIL",
+  "compactImeSidebarAcceptance": false,
+  "olderV22Gl506": 67,
+  "olderV21Gl506": 33,
+  "olderV20Gl506": 73,
+  "olderV19Gl506": 135,
+  "olderEvidenceUnchanged": true,
+  "actualJavaJniAuthenticatedQuest": false,
+  "questOrRewardSuccess": false,
+  "realHttpsWss": false,
+  "zoneSave": false,
+  "fullPhoneUiAccepted": false,
+  "completeResourcesAccepted": false,
+  "physicalDeviceAccepted": false,
+  "wholeGoal": "Active",
+  "next": "Readable phone reflow, minimum 48dp controls, explicit scrolling/paging; bounded framebuffer diagnosis and full NI-11-20, real network and physical gates remain"
+}

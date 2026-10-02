@@ -1,5 +1,21 @@
 # Android native host ingress audit
 
+> 2026-10-02 Android exactef5e56/v23 protected quest workspace checkpoint
+>
+> Only four Android files change; shared renderer/controllers/rules and Windows
+> stay unchanged. 38 committed inputs/clean dual diagnostics/selected resources/
+> installed hashes pass;325/348/shared1230+10existing ignored/fresh Java41+41/
+> actual API31 pass. Compiled occlusion regression0/1 red then1/1 green. Actual
+> row/diary Close retains independent detail; diary/pair/detail leave HUD, six
+> belt targets, chat and both thumbs visible. NPC Exit restores normal layout.
+> Ten original frames inspected/147 raw artifacts; six PIDs38 GL506 still FAIL,
+> fonts/48dp/full phone reflow FAIL, compact/IME not accepted. All old failures
+> retained. Next readable reflow/scroll, bounded GPU and full NI-11–20. No real
+> JNI/login/quest rewards/Zone/save/full resources/device/backend/global pass.
+> Whole Windows-alignment goal stays Active; original checkouts preserved.
+> [Exact v23 and remaining failures](generated/player-qa/native-android-quest-workspace-20261002/README.md).
+
+
 > 2026-10-02 Android exactafea4b/v22 shared quest focus checkpoint
 >
 > Both clean diagnostics/37 inputs/selected resources/installed hashes pass;

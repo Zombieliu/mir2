@@ -1,5 +1,17 @@
 # Android 对齐当前 Windows 完整度 goal
 
+2026-10-02 最新实际v23：干净`ef5e56d1c8e51abd1fad3ee79be9a4ce1aa604e4`，
+仅四个Android文件复用共享任务/现有sidebar，无Windows或规则改动。双诊断包/
+38输入/选定资源/安装hash通过；325/348、shared1230+10原ignored、fresh Java
+41+41/实际API31通过，遮挡回归先编译0/1红再1/1绿。实际点行/日志Close保留
+独立明细，三种窗态让HUD、六belt、chat和双拇指区可见；NPC Exit恢复正常。
+十张原图已查看/147原始证据，六PID仍38 GL506，字体/48dp/完整手机UI与零错误
+渲染FAIL；compact/IME未验收，旧失败保留。下一叶真实手机重排/滚动、有界GPU、
+完整NI-11–20；在线/完整资源/真机仍OPEN，完整Windows分母/goal Active不变。
+[精确v23、实际关闭生命周期与剩余失败](generated/player-qa/native-android-quest-workspace-20261002/README.md)。
+
+下文v22及更早仍按其历史源码/验收范围保留，不重绑旧包或抹除失败。
+
 2026-10-02 最新实际v22：干净`afea4b358680bb1d1a2ec8362ca6ffb538c6d648`
 双原生诊断包/37源码输入/6647 PNG+三metadata/安装hash通过；320/343、共享1230
 +10原ignored、fresh Java41+41/实际API31两变体通过。仅两共享面板标记改public，
@@ -378,7 +390,7 @@ PR #253 保持独立 Draft；不自动改 base、不合并 PR。分阶段验证�
 ## 6. 外部验收材料（不阻止其余安全代码工作）
 
 - Android 真实联网需获准的测试 Gateway（WSS/相关 HTTPS）、服务器版本和
-  普通测试账号。最新已安装v22两种诊断包明确为空地址，uiPreview 禁止联网。
+  普通测试账号。最新已安装v23两种诊断包明确为空地址，uiPreview 禁止联网。
   Windows 报告存在 `/playtest/ws` 不自动构成本轮访问/数据写入许可。
 - 凭据由用户在本地输入；不得从其他工作区、日志或旧文件搜密码/令牌。
 - 完整、获准的资源来源/版本仍需核对；现有 proof pack 不算正式完整共享包。
