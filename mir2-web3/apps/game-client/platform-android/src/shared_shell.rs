@@ -136,6 +136,13 @@ pub(crate) struct HostState {
 }
 
 impl HostState {
+    /// Physical Android presentation insets, including the active IME. Keep
+    /// host fields private; the UI caller converts density exactly once.
+    pub(crate) fn quest_presentation_insets(&self) -> Vec4 {
+        Vec4::new(self.safe_left, self.safe_top, self.safe_right,
+            self.safe_bottom + self.ime_bottom)
+    }
+
     fn reset_personal(&mut self) {
         self.chat.reset();
         self.skills.reset();
@@ -641,6 +648,7 @@ impl Plugin for AndroidSharedShellPlugin {
         crate::ground_labels::install(app);
         crate::mobile_ui::install(app);
         crate::phone_hud::install(app);
+        crate::phone_quests::install(app);
         crate::scene_effects::install(app);
     }
 }
@@ -3473,6 +3481,39 @@ mod tests {
                 }
             }
         }
+    }
+
+    #[test]
+    fn phone_focus_expands_the_actual_shared_quest_panel_without_rewriting_it() {
+        use mir2_client_bevy::quest_ui::*;
+        let mut app = App::new();
+        let mut shell = NativeShellModel::default();
+        shell.screen = Screen::InGame;
+        app.insert_resource(HostState::default())
+            .insert_resource(shell)
+            .insert_resource(mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState::default())
+            .insert_resource(mir2_client_bevy::quest_model::NpcDialogModel::default())
+            .insert_resource(UiScale(1.0))
+            .insert_resource(mir2_client_bevy::crystal_ui::hud::CrystalBeltPresentation::default())
+            .add_systems(PostUpdate, fit_stage.in_set(AndroidStageFit));
+        crate::phone_quests::install(&mut app);
+        app.world_mut().spawn(Window {
+            resolution: bevy::window::WindowResolution::new(1600, 720),
+            ..default()
+        });
+        app.world_mut().spawn((QuestUiRoot, Node::default()));
+        let diary = app.world_mut().spawn((QuestLogPanel, UiTransform::default(), Node {
+            position_type: PositionType::Absolute,
+            left: px(QUEST_DIARY_DESIGN_LEFT), top: px(QUEST_DIARY_DESIGN_TOP),
+            width: px(QUEST_DIARY_DESIGN_WIDTH), height: px(QUEST_DIARY_DESIGN_HEIGHT),
+            display: Display::Flex, ..default()
+        })).id();
+        app.update();
+        assert!(app.world().get::<UiTransform>(diary).unwrap().scale.x > 1.2,
+            "The shared quest panel is still only scaled as part of the desktop canvas");
+        let node = app.world().get::<Node>(diary).unwrap();
+        assert_eq!(node.left, px(QUEST_DIARY_DESIGN_LEFT));
+        assert_eq!(node.width, px(QUEST_DIARY_DESIGN_WIDTH));
     }
 
     #[test]

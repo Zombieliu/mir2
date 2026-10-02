@@ -1110,10 +1110,10 @@ struct NativeControlHintPanel;
 struct NativeQuickBagPanel;
 
 #[derive(Component)]
-struct QuestLogPanel;
+pub struct QuestLogPanel;
 
 #[derive(Component)]
-struct QuestDetailPanel;
+pub struct QuestDetailPanel;
 
 #[derive(Component)]
 struct NpcQuestListPanel;
