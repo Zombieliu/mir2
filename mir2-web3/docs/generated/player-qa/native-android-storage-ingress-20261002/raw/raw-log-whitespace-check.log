@@ -1,0 +1,17 @@
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/bound-java-full.log:2: trailing whitespace.
++Daemon will be stopped at the end of the build 
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/bound-runtime.log:312: new blank line at EOF.
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/bound-rust-normal.log:1324: new blank line at EOF.
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/bound-rust-preview.log:1427: new blank line at EOF.
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/bound-shared-native-player.log:1901: new blank line at EOF.
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/full-runtime.log:314: new blank line at EOF.
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/full-rust-normal.log:1322: new blank line at EOF.
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/full-rust-preview.log:1428: new blank line at EOF.
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/full-shared-native-player.log:1902: new blank line at EOF.
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/java-green-correct-task.log:2: trailing whitespace.
++Daemon will be stopped at the end of the build 
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/java-green-full.log:2: trailing whitespace.
++Daemon will be stopped at the end of the build 
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/java-red.log:2: trailing whitespace.
++Daemon will be stopped at the end of the build 
+mir2-web3/docs/generated/player-qa/native-android-storage-ingress-20261002/raw/rust-storage-targeted.log:995: new blank line at EOF.

@@ -1,0 +1,5 @@
+{
+  "exitCode": 2,
+  "reason": "Original raw command logs include trailing whitespace/blank EOF. Preserve bytes; run formatting check excluding only exact raw directory and verify manifest hashes. Evidence preparation, not product test failure.",
+  "rawModified": false
+}

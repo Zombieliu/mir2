@@ -1,5 +1,25 @@
 # Android 对齐当前 Windows 完整度 goal
 
+2026-10-02 最新源码叶 NI-13：`81eb08cdca3390262e1eff3756afd4d09a16d005`。
+六个源文件接通共享仓库只读投影、Android 角色专属有界 FIFO，以及 Java 公共四包
+白名单：UserStorage/StorageUnlockResult/StoragePasswordResult/ResizeStorage。
+十个函数体 token 保留冻结 Windows `3d735745f`；槽位/当前数量图标复用既有
+共享 helper，Android 仅补包内几何。160 格/稀疏159槽、内容只更新 items、锁定/密码/
+扩展结果、启动拒绝、角色切换、切场、背压与溢出终止批次的源码夹具通过。
+两项 Java 编译后红→绿已保留；基线比较与错误变体任务名属于检查准备失败，单独记录。
+精确提交新鲜359/384、shared1260+10原ignored、runtime292+1原ignored、
+强制fresh Java47+47（每变体五类）、实际 API31 arm64 双检查通过，七门前后六输入一致。
+旧仓库规则、精确存取回执通道、原生 critical 队列、Windows/认证/渲染未改；原两工作区
+HEAD/分支/status未变，不宣称未跟踪内容递归哈希。此前商城/证据已核验发布600d8374a，
+PR253仍Draft；本叶待正常发布。完整分母仍冻结3d735745f，不随远端6ae080711回指降级。
+没有新 APK、实际 Java→JNI/仓库画面/在线存取/密码操作或真机验收；v30旧包不重绑。
+NI-13整体仍PARTIAL、完整goal Active；渲染零错误门仍FAIL，完整UI/NI-12购买Mail/
+NI-14–20/认证/Zone/存档/完整资源/音频/更新/真机仍OPEN。
+[NI-13精确源码、原始失败与未完成门](generated/player-qa/native-android-storage-ingress-20261002/README.md)。
+下一阶段补 NI-12/13 精确包、实际宿主和模拟器验证，并继续完整矩阵，不以源码叶替代整套对齐。
+
+下文 NI-12/v30 及更早为各自历史源码和验收，不覆盖本叶。
+
 2026-10-02 最新源码叶 NI-12：`92033b910cc9ddd996c416ec4024af4625e78b31`。
 六个源文件接通 Java 公共商城元数据白名单、Android 角色绑定/有界 FIFO、共享
 GameShopInfo/Stock 投影；两投影与四标量 helper 的函数体 token 和冻结 Windows

@@ -1,0 +1,51 @@
+{
+  "createdAt": "2026-10-02T14:41:26.204Z",
+  "source": "81eb08cdca3390262e1eff3756afd4d09a16d005",
+  "parent": "600d8374a22e712c3e4f56c96525dd323b8efba8",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "goalStatus": "Active",
+  "fullNI13Status": "PARTIAL",
+  "sourceLeafPassed": true,
+  "newApkBuilt": false,
+  "actualJniVerified": false,
+  "visibleUiVerified": false,
+  "onlineVerified": false,
+  "physicalDeviceVerified": false,
+  "rendererFixed": false,
+  "wholeGoalComplete": false,
+  "boundGateLabels": [
+    "bound-rust-normal",
+    "bound-rust-preview",
+    "bound-shared-native-player",
+    "bound-runtime",
+    "bound-api31-normal",
+    "bound-api31-preview",
+    "bound-java-full"
+  ],
+  "passed": {
+    "androidNormal": 359,
+    "androidPreview": 384,
+    "shared": 1260,
+    "sharedExistingIgnored": 10,
+    "runtime": 292,
+    "runtimeExistingIgnored": 1,
+    "java": [
+      47,
+      47
+    ],
+    "api31": [
+      "normal",
+      "ui-preview"
+    ]
+  },
+  "rootCause": "Android lacked public Storage forwarding and owner-bound producer; two compiled TLS regression cases failed before fixing six files.",
+  "publicMetadata": [
+    "UserStorage",
+    "StorageUnlockResult",
+    "StoragePasswordResult",
+    "ResizeStorage"
+  ],
+  "transferReceipts": "Existing correlated V2 channel unchanged, not duplicated into new metadata path.",
+  "backpressure": "Bounded exact FIFO retry; overflow calls existing host disconnect/DataReset, no transfer request replay.",
+  "next": "Exact NI-12/13 APK/actual host/emulator evidence plus all remaining full Windows matrix gates."
+}

@@ -1,5 +1,26 @@
 # Android native host ingress audit
 
+> 2026-10-02 最新源码叶 NI-13：`81eb08cdca3390262e1eff3756afd4d09a16d005`。
+> 六个源文件接通共享仓库只读投影、Android 角色专属有界 FIFO，以及 Java 公共四包
+> 白名单：UserStorage/StorageUnlockResult/StoragePasswordResult/ResizeStorage。
+> 十个函数体 token 保留冻结 Windows `3d735745f`；槽位/当前数量图标复用既有
+> 共享 helper，Android 仅补包内几何。160 格/稀疏159槽、内容只更新 items、锁定/密码/
+> 扩展结果、启动拒绝、角色切换、切场、背压与溢出终止批次的源码夹具通过。
+> 两项 Java 编译后红→绿已保留；基线比较与错误变体任务名属于检查准备失败，单独记录。
+> 精确提交新鲜359/384、shared1260+10原ignored、runtime292+1原ignored、
+> 强制fresh Java47+47（每变体五类）、实际 API31 arm64 双检查通过，七门前后六输入一致。
+> 旧仓库规则、精确存取回执通道、原生 critical 队列、Windows/认证/渲染未改；原两工作区
+> HEAD/分支/status未变，不宣称未跟踪内容递归哈希。此前商城/证据已核验发布600d8374a，
+> PR253仍Draft；本叶待正常发布。完整分母仍冻结3d735745f，不随远端6ae080711回指降级。
+> 没有新 APK、实际 Java→JNI/仓库画面/在线存取/密码操作或真机验收；v30旧包不重绑。
+> NI-13整体仍PARTIAL、完整goal Active；渲染零错误门仍FAIL，完整UI/NI-12购买Mail/
+> NI-14–20/认证/Zone/存档/完整资源/音频/更新/真机仍OPEN。
+> [NI-13精确源码、原始失败与未完成门](generated/player-qa/native-android-storage-ingress-20261002/README.md)。
+> 下一阶段补 NI-12/13 精确包、实际宿主和模拟器验证，并继续完整矩阵，不以源码叶替代整套对齐。
+>
+> 下文 NI-12/v30 及更早为各自历史源码和验收，不覆盖本叶。
+>
+
 > 2026-10-02 最新源码叶 NI-12：`92033b910cc9ddd996c416ec4024af4625e78b31`。
 > 六个源文件接通 Java 公共商城元数据白名单、Android 角色绑定/有界 FIFO、共享
 > GameShopInfo/Stock 投影；两投影与四标量 helper 的函数体 token 和冻结 Windows
@@ -267,7 +288,7 @@ still missing. Neither label is an online acceptance result.
 | NI-10 | Quest/NPC gameplay bridge | PARTIAL: frozen tracker/detail/rewards/history/dialog/nearby and exact-ACK lifecycle from ccdd51a90 are included in v30. Historical twenty-five-body equivalence and wider Mac failures remain bound to their original inputs. V24 diary/detail reflow and v29 confirmation/alert are retained. Current source2c9ad6f96 v30 adds optional shared phone NPC list, eight reachable rows, independent list/message scroll, 14/16dp text and 18 controls≥48dp; 327/352/shared1254+10existing ignored/fresh Java41+41/API31 gates pass. Actual unselected Finish/alert/OK, quest2/8 selection, both viewport directions, reward B selection, same-PID resume and Leave stay-closed pass only offline; 26 original frames inspected. Separate received offline diary baseline is not authenticated receipt, and no reward grant is accepted. Compiled0/3 red, introduced23/1 modal regression and inventory-count maintenance failure are retained; final phone24/24. Five PIDs38 GL506 keep renderer FAIL. Full actions/routes/Help/localization/compact/IME/multitouch/authenticated JNI/online rewards/device remain OPEN. [Ingress](generated/player-qa/native-android-quest-ingress-20261002/README.md), [v20 failures](generated/player-qa/native-android-quest-preview-20261002/README.md), [v21 Exit](generated/player-qa/native-android-npc-exit-20261002/README.md), [v24 reflow](generated/player-qa/native-android-quest-reflow-20261002/README.md), [v29 modal scope](generated/player-qa/native-android-quest-modal-20261002/README.md), [v30 NPC scope](generated/player-qa/native-android-npc-quests-20261002/README.md) |
 | NI-11 | `push_native_shop_model` / `push_native_npc_shop_service` | PARTIAL: frozen3d735745f shared projection/Java six-packet owner+scene gate/Android FIFO are wired and included unchanged in v30. Twelve extracted bodies, cross-frame pending/order/Exit/CloseWindows/map/terminal/bounds source gates and six focused Mac Windows checks passed in their historical source leaf; wider19/6 failures remain, not a full Windows gate. V19 installed diagnostic evidence includes a visible approved item and actual Buy/Sell/Repair/SRepair close taps; v29/v30 did not retest those service taps. No actual authenticated JNI, online purchase/sale/repair complete receipts, physical-device or complete phone service acceptance. [Ingress/source](generated/player-qa/native-android-npc-ingress-20261002/README.md), [v19 bounded taps](generated/player-qa/native-android-npc-touch-20261002/README.md), [v30 package/current limits](generated/player-qa/native-android-npc-quests-20261002/README.md) |
 | NI-12 | `push_native_game_shop_info` / stock / receipt | PARTIAL: source92033b910 adds exact frozen Windows public catalog/stock projections, selected-Start Java whitelist and bounded Android owner/FIFO producer. Six function bodies preserve token equivalence; 105-row+105-stock, stock-before-info, owner/scene/reset/terminal/backpressure fixtures and shared runtime catalog/receipt gates pass. Android343/368/shared1257+10existing ignored/runtime292+1existing ignored/fresh Java44+44/API31 pass; original two compiled Java failures and separate check-preparation failure retained. Legacy purchase rules and native critical/receipt queues unchanged. No new APK/UI/JNI/live catalog/price/image parity, purchase/Credit/Mail settlement or physical acceptance; do not relabel the installed v30 package. Full NI-12 stays PARTIAL. [Source evidence and open gates](generated/player-qa/native-android-game-shop-ingress-20261002/README.md) |
-| NI-13 | `push_native_storage_model` / items / patch | PARTIAL: exact StoreItemV2/TakeBackItemV2 request receipts exist; contents, lock/password/expansion transitions and model refresh remain OPEN |
+| NI-13 | `push_native_storage_model` / items / patch | PARTIAL: source81eb08cdc adds ten exact frozen Windows pure bodies plus existing shared slot/current-count metadata delegation, four-packet Java public whitelist and bounded owner/FIFO Storage producer. 160/sparse slots, model-versus-items, password/expansion results, rejected Start, owner/map/reset/terminal/backpressure and overflow fixtures pass. Android359/384/shared1260+10existing ignored/runtime292+1existing ignored/fresh Java47+47/API31 pass; compiled two-test red and separate preparation failures retained. StoreItemV2/TakeBackItemV2 stay on the existing correlated receipt channel; old storage rules/native critical queue/runtime/auth/Windows/renderer unchanged. No new APK/actual JNI/UI/live transfer-password-expansion/reconnect-save/physical acceptance; installed v30 cannot be relabeled. Full NI-13 stays PARTIAL. [Exact source evidence and remaining gates](generated/player-qa/native-android-storage-ingress-20261002/README.md) |
 | NI-14 | `push_native_mail_model` / `push_native_mail_service` | OPEN: Android has local mail IME/drafts but no equivalent typed mailbox/service producer. Audit lists, costs, item/money delivery and failure ordering |
 | NI-15 | `push_native_social_model` | OPEN: audit Group/Guild/Trade independently, including membership, permissions, storage, invitation identity, offers, pending operations and authoritative settlement |
 | NI-16 | `push_native_hero_model` / Hero receipts | OPEN: rendering an owned Hero or its mana overlay is not Hero inventory/equipment/skills, key assignment or command-result coverage |

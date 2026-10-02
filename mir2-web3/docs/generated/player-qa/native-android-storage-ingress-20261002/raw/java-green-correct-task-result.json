@@ -1,0 +1,149 @@
+{
+  "label": "java-green-correct-task",
+  "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android",
+  "bin": "./gradlew",
+  "args": [
+    "--offline",
+    "--no-daemon",
+    "--no-build-cache",
+    "--rerun-tasks",
+    ":app:testDebugUnitTest",
+    ":app:testUiPreviewUnitTest",
+    "--console=plain"
+  ],
+  "xmlDirs": [
+    "mir2-web3/apps/game-client/platform-android/android/app/build/test-results/testDebugUnitTest",
+    "mir2-web3/apps/game-client/platform-android/android/app/build/test-results/testUiPreviewUnitTest"
+  ],
+  "started": "2026-10-02T14:27:44.836Z",
+  "ended": "2026-10-02T14:28:26.349Z",
+  "code": 0,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 33253,
+      "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+      "bytes": 23059,
+      "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 75493,
+      "sha256": "61ed32636953ee7b40413901598d79696025c5488cce282b033f4edf1d21d79c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 182051,
+      "sha256": "ffc257f1fef241d25d7487f1737aee2666ca20a3dfee01940cc89b594c0dd818"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 33137,
+      "sha256": "f166a93d7d96caeece1cf72c6c709065d9247da9fcd87d20094d949d3aece18b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 60074,
+      "sha256": "9017649660b5e93b912b6fba872a79c506402dd4444a6b62c2a362858b88d4ad"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 33253,
+      "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+      "bytes": 23059,
+      "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 75493,
+      "sha256": "61ed32636953ee7b40413901598d79696025c5488cce282b033f4edf1d21d79c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 182051,
+      "sha256": "ffc257f1fef241d25d7487f1737aee2666ca20a3dfee01940cc89b594c0dd818"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 33137,
+      "sha256": "f166a93d7d96caeece1cf72c6c709065d9247da9fcd87d20094d949d3aece18b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 60074,
+      "sha256": "9017649660b5e93b912b6fba872a79c506402dd4444a6b62c2a362858b88d4ad"
+    }
+  ],
+  "sourceUnchanged": true,
+  "xml": [
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "0b57e6b28a177a0b79b6c89da10740e0660d935dadd414e5ee8ae9a7258fb026"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "2f94d96abad6ea59d88fef7996131a939aa6697e2bc8a48b53f16522ee69e1d2"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "8885ca62ccb617e78056a48475db879f03a9d8b52c2afd101477db65fcd2dcdf"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4469,
+      "sha256": "44b8751a1367154c9aa696087320724391fcf8378e422416ab274239c19274c4"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "5b8bda9f400d6675a824cb018e9dcbdd9108f7fb1c52abfab30dfaee6055fa4a"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "5d813469dc9108eb2f495d2ed46d59632006c83971e9014f03e503496642aaa6"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "b641a7ba1dae7c7cdb596b10a1589996c84f4ed754c2a7ce59ac18ed100205f7"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "8885ca62ccb617e78056a48475db879f03a9d8b52c2afd101477db65fcd2dcdf"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4471,
+      "sha256": "491d2ccb1e8711eb5c766dc896c3a86f63aa9f3e1d65e0cd9e95d0f7a27eadb1"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "fcc32b48ccf5eb1459d2feb0465065e3bb85ab960c0a6d22af694c98e8596d17"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "createdAt": "2026-10-02T14:18:13.031Z",
+  "parent": "600d8374a22e712c3e4f56c96525dd323b8efba8",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "originals": [
+    {
+      "cwd": "/Users/henryliu/obelisk/numeron",
+      "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+      "branch": "codex/steam-main",
+      "status": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/"
+    },
+    {
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+      "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+      "branch": "codex/android-player-journey",
+      "status": ""
+    }
+  ],
+  "protectedFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "sha256": "fa05c7d9a93254a063f845c37227cbcc32239614d8ca6072d6cbfc7a1d07a2da"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "sha256": "300263e1ae723fe79dc75f9e0a566e57e59cc463e1b5ea43ca981d370a3b7033"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/gateway_bridge.rs",
+      "sha256": "6bc11c9c4fc27672572f79056edb08c56641614ef56a3f6a3c36ae170065a3f7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "sha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+      "sha256": "3d79af27b4809a3a063f39c4c95efc1b8d37ad6a8d46691b3bfbeb3d6b80086f"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+      "sha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055"
+    }
+  ],
+  "functionNames": [
+    "try_transform_storage_model_from_snapshot",
+    "transform_storage_items_from_packet",
+    "storage_items_json",
+    "transform_storage_patch_from_packet",
+    "value_u32",
+    "value_i32",
+    "value_i64",
+    "value_u64",
+    "value_u64_ref",
+    "value_string",
+    "normalized_slot",
+    "extend_item_metadata"
+  ],
+  "currentFrozenDifferences": [
+    "try_transform_storage_model_from_snapshot",
+    "normalized_slot",
+    "extend_item_metadata"
+  ],
+  "preparationFailures": [
+    "raw byte comparison assumed unchanged formatting",
+    "token comparison discovered closure block and two existing shared inventory delegations"
+  ],
+  "classification": "Evidence preparation checks, not product failures; port 10 frozen bodies and use existing shared slot/metadata helpers, not Windows host changes."
+}

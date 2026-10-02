@@ -1,0 +1,98 @@
+{
+  "checkedAt": "2026-10-02T14:29:17.260Z",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "functions": [
+    {
+      "name": "try_transform_storage_model_from_snapshot",
+      "frozenHash": "6d034febeac46dd0fdc1aaf5954657f8eabac9d10197e8467f8dd7761c7bc1c4",
+      "sharedHash": "6d034febeac46dd0fdc1aaf5954657f8eabac9d10197e8467f8dd7761c7bc1c4",
+      "exactFrozenTokens": true
+    },
+    {
+      "name": "transform_storage_items_from_packet",
+      "frozenHash": "be66cd690040f3f6312a3dc6aa7d56312ca2a9e82b318b9970dad3351489c09a",
+      "sharedHash": "be66cd690040f3f6312a3dc6aa7d56312ca2a9e82b318b9970dad3351489c09a",
+      "exactFrozenTokens": true
+    },
+    {
+      "name": "storage_items_json",
+      "frozenHash": "56cab9eae92f34f2ad48f50d29996f439ff315e14c35bac13aec51ae2485c9a0",
+      "sharedHash": "56cab9eae92f34f2ad48f50d29996f439ff315e14c35bac13aec51ae2485c9a0",
+      "exactFrozenTokens": true
+    },
+    {
+      "name": "transform_storage_patch_from_packet",
+      "frozenHash": "e8b9ff9bc0ea6a657e072de6bebdf03fed21c85b04b7340fc87eaa3ef8cd3d39",
+      "sharedHash": "e8b9ff9bc0ea6a657e072de6bebdf03fed21c85b04b7340fc87eaa3ef8cd3d39",
+      "exactFrozenTokens": true
+    },
+    {
+      "name": "value_u32",
+      "frozenHash": "1f841fa561433fcb3cd56f260950e6203e8245a6d2b92cd1bc6a3748c0356aff",
+      "sharedHash": "1f841fa561433fcb3cd56f260950e6203e8245a6d2b92cd1bc6a3748c0356aff",
+      "exactFrozenTokens": true
+    },
+    {
+      "name": "value_i32",
+      "frozenHash": "5cf49d56bbfae69002dc44d67697d99598eb940f71f8b3388fcca0b7555b788b",
+      "sharedHash": "5cf49d56bbfae69002dc44d67697d99598eb940f71f8b3388fcca0b7555b788b",
+      "exactFrozenTokens": true
+    },
+    {
+      "name": "value_i64",
+      "frozenHash": "2020ef7ae913bb8450839ae23968c577bcbcc7f62b2aacabd966f4892bb3b541",
+      "sharedHash": "2020ef7ae913bb8450839ae23968c577bcbcc7f62b2aacabd966f4892bb3b541",
+      "exactFrozenTokens": true
+    },
+    {
+      "name": "value_u64",
+      "frozenHash": "c305165c4f550ceeedd0e275c159b1e8a71cdcb65450410d12482921c39effb8",
+      "sharedHash": "c305165c4f550ceeedd0e275c159b1e8a71cdcb65450410d12482921c39effb8",
+      "exactFrozenTokens": true
+    },
+    {
+      "name": "value_u64_ref",
+      "frozenHash": "dad22cb93163ed2d42d19a1e232170fa6ea3df0c160275fc48c0b75bb0491b87",
+      "sharedHash": "dad22cb93163ed2d42d19a1e232170fa6ea3df0c160275fc48c0b75bb0491b87",
+      "exactFrozenTokens": true
+    },
+    {
+      "name": "value_string",
+      "frozenHash": "2efcfe0cce560f1e65d617810d01b8138ccb7ad73372a340cf3c70e0f37298ae",
+      "sharedHash": "2efcfe0cce560f1e65d617810d01b8138ccb7ad73372a340cf3c70e0f37298ae",
+      "exactFrozenTokens": true
+    }
+  ],
+  "existingStorageRulesByteIdentical": true,
+  "protectedFilesUnchanged": true,
+  "originals": [
+    {
+      "cwd": "/Users/henryliu/obelisk/numeron",
+      "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+      "branch": "codex/steam-main",
+      "status": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/"
+    },
+    {
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+      "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+      "branch": "codex/android-player-journey",
+      "status": ""
+    }
+  ],
+  "untrackedRecursivelyHashed": false,
+  "geometry": "Existing shared native inventory helper, Android packaged-frame lookup; no fake frames",
+  "metadataPackets": [
+    "UserStorage",
+    "StorageUnlockResult",
+    "StoragePasswordResult",
+    "ResizeStorage"
+  ],
+  "v2Transfers": "Existing correlated receipt channel unchanged; excluded from new gameplay path",
+  "backpressure": "Retain exact bounded FIFO front for later native admission, no request replay; overflow uses existing host disconnect/DataReset",
+  "newApkBuilt": false,
+  "actualJniVerified": false,
+  "liveStorageOperationsVerified": false,
+  "rendererFixed": false,
+  "physicalDeviceVerified": false,
+  "wholeGoalComplete": false
+}
