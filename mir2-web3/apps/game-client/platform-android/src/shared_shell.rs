@@ -694,14 +694,8 @@ impl Plugin for AndroidSharedShellPlugin {
         app.init_resource::<mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::phone::PhoneGameShopPresentation>()
             .add_systems(Update, publish_game_shop_phone
                 .before(mir2_client_bevy::crystal_ui::overlays::NativePlayerUiSet::Mutate));
-        app.init_resource::<mir2_client_bevy::crystal_ui::overlays::storage_phone::PhoneStoragePresentation>()
-            .add_systems(Update, publish_storage_phone
-                .before(mir2_client_bevy::crystal_ui::overlays::NativePlayerUiSet::Mutate));
         #[cfg(feature = "ui-preview")]
         app.add_systems(PostUpdate, report_game_shop_phone
-            .after(bevy::ui::UiSystems::PostLayout));
-        #[cfg(feature = "ui-preview")]
-        app.add_systems(PostUpdate, report_storage_phone
             .after(bevy::ui::UiSystems::PostLayout));
         crate::scene_effects::install(app);
     }
@@ -721,56 +715,6 @@ fn publish_game_shop_phone(
         PhoneGameShopPresentation::fit(viewport, safe, fit.scale)
     }).filter(|p| p.is_valid()).unwrap_or_default();
     if *presentation != next { *presentation = next; }
-}
-
-fn publish_storage_phone(
-    windows: Query<&Window>, host: Res<HostState>,
-    mut presentation: ResMut<mir2_client_bevy::crystal_ui::overlays::storage_phone::PhoneStoragePresentation>,
-) {
-    use mir2_client_bevy::crystal_ui::overlays::storage_phone::PhoneStoragePresentation;
-    let next = windows.single().ok().map(|window| {
-        let viewport = Vec2::new(window.width(), window.height());
-        let fit = CrystalStageTransform::fit(viewport.x, viewport.y);
-        let safe = Vec4::new(host.safe_left, host.safe_top, host.safe_right,
-            host.safe_bottom + host.ime_bottom) / window.scale_factor();
-        PhoneStoragePresentation::fit(viewport, safe, fit.scale)
-    }).filter(|p| p.is_valid()).unwrap_or_default();
-    if *presentation != next { *presentation = next; }
-}
-
-#[cfg(feature = "ui-preview")]
-fn report_storage_phone(
-    windows: Query<&Window>, stage: Res<UiScale>,
-    player: Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
-    texts: Query<(&Text, &TextFont, &bevy::text::TextLayoutInfo),
-        With<mir2_client_bevy::crystal_ui::overlays::storage_phone::PhoneStorageText>>,
-    controls: Query<(&ComputedNode, &UiGlobalTransform,
-        &mir2_client_bevy::crystal_ui::overlays::storage_phone::PhoneStorageControl)>,
-    areas: Query<(&ComputedNode,
-        &mir2_client_bevy::crystal_ui::overlays::storage_phone::PhoneStorageScrollArea)>,
-    mut previous: Local<Option<String>>,
-) {
-    if !player.storage_open() { *previous = None; return; }
-    let Ok(window) = windows.single() else { return; };
-    let density = window.scale_factor();
-    let geometry = format!("{:?}|{:?}|{:?}", window.resolution, stage.0,
-        controls.iter().map(|(n, t, c)| (n.size(), t.translation, format!("{c:?}"))).collect::<Vec<_>>());
-    if *previous == Some(geometry.clone()) { return; }
-    *previous = Some(geometry);
-    for (text, font, layout) in &texts {
-        if let FontSize::Px(size) = font.font_size {
-            info!(text=?text.0, font_dp=size*stage.0, glyphs=layout.glyphs.len(),
-                "ANDROID_PHONE_STORAGE_TEXT");
-        }
-    }
-    for (node, transform, control) in &controls {
-        info!(control=?control, size_dp=?node.size()/density,
-            center_dp=?transform.translation/density, "ANDROID_PHONE_STORAGE_CONTROL");
-    }
-    for (node, area) in &areas {
-        info!(pane=?area.0, size_dp=?node.size()/density, content_dp=?node.content_size()/density,
-            offset=?node.scroll_position*node.inverse_scale_factor, "ANDROID_PHONE_STORAGE_SCROLL");
-    }
 }
 
 #[cfg(feature = "ui-preview")]
@@ -889,7 +833,6 @@ mod phone_panel_tests;
 fn fit_stage(
     windows: Query<&Window>,
     phone_shop: Option<Res<mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::phone::PhoneGameShopPresentation>>,
-    phone_storage: Option<Res<mir2_client_bevy::crystal_ui::overlays::storage_phone::PhoneStoragePresentation>>,
     host: Res<HostState>,
     model: Res<NativeShellModel>,
     player: Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
@@ -1175,11 +1118,7 @@ fn fit_stage(
                 } else {
                     3.2
                 };
-            let focused = if (is_inventory || is_storage) && player.storage_open()
-                && phone_storage.as_deref().is_some_and(|phone| phone.is_valid()) {
-                let pane = phone_storage.as_deref().unwrap().pane(is_inventory);
-                mobile_workspace_transform(fit, origin, size, pane, top, 1.0)
-            } else if is_game_shop && phone_shop.as_deref().is_some_and(|phone| phone.is_valid()) {
+            let focused = if is_game_shop && phone_shop.as_deref().is_some_and(|phone| phone.is_valid()) {
                 // An authored_unit phone panel already has dp size. Fit the
                 // SAME safe/IME workspace, not the larger desktop focus scale.
                 let workspace = Rect::from_corners(

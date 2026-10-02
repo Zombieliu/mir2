@@ -6,8 +6,6 @@ mod big_map_coordinates;
 pub mod character_stats;
 #[path = "game_shop_dialog.rs"]
 pub mod game_shop_dialog;
-#[path = "storage_phone.rs"]
-pub mod storage_phone;
 #[path = "hero_dialog.rs"]
 pub mod hero_dialog;
 #[path = "local_keyboard_ui.rs"]
@@ -3574,7 +3572,6 @@ struct OverlayButtonControls<'w, 's> {
     shop_ui: ResMut<'w, ShopUiState>,
     ui_audio: ResMut<'w, crate::ui_audio::NativeUiAudioQueue>,
     phone_shop: Option<ResMut<'w, game_shop_dialog::phone::InputState>>,
-    phone_storage: Option<ResMut<'w, storage_phone::InputState>>,
     buttons: Query<'w, 's, (&'static Interaction, &'static OverlayButton), Changed<Interaction>>,
 }
 
@@ -3740,8 +3737,6 @@ struct OverlayRenderModels<'w> {
     game_shop_geometry: Option<Res<'w, game_shop_dialog::PreviewGeometry>>,
     phone_shop: Option<Res<'w, game_shop_dialog::phone::PhoneGameShopPresentation>>,
     phone_shop_input: Option<Res<'w, game_shop_dialog::phone::InputState>>,
-    phone_storage: Option<Res<'w, storage_phone::PhoneStoragePresentation>>,
-    phone_storage_input: Option<Res<'w, storage_phone::InputState>>,
     shell: Option<Res<'w, NativeShellModel>>,
     state: Res<'w, NativePlayerUiState>,
     inventory: Res<'w, InventoryModel>,
@@ -3782,7 +3777,6 @@ impl Plugin for Mir2CrystalOverlayPlugin {
         }
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<game_shop_dialog::phone::InputState>()
-            .init_resource::<storage_phone::InputState>()
             .init_resource::<localized_help::HelpScrollState>()
             .add_systems(
                 Update,
@@ -3947,7 +3941,6 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                         process_inventory_drag,
                         game_shop_dialog::process_pointer,
                         game_shop_dialog::phone::pointer_input,
-                        storage_phone::pointer_input,
                     )
                         .chain(),
                     process_inventory_delete_pointer,
@@ -5439,19 +5432,12 @@ fn sync_mail_letter_editor(
 /// child controls are excluded by [`inventory_drag_surface_contains`].
 fn process_inventory_drag(
     mut state: ResMut<NativePlayerUiState>,
-    phone_storage: Option<Res<storage_phone::PhoneStoragePresentation>>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     touches: Option<Res<Touches>>,
     windows: Query<(Entity, &Window), With<PrimaryWindow>>,
     panels: Query<&UiTransform, With<OverlayInventory>>,
     mut cursor_moves: MessageReader<CursorMoved>,
 ) {
-    if storage_phone::active(phone_storage.as_deref(), &state) {
-        state.inventory_window.end_drag();
-        state.inventory_window.clear_cursor();
-        cursor_moves.clear();
-        return;
-    }
     if !state.inventory_open()
         || state.mail_feedback_prompt.is_some()
         || state.mail_feedback_input_consumed
@@ -6370,23 +6356,13 @@ fn process_inventory_item_drag(
     mut ordered_reader: Local<bevy::ecs::message::MessageCursor<bevy::window::WindowEvent>>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
     mut pending: ResMut<PendingOperations>,
-    guard: storage_phone::LegacyGuard,
+    diagnostics: Option<Res<InventoryBeltDiagnostics>>,
 ) {
-    let diagnostics = guard.diagnostics;
     state.inventory_item_pointer_consumed = false;
     let ordered_events: Vec<_> = ordered
         .as_ref()
         .map(|events| ordered_reader.read(events).cloned().collect())
         .unwrap_or_default();
-    if storage_phone::active(guard.presentation.as_deref(), &state) {
-        state.inventory_item_drag = None;
-        state.equipment_item_drag = None;
-        if let Some(storage_ui) = storage_ui.as_deref_mut() {
-            storage_ui.storage_item_drag = None;
-        }
-        cursor_moves.clear();
-        return;
-    }
     // Crystal opens InventoryDialog alongside NPCDropDialog. The native core
     // currently represents the NPC panel as the active panel, so retain bag
     // drag input while the service frame is open.
@@ -8355,7 +8331,6 @@ fn process_overlay_buttons(
         mut shop_ui,
         mut ui_audio,
         mut phone_shop,
-        mut phone_storage,
         buttons,
     } = button_controls;
     let mut fallback_effects = UiEffectQueue::default();
@@ -8424,13 +8399,10 @@ fn process_overlay_buttons(
     let parcel_gold_modal_was_open = state.parcel_gold_prompt.is_some();
     let phone_clicks = phone_shop.as_deref_mut()
         .map(|input| std::mem::take(&mut input.clicks)).unwrap_or_default();
-    let storage_clicks = phone_storage.as_deref_mut()
-        .map(|input| std::mem::take(&mut input.clicks)).unwrap_or_default();
     for button in buttons.iter()
         .filter(|(interaction, _)| **interaction == Interaction::Pressed)
         .map(|(_, button)| button)
         .chain(phone_clicks.iter())
-        .chain(storage_clicks.iter())
     {
         if state.hero.modal() {
             continue;
@@ -11807,8 +11779,6 @@ fn render_overlays(
         game_shop_geometry,
         phone_shop,
         phone_shop_input,
-        phone_storage,
-        phone_storage_input,
         shell,
         state,
         inventory,
@@ -11850,24 +11820,11 @@ fn render_overlays(
             return;
         }
 
-        let storage_phone = phone_storage.as_deref().copied()
-            .filter(|phone| storage_phone::active(Some(phone), &state));
-        let bag_visible = state.inventory_open() && (!state.storage_open() || storage.transfers_unlocked())
-            && storage_phone.is_none_or(|phone| phone.paired() || phone_storage_input.as_deref()
-                .is_some_and(|input| input.shown() == storage_phone::Pane::Bag));
-        if let Some(phone) = storage_phone {
-            let size = phone.pane(true).size() * phone.authored_unit;
-            fill_rect_panel(&mut commands, &mut all.p1(),
-                CrystalRect::new(state.inventory_window.left, state.inventory_window.top, size.x, size.y),
-                bag_visible, |parent| storage_phone::render_inventory(parent, asset_server.as_deref(),
-                    &inventory, &ui, &state, &social, parcel_ui.as_deref(), &storage, &storage_ui,
-                    phone, phone_storage_input.as_deref()));
-        } else {
-        fill_rect_panel(
+        fill_positioned_unindexed_panel(
             &mut commands,
             &mut all.p1(),
-            CrystalRect::new(state.inventory_window.left, state.inventory_window.top,
-                INVENTORY_PANEL_SIZE.width as f32, INVENTORY_PANEL_SIZE.height as f32),
+            state.inventory_window.left,
+            state.inventory_window.top,
             // StorageDialog hides InventoryDialog while its password gate is
             // active, then restores the same positioned bag after unlock.
             state.inventory_open() && (!state.storage_open() || storage.transfers_unlocked()),
@@ -11884,11 +11841,10 @@ fn render_overlays(
                 )
             },
         );
-        }
         fill_panel(
             &mut commands,
             &mut all.p2(),
-            state.equipment_open() && storage_phone.is_none(),
+            state.equipment_open(),
             |parent| {
                 render_equipment(
                     parent,
@@ -12013,20 +11969,22 @@ fn render_overlays(
                 }
             },
         );
-        if let Some(phone) = phone_storage.as_deref().copied()
-            .filter(|phone| storage_phone::active(Some(phone), &state)) {
-            let size = phone.pane(false).size() * phone.authored_unit;
-            let visible = phone.paired() || phone_storage_input.as_deref()
-                .is_none_or(|input| input.shown() == storage_phone::Pane::Storage);
-            fill_rect_panel(&mut commands, &mut secondary.p4(),
-                CrystalRect::new(0.0, 0.0, size.x, size.y), visible, |parent|
-                storage_phone::render_storage(parent, asset_server.as_deref(), &storage, &storage_ui,
-                    &inventory, &state, &ui.player, phone, phone_storage_input.as_deref()));
-        } else {
-            fill_rect_panel(&mut commands, &mut secondary.p4(), CrystalRect::new(0.0, 0.0, 388.0, 346.0),
-                state.storage_open(), |parent| render_storage(parent, asset_server.as_deref(),
-                    &storage, &storage_ui, &inventory, &state, &ui.player));
-        }
+        fill_panel(
+            &mut commands,
+            &mut secondary.p4(),
+            state.storage_open(),
+            |parent| {
+                render_storage(
+                    parent,
+                    asset_server.as_deref(),
+                    &storage,
+                    &storage_ui,
+                    &inventory,
+                    &state,
+                    &ui.player,
+                )
+            },
+        );
         fill_panel(
             &mut commands,
             &mut secondary.p5(),
@@ -12370,9 +12328,7 @@ fn overlay_render_fingerprints(
         debug_fingerprint(&*models.shop_ui),
         debug_fingerprint(&*models.game_shop),
         debug_fingerprint(&*models.storage),
-        debug_fingerprint(&(&*models.storage_ui,
-            models.phone_storage.as_deref().filter(|phone| storage_phone::active(Some(phone), &state)),
-            models.phone_storage_input.as_deref().map(|input| input.shown()))),
+        debug_fingerprint(&*models.storage_ui),
         debug_fingerprint(&*models.skills),
         debug_fingerprint(&*models.skill_binding),
         debug_fingerprint(&*models.social),
