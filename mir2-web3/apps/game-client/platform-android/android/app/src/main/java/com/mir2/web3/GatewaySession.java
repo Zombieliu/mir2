@@ -276,6 +276,7 @@ final class GatewaySession implements AutoCloseable {
         // Rust stages it until the accepted owner snapshot; it is not bootstrap.
         boolean forwardQuestMetadata = worldPending() && isQuestMetadataPacket(packet);
         boolean forwardGameShopMetadata = worldPending() && isGameShopMetadataPacket(packet);
+        boolean forwardStorageMetadata = worldPending() && isStorageMetadataPacket(packet);
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -406,7 +407,8 @@ final class GatewaySession implements AutoCloseable {
         if ((forwardEntity && phase == Phase.IN_GAME) || (forwardPersonal && personalGameplayPhase())
                 || (forwardNpc && npcGameplayPhase())
                 || (forwardQuestMetadata && worldPending())
-                || (forwardGameShopMetadata && worldPending())) {
+                || (forwardGameShopMetadata && worldPending())
+                || (forwardStorageMetadata && worldPending())) {
             forwardBounded(envelope, gameplayObserver);
         }
     }
@@ -475,6 +477,12 @@ final class GatewaySession implements AutoCloseable {
         // Unlike personal item receipts, these replies belong to the current
         // scene. Position alone after MapChanged cannot authorize old services.
         return phase == Phase.IN_GAME && startAccepted && hasOwnerSnapshot && hasSceneSnapshot;
+    }
+
+    private static boolean isStorageMetadataPacket(String packet) {
+        // Public read-only metadata, not a second transfer-receipt channel.
+        return packet.equals("UserStorage") || packet.equals("StorageUnlockResult")
+                || packet.equals("StoragePasswordResult") || packet.equals("ResizeStorage");
     }
 
     private static boolean isEntityGameplayPacket(String packet) {

@@ -54,6 +54,8 @@ mod scene_effects;
 mod shared_shell;
 #[cfg(any(target_os = "android", test))]
 mod skill_ingress;
+#[cfg(any(target_os = "android", test))]
+mod storage_ingress;
 mod text_input;
 #[cfg(all(feature = "ui-preview", any(target_os = "android", test)))]
 mod ui_preview;

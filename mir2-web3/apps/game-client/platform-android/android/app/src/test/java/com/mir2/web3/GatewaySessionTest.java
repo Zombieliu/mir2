@@ -638,6 +638,83 @@ public class GatewaySessionTest {
         assertTrue(phase(GatewaySession.Phase.DISCONNECTED).characters.isEmpty());
     }
 
+    @Test public void storageMetadataStagesOnlyDuringAuthenticatedSelectedStart() throws Exception {
+        JSONObject[] metadata = new JSONObject[]{
+            GatewaySession.object("type", "packet", "packet", "UserStorage", "payload",
+                    GatewaySession.object("storage", new org.json.JSONArray().put(JSONObject.NULL)
+                            .put(GatewaySession.object("uniqueId", "17", "name", "TLS storage fixture")))),
+            GatewaySession.object("type", "packet", "packet", "StorageUnlockResult", "payload",
+                    GatewaySession.object("result", 2, "hasPassword", true)),
+            GatewaySession.object("type", "packet", "packet", "StoragePasswordResult", "payload",
+                    GatewaySession.object("result", 4, "hasPassword", true, "removing", false)),
+            GatewaySession.object("type", "packet", "packet", "ResizeStorage", "payload",
+                    GatewaySession.object("size", 160, "hasExpandedStorage", true,
+                            "expiryTimeBinaryDatetime", "635000000000000000"))
+        };
+        connect();
+        for (JSONObject envelope : metadata) peer.send(envelope.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        roster();
+        for (JSONObject envelope : metadata) peer.send(envelope.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        assertNull("Storage metadata cannot bootstrap a character", phase(GatewaySession.Phase.STARTING).world);
+        for (JSONObject envelope : metadata) {
+            peer.send(envelope.toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Selected Start must retain public storage metadata", raw);
+            assertEquals(envelope.toString(), new JSONObject(raw).toString());
+        }
+        assertNull("Storage metadata is not an exact transfer receipt", receipts.poll(100, TimeUnit.MILLISECONDS));
+        for (String unsupported : new String[]{"NPCStorage", "qa.openStorage", "GuildStorageContents"}) {
+            peer.send(GatewaySession.object("type", "packet", "packet", unsupported,
+                    "payload", new JSONObject()).toString());
+            assertNull(gameplayPackets.poll(100, TimeUnit.MILLISECONDS));
+        }
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":1}}");
+        phase(GatewaySession.Phase.CHARACTERS);
+        for (JSONObject envelope : metadata) peer.send(envelope.toString());
+        assertNull("Rejected Start closes storage forwarding", gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void oversizedStorageMetadataFailsClosedBeforeOwnerBootstrap() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(GatewaySession.object("type", "packet", "packet", "UserStorage", "payload",
+                GatewaySession.object("storage", new org.json.JSONArray().put(
+                        GatewaySession.object("uniqueId", "17", "name", "文".repeat(6000))))).toString());
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        assertNull(receipts.poll(100, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void storageMetadataSurvivesOwnerMapTransitionWithoutDuplicatingTransferReceipts() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        assertEquals("0", phase(GatewaySession.Phase.IN_GAME).world.mapFileName);
+        JSONObject resize=GatewaySession.object("type","packet","packet","ResizeStorage","payload",
+                GatewaySession.object("size",160,"hasExpandedStorage",true,"expiryTimeBinaryDatetime",9));
+        peer.send(resize.toString());
+        assertEquals(resize.toString(),new JSONObject(gameplayPackets.poll(3,TimeUnit.SECONDS)).toString());
+        assertNull(receipts.poll(100,TimeUnit.MILLISECONDS));
+
+        JSONObject transfer=GatewaySession.object("type","packet","packet","StoreItemV2","payload",
+                GatewaySession.object("requestId","st-fixture","from",0,"to",159,"success",true));
+        peer.send(transfer.toString());
+        assertEquals(transfer.toString(),new JSONObject(receipts.poll(3,TimeUnit.SECONDS)).toString());
+        assertNull("Do not duplicate the exact transfer channel",gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        assertNull(phase(GatewaySession.Phase.STARTING).world);
+        peer.send(resize.toString());
+        assertEquals(resize.toString(),new JSONObject(gameplayPackets.poll(3,TimeUnit.SECONDS)).toString());
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"1\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":50,\"y\":60}]}}");
+        assertEquals("1",phase(GatewaySession.Phase.IN_GAME).world.mapFileName);
+    }
+
     @Test public void gameShopMetadataStagesOnlyDuringAuthenticatedSelectedStart() throws Exception {
         JSONObject catalog = GatewaySession.object("type", "packet", "packet", "GameShopInfo",
                 "payload", GatewaySession.object("item", GatewaySession.object("gIndex", 31,

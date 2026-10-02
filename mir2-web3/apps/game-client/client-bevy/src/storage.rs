@@ -611,3 +611,304 @@ mod tests {
         assert_eq!(defaults.effective_size(), STORAGE_BASE_SIZE);
     }
 }
+
+// Frozen Windows read-only projection; no storage/password/transfer rules.
+#[cfg(feature = "native-player-ui")]
+pub use native_ingress::{
+    transform_storage_items_from_packet, transform_storage_patch_from_packet,
+    try_transform_storage_model_from_snapshot,
+};
+
+#[cfg(feature = "native-player-ui")]
+#[rustfmt::skip]
+mod native_ingress {
+    use serde_json::{json, Value};
+    use crate::native_inventory_ingress::{native_inventory_slot as normalized_slot, extend_native_item_metadata};
+
+    // These ten bodies retain the frozen Windows 3d735745f tokens exactly.
+    // Geometry is added by the Android host through the same shared helper.
+    pub fn try_transform_storage_model_from_snapshot(payload: &Value) -> Option<Value> {
+        let source = payload
+            .get("storageItems")
+            .or_else(|| payload.get("storage_items"))?
+            .as_array()?;
+        let items = storage_items_json(source)?;
+        let unlocked = payload.get("storageUnlocked")
+            .or_else(|| payload.get("storage_unlocked"))
+            .and_then(Value::as_bool)
+            .unwrap_or_else(|| !payload.get("requireStoragePassword")
+                .or_else(|| payload.get("require_storage_password"))
+                .and_then(Value::as_bool).unwrap_or(false));
+        Some(json!({
+            "items": items,
+            "size": value_u32(payload.get("storageSize").or_else(|| payload.get("storage_size"))).and_then(|value| u16::try_from(value).ok()).unwrap_or(80),
+            "has_password": payload.get("hasStoragePassword").or_else(|| payload.get("has_storage_password")).and_then(Value::as_bool).unwrap_or(false),
+            "unlocked": unlocked,
+            "has_expanded": payload.get("hasExpandedStorage").or_else(|| payload.get("has_expanded_storage")).and_then(Value::as_bool).unwrap_or(false),
+            "expiry": value_i64(payload.get("expandedStorageExpiryTimeBinaryDatetime")
+                .or_else(|| payload.get("expanded_storage_expiry_time_binary_datetime"))
+                .or_else(|| payload.get("expiryTimeBinaryDatetime"))
+                .or_else(|| payload.get("expiry_time_binary_datetime"))).unwrap_or_default(),
+            "selected_bag_slot": Value::Null,
+            "selected_storage_slot": Value::Null,
+            "password_draft": "",
+            "new_password_draft": "",
+            "confirm_password_draft": "",
+        }))
+    }
+
+    pub fn transform_storage_items_from_packet(payload: &Value) -> Option<Value> {
+        Some(json!({ "items": storage_items_json(payload.get("storage")?.as_array()?)? }))
+    }
+
+    fn storage_items_json(entries: &[Value]) -> Option<Vec<Value>> {
+        entries
+            .iter()
+            .enumerate()
+            .filter(|(_, item)| !item.is_null())
+            .map(|(slot, item)| {
+                let unique_id = value_u64(item.get("uniqueId").or_else(|| item.get("unique_id")));
+                let item_index = value_i32(item.get("itemIndex").or_else(|| item.get("item_index")));
+                if unique_id.is_none() && item_index.is_none() {
+                    return None;
+                }
+                let key = unique_id.map(|value| value.to_string()).or_else(|| item_index.map(|value| value.to_string()))?;
+                let mut mapped = json!({
+                    "uniqueId": unique_id,
+                    "key": key,
+                    "name": value_string(item.get("name")).unwrap_or_else(|| item_index.map(|value| format!("Item #{value}")).unwrap_or_default()),
+                    "quantity": value_u32(item.get("count").or_else(|| item.get("quantity"))).unwrap_or(1),
+                    "slot": normalized_slot(item.get("slot"), u32::try_from(slot).unwrap_or_default()),
+                    "container": 4,
+                });
+                extend_item_metadata(&mut mapped, item);
+                Some(mapped)
+            })
+            .collect()
+    }
+
+    pub fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<Value> {
+        let request_id = payload
+            .get("requestId")
+            .or_else(|| payload.get("request_id"))
+            .and_then(Value::as_str)
+            .filter(|value| !value.is_empty());
+        match packet {
+            "StoreItem" | "StoreItemV2" => {
+                if packet == "StoreItemV2" && request_id.is_none() {
+                    return None;
+                }
+                let request_id = (packet == "StoreItemV2").then_some(request_id).flatten();
+                let mut ack = json!({
+                    "operation": "deposit",
+                    "from": value_i32(payload.get("from"))?,
+                    "to": value_i32(payload.get("to"))?,
+                    "success": payload.get("success").and_then(Value::as_bool)?,
+                });
+                if let Some(request_id) = request_id {
+                    ack["requestId"] = json!(request_id);
+                }
+                Some(json!({ "ack": ack }))
+            }
+            "TakeBackItem" | "TakeBackItemV2" => {
+                if packet == "TakeBackItemV2" && request_id.is_none() {
+                    return None;
+                }
+                let request_id = (packet == "TakeBackItemV2").then_some(request_id).flatten();
+                let mut ack = json!({
+                    "operation": "withdraw",
+                    "from": value_i32(payload.get("from"))?,
+                    "to": value_i32(payload.get("to"))?,
+                    "success": payload.get("success").and_then(Value::as_bool)?,
+                });
+                if let Some(request_id) = request_id {
+                    ack["requestId"] = json!(request_id);
+                }
+                Some(json!({ "ack": ack }))
+            }
+            "StorageUnlockResult" => {
+                let result = value_i32(payload.get("result"))?;
+                let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
+                let mut patch = json!({
+                    "has_password": has_password,
+                    "password_result": { "operation": "unlock", "result": result },
+                    "ack": { "operation": "unlock", "success": result == 0 || result == 4 }
+                });
+                if result == 0 || result == 4 || !has_password {
+                    patch["unlocked"] = json!(true);
+                }
+                Some(patch)
+            }
+            "StoragePasswordResult" => {
+                let result = value_i32(payload.get("result"))?;
+                let removing = payload.get("removing").and_then(Value::as_bool)?;
+                let has_password = payload.get("hasPassword").and_then(Value::as_bool)?;
+                let mut patch = json!({
+                    "has_password": has_password,
+                    "password_result": { "operation": "password", "result": result, "removing": removing },
+                    "ack": {
+                        "operation": if removing { "removePassword" } else { "setPassword" },
+                        "success": result == 4,
+                    },
+                });
+                if result == 4 || !has_password {
+                    patch["unlocked"] = json!(true);
+                }
+                Some(patch)
+            }
+            "ResizeStorage" => Some(json!({
+                "size": value_u32(payload.get("size")).and_then(|value| u16::try_from(value).ok())?,
+                "has_expanded": payload.get("hasExpandedStorage").and_then(Value::as_bool)?,
+                "expiry": value_i64(payload.get("expiryTimeBinaryDatetime"))?,
+            })),
+            _ => None,
+        }
+    }
+
+    fn value_u32(value: Option<&Value>) -> Option<u32> {
+        value.and_then(|value| {
+            value
+                .as_u64()
+                .and_then(|number| u32::try_from(number).ok())
+                .or_else(|| value.as_str()?.parse::<u32>().ok())
+        })
+    }
+
+    fn value_i32(value: Option<&Value>) -> Option<i32> {
+        value.and_then(|value| {
+            value
+                .as_i64()
+                .and_then(|number| i32::try_from(number).ok())
+                .or_else(|| value.as_str()?.parse::<i32>().ok())
+        })
+    }
+
+    fn value_i64(value: Option<&Value>) -> Option<i64> {
+        value.and_then(|value| {
+            value
+                .as_i64()
+                .or_else(|| value.as_str()?.parse::<i64>().ok())
+        })
+    }
+
+    fn value_u64(value: Option<&Value>) -> Option<u64> {
+        value.and_then(value_u64_ref)
+    }
+
+    fn value_u64_ref(value: &Value) -> Option<u64> {
+        value
+            .as_u64()
+            .or_else(|| value.as_str()?.parse::<u64>().ok())
+    }
+
+    fn value_string(value: Option<&Value>) -> Option<String> {
+        value.and_then(|value| match value {
+            Value::String(text) if !text.is_empty() => Some(text.clone()),
+            Value::Number(number) => Some(number.to_string()),
+            _ => None,
+        })
+    }
+
+    fn extend_item_metadata(mapped: &mut Value, item: &Value) {
+        extend_native_item_metadata(mapped, item, |_, _| None);
+    }
+}
+
+#[cfg(all(test, feature = "native-player-ui"))]
+mod native_storage_projection_tests {
+    use super::*;
+    use serde_json::{json, Value};
+
+    #[test]
+    fn sparse_slots_aliases_and_empty_drafts_match_authoritative_model() {
+        let mut entries = vec![Value::Null; 160];
+        entries[0] = json!({"unique_id":"17","quantity":"2","name":"fixture"});
+        entries[159] = json!({"item_index":"1200","count":3,"slot":"159","durability_current":12});
+        let value = try_transform_storage_model_from_snapshot(&json!({
+            "storage_items":entries,"storage_size":"160","has_storage_password":true,
+            "require_storage_password":true,"has_expanded_storage":true,
+            "expanded_storage_expiry_time_binary_datetime":"635000000000000000",
+            "password_draft":"ignored fixture draft"
+        }))
+        .unwrap();
+        let model: StorageModel = serde_json::from_value(value).unwrap();
+        assert_eq!(model.items.len(), 2);
+        assert_eq!((model.items[0].slot, model.items[1].slot), (0, 159));
+        assert_eq!(model.items[0].quantity, 2);
+        assert_eq!(model.items[1].container, 4);
+        assert_eq!(model.size, 160);
+        assert!(model.has_password && model.has_expanded && !model.unlocked);
+        assert_eq!(model.expiry, 635000000000000000);
+        assert!(
+            model.password_draft.is_empty()
+                && model.new_password_draft.is_empty()
+                && model.confirm_password_draft.is_empty()
+        );
+        assert!(try_transform_storage_model_from_snapshot(&json!({})).is_none());
+        assert!(
+            transform_storage_items_from_packet(&json!({"storage":[{"name":"no identity"}]}))
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn metadata_results_are_not_snapshots_or_uncorrelated_transfer_success() {
+        let locked = transform_storage_patch_from_packet(
+            "StorageUnlockResult",
+            &json!({"result":2,"hasPassword":true}),
+        )
+        .unwrap();
+        assert!(locked.get("unlocked").is_none());
+        assert_eq!(locked["ack"]["success"], false);
+        let unlocked = transform_storage_patch_from_packet(
+            "StorageUnlockResult",
+            &json!({"result":0,"hasPassword":true}),
+        )
+        .unwrap();
+        assert_eq!(unlocked["unlocked"], true);
+        let removed = transform_storage_patch_from_packet(
+            "StoragePasswordResult",
+            &json!({"result":4,"hasPassword":false,"removing":true}),
+        )
+        .unwrap();
+        assert_eq!(removed["password_result"]["removing"], true);
+        assert_eq!(removed["ack"]["operation"], "removePassword");
+        let expanded = transform_storage_patch_from_packet(
+            "ResizeStorage",
+            &json!({"size":"160","hasExpandedStorage":true,"expiryTimeBinaryDatetime":"9"}),
+        )
+        .unwrap();
+        assert_eq!(expanded, json!({"size":160,"has_expanded":true,"expiry":9}));
+        assert!(transform_storage_patch_from_packet(
+            "ResizeStorage",
+            &json!({"size":65536,"hasExpandedStorage":true,"expiryTimeBinaryDatetime":9})
+        )
+        .is_none());
+        assert!(transform_storage_patch_from_packet(
+            "StoreItemV2",
+            &json!({"from":0,"to":159,"success":true})
+        )
+        .is_none());
+        let ack = transform_storage_patch_from_packet(
+            "StoreItemV2",
+            &json!({"requestId":"st-fixture","from":0,"to":159,"success":true}),
+        )
+        .unwrap();
+        assert_eq!(ack["ack"]["requestId"], "st-fixture");
+        assert!(transform_storage_patch_from_packet("qa.openStorage", &json!({})).is_none());
+    }
+
+    #[test]
+    fn packet_items_do_not_fabricate_or_replace_metadata() {
+        let value = transform_storage_items_from_packet(&json!({"storage":[null,
+            {"uniqueId":"18446744073709551615","name":17,"quantity":"4"}]}))
+        .unwrap();
+        assert_eq!(value["items"][0]["slot"], 1);
+        assert_eq!(value["items"][0]["key"], "18446744073709551615");
+        assert_eq!(value["items"][0]["name"], "17");
+        assert_eq!(value["items"][0]["quantity"], 4);
+        assert_eq!(value.as_object().unwrap().len(), 1);
+        assert!(value.get("unlocked").is_none());
+        assert!(transform_storage_items_from_packet(&json!({"storage":true})).is_none());
+    }
+}

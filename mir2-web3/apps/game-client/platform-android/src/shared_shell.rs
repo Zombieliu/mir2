@@ -119,6 +119,7 @@ pub(crate) struct HostState {
     skills: crate::skill_ingress::AndroidSkillIngress,
     inventory: crate::inventory_ingress::AndroidInventoryIngress,
     game_shop: crate::game_shop_ingress::AndroidGameShopIngress,
+    storage: crate::storage_ingress::AndroidStorageIngress,
     npc: crate::npc_ingress::AndroidNpcIngress,
     player: crate::player_ingress::AndroidPlayerIngress,
     pub(crate) quests: crate::quest_ingress::AndroidQuestIngress,
@@ -153,6 +154,7 @@ impl HostState {
         self.skills.reset();
         self.inventory.reset();
         self.game_shop.reset();
+        self.storage.reset();
         self.npc.reset();
         self.player.reset();
         self.quests.reset();
@@ -184,6 +186,11 @@ impl HostState {
         self.game_shop.flush(
             mir2_bevy_runtime::native_ingest::push_native_game_shop_info,
             mir2_bevy_runtime::native_ingest::push_native_game_shop_stock,
+        );
+        self.storage.flush(
+            mir2_bevy_runtime::native_ingest::push_native_storage_model,
+            mir2_bevy_runtime::native_ingest::push_native_storage_items,
+            mir2_bevy_runtime::native_ingest::push_native_storage_patch,
         );
     }
 
@@ -273,6 +280,15 @@ impl HostState {
             return Ok(false);
         }
         self.inventory.packet(raw)
+    }
+
+    fn accept_storage_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
+        if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
+            || !matches!(screen, Screen::StartingGame | Screen::InGame)
+        {
+            return Ok(false);
+        }
+        self.storage.packet(raw)
     }
 
     fn accept_skill_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
@@ -1435,6 +1451,7 @@ fn receive(
                         || host.accept_chat_packet(model.screen, raw).is_err()
                         || host.accept_quest_packet(model.screen, raw).is_err()
                         || host.accept_game_shop_packet(model.screen, raw).is_err()
+                        || host.accept_storage_packet(model.screen, raw).is_err()
                         || host
                             .accept_npc_packet(
                                 model.screen,
@@ -1781,6 +1798,7 @@ fn receive(
             host.npc.clear_scene();
             host.quests.clear_scene();
             host.game_shop.clear_scene();
+            host.storage.clear_scene();
             if let Some(player) = player.as_deref_mut() {
                 player.request_npc_service_exit();
             }
@@ -1821,6 +1839,7 @@ fn receive(
                         && host.bind_npc_snapshot(raw).is_ok()
                         && host.bind_quest_snapshot(raw).is_ok()
                         && host.bind_game_shop_snapshot(raw).is_ok()
+                        && host.storage.snapshot(raw).is_ok()
                     {
                         projection.ui = ui;
                     } else {
@@ -1978,6 +1997,7 @@ fn receive(
                 // A rejected listed-character Start retires packet-first shop
                 // metadata before another character can be selected.
                 host.game_shop.reset();
+                host.storage.reset();
                 model.apply_gateway_event(Event::StartGameAck {
                     accepted: false,
                     reason: Some(message),
@@ -2608,6 +2628,215 @@ mod quest_host_tests;
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn storage_host_phase_gate_and_render_failure_retire_pending_metadata() {
+        let raw = json!({"type":"packet","packet":"ResizeStorage","payload":{
+            "size":160,"hasExpandedStorage":true,"expiryTimeBinaryDatetime":9}})
+        .to_string();
+        let mut host = HostState::default();
+        assert!(!host
+            .accept_storage_packet(Screen::StartingGame, &raw)
+            .unwrap());
+        host.phase = "STARTING".into();
+        for screen in [
+            Screen::Login,
+            Screen::CharacterSelect,
+            Screen::ConnectionLost,
+        ] {
+            assert!(!host.accept_storage_packet(screen, &raw).unwrap());
+        }
+        assert!(host
+            .accept_storage_packet(Screen::StartingGame, &raw)
+            .unwrap());
+        assert_eq!(host.storage.pending_count(), 1);
+        host.pending_render_request = Some(7);
+        let mut shell = NativeShellModel {
+            screen: Screen::StartingGame,
+            ..default()
+        };
+        assert!(fail_current_render_load(
+            &mut host,
+            &mut shell,
+            7,
+            "OFFLINE storage fixture failure"
+        ));
+        assert_eq!(host.storage.pending_count(), 0);
+        assert!(!host.storage.flush(
+            |_| panic!("retired model"),
+            |_| panic!("retired items"),
+            |_| panic!("retired patch")
+        ));
+    }
+
+    #[test]
+    fn storage_host_actual_receive_stages_then_admits_without_skipping_render_barrier() {
+        let mut app = game_shop_receive_app();
+        INBOX.lock().unwrap().extend([
+            game_shop_host_metadata(
+                "UserStorage",
+                json!({"storage":[null,{"uniqueId":"17","name":"fixture"}]}),
+            ),
+            game_shop_host_metadata(
+                "ResizeStorage",
+                json!({"size":160,"hasExpandedStorage":true,"expiryTimeBinaryDatetime":9}),
+            ),
+            game_shop_host_metadata(
+                "StorageUnlockResult",
+                json!({"result":2,"hasPassword":true}),
+            ),
+        ]);
+        app.update();
+        assert_eq!(
+            app.world().resource::<HostState>().storage.pending_count(),
+            3
+        );
+        assert!(app
+            .world()
+            .resource::<HostState>()
+            .pending_render_request
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::storage::StorageModel>()
+            .items
+            .is_empty());
+        let mut snapshot = game_shop_host_world(42, "Fixture", "0");
+        let mut raw: Value =
+            serde_json::from_str(snapshot["worldSnapshot"].as_str().unwrap()).unwrap();
+        raw["storageItems"] = json!([]);
+        raw["hasStoragePassword"] = json!(true);
+        raw["requireStoragePassword"] = json!(true);
+        snapshot["worldSnapshot"] = json!(raw.to_string());
+        INBOX.lock().unwrap().push_back(snapshot);
+        app.update();
+        let host = app.world().resource::<HostState>();
+        assert_eq!(host.storage.pending_count(), 0);
+        assert_eq!(host.phase, "IN_GAME");
+        assert!(host.pending_render_request.is_some());
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::StartingGame
+        );
+        assert!(OUTBOX.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn storage_host_rejected_start_drops_metadata_before_another_character() {
+        let mut app = game_shop_receive_app();
+        INBOX.lock().unwrap().push_back(game_shop_host_metadata(
+            "ResizeStorage",
+            json!({"size":160,"hasExpandedStorage":true,"expiryTimeBinaryDatetime":9}),
+        ));
+        app.update();
+        assert_eq!(
+            app.world().resource::<HostState>().storage.pending_count(),
+            1
+        );
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(json!({"phase":"CHARACTERS","message":"OFFLINE rejected Start"}));
+        app.update();
+        assert_eq!(
+            app.world().resource::<HostState>().storage.pending_count(),
+            0
+        );
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::CharacterSelect
+        );
+        app.world_mut().resource_mut::<NativeShellModel>().screen = Screen::StartingGame;
+        app.world_mut().resource_mut::<HostState>().phase = "STARTING".into();
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(game_shop_host_world(43, "Other", "1"));
+        app.update();
+        assert_eq!(app.world().resource::<HostState>().phase, "IN_GAME");
+        assert_eq!(
+            app.world().resource::<HostState>().storage.pending_count(),
+            0
+        );
+    }
+
+    #[test]
+    fn storage_host_overflow_rejects_later_metadata_and_world_in_terminal_batch() {
+        let mut app = game_shop_receive_app();
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::storage::StorageModel>()
+            .items
+            .push(mir2_client_bevy::inventory::ItemModel {
+                unique_id: Some(17),
+                slot: 0,
+                container: 4,
+                ..default()
+            });
+        let metadata = game_shop_host_metadata(
+            "ResizeStorage",
+            json!({"size":160,"hasExpandedStorage":true,"expiryTimeBinaryDatetime":9}),
+        );
+        INBOX
+            .lock()
+            .unwrap()
+            .extend(std::iter::repeat_n(metadata, 33));
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(game_shop_host_world(42, "Fixture", "0"));
+        app.update();
+        let host = app.world().resource::<HostState>();
+        assert_eq!(host.phase, "DISCONNECTED");
+        assert_eq!(host.storage.pending_count(), 0);
+        assert!(host.world.is_none() && host.pending_render_request.is_none());
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::ConnectionLost
+        );
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::storage::StorageModel>()
+            .items
+            .is_empty());
+        let command: Value =
+            serde_json::from_str(&OUTBOX.lock().unwrap().pop_front().unwrap()).unwrap();
+        assert_eq!(command["type"], "disconnect");
+        assert!(OUTBOX.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn storage_host_owner_switch_without_reset_revokes_old_contents() {
+        let mut app = game_shop_receive_app();
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(game_shop_host_world(42, "Fixture", "0"));
+        app.update();
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::storage::StorageModel>()
+            .items
+            .push(mir2_client_bevy::inventory::ItemModel {
+                unique_id: Some(17),
+                slot: 0,
+                container: 4,
+                ..default()
+            });
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(game_shop_host_world(43, "Other", "0"));
+        app.update();
+        assert_eq!(app.world().resource::<HostState>().phase, "DISCONNECTED");
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::ConnectionLost
+        );
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::storage::StorageModel>()
+            .items
+            .is_empty());
+    }
+
     fn game_shop_receive_app() -> App {
         INBOX.lock().unwrap().clear();
         OUTBOX.lock().unwrap().clear();
