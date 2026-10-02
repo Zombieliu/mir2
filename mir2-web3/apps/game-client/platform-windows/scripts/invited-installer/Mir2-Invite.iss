@@ -22,7 +22,11 @@ OutputBaseFilename=Numeron-Legend-of-Rebirth-20261001-r8-Setup
 VersionInfoVersion=2026.10.1.8
 VersionInfoDescription=Numeron - Legend of Rebirth multilingual playtest installer
 UninstallDisplayName={#AppName}
+#ifdef Mir2Bootstrap
+UninstallDisplayIcon={app}\{#LauncherExe}
+#else
 UninstallDisplayIcon={app}\game\{#AppExe}
+#endif
 UninstallFilesDir={app}\uninstall
 WizardStyle=modern
 WizardSizePercent=110
@@ -225,6 +229,10 @@ Name: "{userdesktop}\{#AppName}"; Filename: "{app}\{#LauncherExe}"; WorkingDir: 
 ; Finish-page choices are executed in Pascal code so Windows launch errors
 ; can be reported without security-policy workarounds. Silent installs never launch.
 
+#ifdef Mir2Bootstrap
+#include "verified-bootstrap-messages.iss"
+#endif
+
 [Code]
 var
   RuntimeRestartRequired: Boolean;
@@ -243,6 +251,10 @@ function CreateFileW(FileName: String; Access, ShareMode: Cardinal; Security: Na
 function CloseHandle(Handle: NativeUInt): Boolean;
   external 'CloseHandle@kernel32.dll stdcall';
 function SafeLocalePath(Path: String): Boolean; forward;
+
+#ifdef Mir2Bootstrap
+#include "verified-bootstrap-guard.iss"
+#endif
 
 function HoldInstallLock: Boolean;
 var
@@ -323,6 +335,14 @@ begin
     Result := CustomMessage('GameBusy');
     exit;
   end;
+#ifdef Mir2Bootstrap
+  { Seed-only installation must not replace gameplay or updater recovery state. }
+  if not BootstrapCanInstall then
+  begin
+    Result := CustomMessage('BootstrapExisting');
+    exit;
+  end;
+#endif
   if VCRuntimeReady then
   begin
     Log('Microsoft Visual C++ x64 runtime meets 14.44.35211.0 minimum; no runtime changes.');
@@ -550,7 +570,9 @@ procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
+#ifndef Mir2Bootstrap
     RetirePreviousUpdateTransaction;
+#endif
     SeedInitialLocale;
   end;
   if CurStep = ssDone then

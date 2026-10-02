@@ -6726,3 +6726,14 @@ R248 completed the previously blocked R39 data-import follow-up on Windows. The 
 | [x] | Captured Bichon source-frame closure | Commit the 555 deterministic missing map PNGs; generated map-atlas output stays ignored. |
 | [x] | GDI text and deterministic dynamic-state pass | r40 adds exact-key Windows GDI assets, Crystal four-line chat state, shared TCP/Web system-chat scheduling, and persistent seeded per-object animation phases; WebGPU/WebGL2 and temporal gates are green. |
 | [ ] | Final human visual/feel Accepted decision | Automated status is 100% Candidate. Compare the r40 native/Web pair and live windowed clients; do not reinterpret independent roaming actors, random particles, or compositor sampling as a deterministic implementation defect. |
+
+## 2026-10-02 Native distribution task (independent of paused goals)
+
+| Status | Task | Notes |
+| --- | --- | --- |
+| [x] | Signed bundles, executable deltas and guarded online-installer tooling | Local reader/source/fallback, producer, full R10 byte reconstruction, installer closure, native Worker and conditional publisher checks pass. See [delivery runbook](NATIVE-R2-DELIVERY-RUNBOOK.md). R9→R10 EXE payload is 25,438,325 bytes versus 110,934,016 bytes; this is volume evidence, not network throughput. |
+| [~] | Frozen updater / bootstrap build and genuine signed installation checks | Complete the source-bound artifacts and retained integration receipts before making a player release claim. |
+| [ ] | Native R2 route / immutable publication / player-network comparison | Existing Cloudflare OAuth refresh returned HTTP 400. Effective live write/route access and download comparison await valid authorization. Existing Web routes and the game gateway remain unchanged. |
+
+The capacity and periodic-task goals remain paused. Do not promote private R11
+periodic previews as part of the distribution-only task.

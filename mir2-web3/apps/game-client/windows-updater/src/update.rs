@@ -3,6 +3,8 @@ use crate::{
     model::*,
     transaction::{self, Change},
 };
+#[path = "delivery.rs"]
+pub mod delivery;
 use anyhow::{ensure, Context, Result};
 use std::{
     collections::BTreeMap,
@@ -13,6 +15,20 @@ use std::{
 };
 
 pub trait Source {
+    /// Fetch a fresh discovery pair. Progress reports additional response-body
+    /// bytes across both objects, including discarded origin attempts.
+    fn discovery_pair(
+        &self,
+        progress: &mut dyn FnMut(u64) -> Result<()>,
+    ) -> Result<(Vec<u8>, Vec<u8>)> {
+        let bytes = discovery_object(
+            |callback| self.get("latest.json", 32768, callback),
+            progress,
+        )?;
+        let signature =
+            discovery_object(|callback| self.get("latest.p7s", 32768, callback), progress)?;
+        Ok((bytes, signature))
+    }
     fn get(
         &self,
         path: &str,
@@ -27,19 +43,39 @@ pub trait Source {
         progress: &mut dyn FnMut(u64) -> Result<()>,
     ) -> Result<()>;
 }
+fn discovery_object(
+    fetch: impl FnOnce(&mut dyn FnMut(u64) -> Result<()>) -> Result<Vec<u8>>,
+    progress: &mut dyn FnMut(u64) -> Result<()>,
+) -> Result<Vec<u8>> {
+    let mut received = 0;
+    let bytes = fetch(&mut |count| {
+        ensure!(count <= 32769, "discovery response read bound");
+        let advanced = count.saturating_sub(received);
+        received = received.max(count);
+        progress(advanced)?;
+        ensure!(count <= 32768, "discovery response too large");
+        Ok(())
+    })?;
+    ensure!(bytes.len() <= 32768, "discovery response too large");
+    progress((bytes.len() as u64).saturating_sub(received))?;
+    Ok(bytes)
+}
+struct OpenFailure {
+    error: anyhow::Error,
+    unavailable: bool,
+}
 pub struct HttpsSource {
     base: url::Url,
+    legacy_base: url::Url,
     agent: ureq::Agent,
 }
 impl HttpsSource {
     pub fn new() -> Result<Self> {
-        let base = url::Url::parse(crate::FEED_URL)?.join("./")?;
-        ensure!(
-            base.scheme() == "https" && base.username().is_empty() && base.password().is_none(),
-            "invalid update origin"
-        );
+        let base = Self::pinned_base(crate::CDN_FEED_URL)?;
+        let legacy_base = Self::pinned_base(crate::FEED_URL)?;
         Ok(Self {
             base,
+            legacy_base,
             agent: ureq::AgentBuilder::new()
                 .redirects(0)
                 .timeout_connect(Duration::from_secs(8))
@@ -48,39 +84,94 @@ impl HttpsSource {
                 .build(),
         })
     }
-    fn open(&self, path: &str) -> Result<ureq::Response> {
-        relative(path)?;
-        let url = self.base.join(path)?;
+    fn pinned_base(feed: &str) -> Result<url::Url> {
+        let feed = url::Url::parse(feed)?;
         ensure!(
-            url.origin() == self.base.origin() && url.path().starts_with(self.base.path()),
+            feed.scheme() == "https"
+                && feed.username().is_empty()
+                && feed.password().is_none()
+                && feed.query().is_none()
+                && feed.fragment().is_none(),
+            "invalid update origin"
+        );
+        Ok(feed.join("./")?)
+    }
+    fn object_url(base: &url::Url, path: &str) -> Result<url::Url> {
+        relative(path)?;
+        let mut url = base.clone();
+        {
+            let mut segments = url
+                .path_segments_mut()
+                .map_err(|_| anyhow::anyhow!("invalid update origin"))?;
+            segments.pop_if_empty();
+            for segment in path.split('/') {
+                // Encode a literal object key once. Percent-looking manifest
+                // names, spaces and '#' must not become URL control syntax.
+                segments.push(segment);
+            }
+        }
+        ensure!(
+            url.origin() == base.origin()
+                && url.path().starts_with(base.path())
+                && url.query().is_none()
+                && url.fragment().is_none(),
             "update origin escape"
         );
+        Ok(url)
+    }
+    fn open_at(
+        &self,
+        base: &url::Url,
+        path: &str,
+    ) -> std::result::Result<ureq::Response, OpenFailure> {
+        let url = Self::object_url(base, path).map_err(|error| OpenFailure {
+            error,
+            unavailable: false,
+        })?;
         let response = self
             .agent
             .get(url.as_str())
             .set("Accept-Encoding", "identity")
-            .call()?;
-        ensure!(
-            response.status() == 200
-                && response.header("Content-Encoding").unwrap_or("identity") == "identity",
-            "invalid update response"
-        );
+            .call()
+            .map_err(|error| OpenFailure {
+                error: error.into(),
+                unavailable: true,
+            })?;
+        if response.status() != 200 {
+            return Err(OpenFailure {
+                error: anyhow::anyhow!("invalid update HTTP status {}", response.status()),
+                unavailable: true,
+            });
+        }
+        if response.header("Content-Encoding").unwrap_or("identity") != "identity" {
+            return Err(OpenFailure {
+                error: anyhow::anyhow!("invalid update response encoding"),
+                unavailable: false,
+            });
+        }
         Ok(response)
     }
-}
-impl Source for HttpsSource {
-    fn get(
-        &self,
-        path: &str,
+    fn open(&self, path: &str) -> Result<ureq::Response> {
+        // Domains come only from compiled constants. A200 body's validation
+        // failure never switches domains to conceal an integrity failure.
+        match self.open_at(&self.base, path) {
+            Ok(response) => Ok(response),
+            Err(failure) if failure.unavailable => self
+                .open_at(&self.legacy_base, path)
+                .map_err(|failure| failure.error),
+            Err(failure) => Err(failure.error),
+        }
+    }
+    fn response_bytes(
+        response: ureq::Response,
         limit: u64,
         progress: &mut dyn FnMut(u64) -> Result<()>,
     ) -> Result<Vec<u8>> {
-        let r = self.open(path)?;
-        if let Some(len) = r.header("Content-Length") {
+        if let Some(len) = response.header("Content-Length") {
             ensure!(len.parse::<u64>()? <= limit, "response too large");
         }
         let mut result = Vec::new();
-        let mut reader = r.into_reader().take(limit + 1);
+        let mut reader = response.into_reader().take(limit + 1);
         let mut buffer = [0u8; 65536];
         loop {
             let n = reader.read(&mut buffer)?;
@@ -88,10 +179,49 @@ impl Source for HttpsSource {
                 break;
             }
             result.extend_from_slice(&buffer[..n]);
-            ensure!(result.len() as u64 <= limit, "response too large");
             progress(result.len() as u64)?;
+            ensure!(result.len() as u64 <= limit, "response too large");
         }
         Ok(result)
+    }
+}
+impl Source for HttpsSource {
+    fn discovery_pair(
+        &self,
+        progress: &mut dyn FnMut(u64) -> Result<()>,
+    ) -> Result<(Vec<u8>, Vec<u8>)> {
+        for (index, base) in [&self.base, &self.legacy_base].into_iter().enumerate() {
+            let json = match self.open_at(base, "latest.json") {
+                Ok(response) => response,
+                Err(failure) if failure.unavailable && index == 0 => continue,
+                Err(failure) => return Err(failure.error),
+            };
+            let bytes = discovery_object(
+                |callback| Self::response_bytes(json, 32768, callback),
+                progress,
+            )?;
+            let sig = match self.open_at(base, "latest.p7s") {
+                Ok(response) => response,
+                // Restart the WHOLE pair on the other pinned origin. Never
+                // combine a preferred-origin JSON with a legacy signature.
+                Err(failure) if failure.unavailable && index == 0 => continue,
+                Err(failure) => return Err(failure.error),
+            };
+            let signature = discovery_object(
+                |callback| Self::response_bytes(sig, 32768, callback),
+                progress,
+            )?;
+            return Ok((bytes, signature));
+        }
+        unreachable!("two fixed update origins")
+    }
+    fn get(
+        &self,
+        path: &str,
+        limit: u64,
+        progress: &mut dyn FnMut(u64) -> Result<()>,
+    ) -> Result<Vec<u8>> {
+        Self::response_bytes(self.open(path)?, limit, progress)
     }
     fn download(
         &self,
@@ -119,9 +249,9 @@ impl Source for HttpsSource {
                 break;
             }
             total += n as u64;
+            progress(total)?;
             ensure!(total <= entry.size, "oversized payload");
             file.write_all(&buffer[..n])?;
-            progress(total)?;
         }
         file.sync_all()?;
         ensure!(
@@ -148,6 +278,54 @@ fn feed_auth(bytes: &[u8], sig: &[u8], fresh: bool) -> Result<Feed> {
     crate::platform::verify_cms_at(bytes, sig, crate::SIGNING_KEY, feed.created_unix)
         .map_err(anyhow::Error::msg)?;
     Ok(feed)
+}
+fn fresh_discovery(
+    root: &Path,
+    source: &impl Source,
+    status: &impl Status,
+    transfers: &mut Transfers,
+) -> Result<(Feed, Vec<u8>, Vec<u8>)> {
+    for attempt in 1..=3 {
+        let mut pair_bytes = 0u64;
+        let (bytes, signature) = source.discovery_pair(&mut |additional| {
+            pair_bytes = pair_bytes
+                .checked_add(additional)
+                .context("discovery pair transfer overflow")?;
+            ensure!(pair_bytes <= 4 * 32769, "discovery pair transfer bound");
+            transfers.wire_bytes = transfers
+                .wire_bytes
+                .checked_add(additional)
+                .context("discovery transfer overflow")?;
+            progress(status, "checking", 5)
+        })?;
+        ensure!(
+            bytes.len() <= 32768 && signature.len() <= 32768,
+            "discovery pair size bound"
+        );
+        // Schema, compatibility, time and bounds fail immediately. Only a CMS
+        // mismatch can represent promotion between the two alias requests.
+        let feed = Feed::parse(&bytes, now(), true)?;
+        match crate::platform::verify_cms_at(
+            &bytes,
+            &signature,
+            crate::SIGNING_KEY,
+            feed.created_unix,
+        ) {
+            Ok(()) => return Ok((feed, bytes, signature)),
+            Err(error) => {
+                log(
+                    root,
+                    "discovery-pair-auth-failure",
+                    serde_json::json!({"attempt":attempt,"reason":error,"wireBytes":transfers.wire_bytes}),
+                );
+                ensure!(
+                    attempt < 3,
+                    "discovery CMS authentication failed after three fresh pairs: {error}"
+                );
+            }
+        }
+    }
+    unreachable!("bounded discovery attempts")
 }
 pub fn now() -> i64 {
     SystemTime::now()
@@ -321,13 +499,16 @@ fn remote_meta(
     source: &impl Source,
     component: &Component,
     status: &impl Status,
+    transfers: &mut Transfers,
 ) -> Result<BTreeMap<String, Vec<u8>>> {
     let mut files = BTreeMap::new();
     for entry in &component.metadata {
-        let bytes = source.get(
+        let bytes = fetched_bytes(
+            source,
             &format!("{}/{}", component.directory, entry.path),
             entry.size,
-            &mut |_| progress(status, "checking", 10),
+            status,
+            transfers,
         )?;
         ensure!(
             bytes.len() as u64 == entry.size && hash(&bytes) == entry.sha256,
@@ -337,15 +518,47 @@ fn remote_meta(
     }
     Ok(files)
 }
-fn cached_payload(
+#[derive(Default)]
+pub(super) struct Transfers {
+    downloaded_files: usize,
+    downloaded_bytes: u64,
+    wire_bytes: u64,
+}
+fn fetched_bytes(
+    source: &impl Source,
+    path: &str,
+    limit: u64,
+    status: &impl Status,
+    transfers: &mut Transfers,
+) -> Result<Vec<u8>> {
+    let mut received = 0;
+    let result = source.get(path, limit, &mut |bytes| {
+        ensure!(
+            bytes <= limit.saturating_add(1),
+            "source response progress exceeds read bound"
+        );
+        let advanced = bytes.saturating_sub(received);
+        received = received.max(bytes);
+        transfers.wire_bytes += advanced;
+        ensure!(bytes <= limit, "source response exceeds bound");
+        progress(status, "checking", 10)
+    });
+    if let Ok(bytes) = &result {
+        ensure!(bytes.len() as u64 <= limit, "source response exceeds bound");
+        transfers.wire_bytes += (bytes.len() as u64).saturating_sub(received);
+    }
+    result
+}
+pub(super) fn cached_payload(
     root: &Path,
     source: &impl Source,
     path: &str,
     entry: &FileEntry,
     status: &impl Status,
-    done: u64,
-    total: u64,
+    download_progress: (u64, u64),
+    transfers: &mut Transfers,
 ) -> Result<(PathBuf, bool)> {
+    let (done, total) = download_progress;
     let cache = safe::target(root, &format!(".update/downloads/{}", entry.sha256))?;
     if cache.exists() && safe::matches(&cache, entry)? {
         return Ok((cache, false));
@@ -359,12 +572,27 @@ fn cached_payload(
         safe::regular(&part)?;
         fs::remove_file(&part)?;
     }
+    let mut received = 0;
+    transfers.downloaded_files += 1;
     let result = source.download(path, entry, &part, &mut |bytes| {
+        ensure!(
+            bytes <= entry.size.saturating_add(1),
+            "source payload progress exceeds read bound"
+        );
+        let advanced = bytes.saturating_sub(received);
+        received = received.max(bytes);
+        transfers.downloaded_bytes += advanced;
+        transfers.wire_bytes += advanced;
+        ensure!(bytes <= entry.size, "source payload exceeds bound");
         progress(
             status,
             "downloading",
-            30 + ((done + bytes) * 45 / total.max(1)) as u32,
+            (30 + ((done + bytes) * 45 / total.max(1)) as u32).min(75),
         )
+    });
+    let result = result.and_then(|()| {
+        ensure!(safe::matches(&part, entry)?, "download hash mismatch");
+        Ok(())
     });
     if let Err(e) = result {
         if part.exists() {
@@ -373,9 +601,72 @@ fn cached_payload(
         }
         return Err(e);
     }
-    ensure!(safe::matches(&part, entry)?, "download hash mismatch");
+    // Source adapters should report streaming bytes. A successful bounded,
+    // hash-verified adapter that omits the final callback still has exact size.
+    let remaining = entry.size.saturating_sub(received);
+    transfers.downloaded_bytes += remaining;
+    transfers.wire_bytes += remaining;
     crate::platform::replace_file(&part, &cache)?;
     Ok((cache, true))
+}
+fn optional_delivery(
+    root: &Path,
+    source: &impl Source,
+    component: &Component,
+    target: (&BTreeMap<String, Vec<u8>>, &Manifest),
+    status: &impl Status,
+    transfers: &mut Transfers,
+    stats: &mut delivery::Stats,
+) -> Result<Option<delivery::Delivery>> {
+    let (metadata, manifest) = target;
+    let bytes = match fetched_bytes(
+        source,
+        &format!("{}/DELIVERY.json", component.directory),
+        MAX_META,
+        status,
+        transfers,
+    ) {
+        Ok(bytes) => bytes,
+        Err(error) => {
+            ensure!(!status.cancelled(), "update cancelled");
+            log(root, "delivery-unavailable", format!("{error:#}"));
+            return Ok(None);
+        }
+    };
+    let result = (|| -> Result<delivery::Delivery> {
+        let descriptor = delivery::Delivery::parse(
+            &bytes,
+            &component.identity,
+            &metadata["PACKAGE-MANIFEST.json"],
+            &metadata["VERSION.json"],
+            manifest,
+            now(),
+        )?;
+        let signature = fetched_bytes(
+            source,
+            &format!("{}/DELIVERY.p7s", component.directory),
+            32768,
+            status,
+            transfers,
+        )?;
+        crate::platform::verify_cms_at(
+            &bytes,
+            &signature,
+            crate::SIGNING_KEY,
+            descriptor.built_unix,
+        )
+        .map_err(anyhow::Error::msg)?;
+        Ok(descriptor)
+    })();
+    match result {
+        Ok(descriptor) => Ok(Some(descriptor)),
+        Err(error) => {
+            ensure!(!status.cancelled(), "update cancelled");
+            stats.fallbacks += 1;
+            log(root, "delivery-descriptor-fallback", format!("{error:#}"));
+            Ok(None)
+        }
+    }
 }
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -384,6 +675,8 @@ pub struct Outcome {
     pub sequence: u64,
     pub downloaded_files: usize,
     pub downloaded_bytes: u64,
+    pub wire_bytes: u64,
+    pub delivery: delivery::Stats,
     pub changed_game_files: usize,
     pub activated: bool,
 }
@@ -410,17 +703,14 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
             sequence: previous.as_ref().map_or(0, |(f, _)| f.sequence),
             downloaded_files: 0,
             downloaded_bytes: 0,
+            wire_bytes: 0,
+            delivery: delivery::Stats::default(),
             changed_game_files: 0,
             activated: true,
         });
     }
-    let bytes = source.get("latest.json", 32768, &mut |_| {
-        progress(status, "checking", 5)
-    })?;
-    let signature = source.get("latest.p7s", 32768, &mut |_| {
-        progress(status, "checking", 5)
-    })?;
-    let feed = feed_auth(&bytes, &signature, true)?;
+    let mut transfers = Transfers::default();
+    let (feed, bytes, signature) = fresh_discovery(root, source, status, &mut transfers)?;
     feed.check_advance(&bytes, previous.as_ref().map(|(f, b)| (f, b.as_slice())))?;
     let failed = root.join(".update/failed-release.txt");
     if failed.exists() {
@@ -444,10 +734,12 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
         sequence: feed.sequence,
         downloaded_files: 0,
         downloaded_bytes: 0,
+        wire_bytes: 0,
+        delivery: delivery::Stats::default(),
         changed_game_files: 0,
         activated: false,
     };
-    let engine_meta = remote_meta(source, &feed.engine, status)?;
+    let engine_meta = remote_meta(source, &feed.engine, status, &mut transfers)?;
     let engine = Engine::parse(&engine_meta["ENGINE.json"])?;
     crate::platform::verify_cms_at(
         &engine_meta["ENGINE.json"],
@@ -469,15 +761,15 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
         && previous
             .as_ref()
             .is_some_and(|(_, old_bytes)| old_bytes == &bytes)
+        && verify_launch(root).is_ok()
     {
-        if verify_launch(root).is_ok() {
-            return Ok(outcome);
-        }
+        outcome.wire_bytes = transfers.wire_bytes;
+        return Ok(outcome);
     }
     let metadata = if game_same {
         old_meta
     } else {
-        remote_meta(source, &feed.game, status)?
+        remote_meta(source, &feed.game, status, &mut transfers)?
     };
     cms(
         &metadata["RELEASE-STATEMENT.json"],
@@ -517,6 +809,21 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
             removed.push((*path).to_owned());
         }
     }
+    // Existing v1 releases have no accelerator, and zero-payload checks do not
+    // request a potentially large optional descriptor.
+    let mut delivery = if pending.is_empty() {
+        None
+    } else {
+        optional_delivery(
+            root,
+            source,
+            &feed.game,
+            (&metadata, &new),
+            status,
+            &mut transfers,
+            &mut outcome.delivery,
+        )?
+    };
     let engine_needed = engine.exe_sha256 != old_engine.exe_sha256;
     let total = pending.iter().map(|f| f.size).sum::<u64>()
         + if engine_needed { engine.exe_size } else { 0 };
@@ -537,24 +844,47 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
     }
     let metadata_bytes = metadata.values().map(|b| b.len() as u64).sum::<u64>();
     largest = largest.max(metadata_bytes.min(MAX_META));
+    let required = total.saturating_mul(2) + metadata_bytes + backups + largest + 64 * 1024 * 1024;
+    let available = crate::platform::free_bytes(root)?;
     ensure!(
-        total <= MAX_TOTAL
-            && crate::platform::free_bytes(root)?
-                > total.saturating_mul(2) + metadata_bytes + backups + largest + 64 * 1024 * 1024,
+        total <= MAX_TOTAL && available > required,
         "insufficient update and rollback space"
     );
+    if delivery.as_ref().is_some_and(|descriptor| {
+        available <= required.saturating_add(descriptor.extra_cache_bytes())
+    }) {
+        outcome.delivery.fallbacks += 1;
+        log(
+            root,
+            "delivery-space-fallback",
+            "insufficient additional accelerator cache space",
+        );
+        delivery = None;
+    }
     safe::clear_scratch(root, "staging")?;
+    if let Some(delivery) = &delivery {
+        delivery::Acceleration {
+            root,
+            source,
+            component: &feed.game,
+            status,
+            total,
+            transfers: &mut transfers,
+            stats: &mut outcome.delivery,
+        }
+        .run(delivery, &new, &pending)?;
+    }
     let mut changes = vec![];
     let mut done = 0;
     for entry in &pending {
-        let (cache, downloaded) = cached_payload(
+        let (cache, _) = cached_payload(
             root,
             source,
             &format!("{}/{}", feed.game.directory, entry.path),
             entry,
             status,
-            done,
-            total,
+            (done, total),
+            &mut transfers,
         )?;
         let target = safe::target(
             &root.join(".update/staging"),
@@ -573,10 +903,6 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
             new: Some(new),
         });
         done += entry.size;
-        if downloaded {
-            outcome.downloaded_files += 1;
-            outcome.downloaded_bytes += entry.size;
-        }
     }
     outcome.changed_game_files = pending.len() + removed.len();
     for path in removed {
@@ -599,14 +925,14 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
             size: engine.exe_size,
             sha256: engine.exe_sha256.clone(),
         };
-        let (cache, downloaded) = cached_payload(
+        let (cache, _) = cached_payload(
             root,
             source,
             &format!("{}/Mir2Updater.exe", feed.engine.directory),
             &entry,
             status,
-            done,
-            total,
+            (done, total),
+            &mut transfers,
         )?;
         let dir = safe::target(root, &format!("updater/engines/{}", engine.exe_sha256))?;
         fs::create_dir_all(&dir)?;
@@ -633,10 +959,6 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
             crate::platform::replace_file(&temp, &dest)?;
         }
         engine_at(root, &engine.exe_sha256)?;
-        if downloaded {
-            outcome.downloaded_files += 1;
-            outcome.downloaded_bytes += entry.size;
-        }
     }
     changes.push(transaction::stage_bytes(
         root,
@@ -664,6 +986,9 @@ pub fn check_update(root: &Path, source: &impl Source, status: &impl Status) -> 
         return Err(error);
     }
     progress(status, "launching", 100)?;
+    outcome.downloaded_files = transfers.downloaded_files;
+    outcome.downloaded_bytes = transfers.downloaded_bytes;
+    outcome.wire_bytes = transfers.wire_bytes;
     outcome.activated = true;
     Ok(outcome)
 }
