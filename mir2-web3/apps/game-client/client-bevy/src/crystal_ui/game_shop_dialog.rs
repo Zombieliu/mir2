@@ -1587,6 +1587,10 @@ fn format_number(value: u64) -> String {
 }
 
 #[cfg(test)]
+#[path = "game_shop_hit_tests.rs"]
+mod hit_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::inventory::CrystalItemTooltipSourceModel;

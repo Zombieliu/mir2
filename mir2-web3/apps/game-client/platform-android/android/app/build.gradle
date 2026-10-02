@@ -473,8 +473,8 @@ android {
         applicationId 'com.mir2.web3'
         minSdk 31
         targetSdk 35
-        versionCode 33
-        versionName '0.1.30-personal-jni-scenes'
+        versionCode 34
+        versionName '0.1.31-gameshop-page-cache'
         buildConfigField 'String', 'MIR2_GATEWAY_URL', groovy.json.JsonOutput.toJson(System.getenv('MIR2_GATEWAY_WS_URL') ?: '')
 
         ndk {

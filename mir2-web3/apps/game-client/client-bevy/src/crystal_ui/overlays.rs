@@ -11941,6 +11941,7 @@ fn render_overlays(
             state.shop_open(),
             &game_shop,
             &state.game_shop_dialog,
+            state.game_shop_page,
             &ui,
             &inventory,
             &mut game_shop_cache,
@@ -12467,6 +12468,7 @@ struct GameShopRenderKey {
     root: Entity,
     model: GameShopModel,
     dialog: String,
+    page: usize,
     player: String,
     inventory: String,
 }
@@ -12481,6 +12483,7 @@ impl PartialEq for GameShopRenderKey {
         self.root == other.root
             && self.model == other.model
             && self.dialog == other.dialog
+            && self.page == other.page
             && self.player == other.player
             && self.inventory == other.inventory
     }
@@ -12492,6 +12495,7 @@ fn fill_game_shop_panel(
     visible: bool,
     model: &GameShopModel,
     dialog: &game_shop_dialog::GameShopDialogUi,
+    page: usize,
     ui: &UiReadModel,
     inventory: &InventoryModel,
     cache: &mut GameShopRenderCache,
@@ -12552,6 +12556,9 @@ fn fill_game_shop_panel(
         root: entity,
         model: model.clone(),
         dialog: dialog_key,
+        // Paging is UI-only state outside GameShopDialogUi. It must invalidate
+        // the retained tree even when search, quantities and catalog are unchanged.
+        page,
         player: player_key,
         inventory: inventory_key,
     };
