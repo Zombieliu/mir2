@@ -9,6 +9,10 @@
 
 use std::collections::VecDeque;
 
+#[path = "quest_phone.rs"]
+mod phone;
+pub use phone::{PhoneQuestControl, PhoneQuestPresentation, PhoneQuestScrollArea, PhoneQuestText};
+
 #[path = "quest_multi_guidance.rs"]
 mod multi_guidance;
 #[cfg(test)]
@@ -1516,6 +1520,7 @@ impl Plugin for Mir2QuestUiPlugin {
             .init_resource::<NpcDialogNav>()
             .init_resource::<NativePlayerUiState>()
             .init_resource::<UiEffectQueue>()
+            .init_resource::<phone::PhoneInputState>()
             .add_message::<bevy::input::mouse::MouseWheel>()
             .configure_sets(
                 Update,
@@ -1531,6 +1536,12 @@ impl Plugin for Mir2QuestUiPlugin {
                     .in_set(PendingLifecycleSet::UiReset),
             )
             .add_systems(Startup, spawn_quest_ui_panels)
+            .add_systems(
+                Update,
+                phone::pointer_input
+                    .before(process_quest_ui_input)
+                    .in_set(NativePlayerUiSet::Mutate),
+            )
             .add_systems(
                 Update,
                 process_quest_ui_input
@@ -1881,6 +1892,7 @@ fn spawn_quest_ui_panels(mut commands: Commands, asset_server: Option<Res<AssetS
 
 #[derive(SystemParam)]
 struct QuestInputModels<'w> {
+    phone: Option<ResMut<'w, phone::PhoneInputState>>,
     map: Option<Res<'w, MapModel>>,
     notice: Option<Res<'w, crate::crystal_ui::notice::NoticeDialogState>>,
     tracker: Res<'w, QuestTracker>,
@@ -1895,6 +1907,9 @@ struct QuestInputModels<'w> {
 
 #[derive(SystemParam)]
 struct JourneyRenderModels<'w, 's> {
+    phone_snapshot: Local<'s, Option<phone::RenderSnapshot>>,
+    phone: Option<Res<'w, PhoneQuestPresentation>>,
+    phone_input: Option<Res<'w, phone::PhoneInputState>>,
     locale_revision: Local<'s, u64>,
     completed: Res<'w, CompletedQuestTracker>,
     guidance: Res<'w, QuestGuidance>,
@@ -1913,7 +1928,10 @@ fn process_quest_ui_input(
     mut npc_nav: ResMut<NpcDialogNav>,
     mut player_ui: ResMut<NativePlayerUiState>,
     mut effects: Option<ResMut<UiEffectQueue>>,
-    button_events: Query<(&Interaction, &QuestUiButton), (Changed<Interaction>, With<Button>)>,
+    button_events: Query<
+        (&Interaction, &QuestUiButton),
+        (Changed<Interaction>, With<Button>, Without<phone::PhoneQuestButton>),
+    >,
     diary_rows: Query<(&QuestDiaryRow, &RelativeCursorPosition)>,
     shell: Option<Res<NativeShellModel>>,
     keys: Res<ButtonInput<KeyCode>>,
@@ -2028,10 +2046,13 @@ fn process_quest_ui_input(
         }
     }
 
-    for (interaction, action) in button_events.iter() {
-        if *interaction != Interaction::Pressed {
-            continue;
-        }
+    let phone_clicks = models.phone.as_deref_mut()
+        .map(|state| std::mem::take(&mut state.clicks)).unwrap_or_default();
+    for action in button_events.iter()
+        .filter(|(interaction, _)| **interaction == Interaction::Pressed)
+        .map(|(_, action)| action)
+        .chain(phone_clicks.iter())
+    {
         if !matches!(action, QuestUiButton::PrepareQuestFinish { .. }) {
             quest_state.pending_turn_in = None;
         }
@@ -2842,6 +2863,7 @@ fn render_quest_ui(
     }
 
     if !in_game {
+        *journey_models.phone_snapshot = None;
         return;
     }
 
@@ -2849,6 +2871,7 @@ fn render_quest_ui(
 
     // Avoid churn: only re-render when relevant state changed or quest log toggled.
     if *journey_models.locale_revision == crate::native_i18n::revision()
+        && !journey_models.phone.as_ref().is_some_and(|phone| phone.is_changed())
         && !tracker.is_changed()
         && !journey_models.completed.is_changed()
         && !journey_models.guidance.is_changed()
@@ -2979,6 +3002,16 @@ fn render_quest_ui(
     }
 
     // Crystal Q surface: current-quest diary at the source default location.
+    let phone = journey_models.phone.as_deref().filter(|phone| phone.is_valid());
+    let phone_pair = quest_log_open && quest_state.detail_quest(&tracker).is_some();
+    let phone_refresh = if let Some(phone) = phone {
+        let snapshot = phone::RenderSnapshot::capture(phone, &tracker, journey.as_ref(),
+            &ui_model.player, quest_log_open, &quest_state, &journey_models.guidance, &pending);
+        let changed = journey_models.guidance.is_changed() || journey_models.catalog.is_changed()
+            || journey_models.phone_snapshot.as_ref() != Some(&snapshot);
+        *journey_models.phone_snapshot = Some(snapshot);
+        changed
+    } else { *journey_models.phone_snapshot = None; true };
     for (entity, mut node) in all.p2().iter_mut() {
         if quest_log_open {
             // Re-apply source-faithful geometry whenever the panel opens.
@@ -2990,6 +3023,9 @@ fn render_quest_ui(
             node.max_width = Val::Px(QUEST_DIARY_DESIGN_WIDTH);
             node.min_height = Val::Px(QUEST_DIARY_DESIGN_HEIGHT);
             node.max_height = Val::Px(QUEST_DIARY_DESIGN_HEIGHT);
+            if let Some(phone) = phone {
+                phone.apply_panel(&mut node, false, phone_pair);
+            }
         } else {
             // Preserve the closed-state geometry expected by the existing
             // transition assertion; Display::None keeps it non-rendering.
@@ -3002,9 +3038,16 @@ fn render_quest_ui(
         } else {
             Display::None
         };
+        if !phone_refresh { continue; }
         commands.entity(entity).despawn_children();
         if quest_log_open {
             commands.entity(entity).with_children(|panel| {
+                if let Some(phone) = phone {
+                    phone::render_diary(panel, &tracker, &journey_models.guidance,
+                        journey.as_ref(), &quest_state, phone,
+                        journey_models.phone_input.as_deref());
+                    return;
+                }
                 render_quest_diary_panel(
                     panel,
                     &tracker,
@@ -3031,14 +3074,25 @@ fn render_quest_ui(
         node.max_width = Val::Px(QUEST_DETAIL_DESIGN_WIDTH);
         node.min_height = Val::Px(QUEST_DETAIL_DESIGN_HEIGHT);
         node.max_height = Val::Px(QUEST_DETAIL_DESIGN_HEIGHT);
+        if let Some(phone) = phone {
+            phone.apply_panel(&mut node, true, phone_pair);
+        }
         node.display = if visible {
             Display::Flex
         } else {
             Display::None
         };
+        if !phone_refresh { continue; }
         commands.entity(entity).despawn_children();
         if let Some(quest) = detail_quest {
             commands.entity(entity).with_children(|panel| {
+                if let Some(phone) = phone {
+                    phone::render_detail(panel, quest, &journey_models.guidance,
+                        &quest_state, &pending, phone,
+                        journey_models.phone_input.as_deref(), &ui_model.player,
+                        asset_server.as_deref());
+                    return;
+                }
                 render_quest_detail_panel(
                     panel,
                     quest,
@@ -5539,74 +5593,8 @@ fn render_quest_detail_panel(
         guidance,
     );
 
-    let diary_accept =
-        can_accept_quest(quest) && newcomer_diary_accept_authorized(quest, Some(guidance));
-    let diary_finish =
-        can_finish_quest(quest) && newcomer_diary_finish_authorized(quest, Some(guidance));
-    if diary_accept {
-        let pending = pending.contains(&PendingOperationKey::QuestAccept {
-            npc_index: 0,
-            quest_index: quest.quest_index,
-        });
-        quest_log_image_button_at(
-            parent,
-            asset_server,
-            QUEST_LIST_ACCEPT_ASSET,
-            layout.share,
-            QuestUiButton::AcceptQuest {
-                npc_index: 0,
-                quest_index: quest.quest_index,
-            },
-            !pending,
-        );
-    } else if diary_finish {
-        let selected_item_index = state.selected_reward_index.unwrap_or(-1);
-        let pending = pending.contains(&PendingOperationKey::QuestFinish {
-            quest_index: quest.quest_index,
-            selected_item_index,
-        });
-        quest_log_image_button_at(
-            parent,
-            asset_server,
-            QUEST_LIST_FINISH_ASSET,
-            layout.share,
-            QuestUiButton::FinishQuest {
-                quest_index: quest.quest_index,
-                selected_item_index,
-            },
-            quest_finish_enabled(quest, state.selected_reward_index) && !pending,
-        );
-    } else if can_finish_quest(quest) {
-        let waiting = state
-            .pending_turn_in
-            .as_ref()
-            .is_some_and(|request| request.quest_index == quest.quest_index)
-            || pending.contains(&PendingOperationKey::QuestFinish {
-                quest_index: quest.quest_index,
-                selected_item_index: state.selected_reward_index.unwrap_or(-1),
-            });
-        quest_log_image_button_at(
-            parent,
-            asset_server,
-            QUEST_LIST_FINISH_ASSET,
-            layout.share,
-            QuestUiButton::PrepareQuestFinish {
-                quest_index: quest.quest_index,
-            },
-            !waiting,
-        );
-    } else {
-        quest_log_image_button_at(
-            parent,
-            asset_server,
-            QUEST_DETAIL_SHARE_ASSET,
-            layout.share,
-            QuestUiButton::ShareQuest {
-                quest_index: quest.quest_index,
-            },
-            quest.status.is_active(),
-        );
-    }
+    let primary = quest_detail_primary_spec(quest, guidance, state, pending);
+    quest_log_image_button_at(parent, asset_server, primary.asset, layout.share, primary.action, primary.enabled);
     let abandon_pending = pending.contains(&PendingOperationKey::QuestAbandon {
         quest_index: quest.quest_index,
     });
@@ -5620,6 +5608,77 @@ fn render_quest_detail_panel(
         },
         can_abandon_quest(quest) && !abandon_pending,
     );
+}
+
+
+struct QuestDetailPrimarySpec {
+    asset: &'static str,
+    action: QuestUiButton,
+    enabled: bool,
+}
+
+fn detail_primary_spec(asset: &'static str, action: QuestUiButton, enabled: bool) -> QuestDetailPrimarySpec {
+    QuestDetailPrimarySpec { asset, action, enabled }
+}
+
+fn quest_detail_primary_spec(quest: &Quest, guidance: &QuestGuidance, state: &QuestUiState, pending: &PendingOperations) -> QuestDetailPrimarySpec {
+    let diary_accept =
+        can_accept_quest(quest) && newcomer_diary_accept_authorized(quest, Some(guidance));
+    let diary_finish =
+        can_finish_quest(quest) && newcomer_diary_finish_authorized(quest, Some(guidance));
+    if diary_accept {
+        let pending = pending.contains(&PendingOperationKey::QuestAccept {
+            npc_index: 0,
+            quest_index: quest.quest_index,
+        });
+        detail_primary_spec(
+            QUEST_LIST_ACCEPT_ASSET,
+            QuestUiButton::AcceptQuest {
+                npc_index: 0,
+                quest_index: quest.quest_index,
+            },
+            !pending,
+        )
+    } else if diary_finish {
+        let selected_item_index = state.selected_reward_index.unwrap_or(-1);
+        let pending = pending.contains(&PendingOperationKey::QuestFinish {
+            quest_index: quest.quest_index,
+            selected_item_index,
+        });
+        detail_primary_spec(
+            QUEST_LIST_FINISH_ASSET,
+            QuestUiButton::FinishQuest {
+                quest_index: quest.quest_index,
+                selected_item_index,
+            },
+            quest_finish_enabled(quest, state.selected_reward_index) && !pending,
+        )
+    } else if can_finish_quest(quest) {
+        let waiting = state
+            .pending_turn_in
+            .as_ref()
+            .is_some_and(|request| request.quest_index == quest.quest_index)
+            || pending.contains(&PendingOperationKey::QuestFinish {
+                quest_index: quest.quest_index,
+                selected_item_index: state.selected_reward_index.unwrap_or(-1),
+            });
+        detail_primary_spec(
+            QUEST_LIST_FINISH_ASSET,
+            QuestUiButton::PrepareQuestFinish {
+                quest_index: quest.quest_index,
+            },
+            !waiting,
+        )
+    } else {
+        detail_primary_spec(
+            QUEST_DETAIL_SHARE_ASSET,
+            QuestUiButton::ShareQuest {
+                quest_index: quest.quest_index,
+            },
+            quest.status.is_active(),
+        )
+    }
+
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

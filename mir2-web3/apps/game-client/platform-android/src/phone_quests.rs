@@ -1,22 +1,133 @@
 //! Fit the actual shared diary/detail pair as one Android presentation group.
-//! Authored geometry, children, button handlers and authoritative models stay
-//! owned by the shared renderer. Wide phones reserve the same HUD/thumb lane
-//! as the Android HUD; compact/IME fallback does not claim font/48dp acceptance.
+//! The host supplies a dp workspace to the optional shared phone renderer.
+//! Shared controllers/models stay authoritative; the common transform retains
+//! independent diary/detail windows and the same HUD/thumb lane as the HUD.
 use crate::shared_shell::{AndroidStageFit, HostState};
 use bevy::prelude::*;
+#[cfg(feature = "ui-preview")]
+use bevy::text::TextLayoutInfo;
 use mir2_client_bevy::{
-    crystal_ui::overlays::NativePlayerUiState,
+    crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState},
     native_shell::{NativeShellModel, NativeShellScreen},
-    quest_ui::{QuestDetailPanel, QuestLogPanel, QuestUiRoot},
+    quest_ui::{PhoneQuestPresentation, QuestDetailPanel, QuestLogPanel, QuestUiRoot},
 };
 
 pub(crate) fn install(app: &mut App) {
+    app.init_resource::<PhoneQuestPresentation>()
+        .add_systems(
+            Update,
+            publish_phone_presentation
+                .after(NativePlayerUiSet::Mutate)
+                .before(NativePlayerUiSet::Read),
+        )
+        .add_systems(
+            PostUpdate,
+            fit_shared_quest_windows
+                .after(AndroidStageFit)
+                .before(bevy::ui::UiSystems::Layout),
+        );
+    #[cfg(feature = "ui-preview")]
     app.add_systems(
         PostUpdate,
-        fit_shared_quest_windows
-            .after(AndroidStageFit)
-            .before(bevy::ui::UiSystems::Layout),
+        report_phone_quest_geometry.after(bevy::ui::UiSystems::PostLayout),
     );
+}
+
+fn publish_phone_presentation(
+    windows: Query<&Window>,
+    host: Res<HostState>,
+    player: Res<NativePlayerUiState>,
+    world_input: crate::world_input::WorldInputContext,
+    mut presentation: ResMut<PhoneQuestPresentation>,
+) {
+    let next = windows
+        .single()
+        .ok()
+        .and_then(|window| {
+            let viewport = Vec2::new(window.width(), window.height());
+            let fit =
+                mir2_client_bevy::crystal_ui::CrystalStageTransform::fit(viewport.x, viewport.y);
+            let safe = host.quest_presentation_insets() / window.scale_factor();
+            let workspace = workspace(
+                viewport,
+                safe,
+                host.ime_bottom / window.scale_factor(),
+                world_input.quest_sidebar_requested(&player),
+            )?;
+            Some(PhoneQuestPresentation {
+                workspace: workspace.size(),
+                authored_unit: 1.0 / fit.scale,
+            })
+        })
+        .unwrap_or_default();
+    if *presentation != next {
+        *presentation = next;
+    }
+}
+
+#[cfg(feature = "ui-preview")]
+fn report_phone_quest_geometry(
+    windows: Query<&Window>,
+    stage: Res<UiScale>,
+    texts: Query<
+        (&Text, &TextFont, &TextLayoutInfo),
+        With<mir2_client_bevy::quest_ui::PhoneQuestText>,
+    >,
+    controls: Query<
+        (&ComputedNode, &bevy::ui::UiGlobalTransform),
+        With<mir2_client_bevy::quest_ui::PhoneQuestControl>,
+    >,
+    areas: Query<&ComputedNode, With<mir2_client_bevy::quest_ui::PhoneQuestScrollArea>>,
+    mut frames: Local<u16>,
+) {
+    *frames = frames.saturating_add(1);
+    if *frames != 90 {
+        return;
+    }
+    let Ok(window) = windows.single() else { return };
+    let density = window.scale_factor();
+    for (text, font, layout) in &texts {
+        let FontSize::Px(size) = font.font_size else {
+            continue;
+        };
+        info!(text=?text.0, font_dp=size*stage.0, glyphs=layout.glyphs.len(),
+            alpha_masks=layout.glyphs.iter().filter(|glyph| glyph.atlas_info.is_alpha_mask).count(),
+            "ANDROID_PHONE_QUEST_TEXT");
+    }
+    for (node, transform) in &controls {
+        info!(size_dp=?node.size()/density, center_dp=?transform.translation/density,
+            "ANDROID_PHONE_QUEST_CONTROL");
+    }
+    for node in &areas {
+        info!(size_dp=?node.size()/density, content_dp=?node.content_size()/density,
+            offset=?node.scroll_position*node.inverse_scale_factor,
+            "ANDROID_PHONE_QUEST_SCROLL");
+    }
+}
+
+fn workspace(viewport: Vec2, safe: Vec4, ime: f32, protect_chrome: bool) -> Option<Rect> {
+    if !viewport.is_finite()
+        || !safe.is_finite()
+        || !ime.is_finite()
+        || ime < 0.0
+        || viewport.min_element() <= 0.0
+    {
+        return None;
+    }
+    let min = Vec2::new(safe.x, safe.y).max(Vec2::ZERO).min(viewport);
+    let max = (viewport - Vec2::new(safe.z, safe.w).max(Vec2::ZERO))
+        .max(min)
+        .min(viewport);
+    let available = max - min;
+    if available.min_element() <= 0.0 {
+        return None;
+    }
+    let gutter = Vec2::splat(16.0).min(available * 0.25);
+    Some(
+        crate::phone_panels::panel_sidebar(viewport, safe.max(Vec4::ZERO), ime, protect_chrome)
+            .map(|sidebar| sidebar.workspace)
+            .unwrap_or_else(|| Rect::from_corners(min + gutter, max - gutter)),
+    )
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -49,19 +160,7 @@ fn focus_group(
     {
         return None;
     }
-    let min = Vec2::new(safe.x, safe.y).max(Vec2::ZERO).min(viewport);
-    let max = (viewport - Vec2::new(safe.z, safe.w).max(Vec2::ZERO))
-        .max(min)
-        .min(viewport);
-    let available = max - min;
-    if available.min_element() <= 0.0 {
-        return None;
-    }
-    let gutter = Vec2::splat(16.0).min(available * 0.25);
-    let workspace =
-        crate::phone_panels::panel_sidebar(viewport, safe.max(Vec4::ZERO), ime, protect_chrome)
-            .map(|sidebar| sidebar.workspace)
-            .unwrap_or_else(|| Rect::from_corners(min + gutter, max - gutter));
+    let workspace = workspace(viewport, safe, ime, protect_chrome)?;
     let scale = (workspace.size() / (group.size() * stage_scale))
         .min_element()
         .min(3.2);
@@ -337,6 +436,63 @@ mod tests {
             )
             .is_none());
         }
+    }
+
+    #[test]
+    fn phone_reflow_geometry_preserves_dp_targets_without_secondary_shrink() {
+        for (viewport, safe, ime) in [
+            (Vec2::new(851.0, 393.0), Vec4::ZERO, 0.0),
+            (
+                Vec2::new(960.0, 432.0),
+                Vec4::new(12.0, 8.0, 22.0, 12.0),
+                0.0,
+            ),
+            (Vec2::new(568.0, 262.0), Vec4::ZERO, 0.0),
+            (
+                Vec2::new(851.0, 393.0),
+                Vec4::new(0.0, 0.0, 0.0, 170.0),
+                170.0,
+            ),
+        ] {
+            let expected = workspace(viewport, safe, ime, true).unwrap();
+            let fit = CrystalStageTransform::fit(viewport.x, viewport.y);
+            let authored = Rect::from_corners(Vec2::ZERO, expected.size() / fit.scale);
+            let focused =
+                focus_group(authored, viewport, safe, fit.scale, Vec2::ZERO, ime, true).unwrap();
+            assert!((focused.scale - 1.0).abs() < 0.0001);
+            let result = screen_rect(authored, focused.transform(authored), Vec2::ZERO, fit.scale);
+            assert!(result.min.distance(expected.min) < 0.001);
+            assert!(result.max.distance(expected.max) < 0.001);
+            assert!((48.0 / fit.scale * fit.scale * focused.scale - 48.0).abs() < 0.001);
+        }
+    }
+
+    #[test]
+    fn host_publishes_workspace_and_density_conversion_to_shared_phone_renderer() {
+        let mut app = App::new();
+        let mut player = NativePlayerUiState::default();
+        player.core.screen = mir2_ui_core::state::UiScreen::InGame;
+        player.core.panel = mir2_ui_core::state::UiPanel::QuestLog;
+        app.insert_resource(player)
+            .init_resource::<HostState>()
+            .init_resource::<PhoneQuestPresentation>()
+            .add_systems(Update, publish_phone_presentation);
+        app.world_mut().spawn(Window {
+            resolution: bevy::window::WindowResolution::new(851, 393),
+            ..default()
+        });
+        app.update();
+        let value = app.world().resource::<PhoneQuestPresentation>();
+        assert_eq!(
+            value.workspace,
+            workspace(Vec2::new(851.0, 393.0), Vec4::ZERO, 0.0, true)
+                .unwrap()
+                .size()
+        );
+        assert!(
+            (value.authored_unit * CrystalStageTransform::fit(851.0, 393.0).scale - 1.0).abs()
+                < 0.001
+        );
     }
 
     #[test]
