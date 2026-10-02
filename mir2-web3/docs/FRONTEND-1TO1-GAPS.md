@@ -1,5 +1,17 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 Android exact7b62/v20 received-model actual-frame checkpoint
+>
+> Real emulator row tap opens shared quest definition/turn-in/progress2/2 details;
+> received NPC body/Exit visible and Exit removes the window. Seven originals,
+> clean dual packages/35 inputs/resources/installed hashes,315/337/Java41+41/API31
+> bound. HUD does not restore after Exit and quest text/windows remain too small:
+> phone layout/lifecycle FAIL, not full UI acceptance. Five PID captures73 GL506
+> still FAIL; prior135 retained. Next preview panel lifetime/phone quest layout,
+> bounded GPU diagnosis and full Windows inputs/models/resources. No actual JNI,
+> live quest/reward/online/physical acceptance or whole-goal completion follows.
+> [Actual images, taps and retained failures](generated/player-qa/native-android-quest-preview-20261002/README.md).
+
 > 2026-10-02 Android exactccdd51a90 received quest/dialog source checkpoint
 >
 > Android now stages public metadata through authenticated selected Start and

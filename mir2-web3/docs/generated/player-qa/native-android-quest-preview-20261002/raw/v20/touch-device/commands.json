@@ -1,0 +1,324 @@
+{
+  "source": "7b62eda33cbf6c10a41c22516f1e6400dfe92202",
+  "versionCode": 20,
+  "apkSha256": "d946ee116a52890c7137fc20dd7c55a41d2948ad645cb5c83c58e422a3e4bb13",
+  "offlineOnly": true,
+  "physicalDeviceAccepted": false,
+  "noTransactionButtonTapped": true,
+  "stages": [
+    {
+      "name": "quests-ingress",
+      "pid": 12336,
+      "tap": {
+        "x": 943,
+        "y": 168
+      },
+      "source": "7b62eda33cbf6c10a41c22516f1e6400dfe92202",
+      "screenshotBefore": "quests-ingress-before.png",
+      "screenshotAfter": "quests-ingress-after.png"
+    },
+    {
+      "name": "npc-ingress",
+      "pid": 12422,
+      "tap": {
+        "x": 263,
+        "y": 319
+      },
+      "source": "7b62eda33cbf6c10a41c22516f1e6400dfe92202",
+      "screenshotBefore": "npc-ingress-before.png",
+      "screenshotAfter": "npc-ingress-after.png"
+    }
+  ],
+  "commands": [
+    {
+      "name": "avd.txt",
+      "args": [
+        "emu",
+        "avd",
+        "name"
+      ]
+    },
+    {
+      "name": "api.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.version.sdk"
+      ]
+    },
+    {
+      "name": "display.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size"
+      ]
+    },
+    {
+      "name": "density.txt",
+      "args": [
+        "shell",
+        "wm",
+        "density"
+      ]
+    },
+    {
+      "name": "os.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.fingerprint"
+      ]
+    },
+    {
+      "name": "package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "package-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "installed-apk-sha256.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~eO8MZD8YOIsCyXDxvnjO-Q==/com.mir2.web3.uipreview-xoKMEFq2mgsxiciX9InnzQ==/base.apk"
+      ]
+    },
+    {
+      "name": "quests-ingress-stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "quests-ingress-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "quests-ingress"
+      ]
+    },
+    {
+      "name": "quests-ingress-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "quests-ingress-before.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "quests-ingress-before-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=12336",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "quests-ingress-tap.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "943",
+        "168"
+      ]
+    },
+    {
+      "name": "quests-ingress-after.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "quests-ingress-after-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=12336",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "quests-ingress-ime.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "input_method"
+      ]
+    },
+    {
+      "name": "quests-ingress-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ]
+    },
+    {
+      "name": "quests-ingress-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npc-ingress-stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npc-ingress-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "npc-ingress"
+      ]
+    },
+    {
+      "name": "npc-ingress-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npc-ingress-before.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "npc-ingress-before-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=12422",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "npc-ingress-tap.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "263",
+        "319"
+      ]
+    },
+    {
+      "name": "npc-ingress-after.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "npc-ingress-after-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=12422",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "npc-ingress-ime.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "input_method"
+      ]
+    },
+    {
+      "name": "npc-ingress-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ]
+    },
+    {
+      "name": "npc-ingress-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "preview-final-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "debug-final-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ]
+    }
+  ]
+}

@@ -2,6 +2,18 @@
 
 建立：2026-10-01。状态：**Active，尚未完成**。
 
+2026-10-02 最新实际v20：干净`7b62eda33cbf6c10a41c22516f1e6400dfe92202`
+双原生诊断包包含ccdd任务入站；35源码hash、每包6647 PNG/三metadata和已安装
+APK hash通过。Android315/preview337/fresh Java41+41/API31两变体通过。
+模拟器接收Daily条目/可交付态、实际点开共享任务明细显示描述/交付说明/2/2，
+NPC标题/正文/Exit可见、实际Exit关窗，七张原图已查看。**退出后HUD未恢复、
+任务列表/明细手机可读性FAIL**；五PID仍73条GL506，零错误渲染FAIL，旧v19
+135失败不抹除。仅离线源形模型/本地操作，不算真实JNI/任务/奖励/在线/真机。
+下一叶先修退出显示生命周期和手机任务布局，再有界framebuffer诊断及完整分母。
+[精确v20包、原始点按与失败](generated/player-qa/native-android-quest-preview-20261002/README.md)。
+
+下文ccdd/v19及更早保留各自历史源码和验收范围，不重绑旧包或抹除失败。
+
 2026-10-02 最新任务/对话源码叶：`ccdd51a90542d866a3b08096469c2d2819656ce4`。
 NI-10 从缺入站生产者推进为PARTIAL源码：Java公共任务元数据白名单、Android
 owner/scene绑定、共享tracker/history/dialog/nearby及精确ACK已接通；25项纯投影
@@ -341,7 +353,7 @@ PR #253 保持独立 Draft；不自动改 base、不合并 PR。分阶段验证�
 ## 6. 外部验收材料（不阻止其余安全代码工作）
 
 - Android 真实联网需获准的测试 Gateway（WSS/相关 HTTPS）、服务器版本和
-  普通测试账号。最新已安装v19两种诊断包明确为空地址，uiPreview 禁止联网。
+  普通测试账号。最新已安装v20两种诊断包明确为空地址，uiPreview 禁止联网。
   Windows 报告存在 `/playtest/ws` 不自动构成本轮访问/数据写入许可。
 - 凭据由用户在本地输入；不得从其他工作区、日志或旧文件搜密码/令牌。
 - 完整、获准的资源来源/版本仍需核对；现有 proof pack 不算正式完整共享包。

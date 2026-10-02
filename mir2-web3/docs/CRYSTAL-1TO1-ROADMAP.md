@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 Android exact7b62/v20 bounded received-model package checkpoint
+>
+> ccdd source now in clean native diagnostics;35 inputs/resource/installed hashes,
+>315/337/fresh Java41+41/API31 pass. Actual shared received quest details2/2 and
+> NPC dialogue/Exit window removal observed in seven originals. HUD restoration
+> and phone quest readability FAIL, five PIDs73 GL506 renderer FAIL; old135 remain.
+> Android-only four-file fixture/version delta, no backend rules/percentage or
+> real quest/reward/JNI/online/device acceptance. Next display lifecycle/layout
+> repairs, bounded framebuffer diagnosis and complete frozen Windows denominator.
+> Whole Windows-alignment goal remains Active, original workspaces untouched.
+> [Exact v20 source/packages and original failures](generated/player-qa/native-android-quest-preview-20261002/README.md).
+
 > 2026-10-02 Android exactccdd51a90 bounded NI-10 source checkpoint
 >
 > Frozen Windows pure quest/dialog/history/nearby/tooltip projections are shared

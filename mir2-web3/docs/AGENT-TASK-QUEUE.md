@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> 2026-10-02 Android exact7b62/v20 queue; full goal Active
+>
+> Diagnostics includeccdd NI-10 source;35 inputs/resource/installed-hash gates,
+>315/337/fresh Java41+41/API31 pass. Seven original frames show received quest
+> list, real row-to-detail(description/turn-in/2/2), NPC body and Exit removal.
+> HUD-after-Exit and narrow/small quest text FAIL; five PIDs73 GL506 renderer FAIL.
+> Next first inspect preview NPC panel vs shared close lifecycle and fix with red
+> tests/new exact packages; phone quest layout/readability, then bounded framebuffer
+> diagnosis and all remaining NI-11–20/Windows leaves. No authenticated JNI/live
+> quest/reward/save or physical pass; approved environment still unanswered.
+> Keep original workspaces/old failures and do not reuse production/human stores.
+> [Exact package and bounded failures](generated/player-qa/native-android-quest-preview-20261002/README.md).
+
 > 2026-10-02 Android quest/dialog source checkpoint; full goal Active
 >
 > Exactccdd51a90 connects NI-10 public metadata and shared authoritative quest/
