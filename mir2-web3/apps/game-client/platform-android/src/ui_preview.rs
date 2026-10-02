@@ -741,7 +741,9 @@ fn apply(world: &mut World) {
         };
         if scene != "empty-roster" {
             shell.characters = vec![
-                CharacterSummary::new(7, "UI Warrior", 22, "Warrior", "Male"),
+                CharacterSummary::new(7,
+                    if is_personal_jni_preview(&scene) { "OFFLINE JAVA JNI" } else { "UI Warrior" },
+                    22, "Warrior", "Male"),
                 CharacterSummary::new(12, "UI Wizard", 18, "Wizard", "Female"),
                 CharacterSummary::new(21, "UI Taoist", 15, "Taoist", "Male"),
             ];
@@ -1830,6 +1832,20 @@ mod tests {
         ] {
             assert!(SCENES.contains(&scene));
             assert_eq!(preview_panel_for_scene(scene), panel);
+        }
+    }
+
+    #[test]
+    fn java_jni_personal_scene_identity_matches_the_declared_java_sender() {
+        for scene in ["gameshop-jni", "storage-jni", "storage-locked-jni"] {
+            let mut world = World::new();
+            world.insert_resource(PreviewRequest {scene:Some(scene.into()),remaining:0});
+            world.init_resource::<OfflineNpcPreviewReceipt>();
+            apply(&mut world);
+            let shell = world.resource::<NativeShellModel>();
+            assert_eq!(shell.active_character.as_ref().unwrap().name, "OFFLINE JAVA JNI");
+            assert_eq!(shell.characters[0].name, "OFFLINE JAVA JNI");
+            assert_eq!(shell.selected_character_index, Some(7));
         }
     }
 

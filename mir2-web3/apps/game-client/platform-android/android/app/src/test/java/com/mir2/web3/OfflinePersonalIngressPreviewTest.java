@@ -34,8 +34,7 @@ public class OfflinePersonalIngressPreviewTest {
         assertEquals("GameShopStock", stock.getString("packet"));
         assertEquals(2104, stock.getJSONObject("payload").getInt("gIndex"));
         assertEquals(3, stock.getJSONObject("payload").getInt("stockLevel"));
-        assertEquals("ResizeStorage", packet(events.get(107)).getString("packet"));
-        JSONObject world = new JSONObject(events.get(108));
+        JSONObject world = new JSONObject(events.get(107));
         assertEquals("IN_GAME", world.getString("phase"));
         JSONObject snapshot = new JSONObject(world.getString("worldSnapshot"));
         assertEquals(42, snapshot.getInt("playerObjectId"));
@@ -47,10 +46,11 @@ public class OfflinePersonalIngressPreviewTest {
     @Test public void full160SlotsRemainLockedUnlessExplicitOfflineResultFollows() throws Exception {
         for (String scene : new String[]{"storage-jni", "storage-locked-jni"}) {
             List<String> events = OfflinePersonalIngressPreview.events(true, scene);
-            JSONObject items = packet(events.get(109));
+            JSONObject items = packet(events.get(108));
             assertEquals("UserStorage", items.getString("packet"));
             JSONArray slots = items.getJSONObject("payload").getJSONArray("storage");
             assertEquals(160, slots.length());
+            assertEquals("ResizeStorage", packet(events.get(109)).getString("packet"));
             for (int slot = 0; slot < 160; slot++) {
                 assertEquals(90000 + slot, slots.getJSONObject(slot).getLong("uniqueId"));
                 assertEquals(slot % 5 + 1, slots.getJSONObject(slot).getInt("count"));
@@ -84,5 +84,20 @@ public class OfflinePersonalIngressPreviewTest {
 
     private static JSONObject packet(String event) throws Exception {
         return new JSONObject(new JSONObject(event).getString("envelope"));
+    }
+
+    @Test public void independentResizeTestFollowsOwnerSnapshotAndFullItems() throws Exception {
+        List<String> events = OfflinePersonalIngressPreview.events(true, "storage-jni");
+        int world = -1, items = -1, resize = -1;
+        for (int index = 0; index < events.size(); index++) {
+            JSONObject event = new JSONObject(events.get(index));
+            if (event.has("worldSnapshot")) world = index;
+            else if (event.has("envelope")) {
+                String name = packet(events.get(index)).getString("packet");
+                if ("UserStorage".equals(name)) items = index;
+                if ("ResizeStorage".equals(name)) resize = index;
+            }
+        }
+        assertTrue("Resize must be an independent post-bootstrap event", world >= 0 && items > world && resize > items);
     }
 }

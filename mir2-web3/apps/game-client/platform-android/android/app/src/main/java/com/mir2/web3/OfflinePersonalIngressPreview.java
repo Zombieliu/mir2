@@ -30,8 +30,6 @@ final class OfflinePersonalIngressPreview {
                     "canBuyGold", true, "canBuyCredit", true))));
         }
         events.add(packet("GameShopStock", GatewaySession.object("gIndex", 2104, "stockLevel", 3)));
-        events.add(packet("ResizeStorage", GatewaySession.object("size", 160,
-                "hasExpandedStorage", true, "expiryTimeBinaryDatetime", 635000000000000000L)));
         JSONObject snapshot = GatewaySession.object("playerObjectId", 42, "mapFileName", "0",
                 "mapTitle", "OFFLINE JNI Bichon", "entities", new JSONArray().put(
                 GatewaySession.object("kind", "selfPlayer", "objectId", 42, "name", "OFFLINE JAVA JNI",
@@ -55,6 +53,10 @@ final class OfflinePersonalIngressPreview {
                     "icon", 100, "count", slot % 5 + 1));
         }
         events.add(packet("UserStorage", GatewaySession.object("storage", storage)));
+        // A separate newer result, after the complete owner/base and item list.
+        // Do not mix the scalar-result gate with initial snapshot replacement.
+        events.add(packet("ResizeStorage", GatewaySession.object("size", 160,
+                "hasExpandedStorage", true, "expiryTimeBinaryDatetime", 635000000000000000L)));
         if (!"storage-locked-jni".equals(scene)) {
             events.add(packet("StorageUnlockResult", GatewaySession.object("result", 0, "hasPassword", true)));
         }
