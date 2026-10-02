@@ -26,192 +26,6 @@ pub mod screenshot;
 
 use screenshot::ScreenshotPlugin;
 
-// Temporary, Android-only first-surface investigation. This does not change
-// rendering, clear GL errors, or extend the existing camera startup delay.
-#[cfg(target_os = "android")]
-static ANDROID_SURFACE_PROBE_FRAME: core::sync::atomic::AtomicU32 =
-    core::sync::atomic::AtomicU32::new(0);
-
-#[cfg(target_os = "android")]
-static ANDROID_SURFACE_PROBE_CURRENT_RAW: core::sync::atomic::AtomicU32 =
-    core::sync::atomic::AtomicU32::new(0);
-
-#[cfg(target_os = "android")]
-static ANDROID_ATTACHMENT_TRANSITION_PROBED: core::sync::atomic::AtomicBool =
-    core::sync::atomic::AtomicBool::new(false);
-
-// Diagnostic only: reproduce an attachment-type transition on private GL
-// objects. Never change a wgpu object, draw, allocate surface storage, or consume
-// the GL error state. The caller already owns this device's current EGL context.
-#[cfg(target_os = "android")]
-unsafe fn trace_android_attachment_transition() {
-    if ANDROID_ATTACHMENT_TRANSITION_PROBED.swap(true, core::sync::atomic::Ordering::Relaxed) {
-        return;
-    }
-    #[link(name = "GLESv3")]
-    unsafe extern "C" {
-        fn glGetIntegerv(pname: u32, params: *mut i32);
-        fn glGenFramebuffers(n: i32, buffers: *mut u32);
-        fn glBindFramebuffer(target: u32, framebuffer: u32);
-        fn glDeleteFramebuffers(n: i32, buffers: *const u32);
-        fn glGenRenderbuffers(n: i32, buffers: *mut u32);
-        fn glBindRenderbuffer(target: u32, renderbuffer: u32);
-        fn glRenderbufferStorage(target: u32, internal: u32, width: i32, height: i32);
-        fn glDeleteRenderbuffers(n: i32, buffers: *const u32);
-        fn glGenTextures(n: i32, textures: *mut u32);
-        fn glBindTexture(target: u32, texture: u32);
-        fn glTexStorage2D(target: u32, levels: i32, internal: u32, width: i32, height: i32);
-        fn glTexParameteri(target: u32, pname: u32, value: i32);
-        fn glDeleteTextures(n: i32, textures: *const u32);
-        fn glFramebufferRenderbuffer(target: u32, attachment: u32, kind: u32, buffer: u32);
-        fn glFramebufferTexture2D(target: u32, attachment: u32, kind: u32, texture: u32, level: i32);
-        fn glCheckFramebufferStatus(target: u32) -> u32;
-        fn glGetFramebufferAttachmentParameteriv(target: u32, attachment: u32, pname: u32, value: *mut i32);
-    }
-    const DRAW: u32 = 0x8ca9;
-    const RBO: u32 = 0x8d41;
-    const TEX: u32 = 0x0de1;
-    const COLOR: u32 = 0x8ce0;
-    // SAFETY: GLES3 is required by this Android backend. All created objects
-    // are private to this one-shot probe. Save/restore every touched binding;
-    // deletion happens only after detaching/restoring those objects.
-    unsafe {
-        let (mut old_draw, mut old_rbo, mut old_tex) = (0, 0, 0);
-        glGetIntegerv(0x8ca6, &mut old_draw);
-        glGetIntegerv(0x8ca7, &mut old_rbo);
-        glGetIntegerv(0x8069, &mut old_tex);
-        let (mut fbo, mut rbo, mut tex) = (0, 0, 0);
-        glGenFramebuffers(1, &mut fbo);
-        glGenRenderbuffers(1, &mut rbo);
-        glGenTextures(1, &mut tex);
-        glBindRenderbuffer(RBO, rbo);
-        glRenderbufferStorage(RBO, 0x8058, 4, 4);
-        glBindTexture(TEX, tex);
-        glTexStorage2D(TEX, 1, 0x8058, 4, 4);
-        glTexParameteri(TEX, 0x2801, 0x2600);
-        glTexParameteri(TEX, 0x2800, 0x2600);
-        let record = |stage: &str| {
-            let status = glCheckFramebufferStatus(DRAW);
-            let (mut kind, mut name) = (0, 0);
-            glGetFramebufferAttachmentParameteriv(DRAW, COLOR, 0x8cd0, &mut kind);
-            glGetFramebufferAttachmentParameteriv(DRAW, COLOR, 0x8cd1, &mut name);
-            info!("MIR2_ANDROID_ATTACHMENT_TRANSITION_PROBE stage={stage} status=0x{status:x} actual_type=0x{kind:x} actual_name={name} private_fbo={fbo} private_rbo={rbo} private_tex={tex}");
-        };
-        info!("MIR2_ANDROID_ATTACHMENT_TRANSITION_PROBE begin private_objects_only=true");
-        glBindFramebuffer(DRAW, fbo);
-        glFramebufferRenderbuffer(DRAW, COLOR, RBO, rbo);
-        record("fresh_rbo");
-        glFramebufferTexture2D(DRAW, COLOR, TEX, tex, 0);
-        record("replace_with_texture");
-        glBindFramebuffer(DRAW, old_draw as u32);
-        glBindRenderbuffer(RBO, old_rbo as u32);
-        glDeleteRenderbuffers(1, &rbo);
-        glBindFramebuffer(DRAW, fbo);
-        record("delete_unbound_old_rbo");
-        glFramebufferRenderbuffer(DRAW, COLOR, RBO, 0);
-        glFramebufferTexture2D(DRAW, COLOR, TEX, tex, 0);
-        record("explicit_type_detach");
-        glBindFramebuffer(DRAW, old_draw as u32);
-        glBindTexture(TEX, old_tex as u32);
-        glDeleteFramebuffers(1, &fbo);
-        glDeleteTextures(1, &tex);
-        info!("MIR2_ANDROID_ATTACHMENT_TRANSITION_PROBE end restored_bindings=true");
-    }
-}
-
-#[cfg(target_os = "android")]
-pub(crate) fn trace_android_view_outputs(world: &mut World) {
-    let frame = ANDROID_SURFACE_PROBE_FRAME.load(core::sync::atomic::Ordering::Relaxed);
-    if frame > 64 {
-        return;
-    }
-    let current = ANDROID_SURFACE_PROBE_CURRENT_RAW.load(core::sync::atomic::Ordering::Relaxed);
-    let mut query = world.query::<(
-        Entity,
-        &crate::view::ViewTarget,
-        Option<&crate::camera::ExtractedCamera>,
-        Option<&crate::view::ExtractedView>,
-        Option<&crate::view::Msaa>,
-    )>();
-    for (entity, target, camera, view, msaa) in query.iter(world) {
-        // SAFETY: This keeps both the view and the HAL guard alive. Debug
-        // formatting only reads the backend handle, never calls or mutates GL.
-        let output = unsafe {
-            target
-                .out_texture()
-                .and_then(|view| view.as_hal::<wgpu::hal::api::Gles>())
-                .map(|view| format!("{:?}", &*view))
-        };
-        info!("MIR2_ANDROID_VIEW_OUTPUT_PROBE frame={frame} entity={entity:?} current_surface_raw={current} has_camera={} has_view={} msaa={msaa:?} physical_target={:?} output={output:?}",
-            camera.is_some(), view.is_some(), camera.and_then(|camera| camera.physical_target_size));
-    }
-}
-
-#[cfg(target_os = "android")]
-fn trace_android_surface_configuration(configuration: &SurfaceConfiguration, reason: &str) {
-    ANDROID_SURFACE_PROBE_FRAME.store(0, core::sync::atomic::Ordering::Relaxed);
-    info!(
-        "MIR2_ANDROID_SURFACE_CONFIG_PROBE reason={reason} format={:?} size={}x{}",
-        configuration.format, configuration.width, configuration.height
-    );
-}
-
-#[cfg(target_os = "android")]
-fn trace_android_surface_attachment(frame: &wgpu::SurfaceTexture, render_device: &RenderDevice) {
-    use core::sync::atomic::Ordering;
-    let index = ANDROID_SURFACE_PROBE_FRAME.fetch_add(1, Ordering::Relaxed);
-    if index >= 64 {
-        return;
-    }
-    #[link(name = "GLESv3")]
-    unsafe extern "C" {
-        fn glIsRenderbuffer(renderbuffer: u32) -> u8;
-        fn glGetIntegerv(pname: u32, params: *mut i32);
-        fn glBindRenderbuffer(target: u32, renderbuffer: u32);
-        fn glGetRenderbufferParameteriv(target: u32, pname: u32, params: *mut i32);
-    }
-    // SAFETY: Both objects are owned by this render device and retained while
-    // their HAL guards are alive. The HAL context lock makes that exact EGL
-    // context current. Query only an existing renderbuffer; never materialize
-    // a deleted name, mutate its storage, or consume the driver's error state.
-    // The only touched binding is restored before the lock is released.
-    unsafe {
-        let Some(texture) = frame.texture.as_hal::<wgpu::hal::api::Gles>() else {
-            return;
-        };
-        let Some(device) = render_device.wgpu_device().as_hal::<wgpu::hal::api::Gles>() else {
-            return;
-        };
-        let _context = device.context().lock();
-        if let wgpu::hal::gles::TextureInner::Renderbuffer { raw } = texture.inner {
-            let raw = raw.0.get();
-            ANDROID_SURFACE_PROBE_CURRENT_RAW.store(raw, Ordering::Relaxed);
-            let live = glIsRenderbuffer(raw) != 0;
-            let mut binding = 0;
-            let (mut internal, mut width, mut height, mut samples) = (0, 0, 0, 0);
-            if live {
-                glGetIntegerv(0x8ca7, &mut binding); // RENDERBUFFER_BINDING
-                glBindRenderbuffer(0x8d41, raw); // RENDERBUFFER
-                glGetRenderbufferParameteriv(0x8d41, 0x8d44, &mut internal);
-                glGetRenderbufferParameteriv(0x8d41, 0x8d42, &mut width);
-                glGetRenderbufferParameteriv(0x8d41, 0x8d43, &mut height);
-                glGetRenderbufferParameteriv(0x8d41, 0x8cab, &mut samples);
-                glBindRenderbuffer(0x8d41, binding as u32);
-            }
-            info!(
-                "MIR2_ANDROID_SURFACE_ATTACHMENT_PROBE frame={index} raw={raw} live={live} internal=0x{internal:x} size={width}x{height} samples={samples} expected={:?}",
-                texture.format
-            );
-        } else {
-            info!(
-                "MIR2_ANDROID_SURFACE_ATTACHMENT_PROBE frame={index} non_renderbuffer={:?}",
-                texture.inner
-            );
-        }
-        trace_android_attachment_transition();
-    }
-}
-
 pub struct WindowRenderPlugin;
 
 impl Plugin for WindowRenderPlugin {
@@ -562,8 +376,6 @@ pub fn prepare_windows(
         match surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(surface_texture)
             | wgpu::CurrentSurfaceTexture::Suboptimal(surface_texture) => {
-                #[cfg(target_os = "android")]
-                trace_android_surface_attachment(&surface_texture, &render_device);
                 window.set_swapchain_texture(surface_texture, surface_data.texture_view_format);
             }
             #[cfg(target_os = "linux")]
@@ -575,8 +387,6 @@ pub fn prepare_windows(
             }
             wgpu::CurrentSurfaceTexture::Outdated => {
                 render_device.configure_surface(surface, &surface_data.configuration);
-                #[cfg(target_os = "android")]
-                trace_android_surface_configuration(&surface_data.configuration, "outdated");
                 let frame = match surface.get_current_texture() {
                     wgpu::CurrentSurfaceTexture::Success(surface_texture)
                     | wgpu::CurrentSurfaceTexture::Suboptimal(surface_texture) => surface_texture,
@@ -589,8 +399,6 @@ pub fn prepare_windows(
                         continue;
                     }
                 };
-                #[cfg(target_os = "android")]
-                trace_android_surface_attachment(&frame, &render_device);
                 window.set_swapchain_texture(frame, surface_data.texture_view_format);
             }
             wgpu::CurrentSurfaceTexture::Occluded => {}
@@ -716,8 +524,6 @@ pub fn create_surfaces(
                 };
 
                 render_device.configure_surface(&surface, &configuration);
-                #[cfg(target_os = "android")]
-                trace_android_surface_configuration(&configuration, "initial");
 
                 SurfaceData {
                     surface: WgpuWrapper::new(surface),
@@ -751,8 +557,6 @@ pub fn create_surfaces(
             let caps = data.surface.get_capabilities(&render_adapter);
             data.configuration.present_mode = present_mode(window, &caps);
             render_device.configure_surface(&data.surface, &data.configuration);
-            #[cfg(target_os = "android")]
-            trace_android_surface_configuration(&data.configuration, "resize_or_present_mode");
         }
 
         window_surfaces.configured_windows.insert(window.entity);
@@ -800,9 +604,7 @@ fn present_mode(
             );
         });
     if new_present_mode != present_mode && fallbacks.contains(&present_mode) {
-        info!(
-            "PresentMode {present_mode:?} requested but not available. Falling back to {new_present_mode:?}"
-        );
+        info!("PresentMode {present_mode:?} requested but not available. Falling back to {new_present_mode:?}");
     }
     new_present_mode
 }
