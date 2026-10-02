@@ -1120,7 +1120,7 @@ pub struct QuestLogPanel;
 pub struct QuestDetailPanel;
 
 #[derive(Component)]
-struct NpcQuestListPanel;
+pub struct NpcQuestListPanel;
 
 #[derive(Component)]
 pub struct QuestConfirmationPanel;
@@ -1908,6 +1908,7 @@ struct QuestInputModels<'w> {
 #[derive(SystemParam)]
 struct JourneyRenderModels<'w, 's> {
     phone_snapshot: Local<'s, Option<phone::RenderSnapshot>>,
+    phone_npc_snapshot: Local<'s, Option<phone::NpcRenderSnapshot>>,
     phone: Option<Res<'w, PhoneQuestPresentation>>,
     phone_input: Option<Res<'w, phone::PhoneInputState>>,
     locale_revision: Local<'s, u64>,
@@ -2864,6 +2865,7 @@ fn render_quest_ui(
 
     if !in_game {
         *journey_models.phone_snapshot = None;
+        *journey_models.phone_npc_snapshot = None;
         return;
     }
 
@@ -3003,6 +3005,7 @@ fn render_quest_ui(
 
     // Crystal Q surface: current-quest diary at the source default location.
     let phone = journey_models.phone.as_deref().filter(|phone| phone.is_valid());
+    let phone_npc_open = phone.is_some() && quest_state.npc_quest_list_open && has_npc_quests && dialog.is_open;
     let phone_pair = quest_log_open && quest_state.detail_quest(&tracker).is_some();
     let phone_refresh = if let Some(phone) = phone {
         let snapshot = phone::RenderSnapshot::capture(phone, &tracker, journey.as_ref(),
@@ -3033,7 +3036,7 @@ fn render_quest_ui(
             node.top = Val::Px(80.0);
             node.width = Val::Px(600.0);
         }
-        node.display = if quest_log_open {
+        node.display = if quest_log_open && !phone_npc_open {
             Display::Flex
         } else {
             Display::None
@@ -3077,7 +3080,7 @@ fn render_quest_ui(
         if let Some(phone) = phone {
             phone.apply_panel(&mut node, true, phone_pair);
         }
-        node.display = if visible {
+        node.display = if visible && !phone_npc_open {
             Display::Flex
         } else {
             Display::None
@@ -3108,20 +3111,42 @@ fn render_quest_ui(
 
     // Crystal's NPC Quest List is a separate five-row window at
     // `NPCDialog.Width + 47, 0` and remains linked to the NPC dialog lifecycle.
+    let phone_npc_refresh = if let Some(phone) = phone {
+        let snapshot = phone::NpcRenderSnapshot::capture(phone, &tracker, &ui_model.player,
+            &dialog, &journey_models.guidance, &quest_state, &pending);
+        let changed = journey_models.guidance.is_changed() || journey_models.phone_npc_snapshot.as_ref() != Some(&snapshot);
+        *journey_models.phone_npc_snapshot = Some(snapshot);
+        changed
+    } else { *journey_models.phone_npc_snapshot = None; true };
     for (entity, mut node) in all.p4().iter_mut() {
         let visible = quest_state.npc_quest_list_open && has_npc_quests && dialog.is_open;
         node.left = Val::Px(QUEST_LIST_DESIGN_LEFT);
         node.top = Val::Px(QUEST_LIST_DESIGN_TOP);
         node.width = Val::Px(QUEST_LIST_DESIGN_WIDTH);
         node.height = Val::Px(QUEST_LIST_DESIGN_HEIGHT);
+        node.min_width = node.width;
+        node.max_width = node.width;
+        node.min_height = node.height;
+        node.max_height = node.height;
+        node.padding = UiRect::all(Val::Px(0.0));
+        node.row_gap = Val::Px(0.0);
+        node.flex_direction = FlexDirection::Row;
+        if let Some(phone) = phone { phone.apply_panel(&mut node, false, false); }
         node.display = if visible {
             Display::Flex
         } else {
             Display::None
         };
+        if !phone_npc_refresh { continue; }
         commands.entity(entity).despawn_children();
         if visible {
             commands.entity(entity).with_children(|panel| {
+                if let Some(phone) = phone {
+                    phone::render_npc_list(panel, &available_npc_quests, &dialog,
+                        &journey_models.guidance, &quest_state, &pending, phone,
+                        journey_models.phone_input.as_deref(), &ui_model.player, asset_server.as_deref());
+                    return;
+                }
                 render_npc_quest_list_panel(
                     panel,
                     &available_npc_quests,
@@ -5369,42 +5394,14 @@ fn render_npc_quest_list_panel(
         guidance,
     );
 
-    let npc_index = dialog
-        .npc_object_id
-        .or(quest.accept_npc_index)
-        .unwrap_or_default();
-    if can_accept_quest(quest) {
-        let pending = pending.contains(&PendingOperationKey::QuestAccept {
-            npc_index,
-            quest_index: quest.quest_index,
-        });
+    if let Some(primary) = npc_quest_primary_spec(quest, dialog, state, pending) {
         quest_log_image_button_at(
             parent,
             asset_server,
-            QUEST_LIST_ACCEPT_ASSET,
+            primary.asset,
             layout.primary_action,
-            QuestUiButton::AcceptNpcQuest {
-                npc_index,
-                quest_index: quest.quest_index,
-            },
-            !pending,
-        );
-    } else if can_finish_quest(quest) {
-        let selected_item_index = state.npc_selected_reward_index.unwrap_or(-1);
-        let pending = pending.contains(&PendingOperationKey::QuestFinish {
-            quest_index: quest.quest_index,
-            selected_item_index,
-        });
-        quest_log_image_button_at(
-            parent,
-            asset_server,
-            QUEST_LIST_FINISH_ASSET,
-            layout.primary_action,
-            QuestUiButton::FinishQuest {
-                quest_index: quest.quest_index,
-                selected_item_index,
-            },
-            !pending,
+            primary.action,
+            primary.enabled,
         );
     }
     quest_log_image_button_at(
@@ -5641,6 +5638,23 @@ struct QuestDetailPrimarySpec {
 
 fn detail_primary_spec(asset: &'static str, action: QuestUiButton, enabled: bool) -> QuestDetailPrimarySpec {
     QuestDetailPrimarySpec { asset, action, enabled }
+}
+
+// One view specification shared by desktop and phone. Eligibility and pending
+// semantics below are the original NPC list's, not a new Android rule set.
+fn npc_quest_primary_spec(quest: &Quest, dialog: &NpcDialogModel, state: &QuestUiState,
+    pending: &PendingOperations) -> Option<QuestDetailPrimarySpec> {
+    let npc_index = dialog.npc_object_id.or(quest.accept_npc_index).unwrap_or_default();
+    if can_accept_quest(quest) {
+        Some(detail_primary_spec(QUEST_LIST_ACCEPT_ASSET,
+            QuestUiButton::AcceptNpcQuest { npc_index, quest_index: quest.quest_index },
+            !pending.contains(&PendingOperationKey::QuestAccept { npc_index, quest_index: quest.quest_index })))
+    } else if can_finish_quest(quest) {
+        let selected_item_index = state.npc_selected_reward_index.unwrap_or(-1);
+        Some(detail_primary_spec(QUEST_LIST_FINISH_ASSET,
+            QuestUiButton::FinishQuest { quest_index: quest.quest_index, selected_item_index },
+            !pending.contains(&PendingOperationKey::QuestFinish { quest_index: quest.quest_index, selected_item_index })))
+    } else { None }
 }
 
 fn quest_detail_primary_spec(quest: &Quest, guidance: &QuestGuidance, state: &QuestUiState, pending: &PendingOperations) -> QuestDetailPrimarySpec {

@@ -10,7 +10,7 @@ use mir2_client_bevy::{
     crystal_ui::overlays::{NativePlayerUiSet, NativePlayerUiState},
     native_shell::{NativeShellModel, NativeShellScreen},
     quest_ui::{
-        PhoneQuestPresentation, QuestConfirmationPanel, QuestDetailPanel, QuestLogPanel, QuestUiRoot,
+        NpcQuestListPanel, PhoneQuestPresentation, QuestConfirmationPanel, QuestDetailPanel, QuestLogPanel, QuestUiRoot,
     },
 };
 
@@ -212,6 +212,7 @@ fn fit_shared_quest_windows(
             Without<QuestLogPanel>,
             Without<QuestDetailPanel>,
             Without<QuestConfirmationPanel>,
+            Without<NpcQuestListPanel>,
         ),
     >,
     mut panels: Query<
@@ -221,6 +222,7 @@ fn fit_shared_quest_windows(
                 With<QuestLogPanel>,
                 With<QuestDetailPanel>,
                 With<QuestConfirmationPanel>,
+                With<NpcQuestListPanel>,
             )>,
             Without<QuestUiRoot>,
         ),

@@ -28,6 +28,7 @@ pub const SCENES: &[&str] = &[
     "quests-ingress",
     "quest-confirmation",
     "quest-alert",
+    "npc-quests",
     "options",
     "platform",
     "menu",
@@ -823,7 +824,7 @@ fn preview_panel_for_scene(scene: &str) -> UiPanel {
         // The received model owns this dialog's visibility. A pinned manual
         // panel would keep shared world/HUD guards blocked after model Exit.
         // dialog.is_open still supplies the normal shared modal protection.
-        "npc-ingress" => UiPanel::None,
+        "npc-ingress" | "npc-quests" => UiPanel::None,
         _ => UiPanel::None,
     }
 }
@@ -1188,6 +1189,31 @@ fn populate_specimens(world: &mut World, scene: &str) {
             );
         }
         info!(scene, "ANDROID_QUEST_MODAL_MANUAL_UI_ONLY_NOT_LIVE");
+    }
+    if scene == "npc-quests" {
+        use mir2_client_bevy::{quest_model::{NpcDialogModel, NpcDialogOption, QuestReward}, quest_ui::QuestUiState};
+        // Manual presentation-only stress specimen, never a login/packet or
+        // a quest grant. Preview transport stays disabled and no save is used.
+        let seed = world.resource::<QuestTracker>().active_quests[0].clone();
+        world.resource_mut::<QuestTracker>().active_quests = (1..=8).map(|index| {
+            let mut quest = Quest { quest_index: index, title: format!("OFFLINE NPC quest {index}"),
+                status: QuestStatus::ReadyToTurnIn, ..seed.clone() };
+            quest.detail.description_lines = (0..if index == 2 { 14 } else { 2 })
+                .map(|line| format!("Quest {index} line {line}: manual UI, not a granted quest.")).collect();
+            quest.rewards = vec![QuestReward::Gold { amount: 10 },
+                QuestReward::Item { item_id: "manual-reward-a".into(), name: "UI choice A".into(),
+                    quantity: 1, selection_index: Some(0), icon: None, tooltip_source: None },
+                QuestReward::Item { item_id: "manual-reward-b".into(), name: "UI choice B".into(),
+                    quantity: 1, selection_index: Some(1), icon: None, tooltip_source: None }];
+            quest
+        }).collect();
+        world.insert_resource(NpcDialogModel { is_open: true, npc_object_id: Some(99),
+            npc_name: Some("OFFLINE NPC".into()), lines: vec![],
+            options: (1..=8).map(|index| NpcDialogOption { option_id: format!("@FinishQuest:{index}"),
+                label: format!("UI quest {index}"), enabled: true }).collect() });
+        world.init_resource::<QuestUiState>();
+        world.resource_mut::<QuestUiState>().open_npc_quest_list(&(1..=8).collect::<Vec<_>>());
+        info!(scene, "ANDROID_NPC_QUESTS_MANUAL_UI_ONLY_NOT_LIVE");
     }
     if matches!(scene, "quests-ingress" | "npc-ingress") {
         use mir2_client_bevy::quest_model::{CompletedQuestTracker, NearbyNpcModel, NpcDialogModel};
@@ -1691,7 +1717,7 @@ mod tests {
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 43);
+        assert_eq!(SCENES.len(), 44);
     }
 
     #[test]
@@ -1754,6 +1780,24 @@ mod tests {
             assert!(!world.resource::<crate::AndroidGatewayTransportEnabled>().0);
             assert_eq!(preview_panel_for_scene(scene), UiPanel::QuestLog);
         }
+    }
+
+    #[test]
+    fn npc_quests_specimen_only_changes_view_state_not_host_authorization_or_rewards() {
+        let mut world = World::new();
+        world.init_resource::<mir2_client_bevy::social::SocialModel>();
+        let mut host = crate::shared_shell::HostState::default();
+        host.phase = "DISCONNECTED".into();
+        world.insert_resource(host);
+        world.insert_resource(NativeShellModel { screen: Screen::Login, ..default() });
+        world.insert_resource(crate::AndroidGatewayTransportEnabled(false));
+        populate_specimens(&mut world, "npc-quests");
+        assert!(world.resource::<mir2_client_bevy::quest_ui::QuestUiState>().npc_quest_list_open);
+        assert_eq!(world.resource::<mir2_client_bevy::quest_model::QuestTracker>().active_quests.len(), 8);
+        assert_eq!(world.resource::<crate::shared_shell::HostState>().phase, "DISCONNECTED");
+        assert_eq!(world.resource::<NativeShellModel>().screen, Screen::Login);
+        assert!(!world.resource::<crate::AndroidGatewayTransportEnabled>().0);
+        assert_eq!(preview_panel_for_scene("npc-quests"), UiPanel::None);
     }
 
     #[test]

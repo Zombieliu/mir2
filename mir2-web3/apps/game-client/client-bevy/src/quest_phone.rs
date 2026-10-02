@@ -33,6 +33,7 @@ pub(super) struct RenderSnapshot {
     abandon_pending: bool,
     confirmation: Option<i32>,
     alert: Option<String>,
+    npc_open: bool,
 }
 
 impl RenderSnapshot {
@@ -61,6 +62,7 @@ impl RenderSnapshot {
             primary: state.pinned_primary_quest_index,
             confirmation: state.abandon_confirmation_quest_index,
             alert: state.quest_alert_message.clone(),
+            npc_open: state.npc_quest_list_open,
             tab: state.diary_tab,
             page: state.diary_page,
             collapsed: state.collapsed_groups.clone(),
@@ -75,6 +77,37 @@ impl RenderSnapshot {
                 })
             }),
         }
+    }
+}
+
+// NPC payload changes only rebuild NPC controls, never a confirmation's held
+// button. This cache compares rendering inputs, not task eligibility rules.
+#[derive(PartialEq)]
+pub(super) struct NpcRenderSnapshot {
+    presentation: PhoneQuestPresentation,
+    locale: u64,
+    tracker: QuestTracker,
+    player: crate::read_model::PlayerStats,
+    open: bool,
+    selected: Option<i32>,
+    reward: Option<i32>,
+    dialog: (bool, Option<u32>, Option<String>, Vec<String>, Vec<crate::quest_model::NpcDialogOption>),
+    action: Option<(QuestUiButton, bool)>,
+}
+
+impl NpcRenderSnapshot {
+    pub(super) fn capture(presentation: &PhoneQuestPresentation, tracker: &QuestTracker,
+        player: &crate::read_model::PlayerStats, dialog: &NpcDialogModel, guidance: &QuestGuidance,
+        state: &QuestUiState, pending: &PendingOperations) -> Self {
+        let available = npc_available_quests(dialog, tracker, Some(guidance));
+        let selected = available.iter().copied().find(|quest| Some(quest.quest_index) == state.npc_quest_selected_index)
+            .or_else(|| available.first().copied());
+        Self { presentation: *presentation, locale: crate::native_i18n::revision(),
+            tracker: tracker.clone(), player: player.clone(), open: state.npc_quest_list_open,
+            selected: state.npc_quest_selected_index, reward: state.npc_selected_reward_index,
+            dialog: (dialog.is_open, dialog.npc_object_id, dialog.npc_name.clone(),
+                dialog.lines.iter().map(|line| line.text.clone()).collect(), dialog.options.clone()),
+            action: selected.and_then(|quest| npc_quest_primary_spec(quest, dialog, state, pending)).map(|spec| (spec.action, spec.enabled)) }
     }
 }
 
@@ -124,6 +157,8 @@ enum ScrollKey {
     Diary(GuidedDiaryTab, usize),
     Detail(i32),
     Confirmation(InputSurface),
+    NpcList(u32),
+    NpcMessage(u32, i32),
 }
 
 /// This is pointer ownership, not quest eligibility. The existing shared
@@ -133,6 +168,7 @@ enum InputSurface {
     Windows,
     Abandon(i32),
     Alert,
+    Npc,
 }
 
 impl InputSurface {
@@ -141,6 +177,8 @@ impl InputSurface {
             Self::Alert
         } else if let Some(quest) = state.abandon_confirmation_quest_index {
             Self::Abandon(quest)
+        } else if state.npc_quest_list_open {
+            Self::Npc
         } else {
             Self::Windows
         }
@@ -153,6 +191,10 @@ impl InputSurface {
                 action,
                 Some(QuestUiButton::ConfirmAbandonQuest | QuestUiButton::CancelAbandonQuest)
             ),
+            Self::Npc => matches!(action, Some(QuestUiButton::CloseNpcQuestList
+                | QuestUiButton::SelectNpcQuest { .. } | QuestUiButton::SelectNpcQuestReward { .. }
+                | QuestUiButton::AcceptNpcQuest { .. } | QuestUiButton::FinishQuest { .. }
+                | QuestUiButton::NpcQuestHelp)),
             Self::Windows => !matches!(
                 action,
                 Some(
@@ -168,6 +210,7 @@ impl InputSurface {
         match key {
             ScrollKey::Confirmation(owner) => owner == self && self != Self::Windows,
             ScrollKey::Diary(..) | ScrollKey::Detail(..) => self == Self::Windows,
+            ScrollKey::NpcList(..) | ScrollKey::NpcMessage(..) => self == Self::Npc,
         }
     }
 }
@@ -202,6 +245,9 @@ pub(super) struct PhoneInputState {
     diary: Option<(ScrollKey, Vec2)>,
     detail: Option<(ScrollKey, Vec2)>,
     confirmation: Option<(ScrollKey, Vec2)>,
+    npc_list: Option<(ScrollKey, Vec2)>,
+    npc_message: Option<(ScrollKey, Vec2)>,
+    npc_owner: Option<u32>,
     alert_message: Option<String>,
     reset: Option<u64>,
 }
@@ -212,6 +258,8 @@ impl PhoneInputState {
             ScrollKey::Diary(..) => self.diary,
             ScrollKey::Detail(..) => self.detail,
             ScrollKey::Confirmation(..) => self.confirmation,
+            ScrollKey::NpcList(..) => self.npc_list,
+            ScrollKey::NpcMessage(..) => self.npc_message,
         }
         .filter(|(saved, _)| *saved == key)
         .map(|(_, offset)| offset)
@@ -222,6 +270,8 @@ impl PhoneInputState {
             ScrollKey::Diary(..) => &mut self.diary,
             ScrollKey::Detail(..) => &mut self.detail,
             ScrollKey::Confirmation(..) => &mut self.confirmation,
+            ScrollKey::NpcList(..) => &mut self.npc_list,
+            ScrollKey::NpcMessage(..) => &mut self.npc_message,
         };
         *slot = Some((key, offset));
     }
@@ -275,12 +325,23 @@ pub(super) fn pointer_input(
         state.diary = None;
         state.detail = None;
         state.confirmation = None;
+        state.npc_list = None;
+        state.npc_message = None;
         return;
     }
     let surface = InputSurface::current(&quest_state);
+    let npc_owner = (quest_state.npc_quest_list_open && dialog.is_open).then_some(dialog.npc_object_id.unwrap_or_default());
+    let npc_changed = state.npc_owner != npc_owner;
+    if npc_changed {
+        if state.gesture.is_some_and(|gesture| gesture.surface == InputSurface::Npc) { state.gesture = None; }
+        state.npc_list = None;
+        state.npc_message = None;
+        state.npc_owner = npc_owner;
+    }
     if !window.focused
         || player.blocks_world_action(false, false)
         || (dialog.is_open && surface == InputSurface::Windows)
+        || (!dialog.is_open && surface == InputSurface::Npc)
     {
         state.gesture = None;
         return;
@@ -299,6 +360,9 @@ pub(super) fn pointer_input(
         if alert_changed && matches!(area.0, ScrollKey::Confirmation(InputSurface::Alert)) {
             continue;
         }
+        if npc_changed && matches!(area.0, ScrollKey::NpcList(..) | ScrollKey::NpcMessage(..)) {
+            continue;
+        }
         state.remember(
             area.0,
             computed.scroll_position * computed.inverse_scale_factor,
@@ -314,7 +378,7 @@ pub(super) fn pointer_input(
                     |step| surface.allows_scroll(step.key),
                 );
                 let in_clip = button.scroll.is_none_or(|key| {
-                    areas.iter().any(|(_, area, clip, transform, _)| {
+                    surface.allows_scroll(key) && areas.iter().any(|(_, area, clip, transform, _)| {
                         area.0 == key && clip.contains_point(*transform, position)
                     })
                 });
@@ -903,6 +967,119 @@ pub(super) fn render_diary(
     });
 }
 
+fn render_phone_rewards(parent: &mut ChildSpawnerCommands, quest: &Quest, selected_reward: Option<i32>,
+    surface: QuestRewardSelectionSurface, key: ScrollKey, unit: f32, player: &crate::read_model::PlayerStats,
+    guidance: &QuestGuidance, assets: Option<&AssetServer>) {
+    text(parent, &crate::player_text::text("奖励"), unit, true);
+    for reward in &quest.rewards {
+        match reward {
+            crate::quest_model::QuestReward::Experience { amount } => text(
+                parent,
+                &format!("{}: {amount}", crate::player_text::text("Experience")),
+                unit,
+                false,
+            ),
+            crate::quest_model::QuestReward::Gold { amount } => text(
+                parent,
+                &format!("{}: {amount}", crate::player_text::text("Gold")),
+                unit,
+                false,
+            ),
+            _ => {}
+        }
+    }
+    for selectable in [false, true] {
+        for reward in quest.rewards.iter().filter(|reward| matches!(reward,
+            crate::quest_model::QuestReward::Item { selection_index, .. } if selection_index.is_some() == selectable))
+            .filter(|reward| selectable || fixed_reward_is_visible(reward, guidance)).take(5) {
+            let crate::quest_model::QuestReward::Item { name, quantity, selection_index, icon, tooltip_source, .. } = reward else { continue };
+            let label = format!("{} {name} × {quantity}", if selection_index.is_some() && *selection_index == selected_reward { "●" } else { "" });
+            if let Some(reward_index) = selection_index {
+                let entity = button(parent, &label, match surface { QuestRewardSelectionSurface::Detail => QuestUiButton::SelectReward { quest_index: quest.quest_index, reward_index: *reward_index }, QuestRewardSelectionSurface::NpcList => QuestUiButton::SelectNpcQuestReward { quest_index: quest.quest_index, reward_index: *reward_index } }, true, Some(key), unit);
+                if let Some(document) = crystal_item_tooltip_document_from_source(name,
+                    icon.and_then(|icon| u16::try_from(icon).ok()).unwrap_or_default(), *quantity, tooltip_source.as_ref(), player) {
+                    parent.commands().entity(entity).insert(CrystalItemHint(document));
+                }
+            } else { text(parent, &label, unit, false); }
+            if let (Some(assets), Some(icon)) = (assets, icon) {
+                parent.spawn((Node { width: Val::Px(32.0 * unit), height: Val::Px(32.0 * unit), flex_shrink: 0.0, ..default() },
+                    ImageNode { image: assets.load(format!("original-ui/Items/{icon}.png")), ..default() }));
+            }
+        }
+    }
+}
+pub(super) fn render_npc_list(
+    parent: &mut ChildSpawnerCommands,
+    quests: &[&Quest],
+    dialog: &NpcDialogModel,
+    guidance: &QuestGuidance,
+    state: &QuestUiState,
+    pending: &PendingOperations,
+    presentation: &PhoneQuestPresentation,
+    memory: Option<&PhoneInputState>,
+    player: &crate::read_model::PlayerStats,
+    assets: Option<&AssetServer>,
+) {
+    let unit = presentation.authored_unit;
+    let npc = dialog.npc_object_id.unwrap_or_default();
+    let list_key = ScrollKey::NpcList(npc);
+    let selected = quests.iter().copied().find(|quest| Some(quest.quest_index) == state.npc_quest_selected_index)
+        .or_else(|| quests.first().copied());
+    header(parent, &format!("{} · {} ({})", crate::player_text::text("任务"),
+        dialog.npc_name.as_deref().unwrap_or("NPC"), quests.len()), QuestUiButton::CloseNpcQuestList, unit);
+    parent.spawn(Node {
+        width: Val::Percent(100.0), flex_grow: 1.0, flex_basis: Val::Px(0.0),
+        min_height: Val::Px(0.0), column_gap: Val::Px(8.0 * unit), ..default()
+    }).with_children(|body| {
+        body.spawn(Node {
+            width: Val::Percent(40.0), min_width: Val::Px(0.0), min_height: Val::Px(0.0),
+            flex_direction: FlexDirection::Column, row_gap: Val::Px(6.0 * unit), ..default()
+        }).with_children(|list| scroll_content(list, list_key, unit, memory, |list| {
+            for quest in quests {
+                let label = format!("{}{}\n{} · {}级",
+                    if Some(quest.quest_index) == state.npc_quest_selected_index { "● " } else { "" },
+                    crate::player_text::quest_title(quest.quest_index, &quest.title),
+                    crate::player_text::text(quest_diary_status_label(quest)), quest.min_level_needed.max(0));
+                button(list, &label, QuestUiButton::SelectNpcQuest { quest_index: quest.quest_index },
+                    true, Some(list_key), unit);
+            }
+        }));
+        body.spawn(Node {
+            flex_grow: 1.0, flex_basis: Val::Px(0.0), min_width: Val::Px(0.0), min_height: Val::Px(0.0),
+            flex_direction: FlexDirection::Column, row_gap: Val::Px(6.0 * unit), ..default()
+        }).with_children(|message| {
+            if let Some(quest) = selected {
+                let key = ScrollKey::NpcMessage(npc, quest.quest_index);
+                scroll_content(message, key, unit, memory, |message| {
+                    for line in quest_list_message_lines(quest, dialog, Some(guidance)) {
+                        if line.kind != QuestDetailLineKind::Blank {
+                            text(message, &line.text, unit, matches!(line.kind,
+                                QuestDetailLineKind::Title | QuestDetailLineKind::Heading));
+                        }
+                    }
+                    render_phone_rewards(message, quest, state.npc_selected_reward_index,
+                        QuestRewardSelectionSurface::NpcList, key, unit, player, guidance, assets);
+                });
+            }
+        });
+    });
+    parent.spawn(Node {
+        width: Val::Percent(100.0), column_gap: Val::Px(8.0 * unit), flex_shrink: 0.0, ..default()
+    }).with_children(|footer| {
+        if let Some(primary) = selected.and_then(|quest| npc_quest_primary_spec(quest, dialog, state, pending)) {
+            footer.spawn(Node { flex_grow: 1.0, flex_basis: Val::Px(0.0), min_width: Val::Px(0.0), ..default() })
+                .with_children(|footer| {
+                    let label = if matches!(primary.action, QuestUiButton::AcceptNpcQuest { .. }) { "Accept" } else { "交付" };
+                    button(footer, label, primary.action, primary.enabled, None, unit);
+                });
+        }
+        for (label, action) in [("Help", QuestUiButton::NpcQuestHelp), ("Leave", QuestUiButton::CloseNpcQuestList)] {
+            footer.spawn(Node { flex_grow: 1.0, flex_basis: Val::Px(0.0), min_width: Val::Px(0.0), ..default() })
+                .with_children(|footer| { button(footer, label, action, true, None, unit); });
+        }
+    });
+}
+
 pub(super) fn render_detail(
     parent: &mut ChildSpawnerCommands,
     quest: &Quest,
@@ -935,43 +1112,8 @@ pub(super) fn render_detail(
                 );
             }
         }
-        text(parent, &crate::player_text::text("奖励"), unit, true);
-        for reward in &quest.rewards {
-            match reward {
-                crate::quest_model::QuestReward::Experience { amount } => text(
-                    parent,
-                    &format!("{}: {amount}", crate::player_text::text("Experience")),
-                    unit,
-                    false,
-                ),
-                crate::quest_model::QuestReward::Gold { amount } => text(
-                    parent,
-                    &format!("{}: {amount}", crate::player_text::text("Gold")),
-                    unit,
-                    false,
-                ),
-                _ => {}
-            }
-        }
-        for selectable in [false, true] {
-            for reward in quest.rewards.iter().filter(|reward| matches!(reward,
-                crate::quest_model::QuestReward::Item { selection_index, .. } if selection_index.is_some() == selectable))
-                .filter(|reward| selectable || fixed_reward_is_visible(reward, guidance)).take(5) {
-                let crate::quest_model::QuestReward::Item { name, quantity, selection_index, icon, tooltip_source, .. } = reward else { continue };
-                let label = format!("{} {name} × {quantity}", if selection_index.is_some() && *selection_index == state.selected_reward_index { "●" } else { "" });
-                if let Some(reward_index) = selection_index {
-                    let entity = button(parent, &label, QuestUiButton::SelectReward { quest_index: quest.quest_index, reward_index: *reward_index }, true, Some(key), unit);
-                    if let Some(document) = crystal_item_tooltip_document_from_source(name,
-                        icon.and_then(|icon| u16::try_from(icon).ok()).unwrap_or_default(), *quantity, tooltip_source.as_ref(), player) {
-                        parent.commands().entity(entity).insert(CrystalItemHint(document));
-                    }
-                } else { text(parent, &label, unit, false); }
-                if let (Some(assets), Some(icon)) = (assets, icon) {
-                    parent.spawn((Node { width: Val::Px(32.0 * unit), height: Val::Px(32.0 * unit), flex_shrink: 0.0, ..default() },
-                        ImageNode { image: assets.load(format!("original-ui/Items/{icon}.png")), ..default() }));
-                }
-            }
-        }
+        render_phone_rewards(parent, quest, state.selected_reward_index,
+            QuestRewardSelectionSurface::Detail, key, unit, player, guidance, assets);
         if guidance.is_enabled() && quest.status.is_active() {
             button(
                 parent,
@@ -1092,6 +1234,165 @@ mod tests {
             matches!(node.min_height, Val::Px(value) if value / unit >= 48.0),
             "The actual shared phone row needs a 48dp minimum, not the source 15px row"
         );
+    }
+
+    fn npc_fixture() -> App {
+        let mut app = fixture();
+        let world = app.world_mut();
+        let seed = world.resource::<QuestTracker>().active_quests[0].clone();
+        world.resource_mut::<QuestTracker>().active_quests = (7..15)
+            .map(|index| Quest { quest_index: index, ..seed.clone() }).collect();
+        world.insert_resource(NpcDialogModel {
+            is_open: true,
+            npc_object_id: Some(10),
+            npc_name: Some("Guard fixture".into()),
+            ..default()
+        });
+        world.resource_mut::<QuestUiState>().open_npc_quest_list(&(7..15).collect::<Vec<_>>());
+        app.update();
+        app
+    }
+
+    #[test]
+    fn phone_npc_rows_use_full_workspace_and_48dp_controls() {
+        let mut app = npc_fixture();
+        let world = app.world_mut();
+        let phone = *world.resource::<PhoneQuestPresentation>();
+        let node = world.query_filtered::<&Node, With<NpcQuestListPanel>>().single(world).unwrap();
+        assert_eq!(node.width, Val::Px(phone.workspace.x * phone.authored_unit));
+        let rows = world.query::<(&Node, &QuestUiButton)>().iter(world)
+            .filter(|(_, action)| matches!(action, QuestUiButton::SelectNpcQuest { .. })).collect::<Vec<_>>();
+        assert_eq!(rows.len(), 8, "All available quests must remain reachable by scrolling");
+        assert!(rows.iter().all(|(node, _)| matches!(node.min_height, Val::Px(height) if height / phone.authored_unit >= 48.0)));
+    }
+
+    #[test]
+    fn phone_npc_controls_survive_noop_frames_for_release() {
+        let mut app = npc_fixture();
+        let controls = |world: &mut World| world.query::<(Entity, &QuestUiButton)>().iter(world)
+            .filter_map(|(entity, action)| matches!(action, QuestUiButton::SelectNpcQuest { .. }).then_some(entity)).collect::<Vec<_>>();
+        let before = controls(app.world_mut());
+        app.update();
+        app.update();
+        assert_eq!(controls(app.world_mut()), before, "An NPC press must survive the shared controller's no-op ResMut frames");
+    }
+
+    #[test]
+    fn phone_npc_close_is_an_owned_shared_action_with_dialog_open() {
+        let mut app = npc_fixture();
+        app.add_plugins(bevy::input::InputPlugin);
+        let world = app.world_mut();
+        let window = world.spawn(Window::default()).id();
+        let close = world.query::<(Entity, &QuestUiButton)>().iter(world)
+            .find_map(|(entity, action)| matches!(action, QuestUiButton::CloseNpcQuestList).then_some(entity)).unwrap();
+        // Tag the original control to isolate the current NPC input guard as
+        // well as retention. These components are supplied by the phone fix.
+        world.entity_mut(close).insert((PhoneQuestButton { scroll: None },
+            ComputedNode { size: Vec2::new(180.0, 60.0), inverse_scale_factor: 1.0, ..default() },
+            bevy::ui::UiGlobalTransform::from_xy(200.0, 210.0)));
+        use bevy::input::touch::TouchPhase::*;
+        touch(&mut app, window, 1, Started, Vec2::new(200.0, 210.0));
+        app.update();
+        assert!(app.world().resource::<NpcDialogModel>().is_open);
+        touch(&mut app, window, 1, Ended, Vec2::new(200.0, 210.0));
+        app.update();
+        assert!(!app.world().resource::<NpcDialogModel>().is_open, "NPC owns its close despite its world-input blocker");
+        assert!(!app.world().resource::<QuestUiState>().npc_quest_list_open);
+        assert_eq!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
+            vec![QuestUiIntent::SelectNpcDialog { target: "@Exit".into() }]);
+    }
+
+    fn npc_reward_fixture() -> (App, Entity) {
+        let mut app = npc_fixture();
+        app.add_plugins(bevy::input::InputPlugin);
+        let world = app.world_mut();
+        let quest = &mut world.resource_mut::<QuestTracker>().active_quests[0];
+        quest.status = crate::quest_model::QuestStatus::ReadyToTurnIn;
+        quest.finish_npc_index = Some(10);
+        quest.rewards = vec![crate::quest_model::QuestReward::Item {
+            item_id: "UI reward".into(), name: "UI choice".into(), quantity: 1,
+            selection_index: Some(1), icon: None, tooltip_source: None,
+        }];
+        world.resource_mut::<NpcDialogModel>().options.push(crate::quest_model::NpcDialogOption {
+            option_id: "@FinishQuest:7".into(), label: "Deliver UI quest".into(), enabled: true,
+        });
+        let window = world.spawn(Window::default()).id();
+        app.update();
+        app.update();
+        let world = app.world_mut();
+        let reward = world.query::<(Entity, &QuestUiButton)>().iter(world)
+            .find_map(|(entity, action)| matches!(action, QuestUiButton::SelectNpcQuestReward { quest_index: 7, reward_index: 1 }).then_some(entity)).unwrap();
+        let area = world.query::<(Entity, &PhoneQuestScrollArea)>().iter(world)
+            .find_map(|(entity, area)| (area.0 == ScrollKey::NpcMessage(10, 7)).then_some(entity)).unwrap();
+        world.entity_mut(reward).insert((ComputedNode { size: Vec2::new(180.0, 60.0),
+            inverse_scale_factor: 1.0, ..default() }, bevy::ui::UiGlobalTransform::from_xy(200.0, 210.0)));
+        world.entity_mut(area).insert((ComputedNode { size: Vec2::new(400.0, 300.0),
+            content_size: Vec2::new(400.0, 800.0), inverse_scale_factor: 1.0, ..default() },
+            bevy::ui::UiGlobalTransform::from_xy(200.0, 240.0)));
+        (app, window)
+    }
+
+    #[test]
+    fn phone_npc_reward_release_uses_shared_selection_without_granting_reward() {
+        let (mut app, window) = npc_reward_fixture();
+        use bevy::input::touch::TouchPhase::*;
+        touch(&mut app, window, 1, Started, Vec2::new(200.0, 210.0));
+        app.update();
+        assert_eq!(app.world().resource::<QuestUiState>().npc_selected_reward_index, None);
+        touch(&mut app, window, 1, Ended, Vec2::new(200.0, 210.0));
+        app.update();
+        assert_eq!(app.world().resource::<QuestUiState>().npc_selected_reward_index, Some(1));
+        assert_eq!(app.world().resource::<QuestTracker>().active_quests[0].status, crate::quest_model::QuestStatus::ReadyToTurnIn);
+        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+    }
+
+    #[test]
+    fn phone_npc_owner_rejects_covered_detail_finish_and_scroll() {
+        let (mut app, window) = npc_reward_fixture();
+        let world = app.world_mut();
+        // A covered detail can carry the same FinishQuest enum. Its scroll
+        // owner, not merely the action name, must prevent a click-through.
+        world.spawn((PhoneQuestButton { scroll: Some(ScrollKey::Detail(7)) },
+            QuestUiButton::FinishQuest { quest_index: 7, selected_item_index: 1 },
+            ComputedNode { size: Vec2::new(180.0, 60.0), inverse_scale_factor: 1.0, ..default() },
+            bevy::ui::UiGlobalTransform::from_xy(700.0, 210.0)));
+        world.spawn((PhoneQuestScrollArea(ScrollKey::Detail(7)), ScrollPosition::default(),
+            ComputedNode { size: Vec2::new(400.0, 300.0), content_size: Vec2::new(400.0, 800.0), inverse_scale_factor: 1.0, ..default() },
+            bevy::ui::UiGlobalTransform::from_xy(700.0, 240.0)));
+        use bevy::input::touch::TouchPhase::*;
+        touch(&mut app, window, 1, Started, Vec2::new(700.0, 210.0)); app.update();
+        touch(&mut app, window, 1, Ended, Vec2::new(700.0, 210.0)); app.update();
+        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+        assert!(!InputSurface::Npc.allows_scroll(ScrollKey::Detail(7)));
+        assert!(!InputSurface::Alert.allows_scroll(ScrollKey::NpcMessage(10, 7)));
+    }
+
+    #[test]
+    fn phone_npc_focus_loss_and_npc_replacement_cancel_an_owned_reward_press() {
+        use bevy::input::touch::TouchPhase::*;
+        for guard in ["focus", "npc-replacement"] {
+            let (mut app, window) = npc_reward_fixture();
+            touch(&mut app, window, 1, Started, Vec2::new(200.0, 210.0)); app.update();
+            if guard == "focus" { app.world_mut().get_mut::<Window>(window).unwrap().focused = false; }
+            else { app.world_mut().resource_mut::<NpcDialogModel>().npc_object_id = Some(11); }
+            touch(&mut app, window, 1, Ended, Vec2::new(200.0, 210.0)); app.update();
+            assert_eq!(app.world().resource::<QuestUiState>().npc_selected_reward_index, None);
+            assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+            assert!(app.world().resource::<PhoneInputState>().gesture.is_none());
+        }
+    }
+
+    #[test]
+    fn default_desktop_npc_list_retains_source_geometry_and_five_rows() {
+        let mut app = npc_fixture();
+        app.world_mut().remove_resource::<PhoneQuestPresentation>();
+        app.update();
+        let world = app.world_mut();
+        let panel = world.query_filtered::<&Node, With<NpcQuestListPanel>>().single(world).unwrap();
+        assert_eq!(panel.left, Val::Px(QUEST_LIST_DESIGN_LEFT));
+        assert_eq!(panel.width, Val::Px(QUEST_LIST_DESIGN_WIDTH));
+        assert_eq!(panel.height, Val::Px(QUEST_LIST_DESIGN_HEIGHT));
+        assert_eq!(world.query::<&QuestUiButton>().iter(world).filter(|action| matches!(action, QuestUiButton::SelectNpcQuest { .. })).count(), 5);
     }
 
     #[test]
