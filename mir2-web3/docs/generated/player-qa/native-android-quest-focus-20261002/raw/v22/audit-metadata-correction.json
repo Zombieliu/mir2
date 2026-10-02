@@ -1,0 +1,6 @@
+{
+  "classification": "Inherited metadata label correction, not a test or product failure",
+  "initial": "source-v22-initial-metadata.json",
+  "correction": "Production Android presentation adapter plus two shared marker exports; not an Android-only fixture leaf. Record fresh shared UI 1230 pass/10 existing ignored explicitly.",
+  "sourceOrGateResultsChanged": false
+}

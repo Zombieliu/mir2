@@ -1,5 +1,19 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 Android exactafea4b/v22 shared quest focus checkpoint
+>
+> Both clean diagnostics/37 inputs/selected resources/installed hashes pass;
+>320/343/shared1230+10existing ignored/fresh Java41+41/API31 pass. Shared source
+> changes exactly two public markers, all other bytes parent-identical. Production
+> Android adapter fits the actual diary/detail union; compiled0/1 red then1/1 green.
+> Actual row tap opens both windows with retained gap. Phone UI FAIL: enlarged
+> pair obstructs part of HUD/belt/chat and tiny/dark text/targets remain. NPC Exit
+> restores chrome. Seven originals inspected; five PIDs67 GL506 retain renderer
+> FAIL, prior33/73/135 and old failures unchanged. Next protect shared HUD and
+> thumb zones, then readable reflow/48dp/scroll, bounded GPU and full NI-11–20.
+> No live JNI/quest/reward/Zone/save/device/backend/global acceptance; goal Active.
+> [Exact v22 and retained occlusion/readability failures](generated/player-qa/native-android-quest-focus-20261002/README.md).
+
 > 2026-10-02 Android exact545a34/v21 bounded fixture checkpoint, not global parity
 >
 > Two-file Android-only received-NPC fixture/version fix removes a hidden manual

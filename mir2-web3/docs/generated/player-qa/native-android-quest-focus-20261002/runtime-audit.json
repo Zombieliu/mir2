@@ -1,0 +1,93 @@
+{
+  "source": "afea4b358680bb1d1a2ec8362ca6ffb538c6d648",
+  "versionCode": 22,
+  "distinctPids": 5,
+  "entries": [
+    {
+      "directory": "device",
+      "scene": "debug-login",
+      "pid": 13528,
+      "log": "raw/v22/device/debug-login-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": []
+    },
+    {
+      "directory": "device",
+      "scene": "quests-ingress",
+      "pid": 13603,
+      "log": "raw/v22/device/quests-ingress-pid.log",
+      "gl506": 43,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 11:26:42.324 13603 13626 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"quests-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = false;"
+      ]
+    },
+    {
+      "directory": "device",
+      "scene": "npc-ingress",
+      "pid": 13674,
+      "log": "raw/v22/device/npc-ingress-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 11:26:47.080 13674 13697 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"npc-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = true;"
+      ]
+    },
+    {
+      "directory": "touch-device",
+      "scene": "quests-ingress",
+      "pid": 13780,
+      "log": "raw/v22/touch-device/quests-ingress-after-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 11:30:05.069 13780 13803 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"quests-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = false;"
+      ]
+    },
+    {
+      "directory": "touch-device",
+      "scene": "npc-ingress",
+      "pid": 13868,
+      "log": "raw/v22/touch-device/npc-ingress-after-pid.log",
+      "gl506": 24,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 11:30:11.209 13868 13890 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"npc-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = true;"
+      ]
+    }
+  ],
+  "gl506": 67,
+  "logCounting": "One latest cumulative log per distinct PID; canonical event only, no before/after double count",
+  "originalFramesInspectedByPrimary": 7,
+  "screenshotObservations": {
+    "normalLogin": "Empty credentials; Test server not configured",
+    "receivedQuestList": "Shared Daily/title/ready status visible, enlarged but still small",
+    "actualQuestRowTap": "PASS bounded row tap opens the actual shared detail window",
+    "questPairPosition": "PASS bounded both windows visible with retained gap, not independently overlapping each other",
+    "phoneHudAndBeltOcclusion": "FAIL: enlarged diary/detail cover part of status card and belt/chat controls",
+    "questPhoneReadability": "FAIL: tiny text, dark low-contrast glyphs and below-phone-size targets remain; scaling is not reflow",
+    "receivedNpcDialogue": "PASS bounded received title/body/Exit visible",
+    "actualNpcExitTap": "PASS bounded dialogue disappears and HP/MP/belt/joystick/action chrome restores; no fresh Menu tap this leaf"
+  },
+  "zeroErrorRendererGate": "FAIL",
+  "gpuRendererFixThisLeaf": false,
+  "olderV21Gl506": 33,
+  "olderV20Gl506": 73,
+  "olderV19Gl506": 135,
+  "olderEvidenceUnchanged": true,
+  "actualJavaJniAuthenticatedQuest": false,
+  "questOrRewardSuccess": false,
+  "realHttpsWss": false,
+  "zoneSave": false,
+  "fullPhoneUiAccepted": false,
+  "completeResourcesAccepted": false,
+  "physicalDeviceAccepted": false,
+  "wholeGoal": "Active",
+  "next": "Protect the shared HUD/belt/chat and both thumb zones, then reflow fonts/touch rows and scroll/paging; bounded GPU and full Windows denominator remain"
+}
