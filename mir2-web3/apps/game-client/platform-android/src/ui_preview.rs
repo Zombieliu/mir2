@@ -680,25 +680,7 @@ fn apply(world: &mut World) {
     if remaining != 3 {
         return;
     } // let normal session-boundary clearing run first
-    let panel = match scene.as_str() {
-        "inventory" | "inventory-amount" => UiPanel::Inventory,
-        "character" => UiPanel::Character,
-        "skills" => UiPanel::Skill,
-        "quests" | "quests-ingress" => UiPanel::QuestLog,
-        "options" => UiPanel::Options,
-        "platform" => UiPanel::PlatformSettings,
-        "menu" => UiPanel::Menu,
-        "gameshop" => UiPanel::GameShop,
-        "mail" | "mail-compose" => UiPanel::Mail,
-        "bigmap" => UiPanel::BigMap,
-        "storage" | "storage-locked" => UiPanel::Storage,
-        "group" => UiPanel::Group,
-        "guild" => UiPanel::Guild,
-        "trade" => UiPanel::Trade,
-        "chat-settings" => UiPanel::ChatSettings,
-        "npc" | "npc-ingress" => UiPanel::NpcDialog,
-        _ => UiPanel::None,
-    };
+    let panel = preview_panel_for_scene(&scene);
     let mut state = world.resource_mut::<NativePlayerUiState>();
     state.core.screen = UiScreen::InGame;
     initialize_player_panel(&mut state, panel);
@@ -816,6 +798,32 @@ fn apply(world: &mut World) {
             .mail_compose = Some(mir2_ui_core::state::MailComposeDraft::default());
     }
     info!("ANDROID_UI_PREVIEW_READY scene={scene}");
+}
+
+fn preview_panel_for_scene(scene: &str) -> UiPanel {
+    match scene {
+        "inventory" | "inventory-amount" => UiPanel::Inventory,
+        "character" => UiPanel::Character,
+        "skills" => UiPanel::Skill,
+        "quests" | "quests-ingress" => UiPanel::QuestLog,
+        "options" => UiPanel::Options,
+        "platform" => UiPanel::PlatformSettings,
+        "menu" => UiPanel::Menu,
+        "gameshop" => UiPanel::GameShop,
+        "mail" | "mail-compose" => UiPanel::Mail,
+        "bigmap" => UiPanel::BigMap,
+        "storage" | "storage-locked" => UiPanel::Storage,
+        "group" => UiPanel::Group,
+        "guild" => UiPanel::Guild,
+        "trade" => UiPanel::Trade,
+        "chat-settings" => UiPanel::ChatSettings,
+        "npc" => UiPanel::NpcDialog,
+        // The received model owns this dialog's visibility. A pinned manual
+        // panel would keep shared world/HUD guards blocked after model Exit.
+        // dialog.is_open still supplies the normal shared modal protection.
+        "npc-ingress" => UiPanel::None,
+        _ => UiPanel::None,
+    }
 }
 
 fn initialize_panel(state: &mut mir2_ui_core::state::UiState, panel: UiPanel) {
@@ -1661,6 +1669,18 @@ mod tests {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
         assert_eq!(SCENES.len(), 41);
+    }
+
+    #[test]
+    fn npc_received_preview_releases_actual_shared_action_guard_after_dialog_exit() {
+        let mut player = NativePlayerUiState::default();
+        player.core.screen = UiScreen::InGame;
+        initialize_player_panel(&mut player, preview_panel_for_scene("npc-ingress"));
+        assert!(player.blocks_world_action(true, false), "An open received NPC still blocks actions");
+        assert!(!player.blocks_world_action(false, false),
+            "After received dialog Exit, a hidden pinned NpcDialog panel must not keep the HUD/action guard blocked");
+        assert_eq!(preview_panel_for_scene("npc"), UiPanel::NpcDialog, "Preserve the older manual specimen");
+        assert_eq!(preview_panel_for_scene("quests-ingress"), UiPanel::QuestLog);
     }
 
     #[test]
