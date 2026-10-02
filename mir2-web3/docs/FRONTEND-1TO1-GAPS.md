@@ -1,5 +1,16 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 native merchant terrain coverage: future Candidate packaging
+> defaults retain the 15 journey maps and add ten Bichon town/BorderVillage
+> merchant interiors. Frozen R12 WeaponStore0103 has 226 drawable source keys
+> absent from its native index. The 13-store Type1 audit finds 1,458 drawable
+> omissions with 36 SHA-verified source pages. Profile/map-selection checks
+> pass under Windows PowerShell5.1 and PowerShell7.6.5; explicit custom lists
+> retain their previous semantics. Fresh-package and human visual acceptance,
+> whole-world coverage and general on-demand key resolution remain pending.
+> Paused goals retain their status.
+> [Audit, list identity and runbook](NATIVE-SHOP-MAP-COVERAGE-20261002.md).
+
 > 2026-10-02 additive periodic tasks: separate Daily/Weekly diary pages, current
 > town Task Steward guidance, legal entrance/stop-near routing and complete
 > authored nine-language copy. Focused task regressions pass 211/4 ignored,

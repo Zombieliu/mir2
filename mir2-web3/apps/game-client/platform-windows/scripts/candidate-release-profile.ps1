@@ -86,6 +86,14 @@ function Resolve-CandidateMapNames {
     return @($result | Sort-Object)
 }
 
+function Get-CandidateDefaultMapNames {
+    # Default native terrain coverage includes Bichon town and BorderVillage
+    # merchants. Keep the journey minimum separate so explicit custom lists
+    # retain their existing validation and are not expanded silently.
+    $merchantMaps = @('0101', '0102', '0103', '0104', '0105', '0106', '0107', '0125', '0132', '0140')
+    return @(Resolve-CandidateMapNames -MapNames (@(Get-CandidateRequiredMapNames) + $merchantMaps))
+}
+
 function Get-CandidateActorLibraryNames {
     # Exact exported classic-profile libraries as of the September 2026
     # newcomer candidate. Requiring every metadata file detects a silently
@@ -231,13 +239,32 @@ function Test-CandidateReleaseConfiguration {
     $rejected = $false
     try { Resolve-CandidateMapNames -MapNames $missingSupply | Out-Null } catch { $rejected = $true }
     if (-not $rejected) { throw 'Candidate accepted omitted Taoist supply map' }
+    $defaultMaps = @(Get-CandidateDefaultMapNames)
+    $canonicalMapBytes = [Text.Encoding]::UTF8.GetBytes(($defaultMaps -join "`n") + "`n")
+    $mapHasher = [Security.Cryptography.SHA256]::Create()
+    try { $defaultMapHash = [BitConverter]::ToString($mapHasher.ComputeHash($canonicalMapBytes)).Replace('-', '').ToLowerInvariant() }
+    finally { $mapHasher.Dispose() }
+    if ($defaultMaps.Count -ne 25 -or $canonicalMapBytes.Length -ne 113 -or $defaultMapHash -cne '31a38749179cd53877e42a02bc62d5127a7a80225f3b9c6a7cdbb6ce1a209170') {
+        throw 'Candidate default map list differs from the reviewed Bichon merchant closure'
+    }
+    $explicitMaps = @(Resolve-CandidateMapNames -MapNames (Get-CandidateRequiredMapNames))
+    if ($explicitMaps.Count -ne 15 -or $explicitMaps -contains '0103') { throw 'Candidate expanded an explicit legacy map list' }
+    $customMaps = @(Resolve-CandidateMapNames -MapNames (@(Get-CandidateRequiredMapNames) + @('0100', 'D001')))
+    if ($customMaps.Count -ne 16 -or $customMaps -cnotcontains '0100' -or $customMaps -cnotcontains 'd001') {
+        throw 'Candidate lost or duplicated an explicitly selected custom map'
+    }
+    foreach ($badMap in @('../0103', '0103.map.gz', '0:debug', '')) {
+        $rejected = $false
+        try { Resolve-CandidateMapNames -MapNames (@(Get-CandidateRequiredMapNames) + @($badMap)) | Out-Null } catch { $rejected = $true }
+        if (-not $rejected) { throw 'Candidate accepted an unsafe custom map identifier' }
+    }
     foreach ($valid in @('mir2-assets/original-ui/Monster/009/80.png', 'mir2-assets/original-ui/NPC/45/meta.json', 'mir2-assets/original-ui/Gate/03/0.png', 'mir2-assets/original-ui/MapLinkIcon/100.png')) {
         if (-not (Test-CandidateActorFileAllowed -RelativePath $valid)) { throw 'Candidate actor allowlist rejected a valid path' }
     }
     foreach ($invalid in @('mir2-assets/original-ui/Monster/9/80.png', 'mir2-assets/original-ui/Monster/009/payload.exe.png', 'mir2-assets/original-ui/NPC/45/../0.png', 'mir2-assets/original-ui/Gate/04/0.png', 'mir2-assets/original-ui/MapLinkIcon/01.png')) {
         if (Test-CandidateActorFileAllowed -RelativePath $invalid) { throw 'Candidate actor allowlist accepted an invalid path' }
     }
-    Write-Host 'Candidate release configuration tests passed (endpoints, profiles, daylight, map coverage, actor allowlist)'
+    Write-Host 'Candidate release configuration tests passed (endpoints, profiles, daylight, default/custom map coverage, actor allowlist)'
 }
 
 function Test-CandidateSpriteClosureGuards {

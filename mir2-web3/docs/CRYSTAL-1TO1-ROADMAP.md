@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 future native package default: retain the 15 journey maps and add
+> ten audited Bichon merchant interiors. Profile checks preserve explicit
+> custom lists and bind the reviewed 25-map identity. This is packaging input
+> coverage; it does not rebuild the ab970 executable, close whole-world/R2
+> renderer gaps or establish human visual acceptance. Paused goals stay paused.
+> [Scoped source audit and verification](NATIVE-SHOP-MAP-COVERAGE-20261002.md).
+
 > 2026-10-02 published-source native follow-up: movement/action ordering,
 > rejected-combat cancellation and three-class belt/weapon hotkeys are repaired.
 > Input144, sender14 and 30 unique selected Zone checks pass. First incomplete

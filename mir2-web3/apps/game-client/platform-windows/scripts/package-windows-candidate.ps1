@@ -752,7 +752,7 @@ if ($SourceRevision -notmatch '^[0-9a-fA-F]{40}$') { $invalid += 'SourceRevision
 if ((Normalize-Thumbprint -Thumbprint $SignerThumbprint) -notmatch '^[0-9A-F]{40}$') { $invalid += 'SignerThumbprint' }
 if ($invalid.Count -gt 0) { throw ('mandatory attested inputs missing or invalid: ' + ($invalid -join ', ')) }
 $GatewayWsUrl = Resolve-CandidateGatewayWsUrl -Value $GatewayWsUrl
-if ($NativeMapFileNames.Count -eq 0) { $NativeMapFileNames = @(Get-CandidateRequiredMapNames) }
+if ($NativeMapFileNames.Count -eq 0) { $NativeMapFileNames = @(Get-CandidateDefaultMapNames) }
 $NativeMapFileNames = @(Resolve-CandidateMapNames -MapNames $NativeMapFileNames)
 $candidateToml = New-CandidateClientConfiguration -GatewayWsUrl $GatewayWsUrl -QuestGuidance $QuestGuidance -ForceDaylight $ForceDaylight
 Assert-CandidateClientConfiguration -Text $candidateToml | Out-Null
