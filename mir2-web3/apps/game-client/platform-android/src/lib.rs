@@ -50,6 +50,8 @@ mod shared_shell;
 mod skill_ingress;
 mod text_input;
 #[cfg(all(feature = "ui-preview", any(target_os = "android", test)))]
+mod quest_preview;
+#[cfg(all(feature = "ui-preview", any(target_os = "android", test)))]
 mod ui_preview;
 #[cfg(any(target_os = "android", test))]
 mod world_assets;

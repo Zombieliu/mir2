@@ -25,6 +25,7 @@ pub const SCENES: &[&str] = &[
     "character",
     "skills",
     "quests",
+    "quests-ingress",
     "options",
     "platform",
     "menu",
@@ -42,6 +43,7 @@ pub const SCENES: &[&str] = &[
     "trade",
     "chat-settings",
     "npc",
+    "npc-ingress",
     "death",
     "chat",
     "help",
@@ -682,7 +684,7 @@ fn apply(world: &mut World) {
         "inventory" | "inventory-amount" => UiPanel::Inventory,
         "character" => UiPanel::Character,
         "skills" => UiPanel::Skill,
-        "quests" => UiPanel::QuestLog,
+        "quests" | "quests-ingress" => UiPanel::QuestLog,
         "options" => UiPanel::Options,
         "platform" => UiPanel::PlatformSettings,
         "menu" => UiPanel::Menu,
@@ -694,7 +696,7 @@ fn apply(world: &mut World) {
         "guild" => UiPanel::Guild,
         "trade" => UiPanel::Trade,
         "chat-settings" => UiPanel::ChatSettings,
-        "npc" => UiPanel::NpcDialog,
+        "npc" | "npc-ingress" => UiPanel::NpcDialog,
         _ => UiPanel::None,
     };
     let mut state = world.resource_mut::<NativePlayerUiState>();
@@ -1156,6 +1158,26 @@ fn populate_specimens(world: &mut World, scene: &str) {
             unknown_text: None,
         }],
     });
+    if matches!(scene, "quests-ingress" | "npc-ingress") {
+        use mir2_client_bevy::quest_model::{CompletedQuestTracker, NearbyNpcModel, NpcDialogModel};
+        // Clear the manual legacy specimen before producing received models.
+        // Failure must not silently fall back to quest1 or a fabricated dialog.
+        world.insert_resource(QuestTracker::default());
+        world.insert_resource(CompletedQuestTracker::default());
+        world.insert_resource(NpcDialogModel::default());
+        world.insert_resource(NearbyNpcModel::default());
+        match crate::quest_preview::models(scene == "npc-ingress") {
+            Ok(models) => {
+                let count = models.tracker.active_quests.len();
+                let quest_id = models.tracker.active_quests.first().map(|quest| quest.quest_index);
+                let dialog_open = models.dialog.is_open;
+                models.apply(world);
+                info!(scene, count, ?quest_id, dialog_open,
+                    "ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVE");
+            }
+            Err(error) => warn!(error, "ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_FAILED_NOT_LIVE"),
+        }
+    }
     if scene == "multitouch" {
         let mut target = CombatTargetModel::default();
         target.apply(CombatTargetUpdate {
@@ -1638,7 +1660,31 @@ mod tests {
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 39);
+        assert_eq!(SCENES.len(), 41);
+    }
+
+    #[test]
+    fn quest_received_preview_uses_production_model_without_authorizing_main_host() {
+        use mir2_client_bevy::quest_model::{CompletedQuestTracker, NearbyNpcModel, QuestTracker};
+        for scene in ["quests-ingress", "npc-ingress"] {
+            let mut world = World::new();
+            world.init_resource::<mir2_client_bevy::social::SocialModel>();
+            let mut host = crate::shared_shell::HostState::default();
+            host.phase = "DISCONNECTED".into();
+            world.insert_resource(host);
+            world.insert_resource(NativeShellModel {screen:Screen::Login,..default()});
+            world.insert_resource(crate::AndroidGatewayTransportEnabled(false));
+            populate_specimens(&mut world, scene);
+            let tracker = world.resource::<QuestTracker>();
+            assert_eq!(tracker.active_quests[0].quest_index, 2100004,
+                "Must use received metadata, not the manual quest1 placeholder");
+            assert_eq!(tracker.active_quests[0].title, "OFFLINE RECEIVED DAILY QUEST");
+            assert!(world.resource::<CompletedQuestTracker>().contains(9));
+            assert_eq!(world.resource::<NearbyNpcModel>().npcs[0].object_id, 24);
+            assert_eq!(world.resource::<crate::shared_shell::HostState>().phase, "DISCONNECTED");
+            assert_eq!(world.resource::<NativeShellModel>().screen, Screen::Login);
+            assert!(!world.resource::<crate::AndroidGatewayTransportEnabled>().0);
+        }
     }
 
     #[test]
