@@ -275,6 +275,7 @@ final class GatewaySession implements AutoCloseable {
         // Only public metadata for an authenticated, listed-character Start.
         // Rust stages it until the accepted owner snapshot; it is not bootstrap.
         boolean forwardQuestMetadata = worldPending() && isQuestMetadataPacket(packet);
+        boolean forwardGameShopMetadata = worldPending() && isGameShopMetadataPacket(packet);
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -404,7 +405,8 @@ final class GatewaySession implements AutoCloseable {
         }
         if ((forwardEntity && phase == Phase.IN_GAME) || (forwardPersonal && personalGameplayPhase())
                 || (forwardNpc && npcGameplayPhase())
-                || (forwardQuestMetadata && worldPending())) {
+                || (forwardQuestMetadata && worldPending())
+                || (forwardGameShopMetadata && worldPending())) {
             forwardBounded(envelope, gameplayObserver);
         }
     }
@@ -461,6 +463,12 @@ final class GatewaySession implements AutoCloseable {
 
     private static boolean isQuestMetadataPacket(String packet) {
         return packet.equals("NewQuestInfo") || packet.equals("CompleteQuest");
+    }
+
+    private static boolean isGameShopMetadataPacket(String packet) {
+        // Public catalogue/stock only, during this authenticated listed Start.
+        // Rust stages before owner acceptance; no purchase/currency/receipt grant.
+        return packet.equals("GameShopInfo") || packet.equals("GameShopStock");
     }
 
     private boolean npcGameplayPhase() {

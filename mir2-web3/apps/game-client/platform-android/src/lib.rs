@@ -6,15 +6,17 @@
 
 pub mod android_input;
 #[cfg(any(target_os = "android", test))]
-mod chat_ingress;
-#[cfg(any(target_os = "android", test))]
 mod android_ui_clipping;
+#[cfg(any(target_os = "android", test))]
+mod chat_ingress;
 #[cfg(any(target_os = "android", test))]
 mod entity_overlays;
 #[cfg(any(target_os = "android", test))]
 mod entity_render;
 #[cfg(any(target_os = "android", test))]
 mod form_input;
+#[cfg(any(target_os = "android", test))]
+mod game_shop_ingress;
 pub mod gateway_bridge;
 #[cfg(any(target_os = "android", test))]
 mod ground_labels;
@@ -44,6 +46,8 @@ mod phone_quests;
 mod player_ingress;
 #[cfg(any(target_os = "android", test))]
 mod quest_ingress;
+#[cfg(all(feature = "ui-preview", any(target_os = "android", test)))]
+mod quest_preview;
 #[cfg(any(target_os = "android", test))]
 mod scene_effects;
 #[cfg(any(target_os = "android", test))]
@@ -51,8 +55,6 @@ mod shared_shell;
 #[cfg(any(target_os = "android", test))]
 mod skill_ingress;
 mod text_input;
-#[cfg(all(feature = "ui-preview", any(target_os = "android", test)))]
-mod quest_preview;
 #[cfg(all(feature = "ui-preview", any(target_os = "android", test)))]
 mod ui_preview;
 #[cfg(any(target_os = "android", test))]

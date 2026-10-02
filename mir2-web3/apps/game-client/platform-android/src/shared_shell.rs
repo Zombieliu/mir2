@@ -118,6 +118,7 @@ pub(crate) struct HostState {
     chat: crate::chat_ingress::AndroidChatIngress,
     skills: crate::skill_ingress::AndroidSkillIngress,
     inventory: crate::inventory_ingress::AndroidInventoryIngress,
+    game_shop: crate::game_shop_ingress::AndroidGameShopIngress,
     npc: crate::npc_ingress::AndroidNpcIngress,
     player: crate::player_ingress::AndroidPlayerIngress,
     pub(crate) quests: crate::quest_ingress::AndroidQuestIngress,
@@ -139,14 +140,19 @@ impl HostState {
     /// Physical Android presentation insets, including the active IME. Keep
     /// host fields private; the UI caller converts density exactly once.
     pub(crate) fn quest_presentation_insets(&self) -> Vec4 {
-        Vec4::new(self.safe_left, self.safe_top, self.safe_right,
-            self.safe_bottom + self.ime_bottom)
+        Vec4::new(
+            self.safe_left,
+            self.safe_top,
+            self.safe_right,
+            self.safe_bottom + self.ime_bottom,
+        )
     }
 
     fn reset_personal(&mut self) {
         self.chat.reset();
         self.skills.reset();
         self.inventory.reset();
+        self.game_shop.reset();
         self.npc.reset();
         self.player.reset();
         self.quests.reset();
@@ -174,6 +180,10 @@ impl HostState {
         self.player.flush(
             mir2_bevy_runtime::native_ingest::push_native_ui_read_model,
             mir2_bevy_runtime::native_ingest::push_native_wallet_patch,
+        );
+        self.game_shop.flush(
+            mir2_bevy_runtime::native_ingest::push_native_game_shop_info,
+            mir2_bevy_runtime::native_ingest::push_native_game_shop_stock,
         );
     }
 
@@ -230,7 +240,8 @@ impl HostState {
 
     fn accept_quest_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
         if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
-            || !matches!(screen, Screen::StartingGame | Screen::InGame) {
+            || !matches!(screen, Screen::StartingGame | Screen::InGame)
+        {
             return Ok(false);
         }
         self.quests.packet(raw)
@@ -238,6 +249,21 @@ impl HostState {
 
     fn bind_quest_snapshot(&mut self, raw: &str) -> Result<(), &'static str> {
         self.quests.snapshot(raw, self.player.presentation_cursor())
+    }
+
+    fn accept_game_shop_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
+        if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
+            || !matches!(screen, Screen::StartingGame | Screen::InGame)
+        {
+            return Ok(false);
+        }
+        self.game_shop
+            .packet(raw, self.player.presentation_cursor())
+    }
+
+    fn bind_game_shop_snapshot(&mut self, raw: &str) -> Result<(), &'static str> {
+        self.game_shop
+            .snapshot(raw, self.player.presentation_cursor())
     }
 
     fn accept_inventory_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
@@ -1408,6 +1434,7 @@ fn receive(
                         || host.accept_player_packet(model.screen, raw).is_err()
                         || host.accept_chat_packet(model.screen, raw).is_err()
                         || host.accept_quest_packet(model.screen, raw).is_err()
+                        || host.accept_game_shop_packet(model.screen, raw).is_err()
                         || host
                             .accept_npc_packet(
                                 model.screen,
@@ -1753,6 +1780,7 @@ fn receive(
             host.player.clear_scene();
             host.npc.clear_scene();
             host.quests.clear_scene();
+            host.game_shop.clear_scene();
             if let Some(player) = player.as_deref_mut() {
                 player.request_npc_service_exit();
             }
@@ -1792,6 +1820,7 @@ fn receive(
                     if host.bind_chat_owner().is_ok()
                         && host.bind_npc_snapshot(raw).is_ok()
                         && host.bind_quest_snapshot(raw).is_ok()
+                        && host.bind_game_shop_snapshot(raw).is_ok()
                     {
                         projection.ui = ui;
                     } else {
@@ -1946,6 +1975,9 @@ fn receive(
                 });
             }
             "CHARACTERS" if model.screen == Screen::StartingGame => {
+                // A rejected listed-character Start retires packet-first shop
+                // metadata before another character can be selected.
+                host.game_shop.reset();
                 model.apply_gateway_event(Event::StartGameAck {
                     accepted: false,
                     reason: Some(message),
@@ -2576,6 +2608,249 @@ mod quest_host_tests;
 
 #[cfg(test)]
 mod tests {
+    fn game_shop_receive_app() -> App {
+        INBOX.lock().unwrap().clear();
+        OUTBOX.lock().unwrap().clear();
+        let mut app = App::new();
+        app.add_plugins(mir2_bevy_runtime::Mir2NativeSessionBoundaryPlugin);
+        mir2_bevy_runtime::native_ingest::install_native_ingestion(&mut app);
+        #[cfg(feature = "ui-preview")]
+        app.init_resource::<crate::ui_preview::PreviewRequest>();
+        app.insert_resource(NativeShellModel {
+            screen: Screen::StartingGame,
+            ..default()
+        })
+        .insert_resource(HostState {
+            phase: "STARTING".into(),
+            ..default()
+        })
+        .init_resource::<NativeUiIntentQueue>()
+        .add_systems(PreUpdate, receive);
+        app
+    }
+
+    fn game_shop_host_metadata(packet: &str, payload: Value) -> Value {
+        json!({"type":"gatewayGameplayPacket","envelope":
+            json!({"type":"packet","packet":packet,"payload":payload}).to_string()})
+    }
+
+    fn game_shop_host_world(owner: u32, name: &str, map: &str) -> Value {
+        let raw = json!({"playerObjectId":owner,"mapFileName":map,
+            "entities":[{"kind":"selfPlayer","objectId":owner,"name":name,"x":10,"y":20}]});
+        json!({"phase":"IN_GAME","world":{
+            "playerName":name,"mapFileName":map,"x":10,"y":20},
+            "worldSnapshot":raw.to_string()})
+    }
+
+    #[test]
+    fn game_shop_host_phase_gate_and_render_failure_retire_pending_metadata() {
+        let raw =
+            json!({"type":"packet","packet":"GameShopInfo","payload":{"gIndex":31}}).to_string();
+        let mut host = HostState::default();
+        for phase in ["DISCONNECTED", "READY", "CHARACTERS"] {
+            host.phase = phase.into();
+            assert!(!host
+                .accept_game_shop_packet(Screen::StartingGame, &raw)
+                .unwrap());
+        }
+        host.phase = "STARTING".into();
+        for screen in [
+            Screen::Login,
+            Screen::CharacterSelect,
+            Screen::ConnectionLost,
+        ] {
+            assert!(!host.accept_game_shop_packet(screen, &raw).unwrap());
+        }
+        assert!(host
+            .accept_game_shop_packet(Screen::StartingGame, &raw)
+            .unwrap());
+        assert_eq!(host.game_shop.pending_count(), 1);
+        host.pending_render_request = Some(7);
+        let mut shell = NativeShellModel {
+            screen: Screen::StartingGame,
+            ..default()
+        };
+        assert!(fail_current_render_load(
+            &mut host,
+            &mut shell,
+            7,
+            "OFFLINE fixture failure"
+        ));
+        assert_eq!(host.game_shop.pending_count(), 0);
+        assert!(!host
+            .game_shop
+            .flush(|_| panic!("retired catalog"), |_| panic!("retired stock")));
+    }
+
+    #[test]
+    fn game_shop_host_actual_receive_stages_then_admits_without_skipping_render_barrier() {
+        // Exercise the actual Java-envelope receive/bind/native-queue producer.
+        // This headless fixture is not Android JNI, a rendered shop or live WSS.
+        let mut app = game_shop_receive_app();
+        INBOX.lock().unwrap().extend([
+            game_shop_host_metadata("GameShopStock", json!({"gIndex":31,"stockLevel":3})),
+            game_shop_host_metadata(
+                "GameShopInfo",
+                json!({"gIndex":31,"stock":10,"stockLevel":8}),
+            ),
+        ]);
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<HostState>()
+                .game_shop
+                .pending_count(),
+            2
+        );
+        assert!(app
+            .world()
+            .resource::<HostState>()
+            .pending_render_request
+            .is_none());
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::game_shop::GameShopModel>()
+            .items
+            .is_empty());
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(game_shop_host_world(42, "Fixture", "0"));
+        app.update();
+        let host = app.world().resource::<HostState>();
+        assert_eq!(
+            host.game_shop.pending_count(),
+            0,
+            "producer admits deferred metadata after owner"
+        );
+        assert_eq!(host.phase, "IN_GAME");
+        assert!(host.pending_render_request.is_some());
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::StartingGame
+        );
+        assert!(OUTBOX.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn game_shop_host_rejected_start_clears_staged_catalog_before_retry() {
+        let mut app = game_shop_receive_app();
+        INBOX.lock().unwrap().push_back(game_shop_host_metadata(
+            "GameShopInfo",
+            json!({"gIndex":31}),
+        ));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<HostState>()
+                .game_shop
+                .pending_count(),
+            1
+        );
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(json!({"phase":"CHARACTERS","message":"OFFLINE rejected Start"}));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<HostState>()
+                .game_shop
+                .pending_count(),
+            0
+        );
+        assert_eq!(app.world().resource::<HostState>().phase, "CHARACTERS");
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::CharacterSelect
+        );
+        app.world_mut().resource_mut::<NativeShellModel>().screen = Screen::StartingGame;
+        app.world_mut().resource_mut::<HostState>().phase = "STARTING".into();
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(game_shop_host_world(43, "Other", "1"));
+        app.update();
+        assert_eq!(
+            app.world()
+                .resource::<HostState>()
+                .game_shop
+                .pending_count(),
+            0
+        );
+        assert_eq!(app.world().resource::<HostState>().phase, "IN_GAME");
+    }
+
+    #[test]
+    fn game_shop_host_terminal_batch_rejects_later_metadata_and_stale_world() {
+        let mut app = game_shop_receive_app();
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(game_shop_host_world(42, "Fixture", "0"));
+        app.update();
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::game_shop::GameShopModel>()
+            .upsert(mir2_client_bevy::game_shop::GameShopEntry {
+                game_shop_index: 31,
+                ..default()
+            });
+        INBOX.lock().unwrap().extend([
+            game_shop_host_metadata("GameShopInfo", json!({"gIndex":-1})),
+            game_shop_host_metadata("GameShopInfo", json!({"gIndex":32})),
+            game_shop_host_world(42, "Fixture", "0"),
+        ]);
+        app.update();
+        let host = app.world().resource::<HostState>();
+        assert_eq!(host.phase, "DISCONNECTED");
+        assert_eq!(host.game_shop.pending_count(), 0);
+        assert!(host.world.is_none() && host.pending_render_request.is_none());
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::ConnectionLost
+        );
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::game_shop::GameShopModel>()
+            .items
+            .is_empty());
+        let command: Value =
+            serde_json::from_str(&OUTBOX.lock().unwrap().pop_front().unwrap()).unwrap();
+        assert_eq!(command["type"], "disconnect");
+        assert!(OUTBOX.lock().unwrap().is_empty());
+    }
+
+    #[test]
+    fn game_shop_host_owner_swap_without_personal_reset_revokes_old_catalog() {
+        let mut app = game_shop_receive_app();
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(game_shop_host_world(42, "Fixture", "0"));
+        app.update();
+        app.world_mut()
+            .resource_mut::<mir2_client_bevy::game_shop::GameShopModel>()
+            .upsert(mir2_client_bevy::game_shop::GameShopEntry {
+                game_shop_index: 31,
+                ..default()
+            });
+        INBOX
+            .lock()
+            .unwrap()
+            .push_back(game_shop_host_world(43, "Other", "0"));
+        app.update();
+        assert_eq!(app.world().resource::<HostState>().phase, "DISCONNECTED");
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::ConnectionLost
+        );
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::game_shop::GameShopModel>()
+            .items
+            .is_empty());
+    }
+
     #[test]
     fn android_host_does_not_let_desktop_ime_steal_its_editor_connection() {
         let mut app = App::new();
@@ -3502,15 +3777,27 @@ mod tests {
             ..default()
         });
         app.world_mut().spawn((QuestUiRoot, Node::default()));
-        let diary = app.world_mut().spawn((QuestLogPanel, UiTransform::default(), Node {
-            position_type: PositionType::Absolute,
-            left: px(QUEST_DIARY_DESIGN_LEFT), top: px(QUEST_DIARY_DESIGN_TOP),
-            width: px(QUEST_DIARY_DESIGN_WIDTH), height: px(QUEST_DIARY_DESIGN_HEIGHT),
-            display: Display::Flex, ..default()
-        })).id();
+        let diary = app
+            .world_mut()
+            .spawn((
+                QuestLogPanel,
+                UiTransform::default(),
+                Node {
+                    position_type: PositionType::Absolute,
+                    left: px(QUEST_DIARY_DESIGN_LEFT),
+                    top: px(QUEST_DIARY_DESIGN_TOP),
+                    width: px(QUEST_DIARY_DESIGN_WIDTH),
+                    height: px(QUEST_DIARY_DESIGN_HEIGHT),
+                    display: Display::Flex,
+                    ..default()
+                },
+            ))
+            .id();
         app.update();
-        assert!(app.world().get::<UiTransform>(diary).unwrap().scale.x > 1.2,
-            "The shared quest panel is still only scaled as part of the desktop canvas");
+        assert!(
+            app.world().get::<UiTransform>(diary).unwrap().scale.x > 1.2,
+            "The shared quest panel is still only scaled as part of the desktop canvas"
+        );
         let node = app.world().get::<Node>(diary).unwrap();
         assert_eq!(node.left, px(QUEST_DIARY_DESIGN_LEFT));
         assert_eq!(node.width, px(QUEST_DIARY_DESIGN_WIDTH));

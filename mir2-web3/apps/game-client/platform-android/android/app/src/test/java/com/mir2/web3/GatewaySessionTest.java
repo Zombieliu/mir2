@@ -638,6 +638,78 @@ public class GatewaySessionTest {
         assertTrue(phase(GatewaySession.Phase.DISCONNECTED).characters.isEmpty());
     }
 
+    @Test public void gameShopMetadataStagesOnlyDuringAuthenticatedSelectedStart() throws Exception {
+        JSONObject catalog = GatewaySession.object("type", "packet", "packet", "GameShopInfo",
+                "payload", GatewaySession.object("item", GatewaySession.object("gIndex", 31,
+                        "itemName", "TLS fixture product", "stock", 10), "stockLevel", 8));
+        JSONObject stock = GatewaySession.object("type", "packet", "packet", "GameShopStock",
+                "payload", GatewaySession.object("gIndex", 31, "stockLevel", 3));
+        connect();
+        peer.send(catalog.toString()); peer.send(stock.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        roster();
+        peer.send(catalog.toString()); peer.send(stock.toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.start(7);
+        assertEquals("startGame", commands.poll(3, TimeUnit.SECONDS).getString("type"));
+        assertNull("Catalog metadata must not bootstrap a player",
+                phase(GatewaySession.Phase.STARTING).world);
+        for (JSONObject envelope : new JSONObject[]{catalog, stock}) {
+            peer.send(envelope.toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Selected Start must retain packet-first GameShop metadata", raw);
+            assertEquals(envelope.toString(), new JSONObject(raw).toString());
+        }
+        for (String unsupported : new String[]{"NPCStorage", "qa.giveItem", "GameShopPurchase"}) {
+            peer.send(GatewaySession.object("type", "packet", "packet", unsupported,
+                    "payload", new JSONObject()).toString());
+            assertNull(gameplayPackets.poll(100, TimeUnit.MILLISECONDS));
+        }
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":1}}");
+        phase(GatewaySession.Phase.CHARACTERS);
+        peer.send(catalog.toString()); peer.send(stock.toString());
+        assertNull("Rejected Start must close catalog forwarding",
+                gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.disconnect("TLS fixture ended");
+        assertTrue(phase(GatewaySession.Phase.DISCONNECTED).characters.isEmpty());
+    }
+
+    @Test public void gameShopMetadataSurvivesAcceptedOwnerMapTransitionWithoutBootstrap() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        assertEquals("0", phase(GatewaySession.Phase.IN_GAME).world.mapFileName);
+        JSONObject catalog = GatewaySession.object("type", "packet", "packet", "GameShopInfo",
+                "payload", GatewaySession.object("gIndex", 31, "itemName", "TLS fixture product"));
+        peer.send(catalog.toString());
+        assertEquals(catalog.toString(), new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).toString());
+
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        assertNull("Destination position still absent", phase(GatewaySession.Phase.STARTING).world);
+        JSONObject stock = GatewaySession.object("type", "packet", "packet", "GameShopStock",
+                "payload", GatewaySession.object("gIndex", 31, "stockLevel", 3));
+        peer.send(stock.toString());
+        assertEquals(stock.toString(), new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).toString());
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"1\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":50,\"y\":60}]}}");
+        GatewaySession.View entered = phase(GatewaySession.Phase.IN_GAME);
+        assertEquals("1", entered.world.mapFileName);
+        assertEquals(50, entered.world.x);
+        peer.send(catalog.toString());
+        assertEquals(catalog.toString(), new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS)).toString());
+    }
+
+    @Test public void oversizedGameShopMetadataFailsClosedBeforeOwnerBootstrap() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(GatewaySession.object("type", "packet", "packet", "GameShopInfo", "payload",
+                GatewaySession.object("item", GatewaySession.object("gIndex", 31,
+                        "itemName", "文".repeat(6000)))).toString());
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
     @Test public void oversizedQuestMetadataFailsClosedBeforeOwnerBootstrap() throws Exception {
         connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
         phase(GatewaySession.Phase.STARTING);
