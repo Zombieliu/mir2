@@ -10,6 +10,7 @@ import {
 } from './periodic-journey-policy.mjs';
 import { loadCrystalQuestRouteSources } from './route-manifest.mjs';
 import { deadlineBoundPeriodicClient } from './run-periodic-journey.mjs';
+import * as periodicPolicy from './periodic-journey-policy.mjs';
 
 const catalog = JSON.parse(await fs.readFile(new URL('../../../../config/quest-guidance/daily-weekly-v1.json', import.meta.url)));
 const sources = await loadCrystalQuestRouteSources();
@@ -123,6 +124,71 @@ test('kill credit is exact-ID and exact-index, with daily and weekly increments 
   assert.deepEqual(credits.map(credit => [credit.questId, credit.monsterIndex, credit.delta]), [[92001, 39, 1], [92004, 39, 1]]);
   world.questLog.find(quest => quest.questId === 92001).objectives[0].required = 79;
   assert.throws(() => periodicQuestStates(world, routes), /identity\/count/);
+});
+
+const lostTargetEvidence = () => {
+  const engagementStartedAtMs = Date.parse('2026-10-02T00:34:38.801Z');
+  const target = { objectId: 205119, kind: 'monster', name: 'Scarecrow', x: 234, y: 384, hp: 11, dead: false };
+  const beforeSnapshot = { playerObjectId: 1, playerExperience: 152, mapFileName: '0', entities: [owner(10),
+    { objectId: 50001, kind: 'player', class: 'Wizard' }, target] };
+  const afterSnapshot = structuredClone(beforeSnapshot);
+  Object.assign(afterSnapshot.entities[2], { hp: 0, dead: true });
+  return { beforeSnapshot, afterSnapshot, target, beforeSequence: 1240, engagementStartedAtMs, credits: [],
+    events: [{ sequence: 1228, at: new Date(engagementStartedAtMs - 11).toISOString(), direction: 'received',
+      packet: 'ObjectMagic', payload: { objectId: 50001, targetId: 205119, cast: true } }] };
+};
+
+test('lost target: replay the shared Scarecrow death without granting any owner credit', () => {
+  const proof = periodicPolicy.lostPeriodicTarget(lostTargetEvidence());
+  assert.equal(proof.objectId, 205119);
+  assert.equal(proof.foreignPlayerObjectId, 50001);
+  assert.equal(proof.foreignAttackSequence, 1228);
+  assert.equal(proof.reason, 'unattacked-target-killed-by-other-player');
+  assert.equal(proof.ownCreditGranted, false);
+});
+
+for (const type of ['attack', 'attackDirection', 'magic', 'petAttack']) {
+  test(`lost target: ${type} attempt keeps missing credit as an error`, () => {
+    const evidence = lostTargetEvidence();
+    evidence.events.push({ sequence: 1241, direction: 'sent', type, objectId: 205119 });
+    assert.equal(periodicPolicy.lostPeriodicTarget(evidence), null);
+  });
+}
+
+test('lost target: own packet or possible owned pet makes the credit dispute unresolved', () => {
+  const ownPacket = lostTargetEvidence();
+  ownPacket.events.push({ sequence: 1241, direction: 'received', packet: 'ObjectAttack', payload: { objectId: 1 } });
+  assert.equal(periodicPolicy.lostPeriodicTarget(ownPacket), null);
+  const pet = lostTargetEvidence();
+  pet.beforeSnapshot.entities.push({ objectId: 88, kind: 'monster', ownerObjectId: 1 });
+  assert.equal(periodicPolicy.lostPeriodicTarget(pet), null);
+  const unknownPet = lostTargetEvidence(); unknownPet.afterSnapshot.pets = [{ objectId: 88 }];
+  assert.equal(periodicPolicy.lostPeriodicTarget(unknownPet), null);
+});
+
+test('lost target: offscreen/remove alone, living target or changed map is not a death proof', () => {
+  for (const mutation of [e => e.afterSnapshot.entities.pop(), e => Object.assign(e.afterSnapshot.entities[2], { hp: 1, dead: false }),
+    e => { e.afterSnapshot.mapFileName = 'D001'; }]) {
+    const evidence = lostTargetEvidence(); mutation(evidence);
+    evidence.events.push({ sequence: 1241, direction: 'received', packet: 'ObjectRemove', payload: { objectId: 205119 } });
+    assert.equal(periodicPolicy.lostPeriodicTarget(evidence), null);
+  }
+});
+
+test('lost target: wrong target, unknown caster and stale foreign attack remain errors', () => {
+  for (const mutation of [e => { e.events[0].payload.targetId = 205118; }, e => { e.events[0].payload.objectId = 77; },
+    e => { e.events[0].at = new Date(e.engagementStartedAtMs - 10_001).toISOString(); },
+    e => { e.events[0].payload.objectId = 1; }]) {
+    const evidence = lostTargetEvidence(); mutation(evidence);
+    assert.equal(periodicPolicy.lostPeriodicTarget(evidence), null);
+  }
+});
+
+test('lost target: actual quest or experience credit prevents retry classification', () => {
+  const credited = lostTargetEvidence(); credited.credits = [{ questId: 92001, delta: 1 }];
+  assert.equal(periodicPolicy.lostPeriodicTarget(credited), null);
+  const experience = lostTargetEvidence(); experience.afterSnapshot.playerExperience += 1;
+  assert.equal(periodicPolicy.lostPeriodicTarget(experience), null);
 });
 
 test('accepted reward preview is bound to server ID, tier, gold and task counts', () => {

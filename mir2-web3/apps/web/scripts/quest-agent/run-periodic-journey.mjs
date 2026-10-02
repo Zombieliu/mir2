@@ -18,7 +18,7 @@ import { loadCrystalQuestRouteSources } from './route-manifest.mjs';
 import {
   PERIODIC_COMMANDS, validateScenario, assertFixtureIdentity, buildPeriodicRoutes, assertPeriodicOffers,
   periodicQuestStates, periodicCreditDeltas, dailyReady, selectPeriodicFarmPlan, periodicRewardPreview,
-  playerBalance, validatePeriodicFinish, createPeriodicRedactor, periodicTraceProjection, stageName, mapName, sha256,
+  playerBalance, validatePeriodicFinish, createPeriodicRedactor, periodicTraceProjection, lostPeriodicTarget, stageName, mapName, sha256,
 } from './periodic-journey-policy.mjs';
 
 const CATALOG_URL = new URL('../../../../config/quest-guidance/daily-weekly-v1.json', import.meta.url);
@@ -89,7 +89,7 @@ export async function runPeriodicJourney({ input, output, mapPackRoot }) {
     weeklyIds: routes.filter(route => route.cadence === 'weekly').map(route => route.questId),
     status: 'running', completed: false, smokePassed: false, timingAccepted: false, visualAccepted: false,
     capacityAcceptance: false, phases: [], taskStages: [], killCredits: [], accepts: [], finishes: [],
-    travel: [], combat: [], merchants: [], supplies: [], deaths: [], revivals: [], actionReceipts: {}, actionCounts: {},
+    travel: [], combat: [], merchants: [], supplies: [], deaths: [], revivals: [], lostTargets: [], actionReceipts: {}, actionCounts: {},
   };
   const checkpoint = async () => {
     if (!report.finishedAt) report.elapsedMs = Date.now() - startedAtMs;
@@ -256,9 +256,12 @@ export async function runPeriodicJourney({ input, output, mapPackRoot }) {
       checkDeadline(); await recoverDeath(); await ensureSupplies();
       const plan = selectPeriodicFarmPlan(client.snapshot, routes);
       if (!plan) throw new Error('Active daily objectives have no valid farm plan');
-      const beforeStates = periodicQuestStates(client.snapshot, routes), beforeSequence = client.sequence;
+      const beforeSnapshot = { ...client.snapshot, entities: (client.snapshot.entities ?? []).map(entity => ({ ...entity })) };
+      const selectedTarget = plan.target ? { ...plan.target } : null, engagementStartedAtMs = Date.now();
+      const beforeStates = periodicQuestStates(beforeSnapshot, routes), beforeSequence = client.sequence;
+      let engagementResult;
       try {
-        await operation(report.combat, `farm-q${plan.route.questId}-${plan.kill.monsterName}`, async () => {
+        engagementResult = await operation(report.combat, `farm-q${plan.route.questId}-${plan.kill.monsterName}`, async () => {
           const loadout = await prepareLoadout(bounded);
           if (loadout.equipped.length || loadout.learned.length || loadout.consumed.length) report.supplies.push({ label: 'ordinary-loadout', sequence: client.sequence, result: loadout });
           if (plan.target) {
@@ -266,6 +269,10 @@ export async function runPeriodicJourney({ input, output, mapPackRoot }) {
             // ObjectDeath alone is not kill credit. Probe and wait for the
             // exact daily ID, which also exposes the ordinary weekly overlap.
             await refreshCombatWorldSnapshot(bounded);
+            const lostTarget = lostPeriodicTarget({ beforeSnapshot, afterSnapshot: client.snapshot, target: selectedTarget,
+              beforeSequence, engagementStartedAtMs, events: client.events,
+              credits: periodicCreditDeltas(beforeStates, periodicQuestStates(client.snapshot, routes)) });
+            if (lostTarget) return { ...result, lostTarget };
             await bounded.wait(() => periodicCreditDeltas(beforeStates, periodicQuestStates(client.snapshot, routes))
               .some(credit => credit.cadence === 'daily'), 'authoritative daily kill credit', 6_000);
             return result;
@@ -280,6 +287,12 @@ export async function runPeriodicJourney({ input, output, mapPackRoot }) {
         throw error;
       }
       const credits = periodicCreditDeltas(beforeStates, periodicQuestStates(client.snapshot, routes));
+      if (engagementResult?.lostTarget) {
+        report.lostTargets.push({ ...engagementResult.lostTarget, questId: plan.route.questId,
+          beforeSequence, afterSequence: client.sequence, at: new Date().toISOString() });
+        await queueCheckpoint();
+        continue;
+      }
       if (!credits.some(credit => credit.cadence === 'daily')) throw new Error('Daily engagement ended without exact server quest credit');
       creditedEngagements += 1;
       report.combat.at(-1).credits = credits; report.combat.at(-1).creditAfterSequence = beforeSequence;

@@ -201,6 +201,42 @@ export function selectPeriodicFarmPlan(snapshot, routes) {
     Number(right.currentMap) - Number(left.currentMap) || left.distance - right.distance || left.route.slot - right.route.slot)[0] ?? null;
 }
 
+/** A shared target can die while this owner is still approaching it. */
+export function lostPeriodicTarget({ beforeSnapshot, afterSnapshot, target, beforeSequence, engagementStartedAtMs, events, credits }) {
+  const objectId = Number(target?.objectId), selfId = Number(beforeSnapshot?.playerObjectId);
+  if (!Number.isSafeInteger(objectId) || objectId <= 0 || !Number.isSafeInteger(selfId) || selfId <= 0 ||
+      !Number.isFinite(engagementStartedAtMs) || !Number.isSafeInteger(beforeSequence) || credits?.length ||
+      mapName(beforeSnapshot?.mapFileName) !== mapName(afterSnapshot?.mapFileName)) return null;
+  const terminal = (afterSnapshot?.entities ?? []).find(entity => Number(entity.objectId) === objectId);
+  if (nameKey(target.kind) !== 'monster' || target.dead === true || Number(target.hp) <= 0 ||
+      !terminal || !(terminal.dead === true || terminal.hp != null && Number(terminal.hp) <= 0)) return null;
+  if (beforeSnapshot.playerExperience !== afterSnapshot.playerExperience ||
+      actor(beforeSnapshot)?.level !== actor(afterSnapshot)?.level) return null;
+  const worlds = [beforeSnapshot, afterSnapshot];
+  if (worlds.some(world => Number(world.petCount ?? world.playerPetCount ?? 0) > 0 ||
+      ['pets', 'ownedPets', 'playerPets'].some(key => Array.isArray(world[key]) && world[key].length > 0) ||
+      (world.entities ?? []).some(entity => nameKey(entity.kind).includes('pet') || entity.isPet === true ||
+        nameKey(entity.kind) === 'monster' &&
+        [entity.ownerObjectId, entity.owner_object_id, entity.petOwnerObjectId, entity.ownerId].some(id => id != null && Number(id) === selfId)))) return null;
+  const attempted = (events ?? []).some(event => Number(event.sequence) > beforeSequence &&
+    (event.direction === 'sent' && (['attack', 'attackDirection', 'magic'].includes(event.type) || /pet/i.test(event.type ?? '')) ||
+     event.direction === 'received' && ['ObjectAttack', 'ObjectMagic'].includes(event.packet) && Number(event.payload?.objectId) === selfId));
+  if (attempted) return null;
+  const players = worlds.flatMap(world => world.entities ?? []).filter(entity =>
+    nameKey(entity.kind) === 'player' && PERIODIC_CLASSES.includes(entity.class) && Number(entity.objectId) !== selfId);
+  // A cast can already be in flight when the target is selected. Retain a
+  // bounded recent observation, including the 11 ms race in the live trace.
+  const foreign = (events ?? []).find(event => event.direction === 'received' &&
+    ['ObjectAttack', 'ObjectMagic'].includes(event.packet) && event.payload?.cast !== false &&
+    Number(event.payload?.targetId) === objectId &&
+    Date.parse(event.at) >= engagementStartedAtMs - 10_000 &&
+    players.some(player => Number(player.objectId) === Number(event.payload?.objectId)));
+  if (!foreign) return null;
+  return { reason: 'unattacked-target-killed-by-other-player', objectId,
+    foreignPlayerObjectId: Number(foreign.payload.objectId), foreignAttackSequence: foreign.sequence,
+    foreignAttackAt: foreign.at, terminal: { hp: terminal.hp, dead: terminal.dead }, ownCreditGranted: false };
+}
+
 export function periodicRewardPreview(info, route) {
   if (Number(info?.index) !== route.questId || Number(info?.min_level_needed) !== route.minLevel ||
       Number(info?.max_level_needed) !== route.maxLevel || Number(info?.reward_gold) !== route.gold) {
