@@ -73,6 +73,8 @@ pub fn render_system(
     #[cfg(feature = "trace")]
     let _span = info_span!("main_render_schedule").entered();
 
+    #[cfg(target_os = "android")]
+    crate::view::window::trace_android_view_outputs(world);
     world.run_schedule(RenderGraph);
 
     {

@@ -33,6 +33,38 @@ static ANDROID_SURFACE_PROBE_FRAME: core::sync::atomic::AtomicU32 =
     core::sync::atomic::AtomicU32::new(0);
 
 #[cfg(target_os = "android")]
+static ANDROID_SURFACE_PROBE_CURRENT_RAW: core::sync::atomic::AtomicU32 =
+    core::sync::atomic::AtomicU32::new(0);
+
+#[cfg(target_os = "android")]
+pub(crate) fn trace_android_view_outputs(world: &mut World) {
+    let frame = ANDROID_SURFACE_PROBE_FRAME.load(core::sync::atomic::Ordering::Relaxed);
+    if frame > 64 {
+        return;
+    }
+    let current = ANDROID_SURFACE_PROBE_CURRENT_RAW.load(core::sync::atomic::Ordering::Relaxed);
+    let mut query = world.query::<(
+        Entity,
+        &crate::view::ViewTarget,
+        Option<&crate::camera::ExtractedCamera>,
+        Option<&crate::view::ExtractedView>,
+        Option<&crate::view::Msaa>,
+    )>();
+    for (entity, target, camera, view, msaa) in query.iter(world) {
+        // SAFETY: This keeps both the view and the HAL guard alive. Debug
+        // formatting only reads the backend handle, never calls or mutates GL.
+        let output = unsafe {
+            target
+                .out_texture()
+                .and_then(|view| view.as_hal::<wgpu::hal::api::Gles>())
+                .map(|view| format!("{:?}", &*view))
+        };
+        info!("MIR2_ANDROID_VIEW_OUTPUT_PROBE frame={frame} entity={entity:?} current_surface_raw={current} has_camera={} has_view={} msaa={msaa:?} physical_target={:?} output={output:?}",
+            camera.is_some(), view.is_some(), camera.and_then(|camera| camera.physical_target_size));
+    }
+}
+
+#[cfg(target_os = "android")]
 fn trace_android_surface_configuration(configuration: &SurfaceConfiguration, reason: &str) {
     ANDROID_SURFACE_PROBE_FRAME.store(0, core::sync::atomic::Ordering::Relaxed);
     info!(
@@ -70,6 +102,7 @@ fn trace_android_surface_attachment(frame: &wgpu::SurfaceTexture, render_device:
         let _context = device.context().lock();
         if let wgpu::hal::gles::TextureInner::Renderbuffer { raw } = texture.inner {
             let raw = raw.0.get();
+            ANDROID_SURFACE_PROBE_CURRENT_RAW.store(raw, Ordering::Relaxed);
             let live = glIsRenderbuffer(raw) != 0;
             let mut binding = 0;
             let (mut internal, mut width, mut height, mut samples) = (0, 0, 0, 0);
