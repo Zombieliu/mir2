@@ -1,5 +1,22 @@
 # Android native UI coverage — 2026-09-08
 
+2026-10-02 最新实际 v28：精确干净打包源码`84fe8e6344bb0c041e01c66a149b5b42b8198565`。
+三轮临时GPU探针已全部移除，两个渲染文件与277ab已发布基线逐字节相同；
+**没有游戏渲染修复**。新鲜327/350、shared1238+10原ignored、强制fresh Java
+41+41、实际arm64 API31双检查通过，41源码输入/双APK/选定6647PNG+三metadata/
+安装SHA绑定。v28三个独立PID仍24条GL506，零错误渲染FAIL；24张本轮原图已查看。
+实测排除无效surface存储与活跃ViewTarget串线；私有4×4 FBO两次复现模拟器旧
+附件类型状态，显式类型清除仅在私有复现恢复，不代表实际游戏修复。约83文件
+固定依赖/一个Android路径候选已单次询问范围，尚无授权、未实施，其他安全叶继续。
+完整分母冻结3d735745f；远端Windows现指6ae080711，落后上轮56ee33提交/
+冻结源32提交，原因未调查，API300文件列表有上限；不降级、不改写Windows。
+NPC任务手机列表/确认/提示、compact/IME/九语言/多指、完整NI-11–20、
+实际认证JNI/HTTPS/WSS/Zone/存档、完整资源/真机仍OPEN，完整goal Active。
+保留每版原始失败，不把探针准备编译失败称作产品修复红绿，也不重绑旧APK。
+[精确v28基线、三个假设与未关闭渲染门](generated/player-qa/native-android-gles-investigation-20261002/README.md)。
+
+下文v24及更早仅为各自历史源码和验收范围，不覆盖本轮状态。
+
 > 2026-10-01 independent Android/shared sync: merge `007df76c9` imports latest
 > verified Windows continuation `4b73525f3` without changing the original dirty
 > checkout or Android branch. Shared NPC/mail/chat semantics, IME editor epochs,
@@ -15,7 +32,7 @@
 
 Status: shared player UI assembly and offline Android UI baseline, **not whole
 Android UI acceptance or a completed online client**. Work is isolated on
-`codex/android-player-journey`; the original checkout and Windows backend
+`codex/android-shared-sync`; the original Android branch, checkout and Windows backend
 are not edited.
 
 ## Current priority — playable flow first

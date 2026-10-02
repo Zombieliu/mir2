@@ -1,0 +1,458 @@
+{
+  "source": "84fe8e6344bb0c041e01c66a149b5b42b8198565",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "goalStatus": "active",
+  "rendererFixed": false,
+  "graphicsDependencyDecision": "pending user authorization",
+  "hypotheses": [
+    {
+      "name": "invalid surface storage",
+      "result": "ruled out",
+      "canonicalAttachmentRecordsPerScene": 129,
+      "canonicalConfigurationRecordsPerScene": 3,
+      "invalidStorageRecords": 0
+    },
+    {
+      "name": "active view points to old surface",
+      "result": "ruled out for observed draw errors",
+      "viewRecordsPerScene": 130,
+      "activeMismatches": 0,
+      "inactiveMismatchesPerScene": 3
+    },
+    {
+      "name": "emulator stale attachment type metadata",
+      "result": "reproduced twice in private objects; real renderer fix unimplemented",
+      "privateFramebufferStatusSequence": [
+        "0x8cd5",
+        "0x8cd5",
+        "0x8cd6",
+        "0x8cd5"
+      ],
+      "deliberatePrivateFormat0PerScene": 1
+    }
+  ],
+  "packages": [
+    {
+      "file": "package-v24.json",
+      "source": "9a6bff0db9a7ff3eed003c72c90310ec632572d0",
+      "versionCode": 24,
+      "artifacts": [
+        {
+          "variant": "debug",
+          "source": "9a6bff0db9a7ff3eed003c72c90310ec632572d0",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-reflow-v24-20261002/final-apks/mir2-native-quest-reflow-debug-v24.apk",
+          "bytes": 387145917,
+          "sha256": "23796b1da9d191953bf27b70ba021d57a41bddb0c51faff59340ff35de42b842",
+          "libraries": [
+            {
+              "library": "Items",
+              "pngCount": 1003,
+              "allSourceBytesMatch": true,
+              "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+            },
+            {
+              "library": "StateItem",
+              "pngCount": 5192,
+              "allSourceBytesMatch": true,
+              "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a"
+            },
+            {
+              "library": "MagIcon",
+              "pngCount": 224,
+              "allSourceBytesMatch": true,
+              "metadataSha256": null
+            },
+            {
+              "library": "MagIcon2",
+              "pngCount": 224,
+              "allSourceBytesMatch": true,
+              "metadataSha256": null
+            },
+            {
+              "library": "UI_32bit",
+              "pngCount": 4,
+              "allSourceBytesMatch": true,
+              "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9"
+            }
+          ]
+        },
+        {
+          "variant": "preview",
+          "source": "9a6bff0db9a7ff3eed003c72c90310ec632572d0",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-reflow-v24-20261002/final-apks/mir2-native-quest-reflow-preview-v24.apk",
+          "bytes": 391013025,
+          "sha256": "0e12b1d1276f3774ca9b609c52815690595d413d7c820220279ab2ff55bc95d3",
+          "libraries": [
+            {
+              "library": "Items",
+              "pngCount": 1003,
+              "allSourceBytesMatch": true,
+              "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+            },
+            {
+              "library": "StateItem",
+              "pngCount": 5192,
+              "allSourceBytesMatch": true,
+              "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a"
+            },
+            {
+              "library": "MagIcon",
+              "pngCount": 224,
+              "allSourceBytesMatch": true,
+              "metadataSha256": null
+            },
+            {
+              "library": "MagIcon2",
+              "pngCount": 224,
+              "allSourceBytesMatch": true,
+              "metadataSha256": null
+            },
+            {
+              "library": "UI_32bit",
+              "pngCount": 4,
+              "allSourceBytesMatch": true,
+              "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9"
+            }
+          ]
+        }
+      ],
+      "localApkBytesVerified": true
+    },
+    {
+      "file": "package-probe.json",
+      "source": "3bedb220771954a499d31472670108709b066532",
+      "versionCode": 25,
+      "artifacts": [
+        {
+          "variant": "preview",
+          "source": "3bedb220771954a499d31472670108709b066532",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/surface-probe-v25-20261002/apks/mir2-native-surface-probe-preview-v25.apk",
+          "bytes": 391027237,
+          "sha256": "4a9abebee6f2bb0dd6947bc392a4b29a7f81be40f0641b9e819e1e333788966a"
+        }
+      ],
+      "localApkBytesVerified": true
+    },
+    {
+      "file": "package-view-probe.json",
+      "source": "8c7d7cfd8ca30e3ef92a7dc2129e1c437d4c1b59",
+      "versionCode": 26,
+      "artifacts": [
+        {
+          "variant": "preview",
+          "source": "8c7d7cfd8ca30e3ef92a7dc2129e1c437d4c1b59",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/surface-probe-v25-20261002/apks/mir2-native-view-probe-preview-v26.apk",
+          "bytes": 391038769,
+          "sha256": "27a8ab673d19220ad60d64ee4c4a224d5ffb7610c6cd6be2940b20e716debb33"
+        }
+      ],
+      "localApkBytesVerified": true
+    },
+    {
+      "file": "package-transition-probe.json",
+      "source": "2a9d81facb54fd41a7912dcf75ef9eaceeb5aac0",
+      "versionCode": 27,
+      "artifacts": [
+        {
+          "variant": "preview",
+          "source": "2a9d81facb54fd41a7912dcf75ef9eaceeb5aac0",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/surface-probe-v25-20261002/apks/mir2-native-transition-probe-preview-v27.apk",
+          "bytes": 391033581,
+          "sha256": "aa680ecbe30cb49fce705d091ed559b7f6062e68adcc869b6a22810de8ee3154"
+        }
+      ],
+      "localApkBytesVerified": true
+    },
+    {
+      "file": "package-baseline.json",
+      "source": "84fe8e6344bb0c041e01c66a149b5b42b8198565",
+      "versionCode": 28,
+      "artifacts": [
+        {
+          "variant": "debug",
+          "source": "84fe8e6344bb0c041e01c66a149b5b42b8198565",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/surface-probe-v25-20261002/final-apks/mir2-native-diagnostic-free-debug-v28.apk",
+          "bytes": 387145913,
+          "sha256": "b8b93a2157bd8f3a715edb0fe7e4ef758aa28cc55d717434b87b1660bdba2e0c"
+        },
+        {
+          "variant": "preview",
+          "source": "84fe8e6344bb0c041e01c66a149b5b42b8198565",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/surface-probe-v25-20261002/final-apks/mir2-native-diagnostic-free-preview-v28.apk",
+          "bytes": 391013021,
+          "sha256": "7d4aedf5dc3c0d17f2fda76e616880de325e32177363cbf057ebf104341b6fae"
+        }
+      ],
+      "localApkBytesVerified": true
+    }
+  ],
+  "runs": [
+    {
+      "phase": "baseline",
+      "source": "9a6bff0db9a7ff3eed003c72c90310ec632572d0",
+      "versionCode": 24,
+      "scenes": [
+        {
+          "name": "login",
+          "scene": null,
+          "pid": "16035",
+          "cold": {
+            "gl506": 12,
+            "uninitializedColor": 12,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 12,
+            "uninitializedColor": 12,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        },
+        {
+          "name": "world",
+          "scene": "world-render",
+          "pid": "16125",
+          "cold": {
+            "gl506": 0,
+            "uninitializedColor": 0,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 0,
+            "uninitializedColor": 0,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        },
+        {
+          "name": "quests",
+          "scene": "quests-ingress",
+          "pid": "16219",
+          "cold": {
+            "gl506": 10,
+            "uninitializedColor": 10,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 10,
+            "uninitializedColor": 10,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        }
+      ],
+      "canonicalTotal": 22,
+      "zeroErrorAccepted": false
+    },
+    {
+      "phase": "probe",
+      "source": "3bedb220771954a499d31472670108709b066532",
+      "versionCode": 25,
+      "scenes": [
+        {
+          "name": "world",
+          "scene": "world-render",
+          "pid": "16421",
+          "cold": {
+            "gl506": 19,
+            "uninitializedColor": 19,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 19,
+            "uninitializedColor": 19,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        },
+        {
+          "name": "quests",
+          "scene": "quests-ingress",
+          "pid": "16511",
+          "cold": {
+            "gl506": 10,
+            "uninitializedColor": 10,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 10,
+            "uninitializedColor": 10,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        }
+      ],
+      "canonicalTotal": 29,
+      "zeroErrorAccepted": false
+    },
+    {
+      "phase": "probe-view",
+      "source": "8c7d7cfd8ca30e3ef92a7dc2129e1c437d4c1b59",
+      "versionCode": 26,
+      "scenes": [
+        {
+          "name": "world",
+          "scene": "world-render",
+          "pid": "16740",
+          "cold": {
+            "gl506": 21,
+            "uninitializedColor": 21,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 21,
+            "uninitializedColor": 21,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        },
+        {
+          "name": "quests",
+          "scene": "quests-ingress",
+          "pid": "16832",
+          "cold": {
+            "gl506": 4,
+            "uninitializedColor": 4,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 4,
+            "uninitializedColor": 4,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        }
+      ],
+      "canonicalTotal": 25,
+      "zeroErrorAccepted": false
+    },
+    {
+      "phase": "probe-transition",
+      "source": "2a9d81facb54fd41a7912dcf75ef9eaceeb5aac0",
+      "versionCode": 27,
+      "scenes": [
+        {
+          "name": "world",
+          "scene": "world-render",
+          "pid": "17096",
+          "cold": {
+            "gl506": 0,
+            "uninitializedColor": 1,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 0,
+            "uninitializedColor": 1,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        },
+        {
+          "name": "quests",
+          "scene": "quests-ingress",
+          "pid": "17187",
+          "cold": {
+            "gl506": 8,
+            "uninitializedColor": 9,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 8,
+            "uninitializedColor": 9,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        }
+      ],
+      "canonicalTotal": 8,
+      "zeroErrorAccepted": false
+    },
+    {
+      "phase": "baseline-clean",
+      "source": "84fe8e6344bb0c041e01c66a149b5b42b8198565",
+      "versionCode": 28,
+      "scenes": [
+        {
+          "name": "login",
+          "scene": null,
+          "pid": "17484",
+          "cold": {
+            "gl506": 0,
+            "uninitializedColor": 0,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 0,
+            "uninitializedColor": 0,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        },
+        {
+          "name": "world",
+          "scene": "world-render",
+          "pid": "17575",
+          "cold": {
+            "gl506": 0,
+            "uninitializedColor": 0,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 0,
+            "uninitializedColor": 0,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        },
+        {
+          "name": "quests",
+          "scene": "quests-ingress",
+          "pid": "17665",
+          "cold": {
+            "gl506": 24,
+            "uninitializedColor": 24,
+            "fatalOrPanic": 0
+          },
+          "latestCumulative": {
+            "gl506": 24,
+            "uninitializedColor": 24,
+            "fatalOrPanic": 0
+          },
+          "originalFrames": "2340x1080",
+          "sameProcessResume": true
+        }
+      ],
+      "canonicalTotal": 24,
+      "zeroErrorAccepted": false
+    }
+  ],
+  "countPolicy": "one latest cumulative log per distinct PID, never cold+latest sum; independent versions are not a trend",
+  "originalPngCount": 24,
+  "allOriginalFramesInspected": true,
+  "sourceGates": "PASS only the six bounded gates",
+  "currentRendererGate": "FAIL: 24 GL0x506",
+  "wholePhoneUiAccepted": false,
+  "fullResourceAccepted": false,
+  "realNetworkAccepted": false,
+  "physicalDeviceAccepted": false,
+  "sourceHelpersPreserved": true,
+  "retainedPreparationFailures": [
+    "raw/builds/view-probe-check-1.json",
+    "raw/builds/view-probe-check-1.log",
+    "raw/builds/baseline-script-creation-failure.txt"
+  ],
+  "noWindowsCodeOrRemoteWrite": true,
+  "noAuthOrGameRuleChange": true,
+  "noProductionUse": true
+}

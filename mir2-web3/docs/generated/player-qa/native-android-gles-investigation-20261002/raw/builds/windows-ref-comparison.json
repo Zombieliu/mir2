@@ -1,0 +1,1650 @@
+{
+  "capturedAt": "2026-10-02T08:53:48.425Z",
+  "liveWindows": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "status": "ahead",
+  "aheadBy": 32,
+  "behindBy": 0,
+  "totalCommits": 32,
+  "returnedFileCount": 300,
+  "fileListMayBeCapped": true,
+  "liveCommitMessage": "test(capacity): separate movement diagnostics from mixed acceptance",
+  "liveParents": [
+    "fdc79d5501e87dfa6e4b141bb8f2c0c721ec342c"
+  ],
+  "commits": [
+    {
+      "sha": "6b55b668c72ce56a95bc53c62cea22fcf03502d8",
+      "message": "fix(client): explain registration failures and align password validation"
+    },
+    {
+      "sha": "96e6b4e29aca50fd18f9e7850866933318702d8c",
+      "message": "docs: record registration installer verification and handoff"
+    },
+    {
+      "sha": "4642971f780dfcd6152745f48fb91e1fc7c35525",
+      "message": "fix(native): preserve character previews and hide release console"
+    },
+    {
+      "sha": "c3828af30e80600547999eca375b6b86cb700c6b",
+      "message": "docs(native): define Traditional Chinese English and Brazilian Portuguese rollout"
+    },
+    {
+      "sha": "0c2147a7145abe7e773426888dca62bf7392200f",
+      "message": "docs(native): record verified r3 preview and GUI release"
+    },
+    {
+      "sha": "2af40352307184b033516e10d200e860ed3bbf82",
+      "message": "Add native three-language UI and fix Windows DPI viewport"
+    },
+    {
+      "sha": "97144d6a0c819d608c0e9d1c5034259cac489297",
+      "message": "Brand the public Windows installer and correct multilingual path scanning"
+    },
+    {
+      "sha": "12cfb9cfc7a0044294b3b9645e34dc4ac5e8bd68",
+      "message": "Deliver branded multilingual Windows r4 installer and release evidence"
+    },
+    {
+      "sha": "2f51bff04bca3854e5131e54326371f33c40610f",
+      "message": "Support nine native languages and diagnose Windows launch policy blocks"
+    },
+    {
+      "sha": "c7eacee12599a535065ddfe81c0539450f65a5bb",
+      "message": "Handle pinned font data and UTF-8 word boundaries in package scans"
+    },
+    {
+      "sha": "a953243ea8d830743b5d77eb99a01e9605ecf622",
+      "message": "Record verified nine-language r5 installer and signing limits"
+    },
+    {
+      "sha": "f8800b9a078fa3591b4b02bea9f70d642f08b709",
+      "message": "Fix NPC shop inventory placement and localized supply vendor names"
+    },
+    {
+      "sha": "4b73525f379e5640ad19658730bd4874f7d49109",
+      "message": "Record r6 release checks and native update distribution gap"
+    },
+    {
+      "sha": "41364269f4887cb0a2b21fc3147826a69fdc73b2",
+      "message": "Add signed native per-file updater and launcher migration"
+    },
+    {
+      "sha": "9476f3845e89b9ede164fe18e9c353c1e44f7626",
+      "message": "Bind ignored launcher entry points into updater source provenance"
+    },
+    {
+      "sha": "fefd18370a947848d4f2f86ee3468ea4251fe011",
+      "message": "Add native resolution selection and harden signed updater delivery"
+    },
+    {
+      "sha": "6226bccce60110b040f57f5da5448c1cd4e5f805",
+      "message": "Record r7 installer, signed HTTPS publication and real native update acceptance"
+    },
+    {
+      "sha": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+      "message": "fix(gameplay): enforce skill cadence and nonmodal UI input"
+    },
+    {
+      "sha": "3f6dddc1278c7544b5b7044a0f159252d652ca5c",
+      "message": "docs(qa): record matched r8 rollout and installed upgrade"
+    },
+    {
+      "sha": "b39cf9b38a9c8d4ac0a8160f70e128aee89c3120",
+      "message": "docs(qa): preserve original release evidence bytes"
+    },
+    {
+      "sha": "6d498c08008722fac0e460105ddeeb96b956042d",
+      "message": "fix(casters): align aim visibility mana and map status transfer"
+    },
+    {
+      "sha": "3a286b1df8bd306a7ba24780e56219d3690537a0",
+      "message": "fix(qa): honor owner-only movement receipts before caster practice"
+    },
+    {
+      "sha": "14f17f098cd62362a4dd9d3af5f0e0142b1a2edd",
+      "message": "fix(qa): refresh shared readiness before ordinary caster combat"
+    },
+    {
+      "sha": "21fafb0c5116a255184b83535cafd4f88e1b187e",
+      "message": "docs(qa): retain ordinary caster movement readiness evidence"
+    },
+    {
+      "sha": "b4ab36af78826fae768b72e74677d3307ffd8ba5",
+      "message": "fix(qa): recover strict caster retreats through held scrolls"
+    },
+    {
+      "sha": "5bc20dde469f4df0f83263db3d6f2bdc8f119a28",
+      "message": "fix(qa): reaim accepted ground misses within practice budget"
+    },
+    {
+      "sha": "cc1d80adedb1dd9f568953beb6023973d9d706db",
+      "message": "fix(qa): preserve strict caster recovery and fresh retry bounds"
+    },
+    {
+      "sha": "efb92a2208312010a7f899585ee0f0566da7279d",
+      "message": "Fix NPC service lifetime after delayed dialog snapshots and ordered exits"
+    },
+    {
+      "sha": "453a14d41ec40dec047d1efdc279ff147530a6d4",
+      "message": "Keep ordinary Wizard lightning within learned readiness and line-of-sight gates"
+    },
+    {
+      "sha": "36787e9b09b45b322f06db863508e3e3e7598fc8",
+      "message": "Record final caster saves, ordinary supplies and dynamic NPC shop evidence"
+    },
+    {
+      "sha": "b369b07e742f449099c0dbccb7e062beb3973618",
+      "message": "Honor explicit NPC response boundaries without opening a closed service"
+    },
+    {
+      "sha": "3d735745f1117d42a7859e87604a106351dca935",
+      "message": "Record actual NPC response boundaries and ordered native service verification"
+    }
+  ],
+  "files": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/Cargo.lock",
+      "status": "modified",
+      "changes": 1
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+      "status": "modified",
+      "changes": 3
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/big_map_coordinates.rs",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/change_password.rs",
+      "status": "modified",
+      "changes": 37
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "status": "modified",
+      "changes": 330
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/creature_dialog_render.rs",
+      "status": "modified",
+      "changes": 50
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/friend_dialog_render.rs",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "status": "modified",
+      "changes": 132
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "status": "modified",
+      "changes": 126
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs",
+      "status": "modified",
+      "changes": 93
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hud.rs",
+      "status": "modified",
+      "changes": 64
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/item_tooltip.rs",
+      "status": "modified",
+      "changes": 220
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/keyboard_dialog_render.rs",
+      "status": "modified",
+      "changes": 28
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/localized_help.rs",
+      "status": "added",
+      "changes": 456
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/login.rs",
+      "status": "modified",
+      "changes": 92
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_parcel.rs",
+      "status": "modified",
+      "changes": 6
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/metrics.rs",
+      "status": "modified",
+      "changes": 59
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mount_fishing_render.rs",
+      "status": "modified",
+      "changes": 22
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/native_i18n_game_visual_tests.rs",
+      "status": "added",
+      "changes": 515
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/nonmodal_input_tests.rs",
+      "status": "added",
+      "changes": 78
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/notice.rs",
+      "status": "modified",
+      "changes": 122
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "status": "modified",
+      "changes": 35
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_shop_layout_tests.rs",
+      "status": "added",
+      "changes": 642
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "status": "modified",
+      "changes": 614
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "status": "modified",
+      "changes": 18
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/player_inspect.rs",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/preview_data.rs",
+      "status": "modified",
+      "changes": 5
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/ranking_dialog.rs",
+      "status": "modified",
+      "changes": 21
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/select.rs",
+      "status": "modified",
+      "changes": 321
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_assign_dialog.rs",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_bars.rs",
+      "status": "modified",
+      "changes": 285
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_bars_host.rs",
+      "status": "modified",
+      "changes": 6
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/skill_page.rs",
+      "status": "modified",
+      "changes": 2
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/typography.rs",
+      "status": "modified",
+      "changes": 9
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "status": "modified",
+      "changes": 201
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_display.rs",
+      "status": "added",
+      "changes": 1082
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_i18n.rs",
+      "status": "added",
+      "changes": 1178
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_i18n_visual_tests.rs",
+      "status": "added",
+      "changes": 696
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell.rs",
+      "status": "modified",
+      "changes": 225
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_preview_visual_tests.rs",
+      "status": "added",
+      "changes": 610
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs",
+      "status": "modified",
+      "changes": 793
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/player_text.rs",
+      "status": "modified",
+      "changes": 213
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_journey.rs",
+      "status": "modified",
+      "changes": 29
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_multi_guidance.rs",
+      "status": "modified",
+      "changes": 177
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_multilingual_visual_tests.rs",
+      "status": "added",
+      "changes": 673
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_nonmodal_input_tests.rs",
+      "status": "added",
+      "changes": 217
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_practice.rs",
+      "status": "modified",
+      "changes": 74
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_supplies.rs",
+      "status": "modified",
+      "changes": 34
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "status": "modified",
+      "changes": 548
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/skill_model.rs",
+      "status": "modified",
+      "changes": 31
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+      "status": "modified",
+      "changes": 1
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+      "status": "modified",
+      "changes": 1
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/.gitattributes",
+      "status": "added",
+      "changes": 3
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/MULTILINGUAL-SOURCES.json",
+      "status": "added",
+      "changes": 282
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/NotoSans-Bold.ttf",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/NotoSans-Regular.ttf",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/NotoSansArabic-Bold.ttf",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/NotoSansArabic-Regular.ttf",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/NotoSansDevanagari-Bold.ttf",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/NotoSansDevanagari-Regular.ttf",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/NotoSansTC.ttf",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/NotoSansThai-Bold.ttf",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/NotoSansThai-Regular.ttf",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/OFL-NotoSans.txt",
+      "status": "added",
+      "changes": 93
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/OFL-NotoSansArabic.txt",
+      "status": "added",
+      "changes": 93
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/OFL-NotoSansDevanagari.txt",
+      "status": "added",
+      "changes": 93
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/OFL-NotoSansThai.txt",
+      "status": "added",
+      "changes": 93
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/OFL.txt",
+      "status": "added",
+      "changes": 93
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/assets/fonts/SOURCE.json",
+      "status": "added",
+      "changes": 16
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/LAUNCH-4551.zh-CN.txt",
+      "status": "added",
+      "changes": 35
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/build-attested-windows-candidate.ps1",
+      "status": "modified",
+      "changes": 26
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/diagnose-launch-block.ps1",
+      "status": "added",
+      "changes": 316
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/Mir2-Invite.iss",
+      "status": "added",
+      "changes": 562
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/README.md",
+      "status": "added",
+      "changes": 102
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/languages/.gitattributes",
+      "status": "added",
+      "changes": 4
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/languages/HINDI-UPDATE.json",
+      "status": "added",
+      "changes": 88
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/languages/Hindi.isl",
+      "status": "added",
+      "changes": 399
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/languages/Hindi.islu",
+      "status": "added",
+      "changes": 336
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/languages/Indonesian.isl",
+      "status": "added",
+      "changes": 379
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/languages/Inno-Setup-LICENSE.txt",
+      "status": "added",
+      "changes": 32
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/languages/SOURCES.json",
+      "status": "added",
+      "changes": 30
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/languages/VIETNAMESE-UPDATE.json",
+      "status": "added",
+      "changes": 9
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/languages/Vietnamese.isl",
+      "status": "added",
+      "changes": 401
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/languages/Vietnamese.upstream.isl",
+      "status": "added",
+      "changes": 399
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/prepare-installer-input.py",
+      "status": "added",
+      "changes": 170
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/invited-installer/validate-recipe.py",
+      "status": "added",
+      "changes": 106
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/package-windows-candidate.ps1",
+      "status": "modified",
+      "changes": 74
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/player-readme/CONTROLS.txt",
+      "status": "added",
+      "changes": 80
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/player-readme/KNOWN-ISSUES.md",
+      "status": "added",
+      "changes": 7
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/player-readme/README.ar.txt",
+      "status": "added",
+      "changes": 23
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/player-readme/README.en.txt",
+      "status": "added",
+      "changes": 23
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/player-readme/README.hi.txt",
+      "status": "added",
+      "changes": 23
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/player-readme/README.id.txt",
+      "status": "added",
+      "changes": 23
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/player-readme/README.pt-BR.txt",
+      "status": "added",
+      "changes": 23
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/player-readme/README.ru.txt",
+      "status": "added",
+      "changes": 23
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/player-readme/README.th.txt",
+      "status": "added",
+      "changes": 23
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/player-readme/README.vi.txt",
+      "status": "added",
+      "changes": 23
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/player-readme/README.zh-TW.txt",
+      "status": "added",
+      "changes": 24
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/publisher-signing.psm1",
+      "status": "added",
+      "changes": 116
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/sign-publisher-binary.ps1",
+      "status": "added",
+      "changes": 11
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/test-diagnose-launch-block.ps1",
+      "status": "added",
+      "changes": 152
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/test-publisher-signing.ps1",
+      "status": "added",
+      "changes": 22
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/verify-publisher-signatures.ps1",
+      "status": "added",
+      "changes": 11
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/scripts/verify-windows-candidate.ps1",
+      "status": "modified",
+      "changes": 325
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/big_map_input.rs",
+      "status": "modified",
+      "changes": 4
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/buried_monster_replay_tests.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/clipboard.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/cursor.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/entity_overlays.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway_account_feedback.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/input.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/keyboard_world_actions.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/minimap_input.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_display.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_fonts.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_fonts_gpu_tests.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_fonts_soak_tests.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_locale.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_protocol.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/nonmodal_panel_input_tests.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/quest_route_input_tests.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/startup_diagnostics.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/timing.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/window_sizing.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/tests/fixtures/vis03-buried-zombie2-wizard-20261001.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/Cargo.lock",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/Cargo.toml",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/README.md",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/archive-update-release.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/build-updater-release.ps1",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/deploy-prepare-plan.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/deploy-script-tests.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/deploy-server-release.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/make-test-crypto-fixtures.ps1",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/prepare-updater-input.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/test-archive-update-release.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/verify-updater-bundle.ps1",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/bin/launcher.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/bin/updater.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/fs_safe.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/lib.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/model.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/model_regression.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/platform.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/transaction.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/ui.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/update.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/update_receipt_tests.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/tests/real_packages.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/map_transfer_poison_tests.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/private_monster_snapshot_tests.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/routing/tests/zone_skill_cadence_tests.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/gateway/src/web.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/config.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/session.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/skills.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/tests.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/finite_control_poison_handoff_tests.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/manager.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/player_action_cadence_tests.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/runtime/player_magic_cooldown_tests.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/runtime/zone/types.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/src/world_runtime.rs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/crystal_mana_projection.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/simulation/tests/shared_zone_poison_transfer.rs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/lib/generated/localization_bundle.json",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-combat.mjs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-kiting.mjs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-loadout.mjs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-newcomer-v2-recovery.mjs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-newcomer-v2.mjs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/protocol-supplies.mjs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/run-protocol-journey.mjs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-combat.mjs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-kiting.mjs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-loadout.mjs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-newcomer-v2-recovery.mjs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-newcomer-v2.mjs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-protocol-supplies.mjs",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/test-verify-caster-newcomer-v2-evidence.mjs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/apps/web/scripts/quest-agent/verify-caster-newcomer-v2-evidence.mjs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/NATIVE-MULTILINGUAL-DESIGN.md",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/NATIVE-MULTILINGUAL-NINE-LANGUAGES.md",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "status": "modified",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/WINDOWS-LAUNCH-BLOCK-DIAGNOSTICS.md",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/.gitattributes",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/README.md",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/Taoist.post-route-supplies.report.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/Wizard.post-route-supplies.report.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/caster-audit-first.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/caster-audit-r2-final-before-post-route.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/caster-audit-r2-final.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/caster-audit-r2-ordinary.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/caster-evidence-verifier-tests.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/caster-shop-behavior-v3.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/caster-shop-gpu-v3.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/controller-firewall-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/controller-full-final.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/controller-full-v7.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/controller-kiting-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/controller-ordinary-readiness-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/controller-practice-fresh-before-valid-v2.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/controller-strict-budget-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/controller-strict-final-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/controller-wire-readiness-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/curate-r2-receipts.py",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/curated-purchases-verification.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/firewall-reaim.after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/firewall-reaim.before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/firewall-review-boundaries.after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/firewall-review-boundaries.before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/gateway-caster-final-adjacent.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/gateway-caster-final-v2-isolated.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/gateway-full-caster.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/kiting-strict-budget.before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/kiting-strict-no-plan.after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/kiting-strict-no-plan.before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/lightning-controller-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/mana-metadata-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/mana-metadata-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/mana-projection-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/mana-projection-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/map-status-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/map-status-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/native-buried-replay.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/native-full-final-source.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/native-full-final.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/native-shop-lifecycle-fifo-final.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/native-shop-lifecycle-final-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/native-valid-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/native-valid-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/npc-response-cache-recovery.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/npc-response-native-after-full.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/npc-response-runtime-after-full.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/npc-response-runtime-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/npc-response-service-boundary-before-fresh-resume.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/npc-response-service-boundary-before-fresh.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/npc-response-service-boundary-before-recovered.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/npc-response-service-boundary-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/ordinary-cast-readiness-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/ordinary-cast-readiness-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/post-route-supply-smoke.mjs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/practice-wire-readiness-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/private-monster-after-v2.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/private-monster-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/r2-functional-clock-format-before-connect.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/r9-native-backport-full-environment-fixed.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/r9-native-backport-full-final.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/r9-native-backport-full-inputs-restored.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/r9-native-backport-full.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/r9-shared-backport-full.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/r9-shop-lifecycle-gpu.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shared-full-v3.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shared-shop-lifecycle-fifo-final.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shared-shop-lifecycle-final-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shared-shop-lifecycle-full-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shinsu-line-fixture-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shop-lifecycle-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shop-lifecycle-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shop-lifecycle-boundaries-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shop-lifecycle-boundaries-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shop-lifecycle-fifo-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shop-lifecycle-fifo-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shop-lifecycle-gpu-after-03.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shop-lifecycle-gpu-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/shop-lifecycle-gpu-fixture-before-reset.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/simulation-full-caster.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/summon-fixture-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/town-bind-fixture-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/verify-curated-supply-receipts.mjs",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/zone-map-counted-boundary.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/zone-map-status-after.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/checks/zone-map-status-before.log",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/cohort-r2-firewall-miss-before.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/cohort-r2-functional-clock.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/cohort-r2-ordinary-readiness-after.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/cohort-r2-purchases-verification.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/cohort-r2-shop-lifecycle-before.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/cohort-r2-source.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/cohort-r2-supply-receipts.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/cohort-r2-wizard-final-combat.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/functional-recheck-clock.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/mana-receipts.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/map-boundary-receipts.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/npc-response-service-boundary.json",
+      "status": "added",
+      "changes": 0
+    },
+    {
+      "path": "mir2-web3/docs/generated/player-qa/caster-journey-20261001/ordinary-combat-owner-wire-receipts.json",
+      "status": "added",
+      "changes": 0
+    }
+  ],
+  "didChangeFrozenGoal": false,
+  "didResetOrWriteWindows": false,
+  "whyRemoteRefChanged": "not investigated, no inference of author or intention"
+}
