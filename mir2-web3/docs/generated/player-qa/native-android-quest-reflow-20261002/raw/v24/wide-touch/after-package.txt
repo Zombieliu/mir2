@@ -1,0 +1,177 @@
+Activity Resolver Table:
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        f6db3e0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity filter dc40699
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      androidx.profileinstaller.action.SAVE_PROFILE:
+        9cf9d5e com.mir2.web3.uipreview/androidx.profileinstaller.ProfileInstallReceiver filter 5457355
+          Action: "androidx.profileinstaller.action.SAVE_PROFILE"
+      androidx.profileinstaller.action.INSTALL_PROFILE:
+        9cf9d5e com.mir2.web3.uipreview/androidx.profileinstaller.ProfileInstallReceiver filter 40cd53f
+          Action: "androidx.profileinstaller.action.INSTALL_PROFILE"
+      androidx.profileinstaller.action.SKIP_FILE:
+        9cf9d5e com.mir2.web3.uipreview/androidx.profileinstaller.ProfileInstallReceiver filter 2a2e0c
+          Action: "androidx.profileinstaller.action.SKIP_FILE"
+      androidx.profileinstaller.action.BENCHMARK_OPERATION:
+        9cf9d5e com.mir2.web3.uipreview/androidx.profileinstaller.ProfileInstallReceiver filter 74316a
+          Action: "androidx.profileinstaller.action.BENCHMARK_OPERATION"
+
+Domain verification status:
+
+Permissions:
+  Permission [com.mir2.web3.uipreview.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (c6950d0):
+    sourcePackage=com.mir2.web3.uipreview
+    uid=10146 gids=[] type=0 prot=signature
+    perm=PermissionInfo{53184ce com.mir2.web3.uipreview.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}
+
+Registered ContentProviders:
+  com.mir2.web3.uipreview/androidx.startup.InitializationProvider:
+    Provider{1e07fef com.mir2.web3.uipreview/androidx.startup.InitializationProvider}
+
+ContentProvider Authorities:
+  [com.mir2.web3.uipreview.androidx-startup]:
+    Provider{1e07fef com.mir2.web3.uipreview/androidx.startup.InitializationProvider}
+      applicationInfo=ApplicationInfo{56f8c9 com.mir2.web3.uipreview}
+
+Key Set Manager:
+  [com.mir2.web3.uipreview]
+      Signing KeySets: 36
+
+Packages:
+  Package [com.mir2.web3.uipreview] (b18a59b):
+    userId=10146
+    pkg=Package{9245585 com.mir2.web3.uipreview}
+    codePath=/data/app/~~6FKrofvmFjFRKQIkgLMseQ==/com.mir2.web3.uipreview-6N4VzLqAbWDTc-vee0KkXw==
+    resourcePath=/data/app/~~6FKrofvmFjFRKQIkgLMseQ==/com.mir2.web3.uipreview-6N4VzLqAbWDTc-vee0KkXw==
+    legacyNativeLibraryDir=/data/app/~~6FKrofvmFjFRKQIkgLMseQ==/com.mir2.web3.uipreview-6N4VzLqAbWDTc-vee0KkXw==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+    cpuAbiOverride=null
+    versionCode=24 minSdk=31 targetSdk=35
+    minExtensionVersions=[]
+    versionName=0.1.21-quest-reflow
+    usesNonSdkApi=false
+    splits=[base]
+    apkSigningVersion=2
+    applicationInfo=PackageImpl{9245585 com.mir2.web3.uipreview}
+    flags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    queriesPackages=[]
+    dataDir=/data/user/0/com.mir2.web3.uipreview
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    timeStamp=2026-10-02 13:59:24
+    firstInstallTime=2026-09-12 17:13:30
+    lastUpdateTime=2026-10-02 13:59:24
+    signatures=PackageSignatures{6ad4111 version:2, signatures:[a4a9828c], past signatures:[]}
+    installPermissionsFixed=true
+    pkgFlags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA ]
+    declared permissions:
+      com.mir2.web3.uipreview.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature, INSTALLED
+    requested permissions:
+      android.permission.INTERNET
+      android.permission.ACCESS_NETWORK_STATE
+      com.mir2.web3.uipreview.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+    install permissions:
+      android.permission.INTERNET: granted=true
+      com.mir2.web3.uipreview.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true
+      android.permission.ACCESS_NETWORK_STATE: granted=true
+    User 0: ceDataInode=155657 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false
+      overlay paths:
+        /product/overlay/EmulationPixel5/EmulationPixel5Overlay.apk
+      legacy overlay paths:
+        /product/overlay/EmulationPixel5/EmulationPixel5Overlay.apk
+      gids=[3003]
+      runtime permissions:
+
+Queries:
+  system apps queryable: false
+  queries via package name:
+  queries via intent:
+    com.google.android.settings.intelligence:
+      com.mir2.web3.uipreview
+  queryable via interaction:
+    User 0:
+      [com.android.dynsystem,com.android.settings,com.android.server.telecom,com.android.localtransport,com.android.providers.settings,com.android.inputdevices,com.android.keychain,com.android.emulator.multidisplay,com.android.wallpaperbackup,com.android.location.fused,android]:
+        com.mir2.web3.uipreview
+      [com.google.android.gms,com.google.android.gsf]:
+        com.mir2.web3.uipreview
+      com.google.android.inputmethod.latin:
+        com.mir2.web3.uipreview
+  queryable via uses-library:
+
+Package Changes:
+  Sequence number=31
+  User 0:
+    seq=3, package=com.google.android.gms
+    seq=12, package=com.google.android.apps.docs
+    seq=29, package=com.mir2.web3
+    seq=30, package=com.mir2.web3.uipreview
+
+
+Dexopt state:
+  [com.mir2.web3.uipreview]
+    path: /data/app/~~6FKrofvmFjFRKQIkgLMseQ==/com.mir2.web3.uipreview-6N4VzLqAbWDTc-vee0KkXw==/base.apk
+      arm64: [status=run-from-apk] [reason=unknown]
+
+
+Compiler stats:
+  [com.mir2.web3.uipreview]
+     base.apk - 62
+
+APEX session state:
+
+Active APEX packages:
+
+
+Inactive APEX packages:
+
+
+Factory APEX packages:
+
+
+Snapshot statistics
+   Unrecorded-hits: 184  Cork-level: 0
+   Summary stats               TotBlds     TotUsed     TotCork     BigBlds    ShortLvd     TotTime     MaxTime
+          0:39         now           1         366           0           0           0           0           0
+          1:39        0:39           0           0           0           0           0           0           0
+          2:39        1:39           0           0           0           0           0           0           0
+          3:39        2:39          19       39018           0           0           3           3           0
+          4:39        3:39           0           0           0           0           0           0           0
+          5:39        4:39           0           0           0           0           0           0           0
+          6:39        5:39           0           0           0           0           0           0           0
+          7:39        6:39           0           0           0           0           0           0           0
+          8:39        7:39           0           0           0           0           0           0           0
+          9:39        8:39           0           0           0           0           0           0           0
+      16:01:43         now         449      551235           0           0          40          66           1
+
+   Build times                  <= 1ms      <= 2ms      <= 5ms     <= 10ms     <= 20ms     <= 50ms    <= 100ms     > 100ms
+          0:39         now           1           0           0           0           0           0           0           0
+          1:39        0:39           0           0           0           0           0           0           0           0
+          2:39        1:39           0           0           0           0           0           0           0           0
+          3:39        2:39          19           0           0           0           0           0           0           0
+          4:39        3:39           0           0           0           0           0           0           0           0
+          5:39        4:39           0           0           0           0           0           0           0           0
+          6:39        5:39           0           0           0           0           0           0           0           0
+          7:39        6:39           0           0           0           0           0           0           0           0
+          8:39        7:39           0           0           0           0           0           0           0           0
+          9:39        8:39           0           0           0           0           0           0           0           0
+      16:01:43         now         449           0           0           0           0           0           0           0
+
+   Use counters                   <= 1        <= 2        <= 5       <= 10       <= 20       <= 50      <= 100       > 100
+          0:39         now           0           0           0           0           0           0           0           1
+          1:39        0:39           0           0           0           0           0           0           0           0
+          2:39        1:39           0           0           0           0           0           0           0           0
+          3:39        2:39           1           0           2           0           2           4           2           8
+          4:39        3:39           0           0           0           0           0           0           0           0
+          5:39        4:39           0           0           0           0           0           0           0           0
+          6:39        5:39           0           0           0           0           0           0           0           0
+          7:39        6:39           0           0           0           0           0           0           0           0
+          8:39        7:39           0           0           0           0           0           0           0           0
+          9:39        8:39           0           0           0           0           0           0           0           0
+      16:01:43         now          24           1          14          29          25          55          48         252

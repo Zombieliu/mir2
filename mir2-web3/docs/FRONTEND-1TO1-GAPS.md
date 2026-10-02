@@ -1,5 +1,19 @@
 # Frontend 1:1 Gaps
 
+2026-10-02 最新实际 v24：精确干净源码`9a6bff0db9a7ff3eed003c72c90310ec632572d0`，
+四文件可选共享手机任务重排，不复制规则；Windows 默认布局/控制器保留，现来源
+56ee063fb仅多1提交/83文档/0功能源，冻结3d735745f分母仍有效。任务文字14/16dp、
+首屏6控件实测≥48dp；实际点行、滑动、上下滚动、关列表留独立详情、最终恢复HUD
+通过有界验证，13原图已查看/162原证据。编译0/1行尺寸红；5/2触摸失败定位每帧
+重建，手机视图保留控件后8/8绿。最终327/350、shared1238+10原ignored、fresh Java
+41+41/API31双检查通过；39输入、双APK/选定资源/安装SHA绑定。五PID仍82 GL506，
+零错误渲染FAIL；NPC任务列表/确认/提示、九语言、compact/IME/完整手机UI尚缺。
+初次preview编译失败及历史失败原样保留，不重绑旧包。实际认证JNI/HTTPS/WSS、
+完整NI-11–20、玩家/Zone/存档/完整资源/真机仍OPEN，goal Active/完整分母不变。
+[精确v24重排、实际滚动与剩余失败](generated/player-qa/native-android-quest-reflow-20261002/README.md)。
+
+下文v23及更早仅保留各自历史源码和验收范围，不抹除失败。
+
 > 2026-10-02 Android exactef5e56/v23 protected quest workspace checkpoint
 >
 > Only four Android files change; shared renderer/controllers/rules and Windows
