@@ -3571,6 +3571,7 @@ struct OverlayButtonControls<'w, 's> {
     storage_ui: ResMut<'w, StorageUiState>,
     shop_ui: ResMut<'w, ShopUiState>,
     ui_audio: ResMut<'w, crate::ui_audio::NativeUiAudioQueue>,
+    phone_shop: Option<ResMut<'w, game_shop_dialog::phone::InputState>>,
     buttons: Query<'w, 's, (&'static Interaction, &'static OverlayButton), Changed<Interaction>>,
 }
 
@@ -3734,6 +3735,8 @@ struct OverlayRenderModels<'w> {
     asset_server: Option<Res<'w, AssetServer>>,
     wing_materials: Option<Res<'w, CrystalCharacterWingMaterials>>,
     game_shop_geometry: Option<Res<'w, game_shop_dialog::PreviewGeometry>>,
+    phone_shop: Option<Res<'w, game_shop_dialog::phone::PhoneGameShopPresentation>>,
+    phone_shop_input: Option<Res<'w, game_shop_dialog::phone::InputState>>,
     shell: Option<Res<'w, NativeShellModel>>,
     state: Res<'w, NativePlayerUiState>,
     inventory: Res<'w, InventoryModel>,
@@ -3773,6 +3776,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
             app.add_systems(Startup, load_character_wing_materials);
         }
         app.init_resource::<NativePlayerUiState>()
+            .init_resource::<game_shop_dialog::phone::InputState>()
             .init_resource::<localized_help::HelpScrollState>()
             .add_systems(
                 Update,
@@ -3936,6 +3940,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                         process_inventory_item_drag,
                         process_inventory_drag,
                         game_shop_dialog::process_pointer,
+                        game_shop_dialog::phone::pointer_input,
                     )
                         .chain(),
                     process_inventory_delete_pointer,
@@ -3966,6 +3971,7 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 (
                     (
                         render_overlays,
+                        game_shop_dialog::phone::style_editor,
                         big_map_coordinates::update,
                         game_shop_dialog::render_confirmation_system,
                     )
@@ -8324,6 +8330,7 @@ fn process_overlay_buttons(
         mut storage_ui,
         mut shop_ui,
         mut ui_audio,
+        mut phone_shop,
         buttons,
     } = button_controls;
     let mut fallback_effects = UiEffectQueue::default();
@@ -8390,7 +8397,13 @@ fn process_overlay_buttons(
     let game_shop_modal_was_open = state.game_shop_dialog.confirmation.is_some();
     let storage_rental_modal_was_open = state.storage_rental_confirmation.is_some();
     let parcel_gold_modal_was_open = state.parcel_gold_prompt.is_some();
-    for (interaction, button) in buttons.iter() {
+    let phone_clicks = phone_shop.as_deref_mut()
+        .map(|input| std::mem::take(&mut input.clicks)).unwrap_or_default();
+    for button in buttons.iter()
+        .filter(|(interaction, _)| **interaction == Interaction::Pressed)
+        .map(|(_, button)| button)
+        .chain(phone_clicks.iter())
+    {
         if state.hero.modal() {
             continue;
         }
@@ -8402,9 +8415,6 @@ fn process_overlay_buttons(
                     | OverlayButton::CloseSkillAssign
             )
         {
-            continue;
-        }
-        if *interaction != Interaction::Pressed {
             continue;
         }
         if state.storage_password_input_consumed
@@ -11767,6 +11777,8 @@ fn render_overlays(
         asset_server,
         wing_materials,
         game_shop_geometry,
+        phone_shop,
+        phone_shop_input,
         shell,
         state,
         inventory,
@@ -11942,19 +11954,19 @@ fn render_overlays(
             &game_shop,
             &state.game_shop_dialog,
             state.game_shop_page,
+            phone_shop.as_deref().copied().filter(|phone| phone.is_valid())
+                .map(|phone| (phone, phone_shop_input.as_deref().is_some_and(|input| input.filters_open))),
             &ui,
             &inventory,
             &mut game_shop_cache,
             |parent| {
-                game_shop_dialog::render(
-                    parent,
-                    asset_server.as_deref(),
-                    &game_shop,
-                    &ui,
-                    &state,
-                    &inventory,
-                    game_shop_geometry.as_deref(),
-                )
+                if let Some(phone) = phone_shop.as_deref().copied().filter(|phone| phone.is_valid()) {
+                    game_shop_dialog::phone::render(parent, asset_server.as_deref(), &game_shop,
+                        &ui, &state, &inventory, game_shop_geometry.as_deref(), phone, phone_shop_input.as_deref());
+                } else {
+                    game_shop_dialog::render(parent, asset_server.as_deref(), &game_shop,
+                        &ui, &state, &inventory, game_shop_geometry.as_deref());
+                }
             },
         );
         fill_panel(
@@ -12326,10 +12338,13 @@ fn overlay_render_fingerprints(
         debug_fingerprint(&models.letter_editor.as_deref()),
         debug_fingerprint(&models.parcel_ui.as_deref()),
         debug_fingerprint(
-            &models
+            &(models
                 .game_shop_geometry
                 .as_deref()
                 .map(|geometry| geometry.0 as usize),
+                models.phone_shop.as_deref().filter(|phone| phone.is_valid()),
+                models.phone_shop.as_deref().filter(|phone| phone.is_valid())
+                    .map(|_| models.phone_shop_input.as_deref().is_some_and(|input| input.filters_open))),
         ),
         debug_fingerprint(&crate::native_i18n::revision()),
     ]
@@ -12469,6 +12484,7 @@ struct GameShopRenderKey {
     model: GameShopModel,
     dialog: String,
     page: usize,
+    phone: Option<(game_shop_dialog::phone::PhoneGameShopPresentation, bool)>,
     player: String,
     inventory: String,
 }
@@ -12484,6 +12500,7 @@ impl PartialEq for GameShopRenderKey {
             && self.model == other.model
             && self.dialog == other.dialog
             && self.page == other.page
+            && self.phone == other.phone
             && self.player == other.player
             && self.inventory == other.inventory
     }
@@ -12496,6 +12513,7 @@ fn fill_game_shop_panel(
     model: &GameShopModel,
     dialog: &game_shop_dialog::GameShopDialogUi,
     page: usize,
+    phone: Option<(game_shop_dialog::phone::PhoneGameShopPresentation, bool)>,
     ui: &UiReadModel,
     inventory: &InventoryModel,
     cache: &mut GameShopRenderCache,
@@ -12510,6 +12528,10 @@ fn fill_game_shop_panel(
     } else {
         Display::None
     };
+    let size = phone.map(|(phone, _)| phone.workspace * phone.authored_unit)
+        .unwrap_or(Vec2::new(696.0, 476.0));
+    node.width = Val::Px(size.x);
+    node.height = Val::Px(size.y);
     if !visible {
         if cache.key.take().is_some() {
             commands.entity(entity).despawn_children();
@@ -12559,6 +12581,7 @@ fn fill_game_shop_panel(
         // Paging is UI-only state outside GameShopDialogUi. It must invalidate
         // the retained tree even when search, quantities and catalog are unchanged.
         page,
+        phone,
         player: player_key,
         inventory: inventory_key,
     };

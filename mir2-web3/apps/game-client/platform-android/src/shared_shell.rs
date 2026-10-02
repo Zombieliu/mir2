@@ -691,7 +691,63 @@ impl Plugin for AndroidSharedShellPlugin {
         crate::mobile_ui::install(app);
         crate::phone_hud::install(app);
         crate::phone_quests::install(app);
+        app.init_resource::<mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::phone::PhoneGameShopPresentation>()
+            .add_systems(Update, publish_game_shop_phone
+                .before(mir2_client_bevy::crystal_ui::overlays::NativePlayerUiSet::Mutate));
+        #[cfg(feature = "ui-preview")]
+        app.add_systems(PostUpdate, report_game_shop_phone
+            .after(bevy::ui::UiSystems::PostLayout));
         crate::scene_effects::install(app);
+    }
+}
+
+fn publish_game_shop_phone(
+    windows: Query<&Window>,
+    host: Res<HostState>,
+    mut presentation: ResMut<mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::phone::PhoneGameShopPresentation>,
+) {
+    use mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::phone::PhoneGameShopPresentation;
+    let next = windows.single().ok().map(|window| {
+        let viewport = Vec2::new(window.width(), window.height());
+        let fit = CrystalStageTransform::fit(viewport.x, viewport.y);
+        let safe = Vec4::new(host.safe_left, host.safe_top, host.safe_right,
+            host.safe_bottom + host.ime_bottom) / window.scale_factor();
+        PhoneGameShopPresentation::fit(viewport, safe, fit.scale)
+    }).filter(|p| p.is_valid()).unwrap_or_default();
+    if *presentation != next { *presentation = next; }
+}
+
+#[cfg(feature = "ui-preview")]
+fn report_game_shop_phone(
+    windows: Query<&Window>,
+    stage: Res<UiScale>,
+    player: Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
+    texts: Query<(&Text, &TextFont, &bevy::text::TextLayoutInfo),
+        With<mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::phone::PhoneGameShopText>>,
+    controls: Query<(&ComputedNode, &UiGlobalTransform,
+        &mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::phone::PhoneGameShopControl)>,
+    areas: Query<&ComputedNode,
+        With<mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::phone::PhoneGameShopScrollArea>>,
+    mut frames: Local<u16>,
+) {
+    *frames = frames.wrapping_add(1);
+    if *frames % 60 != 0 || !player.shop_open() { return; }
+    let Ok(window) = windows.single() else { return };
+    let density = window.scale_factor();
+    for (text, font, layout) in &texts {
+        if let FontSize::Px(size) = font.font_size {
+            info!(text=?text.0, font_dp=size*stage.0, glyphs=layout.glyphs.len(),
+                alpha_masks=layout.glyphs.iter().filter(|g| g.atlas_info.is_alpha_mask).count(),
+                "ANDROID_PHONE_GAMESHOP_TEXT");
+        }
+    }
+    for (node, transform, control) in &controls {
+        info!(control=?control, size_dp=?node.size()/density,
+            center_dp=?transform.translation/density, "ANDROID_PHONE_GAMESHOP_CONTROL");
+    }
+    for node in &areas {
+        info!(size_dp=?node.size()/density, content_dp=?node.content_size()/density,
+            offset=?node.scroll_position*node.inverse_scale_factor, "ANDROID_PHONE_GAMESHOP_SCROLL");
     }
 }
 
@@ -776,6 +832,7 @@ mod phone_panel_tests;
 
 fn fit_stage(
     windows: Query<&Window>,
+    phone_shop: Option<Res<mir2_client_bevy::crystal_ui::overlays::game_shop_dialog::phone::PhoneGameShopPresentation>>,
     host: Res<HostState>,
     model: Res<NativeShellModel>,
     player: Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>,
@@ -1061,7 +1118,15 @@ fn fit_stage(
                 } else {
                     3.2
                 };
-            let focused = if let Some(sidebar) = sidebar.filter(|_| is_inventory || is_equipment) {
+            let focused = if is_game_shop && phone_shop.as_deref().is_some_and(|phone| phone.is_valid()) {
+                // An authored_unit phone panel already has dp size. Fit the
+                // SAME safe/IME workspace, not the larger desktop focus scale.
+                let workspace = Rect::from_corners(
+                    Vec2::new(safe_edges.x + 16.0, safe_edges.y + 16.0),
+                    Vec2::new(window.width() - safe_edges.z - 16.0, window.height() - safe_edges.w - 16.0),
+                );
+                mobile_workspace_transform(fit, origin, size, workspace, top, 1.0)
+            } else if let Some(sidebar) = sidebar.filter(|_| is_inventory || is_equipment) {
                 mobile_workspace_transform(fit, origin, size, sidebar.workspace, top, max_scale)
             } else {
                 mobile_focus_transform(
