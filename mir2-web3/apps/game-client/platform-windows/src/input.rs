@@ -11,9 +11,11 @@ use bevy::prelude::{
     Window, With,
 };
 use bevy::winit::RawWinitWindowEvent;
-use mir2_client_bevy::crystal_ui::hud::{belt_slot_item, CrystalHudAction};
+use mir2_client_bevy::crystal_ui::hud::CrystalHudAction;
 use mir2_client_bevy::crystal_ui::notice::NoticeDialogState;
-use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
+use mir2_client_bevy::crystal_ui::overlays::{
+    belt_item_use_intent, NativePlayerUiIntent, NativePlayerUiState,
+};
 use mir2_client_bevy::crystal_ui::spec;
 use mir2_client_bevy::entities::{EntityKind, EntityModelSet};
 use mir2_client_bevy::inventory::InventoryModel;
@@ -3254,6 +3256,48 @@ fn hero_fireball_ready(
             .is_some_and(|c| c.remaining_ms(now) == 0)
 }
 
+/// Crystal shares ToggleTime between persistent weapon modes (1000 ms) and
+/// FlamingSword/TwinDrakeBlade preparation (500 ms), independently of the
+/// ordinary attack/cast clock. Authoritative ACKs do not restart this deadline.
+#[derive(Default)]
+pub struct SkillToggleDebounce {
+    identity: Option<(u64, u32)>,
+    until_ms: u64,
+}
+
+impl SkillToggleDebounce {
+    fn observe(&mut self, skills: &SkillModel) {
+        let identity = (
+            skills.authority.session_epoch,
+            skills.authority.player_object_id,
+        );
+        if self.identity != Some(identity) {
+            self.identity = Some(identity);
+            self.until_ms = 0;
+        }
+    }
+
+    fn ready(&self, now_ms: u64) -> bool {
+        now_ms >= self.until_ms
+    }
+
+    fn commit(&mut self, now_ms: u64, delay_ms: u64) {
+        self.until_ms = now_ms.saturating_add(delay_ms);
+    }
+}
+
+fn persistent_weapon_toggle(spell: &str) -> bool {
+    ["Thrusting", "HalfMoon", "CrossHalfMoon", "DoubleSlash"]
+        .iter()
+        .any(|name| spell.eq_ignore_ascii_case(name))
+}
+
+fn weapon_preparation(spell: &str) -> bool {
+    ["FlamingSword", "TwinDrakeBlade", "CounterAttack"]
+        .iter()
+        .any(|name| spell.eq_ignore_ascii_case(name))
+}
+
 pub fn keyboard_skill_system(
     keys: Res<ButtonInput<KeyCode>>,
     commands: Res<GatewayCommands>,
@@ -3275,14 +3319,19 @@ pub fn keyboard_skill_system(
     mut item_intents: Option<
         ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>,
     >,
-    mut magic_target: bevy::prelude::Local<spell_targeting::SpellTargetMemory>,
-    mut fallback_skill_clocks: bevy::prelude::Local<mir2_client_bevy::crystal_ui::overlays::skill_bars::SkillBarsUi>,
+    (mut magic_target, mut fallback_skill_clocks, mut toggle_debounce): (
+        Local<spell_targeting::SpellTargetMemory>,
+        Local<mir2_client_bevy::crystal_ui::overlays::skill_bars::SkillBarsUi>,
+        Local<SkillToggleDebounce>,
+    ),
+    clock: Option<Res<Time<bevy::time::Real>>>,
 ) {
     if !shell
         .as_deref()
         .is_some_and(|s| s.screen == NativeShellScreen::InGame)
     {
         *magic_target = Default::default();
+        *toggle_debounce = Default::default();
     }
     if !gameplay_input_enabled(
         shell.as_deref(),
@@ -3315,21 +3364,31 @@ pub fn keyboard_skill_system(
         .map(|slot| slot - 1);
     if let Some(slot) = belt_slot {
         let now = mir2_client_bevy::hero_model::hero_clock_ms();
-        if inventory.is_some_and(|model| belt_slot_item(model.as_ref(), slot).is_some())
-            && item_intents
+        if let Some(NativePlayerUiIntent::UseItem {
+            key,
+            unique_id,
+            slot,
+            grid,
+        }) = inventory
+            .as_deref()
+            .and_then(|model| belt_item_use_intent(model, slot))
+        {
+            if item_intents
                 .as_deref()
                 .is_none_or(|queue| queue.use_item_ready(now))
-        {
-            let sent =
-                commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::UseItem {
-                    key: None,
-                    unique_id: None,
-                    slot: Some(slot),
-                    grid: Some("belt".to_owned()),
-                }));
-            if sent {
-                if let Some(queue) = item_intents.as_deref_mut() {
-                    queue.commit_item_use(now, 300);
+            {
+                let sent = commands.send_command(GatewayCommand::Wire(
+                    NativeOutboundCommand::UseItem {
+                        key,
+                        unique_id,
+                        slot,
+                        grid,
+                    },
+                ));
+                if sent {
+                    if let Some(queue) = item_intents.as_deref_mut() {
+                        queue.commit_item_use(now, 300);
+                    }
                 }
             }
         }
@@ -3380,6 +3439,11 @@ pub fn keyboard_skill_system(
     let Some(skills) = skills.as_deref() else {
         return;
     };
+    toggle_debounce.observe(skills);
+    let toggle_now_ms = clock
+        .as_deref()
+        .map(|clock| clock.elapsed().as_millis().min(u128::from(u64::MAX)) as u64)
+        .unwrap_or_else(mir2_client_bevy::hero_model::hero_clock_ms);
     let now = std::time::Instant::now();
     if let Some(ui) = player_ui.as_deref_mut() {
         ui.skill_bars.observe(skills, now);
@@ -3395,41 +3459,59 @@ pub fn keyboard_skill_system(
         if selection.cast_kind.as_deref() == Some("passive") {
             continue;
         }
-        let clocks = player_ui.as_deref().map_or(&*fallback_skill_clocks, |ui| &ui.skill_bars);
-        if skills.skill_for_shortcut(skill_slot).is_some_and(|skill| {
-            clocks.readiness_remaining_ms(skill.id, skills, now) > 0
-        }) {
-            continue;
-        }
         let Some(ui) = ui_read_model.as_deref() else {
             continue;
         };
         if ui.player.hp <= 0 {
             continue;
         }
-        if selection
-            .mp_cost
-            .is_some_and(|mp_cost| ui.player.mp < i32::try_from(mp_cost).unwrap_or(i32::MAX))
-        {
-            continue;
-        }
         let Some(spell) = selection.spell.filter(|spell| !spell.trim().is_empty()) else {
             continue;
         };
+        let persistent_toggle = selection.cast_kind.as_deref() == Some("toggle")
+            && persistent_weapon_toggle(&spell);
+        if !persistent_toggle {
+            let clocks = player_ui
+                .as_deref()
+                .map_or(&*fallback_skill_clocks, |ui| &ui.skill_bars);
+            if skills.skill_for_shortcut(skill_slot).is_some_and(|skill| {
+                clocks.readiness_remaining_ms(skill.id, skills, now) > 0
+            }) || selection.mp_cost.is_some_and(|mp_cost| {
+                ui.player.mp < i32::try_from(mp_cost).unwrap_or(i32::MAX)
+            }) {
+                continue;
+            }
+        }
         if selection.cast_kind.as_deref() == Some("toggle") {
-            // Crystal always requests arming FlamingSword; its timed flag is
-            // consumed by the next hit, unlike persistent HalfMoon/Thrusting.
-            let toggle_state = if spell.eq_ignore_ascii_case("FlamingSword") {
+            let toggle_delay_ms = if persistent_toggle {
+                Some(1000)
+            } else if spell.eq_ignore_ascii_case("FlamingSword")
+                || spell.eq_ignore_ascii_case("TwinDrakeBlade")
+            {
+                Some(500)
+            } else {
+                None
+            };
+            if toggle_delay_ms.is_some() && !toggle_debounce.ready(toggle_now_ms) {
+                continue;
+            }
+            // Preparations always request arming. Persistent modes invert
+            // their own authoritative flag; enabling one never disables another.
+            let toggle_state = if weapon_preparation(&spell) {
                 1
             } else if selection.can_use == Some(true) {
                 0
             } else {
                 1
             };
-            commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::SpellToggle {
-                spell,
-                toggle_state,
-            }));
+            let sent = commands.send_command(GatewayCommand::Wire(
+                NativeOutboundCommand::SpellToggle { spell, toggle_state },
+            ));
+            if sent {
+                if let Some(delay_ms) = toggle_delay_ms {
+                    toggle_debounce.commit(toggle_now_ms, delay_ms);
+                }
+            }
             continue;
         }
         let player = entities
@@ -3611,6 +3693,9 @@ fn walk_key_map() -> [(KeyCode, &'static str); 8] {
 
 #[cfg(test)]
 mod tests {
+    mod hotkey_intent_tests {
+        include!("hotkey_intent_tests.rs");
+    }
     mod nonmodal_panel_input_tests {
         include!("nonmodal_panel_input_tests.rs");
     }

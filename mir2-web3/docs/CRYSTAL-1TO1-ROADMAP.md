@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 published-source native follow-up: movement/action ordering,
+> rejected-combat cancellation and three-class belt/weapon hotkeys are repaired.
+> Input144, sender14 and 30 unique selected Zone checks pass. First incomplete
+> asset-fixture failures are retained and disappear with unchanged source plus
+> approved R10 assets. Live rollout/feel acceptance remains separate; paused
+> goals stay paused. [Scoped evidence](NATIVE-COMBAT-HOTKEY-FIX-20261002.md).
+
 > 2026-10-02 live isolated PostgreSQL follow-up: one opt-in periodic test
 > passes both daily and weekly settlement barriers. No success is returned
 > before durable COMMIT; independent full-save/account/projection versions

@@ -1,5 +1,11 @@
 # Crystal Server Parity
 
+> 2026-10-02 ordered combat handoff: earlier movement is canceled even when
+> combat admission rejects for cooldown; fresh later movement remains valid.
+> Owner transform receipts reconcile retired client prediction. Selected Zone
+> movement/materialization/combat checks pass30 unique, native sender14.
+> No cooldown or damage rules are relaxed. [Evidence](NATIVE-COMBAT-HOTKEY-FIX-20261002.md).
+
 > 2026-10-02 live isolated PostgreSQL follow-up: one opt-in periodic test
 > passes both daily and weekly settlement barriers. No success is returned
 > before durable COMMIT; independent full-save/account/projection versions

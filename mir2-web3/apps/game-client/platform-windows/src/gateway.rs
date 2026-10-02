@@ -39,6 +39,10 @@ use crate::native_protocol::{
 };
 use crate::session_config::NativeReconnectConfig;
 
+#[cfg(test)]
+#[path = "gateway_movement_barrier_tests.rs"]
+mod movement_barrier_tests;
+
 #[path = "trade_projection.rs"]
 mod trade_projection;
 
@@ -2455,6 +2459,9 @@ fn drain_command_batch<R: CommandSource>(
                 }
             }
             GatewayCommand::Player(intent) => latest_player = Some(GatewayCommand::Player(intent)),
+            GatewayCommand::Wire(
+                NativeOutboundCommand::Walk { .. } | NativeOutboundCommand::Run { .. },
+            ) => latest_player = Some(command),
             GatewayCommand::Wire(NativeOutboundCommand::LogOut)
             | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
                 leave = Some(command);
@@ -2467,6 +2474,19 @@ fn drain_command_batch<R: CommandSource>(
                 // in the slot for the next poll instead of being accepted and
                 // silently discarded in this batch.
                 break;
+            }
+            other if supersedes_queued_movement(&other) => {
+                // Combat owns the input that follows this boundary. Appending
+                // an older buffered step after it would turn Run -> Attack
+                // into Attack -> Run and resurrect the abandoned movement.
+                // Keep an earlier turn in order; movement received after this
+                // boundary may still occupy the latest-intent slot normally.
+                if let Some(previous) = latest_player.take() {
+                    if matches!(previous, GatewayCommand::Player(PlayerIntent::Turn { .. })) {
+                        batch.push(previous);
+                    }
+                }
+                batch.push(other);
             }
             other if batch.len() < limit => batch.push(other),
             _ => {}
@@ -2494,6 +2514,19 @@ fn drain_command_batch<R: CommandSource>(
         batch.push(player);
     }
     batch
+}
+
+fn supersedes_queued_movement(command: &GatewayCommand) -> bool {
+    matches!(
+        command,
+        GatewayCommand::Wire(
+            NativeOutboundCommand::Attack { .. }
+                | NativeOutboundCommand::AttackDirection { .. }
+                | NativeOutboundCommand::RangeAttack { .. }
+                | NativeOutboundCommand::Magic { .. }
+                | NativeOutboundCommand::Turn { .. }
+        )
+    )
 }
 
 fn retry_delay_for(config: NativeReconnectConfig, attempt: u32, generation: u64) -> Duration {

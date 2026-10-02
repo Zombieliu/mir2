@@ -1390,12 +1390,11 @@ impl ZoneRuntime {
     }
 
     pub fn handle(&mut self, command: ZoneCommand) -> Vec<ZoneOutbound> {
-        // An accepted combat action supersedes movement that reached the Zone
-        // before it. Otherwise the buffered step can run on the next movement
-        // tick after the attack has already launched, pulling the player out of
-        // range. Inspect the authoritative action packet after admission so a
-        // rejected attack leaves movement untouched; a new movement command
-        // arriving after this handle call can still queue normally.
+        // A physical combat intent supersedes earlier movement even when its
+        // action/cooldown admission rejects the attack. Otherwise an abandoned
+        // run can execute on the next movement tick. Keep the action deadlines
+        // unchanged, and let movement arriving after this call queue normally.
+        // Spell preparations/toggles (cast=false) do not replace movement.
         let combat_actor = match &command {
             ZoneCommand::PlayerAttackObject { session_id, now_ms, .. }
             | ZoneCommand::PlayerAttackMaterializedObject { session_id, now_ms, .. }
@@ -1415,6 +1414,15 @@ impl ZoneRuntime {
         };
         let mut expired = combat_actor.as_ref().map_or_else(Vec::new,
             |(session_id, _, now_ms, _, _)| self.expire_player_flaming_sword(session_id, *now_ms));
+        let movement_actor = combat_actor.as_ref().and_then(
+            |(session_id, _, _, _, action_delay)| {
+                if action_delay.is_some() {
+                    self.cancel_movement_for_combat(session_id);
+                    Some(session_id.clone())
+                } else {
+                    None
+                }
+            });
         let mut out = self.handle_inner(command);
         if let Some((session_id, actor_id, now_ms, magic, action_delay)) = combat_actor {
             if zone_outbounds_contain_accepted_player_action(&out, &session_id, actor_id) {
@@ -1430,7 +1438,16 @@ impl ZoneRuntime {
                             now_ms.saturating_add(ZONE_NATIVE_PLAYER_MAGIC_ACTION_MS);
                     }
                 }
-                let mut correction = self.cancel_pending_movement(&session_id);
+            }
+        }
+        if let Some(session_id) = movement_actor {
+            let has_owner_location = out.iter().any(|outbound| matches!(outbound,
+                ZoneOutbound::ToSession { session_id: owner, packets } if owner == &session_id
+                    && packets.iter().any(|packet| matches!(packet, ServerPacket::UserLocation { .. }))));
+            if !has_owner_location {
+                // Reconcile even a step discarded before socket write, using
+                // the real transform after the attack/cast has been handled.
+                let mut correction = self.owner_location_correction(&session_id);
                 correction.append(&mut out);
                 out = correction;
             }
@@ -2534,6 +2551,14 @@ impl ZoneRuntime {
 
     fn movement_action_ready(player: &ZonePlayer, now_ms: u64) -> bool {
         !player.movement_actions.is_empty() && now_ms >= player.movement_ready_at_ms
+    }
+
+    fn cancel_movement_for_combat(&mut self, session_id: &SessionId) {
+        let Some(player) = self.players.get_mut(session_id) else {
+            return;
+        };
+        player.movement_actions.clear();
+        player.run_step_until_ms = 0;
     }
 
     fn cancel_pending_movement(&mut self, session_id: &SessionId) -> Vec<ZoneOutbound> {

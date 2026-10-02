@@ -1,5 +1,11 @@
 # Backend 1:1 Progress
 
+> 2026-10-02 combat-intent repair: physical attack/cast intents retire earlier
+> pending movement before cooldown admission and send an owner transform
+> receipt; deadlines, damage and preparation neutrality remain intact.
+> 30 unique selected Zone checks pass. Deployment/native delay acceptance
+> remains pending. [Evidence](NATIVE-COMBAT-HOTKEY-FIX-20261002.md).
+
 > 2026-10-02 live isolated PostgreSQL follow-up: one opt-in periodic test
 > passes both daily and weekly settlement barriers. No success is returned
 > before durable COMMIT; independent full-save/account/projection versions

@@ -620,6 +620,7 @@ fn assert_combat_clears_only_older_movement(
     owner: &SessionId,
     launch: &[ZoneOutbound],
     old_deadline: u64,
+    combat_action_delay: u64,
 ) {
     assert!(has_packet(launch, owner, |packet| matches!(
         packet,
@@ -639,6 +640,11 @@ fn assert_combat_clears_only_older_movement(
         seq: 3,
         now_ms: old_deadline.saturating_add(1),
     });
+    let next_ready = old_deadline + combat_action_delay;
+    assert_eq!(zone.player_position(owner), Some(Point { x: 331, y: 270 }));
+    assert_eq!(zone.next_pending_movement_deadline_ms(), Some(next_ready));
+    assert!(zone.tick_pending_movement(next_ready - 1).is_empty());
+    zone.tick_pending_movement(next_ready);
     assert_eq!(zone.player_position(owner), Some(Point { x: 330, y: 270 }));
 }
 
@@ -662,19 +668,19 @@ fn accepted_melee_and_materialized_attack_cancel_only_pre_attack_movement() {
             ZoneCommand::PlayerAttackMaterializedObject {
                 session_id: owner.clone(), object_id: 9_100, monster: Some(monster),
                 direction: MirDirection::Right, spell: Spell::None as u8,
-                level: 0, attack_type: 0, damage: 1, now_ms: 12,
+                level: 0, attack_type: 0, damage: 1, now_ms: old_deadline,
             }
         } else {
             ZoneCommand::PlayerAttackObject {
                 session_id: owner.clone(), object_id: 9_100,
                 direction: MirDirection::Right, spell: Spell::None as u8,
-                level: 0, attack_type: 0, damage: 1, now_ms: 12,
+                level: 0, attack_type: 0, damage: 1, now_ms: old_deadline,
             }
         });
         assert!(has_packet(&launch, &owner, |packet| matches!(
             packet, ServerPacket::ObjectAttack { info } if info.object_id == 101
         )), "materialized={materialized}");
-        assert_combat_clears_only_older_movement(&mut zone, &owner, &launch, old_deadline);
+        assert_combat_clears_only_older_movement(&mut zone, &owner, &launch, old_deadline, 550);
     }
 }
 
@@ -696,14 +702,14 @@ fn accepted_range_and_magic_cancel_pre_attack_movement() {
             ZoneCommand::PlayerRangeAttackObject {
                 session_id: owner.clone(), object_id: 9_100,
                 direction: MirDirection::Right, target: Point { x: 335, y: 270 },
-                spell: Spell::Focus, level: 0, attack_type: 0, damage: 1, now_ms: 12,
+                spell: Spell::Focus, level: 0, attack_type: 0, damage: 1, now_ms: old_deadline,
             }
         } else {
             ZoneCommand::PlayerCastMagic {
                 session_id: owner.clone(), object_id: 9_100, spell: Spell::FireBall,
                 direction: MirDirection::Right, target: Point { x: 335, y: 270 },
                 cast: true, level: 0, damage: 1, mp_cost: 0, cooldown_ms: 500,
-                now_ms: 12,
+                now_ms: old_deadline,
             }
         });
         assert!(has_packet(&launch, &owner, |packet| match packet {
@@ -711,12 +717,14 @@ fn accepted_range_and_magic_cancel_pre_attack_movement() {
             ServerPacket::ObjectMagic { object_id, .. } => !ranged && *object_id == 101,
             _ => false,
         }), "ranged={ranged}");
-        assert_combat_clears_only_older_movement(&mut zone, &owner, &launch, old_deadline);
+        assert_combat_clears_only_older_movement(
+            &mut zone, &owner, &launch, old_deadline, if ranged { 550 } else { 600 },
+        );
     }
 }
 
 #[test]
-fn rejected_attack_keeps_the_prior_movement_intact() {
+fn rejected_attack_discards_prior_movement_without_shortening_action_time() {
     let mut zone = zone();
     let owner = session("combat-movement-owner");
     zone.handle(ZoneCommand::Join(join(
@@ -736,9 +744,14 @@ fn rejected_attack_keeps_the_prior_movement_intact() {
     assert!(!has_packet(&rejected, &owner, |packet| matches!(
         packet, ServerPacket::ObjectAttack { .. }
     )));
-    assert_eq!(zone.next_pending_movement_deadline_ms(), Some(old_deadline));
-    zone.tick_pending_movement(old_deadline);
-    assert_eq!(zone.player_position(&owner), Some(Point { x: 330, y: 270 }));
+    assert!(has_packet(&rejected, &owner, |packet| matches!(
+        packet, ServerPacket::UserLocation { location }
+            if location.position == (Point { x: 331, y: 270 })
+    )));
+    assert_eq!(zone.next_pending_movement_deadline_ms(), None);
+    assert_eq!(zone.player_magic_cooldown_remaining_ms(&owner, Spell::FireBall, 12), Some(old_deadline - 12));
+    assert!(zone.tick_pending_movement(old_deadline).is_empty());
+    assert_eq!(zone.player_position(&owner), Some(Point { x: 331, y: 270 }));
 }
 
 #[test]
