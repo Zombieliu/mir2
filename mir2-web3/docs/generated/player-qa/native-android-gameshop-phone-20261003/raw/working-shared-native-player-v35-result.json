@@ -1,0 +1,79 @@
+{
+  "label": "working-shared-native-player-v35",
+  "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+  "bin": "cargo",
+  "args": [
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+    "--features",
+    "native-player-ui",
+    "--lib",
+    "--locked",
+    "--offline",
+    "--",
+    "--test-threads=1"
+  ],
+  "source": "f99edfdbd62b5a80714cce41deaabedc75ec5084",
+  "workingInputs": true,
+  "started": "2026-10-02T19:38:10.114Z",
+  "ended": "2026-10-02T19:38:17.663Z",
+  "code": 0,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74468,
+      "sha256": "86eced1102947319ad26c04e53ab8b845a659401c6254855312098a4ebbb3a2d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+      "bytes": 69639,
+      "sha256": "59d5ebf8b3d2f5fd28a9f058ece77efd5e2171ac6afbe0cb7af84af9c6d614ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 945911,
+      "sha256": "9db9a550c9659852475ba82f3d2f3eb4afd75f3ef80d2bda35c9a577899652a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 185650,
+      "sha256": "d944551b2ca73c555f430512edabb189cbf0c63c9bd18c239d112e9b3a909491"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28735,
+      "sha256": "25cb70ed959e853e2a27da09264b7362e5395c94149972b320daa00f5f12eff2"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74468,
+      "sha256": "86eced1102947319ad26c04e53ab8b845a659401c6254855312098a4ebbb3a2d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+      "bytes": 69639,
+      "sha256": "59d5ebf8b3d2f5fd28a9f058ece77efd5e2171ac6afbe0cb7af84af9c6d614ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 945911,
+      "sha256": "9db9a550c9659852475ba82f3d2f3eb4afd75f3ef80d2bda35c9a577899652a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 185650,
+      "sha256": "d944551b2ca73c555f430512edabb189cbf0c63c9bd18c239d112e9b3a909491"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28735,
+      "sha256": "25cb70ed959e853e2a27da09264b7362e5395c94149972b320daa00f5f12eff2"
+    }
+  ],
+  "sourceUnchanged": true
+}

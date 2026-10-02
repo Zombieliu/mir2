@@ -1,0 +1,4 @@
+*.png -text
+*.gz -text
+raw/** -text
+before/** -text

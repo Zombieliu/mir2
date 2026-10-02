@@ -1,0 +1,11 @@
+{
+  "category": "Evidence verifier XML schema preparation failure; not a product test failure",
+  "source": "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6",
+  "failedFiles": [
+    "evidence-verifier-working-v35-corrected.log",
+    "evidence-verifier-working-v35-corrected-result.json"
+  ],
+  "reason": "v35 Java suite metadata uses file, not the v34 name key; all twelve original XML files exist and tests already passed.",
+  "correction": "Read the recorded file key and verify all twelve XML counts directly; source/APKs unchanged.",
+  "wholeGoalComplete": false
+}

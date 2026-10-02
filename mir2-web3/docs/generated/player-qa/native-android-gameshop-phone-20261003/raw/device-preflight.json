@@ -1,0 +1,207 @@
+{
+  "checked": "2026-10-02T19:45:06.816Z",
+  "probes": [
+    {
+      "name": "device-list.txt",
+      "args": [
+        "devices",
+        "-l"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:05.719Z",
+      "finished": "2026-10-02T19:45:05.735Z"
+    },
+    {
+      "name": "device-avd-name.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "emu",
+        "avd",
+        "name"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:05.735Z",
+      "finished": "2026-10-02T19:45:05.748Z"
+    },
+    {
+      "name": "device-api.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "getprop",
+        "ro.build.version.sdk"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:05.748Z",
+      "finished": "2026-10-02T19:45:05.774Z"
+    },
+    {
+      "name": "device-model.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "getprop",
+        "ro.product.model"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:05.774Z",
+      "finished": "2026-10-02T19:45:05.799Z"
+    },
+    {
+      "name": "device-abi.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "getprop",
+        "ro.product.cpu.abi"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:05.799Z",
+      "finished": "2026-10-02T19:45:05.834Z"
+    },
+    {
+      "name": "device-fingerprint.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "getprop",
+        "ro.build.fingerprint"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:05.834Z",
+      "finished": "2026-10-02T19:45:05.861Z"
+    },
+    {
+      "name": "device-size-before.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "wm",
+        "size"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:05.861Z",
+      "finished": "2026-10-02T19:45:05.907Z"
+    },
+    {
+      "name": "device-density-before.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "wm",
+        "density"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:05.907Z",
+      "finished": "2026-10-02T19:45:05.955Z"
+    },
+    {
+      "name": "debug-package-before.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:05.956Z",
+      "finished": "2026-10-02T19:45:06.012Z"
+    },
+    {
+      "name": "debug-installed-path-before.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:06.013Z",
+      "finished": "2026-10-02T19:45:06.053Z"
+    },
+    {
+      "name": "debug-installed-sha-before.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "sha256sum",
+        "/data/app/~~E5o7KoGpronFVrGav6M8rw==/com.mir2.web3-Q3jfkk4eq3sOci8Hc8cQCw==/base.apk"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:06.053Z",
+      "finished": "2026-10-02T19:45:06.391Z"
+    },
+    {
+      "name": "preview-package-before.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:06.391Z",
+      "finished": "2026-10-02T19:45:06.421Z"
+    },
+    {
+      "name": "preview-installed-path-before.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:06.421Z",
+      "finished": "2026-10-02T19:45:06.457Z"
+    },
+    {
+      "name": "preview-installed-sha-before.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "sha256sum",
+        "/data/app/~~hyALMv6DmzVzMllpH35gdA==/com.mir2.web3.uipreview-YXcQneufM8bXkVaZm7ctzA==/base.apk"
+      ],
+      "code": 0,
+      "started": "2026-10-02T19:45:06.457Z",
+      "finished": "2026-10-02T19:45:06.816Z"
+    }
+  ],
+  "serial": "emulator-5554",
+  "api": 31,
+  "previousArtifacts": [
+    {
+      "variant": "debug",
+      "source": "76d51415b5ceed667898a720c698b3a062bf7790",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gameshop-hit-v34-20261003-yxhQVz/final-apks/mir2-native-gameshop-page-cache-debug-v34.apk",
+      "bytes": 387331897,
+      "sha256": "1480b838f5e174e4f014679d1e02063f830b149ba3fd74ab1fe23d952eaa13c0"
+    },
+    {
+      "variant": "preview",
+      "source": "76d51415b5ceed667898a720c698b3a062bf7790",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gameshop-hit-v34-20261003-yxhQVz/final-apks/mir2-native-gameshop-page-cache-preview-v34.apk",
+      "bytes": 391205185,
+      "sha256": "a97163a19d08b8bc1d417b3a94724a6880baee6c5ea1a980c6f3249e4ce3cab3"
+    }
+  ],
+  "physicalDeviceAccepted": false
+}

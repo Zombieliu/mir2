@@ -1,0 +1,14 @@
+[
+  {
+    "path": "/Users/henryliu/obelisk/numeron",
+    "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+    "branch": "codex/steam-main",
+    "status": " M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/\n"
+  },
+  {
+    "path": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+    "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+    "branch": "codex/android-player-journey",
+    "status": ""
+  }
+]
