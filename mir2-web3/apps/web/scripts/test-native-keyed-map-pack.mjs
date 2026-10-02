@@ -6,6 +6,7 @@ import { existsSync, readFileSync } from "node:fs";
 import fs from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
+import test from "node:test";
 
 import sharp from "sharp";
 
@@ -666,9 +667,9 @@ function sha256(bytes) {
   );
   assert.deepEqual(manifest.mapFileNames, ["0141"]);
   assert.equal(manifest.entries[0].key, "WemadeMir2/Objects2#1");
-  assert.equal(manifest.entries[0].placementMode, "source-offset");
-  assert.equal(manifest.entries[0].offsetX, 7);
-  assert.equal(manifest.entries[0].offsetY, -44);
+  assert.equal(manifest.entries[0].placementMode, undefined);
+  assert.equal(manifest.entries[0].offsetX, undefined);
+  assert.equal(manifest.entries[0].offsetY, undefined);
   const extracted = await sharp(
     path.join(outputRoot, "pages", path.basename(manifest.entries[0].imageUrl)),
   )
@@ -678,6 +679,120 @@ function sha256(bytes) {
   assert.equal(extracted.info.height, 2);
   assert.deepEqual([...extracted.data.subarray(0, 4)], [25, 120, 240, 255]);
 }
+
+await test("full fallback placement follows Crystal draw rules", async (t) => {
+  const cases = [
+    { name: "ordinary front stays bottom-left", libraryIndex: 3, frameIndex: 1, layer: "front", width: 96, height: 80 },
+    { name: "ordinary middle DrawUp ignores library offset", libraryIndex: 2, frameIndex: 40, layer: "middle", width: 54, height: 76 },
+    { name: "48x32 middle floor ignores library offset", libraryIndex: 2, frameIndex: 41, layer: "middle", width: 48, height: 32 },
+    { name: "ordinary front blend ignores library offset", libraryIndex: 3, frameIndex: 42, layer: "front", additive: true },
+    { name: "Objects27 keeps its nonzero source offset", libraryIndex: 28, frameIndex: 43, layer: "front", x: 3, y: -9, sourceOffset: true },
+    { name: "Objects27 zero offset uses ordinary placement", libraryIndex: 28, frameIndex: 44, layer: "front", x: 0, y: 0 },
+    { name: "Objects27 middle DrawUp ignores source offset", libraryIndex: 28, frameIndex: 48, layer: "middle" },
+    { name: "Objects27 ordinary front blend ignores source offset", libraryIndex: 28, frameIndex: 49, layer: "front", additive: true },
+    { name: "library 14 blend retains offset exception", libraryIndex: 14, frameIndex: 45, layer: "front", additive: true, sourceOffset: true },
+    { name: "library 27 blend retains offset exception", libraryIndex: 27, frameIndex: 46, layer: "front", additive: true, sourceOffset: true },
+    { name: "Shanda front blend retains offset exception", libraryIndex: 120, frameIndex: 47, layer: "front", additive: true, sourceOffset: true },
+    { name: "special blend lower boundary 2723 retains offset", libraryIndex: 2, frameIndex: 2723, layer: "front", additive: true, sourceOffset: true },
+    { name: "special blend upper boundary 2732 retains offset", libraryIndex: 2, frameIndex: 2732, layer: "front", additive: true, sourceOffset: true },
+    { name: "blend frame 2722 ignores offset", libraryIndex: 2, frameIndex: 2722, layer: "front", additive: true },
+    { name: "blend frame 2733 ignores offset", libraryIndex: 2, frameIndex: 2733, layer: "front", additive: true },
+    { name: "non-blended special frame uses ordinary draw", libraryIndex: 3, frameIndex: 2723, layer: "front" },
+    ...Array.from({ length: 8 }, (_, phase) => ({
+      name: `middle DrawUpBlend phase ${phase} ignores library offset`,
+      libraryIndex: 2, frameIndex: 60 + phase, layer: "middle",
+      additive: true, middleBlendPhase: phase,
+    })),
+  ].map((value) => ({ width: 54, height: 76, x: 7, y: -44, ...value }));
+  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "native-keyed-map-"));
+  const packagedMapRoot = path.join(tempRoot, "packaged");
+  const originalMapRoot = path.join(tempRoot, "original-map");
+  const fullPackRoot = path.join(tempRoot, "full");
+  const outputRoot = path.join(tempRoot, "native-keyed-map-placement-output");
+  const starterMapRegionPath = path.join(tempRoot, "region.json");
+  const productionAssetConfigPath = path.join(tempRoot, "config.json");
+  await fs.mkdir(packagedMapRoot, { recursive: true });
+  await fs.mkdir(originalMapRoot, { recursive: true });
+  const cells = cases.filter((value) => value.middleBlendPhase === undefined || value.middleBlendPhase === 0).map((value) => (target, base) => {
+    target.writeInt16LE(-1, base);
+    target.writeInt16LE(-1, base + 6);
+    target.writeInt16LE(-1, base + 10);
+    const layerBase = value.layer === "middle" ? 6 : 10;
+    target.writeInt16LE(value.libraryIndex, base + layerBase);
+    target.writeInt16LE(value.frameIndex + 1, base + layerBase + 2);
+    if (value.additive) target[base + (value.layer === "middle" ? 18 : 16)] = value.layer === "middle" ? 0x88 : 0x81;
+  });
+  const mapBytes = makeType100MapBytes(cells);
+  await fs.writeFile(path.join(packagedMapRoot, "0141.map.gz"), gzipSync(mapBytes));
+  await fs.writeFile(starterMapRegionPath, JSON.stringify({ sprites: {} }));
+  const pageBytes = await sharp({ create: { width: 128, height: 128, channels: 4,
+    background: { r: 25, g: 120, b: 240, alpha: 0.5 } } }).png().toBuffer();
+  const pageHash = sha256(pageBytes);
+  const pageUrl = `/generated/crystal-packs/full/pages/${pageHash.slice(0, 2)}/${pageHash}.png`;
+  await fs.mkdir(path.join(fullPackRoot, "pages", pageHash.slice(0, 2)), { recursive: true });
+  await fs.writeFile(path.join(fullPackRoot, "pages", pageHash.slice(0, 2), `${pageHash}.png`), pageBytes);
+  const libraryGroups = new Map();
+  for (const value of cases) {
+    const libraryKey = mapLibraryKeyForIndex(value.libraryIndex);
+    const frames = libraryGroups.get(libraryKey) ?? [];
+    frames.push({ index: value.frameIndex, status: "packed", x: value.x, y: value.y,
+      image: { imageUrl: pageUrl, pageKey: `sha256:${pageHash}`, x: 1, y: 1, width: value.width, height: value.height } });
+    libraryGroups.set(libraryKey, frames);
+  }
+  await fs.mkdir(path.join(fullPackRoot, "libraries"), { recursive: true });
+  const libraries = [];
+  for (const [libraryKey, frames] of libraryGroups) {
+    const bytes = Buffer.from(JSON.stringify({ libraryKey: `Map/${libraryKey}`, frames }));
+    const manifestSha256 = sha256(bytes);
+    const manifestUrl = `/generated/crystal-packs/full/libraries/${manifestSha256}.json`;
+    await fs.writeFile(path.join(fullPackRoot, "libraries", `${manifestSha256}.json`), bytes);
+    libraries.push({ libraryKey: `Map/${libraryKey}`, manifestUrl, manifestSha256 });
+  }
+  const contentHash = "b".repeat(64);
+  await fs.writeFile(path.join(fullPackRoot, "index.json"), JSON.stringify({ contentHash, libraries }));
+  await fs.writeFile(productionAssetConfigPath, JSON.stringify({ assetBaseUrl: "https://assets.invalid/release",
+    fullCrystalPack: { path: "/generated/crystal-packs/full/index.json", contentHash } }));
+  const result = await buildNativeKeyedMapPack({ mapFileNames: ["0141"], packagedMapRoot, originalMapRoot,
+    fullPackRoot, outputRoot, starterMapRegionPath, productionAssetConfigPath,
+    fullPackFallbackMapFileNames: ["0141"], maxMissingSources: 0 });
+  assert.equal(result.fullPackEntryCount, cases.length);
+  assert.equal(result.referenceCount, cases.length);
+  assert.equal(result.additiveEntryCount, cases.filter((value) => value.additive).length);
+  assert.equal(result.noDrawReferenceCount, 0);
+  assert.equal(result.missingSourceCount, 0);
+  const manifest = JSON.parse(await fs.readFile(path.join(outputRoot, "manifest.json"), "utf8"));
+  for (const value of cases) {
+    await t.test(value.name, async () => {
+      const key = `${mapLibraryKeyForIndex(value.libraryIndex)}#${value.frameIndex}`;
+      const entry = manifest.entries.find((candidate) => candidate.key === key);
+      assert.ok(entry, key);
+      assert.equal(entry.width, value.width);
+      assert.equal(entry.height, value.height);
+      if (value.sourceOffset) {
+        assert.equal(entry.placementMode, "source-offset");
+        assert.equal(entry.offsetX, value.x);
+        assert.equal(entry.offsetY, value.y);
+      } else {
+        assert.equal(entry.placementMode, undefined);
+        assert.equal(entry.offsetX, undefined);
+        assert.equal(entry.offsetY, undefined);
+        // Crystal GameScene.DrawObjects + MLibrary.DrawUp/DrawUpBlend:
+        // drawX=470, drawY=384; no .Lib X/Y and no width centering.
+        // 48x32 static floor is DrawFloor(drawX, cellTop=352).
+        // Consume the generated metadata using the native standalone contract.
+        const nativeLeft = 470 + (entry.placementMode === "source-offset" ? entry.offsetX : 0);
+        const nativeTop = 352 + 32 - entry.height + (entry.placementMode === "source-offset" ? entry.offsetY : 0);
+        const crystalTop = value.width === 48 && value.height === 32 && !value.additive ? 352 : 384 - value.height;
+        assert.deepEqual([nativeLeft, nativeTop], [470, crystalTop]);
+      }
+      const extracted = await sharp(path.join(outputRoot, "pages", path.basename(entry.imageUrl)))
+        .raw().toBuffer({ resolveWithObject: true });
+      assert.equal(extracted.info.width, value.width);
+      assert.equal(extracted.info.height, value.height);
+      assert.deepEqual([...extracted.data.subarray(0, 4)], [25, 120, 240, 128]);
+    });
+  }
+});
 
 {
   const tempRoot = await fs.mkdtemp(

@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-02 native full-pack fallback placement: ordinary images now retain
+> the existing bottom-left default instead of inheriting arbitrary `.Lib` X/Y.
+> Crystal's explicit front offset exceptions and image/blend/closure guards
+> remain intact. Generated-manifest checks pass 25 and adjacent routing 1.
+> Frozen private R13 artifacts and the game binary remain intact; fresh package
+> and human visual acceptance remain open. Paused goals stay paused.
+> [Source rules and bounded evidence](NATIVE-MAP-FALLBACK-PLACEMENT-20261002.md).
+
 > 2026-10-02 future native package default: retain the 15 journey maps and add
 > ten audited Bichon merchant interiors. Profile checks preserve explicit
 > custom lists and bind the reviewed 25-map identity. This is packaging input

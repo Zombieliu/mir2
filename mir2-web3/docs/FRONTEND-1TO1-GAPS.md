@@ -1,5 +1,13 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 native fallback placement source repair: ordinary full-pack
+> images omit source offsets and use the native bottom-left default. Tests
+> preserve explicit Objects27/front blend exceptions and source RGBA; generated
+> placement checks pass 25, adjacent routing 1. Frozen R13 remains private and
+> unchanged. Fresh resources, special renderer baselines and human visual
+> acceptance remain open; paused goals retain their status.
+> [Original rules and test scope](NATIVE-MAP-FALLBACK-PLACEMENT-20261002.md).
+
 > 2026-10-02 native merchant terrain coverage: future Candidate packaging
 > defaults retain the 15 journey maps and add ten Bichon town/BorderVillage
 > merchant interiors. Frozen R12 WeaponStore0103 has 226 drawable source keys
