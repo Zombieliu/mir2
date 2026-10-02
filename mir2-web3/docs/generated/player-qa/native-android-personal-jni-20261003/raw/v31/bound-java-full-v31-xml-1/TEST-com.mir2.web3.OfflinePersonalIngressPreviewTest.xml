@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mir2.web3.OfflinePersonalIngressPreviewTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-02T15:26:54" hostname="HenrydeMacBook-Pro-2.local" time="0.029">
+  <properties/>
+  <testcase name="inputsAreBoundedDataNotAuthOrGameplayCommands" classname="com.mir2.web3.OfflinePersonalIngressPreviewTest" time="0.016"/>
+  <testcase name="full160SlotsRemainLockedUnlessExplicitOfflineResultFollows" classname="com.mir2.web3.OfflinePersonalIngressPreviewTest" time="0.008"/>
+  <testcase name="catalogueAndStockArriveBeforeExactOwnerWorld" classname="com.mir2.web3.OfflinePersonalIngressPreviewTest" time="0.005"/>
+  <testcase name="normalBuildAndUnrecognizedSceneCannotGeneratePreviewInputs" classname="com.mir2.web3.OfflinePersonalIngressPreviewTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

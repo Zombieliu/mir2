@@ -1,0 +1,88 @@
+package com.mir2.web3;
+
+import static org.junit.Assert.*;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Set;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.junit.Test;
+
+/** Offline inputs only; no native library, real Gateway or login is tested here. */
+public class OfflinePersonalIngressPreviewTest {
+    @Test public void normalBuildAndUnrecognizedSceneCannotGeneratePreviewInputs() {
+        for (String scene : new String[]{"gameshop-jni", "storage-jni", "storage-locked-jni", "hud", null}) {
+            assertTrue(OfflinePersonalIngressPreview.events(false, scene).isEmpty());
+        }
+        for (String scene : new String[]{"hud", "gameshop", "storage", "qa.openStorage", null}) {
+            assertTrue(OfflinePersonalIngressPreview.events(true, scene).isEmpty());
+        }
+    }
+
+    @Test public void catalogueAndStockArriveBeforeExactOwnerWorld() {
+        List<String> events = OfflinePersonalIngressPreview.events(true, "gameshop-jni");
+        assertEquals(111, events.size());
+        assertEquals("STARTING", new JSONObject(events.get(0)).getString("phase"));
+        for (int index = 0; index < 105; index++) {
+            JSONObject packet = packet(events.get(index + 1));
+            assertEquals("GameShopInfo", packet.getString("packet"));
+            JSONObject item = packet.getJSONObject("payload").getJSONObject("item");
+            assertEquals(2000 + index, item.getInt("gIndex"));
+            assertTrue(item.getString("itemName").startsWith("JNI received "));
+        }
+        JSONObject stock = packet(events.get(106));
+        assertEquals("GameShopStock", stock.getString("packet"));
+        assertEquals(2104, stock.getJSONObject("payload").getInt("gIndex"));
+        assertEquals(3, stock.getJSONObject("payload").getInt("stockLevel"));
+        assertEquals("ResizeStorage", packet(events.get(107)).getString("packet"));
+        JSONObject world = new JSONObject(events.get(108));
+        assertEquals("IN_GAME", world.getString("phase"));
+        JSONObject snapshot = new JSONObject(world.getString("worldSnapshot"));
+        assertEquals(42, snapshot.getInt("playerObjectId"));
+        assertEquals("OFFLINE JAVA JNI", snapshot.getJSONArray("entities").getJSONObject(0).getString("name"));
+        assertEquals("0", snapshot.getString("mapFileName"));
+        assertTrue(snapshot.getBoolean("requireStoragePassword"));
+    }
+
+    @Test public void full160SlotsRemainLockedUnlessExplicitOfflineResultFollows() {
+        for (String scene : new String[]{"storage-jni", "storage-locked-jni"}) {
+            List<String> events = OfflinePersonalIngressPreview.events(true, scene);
+            JSONObject items = packet(events.get(109));
+            assertEquals("UserStorage", items.getString("packet"));
+            JSONArray slots = items.getJSONObject("payload").getJSONArray("storage");
+            assertEquals(160, slots.length());
+            for (int slot = 0; slot < 160; slot++) {
+                assertEquals(90000 + slot, slots.getJSONObject(slot).getLong("uniqueId"));
+                assertEquals(slot % 5 + 1, slots.getJSONObject(slot).getInt("count"));
+            }
+            if ("storage-locked-jni".equals(scene)) assertEquals(110, events.size());
+            else assertEquals("StorageUnlockResult", packet(events.get(110)).getString("packet"));
+        }
+    }
+
+    @Test public void inputsAreBoundedDataNotAuthOrGameplayCommands() {
+        Set<String> allowed = Set.of("GameShopInfo", "GameShopStock", "ResizeStorage", "UserStorage", "StorageUnlockResult");
+        for (String event : OfflinePersonalIngressPreview.events(true, "storage-jni")) {
+            JSONObject outer = new JSONObject(event);
+            assertFalse(outer.has("account_id"));
+            assertFalse(outer.has("accountId"));
+            assertFalse(outer.has("password"));
+            if (outer.has("envelope")) {
+                String inner = outer.getString("envelope");
+                assertTrue(inner.getBytes(StandardCharsets.UTF_8).length <= 16 * 1024);
+                assertTrue(allowed.contains(new JSONObject(inner).getString("packet")));
+            } else if (outer.has("worldSnapshot")) {
+                assertTrue(outer.getString("worldSnapshot").getBytes(StandardCharsets.UTF_8).length <= 1024 * 1024);
+            }
+            assertTrue(event.getBytes(StandardCharsets.UTF_8).length <= 65536 + 2 * outer.optString("worldSnapshot").length());
+        }
+        try {
+            OfflinePersonalIngressPreview.events(true, "storage-jni").clear();
+            fail("Plan must be immutable");
+        } catch (UnsupportedOperationException expected) {}
+    }
+
+    private static JSONObject packet(String event) {
+        return new JSONObject(new JSONObject(event).getString("envelope"));
+    }
+}

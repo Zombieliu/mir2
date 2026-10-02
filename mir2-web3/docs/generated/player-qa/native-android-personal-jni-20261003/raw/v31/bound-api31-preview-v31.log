@@ -1,0 +1,7 @@
+    Building arm64-v8a (aarch64-linux-android)
+error: a value is required for '--features <FEATURES>' but none was supplied
+
+For more information, try '--help'.
+note: If the build failed due to a missing target, you can run this command:
+note: 
+note:     rustup target install aarch64-linux-android

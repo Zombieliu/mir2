@@ -1,0 +1,122 @@
+diff --git a/mir2-web3/apps/game-client/platform-android/android/app/build.gradle b/mir2-web3/apps/game-client/platform-android/android/app/build.gradle
+index be7ea008b..7bd7b59ce 100644
+--- a/mir2-web3/apps/game-client/platform-android/android/app/build.gradle
++++ b/mir2-web3/apps/game-client/platform-android/android/app/build.gradle
+@@ -473,8 +473,8 @@ android {
+         applicationId 'com.mir2.web3'
+         minSdk 31
+         targetSdk 35
+-        versionCode 32
+-        versionName '0.1.29-personal-jni-observer'
++        versionCode 33
++        versionName '0.1.30-personal-jni-scenes'
+         buildConfigField 'String', 'MIR2_GATEWAY_URL', groovy.json.JsonOutput.toJson(System.getenv('MIR2_GATEWAY_WS_URL') ?: '')
+ 
+         ndk {
+diff --git a/mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java b/mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java
+index 4cc64a52a..a23e202da 100644
+--- a/mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java
++++ b/mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java
+@@ -30,8 +30,6 @@ final class OfflinePersonalIngressPreview {
+                     "canBuyGold", true, "canBuyCredit", true))));
+         }
+         events.add(packet("GameShopStock", GatewaySession.object("gIndex", 2104, "stockLevel", 3)));
+-        events.add(packet("ResizeStorage", GatewaySession.object("size", 160,
+-                "hasExpandedStorage", true, "expiryTimeBinaryDatetime", 635000000000000000L)));
+         JSONObject snapshot = GatewaySession.object("playerObjectId", 42, "mapFileName", "0",
+                 "mapTitle", "OFFLINE JNI Bichon", "entities", new JSONArray().put(
+                 GatewaySession.object("kind", "selfPlayer", "objectId", 42, "name", "OFFLINE JAVA JNI",
+@@ -55,6 +53,10 @@ final class OfflinePersonalIngressPreview {
+                     "icon", 100, "count", slot % 5 + 1));
+         }
+         events.add(packet("UserStorage", GatewaySession.object("storage", storage)));
++        // A separate newer result, after the complete owner/base and item list.
++        // Do not mix the scalar-result gate with initial snapshot replacement.
++        events.add(packet("ResizeStorage", GatewaySession.object("size", 160,
++                "hasExpandedStorage", true, "expiryTimeBinaryDatetime", 635000000000000000L)));
+         if (!"storage-locked-jni".equals(scene)) {
+             events.add(packet("StorageUnlockResult", GatewaySession.object("result", 0, "hasPassword", true)));
+         }
+diff --git a/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java b/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java
+index 6d32d3e06..434dc409f 100644
+--- a/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java
++++ b/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java
+@@ -34,8 +34,7 @@ public class OfflinePersonalIngressPreviewTest {
+         assertEquals("GameShopStock", stock.getString("packet"));
+         assertEquals(2104, stock.getJSONObject("payload").getInt("gIndex"));
+         assertEquals(3, stock.getJSONObject("payload").getInt("stockLevel"));
+-        assertEquals("ResizeStorage", packet(events.get(107)).getString("packet"));
+-        JSONObject world = new JSONObject(events.get(108));
++        JSONObject world = new JSONObject(events.get(107));
+         assertEquals("IN_GAME", world.getString("phase"));
+         JSONObject snapshot = new JSONObject(world.getString("worldSnapshot"));
+         assertEquals(42, snapshot.getInt("playerObjectId"));
+@@ -47,10 +46,11 @@ public class OfflinePersonalIngressPreviewTest {
+     @Test public void full160SlotsRemainLockedUnlessExplicitOfflineResultFollows() throws Exception {
+         for (String scene : new String[]{"storage-jni", "storage-locked-jni"}) {
+             List<String> events = OfflinePersonalIngressPreview.events(true, scene);
+-            JSONObject items = packet(events.get(109));
++            JSONObject items = packet(events.get(108));
+             assertEquals("UserStorage", items.getString("packet"));
+             JSONArray slots = items.getJSONObject("payload").getJSONArray("storage");
+             assertEquals(160, slots.length());
++            assertEquals("ResizeStorage", packet(events.get(109)).getString("packet"));
+             for (int slot = 0; slot < 160; slot++) {
+                 assertEquals(90000 + slot, slots.getJSONObject(slot).getLong("uniqueId"));
+                 assertEquals(slot % 5 + 1, slots.getJSONObject(slot).getInt("count"));
+@@ -85,4 +85,19 @@ public class OfflinePersonalIngressPreviewTest {
+     private static JSONObject packet(String event) throws Exception {
+         return new JSONObject(new JSONObject(event).getString("envelope"));
+     }
++
++    @Test public void independentResizeTestFollowsOwnerSnapshotAndFullItems() throws Exception {
++        List<String> events = OfflinePersonalIngressPreview.events(true, "storage-jni");
++        int world = -1, items = -1, resize = -1;
++        for (int index = 0; index < events.size(); index++) {
++            JSONObject event = new JSONObject(events.get(index));
++            if (event.has("worldSnapshot")) world = index;
++            else if (event.has("envelope")) {
++                String name = packet(events.get(index)).getString("packet");
++                if ("UserStorage".equals(name)) items = index;
++                if ("ResizeStorage".equals(name)) resize = index;
++            }
++        }
++        assertTrue("Resize must be an independent post-bootstrap event", world >= 0 && items > world && resize > items);
++    }
+ }
+diff --git a/mir2-web3/apps/game-client/platform-android/src/ui_preview.rs b/mir2-web3/apps/game-client/platform-android/src/ui_preview.rs
+index 0d3173c37..a229b93dd 100644
+--- a/mir2-web3/apps/game-client/platform-android/src/ui_preview.rs
++++ b/mir2-web3/apps/game-client/platform-android/src/ui_preview.rs
+@@ -741,7 +741,9 @@ fn apply(world: &mut World) {
+         };
+         if scene != "empty-roster" {
+             shell.characters = vec![
+-                CharacterSummary::new(7, "UI Warrior", 22, "Warrior", "Male"),
++                CharacterSummary::new(7,
++                    if is_personal_jni_preview(&scene) { "OFFLINE JAVA JNI" } else { "UI Warrior" },
++                    22, "Warrior", "Male"),
+                 CharacterSummary::new(12, "UI Wizard", 18, "Wizard", "Female"),
+                 CharacterSummary::new(21, "UI Taoist", 15, "Taoist", "Male"),
+             ];
+@@ -1833,6 +1835,20 @@ mod tests {
+         }
+     }
+ 
++    #[test]
++    fn java_jni_personal_scene_identity_matches_the_declared_java_sender() {
++        for scene in ["gameshop-jni", "storage-jni", "storage-locked-jni"] {
++            let mut world = World::new();
++            world.insert_resource(PreviewRequest {scene:Some(scene.into()),remaining:0});
++            world.init_resource::<OfflineNpcPreviewReceipt>();
++            apply(&mut world);
++            let shell = world.resource::<NativeShellModel>();
++            assert_eq!(shell.active_character.as_ref().unwrap().name, "OFFLINE JAVA JNI");
++            assert_eq!(shell.characters[0].name, "OFFLINE JAVA JNI");
++            assert_eq!(shell.selected_character_index, Some(7));
++        }
++    }
++
+     #[test]
+     fn java_jni_personal_scenes_never_replace_received_models_with_manual_specimens() {
+         use mir2_client_bevy::{game_shop::{GameShopEntry, GameShopModel}, storage::StorageModel};

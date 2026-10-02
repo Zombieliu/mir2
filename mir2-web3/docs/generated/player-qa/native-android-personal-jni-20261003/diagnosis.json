@@ -1,0 +1,215 @@
+{
+  "source": "0bfa1632c375a11dd54d6c70783edcff652af59e",
+  "goalStatus": "Active",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "observedRemoteWindows": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4",
+  "previousPublishedAndroid": "ecba88bd63e70fa9ec90b938a9779344cabca395",
+  "fullNI12Status": "PARTIAL",
+  "fullNI13Status": "PARTIAL",
+  "versions": [
+    {
+      "version": 31,
+      "source": "0f9c49935a983ba72ac43b845b199abeaf2b5ea7",
+      "parent": "ecba88bd63e70fa9ec90b938a9779344cabca395",
+      "sourceScope": [
+        "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+        "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+        "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+        "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+        "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs"
+      ],
+      "inputs": 47,
+      "gates": [
+        "bound-rust-normal-v31",
+        "bound-rust-preview-v31",
+        "bound-shared-native-player-v31",
+        "bound-runtime-v31",
+        "bound-api31-normal-v31-corrected",
+        "bound-api31-preview-v31-corrected",
+        "bound-java-full-v31"
+      ],
+      "rustPassed": {
+        "normal": 359,
+        "preview": 386,
+        "shared": 1260,
+        "runtime": 292
+      },
+      "existingIgnored": {
+        "shared": 10,
+        "runtime": 1
+      },
+      "javaPassedEach": 51,
+      "javaSuitesEach": 6
+    },
+    {
+      "version": 32,
+      "source": "47e8ea47f0975494478be88eb49be154b6199cbe",
+      "parent": "0f9c49935a983ba72ac43b845b199abeaf2b5ea7",
+      "sourceScope": [
+        "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+        "mir2-web3/apps/game-client/platform-android/android/app/build.gradle"
+      ],
+      "inputs": 47,
+      "gates": [
+        "bound-rust-normal-v32",
+        "bound-rust-preview-v32",
+        "bound-shared-native-player-v32",
+        "bound-runtime-v32",
+        "bound-api31-normal-v32-corrected",
+        "bound-api31-preview-v32-corrected",
+        "bound-java-full-v32"
+      ],
+      "rustPassed": {
+        "normal": 359,
+        "preview": 386,
+        "shared": 1260,
+        "runtime": 292
+      },
+      "existingIgnored": {
+        "shared": 10,
+        "runtime": 1
+      },
+      "javaPassedEach": 51,
+      "javaSuitesEach": 6
+    },
+    {
+      "version": 33,
+      "source": "0bfa1632c375a11dd54d6c70783edcff652af59e",
+      "parent": "47e8ea47f0975494478be88eb49be154b6199cbe",
+      "sourceScope": [
+        "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+        "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+        "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+        "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java"
+      ],
+      "inputs": 47,
+      "gates": [
+        "bound-rust-normal-v33",
+        "bound-rust-preview-v33",
+        "bound-shared-native-player-v33",
+        "bound-runtime-v33",
+        "bound-api31-normal-v33-corrected",
+        "bound-api31-preview-v33-corrected",
+        "bound-java-full-v33"
+      ],
+      "rustPassed": {
+        "normal": 359,
+        "preview": 387,
+        "shared": 1260,
+        "runtime": 292
+      },
+      "existingIgnored": {
+        "shared": 10,
+        "runtime": 1
+      },
+      "javaPassedEach": 52,
+      "javaSuitesEach": 6
+    }
+  ],
+  "newNativeApksBuilt": true,
+  "actualOfflineJavaJniVerified": true,
+  "visibleOfflineShopAndStorageVerified": true,
+  "normalIntentIsolationVerified": true,
+  "wholePhoneUiAccepted": false,
+  "realAuthenticationAccepted": false,
+  "realNetworkAccepted": false,
+  "purchaseAccepted": false,
+  "storageTransferAccepted": false,
+  "physicalDeviceAccepted": false,
+  "rendererFixAccepted": false,
+  "zeroRendererErrorAccepted": false,
+  "fullResourcePackAccepted": false,
+  "wholeGoalComplete": false,
+  "originalsGitStatusPreserved": true,
+  "untrackedRecursivelyHashed": false,
+  "appDataContentHashed": false,
+  "scope": [
+    "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+    "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs"
+  ],
+  "observations": [
+    {
+      "scene": "gameshop-jni",
+      "pid": "22935",
+      "log": "raw/v33/ui-gameshop-jni/24-home-pid.log",
+      "javaStarts": 1,
+      "javaSent": 1,
+      "sharedConsumer": true,
+      "gl506": 0,
+      "uninitializedColor": 0,
+      "fatalOrPanic": 0
+    },
+    {
+      "scene": "storage-jni",
+      "pid": "23245",
+      "log": "raw/v33/ui-storage-jni/16-home-pid.log",
+      "javaStarts": 1,
+      "javaSent": 1,
+      "sharedConsumer": true,
+      "gl506": 20,
+      "uninitializedColor": 20,
+      "fatalOrPanic": 0
+    },
+    {
+      "scene": "storage-locked-jni",
+      "pid": "23386",
+      "log": "raw/v33/ui-storage-locked-jni/final-after-back-pid.log",
+      "javaStarts": 1,
+      "javaSent": 1,
+      "sharedConsumer": true,
+      "gl506": 20,
+      "uninitializedColor": 20,
+      "fatalOrPanic": 0
+    },
+    {
+      "scene": "normal-intent-isolation",
+      "pid": "23573",
+      "log": "raw/v33/ui-normal-intent-isolation/0-cold-pid.log",
+      "javaStarts": 0,
+      "javaSent": 0,
+      "sharedConsumer": false,
+      "gl506": 12,
+      "uninitializedColor": 12,
+      "fatalOrPanic": 0
+    }
+  ],
+  "gl506UniquePidTotal": 52,
+  "ui": {
+    "gameshopNextTapPassed": false,
+    "gameshopNextLongPressPassed": false,
+    "gameshopPage1RetainedAfterResume": true,
+    "storageSecondTabPassed": true,
+    "storageSecondTabRetainedAfterResume": true,
+    "storageInventoryOverlapResolved": false,
+    "complete48dpVerified": false,
+    "lockedScreenshotAccepted": false,
+    "lockedRawEmptyCaptures": 3,
+    "lockedPrivacySecureObserved": true,
+    "lockedModelUnlocked": false
+  },
+  "failures": {
+    "v31PreviewCompiledRed": {
+      "passed": 0,
+      "failed": 2
+    },
+    "v31JavaPreparationCompilationErrors": 39,
+    "v31IntroducedResourceRegression": {
+      "passed": 385,
+      "failed": 1
+    },
+    "v31NativeCheckArgumentPreparationFailure": true,
+    "v31v32ActualOwnerRenderRejected": true,
+    "v33CompiledIdentityRed": {
+      "passed": 0,
+      "failed": 1
+    },
+    "v33CompiledResizeRed": {
+      "failed": 1
+    },
+    "v33EmptyProtectedCaptures": 3,
+    "originalPatchPreparationErrorSavedAsRaw": false
+  }
+}

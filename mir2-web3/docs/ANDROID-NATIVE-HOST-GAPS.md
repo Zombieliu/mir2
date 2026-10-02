@@ -1,5 +1,22 @@
 # Android native host ingress audit
 
+> 2026-10-03 最新实际 v33：干净源码`0bfa1632c375a11dd54d6c70783edcff652af59e`。
+> 三提交/五个 Android 文件接通诊断 Java→实际 JNI→宿主→共享商城/仓库：
+> 105目录/末库存3、160物品/末159槽/扩展/锁定状态得到实际共享回执；不手填模型。
+> v31/v32离线角色名不一致触发正常 render身份校验的失败保留；仅修样本身份与独立
+> 后置 ResizeStorage 事件，不改正式认证/共享规则/Windows/渲染。最终359/387、
+> shared1260+10原ignored、runtime292+1原ignored、fresh Java52+52/API31双检查通过。
+> 每版47输入/七门/双原生APK/选定6647PNG+三metadata/保留数据安装SHA绑定。
+> v33八张有效原图已查看；仓库实点第二页/同PID恢复保留通过，商城翻页点按/长按FAIL，
+> 仓库遮背包与登录/商城手机目标FAIL。锁定模型通过，但密码FLAG_SECURE使三次
+> 原截屏为空，未解除保护、不称可见IME通过。四独立PID共52 GL506，零错误门FAIL。
+> 正式包传预览参数仍是未配置测试服的登录页；仅离线JNI通过，不算真实HTTPS/WSS/
+> 交易/存取/认证/Zone/存档/完整UI/资源/音频/更新/NI-14–20/真机。NI-12/13仍PARTIAL，
+> 完整goal Active/冻结分母3d735745f不变；远端Windows仍6ae080711、原工作区Git状态未变。
+> [三版精确源码、实际JNI/原图、失败与剩余验收](generated/player-qa/native-android-personal-jni-20261003/README.md)。
+> 下一叶定位商城箭头命中并做商城/仓库手机呈现，保持共享控制器；继续完整矩阵。
+> 下文NI-13/v31之前仅为各自历史记录，不覆盖当前状态。
+
 > 2026-10-02 最新源码叶 NI-13：`81eb08cdca3390262e1eff3756afd4d09a16d005`。
 > 六个源文件接通共享仓库只读投影、Android 角色专属有界 FIFO，以及 Java 公共四包
 > 白名单：UserStorage/StorageUnlockResult/StoragePasswordResult/ResizeStorage。

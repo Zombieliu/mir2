@@ -1,0 +1,388 @@
+--------- beginning of main
+10-03 00:35:11.481 23245 23245 I .web3.uiprevie: Late-enabling -Xcheck:jni
+10-03 00:35:11.516 23245 23245 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10146; state: ENABLED
+10-03 00:35:11.550 23245 23245 V GraphicsEnvironment: ANGLE Developer option for 'com.mir2.web3.uipreview' set to: 'default'
+10-03 00:35:11.550 23245 23245 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-03 00:35:11.552 23245 23245 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-03 00:35:11.552 23245 23245 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-03 00:35:11.580 23245 23265 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+10-03 00:35:11.580 23245 23265 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+10-03 00:35:11.581 23245 23265 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+10-03 00:35:11.602 23245 23245 D AppCompatDelegate: Checking for metadata for AppLocalesMetadataHolderService : Service not found
+10-03 00:35:11.609 23245 23245 D gti.InputConnection: InputConnection created
+10-03 00:35:11.611 23245 23245 D gti.InputConnection: setEditorInfo
+10-03 00:35:11.614 23245 23245 W .web3.uiprevie: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-03 00:35:11.615 23245 23245 I GameActivity: Looking for library libmir2_platform_android.so
+10-03 00:35:11.615 23245 23245 I GameActivity: Found library libmir2_platform_android.so. Loading...
+10-03 00:35:11.617 23245 23245 D GameActivity: GameActivity_register
+10-03 00:35:11.617 23245 23245 V GameActivity: Registering com/google/androidgamesdk/GameActivity's 24 native methods...
+10-03 00:35:11.617 23245 23245 D GameActivity: SDK version: 31
+10-03 00:35:11.617 23245 23245 I android-activity: Creating: Activity = 0x1696, saved state size = 0
+10-03 00:35:11.620 23245 23245 V threaded_app: Creating: 0xb40000753583ecb0
+10-03 00:35:11.620 23245 23245 V threaded_app: Callbacks set: 0xb40000753583ed00
+10-03 00:35:11.620 23245 23245 V threaded_app: Launching android_app_entry in a thread
+10-03 00:35:11.620 23245 23267 V threaded_app: android_app_entry called
+10-03 00:35:11.620 23245 23267 V threaded_app: android_app = 0xb400007515843290
+10-03 00:35:11.620 23245 23267 V threaded_app: config = 0xb400007485850970
+10-03 00:35:11.620 23245 23267 V threaded_app: activity = 0xb40000753583ecb0
+10-03 00:35:11.620 23245 23267 V threaded_app: assetmanager = 0xb40000753583d3b0
+10-03 00:35:11.620 23245 23267 V threaded_app: Config: mcc=310 mnc=260 lang=en cnt=US orien=2 touch=3 dens=440 keys=2 nav=2 keysHid=1 navHid=0 sdk=31 size=2 long=2 modetype=1 modenight=1
+10-03 00:35:11.633 23245 23267 D HostConnection: createUnique: call
+10-03 00:35:11.633 23245 23267 D HostConnection: HostConnection::get() New Host Connection established 0xb4000074d583c6d0, tid 23267
+10-03 00:35:11.635 23245 23267 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-03 00:35:11.636 23245 23267 D EGL_emulation: eglCreateContext: 0xb4000074d583c910: maj 3 min 0 rcv 3
+10-03 00:35:11.643 23245 23267 D EGL_emulation: eglMakeCurrent: 0xb4000074d583c910: ver 3 0 (tinfo 0x76fbc37080) (first time)
+10-03 00:35:11.661 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.661670Z[0m [32m INFO[0m [2mbevy_render::renderer[0m[2m:[0m AdapterInfo { name: "Android Emulator OpenGL ES Translator (Apple M1 Max)", vendor: 4203, device: 0, device_type: IntegratedGpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.0 (4.1 Metal - 89.4)", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+10-03 00:35:11.661 23245 23267 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyAdapterInfo { name: "Android Emulator OpenGL ES Translator (Apple M1 Max)", vendor: 4203, device: 0, device_type: IntegratedGpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.0 (4.1 Metal - 89.4)", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+10-03 00:35:11.689 23245 23245 V GameActivity: onStart_native
+10-03 00:35:11.689 23245 23245 V threaded_app: Start: 0xb40000753583ecb0
+10-03 00:35:11.727 23245 23267 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevySparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+10-03 00:35:11.727 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-OrderIndependentTransparencyPlugin not loaded. GPU lacks support: DownlevelFlags::FRAGMENT_WRITABLE_STORAGE.
+10-03 00:35:11.727 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-BackgroundMotionVectorsPlugin not loaded. GPU lacks support for required downlevel capability flags: DownlevelFlags(INDEPENDENT_BLEND).
+10-03 00:35:11.727 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.727352Z[0m [32m INFO[0m [2mbevy_render::render_resource::sparse_buffer_vec[0m[2m:[0m Sparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+10-03 00:35:11.727 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.727543Z[0m [33m WARN[0m [2mbevy_core_pipeline::oit::resolve[0m[2m:[0m OrderIndependentTransparencyPlugin not loaded. GPU lacks support: DownlevelFlags::FRAGMENT_WRITABLE_STORAGE.
+10-03 00:35:11.727 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.727828Z[0m [33m WARN[0m [2mbevy_core_pipeline::prepass::background_motion_vectors[0m[2m:[0m BackgroundMotionVectorsPlugin not loaded. GPU lacks support for required downlevel capability flags: DownlevelFlags(INDEPENDENT_BLEND).
+10-03 00:35:11.780 23245 23267 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyGPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+10-03 00:35:11.781 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.780948Z[0m [32m INFO[0m [2mbevy_render::batching::gpu_preprocessing[0m[2m:[0m GPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+10-03 00:35:11.796 23245 23267 V threaded_app: activityState=11
+10-03 00:35:11.797 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.797046Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+10-03 00:35:11.797 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+10-03 00:35:11.798 23245 23245 V threaded_app: Resume: 0xb40000753583ecb0
+10-03 00:35:11.798 23245 23267 V threaded_app: activityState=12
+10-03 00:35:11.806 23245 23245 V GameActivity: onImeInsetsChanged from Text Listener
+10-03 00:35:11.806 23245 23245 V threaded_app: WindowInsetsChanged: 0xb40000753583ecb0
+10-03 00:35:11.806 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-03 00:35:11.806 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.806596Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-03 00:35:11.812 23245 23245 V GameActivity: onImeInsetsChanged from Text Listener
+10-03 00:35:11.813 23245 23245 V threaded_app: WindowInsetsChanged: 0xb40000753583ecb0
+10-03 00:35:11.813 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-03 00:35:11.813 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.813227Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-03 00:35:11.813 23245 23263 D HostConnection: createUnique: call
+10-03 00:35:11.814 23245 23263 D HostConnection: HostConnection::get() New Host Connection established 0xb4000074d5852450, tid 23263
+10-03 00:35:11.814 23245 23245 V threaded_app: ContentRectChanged: 0xb40000753583ecb0 -- (0 0) (2340 1080)
+10-03 00:35:11.815 23245 23263 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-03 00:35:11.815 23245 23263 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+10-03 00:35:11.816 23245 23263 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-03 00:35:11.816 23245 23263 D EGL_emulation: eglCreateContext: 0xb4000074d5853d10: maj 3 min 0 rcv 3
+10-03 00:35:11.817 23245 23245 V GameActivity: onSurfaceCreated_native
+10-03 00:35:11.817 23245 23245 V threaded_app: NativeWindowCreated: 0xb40000753583ecb0 -- 0xb4000075c59ee140
+10-03 00:35:11.817 23245 23245 V threaded_app: android_app_set_window called
+10-03 00:35:11.819 23245 23263 D EGL_emulation: eglMakeCurrent: 0xb4000074d5853d10: ver 3 0 (tinfo 0x76fbc37100) (first time)
+10-03 00:35:11.821 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: find a way to notify application of content rect change
+10-03 00:35:11.821 23245 23267 V threaded_app: APP_CMD_INIT_WINDOW
+10-03 00:35:11.821 23245 23267 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_winit-0.19.0/sCreating new window mir2-web3 (android) (105v0)
+10-03 00:35:11.821 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.821536Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: find a way to notify application of content rect change
+10-03 00:35:11.821 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.821837Z[0m [32m INFO[0m [2mbevy_winit::system[0m[2m:[0m Creating new window mir2-web3 (android) (105v0)
+10-03 00:35:11.821 23245 23245 V threaded_app: NativeWindowResized: 0xb40000753583ecb0 -- 0xb4000075c59ee140 ( 2340 x 1080 )
+10-03 00:35:11.821 23245 23245 V threaded_app: NativeWindowRedrawNeeded: 0xb40000753583ecb0 -- 0xb4000075c59ee140
+10-03 00:35:11.824 23245 23263 I Gralloc4: mapper 4.x is not supported
+10-03 00:35:11.824 23245 23263 D HostConnection: createUnique: call
+10-03 00:35:11.824 23245 23263 D HostConnection: HostConnection::get() New Host Connection established 0xb4000074d58543d0, tid 23263
+10-03 00:35:11.824 23245 23263 D goldfish-address-space: allocate: Ask for block of size 0x100
+10-03 00:35:11.824 23245 23263 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1efff8000 size 0x8000
+10-03 00:35:11.825 23245 23263 W Gralloc4: allocator 4.x is not supported
+10-03 00:35:11.828 23245 23263 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-03 00:35:11.847 23245 23245 V threaded_app: WindowFocusChanged: 0xb40000753583ecb0 -- 1
+10-03 00:35:11.865 23245 23245 V GameActivity: onImeInsetsChanged from Text Listener
+10-03 00:35:11.865 23245 23245 V threaded_app: WindowInsetsChanged: 0xb40000753583ecb0
+10-03 00:35:11.927 23245 23267 I event src/ui_preview.rs:796: ANDROID_UI_PREVIEW_READY scene=storage-jni waiting_for_offline_java_jni
+10-03 00:35:11.927 23245 23271 I event src/ui_preview.rs:140: ANDROID_PERSONAL_JNI_HOST_OBSERVATION_NOT_LIVEscene = "storage-jni"; phase = ""; screen = InGame; notice = None; data_receipt = None; catalogue = 0; storage_items = 0; storage_size = 80; unlocked = false;
+10-03 00:35:11.927 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.926992Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_UI_PREVIEW_READY scene=storage-jni waiting_for_offline_java_jni
+10-03 00:35:11.927 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.927280Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_PERSONAL_JNI_HOST_OBSERVATION_NOT_LIVE [3mscene[0m[2m=[0m"storage-jni" [3mphase[0m[2m=[0m"" [3mscreen[0m[2m=[0mInGame [3mnotice[0m[2m=[0mNone [3mdata_receipt[0m[2m=[0mNone [3mcatalogue[0m[2m=[0m0 [3mstorage_items[0m[2m=[0m0 [3mstorage_size[0m[2m=[0m80 [3munlocked[0m[2m=[0mfalse
+10-03 00:35:11.950 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-03 00:35:11.950 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:11.950422Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-03 00:35:11.991 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:11.991 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:11.991 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:11.991 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:11.991 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:11.991 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.019 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.019 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.019 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.019 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.019 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.019 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.019 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.043 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.043 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.043 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.043 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.043 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.043 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.043 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.100 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.100 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.100 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.100 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.100 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-03 00:35:12.100 23245 23267 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-03 00:35:12.100 23245 23267 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-03 00:35:12.997 23245 23245 I Mir2UiPreview: PERSONAL_JNI_OFFLINE_START scene=storage-jni events=111
+10-03 00:35:13.003 23245 23271 I event src/ui_preview.rs:140: ANDROID_PERSONAL_JNI_HOST_OBSERVATION_NOT_LIVEscene = "storage-jni"; phase = "STARTING"; screen = InGame; notice = None; data_receipt = None; catalogue = 0; storage_items = 0; storage_size = 80; unlocked = false;
+10-03 00:35:13.003 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.003100Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_PERSONAL_JNI_HOST_OBSERVATION_NOT_LIVE [3mscene[0m[2m=[0m"storage-jni" [3mphase[0m[2m=[0m"STARTING" [3mscreen[0m[2m=[0mInGame [3mnotice[0m[2m=[0mNone [3mdata_receipt[0m[2m=[0mNone [3mcatalogue[0m[2m=[0m0 [3mstorage_items[0m[2m=[0m0 [3mstorage_size[0m[2m=[0m80 [3munlocked[0m[2m=[0mfalse
+10-03 00:35:13.009 23245 23267 D EGL_emulation: app_time_stats: avg=15.75ms min=10.07ms max=110.23ms count=57
+10-03 00:35:13.488 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.488864Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true]
+10-03 00:35:13.488 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true, true, true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true, true, true, true, true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true, true, true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true, true, true, true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true, true, true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true, true, true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true, true, true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true, true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.98, green: 0.91, blue: 0.76, alpha: 1.0 })); glyph_masks = [true, true, true, true, true, true, true, true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true];
+10-03 00:35:13.489 23245 23270 I event src/phone_hud.rs:173: ANDROID_PHONE_TEXT_LAYOUTfont = TextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } }; color = TextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })); glyph_masks = [true, true, true, true];
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.488980Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true, true, true]
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.489005Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true, true, true, true, true]
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.489011Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true, true, true]
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.489016Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true, true, true, true]
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.489021Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true, true, true]
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.489026Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true, true, true]
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.489031Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true, true, true]
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.489036Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true, true]
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.489042Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true]
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.489047Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.98, green: 0.91, blue: 0.76, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true, true, true, true, true, true, true]
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.489053Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true]
+10-03 00:35:13.489 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:13.489058Z[0m [32m INFO[0m [2mmir2_platform_android::phone_hud[0m[2m:[0m ANDROID_PHONE_TEXT_LAYOUT [3mfont[0m[2m=[0mTextFont { font: SystemUi, font_size: Px(23.466667), weight: FontWeight(400), width: FontWidth(1.0), style: Normal, font_smoothing: AntiAliased, font_features: FontFeatures { features: [] }, font_variations: FontVariations { variations: [] } } [3mcolor[0m[2m=[0mTextColor(Srgba(Srgba { red: 0.96, green: 0.85, blue: 0.61, alpha: 1.0 })) [3mglyph_masks[0m[2m=[0m[true, true, true, true]
+10-03 00:35:14.024 23245 23267 D EGL_emulation: app_time_stats: avg=11.06ms min=10.42ms max=13.30ms count=61
+10-03 00:35:15.025 23245 23267 D EGL_emulation: app_time_stats: avg=11.17ms min=10.29ms max=12.76ms count=60
+10-03 00:35:16.025 23245 23267 D EGL_emulation: app_time_stats: avg=11.36ms min=10.57ms max=15.40ms count=60
+10-03 00:35:16.249 23245 23267 I event src/ui_preview.rs:566: ANDROID_REMOTE_BACKSTEP_DIAGNOSTICSdiagnostics = {"enabled":true,"nowMs":1790958916248.2344,"moveClockPulseId":41,"moveClockNextPulseMs":1790958916299.3252,"entryCount":0,"activeEntryCount":0,"processedEventCount":0,"remoteMotionEventCount":0,"remoteRemoveEventCount":0,"ignoredEventCount":0,"staleEventCount":0,"disabledEventCount":0,"pendingEventDropCount":0,"entryEvictionCount":0,"decodeErrorCount":0,"lastDecodeError":null,"offsetQueryCount":0,"offsetMatchCount":0,"targetMismatchCount":0,"inactiveFallbackCount":0,"entries":[]};
+10-03 00:35:16.249 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:16.249059Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_DIAGNOSTICS [3mdiagnostics[0m[2m=[0m{"enabled":true,"nowMs":1790958916248.2344,"moveClockPulseId":41,"moveClockNextPulseMs":1790958916299.3252,"entryCount":0,"activeEntryCount":0,"processedEventCount":0,"remoteMotionEventCount":0,"remoteRemoveEventCount":0,"ignoredEventCount":0,"staleEventCount":0,"disabledEventCount":0,"pendingEventDropCount":0,"entryEvictionCount":0,"decodeErrorCount":0,"lastDecodeError":null,"offsetQueryCount":0,"offsetMatchCount":0,"targetMismatchCount":0,"inactiveFallbackCount":0,"entries":[]}
+10-03 00:35:16.949 23245 23284 D ProfileInstaller: Installing profile for com.mir2.web3.uipreview
+10-03 00:35:17.041 23245 23267 D EGL_emulation: app_time_stats: avg=11.53ms min=10.22ms max=14.91ms count=61
+10-03 00:35:18.043 23245 23267 D EGL_emulation: app_time_stats: avg=11.90ms min=10.45ms max=20.26ms count=60
+10-03 00:35:19.059 23245 23267 D EGL_emulation: app_time_stats: avg=11.72ms min=10.84ms max=17.09ms count=61
+10-03 00:35:20.060 23245 23267 D EGL_emulation: app_time_stats: avg=11.39ms min=10.39ms max=12.64ms count=60
+10-03 00:35:21.060 23245 23267 D EGL_emulation: app_time_stats: avg=11.70ms min=10.49ms max=12.98ms count=60
+10-03 00:35:21.105 23245 23270 I event src/item_geometry.rs:127: ANDROID_ITEM_GEOMETRY_READYitems = 1003; state_items = 2380; sources = [("original-ui/Items/meta.json", "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"), ("original-ui/StateItem/meta.json", "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a")];
+10-03 00:35:21.105 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:21.105187Z[0m [32m INFO[0m [2mmir2_platform_android::item_geometry[0m[2m:[0m ANDROID_ITEM_GEOMETRY_READY [3mitems[0m[2m=[0m1003 [3mstate_items[0m[2m=[0m2380 [3msources[0m[2m=[0m[("original-ui/Items/meta.json", "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"), ("original-ui/StateItem/meta.json", "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a")]
+10-03 00:35:21.116 23245 23270 I event src/ui_preview.rs:140: ANDROID_PERSONAL_JNI_HOST_OBSERVATION_NOT_LIVEscene = "storage-jni"; phase = "IN_GAME"; screen = InGame; notice = None; data_receipt = Some((1, Applied)); catalogue = 105; storage_items = 0; storage_size = 80; unlocked = false;
+10-03 00:35:21.116 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:21.116800Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_PERSONAL_JNI_HOST_OBSERVATION_NOT_LIVE [3mscene[0m[2m=[0m"storage-jni" [3mphase[0m[2m=[0m"IN_GAME" [3mscreen[0m[2m=[0mInGame [3mnotice[0m[2m=[0mNone [3mdata_receipt[0m[2m=[0mSome((1, Applied)) [3mcatalogue[0m[2m=[0m105 [3mstorage_items[0m[2m=[0m0 [3mstorage_size[0m[2m=[0m80 [3munlocked[0m[2m=[0mfalse
+10-03 00:35:21.154 23245 23245 D CompatibilityChangeReporter: Compat change id reported: 163400105; UID 10146; state: ENABLED
+10-03 00:35:21.155 23245 23245 D InputMethodManager: showSoftInput() view=com.mir2.web3.MainActivity$1{8ce9566 VFED..CL. .F....ID 0,0-1,1 aid=1073741825} flags=1 reason=SHOW_SOFT_INPUT
+10-03 00:35:21.169 23245 23263 D EGL_emulation: app_time_stats: avg=4665.18ms min=29.55ms max=9300.82ms count=2
+10-03 00:35:21.189 23245 23271 I event src/ui_preview.rs:140: ANDROID_PERSONAL_JNI_HOST_OBSERVATION_NOT_LIVEscene = "storage-jni"; phase = "IN_GAME"; screen = InGame; notice = None; data_receipt = Some((1, Applied)); catalogue = 105; storage_items = 160; storage_size = 80; unlocked = false;
+10-03 00:35:21.189 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:21.189157Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_PERSONAL_JNI_HOST_OBSERVATION_NOT_LIVE [3mscene[0m[2m=[0m"storage-jni" [3mphase[0m[2m=[0m"IN_GAME" [3mscreen[0m[2m=[0mInGame [3mnotice[0m[2m=[0mNone [3mdata_receipt[0m[2m=[0mSome((1, Applied)) [3mcatalogue[0m[2m=[0m105 [3mstorage_items[0m[2m=[0m160 [3mstorage_size[0m[2m=[0m80 [3munlocked[0m[2m=[0mfalse
+10-03 00:35:21.217 23245 23245 D InsetsController: show(ime(), fromIme=true)
+10-03 00:35:21.230 23245 23245 V GameActivity: onImeInsetsChanged from Text Listener
+10-03 00:35:21.230 23245 23245 V threaded_app: SoftwareKeyboardVisibilityChanged: 0xb40000753583ecb0 -- 1
+10-03 00:35:21.230 23245 23245 V threaded_app: WindowInsetsChanged: 0xb40000753583ecb0
+10-03 00:35:21.239 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:21.239134Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-03 00:35:21.239 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-03 00:35:21.246 23245 23245 V GameActivity: onImeInsetsChanged from Text Listener
+10-03 00:35:21.247 23245 23245 V threaded_app: WindowInsetsChanged: 0xb40000753583ecb0
+10-03 00:35:21.255 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-03 00:35:21.255 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:21.255609Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-03 00:35:21.323 23245 23245 I Mir2UiPreview: PERSONAL_JNI_OFFLINE_SENT scene=storage-jni events=111 NOT_LIVE_NOT_AUTHENTICATED
+10-03 00:35:21.344 23245 23271 I event src/ui_preview.rs:154: ANDROID_PERSONAL_JNI_SHARED_CONSUMER_NOT_LIVEscene = "storage-jni"; catalogue = 105; last_g_index = 2104; last_stock = 3; storage_items = 160; storage_size = 160; last_slot = 159; unlocked = true; has_password = true; icon_width = 16; icon_height = 35;
+10-03 00:35:21.344 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:21.344213Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_PERSONAL_JNI_SHARED_CONSUMER_NOT_LIVE [3mscene[0m[2m=[0m"storage-jni" [3mcatalogue[0m[2m=[0m105 [3mlast_g_index[0m[2m=[0m2104 [3mlast_stock[0m[2m=[0m3 [3mstorage_items[0m[2m=[0m160 [3mstorage_size[0m[2m=[0m160 [3mlast_slot[0m[2m=[0m159 [3munlocked[0m[2m=[0mtrue [3mhas_password[0m[2m=[0mtrue [3micon_width[0m[2m=[0m16 [3micon_height[0m[2m=[0m35
+10-03 00:35:21.401 23245 23245 V GameActivity: onImeInsetsChanged from Text Listener
+10-03 00:35:21.401 23245 23245 V threaded_app: SoftwareKeyboardVisibilityChanged: 0xb40000753583ecb0 -- 0
+10-03 00:35:21.402 23245 23245 V threaded_app: WindowInsetsChanged: 0xb40000753583ecb0
+10-03 00:35:21.415 23245 23245 V GameActivity: onImeInsetsChanged from Text Listener
+10-03 00:35:21.415 23245 23245 V threaded_app: WindowInsetsChanged: 0xb40000753583ecb0
+10-03 00:35:21.422 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-03 00:35:21.422 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:21.422277Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-03 00:35:21.438 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-03 00:35:21.438 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:21.438407Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-03 00:35:21.493 23245 23266 I RustStdoutStderr: [runtime-map] waiting-images center=Some(PresentationGridCenter { x: 302, y: 634 }) states=[native-map-keyed:00e3342688edb59d7ccd3784567586b3ab4c28c1b3bb0fbb928fb8560bb937e8=missing-handle,native-map-keyed:0222e758190fb702f62c1180c302535fa88376dc4d91515f6a3da6858692d879=missing-handle,native-map-keyed:02fcf4c4c475d1c1002d45563f34bf90aabc5d57865a90a9c1d738eea292c519=missing-handle,native-map-keyed:0446dc96478c6a6426006d4ebcd9b473422254a4a3b87d13e6513a4664cc1674=missing-handle,native-map-keyed:04f2f6406275680ee10c2bb613e324d59e0dea10befb67479d5db488f1e5e9bf=missing-handle,native-map-keyed:06877672fe022bb18e0e3289b29a8a2316614ba81070c465594dc1d5f1e414f4=missing-handle,native-map-keyed:0873e402c768945dbd03f13c801f352570c3cbbc15b7547b3965db22c4f88a2d=missing-handle,native-map-keyed:09c1aeb9a676d9b5e9156dd6302baf429a788ede13eb2561f72752639991cfa2=missing-handle,native-map-keyed:0bb6e8f16b06e61e5485cd9c69682635bc4d076e78f3e426bc7c1c0cdf92d50b=missing-handle,native-map-keyed:0e54663e52210f29caafb4e45b01d2ddcdd62fbb4f07359cdbdf327630acedbd=missing-handle,native-map-keyed:101d496a3e3006b8a0640e530d7bb5aaabfc3cc9f7a8844fd83450a65903a0ef=missing-handle,native-map-keyed:1203923d4b3d4f36b85a86235cc024c8987f9aff48ff3f045d589d4fe5efe878=missing-handle,native-map-keyed:13645e18038cb14276656008c43fc00eb92b94607d7eb9a04a64a6f66232d045=missing-handle,native-map-keyed:142960f1af1b8faa165eb1b55b57fc14db26156287a4c5ca23e035daf9f10e33=missing-handle,native-map-keyed:16f3602253a4256b8bf51a103e6bbe9d36a4cfaf6771bebc72d7ca43a25c1de6=missing-handle,native-map-keyed:1a753eed19dc81252971e03a9ea302f2c31bc3cf51d92b187b664a1e8b1936b1=missing-handle,native-map-keyed:1a9940adbeeef6d18f251666fccf2028a616a92cc7a402f3ac04181f56823124=missing-handle,native-map-keyed:1ca36e41f059441aa1750c0cfbddec4904a1b5165d8cfba430f194e286eaee45=missing-handle,native-map-keyed:1d68e7a7c4fdfe49cedb75b5678139cb152cb5b0ebe59b0542935d1fd67d87ae=missing-handle,native-map-keyed:1ef61cf6318b9db7968b35797c3a62b27e08c1ef2475a23ec3ca379b729d92f1=missing-handle,native-map-keyed:1f4a39a368bbaca431ec450a830e3c0bdcaabe0af6de5730eb1f28e59b8dd533=missing-handle,native-map-keyed:20625ebb957139dcbec35004f2ca784c926cdee1439035eb896dbf427495872d=missing-handle,native-map-keyed:22659e86e5cbf79236e023e40ac092600ac5e9ede72a34077c802b5518eb4573=missing-handle,native-map-keyed:226a0bac665d1bf713b8baf39ecf7ae61be856189d1cf823921ed0e53a5c29fe=missing-handle,native-map-keyed:23035e5244797f2f70bbeaa5c393d6d112a6196b5ab8e4d02b351fbf38f8101a=missing-handle,native-map-keyed:230966b0481d315c12097d9ff7d4da07aa1cdf981552a5323ab088ba990ba950=missing-handle,native-map-keyed:232bfc461f055784e7d90e5e0378d3cea8317eb078c4bf66e7afe999812ff902=missing-handle,native-map-keyed:24ec1f87eb0856b5498709b2be2776f9a3627519b839633e9db0a690a7d9b980=missing-handle,native-map-keyed:2675a421a8639ea87dcfc98b62558519a15cedc35d925663b6909d4988742940=missing-handle,native-map-keyed:270c75661f320e8c98c039a8c4a26724a568469937485ff8f748e5e7045d0239=missing-handle,native-map-keyed:2775964d9f9d7b8b06e60a4bc848015817a1fa04cccfffe2e936202ea0756d4b=missing-handle,native-map-keyed:2a537899c5467f32f4e30a657c233ed270db6f829d90106b7fa0704f469d167c=missing-handle,native-map-keyed:2a7228b716f29f6fb29a9b41ed3f1ce17ec6cdbfd89b69ca7c38b6c8b5b5d72a=missing-handle,native-map-keyed:2c76f7575f3d1661681533a2ed2893f96c1f4b914bcfd60ae32c207561eb263b=missing-handle,native-map-keyed:2cd7444281094e689c5fe7c22a994aa527766e0665fc32b2cec42cbdc9978ab4=missing-handle,native-map-keyed:2d98ce9df6396e943fa00aebaf7a929c15ebaa4ab8e71ab99299c7f31b75d240=missing-handle,native-map-keyed:2fa02ae3202a4c91117b85d6ed57ca1d81c787b4b32ad6561c9ca340312d1620=missing-handle,native-map-keyed:313c3e7a3a4bef6d0ef6b02a9b0c37230ef819d06c72012bb513a591244a393d=missing-handle,native-map-keyed:33b2f84e21bb7bb379950d3da05ce44d393d84ca43f7044b6a8d1fba68a4c3a0=missing-handle,native-map-keyed:354a710bc4fda3d19397bf717ca33f56979dd060b1538402c6dcd8a12eb31a81=missing-handle,native-map-keyed:357ae499cdc01c6fb8e7f6a351f3
+10-03 00:35:21.493 23245 23266 I RustStdoutStderr: 
+10-03 00:35:21.542 23245 23266 I RustStdoutStderr: [runtime-map] waiting-images center=Some(PresentationGridCenter { x: 302, y: 634 }) states=[native-map-keyed:2775964d9f9d7b8b06e60a4bc848015817a1fa04cccfffe2e936202ea0756d4b=missing-handle,native-map-keyed:43ec2c30ef193e5c996b16008cfb05b9f11fbf8dd2949b49c06ea4e5de4befbd=missing-handle,native-map-keyed:4994bb7eb67876e03625726b9c449243db24f41e661e82d6a174a9f607afc3a4=missing-handle,native-map-keyed:aa05a9e8169f1d54fbbec27983d32758135c3d7adf82fc462aa08953a6975ad0=missing-handle,native-map-keyed:bcf1c31800d3ab1fc065376015b5b65f5c7e0265e2af04f77d50d120fb5fdee1=missing-handle,native-map-keyed:c10b9612d5c06ceef42df71402d8c1245b3ba31bc842e08d0f6003fed13daa63=missing-handle,native-map-keyed:d2a6feb956b426eb88640e39bcfaaf5b7eb53c2ae46903ed06ac54db9675c3be=missing-handle]
+10-03 00:35:21.596 23245 23266 I RustStdoutStderr: [runtime-map] synced center=Some(PresentationGridCenter { x: 302, y: 634 }) tiles=583 standalone=222 live=805 missingBindings=0 sample=[]
+10-03 00:35:21.690 23245 23271 I event src/shared_shell.rs:1372: packaged Android world frame queuedrequest_id = 1; pages = 7; sprites = 2111; compressed_bytes = 14785921; rgba_bytes = 7340032; map_object_rgba_bytes = 9722880; map_width = 700; map_height = 700; map_atlases = 7; map_tiles = 583; map_standalone_tiles = 222; unresolved_draws = 0; entity_pages = 5; entities = 1; entity_layers = 1; unresolved_entities = 0; entity_unindexed_rects = 24; entity_compressed_bytes = 11209197; entity_rgba_bytes = 83886080; entity_manifest_sha256 = "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9";
+10-03 00:35:21.690 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:35:21.690444Z[0m [32m INFO[0m [2mmir2_platform_android::shared_shell[0m[2m:[0m packaged Android world frame queued [3mrequest_id[0m[2m=[0m1 [3mpages[0m[2m=[0m7 [3msprites[0m[2m=[0m2111 [3mcompressed_bytes[0m[2m=[0m14785921 [3mrgba_bytes[0m[2m=[0m7340032 [3mmap_object_rgba_bytes[0m[2m=[0m9722880 [3mmap_width[0m[2m=[0m700 [3mmap_height[0m[2m=[0m700 [3mmap_atlases[0m[2m=[0m7 [3mmap_tiles[0m[2m=[0m583 [3mmap_standalone_tiles[0m[2m=[0m222 [3munresolved_draws[0m[2m=[0m0 [3mentity_pages[0m[2m=[0m5 [3mentities[0m[2m=[0m1 [3mentity_layers[0m[2m=[0m1 [3munresolved_entities[0m[2m=[0m0 [3mentity_unindexed_rects[0m[2m=[0m24 [3mentity_compressed_bytes[0m[2m=[0m11209197 [3mentity_rgba_bytes[0m[2m=[0m83886080 [3mentity_manifest_sha256[0m[2m=[0m"929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9"
+10-03 00:35:22.061 23245 23267 D EGL_emulation: app_time_stats: avg=32.89ms min=11.51ms max=313.10ms count=30
+10-03 00:35:23.076 23245 23267 D EGL_emulation: app_time_stats: avg=13.27ms min=11.91ms max=16.89ms count=61
+10-03 00:35:24.078 23245 23267 D EGL_emulation: app_time_stats: avg=14.11ms min=12.21ms max=18.05ms count=60
+10-03 00:35:25.084 23245 23267 D EGL_emulation: app_time_stats: avg=14.34ms min=12.22ms max=17.95ms count=60
+10-03 00:35:26.098 23245 23267 D EGL_emulation: app_time_stats: avg=14.65ms min=12.30ms max=21.76ms count=61
+10-03 00:35:27.114 23245 23267 D EGL_emulation: app_time_stats: avg=15.39ms min=12.69ms max=26.69ms count=60
+10-03 00:35:28.133 23245 23267 D EGL_emulation: app_time_stats: avg=14.86ms min=12.79ms max=17.87ms count=61
+10-03 00:35:29.148 23245 23267 D EGL_emulation: app_time_stats: avg=15.16ms min=12.68ms max=18.21ms count=61
+10-03 00:35:30.161 23245 23267 D EGL_emulation: app_time_stats: avg=14.65ms min=12.52ms max=18.74ms count=61
+10-03 00:35:31.178 23245 23267 D EGL_emulation: app_time_stats: avg=13.34ms min=12.33ms max=16.66ms count=61
+10-03 00:35:32.194 23245 23267 D EGL_emulation: app_time_stats: avg=13.17ms min=11.67ms max=15.21ms count=61
+10-03 00:35:33.209 23245 23267 D EGL_emulation: app_time_stats: avg=13.36ms min=12.30ms max=16.11ms count=61
+10-03 00:35:34.227 23245 23267 D EGL_emulation: app_time_stats: avg=12.92ms min=12.10ms max=14.45ms count=61
+10-03 00:35:35.243 23245 23267 D EGL_emulation: app_time_stats: avg=13.09ms min=12.27ms max=15.37ms count=61
+10-03 00:35:36.244 23245 23267 D EGL_emulation: app_time_stats: avg=13.21ms min=12.11ms max=16.49ms count=60
+10-03 00:35:37.260 23245 23267 D EGL_emulation: app_time_stats: avg=13.36ms min=12.17ms max=16.24ms count=61
+10-03 00:35:38.282 23245 23267 D EGL_emulation: app_time_stats: avg=13.42ms min=12.15ms max=16.78ms count=61
+10-03 00:35:39.295 23245 23267 D EGL_emulation: app_time_stats: avg=13.19ms min=12.00ms max=17.50ms count=61
+10-03 00:35:40.298 23245 23267 D EGL_emulation: app_time_stats: avg=13.38ms min=12.26ms max=17.00ms count=60
+10-03 00:35:41.310 23245 23267 D EGL_emulation: app_time_stats: avg=13.56ms min=12.21ms max=17.81ms count=61
+10-03 00:35:42.315 23245 23267 D EGL_emulation: app_time_stats: avg=13.11ms min=12.22ms max=16.79ms count=60
+10-03 00:35:43.327 23245 23267 D EGL_emulation: app_time_stats: avg=13.08ms min=11.99ms max=15.39ms count=61
+10-03 00:35:44.343 23245 23267 D EGL_emulation: app_time_stats: avg=13.42ms min=12.17ms max=17.20ms count=61
+10-03 00:35:45.350 23245 23267 D EGL_emulation: app_time_stats: avg=13.42ms min=12.24ms max=17.83ms count=60
+10-03 00:35:46.360 23245 23267 D EGL_emulation: app_time_stats: avg=13.12ms min=12.26ms max=16.24ms count=61
+10-03 00:35:47.360 23245 23267 D EGL_emulation: app_time_stats: avg=12.95ms min=12.22ms max=15.81ms count=60
+10-03 00:35:48.362 23245 23267 D EGL_emulation: app_time_stats: avg=13.49ms min=12.00ms max=16.92ms count=60
+10-03 00:35:49.376 23245 23267 D EGL_emulation: app_time_stats: avg=13.47ms min=12.06ms max=16.88ms count=61
+10-03 00:35:50.381 23245 23267 D EGL_emulation: app_time_stats: avg=13.20ms min=12.29ms max=15.10ms count=60
+10-03 00:35:51.393 23245 23267 D EGL_emulation: app_time_stats: avg=13.09ms min=12.28ms max=17.43ms count=61
+10-03 00:35:52.393 23245 23267 D EGL_emulation: app_time_stats: avg=13.55ms min=12.23ms max=17.45ms count=60
+10-03 00:35:53.411 23245 23267 D EGL_emulation: app_time_stats: avg=13.15ms min=12.30ms max=17.19ms count=61
+10-03 00:35:54.426 23245 23267 D EGL_emulation: app_time_stats: avg=13.36ms min=12.32ms max=17.71ms count=61
+10-03 00:35:55.427 23245 23267 D EGL_emulation: app_time_stats: avg=13.36ms min=12.15ms max=16.92ms count=60
+10-03 00:35:56.429 23245 23267 D EGL_emulation: app_time_stats: avg=13.53ms min=12.45ms max=15.99ms count=60
+10-03 00:35:57.432 23245 23267 D EGL_emulation: app_time_stats: avg=13.20ms min=12.28ms max=16.53ms count=60
+10-03 00:35:58.443 23245 23267 D EGL_emulation: app_time_stats: avg=13.05ms min=11.66ms max=15.30ms count=61
+10-03 00:35:59.459 23245 23267 D EGL_emulation: app_time_stats: avg=12.99ms min=12.28ms max=16.53ms count=61
+10-03 00:36:00.461 23245 23267 D EGL_emulation: app_time_stats: avg=13.45ms min=11.99ms max=17.21ms count=60
+10-03 00:36:01.476 23245 23267 D EGL_emulation: app_time_stats: avg=13.33ms min=12.24ms max=17.68ms count=61
+10-03 00:36:02.483 23245 23267 D EGL_emulation: app_time_stats: avg=14.21ms min=12.63ms max=19.96ms count=60
+10-03 00:36:03.493 23245 23267 D EGL_emulation: app_time_stats: avg=13.30ms min=12.14ms max=17.38ms count=61
+10-03 00:36:04.493 23245 23267 D EGL_emulation: app_time_stats: avg=13.48ms min=11.89ms max=17.13ms count=60
+10-03 00:36:05.493 23245 23267 D EGL_emulation: app_time_stats: avg=13.42ms min=12.17ms max=17.55ms count=60
+10-03 00:36:06.497 23245 23267 D EGL_emulation: app_time_stats: avg=13.07ms min=11.88ms max=16.29ms count=60
+10-03 00:36:07.510 23245 23267 D EGL_emulation: app_time_stats: avg=13.78ms min=12.26ms max=26.85ms count=61
+10-03 00:36:08.513 23245 23267 D EGL_emulation: app_time_stats: avg=13.26ms min=11.94ms max=16.70ms count=60
+10-03 00:36:09.526 23245 23267 D EGL_emulation: app_time_stats: avg=13.31ms min=12.25ms max=17.02ms count=61
+10-03 00:36:10.526 23245 23267 D EGL_emulation: app_time_stats: avg=12.97ms min=12.05ms max=16.11ms count=60
+10-03 00:36:11.527 23245 23267 D EGL_emulation: app_time_stats: avg=12.88ms min=12.16ms max=13.91ms count=60
+10-03 00:36:12.527 23245 23267 D EGL_emulation: app_time_stats: avg=13.28ms min=12.20ms max=15.38ms count=60
+10-03 00:36:13.547 23245 23267 D EGL_emulation: app_time_stats: avg=13.02ms min=12.09ms max=15.36ms count=61
+10-03 00:36:14.565 23245 23267 D EGL_emulation: app_time_stats: avg=13.20ms min=11.93ms max=17.69ms count=61
+10-03 00:36:15.576 23245 23267 D EGL_emulation: app_time_stats: avg=13.04ms min=12.02ms max=17.50ms count=61
+10-03 00:36:16.577 23245 23267 D EGL_emulation: app_time_stats: avg=13.47ms min=12.39ms max=16.75ms count=60
+10-03 00:36:17.592 23245 23267 D EGL_emulation: app_time_stats: avg=13.17ms min=12.11ms max=15.70ms count=61
+10-03 00:36:18.593 23245 23267 D EGL_emulation: app_time_stats: avg=12.90ms min=12.04ms max=16.24ms count=60
+10-03 00:36:19.609 23245 23267 D EGL_emulation: app_time_stats: avg=13.11ms min=12.20ms max=16.36ms count=61
+10-03 00:36:20.610 23245 23267 D EGL_emulation: app_time_stats: avg=13.30ms min=12.22ms max=15.36ms count=60
+10-03 00:36:21.612 23245 23267 D EGL_emulation: app_time_stats: avg=13.14ms min=12.24ms max=15.62ms count=60
+10-03 00:36:22.614 23245 23267 D EGL_emulation: app_time_stats: avg=13.01ms min=12.13ms max=16.08ms count=60
+10-03 00:36:23.626 23245 23267 D EGL_emulation: app_time_stats: avg=13.40ms min=12.08ms max=16.99ms count=61
+10-03 00:36:24.628 23245 23267 D EGL_emulation: app_time_stats: avg=13.24ms min=12.10ms max=15.05ms count=60
+10-03 00:36:25.643 23245 23267 D EGL_emulation: app_time_stats: avg=13.42ms min=12.36ms max=15.54ms count=61
+10-03 00:36:26.664 23245 23267 D EGL_emulation: app_time_stats: avg=13.47ms min=12.38ms max=15.71ms count=61
+10-03 00:36:27.677 23245 23267 D EGL_emulation: app_time_stats: avg=13.25ms min=12.13ms max=16.73ms count=61
+10-03 00:36:28.694 23245 23267 D EGL_emulation: app_time_stats: avg=13.42ms min=12.19ms max=16.26ms count=61
+10-03 00:36:29.699 23245 23267 D EGL_emulation: app_time_stats: avg=13.02ms min=12.17ms max=16.76ms count=60
+10-03 00:36:30.710 23245 23267 D EGL_emulation: app_time_stats: avg=13.17ms min=12.05ms max=16.01ms count=61
+10-03 00:36:31.726 23245 23267 D EGL_emulation: app_time_stats: avg=13.50ms min=12.14ms max=16.15ms count=61
+10-03 00:36:32.726 23245 23267 D EGL_emulation: app_time_stats: avg=13.96ms min=12.26ms max=18.86ms count=60
+10-03 00:36:33.727 23245 23267 D EGL_emulation: app_time_stats: avg=13.11ms min=12.07ms max=16.00ms count=60
+10-03 00:36:34.729 23245 23267 D EGL_emulation: app_time_stats: avg=14.88ms min=12.25ms max=100.81ms count=55
+10-03 00:36:35.733 23245 23267 D EGL_emulation: app_time_stats: avg=14.15ms min=12.31ms max=38.80ms count=59
+10-03 00:36:36.743 23245 23267 D EGL_emulation: app_time_stats: avg=15.10ms min=13.07ms max=20.57ms count=61
+10-03 00:36:37.744 23245 23267 D EGL_emulation: app_time_stats: avg=15.10ms min=12.10ms max=97.44ms count=55
+10-03 00:36:38.751 23245 23267 D EGL_emulation: app_time_stats: avg=15.54ms min=12.07ms max=44.73ms count=59
+10-03 00:36:39.764 23245 23267 D EGL_emulation: app_time_stats: avg=14.23ms min=12.31ms max=26.54ms count=61
+10-03 00:36:40.777 23245 23267 D EGL_emulation: app_time_stats: avg=13.73ms min=12.26ms max=16.97ms count=61
+10-03 00:36:41.793 23245 23267 D EGL_emulation: app_time_stats: avg=13.09ms min=12.32ms max=14.49ms count=61
+10-03 00:36:42.810 23245 23267 D EGL_emulation: app_time_stats: avg=13.50ms min=12.15ms max=18.40ms count=61
+10-03 00:36:43.814 23245 23267 D EGL_emulation: app_time_stats: avg=13.40ms min=12.17ms max=15.79ms count=60
+10-03 00:36:44.829 23245 23267 D EGL_emulation: app_time_stats: avg=13.77ms min=12.76ms max=16.07ms count=61
+10-03 00:36:45.843 23245 23267 D EGL_emulation: app_time_stats: avg=13.69ms min=12.52ms max=16.14ms count=61
+10-03 00:36:46.844 23245 23267 D EGL_emulation: app_time_stats: avg=13.52ms min=12.48ms max=15.95ms count=60
+10-03 00:36:47.846 23245 23267 D EGL_emulation: app_time_stats: avg=13.58ms min=12.24ms max=17.47ms count=60
+10-03 00:36:48.861 23245 23267 D EGL_emulation: app_time_stats: avg=13.86ms min=12.86ms max=16.78ms count=61
+10-03 00:36:49.863 23245 23267 D EGL_emulation: app_time_stats: avg=13.46ms min=12.25ms max=16.28ms count=60
+10-03 00:36:50.877 23245 23267 D EGL_emulation: app_time_stats: avg=13.63ms min=12.38ms max=16.59ms count=61
+10-03 00:36:51.894 23245 23267 D EGL_emulation: app_time_stats: avg=13.66ms min=12.45ms max=15.52ms count=61
+10-03 00:36:52.911 23245 23267 D EGL_emulation: app_time_stats: avg=13.81ms min=12.52ms max=17.29ms count=61
+10-03 00:36:53.928 23245 23267 D EGL_emulation: app_time_stats: avg=13.55ms min=12.19ms max=17.27ms count=61
+10-03 00:36:54.929 23245 23267 D EGL_emulation: app_time_stats: avg=13.94ms min=12.68ms max=17.01ms count=60
+10-03 00:36:55.944 23245 23267 D EGL_emulation: app_time_stats: avg=13.56ms min=12.41ms max=15.18ms count=61
+10-03 00:36:56.959 23245 23267 D EGL_emulation: app_time_stats: avg=13.69ms min=12.58ms max=16.43ms count=61
+10-03 00:36:57.975 23245 23267 D EGL_emulation: app_time_stats: avg=13.19ms min=12.14ms max=17.15ms count=61
+10-03 00:36:58.976 23245 23267 D EGL_emulation: app_time_stats: avg=13.14ms min=12.28ms max=17.26ms count=60
+10-03 00:36:59.977 23245 23267 D EGL_emulation: app_time_stats: avg=13.16ms min=12.28ms max=17.67ms count=60
+10-03 00:37:00.996 23245 23267 D EGL_emulation: app_time_stats: avg=13.40ms min=12.27ms max=15.60ms count=61
+10-03 00:37:01.998 23245 23267 D EGL_emulation: app_time_stats: avg=13.11ms min=12.30ms max=15.96ms count=60
+10-03 00:37:03.009 23245 23267 D EGL_emulation: app_time_stats: avg=13.11ms min=12.29ms max=18.31ms count=61
+10-03 00:37:04.010 23245 23267 D EGL_emulation: app_time_stats: avg=12.99ms min=12.17ms max=14.27ms count=60
+10-03 00:37:05.028 23245 23267 D EGL_emulation: app_time_stats: avg=13.84ms min=12.54ms max=20.46ms count=61
+10-03 00:37:06.042 23245 23267 D EGL_emulation: app_time_stats: avg=13.52ms min=12.28ms max=16.67ms count=61
+10-03 00:37:07.043 23245 23267 D EGL_emulation: app_time_stats: avg=13.53ms min=12.06ms max=16.26ms count=60
+10-03 00:37:08.061 23245 23267 D EGL_emulation: app_time_stats: avg=13.40ms min=12.49ms max=17.95ms count=61
+10-03 00:37:09.078 23245 23267 D EGL_emulation: app_time_stats: avg=13.62ms min=12.35ms max=18.53ms count=61
+10-03 00:37:10.093 23245 23267 D EGL_emulation: app_time_stats: avg=13.52ms min=12.44ms max=16.76ms count=61
+10-03 00:37:10.203 23245 23245 V threaded_app: Pause: 0xb40000753583ecb0
+10-03 00:37:10.225 23245 23267 V threaded_app: activityState=14
+10-03 00:37:10.226 23245 23245 V threaded_app: WindowFocusChanged: 0xb40000753583ecb0 -- 0
+10-03 00:37:10.612 23245 23245 V threaded_app: NativeWindowDestroyed: 0xb40000753583ecb0 -- 0xb4000075c59ee140
+10-03 00:37:10.612 23245 23245 V threaded_app: android_app_set_window called
+10-03 00:37:10.614 23245 23267 V threaded_app: APP_CMD_TERM_WINDOW
+10-03 00:37:10.624 23245 23271 D HostConnection: createUnique: call
+10-03 00:37:10.625 23245 23271 D HostConnection: HostConnection::get() New Host Connection established 0xb4000074d5855150, tid 23271
+10-03 00:37:10.626 23245 23271 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-03 00:37:10.626 23245 23271 D EGL_emulation: eglMakeCurrent: 0xb4000074d583c910: ver 3 0 (tinfo 0x76fbc37180) (first time)
+10-03 00:37:10.633 23245 23267 V threaded_app: APP_CMD_TERM_WINDOW
+10-03 00:37:10.636 23245 23245 V threaded_app: TrimMemory: 0xb40000753583ecb0 20
+10-03 00:37:10.639 23245 23245 V threaded_app: Stop: 0xb40000753583ecb0
+10-03 00:37:10.640 23245 23267 V threaded_app: activityState=15
+10-03 00:37:10.640 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStop notification to application
+10-03 00:37:10.640 23245 23245 V threaded_app: SaveInstanceState: 0xb40000753583ecb0
+10-03 00:37:10.640 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward saveState notification to application
+10-03 00:37:10.640 23245 23267 V threaded_app: APP_CMD_SAVE_STATE
+10-03 00:37:10.640 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:37:10.640359Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStop notification to application
+10-03 00:37:10.640 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:37:10.640792Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward saveState notification to application
+10-03 00:37:11.232 23245 23245 V GameActivity: onImeInsetsChanged from Text Listener
+10-03 00:37:11.232 23245 23245 V threaded_app: WindowInsetsChanged: 0xb40000753583ecb0
+10-03 00:37:11.232 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-03 00:37:11.232 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:37:11.232399Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-03 00:37:11.233 23245 23245 V GameActivity: onStart_native
+10-03 00:37:11.233 23245 23245 V threaded_app: Start: 0xb40000753583ecb0
+10-03 00:37:11.233 23245 23267 V threaded_app: activityState=11
+10-03 00:37:11.233 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+10-03 00:37:11.233 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:37:11.233919Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+10-03 00:37:11.234 23245 23245 V threaded_app: Resume: 0xb40000753583ecb0
+10-03 00:37:11.234 23245 23267 V threaded_app: activityState=12
+10-03 00:37:11.251 23245 23245 V GameActivity: onImeInsetsChanged from Text Listener
+10-03 00:37:11.251 23245 23245 V threaded_app: WindowInsetsChanged: 0xb40000753583ecb0
+10-03 00:37:11.251 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-03 00:37:11.251 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:37:11.251572Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-03 00:37:11.254 23245 23245 V GameActivity: onSurfaceCreated_native
+10-03 00:37:11.254 23245 23245 V threaded_app: NativeWindowCreated: 0xb40000753583ecb0 -- 0xb4000075c59ee140
+10-03 00:37:11.254 23245 23245 V threaded_app: android_app_set_window called
+10-03 00:37:11.254 23245 23267 V threaded_app: APP_CMD_INIT_WINDOW
+10-03 00:37:11.255 23245 23245 V threaded_app: NativeWindowRedrawNeeded: 0xb40000753583ecb0 -- 0xb4000075c59ee140
+10-03 00:37:11.275 23245 23245 V threaded_app: WindowFocusChanged: 0xb40000753583ecb0 -- 1
+10-03 00:37:11.281 23245 23245 V GameActivity: onImeInsetsChanged from Text Listener
+10-03 00:37:11.282 23245 23245 V threaded_app: WindowInsetsChanged: 0xb40000753583ecb0
+10-03 00:37:11.286 23245 23267 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-03 00:37:11.287 23245 23266 I RustStdoutStderr: [2m2026-10-02T16:37:11.286845Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-03 00:37:12.326 23245 23267 D EGL_emulation: app_time_stats: avg=15.42ms min=12.25ms max=45.97ms count=61
+10-03 00:37:13.343 23245 23267 D EGL_emulation: app_time_stats: avg=13.39ms min=12.27ms max=17.78ms count=61
+10-03 00:37:14.360 23245 23267 D EGL_emulation: app_time_stats: avg=13.17ms min=12.30ms max=15.57ms count=61
+10-03 00:37:15.369 23245 23267 D EGL_emulation: app_time_stats: avg=13.43ms min=12.20ms max=21.73ms count=60

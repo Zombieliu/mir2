@@ -1,0 +1,306 @@
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.11.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build 
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:generateDebugBuildConfig
+> Task :app:javaPreCompileDebug
+> Task :app:generateDebugResValues
+> Task :app:checkDebugAarMetadata
+> Task :app:mapDebugSourceSetPaths
+> Task :app:generateDebugResources
+> Task :app:packageDebugResources
+> Task :app:createDebugCompatibleScreenManifests
+> Task :app:extractDeepLinksDebug
+> Task :app:mergeDebugResources
+> Task :app:parseDebugLocalResources
+> Task :app:processDebugMainManifest
+> Task :app:processDebugManifest
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileDebugUnitTest
+> Task :app:processDebugJavaRes NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes NO-SOURCE
+> Task :app:preUiPreviewBuild UP-TO-DATE
+> Task :app:generateUiPreviewBuildConfig
+> Task :app:javaPreCompileUiPreview
+> Task :app:generateUiPreviewResValues
+> Task :app:checkUiPreviewAarMetadata
+> Task :app:mapUiPreviewSourceSetPaths
+> Task :app:generateUiPreviewResources
+> Task :app:packageUiPreviewResources
+> Task :app:createUiPreviewCompatibleScreenManifests
+> Task :app:extractDeepLinksUiPreview
+> Task :app:parseUiPreviewLocalResources
+> Task :app:processUiPreviewMainManifest
+> Task :app:processUiPreviewManifest
+> Task :app:preUiPreviewUnitTestBuild UP-TO-DATE
+> Task :app:javaPreCompileUiPreviewUnitTest
+> Task :app:processUiPreviewManifestForPackage
+> Task :app:processUiPreviewJavaRes NO-SOURCE
+> Task :app:mergeUiPreviewResources
+> Task :app:processUiPreviewUnitTestJavaRes NO-SOURCE
+> Task :app:processDebugManifestForPackage
+> Task :app:processDebugResources
+> Task :app:processUiPreviewResources
+
+> Task :app:compileDebugJavaWithJavac
+注: /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:bundleDebugClassesToCompileJar
+
+> Task :app:compileUiPreviewJavaWithJavac
+注: /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java使用或覆盖了已过时的 API。
+注: 有关详细信息, 请使用 -Xlint:deprecation 重新编译。
+
+> Task :app:compileDebugUnitTestJavaWithJavac FAILED
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:25: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals("STARTING", new JSONObject(events.get(0)).getString("phase"));
+                                 ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:25: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals("STARTING", new JSONObject(events.get(0)).getString("phase"));
+                                                                        ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:28: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+            assertEquals("GameShopInfo", packet.getString("packet"));
+                                                         ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:29: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+            JSONObject item = packet.getJSONObject("payload").getJSONObject("item");
+                                                  ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:29: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+            JSONObject item = packet.getJSONObject("payload").getJSONObject("item");
+                                                                           ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:30: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+            assertEquals(2000 + index, item.getInt("gIndex"));
+                                                  ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:31: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+            assertTrue(item.getString("itemName").startsWith("JNI received "));
+                                     ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:34: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals("GameShopStock", stock.getString("packet"));
+                                                     ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:35: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals(2104, stock.getJSONObject("payload").getInt("gIndex"));
+                                              ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:35: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals(2104, stock.getJSONObject("payload").getInt("gIndex"));
+                                                                ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:36: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals(3, stock.getJSONObject("payload").getInt("stockLevel"));
+                                           ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:36: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals(3, stock.getJSONObject("payload").getInt("stockLevel"));
+                                                             ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:37: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals("ResizeStorage", packet(events.get(107)).getString("packet"));
+                                                                       ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:38: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        JSONObject world = new JSONObject(events.get(108));
+                           ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:39: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals("IN_GAME", world.getString("phase"));
+                                               ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:40: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        JSONObject snapshot = new JSONObject(world.getString("worldSnapshot"));
+                                                            ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:40: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        JSONObject snapshot = new JSONObject(world.getString("worldSnapshot"));
+                              ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:41: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals(42, snapshot.getInt("playerObjectId"));
+                                        ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:42: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals("OFFLINE JAVA JNI", snapshot.getJSONArray("entities").getJSONObject(0).getString("name"));
+                                                              ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:42: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals("OFFLINE JAVA JNI", snapshot.getJSONArray("entities").getJSONObject(0).getString("name"));
+                                                                                        ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:42: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals("OFFLINE JAVA JNI", snapshot.getJSONArray("entities").getJSONObject(0).getString("name"));
+                                                                                                     ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:43: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertEquals("0", snapshot.getString("mapFileName"));
+                                            ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:44: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        assertTrue(snapshot.getBoolean("requireStoragePassword"));
+                                      ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:51: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+            assertEquals("UserStorage", items.getString("packet"));
+                                                       ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:52: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+            JSONArray slots = items.getJSONObject("payload").getJSONArray("storage");
+                                                 ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:52: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+            JSONArray slots = items.getJSONObject("payload").getJSONArray("storage");
+                                                                         ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:55: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                assertEquals(90000 + slot, slots.getJSONObject(slot).getLong("uniqueId"));
+                                                              ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:55: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                assertEquals(90000 + slot, slots.getJSONObject(slot).getLong("uniqueId"));
+                                                                            ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:56: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                assertEquals(slot % 5 + 1, slots.getJSONObject(slot).getInt("count"));
+                                                              ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:56: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                assertEquals(slot % 5 + 1, slots.getJSONObject(slot).getInt("count"));
+                                                                           ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:59: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+            else assertEquals("StorageUnlockResult", packet(events.get(110)).getString("packet"));
+                                                                                      ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:66: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+            JSONObject outer = new JSONObject(event);
+                               ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:71: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                String inner = outer.getString("envelope");
+                                              ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:73: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                assertTrue(allowed.contains(new JSONObject(inner).getString("packet")));
+                                            ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:73: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                assertTrue(allowed.contains(new JSONObject(inner).getString("packet")));
+                                                                           ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:75: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                assertTrue(outer.getString("worldSnapshot").getBytes(StandardCharsets.UTF_8).length <= 1024 * 1024);
+                                          ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:86: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        return new JSONObject(new JSONObject(event).getString("envelope"));
+                              ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:86: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        return new JSONObject(new JSONObject(event).getString("envelope"));
+                                                             ^
+/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:86: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+        return new JSONObject(new JSONObject(event).getString("envelope"));
+               ^
+39 个错误
+[Incubating] Problems report is available at: file:///Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/build/reports/problems/problems-report.html
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileDebugUnitTestJavaWithJavac'.
+> Compilation failed; see the compiler output below.
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:25: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals("STARTING", new JSONObject(events.get(0)).getString("phase"));
+                                   ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:25: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals("STARTING", new JSONObject(events.get(0)).getString("phase"));
+                                                                          ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:28: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+              assertEquals("GameShopInfo", packet.getString("packet"));
+                                                           ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:29: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+              JSONObject item = packet.getJSONObject("payload").getJSONObject("item");
+                                                    ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:29: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+              JSONObject item = packet.getJSONObject("payload").getJSONObject("item");
+                                                                             ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:30: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+              assertEquals(2000 + index, item.getInt("gIndex"));
+                                                    ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:31: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+              assertTrue(item.getString("itemName").startsWith("JNI received "));
+                                       ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:34: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals("GameShopStock", stock.getString("packet"));
+                                                       ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:35: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals(2104, stock.getJSONObject("payload").getInt("gIndex"));
+                                                ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:35: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals(2104, stock.getJSONObject("payload").getInt("gIndex"));
+                                                                  ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:36: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals(3, stock.getJSONObject("payload").getInt("stockLevel"));
+                                             ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:36: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals(3, stock.getJSONObject("payload").getInt("stockLevel"));
+                                                               ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:37: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals("ResizeStorage", packet(events.get(107)).getString("packet"));
+                                                                         ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:38: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          JSONObject world = new JSONObject(events.get(108));
+                             ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:39: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals("IN_GAME", world.getString("phase"));
+                                                 ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:40: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          JSONObject snapshot = new JSONObject(world.getString("worldSnapshot"));
+                                                              ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:40: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          JSONObject snapshot = new JSONObject(world.getString("worldSnapshot"));
+                                ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:41: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals(42, snapshot.getInt("playerObjectId"));
+                                          ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:42: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals("OFFLINE JAVA JNI", snapshot.getJSONArray("entities").getJSONObject(0).getString("name"));
+                                                                ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:42: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals("OFFLINE JAVA JNI", snapshot.getJSONArray("entities").getJSONObject(0).getString("name"));
+                                                                                          ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:42: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals("OFFLINE JAVA JNI", snapshot.getJSONArray("entities").getJSONObject(0).getString("name"));
+                                                                                                       ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:43: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertEquals("0", snapshot.getString("mapFileName"));
+                                              ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:44: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          assertTrue(snapshot.getBoolean("requireStoragePassword"));
+                                        ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:51: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+              assertEquals("UserStorage", items.getString("packet"));
+                                                         ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:52: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+              JSONArray slots = items.getJSONObject("payload").getJSONArray("storage");
+                                                   ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:52: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+              JSONArray slots = items.getJSONObject("payload").getJSONArray("storage");
+                                                                           ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:55: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                  assertEquals(90000 + slot, slots.getJSONObject(slot).getLong("uniqueId"));
+                                                                ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:55: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                  assertEquals(90000 + slot, slots.getJSONObject(slot).getLong("uniqueId"));
+                                                                              ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:56: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                  assertEquals(slot % 5 + 1, slots.getJSONObject(slot).getInt("count"));
+                                                                ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:56: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                  assertEquals(slot % 5 + 1, slots.getJSONObject(slot).getInt("count"));
+                                                                             ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:59: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+              else assertEquals("StorageUnlockResult", packet(events.get(110)).getString("packet"));
+                                                                                        ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:66: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+              JSONObject outer = new JSONObject(event);
+                                 ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:71: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                  String inner = outer.getString("envelope");
+                                                ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:73: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                  assertTrue(allowed.contains(new JSONObject(inner).getString("packet")));
+                                              ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:73: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                  assertTrue(allowed.contains(new JSONObject(inner).getString("packet")));
+                                                                             ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:75: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+                  assertTrue(outer.getString("worldSnapshot").getBytes(StandardCharsets.UTF_8).length <= 1024 * 1024);
+                                            ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:86: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          return new JSONObject(new JSONObject(event).getString("envelope"));
+                                ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:86: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          return new JSONObject(new JSONObject(event).getString("envelope"));
+                                                               ^
+  /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java:86: 错误: 未报告的异常错误JSONException; 必须对其进行捕获或声明以便抛出
+          return new JSONObject(new JSONObject(event).getString("envelope"));
+                 ^
+  39 个错误
+
+* Try:
+> Check your code and dependencies to fix the compilation error(s)
+> Run with --scan to get full insights.
+
+BUILD FAILED in 8s
+37 actionable tasks: 37 executed

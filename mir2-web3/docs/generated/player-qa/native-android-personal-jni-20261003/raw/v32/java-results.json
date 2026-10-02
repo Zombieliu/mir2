@@ -1,0 +1,104 @@
+[
+  {
+    "variant": "debug",
+    "tests": 51,
+    "failures": 0,
+    "errors": 0,
+    "ignored": 0,
+    "suites": [
+      {
+        "name": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      },
+      {
+        "name": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      },
+      {
+        "name": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      },
+      {
+        "name": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+        "tests": 31,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      },
+      {
+        "name": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      },
+      {
+        "name": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      }
+    ]
+  },
+  {
+    "variant": "preview",
+    "tests": 51,
+    "failures": 0,
+    "errors": 0,
+    "ignored": 0,
+    "suites": [
+      {
+        "name": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      },
+      {
+        "name": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      },
+      {
+        "name": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      },
+      {
+        "name": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+        "tests": 31,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      },
+      {
+        "name": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      },
+      {
+        "name": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "ignored": 0
+      }
+    ]
+  }
+]
