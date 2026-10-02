@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 use crate::config::SkillSnapshot;
-use crate::EquipmentSlot;
+use crate::{EquipmentSlot, ItemContainer};
 use bevy_ecs::entity::Entity;
 use bevy_ecs::prelude::World;
 use mir2_game_data::{
@@ -42,8 +42,8 @@ use super::crystal_compat::{
 };
 use super::equipment::equipment_slot_unique_id;
 use super::items::{
-    crystal_item_template_for_dynamic_key, current_player_required_stat_total,
-    merged_user_item_stats,
+    crystal_item_requirement_rejection_key, crystal_item_template_for_dynamic_key,
+    current_player_required_stat_total, item_unique_id, merged_user_item_stats, ItemState,
 };
 use super::map::{
     current_map_disallows_random_teleport, current_map_disallows_reincarnation, is_safe_zone_point,
@@ -920,7 +920,8 @@ pub(super) fn crystal_spell_required_items_available(world: &World, spell: Spell
         | Spell::SummonSkeleton => has_equipped_crystal_amulet(world, 0),
         Spell::SummonShinsu => equipped_crystal_amulet_component(world, 0, 5).is_some(),
         Spell::SummonHolyDeva => equipped_crystal_amulet_component(world, 0, 2).is_some(),
-        Spell::Poisoning | Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
+        Spell::Poisoning => poisoning_supply(world).is_some(),
+        Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
             has_equipped_crystal_poison(world, None)
         }
         Spell::PoisonCloud => {
@@ -5354,8 +5355,7 @@ fn apply_crystal_poisoning_spell(
         return Vec::new();
     }
 
-    let Some((delete_packet, poison_shape)) = consume_equipped_crystal_poison(world, None, 1)
-    else {
+    let Some((delete_packet, poison_shape)) = consume_poisoning_supply(world) else {
         return Vec::new();
     };
 
@@ -7568,6 +7568,131 @@ fn equipped_crystal_poison_component(
         .map(|item| item.key.clone())
 }
 
+#[derive(Clone, Copy)]
+enum PoisoningSupplyLocation {
+    Equipment(usize),
+    Bag(usize),
+    Belt(usize),
+}
+
+struct PoisoningSupply {
+    location: PoisoningSupplyLocation,
+    item_key: String,
+    shape: u16,
+}
+
+fn carried_poisoning_shape(
+    world: &World,
+    inventory: &InventoryResource,
+    item: &ItemState,
+) -> Option<u16> {
+    if item.quantity == 0
+        || (item.durability_max.unwrap_or_default() > 0 && item.durability_current == Some(0))
+    {
+        return None;
+    }
+    let template = crystal_item_template_for_dynamic_key(&item.key)?;
+    (template.item_type == CRYSTAL_ITEM_TYPE_AMULET
+        && matches!(template.shape, 1 | 2)
+        && crystal_item_requirement_rejection_key(world, inventory, &template).is_none())
+    .then(|| u16::try_from(template.shape).unwrap_or_default())
+}
+
+/// Custom Poisoning rule: preserve equipped priority, then use the lowest bag
+/// slot, then the lowest belt slot. Admission, colour projection and debit all
+/// call this selector; the single-writer session keeps the selection stable.
+/// Other poison spells retain their original equipped-only rules.
+fn poisoning_supply(world: &World) -> Option<PoisoningSupply> {
+    let inventory = world.resource::<InventoryResource>();
+    if let Some((index, item)) = inventory
+        .equipment_items
+        .iter()
+        .enumerate()
+        .find(|(_, item)| {
+            !item.is_broken()
+                && item.quantity > 0
+                && matches!(item.shape, Some(1 | 2))
+                && crystal_item_template_for_dynamic_key(&item.key)
+                    .is_some_and(|template| template.item_type == CRYSTAL_ITEM_TYPE_AMULET)
+        })
+    {
+        return Some(PoisoningSupply {
+            location: PoisoningSupplyLocation::Equipment(index),
+            item_key: item.key.clone(),
+            shape: item.shape.unwrap_or_default(),
+        });
+    }
+    if let Some((index, item, shape)) = inventory
+        .inventory_items
+        .iter()
+        .enumerate()
+        .filter(|(_, item)| matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2))
+        .filter_map(|(index, item)| {
+            carried_poisoning_shape(world, inventory, item).map(|shape| (index, item, shape))
+        })
+        .min_by_key(|(index, item, _)| {
+            (
+                u8::from(item.container == ItemContainer::Bag2),
+                item.slot,
+                item_unique_id(item),
+                *index,
+            )
+        })
+    {
+        return Some(PoisoningSupply {
+            location: PoisoningSupplyLocation::Bag(index),
+            item_key: item.key.clone(),
+            shape,
+        });
+    }
+    inventory
+        .belt_items
+        .iter()
+        .enumerate()
+        .filter(|(_, item)| item.container == ItemContainer::Belt)
+        .filter_map(|(index, item)| {
+            carried_poisoning_shape(world, inventory, item).map(|shape| (index, item, shape))
+        })
+        .min_by_key(|(index, item, _)| (item.slot, item_unique_id(item), *index))
+        .map(|(index, item, shape)| PoisoningSupply {
+            location: PoisoningSupplyLocation::Belt(index),
+            item_key: item.key.clone(),
+            shape,
+        })
+}
+
+fn consume_poisoning_supply(world: &mut World) -> Option<(ServerPacket, u16)> {
+    let supply = poisoning_supply(world)?;
+    let mut inventory = world.resource_mut::<InventoryResource>();
+    let unique_id = match supply.location {
+        PoisoningSupplyLocation::Equipment(index) => {
+            let item = &mut inventory.equipment_items[index];
+            let unique_id = equipment_slot_unique_id(item.slot).unwrap_or(9);
+            item.quantity -= 1;
+            if item.quantity == 0 {
+                inventory.equipment_items.remove(index);
+            }
+            unique_id
+        }
+        PoisoningSupplyLocation::Bag(index) | PoisoningSupplyLocation::Belt(index) => {
+            let items = match supply.location {
+                PoisoningSupplyLocation::Bag(_) => &mut inventory.inventory_items,
+                _ => &mut inventory.belt_items,
+            };
+            let unique_id = item_unique_id(&items[index]);
+            items[index].quantity -= 1;
+            if items[index].quantity == 0 {
+                items.remove(index);
+            }
+            unique_id
+        }
+    };
+    Some((
+        ServerPacket::DeleteItem { unique_id, count: 1 },
+        supply.shape,
+    ))
+}
+
 pub(super) fn zone_magic_inventory_components(
     world: &World,
     spell: Spell,
@@ -7593,7 +7718,8 @@ pub(super) fn zone_magic_inventory_components(
             equipped_crystal_amulet_component(world, 0, 1)?,
             1,
         )]),
-        Spell::Poisoning | Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
+        Spell::Poisoning => Some(vec![component(poisoning_supply(world)?.item_key, 1)]),
+        Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
             Some(vec![component(
                 equipped_crystal_poison_component(world, None, 1)?,
                 1,
@@ -7633,10 +7759,14 @@ pub(super) fn zone_magic_inventory_components(
     }
 }
 
-/// Preserve the Crystal poison colour selected by the equipped poison stack
+/// Preserve the poison colour selected by the actual poison stack
 /// while the gateway moves the cast into the shared Zone runtime. Shape 1 is
 /// green poison, shape 2 is red poison, and zero means no poison component.
 pub(super) fn zone_magic_inventory_item_param(world: &World, spell: Spell) -> u8 {
+    if spell == Spell::Poisoning {
+        return poisoning_supply(world)
+            .map_or(0, |supply| u8::try_from(supply.shape).unwrap_or_default());
+    }
     if !matches!(spell, Spell::Poisoning | Spell::Plague) {
         return 0;
     }
@@ -7714,7 +7844,11 @@ pub(super) fn consume_zone_magic_inventory_components(
             equipped_crystal_amulet_component(world, 0, 1)?;
             Some(Vec::new())
         }
-        Spell::Poisoning | Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
+        Spell::Poisoning => {
+            let (delete_packet, _) = consume_poisoning_supply(world)?;
+            Some(vec![delete_packet])
+        }
+        Spell::PoisonSword | Spell::PoisonShot | Spell::CrippleShot => {
             let (delete_packet, _) = consume_equipped_crystal_poison(world, None, 1)?;
             Some(vec![delete_packet])
         }

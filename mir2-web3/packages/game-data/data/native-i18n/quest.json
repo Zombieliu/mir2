@@ -292,9 +292,9 @@
     },
     {
       "key": "quest.2110015.description",
-      "en": "Defeat 1 Zombie (Type 2) in Dead Mine 1F and complete your class practice: Warriors use Thrusting, Wizards deal spell damage then move, and Taoists equip poison powder and use Poisoning.",
+      "en": "Defeat 1 Zombie (Type 2) in Dead Mine 1F and complete your class practice: Warriors use Thrusting, Wizards deal spell damage then move, and Taoists carry poison powder and use Poisoning.",
       "zh-TW": "在死亡礦區一層消滅 1 只殭屍（二型），並完成職業練習：戰士使用刺殺劍術，法師造成法術傷害后移動，道士準備毒粉后施毒。",
-      "pt-BR": "Derrote 1 Zumbi (Tipo 2) no 1º andar da Mina Morta e conclua o treino: Guerreiro usa Estocada, Mago causa dano mágico e depois se move, e Taoísta equipa pó de veneno e usa Envenenamento.",
+      "pt-BR": "Derrote 1 Zumbi (Tipo 2) no 1º andar da Mina Morta e conclua o treino: Guerreiro usa Estocada, Mago causa dano mágico e depois se move, e Taoísta leva pó de veneno e usa Envenenamento.",
       "aliases": [
         "在死亡矿区一层消灭 1 只僵尸（二型），并完成职业练习：战士使用刺杀剑术，法师造成法术伤害后移动，道士准备毒粉后施毒。",
         "Defeat 1 Zombie2 in D401 and practise Thrusting, repositioned spell damage, or Poisoning with legal materials."
@@ -909,11 +909,11 @@
     },
     {
       "key": "quest.practice.copy.44",
-      "en": "Equip poison powder and poison a monster with Poisoning. This consumes powder.",
-      "zh-TW": "裝備毒粉，用施毒術使怪物中毒；需消耗毒粉。",
-      "pt-BR": "Equipe pó de veneno e envenene um monstro com Envenenamento. A habilidade consome o pó.",
+      "en": "Poison a monster with Poisoning. It can consume powder from your bag or belt, with equipped powder used first.",
+      "zh-TW": "用施毒術使怪物中毒；可消耗背包或腰帶內毒粉，已裝備毒粉優先。",
+      "pt-BR": "Envenene um monstro com Envenenamento. A habilidade pode consumir pó da bolsa ou do cinto, priorizando o pó equipado.",
       "aliases": [
-        "装备毒粉，用施毒术使怪物中毒；需消耗毒粉。"
+        "用施毒术使怪物中毒；可消耗背包或腰带内毒粉，已装备毒粉优先。"
       ]
     },
     {
@@ -1071,11 +1071,11 @@
     },
     {
       "key": "quest.practice.copy.62",
-      "en": "Equip eligible Amulets and carry eligible poison powder. Switch the equipped material between Poisoning and Soul Fireball.",
-      "zh-TW": "裝備可用護身符，背包攜帶可用毒粉；施毒與火符之間切換材料。",
-      "pt-BR": "Equipe Amuletos permitidos e leve pó de veneno adequado na bolsa. Troque o material equipado ao alternar entre Envenenamento e Talismã de Fogo.",
+      "en": "Equip eligible Amulets and carry eligible poison powder in your bag or belt. Poisoning needs no equipment swap.",
+      "zh-TW": "裝備可用護身符，背包或腰帶攜帶可用毒粉；施毒術無需切換裝備。",
+      "pt-BR": "Equipe Amuletos permitidos e leve pó de veneno adequado na bolsa ou no cinto. Envenenamento não exige trocar o equipamento.",
       "aliases": [
-        "装备可用护身符，背包携带可用毒粉；施毒与火符之间切换材料。"
+        "装备可用护身符，背包或腰带携带可用毒粉；施毒术无需切换装备。"
       ]
     },
     {
@@ -1134,11 +1134,11 @@
     },
     {
       "key": "quest.practice.copy.69",
-      "en": "Switch equipped Amulets and poison powder for the skill you use. Materials in your bag are not necessarily equipped.",
-      "zh-TW": "護身符與毒粉需按技能切換裝備；背包里有材料不等于已裝備。",
-      "pt-BR": "Alterne entre Amuletos e pó de veneno equipados conforme a habilidade. Ter o material na bolsa não significa que ele esteja equipado.",
+      "en": "Soul Fireball and summons still require equipped Amulets. Poisoning can consume powder directly from your bag or belt, with equipped powder used first.",
+      "zh-TW": "火符和召喚仍需裝備護身符；施毒術可直接消耗背包或腰帶內毒粉，已裝備毒粉優先。",
+      "pt-BR": "Talismã de Fogo e invocações ainda exigem Amuletos equipados. Envenenamento pode consumir pó diretamente da bolsa ou do cinto, priorizando o pó equipado.",
       "aliases": [
-        "护身符与毒粉需按技能切换装备；背包里有材料不等于已装备。"
+        "火符和召唤仍需装备护身符；施毒术可直接消耗背包或腰带内毒粉，已装备毒粉优先。"
       ]
     },
     {
@@ -2202,11 +2202,11 @@
     },
     {
       "key": "quest.supply.materials",
-      "en": "Fireball/summoning use Amulets; Poisoning uses poison powder.",
-      "zh-TW": "火符/召喚用符；施毒用毒粉。",
-      "pt-BR": "Talismã de Fogo e invocações usam Amuletos; Envenenamento usa pó de veneno.",
+      "en": "Soul Fireball/summoning require equipped Amulets; Poisoning can use carried powder.",
+      "zh-TW": "火符/召喚裝備符；施毒可用攜帶毒粉。",
+      "pt-BR": "Talismã de Fogo e invocações exigem Amuletos equipados; Envenenamento pode usar pó carregado.",
       "aliases": [
-        "火符/召唤用符；施毒用毒粉。",
+        "火符/召唤装备符；施毒可用携带毒粉。",
         "Fireball/summoning use Amulets; Poisoning uses poison powder."
       ]
     },

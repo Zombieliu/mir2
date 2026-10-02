@@ -15501,6 +15501,8 @@ mod tests {
     mod creature_authority_tests;
     #[path = "inventory_receipt_scope_tests.rs"]
     mod inventory_receipt_scope_tests;
+    #[path = "poisoning_carried_tests.rs"]
+    mod poisoning_carried_tests;
     #[path = "ordered_economy_replay_tests.rs"]
     mod ordered_economy_replay_tests;
     #[path = "owner_attack_animation_tests.rs"]

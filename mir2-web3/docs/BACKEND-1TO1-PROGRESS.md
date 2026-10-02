@@ -1,5 +1,12 @@
 # Backend 1:1 Progress
 
+> 2026-10-02 explicit custom Poisoning rule: one shared selector now admits and
+> consumes equipped/bag/belt poison, preserving equipped priority and matching
+> the authoritative Zone colour to the exact stack debit. Seven actual
+> Session/Zone cases, three ordinary Gateway receipt cases and four adjacent
+> Zone cases pass; other material rules
+> are unchanged. No rollout or Crystal parity claim. [Evidence](POISONING-CARRIED-POISON-RULE-20261002.md).
+
 > 2026-10-02 combat-intent repair: physical attack/cast intents retire earlier
 > pending movement before cooldown admission and send an owner transform
 > receipt; deadlines, damage and preparation neutrality remain intact.

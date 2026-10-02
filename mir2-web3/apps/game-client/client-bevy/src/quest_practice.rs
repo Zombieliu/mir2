@@ -83,7 +83,7 @@ fn requirement_instruction(requirement: &str) -> Option<(&str, &str)> {
         "spell damage followed by legal reposition" => ("法术伤害后移动", "先用法术造成伤害，再走到可通行位置；只原地施法不计。"),
         "Poisoning learned" => ("学会施毒术", "先学会施毒术，准备毒粉。"),
         "owned poison effect committed" | "owned poison effect committed with material consumption" =>
-            ("成功施毒", "装备毒粉，用施毒术使怪物中毒；需消耗毒粉。"),
+            ("成功施毒", "用施毒术使怪物中毒；可消耗背包或腰带内毒粉，已装备毒粉优先。"),
         "FireWall learned" => ("学会火墙", "先学会火墙。"),
         "owned FireWall damage committed" => ("自己的火墙造成伤害", "用自己施放的火墙灼伤怪物；只放空地不计。"),
         "HalfMoon learned" => ("学会半月弯刀", "先学会半月弯刀。"),
@@ -93,7 +93,7 @@ fn requirement_instruction(requirement: &str) -> Option<(&str, &str)> {
         "legal reposition between attacks" => ("攻击之间移动", "两次攻击之间移动到可通行位置。"),
         "level-eligible weapon equipped" => ("装备可用武器", "装备一把符合自身等级要求的武器。"),
         "eligible Amulet equipped and legal poison available in bag for re-equip between casts" =>
-            ("装备护身符并携带毒粉", "装备可用护身符，背包携带可用毒粉；施毒与火符之间切换材料。"),
+            ("装备护身符并携带毒粉", "装备可用护身符，背包或腰带携带可用毒粉；施毒术无需切换装备。"),
         _ => return None,
     })
 }
@@ -115,7 +115,7 @@ pub fn supply_instructions(quest_index: i32, class_name: &str) -> Vec<String> {
     } else if class_name.eq_ignore_ascii_case("Taoist") {
         lines.push("道士施法前准备蓝药；火符和召唤骷髅消耗护身符，施毒消耗毒粉。".into());
         lines.push("毒粉商·特拉维斯在制药室（4,9）；点补给检查选择毒粉，会逐段标出店铺入口。".into());
-        lines.push("护身符与毒粉需按技能切换装备；背包里有材料不等于已装备。".into());
+        lines.push("火符和召唤仍需装备护身符；施毒术可直接消耗背包或腰带内毒粉，已装备毒粉优先。".into());
     }
     lines.push("回城卷回到最近经过的安全区；地图禁用卷轴时，可按入口路线步行返回。购买前检查金币和负重。".into());
     lines.into_iter().map(|line| crate::player_text::text(&line)).collect()
@@ -141,6 +141,50 @@ mod tests {
                         assert!(!guide.summary.contains("雷電術"));
                     }
                 }
+            });
+        }
+    }
+
+    #[test]
+    fn poisoning_guidance_explains_carried_supplies_and_keeps_amulets_equipped() {
+        use crate::native_i18n::{with_locale, Locale};
+        let (_, poison) = requirement_instruction("owned poison effect committed with material consumption").unwrap();
+        assert!(poison.contains("背包或腰带") && poison.contains("已装备毒粉优先"));
+        // Resolve real key overrides as well as the displayed instructions.
+        // Extra locale packs previously kept equip/swap-powder copy even
+        // after the canonical three-language entries had been corrected.
+        for (locale, carried, priority, equipped, no_swap, compact_carried, description_carried) in [
+            (Locale::English, "bag or belt", "equipped powder used first", "equipped Amulets",
+                "needs no equipment swap", "carried powder", "carry poison powder"),
+            (Locale::TraditionalChinese, "背包或腰帶", "已裝備毒粉優先", "裝備護身符",
+                "無需切換裝備", "攜帶毒粉", "準備毒粉"),
+            (Locale::BrazilianPortuguese, "bolsa ou do cinto", "priorizando o pó equipado", "Amuletos equipados",
+                "não exige trocar o equipamento", "pó carregado", "leva pó de veneno"),
+            (Locale::Russian, "сумки или пояса", "экипированный порошок используется первым", "экипированных талисманов",
+                "менять экипировку не нужно", "переносимый порошок", "носят ядовитый порошок"),
+            (Locale::Hindi, "थैले या बेल्ट", "पहना हुआ विष चूर्ण पहले", "पहने हुए ताबीज़",
+                "उपकरण बदलना ज़रूरी नहीं", "साथ रखा विष चूर्ण", "विष चूर्ण साथ रखकर"),
+            (Locale::Indonesian, "tas atau sabuk", "bubuk yang dikenakan digunakan lebih dahulu", "Jimat yang dikenakan",
+                "tidak memerlukan pergantian", "bubuk yang dibawa", "membawa Bubuk Racun"),
+            (Locale::Vietnamese, "túi hoặc thắt lưng", "bột đã trang bị được dùng trước", "Bùa đã trang bị",
+                "không cần đổi trang bị", "bột mang theo", "mang Bột độc"),
+            (Locale::Thai, "กระเป๋าหรือเข็มขัด", "ใช้ผงพิษที่สวมใส่ก่อน", "เครื่องรางที่สวมใส่",
+                "ไม่ต้องสลับอุปกรณ์", "ผงพิษที่พกอยู่", "พกผงพิษ"),
+            (Locale::Arabic, "الحقيبة أو الحزام", "المسحوق المجهّز أولًا", "التعويذات المجهّزة",
+                "لا يحتاج «التسميم» إلى تبديل المعدات", "المسحوق المحمول", "يحمل الطاويون مسحوق السم"),
+        ] {
+            with_locale(locale, || {
+                let guide = practice_guide(2_110_015, "Taoist").unwrap();
+                assert!(guide.instructions.iter().any(|line| line.contains(carried) && line.contains(priority)), "{locale:?}: {:?}", guide.instructions);
+                let supplies = supply_instructions(2_110_021, "Taoist");
+                assert!(supplies.iter().any(|line| line.contains(carried) && line.contains(equipped) && line.contains(priority)), "{locale:?}: {supplies:?}");
+                let material_requirement = crate::native_i18n::key("quest.practice.copy.62", "");
+                assert!(material_requirement.contains(no_swap), "{locale:?}: {material_requirement}");
+                let compact = crate::native_i18n::key("quest.supply.materials", "");
+                let compact_equipped = if locale == Locale::TraditionalChinese { "裝備符" } else { equipped };
+                assert!(compact.contains(compact_equipped) && compact.contains(compact_carried), "{locale:?}: {compact}");
+                let description = crate::native_i18n::key("quest.2110015.description", "");
+                assert!(description.contains(description_carried), "{locale:?}: {description}");
             });
         }
     }

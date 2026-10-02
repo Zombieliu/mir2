@@ -179,7 +179,7 @@ pub struct SupplyPlan {
     pub estimated_cost: u32,
     pub bag_weight: Option<(u32, u32)>,
     pub bag_full: bool,
-    pub needs_material_switch: bool,
+    pub needs_taoist_material_guidance: bool,
 }
 
 impl SupplyPlan {
@@ -562,7 +562,7 @@ fn plan_at(
                 ))
             }),
         bag_full: occupied >= usize::from(inventory.bag_slot_capacity()),
-        needs_material_switch: needs_amulet && needs_poison,
+        needs_taoist_material_guidance: needs_amulet && needs_poison,
     }
 }
 
@@ -656,7 +656,7 @@ mod tests {
         let poison = result.rows.iter().find(|row| row.label == "毒粉").unwrap();
         assert_eq!(poison.held, 4);
         assert!(!poison.is_low());
-        assert!(result.needs_material_switch);
+        assert!(result.needs_taoist_material_guidance);
         assert!(
             !plan(&player("Taoist", 13), &inventory, None, Some(2110021))
                 .rows
@@ -893,7 +893,7 @@ mod tests {
             None,
             Some(2110021),
         );
-        assert!(practice.needs_material_switch);
+        assert!(practice.needs_taoist_material_guidance);
         assert!(
             !plan(
                 &player("Taoist", 28),
@@ -901,7 +901,7 @@ mod tests {
                 None,
                 Some(2110004)
             )
-            .needs_material_switch
+            .needs_taoist_material_guidance
         );
     }
 
