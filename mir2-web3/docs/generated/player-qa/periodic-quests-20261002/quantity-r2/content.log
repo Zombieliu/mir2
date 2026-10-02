@@ -1,0 +1,12 @@
+   Compiling mir2-game-data v0.1.0 (C:\Users\Administrator\.codex\worktrees\capacity-transport\mir2-player-journey\mir2-web3\packages\game-data)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.78s
+     Running unittests src\lib.rs (C:/mir2-build/periodic-simulation-20261002\debug\deps\mir2_game_data-3a32aa185306a9c5.exe)
+
+running 4 tests
+test periodic_quests::tests::every_supported_band_has_five_slots_and_only_experience_gold_rewards ... ok
+test periodic_quests::tests::invalid_periodic_slot_objective_and_duplicate_npc_are_rejected ... ok
+test periodic_quests::tests::periodic_additions_do_not_reuse_imported_npc_quest_ids_or_tiles ... ok
+test periodic_quests::tests::periodic_hunts_reference_existing_profile_monsters_and_respawns ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 54 filtered out; finished in 0.08s
+

@@ -244,11 +244,11 @@
       "cadence": "daily",
       "slot": 0,
       "title": "Tomb Red Boar Patrol",
-      "summary": "Defeat 60 Red Boars in Angled Stone Tomb B1. Return to either Task Steward.",
+      "summary": "Defeat 40 Red Boars in Angled Stone Tomb B1. Return to either Task Steward.",
       "rewardExpPercent": 10,
       "gold": 34000,
       "kills": [
-        { "monster": "RedBoar", "monsterIndex": 168, "count": 60, "maps": ["D711"], "x": 251, "y": 41 }
+        { "monster": "RedBoar", "monsterIndex": 168, "count": 40, "maps": ["D711"], "x": 251, "y": 41 }
       ]
     },
     {
@@ -258,11 +258,11 @@
       "cadence": "daily",
       "slot": 1,
       "title": "Tomb Black Boar Patrol",
-      "summary": "Defeat 50 Black Boars in Angled Stone Tomb B1. Return to either Task Steward.",
+      "summary": "Defeat 30 Black Boars in Angled Stone Tomb B1. Return to either Task Steward.",
       "rewardExpPercent": 14,
       "gold": 34000,
       "kills": [
-        { "monster": "BlackBoar", "monsterIndex": 171, "count": 50, "maps": ["D711"], "x": 251, "y": 41 }
+        { "monster": "BlackBoar", "monsterIndex": 171, "count": 30, "maps": ["D711"], "x": 251, "y": 41 }
       ]
     },
     {
@@ -272,11 +272,11 @@
       "cadence": "daily",
       "slot": 2,
       "title": "Zuma Rat Patrol",
-      "summary": "Defeat 30 Giant Rats in Zuma Temple 1F. Return to either Task Steward.",
+      "summary": "Defeat 10 Giant Rats in Zuma Temple 1F. Return to either Task Steward.",
       "rewardExpPercent": 16,
       "gold": 34000,
       "kills": [
-        { "monster": "GiantRat", "monsterIndex": 192, "count": 30, "maps": ["D501"], "x": 200, "y": 200 }
+        { "monster": "GiantRat", "monsterIndex": 192, "count": 10, "maps": ["D501"], "x": 200, "y": 200 }
       ]
     },
     {
@@ -286,12 +286,12 @@
       "cadence": "weekly",
       "slot": 0,
       "title": "Tomb Boar Watch",
-      "summary": "Defeat 180 Red Boars and 150 Black Boars in Angled Stone Tomb B1 this week. Return to either Task Steward.",
+      "summary": "Defeat 120 Red Boars and 90 Black Boars in Angled Stone Tomb B1 this week. Return to either Task Steward.",
       "rewardExpPercent": 50,
       "gold": 250000,
       "kills": [
-        { "monster": "RedBoar", "monsterIndex": 168, "count": 180, "maps": ["D711"], "x": 251, "y": 41 },
-        { "monster": "BlackBoar", "monsterIndex": 171, "count": 150, "maps": ["D711"], "x": 251, "y": 41 }
+        { "monster": "RedBoar", "monsterIndex": 168, "count": 120, "maps": ["D711"], "x": 251, "y": 41 },
+        { "monster": "BlackBoar", "monsterIndex": 171, "count": 90, "maps": ["D711"], "x": 251, "y": 41 }
       ]
     },
     {
@@ -301,12 +301,12 @@
       "cadence": "weekly",
       "slot": 1,
       "title": "Zuma Entrance Watch",
-      "summary": "Defeat 100 Giant Rats and 120 Wedge Moths in Zuma Temple 1F this week. Return to either Task Steward.",
+      "summary": "Defeat 50 Giant Rats and 60 Wedge Moths in Zuma Temple 1F this week. Return to either Task Steward.",
       "rewardExpPercent": 60,
       "gold": 250000,
       "kills": [
-        { "monster": "GiantRat", "monsterIndex": 192, "count": 100, "maps": ["D501"], "x": 200, "y": 200 },
-        { "monster": "WedgeMoth", "monsterIndex": 165, "count": 120, "maps": ["D501"], "x": 200, "y": 200 }
+        { "monster": "GiantRat", "monsterIndex": 192, "count": 50, "maps": ["D501"], "x": 200, "y": 200 },
+        { "monster": "WedgeMoth", "monsterIndex": 165, "count": 60, "maps": ["D501"], "x": 200, "y": 200 }
       ]
     }
   ]

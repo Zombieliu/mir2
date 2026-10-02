@@ -1,5 +1,20 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-02 13:25 Asia/Shanghai periodic-content checkpoint: ordinary
+> Warrior14 and Taoist14 daily sets finish in41m48.518s and55m32.173s,
+> including return/hand-in; independent relogins retain their balances and
+> all five quest states. Wizard target-ownership/controller failures and the
+> Warrior35 original75-minute timeout remain failed measurements. Only the
+> high-band catalog is reduced to40 red boars /30 black boars /10 giant rats;
+> focused4 content +18 packet/persistence +8 rule checks pass (one opt-in PG
+> case explicitly ignored; earlier actual PG proof remains separate).
+> New-count/all-band class pacing is not accepted. r10 signed sequence6 and
+> paired b71 invited gateway are published; actual112,710,277-byte HTTPS
+> update/recheck and installed login boot pass. Native NPC interaction and
+> human acceptance remain open. The ten-hour window elapsed; the active goal
+> is incomplete and continues. No human save or capacity-goal change.
+> [Goal](DAILY-WEEKLY-GOAL.md); [design](DAILY-WEEKLY-QUEST-DESIGN.md).
+
 > 2026-10-02 additive periodic tasks: separate Daily/Weekly diary pages, current
 > town Task Steward guidance, legal entrance/stop-near routing and complete
 > authored nine-language copy. Focused task regressions pass 211/4 ignored,

@@ -24,11 +24,15 @@ progress injection or a quest-state test cannot establish play time.
   time decides the period; client time and packet movement ticks do not.
 - In-progress and ready quests survive a reset. A successful hand-in consumes
   the period in which the hand-in commits, not the acceptance period.
-- Accepting locks that quest's band, targets, absolute EXP and gold. A later
+- Accepting retains that quest ID and band and locks absolute EXP and gold. A later
   level-up, reset or EXP-buff expiry cannot change an active quest's reward.
   Abandoning forfeits unclaimed progress and permits a fresh acceptance subject
   to the same slot limit. A new period clears a completed quest for another
   acceptance; its previous claim watermark is retained.
+  Target quantities remain the versioned server catalog's quantities; the saved
+  reward structure does not freeze a future catalog patch. Timing experiments
+  therefore use a fresh independent realm and preserve original accepted saves
+  under their original binary/catalog, rather than reopening old measurements.
 - Rewards contain only EXP and gold. There are no item rewards, random drops,
   purchase requirements, profession-only practice objectives or boss kills.
 - A credited player or player-owned pet kill may advance an accepted daily and
@@ -109,12 +113,35 @@ count. Guidance coordinates are not an artificial small kill-radius gate.
 | 10–14 | 92001–92005 | Scarecrow 80 / RakingCat 60 / HookingCat 60, `0` | Scarecrow 200 / RakingCat 160 + HookingCat 160, `0` | 12,000 total / 25,000 each |
 | 15–24 | 92006–92010 | Oma 70, `0` / Skeleton 60 / Scorpion 60, `D001` or `D011` | Oma 200, `0` / Skeleton 150 + Scorpion 150, `D001` or `D011` | 24,000 total / 60,000 each |
 | 25–34 | 92011–92015 | Centipede 50 / BlackMaggot 45 / WhimperingBee 45, `D601` | Centipede 150 + BlackMaggot 100 / WhimperingBee 120 + GiantWorm 120, `D601` | 60,000 total / 150,000 each |
-| 35–50 | 92016–92020 | RedBoar 60 / BlackBoar 50, `D711` / GiantRat 30, `D501` | RedBoar 180 + BlackBoar 150, `D711` / GiantRat 100 + WedgeMoth 120, `D501` | 102,000 total / 250,000 each |
+| 35–50 | 92016–92020 | RedBoar 40 / BlackBoar 30, `D711` / GiantRat 10, `D501` | RedBoar 120 + BlackBoar 90, `D711` / GiantRat 50 + WedgeMoth 60, `D501` | 102,000 total / 250,000 each |
 
-The complete three-quest daily sets require 200, 190, 140 and 140 credited kills respectively
+The complete three-quest daily sets require 200, 190, 140 and 80 credited kills respectively
 for the four bands. These are workload counts, not measured durations. Weekly
 progress overlaps the corresponding daily hunts where species/maps match,
 so players do not need to redo identical kills just for the weekly counter.
+
+### Quantity revision after the original high-band measurement
+
+The original Warrior35 server run reached its fixed 75-minute cutoff with
+RedBoar60 and BlackBoar50 ready, GiantRat21/30 still incomplete, zero hand-in
+rewards and a confirmed normal logout. The retained report is a failed daily
+duration gate. At ordinary earlier thresholds it reached Red40 in29m19.836s,
+Black30 in34m48.077s and its first ten rats in66m10.128s, after finishing the
+original larger boar workload and travelling to Zuma. Those thresholds do
+not establish a new-count completion time.
+
+The revision reduces only the 35–50 workload to40/30/10; experience, gold,
+monster stats, equipment and cooldown rules are unchanged. Its weekly boar
+set overlaps three daily sets; the rat/moth set is reduced to50/60 for a
+rough five-to-six-session planning budget. These are planning assumptions,
+pending a fresh ordinary new-catalog journey including travel, combat,
+resupply and return. Existing r10/public b71 evidence uses the original
+60/50/30 catalog and must not be described as this revision's timing proof.
+
+Focused checks after this catalog change pass4 canonical content tests,
+18 packet/persistence tests and8 periodic rules. The opt-in PostgreSQL case
+is explicitly ignored in this focused run; its earlier actual daily/weekly
+COMMIT-barrier proof is retained separately.
 
 ## Imported monster and spawn evidence
 

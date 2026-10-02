@@ -1,0 +1,48 @@
+{
+  "schema": "mir2-periodic-quantity-r2/1",
+  "catalogSha256": "075c915de9c2414745ffbcb243e77e430536cb9af5d64e63d2655468ece71199",
+  "changedLevelBand": [
+    35,
+    50
+  ],
+  "dailyCounts": [
+    40,
+    30,
+    10
+  ],
+  "weeklyCounts": [
+    [
+      120,
+      90
+    ],
+    [
+      50,
+      60
+    ]
+  ],
+  "rewardsChanged": false,
+  "combatRulesChanged": false,
+  "contentPassed": 4,
+  "packetPersistencePassed": 18,
+  "periodicRulesPassed": 8,
+  "postgresOptInIgnored": 1,
+  "newCountTimedCompletionAccepted": false,
+  "humanAccepted": false,
+  "files": [
+    {
+      "path": "content.log",
+      "sha256": "4d4e57d8596c46ee74ea196404e441ab0afe061c20d85cc575635b89e80e6400",
+      "sizeBytes": 874
+    },
+    {
+      "path": "packets-durability.log",
+      "sha256": "e548b10cb3ee4b1952d54fb38378a143ab4153fe507c9e6830e5265f21aa346a",
+      "sizeBytes": 31228
+    },
+    {
+      "path": "rules.log",
+      "sha256": "4b78502abf380c823bb50093901c82426c34105825a5722cff55c1ac51c05b60",
+      "sizeBytes": 38638
+    }
+  ]
+}

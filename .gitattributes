@@ -46,3 +46,7 @@ mir2-web3/docs/generated/player-qa/periodic-quests-20261002/backend/** -text -di
 mir2-web3/docs/generated/player-qa/periodic-quests-20261002/fixtures/** -text -diff
 mir2-web3/docs/generated/player-qa/periodic-quests-20261002/controller/** -text -diff
 mir2-web3/docs/generated/player-qa/periodic-quests-20261002/postgres/** -text -diff
+mir2-web3/docs/generated/player-qa/periodic-quests-20261002/server-measure-r1/** -text -diff
+mir2-web3/docs/generated/player-qa/periodic-quests-20261002/release-r10/** -text -diff
+mir2-web3/docs/generated/player-qa/periodic-quests-20261002/server-measure-r2/** -text -diff
+mir2-web3/docs/generated/player-qa/periodic-quests-20261002/quantity-r2/** -text -diff

@@ -56,6 +56,62 @@ accounts or the damaged historical repository objects.
 Evidence and unchecked acceptance items must remain distinct from human
 frontend acceptance. A ten-hour budget is not evidence of completion.
 
+## Checkpoint after the requested ten-hour window
+
+The original window elapsed at13:11 Asia/Shanghai without all acceptance
+gates passing. The goal remains active. The original low-band Warrior/Taoist
+daily sets pass, but all twelve representative band/class journeys and
+naturally completed weekly hunts are not accepted. Both failed Wizard
+controllers and the original75-minute Warrior35 timeout are retained.
+
+Only the high-band catalog is reduced to40/30/10 daily and120+90 /50+60
+weekly, with all rewards and combat rules unchanged. The new catalog passes
+4 content,18 packet/persistence and8 rules tests; the opt-in PG case was
+ignored here, not counted as a new run. Its earlier real daily/weekly durable
+commit proof remains separately scoped. A fresh independently seeded realm,
+new binary/catalog and receipted ordinary Taoist summon/green-poison tactics
+are being prepared; an earlier threshold or a script existing is not a new
+30–60-minute completion pass.
+
+The r10/b71 paired rollout and signed sequence6 are live. Actual native HTTPS
+r9→r10 updates112,710,277 bytes in296.288s, verifies the changed files and
+rechecks with zero payload downloads. First native boot successfully accepted
+the engine but the original byte-only preference test failed because one
+display JSON file was canonically reserialized with exactly the same typed
+settings. That failure is retained. A narrowly tested semantic display check
+passes the next observed login boot; seven other preferences and personal
+markers remain byte exact. This is installed-delivery proof, not NPC GUI or
+human gameplay acceptance. r11 is being prepared for the catalog revision.
+
+## Checkpoint at 12:35 Asia/Shanghai
+
+The isolated b71 gateway and frozen ordinary controllers are deployed. Warrior14
+completed all three daily hand-ins in 41m48.518s, with 12,000 EXP and 12,000
+gold receipted separately from kill earnings. Its completed tasks, weekly
+overlap, balance and transform survived a service restart and ordinary relogin.
+Taoist14 completed all three in 55m32.173s with no death or merchant visit;
+an independent ordinary relogin matched all five quest states and balances.
+These are two specific level/class measurements, not all-band acceptance.
+
+Preserved Wizard15 and Wizard14 failures exposed controller assumptions about
+AOI corpse reobservation and another player's targetless melee attacks. The
+actual latter kill belongs to Taoist, not Wizard. Strict corpse/ownership
+regressions are separate from the retained failed clocks. Taoist25 was
+resource-aborted at 60m24.793s without a reward; unused spectator buffering
+was disabled only on the isolated realm, without modifying combat/content.
+Warrior35 hit the original 75-minute cutoff with boars complete but rats21/30,
+zero rewards and confirmed normal logout. Higher-band quantity calibration and
+normal Taoist summon/poison tactics remain outstanding; no deadline extension
+or injected progression makes these failures successful.
+
+The invited gateway was safely paired to b71 with original private env,
+PostgreSQL/Redis/state preserved and consistent private backups verified.
+Anonymous StartGame remains rejected. Signed sequence6/r10 discovery and
+immutable files are published with the original Caddy configuration. The real
+r9→r10 file-source delta/rollback checks pass2/2 and new bundle tamper checks
+pass2; actual native HTTPS application/Launcher observation are running next.
+The active goal remains incomplete pending those delivery and pacing gates.
+
 ## Checkpoint at 09:16 Asia/Shanghai
 
 Checked implementation/rule/UI items are supported by focused packet,
