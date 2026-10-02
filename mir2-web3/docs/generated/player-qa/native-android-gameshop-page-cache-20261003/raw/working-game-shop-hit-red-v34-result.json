@@ -1,0 +1,59 @@
+{
+  "label": "working-game-shop-hit-red-v34",
+  "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+  "bin": "cargo",
+  "args": [
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+    "--features",
+    "native-player-ui",
+    "--lib",
+    "--locked",
+    "--offline",
+    "game_shop_dialog::hit_tests",
+    "--",
+    "--test-threads=1"
+  ],
+  "source": "2c2b748263db10f6350c26c0cad9acb68fa5f2a0",
+  "started": "2026-10-02T17:48:19.922Z",
+  "ended": "2026-10-02T17:48:51.992Z",
+  "code": 101,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74181,
+      "sha256": "ef8915bd989058c7151efaf0d6b6f0f86c52e2ee86f9e3e570c0b7a2eebce454"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+      "bytes": 5912,
+      "sha256": "6a88d0482b155b04d8bbe83174646bc601f0941ce140dc2692a1b8c04c53d4df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28740,
+      "sha256": "900d5ee86bd150bab475e2b1a9f3d13437604e51c5e925a3226aeee15cfeb04a"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74181,
+      "sha256": "ef8915bd989058c7151efaf0d6b6f0f86c52e2ee86f9e3e570c0b7a2eebce454"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+      "bytes": 5912,
+      "sha256": "6a88d0482b155b04d8bbe83174646bc601f0941ce140dc2692a1b8c04c53d4df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28740,
+      "sha256": "900d5ee86bd150bab475e2b1a9f3d13437604e51c5e925a3226aeee15cfeb04a"
+    }
+  ],
+  "sourceUnchanged": true
+}

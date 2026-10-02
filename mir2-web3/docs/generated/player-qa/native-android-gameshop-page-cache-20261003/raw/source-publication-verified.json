@@ -1,0 +1,40 @@
+{
+  "checked": "2026-10-02T18:09:33.282Z",
+  "source": "76d51415b5ceed667898a720c698b3a062bf7790",
+  "evidence": "76d51415b5ceed667898a720c698b3a062bf7790",
+  "localAndRemoteExact": true,
+  "branch": "codex/android-shared-sync",
+  "pr": {
+    "baseRef": "codex/playtest-registration",
+    "draft": true,
+    "headRef": "codex/android-shared-sync",
+    "headSha": "76d51415b5ceed667898a720c698b3a062bf7790",
+    "html_url": "https://github.com/Zombieliu/mir2/pull/253",
+    "number": 253,
+    "state": "open"
+  },
+  "originalAfter": [
+    {
+      "path": "/Users/henryliu/obelisk/numeron",
+      "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+      "branch": "codex/steam-main",
+      "status": " M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/\n"
+    },
+    {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+      "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+      "branch": "codex/android-player-journey",
+      "status": ""
+    }
+  ],
+  "untrackedRecursivelyHashed": false,
+  "workingStatus": "",
+  "windowsRemote": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4",
+  "frozenDenominator": "3d735745f1117d42a7859e87604a106351dca935",
+  "initialPushFailureRetained": false,
+  "normalFastForwardOnly": true,
+  "wholeGoalComplete": false,
+  "realNetworkAccepted": false,
+  "physicalDeviceAccepted": false,
+  "goalStatus": "Active"
+}

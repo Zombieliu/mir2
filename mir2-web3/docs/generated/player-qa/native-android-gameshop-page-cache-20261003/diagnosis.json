@@ -1,0 +1,314 @@
+{
+  "created": "2026-10-02T18:22:19.177Z",
+  "source": "76d51415b5ceed667898a720c698b3a062bf7790",
+  "previousPublishedAndroid": "2c2b748263db10f6350c26c0cad9acb68fa5f2a0",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "branch": "codex/android-shared-sync",
+  "pr": 253,
+  "prDraft": true,
+  "sourceAlreadyPublishedAndVerified": true,
+  "version": 34,
+  "versionName": "0.1.31-gameshop-page-cache",
+  "scope": [
+    "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+    "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+    "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs"
+  ],
+  "inputCount": 49,
+  "goalStatus": "Active",
+  "wholeGoalComplete": false,
+  "fullNI12Status": "PARTIAL",
+  "fullNI13Status": "PARTIAL",
+  "rootCause": "Retained GameShopRenderKey omitted NativePlayerUiState.game_shop_page; controller page could change while fill_game_shop_panel reused the old child tree.",
+  "hypotheses": [
+    {
+      "name": "Decorative text intercepts arrow input",
+      "status": "REJECTED",
+      "evidence": "working-game-shop-hit-compiled-red-v34.log",
+      "detail": "Pinned Bevy 0.19 Node requires FocusPolicy; actual generated label boxes/text and ui_focus_system tests passed before any production fix. No FocusPolicy patch applied."
+    },
+    {
+      "name": "Independent retained window cache omits current page",
+      "status": "CONFIRMED",
+      "evidence": "working-game-shop-page-cache-corrected-red-v34.log",
+      "detail": "Two compiled failures 1/14 vs 2/14 and 2/14 vs 1/14. Add page to retained key and equality; corrected green 7/7 and native same-coordinate actual tap follow-up passed."
+    }
+  ],
+  "preparationIssues": [
+    {
+      "evidence": "working-game-shop-hit-red-v34.log",
+      "classification": "test harness compile error, NOT product red",
+      "detail": "ui_stack_system is private; headless harness supplies hierarchy paint order but invokes actual public Bevy ui_focus_system."
+    },
+    {
+      "evidence": [
+        "working-game-shop-page-cache-red-v34.log",
+        "working-game-shop-page-cache-green-v34.log"
+      ],
+      "classification": "new fixture sorting expectation error, separate from cache failure",
+      "detail": "Unpadded names lexically sort 0/1/10/100; fixed new test fixture to zero-padded names, preserving source sorting/friendly-name rules. Then reran proper corrected red and green."
+    }
+  ],
+  "regression": {
+    "compiledCorrectedRed": {
+      "passed": 5,
+      "failed": 2
+    },
+    "correctedGreen": {
+      "passed": 7,
+      "failed": 0
+    },
+    "headlessBoxGeometryOnly": true,
+    "renderedEveryPageAndAll105Identities": true,
+    "unchangedTreeRetained": true,
+    "existingTestsModified": false
+  },
+  "gates": [
+    "bound-rust-normal-v34",
+    "bound-rust-preview-v34",
+    "bound-shared-native-player-v34",
+    "bound-runtime-v34",
+    "bound-api31-normal-v34-corrected",
+    "bound-api31-preview-v34-corrected",
+    "bound-java-full-v34"
+  ],
+  "rustPassed": {
+    "normal": 359,
+    "preview": 387,
+    "shared": 1267,
+    "runtime": 292
+  },
+  "unchangedIgnored": {
+    "shared": 10,
+    "runtime": 1
+  },
+  "javaPassedEach": 52,
+  "newNativeApksBuilt": true,
+  "actualOfflineJavaJniVerified": true,
+  "actualShopPagingVerified": true,
+  "shopFinalPageBoundaryVerified": true,
+  "shopPreviousAndSamePidResumeVerified": true,
+  "storagePageAndSamePidResumeRegressionVerified": true,
+  "normalIntentIsolationVerified": true,
+  "wholePhoneUiAccepted": false,
+  "phoneShop48dpTargetsAccepted": false,
+  "storageInventoryLayoutAccepted": false,
+  "realAuthenticationAccepted": false,
+  "realNetworkAccepted": false,
+  "purchaseAccepted": false,
+  "storageTransferAccepted": false,
+  "physicalDeviceAccepted": false,
+  "rendererFixAccepted": false,
+  "zeroRendererErrorAccepted": false,
+  "fullResourcePackAccepted": false,
+  "windowsHostBuildAccepted": false,
+  "appDataContentHashed": false,
+  "untrackedRecursivelyHashed": false,
+  "friendlyNameSuffixNote": "Existing game_shop_display_name deliberately strips trailing ASCII digits: JNI received 001 -> JNI received. This is not evidence by itself of clipped suffixes; item identity/data unchanged.",
+  "device": {
+    "serial": "emulator-5554",
+    "api": 31,
+    "model": "sdk_gphone64_arm64",
+    "abi": "arm64-v8a",
+    "screenPhysical": [
+      1080,
+      2340
+    ],
+    "screenshots": [
+      2340,
+      1080
+    ],
+    "density": 440,
+    "physicalConnected": false
+  },
+  "scenes": [
+    {
+      "scene": "gameshop-jni",
+      "pid": "24356",
+      "latestLog": "128-home-pid.log",
+      "totals": {
+        "gl506": 6,
+        "uninitializedColor": 6,
+        "fatalOrPanic": 0
+      },
+      "javaStartCount": 1,
+      "javaSentCount": 1,
+      "sharedConsumerCount": 1
+    },
+    {
+      "scene": "storage-jni",
+      "pid": "24896",
+      "latestLog": "16-home-pid.log",
+      "totals": {
+        "gl506": 0,
+        "uninitializedColor": 0,
+        "fatalOrPanic": 0
+      },
+      "javaStartCount": 1,
+      "javaSentCount": 1,
+      "sharedConsumerCount": 1
+    },
+    {
+      "scene": "normal-intent-isolation",
+      "pid": "25060",
+      "latestLog": "0-cold-pid.log",
+      "totals": {
+        "gl506": 11,
+        "uninitializedColor": 11,
+        "fatalOrPanic": 0
+      },
+      "javaStartCount": 0,
+      "javaSentCount": 0,
+      "sharedConsumerCount": 0
+    }
+  ],
+  "totalDistinctPidGl506": 17,
+  "totalDistinctPidUninitializedColor": 17,
+  "observedFatalOrPanic": 0,
+  "screenshots": [
+    {
+      "path": "raw/ui-gameshop-jni/0-cold.png",
+      "observed": "page 1 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/8-tap.png",
+      "observed": "page 2 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/16-tap.png",
+      "observed": "page 3 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/24-tap.png",
+      "observed": "page 4 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/32-tap.png",
+      "observed": "page 5 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/40-tap.png",
+      "observed": "page 6 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/48-tap.png",
+      "observed": "page 7 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/56-tap.png",
+      "observed": "page 8 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/64-tap.png",
+      "observed": "page 9 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/72-tap.png",
+      "observed": "page 10 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/80-tap.png",
+      "observed": "page 11 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/88-tap.png",
+      "observed": "page 12 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/96-tap.png",
+      "observed": "page 13 / 14",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/104-tap.png",
+      "observed": "page 14 / 14, one product with stock 3",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/112-tap.png",
+      "observed": "14 / 14 after next at final-page boundary",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/120-tap.png",
+      "observed": "13 / 14 after actual previous-arrow tap",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-gameshop-jni/128-home.png",
+      "observed": "13 / 14 after same-PID background/resume",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-storage-jni/0-cold.png",
+      "observed": "STORE I and contents, inventory overlap remains",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-storage-jni/8-tap.png",
+      "observed": "STORE II and expansion-expiry fixture visible",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-storage-jni/16-home.png",
+      "observed": "STORE II retained after same-PID resume, overlap remains",
+      "inspectedOriginal": true
+    },
+    {
+      "path": "raw/ui-normal-intent-isolation/0-cold.png",
+      "observed": "normal Login: Test server not configured, no preview marker",
+      "inspectedOriginal": true
+    }
+  ],
+  "selectedResourcesEach": {
+    "png": 6647,
+    "metadata": 3
+  },
+  "artifacts": [
+    {
+      "variant": "debug",
+      "source": "76d51415b5ceed667898a720c698b3a062bf7790",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gameshop-hit-v34-20261003-yxhQVz/final-apks/mir2-native-gameshop-page-cache-debug-v34.apk",
+      "bytes": 387331897,
+      "sha256": "1480b838f5e174e4f014679d1e02063f830b149ba3fd74ab1fe23d952eaa13c0",
+      "applicationId": "com.mir2.web3",
+      "installedSha256": "1480b838f5e174e4f014679d1e02063f830b149ba3fd74ab1fe23d952eaa13c0",
+      "preservedFirstInstallTime": "2026-09-14 06:31:04",
+      "upgradePreservedDataFlag": true
+    },
+    {
+      "variant": "preview",
+      "source": "76d51415b5ceed667898a720c698b3a062bf7790",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gameshop-hit-v34-20261003-yxhQVz/final-apks/mir2-native-gameshop-page-cache-preview-v34.apk",
+      "bytes": 391205185,
+      "sha256": "a97163a19d08b8bc1d417b3a94724a6880baee6c5ea1a980c6f3249e4ce3cab3",
+      "applicationId": "com.mir2.web3.uipreview",
+      "installedSha256": "a97163a19d08b8bc1d417b3a94724a6880baee6c5ea1a980c6f3249e4ce3cab3",
+      "preservedFirstInstallTime": "2026-09-12 17:13:30",
+      "upgradePreservedDataFlag": true
+    }
+  ],
+  "remaining": [
+    "Phone GameShop reflow, readable fonts and >=48dp targets; compact/safe area/IME/multitouch/locales",
+    "Storage plus visible source inventory non-overlapping phone group layout; locked password/IME gate remains unaccepted (v33 FLAG_SECURE raw capture limitation kept)",
+    "NI-12 purchase/Credit/Mail and NI-13 exact online storage operations",
+    "NI-14 through NI-20 shared host inputs and full UI gates",
+    "Approved real HTTPS/WSS login, character list/StartGame/Zone/movement/save/reconnect loop",
+    "Renderer zero-error gate, complete resources/audio/update",
+    "Physical device and final human acceptance"
+  ],
+  "nextLeaf": "Optional phone GameShop presentation and Storage/Inventory grouped layout, retaining existing shared actions/model/pagination/transaction rules and scoped single-writer edits."
+}
