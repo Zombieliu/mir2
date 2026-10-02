@@ -7,7 +7,8 @@ import { createNavigator, selfPlayer, reviveInTown, collectNearbyGold } from './
 import { createMapTraveler } from './protocol-travel.mjs';
 import { loadProtocolCollisionMap } from './protocol-navigation.mjs';
 import { completeQuestObjectives, clearTravelBlockingMonster } from './protocol-combat.mjs';
-import { prepareLoadout, combatAction, combatApproachRange, useSupplies, useClassRecovery } from './protocol-loadout.mjs';
+import { prepareLoadout, combatApproachRange, useSupplies, useClassRecovery } from './protocol-loadout.mjs';
+import { createPeriodicTaoCombatAction } from './periodic-tao-tactics.mjs';
 import { refreshCombatWorldSnapshot } from './protocol-refresh.mjs';
 import { hasAuthoritativePlayerDeath } from './protocol-observation.mjs';
 import { restockV2Supplies, useTownTeleport, townTeleportCount } from './protocol-supplies.mjs';
@@ -61,7 +62,7 @@ export async function runPeriodicJourney({ input, output, mapPackRoot }) {
   const catalogBytes = await fs.readFile(CATALOG_URL);
   const catalog = JSON.parse(catalogBytes);
   const sources = await loadCrystalQuestRouteSources();
-  const controllerHashes = Object.fromEntries(await Promise.all(['run-periodic-journey.mjs', 'periodic-journey-policy.mjs']
+  const controllerHashes = Object.fromEntries(await Promise.all(['run-periodic-journey.mjs', 'periodic-journey-policy.mjs', 'periodic-tao-tactics.mjs']
     .map(async filename => [filename, sha256(await fs.readFile(new URL(filename, import.meta.url)))])));
   const routes = buildPeriodicRoutes(catalog, scenario.initialLevel, sources);
   const redact = createPeriodicRedactor([scenario.accountId, scenario.password]);
@@ -89,7 +90,7 @@ export async function runPeriodicJourney({ input, output, mapPackRoot }) {
     weeklyIds: routes.filter(route => route.cadence === 'weekly').map(route => route.questId),
     status: 'running', completed: false, smokePassed: false, timingAccepted: false, visualAccepted: false,
     capacityAcceptance: false, phases: [], taskStages: [], killCredits: [], accepts: [], finishes: [],
-    travel: [], combat: [], merchants: [], supplies: [], deaths: [], revivals: [], lostTargets: [], staleObservedCorpses: [], actionReceipts: {}, actionCounts: {},
+    travel: [], combat: [], tactics: [], merchants: [], supplies: [], deaths: [], revivals: [], lostTargets: [], staleObservedCorpses: [], actionReceipts: {}, actionCounts: {},
   };
   const checkpoint = async () => {
     if (!report.finishedAt) report.elapsedMs = Date.now() - startedAtMs;
@@ -165,8 +166,11 @@ export async function runPeriodicJourney({ input, output, mapPackRoot }) {
     const healing = await useClassRecovery(owner, { hpThreshold: 0.7, restoreMpIfNeeded: true });
     return { consumed, healing };
   });
+  const periodicCombatAction = createPeriodicTaoCombatAction({ checkDeadline,
+    onReceipt: receipt => report.tactics.push({ ...receipt, at: new Date().toISOString(), sequence: client.sequence }),
+  });
   const combatOptions = {
-    action: async (owner, target) => { checkDeadline(); return combatAction(owner, target); },
+    action: async (owner, target) => { checkDeadline(); return periodicCombatAction(owner, target); },
     approachRange: combatApproachRange, sustain, sleep, maxAttackAttempts: 120, attackCadenceMs: 650,
     maxEngagements: 200, maxSpawnSearches: 8, retrySpawnSearchTimeout: true,
     allowHistoricalSpawnHints: false, spawnSearchTimeoutMs: 10 * 60_000,
