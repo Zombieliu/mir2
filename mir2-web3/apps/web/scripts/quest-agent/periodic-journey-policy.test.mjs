@@ -191,6 +191,107 @@ test('lost target: actual quest or experience credit prevents retry classificati
   assert.equal(periodicPolicy.lostPeriodicTarget(experience), null);
 });
 
+const foreignMeleeEvidence = () => {
+  const target = { objectId: 205114, kind: 'monster', name: 'Scarecrow', x: 213, y: 368, hp: 20, dead: false };
+  const beforeSnapshot = { playerObjectId: 50001, playerExperience: 3150, mapFileName: '0',
+    entities: [{ ...owner(14), objectId: 50001, x: 229, y: 366 },
+      { objectId: 50002, kind: 'player', class: 'Taoist', name: 'OwnedTaoist14', x: 214, y: 369 }, target] };
+  const afterSnapshot = structuredClone(beforeSnapshot);
+  Object.assign(afterSnapshot.entities[2], { hp: 0, dead: true });
+  return { beforeSnapshot, afterSnapshot, target, beforeSequence: 16325,
+    engagementStartedAtMs: Date.parse('2026-10-02T03:33:53.091Z'), credits: [], events: [
+      { sequence: 16341, at: '2026-10-02T03:33:54.719Z', direction: 'received', packet: 'ObjectAttack', payload: { objectId: 50002 } },
+      { sequence: 16342, at: '2026-10-02T03:33:54.719Z', direction: 'received', packet: 'ObjectStruck', payload: { attackerId: 50002, objectId: 205114 } },
+      { sequence: 16355, at: '2026-10-02T03:33:55.395Z', direction: 'received', packet: 'ObjectAttack', payload: { objectId: 50002 } },
+      { sequence: 16356, at: '2026-10-02T03:33:55.473Z', direction: 'received', packet: 'ObjectStruck', payload: { attackerId: 50002, objectId: 205114 } },
+      { sequence: 16359, at: '2026-10-02T03:33:55.474Z', direction: 'received', packet: 'ObjectDied', payload: { objectId: 205114 } },
+      { sequence: 16364, at: '2026-10-02T03:33:55.897Z', direction: 'received', type: 'worldSnapshot', payload: structuredClone(afterSnapshot) },
+    ] };
+};
+
+test('foreign melee: actual Wizard14 no-targetId attack/struck/death race permits reselection only', () => {
+  const evidence = foreignMeleeEvidence(), original = structuredClone(evidence.afterSnapshot);
+  const proof = periodicPolicy.lostPeriodicTarget(evidence);
+  assert.equal(proof.objectId, 205114);
+  assert.equal(proof.foreignPlayerObjectId, 50002);
+  assert.equal(proof.foreignAttackPacket, 'ObjectStruck');
+  assert.equal(proof.foreignAttackSequence, 16356);
+  assert.equal(proof.deathObservationSequence, 16359);
+  assert.equal(proof.snapshotSequence, 16364);
+  assert.equal(proof.ownCreditGranted, false);
+  assert.deepEqual(evidence.afterSnapshot, original);
+});
+
+test('foreign melee: victim, attacker and engagement sequence identities must match', () => {
+  for (const mutate of [
+    e => { e.events[1].payload.objectId = e.events[3].payload.objectId = 205113; },
+    e => { e.events[1].payload.attackerId = e.events[3].payload.attackerId = 999; },
+    e => { e.events[1].payload.attackerId = e.events[3].payload.attackerId = 50001; },
+    e => { e.events[1].sequence = e.events[3].sequence = 16324; },
+    e => { e.events[1].at = e.events[3].at = '2026-10-02T03:33:52.000Z'; },
+    e => { e.events[4].payload.objectId = 205113; },
+  ]) {
+    const evidence = foreignMeleeEvidence(); mutate(evidence);
+    assert.equal(periodicPolicy.lostPeriodicTarget(evidence), null);
+  }
+});
+
+test('foreign melee: death and fresh same-map authoritative corpse are both required', () => {
+  for (const mutate of [
+    e => { e.events.splice(4, 1); },
+    e => { e.events[4].sequence = 16340; },
+    e => { e.events.pop(); },
+    e => { e.events[5].sequence = 16358; },
+    e => { e.events[5].payload.mapFileName = 'D001'; },
+    e => { e.events[5].payload.entities[2].hp = 10; e.events[5].payload.entities[2].dead = false; },
+    e => { e.afterSnapshot.mapFileName = 'D001'; },
+    e => { e.afterSnapshot.entities[2].hp = 10; e.afterSnapshot.entities[2].dead = false; },
+  ]) {
+    const evidence = foreignMeleeEvidence(); mutate(evidence);
+    assert.equal(periodicPolicy.lostPeriodicTarget(evidence), null);
+  }
+});
+
+test('foreign melee: owner actions, accepted damage and XP/quest credit remain unresolved errors', () => {
+  for (const mutate of [
+    e => e.events.push({ sequence: 16330, direction: 'sent', type: 'attack', objectId: 205114 }),
+    e => e.events.push({ sequence: 16330, direction: 'sent', type: 'magic', targetId: 205114 }),
+    e => e.events.push({ sequence: 16330, direction: 'sent', type: 'petAttack' }),
+    e => e.events.push({ sequence: 16330, direction: 'received', packet: 'ObjectStruck', payload: { attackerId: 50001, objectId: 205114 } }),
+    e => e.events.push({ sequence: 16330, direction: 'received', packet: 'Magic', payload: { cast: true } }),
+    e => e.events.push({ sequence: 16330, direction: 'received', packet: 'GainExperience', payload: { amount: 1 } }),
+    e => { e.afterSnapshot.playerExperience += 1; },
+    e => { e.credits = [{ questId: 92001, delta: 1 }]; },
+  ]) {
+    const evidence = foreignMeleeEvidence(); mutate(evidence);
+    assert.equal(periodicPolicy.lostPeriodicTarget(evidence), null);
+  }
+});
+
+test('foreign melee: actual snapshot ownerName and fresh owned Monster packets forbid lost-target credit guesses', () => {
+  for (const mutate of [
+    e => e.afterSnapshot.entities.push({ objectId: 88, kind: 'monster', name: 'Skeleton', ownerName: 'OwnedWizard14' }),
+    e => e.beforeSnapshot.entities.push({ objectId: 88, kind: 'monster', name: 'Skeleton', ownerName: ' ownedwizard14 ' }),
+    e => e.events.push({ sequence: 16330, direction: 'received', packet: 'ObjectMonster', payload: { objectId: 88, masterObjectId: 50001 } }),
+    e => e.events[5].payload.entities.push({ objectId: 88, kind: 'monster', ownerName: 'OwnedWizard14' }),
+  ]) {
+    const evidence = foreignMeleeEvidence(); mutate(evidence);
+    assert.equal(periodicPolicy.lostPeriodicTarget(evidence), null);
+  }
+});
+
+test('lost target: a target-bound foreign cast never overrides owner damage or actual pet ownership', () => {
+  for (const mutate of [
+    e => e.events.push({ sequence: 1241, direction: 'received', packet: 'ObjectStruck', payload: { attackerId: 1, objectId: 205119 } }),
+    e => e.events.push({ sequence: 1241, direction: 'received', packet: 'Magic', payload: { cast: true } }),
+    e => e.events.push({ sequence: 1241, direction: 'received', packet: 'ObjectMonster', payload: { objectId: 88, masterObjectId: 1 } }),
+    e => e.afterSnapshot.entities.push({ objectId: 88, kind: 'monster', name: 'Skeleton', ownerName: 'OwnedWizard14' }),
+  ]) {
+    const evidence = lostTargetEvidence(); mutate(evidence);
+    assert.equal(periodicPolicy.lostPeriodicTarget(evidence), null);
+  }
+});
+
 const staleCorpseEvidence = () => {
   const route = buildPeriodicRoutes(catalog, 15, sources).find(entry => entry.questId === 92006);
   const beforeSnapshot = snapshot(buildPeriodicRoutes(catalog, 15, sources), 15);
@@ -238,6 +339,18 @@ test('stale corpse: pets, accepted owner combat and real XP/quest credit remain 
     e => { e.afterSnapshot.playerExperience += 1; },
     e => { e.afterSnapshot.entities[0].level += 1; },
     e => { e.credits = [{ questId: 92006, delta: 1 }]; },
+  ]) {
+    const evidence = staleCorpseEvidence(); mutate(evidence);
+    assert.equal(periodicPolicy.staleObservedPeriodicCorpse(evidence), null);
+  }
+});
+
+test('stale corpse: actual ownerName and fresh owned monster/damage packets also keep missing credit unresolved', () => {
+  for (const mutate of [
+    e => e.afterSnapshot.entities.push({ objectId: 88, kind: 'monster', name: 'Skeleton', ownerName: 'OwnedWizard14' }),
+    e => e.events.at(-1).payload.entities.push({ objectId: 88, kind: 'monster', ownerName: ' ownedwizard14 ' }),
+    e => e.events.push({ sequence: 1661, direction: 'received', packet: 'ObjectMonster', payload: { objectId: 88, masterObjectId: 1 } }),
+    e => e.events.push({ sequence: 1661, direction: 'received', packet: 'ObjectStruck', payload: { attackerId: 1, objectId: 202101 } }),
   ]) {
     const evidence = staleCorpseEvidence(); mutate(evidence);
     assert.equal(periodicPolicy.staleObservedPeriodicCorpse(evidence), null);

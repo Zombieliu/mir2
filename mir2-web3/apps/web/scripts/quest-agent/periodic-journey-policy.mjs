@@ -22,6 +22,16 @@ const safeInteger = (value, label, minimum = 0) => {
 const actor = snapshot => (snapshot?.entities ?? []).find(entity =>
   String(entity?.objectId) === String(snapshot?.playerObjectId));
 const distance = (left, right) => Math.max(Math.abs(Number(left.x) - Number(right.x)), Math.abs(Number(left.y) - Number(right.y)));
+const possibleOwnerPet = (world, selfId, selfName) => {
+  const ownerName = String(selfName ?? '').trim().toLowerCase();
+  return Number(world?.petCount ?? world?.playerPetCount ?? 0) > 0 ||
+    ['pets', 'ownedPets', 'playerPets'].some(key => Array.isArray(world?.[key]) && world[key].length > 0) ||
+    (world?.entities ?? []).some(entity => nameKey(entity.kind).includes('pet') || entity.isPet === true ||
+      nameKey(entity.kind) === 'monster' && (
+        [entity.ownerObjectId, entity.owner_object_id, entity.petOwnerObjectId, entity.ownerId, entity.masterObjectId]
+          .some(id => id != null && Number(id) === selfId) ||
+        ownerName && String(entity.ownerName ?? '').trim().toLowerCase() === ownerName));
+};
 
 export function validatePeriodicCatalog(catalog) {
   if (catalog?.schema !== 1 || catalog?.profile !== 'daily-weekly-v1' || catalog?.timeZone !== 'UTC+8') {
@@ -212,15 +222,17 @@ export function lostPeriodicTarget({ beforeSnapshot, afterSnapshot, target, befo
       !terminal || !(terminal.dead === true || terminal.hp != null && Number(terminal.hp) <= 0)) return null;
   if (beforeSnapshot.playerExperience !== afterSnapshot.playerExperience ||
       actor(beforeSnapshot)?.level !== actor(afterSnapshot)?.level) return null;
-  const worlds = [beforeSnapshot, afterSnapshot];
-  if (worlds.some(world => Number(world.petCount ?? world.playerPetCount ?? 0) > 0 ||
-      ['pets', 'ownedPets', 'playerPets'].some(key => Array.isArray(world[key]) && world[key].length > 0) ||
-      (world.entities ?? []).some(entity => nameKey(entity.kind).includes('pet') || entity.isPet === true ||
-        nameKey(entity.kind) === 'monster' &&
-        [entity.ownerObjectId, entity.owner_object_id, entity.petOwnerObjectId, entity.ownerId].some(id => id != null && Number(id) === selfId)))) return null;
-  const attempted = (events ?? []).some(event => Number(event.sequence) > beforeSequence &&
+  const recent = (events ?? []).filter(event => Number(event.sequence) > beforeSequence);
+  const worlds = [beforeSnapshot, afterSnapshot, ...recent.filter(event => event.direction === 'received' && event.type === 'worldSnapshot').map(event => event.payload)];
+  if (worlds.some(world => possibleOwnerPet(world, selfId, actor(beforeSnapshot)?.name))) return null;
+  const attempted = recent.some(event =>
     (event.direction === 'sent' && (['attack', 'attackDirection', 'magic'].includes(event.type) || /pet/i.test(event.type ?? '')) ||
-     event.direction === 'received' && ['ObjectAttack', 'ObjectMagic'].includes(event.packet) && Number(event.payload?.objectId) === selfId));
+     event.direction === 'received' && (
+       ['ObjectAttack', 'ObjectMagic'].includes(event.packet) && Number(event.payload?.objectId) === selfId ||
+       event.packet === 'Magic' && event.payload?.cast === true ||
+       event.packet === 'ObjectStruck' && Number(event.payload?.attackerId) === selfId ||
+       event.packet === 'GainExperience' && Number(event.payload?.amount) > 0 ||
+       event.packet === 'ObjectMonster' && Number(event.payload?.masterObjectId) === selfId)));
   if (attempted) return null;
   const players = worlds.flatMap(world => world.entities ?? []).filter(entity =>
     nameKey(entity.kind) === 'player' && PERIODIC_CLASSES.includes(entity.class) && Number(entity.objectId) !== selfId);
@@ -231,10 +243,31 @@ export function lostPeriodicTarget({ beforeSnapshot, afterSnapshot, target, befo
     Number(event.payload?.targetId) === objectId &&
     Date.parse(event.at) >= engagementStartedAtMs - 10_000 &&
     players.some(player => Number(player.objectId) === Number(event.payload?.objectId)));
-  if (!foreign) return null;
-  return { reason: 'unattacked-target-killed-by-other-player', objectId,
+  if (foreign) return { reason: 'unattacked-target-killed-by-other-player', objectId,
     foreignPlayerObjectId: Number(foreign.payload.objectId), foreignAttackSequence: foreign.sequence,
-    foreignAttackAt: foreign.at, terminal: { hp: terminal.hp, dead: terminal.dead }, ownCreditGranted: false };
+    foreignAttackPacket: foreign.packet, foreignAttackAt: foreign.at,
+    terminal: { hp: terminal.hp, dead: terminal.dead }, ownCreditGranted: false };
+  // Crystal melee ObjectAttack has no targetId. Require a victim-bound strike
+  // by a known foreign player, subsequent matching death and fresh corpse.
+  const struck = recent.findLast(event => event.direction === 'received' && event.packet === 'ObjectStruck' &&
+    Number(event.payload?.objectId) === objectId && Date.parse(event.at) >= engagementStartedAtMs &&
+    players.some(player => Number(player.objectId) === Number(event.payload?.attackerId)));
+  if (!struck) return null;
+  const death = recent.findLast(event => event.direction === 'received' && event.packet === 'ObjectDied' &&
+    Number(event.payload?.objectId) === objectId && Number(event.sequence) > Number(struck.sequence) &&
+    Date.parse(event.at) >= Date.parse(struck.at));
+  if (!death) return null;
+  const snapshot = recent.findLast(event => event.direction === 'received' && event.type === 'worldSnapshot' &&
+    Number(event.sequence) > Number(death.sequence) && Date.parse(event.at) >= Date.parse(death.at) &&
+    mapName(event.payload?.mapFileName) === mapName(beforeSnapshot.mapFileName) &&
+    (event.payload?.entities ?? []).some(entity => Number(entity.objectId) === objectId &&
+      (entity.dead === true || entity.hp != null && Number(entity.hp) <= 0)));
+  if (!snapshot) return null;
+  return { reason: 'unattacked-target-killed-by-other-player', objectId,
+    foreignPlayerObjectId: Number(struck.payload.attackerId), foreignAttackSequence: struck.sequence,
+    foreignAttackPacket: struck.packet, foreignAttackAt: struck.at,
+    deathObservationSequence: death.sequence, snapshotSequence: snapshot.sequence,
+    terminal: { hp: terminal.hp, dead: terminal.dead }, ownCreditGranted: false };
 }
 
 /** A spawn search can briefly re-observe an old corpse as an alive packet. */
@@ -253,11 +286,7 @@ export function staleObservedPeriodicCorpse({ error, route, kill, beforeSnapshot
       beforeSnapshot.playerExperience !== afterSnapshot.playerExperience || actor(beforeSnapshot).level !== actor(afterSnapshot).level) return null;
   const recent = (events ?? []).filter(event => Number(event.sequence) > beforeSequence);
   const worlds = [beforeSnapshot, afterSnapshot, ...recent.filter(event => event.type === 'worldSnapshot' && event.direction === 'received').map(event => event.payload)];
-  if (worlds.some(world => Number(world?.petCount ?? world?.playerPetCount ?? 0) > 0 ||
-      ['pets', 'ownedPets', 'playerPets'].some(key => Array.isArray(world?.[key]) && world[key].length > 0) ||
-      (world?.entities ?? []).some(entity => nameKey(entity.kind).includes('pet') || entity.isPet === true ||
-        nameKey(entity.kind) === 'monster' && [entity.ownerObjectId, entity.owner_object_id, entity.petOwnerObjectId, entity.ownerId, entity.masterObjectId]
-          .some(id => id != null && Number(id) === selfId)))) return null;
+  if (worlds.some(world => possibleOwnerPet(world, selfId, actor(beforeSnapshot)?.name))) return null;
   if (recent.some(event => event.direction === 'sent' &&
       (['attack', 'attackDirection', 'magic'].includes(event.type) || /pet/i.test(event.type ?? '')) ||
       event.direction === 'received' && (
