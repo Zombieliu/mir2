@@ -6,6 +6,7 @@ helper's supplementary structural gate; release authenticity is independently
 required by build-bootstrap-installer.ps1 before it calls the helper.
 """
 
+import hashlib
 import importlib.util
 import json
 import os
@@ -26,6 +27,7 @@ SPEC.loader.exec_module(bootstrap)
 archive = bootstrap.archive
 REVISION = "a" * 40
 CANDIDATE = "WN-CANDIDATE-bootstrap-contract-fixture"
+POWERSHELL = os.environ.get("MIR2_BOOTSTRAP_TEST_PWSH") or shutil.which("pwsh")
 
 
 def dumped(value):
@@ -335,6 +337,94 @@ class BootstrapInputsTests(unittest.TestCase):
                                  str(self.output)], capture_output=True, text=True)
         self.assertNotEqual(result.returncode, 0)
         self.assertFalse(self.output.exists())
+
+
+@unittest.skipUnless(POWERSHELL, "PowerShell is required for the Windows builder regression")
+class CanonicalVerifierSourceTests(unittest.TestCase):
+    script_names = ("verify-windows-candidate.ps1", "entity-atlas-closure.ps1",
+                    "player-sprite-closure.ps1", "candidate-release-profile.ps1",
+                    "pet-guild-asset-closure.ps1")
+    font_names = ("NotoSansTC.ttf", "NotoSans-Regular.ttf", "NotoSans-Bold.ttf",
+                  "NotoSansDevanagari-Regular.ttf", "NotoSansDevanagari-Bold.ttf",
+                  "NotoSansThai-Regular.ttf", "NotoSansThai-Bold.ttf",
+                  "NotoSansArabic-Regular.ttf", "NotoSansArabic-Bold.ttf")
+
+    def setUp(self):
+        self.temporary = tempfile.TemporaryDirectory(prefix="mir2-bootstrap-verifier-")
+        self.root = Path(self.temporary.name).absolute()
+        self.platform = self.root / "platform-windows"
+        self.scripts = self.platform / "scripts"
+        self.fonts = self.platform / "assets/fonts"
+        self.scripts.mkdir(parents=True)
+        self.fonts.mkdir(parents=True)
+        source = SCRIPT_ROOT.parents[1] / "platform-windows"
+        for name in self.script_names:
+            shutil.copyfile(source / "scripts" / name, self.scripts / name)
+        for name in self.font_names:
+            shutil.copyfile(source / "assets/fonts" / name, self.fonts / name)
+        self.output = self.root / "proof"
+
+    def tearDown(self):
+        assert self.root.parent.resolve() == Path(tempfile.gettempdir()).resolve()
+        assert self.root.name.startswith("mir2-bootstrap-verifier-")
+        self.temporary.cleanup()
+
+    def copy_source(self):
+        # Load only the actual builder's preparation functions. The installer
+        # entry point, CMS/key code and process-launch functions never run.
+        command = r"""
+$ErrorActionPreference='Stop';Set-StrictMode -Version Latest
+$tokens=$null;$errors=$null
+$ast=[Management.Automation.Language.Parser]::ParseFile($env:MIR2_BOOTSTRAP_TEST_BUILDER,[ref]$tokens,[ref]$errors)
+if($errors.Count-ne0){throw 'Builder parse errors'}
+foreach($name in @('NoLinks','FileSha','SaveJson','CopyCanonicalVerifierSource')){
+    $definitions=@($ast.FindAll({param($node)
+        $node-is[Management.Automation.Language.FunctionDefinitionAst] -and $node.Name-ceq$name
+    },$false))
+    if($definitions.Count-ne1){throw 'Builder test function missing or ambiguous'}
+    . ([scriptblock]::Create($definitions[0].Extent.Text))
+}
+CopyCanonicalVerifierSource $env:MIR2_BOOTSTRAP_TEST_SCRIPTS $env:MIR2_BOOTSTRAP_TEST_PROOF | Out-Null
+"""
+        environment = dict(os.environ, MIR2_BOOTSTRAP_TEST_BUILDER=str(SCRIPT_ROOT / "build-bootstrap-installer.ps1"),
+                           MIR2_BOOTSTRAP_TEST_SCRIPTS=str(self.scripts),
+                           MIR2_BOOTSTRAP_TEST_PROOF=str(self.output))
+        return subprocess.run([POWERSHELL, "-NoProfile", "-NonInteractive", "-Command", command],
+                              capture_output=True, text=True, encoding="utf-8", env=environment, timeout=30)
+
+    def test_complete_canonical_verifier_sources_are_copied_and_receipted(self):
+        result = self.copy_source()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        closure = json.loads((self.output / "canonical-verifier-source-closure.json").read_text("utf-8"))
+        prefix = "apps/game-client/platform-windows/"
+        expected = {prefix + "scripts/" + n for n in self.script_names}
+        expected.update(prefix + "assets/fonts/" + n for n in self.font_names)
+        self.assertEqual(len(closure), 14)
+        self.assertEqual({e["path"] for e in closure}, expected)
+        for entry in closure:
+            relative = entry["path"].removeprefix(prefix)
+            source = self.platform / relative
+            copied = self.output / "verification-source" / entry["path"]
+            self.assertEqual(source.read_bytes(), copied.read_bytes())
+            self.assertEqual(entry["sha256"], hashlib.sha256(copied.read_bytes()).hexdigest().upper())
+            if relative.startswith("assets/fonts/"):
+                self.assertEqual(entry["sizeBytes"], copied.stat().st_size)
+
+    def test_missing_canonical_font_rejected_before_source_receipt(self):
+        (self.fonts / "NotoSansThai-Bold.ttf").unlink()
+        result = self.copy_source()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertFalse((self.output / "canonical-verifier-source-closure.json").exists())
+
+    def test_changed_canonical_font_rejected_against_existing_pin(self):
+        font = self.fonts / "NotoSansTC.ttf"
+        changed = bytearray(font.read_bytes())
+        changed[-1] ^= 1
+        font.write_bytes(changed)
+        result = self.copy_source()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Canonical pinned font source mismatch", result.stderr)
+        self.assertFalse((self.output / "canonical-verifier-source-closure.json").exists())
 
 
 if __name__ == "__main__":

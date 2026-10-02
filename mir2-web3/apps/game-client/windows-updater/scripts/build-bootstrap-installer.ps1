@@ -49,6 +49,73 @@ function SaveJson([string]$Path,$Value) {
     [IO.File]::WriteAllText($Path,($Value|ConvertTo-Json -Depth 20),[Text.UTF8Encoding]::new($false))
 }
 function ReadJson([string]$Path) { Get-Content -LiteralPath $Path -Raw|ConvertFrom-Json }
+function CopyCanonicalVerifierSource([string]$PlatformScripts,[string]$ProofRoot) {
+    # Read only constant pin dictionaries; never run the verifier entry point.
+    # Its pinned-font scan needs the original complete font bytes beside it.
+    $verifier=Join-Path $PlatformScripts 'verify-windows-candidate.ps1'
+    NoLinks $verifier
+    $tokens=$null;$parseErrors=$null
+    $ast=[Management.Automation.Language.Parser]::ParseFile($verifier,[ref]$tokens,[ref]$parseErrors)
+    if($parseErrors.Count-ne0){throw 'Canonical verifier has parse errors'}
+    $definitions=@($ast.FindAll({param($node)
+        $node-is[Management.Automation.Language.FunctionDefinitionAst] -and
+        $node.Name-ceq'Get-PinnedFontScanDefinitions'
+    },$false))
+    if($definitions.Count-ne1){throw 'Canonical font pin definition missing or ambiguous'}
+    $pins=@($definitions[0].Body.FindAll({param($node)
+        $node-is[Management.Automation.Language.HashtableAst]
+    },$false)|ForEach-Object {$_.SafeGetValue()})
+    $expectedFonts=@('NotoSansTC.ttf','NotoSans-Regular.ttf','NotoSans-Bold.ttf',
+        'NotoSansDevanagari-Regular.ttf','NotoSansDevanagari-Bold.ttf',
+        'NotoSansThai-Regular.ttf','NotoSansThai-Bold.ttf',
+        'NotoSansArabic-Regular.ttf','NotoSansArabic-Bold.ttf')
+    if($pins.Count-ne$expectedFonts.Count){throw 'Exactly nine canonical font pins required'}
+    $seen=[Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $fontRoot=Join-Path (Split-Path -Parent $PlatformScripts) 'assets/fonts'
+    $fontSources=@()
+    foreach($pin in $pins){
+        if($expectedFonts-cnotcontains$pin.file -or !$seen.Add($pin.file) -or
+           $pin.length-isnot[int] -or $pin.length-le0 -or
+           ![regex]::IsMatch([string]$pin.sha256,'\A[0-9A-F]{64}\z')){
+            throw 'Canonical font pin shape/name mismatch'
+        }
+        $source=Join-Path $fontRoot $pin.file
+        NoLinks $source
+        $item=Get-Item -LiteralPath $source -Force
+        if($item.PSIsContainer -or $item.LinkType-eq'HardLink' -or
+           $item.Length-ne$pin.length -or (FileSha $source)-cne$pin.sha256){
+            throw ('Canonical pinned font source mismatch: '+$pin.file)
+        }
+        $fontSources+=@{source=$source;pin=$pin}
+    }
+    $verificationRoot=Join-Path $ProofRoot 'verification-source'
+    $verificationScripts=Join-Path $verificationRoot 'apps/game-client/platform-windows/scripts'
+    $verificationFonts=Join-Path $verificationRoot 'apps/game-client/platform-windows/assets/fonts'
+    [IO.Directory]::CreateDirectory($verificationScripts)|Out-Null
+    [IO.Directory]::CreateDirectory($verificationFonts)|Out-Null
+    [IO.Directory]::CreateDirectory((Join-Path $verificationRoot 'docs'))|Out-Null
+    [IO.File]::WriteAllText((Join-Path $verificationRoot 'Cargo.toml'),'# Verification marker only; never compiled.')
+    $closure=@()
+    foreach($name in @('verify-windows-candidate.ps1','entity-atlas-closure.ps1',
+        'player-sprite-closure.ps1','candidate-release-profile.ps1','pet-guild-asset-closure.ps1')){
+        $source=Join-Path $PlatformScripts $name
+        NoLinks $source
+        $destination=Join-Path $verificationScripts $name
+        Copy-Item -LiteralPath $source -Destination $destination
+        if((FileSha $source)-cne(FileSha $destination)){throw 'Verifier copy identity mismatch'}
+        $closure+=@{path=('apps/game-client/platform-windows/scripts/'+$name);sha256=FileSha $destination}
+    }
+    foreach($font in $fontSources){
+        $destination=Join-Path $verificationFonts $font.pin.file
+        Copy-Item -LiteralPath $font.source -Destination $destination
+        if((Get-Item -LiteralPath $destination).Length-ne$font.pin.length -or
+           (FileSha $destination)-cne$font.pin.sha256){throw 'Pinned verifier font copy identity mismatch'}
+        $closure+=@{path=('apps/game-client/platform-windows/assets/fonts/'+$font.pin.file)
+            sizeBytes=$font.pin.length;sha256=FileSha $destination}
+    }
+    SaveJson (Join-Path $ProofRoot 'canonical-verifier-source-closure.json') $closure
+    return $verificationRoot
+}
 function AssertBinary([string]$Path,[string]$Digest,[string]$Publisher) {
     NoLinks $Path
     $file=Get-Item -LiteralPath $Path -Force
@@ -131,26 +198,11 @@ $proof=[ordered]@{schema='mir2.windows.bootstrap-build.v1';passed=$false;candida
     fullOfflineInstallerPreserved=$true;runtimeIncluded=$true;runtimeSha256=$runtimePin
     compilerSha256=$InnoCompilerSha256.ToUpperInvariant();stages=@()}
 try {
-    # Copy the unchanged canonical verifier and its exact helper closure to an
+    # Copy the unchanged canonical verifier, helpers and pinned fonts to an
     # external marker project. Its default evidence writer stays in this proof
     # tree; no repository/global status document or original report is touched.
-    $verificationRoot=Join-Path $OutputRoot 'verification-source'
+    $verificationRoot=CopyCanonicalVerifierSource $platformScripts $OutputRoot
     $verificationScripts=Join-Path $verificationRoot 'apps/game-client/platform-windows/scripts'
-    [IO.Directory]::CreateDirectory($verificationScripts)|Out-Null
-    [IO.Directory]::CreateDirectory((Join-Path $verificationRoot 'docs'))|Out-Null
-    [IO.File]::WriteAllText((Join-Path $verificationRoot 'Cargo.toml'),'# Verification marker only; never compiled.')
-    $verifierNames=@('verify-windows-candidate.ps1','entity-atlas-closure.ps1',
-        'player-sprite-closure.ps1','candidate-release-profile.ps1','pet-guild-asset-closure.ps1')
-    $verifierClosure=@()
-    foreach($name in $verifierNames){
-        $source=Join-Path $platformScripts $name
-        NoLinks $source
-        $destination=Join-Path $verificationScripts $name
-        Copy-Item -LiteralPath $source -Destination $destination
-        if((FileSha $source)-cne(FileSha $destination)){throw 'Verifier copy identity mismatch'}
-        $verifierClosure+=@{path=$name;sha256=FileSha $source}
-    }
-    SaveJson (Join-Path $OutputRoot 'canonical-verifier-source-closure.json') $verifierClosure
     InvokeLogged $powerShell @('-NoProfile','-File',(Join-Path $verificationScripts 'verify-windows-candidate.ps1'),
         '-PackageRoot',$CandidateRoot,'-TrustedSignerThumbprint',$TrustedSignerThumbprint) 'strict-game-verification'
     $report=ReadJson (Join-Path $verificationRoot ('docs/generated/player-qa/windows-package-preflight/'+$Candidate+'-verification.json'))
