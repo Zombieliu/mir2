@@ -2009,6 +2009,7 @@ fn receive(
                 } else if let Ok(ui) = host.player.snapshot(raw) {
                     if host.bind_chat_owner().is_ok()
                         && host.bind_social_owner().is_ok()
+                        && host.social.snapshot(raw).is_ok()
                         && host.bind_npc_snapshot(raw).is_ok()
                         && host.bind_quest_snapshot(raw).is_ok()
                         && host.bind_game_shop_snapshot(raw).is_ok()
@@ -2940,6 +2941,48 @@ mod tests {
         assert_eq!(app.world().resource::<NativeShellModel>().screen,Screen::StartingGame);
         // This headless test proves the actual envelope/bind/queue producer,
         // not Android JNI, original overlay consumption, live WSS or rendering.
+    }
+
+    #[test]
+    fn own_trade_snapshot_actual_host_keeps_instances_and_guest_separate_without_settlement() {
+        let mut app=game_shop_receive_app();
+        let mut event=game_shop_host_world(42,"Fixture","0");
+        let mut world:Value=serde_json::from_str(event["worldSnapshot"].as_str().unwrap()).unwrap();
+        world["gold"]=json!(500);
+        world["inventoryCapacity"]=json!(86);
+        world["inventoryItems"]=json!([
+            {"uniqueId":u64::MAX,"key":"same","name":"Same name","container":"bag2","slot":2,"quantity":201,
+             "tooltipSource":{"info":{"item_index":27,"image":3662,"item_type":8,"shape":0,"stack_size":500},
+              "userItem":{"unique_id":u64::MAX,"item_index":27,"count":201,"identified":true}}},
+            {"uniqueId":7102,"key":"same","name":"Same name","container":"bag1","slot":7,"quantity":1}
+        ]);
+        world["stage5Systems"]=json!({"trade":{"settlementNonce":"own-fixture","partner":"Alice",
+            "offeredSlots":{"1":42,"8":7},"offeredUniqueIds":{"1":u64::MAX,"8":7102},
+            "offeredGold":125,"offeredCurrency":"gold","locked":true,"completed":false}});
+        event["worldSnapshot"]=json!(world.to_string());
+        INBOX.lock().unwrap().extend([
+            game_shop_host_metadata("TradeAccept",json!({"name":"Alice"})),
+            game_shop_host_metadata("TradeGold",json!({"amount":17})),
+            event,
+        ]);
+        app.update();
+        let host=app.world().resource::<HostState>();
+        let trade=&host.social.model().trade;
+        assert_eq!(trade.my_gold,125,"Own authoritative offer never reached the Android cursor");
+        assert_eq!(trade.partner_gold,17);
+        assert_eq!(trade.my_items.len(),10);
+        assert_eq!(trade.my_items[1].as_ref().unwrap().unique_id,Some(u64::MAX));
+        assert_eq!(trade.my_items[1].as_ref().unwrap().count,201);
+        assert_eq!(trade.my_items[8].as_ref().unwrap().unique_id,Some(7102));
+        assert_eq!(trade.my_offer_nonce.as_deref(),Some("own-fixture"));
+        assert!(trade.my_confirmed);
+        assert_eq!(trade.state,"open");
+        assert_eq!(host.player.presentation_cursor().gold,Some(500));
+        assert_eq!(host.social.model().last_event.as_ref().unwrap().success,None);
+        assert!(host.pending_render_request.is_some());
+        assert_eq!(app.world().resource::<NativeShellModel>().screen,Screen::StartingGame);
+        assert_eq!(world["inventoryItems"].as_array().unwrap().len(),2);
+        assert_eq!(world["gold"],500);
     }
 
     #[test]

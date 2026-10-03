@@ -1,11 +1,13 @@
 //! Owner-bound FIFO for the unchanged shared Group/Guild/Trade model.
 //! Public packets are read models/receipts, never local transaction authority.
 use mir2_client_bevy::{
-    native_inventory_ingress::{native_tooltip_info, native_tooltip_source_for_user_item},
+    native_inventory_ingress::{
+        native_tooltip_info, native_tooltip_source_for_user_item, project_native_inventory_model,
+    },
     native_player_ingress::NativeUiPlayerCursor,
     social::SocialModel,
 };
-use serde_json::{Value, json};
+use serde_json::{json, Value};
 use std::collections::VecDeque;
 
 pub(crate) const MAX_SOCIAL_PACKET_BYTES: usize = 512 * 1024;
@@ -161,11 +163,7 @@ impl AndroidSocialIngress {
         if !candidate.apply_network_packet(name, &payload) {
             return Err("Invalid shared social model");
         }
-        let model = serde_json::to_string(&candidate).map_err(|_| "Invalid social projection")?;
-        if model.len() > MAX_MODEL_BYTES {
-            return Err("Social model too large");
-        }
-        serde_json::from_str::<SocialModel>(&model).map_err(|_| "Invalid typed social model")?;
+        let model = checked_model(&candidate)?;
         if self.identity.is_none() {
             self.check_append(raw.len())?;
             self.staged.push_back(raw.to_owned());
@@ -174,6 +172,48 @@ impl AndroidSocialIngress {
             self.pending.push_back(model);
             self.cursor = candidate;
         }
+        Ok(true)
+    }
+
+    /// Only an accepted personal snapshot may show our reserved offer. Public
+    /// TradeItem/TradeGold remain the guest's values, not an own-offer ACK.
+    pub(crate) fn snapshot(&mut self, raw: &str) -> Result<bool, &'static str> {
+        if raw.len() > 1024 * 1024 {
+            return Err("Social snapshot too large");
+        }
+        let world: Value = serde_json::from_str(raw).map_err(|_| "Invalid social snapshot")?;
+        let Some((owner, name)) = &self.identity else {
+            return Ok(false);
+        };
+        if world["playerObjectId"].as_u64() != Some(u64::from(*owner)) {
+            return Err("Social snapshot owner changed");
+        }
+        let actors = world["entities"]
+            .as_array()
+            .ok_or("Missing social snapshot owner")?;
+        let mut selves = actors.iter().filter(|actor| actor["kind"] == "selfPlayer");
+        let actor = selves.next().ok_or("Missing social self player")?;
+        if selves.next().is_some()
+            || actor["objectId"].as_u64() != Some(u64::from(*owner))
+            || actor["name"].as_str() != Some(name.as_str())
+        {
+            return Err("Social snapshot character changed");
+        }
+        // The same pure slot/instance/tooltip projection as the validated
+        // inventory ingress. Own-offer presentation consumes no frame geometry.
+        let inventory = project_native_inventory_model(&world, |_, _| None);
+        let mut candidate = self.cursor.clone();
+        if !mir2_client_bevy::native_trade_ingress::observe_own_offer(
+            &world,
+            &inventory,
+            &mut candidate,
+        ) {
+            return Ok(false);
+        }
+        let model = checked_model(&candidate)?;
+        self.check_append(model.len())?;
+        self.pending.push_back(model);
+        self.cursor = candidate;
         Ok(true)
     }
 
@@ -215,6 +255,15 @@ impl AndroidSocialIngress {
     pub(crate) fn model(&self) -> &SocialModel {
         &self.cursor
     }
+}
+
+fn checked_model(candidate: &SocialModel) -> Result<String, &'static str> {
+    let model = serde_json::to_string(candidate).map_err(|_| "Invalid social projection")?;
+    if model.len() > MAX_MODEL_BYTES {
+        return Err("Social model too large");
+    }
+    serde_json::from_str::<SocialModel>(&model).map_err(|_| "Invalid typed social model")?;
+    Ok(model)
 }
 
 // Read-only wire enrichment mirrors frozen Windows gateway.rs. Template,
@@ -310,7 +359,7 @@ fn value_u64_ref(value: &Value) -> Option<u64> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use mir2_client_bevy::social::{MAX_GUILD_STORAGE_ITEMS, SocialPendingOperation};
+    use mir2_client_bevy::social::{SocialPendingOperation, MAX_GUILD_STORAGE_ITEMS};
 
     fn wire(name: &str, payload: Value) -> String {
         json!({"type":"packet","packet":name,"payload":payload}).to_string()
@@ -329,6 +378,294 @@ mod tests {
             true
         }));
         rows
+    }
+
+    fn own_trade_snapshot_fixture() -> Value {
+        json!({
+            "playerObjectId":42,
+            "entities":[{"kind":"selfPlayer","objectId":42,"name":"Fixture"}],
+            "inventoryCapacity":86,"gold":500,
+            "inventoryItems":[
+                {"uniqueId":u64::MAX,"key":"same","name":"Same name","container":"bag2","slot":2,"quantity":201,
+                 "tooltipSource":{"info":{"item_index":27,"image":3662,"item_type":8,"shape":0,"stack_size":500},
+                  "userItem":{"unique_id":u64::MAX,"item_index":27,"count":201,"identified":true}}},
+                {"uniqueId":7102,"key":"same","name":"Same name","container":"bag1","slot":7,"quantity":1}
+            ],
+            "stage5Systems":{"trade":{"settlementNonce":"own-fixture","partner":"Alice",
+                "offeredSlots":{"1":42,"8":7},"offeredUniqueIds":{"1":u64::MAX,"8":7102},
+                "offeredGold":125,"offeredCurrency":"gold","locked":true,"completed":false}}
+        })
+    }
+
+    fn own_trade_snapshot_open() -> AndroidSocialIngress {
+        let mut ingress = AndroidSocialIngress::default();
+        bind(&mut ingress);
+        let player = NativeUiPlayerCursor::default();
+        for (name, payload) in [
+            ("TradeAccept", json!({"name":"Alice"})),
+            ("TradeGold", json!({"amount":17})),
+            (
+                "TradeItem",
+                json!({"tradeItems":[null,{"unique_id":7103,"item_index":27,"count":9}]}),
+            ),
+        ] {
+            assert!(ingress.packet(&wire(name, payload), &player).unwrap());
+        }
+        take(&mut ingress);
+        ingress
+    }
+
+    #[test]
+    fn own_trade_snapshot_requires_accepted_owner_and_trade_accept() {
+        let world = own_trade_snapshot_fixture().to_string();
+        let mut ingress = AndroidSocialIngress::default();
+        assert!(!ingress.snapshot(&world).unwrap());
+        assert_eq!(ingress.cursor, SocialModel::default());
+        assert_eq!(ingress.pending_count(), 0);
+        bind(&mut ingress);
+        assert!(!ingress.snapshot(&world).unwrap());
+        assert_eq!(ingress.cursor, SocialModel::default());
+        ingress
+            .packet(
+                &wire("TradeRequest", json!({"name":"Alice"})),
+                &NativeUiPlayerCursor::default(),
+            )
+            .unwrap();
+        let requested = ingress.cursor.clone();
+        let queued = ingress.pending_count();
+        assert!(!ingress.snapshot(&world).unwrap());
+        assert_eq!(ingress.cursor, requested);
+        assert_eq!(ingress.pending_count(), queued);
+    }
+
+    #[test]
+    fn own_trade_snapshot_keeps_instances_metadata_guest_and_fifo_without_duplicate_ack() {
+        let mut ingress = own_trade_snapshot_open();
+        let before = ingress.cursor.clone();
+        let world = own_trade_snapshot_fixture();
+        assert!(ingress.snapshot(&world.to_string()).unwrap());
+        let accepted = ingress.cursor.clone();
+        assert_eq!(accepted.trade.my_gold, 125);
+        assert_eq!(accepted.trade.my_items.len(), 10);
+        for slot in 0..10 {
+            assert_eq!(
+                accepted.trade.my_items[slot].is_some(),
+                [1, 8].contains(&slot)
+            );
+        }
+        let item = accepted.trade.my_items[1].as_ref().unwrap();
+        assert_eq!(
+            (item.unique_id, item.item_index, item.count),
+            (Some(u64::MAX), Some(27), 201)
+        );
+        assert_eq!(
+            item.tooltip_source
+                .as_ref()
+                .unwrap()
+                .user_item_image(u32::from(item.count)),
+            3661
+        );
+        assert_eq!(
+            accepted.trade.my_items[8].as_ref().unwrap().unique_id,
+            Some(7102)
+        );
+        assert_eq!(accepted.trade.partner_items, before.trade.partner_items);
+        assert_eq!(accepted.trade.partner_gold, 17);
+        assert_eq!(
+            accepted.trade.my_offer_nonce.as_deref(),
+            Some("own-fixture")
+        );
+        assert!(accepted.trade.my_confirmed);
+        assert_eq!(accepted.trade.state, "open");
+        assert_eq!(accepted.last_event.as_ref().unwrap().success, None);
+        assert!(!ingress.snapshot(&world.to_string()).unwrap());
+        assert_eq!(ingress.cursor, accepted);
+        assert_eq!(ingress.pending_count(), 1);
+        assert!(!ingress.flush(|_| false));
+        assert_eq!(take(&mut ingress), vec![accepted]);
+        assert_eq!(world["gold"], 500);
+        assert_eq!(world["inventoryItems"].as_array().unwrap().len(), 2);
+    }
+
+    #[test]
+    fn own_trade_snapshot_rejects_owner_character_and_duplicate_self_atomically() {
+        let mut ingress = own_trade_snapshot_open();
+        let old = ingress.cursor.clone();
+        let world = own_trade_snapshot_fixture();
+        let mut controls = vec![
+            json!({"playerObjectId":42}),
+            json!({"playerObjectId":42,"entities":[]}),
+        ];
+        for (key, value) in [
+            ("objectId", json!(99)),
+            ("name", json!("Other")),
+            ("kind", json!("remotePlayer")),
+        ] {
+            let mut wrong = world.clone();
+            wrong["entities"][0][key] = value;
+            controls.push(wrong);
+        }
+        let mut foreign = world.clone();
+        foreign["playerObjectId"] = json!(99);
+        controls.push(foreign);
+        let mut duplicate = world.clone();
+        let actor = duplicate["entities"][0].clone();
+        duplicate["entities"].as_array_mut().unwrap().push(actor);
+        controls.push(duplicate);
+        for wrong in controls {
+            assert!(ingress.snapshot(&wrong.to_string()).is_err(), "{wrong}");
+            assert_eq!(ingress.cursor, old);
+            assert_eq!(ingress.pending_count(), 0);
+        }
+    }
+
+    #[test]
+    fn own_trade_snapshot_ignores_incomplete_foreign_or_completed_offers_without_clearing() {
+        let mut ingress = own_trade_snapshot_open();
+        let world = own_trade_snapshot_fixture();
+        assert!(ingress.snapshot(&world.to_string()).unwrap());
+        take(&mut ingress);
+        let old = ingress.cursor.clone();
+        let mut controls = Vec::new();
+        for (key, value) in [
+            ("partner", json!("Other")),
+            ("settlementNonce", json!("different")),
+            ("completed", json!(true)),
+            ("offeredCurrency", json!("bichon")),
+            ("offeredGold", json!(4_294_967_296u64)),
+            ("locked", json!("true")),
+            ("offeredUniqueIds", json!({"1":u64::MAX})),
+        ] {
+            let mut wrong = world.clone();
+            wrong["stage5Systems"]["trade"][key] = value;
+            controls.push(wrong);
+        }
+        let mut missing_offer = world.clone();
+        missing_offer
+            .as_object_mut()
+            .unwrap()
+            .remove("stage5Systems");
+        controls.push(missing_offer);
+        let mut missing_items = world.clone();
+        missing_items
+            .as_object_mut()
+            .unwrap()
+            .remove("inventoryItems");
+        controls.push(missing_items);
+        for wrong in controls {
+            assert!(!ingress.snapshot(&wrong.to_string()).unwrap(), "{wrong}");
+            assert_eq!(ingress.cursor, old);
+            assert_eq!(ingress.pending_count(), 0);
+        }
+    }
+
+    #[test]
+    fn own_trade_snapshot_explicit_clear_changes_only_own_offer_not_settlement() {
+        let mut ingress = own_trade_snapshot_open();
+        let mut world = own_trade_snapshot_fixture();
+        assert!(ingress.snapshot(&world.to_string()).unwrap());
+        let old = ingress.cursor.clone();
+        for key in ["offeredSlots", "offeredUniqueIds"] {
+            world["stage5Systems"]["trade"][key] = json!({});
+        }
+        world["stage5Systems"]["trade"]["offeredGold"] = json!(0);
+        world["stage5Systems"]["trade"]["locked"] = json!(false);
+        assert!(ingress.snapshot(&world.to_string()).unwrap());
+        let cleared = ingress.cursor.clone();
+        assert!(cleared.trade.my_items.iter().all(Option::is_none));
+        assert_eq!(cleared.trade.my_gold, 0);
+        assert!(!cleared.trade.my_confirmed);
+        assert_eq!(cleared.trade.partner_gold, old.trade.partner_gold);
+        assert_eq!(cleared.trade.partner_items, old.trade.partner_items);
+        assert_eq!(cleared.trade.state, "open");
+        assert_eq!(cleared.last_event.as_ref().unwrap().success, None);
+        assert_eq!(take(&mut ingress), vec![old, cleared]);
+        assert_eq!(world["gold"], 500);
+        assert_eq!(world["inventoryItems"].as_array().unwrap().len(), 2);
+    }
+
+    #[test]
+    fn own_trade_snapshot_count_and_byte_backpressure_do_not_commit_new_offer() {
+        let mut ingress = own_trade_snapshot_open();
+        let world = own_trade_snapshot_fixture();
+        let player = NativeUiPlayerCursor::default();
+        for _ in 0..MAX_PENDING {
+            ingress
+                .packet(&wire("GroupInvite", json!({"name":"Alice"})), &player)
+                .unwrap();
+        }
+        let old = ingress.cursor.clone();
+        assert_eq!(
+            ingress.snapshot(&world.to_string()),
+            Err("Social ingress queue full")
+        );
+        assert_eq!(ingress.cursor, old);
+        assert_eq!(ingress.pending_count(), MAX_PENDING);
+        take(&mut ingress);
+        assert!(ingress.snapshot(&world.to_string()).unwrap());
+        take(&mut ingress);
+
+        let mut ingress = own_trade_snapshot_open();
+        let mut world = world;
+        world["stage5Systems"]["trade"]["settlementNonce"] = json!("n".repeat(350_000));
+        let mut accepted = 0;
+        for amount in 0..MAX_PENDING {
+            let old = ingress.cursor.clone();
+            let queued = ingress.pending_count();
+            world["stage5Systems"]["trade"]["offeredGold"] = json!(amount);
+            match ingress.snapshot(&world.to_string()) {
+                Ok(true) => accepted += 1,
+                Err("Social ingress queue full") => {
+                    assert_eq!(ingress.cursor, old);
+                    assert_eq!(ingress.pending_count(), queued);
+                    break;
+                }
+                other => panic!("Unexpected snapshot result: {other:?}"),
+            }
+        }
+        assert!(accepted > 0 && accepted < MAX_PENDING);
+        assert_eq!(take(&mut ingress).len(), accepted);
+    }
+
+    #[test]
+    fn own_trade_snapshot_raw_and_serialized_model_caps_are_atomic() {
+        let mut ingress = own_trade_snapshot_open();
+        let old = ingress.cursor.clone();
+        let mut world = own_trade_snapshot_fixture();
+        assert_eq!(ingress.snapshot("invalid"), Err("Invalid social snapshot"));
+        world["probe"] = json!("x".repeat(1024 * 1024));
+        assert_eq!(
+            ingress.snapshot(&world.to_string()),
+            Err("Social snapshot too large")
+        );
+        world.as_object_mut().unwrap().remove("probe");
+        world["stage5Systems"]["trade"]["settlementNonce"] = json!("n".repeat(MAX_MODEL_BYTES));
+        let raw = world.to_string();
+        assert!(raw.len() < 1024 * 1024);
+        assert_eq!(ingress.snapshot(&raw), Err("Social model too large"));
+        assert_eq!(ingress.cursor, old);
+        assert_eq!(ingress.pending_count(), 0);
+    }
+
+    #[test]
+    fn own_trade_snapshot_scene_preserves_offer_but_new_session_retires_owner_and_fifo() {
+        let mut ingress = own_trade_snapshot_open();
+        let world = own_trade_snapshot_fixture().to_string();
+        assert!(ingress.snapshot(&world).unwrap());
+        let accepted = ingress.cursor.clone();
+        ingress.clear_scene();
+        assert_eq!(ingress.cursor.trade, accepted.trade);
+        assert!(ingress.cursor.last_event.is_none());
+        assert!(!ingress.snapshot(&world).unwrap());
+        assert_eq!(take(&mut ingress), vec![accepted]);
+        ingress.reset();
+        assert!(!ingress.snapshot(&world).unwrap());
+        assert_eq!(ingress.cursor, SocialModel::default());
+        ingress
+            .bind(99, "Other", &NativeUiPlayerCursor::default())
+            .unwrap();
+        assert!(ingress.snapshot(&world).is_err());
+        assert!(take(&mut ingress).is_empty());
     }
 
     #[test]
@@ -443,11 +780,9 @@ mod tests {
             json!({"name":"Alice","ownerObjectId":99}),
             json!({"name":"Alice","characterName":"Other"}),
         ] {
-            assert!(
-                !ingress
-                    .packet(&wire("AddMember", payload), &player)
-                    .unwrap()
-            );
+            assert!(!ingress
+                .packet(&wire("AddMember", payload), &player)
+                .unwrap());
         }
         assert_eq!(ingress.cursor, SocialModel::default());
         assert_eq!(ingress.pending_count(), 0);
@@ -460,18 +795,16 @@ mod tests {
         let player = NativeUiPlayerCursor::default();
         // The shared decoder resizes storage before rejecting an invalid slot.
         let old = ingress.cursor.clone();
-        assert!(
-            ingress
-                .packet(
-                    &wire(
-                        "GuildStorageItemChange",
-                        json!({
+        assert!(ingress
+            .packet(
+                &wire(
+                    "GuildStorageItemChange",
+                    json!({
             "changeType":1,"from":112,"to":0})
-                    ),
-                    &player
-                )
-                .is_err()
-        );
+                ),
+                &player
+            )
+            .is_err());
         assert_eq!(ingress.cursor, old);
         assert_eq!(ingress.pending_count(), 0);
         let invite = wire("GroupInvite", json!({"name":"Alice"}));
@@ -535,25 +868,21 @@ mod tests {
         assert!(accepted > 0 && accepted < MAX_PENDING);
         assert_eq!(ingress.pending_count(), accepted);
         let count = ingress.pending_count();
-        assert!(
-            ingress
-                .packet(
-                    &wire("TradeGold", json!({"amount":1,"probe":"x".repeat(20_000)})),
-                    &player
-                )
-                .is_err()
-        );
-        assert!(
-            ingress
-                .packet(
-                    &wire(
-                        "GuildNoticeChange",
-                        json!({"notice":["a"],"probe":"x".repeat(MAX_SOCIAL_PACKET_BYTES)})
-                    ),
-                    &player
-                )
-                .is_err()
-        );
+        assert!(ingress
+            .packet(
+                &wire("TradeGold", json!({"amount":1,"probe":"x".repeat(20_000)})),
+                &player
+            )
+            .is_err());
+        assert!(ingress
+            .packet(
+                &wire(
+                    "GuildNoticeChange",
+                    json!({"notice":["a"],"probe":"x".repeat(MAX_SOCIAL_PACKET_BYTES)})
+                ),
+                &player
+            )
+            .is_err());
         assert_eq!(ingress.pending_count(), count);
     }
 
