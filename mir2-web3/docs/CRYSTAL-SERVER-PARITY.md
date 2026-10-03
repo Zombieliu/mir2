@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> 2026-10-03 source status/struck repair: HumanObject's 500ms StruckTime gates
+> display only; every hit retains damage/vital receipts. CanMove excludes
+> STUN/DAZED, CanAttack includes DAZED, and actual CanCast includes STUN/DAZED/
+> paralysis/frozen while excluding LRParalysis/Blindness. Existing unrelated
+> personal blindness behavior is retained; the new shared cast guard uses its
+> own exact mask. Dense14, adjacent168, shared_zone209 plus personal3/Gateway48
+> pass. No action deadline relaxation, player collision bypass or new gameplay
+> acceptance. [Source and test boundaries](CROWDED-COMBAT-ESCAPE-20261003.md).
+
 > 2026-10-03 selected Classic/Request Sabuk uses source ten-second palace
 > capture/recapture, sixteen defenses, repair math, archer cadence/regen, price
 > taxes and treasury withdrawal. The invited profile explicitly sets UTC+08:00

@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-03 dense-combat escape: ordinary right hold is no longer swallowed
+> by monster/NPC pixels, expired path blockers retire before A*, player flinches
+> stay bounded and real packets cannot alias local animation predictions.
+> Shared hit display follows the strict source 500ms window without dropping
+> damage. Status masks preserve real control, physical/cast distinctions and
+> preparation neutrality. Native858/5ignored plus animation23 and selected
+> server/Gateway regressions pass. Source Candidate repair only; paired release
+> and ordinary Windows feel acceptance remain open. No global parity change.
+> [Source, regressions and boundaries](CROWDED-COMBAT-ESCAPE-20261003.md).
+
 > 2026-10-03 selected Sabuk Classic/Request delivery: shared palace ownership,
 > registration, native Guild naming, source defenses and owner management are
 > connected through ordinary player packets. TCP and WebSocket share authority.

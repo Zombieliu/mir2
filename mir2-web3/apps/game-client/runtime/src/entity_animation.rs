@@ -360,6 +360,7 @@ pub struct ActionTransition {
 pub enum QueueDisposition {
     Started,
     Queued,
+    Coalesced,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -635,6 +636,21 @@ impl EntityAnimationState {
         }
 
         self.last_enqueued_event_sequence = Some(event.sequence);
+        // Crystal's owner Struck handler allows only one waiting reaction.
+        // Damage/HP packets are independent; dozens of attackers must not
+        // turn into seconds of historical flinches before the next action.
+        if self.kind == EntityKind::Player
+            && event.action == AnimationAction::Struck
+            && self
+                .action_feed
+                .iter()
+                .any(|queued| queued.action == AnimationAction::Struck)
+        {
+            return Ok(EventUpdate {
+                disposition: QueueDisposition::Coalesced,
+                transitions,
+            });
+        }
         self.action_feed.push_back(event);
         let started = self.try_start_front_event(now_ms, &mut transitions)?;
         Ok(EventUpdate {
@@ -651,19 +667,22 @@ impl EntityAnimationState {
     ///
     /// Crystal's generic action feed remains FIFO, but a native presentation
     /// may already have started the next authoritative motion window before a
-    /// previous walk/run cycle reaches its final frame. When no other action is
-    /// waiting, restart that player locomotion immediately so the internal
-    /// action and visible movement phase share the new segment. Every other
-    /// case preserves the ordinary [`Self::apply_event`] queue behavior.
+    /// previous walk/run cycle reaches its final frame. Stale locomotion and
+    /// hit reactions cannot replay after that displacement has already begun.
+    /// Restart the latest segment when only these presentation actions remain;
+    /// real attacks, casts, and life transitions retain their FIFO barriers.
     pub fn apply_latest_locomotion_event(
         &mut self,
         event: AnimationEvent,
         now_ms: u64,
     ) -> Result<EventUpdate, AnimationError> {
         let can_replace = self.kind == EntityKind::Player
-            && self.current_action.is_locomotion()
+            && (self.current_action.is_locomotion()
+                || self.current_action == AnimationAction::Struck)
             && event.action.is_locomotion()
-            && self.action_feed.is_empty();
+            && self.action_feed.iter().all(|queued| {
+                queued.action.is_locomotion() || queued.action == AnimationAction::Struck
+            });
         if !can_replace {
             return self.apply_event(event, now_ms);
         }
@@ -680,6 +699,7 @@ impl EntityAnimationState {
         }
 
         self.last_enqueued_event_sequence = Some(event.sequence);
+        self.action_feed.clear();
         self.start_event(event, now_ms, &mut transitions)?;
         Ok(EventUpdate {
             disposition: QueueDisposition::Started,
@@ -1519,6 +1539,97 @@ mod tests {
         assert_eq!(state.next_motion_at_ms, Some(350));
         assert_eq!(state.queue_depth(), 0);
         assert_eq!(state.last_started_event_sequence(), Some(2));
+    }
+
+    #[test]
+    fn coalesced_player_hits_retire_sequence_without_restarting_reaction() {
+        let mut world = AnimationWorld::new(13);
+        let key = spawn_default(&mut world, "player", EntityKind::Player, 0);
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(1, AnimationAction::Struck, Direction::Down),
+                0,
+            )
+            .unwrap();
+        world
+            .apply_event(
+                &key,
+                AnimationEvent::new(2, AnimationAction::Struck, Direction::Down),
+                50,
+            )
+            .unwrap();
+        for sequence in 3..=50 {
+            let update = world
+                .apply_event(
+                    &key,
+                    AnimationEvent::new(sequence, AnimationAction::Struck, Direction::Down),
+                    50,
+                )
+                .unwrap();
+            assert_eq!(update.disposition, QueueDisposition::Coalesced);
+        }
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.queue_depth(), 1);
+        assert_eq!(state.last_enqueued_event_sequence(), Some(50));
+        assert_eq!(state.last_started_event_sequence(), Some(1));
+        assert_eq!(state.next_motion_at_ms, Some(100));
+        world
+            .apply_latest_locomotion_event(
+                &key,
+                AnimationEvent::new(51, AnimationAction::Walking, Direction::Right),
+                100,
+            )
+            .unwrap();
+        let state = world.state(&key).unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Walking);
+        assert_eq!(state.queue_depth(), 0);
+        assert!(matches!(
+            world.apply_event(
+                &key,
+                AnimationEvent::new(50, AnimationAction::Struck, Direction::Down),
+                100
+            ),
+            Err(AnimationError::OutOfOrderEvent {
+                previous: 51,
+                incoming: 50
+            })
+        ));
+    }
+
+    #[test]
+    fn latest_escape_cannot_discard_waiting_spell_or_death_barrier() {
+        for barrier in [AnimationAction::Spell, AnimationAction::Die] {
+            let mut world = AnimationWorld::new(14);
+            let key = spawn_default(&mut world, "player", EntityKind::Player, 0);
+            world
+                .apply_event(
+                    &key,
+                    AnimationEvent::new(1, AnimationAction::Struck, Direction::Down),
+                    0,
+                )
+                .unwrap();
+            world
+                .apply_event(&key, AnimationEvent::new(2, barrier, Direction::Down), 50)
+                .unwrap();
+            let update = world
+                .apply_latest_locomotion_event(
+                    &key,
+                    AnimationEvent::new(3, AnimationAction::Walking, Direction::Right),
+                    50,
+                )
+                .unwrap();
+            assert_eq!(update.disposition, QueueDisposition::Queued);
+            assert_eq!(
+                world
+                    .state(&key)
+                    .unwrap()
+                    .queued_actions()
+                    .map(|event| event.action)
+                    .collect::<Vec<_>>(),
+                vec![barrier, AnimationAction::Walking]
+            );
+        }
     }
 
     #[test]

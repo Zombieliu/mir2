@@ -9951,7 +9951,6 @@ impl SharedInProcessZoneSessionRuntime {
                 buff.key.as_str(),
                 "crystal-paralysis"
                     | "crystal-dazed"
-                    | "crystal-stun"
                     | "crystal-frozen"
                     | "crystal-blindness"
             )
@@ -12031,6 +12030,14 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(session_id) = self.current_zone_session_id() else {
             return Vec::new();
         };
+        // Native Magic bypasses the personal packet handler. Keep its trusted
+        // finite-status admission before materialization, item spend or Zone
+        // spell deadlines; Cast=false preparation remains neutral.
+        if matches!(&attack.kind, ZoneNativePlayerAttackKind::Magic { cast: true, .. })
+            && self.inner.zone_magic_cast_blocked_by_status()
+        {
+            return self.authoritative_zone_owner_correction();
+        }
         let trusted_physical_monster_target = match &attack.kind {
             ZoneNativePlayerAttackKind::Melee { .. } => attack
                 .monster
@@ -15547,6 +15554,8 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "crowded_escape_tests.rs"]
+    mod crowded_escape_tests;
     #[path = "guild_kill_source_tests.rs"]
     mod guild_kill_source_tests;
     #[path = "creature_authority_tests.rs"]

@@ -798,6 +798,35 @@ fn hovered_world_intent(
     }
 }
 
+fn hovered_actor_reserves_right_inspection(
+    hovered_object_id: Option<&str>,
+    self_object_id: &str,
+    entities: &EntityModelSet,
+    presentation: &NativeEntityPresentation,
+) -> bool {
+    let Some(hovered) = hovered_object_id.filter(|id| *id != self_object_id) else {
+        return false;
+    };
+    if entities.entities.iter().any(|entity| {
+        entity.object_id == hovered && entity.kind == EntityKind::Player
+    }) {
+        return true;
+    }
+    // Hero projections are not part of the renderer-neutral EntityKind enum.
+    // They still own Crystal's Ctrl+right inspection gesture.
+    presentation.overlay_payload()
+        .and_then(|payload| payload.get("entities"))
+        .and_then(serde_json::Value::as_array)
+        .is_some_and(|all| all.iter().any(|entity| {
+            entity.get("kind").and_then(serde_json::Value::as_str) == Some("hero")
+                && entity.get("objectId").is_some_and(|id| {
+                    id.as_str() == Some(hovered)
+                        || id.as_u64().zip(hovered.parse::<u64>().ok())
+                            .is_some_and(|(id, hovered)| id == hovered)
+                })
+        }))
+}
+
 fn hovered_harvest_target(
     hovered_object_id: Option<&str>,
     entities: &EntityModelSet,
@@ -1600,6 +1629,10 @@ pub fn mouse_world_interaction_system(
         .as_deref()
         .is_some_and(|ui| ui.core.options.new_move);
     movement.sync_new_move_option(new_move, now_ms);
+    // A* runs before the direct-step planner. Expire temporary corrections
+    // before every route search, including a route that currently has no exit.
+    // Pruning only after a path is found can make a vacated crowd permanent.
+    movement.prune_blocked_steps(now_ms);
     if left_pressed {
         trace_pointer_input(now_ms, "left", "down");
         if native_input_trace_enabled() {
@@ -2397,11 +2430,14 @@ pub fn mouse_world_interaction_system(
     if right_pressed {
         movement.attack_target = None;
         movement.stop_auto_path(now_ms, "newRightClick");
-        // Crystal reserves right-click object interactions (for example Ctrl+
-        // inspect). Until those are implemented, never turn an object click
-        // into movement through the actor beneath the pointer.
-        if presentation.hovered_object_id().is_some() {
-            movement.stop_hold(now_ms, "rightClickActor");
+        // Crystal's ordinary right hold steers by direction even when a
+        // monster/NPC sprite covers the pointer. Occupancy belongs to the
+        // movement planner, not the sprite hit test. Only Ctrl+other-player
+        // or Hero inspection owns this press instead of an escape hold.
+        if modifiers.control && hovered_actor_reserves_right_inspection(
+            presentation.hovered_object_id(), &object_id, &entities, presentation,
+        ) {
+            movement.stop_hold(now_ms, "rightClickInspect");
             return;
         }
         let origin = movement.authoritative_position.unwrap_or(entity_position);
@@ -2536,7 +2572,7 @@ pub fn mouse_world_interaction_system(
 
     // A right-button hold follows the current cursor as the camera/player
     // moves, rather than terminating at the tile from the initial down edge.
-    // Arm only an accepted world press; blocked UI/actor presses must not
+    // Arm only an accepted world press; blocked UI/inspection presses must not
     // become movement merely because the cursor later leaves that surface.
     if auto_run && presentation.hovered_grid_position().is_some() {
         if let Some(queue) = queue.as_deref_mut() {
@@ -5527,6 +5563,191 @@ mod tests {
         }
     }
 
+    fn crowded_escape_input_app(new_move: bool) -> (
+        bevy::prelude::App,
+        std::sync::mpsc::Receiver<GatewayCommand>,
+    ) {
+        let (mut app, receiver) = input_app();
+        install_movement_clock_and_inbox(&mut app);
+        app.world_mut().spawn(Window::default());
+        app.init_resource::<ButtonInput<MouseButton>>()
+            .init_resource::<NpcDialogModel>()
+            .init_resource::<QuestUiIntentQueue>();
+        let mut ui = NativePlayerUiState::default();
+        ui.core.options.new_move = new_move;
+        app.insert_resource(ui);
+        app.insert_resource(UiReadModel::default());
+        app.insert_resource(world_entities());
+        app.world_mut()
+            .resource_mut::<WorldPointerMovementState>()
+            .observe_identity("1000", (10, 10), "right");
+        app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
+        (app, receiver)
+    }
+
+    #[test]
+    fn crowded_right_press_over_monster_or_npc_pixels_keeps_legal_escape_direction() {
+        for new_move in [false, true] {
+            for hovered in ["2001", "77"] {
+                let (mut app, receiver) = crowded_escape_input_app(new_move);
+                {
+                    let mut presentation = app.world_mut().resource_mut::<NativeEntityPresentation>();
+                    // A sprite can cover clear ground beside its occupied tile.
+                    presentation.set_hover_grid_context_for_test((10, 10), (336., 352.));
+                    presentation.set_hovered_object_id_for_test(Some(hovered));
+                }
+                app.world_mut().resource_mut::<WorldPointerMovementState>().attack_target = Some(2001);
+                app.world_mut().resource_mut::<QuestUiIntentQueue>()
+                    .push_intent(QuestUiIntent::AttackTarget { object_id: 2001 });
+                app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+                    .press(MouseButton::Right);
+
+                app.update();
+
+                assert!(matches!(receiver.try_recv(),
+                    Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "left"),
+                    "right escape was discarded for {hovered}, NewMove={new_move}");
+                let movement = app.world().resource::<WorldPointerMovementState>();
+                assert_eq!(movement.attack_target, None);
+                assert_eq!(movement.pending.front().unwrap().to, (9, 10));
+                assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+                assert!(receiver.try_recv().is_err(), "escape must emit only one movement intent");
+            }
+        }
+    }
+
+    #[test]
+    fn crowded_right_press_over_actor_survives_blockers_then_escapes_on_same_hold() {
+        for new_move in [false, true] {
+            for hovered_kind in [EntityKind::Monster, EntityKind::Npc] {
+                let (mut app, receiver) = crowded_escape_input_app(new_move);
+                let mut entities = movement_entities();
+                for (index, direction) in [
+                    "up", "upright", "right", "downright", "down", "downleft", "left", "upleft",
+                ].iter().enumerate() {
+                    let point = movement_target((10, 10), direction, 1);
+                    entities.entities.push(EntityModel {
+                        object_id: (3000 + index).to_string(),
+                        kind: hovered_kind,
+                        name: "Crowd blocker".to_owned(),
+                        x: point.0,
+                        y: point.1,
+                        level: Some(1),
+                        direction: Some("left".to_owned()),
+                    });
+                }
+                app.insert_resource(entities);
+                {
+                    let mut presentation = app.world_mut().resource_mut::<NativeEntityPresentation>();
+                    presentation.set_hover_grid_context_for_test((10, 10), (672., 352.));
+                    presentation.set_hovered_object_id_for_test(Some("3002"));
+                }
+                app.world_mut().resource_mut::<WorldPointerMovementState>().attack_target = Some(2001);
+                app.world_mut().resource_mut::<QuestUiIntentQueue>()
+                    .push_intent(QuestUiIntent::AttackTarget { object_id: 2001 });
+                app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+                    .press(MouseButton::Right);
+                app.update();
+                assert!(receiver.try_recv().is_err(), "live surrounding actors remain solid");
+                assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, None);
+                assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+                assert_eq!(app.world().resource::<WorldPointerMovementState>().active,
+                    Some(WorldPointerMovementMode::Run),
+                    "blocked world press must retain escape hold: {hovered_kind:?}, NewMove={new_move}");
+
+                app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+                    .clear_just_pressed(MouseButton::Right);
+                assert!(app.world().resource::<ButtonInput<MouseButton>>().pressed(MouseButton::Right));
+                app.insert_resource(movement_entities());
+                {
+                    let mut presentation = app.world_mut().resource_mut::<NativeEntityPresentation>();
+                    presentation.set_hover_grid_context_for_test((10, 10), (672., 352.));
+                    presentation.set_hovered_object_id_for_test(None);
+                }
+                advance_movement_clock(&mut app, 1);
+                app.update();
+                assert!(matches!(receiver.try_recv(),
+                    Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"),
+                    "same physical hold did not escape after blockers left: {hovered_kind:?}, NewMove={new_move}");
+                assert!(receiver.try_recv().is_err());
+            }
+        }
+    }
+
+    #[test]
+    fn crowded_ctrl_other_player_inspect_press_cannot_become_a_later_escape_hold() {
+        for new_move in [false, true] {
+            let (mut app, receiver) = crowded_escape_input_app(new_move);
+            app.world_mut().resource_mut::<EntityModelSet>().entities.push(EntityModel {
+                object_id: "4000".to_owned(), kind: EntityKind::Player,
+                name: "Other player".to_owned(), x: 11, y: 10,
+                level: Some(10), direction: Some("left".to_owned()),
+            });
+            {
+                let mut presentation = app.world_mut().resource_mut::<NativeEntityPresentation>();
+                presentation.set_hover_grid_context_for_test((10, 10), (672., 352.));
+                presentation.set_hovered_object_id_for_test(Some("4000"));
+            }
+            app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::ControlLeft);
+            app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Right);
+            app.update();
+            assert!(receiver.try_recv().is_err());
+            assert_eq!(app.world().resource::<WorldPointerMovementState>().active, None);
+            app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+                .clear_just_pressed(MouseButton::Right);
+            app.world_mut().resource_mut::<ButtonInput<KeyCode>>().release(KeyCode::ControlLeft);
+            app.world_mut().resource_mut::<NativeEntityPresentation>()
+                .set_hovered_object_id_for_test(None);
+            app.update();
+            assert!(receiver.try_recv().is_err(), "inspect-owned press leaked into held movement");
+        }
+    }
+
+    #[test]
+    fn crowded_modal_right_press_cannot_become_escape_when_dialog_closes() {
+        for new_move in [false, true] {
+            let (mut app, receiver) = crowded_escape_input_app(new_move);
+            app.world_mut().resource_mut::<NpcDialogModel>().is_open = true;
+            app.world_mut().resource_mut::<NativeEntityPresentation>()
+                .set_hover_grid_context_for_test((10, 10), (672., 352.));
+            app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Right);
+            app.update();
+            assert!(receiver.try_recv().is_err());
+            app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+                .clear_just_pressed(MouseButton::Right);
+            app.world_mut().resource_mut::<NpcDialogModel>().is_open = false;
+            app.update();
+            assert!(receiver.try_recv().is_err(), "modal-owned press leaked into held movement");
+            assert_eq!(app.world().resource::<WorldPointerMovementState>().active, None);
+        }
+    }
+
+    #[test]
+    fn crowded_expired_rejections_are_removed_before_new_move_path_search() {
+        let (mut app, receiver) = crowded_escape_input_app(true);
+        app.insert_resource(movement_entities());
+        app.world_mut().resource_mut::<NativeEntityPresentation>()
+            .set_hover_grid_context_for_test((10, 10), (672., 352.));
+        for direction in [
+            "up", "upright", "right", "downright", "down", "downleft", "left", "upleft",
+        ] {
+            app.world_mut().resource_mut::<WorldPointerMovementState>().blocked_steps.push(BlockedSelfMove {
+                from: (10, 10), direction, mode: WorldPointerMovementMode::Walk,
+                observed_at_ms: 0.,
+            });
+        }
+        // All eight exits were temporarily rejected by live crowd occupancy.
+        // The crowd has now moved away and every hint is older than its TTL.
+        advance_movement_clock(&mut app, 3_001);
+        app.world_mut().resource_mut::<ButtonInput<MouseButton>>().press(MouseButton::Right);
+        app.update();
+        assert!(matches!(receiver.try_recv(),
+            Ok(GatewayCommand::Player(PlayerIntent::Walk { direction })) if direction == "right"),
+            "expired rejection hints still starved NewMove A* before planner pruning");
+        assert!(app.world().resource::<WorldPointerMovementState>().blocked_steps.is_empty());
+        assert!(receiver.try_recv().is_err());
+    }
+
     #[test]
     fn classic_right_hold_tracks_cursor_without_path_and_stops_on_release() {
         // Crystal GameScene.cs:11310 gates path/marker on NewMove, while
@@ -6665,7 +6886,7 @@ mod tests {
     }
 
     #[test]
-    fn right_click_run_is_blocked_by_modal_or_hovered_actor() {
+    fn right_click_run_is_blocked_by_modal() {
         let right_click_app = |dialog_open: bool, hovered_object_id: Option<&str>| {
             let (mut app, receiver) = input_app();
             app.world_mut().spawn(Window::default());
@@ -6690,11 +6911,9 @@ mod tests {
             (app, receiver)
         };
 
-        for (dialog_open, hovered_object_id) in [(true, None), (false, Some("2001"))] {
-            let (mut app, receiver) = right_click_app(dialog_open, hovered_object_id);
-            app.update();
-            assert!(receiver.try_recv().is_err());
-        }
+        let (mut app, receiver) = right_click_app(true, None);
+        app.update();
+        assert!(receiver.try_recv().is_err());
     }
 
     #[test]

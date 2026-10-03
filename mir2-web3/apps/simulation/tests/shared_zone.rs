@@ -8222,7 +8222,8 @@ fn zone_native_player_magic_spends_mana_and_enforces_cooldown() {
         damage: 1,
         mp_cost: 4,
         cooldown_ms: 500,
-        now_ms: 600,
+        // HumanObject.Magic also reserves a global 1800 ms SpellTime.
+        now_ms: 1_820,
     });
     assert!(has_packet(&second_launch, &first, |packet| matches!(
         packet,
@@ -8236,7 +8237,7 @@ fn zone_native_player_magic_spends_mana_and_enforces_cooldown() {
                 if info.object_id == 101 && info.percent == 2
         )));
     }
-    let _ = zone.tick(600);
+    let _ = zone.tick(1_820);
 
     let mp_reject = zone.handle(ZoneCommand::PlayerCastMagic {
         session_id: first.clone(),
@@ -8249,7 +8250,8 @@ fn zone_native_player_magic_spends_mana_and_enforces_cooldown() {
         damage: 1,
         mp_cost: 3,
         cooldown_ms: 500,
-        now_ms: 1200,
+        // Both spell clocks are ready, so this rejection isolates insufficient MP.
+        now_ms: 3_620,
     });
     assert!(has_packet(&mp_reject, &first, |packet| matches!(
         packet,
@@ -8338,6 +8340,36 @@ fn zone_native_player_magic_respects_spell_action_window_across_spells() {
         )));
     }
 
+    // Crystal HumanObject.Magic reserves SpellTime = cast time + 1800 ms,
+    // independently of this fixture's one-millisecond per-spell cooldown.
+    let mp_before_boundary = zone.player_vitals(&first).unwrap().2;
+    let before_deadline = zone.handle(ZoneCommand::PlayerCastMagic {
+        session_id: first.clone(),
+        object_id: 9100,
+        spell: Spell::ThunderBolt,
+        direction: MirDirection::Right,
+        target: Point { x: 334, y: 270 },
+        cast: true,
+        level: 1,
+        damage: 1,
+        mp_cost: 1,
+        cooldown_ms: 1,
+        now_ms: 1_819,
+    });
+    assert!(has_packet(&before_deadline, &first, |packet| matches!(
+        packet,
+        ServerPacket::UserLocation { .. }
+    )));
+    for target in [&first, &second] {
+        assert!(!has_packet(&before_deadline, target, |packet| matches!(
+            packet,
+            ServerPacket::Magic { .. }
+                | ServerPacket::ObjectMagic { .. }
+                | ServerPacket::ObjectMana { .. }
+        )));
+    }
+    assert_eq!(zone.player_vitals(&first).unwrap().2, mp_before_boundary);
+
     let ready = zone.handle(ZoneCommand::PlayerCastMagic {
         session_id: first.clone(),
         object_id: 9100,
@@ -8349,7 +8381,7 @@ fn zone_native_player_magic_respects_spell_action_window_across_spells() {
         damage: 1,
         mp_cost: 1,
         cooldown_ms: 1,
-        now_ms: 320,
+        now_ms: 1_820,
     });
     assert!(has_packet(&ready, &first, |packet| matches!(
         packet,
@@ -8365,6 +8397,7 @@ fn zone_native_player_magic_respects_spell_action_window_across_spells() {
             ..
         } if *object_id == 101 && *spell == Spell::ThunderBolt && *target_id == 9100
     )));
+    assert_eq!(zone.player_vitals(&first).unwrap().2, mp_before_boundary - 1);
 }
 
 #[test]
@@ -8955,7 +8988,7 @@ fn zone_native_player_summon_skeleton_recalls_existing_owned_summon_without_resp
         damage: 0,
         mp_cost: 7,
         cooldown_ms: 1_000,
-        now_ms: 1_200,
+        now_ms: 1_810,
     });
 
     assert!(has_packet(&recall, &first, |packet| matches!(
@@ -8984,7 +9017,8 @@ fn zone_native_player_summon_skeleton_recalls_existing_owned_summon_without_resp
                 && movement.position == (Point { x: 334, y: 270 })
     )));
 
-    let later = zone.tick(2_000);
+    // Check beyond a full 500 ms materialization delay after the legal recall.
+    let later = zone.tick(2_400);
     assert!(!has_packet(&later, &first, |packet| matches!(
         packet,
         ServerPacket::ObjectMonster { info } if info.name == "BoneFamiliar"
@@ -9278,7 +9312,7 @@ fn zone_native_pet_enhancer_buffs_owned_summon_and_increases_damage() {
         damage: 0,
         mp_cost: 0,
         cooldown_ms: 1,
-        now_ms: 600,
+        now_ms: 1_810,
     });
     assert!(has_packet(&enhanced, &first, |packet| matches!(
         packet,
@@ -9301,7 +9335,7 @@ fn zone_native_pet_enhancer_buffs_owned_summon_and_increases_damage() {
     zone.handle(ZoneCommand::SpawnMonster {
         session_id: first.clone(),
         monster: native_monster_spawn(9100, 332, 270),
-        now_ms: 620,
+        now_ms: 1_820,
     });
 
     let shown = zone.tick(2_511);
@@ -13305,7 +13339,7 @@ fn level50_wizard_relocation_clone_and_self_buffs_are_zone_authoritative() {
         damage: 0,
         mp_cost: 0,
         cooldown_ms: 500,
-        now_ms: 1_000,
+        now_ms: 1_820,
     });
     assert!(has_packet(&recast, &wizard, |packet| matches!(
         packet,

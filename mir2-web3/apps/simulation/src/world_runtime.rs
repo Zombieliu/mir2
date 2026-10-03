@@ -730,6 +730,10 @@ impl InProcessWorldRuntime {
         self.session.zone_magic_attack_profile(spell)
     }
 
+    pub fn zone_magic_cast_blocked_by_status(&self) -> bool {
+        self.session.zone_magic_cast_blocked_by_status()
+    }
+
     pub fn item_rental_request(&mut self, partner_name: &str, renting: bool) -> Vec<ServerPacket> {
         self.session.item_rental_request(partner_name, renting)
     }

@@ -1,0 +1,28 @@
+Full retained log: C:/mir2-build/crowded-entity-animation-green-20261003.log
+SHA256: 83e686b498190e014ad6797b4b38eb9858f7dacbc0a05a2c9e3333527d24e82e
+
+running 23 tests
+test tests::action_feed_preserves_walk_run_attack_and_struck_fifo_order ... ok
+test tests::clock_is_monotonic ... ok
+test tests::coalesced_player_hits_retire_sequence_without_restarting_reaction ... ok
+test tests::crystal_default_catalogs_match_audited_frame_sets ... ok
+test tests::custom_catalog_rejects_invalid_or_missing_actions ... ok
+test tests::die_clears_later_actions_and_holds_dead ... ok
+test tests::draw_frame_uses_crystal_direction_stride_and_signed_reverse_offset ... ok
+test tests::event_sequence_must_increase ... ok
+test tests::harvested_monster_transitions_from_dead_to_persistent_skeleton ... ok
+test tests::kind_change_without_remove_still_reincarnates ... ok
+test tests::latest_escape_cannot_discard_waiting_spell_or_death_barrier ... ok
+test tests::latest_player_locomotion_preserves_waiting_combat_fifo ... ok
+test tests::latest_player_locomotion_restarts_without_stale_queueing ... ok
+test tests::monster_spawn_uses_seeded_random_frame_and_100_ms_grid ... ok
+test tests::npc_reselects_standing_or_harvest_with_audited_intervals ... ok
+test tests::per_object_rng_is_independent_of_spawn_order ... ok
+test tests::player_standing_starts_at_zero_and_cycles_every_500_ms ... ok
+test tests::repeated_snapshot_preserves_phase_queue_deadline_rng_and_incarnation ... ok
+test tests::revive_barrier_discards_stale_actions_blocking_a_dead_actor ... ok
+test tests::revive_draws_reverse_frames_and_returns_to_standing ... ok
+test tests::show_and_hide_use_source_frames_and_complete_deterministically ... ok
+test tests::show_interrupts_an_in_progress_hide_instead_of_stalling_in_the_queue ... ok
+test tests::stale_incarnation_cannot_receive_events ... ok
+test result: ok. 23 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

@@ -1236,6 +1236,10 @@ pub(crate) struct ZonePlayer {
     pub flaming_sword_ready_at_ms: u64,
     #[serde(default)]
     pub last_damaged_at_ms: u64,
+    /// Crystal's ordinary monster-hit presentation window, independent of
+    /// damage settlement and the player's action/movement deadlines.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub native_struck_ready_at_ms: Option<u64>,
     #[serde(default)]
     pub last_regen_at_ms: u64,
     pub chat_profile: ZoneChatProfile,
@@ -1348,6 +1352,7 @@ impl ZonePlayer {
             flaming_sword_armed: false,
             flaming_sword_ready_at_ms: 0,
             last_damaged_at_ms: 0,
+            native_struck_ready_at_ms: None,
             last_regen_at_ms: 0,
             chat_profile: join.chat_profile,
             combat_stats: join.combat_stats,

@@ -218,6 +218,7 @@ const ZONE_NATIVE_PLAYER_MELEE_ACTION_MS: u64 = 550;
 const ZONE_NATIVE_PLAYER_FLAMING_SWORD_MS: u64 = 10_000;
 const ZONE_NATIVE_PLAYER_MAGIC_ACTION_MS: u64 = 600;
 const ZONE_NATIVE_PLAYER_SPELL_ACTION_MS: u64 = 1_800;
+const ZONE_NATIVE_PLAYER_STRUCK_WINDOW_MS: u64 = 500;
 
 // Crystal HumanObject.Magic uses one global SpellTime in addition to each
 // magic's DelayBase/DelayReduction. FlameField alone lengthens that gate.
@@ -250,6 +251,7 @@ const CRYSTAL_POISON_FROZEN: u16 = 8;
 const CRYSTAL_POISON_STUN: u16 = 16;
 const CRYSTAL_POISON_LR_PARALYSIS: u16 = 256;
 const CRYSTAL_POISON_PARALYSIS: u16 = 32;
+const CRYSTAL_POISON_DAZED: u16 = 1024;
 const CRYSTAL_SPELL_EFFECT_ENTRAPMENT: u8 = 9;
 const CRYSTAL_STAT_MIN_AC: u8 = 0;
 const CRYSTAL_STAT_MAX_AC: u8 = 1;
@@ -297,6 +299,7 @@ pub(super) struct ZonePlayerActionClock {
     magic_ready_at_ms: BTreeMap<u8, u64>,
     flaming_sword_armed: bool,
     flaming_sword_ready_at_ms: u64,
+    native_struck_ready_at_ms: Option<u64>,
 }
 
 /// An online map handoff carries only finite control-poison deadlines. Counted
@@ -1041,6 +1044,7 @@ impl ZoneRuntime {
             magic_ready_at_ms: player.magic_ready_at_ms.clone(),
             flaming_sword_armed: player.flaming_sword_armed,
             flaming_sword_ready_at_ms: player.flaming_sword_ready_at_ms,
+            native_struck_ready_at_ms: player.native_struck_ready_at_ms,
         })
     }
 
@@ -1059,6 +1063,7 @@ impl ZoneRuntime {
         player.magic_ready_at_ms = clock.magic_ready_at_ms;
         player.flaming_sword_armed = clock.flaming_sword_armed;
         player.flaming_sword_ready_at_ms = clock.flaming_sword_ready_at_ms;
+        player.native_struck_ready_at_ms = clock.native_struck_ready_at_ms;
     }
 
     pub(super) fn player_finite_control_poison_clock(
@@ -1217,6 +1222,20 @@ impl ZoneRuntime {
             .map(|player| (player.hp, player.max_hp, player.mp))
     }
 
+    /// Integration-fixture access to existing finite status admission. This is
+    /// absent from ordinary builds and is never a client packet or QA command.
+    #[doc(hidden)]
+    #[cfg(feature = "test-support")]
+    pub fn apply_finite_player_status_for_test(
+        &mut self,
+        session_id: &SessionId,
+        poison: u16,
+        duration_ms: u64,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        self.apply_native_player_status_poison(session_id, poison, duration_ms, now_ms)
+    }
+
     /// Server-internal Harvest admission. Missing trusted state is denied.
     pub fn player_harvest_admitted(&self, session_id: &SessionId, now_ms: u64) -> bool {
         self.players
@@ -1330,6 +1349,7 @@ impl ZoneRuntime {
         self.clear_spider_target_life(object_id);
         if let Some(player) = self.players.values_mut().find(|p| p.object_id == object_id) {
             player.movement_actions.clear();
+            player.native_struck_ready_at_ms = None;
         }
         self.pending_native_player_hits
             .retain(|hit| hit.target_object_id != object_id);
@@ -1806,7 +1826,8 @@ impl ZoneRuntime {
             return false;
         };
         if cast && (now_ms < player.next_spell_ready_at_ms
-            || now_ms < player.movement_ready_at_ms) {
+            || now_ms < player.movement_ready_at_ms
+            || zone_player_status_blocks_cast(player, now_ms)) {
             return false;
         }
         if object_id == 0 && zone_magic_targets_ground_point(spell) {
@@ -4890,7 +4911,8 @@ impl ZoneRuntime {
             return Vec::new();
         };
         if cast && (now_ms < player.next_spell_ready_at_ms
-            || now_ms < player.movement_ready_at_ms) {
+            || now_ms < player.movement_ready_at_ms
+            || zone_player_status_blocks_cast(player, now_ms)) {
             return self.correct_player_location(session_id, now_ms);
         }
         // Authoritatively recompute the magic damage from the player's stat block
@@ -10267,6 +10289,7 @@ impl ZoneRuntime {
             health_percent,
             poison,
             killed,
+            show_struck,
             heal_settlement,
             damage_settlement,
         ) = {
@@ -10306,6 +10329,17 @@ impl ZoneRuntime {
             if damage > 0 {
                 target.last_damaged_at_ms = now_ms;
             }
+            // HumanObject.Attacked shares one StruckTime across all ordinary
+            // monster attackers. Every hit still settles damage; only the
+            // owner/observer flinch packet is admitted through this window.
+            // Environmental Struck has no such throttle in Crystal.
+            let show_struck = damage > 0 && !unmitigated
+                && (!attack_procs || target.native_struck_ready_at_ms
+                    .is_none_or(|ready_at_ms| now_ms > ready_at_ms));
+            if show_struck && attack_procs {
+                target.native_struck_ready_at_ms = Some(
+                    now_ms.saturating_add(ZONE_NATIVE_PLAYER_STRUCK_WINDOW_MS));
+            }
             let poison = if target.dead {
                 target.clear_status_poisons();
                 None
@@ -10324,6 +10358,7 @@ impl ZoneRuntime {
                 native_player_health_percent(target.hp, target.max_hp),
                 poison,
                 target.dead,
+                show_struck,
                 heal_settlement,
                 (damage > 0).then(|| target.vital_settlement(hp_before_damage)),
             )
@@ -10363,7 +10398,7 @@ impl ZoneRuntime {
             ];
         }
         let mut packets = Vec::new();
-        if !unmitigated {
+        if show_struck {
             packets.push(ServerPacket::ObjectStruck {
                 info: ObjectStruckInfo {
                     object_id: target_object_id,
@@ -15543,7 +15578,18 @@ fn zone_player_status_blocks_movement(player: &ZonePlayer, now_ms: u64) -> bool 
     zone_player_active_status(player, now_ms)
         & (CRYSTAL_POISON_PARALYSIS
             | CRYSTAL_POISON_LR_PARALYSIS
-            | CRYSTAL_POISON_STUN
+            | CRYSTAL_POISON_FROZEN)
+        != 0
+}
+
+fn zone_player_status_blocks_cast(player: &ZonePlayer, now_ms: u64) -> bool {
+    // Crystal HumanObject.CanCast differs from CanMove and CanAttack: STUN
+    // prevents magic but permits physical action. LRParalysis is not in this
+    // server cast mask. Preparation (cast=false) does not consume an action.
+    zone_player_active_status(player, now_ms)
+        & (CRYSTAL_POISON_STUN
+            | CRYSTAL_POISON_DAZED
+            | CRYSTAL_POISON_PARALYSIS
             | CRYSTAL_POISON_FROZEN)
         != 0
 }
@@ -15563,6 +15609,7 @@ fn zone_player_melee_attack_admitted(player: &ZonePlayer, now_ms: u64) -> bool {
         && !player.fishing
         && (!player.riding_mount || state.mount_attack_allowed)
         && !zone_player_status_blocks_movement(player, now_ms)
+        && zone_player_active_status(player, now_ms) & CRYSTAL_POISON_DAZED == 0
 }
 
 fn zone_player_range_attack_admitted(player: &ZonePlayer, now_ms: u64) -> bool {

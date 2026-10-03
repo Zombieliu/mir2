@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> 2026-10-03 active user task: dense-monster right-hold escape repair.
+> Sprite-hover input rejection, expired A* correction hints, historical player
+> flinches and predicted/source sequence aliasing are repaired. Shared monster
+> hits retain every damage settlement while using Crystal's 500ms display
+> window; movement/attack/cast status masks are separated at Zone and trusted
+> Gateway admission. Native858/5ignored, animation23, denseZone14, Zone168,
+> personal3, shared_zone209 and Gateway5+43 pass. Five old spell-time fixtures
+> also fail on unchanged R16 and are now source-corrected with failure logs kept.
+> These are source/test results; no new package,
+> update feed, live rollout or human gameplay acceptance follows. Preserve the
+> locked F-drive install and paused capacity goal.
+> [Findings and release boundaries](CROWDED-COMBAT-ESCAPE-20261003.md).
+
 > 2026-10-03 active user task: deliver shared Sabuk Classic/Request siege.
 > Ordinary Guild naming, NPC registration/management, shared TCP+WebSocket
 > palace capture, native gate footprint and durable castle/account transactions

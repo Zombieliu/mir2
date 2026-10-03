@@ -12,7 +12,7 @@ use bevy::prelude::{Query, Res, ResMut, Resource, Time, Window, With};
 use bevy::window::PrimaryWindow;
 use mir2_bevy_runtime::entity_animation::{
     AnimationAction, AnimationCatalog, AnimationEvent, AnimationWorld, Direction, EntityKind,
-    TransitionReason,
+    QueueDisposition, TransitionReason,
 };
 use serde_json::Value;
 
@@ -65,6 +65,9 @@ pub struct NativeEntityPresentation {
     world: AnimationWorld,
     latest_payload: Option<Value>,
     pending_payload: Option<Value>,
+    /// Packet-adapter numbers are independent of locally predicted actions.
+    last_source_sequence: HashMap<String, u64>,
+    /// Monotonic AnimationWorld numbers include both packets and predictions.
     last_applied_sequence: HashMap<String, u64>,
     last_libraries: HashMap<String, String>,
     last_frames: HashMap<String, (i64, AnimationAction)>,
@@ -88,6 +91,7 @@ impl Default for NativeEntityPresentation {
             world: AnimationWorld::new(NATIVE_ANIMATION_WORLD_SEED),
             latest_payload: None,
             pending_payload: None,
+            last_source_sequence: HashMap::new(),
             last_applied_sequence: HashMap::new(),
             last_libraries: HashMap::new(),
             last_frames: HashMap::new(),
@@ -390,10 +394,10 @@ impl NativeEntityPresentation {
             return false;
         };
         let phase_count = native_motion_phase_count(entity, action);
-        let Some(key) = self
+        let Some((key, previous_pose)) = self
             .world
             .active_state(object_id)
-            .map(|state| state.key.clone())
+            .map(|state| (state.key.clone(), state.pose()))
         else {
             return false;
         };
@@ -403,16 +407,28 @@ impl NativeEntityPresentation {
             .copied()
             .unwrap_or(0)
             .saturating_add(1);
-        if self
+        let Ok(update) = self
             .world
             .apply_latest_locomotion_event(
                 &key,
                 AnimationEvent::new(animation_sequence, action, direction),
                 animation_now_ms,
             )
-            .is_err()
-        {
+        else {
             return false;
+        };
+        if update.disposition == QueueDisposition::Started
+            && (previous_pose.action == AnimationAction::Struck || previous_pose.queue_depth > 0)
+        {
+            crate::movement_trace::record(serde_json::json!({
+                "type": "selfEscapePresentationStarted",
+                "objectId": object_id,
+                "previousAction": format!("{:?}", previous_pose.action),
+                "previousQueueDepth": previous_pose.queue_depth,
+                "movementSequence": animation_sequence,
+                "animationAtMs": animation_now_ms,
+                "motionAtUnixMs": motion_now_ms,
+            }));
         }
         self.last_applied_sequence
             .insert(object_id.to_owned(), animation_sequence);
@@ -595,7 +611,26 @@ impl NativeEntityPresentation {
         let Some(mut payload) = self.pending_payload.take() else {
             return;
         };
-        self.attach_native_motion_windows(&mut payload, motion_now_ms);
+        // Source echoes can be normalized to the active predicted action by
+        // motion reconciliation. Capture their adapter numbers beforehand so
+        // a local animation number can never retire a later real packet.
+        let source_sequences = payload
+            .get("entities")
+            .and_then(Value::as_array)
+            .into_iter()
+            .flatten()
+            .filter_map(|entity| {
+                entity
+                    .get("_nativeAnimationAction")
+                    .and_then(Value::as_str)
+                    .and_then(parse_action)?;
+                Some((
+                    entity.get("objectId").and_then(value_object_id)?,
+                    entity.get("_nativeAnimationSequence").and_then(Value::as_u64)?,
+                ))
+            })
+            .collect::<HashMap<_, _>>();
+        let stale_source_echoes = self.attach_native_motion_windows(&mut payload, motion_now_ms);
         let observed = payload
             .get("entities")
             .and_then(Value::as_array)
@@ -632,6 +667,7 @@ impl NativeEntityPresentation {
             .collect::<Vec<_>>();
         for key in removed {
             let _ = self.world.remove(&key);
+            self.last_source_sequence.remove(&key.object_id);
             self.last_applied_sequence.remove(&key.object_id);
             self.last_libraries.remove(&key.object_id);
             self.last_frames.remove(&key.object_id);
@@ -654,6 +690,7 @@ impl NativeEntityPresentation {
                 {
                     let _ = self.world.remove(&key);
                 }
+                self.last_source_sequence.remove(&entity.object_id);
                 self.last_applied_sequence.remove(&entity.object_id);
                 self.last_frames.remove(&entity.object_id);
             }
@@ -679,15 +716,28 @@ impl NativeEntityPresentation {
                 .or_else(|| {
                     (update.spawned && entity.initially_dead).then_some((0, AnimationAction::Dead))
                 });
-            let Some((sequence, action)) = action else {
+            let Some((normalized_sequence, action)) = action else {
                 continue;
             };
-            if self.last_applied_sequence.get(&entity.object_id) == Some(&sequence) {
+            let source_sequence = source_sequences
+                .get(&entity.object_id)
+                .copied()
+                .unwrap_or(normalized_sequence);
+            if self.last_source_sequence.get(&entity.object_id)
+                .is_some_and(|previous| source_sequence <= *previous)
+            {
                 continue;
             }
             let Some(action) = normalize_action(entity.kind, action) else {
                 continue;
             };
+            if stale_source_echoes.contains(&entity.object_id) && !update.spawned {
+                self.last_source_sequence.insert(entity.object_id, source_sequence);
+                continue;
+            }
+            let sequence_floor = source_sequence.max(normalized_sequence);
+            let sequence = self.last_applied_sequence.get(&entity.object_id)
+                .map_or(sequence_floor, |previous| sequence_floor.max(previous.saturating_add(1)));
             let revival_barrier = action == AnimationAction::Revive
                 || (entity.kind == EntityKind::Player
                     && action == AnimationAction::Standing
@@ -709,8 +759,7 @@ impl NativeEntityPresentation {
                     )
                     .is_ok()
                 {
-                    self.last_applied_sequence
-                        .insert(entity.object_id, sequence);
+                    self.retire_source_action(&entity.object_id, source_sequence, sequence, action);
                 }
                 continue;
             }
@@ -723,7 +772,7 @@ impl NativeEntityPresentation {
                 && self.world.state(&update.key).is_ok_and(|state| {
                     matches!(
                         state.pose().action,
-                        AnimationAction::Walking | AnimationAction::Running
+                        AnimationAction::Walking | AnimationAction::Running | AnimationAction::Struck
                     )
                 });
             if coalesces_active_player_motion {
@@ -733,7 +782,8 @@ impl NativeEntityPresentation {
                 // target for every tile, so queuing another walk/run here would
                 // replay stale locomotion after the new motion window already
                 // began. The active window below owns the visible movement
-                // phase; retain FIFO semantics for every non-movement action.
+                // phase. Obsolete flinches may not postpone this displacement;
+                // real attack/cast/life barriers still retain FIFO semantics.
                 if self
                     .world
                     .apply_latest_locomotion_event(
@@ -743,22 +793,30 @@ impl NativeEntityPresentation {
                     )
                     .is_ok()
                 {
-                    self.last_applied_sequence
-                        .insert(entity.object_id, sequence);
+                    self.retire_source_action(&entity.object_id, source_sequence, sequence, action);
                 }
                 continue;
             }
-            if self
+            if let Ok(update) = self
                 .world
                 .apply_event(
                     &update.key,
                     AnimationEvent::new(sequence, action, entity.direction),
                     animation_now_ms,
                 )
-                .is_ok()
             {
-                self.last_applied_sequence
-                    .insert(entity.object_id, sequence);
+                if update.disposition == QueueDisposition::Coalesced
+                    && self.self_object_id.as_deref() == Some(entity.object_id.as_str())
+                {
+                    crate::movement_trace::record(serde_json::json!({
+                        "type": "ownerFlinchCoalesced",
+                        "objectId": entity.object_id,
+                        "actionSequence": sequence,
+                        "sourceActionSequence": source_sequence,
+                        "animationAtMs": animation_now_ms,
+                    }));
+                }
+                self.retire_source_action(&entity.object_id, source_sequence, sequence, action);
             }
         }
 
@@ -766,13 +824,32 @@ impl NativeEntityPresentation {
         self.payload_dirty = true;
     }
 
-    fn attach_native_motion_windows(&mut self, payload: &mut Value, now_ms: u64) {
+    fn retire_source_action(
+        &mut self,
+        object_id: &str,
+        source_sequence: u64,
+        animation_sequence: u64,
+        action: AnimationAction,
+    ) {
+        self.last_source_sequence.insert(object_id.to_owned(), source_sequence);
+        self.last_applied_sequence.insert(object_id.to_owned(), animation_sequence);
+        if matches!(action, AnimationAction::Walking | AnimationAction::Running) {
+            if let Some(window) = self.motion_windows.get_mut(object_id) {
+                // The packet's raw number is not an AnimationWorld number
+                // once a prediction has occupied that number in the feed.
+                window.animation_sequence = animation_sequence;
+            }
+        }
+    }
+
+    fn attach_native_motion_windows(&mut self, payload: &mut Value, now_ms: u64) -> HashSet<String> {
+        let mut stale_source_echoes = HashSet::new();
         let Some(entities) = payload.get_mut("entities").and_then(Value::as_array_mut) else {
             mir2_bevy_runtime::clear_mir2_self_camera_motion();
             self.self_object_id = None;
             self.last_positions.clear();
             self.motion_windows.clear();
-            return;
+            return stale_source_echoes;
         };
         let mut observed_ids = HashSet::new();
         let mut self_center_correction = None;
@@ -819,6 +896,7 @@ impl NativeEntityPresentation {
                     entity["_nativeAnimationAction"] =
                         Value::from(movement_action_name(window.action));
                     stale_self_source_echo_applied = true;
+                    stale_source_echoes.insert(object_id.clone());
                 }
             }
 
@@ -971,6 +1049,7 @@ impl NativeEntityPresentation {
             mir2_bevy_runtime::clear_mir2_self_camera_motion();
             self.self_object_id = None;
         }
+        stale_source_echoes
     }
 
     fn expire_native_motion_windows(&mut self, now_ms: u64) {
@@ -1926,6 +2005,120 @@ mod tests {
     }
 
     #[test]
+    fn crowded_owner_hits_keep_one_waiting_flinch_behind_attack() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut payload = player_payload(1);
+        payload["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+        presentation.observe_packet_payload(payload.clone(), 0);
+        for sequence in 2..=49 {
+            payload["entities"][0]["_nativeAnimationAction"] = json!("struck");
+            payload["entities"][0]["_nativeAnimationSequence"] = json!(sequence);
+            presentation.observe_packet_payload(payload.clone(), 50);
+        }
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Attack1);
+        assert_eq!(state.queue_depth(), 1, "48 real hit packets must not become 48 flinches");
+        assert_eq!(state.queued_actions().next().unwrap().action, AnimationAction::Struck);
+    }
+
+    #[test]
+    fn crowded_owner_escape_starts_fresh_motion_instead_of_replaying_old_flinches() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut payload = player_payload(1);
+        payload["entities"][0]["_nativeAnimationAction"] = json!("standing");
+        presentation.observe_packet_payload(payload.clone(), 0);
+        for sequence in 2..=49 {
+            payload["entities"][0]["_nativeAnimationAction"] = json!("struck");
+            payload["entities"][0]["_nativeAnimationSequence"] = json!(sequence);
+            presentation.observe_packet_payload(payload.clone(), 50);
+        }
+        assert!(presentation.begin_local_self_motion("1", (10, 10), (11, 10), "right", false, 100, 1_100));
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Walking, "fresh escape was queued behind stale hits");
+        assert_eq!(state.queue_depth(), 0);
+        assert_eq!(presentation.overlay_payload().unwrap()["entities"][0]["x"], json!(10), "pixels cannot forge tile authority");
+        let before_ack = presentation.motion_windows["1"];
+        assert!(before_ack.locally_predicted);
+        let mut acknowledged = player_payload(51);
+        acknowledged["sceneView"]["center"]["x"] = json!(11);
+        acknowledged["entities"][0]["x"] = json!(11);
+        acknowledged["entities"][0]["direction"] = json!("right");
+        presentation.replace_payload(acknowledged);
+        presentation.sync_pending_payload(200, 1_200);
+        let after_ack = presentation.motion_windows["1"];
+        assert!(!after_ack.locally_predicted);
+        assert_eq!(after_ack.started_ms, before_ack.started_ms);
+        assert_eq!(after_ack.expires_ms, before_ack.expires_ms);
+        assert_eq!(presentation.world.active_state("1").unwrap().queue_depth(), 0);
+    }
+
+    #[test]
+    fn crowded_authoritative_move_does_not_wait_for_old_hit_reactions() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut payload = player_payload(1);
+        payload["entities"][0]["_nativeAnimationAction"] = json!("struck");
+        presentation.replace_payload(payload.clone());
+        presentation.sync_pending_payload(0, 1_000);
+        payload["entities"][0]["_nativeAnimationSequence"] = json!(2);
+        presentation.replace_payload(payload.clone());
+        presentation.sync_pending_payload(50, 1_050);
+        payload["entities"][0]["_nativeAnimationSequence"] = json!(3);
+        payload["entities"][0]["_nativeAnimationAction"] = json!("walking");
+        payload["entities"][0]["direction"] = json!("right");
+        payload["entities"][0]["x"] = json!(11);
+        payload["sceneView"]["center"]["x"] = json!(11);
+        presentation.replace_payload(payload);
+        presentation.sync_pending_payload(100, 1_100);
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Walking);
+        assert_eq!(state.queue_depth(), 0);
+        assert_eq!(presentation.motion_windows["1"].started_ms, 1_100);
+    }
+
+    #[test]
+    fn crowded_sixty_escape_steps_with_continuing_hits_have_no_historical_animation_backlog() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut payload = player_payload(1);
+        payload["entities"][0]["_nativeAnimationAction"] = json!("standing");
+        presentation.replace_payload(payload.clone());
+        presentation.sync_pending_payload(0, 1_000);
+        let mut sequence = 1;
+        for step in 0..60 {
+            let animation_ms = step as u64 * 600;
+            let motion_ms = 1_000 + animation_ms;
+            let x = 10 + step;
+            for _ in 0..8 {
+                sequence += 1;
+                payload["entities"][0]["_nativeAnimationAction"] = json!("struck");
+                payload["entities"][0]["_nativeAnimationSequence"] = json!(sequence);
+                presentation.replace_payload(payload.clone());
+                presentation.sync_pending_payload(animation_ms, motion_ms);
+            }
+            assert!(presentation.begin_local_self_motion("1", (x, 10), (x + 1, 10), "right", false, animation_ms, motion_ms));
+            let state = presentation.world.active_state("1").unwrap();
+            assert_eq!(state.pose().action, AnimationAction::Walking, "escape step {step}");
+            assert_eq!(state.queue_depth(), 0, "escape step {step}");
+            sequence += 1; // The real packet adapter does not count local predictions.
+            payload["entities"][0]["_nativeAnimationAction"] = json!("walking");
+            payload["entities"][0]["_nativeAnimationSequence"] = json!(sequence);
+            payload["entities"][0]["direction"] = json!("right");
+            payload["entities"][0]["x"] = json!(x + 1);
+            payload["sceneView"]["center"]["x"] = json!(x + 1);
+            presentation.replace_payload(payload.clone());
+            presentation.sync_pending_payload(animation_ms + 100, motion_ms + 100);
+            assert_eq!(presentation.motion_windows["1"].started_ms, motion_ms);
+            for _ in 0..8 {
+                sequence += 1;
+                payload["entities"][0]["_nativeAnimationAction"] = json!("struck");
+                payload["entities"][0]["_nativeAnimationSequence"] = json!(sequence);
+                presentation.replace_payload(payload.clone());
+                presentation.sync_pending_payload(animation_ms + 200, motion_ms + 200);
+            }
+            assert!(presentation.world.active_state("1").unwrap().queue_depth() <= 1);
+        }
+    }
+
+    #[test]
     fn same_frame_packet_payloads_retain_attack_then_struck_in_action_feed() {
         for kind in ["selfPlayer", "monster"] {
             let mut presentation = NativeEntityPresentation::default();
@@ -2255,6 +2448,123 @@ mod tests {
         assert_eq!(rendered["entities"][0]["motionSortY"], json!(10));
         assert_eq!(rendered["entities"][0]["motionStartedMs"], json!(1_100));
         assert_eq!(presentation.last_applied_sequence.get("1"), Some(&9));
+    }
+
+    fn prediction_with_next_source_sequence_collision() -> NativeEntityPresentation {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut initial = player_payload(7);
+        initial["entities"][0]["_nativeAnimationAction"] = json!("standing");
+        presentation.replace_payload(initial);
+        presentation.sync_pending_payload(0, 1_000);
+        assert!(presentation.begin_local_self_motion(
+            "1", (10, 10), (11, 10), "right", false, 100, 1_100,
+        ));
+        assert_eq!(presentation.motion_windows["1"].animation_sequence, 8);
+        presentation
+    }
+
+    #[test]
+    fn synthetic_prediction_sequence_collision_cannot_drop_next_real_death() {
+        let mut presentation = prediction_with_next_source_sequence_collision();
+        // The adapter's clock was not advanced by local pixels. Its very next
+        // real event therefore has the number used by the prediction above.
+        let mut death = player_payload(8);
+        death["entities"][0]["_nativeAnimationAction"] = json!("die");
+        death["entities"][0]["dead"] = json!(true);
+        presentation.replace_payload(death.clone());
+        presentation.sync_pending_payload(200, 1_200);
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.queued_actions().map(|event| event.action).collect::<Vec<_>>(),
+            vec![AnimationAction::Die], "a source Death must retain its life barrier");
+        assert_eq!(presentation.overlay_payload().unwrap()["entities"][0]["x"], json!(10));
+        presentation.replace_payload(death);
+        presentation.sync_pending_payload(250, 1_250);
+        assert_eq!(presentation.world.active_state("1").unwrap().queue_depth(), 1,
+            "repeated Death projections cannot queue a second life barrier");
+        presentation.world.tick(700).unwrap();
+        assert_eq!(presentation.world.active_state("1").unwrap().pose().action, AnimationAction::Die);
+    }
+
+    #[test]
+    fn synthetic_prediction_sequence_collision_cannot_drop_next_real_spell() {
+        let mut presentation = prediction_with_next_source_sequence_collision();
+        let mut spell = player_payload(8);
+        spell["entities"][0]["_nativeAnimationAction"] = json!("spell");
+        presentation.replace_payload(spell.clone());
+        presentation.sync_pending_payload(200, 1_200);
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.queued_actions().map(|event| event.action).collect::<Vec<_>>(),
+            vec![AnimationAction::Spell], "a source cast must retain its FIFO barrier");
+        presentation.replace_payload(spell);
+        presentation.sync_pending_payload(250, 1_250);
+        assert_eq!(presentation.world.active_state("1").unwrap().queue_depth(), 1,
+            "repeated cast projections cannot replay the spell");
+        presentation.world.tick(700).unwrap();
+        assert_eq!(presentation.world.active_state("1").unwrap().pose().action, AnimationAction::Spell);
+    }
+
+    #[test]
+    fn synthetic_prediction_sequence_collision_ack_keeps_original_motion_window() {
+        let mut presentation = prediction_with_next_source_sequence_collision();
+        let prediction = presentation.motion_windows["1"];
+        let mut ack = player_payload(8);
+        ack["entities"][0]["direction"] = json!("right");
+        ack["entities"][0]["x"] = json!(11);
+        ack["sceneView"]["center"]["x"] = json!(11);
+        presentation.replace_payload(ack.clone());
+        presentation.sync_pending_payload(200, 1_200);
+        let confirmed = presentation.motion_windows["1"];
+        assert!(!confirmed.locally_predicted);
+        assert_eq!(confirmed.started_ms, prediction.started_ms);
+        assert_eq!(confirmed.expires_ms, prediction.expires_ms);
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Walking);
+        assert_eq!(state.queue_depth(), 0);
+        assert_eq!(state.last_started_event_sequence(), Some(confirmed.animation_sequence),
+            "the motion window and active animation must use one presentation sequence");
+        let last_enqueued = state.last_enqueued_event_sequence();
+        presentation.replace_payload(ack.clone());
+        presentation.sync_pending_payload(250, 1_250);
+        assert_eq!(presentation.motion_windows["1"].started_ms, prediction.started_ms);
+        assert_eq!(presentation.world.active_state("1").unwrap().last_enqueued_event_sequence(), last_enqueued);
+        presentation.render_state_if_changed_with_clocks(700, 1_700, true, |payload, _, _| Some(payload.clone()));
+        presentation.replace_payload(ack);
+        presentation.sync_pending_payload(800, 1_800);
+        assert!(!presentation.has_active_motion(1_800), "a completed movement cannot replay on its repeated ACK");
+        let state = presentation.world.active_state("1").unwrap();
+        assert_eq!(state.pose().action, AnimationAction::Standing);
+        assert_eq!(state.queue_depth(), 0);
+    }
+
+    #[test]
+    fn synthetic_prediction_sequence_collision_stale_echo_cannot_retire_future_death() {
+        let mut presentation = prediction_with_next_source_sequence_collision();
+        let mut first_ack = player_payload(8);
+        first_ack["entities"][0]["direction"] = json!("right");
+        first_ack["entities"][0]["x"] = json!(11);
+        first_ack["sceneView"]["center"]["x"] = json!(11);
+        presentation.replace_payload(first_ack.clone());
+        presentation.sync_pending_payload(200, 1_200);
+        assert!(presentation.begin_local_self_motion(
+            "1", (11, 10), (12, 10), "right", false, 700, 1_700,
+        ));
+        let prediction = presentation.motion_windows["1"];
+        // Reconciliation rewrites this old source echo with the second
+        // prediction's higher animation number. That is not its packet number.
+        presentation.replace_payload(first_ack);
+        presentation.sync_pending_payload(750, 1_750);
+        assert_eq!(presentation.motion_windows["1"].started_ms, prediction.started_ms);
+        assert_eq!(presentation.world.active_state("1").unwrap().queue_depth(), 0);
+        let mut death = player_payload(9);
+        death["entities"][0]["x"] = json!(11);
+        death["sceneView"]["center"]["x"] = json!(11);
+        death["entities"][0]["_nativeAnimationAction"] = json!("die");
+        death["entities"][0]["dead"] = json!(true);
+        presentation.replace_payload(death);
+        presentation.sync_pending_payload(800, 1_800);
+        assert_eq!(presentation.world.active_state("1").unwrap().queued_actions()
+            .map(|event| event.action).collect::<Vec<_>>(), vec![AnimationAction::Die],
+            "normalizing a stale receipt cannot consume the next real Death");
     }
 
     #[test]

@@ -1,5 +1,17 @@
 # Backend 1:1 Progress
 
+> 2026-10-03 dense-monster escape: every ordinary hit still settles damage;
+> only its player flinch packet shares Crystal's strict 500ms window. The
+> optional window survives checkpoint/online handoff and clears with life.
+> STUN/DAZED no longer become movement locks; physical and actual-cast masks
+> remain distinct. Native shared Magic gets trusted cast=true status admission
+> before materialization/spend; profile and preparation remain neutral.
+> DenseZone14, Zone168, shared_zone209, personal3 and Gateway5+43 pass. Five
+> legacy timing fixtures also fail on unchanged R16; source-correct times now
+> retain before/deadline and MP fences. Fixture labels and
+> retained failures are explicit. No live rollout/load or whole-game acceptance.
+> [Evidence](CROWDED-COMBAT-ESCAPE-20261003.md).
+
 > 2026-10-03 shared Sabuk authority: one clock observes real primary palace
 > occupants; capture/settlement, source defense HP, repairs, taxes and bank
 > withdrawal persist under Conquest → Guild → Hero → account/save locks.

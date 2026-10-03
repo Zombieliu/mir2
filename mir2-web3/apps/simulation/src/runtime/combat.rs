@@ -64,6 +64,10 @@ mod warrior_preparation_tests;
 #[path = "zone_melee_passive_progression_tests.rs"]
 mod zone_melee_passive_progression_tests;
 
+#[cfg(test)]
+#[path = "player_status_admission_tests.rs"]
+mod player_status_admission_tests;
+
 #[allow(deprecated)]
 pub(super) fn attack_target_in_direction(world: &World, direction: MirDirection) -> Option<u32> {
     attack_target_in_direction_at_distance(world, direction, 1)
@@ -287,8 +291,6 @@ pub(super) fn crystal_player_has_active_buff(world: &World, key: &str) -> bool {
 pub(super) fn crystal_player_movement_blocked_by_status(world: &World) -> bool {
     [
         CAVE_MAGGOT_PARALYSIS_BUFF_KEY,
-        HELL_KEEPER_DAZED_BUFF_KEY,
-        MAN_TREE_STUN_BUFF_KEY,
         ICE_GUARD_FROZEN_BUFF_KEY,
     ]
     .iter()
@@ -297,11 +299,13 @@ pub(super) fn crystal_player_movement_blocked_by_status(world: &World) -> bool {
 
 pub(super) fn crystal_player_attack_blocked_by_status(world: &World) -> bool {
     crystal_player_movement_blocked_by_status(world)
+        || crystal_player_has_active_buff(world, HELL_KEEPER_DAZED_BUFF_KEY)
         || crystal_player_has_active_buff(world, RESTLESS_JAR_BLINDNESS_BUFF_KEY)
 }
 
 pub(super) fn crystal_player_magic_blocked_by_status(world: &World) -> bool {
     crystal_player_attack_blocked_by_status(world)
+        || crystal_player_has_active_buff(world, MAN_TREE_STUN_BUFF_KEY)
 }
 
 pub(super) fn crystal_player_slowed_by_status(world: &World) -> bool {
@@ -3389,6 +3393,22 @@ impl SimulationSession {
             }
         }
         (spell, spell_level, damage)
+    }
+
+    /// Trusted personal status admission for an actual shared-Zone cast.
+    /// Profile lookup is also used by preparation/toggle packets, which must
+    /// not consume or inherit a Cast=true status gate.
+    pub fn zone_magic_cast_blocked_by_status(&self) -> bool {
+        // CanCast has its own mask: Blindness is not a spell lock. Keep this
+        // shared admission independent of the existing personal attack mask.
+        [
+            CAVE_MAGGOT_PARALYSIS_BUFF_KEY,
+            HELL_KEEPER_DAZED_BUFF_KEY,
+            MAN_TREE_STUN_BUFF_KEY,
+            ICE_GUARD_FROZEN_BUFF_KEY,
+        ]
+        .iter()
+        .any(|key| crystal_player_has_active_buff(self.app.world(), key))
     }
 
     pub fn zone_magic_attack_profile(&self, spell: Spell) -> Option<(u8, i32, i32, u64)> {

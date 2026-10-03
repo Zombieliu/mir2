@@ -1,0 +1,19 @@
+Full retained log: C:/mir2-build/crowded-escape-server-green-20261003.log
+SHA256: cd264b38a40319caa7e9662dc3e9e05171fc3ebcccbe6c97ea85cec857dfc198
+
+running 14 tests
+test completely_surrounded_player_cannot_cross_live_monster_but_can_escape_after_kill ... ok
+test crystal_cast_status_mask_keeps_lr_paralysis_out_and_preparation_neutral ... ok
+test crystal_dazed_allows_escape_but_rejects_physical_attack_and_actual_magic ... ok
+test crystal_stun_allows_manual_walk_and_run_through_empty_corridor ... ok
+test crystal_stun_allows_physical_attack_but_never_bypasses_melee_action_cadence ... ok
+test crystal_stun_rejects_actual_cast_without_mana_cooldown_or_target_damage ... ok
+test dense_struck_window_survives_exact_checkpoint_without_restarting_hit_flinch ... ok
+test frozen_expiry_releases_movement_even_when_independent_stun_remains_active ... ok
+test living_struck_clock_is_optional_in_checkpoints_and_cleared_on_life_transition ... ok
+test ordinary_struck_admission_is_strictly_after_the_shared_five_hundred_ms_deadline ... ok
+test paralysis_frozen_and_lr_paralysis_keep_real_block_until_deadline_then_new_held_move_works ... ok
+test pending_escape_keeps_finite_player_action_deadline_despite_dense_incoming_hits ... ok
+test seven_same_tick_monster_hits_damage_each_time_but_present_one_shared_flinch ... ok
+test staggered_dense_hits_share_five_hundred_ms_window_without_dropping_damage ... ok
+test result: ok. 14 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
