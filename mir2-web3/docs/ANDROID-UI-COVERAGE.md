@@ -1,6 +1,25 @@
 # Android native UI coverage — 2026-09-08
 
-2026-10-03 当前 NI-14 邮件结果接线源码：`4aee63e635ee64befcd9af75c96f769bc13eb61e`。
+2026-10-03 当前 Android 无损 u64 宿主源码：`f895302be399529df3163cbf3c44499772acd8c2`。
+修复默认 JSON 将上限邮件ID转为Double的问题；网络/快照克隆/原生出站采用有界
+标准Tokener扩展，正整数u64仍按数字写出，字符串/浮点/溢出拒绝，不改协议或认证规则。
+四个Android源/测试文件；53旧输入/11受保护整文件/7认证方法/旧Java断言未变，
+connect仅换解码器、MainActivity仅两处解析替换。57输入/七门新鲜394/422、
+shared1292+10原ignored、runtime296+1原ignored、Java74+74/API31双检查通过。
+新双APK/选定6647PNG+3metadata/-r保留数据安装SHA绑定f895302b；Code仍35，不冒称新版本。
+实际API31默认解析红、TLS产品红1/1失败保留；两份安装APK各40项数字探针通过，
+探针不夹带产品解码器。此门不等于Activity pump/邮件JNI/真实登录或在线结算。
+5原图已看：邮箱同PID恢复/既有商城JNI/正式包预览隔离通过，仅离线；邮箱小控件/
+IME裁切FAIL。四独立PID冷日志0/0/23/0，GPU零错误仍FAIL，不据错误次数差宣称优化。
+上限u64离线宿主边界已验证，但邮件实际JNI/获准在线流程/Zone/保存/完整UI/
+NI-15–20/资源/音频/更新/真机/人工仍OPEN，NI-14仍PARTIAL，完整goal Active。
+UI设计修补仍待人明确确认；冻结分母3d735745f不缩减，真正Windows来源56ee063fb
+仅多1提交/83文档证据/0功能源，原工作区Git checkpoint保留，独立PR253保持Draft。
+[无损ID源码、精确APK/设备探针/失败与完整剩余门](generated/player-qa/native-android-mail-wire-20261003/README.md)。
+
+下文为对应历史源码与实测，不重绑到本叶。
+
+2026-10-03 历史 NI-14 邮件结果接线源码：`4aee63e635ee64befcd9af75c96f769bc13eb61e`。
 只有真实认证 WebSocket 写成功才记录自身 send/claim；私有回执绑定本连接代次、
 角色和原 claim ID，拒绝伪造/串类/旧连接。ACK 不授予金币物品，等待权威邮箱刷新
 才交给原共享反馈消费者；runtime 保留回执并隔帧消费后续邮箱，不改邮件规则或 UI 布局。
