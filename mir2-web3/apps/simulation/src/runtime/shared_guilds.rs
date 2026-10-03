@@ -395,10 +395,14 @@ use mir2_protocol::{GuildMember, GuildRank, ServerPacket};
 #[derive(Resource, Default)]
 pub(super) struct SharedGuildSession {
     pub enabled: bool,
-    create_grant: Option<Stage5FriendIdentity>,
+    create_grant: Option<GuildCreationGrant>,
     online: BTreeSet<(String, i32)>,
     last_announced_name: Option<String>,
     loaded_bank_guild: Option<String>,
+}
+struct GuildCreationGrant {
+    identity: Stage5FriendIdentity,
+    npc_binding: Option<(u32,String)>,
 }
 fn world_identity(world: &World) -> Option<Stage5FriendIdentity> {
     let session = world.resource::<SessionResource>();
@@ -622,7 +626,7 @@ impl crate::SimulationSession {
         }
     }
     pub(super) fn grant_shared_guild_creation_from_npc(&mut self) -> Vec<ServerPacket> {
-        if !enabled(self.app.world()) {
+        if !enabled(self.app.world()) || super::components::current_player_is_dead(self.app.world()) {
             return Vec::new();
         }
         let Some(identity) = world_identity(self.app.world()) else {
@@ -637,10 +641,12 @@ impl crate::SimulationSession {
         {
             return Vec::new();
         }
+        let npc_binding=self.app.world().resource::<super::resources::NpcStateResource>().active_npc_dialog.as_ref()
+            .map(|dialog|(dialog.npc_object_id,self.app.world().resource::<super::resources::MapRuntimeResource>().current_map.file_name.clone()));
         self.app
             .world_mut()
             .resource_mut::<SharedGuildSession>()
-            .create_grant = Some(identity);
+            .create_grant = Some(GuildCreationGrant{identity,npc_binding});
         vec![ServerPacket::GuildNameRequest]
     }
     pub fn submit_shared_guild_name(&mut self, name: &str) -> Result<Vec<ServerPacket>, String> {
@@ -651,8 +657,20 @@ impl crate::SimulationSession {
             .world_mut()
             .get_resource_mut::<SharedGuildSession>()
             .and_then(|mut state| state.create_grant.take());
-        if grant.as_ref() != Some(&identity) {
+        let Some(grant)=grant else {
             return Err("guild create requires an unused NPC authorization".into());
+        };
+        if grant.identity!=identity {return Err("guild creation actor changed".into());}
+        if super::components::current_player_is_dead(self.app.world()) {
+            return Err("guild creation requires a living character".into());
+        }
+        if let Some((npc_id,map))=grant.npc_binding {
+            let current=self.app.world().resource::<super::resources::NpcStateResource>().active_npc_dialog.as_ref();
+            if current.is_none_or(|dialog|dialog.npc_object_id!=npc_id)
+                || self.app.world().resource::<super::resources::MapRuntimeResource>().current_map.file_name!=map
+                || !super::npc::crystal_npc_object_in_data_range(self.app.world(),npc_id) {
+                return Err("guild creation NPC authorization expired".into());
+            }
         }
         if name.is_empty() {
             return Ok(Vec::new());

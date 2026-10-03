@@ -380,6 +380,13 @@ pub fn render_editor_styled(
         ))
         .with_children(|input| {
             let scroll = model.text_scroll;
+            // Source name fields have a fixed skin height. Arabic's real line
+            // metrics can exceed it; indicators must fit the content viewport
+            // even when the text layout scrolls to its end. Preserve glyph
+            // shaping/size and clip only the caret/composition geometry.
+            let inset = if multiline { 0. } else { 2. };
+            let content_width = (rect.width - inset).max(1.);
+            let content_height = (rect.height - inset).max(1.);
             if model.layout_text == editor.text() {
                 for r in model.text_layout.selection_rects(editor.selection()) {
                     input.spawn((
@@ -402,12 +409,20 @@ pub fn render_editor_styled(
                         .text_layout
                         .selection_rects(start..start + composition.value.len())
                     {
+                        let left = (r.x - scroll[0]).max(0.);
+                        let right = (r.x + r.width - scroll[0]).min(content_width);
+                        if right <= left {
+                            continue;
+                        }
                         input.spawn((
                             Node {
                                 position_type: PositionType::Absolute,
-                                left: Val::Px(r.x - scroll[0]),
-                                top: Val::Px(r.y + r.height - 1. - scroll[1]),
-                                width: Val::Px(r.width),
+                                left: Val::Px(left),
+                                top: Val::Px(
+                                    (r.y + r.height - 1. - scroll[1])
+                                        .clamp(0., content_height - 1.),
+                                ),
+                                width: Val::Px(right - left),
                                 height: Val::Px(1.),
                                 ..default()
                             },
@@ -464,13 +479,15 @@ pub fn render_editor_styled(
                     });
                 let caret = caret.or_else(|| editor.text().is_empty().then_some((0., 0., 14.)));
                 if let Some((x, y, h)) = caret {
+                    let top = (y - scroll[1]).clamp(0., content_height - 1.);
+                    let bottom = (y + h - scroll[1]).clamp(top + 1., content_height);
                     input.spawn((
                         Node {
                             position_type: PositionType::Absolute,
-                            left: Val::Px(x - scroll[0]),
-                            top: Val::Px(y - scroll[1]),
+                            left: Val::Px((x - scroll[0]).clamp(0., content_width - 1.)),
+                            top: Val::Px(top),
                             width: Val::Px(1.),
-                            height: Val::Px(h),
+                            height: Val::Px(bottom - top),
                             ..default()
                         },
                         BackgroundColor(Color::WHITE),

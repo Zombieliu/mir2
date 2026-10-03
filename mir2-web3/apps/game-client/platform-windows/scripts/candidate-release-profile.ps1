@@ -1,4 +1,4 @@
-# Shared release configuration and resource closure for the invited 0-30 build.
+# Shared release configuration and resource closure for the invited 0-30 and Sabuk build.
 # This file does not sign, publish, mutate saves, or relax the Candidate gates.
 
 function Resolve-CandidateGatewayWsUrl {
@@ -88,10 +88,13 @@ function Resolve-CandidateMapNames {
 
 function Get-CandidateDefaultMapNames {
     # Default native terrain coverage includes Bichon town and BorderVillage
-    # merchants. Keep the journey minimum separate so explicit custom lists
-    # retain their existing validation and are not expanded silently.
+    # merchants, the Bichon siege registrar (0122), Sabuk palace (0150), and
+    # the five adjacent Sabuk interiors (0151-0155). The public approach is map
+    # 3, already in the journey minimum. Keep the minimum separate so explicit
+    # custom lists retain their existing validation and are not expanded silently.
     $merchantMaps = @('0101', '0102', '0103', '0104', '0105', '0106', '0107', '0125', '0132', '0140')
-    return @(Resolve-CandidateMapNames -MapNames (@(Get-CandidateRequiredMapNames) + $merchantMaps))
+    $siegeMaps = @('0122', '0150', '0151', '0152', '0153', '0154', '0155')
+    return @(Resolve-CandidateMapNames -MapNames (@(Get-CandidateRequiredMapNames) + $merchantMaps + $siegeMaps))
 }
 
 function Get-CandidateActorLibraryNames {
@@ -244,14 +247,18 @@ function Test-CandidateReleaseConfiguration {
     $mapHasher = [Security.Cryptography.SHA256]::Create()
     try { $defaultMapHash = [BitConverter]::ToString($mapHasher.ComputeHash($canonicalMapBytes)).Replace('-', '').ToLowerInvariant() }
     finally { $mapHasher.Dispose() }
-    if ($defaultMaps.Count -ne 25 -or $canonicalMapBytes.Length -ne 113 -or $defaultMapHash -cne '31a38749179cd53877e42a02bc62d5127a7a80225f3b9c6a7cdbb6ce1a209170') {
-        throw 'Candidate default map list differs from the reviewed Bichon merchant closure'
+    if ($defaultMaps.Count -ne 32 -or $canonicalMapBytes.Length -ne 148 -or $defaultMapHash -cne 'f4fa9561a574f2b1d221599430bec7203ebbf57d268d84cab61982a3790642af') {
+        throw 'Candidate default map list differs from the reviewed Bichon merchant and Sabuk closure'
     }
     $explicitMaps = @(Resolve-CandidateMapNames -MapNames (Get-CandidateRequiredMapNames))
-    if ($explicitMaps.Count -ne 15 -or $explicitMaps -contains '0103') { throw 'Candidate expanded an explicit legacy map list' }
+    if ($explicitMaps.Count -ne 15 -or $explicitMaps -contains '0103' -or $explicitMaps -contains '0122' -or $explicitMaps -contains '0150') { throw 'Candidate expanded an explicit legacy map list' }
     $customMaps = @(Resolve-CandidateMapNames -MapNames (@(Get-CandidateRequiredMapNames) + @('0100', 'D001')))
     if ($customMaps.Count -ne 16 -or $customMaps -cnotcontains '0100' -or $customMaps -cnotcontains 'd001') {
         throw 'Candidate lost or duplicated an explicitly selected custom map'
+    }
+    $customSiegeMaps = @(Resolve-CandidateMapNames -MapNames (@(Get-CandidateRequiredMapNames) + @('0150', '0155', '0150', 'D001')))
+    if ($customSiegeMaps.Count -ne 17 -or $customSiegeMaps -cnotcontains '0150' -or $customSiegeMaps -cnotcontains '0155' -or $customSiegeMaps -contains '0122') {
+        throw 'Candidate changed an explicit partial siege map selection or failed to deduplicate it'
     }
     foreach ($badMap in @('../0103', '0103.map.gz', '0:debug', '')) {
         $rejected = $false
@@ -264,7 +271,7 @@ function Test-CandidateReleaseConfiguration {
     foreach ($invalid in @('mir2-assets/original-ui/Monster/9/80.png', 'mir2-assets/original-ui/Monster/009/payload.exe.png', 'mir2-assets/original-ui/NPC/45/../0.png', 'mir2-assets/original-ui/Gate/04/0.png', 'mir2-assets/original-ui/MapLinkIcon/01.png')) {
         if (Test-CandidateActorFileAllowed -RelativePath $invalid) { throw 'Candidate actor allowlist accepted an invalid path' }
     }
-    Write-Host 'Candidate release configuration tests passed (endpoints, profiles, daylight, default/custom map coverage, actor allowlist)'
+    Write-Host 'Candidate release configuration tests passed (endpoints, profiles, daylight, 32-map default merchant/Sabuk coverage, explicit legacy/custom coverage, actor allowlist)'
 }
 
 function Test-CandidateSpriteClosureGuards {

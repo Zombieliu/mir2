@@ -603,11 +603,13 @@ pub(super) fn handle_npc_interaction(
     context: NpcInteractionContext,
     mut packets: Vec<ServerPacket>,
 ) -> Vec<ServerPacket> {
+    if let Some(result)=super::npc_conquest::officer_main(world,&context) {return result;}
     if let Some(script_key) = context.script_key.as_deref() {
         if let Some(result) = run_crystal_npc_script(world, &context, script_key, "@Main") {
             packets.extend(result.packets);
             if let Some(mut dialog) = result.dialog {
                 append_crystal_quest_links(world, &context, &mut dialog);
+                super::npc_conquest::append_registrar_entry(world,&context,&mut dialog);
                 let footer = dialog.footer.clone();
                 set_dialog(world, dialog);
                 packets.push(ServerPacket::ObjectChat {
@@ -785,7 +787,7 @@ pub(super) fn run_crystal_npc_script_impl(
         process_crystal_npc_goods_expiry(world);
         let buy_back_items = crystal_npc_buy_back_items_for_script(world, &script.script_key);
         let used_goods_items = crystal_npc_used_goods_for_script(world, &script.script_key);
-        if let Some(service_packets) = crystal_npc_service_packets_for_label_with_markets(
+        if let Some(mut service_packets) = crystal_npc_service_packets_for_label_with_markets(
             Some(script),
             &section.label,
             &buy_back_items,
@@ -799,6 +801,7 @@ pub(super) fn run_crystal_npc_script_impl(
                 &section.label,
                 &service_packets,
             );
+            super::npc_conquest_trade::refresh_conquest_goods_price(world, &mut service_packets);
             if label_key == "STORAGE" {
                 packets.extend(crystal_npc_storage_open_packets(world));
             } else if label_key == "REFINE" {
@@ -1143,6 +1146,18 @@ pub(super) fn crystal_npc_named_token_value(world: &World, token: &str) -> Optio
     }
 
     let (name, args) = parse_crystal_npc_function_token(trimmed)?;
+    if super::npc_conquest::enabled(world) {
+        let snapshot = match name.as_str() {
+            "CONQUESTRATE" | "CONQUESTGOLD" | "CONQUESTSCHEDULE" => super::npc_conquest::script_snapshot(world),
+            _ => None,
+        };
+        match name.as_str() {
+            "CONQUESTRATE" => return Some(snapshot.map(|record| record.tax_rate_percent.to_string()).unwrap_or_else(|| "0".into())),
+            "CONQUESTGOLD" => return Some(snapshot.map(|record| record.gold.to_string()).unwrap_or_else(|| "0".into())),
+            "CONQUESTSCHEDULE" => return Some(if snapshot.is_some_and(|record| record.attacker_guild_id.is_some()) { "Scheduled" } else { "Not scheduled" }.into()),
+            _ => {}
+        }
+    }
     match name.as_str() {
         "CONQUESTOWNER" => Some(crystal_npc_conquest_owner_name(world)),
         "CONQUESTRATE" => Some(
@@ -1516,6 +1531,10 @@ pub(super) fn crystal_npc_check_conquest(world: &World, parts: &[&str]) -> bool 
     let Ok(conquest_id) = conquest_id.parse::<i32>() else {
         return false;
     };
+    if super::npc_conquest::enabled(world) {
+        return conquest_id == 1 && super::npc_conquest::script_snapshot(world)
+            .is_some_and(|record| !record.war_active);
+    }
     world
         .resource::<MapRuntimeResource>()
         .conquest_wars
@@ -1532,6 +1551,9 @@ pub(super) enum ConquestAssetKind {
 }
 
 pub(super) fn crystal_npc_condition_conquest_owner(world: &World, _parts: &[&str]) -> bool {
+    if super::npc_conquest::enabled(world) {
+        return super::npc_conquest::script_owner_matches(world);
+    }
     let stage5 = world.resource::<Stage5SystemsResource>();
     let owner = stage5.stage5_systems.conquest.castle_owner.trim();
     !owner.is_empty()
@@ -1540,6 +1562,9 @@ pub(super) fn crystal_npc_condition_conquest_owner(world: &World, _parts: &[&str
 }
 
 pub(super) fn crystal_npc_conquest_owner_name(world: &World) -> String {
+    if super::npc_conquest::enabled(world) {
+        return super::npc_conquest::script_owner_name(world);
+    }
     let owner = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -1573,6 +1598,9 @@ pub(super) fn crystal_npc_check_permission(world: &World, _parts: &[&str]) -> bo
 }
 
 pub(super) fn crystal_npc_afford_conquest_asset(world: &World, kind: ConquestAssetKind) -> bool {
+    // The shared officer issues priced, range-bound management capabilities.
+    // Old personal-snapshot affordability must never authorize a mutation.
+    if super::npc_conquest::enabled(world) { return false; }
     let player_runtime = world.resource::<PlayerRuntimeResource>();
     let stage5 = world.resource::<Stage5SystemsResource>();
     let available = player_runtime
@@ -1635,6 +1663,16 @@ pub(super) fn crystal_npc_conquest_asset_label(
     let Ok(asset_id) = u8::try_from(asset_id.max(0)) else {
         return "Unknown".to_string();
     };
+    if super::npc_conquest::enabled(world) {
+        let key = format!("{}:{asset_id}", match kind { ConquestAssetKind::Guard => "archer", ConquestAssetKind::Wall => "wall", ConquestAssetKind::Gate => "gate" });
+        let Some(record) = super::npc_conquest::script_snapshot(world) else { return "Unknown".into(); };
+        let Some(defense) = record.defenses.get(&key) else { return "Unknown".into(); };
+        return match kind {
+            ConquestAssetKind::Guard => if defense.hp > 0 { "Alive" } else { "Dead" },
+            ConquestAssetKind::Wall => if defense.hp == defense.max_hp { "Repaired" } else { "Damaged" },
+            ConquestAssetKind::Gate => if defense.hp == 0 { "Damaged" } else if defense.open { "Open" } else { "Closed" },
+        }.into();
+    }
     let conquest = &world
         .resource::<Stage5SystemsResource>()
         .stage5_systems
@@ -2939,6 +2977,7 @@ pub(super) fn crystal_npc_message_packet(
 }
 
 pub(super) fn crystal_npc_set_conquest_rate(world: &mut World, parts: &[&str]) {
+    if super::npc_conquest::enabled(world) { return; }
     let Some(rate) = parts.last().and_then(|value| value.parse::<u8>().ok()) else {
         return;
     };
@@ -2956,6 +2995,7 @@ pub(super) fn crystal_npc_repair_conquest_asset(
     kind: ConquestAssetKind,
     parts: &[&str],
 ) {
+    if super::npc_conquest::enabled(world) { return; }
     let Some(asset_id) = crystal_npc_asset_id(parts) else {
         return;
     };
@@ -2979,6 +3019,7 @@ pub(super) fn crystal_npc_repair_conquest_asset(
 }
 
 pub(super) fn crystal_npc_repair_all_conquest_assets(world: &mut World) {
+    if super::npc_conquest::enabled(world) { return; }
     let mut resources = world.resource_mut::<Stage5SystemsResource>();
     resources.stage5_systems.conquest.guards = (1..=12).collect();
     resources.stage5_systems.conquest.walls = (1..=3).collect();
@@ -2991,6 +3032,7 @@ pub(super) fn crystal_npc_repair_all_conquest_assets(world: &mut World) {
 }
 
 pub(super) fn crystal_npc_set_conquest_gate_open(world: &mut World, parts: &[&str], open: bool) {
+    if super::npc_conquest::enabled(world) { return; }
     let Some(asset_id) = crystal_npc_asset_id(parts) else {
         return;
     };
@@ -3012,6 +3054,7 @@ pub(super) fn crystal_npc_set_conquest_gate_open(world: &mut World, parts: &[&st
 }
 
 pub(super) fn crystal_npc_start_conquest(world: &mut World, parts: &[&str]) {
+    if super::npc_conquest::enabled(world) { return; }
     let conquest_id = parts.first().copied().unwrap_or("1");
     let mut resources = world.resource_mut::<Stage5SystemsResource>();
     push_unique(
@@ -3026,6 +3069,7 @@ pub(super) fn crystal_npc_start_conquest(world: &mut World, parts: &[&str]) {
 }
 
 pub(super) fn crystal_npc_take_conquest_gold(world: &mut World, parts: &[&str]) {
+    if super::npc_conquest::enabled(world) { return; }
     let amount = parts
         .get(1)
         .or_else(|| parts.first())
@@ -3600,7 +3644,7 @@ impl SimulationSession {
         target: &str,
         input_value: Option<String>,
     ) -> Vec<ServerPacket> {
-        if !is_in_world(self.app.world()) {
+        if !is_in_world(self.app.world()) || super::components::current_player_is_dead(self.app.world()) {
             return Vec::new();
         }
 
@@ -3665,6 +3709,7 @@ impl SimulationSession {
         if normalized_target.eq_ignore_ascii_case("@CREATEGUILD") {
             return self.grant_shared_guild_creation_from_npc();
         }
+        if let Some(packets)=self.select_shared_conquest_npc(&normalized_target) {return packets;}
 
         // Crystal treats this as a built-in NPC key, not a script section.
         // Keep it after the active-dialog link and DataRange checks: callers

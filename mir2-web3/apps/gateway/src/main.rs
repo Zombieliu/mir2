@@ -3,9 +3,10 @@ use std::io;
 use std::path::PathBuf;
 
 use mir2_gateway::tcp::chat_broadcast::ChatBroadcastHub;
-use mir2_gateway::tcp::run_tcp_gateway;
-use mir2_gateway::web::run_web_gateway;
+use mir2_gateway::tcp::run_tcp_gateway_with_zone_registry;
+use mir2_gateway::web::run_web_gateway_with_zone_registry;
 use mir2_gateway::GatewayConfig;
+use std::sync::Arc;
 
 const DEFAULT_TCP_ADDR: &str = "127.0.0.1:7000";
 const DEFAULT_WEB_ADDR: &str = "127.0.0.1:7010";
@@ -79,19 +80,32 @@ async fn async_main() -> std::io::Result<()> {
     let config = configure_save_recovery_mac_key(config, encoded_recovery_key.as_deref())
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let _guild_clock = mir2_gateway::guild_clock::GuildClockService::start(config.clone())?;
+    let topology = mir2_gateway::ZoneTopology::from_env()
+        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
+    let factory = topology.runtime_factory();
+    let registry = Arc::new(
+        mir2_gateway::ZoneRegistry::with_router_and_owner_lease_authority(
+            topology.default_zone_id().clone(),
+            factory.clone(),
+            topology.router(),
+            mir2_gateway::zone_lease::default_zone_owner_lease_authority_from_env(),
+        ),
+    );
+    let _conquest_clock =
+        mir2_gateway::conquest_clock::ConquestClockService::start(config.clone(), factory)?;
     let chat_hub = ChatBroadcastHub::from_env()?;
     let _chat_broadcast_task = chat_hub.spawn();
 
     tokio::select! {
         result = async {
             tokio::try_join!(
-                run_tcp_gateway(&tcp_addr, config.clone(), chat_hub.clone()),
-                run_web_gateway(&web_addr, config, chat_hub),
+                run_tcp_gateway_with_zone_registry(&tcp_addr, config.clone(), chat_hub.clone(),registry.clone()),
+                run_web_gateway_with_zone_registry(&web_addr, config, chat_hub,registry),
             )
         } => { result?; }
-        signal = tokio::signal::ctrl_c() => {
+        signal = gateway_shutdown_signal() => {
             signal?;
-            eprintln!("gateway interrupt received; settling the server-owned guild clock");
+            eprintln!("gateway shutdown received; settling the server-owned guild and conquest clocks");
         }
         _ = operator_stdin_shutdown() => {
             eprintln!("gateway operator shutdown received; settling the server-owned guild clock");
@@ -100,8 +114,25 @@ async fn async_main() -> std::io::Result<()> {
     // Operators should disconnect players before stopping the local server.
     // Joining the clock completes any in-flight File publication before exit.
     drop(_guild_clock);
+    drop(_conquest_clock);
 
     Ok(())
+}
+
+// systemd uses SIGTERM for normal stops. Let the durable clocks finish their
+// final admitted samples and relinquish their grants before the runtime exits.
+async fn gateway_shutdown_signal() -> io::Result<()> {
+    #[cfg(unix)]
+    {
+        let mut terminate =
+            tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())?;
+        tokio::select! {
+            result = tokio::signal::ctrl_c() => result,
+            _ = terminate.recv() => Ok(()),
+        }
+    }
+    #[cfg(not(unix))]
+    tokio::signal::ctrl_c().await
 }
 
 // Opt-in local console control for hosts whose PTY cancellation kills the

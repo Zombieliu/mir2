@@ -501,6 +501,9 @@ pub enum NativeOutboundCommand {
         action: u8,
         id: i32,
     },
+    GuildNameReturn {
+        name: String,
+    },
     RequestGuildInfo {
         #[serde(rename = "infoType")]
         info_type: u8,
@@ -704,6 +707,7 @@ impl NativeOutboundCommand {
             Self::DelMember { .. } => "delMember",
             Self::GroupInvite { .. } => "groupInvite",
             Self::GuildBuffUpdate { .. } => "guildBuffUpdate",
+            Self::GuildNameReturn { .. } => "guildNameReturn",
             Self::RequestGuildInfo { .. } => "requestGuildInfo",
             Self::GuildStorageGoldChange { .. } => "guildStorageGoldChange",
             Self::GuildStorageItemChange { .. } => "guildStorageItemChange",

@@ -440,6 +440,16 @@ pub(super) fn conquest_movement_allowed(world: &World, conquest_index: i32) -> b
     if conquest_index <= 0 {
         return true;
     }
+    let config=&world.resource::<RuntimeConfigResource>().config;
+    if config.conquest_policies.iter().any(|p|p.index==conquest_index) {
+        let Ok(Some(record))=config.shared_conquest_snapshot_checked(conquest_index) else{return false};
+        let session=world.resource::<SessionResource>();
+        let Some((account_id,character))=session.account_id.as_ref().zip(session.selected_character.as_ref()) else{return false};
+        let identity=crate::config::Stage5FriendIdentity{account_id:account_id.clone(),character_index:character.index};
+        let Ok(store)=config.account_store.lock() else{return false};
+        return record.owner_guild_id.as_ref()
+            .and_then(|id|store.shared_guilds.get(id)).is_some_and(|g|g.member(&identity).is_some());
+    }
     let guild = world
         .resource::<Stage5SystemsResource>()
         .stage5_systems

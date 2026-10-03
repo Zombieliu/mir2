@@ -31,6 +31,14 @@ pub async fn run_tcp_gateway(
     serve_tcp_gateway(listener, config, chat_hub).await
 }
 
+/// Both production transports share this registry and the same authoritative world.
+pub async fn run_tcp_gateway_with_zone_registry(
+    addr: &str, config: GatewayConfig, chat_hub: ChatBroadcastHub,
+    zone_registry: Arc<ZoneRegistry>,
+) -> io::Result<()> {
+    serve_tcp_gateway_with_zone_registry(TcpListener::bind(addr).await?,config,chat_hub,zone_registry).await
+}
+
 /// Serve the public Mir2 TCP protocol on a pre-bound listener.
 ///
 /// Production uses [`run_tcp_gateway`]. Acceptances use this form so the OS can
@@ -39,6 +47,20 @@ pub async fn serve_tcp_gateway(
     listener: TcpListener,
     config: GatewayConfig,
     chat_hub: ChatBroadcastHub,
+) -> io::Result<()> {
+    let topology=ZoneTopology::from_env().map_err(|error|io::Error::new(io::ErrorKind::InvalidInput,error))?;
+    let factory=topology.runtime_factory();
+    let registry=Arc::new(ZoneRegistry::with_router_and_owner_lease_authority(
+        topology.default_zone_id().clone(),factory.clone(),topology.router(),
+        crate::zone_lease::default_zone_owner_lease_authority_from_env(),
+    ));
+    let _conquest=crate::conquest_clock::ConquestClockService::start(config.clone(),factory)?;
+    serve_tcp_gateway_with_zone_registry(listener,config,chat_hub,registry).await
+}
+
+pub async fn serve_tcp_gateway_with_zone_registry(
+    listener: TcpListener, config: GatewayConfig, chat_hub: ChatBroadcastHub,
+    zone_registry: Arc<ZoneRegistry>,
 ) -> io::Result<()> {
     // Activated Crystal world: host every map full-size in the shared zone (see
     // `run_web_gateway`). Empty maps stay dormant regardless.
@@ -64,11 +86,6 @@ pub async fn serve_tcp_gateway(
     }
     let addr = listener.local_addr()?;
     let config = Arc::new(config);
-    let topology = ZoneTopology::from_env()
-        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
-    let zone_registry = Arc::new(
-        topology.zone_registry(crate::zone_lease::default_zone_owner_lease_authority_from_env()),
-    );
     let gameplay_event_sink = default_gameplay_event_sink_from_env();
     let persistence_admission = Arc::new(Semaphore::new(tcp_persistence_session_limit_from_env()));
 

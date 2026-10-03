@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> 2026-10-03 shared Sabuk authority: one clock observes real primary palace
+> occupants; capture/settlement, source defense HP, repairs, taxes and bank
+> withdrawal persist under Conquest → Guild → Hero → account/save locks.
+> Mirror castle writes fence full original account/save images and strict CAS;
+> restores revoke clock grants and unknown COMMIT outcomes freeze writes.
+> Local conquest95/domain29/Gateway13/live-transport1, account22 and shared-Guild24
+> checks pass (dedicated DB checks separate). Linux shutdown flush and paired
+> rollout await their delivery gates. [Evidence](SABUK-SHARED-SIEGE-20261003.md).
+
 > 2026-10-03 user-directed periodic rebalance: all 26 hunt targets are
 > ceil(previous/10); the full daily/weekly sets lock consecutive five/ten-level
 > EXP budgets at acceptance, with gold unchanged. u64 slot allocation retains

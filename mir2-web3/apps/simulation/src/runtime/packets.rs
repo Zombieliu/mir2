@@ -9968,9 +9968,11 @@ impl SimulationSession {
                 item_index,
                 count,
                 panel_type,
-            } => buy_item_impl(self.app.world_mut(), item_index, count, panel_type),
+            } => self.try_shared_conquest_buy(item_index, count, panel_type)
+                .unwrap_or_else(|| buy_item_impl(self.app.world_mut(), item_index, count, panel_type)),
             ClientPacket::SellItem { unique_id, count } => {
-                sell_item_impl(self.app.world_mut(), unique_id, count)
+                self.try_shared_conquest_sell(unique_id, count)
+                    .unwrap_or_else(|| sell_item_impl(self.app.world_mut(), unique_id, count))
             }
             ClientPacket::RepairItem { unique_id } => prepend_packet(
                 ServerPacket::RepairItem { unique_id },

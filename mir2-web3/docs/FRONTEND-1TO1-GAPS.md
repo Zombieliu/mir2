@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-03 Sabuk entry: the ordinary Guild-name request now opens the native
+> editable/IME dialog and submits the typed name once. Castle NPC pages use the
+> existing localized/paged dialog, with fifty strings in nine locales. Closed,
+> open and destroyed source gates use the server's reviewed footprint. Native
+> host845 and shared-UI1217 checks pass. Nine-locale production-widget GPU pages
+> pass after fitting Arabic caret/composition indicators to the input viewport;
+> installed human acceptance remains open. The map default adds seven verified palace/interior
+> maps, totaling32; this does not claim whole-world resource closure.
+> [QA and delivery scope](SABUK-SHARED-SIEGE-20261003.md).
+
 > 2026-10-02 native fallback placement source repair: ordinary full-pack
 > images omit source offsets and use the native bottom-left default. Tests
 > preserve explicit Objects27/front blend exceptions and source RGBA; generated

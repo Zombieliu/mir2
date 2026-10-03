@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-10-03 active user task: deliver shared Sabuk Classic/Request siege.
+> Ordinary Guild naming, NPC registration/management, shared TCP+WebSocket
+> palace capture, native gate footprint and durable castle/account transactions
+> are implemented. Local conquest/domain/transport and adjacent save/Guild/native
+> checks and nine-language GPU page captures pass within the stated scope.
+> Dedicated PostgreSQL and the clean paired R16 package/rollout remain delivery gates.
+> Keep the user's locked F-drive installed client deferred; capacity stays paused.
+> [Rules, receipts and human route](SABUK-SHARED-SIEGE-20261003.md).
+
 > 2026-10-02 active queue: finish default server entry and r9 installed-boot
 > handoff; implement, verify and release Bichon/Mongchon daily and weekly
 > Task Stewards. Periodic, durable, UI, class-timing and rollout checkboxes

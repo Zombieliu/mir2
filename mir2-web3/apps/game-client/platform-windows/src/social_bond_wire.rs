@@ -5,6 +5,7 @@ use serde::Deserialize;
 use serde_json::Value;
 pub fn command(packet: &P) -> Option<C> {
     Some(match packet {
+        P::GuildNameReturn { name } => C::GuildNameReturn { name: name.clone() },
         P::AllowMentor => C::AllowMentor,
         P::AddMentor { name } => C::AddMentor { name: name.clone() },
         P::CancelMentor => C::CancelMentor,
@@ -29,6 +30,7 @@ pub fn packet(name: &str, payload: &Value) -> Option<S> {
         name: String,
     }
     Some(match name {
+        "GuildNameRequest" => S::GuildNameRequest,
         "MentorUpdate" => {
             #[derive(Deserialize)]
             #[serde(rename_all = "camelCase")]
@@ -88,6 +90,24 @@ pub fn packet(name: &str, payload: &Value) -> Option<S> {
 mod tests {
     use super::*;
     use serde_json::json;
+    #[test]
+    fn guild_creation_uses_only_original_name_request_and_typed_return() {
+        assert_eq!(
+            packet("GuildNameRequest", &json!({})),
+            Some(S::GuildNameRequest)
+        );
+        let name = "Guild公會";
+        let result = command(&P::GuildNameReturn { name: name.into() }).unwrap();
+        assert_eq!(
+            serde_json::to_value(result).unwrap(),
+            json!({"type":"guildNameReturn","name":name})
+        );
+        assert!(packet("GuildRequestWar", &json!({})).is_none());
+        assert!(command(&P::GuildWarReturn {
+            name: "Other".into()
+        })
+        .is_none());
+    }
     #[test]
     fn original_fields_are_preserved_and_missing_fields_fail_closed() {
         assert!(matches!(

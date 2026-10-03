@@ -1,0 +1,51 @@
+name: Mir2 Sabuk Acceptance
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  siege-linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: mir2_conquest_qa
+          POSTGRES_USER: conquest_qa
+          POSTGRES_PASSWORD: ci-only-isolated-conquest
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      MIR2_CONQUEST_TEST_DATABASE_URL: postgres://conquest_qa:ci-only-isolated-conquest@127.0.0.1:5432/mir2_conquest_qa
+      CARGO_BUILD_JOBS: "2"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup toolchain install 1.89.0 --profile minimal
+      - name: Siege state, NPC permissions and transactions
+        working-directory: mir2-web3
+        run: cargo +1.89.0 test --locked -p mir2-simulation --lib conquest -- --test-threads=1
+      - name: Ordinary shared conquest flow
+        working-directory: mir2-web3
+        run: cargo +1.89.0 test --locked -p mir2-simulation --test shared_conquest -- --test-threads=1
+      - name: PostgreSQL competing writers and rollback
+        working-directory: mir2-web3
+        run: cargo +1.89.0 test --locked -p mir2-simulation --lib conquest_mirror_postgres -- --ignored --test-threads=1
+      - name: Shared clock and live protocol bridge
+        working-directory: mir2-web3
+        run: |
+          cargo +1.89.0 test --locked -p mir2-gateway conquest_ -- --test-threads=1
+          cargo +1.89.0 test --locked -p mir2-gateway --test shared_conquest_transport -- --test-threads=1

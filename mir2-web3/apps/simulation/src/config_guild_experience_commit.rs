@@ -16,6 +16,10 @@ impl AccountStoreMutationPlan {
         committed: &AccountStore,
     ) {
         self.force_source_cas = true;
+        for (index, mutation) in &mut self.conquests {
+            mutation.expected_version = receipt.conquest_versions.get(index).copied();
+            mutation.original = committed.shared_conquests.get(index).cloned();
+        }
         for (id, mutation) in &mut self.guilds {
             mutation.expected_version = receipt.guild_versions.get(id).copied();
         }

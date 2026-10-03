@@ -406,6 +406,9 @@ impl InProcessWorldRuntime {
     pub fn shared_mentor_config(&self) -> Option<SimulationConfig> {
         self.session.shared_mentor_config()
     }
+    pub fn shared_conquest_config(&self) -> Option<SimulationConfig> {
+        self.session.shared_mentor_config().filter(|config| !config.conquest_policies.is_empty())
+    }
     pub fn refresh_shared_social_buffs(&mut self, online: &std::collections::BTreeSet<(String, i32)>) -> Result<Vec<ServerPacket>, String> {
         self.session.refresh_shared_social_buffs(online)
     }

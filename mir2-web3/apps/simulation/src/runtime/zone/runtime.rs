@@ -16,6 +16,8 @@ pub(super) mod tucson_ai;
 use tucson_ai::*;
 pub(super) mod gate_ai;
 use gate_ai::*;
+pub(super) mod conquest;
+use conquest::ZoneConquestProjection;
 pub(super) mod pet_special_ai;
 use pet_special_ai::*;
 #[path = "intelligent_creature_host.rs"]
@@ -314,6 +316,7 @@ pub(super) struct ZonePlayerFiniteControlPoisonClock {
 // (the derive was vestigial). See docs/L2-ECS-ZONE-DESIGN.md.
 #[derive(Debug)]
 pub struct ZoneRuntime {
+    conquest: Option<ZoneConquestProjection>,
     intelligent_creatures: BTreeMap<SessionId, CreatureHost>,
     intelligent_creature_intents: Vec<super::intelligent_creatures::CreaturePickupIntent>,
     intelligent_creature_operations: Vec<super::intelligent_creatures::CreatureOperation>,
@@ -608,6 +611,7 @@ impl ZoneRuntime {
             removed_object_ids: BTreeSet::new(),
             harvested_object_ids: BTreeSet::new(),
             native_monsters: BTreeMap::new(),
+            conquest: None,
             intelligent_creatures: BTreeMap::new(),
             intelligent_creature_intents: Vec::new(),
             intelligent_creature_operations: Vec::new(),
@@ -652,6 +656,7 @@ impl ZoneRuntime {
             self.npc_teleport_config.clone(),
         );
         fork.players = self.players.clone();
+        fork.conquest = self.conquest.clone();
         fork.journey_evidence_enabled = self.journey_evidence_enabled;
         fork.objects = self.objects.clone();
         fork.dead_object_ids = self.dead_object_ids.clone();
@@ -932,7 +937,8 @@ impl ZoneRuntime {
                 && target.hp > 0
                 && zone_native_monster_is_authoritatively_melee_attackable(target)
         }) || self.players.values().any(|target| {
-            target.position == front && zone_player_can_attack_player(player, target)
+            target.position == front && self.conquest_player_can_attack_player(player, target,
+                u64::try_from(std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap_or_default().as_millis()).unwrap_or(u64::MAX))
         }) {
             return true;
         }
@@ -2013,6 +2019,7 @@ impl ZoneRuntime {
         outbounds.extend(self.tick_stage_summon_states(now_ms));
         outbounds.extend(self.tick_monster_visibility_states(now_ms));
         outbounds.extend(self.tick_node_ai(now_ms));
+        outbounds.extend(self.tick_conquest_archer_regen(now_ms));
         outbounds.extend(self.tick_native_monsters(now_ms));
         outbounds.extend(self.tick_intelligent_creatures(now_ms));
         outbounds.extend(self.tick_doors(now_ms));
@@ -4264,7 +4271,7 @@ impl ZoneRuntime {
                 .find(|target| {
                     target.object_id != selected_id
                         && target.position == point
-                        && zone_player_can_attack_player(attacker, target)
+                        && self.conquest_player_can_attack_player(attacker, target, now_ms)
                 })
                 .cloned();
             if let Some(target) = target {
@@ -4325,7 +4332,7 @@ impl ZoneRuntime {
             attack_spell,
             level,
         );
-        if !zone_player_can_attack_player(&attacker, &target)
+        if !self.conquest_player_can_attack_player(&attacker, &target, now_ms)
             || !points_within_action_range(&attacker.position, &target.position, max_range)
             || (is_area_skill && area_hit.is_none())
         {
@@ -4756,7 +4763,7 @@ impl ZoneRuntime {
         if spell == Spell::Hallucination {
             return self.correct_player_location(session_id, now_ms);
         }
-        if !zone_player_can_attack_player(&attacker, &target)
+        if !self.conquest_player_can_attack_player(&attacker, &target, now_ms)
             || target_point != target.position
             || !points_within_action_range(
                 &attacker.position,
@@ -5425,7 +5432,7 @@ impl ZoneRuntime {
         if spell == Spell::Hallucination {
             return Vec::new();
         }
-        if !zone_player_can_attack_player(&attacker, &target)
+        if !self.conquest_player_can_attack_player(&attacker, &target, now_ms)
             || target_point != target.position
             || !points_within_action_range(
                 &attacker.position,
@@ -8520,7 +8527,7 @@ impl ZoneRuntime {
         for (target_session_id, target) in player_targets {
             if zone_players_are_friendly(&caster, &target) {
                 outbounds.extend(self.apply_native_player_heal(target_session_id, 25));
-            } else if zone_player_can_attack_player(&caster, &target) {
+            } else if self.conquest_player_can_attack_player(&caster, &target, now_ms) {
                 let resolved_damage =
                     zone_player_native_incoming_damage(&target, action.damage.max(1), true, now_ms);
                 if let Some((packets, damage_outbounds)) = self.apply_native_player_pvp_damage(
@@ -8634,7 +8641,7 @@ impl ZoneRuntime {
             .iter()
             .filter_map(|(session_id, player)| {
                 (action.locations.contains(&player.position)
-                    && zone_player_can_attack_player(&caster, player))
+                    && self.conquest_player_can_attack_player(&caster, player, now_ms))
                 .then(|| (session_id.clone(), player.object_id))
             })
             .collect::<Vec<_>>();
@@ -8782,7 +8789,7 @@ impl ZoneRuntime {
             .iter()
             .filter_map(|(session_id, player)| {
                 (action.locations.contains(&player.position)
-                    && zone_player_can_attack_player(&caster, player))
+                    && self.conquest_player_can_attack_player(&caster, player, now_ms))
                 .then(|| (session_id.clone(), player.clone()))
             })
             .collect::<Vec<_>>();
@@ -9391,6 +9398,7 @@ impl ZoneRuntime {
             return Vec::new();
         };
 
+        self.conquest_delay_archer_regen(object_id,now_ms);
         let mut packets = vec![
             ServerPacket::DamageIndicator {
                 damage: applied_damage,
@@ -9748,6 +9756,7 @@ impl ZoneRuntime {
             })
         });
 
+        if self.native_monsters.contains_key(&hit.attacker_object_id) && self.conquest_is_archer(hit.object_id) {return Vec::new();}
         if self.native_monsters.contains_key(&hit.attacker_object_id)
             && self
                 .native_monsters
@@ -10213,6 +10222,7 @@ impl ZoneRuntime {
         hit: PendingNativePlayerHit,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
+        if self.conquest_is_archer(hit.attacker_object_id) && !self.conquest_archer_impact_allowed(hit.attacker_object_id,&hit.target_session_id,hit.target_object_id,now_ms) {return Vec::new();}
         self.resolve_native_player_damage(hit, now_ms, false, true)
     }
 
@@ -11245,6 +11255,7 @@ impl ZoneRuntime {
     }
 
     fn tick_native_monster(&mut self, object_id: u32, now_ms: u64) -> Vec<ZoneOutbound> {
+        if let Some(outbounds)=self.try_tick_conquest_defense(object_id,now_ms) {return outbounds;}
         let Some(monster) = self.native_monsters.get(&object_id).cloned() else {
             return Vec::new();
         };
@@ -12112,7 +12123,7 @@ impl ZoneRuntime {
             return false;
         }
         if self.objects.values().any(|object| {
-            object.object_id != object_id && !self.is_intelligent_creature_object(object.object_id) && retained_zone_object_blocks_tile(object, point)
+            object.object_id != object_id && !self.is_intelligent_creature_object(object.object_id) && !self.conquest_gate_is_open(object.object_id) && retained_zone_object_blocks_tile(object, point)
         }) {
             return false;
         }
@@ -12124,6 +12135,7 @@ impl ZoneRuntime {
                     && !monster.dead
                     && monster.hp > 0
                     && monster_visibility_is_visible(monster)
+                    && !self.conquest_gate_is_open(*other_object_id)
                     && monster.position == *point
             })
     }
@@ -12262,6 +12274,8 @@ impl ZoneRuntime {
         now_ms: u64,
         cause: NativeMonsterDamageCause,
     ) -> Option<NativeMonsterDamageResult> {
+        let managed_conquest=self.conquest_is_defense(object_id);
+        if managed_conquest && !self.conquest_defense_accepts_damage(object_id,attacker_session_id,now_ms) {return None;}
         let (
             damage,
             health_percent,
@@ -12277,7 +12291,7 @@ impl ZoneRuntime {
             let monster = self.native_monsters.get_mut(&object_id)?;
             if monster.dead
                 || (cause != NativeMonsterDamageCause::ScriptedDeath
-                    && (monster.ai == 81
+                    && ((monster.ai == 81 && !managed_conquest)
                         || !football_accepts_hp_change(monster)
                         || !horned_encounter_is_attack_target(monster)
                         || !hell_accepts_attack(monster)
@@ -12341,6 +12355,9 @@ impl ZoneRuntime {
                 (killed && is_boss).then(|| monster.damage_contributions.clone()),
             )
         };
+        if managed_conquest && damage > 0 {
+            self.record_conquest_damage_admitted(object_id, now_ms);
+        }
         if killed {
             self.clear_entity_combat_target_life(object_id);
             self.clear_statue_centipede_target_life(object_id);
@@ -14205,15 +14222,16 @@ impl ZoneRuntime {
         if self
             .objects
             .values()
-            .any(|object| !self.is_intelligent_creature_object(object.object_id) && retained_zone_object_blocks_tile(object, point))
+            .any(|object| !self.is_intelligent_creature_object(object.object_id) && !self.conquest_gate_is_open(object.object_id) && retained_zone_object_blocks_tile(object, point))
         {
             return false;
         }
-        if self.native_monsters.values().any(|monster| {
+        if self.native_monsters.iter().any(|(id,monster)| {
             !monster.dead
                 && monster.hp > 0
                 && monster_visibility_is_visible(monster)
-                && monster.position == *point
+                && !self.conquest_gate_is_open(*id)
+                    && monster.position == *point
         }) {
             return false;
         }
@@ -14234,15 +14252,16 @@ impl ZoneRuntime {
         if self
             .objects
             .values()
-            .any(|object| !self.is_intelligent_creature_object(object.object_id) && retained_zone_object_blocks_tile(object, point))
+            .any(|object| !self.is_intelligent_creature_object(object.object_id) && !self.conquest_gate_is_open(object.object_id) && retained_zone_object_blocks_tile(object, point))
         {
             return false;
         }
-        if self.native_monsters.values().any(|monster| {
+        if self.native_monsters.iter().any(|(id,monster)| {
             !monster.dead
                 && monster.hp > 0
                 && monster_visibility_is_visible(monster)
-                && monster.position == *point
+                && !self.conquest_gate_is_open(*id)
+                    && monster.position == *point
         }) {
             return false;
         }

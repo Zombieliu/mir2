@@ -947,6 +947,7 @@ pub(super) fn buy_item_impl(
     let rate = crystal_npc_info_by_script_key(&service.script_key)
         .map(|npc| npc.price_rate)
         .unwrap_or(1.0);
+    let rate = super::npc_conquest_trade::conquest_price_rate(world, &service, rate);
     let Some(purchase_item) = crystal_npc_service_item_for_purchase(world, &service, item_index)
     else {
         return Vec::new();
@@ -971,7 +972,7 @@ pub(super) fn buy_item_impl(
     }
 
     let key = crystal_item_key_for_template(&template);
-    let cost = crystal_npc_purchase_cost(&template, buy_count, rate);
+    let cost = super::npc_conquest_trade::conquest_purchase_cost(world, &service, &template, buy_count, rate);
     let uses_pearls = service.label_key == "PEARLBUY";
     let player_name = world
         .resource::<SessionResource>()

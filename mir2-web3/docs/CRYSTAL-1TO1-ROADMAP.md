@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-03 selected Sabuk Classic/Request delivery: shared palace ownership,
+> registration, native Guild naming, source defenses and owner management are
+> connected through ordinary player packets. TCP and WebSocket share authority.
+> Broken source NPC bindings and the source defense-region gap are explicitly
+> repaired. Local focused/adjacent and nine-language GPU checks pass; PostgreSQL/package rollout
+> gates and human gameplay acceptance remain open. No four-mode or whole-game
+> parity claim. [Scope and source](SABUK-SHARED-SIEGE-20261003.md).
+
 > 2026-10-03 revised custom daily/weekly brief: kill requirements are divided
 > by ten (ceiling), three dailies award about five levels and two weeklies about
 > ten levels from acceptance level. Counts and aliases match in nine native

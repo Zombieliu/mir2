@@ -34,6 +34,37 @@ struct ZoneManagerCheckpoint {
 }
 
 impl ZoneManager {
+    pub fn conquest_projection_ready(&self, session_id: &SessionId) -> bool {
+        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| zone.conquest_projection_ready())
+    }
+    pub fn conquest_record_revision(&self, session_id: &SessionId) -> Option<u64> {
+        self.session_zones.get(session_id).and_then(|key| self.zones.get(key)).and_then(|zone| zone.conquest_record_revision())
+    }
+    pub fn conquest_membership_matches(&self, session_id: &SessionId, guild_id: Option<&str>) -> bool {
+        self.session_zones.get(session_id).and_then(|key| self.zones.get(key)).is_some_and(|zone| zone.conquest_membership_matches(session_id,guild_id))
+    }
+    pub fn conquest_player_kill_is_lawful(&self, session_id: &SessionId, attacker_object_id: u32, target_object_id: u32, now_ms: u64) -> bool {
+        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
+            .is_some_and(|zone| zone.conquest_player_kill_is_lawful(session_id, attacker_object_id, target_object_id, now_ms))
+    }
+    pub fn conquest_player_samples(&self)->Vec<super::ZoneConquestPlayerSample> {
+        self.zones.values().flat_map(|zone|zone.conquest_player_samples()).collect()
+    }
+    pub fn conquest_defense_samples(&self)->Vec<super::ZoneConquestDefenseSample> {
+        self.zones.values().flat_map(|zone|zone.conquest_defense_samples()).collect()
+    }
+    pub fn apply_conquest_projection(
+        &mut self, policy:&crate::conquest::ConquestPolicy, record:&crate::conquest::SharedConquestRecord,
+        memberships:&[super::ZoneConquestMembership],epoch_now_ms:u64,zone_now_ms:u64,
+    )->Result<Vec<ZoneOutbound>,String> {
+        let mut outbounds=Vec::new();
+        for (key,zone) in &mut self.zones {
+            if key.shard_id!="primary" || key.channel_id!=0 || key.instance_id!="main" {continue;}
+            outbounds.extend(zone.apply_conquest_projection(policy,record,memberships,epoch_now_ms,zone_now_ms)?);
+        }
+        Ok(outbounds)
+    }
     pub fn next_pending_movement_deadline_ms(&self) -> Option<u64> {
         self.zones
             .values()

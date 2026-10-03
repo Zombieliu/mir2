@@ -2570,6 +2570,28 @@ pub async fn run_web_gateway(
     config: GatewayConfig,
     chat_hub: ChatBroadcastHub,
 ) -> io::Result<()> {
+    let topology=ZoneTopology::from_env().map_err(|error|io::Error::new(io::ErrorKind::InvalidInput,error))?;
+    let factory=topology.runtime_factory();
+    let registry=Arc::new(ZoneRegistry::with_router_and_owner_lease_authority(
+        topology.default_zone_id().clone(),factory.clone(),topology.router(),
+        crate::zone_lease::default_zone_owner_lease_authority_from_env(),
+    ));
+    let _conquest=crate::conquest_clock::ConquestClockService::start(config.clone(),factory)?;
+    run_web_gateway_with_zone_registry(addr,config,chat_hub,registry).await
+}
+
+pub async fn run_web_gateway_with_zone_registry(
+    addr: &str, config: GatewayConfig, chat_hub: ChatBroadcastHub,
+    zone_registry: Arc<ZoneRegistry>,
+) -> io::Result<()> {
+    serve_web_gateway_with_zone_registry(TcpListener::bind(addr).await?,config,chat_hub,zone_registry).await
+}
+
+/// Pre-bound production handler used by isolated socket acceptances.
+pub async fn serve_web_gateway_with_zone_registry(
+    listener:TcpListener, config:GatewayConfig,chat_hub:ChatBroadcastHub,
+    zone_registry:Arc<ZoneRegistry>,
+) -> io::Result<()> {
     // Activated Crystal world: host every map full-size in the shared zone so
     // players roam all of Bichon (and reach every transfer), not just the
     // starter slice. Empty maps stay dormant regardless.
@@ -2593,8 +2615,6 @@ pub async fn run_web_gateway(
             recovery.replayed, recovery.already_committed, recovery.quarantined
         );
     }
-    let topology = ZoneTopology::from_env()
-        .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
     let spectator = SpectatorHub::from_env();
     let ai_live = AiLiveHub::from_env()
         .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?;
@@ -2610,10 +2630,7 @@ pub async fn run_web_gateway(
     let state = WebState {
         config: Arc::new(config),
         deploy_revision: deploy_revision_from_env(),
-        zone_registry: Arc::new(
-            topology
-                .zone_registry(crate::zone_lease::default_zone_owner_lease_authority_from_env()),
-        ),
+        zone_registry,
         chat_hub,
         session_cache: gateway_session_cache_from_env()
             .map_err(|error| io::Error::new(io::ErrorKind::InvalidInput, error))?,
@@ -2690,7 +2707,7 @@ pub async fn run_web_gateway(
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
-    let listener = TcpListener::bind(addr).await?;
+    let addr=listener.local_addr()?;
     eprintln!("mir2-gateway web listening on http://{addr}");
 
     axum::serve(

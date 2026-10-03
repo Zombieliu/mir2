@@ -17,6 +17,9 @@ permissions:
   contents: read
 
 jobs:
+  siege-acceptance:
+    uses: ./.github/workflows/sabuk-acceptance.yml
+
   build-linux-x64:
     runs-on: ubuntu-latest
     timeout-minutes: 45

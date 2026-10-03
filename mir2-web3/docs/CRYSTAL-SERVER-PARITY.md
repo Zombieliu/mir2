@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> 2026-10-03 selected Classic/Request Sabuk uses source ten-second palace
+> capture/recapture, sixteen defenses, repair math, archer cadence/regen, price
+> taxes and treasury withdrawal. The invited profile explicitly sets UTC+08:00
+> rather than changing Crystal's UTC helper. Missing ordinary signup/Officer and
+> merchant bindings, and the source gate/archer region gap, are documented
+> playability repairs. No invented winner payout or four-mode parity claim.
+> Local and nine-language GPU checks pass; isolated DB/release gates and human acceptance remain.
+> [Source comparison and scope](SABUK-SHARED-SIEGE-20261003.md).
+
 > 2026-10-03 explicit custom periodic economy: reduced hunt counts and five/ten
 > level daily/weekly totals replace the initial 40%/110% rewards. The normal
 > acceptance lock, EXP-rate rule, multilevel progression, full-save CAS and

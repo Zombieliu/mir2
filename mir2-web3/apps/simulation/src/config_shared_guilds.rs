@@ -90,7 +90,7 @@ pub(super) fn build_guild_mutations(
     scope: AccountStoreMutationScope<'_>,
 ) -> BTreeMap<String, GuildMutation> {
     let ids: BTreeSet<String> = match scope {
-        AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. } => {
+        AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithGuildsAndConquests { guild_ids, .. } => {
             guild_ids.iter().cloned().collect()
         }
         AccountStoreMutationScope::FullRestore => original
@@ -124,7 +124,7 @@ pub(super) fn validate_guild_scope(
             .map_err(AccountStoreTransactionScopeError::InvalidGuildState);
     }
     let allowed: BTreeSet<&str> = match scope {
-        AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. } => {
+        AccountStoreMutationScope::AccountsWithGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { guild_ids, .. } | AccountStoreMutationScope::AccountsWithGuildsAndConquests { guild_ids, .. } => {
             guild_ids.iter().map(String::as_str).collect()
         }
         _ => BTreeSet::new(),
@@ -143,7 +143,7 @@ pub(super) fn validate_guild_scope(
         }
     }
     let authorized_accounts: BTreeSet<&str> = match scope {
-        AccountStoreMutationScope::AccountsWithGuilds { account_ids, .. } | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { account_ids, .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { account_ids, .. } => {
+        AccountStoreMutationScope::AccountsWithGuilds { account_ids, .. } | AccountStoreMutationScope::AccountsWithGlobalAndGuilds { account_ids, .. } | AccountStoreMutationScope::AccountsWithHeroesAndGuilds { account_ids, .. } | AccountStoreMutationScope::AccountsWithGuildsAndConquests { account_ids, .. } => {
             account_ids.iter().map(String::as_str).collect()
         }
         _ => BTreeSet::new(),

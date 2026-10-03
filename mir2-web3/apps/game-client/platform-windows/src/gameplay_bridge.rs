@@ -50,6 +50,7 @@ use mir2_client_bevy::crystal_ui::notice::{NoticeDialogState, NoticePacketUpdate
 use mir2_client_bevy::crystal_ui::overlays::{
     NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
 };
+use mir2_client_bevy::crystal_ui::overlays::social_bond_dialog::GuildCreationContext;
 
 const MAX_NEARBY_NPCS: usize = 8;
 const MAX_GROUND_DROPS: usize = 4;
@@ -1924,6 +1925,40 @@ fn apply_authoritative_observe_state(
     debug_assert!(transition.effects.is_empty());
 }
 
+fn native_guild_creation_context(
+    dialog: Option<&NpcDialogModel>,
+    big_map: Option<&BigMapModel>,
+) -> Option<GuildCreationContext> {
+    let dialog = dialog?;
+    if !dialog.is_open
+        || !dialog.options.iter().any(|option| option.enabled
+            && option.option_id.eq_ignore_ascii_case("@CREATEGUILD"))
+    {
+        return None;
+    }
+    let npc_object_id = dialog.npc_object_id.filter(|id| *id != 0)?;
+    let big_map = big_map?;
+    big_map.current_map_index?;
+    Some(GuildCreationContext { npc_object_id, map_epoch: big_map.reset_epoch })
+}
+
+fn observe_native_social_snapshot(ui: &mut NativePlayerUiState, snapshot: &NativeGameplaySnapshot) {
+    // Fold boundaries in network order. A later NPC/map change in the same
+    // drain must retire an earlier GuildNameRequest before presentation.
+    if !ui.accepts_npc_service_reply() {
+        ui.social_bonds.invalidate_guild_creation();
+    } else if snapshot.big_map_only {
+        ui.social_bonds.retain_guild_creation_map(snapshot.big_map.reset_epoch);
+    } else {
+        ui.social_bonds.retain_guild_creation_context(native_guild_creation_context(
+            Some(&snapshot.dialog), Some(&snapshot.big_map),
+        ));
+    }
+    if let Some(packet) = snapshot.social_bond_packet.as_ref() {
+        ui.social_bonds.observe(packet);
+    }
+}
+
 #[derive(SystemParam)]
 pub(crate) struct GameplayDrainModels<'w> {
     chat: Option<ResMut<'w, mir2_client_bevy::chat::ChatModel>>,
@@ -1954,6 +1989,7 @@ pub fn drain_gameplay_events(
     let (snapshots, transport_advanced) = inbox.drain();
     if transport_advanced {
         if let Some(ui) = models.player_ui.as_deref_mut() {
+            ui.social_bonds.invalidate_guild_creation();
             ui.ranking = Default::default();
             ui.equipment_dialogs = Default::default();
             ui.creature = Default::default();
@@ -1972,6 +2008,7 @@ pub fn drain_gameplay_events(
     }
     if !should_apply_gameplay_snapshot(shell.screen) {
         if let Some(ui) = models.player_ui.as_deref_mut() {
+            ui.social_bonds.invalidate_guild_creation();
             ui.ranking = Default::default();
             ui.equipment_dialogs = Default::default();
             ui.creature = Default::default();
@@ -2044,11 +2081,8 @@ pub fn drain_gameplay_events(
                     .apply_packet(*remove, active_buffs, guild_buffs);
             }
         }
-        for packet in snapshots
-            .iter()
-            .filter_map(|s| s.social_bond_packet.as_ref())
-        {
-            ui.social_bonds.observe(packet);
+        for snapshot in &snapshots {
+            observe_native_social_snapshot(ui, snapshot);
         }
         for packet in snapshots
             .iter()
@@ -2297,6 +2331,7 @@ pub fn forward_quest_ui_intents(
         .unwrap_or_default();
     if shell.screen != NativeShellScreen::InGame {
         if let Some(ui) = player_ui_state.as_deref_mut() {
+            ui.social_bonds.invalidate_guild_creation();
             ui.ranking = Default::default();
             ui.equipment_dialogs = Default::default();
             ui.creature = Default::default();
@@ -2336,6 +2371,16 @@ pub fn forward_quest_ui_intents(
     let dead = read_model
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
+    if let Some(ui) = player_ui_state.as_deref_mut() {
+        let context = if dead || !ui.accepts_npc_service_reply()
+            || social.as_deref().is_some_and(|model| model.guild.name.is_some())
+        {
+            None
+        } else {
+            native_guild_creation_context(dialog.as_deref(), big_map.as_deref())
+        };
+        ui.social_bonds.retain_guild_creation_context(context);
+    }
     let quest_modal = quest_ui_state.as_deref().is_some_and(QuestUiState::blocks_world_input);
     let world_actions_blocked = quest_modal
         || big_map_ui.as_deref().is_some_and(|map| map.search_focused)
@@ -2641,15 +2686,34 @@ pub fn forward_quest_ui_intents(
             || matches!(&command, NativeOutboundCommand::SelectNpcDialog { target } if !target.eq_ignore_ascii_case("@exit"));
         let exits_npc_service = matches!(&command,
             NativeOutboundCommand::SelectNpcDialog { target } if target.eq_ignore_ascii_case("@exit"));
+        let guild_creation_request = if matches!(&command,
+            NativeOutboundCommand::SelectNpcDialog { target } if target.eq_ignore_ascii_case("@CREATEGUILD"))
+        {
+            let Some(context) = native_guild_creation_context(dialog.as_deref(), big_map.as_deref()) else {
+                continue;
+            };
+            if dead || !player_ui_state.as_deref().is_some_and(|ui|
+                ui.social_bonds.can_request_guild_creation(context))
+            {
+                continue;
+            }
+            Some(context)
+        } else { None };
         let sent = commands.send_command(GatewayCommand::Wire(command));
         if let Some(ui) = player_ui_state.as_deref_mut() {
             if exits_npc_service {
+                ui.social_bonds.invalidate_guild_creation();
                 // Exit was already accepted by the local FIFO. Preserve it
                 // after an older successful service retry, even if sending
                 // this exit fails. A later accepted request may reopen it.
                 ui.request_npc_service_exit();
             } else if sent && begins_npc_service {
                 ui.begin_npc_service_request();
+                if let Some(context) = guild_creation_request {
+                    ui.social_bonds.begin_guild_creation_request(context);
+                } else {
+                    ui.social_bonds.invalidate_guild_creation();
+                }
             }
         }
         if let Some(object_id) = traced_attack_target {
@@ -2740,6 +2804,12 @@ pub fn forward_quest_ui_intents(
                 }
             }
             NativePlayerUiIntent::SocialBondPacket(packet) => {
+                if matches!(packet, mir2_protocol::ClientPacket::GuildNameReturn { .. })
+                    && !player_ui_state.as_deref().is_some_and(|ui|
+                        ui.social_bonds.can_dispatch_guild_name(&packet))
+                {
+                    continue;
+                }
                 let Some(command) = crate::social_bond_wire::command(&packet) else {
                     continue;
                 };
@@ -3163,6 +3233,11 @@ pub fn forward_quest_ui_intents(
             NativeOutboundCommand::Inspect { ranking: true, .. }
         );
         let sent = commands.send_command(GatewayCommand::Wire(command));
+        if sent {
+            if let (Some(ui), Some(packet)) = (player_ui_state.as_deref_mut(), bond_request.as_ref()) {
+                ui.social_bonds.guild_name_dispatched(packet);
+            }
+        }
         if let (Some((request_id, spell, key, old_key)), Some(ui)) =
             (magic_key_request, player_ui_state.as_deref_mut())
         {
@@ -4242,6 +4317,10 @@ fn strip_crystal_markup(text: &str) -> String {
     }
     output
 }
+
+#[cfg(test)]
+#[path = "guild_creation_tests.rs"]
+mod guild_creation_tests;
 
 #[cfg(test)]
 mod tests {

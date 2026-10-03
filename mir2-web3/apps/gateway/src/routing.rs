@@ -1,5 +1,7 @@
 #[path = "shared_guilds.rs"]
 mod shared_guilds;
+#[path="routing/shared_conquest.rs"]
+mod shared_conquest;
 #[path = "shared_creatures.rs"]
 mod shared_creatures;
 #[path = "shared_marriage.rs"]
@@ -9444,6 +9446,24 @@ impl SharedInProcessZoneSessionRuntime {
         let mut shout_consume = None;
         let mut player_damages = Vec::new();
         let mut player_heals = Vec::new();
+        // Read durable castle and Guild authority before taking the Zone lock.
+        // Bootstrap must not leave gates absent or allegiance stale until the
+        // scheduler's next 10-second capture observation.
+        let conquest_config = self.inner.shared_conquest_config().filter(|config| config.conquest_policies.iter().any(|policy| policy.map_file_name.eq_ignore_ascii_case(&map_file_name) || policy.palace_file_name.eq_ignore_ascii_case(&map_file_name)));
+        let actor_guild = conquest_config.as_ref().and_then(|config| config.account_store.lock().ok()).and_then(|store| store.shared_guilds.values().find(|guild| guild.members.iter().any(|member| member.identity.account_id == key.account_id && member.identity.character_index == key.character_index)).map(|guild| guild.id.clone()));
+        let revision = conquest_config.as_ref().and_then(|config| config.account_store.lock().ok()).and_then(|store| store.shared_conquests.get(&1).map(|record| record.revision)).unwrap_or(1);
+        let needs_castle_bootstrap = {
+            let state = self.zone_state.lock().expect("shared zone presence mutex should not be poisoned");
+            !state.zone_sessions.contains_key(&key) || state.players.get(&key).is_none_or(|player| player.map_file_name != map_file_name) || !state.zone_manager.conquest_projection_ready(&session_id)
+                || state.zone_manager.conquest_record_revision(&session_id) != Some(revision)
+                || !state.zone_manager.conquest_membership_matches(&session_id,actor_guild.as_deref())
+        };
+        let conquest_projection = conquest_config.filter(|config| needs_castle_bootstrap && config.conquest_policies.iter().any(|policy| policy.map_file_name.eq_ignore_ascii_case(&map_file_name) || policy.palace_file_name.eq_ignore_ascii_case(&map_file_name)))
+            .map(|config| shared_conquest::bootstrap_projection(&config));
+        if let Some(Err(error)) = &conquest_projection {
+            eprintln!("[conquest-bootstrap] {error}");
+            return self.remove_presence();
+        }
         let mut zone_state = self
             .zone_state
             .lock()
@@ -9575,6 +9595,16 @@ impl SharedInProcessZoneSessionRuntime {
                         },
                     ));
                 }
+                if let Some(Ok(projection)) = &conquest_projection {
+                    match zone_state.project_bootstrap_conquest(projection) {
+                        Ok(projected) => outbounds.extend(projected),
+                        Err(error) => {
+                            eprintln!("[conquest-bootstrap] {error}");
+                            drop(zone_state);
+                            return self.remove_presence();
+                        }
+                    }
+                }
                 let (
                     zone_packets,
                     zone_transform,
@@ -9665,6 +9695,16 @@ impl SharedInProcessZoneSessionRuntime {
                             now_ms,
                         }),
                 );
+            }
+            if let Some(Ok(projection)) = &conquest_projection {
+                match zone_state.project_bootstrap_conquest(projection) {
+                    Ok(projected) => outbounds.extend(projected),
+                    Err(error) => {
+                        eprintln!("[conquest-bootstrap] {error}");
+                        drop(zone_state);
+                        return self.remove_presence();
+                    }
+                }
             }
             let (
                 zone_packets,
@@ -12173,6 +12213,10 @@ impl SharedInProcessZoneSessionRuntime {
                 }
             }
         };
+        let siege_kill_is_lawful = self.current_presence_key().is_some_and(|key| {
+            let state = self.zone_state.lock().expect("shared zone presence mutex should not be poisoned");
+            state.zone_sessions.get(&key).is_some_and(|session| state.zone_manager.conquest_player_kill_is_lawful(session, attack.object_id, target_object_id, now_ms))
+        });
         let mut dispatched = self.dispatch_zone_player_command(command, false);
         if let Some(spell) = melee_spell_to_commit {
             // Dispatch still carries Zone IDs here; wire-owner remapping runs
@@ -12224,7 +12268,7 @@ impl SharedInProcessZoneSessionRuntime {
             })
         {
             let attack_mode = self.inner.world_snapshot().stage5_systems.attack_mode;
-            if !is_red_player_target && !matches!(attack_mode, 3 | 4) {
+            if !is_red_player_target && !siege_kill_is_lawful && !matches!(attack_mode, 3 | 4) {
                 self.inner.apply_zone_unlawful_player_kill(100);
                 pk_colour_changed = true;
             }
@@ -14102,6 +14146,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
         self.validate_shared_magic_actor(&command)?;
+        let conquest_npc_action = matches!(&command, WorldCommand::ClientPacket(ClientPacket::CallNpc { key, .. }) if key.starts_with("@sabuk:"));
         self.inner.enable_shared_guild_authority();
         if matches!(&command,WorldCommand::ClientPacket(ClientPacket::StartGame{..})){self.inner.refresh_shared_guild_authority()?;}
         self.last_game_shop_purchase_outcome = None;
@@ -14684,6 +14729,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
                 .iter()
                 .any(|packet| matches!(packet, ServerPacket::UserLocation { .. }));
         drop(inner_stage);
+        if conquest_npc_action {
+            if let Some(config) = self.inner.shared_conquest_config() {
+                if let Err(error) = shared_conquest::project_registry_committed(&config, &self.ranking_zones, &self.ranking_replica_zones) {
+                    eprintln!("[conquest-npc] committed projection retry needed: {error}");
+                }
+            }
+        }
         let reconcile_stage = GatewaySlowStage::start("shared_session.reconcile");
         // At this boundary `command_packets` is the personal command result.
         // Pending and cadence Zone outbounds were collected separately in
@@ -24661,7 +24713,7 @@ mod tests {
             },
             "mapFileName": "0",
             "mapTitle": "BichonProvince",
-            "position": { "x": 335, "y": 266 },
+            "position": { "x": 334, "y": 265 },
             "direction": "UpRight",
             "hp": 51,
             "maxHp": 51,
@@ -24681,8 +24733,8 @@ mod tests {
         assert!(packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::UserLocation { location }
-                if location.position.x == 335 && location.position.y == 266
-        )));
+                if location.position.x == 334 && location.position.y == 265
+        )), "QA transform import returned {packets:?}");
         let snapshot = session.world_snapshot();
         let self_entity = snapshot
             .entities
@@ -24691,7 +24743,7 @@ mod tests {
             .expect("self player should remain visible after QA native-state apply");
 
         assert_eq!(snapshot.map_file_name.as_deref(), Some("0"));
-        assert_eq!((self_entity.x, self_entity.y), (335, 266));
+        assert_eq!((self_entity.x, self_entity.y), (334, 265));
         assert_eq!(self_entity.direction, MirDirection::UpRight);
     }
 

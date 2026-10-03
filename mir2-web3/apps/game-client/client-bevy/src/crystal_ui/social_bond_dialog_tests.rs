@@ -1,5 +1,190 @@
 use super::*;
 
+fn guild_context() -> GuildCreationContext {
+    GuildCreationContext {
+        npc_object_id: 427,
+        map_epoch: 7,
+    }
+}
+fn guild_name_prompt() -> SocialBondDialogs {
+    let mut ui = SocialBondDialogs::default();
+    assert!(ui.begin_guild_creation_request(guild_context()));
+    assert!(ui.observe(&ServerPacket::GuildNameRequest));
+    assert!(matches!(
+        ui.prompt.as_ref().unwrap().kind,
+        BondPromptKind::GuildName { .. }
+    ));
+    ui
+}
+
+#[test]
+fn guild_name_requires_the_sent_original_npc_link_and_consumes_request_once() {
+    let mut ui = SocialBondDialogs::default();
+    assert!(ui.observe(&ServerPacket::GuildNameRequest));
+    assert!(
+        ui.prompt.is_none(),
+        "unsolicited packets cannot open the name modal"
+    );
+    assert!(ui.begin_guild_creation_request(guild_context()));
+    assert!(
+        !ui.begin_guild_creation_request(guild_context()),
+        "duplicate click is suppressed"
+    );
+    ui.observe(&ServerPacket::GuildNameRequest);
+    let revision = ui.prompt.as_ref().unwrap().revision;
+    ui.input_name(revision, "Knights");
+    ui.observe(&ServerPacket::GuildNameRequest);
+    assert_eq!(ui.prompt.as_ref().unwrap().revision, revision);
+    assert!(
+        matches!(&ui.prompt.as_ref().unwrap().kind, BondPromptKind::GuildName { text } if text == "Knights")
+    );
+    let packet = ui.answer(revision, true).unwrap();
+    assert!(matches!(&packet, ClientPacket::GuildNameReturn { name } if name == "Knights"));
+    assert!(ui.can_dispatch_guild_name(&packet));
+    assert!(ui.answer(revision, true).is_none());
+    ui.guild_name_dispatched(&packet);
+    assert!(!ui.can_dispatch_guild_name(&packet));
+    ui.release_unsent(&packet);
+    ui.observe(&ServerPacket::GuildNameRequest);
+    assert!(
+        ui.prompt.is_none(),
+        "old server request cannot reopen a submitted prompt"
+    );
+}
+
+#[test]
+fn guild_name_cancel_and_stale_buttons_do_not_submit_or_restore() {
+    let mut ui = guild_name_prompt();
+    let revision = ui.prompt.as_ref().unwrap().revision;
+    assert!(ui.answer(revision, false).is_none());
+    assert!(ui.answer(revision, true).is_none());
+    ui.observe(&ServerPacket::GuildNameRequest);
+    assert!(ui.prompt.is_none());
+    assert!(ui.begin_guild_creation_request(guild_context()));
+    ui.observe(&ServerPacket::GuildNameRequest);
+    let fresh = ui.prompt.as_ref().unwrap().revision;
+    assert!(fresh > revision);
+    assert!(ui.answer(revision, false).is_none());
+    assert_eq!(ui.prompt.as_ref().unwrap().revision, fresh);
+}
+
+#[test]
+fn guild_name_map_npc_exit_and_session_boundaries_retire_queued_name() {
+    for boundary in 0..4 {
+        let mut ui = guild_name_prompt();
+        let revision = ui.prompt.as_ref().unwrap().revision;
+        ui.input_name(revision, "Knights");
+        let packet = ui.answer(revision, true).unwrap();
+        match boundary {
+            0 => ui.retain_guild_creation_map(8),
+            1 => ui.retain_guild_creation_context(Some(GuildCreationContext {
+                npc_object_id: 428,
+                ..guild_context()
+            })),
+            2 => ui.retain_guild_creation_context(None),
+            3 => ui.reset_session(),
+            _ => unreachable!(),
+        }
+        assert!(!ui.can_dispatch_guild_name(&packet), "boundary={boundary}");
+        ui.release_unsent(&packet);
+        ui.observe(&ServerPacket::GuildNameRequest);
+        assert!(ui.prompt.is_none(), "boundary={boundary}");
+    }
+}
+
+#[test]
+fn guild_name_local_transport_failure_restores_only_current_authorization() {
+    let mut ui = guild_name_prompt();
+    let revision = ui.prompt.as_ref().unwrap().revision;
+    ui.input_name(revision, "Knights");
+    let packet = ui.answer(revision, true).unwrap();
+    ui.release_unsent(&packet);
+    assert_eq!(ui.prompt.as_ref().unwrap().revision, revision);
+    let retried = ui.answer(revision, true).unwrap();
+    assert_eq!(retried, packet);
+    assert!(ui.can_dispatch_guild_name(&retried));
+    ui.retain_guild_creation_map(8);
+    ui.release_unsent(&retried);
+    assert!(ui.prompt.is_none());
+}
+
+#[test]
+fn guild_name_editor_applies_twenty_utf16_units_and_validates_before_submission() {
+    let mut ui = guild_name_prompt();
+    let revision = ui.prompt.as_ref().unwrap().revision;
+    assert!(ui.answer(revision, true).is_none());
+    ui.input_name(revision, "ab");
+    assert!(ui.answer(revision, true).is_none());
+    ui.input.editor.as_mut().unwrap().select_all();
+    ui.input_name(revision, &"🦀".repeat(11));
+    let packet = ui.answer(revision, true).unwrap();
+    assert!(
+        matches!(packet, ClientPacket::GuildNameReturn { name } if name.encode_utf16().count() == 20)
+    );
+    let mut ui = guild_name_prompt();
+    let revision = ui.prompt.as_ref().unwrap().revision;
+    ui.input_name(revision, "bad\\name");
+    assert!(ui.answer(revision, true).is_none());
+    assert!(ui.input.edit_notice.is_some());
+}
+
+#[test]
+fn guild_name_preserves_existing_bonds_and_never_handles_guild_war_as_sabuk() {
+    let mut ui = guild_name_prompt();
+    let revision = ui.prompt.as_ref().unwrap().revision;
+    ui.input_name(revision, "Knights");
+    let packet = ui.answer(revision, true).unwrap();
+    ui.observe(&ServerPacket::MentorUpdate {
+        name: "Mentor".into(),
+        level: 40,
+        online: true,
+        mentee_exp: 5,
+    });
+    ui.observe(&ServerPacket::LoverUpdate {
+        name: "Lover".into(),
+        date_binary_datetime: 123,
+        map_name: "Bichon".into(),
+        married_days: 1,
+    });
+    assert!(ui.can_dispatch_guild_name(&packet));
+    assert_eq!(ui.mentor.name, "Mentor");
+    assert_eq!(ui.relationship.name, "Lover");
+    assert!(!ui.observe(&ServerPacket::GuildRequestWar));
+    ui.observe(&ServerPacket::MarriageRequest { name: "New".into() });
+    assert!(!ui.can_dispatch_guild_name(&packet));
+    ui.release_unsent(&packet);
+    assert!(
+        matches!(&ui.prompt.as_ref().unwrap().kind, BondPromptKind::MarriageInvite { name } if name == "New")
+    );
+}
+
+#[test]
+fn guild_name_prompt_has_copy_in_all_nine_locales_without_translating_names() {
+    let prompt = BondPrompt {
+        revision: 1,
+        kind: BondPromptKind::GuildName {
+            text: "Knights".into(),
+        },
+    };
+    for locale in crate::native_i18n::Locale::ALL {
+        crate::native_i18n::with_locale(locale, || {
+            let text = prompt.text("Warrior");
+            assert!(!text.is_empty());
+            assert!(
+                text.contains('3') && text.contains("20"),
+                "locale={locale:?}"
+            );
+            assert!(!text.contains("Knights"));
+            if locale != crate::native_i18n::Locale::English {
+                assert_ne!(
+                    text,
+                    "Please enter a guild name, length must be 3~20 characters."
+                );
+            }
+        });
+    }
+}
+
 #[test]
 fn rejected_transport_restores_prompt_and_stale_reply_cannot_replace_new_invitation() {
     let mut b = SocialBondDialogs::default();

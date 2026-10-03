@@ -1,4 +1,5 @@
 mod config;
+pub mod conquest;
 pub mod db_projection;
 mod runtime;
 pub mod user_item_uid;
@@ -13,6 +14,7 @@ pub use user_item_uid::{
 };
 
 pub use config::{
+    ConquestManagementAction, ConquestDefenseSample,
     PreparedKillAccountSource, PreparedKillPublication, PreparedKillPublicationFailure,
     account_store_requires_postgres_source_from_env, account_store_runtime_backend_from_env,
     ban_account_in_store, deliver_stage5_system_mail, new_stage5_mail_delivery_nonce,
@@ -35,6 +37,7 @@ pub use config::{
     WorldItemSnapshot, WorldItemTooltipSource, WorldSnapshot, WorldSnapshotClientView,
 };
 pub use runtime::{
+    ZoneConquestMembership, ZoneConquestPlayerSample, ZoneConquestDefenseSample,
     SharedMonsterKillCommitFailure,
     CreatureOperation, CreatureOwner, CreaturePickupIntent,
     crystal_world_respawn_spawns, gate5_demo_scenario, intelligent_creature_allows_ground_drop,

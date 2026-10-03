@@ -23,6 +23,7 @@ pub use replay::{
 };
 pub use replication::{ZoneReplicaCheckpoint, ZoneStandbyReplica};
 pub use runtime::ZoneRuntime;
+pub use runtime::conquest::{ZoneConquestMembership, ZoneConquestPlayerSample, ZoneConquestDefenseSample};
 pub use types::{
     GroundDropClaimTicket, PlayerId, SessionId, ZoneBossRewardAudit, ZoneChatItem, ZoneChatProfile,
     ZoneCommand, ZoneJoin, ZoneKey, ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterKillAward,

@@ -2,7 +2,7 @@
 //! must supply trusted shared authority before enabling gate damage or opening.
 use super::*;
 
-fn gate_offsets(effect: u8) -> &'static [(i32, i32)] {
+pub(super) fn gate_offsets(effect: u8) -> &'static [(i32, i32)] {
     match effect {
         1 => &[
             (0, -1),
@@ -66,8 +66,8 @@ impl ZoneRuntime {
     /// Derived dynamic occupancy never mutates static map walls. Removing a
     /// gate therefore cannot accidentally remove an overlapping real wall.
     pub(super) fn gate_blocks_tile(&self, point: &Point) -> bool {
-        self.native_monsters.values().any(|m| {
-            if m.ai != 81 || m.dead || m.hp <= 0 {
+        self.native_monsters.iter().any(|(id,m)| {
+            if m.ai != 81 || m.dead || m.hp <= 0 || self.conquest_gate_is_open(*id) {
                 return false;
             }
             let effect = crystal_monster_by_name(&m.name).map_or(0, |t| t.effect);

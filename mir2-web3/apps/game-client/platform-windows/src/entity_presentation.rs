@@ -290,6 +290,22 @@ impl NativeEntityPresentation {
         let entities = self.latest_payload.as_ref()?.get("entities")?.as_array()?;
         Some(entities.iter().any(|entity| {
             let kind = entity.get("kind").and_then(Value::as_str);
+            let is_sabuk_gate = kind == Some("monster")
+                && self.current_map_file_name().is_some_and(|map| map.trim_end_matches(".map").eq_ignore_ascii_case("3"))
+                && entity.get("ai").and_then(Value::as_u64) == Some(81)
+                && entity.get("image").and_then(Value::as_u64) == Some(950)
+                && entity.get("name").and_then(Value::as_str) == Some("SabukGate")
+                && entity.get("x").and_then(Value::as_i64) == Some(672)
+                && entity.get("y").and_then(Value::as_i64) == Some(330);
+            if is_sabuk_gate {
+                if entity.get("dead").and_then(Value::as_bool) == Some(true)
+                    || entity.get("direction").and_then(Value::as_str).is_some_and(|direction| direction.eq_ignore_ascii_case("left")) {
+                    return false;
+                }
+                // Source AI81, effect 1: center plus the eight closed cells.
+                return [(0,0),(0,-1),(0,-2),(1,-1),(1,-2),(-1,0),(-2,0),(-1,-1),(-1,1)].iter()
+                    .any(|(dx,dy)| point == (672+dx,330+dy));
+            }
             matches!(kind, Some("selfPlayer" | "player" | "monster" | "npc"))
                 && entity.get("dead").and_then(Value::as_bool) != Some(true)
                 && entity.get("x").and_then(Value::as_i64) == Some(i64::from(point.0))
@@ -1759,6 +1775,36 @@ mod tests {
             Some(false),
             "self never blocks its own route"
         );
+    }
+
+    #[test]
+    fn sabuk_gate_prediction_matches_closed_open_destroyed_source_footprint() {
+        let mut payload = player_payload(1);
+        payload["mapFileName"] = json!("3.map");
+        payload["entities"].as_array_mut().unwrap().push(json!({"objectId":2,"kind":"monster","name":"SabukGate","ai":81,"image":950,"x":672,"y":330,"direction":"up","dead":false}));
+        let cells = [(672,330),(672,329),(672,328),(673,329),(673,328),(671,330),(670,330),(671,329),(671,331)];
+        let mut presentation = NativeEntityPresentation::default();
+        presentation.latest_payload = Some(payload.clone());
+        for cell in cells { assert_eq!(presentation.tile_has_blocking_entity("1",cell),Some(true)); }
+        assert_eq!(presentation.tile_has_blocking_entity("1",(674,330)),Some(false));
+        for direction in ["Left","left"] {
+            payload["entities"][1]["direction"] = json!(direction);
+            presentation.latest_payload = Some(payload.clone());
+            for cell in cells { assert_eq!(presentation.tile_has_blocking_entity("1",cell),Some(false)); }
+        }
+        payload["entities"][1]["direction"] = json!("up");
+        payload["entities"][1]["dead"] = json!(true);
+        presentation.latest_payload = Some(payload.clone());
+        for cell in cells { assert_eq!(presentation.tile_has_blocking_entity("1",cell),Some(false)); }
+        payload["entities"][1]["dead"] = json!(false);
+        payload["entities"][1]["direction"] = json!("left");
+        payload["entities"].as_array_mut().unwrap().push(json!({"objectId":3,"kind":"npc","x":672,"y":330,"dead":false}));
+        presentation.latest_payload = Some(payload.clone());
+        assert_eq!(presentation.tile_has_blocking_entity("1",(672,330)),Some(true));
+        payload["entities"].as_array_mut().unwrap().pop();
+        payload["mapFileName"] = json!("0.map");
+        presentation.latest_payload = Some(payload);
+        assert_eq!(presentation.tile_has_blocking_entity("1",(672,330)),Some(true),"ordinary actors on other maps retain collision");
     }
 
     #[test]

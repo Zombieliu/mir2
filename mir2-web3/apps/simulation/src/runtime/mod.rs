@@ -38,6 +38,8 @@ mod monster_ai;
 mod monsters;
 mod movement;
 mod npc;
+mod npc_conquest;
+mod npc_conquest_trade;
 mod npc_script;
 mod onchain;
 mod packets;
@@ -65,6 +67,7 @@ mod social_economy;
 mod stage5;
 mod stats;
 pub mod zone;
+pub use zone::{ZoneConquestMembership, ZoneConquestPlayerSample, ZoneConquestDefenseSample};
 
 /// Crystal's symmetric object-data/AOI radius around the local player.
 pub const CRYSTAL_OBJECT_DATA_RANGE: i32 = crystal_compat::CRYSTAL_DATA_RANGE;
