@@ -39,6 +39,10 @@ pub const SCENES: &[&str] = &[
     "npcshop-repair",
     "npcshop-srepair",
     "mail",
+    "mail-claim-jni",
+    "mail-claim-failure-jni",
+    "mail-send-jni",
+    "mail-send-failure-jni",
     "bigmap",
     "storage",
     "storage-locked",
@@ -76,14 +80,38 @@ struct OfflinePersonalJniReceipt {
     last_observation: String,
 }
 
+#[derive(Resource, Default)]
+struct OfflineMailJniReceipt {
+    feedback_observed: bool,
+    feedback_this_frame: bool,
+}
+
+fn mail_jni_expected(scene: &str) -> Option<(mir2_client_bevy::mail::MailOperationKind, bool)> {
+    use mir2_client_bevy::mail::MailOperationKind::{Collect, Send};
+    match scene {
+        "mail-claim-jni" => Some((Collect, true)),
+        "mail-claim-failure-jni" => Some((Collect, false)),
+        "mail-send-jni" => Some((Send, true)),
+        "mail-send-failure-jni" => Some((Send, false)),
+        _ => None,
+    }
+}
+
 fn is_personal_jni_preview(scene: &str) -> bool {
     matches!(scene, "gameshop-jni" | "storage-jni" | "storage-locked-jni")
+        || mail_jni_expected(scene).is_some()
 }
 
 pub fn install(app: &mut App) {
     app.init_resource::<PreviewRequest>()
         .init_resource::<OfflineNpcPreviewReceipt>()
         .init_resource::<OfflinePersonalJniReceipt>()
+        .init_resource::<OfflineMailJniReceipt>()
+        .add_systems(Update, report_mail_jni_consumer
+            .after(mir2_client_bevy::pending_operations::PendingLifecycleSet::Ingest)
+            .after(mir2_client_bevy::pending_operations::PendingLifecycleSet::UiReset)
+            .before(mir2_client_bevy::crystal_ui::overlays::NativePlayerUiSet::Mutate))
+        .add_systems(PostUpdate, report_mail_jni_ui_result.before(apply))
         .add_systems(Update, report_world_render_ready)
         .add_systems(Update, report_owned_hero_mana_visible)
         .add_systems(Update, start_world_render_motion_specimen)
@@ -92,6 +120,78 @@ pub fn install(app: &mut App) {
             PostUpdate,
             (apply, report_npc_preview_consumer, report_personal_jni_consumer).chain(),
         );
+}
+
+fn mail_jni_models_received(
+    scene: &str,
+    mail: &mir2_client_bevy::mail::MailModel,
+    inventory: &mir2_client_bevy::inventory::InventoryModel,
+    ui: &UiReadModel,
+) -> bool {
+    use mir2_client_bevy::mail::MailOperationKind;
+    let Some((kind, success)) = mail_jni_expected(scene) else { return false; };
+    let Some(feedback) = mail.operation_feedback() else { return false; };
+    let visible = mail.visible_mails();
+    feedback.kind == kind && feedback.success == success
+        && feedback.mail_id == (kind == MailOperationKind::Collect).then_some(u64::MAX)
+        && ui.player.name.as_deref() == Some("OFFLINE JAVA JNI")
+        && ui.player.gold == 777 && ui.player.credit == 33
+        && inventory.items.len() == 12
+        && inventory.items.first().is_some_and(|item| item.unique_id == Some(80000))
+        && inventory.items.last().is_some_and(|item| item.unique_id == Some(80011))
+        && visible.len() == 256
+        && visible.iter().enumerate().all(|(index, row)| {
+            row.id == (if index == 255 {u64::MAX} else {index as u64 + 1})
+                && row.gold == 77 && !row.claimed && row.items.len() == 5
+                && row.items.iter().enumerate().all(|(item, attachment)| {
+                    attachment.unique_id == Some(u64::MAX - (index as u64 * 5 + item as u64))
+                        && attachment.count == item as u16 + 1
+                })
+        })
+}
+
+fn report_mail_jni_consumer(
+    request: Res<PreviewRequest>,
+    mut receipt: ResMut<OfflineMailJniReceipt>,
+    host: Res<crate::shared_shell::HostState>,
+    mail: Res<mir2_client_bevy::mail::MailModel>,
+    inventory: Res<mir2_client_bevy::inventory::InventoryModel>,
+    ui: Res<UiReadModel>,
+) {
+    let Some(scene) = request.scene.as_deref() else { return; };
+    if receipt.feedback_observed || host.phase != "IN_GAME"
+        || !mail_jni_models_received(scene, &mail, &inventory, &ui) { return; }
+    let (kind, success) = mail_jni_expected(scene).unwrap();
+    // Read-only observation AFTER production ingest and BEFORE the unchanged
+    // shared UI consumes this transient row. No model/pending/rule is seeded.
+    info!(scene, kind = ?kind, success, claim_id = ?mail.operation_feedback().unwrap().mail_id,
+        mails = 256, attachments = 1280, last_mail_id = u64::MAX,
+        gold = ui.player.gold, bag_items = inventory.items.len(),
+        "ANDROID_MAIL_JNI_SHARED_FEEDBACK_NOT_LIVE");
+    receipt.feedback_observed = true;
+    receipt.feedback_this_frame = true;
+}
+
+fn report_mail_jni_ui_result(
+    request: Res<PreviewRequest>,
+    mut receipt: ResMut<OfflineMailJniReceipt>,
+    mail: Res<mir2_client_bevy::mail::MailModel>,
+    compose: Res<mir2_client_bevy::crystal_ui::overlays::MailComposeUi>,
+) {
+    if !receipt.feedback_this_frame { return; }
+    receipt.feedback_this_frame = false;
+    let Some(scene) = request.scene.as_deref() else { return; };
+    let Some((kind, success)) = mail_jni_expected(scene) else { return; };
+    let expected_notice = if success {None} else if kind == mir2_client_bevy::mail::MailOperationKind::Collect {
+        Some("Mail claim failed")
+    } else {Some("Mail was rejected; draft kept")};
+    let removed = mail.operation_feedback().is_none();
+    let notice_matches = compose.last_notice.as_deref() == expected_notice;
+    // Same-frame shared UI consumption, not an authenticated operation, pending
+    // retirement, draft/reader closure proof, GPU frame or server settlement.
+    info!(scene, kind = ?kind, success, feedback_removed = removed, notice_matches,
+        notice = ?compose.last_notice, mails = mail.visible_mails().len(),
+        "ANDROID_MAIL_JNI_SHARED_UI_RESULT_NOT_LIVE");
 }
 
 fn personal_jni_models_received(
@@ -913,7 +1013,8 @@ fn preview_panel_for_scene(scene: &str) -> UiPanel {
         "platform" => UiPanel::PlatformSettings,
         "menu" => UiPanel::Menu,
         "gameshop" | "gameshop-jni" => UiPanel::GameShop,
-        "mail" | "mail-compose" => UiPanel::Mail,
+        "mail" | "mail-compose" | "mail-claim-jni" | "mail-claim-failure-jni"
+            | "mail-send-jni" | "mail-send-failure-jni" => UiPanel::Mail,
         "bigmap" => UiPanel::BigMap,
         "storage" | "storage-locked" | "storage-jni" | "storage-locked-jni" => UiPanel::Storage,
         "group" => UiPanel::Group,
@@ -1635,6 +1736,10 @@ fn populate_specimens(world: &mut World, scene: &str) {
 }
 
 #[cfg(test)]
+#[path = "mail_jni_preview_tests.rs"]
+mod mail_jni_preview_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use mir2_client_bevy::shop::{NpcShopServiceMode, ShopModel};
@@ -1820,7 +1925,7 @@ mod tests {
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 47);
+        assert_eq!(SCENES.len(), 51);
     }
 
     #[test]

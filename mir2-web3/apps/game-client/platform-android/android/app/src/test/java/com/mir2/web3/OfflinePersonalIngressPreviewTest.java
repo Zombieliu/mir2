@@ -82,6 +82,80 @@ public class OfflinePersonalIngressPreviewTest {
         } catch (UnsupportedOperationException expected) {}
     }
 
+    @Test public void mailJniVariantsProvideOwnerBoundResultFollowedByAuthoritativeMailbox() throws Exception {
+        for (String scene : new String[]{"mail-claim-jni", "mail-claim-failure-jni", "mail-send-jni", "mail-send-failure-jni"}) {
+            List<String> events = OfflinePersonalIngressPreview.events(true, scene);
+            assertFalse("Mail has no real Java/JNI diagnostic stream yet", events.isEmpty());
+            assertEquals("STARTING", WireJson.decode(events.get(0)).getString("phase"));
+            JSONObject owner = WireJson.decode(WireJson.decode(events.get(1)).getString("worldSnapshot"));
+            assertEquals("9", owner.getString("androidMailGeneration"));
+            assertEquals("OFFLINE JAVA JNI", owner.getJSONArray("entities").getJSONObject(0).getString("name"));
+            JSONObject result = packet(events.get(2));
+            assertEquals("androidMailResult", result.getString("type"));
+            assertEquals(scene.startsWith("mail-claim") ? "ParcelCollected" : "MailSent", result.getString("packet"));
+            assertEquals(scene.contains("failure") ? -1 : 1, result.getInt("result"));
+            assertEquals("9", result.getString("connectionGeneration"));
+            assertEquals(42, result.getInt("ownerObjectId"));
+            assertEquals("OFFLINE JAVA JNI", result.getString("characterName"));
+            if (scene.startsWith("mail-claim")) assertEquals("18446744073709551615", result.getString("claimMailId"));
+            else assertTrue(result.isNull("claimMailId"));
+            assertEquals("ReceiveMail", packet(events.get(3)).getString("packet"));
+            assertEquals("ReceiveMail", packet(events.get(4)).getString("packet"));
+            assertEquals(5, events.size());
+        }
+    }
+
+    @Test public void mailJniFullMailboxKeepsAllFiveUnsignedAttachmentsWithoutInventingSettlement() throws Exception {
+        for (String scene : new String[]{"mail-claim-jni", "mail-claim-failure-jni", "mail-send-jni", "mail-send-failure-jni"}) {
+            List<String> events = OfflinePersonalIngressPreview.events(true, scene);
+            JSONObject owner = WireJson.decode(WireJson.decode(events.get(1)).getString("worldSnapshot"));
+            assertEquals(777, owner.getInt("gold"));
+            assertEquals(12, owner.getJSONArray("inventoryItems").length());
+            for (JSONArray rows : new JSONArray[]{owner.getJSONArray("mail"),
+                    packet(events.get(3)).getJSONObject("payload").getJSONArray("mail"),
+                    packet(events.get(4)).getJSONObject("payload").getJSONArray("mail")}) {
+                assertEquals(256, rows.length());
+                for (int index = 0; index < 256; index++) {
+                    JSONObject row = rows.getJSONObject(index);
+                    assertEquals(index == 255 ? "18446744073709551615" : String.valueOf(index + 1), row.get("mailId").toString());
+                    assertEquals(77, row.getInt("gold"));
+                    assertFalse(row.getBoolean("collected"));
+                    JSONArray attachments = row.getJSONArray("items");
+                    assertEquals(5, attachments.length());
+                    for (int item = 0; item < 5; item++) {
+                        String expected = new java.math.BigInteger("18446744073709551615")
+                                .subtract(java.math.BigInteger.valueOf(index * 5L + item)).toString();
+                        assertEquals(expected, attachments.getJSONObject(item).get("uniqueId").toString());
+                    }
+                }
+            }
+        }
+    }
+
+    @Test public void mailJniInputsStayBoundedImmutableAndAbsentInNormalOrUnlistedScenes() throws Exception {
+        for (String scene : new String[]{"mail-claim-jni", "mail-claim-failure-jni", "mail-send-jni", "mail-send-failure-jni"}) {
+            assertTrue(OfflinePersonalIngressPreview.events(false, scene).isEmpty());
+            List<String> events = OfflinePersonalIngressPreview.events(true, scene);
+            for (String event : events) {
+                JSONObject outer = WireJson.decode(event);
+                assertFalse(outer.has("account_id"));assertFalse(outer.has("accountId"));assertFalse(outer.has("password"));
+                int worldBytes = outer.optString("worldSnapshot").getBytes(StandardCharsets.UTF_8).length;
+                int packetBytes = outer.optString("envelope").getBytes(StandardCharsets.UTF_8).length;
+                assertTrue(worldBytes <= 1024 * 1024);
+                assertTrue(packetBytes <= 512 * 1024);
+                assertTrue(event.getBytes(StandardCharsets.UTF_8).length <= 65536 + 2 * worldBytes + 2 * packetBytes);
+                if (outer.has("envelope")) {
+                    JSONObject inner = WireJson.decode(outer.getString("envelope"));
+                    assertTrue(inner.getString("type").equals("androidMailResult")
+                            || (inner.getString("type").equals("packet") && inner.getString("packet").equals("ReceiveMail")));
+                }
+            }
+            assertThrows(UnsupportedOperationException.class, events::clear);
+        }
+        assertTrue(OfflinePersonalIngressPreview.events(true, "mail-claim-jni-bypass").isEmpty());
+        assertTrue(OfflinePersonalIngressPreview.events(true, "mail-result-jni").isEmpty());
+    }
+
     private static JSONObject packet(String event) throws Exception {
         return new JSONObject(new JSONObject(event).getString("envelope"));
     }
