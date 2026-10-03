@@ -1,16 +1,23 @@
 # Android native host ingress audit
 
-2026-10-03 当前源码叶 NI-14 邮件断线清理：`7280d07532b9739a31a9caaadb250a096592bab6`。
-仅两处 Android 文件修复“先清关联、后断线”导致旧改密码 pending 残留的问题，
-复用原宿主 unknown 清理；未改规则、认证、Windows 或 UI 布局。新增测试编译后
-0/1红→通过，queued/已Sent两场景及原邮件回归11/11；旧测试字节保留。
-精确干净提交56输入/七门：Android389/417、shared1292+10原ignored、runtime292
-+1原ignored、fresh Java59+59（每变体六类）、API31双check；十二受保护文件未变。
-本叶无新APK/安装/实际JNI/模拟器交互/在线邮件/真机验收，MailSent/ParcelCollected
-结果关联仍OPEN，NI-14仍PARTIAL。UI修复仍待用户明确确认，GPU零错误门仍FAIL。
-完整goal Active；冻结Windows分母3d735745f不缩减，本轮远端6ae080711未变，
-原两个工作区Git checkpoint保持，不宣称未跟踪内容递归哈希。
-[最小修复、原始红绿/准备错误及完整未完成门](generated/player-qa/native-android-mail-cleanup-20261003/README.md)。
+2026-10-03 当前 NI-14 邮件结果接线源码：`4aee63e635ee64befcd9af75c96f769bc13eb61e`。
+只有真实认证 WebSocket 写成功才记录自身 send/claim；私有回执绑定本连接代次、
+角色和原 claim ID，拒绝伪造/串类/旧连接。ACK 不授予金币物品，等待权威邮箱刷新
+才交给原共享反馈消费者；runtime 保留回执并隔帧消费后续邮箱，不改邮件规则或 UI 布局。
+五源文件；四组产品红保留并转绿，邻近 Android44/runtime16/Windows邮件5通过。
+精确干净提交56输入/七门：Android394/422、shared1292+10原ignored、runtime296
++1原ignored、fresh Java65+65（每变体六类）、API31双check；12受保护整文件、
+8认证方法/5原runtime方法/30旧runtime测试规范化一致。
+新双原生APK/包内库/选定6647PNG+3metadata/模拟器安装SHA均绑定4aee63e6；
+保留数据以-r -d从失败v36回到源码版本35，版本名仍0.1.32-gameshop-phone，不冒称新版本号。
+5原图已查看，离线邮箱同PID恢复、既有商城实际Java→JNI与普通包预览隔离通过；
+邮箱桌面小控件/IME裁切未通过。四独立PID冷日志GL506=7/24/29/12，共72，GPU零错误仍FAIL。
+邮件结果实际JNI、在线收发结算/真实登录/Zone/保存/真机/完整UI/NI-15–20仍OPEN，
+Android上限u64 JSON仍缺（超signed-long的claim拒绝而不猜ID），NI-14仍PARTIAL。
+UI设计修复仍待用户明确确认；完整goal Active，冻结Windows分母3d735745f不缩减。
+本轮真正Windows来源56ee063fb仅多1提交/83文档证据/0功能源，旧分支6ae080711未变。
+原两工作区Git checkpoint保留，不宣称未跟踪内容递归哈希；PR253保持独立Draft。
+[源码、APK SHA、实测原图、全部失败分类和剩余门](generated/player-qa/native-android-mail-feedback-20261003/README.md)。
 
 下文为各自历史源码/安装包证据，不重绑到本叶。
 
@@ -387,7 +394,7 @@ still missing. Neither label is an online acceptance result.
 | NI-11 | `push_native_shop_model` / `push_native_npc_shop_service` | PARTIAL: frozen3d735745f shared projection/Java six-packet owner+scene gate/Android FIFO are wired and included unchanged in v30. Twelve extracted bodies, cross-frame pending/order/Exit/CloseWindows/map/terminal/bounds source gates and six focused Mac Windows checks passed in their historical source leaf; wider19/6 failures remain, not a full Windows gate. V19 installed diagnostic evidence includes a visible approved item and actual Buy/Sell/Repair/SRepair close taps; v29/v30 did not retest those service taps. No actual authenticated JNI, online purchase/sale/repair complete receipts, physical-device or complete phone service acceptance. [Ingress/source](generated/player-qa/native-android-npc-ingress-20261002/README.md), [v19 bounded taps](generated/player-qa/native-android-npc-touch-20261002/README.md), [v30 package/current limits](generated/player-qa/native-android-npc-quests-20261002/README.md) |
 | NI-12 | `push_native_game_shop_info` / stock / receipt | PARTIAL: source92033b910 adds exact frozen Windows public catalog/stock projections, selected-Start Java whitelist and bounded Android owner/FIFO producer. Six function bodies preserve token equivalence; 105-row+105-stock, stock-before-info, owner/scene/reset/terminal/backpressure fixtures and shared runtime catalog/receipt gates pass. Android343/368/shared1257+10existing ignored/runtime292+1existing ignored/fresh Java44+44/API31 pass; original two compiled Java failures and separate check-preparation failure retained. Legacy purchase rules and native critical/receipt queues unchanged. No new APK/UI/JNI/live catalog/price/image parity, purchase/Credit/Mail settlement or physical acceptance; do not relabel the installed v30 package. Full NI-12 stays PARTIAL. [Source evidence and open gates](generated/player-qa/native-android-game-shop-ingress-20261002/README.md) |
 | NI-13 | `push_native_storage_model` / items / patch | PARTIAL: source81eb08cdc adds ten exact frozen Windows pure bodies plus existing shared slot/current-count metadata delegation, four-packet Java public whitelist and bounded owner/FIFO Storage producer. 160/sparse slots, model-versus-items, password/expansion results, rejected Start, owner/map/reset/terminal/backpressure and overflow fixtures pass. Android359/384/shared1260+10existing ignored/runtime292+1existing ignored/fresh Java47+47/API31 pass; compiled two-test red and separate preparation failures retained. StoreItemV2/TakeBackItemV2 stay on the existing correlated receipt channel; old storage rules/native critical queue/runtime/auth/Windows/renderer unchanged. No new APK/actual JNI/UI/live transfer-password-expansion/reconnect-save/physical acceptance; installed v30 cannot be relabeled. Full NI-13 stays PARTIAL. [Exact source evidence and remaining gates](generated/player-qa/native-android-storage-ingress-20261002/README.md) |
-| NI-14 | `push_native_mail_model` / `push_native_mail_service` | PARTIAL: source7280d0753 fixes terminal mail-producer failure by invoking the existing transport owner before correlation reset; queued and already-Sent password cases no longer remain pending. Two Android files only; original tests and twelve protected rule/consumer/Windows/auth/runtime files remain byte-identical. Compiled0/1 red, then same assertion green and adjacent11/11. Clean56 inputs/seven gates: Android389/417, shared1292+10existing ignored, runtime292+1existing ignored, fresh Java59+59 (six classes per variant), API31 dual checks. Source49693ab1a seven outbound commands and source3003f0780 read-only ingress are retained. Exact MailSent/ParcelCollected correlation remains OPEN; socket Sent is not an ACK, and authoritative ReceiveMail reconciliation is not complete send/failure feedback. No new APK/install/actual Java-to-JNI/phone/live settlement/device acceptance; Android upper-u64 JSON remains unverified. UI design approval and GPU gate remain open. [Current cleanup source/failed test/remaining gates](generated/player-qa/native-android-mail-cleanup-20261003/README.md); [historical egress](generated/player-qa/native-android-mail-egress-20261003/README.md); [historical ingress](generated/player-qa/native-android-mail-ingress-20261003/README.md) |
+| NI-14 | `push_native_mail_model` / `push_native_mail_service` | PARTIAL: source4aee63e6 records only an actual authenticated send/claim write and fences own legacy results by connection generation/owner/original claim ID. Private feedback waits for an authoritative mailbox; no ACK-alone gold/item/claimed grant. The native queue preserves typed feedback and holds later mail models until the next shared-consumer frame. Five source files, twelve protected whole files unchanged, auth method bodies and frozen helper/seven wire schemas retained; product red/green and clean56 inputs/seven gates pass Android394/422, shared1292+10existing ignored, runtime296+1existing ignored, fresh Java65+65, API31 dual checks. Exact dual native APKs/ELFs/6647 selected PNGs+3metadata/installed hashes pass; preserve-data downgrade from failedv36 to source version35. Five original emulator frames inspected: mail same-PID resume and existing GameShop JNI/normal preview isolation pass only offline. Phone mail controls/IME clipping FAIL; four PIDs72 GL506 keep GPU gate FAIL. Mail result actual Java-to-JNI, complete Android upper-u64 JSON, approved real login/live settlement/device/full UI remain OPEN. UI design repair still awaits human confirmation, whole goal Active. [Current feedback source/APK/emulator/failures/open gates](generated/player-qa/native-android-mail-feedback-20261003/README.md); [historical cleanup](generated/player-qa/native-android-mail-cleanup-20261003/README.md); [historical egress](generated/player-qa/native-android-mail-egress-20261003/README.md); [historical ingress](generated/player-qa/native-android-mail-ingress-20261003/README.md) |
 | NI-15 | `push_native_social_model` | OPEN: audit Group/Guild/Trade independently, including membership, permissions, storage, invitation identity, offers, pending operations and authoritative settlement |
 | NI-16 | `push_native_hero_model` / Hero receipts | OPEN: rendering an owned Hero or its mana overlay is not Hero inventory/equipment/skills, key assignment or command-result coverage |
 | NI-17 | `push_native_lighting_render_state` and effects | PARTIAL: selected public object effects exist. Complete supported spell/light/action variants and Android audio/focus; do not silently enable the desktop audio backend |

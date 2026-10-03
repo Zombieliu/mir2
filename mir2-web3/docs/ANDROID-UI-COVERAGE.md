@@ -1,16 +1,23 @@
 # Android native UI coverage — 2026-09-08
 
-2026-10-03 当前源码叶 NI-14 邮件断线清理：`7280d07532b9739a31a9caaadb250a096592bab6`。
-仅两处 Android 文件修复“先清关联、后断线”导致旧改密码 pending 残留的问题，
-复用原宿主 unknown 清理；未改规则、认证、Windows 或 UI 布局。新增测试编译后
-0/1红→通过，queued/已Sent两场景及原邮件回归11/11；旧测试字节保留。
-精确干净提交56输入/七门：Android389/417、shared1292+10原ignored、runtime292
-+1原ignored、fresh Java59+59（每变体六类）、API31双check；十二受保护文件未变。
-本叶无新APK/安装/实际JNI/模拟器交互/在线邮件/真机验收，MailSent/ParcelCollected
-结果关联仍OPEN，NI-14仍PARTIAL。UI修复仍待用户明确确认，GPU零错误门仍FAIL。
-完整goal Active；冻结Windows分母3d735745f不缩减，本轮远端6ae080711未变，
-原两个工作区Git checkpoint保持，不宣称未跟踪内容递归哈希。
-[最小修复、原始红绿/准备错误及完整未完成门](generated/player-qa/native-android-mail-cleanup-20261003/README.md)。
+2026-10-03 当前 NI-14 邮件结果接线源码：`4aee63e635ee64befcd9af75c96f769bc13eb61e`。
+只有真实认证 WebSocket 写成功才记录自身 send/claim；私有回执绑定本连接代次、
+角色和原 claim ID，拒绝伪造/串类/旧连接。ACK 不授予金币物品，等待权威邮箱刷新
+才交给原共享反馈消费者；runtime 保留回执并隔帧消费后续邮箱，不改邮件规则或 UI 布局。
+五源文件；四组产品红保留并转绿，邻近 Android44/runtime16/Windows邮件5通过。
+精确干净提交56输入/七门：Android394/422、shared1292+10原ignored、runtime296
++1原ignored、fresh Java65+65（每变体六类）、API31双check；12受保护整文件、
+8认证方法/5原runtime方法/30旧runtime测试规范化一致。
+新双原生APK/包内库/选定6647PNG+3metadata/模拟器安装SHA均绑定4aee63e6；
+保留数据以-r -d从失败v36回到源码版本35，版本名仍0.1.32-gameshop-phone，不冒称新版本号。
+5原图已查看，离线邮箱同PID恢复、既有商城实际Java→JNI与普通包预览隔离通过；
+邮箱桌面小控件/IME裁切未通过。四独立PID冷日志GL506=7/24/29/12，共72，GPU零错误仍FAIL。
+邮件结果实际JNI、在线收发结算/真实登录/Zone/保存/真机/完整UI/NI-15–20仍OPEN，
+Android上限u64 JSON仍缺（超signed-long的claim拒绝而不猜ID），NI-14仍PARTIAL。
+UI设计修复仍待用户明确确认；完整goal Active，冻结Windows分母3d735745f不缩减。
+本轮真正Windows来源56ee063fb仅多1提交/83文档证据/0功能源，旧分支6ae080711未变。
+原两工作区Git checkpoint保留，不宣称未跟踪内容递归哈希；PR253保持独立Draft。
+[源码、APK SHA、实测原图、全部失败分类和剩余门](generated/player-qa/native-android-mail-feedback-20261003/README.md)。
 
 下文为各自历史源码/安装包证据，不重绑到本叶。
 
