@@ -501,6 +501,108 @@ public class GatewaySessionTest {
         assertEquals("17",own.getString("claimMailId"));assertEquals(-1,own.getInt("result"));
     }
 
+    @Test public void mailResultClaimPreservesTheFullUnsignedIdOnTheActualWrite() throws Exception {
+        String epoch = enterMailResultWorld();
+        java.math.BigInteger id = new java.math.BigInteger("18446744073709551615");
+        assertTrue("The shared u64 mail ID must not be truncated or rejected",
+                session.sendAuthenticated(GatewaySession.object("type", "collectParcel", "mailId", id)));
+        JSONObject written = commands.poll(3, TimeUnit.SECONDS);
+        assertNotNull(written);
+        assertEquals(id.toString(), written.get("mailId").toString());
+        peer.send("{\"type\":\"packet\",\"packet\":\"ParcelCollected\",\"payload\":{\"result\":1,\"mailId\":2}}");
+        JSONObject result = new JSONObject(gameplayPackets.poll(3, TimeUnit.SECONDS));
+        assertEquals(id.toString(), result.getString("claimMailId"));
+        assertEquals(epoch, result.getString("connectionGeneration"));
+    }
+
+    @Test public void wireDecoderPreservesUnsignedIntegersThroughNestedCloneAndEncoding() throws Exception {
+        for (String id : new String[]{"1", "9007199254740993", "9223372036854775807",
+                "9223372036854775808", "18446744073709551614", "18446744073709551615"}) {
+            JSONObject value = WireJson.decode("{\"a\":[{\"id\":" + id + "}],\"text\":\"" + id + "\"}");
+            assertEquals(id, WireJson.unsignedIdentity(value.getJSONArray("a").getJSONObject(0).get("id")));
+            assertTrue(value.toString().contains("\"id\":" + id));
+            assertEquals(id, WireJson.unsignedIdentity(WireJson.decode(value.toString())
+                    .getJSONArray("a").getJSONObject(0).get("id")));
+            assertTrue(value.get("text") instanceof String);
+        }
+        assertEquals("-9223372036854775808", WireJson.decode("{\"id\":-9223372036854775808}").get("id").toString());
+    }
+
+    @Test public void nativeWireEnvelopeSendsTheExactUnsignedIdAndCorrelatesItsOwnAck() throws Exception {
+        enterMailResultWorld();
+        JSONObject envelope = WireJson.decode("{\"sequence\":7,\"command\":{\"type\":\"collectParcel\",\"mailId\":18446744073709551615}}");
+        assertEquals(7, envelope.getLong("sequence"));
+        assertTrue(session.sendAuthenticated(envelope.getJSONObject("command")));
+        assertEquals("18446744073709551615", commands.poll(3, TimeUnit.SECONDS).get("mailId").toString());
+        peer.send("{\"type\":\"packet\",\"packet\":\"ParcelCollected\",\"payload\":{\"result\":1}}");
+        JSONObject result = WireJson.decode(gameplayPackets.poll(3, TimeUnit.SECONDS));
+        assertEquals("18446744073709551615", result.getString("claimMailId"));
+        assertFalse(session.sendAuthenticated(envelope.getJSONObject("command")));
+    }
+
+    @Test public void wireIdentityNeverAcceptsStringsFloatsOrOutOfRangeValues() throws Exception {
+        for (Object value : new Object[]{0, -1L, 9007199254740992.0, "18446744073709551615",
+                new java.math.BigInteger("18446744073709551616"), new java.math.BigDecimal("1.0")}) {
+            assertNull(WireJson.unsignedIdentity(value));
+        }
+        JSONObject decimal = WireJson.decode("{\"a\":1.0,\"b\":1e3}");
+        assertNull(WireJson.unsignedIdentity(decimal.get("a")));
+        assertNull(WireJson.unsignedIdentity(decimal.get("b")));
+    }
+
+    @Test public void wireDecoderRejectsOutOfRangeAndMalformedNumericLiterals() throws Exception {
+        for (String raw : new String[]{"{\"id\":18446744073709551616}", "{\"id\":-9223372036854775809}",
+                "{\"id\":01}", "{\"id\":1abc}", "{} trailing", "[]", "", "null"}) {
+            assertThrows(org.json.JSONException.class, () -> WireJson.decode(raw));
+        }
+    }
+
+    @Test public void wireDecoderBoundsDepthBytesAndIntegerAllocation() throws Exception {
+        assertThrows(org.json.JSONException.class,
+                () -> WireJson.decode("{\"a\":" + "[".repeat(65) + "0" + "]".repeat(65) + "}"));
+        assertThrows(org.json.JSONException.class,
+                () -> WireJson.decode("{\"text\":\"" + "文".repeat(350000) + "\"}"));
+        assertThrows(org.json.JSONException.class,
+                () -> WireJson.decode("{\"id\":" + "9".repeat(10000) + "}"));
+        assertThrows(org.json.JSONException.class, () -> WireJson.decode(null));
+    }
+
+    @Test public void mailResultRejectsUnrepresentableIdentityWithoutRecordingAnOperation() throws Exception {
+        enterMailResultWorld();
+        for (Object value : new Object[]{new java.math.BigInteger("18446744073709551616"),
+                "18446744073709551615", new java.math.BigDecimal("1.0"), -1L}) {
+            assertFalse(session.sendAuthenticated(GatewaySession.object("type", "collectParcel", "mailId", value)));
+        }
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+        assertTrue(session.sendAuthenticated(GatewaySession.object("type", "collectParcel", "mailId", 17)));
+        commands.poll(3, TimeUnit.SECONDS);
+        finishOwnMail("ParcelCollected");
+    }
+
+    @Test public void wireReadOnlyMailAndWorldSnapshotRetainTheFullUnsignedId() throws Exception {
+        enterMailResultWorld();
+        String id = "18446744073709551615";
+        peer.send("{\"type\":\"packet\",\"packet\":\"ReceiveMail\",\"payload\":{\"mail\":[{\"mailId\":" + id + "}]}}");
+        String packet = gameplayPackets.poll(3, TimeUnit.SECONDS);
+        assertNotNull(packet);
+        assertTrue(packet.contains("\"mailId\":" + id));
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\","
+                + "\"mail\":[{\"mailId\":" + id + "}],\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        String snapshot = phase(GatewaySession.Phase.IN_GAME).worldSnapshot;
+        assertNotNull(snapshot);
+        assertTrue(snapshot.contains("\"mailId\":" + id));
+        assertEquals("Fixture", WireJson.decode(snapshot).getJSONArray("entities").getJSONObject(0).getString("name"));
+    }
+
+    @Test public void wireOutOfRangeNetworkIntegerDisconnectsWithoutForwarding() throws Exception {
+        enterMailResultWorld();
+        peer.send("{\"type\":\"packet\",\"packet\":\"ReceiveMail\",\"payload\":{\"mail\":[{\"mailId\":18446744073709551616}]}}");
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type", "collectParcel", "mailId", 17)));
+    }
+
     @Test public void mailResultNumericStringUsesTheFrozenWindowsScalarPath() throws Exception {
         enterMailResultWorld();
         assertTrue(session.sendAuthenticated(GatewaySession.object("type","sendMail","name","Friend","message","body")));

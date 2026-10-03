@@ -198,7 +198,7 @@ public final class MainActivity extends GameActivity {
                 String raw = nativePoll();
                 if (raw.isEmpty()) break;
                 try {
-                    JSONObject command = new JSONObject(raw);
+                    JSONObject command = WireJson.decode(raw);
                     switch (command.getString("type")) {
                         case "connect": connect(); break;
                         case "login": if (!BuildConfig.UI_PREVIEW) session.login(command.getString("account"), command.getString("password")); break;
@@ -247,7 +247,7 @@ public final class MainActivity extends GameActivity {
                     boolean sent = false;
                     long sequence = 0;
                     try {
-                        JSONObject envelope = new JSONObject(raw);
+                        JSONObject envelope = WireJson.decode(raw);
                         sequence = envelope.getLong("sequence");
                         sent = session.sendAuthenticated(envelope.getJSONObject("command"));
                     } catch (Exception ignored) {

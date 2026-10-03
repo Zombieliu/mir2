@@ -152,7 +152,7 @@ final class GatewaySession implements AutoCloseable {
                             || text.getBytes(StandardCharsets.UTF_8).length > 1024 * 1024) {
                         disconnect("Gateway message too large"); return;
                     }
-                    try { receive(new JSONObject(text)); }
+                    try { receive(WireJson.decode(text)); }
                     catch (JSONException | IllegalArgumentException error) {
                         disconnect("Invalid gateway response; reconnect and log in again");
                     }
@@ -240,12 +240,8 @@ final class GatewaySession implements AutoCloseable {
         if (claim || sendMail) {
             if (!startAccepted || !hasOwnerSnapshot || mailOperation != MailOperation.NONE) return false;
             if (claim) {
-                // Android org.json rounds unsigned values beyond Long.MAX_VALUE
-                // into doubles. Fail closed instead of correlating a rounded ID.
-                Object raw = command.opt("mailId");
-                if (!(raw instanceof Integer) && !(raw instanceof Long)) return false;
-                if (((Number) raw).longValue() <= 0) return false;
-                claimId = raw.toString();
+                claimId = WireJson.unsignedIdentity(command.opt("mailId"));
+                if (claimId == null) return false;
             }
         }
         boolean written = socket.send(command.toString());
@@ -284,7 +280,7 @@ final class GatewaySession implements AutoCloseable {
                     readPosition(entity);
                     // Keep the complete immutable server payload until StartGame is accepted.
                     // Host-only receipt epoch; server input cannot select it.
-                    JSONObject hostWorld = new JSONObject(world.toString());
+                    JSONObject hostWorld = WireJson.decode(world.toString());
                     hostWorld.put("androidMailGeneration", String.valueOf(generation));
                     pendingSnapshot = hostWorld.toString();
                     hasOwnerSnapshot = true;
