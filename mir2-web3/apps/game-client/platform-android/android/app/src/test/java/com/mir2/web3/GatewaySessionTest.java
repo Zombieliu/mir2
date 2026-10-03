@@ -1095,6 +1095,92 @@ public class GatewaySessionTest {
         assertNull(receipts.poll(100, TimeUnit.MILLISECONDS));
     }
 
+    @Test public void socialMetadataRequiresListedStartAndPreservesEveryPublicPacket() throws Exception {
+        String[] packets = {"SwitchGroup", "DeleteGroup", "DeleteMember", "GroupInvite",
+                "GroupInviteResult", "AddMember", "GroupMembersMap", "GroupMemberInfo",
+                "GuildStatus", "GuildNoticeChange", "GuildNoticeResult", "GuildMemberChange",
+                "GuildStorageGoldChange", "GuildStorageList", "GuildStorageItemChange",
+                "GuildInvite", "GuildInviteResult", "TradeRequest", "TradeAccept", "TradeGold",
+                "TradeItem", "TradeConfirm", "TradeCancel", "DepositTradeItem", "RetrieveTradeItem"};
+        connect();
+        for (String packet : packets) peer.send(GatewaySession.object("type", "packet", "packet", packet,
+                "payload", new JSONObject()).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        roster();
+        for (String packet : packets) peer.send(GatewaySession.object("type", "packet", "packet", packet,
+                "payload", new JSONObject()).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        assertNull("Social metadata is not owner/bootstrap authority", phase(GatewaySession.Phase.STARTING).world);
+        for (String packet : packets) {
+            JSONObject envelope = GatewaySession.object("type", "packet", "packet", packet,
+                    "payload", GatewaySession.object("marker", packet, "unique_id", "18446744073709551615"));
+            peer.send(envelope.toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Public social packet missing from Android host: " + packet, raw);
+            assertEquals(envelope.toString(), WireJson.decode(raw).toString());
+        }
+        assertNull("Social data is not a private transfer receipt", receipts.poll(100, TimeUnit.MILLISECONDS));
+        for (String unsupported : new String[]{"GuildStorageContents", "GroupTeleport", "stage5Command", "qa.giveItem"}) {
+            peer.send(GatewaySession.object("type", "packet", "packet", unsupported,
+                    "payload", new JSONObject()).toString());
+            assertNull(gameplayPackets.poll(100, TimeUnit.MILLISECONDS));
+        }
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":1}}");
+        phase(GatewaySession.Phase.CHARACTERS);
+        peer.send(GatewaySession.object("type", "packet", "packet", "GuildStatus",
+                "payload", new JSONObject()).toString());
+        assertNull("Rejected Start retires social metadata", gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void socialLargeReadModelsHaveOnlyTheirOwnBoundedRoute() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        phase(GatewaySession.Phase.STARTING);
+        for (String packet : new String[]{"GroupMemberInfo", "GuildMemberChange", "GuildStorageList",
+                "TradeItem", "GuildNoticeChange"}) {
+            JSONObject envelope = GatewaySession.object("type", "packet", "packet", packet,
+                    "payload", GatewaySession.object("probe", "文".repeat(7000)));
+            assertTrue(envelope.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 16 * 1024);
+            peer.send(envelope.toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Bounded large social read model must reach Rust validation: " + packet, raw);
+            assertEquals(envelope.toString(), WireJson.decode(raw).toString());
+        }
+        peer.send(GatewaySession.object("type", "packet", "packet", "TradeGold", "payload",
+                GatewaySession.object("amount", 1, "probe", "文".repeat(7000))).toString());
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull("A small social receipt does not acquire a large cap", gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void socialReadModelAboveHardCapFailsClosed() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(GatewaySession.object("type", "packet", "packet", "GuildNoticeChange", "payload",
+                GatewaySession.object("notice", new org.json.JSONArray().put("a"),
+                        "probe", "文".repeat(180000))).toString());
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void socialMetadataSurvivesAcceptedOwnerMapTransitionWithoutAuthorizingScene() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        phase(GatewaySession.Phase.IN_GAME);
+        JSONObject social = GatewaySession.object("type", "packet", "packet", "GroupInvite", "payload",
+                GatewaySession.object("name", "Alice"));
+        peer.send(social.toString());
+        assertEquals(social.toString(), WireJson.decode(gameplayPackets.poll(3, TimeUnit.SECONDS)).toString());
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        assertNull(phase(GatewaySession.Phase.STARTING).world);
+        peer.send(social.toString());
+        assertEquals(social.toString(), WireJson.decode(gameplayPackets.poll(3, TimeUnit.SECONDS)).toString());
+        assertNull(receipts.poll(100, TimeUnit.MILLISECONDS));
+        session.disconnect("Fixture end"); phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
     @Test public void storageMetadataSurvivesOwnerMapTransitionWithoutDuplicatingTransferReceipts() throws Exception {
         connect(); roster(); session.start(7); commands.poll(3, TimeUnit.SECONDS);
         peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");

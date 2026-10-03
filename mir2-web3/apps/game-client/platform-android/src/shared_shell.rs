@@ -54,9 +54,9 @@ fn enqueue_host_event(queue: &mut VecDeque<Value>, text: &str) {
         .flatten();
     let valid = parsed.as_ref().is_some_and(|value| {
         let snapshot_bytes = value["worldSnapshot"].as_str().map_or(0, str::len);
-        let mail_bytes = large_mail_host_payload_bytes(value);
+        let personal_bytes = large_personal_host_payload_bytes(value);
         snapshot_bytes <= 1024 * 1024
-            && text.len() <= 65536 + 2 * snapshot_bytes + 2 * mail_bytes
+            && text.len() <= 65536 + 2 * snapshot_bytes + 2 * personal_bytes
             && queue.len() < 32
             && queue
                 .iter()
@@ -102,13 +102,35 @@ fn large_mail_host_payload_bytes(value: &Value) -> usize {
     }
 }
 
+fn large_personal_host_payload_bytes(value: &Value) -> usize {
+    let mail_bytes = large_mail_host_payload_bytes(value);
+    if mail_bytes != 0 {
+        return mail_bytes;
+    }
+    if value["type"] != "gatewayGameplayPacket" {
+        return 0;
+    }
+    let Some(raw) = value["envelope"].as_str()
+        .filter(|raw| raw.len() <= crate::social_ingress::MAX_SOCIAL_PACKET_BYTES)
+    else { return 0; };
+    if serde_json::from_str::<Value>(raw).ok().is_some_and(|event|
+        event["type"] == "packet" && event["packet"].as_str()
+            .is_some_and(crate::social_ingress::is_large_social_packet_name))
+    {
+        raw.len()
+    } else {
+        0
+    }
+}
+
 fn scene_render_packet(raw: &str) -> Option<&str> {
-    // Personal mail already passed its dedicated phase/owner/epoch decoder.
+    // Personal mail/social already passed dedicated phase/owner decoders.
     // A host-only receipt is not a public scene envelope, and a full mailbox
     // exceeds the scene decoders' small caps. Neither can affect world objects.
-    // Unknown or malformed non-mail input still reaches the original fail-closed
-    // scene validation; classification does not authorize mail admission.
-    (!crate::mail_ingress::is_mail_packet(raw)).then_some(raw)
+    // Unknown or malformed other input retains fail-closed scene validation.
+    // Classification does not authorize personal-data admission.
+    (!crate::mail_ingress::is_mail_packet(raw)
+        && !crate::social_ingress::is_social_packet(raw)).then_some(raw)
 }
 
 #[cfg(target_os = "android")]
@@ -159,6 +181,7 @@ pub(crate) struct HostState {
     game_shop: crate::game_shop_ingress::AndroidGameShopIngress,
     storage: crate::storage_ingress::AndroidStorageIngress,
     mail: crate::mail_ingress::AndroidMailIngress,
+    social: crate::social_ingress::AndroidSocialIngress,
     npc: crate::npc_ingress::AndroidNpcIngress,
     player: crate::player_ingress::AndroidPlayerIngress,
     pub(crate) quests: crate::quest_ingress::AndroidQuestIngress,
@@ -195,6 +218,7 @@ impl HostState {
         self.game_shop.reset();
         self.storage.reset();
         self.mail.reset();
+        self.social.reset();
         self.npc.reset();
         self.player.reset();
         self.quests.reset();
@@ -236,6 +260,7 @@ impl HostState {
             mir2_bevy_runtime::native_ingest::push_native_mail_model,
             mir2_bevy_runtime::native_ingest::push_native_mail_service,
         );
+        self.social.flush(mir2_bevy_runtime::native_ingest::push_native_social_model);
     }
 
     fn accept_player_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
@@ -351,6 +376,20 @@ impl HostState {
             return Ok(false);
         }
         self.skills.packet(raw)
+    }
+
+    fn accept_social_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
+        if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
+            || !matches!(screen, Screen::StartingGame | Screen::InGame)
+        {
+            return Ok(false);
+        }
+        self.social.packet(raw, self.player.presentation_cursor())
+    }
+
+    fn bind_social_owner(&mut self) -> Result<(), &'static str> {
+        let (owner, name) = self.player.identity().ok_or("Missing social owner")?;
+        self.social.bind(owner, name, self.player.presentation_cursor())
     }
 }
 
@@ -1564,10 +1603,12 @@ fn receive(
                 && matches!(model.screen, Screen::StartingGame | Screen::InGame)
             {
                 if let Some(raw) = value["envelope"].as_str() {
-                    // Full mailboxes and host-only own-result envelopes use
-                    // the dedicated bounded, owner/connection-fenced decoder.
+                    // Large personal models use their dedicated bounded,
+                    // owner-fenced decoders, not siblings' small packet caps.
                     let rejected = if crate::mail_ingress::is_mail_packet(raw) {
                         host.accept_mail_packet(model.screen, raw).is_err()
+                    } else if crate::social_ingress::is_social_packet(raw) {
+                        host.accept_social_packet(model.screen, raw).is_err()
                     } else {
                         host.accept_skill_packet(model.screen, raw).is_err()
                             || host.accept_inventory_packet(model.screen, raw).is_err()
@@ -1929,6 +1970,7 @@ fn receive(
             host.game_shop.clear_scene();
             host.storage.clear_scene();
             host.mail.clear_scene();
+            host.social.clear_scene();
             if let Some(player) = player.as_deref_mut() {
                 player.request_npc_service_exit();
             }
@@ -1966,6 +2008,7 @@ fn receive(
                     projected = None;
                 } else if let Ok(ui) = host.player.snapshot(raw) {
                     if host.bind_chat_owner().is_ok()
+                        && host.bind_social_owner().is_ok()
                         && host.bind_npc_snapshot(raw).is_ok()
                         && host.bind_quest_snapshot(raw).is_ok()
                         && host.bind_game_shop_snapshot(raw).is_ok()
@@ -2130,6 +2173,7 @@ fn receive(
                 host.game_shop.reset();
                 host.storage.reset();
                 host.mail.reset();
+                host.social.reset();
                 model.apply_gateway_event(Event::StartGameAck {
                     accepted: false,
                     reason: Some(message),
@@ -2857,6 +2901,137 @@ mod mail_egress_tests;
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn social_large_read_models_reside_without_entering_scene_decoders() {
+        let event = game_shop_host_metadata("GuildNoticeChange", json!({
+            "notice":(0..200).map(|_| "文".repeat(32)).collect::<Vec<_>>(),
+            "update":0,"probe":"x".repeat(70_000)}));
+        let raw = event["envelope"].as_str().unwrap();
+        assert!(raw.len() > 65536 && raw.len() < 512 * 1024);
+        let mut queue = VecDeque::new();
+        enqueue_host_event(&mut queue, &event.to_string());
+        assert_eq!(queue.front(), Some(&event), "Public social read model lost at host envelope cap");
+        assert!(scene_render_packet(raw).is_none(), "Personal social data entered scene decoders");
+    }
+
+    #[test]
+    fn social_host_actual_receive_stages_then_binds_without_render_acceptance() {
+        let mut app=game_shop_receive_app();
+        INBOX.lock().unwrap().extend([
+            game_shop_host_metadata("GroupInvite",json!({"name":"Alice"})),
+            game_shop_host_metadata("GuildStatus",json!({"guildName":"WireGuild","guildRankName":"Leader","myOptions":3})),
+            game_shop_host_metadata("TradeAccept",json!({"name":"Alice"})),
+            game_shop_host_metadata("TradeGold",json!({"amount":50})),
+        ]);
+        app.update();
+        let host=app.world().resource::<HostState>();
+        assert_eq!(host.social.pending_count(),4);
+        assert_eq!(host.social.model(),&mir2_client_bevy::social::SocialModel::default());
+        assert!(host.pending_render_request.is_none());
+        INBOX.lock().unwrap().push_back(game_shop_host_world(42,"Fixture","0"));
+        app.update();
+        let host=app.world().resource::<HostState>();
+        assert_eq!(host.social.pending_count(),0,"Typed native producer did not accept FIFO");
+        assert_eq!(host.social.model().group.pending_invite_from.as_deref(),Some("Alice"));
+        assert_eq!(host.social.model().guild.permissions,vec!["CanChangeRank","CanRecruit"]);
+        assert_eq!(host.social.model().trade.partner_gold,50);
+        assert_eq!(host.social.model().trade.my_gold,0);
+        assert!(host.pending_render_request.is_some());
+        assert_eq!(app.world().resource::<NativeShellModel>().screen,Screen::StartingGame);
+        // This headless test proves the actual envelope/bind/queue producer,
+        // not Android JNI, original overlay consumption, live WSS or rendering.
+    }
+
+    #[test]
+    fn social_host_phase_and_render_failure_retire_owner_and_fifo() {
+        let raw=game_shop_host_metadata("GroupInvite",json!({"name":"Alice"}));
+        let raw=raw["envelope"].as_str().unwrap();
+        let mut host=HostState::default();
+        host.phase="STARTING".into();
+        for screen in [Screen::Login,Screen::CharacterSelect,Screen::ConnectionLost] {
+            assert!(!host.accept_social_packet(screen,raw).unwrap());
+        }
+        for phase in ["READY","CHARACTERS","DISCONNECTED"] {
+            host.phase=phase.into();
+            assert!(!host.accept_social_packet(Screen::StartingGame,raw).unwrap());
+        }
+        host.phase="STARTING".into();
+        assert!(host.bind_social_owner().is_err());
+        assert!(host.accept_social_packet(Screen::StartingGame,raw).unwrap());
+        host.pending_render_request=Some(7);
+        let mut model=NativeShellModel {screen:Screen::StartingGame,..default()};
+        assert!(fail_current_render_load(&mut host,&mut model,7,"OFFLINE social fixture failure"));
+        assert_eq!(host.social.pending_count(),0);
+        assert_eq!(host.social.model(),&mir2_client_bevy::social::SocialModel::default());
+        assert!(!host.social.flush(|_|panic!("Retired social FIFO leaked")));
+        assert!(!host.accept_social_packet(Screen::StartingGame,raw).unwrap());
+    }
+
+    #[test]
+    fn social_host_rejected_start_clears_packet_first_data_before_retry() {
+        let mut app=game_shop_receive_app();
+        INBOX.lock().unwrap().push_back(game_shop_host_metadata("AddMember",json!({"name":"Old"})));
+        app.update();
+        assert_eq!(app.world().resource::<HostState>().social.pending_count(),1);
+        INBOX.lock().unwrap().push_back(json!({"phase":"CHARACTERS","message":"Rejected"}));
+        app.update();
+        assert_eq!(app.world().resource::<HostState>().social.pending_count(),0);
+        let mut host=app.world_mut().resource_mut::<HostState>();
+        host.phase="STARTING".into();
+        drop(host);
+        app.world_mut().resource_mut::<NativeShellModel>().screen=Screen::StartingGame;
+        INBOX.lock().unwrap().extend([
+            game_shop_host_metadata("AddMember",json!({"name":"New"})),
+            game_shop_host_world(99,"Other","0"),
+        ]);
+        app.update();
+        let host=app.world().resource::<HostState>();
+        assert_eq!(host.social.model().group.members.len(),1);
+        assert_eq!(host.social.model().group.members[0].name,"New");
+        assert_eq!(host.social.pending_count(),0);
+    }
+
+    #[test]
+    fn social_host_map_transition_keeps_personal_state_and_rejects_owner_swap() {
+        let mut app=game_shop_receive_app();
+        INBOX.lock().unwrap().extend([
+            game_shop_host_world(42,"Fixture","0"),
+            game_shop_host_metadata("GroupMemberInfo",json!({"members":[{"name":"Fixture"}],"leaderName":"Fixture"})),
+            game_shop_host_metadata("GuildStatus",json!({"guildName":"WireGuild","guildRankName":"Leader","myOptions":255})),
+        ]);
+        app.update();
+        INBOX.lock().unwrap().push_back(game_shop_host_world(42,"Fixture","1"));
+        app.update();
+        let host=app.world().resource::<HostState>();
+        assert_eq!(host.social.model().group.members[0].name,"Fixture");
+        assert_eq!(host.social.model().guild.name.as_deref(),Some("WireGuild"));
+        assert_eq!(host.social.model().guild.permissions.len(),8);
+        INBOX.lock().unwrap().push_back(game_shop_host_world(99,"Other","1"));
+        app.update();
+        assert_eq!(app.world().resource::<HostState>().social.model(),&mir2_client_bevy::social::SocialModel::default());
+        assert_eq!(app.world().resource::<NativeShellModel>().screen,Screen::ConnectionLost);
+    }
+
+    #[test]
+    fn social_host_invalid_large_model_revokes_terminal_batch_without_scene_bypass() {
+        let mut app=game_shop_receive_app();
+        let invalid=game_shop_host_metadata("GuildNoticeChange",json!({"notice":vec!["a";201]}));
+        INBOX.lock().unwrap().extend([
+            invalid,
+            game_shop_host_metadata("AddMember",json!({"name":"Stale"})),
+            game_shop_host_world(42,"Fixture","0"),
+        ]);
+        app.update();
+        let host=app.world().resource::<HostState>();
+        assert_eq!(host.phase,"DISCONNECTED");
+        assert_eq!(host.social.pending_count(),0);
+        assert!(host.pending_render_request.is_none());
+        assert_eq!(app.world().resource::<NativeShellModel>().screen,Screen::ConnectionLost);
+        let object=game_shop_host_metadata("ObjectGuildNameChanged",json!({"objectId":77,"guildName":"Peer"}));
+        assert!(scene_render_packet(object["envelope"].as_str().unwrap()).is_some());
+        assert!(scene_render_packet("{").is_some());
+    }
+
     #[test]
     fn mail_scene_render_dispatch_excludes_private_results_and_full_mailbox() {
         use crate::scene_effects::{EffectPacketOutcome, SceneEffects};

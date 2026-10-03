@@ -310,6 +310,7 @@ final class GatewaySession implements AutoCloseable {
         boolean forwardGameShopMetadata = worldPending() && isGameShopMetadataPacket(packet);
         boolean forwardStorageMetadata = worldPending() && isStorageMetadataPacket(packet);
         boolean forwardMailMetadata = worldPending() && isMailMetadataPacket(packet);
+        boolean forwardSocialMetadata = worldPending() && isSocialMetadataPacket(packet);
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -442,7 +443,8 @@ final class GatewaySession implements AutoCloseable {
                 || (forwardQuestMetadata && worldPending())
                 || (forwardGameShopMetadata && worldPending())
                 || (forwardStorageMetadata && worldPending())
-                || (forwardMailMetadata && worldPending())) {
+                || (forwardMailMetadata && worldPending())
+                || (forwardSocialMetadata && worldPending())) {
             forwardBounded(envelope, gameplayObserver);
             if (forwardMailMetadata && packet.equals("ReceiveMail")
                     && payload.optJSONArray("mail") != null && mailOwnerMatches()
@@ -523,14 +525,39 @@ final class GatewaySession implements AutoCloseable {
 
     private static void forwardBounded(JSONObject envelope, Consumer<String> target) {
         String raw = envelope.toString();
-        // A full shared mailbox has up to 256 rows. Only its read-only packet
-        // gets the larger bound; services and every other packet retain 16 KiB.
+        // Only full mailbox/social read models get this larger hard bound.
+        // Small receipts, services and arbitrary packets retain 16 KiB.
         int limit = "packet".equals(envelope.optString("type"))
-                && "ReceiveMail".equals(envelope.optString("packet")) ? 512 * 1024 : 16 * 1024;
+                && ("ReceiveMail".equals(envelope.optString("packet"))
+                        || isLargeSocialMetadataPacket(envelope.optString("packet"))) ? 512 * 1024 : 16 * 1024;
         if (raw.getBytes(StandardCharsets.UTF_8).length > limit) {
             throw new IllegalArgumentException("inbound packet size limit");
         }
         target.accept(raw);
+    }
+
+    private static boolean isSocialMetadataPacket(String packet) {
+        // Exact public names consumed by the shared SocialModel. This route
+        // cannot authenticate/StartGame or settle any wallet/inventory state.
+        return packet.equals("SwitchGroup") || packet.equals("DeleteGroup")
+                || packet.equals("DeleteMember") || packet.equals("GroupInvite")
+                || packet.equals("GroupInviteResult") || packet.equals("AddMember")
+                || packet.equals("GroupMembersMap") || packet.equals("GroupMemberInfo")
+                || packet.equals("GuildStatus") || packet.equals("GuildNoticeChange")
+                || packet.equals("GuildNoticeResult") || packet.equals("GuildMemberChange")
+                || packet.equals("GuildStorageGoldChange") || packet.equals("GuildStorageList")
+                || packet.equals("GuildStorageItemChange") || packet.equals("GuildInvite")
+                || packet.equals("GuildInviteResult") || packet.equals("TradeRequest")
+                || packet.equals("TradeAccept") || packet.equals("TradeGold")
+                || packet.equals("TradeItem") || packet.equals("TradeConfirm")
+                || packet.equals("TradeCancel") || packet.equals("DepositTradeItem")
+                || packet.equals("RetrieveTradeItem");
+    }
+
+    private static boolean isLargeSocialMetadataPacket(String packet) {
+        return packet.equals("GroupMemberInfo") || packet.equals("GuildMemberChange")
+                || packet.equals("GuildStorageList") || packet.equals("TradeItem")
+                || packet.equals("GuildNoticeChange");
     }
 
     private static boolean isPersonalSkillPacket(String packet) {
