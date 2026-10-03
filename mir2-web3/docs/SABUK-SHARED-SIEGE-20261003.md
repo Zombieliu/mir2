@@ -118,10 +118,37 @@ The retained [local receipt](generated/player-qa/sabuk-20261003/local-validation
 records log hashes and representative screenshots. These controlled NPC-page
 fixtures do not constitute live gameplay or OS-specific IME-window acceptance.
 
-Dedicated PostgreSQL concurrency and the paired R16 release are separate
-remaining delivery gates at this checkpoint.
-The reusable `sabuk-acceptance.yml` runs the isolated PostgreSQL gate as part of
-the Gateway release workflow. Human mouse/gameplay acceptance remains separate.
+The isolated PostgreSQL source-CAS concurrency gate passed in the
+[paired release CI](https://github.com/Zombieliu/mir2/actions/runs/37104864228),
+along with Linux Rust 1.89 conquest95/domain29/Gateway13/live TCP+WebSocket1.
+The matched Gateway source `5ec7e7227833e5caacc31957902ca3b9f9fd4d0a` is deployed
+only to the invited realm. Its drained SIGTERM/restart exited normally with
+no shutdown panic; a read-only check observed the independent clock and sixteen
+durable defenses. Capacity/configuration and the original realm are unchanged.
+
+The signed **R16 / sequence11** automatic update is published. Nineteen public
+HTTPS checks byte-match the pinned feed, metadata, complete executable/manifest,
+seven new compressed maps and updater. Delivery uses frozen source
+`4c60c323aed11829abae6ee5ce6e13c675a3c1c3`; engine and Launcher hashes retain
+their R15 identities. An earlier private older-updater build was detected before
+upload, publication or installation and remains marked unpublished.
+
+The runtime-inclusive online installer is **27,481,889 bytes**. Its strict
+package/CMS, nine-language, literal seed closure and compiler gates pass. Public
+TLS, HEAD, a 206 byte range and complete-body SHA-256 match the local build:
+[Windows R16 online installer](https://165.154.65.136.sslip.io/client-updates/releases/bootstrap-WN-CANDIDATE-20261003-invited-16/Numeron-Legend-of-Rebirth-20261003-r16-Bootstrap.exe).
+Share that HTTPS link on Discord; no game payload is attached to the message.
+First installation still downloads the game resources. Existing installations
+use their Launcher. The full offline installer is built locally at 617,787,960
+bytes and has not been published as a download.
+
+The current public download route uses the existing static server. R2/CDN
+promotion and any measured speed improvement are not claimed. Setup/game remain
+without public Authenticode publisher trust; CMS integrity does not establish
+Windows application-control trust. The [release receipt](generated/player-qa/sabuk-20261003/release-r16.json)
+pins the retained raw proofs and separates installation/gameplay from publication.
+Fresh bootstrap installation, actual R15→R16 installed updating, OS-specific IME
+and human mouse/siege gameplay acceptance remain open.
 
 ## Human acceptance route
 

@@ -6,7 +6,9 @@
 > rather than changing Crystal's UTC helper. Missing ordinary signup/Officer and
 > merchant bindings, and the source gate/archer region gap, are documented
 > playability repairs. No invented winner payout or four-mode parity claim.
-> Local and nine-language GPU checks pass; isolated DB/release gates and human acceptance remain.
+> Local/nine-language GPU and isolated PostgreSQL CI checks pass. The paired
+> R16 Gateway and signed sequence11 update feed are published; restart observes
+> the shared clock and sixteen defenses. Human gameplay acceptance remains.
 > [Source comparison and scope](SABUK-SHARED-SIEGE-20261003.md).
 
 > 2026-10-03 explicit custom periodic economy: reduced hunt counts and five/ten

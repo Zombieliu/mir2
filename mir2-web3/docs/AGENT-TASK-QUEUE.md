@@ -5,7 +5,10 @@
 > palace capture, native gate footprint and durable castle/account transactions
 > are implemented. Local conquest/domain/transport and adjacent save/Guild/native
 > checks and nine-language GPU page captures pass within the stated scope.
-> Dedicated PostgreSQL and the clean paired R16 package/rollout remain delivery gates.
+> The isolated PostgreSQL CI gate passes. The paired R16 Gateway and signed
+> sequence11 update feed are live; the runtime-inclusive 27.48 MB online installer
+> has passed public TLS/HEAD/range/full-body checks. Human gameplay acceptance
+> and actual R15→R16 installation remain separate; R2/CDN is not promoted.
 > Keep the user's locked F-drive installed client deferred; capacity stays paused.
 > [Rules, receipts and human route](SABUK-SHARED-SIEGE-20261003.md).
 

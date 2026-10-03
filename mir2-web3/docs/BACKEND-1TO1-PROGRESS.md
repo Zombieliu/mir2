@@ -6,8 +6,11 @@
 > Mirror castle writes fence full original account/save images and strict CAS;
 > restores revoke clock grants and unknown COMMIT outcomes freeze writes.
 > Local conquest95/domain29/Gateway13/live-transport1, account22 and shared-Guild24
-> checks pass (dedicated DB checks separate). Linux shutdown flush and paired
-> rollout await their delivery gates. [Evidence](SABUK-SHARED-SIEGE-20261003.md).
+> checks pass. Isolated PostgreSQL source-CAS CI passes; the deployed R16 Gateway
+> stops normally with exit0, restarts and retains its independent clock and
+> sixteen defenses. Signed sequence11 is published with unchanged capacity and
+> original realm. Human siege acceptance remains open.
+> [Evidence](SABUK-SHARED-SIEGE-20261003.md).
 
 > 2026-10-03 user-directed periodic rebalance: all 26 hunt targets are
 > ceil(previous/10); the full daily/weekly sets lock consecutive five/ten-level

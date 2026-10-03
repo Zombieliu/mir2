@@ -4,8 +4,9 @@
 > registration, native Guild naming, source defenses and owner management are
 > connected through ordinary player packets. TCP and WebSocket share authority.
 > Broken source NPC bindings and the source defense-region gap are explicitly
-> repaired. Local focused/adjacent and nine-language GPU checks pass; PostgreSQL/package rollout
-> gates and human gameplay acceptance remain open. No four-mode or whole-game
+> repaired. Local focused/adjacent, nine-language GPU and isolated PostgreSQL CI
+> checks pass. Paired R16 Gateway/sequence11 and a verified online installer are
+> published; human gameplay and installed-client acceptance remain open. No four-mode or whole-game
 > parity claim. [Scope and source](SABUK-SHARED-SIEGE-20261003.md).
 
 > 2026-10-03 revised custom daily/weekly brief: kill requirements are divided

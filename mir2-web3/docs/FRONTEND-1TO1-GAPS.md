@@ -8,6 +8,10 @@
 > pass after fitting Arabic caret/composition indicators to the input viewport;
 > installed human acceptance remains open. The map default adds seven verified palace/interior
 > maps, totaling32; this does not claim whole-world resource closure.
+> The 32-map R16 package, paired Gateway and sequence11 feed are published.
+> Its online installer is 27,481,889 bytes and has public TLS/HEAD/range/full-body
+> SHA evidence. Fresh installer and installed human acceptance remain open;
+> the full offline installer is built locally and R2/CDN is not promoted.
 > [QA and delivery scope](SABUK-SHARED-SIEGE-20261003.md).
 
 > 2026-10-02 native fallback placement source repair: ordinary full-pack
