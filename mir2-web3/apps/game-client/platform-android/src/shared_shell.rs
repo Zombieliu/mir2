@@ -102,6 +102,15 @@ fn large_mail_host_payload_bytes(value: &Value) -> usize {
     }
 }
 
+fn scene_render_packet(raw: &str) -> Option<&str> {
+    // Personal mail already passed its dedicated phase/owner/epoch decoder.
+    // A host-only receipt is not a public scene envelope, and a full mailbox
+    // exceeds the scene decoders' small caps. Neither can affect world objects.
+    // Unknown or malformed non-mail input still reaches the original fail-closed
+    // scene validation; classification does not authorize mail admission.
+    (!crate::mail_ingress::is_mail_packet(raw)).then_some(raw)
+}
+
 #[cfg(target_os = "android")]
 #[unsafe(no_mangle)]
 pub extern "system" fn Java_com_mir2_web3_MainActivity_nativeEvent<'a>(
@@ -1615,10 +1624,14 @@ fn receive(
                 }
             }
             #[cfg(target_os = "android")]
-            if let Some(raw) = value["envelope"].as_str().filter(|_| {
-                host.phase == "IN_GAME"
-                    && matches!(model.screen, Screen::StartingGame | Screen::InGame)
-            }) {
+            if let Some(raw) = value["envelope"]
+                .as_str()
+                .filter(|_| {
+                    host.phase == "IN_GAME"
+                        && matches!(model.screen, Screen::StartingGame | Screen::InGame)
+                })
+                .and_then(scene_render_packet)
+            {
                 let now_ms = time
                     .as_deref()
                     .map(|time| u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX))
@@ -2844,6 +2857,50 @@ mod mail_egress_tests;
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn mail_scene_render_dispatch_excludes_private_results_and_full_mailbox() {
+        use crate::scene_effects::{EffectPacketOutcome, SceneEffects};
+        let own = json!({"type":"androidMailResult","packet":"ParcelCollected","result":1,
+            "connectionGeneration":"9","ownerObjectId":42,"characterName":"Fixture",
+            "claimMailId":"18446744073709551615"}).to_string();
+        let full = game_shop_host_metadata("ReceiveMail", json!({"mail":(0..256).map(|index|
+            json!({"mailId":index+1,"senderName":"NPC","message":"full mailbox".repeat(20),
+                "gold":77,"items":[],"collected":false})).collect::<Vec<_>>()}));
+        let full = full["envelope"].as_str().unwrap();
+        assert!(full.len() > 16 * 1024 && full.len() <= crate::mail_ingress::MAX_MAIL_PACKET_BYTES);
+        let positions = std::collections::HashMap::new();
+        for raw in [&own, full] {
+            assert!(crate::mail_ingress::is_mail_packet(raw));
+            assert_eq!(SceneEffects::default().observe_packet(raw, 0, &positions), EffectPacketOutcome::Rejected);
+            assert!(scene_render_packet(raw).is_none(), "Personal mail reached the Android-only scene decoders");
+        }
+        for packet in ["ReceiveMail", "MailSendRequest", "MailCost", "MailLockedItem"] {
+            let raw = json!({"type":"packet","packet":packet,"payload":{}}).to_string();
+            assert!(scene_render_packet(&raw).is_none());
+        }
+        // Classification alone grants no identity or admission. The original
+        // receive path must still run phase/owner/epoch/schema checks first.
+    }
+
+    #[test]
+    fn mail_scene_render_dispatch_keeps_non_mail_and_invalid_scene_checks() {
+        use crate::scene_effects::{EffectPacketOutcome, SceneEffects};
+        let positions = std::collections::HashMap::new();
+        let movement = json!({"type":"packet","packet":"ObjectWalk",
+            "payload":{"objectId":43,"x":302,"y":631,"direction":"Down"}}).to_string();
+        let effect = json!({"type":"packet","packet":"MapEffect",
+            "payload":{"location":{"x":302,"y":634},"effect":999,"value":0}}).to_string();
+        for raw in [&movement, &effect] {
+            assert_eq!(scene_render_packet(raw), Some(raw.as_str()));
+            assert_eq!(SceneEffects::default().observe_packet(raw, 0, &positions), EffectPacketOutcome::Ignored);
+        }
+        for raw in ["{", r#"{"type":"unknown"}"#,
+            r#"{"type":"packet","packet":"MapEffect","payload":{}}"#] {
+            assert_eq!(scene_render_packet(raw), Some(raw));
+            assert_eq!(SceneEffects::default().observe_packet(raw, 0, &positions), EffectPacketOutcome::Rejected);
+        }
+    }
+
     #[test]
     fn mail_result_actual_host_keeps_feedback_visible_and_reconciles_only_after_refresh() {
         use mir2_client_bevy::{mail::MailModel,pending_operations::PendingOperations,
