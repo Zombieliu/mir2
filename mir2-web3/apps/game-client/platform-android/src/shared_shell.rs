@@ -1555,8 +1555,8 @@ fn receive(
                 && matches!(model.screen, Screen::StartingGame | Screen::InGame)
             {
                 if let Some(raw) = value["envelope"].as_str() {
-                    // Full mailbox packets must not hit unrelated domains'
-                    // 16 KiB guards before the dedicated bounded mail decoder.
+                    // Full mailboxes and host-only own-result envelopes use
+                    // the dedicated bounded, owner/connection-fenced decoder.
                     let rejected = if crate::mail_ingress::is_mail_packet(raw) {
                         host.accept_mail_packet(model.screen, raw).is_err()
                     } else {
@@ -2844,6 +2844,46 @@ mod mail_egress_tests;
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn mail_result_actual_host_keeps_feedback_visible_and_reconciles_only_after_refresh() {
+        use mir2_client_bevy::{mail::MailModel,pending_operations::PendingOperations,
+            crystal_ui::overlays::{NativePlayerUiIntent,NativePlayerUiIntentQueue}};
+        let mut app=game_shop_receive_app();
+        app.add_plugins(mir2_bevy_runtime::Mir2NativeMailIngressPlugin)
+            .init_resource::<NativePlayerUiIntentQueue>();
+        let mut host_event=game_shop_host_world(42,"Fixture","0");
+        let mut raw:Value=serde_json::from_str(host_event["worldSnapshot"].as_str().unwrap()).unwrap();
+        raw["androidMailGeneration"]=json!("9");
+        host_event["worldSnapshot"]=json!(raw.to_string());
+        INBOX.lock().unwrap().push_back(host_event);app.update();
+        let intent=NativePlayerUiIntent::ClaimMail{mail_id:17};
+        let key=intent.pending_key().unwrap();
+        app.world_mut().resource_scope(|world,mut pending:Mut<PendingOperations>|{
+            assert!(world.resource_mut::<NativePlayerUiIntentQueue>().push_pending_intent(&mut pending,intent));
+        });
+        // Emulate the producer dequeue; a Sent write does not retire pending.
+        app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents();
+        let own=json!({"type":"androidMailResult","packet":"ParcelCollected","result":1,
+            "connectionGeneration":"9","ownerObjectId":42,"characterName":"Fixture","claimMailId":"17"});
+        INBOX.lock().unwrap().push_back(json!({"type":"gatewayGameplayPacket","envelope":own.to_string()}));
+        app.update();
+        assert!(app.world().resource::<PendingOperations>().contains(&key));
+        assert!(app.world().resource::<MailModel>().operation_feedback().is_none());
+        INBOX.lock().unwrap().extend([
+            game_shop_host_metadata("ReceiveMail",json!({"mail":[{"mailId":"17","senderName":"NPC","message":"Authoritative","gold":77,"items":[],"collected":false}]})),
+            game_shop_host_metadata("ReceiveMail",json!({"mail":[]})),
+        ]);
+        app.update();
+        let mail=app.world().resource::<MailModel>();
+        assert_eq!(mail.operation_feedback().unwrap().mail_id,Some(17));
+        assert_eq!(mail.mails[0].gold,77);assert!(!mail.mails[0].claimed);
+        assert!(!app.world().resource::<PendingOperations>().contains(&key));
+        assert_eq!(app.world().resource::<NativeShellModel>().screen,Screen::StartingGame);
+        app.update();
+        assert!(app.world().resource::<MailModel>().mails.is_empty());
+        assert_eq!(app.world().resource::<HostState>().phase,"IN_GAME");
+    }
+
     #[test]
     fn storage_host_phase_gate_and_render_failure_retire_pending_metadata() {
         let raw = json!({"type":"packet","packet":"ResizeStorage","payload":{

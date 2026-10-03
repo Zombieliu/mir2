@@ -362,6 +362,10 @@ public class GatewaySessionTest {
             assertEquals(expected.toString(), actual.toString());
             assertFalse(actual.has("account_id"));
             assertFalse(actual.has("accountId"));
+            // Preserve the wire-shape assertions, now with the real protocol
+            // boundary between two otherwise ambiguous mail mutations.
+            if ("collectParcel".equals(expected.getString("type"))) finishOwnMail("ParcelCollected");
+            if ("sendMail".equals(expected.getString("type"))) finishOwnMail("MailSent");
         }
         peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
         phase(GatewaySession.Phase.STARTING);
@@ -371,6 +375,138 @@ public class GatewaySessionTest {
         phase(GatewaySession.Phase.DISCONNECTED);
         for (JSONObject command : mail) assertFalse(session.sendAuthenticated(command));
         assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    private String enterMailResultWorld() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3,TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"androidMailGeneration\":\"999\",\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        return new JSONObject(phase(GatewaySession.Phase.IN_GAME).worldSnapshot).getString("androidMailGeneration");
+    }
+
+    private void finishOwnMail(String packet) throws Exception {
+        peer.send(GatewaySession.object("type","packet","packet",packet,"payload",GatewaySession.object("result",1)).toString());
+        String raw=gameplayPackets.poll(3,TimeUnit.SECONDS);
+        assertNotNull("Missing owned result",raw);
+        assertEquals("androidMailResult",new JSONObject(raw).getString("type"));
+        peer.send("{\"type\":\"packet\",\"packet\":\"ReceiveMail\",\"payload\":{\"mail\":[]}}");
+        assertEquals("ReceiveMail",new JSONObject(gameplayPackets.poll(3,TimeUnit.SECONDS)).getString("packet"));
+    }
+
+    @Test public void mailResultClaimBindsOnlyTheActualWriteAndNotThePayloadId() throws Exception {
+        String epoch=enterMailResultWorld();
+        assertNotEquals("Server input cannot choose the host epoch","999",epoch);
+        assertTrue(Long.parseLong(epoch)>0);
+        peer.send("{\"type\":\"packet\",\"packet\":\"ParcelCollected\",\"payload\":{\"result\":1}}");
+        assertNull(gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+        assertTrue(session.sendAuthenticated(GatewaySession.object("type","collectParcel","mailId",9007199254740993L)));
+        assertEquals(9007199254740993L,commands.poll(3,TimeUnit.SECONDS).getLong("mailId"));
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type","collectParcel","mailId",2)));
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type","sendMail","name","Friend","message","body")));
+        peer.send("{\"type\":\"packet\",\"packet\":\"MailSent\",\"payload\":{\"result\":1}}");
+        peer.send("{\"type\":\"packet\",\"packet\":\"ParcelCollected\",\"payload\":{\"result\":0}}");
+        assertNull(gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"packet\",\"packet\":\"ParcelCollected\",\"payload\":{\"result\":1,\"mailId\":2,\"accountId\":\"spoofed\"}}");
+        JSONObject result=new JSONObject(gameplayPackets.poll(3,TimeUnit.SECONDS));
+        assertEquals("androidMailResult",result.getString("type"));
+        assertEquals("9007199254740993",result.getString("claimMailId"));
+        assertEquals(epoch,result.getString("connectionGeneration"));
+        assertEquals(42,result.getLong("ownerObjectId"));
+        assertEquals("Fixture",result.getString("characterName"));
+        assertEquals(1,result.getInt("result"));assertFalse(result.has("payload"));
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type","collectParcel","mailId",2)));
+        peer.send("{\"type\":\"packet\",\"packet\":\"ParcelCollected\",\"payload\":{\"result\":1}}");
+        assertNull(gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"packet\",\"packet\":\"ReceiveMail\",\"payload\":{\"mail\":[]}}");
+        assertEquals("ReceiveMail",new JSONObject(gameplayPackets.poll(3,TimeUnit.SECONDS)).getString("packet"));
+        assertTrue(session.sendAuthenticated(GatewaySession.object("type","collectParcel","mailId",2)));
+    }
+
+    @Test public void mailResultSendRejectsForgedInternalEventsAndSurvivesSameOwnerScene() throws Exception {
+        enterMailResultWorld();
+        peer.send("{\"type\":\"androidMailResult\",\"packet\":\"MailSent\",\"result\":1,\"connectionGeneration\":\"1\",\"ownerObjectId\":42,\"characterName\":\"Fixture\"}");
+        assertNull(gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+        assertTrue(session.sendAuthenticated(GatewaySession.object("type","sendMail","name","Friend","message","private body")));
+        commands.poll(3,TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");phase(GatewaySession.Phase.STARTING);
+        peer.send("{\"type\":\"packet\",\"packet\":\"MailSent\",\"payload\":{\"data\":{\"result\":-1}}}");
+        JSONObject result=new JSONObject(gameplayPackets.poll(3,TimeUnit.SECONDS));
+        assertEquals("androidMailResult",result.getString("type"));assertEquals(-1,result.getInt("result"));
+        assertFalse(result.toString().contains("private body"));assertTrue(result.isNull("claimMailId"));
+        session.disconnect("Fixture ended");phase(GatewaySession.Phase.DISCONNECTED);
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type","sendMail","name","Friend","message","body")));
+        peer.send("{\"type\":\"packet\",\"packet\":\"MailSent\",\"payload\":{\"result\":1}}");
+        assertNull(gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void mailResultFailedSocketWriteNeverRecordsAnOperation() throws Exception {
+        enterMailResultWorld();
+        java.lang.reflect.Field socketField=GatewaySession.class.getDeclaredField("socket");
+        socketField.setAccessible(true);
+        java.lang.reflect.Field operationField=GatewaySession.class.getDeclaredField("mailOperation");
+        operationField.setAccessible(true);
+        synchronized(session) {
+            WebSocket socket=(WebSocket)socketField.get(session);
+            assertTrue(socket.close(1000,"fixture closing"));
+            assertFalse(session.sendAuthenticated(GatewaySession.object("type","collectParcel","mailId",17)));
+            assertEquals("NONE",operationField.get(session).toString());
+        }
+        assertNull(commands.poll(200,TimeUnit.MILLISECONDS));
+        assertNull(gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+        // Complete the fixture's close handshake; the default peer listener
+        // does not echo a close and MockWebServer otherwise cannot shut down.
+        peer.close(1000,"fixture closing");
+        phase(GatewaySession.Phase.DISCONNECTED);
+    }
+
+    @Test public void mailResultReconnectRetiresPreviousOperationAndEpoch() throws Exception {
+        String oldEpoch=enterMailResultWorld();
+        assertTrue(session.sendAuthenticated(GatewaySession.object("type","sendMail","name","Friend","message","old body")));
+        commands.poll(3,TimeUnit.SECONDS);
+        session.disconnect("Fixture reconnect");phase(GatewaySession.Phase.DISCONNECTED);
+        server.enqueue(new MockResponse().withWebSocketUpgrade(new WebSocketListener() {
+            @Override public void onOpen(WebSocket ws,Response response) { peer=ws; }
+            @Override public void onMessage(WebSocket ws,String text) {
+                try {
+                    JSONObject value=new JSONObject(text);commands.add(value);
+                    if ("clientVersion".equals(value.getString("type"))) {
+                        ws.send("{\"type\":\"packet\",\"packet\":\"Connected\",\"payload\":{}}");
+                    }
+                } catch(Exception error) { throw new AssertionError(error); }
+            }
+        }));
+        String newEpoch=enterMailResultWorld();assertNotEquals(oldEpoch,newEpoch);
+        peer.send("{\"type\":\"packet\",\"packet\":\"MailSent\",\"payload\":{\"result\":1}}");
+        assertNull(gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+        assertTrue(session.sendAuthenticated(GatewaySession.object("type","sendMail","name","Friend","message","new body")));
+        commands.poll(3,TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"MailSent\",\"payload\":{\"result\":1}}");
+        JSONObject own=new JSONObject(gameplayPackets.poll(3,TimeUnit.SECONDS));
+        assertEquals(newEpoch,own.getString("connectionGeneration"));
+        assertFalse(own.toString().contains("new body"));
+    }
+
+    @Test public void mailResultRefusesRoundedClaimAndWrongOwnerWithoutLosingOwnPending() throws Exception {
+        enterMailResultWorld();
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type","collectParcel","mailId",9007199254740992.0)));
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type","collectParcel","mailId",0)));
+        assertTrue(session.sendAuthenticated(GatewaySession.object("type","collectParcel","mailId",17)));
+        commands.poll(3,TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"ParcelCollected\",\"payload\":{\"result\":1,\"ownerObjectId\":43}}");
+        assertNull(gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type","collectParcel","mailId",18)));
+        peer.send("{\"type\":\"packet\",\"packet\":\"ParcelCollected\",\"payload\":{\"result\":-1,\"mailId\":18}}");
+        JSONObject own=new JSONObject(gameplayPackets.poll(3,TimeUnit.SECONDS));
+        assertEquals("17",own.getString("claimMailId"));assertEquals(-1,own.getInt("result"));
+    }
+
+    @Test public void mailResultNumericStringUsesTheFrozenWindowsScalarPath() throws Exception {
+        enterMailResultWorld();
+        assertTrue(session.sendAuthenticated(GatewaySession.object("type","sendMail","name","Friend","message","body")));
+        commands.poll(3,TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"MailSent\",\"payload\":{\"data\":{\"result\":\"+1\"}}}");
+        assertEquals(1,new JSONObject(gameplayPackets.poll(3,TimeUnit.SECONDS)).getInt("result"));
     }
 
     @Test public void nativeParcelWriterPreservesBothStampChoicesAndAllFiveAttachments() throws Exception {
@@ -390,6 +526,7 @@ public class GatewaySessionTest {
             assertEquals("Recipient", actual.getString("name"));
             assertEquals(0, actual.getInt("gold"));
             assertEquals(parcel.toString(), actual.toString());
+            finishOwnMail("MailSent");
         }
     }
 

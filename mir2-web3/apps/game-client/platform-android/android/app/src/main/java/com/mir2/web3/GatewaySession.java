@@ -23,6 +23,7 @@ import org.json.JSONObject;
 final class GatewaySession implements AutoCloseable {
     enum Phase { DISCONNECTED, CONNECTING, READY, LOGIN, CHARACTERS, STARTING, IN_GAME }
     private enum AccountOperation { NONE, CREATE, DELETE }
+    private enum MailOperation { NONE, SEND, COLLECT, WAITING_REFRESH }
 
     static final class Character {
         final int index;
@@ -89,6 +90,10 @@ final class GatewaySession implements AutoCloseable {
     private AccountOperation accountOperation = AccountOperation.NONE;
     private Integer pendingDeleteIndex;
     private JSONObject pendingAccountEvent;
+    private MailOperation mailOperation = MailOperation.NONE;
+    private String claimMailId;
+    private long mailGeneration, mailOwnerId;
+    private String mailOwnerName;
     private boolean closed;
 
     GatewaySession(OkHttpClient client, Consumer<View> observer) {
@@ -230,7 +235,30 @@ final class GatewaySession implements AutoCloseable {
                 || type.equals("startGame") || type.equals("passkeyLogin")) {
             return false;
         }
-        return socket.send(command.toString());
+        boolean claim = type.equals("collectParcel"), sendMail = type.equals("sendMail");
+        String claimId = null;
+        if (claim || sendMail) {
+            if (!startAccepted || !hasOwnerSnapshot || mailOperation != MailOperation.NONE) return false;
+            if (claim) {
+                // Android org.json rounds unsigned values beyond Long.MAX_VALUE
+                // into doubles. Fail closed instead of correlating a rounded ID.
+                Object raw = command.opt("mailId");
+                if (!(raw instanceof Integer) && !(raw instanceof Long)) return false;
+                if (((Number) raw).longValue() <= 0) return false;
+                claimId = raw.toString();
+            }
+        }
+        boolean written = socket.send(command.toString());
+        if (written && (claim || sendMail)) {
+            // Socket callbacks use this same monitor. Record only the actual
+            // accepted write, not the Rust FIFO or a guessed payload ID.
+            mailOperation = claim ? MailOperation.COLLECT : MailOperation.SEND;
+            claimMailId = claimId;
+            mailGeneration = generation;
+            mailOwnerId = ownerObjectId;
+            mailOwnerName = player;
+        }
+        return written;
     }
 
     private void receive(JSONObject envelope) throws JSONException {
@@ -255,11 +283,15 @@ final class GatewaySession implements AutoCloseable {
                     map = bounded(world.getString("mapFileName"));
                     readPosition(entity);
                     // Keep the complete immutable server payload until StartGame is accepted.
-                    pendingSnapshot = world.toString();
+                    // Host-only receipt epoch; server input cannot select it.
+                    JSONObject hostWorld = new JSONObject(world.toString());
+                    hostWorld.put("androidMailGeneration", String.valueOf(generation));
+                    pendingSnapshot = hostWorld.toString();
                     hasOwnerSnapshot = true;
                     hasSceneSnapshot = true;
                     ownerObjectId = owner;
                     publishWorld();
+                    if (hasMailRefresh(world) && mailOwnerMatches()) clearMailFeedbackWait();
                     return;
                 }
             }
@@ -267,6 +299,10 @@ final class GatewaySession implements AutoCloseable {
         }
         if (!type.equals("packet")) return;
         String packet = envelope.getString("packet");
+        if (packet.equals("MailSent") || packet.equals("ParcelCollected")) {
+            forwardOwnMailResult(packet, envelope.optJSONObject("payload"));
+            return; // Never forward anonymous server ACKs or raw payload fields.
+        }
         boolean forwardEntity = phase == Phase.IN_GAME && isEntityGameplayPacket(packet);
         boolean forwardPersonal = personalGameplayPhase()
                 && (isPersonalSkillPacket(packet) || isInventoryOperationPacket(packet)
@@ -412,7 +448,77 @@ final class GatewaySession implements AutoCloseable {
                 || (forwardStorageMetadata && worldPending())
                 || (forwardMailMetadata && worldPending())) {
             forwardBounded(envelope, gameplayObserver);
+            if (forwardMailMetadata && packet.equals("ReceiveMail")
+                    && payload.optJSONArray("mail") != null && mailOwnerMatches()
+                    && mailPayloadOwnerMatches(payload)) {
+                clearMailFeedbackWait();
+            }
         }
+    }
+
+    private void forwardOwnMailResult(String packet, JSONObject payload) {
+        if (!personalGameplayPhase() || payload == null || !mailOwnerMatches()) return;
+        if (!(packet.equals("MailSent") && mailOperation == MailOperation.SEND)
+                && !(packet.equals("ParcelCollected") && mailOperation == MailOperation.COLLECT)) return;
+        JSONObject body = payload.optJSONObject("data");
+        if (body == null) body = payload;
+        if (!mailPayloadOwnerMatches(payload) || !mailPayloadOwnerMatches(body)) return;
+        Object raw = body.opt("result");
+        int result;
+        if (raw instanceof Integer || raw instanceof Long) {
+            long value = ((Number)raw).longValue();
+            if (value != 1 && value != -1) return;
+            result = (int)value;
+        } else if (raw instanceof String) {
+            // Match the frozen shared value_i32 numeric-string path as well.
+            try { result = Integer.parseInt((String)raw); }
+            catch (NumberFormatException invalid) { return; }
+            if (result != 1 && result != -1) return;
+        } else return;
+        JSONObject own = object("type", "androidMailResult", "packet", packet,
+                "result", result, "connectionGeneration", String.valueOf(mailGeneration),
+                "ownerObjectId", mailOwnerId, "characterName", mailOwnerName,
+                "claimMailId", claimMailId == null ? JSONObject.NULL : claimMailId);
+        mailOperation = MailOperation.WAITING_REFRESH;
+        forwardBounded(own, gameplayObserver);
+    }
+
+    private boolean mailOwnerMatches() {
+        return mailOperation != MailOperation.NONE && mailGeneration == generation
+                && mailOwnerId == ownerObjectId && player.equals(mailOwnerName);
+    }
+
+    private boolean mailPayloadOwnerMatches(JSONObject payload) {
+        if (payload.has("hero") && !Boolean.FALSE.equals(payload.opt("hero"))) return false;
+        if (payload.has("characterName") && !player.equals(payload.opt("characterName"))) return false;
+        if (payload.has("ownerObjectId")) {
+            Object raw = payload.opt("ownerObjectId");
+            if (!(raw instanceof Integer) && !(raw instanceof Long)) return false;
+            if (((Number)raw).longValue() != ownerObjectId) return false;
+        }
+        return true;
+    }
+
+    private void clearMailFeedbackWait() {
+        if (mailOperation == MailOperation.WAITING_REFRESH) resetMailOperation();
+    }
+
+    private void resetMailOperation() {
+        mailOperation = MailOperation.NONE; claimMailId = null;
+        mailGeneration = mailOwnerId = 0; mailOwnerName = null;
+    }
+
+    private static boolean hasMailRefresh(JSONObject world) {
+        // Same source precedence as the shared mail_source projection.
+        for (String nested : new String[]{"stage5Systems", "stage5_systems"}) {
+            JSONObject value = world.optJSONObject(nested);
+            if (value != null && value.has("mail")) return value.optJSONArray("mail") != null;
+        }
+        for (String key : new String[]{"mails", "mail"}) {
+            if (world.has(key)) return world.optJSONArray(key) != null;
+        }
+        JSONObject value = world.optJSONObject("stage5");
+        return value != null && value.optJSONArray("mail") != null;
     }
 
     private void forwardReceipt(JSONObject envelope) {
@@ -492,8 +598,8 @@ final class GatewaySession implements AutoCloseable {
     }
 
     private static boolean isMailMetadataPacket(String packet) {
-        // Read-only lists/server quotes/locks. Anonymous MailSent and
-        // ParcelCollected cannot settle the existing exact receipt channel.
+        // Read-only lists/server quotes/locks. Mail results have a separate
+        // own-write/epoch path; anonymous ACKs never enter this whitelist.
         return packet.equals("ReceiveMail") || packet.equals("MailSendRequest")
                 || packet.equals("MailCost") || packet.equals("MailLockedItem");
     }
@@ -561,6 +667,7 @@ final class GatewaySession implements AutoCloseable {
         publish("Character: " + player + "\nMap: " + map + "\nServer position: (" + x + ", " + y + ")");
     }
     private void resetWorld() {
+        resetMailOperation();
         player = map = ""; x = y = null; startAccepted = false; pendingSnapshot = null;
         hasOwnerSnapshot = false;
         hasSceneSnapshot = false;

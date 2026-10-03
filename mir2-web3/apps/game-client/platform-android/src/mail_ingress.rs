@@ -1,7 +1,11 @@
-//! Bounded read-only mailbox/parcel ingress for one accepted character.
-//! No sends, claims, account identity grant, local postage, or receipt correlation.
+//! Bounded mailbox/parcel ingress for one accepted character and host epoch.
+//! Only own host-correlated feedback is attached to a later authoritative list.
+//! No authentication, local custody, eligibility, postage or settlement rules.
 use mir2_client_bevy::{
-    mail::{MailModel, MAX_MAIL_ATTACHMENTS, MAX_MAIL_MESSAGES},
+    mail::{
+        MailModel, MailOperationFeedback, MailOperationKind, MAX_MAIL_ATTACHMENTS,
+        MAX_MAIL_MESSAGES,
+    },
     mail_service::MailServiceEvent,
     native_mail_ingress::{
         mail_service_event_from_packet, mail_source, try_transform_mail_model_from_packet,
@@ -27,7 +31,9 @@ pub(crate) fn is_mail_packet(raw: &str) -> bool {
     serde_json::from_str::<Value>(raw)
         .ok()
         .is_some_and(|value| {
-            value["type"] == "packet" && value["packet"].as_str().is_some_and(is_mail_packet_name)
+            value["type"] == "androidMailResult"
+                || (value["type"] == "packet"
+                    && value["packet"].as_str().is_some_and(is_mail_packet_name))
         })
 }
 fn is_mail_packet_name(name: &str) -> bool {
@@ -55,6 +61,8 @@ pub(crate) struct AndroidMailIngress {
     identity: Option<(u32, String)>,
     map: Option<String>,
     pending: VecDeque<Pending>,
+    generation: Option<u64>,
+    feedback: Option<MailOperationFeedback>,
 }
 impl AndroidMailIngress {
     pub(crate) fn reset(&mut self) {
@@ -89,12 +97,23 @@ impl AndroidMailIngress {
         if self.identity.as_ref().is_some_and(|old| old != &identity) {
             return Err("Mail owner changed; reconnect");
         }
+        let generation = world
+            .get("androidMailGeneration")
+            .map(|value| host_u64(value).ok_or("Invalid mail host epoch"))
+            .transpose()?;
+        if self.generation.is_some() && self.generation != generation {
+            return Err("Mail host epoch changed; reconnect");
+        }
         let mut pending = self.pending.clone();
+        let mut feedback_attached = false;
         if let Some(entries) = mail_source(&world) {
             let count = checked_source(entries, true)?;
             let model = try_transform_mail_model_from_snapshot(&world)
                 .ok_or("Invalid mail snapshot projection")?;
-            let message = Pending::Model(checked_model(model, count)?);
+            let raw = checked_model(model, count)?;
+            let raw = with_mail_feedback(raw, self.feedback.as_ref())?;
+            feedback_attached = self.feedback.is_some();
+            let message = Pending::Model(raw);
             // Packet-first current data follows the initial base, never the reverse.
             if self.identity.is_none() {
                 pending.push_front(message);
@@ -106,6 +125,10 @@ impl AndroidMailIngress {
         self.identity = Some(identity);
         self.map = Some(map.to_owned());
         self.pending = pending;
+        self.generation = generation;
+        if feedback_attached {
+            self.feedback = None;
+        }
         Ok(())
     }
     pub(crate) fn packet(&mut self, raw: &str) -> Result<bool, &'static str> {
@@ -113,6 +136,9 @@ impl AndroidMailIngress {
             return Err("Mail packet too large");
         }
         let envelope: Value = serde_json::from_str(raw).map_err(|_| "Invalid mail packet")?;
+        if envelope["type"] == "androidMailResult" {
+            return self.own_result(raw, &envelope);
+        }
         if envelope["type"] != "packet" {
             return Ok(false);
         }
@@ -138,7 +164,10 @@ impl AndroidMailIngress {
             let count = checked_source(&payload["mail"], false)?;
             let model = try_transform_mail_model_from_packet(payload)
                 .ok_or("Invalid mail packet projection")?;
-            Pending::Model(checked_model(model, count)?)
+            Pending::Model(with_mail_feedback(
+                checked_model(model, count)?,
+                self.feedback.as_ref(),
+            )?)
         } else {
             let event = mail_service_event_from_packet(packet, payload)
                 .ok_or("Invalid mail service event")?;
@@ -151,6 +180,46 @@ impl AndroidMailIngress {
         pending.push_back(message);
         checked_queue(&pending)?;
         self.pending = pending;
+        if packet == "ReceiveMail" {
+            self.feedback = None;
+        }
+        Ok(true)
+    }
+    fn own_result(&mut self, raw: &str, envelope: &Value) -> Result<bool, &'static str> {
+        if raw.len() > MAX_SERVICE_PACKET_BYTES {
+            return Err("Mail result too large");
+        }
+        let Some((owner, name)) = self.identity.as_ref() else {
+            return Ok(false);
+        };
+        if self.generation.is_none()
+            || host_u64(&envelope["connectionGeneration"]) != self.generation
+            || envelope["ownerObjectId"].as_u64() != Some(u64::from(*owner))
+            || envelope["characterName"].as_str() != Some(name.as_str())
+        {
+            return Ok(false);
+        }
+        let Some(result) = envelope["result"].as_i64().filter(|n| matches!(n, 1 | -1)) else {
+            return Ok(false);
+        };
+        let (kind, mail_id) = match envelope["packet"].as_str() {
+            Some("MailSent") if envelope["claimMailId"].is_null() => {
+                (MailOperationKind::Send, None)
+            }
+            Some("ParcelCollected") => (
+                MailOperationKind::Collect,
+                Some(host_u64(&envelope["claimMailId"]).ok_or("Invalid owned claim ID")?),
+            ),
+            _ => return Ok(false),
+        };
+        if self.feedback.is_some() {
+            return Err("Mail feedback already waiting");
+        }
+        self.feedback = Some(MailOperationFeedback {
+            kind,
+            success: result == 1,
+            mail_id,
+        });
         Ok(true)
     }
     fn matches_owner(&self, payload: &Value) -> bool {
@@ -266,6 +335,44 @@ fn checked_queue(queue: &VecDeque<Pending>) -> Result<(), &'static str> {
     Ok(())
 }
 
+fn host_u64(value: &Value) -> Option<u64> {
+    let value = value.as_str()?;
+    if value.is_empty() || value.len() > 20 || !value.bytes().all(|b| b.is_ascii_digit()) {
+        return None;
+    }
+    value.parse::<u64>().ok().filter(|n| *n != 0)
+}
+
+fn with_mail_feedback(
+    raw: String,
+    feedback: Option<&MailOperationFeedback>,
+) -> Result<String, &'static str> {
+    let Some(feedback) = feedback else {
+        return Ok(raw);
+    };
+    let mut model: Value = serde_json::from_str(&raw).map_err(|_| "Invalid mail feedback base")?;
+    let rows = model["mails"]
+        .as_array_mut()
+        .ok_or("Missing mail feedback list")?;
+    let count = rows.len();
+    // Exact frozen Windows transient feedback row; shared MailModel keeps it
+    // outside the 256 real-message quota and its existing consumer owns cleanup.
+    rows.push(
+        serde_json::json!({"id":u64::MAX,"sender":"","subject":"","body":"",
+        "gold":0,"items":[],"claimed":false,"locked":true,"read":true,"operation":feedback}),
+    );
+    let typed: MailModel =
+        serde_json::from_value(model.clone()).map_err(|_| "Invalid typed mail feedback")?;
+    if typed.mails.len() != count + 1 || typed.operation_feedback() != Some(feedback) {
+        return Err("Mail feedback was not retained");
+    }
+    let raw = model.to_string();
+    if raw.len() > MAX_MODEL_BYTES {
+        return Err("Mail feedback model too large");
+    }
+    Ok(raw)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -281,6 +388,178 @@ mod tests {
     }
     fn packet(name: &str, payload: Value) -> String {
         json!({"type":"packet","packet":name,"payload":payload}).to_string()
+    }
+
+    fn bound_mail() -> AndroidMailIngress {
+        let mut ingress = AndroidMailIngress::default();
+        let mut base = world(42, "Fixture", "0");
+        base["androidMailGeneration"] = json!("9");
+        ingress.snapshot(&base.to_string()).unwrap();
+        ingress
+    }
+
+    fn own_result(packet: &str, result: i32, claim: Option<u64>) -> Value {
+        json!({"type":"androidMailResult","packet":packet,"result":result,
+            "connectionGeneration":"9","ownerObjectId":42,"characterName":"Fixture",
+            "claimMailId":claim.map(|id|id.to_string())})
+    }
+
+    #[test]
+    fn mail_result_waits_for_later_authoritative_refresh_and_uses_owned_claim_id() {
+        let mut ingress = bound_mail();
+        assert!(!ingress
+            .packet(&packet("ParcelCollected", json!({"result":1,"mailId":3})))
+            .unwrap());
+        let event = own_result("ParcelCollected", 1, Some(9007199254740993));
+        assert!(is_mail_packet(&event.to_string()));
+        assert!(ingress.packet(&event.to_string()).unwrap());
+        assert!(ingress.flush(|_| panic!("ACK cannot invent a mailbox"), |_| false));
+        assert!(ingress
+            .packet(&packet("ReceiveMail", json!({"mail":[row(2)]})))
+            .unwrap());
+        assert!(ingress.flush(
+            |raw| {
+                let model: MailModel = serde_json::from_str(&raw).unwrap();
+                assert_eq!(model.mails[0].id, 2);
+                assert_eq!(model.mails[0].gold, 77);
+                assert!(
+                    !model.mails[0].claimed,
+                    "A receipt must not edit server mail custody"
+                );
+                assert_eq!(
+                    model.operation_feedback().unwrap().mail_id,
+                    Some(9007199254740993)
+                );
+                assert!(model.operation_feedback().unwrap().success);
+                true
+            },
+            |_| false
+        ));
+    }
+
+    #[test]
+    fn mail_result_rejects_anonymous_stale_other_owner_and_invalid_kind_or_result() {
+        let mut ingress = bound_mail();
+        for (key, value) in [
+            ("connectionGeneration", json!("8")),
+            ("ownerObjectId", json!(43)),
+            ("characterName", json!("Other")),
+            ("packet", json!("ReadMail")),
+            ("result", json!(0)),
+            ("connectionGeneration", Value::Null),
+        ] {
+            let mut event = own_result("MailSent", 1, None);
+            event[key] = value;
+            assert!(!ingress
+                .packet(&event.to_string())
+                .is_ok_and(|accepted| accepted));
+        }
+        let mut unbound = AndroidMailIngress::default();
+        assert!(!unbound
+            .packet(&own_result("MailSent", 1, None).to_string())
+            .is_ok_and(|a| a));
+        assert!(ingress
+            .packet(&own_result("MailSent", -1, None).to_string())
+            .unwrap());
+        assert!(
+            ingress
+                .packet(&own_result("MailSent", 1, None).to_string())
+                .is_err(),
+            "No second feedback may replace the first"
+        );
+        assert!(ingress
+            .packet(&packet("ReceiveMail", json!({"mail":[]})))
+            .unwrap());
+        assert!(ingress.flush(
+            |raw| {
+                let model: MailModel = serde_json::from_str(&raw).unwrap();
+                let result = model.operation_feedback().unwrap();
+                assert_eq!(result.kind, mir2_client_bevy::mail::MailOperationKind::Send);
+                assert!(!result.success);
+                assert_eq!(result.mail_id, None);
+                true
+            },
+            |_| false
+        ));
+    }
+
+    #[test]
+    fn mail_result_full_inbox_preserves_256_real_rows_and_exact_retry_front() {
+        let mut ingress = bound_mail();
+        assert!(ingress
+            .packet(&own_result("ParcelCollected", -1, Some(u64::MAX)).to_string())
+            .unwrap());
+        let rows: Vec<_> = (1..=MAX_MAIL_MESSAGES).map(|id| row(id as u64)).collect();
+        assert!(ingress
+            .packet(&packet("ReceiveMail", json!({"mail":rows})))
+            .unwrap());
+        let mut rejected = None;
+        assert!(!ingress.flush(
+            |raw| {
+                rejected = Some(raw);
+                false
+            },
+            |_| false
+        ));
+        assert_eq!(ingress.pending_count(), 1);
+        assert!(ingress.flush(
+            |raw| {
+                assert_eq!(Some(&raw), rejected.as_ref());
+                let model: MailModel = serde_json::from_str(&raw).unwrap();
+                assert_eq!(
+                    model.mails.iter().filter(|m| m.operation.is_none()).count(),
+                    256
+                );
+                assert_eq!(model.mails.len(), 257);
+                assert_eq!(model.operation_feedback().unwrap().mail_id, Some(u64::MAX));
+                assert!(!model.operation_feedback().unwrap().success);
+                true
+            },
+            |_| false
+        ));
+    }
+
+    #[test]
+    fn mail_result_scene_keeps_receipt_and_reset_retires_old_connection() {
+        let mut ingress = bound_mail();
+        assert!(ingress
+            .packet(&own_result("MailSent", 1, None).to_string())
+            .unwrap());
+        ingress.clear_scene();
+        let mut next = world(42, "Fixture", "1");
+        next["androidMailGeneration"] = json!("9");
+        ingress.snapshot(&next.to_string()).unwrap();
+        assert!(!ingress
+            .packet(&packet("ReceiveMail", json!({"mail":[],"mapFileName":"0"})))
+            .unwrap());
+        next["mails"] = json!([]);
+        ingress.snapshot(&next.to_string()).unwrap();
+        assert!(ingress.flush(
+            |raw| {
+                assert!(serde_json::from_str::<MailModel>(&raw)
+                    .unwrap()
+                    .operation_feedback()
+                    .is_some());
+                true
+            },
+            |_| false
+        ));
+        ingress.reset();
+        next["androidMailGeneration"] = json!("10");
+        ingress.snapshot(&next.to_string()).unwrap();
+        assert!(!ingress
+            .packet(&own_result("MailSent", 1, None).to_string())
+            .unwrap());
+        assert!(ingress.flush(
+            |raw| {
+                assert!(serde_json::from_str::<MailModel>(&raw)
+                    .unwrap()
+                    .operation_feedback()
+                    .is_none());
+                true
+            },
+            |_| false
+        ));
     }
     #[test]
     fn mail_packet_first_stays_inert_until_owner_then_follows_snapshot_base() {

@@ -456,6 +456,7 @@ impl NativeInboundBuffer {
     fn evict_oldest_non_boundary(&mut self) -> bool {
         let Some(index) = self.pending.iter().position(|message| {
             !is_valid_mail_cost(message)
+                && !is_mail_operation_feedback(message)
                 && !matches!(
                     message,
                     NativeInboundMessage::DataReset
@@ -538,6 +539,9 @@ pub fn native_pending_buffer_bytes() -> Option<usize> {
 }
 
 fn is_coalescible_snapshot(message: &NativeInboundMessage) -> bool {
+    if is_mail_operation_feedback(message) {
+        return false;
+    }
     matches!(
         message,
         NativeInboundMessage::WorldState(_)
@@ -567,6 +571,9 @@ fn is_replaceable_render_asset(message: &NativeInboundMessage) -> bool {
 }
 
 fn same_coalescing_slot(left: &NativeInboundMessage, right: &NativeInboundMessage) -> bool {
+    if is_mail_operation_feedback(left) || is_mail_operation_feedback(right) {
+        return false;
+    }
     match (left, right) {
         (NativeInboundMessage::WorldState(_), NativeInboundMessage::WorldState(_))
         | (
@@ -605,32 +612,44 @@ fn same_coalescing_slot(left: &NativeInboundMessage, right: &NativeInboundMessag
 }
 
 fn is_critical_message(message: &NativeInboundMessage) -> bool {
-    matches!(
-        message,
-        NativeInboundMessage::InventoryOperationAck(_)
-            | NativeInboundMessage::DataReset
-            | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
-            | NativeInboundMessage::SceneReset
-            | NativeInboundMessage::WalletPatch(_)
-            | NativeInboundMessage::GameShopInfo(_)
-            | NativeInboundMessage::GameShopStock(_)
-            | NativeInboundMessage::GameShopReceipt(_)
-            | NativeInboundMessage::MailService(_)
-            | NativeInboundMessage::NpcShopService(_)
-            | NativeInboundMessage::StoragePatch(_)
-            | NativeInboundMessage::SocialModel(_)
-            | NativeInboundMessage::HeroModelReceipt(_)
-            | NativeInboundMessage::SkillModelReceipt(_)
-    )
+    is_mail_operation_feedback(message)
+        || matches!(
+            message,
+            NativeInboundMessage::InventoryOperationAck(_)
+                | NativeInboundMessage::DataReset
+                | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
+                | NativeInboundMessage::SceneReset
+                | NativeInboundMessage::WalletPatch(_)
+                | NativeInboundMessage::GameShopInfo(_)
+                | NativeInboundMessage::GameShopStock(_)
+                | NativeInboundMessage::GameShopReceipt(_)
+                | NativeInboundMessage::MailService(_)
+                | NativeInboundMessage::NpcShopService(_)
+                | NativeInboundMessage::StoragePatch(_)
+                | NativeInboundMessage::SocialModel(_)
+                | NativeInboundMessage::HeroModelReceipt(_)
+                | NativeInboundMessage::SkillModelReceipt(_)
+        )
 }
 
 fn is_operation_ack(message: &NativeInboundMessage) -> bool {
-    matches!(
-        message,
-        NativeInboundMessage::InventoryOperationAck(_)
-            | NativeInboundMessage::HeroModelReceipt(_)
-            | NativeInboundMessage::SkillModelReceipt(_)
-    )
+    is_mail_operation_feedback(message)
+        || matches!(
+            message,
+            NativeInboundMessage::InventoryOperationAck(_)
+                | NativeInboundMessage::HeroModelReceipt(_)
+                | NativeInboundMessage::SkillModelReceipt(_)
+        )
+}
+
+/// A mailbox carrying the shared typed operation feedback is an ACK, not a
+/// replaceable snapshot. Keep the existing mailbox consumer and reset policy.
+fn is_mail_operation_feedback(message: &NativeInboundMessage) -> bool {
+    let NativeInboundMessage::MailModel(raw) = message else {
+        return false;
+    };
+    serde_json::from_str::<mir2_client_bevy::mail::MailModel>(raw)
+        .is_ok_and(|model| model.operation_feedback().is_some())
 }
 
 fn native_message_bytes(message: &NativeInboundMessage) -> usize {
@@ -973,8 +992,19 @@ impl NativeInbound {
                 }
             }
             let mut retained = VecDeque::new();
+            let mut mail_feedback_delivered = false;
             while let Some(message) = state.pending.pop_front() {
+                // The unchanged shared MailModel consumer assigns each model
+                // in turn, and its overlay observes the final one this frame.
+                // Leave later mailboxes queued until that overlay can consume
+                // the feedback; do not delay any other typed domain.
+                if mail_feedback_delivered && matches!(message, NativeInboundMessage::MailModel(_))
+                {
+                    retained.push_back(message);
+                    continue;
+                }
                 if matches(&message) {
+                    mail_feedback_delivered |= is_mail_operation_feedback(&message);
                     matched.push(message);
                 } else {
                     retained.push_back(message);
@@ -1171,6 +1201,85 @@ mod tests {
             game_shop_receipt: None,
             mail_cost_reserve: None,
         }
+    }
+
+    #[test]
+    fn mail_feedback_is_not_coalesced_by_later_mailbox_snapshots() {
+        let mut buffer = active_buffer();
+        let receipt = r#"{"mails":[{"id":18446744073709551615,"operation":{"kind":"collect","success":true,"mailId":9007199254740993}}]}"#;
+        assert!(buffer.enqueue(NativeInboundMessage::MailModel(receipt.into())));
+        assert!(buffer.enqueue(NativeInboundMessage::MailModel(r#"{"mails":[]}"#.into())));
+        assert_eq!(
+            buffer.pending.len(),
+            2,
+            "A later mailbox must not erase the earlier operation receipt"
+        );
+        assert!(
+            matches!(buffer.pending.front(), Some(NativeInboundMessage::MailModel(raw)) if raw == receipt)
+        );
+    }
+
+    #[test]
+    fn mail_feedback_is_last_mail_model_in_one_consumer_drain() {
+        let _guard = native_queue_test_guard();
+        let inbound = NativeInbound::new();
+        let receipt = r#"{"mails":[{"operation":{"kind":"send","success":true,"mailId":null}}]}"#;
+        assert!(push_native_mail_model(receipt.into()));
+        assert!(push_native_mail_model(r#"{"mails":[]}"#.into()));
+        let mut seen = Vec::new();
+        inbound.drain_matching(
+            |m| matches!(m, NativeInboundMessage::MailModel(_)),
+            |m| seen.push(m),
+        );
+        assert_eq!(
+            seen.len(),
+            1,
+            "The shared consumer needs a frame to observe this feedback before a later model"
+        );
+        assert!(is_mail_operation_feedback(&seen[0]));
+        assert_eq!(inbound.diagnostics().message_count, 1);
+        inbound.drain_matching(
+            |m| matches!(m, NativeInboundMessage::MailModel(_)),
+            |m| seen.push(m),
+        );
+        assert_eq!(seen.len(), 2);
+        assert!(!is_mail_operation_feedback(&seen[1]));
+    }
+
+    #[test]
+    fn mail_feedback_survives_pressure_scene_reset_and_game_shop_reserve() {
+        let mut buffer = active_buffer();
+        let receipt = r#"{"mails":[{"operation":{"kind":"send","success":false,"mailId":null}}]}"#;
+        assert!(buffer.enqueue(NativeInboundMessage::MailModel(receipt.into())));
+        for i in 0..MAX_NATIVE_MESSAGES - 1 {
+            assert!(buffer.enqueue(NativeInboundMessage::SocialModel(i.to_string())));
+        }
+        assert!(buffer.enqueue(NativeInboundMessage::SceneReset));
+        assert!(
+            buffer.enqueue(NativeInboundMessage::GameShopReceipt(valid_receipt(
+                "gs-own"
+            )))
+        );
+        assert!(buffer.pending.iter().any(
+            |message| matches!(message, NativeInboundMessage::MailModel(raw) if raw == receipt)
+        ));
+        assert!(buffer.game_shop_receipt.is_some());
+        assert!(buffer.pending_bytes() <= MAX_NATIVE_BUFFER_BYTES);
+        assert!(buffer.message_count() <= MAX_NATIVE_MESSAGES);
+        assert!(buffer.enqueue(NativeInboundMessage::DataReset));
+        assert!(!buffer.pending.iter().any(is_mail_operation_feedback));
+    }
+
+    #[test]
+    fn malformed_feedback_cannot_reserve_ack_capacity_and_plain_mail_still_coalesces() {
+        let mut buffer = active_buffer();
+        let bad = NativeInboundMessage::MailModel(
+            r#"{"mails":[{"operation":{"kind":"send","success":"yes"}}]}"#.into(),
+        );
+        assert!(!is_mail_operation_feedback(&bad));
+        assert!(buffer.enqueue(bad));
+        assert!(buffer.enqueue(NativeInboundMessage::MailModel(r#"{"mails":[]}"#.into())));
+        assert_eq!(buffer.pending.len(), 1);
     }
 
     #[test]
