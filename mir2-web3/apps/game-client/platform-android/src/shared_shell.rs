@@ -2622,6 +2622,8 @@ fn forward_native_mail_ui_intents(
     mut intents: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>>,
     mut pending: Option<ResMut<mir2_client_bevy::pending_operations::PendingOperations>>,
     mut gateway: Option<ResMut<crate::gateway_bridge::AndroidGatewayOutboundQueue>>,
+    mut adapter: Option<ResMut<crate::gateway_bridge::AndroidGatewayHostAdapter>>,
+    mut ui_state: Option<ResMut<mir2_ui_core::state::UiState>>,
 ) {
     let Some(intents) = intents.as_deref_mut() else {
         return;
@@ -2679,7 +2681,16 @@ fn forward_native_mail_ui_intents(
         });
         intents.clear();
         if let Some(queue) = gateway.as_deref_mut() {
-            queue.mark_terminal_reset();
+            // Retire other domains while their correlation is still present.
+            // Clearing the queue first would hide an outstanding password
+            // change from the existing transport owner's unknown cleanup.
+            if let (Some(adapter), Some(ui_state)) =
+                (adapter.as_deref_mut(), ui_state.as_deref_mut())
+            {
+                adapter.on_connection_lost(queue, ui_state);
+            } else {
+                queue.mark_terminal_reset();
+            }
         }
         crate::mir2_android_gateway_connection_lost();
         mir2_bevy_runtime::native_ingest::push_native_data_reset();

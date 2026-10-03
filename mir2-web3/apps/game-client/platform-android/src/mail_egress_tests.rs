@@ -565,3 +565,69 @@ fn mail_egress_real_native_copy_callback_and_generation_never_settle_or_replay()
     assert!(!app.world().resource::<PendingOperations>().contains(&key));
     crate::mir2_android_gateway_host_stop();
 }
+
+#[test]
+fn mail_terminal_failure_preserves_existing_cross_domain_unknown_cleanup() {
+    use mir2_ui_core::{
+        effect::{SecretText, SecurityRequest},
+        state::UiState,
+    };
+    for drained in [false, true] {
+        let mut app = app();
+        let mut queue = AndroidGatewayOutboundQueue::with_capacity(1);
+        queue
+            .enqueue_security_request(SecurityRequest::ChangePassword {
+                account: "Fixture".into(),
+                old_password: SecretText::new("fixture-old"),
+                new_password: SecretText::new("fixture-new"),
+            })
+            .unwrap();
+        app.insert_resource(queue);
+        app.world_mut()
+            .resource_mut::<UiState>()
+            .security
+            .change_password_pending = true;
+        if drained {
+            let leases = drain_android_gateway_for_host(&mut app, 1);
+            assert_eq!(leases.len(), 1);
+            report_android_gateway_write_result(
+                &mut app,
+                leases[0].clone(),
+                AndroidGatewayHostWriteResult::Sent,
+            );
+            // Fill the producer after its older operation has already left the FIFO.
+            app.world_mut()
+                .resource_mut::<AndroidGatewayOutboundQueue>()
+                .enqueue(mir2_ui_core::effect::GatewayCommand::Logout)
+                .unwrap();
+        }
+        push(
+            &mut app,
+            NativePlayerUiIntent::MailCost {
+                gold: 0,
+                attachment_unique_ids: vec![],
+                stamped: false,
+            },
+        );
+        app.update();
+        assert_eq!(
+            app.world().resource::<NativeShellModel>().screen,
+            Screen::ConnectionLost
+        );
+        assert!(
+            !app.world()
+                .resource::<UiState>()
+                .security
+                .change_password_pending,
+            "Mail failure cleared correlation before the existing transport owner could retire it"
+        );
+        assert!(drain_android_gateway_for_host(&mut app, 16).is_empty());
+        app.update();
+        assert!(
+            !app.world()
+                .resource::<UiState>()
+                .security
+                .change_password_pending
+        );
+    }
+}
