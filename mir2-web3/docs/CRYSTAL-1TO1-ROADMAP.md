@@ -1,6 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-2026-10-03 当前源码阶段 NI-14 邮件出站：`49693ab1a66ca1ba5573895ce825ea091d5864f4`。
+2026-10-03 当前源码叶 NI-14 邮件断线清理：`7280d07532b9739a31a9caaadb250a096592bab6`。
+仅两处 Android 文件修复“先清关联、后断线”导致旧改密码 pending 残留的问题，
+复用原宿主 unknown 清理；未改规则、认证、Windows 或 UI 布局。新增测试编译后
+0/1红→通过，queued/已Sent两场景及原邮件回归11/11；旧测试字节保留。
+精确干净提交56输入/七门：Android389/417、shared1292+10原ignored、runtime292
++1原ignored、fresh Java59+59（每变体六类）、API31双check；十二受保护文件未变。
+本叶无新APK/安装/实际JNI/模拟器交互/在线邮件/真机验收，MailSent/ParcelCollected
+结果关联仍OPEN，NI-14仍PARTIAL。UI修复仍待用户明确确认，GPU零错误门仍FAIL。
+完整goal Active；冻结Windows分母3d735745f不缩减，本轮远端6ae080711未变，
+原两个工作区Git checkpoint保持，不宣称未跟踪内容递归哈希。
+[最小修复、原始红绿/准备错误及完整未完成门](generated/player-qa/native-android-mail-cleanup-20261003/README.md)。
+
+下文为各自历史源码/安装包证据，不重绑到本叶。
+
+2026-10-03 历史源码阶段 NI-14 邮件出站：`49693ab1a66ca1ba5573895ce825ea091d5864f4`。
 共享 UI 的读信、收取、删除、锁信、邮费询价、附件锁定和发信已进入 Android
 现有认证宿主队列；保留盖章选项和原附件 UID/Bag1/Bag2 校验，不复制邮费、资格、
 物品或结算规则。冻结 Windows 附件 helper 与七种序列化字段一致，12 个受保护
