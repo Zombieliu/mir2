@@ -82,6 +82,7 @@ struct OfflinePersonalJniReceipt {
 
 #[derive(Resource, Default)]
 struct OfflineMailJniReceipt {
+    scene: Option<String>,
     feedback_observed: bool,
     feedback_this_frame: bool,
 }
@@ -151,20 +152,19 @@ fn mail_jni_models_received(
 }
 
 fn report_mail_jni_consumer(
-    request: Res<PreviewRequest>,
     mut receipt: ResMut<OfflineMailJniReceipt>,
     host: Res<crate::shared_shell::HostState>,
     mail: Res<mir2_client_bevy::mail::MailModel>,
     inventory: Res<mir2_client_bevy::inventory::InventoryModel>,
     ui: Res<UiReadModel>,
 ) {
-    let Some(scene) = request.scene.as_deref() else { return; };
+    let Some(scene) = receipt.scene.clone() else { return; };
     if receipt.feedback_observed || host.phase != "IN_GAME"
-        || !mail_jni_models_received(scene, &mail, &inventory, &ui) { return; }
-    let (kind, success) = mail_jni_expected(scene).unwrap();
+        || !mail_jni_models_received(&scene, &mail, &inventory, &ui) { return; }
+    let (kind, success) = mail_jni_expected(&scene).unwrap();
     // Read-only observation AFTER production ingest and BEFORE the unchanged
     // shared UI consumes this transient row. No model/pending/rule is seeded.
-    info!(scene, kind = ?kind, success, claim_id = ?mail.operation_feedback().unwrap().mail_id,
+    info!(scene = scene.as_str(), kind = ?kind, success, claim_id = ?mail.operation_feedback().unwrap().mail_id,
         mails = 256, attachments = 1280, last_mail_id = u64::MAX,
         gold = ui.player.gold, bag_items = inventory.items.len(),
         "ANDROID_MAIL_JNI_SHARED_FEEDBACK_NOT_LIVE");
@@ -173,15 +173,14 @@ fn report_mail_jni_consumer(
 }
 
 fn report_mail_jni_ui_result(
-    request: Res<PreviewRequest>,
     mut receipt: ResMut<OfflineMailJniReceipt>,
     mail: Res<mir2_client_bevy::mail::MailModel>,
     compose: Res<mir2_client_bevy::crystal_ui::overlays::MailComposeUi>,
 ) {
     if !receipt.feedback_this_frame { return; }
     receipt.feedback_this_frame = false;
-    let Some(scene) = request.scene.as_deref() else { return; };
-    let Some((kind, success)) = mail_jni_expected(scene) else { return; };
+    let Some(scene) = receipt.scene.clone() else { return; };
+    let Some((kind, success)) = mail_jni_expected(&scene) else { return; };
     let expected_notice = if success {None} else if kind == mir2_client_bevy::mail::MailOperationKind::Collect {
         Some("Mail claim failed")
     } else {Some("Mail was rejected; draft kept")};
@@ -189,7 +188,7 @@ fn report_mail_jni_ui_result(
     let notice_matches = compose.last_notice.as_deref() == expected_notice;
     // Same-frame shared UI consumption, not an authenticated operation, pending
     // retirement, draft/reader closure proof, GPU frame or server settlement.
-    info!(scene, kind = ?kind, success, feedback_removed = removed, notice_matches,
+    info!(scene = scene.as_str(), kind = ?kind, success, feedback_removed = removed, notice_matches,
         notice = ?compose.last_notice, mails = mail.visible_mails().len(),
         "ANDROID_MAIL_JNI_SHARED_UI_RESULT_NOT_LIVE");
 }
@@ -825,6 +824,8 @@ fn apply(world: &mut World) {
         personal.scene = None;
         personal.logged = false;
         personal.last_observation.clear();
+        world.init_resource::<OfflineMailJniReceipt>();
+        *world.resource_mut::<OfflineMailJniReceipt>() = OfflineMailJniReceipt::default();
         // UI fixtures are not Gateway events and do not invoke auth/StartGame.
         let mut shell = NativeShellModel::default();
         shell.screen = match scene.as_str() {
@@ -893,6 +894,11 @@ fn apply(world: &mut World) {
         let mut receipt = world.resource_mut::<OfflinePersonalJniReceipt>();
         receipt.scene = Some(scene.clone());
         receipt.logged = false;
+        if mail_jni_expected(&scene).is_some() {
+            // PreviewRequest retires after this frame. Delayed Java/JNI inputs
+            // need persistent, preview-only observation metadata, not data seeds.
+            world.resource_mut::<OfflineMailJniReceipt>().scene = Some(scene.clone());
+        }
         info!("ANDROID_UI_PREVIEW_READY scene={scene} waiting_for_offline_java_jni");
         return;
     }

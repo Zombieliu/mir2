@@ -120,3 +120,45 @@ fn mail_jni_scene_identity_uses_the_same_declared_java_owner() {
         assert_eq!(shell.selected_character_index, Some(7));
     }
 }
+
+#[test]
+fn mail_jni_observer_accepts_delayed_models_after_preview_request_is_retired() {
+    for scene in MAIL_JNI_SCENES {
+        let mut app = App::new();
+        app.insert_resource(PreviewRequest {
+            scene: Some(scene.into()),
+            remaining: 0,
+        });
+        app.init_resource::<OfflineNpcPreviewReceipt>()
+            .init_resource::<OfflineMailJniReceipt>()
+            .init_resource::<NativePlayerUiState>();
+        for _ in 0..4 {
+            apply(app.world_mut());
+        }
+        assert!(app.world().resource::<PreviewRequest>().scene.is_none());
+        // Typed, delayed models test only the real observer's request lifecycle.
+        // This is not Java/JNI, a rendered frame, an operation or settlement.
+        let (mail, inventory, ui) = received_models(scene);
+        let mut host = crate::shared_shell::HostState::default();
+        host.phase = "IN_GAME".into();
+        app.insert_resource(host)
+            .insert_resource(mail)
+            .insert_resource(inventory)
+            .insert_resource(ui)
+            .add_systems(Update, report_mail_jni_consumer);
+        app.update();
+        let receipt = app.world().resource::<OfflineMailJniReceipt>();
+        assert!(receipt.feedback_observed, "Lost delayed scene {scene}");
+        assert!(receipt.feedback_this_frame);
+        // A later preview must not inherit a completed mail observation.
+        *app.world_mut().resource_mut::<PreviewRequest>() = PreviewRequest {
+            scene: Some("roster".into()),
+            remaining: 0,
+        };
+        apply(app.world_mut());
+        app.update();
+        let receipt = app.world().resource::<OfflineMailJniReceipt>();
+        assert!(!receipt.feedback_observed);
+        assert!(!receipt.feedback_this_frame);
+    }
+}
