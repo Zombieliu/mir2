@@ -1,6 +1,24 @@
 # Android native UI coverage — 2026-09-08
 
-2026-10-03 当前 NI-15 社交入站源码：`d4dbb124c2a4fe63364571fe48bd5af8b6463bee`。
+2026-10-03 当前 NI-15 本人报价共享投影源码：`a9698682322d27bab6be8bab69327841f540f89c`。
+将冻结 Windows 的 OwnOffer 字段及纯展示函数抽入共享 native_trade_ingress，
+Windows 仅薄委托且原5测试/fixture字节未改；Android在既有核验角色snapshot后调用。
+服务端自己的nonce/10槽位/u64实例/计数/tooltip/金额/锁定与guest报价保持分离；
+缺失/无效/重复/已完成报价不覆盖，显式清空仅清本人；不打开、重开或结算交易。
+五功能文件，65输入在干净提交九门/双APK前后稳定；60非本叶整文件/57旧Java断言/
+10认证会话方法/5物品helper未改，共享生产函数和字段schema与冻结Windows归一相同。
+九门421/454、shared1297+10原ignored、runtime296+1原ignored、fresh Java81+81/
+API31双检查、Mac host上Windows原5报价+1guest-tooltip回归通过；不是Windows全量OS gate。
+新普通/preview APK及ELF SHA、选定6647 PNG+3metadata已核对，未安装、无本源新截图，
+实际social JNI/原overlay消费/出站/真实账号在线操作与结算/手机UI/真机仍OPEN。
+NI-15仍PARTIAL、完整AP-01–21/goal Active；UI修补待明确重新批准，旧GPU FAIL保留。
+真正Windows来源56ee063fb仍较冻结3d735745f仅多1提交/83文档证据/0功能源，分母不缩减。
+两原worktree Git checkpoint保留，不声称未跟踪字节证明。
+[本人报价精确源码、双APK、九门和剩余验收](generated/player-qa/native-android-own-trade-20261003/README.md)。
+
+下文只记录历史对应源码/安装包，不重绑到当前本叶。
+
+2026-10-03 历史 NI-15 社交入站源码：`d4dbb124c2a4fe63364571fe48bd5af8b6463bee`。
 接通25个公共Group/Guild/Trade名字到原共享SocialModel及native FIFO；
 认证后listed-Start暂存，既有角色snapshot绑定才发布；候选原子提交，错角色/
 hero/超界拒绝，背压保序，断开/启动拒绝清空、切图保留个人状态。
