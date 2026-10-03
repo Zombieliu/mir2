@@ -1,6 +1,25 @@
 # Android native UI coverage — 2026-09-08
 
-2026-10-03 最新源码叶 NI-14：`3003f0780c7254b69ff880a32161cce17142dab2`。
+2026-10-03 当前源码阶段 NI-14 邮件出站：`49693ab1a66ca1ba5573895ce825ea091d5864f4`。
+共享 UI 的读信、收取、删除、锁信、邮费询价、附件锁定和发信已进入 Android
+现有认证宿主队列；保留盖章选项和原附件 UID/Bag1/Bag2 校验，不复制邮费、资格、
+物品或结算规则。冻结 Windows 附件 helper 与七种序列化字段一致，12 个受保护
+规则/消费者/Windows/认证文件字节未变；仅增加传输接口，没有 UI 设计修改。
+原四项编译红 0/4→4/4；扩展 8/2 属测试夹具缺项，补正式共享清理消费者后 10/10，
+断言不删改。精确干净提交 56 输入/七门通过：Android388/416、shared1292+10原ignored、
+runtime292+1原ignored、fresh Java59+59（各六类）和 API31 双检查。
+C copy/callback/generation 仅 headless；TLS 是本地 JVM 夹具。收取模型读回可复用原
+reconcile，但 MailSent/ParcelCollected 的本连接/意图结果关联仍未接通，不虚构 ACK。
+本阶段无新 APK/安装/实际 Java→JNI/截图/在线邮件或真机验收；当前只读发现
+1 台模拟器、0 台真机。Rust 完整 u64 不等于 Android JSON 全范围实测，仍待核验。
+NI-14 仍 PARTIAL、完整 goal Active；NI-15–20、完整 UI/渲染/资源/音频/更新/
+认证/Zone/保存/真机/人工验收保持 OPEN。v36 仍回退，UI 修复仍待用户确认继续。
+冻结分母 3d735745f 与本轮远端 Windows6ae080711 不变，原工作区保留。
+[精确源码、失败分类与剩余门](generated/player-qa/native-android-mail-egress-20261003/README.md)。
+
+下文只读接线和旧包结果均是对应版本的历史记录，不重绑到本阶段。
+
+2026-10-03 历史邮箱只读接线 NI-14：`3003f0780c7254b69ff880a32161cce17142dab2`。
 Android 已接通共享邮箱只读列表、服务端邮费和附件锁定事件；256封×5附件、
 角色/场景/拒绝启动/背压/溢出测试通过。14个投影函数与冻结Windows一致，
 原邮件规则、消费者函数体、认证、Windows宿主及UI设计不变；只封装消费者注册。
