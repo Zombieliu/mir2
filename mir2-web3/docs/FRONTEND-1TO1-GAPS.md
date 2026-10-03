@@ -1,6 +1,25 @@
 # Frontend 1:1 Gaps
 
-2026-10-03 当前 NI-14 实际邮件 JNI 源码：`2be65cc9eb43205a4bdd77c808e367de67206829`。
+2026-10-03 当前 NI-15 社交入站源码：`d4dbb124c2a4fe63364571fe48bd5af8b6463bee`。
+接通25个公共Group/Guild/Trade名字到原共享SocialModel及native FIFO；
+认证后listed-Start暂存，既有角色snapshot绑定才发布；候选原子提交，错角色/
+hero/超界拒绝，背压保序，断开/启动拒绝清空、切图保留个人状态。
+五Android功能文件；61输入稳定，56非本叶整文件/53旧Java断言/10认证会话方法未改，
+5物品补全/数值helper函数体与冻结Windows归一token相同。完整七门412/445、
+shared1292+10原ignored、runtime296+1原ignored、fresh Java81+81/API31双检查通过。
+编译红日志保留；初版Java红XML复制目录被green重用，原XML未保留，不宣称全量原始
+证据无覆盖；最终Java分检查名归档。128字符样本纠正为原32字符，不放宽共享规则。
+新普通/preview APK分别533331663/541337559bytes，原生库SHA/选定6647PNG+3metadata
+已核对，但未安装、未新截图/JNI/online或真机验收，旧2be65cc9邮件证据不重绑。
+自己的trade snapshot/社交出站/实际JNI/在线会员权限邀请报价结算仍OPEN，NI-15
+现为PARTIAL；完整AP-01–21/goal Active，UI设计修补仍需人明确重新批准，GPU旧FAIL保留。
+发布前重新核验真正Windows来源56ee063fb，较冻结3d735745f仍仅1提交/83文档证据/
+0功能源；冻结完整分母不缩减。两原worktree Git checkpoint保留，不声称未跟踪字节证明。
+[NI-15精确源码、两APK、失败/七门与剩余验收](generated/player-qa/native-android-social-ingress-20261003/README.md)。
+
+下文只记录对应历史源码/安装包，不重绑到本叶。
+
+2026-10-03 历史 NI-14 实际邮件 JNI 源码：`2be65cc9eb43205a4bdd77c808e367de67206829`。
 四种离线 Java→nativeEvent→角色/代次有界邮箱→原共享反馈消费者实际通过；
 256封×5附件/上限u64、金777/袋12不被样本回执授予或结算。0b61463e的实际
 误断线由0268ad60隔离邮件与Android图形解码修复；其观察器短请求已清空的
