@@ -1,0 +1,104 @@
+[
+  {
+    "name": "publish-source-local-before.txt",
+    "bin": "git",
+    "args": [
+      "rev-parse",
+      "HEAD"
+    ],
+    "started": "2026-10-02T20:06:58.939Z",
+    "exitCode": 0,
+    "finished": "2026-10-02T20:06:58.945Z"
+  },
+  {
+    "name": "publish-source-status-before.txt",
+    "bin": "git",
+    "args": [
+      "status",
+      "--porcelain"
+    ],
+    "started": "2026-10-02T20:06:58.945Z",
+    "exitCode": 0,
+    "finished": "2026-10-02T20:06:59.060Z"
+  },
+  {
+    "name": "publish-source-branch-before.txt",
+    "bin": "git",
+    "args": [
+      "branch",
+      "--show-current"
+    ],
+    "started": "2026-10-02T20:06:59.060Z",
+    "exitCode": 0,
+    "finished": "2026-10-02T20:06:59.066Z"
+  },
+  {
+    "name": "publish-source-remote-before.txt",
+    "bin": "git",
+    "args": [
+      "ls-remote",
+      "--heads",
+      "origin",
+      "refs/heads/codex/android-shared-sync",
+      "refs/heads/codex/windows-player-journey"
+    ],
+    "started": "2026-10-02T20:06:59.066Z",
+    "exitCode": 0,
+    "finished": "2026-10-02T20:07:04.440Z"
+  },
+  {
+    "name": "publish-source-ancestry.txt",
+    "bin": "git",
+    "args": [
+      "merge-base",
+      "--is-ancestor",
+      "f99edfdbd62b5a80714cce41deaabedc75ec5084",
+      "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6"
+    ],
+    "started": "2026-10-02T20:07:04.441Z",
+    "exitCode": 0,
+    "finished": "2026-10-02T20:07:04.457Z"
+  },
+  {
+    "name": "publish-source-push.txt",
+    "bin": "git",
+    "args": [
+      "push",
+      "origin",
+      "HEAD:refs/heads/codex/android-shared-sync"
+    ],
+    "started": "2026-10-02T20:07:04.457Z",
+    "exitCode": 0,
+    "finished": "2026-10-02T20:07:11.670Z"
+  },
+  {
+    "name": "publish-source-remote-after.txt",
+    "bin": "git",
+    "args": [
+      "ls-remote",
+      "--heads",
+      "origin",
+      "refs/heads/codex/android-shared-sync",
+      "refs/heads/codex/windows-player-journey"
+    ],
+    "started": "2026-10-02T20:07:11.670Z",
+    "exitCode": 0,
+    "finished": "2026-10-02T20:07:17.016Z"
+  },
+  {
+    "name": "publish-source-pr-after.json",
+    "bin": "gh",
+    "args": [
+      "pr",
+      "view",
+      "253",
+      "--repo",
+      "Zombieliu/mir2",
+      "--json",
+      "number,state,isDraft,headRefName,baseRefName,headRefOid,url"
+    ],
+    "started": "2026-10-02T20:07:17.016Z",
+    "exitCode": 0,
+    "finished": "2026-10-02T20:07:19.066Z"
+  }
+]

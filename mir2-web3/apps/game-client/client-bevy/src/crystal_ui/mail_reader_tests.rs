@@ -13,7 +13,7 @@ fn reader_test_app() -> App {
         .init_resource::<StorageModel>()
         .init_resource::<crate::social::SocialModel>()
         .init_resource::<ButtonInput<KeyCode>>()
-        .init_resource::<crate::audio::NativeUiAudioQueue>()
+        .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
         .add_message::<KeyboardInput>()
         .insert_resource(NativeShellModel {
             screen: NativeShellScreen::InGame,
@@ -85,7 +85,9 @@ fn opens_unread_once_but_reopens_already_read_without_status_send() {
         vec![NativePlayerUiIntent::ReadMail { mail_id: 10 }]
     );
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = None;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = None;
     press_button(&mut app, OverlayButton::ReadMail(11));
     assert_eq!(
         app.world().resource::<NativePlayerUiState>().mail_reader,
@@ -100,7 +102,9 @@ fn opens_unread_once_but_reopens_already_read_without_status_send() {
         .drain_intents()
         .is_empty());
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = None;
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = None;
     app.world_mut().resource_mut::<MailModel>().selected_id = Some(10);
     press_button(&mut app, OverlayButton::SelectMail(10));
     assert_eq!(
@@ -125,13 +129,24 @@ fn exact_id_and_kind_refreshes_reject_stale_reader_actions() {
     };
     assert!(mail_reader_is_current(&reader, &model));
     model.mails[0] = message(20, true, true, false);
-    assert!(!mail_reader_is_current(&reader, &model), "attachment changes switch source reader kind");
+    assert!(
+        !mail_reader_is_current(&reader, &model),
+        "attachment changes switch source reader kind"
+    );
     model.mails[0] = message(21, false, true, false);
-    assert!(!mail_reader_is_current(&reader, &model), "row reordering or replacement cannot retarget ID");
+    assert!(
+        !mail_reader_is_current(&reader, &model),
+        "row reordering or replacement cannot retarget ID"
+    );
 
     let mut app = reader_test_app();
-    app.world_mut().resource_mut::<MailModel>().mails.push(message(20, false, true, false));
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(reader);
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(message(20, false, true, false));
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(reader);
     app.world_mut().resource_mut::<MailModel>().mails.clear();
     press_button(&mut app, OverlayButton::MailReaderDelete);
     assert!(app
@@ -166,8 +181,13 @@ fn production_refresh_closes_removed_or_retyped_reader_before_input() {
             ..Default::default()
         })
         .add_systems(Update, sync_local_panel_models);
-    app.world_mut().resource_mut::<MailModel>().mails.push(message(25, false, true, false));
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(message(25, false, true, false));
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 25,
         kind: MailReaderKind::Letter,
     });
@@ -175,7 +195,10 @@ fn production_refresh_closes_removed_or_retyped_reader_before_input() {
     app.update();
     let state = app.world().resource::<NativePlayerUiState>();
     assert!(state.mail_reader.is_none());
-    assert!(state.mail_reader_input_consumed, "refresh cancellation consumes the exposed frame");
+    assert!(
+        state.mail_reader_input_consumed,
+        "refresh cancellation consumes the exposed frame"
+    );
 }
 
 #[test]
@@ -187,18 +210,24 @@ fn reader_actions_keep_source_guards_and_status_queue_dedup() {
         message(32, true, true, false),
     ]);
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 30,
         kind: MailReaderKind::Letter,
     });
     press_button(&mut app, OverlayButton::MailReaderDelete);
-    assert!(app
-        .world_mut()
-        .resource_mut::<NativePlayerUiIntentQueue>()
-        .drain_intents()
-        .is_empty(), "locked source letters do not delete");
+    assert!(
+        app.world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty(),
+        "locked source letters do not delete"
+    );
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 31,
         kind: MailReaderKind::Letter,
     });
@@ -222,14 +251,20 @@ fn reader_actions_keep_source_guards_and_status_queue_dedup() {
             .drain_intents(),
         vec![NativePlayerUiIntent::DeleteMail { mail_id: 31 }]
     );
-    assert!(app.world().resource::<NativePlayerUiState>().mail_reader.is_none());
+    assert!(app
+        .world()
+        .resource::<NativePlayerUiState>()
+        .mail_reader
+        .is_none());
     // The production sync system clears a close-frame latch on the next UI
     // frame. Model that next frame before exercising an unrelated parcel.
     app.world_mut()
         .resource_mut::<NativePlayerUiState>()
         .mail_reader_input_consumed = false;
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 32,
         kind: MailReaderKind::Parcel,
     });
@@ -250,7 +285,12 @@ fn reply_prefills_only_authorized_sender_and_reader_close_consumes_frame() {
         message(41, false, true, false),
     ]);
     press_button(&mut app, OverlayButton::MailReply(41));
-    assert!(app.world().resource::<NativePlayerUiState>().core.mail_compose.is_none());
+    assert!(app
+        .world()
+        .resource::<NativePlayerUiState>()
+        .core
+        .mail_compose
+        .is_none());
     press_button(&mut app, OverlayButton::MailReply(40));
     assert_eq!(
         app.world()
@@ -281,24 +321,36 @@ fn reply_prefills_only_authorized_sender_and_reader_close_consumes_frame() {
     app.update();
     app.world_mut().despawn(close);
     app.world_mut().despawn(covered);
-    assert!(app.world().resource::<NativePlayerUiState>().mail_reader.is_none());
     assert!(app
         .world()
         .resource::<NativePlayerUiState>()
-        .mail_reader_input_consumed);
-    assert!(app
-        .world_mut()
-        .resource_mut::<NativePlayerUiIntentQueue>()
-        .drain_intents()
-        .is_empty(), "reader close cannot leak to a covered list action");
+        .mail_reader
+        .is_none());
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_reader_input_consumed
+    );
+    assert!(
+        app.world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty(),
+        "reader close cannot leak to a covered list action"
+    );
 }
 
 #[test]
 fn source_reader_geometry_body_and_attachment_metadata_are_bounded() {
     let mut app = super::tests::overlay_render_test_app();
     let parcel = message(50, true, true, false);
-    app.world_mut().resource_mut::<MailModel>().mails.push(parcel.clone());
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(parcel.clone());
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 50,
         kind: MailReaderKind::Parcel,
     });
@@ -315,12 +367,21 @@ fn source_reader_geometry_body_and_attachment_metadata_are_bounded() {
     assert_eq!(mail_reader_text(&parcel), "first\r\nsecond");
     assert!(!mail_date_label(parcel.date_sent_binary_datetime).is_empty());
     assert_eq!(parcel.items.len().min(5), 1);
-    assert_eq!(parcel.items[0].image, Some(71), "only explicit attachment images are rendered");
+    assert_eq!(
+        parcel.items[0].image,
+        Some(71),
+        "only explicit attachment images are rendered"
+    );
     super::primary_item_image_tests::load_original_images(world);
     let (cell, image, node) = world
         .query::<(&OriginalItemImage, &ImageNode, &Node)>()
         .iter(world)
-        .find(|(_, image, _)| image.image.path().is_some_and(|path| path.to_string() == "original-ui/Items/71.png"))
+        .find(|(_, image, _)| {
+            image
+                .image
+                .path()
+                .is_some_and(|path| path.to_string() == "original-ui/Items/71.png")
+        })
         .expect("parcel attachment uses original item layout");
     assert_eq!((cell.cell_width, cell.cell_height), (35, 31));
     let bitmap = world.resource::<Assets<Image>>().get(&image.image).unwrap();
@@ -333,8 +394,13 @@ fn source_reader_geometry_body_and_attachment_metadata_are_bounded() {
 #[test]
 fn escape_closes_reader_and_session_reset_clears_it() {
     let mut app = reader_test_app();
-    app.world_mut().resource_mut::<MailModel>().mails.push(message(60, false, true, false));
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<MailModel>()
+        .mails
+        .push(message(60, false, true, false));
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 60,
         kind: MailReaderKind::Letter,
     });
@@ -342,11 +408,16 @@ fn escape_closes_reader_and_session_reset_clears_it() {
         .resource_mut::<ButtonInput<KeyCode>>()
         .press(KeyCode::Escape);
     app.update();
-    assert!(app.world().resource::<NativePlayerUiState>().mail_reader.is_none());
     assert!(app
         .world()
         .resource::<NativePlayerUiState>()
-        .mail_reader_input_consumed);
+        .mail_reader
+        .is_none());
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_reader_input_consumed
+    );
 
     let mut state = NativePlayerUiState {
         mail_reader: Some(MailReaderUi {

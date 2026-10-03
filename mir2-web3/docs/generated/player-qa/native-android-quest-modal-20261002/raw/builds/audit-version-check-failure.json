@@ -1,0 +1,11 @@
+{
+  "source": "2161a940ec7a59e966ed2638667f0c7b1a8e32b6",
+  "exitCode": 1,
+  "kind": "evidence helper stale previous-version expectation",
+  "expected": "versionCode='28'",
+  "actual": "versionCode='29'",
+  "actualBadgingPreserved": "debug-badging.txt",
+  "toolErrorOutputTruncated": true,
+  "productFailure": false,
+  "sourceGatesUnchanged": true
+}

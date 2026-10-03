@@ -1,0 +1,297 @@
+--------- beginning of system
+09-13 19:24:15.390   522  2590 I ActivityManager: Force stopping com.mir2.web3.uipreview appid=10146 user=0: from pid 5133
+09-13 19:24:15.390   522  2590 I ActivityManager: Killing 4651:com.google.android.apps.youtube.music/u0a117 (adj 985): empty #17
+--------- beginning of main
+09-13 19:24:15.393   843   843 D CarrierSvcBindHelper: No carrier app for: 0
+09-13 19:24:15.397   522  4607 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(uid/pid:10117/4651, android.os.BinderProxy@a74d6bd)
+09-13 19:24:15.397   522  2555 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(uid/pid:10117/4651, android.os.BinderProxy@5b34b2)
+09-13 19:24:15.397   522  5036 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(uid/pid:10117/4651, android.os.BinderProxy@48fdc03)
+09-13 19:24:15.397   522  5036 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(uid/pid:10117/4651, android.os.BinderProxy@39bc780)
+09-13 19:24:15.398   322   322 I Zygote  : Process 4651 exited due to signal 9 (Killed)
+09-13 19:24:15.398   522   633 D ConnectivityService: releasing NetworkRequest [ REQUEST id=129, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10117 RequestorUid: 10117 RequestorPkg: com.google.android.apps.youtube.music] ] (release request)
+09-13 19:24:15.398   522   633 D ConnectivityService: releasing NetworkRequest [ REQUEST id=131, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10117 RequestorUid: 10117 RequestorPkg: com.google.android.apps.youtube.music] ] (release request)
+09-13 19:24:15.398   522   633 D ConnectivityService: releasing NetworkRequest [ REQUEST id=134, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10117 RequestorUid: 10117 RequestorPkg: com.google.android.apps.youtube.music] ] (release request)
+09-13 19:24:15.418   522  2590 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras)} from uid 2000
+09-13 19:24:15.421   522  2590 W ActivityTaskManager: Can't find TaskDisplayArea to determine support for multi window. Task id=393 attached=false
+09-13 19:24:15.422   522  2590 D CompatibilityChangeReporter: Compat change id reported: 174042980; UID 10146; state: DISABLED
+09-13 19:24:15.422   522  2590 D CompatibilityChangeReporter: Compat change id reported: 184838306; UID 10146; state: DISABLED
+09-13 19:24:15.422   522  2590 D CompatibilityChangeReporter: Compat change id reported: 185004937; UID 10146; state: DISABLED
+09-13 19:24:15.424   693   899 D PhoneStartingWindowTypeAlgorithm: preferredStartingWindowType newTask:true taskSwitch:true processRunning:false allowTaskSnapshot:true activityCreated:false useEmptySplashScreen:true legacySplashScreen:false topIsHome:false
+09-13 19:24:15.424   693   899 D StartingSurfaceDrawer: addSplashScreen com.mir2.web3.uipreview theme=7f0d010a task=393 suggestType=3
+09-13 19:24:15.427   522   542 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10146; state: DISABLED
+09-13 19:24:15.427   522   542 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10146; state: DISABLED
+09-13 19:24:15.427   522   542 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10146; state: DISABLED
+09-13 19:24:15.427   522   542 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10146; state: ENABLED
+09-13 19:24:15.427   522   551 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10146; state: ENABLED
+09-13 19:24:15.427   693   905 D StartingSurfaceDrawer: window attributes color: 0 icon null duration 0 brandImage null
+09-13 19:24:15.428   693   905 W StartingSurfaceDrawer: Window background does not exist, using android.graphics.drawable.ColorDrawable@424e658
+09-13 19:24:15.428   693   905 D SplashScreenView: Build android.window.SplashScreenView{d3f8096 V.E...... ......ID 0,0-0,0}
+09-13 19:24:15.428   693   905 D SplashScreenView: Icon: view: null drawable: null size: 0
+09-13 19:24:15.428   693   905 D SplashScreenView: Branding: view: android.view.View{73ba417 G.ED..... ......I. 0,0-0,0 #10204a6 android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+09-13 19:24:15.428   693   905 D StartingSurfaceDrawer: fillViewWithIcon surfaceWindowView android.window.SplashScreenView{d3f8096 V.E...... ......ID 0,0-0,0}
+09-13 19:24:15.430   322   322 D Zygote  : Forked child process 5142
+09-13 19:24:15.430   522   551 I ActivityManager: Start proc 5142:com.mir2.web3.uipreview/u0a146 for pre-top-activity {com.mir2.web3.uipreview/com.mir2.web3.MainActivity}
+09-13 19:24:15.435  5142  5142 I .web3.uiprevie: Late-enabling -Xcheck:jni
+09-13 19:24:15.436   522   552 I libprocessgroup: Successfully killed process cgroup uid 10117 pid 4651 in 45ms
+09-13 19:24:15.440   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1fa814000 0x1fb1b8000]
+09-13 19:24:15.441   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1fb1b8000 0x1fbb5c000]
+09-13 19:24:15.445   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1f9450000 0x1f9df4000]
+--------- beginning of kernel
+09-13 19:24:15.452   190   190 I logd    : logdr: UID=2000 GID=2000 PID=5144 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-13 19:24:15.453   405   449 I adbd    : jdwp connection from 5142
+09-13 19:24:15.457   693   914 D EGL_emulation: app_time_stats: avg=15427.31ms min=15427.31ms max=15427.31ms count=1
+09-13 19:24:15.458   693   914 D EGL_emulation: app_time_stats: avg=17687.60ms min=58.55ms max=35316.64ms count=2
+09-13 19:24:15.467  5142  5142 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10146; state: ENABLED
+09-13 19:24:15.475   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1fdcec000 0x1fe690000]
+09-13 19:24:15.530  5142  5142 V GraphicsEnvironment: ANGLE Developer option for 'com.mir2.web3.uipreview' set to: 'default'
+09-13 19:24:15.531  5142  5142 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+09-13 19:24:15.531  1234  1234 I GsaVoiceInteractionSrv: Handling ACTION_STOP_HOTWORD
+09-13 19:24:15.531  1234  1234 E HwDetectorWithState: a: 3
+09-13 19:24:15.531  5142  5142 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-13 19:24:15.532  5142  5142 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-13 19:24:15.559  5142  5166 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+09-13 19:24:15.560  5142  5166 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+09-13 19:24:15.576  5142  5166 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+09-13 19:24:15.585  5142  5142 D AppCompatDelegate: Checking for metadata for AppLocalesMetadataHolderService : Service not found
+09-13 19:24:15.594  5142  5142 D gti.InputConnection: InputConnection created
+09-13 19:24:15.597  5142  5142 D gti.InputConnection: setEditorInfo
+09-13 19:24:15.599  5142  5142 W .web3.uiprevie: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+09-13 19:24:15.600  5142  5142 I GameActivity: Looking for library libmir2_platform_android.so
+09-13 19:24:15.600  5142  5142 I GameActivity: Found library libmir2_platform_android.so. Loading...
+09-13 19:24:15.602  5142  5142 D GameActivity: GameActivity_register
+09-13 19:24:15.602  5142  5142 V GameActivity: Registering com/google/androidgamesdk/GameActivity's 24 native methods...
+09-13 19:24:15.602  5142  5142 D GameActivity: SDK version: 31
+09-13 19:24:15.603  5142  5142 I android-activity: Creating: Activity = 0x1696, saved state size = 0
+09-13 19:24:15.606  5142  5142 V threaded_app: Creating: 0xb400006e666c7430
+09-13 19:24:15.606  5142  5142 V threaded_app: Callbacks set: 0xb400006e666c7480
+09-13 19:24:15.606  5142  5142 V threaded_app: Launching android_app_entry in a thread
+09-13 19:24:15.607  5142  5168 V threaded_app: android_app_entry called
+09-13 19:24:15.607  5142  5168 V threaded_app: android_app = 0xb400006e466ce210
+09-13 19:24:15.607  5142  5168 V threaded_app: config = 0xb400006db66d0370
+09-13 19:24:15.607  5142  5168 V threaded_app: activity = 0xb400006e666c7430
+09-13 19:24:15.607  5142  5168 V threaded_app: assetmanager = 0xb400006e666c1fd0
+09-13 19:24:15.607  5142  5168 V threaded_app: Config: mcc=310 mnc=260 lang=en cnt=US orien=2 touch=3 dens=440 keys=2 nav=2 keysHid=1 navHid=0 sdk=31 size=2 long=2 modetype=1 modenight=1
+09-13 19:24:15.624  5142  5168 D HostConnection: createUnique: call
+09-13 19:24:15.625  5142  5168 D HostConnection: HostConnection::get() New Host Connection established 0xb400006e066b6550, tid 5168
+09-13 19:24:15.626  5142  5168 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-13 19:24:15.627   187   187 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device VINTF manifest.
+09-13 19:24:15.628  5142  5168 D EGL_emulation: eglCreateContext: 0xb400006e066b7390: maj 3 min 0 rcv 3
+09-13 19:24:15.630  5142  5168 D EGL_emulation: eglMakeCurrent: 0xb400006e066b7390: ver 3 0 (tinfo 0x7024b2c080) (first time)
+09-13 19:24:15.645   522   837 D ConnectivityService: requestNetwork for uid/pid:10146/5142 activeRequest: null callbackRequest: 142 [NetworkRequest [ REQUEST id=143, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]] callback flags: 0 priority: 2147483647
+09-13 19:24:15.645   522   633 D ConnectivityService: NetReassign [143 : null → 101]
+09-13 19:24:15.646   522   626 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=143, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]
+09-13 19:24:15.646   522   626 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=143, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]
+09-13 19:24:15.646   522   626 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=143, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]
+09-13 19:24:15.648  5142  5168 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bAdapterInfo { name: "Android Emulator OpenGL ES Translator (Apple M1 Max)", vendor: 4203, device: 0, device_type: IntegratedGpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.0 (4.1 Metal - 89.4)", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-13 19:24:15.648  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.648647Z[0m [32m INFO[0m [2mbevy_render::renderer[0m[2m:[0m AdapterInfo { name: "Android Emulator OpenGL ES Translator (Apple M1 Max)", vendor: 4203, device: 0, device_type: IntegratedGpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.0 (4.1 Metal - 89.4)", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-13 19:24:15.649  5142  5142 V GameActivity: onStart_native
+09-13 19:24:15.649  5142  5142 V threaded_app: Start: 0xb400006e666c7430
+09-13 19:24:15.707  5142  5168 W log event: Resource `<Enable the debug feature to see the name>` was inserted during a call to World::resource_scope: the inserted value will be overwritten.log.target = "bevy_ecs::world"; log.module_path = "bevy_ecs::world"; log.file = "/Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_ecs-0.19.0/src/world/mod.rs"; log.line = 2931;
+09-13 19:24:15.707  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.707306Z[0m [33m WARN[0m [2mbevy_ecs::world[0m[2m:[0m Resource `<Enable the debug feature to see the name>` was inserted during a call to World::resource_scope: the inserted value will be overwritten.
+09-13 19:24:15.720  5142  5168 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bSparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+09-13 19:24:15.720  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.720449Z[0m [32m INFO[0m [2mbevy_render::render_resource::sparse_buffer_vec[0m[2m:[0m Sparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+09-13 19:24:15.720  5142  5168 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-OrderIndependentTransparencyPlugin not loaded. GPU lacks support: DownlevelFlags::FRAGMENT_WRITABLE_STORAGE.
+09-13 19:24:15.720  5142  5168 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-BackgroundMotionVectorsPlugin not loaded. GPU lacks support for required downlevel capability flags: DownlevelFlags(INDEPENDENT_BLEND).
+09-13 19:24:15.720  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.720592Z[0m [33m WARN[0m [2mbevy_core_pipeline::oit::resolve[0m[2m:[0m OrderIndependentTransparencyPlugin not loaded. GPU lacks support: DownlevelFlags::FRAGMENT_WRITABLE_STORAGE.
+09-13 19:24:15.720  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.720621Z[0m [33m WARN[0m [2mbevy_core_pipeline::prepass::background_motion_vectors[0m[2m:[0m BackgroundMotionVectorsPlugin not loaded. GPU lacks support for required downlevel capability flags: DownlevelFlags(INDEPENDENT_BLEND).
+09-13 19:24:15.724   522   542 I ActivityTaskManager: Config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.134 fontWeightAdjustment=0}
+09-13 19:24:15.727   522   542 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 136 - 1080, 2208) mMaxBounds=Rect(0, 0 - 1080, 2340) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.134 fontWeightAdjustment=0} unchanged for IME proc com.google.android.inputmethod.latin
+09-13 19:24:15.728   522   542 I WindowManager: Override config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.134 fontWeightAdjustment=0} for displayId=0
+09-13 19:24:15.729   522   542 V ActivityTaskManager: Sending to IME proc com.google.android.inputmethod.latin new config {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.134 fontWeightAdjustment=0}
+09-13 19:24:15.729   693   693 D StatusBar: disable<e i a s b h r c s > disable2<q i n >
+09-13 19:24:15.731  1201  1201 W GoogleInputMethodService: GoogleInputMethodService.onConfigurationChanged():1661 onConfigurationChanged() : NewConfig = {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.164 fontWeightAdjustment=0}
+09-13 19:24:15.731  1201  1201 I NormalModeController: NormalModeController.getKeyboardBodyViewHolderPaddingBottom():109 currentPrimeKeyboardType:SOFT systemPaddingBottom:-1
+09-13 19:24:15.732  1201  1201 I NormalModeController: NormalModeController.getKeyboardBodyViewHolderPaddingBottom():109 currentPrimeKeyboardType:SOFT systemPaddingBottom:-1
+09-13 19:24:15.733  1201  1201 I GoogleInputMethodService: GoogleInputMethodService.initializeKeyboardTheme():1399 Apply keyboard theme: theme_border_stylesheet_googleblue_materiallight_builtin_google_blue_light.binarypb_land
+09-13 19:24:15.733   522   542 I InputManager-JNI: Viewport [0] to add: local:4619827259835644672, isActive: true
+09-13 19:24:15.733   522   610 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO |
+09-13 19:24:15.733   522   610 I InputReader: Touch device 'virtio_input_multi_touch_10' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 19:24:15.733   522   610 I InputReader: Touch device 'virtio_input_multi_touch_6' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 19:24:15.733   522   610 I InputReader: Touch device 'virtio_input_multi_touch_11' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 19:24:15.733   522   610 I InputReader: Touch device 'virtio_input_multi_touch_4' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 19:24:15.733   522   610 I InputReader: Device reconfigured: id=8, name='virtio_input_multi_touch_1', size 1080x2340, orientation 1, mode 1, display id 0
+09-13 19:24:15.733   522   610 I InputReader: Touch device 'virtio_input_multi_touch_7' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 19:24:15.733   522   610 I InputReader: Touch device 'virtio_input_multi_touch_2' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 19:24:15.733   522   610 I InputReader: Touch device 'virtio_input_multi_touch_9' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 19:24:15.733   522   610 I InputReader: Touch device 'virtio_input_multi_touch_5' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 19:24:15.733   522   610 I InputReader: Touch device 'virtio_input_multi_touch_3' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 19:24:15.733   522   610 I InputReader: Touch device 'virtio_input_multi_touch_8' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-13 19:24:15.735  1201  1201 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.735  1201  1201 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.736  1201  1201 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.736  1201  1201 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.736   843  1112 D TelephonyProvider: subIdString = 1 subId = 1
+09-13 19:24:15.736  1201  1201 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.736   843  1112 D TelephonyProvider: subIdString = 1 subId = 1
+09-13 19:24:15.736  1201  1201 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.736  1201  1201 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.736  1201  1201 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.736  1201  1624 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.736  1201  1624 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.738   522  5136 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-13 19:24:15.738   522  5136 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-13 19:24:15.738   522   522 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@fb93c0e
+09-13 19:24:15.740  1201  1623 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.740  1201  1623 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.741  1201  1201 I KeyboardViewUtil: KeyboardViewUtil.getKeyboardHeightRatio():166 systemKeyboardHeightRatio:1.000000; userKeyboardHeightRatio:1.000000.
+09-13 19:24:15.741   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1f6690000 0x1f67ec000]
+09-13 19:24:15.742  1201  1201 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():2002
+09-13 19:24:15.743  1201  1201 I DeviceUnlockedTag: DeviceUnlockedTag.notifyDeviceLockStatusChanged():31 Notify device unlocked.
+09-13 19:24:15.743  1201  1201 W SessionManager: SessionManager.beginSession():53 Try to begin an already begun session [INPUT_SESSION], end it first
+09-13 19:24:15.743   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1f5348000 0x1f5cec000]
+09-13 19:24:15.743  1201  1201 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.743  1201  1201 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-13 19:24:15.748   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1f67ec000 0x1f7190000]
+09-13 19:24:15.749   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1f7b74000 0x1f7c00000]
+09-13 19:24:15.750   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1f7fe4000 0x1f7fec000]
+09-13 19:24:15.751   693  1155 D HostConnection: createUnique: call
+09-13 19:24:15.751   693  1155 D HostConnection: HostConnection::get() New Host Connection established 0xb400006e066bed10, tid 1155
+09-13 19:24:15.753   693  1155 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-13 19:24:15.753   693  1155 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-13 19:24:15.753   693  1155 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-13 19:24:15.754  1201  1201 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1105 update screenHeightWithoutNaviBar to: 948
+09-13 19:24:15.754  1201  1201 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1112 update max height when insets changes
+09-13 19:24:15.754   693  1155 D EGL_emulation: eglCreateContext: 0xb400006e066c1290: maj 3 min 0 rcv 3
+09-13 19:24:15.755  1201  1201 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1105 update screenHeightWithoutNaviBar to: 1080
+09-13 19:24:15.755  1201  1201 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1112 update max height when insets changes
+09-13 19:24:15.755  1201  1201 I DictionarySuperpacksManager: DictionarySuperpacksManager$1.onEnabledInputMethodEntriesChanged():60 onEnabledInputMethodEntriesChanged
+09-13 19:24:15.756   693  1155 D EGL_emulation: eglMakeCurrent: 0xb400006e066c1290: ver 3 0 (tinfo 0x701dddf200) (first time)
+09-13 19:24:15.758   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1f7fec000 0x1f7ff4000]
+09-13 19:24:15.759   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1f7ae4000 0x1f7b20000]
+09-13 19:24:15.761   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1f7ff4000 0x1f7ffc000]
+09-13 19:24:15.764   338   338 D goldfish-address-space: claimShared: Ask to claim region [0x1f7f60000 0x1f7f68000]
+09-13 19:24:15.764   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f7b30000 0x1f7b6c000]
+09-13 19:24:15.766   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f7190000 0x1f721c000]
+09-13 19:24:15.770   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f7f68000 0x1f7fa4000]
+09-13 19:24:15.775   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f7dc8000 0x1f7e04000]
+09-13 19:24:15.779   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f7e04000 0x1f7eb4000]
+09-13 19:24:15.782   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f721c000 0x1f72cc000]
+09-13 19:24:15.784   693   693 I OpaEnabledReceiver: Dispatching OPA eligble = false; AGSA = true; OPA enabled = false
+09-13 19:24:15.784   693   693 I OpaLayout: Setting opa enabled to false
+09-13 19:24:15.784   693   693 I OpaLayout: Setting opa enabled to false
+09-13 19:24:15.793   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f7c00000 0x1f7cb0000]
+09-13 19:24:15.795  5142  5168 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bGPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+09-13 19:24:15.795  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.795623Z[0m [32m INFO[0m [2mbevy_render::batching::gpu_preprocessing[0m[2m:[0m GPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+09-13 19:24:15.805  5142  5172 D HostConnection: createUnique: call
+09-13 19:24:15.805  5142  5172 D HostConnection: HostConnection::get() New Host Connection established 0xb400006e066cb9d0, tid 5172
+09-13 19:24:15.807  5142  5172 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-13 19:24:15.808  5142  5172 D EGL_emulation: eglMakeCurrent: 0xb400006e066b7390: ver 3 0 (tinfo 0x7024b2c100) (first time)
+09-13 19:24:15.809  5142  5171 D HostConnection: createUnique: call
+09-13 19:24:15.809  5142  5171 D HostConnection: HostConnection::get() New Host Connection established 0xb400006e066b7ed0, tid 5171
+09-13 19:24:15.811  5142  5171 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-13 19:24:15.811  5142  5171 D EGL_emulation: eglMakeCurrent: 0xb400006e066b7390: ver 3 0 (tinfo 0x7024b2c180) (first time)
+09-13 19:24:15.825   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f7190000 0x1f721c000]
+09-13 19:24:15.829   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f7cb0000 0x1f7d3c000]
+09-13 19:24:15.833  5142  5168 V threaded_app: activityState=11
+09-13 19:24:15.833  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.833820Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+09-13 19:24:15.833  5142  5168 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+09-13 19:24:15.835  5142  5142 V threaded_app: Resume: 0xb400006e666c7430
+09-13 19:24:15.835  5142  5168 V threaded_app: activityState=12
+09-13 19:24:15.840   522  2590 W WindowManager: Failed looking up window session=Session{964bee6 5142:u0a10146} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5599 com.android.server.wm.Session.insetsModified:629 android.view.IWindowSession$Stub.onTransact:1151
+09-13 19:24:15.843   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f7d3c000 0x1f7d78000]
+09-13 19:24:15.846   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f7d78000 0x1f7db4000]
+09-13 19:24:15.847  5142  5142 V GameActivity: onImeInsetsChanged from Text Listener
+09-13 19:24:15.847  5142  5142 V threaded_app: WindowInsetsChanged: 0xb400006e666c7430
+09-13 19:24:15.847  5142  5168 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-13 19:24:15.847  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.847547Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-13 19:24:15.851   522   543 D CompatibilityChangeReporter: Compat change id reported: 158002302; UID 10146; state: ENABLED
+09-13 19:24:15.852  5142  5142 V GameActivity: onImeInsetsChanged from Text Listener
+09-13 19:24:15.852  5142  5142 V threaded_app: WindowInsetsChanged: 0xb400006e666c7430
+09-13 19:24:15.853  5142  5164 D HostConnection: createUnique: call
+09-13 19:24:15.853  5142  5164 D HostConnection: HostConnection::get() New Host Connection established 0xb400006e066ce250, tid 5164
+09-13 19:24:15.854  5142  5142 V threaded_app: ContentRectChanged: 0xb400006e666c7430 -- (0 0) (2340 1080)
+09-13 19:24:15.855  5142  5142 V GameActivity: onSurfaceCreated_native
+09-13 19:24:15.855  5142  5142 V threaded_app: NativeWindowCreated: 0xb400006e666c7430 -- 0xb400006ef685ea90
+09-13 19:24:15.855  5142  5142 V threaded_app: android_app_set_window called
+09-13 19:24:15.855  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.855316Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-13 19:24:15.855  5142  5168 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-13 19:24:15.855  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.855462Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: find a way to notify application of content rect change
+09-13 19:24:15.855  5142  5168 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: find a way to notify application of content rect change
+09-13 19:24:15.855  5142  5164 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-13 19:24:15.856  5142  5168 V threaded_app: APP_CMD_INIT_WINDOW
+09-13 19:24:15.856  5142  5142 V threaded_app: NativeWindowResized: 0xb400006e666c7430 -- 0xb400006ef685ea90 ( 2340 x 1080 )
+09-13 19:24:15.856  5142  5142 V threaded_app: NativeWindowRedrawNeeded: 0xb400006e666c7430 -- 0xb400006ef685ea90
+09-13 19:24:15.856  5142  5164 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-13 19:24:15.856  5142  5164 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-13 19:24:15.856  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.856707Z[0m [32m INFO[0m [2mbevy_winit::system[0m[2m:[0m Creating new window mir2-web3 (android) (105v0)
+09-13 19:24:15.856  5142  5168 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_winit-0.19.0/sCreating new window mir2-web3 (android) (105v0)
+09-13 19:24:15.857  5142  5164 D EGL_emulation: eglCreateContext: 0xb400006e066ce850: maj 3 min 0 rcv 3
+09-13 19:24:15.859  5142  5164 D EGL_emulation: eglMakeCurrent: 0xb400006e066ce850: ver 3 0 (tinfo 0x7024b2c200) (first time)
+09-13 19:24:15.863   363   568 E HWComposer: getSupportedContentTypes: getSupportedContentTypes failed for display 4619827259835644672: Unsupported (8)
+09-13 19:24:15.863   187   187 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+09-13 19:24:15.864  5142  5164 I Gralloc4: mapper 4.x is not supported
+09-13 19:24:15.866  5142  5164 D HostConnection: createUnique: call
+09-13 19:24:15.867  5142  5164 D HostConnection: HostConnection::get() New Host Connection established 0xb400006e066d19d0, tid 5164
+09-13 19:24:15.867  5142  5164 D goldfish-address-space: allocate: Ask for block of size 0x100
+09-13 19:24:15.867  5142  5164 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1f3ff8000 size 0x8000
+09-13 19:24:15.869   187   187 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.allocator@4.0::IAllocator/default in either framework or device VINTF manifest.
+09-13 19:24:15.869  5142  5164 W Gralloc4: allocator 4.x is not supported
+09-13 19:24:15.870   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f4000000 0x1f49a4000]
+09-13 19:24:15.874  5142  5164 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-13 19:24:15.881   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f49a4000 0x1f5348000]
+09-13 19:24:15.884   693   899 D StartingSurfaceDrawer: Task start finish, remove starting surface for task 393
+09-13 19:24:15.884   693   899 V StartingSurfaceDrawer: Removing splash screen window for task: 393
+09-13 19:24:15.886   522   539 I ActivityTaskManager: Displayed com.mir2.web3.uipreview/com.mir2.web3.MainActivity: +466ms
+09-13 19:24:15.890  5142  5142 V threaded_app: WindowFocusChanged: 0xb400006e666c7430 -- 1
+09-13 19:24:15.893  1201  1201 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3420
+09-13 19:24:15.893  1201  1201 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():2002
+09-13 19:24:15.893  1201  1201 I DeviceUnlockedTag: DeviceUnlockedTag.notifyDeviceLockStatusChanged():31 Notify device unlocked.
+09-13 19:24:15.894   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1fb1b8000 0x1fbb5c000]
+09-13 19:24:15.905  5142  5142 V GameActivity: onImeInsetsChanged from Text Listener
+09-13 19:24:15.906  5142  5142 V threaded_app: WindowInsetsChanged: 0xb400006e666c7430
+09-13 19:24:15.914   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1fa814000 0x1fb1b8000]
+09-13 19:24:15.919   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f9450000 0x1f9df4000]
+09-13 19:24:15.944   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f5cec000 0x1f6690000]
+09-13 19:24:15.996  5142  5168 I event src/ui_preview.rs:484: ANDROID_UI_PREVIEW_READY scene=world-render
+09-13 19:24:15.996  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:15.996363Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_UI_PREVIEW_READY scene=world-render
+09-13 19:24:16.017  5142  5168 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-13 19:24:16.017  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:16.017212Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-13 19:24:16.051  5142  5170 D HostConnection: createUnique: call
+09-13 19:24:16.052  5142  5170 D HostConnection: HostConnection::get() New Host Connection established 0xb400006e066d6110, tid 5170
+09-13 19:24:16.053  5142  5170 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0
+09-13 19:24:16.053  5142  5170 D EGL_emulation: eglMakeCurrent: 0xb400006e066b7390: ver 3 0 (tinfo 0x7024b2c280) (first time)
+09-13 19:24:16.077   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f9e70000 0x1fa814000]
+09-13 19:24:16.159   522  5136 W InputManager-JNI: Input channel object '4793ad6 Splash Screen com.mir2.web3.uipreview (client)' was disposed without first being removed with the input manager!
+09-13 19:24:16.344   338   491 D goldfish-address-space: claimShared: Ask to claim region [0x1f7b74000 0x1f7c00000]
+09-13 19:24:16.345  1059  3389 I FontLog : Received query Noto Color Emoji Compat, URI content://com.google.android.gms.fonts [CONTEXT service_id=132 ]
+09-13 19:24:16.345  1059  3389 I FontLog : Query [emojicompat-emoji-font] resolved to {Noto Color Emoji Compat, wdth 100.0, wght 400, ital 0.0, bestEffort false} [CONTEXT service_id=132 ]
+09-13 19:24:16.346  1059  3389 I FontLog : Fetch {Noto Color Emoji Compat, wdth 100.0, wght 400, ital 0.0, bestEffort false} end status Status{statusCode=SUCCESS, resolution=null} [CONTEXT service_id=132 ]
+09-13 19:24:16.349  1059  1086 I FontLog : Pulling font file for id = 13, cache size = 10 [CONTEXT service_id=132 ]
+09-13 19:24:16.353  1059  1086 I FontLog : Pulling font file for id = 13, cache size = 10 [CONTEXT service_id=132 ]
+09-13 19:24:16.402  5142  5167 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=40 entity_live=false entity_self_visible=false entity_layers=2
+09-13 19:24:16.429  5142  5167 I RustStdoutStderr: [runtime-map] waiting-standalone missing=[native-map-keyed:aa9aaaf2b454da86f830df83051919b78591eccd79b0d652e2c946c1e479d891,native-map-keyed:65b87ccadfc93885daa0b0dc990e0208dce85008de840713258d72b4b63bd1c0,native-map-keyed:fe408a39dddb5e957c2c1fc1ec81cd7c943783361055ff8db9047d66c8dfc464,native-map-keyed:90ca75cb64ab17a25798af4e6c4d4555b9be4e2a51d4b7e792537d4bde7f7822,native-map-keyed:96647ef10e2fa2df1d224b599bda5456454f4d3fe2238109ad231e63b1b5aa05,native-map-keyed:ba760433cd7414e24e51f6ea75d660b5222f55ad8d7851f50b45bf06ad6bfb15,native-map-keyed:26aa612a5755ef95b03c2bfb8c32208b7b862aa4abbf134fa4f9741e95aa173b,native-map-keyed:e8411c39eebac124a550dc010f60bc9ca0133f45ecef561d421b7c05b25fadb4,native-map-keyed:5b989e10335bf3eab5150333209b45050a280e234a8be2cefa3bed4eca0fb430,native-map-keyed:f99ca06f005fa6de70041288a4f604e48b4dca6a9e06d962f27975c16ad4b78d,native-map-keyed:d201f992ba0b2ca87100e052805d6aef9ef5e4a605b39a0696a039d087b8bd71,native-map-keyed:3833a31d0270eb65c74ff8a8b3334f035838c35031c48908ec6586f4ed1d0e53,native-map-keyed:a3bbae3aa38ae2487c395ec573335305a7f5a04bba0bfb829207f359c31df81c,native-map-keyed:c0fb45e9956765f71d9a59c67240104aa3b57a7e447fd45d68147e8876a26baa,native-map-keyed:232bfc461f055784e7d90e5e0378d3cea8317eb078c4bf66e7afe999812ff902,native-map-keyed:d40064aedb300a0c590d9fa3f3204b91021a61499c08f9d0716cc0f36620b6a9,native-map-keyed:ffc093f86a65f8e00a03c2f443f7ef262a448b6e60f25eabe63582f03c04c313,native-map-keyed:357ae499cdc01c6fb8e7f6a351f31e453a56bc0be6a8b044a7d5b03d97e69edc,native-map-keyed:142960f1af1b8faa165eb1b55b57fc14db26156287a4c5ca23e035daf9f10e33,native-map-keyed:fc858961ab49b6744d95b643f4286f3aae93febfa3d52f62d18afcf258a9a342,native-map-keyed:d1bd1ece243fe2a29604f31a4d0f638bee60543ead0de466166a000c46a11617,native-map-keyed:c60c7238cc4b5e882db07db460ffca6bebf61f020fced87785c279c17334092c,native-map-keyed:04f2f6406275680ee10c2bb613e324d59e0dea10befb67479d5db488f1e5e9bf,native-map-keyed:80b981fe9eace4f6c8fa494e0a3c4cc1c707ebfecc40d9a4434c5789e3052e1b,native-map-keyed:6ef860ce7467e486f22d5dd1745ad76623a2c321a0104fc346a8aa09e671e707,native-map-keyed:a87dbfa37b42f082b27d4ddbc51291b9c1574e745af424c13649911269324824,native-map-keyed:37709d68b8604ed7f6347c1a061a887ab60c06d4a241460107a11861aab3a484,native-map-keyed:e00b4c4d2b781f2a9182fa8923db3f219d9dc2301bf6803e1b58fd51d01be1cd,native-map-keyed:d2a6feb956b426eb88640e39bcfaaf5b7eb53c2ae46903ed06ac54db9675c3be,native-map-keyed:55d52696ef087177ceeeadbcc9497188994ad6423bd844b5711ef3f86f8dfdf7,native-map-keyed:58ba917565b84b2d1ccba0b6fc186abc6d44127eb4519d53924ab018c54447cf,native-map-keyed:02fcf4c4c475d1c1002d45563f34bf90aabc5d57865a90a9c1d738eea292c519,native-map-keyed:226a0bac665d1bf713b8baf39ecf7ae61be856189d1cf823921ed0e53a5c29fe,native-map-keyed:4994bb7eb67876e03625726b9c449243db24f41e661e82d6a174a9f607afc3a4,native-map-keyed:b537b5735e33470456a6462cd0dc84814bf925c377afb556a58c95fbac788b11,native-map-keyed:c5aedaadc41e9474fd79125972e0f4bc1e30f8c7142d7d934d6df890f3be78e2,native-map-keyed:2c76f7575f3d1661681533a2ed2893f96c1f4b914bcfd60ae32c207561eb263b,native-map-keyed:2cd7444281094e689c5fe7c22a994aa527766e0665fc32b2cec42cbdc9978ab4,native-map-keyed:6a778aa0f93b323c9102b3ec389ed4c65d65644552e32a1c32ed487603dce9a0,native-map-keyed:daac139b8048bd2ca0ae710ce274fdced5abd65987ebc71a4fd0150b8162198f,native-map-keyed:6a331d64448423171c9bd195276a89f11bc868c7f5bcfecd8d7c4d01d7aa77f4,native-map-keyed:751001c28e3ef669ffa96b3633f386939502bef3dd3529e72ee16051cc4b59e4,native-map-keyed:9193eb213fa563a95c340cb2a2ffc65d0aaaf61ae51c73664d2cde2edf4c4281,native-map-keyed:d9c8ff59b2a56ad01e23464985cbc57ac906ab954db069085708e3d95149efcd,native-map-keyed:0446dc96478c6a6426006d4ebcd9b473422254a4a3b87d13e6513a4664cc1674,native-map-keyed:6ad43bea0b7c50814b20d3e8a86d0b3c036dd87667a57a46d0540ea871ca535e,native-map-keyed:69d2b1d711ea28062395eaf1824dfe56230c50f8f55e47e6ba4f299ebae306ec,native-map-keyed:fae1e51ea06cb7c62fc1e1a144e6a1adce22184b6613ffa4c1ce99c1a67336f8,native-map-keyed:eb0860d3f49ccd4daae782
+09-13 19:24:16.429  5142  5167 I RustStdoutStderr:
+09-13 19:24:16.432  5142  5167 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=209 entity_live=false entity_self_visible=false entity_layers=3
+09-13 19:24:16.481   190   190 I logd    : logdr: UID=2000 GID=2000 PID=5183 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-13 19:24:16.507  5142  5167 I RustStdoutStderr: [runtime-map] waiting-standalone missing=[native-map-keyed:3833a31d0270eb65c74ff8a8b3334f035838c35031c48908ec6586f4ed1d0e53,native-map-keyed:80b981fe9eace4f6c8fa494e0a3c4cc1c707ebfecc40d9a4434c5789e3052e1b,native-map-keyed:37709d68b8604ed7f6347c1a061a887ab60c06d4a241460107a11861aab3a484,native-map-keyed:55d52696ef087177ceeeadbcc9497188994ad6423bd844b5711ef3f86f8dfdf7,native-map-keyed:02fcf4c4c475d1c1002d45563f34bf90aabc5d57865a90a9c1d738eea292c519,native-map-keyed:daac139b8048bd2ca0ae710ce274fdced5abd65987ebc71a4fd0150b8162198f,native-map-keyed:69d2b1d711ea28062395eaf1824dfe56230c50f8f55e47e6ba4f299ebae306ec,native-map-keyed:35fded5dc786ac191da47a42e1f2c4114875c5035cb6a15c9e3d28445a598672,native-map-keyed:79e6ce053dc8315b85563d4404dea96d04bfb1848b6c239bb5f6ab74c33cc78c,native-map-keyed:79e6ce053dc8315b85563d4404dea96d04bfb1848b6c239bb5f6ab74c33cc78c,native-map-keyed:625797bcdecfa961da0d38a6a28b49ae8d84ca350dfd56fbe0c04c826ad25c96,native-map-keyed:898aa9e0255a388edf134aadad5bd262461bd18ad8521d6ab37f9050f68fe545,native-map-keyed:35a7e8eae83e7c45a4bb47eb6126d9bedbf25bc2989037e6b80e00e1ce4c92f8,native-map-keyed:b40a54a9b34fa287ee6653b2dcaf2656625c161702c51ae2e9ebb9e00e57926d,native-map-keyed:f8a574c8150f8045765e94a0cadb58b285ab13476433f5e520375ed51aad63e0,native-map-keyed:7853f1ae68df42bd77f1b76cb22186f6e9b9d7ea6daa5db1de0ce685186de5bd,native-map-keyed:beaf69222d96d2b57d787e274b5ade7119a59239081b65ad8fbb0c5260cf7aa7,native-map-keyed:3abaf608aed039950081ea83ba218f9db54214fe5de9faf1d405bbf76f6ed2bf,native-map-keyed:7d737ed70a5fd760e7e801c574ff55d710b774902b6919c1512d873c40b9ae09,native-map-keyed:6dad636a48deda7cf0ff88de20de9e7006fbaba7d315da7c9fc5ffdcc9535b34]
+09-13 19:24:16.510  5142  5167 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=228 entity_live=false entity_self_visible=false entity_layers=3
+09-13 19:24:16.541  5142  5167 I RustStdoutStderr: [runtime-map] synced center=Some(PresentationGridCenter { x: 302, y: 634 }) tiles=607 standalone=242 live=849 missingBindings=0 sample=[]
+09-13 19:24:16.545  5142  5167 I RustStdoutStderr: [android-world-render] map_current=true map_live=849 map_missing=0 map_image_revision=228 entity_live=false entity_self_visible=false entity_layers=6
+09-13 19:24:16.920  5142  5167 I RustStdoutStderr: [android-world-render] map_current=true map_live=849 map_missing=0 map_image_revision=228 entity_live=true entity_self_visible=true entity_layers=12
+09-13 19:24:16.945  5142  5171 I event src/shared_shell.rs:1089: packaged Android world frame queuedrequest_id = 18446744073709551615; pages = 7; sprites = 2111; compressed_bytes = 14785921; rgba_bytes = 7340032; map_object_rgba_bytes = 10489920; map_width = 700; map_height = 700; map_atlases = 7; map_tiles = 607; map_standalone_tiles = 242; unresolved_draws = 0; entity_pages = 5; entities = 7; entity_layers = 12; unresolved_entities = 0; entity_unindexed_rects = 24; entity_compressed_bytes = 11209197; entity_rgba_bytes = 83886080; entity_manifest_sha256 = "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9";
+09-13 19:24:16.945  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:16.945443Z[0m [32m INFO[0m [2mmir2_platform_android::shared_shell[0m[2m:[0m packaged Android world frame queued [3mrequest_id[0m[2m=[0m18446744073709551615 [3mpages[0m[2m=[0m7 [3msprites[0m[2m=[0m2111 [3mcompressed_bytes[0m[2m=[0m14785921 [3mrgba_bytes[0m[2m=[0m7340032 [3mmap_object_rgba_bytes[0m[2m=[0m10489920 [3mmap_width[0m[2m=[0m700 [3mmap_height[0m[2m=[0m700 [3mmap_atlases[0m[2m=[0m7 [3mmap_tiles[0m[2m=[0m607 [3mmap_standalone_tiles[0m[2m=[0m242 [3munresolved_draws[0m[2m=[0m0 [3mentity_pages[0m[2m=[0m5 [3mentities[0m[2m=[0m7 [3mentity_layers[0m[2m=[0m12 [3munresolved_entities[0m[2m=[0m0 [3mentity_unindexed_rects[0m[2m=[0m24 [3mentity_compressed_bytes[0m[2m=[0m11209197 [3mentity_rgba_bytes[0m[2m=[0m83886080 [3mentity_manifest_sha256[0m[2m=[0m"929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9"
+09-13 19:24:16.962  5142  5172 I event src/ui_preview.rs:251: ANDROID_OBJECT_METADATA_PRESENTATION_APPLIED
+09-13 19:24:16.962  5142  5172 I event src/ui_preview.rs:284: ANDROID_WORLD_RENDER_READYrequest_id = 18446744073709551615; center_x = 302; center_y = 634; map_tiles = 849; entities = 7; entity_layers = 12;
+09-13 19:24:16.962  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:16.962338Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_METADATA_PRESENTATION_APPLIED
+09-13 19:24:16.962  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:16.962425Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_WORLD_RENDER_READY [3mrequest_id[0m[2m=[0m18446744073709551615 [3mcenter_x[0m[2m=[0m302 [3mcenter_y[0m[2m=[0m634 [3mmap_tiles[0m[2m=[0m849 [3mentities[0m[2m=[0m7 [3mentity_layers[0m[2m=[0m12
+09-13 19:24:16.990  5142  5172 I event src/shared_shell.rs:1666: ANDROID_EFFECT_RENDER_STATE_READYeffect_count = 2;
+09-13 19:24:16.990  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:16.989978Z[0m [32m INFO[0m [2mmir2_platform_android::shared_shell[0m[2m:[0m ANDROID_EFFECT_RENDER_STATE_READY [3meffect_count[0m[2m=[0m2
+09-13 19:24:17.319  5142  5168 D EGL_emulation: app_time_stats: avg=54.27ms min=13.13ms max=347.74ms count=25
+09-13 19:24:17.511   190   190 I logd    : logdr: UID=2000 GID=2000 PID=5186 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-13 19:24:18.335  5142  5168 D EGL_emulation: app_time_stats: avg=18.24ms min=15.52ms max=21.97ms count=55
+09-13 19:24:18.532  5142  5171 I event src/ui_preview.rs:103: ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED
+09-13 19:24:18.532  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:18.532114Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED
+09-13 19:24:18.534  5142  5171 I event src/ui_preview.rs:111: ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED
+09-13 19:24:18.534  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:18.534469Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED
+09-13 19:24:18.535  5142  5171 I event src/ui_preview.rs:122: ANDROID_ARCHER_RANGE_PRESENTATION_STARTED
+09-13 19:24:18.536  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:18.535957Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_ARCHER_RANGE_PRESENTATION_STARTED
+09-13 19:24:18.537  5142  5171 I event src/ui_preview.rs:133: ANDROID_MOUNTED_ATTACK_PRESENTATION_STARTED
+09-13 19:24:18.538  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:18.537816Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_MOUNTED_ATTACK_PRESENTATION_STARTED
+09-13 19:24:18.576  5142  5168 I event src/ui_preview.rs:223: ANDROID_REMOTE_BACKSTEP_POSE_ACTIVEoffset_x = 84.0; offset_y = 0.0;
+09-13 19:24:18.576  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:18.576397Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_POSE_ACTIVE [3moffset_x[0m[2m=[0m84.0 [3moffset_y[0m[2m=[0m0.0
+09-13 19:24:19.336  5142  5168 I event src/ui_preview.rs:230: ANDROID_REMOTE_BACKSTEP_POSE_SETTLED
+09-13 19:24:19.336  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:19.335999Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_POSE_SETTLED
+09-13 19:24:19.352  5142  5168 D EGL_emulation: app_time_stats: avg=18.32ms min=15.44ms max=25.15ms count=55
+09-13 19:24:20.365  5142  5168 D EGL_emulation: app_time_stats: avg=18.04ms min=16.30ms max=19.89ms count=56
+09-13 19:24:20.402  5142  5168 I event src/ui_preview.rs:216: ANDROID_REMOTE_BACKSTEP_DIAGNOSTICSdiagnostics = {"enabled":true,"nowMs":1789298660401.9482,"moveClockPulseId":37,"moveClockNextPulseMs":1789298660501.9482,"entryCount":1,"activeEntryCount":0,"processedEventCount":1,"remoteMotionEventCount":1,"remoteRemoveEventCount":0,"ignoredEventCount":0,"staleEventCount":0,"disabledEventCount":0,"pendingEventDropCount":0,"entryEvictionCount":0,"decodeErrorCount":0,"lastDecodeError":null,"offsetQueryCount":101,"offsetMatchCount":47,"targetMismatchCount":0,"inactiveFallbackCount":54,"entries":[{"atMs":2640.0,"packet":"ObjectBackStep","objectId":"9003","fromX":301.0,"fromY":634.0,"toX":299.0,"toY":634.0,"direction":"Right","mode":"backstep","phaseCount":8,"startedMs":1789298658556.533,"startedPulseId":20,"expiresMs":1789298660401.9482,"phaseIndex":7,"nextPhaseMs":1789298660501.9482,"completed":true}]};
+09-13 19:24:20.403  5142  5167 I RustStdoutStderr: [2m2026-09-13T11:24:20.402794Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_DIAGNOSTICS [3mdiagnostics[0m[2m=[0m{"enabled":true,"nowMs":1789298660401.9482,"moveClockPulseId":37,"moveClockNextPulseMs":1789298660501.9482,"entryCount":1,"activeEntryCount":0,"processedEventCount":1,"remoteMotionEventCount":1,"remoteRemoveEventCount":0,"ignoredEventCount":0,"staleEventCount":0,"disabledEventCount":0,"pendingEventDropCount":0,"entryEvictionCount":0,"decodeErrorCount":0,"lastDecodeError":null,"offsetQueryCount":101,"offsetMatchCount":47,"targetMismatchCount":0,"inactiveFallbackCount":54,"entries":[{"atMs":2640.0,"packet":"ObjectBackStep","objectId":"9003","fromX":301.0,"fromY":634.0,"toX":299.0,"toY":634.0,"direction":"Right","mode":"backstep","phaseCount":8,"startedMs":1789298658556.533,"startedPulseId":20,"expiresMs":1789298660401.9482,"phaseIndex":7,"nextPhaseMs":1789298660501.9482,"completed":true}]}

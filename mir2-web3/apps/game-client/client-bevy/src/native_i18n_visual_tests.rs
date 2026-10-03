@@ -163,28 +163,28 @@ pub(crate) fn i18n_offscreen_app_configured(
     assert!(root.is_absolute() && root.is_dir());
     assert!(root.join("original-ui/ChrSel/meta.json").is_file());
     let mut app = App::new();
-    app.add_plugins(
-        DefaultPlugins
-            .set(AssetPlugin {
-                file_path: root.to_str().expect("UTF-8 asset path").to_owned(),
-                meta_check: AssetMetaCheck::Never,
-                ..default()
-            })
-            .set(ImagePlugin::default_nearest())
-            .set(WindowPlugin {
-                primary_window: None,
-                exit_condition: ExitCondition::DontExit,
-                ..default()
-            })
-            .set(RenderPlugin {
-                synchronous_pipeline_compilation: true,
-                ..default()
-            })
-            .disable::<WinitPlugin>()
-            .disable::<PipelinedRenderingPlugin>()
-            .disable::<bevy::audio::AudioPlugin>()
-            .disable::<bevy::app::TerminalCtrlCHandlerPlugin>(),
-    );
+    let plugins = DefaultPlugins
+        .set(AssetPlugin {
+            file_path: root.to_str().expect("UTF-8 asset path").to_owned(),
+            meta_check: AssetMetaCheck::Never,
+            ..default()
+        })
+        .set(ImagePlugin::default_nearest())
+        .set(WindowPlugin {
+            primary_window: None,
+            exit_condition: ExitCondition::DontExit,
+            ..default()
+        })
+        .set(RenderPlugin {
+            synchronous_pipeline_compilation: true,
+            ..default()
+        })
+        .disable::<WinitPlugin>()
+        .disable::<PipelinedRenderingPlugin>()
+        .disable::<bevy::app::TerminalCtrlCHandlerPlugin>();
+    #[cfg(feature = "native-ui")]
+    let plugins = plugins.disable::<bevy::audio::AudioPlugin>();
+    app.add_plugins(plugins);
     app.add_plugins(NativeI18nPlugin);
     if shell {
         app.add_plugins(Mir2NativeShellUiPlugin);

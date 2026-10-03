@@ -638,18 +638,18 @@ pub(crate) fn set_language_popup_for_tests(world: &mut World, open: bool) {
 pub struct NativeI18nPlugin;
 impl Plugin for NativeI18nPlugin {
     fn build(&self, app: &mut App) {
+        let interactions = (
+            toggle_language_menu,
+            choose_language,
+            show_language_selector,
+        )
+            .chain();
+        #[cfg(feature = "native-player-ui")]
+        let interactions =
+            interactions.before(crate::crystal_ui::overlays::NativePlayerUiSet::Mutate);
         app.init_resource::<LocaleMenuState>()
             .add_systems(Startup, spawn_language_selector)
-            .add_systems(
-                Update,
-                (
-                    toggle_language_menu,
-                    choose_language,
-                    show_language_selector,
-                )
-                    .chain()
-                    .before(crate::crystal_ui::overlays::NativePlayerUiSet::Mutate),
-            )
+            .add_systems(Update, interactions)
             .add_systems(
                 PostUpdate,
                 (

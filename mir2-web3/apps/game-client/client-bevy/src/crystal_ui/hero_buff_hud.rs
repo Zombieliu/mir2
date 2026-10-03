@@ -69,7 +69,7 @@ pub fn process(
     windows: Query<&Window, With<PrimaryWindow>>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     mut effects: Option<ResMut<UiEffectQueue>>,
-    mut audio: Option<ResMut<crate::audio::NativeUiAudioQueue>>,
+    mut audio: Option<ResMut<crate::ui_audio::NativeUiAudioQueue>>,
 ) {
     ui.hero_buffs.rows.hovered = false;
     if shell.screen != NativeShellScreen::InGame
@@ -114,7 +114,7 @@ pub fn process(
             });
         }
         if let Some(a) = audio.as_deref_mut() {
-            a.push(crate::audio::NativeUiSound::ButtonA);
+            a.push(crate::ui_audio::NativeUiSound::ButtonA);
         }
     }
 }

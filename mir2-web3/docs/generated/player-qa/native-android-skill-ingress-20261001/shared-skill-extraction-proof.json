@@ -1,0 +1,7 @@
+{
+  "base": "73425a969253f259b6435fb985987272fd08d493",
+  "comparison": "Rust tokens excluding comments and whitespace outside string literals",
+  "pureCursorTokensEqual": true,
+  "transformTokensEqual": true,
+  "patchHelperTokensEqual": true
+}

@@ -55,9 +55,8 @@ impl CrystalStageTransform {
         {
             let width = viewport_width.max(1.0).round() as u32;
             let height = viewport_height.max(1.0).round() as u32;
-            let (origin, size) = crate::native_display::stage_viewport(
-                bevy::math::UVec2::new(width, height),
-            );
+            let (origin, size) =
+                crate::native_display::stage_viewport(bevy::math::UVec2::new(width, height));
             if size.x != 0 && size.y != 0 {
                 return Self {
                     scale: size.x as f32 / STAGE_WIDTH,
@@ -300,5 +299,4 @@ mod tests {
             }
         }
     }
-
 }

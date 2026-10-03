@@ -1,0 +1,162 @@
+{
+  "scope": "12 frozen Windows pure projection bodies and thin host delegates only",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "selectedSource": "4e35d3a34041f47370ba7f1338d4b5e0f8d7c0f8",
+  "sourceParent": "189e1714a92e3bba1102743659b03782f9e3bdb3",
+  "permittedDifferences": [
+    "helper names",
+    "shop and game-data imported namespace",
+    "host geometry callback injection and forwarding",
+    "comments and Rustfmt formatting"
+  ],
+  "entries": [
+    {
+      "frozenFunction": "crystal_tooltip_viewer",
+      "sharedFunction": "native_tooltip_viewer",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "frozenHeader": "fn crystal_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClass)>",
+      "sharedHeader": "fn native_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClass)>",
+      "frozenBodySha256": "1cafcfede0938b84c35df1ee7793331a5877edc83849c472aa6231ce7e1451eb",
+      "sharedBodySha256": "1cafcfede0938b84c35df1ee7793331a5877edc83849c472aa6231ce7e1451eb",
+      "normalizedSha256": "47b6bf68315899e7478375ddc54d3ada98ea4fd7a92a17d44728eefa2ae200b1",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    },
+    {
+      "frozenFunction": "unique_crystal_tooltip_info",
+      "sharedFunction": "native_tooltip_info",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "frozenHeader": "fn unique_crystal_tooltip_info(item_index: i32) -> Option<CrystalItemInfoModel>",
+      "sharedHeader": "fn native_tooltip_info(item_index: i32) -> Option<CrystalItemInfoModel>",
+      "frozenBodySha256": "4da53780655bdc817ded9b8cb20cb3d6de3b99e78355a8a8a35c088537133e2f",
+      "sharedBodySha256": "8f84570adac95a4848f8c6736cb93937f6b2a13b225446f10a825d895966f8a4",
+      "normalizedSha256": "3b96dc4332385d021d64a7767a44f01027a8370e83e13df4647dbd0f9d6dae2b",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    },
+    {
+      "frozenFunction": "crystal_real_tooltip_info",
+      "sharedFunction": "native_real_tooltip_info",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "frozenHeader": "fn crystal_real_tooltip_info(\n    info: &CrystalItemInfoModel,\n    viewer: Option<(u16, MirClass)>,\n) -> Option<CrystalItemInfoModel>",
+      "sharedHeader": "fn native_real_tooltip_info(\n    info: &CrystalItemInfoModel,\n    viewer: Option<(u16, MirClass)>,\n) -> Option<CrystalItemInfoModel>",
+      "frozenBodySha256": "7ecf66b432b8e87fc9e51c9bbc7be48184329622a65b7c8ce6f41dc1f0ae01fc",
+      "sharedBodySha256": "88b438fa69f47e817db663892f3ed5554d5d4ff7bb0ae790e75f3309968ee525",
+      "normalizedSha256": "a9770c266d72af03643526bbc9efc22100a716fb1720d9996f56f59030338957",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    },
+    {
+      "frozenFunction": "crystal_tooltip_source_for_user_item",
+      "sharedFunction": "native_tooltip_source_for_user_item",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "frozenHeader": "fn crystal_tooltip_source_for_user_item(\n    value: &Value,\n    cursor: &NativeUiPlayerCursor,\n) -> Option<CrystalItemTooltipSourceModel>",
+      "sharedHeader": "fn native_tooltip_source_for_user_item(\n    value: &Value,\n    cursor: &NativeUiPlayerCursor,\n) -> Option<CrystalItemTooltipSourceModel>",
+      "frozenBodySha256": "a3b17a5233aef1665f5b5165e289a0b942e7d3ca6b71f5c4adff64a4ed7b70e7",
+      "sharedBodySha256": "232ea688f27c549545d2e3cfd80fe716672ec75a807cf797b7cc793e5dc9dfd7",
+      "normalizedSha256": "423e041ece0e74e52fcf61b2199d9f3e9d2597ecae2b84410412e456ac997bad",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    },
+    {
+      "frozenFunction": "npc_shop_service_from_packet",
+      "sharedFunction": "npc_shop_service_from_packet",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "frozenHeader": "fn npc_shop_service_from_packet(\n    packet: &str,\n    payload: &Value,\n) -> Option<mir2_client_bevy::shop::NpcShopServiceSignal>",
+      "sharedHeader": "fn npc_shop_service_from_packet(packet: &str, payload: &Value) -> Option<NpcShopServiceSignal>",
+      "frozenBodySha256": "83831ca40884f0e3a46131afeafa210eb6bc58ffca8cbbddc01f14f47ca7965b",
+      "sharedBodySha256": "e6a48281c148aa63370b856e20aadde19d4581028dba1900754d900986437153",
+      "normalizedSha256": "fd46abac27fade2e9350c597e7ec704d1952caa329825c892550cd8a50d69fd3",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    },
+    {
+      "frozenFunction": "transform_shop_model_from_packet",
+      "sharedFunction": "transform_shop_model_from_packet",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "frozenHeader": "fn transform_shop_model_from_packet(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value",
+      "sharedHeader": "fn transform_shop_model_from_packet(\n    payload: &Value,\n    cursor: &NativeUiPlayerCursor,\n    mut geometry: impl FnMut(NativeItemLibrary, u16) -> Option<NativeItemFrameGeometry>,\n) -> Value",
+      "frozenBodySha256": "9303e40ac9d958c8e0e4f36216f1455659f2bc22257f9cbd85ffa02a3fb847ee",
+      "sharedBodySha256": "d8949c8d231dc52d61517c04991155ff1f31c4273c9175e8b266726c8563807f",
+      "normalizedSha256": "cb9cf6b4fa2318ad986275f689408ab7759ecbde3442e7a27c3ee7f769a84327",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    },
+    {
+      "frozenFunction": "transform_shop_model_from_snapshot",
+      "sharedFunction": "transform_shop_model_from_snapshot",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "frozenHeader": "fn transform_shop_model_from_snapshot(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value",
+      "sharedHeader": "fn transform_shop_model_from_snapshot(\n    payload: &Value,\n    cursor: &NativeUiPlayerCursor,\n    mut geometry: impl FnMut(NativeItemLibrary, u16) -> Option<NativeItemFrameGeometry>,\n) -> Value",
+      "frozenBodySha256": "4a4aaf178c4366fe1250d68af8009db8e375ed69440636f06200c43b273ede9e",
+      "sharedBodySha256": "98c2502ee0c2378f1cf48292bad2fef143e98b811bdaa3020de355047168ab2e",
+      "normalizedSha256": "d198d9f7b83852a9f7bd7aa71b7e80fdef48d7c020d20f22816ca54b5c2a4764",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    },
+    {
+      "frozenFunction": "shop_good_json",
+      "sharedFunction": "shop_good_json",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "frozenHeader": "fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) -> Option<Value>",
+      "sharedHeader": "fn shop_good_json(\n    item: &Value,\n    fallback: usize,\n    cursor: &NativeUiPlayerCursor,\n    mut geometry: impl FnMut(NativeItemLibrary, u16) -> Option<NativeItemFrameGeometry>,\n) -> Option<Value>",
+      "frozenBodySha256": "0f1d0f5eafedd0e8070d642a3c701b28c7b8e61412f4697032275410e5da5464",
+      "sharedBodySha256": "b1565d612190e2b136b260f8e808a45fcf3820346f839d89dc661c2a06680fde",
+      "normalizedSha256": "332eaa254784108c6b66824b5a4461fc3008dee774bb7f179abb41bfaaf2373e",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    },
+    {
+      "frozenFunction": "shop_hide_added_stats",
+      "sharedFunction": "shop_hide_added_stats",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "frozenHeader": "fn shop_hide_added_stats(payload: &Value) -> bool",
+      "sharedHeader": "fn shop_hide_added_stats(payload: &Value) -> bool",
+      "frozenBodySha256": "3a10a8550528d2a059bb59a662daf36f660841f497714c1ad3f4bbc06195d588",
+      "sharedBodySha256": "3a10a8550528d2a059bb59a662daf36f660841f497714c1ad3f4bbc06195d588",
+      "normalizedSha256": "b52ec7424eeea17e96eee94e88edbf7e8884563014f93c0f95d075ad24cb9f40",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    },
+    {
+      "frozenFunction": "transform_npc_catalog_packet",
+      "sharedFunction": "transform_npc_catalog_packet",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "frozenHeader": "fn transform_npc_catalog_packet(\n    packet: &str,\n    payload: &Value,\n    cursor: &mut NativeUiPlayerCursor,\n) -> Option<Value>",
+      "sharedHeader": "fn transform_npc_catalog_packet(\n    packet: &str,\n    payload: &Value,\n    cursor: &mut NativeUiPlayerCursor,\n    geometry: impl FnMut(NativeItemLibrary, u16) -> Option<NativeItemFrameGeometry>,\n) -> Option<Value>",
+      "frozenBodySha256": "fec817892133168dcc021863911a85e766d0dd9ee532e592eebfec69f8b945cd",
+      "sharedBodySha256": "64be0fae249a9f27cd864ddf6be8a38796661ae8f1fa50af6c1c2119c37ffcde",
+      "normalizedSha256": "4a5ee429be9011a5ab37766609ccf72c25e4fa13b5857eb33ef2a9a09f0c6315",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    },
+    {
+      "frozenFunction": "try_transform_shop_model_from_packet",
+      "sharedFunction": "try_transform_shop_model_from_packet",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "frozenHeader": "fn try_transform_shop_model_from_packet(\n    payload: &Value,\n    cursor: &NativeUiPlayerCursor,\n) -> Option<Value>",
+      "sharedHeader": "fn try_transform_shop_model_from_packet(\n    payload: &Value,\n    cursor: &NativeUiPlayerCursor,\n    mut geometry: impl FnMut(NativeItemLibrary, u16) -> Option<NativeItemFrameGeometry>,\n) -> Option<Value>",
+      "frozenBodySha256": "b005c438ed2aca5151b6d510f80ede30726b203aa2ef6f4b5b36b6d723130848",
+      "sharedBodySha256": "3b11b35c9f76cdc518cc3154853b07cbce2bbcbf3be32f6eec52bc26cb927e1d",
+      "normalizedSha256": "baa4b7aeaeaabe971fa39316212b1adbbc7dbed599cbc80822aa7c50c37500b3",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    },
+    {
+      "frozenFunction": "payload_has_valid_shop_array",
+      "sharedFunction": "payload_has_valid_shop_array",
+      "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "frozenHeader": "fn payload_has_valid_shop_array(payload: &Value) -> bool",
+      "sharedHeader": "fn payload_has_valid_shop_array(payload: &Value) -> bool",
+      "frozenBodySha256": "c18608d90ea281063539c73a007d2ca4d01d0f2e71337ccf87cd943dc00e15ce",
+      "sharedBodySha256": "c18608d90ea281063539c73a007d2ca4d01d0f2e71337ccf87cd943dc00e15ce",
+      "normalizedSha256": "1b8b745402ad72454b23314f5440d38d584175393297521d8f8a09ba887d7561",
+      "bodyEqual": true,
+      "thinWindowsDelegation": true
+    }
+  ],
+  "pass": true,
+  "windowsDeviceAccepted": false,
+  "authenticatedAndroidAccepted": false,
+  "completeNpcReceiptsAccepted": false
+}

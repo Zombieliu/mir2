@@ -1,0 +1,1398 @@
+{
+  "source": "76d51415b5ceed667898a720c698b3a062bf7790",
+  "goalStatus": "Active",
+  "payloadCount": 278,
+  "totalBytes": 16957314,
+  "payloads": [
+    {
+      "path": "diagnosis.json",
+      "bytes": 10845,
+      "sha256": "ba12982212d9a50ec6c706666cdeb7cc87227818334a90c19a9cac0cd4f75285"
+    },
+    {
+      "path": "raw/audit-packages.mjs",
+      "bytes": 5473,
+      "sha256": "6738c9c6ff164ae365285558077f8638b2e42ef7785ec68187f0d66a1cfdb057"
+    },
+    {
+      "path": "raw/bound-api31-normal-v34-corrected-result.json",
+      "bytes": 20393,
+      "sha256": "39815072137b8a0109be05efa554f4c03edf7192a1b97e3cc31b7e652ad95e54"
+    },
+    {
+      "path": "raw/bound-api31-normal-v34-corrected.log",
+      "bytes": 33230,
+      "sha256": "bd59fb9cf9a3ce4ef4789f56aad89c1608ab0b94c2e24328afd777c9d01bc6f4"
+    },
+    {
+      "path": "raw/bound-api31-preview-v34-corrected-result.json",
+      "bytes": 20430,
+      "sha256": "1018afe4188fab57da7bc6b9c2ba3caaf00fe0e3c83b1399114dd00e368ba6b8"
+    },
+    {
+      "path": "raw/bound-api31-preview-v34-corrected.log",
+      "bytes": 33229,
+      "sha256": "b7bee1f6eaec8e290b2ef57dad2da79fb24236015cda16f1c5e3ea63639274cc"
+    },
+    {
+      "path": "raw/bound-java-full-v34-result.json",
+      "bytes": 23076,
+      "sha256": "a1f00bd0d47361b7202c714d364a49a2899e145774b1d3598956b10b61611d05"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-0/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "75ad1004538c0a294e85a4166db75ed082fb6849130a2833d895de9123a49c46"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-0/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "d9b4fd5dd4f5ed2f446eaccd168b7a27cedfec758a18af9fd2d83d38b772cc53"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-0/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "21436f29f2bb63e11ce40c5dbd700f553f58760c706c80bc7443893cf5ad3e28"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-0/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4467,
+      "sha256": "7743439f2c952f2acd274598448e6e0115ed95a3c2a1ed0393897ab0b0be74d9"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-0/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "2a6fa60c7441d9eafd5a94bd9e63e088415c34b02f2a3dab13e3f50af86aa40a"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-0/TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 1075,
+      "sha256": "d7bfe0e112480a782d43c7d661b3950da6cd9b4361f6d9aed21135fc3b0900d8"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-1/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 963,
+      "sha256": "f987c9c8b4ed77284a1ca3271a8b94dbfd39c0b802db7199a579eb4c87fc788a"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-1/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "2c2fe3d45cd04d1bb570194785441af585c4d80886242f83373c118649da9fb5"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-1/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 856,
+      "sha256": "494e9b34f983cda7f63d7309c97eb7ba6227116e5e086456ca0336fd181cfb1d"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-1/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4470,
+      "sha256": "ec3946f1ed87df4305829e8c58d899e0d7bf245faeebbfe64ee042d7aa0a6cbf"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-1/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "85cf3a89b24b8f62652b181bdc7c2f340ac7d52044b0fd1f98c7b302810d0bd4"
+    },
+    {
+      "path": "raw/bound-java-full-v34-xml-1/TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 1076,
+      "sha256": "8edbc7a11bc5dec0b9bbd16a6fa3152231776421de177fd1f0bc789085976e4a"
+    },
+    {
+      "path": "raw/bound-java-full-v34.log",
+      "bytes": 3149,
+      "sha256": "36fdc3d7a7410f2668f811ed7ce361003c8b1db9986e2fe3da60f34c9035aea6"
+    },
+    {
+      "path": "raw/bound-runtime-v34-result.json",
+      "bytes": 20377,
+      "sha256": "29b574a701a900f161c2444adf08aadbb6d7c9b2eeda9aa5edb0a92766d87c52"
+    },
+    {
+      "path": "raw/bound-runtime-v34.log",
+      "bytes": 27145,
+      "sha256": "884424286ec6cc0c825cc0d3410086397b23a2799a85a4641edb91f98d632717"
+    },
+    {
+      "path": "raw/bound-rust-normal-v34-result.json",
+      "bytes": 20390,
+      "sha256": "6d0f86d811b299df1dcf71195ce6d1386d84c85b9c52b72172aab9233f19d245"
+    },
+    {
+      "path": "raw/bound-rust-normal-v34.log",
+      "bytes": 75329,
+      "sha256": "86dd561ef123ac63e70bfc68adf95c746f3a6a166a903c422c2d9481f03bb44d"
+    },
+    {
+      "path": "raw/bound-rust-preview-v34-result.json",
+      "bytes": 20427,
+      "sha256": "02c33af770c938ad6d95e1b06e011eb370354b0fa5f51cef0f46668eb8c5ccc4"
+    },
+    {
+      "path": "raw/bound-rust-preview-v34.log",
+      "bytes": 80782,
+      "sha256": "e90c95d8b73173375b522fceccdcc579ac3a5c74525044ba08872ed02b4b95bc"
+    },
+    {
+      "path": "raw/bound-shared-native-player-v34-result.json",
+      "bytes": 20436,
+      "sha256": "9f08249f2ced048854fb7e606a86fdc562490e06ab462cb09aabfc996f5089a2"
+    },
+    {
+      "path": "raw/bound-shared-native-player-v34.log",
+      "bytes": 156916,
+      "sha256": "0bba41796abb0c2b5a9783334089fa25617dff7b2a0b074d0d19b14286fcd3e1"
+    },
+    {
+      "path": "raw/build-pair.mjs",
+      "bytes": 3957,
+      "sha256": "9780df159da9f0be5c1107114b559049da7008fbf1eb70b961defff80388a9af"
+    },
+    {
+      "path": "raw/capture-ui.mjs",
+      "bytes": 4780,
+      "sha256": "c83dd0af22927c681fa89c599b358434acd3b7429d6fd9fdd3650c756be3833d"
+    },
+    {
+      "path": "raw/debug-badging.txt",
+      "bytes": 4634,
+      "sha256": "fc3aaec4cc834aefb38368f353949651826f04bf89bf7668068799c57ae7f37d"
+    },
+    {
+      "path": "raw/debug-build-end.txt",
+      "bytes": 25,
+      "sha256": "d4730131cf5f94a25a00f2d17553dbb9b8bdf26811ca4e4d8aadd579a3566fcf"
+    },
+    {
+      "path": "raw/debug-build-start.txt",
+      "bytes": 25,
+      "sha256": "f62d3be23d1eb650db9bfb75a6914e0a0d21501da6897fe809a6f3c10bfa402d"
+    },
+    {
+      "path": "raw/debug-build.log",
+      "bytes": 36287,
+      "sha256": "d32c812748cf17140c87c7f5523a834c4766c2c6c3902999a59255f4aadd686d"
+    },
+    {
+      "path": "raw/debug-BuildConfig.java.txt",
+      "bytes": 583,
+      "sha256": "e2caf91d0a1025db2ce31fe1686b5a6addc958755d79e00d5ff7968313eb57bc"
+    },
+    {
+      "path": "raw/debug-installed-path.txt",
+      "bytes": 93,
+      "sha256": "319e02721671eea1a2de3d48ca20f8fb57decfaebfd0178d2c52c5574dd1f08f"
+    },
+    {
+      "path": "raw/debug-installed-sha.txt",
+      "bytes": 151,
+      "sha256": "f5f528f8237d844e3d426826936507b1fa7aafa954cc1f452d115d0547128e5a"
+    },
+    {
+      "path": "raw/debug-package-after.txt",
+      "bytes": 9288,
+      "sha256": "a0603d3ceccf564d2a4192d2c7ed063d3898ec199560a7b7ffc39ff1b0940834"
+    },
+    {
+      "path": "raw/debug-package-before.txt",
+      "bytes": 9733,
+      "sha256": "a3b8e82d16c19edb6b468ac3386906e659afd2da891585ce530e46be046a0e4c"
+    },
+    {
+      "path": "raw/debug-source-after.txt",
+      "bytes": 41,
+      "sha256": "9744f0409a33e1eb377c0027580216d012659584f21f6b572e9bb7fc036b2c35"
+    },
+    {
+      "path": "raw/debug-source-before.txt",
+      "bytes": 41,
+      "sha256": "9744f0409a33e1eb377c0027580216d012659584f21f6b572e9bb7fc036b2c35"
+    },
+    {
+      "path": "raw/debug-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/debug-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/device-abi.txt",
+      "bytes": 10,
+      "sha256": "7f10c3cd4593d1d6ded27d658e7c05216011c955c200aac551caad0c979d4d90"
+    },
+    {
+      "path": "raw/device-api.txt",
+      "bytes": 3,
+      "sha256": "32c2643e0dc65524c9f1f6f9f00937322fd68d59986bc381d9ff2285d23e353d"
+    },
+    {
+      "path": "raw/device-avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "path": "raw/device-density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "path": "raw/device-list.txt",
+      "bytes": 147,
+      "sha256": "e8fe6f96c101382176c616dba8f9ce8e63405777dd1e7e953e586371e2a0e9e6"
+    },
+    {
+      "path": "raw/device-model.txt",
+      "bytes": 19,
+      "sha256": "2e781b655b0a1fbca1235d182864661fab33a2a3ef3d4521e580f04b0b009ead"
+    },
+    {
+      "path": "raw/device-size.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "path": "raw/install-baseline.json",
+      "bytes": 1575,
+      "sha256": "60fe463b1e5c5061c831b9656fe70702a92e5c76badf3ccf929bfa23555fb608"
+    },
+    {
+      "path": "raw/install-debug.txt",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "path": "raw/install-preview.txt",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "path": "raw/java-results.json",
+      "bytes": 2287,
+      "sha256": "7cd43ce872a732ea634661e43a5467938eb39ef215f757d1b55cf343597cf82e"
+    },
+    {
+      "path": "raw/original-worktrees-after.json",
+      "bytes": 577,
+      "sha256": "63adcf2ba8093b76a003fdf501e092593c51c1ea0cc4918789f5b6fc4e1dd4e9"
+    },
+    {
+      "path": "raw/original-worktrees-before.json",
+      "bytes": 577,
+      "sha256": "63adcf2ba8093b76a003fdf501e092593c51c1ea0cc4918789f5b6fc4e1dd4e9"
+    },
+    {
+      "path": "raw/package-baseline.json",
+      "bytes": 9956,
+      "sha256": "e8f76bb14b6ffe15792f88fc286065280116cecf3f6cc9bfd4a89da3c067fa0e"
+    },
+    {
+      "path": "raw/pr-after-source-publish.json",
+      "bytes": 230,
+      "sha256": "71adee7e0b14ad1707e01f68c6f83e63dabfd4551336cc5ee64f496e86670b2b"
+    },
+    {
+      "path": "raw/pr-after-source-publish.json.status.json",
+      "bytes": 218,
+      "sha256": "a026839f2210ef5ec6a936c8e236da4489e70b1fb5d85e7cf07f6e80e12d8fa2"
+    },
+    {
+      "path": "raw/preview-badging.txt",
+      "bytes": 4654,
+      "sha256": "a6c90de2b699871224a1d11e69b8569f6f33b06bb747a7d8b24c88960c135554"
+    },
+    {
+      "path": "raw/preview-build-end.txt",
+      "bytes": 25,
+      "sha256": "a35cde7d4af73d655256e7cd0e9ee4752039333d922a5b17e2a560f9e4954f68"
+    },
+    {
+      "path": "raw/preview-build-start.txt",
+      "bytes": 25,
+      "sha256": "044b12aca25b9adc50fee7e19dbd95d4d215758852fef397281eaeb4e14b2092"
+    },
+    {
+      "path": "raw/preview-build.log",
+      "bytes": 36506,
+      "sha256": "006021fea9e6fab983131158f67d6254623bd5336952e1c3ccd8f97b6e7cd12b"
+    },
+    {
+      "path": "raw/preview-BuildConfig.java.txt",
+      "bytes": 600,
+      "sha256": "1b998032584f88be02b50f6cb344a9752d34034e1ee09081a71b80784577543f"
+    },
+    {
+      "path": "raw/preview-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/preview-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/preview-package-after.txt",
+      "bytes": 9580,
+      "sha256": "dd827b6caae63589d3cad87f7b2160cc4a2a04c97843f63f3030a602416f5dbf"
+    },
+    {
+      "path": "raw/preview-package-before.txt",
+      "bytes": 10056,
+      "sha256": "383b89b16aa4f8c9914eeabb8d3fea855f0e470175036deff77336882a38d780"
+    },
+    {
+      "path": "raw/preview-source-after.txt",
+      "bytes": 41,
+      "sha256": "9744f0409a33e1eb377c0027580216d012659584f21f6b572e9bb7fc036b2c35"
+    },
+    {
+      "path": "raw/preview-source-before.txt",
+      "bytes": 41,
+      "sha256": "9744f0409a33e1eb377c0027580216d012659584f21f6b572e9bb7fc036b2c35"
+    },
+    {
+      "path": "raw/preview-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/preview-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/publish-source-only-https-result.json",
+      "bytes": 210,
+      "sha256": "3c77670449959b70ae48d17072cdae80813834c65c9b38b7e4778f89f59b275a"
+    },
+    {
+      "path": "raw/publish-source-only-https-start.json",
+      "bytes": 435,
+      "sha256": "4f7b60d844525955aa4ab2ac03ede7d68862424b10aff0952115b61dc903807b"
+    },
+    {
+      "path": "raw/publish-source-only-https.stderr.log",
+      "bytes": 136,
+      "sha256": "54530f40a46e7dabbabc38253d3ea240c8f8a1da262f0505da3a19fac448b83a"
+    },
+    {
+      "path": "raw/publish-source-only-https.stdout.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/remote-after-source-publish.txt",
+      "bytes": 159,
+      "sha256": "164327a45481fb0c653097aecff06b471a7ce93f3e6f61f9607b395b7a78d63d"
+    },
+    {
+      "path": "raw/remote-after-source-publish.txt.status.json",
+      "bytes": 259,
+      "sha256": "f52623f13269f06c0b6e6aab80814dfbdae089466f455294a5fd6cf0d5eb1d7e"
+    },
+    {
+      "path": "raw/source-and-package-baseline.json",
+      "bytes": 16413,
+      "sha256": "7cda4fe6df24b09241a86fdbe839532189c6e18946f11ebbf1cfcb48e60cae23"
+    },
+    {
+      "path": "raw/source-commit-binding.json",
+      "bytes": 11511,
+      "sha256": "4a322b69ea9ad196d380e9d58659a84fa1d632264d8f90d8a9150e5c27284213"
+    },
+    {
+      "path": "raw/source-publication-verified.json",
+      "bytes": 1524,
+      "sha256": "ef5a5c7593d08b079b955d53a5cd0295928689483945eb9a6747ded629df8129"
+    },
+    {
+      "path": "raw/source-staged-diff.patch",
+      "bytes": 13871,
+      "sha256": "a8cbdd8d2f19b3611d54469da7207dd3aadfaf7298cd5ada124fca7460922f7f"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/0-cold-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/0-cold-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/0-cold-package.txt",
+      "bytes": 9581,
+      "sha256": "1061f24e278f7edb012b024b464db6a4def49bfdda0135584b2438f72f0587c3"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/0-cold-pid.log",
+      "bytes": 45470,
+      "sha256": "0ed5b8a2aac815483ac79a50951864a24e8d72a8a521335d3f5bfa1e4ff828e9"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/0-cold.png",
+      "bytes": 579559,
+      "sha256": "c284db7e3d845f1b3a00f2425fb4095a21b2cbb9eb0a7ec9af8df2c36d97eccc"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/104-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/104-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/104-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/104-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "15d319f2587b917ec340de111b5ec312547754a6e73bf950d27a62f78aaa1369"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/104-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/104-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/104-tap-pid.log",
+      "bytes": 54190,
+      "sha256": "27b91c5909459bd0bbb10ce90439152cc03199ab876a88db796dfdbb8b5ebd50"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/104-tap.png",
+      "bytes": 545943,
+      "sha256": "abab00bbf382b7beee09da6a1b595deefc354e95afdc9768bd7ac739cfd2fdd0"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/112-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/112-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/112-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/112-tap-package.txt",
+      "bytes": 10054,
+      "sha256": "93be5abca296e5e8cfbe9ba3ffaca979958b0cf2075dc7328fd55ad4763b8165"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/112-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/112-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/112-tap-pid.log",
+      "bytes": 67598,
+      "sha256": "8527962ace93919f90bbdd47341b85f4d3ae9b288015faf293a6482c727743dd"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/112-tap.png",
+      "bytes": 545973,
+      "sha256": "9a0ba0c711d3d5cb9ccd97ce77cf596f254f7b9c1a9ecebe825866d04a1277d8"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/120-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/120-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/120-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/120-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "26f8b6c79f722ecddb881daea12fa2d4fa24ce171df96369ece0089ffbbd96ae"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/120-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/120-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/120-tap-pid.log",
+      "bytes": 67925,
+      "sha256": "3aaf5e4540017c6c934846b60e25ae99f5a699a1082e65f21d94519738e4c0ed"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/120-tap.png",
+      "bytes": 579825,
+      "sha256": "a51be4e15888045d2a50d9f601d64397c0a2e2af59d38600dc334278c9348ca1"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/128-home-home.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/128-home-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/128-home-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/128-home-package.txt",
+      "bytes": 10054,
+      "sha256": "b3efff02de0b887970ac52f96d7d29e16fd49bfbf0f9c8df7cde97b2dacef8ab"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/128-home-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/128-home-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/128-home-pid.log",
+      "bytes": 74187,
+      "sha256": "d4270225f5f2d47532d37ea7357ba71fe77b6b4af34deb38ea518b124076b861"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/128-home-resume.txt",
+      "bytes": 292,
+      "sha256": "a07eba624146f8453026c48b2e28496951eda5e8b4764108c5037f681cf09aaf"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/128-home.png",
+      "bytes": 579797,
+      "sha256": "59a189a111696b0097bc4a98f82717c5a4f08788baa492c2a6aea4a2ce8d64d4"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/137-stop-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/137-stop-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/137-stop-package.txt",
+      "bytes": 10054,
+      "sha256": "f91b8b678aaee648c26feb5e985ac43a14b8b4f9450c04fa8099a5256967862d"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/137-stop-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/137-stop-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/16-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/16-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/16-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/16-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "e38688720b19004bda494e133f61d0991a749a028ebaea135e4cdaf07b5b60fe"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/16-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/16-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/16-tap-pid.log",
+      "bytes": 51574,
+      "sha256": "fe3c442e16aac3532e9724857eecf124dc43b3842b049f82bd16997a0275d656"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/16-tap.png",
+      "bytes": 579639,
+      "sha256": "c3fae1c10942307642f89260bec008796a9ed05a217bc83c2ab5b5a825b91dea"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/24-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/24-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/24-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/24-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "2b6d790c7cf94148a1841fb56df113352add2d2d0620992dde7dc2aedc661e4c"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/24-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/24-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/24-tap-pid.log",
+      "bytes": 51901,
+      "sha256": "ef6917ca165a10481d3d4474a85e1a1bb4709026b7c8f020058e67104299e538"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/24-tap.png",
+      "bytes": 579614,
+      "sha256": "e297849673d481cf0a94e3a69582ac3ce08165d6fd62e08c842ec8347a150d0d"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/32-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/32-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/32-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/32-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "49ad8471cf1c06e4455b826ea894c914705e69f2a28f09d7afa8fced672f308b"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/32-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/32-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/32-tap-pid.log",
+      "bytes": 52119,
+      "sha256": "fab852b29a0d7258faf59c5ee1c681cc4e49119f7e5503eb78ade963d0f1033e"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/32-tap.png",
+      "bytes": 579548,
+      "sha256": "4722ccd9baa780680b1fab921e66a554cf526cf149c7ab4a83130e83522bb1d0"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/40-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/40-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/40-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/40-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "f47c5b5665d55973476d4344f89218c0a1a5072f50b485781692e46bf3acfb01"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/40-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/40-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/40-tap-pid.log",
+      "bytes": 52337,
+      "sha256": "549c994c6def6c7329752a76e2520e01932e51e9c5949ce7dca4668961ec91e9"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/40-tap.png",
+      "bytes": 579728,
+      "sha256": "4f56c7ff4d07cff134c690bdce99a6813a1174077508ffe79bb1e7f1f17fa122"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/48-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/48-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/48-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/48-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "023c2a69814f9a249d5e1a2893b122b8db784dcd1f90324a2c4699987dc9e7f5"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/48-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/48-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/48-tap-pid.log",
+      "bytes": 52555,
+      "sha256": "12ce6cd847d0984bb88752ef74c28f54aa613e09bd346795f016fd5be42a4dc9"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/48-tap.png",
+      "bytes": 579682,
+      "sha256": "cc14809084b41fc26e6ca558a1a01b679e4342a4b7872b71e2e81a806b2c8c0c"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/56-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/56-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/56-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/56-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "62ca2aa766d62360bd48812e2904f10677d34eff1e4fd0cb5732f0cbf028be29"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/56-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/56-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/56-tap-pid.log",
+      "bytes": 52773,
+      "sha256": "deb66914de59b03af721c7e99e121a28a4fec2bb55d0df85d00866c278e3c99b"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/56-tap.png",
+      "bytes": 579723,
+      "sha256": "5e05e55cf0f4b97688cb04c486e6cd911cafcf0c45cd4ccb89673a10240832f8"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/64-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/64-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/64-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/64-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "5a70b1a27e44eb237bf9f80ce733883618369dba0cf0454569c9ee1e22aea137"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/64-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/64-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/64-tap-pid.log",
+      "bytes": 52991,
+      "sha256": "e21a35de086e967b61f13da49c12d23a30a138150b430d25be6989cf6e81eeb5"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/64-tap.png",
+      "bytes": 579629,
+      "sha256": "24343672209188254529d67a57ce9cf40033941b6242de8551f44e46f1a0af91"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/72-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/72-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/72-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/72-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "7947c90410f1977ff7d10d7f59e862103aac4ec4edd3064e4392b49f1deda389"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/72-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/72-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/72-tap-pid.log",
+      "bytes": 53209,
+      "sha256": "da7ae0076d35fc533c22df864bf869708a8eaab43bad9043bd320d6708c8b6ab"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/72-tap.png",
+      "bytes": 579768,
+      "sha256": "98036aade807fa87879f9f56e6ecec35b704403d7dab657721f0bfbd5211d74f"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/8-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/8-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/8-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/8-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "fb12462ea0af92164e96e005c3ed65d46377dbf836d9956268a057ef205eb6ed"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/8-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/8-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/8-tap-pid.log",
+      "bytes": 48958,
+      "sha256": "3c147f7469147369cd61985cc446086d5702623bc37f0bba393b385ba9a2e583"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/8-tap.png",
+      "bytes": 579546,
+      "sha256": "534e07136cd05ab7dcd1154db1cb164270c688b33479927e518bf6b9fc8928f0"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/80-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/80-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/80-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/80-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "4ae763003a8e5325360444348b78adbe9974df7f02b15b64cb786609db8790f6"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/80-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/80-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/80-tap-pid.log",
+      "bytes": 53536,
+      "sha256": "c610811968f0c7016607db72a5f95a85328015efd495fa8de7962a1ae872ad19"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/80-tap.png",
+      "bytes": 579662,
+      "sha256": "c8a371033f26b0bac112f799de6e1438ca687a1fca692379a9a07204167c0017"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/88-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/88-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/88-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/88-tap-package.txt",
+      "bytes": 10053,
+      "sha256": "6eb5b225890dc914ec2bec0eb917a1e65b1198d2152de7377b56d23501dcfc38"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/88-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/88-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/88-tap-pid.log",
+      "bytes": 53754,
+      "sha256": "b3646971c405eaa80d8d083d96c466c90d6d1d876249422d6e44a8176c7e1282"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/88-tap.png",
+      "bytes": 579793,
+      "sha256": "3cfd77517081469d1972b35228e87dffbb86729c919cde8ca91d176bac2ecd5c"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/96-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/96-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/96-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/96-tap-package.txt",
+      "bytes": 10052,
+      "sha256": "a1f4f5cd2088df3a6643042c845f2434917afac8906db0cee6d420aa570d9aac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/96-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/96-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/96-tap-pid.log",
+      "bytes": 53972,
+      "sha256": "ab5efee27f05ad2b20597a90e63025c16c7022364411b9c14b7985f70cdfd6c4"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/96-tap.png",
+      "bytes": 579885,
+      "sha256": "20928e18e1dc329d6e01be8f9d760660f4e17920a3f3d9c7d85bb7f62162ab4f"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/commands.json",
+      "bytes": 39175,
+      "sha256": "5e5f18709bb4a034f4ffa1e5409bc93c86ce1c4ebb32b4b81c6531b1e1287fcc"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/pid.txt",
+      "bytes": 6,
+      "sha256": "5fd09da01981adead30649577ab6d6065a1590a86a3716f5931859cb49d3b9ac"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/start.txt",
+      "bytes": 217,
+      "sha256": "ef9cd02e8439176a6c2ef15c3197a2fd1ac834590d748cbe86dce0ad9baa7244"
+    },
+    {
+      "path": "raw/ui-gameshop-jni/stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-normal-intent-isolation/0-cold-installed-path.txt",
+      "bytes": 93,
+      "sha256": "319e02721671eea1a2de3d48ca20f8fb57decfaebfd0178d2c52c5574dd1f08f"
+    },
+    {
+      "path": "raw/ui-normal-intent-isolation/0-cold-installed-sha.txt",
+      "bytes": 151,
+      "sha256": "f5f528f8237d844e3d426826936507b1fa7aafa954cc1f452d115d0547128e5a"
+    },
+    {
+      "path": "raw/ui-normal-intent-isolation/0-cold-package.txt",
+      "bytes": 9287,
+      "sha256": "4f474f5734f88779bd076ac8d4af2e7c5c77505f4631aa331f254146636f3ddb"
+    },
+    {
+      "path": "raw/ui-normal-intent-isolation/0-cold-pid.log",
+      "bytes": 20253,
+      "sha256": "b7f24e0a3cb585caefec556a9fb649c039932e915204beaee5ea508d54360c83"
+    },
+    {
+      "path": "raw/ui-normal-intent-isolation/0-cold.png",
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "path": "raw/ui-normal-intent-isolation/commands.json",
+      "bytes": 2789,
+      "sha256": "9e91f923738c941d9653d463b9dd80e2566231a7ce94015b7be29b3f486acdd9"
+    },
+    {
+      "path": "raw/ui-normal-intent-isolation/pid.txt",
+      "bytes": 6,
+      "sha256": "505d3bc5a96cdfce32a19eda3aa929f03c5835c6b99e85fb9acce163566d8967"
+    },
+    {
+      "path": "raw/ui-normal-intent-isolation/start.txt",
+      "bytes": 171,
+      "sha256": "63f98af14be94fde7149b7d0e5e75d7694f0a00d320e26caf793d02dca4c07a9"
+    },
+    {
+      "path": "raw/ui-normal-intent-isolation/stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-storage-jni/0-cold-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-storage-jni/0-cold-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-storage-jni/0-cold-package.txt",
+      "bytes": 10053,
+      "sha256": "9460c244f65887257d7a621155184f138e78ac62ffb53e07ea9584b0952f8e2e"
+    },
+    {
+      "path": "raw/ui-storage-jni/0-cold-pid.log",
+      "bytes": 45428,
+      "sha256": "ab83dc80cb7b07d0dcbe3eb9d442574809cb24c5f76c1ef16016990851c19504"
+    },
+    {
+      "path": "raw/ui-storage-jni/0-cold.png",
+      "bytes": 550501,
+      "sha256": "a29d07497947c6efa54e936fabfbefd731b46cae64ef3682b6a490d757de8e37"
+    },
+    {
+      "path": "raw/ui-storage-jni/16-home-home.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-storage-jni/16-home-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-storage-jni/16-home-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-storage-jni/16-home-package.txt",
+      "bytes": 10054,
+      "sha256": "26275580b428ef3fa3492bb19b59684f7dc59946e85e357dcd05babf989dfa48"
+    },
+    {
+      "path": "raw/ui-storage-jni/16-home-pid-after.txt",
+      "bytes": 6,
+      "sha256": "81b91a7547f2748ceda44c2afc35a565fedd84a2d4be8d17b5e5e8e1f3550b41"
+    },
+    {
+      "path": "raw/ui-storage-jni/16-home-pid-before.txt",
+      "bytes": 6,
+      "sha256": "81b91a7547f2748ceda44c2afc35a565fedd84a2d4be8d17b5e5e8e1f3550b41"
+    },
+    {
+      "path": "raw/ui-storage-jni/16-home-pid.log",
+      "bytes": 58666,
+      "sha256": "293b953d4cf38b0dc33602cd05a68cfae5ae88cf41e1d862fb1d7e32b5ff5d0e"
+    },
+    {
+      "path": "raw/ui-storage-jni/16-home-resume.txt",
+      "bytes": 292,
+      "sha256": "61385ff11e64e08f5b0f23337be907eb6fab4346aa67c457404ae3caa4777b86"
+    },
+    {
+      "path": "raw/ui-storage-jni/16-home.png",
+      "bytes": 557017,
+      "sha256": "9b268d42cbd87309305281f90a84648b358f98594be591396f17c1685cddf6ec"
+    },
+    {
+      "path": "raw/ui-storage-jni/25-stop-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-storage-jni/25-stop-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-storage-jni/25-stop-package.txt",
+      "bytes": 10053,
+      "sha256": "d3fc51944f47482a32f17e17fc1becafbbe7036de3af9c938df140ac1ef25fed"
+    },
+    {
+      "path": "raw/ui-storage-jni/25-stop-pid-before.txt",
+      "bytes": 6,
+      "sha256": "81b91a7547f2748ceda44c2afc35a565fedd84a2d4be8d17b5e5e8e1f3550b41"
+    },
+    {
+      "path": "raw/ui-storage-jni/25-stop-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-storage-jni/8-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-storage-jni/8-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "ad457b390e3fa7a5fbec4b50aca99ad21d240a408ac58758e8cff2dd26a36d21"
+    },
+    {
+      "path": "raw/ui-storage-jni/8-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "1f9dab0ba72fa739f6c80163cd921439a77ad803d744eb2371d753e392fa4633"
+    },
+    {
+      "path": "raw/ui-storage-jni/8-tap-package.txt",
+      "bytes": 10054,
+      "sha256": "76ce3015b325a3492c4765d6f95e4bcc29c78c173041e395698ae33ee573c880"
+    },
+    {
+      "path": "raw/ui-storage-jni/8-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "81b91a7547f2748ceda44c2afc35a565fedd84a2d4be8d17b5e5e8e1f3550b41"
+    },
+    {
+      "path": "raw/ui-storage-jni/8-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "81b91a7547f2748ceda44c2afc35a565fedd84a2d4be8d17b5e5e8e1f3550b41"
+    },
+    {
+      "path": "raw/ui-storage-jni/8-tap-pid.log",
+      "bytes": 52295,
+      "sha256": "9dec0ecc80b9f0d7096efab34adad8a2bdda4a3551902fd7482c694c6078483b"
+    },
+    {
+      "path": "raw/ui-storage-jni/8-tap.png",
+      "bytes": 557172,
+      "sha256": "64036a54aff126cbcf7e86498c312388921d11aa1221e788c69f77c459954bc0"
+    },
+    {
+      "path": "raw/ui-storage-jni/commands.json",
+      "bytes": 8934,
+      "sha256": "4977d440be01206c2fb5bf41fdeffbd9b4a09557d9d6a7b945c4e62042b4587c"
+    },
+    {
+      "path": "raw/ui-storage-jni/pid.txt",
+      "bytes": 6,
+      "sha256": "81b91a7547f2748ceda44c2afc35a565fedd84a2d4be8d17b5e5e8e1f3550b41"
+    },
+    {
+      "path": "raw/ui-storage-jni/start.txt",
+      "bytes": 217,
+      "sha256": "d40b4c0c4d5fefa9c8d8996c520951777e119704e6709147f685ca6744c81a35"
+    },
+    {
+      "path": "raw/ui-storage-jni/stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/working-final-diff.patch",
+      "bytes": 3023,
+      "sha256": "1a451bd5557c56c74e21a238bc8e56a85195f26a10b60f615ec878ee29aeae76"
+    },
+    {
+      "path": "raw/working-game-shop-hit-compiled-red-v34-result.json",
+      "bytes": 1917,
+      "sha256": "8c5ecfb93819160a758e3b49e8e676286fcfb363bb0cecf82ea43e52f8c7834c"
+    },
+    {
+      "path": "raw/working-game-shop-hit-compiled-red-v34.log",
+      "bytes": 21791,
+      "sha256": "1115b097687c22fee01970d5c1c1f75b6669b75a22b1d62bc2580df688f06da3"
+    },
+    {
+      "path": "raw/working-game-shop-hit-red-v34-result.json",
+      "bytes": 1910,
+      "sha256": "cf4665caf1fbe7133fc09b52e91b3149891342bed9f74c81bc34b60c571ead15"
+    },
+    {
+      "path": "raw/working-game-shop-hit-red-v34.log",
+      "bytes": 10682,
+      "sha256": "9d0bfeb10bd348c8dc0d974d2e3d4a371ab533ddedd7890fe991605834b347eb"
+    },
+    {
+      "path": "raw/working-game-shop-page-cache-corrected-green-v34-result.json",
+      "bytes": 2333,
+      "sha256": "f579c9f25dce516fcf74f0d9b1ebe46cb5ffe62a58f3806d5db02274ff591d77"
+    },
+    {
+      "path": "raw/working-game-shop-page-cache-corrected-green-v34.log",
+      "bytes": 22193,
+      "sha256": "b1eb1920597d039f59594e7bd01eb773f64a8191107d3e46fbbbe7940cea50cc"
+    },
+    {
+      "path": "raw/working-game-shop-page-cache-corrected-red-v34-result.json",
+      "bytes": 2333,
+      "sha256": "6bfd3d83d2d7df1d91f69388b4339411dfae3c09bf88143e05c97cf45c5cfa5c"
+    },
+    {
+      "path": "raw/working-game-shop-page-cache-corrected-red-v34.log",
+      "bytes": 23504,
+      "sha256": "49f8435e1447af9cfcbb8e65453cf36edd22ad6e7fdfccc932a02809b36251b2"
+    },
+    {
+      "path": "raw/working-game-shop-page-cache-green-v34-result.json",
+      "bytes": 2325,
+      "sha256": "7e70c5c6a5f16d6d6bee0a0d0e4421f9f2f1a466af2a25888a5a09fb8616aedd"
+    },
+    {
+      "path": "raw/working-game-shop-page-cache-green-v34.log",
+      "bytes": 23589,
+      "sha256": "0e35c494fa6b62533874d7aab0d9b4e1aec18cab8aa96a6aa8000ce8a268b1c5"
+    },
+    {
+      "path": "raw/working-game-shop-page-cache-red-v34-result.json",
+      "bytes": 2321,
+      "sha256": "f13e8daaed94dff368e6d236ca86e6cf7297d82ac95b5649e04550c270f0258a"
+    },
+    {
+      "path": "raw/working-game-shop-page-cache-red-v34.log",
+      "bytes": 23513,
+      "sha256": "39ab9fdd3b290d8c003b5133d3a93dc97a23d10ed2beb11a71574e3a8f9dcb6f"
+    }
+  ]
+}

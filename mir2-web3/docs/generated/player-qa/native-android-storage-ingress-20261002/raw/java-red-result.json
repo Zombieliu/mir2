@@ -1,0 +1,17 @@
+{
+  "args": [
+    "--offline",
+    "--no-daemon",
+    "--no-build-cache",
+    "--rerun-tasks",
+    "testDebugUnitTest",
+    "--tests",
+    "com.mir2.web3.GatewaySessionTest.storageMetadataStagesOnlyDuringAuthenticatedSelectedStart",
+    "--tests",
+    "com.mir2.web3.GatewaySessionTest.oversizedStorageMetadataFailsClosedBeforeOwnerBootstrap"
+  ],
+  "started": "2026-10-02T14:13:32.264Z",
+  "ended": "2026-10-02T14:13:48.947Z",
+  "code": 1,
+  "signal": null
+}

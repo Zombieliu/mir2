@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> 2026-10-02 independent Android-source integration imports exact3d735745f.
+> The three conflicted Gateway/Zone files fully normalize to the same upstream
+> Rust source; no new server rule fork. This Mac reruns only Zone179, mana metadata3,
+> mana projection5, finite poison transfer5, Gateway private4/map-transfer3/
+> cadence4/personal-projection2. No full-server, live-player, deployment or
+> production acceptance is added. Old failure/Windows scopes and capacity pause
+> remain intact. [Exact scope](generated/player-qa/native-android-windows-refresh-20261002/README.md).
+
 > 2026-10-01 caster follow-up: strict audit of independent frozen saves and
 > normal logout receipts verifies 52/52 newcomer-v2 nodes (Wizard 26/26,
 > Taoist 26/26), both at level 30 with zero observed deaths. The earlier 33/52

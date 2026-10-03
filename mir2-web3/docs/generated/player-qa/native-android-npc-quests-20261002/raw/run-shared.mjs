@@ -1,0 +1,16 @@
+import {spawnSync} from 'node:child_process';
+import {readFileSync,writeFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {join,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=dirname(fileURLToPath(import.meta.url));
+const [name,filter='phone_quest_confirmation']=process.argv.slice(2);
+const file='mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs';
+const hash=createHash('sha256').update(readFileSync(file)).digest('hex');
+const args=['+1.95.0','test','--manifest-path','mir2-web3/apps/game-client/client-bevy/Cargo.toml','--lib','--features','native-player-ui','--locked','--offline',filter,'--','--test-threads=1'];
+const started=new Date().toISOString();
+const r=spawnSync('cargo',args,{env:{...process.env,CARGO_TARGET_DIR:'mir2-web3/apps/game-client/platform-android/target/shared-sync-build-cache'},encoding:'utf8',maxBuffer:32*1024*1024});
+writeFileSync(join(root,name+'.log'),r.stdout+r.stderr,{flag:'wx'});
+writeFileSync(join(root,name+'.json'),JSON.stringify({command:'cargo',args,started,finished:new Date().toISOString(),exitCode:r.status,signal:r.signal,phoneSourceSha256:hash,log:name+'.log'},null,2)+'\n',{flag:'wx'});
+console.log(JSON.stringify({name,exitCode:r.status,result:(r.stdout+r.stderr).match(/test result:.*|error\[[^\]]+\]:[^\n]*/g)}));
+process.exitCode=r.status;

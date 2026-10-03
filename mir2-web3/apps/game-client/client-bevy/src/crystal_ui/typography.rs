@@ -7,7 +7,7 @@
 
 use bevy::prelude::{FontSize, FontSource, TextFont};
 
-#[cfg(all(feature = "native-ui", not(feature = "system-font-discovery")))]
+#[cfg(all(feature = "native-player-ui", not(feature = "system-font-discovery")))]
 compile_error!(
     "native Crystal UI requires Bevy system_font_discovery for FontSource::Family(\"Arial\")"
 );

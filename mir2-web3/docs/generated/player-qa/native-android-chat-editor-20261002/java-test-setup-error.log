@@ -1,0 +1,6 @@
+Java test invocation setup failure, before Gradle executed:
+workdir: mir2-web3/apps/game-client/platform-android/android
+attempted relative redirect: ../../../target/chat-editor-v16-20261002/java-final.log
+zsh:1: no such file or directory: ../../../target/chat-editor-v16-20261002/java-final.log
+exit_code: 1
+This is not a product test failure or a passing test result. Corrected to an exact absolute QA path in the next invocation.

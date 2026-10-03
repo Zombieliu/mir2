@@ -119,8 +119,12 @@ pub fn drain_gateway_events(
         } else {
             shell.apply_gateway_event(event);
         }
-        if shell.screen != previous_screen && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
-            eprintln!("[native-shell] transition {previous_screen:?} -> {:?}", shell.screen);
+        if shell.screen != previous_screen && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some()
+        {
+            eprintln!(
+                "[native-shell] transition {previous_screen:?} -> {:?}",
+                shell.screen
+            );
         }
 
         if connected
@@ -193,9 +197,7 @@ pub fn forward_native_ui_intents(
                 secret_answer,
                 email_address,
                 ..
-            }
-                if shell.register_request_in_flight && !register_command_sent =>
-            {
+            } if shell.register_request_in_flight && !register_command_sent => {
                 register_command_sent = true;
                 commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::ClientVersion));
                 Some(NativeOutboundCommand::NewAccount {
@@ -392,17 +394,20 @@ mod tests {
         let mut shell = NativeShellModel::default();
         shell.screen = NativeShellScreen::Registration;
         shell.register_request_in_flight = true;
-        let (commands, _) = forward(shell, [NativeUiIntent::SubmitRegistration {
-            account_id: "player".to_owned(),
-            password: "secret".to_owned(),
-            confirm_password: "secret".to_owned(),
-            birth_date: "2000-01-01".to_owned(),
-            birth_date_binary: 630_822_816_000_000_000,
-            user_name: "Player Name".to_owned(),
-            secret_question: "pet?".to_owned(),
-            secret_answer: "cat".to_owned(),
-            email_address: "player@example.test".to_owned(),
-        }]);
+        let (commands, _) = forward(
+            shell,
+            [NativeUiIntent::SubmitRegistration {
+                account_id: "player".to_owned(),
+                password: "secret".to_owned(),
+                confirm_password: "secret".to_owned(),
+                birth_date: "2000-01-01".to_owned(),
+                birth_date_binary: 630_822_816_000_000_000,
+                user_name: "Player Name".to_owned(),
+                secret_question: "pet?".to_owned(),
+                secret_answer: "cat".to_owned(),
+                email_address: "player@example.test".to_owned(),
+            }],
+        );
         assert!(commands.iter().any(|command| matches!(
             command,
             GatewayCommand::Wire(NativeOutboundCommand::NewAccount {

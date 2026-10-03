@@ -1,0 +1,147 @@
+--------- beginning of main
+10-02 19:58:10.355 20183 20183 I com.mir2.web3: Late-enabling -Xcheck:jni
+10-02 19:58:10.383 20183 20183 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10147; state: ENABLED
+10-02 19:58:10.417 20183 20183 V GraphicsEnvironment: ANGLE Developer option for 'com.mir2.web3' set to: 'default'
+10-02 19:58:10.417 20183 20183 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-02 19:58:10.418 20183 20183 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-02 19:58:10.418 20183 20183 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-02 19:58:10.449 20183 20204 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+10-02 19:58:10.450 20183 20204 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+10-02 19:58:10.463 20183 20204 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+10-02 19:58:10.473 20183 20183 D AppCompatDelegate: Checking for metadata for AppLocalesMetadataHolderService : Service not found
+10-02 19:58:10.480 20183 20183 D gti.InputConnection: InputConnection created
+10-02 19:58:10.483 20183 20183 D gti.InputConnection: setEditorInfo
+10-02 19:58:10.487 20183 20183 W com.mir2.web3: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-02 19:58:10.487 20183 20183 I GameActivity: Looking for library libmir2_platform_android.so
+10-02 19:58:10.487 20183 20183 I GameActivity: Found library libmir2_platform_android.so. Loading...
+10-02 19:58:10.489 20183 20183 D GameActivity: GameActivity_register
+10-02 19:58:10.489 20183 20183 V GameActivity: Registering com/google/androidgamesdk/GameActivity's 24 native methods...
+10-02 19:58:10.489 20183 20183 D GameActivity: SDK version: 31
+10-02 19:58:10.490 20183 20183 I android-activity: Creating: Activity = 0x1696, saved state size = 0
+10-02 19:58:10.492 20183 20183 V threaded_app: Creating: 0xb400007535841870
+10-02 19:58:10.492 20183 20183 V threaded_app: Callbacks set: 0xb4000075358418c0
+10-02 19:58:10.492 20183 20183 V threaded_app: Launching android_app_entry in a thread
+10-02 19:58:10.492 20183 20206 V threaded_app: android_app_entry called
+10-02 19:58:10.492 20183 20206 V threaded_app: android_app = 0xb400007515843290
+10-02 19:58:10.492 20183 20206 V threaded_app: config = 0xb400007485853530
+10-02 19:58:10.492 20183 20206 V threaded_app: activity = 0xb400007535841870
+10-02 19:58:10.492 20183 20206 V threaded_app: assetmanager = 0xb40000753583d3b0
+10-02 19:58:10.492 20183 20206 V threaded_app: Config: mcc=310 mnc=260 lang=en cnt=US orien=2 touch=3 dens=440 keys=2 nav=2 keysHid=1 navHid=0 sdk=31 size=2 long=2 modetype=1 modenight=1
+10-02 19:58:10.514 20183 20206 D HostConnection: createUnique: call
+10-02 19:58:10.514 20183 20206 D HostConnection: HostConnection::get() New Host Connection established 0xb4000074d583bad0, tid 20206
+10-02 19:58:10.516 20183 20206 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-02 19:58:10.518 20183 20206 D EGL_emulation: eglCreateContext: 0xb4000074d583a990: maj 3 min 0 rcv 3
+10-02 19:58:10.519 20183 20206 D EGL_emulation: eglMakeCurrent: 0xb4000074d583a990: ver 3 0 (tinfo 0x76fbbe1080) (first time)
+10-02 19:58:10.534 20183 20206 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyAdapterInfo { name: "Android Emulator OpenGL ES Translator (Apple M1 Max)", vendor: 4203, device: 0, device_type: IntegratedGpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.0 (4.1 Metal - 89.4)", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+10-02 19:58:10.534 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.534262Z[0m [32m INFO[0m [2mbevy_render::renderer[0m[2m:[0m AdapterInfo { name: "Android Emulator OpenGL ES Translator (Apple M1 Max)", vendor: 4203, device: 0, device_type: IntegratedGpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.0 (4.1 Metal - 89.4)", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+10-02 19:58:10.540 20183 20183 V GameActivity: onStart_native
+10-02 19:58:10.540 20183 20183 V threaded_app: Start: 0xb400007535841870
+10-02 19:58:10.599 20183 20206 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevySparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+10-02 19:58:10.599 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.599511Z[0m [32m INFO[0m [2mbevy_render::render_resource::sparse_buffer_vec[0m[2m:[0m Sparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+10-02 19:58:10.599 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-OrderIndependentTransparencyPlugin not loaded. GPU lacks support: DownlevelFlags::FRAGMENT_WRITABLE_STORAGE.
+10-02 19:58:10.599 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-BackgroundMotionVectorsPlugin not loaded. GPU lacks support for required downlevel capability flags: DownlevelFlags(INDEPENDENT_BLEND).
+10-02 19:58:10.599 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.599610Z[0m [33m WARN[0m [2mbevy_core_pipeline::oit::resolve[0m[2m:[0m OrderIndependentTransparencyPlugin not loaded. GPU lacks support: DownlevelFlags::FRAGMENT_WRITABLE_STORAGE.
+10-02 19:58:10.599 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.599654Z[0m [33m WARN[0m [2mbevy_core_pipeline::prepass::background_motion_vectors[0m[2m:[0m BackgroundMotionVectorsPlugin not loaded. GPU lacks support for required downlevel capability flags: DownlevelFlags(INDEPENDENT_BLEND).
+10-02 19:58:10.651 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.650755Z[0m [32m INFO[0m [2mbevy_render::batching::gpu_preprocessing[0m[2m:[0m GPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+10-02 19:58:10.651 20183 20206 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyGPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+10-02 19:58:10.692 20183 20206 V threaded_app: activityState=11
+10-02 19:58:10.692 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.692738Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+10-02 19:58:10.692 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+10-02 19:58:10.693 20183 20183 V threaded_app: Resume: 0xb400007535841870
+10-02 19:58:10.695 20183 20206 V threaded_app: activityState=12
+10-02 19:58:10.704 20183 20183 V GameActivity: onImeInsetsChanged from Text Listener
+10-02 19:58:10.705 20183 20183 V threaded_app: WindowInsetsChanged: 0xb400007535841870
+10-02 19:58:10.705 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.705122Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-02 19:58:10.705 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-02 19:58:10.708 20183 20183 V GameActivity: onImeInsetsChanged from Text Listener
+10-02 19:58:10.709 20183 20183 V threaded_app: WindowInsetsChanged: 0xb400007535841870
+10-02 19:58:10.709 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.709066Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-02 19:58:10.709 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-02 19:58:10.709 20183 20202 D HostConnection: createUnique: call
+10-02 19:58:10.709 20183 20202 D HostConnection: HostConnection::get() New Host Connection established 0xb4000074d5854010, tid 20202
+10-02 19:58:10.710 20183 20202 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-02 19:58:10.710 20183 20202 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+10-02 19:58:10.711 20183 20202 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-02 19:58:10.711 20183 20202 D EGL_emulation: eglCreateContext: 0xb4000074d58549d0: maj 3 min 0 rcv 3
+10-02 19:58:10.715 20183 20202 D EGL_emulation: eglMakeCurrent: 0xb4000074d58549d0: ver 3 0 (tinfo 0x76fbbe1100) (first time)
+10-02 19:58:10.718 20183 20202 I Gralloc4: mapper 4.x is not supported
+10-02 19:58:10.719 20183 20202 D HostConnection: createUnique: call
+10-02 19:58:10.719 20183 20202 D HostConnection: HostConnection::get() New Host Connection established 0xb4000074d5854fd0, tid 20202
+10-02 19:58:10.719 20183 20202 D goldfish-address-space: allocate: Ask for block of size 0x100
+10-02 19:58:10.719 20183 20202 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1efff8000 size 0x8000
+10-02 19:58:10.720 20183 20202 W Gralloc4: allocator 4.x is not supported
+10-02 19:58:10.720 20183 20183 V threaded_app: ContentRectChanged: 0xb400007535841870 -- (0 0) (2340 1080)
+10-02 19:58:10.721 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.720988Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: find a way to notify application of content rect change
+10-02 19:58:10.721 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: find a way to notify application of content rect change
+10-02 19:58:10.723 20183 20183 V GameActivity: onSurfaceCreated_native
+10-02 19:58:10.723 20183 20183 V threaded_app: NativeWindowCreated: 0xb400007535841870 -- 0xb4000075c59f6980
+10-02 19:58:10.723 20183 20183 V threaded_app: android_app_set_window called
+10-02 19:58:10.723 20183 20202 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-02 19:58:10.724 20183 20206 V threaded_app: APP_CMD_INIT_WINDOW
+10-02 19:58:10.724 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.724184Z[0m [32m INFO[0m [2mbevy_winit::system[0m[2m:[0m Creating new window mir2-web3 (android) (105v0)
+10-02 19:58:10.724 20183 20206 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_winit-0.19.0/sCreating new window mir2-web3 (android) (105v0)
+10-02 19:58:10.724 20183 20183 V threaded_app: NativeWindowResized: 0xb400007535841870 -- 0xb4000075c59f6980 ( 2340 x 1080 )
+10-02 19:58:10.724 20183 20183 V threaded_app: NativeWindowRedrawNeeded: 0xb400007535841870 -- 0xb4000075c59f6980
+10-02 19:58:10.746 20183 20183 V GameActivity: onImeInsetsChanged from Text Listener
+10-02 19:58:10.746 20183 20183 V threaded_app: WindowInsetsChanged: 0xb400007535841870
+10-02 19:58:10.750 20183 20183 V threaded_app: WindowFocusChanged: 0xb400007535841870 -- 1
+10-02 19:58:10.764 20183 20183 V GameActivity: onImeInsetsChanged from Text Listener
+10-02 19:58:10.764 20183 20183 V threaded_app: WindowInsetsChanged: 0xb400007535841870
+10-02 19:58:10.816 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.816904Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-02 19:58:10.817 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-02 19:58:10.884 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-02 19:58:10.884 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:10.884580Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-02 19:58:11.893 20183 20206 D EGL_emulation: app_time_stats: avg=13.88ms min=9.49ms max=89.00ms count=58
+10-02 19:58:12.910 20183 20206 D EGL_emulation: app_time_stats: avg=10.17ms min=9.52ms max=11.28ms count=61
+10-02 19:58:13.932 20183 20206 D EGL_emulation: app_time_stats: avg=10.49ms min=9.44ms max=11.94ms count=61
+10-02 19:58:14.942 20183 20206 D EGL_emulation: app_time_stats: avg=10.64ms min=9.53ms max=13.87ms count=61
+10-02 19:58:15.330 20183 20183 V threaded_app: Pause: 0xb400007535841870
+10-02 19:58:15.331 20183 20206 V threaded_app: activityState=14
+10-02 19:58:15.348 20183 20183 V threaded_app: WindowFocusChanged: 0xb400007535841870 -- 0
+10-02 19:58:15.746 20183 20183 V threaded_app: NativeWindowDestroyed: 0xb400007535841870 -- 0xb4000075c59f6980
+10-02 19:58:15.746 20183 20183 V threaded_app: android_app_set_window called
+10-02 19:58:15.746 20183 20206 V threaded_app: APP_CMD_TERM_WINDOW
+10-02 19:58:15.762 20183 20210 D HostConnection: createUnique: call
+10-02 19:58:15.763 20183 20210 D HostConnection: HostConnection::get() New Host Connection established 0xb4000074d5853710, tid 20210
+10-02 19:58:15.765 20183 20210 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-02 19:58:15.766 20183 20210 D EGL_emulation: eglMakeCurrent: 0xb4000074d583a990: ver 3 0 (tinfo 0x76fbbe1180) (first time)
+10-02 19:58:15.771 20183 20206 V threaded_app: APP_CMD_TERM_WINDOW
+10-02 19:58:15.778 20183 20183 V threaded_app: TrimMemory: 0xb400007535841870 20
+10-02 19:58:15.782 20183 20183 V threaded_app: Stop: 0xb400007535841870
+10-02 19:58:15.783 20183 20206 V threaded_app: activityState=15
+10-02 19:58:15.783 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStop notification to application
+10-02 19:58:15.783 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:15.783893Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStop notification to application
+10-02 19:58:15.784 20183 20183 V threaded_app: SaveInstanceState: 0xb400007535841870
+10-02 19:58:15.784 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward saveState notification to application
+10-02 19:58:15.784 20183 20206 V threaded_app: APP_CMD_SAVE_STATE
+10-02 19:58:15.784 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:15.784407Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward saveState notification to application
+10-02 19:58:16.054 20183 20238 D ProfileInstaller: Installing profile for com.mir2.web3
+10-02 19:58:16.384 20183 20183 V GameActivity: onImeInsetsChanged from Text Listener
+10-02 19:58:16.384 20183 20183 V threaded_app: WindowInsetsChanged: 0xb400007535841870
+10-02 19:58:16.385 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-02 19:58:16.385 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:16.385130Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-02 19:58:16.386 20183 20183 V GameActivity: onStart_native
+10-02 19:58:16.386 20183 20183 V threaded_app: Start: 0xb400007535841870
+10-02 19:58:16.386 20183 20206 V threaded_app: activityState=11
+10-02 19:58:16.386 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+10-02 19:58:16.386 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:16.386724Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+10-02 19:58:16.387 20183 20183 V threaded_app: Resume: 0xb400007535841870
+10-02 19:58:16.387 20183 20206 V threaded_app: activityState=12
+10-02 19:58:16.402 20183 20183 V GameActivity: onImeInsetsChanged from Text Listener
+10-02 19:58:16.403 20183 20183 V threaded_app: WindowInsetsChanged: 0xb400007535841870
+10-02 19:58:16.403 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-02 19:58:16.403 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:16.403170Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-02 19:58:16.405 20183 20183 V GameActivity: onSurfaceCreated_native
+10-02 19:58:16.405 20183 20183 V threaded_app: NativeWindowCreated: 0xb400007535841870 -- 0xb4000075c59f6980
+10-02 19:58:16.405 20183 20183 V threaded_app: android_app_set_window called
+10-02 19:58:16.405 20183 20206 V threaded_app: APP_CMD_INIT_WINDOW
+10-02 19:58:16.405 20183 20183 V threaded_app: NativeWindowRedrawNeeded: 0xb400007535841870 -- 0xb4000075c59f6980
+10-02 19:58:16.425 20183 20183 V threaded_app: WindowFocusChanged: 0xb400007535841870 -- 1
+10-02 19:58:16.429 20183 20183 V GameActivity: onImeInsetsChanged from Text Listener
+10-02 19:58:16.429 20183 20183 V threaded_app: WindowInsetsChanged: 0xb400007535841870
+10-02 19:58:16.441 20183 20206 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-02 19:58:16.442 20183 20205 I RustStdoutStderr: [2m2026-10-02T11:58:16.441757Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-02 19:58:17.475 20183 20206 D EGL_emulation: app_time_stats: avg=12.52ms min=9.35ms max=48.01ms count=61
+10-02 19:58:18.492 20183 20206 D EGL_emulation: app_time_stats: avg=10.61ms min=9.73ms max=11.99ms count=61
+10-02 19:58:19.509 20183 20206 D EGL_emulation: app_time_stats: avg=10.25ms min=9.50ms max=12.72ms count=61
+10-02 19:58:20.511 20183 20206 D EGL_emulation: app_time_stats: avg=10.47ms min=9.37ms max=16.59ms count=60

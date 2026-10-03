@@ -1,0 +1,8 @@
+Command:
+cargo +1.95.0 test --locked --offline --features ui-preview
+
+Result:
+test result: ok. 149 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out
+src/main.rs: 0 passed; doc-tests: 0 passed
+
+Existing warnings in shared client-bevy sources were not modified by this Android-private slice.

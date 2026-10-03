@@ -1,0 +1,20 @@
+{
+  "source": "92033b910cc9ddd996c416ec4024af4625e78b31",
+  "productFailure": {
+    "count": 2,
+    "compiled": true,
+    "scope": "Java GameShop metadata producer fixture",
+    "record": "java-red-debug.xml",
+    "testSource": "java-red-test-source.java.txt",
+    "beforeGatewaySource": "java-red-gateway-source.java.txt"
+  },
+  "preparationFailure": {
+    "compiled": false,
+    "record": "android-api31-normal-result.json",
+    "reason": "cargo-ndk initial metadata looked for Cargo.toml at repository root; corrected Android crate cwd passes"
+  },
+  "finalGatesPassed": true,
+  "actualJniAccepted": false,
+  "livePurchaseAccepted": false,
+  "priorFailuresRetained": true
+}

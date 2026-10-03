@@ -247,7 +247,10 @@ fn crystal_skill_level(world: &World, spell_name: &str) -> Option<u8> {
         .map(|skill| skill.level)
 }
 
-pub(super) fn crystal_skill_magic(world: &World, spell_name: &str) -> Option<(CrystalMagicTemplate, u8)> {
+pub(super) fn crystal_skill_magic(
+    world: &World,
+    spell_name: &str,
+) -> Option<(CrystalMagicTemplate, u8)> {
     let level = crystal_skill_level(world, spell_name)?;
     Some((crystal_magic_by_spell(spell_name)?, level))
 }
@@ -1736,7 +1739,11 @@ fn prepare_slaying_after_attack(world: &mut World, roll: u64) -> Vec<ServerPacke
 
 fn slaying_attack_roll(world: &World) -> u64 {
     // Reuse the existing combat chance seed, retaining all twelve outcomes.
-    combat_chance_value(runtime_tick(world), current_player_object_id(world).unwrap_or_default(), 2) % 12
+    combat_chance_value(
+        runtime_tick(world),
+        current_player_object_id(world).unwrap_or_default(),
+        2,
+    ) % 12
 }
 
 pub(super) fn apply_player_paralysis(world: &mut World, current_tick: u64, duration_ticks: u64) {
@@ -3664,7 +3671,10 @@ impl SimulationSession {
         }
 
         let slaying_roll = slaying_attack_roll(self.app.world());
-        packets.extend(prepare_slaying_after_attack(self.app.world_mut(), slaying_roll));
+        packets.extend(prepare_slaying_after_attack(
+            self.app.world_mut(),
+            slaying_roll,
+        ));
 
         if let Some(level) = crystal_skill_level(self.app.world(), "Meditation") {
             if level >= 3

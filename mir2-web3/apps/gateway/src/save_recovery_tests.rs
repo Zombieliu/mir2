@@ -645,9 +645,11 @@ fn recovery_path_comparison_resolves_missing_descendants_without_creating_them()
         canonical.join("not-created").join("accounts.json")
     );
     assert!(!state.root.join("not-created").exists());
-    assert!(super::absolute_without_parent_components(&state.root.join(".."))
-        .unwrap_err()
-        .contains("parent-directory"));
+    assert!(
+        super::absolute_without_parent_components(&state.root.join(".."))
+            .unwrap_err()
+            .contains("parent-directory")
+    );
 }
 
 #[test]

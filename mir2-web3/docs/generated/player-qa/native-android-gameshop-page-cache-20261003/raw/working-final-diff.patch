@@ -1,0 +1,76 @@
+diff --git a/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs b/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs
+index 3cb944771..9291e81a2 100644
+--- a/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs
++++ b/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs
+@@ -1586,6 +1586,10 @@ fn format_number(value: u64) -> String {
+     result
+ }
+ 
++#[cfg(test)]
++#[path = "game_shop_hit_tests.rs"]
++mod hit_tests;
++
+ #[cfg(test)]
+ mod tests {
+     use super::*;
+diff --git a/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs b/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs
+index 21d6ef880..223168ae4 100644
+--- a/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs
++++ b/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs
+@@ -11941,6 +11941,7 @@ fn render_overlays(
+             state.shop_open(),
+             &game_shop,
+             &state.game_shop_dialog,
++            state.game_shop_page,
+             &ui,
+             &inventory,
+             &mut game_shop_cache,
+@@ -12467,6 +12468,7 @@ struct GameShopRenderKey {
+     root: Entity,
+     model: GameShopModel,
+     dialog: String,
++    page: usize,
+     player: String,
+     inventory: String,
+ }
+@@ -12481,6 +12483,7 @@ impl PartialEq for GameShopRenderKey {
+         self.root == other.root
+             && self.model == other.model
+             && self.dialog == other.dialog
++            && self.page == other.page
+             && self.player == other.player
+             && self.inventory == other.inventory
+     }
+@@ -12492,6 +12495,7 @@ fn fill_game_shop_panel(
+     visible: bool,
+     model: &GameShopModel,
+     dialog: &game_shop_dialog::GameShopDialogUi,
++    page: usize,
+     ui: &UiReadModel,
+     inventory: &InventoryModel,
+     cache: &mut GameShopRenderCache,
+@@ -12552,6 +12556,9 @@ fn fill_game_shop_panel(
+         root: entity,
+         model: model.clone(),
+         dialog: dialog_key,
++        // Paging is UI-only state outside GameShopDialogUi. It must invalidate
++        // the retained tree even when search, quantities and catalog are unchanged.
++        page,
+         player: player_key,
+         inventory: inventory_key,
+     };
+diff --git a/mir2-web3/apps/game-client/platform-android/android/app/build.gradle b/mir2-web3/apps/game-client/platform-android/android/app/build.gradle
+index 7bd7b59ce..5d4ecb796 100644
+--- a/mir2-web3/apps/game-client/platform-android/android/app/build.gradle
++++ b/mir2-web3/apps/game-client/platform-android/android/app/build.gradle
+@@ -473,8 +473,8 @@ android {
+         applicationId 'com.mir2.web3'
+         minSdk 31
+         targetSdk 35
+-        versionCode 33
+-        versionName '0.1.30-personal-jni-scenes'
++        versionCode 34
++        versionName '0.1.31-gameshop-page-cache'
+         buildConfigField 'String', 'MIR2_GATEWAY_URL', groovy.json.JsonOutput.toJson(System.getenv('MIR2_GATEWAY_WS_URL') ?: '')
+ 
+         ndk {

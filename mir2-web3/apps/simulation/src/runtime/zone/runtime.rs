@@ -191,7 +191,9 @@ fn zone_outbounds_contain_accepted_player_action(
             // A relocation spell can address the owner without a same-zone
             // observer action; its accepted owner packet is still decisive.
             ServerPacket::Magic { .. } | ServerPacket::RangeAttack { .. } => owner,
-            ServerPacket::MagicCast { spell: Spell::ShoulderDash } => owner,
+            ServerPacket::MagicCast {
+                spell: Spell::ShoulderDash,
+            } => owner,
             _ => false,
         })
     })
@@ -931,23 +933,23 @@ impl ZoneRuntime {
                 && !target.dead
                 && target.hp > 0
                 && zone_native_monster_is_authoritatively_melee_attackable(target)
-        }) || self.players.values().any(|target| {
-            target.position == front && zone_player_can_attack_player(player, target)
-        }) {
+        }) || self
+            .players
+            .values()
+            .any(|target| target.position == front && zone_player_can_attack_player(player, target))
+        {
             return true;
         }
         // A trusted not-yet-materialized target must obey the same initial
         // visibility/disposition rules. An existing ID always wins over stale
         // personal metadata, including a corpse or another type of object.
         materialized.is_some_and(|spawn| {
-            spawn.position == front
-                && !self.object_id_in_use(spawn.object_id)
-                && {
-                    let target = ZoneNativeMonster::from_spawn(spawn, spawn.object_id);
-                    !target.dead
-                        && target.hp > 0
-                        && zone_native_monster_is_authoritatively_melee_attackable(&target)
-                }
+            spawn.position == front && !self.object_id_in_use(spawn.object_id) && {
+                let target = ZoneNativeMonster::from_spawn(spawn, spawn.object_id);
+                !target.dead
+                    && target.hp > 0
+                    && zone_native_monster_is_authoritatively_melee_attackable(&target)
+            }
         })
     }
 
@@ -1024,27 +1026,42 @@ impl ZoneRuntime {
         })
     }
 
-    pub(super) fn player_action_clock(&self, session_id: &SessionId) -> Option<ZonePlayerActionClock> {
-        self.players.get(session_id).map(|player| ZonePlayerActionClock {
-            account_id: player.account_id.clone(),
-            character_index: player.character_index,
-            object_id: player.object_id,
-            movement_ready_at_ms: player.movement_ready_at_ms,
-            next_attack_ready_at_ms: player.next_attack_ready_at_ms,
-            next_spell_ready_at_ms: player.next_spell_ready_at_ms,
-            magic_ready_at_ms: player.magic_ready_at_ms.clone(),
-            flaming_sword_armed: player.flaming_sword_armed,
-            flaming_sword_ready_at_ms: player.flaming_sword_ready_at_ms,
-        })
+    pub(super) fn player_action_clock(
+        &self,
+        session_id: &SessionId,
+    ) -> Option<ZonePlayerActionClock> {
+        self.players
+            .get(session_id)
+            .map(|player| ZonePlayerActionClock {
+                account_id: player.account_id.clone(),
+                character_index: player.character_index,
+                object_id: player.object_id,
+                movement_ready_at_ms: player.movement_ready_at_ms,
+                next_attack_ready_at_ms: player.next_attack_ready_at_ms,
+                next_spell_ready_at_ms: player.next_spell_ready_at_ms,
+                magic_ready_at_ms: player.magic_ready_at_ms.clone(),
+                flaming_sword_armed: player.flaming_sword_armed,
+                flaming_sword_ready_at_ms: player.flaming_sword_ready_at_ms,
+            })
     }
 
     pub(super) fn restore_player_action_clock(
-        &mut self, session_id: &SessionId, clock: ZonePlayerActionClock,
+        &mut self,
+        session_id: &SessionId,
+        clock: ZonePlayerActionClock,
     ) {
-        let Some(player) = self.players.get_mut(session_id) else { return; };
-        if (player.account_id.as_str(), player.character_index, player.object_id)
-            != (clock.account_id.as_str(), clock.character_index, clock.object_id)
-        {
+        let Some(player) = self.players.get_mut(session_id) else {
+            return;
+        };
+        if (
+            player.account_id.as_str(),
+            player.character_index,
+            player.object_id,
+        ) != (
+            clock.account_id.as_str(),
+            clock.character_index,
+            clock.object_id,
+        ) {
             return;
         }
         player.movement_ready_at_ms = clock.movement_ready_at_ms;
@@ -1056,76 +1073,128 @@ impl ZoneRuntime {
     }
 
     pub(super) fn player_finite_control_poison_clock(
-        &self, session_id: &SessionId,
+        &self,
+        session_id: &SessionId,
     ) -> Option<ZonePlayerFiniteControlPoisonClock> {
-        let player = self.players.get(session_id).filter(|p| !p.dead && p.hp > 0)?;
-        let control_mask = CRYSTAL_POISON_SLOW | CRYSTAL_POISON_FROZEN
-            | CRYSTAL_POISON_STUN | CRYSTAL_POISON_PARALYSIS | CRYSTAL_POISON_LR_PARALYSIS;
-        let deadlines = (0..16).filter_map(|shift| {
-            let bit = 1_u16 << shift;
-            if player.native_status_poison & control_mask & bit == 0
-                || self.native_periodic_player_poisons.iter().any(|lease|
-                    lease.target == player.object_id && lease.mask & bit != 0)
-            {
-                return None;
-            }
-            player.native_status_poison_deadlines.get(&bit).copied()
-                .or(player.native_status_poison_expires_at_ms)
-                .filter(|deadline| *deadline != u64::MAX)
-                .map(|deadline| (bit, deadline))
-        }).collect();
+        let player = self
+            .players
+            .get(session_id)
+            .filter(|p| !p.dead && p.hp > 0)?;
+        let control_mask = CRYSTAL_POISON_SLOW
+            | CRYSTAL_POISON_FROZEN
+            | CRYSTAL_POISON_STUN
+            | CRYSTAL_POISON_PARALYSIS
+            | CRYSTAL_POISON_LR_PARALYSIS;
+        let deadlines = (0..16)
+            .filter_map(|shift| {
+                let bit = 1_u16 << shift;
+                if player.native_status_poison & control_mask & bit == 0
+                    || self
+                        .native_periodic_player_poisons
+                        .iter()
+                        .any(|lease| lease.target == player.object_id && lease.mask & bit != 0)
+                {
+                    return None;
+                }
+                player
+                    .native_status_poison_deadlines
+                    .get(&bit)
+                    .copied()
+                    .or(player.native_status_poison_expires_at_ms)
+                    .filter(|deadline| *deadline != u64::MAX)
+                    .map(|deadline| (bit, deadline))
+            })
+            .collect();
         Some(ZonePlayerFiniteControlPoisonClock {
-            account_id: player.account_id.clone(), character_index: player.character_index,
-            object_id: player.object_id, life_generation: player.life_generation, deadlines,
+            account_id: player.account_id.clone(),
+            character_index: player.character_index,
+            object_id: player.object_id,
+            life_generation: player.life_generation,
+            deadlines,
         })
     }
 
     pub(super) fn restore_player_finite_control_poison_clock(
-        &mut self, session_id: &SessionId, clock: ZonePlayerFiniteControlPoisonClock,
+        &mut self,
+        session_id: &SessionId,
+        clock: ZonePlayerFiniteControlPoisonClock,
     ) {
-        let Some(player) = self.players.get_mut(session_id).filter(|p| !p.dead && p.hp > 0) else { return; };
-        if (player.account_id.as_str(), player.character_index, player.object_id, player.life_generation)
-            != (clock.account_id.as_str(), clock.character_index, clock.object_id, clock.life_generation)
-        {
+        let Some(player) = self
+            .players
+            .get_mut(session_id)
+            .filter(|p| !p.dead && p.hp > 0)
+        else {
+            return;
+        };
+        if (
+            player.account_id.as_str(),
+            player.character_index,
+            player.object_id,
+            player.life_generation,
+        ) != (
+            clock.account_id.as_str(),
+            clock.character_index,
+            clock.object_id,
+            clock.life_generation,
+        ) {
             return;
         }
         // Retain absolute deadlines, not durations measured from the new Join.
         let mask = clock.deadlines.keys().fold(0, |mask, bit| mask | *bit);
-        player.native_status_poison_deadlines.extend(clock.deadlines);
+        player
+            .native_status_poison_deadlines
+            .extend(clock.deadlines);
         player.native_status_poison |= mask;
         player.poison |= mask;
-        player.native_status_poison_expires_at_ms =
-            player.native_status_poison_deadlines.values().copied().max();
+        player.native_status_poison_expires_at_ms = player
+            .native_status_poison_deadlines
+            .values()
+            .copied()
+            .max();
     }
 
     pub(super) fn calibrate_online_join_poison(
-        &self, session_id: &SessionId, outbounds: &mut Vec<ZoneOutbound>,
+        &self,
+        session_id: &SessionId,
+        outbounds: &mut Vec<ZoneOutbound>,
     ) {
-        let Some(player) = self.players.get(session_id) else { return; };
+        let Some(player) = self.players.get(session_id) else {
+            return;
+        };
         // Join's observer bootstrap was constructed before the transfer clocks
         // were restored. Correct those unsent ObjectPlayer projections too.
         for outbound in outbounds.iter_mut() {
             let packets = match outbound {
-                ZoneOutbound::ToSession { packets, .. } | ZoneOutbound::ToMany { packets, .. }
-                    | ZoneOutbound::ToAll { packets } => packets,
+                ZoneOutbound::ToSession { packets, .. }
+                | ZoneOutbound::ToMany { packets, .. }
+                | ZoneOutbound::ToAll { packets } => packets,
                 _ => continue,
             };
             for packet in packets {
                 if let ServerPacket::ObjectPlayer { info } = packet {
-                    if info.object_id == player.object_id { info.poison = player.poison; }
+                    if info.object_id == player.object_id {
+                        info.poison = player.poison;
+                    }
                 }
             }
         }
         outbounds.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: vec![ServerPacket::ObjectPoisoned {
-                object_id: player.object_id, poison: player.poison,
+                object_id: player.object_id,
+                poison: player.poison,
             }],
         });
     }
 
-    fn expire_player_flaming_sword(&mut self, session_id: &SessionId, now_ms: u64) -> Vec<ZoneOutbound> {
-        let Some(player) = self.players.get_mut(session_id) else { return Vec::new(); };
+    fn expire_player_flaming_sword(
+        &mut self,
+        session_id: &SessionId,
+        now_ms: u64,
+    ) -> Vec<ZoneOutbound> {
+        let Some(player) = self.players.get_mut(session_id) else {
+            return Vec::new();
+        };
         if !player.flaming_sword_armed || now_ms < player.flaming_sword_ready_at_ms {
             return Vec::new();
         }
@@ -1133,36 +1202,54 @@ impl ZoneRuntime {
         vec![ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: vec![ServerPacket::SpellToggle {
-                object_id: player.object_id, spell: Spell::FlamingSword, can_use: false,
+                object_id: player.object_id,
+                spell: Spell::FlamingSword,
+                can_use: false,
             }],
         }]
     }
 
     fn prepare_player_flaming_sword(
-        &mut self, session_id: &SessionId, level: u8, now_ms: u64,
+        &mut self,
+        session_id: &SessionId,
+        level: u8,
+        now_ms: u64,
     ) -> Vec<ZoneOutbound> {
         let mut out = self.expire_player_flaming_sword(session_id, now_ms);
-        let Some(magic) = crystal_magic_by_spell("FlamingSword") else { return out; };
+        let Some(magic) = crystal_magic_by_spell("FlamingSword") else {
+            return out;
+        };
         let cost = i32::from(magic.base_cost) + i32::from(magic.level_cost) * i32::from(level);
-        let Some(player) = self.players.get_mut(session_id) else { return out; };
-        if player.class != MirClass::Warrior || player.dead || player.hp <= 0
-            || player.flaming_sword_armed || now_ms < player.flaming_sword_ready_at_ms
+        let Some(player) = self.players.get_mut(session_id) else {
+            return out;
+        };
+        if player.class != MirClass::Warrior
+            || player.dead
+            || player.hp <= 0
+            || player.flaming_sword_armed
+            || now_ms < player.flaming_sword_ready_at_ms
             || player.mp <= cost
         {
             return out;
         }
         player.flaming_sword_armed = true;
-        player.flaming_sword_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_PLAYER_FLAMING_SWORD_MS);
+        player.flaming_sword_ready_at_ms =
+            now_ms.saturating_add(ZONE_NATIVE_PLAYER_FLAMING_SWORD_MS);
         player.mp -= cost;
         out.push(ZoneOutbound::ToSession {
             session_id: session_id.clone(),
             packets: vec![
                 ServerPacket::SpellToggle {
-                    object_id: player.object_id, spell: Spell::FlamingSword, can_use: true,
+                    object_id: player.object_id,
+                    spell: Spell::FlamingSword,
+                    can_use: true,
                 },
-                ServerPacket::ObjectMana { info: ObjectManaInfo {
-                    object_id: player.object_id, percent: zone_mana_percent(player.mp),
-                }},
+                ServerPacket::ObjectMana {
+                    info: ObjectManaInfo {
+                        object_id: player.object_id,
+                        percent: zone_mana_percent(player.mp),
+                    },
+                },
             ],
         });
         out
@@ -1397,24 +1484,53 @@ impl ZoneRuntime {
         // rejected attack leaves movement untouched; a new movement command
         // arriving after this handle call can still queue normally.
         let combat_actor = match &command {
-            ZoneCommand::PlayerAttackObject { session_id, now_ms, .. }
-            | ZoneCommand::PlayerAttackMaterializedObject { session_id, now_ms, .. }
-            | ZoneCommand::PlayerRangeAttackObject { session_id, now_ms, .. }
-            | ZoneCommand::PlayerRangeAttackMaterializedObject { session_id, now_ms, .. } => self
-                .players
-                .get(session_id)
-                .map(|player| (session_id.clone(), player.object_id, *now_ms, false,
-                    Some(ZONE_NATIVE_PLAYER_MELEE_ACTION_MS))),
-            ZoneCommand::PlayerCastMagic { session_id, now_ms, cast, .. }
-            | ZoneCommand::PlayerCastMagicWithItem { session_id, now_ms, cast, .. } => self
-                .players
-                .get(session_id)
-                .map(|player| (session_id.clone(), player.object_id, *now_ms, true,
-                    cast.then_some(ZONE_NATIVE_PLAYER_MAGIC_ACTION_MS))),
+            ZoneCommand::PlayerAttackObject {
+                session_id, now_ms, ..
+            }
+            | ZoneCommand::PlayerAttackMaterializedObject {
+                session_id, now_ms, ..
+            }
+            | ZoneCommand::PlayerRangeAttackObject {
+                session_id, now_ms, ..
+            }
+            | ZoneCommand::PlayerRangeAttackMaterializedObject {
+                session_id, now_ms, ..
+            } => self.players.get(session_id).map(|player| {
+                (
+                    session_id.clone(),
+                    player.object_id,
+                    *now_ms,
+                    false,
+                    Some(ZONE_NATIVE_PLAYER_MELEE_ACTION_MS),
+                )
+            }),
+            ZoneCommand::PlayerCastMagic {
+                session_id,
+                now_ms,
+                cast,
+                ..
+            }
+            | ZoneCommand::PlayerCastMagicWithItem {
+                session_id,
+                now_ms,
+                cast,
+                ..
+            } => self.players.get(session_id).map(|player| {
+                (
+                    session_id.clone(),
+                    player.object_id,
+                    *now_ms,
+                    true,
+                    cast.then_some(ZONE_NATIVE_PLAYER_MAGIC_ACTION_MS),
+                )
+            }),
             _ => None,
         };
-        let mut expired = combat_actor.as_ref().map_or_else(Vec::new,
-            |(session_id, _, now_ms, _, _)| self.expire_player_flaming_sword(session_id, *now_ms));
+        let mut expired = combat_actor
+            .as_ref()
+            .map_or_else(Vec::new, |(session_id, _, now_ms, _, _)| {
+                self.expire_player_flaming_sword(session_id, *now_ms)
+            });
         let mut out = self.handle_inner(command);
         if let Some((session_id, actor_id, now_ms, magic, action_delay)) = combat_actor {
             if zone_outbounds_contain_accepted_player_action(&out, &session_id, actor_id) {
@@ -1647,8 +1763,11 @@ impl ZoneRuntime {
                 damage,
                 now_ms,
             ),
-            ZoneCommand::PreparePlayerFlamingSword { session_id, level, now_ms } =>
-                self.prepare_player_flaming_sword(&session_id, level, now_ms),
+            ZoneCommand::PreparePlayerFlamingSword {
+                session_id,
+                level,
+                now_ms,
+            } => self.prepare_player_flaming_sword(&session_id, level, now_ms),
             ZoneCommand::PlayerCastMagic {
                 session_id,
                 object_id,
@@ -1782,8 +1901,8 @@ impl ZoneRuntime {
         let Some(player) = self.players.get(session_id) else {
             return false;
         };
-        if cast && (now_ms < player.next_spell_ready_at_ms
-            || now_ms < player.movement_ready_at_ms) {
+        if cast && (now_ms < player.next_spell_ready_at_ms || now_ms < player.movement_ready_at_ms)
+        {
             return false;
         }
         if object_id == 0 && zone_magic_targets_ground_point(spell) {
@@ -1827,7 +1946,9 @@ impl ZoneRuntime {
         if zone_magic_targets_friendly_player(spell)
             && object_id != 0
             && !(zone_magic_targets_self(spell)
-                && self.players.get(session_id)
+                && self
+                    .players
+                    .get(session_id)
                     .is_some_and(|player| player.object_id == object_id))
         {
             let Some(target_session_id) =
@@ -2061,7 +2182,10 @@ impl ZoneRuntime {
             if spawn.crystal_drop_seed.is_some() {
                 spawn.crystal_drop_seed = Some(now_ms);
                 spawn.drops = crate::runtime::drops::zone_ground_drop_snapshots_for_monster_at_tick(
-                    object_id, &spawn.name, now_ms);
+                    object_id,
+                    &spawn.name,
+                    now_ms,
+                );
             }
             let (changed, respawn_outbounds) =
                 self.spawn_authoritative_monster_internal(&spawn, now_ms, true, true);
@@ -3748,7 +3872,9 @@ impl ZoneRuntime {
         damage: i32,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
-        if self.is_intelligent_creature_object(object_id) { return self.owner_location_correction(session_id); }
+        if self.is_intelligent_creature_object(object_id) {
+            return self.owner_location_correction(session_id);
+        }
         let Some(player) = self.players.get(session_id) else {
             return Vec::new();
         };
@@ -3816,7 +3942,9 @@ impl ZoneRuntime {
         damage: i32,
         now_ms: u64,
     ) -> Vec<ZoneOutbound> {
-        if self.is_intelligent_creature_object(object_id) { return self.owner_location_correction(session_id); }
+        if self.is_intelligent_creature_object(object_id) {
+            return self.owner_location_correction(session_id);
+        }
         let Some(player) = self.players.get(session_id) else {
             return Vec::new();
         };
@@ -3905,7 +4033,14 @@ impl ZoneRuntime {
         }
         let actor_id = player.object_id;
         let mut outbounds = self.player_attack_native_object_admitted(
-            session_id, object_id, direction, spell, level, attack_type, damage, now_ms,
+            session_id,
+            object_id,
+            direction,
+            spell,
+            level,
+            attack_type,
+            damage,
+            now_ms,
         );
         let accepted = outbounds.iter().any(|outbound| {
             let packets = match outbound {
@@ -3914,9 +4049,11 @@ impl ZoneRuntime {
                 | ZoneOutbound::ToAll { packets } => packets,
                 _ => return false,
             };
-            packets.iter().any(|packet| matches!(packet,
+            packets.iter().any(|packet| {
+                matches!(packet,
                 ServerPacket::ObjectAttack { info }
-                    if info.object_id == actor_id && info.spell == spell))
+                    if info.object_id == actor_id && info.spell == spell)
+            })
         });
         if accepted && mp_cost > 0 {
             if let Some(player) = self.players.get_mut(session_id) {
@@ -3929,7 +4066,9 @@ impl ZoneRuntime {
                 outbounds.push(ZoneOutbound::ToSession {
                     session_id: session_id.clone(),
                     packets: vec![ServerPacket::SpellToggle {
-                        object_id: player.object_id, spell: Spell::FlamingSword, can_use: false,
+                        object_id: player.object_id,
+                        spell: Spell::FlamingSword,
+                        can_use: false,
                     }],
                 });
             }
@@ -4857,8 +4996,8 @@ impl ZoneRuntime {
         let Some(player) = self.players.get(session_id) else {
             return Vec::new();
         };
-        if cast && (now_ms < player.next_spell_ready_at_ms
-            || now_ms < player.movement_ready_at_ms) {
+        if cast && (now_ms < player.next_spell_ready_at_ms || now_ms < player.movement_ready_at_ms)
+        {
             return self.correct_player_location(session_id, now_ms);
         }
         // Authoritatively recompute the magic damage from the player's stat block
@@ -4931,7 +5070,9 @@ impl ZoneRuntime {
         if zone_magic_targets_friendly_player(spell)
             && object_id != 0
             && !(zone_magic_targets_self(spell)
-                && self.players.get(session_id)
+                && self
+                    .players
+                    .get(session_id)
                     .is_some_and(|player| player.object_id == object_id))
         {
             let Some(target_session_id) =
@@ -8978,10 +9119,7 @@ impl ZoneRuntime {
         ]
     }
 
-    fn remove_native_player_magic_shield(
-        &mut self,
-        session_id: &SessionId,
-    ) -> Vec<ServerPacket> {
+    fn remove_native_player_magic_shield(&mut self, session_id: &SessionId) -> Vec<ServerPacket> {
         let Some(player) = self.players.get_mut(session_id) else {
             return Vec::new();
         };
@@ -9715,12 +9853,15 @@ impl ZoneRuntime {
                     && receipt.life_generation == player.life_generation
                     && receipt.zone_key == self.key
                     && receipt.target_object_id == hit.object_id
-            }) && self.native_monsters.get(&hit.object_id).is_some_and(|target| {
-                !target.dead
-                    && target.hp > 0
-                    && monster_visibility_is_attackable(target)
-                    && zone_tile_distance(&target.position, &receipt.target_location) <= 2
-            })
+            }) && self
+                .native_monsters
+                .get(&hit.object_id)
+                .is_some_and(|target| {
+                    !target.dead
+                        && target.hp > 0
+                        && monster_visibility_is_attackable(target)
+                        && zone_tile_distance(&target.position, &receipt.target_location) <= 2
+                })
         });
 
         if self.native_monsters.contains_key(&hit.attacker_object_id)
@@ -12087,7 +12228,9 @@ impl ZoneRuntime {
             return false;
         }
         if self.objects.values().any(|object| {
-            object.object_id != object_id && !self.is_intelligent_creature_object(object.object_id) && retained_zone_object_blocks_tile(object, point)
+            object.object_id != object_id
+                && !self.is_intelligent_creature_object(object.object_id)
+                && retained_zone_object_blocks_tile(object, point)
         }) {
             return false;
         }
@@ -12363,18 +12506,24 @@ impl ZoneRuntime {
                     }
                 });
         if killed {
-            let bonus = reward_owner_session_id.as_ref()
+            let bonus = reward_owner_session_id
+                .as_ref()
                 .and_then(|owner| self.players.get(owner))
                 .map_or(0, |owner| owner.combat_stats.item_drop_rate_percent.max(0));
             if bonus > 0 {
-                if let Some(seed) = self.native_monsters.get(&object_id).and_then(|monster| monster.crystal_drop_seed) {
+                if let Some(seed) = self
+                    .native_monsters
+                    .get(&object_id)
+                    .and_then(|monster| monster.crystal_drop_seed)
+                {
                     drops = crate::runtime::drops::zone_ground_drop_snapshots_for_monster_at_tick_with_rate(
                         object_id, &monster_name, seed, bonus);
                 }
             }
             if !self.yimoogi_allows_drop(object_id)
                 || mir2_game_data::crystal_map_respawns_ref(&self.key.map_file_name)
-                    .is_some_and(|map| map.no_drop_monster) {
+                    .is_some_and(|map| map.no_drop_monster)
+            {
                 drops.clear();
             }
         }
@@ -12814,9 +12963,13 @@ impl ZoneRuntime {
 
     fn canonical_observer_zone_object_packet(&self, packet: ServerPacket) -> Option<ServerPacket> {
         // Personal projections cannot mutate the controlled shared pickup actor.
-        if retained_zone_object_from_packet(&packet).is_some_and(|o| self.is_intelligent_creature_object(o.object_id))
-            || retained_zone_object_remove_id(&packet).is_some_and(|id| self.is_intelligent_creature_object(id))
-            || retained_zone_object_update_id(&packet).is_some_and(|id| self.is_intelligent_creature_object(id)) {
+        if retained_zone_object_from_packet(&packet)
+            .is_some_and(|o| self.is_intelligent_creature_object(o.object_id))
+            || retained_zone_object_remove_id(&packet)
+                .is_some_and(|id| self.is_intelligent_creature_object(id))
+            || retained_zone_object_update_id(&packet)
+                .is_some_and(|id| self.is_intelligent_creature_object(id))
+        {
             return None;
         }
         let packet = match packet {
@@ -14177,11 +14330,10 @@ impl ZoneRuntime {
         if self.gate_blocks_tile(point) || self.collision.is_blocked(point) {
             return false;
         }
-        if self
-            .objects
-            .values()
-            .any(|object| !self.is_intelligent_creature_object(object.object_id) && retained_zone_object_blocks_tile(object, point))
-        {
+        if self.objects.values().any(|object| {
+            !self.is_intelligent_creature_object(object.object_id)
+                && retained_zone_object_blocks_tile(object, point)
+        }) {
             return false;
         }
         if self.native_monsters.values().any(|monster| {
@@ -14206,11 +14358,10 @@ impl ZoneRuntime {
         if self.gate_blocks_tile(point) || self.collision.is_player_movement_blocked(point) {
             return false;
         }
-        if self
-            .objects
-            .values()
-            .any(|object| !self.is_intelligent_creature_object(object.object_id) && retained_zone_object_blocks_tile(object, point))
-        {
+        if self.objects.values().any(|object| {
+            !self.is_intelligent_creature_object(object.object_id)
+                && retained_zone_object_blocks_tile(object, point)
+        }) {
             return false;
         }
         if self.native_monsters.values().any(|monster| {
@@ -17339,10 +17490,7 @@ mod magic_shield_lifecycle_tests {
         session_id
     }
 
-    fn has_packet(
-        outbounds: &[ZoneOutbound],
-        predicate: impl Fn(&ServerPacket) -> bool,
-    ) -> bool {
+    fn has_packet(outbounds: &[ZoneOutbound], predicate: impl Fn(&ServerPacket) -> bool) -> bool {
         outbounds.iter().any(|outbound| {
             let packets = match outbound {
                 ZoneOutbound::ToSession { packets, .. }

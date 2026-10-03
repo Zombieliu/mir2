@@ -1,0 +1,1630 @@
+{
+  "schema": 1,
+  "kind": "native-android-shared-own-trade-snapshot-source-and-apk",
+  "createdAt": "2026-10-03T07:13:52.663Z",
+  "source": "a9698682322d27bab6be8bab69327841f540f89c",
+  "parent": "48caf6d477c188597560f8dbc5ad0a7dd32f8e82",
+  "branch": "codex/android-shared-sync",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "rawEvidenceRoot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/own-trade-20261003-Ogipdk",
+  "previousSocialIngressSource": "d4dbb124c2a4fe63364571fe48bd5af8b6463bee",
+  "scope": [
+    "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/native_trade_ingress.rs",
+    "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+    "mir2-web3/apps/game-client/platform-android/src/social_ingress.rs",
+    "mir2-web3/apps/game-client/platform-windows/src/trade_projection.rs"
+  ],
+  "inputs": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/big_map.rs",
+      "bytes": 46169,
+      "sha256": "0a1f91a1ef552b996445495cd19f16ebd33a72e4a306ff404b2fe419bca2ee97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74468,
+      "sha256": "86eced1102947319ad26c04e53ab8b845a659401c6254855312098a4ebbb3a2d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+      "bytes": 10200,
+      "sha256": "d8c9024b39d89363dbe35ec67eda5cd7d8a91276e5ad785fef54cee6d6f08138"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+      "bytes": 69639,
+      "sha256": "59d5ebf8b3d2f5fd28a9f058ece77efd5e2171ac6afbe0cb7af84af9c6d614ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "bytes": 42293,
+      "sha256": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 946575,
+      "sha256": "0d75836616c14ca77b6038011fd65e2b5a4a4c53ceae90cb7b3489a266855f09"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "bytes": 67126,
+      "sha256": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "bytes": 60408,
+      "sha256": "c7f9f40be0caf3cfc37edd5a18ff24e76a795dc5d4183b33adf6501800de54cc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+      "bytes": 37415,
+      "sha256": "25becf5d258dba0c25f619ffecf818db997260a9439e295ddccd432df8bd9032"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 2967,
+      "sha256": "f123669f61be594caa0e7d1d608f04d40d422151c3cdc8bce5a2b1ab8bc81733"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "bytes": 23201,
+      "sha256": "8b45f76f8974b21f0fe8729965e89d979955eca4f8da831c4aaebb205d2384ac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_egress.rs",
+      "bytes": 11698,
+      "sha256": "7f487f260692b1e983a01f1f7ec644de844efa9dfc7690c0b950569f16d0cf3c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_ingress.rs",
+      "bytes": 13402,
+      "sha256": "fbed53a162e45cd93a65e2619a5a9debbd45d0e0f23bbffdddf4038a6f5a5a67"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "bytes": 13160,
+      "sha256": "38ff1c5220d259b7e609090031219047524b80636e1450a40b28fd7898ba302f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_quest_ingress.rs",
+      "bytes": 22705,
+      "sha256": "ca0d25fd5ce014ab0e8cdaacdf8334001df1f491299d417d18fc0ab32612d5a0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_trade_ingress.rs",
+      "bytes": 12436,
+      "sha256": "bc82fbe75c8274598ee543836aefa619345892f472450e9daac4ca71609c9438"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+      "bytes": 76211,
+      "sha256": "62872e48f74dcfbdc746b56b65bee6aebf3dc2837be3d4fdfb85ca3d27988575"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "bytes": 368258,
+      "sha256": "ff3ed519f0087de4583e0891f24039ba16c612aee0d027886be85f9c98b67850"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+      "bytes": 9075,
+      "sha256": "25326f497aabe20bb7300b6e3cacdec21c5851b1eb957bb8fc6300279b429979"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+      "bytes": 15596,
+      "sha256": "71bdbf1637176190cb93703fc94a59af047cf8326f8f88a8093ae8e98f130495"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social.rs",
+      "bytes": 76619,
+      "sha256": "efe22789c06888d1d65d29be68896e579fcbaffc40829f9d3618a7b54ca56ead"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 33253,
+      "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+      "bytes": 123990,
+      "sha256": "470969816b029c95a8a222700510a423dcd7201e955aef27a655a6b434dc6f3d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28735,
+      "sha256": "25cb70ed959e853e2a27da09264b7362e5395c94149972b320daa00f5f12eff2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 41149,
+      "sha256": "5b9ed72dbb0e606e07669c57d131c9cb431e9ecf21260f22e955555d566bd98c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+      "bytes": 21307,
+      "sha256": "023e2af8b86c2e08d4ddef767465e6c7c49c403242490b557c952d2b0292a5e6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+      "bytes": 8208,
+      "sha256": "29d1542d76236cb75a85d1a31da896ff4418b77a9327f803cc5cd919f7ec58af"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/WireJson.java",
+      "bytes": 3855,
+      "sha256": "682026d344ad6bcb4f4046deb896cb13646e70fb5ca6d90e4871107eaf848c8a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 93798,
+      "sha256": "6d223055d248c2d49a8896042a3524314106365ebd5a9bc4621a44722382241d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+      "bytes": 11035,
+      "sha256": "51f3427ec71b4203c61c34af4196691d429d310ead77157aa3e85d1a9f80af19"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+      "bytes": 5853,
+      "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+      "bytes": 22413,
+      "sha256": "031b9a406e0df4ac8bf588fb674a435d9cc4d8e4ad2505e3dc504cb354f18796"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/gateway_bridge.rs",
+      "bytes": 126330,
+      "sha256": "466de4b827f00b5ee27b9d487ea3f24087436ef6f408d318bcf563671157710f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/item_geometry.rs",
+      "bytes": 9207,
+      "sha256": "f30ff2524a5febc632a095b14cdb1bfaadf9f0cbb866bafc14340febd1898fce"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 75613,
+      "sha256": "2c515da5462c958fcc99a4fdeb1a03a95da4532ea1967c966cf8c458b35751c2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_egress_tests.rs",
+      "bytes": 22594,
+      "sha256": "94d76826ffee12d55c7d413681fac3b144c65ff0c4e455a45007ded81976ccd5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_host_tests.rs",
+      "bytes": 12532,
+      "sha256": "4a2004c997198bdceec1a3f807a84d7ef707dab3e255509543931c5d11ba4810"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_ingress.rs",
+      "bytes": 31534,
+      "sha256": "66a32131633cf425dfd2b84d682f7202f10834f9fa160bd88fecde4d883c41e8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_jni_preview_tests.rs",
+      "bytes": 6346,
+      "sha256": "5cc0dfb95048b6e6dd5bc4981e54efcdb5690aa4ede77292a3e03e06e800b64a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mobile_ui.rs",
+      "bytes": 91921,
+      "sha256": "a09f30d587ace87d3cbbc3eaf1c445e73d76aacc2bc112a2026f0925d7dc8d7f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_host_tests.rs",
+      "bytes": 5208,
+      "sha256": "507be77c53a8e139c73b47a02414d01545a3598dcafbfae05907baa4287f31ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_ingress.rs",
+      "bytes": 20887,
+      "sha256": "1544b4dbe37e86dddcc90b04db6b09818c02a871978f4f237d2b3d8ebb501a75"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+      "bytes": 29603,
+      "sha256": "acf81d18dd9c1b3df062cf2dc8d268e680ac358d8ff9cdd665258bd23f1b9837"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+      "bytes": 4789,
+      "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+      "bytes": 20595,
+      "sha256": "7a8a6e6734446b9d7395700694aa4e17847cf36972b9adcc319de1e28fbd64bf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+      "bytes": 10548,
+      "sha256": "230f7b9746254e8598ca99ad846c4b96b3f29a6e1945913ddef89725618510fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_host_tests.rs",
+      "bytes": 8715,
+      "sha256": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_ingress.rs",
+      "bytes": 32437,
+      "sha256": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_preview.rs",
+      "bytes": 6222,
+      "sha256": "b9640e921983930e2fb757d33c886363630c4e109cb3fdcd06e548df664ed65a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 209573,
+      "sha256": "93337b36996d6412a320da38ee0f09bbc1bcda36d96b3811738c6b2e9d8700e2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/social_ingress.rs",
+      "bytes": 40202,
+      "sha256": "8f9e10a6b9c1d957a0c29af006d1f07eb16cd2506bd9695c67e655e6c95ecafa"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+      "bytes": 23059,
+      "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/text_input.rs",
+      "bytes": 10918,
+      "sha256": "5305f310cb666e2ca608a957c47f8161a192008d265a13bc6e0efec3f63b848b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 93192,
+      "sha256": "b119d30ea765e2e70519fd93a50f89a43f1e21936bd89de660cfe96f98d19cdc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/world_input.rs",
+      "bytes": 5009,
+      "sha256": "b45aadb88962376b40181026009ade36019d7dc26095a19295d8e892db7fd4a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+      "bytes": 149003,
+      "sha256": "974d1b00d3673b226e9e0f71c460660d2f640010ee144b48d2c786868b53d4f4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+      "bytes": 2062,
+      "sha256": "d22a6037b05a4baff1694fca1a796c1f49ab990fb496f65ec8e083a6b2d97a20"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 323202,
+      "sha256": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 449445,
+      "sha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "bytes": 20604,
+      "sha256": "72bd28372023ed3ea210b5f5849055b34cc22dea25b38ea3b4a2963c013b2fba"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/trade_projection.rs",
+      "bytes": 8144,
+      "sha256": "4448a154b6370e16505d2227767d0e199f9c0ff31c87a24bbb52f09c37b7e3d4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 450375,
+      "sha256": "2f306d818fc809412a52e69312dddcc3ce30772ab1fd6174b0d19c79558651e0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 82471,
+      "sha256": "8702d0ccf872aa6a943c9ed40692ce5c233bfc6d4233b1854f4521142871ce95"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+      "bytes": 13568,
+      "sha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+      "bytes": 27032,
+      "sha256": "3d79af27b4809a3a063f39c4c95efc1b8d37ad6a8d46691b3bfbeb3d6b80086f"
+    }
+  ],
+  "guard": {
+    "sharedOwnOfferProjection": {
+      "name": "observe_own_offer",
+      "frozenSha256": "9c1bc3a2a1f153c622d314e3fd2670e949c4cd8f41a18dda431cbf3f2f5a40c5",
+      "sharedSha256": "9c1bc3a2a1f153c622d314e3fd2670e949c4cd8f41a18dda431cbf3f2f5a40c5",
+      "parentBodyEqualsFrozen": true,
+      "sharedBodyEqualsFrozen": true
+    },
+    "ownOfferSchema": {
+      "frozenSha256": "2636e2a8908647af8495c45040903e30bd2fe0bdf7e84992b36230ddf123c9dd",
+      "sharedSha256": "2636e2a8908647af8495c45040903e30bd2fe0bdf7e84992b36230ddf123c9dd",
+      "equal": true
+    },
+    "windowsThinWrapper": {
+      "name": "observe_own_offer",
+      "body": "{mir2_client_bevy::native_trade_ingress::observe_own_offer(snapshot,inventory_json,social)}",
+      "unchangedTestsModule": true
+    },
+    "windowsOriginalTests": [
+      {
+        "name": "own_trade_snapshot_keeps_exact_slots_instances_metadata_and_guest_state",
+        "parentEqualsCurrent": true,
+        "frozenEqualsCurrent": true,
+        "sharedEqualsFrozenCanonical": true
+      },
+      {
+        "name": "own_trade_snapshot_never_accepts_or_reopens_an_exchange",
+        "parentEqualsCurrent": true,
+        "frozenEqualsCurrent": true,
+        "sharedEqualsFrozenCanonical": true
+      },
+      {
+        "name": "own_trade_snapshot_rejects_missing_malformed_wrong_owner_and_currency",
+        "parentEqualsCurrent": true,
+        "frozenEqualsCurrent": true,
+        "sharedEqualsFrozenCanonical": true
+      },
+      {
+        "name": "own_trade_snapshot_rejects_swapped_duplicate_or_nonbag_items_without_guessing_names",
+        "parentEqualsCurrent": true,
+        "frozenEqualsCurrent": true,
+        "sharedEqualsFrozenCanonical": true
+      },
+      {
+        "name": "own_trade_snapshot_clears_only_explicit_own_offer_and_does_not_settle",
+        "parentEqualsCurrent": true,
+        "frozenEqualsCurrent": true,
+        "sharedEqualsFrozenCanonical": true
+      }
+    ],
+    "sharedTestCanonicalLimits": "Whitespace/comments and optional trailing call comma removed; Windows original tests module is exact byte-identical.",
+    "helpers": [
+      {
+        "name": "enrich_guild_storage_item",
+        "windows": "5e515eced50d71f34a8e36dd83404a95b183c1ca6bd03e5d846cb1aa774a0592",
+        "android": "5e515eced50d71f34a8e36dd83404a95b183c1ca6bd03e5d846cb1aa774a0592",
+        "equal": true
+      },
+      {
+        "name": "add_social_item_tooltip_sources",
+        "windows": "2f2b82263fbdd3948fbaf381982638ba82d095304a407116be6bb532e5d735b4",
+        "android": "2f2b82263fbdd3948fbaf381982638ba82d095304a407116be6bb532e5d735b4",
+        "equal": true
+      },
+      {
+        "name": "value_i32",
+        "windows": "e6e48322f7b5aba51d054878a05570f97bec577d45be4834d170fec6d4476b48",
+        "android": "e6e48322f7b5aba51d054878a05570f97bec577d45be4834d170fec6d4476b48",
+        "equal": true
+      },
+      {
+        "name": "value_u64",
+        "windows": "fb8ae78a3b312f246ea225ef0bf0571c0ec9705927a813cfddc9aae29716f74a",
+        "android": "fb8ae78a3b312f246ea225ef0bf0571c0ec9705927a813cfddc9aae29716f74a",
+        "equal": true
+      },
+      {
+        "name": "value_u64_ref",
+        "windows": "98ab3fc7db4d5fecd5fe92007b7105f36588b732c5112473d62266b98e4e73ff",
+        "android": "98ab3fc7db4d5fecd5fe92007b7105f36588b732c5112473d62266b98e4e73ff",
+        "equal": true
+      }
+    ],
+    "auth": [
+      {
+        "name": "endpoint",
+        "equal": true,
+        "sha256": "4f61af3abe942c436b2fae84c2d3df75a5c5892718b3c6c22d95111ce3d181e3"
+      },
+      {
+        "name": "login",
+        "equal": true,
+        "sha256": "4f999ead03041383f8c886143f6f8e315c9a3ca5f7121bf74ead9a046576ff12"
+      },
+      {
+        "name": "createCharacter",
+        "equal": true,
+        "sha256": "293869bdb5e35bb796a90cc8488b92e3e03826022840324fdf1f31efee4cc740"
+      },
+      {
+        "name": "deleteCharacter",
+        "equal": true,
+        "sha256": "1e4adff00ea671bc1068fdd94e3a703fe09fc5a23a5c9f59859b95d45d3456af"
+      },
+      {
+        "name": "start",
+        "equal": true,
+        "sha256": "1100fc2732cfd92b3a8d05088334208bb559f5efe964e83da5edcc24193e40b3"
+      },
+      {
+        "name": "disconnect",
+        "equal": true,
+        "sha256": "82ed7b5333fc39856d52d16db179138259ed202c6a3e7da39bdcc7bf165930ee"
+      },
+      {
+        "name": "resetWorld",
+        "equal": true,
+        "sha256": "a2fb57475cd319ba76ca0298002518a8c8f0b082aa1ac327a38b345ed33695e6"
+      },
+      {
+        "name": "personalGameplayPhase",
+        "equal": true,
+        "sha256": "88c6e7e393e05310a987fd80f467afb3f81c4f4b01aa1781723ae443e110007a"
+      },
+      {
+        "name": "forwardOwnMailResult",
+        "equal": true,
+        "sha256": "eaa16ea5afa8ce76034c53bbacbe8021563d8982d7df65b333d69c636377fa63"
+      },
+      {
+        "name": "forwardReceipt",
+        "equal": true,
+        "sha256": "e4ecdb9c8d3c2af453923ed7b215d7a92d73cea2d2d5e911e5c52dff7d3e0543"
+      }
+    ],
+    "originalJavaTests": 57,
+    "originalJavaTestsUnchanged": true,
+    "protectedWholeFiles": 60,
+    "protectedWholeFilesUnchanged": true,
+    "originalCheckouts": [
+      {
+        "path": "/Users/henryliu/obelisk/numeron",
+        "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+        "branch": "codex/steam-main",
+        "status": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/",
+        "equal": true
+      },
+      {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+        "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+        "branch": "codex/android-player-journey",
+        "status": "",
+        "equal": true
+      }
+    ],
+    "checkpointLimits": "Git HEAD/branch/status only; not a recursive untracked-byte proof"
+  },
+  "compiledRed": {
+    "label": "red-rust-own-trade-host",
+    "source": "48caf6d477c188597560f8dbc5ad0a7dd32f8e82",
+    "code": 101,
+    "compiled": true,
+    "rust": [
+      {
+        "passed": 0,
+        "failed": 1,
+        "ignored": 0
+      }
+    ],
+    "sourceUnchanged": true,
+    "log": "red-rust-own-trade-host.log",
+    "result": "red-rust-own-trade-host-result.json",
+    "limits": "Actual headless Android Host receive/bind fixture at parent HEAD plus new regression, not JNI or a clean baseline checkout."
+  },
+  "beforeWindows": {
+    "label": "before-windows-own-trade",
+    "source": "48caf6d477c188597560f8dbc5ad0a7dd32f8e82",
+    "code": 0,
+    "rust": [
+      {
+        "passed": 5,
+        "failed": 0,
+        "ignored": 0
+      }
+    ],
+    "sourceUnchanged": true,
+    "log": "before-windows-own-trade.log",
+    "limits": "Mac host target filter only, no full Windows OS gate."
+  },
+  "focusedGreen": [
+    {
+      "label": "green-android-own-trade-focused",
+      "source": "48caf6d477c188597560f8dbc5ad0a7dd32f8e82",
+      "rust": [
+        {
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "code": 0,
+      "sourceUnchanged": true,
+      "log": "green-android-own-trade-focused.log",
+      "result": "green-android-own-trade-focused-result.json",
+      "limits": "Uncommitted implementation before formatting; final clean source tested separately."
+    },
+    {
+      "label": "green-shared-own-trade-focused",
+      "source": "48caf6d477c188597560f8dbc5ad0a7dd32f8e82",
+      "rust": [
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "code": 0,
+      "sourceUnchanged": true,
+      "log": "green-shared-own-trade-focused.log",
+      "result": "green-shared-own-trade-focused-result.json",
+      "limits": "Uncommitted implementation before formatting; final clean source tested separately."
+    },
+    {
+      "label": "green-windows-own-trade-focused",
+      "source": "48caf6d477c188597560f8dbc5ad0a7dd32f8e82",
+      "rust": [
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "code": 0,
+      "sourceUnchanged": true,
+      "log": "green-windows-own-trade-focused.log",
+      "result": "green-windows-own-trade-focused-result.json",
+      "limits": "Uncommitted implementation before formatting; final clean source tested separately."
+    }
+  ],
+  "tests": [
+    {
+      "label": "bound-rust-normal-own-trade",
+      "source": "a9698682322d27bab6be8bab69327841f540f89c",
+      "started": "2026-10-03T07:04:56.433Z",
+      "ended": "2026-10-03T07:05:15.869Z",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "code": 0,
+      "rust": [
+        {
+          "passed": 421,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "log": "bound-rust-normal-own-trade.log",
+      "result": "bound-rust-normal-own-trade-result.json"
+    },
+    {
+      "label": "bound-rust-preview-own-trade",
+      "source": "a9698682322d27bab6be8bab69327841f540f89c",
+      "started": "2026-10-03T07:05:16.025Z",
+      "ended": "2026-10-03T07:05:50.603Z",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--features",
+        "ui-preview",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "code": 0,
+      "rust": [
+        {
+          "passed": 454,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "log": "bound-rust-preview-own-trade.log",
+      "result": "bound-rust-preview-own-trade-result.json"
+    },
+    {
+      "label": "bound-shared-native-player-own-trade",
+      "source": "a9698682322d27bab6be8bab69327841f540f89c",
+      "started": "2026-10-03T07:05:50.733Z",
+      "ended": "2026-10-03T07:06:07.894Z",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+        "--features",
+        "native-player-ui",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "code": 0,
+      "rust": [
+        {
+          "passed": 1297,
+          "failed": 0,
+          "ignored": 10
+        }
+      ],
+      "sourceUnchanged": true,
+      "log": "bound-shared-native-player-own-trade.log",
+      "result": "bound-shared-native-player-own-trade-result.json"
+    },
+    {
+      "label": "bound-runtime-own-trade",
+      "source": "a9698682322d27bab6be8bab69327841f540f89c",
+      "started": "2026-10-03T07:06:08.026Z",
+      "ended": "2026-10-03T07:06:27.550Z",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/runtime/Cargo.toml",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "code": 0,
+      "rust": [
+        {
+          "passed": 296,
+          "failed": 0,
+          "ignored": 1
+        }
+      ],
+      "sourceUnchanged": true,
+      "log": "bound-runtime-own-trade.log",
+      "result": "bound-runtime-own-trade-result.json"
+    },
+    {
+      "label": "bound-api31-normal-own-trade",
+      "source": "a9698682322d27bab6be8bab69327841f540f89c",
+      "started": "2026-10-03T07:06:27.680Z",
+      "ended": "2026-10-03T07:06:36.846Z",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "--platform",
+        "31",
+        "check",
+        "--lib",
+        "--locked",
+        "--offline"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android",
+      "code": 0,
+      "rust": [],
+      "sourceUnchanged": true,
+      "log": "bound-api31-normal-own-trade.log",
+      "result": "bound-api31-normal-own-trade-result.json"
+    },
+    {
+      "label": "bound-api31-preview-own-trade",
+      "source": "a9698682322d27bab6be8bab69327841f540f89c",
+      "started": "2026-10-03T07:06:36.970Z",
+      "ended": "2026-10-03T07:06:45.715Z",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "--platform",
+        "31",
+        "check",
+        "--lib",
+        "--features",
+        "ui-preview",
+        "--locked",
+        "--offline"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android",
+      "code": 0,
+      "rust": [],
+      "sourceUnchanged": true,
+      "log": "bound-api31-preview-own-trade.log",
+      "result": "bound-api31-preview-own-trade-result.json"
+    },
+    {
+      "label": "bound-java-full-own-trade",
+      "source": "a9698682322d27bab6be8bab69327841f540f89c",
+      "started": "2026-10-03T07:06:45.840Z",
+      "ended": "2026-10-03T07:07:48.726Z",
+      "command": [
+        "./gradlew",
+        "--offline",
+        "--no-daemon",
+        "--no-build-cache",
+        "--rerun-tasks",
+        ":app:testDebugUnitTest",
+        ":app:testUiPreviewUnitTest",
+        "--console=plain"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android",
+      "code": 0,
+      "rust": [],
+      "java": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 57,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 57,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "log": "bound-java-full-own-trade.log",
+      "result": "bound-java-full-own-trade-result.json"
+    },
+    {
+      "label": "bound-windows-own-trade",
+      "source": "a9698682322d27bab6be8bab69327841f540f89c",
+      "started": "2026-10-03T07:07:48.855Z",
+      "ended": "2026-10-03T07:08:22.207Z",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "own_trade_snapshot",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "code": 0,
+      "rust": [
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "log": "bound-windows-own-trade.log",
+      "result": "bound-windows-own-trade-result.json"
+    },
+    {
+      "label": "bound-windows-partner-trade-tooltip",
+      "source": "a9698682322d27bab6be8bab69327841f540f89c",
+      "started": "2026-10-03T07:08:22.338Z",
+      "ended": "2026-10-03T07:08:22.784Z",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "trade_item_tooltip_adapter",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "code": 0,
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "log": "bound-windows-partner-trade-tooltip.log",
+      "result": "bound-windows-partner-trade-tooltip-result.json"
+    }
+  ],
+  "package": {
+    "source": "a9698682322d27bab6be8bab69327841f540f89c",
+    "inputs": [
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/big_map.rs",
+        "bytes": 46169,
+        "sha256": "0a1f91a1ef552b996445495cd19f16ebd33a72e4a306ff404b2fe419bca2ee97"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+        "bytes": 74468,
+        "sha256": "86eced1102947319ad26c04e53ab8b845a659401c6254855312098a4ebbb3a2d"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+        "bytes": 10200,
+        "sha256": "d8c9024b39d89363dbe35ec67eda5cd7d8a91276e5ad785fef54cee6d6f08138"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+        "bytes": 69639,
+        "sha256": "59d5ebf8b3d2f5fd28a9f058ece77efd5e2171ac6afbe0cb7af84af9c6d614ab"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+        "bytes": 42293,
+        "sha256": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+        "bytes": 946575,
+        "sha256": "0d75836616c14ca77b6038011fd65e2b5a4a4c53ceae90cb7b3489a266855f09"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+        "bytes": 67126,
+        "sha256": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+        "bytes": 60408,
+        "sha256": "c7f9f40be0caf3cfc37edd5a18ff24e76a795dc5d4183b33adf6501800de54cc"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+        "bytes": 37415,
+        "sha256": "25becf5d258dba0c25f619ffecf818db997260a9439e295ddccd432df8bd9032"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+        "bytes": 2967,
+        "sha256": "f123669f61be594caa0e7d1d608f04d40d422151c3cdc8bce5a2b1ab8bc81733"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+        "bytes": 23201,
+        "sha256": "8b45f76f8974b21f0fe8729965e89d979955eca4f8da831c4aaebb205d2384ac"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_egress.rs",
+        "bytes": 11698,
+        "sha256": "7f487f260692b1e983a01f1f7ec644de844efa9dfc7690c0b950569f16d0cf3c"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_ingress.rs",
+        "bytes": 13402,
+        "sha256": "fbed53a162e45cd93a65e2619a5a9debbd45d0e0f23bbffdddf4038a6f5a5a67"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+        "bytes": 13160,
+        "sha256": "38ff1c5220d259b7e609090031219047524b80636e1450a40b28fd7898ba302f"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_quest_ingress.rs",
+        "bytes": 22705,
+        "sha256": "ca0d25fd5ce014ab0e8cdaacdf8334001df1f491299d417d18fc0ab32612d5a0"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_trade_ingress.rs",
+        "bytes": 12436,
+        "sha256": "bc82fbe75c8274598ee543836aefa619345892f472450e9daac4ca71609c9438"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+        "bytes": 76211,
+        "sha256": "62872e48f74dcfbdc746b56b65bee6aebf3dc2837be3d4fdfb85ca3d27988575"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+        "bytes": 368258,
+        "sha256": "ff3ed519f0087de4583e0891f24039ba16c612aee0d027886be85f9c98b67850"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+        "bytes": 9075,
+        "sha256": "25326f497aabe20bb7300b6e3cacdec21c5851b1eb957bb8fc6300279b429979"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+        "bytes": 15596,
+        "sha256": "71bdbf1637176190cb93703fc94a59af047cf8326f8f88a8093ae8e98f130495"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/social.rs",
+        "bytes": 76619,
+        "sha256": "efe22789c06888d1d65d29be68896e579fcbaffc40829f9d3618a7b54ca56ead"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+        "bytes": 33253,
+        "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+        "bytes": 123990,
+        "sha256": "470969816b029c95a8a222700510a423dcd7201e955aef27a655a6b434dc6f3d"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+        "bytes": 28735,
+        "sha256": "25cb70ed959e853e2a27da09264b7362e5395c94149972b320daa00f5f12eff2"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+        "bytes": 41149,
+        "sha256": "5b9ed72dbb0e606e07669c57d131c9cb431e9ecf21260f22e955555d566bd98c"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+        "bytes": 21307,
+        "sha256": "023e2af8b86c2e08d4ddef767465e6c7c49c403242490b557c952d2b0292a5e6"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+        "bytes": 8208,
+        "sha256": "29d1542d76236cb75a85d1a31da896ff4418b77a9327f803cc5cd919f7ec58af"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/WireJson.java",
+        "bytes": 3855,
+        "sha256": "682026d344ad6bcb4f4046deb896cb13646e70fb5ca6d90e4871107eaf848c8a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+        "bytes": 93798,
+        "sha256": "6d223055d248c2d49a8896042a3524314106365ebd5a9bc4621a44722382241d"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+        "bytes": 11035,
+        "sha256": "51f3427ec71b4203c61c34af4196691d429d310ead77157aa3e85d1a9f80af19"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+        "bytes": 5853,
+        "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+        "bytes": 22413,
+        "sha256": "031b9a406e0df4ac8bf588fb674a435d9cc4d8e4ad2505e3dc504cb354f18796"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/gateway_bridge.rs",
+        "bytes": 126330,
+        "sha256": "466de4b827f00b5ee27b9d487ea3f24087436ef6f408d318bcf563671157710f"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/item_geometry.rs",
+        "bytes": 9207,
+        "sha256": "f30ff2524a5febc632a095b14cdb1bfaadf9f0cbb866bafc14340febd1898fce"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+        "bytes": 75613,
+        "sha256": "2c515da5462c958fcc99a4fdeb1a03a95da4532ea1967c966cf8c458b35751c2"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/mail_egress_tests.rs",
+        "bytes": 22594,
+        "sha256": "94d76826ffee12d55c7d413681fac3b144c65ff0c4e455a45007ded81976ccd5"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/mail_host_tests.rs",
+        "bytes": 12532,
+        "sha256": "4a2004c997198bdceec1a3f807a84d7ef707dab3e255509543931c5d11ba4810"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/mail_ingress.rs",
+        "bytes": 31534,
+        "sha256": "66a32131633cf425dfd2b84d682f7202f10834f9fa160bd88fecde4d883c41e8"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/mail_jni_preview_tests.rs",
+        "bytes": 6346,
+        "sha256": "5cc0dfb95048b6e6dd5bc4981e54efcdb5690aa4ede77292a3e03e06e800b64a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/mobile_ui.rs",
+        "bytes": 91921,
+        "sha256": "a09f30d587ace87d3cbbc3eaf1c445e73d76aacc2bc112a2026f0925d7dc8d7f"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/npc_host_tests.rs",
+        "bytes": 5208,
+        "sha256": "507be77c53a8e139c73b47a02414d01545a3598dcafbfae05907baa4287f31ea"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/npc_ingress.rs",
+        "bytes": 20887,
+        "sha256": "1544b4dbe37e86dddcc90b04db6b09818c02a871978f4f237d2b3d8ebb501a75"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+        "bytes": 29603,
+        "sha256": "acf81d18dd9c1b3df062cf2dc8d268e680ac358d8ff9cdd665258bd23f1b9837"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+        "bytes": 4789,
+        "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+        "bytes": 20595,
+        "sha256": "7a8a6e6734446b9d7395700694aa4e17847cf36972b9adcc319de1e28fbd64bf"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+        "bytes": 10548,
+        "sha256": "230f7b9746254e8598ca99ad846c4b96b3f29a6e1945913ddef89725618510fc"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/quest_host_tests.rs",
+        "bytes": 8715,
+        "sha256": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/quest_ingress.rs",
+        "bytes": 32437,
+        "sha256": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/quest_preview.rs",
+        "bytes": 6222,
+        "sha256": "b9640e921983930e2fb757d33c886363630c4e109cb3fdcd06e548df664ed65a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+        "bytes": 209573,
+        "sha256": "93337b36996d6412a320da38ee0f09bbc1bcda36d96b3811738c6b2e9d8700e2"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/social_ingress.rs",
+        "bytes": 40202,
+        "sha256": "8f9e10a6b9c1d957a0c29af006d1f07eb16cd2506bd9695c67e655e6c95ecafa"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+        "bytes": 23059,
+        "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/text_input.rs",
+        "bytes": 10918,
+        "sha256": "5305f310cb666e2ca608a957c47f8161a192008d265a13bc6e0efec3f63b848b"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+        "bytes": 93192,
+        "sha256": "b119d30ea765e2e70519fd93a50f89a43f1e21936bd89de660cfe96f98d19cdc"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/world_input.rs",
+        "bytes": 5009,
+        "sha256": "b45aadb88962376b40181026009ade36019d7dc26095a19295d8e892db7fd4a5"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+        "bytes": 149003,
+        "sha256": "974d1b00d3673b226e9e0f71c460660d2f640010ee144b48d2c786868b53d4f4"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "bytes": 2062,
+        "sha256": "d22a6037b05a4baff1694fca1a796c1f49ab990fb496f65ec8e083a6b2d97a20"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+        "bytes": 323202,
+        "sha256": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+        "bytes": 449445,
+        "sha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+        "bytes": 20604,
+        "sha256": "72bd28372023ed3ea210b5f5849055b34cc22dea25b38ea3b4a2963c013b2fba"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/trade_projection.rs",
+        "bytes": 8144,
+        "sha256": "4448a154b6370e16505d2227767d0e199f9c0ff31c87a24bbb52f09c37b7e3d4"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+        "bytes": 450375,
+        "sha256": "2f306d818fc809412a52e69312dddcc3ce30772ab1fd6174b0d19c79558651e0"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+        "bytes": 82471,
+        "sha256": "8702d0ccf872aa6a943c9ed40692ce5c233bfc6d4233b1854f4521142871ce95"
+      },
+      {
+        "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+        "bytes": 13568,
+        "sha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055"
+      },
+      {
+        "path": "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+        "bytes": 27032,
+        "sha256": "3d79af27b4809a3a063f39c4c95efc1b8d37ad6a8d46691b3bfbeb3d6b80086f"
+      }
+    ],
+    "versionCode": 35,
+    "versionName": "0.1.32-gameshop-phone",
+    "gatewayUrl": "",
+    "environment": {
+      "MIR2_ANDROID_UI_ASSET_ROOT": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/weight-assets-KtITw2/shared-ui-assets",
+      "MIR2_ANDROID_WORLD_ASSET_ROOT": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/shared-sync-build-cache/local-world-20260911-objects",
+      "MIR2_ANDROID_ENTITY_ASSET_ROOT": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/shared-sync-build-cache/entity-proof-assets-with-archer-bow-20260912",
+      "MIR2_ANDROID_ENTITY_ASSET_PACK_ID": "android-archer-mount-bow-proof-20260912"
+    },
+    "artifacts": [
+      {
+        "variant": "debug",
+        "source": "a9698682322d27bab6be8bab69327841f540f89c",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/own-trade-20261003-Ogipdk/final-apks/mir2-native-own-trade-debug-a96986823.apk",
+        "bytes": 533340599,
+        "sha256": "1c47a16d8df2b1b34d0ced2bcf892d4ae893743a06e9bb73d4da8e15b71547c0",
+        "nativeElfBytes": 145606384,
+        "nativeElfSha256": "e6720d984b94cf7b57b5282f112fe98cf329cd97cb7b9adb4fa40457aea01348",
+        "nativeElfMatchesThisVariantStrippedOutput": true,
+        "package": "package: name='com.mir2.web3' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+        "gatewayUrl": "",
+        "uiPreview": false,
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        }
+      },
+      {
+        "variant": "preview",
+        "source": "a9698682322d27bab6be8bab69327841f540f89c",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/own-trade-20261003-Ogipdk/final-apks/mir2-native-own-trade-preview-a96986823.apk",
+        "bytes": 541394679,
+        "sha256": "0124a3a9c844348fdbd99c640b518afb84b6e65a8bdcd34d6658b1684178b489",
+        "nativeElfBytes": 149630000,
+        "nativeElfSha256": "7345de229afcefbdce0aefed333a09a82a5b38879a29adf9708f50480daccb0a",
+        "nativeElfMatchesThisVariantStrippedOutput": true,
+        "package": "package: name='com.mir2.web3.uipreview' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+        "gatewayUrl": "",
+        "uiPreview": true,
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        }
+      }
+    ]
+  },
+  "resources": {
+    "source": "a9698682322d27bab6be8bab69327841f540f89c",
+    "artifacts": [
+      {
+        "variant": "debug",
+        "apkSha256": "1c47a16d8df2b1b34d0ced2bcf892d4ae893743a06e9bb73d4da8e15b71547c0",
+        "nativeElfSha256": "e6720d984b94cf7b57b5282f112fe98cf329cd97cb7b9adb4fa40457aea01348",
+        "selectedUiPngCount": 6647,
+        "selectedMetadataCount": 3,
+        "libraries": [
+          {
+            "library": "Items",
+            "pngCount": 1003,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe",
+            "entryHashListSha256": "9b631445514b2f41c54d3607ce2e9cd529b6da5aba48412d8bc12aae680233a3"
+          },
+          {
+            "library": "StateItem",
+            "pngCount": 5192,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a",
+            "entryHashListSha256": "aa4f05c5d4ee057566a1ef8b34a97dc73302e77568115e1a0b306d6290651d13"
+          },
+          {
+            "library": "MagIcon",
+            "pngCount": 224,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": null,
+            "entryHashListSha256": "f3a467b56e3ff3b88806208cbd531bc65616100c17eb81579daee8b1dd25cf43"
+          },
+          {
+            "library": "MagIcon2",
+            "pngCount": 224,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": null,
+            "entryHashListSha256": "e31e0fd0b447d4579636bb15b1570219957a9475f42a70515aade5c41a786142"
+          },
+          {
+            "library": "UI_32bit",
+            "pngCount": 4,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9",
+            "entryHashListSha256": "fee27a48da6053e1a8a84cbe4db0b3bcb5e2c1002cc16b63ec9926bbb3138201"
+          }
+        ],
+        "frozenWeightFramesByteMatch": true,
+        "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+        "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        },
+        "approvedFullResourceReleaseAccepted": false
+      },
+      {
+        "variant": "preview",
+        "apkSha256": "0124a3a9c844348fdbd99c640b518afb84b6e65a8bdcd34d6658b1684178b489",
+        "nativeElfSha256": "7345de229afcefbdce0aefed333a09a82a5b38879a29adf9708f50480daccb0a",
+        "selectedUiPngCount": 6647,
+        "selectedMetadataCount": 3,
+        "libraries": [
+          {
+            "library": "Items",
+            "pngCount": 1003,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe",
+            "entryHashListSha256": "9b631445514b2f41c54d3607ce2e9cd529b6da5aba48412d8bc12aae680233a3"
+          },
+          {
+            "library": "StateItem",
+            "pngCount": 5192,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a",
+            "entryHashListSha256": "aa4f05c5d4ee057566a1ef8b34a97dc73302e77568115e1a0b306d6290651d13"
+          },
+          {
+            "library": "MagIcon",
+            "pngCount": 224,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": null,
+            "entryHashListSha256": "f3a467b56e3ff3b88806208cbd531bc65616100c17eb81579daee8b1dd25cf43"
+          },
+          {
+            "library": "MagIcon2",
+            "pngCount": 224,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": null,
+            "entryHashListSha256": "e31e0fd0b447d4579636bb15b1570219957a9475f42a70515aade5c41a786142"
+          },
+          {
+            "library": "UI_32bit",
+            "pngCount": 4,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9",
+            "entryHashListSha256": "fee27a48da6053e1a8a84cbe4db0b3bcb5e2c1002cc16b63ec9926bbb3138201"
+          }
+        ],
+        "frozenWeightFramesByteMatch": true,
+        "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+        "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        },
+        "approvedFullResourceReleaseAccepted": false
+      }
+    ]
+  },
+  "deviceInventory": {
+    "at": "2026-10-03T07:13:52.039Z",
+    "raw": "List of devices attached\nemulator-5554          device product:sdk_gphone64_arm64 model:sdk_gphone64_arm64 device:emulator64_arm64 transport_id:3\n\n",
+    "emulators": [
+      "emulator-5554          device product:sdk_gphone64_arm64 model:sdk_gphone64_arm64 device:emulator64_arm64 transport_id:3"
+    ],
+    "physical": [],
+    "facts": {
+      "at": "2026-10-03T07:16:52.019Z",
+      "serial": "emulator-5554",
+      "readOnly": true,
+      "sdk": "31",
+      "release": "12",
+      "model": "sdk_gphone64_arm64",
+      "abi": "arm64-v8a"
+    }
+  },
+  "remoteBeforePush": {
+    "at": "2026-10-03T07:06:28.524Z",
+    "source": "a9698682322d27bab6be8bab69327841f540f89c",
+    "remote": [
+      {
+        "sha": "48caf6d477c188597560f8dbc5ad0a7dd32f8e82",
+        "ref": "refs/heads/codex/android-shared-sync"
+      },
+      {
+        "sha": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+        "ref": "refs/heads/codex/playtest-registration"
+      },
+      {
+        "sha": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4",
+        "ref": "refs/heads/codex/windows-player-journey"
+      }
+    ],
+    "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+    "windowsSource": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+    "windowsCommitsAfterFrozen": 1,
+    "changedPaths": [
+      "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/README.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/.gitattributes",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/README.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/actual-native-update-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/actual-native-update.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/native-installed-update-r9.py",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/run-actual-native-update.ps1",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/WN-CANDIDATE-20261001-invited-09-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-attested-client.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-package-process-attempt5.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-package-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate-final-verification.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate-verification-reuse.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/BUILD-ATTESTATION.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/RELEASE-STATEMENT.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/VERSION.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-input-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-input.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-template-copy.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/inventory.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/package-client.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt2.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt3.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt4.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt2-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt3-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt4-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt1.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt2.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt3.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt4.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/prepare-real-fixtures-final.py",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-fixture-preflight-attempt1.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-input-long-path-diagnostic.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-helper-attempt2.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-helper-attempt3.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt2.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt3.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-helper-preflight-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-manifest-delta-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-old-r8-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-integration-final-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-package-integration-final.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-r8-r9-final-fixtures.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-update-qa-evidence.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-update-qa-final.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/r9-release-receipt.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/release-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/short-worktree-input-preparation.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/short-worktree-staging-path-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/update-archive.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-build.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-bundle-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-bundle-verification.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-installer-input.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/BUILD-UPDATER.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/bundle/UPDATER-BUNDLE.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/engine-release/ENGINE.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/feed/latest.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/apply.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/create-stage.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-apply.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-create-stage.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-plan.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-preflight.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/preflight.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/upload.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/inventory.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/public-https-publication-report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/publish-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/publish-r9.ps1",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/shop-lifecycle-20261001.md"
+    ],
+    "changedPathCount": 83,
+    "functional": [],
+    "pr": {
+      "baseRefName": "codex/playtest-registration",
+      "headRefName": "codex/android-shared-sync",
+      "headRefOid": "48caf6d477c188597560f8dbc5ad0a7dd32f8e82",
+      "isDraft": true,
+      "number": 253,
+      "state": "OPEN",
+      "url": "https://github.com/Zombieliu/mir2/pull/253"
+    }
+  },
+  "rawIndex": {
+    "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/own-trade-20261003-Ogipdk/raw-payload-index.json",
+    "bytes": 10811,
+    "sha256": "bf4dd6382381e8e726f6cefe20ac59a0e2e24d998943cd8b37b48e7ae4f554c6",
+    "regularFiles": 58,
+    "totalBytes": 1076024606,
+    "excludes": [
+      "raw-payload-index.json",
+      "reports created after this index"
+    ]
+  },
+  "acceptance": {
+    "NI15": "PARTIAL",
+    "newApkBuilt": true,
+    "newApkInstalled": false,
+    "ownTradeSnapshotSource": true,
+    "ownTradeSnapshotActualJni": false,
+    "ownTradeSnapshotLive": false,
+    "androidActualSocialJni": false,
+    "sharedSocialOverlayActualConsumer": false,
+    "realGatewayLogin": false,
+    "onlineGroupGuildTrade": false,
+    "socialEgress": false,
+    "physicalDevice": false,
+    "phoneLayout": false,
+    "GpuGate": "Prior actual gate FAIL; not rerun on this source",
+    "goal": "Active"
+  },
+  "next": [
+    "Shared native social intent egress with bounded exact-operation pending and send-failure handling",
+    "Current-source offline actual Java→JNI→unchanged SocialModel/overlay evidence",
+    "Approved authenticated online operations and authoritative settlement",
+    "Phone layout after explicit reapproval; physical and final human acceptance"
+  ]
+}

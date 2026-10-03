@@ -1,0 +1,698 @@
+{
+  "installedSource": "2161a940ec7a59e966ed2638667f0c7b1a8e32b6",
+  "versionCode": 29,
+  "actualDevice": "emulator-5554",
+  "offlineOnly": true,
+  "realNetworkAccepted": false,
+  "physicalDeviceAccepted": false,
+  "commands": [
+    {
+      "name": "avd.txt",
+      "args": [
+        "emu",
+        "avd",
+        "name"
+      ],
+      "started": "2026-10-02T10:26:21.624Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:21.637Z"
+    },
+    {
+      "name": "api.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.version.sdk"
+      ],
+      "started": "2026-10-02T10:26:21.637Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:21.653Z"
+    },
+    {
+      "name": "os.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.fingerprint"
+      ],
+      "started": "2026-10-02T10:26:21.653Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:21.668Z"
+    },
+    {
+      "name": "display.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size"
+      ],
+      "started": "2026-10-02T10:26:21.668Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:21.687Z"
+    },
+    {
+      "name": "density.txt",
+      "args": [
+        "shell",
+        "wm",
+        "density"
+      ],
+      "started": "2026-10-02T10:26:21.688Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:21.707Z"
+    },
+    {
+      "name": "debug-installed-path-before.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:26:21.922Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:21.943Z"
+    },
+    {
+      "name": "debug-installed-sha-before.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~wrCZQffI2p4lfcsgNFAGlA==/com.mir2.web3-GHFvLMs_FFbiR-RWH4aO7Q==/base.apk"
+      ],
+      "started": "2026-10-02T10:26:21.944Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:22.175Z"
+    },
+    {
+      "name": "debug-package-before.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:26:22.175Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:22.195Z"
+    },
+    {
+      "name": "preview-installed-path-before.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:22.429Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:22.454Z"
+    },
+    {
+      "name": "preview-installed-sha-before.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~Tk3cdhukNvmovswrAxFOyQ==/com.mir2.web3.uipreview--WucrCpJploXa4YfpM3SIw==/base.apk"
+      ],
+      "started": "2026-10-02T10:26:22.454Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:22.701Z"
+    },
+    {
+      "name": "preview-package-before.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:22.701Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:22.719Z"
+    },
+    {
+      "name": "login-stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:26:22.720Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:22.743Z"
+    },
+    {
+      "name": "login-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3/com.mir2.web3.MainActivity"
+      ],
+      "started": "2026-10-02T10:26:22.743Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:23.267Z"
+    },
+    {
+      "name": "login-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:26:23.267Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:23.288Z"
+    },
+    {
+      "name": "login-cold.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T10:26:27.290Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:27.819Z"
+    },
+    {
+      "name": "login-cold-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=18223",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T10:26:27.820Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:27.847Z"
+    },
+    {
+      "name": "login-home.txt",
+      "args": [
+        "shell",
+        "input",
+        "keyevent",
+        "KEYCODE_HOME"
+      ],
+      "started": "2026-10-02T10:26:27.847Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:27.873Z"
+    },
+    {
+      "name": "login-resume.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3/com.mir2.web3.MainActivity"
+      ],
+      "started": "2026-10-02T10:26:28.874Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:28.955Z"
+    },
+    {
+      "name": "login-resume-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:26:32.956Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:32.977Z"
+    },
+    {
+      "name": "login-resumed.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T10:26:32.977Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:33.498Z"
+    },
+    {
+      "name": "login-latest-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=18223",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T10:26:33.498Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:33.527Z"
+    },
+    {
+      "name": "login-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:26:33.527Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:33.560Z"
+    },
+    {
+      "name": "world-stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:33.561Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:33.597Z"
+    },
+    {
+      "name": "world-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "world-render"
+      ],
+      "started": "2026-10-02T10:26:33.597Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:33.997Z"
+    },
+    {
+      "name": "world-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:33.998Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:34.021Z"
+    },
+    {
+      "name": "world-cold.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T10:26:38.022Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:38.289Z"
+    },
+    {
+      "name": "world-cold-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=18316",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T10:26:38.289Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:38.319Z"
+    },
+    {
+      "name": "world-home.txt",
+      "args": [
+        "shell",
+        "input",
+        "keyevent",
+        "KEYCODE_HOME"
+      ],
+      "started": "2026-10-02T10:26:38.319Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:38.346Z"
+    },
+    {
+      "name": "world-resume.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "world-render"
+      ],
+      "started": "2026-10-02T10:26:39.348Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:39.426Z"
+    },
+    {
+      "name": "world-resume-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:43.427Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:43.447Z"
+    },
+    {
+      "name": "world-resumed.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T10:26:43.447Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:43.712Z"
+    },
+    {
+      "name": "world-latest-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=18316",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T10:26:43.713Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:43.743Z"
+    },
+    {
+      "name": "world-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:43.743Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:43.781Z"
+    },
+    {
+      "name": "quests-stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:43.781Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:43.811Z"
+    },
+    {
+      "name": "quests-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "quests-ingress"
+      ],
+      "started": "2026-10-02T10:26:43.811Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:44.205Z"
+    },
+    {
+      "name": "quests-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:44.205Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:44.227Z"
+    },
+    {
+      "name": "quests-cold.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T10:26:48.229Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:48.393Z"
+    },
+    {
+      "name": "quests-cold-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=18404",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T10:26:48.393Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:48.422Z"
+    },
+    {
+      "name": "quests-home.txt",
+      "args": [
+        "shell",
+        "input",
+        "keyevent",
+        "KEYCODE_HOME"
+      ],
+      "started": "2026-10-02T10:26:48.422Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:48.447Z"
+    },
+    {
+      "name": "quests-resume.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "quests-ingress"
+      ],
+      "started": "2026-10-02T10:26:49.447Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:49.521Z"
+    },
+    {
+      "name": "quests-resume-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:53.522Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:53.541Z"
+    },
+    {
+      "name": "quests-resumed.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T10:26:53.541Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:53.712Z"
+    },
+    {
+      "name": "quests-latest-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=18404",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T10:26:53.712Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:53.742Z"
+    },
+    {
+      "name": "quests-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:53.743Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:53.774Z"
+    },
+    {
+      "name": "debug-installed-path-after.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:26:53.998Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:54.020Z"
+    },
+    {
+      "name": "debug-installed-sha-after.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~wrCZQffI2p4lfcsgNFAGlA==/com.mir2.web3-GHFvLMs_FFbiR-RWH4aO7Q==/base.apk"
+      ],
+      "started": "2026-10-02T10:26:54.025Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:54.281Z"
+    },
+    {
+      "name": "debug-package-after.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:26:54.281Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:54.314Z"
+    },
+    {
+      "name": "preview-installed-path-after.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:54.534Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:54.559Z"
+    },
+    {
+      "name": "preview-installed-sha-after.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~Tk3cdhukNvmovswrAxFOyQ==/com.mir2.web3.uipreview--WucrCpJploXa4YfpM3SIw==/base.apk"
+      ],
+      "started": "2026-10-02T10:26:54.565Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:54.812Z"
+    },
+    {
+      "name": "preview-package-after.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:54.813Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:54.832Z"
+    },
+    {
+      "name": "com.mir2.web3-final-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:26:54.833Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:54.855Z"
+    },
+    {
+      "name": "com.mir2.web3.uipreview-final-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:26:54.855Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T10:26:54.877Z"
+    }
+  ],
+  "scenes": [
+    {
+      "name": "login",
+      "scene": null,
+      "pid": "18223",
+      "cold": {
+        "gl506": 9,
+        "uninitializedColor": 9,
+        "fatalOrPanic": 0
+      },
+      "latestCumulative": {
+        "gl506": 9,
+        "uninitializedColor": 9,
+        "fatalOrPanic": 0
+      },
+      "originalFrames": "2340x1080",
+      "sameProcessResume": true
+    },
+    {
+      "name": "world",
+      "scene": "world-render",
+      "pid": "18316",
+      "cold": {
+        "gl506": 0,
+        "uninitializedColor": 0,
+        "fatalOrPanic": 0
+      },
+      "latestCumulative": {
+        "gl506": 0,
+        "uninitializedColor": 0,
+        "fatalOrPanic": 0
+      },
+      "originalFrames": "2340x1080",
+      "sameProcessResume": true
+    },
+    {
+      "name": "quests",
+      "scene": "quests-ingress",
+      "pid": "18404",
+      "cold": {
+        "gl506": 8,
+        "uninitializedColor": 8,
+        "fatalOrPanic": 0
+      },
+      "latestCumulative": {
+        "gl506": 8,
+        "uninitializedColor": 8,
+        "fatalOrPanic": 0
+      },
+      "originalFrames": "2340x1080",
+      "sameProcessResume": true
+    }
+  ],
+  "canonicalTotal": 17,
+  "zeroErrorAccepted": false
+}

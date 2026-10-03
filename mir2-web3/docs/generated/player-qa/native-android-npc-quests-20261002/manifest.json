@@ -1,0 +1,1580 @@
+{
+  "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+  "payloads": [
+    {
+      "path": "diagnosis.json",
+      "bytes": 1735,
+      "sha256": "e27cfc80a9ba46cca86bbabea25ed50f10a35196f4f8da34a8ad82855cd2b3c0"
+    },
+    {
+      "path": "raw/assemble-ledgers.mjs",
+      "bytes": 7905,
+      "sha256": "8d1420628fb2ae1ed484cc3e9bf46cc47e44f08f2056da75a3bff3b5fc1b1f63"
+    },
+    {
+      "path": "raw/audit-baseline.mjs",
+      "bytes": 4312,
+      "sha256": "963cbd87c10bb75be2a61046a1affcf78d3e053bb966ea641db5580ca67742cd"
+    },
+    {
+      "path": "raw/baseline-source-2/android-normal-final.log",
+      "bytes": 71868,
+      "sha256": "de13c8114db6cbe5bbe67bc3a6158fecf25f948df142cf75f0fdc5d43994b4fc"
+    },
+    {
+      "path": "raw/baseline-source-2/android-preview-final.log",
+      "bytes": 76681,
+      "sha256": "cdc8b2dd23179a82bb62e972abef2e6a399c2f76a9cc9c7982b06d5fb8903008"
+    },
+    {
+      "path": "raw/baseline-source-2/api31-debug.log",
+      "bytes": 33406,
+      "sha256": "f2bfae502bec52f1438f5641184fd26553473071145cbb76ee975ca08df52f31"
+    },
+    {
+      "path": "raw/baseline-source-2/api31-uiPreview.log",
+      "bytes": 33410,
+      "sha256": "fc079c1c5b2c4adc4d4b3f1fa7a2695a94ccb3ce9fb7dd23fb65e50f5b8b4e88"
+    },
+    {
+      "path": "raw/baseline-source-2/gate-commands.json",
+      "bytes": 72745,
+      "sha256": "b18e819d678849ab64507fb44a5f236de2b03091adb9dbedb3399767e1f5fc35"
+    },
+    {
+      "path": "raw/baseline-source-2/java-fresh.log",
+      "bytes": 3149,
+      "sha256": "f1639ccac1ec6a28f68b5dc0f1439323c80eac844a50158298d3e72f638984b2"
+    },
+    {
+      "path": "raw/baseline-source-2/java-results.json",
+      "bytes": 2479,
+      "sha256": "a8ff21ebc0fc0a7487a0226234b554dcc3562c1cc89154e3e852dafbd86d47fe"
+    },
+    {
+      "path": "raw/baseline-source-2/java-xml/Debug/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 963,
+      "sha256": "db73d239851c4451672f8cf312386c46b82ea9be87eb604fdec2e36791788c28"
+    },
+    {
+      "path": "raw/baseline-source-2/java-xml/Debug/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "657e9fcd214f1c8304163a4a19ee87d99366ed85c2d74a2eb98204479dd1bd82"
+    },
+    {
+      "path": "raw/baseline-source-2/java-xml/Debug/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 856,
+      "sha256": "2947aeddcb0b81c40b0c2ce422895bc104da135c512984a92ba11ce3ce8ace2a"
+    },
+    {
+      "path": "raw/baseline-source-2/java-xml/Debug/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3622,
+      "sha256": "b2236ffaf924830aab6068bb8a88ca49caabe7f40252389d77d84c62a6d55692"
+    },
+    {
+      "path": "raw/baseline-source-2/java-xml/Debug/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "47078082f5876571641e1bd937fbfc0846bd3728fdf0b8a071ffd0fc296c7201"
+    },
+    {
+      "path": "raw/baseline-source-2/java-xml/UiPreview/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "676765f66c98e3cca891667d175ef73b560d24c1f0355f4ce46e7d0ce2bf425b"
+    },
+    {
+      "path": "raw/baseline-source-2/java-xml/UiPreview/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "a97a096714f057287f093e9ac99a876c74887368913253d28e6ed2a97ae60012"
+    },
+    {
+      "path": "raw/baseline-source-2/java-xml/UiPreview/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "66b672e5b2d10e7efe835c044823ffa7b4c106807c236709f96c585b0a350bc1"
+    },
+    {
+      "path": "raw/baseline-source-2/java-xml/UiPreview/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3622,
+      "sha256": "0784df000689d806a49d8787fcca1047f487f705b4dc6c06c2f07aa8ab3d2ac8"
+    },
+    {
+      "path": "raw/baseline-source-2/java-xml/UiPreview/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "39c3a665f0be320fc09c66a083ded3557323428e38bf21a0d9271d569ea5b138"
+    },
+    {
+      "path": "raw/baseline-source-2/shared-bevy-final.log",
+      "bytes": 155355,
+      "sha256": "f2cae2da769de1e83af86f9cb575ee752bc364edf9414e626ce79fa5840b3754"
+    },
+    {
+      "path": "raw/baseline-source/android-normal-final.log",
+      "bytes": 72009,
+      "sha256": "4d0fadc99ba22fca32f271c4078feadaca465a78e59656e1164726af00816092"
+    },
+    {
+      "path": "raw/baseline-source/android-preview-final.log",
+      "bytes": 77280,
+      "sha256": "076f75cd60013882f901af037e5bfe19acde293adb261b597e1325e753430abb"
+    },
+    {
+      "path": "raw/baseline-source/gate-commands.json",
+      "bytes": 24418,
+      "sha256": "156a99f5262094f6ebf0ed45d4e37ff4b5542909dafa74d7cb37961508eeda15"
+    },
+    {
+      "path": "raw/baseline-v30/api.txt",
+      "bytes": 3,
+      "sha256": "32c2643e0dc65524c9f1f6f9f00937322fd68d59986bc381d9ff2285d23e353d"
+    },
+    {
+      "path": "raw/baseline-v30/avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "path": "raw/baseline-v30/com.mir2.web3-final-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/baseline-v30/com.mir2.web3.uipreview-final-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/baseline-v30/commands.json",
+      "bytes": 15811,
+      "sha256": "4aac46b37273d27162f718b31765ea61a3d2310274bef9e012e3a6bf42327358"
+    },
+    {
+      "path": "raw/baseline-v30/debug-installed-path-after.txt",
+      "bytes": 93,
+      "sha256": "fd6d4817fc714ffbd0d29fa253424396801a3dbc541d92a5817e20d44154b5e3"
+    },
+    {
+      "path": "raw/baseline-v30/debug-installed-path-before.txt",
+      "bytes": 93,
+      "sha256": "fd6d4817fc714ffbd0d29fa253424396801a3dbc541d92a5817e20d44154b5e3"
+    },
+    {
+      "path": "raw/baseline-v30/debug-installed-sha-after.txt",
+      "bytes": 151,
+      "sha256": "597297e0c178f84e6b905a2d0cf6289c68d3fe59be24f799f6bab9a25d63423b"
+    },
+    {
+      "path": "raw/baseline-v30/debug-installed-sha-before.txt",
+      "bytes": 151,
+      "sha256": "597297e0c178f84e6b905a2d0cf6289c68d3fe59be24f799f6bab9a25d63423b"
+    },
+    {
+      "path": "raw/baseline-v30/debug-package-after.txt",
+      "bytes": 9726,
+      "sha256": "ea7978d1d604180ff98ca1d08ff63397d7f7093deb49db859c8f71ca830fab4e"
+    },
+    {
+      "path": "raw/baseline-v30/debug-package-before.txt",
+      "bytes": 9282,
+      "sha256": "c4cef910166e318fee3f552ce582f2ecb43768c37848217b3cc66d9987fe27ee"
+    },
+    {
+      "path": "raw/baseline-v30/density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "path": "raw/baseline-v30/display.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "path": "raw/baseline-v30/login-cold-pid.log",
+      "bytes": 15056,
+      "sha256": "f50b726fdbc0c869364796ad5f2c754d5d74f51483ac8cbccfdaff3ec58e4a7c"
+    },
+    {
+      "path": "raw/baseline-v30/login-cold.png",
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "path": "raw/baseline-v30/login-home.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/baseline-v30/login-latest-pid.log",
+      "bytes": 21402,
+      "sha256": "a38b3c99d9de55a8192d962757ced6ebe07a95528831a1310aa767bfdf415976"
+    },
+    {
+      "path": "raw/baseline-v30/login-pid.txt",
+      "bytes": 6,
+      "sha256": "5f76208d95c244398a085d21447dcdcdbd5ed13ada799dcc152d82fa59097219"
+    },
+    {
+      "path": "raw/baseline-v30/login-resume-pid.txt",
+      "bytes": 6,
+      "sha256": "5f76208d95c244398a085d21447dcdcdbd5ed13ada799dcc152d82fa59097219"
+    },
+    {
+      "path": "raw/baseline-v30/login-resume.txt",
+      "bytes": 233,
+      "sha256": "7e05b10fd30cd0b0b736f5b0687391e1585539d8671ab774d20ad048bd4c15be"
+    },
+    {
+      "path": "raw/baseline-v30/login-resumed.png",
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "path": "raw/baseline-v30/login-start.txt",
+      "bytes": 158,
+      "sha256": "1d4189f63c66c91f2f222e68bf190185b0c4f7626e5569922741c80cf0171ab1"
+    },
+    {
+      "path": "raw/baseline-v30/login-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/baseline-v30/login-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/baseline-v30/os.txt",
+      "bytes": 89,
+      "sha256": "9e2f1f3d18da07932a4b18c12a1ec39c77234bf650bfd4f821ca991c4c0a90c8"
+    },
+    {
+      "path": "raw/baseline-v30/preview-installed-path-after.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/baseline-v30/preview-installed-path-before.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/baseline-v30/preview-installed-sha-after.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/baseline-v30/preview-installed-sha-before.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/baseline-v30/preview-package-after.txt",
+      "bytes": 10041,
+      "sha256": "451af320a9939904fa39adede742e38b4f0a1d7075a92429969d9fae1423c09d"
+    },
+    {
+      "path": "raw/baseline-v30/preview-package-before.txt",
+      "bytes": 10043,
+      "sha256": "9894d75996d9497db0377c6e33e69a406f1c39c54ffb597fed9470c026c22784"
+    },
+    {
+      "path": "raw/baseline-v30/quests-cold-pid.log",
+      "bytes": 51622,
+      "sha256": "0f14db45814cea465c6131c50f36d8b1b821004df1edd930d8339e6881776556"
+    },
+    {
+      "path": "raw/baseline-v30/quests-cold.png",
+      "bytes": 168042,
+      "sha256": "dce5a9600e7ab16b18a029e57fccd5a1a57626ffd9b748052cbfb2b9b6e69b06"
+    },
+    {
+      "path": "raw/baseline-v30/quests-home.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/baseline-v30/quests-latest-pid.log",
+      "bytes": 59277,
+      "sha256": "0a035f6ad10d5673fe0c0b786735c5654f3b1a2dd65ce7300cee7c7c9738b0dc"
+    },
+    {
+      "path": "raw/baseline-v30/quests-pid.txt",
+      "bytes": 6,
+      "sha256": "d764c5f130917b3526beb562ec25f0d8c5c1b4a8a824cda1fe186fe9582f5808"
+    },
+    {
+      "path": "raw/baseline-v30/quests-resume-pid.txt",
+      "bytes": 6,
+      "sha256": "d764c5f130917b3526beb562ec25f0d8c5c1b4a8a824cda1fe186fe9582f5808"
+    },
+    {
+      "path": "raw/baseline-v30/quests-resume.txt",
+      "bytes": 292,
+      "sha256": "e29f400e46d267447ce34798e34400b7c6462e5b89b0f5274cd8fb4122ec667d"
+    },
+    {
+      "path": "raw/baseline-v30/quests-resumed.png",
+      "bytes": 168042,
+      "sha256": "dce5a9600e7ab16b18a029e57fccd5a1a57626ffd9b748052cbfb2b9b6e69b06"
+    },
+    {
+      "path": "raw/baseline-v30/quests-start.txt",
+      "bytes": 217,
+      "sha256": "72972fdf616be4aea94ec41a70d445425ebe2e651fccc738ac98ec2618da24e1"
+    },
+    {
+      "path": "raw/baseline-v30/quests-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/baseline-v30/quests-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/baseline-v30/world-cold-pid.log",
+      "bytes": 46654,
+      "sha256": "e8c05aaec07b749cf472563e06c428137d3def3bbc05de18e2907dc65d9eed68"
+    },
+    {
+      "path": "raw/baseline-v30/world-cold.png",
+      "bytes": 1000768,
+      "sha256": "3192e085e5647817c13733e6e6e42fc98087a55e4da2b98bac0269fd09b5ae75"
+    },
+    {
+      "path": "raw/baseline-v30/world-home.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/baseline-v30/world-latest-pid.log",
+      "bytes": 56278,
+      "sha256": "970bdd44e12e948000fbe0ede99f2d1dab6abfd5cd7f44fc3d217be166828853"
+    },
+    {
+      "path": "raw/baseline-v30/world-pid.txt",
+      "bytes": 6,
+      "sha256": "1e38e9c4bbd1487ef9bba115bbcc8013d5ace522e576c2a8ddb3f1ad03dcae45"
+    },
+    {
+      "path": "raw/baseline-v30/world-resume-pid.txt",
+      "bytes": 6,
+      "sha256": "1e38e9c4bbd1487ef9bba115bbcc8013d5ace522e576c2a8ddb3f1ad03dcae45"
+    },
+    {
+      "path": "raw/baseline-v30/world-resume.txt",
+      "bytes": 292,
+      "sha256": "352ab93ca09ae35cd6e306b67d3e642b6b95680f5cb56719ccea8802fcf35512"
+    },
+    {
+      "path": "raw/baseline-v30/world-resumed.png",
+      "bytes": 1003638,
+      "sha256": "f9ec1923bd156de6a16bf06fe685fbca3bb0df818ad95c02bf34f6c2c598211e"
+    },
+    {
+      "path": "raw/baseline-v30/world-start.txt",
+      "bytes": 217,
+      "sha256": "7ca96a9e299f4931819f8258641a7f0acb080d109ce23711cbf3a7d0ad7050c7"
+    },
+    {
+      "path": "raw/baseline-v30/world-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/baseline-v30/world-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/build-baseline-pair.mjs",
+      "bytes": 4021,
+      "sha256": "a0761364aa4ec51808e67c96d6750a12bccd5b6034024775f41b6d581bbb1005"
+    },
+    {
+      "path": "raw/capture-gpu.mjs",
+      "bytes": 5139,
+      "sha256": "27a7bb37ea96f7649267365f3304a6146523c17112e23561dafd11133f0995b3"
+    },
+    {
+      "path": "raw/capture-modal-ui.mjs",
+      "bytes": 4076,
+      "sha256": "a13ec88dc89568edfbde3a83ecedf1b56d757f797a69cc1af25d764c8e98b6f4"
+    },
+    {
+      "path": "raw/debug-badging.txt",
+      "bytes": 4631,
+      "sha256": "9c272fa6bef6bb47d89a8c4a0feb1af729ceb306ecb7b1f0c36c1624ccfba136"
+    },
+    {
+      "path": "raw/debug-build-end.txt",
+      "bytes": 25,
+      "sha256": "f4262643c863cbd645bf67fbe8383a8a6cf8fcc3bcc5981aa66b7a33dc7b5cf3"
+    },
+    {
+      "path": "raw/debug-build-start.txt",
+      "bytes": 25,
+      "sha256": "2c1bfb069da5bcf5ac87112a181ad64797008c36a44f37abe25d2f6636983676"
+    },
+    {
+      "path": "raw/debug-build.log",
+      "bytes": 36287,
+      "sha256": "74b96dc201e377f553613f753a8188ae3ff3adf0e1df2bb7fc1945f549ca7833"
+    },
+    {
+      "path": "raw/debug-BuildConfig.java.txt",
+      "bytes": 580,
+      "sha256": "458fe589f29ab802fd084b65c33977a2038daccec9e94b3d97cf61aadda933d2"
+    },
+    {
+      "path": "raw/debug-source-after.txt",
+      "bytes": 41,
+      "sha256": "6440fe500240cbe3b691cb9978ad772c95629fc463a8f24aa198587f0a14b9c2"
+    },
+    {
+      "path": "raw/debug-source-before.txt",
+      "bytes": 41,
+      "sha256": "6440fe500240cbe3b691cb9978ad772c95629fc463a8f24aa198587f0a14b9c2"
+    },
+    {
+      "path": "raw/debug-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/debug-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/failure-classification.json",
+      "bytes": 474,
+      "sha256": "9f3107e70f4c0ab088e7e9d3af1f221bbd08c46f54992e41262db61388ebb4ff"
+    },
+    {
+      "path": "raw/install-api.txt",
+      "bytes": 3,
+      "sha256": "32c2643e0dc65524c9f1f6f9f00937322fd68d59986bc381d9ff2285d23e353d"
+    },
+    {
+      "path": "raw/install-debug-package.txt",
+      "bytes": 9284,
+      "sha256": "ad6f424d430045ef103bcf0dc5fec45a8ee2fb5425efeeac363f2b5a13660664"
+    },
+    {
+      "path": "raw/install-debug-path-after.txt",
+      "bytes": 93,
+      "sha256": "fd6d4817fc714ffbd0d29fa253424396801a3dbc541d92a5817e20d44154b5e3"
+    },
+    {
+      "path": "raw/install-debug-path-before.txt",
+      "bytes": 93,
+      "sha256": "b3c000dbd3f33311e25bf250df631558c2cb588e9c640a642c2b5c7dabffc576"
+    },
+    {
+      "path": "raw/install-debug-result.txt",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "path": "raw/install-debug-sha-after.txt",
+      "bytes": 151,
+      "sha256": "597297e0c178f84e6b905a2d0cf6289c68d3fe59be24f799f6bab9a25d63423b"
+    },
+    {
+      "path": "raw/install-debug-sha-before.txt",
+      "bytes": 151,
+      "sha256": "1e4ad00e820ba127aa3bc9c0beef8c9a30bf5e6e16bf437fca21bd814227f6ad"
+    },
+    {
+      "path": "raw/install-debug-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/install-devices.txt",
+      "bytes": 147,
+      "sha256": "e8fe6f96c101382176c616dba8f9ce8e63405777dd1e7e953e586371e2a0e9e6"
+    },
+    {
+      "path": "raw/install-preview-package.txt",
+      "bytes": 9570,
+      "sha256": "a173d3cdf85c83a953bb8f7ed20ce4592d1914e760ce3dcd5e04795cd54fec25"
+    },
+    {
+      "path": "raw/install-preview-path-after.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/install-preview-path-before.txt",
+      "bytes": 103,
+      "sha256": "50830cb2448b407ead769533e5f8e1252c96c74a8ef2ce753214e58a2264316f"
+    },
+    {
+      "path": "raw/install-preview-result.txt",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "path": "raw/install-preview-sha-after.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/install-preview-sha-before.txt",
+      "bytes": 161,
+      "sha256": "e394e7d4f23ff6106ec9e0be229422aa4d354055d93c8d09e7877eff20e0d8a7"
+    },
+    {
+      "path": "raw/install-preview-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/install-v29-pair.mjs",
+      "bytes": 2431,
+      "sha256": "7692d5f1361fec07638479bc00f0c6121f71d2bed418d1d444bbda388a048202"
+    },
+    {
+      "path": "raw/installation.json",
+      "bytes": 5033,
+      "sha256": "96982f27476bcbc66bf602c96a8242b0c5f823da857ffdb8919eacb8f57eb68c"
+    },
+    {
+      "path": "raw/manual-frame-ledger.json",
+      "bytes": 12122,
+      "sha256": "9e7172b050892d60b7c550bceeeb8df4f2e7bb86d9515dd49af991e558bb48d2"
+    },
+    {
+      "path": "raw/npc-geometry.json",
+      "bytes": 3224,
+      "sha256": "a892e221b7871ed6d121c579a750af8ca57ffcfddda4582dca1e7b386d81d9d8"
+    },
+    {
+      "path": "raw/npc-green.json",
+      "bytes": 523,
+      "sha256": "77b73c271f090347ce0ef78a4783e8187b442386e20e738223e7ec7f633e62f8"
+    },
+    {
+      "path": "raw/npc-green.log",
+      "bytes": 21546,
+      "sha256": "1ed0741c3000d6d5fba99b7ed90f07780d2df1296cb4ae24266a3d9da76ec153"
+    },
+    {
+      "path": "raw/npc-red-source.rs",
+      "bytes": 62655,
+      "sha256": "dd25c3c3208f0c41aacfc621c18fb36db3104c058138da2583c4c4b5090f221c"
+    },
+    {
+      "path": "raw/npc-red.json",
+      "bytes": 523,
+      "sha256": "a1a7bb189005101b5c986b47c29fcfb4b1a0cb892e03badbe8743fdf7a8e19f1"
+    },
+    {
+      "path": "raw/npc-red.log",
+      "bytes": 22968,
+      "sha256": "abc3663624713a9dbb8a2e927939206c72c53a2ed998e7f12ae2ac0dc91e7e2e"
+    },
+    {
+      "path": "raw/original-checkouts-after.json",
+      "bytes": 746,
+      "sha256": "f1ac475845fa3dc83b3db9910400fd160ade46ca2893109845140b27962b738d"
+    },
+    {
+      "path": "raw/original-checkouts-before.json",
+      "bytes": 746,
+      "sha256": "83fce8d575c0e1d9a42e035c98d1fc3e41a8c0ba9f4e8cab87a4f6787a0eda6e"
+    },
+    {
+      "path": "raw/package-baseline.json",
+      "bytes": 8391,
+      "sha256": "61be2729b8b850d4ddc81730ad1ee62b818d9b497685bbe33e6282966adc5bbc"
+    },
+    {
+      "path": "raw/phone-suite-failed-source.rs",
+      "bytes": 75397,
+      "sha256": "c681e9761281110b67783793681b908599b7e93b5e077db37da7875fa7f8f4d2"
+    },
+    {
+      "path": "raw/phone-suite-final-2.json",
+      "bytes": 545,
+      "sha256": "89424464bf0b8e377a14d5f7c5af68b27427012790a748f608e5385a5444d6cc"
+    },
+    {
+      "path": "raw/phone-suite-final-2.log",
+      "bytes": 23696,
+      "sha256": "312b1e1bd53a536d8f7ef4a9a3c6fdc83e32c6fa5428d7ae83b26ccd2cdbe3b3"
+    },
+    {
+      "path": "raw/phone-suite-final.json",
+      "bytes": 545,
+      "sha256": "80b00c0350280a96ac728352af5b5484debcb3d2fec46a131e2fa7990adf0419"
+    },
+    {
+      "path": "raw/phone-suite-final.log",
+      "bytes": 24273,
+      "sha256": "bd25384271b93c1a733ffff3fea77da1da6fd0977d947a43fcb12f20e66a8810"
+    },
+    {
+      "path": "raw/prepare-evidence.mjs",
+      "bytes": 3674,
+      "sha256": "283efe14707e8240eed85913ed79e42c9667ffd91d3bd7df569667aa2f4c110a"
+    },
+    {
+      "path": "raw/preview-badging.txt",
+      "bytes": 4651,
+      "sha256": "39f1929ad47b87cf051acef58586d15e05b039064b9b58213509f4e44acf386d"
+    },
+    {
+      "path": "raw/preview-build-end.txt",
+      "bytes": 25,
+      "sha256": "1488d563cd99c688bb4a3ccbe58a89e6469b41c0946b5dace44351e63106a49f"
+    },
+    {
+      "path": "raw/preview-build-start.txt",
+      "bytes": 25,
+      "sha256": "a5d3cf8f478459f0584e300d9af429c4e4d28375ba539631d89fb4b0dac18c3d"
+    },
+    {
+      "path": "raw/preview-build.log",
+      "bytes": 36506,
+      "sha256": "1efe05336dee1316bd24460cd414b3ab722dfe7b5e38eb13318968fb4f1e7a23"
+    },
+    {
+      "path": "raw/preview-BuildConfig.java.txt",
+      "bytes": 597,
+      "sha256": "8dc5fc1681bdb9a8a932168e72175b6ed802dbb54bd450486aa4d4f3eb248624"
+    },
+    {
+      "path": "raw/preview-source-after.txt",
+      "bytes": 41,
+      "sha256": "6440fe500240cbe3b691cb9978ad772c95629fc463a8f24aa198587f0a14b9c2"
+    },
+    {
+      "path": "raw/preview-source-before.txt",
+      "bytes": 41,
+      "sha256": "6440fe500240cbe3b691cb9978ad772c95629fc463a8f24aa198587f0a14b9c2"
+    },
+    {
+      "path": "raw/preview-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/preview-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/red-source-verification.json",
+      "bytes": 186,
+      "sha256": "c54e090c4580e45e1cd0da74dc992729443af3c224cda1245f5f9e73c0bcd09d"
+    },
+    {
+      "path": "raw/run-baseline-gates.mjs",
+      "bytes": 4705,
+      "sha256": "3e7da0f99e524e6eb602659fe4419000b8eace7733829994618a0ef26412171d"
+    },
+    {
+      "path": "raw/run-shared.mjs",
+      "bytes": 1354,
+      "sha256": "eb55d364ad2c3cfb9f153e082ced4ea6b41fcc36da22205dd458e5c3b8986e64"
+    },
+    {
+      "path": "raw/scene-count-failed-source.rs",
+      "bytes": 80288,
+      "sha256": "a7fb89890c234d4659dc3afdca7ddfe406819c441f5d3bb4c5330645445efd23"
+    },
+    {
+      "path": "raw/source-and-package-baseline.json",
+      "bytes": 10619,
+      "sha256": "5dee50f35ea3ce33d8010be9a069a0e8e493e691d5e74d2a6dd260bb73fc8c04"
+    },
+    {
+      "path": "raw/source-v30.json",
+      "bytes": 1140,
+      "sha256": "7de37fdea94009deba31519aa058e5f43298c592ed28e219a06090b10d8f80c3"
+    },
+    {
+      "path": "raw/ui-npc-quests/0-cold-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/0-cold-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/0-cold-package.txt",
+      "bytes": 9570,
+      "sha256": "19c4658b651ca3ae3138a882bdf077a81596b9c999392588ab95ccdb69b1231b"
+    },
+    {
+      "path": "raw/ui-npc-quests/0-cold-pid.log",
+      "bytes": 57169,
+      "sha256": "3e4d2f27b93844643ecbe52b767fb0b764c2f9dccbe21c586e056d2605909d5a"
+    },
+    {
+      "path": "raw/ui-npc-quests/0-cold.png",
+      "bytes": 178766,
+      "sha256": "312f06fc5bca3c79383eef1bb65aca28039a7a07de301db5e39afd05ff8186fb"
+    },
+    {
+      "path": "raw/ui-npc-quests/104-home-home.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/104-home-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/104-home-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/104-home-package.txt",
+      "bytes": 10044,
+      "sha256": "02b4e7054af5cc945554c8ee1b5cf63847548a0223d8ba53c23615560a544415"
+    },
+    {
+      "path": "raw/ui-npc-quests/104-home-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/104-home-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/104-home-pid.log",
+      "bytes": 112462,
+      "sha256": "386b79be4700e66bce6b8552731dcff631013d94777ec4f04d3e8df52c6c944a"
+    },
+    {
+      "path": "raw/ui-npc-quests/104-home-resume.txt",
+      "bytes": 292,
+      "sha256": "352ab93ca09ae35cd6e306b67d3e642b6b95680f5cb56719ccea8802fcf35512"
+    },
+    {
+      "path": "raw/ui-npc-quests/104-home.png",
+      "bytes": 161954,
+      "sha256": "9d82237f2b79c759d7c20312dbac3d74f46db09168c6c0e841a5d86dd10438ab"
+    },
+    {
+      "path": "raw/ui-npc-quests/113-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/113-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/113-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/113-tap-package.txt",
+      "bytes": 10044,
+      "sha256": "867805da3fd85ba573f43b34fed8a6e2ceaa4b8f415e394e485c9dfa33c8d3f1"
+    },
+    {
+      "path": "raw/ui-npc-quests/113-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/113-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/113-tap-pid.log",
+      "bytes": 120092,
+      "sha256": "1b42c8a5da7434a5b78c46cd359c7d4bc64aa335f54304af391591ddc2930ce4"
+    },
+    {
+      "path": "raw/ui-npc-quests/113-tap.png",
+      "bytes": 161975,
+      "sha256": "6a92a4ac5df5357a67a8d3564966f7179fcf8299200d4aef0c995c85a34a7ebd"
+    },
+    {
+      "path": "raw/ui-npc-quests/121-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/121-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/121-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/121-tap-package.txt",
+      "bytes": 10044,
+      "sha256": "fcdef42cf2b631261c9594ac8609cd3e6f068507182a8cd5c87ee60094b55108"
+    },
+    {
+      "path": "raw/ui-npc-quests/121-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/121-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/121-tap-pid.log",
+      "bytes": 120310,
+      "sha256": "a0683113952e9afbf87b82e471cc94a82b818a8ad73fc9c28fdca08cd588ccdc"
+    },
+    {
+      "path": "raw/ui-npc-quests/121-tap.png",
+      "bytes": 87476,
+      "sha256": "e563553b4dd19c99f682d2c1c446224ff062c9d1a707dfe809484835e4ceaf4d"
+    },
+    {
+      "path": "raw/ui-npc-quests/129-home-home.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/129-home-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/129-home-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/129-home-package.txt",
+      "bytes": 10044,
+      "sha256": "09cb99b1c1d386423a3313a9930f0db8127240f70b3b84202ddf707dac6db73c"
+    },
+    {
+      "path": "raw/ui-npc-quests/129-home-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/129-home-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/129-home-pid.log",
+      "bytes": 127116,
+      "sha256": "45c6a7f05cf2ddd29337c007749825dc70dcdbf2bddc99d2b3b89e00298ead24"
+    },
+    {
+      "path": "raw/ui-npc-quests/129-home-resume.txt",
+      "bytes": 292,
+      "sha256": "9c146548fe85f23fdeee77604f60aacb599897d140f93a5f120288ec72a374bc"
+    },
+    {
+      "path": "raw/ui-npc-quests/129-home.png",
+      "bytes": 87476,
+      "sha256": "e563553b4dd19c99f682d2c1c446224ff062c9d1a707dfe809484835e4ceaf4d"
+    },
+    {
+      "path": "raw/ui-npc-quests/138-stop-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/138-stop-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/138-stop-package.txt",
+      "bytes": 10044,
+      "sha256": "b926fe6328a330262eb6ffa8d649f604ed5d48c1681ed89bcfe7a29b0a29d0e4"
+    },
+    {
+      "path": "raw/ui-npc-quests/138-stop-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/138-stop-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/16-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/16-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/16-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/16-tap-package.txt",
+      "bytes": 10043,
+      "sha256": "5602a6cc3876e62e44f8d4b71e4ebb4ebb30b4de43894f567f70cccd4836baaa"
+    },
+    {
+      "path": "raw/ui-npc-quests/16-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/16-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/16-tap-pid.log",
+      "bytes": 68703,
+      "sha256": "13104db4068c60d15f17e01cd6c05d39f4c1f6ce7a09a0fd58721baa1b3b5964"
+    },
+    {
+      "path": "raw/ui-npc-quests/16-tap.png",
+      "bytes": 178766,
+      "sha256": "312f06fc5bca3c79383eef1bb65aca28039a7a07de301db5e39afd05ff8186fb"
+    },
+    {
+      "path": "raw/ui-npc-quests/24-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/24-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/24-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/24-tap-package.txt",
+      "bytes": 10043,
+      "sha256": "bc3ea92cacc3300f90a385bbaae276a9430ad56b5cf4379964f71de780aa8712"
+    },
+    {
+      "path": "raw/ui-npc-quests/24-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/24-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/24-tap-pid.log",
+      "bytes": 72518,
+      "sha256": "0627e6f9b79fc65fa0d3f0fd94eb9550c8c70a1bdd1d95bdf74e47e0db86cf55"
+    },
+    {
+      "path": "raw/ui-npc-quests/24-tap.png",
+      "bytes": 186289,
+      "sha256": "f97273e4fab9e3912b45e1a5550a1173b2686ff4475cc4521c81a3821d017e6e"
+    },
+    {
+      "path": "raw/ui-npc-quests/32-swipe-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/32-swipe-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/32-swipe-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/32-swipe-package.txt",
+      "bytes": 10044,
+      "sha256": "cc4c8b2adfc689521daa3d6534ef6b9496f8bc644892daf8dd5da23caff50c03"
+    },
+    {
+      "path": "raw/ui-npc-quests/32-swipe-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/32-swipe-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/32-swipe-pid.log",
+      "bytes": 76224,
+      "sha256": "b04c1f245ae4e7cdcd72e77a9c48e9293bd07fbbf1d1372b760d85738456ec3b"
+    },
+    {
+      "path": "raw/ui-npc-quests/32-swipe.png",
+      "bytes": 188026,
+      "sha256": "0618ff91fc5477ec50cbd5c6998e3e0c51b04d909dca2a80a7a14c6d549717c2"
+    },
+    {
+      "path": "raw/ui-npc-quests/40-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/40-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/40-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/40-tap-package.txt",
+      "bytes": 10044,
+      "sha256": "82204b0eacfc76e22e6c3d291041ac743e4e94787f2446b2e7b8338ad0f5288a"
+    },
+    {
+      "path": "raw/ui-npc-quests/40-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/40-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/40-tap-pid.log",
+      "bytes": 79712,
+      "sha256": "683b87872fc3680945218c91be01c0359ecab8718ac9058b3dfead1662dae0b5"
+    },
+    {
+      "path": "raw/ui-npc-quests/40-tap.png",
+      "bytes": 192917,
+      "sha256": "8f4498cd1f2dbd4e548d4e323ef4c94068de3e19e8f62c1a8cb3bf402ec1a520"
+    },
+    {
+      "path": "raw/ui-npc-quests/48-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/48-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/48-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/48-tap-package.txt",
+      "bytes": 10044,
+      "sha256": "73e8517f2ba6fbbda90f06af8afea8b2292277209fa1f9172ecfcd9073d56e11"
+    },
+    {
+      "path": "raw/ui-npc-quests/48-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/48-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/48-tap-pid.log",
+      "bytes": 83636,
+      "sha256": "ed50f18abfc91b9ac42c27d7c9ec262fe31b687242a3337e99371c8541d327e0"
+    },
+    {
+      "path": "raw/ui-npc-quests/48-tap.png",
+      "bytes": 188026,
+      "sha256": "0618ff91fc5477ec50cbd5c6998e3e0c51b04d909dca2a80a7a14c6d549717c2"
+    },
+    {
+      "path": "raw/ui-npc-quests/56-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/56-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/56-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/56-tap-package.txt",
+      "bytes": 10044,
+      "sha256": "25163e2e0c9359375e75f24634a1fe1756d80abd4444da105ca737df7c43b238"
+    },
+    {
+      "path": "raw/ui-npc-quests/56-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/56-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/56-tap-pid.log",
+      "bytes": 83963,
+      "sha256": "2b3f72acb2b37bd81534e5703bae45f8b2a9343110e0b65d0f916db58c33ca93"
+    },
+    {
+      "path": "raw/ui-npc-quests/56-tap.png",
+      "bytes": 188013,
+      "sha256": "bf0b81352caa3bb2caa25cc39e6dd63629b322e0dd1703a0185373c2cd866590"
+    },
+    {
+      "path": "raw/ui-npc-quests/64-swipe-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/64-swipe-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/64-swipe-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/64-swipe-package.txt",
+      "bytes": 10044,
+      "sha256": "ac508b3d3d8c285198b5c04389372ef12e29cc070028fd420e26a85eb81d0195"
+    },
+    {
+      "path": "raw/ui-npc-quests/64-swipe-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/64-swipe-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/64-swipe-pid.log",
+      "bytes": 87669,
+      "sha256": "a7dc550ad44238328847697f42ec8f294cfb0e9d3684729fc973b804d96e2577"
+    },
+    {
+      "path": "raw/ui-npc-quests/64-swipe.png",
+      "bytes": 189656,
+      "sha256": "86a1abf58a7282ded4babd654c8b06b55f625fcac621eace4d401d28eb8514d6"
+    },
+    {
+      "path": "raw/ui-npc-quests/72-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/72-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/72-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/72-tap-package.txt",
+      "bytes": 10044,
+      "sha256": "d03c5f8c287bcf31f56afbb7a9ff4f7a94444b8cefd743db1f2271927cbf84d5"
+    },
+    {
+      "path": "raw/ui-npc-quests/72-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/72-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/72-tap-pid.log",
+      "bytes": 92901,
+      "sha256": "fad86b8f259c07390e2d93a5cee5293f76a1da521309d6bd5cc7eae2ed74ab44"
+    },
+    {
+      "path": "raw/ui-npc-quests/72-tap.png",
+      "bytes": 188195,
+      "sha256": "28c0b038031aa658aa1c391c4cf858ac2539e899c4526bdb05c0cb96b449649d"
+    },
+    {
+      "path": "raw/ui-npc-quests/8-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/8-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/8-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/8-tap-package.txt",
+      "bytes": 10043,
+      "sha256": "2e6e235e9c1ca2d3efd7faf92e063efef7fbd894732a78043e6ad58ccbd62b5b"
+    },
+    {
+      "path": "raw/ui-npc-quests/8-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/8-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/8-tap-pid.log",
+      "bytes": 64779,
+      "sha256": "a57bc26660128fb076445d9a54783c2439a165076bddb3608a1109c9c4a22b94"
+    },
+    {
+      "path": "raw/ui-npc-quests/8-tap.png",
+      "bytes": 67448,
+      "sha256": "b873ce1f3cc23e970bda8dbd62ce71a1279029b1cb20e5f5c541bae5d12aa4bc"
+    },
+    {
+      "path": "raw/ui-npc-quests/80-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/80-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/80-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/80-tap-package.txt",
+      "bytes": 10044,
+      "sha256": "fbfd69c24293b37bb7c485452c9681bbcd85cfd26f4110f37f728db02563f6f5"
+    },
+    {
+      "path": "raw/ui-npc-quests/80-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/80-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/80-tap-pid.log",
+      "bytes": 93119,
+      "sha256": "6053a153f3fce606280aab3628cfe54bc8ec235dd76e727dec49832370b86302"
+    },
+    {
+      "path": "raw/ui-npc-quests/80-tap.png",
+      "bytes": 182551,
+      "sha256": "f51e73b940a32474eb8ffc724d862c59f631c924f8ecb6ba3dd358428c9dfa38"
+    },
+    {
+      "path": "raw/ui-npc-quests/88-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/88-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/88-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/88-tap-package.txt",
+      "bytes": 10044,
+      "sha256": "57752f3330c9ceb0f82ce8761b9723aaa52eff092a87f52af4f475a0e095d59a"
+    },
+    {
+      "path": "raw/ui-npc-quests/88-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/88-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/88-tap-pid.log",
+      "bytes": 100750,
+      "sha256": "0a63a9653b670bd9b6a6d4344922d2e1b9f4c754bcab26e4138bf0a24948ca93"
+    },
+    {
+      "path": "raw/ui-npc-quests/88-tap.png",
+      "bytes": 161209,
+      "sha256": "3ae01f7a14415463278e22edcbec282a4b76c38b7ae5fe7078291fb64103129f"
+    },
+    {
+      "path": "raw/ui-npc-quests/96-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-npc-quests/96-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-npc-quests/96-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-npc-quests/96-tap-package.txt",
+      "bytes": 10043,
+      "sha256": "19c5ed6b9f94e807be30035df3bd5fd05ba066e6d6d15e4280adf02fe3765d30"
+    },
+    {
+      "path": "raw/ui-npc-quests/96-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/96-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/96-tap-pid.log",
+      "bytes": 106091,
+      "sha256": "865d00a67dde40f5153ea032a13bee665793f276e27a75d23dc40d15932793ed"
+    },
+    {
+      "path": "raw/ui-npc-quests/96-tap.png",
+      "bytes": 161954,
+      "sha256": "9d82237f2b79c759d7c20312dbac3d74f46db09168c6c0e841a5d86dd10438ab"
+    },
+    {
+      "path": "raw/ui-npc-quests/commands.json",
+      "bytes": 39504,
+      "sha256": "dad50b22eda5e5bf4dfb5fcb44324d24b51b0721d03a7b37b4a6a270eb236a93"
+    },
+    {
+      "path": "raw/ui-npc-quests/pid.txt",
+      "bytes": 6,
+      "sha256": "77514167dd45c00a38f9aa095878e868755a487b1d010c11ceb4fa262c772078"
+    },
+    {
+      "path": "raw/ui-npc-quests/start.txt",
+      "bytes": 217,
+      "sha256": "ea7070821c2b472510eb9faa52393ff913b0d860d4f9b667c2f168ec4db981ce"
+    },
+    {
+      "path": "raw/ui-npc-quests/stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/0-cold-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/0-cold-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/0-cold-package.txt",
+      "bytes": 10041,
+      "sha256": "7398615a0004383d2aaa109842f808cb52104d15a2fab90c96de3670812e8090"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/0-cold-pid.log",
+      "bytes": 49737,
+      "sha256": "03446d4fcb3029bce965386184d4a8253240332ce7a4f395334495430a7071b3"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/0-cold.png",
+      "bytes": 71485,
+      "sha256": "0b7b10383876ad5772e2494f3a9d2b7432b68da8726a61b643ca5f2af4679059"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/16-home-home.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/16-home-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/16-home-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/16-home-package.txt",
+      "bytes": 10043,
+      "sha256": "eddbe93393cebd7976bfc0db2766c4cbdee598779906368d70f49e41484003c4"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/16-home-pid-after.txt",
+      "bytes": 6,
+      "sha256": "f811a234823bf846c9d9bc22c22adffb189a2e5953e2cd930acb7e97b31adfbb"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/16-home-pid-before.txt",
+      "bytes": 6,
+      "sha256": "f811a234823bf846c9d9bc22c22adffb189a2e5953e2cd930acb7e97b31adfbb"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/16-home-pid.log",
+      "bytes": 63172,
+      "sha256": "4c029a89dce5e49852733329ff5debe4f596dc1f4655b3d2a472dcb7210810f9"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/16-home-resume.txt",
+      "bytes": 292,
+      "sha256": "59680bace2548346050522439d4fe1b00108d485554dbd12acedc67091af3bb2"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/16-home.png",
+      "bytes": 203792,
+      "sha256": "4dcdec0df143f71071b8816ea483b607244bb1260b3097b028ac7d3b5f141c46"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/25-stop-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/25-stop-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/25-stop-package.txt",
+      "bytes": 10043,
+      "sha256": "7ac0d00e8c1e8577a62eef07db4d1364552a70363932633129d355d0228eaced"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/25-stop-pid-before.txt",
+      "bytes": 6,
+      "sha256": "f811a234823bf846c9d9bc22c22adffb189a2e5953e2cd930acb7e97b31adfbb"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/25-stop-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/8-tap-action.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/8-tap-installed-path.txt",
+      "bytes": 103,
+      "sha256": "5f4c4791c399bf6a2eadcd0a7bcb1b110f81f183da4a40ea41355ccb8d8beb1e"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/8-tap-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "ad1453fa0ab8497a8b85f96d07a5185d4641ef86e0e925e3f02e0e6e45e9844c"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/8-tap-package.txt",
+      "bytes": 10043,
+      "sha256": "b0b09d4a94da0f2faf3bf71048351adfd981bb0d8c1c90f57e8ee72f00474bf0"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/8-tap-pid-after.txt",
+      "bytes": 6,
+      "sha256": "f811a234823bf846c9d9bc22c22adffb189a2e5953e2cd930acb7e97b31adfbb"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/8-tap-pid-before.txt",
+      "bytes": 6,
+      "sha256": "f811a234823bf846c9d9bc22c22adffb189a2e5953e2cd930acb7e97b31adfbb"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/8-tap-pid.log",
+      "bytes": 56911,
+      "sha256": "4afe2f4ae743d585fb79810a4ad9d0b0103cfd6697951ab2b713b46619fefe22"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/8-tap.png",
+      "bytes": 203792,
+      "sha256": "4dcdec0df143f71071b8816ea483b607244bb1260b3097b028ac7d3b5f141c46"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/commands.json",
+      "bytes": 8784,
+      "sha256": "c2cda317ffc65de7fa21e76a4309615afc5d2cc7768c3aba174ab2d03ef7a0a9"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/pid.txt",
+      "bytes": 6,
+      "sha256": "f811a234823bf846c9d9bc22c22adffb189a2e5953e2cd930acb7e97b31adfbb"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/start.txt",
+      "bytes": 217,
+      "sha256": "92d13effcde5af4d58051d1255fb13b83abdc28902b9976468219c55444577a5"
+    },
+    {
+      "path": "raw/ui-quest-confirmation/stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "raw/verify-evidence.mjs",
+      "bytes": 8031,
+      "sha256": "c93f919e3a99ea821114967fa63f43cc487ddc32dd22f4f32c0a81e2e6c68d89"
+    }
+  ]
+}

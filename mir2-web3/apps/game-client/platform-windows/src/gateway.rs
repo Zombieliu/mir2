@@ -16,11 +16,19 @@ use std::{
 };
 
 use futures_util::{SinkExt, StreamExt};
+use mir2_client_bevy::native_chat_ingress::transform_chat_line;
 use mir2_client_bevy::game_shop::{GameShopReceipt, GameShopRequest};
 use mir2_client_bevy::inventory::{
     CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel,
 };
+use mir2_client_bevy::native_player_ingress::{
+    apply_wallet_delta, merge_wallet_into_payload, merge_wallet_into_world,
+    update_wallet_from_snapshot, wallet_value, NativeUiPlayerCursor, WalletState,
+};
 use mir2_client_bevy::native_shell::{CharacterSummary, NativeGatewayEvent as ShellGatewayEvent};
+use mir2_client_bevy::native_quest_ingress::{
+    add_quest_reward_tooltip_sources, crystal_tooltip_source_for_preview, crystal_wire_item_info,
+};
 use mir2_client_bevy::pending_operations::{InventoryOperationAck, QuestOperationAck};
 use mir2_client_bevy::skill_model::MAX_LEARNED_SKILLS;
 use mir2_client_bevy::social::SocialModel;
@@ -753,461 +761,37 @@ fn gateway_unix_ms() -> u64 {
         .unwrap_or(0)
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
-struct WalletState {
-    gold: u32,
-    credit: u32,
-}
-
-/// Packet-first authoritative HUD cursor for the native client.
-///
-/// Gateway snapshots may be partial during bootstrap, reconnect, and map
-/// transitions. A missing JSON field means "no update"; it must not erase the
-/// complete `UserInformation` values that were already delivered.
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
-struct NativeUiPlayerCursor {
-    npc_shop_uses_pearls: bool,
-    npc_shop_hide_added_stats: bool,
-    hp: Option<i32>,
-    max_hp: Option<i32>,
-    mp: Option<i32>,
-    max_mp: Option<i32>,
-    gold: Option<u32>,
-    credit: Option<u32>,
-    crystal_stats: Option<Vec<mir2_client_bevy::read_model::CrystalPlayerStatModel>>,
-    level: Option<u32>,
-    experience: Option<i64>,
-    max_experience: Option<i64>,
-    current_weight: Option<u16>,
-    player_weights: Option<mir2_client_bevy::read_model::PlayerWeights>,
-    max_weight: Option<u16>,
-    name: Option<String>,
-    class_name: Option<String>,
-    gender: Option<String>,
-    hair: Option<u8>,
-    wing_effect: Option<u8>,
-    guild_name: Option<String>,
-    guild_rank_name: Option<String>,
-    map_name: Option<String>,
-    in_safe_zone: Option<bool>,
-}
-
-impl NativeUiPlayerCursor {
-    fn reset(&mut self) {
-        *self = Self::default();
-    }
-
-    fn observe_world_snapshot(&mut self, payload: &Value) {
-        // Full world snapshots own this optional block; absent/null must clear old weights.
-        self.player_weights = payload
-            .get("playerWeights")
-            .and_then(|value| serde_json::from_value(value.clone()).ok());
-        if let Some(value) = value_i32(payload.get("playerHp")) {
-            self.hp = Some(value);
-        }
-        if let Some(value) = value_i32(payload.get("playerMaxHp")) {
-            self.max_hp = Some(value);
-        }
-        if let Some(value) = value_i32(payload.get("playerMp")) {
-            self.mp = Some(value);
-        }
-        if let Some(value) = value_i32(payload.get("playerMaxMp")) {
-            self.max_mp = Some(value);
-        }
-        if let Some(value) = value_u32(payload.get("gold")) {
-            self.gold = Some(value);
-        }
-        if let Some(value) = value_u32(payload.get("credit")) {
-            self.credit = Some(value);
-        }
-        if let Some(value) = payload.get("playerCrystalStats") {
-            if let Ok(stats) = serde_json::from_value::<
-                Vec<mir2_client_bevy::read_model::CrystalPlayerStatModel>,
-            >(value.clone())
-            {
-                self.crystal_stats = Some(stats);
-            }
-        }
-        if let Some(value) = value_i64(payload.get("playerExperience")) {
-            self.experience = Some(value);
-        }
-        if let Some(value) = value_i64(payload.get("playerMaxExperience")) {
-            self.max_experience = Some(value);
-        }
-        if let Some(value) =
-            value_u32(payload.get("currentWeight")).and_then(|value| u16::try_from(value).ok())
-        {
-            self.current_weight = Some(value);
-        }
-        if let Some(value) =
-            value_u32(payload.get("maxWeight")).and_then(|value| u16::try_from(value).ok())
-        {
-            self.max_weight = Some(value);
-        }
-        if let Some(value) = value_string(payload.get("mapTitle")) {
-            self.map_name = Some(value);
-        }
-        if let Some(value) = payload.get("inSafeZone").and_then(Value::as_bool) {
-            self.in_safe_zone = Some(value);
-        }
-
-        let player_object_id = value_u32(payload.get("playerObjectId"));
-        let self_player = payload
-            .get("entities")
-            .and_then(Value::as_array)
-            .and_then(|entities| {
-                entities.iter().find(|entity| {
-                    entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
-                        || player_object_id.is_some_and(|object_id| {
-                            value_u32(entity.get("objectId")) == Some(object_id)
-                        })
-                })
-            });
-        if let Some(value) = value_u32(self_player.and_then(|entity| entity.get("level"))) {
-            self.level = Some(value);
-        }
-        if let Some(value) = value_string(self_player.and_then(|entity| entity.get("name"))) {
-            self.name = Some(value);
-        }
-        if let Some(value) = value_string(
-            self_player.and_then(|entity| entity.get("class").or_else(|| entity.get("className"))),
-        ) {
-            self.class_name = Some(value);
-        }
-        if let Some(value) = value_string(
-            self_player.and_then(|entity| entity.get("gender").or_else(|| entity.get("genderKey"))),
-        ) {
-            self.gender = Some(value);
-        }
-        if let Some(value) = value_u32(self_player.and_then(|entity| entity.get("hair")))
-            .and_then(|value| u8::try_from(value).ok())
-        {
-            self.hair = Some(value);
-        }
-        if let Some(value) = value_u32(self_player.and_then(|entity| {
-            entity
-                .get("wingEffect")
-                .or_else(|| entity.get("wing_effect"))
-        }))
-        .and_then(|value| u8::try_from(value).ok())
-        {
-            // Zero is an explicit authoritative clear; a missing field is a
-            // partial snapshot and must preserve the previous value.
-            self.wing_effect = Some(value);
-        }
-        if let Some(value) = value_string(self_player.and_then(|entity| entity.get("guildName"))) {
-            self.guild_name = Some(value);
-        }
-        if let Some(value) = value_string(self_player.and_then(|entity| {
-            entity
-                .get("guildRankName")
-                .or_else(|| entity.get("guildRank"))
-        })) {
-            self.guild_rank_name = Some(value);
-        }
-    }
-
-    fn observe_user_information(&mut self, payload: &Value) {
-        if let Some(value) = value_i32(payload.get("hp").or_else(|| payload.get("playerHp"))) {
-            self.hp = Some(value);
-        }
-        if let Some(value) = value_i32(payload.get("maxHp").or_else(|| payload.get("playerMaxHp")))
-        {
-            self.max_hp = Some(value);
-        }
-        if let Some(value) = value_i32(payload.get("mp").or_else(|| payload.get("playerMp"))) {
-            self.mp = Some(value);
-        }
-        if let Some(value) = value_i32(payload.get("maxMp").or_else(|| payload.get("playerMaxMp")))
-        {
-            self.max_mp = Some(value);
-        }
-        if let Some(value) = value_u32(payload.get("gold")) {
-            self.gold = Some(value);
-        }
-        if let Some(value) = value_u32(payload.get("credit")) {
-            self.credit = Some(value);
-        }
-        if let Some(value) = value_u32(payload.get("level")) {
-            self.level = Some(value);
-        }
-        if let Some(value) = value_i64(
-            payload
-                .get("experience")
-                .or_else(|| payload.get("playerExperience")),
-        ) {
-            self.experience = Some(value);
-        }
-        if let Some(value) = value_i64(
-            payload
-                .get("maxExperience")
-                .or_else(|| payload.get("playerMaxExperience")),
-        ) {
-            self.max_experience = Some(value);
-        }
-        if let Some(value) =
-            value_u32(payload.get("currentWeight")).and_then(|value| u16::try_from(value).ok())
-        {
-            self.current_weight = Some(value);
-        }
-        if let Some(value) =
-            value_u32(payload.get("maxWeight")).and_then(|value| u16::try_from(value).ok())
-        {
-            self.max_weight = Some(value);
-        }
-        if let Some(value) = value_string(payload.get("name")) {
-            self.name = Some(value);
-        }
-        if let Some(value) = value_string(payload.get("class").or_else(|| payload.get("className")))
-        {
-            self.class_name = Some(value);
-        }
-        if let Some(value) =
-            value_string(payload.get("gender").or_else(|| payload.get("genderKey")))
-        {
-            self.gender = Some(value);
-        }
-        if let Some(value) =
-            value_u32(payload.get("hair")).and_then(|value| u8::try_from(value).ok())
-        {
-            self.hair = Some(value);
-        }
-        if let Some(value) = value_string(payload.get("guildName")) {
-            self.guild_name = Some(value);
-        }
-        if let Some(value) = value_string(
-            payload
-                .get("guildRankName")
-                .or_else(|| payload.get("guildRank")),
-        ) {
-            self.guild_rank_name = Some(value);
-        }
-        if let Some(value) = payload
-            .get("inSafeZone")
-            .or_else(|| payload.get("in_safe_zone"))
-            .and_then(Value::as_bool)
-        {
-            self.in_safe_zone = Some(value);
-        }
-        self.observe_map_identity(payload);
-    }
-
-    fn observe_map_identity(&mut self, payload: &Value) {
-        if let Some(value) = value_string(
-            payload
-                .get("title")
-                .or_else(|| payload.get("mapTitle"))
-                .or_else(|| payload.get("mapName")),
-        ) {
-            self.map_name = Some(value);
-        }
-    }
-
-    fn to_read_model_json(&self) -> Value {
-        json!({
-            "player": {
-                "hp": self.hp.unwrap_or_default(),
-                "maxHp": self.max_hp.unwrap_or_default(),
-                "mp": self.mp.unwrap_or_default(),
-                "maxMp": self.max_mp.unwrap_or_default(),
-                "gold": self.gold.unwrap_or_default(),
-                "credit": self.credit.unwrap_or_default(),
-                "crystalStats": self.crystal_stats.clone(),
-                "level": self.level.unwrap_or_default(),
-                "experience": self.experience.unwrap_or_default(),
-                "maxExperience": self.max_experience.unwrap_or_default(),
-                "currentWeight": self.current_weight.unwrap_or_default(),
-                "currentWeightKnown":self.current_weight.is_some(),
-                "weights":self.player_weights,
-                "maxWeight": self.max_weight.unwrap_or_default(),
-                "name": self.name,
-                "className": self.class_name,
-                "gender": self.gender,
-                "hair": self.hair,
-                "wingEffect": self.wing_effect,
-                "guildName": self.guild_name,
-                "guildRankName": self.guild_rank_name,
-                "mapName": self.map_name,
-                "inSafeZone": self.in_safe_zone.unwrap_or(false),
-            }
-        })
-    }
-}
-
 fn crystal_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClass)> {
-    let level = u16::try_from(cursor.level?).ok()?;
-    let class = match cursor
-        .class_name
-        .as_deref()?
-        .trim()
-        .to_ascii_lowercase()
-        .as_str()
-    {
-        "warrior" => MirClass::Warrior,
-        "wizard" => MirClass::Wizard,
-        "taoist" => MirClass::Taoist,
-        "assassin" => MirClass::Assassin,
-        "archer" => MirClass::Archer,
-        _ => return None,
-    };
-    Some((level, class))
+    mir2_client_bevy::native_inventory_ingress::native_tooltip_viewer(cursor)
 }
 
 /// Crystal's `UserItem` wire carrier has only an item index. Resolve it only
 /// when that index names exactly one row in the extracted Crystal database;
 /// an ambiguous or absent index must stay partial rather than choosing a row.
 fn unique_crystal_tooltip_template(item_index: i32) -> Option<CrystalItemTemplate> {
-    let mut matches = crystal_item_manifest()
-        .items
-        .into_iter()
-        .filter(|item| item.item_index == item_index);
-    let item = matches.next()?;
-    if matches.next().is_some() {
-        return None;
-    }
-    Some(item)
+    mir2_client_bevy::native_inventory_ingress::unique_crystal_item_template(item_index)
 }
 
 fn unique_crystal_tooltip_info(item_index: i32) -> Option<CrystalItemInfoModel> {
-    serde_json::from_value(serde_json::to_value(unique_crystal_tooltip_template(item_index)?).ok()?)
-        .ok()
+    mir2_client_bevy::native_inventory_ingress::native_tooltip_info(item_index)
 }
 
-fn crystal_wire_item_info(value: &Value) -> Option<CrystalItemInfoModel> {
-    let mut object = value.as_object()?.clone();
-    if !object.contains_key("item_index") {
-        object.insert(
-            "item_index".to_owned(),
-            object.get("index").cloned().unwrap_or(Value::Null),
-        );
-    }
-    serde_json::from_value(Value::Object(object)).ok()
-}
 
 fn crystal_real_tooltip_info(
     info: &CrystalItemInfoModel,
     viewer: Option<(u16, MirClass)>,
 ) -> Option<CrystalItemInfoModel> {
-    let (level, class) = viewer?;
-    if !info.class_based && !info.level_based {
-        return Some(info.clone());
-    }
-    let origin = unique_crystal_tooltip_template(info.item_index)?;
-    let origin_model =
-        serde_json::from_value::<CrystalItemInfoModel>(serde_json::to_value(&origin).ok()?).ok()?;
-    if origin_model != *info {
-        return None;
-    }
-    serde_json::from_value(
-        serde_json::to_value(crystal_real_item_for_player(&origin, level, class)).ok()?,
-    )
-    .ok()
+    mir2_client_bevy::native_inventory_ingress::native_real_tooltip_info(info, viewer)
 }
 
 fn crystal_tooltip_source_for_user_item(
     value: &Value,
     cursor: &NativeUiPlayerCursor,
 ) -> Option<CrystalItemTooltipSourceModel> {
-    let user_item = serde_json::from_value::<CrystalUserItemModel>(value.clone()).ok()?;
-    let info = unique_crystal_tooltip_info(user_item.item_index)?;
-    let viewer = crystal_tooltip_viewer(cursor);
-    let socket_infos = user_item
-        .slots
-        .iter()
-        .map(|slot| {
-            slot.as_ref()
-                .and_then(|socket| unique_crystal_tooltip_info(socket.item_index))
-        })
-        .collect::<Vec<_>>();
-    let real_socket_infos = if viewer.is_some() {
-        socket_infos
-            .iter()
-            .map(|socket| {
-                socket
-                    .as_ref()
-                    .and_then(|socket| crystal_real_tooltip_info(socket, viewer))
-            })
-            .collect()
-    } else {
-        Vec::new()
-    };
-    Some(CrystalItemTooltipSourceModel {
-        real_info: crystal_real_tooltip_info(&info, viewer),
-        info,
-        user_item: Some(user_item),
-        socket_infos,
-        real_socket_infos,
-    })
+    mir2_client_bevy::native_inventory_ingress::native_tooltip_source_for_user_item(value, cursor)
 }
 
-/// Mirrors `new UserItem(info)` at the two Crystal catalogue-only surfaces.
-/// GameShop supplies a count; QuestCell leaves the constructor's zero count
-/// alone and paints the reward quantity as a separate cell label.
-fn crystal_tooltip_source_for_preview(
-    info: CrystalItemInfoModel,
-    count: u16,
-    cursor: &NativeUiPlayerCursor,
-) -> CrystalItemTooltipSourceModel {
-    let user_item = CrystalUserItemModel {
-        item_index: info.item_index,
-        current_dura: info.durability,
-        max_dura: info.durability,
-        count,
-        identified: false,
-        slots: vec![None; usize::from(info.slots)],
-        ..Default::default()
-    };
-    let viewer = crystal_tooltip_viewer(cursor);
-    CrystalItemTooltipSourceModel {
-        real_info: crystal_real_tooltip_info(&info, viewer),
-        info,
-        user_item: Some(user_item),
-        socket_infos: Vec::new(),
-        real_socket_infos: Vec::new(),
-    }
-}
 
-fn add_quest_reward_tooltip_sources(payload: &mut Value, cursor: &NativeUiPlayerCursor) {
-    let Some(payload_object) = payload.as_object_mut() else {
-        return;
-    };
-    let raw_info = payload_object.get("info").cloned();
-    let Some(rewards) = payload_object
-        .get_mut("rewards")
-        .and_then(Value::as_object_mut)
-    else {
-        return;
-    };
-    for (rendered_key, raw_key) in [
-        ("items", "rewards_fixed_item"),
-        ("selectItems", "rewards_select_item"),
-    ] {
-        let raw_items = raw_info
-            .as_ref()
-            .and_then(|info| info.get(raw_key))
-            .and_then(Value::as_array);
-        let Some(rendered_items) = rewards.get_mut(rendered_key).and_then(Value::as_array_mut)
-        else {
-            continue;
-        };
-        for (index, rendered) in rendered_items.iter_mut().enumerate() {
-            let info = raw_items
-                .and_then(|items| items.get(index))
-                .and_then(|reward| reward.get("item"))
-                .and_then(crystal_wire_item_info)
-                .or_else(|| {
-                    value_i32(rendered.get("itemIndex")).and_then(unique_crystal_tooltip_info)
-                });
-            let (Some(info), Some(object)) = (info, rendered.as_object_mut()) else {
-                continue;
-            };
-            object.insert(
-                "tooltipSource".to_owned(),
-                json!(crystal_tooltip_source_for_preview(info, 0, cursor)),
-            );
-        }
-    }
-}
 
 fn enrich_guild_storage_item(value: &mut Value, cursor: &NativeUiPlayerCursor) {
     let Some(item) = value.get("item").cloned() else {
@@ -1304,37 +888,6 @@ struct PendingMailOperationFeedback {
 
 const MAX_PENDING_MAIL_FEEDBACK: usize = 1;
 
-const MAX_SKILL_PACKET_PATCHES: usize = MAX_LEARNED_SKILLS;
-
-#[derive(Debug, Clone, Default)]
-struct SkillPacketPatch {
-    identity: String,
-    base_snapshot_tick: u64,
-    /// Tick-less deltas may affect only one bounded snapshot serial. This
-    /// prevents an event without an ordering tick from living forever.
-    zero_tick_expires_at_snapshot_serial: Option<u64>,
-    delay_ms: Option<u32>,
-    level: Option<u8>,
-    experience: Option<u16>,
-    can_use: Option<bool>,
-    mp_cost: Option<u32>,
-}
-
-#[derive(Debug, Clone, Copy)]
-struct PlayerVitalsPatch {
-    base_snapshot_tick: u64,
-    zero_tick_expires_at_snapshot_serial: Option<u64>,
-    mp: Option<i32>,
-    max_mp: Option<i32>,
-}
-
-#[derive(Debug, Clone, Copy)]
-struct SkillRemovalPatch {
-    hotkey: u8,
-    base_snapshot_tick: u64,
-    zero_tick_expires_at_snapshot_serial: Option<u64>,
-}
-
 /// Packet-first cursor for personal skill/vital deltas. The gateway does not
 /// expose a server sequence on these browser events, so the last snapshot
 /// tick at packet arrival is used as a bounded stale-snapshot fence: snapshots
@@ -1347,39 +900,18 @@ struct SkillPacketCursor {
     pending_hero_receipts: std::collections::VecDeque<String>,
     pending_receipt_model: Option<String>,
     pending_latest_model: Option<String>,
-    session_epoch: u64,
-    magic_icons: std::collections::HashMap<String, u8>,
-    magic_needs: std::collections::HashMap<String, [Option<u16>; 3]>,
-    magic_names: std::collections::HashMap<String, String>,
-    magic_casts: std::collections::HashMap<String, u64>,
-    next_magic_cast: u64,
-    snapshot_serial: u64,
-    patches: Vec<SkillPacketPatch>,
-    removals: Vec<SkillRemovalPatch>,
-    vitals: Option<PlayerVitalsPatch>,
-    player_object_id: Option<u32>,
+    core: mir2_client_bevy::native_skill_ingress::NativeSkillPacketCursor,
 }
 
 impl Default for SkillPacketCursor {
     fn default() -> Self {
-        static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
         Self {
             hero: Default::default(),
             pending_hero_model: None,
             pending_hero_receipts: Default::default(),
             pending_receipt_model: None,
             pending_latest_model: None,
-            session_epoch: NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
-            snapshot_serial: 0,
-            magic_icons: Default::default(),
-            magic_needs: Default::default(),
-            magic_names: Default::default(),
-            magic_casts: Default::default(),
-            next_magic_cast: 0,
-            patches: vec![],
-            removals: vec![],
-            vitals: None,
-            player_object_id: None,
+            core: Default::default(),
         }
     }
 }
@@ -1391,7 +923,7 @@ impl SkillPacketCursor {
         player: &NativeUiPlayerCursor,
     ) -> Result<(), String> {
         if self.hero.apply_packet(packet, payload) {
-            self.hero.session_epoch = self.session_epoch;
+            self.hero.session_epoch = self.core.authority().session_epoch;
             if let Some(info) = self.hero.info.as_ref() {
                 self.hero.inventory_view = hero_inventory_view(info, player);
                 self.hero.auto_pot_view = hero_auto_pot_view(info, player);
@@ -1471,439 +1003,19 @@ impl SkillPacketCursor {
     fn reset(&mut self) {
         *self = Self::default();
     }
-
     fn observe_snapshot(&mut self, payload: &mut Value) {
-        self.snapshot_serial = self.snapshot_serial.saturating_add(1);
-        self.player_object_id = value_u32(payload.get("playerObjectId"));
-        let snapshot_tick = world_payload_tick_from(Some(payload));
-        let snapshot_serial = self.snapshot_serial;
-        self.patches
-            .retain(|patch| Self::patch_is_active(patch, snapshot_tick, snapshot_serial));
-        self.removals
-            .retain(|patch| Self::removal_is_active(patch, snapshot_tick, snapshot_serial));
-        if self
-            .vitals
-            .is_some_and(|patch| !Self::vitals_is_active(&patch, snapshot_tick, snapshot_serial))
-        {
-            self.vitals = None;
-        }
-        self.apply_active_patches(payload, snapshot_tick);
-        // A tick-less patch is valid for the snapshot that is being observed,
-        // then retires even if future snapshots keep reporting tick=0.
-        self.patches
-            .retain(|patch| patch.zero_tick_expires_at_snapshot_serial != Some(snapshot_serial));
-        self.removals
-            .retain(|patch| patch.zero_tick_expires_at_snapshot_serial != Some(snapshot_serial));
-        if self.vitals.is_some_and(|patch| {
-            patch.zero_tick_expires_at_snapshot_serial == Some(snapshot_serial)
-        }) {
-            self.vitals = None;
-        }
+        self.core.observe_snapshot(payload);
     }
-
-    fn apply_active_patches(&self, payload: &mut Value, snapshot_tick: u64) {
-        payload["_nativeSkillAuthority"] = json!({"sessionEpoch":self.session_epoch,"snapshotSerial":self.snapshot_serial,"playerObjectId":self.player_object_id.unwrap_or(0)});
-        if let Some(skills) = skill_array_mut(payload) {
-            skills.truncate(MAX_LEARNED_SKILLS);
-
-            for skill in skills.iter_mut() {
-                if let Some(name) = skill
-                    .get("spell")
-                    .and_then(Value::as_str)
-                    .and_then(|spell| self.magic_names.get(&spell.to_ascii_lowercase()))
-                {
-                    skill["magicName"] = json!(name);
-                }
-
-                if let Some(sequence) = skill
-                    .get("spell")
-                    .and_then(Value::as_str)
-                    .and_then(|spell| self.magic_casts.get(&spell.to_ascii_lowercase()))
-                {
-                    skill["castSequence"] = json!(sequence);
-                }
-
-                if let Some(icon) = skill
-                    .get("spell")
-                    .and_then(Value::as_str)
-                    .and_then(|spell| self.magic_icons.get(&spell.to_ascii_lowercase()))
-                    .copied()
-                {
-                    skill["icon"] = json!(icon);
-                }
-                if let Some(needs) = skill
-                    .get("spell")
-                    .and_then(Value::as_str)
-                    .and_then(|spell| self.magic_needs.get(&spell.to_ascii_lowercase()))
-                {
-                    for (field, value) in ["need1", "need2", "need3"].into_iter().zip(needs) {
-                        if let Some(value) = value {
-                            skill[field] = json!(value);
-                        }
-                    }
-                }
-                if self.removals.iter().any(|removal| {
-                    skill_hotkey(skill) == Some(removal.hotkey)
-                        && Self::removal_is_active(removal, snapshot_tick, self.snapshot_serial)
-                }) {
-                    continue;
-                }
-                for patch in self.patches.iter().filter(|patch| {
-                    Self::patch_is_active(patch, snapshot_tick, self.snapshot_serial)
-                }) {
-                    if skill_matches_identity(skill, &patch.identity) {
-                        apply_skill_patch(skill, patch);
-                    }
-                }
-            }
-
-            skills.retain(|skill| {
-                !self.removals.iter().any(|removal| {
-                    skill_hotkey(skill) == Some(removal.hotkey)
-                        && Self::removal_is_active(removal, snapshot_tick, self.snapshot_serial)
-                })
-            });
-        }
-
-        if let Some(vitals) = self.vitals {
-            if Self::vitals_is_active(&vitals, snapshot_tick, self.snapshot_serial) {
-                if let Some(mp) = vitals.mp {
-                    payload["playerMp"] = json!(mp);
-                }
-                if let Some(max_mp) = vitals.max_mp {
-                    payload["playerMaxMp"] = json!(max_mp);
-                }
-            }
-        }
+    fn apply_active_patches(&self, payload: &mut Value, tick: u64) {
+        self.core.apply_active_patches(payload, tick);
     }
-
-    fn patch_is_active(patch: &SkillPacketPatch, snapshot_tick: u64, snapshot_serial: u64) -> bool {
-        patch
-            .zero_tick_expires_at_snapshot_serial
-            .map(|expires| snapshot_serial <= expires)
-            .unwrap_or(snapshot_tick == 0 || snapshot_tick <= patch.base_snapshot_tick)
+    fn apply_packet(&mut self, packet: &str, payload: &Value, tick: u64) -> bool {
+        self.core.apply_packet(packet, payload, tick)
     }
-
-    fn removal_is_active(
-        patch: &SkillRemovalPatch,
-        snapshot_tick: u64,
-        snapshot_serial: u64,
-    ) -> bool {
-        patch
-            .zero_tick_expires_at_snapshot_serial
-            .map(|expires| snapshot_serial <= expires)
-            .unwrap_or(snapshot_tick == 0 || snapshot_tick <= patch.base_snapshot_tick)
-    }
-
-    fn vitals_is_active(
-        patch: &PlayerVitalsPatch,
-        snapshot_tick: u64,
-        snapshot_serial: u64,
-    ) -> bool {
-        patch
-            .zero_tick_expires_at_snapshot_serial
-            .map(|expires| snapshot_serial <= expires)
-            .unwrap_or(snapshot_tick == 0 || snapshot_tick <= patch.base_snapshot_tick)
-    }
-
-    fn apply_packet(&mut self, packet: &str, payload: &Value, base_snapshot_tick: u64) -> bool {
-        match packet {
-            "NewMagic" => {
-                if payload.get("hero").and_then(Value::as_bool) != Some(false) {
-                    return false;
-                }
-                let Some(magic) = payload.get("magic") else {
-                    return false;
-                };
-                let Some(spell) = magic
-                    .get("spell")
-                    .and_then(Value::as_str)
-                    .filter(|v| !v.is_empty())
-                else {
-                    return false;
-                };
-                let known = self
-                    .magic_icons
-                    .keys()
-                    .chain(self.magic_names.keys())
-                    .chain(self.magic_needs.keys())
-                    .any(|key| key.eq_ignore_ascii_case(spell));
-                let distinct = self
-                    .magic_icons
-                    .keys()
-                    .chain(self.magic_names.keys())
-                    .chain(self.magic_needs.keys())
-                    .map(|key| key.to_ascii_lowercase())
-                    .collect::<std::collections::HashSet<_>>()
-                    .len();
-                if !known && distinct >= MAX_LEARNED_SKILLS {
-                    return false;
-                }
-                if let Some(name) = magic
-                    .get("name")
-                    .and_then(Value::as_str)
-                    .filter(|v| !v.is_empty())
-                {
-                    self.magic_names
-                        .insert(spell.to_ascii_lowercase(), name.to_owned());
-                }
-                if let Some(icon) = value_u32(magic.get("icon")).and_then(|v| u8::try_from(v).ok())
-                {
-                    self.magic_icons.insert(spell.to_ascii_lowercase(), icon);
-                }
-                self.magic_needs.insert(
-                    spell.to_ascii_lowercase(),
-                    ["need1", "need2", "need3"].map(|field| {
-                        value_u32(magic.get(field)).and_then(|v| u16::try_from(v).ok())
-                    }),
-                );
-                true
-            }
-
-            "UserInformation" => {
-                let Some(object_id) = value_u32(payload.get("objectId")) else {
-                    return false;
-                };
-                self.player_object_id = Some(object_id);
-                self.vitals = Some(PlayerVitalsPatch {
-                    base_snapshot_tick,
-                    zero_tick_expires_at_snapshot_serial: zero_tick_expiry_serial(
-                        self.snapshot_serial,
-                        base_snapshot_tick,
-                    ),
-                    mp: value_i32(payload.get("mp").or_else(|| payload.get("playerMp"))),
-                    max_mp: value_i32(payload.get("maxMp").or_else(|| payload.get("playerMaxMp"))),
-                });
-                if self
-                    .vitals
-                    .is_some_and(|patch| patch.mp.is_none() && patch.max_mp.is_none())
-                {
-                    self.vitals = None;
-                    return false;
-                }
-                true
-            }
-            "Magic" | "MagicCast" => self.observe_owner_cast(packet, payload),
-            "MagicDelay" => {
-                if !self.packet_targets_player(payload) {
-                    return false;
-                }
-                let Some(identity) = packet_spell_identity(payload) else {
-                    return false;
-                };
-                let Some(delay) = value_u32(payload.get("delay")) else {
-                    return false;
-                };
-                self.upsert_patch(identity, base_snapshot_tick, |patch| {
-                    patch.delay_ms = Some(delay);
-                    if let Some(mp_cost) =
-                        value_u32(payload.get("mpCost").or_else(|| payload.get("mp_cost")))
-                    {
-                        patch.mp_cost = Some(mp_cost);
-                    }
-                });
-                true
-            }
-            "MagicLeveled" => {
-                if !self.packet_targets_player(payload) {
-                    return false;
-                }
-                let Some(identity) = packet_spell_identity(payload) else {
-                    return false;
-                };
-                let Some(level) =
-                    value_u32(payload.get("level")).and_then(|value| u8::try_from(value).ok())
-                else {
-                    return false;
-                };
-                self.upsert_patch(identity, base_snapshot_tick, |patch| {
-                    patch.level = Some(level);
-                    patch.experience = value_u32(payload.get("experience"))
-                        .and_then(|value| u16::try_from(value).ok());
-                });
-                true
-            }
-            "SpellToggle" => {
-                if !self.packet_targets_player(payload) {
-                    return false;
-                }
-                let Some(identity) = packet_spell_identity(payload) else {
-                    return false;
-                };
-                let Some(can_use) = payload.get("canUse").and_then(Value::as_bool) else {
-                    return false;
-                };
-                self.upsert_patch(identity, base_snapshot_tick, |patch| {
-                    patch.can_use = Some(can_use);
-                });
-                true
-            }
-            "RemoveMagic" => {
-                let Some(hotkey) = value_u32(payload.get("placeId"))
-                    .and_then(|value| (1..=8).contains(&value).then_some(value as u8))
-                else {
-                    return false;
-                };
-                if self.removals.len() >= MAX_SKILL_PACKET_PATCHES {
-                    self.removals.remove(0);
-                }
-                self.removals.push(SkillRemovalPatch {
-                    hotkey,
-                    base_snapshot_tick,
-                    zero_tick_expires_at_snapshot_serial: zero_tick_expiry_serial(
-                        self.snapshot_serial,
-                        base_snapshot_tick,
-                    ),
-                });
-                true
-            }
-            _ => false,
-        }
-    }
-
-    fn observe_owner_cast(&mut self, packet: &str, payload: &Value) -> bool {
-        match packet {
-            "Magic" if payload.get("cast").and_then(Value::as_bool) == Some(true) => {}
-            "MagicCast"
-                if payload
-                    .get("cast")
-                    .is_none_or(|cast| cast.as_bool() == Some(true)) => {}
-            _ => return false,
-        }
-        let Some(player_id) = self.player_object_id.filter(|id| *id != 0) else {
-            return false;
-        };
-        // These are owner-only Crystal packets and normally omit objectId.
-        // Never let an explicit Hero/other actor identity override that owner.
-        if payload
-            .get("hero")
-            .is_some_and(|hero| hero.as_bool() != Some(false))
-            || payload
-                .get("objectId")
-                .is_some_and(|actor| value_u32(Some(actor)) != Some(player_id))
-        {
-            return false;
-        }
-        let Some(identity) = packet_spell_identity(payload) else {
-            return false;
-        };
-        if !self.magic_casts.contains_key(&identity) && self.magic_casts.len() >= MAX_LEARNED_SKILLS
-        {
-            return false;
-        }
-        self.next_magic_cast = self.next_magic_cast.saturating_add(1);
-        self.magic_casts.insert(identity, self.next_magic_cast);
-        true
-    }
-
-    fn packet_targets_player(&self, payload: &Value) -> bool {
-        // The authoritative SpellToggle packet always carries an object id.
-        // Treat a missing/malformed id as an invalid packet instead of letting
-        // it mutate the local player's skill state by default.
-        let Some(object_id) = value_u32(payload.get("objectId")) else {
-            return false;
-        };
-        object_id != 0
-            && self
-                .player_object_id
-                .map(|player_id| player_id != 0 && player_id == object_id)
-                .unwrap_or(false)
-    }
-
-    fn upsert_patch(
-        &mut self,
-        identity: String,
-        base_snapshot_tick: u64,
-        update: impl FnOnce(&mut SkillPacketPatch),
-    ) {
-        let zero_tick_expires_at_snapshot_serial =
-            zero_tick_expiry_serial(self.snapshot_serial, base_snapshot_tick);
-        if let Some(patch) = self
-            .patches
-            .iter_mut()
-            .find(|patch| patch.identity == identity)
-        {
-            patch.base_snapshot_tick = base_snapshot_tick;
-            patch.zero_tick_expires_at_snapshot_serial = zero_tick_expires_at_snapshot_serial;
-            update(patch);
-            return;
-        }
-        if self.patches.len() >= MAX_SKILL_PACKET_PATCHES {
-            self.patches.remove(0);
-        }
-        let mut patch = SkillPacketPatch {
-            identity,
-            base_snapshot_tick,
-            zero_tick_expires_at_snapshot_serial,
-            ..Default::default()
-        };
-        update(&mut patch);
-        self.patches.push(patch);
-    }
-}
-
-fn zero_tick_expiry_serial(snapshot_serial: u64, base_snapshot_tick: u64) -> Option<u64> {
-    (base_snapshot_tick == 0).then(|| snapshot_serial.saturating_add(1))
 }
 
 fn world_payload_tick_from(payload: Option<&Value>) -> u64 {
-    payload
-        .and_then(|payload| {
-            value_u64(payload.get("tick"))
-                .or_else(|| value_u64(payload.get("snapshotTick")))
-                .or_else(|| value_u64(payload.get("snapshot_tick")))
-        })
-        .unwrap_or(0)
-}
-
-fn skill_array_mut(payload: &mut Value) -> Option<&mut Vec<Value>> {
-    if payload.get("knownSkills").is_some() {
-        return payload.get_mut("knownSkills").and_then(Value::as_array_mut);
-    }
-    if payload.get("known_skills").is_some() {
-        return payload
-            .get_mut("known_skills")
-            .and_then(Value::as_array_mut);
-    }
-    payload.get_mut("skills").and_then(Value::as_array_mut)
-}
-
-fn packet_spell_identity(payload: &Value) -> Option<String> {
-    let spell = payload.get("spell").and_then(Value::as_str)?.trim();
-    (!spell.is_empty()).then(|| spell.to_ascii_lowercase())
-}
-
-fn skill_hotkey(skill: &Value) -> Option<u8> {
-    value_u32(skill.get("hotkey").or_else(|| skill.get("key")))
-        .and_then(|value| u8::try_from(value).ok())
-}
-
-fn skill_matches_identity(skill: &Value, identity: &str) -> bool {
-    // Packet spell ids may only patch a snapshot's authoritative spell field.
-    // Display names and local keys are not protocol identifiers.
-    skill
-        .get("spell")
-        .and_then(Value::as_str)
-        .map(|value| value.trim().eq_ignore_ascii_case(identity))
-        .unwrap_or(false)
-}
-
-fn apply_skill_patch(skill: &mut Value, patch: &SkillPacketPatch) {
-    if let Some(delay) = patch.delay_ms {
-        skill["delayMs"] = json!(delay);
-    }
-    if let Some(level) = patch.level {
-        skill["level"] = json!(level);
-    }
-    if let Some(experience) = patch.experience {
-        skill["experience"] = json!(experience);
-    }
-    if let Some(can_use) = patch.can_use {
-        skill["canUse"] = json!(can_use);
-    }
-    if let Some(mp_cost) = patch.mp_cost {
-        skill["mpCost"] = json!(mp_cost);
-    }
+    mir2_client_bevy::native_skill_ingress::world_payload_tick_from(payload)
 }
 
 /// Connect to the gateway, accept validated native UI/gameplay commands, and
@@ -3662,7 +2774,7 @@ where
                 snapshot.hero_buff_event = Some(
                     mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Event::Buff {
                         identity: mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Identity {
-                            session_epoch: skill_cursor.session_epoch,
+                            session_epoch: skill_cursor.core.authority().session_epoch,
                             hero_generation: skill_cursor.hero.hero_generation,
                             object_id: info.object_id,
                         },
@@ -3670,7 +2782,7 @@ where
                     },
                 );
             }
-            snapshot.status_buff_event = Some((skill_cursor.player_object_id, buff));
+            snapshot.status_buff_event = Some((skill_cursor.core.player_object_id(), buff));
             let _ = gameplay_events.send(snapshot);
         }
         if packet == "GuildBuffList" {
@@ -3724,7 +2836,7 @@ where
             skill_cursor.hero.info.as_ref().map(|info| {
                 mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Event::Information(
                     mir2_client_bevy::crystal_ui::overlays::hero_buff_hud::Identity {
-                        session_epoch: skill_cursor.session_epoch,
+                        session_epoch: skill_cursor.core.authority().session_epoch,
                         hero_generation: skill_cursor.hero.hero_generation,
                         object_id: info.object_id,
                     },
@@ -3780,7 +2892,7 @@ where
             gameplay_adapter.observe_world_snapshot(&payload);
             skill_cursor.observe_snapshot(&mut payload);
             if skill_cursor.hero.observe_snapshot(&payload) {
-                skill_cursor.hero.session_epoch = skill_cursor.session_epoch;
+                skill_cursor.hero.session_epoch = skill_cursor.core.authority().session_epoch;
                 let json = serde_json::to_string(&skill_cursor.hero).map_err(|e| e.to_string())?;
                 if skill_cursor.hero.skill_key_ack.is_some() {
                     skill_cursor.pending_hero_receipts.push_back(json);
@@ -3898,7 +3010,10 @@ where
                 "MapInformation" => {
                     eprintln!("[gateway-client] packet {packet}");
                     if mir2_bevy_runtime::native_render_diagnostics_enabled() {
-                        mir2_bevy_runtime::record_native_render_marker("mapBoundary", json!({"packet":packet}));
+                        mir2_bevy_runtime::record_native_render_marker(
+                            "mapBoundary",
+                            json!({"packet":packet}),
+                        );
                     }
                     if let Some(payload) = event.payload.as_ref() {
                         map_packet_cursor.observe_map_information(payload);
@@ -3914,7 +3029,10 @@ where
                 "MapChanged" => {
                     eprintln!("[gateway-client] packet {packet}");
                     if mir2_bevy_runtime::native_render_diagnostics_enabled() {
-                        mir2_bevy_runtime::record_native_render_marker("mapBoundary", json!({"packet":packet}));
+                        mir2_bevy_runtime::record_native_render_marker(
+                            "mapBoundary",
+                            json!({"packet":packet}),
+                        );
                     }
                     if let Some(payload) = event.payload.as_ref() {
                         map_packet_cursor.observe_map_information_kind(payload, "MapChanged");
@@ -3993,8 +3111,8 @@ where
                     };
                     push_native_npc_shop_service(signal)?;
                 }
-                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem"
-                | "EquipItem" | "RemoveItem" => {
+                "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem" | "EquipItem"
+                | "RemoveItem" => {
                     if let Some(payload) = event.payload.as_ref() {
                         if let Some(ack) = transform_inventory_operation_ack(packet, payload) {
                             if let Ok(json) = serde_json::to_string(&ack) {
@@ -4012,7 +3130,8 @@ where
                         if let Some(item) = transform_game_shop_info_from_packet(payload, ui_cursor)
                         {
                             let json = serde_json::to_string(&item).map_err(|e| e.to_string())?;
-                            let enqueued = mir2_bevy_runtime::native_ingest::push_native_game_shop_info(json);
+                            let enqueued =
+                                mir2_bevy_runtime::native_ingest::push_native_game_shop_info(json);
                             if item.get("gameShopIndex").and_then(Value::as_i64) == Some(31)
                                 && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some()
                             {
@@ -4063,7 +3182,9 @@ where
                 "MailSendRequest" | "MailCost" | "MailLockedItem" => {
                     let payload = event.payload.as_ref().unwrap_or(&Value::Null);
                     if !push_native_mail_service_event(packet, payload)? {
-                        eprintln!("[gateway-client] ignored malformed {packet} parcel service packet");
+                        eprintln!(
+                            "[gateway-client] ignored malformed {packet} parcel service packet"
+                        );
                     }
                 }
                 "ReceiveMail" => {
@@ -4076,10 +3197,8 @@ where
                         let mut enqueued = false;
                         if let Some(mut model) = try_transform_mail_model_from_packet(payload) {
                             converted = true;
-                            enqueued = push_mail_model_with_feedback(
-                                &mut model,
-                                pending_mail_feedback,
-                            )?;
+                            enqueued =
+                                push_mail_model_with_feedback(&mut model, pending_mail_feedback)?;
                         }
                         if std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some() {
                             eprintln!(
@@ -4193,19 +3312,26 @@ fn forward_stale_map_receipts(
     skill_cursor: &mut SkillPacketCursor,
 ) -> Result<(), String> {
     validate_quest_operation_ack(payload)?;
-    if let Some(ack) = payload.get("questOperationAck").filter(|value| !value.is_null()) {
+    if let Some(ack) = payload
+        .get("questOperationAck")
+        .filter(|value| !value.is_null())
+    {
         // ACKs are applied before full gameplay projections; this envelope
         // carries the current big map and no old actors or scene metadata.
         let mut receipt = gameplay_adapter.big_map_snapshot();
-        receipt.quest_operation_ack = Some(serde_json::from_value(ack.clone()).map_err(|e| e.to_string())?);
+        receipt.quest_operation_ack =
+            Some(serde_json::from_value(ack.clone()).map_err(|e| e.to_string())?);
         let _ = gameplay_events.send(receipt);
     }
-    if payload.get("skillKeyAck").is_some_and(|value| !value.is_null()) {
+    if payload
+        .get("skillKeyAck")
+        .is_some_and(|value| !value.is_null())
+    {
         // Skill authority is session-scoped. Retain its full model with the
         // receipt, independently of the rejected world/map projection.
         skill_cursor.observe_snapshot(payload);
         if skill_cursor.hero.observe_snapshot(payload) {
-            skill_cursor.hero.session_epoch = skill_cursor.session_epoch;
+            skill_cursor.hero.session_epoch = skill_cursor.core.authority().session_epoch;
             if skill_cursor.hero.skill_key_ack.is_some() {
                 skill_cursor.pending_hero_receipts.push_back(
                     serde_json::to_string(&skill_cursor.hero).map_err(|e| e.to_string())?,
@@ -4243,8 +3369,15 @@ fn apply_map_information_to_world_payload(world: &mut Value, packet: &Value) -> 
         return false;
     };
     if map_changed {
-        for key in ["mapTitle", "miniMapIndex", "bigMapIndex", "mapLightSetting",
-            "mapDarkLight", "weatherParticles", "mapMusic"] {
+        for key in [
+            "mapTitle",
+            "miniMapIndex",
+            "bigMapIndex",
+            "mapLightSetting",
+            "mapDarkLight",
+            "weatherParticles",
+            "mapMusic",
+        ] {
             object.remove(key);
         }
     }
@@ -4327,12 +3460,15 @@ impl NativeMapPacketCursor {
         });
         if changed || self.map_file_name.is_none() {
             if mir2_bevy_runtime::native_render_diagnostics_enabled() {
-                mir2_bevy_runtime::record_native_render_marker("mapIdentity", json!({
-                    "event":"packet", "packet":packet_kind,
-                    "sourceFile":self.map_file_name, "sourceTitle":self.identity_metadata.get("mapTitle"),
-                    "sourceMiniMap":self.mini_map_index, "destinationFile":map_file_name,
-                    "destinationTitle":packet.get("title"), "destinationMiniMap":packet_minimap_value(packet),
-                }));
+                mir2_bevy_runtime::record_native_render_marker(
+                    "mapIdentity",
+                    json!({
+                        "event":"packet", "packet":packet_kind,
+                        "sourceFile":self.map_file_name, "sourceTitle":self.identity_metadata.get("mapTitle"),
+                        "sourceMiniMap":self.mini_map_index, "destinationFile":map_file_name,
+                        "destinationTitle":packet.get("title"), "destinationMiniMap":packet_minimap_value(packet),
+                    }),
+                );
             }
             self.trace_pending_snapshot = true;
             self.trace_rejected_file = None;
@@ -4343,13 +3479,17 @@ impl NativeMapPacketCursor {
         }
         self.map_file_name = Some(map_file_name.to_owned());
         for (source, destination) in [
-            ("mapIndex", "mapIndex"), ("title", "mapTitle"),
-            ("bigMapIndex", "bigMapIndex"), ("lights", "mapLightSetting"),
-            ("mapDarkLight", "mapDarkLight"), ("weatherParticles", "weatherParticles"),
+            ("mapIndex", "mapIndex"),
+            ("title", "mapTitle"),
+            ("bigMapIndex", "bigMapIndex"),
+            ("lights", "mapLightSetting"),
+            ("mapDarkLight", "mapDarkLight"),
+            ("weatherParticles", "weatherParticles"),
             ("music", "mapMusic"),
         ] {
             if let Some(value) = packet.get(source).filter(|value| !value.is_null()) {
-                self.identity_metadata.insert(destination.to_owned(), value.clone());
+                self.identity_metadata
+                    .insert(destination.to_owned(), value.clone());
             }
         }
 
@@ -4361,26 +3501,41 @@ impl NativeMapPacketCursor {
     }
 
     fn snapshot_is_from_previous_map(&self, snapshot: &Value) -> bool {
-        self.map_file_name.as_deref().zip(map_file_name(snapshot))
+        self.map_file_name
+            .as_deref()
+            .zip(map_file_name(snapshot))
             .is_some_and(|(current, incoming)| {
                 normalize_map_file_name(current) != normalize_map_file_name(incoming)
             })
     }
 
     fn trace_snapshot_identity(&mut self, snapshot: &Value) {
-        if !mir2_bevy_runtime::native_render_diagnostics_enabled() { return; }
+        if !mir2_bevy_runtime::native_render_diagnostics_enabled() {
+            return;
+        }
         let rejected = self.snapshot_is_from_previous_map(snapshot);
         let incoming = map_file_name(snapshot).unwrap_or("<partial>");
-        if rejected && self.trace_rejected_file.as_deref() == Some(incoming) { return; }
-        if !rejected && !self.trace_pending_snapshot && self.trace_rejected_file.is_none() { return; }
-        mir2_bevy_runtime::record_native_render_marker("mapIdentity", json!({
-            "event":"snapshot", "accepted":!rejected, "snapshotFile":incoming,
-            "snapshotTitle":snapshot.get("mapTitle"), "snapshotMiniMap":packet_minimap_value(snapshot),
-            "authoritativeFile":self.map_file_name, "authoritativeTitle":self.identity_metadata.get("mapTitle"),
-            "authoritativeMiniMap":self.mini_map_index,
-        }));
-        if rejected { self.trace_rejected_file = Some(incoming.to_owned()); }
-        else { self.trace_pending_snapshot = false; self.trace_rejected_file = None; }
+        if rejected && self.trace_rejected_file.as_deref() == Some(incoming) {
+            return;
+        }
+        if !rejected && !self.trace_pending_snapshot && self.trace_rejected_file.is_none() {
+            return;
+        }
+        mir2_bevy_runtime::record_native_render_marker(
+            "mapIdentity",
+            json!({
+                "event":"snapshot", "accepted":!rejected, "snapshotFile":incoming,
+                "snapshotTitle":snapshot.get("mapTitle"), "snapshotMiniMap":packet_minimap_value(snapshot),
+                "authoritativeFile":self.map_file_name, "authoritativeTitle":self.identity_metadata.get("mapTitle"),
+                "authoritativeMiniMap":self.mini_map_index,
+            }),
+        );
+        if rejected {
+            self.trace_rejected_file = Some(incoming.to_owned());
+        } else {
+            self.trace_pending_snapshot = false;
+            self.trace_rejected_file = None;
+        }
     }
 
     fn merge_into_same_map_snapshot(&mut self, snapshot: &mut Value) {
@@ -5097,62 +4252,9 @@ fn transform_inventory_operation_ack(
     packet: &str,
     payload: &Value,
 ) -> Option<InventoryOperationAck> {
-    if packet == "DeleteItem" {
-        // Crystal's S.DeleteItem receipt carries the exact instance/count but
-        // no Success field. Receiving the packet itself is the authoritative
-        // success acknowledgement.
-        return Some(InventoryOperationAck::Delete {
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
-            success: true,
-        });
-    }
-    let success = payload.get("success")?.as_bool()?;
-    match packet {
-        "EquipItem" => Some(InventoryOperationAck::Equip {
-            grid: payload.get("grid")?.as_str()?.to_owned(),
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            to: value_i32(payload.get("to"))?,
-            success,
-        }),
-        "RemoveItem" => Some(InventoryOperationAck::Remove {
-            grid: payload.get("grid")?.as_str()?.to_owned(),
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            to: value_i32(payload.get("to"))?,
-            success,
-        }),
-        "DropItem" => Some(InventoryOperationAck::Drop {
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
-            hero_inventory: payload.get("heroInventory")?.as_bool()?,
-            success,
-        }),
-        "MoveItem" => Some(InventoryOperationAck::Move {
-            grid: payload.get("grid")?.as_str()?.to_owned(),
-            from: value_i32(payload.get("from"))?,
-            to: value_i32(payload.get("to"))?,
-            success,
-        }),
-        "MergeItem" => Some(InventoryOperationAck::Merge {
-            grid_from: payload.get("gridFrom")?.as_str()?.to_owned(),
-            grid_to: payload.get("gridTo")?.as_str()?.to_owned(),
-            id_from: value_u64(payload.get("idFrom"))?,
-            id_to: value_u64(payload.get("idTo"))?,
-            success,
-        }),
-        "SplitItem1" => Some(InventoryOperationAck::Split {
-            grid: payload.get("grid")?.as_str()?.to_owned(),
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
-            success,
-        }),
-        "SellItem" => Some(InventoryOperationAck::Sell {
-            unique_id: value_u64(payload.get("uniqueId"))?,
-            count: value_u32(payload.get("count")).and_then(|value| u16::try_from(value).ok())?,
-            success,
-        }),
-        _ => None,
-    }
+    mir2_client_bevy::native_inventory_ingress::project_native_inventory_operation_ack(
+        packet, payload,
+    )
 }
 
 fn transform_game_shop_info_from_packet(
@@ -5237,39 +4339,7 @@ fn npc_shop_service_from_packet(
     packet: &str,
     payload: &Value,
 ) -> Option<mir2_client_bevy::shop::NpcShopServiceSignal> {
-    use mir2_client_bevy::shop::{NpcShopServiceMode, NpcShopServiceSignal};
-    let signal = match packet {
-        "NPCResponse"
-            if payload
-                .get("page")
-                .and_then(Value::as_array)
-                .is_some_and(|page| page.iter().all(Value::is_string)) =>
-        {
-            NpcShopServiceSignal::default()
-        }
-        "NPCGoods" | "NPCPearlGoods" => NpcShopServiceSignal {
-            mode: NpcShopServiceMode::Buy,
-            repair_rate: None,
-        },
-        "NPCSell" => NpcShopServiceSignal {
-            mode: NpcShopServiceMode::Sell,
-            repair_rate: None,
-        },
-        "NPCRepair" | "NPCSRepair" => NpcShopServiceSignal {
-            mode: if packet == "NPCRepair" {
-                NpcShopServiceMode::Repair
-            } else {
-                NpcShopServiceMode::SpecialRepair
-            },
-            repair_rate: payload
-                .get("rate")
-                .and_then(Value::as_f64)
-                .filter(|rate| rate.is_finite() && *rate >= 0.0)
-                .map(|rate| rate as f32),
-        },
-        _ => return None,
-    };
-    signal.is_valid().then_some(signal)
+    mir2_client_bevy::native_npc_ingress::npc_shop_service_from_packet(packet, payload)
 }
 
 fn push_native_npc_shop_service(
@@ -5284,95 +4354,19 @@ fn push_native_npc_shop_service(
 }
 
 fn transform_shop_model_from_packet(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value {
-    let goods: Vec<Value> = payload
-        .get("list")
-        .and_then(Value::as_array)
-        .map(|list| {
-            list.iter()
-                .enumerate()
-                .filter_map(|(slot, item)| shop_good_json(item, slot, cursor))
-                .collect()
-        })
-        .unwrap_or_default();
-    json!({
-        "goods": goods,
-        "selected_id": Value::Null,
-        "hide_added_stats": if ["hideAddedStats", "hide_added_stats", "shopHideAddedStats", "shop_hide_added_stats"].iter().any(|key| payload.get(*key).is_some()) { shop_hide_added_stats(payload) } else { cursor.npc_shop_hide_added_stats },
-        "selected_bag_slot_for_sell": Value::Null,
-        "selected_bag_slot_for_repair": Value::Null,
-    })
+    mir2_client_bevy::native_npc_ingress::transform_shop_model_from_packet(payload, cursor, native_inventory_frame_geometry)
 }
 
 fn transform_shop_model_from_snapshot(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value {
-    let list = ["shopGoods", "shop_goods", "npcGoods", "npc_goods"]
-        .iter()
-        .find_map(|key| payload.get(*key))
-        .and_then(Value::as_array);
-    let goods: Vec<Value> = list
-        .map(|list| {
-            list.iter()
-                .enumerate()
-                .filter_map(|(slot, item)| shop_good_json(item, slot, cursor))
-                .collect()
-        })
-        .unwrap_or_default();
-    json!({
-        "goods": goods,
-        "selected_id": Value::Null,
-        "hide_added_stats": shop_hide_added_stats(payload),
-        "selected_bag_slot_for_sell": Value::Null,
-        "selected_bag_slot_for_repair": Value::Null,
-    })
+    mir2_client_bevy::native_npc_ingress::transform_shop_model_from_snapshot(payload, cursor, native_inventory_frame_geometry)
 }
 
 fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) -> Option<Value> {
-    let id = value_u64(
-        item.get("uniqueId")
-            .or_else(|| item.get("unique_id"))
-            .or_else(|| item.get("id"))
-            .or_else(|| item.get("itemIndex"))
-            .or_else(|| item.get("item_index")),
-    )?;
-    let tooltip_source = item
-        .get("tooltipSource")
-        .cloned()
-        .or_else(|| crystal_tooltip_source_for_user_item(item, cursor).map(|source| json!(source)));
-    let count = value_u32(item.get("count").or_else(|| item.get("quantity"))).unwrap_or(1);
-    let icon = crystal_user_item_icon(item, count).or_else(|| {
-        value_u32(item.get("icon"))
-            .and_then(|value| u16::try_from(value).ok())
-            .filter(|value| *value != 0)
-    });
-    let icon_geometry = icon.and_then(item_frame_geometry);
-    Some(json!({
-        "unique_id": id,
-        "use_pearls": cursor.npc_shop_uses_pearls,
-        "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),
-        "price": value_u32(item.get("price")).unwrap_or_default(),
-        "count": u16::try_from(count).unwrap_or(1),
-        "stock": value_i32(item.get("stock")).unwrap_or(-1),
-        "panel_type": value_u32(item.get("panelType").or_else(|| item.get("panel_type")))
-            .and_then(|value| u8::try_from(value).ok())
-            .unwrap_or(u8::try_from(fallback).unwrap_or_default()),
-        "icon": icon.unwrap_or_default(),
-        "icon_width": icon_geometry.map(|frame| frame.width).unwrap_or_default(),
-        "icon_height": icon_geometry.map(|frame| frame.height).unwrap_or_default(),
-        "description": value_string(item.get("description")).unwrap_or_default(),
-        "tooltip_source": tooltip_source,
-    }))
+    mir2_client_bevy::native_npc_ingress::shop_good_json(item, fallback, cursor, native_inventory_frame_geometry)
 }
 
 fn shop_hide_added_stats(payload: &Value) -> bool {
-    [
-        "hideAddedStats",
-        "hide_added_stats",
-        "shopHideAddedStats",
-        "shop_hide_added_stats",
-    ]
-    .iter()
-    .find_map(|key| payload.get(*key))
-    .and_then(Value::as_bool)
-    .unwrap_or(false)
+    mir2_client_bevy::native_npc_ingress::shop_hide_added_stats(payload)
 }
 
 /// The ordinary catalogue packet changes both goods and their currency atomically.
@@ -5382,45 +4376,18 @@ fn transform_npc_catalog_packet(
     payload: &Value,
     cursor: &mut NativeUiPlayerCursor,
 ) -> Option<Value> {
-    if !matches!(packet, "NPCGoods" | "NPCPearlGoods") {
-        return None;
-    }
-    let previous = cursor.npc_shop_uses_pearls;
-    cursor.npc_shop_uses_pearls = packet == "NPCPearlGoods";
-    let mut model = try_transform_shop_model_from_packet(payload, cursor);
-    if let Some(model) = model.as_mut() {
-        if packet == "NPCPearlGoods" {
-            // Original Pearl packet has no HideAddedStats and does not assign it.
-            model["hide_added_stats"] = json!(cursor.npc_shop_hide_added_stats);
-        } else {
-            cursor.npc_shop_hide_added_stats = shop_hide_added_stats(payload);
-        }
-    } else {
-        cursor.npc_shop_uses_pearls = previous;
-    }
-    model
+    mir2_client_bevy::native_npc_ingress::transform_npc_catalog_packet(packet, payload, cursor, native_inventory_frame_geometry)
 }
 
 fn try_transform_shop_model_from_packet(
     payload: &Value,
     cursor: &NativeUiPlayerCursor,
 ) -> Option<Value> {
-    let list = payload.get("list")?.as_array()?;
-    if list
-        .iter()
-        .enumerate()
-        .any(|(slot, item)| shop_good_json(item, slot, cursor).is_none())
-    {
-        return None;
-    }
-    Some(transform_shop_model_from_packet(payload, cursor))
+    mir2_client_bevy::native_npc_ingress::try_transform_shop_model_from_packet(payload, cursor, native_inventory_frame_geometry)
 }
 
 fn payload_has_valid_shop_array(payload: &Value) -> bool {
-    ["shopGoods", "shop_goods", "npcGoods", "npc_goods"]
-        .iter()
-        .find_map(|key| payload.get(*key))
-        .is_some_and(Value::is_array)
+    mir2_client_bevy::native_npc_ingress::payload_has_valid_shop_array(payload)
 }
 
 fn mail_source(payload: &Value) -> Option<&Value> {
@@ -5441,7 +4408,12 @@ fn try_transform_mail_model_from_snapshot(payload: &Value) -> Option<Value> {
     let entries = mail_source(payload)?.as_array()?;
     let visible = entries
         .iter()
-        .filter(|mail| !mail.get("deleted").and_then(Value::as_bool).unwrap_or(false))
+        .filter(|mail| {
+            !mail
+                .get("deleted")
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+        })
         .cloned()
         .collect::<Vec<_>>();
     mail_model_from_entries(&visible)
@@ -5664,12 +4636,17 @@ fn try_transform_storage_model_from_snapshot(payload: &Value) -> Option<Value> {
         .or_else(|| payload.get("storage_items"))?
         .as_array()?;
     let items = storage_items_json(source)?;
-    let unlocked = payload.get("storageUnlocked")
+    let unlocked = payload
+        .get("storageUnlocked")
         .or_else(|| payload.get("storage_unlocked"))
         .and_then(Value::as_bool)
-        .unwrap_or_else(|| !payload.get("requireStoragePassword")
-            .or_else(|| payload.get("require_storage_password"))
-            .and_then(Value::as_bool).unwrap_or(false));
+        .unwrap_or_else(|| {
+            !payload
+                .get("requireStoragePassword")
+                .or_else(|| payload.get("require_storage_password"))
+                .and_then(Value::as_bool)
+                .unwrap_or(false)
+        });
     Some(json!({
         "items": items,
         "size": value_u32(payload.get("storageSize").or_else(|| payload.get("storage_size"))).and_then(|value| u16::try_from(value).ok()).unwrap_or(80),
@@ -5796,148 +4773,8 @@ fn transform_storage_patch_from_packet(packet: &str, payload: &Value) -> Option<
     }
 }
 
-fn wallet_value(payload: &Value, field: &str) -> Option<u32> {
-    value_u32(payload.get(field))
-        .or_else(|| value_u32(payload.get("value")))
-        .or_else(|| value_u32(payload.get("amount")))
-}
-
 fn transform_skill_model(payload: &Value) -> Value {
-    let skills = payload
-        .get("knownSkills")
-        .or_else(|| payload.get("known_skills"))
-        .or_else(|| payload.get("skills"))
-        .and_then(Value::as_array)
-        .map(|skills| {
-            skills
-                .iter()
-                .take(MAX_LEARNED_SKILLS)
-                .enumerate()
-                .map(|(idx, skill)| {
-                    let id = value_u32(skill.get("id")).unwrap_or(idx as u32);
-                    let key = skill.get("key").and_then(Value::as_str).map(str::to_owned);
-                    let name = skill
-                        .get("magicName")
-                        .and_then(Value::as_str)
-                        .filter(|v| !v.is_empty())
-                        .or_else(|| skill.get("name").and_then(Value::as_str))
-                        .unwrap_or_default()
-                        .to_owned();
-                    let level = value_u32(skill.get("level"))
-                        .and_then(|value| u8::try_from(value).ok())
-                        .unwrap_or(0);
-                    let delay_ms = value_i64(
-                        skill
-                            .get("delayMs")
-                            .or_else(|| skill.get("delay_ms"))
-                            .or_else(|| skill.get("cooldownMs")),
-                    )
-                    .unwrap_or(0);
-                    let mut transformed = serde_json::Map::new();
-                    transformed.insert("id".to_owned(), json!(id));
-                    transformed.insert(
-                        "castSequence".to_owned(),
-                        skill.get("castSequence").cloned().unwrap_or(json!(0)),
-                    );
-                    transformed.insert(
-                        "icon".to_owned(),
-                        value_u32(skill.get("icon"))
-                            .and_then(|v| u8::try_from(v).ok())
-                            .map(|v| json!(v))
-                            .unwrap_or(Value::Null),
-                    );
-                    let definition = skill
-                        .get("spell")
-                        .and_then(Value::as_str)
-                        .and_then(mir2_game_data::crystal_magic_by_spell);
-                    for (field, fallback) in [
-                        ("experience", None),
-                        ("need1", definition.as_ref().map(|v| v.need1)),
-                        ("need2", definition.as_ref().map(|v| v.need2)),
-                        ("need3", definition.as_ref().map(|v| v.need3)),
-                    ] {
-                        let value = skill
-                            .get(field)
-                            .map(|v| value_u32(Some(v)).and_then(|n| u16::try_from(n).ok()))
-                            .unwrap_or(fallback);
-                        transformed.insert(
-                            field.to_owned(),
-                            value.map(|v| json!(v)).unwrap_or(Value::Null),
-                        );
-                    }
-                    transformed.insert("name".to_owned(), json!(name));
-                    transformed.insert("level".to_owned(), json!(level));
-                    transformed.insert("key".to_owned(), json!(key));
-                    transformed.insert("cooldown_ms".to_owned(), json!(delay_ms.max(0)));
-                    transformed.insert(
-                        "spell".to_owned(),
-                        optional_non_empty_string_value(skill.get("spell")),
-                    );
-                    transformed.insert(
-                        "castKind".to_owned(),
-                        optional_non_empty_string_value(skill.get("castKind")),
-                    );
-                    transformed.insert(
-                        "canUse".to_owned(),
-                        skill.get("canUse").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "offensive".to_owned(),
-                        skill.get("offensive").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "hotkey".to_owned(),
-                        skill.get("hotkey").cloned().unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "cooldownRemainingTicks".to_owned(),
-                        value_u32(
-                            skill
-                                .get("cooldownRemainingTicks")
-                                .or_else(|| skill.get("cooldown_remaining_ticks")),
-                        )
-                        .map(|value| json!(value))
-                        .unwrap_or_else(|| json!(0)),
-                    );
-                    transformed.insert(
-                        "cooldownRemainingMs".to_owned(),
-                        value_u32(
-                            skill
-                                .get("cooldownRemainingMs")
-                                .or_else(|| skill.get("cooldown_remaining_ms")),
-                        )
-                        .map(|value| json!(value))
-                        .unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "mpCost".to_owned(),
-                        value_u32(skill.get("mpCost").or_else(|| skill.get("mp_cost")))
-                            .map(|value| json!(value))
-                            .unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "castTimeMs".to_owned(),
-                        value_i64(
-                            skill
-                                .get("castTimeMs")
-                                .or_else(|| skill.get("cast_time_ms")),
-                        )
-                        .map(|value| json!(value))
-                        .unwrap_or(Value::Null),
-                    );
-                    transformed.insert(
-                        "experience".to_owned(),
-                        value_u32(skill.get("experience"))
-                            .and_then(|value| u16::try_from(value).ok())
-                            .map(|value| json!(value))
-                            .unwrap_or(Value::Null),
-                    );
-                    Value::Object(transformed)
-                })
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default();
-    json!({ "skills": skills,"skillKeyAck":payload.get("skillKeyAck").cloned().unwrap_or(Value::Null), "authority":payload.get("_nativeSkillAuthority").cloned().unwrap_or(json!({"sessionEpoch":0,"snapshotSerial":0,"playerObjectId":0})) })
+    mir2_client_bevy::native_skill_ingress::project_native_skill_model(payload)
 }
 
 fn push_native_skill_model_from_world(payload: &Value) -> Result<bool, String> {
@@ -5968,52 +4805,7 @@ fn value_string(value: Option<&Value>) -> Option<String> {
 /// indices. Bag and belt entries already carry numeric slots, while equipment
 /// entries intentionally expose names such as `weapon` and `armour`.
 fn normalized_slot(value: Option<&Value>, fallback: u32) -> u32 {
-    if let Some(slot) = value_u32(value) {
-        return slot;
-    }
-
-    let Some(name) = value.and_then(Value::as_str) else {
-        return fallback;
-    };
-    match name.trim().to_ascii_lowercase().replace('_', "-").as_str() {
-        "weapon" => 0,
-        "armour" | "armor" => 1,
-        "helmet" => 2,
-        "torch" => 3,
-        "necklace" => 4,
-        "bracelet-left" | "braceletleft" | "braceletl" => 5,
-        "bracelet-right" | "braceletright" | "braceletr" => 6,
-        "ring-left" | "ringleft" | "ringl" => 7,
-        "ring-right" | "ringright" | "ringr" => 8,
-        "amulet" => 9,
-        "belt" => 10,
-        "boots" => 11,
-        "stone" => 12,
-        "mount" => 13,
-        _ => fallback,
-    }
-}
-
-/// Transform gateway `Chat` and `ObjectChat` packet payloads into the shared
-/// renderer-neutral chat line. Crystal uses `message` for direct/system chat
-/// and `text` for object chat, so the packet kind selects the authoritative
-/// field instead of accepting an unrelated similarly named property.
-fn transform_chat_line(packet: &str, payload: &Value) -> Option<mir2_client_bevy::chat::ChatLine> {
-    let text_field = match packet {
-        "Chat" => "message",
-        "ObjectChat" => "text",
-        _ => return None,
-    };
-    let text = payload
-        .get(text_field)
-        .and_then(Value::as_str)
-        .map(str::to_owned)?;
-    let channel = payload
-        .get("chatType")
-        .and_then(Value::as_str)
-        .map(str::to_owned)
-        .unwrap_or_else(|| "normal".to_owned());
-    Some(mir2_client_bevy::chat::ChatLine { text, channel })
+    mir2_client_bevy::native_inventory_ingress::native_inventory_slot(value, fallback)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
@@ -6276,67 +5068,35 @@ mod ranking_projection_tests {
 }
 
 fn transform_inventory_model(payload: &Value) -> Value {
-    let gold = value_u32_or(payload.get("gold"), 0);
-    // Only an explicit Crystal-array length can unlock page two. Occupied
-    // item count and the runtime's broader maxBagSlots value are not evidence
-    // that this character purchased inventory expansion.
-    let capacity = value_u32(payload.get("inventoryCapacity"))
-        .and_then(|value| u16::try_from(value).ok())
-        .map(mir2_client_bevy::inventory::InventoryModel::canonical_capacity)
-        .unwrap_or(mir2_client_bevy::inventory::CRYSTAL_BASE_INVENTORY_CAPACITY);
+    mir2_client_bevy::native_inventory_ingress::project_native_inventory_model(
+        payload,
+        native_inventory_frame_geometry,
+    )
+}
 
-    let map_items = |items: Option<&Value>, default_container: u8| -> Vec<Value> {
-        items
-            .and_then(Value::as_array)
-            .map(|list| {
-                list.iter()
-                    .enumerate()
-                    .map(|(index, item)| {
-                        let fallback_slot = u32::try_from(index).unwrap_or(0);
-                        let unique_id = item
-                            .get("uniqueId")
-                            .or_else(|| item.get("unique_id"))
-                            .and_then(value_u64_ref);
-                        let key = value_string(item.get("key"))
-                            .or_else(|| value_string(item.get("itemIndex")))
-                            .or_else(|| value_string(item.get("item_index")))
-                            .or_else(|| unique_id.map(|id| id.to_string()))
-                            .unwrap_or_else(|| index.to_string());
-                        let local_slot = normalized_slot(item.get("slot"), fallback_slot);
-                        let source_container = value_string(item.get("container"))
-                            .unwrap_or_default()
-                            .to_ascii_lowercase();
-                        let (container, slot) = if default_container == 0 {
-                            match source_container.as_str() {
-                                "bag2" => (0, 40u32.saturating_add(local_slot)),
-                                "quest" => (3, local_slot),
-                                _ => (0, local_slot),
-                            }
-                        } else {
-                            (default_container, local_slot)
-                        };
-                        let mut mapped = json!({
-                            "uniqueId": unique_id,
-                            "key": key,
-                            "name": value_string(item.get("name")).unwrap_or_default(),
-                            "quantity": value_u32(item.get("quantity").or_else(|| item.get("count"))).unwrap_or(1),
-                            "slot": slot,
-                            "container": container,
-                        });
-                        extend_item_metadata(&mut mapped, item);
-                        mapped
-                    })
-                    .collect()
+fn native_inventory_frame_geometry(
+    library: mir2_client_bevy::native_inventory_ingress::NativeItemLibrary,
+    index: u16,
+) -> Option<mir2_client_bevy::native_inventory_ingress::NativeItemFrameGeometry> {
+    use mir2_client_bevy::native_inventory_ingress::{NativeItemFrameGeometry, NativeItemLibrary};
+    match library {
+        NativeItemLibrary::Items => {
+            item_frame_geometry(index).map(|frame| NativeItemFrameGeometry {
+                width: frame.width,
+                height: frame.height,
+                x: 0,
+                y: 0,
             })
-            .unwrap_or_default()
-    };
-
-    let mut items = Vec::new();
-    items.extend(map_items(payload.get("inventoryItems"), 0));
-    items.extend(map_items(payload.get("beltItems"), 1));
-    items.extend(map_items(payload.get("equipmentItems"), 2));
-
-    json!({ "capacity": capacity, "gold": gold, "items": items })
+        }
+        NativeItemLibrary::StateItem => {
+            state_item_frame_geometry(index).map(|frame| NativeItemFrameGeometry {
+                width: frame.width,
+                height: frame.height,
+                x: frame.x,
+                y: frame.y,
+            })
+        }
+    }
 }
 
 /// Copy the item fields that the simulation already exposes into the shared
@@ -6344,102 +5104,18 @@ fn transform_inventory_model(payload: &Value) -> Value {
 /// case and web snapshot camel case: native sessions can receive either while
 /// reconnecting or applying a storage patch.
 fn extend_item_metadata(mapped: &mut Value, item: &Value) {
-    let metadata = [
-        ("icon", &["icon"][..]),
-        ("stateImage", &["stateImage", "state_image"][..]),
-        ("description", &["description"][..]),
-        (
-            "durabilityCurrent",
-            &[
-                "durabilityCurrent",
-                "durability_current",
-                "currentDura",
-                "current_dura",
-            ][..],
-        ),
-        (
-            "durabilityMax",
-            &["durabilityMax", "durability_max", "maxDura", "max_dura"][..],
-        ),
-        ("sellValue", &["sellValue", "sell_value", "price"][..]),
-        ("equipSlot", &["equipSlot", "equip_slot"][..]),
-        ("grade", &["grade"][..]),
-        ("attack", &["attack"][..]),
-        ("defence", &["defence", "defense"][..]),
-        ("addedAttack", &["addedAttack", "added_attack"][..]),
-        (
-            "addedDefence",
-            &[
-                "addedDefence",
-                "added_defence",
-                "addedDefense",
-                "added_defense",
-            ][..],
-        ),
-        ("addedLuck", &["addedLuck", "added_luck"][..]),
-        ("shape", &["shape"][..]),
-        ("socketSlots", &["socketSlots", "socket_slots"][..]),
-        ("tooltipSource", &["tooltipSource", "tooltip_source"][..]),
-    ];
-    let Some(target) = mapped.as_object_mut() else {
-        return;
-    };
-    for (target_name, candidates) in metadata {
-        if let Some(value) = candidates.iter().find_map(|name| item.get(*name)).cloned() {
-            target.insert(target_name.to_owned(), value);
-        }
-    }
-    let source_icon = value_u32(target.get("quantity"))
-        .and_then(|quantity| crystal_user_item_icon(item, quantity));
-    if let Some(icon) = source_icon {
-        target.insert("icon".to_owned(), json!(icon));
-    }
-    let icon = source_icon.or_else(|| {
-        value_u32(target.get("icon"))
-            .and_then(|value| u16::try_from(value).ok())
-            .filter(|value| *value != 0)
-    });
-    if let Some(frame) = icon.and_then(item_frame_geometry) {
-        target.insert("iconWidth".to_owned(), json!(frame.width));
-        target.insert("iconHeight".to_owned(), json!(frame.height));
-    }
-    let state_image = value_u32(target.get("stateImage"))
-        .and_then(|value| u16::try_from(value).ok())
-        .filter(|value| *value != 0);
-    if let Some(frame) = state_image.and_then(state_item_frame_geometry) {
-        target.insert("stateImageX".to_owned(), json!(frame.x));
-        target.insert("stateImageY".to_owned(), json!(frame.y));
-        target.insert("stateImageWidth".to_owned(), json!(frame.width));
-        target.insert("stateImageHeight".to_owned(), json!(frame.height));
-    }
+    mir2_client_bevy::native_inventory_ingress::extend_native_item_metadata(
+        mapped,
+        item,
+        native_inventory_frame_geometry,
+    );
 }
 
 /// Resolve only concrete UserItem surfaces (bag/belt/equipment/storage/NPC
 /// goods). Catalogue previews never call this. The current quantity is the
 /// authority, not a stale tooltip UserItem count, icon, or viewer realInfo.
 fn crystal_user_item_icon(item: &Value, count: u32) -> Option<u16> {
-    if let Some(info) = item
-        .get("tooltipSource")
-        .or_else(|| item.get("tooltip_source"))
-        .and_then(|source| source.get("info"))
-    {
-        return Some(mir2_game_data::crystal_user_item_image(
-            u8::try_from(value_u32(info.get("item_type"))?).ok()?,
-            i16::try_from(value_i32(info.get("shape"))?).ok()?,
-            u16::try_from(value_u32(info.get("stack_size"))?).ok()?,
-            u16::try_from(value_u32(info.get("image"))?).ok()?,
-            count,
-        ));
-    }
-    let index = value_i32(item.get("item_index").or_else(|| item.get("itemIndex")))?;
-    let info = unique_crystal_tooltip_template(index)?;
-    Some(mir2_game_data::crystal_user_item_image(
-        info.item_type,
-        info.shape,
-        info.stack_size,
-        info.image,
-        count,
-    ))
+    mir2_client_bevy::native_inventory_ingress::native_user_item_icon(item, count)
 }
 
 /// Transform a gateway `worldSnapshot` payload into the shared
@@ -6533,84 +5209,6 @@ fn transform_ui_read_model(payload: &Value) -> Value {
     })
 }
 
-/// Merge absolute wallet fields carried by a full snapshot or UserInformation
-/// packet into the gateway-local packet-first wallet cursor. The cursor only
-/// feeds read-model patches; it never claims that a purchase succeeded.
-fn update_wallet_from_snapshot(last_wallet: &mut Option<WalletState>, payload: &Value) {
-    let mut wallet = last_wallet.unwrap_or_default();
-    let mut changed = false;
-    if let Some(gold) = value_u32(payload.get("gold")) {
-        wallet.gold = gold;
-        changed = true;
-    }
-    if let Some(credit) = value_u32(payload.get("credit")) {
-        wallet.credit = credit;
-        changed = true;
-    }
-    if changed {
-        *last_wallet = Some(wallet);
-    }
-}
-
-fn merge_wallet_into_world(last_world_payload: &mut Option<Value>, wallet: Option<WalletState>) {
-    let Some(payload) = last_world_payload.as_mut() else {
-        return;
-    };
-    merge_wallet_into_payload(payload, wallet);
-}
-
-fn merge_wallet_into_payload(payload: &mut Value, wallet: Option<WalletState>) {
-    let Some(wallet) = wallet else {
-        return;
-    };
-    payload["gold"] = json!(wallet.gold);
-    payload["credit"] = json!(wallet.credit);
-}
-
-/// Crystal's Gained/LoseGold and Gained/LoseCredit packets carry deltas, not
-/// the resulting wallet total. Keep the shared read model timely by applying
-/// the signed delta to the last authoritative wallet cursor, then fold the
-/// absolute value into the latest packet-first world payload as well.
-fn apply_wallet_delta(
-    last_wallet: &mut Option<WalletState>,
-    last_world_payload: &mut Option<Value>,
-    field: &str,
-    amount: Option<u32>,
-    gained: bool,
-) -> Option<u32> {
-    let amount = amount?;
-    if last_wallet.is_none() {
-        let mut wallet = WalletState::default();
-        if let Some(payload) = last_world_payload.as_ref() {
-            wallet.gold = value_u32(payload.get("gold")).unwrap_or_default();
-            wallet.credit = value_u32(payload.get("credit")).unwrap_or_default();
-        }
-        *last_wallet = Some(wallet);
-    }
-    let wallet = last_wallet.as_mut()?;
-    let value = match field {
-        "gold" if gained => {
-            wallet.gold = wallet.gold.saturating_add(amount);
-            wallet.gold
-        }
-        "gold" => {
-            wallet.gold = wallet.gold.saturating_sub(amount);
-            wallet.gold
-        }
-        "credit" if gained => {
-            wallet.credit = wallet.credit.saturating_add(amount);
-            wallet.credit
-        }
-        "credit" => {
-            wallet.credit = wallet.credit.saturating_sub(amount);
-            wallet.credit
-        }
-        _ => return None,
-    };
-    merge_wallet_into_world(last_world_payload, *last_wallet);
-    Some(value)
-}
-
 /// UserInformation is the first packet-first character bootstrap on native
 /// transports and already contains wallet/HP/XP values. Forward it directly
 /// instead of waiting for the next periodic worldSnapshot.
@@ -6690,7 +5288,7 @@ mod tests {
             (Some(17), Some(0), Some(29))
         );
         cursor.reset();
-        assert!(cursor.magic_needs.is_empty());
+        assert!(cursor.core.diagnostics().magic_need_count == 0);
     }
     use tokio::net::TcpListener;
     use tokio::sync::oneshot;
@@ -6984,11 +5582,13 @@ mod tests {
             ("MailCost", json!({"cost":125})),
             ("MailLockedItem", json!({"uniqueId":77,"locked":true})),
         ] {
-            assert!(push_native_mail_service_event_with(packet, &payload, |json| {
-                delivered.push(json);
-                true
-            })
-            .unwrap());
+            assert!(
+                push_native_mail_service_event_with(packet, &payload, |json| {
+                    delivered.push(json);
+                    true
+                })
+                .unwrap()
+            );
         }
         let events = delivered
             .iter()
@@ -7149,7 +5749,8 @@ mod tests {
             "storage_items": [], "has_storage_password": true,
             "require_storage_password": true,
             "expanded_storage_expiry_time_binary_datetime": 987
-        })).expect("locked authoritative snapshot");
+        }))
+        .expect("locked authoritative snapshot");
         assert_eq!(locked_snapshot["unlocked"], false);
         assert_eq!(locked_snapshot["size"], 80);
         assert_eq!(locked_snapshot["expiry"], 987);
@@ -7157,13 +5758,15 @@ mod tests {
             "storageItems": [], "hasStoragePassword": true,
             "requireStoragePassword": false,
             "expandedStorageExpiryTimeBinaryDatetime": 654
-        })).expect("unlocked authoritative snapshot");
+        }))
+        .expect("unlocked authoritative snapshot");
         assert_eq!(unlocked_snapshot["unlocked"], true);
         assert_eq!(unlocked_snapshot["expiry"], 654);
         let explicit_unlock = try_transform_storage_model_from_snapshot(&json!({
             "storageItems": [], "requireStoragePassword": true,
             "storageUnlocked": true
-        })).expect("explicit unlock compatibility");
+        }))
+        .expect("explicit unlock compatibility");
         assert_eq!(explicit_unlock["unlocked"], true);
 
         let password_failure = transform_storage_patch_from_packet(
@@ -7178,11 +5781,15 @@ mod tests {
         .expect("password failure acknowledgement");
         assert_eq!(password_failure["ack"]["operation"], "removePassword");
         assert_eq!(password_failure["ack"]["success"], false);
-        assert!(password_failure.get("expiry").is_none(),
-            "password last-set timestamp must not replace warehouse rental expiry");
+        assert!(
+            password_failure.get("expiry").is_none(),
+            "password last-set timestamp must not replace warehouse rental expiry"
+        );
         let no_password = transform_storage_patch_from_packet(
-            "StorageUnlockResult", &json!({"result": 4, "hasPassword": false})
-        ).expect("no-password unlock result");
+            "StorageUnlockResult",
+            &json!({"result": 4, "hasPassword": false}),
+        )
+        .expect("no-password unlock result");
         assert_eq!(no_password["ack"]["success"], true);
         assert_eq!(no_password["unlocked"], true);
 
@@ -7659,18 +6266,27 @@ mod tests {
             "packet": "MapChanged",
             "payload": {"mapIndex": 401, "fileName": "D401", "title": "DeadMineEntrance", "miniMap": 8},
         });
-        assert_eq!(ingest!(d401_changed), WorldSnapshotIngestOutcome::NotSnapshot);
+        assert_eq!(
+            ingest!(d401_changed),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
         let partial_destination = json!({
             "type": "worldSnapshot",
             "payload": {"mapTitle": "BichonProvince", "miniMapIndex": 1,
                 "sceneView": {"center": {"x": 30, "y": 179}}},
         });
-        assert_eq!(ingest!(partial_destination), WorldSnapshotIngestOutcome::Applied);
+        assert_eq!(
+            ingest!(partial_destination),
+            WorldSnapshotIngestOutcome::Applied
+        );
         let destination = last_world_payload.as_ref().unwrap();
         assert_eq!(destination["mapFileName"], json!("D401"));
         assert_eq!(destination["mapTitle"], json!("DeadMineEntrance"));
         assert_eq!(destination["miniMapIndex"], json!(8));
-        assert_eq!(transform_world_snapshot(destination)["playerStats"]["mapName"], json!("DeadMineEntrance"));
+        assert_eq!(
+            transform_world_snapshot(destination)["playerStats"]["mapName"],
+            json!("DeadMineEntrance")
+        );
         let d401_snapshot = json!({
             "type": "worldSnapshot",
             // The ordinary server snapshot deliberately lacks miniMapIndex.
@@ -7678,7 +6294,9 @@ mod tests {
         });
         assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
         assert_eq!(
-            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            last_world_payload
+                .as_ref()
+                .and_then(|world| world.get("miniMapIndex")),
             Some(&json!(8))
         );
         let map_model: mir2_client_bevy::map::MapModel = serde_json::from_value(
@@ -7693,7 +6311,9 @@ mod tests {
 
         assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
         assert_eq!(
-            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            last_world_payload
+                .as_ref()
+                .and_then(|world| world.get("miniMapIndex")),
             Some(&json!(8)),
             "later same-map snapshots retain the cursor"
         );
@@ -7727,11 +6347,19 @@ mod tests {
         );
         // This is a stale pre-transition payload. It cannot clear the newer
         // D401 packet identity before the first fresh D401 snapshot arrives.
-        assert_eq!(ingest!(d402_snapshot), WorldSnapshotIngestOutcome::NotSnapshot);
-        assert_eq!(last_world_payload.as_ref().unwrap()["miniMapIndex"], json!(8));
+        assert_eq!(
+            ingest!(d402_snapshot),
+            WorldSnapshotIngestOutcome::NotSnapshot
+        );
+        assert_eq!(
+            last_world_payload.as_ref().unwrap()["miniMapIndex"],
+            json!(8)
+        );
         assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
         assert_eq!(
-            last_world_payload.as_ref().and_then(|world| world.get("miniMapIndex")),
+            last_world_payload
+                .as_ref()
+                .and_then(|world| world.get("miniMapIndex")),
             Some(&json!(8)),
             "the new D401 packet restores index 8 after the zero-index map"
         );
@@ -7741,9 +6369,10 @@ mod tests {
             WorldSnapshotIngestOutcome::NotSnapshot
         );
         assert_eq!(ingest!(d401_snapshot), WorldSnapshotIngestOutcome::Applied);
-        assert!(last_world_payload
-            .as_ref()
-            .is_some_and(|world| world.get("miniMapIndex").is_none()),
+        assert!(
+            last_world_payload
+                .as_ref()
+                .is_some_and(|world| world.get("miniMapIndex").is_none()),
             "a session boundary must not reuse the prior map's packet cursor"
         );
     }
@@ -9815,10 +8444,7 @@ mod tests {
             &json!({"hero":false,"magic":{"spell":"spell0","name":"Updated"}}),
             0
         ));
-        assert_eq!(
-            cursor.magic_names.get("spell0").map(String::as_str),
-            Some("Updated")
-        );
+        assert_eq!(cursor.core.magic_name("spell0"), Some("Updated"));
     }
 
     #[test]
@@ -9922,8 +8548,8 @@ mod tests {
         cursor.observe_snapshot(&mut fresh);
         assert_eq!(fresh["playerMp"], json!(35));
         assert_eq!(fresh["knownSkills"][0]["cooldownRemainingTicks"], json!(9));
-        assert!(cursor.patches.is_empty());
-        assert!(cursor.vitals.is_none());
+        assert!(cursor.core.diagnostics().patch_count == 0);
+        assert!(!cursor.core.diagnostics().has_vitals);
     }
 
     #[test]
@@ -9941,16 +8567,13 @@ mod tests {
             });
             cursor.observe_snapshot(&mut prior);
         }
-        assert_eq!(cursor.snapshot_serial, 2);
+        assert_eq!(cursor.core.authority().snapshot_serial, 2);
         assert!(cursor.apply_packet(
             "MagicDelay",
             &json!({"objectId":1001,"spell":"FireBall","delay":12}),
             0
         ));
-        assert_eq!(
-            cursor.patches[0].zero_tick_expires_at_snapshot_serial,
-            Some(3)
-        );
+        assert_eq!(cursor.core.diagnostics().first_patch_expiry_serial, Some(3));
         let mut next = json!({
             "tick": 0,
             "playerObjectId": 1001,
@@ -9963,7 +8586,7 @@ mod tests {
         cursor.observe_snapshot(&mut next);
         assert_eq!(next["knownSkills"][0]["delayMs"], json!(12));
         assert_eq!(next["knownSkills"][0]["cooldownRemainingTicks"], json!(3));
-        assert!(cursor.patches.is_empty());
+        assert!(cursor.core.diagnostics().patch_count == 0);
         let mut later = json!({
             "tick": 0,
             "playerObjectId": 1001,
@@ -9989,7 +8612,10 @@ mod tests {
         }
         assert!(removal_cursor.apply_packet("RemoveMagic", &json!({"placeId":1}), 0));
         assert_eq!(
-            removal_cursor.removals[0].zero_tick_expires_at_snapshot_serial,
+            removal_cursor
+                .core
+                .diagnostics()
+                .first_removal_expiry_serial,
             Some(3)
         );
         let mut next = json!({
@@ -10002,7 +8628,7 @@ mod tests {
         removal_cursor.observe_snapshot(&mut next);
         assert_eq!(next["knownSkills"].as_array().unwrap().len(), 1);
         assert_eq!(next["knownSkills"][0]["spell"], json!("Lightning"));
-        assert!(removal_cursor.removals.is_empty());
+        assert!(removal_cursor.core.diagnostics().removal_count == 0);
         let mut later = json!({
             "tick": 0,
             "knownSkills": [
@@ -10029,10 +8655,7 @@ mod tests {
             0
         ));
         assert_eq!(
-            vitals_cursor
-                .vitals
-                .unwrap()
-                .zero_tick_expires_at_snapshot_serial,
+            vitals_cursor.core.diagnostics().vitals_expiry_serial,
             Some(3)
         );
         let mut next = json!({
@@ -10043,7 +8666,7 @@ mod tests {
         });
         vitals_cursor.observe_snapshot(&mut next);
         assert_eq!(next["playerMp"], json!(40));
-        assert!(vitals_cursor.vitals.is_none());
+        assert!(!vitals_cursor.core.diagnostics().has_vitals);
         let mut later = json!({
             "tick": 0,
             "playerObjectId": 1001,
@@ -10075,7 +8698,7 @@ mod tests {
             &json!({"objectId":2002,"spell":"FlamingSword","canUse":true}),
             100
         ));
-        assert!(cursor.patches.is_empty());
+        assert!(cursor.core.diagnostics().patch_count == 0);
 
         assert!(cursor.apply_packet(
             "SpellToggle",
@@ -10150,7 +8773,7 @@ mod tests {
         ] {
             assert!(!cursor.apply_packet("SpellToggle", &payload, 100));
         }
-        assert!(cursor.patches.is_empty());
+        assert!(cursor.core.diagnostics().patch_count == 0);
 
         assert!(cursor.apply_packet(
             "MagicDelay",
@@ -10564,13 +9187,13 @@ mod tests {
         assert!(!cursor.apply_packet("RemoveMagic", &json!({"placeId":0}), 0));
         assert!(!cursor.apply_packet("RemoveMagic", &json!({"placeId":9}), 0));
         assert!(!cursor.apply_packet("UserInformation", &json!({}), 0));
-        assert!(cursor.patches.is_empty());
-        assert!(cursor.removals.is_empty());
-        assert!(cursor.vitals.is_none());
+        assert!(cursor.core.diagnostics().patch_count == 0);
+        assert!(cursor.core.diagnostics().removal_count == 0);
+        assert!(!cursor.core.diagnostics().has_vitals);
 
         // Personal skill deltas require the authoritative player object id;
         // establish it before testing the name-only snapshot rejection.
-        cursor.player_object_id = Some(1001);
+        cursor.observe_snapshot(&mut json!({"playerObjectId":1001}));
         let mut snapshot = json!({
             "tick": 0,
             "playerObjectId": 1001,
@@ -10590,7 +9213,7 @@ mod tests {
             snapshot["knownSkills"][0]["cooldownRemainingTicks"],
             json!(4)
         );
-        assert!(cursor.patches.is_empty());
+        assert!(cursor.core.diagnostics().patch_count == 0);
     }
 
     #[test]
@@ -10634,19 +9257,33 @@ mod tests {
     #[test]
     fn mail_reader_metadata_and_exact_source_icons_survive_wire_transform() {
         let template = mir2_game_data::crystal_item_by_index(658).expect("potion template");
-        let mail = mail_message_json(&json!({"mailId":42,"canReply":true,"dateSentBinaryDatetime":"621355968000000000",
-            "items":[{"itemIndex":658,"uniqueId":777,"count":3}]})).unwrap();
+        let mail = mail_message_json(
+            &json!({"mailId":42,"canReply":true,"dateSentBinaryDatetime":"621355968000000000",
+            "items":[{"itemIndex":658,"uniqueId":777,"count":3}]}),
+        )
+        .unwrap();
         assert_eq!(mail["can_reply"], true);
         assert_eq!(mail["metadata_known"], true);
-        assert_eq!(mail["date_sent_binary_datetime"], 621_355_968_000_000_000i64);
+        assert_eq!(
+            mail["date_sent_binary_datetime"],
+            621_355_968_000_000_000i64
+        );
         assert_eq!(mail["items"][0]["image"], template.image);
         assert_eq!(mail["items"][0]["uniqueId"], 777);
         assert_eq!(mail["items"][0]["count"], 3);
-        assert_eq!(mail_attachment_json(&json!(template.name)).unwrap()["image"], template.image);
-        assert!(mail_attachment_json(&json!("unknown mail item 12345")).unwrap()["image"].is_null());
+        assert_eq!(
+            mail_attachment_json(&json!(template.name)).unwrap()["image"],
+            template.image
+        );
+        assert!(
+            mail_attachment_json(&json!("unknown mail item 12345")).unwrap()["image"].is_null()
+        );
         let snapshot = mail_message_json(&json!({"id":42,"items":[]})).unwrap();
         assert_eq!(snapshot["metadata_known"], false);
-        let command = NativeOutboundCommand::LockMail { mail_id: 42, lock: true };
+        let command = NativeOutboundCommand::LockMail {
+            mail_id: 42,
+            lock: true,
+        };
         assert_eq!(command.command_type(), "lockMail");
         let wire = serde_json::to_value(command).unwrap();
         assert_eq!(wire["mailId"], 42);
@@ -10656,8 +9293,11 @@ mod tests {
     #[test]
     fn storage_password_receipts_preserve_results_without_echoing_credentials() {
         for result in 0..=6 {
-            let unlock = transform_storage_patch_from_packet("StorageUnlockResult",
-                &json!({"result":result,"hasPassword":true,"password":"private-input"})).unwrap();
+            let unlock = transform_storage_patch_from_packet(
+                "StorageUnlockResult",
+                &json!({"result":result,"hasPassword":true,"password":"private-input"}),
+            )
+            .unwrap();
             assert_eq!(unlock["password_result"]["operation"], "unlock");
             assert_eq!(unlock["password_result"]["result"], result);
             assert_eq!(unlock["ack"]["success"], result == 0 || result == 4);
@@ -10669,23 +9309,49 @@ mod tests {
             for removing in [false, true] {
                 let password = transform_storage_patch_from_packet("StoragePasswordResult",
                     &json!({"result":result,"removing":removing,"hasPassword":true,"password":"private-input"})).unwrap();
-                assert_eq!(password["password_result"], json!({"operation":"password","result":result,"removing":removing}));
+                assert_eq!(
+                    password["password_result"],
+                    json!({"operation":"password","result":result,"removing":removing})
+                );
                 assert!(!password.to_string().contains("private-input"));
             }
             assert!(!unlock.to_string().contains("private-input"));
         }
-        assert!(transform_storage_patch_from_packet("StorageUnlockResult", &json!({"hasPassword":true})).is_none());
-        assert!(transform_storage_patch_from_packet("StoragePasswordResult", &json!({"result":4,"hasPassword":true})).is_none());
+        assert!(transform_storage_patch_from_packet(
+            "StorageUnlockResult",
+            &json!({"hasPassword":true})
+        )
+        .is_none());
+        assert!(transform_storage_patch_from_packet(
+            "StoragePasswordResult",
+            &json!({"result":4,"hasPassword":true})
+        )
+        .is_none());
     }
 
     #[test]
     fn equipment_storage_ack_transform_preserves_identity_and_failure() {
         for success in [false, true] {
-            let payload = json!({"grid":"Storage","uniqueId":"9007199254740993","to":17,"success":success});
-            assert_eq!(transform_inventory_operation_ack("EquipItem", &payload),
-                Some(InventoryOperationAck::Equip { grid: "Storage".into(), unique_id: 9007199254740993, to: 17, success }));
-            assert_eq!(transform_inventory_operation_ack("RemoveItem", &payload),
-                Some(InventoryOperationAck::Remove { grid: "Storage".into(), unique_id: 9007199254740993, to: 17, success }));
+            let payload =
+                json!({"grid":"Storage","uniqueId":"9007199254740993","to":17,"success":success});
+            assert_eq!(
+                transform_inventory_operation_ack("EquipItem", &payload),
+                Some(InventoryOperationAck::Equip {
+                    grid: "Storage".into(),
+                    unique_id: 9007199254740993,
+                    to: 17,
+                    success
+                })
+            );
+            assert_eq!(
+                transform_inventory_operation_ack("RemoveItem", &payload),
+                Some(InventoryOperationAck::Remove {
+                    grid: "Storage".into(),
+                    unique_id: 9007199254740993,
+                    to: 17,
+                    success
+                })
+            );
             for field in ["grid", "uniqueId", "to", "success"] {
                 let mut malformed = payload.clone();
                 malformed.as_object_mut().unwrap().remove(field);

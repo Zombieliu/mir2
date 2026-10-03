@@ -1,0 +1,377 @@
+{
+  "sourceCommit": "ccdd51a90542d866a3b08096469c2d2819656ce4",
+  "rawBytesUnmodified": true,
+  "rawArtifacts": 74,
+  "files": [
+    {
+      "file": "raw/candidate-gates-v2/focused-quest.json",
+      "bytes": 2896,
+      "sha256": "ce2c065308ba19e62358d23ba90fdaa5599e6ef099d6c871e0f83ebae19edc8e"
+    },
+    {
+      "file": "raw/candidate-gates-v2/focused-quest.log",
+      "bytes": 45025,
+      "sha256": "9a9b59dbd21416302ca27ca8682a8e2d219c6197045f10b04041f3eef9ee5949"
+    },
+    {
+      "file": "raw/candidate-gates-v2/windows-quest.json",
+      "bytes": 2924,
+      "sha256": "9805e2902bfd86a5e0b2ddbc915e5366c34716d219d84e4b784310a1cf8333b5"
+    },
+    {
+      "file": "raw/candidate-gates-v2/windows-quest.log",
+      "bytes": 52453,
+      "sha256": "ec0e73b287ae0a2960adfa327729cdd974b67c756c51502196c45d1e2687175b"
+    },
+    {
+      "file": "raw/candidate-gates-v3/focused-quest.json",
+      "bytes": 2896,
+      "sha256": "9a06cd297df35d7974791eb7c9cdfca60a6db6468f9a1255fe3db694c2af144f"
+    },
+    {
+      "file": "raw/candidate-gates-v3/focused-quest.log",
+      "bytes": 34548,
+      "sha256": "9eec51f0c2350c8696034ef0abf97c4363ee724dc9d0bf2b56767bb529577dbe"
+    },
+    {
+      "file": "raw/candidate-gates-v4/focused-quest.json",
+      "bytes": 3102,
+      "sha256": "78d5b064c83b91c2068ec5e643f0156ccb0a36a4e940b3fdee8d211f23709dcf"
+    },
+    {
+      "file": "raw/candidate-gates-v4/focused-quest.log",
+      "bytes": 43180,
+      "sha256": "fdca08699b038e1fcaa33b9d6048ea5487187f863c48461cbdeee95fd099f5ae"
+    },
+    {
+      "file": "raw/candidate-gates/focused-quest.json",
+      "bytes": 2896,
+      "sha256": "ec5a15652b46cd92b2af936e25d8c988adce5c52de60417723c79cdff942d9ac"
+    },
+    {
+      "file": "raw/candidate-gates/focused-quest.log",
+      "bytes": 34354,
+      "sha256": "40d32e043ef1b5f2bb79430b6fad3f161891e940c5b3f537216050b027ac2d05"
+    },
+    {
+      "file": "raw/candidate-gates/java.json",
+      "bytes": 2732,
+      "sha256": "04b5e0faecfe51fe75ec53e7661efe926d55c163f3224eb67218b64f5375edf7"
+    },
+    {
+      "file": "raw/candidate-gates/java.log",
+      "bytes": 3149,
+      "sha256": "17a6819ef20b72cbb2eb50edb59dca8f6e44fda95b523db265f38e014d774472"
+    },
+    {
+      "file": "raw/candidate-gates/windows-quest.json",
+      "bytes": 2895,
+      "sha256": "33357a22fe27a6d8cacba4fc6ca7658892a33966f9ecd32f52de194912213204"
+    },
+    {
+      "file": "raw/candidate-gates/windows-quest.log",
+      "bytes": 67,
+      "sha256": "fcad680189747fa5472fb84de5a492617c70b7cc28fe458346d7cce0c330e47a"
+    },
+    {
+      "file": "raw/check-gates.mjs",
+      "bytes": 5476,
+      "sha256": "6c5ec657b9b6a57d27a0d34bd4bc6244252f2468ec2453e1b20d17282dc85e94"
+    },
+    {
+      "file": "raw/extract.mjs",
+      "bytes": 4594,
+      "sha256": "1ef821b60385bcacf93a2062ee4fab5d53dff58c591be0c0eaa499d03fa19c7f"
+    },
+    {
+      "file": "raw/extraction-blocks.json",
+      "bytes": 22405,
+      "sha256": "6349da105779d70891579ec4085bfbf7da9bf8523f5cdc5647fb4b2e4517cb1c"
+    },
+    {
+      "file": "raw/final-gates.mjs",
+      "bytes": 1005,
+      "sha256": "10c87e3819d6d48a7bb5eea52dd81ae7b3201a4f5b5289e96ab55a8cb64c55e9"
+    },
+    {
+      "file": "raw/final-source/android-normal.json",
+      "bytes": 3089,
+      "sha256": "4edd248ca20e900a67225069374905a20607765011f47e7a6aaa68a2457313ec"
+    },
+    {
+      "file": "raw/final-source/android-normal.log",
+      "bytes": 71144,
+      "sha256": "36a7cd31c654f25d5ea9f0beca4aa134e632a49214ec60421079135609c4b6bc"
+    },
+    {
+      "file": "raw/final-source/android-preview.json",
+      "bytes": 3126,
+      "sha256": "fded745dd0c030a457c831ed31e0986371b002a619586f2a3758ef95f688b17c"
+    },
+    {
+      "file": "raw/final-source/android-preview.log",
+      "bytes": 75322,
+      "sha256": "1488473dd7da2c8e1e4d6f798358545ec1ede1f062970d316dc2fef88f134499"
+    },
+    {
+      "file": "raw/final-source/api31-debug.json",
+      "bytes": 2961,
+      "sha256": "e29eada51280cbf791e5d615b778456d643b0f798bf44135a33b6c1909fba5c6"
+    },
+    {
+      "file": "raw/final-source/api31-debug.log",
+      "bytes": 33682,
+      "sha256": "c2e1553c7e6222b9234d8bdb0494f69a03c23b5e42c993b68c1c5c553699631c"
+    },
+    {
+      "file": "raw/final-source/api31-preview.json",
+      "bytes": 2963,
+      "sha256": "a275b031dd3657580bc832a98dbe368356558b3df9b592322469c6b9a1e25b92"
+    },
+    {
+      "file": "raw/final-source/api31-preview.log",
+      "bytes": 33685,
+      "sha256": "abf67a50a630acf162906c5ee540f4645e152eb079055e0c6caf176fc957ebef"
+    },
+    {
+      "file": "raw/final-source/java-results.json",
+      "bytes": 2479,
+      "sha256": "8f96d8fb8e6c6d38a07f8980f58d4e922a8f102bc96df1cb2db711ad2dbd5a3e"
+    },
+    {
+      "file": "raw/final-source/java-xml/Debug/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "f73c52e63d5ff4bd8a2e927a8ad172ba4cc3e912b8b5475dc0a80a40a6d13b36"
+    },
+    {
+      "file": "raw/final-source/java-xml/Debug/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "b8ab2e17eabd8339363003971862c94198253b3ad68e1c4e4835c8ba4e2435bf"
+    },
+    {
+      "file": "raw/final-source/java-xml/Debug/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 856,
+      "sha256": "f1652427701ec518a5fa55b678b8631431f18eb21914496cdb324d5e4103c4a2"
+    },
+    {
+      "file": "raw/final-source/java-xml/Debug/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3621,
+      "sha256": "cad2b4b116821b07cc01fa584af4acdd47f6bdaea981bf5346f866cbfc2e6fcf"
+    },
+    {
+      "file": "raw/final-source/java-xml/Debug/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "4d38858012273a59ecd31feed8204fc954ec49a9f5143a3e6b647231740b72c5"
+    },
+    {
+      "file": "raw/final-source/java-xml/UiPreview/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "8da061fc3f6d14af0facddad5d4b9faa3932f06e211cddb8892402a22e5264b3"
+    },
+    {
+      "file": "raw/final-source/java-xml/UiPreview/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "4e167203ab518f7bd029440768b85d13df9664ab5a9189c14e70b503e0b25fb5"
+    },
+    {
+      "file": "raw/final-source/java-xml/UiPreview/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 856,
+      "sha256": "0864bb3c5f719b8bd993a64b94fec2c2e7d4fd3e163443b047feb9f19df6cfe1"
+    },
+    {
+      "file": "raw/final-source/java-xml/UiPreview/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3622,
+      "sha256": "07abebfb610f9105f97219600cc6c60c7d3c314dd15b69cf09ebe49282d381f7"
+    },
+    {
+      "file": "raw/final-source/java-xml/UiPreview/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "8c2e3f0e3be5992002574c7bd5d6d93ab7b559e4ac8d440dc7cf94352d57767c"
+    },
+    {
+      "file": "raw/final-source/java.json",
+      "bytes": 2940,
+      "sha256": "dc56d9d6fa6d67cbef8f9e81532395f237ef4cc1c797a02de117ec0429ecc246"
+    },
+    {
+      "file": "raw/final-source/java.log",
+      "bytes": 3149,
+      "sha256": "4bb05f77346138d2e5797f42b8c4682723ee283e1be49bcc5a1e4b8cf20d01ed"
+    },
+    {
+      "file": "raw/final-source/results.json",
+      "bytes": 1390,
+      "sha256": "a16ddf07283a482c75995588282a63552ba685e3478e7fbcd1b6926fefda519c"
+    },
+    {
+      "file": "raw/final-source/shared-bevy.json",
+      "bytes": 3123,
+      "sha256": "07233ecee677ec80d96c8016daec12a58cdc6a6e6ae5e957f82e57b8546555c2"
+    },
+    {
+      "file": "raw/final-source/shared-bevy.log",
+      "bytes": 153253,
+      "sha256": "7ac2ede1c61f1cb4641046d428942ac850d70133d60f48c6fd64f6bd5f339a44"
+    },
+    {
+      "file": "raw/final-source/shared-runtime.json",
+      "bytes": 3080,
+      "sha256": "10769dc02fb2c591e94ef79d144456f894cc1fd36eb8b534b4f98ea6c4977ba1"
+    },
+    {
+      "file": "raw/final-source/shared-runtime.log",
+      "bytes": 27423,
+      "sha256": "dbc5b01f2ec53a6e5bd41992f4baeaf91614a68719017174ccd2d98267c269e6"
+    },
+    {
+      "file": "raw/final-source/windows-bridge.json",
+      "bytes": 3152,
+      "sha256": "f7e1f817dbb38c13c0205dc979dddcb677d8d861feca724ec58b4d3e68916081"
+    },
+    {
+      "file": "raw/final-source/windows-bridge.log",
+      "bytes": 49491,
+      "sha256": "f91b737e3a1f48dda93814c4dd198f807d6b1f8c45ffd0479eda30bac566d102"
+    },
+    {
+      "file": "raw/final-source/windows-completed.json",
+      "bytes": 3138,
+      "sha256": "6c5783b1c4b9e594933ff2d6149945d7dd5fa97b129afdce5c16a41b43f7a3ac"
+    },
+    {
+      "file": "raw/final-source/windows-completed.log",
+      "bytes": 39387,
+      "sha256": "adfa5751bf74a59e503deeb9d4b088c21bcba8b4bd370a5db1e49ca562f653d6"
+    },
+    {
+      "file": "raw/final-source/windows-exact-ack.json",
+      "bytes": 3210,
+      "sha256": "9ec7c3c7149e30340ed3b98c97646c36cbbd36c8e4fcb8103e562b167fe4978a"
+    },
+    {
+      "file": "raw/final-source/windows-exact-ack.log",
+      "bytes": 38725,
+      "sha256": "1eebb1de2361b346d1bb246c165f06f56ecfa6bb13c3140b2cad1d33b69cc146"
+    },
+    {
+      "file": "raw/final-source/windows-gateway-quest.json",
+      "bytes": 3155,
+      "sha256": "a8efe43ec015a35237569cb352bb116570dbcedd9d50147ce3315eb3cedd9441"
+    },
+    {
+      "file": "raw/final-source/windows-gateway-quest.log",
+      "bytes": 38820,
+      "sha256": "d158d073b0fb65fc108851711b1f3fa40e44a2a148cd35bbd7759382a46f354c"
+    },
+    {
+      "file": "raw/final-source/windows-projection.json",
+      "bytes": 3160,
+      "sha256": "a5f07f91957c9ef610ec886d8416cecf16b8c4cf246ec085ef946ddca2ed5540"
+    },
+    {
+      "file": "raw/final-source/windows-projection.log",
+      "bytes": 39025,
+      "sha256": "561292080974292789ddf78bfd02c2c9d3c3b42f4b45890aada7e27fc8af4f64"
+    },
+    {
+      "file": "raw/final-source/windows-quest.json",
+      "bytes": 3132,
+      "sha256": "1dcb4c1a13f482702bcf1620982c9a13ddf2167b06a1fc37479a81e03b01632c"
+    },
+    {
+      "file": "raw/final-source/windows-quest.log",
+      "bytes": 50251,
+      "sha256": "6cb747947a3f748e04703743e6bddc1e98474417a9e7b81102e60878831fd9da"
+    },
+    {
+      "file": "raw/final-source/windows-tooltip.json",
+      "bytes": 3134,
+      "sha256": "a444c8e57b4e93153bd293d2d03252114eed398f256a9d72c0768fd49710f633"
+    },
+    {
+      "file": "raw/final-source/windows-tooltip.log",
+      "bytes": 38943,
+      "sha256": "7913aa6b04e7767dc34173efa32e38a32eba4eef599dbe45d61e7db61b6cc2c6"
+    },
+    {
+      "file": "raw/finish-gates.mjs",
+      "bytes": 1132,
+      "sha256": "8325a3801dc55e647b374819f32bdef937fd1ec2e3cb04cb528989b587a362ca"
+    },
+    {
+      "file": "raw/java-quest-compiled-red.log",
+      "bytes": 2550,
+      "sha256": "9ca438fec9f87ce2e66cb747ac83d28989d7102636358b96523ebae6ef5de6ad"
+    },
+    {
+      "file": "raw/java-quest-red.log",
+      "bytes": 946,
+      "sha256": "12d433c06e220aa6205919a99b1faa9fc96c76203cdf7a9f1c5902532dec71c4"
+    },
+    {
+      "file": "raw/java-red-source-binding.json",
+      "bytes": 616,
+      "sha256": "8740ea26a6d692b0e368429eeb7d18e035f3ac0c3942c41b4a794bc3b507f22f"
+    },
+    {
+      "file": "raw/java-red.mjs",
+      "bytes": 2794,
+      "sha256": "1d7fe69e3ac156b76a3426989de8e45afa9706c43b6d69f738ebef73c317c50b"
+    },
+    {
+      "file": "raw/projection-parity.json",
+      "bytes": 4740,
+      "sha256": "ef0cc52f0b5b37d3689c2f6eb3720038d5d4e3b69770615878a1d3c43bdb4daf"
+    },
+    {
+      "file": "raw/projection-parity.mjs",
+      "bytes": 4252,
+      "sha256": "d75abb12f878c76f7f34cbbe6b7bec492cc87c8f334b0602286179598085f2dc"
+    },
+    {
+      "file": "raw/rust-quest-late-exit-red.log",
+      "bytes": 41776,
+      "sha256": "6ba7c74baa27358bf5a39fd71f31c5eac2a5667df3e11448b77af9689422450d"
+    },
+    {
+      "file": "raw/rust-quest-owner-guard-red.log",
+      "bytes": 41597,
+      "sha256": "e2664ac2876e67d9870410215833b23590b0893e68b35f2cb01053755a5c876e"
+    },
+    {
+      "file": "raw/source-binding.json",
+      "bytes": 7399,
+      "sha256": "00674467d83b9e228468ac973500b34573a7420a4ba8169a83f07cc676d61b03"
+    },
+    {
+      "file": "raw/windows-baseline-binding.json",
+      "bytes": 3901,
+      "sha256": "f63f9ef8d52b8bb68046556c86b904eae2dbd39cdf45c3c3658bb2004f1b9491"
+    },
+    {
+      "file": "raw/windows-baseline.mjs",
+      "bytes": 3122,
+      "sha256": "37bb513b4509f92a835cf50ce0a985631db22efa09fba871f7205bf79f70b446"
+    },
+    {
+      "file": "raw/windows-bridge-baseline-binding.json",
+      "bytes": 4487,
+      "sha256": "f5e3cb6e67a8fb7b56aced1bff77ebf08b5c46ffa244ba5e094ceccb1d402311"
+    },
+    {
+      "file": "raw/windows-bridge-baseline.mjs",
+      "bytes": 3700,
+      "sha256": "a07570c76aadbee768e622633a6de65fd5905ccd3c235afe058a5efeac6ec4b3"
+    },
+    {
+      "file": "raw/windows-bridge-published-baseline.log",
+      "bytes": 48972,
+      "sha256": "f229fdea15ef542b2f562b3648c12b2d5cd95b8584f8ce9cbc30b7e9bddd5adc"
+    },
+    {
+      "file": "raw/windows-quest-published-baseline.log",
+      "bytes": 50297,
+      "sha256": "4f59dfc243d3173968a975d8999588f2c7599c1165f6e948f41b511fcdf817ce"
+    }
+  ]
+}

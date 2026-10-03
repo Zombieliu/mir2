@@ -1,0 +1,153 @@
+{
+  "label": "working-java-full-v35",
+  "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android",
+  "bin": "./gradlew",
+  "args": [
+    "--offline",
+    "--no-daemon",
+    "--no-build-cache",
+    "--rerun-tasks",
+    ":app:testDebugUnitTest",
+    ":app:testUiPreviewUnitTest",
+    "--console=plain"
+  ],
+  "xmlDirs": [
+    "mir2-web3/apps/game-client/platform-android/android/app/build/test-results/testDebugUnitTest",
+    "mir2-web3/apps/game-client/platform-android/android/app/build/test-results/testUiPreviewUnitTest"
+  ],
+  "source": "f99edfdbd62b5a80714cce41deaabedc75ec5084",
+  "workingInputs": true,
+  "started": "2026-10-02T19:36:23.307Z",
+  "ended": "2026-10-02T19:37:07.857Z",
+  "code": 0,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74468,
+      "sha256": "86eced1102947319ad26c04e53ab8b845a659401c6254855312098a4ebbb3a2d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+      "bytes": 69639,
+      "sha256": "59d5ebf8b3d2f5fd28a9f058ece77efd5e2171ac6afbe0cb7af84af9c6d614ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 945911,
+      "sha256": "9db9a550c9659852475ba82f3d2f3eb4afd75f3ef80d2bda35c9a577899652a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 185650,
+      "sha256": "d944551b2ca73c555f430512edabb189cbf0c63c9bd18c239d112e9b3a909491"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28735,
+      "sha256": "25cb70ed959e853e2a27da09264b7362e5395c94149972b320daa00f5f12eff2"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74468,
+      "sha256": "86eced1102947319ad26c04e53ab8b845a659401c6254855312098a4ebbb3a2d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+      "bytes": 69639,
+      "sha256": "59d5ebf8b3d2f5fd28a9f058ece77efd5e2171ac6afbe0cb7af84af9c6d614ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 945911,
+      "sha256": "9db9a550c9659852475ba82f3d2f3eb4afd75f3ef80d2bda35c9a577899652a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 185650,
+      "sha256": "d944551b2ca73c555f430512edabb189cbf0c63c9bd18c239d112e9b3a909491"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28735,
+      "sha256": "25cb70ed959e853e2a27da09264b7362e5395c94149972b320daa00f5f12eff2"
+    }
+  ],
+  "sourceUnchanged": true,
+  "xml": [
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 967,
+      "sha256": "29907d5321f818eae26b326d70b5fae122892b014fd6e492696f01b415bb17fe"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "ae06dbdf47f4501f760f539353c5155db336c635899a4dee403ad55dca5d0264"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 856,
+      "sha256": "21d7ed2978ab72a57ccea298380a6def2c4bcaa510c6dda21efe405755b72ec3"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4468,
+      "sha256": "91df033e878c9f29f6f24a4f7dc0713e3ddcef92ff6b45b25d3c37d6d8d60e18"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "0a350860fc977deb4860dab97233d5666d2c830b1061098505d9ed54e2c60146"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 1074,
+      "sha256": "431c52f2fa9bf77492aa3f30d53195400b92e1dd42e4f9514bf2fc70403d8d9f"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "a81b0c9d88c7821e7c02ed0cb162e28adcb65196ca87ced0d1e3404a0e420b10"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 871,
+      "sha256": "cdbe8a1435d0e8fb983eb3d5eed42699640cf7e11130e3519997ad30faa252e9"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "32a8c3c08cb68876e734a63ac967aa9720ffaab1082f0b9f3feb7d3a48ad82ce"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4469,
+      "sha256": "df681c5c01f9d6ffc1baed3494321ae0ad67422a82b6e6662fe5baa749dea2a0"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "58a5d913371795c89eb8359abaf733d3a014d97eec8364e78e39181b8ff3077e"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 1074,
+      "sha256": "5ba378616878621256e1208fa03ae5e0e02ff3a072435eeead34fc8e0c279a2e"
+    }
+  ]
+}

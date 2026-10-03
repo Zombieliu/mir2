@@ -12,10 +12,22 @@ fn ordinary_panels_capture_their_rectangles_without_locking_world_actions() {
     ] {
         let mut state = NativePlayerUiState::default();
         state.core.panel = panel;
-        assert!(state.blocks_world_pointer_at(inside[0], inside[1]), "{panel:?} pointer leaked");
-        assert!(!state.blocks_world_pointer_at(700.0, 500.0), "{panel:?} froze outside pointer");
-        assert!(!state.blocks_world_action(false, false), "{panel:?} froze keyboard/actions");
-        assert!(!state.blocks_route_navigation(), "{panel:?} cancelled established target/route");
+        assert!(
+            state.blocks_world_pointer_at(inside[0], inside[1]),
+            "{panel:?} pointer leaked"
+        );
+        assert!(
+            !state.blocks_world_pointer_at(700.0, 500.0),
+            "{panel:?} froze outside pointer"
+        );
+        assert!(
+            !state.blocks_world_action(false, false),
+            "{panel:?} froze keyboard/actions"
+        );
+        assert!(
+            !state.blocks_route_navigation(),
+            "{panel:?} cancelled established target/route"
+        );
         state.skill_assign.open = true;
         assert!(state.blocks_world_pointer_at(700.0, 500.0));
         assert!(state.blocks_world_action(false, false));
@@ -32,7 +44,12 @@ fn actual_skills_toggle_keeps_character_frame_hit_capture_on_every_page() {
     state.toggle_skill();
     assert!(state.skill_open());
     assert_eq!(state.core.panel, mir2_ui_core::state::UiPanel::Character);
-    for page in [CharacterPage::Character, CharacterPage::Stats1, CharacterPage::Stats2, CharacterPage::Spells] {
+    for page in [
+        CharacterPage::Character,
+        CharacterPage::Stats1,
+        CharacterPage::Stats2,
+        CharacterPage::Spells,
+    ] {
         state.character_page = page;
         assert!(state.blocks_world_pointer_at(780.0, 120.0));
         assert!(!state.blocks_world_pointer_at(700.0, 500.0));

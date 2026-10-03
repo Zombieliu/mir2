@@ -18,6 +18,7 @@ use crate::map::TILE_SIZE;
 #[serde(rename_all = "camelCase")]
 pub enum EntityKind {
     Player,
+    Hero,
     SelfPlayer,
     Monster,
     Npc,
@@ -27,7 +28,7 @@ impl EntityKind {
     pub fn color(self) -> Color {
         match self {
             Self::SelfPlayer => Color::srgb(0.74, 0.58, 0.28),
-            Self::Player => Color::srgb(0.60, 0.55, 0.42),
+            Self::Player | Self::Hero => Color::srgb(0.60, 0.55, 0.42),
             Self::Monster => Color::srgb(0.55, 0.27, 0.18),
             Self::Npc => Color::srgb(0.48, 0.57, 0.33),
         }
@@ -35,7 +36,7 @@ impl EntityKind {
 
     pub fn size(self) -> Vec2 {
         match self {
-            Self::SelfPlayer | Self::Player => Vec2::new(24.0, 32.0),
+            Self::SelfPlayer | Self::Player | Self::Hero => Vec2::new(24.0, 32.0),
             Self::Monster => Vec2::new(28.0, 28.0),
             Self::Npc => Vec2::new(20.0, 30.0),
         }
@@ -44,7 +45,7 @@ impl EntityKind {
     pub fn facing_color(self) -> Color {
         match self {
             Self::SelfPlayer => Color::srgb(1.0, 0.92, 0.74),
-            Self::Player => Color::srgb(0.84, 0.93, 1.0),
+            Self::Player | Self::Hero => Color::srgb(0.84, 0.93, 1.0),
             Self::Monster => Color::srgb(1.0, 0.82, 0.74),
             Self::Npc => Color::srgb(0.89, 1.0, 0.87),
         }
@@ -80,8 +81,8 @@ impl EntityModel {
         match (self.kind, variant) {
             (EntityKind::SelfPlayer, 0) => Color::srgb(1.0, 0.92, 0.74),
             (EntityKind::SelfPlayer, _) => Color::srgb(0.95, 0.83, 0.58),
-            (EntityKind::Player, 0) => Color::srgb(0.78, 0.92, 1.0),
-            (EntityKind::Player, _) => Color::srgb(0.67, 0.84, 0.98),
+            (EntityKind::Player | EntityKind::Hero, 0) => Color::srgb(0.78, 0.92, 1.0),
+            (EntityKind::Player | EntityKind::Hero, _) => Color::srgb(0.67, 0.84, 0.98),
             (EntityKind::Monster, 0) => Color::srgb(1.0, 0.70, 0.46),
             (EntityKind::Monster, _) => Color::srgb(0.94, 0.59, 0.34),
             (EntityKind::Npc, 0) => Color::srgb(0.87, 1.0, 0.76),
@@ -265,6 +266,19 @@ mod tests {
     fn kinds_have_distinct_palette() {
         assert_ne!(EntityKind::Monster.color(), EntityKind::Npc.color());
         assert_ne!(EntityKind::SelfPlayer.color(), EntityKind::Player.color());
+        assert_eq!(EntityKind::Hero.color(), EntityKind::Player.color());
+        assert_eq!(EntityKind::Hero.size(), EntityKind::Player.size());
+    }
+
+    #[test]
+    fn entity_model_set_accepts_authoritative_hero_kind() {
+        let model: EntityModelSet = serde_json::from_str(
+            r#"{"entities":[{"objectId":"9006","kind":"hero","name":"Spirit","x":302,"y":634,"level":12,"direction":"up"}]}"#,
+        )
+        .expect("hero entity should be part of the shared object model");
+
+        assert_eq!(model.entities.len(), 1);
+        assert_eq!(model.entities[0].kind, EntityKind::Hero);
     }
 
     #[test]

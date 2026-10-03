@@ -1,0 +1,33 @@
+{
+  "source": "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6",
+  "versionCode": 35,
+  "serial": "emulator-5554",
+  "api": 31,
+  "artifacts": [
+    {
+      "variant": "debug",
+      "source": "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gameshop-phone-v35-20261003-C6YjqR/final-apks/mir2-native-gameshop-phone-debug-v35.apk",
+      "bytes": 387369921,
+      "sha256": "5d05f1c38dfa7afc7b95daeafd9a5a60acae2d4adc2033786ba90b849d373d0d",
+      "applicationId": "com.mir2.web3",
+      "installedSha256": "5d05f1c38dfa7afc7b95daeafd9a5a60acae2d4adc2033786ba90b849d373d0d",
+      "preservedFirstInstallTime": "2026-09-14 06:31:04",
+      "upgradePreservedDataFlag": true
+    },
+    {
+      "variant": "preview",
+      "source": "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gameshop-phone-v35-20261003-C6YjqR/final-apks/mir2-native-gameshop-phone-preview-v35.apk",
+      "bytes": 391500869,
+      "sha256": "75ad4cd7766308b1fe4682eede323d1a97a41772a516cb7a08b0c0c354b32a1d",
+      "applicationId": "com.mir2.web3.uipreview",
+      "installedSha256": "75ad4cd7766308b1fe4682eede323d1a97a41772a516cb7a08b0c0c354b32a1d",
+      "preservedFirstInstallTime": "2026-09-12 17:13:30",
+      "upgradePreservedDataFlag": true
+    }
+  ],
+  "physicalDeviceAccepted": false,
+  "realNetworkAccepted": false,
+  "appDataContentHashed": false
+}

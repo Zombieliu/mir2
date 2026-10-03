@@ -248,34 +248,59 @@ mod tests {
     }
     #[test]
     fn hero_mount_ordinary_ride_emits_distinct_owner_and_hero_updates() {
-        use super::super::super::{equipment::equipment_state_from_item_state, resources::InventoryResource};
-        let mut s=scene();
-        let mut own=mount(true,true);own.unique_id=99001;
-        let equipment=equipment_state_from_item_state(&own,crate::EquipmentSlot::Mount);
-        s.app.world_mut().resource_mut::<InventoryResource>().equipment_items.push(equipment);
-        s.app.world_mut().resource_mut::<MountResource>().has_saddle=true;
-        s.app.world_mut().resource_mut::<HeroInventoryResource>().equipment=vec![mount(true,true)];
-        for expected in [true,false] {
-            let packets=s.handle_packet(ClientPacket::Chat{message:"@RIDE".into(),linked_items:vec![]});
-            for id in [1000,1001] {
+        use super::super::super::{
+            equipment::equipment_state_from_item_state, resources::InventoryResource,
+        };
+        let mut s = scene();
+        let mut own = mount(true, true);
+        own.unique_id = 99001;
+        let equipment = equipment_state_from_item_state(&own, crate::EquipmentSlot::Mount);
+        s.app
+            .world_mut()
+            .resource_mut::<InventoryResource>()
+            .equipment_items
+            .push(equipment);
+        s.app.world_mut().resource_mut::<MountResource>().has_saddle = true;
+        s.app
+            .world_mut()
+            .resource_mut::<HeroInventoryResource>()
+            .equipment = vec![mount(true, true)];
+        for expected in [true, false] {
+            let packets = s.handle_packet(ClientPacket::Chat {
+                message: "@RIDE".into(),
+                linked_items: vec![],
+            });
+            for id in [1000, 1001] {
                 assert!(packets.iter().any(|packet|matches!(packet,ServerPacket::MountUpdate{object_id,riding_mount,..} if *object_id==id&&*riding_mount==expected)),"{packets:?}");
             }
-            assert_eq!(riding(s.app.world()),expected);
+            assert_eq!(riding(s.app.world()), expected);
         }
     }
     #[test]
     fn hero_mount_ordinary_pet_modes_gate_attack_and_move_independently() {
-        let mut s=scene();
+        let mut s = scene();
         for mode in 0..=4 {
-            s.handle_packet(ClientPacket::ChangePMode{mode});
-            assert_eq!(super::super::hero_attack_mode_allowed(s.app.world()),matches!(mode,0|2|4));
-            assert_eq!(super::super::hero_move_mode_allowed(s.app.world()),matches!(mode,0|1|4));
+            s.handle_packet(ClientPacket::ChangePMode { mode });
+            assert_eq!(
+                super::super::hero_attack_mode_allowed(s.app.world()),
+                matches!(mode, 0 | 2 | 4)
+            );
+            assert_eq!(
+                super::super::hero_move_mode_allowed(s.app.world()),
+                matches!(mode, 0 | 1 | 4)
+            );
         }
     }
-
 }
 
 #[derive(Clone)]
 pub(super) struct TransientSnapshot(Option<HeroMount>);
-pub(super) fn capture_transient(world:&World)->TransientSnapshot {TransientSnapshot(world.get_resource::<HeroMount>().cloned())}
-pub(super) fn restore_transient(world:&mut World,snapshot:&TransientSnapshot){world.remove_resource::<HeroMount>();if let Some(state)=&snapshot.0 {world.insert_resource(state.clone());}}
+pub(super) fn capture_transient(world: &World) -> TransientSnapshot {
+    TransientSnapshot(world.get_resource::<HeroMount>().cloned())
+}
+pub(super) fn restore_transient(world: &mut World, snapshot: &TransientSnapshot) {
+    world.remove_resource::<HeroMount>();
+    if let Some(state) = &snapshot.0 {
+        world.insert_resource(state.clone());
+    }
+}

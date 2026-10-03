@@ -218,7 +218,11 @@ pub(super) fn client_buff_for_state(world: &World, buff: &BuffState) -> Option<C
         buff_type: crystal_buff_type_for_key(&buff.key)?,
         visible: crystal_buff_visible_for_key(&buff.key),
         object_id,
-        expire_time: if infinite { 0 } else { buff.remaining_ms(tick).min(i64::MAX as u64) as i64 },
+        expire_time: if infinite {
+            0
+        } else {
+            buff.remaining_ms(tick).min(i64::MAX as u64) as i64
+        },
         infinite,
         paused: false,
         stats,

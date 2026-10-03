@@ -1,0 +1,5 @@
+Device: sdk_gphone64_arm64, Android API 31 emulator, 1080x2340
+Install: adb install -r passed
+Launch: process reached native Bevy window, but this retry did not reach render-ready
+Renderer: Emulator 31.3.10 SwiftShader hit DeviceLost before render-ready
+Acceptance: package/install evidence only; no new visible-scene or soak claim

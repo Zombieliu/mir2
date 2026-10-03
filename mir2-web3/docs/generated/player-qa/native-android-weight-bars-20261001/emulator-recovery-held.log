@@ -1,0 +1,129 @@
+INFO         | Android emulator version 37.1.11.0 (build_id 15917651) (CL:N/A)
+INFO         | Graphics backend: gfxstream
+INFO         | Found systemPath /Users/henryliu/Library/Android/sdk/system-images/android-31/google_apis/arm64-v8a/
+WARNING      | Please update the emulator to one that supports the feature(s): Vulkan
+INFO         | Guest GLES Driver: Auto (ext controls)
+INFO         | emuglConfig_init: vulkan_mode_selected:lavapipe gles_mode_selected:host
+INFO         | Checking system compatibility:
+INFO         |   Checking: hasSufficientDiskSpace
+INFO         |      Ok: Disk space requirements to run avd: `Mir2_API_31_ARM64` are met
+INFO         |   Checking: hasSufficientHwGpu
+INFO         |      Ok: Hardware GPU compatibility checks are not required
+INFO         |   Checking: hasSufficientSystem
+INFO         |      Ok: System requirements to run avd: `Mir2_API_31_ARM64` are met
+INFO         | Storing crashdata in: /tmp/android-henryliu/emu-crash-37.1.11.db, detection is enabled for process: 21516
+INFO         | Showing crashdialog to get consent.
+  module_list[0].crashpad_annotations["ERRLOG"] (type = 1) = bad color buffer handle 212
+Failed to find ColorBuffer: 284
+Failed to find ColorBuffer: 343
+Failed to find ColorBuffer: 390
+Failed to find ColorBuffer: 403
+Failed to find ColorBuffer: 423
+Failed to find ColorBuffer: 434
+Failed to find ColorBuffer: 627
+bad color buffer handle 653
+Failed to find ColorBuffer: 869
+Failed to find ColorBuffer: 1122
+Failed to find ColorBuffer: 1182
+Failed to find ColorBuffer: 1307
+Failed to find ColorBuffer: 1497
+Failed to find ColorBuffer: 1531
+Failed to find ColorBuffer: 1556
+Failed to find ColorBuffer: 1593
+Failed to find ColorBuffer: 1715
+Failed to find ColorBuffer: 2019
+Failed to find ColorBuffer: 2048
+Failed to find ColorBuffer: 2220
+bad color buffer handle 2564
+bad color buffer handle 2651
+bad color buffer handle 2886
+bad color buffer handle 3035
+bad color buffer handle 3148
+Failed to find ColorBuffer: 3155
+bad color buffer handle 3362
+bad color buffer handle 3396
+Failed to find ColorBuffer: 3539
+Failed to find ColorBuffer: 3590
+Failed to find ColorBuffer: 3623
+Failed to find ColorBuffer: 3778
+Failed to find ColorBuffer: 4129
+bad color buffer handle 5090
+bad color buffer handle 5288
+Failed to find ColorBuffer: 5301
+Failed to find ColorBuffer: 5318
+Failed to find ColorBuffer: 5388
+Failed to find ColorBuffer: 5453
+Failed to find ColorBuffer: 5616
+Failed to find ColorBuffer: 5663
+Failed to find ColorBuffer: 5701
+bad color buffer handle 5937
+Failed to find ColorBuffer: 6183
+Failed to find ColorBuffer: 6463
+Failed to find ColorBuffer: 6490
+Failed to find ColorBuffer: 6721
+Failed to find ColorBuffer: 6805
+Failed to find ColorBuffer: 6835
+bad color buffer handle 7071
+Failed to find ColorBuffer: 7323
+Failed to find ColorBuffer: 7484
+Failed to find ColorBuffer: 7512
+Failed to find ColorBuffer: 7538
+Failed to find ColorBuffer: 7746
+Failed to find ColorBuffer: 7786
+bad color buffer handle 8157
+Failed to find ColorBuffer: 8193
+Failed to find ColorBuffer: 8199
+Failed to find ColorBuffer: 8161
+Failed to find ColorBuffer: 8352
+bad color buffer handle 8520
+bad color buffer handle 8720
+Failed to find ColorBuffer: 8751
+bad color buffer handle 9383
+bad color buffer handle 9419
+bad color buffer handle 9529
+Failed to find ColorBuffer: 9564
+Failed to find ColorBuffer: 9530
+Failed to find ColorBuffer: 9591
+bad color buffer handle 9617
+Failed to find ColorBuffer: 9700
+
+  module_list[0].crashpad_annotations["disk.dataPartition.size"] (type = 1) = 20G
+  module_list[0].crashpad_annotations["hw.lcd.height"] (type = 1) = 2340
+  module_list[0].crashpad_annotations["hw.gpu.mode"] (type = 1) = auto
+  module_list[0].crashpad_annotations["hw.cpu.ncore"] (type = 1) = 4
+  module_list[0].crashpad_annotations["hw.sensor.hinge"] (type = 1) = no
+  module_list[0].crashpad_annotations["hw.lcd.width"] (type = 1) = 1080
+  module_list[0].crashpad_annotations["hw.ramSize"] (type = 1) = 4096M
+  module_list[0].crashpad_annotations["PlayStore.enabled"] (type = 1) = no
+  module_list[0].crashpad_annotations["cpu_cores"] (type = 1) = 10
+  module_list[0].crashpad_annotations["hw.gpu.enabled"] (type = 1) = yes
+  module_list[0].crashpad_annotations["free_ram"] (type = 1) = 29269
+  module_list[0].crashpad_annotations["avd_space"] (type = 1) = 374521483264
+  module_list[0].crashpad_annotations["ro.build.fingerprint"] (type = 1) = google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys
+  module_list[0].crashpad_annotations["grpc"] (type = 1) = cn:T,adv,
+  module_list[0].crashpad_annotations["AVD_FLAVOR"] (type = 1) = AVD_PHONE
+  module_list[0].crashpad_annotations["gfxstream_features"] (type = 1) = GlPipeChecksum, Vulkan, HasSharedSlotsHostMemoryAllocator, VulkanShaderFloat16Int8, GlAsyncSwap, GlDma, GlDirectMem, GlesDynamicVersion, RefCountPipe, HostComposition, VulkanNullOptionalStrings, YuvCache, VulkanIgnoredHandles, VulkanQueueSubmitWithCommands, VulkanVirtualQueue, 
+  module_list[0].crashpad_annotations["internal-msg"] (type = 1) = emuglConfig_init: gpu_mode_requested: host, no_window: 0
+emuglConfig_init: GPU emulation enabled using Vulkan:'host' GLES:'host' modes
+Deciding if GLDirectMem/Vulkan should be enabled. Selected GLES renderer: Host Selected Vulkan renderer: Host API level: 31 
+Enabling Vulkan
+Enabling GLDirectMem
+Selecting Vulkan device: Apple M1 Max, Version: 1.1.323
+VkEmulation deviceInfo: 
+hasGraphicsQueueFamily = 1
+hasComputeQueueFamily = 1
+externalMemoryMode = Metal
+supportsExternalMemoryImport = 1
+supportsExternalMemoryExport = 1
+supportsDriverProperties = 1
+supportsExternalMemoryHostProps = 1
+hasSamplerYcbcrConversionExtension = 1
+supportsSamplerYcbcrConversion = 1
+glInteropSupported = 0
+hasNvidiaDeviceDiagnosticCheckpointsExtension = 0
+supportsNvidiaDeviceDiagnosticCheckpoints = 0
+supportsPrivateData = 1
+
+Vulkan emulation initialized
+
+  module_list[0].crashpad_annotations["command_line"] (type = 1) = -avd Mir2_API_31_ARM64 -no-snapshot-load -no-snapshot-save -gpu host -no-boot-anim -no-audio 

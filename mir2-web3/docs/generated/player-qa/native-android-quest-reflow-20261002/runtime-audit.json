@@ -1,0 +1,171 @@
+{
+  "source": "9a6bff0db9a7ff3eed003c72c90310ec632572d0",
+  "versionCode": 24,
+  "distinctPids": 5,
+  "entries": [
+    {
+      "directory": "device",
+      "scene": "debug-login",
+      "pid": 15290,
+      "log": "raw/v24/device/debug-login-pid.log",
+      "gl506": 26,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": []
+    },
+    {
+      "directory": "device",
+      "scene": "quests-ingress",
+      "pid": 15365,
+      "log": "raw/v24/device/quests-ingress-pid.log",
+      "gl506": 8,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 13:59:30.795 15365 15388 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"quests-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = false;"
+      ]
+    },
+    {
+      "directory": "device",
+      "scene": "npc-ingress",
+      "pid": 15438,
+      "log": "raw/v24/device/npc-ingress-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 13:59:35.554 15438 15459 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"npc-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = true;"
+      ]
+    },
+    {
+      "directory": "wide-touch",
+      "scene": "pair",
+      "pid": 15574,
+      "log": "raw/v24/wide-touch/pair-pid.log",
+      "gl506": 28,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 14:02:43.488 15574 15596 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"quests-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = false;"
+      ]
+    },
+    {
+      "directory": "wide-touch-retry",
+      "scene": "all-closed",
+      "pid": 15700,
+      "log": "raw/v24/wide-touch-retry/all-closed-pid.log",
+      "gl506": 20,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 14:07:20.980 15700 15722 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"quests-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = false;"
+      ]
+    }
+  ],
+  "gl506": 82,
+  "logCounting": "Only each distinct PID latest cumulative log; canonical diagnostic events exclude RustStdoutStderr duplicates; no frame/scroll double counting",
+  "originalFramesInspectedByPrimary": 13,
+  "firstDiaryRuntimeMetrics": {
+    "controls": [
+      {
+        "width": 375.63635,
+        "height": 51.636364
+      },
+      {
+        "width": 48,
+        "height": 48
+      },
+      {
+        "width": 375.63635,
+        "height": 48
+      },
+      {
+        "width": 375.63635,
+        "height": 48
+      },
+      {
+        "width": 192,
+        "height": 48
+      },
+      {
+        "width": 191.63637,
+        "height": 48
+      }
+    ],
+    "texts": [
+      {
+        "font": 16,
+        "glyphs": 4,
+        "alphaMasks": 4
+      },
+      {
+        "font": 13.999999046325684,
+        "glyphs": 1,
+        "alphaMasks": 1
+      },
+      {
+        "font": 13.999999046325684,
+        "glyphs": 10,
+        "alphaMasks": 10
+      },
+      {
+        "font": 13.999999046325684,
+        "glyphs": 7,
+        "alphaMasks": 7
+      },
+      {
+        "font": 13.999999046325684,
+        "glyphs": 44,
+        "alphaMasks": 44
+      },
+      {
+        "font": 13.999999046325684,
+        "glyphs": 2,
+        "alphaMasks": 2
+      },
+      {
+        "font": 13.999999046325684,
+        "glyphs": 1,
+        "alphaMasks": 1
+      },
+      {
+        "font": 13.999999046325684,
+        "glyphs": 1,
+        "alphaMasks": 1
+      }
+    ],
+    "allSixControlsMinimum48Dp": true,
+    "body14DpHeading16Dp": true,
+    "allObservedGlyphsAlphaMask": true,
+    "pairMetricsNotFreshlyLogged": true
+  },
+  "observations": {
+    "normalLogin": "Empty credentials; Test server not configured",
+    "actualRow": "PASS bounded: real row tap opens two independent shared windows",
+    "actualSwipe": "PASS bounded: actual vertical swipe advances full source detail content without selecting another row",
+    "actualScrollButtons": "PASS bounded: actual Down reaches progress/rewards/choice labels; Up returns; no reward or operation tapped",
+    "closeDiary": "PASS bounded: actual close leaves detail visible, wider, with retained scroll and protected HUD",
+    "closeDetail": "PASS bounded: actual close removes the last quest window and restores default HUD/belt/chat/thumb layout",
+    "readability": "PASS bounded captured wide-phone diary and detail: readable wrapped full titles/body/progress/reward labels; not all quest surfaces, locales or devices",
+    "npc": "Initial NPC dialogue remains visible; no fresh Exit/Menu/combat acceptance this leaf"
+  },
+  "zeroErrorRendererGate": "FAIL",
+  "fullPhoneUiGate": "OPEN/FAIL renderer and remaining surfaces",
+  "gpuRendererFixThisLeaf": false,
+  "remaining": "NPC quest list, confirmations/alerts, all nine locale reflow cases, compact/IME overlap and physical/multitouch acceptance still open; bounded GPU and complete NI-11-20 remain",
+  "retainedOldGl506": {
+    "v23": 38,
+    "v22": 67,
+    "v21": 33,
+    "v20": 73,
+    "v19": 135
+  },
+  "olderEvidenceUnchanged": true,
+  "actualJavaJniAuthenticatedQuest": false,
+  "realHttpsWss": false,
+  "questOrRewardSuccess": false,
+  "zoneSave": false,
+  "completeResourcesAccepted": false,
+  "physicalDeviceAccepted": false,
+  "wholeGoal": "Active"
+}

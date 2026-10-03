@@ -200,6 +200,15 @@ impl TradeDialogUi {
         let p = self.positions[side.index()];
         CrystalRect::new(p.x, p.y, 204.0, 152.0)
     }
+    pub(super) fn focus_rect(&self) -> CrystalRect {
+        let own = self.rect(TradeSide::Own);
+        let guest = self.rect(TradeSide::Guest);
+        let left = own.left.min(guest.left);
+        let top = own.top.min(guest.top);
+        let right = (own.left + own.width).max(guest.left + guest.width);
+        let bottom = (own.top + own.height).max(guest.top + guest.height);
+        CrystalRect::new(left, top, right - left, bottom - top)
+    }
     pub(super) fn covers_cursor(&self, cursor: Vec2) -> bool {
         self.open
             && [TradeSide::Own, TradeSide::Guest]
@@ -390,6 +399,7 @@ pub(super) fn process_drag(
     mut state: ResMut<NativePlayerUiState>,
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     windows: Query<(Entity, &Window), With<PrimaryWindow>>,
+    panel: Query<&UiTransform, With<OverlayTrade>>,
     mut moves: MessageReader<CursorMoved>,
 ) {
     let events: Vec<_> = moves.read().cloned().collect();
@@ -406,12 +416,24 @@ pub(super) fn process_drag(
         state.trade_dialog.drag = None;
         return;
     }
+    let focus_rect = state.trade_dialog.focus_rect();
+    let map_cursor = |cursor| {
+        focused_panel_cursor(
+            cursor_logical(window, cursor),
+            Vec2::new(focus_rect.left, focus_rect.top),
+            Vec2::new(focus_rect.width, focus_rect.height),
+            panel.single().ok(),
+        )
+    };
     let path: Vec<_> = events
         .iter()
         .filter(|e| e.window == entity)
-        .map(|e| cursor_logical(window, e.position))
+        .filter_map(|e| map_cursor(e.position))
         .collect();
-    let current = path.last().copied().or_else(|| help_cursor_logical(window));
+    let current = path
+        .last()
+        .copied()
+        .or_else(|| window.cursor_position().and_then(map_cursor));
     if mouse.just_pressed(MouseButton::Left) {
         let start = path
             .first()
@@ -623,6 +645,7 @@ pub(super) fn render(
     social: &crate::social::SocialModel,
     state: &NativePlayerUiState,
     player: &crate::read_model::PlayerStats,
+    origin: Vec2,
 ) {
     let Some(assets) = assets else {
         return;
@@ -637,8 +660,8 @@ pub(super) fn render(
                 side,
                 Node {
                     position_type: PositionType::Absolute,
-                    left: Val::Px(rect.left),
-                    top: Val::Px(rect.top),
+                    left: Val::Px(rect.left - origin.x),
+                    top: Val::Px(rect.top - origin.y),
                     width: Val::Px(204.0),
                     height: Val::Px(152.0),
                     ..default()

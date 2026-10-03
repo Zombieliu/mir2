@@ -1,0 +1,69 @@
+{
+  "label": "working-game-shop-page-cache-green-v34",
+  "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+  "bin": "cargo",
+  "args": [
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+    "--features",
+    "native-player-ui",
+    "--lib",
+    "--locked",
+    "--offline",
+    "game_shop_dialog::hit_tests",
+    "--",
+    "--test-threads=1"
+  ],
+  "source": "2c2b748263db10f6350c26c0cad9acb68fa5f2a0",
+  "started": "2026-10-02T17:55:47.961Z",
+  "ended": "2026-10-02T17:56:05.584Z",
+  "code": 101,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74181,
+      "sha256": "ef8915bd989058c7151efaf0d6b6f0f86c52e2ee86f9e3e570c0b7a2eebce454"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+      "bytes": 10198,
+      "sha256": "c5c8efe977b9312e8d7ea32acd5dda0019d8ac808fc7f812cd3f5c47ca483a01"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28740,
+      "sha256": "4db7ab917ff424ebca5d89aa88e6c412bfc576be00c360199dd56bc5220a7395"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 944150,
+      "sha256": "82d299e41715cecbc2a3cf7afa29e4cd9b9282ff1d4044d901700294b303be3c"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74181,
+      "sha256": "ef8915bd989058c7151efaf0d6b6f0f86c52e2ee86f9e3e570c0b7a2eebce454"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+      "bytes": 10198,
+      "sha256": "c5c8efe977b9312e8d7ea32acd5dda0019d8ac808fc7f812cd3f5c47ca483a01"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28740,
+      "sha256": "4db7ab917ff424ebca5d89aa88e6c412bfc576be00c360199dd56bc5220a7395"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 944150,
+      "sha256": "82d299e41715cecbc2a3cf7afa29e4cd9b9282ff1d4044d901700294b303be3c"
+    }
+  ],
+  "sourceUnchanged": true
+}

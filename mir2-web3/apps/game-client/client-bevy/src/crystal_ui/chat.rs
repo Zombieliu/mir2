@@ -10,8 +10,8 @@ use bevy::ui::{BackgroundColor, Node, PositionType, Val};
 
 use crate::chat::{ChatChannel, ChatLine, ChatModel};
 use crate::crystal_ui::overlays::{
-    NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState, UiEffectQueue,
-    dispatch_ui_action,
+    dispatch_ui_action, NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
+    UiEffectQueue,
 };
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_ui_core::action::UiAction;
@@ -19,7 +19,7 @@ use mir2_ui_core::state::{UiChatChannel, UiChatSettings};
 
 use super::spec;
 use super::spec::CrystalRect;
-use super::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
+use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use super::widget::CrystalHint;
 
 /// The Crystal 1024x768 chat panel's screen-space origin.
@@ -253,6 +253,25 @@ pub struct CrystalChatElement;
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CrystalChatInput;
 
+/// Stable presentation hooks for native hosts; desktop geometry is unchanged.
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CrystalChatLine {
+    pub row: usize,
+}
+
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CrystalChatBackdrop;
+
+/// Optional host-owned physical pointer bounds. A compact host does not expose
+/// the desktop's draggable twelve-pixel scrollbar; semantic Up/Down still use
+/// the shared action queue. `None` preserves Crystal's desktop pointer path.
+#[derive(Resource, Debug, Default)]
+pub struct CrystalChatPointerBounds(pub Option<Rect>);
+
+#[cfg(test)]
+#[path = "chat_phone_tests.rs"]
+mod phone_presentation_tests;
+
 /// A typed, presentation-only result of pressing a Crystal chat control.
 ///
 /// The plugin places these in [`CrystalChatActionQueue`]. Presentation actions
@@ -327,8 +346,13 @@ struct CrystalChatSettingsButton {
     library: CrystalChatAssetLibrary,
 }
 
+/// Marker for the shared 224x180 Crystal settings panel.
+///
+/// Native hosts may use this marker to apply a platform presentation
+/// transform. The panel remains the shared implementation, and Bevy applies
+/// the same [`UiTransform`] to rendering and button hit testing.
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq)]
-struct CrystalChatSettingsModal;
+pub struct CrystalChatSettingsModal;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CrystalChatColors {
@@ -342,6 +366,7 @@ pub struct Mir2CrystalChatPlugin;
 impl Plugin for Mir2CrystalChatPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<ChatModel>()
+            .init_resource::<CrystalChatPointerBounds>()
             .init_resource::<CrystalChatActionQueue>()
             .init_resource::<CrystalChatState>()
             .init_resource::<NativePlayerUiState>()
@@ -357,6 +382,9 @@ impl Plugin for Mir2CrystalChatPlugin {
             .add_systems(
                 Update,
                 (
+                    // Capture presses from the current tree before a model
+                    // refresh can despawn it during render_crystal_chat.
+                    consume_chat_button_interactions,
                     handle_chat_settings_keys,
                     handle_chat_scroll_keys,
                     handle_chat_pointer_scroll,
@@ -366,7 +394,6 @@ impl Plugin for Mir2CrystalChatPlugin {
                     render_crystal_chat,
                     sync_chat_button_visuals,
                     sync_chat_settings_button_visuals,
-                    consume_chat_button_interactions,
                 )
                     .chain()
                     .after(crate::crystal_ui::overlays::NativePlayerUiSet::Mutate),
@@ -983,6 +1010,7 @@ fn spawn_chat_frame_with_spec(
 ) {
     parent.spawn((
         CrystalChatElement,
+        CrystalChatBackdrop,
         Node {
             position_type: PositionType::Absolute,
             left: Val::Px(frame.rect.left),
@@ -992,7 +1020,12 @@ fn spawn_chat_frame_with_spec(
             ..default()
         },
         ImageNode {
-            image: asset_server.load(crystal_asset(frame.library, frame.index)),
+            // Crystal ChatDialog.UpdateBackground selects the preceding frame;
+            // transparency is authored in that asset, not a global alpha tint.
+            image: asset_server.load(crystal_asset(
+                frame.library,
+                frame.index - u16::from(transparent),
+            )),
             color: chat_tint(transparent),
             ..default()
         },
@@ -1015,6 +1048,7 @@ fn spawn_chat_settings_panel(
             CrystalChatElement,
             CrystalChatSettingsModal,
             Button,
+            UiTransform::default(),
             Node {
                 position_type: PositionType::Absolute,
                 left: Val::Px(panel_left),
@@ -1024,7 +1058,11 @@ fn spawn_chat_settings_panel(
                 ..default()
             },
             ImageNode {
-                image: asset_server.load(title_asset(466)),
+                // ChatOptionDialog.SwitchTab also changes the label-bearing skin.
+                image: asset_server.load(title_asset(match state.settings_tab {
+                    CrystalChatSettingsTab::Filters => 466,
+                    CrystalChatSettingsTab::Chat => 467,
+                })),
                 ..default()
             },
         ))
@@ -1042,19 +1080,21 @@ fn spawn_chat_settings_panel(
                     BorderColor::all(Color::srgb(0.65, 0.5, 0.22)),
                 ));
             }
+            // This asset pack labels 464/465 FILTER and 462/463 CHAT BOX;
+            // keep the label and action paired, unlike the legacy C# indices.
             spawn_chat_settings_button(
                 panel,
                 asset_server,
                 if state.settings_tab == CrystalChatSettingsTab::Filters {
-                    463
+                    465
                 } else {
-                    462
+                    464
                 },
-                463,
+                465,
                 if state.settings_tab == CrystalChatSettingsTab::Filters {
-                    462
+                    464
                 } else {
-                    463
+                    465
                 },
                 CrystalChatAssetLibrary::Title,
                 (8.0, 8.0),
@@ -1064,15 +1104,15 @@ fn spawn_chat_settings_panel(
                 panel,
                 asset_server,
                 if state.settings_tab == CrystalChatSettingsTab::Chat {
-                    465
+                    463
                 } else {
-                    464
+                    462
                 },
-                464,
+                463,
                 if state.settings_tab == CrystalChatSettingsTab::Chat {
-                    464
+                    462
                 } else {
-                    465
+                    463
                 },
                 CrystalChatAssetLibrary::Title,
                 (78.0, 8.0),
@@ -1437,6 +1477,7 @@ fn spawn_chat_line(
 
     parent.spawn((
         CrystalChatElement,
+        CrystalChatLine { row },
         Node {
             position_type: PositionType::Absolute,
             left: Val::Px(left),
@@ -1478,20 +1519,13 @@ fn spawn_chat_input(
     ));
 }
 
-fn chat_tint(transparent: bool) -> Color {
-    if transparent {
-        Color::srgba(1.0, 1.0, 1.0, 0.8)
-    } else {
-        Color::WHITE
-    }
+fn chat_tint(_transparent: bool) -> Color {
+    Color::WHITE
 }
 
-fn chat_color(color: Color, transparent: bool) -> Color {
-    if !transparent {
-        return color;
-    }
-    let srgba = color.to_srgba();
-    Color::srgba(srgba.red, srgba.green, srgba.blue, srgba.alpha * 0.8)
+fn chat_color(color: Color, _transparent: bool) -> Color {
+    // Source labels retain their own channel foreground/background colors.
+    color
 }
 
 fn spawn_chat_button(
@@ -1872,10 +1906,9 @@ mod tests {
                 rows.iter().map(|row| row.text.as_str()).collect::<String>(),
                 translated
             );
-            assert!(
-                rows.iter()
-                    .all(|row| unicode_width::UnicodeWidthStr::width(row.text.as_str()) <= 90)
-            );
+            assert!(rows
+                .iter()
+                .all(|row| unicode_width::UnicodeWidthStr::width(row.text.as_str()) <= 90));
             assert_eq!(model.lines, before);
         });
     }
@@ -2410,11 +2443,9 @@ mod tests {
         // Shout shows shout variants only
         let shout = filter_lines_by_filter(&lines, CrystalChatFilter::Shout);
         assert_eq!(shout.len(), 3);
-        assert!(
-            shout
-                .iter()
-                .all(|l| channel_matches_filter(&l.channel, CrystalChatFilter::Shout))
-        );
+        assert!(shout
+            .iter()
+            .all(|l| channel_matches_filter(&l.channel, CrystalChatFilter::Shout)));
         // Whisper
         let whisper = filter_lines_by_filter(&lines, CrystalChatFilter::Whisper);
         assert_eq!(whisper.len(), 1);
@@ -2566,10 +2597,155 @@ mod tests {
     }
 
     #[test]
-    fn transparent_chat_tint_matches_crystal_binary_opacity() {
+    fn settings_background_tracks_active_tab() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .add_message::<bevy::input::mouse::MouseWheel>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .init_resource::<ChatModel>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_plugins(Mir2CrystalChatPlugin);
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            ui.core.screen = mir2_ui_core::state::UiScreen::InGame;
+            ui.core.panel = mir2_ui_core::state::UiPanel::ChatSettings;
+        }
+        for (tab, index) in [
+            (CrystalChatSettingsTab::Filters, 466),
+            (CrystalChatSettingsTab::Chat, 467),
+            (CrystalChatSettingsTab::Filters, 466),
+        ] {
+            app.world_mut()
+                .resource_mut::<CrystalChatState>()
+                .settings_tab = tab;
+            app.update();
+            let expected: Handle<Image> = app
+                .world()
+                .resource::<AssetServer>()
+                .load(title_asset(index));
+            let world = app.world_mut();
+            let image = world
+                .query_filtered::<&ImageNode, With<CrystalChatSettingsModal>>()
+                .single(world)
+                .unwrap();
+            assert_eq!(
+                image.image, expected,
+                "wrong settings background for {tab:?}"
+            );
+            for (action, button) in world
+                .query::<(&CrystalChatAction, &CrystalChatSettingsButton)>()
+                .iter(world)
+            {
+                let (target, base) = match action {
+                    CrystalChatAction::SettingsTab(CrystalChatSettingsTab::Filters) => {
+                        (CrystalChatSettingsTab::Filters, 464)
+                    }
+                    CrystalChatAction::SettingsTab(CrystalChatSettingsTab::Chat) => {
+                        (CrystalChatSettingsTab::Chat, 462)
+                    }
+                    _ => continue,
+                };
+                // The staged Title PNGs label 462/463 CHAT BOX and 464/465 FILTER.
+                assert_eq!(button.normal, base + u16::from(tab == target));
+                assert!([base, base + 1].contains(&button.hover));
+                assert!([base, base + 1].contains(&button.pressed));
+            }
+        }
+    }
+
+    #[test]
+    fn settings_press_survives_same_frame_model_invalidation() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .add_message::<bevy::input::mouse::MouseWheel>()
+            .init_resource::<ButtonInput<KeyCode>>()
+            .init_resource::<ChatModel>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_plugins(Mir2CrystalChatPlugin);
+        {
+            let mut ui = app.world_mut().resource_mut::<NativePlayerUiState>();
+            ui.core.screen = mir2_ui_core::state::UiScreen::InGame;
+            ui.core.panel = mir2_ui_core::state::UiPanel::ChatSettings;
+        }
+        app.update();
+        let world = app.world_mut();
+        let button = world
+            .query::<(Entity, &CrystalChatAction)>()
+            .iter(world)
+            .find(|(_, action)| {
+                **action == CrystalChatAction::SettingsTab(CrystalChatSettingsTab::Chat)
+            })
+            .unwrap()
+            .0;
+        *world.get_mut::<Interaction>(button).unwrap() = Interaction::Pressed;
+        // A concurrent read-model refresh must not delete the press before
+        // the shared action consumer can observe it.
+        world.resource_mut::<ChatModel>().set_changed();
+        app.update();
+        assert_eq!(
+            app.world().resource::<CrystalChatState>().settings_tab,
+            CrystalChatSettingsTab::Chat
+        );
+    }
+
+    #[test]
+    fn chat_background_uses_source_frame_for_all_sizes_and_transparency_modes() {
+        let mut app = App::new();
+        app.add_plugins(MinimalPlugins)
+            .add_plugins(AssetPlugin::default())
+            .init_asset::<Image>()
+            .init_resource::<ChatModel>()
+            .init_resource::<CrystalChatState>()
+            .insert_resource(NativeShellModel {
+                screen: NativeShellScreen::InGame,
+                ..default()
+            })
+            .add_systems(Startup, spawn_chat_root)
+            .add_systems(Update, render_crystal_chat);
+        for (size, index) in [
+            (CrystalChatWindowSize::Small, 2221),
+            (CrystalChatWindowSize::Medium, 2224),
+            (CrystalChatWindowSize::Large, 2227),
+        ] {
+            for transparent in [false, true] {
+                {
+                    let mut state = app.world_mut().resource_mut::<CrystalChatState>();
+                    state.window_size = size;
+                    state.applied_settings.transparent = transparent;
+                }
+                app.update();
+                let expected: Handle<Image> = app
+                    .world()
+                    .resource::<AssetServer>()
+                    .load(prguse_asset(index - u16::from(transparent)));
+                let world = app.world_mut();
+                assert!(
+                    world
+                        .query::<&ImageNode>()
+                        .iter(world)
+                        .any(|image| image.image == expected && image.color == Color::WHITE),
+                    "missing source chat frame for {size:?}, transparent={transparent}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn transparent_chat_preserves_source_color_opacity() {
         assert_eq!(chat_tint(false).to_srgba().alpha, 1.0);
-        assert_eq!(chat_tint(true).to_srgba().alpha, 0.8);
-        assert_eq!(chat_color(Color::WHITE, true).to_srgba().alpha, 0.8);
+        assert_eq!(chat_tint(true).to_srgba().alpha, 1.0);
+        assert_eq!(chat_color(Color::WHITE, true), Color::WHITE);
+        assert_eq!(chat_color(Color::NONE, true), Color::NONE);
     }
 
     #[test]
@@ -2633,12 +2809,11 @@ mod tests {
                 .drain_intents(),
             vec![NativePlayerUiIntent::TradeRequest]
         );
-        assert!(
-            app.world()
-                .resource::<crate::social::SocialModel>()
-                .pending
-                .is_empty()
-        );
+        assert!(app
+            .world()
+            .resource::<crate::social::SocialModel>()
+            .pending
+            .is_empty());
 
         app.world_mut()
             .resource_mut::<CrystalChatActionQueue>()
@@ -2693,12 +2868,11 @@ mod tests {
         app.update();
         assert_eq!(app.world().resource::<CrystalChatState>().scroll, 5);
         assert!(app.world().resource::<CrystalChatActionQueue>().is_empty());
-        assert!(
-            app.world_mut()
-                .resource_mut::<NativePlayerUiIntentQueue>()
-                .drain_intents()
-                .is_empty()
-        );
+        assert!(app
+            .world_mut()
+            .resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
     }
 
     #[test]
@@ -2843,6 +3017,7 @@ fn handle_chat_pointer_scroll(
     shell: Option<Res<NativeShellModel>>,
     ui: Res<NativePlayerUiState>,
     mut grab: Local<Option<f32>>,
+    bounds: Option<Res<CrystalChatPointerBounds>>,
 ) {
     let deltas: Vec<_> = wheel.read().map(|e| (e.y, e.unit)).collect();
     let (Some(mouse), Ok(window)) = (mouse, windows.single()) else {
@@ -2861,6 +3036,23 @@ fn handle_chat_pointer_scroll(
     let Some(cursor) = window.cursor_position() else {
         return;
     };
+    if let Some(bounds) = bounds.as_deref().and_then(|bounds| bounds.0) {
+        *grab = None;
+        if bounds.contains(cursor * window.scale_factor()) {
+            let count = display_chat_rows(&chat, &state).len();
+            for (delta, unit) in deltas {
+                let notches = match unit {
+                    bevy::input::mouse::MouseScrollUnit::Line => delta,
+                    bevy::input::mouse::MouseScrollUnit::Pixel => delta / 120.,
+                }
+                .trunc() as i64;
+                state.scroll = (state.scroll as i64 - notches)
+                    .clamp(0, count.saturating_sub(1) as i64)
+                    as usize;
+            }
+        }
+        return;
+    }
     let transform = super::metrics::CrystalStageTransform::fit_native(
         window.resolution.width(),
         window.resolution.height(),

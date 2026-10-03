@@ -636,12 +636,15 @@ fn player_frame_path_parts(frame_path: &str) -> Option<(String, i64, String)> {
     // Complete content packs keep large monster libraries as individual PNGs.
     // Apply the same metadata/file checks as character frames, without forcing
     // every monster texture into the always-resident starter atlas.
-    let monster_library = library.strip_prefix("Monster/").is_some_and(|index| {
-        index.len() == 3 && index.bytes().all(|b| b.is_ascii_digit())
-    });
+    let monster_library = library
+        .strip_prefix("Monster/")
+        .is_some_and(|index| index.len() == 3 && index.bytes().all(|b| b.is_ascii_digit()));
     let gate_library = matches!(library, "Gate/00" | "Gate/01" | "Gate/02" | "Gate/03");
-    if library != "DNItems" && !is_player_sprite_library(library) && !is_pet_sprite_library(library)
-        && !monster_library && !gate_library
+    if library != "DNItems"
+        && !is_player_sprite_library(library)
+        && !is_pet_sprite_library(library)
+        && !monster_library
+        && !gate_library
     {
         return None;
     }
@@ -2192,7 +2195,10 @@ mod tests {
     #[test]
     fn crystal_npc_image_libraries_keep_npcs_and_flags_separate() {
         assert_eq!(crystal_npc_library_from_image(8).as_deref(), Some("NPC/08"));
-        assert_eq!(crystal_npc_library_from_image(45).as_deref(), Some("NPC/45"));
+        assert_eq!(
+            crystal_npc_library_from_image(45).as_deref(),
+            Some("NPC/45")
+        );
         assert_eq!(
             crystal_npc_library_from_image(1000).as_deref(),
             Some("Flag/00")
@@ -2406,13 +2412,19 @@ mod tests {
 
     #[test]
     fn monster_standalone_paths_remain_strict() {
-        for path in ["/original-ui/Monster/009/80.png", "/original-ui/Gate/00/33.png"] {
+        for path in [
+            "/original-ui/Monster/009/80.png",
+            "/original-ui/Gate/00/33.png",
+        ] {
             assert!(player_frame_path_parts(path).is_some(), "{path}");
         }
         for path in [
-            "/original-ui/Monster/../009/80.png", "/original-ui/Monster/9/80.png",
-            "/original-ui/Monster/009/-1.png", "/original-ui/Monster/009/080.png",
-            "/original-ui/Monster/009/80.png/extra", "/original-ui/Gate/04/0.png",
+            "/original-ui/Monster/../009/80.png",
+            "/original-ui/Monster/9/80.png",
+            "/original-ui/Monster/009/-1.png",
+            "/original-ui/Monster/009/080.png",
+            "/original-ui/Monster/009/80.png/extra",
+            "/original-ui/Gate/04/0.png",
         ] {
             assert!(player_frame_path_parts(path).is_none(), "{path}");
         }
@@ -2421,13 +2433,31 @@ mod tests {
     #[test]
     fn newcomer_monster_standalone_frames_retain_original_geometry() {
         let index = starter_atlas_index().expect("starter atlas index");
-        for library in ["Monster/009", "Monster/011", "Monster/022", "Monster/027",
-            "Monster/029", "Monster/030", "Monster/069", "Monster/070", "Monster/078", "Gate/00"] {
+        for library in [
+            "Monster/009",
+            "Monster/011",
+            "Monster/022",
+            "Monster/027",
+            "Monster/029",
+            "Monster/030",
+            "Monster/069",
+            "Monster/070",
+            "Monster/078",
+            "Gate/00",
+        ] {
             let frames = load_original_frame_geometry(library).expect(library);
             for (frame, geometry) in frames {
-                let layer = build_entity_layer(index, &mut HashMap::new(), "1:body".to_owned(),
-                    &format!("/original-ui/{library}"), frame, 100.0, 200.0, 5.0)
-                    .unwrap_or_else(|| panic!("missing native {library}/{frame}"));
+                let layer = build_entity_layer(
+                    index,
+                    &mut HashMap::new(),
+                    "1:body".to_owned(),
+                    &format!("/original-ui/{library}"),
+                    frame,
+                    100.0,
+                    200.0,
+                    5.0,
+                )
+                .unwrap_or_else(|| panic!("missing native {library}/{frame}"));
                 assert_eq!(layer["width"], json!(geometry.width as f32));
                 assert_eq!(layer["height"], json!(geometry.height as f32));
                 assert_eq!(layer["left"], json!(100.0 + geometry.offset_x as f32));
@@ -2441,9 +2471,16 @@ mod tests {
         let index = starter_atlas_index().expect("starter atlas index");
         for frame in 0..224 {
             let layer = build_entity_layer(
-                index, &mut HashMap::new(), "42:body".to_owned(),
-                "/original-ui/Monster/006", frame, 100.0, 200.0, 5.0,
-            ).unwrap_or_else(|| panic!("HookingCat missing native frame {frame}"));
+                index,
+                &mut HashMap::new(),
+                "42:body".to_owned(),
+                "/original-ui/Monster/006",
+                frame,
+                100.0,
+                200.0,
+                5.0,
+            )
+            .unwrap_or_else(|| panic!("HookingCat missing native frame {frame}"));
             assert_eq!(layer["atlasKey"], "hooking-cat");
             assert!(layer["width"].as_f64().unwrap() > 0.0);
             assert!(layer["height"].as_f64().unwrap() > 0.0);
@@ -2550,19 +2587,34 @@ mod tests {
                                 build_entity_render_state_with_poses(&payload, &poses).unwrap();
                             let entity = &state["entities"][0];
                             let layers = entity["layers"].as_array().unwrap();
-                            let actor_layers = layers.iter().filter(|layer| !layer["key"].as_str().unwrap().contains(":self-occlusion:")).collect::<Vec<_>>();
+                            let actor_layers = layers
+                                .iter()
+                                .filter(|layer| {
+                                    !layer["key"].as_str().unwrap().contains(":self-occlusion:")
+                                })
+                                .collect::<Vec<_>>();
                             assert_eq!(actor_layers.len(), 3,
                                 "{library} offset {body_offset}, {direction}, {action:?}, phase {phase}");
                             assert_eq!(layers.len(), 5, "three actor parts plus body/hair redraw");
                             for role in ["body", "hair"] {
-                                let original = actor_layers.iter().find(|v| v["key"] == format!("1000:{role}")).unwrap();
-                                let redraw = layers.iter().find(|v| v["key"] == format!("1000:self-occlusion:{role}")).unwrap();
-                                for field in ["path", "atlasRectKey", "left", "top", "width", "height"] {
+                                let original = actor_layers
+                                    .iter()
+                                    .find(|v| v["key"] == format!("1000:{role}"))
+                                    .unwrap();
+                                let redraw = layers
+                                    .iter()
+                                    .find(|v| v["key"] == format!("1000:self-occlusion:{role}"))
+                                    .unwrap();
+                                for field in
+                                    ["path", "atlasRectKey", "left", "top", "width", "height"]
+                                {
                                     assert_eq!(original[field], redraw[field]);
                                 }
                                 assert_eq!(redraw["opacity"], json!(0.4));
                                 assert_eq!(redraw["additive"], json!(false));
-                                assert!(redraw["z"].as_f64().unwrap() > original["z"].as_f64().unwrap());
+                                assert!(
+                                    redraw["z"].as_f64().unwrap() > original["z"].as_f64().unwrap()
+                                );
                             }
                             let body = layers
                                 .iter()

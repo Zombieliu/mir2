@@ -1,0 +1,3 @@
+*.log -text
+*.txt -text
+*.json -text

@@ -17,7 +17,7 @@ fn password_test_app() -> App {
         .init_resource::<ShopUiState>()
         .init_resource::<crate::social::SocialModel>()
         .init_resource::<ButtonInput<KeyCode>>()
-        .init_resource::<crate::audio::NativeUiAudioQueue>()
+        .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
         .add_message::<KeyboardInput>()
         .insert_resource(NativeShellModel {
             screen: NativeShellScreen::InGame,
@@ -48,9 +48,13 @@ fn type_text(app: &mut App, text: &str) {
 }
 
 fn press_key(app: &mut App, key: KeyCode) {
-    app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(key);
+    app.world_mut()
+        .resource_mut::<ButtonInput<KeyCode>>()
+        .press(key);
     app.update();
-    app.world_mut().resource_mut::<ButtonInput<KeyCode>>().release(key);
+    app.world_mut()
+        .resource_mut::<ButtonInput<KeyCode>>()
+        .release(key);
 }
 
 fn press_button(app: &mut App, button: OverlayButton) {
@@ -78,11 +82,18 @@ fn locked_storage_opens_a_masked_modal_and_escape_closes_without_sending() {
 
     app.update();
     let state = app.world().resource::<NativePlayerUiState>();
-    let prompt = state.storage_password_prompt.as_ref().expect("locked prompt");
+    let prompt = state
+        .storage_password_prompt
+        .as_ref()
+        .expect("locked prompt");
     assert_eq!(prompt.stage, StoragePasswordStage::Unlock);
     assert!(state.blocks_gameplay_keys());
     assert!(state.blocks_world_click());
-    assert!(app.world().resource::<StorageModel>().password_draft.is_empty());
+    assert!(app
+        .world()
+        .resource::<StorageModel>()
+        .password_draft
+        .is_empty());
 
     type_text(&mut app, " Secret ");
     let prompt = app
@@ -150,7 +161,11 @@ fn protect_click_runs_current_new_confirm_and_queues_only_after_exact_confirmati
 
     {
         let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
-        state.storage_password_prompt.as_mut().expect("prompt").draft = "New Pw".into();
+        state
+            .storage_password_prompt
+            .as_mut()
+            .expect("prompt")
+            .draft = "New Pw".into();
     }
     press_button(&mut app, OverlayButton::StoragePasswordSubmit);
     assert!(app
@@ -158,10 +173,11 @@ fn protect_click_runs_current_new_confirm_and_queues_only_after_exact_confirmati
         .resource::<NativePlayerUiState>()
         .storage_password_prompt
         .is_none());
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .storage_password_input_consumed);
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .storage_password_input_consumed
+    );
     assert!(app
         .world()
         .resource::<NativePlayerUiState>()
@@ -332,7 +348,9 @@ fn rendered_modal_is_a_visible_full_stage_pointer_blocker() {
 fn successful_password_removal_dismisses_storage_once_without_closing_other_panels() {
     for equipment_open in [false, true] {
         let mut app = password_test_app();
-        app.insert_resource(crate::storage::StorageUiFeedback { close_requested: true });
+        app.insert_resource(crate::storage::StorageUiFeedback {
+            close_requested: true,
+        });
         {
             let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
             state.core.panel = mir2_ui_core::state::UiPanel::Storage;
@@ -344,20 +362,42 @@ fn successful_password_removal_dismisses_storage_once_without_closing_other_pane
         assert!(!state.storage_open());
         assert!(state.storage_password_prompt.is_none());
         assert!(state.storage_password_input_consumed);
-        assert_eq!(state.core.panel, if equipment_open {
-            mir2_ui_core::state::UiPanel::Character
-        } else {
-            mir2_ui_core::state::UiPanel::Inventory
-        });
-        assert!(!app.world().resource::<crate::storage::StorageUiFeedback>().close_requested);
-        app.world_mut().resource_mut::<NativePlayerUiState>().core.panel = mir2_ui_core::state::UiPanel::Storage;
+        assert_eq!(
+            state.core.panel,
+            if equipment_open {
+                mir2_ui_core::state::UiPanel::Character
+            } else {
+                mir2_ui_core::state::UiPanel::Inventory
+            }
+        );
+        assert!(
+            !app.world()
+                .resource::<crate::storage::StorageUiFeedback>()
+                .close_requested
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::Storage;
         app.update();
         assert!(app.world().resource::<NativePlayerUiState>().storage_open());
     }
     let mut app = password_test_app();
-    app.insert_resource(crate::storage::StorageUiFeedback { close_requested: true });
-    app.world_mut().resource_mut::<NativePlayerUiState>().core.panel = mir2_ui_core::state::UiPanel::QuestLog;
+    app.insert_resource(crate::storage::StorageUiFeedback {
+        close_requested: true,
+    });
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .core
+        .panel = mir2_ui_core::state::UiPanel::QuestLog;
     app.update();
-    assert_eq!(app.world().resource::<NativePlayerUiState>().core.panel, mir2_ui_core::state::UiPanel::QuestLog);
-    assert!(!app.world().resource::<crate::storage::StorageUiFeedback>().close_requested);
+    assert_eq!(
+        app.world().resource::<NativePlayerUiState>().core.panel,
+        mir2_ui_core::state::UiPanel::QuestLog
+    );
+    assert!(
+        !app.world()
+            .resource::<crate::storage::StorageUiFeedback>()
+            .close_requested
+    );
 }

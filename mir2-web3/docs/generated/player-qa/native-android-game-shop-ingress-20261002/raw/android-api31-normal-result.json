@@ -1,0 +1,20 @@
+{
+  "label": "android-api31-normal",
+  "bin": "cargo",
+  "args": [
+    "+1.95.0",
+    "ndk",
+    "-t",
+    "arm64-v8a",
+    "--platform",
+    "31",
+    "check",
+    "--manifest-path",
+    "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+    "--lib"
+  ],
+  "started": "2026-10-02T13:22:30.499Z",
+  "ended": "2026-10-02T13:22:30.586Z",
+  "code": 1,
+  "signal": null
+}

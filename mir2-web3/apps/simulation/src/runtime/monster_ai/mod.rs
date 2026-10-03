@@ -2806,15 +2806,23 @@ impl SimulationSession {
     }
 
     pub fn tick(&mut self) -> Vec<ServerPacket> {
-        let before=match self.begin_guild_experience_command(false){Ok(before)=>before,Err(_)=>return Vec::new()};
-        let packets=self.tick_with_world_advance(advance_world);
-        self.finish_guild_experience_command(before,packets).unwrap_or_default()
+        let before = match self.begin_guild_experience_command(false) {
+            Ok(before) => before,
+            Err(_) => return Vec::new(),
+        };
+        let packets = self.tick_with_world_advance(advance_world);
+        self.finish_guild_experience_command(before, packets)
+            .unwrap_or_default()
     }
 
     pub(crate) fn tick_shared_zone_personal_state(&mut self) -> Vec<ServerPacket> {
-        let before=match self.begin_guild_experience_command(false){Ok(before)=>before,Err(_)=>return Vec::new()};
+        let before = match self.begin_guild_experience_command(false) {
+            Ok(before) => before,
+            Err(_) => return Vec::new(),
+        };
         let packets = advance_shared_zone_personal_world(self.app.world_mut());
-        let packets=self.finalize_packets(packets);
-        self.finish_guild_experience_command(before,packets).unwrap_or_default()
+        let packets = self.finalize_packets(packets);
+        self.finish_guild_experience_command(before, packets)
+            .unwrap_or_default()
     }
 }

@@ -136,7 +136,10 @@ fn sale_quote(
 ) -> Option<u32> {
     shop.allows_sell().then_some(())?;
     let item = selected_item(shop, inventory, state)?;
-    crate::crystal_ui::npc_item_quote::crystal_npc_sale_quote(item, sale_selection_count(state, item)?)
+    crate::crystal_ui::npc_item_quote::crystal_npc_sale_quote(
+        item,
+        sale_selection_count(state, item)?,
+    )
 }
 
 fn repair_quote(
@@ -251,7 +254,8 @@ fn selected_item<'a>(
     state: &NativePlayerUiState,
 ) -> Option<&'a ItemModel> {
     if shop.allows_repair() || shop.allows_special_repair() {
-        selected_repair_item(state, inventory).filter(|item| item.container == 0)
+        selected_repair_item(state, inventory)
+            .filter(|item| item.container == 0)
             .filter(|item| {
                 state
                     .shop_service_drag_unique_id
@@ -339,7 +343,9 @@ fn render_contents(
     let service = service_action(shop);
     let repair = shop.allows_repair() || shop.allows_special_repair();
     let selected = selected_item(shop, inventory, state);
-    let repair_quote = repair.then(|| selected.and_then(|item| repair_quote(shop, item))).flatten();
+    let repair_quote = repair
+        .then(|| selected.and_then(|item| repair_quote(shop, item)))
+        .flatten();
     let enabled = service.is_some()
         && selected.is_some_and(|item| item_unique_id(item).is_some())
         && if repair {
@@ -368,7 +374,13 @@ fn render_contents(
             service.is_some(),
         );
     } else if let Some((title, action)) = service {
-        overlay_absolute_button(parent, &crate::native_i18n::tr(title), CONFIRM, action, enabled);
+        overlay_absolute_button(
+            parent,
+            &crate::native_i18n::tr(title),
+            CONFIRM,
+            action,
+            enabled,
+        );
         overlay_absolute_button(
             parent,
             &crate::native_i18n::tr("Hold"),
@@ -378,9 +390,16 @@ fn render_contents(
         );
     }
     let title = service.map_or("Unavailable", |(title, _)| title);
-    let quote_text = |amount: &str| crate::native_i18n::format_key(
-        "game.npc.service_quote", "{service}: {amount} gold",
-        &[("service", &crate::native_i18n::tr(title)), ("amount", amount)]);
+    let quote_text = |amount: &str| {
+        crate::native_i18n::format_key(
+            "game.npc.service_quote",
+            "{service}: {amount} gold",
+            &[
+                ("service", &crate::native_i18n::tr(title)),
+                ("amount", amount),
+            ],
+        )
+    };
     let info = if repair {
         repair_quote.map_or_else(
             || crate::native_i18n::tr("Quote unavailable"),
@@ -410,7 +429,11 @@ fn render_contents(
         parent,
         &info,
         CrystalRect::new(30.0, 10.0, 140.0, 26.0),
-        if crate::native_i18n::active() { 9.0 } else { 10.0 },
+        if crate::native_i18n::active() {
+            9.0
+        } else {
+            10.0
+        },
         TEXT,
     );
     if let Some(item) = selected {
@@ -433,7 +456,13 @@ fn render_contents(
                     ));
                 });
         } else {
-            overlay_text_at(parent, &crate::player_text::name(&item.name), ITEM, 10.0, TEXT);
+            overlay_text_at(
+                parent,
+                &crate::player_text::name(&item.name),
+                ITEM,
+                10.0,
+                TEXT,
+            );
         }
     }
 
@@ -475,7 +504,6 @@ fn render_contents(
             true,
         );
     }
-
 }
 
 #[cfg(test)]
@@ -625,7 +653,10 @@ mod tests {
             crate::crystal_ui::npc_item_quote::crystal_npc_sale_quote(&inventory.items[0], 3),
             Some(1968)
         );
-        assert_eq!(selected_item(&shop, &inventory, &state).map(|item| item.slot), Some(45));
+        assert_eq!(
+            selected_item(&shop, &inventory, &state).map(|item| item.slot),
+            Some(45)
+        );
         assert_eq!(sale_quote(&shop, &inventory, &state), Some(1968));
         assert!(selection_intent(&shop, &inventory, &state).is_some());
         assert!(submit_selection(
@@ -685,7 +716,10 @@ mod tests {
             crate::crystal_ui::npc_item_quote::crystal_npc_sale_quote(&inventory.items[0], 2),
             Some(101)
         );
-        assert_eq!(selected_item(&shop, &inventory, &state).map(|item| item.slot), Some(45));
+        assert_eq!(
+            selected_item(&shop, &inventory, &state).map(|item| item.slot),
+            Some(45)
+        );
         assert_eq!(sale_quote(&shop, &inventory, &state), Some(101));
         assert!(selection_intent(&shop, &inventory, &state).is_some());
         assert!(submit_selection(
@@ -697,7 +731,10 @@ mod tests {
         ));
         assert!(matches!(
             intents.drain_intents().as_slice(),
-            [NativePlayerUiIntent::SellItem { unique_id: 77, count: 2 }]
+            [NativePlayerUiIntent::SellItem {
+                unique_id: 77,
+                count: 2
+            }]
         ));
         pending.clear();
 
@@ -929,7 +966,10 @@ mod tests {
             }]
         );
         app.update();
-        assert_eq!(app.world().resource::<crate::chat::ChatModel>().lines.len(), 1);
+        assert_eq!(
+            app.world().resource::<crate::chat::ChatModel>().lines.len(),
+            1
+        );
     }
 
     #[test]
@@ -943,10 +983,8 @@ mod tests {
             repair_rate: Some(1.0),
             ..Default::default()
         };
-        app.world_mut().resource_mut::<InventoryModel>().items = vec![
-            repairable_item(10, 0, 45),
-            repairable_item(20, 2, 13),
-        ];
+        app.world_mut().resource_mut::<InventoryModel>().items =
+            vec![repairable_item(10, 0, 45), repairable_item(20, 2, 13)];
         app.world_mut()
             .resource_mut::<NativePlayerUiState>()
             .shop_repair_slot = Some(45);
@@ -998,21 +1036,26 @@ mod tests {
             (Val::Px(114.0), Val::Px(62.0), Val::Px(48.0), Val::Px(25.0))
         );
         assert!(labels.iter().any(|text| text == "修理：188 金币"));
-        assert!(controls.iter().filter(|(action, _)| {
-            matches!(
-                action,
-                OverlayButton::ShopRepair
-                    | OverlayButton::ShopSRepair
-                    | OverlayButton::ShopSell
-                    | OverlayButton::ShopToggleHold
-                    | OverlayButton::ShopShowBuy
-            )
-        }).all(|(_, node)| match (node.left, node.top, node.width, node.height) {
-            (Val::Px(left), Val::Px(top), Val::Px(width), Val::Px(height)) => {
-                left >= 0.0 && top >= 0.0 && left + width <= 176.0 && top + height <= 147.0
-            }
-            _ => false,
-        }));
+        assert!(controls
+            .iter()
+            .filter(|(action, _)| {
+                matches!(
+                    action,
+                    OverlayButton::ShopRepair
+                        | OverlayButton::ShopSRepair
+                        | OverlayButton::ShopSell
+                        | OverlayButton::ShopToggleHold
+                        | OverlayButton::ShopShowBuy
+                )
+            })
+            .all(
+                |(_, node)| match (node.left, node.top, node.width, node.height) {
+                    (Val::Px(left), Val::Px(top), Val::Px(width), Val::Px(height)) => {
+                        left >= 0.0 && top >= 0.0 && left + width <= 176.0 && top + height <= 147.0
+                    }
+                    _ => false,
+                }
+            ));
         assert!(!controls.iter().any(|(action, _)| {
             matches!(
                 action,
@@ -1034,7 +1077,11 @@ mod tests {
         }
         app.update();
         let world = app.world_mut();
-        let labels: Vec<_> = world.query::<&Text>().iter(world).map(|text| text.0.clone()).collect();
+        let labels: Vec<_> = world
+            .query::<&Text>()
+            .iter(world)
+            .map(|text| text.0.clone())
+            .collect();
         assert!(labels.iter().any(|text| text == "暂无报价"));
     }
 
@@ -1046,8 +1093,16 @@ mod tests {
         };
         let mut state = NativePlayerUiState::default();
         state.toggle_npc_shop();
-        assert!(drag_target_at_cursor(&shop, &state, Vec2::new(304.0, 298.0)));
-        assert!(!drag_target_at_cursor(&shop, &state, Vec2::new(40.0, 298.0)));
+        assert!(drag_target_at_cursor(
+            &shop,
+            &state,
+            Vec2::new(304.0, 298.0)
+        ));
+        assert!(!drag_target_at_cursor(
+            &shop,
+            &state,
+            Vec2::new(40.0, 298.0)
+        ));
     }
 
     #[test]

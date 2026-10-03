@@ -91,7 +91,7 @@ pub enum KeyboardRow {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-#[cfg_attr(feature = "native-ui", derive(bevy::prelude::Component))]
+#[cfg_attr(feature = "native-player-ui", derive(bevy::prelude::Component))]
 pub enum KeyboardAction {
     Close,
     Reset,
@@ -102,7 +102,7 @@ pub enum KeyboardAction {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-#[cfg_attr(feature = "native-ui", derive(bevy::prelude::Resource))]
+#[cfg_attr(feature = "native-player-ui", derive(bevy::prelude::Resource))]
 pub struct KeyboardDialogUi {
     pub open: bool,
     pub enforce: bool,
@@ -405,11 +405,11 @@ impl KeyboardDialogUi {
     }
 }
 
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 #[path = "keyboard_dialog_render.rs"]
 pub mod view;
 
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 #[path = "keyboard_dialog_host.rs"]
 pub mod host;
 

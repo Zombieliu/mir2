@@ -128,6 +128,10 @@ pub struct UiReadModel {
 pub struct UiSurfaceSignals {
     /// One-shot request emitted by an authoritative `NPCGoods` packet.
     pub npc_shop_open_requested: bool,
+    /// A valid non-Closed service reply was consumed, even if a later Closed
+    /// reply cancels its opening in the same frame. This retires only an
+    /// accepted pending request; it cannot undo an explicit local exit.
+    pub npc_service_opening_observed: bool,
 }
 
 /// Clamp a value into `[0.0, 1.0]`, returning `0.0` when the max is absent or

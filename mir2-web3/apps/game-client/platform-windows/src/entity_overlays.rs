@@ -7,11 +7,11 @@ use std::collections::HashMap;
 
 use bevy::prelude::*;
 use bevy::text::LineBreak;
-use mir2_bevy_runtime::PresentationPoseBuffer;
 use mir2_bevy_runtime::entity_animation::AnimationAction;
+use mir2_bevy_runtime::PresentationPoseBuffer;
 use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
 use mir2_client_bevy::crystal_ui::quest_targets::tracker_targets_monster;
-use mir2_client_bevy::crystal_ui::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
+use mir2_client_bevy::crystal_ui::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use mir2_client_bevy::native_i18n;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::quest_model::{QuestStatus, QuestTracker};
@@ -1737,19 +1737,17 @@ mod tests {
             ["Potion"]
         );
 
-        assert!(
-            overlay_entries(
-                &payload,
-                OverlayVisibility {
-                    name_view: false,
-                    drop_view: false
-                },
-                None,
-                false,
-                None,
-            )
-            .is_empty()
-        );
+        assert!(overlay_entries(
+            &payload,
+            OverlayVisibility {
+                name_view: false,
+                drop_view: false
+            },
+            None,
+            false,
+            None,
+        )
+        .is_empty());
     }
 
     #[test]
@@ -2338,12 +2336,10 @@ mod tests {
 
         assert_eq!(entry_names(&entries), ["◆", "Deer"]);
         assert!(quest_markers(&entries).is_empty());
-        assert!(
-            entries
-                .iter()
-                .filter(|entry| entry.name.is_some())
-                .all(|entry| entry.color == Color::srgb_u8(0xff, 0xe6, 0x58))
-        );
+        assert!(entries
+            .iter()
+            .filter(|entry| entry.name.is_some())
+            .all(|entry| entry.color == Color::srgb_u8(0xff, 0xe6, 0x58)));
     }
 
     #[test]

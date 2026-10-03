@@ -1,0 +1,14 @@
+/tmp/android-chat-final-preview.log:test result: ok. 89 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+/tmp/android-chat-final-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-chat-final-preview.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-chat-final-shared.log:test result: ok. 583 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.45s
+/tmp/android-chat-final-shared.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-chat-final-normal.log:test result: ok. 86 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+/tmp/android-chat-final-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-chat-final-normal.log:test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+/tmp/android-chat-invalidation-red.log:  left: Tick { tick: 9 }
+/tmp/android-chat-invalidation-red.log: right: Tick { tick: 3 }
+/tmp/android-chat-invalidation-red.log:test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 85 filtered out; finished in 0.01s
+/tmp/android-chat-order-red.log:  left: Filters
+/tmp/android-chat-order-red.log: right: Chat
+/tmp/android-chat-order-red.log:test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 584 filtered out; finished in 0.02s

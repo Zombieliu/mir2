@@ -1,0 +1,1 @@
+    mResumedActivity: ActivityRecord{461d282 u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity t674}

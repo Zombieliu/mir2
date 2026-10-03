@@ -482,6 +482,130 @@ pub fn game_shop_page_entries(model: &GameShopModel, page: usize) -> &[GameShopE
     &model.items[start.min(end)..end]
 }
 
+// Native hosts share the frozen Windows packet projection, not purchase rules.
+// Feature-gated because the catalogue tooltip needs the native owner cursor.
+#[cfg(feature = "native-player-ui")]
+pub use native_ingress::{
+    transform_game_shop_info_from_packet, transform_game_shop_stock_from_packet,
+};
+
+#[cfg(feature = "native-player-ui")]
+mod native_ingress {
+    use crate::{
+        native_player_ingress::NativeUiPlayerCursor,
+        native_quest_ingress::{crystal_tooltip_source_for_preview, crystal_wire_item_info},
+    };
+    use serde_json::{json, Value};
+
+    // Bodies preserved from Windows3d735745f. The host supplies authentication,
+    // identity/lifetime and queue bounds; these functions only project metadata.
+    pub fn transform_game_shop_info_from_packet(
+        payload: &Value,
+        cursor: &NativeUiPlayerCursor,
+    ) -> Option<Value> {
+        let item = payload
+            .get("item")
+            .filter(|value| value.is_object())
+            .unwrap_or(payload);
+        let info = item.get("info").filter(|value| value.is_object());
+        let game_shop_index = value_i32(item.get("gIndex").or_else(|| item.get("g_index")))?;
+        let stock_level = value_i32(
+            payload
+                .get("stockLevel")
+                .or_else(|| payload.get("stock_level"))
+                .or_else(|| item.get("stockLevel"))
+                .or_else(|| item.get("stock_level")),
+        )
+        .unwrap_or_else(|| value_i32(item.get("stock")).unwrap_or(0));
+        let tooltip_source = info.and_then(crystal_wire_item_info).map(|info| {
+            let count = value_u32(item.get("count"))
+                .and_then(|value| u16::try_from(value).ok())
+                .unwrap_or(1);
+            crystal_tooltip_source_for_preview(info, count, cursor)
+        });
+        Some(json!({
+            "itemIndex": value_i32(item.get("itemIndex").or_else(|| item.get("item_index")))
+                .or_else(|| value_i32(info.and_then(|value| value.get("index"))))
+                .unwrap_or_default(),
+            "gameShopIndex": game_shop_index,
+            "itemName": value_string(item.get("itemName"))
+                .or_else(|| value_string(info.and_then(|value| value.get("name"))))
+                .unwrap_or_else(|| "Item".to_owned()),
+            "image": value_u32(item.get("image"))
+                .or_else(|| value_u32(info.and_then(|value| value.get("image"))))
+                .unwrap_or_default(),
+            "itemType": value_u32(item.get("itemType").or_else(|| item.get("item_type")))
+                .or_else(|| value_u32(info.and_then(|value| value.get("itemType")).or_else(|| info.and_then(|value| value.get("item_type")))))
+                .unwrap_or_default(),
+            "goldPrice": value_u32(item.get("goldPrice").or_else(|| item.get("gold_price"))).unwrap_or_default(),
+            "creditPrice": value_u32(item.get("creditPrice").or_else(|| item.get("credit_price"))).unwrap_or_default(),
+            "count": value_u32(item.get("count")).unwrap_or(1),
+            "class": value_string(item.get("class")).unwrap_or_else(|| "All".to_owned()),
+            "category": value_string(item.get("category")).unwrap_or_default(),
+            "stock": value_i32(item.get("stock")).unwrap_or_default(),
+            "stockLevel": stock_level,
+            "deal": item.get("deal").and_then(Value::as_bool).unwrap_or(false),
+            "topItem": item.get("topItem").or_else(|| item.get("top_item")).and_then(Value::as_bool).unwrap_or(false),
+            "dateBinaryDatetime": value_i64(item.get("dateBinaryDatetime").or_else(|| item.get("date_binary_datetime"))).unwrap_or_default(),
+            "canBuyCredit": item.get("canBuyCredit").or_else(|| item.get("can_buy_credit")).and_then(Value::as_bool).unwrap_or(false),
+            "canBuyGold": item.get("canBuyGold").or_else(|| item.get("can_buy_gold")).and_then(Value::as_bool).unwrap_or(false),
+            "tooltipSource": tooltip_source,
+        }))
+    }
+
+    pub fn transform_game_shop_stock_from_packet(payload: &Value) -> Option<Value> {
+        let game_shop_index = value_i32(
+            payload
+                .get("gIndex")
+                .or_else(|| payload.get("g_index"))
+                .or_else(|| payload.get("gameShopIndex"))
+                .or_else(|| payload.get("game_shop_index"))
+                .or_else(|| payload.get("index")),
+        )?;
+        let stock_level = value_i32(
+            payload
+                .get("stockLevel")
+                .or_else(|| payload.get("stock_level"))
+                .or_else(|| payload.get("stock")),
+        )?;
+        Some(json!({ "gameShopIndex": game_shop_index, "stockLevel": stock_level }))
+    }
+
+    fn value_u32(value: Option<&Value>) -> Option<u32> {
+        value.and_then(|value| {
+            value
+                .as_u64()
+                .and_then(|number| u32::try_from(number).ok())
+                .or_else(|| value.as_str()?.parse::<u32>().ok())
+        })
+    }
+
+    fn value_i32(value: Option<&Value>) -> Option<i32> {
+        value.and_then(|value| {
+            value
+                .as_i64()
+                .and_then(|number| i32::try_from(number).ok())
+                .or_else(|| value.as_str()?.parse::<i32>().ok())
+        })
+    }
+
+    fn value_i64(value: Option<&Value>) -> Option<i64> {
+        value.and_then(|value| {
+            value
+                .as_i64()
+                .or_else(|| value.as_str()?.parse::<i64>().ok())
+        })
+    }
+
+    fn value_string(value: Option<&Value>) -> Option<String> {
+        value.and_then(|value| match value {
+            Value::String(text) if !text.is_empty() => Some(text.clone()),
+            Value::Number(number) => Some(number.to_string()),
+            _ => None,
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -498,6 +622,114 @@ mod tests {
             can_buy_credit: true,
             ..Default::default()
         }
+    }
+
+    #[cfg(feature = "native-player-ui")]
+    #[test]
+    fn native_catalog_projection_keeps_windows_aliases_stock_and_tooltip() {
+        let payload = serde_json::json!({
+            "item": {"item_index":"1200","g_index":"42","info":{
+                "index":1200,"name":"CashPotion","item_type":3,"image":77},
+                "gold_price":"100","credit_price":5,"count":2,"class":"All",
+                "category":"Potion","stock":10,"deal":true,"top_item":true,
+                "date_binary_datetime":"9223372036854775807",
+                "can_buy_credit":true,"can_buy_gold":true},
+            "stock_level":8
+        });
+        let model: GameShopEntry = serde_json::from_value(
+            transform_game_shop_info_from_packet(
+                &payload,
+                &crate::native_player_ingress::NativeUiPlayerCursor::default(),
+            )
+            .unwrap(),
+        )
+        .unwrap();
+        assert_eq!(
+            (model.item_index, model.game_shop_index, model.image),
+            (1200, 42, 77)
+        );
+        assert_eq!((model.stock, model.stock_level, model.count), (10, 8, 2));
+        assert_eq!((model.gold_price, model.credit_price), (100, 5));
+        assert_eq!(model.item_name, "CashPotion");
+        assert!(model.deal && model.top_item && model.can_buy_credit && model.can_buy_gold);
+        assert_eq!(model.date_binary_datetime, i64::MAX);
+        let tooltip = model.tooltip_source.unwrap();
+        let user_item = tooltip.user_item.unwrap();
+        assert_eq!((user_item.item_index, user_item.count), (1200, 2));
+        assert!(!user_item.identified);
+    }
+
+    #[cfg(feature = "native-player-ui")]
+    #[test]
+    fn native_stock_projection_keeps_windows_aliases_and_checked_integers() {
+        for index in [
+            "gIndex",
+            "g_index",
+            "gameShopIndex",
+            "game_shop_index",
+            "index",
+        ] {
+            for stock in ["stockLevel", "stock_level", "stock"] {
+                let mut payload = serde_json::json!({});
+                payload[index] = serde_json::json!("42");
+                payload[stock] = serde_json::json!("3");
+                assert_eq!(
+                    transform_game_shop_stock_from_packet(&payload).unwrap(),
+                    serde_json::json!({"gameShopIndex":42,"stockLevel":3})
+                );
+            }
+        }
+        for value in [
+            serde_json::json!(true),
+            serde_json::json!(42.5),
+            serde_json::json!(2147483648_u64),
+            serde_json::json!("not-an-index"),
+        ] {
+            assert!(transform_game_shop_stock_from_packet(
+                &serde_json::json!({"gIndex":value,"stockLevel":3})
+            )
+            .is_none());
+        }
+        assert!(transform_game_shop_stock_from_packet(
+            &serde_json::json!({"gIndex":42,"stockLevel":4294967296_u64})
+        )
+        .is_none());
+    }
+
+    #[cfg(feature = "native-player-ui")]
+    #[test]
+    fn native_catalog_projection_preserves_flat_defaults_and_outer_stock_precedence() {
+        let cursor = crate::native_player_ingress::NativeUiPlayerCursor::default();
+        let defaults =
+            transform_game_shop_info_from_packet(&serde_json::json!({"gIndex":31}), &cursor)
+                .unwrap();
+        let defaults: GameShopEntry = serde_json::from_value(defaults).unwrap();
+        assert_eq!(
+            (
+                defaults.item_name.as_str(),
+                defaults.class.as_str(),
+                defaults.count
+            ),
+            ("Item", "All", 1)
+        );
+        assert_eq!(defaults.stock_level, 0);
+        assert!(!defaults.can_buy_gold && !defaults.can_buy_credit);
+        assert!(defaults.tooltip_source.is_none());
+        let nested = transform_game_shop_info_from_packet(
+            &serde_json::json!({
+                "item":{"gIndex":31,"stockLevel":7,"stock":10,"itemName":123},
+                "stockLevel":2
+            }),
+            &cursor,
+        )
+        .unwrap();
+        assert_eq!(nested["stockLevel"], 2);
+        assert_eq!(nested["itemName"], "123");
+        assert!(transform_game_shop_info_from_packet(
+            &serde_json::json!({"itemIndex":31}),
+            &cursor
+        )
+        .is_none());
     }
 
     #[test]

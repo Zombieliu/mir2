@@ -1,0 +1,24 @@
+{
+  "source": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "cursorAndWalletFields": true,
+  "fiveCursorMethods": true,
+  "helperBodies": [
+    "update_wallet_from_snapshot",
+    "merge_wallet_into_world",
+    "merge_wallet_into_payload",
+    "apply_wallet_delta",
+    "wallet_value",
+    "value_u32",
+    "value_i32",
+    "value_i64",
+    "value_string"
+  ],
+  "permittedDifferences": [
+    "visibility",
+    "read_model namespace",
+    "formatting including trailing commas"
+  ],
+  "windowsHostUsesSharedImplementation": true,
+  "windowsDeviceAccepted": false,
+  "authenticatedAndroidAccepted": false
+}

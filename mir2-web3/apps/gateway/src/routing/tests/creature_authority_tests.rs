@@ -89,8 +89,7 @@ fn creature_mouse_pickup_rejects_remote_tile_and_baby_pig_can_pick_nearby() {
                 y: entity.y,
             });
         if creature_position.as_ref().is_some_and(|position| {
-            (position.x - drop.x).abs().max((position.y - drop.y).abs())
-                <= mouse_pickup_range
+            (position.x - drop.x).abs().max((position.y - drop.y).abs()) <= mouse_pickup_range
         }) {
             break;
         }
@@ -99,8 +98,7 @@ fn creature_mouse_pickup_rejects_remote_tile_and_baby_pig_can_pick_nearby() {
     }
     assert!(
         creature_position.as_ref().is_some_and(|position| {
-            (position.x - drop.x).abs().max((position.y - drop.y).abs())
-                <= mouse_pickup_range
+            (position.x - drop.x).abs().max((position.y - drop.y).abs()) <= mouse_pickup_range
         }),
         "creature did not enter mouse pickup range: creature={creature_position:?}, drop=({}, {})",
         drop.x,

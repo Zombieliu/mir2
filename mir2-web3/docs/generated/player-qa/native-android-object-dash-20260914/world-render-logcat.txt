@@ -1,0 +1,988 @@
+--------- beginning of main
+09-14 02:32:34.927  1337  4522 I Auth    : [SupervisedAccountIntentOperation] onHandleIntent(): android.intent.action.PACKAGE_ADDED
+09-14 02:32:34.928  1337  1337 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+09-14 02:32:34.928  1337  1337 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+09-14 02:32:34.928  1337  4522 I PackageIntentOperation: Feature flags not enabled, skipping. [CONTEXT service_id=258 ]
+09-14 02:32:34.934  1337  1337 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.common.BIND_SHARED_PREFS pkg=com.google.android.gms }
+--------- beginning of system
+09-14 02:32:34.935   518   564 E VerityUtils: Failed to measure fs-verity, errno 1: /data/app/~~fbW_KKOBbhGwF6HroGiFyw==/com.mir2.web3.uipreview-INKW1YHZ7xTKvNsEnsIiCg==/base.apk
+09-14 02:32:34.942  1063  4520 I FontLog : Package com.mir2.web3.uipreview has no metadata [CONTEXT service_id=132 ]
+09-14 02:32:34.956   518   673 I ActivityTaskManager: START u0 {flg=0x10000000 cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras)} from uid 2000
+09-14 02:32:34.957  1337  2292 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.gms componentName=AppsCorpus serviceId=36
+09-14 02:32:34.959   518   673 W ActivityTaskManager: Can't find TaskDisplayArea to determine support for multi window. Task id=414 attached=false
+09-14 02:32:34.960  1063  1147 W ChimeraUtils: Module com.google.android.gms.nearby_en has empty metadata display_name_string_id
+09-14 02:32:34.960   518   673 D CompatibilityChangeReporter: Compat change id reported: 174042980; UID 10146; state: DISABLED
+09-14 02:32:34.960  1063  1147 W ChimeraUtils: Module com.google.android.gms.nearby_en has empty metadata display_name_string_id
+09-14 02:32:34.960   518   673 D CompatibilityChangeReporter: Compat change id reported: 184838306; UID 10146; state: DISABLED
+09-14 02:32:34.961   518   673 D CompatibilityChangeReporter: Compat change id reported: 185004937; UID 10146; state: DISABLED
+09-14 02:32:34.961   518   673 D CompatibilityChangeReporter: Compat change id reported: 181136395; UID 10146; state: DISABLED
+09-14 02:32:34.961   518   673 D CompatibilityChangeReporter: Compat change id reported: 174042936; UID 10146; state: DISABLED
+09-14 02:32:34.962   691   818 D PhoneStartingWindowTypeAlgorithm: preferredStartingWindowType newTask:true taskSwitch:true processRunning:false allowTaskSnapshot:true activityCreated:false useEmptySplashScreen:true legacySplashScreen:false topIsHome:false
+09-14 02:32:34.963   691   818 D StartingSurfaceDrawer: addSplashScreen com.mir2.web3.uipreview theme=7f0d010a task=414 suggestType=3
+09-14 02:32:34.978   691   819 D StartingSurfaceDrawer: window attributes color: 0 icon null duration 0 brandImage null
+09-14 02:32:34.979   518   538 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10146; state: DISABLED
+09-14 02:32:34.979   518   538 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10146; state: DISABLED
+09-14 02:32:34.979   518   538 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10146; state: DISABLED
+09-14 02:32:34.979   518   538 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10146; state: ENABLED
+09-14 02:32:34.979   518   547 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10146; state: ENABLED
+09-14 02:32:34.991   319   319 D Zygote  : Forked child process 4546
+--------- beginning of kernel
+09-14 02:32:35.011   188   188 I logd    : logdr: UID=2000 GID=2000 PID=4547 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-14 02:32:34.991   518   547 I ActivityManager: Start proc 4546:com.mir2.web3.uipreview/u0a146 for pre-top-activity {com.mir2.web3.uipreview/com.mir2.web3.MainActivity}
+09-14 02:32:34.991   691   819 W StartingSurfaceDrawer: Window background does not exist, using android.graphics.drawable.ColorDrawable@807f1dc
+09-14 02:32:34.995  4546  4546 I .web3.uiprevie: Late-enabling -Xcheck:jni
+09-14 02:32:35.002   691   819 D SplashScreenView: Build android.window.SplashScreenView{3104fc8 V.E...... ......ID 0,0-0,0}
+09-14 02:32:35.002   691   819 D SplashScreenView: Icon: view: null drawable: null size: 0
+09-14 02:32:35.002   691   819 D SplashScreenView: Branding: view: android.view.View{2f11861 G.ED..... ......I. 0,0-0,0 #10204a6 android:id/splashscreen_branding_view} drawable: null size w: 0 h: 0
+09-14 02:32:35.002   691   819 D StartingSurfaceDrawer: fillViewWithIcon surfaceWindowView android.window.SplashScreenView{3104fc8 V.E...... ......ID 0,0-0,0}
+09-14 02:32:35.013  1337  2256 I Icing   : IndexChimeraService.getServiceInterface callingPackage=com.google.android.gms componentName=null serviceId=30
+09-14 02:32:35.013   372   422 I adbd    : jdwp connection from 4546
+09-14 02:32:35.025  1337  2167 I Icing   : Usage reports ok 0, Failed Usage reports 0, indexed 0, rejected 0
+09-14 02:32:35.030   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f66e0000 0x1f7084000]
+09-14 02:32:35.032   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7084000 0x1f7a28000]
+09-14 02:32:35.052   335   335 D goldfish-address-space: claimShared: Ask to claim region [0x1f941c000 0x1f9dc0000]
+09-14 02:32:35.067  1267  1267 I GsaVoiceInteractionSrv: Handling ACTION_STOP_HOTWORD
+09-14 02:32:35.067  1267  1267 E HwDetectorWithState: a: 3
+09-14 02:32:35.090   966  1374 D EGL_emulation: app_time_stats: avg=37617.01ms min=37617.01ms max=37617.01ms count=1
+09-14 02:32:35.091  1063  1080 I .gms.persisten: Background young concurrent copying GC freed 362935(18MB) AllocSpace objects, 34(964KB) LOS objects, 52% free, 17MB/36MB, paused 17us,9us total 141.985ms
+09-14 02:32:35.124   691   825 D EGL_emulation: app_time_stats: avg=4722.10ms min=4722.10ms max=4722.10ms count=1
+09-14 02:32:35.126   691   825 D EGL_emulation: app_time_stats: avg=10392.80ms min=70.64ms max=60988.46ms count=6
+09-14 02:32:35.135   518  1520 W ActivityManager: Slow operation: 62ms so far, now at attachApplicationLocked: before bindApplication
+09-14 02:32:35.135   518  1520 W ActivityManager: Slow operation: 62ms so far, now at attachApplicationLocked: immediately before bindApplication
+09-14 02:32:35.136   518  1520 W ActivityManager: Slow operation: 62ms so far, now at attachApplicationLocked: immediately after bindApplication
+09-14 02:32:35.136   518  1520 W ActivityManager: Slow operation: 62ms so far, now at attachApplicationLocked: after updateLruProcessLocked
+09-14 02:32:35.137   518  1520 W ActivityManager: Slow operation: 63ms so far, now at attachApplicationLocked: after mServices.attachApplicationLocked
+09-14 02:32:35.173  1337  2167 I Icing   : Usage reports ok 1, Failed Usage reports 0, indexed 0, rejected 0
+09-14 02:32:35.175  4546  4546 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10146; state: ENABLED
+09-14 02:32:35.200  1063  1063 D BoundBrokerSvc: onBind: Intent { act=com.google.android.gms.scheduler.ACTION_PROXY_SCHEDULE cmp=com.google.android.gms/.chimera.PersistentInternalBoundBrokerService }
+09-14 02:32:35.200  1063  1063 D BoundBrokerSvc: Loading bound service for intent: Intent { act=com.google.android.gms.scheduler.ACTION_PROXY_SCHEDULE cmp=com.google.android.gms/.chimera.PersistentInternalBoundBrokerService }
+09-14 02:32:35.202  1337  2167 I Icing   : Indexing com.google.android.gms-apps from com.google.android.gms
+09-14 02:32:35.209  1337  2167 I Icing   : Indexing done com.google.android.gms-apps
+09-14 02:32:35.255  4546  4546 V GraphicsEnvironment: ANGLE Developer option for 'com.mir2.web3.uipreview' set to: 'default'
+09-14 02:32:35.255  4546  4546 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+09-14 02:32:35.268  4546  4546 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-14 02:32:35.268  4546  4546 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+09-14 02:32:35.313  4546  4575 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+09-14 02:32:35.314  4546  4575 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+09-14 02:32:35.315  4546  4575 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+09-14 02:32:35.370   518   538 I ActivityTaskManager: Config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.52 fontWeightAdjustment=0}
+09-14 02:32:35.373   518   538 W ActivityTaskManager: Current config: {1.0 310mcc260mnc [en_US] ldltr sw392dp w392dp h750dp 440dpi nrml long port finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 1080, 2340) mAppBounds=Rect(0, 136 - 1080, 2208) mMaxBounds=Rect(0, 0 - 1080, 2340) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_0} s.52 fontWeightAdjustment=0} unchanged for IME proc com.google.android.inputmethod.latin
+09-14 02:32:35.375   518   538 I WindowManager: Override config changes=20000480 {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.52 fontWeightAdjustment=0} for displayId=0
+09-14 02:32:35.375   518   538 V ActivityTaskManager: Sending to IME proc com.google.android.inputmethod.latin new config {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.52 fontWeightAdjustment=0}
+09-14 02:32:35.376   691   691 D StatusBar: disable<e i a s b h r c s > disable2<q i n >
+09-14 02:32:35.377  1222  1222 W GoogleInputMethodService: GoogleInputMethodService.onConfigurationChanged():1661 onConfigurationChanged() : NewConfig = {1.0 310mcc260mnc [en_US] ldltr sw392dp w753dp h364dp 440dpi nrml long land finger qwerty/v/v dpad/v winConfig={ mBounds=Rect(0, 0 - 2340, 1080) mAppBounds=Rect(136, 0 - 2208, 1080) mMaxBounds=Rect(0, 0 - 2340, 1080) mWindowingMode=fullscreen mDisplayWindowingMode=fullscreen mActivityType=undefined mAlwaysOnTop=undefined mRotation=ROTATION_90} s.89 fontWeightAdjustment=0}
+09-14 02:32:35.377  1222  1222 I NormalModeController: NormalModeController.getKeyboardBodyViewHolderPaddingBottom():109 currentPrimeKeyboardType:SOFT systemPaddingBottom:-1
+09-14 02:32:35.378  1222  1222 I NormalModeController: NormalModeController.getKeyboardBodyViewHolderPaddingBottom():109 currentPrimeKeyboardType:SOFT systemPaddingBottom:-1
+09-14 02:32:35.379  1222  1771 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.380  1222  1222 I GoogleInputMethodService: GoogleInputMethodService.initializeKeyboardTheme():1399 Apply keyboard theme: theme_border_stylesheet_googleblue_materiallight_builtin_google_blue_light.binarypb_land
+09-14 02:32:35.381   518  2683 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-14 02:32:35.382   518  2683 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-14 02:32:35.387   518   518 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@97e6e4d
+09-14 02:32:35.391   518   538 I InputManager-JNI: Viewport [0] to add: local:4619827259835644672, isActive: true
+09-14 02:32:35.392   518   605 I InputReader: Reconfiguring input devices, changes=DISPLAY_INFO |
+09-14 02:32:35.392   518   605 I InputReader: Touch device 'virtio_input_multi_touch_10' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-14 02:32:35.392   518   605 I InputReader: Touch device 'virtio_input_multi_touch_6' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-14 02:32:35.392   518   605 I InputReader: Touch device 'virtio_input_multi_touch_11' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-14 02:32:35.392   518   605 I InputReader: Touch device 'virtio_input_multi_touch_4' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-14 02:32:35.392   518   605 I InputReader: Device reconfigured: id=8, name='virtio_input_multi_touch_1', size 1080x2340, orientation 1, mode 1, display id 0
+09-14 02:32:35.392   518   605 I InputReader: Touch device 'virtio_input_multi_touch_7' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-14 02:32:35.392   518   605 I InputReader: Touch device 'virtio_input_multi_touch_2' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-14 02:32:35.392   518   605 I InputReader: Touch device 'virtio_input_multi_touch_9' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-14 02:32:35.392   518   605 I InputReader: Touch device 'virtio_input_multi_touch_5' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-14 02:32:35.392   518   605 I InputReader: Touch device 'virtio_input_multi_touch_3' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-14 02:32:35.392   518   605 I InputReader: Touch device 'virtio_input_multi_touch_8' could not query the properties of its associated display.  The device will be inoperable until the display size becomes available.
+09-14 02:32:35.397  1222  1222 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.397  1222  1222 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.397  1222  1222 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.397  1222  1222 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.398  1222  1222 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.398  1222  1222 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.398  1222  1222 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.398  1222  1222 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.399  1222  1772 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.399  1222  1772 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.401  1222  1771 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.401  1222  1771 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.404   335   335 D goldfish-address-space: claimShared: Ask to claim region [0x1f7084000 0x1f7a28000]
+09-14 02:32:35.405   851  1019 D TelephonyProvider: subIdString = 1 subId = 1
+09-14 02:32:35.405   851  1019 D TelephonyProvider: subIdString = 1 subId = 1
+09-14 02:32:35.408  1445  1445 I A       : onApplyWindowInsets: systemWindowInsets=Insets{left=0, top=145, right=0, bottom=132}
+09-14 02:32:35.408  1445  1445 I A       : onApplyWindowInsets: Adjusting for display cutouts. Safe insets: left=0, top=136, right=0, bottom=0
+09-14 02:32:35.408  1445  1445 I A       : onApplyWindowInsets: systemWindowInsets=Insets{left=0, top=145, right=0, bottom=132}
+09-14 02:32:35.415   335   335 D goldfish-address-space: claimShared: Ask to claim region [0x1f5398000 0x1f5d3c000]
+09-14 02:32:35.428   691   782 W Looper  : Slow delivery took 34ms wmshell.main h=android.os.Handler c=null m=16
+09-14 02:32:35.429   335   335 D goldfish-address-space: claimShared: Ask to claim region [0x1f7a28000 0x1f7b84000]
+09-14 02:32:35.429  1222  1222 I KeyboardViewUtil: KeyboardViewUtil.getKeyboardHeightRatio():166 systemKeyboardHeightRatio:1.000000; userKeyboardHeightRatio:1.000000.
+09-14 02:32:35.431  4546  4546 D AppCompatDelegate: Checking for metadata for AppLocalesMetadataHolderService : Service not found
+09-14 02:32:35.432   518   518 W NotificationHistory: Attempted to add notif for locked/gone/disabled user 0
+09-14 02:32:35.440   691   782 W Looper  : Drained
+09-14 02:32:35.441   335   335 D goldfish-address-space: claimShared: Ask to claim region [0x1f7b84000 0x1f7ce0000]
+09-14 02:32:35.446  1222  1222 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():2002
+09-14 02:32:35.447  1222  1222 I DeviceUnlockedTag: DeviceUnlockedTag.notifyDeviceLockStatusChanged():31 Notify device unlocked.
+09-14 02:32:35.448  1222  1222 W SessionManager: SessionManager.beginSession():53 Try to begin an already begun session [INPUT_SESSION], end it first
+09-14 02:32:35.448  1222  1222 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.448  1222  1222 I Environment: Environment.getDeviceMode():833 Get device mode by ui mode:1 and smallestScreenWidthDp:392
+09-14 02:32:35.448  1222  1222 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1105 update screenHeightWithoutNaviBar to: 948
+09-14 02:32:35.448  1222  1222 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1112 update max height when insets changes
+09-14 02:32:35.458   335   335 D goldfish-address-space: claimShared: Ask to claim region [0x1f7ce0000 0x1f7ce4000]
+09-14 02:32:35.461   335   335 D goldfish-address-space: claimShared: Ask to claim region [0x1f7ce4000 0x1f7d20000]
+09-14 02:32:35.461  1222  1222 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1105 update screenHeightWithoutNaviBar to: 1080
+09-14 02:32:35.461  1222  1222 I GoogleInputMethodService: GoogleInputMethodService.lambda$setDecorViewApplyWindowInsetsListener$9():1112 update max height when insets changes
+09-14 02:32:35.461  1222  1222 I DictionarySuperpacksManager: DictionarySuperpacksManager$1.onEnabledInputMethodEntriesChanged():60 onEnabledInputMethodEntriesChanged
+09-14 02:32:35.474   966  1374 E FrameEvents: updateAcquireFence: Did not find frame.
+09-14 02:32:35.475   335   335 D goldfish-address-space: claimShared: Ask to claim region [0x1f7d20000 0x1f7d24000]
+09-14 02:32:35.477   335   335 D goldfish-address-space: claimShared: Ask to claim region [0x1f7d20000 0x1f7d5c000]
+09-14 02:32:35.477  4546  4546 D gti.InputConnection: InputConnection created
+09-14 02:32:35.477   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7d5c000 0x1f7d60000]
+09-14 02:32:35.478   966  1374 E FrameEvents: updateAcquireFence: Did not find frame.
+09-14 02:32:35.479   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7d60000 0x1f7d64000]
+09-14 02:32:35.480   518  2136 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-14 02:32:35.480   518  2136 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-14 02:32:35.481  4546  4546 D gti.InputConnection: setEditorInfo
+09-14 02:32:35.481   518  2136 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-14 02:32:35.481   518  2136 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-14 02:32:35.481   518  2136 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-14 02:32:35.481   518  2136 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-14 02:32:35.481   518  2136 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-14 02:32:35.481   518  2136 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-14 02:32:35.481   518  2136 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-14 02:32:35.481   518  2136 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-14 02:32:35.484  4546  4546 W .web3.uiprevie: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+09-14 02:32:35.484   518   518 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@6caa83d
+09-14 02:32:35.484   518   518 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@fba6832
+09-14 02:32:35.484   518   518 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@6c9c983
+09-14 02:32:35.484   518   518 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@da2e700
+09-14 02:32:35.484   518   518 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@abe8b39
+09-14 02:32:35.485  4546  4546 I GameActivity: Looking for library libmir2_platform_android.so
+09-14 02:32:35.486  4546  4546 I GameActivity: Found library libmir2_platform_android.so. Loading...
+09-14 02:32:35.489   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7d60000 0x1f7dec000]
+09-14 02:32:35.491  1257  1784 W MediaProvider: Failed to fetch original file descriptor
+09-14 02:32:35.491  1257  1784 W MediaProvider: java.io.IOException: stat failed: EACCES (Permission denied)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at com.android.providers.media.MediaProvider.getFileFromFileDescriptor(MediaProvider.java:5794)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at com.android.providers.media.MediaProvider.getOriginalMediaFormatFileDescriptor(MediaProvider.java:5711)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at com.android.providers.media.MediaProvider.openTypedAssetFileCommon(MediaProvider.java:7134)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at com.android.providers.media.MediaProvider.openTypedAssetFile(MediaProvider.java:7115)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at android.content.ContentProvider$Transport.openTypedAssetFile(ContentProvider.java:548)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at android.content.ContentProviderNative.onTransact(ContentProviderNative.java:327)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at android.os.Binder.execTransactInternal(Binder.java:1179)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at android.os.Binder.execTransact(Binder.java:1143)
+09-14 02:32:35.491  1257  1784 W MediaProvider: Caused by: android.system.ErrnoException: stat failed: EACCES (Permission denied)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at libcore.io.Linux.stat(Native Method)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at libcore.io.ForwardingOs.stat(ForwardingOs.java:853)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at libcore.io.BlockGuardOs.stat(BlockGuardOs.java:420)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at libcore.io.ForwardingOs.stat(ForwardingOs.java:853)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at android.app.ActivityThread$AndroidOs.stat(ActivityThread.java:7739)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at android.system.Os.stat(Os.java:919)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	at com.android.providers.media.MediaProvider.getFileFromFileDescriptor(MediaProvider.java:5788)
+09-14 02:32:35.491  1257  1784 W MediaProvider: 	... 7 more
+09-14 02:32:35.492  4546  4546 D GameActivity: GameActivity_register
+09-14 02:32:35.492  4546  4546 V GameActivity: Registering com/google/androidgamesdk/GameActivity's 24 native methods...
+09-14 02:32:35.492  4546  4546 D GameActivity: SDK version: 31
+09-14 02:32:35.492   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7dec000 0x1f7e28000]
+09-14 02:32:35.494  4546  4546 I android-activity: Creating: Activity = 0x1696, saved state size = 0
+09-14 02:32:35.496   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7e28000 0x1f7e64000]
+09-14 02:32:35.497   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7e64000 0x1f7e6c000]
+09-14 02:32:35.498  4546  4546 V threaded_app: Creating: 0xb400007a384b7d10
+09-14 02:32:35.498  4546  4546 V threaded_app: Callbacks set: 0xb400007a384b7d60
+09-14 02:32:35.498  4546  4546 V threaded_app: Launching android_app_entry in a thread
+09-14 02:32:35.498  4546  4585 V threaded_app: android_app_entry called
+09-14 02:32:35.498  4546  4585 V threaded_app: android_app = 0xb400007a184b0c50
+09-14 02:32:35.498  4546  4585 V threaded_app: config = 0xb4000079884cc080
+09-14 02:32:35.498  4546  4585 V threaded_app: activity = 0xb400007a384b7d10
+09-14 02:32:35.498  4546  4585 V threaded_app: assetmanager = 0xb400007a384b47f0
+09-14 02:32:35.498  4546  4585 V threaded_app: Config: mcc=310 mnc=260 lang=en cnt=US orien=2 touch=3 dens=440 keys=2 nav=2 keysHid=1 navHid=0 sdk=31 size=2 long=2 modetype=1 modenight=1
+09-14 02:32:35.498   389  2466 D NuPlayerDriver: NuPlayerDriver(0xb400007c2a2b4a30) created, clientPid(691)
+09-14 02:32:35.498   966  1043 D LoaderTask: loadWorkspace: loading default favorites
+09-14 02:32:35.499   184   184 I hwservicemanager: getTransport: Cannot find entry android.hardware.media.omx@1.0::IOmx/default in either framework or device VINTF manifest.
+09-14 02:32:35.499   389  2466 D MediaPlayerService: OMX service is not available
+09-14 02:32:35.507   691  1140 D HostConnection: createUnique: call
+09-14 02:32:35.508   691  1140 D HostConnection: HostConnection::get() New Host Connection established 0xb4000079d8517150, tid 1140
+09-14 02:32:35.509   691  1140 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-14 02:32:35.509   691  1140 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-14 02:32:35.509   691  1140 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-14 02:32:35.513   518   564 E VerityUtils: Failed to measure fs-verity, errno 1: /data/app/~~fbW_KKOBbhGwF6HroGiFyw==/com.mir2.web3.uipreview-INKW1YHZ7xTKvNsEnsIiCg==/base.apk
+09-14 02:32:35.513   966  1043 D LoaderTask: loadWorkspace
+09-14 02:32:35.513   966  1043 D LoaderTask: Cancelled
+09-14 02:32:35.513   966  1043 D LoaderTask: loadWorkspace: loading default favorites
+09-14 02:32:35.516   691  1140 D EGL_emulation: eglCreateContext: 0xb4000079d8517d50: maj 3 min 1 rcv 4
+09-14 02:32:35.530   518  2136 W InputManager-JNI: Input channel object '90a8d8f com.google.android.apps.nexuslauncher/com.google.android.apps.nexuslauncher.NexusLauncherActivity (client)' was disposed without first being removed with the input manager!
+09-14 02:32:35.545   691  1140 D EGL_emulation: eglMakeCurrent: 0xb4000079d8517d50: ver 3 1 (tinfo 0x7bf25b3200) (first time)
+09-14 02:32:35.547   389  4594 D GenericSource: FileSource remote
+09-14 02:32:35.548   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7e6c000 0x1f7e74000]
+09-14 02:32:35.549  4546  4585 D HostConnection: createUnique: call
+09-14 02:32:35.549  4546  4585 D HostConnection: HostConnection::get() New Host Connection established 0xb4000079d84c1710, tid 4585
+09-14 02:32:35.556  4546  4585 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-14 02:32:35.559   184   184 I hwservicemanager: getTransport: Cannot find entry android.hardware.configstore@1.0::ISurfaceFlingerConfigs/default in either framework or device VINTF manifest.
+09-14 02:32:35.562  4546  4585 D EGL_emulation: eglCreateContext: 0xb4000079d84c1050: maj 3 min 1 rcv 4
+09-14 02:32:35.564   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7e74000 0x1f7e7c000]
+09-14 02:32:35.564  1445  1445 I A       : Constructor was called
+09-14 02:32:35.564  1445  1445 I A       : No savedInstanceState.
+09-14 02:32:35.564  1445  1445 I A       : makeRequest: subscribing to new source
+09-14 02:32:35.564  1445  1445 I A       : OnCreate Was Called
+09-14 02:32:35.565  1445  1445 I A       : getMinusOnePromotion
+09-14 02:32:35.565   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7e7c000 0x1f7e84000]
+09-14 02:32:35.568   966  1043 D LoaderTask: loadWorkspace
+09-14 02:32:35.569   966  1043 D LoaderTask: sanitizeData
+09-14 02:32:35.569   966  1043 D LoaderTask: bindWorkspace
+09-14 02:32:35.570   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7e84000 0x1f7ec0000]
+09-14 02:32:35.571  1445  1445 I A       : #enqueuePeriodicJob: running = [INVALID: format=%b, type=java.util.concurrent.atomic.AtomicBoolean, value=false]
+09-14 02:32:35.572  1445  1729 I A       : enable_prod_refresh is true but we have no valid refresh schedule
+09-14 02:32:35.572  1445  1729 I A       : FeedSyncWorker #periodicWorkSpec with schedule at time TimeUnitPair{duration=1440, timeUnit=MINUTES}
+09-14 02:32:35.574  1445  1445 I A       : loading data on surface MinusOne.
+09-14 02:32:35.576   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7ec0000 0x1f7f4c000]
+09-14 02:32:35.580   518  1520 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-14 02:32:35.581   518  4567 I MediaFocusControl: requestAudioFocus() from uid/pid 10135/691 AA=USAGE_NOTIFICATION/CONTENT_TYPE_SONIFICATION clientId=android.media.AudioManager@bcf925b callingPack=com.android.systemui req=3 flags=0x0 sdk=31
+09-14 02:32:35.581   518  1520 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-14 02:32:35.581   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7f4c000 0x1f7f88000]
+09-14 02:32:35.581   518   518 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@db1f265
+09-14 02:32:35.589   518  1520 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-14 02:32:35.589   518  1520 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-14 02:32:35.589   518   518 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@5c2c106
+09-14 02:32:35.589   518  1520 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-14 02:32:35.589   518  1520 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-14 02:32:35.589   518   518 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@f65091d
+09-14 02:32:35.589   518  1520 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-14 02:32:35.589   518  1520 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-14 02:32:35.589   518   518 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@a224563
+09-14 02:32:35.589   518  1520 W ActivityManager: Unable to start service Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } U=0: not found
+09-14 02:32:35.589   518  1520 W RemoteSmartspaceService: could not bind to Intent { act=android.service.smartspace.SmartspaceService cmp=com.google.android.as/com.google.android.apps.miphone.aiai.app.AiAiSmartspaceService } using flags 67112961
+09-14 02:32:35.589   518   518 W ActivityManager: Unbind failed: could not find connection for android.app.LoadedApk$ServiceDispatcher$InnerConnection@84e1a19
+09-14 02:32:35.589   966  1043 D LoaderTask: sendFirstScreenActiveInstallsBroadcast
+09-14 02:32:35.590   966   966 W PageIndicator: Current dot index invalid. Cannot set current page offset.
+09-14 02:32:35.590   966   966 W PageIndicator: Current dot index invalid. Cannot set current page offset.
+09-14 02:32:35.590   966   966 W PageIndicator: Current dot index invalid. Cannot set current page offset.
+09-14 02:32:35.593   518  4567 I AudioService.FadeOutManager: unfadeOutUid() uid:10135
+09-14 02:32:35.593  4546  4585 D EGL_emulation: eglMakeCurrent: 0xb4000079d84c1050: ver 3 1 (tinfo 0x7bf9731080) (first time)
+09-14 02:32:35.593  1445  1748 I A       : RenderableStreamDataSource#loadData - Future succeed, cache status: Cache miss
+09-14 02:32:35.594   966  1043 D LoaderTask: step 1 complete
+09-14 02:32:35.595  1445  1445 I A       : onApplyWindowInsets: systemWindowInsets=Insets{left=136, top=77, right=132, bottom=0}
+09-14 02:32:35.595  1445  1445 I A       : onApplyWindowInsets: Adjusting for display cutouts. Safe insets: left=136, top=0, right=0, bottom=0
+09-14 02:32:35.595  1445  1445 I A       : onApplyWindowInsets: systemWindowInsets=Insets{left=136, top=77, right=132, bottom=0}
+09-14 02:32:35.598  1445  1445 I A       : Setting recyclerBinder size to 2072, 1080
+09-14 02:32:35.599  1445  1445 I A       : StreamFragmentPeer#onPending
+09-14 02:32:35.599  1445  1445 I A       : #fetchAndStoreData() on surface MinusOne.
+09-14 02:32:35.604   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7a28000 0x1f7ad8000]
+09-14 02:32:35.607   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7ad8000 0x1f7b88000]
+09-14 02:32:35.608   691   691 I OpaEnabledReceiver: Dispatching OPA eligble = false; AGSA = true; OPA enabled = false
+09-14 02:32:35.608   691   691 I OpaLayout: Setting opa enabled to false
+09-14 02:32:35.608   691   691 I OpaLayout: Setting opa enabled to false
+09-14 02:32:35.628   691   691 D InterruptionStateProvider: No bubble up: not allowed to bubble: -1|android|19|null|1000
+09-14 02:32:35.628   691   691 D InterruptionStateProvider: No heads up: unimportant notification: -1|android|19|null|1000
+09-14 02:32:35.629   691   887 D PeopleSpaceWidgetMgr: Sbn doesn't contain valid PeopleTileKey: null/-1/android
+09-14 02:32:35.629  1445  1729 W A       : Fetch failed. Renderable stream failure reason: USER_SIGNED_OUT
+09-14 02:32:35.629  1445  1729 W A       : DiscoverPrecheckException(precheckFailureReason=com.google.android.apps.search.googleapp.discover.y.a.c@250cca5)
+09-14 02:32:35.629  1445  1729 W A       : 	at com.google.android.apps.search.googleapp.discover.y.ax.apply(SourceFile:4)
+09-14 02:32:35.629  1445  1729 W A       : 	at com.google.apps.tiktok.tracing.di.apply(SourceFile:2)
+09-14 02:32:35.629  1445  1729 W A       : 	at com.google.common.w.a.f.d(SourceFile:2)
+09-14 02:32:35.629  1445  1729 W A       : 	at com.google.common.w.a.h.run(SourceFile:9)
+09-14 02:32:35.629  1445  1729 W A       : 	at com.google.android.libraries.g.ab.run(SourceFile:1)
+09-14 02:32:35.629  1445  1729 W A       : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+09-14 02:32:35.629  1445  1729 W A       : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+09-14 02:32:35.629  1445  1729 W A       : 	at com.google.android.libraries.g.n.run(SourceFile:2)
+09-14 02:32:35.629  1445  1729 W A       : 	at com.google.android.libraries.g.d.run(SourceFile:2)
+09-14 02:32:35.629  1445  1729 W A       : 	at java.lang.Thread.run(Thread.java:920)
+09-14 02:32:35.631   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7b88000 0x1f7c38000]
+09-14 02:32:35.632  1445  1445 W A       : Failed RenderableStream callback; SubscriptionCallbacks#onError(Throwable) called.
+09-14 02:32:35.632  1445  1445 W A       : com.google.android.apps.search.googleapp.discover.x.f: DiscoverPrecheckException(precheckFailureReason=com.google.android.apps.search.googleapp.discover.y.a.c@250cca5)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.android.apps.search.googleapp.discover.x.am.d(SourceFile:1)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.android.apps.search.googleapp.discover.x.ai.apply(SourceFile:20)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.apps.tiktok.tracing.di.apply(SourceFile:2)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.common.w.a.a.d(SourceFile:2)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.common.w.a.c.run(SourceFile:11)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.android.libraries.g.ab.run(SourceFile:1)
+09-14 02:32:35.632  1445  1445 W A       : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+09-14 02:32:35.632  1445  1445 W A       : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.android.libraries.g.n.run(SourceFile:2)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.android.libraries.g.d.run(SourceFile:2)
+09-14 02:32:35.632  1445  1445 W A       : 	at java.lang.Thread.run(Thread.java:920)
+09-14 02:32:35.632  1445  1445 W A       : Caused by: DiscoverPrecheckException(precheckFailureReason=com.google.android.apps.search.googleapp.discover.y.a.c@250cca5)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.android.apps.search.googleapp.discover.y.ax.apply(SourceFile:4)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.apps.tiktok.tracing.di.apply(SourceFile:2)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.common.w.a.f.d(SourceFile:2)
+09-14 02:32:35.632  1445  1445 W A       : 	at com.google.common.w.a.h.run(SourceFile:9)
+09-14 02:32:35.632  1445  1445 W A       : 	... 6 more
+09-14 02:32:35.642  1445  1717 I WM-GreedyScheduler: Ignoring schedule request in non-main process
+09-14 02:32:35.649  1445  1445 W View    : requestLayout() improperly called by android.widget.FrameLayout{a570b4d V.E...... ......ID 0,0-2072,550 #7f0b0dc4 app:id/googleapp_discover_header_container} during layout: running second layout pass
+09-14 02:32:35.657  1445  1717 I WM-GreedyScheduler: Ignoring schedule request in a secondary process
+09-14 02:32:35.657   518  1520 D ConnectivityService: requestNetwork for uid/pid:10146/4546 activeRequest: null callbackRequest: 126 [NetworkRequest [ REQUEST id=127, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]] callback flags: 0 priority: 2147483647
+09-14 02:32:35.658   518   628 D ConnectivityService: NetReassign [127 : null → 101]
+09-14 02:32:35.659   518   621 D WifiNetworkFactory: got request NetworkRequest [ REQUEST id=127, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]
+09-14 02:32:35.659   518   621 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=127, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]
+09-14 02:32:35.659   518   621 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=127, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10146 RequestorUid: 10146 RequestorPkg: com.mir2.web3.uipreview] ]
+09-14 02:32:35.661  4546  4585 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bAdapterInfo { name: "Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver-5.0.0))", vendor: 0, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.1 git hash: fbf66f49c7cc))", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-14 02:32:35.661  4546  4585 W event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bThe selected adapter is using a driver that only supports software rendering. This is likely to be very slow. See https://bevy.org/learn/errors/b0006/
+09-14 02:32:35.661  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:35.661647Z[0m [32m INFO[0m [2mbevy_render::renderer[0m[2m:[0m AdapterInfo { name: "Android Emulator OpenGL ES Translator (ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0) (0x0000C0DE)), SwiftShader driver-5.0.0))", vendor: 0, device: 0, device_type: Cpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.1 (OpenGL ES 3.1.0 (ANGLE 2.1.1 git hash: fbf66f49c7cc))", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+09-14 02:32:35.661  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:35.661741Z[0m [33m WARN[0m [2mbevy_render::renderer[0m[2m:[0m The selected adapter is using a driver that only supports software rendering. This is likely to be very slow. See https://bevy.org/learn/errors/b0006/
+09-14 02:32:35.673   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7ec0000 0x1f7f4c000]
+09-14 02:32:35.676  4546  4546 V GameActivity: onStart_native
+09-14 02:32:35.676  4546  4546 V threaded_app: Start: 0xb400007a384b7d10
+09-14 02:32:35.681   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7c38000 0x1f7cc4000]
+09-14 02:32:35.748  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:35.747975Z[0m [33m WARN[0m [2mbevy_ecs::world[0m[2m:[0m Resource `<Enable the debug feature to see the name>` was inserted during a call to World::resource_scope: the inserted value will be overwritten.
+09-14 02:32:35.748  4546  4585 W log event: Resource `<Enable the debug feature to see the name>` was inserted during a call to World::resource_scope: the inserted value will be overwritten.log.target = "bevy_ecs::world"; log.module_path = "bevy_ecs::world"; log.file = "/Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_ecs-0.19.0/src/world/mod.rs"; log.line = 2931;
+09-14 02:32:35.767  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:35.767755Z[0m [32m INFO[0m [2mbevy_render::render_resource::sparse_buffer_vec[0m[2m:[0m Sparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+09-14 02:32:35.767  4546  4585 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bSparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+09-14 02:32:35.767  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:35.767841Z[0m [33m WARN[0m [2mbevy_core_pipeline::oit::resolve[0m[2m:[0m OrderIndependentTransparencyPlugin not loaded. RenderDevice lacks support: max_storage_buffers_per_shader_stage < OIT_REQUIRED_STORAGE_BUFFERS. [3mmax_storage_buffers_per_shader_stage[0m[2m=[0m0 [3mOIT_REQUIRED_STORAGE_BUFFERS[0m[2m=[0m3
+09-14 02:32:35.767  4546  4585 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-OrderIndependentTransparencyPlugin not loaded. RenderDevice lacks support: max_storage_buffers_per_shader_stage < OIT_REQUIRED_STORAGE_BUFFERS.max_storage_buffers_per_shader_stage = 0; OIT_REQUIRED_STORAGE_BUFFERS = 3;
+09-14 02:32:35.788   966  1043 D LoaderTask: loadAllApps
+09-14 02:32:35.789   966  1043 D LoaderTask: bindAllApps
+09-14 02:32:35.792   966  1043 D LoaderTask: update icon cache
+09-14 02:32:35.792   966  1043 D LoaderTask: save shortcuts in icon cache
+09-14 02:32:35.792   966  1043 D LoaderTask: step 2 complete
+09-14 02:32:35.793   966  1043 D LoaderTask: loadDeepShortcuts
+09-14 02:32:35.793   966  1043 D LoaderTask: bindDeepShortcuts
+09-14 02:32:35.793   966  1043 D LoaderTask: save deep shortcuts in icon cache
+09-14 02:32:35.797   966  1043 D LoaderTask: step 3 complete
+09-14 02:32:35.885  1063  4480 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+09-14 02:32:35.885  1063  4480 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@214218053@21.42.18 (190400-410302452):2)
+09-14 02:32:35.885  1063  4480 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@214218053@21.42.18 (190400-410302452):0)
+09-14 02:32:35.898  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:35.898343Z[0m [32m INFO[0m [2mbevy_render::batching::gpu_preprocessing[0m[2m:[0m GPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+09-14 02:32:35.898  4546  4585 I event /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/third_party/bGPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+09-14 02:32:35.939  4546  4589 D HostConnection: createUnique: call
+09-14 02:32:35.940  4546  4589 D HostConnection: HostConnection::get() New Host Connection established 0xb4000079d84d7250, tid 4589
+09-14 02:32:35.943  4546  4589 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-14 02:32:35.947  4546  4589 D EGL_emulation: eglMakeCurrent: 0xb4000079d84c1050: ver 3 1 (tinfo 0x7bf9731100) (first time)
+09-14 02:32:35.959   518   628 D ConnectivityService: reportNetworkConnectivity(101, false) by 10103
+09-14 02:32:35.959   518   628 D ConnectivityService: reportNetworkConnectivity(101, false) by 10103
+09-14 02:32:35.960   793  2452 D NetworkMonitor/101: Forcing reevaluation for UID 10103. Dns signal count: 0
+09-14 02:32:35.962  4546  4590 D HostConnection: createUnique: call
+09-14 02:32:35.962  4546  4590 D HostConnection: HostConnection::get() New Host Connection established 0xb4000079d84c5b50, tid 4590
+09-14 02:32:35.966  4546  4590 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-14 02:32:35.967   318  4602 D resolv  : ResNSendHandler::run: 0 / {101 983141 101 983141 1073 1}
+09-14 02:32:35.967   318  4602 I resolv  : resolv_populate_res_for_net: netid=101
+09-14 02:32:35.967   318  4602 D resolv  : res_nsend
+09-14 02:32:35.967   318  4602 I resolv  : resolv_cache_lookup: lookup
+09-14 02:32:35.967   318  4602 I resolv  : resolv_cache_lookup: NOT IN CACHE (STALE ENTRY 0xb400007ba079e690DISCARDED)
+09-14 02:32:35.967   318  4602 I resolv  : _cache_remove_p: entry 26 removed (count=11)
+09-14 02:32:35.967   318  4602 I resolv  : resolv_populate_res_for_net: netid=101
+09-14 02:32:35.967   318  4602 I resolv  : res_stats_usable_server: NS stats: S 56 + E 0 + T 0 + I 0 = 56, rtt = 1248, min_samples = 8
+09-14 02:32:35.967   318  4602 I resolv  : res_stats_usable_server: success rate 100
+09-14 02:32:35.967   318  4602 D resolv  : res_nsend: Querying server (# 1) address = 10.0.2.3:53
+09-14 02:32:35.967   318  4602 D resolv  : send_dg: new DG socket
+09-14 02:32:35.967   318  4602 I resolv  : get_timeout: using timeout of 5000 msec
+09-14 02:32:35.968   318  4602 I resolv  : retrying_poll: 56 retrying_poll
+09-14 02:32:35.969   318  4603 D resolv  : ResNSendHandler::run: 0 / {101 983141 101 983141 1073 1}
+09-14 02:32:35.969   318  4603 I resolv  : resolv_populate_res_for_net: netid=101
+09-14 02:32:35.969   318  4603 D resolv  : res_nsend
+09-14 02:32:35.969   318  4603 I resolv  : resolv_cache_lookup: lookup
+09-14 02:32:35.969   318  4603 I resolv  : resolv_cache_lookup: NOT IN CACHE (STALE ENTRY 0xb400007b7079edd0DISCARDED)
+09-14 02:32:35.969   318  4603 I resolv  : _cache_remove_p: entry 27 removed (count=10)
+09-14 02:32:35.969   318  4603 I resolv  : resolv_populate_res_for_net: netid=101
+09-14 02:32:35.969   318  4603 I resolv  : res_stats_usable_server: NS stats: S 56 + E 0 + T 0 + I 0 = 56, rtt = 1248, min_samples = 8
+09-14 02:32:35.969   318  4603 I resolv  : res_stats_usable_server: success rate 100
+09-14 02:32:35.969   318  4603 D resolv  : res_nsend: Querying server (# 1) address = 10.0.2.3:53
+09-14 02:32:35.969   318  4603 D resolv  : send_dg: new DG socket
+09-14 02:32:35.969   318  4603 I resolv  : get_timeout: using timeout of 5000 msec
+09-14 02:32:35.969   318  4603 I resolv  : retrying_poll: 58 retrying_poll
+09-14 02:32:35.974   318  4601 D resolv  : ResNSendHandler::run: 0 / {101 983141 101 983141 1073 1}
+09-14 02:32:35.974   318  4604 D resolv  : ResNSendHandler::run: 0 / {101 983141 101 983141 1073 1}
+09-14 02:32:35.974   318  4604 I resolv  : resolv_populate_res_for_net: netid=101
+09-14 02:32:35.974   318  4604 D resolv  : res_nsend
+09-14 02:32:35.974   318  4604 I resolv  : resolv_cache_lookup: lookup
+09-14 02:32:35.974   318  4604 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0xb400007b907a2070
+09-14 02:32:35.974   318  4601 I resolv  : resolv_populate_res_for_net: netid=101
+09-14 02:32:35.974   318  4601 D resolv  : res_nsend
+09-14 02:32:35.974   318  4601 I resolv  : resolv_cache_lookup: lookup
+09-14 02:32:35.974   318  4601 I resolv  : resolv_cache_lookup: NOT IN CACHE
+09-14 02:32:35.974   318  4601 I resolv  : resolv_populate_res_for_net: netid=101
+09-14 02:32:35.974   318  4601 I resolv  : res_stats_usable_server: NS stats: S 56 + E 0 + T 0 + I 0 = 56, rtt = 1248, min_samples = 8
+09-14 02:32:35.974   318  4601 I resolv  : res_stats_usable_server: success rate 100
+09-14 02:32:35.975   318  4601 D resolv  : res_nsend: Querying server (# 1) address = 10.0.2.3:53
+09-14 02:32:35.975   318  4601 D resolv  : send_dg: new DG socket
+09-14 02:32:35.975   318  4601 I resolv  : get_timeout: using timeout of 5000 msec
+09-14 02:32:35.975   318  4601 I resolv  : retrying_poll: 60 retrying_poll
+09-14 02:32:35.981  4546  4590 D EGL_emulation: eglMakeCurrent: 0xb4000079d84c1050: ver 3 1 (tinfo 0x7bf9731180) (first time)
+09-14 02:32:36.041   966  1043 D LoaderTask: load widgets
+09-14 02:32:36.042   966  1043 D LoaderTask: bindWidgets
+09-14 02:32:36.047   966  1043 D LoaderTask: save widgets in icon cache
+09-14 02:32:36.047   966  1043 D LoaderTask: finish icon update
+09-14 02:32:36.094   389  4586 I GenericSource: start
+09-14 02:32:36.095   691   691 D MediaRouter: onRestoreRoute() : route=RouteInfo{ name=Phone, description=null, status=null, category=RouteCategory{ name=System types=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO  groupable=false }, supportedTypes=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO , presentationDisplay=null }
+09-14 02:32:36.095   691   691 V MediaRouter: Selecting route: RouteInfo{ name=Phone, description=null, status=null, category=RouteCategory{ name=System types=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO  groupable=false }, supportedTypes=ROUTE_TYPE_LIVE_AUDIO ROUTE_TYPE_LIVE_VIDEO , presentationDisplay=null }
+09-14 02:32:36.096   389  4607 D CCodec  : allocate(c2.android.vorbis.decoder)
+09-14 02:32:36.109  4546  4585 V threaded_app: activityState=11
+09-14 02:32:36.110  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:36.110019Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+09-14 02:32:36.110  4546  4585 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+09-14 02:32:36.110   389  4607 I CCodec  : setting up 'default' as default (vendor) store
+09-14 02:32:36.110   404   749 V C2Store : in init
+09-14 02:32:36.110   404   749 V C2Store : loading dll
+09-14 02:32:36.111   389  4607 I CCodec  : Created component [c2.android.vorbis.decoder]
+09-14 02:32:36.111   389  4607 D CCodecConfig: read media type: audio/vorbis
+09-14 02:32:36.111   389  4607 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.max-count.values
+09-14 02:32:36.111   389  4607 D ReflectedParamUpdater: extent() != 1 for single value type: output.subscribed-indices.values
+09-14 02:32:36.111   389  4607 D ReflectedParamUpdater: extent() != 1 for single value type: input.buffers.allocator-ids.values
+09-14 02:32:36.111   389  4607 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.allocator-ids.values
+09-14 02:32:36.111   389  4607 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.allocator-ids.values
+09-14 02:32:36.111   389  4607 D ReflectedParamUpdater: extent() != 1 for single value type: output.buffers.pool-ids.values
+09-14 02:32:36.111   389  4607 D ReflectedParamUpdater: extent() != 1 for single value type: algo.buffers.pool-ids.values
+09-14 02:32:36.112   389  4607 I CCodecConfig: query failed after returning 7 values (BAD_INDEX)
+09-14 02:32:36.112   389  4607 D CCodecConfig: c2 config diff is Dict {
+09-14 02:32:36.112   389  4607 D CCodecConfig:   c2::u32 coded.bitrate.value = 64000
+09-14 02:32:36.112   389  4607 D CCodecConfig:   c2::u32 input.buffers.max-size.value = 32768
+09-14 02:32:36.112   389  4607 D CCodecConfig:   c2::u32 input.delay.value = 0
+09-14 02:32:36.112   389  4607 D CCodecConfig:   string input.media-type.value = "audio/vorbis"
+09-14 02:32:36.112   389  4607 D CCodecConfig:   string output.media-type.value = "audio/raw"
+09-14 02:32:36.112   389  4607 D CCodecConfig:   c2::u32 raw.channel-count.value = 1
+09-14 02:32:36.112   389  4607 D CCodecConfig:   c2::u32 raw.sample-rate.value = 48000
+09-14 02:32:36.112   389  4607 D CCodecConfig: }
+09-14 02:32:36.112   389  4607 D CCodec  : [c2.android.vorbis.decoder] buffers are bound to CCodec for this session
+09-14 02:32:36.112   389  4607 D CCodecConfig: no c2 equivalents for durationUs
+09-14 02:32:36.112   389  4607 D CCodecConfig: no c2 equivalents for csd-1
+09-14 02:32:36.112   389  4607 D CCodecConfig: no c2 equivalents for channel-mask
+09-14 02:32:36.112   389  4607 D CCodecConfig: no c2 equivalents for flags
+09-14 02:32:36.112   389  4607 D CCodecConfig: c2 config diff is   c2::u32 coded.bitrate.value = 70000
+09-14 02:32:36.112   389  4607 W Codec2Client: query -- param skipped: index = 1107298332.
+09-14 02:32:36.112   389  4607 D CCodec  : setup formats input: AMessage(what = 0x00000000) = {
+09-14 02:32:36.112   389  4607 D CCodec  :   int32_t bitrate = 70000
+09-14 02:32:36.112   389  4607 D CCodec  :   int32_t channel-count = 1
+09-14 02:32:36.112   389  4607 D CCodec  :   int32_t max-input-size = 32768
+09-14 02:32:36.112   389  4607 D CCodec  :   string mime = "audio/vorbis"
+09-14 02:32:36.112   389  4607 D CCodec  :   int32_t sample-rate = 48000
+09-14 02:32:36.112   389  4607 D CCodec  : }
+09-14 02:32:36.112   389  4607 D CCodec  : setup formats output: AMessage(what = 0x00000000) = {
+09-14 02:32:36.112   389  4607 D CCodec  :   int32_t channel-count = 1
+09-14 02:32:36.112   389  4607 D CCodec  :   string mime = "audio/raw"
+09-14 02:32:36.112   389  4607 D CCodec  :   int32_t sample-rate = 48000
+09-14 02:32:36.112   389  4607 D CCodec  :   int32_t channel-mask = 1
+09-14 02:32:36.112   389  4607 D CCodec  : }
+09-14 02:32:36.112   389  4607 I CCodecConfig: query failed after returning 7 values (BAD_INDEX)
+09-14 02:32:36.112   389  4607 I MediaCodec: MediaCodec will operate in async mode
+09-14 02:32:36.112   389  4606 D MediaCodec: keep callback message for reclaim
+09-14 02:32:36.112   389  4607 W Codec2Client: query -- param skipped: index = 1342179345.
+09-14 02:32:36.112   389  4607 W Codec2Client: query -- param skipped: index = 2415921170.
+09-14 02:32:36.112   389  4607 D C2Store : Using DMABUF Heaps
+09-14 02:32:36.112   389  4607 D CCodecBufferChannel: [c2.android.vorbis.decoder#197] Created input block pool with allocatorID 16 => poolID 17 - OK (0)
+09-14 02:32:36.113   518   543 D BufferPoolAccessor2.0: bufferpool2 0xb400007a284f94b8 : 0(0 size) total buffers - 0(0 size) used buffers - 0/7 (recycle/alloc) - 6/18 (fetch/transfer)
+09-14 02:32:36.113   518   543 D BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007a284f94b8 cached: 0/0M, 0/0% in use; allocs: 7, 0% recycled; transfers: 18, 67% unfetched
+09-14 02:32:36.113   691  1000 D BufferPoolAccessor2.0: bufferpool2 0xb400007a284d8328 : 0(0 size) total buffers - 0(0 size) used buffers - 1/7 (recycle/alloc) - 6/36 (fetch/transfer)
+09-14 02:32:36.113   389  4607 I CCodecBufferChannel: [c2.android.vorbis.decoder#197] Created output block pool with allocatorID 16 => poolID 26 - OK
+09-14 02:32:36.113   691  1000 D BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007a284d8328 cached: 0/0M, 0/0% in use; allocs: 7, 14% recycled; transfers: 36, 83% unfetched
+09-14 02:32:36.113   389  4607 D CCodecBufferChannel: [c2.android.vorbis.decoder#197] Configured output block pool ids 26 => OK
+09-14 02:32:36.113   691  1000 D BufferPoolAccessor2.0: bufferpool2 0xb400007a284cea88 : 0(0 size) total buffers - 0(0 size) used buffers - 2/7 (recycle/alloc) - 5/38 (fetch/transfer)
+09-14 02:32:36.113   691  1000 D BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007a284cea88 cached: 0/0M, 0/0% in use; allocs: 7, 29% recycled; transfers: 38, 87% unfetched
+09-14 02:32:36.113   691  1000 D BufferPoolAccessor2.0: bufferpool2 0xb400007a284d0d38 : 0(0 size) total buffers - 0(0 size) used buffers - 2/7 (recycle/alloc) - 5/18 (fetch/transfer)
+09-14 02:32:36.113   691  1000 D BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007a284d0d38 cached: 0/0M, 0/0% in use; allocs: 7, 29% recycled; transfers: 18, 72% unfetched
+09-14 02:32:36.113   518   543 D BufferPoolAccessor2.0: bufferpool2 0xb400007a284fa988 : 0(0 size) total buffers - 0(0 size) used buffers - 2/7 (recycle/alloc) - 5/24 (fetch/transfer)
+09-14 02:32:36.113   518   543 D BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007a284fa988 cached: 0/0M, 0/0% in use; allocs: 7, 29% recycled; transfers: 24, 79% unfetched
+09-14 02:32:36.113   389  4607 I DMABUFHEAPS: Using DMA-BUF heap named: system
+09-14 02:32:36.113   518   543 D BufferPoolAccessor2.0: bufferpool2 0xb400007a28500f48 : 0(0 size) total buffers - 0(0 size) used buffers - 1/7 (recycle/alloc) - 6/34 (fetch/transfer)
+09-14 02:32:36.113   518   543 D BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007a28500f48 cached: 0/0M, 0/0% in use; allocs: 7, 14% recycled; transfers: 34, 82% unfetched
+09-14 02:32:36.113   518   543 D BufferPoolAccessor2.0: bufferpool2 0xb400007a284fcc38 : 0(0 size) total buffers - 0(0 size) used buffers - 1/7 (recycle/alloc) - 6/34 (fetch/transfer)
+09-14 02:32:36.113   518   543 D BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007a284fcc38 cached: 0/0M, 0/0% in use; allocs: 7, 14% recycled; transfers: 34, 82% unfetched
+09-14 02:32:36.113   518   791 D BufferPoolAccessor2.0: bufferpool2 0xb400007a284fa738 : 0(0 size) total buffers - 0(0 size) used buffers - 2/7 (recycle/alloc) - 5/26 (fetch/transfer)
+09-14 02:32:36.113   404  4611 D SimpleC2Component: Using output block pool with poolID 26 => got 26 - 0
+09-14 02:32:36.113   518   791 D BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007a284fa738 cached: 0/0M, 0/0% in use; allocs: 7, 29% recycled; transfers: 26, 81% unfetched
+09-14 02:32:36.113   518   791 D BufferPoolAccessor2.0: bufferpool2 0xb400007a284f8488 : 0(0 size) total buffers - 0(0 size) used buffers - 2/7 (recycle/alloc) - 5/24 (fetch/transfer)
+09-14 02:32:36.113   518   791 D BufferPoolAccessor2.0: Destruction - bufferpool2 0xb400007a284f8488 cached: 0/0M, 0/0% in use; allocs: 7, 29% recycled; transfers: 24, 79% unfetched
+09-14 02:32:36.125  4546  4546 V threaded_app: Resume: 0xb400007a384b7d10
+09-14 02:32:36.126  4546  4585 V threaded_app: activityState=12
+09-14 02:32:36.133   518  2136 W WindowManager: Failed looking up window session=Session{272d582 4546:u0a10146} callers=com.android.server.wm.WindowManagerService.windowForClientLocked:5599 com.android.server.wm.Session.insetsModified:629 android.view.IWindowSession$Stub.onTransact:1151
+09-14 02:32:36.139  4546  4546 I Choreographer: Skipped 51 frames!  The application may be doing too much work on its main thread.
+09-14 02:32:36.142  4546  4546 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 02:32:36.142  4546  4546 V threaded_app: WindowInsetsChanged: 0xb400007a384b7d10
+09-14 02:32:36.143  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:36.143561Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 02:32:36.143  4546  4585 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 02:32:36.146   355   482 D AudioFlinger: Client defaulted notificationFrames to 12213 for frameCount 24426
+09-14 02:32:36.147   358   892 W ServiceManager: Permission failure: android.permission.ACCESS_SURFACE_FLINGER from uid=10146 pid=4546
+09-14 02:32:36.147   358   892 D PermissionCache: checking android.permission.ACCESS_SURFACE_FLINGER for uid=10146 => denied (89 us)
+09-14 02:32:36.147   358   892 W ServiceManager: Permission failure: android.permission.ROTATE_SURFACE_FLINGER from uid=10146 pid=4546
+09-14 02:32:36.147   358   892 D PermissionCache: checking android.permission.ROTATE_SURFACE_FLINGER for uid=10146 => denied (82 us)
+09-14 02:32:36.147   518   539 D CompatibilityChangeReporter: Compat change id reported: 158002302; UID 10146; state: ENABLED
+09-14 02:32:36.150  4546  4546 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 02:32:36.151  4546  4546 V threaded_app: WindowInsetsChanged: 0xb400007a384b7d10
+09-14 02:32:36.151  4546  4546 V threaded_app: ContentRectChanged: 0xb400007a384b7d10 -- (0 0) (2340 1080)
+09-14 02:32:36.151  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:36.151931Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 02:32:36.151  4546  4585 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 02:32:36.151  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:36.151980Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: find a way to notify application of content rect change
+09-14 02:32:36.151  4546  4585 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: find a way to notify application of content rect change
+09-14 02:32:36.152  4546  4546 V GameActivity: onSurfaceCreated_native
+09-14 02:32:36.152  4546  4546 V threaded_app: NativeWindowCreated: 0xb400007a384b7d10 -- 0xb400007ac864d3e0
+09-14 02:32:36.152  4546  4546 V threaded_app: android_app_set_window called
+09-14 02:32:36.153  4546  4573 D HostConnection: createUnique: call
+09-14 02:32:36.153  4546  4573 D HostConnection: HostConnection::get() New Host Connection established 0xb4000079d84db810, tid 4573
+09-14 02:32:36.154  4546  4573 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-14 02:32:36.155  4546  4573 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-14 02:32:36.155  4546  4573 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-14 02:32:36.157   355   482 D AF::TrackHandle: OpPlayAudio: track:55 usage:5 not muted
+09-14 02:32:36.158  4546  4585 V threaded_app: APP_CMD_INIT_WINDOW
+09-14 02:32:36.158  4546  4546 V threaded_app: NativeWindowResized: 0xb400007a384b7d10 -- 0xb400007ac864d3e0 ( 2340 x 1080 )
+09-14 02:32:36.158  4546  4546 V threaded_app: NativeWindowRedrawNeeded: 0xb400007a384b7d10 -- 0xb400007ac864d3e0
+09-14 02:32:36.158  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:36.158675Z[0m [32m INFO[0m [2mbevy_winit::system[0m[2m:[0m Creating new window mir2-web3 (android) (105v0)
+09-14 02:32:36.158  4546  4585 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_winit-0.19.0/sCreating new window mir2-web3 (android) (105v0)
+09-14 02:32:36.161  4546  4573 D EGL_emulation: eglCreateContext: 0xb4000079d84d97d0: maj 3 min 1 rcv 4
+09-14 02:32:36.161  4546  4573 D EGL_emulation: eglMakeCurrent: 0xb4000079d84d97d0: ver 3 1 (tinfo 0x7bf9731200) (first time)
+09-14 02:32:36.174   321  4618 I android.hardware.audio.service: external/tinyalsa_new/src/mixer.c:736:26: runtime error: unsigned integer overflow: 0 - 1 cannot be represented in type 'unsigned int'
+09-14 02:32:36.175   321  4618 I android.hardware.audio.service: SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior external/tinyalsa_new/src/mixer.c:736:26 in
+09-14 02:32:36.179   358   461 E HWComposer: getSupportedContentTypes: getSupportedContentTypes failed for display 4619827259835644672: Unsupported (8)
+09-14 02:32:36.180   184   184 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+09-14 02:32:36.180  4546  4573 I Gralloc4: mapper 4.x is not supported
+09-14 02:32:36.181  4546  4573 D HostConnection: createUnique: call
+09-14 02:32:36.181  4546  4573 D HostConnection: HostConnection::get() New Host Connection established 0xb4000079d84db450, tid 4573
+09-14 02:32:36.181  4546  4573 D goldfish-address-space: allocate: Ask for block of size 0x100
+09-14 02:32:36.181  4546  4573 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1f3ff8000 size 0x8000
+09-14 02:32:36.182   184   184 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.allocator@4.0::IAllocator/default in either framework or device VINTF manifest.
+09-14 02:32:36.182  4546  4573 W Gralloc4: allocator 4.x is not supported
+09-14 02:32:36.182   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f5d3c000 0x1f66e0000]
+09-14 02:32:36.196  4546  4573 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-14 02:32:36.208   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f49dc000 0x1f5380000]
+09-14 02:32:36.212   691   818 D StartingSurfaceDrawer: Task start finish, remove starting surface for task 414
+09-14 02:32:36.212   691   818 V StartingSurfaceDrawer: Removing splash screen window for task: 414
+09-14 02:32:36.213   518   535 I ActivityTaskManager: Displayed com.mir2.web3.uipreview/com.mir2.web3.MainActivity: +1s256ms
+09-14 02:32:36.228    37    37 I snd_hda_intel 0000: 00:01.0: IRQ timing workaround is activated for card #0. Suggest a bigger bdl_pos_adj.
+09-14 02:32:36.230  4546  4546 V threaded_app: WindowFocusChanged: 0xb400007a384b7d10 -- 1
+09-14 02:32:36.236  1222  1222 I GoogleInputMethodService: GoogleInputMethodService.onFinishInput():3420
+09-14 02:32:36.236  1222  1222 I GoogleInputMethodService: GoogleInputMethodService.onStartInput():2002
+09-14 02:32:36.236  1222  1222 I DeviceUnlockedTag: DeviceUnlockedTag.notifyDeviceLockStatusChanged():31 Notify device unlocked.
+09-14 02:32:36.237   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f9248000 0x1f9bec000]
+09-14 02:32:36.250  4546  4546 V GameActivity: onImeInsetsChanged from Text Listener
+09-14 02:32:36.250  4546  4546 V threaded_app: WindowInsetsChanged: 0xb400007a384b7d10
+09-14 02:32:36.259   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f9bec000 0x1fa590000]
+09-14 02:32:36.279   355   493 D AudioFlinger: mixer(0xb400007bbbe81a70) throttle end: throttle time(40)
+09-14 02:32:36.475   355   493 D AudioFlinger: mixer(0xb400007bbbe81a70) throttle end: throttle time(3)
+09-14 02:32:36.476   518   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+09-14 02:32:36.476   518   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+09-14 02:32:36.533   518  2136 W InputManager-JNI: Input channel object '5705bf2 Splash Screen com.mir2.web3.uipreview (client)' was disposed without first being removed with the input manager!
+09-14 02:32:36.564   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f66e0000 0x1f7084000]
+09-14 02:32:36.565   518   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+09-14 02:32:36.565   518   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+09-14 02:32:36.634  1063  2291 I FontLog : Received query Noto Color Emoji Compat, URI content://com.google.android.gms.fonts [CONTEXT service_id=132 ]
+09-14 02:32:36.635  1063  2291 I FontLog : Query [emojicompat-emoji-font] resolved to {Noto Color Emoji Compat, wdth 100.0, wght 400, ital 0.0, bestEffort false} [CONTEXT service_id=132 ]
+09-14 02:32:36.636  1063  2291 I FontLog : Fetch {Noto Color Emoji Compat, wdth 100.0, wght 400, ital 0.0, bestEffort false} end status Status{statusCode=SUCCESS, resolution=null} [CONTEXT service_id=132 ]
+09-14 02:32:36.637  1063  1298 I FontLog : Pulling font file for id = 12, cache size = 11 [CONTEXT service_id=132 ]
+09-14 02:32:36.640  1063  1568 I FontLog : Pulling font file for id = 12, cache size = 11 [CONTEXT service_id=132 ]
+09-14 02:32:36.675   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1fa590000 0x1faf34000]
+09-14 02:32:36.719   691   825 D EGL_emulation: app_time_stats: avg=97.92ms min=2.34ms max=669.54ms count=11
+09-14 02:32:36.721   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7d60000 0x1f7dec000]
+09-14 02:32:36.815   318  4603 I resolv  : retrying_poll: 58 retrying_poll returning 1
+09-14 02:32:36.815  1063  4480 E GmsTaskScheduler: sendWakeUpEvent called on SchedulerClientBroadcastStrategy
+09-14 02:32:36.820   318  4602 I resolv  : retrying_poll: 56 retrying_poll returning 1
+09-14 02:32:36.820   318  4602 I resolv  : res_nsend: used send_dg 104 terrno: 0
+09-14 02:32:36.820   318  4602 I resolv  : res_stats_set_sample: rcode = 0, sec = 852
+09-14 02:32:36.820   318  4602 I resolv  : res_cache_add_stats_sample_locked: adding sample to stats, next = 56, count = 56
+09-14 02:32:36.820   318  4602 D resolv  : res_nsend: got answer:
+09-14 02:32:36.820   318  4602 I resolv  : answer_getTTL: TTL = 1
+09-14 02:32:36.820   318  4602 I resolv  : _cache_add_p: entry 30 added (count=11)
+09-14 02:32:36.820   318  4602 I resolv  : cache_dump_mru_locked: MRU LIST (11):  30 1 29 28 20 19 17 16 15 14 9
+09-14 02:32:36.818   318  4603 I resolv  : res_nsend: used send_dg 48 terrno: 0
+09-14 02:32:36.822   318  4603 I resolv  : res_stats_set_sample: rcode = 0, sec = 849
+09-14 02:32:36.822   318  4603 I resolv  : res_cache_add_stats_sample_locked: adding sample to stats, next = 57, count = 57
+09-14 02:32:36.822   318  4603 D resolv  : res_nsend: got answer:
+09-14 02:32:36.822   318  4603 I resolv  : answer_getTTL: TTL = 1
+09-14 02:32:36.822   318  4603 I resolv  : _cache_add_p: entry 31 added (count=12)
+09-14 02:32:36.822   318  4603 I resolv  : cache_dump_mru_locked: MRU LIST (12):  31 30 1 29 28 20 19 17 16 15 14 9
+09-14 02:32:36.823   318  4601 I resolv  : retrying_poll: 60 retrying_poll returning 1
+09-14 02:32:36.823   318  4601 I resolv  : res_nsend: used send_dg 32 terrno: 0
+09-14 02:32:36.823   318  4601 I resolv  : res_stats_set_sample: rcode = 0, sec = 848
+09-14 02:32:36.823   318  4601 I resolv  : res_cache_add_stats_sample_locked: adding sample to stats, next = 58, count = 58
+09-14 02:32:36.823   318  4601 D resolv  : res_nsend: got answer:
+09-14 02:32:36.823   318  4601 I resolv  : answer_getTTL: TTL = 0
+09-14 02:32:36.823   318  4601 I resolv  : cache_dump_mru_locked: MRU LIST (12):  31 30 1 29 28 20 19 17 16 15 14 9
+09-14 02:32:36.826   793  4600 D NetworkMonitor/101: PROBE_DNS connectivitycheck.gstatic.com 859ms OK 220.181.174.98
+09-14 02:32:36.826   793  4599 D NetworkMonitor/101: PROBE_DNS www.google.com 860ms OK 28.0.0.73
+09-14 02:32:36.827  1063  1150 W GLSUser : [AppCertManager] Failed to get security token.
+09-14 02:32:36.827  1063  1150 W GLSUser : java.io.IOException: Invalid scope
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at zcd.e(:com.google.android.gms@214218053@21.42.18 (190400-410302452):22)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at zcd.d(:com.google.android.gms@214218053@21.42.18 (190400-410302452):7)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at zcd.c(:com.google.android.gms@214218053@21.42.18 (190400-410302452):0)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at hzf.b(:com.google.android.gms@214218053@21.42.18 (190400-410302452):12)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at hzd.b(:com.google.android.gms@214218053@21.42.18 (190400-410302452):2)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at hyz.a(:com.google.android.gms@214218053@21.42.18 (190400-410302452):0)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at fkn.d(:com.google.android.gms@214218053@21.42.18 (190400-410302452):5)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at gma.call(:com.google.android.gms@214218053@21.42.18 (190400-410302452):13)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at pzh.c(:com.google.android.gms@214218053@21.42.18 (190400-410302452):6)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at pzh.run(:com.google.android.gms@214218053@21.42.18 (190400-410302452):7)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at qdn.run(:com.google.android.gms@214218053@21.42.18 (190400-410302452):0)
+09-14 02:32:36.827  1063  1150 W GLSUser : 	at java.lang.Thread.run(Thread.java:920)
+09-14 02:32:36.827   318  4631 D resolv  : GetAddrInfoHandler::run: {101 983141 101 983141 1073 1}
+09-14 02:32:36.827   318  4631 D resolv  : resolv_getaddrinfo: explore_fqdn(): ai_family=0 ai_socktype=1 ai_protocol=6
+09-14 02:32:36.829  1063  1150 I Auth    : [ReflectiveChannelBinder] Successfully bound channel!
+09-14 02:32:36.830   318  4632 D resolv  : GetAddrInfoHandler::run: {101 983141 101 983141 1073 1}
+09-14 02:32:36.830   318  4632 D resolv  : resolv_getaddrinfo: explore_fqdn(): ai_family=0 ai_socktype=1 ai_protocol=6
+09-14 02:32:36.831   318  4633 D resolv  : doQuery: (1, 28)
+09-14 02:32:36.831   318  4633 D resolv  : res_nmkquery: (QUERY, IN, AAAA)
+09-14 02:32:36.831   318  4633 D resolv  : res_nsend
+09-14 02:32:36.831   318  4633 I resolv  : resolv_cache_lookup: lookup
+09-14 02:32:36.831   318  4633 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0xb400007ba079e690
+09-14 02:32:36.831   318  4633 D resolv  : doQuery: rcode=0, ancount=0
+09-14 02:32:36.831   318  4635 D resolv  : doQuery: (1, 28)
+09-14 02:32:36.831   318  4635 D resolv  : res_nmkquery: (QUERY, IN, AAAA)
+09-14 02:32:36.831   318  4635 D resolv  : res_nsend
+09-14 02:32:36.831   318  4635 I resolv  : resolv_cache_lookup: lookup
+09-14 02:32:36.831   318  4635 I resolv  : resolv_cache_lookup: NOT IN CACHE
+09-14 02:32:36.831   318  4635 I resolv  : resolv_populate_res_for_net: netid=101
+09-14 02:32:36.831   318  4635 I resolv  : res_stats_usable_server: NS stats: S 59 + E 0 + T 0 + I 0 = 59, rtt = 1228, min_samples = 8
+09-14 02:32:36.831   318  4635 I resolv  : res_stats_usable_server: success rate 100
+09-14 02:32:36.831   318  4635 D resolv  : res_nsend: Querying server (# 1) address = 10.0.2.3:53
+09-14 02:32:36.831   318  4635 D resolv  : send_dg: new DG socket
+09-14 02:32:36.831   318  4635 I resolv  : get_timeout: using timeout of 5000 msec
+09-14 02:32:36.831   318  4635 I resolv  : retrying_poll: 56 retrying_poll
+09-14 02:32:36.832   318  4634 D resolv  : doQuery: (1, 1)
+09-14 02:32:36.832   318  4634 D resolv  : res_nmkquery: (QUERY, IN, A)
+09-14 02:32:36.833   318  4634 D resolv  : res_nsend
+09-14 02:32:36.833   318  4634 I resolv  : resolv_cache_lookup: lookup
+09-14 02:32:36.833   318  4634 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0xb400007b907a2070
+09-14 02:32:36.833   318  4634 D resolv  : doQuery: rcode=0, ancount=1
+09-14 02:32:36.833   318  4637 D resolv  : GetAddrInfoHandler::run: {101 786533 101 983141 10099 0}
+09-14 02:32:36.833   318  4637 D resolv  : resolv_getaddrinfo: explore_fqdn(): ai_family=0 ai_socktype=1 ai_protocol=6
+09-14 02:32:36.833   318  4631 I ResolverController: No valid NAT64 prefix (101, <unspecified>/0)
+09-14 02:32:36.835   318  4636 D resolv  : doQuery: (1, 1)
+09-14 02:32:36.835   318  4636 D resolv  : res_nmkquery: (QUERY, IN, A)
+09-14 02:32:36.835   318  4636 D resolv  : res_nsend
+09-14 02:32:36.835   318  4636 I resolv  : resolv_cache_lookup: lookup
+09-14 02:32:36.835   318  4636 I resolv  : resolv_cache_lookup: FOUND IN CACHE entry=0xb400007b7079edd0
+09-14 02:32:36.835   318  4636 D resolv  : doQuery: rcode=0, ancount=1
+09-14 02:32:36.838   318  4639 D resolv  : doQuery: (1, 1)
+09-14 02:32:36.838   318  4639 D resolv  : res_nmkquery: (QUERY, IN, A)
+09-14 02:32:36.838   318  4639 D resolv  : res_nsend
+09-14 02:32:36.838   318  4639 I resolv  : resolv_cache_lookup: lookup
+09-14 02:32:36.838   318  4639 I resolv  : resolv_cache_lookup: NOT IN CACHE (STALE ENTRY 0xb400007b8079cb50DISCARDED)
+09-14 02:32:36.838   318  4639 I resolv  : _cache_remove_p: entry 19 removed (count=11)
+09-14 02:32:36.838   318  4639 I resolv  : resolv_populate_res_for_net: netid=101
+09-14 02:32:36.838   318  4638 D resolv  : doQuery: (1, 28)
+09-14 02:32:36.838   318  4638 D resolv  : res_nmkquery: (QUERY, IN, AAAA)
+09-14 02:32:36.838   318  4638 D resolv  : res_nsend
+09-14 02:32:36.838   318  4638 I resolv  : resolv_cache_lookup: lookup
+09-14 02:32:36.838   318  4638 I resolv  : resolv_cache_lookup: NOT IN CACHE
+09-14 02:32:36.838   318  4638 I resolv  : resolv_populate_res_for_net: netid=101
+09-14 02:32:36.838   318  4638 I resolv  : res_stats_usable_server: NS stats: S 59 + E 0 + T 0 + I 0 = 59, rtt = 1228, min_samples = 8
+09-14 02:32:36.838   318  4638 I resolv  : res_stats_usable_server: success rate 100
+09-14 02:32:36.838   318  4638 D resolv  : res_nsend: Querying server (# 1) address = 10.0.2.3:53
+09-14 02:32:36.838   318  4638 D resolv  : send_dg: new DG socket
+09-14 02:32:36.839   318  4638 I resolv  : get_timeout: using timeout of 5000 msec
+09-14 02:32:36.839   318  4638 I resolv  : retrying_poll: 54 retrying_poll
+09-14 02:32:36.841   318  4639 I resolv  : res_stats_usable_server: NS stats: S 59 + E 0 + T 0 + I 0 = 59, rtt = 1228, min_samples = 8
+09-14 02:32:36.841   318  4639 I resolv  : res_stats_usable_server: success rate 100
+09-14 02:32:36.841   318  4639 D resolv  : res_nsend: Querying server (# 1) address = 10.0.2.3:53
+09-14 02:32:36.841   318  4639 D resolv  : send_dg: new DG socket
+09-14 02:32:36.841   318  4639 I resolv  : get_timeout: using timeout of 5000 msec
+09-14 02:32:36.841   318  4639 I resolv  : retrying_poll: 58 retrying_poll
+09-14 02:32:36.906  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:36.906087Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_UI_PREVIEW_READY scene=world-render
+09-14 02:32:36.906  4546  4585 I event src/ui_preview.rs:628: ANDROID_UI_PREVIEW_READY scene=world-render
+09-14 02:32:36.910  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:36.910893Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+09-14 02:32:36.910  4546  4588 D HostConnection: createUnique: call
+09-14 02:32:36.911  4546  4588 D HostConnection: HostConnection::get() New Host Connection established 0xb4000079d84dc890, tid 4588
+09-14 02:32:36.912  4546  4588 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_1
+09-14 02:32:36.912  4546  4588 D EGL_emulation: eglMakeCurrent: 0xb4000079d84c1050: ver 3 1 (tinfo 0x7bf9731280) (first time)
+09-14 02:32:36.919  4546  4585 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+09-14 02:32:37.035   188   188 I logd    : logdr: UID=2000 GID=2000 PID=4641 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-14 02:32:37.143   335   398 D goldfish-address-space: claimShared: Ask to claim region [0x1f7084000 0x1f7a28000]
+09-14 02:32:37.315   318  4635 I resolv  : retrying_poll: 56 retrying_poll returning 1
+09-14 02:32:37.315   318  4635 I resolv  : res_nsend: used send_dg 32 terrno: 0
+09-14 02:32:37.315   318  4635 I resolv  : res_stats_set_sample: rcode = 0, sec = 484
+09-14 02:32:37.315   318  4635 I resolv  : res_cache_add_stats_sample_locked: adding sample to stats, next = 59, count = 59
+09-14 02:32:37.315   318  4635 D resolv  : res_nsend: got answer:
+09-14 02:32:37.315   318  4635 I resolv  : answer_getTTL: TTL = 0
+09-14 02:32:37.315   318  4635 I resolv  : cache_dump_mru_locked: MRU LIST (11):  31 1 30 29 28 20 17 16 15 14 9
+09-14 02:32:37.315   318  4635 D resolv  : doQuery: rcode=0, ancount=0
+09-14 02:32:37.316   318  4632 I ResolverController: No valid NAT64 prefix (101, <unspecified>/0)
+09-14 02:32:37.317   318  4639 I resolv  : retrying_poll: 58 retrying_poll returning 1
+09-14 02:32:37.317   318  4639 I resolv  : res_nsend: used send_dg 56 terrno: 0
+09-14 02:32:37.317   318  4639 I resolv  : res_stats_set_sample: rcode = 0, sec = 476
+09-14 02:32:37.317   318  4639 I resolv  : res_cache_add_stats_sample_locked: adding sample to stats, next = 60, count = 60
+09-14 02:32:37.317   318  4639 D resolv  : res_nsend: got answer:
+09-14 02:32:37.317   318  4639 I resolv  : answer_getTTL: TTL = 1
+09-14 02:32:37.317   318  4639 I resolv  : _cache_add_p: entry 32 added (count=12)
+09-14 02:32:37.317   318  4639 I resolv  : cache_dump_mru_locked: MRU LIST (12):  32 31 1 30 29 28 20 17 16 15 14 9
+09-14 02:32:37.317   318  4639 D resolv  : doQuery: rcode=0, ancount=1
+09-14 02:32:37.317   318  4638 I resolv  : retrying_poll: 54 retrying_poll returning 1
+09-14 02:32:37.317   318  4638 I resolv  : res_nsend: used send_dg 40 terrno: 0
+09-14 02:32:37.317   318  4638 I resolv  : res_stats_set_sample: rcode = 0, sec = 478
+09-14 02:32:37.317   318  4638 I resolv  : res_cache_add_stats_sample_locked: adding sample to stats, next = 61, count = 61
+09-14 02:32:37.317   318  4638 D resolv  : res_nsend: got answer:
+09-14 02:32:37.317   318  4638 I resolv  : answer_getTTL: TTL = 0
+09-14 02:32:37.317   318  4638 I resolv  : cache_dump_mru_locked: MRU LIST (12):  32 31 1 30 29 28 20 17 16 15 14 9
+09-14 02:32:37.317   318  4638 D resolv  : doQuery: rcode=0, ancount=0
+09-14 02:32:37.318   318  4637 I ResolverController: No valid NAT64 prefix (101, <unspecified>/0)
+09-14 02:32:37.348  4546  4583 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=32 entity_live=false entity_self_visible=false entity_layers=2
+09-14 02:32:37.389  4546  4583 I RustStdoutStderr: [runtime-map] waiting-standalone missing=[native-map-keyed:aa9aaaf2b454da86f830df83051919b78591eccd79b0d652e2c946c1e479d891,native-map-keyed:65b87ccadfc93885daa0b0dc990e0208dce85008de840713258d72b4b63bd1c0,native-map-keyed:fe408a39dddb5e957c2c1fc1ec81cd7c943783361055ff8db9047d66c8dfc464,native-map-keyed:90ca75cb64ab17a25798af4e6c4d4555b9be4e2a51d4b7e792537d4bde7f7822,native-map-keyed:96647ef10e2fa2df1d224b599bda5456454f4d3fe2238109ad231e63b1b5aa05,native-map-keyed:b9860402c1e352eb7590276c0d8bbce87098b178f121a7b64740ff18a6317329,native-map-keyed:ba760433cd7414e24e51f6ea75d660b5222f55ad8d7851f50b45bf06ad6bfb15,native-map-keyed:26aa612a5755ef95b03c2bfb8c32208b7b862aa4abbf134fa4f9741e95aa173b,native-map-keyed:e8411c39eebac124a550dc010f60bc9ca0133f45ecef561d421b7c05b25fadb4,native-map-keyed:5b989e10335bf3eab5150333209b45050a280e234a8be2cefa3bed4eca0fb430,native-map-keyed:f99ca06f005fa6de70041288a4f604e48b4dca6a9e06d962f27975c16ad4b78d,native-map-keyed:b2312a0f6a633ad59cbf1224fa97c5ccd96e6f1d40bab2c56278c7675a7fec16,native-map-keyed:8e12f616e3e9ba73d162821f0e3d9fe525e24a06d336c22e8bafd227b546a216,native-map-keyed:d201f992ba0b2ca87100e052805d6aef9ef5e4a605b39a0696a039d087b8bd71,native-map-keyed:3833a31d0270eb65c74ff8a8b3334f035838c35031c48908ec6586f4ed1d0e53,native-map-keyed:a3bbae3aa38ae2487c395ec573335305a7f5a04bba0bfb829207f359c31df81c,native-map-keyed:c0fb45e9956765f71d9a59c67240104aa3b57a7e447fd45d68147e8876a26baa,native-map-keyed:232bfc461f055784e7d90e5e0378d3cea8317eb078c4bf66e7afe999812ff902,native-map-keyed:d40064aedb300a0c590d9fa3f3204b91021a61499c08f9d0716cc0f36620b6a9,native-map-keyed:43ec2c30ef193e5c996b16008cfb05b9f11fbf8dd2949b49c06ea4e5de4befbd,native-map-keyed:ffc093f86a65f8e00a03c2f443f7ef262a448b6e60f25eabe63582f03c04c313,native-map-keyed:357ae499cdc01c6fb8e7f6a351f31e453a56bc0be6a8b044a7d5b03d97e69edc,native-map-keyed:142960f1af1b8faa165eb1b55b57fc14db26156287a4c5ca23e035daf9f10e33,native-map-keyed:fc858961ab49b6744d95b643f4286f3aae93febfa3d52f62d18afcf258a9a342,native-map-keyed:d1bd1ece243fe2a29604f31a4d0f638bee60543ead0de466166a000c46a11617,native-map-keyed:6ba897f8b82efa0a41f233589ef528ceb6822f487542ac6cc926797af456e5ab,native-map-keyed:c60c7238cc4b5e882db07db460ffca6bebf61f020fced87785c279c17334092c,native-map-keyed:04f2f6406275680ee10c2bb613e324d59e0dea10befb67479d5db488f1e5e9bf,native-map-keyed:80b981fe9eace4f6c8fa494e0a3c4cc1c707ebfecc40d9a4434c5789e3052e1b,native-map-keyed:6ef860ce7467e486f22d5dd1745ad76623a2c321a0104fc346a8aa09e671e707,native-map-keyed:a87dbfa37b42f082b27d4ddbc51291b9c1574e745af424c13649911269324824,native-map-keyed:37709d68b8604ed7f6347c1a061a887ab60c06d4a241460107a11861aab3a484,native-map-keyed:e00b4c4d2b781f2a9182fa8923db3f219d9dc2301bf6803e1b58fd51d01be1cd,native-map-keyed:d2a6feb956b426eb88640e39bcfaaf5b7eb53c2ae46903ed06ac54db9675c3be,native-map-keyed:55d52696ef087177ceeeadbcc9497188994ad6423bd844b5711ef3f86f8dfdf7,native-map-keyed:60593053797e508260c66f2dccb2147fab3fd0583aebd36139637b2191310d19,native-map-keyed:58ba917565b84b2d1ccba0b6fc186abc6d44127eb4519d53924ab018c54447cf,native-map-keyed:02fcf4c4c475d1c1002d45563f34bf90aabc5d57865a90a9c1d738eea292c519,native-map-keyed:226a0bac665d1bf713b8baf39ecf7ae61be856189d1cf823921ed0e53a5c29fe,native-map-keyed:4994bb7eb67876e03625726b9c449243db24f41e661e82d6a174a9f607afc3a4,native-map-keyed:c5aedaadc41e9474fd79125972e0f4bc1e30f8c7142d7d934d6df890f3be78e2,native-map-keyed:2c76f7575f3d1661681533a2ed2893f96c1f4b914bcfd60ae32c207561eb263b,native-map-keyed:2cd7444281094e689c5fe7c22a994aa527766e0665fc32b2cec42cbdc9978ab4,native-map-keyed:daac139b8048bd2ca0ae710ce274fdced5abd65987ebc71a4fd0150b8162198f,native-map-keyed:6a331d64448423171c9bd195276a89f11bc868c7f5bcfecd8d7c4d01d7aa77f4,native-map-keyed:751001c28e3ef669ffa96b3633f386939502bef3dd3529e72ee16051cc4b59e4,native-map-keyed:9193eb213fa563a95c340cb2a2ffc65d0aaaf61ae51c73664d2cde2edf4c4281,native-map-keyed:d9c8ff59b2a56ad01e23464985cbc57ac906ab954db069085708e3d95149efcd,native-map-keyed:ba105845f02f71b90b6175
+09-14 02:32:37.389  4546  4583 I RustStdoutStderr:
+09-14 02:32:37.392  4546  4583 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=214 entity_live=false entity_self_visible=false entity_layers=3
+09-14 02:32:37.520   389  4605 D AudioTrack: stop(15): called with 82980 frames delivered
+09-14 02:32:37.539  4546  4583 I RustStdoutStderr: [runtime-map] waiting-standalone missing=[native-map-keyed:d1bd1ece243fe2a29604f31a4d0f638bee60543ead0de466166a000c46a11617,native-map-keyed:80b981fe9eace4f6c8fa494e0a3c4cc1c707ebfecc40d9a4434c5789e3052e1b,native-map-keyed:60593053797e508260c66f2dccb2147fab3fd0583aebd36139637b2191310d19,native-map-keyed:c5aedaadc41e9474fd79125972e0f4bc1e30f8c7142d7d934d6df890f3be78e2,native-map-keyed:9193eb213fa563a95c340cb2a2ffc65d0aaaf61ae51c73664d2cde2edf4c4281,native-map-keyed:c49abaad33bc768006dc4ffaaa3f2426c87aec52d492e6d991be5d84ff024a4d,native-map-keyed:e4261c2ac122f22d06a39cf5fa7733b3d5352d15c62913d87acb31d796bfa00e,native-map-keyed:d55df9cadf87a4521e874ad3f1da63ad40717aa00136d10948d16dcc955a446d,native-map-keyed:e4261c2ac122f22d06a39cf5fa7733b3d5352d15c62913d87acb31d796bfa00e,native-map-keyed:e4261c2ac122f22d06a39cf5fa7733b3d5352d15c62913d87acb31d796bfa00e,native-map-keyed:f8a574c8150f8045765e94a0cadb58b285ab13476433f5e520375ed51aad63e0,native-map-keyed:20625ebb957139dcbec35004f2ca784c926cdee1439035eb896dbf427495872d,native-map-keyed:898afb2da67d0a4006f64d1ea0d083fc9b33f3ffc4a0eb77f778c2ad37245750,native-map-keyed:16f3602253a4256b8bf51a103e6bbe9d36a4cfaf6771bebc72d7ca43a25c1de6,native-map-keyed:494744ff4f39df68c724b44cd92d787e09f94d63ad8273922e6c027d1b432d02,native-map-keyed:120fd8e86ad6a1121b73b64f684cad8a6e301c75c6a40787a4a564c5aadaab4a]
+09-14 02:32:37.542  4546  4583 I RustStdoutStderr: [android-world-render] map_current=false map_live=0 map_missing=0 map_image_revision=228 entity_live=false entity_self_visible=false entity_layers=3
+09-14 02:32:37.596  4546  4583 I RustStdoutStderr: [runtime-map] synced center=Some(PresentationGridCenter { x: 302, y: 634 }) tiles=607 standalone=242 live=849 missingBindings=0 sample=[]
+09-14 02:32:37.606  4546  4583 I RustStdoutStderr: [android-world-render] map_current=true map_live=849 map_missing=0 map_image_revision=228 entity_live=false entity_self_visible=false entity_layers=6
+09-14 02:32:37.816  1063  1150 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+09-14 02:32:37.816  1063  1150 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@214218053@21.42.18 (190400-410302452):2)
+09-14 02:32:37.816  1063  1150 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@214218053@21.42.18 (190400-410302452):0)
+09-14 02:32:37.816   793  4600 D NetworkMonitor/101: PROBE_HTTP http://connectivitycheck.gstatic.com/generate_204 time=989ms ret=204 request={Connection=[close], User-Agent=[Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36]} headers={null=[HTTP/1.1 204 No Content], Connection=[close], Content-Length=[0], Cross-Origin-Resource-Policy=[cross-origin], Date=[Sun, 13 Sep 2026 18:32:37 GMT], X-Android-Received-Millis=[1789324357816], X-Android-Response-Source=[NETWORK 204], X-Android-Selected-Protocol=[http/1.1], X-Android-Sent-Millis=[1789324357319]}
+09-14 02:32:37.877  4546  4583 I RustStdoutStderr: [android-world-render] map_current=true map_live=849 map_missing=0 map_image_revision=228 entity_live=true entity_self_visible=true entity_layers=12
+09-14 02:32:37.937  4546  4589 I event src/shared_shell.rs:1089: packaged Android world frame queuedrequest_id = 18446744073709551615; pages = 7; sprites = 2111; compressed_bytes = 14785921; rgba_bytes = 7340032; map_object_rgba_bytes = 10489920; map_width = 700; map_height = 700; map_atlases = 7; map_tiles = 607; map_standalone_tiles = 242; unresolved_draws = 0; entity_pages = 5; entities = 7; entity_layers = 12; unresolved_entities = 0; entity_unindexed_rects = 24; entity_compressed_bytes = 11209197; entity_rgba_bytes = 83886080; entity_manifest_sha256 = "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9";
+09-14 02:32:37.937  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:37.937578Z[0m [32m INFO[0m [2mmir2_platform_android::shared_shell[0m[2m:[0m packaged Android world frame queued [3mrequest_id[0m[2m=[0m18446744073709551615 [3mpages[0m[2m=[0m7 [3msprites[0m[2m=[0m2111 [3mcompressed_bytes[0m[2m=[0m14785921 [3mrgba_bytes[0m[2m=[0m7340032 [3mmap_object_rgba_bytes[0m[2m=[0m10489920 [3mmap_width[0m[2m=[0m700 [3mmap_height[0m[2m=[0m700 [3mmap_atlases[0m[2m=[0m7 [3mmap_tiles[0m[2m=[0m607 [3mmap_standalone_tiles[0m[2m=[0m242 [3munresolved_draws[0m[2m=[0m0 [3mentity_pages[0m[2m=[0m5 [3mentities[0m[2m=[0m7 [3mentity_layers[0m[2m=[0m12 [3munresolved_entities[0m[2m=[0m0 [3mentity_unindexed_rects[0m[2m=[0m24 [3mentity_compressed_bytes[0m[2m=[0m11209197 [3mentity_rgba_bytes[0m[2m=[0m83886080 [3mentity_manifest_sha256[0m[2m=[0m"929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9"
+09-14 02:32:37.960   518   963 I MediaFocusControl: abandonAudioFocus() from uid/pid 10135/691 clientId=android.media.AudioManager@bcf925b
+09-14 02:32:37.960   691  4581 V MediaPlayer: resetDrmState:  mDrmInfo=null mDrmProvisioningThread=null mPrepareDrmInProgress=false mActiveDrmScheme=false
+09-14 02:32:37.960   691  4581 V MediaPlayer: cleanDrmObj: mDrmObj=null mDrmSessionId=null
+09-14 02:32:37.960   389  2045 D NuPlayerDriver: reset(0xb400007c2a2b4a30) at state 6
+09-14 02:32:37.965   389  4607 I hw-BpHwBinder: onLastStrongRef automatically unlinking death recipients
+09-14 02:32:37.965   404   776 I hw-BpHwBinder: onLastStrongRef automatically unlinking death recipients
+09-14 02:32:37.966   404   776 V C2Store : in ~ComponentModule
+09-14 02:32:37.966   404   776 V C2Store : unloading dll
+09-14 02:32:37.968   389  4586 D NuPlayerDriver: notifyResetComplete(0xb400007c2a2b4a30)
+09-14 02:32:37.968   389  2045 W AMessage: failed to post message as target looper for handler 0 is gone.
+09-14 02:32:37.989  4546  4590 I event src/ui_preview.rs:385: ANDROID_OBJECT_METADATA_PRESENTATION_APPLIED
+09-14 02:32:37.989  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:37.989683Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_METADATA_PRESENTATION_APPLIED
+09-14 02:32:37.991  4546  4590 I event src/ui_preview.rs:390: ANDROID_OBJECT_POISON_PRESENTATION_APPLIED
+09-14 02:32:37.991  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:37.991295Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_POISON_PRESENTATION_APPLIED
+09-14 02:32:37.992  4546  4590 I event src/ui_preview.rs:395: ANDROID_OBJECT_HIDDEN_PRESENTATION_APPLIED
+09-14 02:32:37.992  4546  4590 I event src/ui_preview.rs:428: ANDROID_WORLD_RENDER_READYrequest_id = 18446744073709551615; center_x = 302; center_y = 634; map_tiles = 849; entities = 7; entity_layers = 12;
+09-14 02:32:37.992  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:37.992362Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_HIDDEN_PRESENTATION_APPLIED
+09-14 02:32:37.992  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:37.992423Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_WORLD_RENDER_READY [3mrequest_id[0m[2m=[0m18446744073709551615 [3mcenter_x[0m[2m=[0m302 [3mcenter_y[0m[2m=[0m634 [3mmap_tiles[0m[2m=[0m849 [3mentities[0m[2m=[0m7 [3mentity_layers[0m[2m=[0m12
+09-14 02:32:38.052  4546  4590 I event src/shared_shell.rs:1666: ANDROID_EFFECT_RENDER_STATE_READYeffect_count = 2;
+09-14 02:32:38.052  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:38.052274Z[0m [32m INFO[0m [2mmir2_platform_android::shared_shell[0m[2m:[0m ANDROID_EFFECT_RENDER_STATE_READY [3meffect_count[0m[2m=[0m2
+09-14 02:32:38.254  4546  4585 D EGL_emulation: app_time_stats: avg=104.25ms min=30.54ms max=454.48ms count=15
+09-14 02:32:38.740  1063  1150 W Conscrypt: Could not set socket write timeout: java.net.SocketException: Socket closed
+09-14 02:32:38.740  1063  1150 W Conscrypt: 	at com.google.android.gms.org.conscrypt.Platform.setSocketWriteTimeout(:com.google.android.gms@214218053@21.42.18 (190400-410302452):2)
+09-14 02:32:38.740  1063  1150 W Conscrypt: 	at com.google.android.gms.org.conscrypt.ConscryptFileDescriptorSocket.setSoWriteTimeout(:com.google.android.gms@214218053@21.42.18 (190400-410302452):0)
+09-14 02:32:39.065   188   188 I logd    : logdr: UID=2000 GID=2000 PID=4645 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-14 02:32:39.290  4546  4585 D EGL_emulation: app_time_stats: avg=54.47ms min=38.73ms max=141.76ms count=19
+09-14 02:32:39.537  4546  4589 I event src/ui_preview.rs:103: ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED
+09-14 02:32:39.537  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:39.537739Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED
+09-14 02:32:39.540  4546  4589 I event src/ui_preview.rs:111: ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED
+09-14 02:32:39.540  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:39.540163Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED
+09-14 02:32:39.542  4546  4589 I event src/ui_preview.rs:122: ANDROID_ARCHER_RANGE_PRESENTATION_STARTED
+09-14 02:32:39.542  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:39.542027Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_ARCHER_RANGE_PRESENTATION_STARTED
+09-14 02:32:39.543  4546  4589 I event src/ui_preview.rs:133: ANDROID_OBJECT_DASH_PRESENTATION_APPLIED
+09-14 02:32:39.543  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:39.543330Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_DASH_PRESENTATION_APPLIED
+09-14 02:32:39.544  4546  4589 I event src/ui_preview.rs:144: ANDROID_MOUNTED_ATTACK_PRESENTATION_STARTED
+09-14 02:32:39.544  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:39.544531Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_MOUNTED_ATTACK_PRESENTATION_STARTED
+09-14 02:32:39.545  4546  4589 I event src/ui_preview.rs:155: ANDROID_OBJECT_PUSHED_PRESENTATION_APPLIED
+09-14 02:32:39.545  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:39.545541Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_PUSHED_PRESENTATION_APPLIED
+09-14 02:32:39.637  4546  4585 I event src/ui_preview.rs:321: ANDROID_REMOTE_BACKSTEP_POSE_ACTIVEoffset_x = 84.0; offset_y = 0.0;
+09-14 02:32:39.638  4546  4585 I event src/ui_preview.rs:335: ANDROID_OBJECT_PUSHED_POSE_ACTIVEoffset_x = 32.0; offset_y = 0.0;
+09-14 02:32:39.638  4546  4585 I event src/ui_preview.rs:352: ANDROID_OBJECT_DASH_POSE_ACTIVEoffset_x = -32.0; offset_y = 0.0;
+09-14 02:32:39.638  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:39.637762Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_POSE_ACTIVE [3moffset_x[0m[2m=[0m84.0 [3moffset_y[0m[2m=[0m0.0
+09-14 02:32:39.638  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:39.638078Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_PUSHED_POSE_ACTIVE [3moffset_x[0m[2m=[0m32.0 [3moffset_y[0m[2m=[0m0.0
+09-14 02:32:39.638  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:39.638100Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_DASH_POSE_ACTIVE [3moffset_x[0m[2m=[0m-32.0 [3moffset_y[0m[2m=[0m0.0
+09-14 02:32:39.899   793  4599 D NetworkMonitor/101: PROBE_HTTPS https://www.google.com/generate_204 time=3072ms ret=204 request={Connection=[close], User-Agent=[Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36]} headers={null=[HTTP/1.1 204 No Content], Alt-Svc=[h3=":443"; ma=2592000,h3-29=":443"; ma=2592000], Connection=[close], Content-Length=[0], Cross-Origin-Resource-Policy=[cross-origin], Date=[Sun, 13 Sep 2026 18:32:39 GMT], X-Android-Received-Millis=[1789324359898], X-Android-Response-Source=[NETWORK 204], X-Android-Selected-Protocol=[http/1.1], X-Android-Sent-Millis=[1789324358735]}
+09-14 02:32:39.903  1063  1150 E GmsTaskScheduler: sendWakeUpEvent called on SchedulerClientBroadcastStrategy
+09-14 02:32:39.912  1063  1150 W GLSUser : [AppCertManager] IOException while requesting key:
+09-14 02:32:39.912  1063  1150 W GLSUser : java.io.IOException: Invalid device key response.
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at hzf.b(:com.google.android.gms@214218053@21.42.18 (190400-410302452):28)
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at hzd.b(:com.google.android.gms@214218053@21.42.18 (190400-410302452):2)
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at hyz.a(:com.google.android.gms@214218053@21.42.18 (190400-410302452):0)
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at fkn.d(:com.google.android.gms@214218053@21.42.18 (190400-410302452):5)
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at gma.call(:com.google.android.gms@214218053@21.42.18 (190400-410302452):13)
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at pzh.c(:com.google.android.gms@214218053@21.42.18 (190400-410302452):6)
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at pzh.run(:com.google.android.gms@214218053@21.42.18 (190400-410302452):7)
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at qdn.run(:com.google.android.gms@214218053@21.42.18 (190400-410302452):0)
+09-14 02:32:39.912  1063  1150 W GLSUser : 	at java.lang.Thread.run(Thread.java:920)
+09-14 02:32:39.913  4546  4585 I event src/ui_preview.rs:346: ANDROID_OBJECT_PUSHED_POSE_SETTLED
+09-14 02:32:39.913  4546  4585 I event src/ui_preview.rs:363: ANDROID_OBJECT_DASH_POSE_SETTLED
+09-14 02:32:39.913  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:39.913108Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_PUSHED_POSE_SETTLED
+09-14 02:32:39.913  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:39.913336Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_OBJECT_DASH_POSE_SETTLED
+09-14 02:32:39.915  1063  4539 I NetworkScheduler.Stats: Task com.google.android.gms/com.google.android.gms.auth.account.be.legacy.AuthCronService finished executing. cause:5 result: 3 elapsed_millis: 5942 uptime_millis: 5942 exec_start_elapsed_seconds: 69 [CONTEXT service_id=218 ]
+09-14 02:32:40.305  4546  4585 D EGL_emulation: app_time_stats: avg=50.67ms min=39.11ms max=65.05ms count=20
+09-14 02:32:40.603  4546  4585 I event src/ui_preview.rs:329: ANDROID_REMOTE_BACKSTEP_POSE_SETTLED
+09-14 02:32:40.604  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:40.603939Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_POSE_SETTLED
+09-14 02:32:40.702  4546  4585 I event src/ui_preview.rs:316: ANDROID_REMOTE_BACKSTEP_DIAGNOSTICSdiagnostics = {"enabled":true,"nowMs":1789324360701.2722,"moveClockPulseId":30,"moveClockNextPulseMs":1789324360753.286,"entryCount":3,"activeEntryCount":0,"processedEventCount":3,"remoteMotionEventCount":3,"remoteRemoveEventCount":0,"ignoredEventCount":0,"staleEventCount":0,"disabledEventCount":0,"pendingEventDropCount":0,"entryEvictionCount":0,"decodeErrorCount":0,"lastDecodeError":null,"offsetQueryCount":66,"offsetMatchCount":35,"targetMismatchCount":0,"inactiveFallbackCount":31,"entries":[{"atMs":3762.0,"packet":"ObjectPushed","objectId":"9002","fromX":304.0,"fromY":634.0,"toX":303.0,"toY":634.0,"direction":"Left","mode":"pushed","phaseCount":3,"startedMs":1789324359583.144,"startedPulseId":22,"expiresMs":1789324360701.2722,"phaseIndex":2,"nextPhaseMs":1789324360753.286,"completed":true},{"atMs":3342.0,"packet":"ObjectBackStep","objectId":"9003","fromX":301.0,"fromY":634.0,"toX":299.0,"toY":634.0,"direction":"Right","mode":"backstep","phaseCount":8,"startedMs":1789324359583.144,"startedPulseId":22,"expiresMs":1789324360701.2722,"phaseIndex":7,"nextPhaseMs":1789324360753.286,"completed":true},{"atMs":3760.0,"packet":"ObjectDash","objectId":"9004","fromX":301.0,"fromY":631.0,"toX":302.0,"toY":631.0,"direction":"Right","mode":"dashL","phaseCount":3,"startedMs":1789324359583.144,"startedPulseId":22,"expiresMs":1789324360701.2722,"phaseIndex":2,"nextPhaseMs":1789324360753.286,"completed":true}]};
+09-14 02:32:40.702  4546  4583 I RustStdoutStderr: [2m2026-09-13T18:32:40.701959Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_DIAGNOSTICS [3mdiagnostics[0m[2m=[0m{"enabled":true,"nowMs":1789324360701.2722,"moveClockPulseId":30,"moveClockNextPulseMs":1789324360753.286,"entryCount":3,"activeEntryCount":0,"processedEventCount":3,"remoteMotionEventCount":3,"remoteRemoveEventCount":0,"ignoredEventCount":0,"staleEventCount":0,"disabledEventCount":0,"pendingEventDropCount":0,"entryEvictionCount":0,"decodeErrorCount":0,"lastDecodeError":null,"offsetQueryCount":66,"offsetMatchCount":35,"targetMismatchCount":0,"inactiveFallbackCount":31,"entries":[{"atMs":3762.0,"packet":"ObjectPushed","objectId":"9002","fromX":304.0,"fromY":634.0,"toX":303.0,"toY":634.0,"direction":"Left","mode":"pushed","phaseCount":3,"startedMs":1789324359583.144,"startedPulseId":22,"expiresMs":1789324360701.2722,"phaseIndex":2,"nextPhaseMs":1789324360753.286,"completed":true},{"atMs":3342.0,"packet":"ObjectBackStep","objectId":"9003","fromX":301.0,"fromY":634.0,"toX":299.0,"toY":634.0,"direction":"Right","mode":"backstep","phaseCount":8,"startedMs":1789324359583.144,"startedPulseId":22,"expiresMs":1789324360701.2722,"phaseIndex":7,"nextPhaseMs":1789324360753.286,"completed":true},{"atMs":3760.0,"packet":"ObjectDash","objectId":"9004","fromX":301.0,"fromY":631.0,"toX":302.0,"toY":631.0,"direction":"Right","mode":"dashL","phaseCount":3,"startedMs":1789324359583.144,"startedPulseId":22,"expiresMs":1789324360701.2722,"phaseIndex":2,"nextPhaseMs":1789324360753.286,"completed":true}]}
+09-14 02:32:41.019   793  4598 D NetworkMonitor/101: PROBE_FALLBACK http://www.google.com/gen_204 time=2053ms ret=204 request={Connection=[close], User-Agent=[Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.32 Safari/537.36]} headers={null=[HTTP/1.1 204 No Content], Connection=[close], Content-Length=[0], Content-Security-Policy=[object-src 'none';base-uri 'self';script-src 'nonce-J7gI4adZOngUbzIX6S2rEQ' 'strict-dynamic' 'report-sample' 'unsafe-eval' 'unsafe-inline' https: http:;report-uri https://csp.withgoogle.com/csp/gws/other], Content-Type=[text/html; charset=UTF-8], Date=[Sun, 13 Sep 2026 18:32:41 GMT], Permissions-Policy=[unload=()], Server=[gws], Set-Cookie=[__Secure-STRP=ANmZwa2yGrqTGOYyKqlnQ2YrSVMiOzJXnqw3Kio-NEEK1pfNqiVORo1lcgrXBVx5m0a_LsCM2ndCmu_tspWDdR9RhfREtLC-6k5i; expires=Sun, 13-Sep-2026 18:37:41 GMT; path=/; domain=.google.com; Secure; SameSite=strict, SEARCH_SAMESITE=CgQI5aEB; expires=Fri, 12-Mar-2027 18:32:41 GMT; path=/; domain=.google.com; SameSite=strict], X-Android-Received-Millis=[1789324361019], X-Android-Response-Source=[NETWORK 204], X-Android-Selected-Protocol=[http/1.1], X-Android-Sent-Millis=[1789324360517], X-Frame-Options=[SAMEORIGIN], X-XSS-Protection=[0]}
+09-14 02:32:41.024   793  4598 D NetworkMonitor/101: isCaptivePortal: isSuccessful()=true isPortal()=false RedirectUrl=null isPartialConnectivity()=false Time=5059ms
+09-14 02:32:41.030   518   628 D ConnectivityService: [101 WIFI] validation passed
+09-14 02:32:41.100   188   188 I logd    : logdr: UID=2000 GID=2000 PID=4648 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns
+09-14 02:32:41.114   518   773 D BufferPoolAccessor2.0: evictor expired: 6, evicted: 0
+09-14 02:32:41.115   691   999 D BufferPoolAccessor2.0: evictor expired: 3, evicted: 0
+09-14 02:32:41.337  4546  4585 D EGL_emulation: app_time_stats: avg=49.07ms min=39.15ms max=60.67ms count=21
+09-14 02:32:42.040  4546  4651 D ProfileInstaller: Installing profile for com.mir2.web3.uipreview
+09-14 02:32:42.239   680   680 I wpa_supplicant: wlan0: CTRL-EVENT-BEACON-LOSS
+09-14 02:32:42.356  4546  4585 D EGL_emulation: app_time_stats: avg=53.59ms min=44.90ms max=92.12ms count=19
+09-14 02:32:43.115   389  4610 D BufferPoolAccessor2.0: bufferpool2 0xb400007c4a2b4ea8 : 0(0 size) total buffers - 0(0 size) used buffers - 93/101 (recycle/alloc) - 8/198 (fetch/transfer)
+09-14 02:32:43.118   404   722 D BufferPoolAccessor2.0: bufferpool2 0xb4000072ee752a68 : 0(0 size) total buffers - 0(0 size) used buffers - 93/97 (recycle/alloc) - 4/96 (fetch/transfer)
+09-14 02:32:43.118   404   722 D BufferPoolAccessor2.0: evictor expired: 1, evicted: 1
+09-14 02:32:43.118   389  4610 D BufferPoolAccessor2.0: evictor expired: 1, evicted: 1
+09-14 02:32:43.401  4546  4585 D EGL_emulation: app_time_stats: avg=47.47ms min=37.74ms max=59.02ms count=22
+09-14 02:32:44.433  4546  4585 D EGL_emulation: app_time_stats: avg=49.05ms min=38.48ms max=67.41ms count=21
+09-14 02:32:44.514  3637  3675 D CompatibilityChangeReporter: Compat change id reported: 150939131; UID 10102; state: ENABLED
+09-14 02:32:45.468  4546  4585 D EGL_emulation: app_time_stats: avg=51.49ms min=44.11ms max=60.48ms count=20
+09-14 02:32:46.523  4546  4585 D EGL_emulation: app_time_stats: avg=47.87ms min=37.30ms max=64.38ms count=22
+09-14 02:32:47.550  4546  4585 D EGL_emulation: app_time_stats: avg=46.60ms min=36.40ms max=56.20ms count=22
+09-14 02:32:48.555  4546  4585 D EGL_emulation: app_time_stats: avg=47.72ms min=38.01ms max=65.71ms count=21
+09-14 02:32:49.566  4546  4585 D EGL_emulation: app_time_stats: avg=48.12ms min=37.77ms max=57.50ms count=21
+09-14 02:32:50.017   518  2804 I ActivityManager: Killing 4016:com.android.externalstorage/u0a64 (adj 965): empty #17
+09-14 02:32:50.017   518  2804 I ActivityManager: Killing 2774:com.google.android.cellbroadcastreceiver/u0a137 (adj 975): empty #18
+09-14 02:32:50.021   319   319 I Zygote  : Process 4016 exited due to signal 9 (Killed)
+09-14 02:32:50.021   518  2139 I ActivityManager: Killing 4146:com.google.android.apps.maps/u0a110 (adj 985): empty #17
+09-14 02:32:50.023   319   319 I Zygote  : Process 2774 exited due to signal 9 (Killed)
+09-14 02:32:50.040   319   319 I Zygote  : Process 4146 exited due to signal 9 (Killed)
+09-14 02:32:50.040   518  2134 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(uid/pid:10110/4146, android.os.BinderProxy@809fba)
+09-14 02:32:50.040   518  2139 D ConnectivityService: ConnectivityService NetworkRequestInfo binderDied(uid/pid:10110/4146, android.os.BinderProxy@b4ade6b)
+09-14 02:32:50.040   518   628 D ConnectivityService: releasing NetworkRequest [ REQUEST id=124, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10110 RequestorUid: 10110 RequestorPkg: com.google.android.apps.maps] ] (release request)
+09-14 02:32:50.063   518   548 I libprocessgroup: Successfully killed process cgroup uid 10064 pid 4016 in 45ms
+09-14 02:32:50.063   518   548 I libprocessgroup: Successfully killed process cgroup uid 10137 pid 2774 in 0ms
+09-14 02:32:50.063   518   548 I libprocessgroup: Successfully killed process cgroup uid 10110 pid 4146 in 0ms
+09-14 02:32:50.171   680   680 I wpa_supplicant: wlan0: CTRL-EVENT-BEACON-LOSS
+09-14 02:32:50.247  1063  1063 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.scheduler.ACTION_PROXY_SCHEDULE cmp=com.google.android.gms/.chimera.PersistentInternalBoundBrokerService }
+09-14 02:32:50.369   529   529 I binder  : 518:529 DecRefs 0 refcount change on invalid ref 1844 ret -22
+09-14 02:32:50.369   529   529 I binder  : 518:529 DecRefs 0 refcount change on invalid ref 1843 ret -22
+09-14 02:32:50.370   529   529 I binder  : 518:529 DecRefs 0 refcount change on invalid ref 1635 ret -22
+09-14 02:32:50.370   529   529 I binder  : 518:529 DecRefs 0 refcount change on invalid ref 1634 ret -22
+09-14 02:32:50.370   529   529 I binder  : 518:529 DecRefs 0 refcount change on invalid ref 1608 ret -22
+09-14 02:32:50.370   529   529 I binder  : 518:529 DecRefs 0 refcount change on invalid ref 1607 ret -22
+09-14 02:32:50.373   518   537 I DropBoxManagerService: add tag=system_server_strictmode isTagEnabled=true flags=0x2
+09-14 02:32:50.587  4546  4585 D EGL_emulation: app_time_stats: avg=48.60ms min=38.15ms max=57.21ms count=21
+09-14 02:32:51.314  3982  4015 I Dialer  : OmtpVvmCarrierCfgHlpr - OmtpEvent:CONFIG_STATUS_SMS_TIME_OUT
+09-14 02:32:51.314  3982  3982 I Dialer  : RetryPolicy - discarding deferred status: configuration_state=4
+09-14 02:32:51.315  3982  3982 I Dialer  : VvmTaskExecutor - no more tasks, stopping service if no task are added in 5000 millis
+09-14 02:32:51.316   518   546 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10095; state: DISABLED
+09-14 02:32:51.316  3982  3982 I Dialer  : VvmTaskReceiver - task received
+09-14 02:32:51.316  3982  3982 I Dialer  : VvmTaskReceiver - TaskExecutor already running
+09-14 02:32:51.316  3982  3982 I Dialer  : Task.createTask - create task:com.android.voicemail.impl.ActivationTask
+09-14 02:32:51.316  3982  3982 I Dialer  : RetryPolicy - retry #1 for com.android.voicemail.impl.ActivationTask@351103e queued, executing in 5000
+09-14 02:32:51.316  3982  3982 I Dialer  : VvmTaskExecutor - com.android.voicemail.impl.ActivationTask@351103e added
+09-14 02:32:51.316  3982  3982 I Dialer  : VvmTaskExecutor - minimal wait time:5000
+09-14 02:32:51.316  3982  3982 I Dialer  : VvmTaskExecutor - sleep for 5000 millis
+09-14 02:32:51.625  4546  4585 D EGL_emulation: app_time_stats: avg=47.06ms min=37.91ms max=57.96ms count=22
+09-14 02:32:52.376   518   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.stats.service.DropBoxEntryAddedReceiver
+09-14 02:32:52.376   518   546 W BroadcastQueue: Background execution not allowed: receiving Intent { act=android.intent.action.DROPBOX_ENTRY_ADDED flg=0x10 (has extras) } to com.google.android.gms/.chimera.GmsIntentOperationService$PersistentTrustedReceiver
+09-14 02:32:52.667  4546  4585 D EGL_emulation: app_time_stats: avg=47.35ms min=37.75ms max=54.59ms count=22
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: Exception in upload method
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: com.google.android.apps.gsa.shared.q.d: Error code: 656394 | null
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.n.fZ(SourceFile:1)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.k.a.n.fZ(SourceFile:2)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.common.w.a.bv.run(SourceFile:6)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bt.b(SourceFile:1)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bw.run(SourceFile:1)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.ab.run(SourceFile:1)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.n.run(SourceFile:2)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.d.run(SourceFile:2)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at java.lang.Thread.run(Thread.java:920)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: Caused by: java.util.concurrent.TimeoutException
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.w.run(SourceFile:2)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.k.a.k.run(SourceFile:2)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bt.b(SourceFile:1)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bw.run(SourceFile:1)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:462)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.r.run(SourceFile:1)
+09-14 02:32:52.706  1445  1748 E cr_CronetUrlRequestContext: 	... 5 more
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: Exception in upload method
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: com.google.android.apps.gsa.shared.q.d: Error code: 656394 | null
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.n.fZ(SourceFile:1)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.k.a.n.fZ(SourceFile:2)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.common.w.a.bv.run(SourceFile:6)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bt.b(SourceFile:1)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bw.run(SourceFile:1)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.ab.run(SourceFile:1)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.n.run(SourceFile:2)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.d.run(SourceFile:2)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at java.lang.Thread.run(Thread.java:920)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: Caused by: java.util.concurrent.TimeoutException
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.w.run(SourceFile:2)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.k.a.k.run(SourceFile:2)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bt.b(SourceFile:1)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bw.run(SourceFile:1)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:462)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.r.run(SourceFile:1)
+09-14 02:32:52.706  1445  1729 E cr_CronetUrlRequestContext: 	... 5 more
+09-14 02:32:53.714  4546  4585 D EGL_emulation: app_time_stats: avg=47.56ms min=37.78ms max=58.82ms count=22
+09-14 02:32:54.755  4546  4585 D EGL_emulation: app_time_stats: avg=47.18ms min=37.52ms max=57.46ms count=22
+09-14 02:32:55.768  4546  4585 D EGL_emulation: app_time_stats: avg=50.66ms min=40.77ms max=71.25ms count=20
+09-14 02:32:56.357  3982  4015 I Dialer  : VvmTaskExecutor - executing task com.android.voicemail.impl.ActivationTask@351103e
+09-14 02:32:56.357  3982  4015 I Dialer  : PreOMigrationHandler - ComponentInfo{com.android.phone/com.android.services.telephony.TelephonyConnectionService}, ***, UserHandle{0} already migrated
+09-14 02:32:56.367  1621  3677 I VoicemailNotifier: receivers for android.intent.action.PROVIDER_CHANGED :[]
+09-14 02:32:56.368  3982  4015 I Dialer  : VvmActivationTask - VVM content provider configured - vvm_type_cvvm
+09-14 02:32:56.368  3982  4015 I Dialer  : OmtpVvmCarrierCfgHlpr - OmtpEvent:CONFIG_ACTIVATING
+09-14 02:32:56.371  1621  3677 I VoicemailNotifier: receivers for android.intent.action.PROVIDER_CHANGED :[]
+09-14 02:32:56.390   851  1019 D SmsNumberUtils: enter filterDestAddr. destAddr="[BajqU4K5_YhSYbs-7QUn0dOwcmI]"
+09-14 02:32:56.391   851  1019 D SmsNumberUtils: destAddr is not formatted.
+09-14 02:32:56.391   851  1019 D SmsNumberUtils: leave filterDestAddr, new destAddr="[BajqU4K5_YhSYbs-7QUn0dOwcmI]"
+09-14 02:32:56.396   518   546 W BroadcastQueue: Permission Denial: broadcasting Intent { act=com.android.voicemailomtp.sms.REQUEST_SENT flg=0x10 pkg=com.android.dialer } from com.android.dialer (pid=-1, uid=10095) requires com.android.dialer.permission.DIALER_ORIGIN due to registered receiver BroadcastFilter{d0bbe78 10095/u0 ReceiverList{ea9f3db 3982 com.android.dialer/10095/u0 remote:ba1e4ea}}
+09-14 02:32:56.779  4546  4585 D EGL_emulation: app_time_stats: avg=48.10ms min=37.93ms max=55.53ms count=21
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: Could not register for notifications with InnerTube:
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: tcg: sgv: Precondition check failed.
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at tbw.apply(Unknown Source:4)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at rnl.o(PG:5)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at rnl.b(PG:2)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at tby.d(PG:4)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at xas.c(PG:51)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at xas.j(PG:38)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at xas.d(PG:3)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at xap.run(Unknown Source:2)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:462)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at nvu.run(PG:1)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at nvp.run(PG:2)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at nvh.run(PG:3)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at java.lang.Thread.run(Thread.java:920)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: Caused by: sgv: Precondition check failed.
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at tau.e(PG:5)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at rux.c(PG:18)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at rty.run(PG:17)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at rmq.run(PG:12)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	... 1 more
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: Caused by: byd
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	at rty.run(PG:12)
+09-14 02:32:57.517  4034  4250 W YouTubeMusic: 	... 4 more
+09-14 02:32:57.800  4546  4585 D EGL_emulation: app_time_stats: avg=51.00ms min=38.86ms max=72.79ms count=20
+09-14 02:32:58.107   680   680 I wpa_supplicant: wlan0: CTRL-EVENT-BEACON-LOSS
+09-14 02:32:58.801  4546  4585 D EGL_emulation: app_time_stats: avg=47.60ms min=37.80ms max=61.28ms count=21
+09-14 02:32:59.817  4546  4585 D EGL_emulation: app_time_stats: avg=48.30ms min=37.82ms max=58.82ms count=21
+09-14 02:33:00.017   691   825 D EGL_emulation: app_time_stats: avg=2910.88ms min=12.42ms max=23118.67ms count=8
+09-14 02:33:00.824  4546  4585 D EGL_emulation: app_time_stats: avg=47.89ms min=38.11ms max=58.15ms count=21
+09-14 02:33:01.856  4546  4585 D EGL_emulation: app_time_stats: avg=46.83ms min=37.41ms max=54.38ms count=22
+09-14 02:33:02.903  4546  4585 D EGL_emulation: app_time_stats: avg=47.59ms min=38.23ms max=55.85ms count=22
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: Exception in upload method
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: com.google.android.apps.gsa.shared.q.d: Error code: 656394 | null
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.n.fZ(SourceFile:1)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.k.a.n.fZ(SourceFile:2)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.common.w.a.bv.run(SourceFile:6)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bt.b(SourceFile:1)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bw.run(SourceFile:1)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.ab.run(SourceFile:1)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.n.run(SourceFile:2)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.d.run(SourceFile:2)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at java.lang.Thread.run(Thread.java:920)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: Caused by: java.util.concurrent.TimeoutException
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.w.run(SourceFile:2)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.k.a.k.run(SourceFile:2)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bt.b(SourceFile:1)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bw.run(SourceFile:1)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:462)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.r.run(SourceFile:1)
+09-14 02:33:03.774  1445  1748 E cr_CronetUrlRequestContext: 	... 5 more
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: Exception in upload method
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: com.google.android.apps.gsa.shared.q.d: Error code: 656394 | null
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.c.a.n.fZ(SourceFile:1)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.k.a.n.fZ(SourceFile:2)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.common.w.a.bv.run(SourceFile:6)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bt.b(SourceFile:1)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bw.run(SourceFile:1)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.ab.run(SourceFile:1)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1167)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:641)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.n.run(SourceFile:2)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.d.run(SourceFile:2)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at java.lang.Thread.run(Thread.java:920)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: Caused by: java.util.concurrent.TimeoutException
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.w.run(SourceFile:2)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.gsa.k.a.k.run(SourceFile:2)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bt.b(SourceFile:1)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.apps.gsa.shared.util.c.a.bw.run(SourceFile:1)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:462)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at java.util.concurrent.FutureTask.run(FutureTask.java:266)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	at com.google.android.libraries.g.r.run(SourceFile:1)
+09-14 02:33:03.774  1445  1729 E cr_CronetUrlRequestContext: 	... 5 more
+09-14 02:33:03.921  4546  4585 D EGL_emulation: app_time_stats: avg=48.42ms min=37.02ms max=64.46ms count=21
+09-14 02:33:04.924  4546  4585 D EGL_emulation: app_time_stats: avg=47.71ms min=37.08ms max=56.81ms count=21
+09-14 02:33:05.957  4546  4585 D EGL_emulation: app_time_stats: avg=49.18ms min=38.90ms max=59.00ms count=21
+09-14 02:33:06.051   680   680 I wpa_supplicant: wlan0: CTRL-EVENT-BEACON-LOSS
+09-14 02:33:06.701   518   518 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10117; state: DISABLED
+09-14 02:33:06.706  1445  1445 I BgTaskExecutorImpl: Starting NONEXCLUSIVE background task DOODLE_SCHEDULE_SYNC_TASK.
+09-14 02:33:07.003   188   188 I logd    : logdr: UID=2000 GID=2000 PID=4675 n tail=0 logMask=99 pid=0 start=0ns deadline=0ns

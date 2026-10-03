@@ -798,15 +798,19 @@ mod tests {
         native_i18n::activate(Locale::English);
         let (mut app, target, camera) = i18n_offscreen_app_configured(&assets, true, |app| {
             app.add_plugins((NativeDisplayUiPlugin, Mir2CrystalHudPlugin));
-            // The offline helper omits the audio device plugin. Overlay startup
-            // still runs normally and requires its typed asset container.
-            app.init_resource::<Assets<bevy::audio::AudioSource>>()
-                .insert_resource(crate::options_effects::OptionsRuntime::with_config_path(
-                    output.join("fixture-options.json"),
-                ))
-                .insert_resource(crate::skill_binding_persistence::SkillBindingPersistenceRuntime::with_config_path(
+            // The offline helper omits the audio device plugin. Desktop overlay
+            // startup needs its typed container only with the audio feature;
+            // the shared phone UI must compile without enabling that backend.
+            #[cfg(feature = "native-ui")]
+            app.init_resource::<Assets<bevy::audio::AudioSource>>();
+            app.insert_resource(crate::options_effects::OptionsRuntime::with_config_path(
+                output.join("fixture-options.json"),
+            ))
+            .insert_resource(
+                crate::skill_binding_persistence::SkillBindingPersistenceRuntime::with_config_path(
                     output.join("fixture-skill-bindings.json"),
-                ));
+                ),
+            );
         });
         app.init_resource::<DisplayCapture>()
             .insert_resource(crate::map::MapModel {

@@ -1,0 +1,10 @@
+{
+  "source": "2c2e5e214693859d7d56e414fb3ff9233e58409c",
+  "baselineFile": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+  "baselineSha256": "61945f8aeb35d5b6228f97ab381d8b04d19f6fdd4924cb14daabfc38eb530dae",
+  "finalOwnedSourceRestoredSha256": "9f7055624e4be0a529798e9a4ab6a71e9a8914bb5ce9091a072441306c42a768",
+  "testSourceSha256": "7a82f48c64124de335dec8b6fa391dd1af23f79f6c02c2305cc328330d9d0f9b",
+  "exactCurrentSourceRestored": true,
+  "status": 1,
+  "environmentOnlyFirstAttemptRetained": "java-quest-red.log; SDK missing, no product test ran"
+}

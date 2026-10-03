@@ -1,0 +1,72 @@
+[
+  {
+    "gate": "android-normal",
+    "status": 0,
+    "finished": "2026-10-02T01:06:16.711Z"
+  },
+  {
+    "gate": "android-preview",
+    "status": 0,
+    "finished": "2026-10-02T01:06:59.511Z"
+  },
+  {
+    "gate": "shared-bevy",
+    "status": 0,
+    "finished": "2026-10-02T01:07:24.294Z"
+  },
+  {
+    "gate": "shared-runtime",
+    "status": 0,
+    "finished": "2026-10-02T01:07:42.242Z"
+  },
+  {
+    "gate": "windows-bridge",
+    "status": 1,
+    "finished": "2026-10-02T01:08:23.531Z"
+  },
+  {
+    "gate": "windows-tooltip",
+    "status": 0,
+    "finished": "2026-10-02T01:15:20.265Z"
+  },
+  {
+    "gate": "windows-completed",
+    "status": 0,
+    "finished": "2026-10-02T01:15:20.630Z"
+  },
+  {
+    "gate": "windows-quest",
+    "status": 1,
+    "finished": "2026-10-02T01:15:21.021Z"
+  },
+  {
+    "gate": "windows-projection",
+    "status": 0,
+    "finished": "2026-10-02T01:15:21.362Z"
+  },
+  {
+    "gate": "windows-gateway-quest",
+    "status": 0,
+    "finished": "2026-10-02T01:15:21.708Z"
+  },
+  {
+    "gate": "windows-exact-ack",
+    "status": 0,
+    "finished": "2026-10-02T01:15:22.051Z"
+  },
+  {
+    "gate": "java",
+    "status": 0,
+    "finished": "2026-10-02T01:15:58.429Z"
+  },
+  {
+    "gate": "api31-debug",
+    "status": 0,
+    "finished": "2026-10-02T01:16:22.503Z"
+  },
+  {
+    "gate": "api31-preview",
+    "status": 0,
+    "finished": "2026-10-02T01:16:32.126Z"
+  }
+]

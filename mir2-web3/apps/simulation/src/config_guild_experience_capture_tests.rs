@@ -8,15 +8,26 @@ fn guild_xp_no_guild_kill_source_still_freezes_on_unknown_account_only_publicati
     source.guild_experience_journal.pending.clear();
     source.guild_experience_journal.next_sequence = 0;
     let permit = GuildExperienceCommitPermit::from_verified_shared_kill(
-        identity.clone(), "legacy/no-guild/kill".into(), "b".repeat(64), None,
-    ).unwrap();
-    source.guild_experience_journal.applied_kill_receipts.insert(permit.kill_key.clone(), permit.kill_payload_hash.clone());
+        identity.clone(),
+        "legacy/no-guild/kill".into(),
+        "b".repeat(64),
+        None,
+    )
+    .unwrap();
+    source
+        .guild_experience_journal
+        .applied_kill_receipts
+        .insert(permit.kill_key.clone(), permit.kill_payload_hash.clone());
     config.account_store.lock().unwrap().shared_guilds.clear();
     config.save_account_store().unwrap();
     let original = fs::read(&path).unwrap();
-    let uncertain = config.clone().with_account_store_database_url("postgresql://xp-probe@127.0.0.1:1/xp_probe");
+    let uncertain = config
+        .clone()
+        .with_account_store_database_url("postgresql://xp-probe@127.0.0.1:1/xp_probe");
     uncertain.inject_guild_xp_unknown_publication_probe();
-    assert!(authorized_commit(&uncertain, &permit, source).unwrap_err().contains(GUILD_COMMIT_OUTCOME_UNKNOWN));
+    assert!(authorized_commit(&uncertain, &permit, source)
+        .unwrap_err()
+        .contains(GUILD_COMMIT_OUTCOME_UNKNOWN));
     assert_eq!(uncertain.guild_xp_publication_probe_attempts(), 1);
     assert!(config.save_account_store().is_err());
     assert_eq!(fs::read(&path).unwrap(), original);

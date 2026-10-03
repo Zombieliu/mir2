@@ -1,9 +1,16 @@
 use super::*;
 use crate::crystal_ui::hud;
 use crate::inventory::{CrystalItemInfoModel, CrystalItemTooltipSourceModel, CrystalUserItemModel};
-use crate::pending_operations::{apply_inventory_operation_ack, InventoryOperationAck, InventoryOperationFeedback};
+use crate::pending_operations::{
+    apply_inventory_operation_ack, InventoryOperationAck, InventoryOperationFeedback,
+};
 
-fn tooltip(item_index: i32, unique_id: u64, quantity: u32, item_type: u8) -> CrystalItemTooltipSourceModel {
+fn tooltip(
+    item_index: i32,
+    unique_id: u64,
+    quantity: u32,
+    item_type: u8,
+) -> CrystalItemTooltipSourceModel {
     CrystalItemTooltipSourceModel {
         info: CrystalItemInfoModel {
             item_index,
@@ -21,7 +28,14 @@ fn tooltip(item_index: i32, unique_id: u64, quantity: u32, item_type: u8) -> Cry
     }
 }
 
-fn item(container: u8, slot: u32, unique_id: u64, item_index: i32, quantity: u32, item_type: u8) -> ItemModel {
+fn item(
+    container: u8,
+    slot: u32,
+    unique_id: u64,
+    item_index: i32,
+    quantity: u32,
+    item_type: u8,
+) -> ItemModel {
     ItemModel {
         unique_id: Some(unique_id),
         key: format!("item-{unique_id}"),
@@ -67,7 +81,10 @@ fn equipment_storage_app() -> (App, Entity) {
     }
     app.update();
     assert!(app.world().resource::<NativePlayerUiState>().storage_open());
-    assert!(app.world().resource::<NativePlayerUiState>().equipment_open());
+    assert!(app
+        .world()
+        .resource::<NativePlayerUiState>()
+        .equipment_open());
     (app, window)
 }
 
@@ -105,17 +122,18 @@ fn move_cursor(app: &mut App, window: Entity, point: Vec2) {
 }
 
 fn left(app: &mut App, window: Entity, pressed: bool) {
-    app.world_mut().write_message(bevy::window::WindowEvent::MouseButtonInput(
-        bevy::input::mouse::MouseButtonInput {
-            window,
-            button: MouseButton::Left,
-            state: if pressed {
-                bevy::input::ButtonState::Pressed
-            } else {
-                bevy::input::ButtonState::Released
+    app.world_mut()
+        .write_message(bevy::window::WindowEvent::MouseButtonInput(
+            bevy::input::mouse::MouseButtonInput {
+                window,
+                button: MouseButton::Left,
+                state: if pressed {
+                    bevy::input::ButtonState::Pressed
+                } else {
+                    bevy::input::ButtonState::Released
+                },
             },
-        },
-    ));
+        ));
 }
 
 fn drag(app: &mut App, window: Entity, source: Vec2, target: Vec2) {
@@ -144,17 +162,24 @@ fn storage_and_character_dialogs_keep_source_bounds_and_slots_reachable_together
         Some(0),
         "character equipment hit rect retains its source top-right offset"
     );
-    assert!(storage_slot_at_cursor(
-        &state,
-        app.world().resource::<StorageModel>(),
-        app.world().resource::<StorageUiState>(),
-        storage_point(5),
-    ) == Some(5));
+    assert!(
+        storage_slot_at_cursor(
+            &state,
+            app.world().resource::<StorageModel>(),
+            app.world().resource::<StorageUiState>(),
+            storage_point(5),
+        ) == Some(5)
+    );
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().toggle_equipment();
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .toggle_equipment();
     let state = app.world().resource::<NativePlayerUiState>();
     assert!(state.storage_open());
-    assert!(!state.equipment_open(), "CharacterDialog closes without closing StorageDialog");
+    assert!(
+        !state.equipment_open(),
+        "CharacterDialog closes without closing StorageDialog"
+    );
 }
 
 #[test]
@@ -175,7 +200,10 @@ fn concurrent_storage_character_render_keeps_all_source_character_tabs_and_equip
     let (equipment, storage) = {
         let mut equipment = world.query_filtered::<&Node, With<OverlayEquipment>>();
         let mut storage = world.query_filtered::<&Node, With<OverlayStorage>>();
-        (equipment.single(world).expect("CharacterDialog root"), storage.single(world).expect("StorageDialog root"))
+        (
+            equipment.single(world).expect("CharacterDialog root"),
+            storage.single(world).expect("StorageDialog root"),
+        )
     };
     assert_eq!(equipment.display, Display::Flex);
     assert_eq!(equipment.left, Val::Px(CRYSTAL_CHARACTER_PANEL_RECT.left));
@@ -270,11 +298,16 @@ fn equipment_storage_amulet_merge_locks_its_live_endpoints_until_matching_ack() 
     drag(&mut app, window, equipment_point(9), storage_point(5));
     assert_eq!(drain(&mut app).len(), 1);
     drag(&mut app, window, equipment_point(9), storage_point(5));
-    assert!(drain(&mut app).is_empty(), "source cells remain locked pending the merge receipt");
+    assert!(
+        drain(&mut app).is_empty(),
+        "source cells remain locked pending the merge receipt"
+    );
 
     assert_eq!(
         apply_inventory_operation_ack(
-            app.world_mut().resource_mut::<PendingOperations>().into_inner(),
+            app.world_mut()
+                .resource_mut::<PendingOperations>()
+                .into_inner(),
             &mut InventoryOperationFeedback::default(),
             InventoryOperationAck::Merge {
                 grid_from: "Equipment".to_owned(),
@@ -287,7 +320,11 @@ fn equipment_storage_amulet_merge_locks_its_live_endpoints_until_matching_ack() 
         1,
     );
     drag(&mut app, window, equipment_point(9), storage_point(5));
-    assert_eq!(drain(&mut app).len(), 1, "only the matching receipt releases the gesture");
+    assert_eq!(
+        drain(&mut app).len(),
+        1,
+        "only the matching receipt releases the gesture"
+    );
 }
 
 #[test]

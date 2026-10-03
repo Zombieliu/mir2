@@ -1,0 +1,74 @@
+{
+  "at": "2026-10-02T13:02:38.775Z",
+  "android": {
+    "directory": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+    "head": "bffed177fb6dab5b2b9afe973028b04710d93331",
+    "branch": "codex/android-shared-sync",
+    "status": " M mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java\n"
+  },
+  "preserved": [
+    {
+      "directory": "/Users/henryliu/obelisk/numeron",
+      "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+      "branch": "codex/steam-main",
+      "status": " M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/\n"
+    },
+    {
+      "directory": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+      "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+      "branch": "codex/android-player-journey",
+      "status": ""
+    }
+  ],
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "projections": [
+    {
+      "name": "transform_game_shop_info_from_packet",
+      "frozenSha256": "35861593d6dd3548ac9225a12e60333b3e93162c786c19b8cbce2a009cff2de5",
+      "currentSha256": "35861593d6dd3548ac9225a12e60333b3e93162c786c19b8cbce2a009cff2de5",
+      "sameBody": true
+    },
+    {
+      "name": "transform_game_shop_stock_from_packet",
+      "frozenSha256": "b53427b6570c3b67ab0877f157bf3a4c5e7135bba44fd7926d094fb56b5a09f5",
+      "currentSha256": "b53427b6570c3b67ab0877f157bf3a4c5e7135bba44fd7926d094fb56b5a09f5",
+      "sameBody": true
+    },
+    {
+      "name": "value_u32",
+      "frozenSha256": "468904f2a60a45fc5ffa52a9f50bafe02cddfb73fa92126bfad771f23ce5e238",
+      "currentSha256": "468904f2a60a45fc5ffa52a9f50bafe02cddfb73fa92126bfad771f23ce5e238",
+      "sameBody": true
+    },
+    {
+      "name": "value_i32",
+      "frozenSha256": "93cc955b666eaa1144d1a04023d04b70990460dc6de08799394a762cf3bdf77f",
+      "currentSha256": "93cc955b666eaa1144d1a04023d04b70990460dc6de08799394a762cf3bdf77f",
+      "sameBody": true
+    },
+    {
+      "name": "value_i64",
+      "frozenSha256": "2948d8480a7d74ec18176033f905a222ecf9e2c67e2be1fc025697da91039cdd",
+      "currentSha256": "2948d8480a7d74ec18176033f905a222ecf9e2c67e2be1fc025697da91039cdd",
+      "sameBody": true
+    },
+    {
+      "name": "value_string",
+      "frozenSha256": "6c8b868074f3001b5b52ac0024f5c3f468e20ec32bd72ff21ab61e4d1b480cb9",
+      "currentSha256": "6c8b868074f3001b5b52ac0024f5c3f468e20ec32bd72ff21ab61e4d1b480cb9",
+      "sameBody": true
+    }
+  ],
+  "redTest": {
+    "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+    "sha256": "2c5e62238479a9d9086d9a4c1567917d157db2ec976a87a8e011b50e149e01ac"
+  },
+  "scope": [
+    "client-bevy/src/game_shop.rs",
+    "platform-android/src/game_shop_ingress.rs",
+    "platform-android/src/lib.rs",
+    "platform-android/src/shared_shell.rs",
+    "platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+    "platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java"
+  ]
+}

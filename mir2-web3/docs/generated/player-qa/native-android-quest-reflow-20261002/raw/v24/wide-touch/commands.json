@@ -1,0 +1,295 @@
+{
+  "source": "9a6bff0db9a7ff3eed003c72c90310ec632572d0",
+  "versionCode": 24,
+  "apkSha256": "0e12b1d1276f3774ca9b609c52815690595d413d7c820220279ab2ff55bc95d3",
+  "offlineOnly": true,
+  "noTransactionButtonTapped": true,
+  "physicalDeviceAccepted": false,
+  "steps": [
+    {
+      "name": "pair",
+      "kind": "tap",
+      "coordinates": [
+        1300,
+        530
+      ]
+    }
+  ],
+  "frames": [
+    {
+      "name": "diary",
+      "pid": 15574,
+      "originalFrame": "diary.png",
+      "log": "diary-pid.log"
+    },
+    {
+      "name": "pair",
+      "pid": 15574,
+      "originalFrame": "pair.png",
+      "log": "pair-pid.log"
+    }
+  ],
+  "commands": [
+    {
+      "name": "avd.txt",
+      "args": [
+        "emu",
+        "avd",
+        "name"
+      ],
+      "started": "2026-10-02T06:02:42.349Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:42.363Z"
+    },
+    {
+      "name": "api.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.version.sdk"
+      ],
+      "started": "2026-10-02T06:02:42.363Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:42.386Z"
+    },
+    {
+      "name": "os.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.fingerprint"
+      ],
+      "started": "2026-10-02T06:02:42.386Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:42.402Z"
+    },
+    {
+      "name": "display.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size"
+      ],
+      "started": "2026-10-02T06:02:42.402Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:42.422Z"
+    },
+    {
+      "name": "density.txt",
+      "args": [
+        "shell",
+        "wm",
+        "density"
+      ],
+      "started": "2026-10-02T06:02:42.423Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:42.442Z"
+    },
+    {
+      "name": "before-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T06:02:42.442Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:42.471Z"
+    },
+    {
+      "name": "before-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T06:02:42.471Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:42.491Z"
+    },
+    {
+      "name": "before-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~6FKrofvmFjFRKQIkgLMseQ==/com.mir2.web3.uipreview-6N4VzLqAbWDTc-vee0KkXw==/base.apk"
+      ],
+      "started": "2026-10-02T06:02:42.492Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:42.731Z"
+    },
+    {
+      "name": "stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T06:02:42.731Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:42.754Z"
+    },
+    {
+      "name": "start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "quests-ingress"
+      ],
+      "started": "2026-10-02T06:02:42.754Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:43.188Z"
+    },
+    {
+      "name": "pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T06:02:47.191Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:47.210Z"
+    },
+    {
+      "name": "diary.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T06:02:47.211Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:47.373Z"
+    },
+    {
+      "name": "diary-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=15574",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T06:02:47.373Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:47.403Z"
+    },
+    {
+      "name": "pair-input.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1300",
+        "530"
+      ],
+      "started": "2026-10-02T06:02:47.403Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:47.430Z"
+    },
+    {
+      "name": "pair.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T06:02:49.433Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:49.602Z"
+    },
+    {
+      "name": "pair-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=15574",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T06:02:49.602Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:49.630Z"
+    },
+    {
+      "name": "after-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T06:02:49.631Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:49.652Z"
+    },
+    {
+      "name": "after-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T06:02:49.652Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:49.674Z"
+    },
+    {
+      "name": "after-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~6FKrofvmFjFRKQIkgLMseQ==/com.mir2.web3.uipreview-6N4VzLqAbWDTc-vee0KkXw==/base.apk"
+      ],
+      "started": "2026-10-02T06:02:49.674Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:49.924Z"
+    },
+    {
+      "name": "ime.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "input_method"
+      ],
+      "started": "2026-10-02T06:02:49.925Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:49.991Z"
+    },
+    {
+      "name": "resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ],
+      "started": "2026-10-02T06:02:49.992Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:50.014Z"
+    },
+    {
+      "name": "stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T06:02:50.015Z",
+      "status": 0,
+      "finished": "2026-10-02T06:02:50.047Z"
+    }
+  ]
+}

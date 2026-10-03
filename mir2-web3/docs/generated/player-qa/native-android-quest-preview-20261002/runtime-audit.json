@@ -1,0 +1,89 @@
+{
+  "source": "7b62eda33cbf6c10a41c22516f1e6400dfe92202",
+  "versionCode": 20,
+  "distinctPids": 5,
+  "entries": [
+    {
+      "directory": "device",
+      "scene": "debug-login",
+      "pid": 12070,
+      "log": "raw/v20/device/debug-login-pid.log",
+      "gl506": 11,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": []
+    },
+    {
+      "directory": "device",
+      "scene": "quests-ingress",
+      "pid": 12149,
+      "log": "raw/v20/device/quests-ingress-pid.log",
+      "gl506": 10,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 09:51:24.488 12149 12172 I event src/ui_preview.rs:1175: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"quests-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = false;"
+      ]
+    },
+    {
+      "directory": "device",
+      "scene": "npc-ingress",
+      "pid": 12222,
+      "log": "raw/v20/device/npc-ingress-pid.log",
+      "gl506": 52,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 09:51:29.269 12222 12244 I event src/ui_preview.rs:1175: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"npc-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = true;"
+      ]
+    },
+    {
+      "directory": "touch-device",
+      "scene": "quests-ingress",
+      "pid": 12336,
+      "log": "raw/v20/touch-device/quests-ingress-after-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 09:55:10.609 12336 12359 I event src/ui_preview.rs:1175: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"quests-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = false;"
+      ]
+    },
+    {
+      "directory": "touch-device",
+      "scene": "npc-ingress",
+      "pid": 12422,
+      "log": "raw/v20/touch-device/npc-ingress-after-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 09:55:16.788 12422 12444 I event src/ui_preview.rs:1175: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"npc-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = true;"
+      ]
+    }
+  ],
+  "gl506": 73,
+  "logCounting": "One latest cumulative log per distinct PID, no touch-before/after double count; only canonical event for duplicate Rust markers",
+  "originalFramesInspectedByPrimary": 7,
+  "screenshotObservations": {
+    "normalLogin": "Empty credentials; Test server not configured",
+    "receivedQuestList": "PASS bounded Daily/title/ready-to-turn-in status visible",
+    "actualQuestRowTap": "PASS bounded detail opens; definition/turn-in text and 2/2 progress visible",
+    "receivedNpcDialogue": "PASS bounded title/body/Exit visible",
+    "actualNpcExitTap": "PASS bounded dialogue window disappears",
+    "hudRestorationAfterNpcExit": "FAIL - original after frame has no restored HUD",
+    "questPhoneReadability": "FAIL - narrow windows and small text; not 48dp or full phone layout acceptance"
+  },
+  "zeroErrorRendererGate": "FAIL",
+  "rendererFixThisLeaf": false,
+  "olderV19Gl506": 135,
+  "olderEvidenceUnchanged": true,
+  "actualJavaJniAuthenticatedQuest": false,
+  "questOrRewardSuccess": false,
+  "realHttpsWss": false,
+  "zoneSave": false,
+  "fullPhoneUiAccepted": false,
+  "completeResourcesAccepted": false,
+  "physicalDeviceAccepted": false,
+  "wholeGoal": "Active"
+}

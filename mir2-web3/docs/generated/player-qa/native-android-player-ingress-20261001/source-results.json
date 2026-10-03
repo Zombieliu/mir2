@@ -1,0 +1,99 @@
+{
+  "frozenWindows": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "rust": [
+    {
+      "file": "normal-final.log",
+      "passed": 257,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "file": "preview-final.log",
+      "passed": 270,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "file": "shared-final.log",
+      "passed": 1203,
+      "failed": 0,
+      "ignored": 8
+    },
+    {
+      "file": "windows-cursor-mac.log",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "file": "windows-weight-mac.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "file": "windows-wallet-mac.log",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "file": "windows-appearance-mac.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "java": [
+    {
+      "variant": "Debug",
+      "suiteCount": 5,
+      "tests": 36,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer"
+    },
+    {
+      "variant": "UiPreview",
+      "suiteCount": 5,
+      "tests": 36,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer"
+    }
+  ],
+  "arm64Api31": {
+    "normal": true,
+    "actualPreviewFeature": true
+  },
+  "extraction": {
+    "source": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+    "cursorAndWalletFields": true,
+    "fiveCursorMethods": true,
+    "helperBodies": [
+      "update_wallet_from_snapshot",
+      "merge_wallet_into_world",
+      "merge_wallet_into_payload",
+      "apply_wallet_delta",
+      "wallet_value",
+      "value_u32",
+      "value_i32",
+      "value_i64",
+      "value_string"
+    ],
+    "permittedDifferences": [
+      "visibility",
+      "read_model namespace",
+      "formatting including trailing commas"
+    ],
+    "windowsHostUsesSharedImplementation": true,
+    "windowsDeviceAccepted": false,
+    "authenticatedAndroidAccepted": false
+  },
+  "windowsExecutionHost": "macOS source-filter tests, not Windows device acceptance",
+  "apkAccepted": false,
+  "authenticatedGameplayAccepted": false,
+  "physicalDeviceAccepted": false
+}

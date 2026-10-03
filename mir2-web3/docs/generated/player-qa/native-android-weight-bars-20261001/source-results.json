@@ -1,0 +1,216 @@
+{
+  "parentSource": "9e29d7b67bead922ead99ae4179ae2e452f06e3e",
+  "sourceFiles": [
+    {
+      "name": "android/app/build.gradle",
+      "sha256": "95040e0fe995da1fec02e88dc59bb05a2e6b60cf0673eb9219206c6255414841"
+    },
+    {
+      "name": "stage-shared-weight-assets.mjs",
+      "sha256": "19e34d28c4100d5320e45004fff585159b4c15e603ab29ba5734e45e53d9ab40"
+    },
+    {
+      "name": "test-shared-weight-assets.mjs",
+      "sha256": "b650742e5a42cab29b3eb1f7471963874d5fdfe78881e62a71aa67460ee86950"
+    }
+  ],
+  "controls": [
+    {
+      "name": "guard-final.log",
+      "passed": 20,
+      "total": 20,
+      "results": [
+        {
+          "name": "completeSparse",
+          "accepted": true,
+          "status": 0
+        },
+        {
+          "name": "missingLibrary",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "missingMetadata",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "invalidMetadata",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "duplicateMetadata",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "missing471",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "wrongMetadataPath",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "fractionalIndex",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "wrongGeometry",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "negativeOffset",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "missingPng",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "truncatedPng",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "dimensionMismatch",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "oversizedHeader",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "wrongSignature",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "missingManifestEntry",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "duplicateManifest",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "wrongManifestPath",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "manifestMetadataMismatch",
+          "accepted": false,
+          "status": 1
+        },
+        {
+          "name": "manifestCountMismatch",
+          "accepted": false,
+          "status": 1
+        }
+      ],
+      "fixtureRoot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/weight-frame-gate-1OtHhe",
+      "sourceUnchanged": true,
+      "sourceIdentity": "432392752f3634b35af4062cd5446e46c98899dea5d85998ac9f92aff688a739",
+      "apkBuilt": false,
+      "gradleOffline": true,
+      "gameplayNetworkUsed": false,
+      "networkTrafficObserved": false
+    },
+    {
+      "name": "item-adjacent.log",
+      "passed": 13,
+      "total": 13,
+      "fixtureRoot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/item-geometry-gate-aPqBnR",
+      "sourceUnchanged": true,
+      "sourceIdentity": "535428fc03d0a32bf3798bfcd21dfda292bf6021c3a4e170ec6c5dd0043c0d26",
+      "apkBuilt": false,
+      "gradleOffline": true,
+      "gameplayNetworkUsed": false,
+      "networkTrafficObserved": false
+    },
+    {
+      "name": "skill-adjacent.log",
+      "passed": 7,
+      "total": 7,
+      "fixtureRoot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/skill-frame-gate-JgIUgS",
+      "sourceUnchanged": true,
+      "sourceIdentity": "3f7d796db93034138f730d86dff9f157ced6284c5615dabe511aa22663f38613",
+      "apkBuilt": false,
+      "gradleOffline": true,
+      "gameplayNetworkUsed": false,
+      "networkTrafficObserved": false
+    }
+  ],
+  "java": [
+    {
+      "variant": "Debug",
+      "suites": 5,
+      "tests": 36,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "variant": "UiPreview",
+      "suites": 5,
+      "tests": 36,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "staged": [
+    {
+      "library": "Items",
+      "pngCount": 1003,
+      "allBytesMatch": true,
+      "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+    },
+    {
+      "library": "StateItem",
+      "pngCount": 5192,
+      "allBytesMatch": true,
+      "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a"
+    },
+    {
+      "library": "MagIcon",
+      "pngCount": 224,
+      "allBytesMatch": true,
+      "metadataSha256": null
+    },
+    {
+      "library": "MagIcon2",
+      "pngCount": 224,
+      "allBytesMatch": true,
+      "metadataSha256": null
+    },
+    {
+      "library": "UI_32bit",
+      "pngCount": 4,
+      "allBytesMatch": true,
+      "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9"
+    }
+  ],
+  "stagedPngCount": 6647,
+  "frozenWindows": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "priorPackUnchanged": true,
+  "sourceOnlyCheckpoint": true,
+  "apkBuilt": false,
+  "emulatorImageAccepted": false,
+  "fullResourceReleaseAccepted": false,
+  "authenticatedGameplayAccepted": false,
+  "physicalDeviceAccepted": false
+}

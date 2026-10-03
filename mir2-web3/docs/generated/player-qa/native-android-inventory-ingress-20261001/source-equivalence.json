@@ -1,0 +1,68 @@
+{
+  "basis": "32ee7faa165d3d034447c69cacafabd7b4d22377",
+  "functions": [
+    {
+      "previous": "transform_inventory_operation_ack",
+      "current": "project_native_inventory_operation_ack",
+      "bodyTokensEquivalent": true
+    },
+    {
+      "previous": "transform_inventory_model",
+      "current": "project_native_inventory_model",
+      "bodyTokensEquivalent": true
+    },
+    {
+      "previous": "extend_item_metadata",
+      "current": "extend_native_item_metadata",
+      "bodyTokensEquivalent": true
+    },
+    {
+      "previous": "crystal_user_item_icon",
+      "current": "native_user_item_icon",
+      "bodyTokensEquivalent": true
+    },
+    {
+      "previous": "unique_crystal_tooltip_template",
+      "current": "unique_crystal_item_template",
+      "bodyTokensEquivalent": true
+    },
+    {
+      "previous": "normalized_slot",
+      "current": "native_inventory_slot",
+      "bodyTokensEquivalent": true
+    },
+    {
+      "previous": "value_u32",
+      "current": "value_u32",
+      "bodyTokensEquivalent": true
+    },
+    {
+      "previous": "value_u32_or",
+      "current": "value_u32_or",
+      "bodyTokensEquivalent": true
+    },
+    {
+      "previous": "value_i32",
+      "current": "value_i32",
+      "bodyTokensEquivalent": true
+    },
+    {
+      "previous": "value_u64",
+      "current": "value_u64",
+      "bodyTokensEquivalent": true
+    },
+    {
+      "previous": "value_u64_ref",
+      "current": "value_u64_ref",
+      "bodyTokensEquivalent": true
+    },
+    {
+      "previous": "value_string",
+      "current": "value_string",
+      "bodyTokensEquivalent": true
+    }
+  ],
+  "windowsSevenPacketRouteUnchanged": true,
+  "geometryDependency": "host callback; filesystem lookup stays on Windows",
+  "rulesChanged": false
+}

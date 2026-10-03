@@ -56,9 +56,11 @@ impl MailServiceInbox {
     }
 
     pub fn pop(&mut self) -> Option<MailServiceEvent> {
-        self.events
-            .pop_front()
-            .or_else(|| self.cost_reserve.take().map(|cost| MailServiceEvent::Cost { cost }))
+        self.events.pop_front().or_else(|| {
+            self.cost_reserve
+                .take()
+                .map(|cost| MailServiceEvent::Cost { cost })
+        })
     }
 
     pub fn drain(&mut self) -> Vec<MailServiceEvent> {
@@ -98,8 +100,7 @@ mod tests {
             r#"{"kind":"lockedItem","uniqueId":77,"locked":true}"#
         );
         assert_eq!(
-            serde_json::from_str::<MailServiceEvent>(r#"{"kind":"cost","cost":125}"#)
-                .unwrap(),
+            serde_json::from_str::<MailServiceEvent>(r#"{"kind":"cost","cost":125}"#).unwrap(),
             MailServiceEvent::Cost { cost: 125 }
         );
     }

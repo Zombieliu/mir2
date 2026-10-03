@@ -224,6 +224,13 @@ fn app() -> App {
 fn rect(node: &Node) -> (Val, Val, Val, Val) {
     (node.left, node.top, node.width, node.height)
 }
+fn px_value(value: Val) -> f32 {
+    match value {
+        Val::Px(value) => value,
+        Val::Auto => 0.0,
+        other => panic!("Unexpected stage-coordinate unit: {other:?}"),
+    }
+}
 fn values(r: CrystalRect) -> (Val, Val, Val, Val) {
     (
         Val::Px(r.left),
@@ -250,9 +257,29 @@ fn trade_dialog_ecs_has_original_pair_positions_and_twenty_uncompacted_cells() {
     app.update();
     let world = app.world_mut();
     let windows = world
-        .query::<(&TradeSide, &Node)>()
+        .query::<(Entity, &TradeSide, &Node)>()
         .iter(world)
-        .map(|(s, n)| (*s, rect(n)))
+        .map(|(entity, side, node)| {
+            // The Android focus adapter wraps the pair in a movable shared
+            // parent. Verify authored stage positions, not child-local offsets.
+            let mut position = Vec2::new(px_value(node.left), px_value(node.top));
+            let mut child = entity;
+            while let Some(parent) = world.get::<ChildOf>(child) {
+                child = parent.parent();
+                if let Some(ancestor) = world.get::<Node>(child) {
+                    position += Vec2::new(px_value(ancestor.left), px_value(ancestor.top));
+                }
+            }
+            (
+                *side,
+                (
+                    Val::Px(position.x),
+                    Val::Px(position.y),
+                    node.width,
+                    node.height,
+                ),
+            )
+        })
         .collect::<Vec<_>>();
     assert_eq!(windows.len(), 2);
     assert!(windows.contains(&(TradeSide::Own, values(OWN_RECT))));
@@ -709,6 +736,17 @@ fn trade_gold_modal_ecs_uses_original_amount_box_and_hides_ok_for_invalid_input(
     ));
     app.update();
     let world = app.world_mut();
+    assert_eq!(
+        world
+            .query_filtered::<Entity, (
+                With<OverlayTradeGoldInput>,
+                With<Button>,
+                With<NativeTextInputTarget>
+            )>()
+            .iter(world)
+            .count(),
+        1
+    );
     let modal = world
         .query_filtered::<(&Node, &GlobalZIndex, Option<&Button>), With<OverlayTradeGoldModal>>()
         .single(world)
@@ -957,5 +995,19 @@ fn trade_dialog_sync_leaves_session_without_leaking_positions_or_prompt() {
     assert_eq!(
         app.world().resource::<NativePlayerUiState>().trade_dialog,
         TradeDialogUi::default()
+    );
+}
+
+#[test]
+fn trade_focus_rect_tracks_both_draggable_windows() {
+    let mut dialog = TradeDialogUi::default();
+    assert_eq!(
+        dialog.focus_rect(),
+        CrystalRect::new(298.0, 418.0, 428.0, 152.0)
+    );
+    dialog.positions = [Vec2::new(700.0, 100.0), Vec2::new(50.0, 500.0)];
+    assert_eq!(
+        dialog.focus_rect(),
+        CrystalRect::new(50.0, 100.0, 854.0, 552.0)
     );
 }

@@ -1,0 +1,39 @@
+{
+  "name": "java",
+  "command": "./gradlew",
+  "args": [
+    "--no-daemon",
+    "--offline",
+    "--rerun-tasks",
+    "testDebugUnitTest",
+    "testUiPreviewUnitTest"
+  ],
+  "started": "2026-10-02T00:45:18.689Z",
+  "finished": "2026-10-02T00:45:54.476Z",
+  "status": 0,
+  "sourceHashesBefore": {
+    "client-bevy/src/lib.rs": "487cb9876fa41f01f9bf125ff630bd4bbff76d0635b35e01b83b142fcc2490bd",
+    "client-bevy/src/native_quest_ingress.rs": "493af7278cfce05166f76d869cd05c7d602e8536fe345c77aa1fb31f54fa782f",
+    "platform-windows/src/gameplay_bridge.rs": "634cc1a01b85061fe37d9b58a4b35650da2f9508d7646b43478fc664759604ed",
+    "platform-windows/src/gateway.rs": "c8ce341f6a83f29e2f78a2ab8b8693082bc3ebfa8511b78cfaa83c255227f2e5",
+    "platform-android/src/lib.rs": "ca9fe6cf9c7e7f644e0c63b3fef5b37b7ac73488fbffd77169a043c43075ff10",
+    "platform-android/src/shared_shell.rs": "1f1995408830b11e5509ecf96800a71955a639ba2164f24223619fdb9d22df24",
+    "platform-android/src/quest_ingress.rs": "9a169ac085f8fcdc61b6eb234f9a5eee555c45cbd6b757f16a66337fe85c2c13",
+    "platform-android/src/quest_host_tests.rs": "abf700f8c792cfac6d261a0ca2721a59d89d519157044281675c97fd893e6530",
+    "platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java": "9f7055624e4be0a529798e9a4ab6a71e9a8914bb5ce9091a072441306c42a768",
+    "platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java": "7a82f48c64124de335dec8b6fa391dd1af23f79f6c02c2305cc328330d9d0f9b"
+  },
+  "sourceHashesAfter": {
+    "client-bevy/src/lib.rs": "487cb9876fa41f01f9bf125ff630bd4bbff76d0635b35e01b83b142fcc2490bd",
+    "client-bevy/src/native_quest_ingress.rs": "493af7278cfce05166f76d869cd05c7d602e8536fe345c77aa1fb31f54fa782f",
+    "platform-windows/src/gameplay_bridge.rs": "634cc1a01b85061fe37d9b58a4b35650da2f9508d7646b43478fc664759604ed",
+    "platform-windows/src/gateway.rs": "c8ce341f6a83f29e2f78a2ab8b8693082bc3ebfa8511b78cfaa83c255227f2e5",
+    "platform-android/src/lib.rs": "ca9fe6cf9c7e7f644e0c63b3fef5b37b7ac73488fbffd77169a043c43075ff10",
+    "platform-android/src/shared_shell.rs": "1f1995408830b11e5509ecf96800a71955a639ba2164f24223619fdb9d22df24",
+    "platform-android/src/quest_ingress.rs": "9a169ac085f8fcdc61b6eb234f9a5eee555c45cbd6b757f16a66337fe85c2c13",
+    "platform-android/src/quest_host_tests.rs": "abf700f8c792cfac6d261a0ca2721a59d89d519157044281675c97fd893e6530",
+    "platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java": "9f7055624e4be0a529798e9a4ab6a71e9a8914bb5ce9091a072441306c42a768",
+    "platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java": "7a82f48c64124de335dec8b6fa391dd1af23f79f6c02c2305cc328330d9d0f9b"
+  },
+  "sourceUnchanged": true
+}

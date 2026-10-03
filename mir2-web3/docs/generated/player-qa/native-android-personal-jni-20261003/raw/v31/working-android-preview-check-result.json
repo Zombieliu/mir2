@@ -1,0 +1,39 @@
+{
+  "label": "working-android-preview-check",
+  "bin": "cargo",
+  "args": [
+    "+1.95.0",
+    "ndk",
+    "-t",
+    "arm64-v8a",
+    "--platform",
+    "31",
+    "check",
+    "--lib",
+    "--locked",
+    "--offline",
+    "--features",
+    "ui-preview"
+  ],
+  "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android",
+  "source": "ecba88bd63e70fa9ec90b938a9779344cabca395",
+  "started": "2026-10-02T15:21:26.083Z",
+  "ended": "2026-10-02T15:21:30.170Z",
+  "code": 0,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 85975,
+      "sha256": "e68349feea75a3753ab5c18adfb39025173f025f286eebc36797da91603d8f81"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 85975,
+      "sha256": "e68349feea75a3753ab5c18adfb39025173f025f286eebc36797da91603d8f81"
+    }
+  ],
+  "sourceUnchanged": true
+}

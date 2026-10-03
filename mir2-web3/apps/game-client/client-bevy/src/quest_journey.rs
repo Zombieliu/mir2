@@ -108,8 +108,11 @@ const fn one_objective_group() -> usize {
 // Presentation models stay canonical for web/legacy clients. Native locale
 // selection is applied before their sentences are composed and measured.
 fn localized(source: &str) -> String {
-    if crate::native_i18n::active() { crate::player_text::text(source) }
-    else { source.to_owned() }
+    if crate::native_i18n::active() {
+        crate::player_text::text(source)
+    } else {
+        source.to_owned()
+    }
 }
 
 impl NewcomerJourneyCatalog {
@@ -564,25 +567,42 @@ impl NewcomerGraduationCatalog {
                 GraduationOption {
                     direction: GraduationDirection::Equipment,
                     title: class.equipment.title.clone(),
-                    summary: format!("{} {}", localized(&class.equipment.requirements), localized("Equipment target.")),
+                    summary: format!(
+                        "{} {}",
+                        localized(&class.equipment.requirements),
+                        localized("Equipment target.")
+                    ),
                     instruction: class.equipment.normal_acquisition.clone(),
                 },
                 GraduationOption {
                     direction: GraduationDirection::Skill,
                     title: class.skill.title.clone(),
-                    summary: format!("{} {}", localized(&class.skill.requirements), localized("Next skill goal.")),
+                    summary: format!(
+                        "{} {}",
+                        localized(&class.skill.requirements),
+                        localized("Next skill goal.")
+                    ),
                     instruction: class.skill.normal_acquisition.clone(),
                 },
                 GraduationOption {
                     direction: GraduationDirection::Challenge,
                     title: self.challenge.title.clone(),
                     summary: if crate::native_i18n::active() {
-                        crate::player_text::text(&format!("{} difficulty · {}",
-                            localized(&self.challenge.difficulty), localized(&self.challenge.map_title)))
-                    } else { format!("{} difficulty · {}", self.challenge.difficulty, self.challenge.map_title) },
+                        crate::player_text::text(&format!(
+                            "{} difficulty · {}",
+                            localized(&self.challenge.difficulty),
+                            localized(&self.challenge.map_title)
+                        ))
+                    } else {
+                        format!(
+                            "{} difficulty · {}",
+                            self.challenge.difficulty, self.challenge.map_title
+                        )
+                    },
                     instruction: format!(
                         "{} {}",
-                        localized(&self.challenge.normal_travel), localized(&self.challenge.detail)
+                        localized(&self.challenge.normal_travel),
+                        localized(&self.challenge.detail)
                     ),
                 },
             ],
@@ -753,7 +773,12 @@ fn npc_action(
     };
     (
         localized(&format!("{verb} {name}")),
-        Some(format!("{} ({},{})", localized(map), location.x, location.y)),
+        Some(format!(
+            "{} ({},{})",
+            localized(map),
+            location.x,
+            location.y
+        )),
     )
 }
 

@@ -1,0 +1,7 @@
+Stopping: com.mir2.web3
+Starting: Intent { cmp=com.mir2.web3/.MainActivity }
+Status: timeout
+LaunchState: UNKNOWN (-1)
+Activity: com.mir2.web3/.MainActivity
+WaitTime: 12812
+Complete

@@ -1,0 +1,3 @@
+mtime=2026-09-12 07:48:18 +0800
+bytes=375653485
+path=mir2-web3/apps/game-client/platform-android/android/app/build/outputs/apk/uiPreview/app-uiPreview.apk

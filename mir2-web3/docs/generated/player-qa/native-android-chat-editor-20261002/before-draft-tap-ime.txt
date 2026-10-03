@@ -1,0 +1,3 @@
+  mCurFocusedWindow=android.os.BinderProxy@6e53ee3 softInputMode=STATE_UNSPECIFIED|ADJUST_RESIZE|IS_FORWARD_NAVIGATION client=ClientState{f730f0e uid=10146 pid=7897 displayId=0}
+  mShowRequested=false mShowExplicitlyRequested=false mShowForced=false mInputShown=false
+  mIsInputViewShown=true mStatusIcon=0

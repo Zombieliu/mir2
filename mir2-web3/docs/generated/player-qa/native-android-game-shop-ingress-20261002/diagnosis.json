@@ -1,0 +1,36 @@
+{
+  "source": "92033b910cc9ddd996c416ec4024af4625e78b31",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "latestObservedWindows": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4",
+  "sourceScope": [
+    "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+    "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+    "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+    "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java"
+  ],
+  "boundGates": [
+    "bound-rust-normal",
+    "bound-rust-preview",
+    "bound-shared-native-player",
+    "bound-runtime",
+    "bound-api31-normal",
+    "bound-api31-preview",
+    "bound-java-full"
+  ],
+  "nativeIngressId": "NI-12",
+  "boundedSourceLeafAccepted": true,
+  "wholeNi12Accepted": false,
+  "newApkBuilt": false,
+  "newScreenshots": false,
+  "liveAuthentication": false,
+  "liveJavaJni": false,
+  "realPlayerLoop": false,
+  "physicalDeviceAccepted": false,
+  "zeroErrorRendererAccepted": false,
+  "wholeWindowsParityAccepted": false,
+  "goalStatus": "active",
+  "priorV30RendererFailureNotRemeasured": true,
+  "remotePublicationNotInferredFromLocalCommit": true
+}

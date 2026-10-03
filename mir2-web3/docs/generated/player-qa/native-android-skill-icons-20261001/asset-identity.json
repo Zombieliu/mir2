@@ -1,0 +1,14 @@
+{
+  "parentSource": "6d9f024e1c7a71eeec04500ec6ef63439c5cde85",
+  "priorFilesByteIdentical": 12789,
+  "magicFramesPixelHashMatched": 448,
+  "oldManifestSha256": "890ae5d8f0fca13246654c26c5826575887bf22faa7d44504c88d0dbd0307cca",
+  "newManifestSha256": "e14940711b944e54baa41254fca3f4b8e0ca0ad3e5d92e76e12a366823ca7735",
+  "sourceLibraries": {
+    "MagIcon": { "frames": 224, "bytes": 199927, "sha256": "5f49bf35158f680852a66833ec3c706ad045448ef1526d1f7fdd116807de3030" },
+    "MagIcon2": { "frames": 224, "bytes": 345567, "sha256": "0875fc38fa58a101f09346374479de712661f672ef39e6c0ea9679d59aad2a4e" }
+  },
+  "offlineOnly": true,
+  "onlineAccepted": false,
+  "physicalDeviceAccepted": false
+}

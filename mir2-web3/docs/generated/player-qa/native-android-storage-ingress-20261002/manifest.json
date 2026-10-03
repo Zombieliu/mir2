@@ -1,0 +1,372 @@
+{
+  "version": 1,
+  "source": "81eb08cdca3390262e1eff3756afd4d09a16d005",
+  "payloads": [
+    {
+      "path": "raw/GatewaySession-before.java",
+      "bytes": 32654,
+      "sha256": "04106bfe069c5da4f6c05f7a13583d539074e099e7bad206bfdef0c9ecf21548"
+    },
+    {
+      "path": "raw/GatewaySessionTest-red.java",
+      "bytes": 57962,
+      "sha256": "8c96bd0b0b1eb2d2e2e31c59c78444b00e54d1e0c1fb449fbcd89d0707f49f9e"
+    },
+    {
+      "path": "raw/baseline.json",
+      "bytes": 2654,
+      "sha256": "0537d703cff05d62892898ecbbe316fa7b12c55d9506441d6cc5e9f245763466"
+    },
+    {
+      "path": "raw/bound-api31-normal-result.json",
+      "bytes": 3062,
+      "sha256": "331e9c310459e3f7ffce282df8e40a3b3f5b92d247150b8ffa431c86057ad445"
+    },
+    {
+      "path": "raw/bound-api31-normal.log",
+      "bytes": 32802,
+      "sha256": "0beacee6c1df2cff304614f4702cc43d4d01d6c664a4252eec16128c4ed3606d"
+    },
+    {
+      "path": "raw/bound-api31-preview-result.json",
+      "bytes": 3099,
+      "sha256": "923b1bd855ac93bb907fa25c01a51b823ae4e3f1f8faeb3ac4a4143028bc0581"
+    },
+    {
+      "path": "raw/bound-api31-preview.log",
+      "bytes": 32802,
+      "sha256": "0d19145183bbc8a17d54532aa0e9f923ac64eb2557759083a37f10990f0300dc"
+    },
+    {
+      "path": "raw/bound-java-full-result.json",
+      "bytes": 5366,
+      "sha256": "205ba8978d32d13827b3ddd0f36d9d6c66935012f9f8c2f590696400f6a20c0c"
+    },
+    {
+      "path": "raw/bound-java-full-xml-0/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "14d76cb1cabfa661c7e3fb0ad791cac24d0ed66ae716e80556c524a123a19f5b"
+    },
+    {
+      "path": "raw/bound-java-full-xml-0/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "6e361bcdd95900bfcdcea85b217ee12f30c6c1a41283b4b2e0763a5fd6651082"
+    },
+    {
+      "path": "raw/bound-java-full-xml-0/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "6cf9320d8480688fc8f508c7bc09e4de500c7e78deb7416d8b5dffb849eec92c"
+    },
+    {
+      "path": "raw/bound-java-full-xml-0/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4468,
+      "sha256": "de12b59f9dbb07882e2eb91c67edb3e11e7fee5071efe0fa1f02f282cf4de33b"
+    },
+    {
+      "path": "raw/bound-java-full-xml-0/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "07d17835e16a5ca710f2ff02986f2ab2d91ba5cfe49fcaa1a5f9269cbe1ff7aa"
+    },
+    {
+      "path": "raw/bound-java-full-xml-1/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "b6891ea594b4c0527e2656b0d812bf6709aa9191d31db96b30e408e7555050f9"
+    },
+    {
+      "path": "raw/bound-java-full-xml-1/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 871,
+      "sha256": "b674276889a6cdfe39f978afa40b25ab6f8d3b447a953e0516fd6207b86b5eae"
+    },
+    {
+      "path": "raw/bound-java-full-xml-1/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "d23eb9037b60373e7557a8ad74798131f11823536bdfbdfef76663cbf5243998"
+    },
+    {
+      "path": "raw/bound-java-full-xml-1/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4467,
+      "sha256": "67391636721173217de9d050984a8d7f8e44959042333a3bf0ae02a0fae1112d"
+    },
+    {
+      "path": "raw/bound-java-full-xml-1/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "32e6139adbfda4cb661c659d3dfd339b1d4c7f7520392bb0bec124e79f55a79d"
+    },
+    {
+      "path": "raw/bound-java-full.log",
+      "bytes": 3149,
+      "sha256": "b2a3f6edaa0c5b9a2957c4ff795807e0a3c71ed517d3360e5c6829bb48dbed9e"
+    },
+    {
+      "path": "raw/bound-runtime-result.json",
+      "bytes": 3056,
+      "sha256": "434974d9ae0ce399b6fd9f0ad32ba4a837062d555cd8687f1da5fdc1a798572c"
+    },
+    {
+      "path": "raw/bound-runtime.log",
+      "bytes": 27145,
+      "sha256": "d898e803ed26c8a8125d605436c5c364dfa9572fc5c1d7392b0bb7053832fcb9"
+    },
+    {
+      "path": "raw/bound-rust-normal-result.json",
+      "bytes": 3069,
+      "sha256": "0ce5764a70649eb34f77f68395ca36e5db123c8e830a3cf9d09796b9e6f580d3"
+    },
+    {
+      "path": "raw/bound-rust-normal.log",
+      "bytes": 75188,
+      "sha256": "99f5c12703fa840963fa562e1859387772f795159faf7443839a608a941465cc"
+    },
+    {
+      "path": "raw/bound-rust-preview-result.json",
+      "bytes": 3106,
+      "sha256": "83f7f83ca793a0064945cacc7aaa5461a1ca303f622d87aed8685375fed0609e"
+    },
+    {
+      "path": "raw/bound-rust-preview.log",
+      "bytes": 80001,
+      "sha256": "0ddb4b716f92b71e8feb9d0910130c252ca8a1e64b23cae6c82fe2c6f970931f"
+    },
+    {
+      "path": "raw/bound-shared-native-player-result.json",
+      "bytes": 3115,
+      "sha256": "cb86fe5534793c95d1ee45573518f36aca0d86fe1790c3712bc20bbd2b79d3bd"
+    },
+    {
+      "path": "raw/bound-shared-native-player.log",
+      "bytes": 155999,
+      "sha256": "c15034a6167570f236814b09c999371b7aca53199a04e6c5a857d7f8ec64e829"
+    },
+    {
+      "path": "raw/failure-classification.json",
+      "bytes": 1074,
+      "sha256": "8cd6a5a54e2082223e8431d044d8fb57e133ff860c4178dfd9857ac765d7e9af"
+    },
+    {
+      "path": "raw/frozen-storage-functions.json",
+      "bytes": 23647,
+      "sha256": "dc61652b4470c57b48ad3aa66f9d256b371677adfd062d4ec3f6bad0463ad184"
+    },
+    {
+      "path": "raw/full-api31-normal-result.json",
+      "bytes": 3005,
+      "sha256": "c7c95f7b4fe96d810039ea31bd3acf2eb86516ab04f71f49206900d2867ce743"
+    },
+    {
+      "path": "raw/full-api31-normal.log",
+      "bytes": 33230,
+      "sha256": "6313cd6b8dcbc8395aac8d3ab14a97e726d7450fdf582cb0833f83b4a7515362"
+    },
+    {
+      "path": "raw/full-api31-preview-result.json",
+      "bytes": 3042,
+      "sha256": "f5d94d63f47b377dd4e82f3e1b0299831471a0fd82d474970dfebdbc36071076"
+    },
+    {
+      "path": "raw/full-api31-preview.log",
+      "bytes": 33229,
+      "sha256": "433e7e13ebe7e135255a836f3064877da515a0c3ac2ac9fbd4a462f61b43b740"
+    },
+    {
+      "path": "raw/full-runtime-result.json",
+      "bytes": 2999,
+      "sha256": "e07cd0aa6122df29f19fc11e70e5654c8a5127c41b6be6ea3f0d657341e2384a"
+    },
+    {
+      "path": "raw/full-runtime.log",
+      "bytes": 27422,
+      "sha256": "b61ac6d5088128a82e7e2df89e8d07727ffb8cc79802ac033c7f5da4bf4a89cb"
+    },
+    {
+      "path": "raw/full-rust-normal-result.json",
+      "bytes": 3012,
+      "sha256": "1c1ce77cdae73aa41b034ffcf19deb719b4634e57e6104a909b321b37d6f4d5e"
+    },
+    {
+      "path": "raw/full-rust-normal.log",
+      "bytes": 74901,
+      "sha256": "2b640c07579c3f033dac84e2d5ec3a981bae9ec15dcba9a3c038103d8dd75822"
+    },
+    {
+      "path": "raw/full-rust-preview-result.json",
+      "bytes": 3049,
+      "sha256": "84e67f4356cc739fe6e5a7196159c789894af25c0b7d2cdbbf57018d37282ade"
+    },
+    {
+      "path": "raw/full-rust-preview.log",
+      "bytes": 80142,
+      "sha256": "c7f1be3274703c37144b2f62d9411ca48623c7b66e88f8daacbee729a773bd41"
+    },
+    {
+      "path": "raw/full-shared-native-player-result.json",
+      "bytes": 3058,
+      "sha256": "8ff6541b289009c5764d277bce6c571cc2be236b93c53627871286548f000a51"
+    },
+    {
+      "path": "raw/full-shared-native-player.log",
+      "bytes": 156140,
+      "sha256": "88579da64fcd797cc0f130f1d8a4b22103813dc07ccac075e1425813c6552625"
+    },
+    {
+      "path": "raw/java-green-correct-task-result.json",
+      "bytes": 5318,
+      "sha256": "09b309b1f734626548ccaa46f40449b68930574584eef10a2442c3f9ba10c8ee"
+    },
+    {
+      "path": "raw/java-green-correct-task-xml-0/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "0b57e6b28a177a0b79b6c89da10740e0660d935dadd414e5ee8ae9a7258fb026"
+    },
+    {
+      "path": "raw/java-green-correct-task-xml-0/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "2f94d96abad6ea59d88fef7996131a939aa6697e2bc8a48b53f16522ee69e1d2"
+    },
+    {
+      "path": "raw/java-green-correct-task-xml-0/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "8885ca62ccb617e78056a48475db879f03a9d8b52c2afd101477db65fcd2dcdf"
+    },
+    {
+      "path": "raw/java-green-correct-task-xml-0/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4469,
+      "sha256": "44b8751a1367154c9aa696087320724391fcf8378e422416ab274239c19274c4"
+    },
+    {
+      "path": "raw/java-green-correct-task-xml-0/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "5b8bda9f400d6675a824cb018e9dcbdd9108f7fb1c52abfab30dfaee6055fa4a"
+    },
+    {
+      "path": "raw/java-green-correct-task-xml-1/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "5d813469dc9108eb2f495d2ed46d59632006c83971e9014f03e503496642aaa6"
+    },
+    {
+      "path": "raw/java-green-correct-task-xml-1/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "b641a7ba1dae7c7cdb596b10a1589996c84f4ed754c2a7ce59ac18ed100205f7"
+    },
+    {
+      "path": "raw/java-green-correct-task-xml-1/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "8885ca62ccb617e78056a48475db879f03a9d8b52c2afd101477db65fcd2dcdf"
+    },
+    {
+      "path": "raw/java-green-correct-task-xml-1/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4471,
+      "sha256": "491d2ccb1e8711eb5c766dc896c3a86f63aa9f3e1d65e0cd9e95d0f7a27eadb1"
+    },
+    {
+      "path": "raw/java-green-correct-task-xml-1/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "fcc32b48ccf5eb1459d2feb0465065e3bb85ab960c0a6d22af694c98e8596d17"
+    },
+    {
+      "path": "raw/java-green-correct-task.log",
+      "bytes": 3149,
+      "sha256": "250981e0dabc9feb8ec0cb55989b48c4cd6c4924222b7aff93be7880c6618ff9"
+    },
+    {
+      "path": "raw/java-green-full-result.json",
+      "bytes": 3487,
+      "sha256": "babeb96626a2aabbc504c0b103a0f6b1d4fade1144b2e050eaef02496dc9a48b"
+    },
+    {
+      "path": "raw/java-green-full.log",
+      "bytes": 1107,
+      "sha256": "e4f357abfdb513243270ebcac090bfade3d637eebd769d28b5d4504bc8e03aa3"
+    },
+    {
+      "path": "raw/java-red-result.json",
+      "bytes": 459,
+      "sha256": "1ac81fae4aa316865804f9525e20a6a5cfac5471632d5381b347aa2457bd5a79"
+    },
+    {
+      "path": "raw/java-red.log",
+      "bytes": 2554,
+      "sha256": "c254f2003d7ab2866127d4da45a1e69cad73877d262aca4e7b44a2e114c6e825"
+    },
+    {
+      "path": "raw/java-red.xml",
+      "bytes": 9637,
+      "sha256": "3646a757a18ea9a757dafc3e5e054f82e36e3a46b998e7b6a63b872efdd8b9de"
+    },
+    {
+      "path": "raw/publication-status-ni12.json",
+      "bytes": 1590,
+      "sha256": "892cdc5a0de48bb194273b0cb447aa78d244500411693942308bf7dabae8dd00"
+    },
+    {
+      "path": "raw/raw-log-whitespace-check.log",
+      "bytes": 1868,
+      "sha256": "65133f4c2c49c0fb41924295ce30217bf3de8bfc2ceb3a0d6ff8534d38cd1dad"
+    },
+    {
+      "path": "raw/raw-log-whitespace-classification.json",
+      "bytes": 272,
+      "sha256": "e7941297b8e0c876c54839c8bd535982ee8d74a1008aafd04a1c89b78238ce49"
+    },
+    {
+      "path": "raw/red-input.json",
+      "bytes": 142,
+      "sha256": "d207e751cf94b7d8934dcb285680c39af066fa6fdfc1e2f05e5e11e57bbd504a"
+    },
+    {
+      "path": "raw/rust-storage-targeted-result.json",
+      "bytes": 2958,
+      "sha256": "7694ae121289acb8eff579836248f1355ea308d01713d77f35d61eeb49f939e6"
+    },
+    {
+      "path": "raw/rust-storage-targeted.log",
+      "bytes": 43409,
+      "sha256": "f989782a714beacc53e8ec703cd3ab85e2895b14a6828b7ece26fc8f8ec9410e"
+    },
+    {
+      "path": "raw/source/mir2-web3__apps__game-client__client-bevy__src__storage.rs",
+      "bytes": 33253,
+      "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+    },
+    {
+      "path": "raw/source/mir2-web3__apps__game-client__platform-android__android__app__src__main__java__com__mir2__web3__GatewaySession.java",
+      "bytes": 33137,
+      "sha256": "f166a93d7d96caeece1cf72c6c709065d9247da9fcd87d20094d949d3aece18b"
+    },
+    {
+      "path": "raw/source/mir2-web3__apps__game-client__platform-android__android__app__src__test__java__com__mir2__web3__GatewaySessionTest.java",
+      "bytes": 60074,
+      "sha256": "9017649660b5e93b912b6fba872a79c506402dd4444a6b62c2a362858b88d4ad"
+    },
+    {
+      "path": "raw/source/mir2-web3__apps__game-client__platform-android__src__lib.rs",
+      "bytes": 75493,
+      "sha256": "61ed32636953ee7b40413901598d79696025c5488cce282b033f4edf1d21d79c"
+    },
+    {
+      "path": "raw/source/mir2-web3__apps__game-client__platform-android__src__shared_shell.rs",
+      "bytes": 182051,
+      "sha256": "ffc257f1fef241d25d7487f1737aee2666ca20a3dfee01940cc89b594c0dd818"
+    },
+    {
+      "path": "raw/source/mir2-web3__apps__game-client__platform-android__src__storage_ingress.rs",
+      "bytes": 23059,
+      "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+    },
+    {
+      "path": "raw/source-boundary-audit.json",
+      "bytes": 4105,
+      "sha256": "79981967bcb8706340c493db0c4a41c15d0486f8ab6aa738d72d1109dcafa6fd"
+    },
+    {
+      "path": "raw/source-commit-binding.json",
+      "bytes": 3765,
+      "sha256": "f407c3aaf63e1fb3e389b2339f2de6656aaa6f1cc313495a5a2a1d4f8e141e06"
+    },
+    {
+      "path": "diagnosis.json",
+      "bytes": 1604,
+      "sha256": "bd4446bdc64748e371209920b7b11d2ca006b2179384016719e192a24e040473"
+    }
+  ],
+  "totalBytes": 1496163
+}

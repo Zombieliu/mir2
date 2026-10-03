@@ -1,0 +1,187 @@
+{
+  "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+  "pid": "19449",
+  "frame": "ui-npc-quests/0-cold.png",
+  "derivation": "Only native I event geometry rows; duplicate RustStdoutStderr rows excluded. Raw floating-point font sizes retained; nominal fontDp rounded only within 0.00001 dp.",
+  "controls": [
+    {
+      "widthDp": 48,
+      "heightDp": 48,
+      "centerDp": [
+        802.9091,
+        48
+      ]
+    },
+    {
+      "widthDp": 285.45456,
+      "heightDp": 51.636364,
+      "centerDp": [
+        224.18182,
+        112
+      ]
+    },
+    {
+      "widthDp": 285.45456,
+      "heightDp": 52,
+      "centerDp": [
+        224.18182,
+        172.18182
+      ]
+    },
+    {
+      "widthDp": 285.45456,
+      "heightDp": 51.636364,
+      "centerDp": [
+        224.18182,
+        231.63637
+      ]
+    },
+    {
+      "widthDp": 285.45456,
+      "heightDp": 52,
+      "centerDp": [
+        224.18182,
+        291.81818
+      ]
+    },
+    {
+      "widthDp": 285.45456,
+      "heightDp": 51.636364,
+      "centerDp": [
+        224.18182,
+        351.27274
+      ]
+    },
+    {
+      "widthDp": 285.45456,
+      "heightDp": 52,
+      "centerDp": [
+        224.18182,
+        411.45456
+      ]
+    },
+    {
+      "widthDp": 285.45456,
+      "heightDp": 51.636364,
+      "centerDp": [
+        224.18182,
+        470.9091
+      ]
+    },
+    {
+      "widthDp": 285.45456,
+      "heightDp": 52,
+      "centerDp": [
+        224.18182,
+        531.0909
+      ]
+    },
+    {
+      "widthDp": 428,
+      "heightDp": 48,
+      "centerDp": [
+        604.9091,
+        290.18182
+      ]
+    },
+    {
+      "widthDp": 428,
+      "heightDp": 48,
+      "centerDp": [
+        604.9091,
+        346.18182
+      ]
+    },
+    {
+      "widthDp": 245.81818,
+      "heightDp": 48,
+      "centerDp": [
+        196.36363,
+        344.72726
+      ]
+    },
+    {
+      "widthDp": 245.81818,
+      "heightDp": 48,
+      "centerDp": [
+        450.18182,
+        344.72726
+      ]
+    },
+    {
+      "widthDp": 245.81818,
+      "heightDp": 48,
+      "centerDp": [
+        704,
+        344.72726
+      ]
+    },
+    {
+      "widthDp": 146.54546,
+      "heightDp": 48,
+      "centerDp": [
+        146.72728,
+        290.9091
+      ]
+    },
+    {
+      "widthDp": 146.90909,
+      "heightDp": 48,
+      "centerDp": [
+        301.45456,
+        290.9091
+      ]
+    },
+    {
+      "widthDp": 217.81818,
+      "heightDp": 48,
+      "centerDp": [
+        491.81818,
+        290.9091
+      ]
+    },
+    {
+      "widthDp": 218.18182,
+      "heightDp": 48,
+      "centerDp": [
+        718.1818,
+        290.9091
+      ]
+    }
+  ],
+  "scrollAreas": [
+    {
+      "widthDp": 301.45456,
+      "heightDp": 182.54546,
+      "contentDp": [
+        301.45456,
+        486.54544
+      ],
+      "initialOffset": [
+        0,
+        0
+      ]
+    },
+    {
+      "widthDp": 444,
+      "heightDp": 182.54546,
+      "contentDp": [
+        444,
+        300
+      ],
+      "initialOffset": [
+        0,
+        0
+      ]
+    }
+  ],
+  "rawFontDp": [
+    13.999999046325684,
+    16
+  ],
+  "fontDp": [
+    14,
+    16
+  ],
+  "boundary": "Off-screen rows and rewards are clipped until scrolled; not all controls initially visible and not whole-phone-layout acceptance."
+}

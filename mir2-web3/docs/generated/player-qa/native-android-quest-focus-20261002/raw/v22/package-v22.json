@@ -1,0 +1,110 @@
+{
+  "source": "afea4b358680bb1d1a2ec8362ca6ffb538c6d648",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "versionCode": 22,
+  "versionName": "0.1.19-quest-focus",
+  "cleanBeforeAfterBothBuilds": true,
+  "sourceGateHashesMatchCommittedInputs": true,
+  "gatewayUrl": "",
+  "minimumApi": 31,
+  "targetApi": 35,
+  "abi": "arm64-v8a",
+  "artifacts": [
+    {
+      "variant": "debug",
+      "source": "afea4b358680bb1d1a2ec8362ca6ffb538c6d648",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-focus-v22-20261002/final-apks/mir2-native-quest-focus-debug-v22.apk",
+      "bytes": 386833517,
+      "sha256": "c06b8b3ee028836974bfaa5629fbb56606de492924eaae3685e0816b1cb768b8",
+      "libraries": [
+        {
+          "library": "Items",
+          "pngCount": 1003,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+        },
+        {
+          "library": "StateItem",
+          "pngCount": 5192,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a"
+        },
+        {
+          "library": "MagIcon",
+          "pngCount": 224,
+          "allSourceBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "MagIcon2",
+          "pngCount": 224,
+          "allSourceBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "UI_32bit",
+          "pngCount": 4,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9"
+        }
+      ],
+      "offlineItem7": {
+        "width": 36,
+        "height": 26,
+        "pngSha256": "60f5e8a61589c2a4b5c3cdcf64e93a1101110435333cf2e5484da056f0a7ae6a"
+      }
+    },
+    {
+      "variant": "preview",
+      "source": "afea4b358680bb1d1a2ec8362ca6ffb538c6d648",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-focus-v22-20261002/final-apks/mir2-native-quest-focus-preview-v22.apk",
+      "bytes": 390828257,
+      "sha256": "ad6b01d67fd6711a8f2b18fb568f5ee17e0f67f7b2a33b8a73c6301bf54597c3",
+      "libraries": [
+        {
+          "library": "Items",
+          "pngCount": 1003,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+        },
+        {
+          "library": "StateItem",
+          "pngCount": 5192,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a"
+        },
+        {
+          "library": "MagIcon",
+          "pngCount": 224,
+          "allSourceBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "MagIcon2",
+          "pngCount": 224,
+          "allSourceBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "UI_32bit",
+          "pngCount": 4,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9"
+        }
+      ],
+      "offlineItem7": {
+        "width": 36,
+        "height": 26,
+        "pngSha256": "60f5e8a61589c2a4b5c3cdcf64e93a1101110435333cf2e5484da056f0a7ae6a"
+      }
+    }
+  ],
+  "each6647PngAndThreeMetadataMatchInputs": true,
+  "gpuRendererSourceChangedThisLeaf": false,
+  "kind": "Rust release cdylib inside Gradle Debug diagnostic variants; not store Release",
+  "previousFailedFramesAndLogsRetained": true,
+  "fullResourceReleaseAccepted": false,
+  "fullPhoneUiAccepted": false,
+  "authenticatedGameplayAccepted": false,
+  "physicalDeviceAccepted": false
+}

@@ -1,0 +1,1329 @@
+   Compiling mir2-client-bevy v0.1.0 (/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy)
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:210:21
+    |
+210 |                     (32. / 3.),
+    |                     ^        ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+210 -                     (32. / 3.),
+210 +                     32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:414:29
+    |
+414 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+414 -                             (32. / 3.),
+414 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:421:29
+    |
+421 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+421 -                             (32. / 3.),
+421 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:476:25
+    |
+476 |                         (32. / 3.),
+    |                         ^        ^
+    |
+help: remove these parentheses
+    |
+476 -                         (32. / 3.),
+476 +                         32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:695:33
+    |
+695 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+695 -                                 (32. / 3.),
+695 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:702:33
+    |
+702 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+702 -                                 (32. / 3.),
+702 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:715:33
+    |
+715 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+715 -                                 (32. / 3.),
+715 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:727:33
+    |
+727 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+727 -                                 (32. / 3.),
+727 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:831:29
+    |
+831 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+831 -                             (32. / 3.),
+831 +                             32. / 3. ,
+    |
+
+warning: unused import: `shop_buy_enabled`
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:71:5
+   |
+71 |     shop_buy_enabled, shop_buy_enabled_with_pearls, shop_quantity_clamped, shop_quantity_dec,
+   |     ^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:76:5
+   |
+76 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `storage_remove_password_enabled`, `storage_set_password_enabled`, and `storage_unlock_enabled`
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:82:5
+   |
+82 |     storage_remove_password_enabled, storage_set_password_enabled, storage_unlock_enabled,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `SKILL_ROW_SIZE`
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:127:41
+    |
+127 |     SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE, SKILL_ROW_STEP_Y,
+    |                                         ^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unnecessary parentheses around `if` condition
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7978:8
+     |
+7978 |     if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |        ^
+7979 |         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                  ^
+     |
+help: remove these parentheses
+     |
+7978 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+7979 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+warning: variable does not need to be mutable
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:1304:5
+     |
+1304 |     mut pending: ResMut<PendingOperations>,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7112:17
+     |
+7112 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7113:28
+     |
+7113 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7113:28
+     |
+7113 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7539:18
+     |
+7539 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8232:25
+     |
+8232 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8233:36
+     |
+8233 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8217:5
+     |
+8217 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8233:36
+     |
+8233 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:11701:9
+      |
+11701 |         skill_binding,
+      |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:11702:9
+      |
+11702 |         skill_persistence,
+      |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: unused variable: `inventory`
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:16162:5
+      |
+16162 |     inventory: &InventoryModel,
+      |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_inventory`
+
+warning: unused variable: `state`
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:16163:5
+      |
+16163 |     state: &NativePlayerUiState,
+      |     ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `compose_ui`
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:16164:5
+      |
+16164 |     compose_ui: &MailComposeUi,
+      |     ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_compose_ui`
+
+warning: unused variable: `nearby`
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:1921:5
+     |
+1921 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `overlays::CrystalCharacterWingMaterials` is more private than the item `hero_dialog::render::render`
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:234:1
+    |
+234 | / pub fn render(
+235 | |     mut commands: Commands,
+236 | |     roots: Query<Entity, With<OverlayRoot>>,
+237 | |     old: Query<Entity, With<HeroRoot>>,
+...   |
+242 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+243 | | ) {
+    | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+    |
+note: but type `overlays::CrystalCharacterWingMaterials` is only usable at visibility `pub(self)`
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:196:1
+    |
+196 | struct CrystalCharacterWingMaterials([Handle<CrystalAdditiveUiMaterial>; 4]);
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `#[warn(private_interfaces)]` on by default
+
+warning: constant `NPC_SHOP_BUY_PANEL_SIZE` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3267:7
+     |
+3267 | const NPC_SHOP_BUY_PANEL_SIZE: Vec2 = Vec2::new(
+     |       ^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `NPC_SHOP_SERVICE_PANEL_SIZE` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3271:7
+     |
+3271 | const NPC_SHOP_SERVICE_PANEL_SIZE: Vec2 = Vec2::new(360.0, 360.0);
+     |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `NPC_SHOP_SERVICE_ACTION_TOP` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3272:7
+     |
+3272 | const NPC_SHOP_SERVICE_ACTION_TOP: f32 = 326.0;
+     |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: multiple variants are never constructed
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3352:5
+     |
+3323 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+3352 |     OptionsMusicVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3353 |     OptionsMusicVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3354 |     OptionsSoundVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3355 |     OptionsSoundVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3356 |     ToggleInventory,
+     |     ^^^^^^^^^^^^^^^
+3357 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+3358 |     ToggleShop,
+     |     ^^^^^^^^^^
+3359 |     ToggleNpcShop,
+     |     ^^^^^^^^^^^^^
+3360 |     ToggleStorage,
+     |     ^^^^^^^^^^^^^
+...
+3363 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+3368 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+3387 |     GroupInviteNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3388 |     GroupInviteNameSubmit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3391 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+3395 |     GuildRecruitNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3399 |     GuildCancelNoticeEdit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+3400 |     SelectGuildMember(u8),
+     |     ^^^^^^^^^^^^^^^^^
+3401 |     GuildKickMember(u8),
+3402 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+3405 |     GuildAssignNextRank,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3414 |     GuildRankNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+...
+3462 |     ClaimMail(u64),
+     |     ^^^^^^^^^
+...
+3473 |     MailRecipientFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+3474 |     MailAttachmentPagePrev,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3475 |     MailAttachmentPageNext,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3476 |     MailMessageFocus,
+     |     ^^^^^^^^^^^^^^^^
+3477 |     MailGoldInc,
+     |     ^^^^^^^^^^^
+3478 |     MailGoldFocus,
+3479 |     MailGoldDec,
+     |     ^^^^^^^^^^^
+3480 |     AddMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^
+3481 |     RemoveMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^^^^
+...
+3509 |     ShopConfirm,
+     |     ^^^^^^^^^^^
+3510 |     ShopCancel,
+     |     ^^^^^^^^^^
+3511 |     SelectBagForSell(u32),
+     |     ^^^^^^^^^^^^^^^^
+3512 |     SelectBagForRepair(u32),
+     |     ^^^^^^^^^^^^^^^^^^
+3513 |     // Cash shop
+3514 |     SelectGameShopGood(i32),
+     |     ^^^^^^^^^^^^^^^^^^
+...
+3517 |     GameShopBuy,
+     |     ^^^^^^^^^^^
+3518 |     GameShopQuantityInc,
+     |     ^^^^^^^^^^^^^^^^^^^
+3519 |     GameShopQuantityDec,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3524 |     SelectBagForStore(u32),
+     |     ^^^^^^^^^^^^^^^^^
+...
+3527 |     StorageDeposit,
+     |     ^^^^^^^^^^^^^^
+3528 |     StorageWithdraw,
+     |     ^^^^^^^^^^^^^^^
+...
+3531 |     StorageRemovePassword,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `fill_sized_panel` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:12294:4
+      |
+12294 | fn fill_sized_panel<C: Component>(
+      |    ^^^^^^^^^^^^^^^^
+
+warning: function `overlay_compact_item_button` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:13895:4
+      |
+13895 | fn overlay_compact_item_button(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `overlay_clickable_text_at` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:15579:4
+      |
+15579 | fn overlay_clickable_text_at(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_chat_draft` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:15816:4
+      |
+15816 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+      |    ^^^^^^^^^^^^^^^^^
+
+warning: function `render_mail_compose` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:16341:4
+      |
+16341 | fn render_mail_compose(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `npc_shop_panel_size` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17435:4
+      |
+17435 | fn npc_shop_panel_size(shop: &ShopModel, state: &NativePlayerUiState) -> Vec2 {
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `npc_shop_service_bag_rect` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17462:4
+      |
+17462 | fn npc_shop_service_bag_rect(index: usize, repair_mode: bool) -> CrystalRect {
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `npc_shop_service_equipment_rect` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17477:4
+      |
+17477 | fn npc_shop_service_equipment_rect(slot: u32) -> CrystalRect {
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `native_game_shop_page_entries` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17515:4
+      |
+17515 | fn native_game_shop_page_entries(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_game_shop` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17524:4
+      |
+17524 | fn render_game_shop(
+      |    ^^^^^^^^^^^^^^^^
+
+warning: function `spawn_game_shop_product` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17779:4
+      |
+17779 | fn spawn_game_shop_product(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_editor.rs:13:18
+   |
+13 | pub(super) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `0` is never read
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/options_volume.rs:28:38
+   |
+28 | pub(super) struct OptionsVolumeTrack(pub(super) VolumeChannel);
+   |                   ------------------ ^^^^^^^^^^^^^^^^^^^^^^^^
+   |                   |
+   |                   field in this struct
+   |
+   = help: consider removing this field
+
+warning: field `0` is never read
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/options_volume.rs:31:38
+   |
+31 | pub(super) struct OptionsVolumeThumb(pub(super) VolumeChannel);
+   |                   ------------------ ^^^^^^^^^^^^^^^^^^^^^^^^
+   |                   |
+   |                   field in this struct
+   |
+   = help: consider removing this field
+
+warning: fields `side` and `slot` are never read
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs:368:9
+    |
+367 | pub(super) struct TradeCell {
+    |                   --------- fields in this struct
+368 |     pub side: TradeSide,
+    |         ^^^^
+369 |     pub slot: usize,
+    |         ^^^^
+
+warning: field `0` is never read
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs:372:29
+    |
+372 | pub(super) struct TradeName(pub TradeSide);
+    |                   --------- ^^^^^^^^^^^^^
+    |                   |
+    |                   field in this struct
+    |
+    = help: consider removing this field
+
+warning: field `0` is never read
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs:374:29
+    |
+374 | pub(super) struct TradeGold(pub TradeSide);
+    |                   --------- ^^^^^^^^^^^^^
+    |                   |
+    |                   field in this struct
+    |
+    = help: consider removing this field
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:40:7
+   |
+40 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: constant `AUX_CHANGE_PASSWORD_PANEL` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:50:7
+   |
+50 | const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:380:5
+    |
+374 | pub(crate) enum NativeShellButton {
+    |                 ----------------- variants in this enum
+...
+380 |     CycleClass,
+    |     ^^^^^^^^^^
+381 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+389 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+390 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_field` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:2187:4
+     |
+2187 | fn spawn_aux_field(
+     |    ^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:2307:4
+     |
+2307 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:2343:4
+     |
+2343 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:2380:4
+     |
+2380 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: associated function `from_quest` is never used
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_journey.rs:679:8
+    |
+678 | impl JourneyStep {
+    | ---------------- associated function in this implementation
+679 |     fn from_quest(quest: &Quest, route: Option<&JourneyQuestOverride>) -> Self {
+    |        ^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:72:7
+   |
+72 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: method `display_label` is never used
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:782:8
+    |
+763 | impl QuestStageFilter {
+    | --------------------- method in this implementation
+...
+782 |     fn display_label(self) -> String {
+    |        ^^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter`, `QuestHelp`, `QuestPagePrevious`, and `QuestPageNext` are never constructed
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:1192:5
+     |
+1144 | enum QuestUiButton {
+     |      ------------- variants in this enum
+...
+1192 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1195 |     QuestHelp,
+     |     ^^^^^^^^^
+1196 |     QuestPagePrevious,
+     |     ^^^^^^^^^^^^^^^^^
+1197 |     QuestPageNext,
+     |     ^^^^^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `explicit_quest_dialog_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:3824:4
+     |
+3824 | fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `wrap_guidance_hint` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:4744:4
+     |
+4744 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:6523:4
+     |
+6523 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:6763:4
+     |
+6763 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `npc_dialog_close_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:6902:4
+     |
+6902 | fn npc_dialog_close_button(parent: &mut ChildSpawnerCommands) {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `intent_from_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:6935:4
+     |
+6935 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: method `file_name` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/ui_audio.rs:26:19
+   |
+25 | impl NativeUiSound {
+   | ------------------ method in this implementation
+26 |     pub(crate) fn file_name(self) -> &'static str {
+   |                   ^^^^^^^^^
+
+warning: methods `drain_bounded` and `clear_pending` are never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/ui_audio.rs:50:19
+   |
+42 | impl NativeUiAudioQueue {
+   | ----------------------- methods in this implementation
+...
+50 |     pub(crate) fn drain_bounded(&mut self, max: usize) -> Vec<NativeUiSound> {
+   |                   ^^^^^^^^^^^^^
+...
+55 |     pub(crate) fn clear_pending(&mut self) {
+   |                   ^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7111:9
+     |
+7111 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7112:9
+     |
+7112 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7113:9
+     |
+7113 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8231:17
+     |
+8231 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8232:17
+     |
+8232 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8233:17
+     |
+8233 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: `mir2-client-bevy` (lib) generated 78 warnings (run `cargo fix --lib -p mir2-client-bevy` to apply 36 suggestions)
+   Compiling mir2-bevy-runtime v0.1.0 (/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/runtime)
+warning: function `self_camera_offset_for_applied_center` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/runtime/src/lib.rs:6266:4
+     |
+6266 | fn self_camera_offset_for_applied_center(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `mir2-bevy-runtime` (lib) generated 1 warning
+   Compiling mir2-platform-android v0.1.0 (/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android)
+warning: methods `center` and `actor_positions` are never used
+   --> src/entity_overlays.rs:118:19
+    |
+117 | impl ActorOverlayModel {
+    | ---------------------- methods in this implementation
+118 |     pub(crate) fn center(&self) -> Option<(i32, i32)> {
+    |                   ^^^^^^
+...
+122 |     pub(crate) fn actor_positions(&self) -> HashMap<u32, (i32, i32)> {
+    |                   ^^^^^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `install` is never used
+   --> src/entity_overlays.rs:469:15
+    |
+469 | pub(crate) fn install(app: &mut App) {
+    |               ^^^^^^^
+
+warning: fields `width`, `height`, and `rgba` are never read
+   --> src/entity_render.rs:310:16
+    |
+308 | pub(crate) struct DecodedEntityAtlasPage {
+    |                   ---------------------- fields in this struct
+309 |     pub(crate) key: String,
+310 |     pub(crate) width: u32,
+    |                ^^^^^
+311 |     pub(crate) height: u32,
+    |                ^^^^^^
+312 |     pub(crate) rgba: Vec<u8>,
+    |                ^^^^
+    |
+    = note: `DecodedEntityAtlasPage` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: method `mail_draft_epoch` is never used
+  --> src/form_input.rs:80:12
+   |
+20 | impl FormInput<'_> {
+   | ------------------ method in this implementation
+...
+80 |     pub fn mail_draft_epoch(&self) -> Option<u64> {
+   |            ^^^^^^^^^^^^^^^^
+
+warning: method `center` is never used
+  --> src/ground_labels.rs:49:19
+   |
+48 | impl GroundDropLabelModel {
+   | ------------------------- method in this implementation
+49 |     pub(crate) fn center(&self) -> Option<(i32, i32)> {
+   |                   ^^^^^^
+
+warning: function `install` is never used
+   --> src/ground_labels.rs:177:15
+    |
+177 | pub(crate) fn install(app: &mut App) {
+    |               ^^^^^^^
+
+warning: function `active_action_name` is never used
+   --> src/live_entity.rs:911:15
+    |
+911 | pub(crate) fn active_action_name(object_id: u32) -> Option<String> {
+    |               ^^^^^^^^^^^^^^^^^^
+
+warning: function `poll_action_frame` is never used
+    --> src/live_entity.rs:2381:15
+     |
+2381 | pub(crate) fn poll_action_frame() -> Option<String> {
+     |               ^^^^^^^^^^^^^^^^^
+
+warning: constant `MAX_IMAGE_BYTES` is never used
+  --> src/map_objects.rs:11:7
+   |
+11 | const MAX_IMAGE_BYTES: usize = 16 * 1024 * 1024;
+   |       ^^^^^^^^^^^^^^^
+
+warning: constant `MAX_SELECTED_RGBA_BYTES` is never used
+  --> src/map_objects.rs:13:7
+   |
+13 | const MAX_SELECTED_RGBA_BYTES: usize = 128 * 1024 * 1024;
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `DecodedMapObjectImage` is never constructed
+  --> src/map_objects.rs:54:19
+   |
+54 | pub(crate) struct DecodedMapObjectImage {
+   |                   ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `decode_png` is never used
+   --> src/map_objects.rs:192:4
+    |
+192 | fn decode_png(bytes: &[u8], width: u32, height: u32) -> Result<Vec<u8>, WorldAssetError> {
+    |    ^^^^^^^^^^
+
+warning: function `decode_selected_map_objects` is never used
+   --> src/map_objects.rs:253:15
+    |
+253 | pub(crate) fn decode_selected_map_objects<F>(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `standalone_tile_count` is never read
+   --> src/map_render.rs:152:16
+    |
+149 | pub(crate) struct MapRenderProduct {
+    |                   ---------------- field in this struct
+...
+152 |     pub(crate) standalone_tile_count: usize,
+    |                ^^^^^^^^^^^^^^^^^^^^^
+    |
+    = note: `MapRenderProduct` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: function `install` is never used
+   --> src/phone_hud.rs:126:15
+    |
+126 | pub(crate) fn install(app: &mut App) {
+    |               ^^^^^^^
+
+warning: function `report_phone_text` is never used
+   --> src/phone_hud.rs:151:4
+    |
+151 | fn report_phone_text(
+    |    ^^^^^^^^^^^^^^^^^
+
+warning: function `chat_entry` is never used
+   --> src/phone_hud.rs:259:4
+    |
+259 | fn chat_entry(
+    |    ^^^^^^^^^^
+
+warning: function `install` is never used
+   --> src/scene_effects.rs:969:15
+    |
+969 | pub(crate) fn install(app: &mut App) {
+    |               ^^^^^^^
+
+warning: static `PRESENTATION_OUTBOX` is never used
+  --> src/shared_shell.rs:17:8
+   |
+17 | static PRESENTATION_OUTBOX: Mutex<VecDeque<String>> = Mutex::new(VecDeque::new());
+   |        ^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAX_PRESENTATION_EVENTS` is never used
+  --> src/shared_shell.rs:18:7
+   |
+18 | const MAX_PRESENTATION_EVENTS: usize = 64;
+   |       ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `enqueue_presentation_event` is never used
+  --> src/shared_shell.rs:20:15
+   |
+20 | pub(crate) fn enqueue_presentation_event(event: String) {
+   |               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `AndroidPresentationMainThread` is never constructed
+  --> src/shared_shell.rs:32:19
+   |
+32 | pub(crate) struct AndroidPresentationMainThread;
+   |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `flush_presentation_events` is never used
+  --> src/shared_shell.rs:34:4
+   |
+34 | fn flush_presentation_events(_main_thread: NonSend<AndroidPresentationMainThread>) {
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: fields `scene`, `world_snapshot`, and `request_id` are never read
+   --> src/shared_shell.rs:195:5
+    |
+194 | struct DeferredRenderLoad {
+    |        ------------------ fields in this struct
+195 |     scene: crate::world_projection::ProjectedScene,
+    |     ^^^^^
+196 |     world_snapshot: String,
+    |     ^^^^^^^^^^^^^^
+197 |     request_id: u64,
+    |     ^^^^^^^^^^
+    |
+    = note: `DeferredRenderLoad` has a derived impl for the trait `Debug`, but this is intentionally ignored during dead code analysis
+
+warning: struct `AndroidSharedShellPlugin` is never constructed
+   --> src/shared_shell.rs:354:12
+    |
+354 | pub struct AndroidSharedShellPlugin;
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: struct `AndroidShellBleed` is never constructed
+   --> src/shared_shell.rs:365:8
+    |
+365 | struct AndroidShellBleed(AndroidShellBleedEdge);
+    |        ^^^^^^^^^^^^^^^^^
+
+warning: constant `SHELL_SIDE_BLEED_SOURCE_WIDTH` is never used
+   --> src/shared_shell.rs:369:7
+    |
+369 | const SHELL_SIDE_BLEED_SOURCE_WIDTH: f32 = 160.0;
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `SHELL_VERTICAL_BLEED_SOURCE_HEIGHT` is never used
+   --> src/shared_shell.rs:370:7
+    |
+370 | const SHELL_VERTICAL_BLEED_SOURCE_HEIGHT: f32 = 96.0;
+    |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_android_shell_bleed` is never used
+   --> src/shared_shell.rs:372:4
+    |
+372 | fn spawn_android_shell_bleed(mut commands: Commands, asset_server: Res<AssetServer>) {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `fit_shell_bleed` is never used
+   --> src/shared_shell.rs:478:4
+    |
+478 | fn fit_shell_bleed(
+    |    ^^^^^^^^^^^^^^^
+
+warning: function `report_preview_mail_layout` is never used
+   --> src/shared_shell.rs:567:4
+    |
+567 | fn report_preview_mail_layout(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `report_preview_social_layout` is never used
+   --> src/shared_shell.rs:612:4
+    |
+612 | fn report_preview_social_layout(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `tick_scene_effects` is never used
+    --> src/shared_shell.rs:1764:4
+     |
+1764 | fn tick_scene_effects(
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `reject_current_render_receipt` is never used
+    --> src/shared_shell.rs:1841:4
+     |
+1841 | fn reject_current_render_receipt(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `observe_render_receipt` is never used
+    --> src/shared_shell.rs:1860:4
+     |
+1860 | fn observe_render_receipt(
+     |    ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `keyboard` is never used
+    --> src/shared_shell.rs:2255:4
+     |
+2255 | fn keyboard(
+     |    ^^^^^^^^
+
+warning: field `remaining` is never read
+  --> src/ui_preview.rs:55:5
+   |
+53 | pub struct PreviewRequest {
+   |            -------------- field in this struct
+54 |     pub scene: Option<String>,
+55 |     remaining: u8,
+   |     ^^^^^^^^^
+
+warning: function `install` is never used
+  --> src/ui_preview.rs:58:8
+   |
+58 | pub fn install(app: &mut App) {
+   |        ^^^^^^^
+
+warning: function `report_owned_hero_mana_visible` is never used
+  --> src/ui_preview.rs:67:4
+   |
+67 | fn report_owned_hero_mana_visible(
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `start_world_render_motion_specimen` is never used
+  --> src/ui_preview.rs:80:4
+   |
+80 | fn start_world_render_motion_specimen(
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_offline_entity_packet` is never used
+   --> src/ui_preview.rs:231:4
+    |
+231 | fn apply_offline_entity_packet(packet: &str) -> bool {
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_offline_object_metadata_specimen` is never used
+   --> src/ui_preview.rs:256:4
+    |
+256 | fn apply_offline_object_metadata_specimen(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_offline_object_poison_specimen` is never used
+   --> src/ui_preview.rs:307:4
+    |
+307 | fn apply_offline_object_poison_specimen(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_offline_object_hidden_specimen` is never used
+   --> src/ui_preview.rs:339:4
+    |
+339 | fn apply_offline_object_hidden_specimen(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply_offline_owned_hero_vitals_specimen` is never used
+   --> src/ui_preview.rs:371:4
+    |
+371 | fn apply_offline_owned_hero_vitals_specimen(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `report_world_render_motion_pose` is never used
+   --> src/ui_preview.rs:421:4
+    |
+421 | fn report_world_render_motion_pose(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `report_world_render_ready` is never used
+   --> src/ui_preview.rs:499:4
+    |
+499 | fn report_world_render_ready(
+    |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `apply` is never used
+   --> src/ui_preview.rs:576:4
+    |
+576 | fn apply(world: &mut World) {
+    |    ^^^^^
+
+warning: `mir2-platform-android` (lib test) generated 48 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 33.85s
+     Running unittests src/lib.rs (mir2-web3/apps/game-client/platform-android/target/shared-sync-build-cache/debug/deps/mir2_platform_android-0a246bf16a1ce374)
+
+running 246 tests
+test android_input::tests::joystick_is_motion_not_a_fake_inventory_action ... ok
+test android_input::tests::safe_area_and_landscape_metrics_are_retained ... ok
+test android_input::tests::back_closes_keyboard_then_panel_then_requests_exit ... ok
+test android_input::tests::lifecycle_retries_only_after_network_recovers_in_foreground ... ok
+test android_ui_clipping::tests::mirrored_transform_keeps_minimum_before_maximum ... ok
+test android_ui_clipping::tests::clip_tracks_scaled_mail_window_and_translation ... ok
+test android_input::tests::semantic_taps_do_not_all_open_inventory ... ok
+test android_input::tests::guild_storage_targets_route_to_shared_typed_actions ... ok
+test android_ui_clipping::tests::visible_axis_remains_infinite_without_nan ... ok
+test android_input::tests::long_press_drag_and_keyboard_use_shared_actions ... ok
+test android_ui_clipping::tests::partial_overflow_uses_transformed_bounds ... ok
+test entity_overlays::tests::malformed_or_duplicate_actor_data_fails_closed ... ok
+test entity_overlays::tests::projection_keeps_crystal_actor_fields_and_server_health_percent ... ok
+test entity_overlays::tests::authoritative_damage_floaters_are_deduplicated_capped_and_animated ... ok
+test entity_render::tests::authoritative_objects_resolve_into_shared_entity_layers ... ok
+test entity_render::tests::authoritative_ground_drops_use_exact_packaged_dnitems_frames ... ok
+test entity_render::tests::assassin_standing_uses_authoritative_alt_body_hair_and_dual_weapons ... ok
+test entity_render::tests::archer_walk_uses_compact_alt_catalog_when_library_is_packaged ... ok
+test entity_render::tests::configured_extended_atlas_resolves_real_archer_and_mount_when_present ... ok
+test entity_render::tests::configured_shared_atlas_resolves_real_assassin_layers_when_present ... ok
+test entity_render::tests::configured_shared_atlas_resolves_real_player_frame_when_present ... ok
+test entity_render::tests::assassin_actions_use_alt_catalog_layers_and_decode_space_paths ... ok
+test entity_render::tests::missing_authoritative_pose_does_not_fall_back_to_frame_zero ... ok
+test entity_render::tests::fully_unindexed_atlas_rects_are_reported_and_never_used_for_placement ... ok
+test entity_render::tests::mounted_standing_uses_crystal_416_body_band_and_mount_offset ... ok
+test entity_render::tests::partial_atlas_pages_reject_rects_outside_their_exact_page ... ok
+test entity_render::tests::partially_indexed_atlas_rects_remain_rejected ... ok
+test entity_render::tests::selected_atlas_page_must_match_its_manifest_sha256 ... ok
+test entity_render::tests::mounted_walk_uses_exact_body_and_mount_action_bands ... ok
+test entity_render::tests::sharded_atlases_reject_duplicate_source_paths_globally ... ok
+test entity_render::tests::packaged_atlas_precomputes_bounded_packet_action_frames ... ok
+test entity_render::tests::sharded_atlases_resolve_one_authoritative_entity_without_loading_unused_pages ... ok
+test entity_render::tests::unknown_monster_stays_an_object_but_is_reported_unresolved ... ok
+test form_input::tests::inventory_amount_uses_shared_bounds_without_mutating_the_stack ... ok
+test form_input::tests::locked_storage_keyboard_never_edits_balance_or_unlocks ... ok
+test android_ui_clipping::tests::scaled_body_clip_intersects_parent_and_propagates_through_visible_nodes ... ok
+test form_input::tests::mail_body_full_replacement_can_clear_the_shared_editor ... ok
+test gateway_bridge::tests::authoritative_change_password_result_reduces_shared_state_once ... ok
+test gateway_bridge::tests::change_password_request_is_bounded_without_echoing_secret_values ... ok
+test gateway_bridge::tests::change_password_result_parser_preserves_codes_and_bounds_banned_notice ... ok
+test form_input::tests::recipient_ime_cannot_edit_the_read_only_label_in_a_composed_letter ... ok
+test gateway_bridge::tests::change_password_uses_real_gateway_shape_and_redacts_credentials ... ok
+test android_ui_clipping::tests::display_none_override_and_removing_overflow_match_shared_semantics ... ok
+test form_input::tests::stale_mail_body_event_cannot_edit_a_different_field_or_closed_window ... ok
+test form_input::tests::mail_body_uses_utf16_and_never_splits_an_emoji_grapheme ... ok
+test gateway_bridge::tests::connection_loss_discards_all_old_generation_commands ... ok
+test form_input::tests::mail_body_preserves_newlines_and_shared_length_limit ... ok
+test gateway_bridge::tests::connection_loss_closes_change_password_and_rejects_late_result ... ok
+test gateway_bridge::tests::drained_storage_transport_failure_clears_exact_pending_without_replay_or_id_reuse ... ok
+test gateway_bridge::tests::exact_receipt_is_retained_when_malformed_or_semantic_invalid_flood_is_rejected ... ok
+test gateway_bridge::tests::fifo_sequence_and_lifecycle_gate_preserve_commands ... ok
+test gateway_bridge::tests::guild_storage_commands_have_exact_browser_shapes_and_fail_closed ... ok
+test gateway_bridge::tests::inbound_budget_reports_limits_and_releases_bytes_on_drain_and_clear ... ok
+test gateway_bridge::tests::inbound_count_flood_cannot_bypass_byte_budget ... ok
+test gateway_bridge::tests::inbound_message_limit_counts_unicode_utf8_bytes ... ok
+test gateway_bridge::tests::inbound_rejects_single_message_and_total_byte_overflow_without_eviction ... ok
+test gateway_bridge::tests::invalid_receipt_does_not_overwrite_exact_receipt_reserve ... ok
+test gateway_bridge::tests::motion_cannot_evict_non_motion_when_queue_is_full ... ok
+test gateway_bridge::tests::motion_uses_browser_command_shape_and_coalesces_unsent_intents ... ok
+test gateway_bridge::tests::overflow_is_rejected_and_observable_without_dropping_existing_fifo ... ok
+test gateway_bridge::tests::native_capability_and_receipt_helpers_use_shared_contract ... ok
+test gateway_bridge::tests::oversized_mail_attachment_set_is_never_sent_or_silently_truncated ... ok
+test gateway_bridge::tests::public_inbound_push_enforces_default_count_and_total_byte_limits ... ok
+test gateway_bridge::tests::receipt_received_without_pending_cannot_be_promoted_later ... ok
+test gateway_bridge::tests::retry_connection_is_a_host_action_not_a_fabricated_client_version_packet ... ok
+test gateway_bridge::tests::every_wire_gateway_command_has_exact_browser_shape ... ok
+test gateway_bridge::tests::second_game_shop_request_is_rejected_until_exact_receipt ... ok
+test gateway_bridge::tests::set_chat_channel_is_retained_but_never_marked_sendable ... ok
+test gateway_bridge::tests::shared_guild_storage_actions_have_deterministic_android_wire_shapes ... ok
+test entity_overlays::tests::confirmed_hit_reveals_zero_expiry_health_without_inventing_exact_hp ... ok
+test gateway_bridge::tests::valid_wrong_receipt_cannot_reserve_or_suppress_pending_unknown ... ok
+test gateway_bridge::tests::storage_receipt_with_wrong_protocol_or_coordinates_is_rejected ... ok
+test gateway_bridge::tests::storage_receipt_parser_and_queue_require_exact_current_request ... ok
+test ground_labels::tests::authoritative_labels_keep_identity_quantity_color_and_crystal_anchor ... ok
+test ground_labels::tests::malformed_or_cross_kind_duplicate_identity_is_rejected_atomically ... ok
+test ground_labels::tests::replacement_and_reset_advance_only_when_presentation_changes ... ok
+test entity_overlays::tests::hero_mana_requires_the_local_owner_and_crystal_class_level_gate ... ok
+test ground_pickups::tests::malformed_or_ambiguous_authority_is_rejected_atomically ... ok
+test ground_pickups::tests::authoritative_drops_are_sorted_bounded_and_keep_server_identity ... ok
+test inventory_ingress::tests::legacy_quantity_fallback_remains_the_frozen_windows_projection ... ok
+test inventory_ingress::tests::character_connection_reset_discards_old_models_and_receipts ... ok
+test inventory_ingress::tests::backpressure_retains_fifo_receipts_and_only_coalesces_plain_models ... ok
+test inventory_ingress::tests::ack_nack_release_only_shared_matching_key_without_mutating_items_or_wallet ... ok
+test inventory_ingress::tests::validated_world_produces_the_shared_typed_inventory_without_geometry_guesses ... ok
+test inventory_ingress::tests::malformed_lists_models_and_receipts_are_rejected_without_fake_completion ... ok
+test inventory_ingress::tests::no_identity_foreign_owner_hero_and_unsupported_packets_cannot_confirm_player ... ok
+test inventory_ingress::tests::queue_overflow_is_fail_closed_not_receipt_eviction ... ok
+test live_entity::tests::crystal_poison_draw_colour_precedence_is_exact ... ok
+test live_entity::tests::authoritative_identity_packets_update_visible_and_hidden_actor_metadata ... ok
+test entity_overlays::tests::names_follow_name_view_but_exact_self_and_timed_monster_bars_do_not ... ok
+test live_entity::tests::authoritative_level_effect_flags_follow_existing_actor_identity_without_placeholders ... ok
+test live_entity::tests::authoritative_packets_patch_exact_models_and_render_without_prediction ... ok
+test ground_labels::tests::visible_label_tree_is_pass_through_and_honors_shared_drop_view ... ok
+test live_entity::tests::authoritative_poison_updates_visible_hidden_and_future_actor_layers ... ok
+test live_entity::tests::crystal_slow_halves_only_movement_action_cadence_and_rebases_mid_frame ... ok
+test live_entity::tests::damage_indicator_retains_exact_event_and_only_real_hits_extend_health ... ok
+test live_entity::tests::death_skeleton_and_revive_use_terminal_packet_poses ... ok
+test live_entity::tests::ground_item_and_gold_packets_update_models_and_exact_dnitems_render ... ok
+test map_objects::tests::manifest_is_map_scoped_and_content_addressed ... ok
+test map_render::tests::configured_bichon_pack_builds_real_floor_frame_when_present ... ok
+test map_render::tests::packaged_loader_rejects_unsafe_names_and_builds_valid_map ... ok
+test map_render::tests::type100_floor_draw_uses_shared_runtime_wire_shape ... ok
+test live_entity::tests::lifecycle_packets_keep_hidden_and_removed_objects_authoritative ... ok
+test live_entity::tests::local_movement_skill_packets_drive_only_the_self_actor ... ok
+test live_entity::tests::object_hero_identity_and_mana_follow_only_the_authoritative_actor ... ok
+test live_entity::tests::object_hidden_keeps_actor_present_and_applies_crystal_half_opacity ... ok
+test mobile_ui::tests::gameplay_controls_follow_short_edge_and_keep_button_height ... ok
+test live_entity::tests::packet_action_frames_advance_and_settle_without_another_snapshot ... ok
+test mobile_ui::tests::android_drag_handles_keep_system_gesture_gutter ... ok
+test live_entity::tests::remote_object_dash_alternates_running_halves_and_fail_cancels_motion ... ok
+test live_entity::tests::remote_object_pushed_uses_authoritative_endpoint_and_crystal_reverse_walk_pose ... ok
+test live_entity::tests::remote_run_backstep_turn_and_remove_emit_authoritative_presentation_events ... ok
+test live_entity::tests::user_dash_uses_self_actor_halves_and_fail_returns_to_standing ... ok
+test mobile_ui::tests::pickup_touch_queues_exact_shared_object_without_local_removal ... ok
+test mobile_ui::tests::commerce_panel_disables_the_world_joystick_gesture ... ok
+test mobile_ui::tests::joystick_claims_a_same_frame_touch_without_a_ghost_ui_click ... ok
+test mobile_ui::tests::revive_requires_known_dead_player_and_both_active_screens ... ok
+test mobile_ui::tests::ime_context_change_releases_the_pointer_until_the_touch_ends ... ok
+test mobile_ui::tests::joystick_owner_does_not_block_a_secondary_action_finger ... ok
+test mobile_ui::tests::background_cancels_touch_owners_and_resume_does_not_reclaim_held_fingers ... ok
+test mobile_ui::tests::revive_touch_queues_shared_intent_once_without_local_resurrection ... ok
+test mobile_ui::tests::secondary_actions_keep_exact_targets_while_the_joystick_is_owned ... ok
+test mobile_ui::tests::same_frame_tap_has_release_edge_and_does_not_hold_mouse ... ok
+test mobile_ui::tests::settled_drag_positions_do_not_invalidate_shared_ui_each_frame ... ok
+test mobile_ui::tests::touch_close_also_closes_shared_help ... ok
+test mobile_ui::tests::expanded_phone_rail_cancels_owned_and_rejects_fresh_hidden_joystick_motion ... ok
+test mobile_ui::tests::rail_transition_releases_the_old_pointer_without_a_ghost_menu_click ... ok
+test mobile_ui::tests::secondary_action_finger_activates_the_button_while_joystick_is_owned ... ok
+test phone_hud::tests::compact_thumb_row_and_chat_do_not_overlap ... ok
+test phone_hud::tests::empty_chat_does_not_reserve_blank_desktop_history_space ... ok
+test phone_hud::tests::android_family_resolution_preserves_explicit_fonts_and_shared_default ... ok
+test phone_hud::tests::focused_chat_retains_all_source_channel_trade_and_size_actions ... ok
+test phone_hud::tests::keyboard_and_safe_insets_are_counted_once ... ok
+test phone_hud::tests::narrow_landscape_still_has_a_chat_entry_and_three_touch_controls ... ok
+test mobile_ui::tests::touch_close_cannot_bypass_amount_modal_or_inactive_shell ... ok
+test mobile_ui::tests::secondary_finger_cannot_inherit_drag_after_owner_releases ... ok
+test phone_hud::tests::phone_chat_leaves_thumb_zones_clear_and_belt_has_real_tap_targets ... ok
+test mobile_ui::tests::panel_transition_keeps_nonmodal_motion_but_cancels_modal_and_pointer_owners ... ok
+test phone_hud::tests::chat_settings_descendants_are_not_reflowed_or_hidden ... ok
+test phone_hud::tests::modal_and_login_hide_phone_chrome_without_mutating_player_state ... ok
+test mobile_ui::tests::ui_hit_testing_observes_the_new_tap_not_the_previous_cursor ... ok
+test phone_hud::tests::shared_controls_survive_adaptation_and_desktop_frame_is_hidden ... ok
+test mobile_ui::tests::touch_targets_keep_48_logical_pixels_after_stage_scaling ... ok
+test phone_hud::tests::phone_chat_control_keeps_semantic_button_with_its_own_readable_label ... ok
+test shared_shell::tests::android_back_is_one_shared_escape_press_release_pair ... ok
+test phone_hud::tests::shared_rebuild_keeps_phone_nodes_and_does_not_change_chat_settings ... ok
+test shared_shell::tests::android_host_does_not_let_desktop_ime_steal_its_editor_connection ... ok
+test shared_shell::tests::belt_edge_fits_side_gutter_and_falls_back_without_overlap ... ok
+test shared_shell::tests::big_map_search_stays_above_landscape_ime ... ok
+test shared_shell::tests::compact_chat_settings_gets_a_bounded_touch_scale_on_phone_viewports ... ok
+test shared_shell::tests::editor_epoch_rejects_old_callbacks_when_the_same_mail_field_reopens ... ok
+test shared_shell::tests::every_shared_amount_dialog_uses_its_modal_geometry_for_ime ... ok
+test shared_shell::tests::authoritative_pickup_intent_reaches_android_gateway_without_local_removal ... ok
+test shared_shell::tests::focus_scale_respects_safe_edges_and_never_shrinks_dialogs ... ok
+test shared_shell::tests::focused_panel_bounds_stay_inside_phone_safe_viewports ... ok
+test shared_shell::tests::gateway_receipt_bridge_accepts_only_supported_authoritative_results ... ok
+test shared_shell::tests::guild_notice_keeps_all_eight_text_lines_above_ime ... ok
+test shared_shell::tests::fit_stage_applies_group_focus_to_the_bounded_shared_social_panel ... ok
+test scene_effects::tests::catalog_resolves_exact_crystal_frames ... ok
+test scene_effects::tests::authoritative_effect_packets_render_without_fallbacks ... ok
+test shared_shell::tests::invalidation_discards_network_effects_but_retains_local_effects_in_order ... ok
+test scene_effects::tests::projectile_interpolates_and_object_spell_is_removed_by_lifecycle ... ok
+test shared_shell::tests::mail_recipient_ime_uses_the_shared_prompt_coordinates ... ok
+test shared_shell::tests::inventory_receipts_survive_scene_loading_but_not_render_or_session_failure ... ok
+test scene_effects::tests::malformed_or_unknown_effects_never_draw_placeholders ... ok
+test shared_shell::tests::map_transition_reuses_loading_barrier_without_reauthentication ... ok
+test shared_shell::tests::minimap_anchor_preserves_scale_and_safe_edge_across_aspects ... ok
+test shared_shell::tests::render_receipt_accepts_an_authoritative_camera_center_away_from_player_tile ... ok
+test shared_shell::tests::render_load_failure_recovers_only_the_matching_authoritative_frame ... ok
+test shared_shell::tests::render_receipt_uses_only_the_authenticated_character_for_each_barrier ... ok
+test mobile_ui::tests::nonmodal_views_keep_the_android_joystick_and_motion_intent_available ... ok
+test shared_shell::tests::host_drives_shared_shell_without_a_parallel_form_or_fake_world ... ok
+test shared_shell::tests::skill_host_phase_guard_and_render_failure_cannot_republish_previous_character ... ok
+test shared_shell::tests::structured_world_requires_active_start_and_never_parses_notice_text ... ok
+test shared_shell::tests::tall_shell_bleed_fills_vertical_gutters_without_resizing_the_stage ... ok
+test shared_shell::tests::wide_phone_shell_bleed_fills_only_noninteractive_side_gutters ... ok
+test shared_shell::tests::repeated_editor_tap_reopens_but_held_press_does_not_reset_ime ... ok
+test skill_ingress::tests::failed_exact_receipt_keeps_own_keys_through_backpressure_and_is_never_replayed ... ok
+test shared_shell::tests::world_receipt_requires_exact_request_and_does_not_unlock_gameplay ... ok
+test skill_ingress::tests::malformed_and_hero_results_cannot_confirm_player_key_operations ... ok
+test skill_ingress::tests::only_successful_owner_casts_start_shared_overlay_and_republish_does_not_restart_it ... ok
+test skill_ingress::tests::real_typed_skills_preserve_exact_ms_and_idle_readiness_for_three_classes ... ok
+test skill_ingress::tests::packet_metadata_wins_over_stale_tick_and_fresh_authority_retires_it ... ok
+test skill_ingress::tests::scene_retains_personal_cast_identity_but_reset_or_character_change_cannot_leak_it ... ok
+test phone_hud::tests::nonmodal_views_keep_phone_status_and_chat_entry_without_desktop_display_resource ... ok
+test shared_shell::tests::standalone_mail_windows_fit_above_ime_without_rewriting_shared_nodes ... ok
+test skill_ingress::tests::receipt_capacity_is_bounded_without_evicting_prior_exact_results ... ok
+test shared_shell::tests::shared_session_reset_clears_android_player_intents_without_reusing_storage_ids ... ok
+test shared_shell::tests::inactive_cleanup_runs_before_and_after_ui_producers_and_never_replays_on_resume ... ok
+test tests::android_destroy_clears_pending_purchase_without_replay ... ok
+test tests::android_close_panel_semantic_and_back_are_shared_close_paths ... ok
+test tests::android_inbound_overflow_marks_both_owners_unknown_without_replay ... ok
+test tests::android_chat_settings_semantics_keep_trade_outside_crystal_eight_checkboxes ... ok
+test tests::android_crystal_options_commit_immediately_and_platform_window_mode_is_separate ... ok
+test tests::android_production_adapter_rolls_back_ui_when_outbound_queue_is_full ... ok
+test tests::android_malformed_receipt_through_update_does_not_release_pending ... ok
+test tests::change_password_effect_is_consumed_into_the_real_gateway_queue ... ok
+test tests::exact_receipt_survives_wrong_invalid_duplicate_and_flood_once ... ok
+test tests::foreground_in_game_joystick_reaches_exact_authenticated_wire_queue ... ok
+test tests::android_production_inbound_receipt_releases_both_correlation_owners ... ok
+test tests::gateway_effects_are_consumed_into_the_host_queue ... ok
+test tests::inactive_screen_or_transport_drops_motion_instead_of_replaying_it ... ok
+test tests::observe_request_is_consumed_as_the_crystal_chat_command ... ok
+test tests::plugin_reduces_a_semantic_android_tap_through_ui_core ... ok
+test tests::production_ffi_generation_loss_closes_shop_and_storage_before_recovery ... ok
+test tests::production_host_non_storage_failure_does_not_change_existing_state ... ok
+test tests::production_host_write_failure_marks_storage_unknown_and_next_request_is_new ... ok
+test tests::receipt_without_pending_is_quarantined_even_when_queue_overflows ... ok
+test tests::rejected_observe_enqueue_restores_last_authoritative_value ... ok
+test text_input::tests::character_name_uses_shared_unicode_filter ... ok
+test tests::production_ffi_never_exposes_local_only_as_socket_command ... ok
+test text_input::tests::only_long_form_shared_drafts_accept_ime_newlines ... ok
+test text_input::tests::password_editor_is_secure_and_bounded ... ok
+test tests::rejected_change_password_enqueue_clears_pending_without_leaking_secrets ... ok
+test text_input::tests::registration_ime_is_bounded_private_and_rejects_stale_edits ... ok
+test text_input::tests::stale_editor_cannot_change_another_screen_or_field ... ok
+test text_input::tests::guild_notice_ime_reuses_shared_filter_and_freezes_pending_draft ... ok
+test ui_preview::tests::chat_settings_preview_opens_with_an_applicable_draft ... ok
+test text_input::tests::player_edit_is_local_bounded_and_focus_guarded ... ok
+test tests::shared_guild_storage_actions_reach_android_queue_through_semantic_input ... ok
+test ui_preview::tests::locked_storage_scene_exposes_only_a_secure_local_draft ... ok
+test tests::wrong_valid_receipt_then_overflow_marks_exact_pending_unknown ... ok
+test ui_preview::tests::game_shop_and_big_map_scenes_have_navigable_offline_fixtures ... ok
+test ui_preview::tests::scene_inventory_is_unique_and_bounded ... ok
+test ui_preview::tests::multitouch_scene_exposes_exact_offline_action_targets ... ok
+test ui_preview::tests::item_specimens_have_identity_for_shared_local_dialogs ... ok
+test ui_preview::tests::skill_preview_uses_typed_owner_ingress_not_an_unbound_placeholder ... ok
+test world_assets::tests::configured_external_pack_is_valid_when_present ... ok
+test ui_preview::tests::skills_specimen_opens_shared_spell_page_directly ... ok
+test world_assets::tests::compact_pack_is_validated_and_decoded_to_rgba ... ok
+test world_assets::tests::manifest_rejects_page_path_traversal_before_reading_png ... ok
+test world_assets::tests::manifest_rejects_stats_drift ... ok
+test world_assets::tests::png_dimensions_must_match_manifest ... ok
+test ui_preview::tests::social_preview_scenes_expose_bounded_offline_models ... ok
+test ui_preview::tests::npc_service_preview_scenes_expose_each_authoritative_service_mode ... ok
+test world_projection::tests::nullable_snapshot_scalars_use_shared_defaults_without_rejecting_the_scene ... ok
+test world_projection::tests::retains_scene_and_actors_and_uses_shared_hud_type ... ok
+test world_projection::tests::accepts_hero_in_shared_entity_projection ... ok
+test tests::production_ffi_rejects_leases_drained_before_generation_change ... ok
+test world_projection::tests::rejects_stale_mismatched_and_invalid_authority ... ok
+test world_projection::tests::validates_and_normalizes_authoritative_ground_drops ... ok
+test world_projection::tests::scene_projection_uses_server_center_and_validates_shared_schema ... ok
+test tests::production_ffi_sent_without_ack_then_disconnect_allows_fresh_storage_id ... ok
+test mobile_ui::tests::true_modals_and_death_block_fresh_and_owned_joystick_over_an_ordinary_view ... ok
+test shared_shell::tests::host_inbox_accepts_large_snapshot_but_bounds_memory_and_fails_closed ... ok
+test scene_effects::tests::tracked_effect_export_matches_metadata_without_a_stale_fixed_frame_count ... ok
+
+test result: ok. 246 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.29s
+

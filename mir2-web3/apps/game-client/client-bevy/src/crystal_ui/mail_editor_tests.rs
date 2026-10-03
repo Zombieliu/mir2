@@ -64,16 +64,24 @@ fn unicode_selection_delete_and_ctrl_a_keep_grapheme_boundaries() {
     editor.edit_key(&release(KeyCode::ControlLeft), &mut draft);
     editor.edit_key(&key(KeyCode::KeyN, "新"), &mut draft);
     assert_eq!(draft.message, "新");
-    assert_eq!(editor.active_editor().unwrap().selection(), "新".len().."新".len());
+    assert_eq!(
+        editor.active_editor().unwrap().selection(),
+        "新".len().."新".len()
+    );
 }
 
 #[test]
 fn home_end_arrows_and_shift_use_captured_visual_layout_and_scroll_to_caret() {
-    let message = (0..12).map(|index| format!("{index}\n")).collect::<String>();
+    let message = (0..12)
+        .map(|index| format!("{index}\n"))
+        .collect::<String>();
     let mut editor = MailLetterEditor::default();
     let mut draft = draft(&message);
     editor.sync(true, Some(&draft.message));
-    let mut starts = message.match_indices('\n').map(|(index, _)| index + 1).collect::<Vec<_>>();
+    let mut starts = message
+        .match_indices('\n')
+        .map(|(index, _)| index + 1)
+        .collect::<Vec<_>>();
     starts.insert(0, 0);
     let mut lines = Vec::new();
     for (index, start) in starts.iter().copied().enumerate() {
@@ -89,7 +97,10 @@ fn home_end_arrows_and_shift_use_captured_visual_layout_and_scroll_to_caret() {
     editor.edit_key(&key(KeyCode::End, ""), &mut draft);
     editor.edit_key(&release(KeyCode::ControlLeft), &mut draft);
     assert_eq!(editor.active_editor().unwrap().caret(), message.len());
-    assert!(editor.scroll().y > 0.0, "bottom caret must scroll into the real viewport");
+    assert!(
+        editor.scroll().y > 0.0,
+        "bottom caret must scroll into the real viewport"
+    );
 
     editor.edit_key(&key(KeyCode::ArrowUp, ""), &mut draft);
     let first_up = editor.active_editor().unwrap().caret();
@@ -145,8 +156,14 @@ fn wrapped_boundary_keeps_the_chosen_downward_line_and_scroll_affinity() {
     assert_eq!(editor.visual_line, 0);
     editor.edit_key(&key(KeyCode::ArrowDown, ""), &mut draft);
     assert_eq!(editor.active_editor().unwrap().caret(), 2);
-    assert_eq!(editor.visual_line, 1, "the shared wrap byte retains downward affinity");
-    assert!(editor.scroll().y > 0.0, "scrolling follows the chosen second visual line");
+    assert_eq!(
+        editor.visual_line, 1,
+        "the shared wrap byte retains downward affinity"
+    );
+    assert!(
+        editor.scroll().y > 0.0,
+        "scrolling follows the chosen second visual line"
+    );
 }
 
 #[test]
@@ -217,7 +234,11 @@ fn wheel_uses_shaped_extent_clamps_and_preserves_caret_and_selection() {
         },
         message.clone(),
     );
-    assert_eq!(editor.scroll().y, 259.0, "unchanged frame capture keeps wheel scroll");
+    assert_eq!(
+        editor.scroll().y,
+        259.0,
+        "unchanged frame capture keeps wheel scroll"
+    );
     assert!(!editor.scroll_wheel_lines(-1.0), "bottom cannot overscroll");
 
     editor.accept_layout(
@@ -237,12 +258,15 @@ fn wheel_uses_shaped_extent_clamps_and_preserves_caret_and_selection() {
         },
         message.clone(),
     );
-    assert_eq!(editor.scroll().y, 59.0, "new shaped extent clamps retained wheel scroll");
+    assert_eq!(
+        editor.scroll().y,
+        59.0,
+        "new shaped extent clamps retained wheel scroll"
+    );
 
     assert!(editor.scroll_wheel_pixels(10_000.0));
     assert_eq!(editor.scroll().y, 0.0, "wheel clamps to shaped top");
 }
-
 
 #[test]
 fn host_clipboard_cut_and_paste_share_selection_and_utf16_budget() {
@@ -259,6 +283,69 @@ fn host_clipboard_cut_and_paste_share_selection_and_utf16_budget() {
     editor.paste(&mut draft, &"😀".repeat(251));
     assert_eq!(draft.message, "😀".repeat(250));
     assert_eq!(draft.message.encode_utf16().count(), MAIL_LETTER_BODY_LIMIT);
+}
+
+#[test]
+fn whole_document_ime_replacement_ignores_selection_and_normalizes_line_endings() {
+    let mut editor = MailLetterEditor::default();
+    let mut draft = draft("old body");
+    editor.sync(true, Some(&draft.message));
+    editor.install_layout(vec![line(0.0, &[0, 1, 3, draft.message.len()])]);
+    editor.pointer(Vec2::new(11.0, 4.0), false);
+    editor.pointer(Vec2::new(39.0, 4.0), true);
+    editor.set_composition("uncommitted".into(), None);
+
+    editor.replace_document(&mut draft, "新\r\n😀\rend\0");
+    assert_eq!(draft.message, "新\n😀\nend");
+    assert_eq!(draft.recipient, "Receiver");
+    assert!(draft.attachment_unique_ids.is_empty());
+    assert!(editor.composition().is_none());
+    let active = editor.active_editor().unwrap();
+    assert_eq!(active.text(), draft.message);
+    assert_eq!(active.caret(), draft.message.len());
+    assert!(active.selection().is_empty());
+    assert!(active.is_boundary(active.caret()));
+    assert_eq!(
+        editor.ime_caret(),
+        None,
+        "old shaped text cannot place the new caret"
+    );
+    editor.install_layout(vec![line(0.0, &[0, draft.message.len()])]);
+    assert_eq!(editor.ime_caret(), Some(Vec2::new(11.0, 20.0)));
+}
+
+#[test]
+fn whole_document_replacement_fits_utf16_without_splitting_a_grapheme() {
+    let mut editor = MailLetterEditor::default();
+    let mut draft = draft("existing text");
+    editor.replace_document(&mut draft, &"😀".repeat(251));
+    assert_eq!(draft.message, "😀".repeat(250));
+    assert_eq!(draft.message.encode_utf16().count(), MAIL_LETTER_BODY_LIMIT);
+
+    // The family is one grapheme but eleven UTF-16 units. A one-unit remainder
+    // must keep none of it, rather than exposing a partial joined sequence.
+    editor.replace_document(&mut draft, &format!("{}👩‍👩‍👧‍👦tail", "x".repeat(499)));
+    assert_eq!(draft.message, "x".repeat(499));
+    assert_eq!(editor.active_editor().unwrap().caret(), 499);
+    assert!(editor.active_editor().unwrap().selection().is_empty());
+}
+
+#[test]
+fn whole_document_replacement_handles_deletion_and_repeat_notifications() {
+    let mut editor = MailLetterEditor::default();
+    let mut draft = draft("before");
+    editor.replace_document(&mut draft, "after");
+    editor.replace_document(&mut draft, "after");
+    assert_eq!(
+        draft.message, "after",
+        "whole-field notifications never append"
+    );
+    editor.replace_document(&mut draft, "");
+    assert_eq!(draft.message, "");
+    assert_eq!(editor.active_editor().unwrap().text(), "");
+    assert_eq!(editor.active_editor().unwrap().selection(), 0..0);
+    assert_eq!(editor.active_editor().unwrap().caret(), 0);
+    assert_eq!(draft.recipient, "Receiver");
 }
 
 #[test]
@@ -280,7 +367,6 @@ fn ime_preedit_is_presentation_only_and_uses_real_authoritative_caret_layout() {
     assert_eq!(draft.message, "abc你好d");
 }
 
-
 #[test]
 fn preedit_display_layout_rewraps_candidate_and_scroll_without_mutating_draft() {
     let mut editor = MailLetterEditor::default();
@@ -288,7 +374,10 @@ fn preedit_display_layout_rewraps_candidate_and_scroll_without_mutating_draft() 
     editor.sync(true, Some(&draft.message));
     editor.modifiers[0] = true;
     editor.set_composition("甲乙".into(), None);
-    assert_eq!(editor.modifiers, [false; 4], "composition cannot retain Ctrl");
+    assert_eq!(
+        editor.modifiers, [false; 4],
+        "composition cannot retain Ctrl"
+    );
     let display = "a甲乙".to_owned();
     editor.accept_display_layout(
         EditorTextLayout {
@@ -299,7 +388,10 @@ fn preedit_display_layout_rewraps_candidate_and_scroll_without_mutating_draft() 
                     height: 20.0,
                     stops: vec![
                         CaretStop { byte: 1, x: 0.0 },
-                        CaretStop { byte: display.len(), x: 45.0 },
+                        CaretStop {
+                            byte: display.len(),
+                            x: 45.0,
+                        },
                     ],
                 },
             ],
@@ -310,9 +402,16 @@ fn preedit_display_layout_rewraps_candidate_and_scroll_without_mutating_draft() 
 
     assert_eq!(draft.message, "a");
     assert_eq!(editor.ime_caret(), Some(Vec2::new(45.0, 220.0)));
-    assert_eq!(editor.scroll().y, 59.0, "preedit layout clamps using its wrapped extent");
+    assert_eq!(
+        editor.scroll().y,
+        59.0,
+        "preedit layout clamps using its wrapped extent"
+    );
 
     editor.modifiers[1] = true;
     editor.clear_composition();
-    assert_eq!(editor.modifiers, [false; 4], "clear also drops stale Ctrl state");
+    assert_eq!(
+        editor.modifiers, [false; 4],
+        "clear also drops stale Ctrl state"
+    );
 }

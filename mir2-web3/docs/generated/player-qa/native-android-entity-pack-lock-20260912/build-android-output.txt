@@ -1,0 +1,7 @@
+[platform-android] variant: uiPreview
+[platform-android] minimum API: 31
+[platform-android] entity pack ID: local-player-shards-20260912
+BUILD SUCCESSFUL in 19s
+[platform-android] APK: apps/game-client/platform-android/android/app/build/outputs/apk/uiPreview/app-uiPreview.apk
+[platform-android] SHA-256: f420968ea3ec633649bc0dd940594eb7fedeb12f5463af7c7bd2f1f8da20e10b
+[platform-android] package gate passed

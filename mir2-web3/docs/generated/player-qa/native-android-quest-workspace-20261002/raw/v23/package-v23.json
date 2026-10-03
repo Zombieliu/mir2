@@ -1,0 +1,100 @@
+{
+  "source": "ef5e56d1c8e51abd1fad3ee79be9a4ce1aa604e4",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "versionCode": 23,
+  "versionName": "0.1.20-quest-workspace",
+  "cleanBeforeAfterBothBuilds": true,
+  "sourceGateHashesMatchCommittedInputs": true,
+  "gatewayUrl": "",
+  "minimumApi": 31,
+  "targetApi": 35,
+  "abi": "arm64-v8a",
+  "artifacts": [
+    {
+      "variant": "debug",
+      "source": "ef5e56d1c8e51abd1fad3ee79be9a4ce1aa604e4",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-workspace-v23-20261002/final-apks/mir2-native-quest-workspace-debug-v23.apk",
+      "bytes": 386848869,
+      "sha256": "69b526f48cce6c6a0d385d2586e85e6445d927f7827b203feda7bca445eaaacf",
+      "libraries": [
+        {
+          "library": "Items",
+          "pngCount": 1003,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+        },
+        {
+          "library": "StateItem",
+          "pngCount": 5192,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a"
+        },
+        {
+          "library": "MagIcon",
+          "pngCount": 224,
+          "allSourceBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "MagIcon2",
+          "pngCount": 224,
+          "allSourceBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "UI_32bit",
+          "pngCount": 4,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9"
+        }
+      ]
+    },
+    {
+      "variant": "preview",
+      "source": "ef5e56d1c8e51abd1fad3ee79be9a4ce1aa604e4",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-workspace-v23-20261002/final-apks/mir2-native-quest-workspace-preview-v23.apk",
+      "bytes": 390827589,
+      "sha256": "caedd343de692b6cdce291acc01d4a7b318021fdef187c662ddd8a8971611fa6",
+      "libraries": [
+        {
+          "library": "Items",
+          "pngCount": 1003,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe"
+        },
+        {
+          "library": "StateItem",
+          "pngCount": 5192,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a"
+        },
+        {
+          "library": "MagIcon",
+          "pngCount": 224,
+          "allSourceBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "MagIcon2",
+          "pngCount": 224,
+          "allSourceBytesMatch": true,
+          "metadataSha256": null
+        },
+        {
+          "library": "UI_32bit",
+          "pngCount": 4,
+          "allSourceBytesMatch": true,
+          "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9"
+        }
+      ]
+    }
+  ],
+  "each6647PngAndThreeMetadataMatchInputs": true,
+  "kind": "Native Bevy GameActivity; Rust release cdylib inside Gradle Debug diagnostic variants, not store Release",
+  "gpuRendererSourceChangedThisLeaf": false,
+  "olderFailuresRetained": true,
+  "fullResourceReleaseAccepted": false,
+  "fullPhoneUiAccepted": false,
+  "realNetworkAccepted": false,
+  "physicalDeviceAccepted": false
+}

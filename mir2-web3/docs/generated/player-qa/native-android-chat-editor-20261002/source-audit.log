@@ -1,0 +1,120 @@
+{
+  "source": "8cd2e7eaeead8c71f74fbbaa9250bb2d875fed04",
+  "frozenWindows": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "rust": [
+    {
+      "name": "editor-after.log",
+      "passed": 3,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "normal-final.log",
+      "passed": 276,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "preview-final.log",
+      "passed": 290,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "java": [
+    {
+      "variant": "Debug",
+      "suites": 5,
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer"
+    },
+    {
+      "variant": "UiPreview",
+      "suites": 5,
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+      "sha256": "5f56a3311a3685c62f8b71b0c41fd45d0e9a034675b8bb30fbeb465ccc926777"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_chat_layout_tests.rs",
+      "sha256": "3c687a97d2bfff9432c497d0ebb06d2210d0ca30bfa35fdd635186de14d2c6d3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/chat_editor_tests.rs",
+      "sha256": "52a0f5036b96f0500112e935ecc71683539a02bff5b71f1d3aeb83e24b381983"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "sha256": "0ac4cb10159dfce781f9bc255fd8d86f64d9d8719b5765faf00a5af411ec92f3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "sha256": "7a23e46e56365907a019e4e312f8d864fb801186861c1dfbc7966dff991bc0a0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+      "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/text_input.rs",
+      "sha256": "5305f310cb666e2ca608a957c47f8161a192008d265a13bc6e0efec3f63b848b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "sha256": "4aba83a92c4b46a075cd80d275d40c041df76c03cbd6bf1fbcf5ac7077e89bdb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+      "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "sha256": "2de2c2c3e4366014b489f9cdbe56ee25e95d52a0417c9a4aba25a4ccdbf5fc2a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+      "sha256": "bf68446cf5ae91e42e0d061036726d2cf0e460479cff17dea2804696a71ce6cd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_chat_ingress.rs",
+      "sha256": "09b993fc22688e6342e2e2e904159f97f4412e2314aa6acd5592d72468527e31"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "sha256": "1a7c257feeda322e788e99a2c52947084822ed5a847db5f4190594b6b851c59c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "sha256": "8aacaf2c8605b55387b049d72dea03638d6cdeff90688d5a309525dabb61dcde"
+    }
+  ],
+  "failureFirst": {
+    "compiledBefore": true,
+    "passed": 0,
+    "failed": 3,
+    "rustImportAndJavaRedirectSetupErrorsRetainedSeparately": true
+  },
+  "arm64Api31": {
+    "normal": true,
+    "actualPreviewFeature": true
+  },
+  "rootCause": "Original shared CrystalChatInput lacked Button/NativeTextInputTarget, so a same-focused-field retap after Android Back never entered existing EditorTouch keyboard reactivation.",
+  "regressionBoundary": "Injected Interaction / real shared child markers and PreUpdate-before-Update capture; not real picking, Java IME or send/echo acceptance.",
+  "review": "Four-file bounded read-only review: no new P0/P1/P2; reviewer did not run tests/build/device.",
+  "existingExtremeImeControlOverflowOpen": true,
+  "previousV15GlErrorsRetained": true,
+  "fullPhoneUiAccepted": false,
+  "authenticatedGameplayAccepted": false,
+  "physicalDeviceAccepted": false
+}

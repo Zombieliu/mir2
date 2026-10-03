@@ -1,0 +1,4 @@
+{"name":"npcshop","pid":11272,"tap":{"x":778,"y":158},"source":"78e7d2309f6a6b92cea1737c76c5eedfd863e46e","screenshotBefore":"npcshop-before.png","screenshotAfter":"npcshop-after.png"}
+{"name":"npcshop-sell","pid":11360,"tap":{"x":1278,"y":158},"source":"78e7d2309f6a6b92cea1737c76c5eedfd863e46e","screenshotBefore":"npcshop-sell-before.png","screenshotAfter":"npcshop-sell-after.png"}
+{"name":"npcshop-repair","pid":11445,"tap":{"x":1278,"y":158},"source":"78e7d2309f6a6b92cea1737c76c5eedfd863e46e","screenshotBefore":"npcshop-repair-before.png","screenshotAfter":"npcshop-repair-after.png"}
+{"name":"npcshop-srepair","pid":11530,"tap":{"x":1278,"y":158},"source":"78e7d2309f6a6b92cea1737c76c5eedfd863e46e","screenshotBefore":"npcshop-srepair-before.png","screenshotAfter":"npcshop-srepair-after.png"}

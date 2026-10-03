@@ -1,0 +1,29 @@
+{
+  "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+  "sourceFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+      "sha256": "62872e48f74dcfbdc746b56b65bee6aebf3dc2837be3d4fdfb85ca3d27988575"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "sha256": "ff3ed519f0087de4583e0891f24039ba16c612aee0d027886be85f9c98b67850"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+      "sha256": "7a8a6e6734446b9d7395700694aa4e17847cf36972b9adcc319de1e28fbd64bf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "sha256": "820d61cb49c239f74bbaf5c274334bbc10ae8465a69d79c77c392188e4642533"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "sha256": "59022e6bcc9bc6a7c1e19ded42f44d97a9fd13e2bf0c5518b337fff90aca9419"
+    }
+  ],
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "latestObservedWindows": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4",
+  "scopeFiles": 5,
+  "rendererFixAccepted": false
+}

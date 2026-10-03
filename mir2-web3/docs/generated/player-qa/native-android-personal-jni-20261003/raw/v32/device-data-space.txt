@@ -1,0 +1,2 @@
+Filesystem      Size Used Avail Use% Mounted on
+/dev/block/dm-4  20G 1.2G   18G   7% /storage/emulated/0/Android/obb

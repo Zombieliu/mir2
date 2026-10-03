@@ -1,0 +1,1877 @@
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:210:21
+    |
+210 |                     (32. / 3.),
+    |                     ^        ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+210 -                     (32. / 3.),
+210 +                     32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:414:29
+    |
+414 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+414 -                             (32. / 3.),
+414 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:421:29
+    |
+421 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+421 -                             (32. / 3.),
+421 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:476:25
+    |
+476 |                         (32. / 3.),
+    |                         ^        ^
+    |
+help: remove these parentheses
+    |
+476 -                         (32. / 3.),
+476 +                         32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:695:33
+    |
+695 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+695 -                                 (32. / 3.),
+695 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:702:33
+    |
+702 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+702 -                                 (32. / 3.),
+702 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:715:33
+    |
+715 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+715 -                                 (32. / 3.),
+715 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:727:33
+    |
+727 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+727 -                                 (32. / 3.),
+727 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:831:29
+    |
+831 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+831 -                             (32. / 3.),
+831 +                             32. / 3. ,
+    |
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> src/crystal_ui/overlays.rs:76:5
+   |
+76 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `SKILL_ROW_SIZE`
+   --> src/crystal_ui/overlays.rs:127:41
+    |
+127 |     SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE, SKILL_ROW_STEP_Y,
+    |                                         ^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> src/crystal_ui/social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unnecessary parentheses around `if` condition
+    --> src/crystal_ui/overlays.rs:8064:8
+     |
+8064 | ...if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |       ^
+8065 | ...    || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                 ^
+     |
+help: remove these parentheses
+     |
+8064 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+8065 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+warning: variable does not need to be mutable
+   --> src/crystal_ui/mail_editor_tests.rs:121:9
+    |
+121 |     let mut draft = draft("abcd");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/crystal_ui/mail_editor_tests.rs:172:9
+    |
+172 |     let mut draft = draft("letter body");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/crystal_ui/mail_editor_tests.rs:189:9
+    |
+189 |     let mut draft = draft(&message);
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/crystal_ui/overlays.rs:1312:5
+     |
+1312 |     mut pending: ResMut<PendingOperations>,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/crystal_ui/overlays.rs:7198:17
+     |
+7198 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/crystal_ui/overlays.rs:7199:28
+     |
+7199 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> src/crystal_ui/overlays.rs:7199:28
+     |
+7199 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> src/crystal_ui/overlays.rs:7625:18
+     |
+7625 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> src/crystal_ui/overlays.rs:8319:25
+     |
+8319 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/crystal_ui/overlays.rs:8320:36
+     |
+8320 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> src/crystal_ui/overlays.rs:8304:5
+     |
+8304 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> src/crystal_ui/overlays.rs:8320:36
+     |
+8320 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+     --> src/crystal_ui/overlays.rs:11789:9
+      |
+11789 |         skill_binding,
+      |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+     --> src/crystal_ui/overlays.rs:11790:9
+      |
+11790 |         skill_persistence,
+      |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: unused variable: `inventory`
+     --> src/crystal_ui/overlays.rs:16250:5
+      |
+16250 |     inventory: &InventoryModel,
+      |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_inventory`
+
+warning: unused variable: `state`
+     --> src/crystal_ui/overlays.rs:16251:5
+      |
+16251 |     state: &NativePlayerUiState,
+      |     ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `compose_ui`
+     --> src/crystal_ui/overlays.rs:16252:5
+      |
+16252 |     compose_ui: &MailComposeUi,
+      |     ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_compose_ui`
+
+warning: variable does not need to be mutable
+   --> src/crystal_ui/mail_parcel_tests.rs:254:9
+    |
+254 |     let mut state = NativePlayerUiState::default();
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `nearby`
+    --> src/quest_ui.rs:1921:5
+     |
+1921 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `overlays::CrystalCharacterWingMaterials` is more private than the item `hero_dialog::render::render`
+   --> src/crystal_ui/hero_dialog_render.rs:234:1
+    |
+234 | / pub fn render(
+235 | |     mut commands: Commands,
+236 | |     roots: Query<Entity, With<OverlayRoot>>,
+237 | |     old: Query<Entity, With<HeroRoot>>,
+...   |
+242 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+243 | | ) {
+    | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+    |
+note: but type `overlays::CrystalCharacterWingMaterials` is only usable at visibility `pub(self)`
+   --> src/crystal_ui/overlays.rs:196:1
+    |
+196 | struct CrystalCharacterWingMaterials([Handle<CrystalAdditiveUiMaterial>...
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `overlays::OverlayButton` is more private than the item `press_real_button`
+    --> src/crystal_ui/npc_shop_layout_tests.rs:107:1
+     |
+ 107 | pub(crate) fn press_real_button(app: &mut App, action: OverlayButton) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function `press_real_button` is reachable at visibility `pub(crate)`
+     |
+note: but type `overlays::OverlayButton` is only usable at visibility `pub(self)`
+    --> src/crystal_ui/overlays.rs:3350:1
+     |
+3350 | enum OverlayButton {
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: multiple variants are never constructed
+    --> src/crystal_ui/overlays.rs:3379:5
+     |
+3350 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+3379 |     OptionsMusicVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3380 |     OptionsMusicVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3381 |     OptionsSoundVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3382 |     OptionsSoundVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3383 |     ToggleInventory,
+3384 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+3385 |     ToggleShop,
+     |     ^^^^^^^^^^
+3386 |     ToggleNpcShop,
+     |     ^^^^^^^^^^^^^
+3387 |     ToggleStorage,
+     |     ^^^^^^^^^^^^^
+...
+3390 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+3395 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+3414 |     GroupInviteNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3415 |     GroupInviteNameSubmit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3418 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+3422 |     GuildRecruitNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3426 |     GuildCancelNoticeEdit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+3427 |     SelectGuildMember(u8),
+     |     ^^^^^^^^^^^^^^^^^
+3428 |     GuildKickMember(u8),
+3429 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+3432 |     GuildAssignNextRank,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3441 |     GuildRankNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+...
+3545 |     GameShopQuantityInc,
+     |     ^^^^^^^^^^^^^^^^^^^
+3546 |     GameShopQuantityDec,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3558 |     StorageRemovePassword,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `fill_sized_panel` is never used
+     --> src/crystal_ui/overlays.rs:12382:4
+      |
+12382 | fn fill_sized_panel<C: Component>(
+      |    ^^^^^^^^^^^^^^^^
+
+warning: function `overlay_compact_item_button` is never used
+     --> src/crystal_ui/overlays.rs:13983:4
+      |
+13983 | fn overlay_compact_item_button(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `overlay_clickable_text_at` is never used
+     --> src/crystal_ui/overlays.rs:15667:4
+      |
+15667 | fn overlay_clickable_text_at(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_chat_draft` is never used
+     --> src/crystal_ui/overlays.rs:15904:4
+      |
+15904 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+      |    ^^^^^^^^^^^^^^^^^
+
+warning: function `render_game_shop` is never used
+     --> src/crystal_ui/overlays.rs:17612:4
+      |
+17612 | fn render_game_shop(
+      |    ^^^^^^^^^^^^^^^^
+
+warning: function `spawn_game_shop_product` is never used
+     --> src/crystal_ui/overlays.rs:17867:4
+      |
+17867 | fn spawn_game_shop_product(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> src/crystal_ui/mail_editor.rs:13:18
+   |
+13 | pub(super) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(1...
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `preview_rect` is never used
+   --> src/crystal_ui/select.rs:652:4
+    |
+652 | fn preview_rect(frame: PreviewFrame) -> CrystalRect {
+    |    ^^^^^^^^^^^^
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> src/native_shell_ui.rs:40:7
+   |
+40 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: constant `AUX_CHANGE_PASSWORD_PANEL` is never used
+  --> src/native_shell_ui.rs:50:7
+   |
+50 | const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> src/native_shell_ui.rs:380:5
+    |
+374 | pub(crate) enum NativeShellButton {
+    |                 ----------------- variants in this enum
+...
+380 |     CycleClass,
+    |     ^^^^^^^^^^
+381 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+389 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+390 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_field` is never used
+    --> src/native_shell_ui.rs:2187:4
+     |
+2187 | fn spawn_aux_field(
+     |    ^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> src/native_shell_ui.rs:2307:4
+     |
+2307 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &...
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> src/native_shell_ui.rs:2343:4
+     |
+2343 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> src/native_shell_ui.rs:2380:4
+     |
+2380 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, act...
+     |    ^^^^^^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> src/quest_ui.rs:72:7
+   |
+72 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter`, `QuestHelp`, `QuestPagePrevious`, and `QuestPageNext` are never constructed
+    --> src/quest_ui.rs:1192:5
+     |
+1144 | enum QuestUiButton {
+     |      ------------- variants in this enum
+...
+1192 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1195 |     QuestHelp,
+     |     ^^^^^^^^^
+1196 |     QuestPagePrevious,
+     |     ^^^^^^^^^^^^^^^^^
+1197 |     QuestPageNext,
+     |     ^^^^^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `wrap_guidance_hint` is never used
+    --> src/quest_ui.rs:4755:4
+     |
+4755 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+    --> src/quest_ui.rs:6534:4
+     |
+6534 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Ques...
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> src/quest_ui.rs:6774:4
+     |
+6774 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `npc_dialog_close_button` is never used
+    --> src/quest_ui.rs:6913:4
+     |
+6913 | fn npc_dialog_close_button(parent: &mut ChildSpawnerCommands) {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> src/skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: method `file_name` is never used
+  --> src/ui_audio.rs:26:19
+   |
+25 | impl NativeUiSound {
+   | ------------------ method in this implementation
+26 |     pub(crate) fn file_name(self) -> &'static str {
+   |                   ^^^^^^^^^
+
+warning: method `clear_pending` is never used
+  --> src/ui_audio.rs:55:19
+   |
+42 | impl NativeUiAudioQueue {
+   | ----------------------- method in this implementation
+...
+55 |     pub(crate) fn clear_pending(&mut self) {
+   |                   ^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:7197:9
+     |
+7197 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:7198:9
+     |
+7198 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:7199:9
+     |
+7199 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:8318:17
+     |
+8318 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:8319:17
+     |
+8319 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:8320:17
+     |
+8320 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src/crystal_ui/mail_parcel_tests.rs:111:5
+    |
+111 |     drop(compose);
+    |     ^^^^^-------^
+    |          |
+    |          argument has type `&overlays::MailComposeUi`
+    |
+    = note: `#[warn(dropping_references)]` on by default
+help: use `let _ = ...` to ignore the expression or result
+    |
+111 -     drop(compose);
+111 +     let _ = compose;
+    |
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src/crystal_ui/mail_parcel_tests.rs:112:5
+    |
+112 |     drop(state);
+    |     ^^^^^-----^
+    |          |
+    |          argument has type `&overlays::NativePlayerUiState`
+    |
+help: use `let _ = ...` to ignore the expression or result
+    |
+112 -     drop(state);
+112 +     let _ = state;
+    |
+
+warning: `mir2-client-bevy` (lib test) generated 67 warnings (run `cargo fix --lib -p mir2-client-bevy --tests` to apply 38 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.28s
+     Running unittests src/lib.rs (mir2-web3/apps/game-client/platform-android/target/shared-sync-build-cache/debug/deps/mir2_client_bevy-459f200103c0b688)
+
+running 1240 tests
+test big_map::geometry::tests::original_small_large_and_missing_images_share_exact_integer_geometry ... ok
+test big_map::tests::authoritative_render_snapshot_exposes_map_image_player_and_npc_rows ... ok
+test big_map::tests::cached_non_current_search_result_cannot_enable_teleport ... ok
+test big_map::tests::full_queue_rolls_back_local_search_submission ... ok
+test big_map::tests::gateway_intents_are_bounded_deduplicated_and_never_mutate_player_map ... ok
+test big_map::tests::map_or_session_reset_invalidates_pending_gateway_intents ... ok
+test big_map::tests::new_authoritative_search_result_overrides_local_selection ... ok
+test big_map::tests::npc_selection_and_eighteen_row_paging_are_stable ... ok
+test big_map::tests::oversized_payloads_are_bounded_and_text_is_truncated ... ok
+test big_map::tests::render_snapshot_never_invents_missing_map_or_npc_data ... ok
+test big_map::tests::same_scene_snapshot_keeps_existing_remote_active_map ... ok
+test big_map::tests::same_scene_snapshot_preserves_local_big_map_controls ... ok
+test big_map::tests::search_normalizes_draft_and_enforces_cooldown ... ok
+test big_map::tests::search_result_is_authoritative_and_selects_only_a_known_npc ... ok
+test big_map::tests::serde_is_backward_compatible_with_missing_optional_fields ... ok
+test big_map::tests::session_and_map_resets_drop_stale_npcs_without_losing_connection_setup ... ok
+test big_map::tests::snapshot_map_change_or_removed_npc_drops_local_selection ... ok
+test big_map::tests::teleport_intent_is_server_gated_and_never_changes_map ... ok
+test character::tests::character_panel_shows_stats ... ok
+test chat::tests::chat_model_trims_oldest_past_cap ... ok
+test chat::tests::recent_text_returns_last_n ... ok
+test chat::tests::settings_filter_channel_keeps_presentation_aliases_separate ... ok
+test chat_settings_effects::tests::apply_and_persist_share_one_payload_without_swallowing_gateway_effects ... ok
+test chat_settings_effects::tests::corrupt_primary_uses_backup_then_defaults ... ok
+test chat_settings_effects::tests::persisted_file_is_an_explicit_non_secret_allow_list ... ok
+test crystal_ui::assets::tests::login_asset_paths_follow_crystal_spec_indexes ... ok
+test crystal_ui::assets::tests::safe_key_asset_paths_cover_panel_and_all_button_states ... ok
+test crystal_ui::change_password::tests::change_password_original_frame_masks_secrets_and_disables_invalid_submit ... ok
+test crystal_ui::chat::phone_presentation_tests::default_does_not_enable_mobile_pointer_override ... ok
+test crystal_ui::chat::phone_presentation_tests::hidden_phone_chat_cannot_scroll_or_replay_input ... ok
+test crystal_ui::chat::phone_presentation_tests::phone_wheel_uses_actual_bounds_at_double_density ... ok
+test crystal_ui::chat::pointer_scroll_tests::foreground_wheel_consumption_prevents_chat_scroll_and_does_not_replay ... ok
+test crystal_ui::chat::pointer_scroll_tests::original_track_reaches_last_history_index ... ok
+test crystal_ui::chat::tests::canonical_chat_channel_fixture_matrix_is_case_insensitive_and_alias_safe ... ok
+test crystal_ui::chat::tests::channel_colors_follow_main_dialogs_special_cases ... ok
+test crystal_ui::chat::tests::chat_action_queue_is_consumed_and_mutates_state ... ok
+test crystal_ui::chat::tests::chat_and_object_chat_fixtures_preserve_packet_text_and_canonical_channel ... ok
+test crystal_ui::chat::tests::chat_background_uses_source_frame_for_all_sizes_and_transparency_modes ... ok
+test crystal_ui::chat::tests::chat_frame_uses_exact_crystal_four_line_geometry ... ok
+test crystal_ui::chat::tests::chat_input_entity_exists_only_while_the_authoritative_ui_state_is_focused ... ok
+test crystal_ui::chat::tests::child_coordinates_are_added_to_chat_panel_origin ... ok
+test crystal_ui::chat::tests::combined_hidden_and_filter_display ... ok
+test crystal_ui::chat::tests::control_filters_and_settings_hide_the_same_canonical_channel_families ... ok
+test crystal_ui::chat::tests::every_chat_size_moves_its_frame_text_and_control_bar_together ... ok
+test crystal_ui::chat::tests::filtered_lines_by_filter_state_and_display_content ... ok
+test crystal_ui::chat::tests::focused_chat_input_stays_at_crystal_bottom_for_all_window_sizes ... ok
+test crystal_ui::chat::tests::native_chat_translation_preserves_player_channels_and_canonical_messages ... ok
+test crystal_ui::chat::tests::recent_four_selection_preserves_newest_source_order ... ok
+test crystal_ui::chat::tests::resize_cycles_through_crystal_line_counts_and_frame_indices ... ok
+test crystal_ui::chat::tests::scroll_button_frames_match_crystal_source_triples ... ok
+test crystal_ui::chat::tests::scroll_home_up_down_end_truly_change_position ... ok
+test crystal_ui::chat::tests::settings_background_tracks_active_tab ... ok
+test crystal_ui::chat::tests::settings_channel_matrix_preserves_trade_without_rendering_a_ninth_checkbox ... ok
+test crystal_ui::chat::tests::settings_controls_are_staged_and_cancel_restores_committed_values ... ok
+test crystal_ui::chat::tests::settings_filter_alias_matrix_keeps_shout_and_system_variants_only ... ok
+test crystal_ui::chat::tests::settings_press_survives_same_frame_model_invalidation ... ok
+test crystal_ui::chat::tests::source_chat_hint_matrix_excludes_scroll_and_settings_panel_controls ... ok
+test crystal_ui::chat::tests::source_scroll_can_start_at_last_line_even_when_window_is_taller ... ok
+test crystal_ui::chat::tests::source_trade_button_queues_trade_request_without_changing_chat_filter ... ok
+test crystal_ui::chat::tests::trade_message_blocks_chat_scroll_buttons_and_queued_actions ... ok
+test crystal_ui::chat::tests::transparent_chat_preserves_source_color_opacity ... ok
+test crystal_ui::chat::tests::trimmed_message_and_format_for_filter ... ok
+test crystal_ui::chat::tests::visible_slice_respects_scroll_and_filter ... ok
+test crystal_ui::chat::tests::web_filtered_by_crystal_settings_complete_type_matrix ... ok
+test crystal_ui::chat::tests::window_size_spec_matches_crystal_frames ... ok
+test crystal_ui::chat::tests::z_order_is_hud_below_chat_below_dialog_below_death_below_menu ... ok
+test crystal_ui::guild_storage::tests::amount_box_starts_with_maximum_selected_and_clamps_numeric_input_without_overflow ... ok
+test crystal_ui::guild_storage::tests::constructor_keeps_source_index_one_but_initial_slots_zero_through_sixty_three ... ok
+test crystal_ui::guild_storage::tests::drag_matches_every_source_integer_y_including_nonreciprocal_snap_steps ... ok
+test crystal_ui::guild_storage::tests::every_visible_row_preserves_all_eight_columns_and_authoritative_slot_ids ... ok
+test crystal_ui::guild_storage::tests::storage_geometry_and_button_art_do_not_confuse_draw_size_with_hit_size ... ok
+test crystal_ui::guild_storage::tests::wheel_uses_truncated_notches_clamps_and_retains_the_source_zero_delta_update ... ok
+test crystal_ui::hud::hud_item_image_tests::primary_belt_integer_alpha_offsets_and_clipping_match_32_by_32_source_cell ... ok
+test crystal_ui::hud::hud_item_image_tests::primary_belt_selects_current_image_before_layout_and_never_reuses_an_empty_white_texture ... ok
+test crystal_ui::hud::tests::belt_controls_mutate_only_local_presentation_state ... ok
+test crystal_ui::hud::tests::belt_count_matches_crystal_without_native_prefix_or_durability_text ... ok
+test crystal_ui::hud::tests::belt_hit_target_tracks_late_population_and_clear ... ok
+test crystal_ui::hud::tests::belt_labels_are_bounded_without_splitting_unicode ... ok
+test crystal_ui::hud::tests::belt_mapping_uses_container_one_and_exact_slot ... ok
+test crystal_ui::hud::tests::belt_rotate_and_close_controls_follow_source_frames_and_geometry ... ok
+test crystal_ui::hud::tests::camera_mode_hides_actual_hud_root_and_restores_it ... ok
+test crystal_ui::hud::tests::centered_hud_text_uses_flex_alignment_for_unwrapped_single_lines ... ok
+test crystal_ui::hud::tests::character_button_uses_exact_crystal_three_state_assets_and_geometry ... ok
+test crystal_ui::hud::tests::crystal_z_toggles_belt_and_ctrl_z_rotates_without_reopening ... ok
+test crystal_ui::hud::tests::free_inventory_slots_follow_crystal_inventory_array_capacity ... ok
+test crystal_ui::hud::tests::hp_view_alternate_labels_keep_authoritative_current_and_max_values ... ok
+test crystal_ui::hud::tests::hp_view_ecs_gate_swaps_presentation_without_mutating_options ... ok
+test crystal_ui::hud::tests::hud_session_reset_restores_new_scene_belt_and_mail_defaults ... ok
+test crystal_ui::hud::tests::hud_session_reset_wins_over_stale_belt_press_outside_gameplay ... ok
+test crystal_ui::hud::tests::inventory_button_uses_exact_crystal_three_state_assets_and_geometry ... ok
+test crystal_ui::hud::tests::legacy_item_hint_is_explicitly_partial_and_preserves_supported_fields ... ok
+test crystal_ui::hud::tests::level_label_matches_crystal_autosize_extraction_bounds ... ok
+test crystal_ui::hud::tests::low_level_warrior_hides_mp_and_uses_hp_only_labels ... ok
+test crystal_ui::hud::tests::low_level_warrior_uses_crystal_full_width_hp_orb ... ok
+test crystal_ui::hud::tests::main_hud_button_matrix_uses_exact_crystal_assets_and_geometry ... ok
+test crystal_ui::hud::tests::main_hud_hint_matrix_covers_only_source_hint_controls ... ok
+test crystal_ui::hud::tests::main_hud_text_uses_crystal_point_size_and_source_anchors ... ok
+test crystal_ui::hud::tests::minimap_controls_share_one_identity_layer_without_moving_bottom_hud ... ok
+test crystal_ui::hud::tests::minimap_light_indicator_uses_crystal_time_of_day_frames ... ok
+test crystal_ui::hud::tests::minimap_toggle_uses_crystal_collapsed_frame_and_footer_positions ... ok
+test crystal_ui::hud::tests::minimap_visibility_system_initializes_with_overlapping_node_markers ... ok
+test crystal_ui::hud::tests::missing_minimap_index_or_dimensions_forces_small_frame_without_losing_preference ... ok
+test crystal_ui::hud::tests::native_map_title_locale_changes_without_changing_authoritative_model ... ok
+test crystal_ui::hud::tests::new_mail_indicator_uses_source_geometry_and_blink_contract ... ok
+test crystal_ui::hud::tests::orb_clip_is_bottom_anchored_and_ratio_clamped ... ok
+test crystal_ui::hud::tests::orb_source_rects_match_crystal_prguse_four_halves ... ok
+test crystal_ui::hud::tests::progress_bars_follow_crystal_source_width_insets ... ok
+test crystal_ui::hud::tests::source_positions_match_crystal_main_dialog ... ok
+test crystal_ui::hud::tests::trade_message_answer_frame_blocks_belt_controls ... ok
+test crystal_ui::item_image::tests::transparent_frame_falls_back_to_full_size_but_invalid_rgba_is_not_guessed ... ok
+test crystal_ui::item_image::tests::true_size_uses_any_nonzero_alpha_not_rgb_and_does_not_return_trim_origin ... ok
+test crystal_ui::item_tooltip::tests::bind_section_uses_crystal_expiry_seal_and_rental_clock_text ... ok
+test crystal_ui::item_tooltip::tests::broken_socket_does_not_contribute_to_parent_added_stats ... ok
+test crystal_ui::item_tooltip::tests::common_potion_follows_crystal_section_order_and_instance_count_weight ... ok
+test crystal_ui::item_tooltip::tests::legacy_snapshot_is_explicitly_partial_and_never_guesses_item_type ... ok
+test crystal_ui::item_tooltip::tests::localized_item_names_keep_instance_count_refine_prefix_and_source_identity ... ok
+test crystal_ui::item_tooltip::tests::native_percentage_item_tooltips_use_complete_source_keys ... ok
+test crystal_ui::item_tooltip::tests::native_signed_rates_preserve_separate_sign_value_and_added_stats ... ok
+test crystal_ui::item_tooltip::tests::npc_shop_hide_added_stats_preserves_base_and_bind_text_but_hides_curse ... ok
+test crystal_ui::item_tooltip::tests::unidentified_item_hides_instance_and_socket_added_stats ... ok
+test crystal_ui::item_tooltip::tests::viewer_resolved_item_drives_stats_and_authoritative_requirement_colour ... ok
+test crystal_ui::item_tooltip::tests::viewer_resolved_socket_contributes_stats_but_original_socket_names_identity ... ok
+test crystal_ui::item_tooltip::tests::weapon_uses_crystal_durability_scale_requirement_colour_and_added_stats ... ok
+test crystal_ui::login::tests::login_button_specs_use_exact_crystal_hit_rects ... ok
+test crystal_ui::login::tests::login_caret_uses_crystal_style_half_second_blink ... ok
+test crystal_ui::login::tests::login_element_set_covers_expected_crystal_scene_members ... ok
+test crystal_ui::metrics::tests::dpi_profiles_preserve_logical_stage_and_control_hits ... ok
+test crystal_ui::metrics::tests::dpi_scaled_stage_preserves_logical_coordinates ... ok
+test crystal_ui::metrics::tests::hud_and_minimap_stay_inside_the_logical_stage ... ok
+test crystal_ui::metrics::tests::invalid_rects_and_viewports_never_produce_nan_or_zero_hits ... ok
+test crystal_ui::metrics::tests::letterbox_is_not_an_interactive_stage_region ... ok
+test crystal_ui::metrics::tests::native_baseline_is_identity ... ok
+test crystal_ui::metrics::tests::resized_window_letterbox_keeps_logical_stage ... ok
+test crystal_ui::metrics::tests::wide_viewport_letterboxes_horizontally ... ok
+test crystal_ui::metrics::tests::world_and_ui_hits_use_a_single_stage_transform ... ok
+test crystal_ui::minimap::tests::click_inverse_uses_clamped_crop_and_small_image_stretch ... ok
+test crystal_ui::minimap::tests::click_snapshot_rejects_map_epoch_image_and_dimensions_but_retains_displayed_crop ... ok
+test crystal_ui::minimap::tests::d401_profile_uses_authoritative_index_image_and_map_dimensions ... ok
+test crystal_ui::minimap::tests::map_change_uses_the_new_authoritative_image_geometry ... ok
+test crystal_ui::minimap::tests::marker_positions_share_the_same_source_crop_transform ... ok
+test crystal_ui::minimap::tests::minimap_content_stays_above_the_hud_skin_during_night_lighting ... ok
+test crystal_ui::minimap::tests::quest_target_marker_is_larger_and_gold ... ok
+test crystal_ui::minimap::tests::small_source_crop_scales_markers_with_the_stretched_image ... ok
+test crystal_ui::minimap::tests::source_crop_centres_the_d401_player_and_clamps_edges ... ok
+test crystal_ui::notice::tests::empty_notice_is_consumed_without_opening_blank_modal ... ok
+test crystal_ui::notice::tests::exact_notice_geometry_matches_crystal_source ... ok
+test crystal_ui::notice::tests::native_notice_localizes_only_the_exact_system_notice_before_wrapping ... ok
+test crystal_ui::notice::tests::newer_notice_opens_once_and_close_does_not_reopen_from_same_snapshot ... ok
+test crystal_ui::notice::tests::notice_body_is_clipped_before_crystal_scrollbar_gutter ... ok
+test crystal_ui::notice::tests::notice_long_lines_wrap_before_the_scrollbar_gutter ... ok
+test crystal_ui::notice::tests::notice_wrap_preserves_blank_lines_and_breaks_oversized_tokens ... ok
+test crystal_ui::notice::tests::scroll_clamps_to_the_crystal_nineteen_line_window ... ok
+test crystal_ui::notice::tests::session_reset_allows_same_content_from_a_new_authoritative_delivery ... ok
+test crystal_ui::notice::tests::source_colour_and_http_link_markup_preserve_visible_text ... ok
+test crystal_ui::npc_item_quote::tests::durable_zero_max_uses_the_source_zero_ratio ... ok
+test crystal_ui::npc_item_quote::tests::quote_keeps_the_fractional_client_affordability_threshold ... ok
+test crystal_ui::npc_item_quote::tests::quote_uses_live_durability_and_rejects_incomplete_or_stale_source ... ok
+test crystal_ui::npc_item_quote::tests::quote_uses_source_stat_weight_and_service_multiplier ... ok
+test crystal_ui::npc_item_quote::tests::rental_doubles_before_the_npc_service_multiplier ... ok
+test crystal_ui::npc_item_quote::tests::sale_quote_multiplies_before_halving_and_requires_current_concrete_source ... ok
+test crystal_ui::overlays::big_map_coordinates::tests::closing_or_losing_focus_clears_pointer_coordinate_before_reopening ... ok
+test crystal_ui::overlays::big_map_coordinates::tests::hover_coordinates_match_navigation_tiles_for_scaled_centered_map_images ... ok
+test crystal_ui::overlays::big_map_coordinates::tests::hover_ignores_image_margins_buttons_npc_list_and_letterboxing ... ok
+test crystal_ui::overlays::big_map_coordinates::tests::hover_updates_retained_label_without_rebuilding_or_mutating_same_tile ... ok
+test crystal_ui::overlays::big_map_coordinates::tests::map_render_cache_refreshes_npc_selection_scroll_player_and_renderer_state ... ok
+test crystal_ui::overlays::big_map_coordinates::tests::missing_image_or_invalid_dimensions_never_display_player_coordinate_as_pointer ... ok
+test crystal_ui::overlays::big_map_coordinates::tests::mouse_leave_retains_last_coordinate_but_map_session_and_world_changes_clear_it ... ok
+test crystal_ui::overlays::big_map_coordinates::tests::preview_map_uses_its_own_dimensions_and_never_keeps_current_map_coordinates ... ok
+test crystal_ui::overlays::character_stats::tests::source_status_rows_use_authoritative_ids_and_do_not_put_weight_in_ac_row ... ok
+test crystal_ui::overlays::character_stats::tests::state_weight_rows_keep_full_values_and_original_capacity_ids ... ok
+test crystal_ui::overlays::character_stats::tests::state_weights_missing_values_stay_unknown_and_experience_matches_source_percent ... ok
+test crystal_ui::overlays::combat_mode_keys::tests::cycles_wait_for_server_modes_and_use_independent_source_delays ... ok
+test crystal_ui::overlays::combat_mode_keys::tests::direct_modes_are_unthrottled_and_invalid_packets_never_change_state ... ok
+test crystal_ui::overlays::creature_dialog::tests::animation_uses_source_strips_and_switches_after_completed_idle_loop ... ok
+test crystal_ui::overlays::creature_dialog::tests::filters_are_draft_until_save_and_mode_respects_rules ... ok
+test crystal_ui::overlays::creature_dialog::tests::open_subscribes_and_selects_authoritative_summoned_slot ... ok
+test crystal_ui::overlays::creature_dialog::tests::original_baby_pig_zero_is_summoned_and_none_ninety_nine_is_not ... ok
+test crystal_ui::overlays::creature_dialog::tests::release_verification_is_case_insensitive_and_bound_to_opened_pet ... ok
+test crystal_ui::overlays::creature_dialog::tests::rename_requires_server_token_and_original_ascii_name_rules ... ok
+test crystal_ui::overlays::creature_dialog::tests::summon_dismiss_release_are_gated_by_authoritative_state ... ok
+test crystal_ui::overlays::creature_dialog::view::pickup_text_tests::native_pickup_caption_preserves_both_explicit_fragments_in_all_locales ... ok
+test crystal_ui::overlays::equipment_creature_host::tests::equipped_windows_capture_their_rectangles_not_the_whole_world ... ok
+test crystal_ui::overlays::equipment_creature_host::tests::escape_status_cancel_keeps_server_fishing_state_until_ack ... ok
+test crystal_ui::overlays::equipment_creature_host::tests::pending_bootstrap_does_not_misreport_no_creatures ... ok
+test crystal_ui::overlays::equipment_creature_host::tests::source_animation_offsets_are_loaded_from_export_metadata ... ok
+test crystal_ui::overlays::equipment_storage_tests::concurrent_storage_character_render_keeps_all_source_character_tabs_and_equipment_cell ... ok
+test crystal_ui::overlays::equipment_storage_tests::equipment_storage_amulet_merge_locks_its_live_endpoints_until_matching_ack ... ok
+test crystal_ui::overlays::equipment_storage_tests::equipment_storage_drag_rechecks_source_identity_and_storage_lock ... ok
+test crystal_ui::overlays::equipment_storage_tests::ordered_equipment_storage_amulet_merge_uses_complete_live_identity ... ok
+test crystal_ui::overlays::equipment_storage_tests::ordered_equipment_to_storage_uses_remove_item_and_occupied_fallback ... ok
+test crystal_ui::overlays::equipment_storage_tests::ordered_storage_to_equipment_uses_actual_slot_and_source_amulet_merge ... ok
+test crystal_ui::overlays::equipment_storage_tests::storage_and_character_dialogs_keep_source_bounds_and_slots_reachable_together ... ok
+test crystal_ui::overlays::friend_dialog::host::tests::ctrl_a_replaces_graphemes_and_shortcut_letters_are_not_inserted ... ok
+test crystal_ui::overlays::friend_dialog::host::tests::unfocused_editor_does_not_append_and_full_queue_retains_draft ... ok
+test crystal_ui::overlays::friend_dialog::tests::editor_identity_changes_on_new_modal_and_session_but_not_edits ... ok
+test crystal_ui::overlays::friend_dialog::tests::empty_or_oversize_memo_is_never_submitted_to_silent_server_rejection ... ok
+test crystal_ui::overlays::friend_dialog::tests::failed_send_restores_exact_target_and_draft_without_overwriting_new_modal ... ok
+test crystal_ui::overlays::friend_dialog::tests::friend_original_twelve_row_paging_is_preserved ... ok
+test crystal_ui::overlays::friend_dialog::tests::friend_removed_target_invalidates_modal ... ok
+test crystal_ui::overlays::friend_dialog::tests::friend_selection_uses_identity_and_update_clears_it ... ok
+test crystal_ui::overlays::friend_dialog::tests::friend_tab_and_online_whisper_match_original ... ok
+test crystal_ui::overlays::friend_dialog::tests::memo_accepts_over_server_limit_and_preserves_draft_for_correction ... ok
+test crystal_ui::overlays::friend_dialog::text_editor::tests::deletion_and_arrows_preserve_unicode_graphemes ... ok
+test crystal_ui::overlays::friend_dialog::text_editor::tests::existing_overlong_draft_can_be_repaired_without_truncation ... ok
+test crystal_ui::overlays::friend_dialog::text_editor::tests::home_end_and_selection_collapse_follow_line_boundaries ... ok
+test crystal_ui::overlays::friend_dialog::text_editor::tests::mir_input_box_prefix_policy_preserves_fitting_utf16_text_and_selection ... ok
+test crystal_ui::overlays::friend_dialog::text_editor::tests::newline_and_paste_share_budget_and_normalization ... ok
+test crystal_ui::overlays::friend_dialog::text_editor::tests::renderer_layout_supports_wrapping_hit_selection_and_vertical_navigation ... ok
+test crystal_ui::overlays::friend_dialog::text_editor::tests::selection_replacement_uses_utf16_budget_atomically ... ok
+test crystal_ui::overlays::friend_dialog::text_editor::tests::unsafe_offsets_snap_and_inserted_combining_text_keeps_valid_caret ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::categories_keep_server_order_and_class_section_search_filter_real_flags ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::confirmation_revalidates_price_stock_and_wallet_then_queues_once ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::consumed_clipboard_shortcut_never_inserts_its_v_literal ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::ctrl_a_selects_the_search_draft_without_appending_its_literal ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::game_shop_names_match_crystal_friendly_name_and_grade_color ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::preview_keeps_crystal_direction_gender_clock_and_weapon_depth ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::quantities_are_per_product_and_respect_five_stacks_stock_and_flags ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::raw_home_and_end_clear_ctrl_a_selection_when_button_edge_is_missing ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::raw_navigation_and_delete_are_single_shot_with_press_release_stream ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::recent_filter_excludes_zero_old_and_exact_seven_day_boundary ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::search_editor_caps_edits_and_resets_filter_page_state ... ok
+test crystal_ui::overlays::game_shop_dialog::tests::shop_search_accepts_raw_and_localized_names_without_rewriting_item_identity ... ok
+test crystal_ui::overlays::group_dialog::tests::original_name_prompt_sends_only_add_without_permission_toggle ... ok
+test crystal_ui::overlays::group_dialog::tests::same_inviter_can_invite_again_after_decline_but_snapshot_is_idempotent ... ok
+test crystal_ui::overlays::group_dialog::tests::source_invitation_accept_shows_group_and_rejects_stale_epoch ... ok
+test crystal_ui::overlays::group_dialog::tests::source_member_map_arrives_before_member_and_is_removed_on_leave ... ok
+test crystal_ui::overlays::group_dialog::tests::source_membership_order_gates_leader_and_full_group ... ok
+test crystal_ui::overlays::group_dialog::tests::stale_send_failure_does_not_replace_new_input ... ok
+test crystal_ui::overlays::guild_buff_dialog::tests::acquisition_activation_and_permissions_use_authority_without_optimism ... ok
+test crystal_ui::overlays::guild_buff_dialog::tests::list_request_failure_retries_and_character_change_clears_authority ... ok
+test crystal_ui::overlays::guild_buff_dialog::tests::ordinary_deltas_preserve_catalog_and_other_buffs ... ok
+test crystal_ui::overlays::guild_buff_dialog::tests::scroll_drag_and_catalog_shrink_are_bounded_with_stable_ids ... ok
+test crystal_ui::overlays::guild_buff_dialog::tests::source_row_states_use_guildskill_icon_triplets ... ok
+test crystal_ui::overlays::guild_panel::tests::guild_buff_queue_failure_releases_list_retry_without_optimistic_unlock ... ok
+test crystal_ui::overlays::guild_panel::tests::guild_invitation_response_is_bound_to_exact_inviter_epoch ... ok
+test crystal_ui::overlays::guild_panel::tests::member_rank_change_is_only_sent_after_confirmation_with_original_fields ... ok
+test crystal_ui::overlays::guild_panel::tests::rank_rename_uses_type_three_and_cannot_edit_a_senior_rank ... ok
+test crystal_ui::overlays::guild_panel::tests::source_member_pages_advance_twenty_five_and_clamp_to_eighteen_visible_rows ... ok
+test crystal_ui::overlays::guild_panel::tests::source_notice_edit_and_submission_have_separate_limits ... ok
+test crystal_ui::overlays::guild_panel::tests::source_rank_edit_budget_is_twenty_utf16_and_selection_survives_sync ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_coalesced_control_a_release_then_digits_keeps_modifier_event_order ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_coalesced_digits_backspace_and_enter_submit_the_edited_not_old_amount ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_enter_on_invalid_uint_closes_silently_like_source_invoke_click ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_escape_drains_its_keyboard_batch_without_leaking_to_the_next_modal ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_modal_blocks_underlying_buttons_even_in_the_frame_it_closes ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_modal_submission_is_exact_nonoptimistic_deduplicated_and_throttled ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_mouse_buttons_keep_default_button_b_and_explicit_close_button_a ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_prompt_sync_cancels_changed_identity_revoked_rank_and_session_exit ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_real_keyboard_route_consumes_modal_keys_and_submits_only_on_enter ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_source_modal_has_exact_coin_input_button_geometry_and_invalid_ok_visibility ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_gold_zero_and_stale_guild_rank_or_balance_do_not_send_mutations ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_alpha_true_size_centres_without_cropping_and_refreshes_same_handle ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_compressed_press_move_release_keeps_the_real_motion_before_ending_drag ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_current_stack_image_and_count_do_not_use_stale_tooltip_count_or_real_info ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_ecs_has_source_grid_background_hit_rects_and_separate_arrow_art ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_known_source_frame_zero_is_drawn_but_missing_source_is_not_guessed ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_original_images_keep_negative_odd_offsets_and_refresh_loaded_dimensions ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_real_original_pngs_follow_get_true_size_and_keep_full_draw_dimensions ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_scroll_persists_on_hide_but_session_reset_clears_pointer_and_gold_modal ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_source_tab_visibility_and_gold_withdraw_are_independent_rank_rules ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_thumb_drag_uses_source_grab_offset_scale_clamp_and_focus_release ... ok
+test crystal_ui::overlays::guild_storage_tests::guild_storage_wheel_is_window_cursor_modal_and_unit_scoped ... ok
+test crystal_ui::overlays::help_shortcut_keys_follow_loaded_binding_and_clear_unbound ... ok
+test crystal_ui::overlays::hero_buff_hud::tests::exact_hero_identity_filters_player_old_hero_and_refresh_retains_buffs ... ok
+test crystal_ui::overlays::hero_buff_hud::tests::hero_buff_render_is_separate_and_survives_source_camera_mode ... ok
+test crystal_ui::overlays::hero_buff_hud::tests::ordinary_hero_spawn_state_updates_host_and_rejects_invalid_state ... ok
+test crystal_ui::overlays::hero_buff_hud::tests::ordinary_recall_disposes_buffs_and_dead_state_keeps_page ... ok
+test crystal_ui::overlays::hero_dialog::assign::tests::hero_draft_survives_send_failure_and_does_not_accept_player_keys ... ok
+test crystal_ui::overlays::hero_dialog::assign::tests::hero_none_to_none_never_dispatches_the_player_unbind_branch ... ok
+test crystal_ui::overlays::hero_dialog::assign::tests::hero_optimistic_key_waits_for_transport_then_exact_receipt ... ok
+test crystal_ui::overlays::hero_dialog::cross::tests::exact_failed_transfer_then_other_success_does_not_clear_player_selection ... ok
+test crystal_ui::overlays::hero_dialog::cross::tests::hit_order_matches_player_front_and_hero_window_z ... ok
+test crystal_ui::overlays::hero_dialog::cross::tests::ordered_batched_drag_keeps_player_origin_and_hero_raw_destination ... ok
+test crystal_ui::overlays::hero_dialog::cross::tests::right_cancel_and_closing_player_bag_clear_cross_selection ... ok
+test crystal_ui::overlays::hero_dialog::cross::tests::right_cancel_does_not_also_use_the_covered_hero_potion ... ok
+test crystal_ui::overlays::hero_dialog::geometry::tests::own_modal_regions_never_click_a_covered_belt_or_character_tab ... ok
+test crystal_ui::overlays::hero_dialog::host::tests::auto_pot_amount_uses_hp_stat_twelve_and_restores_draft_on_transport_failure ... ok
+test crystal_ui::overlays::hero_dialog::host::tests::confirmation_revalidates_uid_and_retains_draft_when_shared_gate_is_busy ... ok
+test crystal_ui::overlays::hero_dialog::host::tests::hero_assign_blocks_world_and_covered_controls_but_allows_own_modal_host ... ok
+test crystal_ui::overlays::hero_dialog::host::tests::hero_merge_preserves_uids_and_rejects_full_or_identical_stacks ... ok
+test crystal_ui::overlays::hero_dialog::host::tests::only_exact_unsent_request_releases_wait_without_dropping_draft ... ok
+test crystal_ui::overlays::hero_dialog::host::tests::ordered_item_receipt_releases_lock_before_later_configuration_echo ... ok
+test crystal_ui::overlays::hero_dialog::item_use::tests::auto_equip_and_potion_plans_keep_exact_hero_grid_and_uid ... ok
+test crystal_ui::overlays::hero_dialog::item_use::tests::player_hero_transfers_reject_occupied_incompatible_and_preserve_stack_uids ... ok
+test crystal_ui::overlays::hero_dialog::item_use::tests::remove_uses_raw_belt_fallback_without_negative_index ... ok
+test crystal_ui::overlays::hero_dialog::item_use::tests::restock_waits_for_empty_belt_and_revalidates_source_uid ... ok
+test crystal_ui::overlays::hero_dialog::tests::absent_hero_never_uses_player_inventory_or_opens_pages ... ok
+test crystal_ui::overlays::hero_dialog::tests::item_result_matches_exact_slots_and_failed_operations_keep_selection ... ok
+test crystal_ui::overlays::hero_dialog::tests::original_capacity_keeps_two_belt_cells_and_unlocks_rows_without_inventing_items ... ok
+test crystal_ui::overlays::hero_dialog::tests::page_toggle_health_and_session_are_actor_scoped ... ok
+test crystal_ui::overlays::keyboard_dialog::host::tests::capture_escape_is_consumed_and_unfocused_capture_is_ignored ... ok
+test crystal_ui::overlays::keyboard_dialog::host::tests::chord_capture_consumes_gameplay_and_unfocused_edges_are_discarded ... ok
+test crystal_ui::overlays::keyboard_dialog::host::tests::disk_save_replaces_previous_file_and_loads_application_scoped_binding ... ok
+test crystal_ui::overlays::keyboard_dialog::host::tests::held_and_two_sided_control_releases_preserve_event_time_bank ... ok
+test crystal_ui::overlays::keyboard_dialog::host::tests::logical_keyboard_layout_and_numpad_remain_distinct ... ok
+test crystal_ui::overlays::keyboard_dialog::host::tests::post_option_sync_applies_skill_mode_in_the_same_update ... ok
+test crystal_ui::overlays::keyboard_dialog::host::tests::quick_control_chord_uses_keydown_modifiers_in_real_input_pipeline ... ok
+test crystal_ui::overlays::keyboard_dialog::host::tests::remapped_binding_suppresses_original_key_and_obeys_modifiers ... ok
+test crystal_ui::overlays::keyboard_dialog::host::tests::skill_mode_is_applied_after_each_disk_load ... ok
+test crystal_ui::overlays::keyboard_dialog::host::tests::skill_mode_switches_host_dispatch_without_replacing_later_custom_edits ... ok
+test crystal_ui::overlays::keyboard_dialog::tests::crystal_defaults_preserve_all_96_real_entries_and_overlapping_tab_actions ... ok
+test crystal_ui::overlays::keyboard_dialog::tests::delete_unbinds_duplicates_are_allowed_and_second_click_cancels_capture ... ok
+test crystal_ui::overlays::keyboard_dialog::tests::original_target_lock_uses_current_event_even_on_key_up ... ok
+test crystal_ui::overlays::keyboard_dialog::tests::persistence_round_trip_and_invalid_load_are_atomic ... ok
+test crystal_ui::overlays::keyboard_dialog::tests::same_frame_skill_events_keep_each_own_target_lock_flag ... ok
+test crystal_ui::overlays::keyboard_dialog::tests::skill_mode_remaps_only_explicit_skill_modifier_rows ... ok
+test crystal_ui::overlays::keyboard_dialog::tests::source_group_geometry_and_scroll_clamps ... ok
+test crystal_ui::overlays::keyboard_dialog::tests::strict_and_relaxed_capture_restore_all_modifiers_on_reset ... ok
+test crystal_ui::overlays::leave_game_dialog::tests::confirmation_uses_original_single_request_gate ... ok
+test crystal_ui::overlays::leave_game_dialog::tests::decline_closes_and_consumes_frame_without_emitting_leave ... ok
+test crystal_ui::overlays::leave_game_dialog::tests::source_delay_counts_down_then_opens_confirmation ... ok
+test crystal_ui::overlays::leave_game_input_tests::leave_game_old_enter_cannot_confirm_new_pointer_prompt ... ok
+test crystal_ui::overlays::local_keyboard_ui::tests::autorun_hint_only_on_real_state_change ... ok
+test crystal_ui::overlays::local_keyboard_ui::tests::source_drop_view_has_five_seconds_and_repeated_key_does_not_extend_it ... ok
+test crystal_ui::overlays::localized_help::tests::localized_help_catalog_is_integrated_for_all_nine_languages ... ok
+test crystal_ui::overlays::localized_help::tests::localized_help_covers_each_original_image_once_and_preserves_shortcut_pages ... ok
+test crystal_ui::overlays::localized_help::tests::localized_help_scroll_positions_are_independent_across_page_and_locale ... ok
+test crystal_ui::overlays::localized_help::tests::localized_help_scroll_reaches_both_ends_and_never_leaves_content_bounds ... ok
+test crystal_ui::overlays::localized_help::tests::localized_help_scroll_survives_despawn_and_respawn_of_the_same_page ... ok
+test crystal_ui::overlays::localized_help::tests::localized_help_unlaid_out_zero_content_cannot_erase_the_saved_offset ... ok
+test crystal_ui::overlays::localized_shop_currency_preserves_server_values_without_english_plural_suffix ... ok
+test crystal_ui::overlays::mail_compose_drag::tests::scaled_batch_release_clamping_modality_and_session_reset ... ok
+test crystal_ui::overlays::mail_compose_drag::tests::source_children_exclude_drag_and_recipient_label_is_not_control ... ok
+test crystal_ui::overlays::mail_compose_input_tests::compose_enter_keeps_multiline_without_text_payload_or_accidental_send ... ok
+test crystal_ui::overlays::mail_compose_input_tests::compose_gold_accepts_digits_backspace_and_rejects_overflow_without_wallet_mutation ... ok
+test crystal_ui::overlays::mail_compose_input_tests::compose_recipient_uses_server_twenty_scalar_limit ... ok
+test crystal_ui::overlays::mail_compose_paging_tests::all_eligible_items_remain_reachable_and_stale_pages_clamp ... ok
+test crystal_ui::overlays::mail_compose_paging_tests::compose_footer_can_move_without_moving_fields_or_attachment_controls ... ok
+test crystal_ui::overlays::mail_compose_paging_tests::populated_compose_controls_stay_inside_mail_frame ... ok
+test crystal_ui::overlays::mail_compose_paging_tests::unaddressable_or_other_container_items_do_not_create_rows ... ok
+test crystal_ui::overlays::mail_compose_tests::letter_renderer_follows_the_movable_source_window_position ... ok
+test crystal_ui::overlays::mail_compose_tests::letter_renderer_uses_source_root_full_multiline_text_and_visible_focus ... ok
+test crystal_ui::overlays::mail_compose_tests::mail_body_utf16_budget_matches_with_and_without_native_editor ... ok
+test crystal_ui::overlays::mail_compose_tests::mail_body_wheel_ignores_pending_send_and_focus_loss ... ok
+test crystal_ui::overlays::mail_compose_tests::parcel_to_letter_or_reply_never_sends_hidden_gold_or_items_and_keeps_parcel_draft ... ok
+test crystal_ui::overlays::mail_compose_tests::queued_friend_inspect_and_bond_letter_request_uses_the_safe_letter_transition ... ok
+test crystal_ui::overlays::mail_compose_tests::recipient_cancel_and_letter_send_keep_input_isolated_and_draft_authoritative ... ok
+test crystal_ui::overlays::mail_compose_tests::scaled_mail_body_wheel_routes_letter_and_parcel_without_leaking_past_guards ... ok
+test crystal_ui::overlays::mail_compose_tests::submitted_letter_body_is_frozen_until_the_uncorrelated_send_receipt ... ok
+test crystal_ui::overlays::mail_compose_tests::write_recipient_prompt_confirms_exact_recipient_and_consumes_covered_parcel_action ... ok
+test crystal_ui::overlays::mail_delete_tests::attachment_confirm_rechecks_identity_contents_and_lock_before_queueing ... ok
+test crystal_ui::overlays::mail_delete_tests::attachment_delete_opens_a_confirm_but_plain_mail_stays_direct_and_locked_mail_rejects ... ok
+test crystal_ui::overlays::mail_delete_tests::mail_status_retry_preserves_authority_and_claim_pending_protection ... ok
+test crystal_ui::overlays::mail_delete_tests::no_escape_close_and_session_reset_clear_the_prompt_without_sending ... ok
+test crystal_ui::overlays::mail_delete_tests::rendered_warning_uses_a_modal_source_frame_and_blocks_pointer_input ... ok
+test crystal_ui::overlays::mail_delete_tests::unacknowledged_mail_status_commands_deduplicate_only_until_queue_drain ... ok
+test crystal_ui::overlays::mail_delete_tests::yes_and_enter_consume_the_close_frame_and_silent_rejection_allows_reconfirm ... ok
+test crystal_ui::overlays::mail_editor::tests::home_end_arrows_and_shift_use_captured_visual_layout_and_scroll_to_caret ... ok
+test crystal_ui::overlays::mail_editor::tests::host_clipboard_cut_and_paste_share_selection_and_utf16_budget ... ok
+test crystal_ui::overlays::mail_editor::tests::ime_preedit_is_presentation_only_and_uses_real_authoritative_caret_layout ... ok
+test crystal_ui::overlays::mail_editor::tests::pointer_hit_test_uses_uneven_shaped_stops_and_selection_extends ... ok
+test crystal_ui::overlays::mail_editor::tests::preedit_display_layout_rewraps_candidate_and_scroll_without_mutating_draft ... ok
+test crystal_ui::overlays::mail_editor::tests::retained_letter_draft_keeps_selection_through_a_transient_modal ... ok
+test crystal_ui::overlays::mail_editor::tests::unicode_selection_delete_and_ctrl_a_keep_grapheme_boundaries ... ok
+test crystal_ui::overlays::mail_editor::tests::wheel_uses_shaped_extent_clamps_and_preserves_caret_and_selection ... ok
+test crystal_ui::overlays::mail_editor::tests::whole_document_ime_replacement_ignores_selection_and_normalizes_line_endings ... ok
+test crystal_ui::overlays::mail_editor::tests::whole_document_replacement_fits_utf16_without_splitting_a_grapheme ... ok
+test crystal_ui::overlays::mail_editor::tests::whole_document_replacement_handles_deletion_and_repeat_notifications ... ok
+test crystal_ui::overlays::mail_editor::tests::wrapped_boundary_keeps_the_chosen_downward_line_and_scroll_affinity ... ok
+test crystal_ui::overlays::mail_feedback_tests::feedback_modal_renders_source_frame_message_and_ok_above_mail_layers ... ok
+test crystal_ui::overlays::mail_feedback_tests::local_validation_and_feedback_close_consume_covered_mail_actions ... ok
+test crystal_ui::overlays::mail_feedback_tests::result_receipts_close_only_successful_source_surfaces_and_keep_rejected_draft ... ok
+test crystal_ui::overlays::mail_list::tests::list_uses_original_rows_and_hides_unavailable_reply_and_list_claim ... ok
+test crystal_ui::overlays::mail_list::tests::row_preview_uses_message_not_subject_and_updates_lock_marker ... ok
+test crystal_ui::overlays::mail_parcel::tests::cost_response_is_ignored_when_the_draft_changed_in_flight ... ok
+test crystal_ui::overlays::mail_parcel::tests::local_close_keeps_an_unanswered_cost_request_reserved ... ok
+test crystal_ui::overlays::mail_parcel::tests::refresh_drops_replaced_attachment_and_releases_only_its_exact_identity ... ok
+test crystal_ui::overlays::mail_parcel::tests::rejected_postage_is_unavailable_and_does_not_retry_every_frame ... ok
+test crystal_ui::overlays::mail_parcel::tests::slots_follow_source_cover_and_use_live_identities ... ok
+test crystal_ui::overlays::mail_parcel::tests::timed_out_cost_reserves_its_fingerprint_until_the_delayed_reply_arrives ... ok
+test crystal_ui::overlays::mail_parcel_tests::open_parcel_uses_recipient_prompt_without_overwriting_a_saved_draft ... ok
+test crystal_ui::overlays::mail_parcel_tests::parcel_lock_is_exact_and_local_cancel_recovers_if_echoes_are_dropped ... ok
+test crystal_ui::overlays::mail_parcel_tests::parcel_locked_bag_item_is_dimmed_and_cannot_start_a_drag ... ok
+test crystal_ui::overlays::mail_parcel_tests::parcel_renderer_uses_independent_source_frame_cells_and_bag_offset ... ok
+test crystal_ui::overlays::mail_parcel_tests::parcel_selected_uid_blocks_the_overlay_action_chain ... ok
+test crystal_ui::overlays::mail_parcel_tests::quote_is_invalidated_by_live_attachment_pricing_changes ... ok
+test crystal_ui::overlays::mail_parcel_tests::quote_singleflight_ignores_stale_cost_and_requires_current_live_ids ... ok
+test crystal_ui::overlays::mail_reader_drag::tests::child_controls_never_start_a_drag_but_source_notcontrol_labels_do ... ok
+test crystal_ui::overlays::mail_reader_drag::tests::readers_keep_separate_positions_clamp_and_cancel_stale_identity ... ok
+test crystal_ui::overlays::mail_reader_drag::tests::scaled_pointer_batch_moves_before_release_and_focus_loss_cancels ... ok
+test crystal_ui::overlays::mail_reader_tests::escape_closes_reader_and_session_reset_clears_it ... ok
+test crystal_ui::overlays::mail_reader_tests::exact_id_and_kind_refreshes_reject_stale_reader_actions ... ok
+test crystal_ui::overlays::mail_reader_tests::opens_unread_once_but_reopens_already_read_without_status_send ... ok
+test crystal_ui::overlays::mail_reader_tests::production_refresh_closes_removed_or_retyped_reader_before_input ... ok
+test crystal_ui::overlays::mail_reader_tests::reader_actions_keep_source_guards_and_status_queue_dedup ... ok
+test crystal_ui::overlays::mail_reader_tests::reply_prefills_only_authorized_sender_and_reader_close_consumes_frame ... ok
+test crystal_ui::overlays::mail_reader_tests::source_reader_geometry_body_and_attachment_metadata_are_bounded ... ok
+test crystal_ui::overlays::mail_recipient_host_tests::host_recipient_replacement_matches_shared_typed_filtering ... ok
+test crystal_ui::overlays::mail_recipient_host_tests::host_recipient_replacement_rejects_absent_prompt_without_changing_body ... ok
+test crystal_ui::overlays::mail_recipient_host_tests::reopening_same_prompt_text_uses_a_new_host_editor_epoch ... ok
+test crystal_ui::overlays::mail_text_adapter::tests::target_binds_kind_recipient_draft_epoch_editor_and_session ... ok
+test crystal_ui::overlays::mail_text_adapter::tests::target_cancels_while_mail_body_is_covered_or_send_is_pending ... ok
+test crystal_ui::overlays::mount_fishing_dialog::tests::attachment_intent_preserves_host_identity_and_waits_for_exact_ack ... ok
+test crystal_ui::overlays::mount_fishing_dialog::tests::equipment_gate_uses_actual_type_shape_slot_and_identity ... ok
+test crystal_ui::overlays::mount_fishing_dialog::tests::fishing_cast_requires_rod_water_facing_standing_transform_and_cooldown ... ok
+test crystal_ui::overlays::mount_fishing_dialog::tests::mount_cooldown_and_animation_match_original_variants ... ok
+test crystal_ui::overlays::mount_fishing_dialog::tests::removal_uses_raw_uid_even_when_catalog_label_is_missing ... ok
+test crystal_ui::overlays::mount_fishing_dialog::tests::status_is_owner_authoritative_and_reel_removal_disables_auto ... ok
+test crystal_ui::overlays::native_i18n_game_visual_tests::caster_medicine_amulet_poison_service_cycles_offscreen ... ignored, explicit offline caster shop GPU fixture; original assets, bundled fonts, fresh output
+test crystal_ui::overlays::native_i18n_game_visual_tests::multilingual_game_widgets_render_offscreen ... ignored, explicit native real-asset multilingual GPU layout fixture; run alone
+test crystal_ui::overlays::native_i18n_game_visual_tests::nine_locale_medicine_shop_opens_beside_inventory_offscreen ... ignored, explicit offline GPU fixture; real service request, packaged assets and fresh output
+test crystal_ui::overlays::native_i18n_game_visual_tests::three_class_medicine_shop_retains_goods_after_delayed_text_hide_offscreen ... ignored, explicit delayed NPC snapshot GPU regression; original assets and fresh output
+test crystal_ui::overlays::nonmodal_input_tests::actual_skills_toggle_keeps_character_frame_hit_capture_on_every_page ... ok
+test crystal_ui::overlays::nonmodal_input_tests::commerce_and_real_prompts_keep_global_action_capture ... ok
+test crystal_ui::overlays::nonmodal_input_tests::help_surface_follows_dragged_bounds_and_keeps_drag_modal_capture ... ok
+test crystal_ui::overlays::nonmodal_input_tests::ordinary_panels_capture_their_rectangles_without_locking_world_actions ... ok
+test crystal_ui::overlays::npc_item_service::tests::enqueue_clears_target_only_on_success_and_sale_count_never_exceeds_stack ... ok
+test crystal_ui::overlays::npc_item_service::tests::fractional_quote_rejects_truncated_server_cost_and_accepts_ceil_gold ... ok
+test crystal_ui::overlays::npc_item_service::tests::hold_low_gold_reports_once_without_pending_or_losing_selection ... ok
+test crystal_ui::overlays::npc_item_service::tests::hold_selection_emits_once_and_idle_updates_do_not_resubmit ... ok
+test crystal_ui::overlays::npc_item_service::tests::rendered_service_uses_source_origin_without_an_equipment_picker ... ok
+test crystal_ui::overlays::npc_item_service::tests::repair_requires_the_untruncated_crystal_gold_threshold_and_keeps_target ... ok
+test crystal_ui::overlays::npc_item_service::tests::repair_selection_accepts_only_bag_items_and_sale_uses_only_bag ... ok
+test crystal_ui::overlays::npc_item_service::tests::sale_wallet_cap_uses_the_full_stack_quote_and_retains_the_target ... ok
+test crystal_ui::overlays::npc_item_service::tests::sale_without_a_concrete_quote_keeps_its_target_and_does_not_enqueue ... ok
+test crystal_ui::overlays::npc_item_service::tests::service_actions_are_authoritative_and_never_default_to_sell ... ok
+test crystal_ui::overlays::npc_item_service::tests::service_drag_target_uses_crystal_drop_origin_and_not_the_old_buy_origin ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::accepted_new_npc_request_survives_retiring_the_previous_npc_child ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::accepted_request_survives_closed_only_frames_then_retires_on_real_service_open ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::caster_medicine_and_material_services_keep_buy_sell_close_reopen_usable ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::close_button_and_map_change_cancel_an_accepted_pending_npc_request ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::close_pending_service_by_escape_after_closed_only_with_bag_open ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::close_pending_service_by_escape_after_closed_only_without_any_panel ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::close_pending_service_by_real_inventory_close_button ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::delayed_text_hide_does_not_leave_a_closed_service_modal_after_scene_reset ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::direct_medicine_service_opens_separate_bag_and_usable_buy_controls_in_one_frame ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::escape_after_text_hide_drops_old_buy_capability_before_sell_only_service ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::explicit_npc_exit_closes_service_with_an_already_hidden_text_page ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::late_goods_after_explicit_exit_cannot_reopen_the_previous_service ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::map_information_epoch_closes_an_old_service_without_a_scene_reset_packet ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::medicine_service_opens_when_text_hide_and_goods_arrive_in_the_same_frame ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::medicine_service_survives_delayed_parent_text_hide_for_all_three_classes ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::new_npc_text_page_cannot_keep_the_previous_merchants_buy_service ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::ordered_exit_closes_real_service_and_rejects_late_goods_but_a_new_request_can_reopen ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::ordered_service_open_then_close_retires_request_even_if_no_child_was_open ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::paired_service_and_bag_remain_visible_across_supported_viewport_transforms ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::service_open_preserves_visible_bag_positions_and_repairs_collisions_or_offstage_state ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::shop_tab_switch_and_bag_reopen_repair_overlap_but_idle_updates_preserve_manual_drag ... ok
+test crystal_ui::overlays::npc_shop_layout_tests::stale_parent_dialog_cannot_unlock_an_explicit_exit_on_later_frames ... ok
+test crystal_ui::overlays::options_volume_tests::batched_press_and_move_captures_the_first_point_then_uses_the_last_held_point ... ok
+test crystal_ui::overlays::options_volume_tests::earlier_pointer_consumption_blocks_a_new_volume_capture ... ok
+test crystal_ui::overlays::options_volume_tests::renderer_uses_source_size_tracks_and_source_thumb_positions_without_half_bar_buttons ... ok
+test crystal_ui::overlays::options_volume_tests::scaled_sound_bar_captures_click_position_then_held_drag_without_duplicate_actions ... ok
+test crystal_ui::overlays::options_volume_tests::source_volume_mapping_preserves_min_mid_and_max_positions ... ok
+test crystal_ui::overlays::options_volume_tests::volume_capture_cancels_for_covered_focus_and_session_boundaries ... ok
+test crystal_ui::overlays::primary_item_image_tests::primary_all_1003_source_pngs_use_alpha_size_for_every_native_cell_family ... ok
+test crystal_ui::overlays::primary_item_image_tests::primary_default_white_texture_is_not_an_item_and_missing_assets_hide_previous_images ... ok
+test crystal_ui::overlays::primary_item_image_tests::primary_equipment_and_storage_use_default_mir_item_cell_size_without_clipping ... ok
+test crystal_ui::overlays::primary_item_image_tests::primary_inventory_outer_rows_allow_original_oversized_draws_without_widening_hit_targets ... ok
+test crystal_ui::overlays::primary_item_image_tests::primary_npc_source_zero_and_oversized_icons_use_40_by_32_area_not_frame_metadata ... ok
+test crystal_ui::overlays::primary_item_image_tests::primary_source_count_changes_reselect_and_remeasure_without_mutating_item_metadata ... ok
+test crystal_ui::overlays::primary_item_image_tests::primary_trade_rows_use_current_user_item_image_and_unstretched_original_pixels ... ok
+test crystal_ui::overlays::ranking_dialog::player_inspect::tests::failed_dispatch_releases_only_pending_inspect_without_fabricating_equipment ... ok
+test crystal_ui::overlays::ranking_dialog::player_inspect::tests::inspect_equipment_press_is_read_only_and_does_not_drag_parent ... ok
+test crystal_ui::overlays::ranking_dialog::player_inspect::tests::late_or_unsolicited_inspect_cannot_reopen_closed_or_different_player ... ok
+test crystal_ui::overlays::ranking_dialog::tests::empty_short_and_malformed_rankings_do_not_create_invalid_rows_or_scroll_nan ... ok
+test crystal_ui::overlays::ranking_dialog::tests::filter_change_waits_for_old_untagged_reply_without_showing_old_rows ... ok
+test crystal_ui::overlays::ranking_dialog::tests::hide_cancels_debounce_but_preserves_inflight_context_until_response ... ok
+test crystal_ui::overlays::ranking_dialog::tests::ordinary_queue_pressure_cannot_evict_a_correlated_ranking_request ... ok
+test crystal_ui::overlays::ranking_dialog::tests::rapid_scroll_debounces_to_latest_page_and_inspect_waits_for_page_reply ... ok
+test crystal_ui::overlays::ranking_dialog::tests::thumb_endpoints_and_short_last_page_obey_authoritative_count ... ok
+test crystal_ui::overlays::ranking_dialog::tests::unsent_release_matches_exact_request_and_retries_without_duplicate_inflight ... ok
+test crystal_ui::overlays::skill_assign_dialog::tests::assignment_labels_match_original_fixed_two_line_strings ... ok
+test crystal_ui::overlays::skill_assign_dialog::tests::assignment_render_uses_original_frame_and_button_dimensions ... ok
+test crystal_ui::overlays::skill_assign_dialog::tests::committing_slot16_clears_occupant_without_swapping_and_none_is_explicit_zero ... ok
+test crystal_ui::overlays::skill_assign_dialog::tests::duplicate_processed_ack_cannot_settle_a_new_key_request ... ok
+test crystal_ui::overlays::skill_assign_dialog::tests::only_exact_processed_receipt_retires_overlay_not_any_count_of_snapshots ... ok
+test crystal_ui::overlays::skill_assign_dialog::tests::rejected_receipt_restores_exact_draft_and_epoch_change_drops_old_request ... ok
+test crystal_ui::overlays::skill_assign_dialog::tests::selection_is_a_draft_save_sends_source_oldkey_and_failed_send_retains_it ... ok
+test crystal_ui::overlays::skill_assign_dialog::tests::sixteen_player_bindings_roundtrip_without_hero_slots ... ok
+test crystal_ui::overlays::skill_bars::host::tests::exact_source_resources_have_measured_sizes_and_cooldown_duration ... ok
+test crystal_ui::overlays::skill_bars::tests::exact_readiness_expires_while_snapshot_is_idle_without_drawing_a_cast ... ok
+test crystal_ui::overlays::skill_bars::tests::fresh_readiness_samples_replace_old_ones_but_stale_serials_cannot_restart_them ... ok
+test crystal_ui::overlays::skill_bars::tests::late_flaming_sword_hit_overlay_does_not_extend_authoritative_arm_readiness ... ok
+test crystal_ui::overlays::skill_bars::tests::legacy_tick_readiness_ages_instead_of_waiting_for_a_snapshot ... ok
+test crystal_ui::overlays::skill_bars::tests::ordinary_spell_toggles_do_not_inherit_a_visual_cast_delay ... ok
+test crystal_ui::overlays::skill_bars::tests::reconnect_and_character_identity_clear_previous_readiness ... ok
+test crystal_ui::overlays::skill_bars::tests::server_cast_sequence_starts_once_and_delay_changes_do_not_restart_clock ... ok
+test crystal_ui::overlays::skill_bars::tests::source_show_preserves_inclusive_bar_boundary_and_server_key ... ok
+test crystal_ui::overlays::skill_bars::tests::spell_cooldown_visual_is_separate_from_another_spells_global_action_gate ... ok
+test crystal_ui::overlays::skill_bars::tests::stale_cast_sequence_cannot_restart_a_newer_accepted_spell_clock ... ok
+test crystal_ui::overlays::skill_page::tests::learned_skill_renders_real_icon_full_name_and_experience_even_when_passive ... ok
+test crystal_ui::overlays::skill_page::tests::source_experience_uses_level_specific_threshold_without_fabricating_data ... ok
+test crystal_ui::overlays::skill_page::tests::source_keys_use_two_lines_and_no_unbound_placeholder ... ok
+test crystal_ui::overlays::social_bond_dialog::host::tests::full_queue_restores_name_modal_and_session_reset_clears_relationship_owner ... ok
+test crystal_ui::overlays::social_bond_dialog::host::tests::invitation_blocks_gameplay_and_decline_uses_authoritative_reply ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::invitation_revision_reply_and_session_boundary_are_exact ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::marriage_actions_guard_missing_offline_partner_without_optimistic_updates ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::mentor_add_cancel_and_allow_do_not_fabricate_server_state ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::mentor_editor_preserves_grapheme_selection_and_source_name_packet ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::mentor_input_enforces_winforms_utf16_limit_and_rejects_stale_text ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::mentor_rows_follow_source_level_order_and_authoritative_online_xp ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::rejected_transport_restores_prompt_and_stale_reply_cannot_replace_new_invitation ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::relationship_dates_preserve_source_zero_and_divorce_tick_branches ... ok
+test crystal_ui::overlays::social_bond_dialog::tests::server_change_invalidates_stale_mentorship_confirmation ... ok
+test crystal_ui::overlays::status_hud::tests::camera_mode_hides_and_restores_real_dura_and_buff_images ... ok
+test crystal_ui::overlays::status_hud::tests::camera_restore_shows_dura_without_changing_saved_source_preference ... ok
+test crystal_ui::overlays::status_hud::tests::collapsed_buff_count_uses_centered_original_bold_font ... ok
+test crystal_ui::overlays::status_hud::tests::hints_use_source_special_stats_percent_and_elapsed_time ... ok
+test crystal_ui::overlays::status_hud::tests::malformed_buff_does_not_mutate_and_blink_uses_source_rounding ... ok
+test crystal_ui::overlays::status_hud::tests::ordinary_numeric_buff_discriminant_resolves_actual_icon ... ok
+test crystal_ui::overlays::status_hud::tests::owner_pause_refresh_remove_and_identity_are_authoritative ... ok
+test crystal_ui::overlays::status_hud::tests::paused_packet_uses_receipt_time_even_if_ui_drain_is_late ... ok
+test crystal_ui::overlays::status_hud::tests::real_source_frames_and_threshold_boundaries ... ok
+test crystal_ui::overlays::storage_drag_tests::ordered_warehouse_bag_drag_merges_only_complete_compatible_live_stacks ... ok
+test crystal_ui::overlays::storage_drag_tests::ordered_warehouse_bag_drag_uses_exact_store_v2_target_and_identity ... ok
+test crystal_ui::overlays::storage_drag_tests::ordered_warehouse_storage_drag_merges_only_nonfull_compatible_target_and_same_slot_is_noop ... ok
+test crystal_ui::overlays::storage_drag_tests::ordered_warehouse_storage_drag_moves_empty_and_incompatible_or_full_targets ... ok
+test crystal_ui::overlays::storage_drag_tests::ordered_warehouse_storage_drag_uses_exact_take_back_v2_target_and_compatible_merge ... ok
+test crystal_ui::overlays::storage_drag_tests::pending_storage_move_locks_source_and_target_cells_until_exact_ack ... ok
+test crystal_ui::overlays::storage_drag_tests::pending_warehouse_gesture_locks_its_item_but_not_independent_cells ... ok
+test crystal_ui::overlays::storage_drag_tests::warehouse_bag_drag_falls_back_from_incompatible_or_stale_occupied_target ... ok
+test crystal_ui::overlays::storage_drag_tests::warehouse_drag_rechecks_both_source_identities_and_cancels_on_cursor_exit ... ok
+test crystal_ui::overlays::storage_drag_tests::warehouse_drag_rejects_password_locked_inaccessible_and_full_destinations ... ok
+test crystal_ui::overlays::storage_drag_tests::warehouse_open_close_and_npc_reopen_keep_their_source_bag_positions ... ok
+test crystal_ui::overlays::storage_drag_tests::warehouse_storage_drag_rechecks_source_and_rejects_locked_or_inaccessible_pages ... ok
+test crystal_ui::overlays::storage_password_tests::locked_storage_opens_a_masked_modal_and_escape_closes_without_sending ... ok
+test crystal_ui::overlays::storage_password_tests::modal_frame_uses_the_centered_source_geometry_and_blocks_world_input ... ok
+test crystal_ui::overlays::storage_password_tests::protect_click_runs_current_new_confirm_and_queues_only_after_exact_confirmation ... ok
+test crystal_ui::overlays::storage_password_tests::rejected_password_queue_keeps_the_visible_draft_and_session_reset_drops_it ... ok
+test crystal_ui::overlays::storage_password_tests::rendered_modal_is_a_visible_full_stage_pointer_blocker ... ok
+test crystal_ui::overlays::storage_password_tests::session_boundary_clears_visible_and_legacy_password_drafts ... ok
+test crystal_ui::overlays::storage_password_tests::successful_password_removal_dismisses_storage_once_without_closing_other_panels ... ok
+test crystal_ui::overlays::storage_password_tests::unlock_submission_stays_closed_while_pending_and_reopens_after_a_result ... ok
+test crystal_ui::overlays::storage_rental_tests::low_gold_rental_can_retry_after_an_unchanged_snapshot_and_double_enter_queues_once ... ok
+test crystal_ui::overlays::storage_rental_tests::rendered_unrented_page_hides_cells_and_rental_prompt_blocks_the_full_stage ... ok
+test crystal_ui::overlays::storage_rental_tests::rent_only_queues_after_ok_and_renewal_uses_the_source_confirmation ... ok
+test crystal_ui::overlays::storage_rental_tests::rental_expiry_decodes_dotnet_binary_without_displaying_raw_ticks ... ok
+test crystal_ui::overlays::storage_rental_tests::rental_modal_consumes_close_frame ... ok
+test crystal_ui::overlays::storage_rental_tests::second_storage_tab_remains_selectable_and_unrented_page_is_a_rental_cover ... ok
+test crystal_ui::overlays::tests::all_independent_mail_windows_expose_the_shared_host_marker ... ok
+test crystal_ui::overlays::tests::any_window_blocks_world_click_and_action ... ok
+test crystal_ui::overlays::tests::armed_bag_move_uses_crystal_raw_source_when_empty_belt_slot_is_clicked ... ok
+test crystal_ui::overlays::tests::assigning_a_skill_key_uses_server_command_without_rewriting_legacy_file ... ok
+test crystal_ui::overlays::tests::belt_mouse_intent_requires_the_current_unique_instance ... ok
+test crystal_ui::overlays::tests::belt_use_intent_targets_belt_grid ... ok
+test crystal_ui::overlays::tests::bichon_destination_ecs_only_renders_unfinished_arrival_on_bichon ... ok
+test crystal_ui::overlays::tests::big_map_disabled_teleport_uses_explicit_crystal_title_823_frame ... ok
+test crystal_ui::overlays::tests::big_map_ecs_shows_loading_text_without_authoritative_image ... ok
+test crystal_ui::overlays::tests::big_map_ecs_spawns_authoritative_image_player_and_npc_rows ... ok
+test crystal_ui::overlays::tests::big_map_hunt_regions_render_remaining_target ... ok
+test crystal_ui::overlays::tests::big_map_images_and_player_markers_use_centered_source_viewport ... ok
+test crystal_ui::overlays::tests::bigmap_zoom_is_clamped_and_retained ... ok
+test crystal_ui::overlays::tests::cash_shop_selection_pages_beyond_first_eight_rows_is_receipt_deduped ... ok
+test crystal_ui::overlays::tests::character_c_and_f10_share_source_page_semantics_without_click_audio ... ok
+test crystal_ui::overlays::tests::character_hud_activation_restores_every_non_character_page_before_closing ... ok
+test crystal_ui::overlays::tests::character_hud_pointer_uses_button_a_and_restores_character_page ... ok
+test crystal_ui::overlays::tests::character_slots_and_item_actions_fail_closed_without_a_live_item ... ok
+test crystal_ui::overlays::tests::character_unequip_addresses_first_real_free_bag_cell_and_never_mutates_locally ... ok
+test crystal_ui::overlays::tests::character_unequip_never_aliases_a_free_belt_slot_to_an_occupied_bag_slot ... ok
+test crystal_ui::overlays::tests::chat_focus_blocks_gameplay_keys_not_bag ... ok
+test crystal_ui::overlays::tests::compact_labels_use_supported_ascii_and_bag_cells_hide_durability ... ok
+test crystal_ui::overlays::tests::crystal_character_gender_class_and_guild_projection_is_exact ... ok
+test crystal_ui::overlays::tests::crystal_character_hair_uses_source_index_offsets_and_assassin_adjustment ... ok
+test crystal_ui::overlays::tests::crystal_character_inventory_and_skill_page_actions_are_local_and_real ... ok
+test crystal_ui::overlays::tests::crystal_character_paper_doll_order_is_wing_armour_weapon_then_helmet_or_hair ... ok
+test crystal_ui::overlays::tests::crystal_character_source_geometry_matches_character_dialog ... ok
+test crystal_ui::overlays::tests::crystal_character_wing_material_installs_source_additive_pipeline_and_fixed_handles ... ok
+test crystal_ui::overlays::tests::crystal_character_wings_use_exact_source_indices_offsets_and_draw_blend ... ok
+test crystal_ui::overlays::tests::crystal_menu_options_and_bigmap_use_source_geometry ... ok
+test crystal_ui::overlays::tests::crystal_p_shortcut_opens_group_even_while_help_is_visible ... ok
+test crystal_ui::overlays::tests::crystal_page_helpers_keep_all_authoritative_rows_reachable ... ok
+test crystal_ui::overlays::tests::crystal_social_panels_use_original_geometry_and_bounded_rows ... ok
+test crystal_ui::overlays::tests::deferred_npc_repair_confirms_reject_replaced_drag_sources ... ok
+test crystal_ui::overlays::tests::deferred_npc_sale_confirm_rejects_a_replaced_drag_source ... ok
+test crystal_ui::overlays::tests::delete_amount_title_reserves_two_lines_before_item_and_input ... ok
+test crystal_ui::overlays::tests::dragging_window_scrollbar_or_button_captures_pointer_and_blocks_movement ... ok
+test crystal_ui::overlays::tests::enter_focuses_escape_cancels_and_empty_not_sent ... ok
+test crystal_ui::overlays::tests::exit_application_effect_is_taken_once_without_swallowing_gateway_work ... ok
+test crystal_ui::overlays::tests::five_small_main_hud_buttons_emit_button_a_on_real_press_edges ... ok
+test crystal_ui::overlays::tests::focused_inventory_pointer_round_trips_and_drag_materializes_safe_translation ... ok
+test crystal_ui::overlays::tests::foreground_close_press_blocks_overlapping_minimap_hud_press ... ok
+test crystal_ui::overlays::tests::full_intent_queue_rejects_game_shop_without_any_pending_state ... ok
+test crystal_ui::overlays::tests::full_social_intent_queue_rejects_without_pending_or_eviction ... ok
+test crystal_ui::overlays::tests::game_shop_editor_tree_is_retained_until_editor_or_preview_changes ... ok
+test crystal_ui::overlays::tests::game_shop_hud_pointer_uses_button_c_and_resets_quantity_only_on_close ... ok
+test crystal_ui::overlays::tests::group_invite_name_is_bounded_ordered_and_authoritative ... ok
+test crystal_ui::overlays::tests::guild_notice_edit_publish_failure_retry_and_receipt_stay_authoritative ... ok
+test crystal_ui::overlays::tests::guild_notice_editor_consumes_real_keyboard_messages_before_chat ... ok
+test crystal_ui::overlays::tests::guild_notice_preserves_source_lines_and_leaves_200_line_rejection_to_server ... ok
+test crystal_ui::overlays::tests::guild_notice_touch_target_exists_only_for_editable_draft ... ok
+test crystal_ui::overlays::tests::guild_permission_aliases_accept_authoritative_bit_names ... ok
+test crystal_ui::overlays::tests::guild_storage_and_rank_intents_register_exact_authoritative_pending_keys ... ok
+test crystal_ui::overlays::tests::guild_tabs_request_the_matching_authoritative_page ... ok
+test crystal_ui::overlays::tests::help_captures_its_surface_and_has_dialog_priority_without_chat_key_capture ... ok
+test crystal_ui::overlays::tests::help_catalog_matches_the_crystal_45_page_contract ... ok
+test crystal_ui::overlays::tests::help_drag_preserves_grab_offset_clamps_and_stops_on_release ... ok
+test crystal_ui::overlays::tests::help_drag_system_fails_closed_without_headless_input_resources ... ok
+test crystal_ui::overlays::tests::help_drag_system_uses_the_shared_stage_transform_and_release_edge ... ok
+test crystal_ui::overlays::tests::help_drag_uses_only_blank_header_and_hide_clears_movement ... ok
+test crystal_ui::overlays::tests::help_escape_closes_all_without_opening_menu_and_preserves_page ... ok
+test crystal_ui::overlays::tests::help_internal_buttons_emit_one_button_a_while_menu_toggle_is_silent ... ok
+test crystal_ui::overlays::tests::help_navigation_wraps_clamps_and_hide_preserves_page ... ok
+test crystal_ui::overlays::tests::help_renderer_maps_dynamic_and_image_pages_without_fabrication ... ok
+test crystal_ui::overlays::tests::help_shortcut_requires_ctrl_and_shift_unpressed_but_ignores_alt ... ok
+test crystal_ui::overlays::tests::help_shortcut_rows_stay_inside_body_without_losing_content ... ok
+test crystal_ui::overlays::tests::help_sort_true_raises_on_show_and_drag_below_modal_layers ... ok
+test crystal_ui::overlays::tests::hud_controls_remain_above_quest_world_blocker_and_options_switches_panel ... ok
+test crystal_ui::overlays::tests::hud_mail_bigmap_minimap_actions_are_exhaustively_handled ... ok
+test crystal_ui::overlays::tests::inspect_and_equip_mapping_cover_quest_rewards ... ok
+test crystal_ui::overlays::tests::inspected_equip_prefers_authoritative_slot_over_display_name ... ok
+test crystal_ui::overlays::tests::inventory_allows_world_pointer_outside_but_keeps_drag_and_modal_capture ... ok
+test crystal_ui::overlays::tests::inventory_buttons_use_explicit_instance_ids_and_suppress_duplicate_presses ... ok
+test crystal_ui::overlays::tests::inventory_capacity_downgrade_closes_the_second_page_fail_closed ... ok
+test crystal_ui::overlays::tests::inventory_delete_amount_editing_clamps_and_close_matches_crystal ... ok
+test crystal_ui::overlays::tests::inventory_delete_dialog_uses_source_centered_geometry ... ok
+test crystal_ui::overlays::tests::inventory_delete_mode_uses_exact_stack_or_single_item_flow ... ok
+test crystal_ui::overlays::tests::inventory_drag_keeps_same_frame_press_motion_release ... ok
+test crystal_ui::overlays::tests::inventory_drag_matches_mircontrol_child_hit_and_stage_clamp_rules ... ok
+test crystal_ui::overlays::tests::inventory_drag_system_uses_shared_stage_transform_and_preserves_location ... ok
+test crystal_ui::overlays::tests::inventory_drag_tracks_one_touch_without_stealing_other_fingers ... ok
+test crystal_ui::overlays::tests::inventory_drag_uses_prepress_cursor_when_sendinput_batches_the_destination ... ok
+test crystal_ui::overlays::tests::inventory_footer_uses_crystal_gold_and_weight_rules ... ok
+test crystal_ui::overlays::tests::inventory_hud_pointer_edges_enqueue_one_crystal_button_a_sound ... ok
+test crystal_ui::overlays::tests::inventory_icons_use_true_size_centering_and_fail_closed_without_geometry ... ok
+test crystal_ui::overlays::tests::inventory_item_drag_bag_destinations_use_source_merge_or_swap_rules ... ok
+test crystal_ui::overlays::tests::inventory_item_drag_rejects_replaced_source_between_press_and_release ... ok
+test crystal_ui::overlays::tests::inventory_item_drag_to_empty_belt_emits_one_raw_slot_move ... ok
+test crystal_ui::overlays::tests::inventory_item_drag_uses_ordered_cross_frame_press_and_release ... ok
+test crystal_ui::overlays::tests::inventory_item_drag_uses_ordered_same_frame_press_motion_release ... ok
+test crystal_ui::overlays::tests::inventory_item_motion_without_button_edges_does_not_move ... ok
+test crystal_ui::overlays::tests::inventory_second_tab_uses_exact_crystal_locked_and_page_assets ... ok
+test crystal_ui::overlays::tests::item_use_time_is_shared_across_player_hero_and_survives_draining ... ok
+test crystal_ui::overlays::tests::mail_claim_and_delete_disabled_states ... ok
+test crystal_ui::overlays::tests::mail_open_blocks_world_click_and_uses_reducer ... ok
+test crystal_ui::overlays::tests::mail_panel_cache_keeps_children_until_mail_inputs_change ... ok
+test crystal_ui::overlays::tests::menu_hud_pointer_uses_button_c_and_toggles_menu_without_gameplay_intents ... ok
+test crystal_ui::overlays::tests::minimap_toggle_retains_state_and_mail_bigmap_esc_behavior ... ok
+test crystal_ui::overlays::tests::native_panel_ecs_bounds_inventory_skill_and_cash_shop_at_1024x768 ... ok
+test crystal_ui::overlays::tests::non_ingame_keyboard_defers_session_clear_to_revision_pipeline ... ok
+test crystal_ui::overlays::tests::npc_dialog_explicit_exit_moves_the_bag_and_closes_only_its_service_children ... ok
+test crystal_ui::overlays::tests::npc_game_shop_guild_and_trade_cells_share_the_crystal_item_hint_lifecycle ... ok
+test crystal_ui::overlays::tests::npc_goods_cell_uses_crystal_geometry_labels_selection_and_hidden_added_stats ... ok
+test crystal_ui::overlays::tests::npc_goods_geometry_and_new_marker_match_mir_goods_cell_rules ... ok
+test crystal_ui::overlays::tests::npc_repair_service_does_not_reinterpret_equipment_as_bag_selection ... ok
+test crystal_ui::overlays::tests::npc_service_reply_gate_keeps_accepted_request_across_a_closed_only_frame ... ok
+test crystal_ui::overlays::tests::npc_service_reply_gate_never_unlocks_explicit_exit_on_a_delayed_opening ... ok
+test crystal_ui::overlays::tests::npc_shop_renders_the_visible_inventory_drag_source_with_single_core_panel ... ok
+test crystal_ui::overlays::tests::npc_shop_root_uses_the_rendered_buy_or_service_bounds ... ok
+test crystal_ui::overlays::tests::npc_shop_service_controls_are_bounded_and_keep_the_action_row_clear ... ok
+test crystal_ui::overlays::tests::open_big_map_requests_authoritative_info_when_map_identity_arrives_late ... ok
+test crystal_ui::overlays::tests::operation_disabled_inventory_item_remains_a_rich_tooltip_hover_target ... ok
+test crystal_ui::overlays::tests::options_adapter_applies_immediately_and_close_does_not_roll_back ... ok
+test crystal_ui::overlays::tests::ordered_bag_drag_to_npc_target_selects_sale_without_inventory_move ... ok
+test crystal_ui::overlays::tests::ordered_bag_drag_to_npc_target_uses_the_active_service_and_hold_once ... ok
+test crystal_ui::overlays::tests::ordered_bag_drag_to_old_npc_service_origin_does_not_select_or_move ... ok
+test crystal_ui::overlays::tests::ordered_npc_service_drag_rejects_replaced_source_identity ... ok
+test crystal_ui::overlays::tests::overlay_bigmap_zoom_buttons_clamp ... ok
+test crystal_ui::overlays::tests::overlay_buttons_mail_flow_generates_intents ... ok
+test crystal_ui::overlays::tests::overlay_buttons_shop_storage_flow_generates_intents ... ok
+test crystal_ui::overlays::tests::overlay_keyboard_toggles_inventory_with_i ... ok
+test crystal_ui::overlays::tests::overlay_keyboard_toggles_skills_with_f11 ... ok
+test crystal_ui::overlays::tests::overlay_mutate_set_runs_before_res_readers ... ok
+test crystal_ui::overlays::tests::panel_close_keeps_coexisting_help_while_session_reset_clears_it ... ok
+test crystal_ui::overlays::tests::quest_inventory_items_are_inspectable_but_read_only ... ok
+test crystal_ui::overlays::tests::queued_game_shop_is_non_evicting_and_drains_exactly_once_after_flood ... ok
+test crystal_ui::overlays::tests::revive_v_does_not_toggle_minimap_but_alive_v_does ... ok
+test crystal_ui::overlays::tests::send_after_blur_requires_refocus ... ok
+test crystal_ui::overlays::tests::shop_blocks_world_click_and_uses_reducer ... ok
+test crystal_ui::overlays::tests::shop_quantity_and_buy_sell_disabled_states ... ok
+test crystal_ui::overlays::tests::skill_selection_is_local_and_clears_when_windows_close ... ok
+test crystal_ui::overlays::tests::skill_shortcut_uses_one_real_character_dialog_with_all_four_tabs ... ok
+test crystal_ui::overlays::tests::stale_drop_confirmation_cannot_address_a_replacement_stack ... ok
+test crystal_ui::overlays::tests::stale_inventory_delete_prompt_cannot_delete_a_replacement_stack ... ok
+test crystal_ui::overlays::tests::storage_blocks_world_click_and_close_retains_minimap ... ok
+test crystal_ui::overlays::tests::storage_deposit_withdraw_and_password_disabled_states ... ok
+test crystal_ui::overlays::tests::storage_request_ids_survive_queue_clear_for_connection_reset ... ok
+test crystal_ui::overlays::tests::unchanged_large_overlay_scenes_keep_their_complete_entity_sets ... ok
+test crystal_ui::overlays::tests::unchanged_mail_compose_keeps_retained_entities_and_draft_change_rerenders ... ok
+test crystal_ui::overlays::tests::warehouse_uses_the_concurrent_bag_rich_tooltip_document ... ok
+test crystal_ui::overlays::tests::z_order_and_modal_priority_correct ... ok
+test crystal_ui::overlays::text_input::tests::changed_editor_identity_drops_old_ime_commit ... ok
+test crystal_ui::overlays::text_input::tests::chinese_preedit_is_visible_but_only_commit_updates_the_draft ... ok
+test crystal_ui::overlays::text_input::tests::committed_chinese_obeys_real_name_utf16_limit_and_memo_multiline_policy ... ok
+test crystal_ui::overlays::text_input::tests::covered_or_new_session_mail_target_rejects_late_ime_commit ... ok
+test crystal_ui::overlays::text_input::tests::escape_cancels_composition_without_closing_the_modal_or_erasing_draft ... ok
+test crystal_ui::overlays::text_input::tests::focus_loss_or_exact_keyboard_capture_disables_ime_and_rejects_commit ... ok
+test crystal_ui::overlays::text_input::tests::game_shop_search_has_a_unique_topmost_ime_lease_and_commits_to_filter ... ok
+test crystal_ui::overlays::text_input::tests::mail_ime_preedit_never_mutates_draft_and_exact_commit_is_once ... ok
+test crystal_ui::overlays::text_input::tests::menu_editor_and_overlay_labels_use_original_arial_family ... ok
+test crystal_ui::overlays::text_input::tests::prompt_owner_matches_keyboard_dispatch_above_covered_key_configuration ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_front_guest_blocks_own_and_bag_and_page_slots_are_normalized ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_full_cross_grid_stack_rejects_and_partial_snapshot_invalidates_selection ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_guest_and_both_locks_are_read_only ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_headless_click_and_held_drag_emit_one_exact_transfer ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_headless_npc_modal_and_snapshot_replacement_discard_selection ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_headless_pointer_focus_loss_clears_selection ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_inventory_button_in_same_frame_does_not_open_inspect_popup ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_merge_maps_all_three_grid_directions_and_waits_for_exact_ack ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_merge_pending_blocks_confirm_and_gold_buttons ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_ordered_bare_release_cannot_place_or_select ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_ordered_consecutive_drags_after_authoritative_deposit_and_retrieve ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_ordered_pointer_tracks_while_pending_and_next_press_needs_no_motion ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_ordered_preselected_source_can_be_dragged_without_deselecting ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_ordered_previous_frame_source_and_batched_drag_keep_press_origin ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_ordered_second_stationary_click_still_deselects ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_reorders_empty_or_incompatible_trade_slots_without_optimistic_swap ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_retrieve_exact_empty_slot_full_bag_and_reserved_origin ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_send_exact_slots_and_wait_for_failure_ack_without_editing_assets ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_stale_uid_quantity_and_exchange_fail_closed ... ok
+test crystal_ui::overlays::trade_dialog::items::tests::trade_items_zero_uid_is_concrete_and_only_authoritative_offers_hide_bag_item ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_accept_shows_inventory_without_switching_back_on_every_snapshot ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_cancel_hides_pair_sends_one_request_and_keeps_backpack_and_offers ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_confirm_toggles_source_bool_without_claiming_settlement ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_drag_owns_pair_overlap_cells_and_clamps_whole_window ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_ecs_has_original_pair_positions_and_twenty_uncompacted_cells ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_ecs_uses_original_art_names_gold_and_only_own_confirm_close ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_locked_confirm_uses_source_521_without_a_partner_button ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_owner_change_and_terminal_packets_dispose_amount_prompt_not_positions ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_sparse_cells_keep_hints_current_quantity_and_no_text_rows ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_sync_leaves_session_without_leaking_positions_or_prompt ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_unlock_updates_even_when_partner_amount_is_equal ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_dialog_unrelated_social_packet_in_same_frame_cannot_hide_source_unlock ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_focus_rect_tracks_both_draggable_windows ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_gold_buttons_cancel_close_and_modal_edge_never_leak_other_actions ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_gold_escape_only_dismisses_modal_and_general_escape_keeps_trade_pair ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_gold_invalid_zero_owner_change_balance_drop_and_pending_fail_without_packets ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_gold_keyboard_control_a_uses_ordered_modifier_state_and_zero_is_silent ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_gold_keyboard_respects_coalesced_text_backspace_enter_and_drains_remainder ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_gold_modal_ecs_uses_original_amount_box_and_hides_ok_for_invalid_input ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_gold_prompt_submits_edited_amount_once_without_mutating_wallet_or_offer ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_gold_same_partner_new_exchange_rejects_stale_prompt_even_before_ui_sync ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_invitation_button_frame_does_not_activate_covered_inventory_or_duplicate_reply ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_invitation_keyboard_uses_source_yes_no_and_consumes_extra_input ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_invitation_renders_original_modal_assets_and_resets_at_login ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_invitation_replies_once_and_waits_for_server_accept ... ok
+test crystal_ui::overlays::trade_dialog::tests::trade_invitation_stale_buttons_and_cancel_unlock_have_distinct_ownership ... ok
+test crystal_ui::panel_layouts::tests::big_map_npc_rows_fit_the_declared_list_lane ... ok
+test crystal_ui::panel_layouts::tests::grid_quantities_are_bounded_and_consistent ... ok
+test crystal_ui::panel_layouts::tests::known_rects_do_not_escape_explicit_mail_panel ... ok
+test crystal_ui::panel_layouts::tests::native_inventory_skill_and_shop_viewports_are_bounded ... ok
+test crystal_ui::panel_layouts::tests::source_confirmed_fixed_triples_are_complete ... ok
+test crystal_ui::panel_layouts::tests::sprite_variant_counts_match_source_state_matrices ... ok
+test crystal_ui::panel_layouts::tests::unknown_geometry_is_explicitly_unresolved ... ok
+test crystal_ui::preview_data::tests::all_crystal_character_preview_sets_have_sixteen_frames ... ok
+test crystal_ui::preview_data::tests::wizard_overlay_uses_source_plus_560_rule ... ok
+test crystal_ui::quest_targets::tests::authored_target_arrival_flag_never_marks_a_named_monster ... ok
+test crystal_ui::quest_targets::tests::authored_target_hunts_use_configured_kill_order_not_flag_or_display_text ... ok
+test crystal_ui::quest_targets::tests::matches_crystal_plural_possessive_and_camel_case_labels ... ok
+test crystal_ui::quest_targets::tests::nearest_target_is_selected_for_the_requested_quest ... ok
+test crystal_ui::quest_targets::tests::only_incomplete_in_progress_objectives_mark_targets ... ok
+test crystal_ui::select::creation_preview_uses_source_offset_and_stays_above_buttons ... ok
+test crystal_ui::select::tests::class_and_gender_map_to_crystal_preview_bases ... ok
+test crystal_ui::select::tests::create_and_select_share_all_ten_source_body_sequences ... ok
+test crystal_ui::select::tests::crystal_last_access_formats_binary_datetime_and_preserves_never ... ok
+test crystal_ui::select::tests::crystal_vertical_centered_text_uses_the_source_control_alignment ... ok
+test crystal_ui::select::tests::first_preview_frame_applies_crystal_use_offset_anchor ... ok
+test crystal_ui::select::tests::layered_crystal_previews_have_one_shared_clock_driver ... ok
+test crystal_ui::select::tests::preview_frame_paths_cover_the_resident_crystal_animation_set ... ok
+test crystal_ui::select::tests::redraw_preserves_frame_and_partial_clock_but_choice_change_restarts ... ok
+test crystal_ui::select::tests::slot_frame_maps_class_and_selection_state ... ok
+test crystal_ui::spec::tests::character_select_always_exposes_four_slots_and_five_bottom_buttons ... ok
+test crystal_ui::spec::tests::character_slot_frames_follow_crystal_class_and_selection_rule ... ok
+test crystal_ui::spec::tests::login_panel_and_controls_match_crystal_absolute_coordinates ... ok
+test crystal_ui::spec::tests::native_hud_uses_full_width_main_chat_and_minimap_frames ... ok
+test crystal_ui::spec::tests::safe_key_panel_and_controls_match_input_key_dialog_source ... ok
+test crystal_ui::storage_password::tests::change_keeps_exact_current_and_requires_matching_confirmation ... ok
+test crystal_ui::storage_password::tests::forced_setup_mismatch_restarts_new_password_and_cancel_closes_storage ... ok
+test crystal_ui::storage_password::tests::unlock_masks_draft_and_leaves_format_validation_to_server ... ok
+test crystal_ui::typography::tests::crystal_default_matches_source_arial_eight_point_at_96_dpi ... ok
+test crystal_ui::widget::tests::captured_hint_survives_rebuilt_target_without_rehiding_identical_text ... ok
+test crystal_ui::widget::tests::disabled_state_uses_normal_frame_path ... ok
+test crystal_ui::widget::tests::enlarged_display_hints_track_the_cursor_and_clamp_in_ui_coordinates ... ok
+test crystal_ui::widget::tests::explicit_disabled_asset_overrides_normal_frame_path ... ok
+test crystal_ui::widget::tests::fullscreen_hints_use_the_centered_stage_instead_of_letterbox_bars ... ok
+test crystal_ui::widget::tests::hint_overlay_shows_only_one_hovered_nonempty_hint_and_preserves_layout_when_hidden ... ok
+test crystal_ui::widget::tests::hint_position_matches_crystal_offset_and_clamps_all_edges ... ok
+test crystal_ui::widget::tests::hint_position_uses_current_window_logical_bounds ... ok
+test crystal_ui::widget::tests::hint_system_converts_window_coordinates_to_scaled_ui_space ... ok
+test crystal_ui::widget::tests::hit_testing_uses_control_rect_not_intrinsic_image_size ... ok
+test crystal_ui::widget::tests::item_hint_system_uses_scaled_ui_coordinates_and_remeasures_on_scale_change ... ok
+test crystal_ui::widget::tests::oversized_button_art_stays_anchored_to_control_origin ... ok
+test crystal_ui::widget::tests::phone_hints_keep_os_logical_coordinates_without_desktop_viewport ... ok
+test crystal_ui::widget::tests::position_system_never_revives_a_hidden_overlay_without_a_hover_target ... ok
+test crystal_ui::widget::tests::rebuilt_button_picking_honors_clipped_grandparent_and_override_clip ... ok
+test crystal_ui::widget::tests::rich_item_hint_keeps_children_across_renderer_entity_churn ... ok
+test crystal_ui::widget::tests::rich_item_hint_remains_active_while_the_item_cell_is_pressed ... ok
+test crystal_ui::widget::tests::visual_state_prefers_pressed_then_hover_then_focus ... ok
+test entities::tests::accent_color_is_deterministic_per_name ... ok
+test entities::tests::body_size_grows_with_level ... ok
+test entities::tests::entity_index_keys_by_object_id ... ok
+test entities::tests::entity_model_set_accepts_authoritative_hero_kind ... ok
+test entities::tests::existing_entity_transform_tracks_later_snapshots ... ok
+test entities::tests::kinds_have_distinct_palette ... ok
+test game_shop::tests::bounded_pages_keep_products_after_the_first_24_selectable ... ok
+test game_shop::tests::disabled_reason_distinguishes_currency_stock_and_selection ... ok
+test game_shop::tests::malformed_catalog_and_early_stock_streams_remain_bounded ... ok
+test game_shop::tests::one_hundred_five_products_accumulate_in_gindex_order_and_duplicate_upsert ... ok
+test game_shop::tests::purchase_guard_checks_payment_stock_class_balance_and_overflow ... ok
+test game_shop::tests::quantity_and_stock_follow_crystal_bounds ... ok
+test game_shop::tests::receipt_exact_match_releases_pending_and_late_receipt_does_not ... ok
+test game_shop::tests::request_sequence_exhaustion_fails_closed_instead_of_repeating ... ok
+test game_shop::tests::session_clear_removes_server_catalog_and_transient_selection ... ok
+test game_shop::tests::shared_ui_and_model_mirror_the_same_request_exactly ... ok
+test game_shop::tests::terminal_session_reset_marks_lost_purchase_unknown_without_replay ... ok
+test game_shop::tests::upsert_is_keyed_by_authoritative_game_shop_index ... ok
+test hero_model::tests::auto_pot_echo_uses_crystal_stats_and_switching_identity_invalidates_pending_generation ... ok
+test hero_model::tests::early_actor_is_applied_only_after_exact_hero_information_and_identity_match ... ok
+test hero_model::tests::full_bootstrap_and_live_health_are_independent_of_player_data ... ok
+test hero_model::tests::hero_cast_clock_reanchors_negative_elapsed_without_restarting_cooldown ... ok
+test hero_model::tests::hero_receipt_uses_exact_actor_epoch_keys_and_preserves_zero_zero_source_routing ... ok
+test hero_model::tests::item_result_receipt_marks_each_operation_but_not_later_snapshots_or_health ... ok
+test hud::tests::hp_and_mp_fills_use_crystal_bar_colors ... ok
+test hud::tests::hud_label_falls_back_when_name_missing ... ok
+test hud::tests::hud_label_includes_name_level_gold_and_bars ... ok
+test inventory::tests::concrete_item_image_preserves_non_amulets_unknown_shapes_and_zero_stack_size ... ok
+test inventory::tests::concrete_item_image_uses_current_count_and_base_info_not_tooltip_or_viewer_variant ... ok
+test inventory::tests::concrete_zero_image_requires_source_info_and_ignores_names_or_stale_icons ... ok
+test inventory::tests::crystal_stack_label_uses_source_stack_size_including_one_without_inventing_legacy_counts ... ok
+test inventory::tests::crystal_tooltip_source_json_preserves_catalogue_instance_and_socket_metadata ... ok
+test inventory::tests::inventory_capacity_is_authoritative_and_legacy_json_fails_closed ... ok
+test inventory::tests::items_are_grouped_by_container_and_sorted_by_slot ... ok
+test inventory::tests::legacy_item_json_and_full_metadata_are_both_compatible ... ok
+test inventory::tests::legacy_item_json_without_instance_id_remains_compatible_but_unaddressable ... ok
+test inventory::tests::panel_renders_bag_item_names_and_quantities ... ok
+test inventory::tests::summary_is_compact_and_deterministic ... ok
+test mail::tests::full_mailbox_keeps_appended_receipt_without_evicting_real_mail ... ok
+test mail::tests::mail_claim_and_delete_rules ... ok
+test mail::tests::mail_dates_follow_source_format_and_leave_unknown_values_blank ... ok
+test mail::tests::mail_deserialization_is_backward_compatible_and_bounded ... ok
+test mail::tests::mail_pages_are_ten_rows_and_clamp_after_refresh_delete ... ok
+test mail::tests::mailbox_limits_real_messages_and_feedback_independently ... ok
+test mail::tests::serde_roundtrip ... ok
+test mail::tests::stale_mail_selection_fails_closed ... ok
+test mail::tests::user_item_metadata_roundtrips_without_string_loss ... ok
+test mail_service::tests::inbox_reserves_one_cost_after_full_fifo_without_reordering ... ok
+test mail_service::tests::reserved_cost_keeps_inbox_nonempty_until_popped_or_cleared ... ok
+test mail_service::tests::serializes_source_packet_events_with_stable_camel_case_fields ... ok
+test map::tests::colors_are_deterministic_and_bounded ... ok
+test map::tests::later_patch_wins_over_later_when_overlapping ... ok
+test map::tests::overlapping_patches_render_one_tile_and_later_patch_wins ... ok
+test map::tests::terrain_lookup_returns_kind_inside_patch ... ok
+test map::tests::tile_world_conversion_flips_y ... ok
+test native_chat_ingress::tests::channel_default_and_empty_messages_are_exact_windows_semantics ... ok
+test native_chat_ingress::tests::exact_kind_selects_the_authoritative_text_without_fallback ... ok
+test native_display::tests::arabic_dimensions_keep_width_before_height_in_mixed_direction_labels ... ok
+test native_display::tests::automatic_size_matches_notebook_dpi_and_always_fits_work_area ... ok
+test native_display::tests::every_resolution_and_nine_language_labels_are_complete ... ok
+test native_display::tests::login_display_labels_switch_in_all_nine_locales ... ok
+test native_display::tests::login_selector_accepts_supported_choices_and_never_changes_in_game ... ok
+test native_display::tests::nine_locale_login_and_scaled_hud_offscreen ... ignored, offline GPU evidence; run alone with real MIR2_I18N_VISUAL_ASSET_ROOT and a fresh MIR2_DISPLAY_VISUAL_OUTPUT
+test native_display::tests::stage_viewport_is_centered_exact_four_three_and_guards_minimized_targets ... ok
+test native_display::tests::unavailable_resolution_cannot_be_selected_and_monitor_change_recovers_auto ... ok
+test native_i18n::tests::adjacent_capture_boundaries_are_explicit_and_values_remain_opaque ... ok
+test native_i18n::tests::catalogue_padding_is_normalized_without_removing_display_whitespace ... ok
+test native_i18n::tests::formatting_never_reinterprets_names_or_payloads ... ok
+test native_i18n::tests::indexed_lookup_matches_full_scan_for_counters_npc_markup_and_numeric_formats ... ok
+test native_i18n::tests::language_popup_survives_options_children_rebuilt_each_update ... ok
+test native_i18n::tests::locales_are_exactly_the_requested_nine ... ok
+test native_i18n::tests::npc_return_keeps_menu_context_separate_from_quest_heading ... ok
+test native_i18n::tests::numeric_formats_and_npc_colour_markup_preserve_opaque_values ... ok
+test native_i18n::tests::scoped_locales_restore_and_are_thread_local ... ok
+test native_i18n::tests::template_index_preserves_specificity_later_domain_and_unicode_prefixes ... ok
+test native_i18n::tests::unknown_counter_lookup_has_a_bounded_candidate_set ... ok
+test native_inventory_ingress::tests::concrete_source_info_owns_zero_image_and_current_stack_count ... ok
+test native_inventory_ingress::tests::explicit_capacity_containers_and_u64_identity_match_windows_projection ... ok
+test native_inventory_ingress::tests::metadata_aliases_and_host_geometry_preserve_original_offsets ... ok
+test native_inventory_ingress::tests::named_equipment_slots_and_unknown_fallbacks_are_shared ... ok
+test native_inventory_ingress::tests::occupancy_and_max_bag_slots_never_grant_expansion ... ok
+test native_inventory_ingress::tests::seven_ack_kinds_preserve_complete_fields_and_failure ... ok
+test native_inventory_ingress::tests::uncorrelatable_or_malformed_receipts_are_not_success ... ok
+test native_npc_ingress::tests::catalogue_keeps_exact_identity_original_geometry_and_currency ... ok
+test native_npc_ingress::tests::only_a_real_npc_response_is_a_close_boundary ... ok
+test native_npc_ingress::tests::ordinary_goods_sell_and_repair_keep_independent_capabilities ... ok
+test native_npc_ingress::tests::snapshot_catalogue_is_passive_and_absent_geometry_is_not_guessed ... ok
+test native_shell::tests::change_password_banned_is_not_treated_as_success ... ok
+test native_shell::tests::change_password_requires_account_and_matching_valid_fields ... ok
+test native_shell::tests::character_create_can_be_cancelled_without_gateway_success ... ok
+test native_shell::tests::character_delete_updates_selection ... ok
+test native_shell::tests::create_character_success_transitions_back_to_select ... ok
+test native_shell::tests::debug_output_never_contains_password_and_login_clears_it ... ok
+test native_shell::tests::delete_confirmation_is_local_and_second_confirm_is_rejected ... ok
+test native_shell::tests::disconnect_and_retry_returns_to_connecting ... ok
+test native_shell::tests::disconnect_does_not_auto_reconnect_without_retry ... ok
+test native_shell::tests::disconnect_during_door_cannot_later_reveal_stale_characters ... ok
+test native_shell::tests::empty_login_fields_do_not_block_opening_the_new_account_dialog ... ok
+test native_shell::tests::empty_roster_is_supported_after_login_success ... ok
+test native_shell::tests::in_game_disconnect_clears_password_and_session_payload ... ok
+test native_shell::tests::in_game_logout_clears_password_and_does_not_auto_retry ... ok
+test native_shell::tests::logged_out_returns_to_character_select_with_server_roster ... ok
+test native_shell::tests::login_door_uses_original_frames_and_blocks_start_until_completion ... ok
+test native_shell::tests::login_failure_then_disconnect_retry ... ok
+test native_shell::tests::login_flow_transitions_to_character_select_after_success ... ok
+test native_shell::tests::logout_failure_keeps_character_and_allows_retry_then_switch ... ok
+test native_shell::tests::missing_fields_are_rejected_for_login ... ok
+test native_shell::tests::operation_failure_returns_starting_game_to_character_select ... ok
+test native_shell::tests::ordinary_player_bootstrap_requires_accepted_start_game_ack ... ok
+test native_shell::tests::registration_date_encoding_matches_dotnet_unspecified_datetime_ticks ... ok
+test native_shell::tests::registration_email_validation_matches_crystals_shared_pattern ... ok
+test native_shell::tests::registration_failure_keeps_the_dialog_and_late_receipts_are_ignored ... ok
+test native_shell::tests::registration_optional_fields_accept_empty_values_and_keep_their_bounds ... ok
+test native_shell::tests::registration_password_boundaries_and_production_weak_passwords_are_rejected ... ok
+test native_shell::tests::registration_password_policy_does_not_block_legacy_login_credentials ... ok
+test native_shell::tests::registration_requires_a_dedicated_validated_dialog_and_returns_to_login_on_success ... ok
+test native_shell::tests::safe_key_permutation_is_deterministic_and_complete ... ok
+test native_shell::tests::select_and_start_only_allow_valid_indices ... ok
+test native_shell::tests::start_game_ack_does_not_enter_game ... ok
+test native_shell::tests::start_game_ack_fact_is_reset_for_new_entry_logout_and_disconnect ... ok
+test native_shell_ui::i18n_visual_tests::multilingual_shell_screens_and_font_switches_render_offscreen ... ignored, explicit real-asset offline GPU multilingual screenshots and bounded font switch checks; run alone
+test native_shell_ui::preview_visual_tests::all_character_previews_animate_and_wizard_glow_adds_offscreen ... ignored, explicit real-asset offscreen GPU screenshots; run alone with MIR2_PREVIEW_VISUAL_ASSET_ROOT and MIR2_PREVIEW_VISUAL_OUTPUT
+test native_shell_ui::tests::auxiliary_fields_reject_invalid_name_and_password_characters ... ok
+test native_shell_ui::tests::change_password_submit_intent_contains_authoritative_account_and_all_fields ... ok
+test native_shell_ui::tests::composed_text_does_not_turn_control_shortcuts_into_text ... ok
+test native_shell_ui::tests::connection_lost_dialog_uses_crystal_message_box_and_ok_button_geometry ... ok
+test native_shell_ui::tests::connection_notice_collapses_localized_socket_text_to_a_bounded_summary ... ok
+test native_shell_ui::tests::connection_notice_truncation_is_unicode_safe ... ok
+test native_shell_ui::tests::delete_click_and_cancel_enqueue_no_gateway_packet ... ok
+test native_shell_ui::tests::door_waits_for_all_frames_then_updates_the_real_background_handle ... ok
+test native_shell_ui::tests::draining_does_not_reopen_a_request_before_its_ack ... ok
+test native_shell_ui::tests::duplicate_registration_submit_is_rejected_without_logging_password ... ok
+test native_shell_ui::tests::empty_composed_text_uses_logical_character_fallback ... ok
+test native_shell_ui::tests::focus_cycles_are_consistent ... ok
+test native_shell_ui::tests::localized_create_and_select_keep_protocol_identity_and_opaque_names ... ok
+test native_shell_ui::tests::localized_create_request_translates_only_typed_class_and_gender ... ok
+test native_shell_ui::tests::localized_delete_prompt_does_not_reinterpret_placeholders_in_player_names ... ok
+test native_shell_ui::tests::localized_shell_rebuilds_without_changing_form_input_or_validation ... ok
+test native_shell_ui::tests::logical_character_fallback_does_not_turn_control_shortcuts_into_text ... ok
+test native_shell_ui::tests::login_system_applies_an_entire_rapid_character_batch_in_one_update ... ok
+test native_shell_ui::tests::login_system_honors_backspace_and_delete_repeat_messages ... ok
+test native_shell_ui::tests::masks_password_without_plain_chars ... ok
+test native_shell_ui::tests::new_character_class_and_gender_choices_are_limited_to_existing_backend_flow ... ok
+test native_shell_ui::tests::new_character_uses_crystal_geometry_assets_and_supported_control_bounds ... ok
+test native_shell_ui::tests::printable_chars_filter_control_chars ... ok
+test native_shell_ui::tests::rapid_keyboard_batch_consumes_text_and_logical_character_fallbacks_in_order ... ok
+test native_shell_ui::tests::registration_failure_releases_submission_for_recovery ... ok
+test native_shell_ui::tests::registration_focus_order_covers_every_crystal_dialog_control ... ok
+test native_shell_ui::tests::registration_invalid_email_never_queues_even_when_a_raw_intent_bypasses_the_button ... ok
+test native_shell_ui::tests::registration_keyboard_validation_and_editing_clear_only_stale_notices ... ok
+test native_shell_ui::tests::registration_password_colors_and_submit_agree_with_the_production_policy ... ok
+test native_shell_ui::tests::registration_renderer_enables_submit_only_for_a_valid_idle_form ... ok
+test native_shell_ui::tests::registration_submit_intent_preserves_every_supported_new_account_field ... ok
+test native_shell_ui::tests::repeated_character_create_submission_is_not_queued_twice ... ok
+test native_shell_ui::tests::rotates_class_and_gender_choices_and_dedups_gateway_intent_queue ... ok
+test native_shell_ui::tests::single_event_can_carry_multiple_composed_characters ... ok
+test native_shell_ui::tests::valid_registration_is_the_only_registration_intent_queued ... ok
+test options_effects::hero_buff_source_preferences::original_save_mirrors_player_expansion_under_hero_key_without_mutating_live_option ... ok
+test options_effects::tests::all_crystal_option_and_highlight_fields_round_trip_through_persistence ... ok
+test options_effects::tests::apply_consumes_audio_window_and_persistence_effects ... ok
+test options_effects::tests::corrupt_primary_falls_back_to_backup_then_defaults ... ok
+test options_effects::tests::options_drain_is_bounded_per_update ... ok
+test options_effects::tests::persisted_payload_contains_only_non_secret_allow_list ... ok
+test options_effects::tests::repeated_identical_effects_are_idempotent_and_non_option_effects_survive ... ok
+test options_effects::tests::startup_loads_persisted_options_and_applies_window_mode ... ok
+test options_effects::tests::version_one_options_upgrade_with_crystal_defaults ... ok
+test options_effects::tests::version_two_options_upgrade_with_highlight_target_enabled ... ok
+test pending_operations::native_ui_tests::account_a_to_b_reset_clears_ui_tracking_targets_and_unforwarded_intents ... ok
+test pending_operations::native_ui_tests::dangerous_intent_queue_blocks_double_press_and_distinct_mail_ids ... ok
+test pending_operations::native_ui_tests::leaving_in_game_requests_session_reset_without_a_timeout ... ok
+test pending_operations::native_ui_tests::shell_boundary_does_not_duplicate_an_already_ingested_session_reset ... ok
+test pending_operations::tests::cash_game_shop_refresh_is_diagnostic_only_without_request_id ... ok
+test pending_operations::tests::decoded_refresh_advances_revisions_but_never_unlocks_any_domain ... ok
+test pending_operations::tests::delete_receipt_releases_only_matching_instance_and_count ... ok
+test pending_operations::tests::equipment_storage_receipts_release_only_the_exact_grid_item_and_slot ... ok
+test pending_operations::tests::exact_ack_or_nack_releases_only_the_correlated_inventory_key ... ok
+test pending_operations::tests::exact_duplicates_are_blocked_but_distinct_resources_are_not_merged ... ok
+test pending_operations::tests::inventory_refresh_releases_only_exact_drop_move_merge_split_and_sell_evidence ... ok
+test pending_operations::tests::legacy_storage_ack_does_not_release_v2_pending ... ok
+test pending_operations::tests::mail_refresh_releases_only_proven_read_claim_and_delete_keys ... ok
+test pending_operations::tests::mail_result_releases_success_and_failure_without_refresh_guessing ... ok
+test pending_operations::tests::pending_operations_are_bounded_and_fail_closed ... ok
+test pending_operations::tests::preserving_reset_keeps_only_exact_game_shop_key_for_receipt_ingest ... ok
+test pending_operations::tests::quest_ack_and_nack_release_only_the_exact_submission ... ok
+test pending_operations::tests::quest_refresh_releases_abandon_only_after_authoritative_lifecycle_change ... ok
+test pending_operations::tests::quest_refresh_releases_only_the_quest_with_a_proven_lifecycle_change ... ok
+test pending_operations::tests::sell_nack_releases_only_matching_item_and_count ... ok
+test pending_operations::tests::session_reset_clears_pending_without_claiming_success ... ok
+test pending_operations::tests::shop_refresh_proves_finite_stock_buy_but_not_unlimited_or_repair ... ok
+test pending_operations::tests::storage_ack_and_nack_release_only_the_correlatable_operation ... ok
+test pending_operations::tests::storage_ack_never_releases_the_other_transfer_kind ... ok
+test pending_operations::tests::storage_ack_releases_at_most_one_legacy_duplicate_slot ... ok
+test pending_operations::tests::storage_failed_ack_releases_one_and_repeated_ack_is_noop ... ok
+test pending_operations::tests::storage_refresh_requires_exact_transfer_or_metadata_transition ... ok
+test pending_operations::tests::storage_renewal_releases_only_after_authoritative_expiry_extension ... ok
+test pending_operations::tests::storage_request_id_generation_is_monotonic_and_fails_closed_on_overflow ... ok
+test pending_operations::tests::storage_transfer_registration_rejects_same_coordinates_with_different_ids ... ok
+test pending_operations::tests::storage_transfer_slot_reuse_after_ack_releases_only_the_current_pending ... ok
+test pending_operations::tests::storage_v2_ack_releases_exact_request_only_even_for_same_coordinates ... ok
+test pending_operations::tests::trade_merge_inventory_deltas_never_substitute_for_matching_ack ... ok
+test pending_operations::tests::unchanged_inventory_snapshot_does_not_unlock_move_or_split ... ok
+test player_text::tests::all_twenty_six_authored_quests_have_chinese_titles_and_guides ... ok
+test player_text::tests::chapter_and_status_templates_require_known_system_labels ... ok
+test player_text::tests::chapter_titles_goals_rewards_and_class_hints_are_covered ... ok
+test player_text::tests::current_mine_patrol_and_all_copy_keep_distinct_monster_types ... ok
+test player_text::tests::dynamic_kill_labels_preserve_counts_and_only_translate_known_monsters ... ok
+test player_text::tests::native_named_arguments_remain_opaque_and_unknown_text_is_unchanged ... ok
+test player_text::tests::native_original_sections_resolve_whole_paragraph_before_wrapping ... ok
+test player_text::tests::native_quest_locales_cover_all_authored_ids ... ok
+test player_text::tests::native_reward_names_translate_before_quantity_without_changing_reward_identity ... ok
+test player_text::tests::price_templates_preserve_currency_amounts_and_reject_free_text ... ok
+test player_text::tests::system_names_are_exact_and_unknown_player_like_names_remain_intact ... ok
+test quest_destination::tests::bichon_destination_matches_imported_safe_zone ... ok
+test quest_destination::tests::v2_oma_task_resolves_to_the_imported_oma_map_identity ... ok
+test quest_guidance::tests::configured_order_precedes_unconfigured_server_order ... ok
+test quest_guidance::tests::crystal_mode_is_the_default_and_unknown_values_are_ignored ... ok
+test quest_guidance::tests::newcomer_profile_loads_unique_classified_entries ... ok
+test quest_guidance::tests::newcomer_v2_profile_loads_every_server_owned_journey_task ... ok
+test quest_hunt_regions::tests::a1_remaining_cats_use_real_bichon_spawn_and_completed_targets_disappear ... ok
+test quest_hunt_regions::tests::wooma_practice_uses_three_actual_footholds_even_after_kill_quota ... ok
+test quest_journey::graduation_tests::graduation_projects_only_the_matching_class_three_local_targets ... ok
+test quest_journey::graduation_tests::graduation_requires_the_authoritative_v2_route_growth_claims_and_level ... ok
+test quest_journey::graduation_tests::v1_and_crystal_profiles_never_project_v2_graduation_choices ... ok
+test quest_journey::newcomer_v2_guidance_tests::v1_bundle_and_profile_selection_remain_available ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_bundle_has_six_chapters_and_projects_all_twenty_six_server_tasks ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_chapter_selection_never_treats_level_as_completion ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_keeps_at_most_three_server_objective_groups_in_the_hud_projection ... ok
+test quest_journey::newcomer_v2_guidance_tests::v2_uses_reviewed_jane_and_board_endpoints ... ok
+test quest_journey::tests::bundled_profile_has_six_contiguous_chapters_through_level_thirty ... ok
+test quest_journey::tests::chapter_progress_uses_only_authoritative_completed_ids ... ok
+test quest_journey::tests::class_hint_is_presentation_text_and_never_a_completion_signal ... ok
+test quest_journey::tests::completed_full_class_route_is_a_graduated_journey_even_when_overleveled ... ok
+test quest_journey::tests::crystal_mode_has_no_journey_projection ... ok
+test quest_journey::tests::diary_accept_and_finish_take_priority_over_npc_fallbacks ... ok
+test quest_journey::tests::extra_experience_does_not_skip_an_unfinished_earlier_chapter_quest ... ok
+test quest_journey::tests::main_step_prefers_turn_in_and_does_not_promote_optional_teaching_quest ... ok
+test quest_journey::tests::next_step_objective_collapses_multiline_server_text_to_one_layout_line ... ok
+test quest_journey::tests::next_step_omits_fixed_items_with_zero_authoritative_quantity ... ok
+test quest_journey::tests::next_step_uses_reviewed_location_when_giver_is_outside_live_entities ... ok
+test quest_journey::tests::unknown_history_keeps_an_active_earlier_chapter_visible_when_overleveled ... ok
+test quest_model::tests::authoritative_quest_apply_change_complete_and_remove_work ... ok
+test quest_model::tests::completed_history_distinguishes_unknown_empty_and_authoritative_ids ... ok
+test quest_model::tests::dialog_updates_replace_then_close_cleanly ... ok
+test quest_model::tests::no_duplicate_quest_entry_after_apply_or_upsert ... ok
+test quest_model::tests::pickup_feedback_keeps_recent_list_and_preserves_label ... ok
+test quest_model::tests::progress_and_completion_reward_labels_are_stable ... ok
+test quest_model::tests::target_hp_is_clamped_and_displayed ... ok
+test quest_model::tests::unknown_quest_status_and_npc_text_are_preserved ... ok
+test quest_practice::tests::every_authored_class_requirement_has_player_instructions ... ok
+test quest_practice::tests::graduation_requires_both_warrior_skills_without_other_classes ... ok
+test quest_practice::tests::native_lightning_practice_uses_its_own_spell_name_and_keeps_legacy_copy ... ok
+test quest_practice::tests::native_practice_and_supplies_cover_every_class_without_mutating_requirements ... ok
+test quest_supplies::tests::canonical_item_ids_override_translated_or_conflicting_display_names ... ok
+test quest_supplies::tests::expiry_seals_and_broken_instances_use_actual_tooltip_metadata ... ok
+test quest_supplies::tests::learned_material_skills_require_a_matching_authoritative_skill_entry ... ok
+test quest_supplies::tests::material_inventory_includes_equipment_without_counting_storage_or_duplicates ... ok
+test quest_supplies::tests::potion_tiers_and_known_weight_do_not_fabricate_inventory_readiness ... ok
+test quest_supplies::tests::requirements_shapes_and_equipment_slots_reject_unusable_materials_before_deduplication ... ok
+test quest_supplies::tests::travel_recommendations_do_not_become_unconfigured_departure_requirements ... ok
+test quest_supplies::tests::vendor_routes_use_imported_npcs_and_acknowledged_map_leg ... ok
+test quest_supplies::tests::wizard_late_route_shows_real_mp_and_upgraded_purchase_size ... ok
+test quest_ui::multi_guidance::tests::authored_cat_region_is_nearby_without_live_entities_and_completed_or_absent_progress_is_not_inferred ... ok
+test quest_ui::multi_guidance::tests::authored_target_map_takes_priority_over_a_monster_on_the_wrong_map ... ok
+test quest_ui::multi_guidance::tests::authored_target_oma_arrival_card_keeps_navigation_when_oma_appears ... ok
+test quest_ui::multi_guidance::tests::chapter_recommendation_wins_unless_player_pins_an_active_task ... ok
+test quest_ui::multi_guidance::tests::d401_route_card_displays_navigation_feedback_with_its_outcome_color ... ok
+test quest_ui::multi_guidance::tests::forced_line_breaks_preserve_indic_thai_and_combining_graphemes ... ok
+test quest_ui::multi_guidance::tests::full_counters_are_never_truncated ... ok
+test quest_ui::multi_guidance::tests::hud_renders_all_counters_and_switches_only_the_chosen_primary ... ok
+test quest_ui::multi_guidance::tests::hunt_navigation_card_keeps_region_action_with_or_without_visible_skeletons ... ok
+test quest_ui::multi_guidance::tests::long_route_and_other_map_rows_reserve_every_wrapped_line ... ok
+test quest_ui::multi_guidance::tests::long_unbroken_word_after_short_label_keeps_word_boundary ... ok
+test quest_ui::multi_guidance::tests::manual_choice_survives_server_reordering_and_ready_state_then_falls_back ... ok
+test quest_ui::multi_guidance::tests::native_portuguese_practice_wraps_before_height_and_keeps_controls_reachable ... ok
+test quest_ui::multi_guidance::tests::native_supply_vendor_names_match_the_routed_npc_in_every_locale ... ok
+test quest_ui::multi_guidance::tests::native_tracker_wheel_only_scrolls_hovered_viewport_and_clamps_to_content ... ok
+test quest_ui::multi_guidance::tests::nearest_two_other_tasks_only_use_actual_visible_targets ... ok
+test quest_ui::multi_guidance::tests::oma_route_card_uses_the_imported_bichon_entrance_and_navigation_intent ... ok
+test quest_ui::multi_guidance::tests::practice_card_names_skills_for_the_players_class_and_keeps_server_completion ... ok
+test quest_ui::multi_guidance::tests::remote_map_labels_require_known_map_and_authored_target ... ok
+test quest_ui::multilingual_visual_tests::nine_locale_longest_quests_and_real_npc_menus_offscreen ... ignored, explicit offline GPU fixture; run alone with real packaged assets and fresh output
+test quest_ui::multilingual_visual_tests::nine_locale_selected_supply_vendors_have_no_missing_glyphs_offscreen ... ignored, explicit offline GPU fixture; run alone with real packaged assets and fresh output
+test quest_ui::nonmodal_input_tests::actual_confirmation_and_alert_keep_full_stage_and_keyboard_capture ... ok
+test quest_ui::nonmodal_input_tests::authoritative_removal_clears_hidden_detail_and_diary_selection_capture ... ok
+test quest_ui::nonmodal_input_tests::npc_dialog_and_native_transactions_keep_their_existing_global_guard ... ok
+test quest_ui::nonmodal_input_tests::q_and_escape_hide_only_diary_while_independent_detail_keeps_its_pointer_bounds ... ok
+test quest_ui::nonmodal_input_tests::rendered_diary_and_detail_capture_only_their_source_frame_bounds ... ok
+test quest_ui::route::tests::bichon_to_oma_uses_the_imported_public_entrance_not_the_cave_landing ... ok
+test quest_ui::route::tests::hidden_normal_exit_remains_legal_but_visible_exit_is_preferred ... ok
+test quest_ui::route::tests::target_switch_and_authoritative_map_change_recompute_the_next_step ... ok
+test quest_ui::route::tests::unknown_or_unroutable_targets_never_fabricate_an_entrance ... ok
+test quest_ui::supply_visual_tests::caster_supplies_and_chinese_quest_cards_offscreen ... ignored, explicit offscreen GPU screenshots; run alone after ordinary tests
+test quest_ui::tests::abandon_button_requires_yes_and_preserves_quest_id ... ok
+test quest_ui::tests::abandon_is_allowed_for_both_current_quest_states ... ok
+test quest_ui::tests::accept_and_finish_enabled_logic ... ok
+test quest_ui::tests::action_to_intent_preserves_payload ... ok
+test quest_ui::tests::back_history_removes_stale_quest_operation_links ... ok
+test quest_ui::tests::bichon_arrival_card_has_readable_destination_and_local_map_button ... ok
+test quest_ui::tests::blocks_gameplay_when_modal_open ... ok
+test quest_ui::tests::combat_target_panel_uses_compact_crystal_safe_geometry ... ok
+test quest_ui::tests::compact_native_labels_are_bounded_and_keep_quantities ... ok
+test quest_ui::tests::compact_quest_labels_never_truncate_inside_a_grapheme ... ok
+test quest_ui::tests::crystal_quest_diary_assets_are_source_bound_and_non_placeholder ... ok
+test quest_ui::tests::diary_right_click_toggles_tracking_without_opening_detail ... ok
+test quest_ui::tests::disabled_npc_option_rejects_a_stale_button_event ... ok
+test quest_ui::tests::escape_closes_npc_dialog_and_queues_authoritative_exit ... ok
+test quest_ui::tests::escape_closes_quest_without_falling_through_to_menu ... ok
+test quest_ui::tests::explicit_starter_dialog_links_map_to_exact_quest_actions ... ok
+test quest_ui::tests::fixed_and_selectable_quest_rewards_are_both_rich_hover_targets ... ok
+test quest_ui::tests::full_queue_reports_pickup_not_queued_instead_of_success ... ok
+test quest_ui::tests::graduation_target_selection_is_local_and_clears_with_the_session ... ok
+test quest_ui::tests::guided_diary_side_pages_fit_inside_the_crystal_frame ... ok
+test quest_ui::tests::helper_queue_keeps_zero_id_payloads ... ok
+test quest_ui::tests::hunt_navigation_click_checks_the_specific_unfinished_kill_and_authoritative_region ... ok
+test quest_ui::tests::hunt_navigation_ready_status_means_turn_in_not_reward_already_claimed ... ok
+test quest_ui::tests::input_blocking_prevents_world_shortcuts_when_quest_log_open ... ok
+test quest_ui::tests::intent_queue_keeps_oldest_fifo_and_reports_rejected_overflow ... ok
+test quest_ui::tests::is_quest_log_open_reads_the_single_source ... ok
+test quest_ui::tests::localized_detail_title_uses_only_the_unused_header_strip ... ok
+test quest_ui::tests::manual_input_clears_only_stale_attacks_from_both_intent_lanes ... ok
+test quest_ui::tests::native_detail_title_renders_the_full_caption_in_all_nine_languages ... ok
+test quest_ui::tests::native_npc_wrapped_opaque_values_never_receive_a_second_translation ... ok
+test quest_ui::tests::native_quest_filters_keep_quest_context_for_shared_words ... ok
+test quest_ui::tests::native_quest_player_targets_never_translate_player_chosen_names ... ok
+test quest_ui::tests::native_quest_titles_use_scroll_rows_and_fixed_labels_ellipsize_after_translation ... ok
+test quest_ui::tests::newcomer_detail_wraps_hint_into_scrollable_logical_lines ... ok
+test quest_ui::tests::newcomer_diary_accept_and_finish_work_without_an_npc_dialog ... ok
+test quest_ui::tests::newcomer_diary_authority_requires_explicit_zero_template_indices ... ok
+test quest_ui::tests::newcomer_diary_lists_only_explicitly_authorized_available_quests ... ok
+test quest_ui::tests::newcomer_diary_preserves_server_cadence_over_static_category ... ok
+test quest_ui::tests::newcomer_hides_only_fixed_zero_rewards_and_keeps_choice_indices ... ok
+test quest_ui::tests::newcomer_sorting_is_shared_and_prioritizes_ready_quests ... ok
+test quest_ui::tests::newcomer_tracker_hides_behind_open_windows_without_changing_crystal_tracker ... ok
+test quest_ui::tests::newcomer_v2_diary_keeps_main_visible_and_pages_all_imported_tasks ... ok
+test quest_ui::tests::npc_dialog_click_pushes_history_and_close_clears ... ok
+test quest_ui::tests::npc_dialog_nav_push_pop_and_return ... ok
+test quest_ui::tests::npc_dialog_pages_keep_all_service_links_inside_the_content_area ... ok
+test quest_ui::tests::npc_dialog_wrap_prefers_words_and_hard_breaks_weighted_text ... ok
+test quest_ui::tests::npc_exit_link_requests_service_exit_only_after_its_intent_is_accepted ... ok
+test quest_ui::tests::npc_list_accept_after_stale_previous_dialog_emits_selected_quest ... ok
+test quest_ui::tests::npc_list_accept_is_bound_to_current_npc_and_available_quest ... ok
+test quest_ui::tests::npc_list_message_omits_progress_and_uses_finish_copy_at_distinct_npc ... ok
+test quest_ui::tests::npc_quest_list_assets_and_geometry_match_crystal_source ... ok
+test quest_ui::tests::npc_quest_membership_and_five_row_selection_follow_current_npc ... ok
+test quest_ui::tests::npc_quest_operations_accept_crystal_runtime_link_forms ... ok
+test quest_ui::tests::pickup_button_requires_a_current_authoritative_ground_object ... ok
+test quest_ui::tests::plugin_schedule_supports_repeated_authoritative_panel_refreshes ... ok
+test quest_ui::tests::pressed_d401_route_button_enqueues_the_current_oma_entrance ... ok
+test quest_ui::tests::quest_detail_assets_and_geometry_match_crystal_source ... ok
+test quest_ui::tests::quest_detail_preserves_source_sections_and_independent_window_state ... ok
+test quest_ui::tests::quest_diary_contains_only_current_quests_and_preserves_source_group_order ... ok
+test quest_ui::tests::quest_diary_geometry_matches_crystal_source_at_100_125_and_150_percent ... ok
+test quest_ui::tests::quest_diary_groups_expand_by_default_and_toggle_locally ... ok
+test quest_ui::tests::quest_finish_enabled_requires_reward_selection_when_needed ... ok
+test quest_ui::tests::quest_log_accept_without_exact_dialog_is_rejected_locally ... ok
+test quest_ui::tests::quest_log_filter_and_page_state_reset_selection_without_touching_authority ... ok
+test quest_ui::tests::quest_log_open_close_via_q_and_escape ... ok
+test quest_ui::tests::quest_message_box_geometry_and_copy_match_crystal_source ... ok
+test quest_ui::tests::quest_operations_deduplicate_until_authoritative_quest_refresh ... ok
+test quest_ui::tests::quest_selection_updates_state_and_clears_reward ... ok
+test quest_ui::tests::queue_is_empty_after_draining ... ok
+test quest_ui::tests::real_click_accept_quest_produces_intent_and_feedback ... ok
+test quest_ui::tests::real_click_finish_without_reward_selection_is_blocked ... ok
+test quest_ui::tests::retry_saturation_returns_every_dropped_intent_for_pending_release ... ok
+test quest_ui::tests::reward_selection_is_required_only_for_selectable_item_rewards ... ok
+test quest_ui::tests::route_navigation_is_discarded_after_leaving_the_game_session ... ok
+test quest_ui::tests::route_navigation_queue_is_bounded_and_preserves_the_configured_source_coordinate ... ok
+test quest_ui::tests::route_navigation_rechecks_primary_task_and_current_entrance ... ok
+test quest_ui::tests::select_quest_and_track_flow ... ok
+test quest_ui::tests::stale_target_click_cannot_emit_attack_intent ... ok
+test quest_ui::tests::tile_pickup_button_requires_an_authoritative_tile_entry ... ok
+test quest_ui::tests::tracker_has_no_implicit_fallback_when_nothing_is_tracked ... ok
+test quest_ui::tests::tracker_uses_explicit_order_and_ignores_non_current_entries ... ok
+test quest_ui::tests::tracking_sets_feedback_and_state ... ok
+test quest_ui::tests::tracking_toggle_preserves_order_caps_five_and_removes ... ok
+test quest_ui::tests::unknown_combat_target_health_has_no_zero_bar_or_zero_label ... ok
+test quest_ui::tests::wrapped_text_and_disabled_action_hitboxes_keep_their_bounds ... ok
+test quest_ui::turn_in::tests::quest_turn_in_at_kyle_points_back_to_board_without_sending_any_operation ... ok
+test quest_ui::turn_in::tests::quest_turn_in_cancels_stale_or_closed_detail_before_server_reply ... ok
+test quest_ui::turn_in::tests::quest_turn_in_detail_click_waits_for_correct_server_offer_and_submits_once ... ok
+test quest_ui::turn_in::tests::quest_turn_in_detail_renders_finish_and_card_locates_board_before_opening_map ... ok
+test quest_ui::turn_in::tests::quest_turn_in_v2_board_and_growth_claim_use_loaded_id_not_kyle_static_index ... ok
+test read_model::tests::hp_and_mp_bars_normalize_to_clamped_fractions ... ok
+test read_model::tests::overfull_and_negative_values_clamp ... ok
+test read_model::tests::wing_effect_round_trips_without_defaulting_missing_authority ... ok
+test read_model::tests::zero_or_negative_max_produces_empty_bar ... ok
+test shop::pearl_tests::pearl_catalog_uses_pearls_without_spending_gold_for_ui_validation ... ok
+test shop::tests::buy_disabled_when_not_enough_gold_or_stock ... ok
+test shop::tests::legacy_service_mode_json_keeps_default_capability_fallbacks ... ok
+test shop::tests::malformed_repair_signal_fails_closed ... ok
+test shop::tests::quantity_clamping ... ok
+test shop::tests::sell_requires_bag_item ... ok
+test shop::tests::serde_roundtrip ... ok
+test shop::tests::service_modes_are_authoritative_and_buy_sell_can_be_combined ... ok
+test skill_binding_persistence::tests::corrupt_primary_then_backup_then_defaults ... ok
+test skill_binding_persistence::tests::deserialize_keeps_the_existing_bounded_sanitizing_contract ... ok
+test skill_binding_persistence::tests::failed_persist_is_observable_and_does_not_commit_cache ... ok
+test skill_binding_persistence::tests::roundtrip_uses_primary_and_resets_transient_ui_state ... ok
+test skill_binding_persistence::tests::runtime_persist_is_idempotent_and_exposes_success ... ok
+test skill_binding_persistence::tests::serialized_payload_is_only_the_bindings_allow_list ... ok
+test skill_binding_persistence::tests::startup_system_loads_resource_and_plugin_registers_resources ... ok
+test skill_binding_ui::tests::assigning_an_occupied_slot_rebinds_both_sides_uniquely ... ok
+test skill_binding_ui::tests::assignment_is_gated_by_assign_key_and_slot_range ... ok
+test skill_binding_ui::tests::global_file_cannot_override_same_skill_id_in_another_character ... ok
+test skill_binding_ui::tests::merge_changes_only_hotkey_for_known_skill ... ok
+test skill_binding_ui::tests::missing_binding_row_is_added_without_touching_known_skill_data ... ok
+test skill_binding_ui::tests::refresh_imports_server_keys_and_removes_stale_entries ... ok
+test skill_binding_ui::tests::refresh_scans_later_learned_skill_for_explicit_server_hotkey ... ok
+test skill_binding_ui::tests::selection_requires_a_learned_skill ... ok
+test skill_binding_ui::tests::serde_round_trip_and_invalid_disk_state_are_bounded ... ok
+test skill_binding_ui::tests::unknown_binding_fails_closed_during_assignment_and_merge ... ok
+test skill_model::tests::cooldown_and_mp_metadata_survive_deserialization ... ok
+test skill_model::tests::duplicate_hotkey_uses_first_learned_entry_and_does_not_duplicate_loser ... ok
+test skill_model::tests::exact_cooldown_readiness_is_additive_and_explicit_zero_is_preserved ... ok
+test skill_model::tests::explicit_experience_sidecar_overrides_only_fields_it_supplies ... ok
+test skill_model::tests::invalid_explicit_hotkeys_fail_closed_instead_of_filling_shortcuts ... ok
+test skill_model::tests::learned_skills_and_bindings_share_one_deterministic_bound ... ok
+test skill_model::tests::missing_hotkeys_remain_unassigned ... ok
+test skill_model::tests::name_and_key_only_skill_has_no_authoritative_spell_for_f1 ... ok
+test skill_model::tests::only_explicit_server_hotkeys_are_resolved ... ok
+test skill_model::tests::original_skill_experience_is_optional_and_round_trips_without_fabrication ... ok
+test skill_model::tests::oversized_skill_and_sidecar_payloads_keep_the_same_prefix_and_order ... ok
+test skill_model::tests::rich_server_skill_json_is_backward_compatible_and_selectable ... ok
+test skill_model::tests::toggle_definition_and_authoritative_enabled_state_remain_independent ... ok
+test skill_model::tests::unknown_or_missing_cast_kind_fails_closed ... ok
+test social::tests::a_different_inviter_supersedes_only_the_old_acceptance ... ok
+test social::tests::empty_guild_status_is_authoritative_leave_and_releases_guild_pending ... ok
+test social::tests::every_authoritative_group_and_guild_operation_releases_only_on_matching_state ... ok
+test social::tests::failed_or_unrelated_trade_packets_do_not_fake_completion ... ok
+test social::tests::group_invite_accept_is_correlated_and_allows_second_invite ... ok
+test social::tests::group_roster_is_bounded_and_leader_is_authoritative ... ok
+test social::tests::guild_invite_duplicate_and_roster_transition_are_idempotent ... ok
+test social::tests::guild_notice_receipt_does_not_optimistically_replace_content ... ok
+test social::tests::guild_packets_accept_server_packet_snake_case_and_camel_case_compatibility ... ok
+test social::tests::guild_permissions_follow_wire_bits_and_matching_rank_options ... ok
+test social::tests::guild_rank_change_with_empty_member_name_releases_exact_pending ... ok
+test social::tests::guild_storage_packets_are_bounded_correlated_and_authoritative ... ok
+test social::tests::invite_failure_is_exactly_correlated_and_can_retry ... ok
+test social::tests::malformed_and_oversized_social_packets_fail_closed ... ok
+test social::tests::out_of_order_snapshot_does_not_release_unacknowledged_trade_or_group_work ... ok
+test social::tests::pending_is_not_cleared_by_unchanged_snapshot_but_is_cleared_by_matching_event ... ok
+test social::tests::reset_clears_models_and_pending ... ok
+test social::tests::scene_reset_preserves_social_models_but_session_reset_clears_them ... ok
+test social::tests::trade_deposit_and_retrieve_ack_match_packet_and_both_slots ... ok
+test social::trade_source_tests::trade_completion_and_terminal_cancel_reset_both_sides_and_only_trade_pending ... ok
+test social::trade_source_tests::trade_equal_guest_offer_packets_still_release_local_lock_but_not_own_gold_request ... ok
+test social::trade_source_tests::trade_malformed_packets_are_transactional_and_do_not_advance_revision ... ok
+test social::trade_source_tests::trade_matching_failure_is_a_cell_unlock_not_an_item_success ... ok
+test social::trade_source_tests::trade_new_owner_clears_previous_offer_but_duplicate_accept_retains_current_offer ... ok
+test social::trade_source_tests::trade_own_gold_request_requires_exact_same_exchange_snapshot_delta ... ok
+test social::trade_source_tests::trade_same_partner_new_exchange_cannot_acknowledge_an_old_own_offer ... ok
+test social::trade_source_tests::trade_unlock_is_not_cancel_and_keeps_offers_partner_and_unrelated_pending ... ok
+test social::trade_source_tests::trade_wire_sparse_slots_are_not_compacted_and_zero_count_is_not_invented ... ok
+test storage::tests::crystal_storage_is_two_real_ten_by_eight_pages ... ok
+test storage::tests::deposit_requires_unlocked_and_free_slot ... ok
+test storage::tests::serde_roundtrip ... ok
+test storage::tests::storage_capacity_uses_crystal_80_and_160_slot_boundaries ... ok
+test storage::tests::storage_expansion_revocation_invalidates_selected_second_page_slot ... ok
+test storage::tests::storage_keeps_smaller_authoritative_capacity_and_locks_second_page ... ok
+test storage::tests::storage_occupied_and_free ... ok
+test storage::tests::storage_selection_requires_exact_slot_and_unique_id ... ok
+test storage::tests::storage_serde_defaults_and_bounds_legacy_payloads ... ok
+
+test result: ok. 1230 passed; 0 failed; 10 ignored; 0 measured; 0 filtered out; finished in 5.20s
+

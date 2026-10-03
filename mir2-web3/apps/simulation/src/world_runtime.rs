@@ -1,10 +1,10 @@
 use std::any::Any;
 
 use crate::runtime::{
-    GameShopPurchaseOutcome, SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery,
-    SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
-    SharedSkillItemConsumptionComponent, SharedTradeOffer, ZoneMonsterSpawn, ZonePlayerCombatStats,
-    LocalPlayerVitalsSnapshot,
+    GameShopPurchaseOutcome, LocalPlayerVitalsSnapshot, SharedAccountInventoryTransactionReceipt,
+    SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
+    SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, ZoneMonsterSpawn,
+    ZonePlayerCombatStats,
 };
 use crate::{
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
@@ -43,7 +43,9 @@ pub struct NativeGameShopPurchaseRequest {
 pub enum WorldCommand {
     ClientPacket(ClientPacket),
     /// Gateway-only bootstrap after taking custody of an authenticated retained session.
-    ReplayRetainedStartGameBootstrap { character_index: i32 },
+    ReplayRetainedStartGameBootstrap {
+        character_index: i32,
+    },
     /// Trusted native receipt purchase. Raw clients cannot construct this
     /// command; Gateway binds the server idempotency key to authenticated
     /// identity before the Zone/Simulation path sees it.
@@ -129,9 +131,9 @@ pub fn validate_production_player_command(
     command: &WorldCommand,
 ) -> Result<(), String> {
     match command {
-        WorldCommand::ReplayRetainedStartGameBootstrap { .. } => {
-            Err("retained bootstrap replay is not allowed on the production player path".to_string())
-        }
+        WorldCommand::ReplayRetainedStartGameBootstrap { .. } => Err(
+            "retained bootstrap replay is not allowed on the production player path".to_string(),
+        ),
         WorldCommand::PasskeyLogin { .. } => {
             Err("raw passkey login is not allowed on the production player path".to_string())
         }
@@ -234,7 +236,9 @@ impl WorldCommand {
                 WorldCommandKind::ClientPacket(client_packet_name(packet))
             }
             Self::NativeGameShopPurchase(_) => WorldCommandKind::ClientPacket("GameShopBuy"),
-            Self::ReplayRetainedStartGameBootstrap { .. } => WorldCommandKind::ReplayRetainedStartGameBootstrap,
+            Self::ReplayRetainedStartGameBootstrap { .. } => {
+                WorldCommandKind::ReplayRetainedStartGameBootstrap
+            }
             Self::PasskeyLogin { .. } => WorldCommandKind::PasskeyLogin,
             Self::MoveTo { .. } => WorldCommandKind::MoveTo,
             Self::Attack { .. } => WorldCommandKind::Attack,
@@ -340,7 +344,14 @@ pub trait WorldRuntime: Send + Sync {
     }
 
     fn world_snapshot(&self) -> WorldSnapshot;
-    fn supports_magic_key_assignment(&self,_spell:mir2_protocol::Spell,_key:u8,_old_key:u8)->bool{false}
+    fn supports_magic_key_assignment(
+        &self,
+        _spell: mir2_protocol::Spell,
+        _key: u8,
+        _old_key: u8,
+    ) -> bool {
+        false
+    }
     fn current_map_shared_entity_snapshots(&self) -> Vec<WorldEntitySnapshot> {
         Vec::new()
     }
@@ -406,7 +417,10 @@ impl InProcessWorldRuntime {
     pub fn shared_mentor_config(&self) -> Option<SimulationConfig> {
         self.session.shared_mentor_config()
     }
-    pub fn refresh_shared_social_buffs(&mut self, online: &std::collections::BTreeSet<(String, i32)>) -> Result<Vec<ServerPacket>, String> {
+    pub fn refresh_shared_social_buffs(
+        &mut self,
+        online: &std::collections::BTreeSet<(String, i32)>,
+    ) -> Result<Vec<ServerPacket>, String> {
         self.session.refresh_shared_social_buffs(online)
     }
     pub fn social_experience_buff_rates(&self) -> (Option<i32>, Option<i32>) {
@@ -604,14 +618,31 @@ impl InProcessWorldRuntime {
         )
     }
 
-    pub fn reconcile_shared_monster_kill_receipt(&mut self, key: &str, hash: &str) -> Result<(), crate::PreparedKillPublicationFailure> {
-        self.session.reconcile_shared_monster_kill_receipt(key,hash)
+    pub fn reconcile_shared_monster_kill_receipt(
+        &mut self,
+        key: &str,
+        hash: &str,
+    ) -> Result<(), crate::PreparedKillPublicationFailure> {
+        self.session
+            .reconcile_shared_monster_kill_receipt(key, hash)
     }
 
-    pub fn commit_shared_monster_kill_via_postgres<T,F>(&mut self, key: &str, award: &crate::runtime::zone::ZoneMonsterKillAward, publish: F)
-        -> Result<(T, Vec<ServerPacket>), crate::PreparedKillPublicationFailure>
-    where F: FnOnce(&crate::PreparedKillAccountSource) -> Result<crate::PreparedKillPublication<T>, crate::PreparedKillPublicationFailure> {
-        self.session.commit_shared_monster_kill_via_postgres(key,award,publish)
+    pub fn commit_shared_monster_kill_via_postgres<T, F>(
+        &mut self,
+        key: &str,
+        award: &crate::runtime::zone::ZoneMonsterKillAward,
+        publish: F,
+    ) -> Result<(T, Vec<ServerPacket>), crate::PreparedKillPublicationFailure>
+    where
+        F: FnOnce(
+            &crate::PreparedKillAccountSource,
+        ) -> Result<
+            crate::PreparedKillPublication<T>,
+            crate::PreparedKillPublicationFailure,
+        >,
+    {
+        self.session
+            .commit_shared_monster_kill_via_postgres(key, award, publish)
     }
 
     pub fn commit_shared_monster_kill_award_with_receipt(
@@ -619,13 +650,20 @@ impl InProcessWorldRuntime {
         key: &str,
         award: &crate::runtime::zone::ZoneMonsterKillAward,
     ) -> SharedAccountInventoryTransactionReceipt {
-        self.session.commit_shared_monster_kill_award_with_receipt(key, award)
+        self.session
+            .commit_shared_monster_kill_award_with_receipt(key, award)
     }
 
     pub fn try_commit_shared_monster_kill_award_with_receipt(
-        &mut self, key: &str, award: &crate::runtime::zone::ZoneMonsterKillAward,
-    ) -> Result<(SharedAccountInventoryTransactionReceipt, bool), crate::runtime::SharedMonsterKillCommitFailure> {
-        self.session.try_commit_shared_monster_kill_award_with_receipt(key, award)
+        &mut self,
+        key: &str,
+        award: &crate::runtime::zone::ZoneMonsterKillAward,
+    ) -> Result<
+        (SharedAccountInventoryTransactionReceipt, bool),
+        crate::runtime::SharedMonsterKillCommitFailure,
+    > {
+        self.session
+            .try_commit_shared_monster_kill_award_with_receipt(key, award)
     }
 
     pub fn commit_shared_skill_item_consumption_transaction(
@@ -985,8 +1023,14 @@ impl InProcessWorldRuntime {
 }
 
 impl WorldRuntime for InProcessWorldRuntime {
-    fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
-        self.session.supports_magic_key_assignment(spell,key,old_key)
+    fn supports_magic_key_assignment(
+        &self,
+        spell: mir2_protocol::Spell,
+        key: u8,
+        old_key: u8,
+    ) -> bool {
+        self.session
+            .supports_magic_key_assignment(spell, key, old_key)
     }
     fn as_any(&self) -> &dyn Any {
         self
@@ -1001,14 +1045,24 @@ impl WorldRuntime for InProcessWorldRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
-        let xp_source = matches!(&command, WorldCommand::Attack{..}|WorldCommand::Interact{..}
-            |WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}|WorldCommand::CastSkill{..});
-        let before = if xp_source { self.session.begin_guild_experience_command(false)? } else { None };
+        let xp_source = matches!(
+            &command,
+            WorldCommand::Attack { .. }
+                | WorldCommand::Interact { .. }
+                | WorldCommand::SelectNpcDialog { .. }
+                | WorldCommand::SubmitNpcInput { .. }
+                | WorldCommand::CastSkill { .. }
+        );
+        let before = if xp_source {
+            self.session.begin_guild_experience_command(false)?
+        } else {
+            None
+        };
         let packets = match command {
             WorldCommand::ClientPacket(packet) => self.session.try_handle_packet(packet)?,
-            WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => {
-                self.session.replay_active_character_bootstrap(character_index)
-            }
+            WorldCommand::ReplayRetainedStartGameBootstrap { character_index } => self
+                .session
+                .replay_active_character_bootstrap(character_index),
             WorldCommand::NativeGameShopPurchase(request) => {
                 self.session
                     .game_shop_buy_packet_idempotent(request)?
@@ -1075,7 +1129,8 @@ impl WorldRuntime for InProcessWorldRuntime {
             }
             WorldCommand::Tick => self.session.tick(),
         };
-        self.session.finish_guild_experience_command(before,packets)
+        self.session
+            .finish_guild_experience_command(before, packets)
     }
 
     fn execute_with_outcome(

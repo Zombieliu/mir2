@@ -5364,11 +5364,9 @@ async fn handle_socket_work(
     let (zone_outbound_tx, zone_outbound_rx) = mpsc::channel(LIVE_ZONE_OUTBOUND_CAPACITY);
     let (owner_location_outbound_tx, owner_location_outbound_rx) =
         mpsc::channel(OWNER_LOCATION_OUTBOUND_CAPACITY);
-    let zone_outbound_sender = SharedZoneLiveOutboundSender::new(
-        zone_outbound_tx,
-        owner_location_outbound_tx,
-    )
-    .with_overload_signal(overload_tx);
+    let zone_outbound_sender =
+        SharedZoneLiveOutboundSender::new(zone_outbound_tx, owner_location_outbound_tx)
+            .with_overload_signal(overload_tx);
     let _zone_outbound_sender_task = spawn_zone_outbound_sender(
         zone_outbound_rx,
         owner_location_outbound_rx,
@@ -6866,11 +6864,11 @@ fn runtime_tick_defer_duration_for_action(action: &SessionAction) -> Option<Dura
         | SessionAction::CastSkill { .. }
         | SessionAction::Packet(
             ClientPacket::Walk { .. }
-                | ClientPacket::Run { .. }
-                | ClientPacket::Turn { .. }
-                | ClientPacket::Attack { .. }
-                | ClientPacket::RangeAttack { .. }
-                | ClientPacket::Magic { .. },
+            | ClientPacket::Run { .. }
+            | ClientPacket::Turn { .. }
+            | ClientPacket::Attack { .. }
+            | ClientPacket::RangeAttack { .. }
+            | ClientPacket::Magic { .. },
         ) => Some(gateway_runtime_tick_input_wake_grace()),
         _ => None,
     }
@@ -8626,14 +8624,16 @@ fn quest_operation_ack_for_responses(
             // day boundary. It is not a receipt for this Finish request.
             // Both permanent and repeatable successful hand-ins emit an exact
             // Remove; repeatable deliberately carries completed=false.
-            success: responses.iter().any(|packet| matches!(packet,
-                ServerPacket::ChangeQuest {
-                    quest_id,
-                    taken: false,
-                    quest_state: 2,
-                    ..
-                } if quest_id == quest_index
-            )),
+            success: responses.iter().any(|packet| {
+                matches!(packet,
+                    ServerPacket::ChangeQuest {
+                        quest_id,
+                        taken: false,
+                        quest_state: 2,
+                        ..
+                    } if quest_id == quest_index
+                )
+            }),
         },
         QuestOperationRequest::AbandonQuest {
             request_id,
@@ -8670,17 +8670,21 @@ fn is_low_latency_action(action: &SessionAction) -> bool {
 }
 
 fn responses_change_quest_state(responses: &[ServerPacket]) -> bool {
-    responses.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::ChangeQuest { .. } | ServerPacket::CompleteQuest { .. }
-    ))
+    responses.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::ChangeQuest { .. } | ServerPacket::CompleteQuest { .. }
+        )
+    })
 }
 
 fn responses_change_player_progression(responses: &[ServerPacket]) -> bool {
-    responses.iter().any(|packet| matches!(
-        packet,
-        ServerPacket::GainExperience { .. } | ServerPacket::LevelChanged { .. }
-    ))
+    responses.iter().any(|packet| {
+        matches!(
+            packet,
+            ServerPacket::GainExperience { .. } | ServerPacket::LevelChanged { .. }
+        )
+    })
 }
 
 fn low_latency_responses_require_world_snapshot(responses: &[ServerPacket]) -> bool {
@@ -8798,8 +8802,12 @@ fn project_known_skill_icons(payload: &mut Value) {
         };
         // Explicit wire metadata wins, including icon zero and localized names.
         // `name` may still be a starter alias, so keep the authoritative name separate.
-        record.entry("icon").or_insert_with(|| json!(definition.icon));
-        record.entry("magicName").or_insert_with(|| json!(definition.name));
+        record
+            .entry("icon")
+            .or_insert_with(|| json!(definition.icon));
+        record
+            .entry("magicName")
+            .or_insert_with(|| json!(definition.name));
     }
 }
 
@@ -10348,7 +10356,11 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "hideAddedStats": hide_added_stats
             }
         }),
-        ServerPacket::NPCPearlGoods { list, rate, panel_type } => json!({
+        ServerPacket::NPCPearlGoods {
+            list,
+            rate,
+            panel_type,
+        } => json!({
             "type": "packet",
             "packet": "NPCPearlGoods",
             "payload": {
@@ -10714,6 +10726,17 @@ fn server_packet_to_event(packet: &ServerPacket) -> Value {
                 "payload": payload
             })
         }
+        ServerPacket::UserBackStep {
+            location,
+            direction,
+        } => json!({
+            "type": "packet",
+            "packet": "UserBackStep",
+            "payload": {
+                "location": {"x": location.x, "y": location.y},
+                "direction": format!("{:?}", direction)
+            }
+        }),
         ServerPacket::ObjectSitDown { movement, sitting } => {
             let mut payload = movement_json(
                 movement.object_id,
@@ -12620,9 +12643,11 @@ mod tests {
     #[test]
     fn spectator_snapshot_enabled_without_active_identity_does_not_publish() {
         let spectator = snapshot_test_spectator(true);
-        assert!(super::publish_spectator_frame_if_enabled(&spectator, || None)
-            .expect("inactive session should be skipped")
-            .is_none());
+        assert!(
+            super::publish_spectator_frame_if_enabled(&spectator, || None)
+                .expect("inactive session should be skipped")
+                .is_none()
+        );
         assert_eq!(spectator.metrics().published_frames_total, 0);
     }
 
@@ -12750,9 +12775,15 @@ mod tests {
         });
         assert_eq!(frame["payload"]["knownSkills"][0]["mpCost"], 7);
         assert!(frame["payload"]["knownSkills"][0].get("mp_cost").is_none());
-        assert_eq!(frame["payload"]["knownSkills"][0]["cooldownRemainingMs"], 275);
+        assert_eq!(
+            frame["payload"]["knownSkills"][0]["cooldownRemainingMs"],
+            275
+        );
         let mut legacy = frame["payload"]["knownSkills"][0].clone();
-        legacy.as_object_mut().unwrap().remove("cooldownRemainingMs");
+        legacy
+            .as_object_mut()
+            .unwrap()
+            .remove("cooldownRemainingMs");
         let decoded: mir2_simulation::SkillSnapshot = serde_json::from_value(legacy).unwrap();
         assert_eq!(decoded.cooldown_remaining_ms, None);
     }
@@ -13489,55 +13520,85 @@ mod tests {
             quest_index: 142,
             selected_item_index: -1,
         };
-        let request = super::quest_operation_request_for_browser_command(&command).unwrap().unwrap();
+        let request = super::quest_operation_request_for_browser_command(&command)
+            .unwrap()
+            .unwrap();
         let remove = |quest_id, completed, taken, quest_state| ServerPacket::ChangeQuest {
-            quest_id, completed, taken, quest_state,
-            task_list: Vec::new(), new: false, track_quest: false,
+            quest_id,
+            completed,
+            taken,
+            quest_state,
+            task_list: Vec::new(),
+            new: false,
+            track_quest: false,
         };
         let success = |packets: Vec<ServerPacket>| {
-            serde_json::to_value(super::quest_operation_ack_for_responses(&request, &packets)).unwrap()["success"] == true
+            serde_json::to_value(super::quest_operation_ack_for_responses(&request, &packets))
+                .unwrap()["success"]
+                == true
         };
         assert!(success(vec![remove(142, false, false, 2)]));
         assert!(success(vec![remove(142, true, false, 2)]));
         assert!(!success(vec![remove(141, false, false, 2)]));
         assert!(!success(vec![remove(142, false, true, 1)]));
-        assert!(!success(vec![ServerPacket::CompleteQuest { completed_quests: vec![142] }]));
+        assert!(!success(vec![ServerPacket::CompleteQuest {
+            completed_quests: vec![142]
+        }]));
         assert!(!success(Vec::new()));
     }
 
     #[test]
     fn quest_calendar_changes_force_snapshot_even_on_idle_actions() {
         assert!(!should_send_world_snapshot_for_action(&SessionAction::Tick));
-        assert!(!should_send_world_snapshot_for_action(&SessionAction::Packet(
-            ClientPacket::KeepAlive { time: 0 },
-        )));
+        assert!(!should_send_world_snapshot_for_action(
+            &SessionAction::Packet(ClientPacket::KeepAlive { time: 0 },)
+        ));
         assert!(!responses_require_world_snapshot(&[]));
         assert!(!super::responses_change_quest_state(&[]));
-        assert!(!super::responses_change_quest_state(&[ServerPacket::ObjectShow { object_id: 42 }]));
-        assert!(super::responses_change_quest_state(&[ServerPacket::CompleteQuest { completed_quests: vec![] }]));
-        assert!(super::responses_change_quest_state(&[ServerPacket::ChangeQuest {
-            quest_id: 2_100_004, completed: false, taken: true, quest_state: 1,
-            task_list: vec![], new: false, track_quest: false,
-        }]));
-        assert!(responses_require_world_snapshot(&[ServerPacket::CompleteQuest {
-            completed_quests: vec![],
-        }]));
-        assert!(responses_require_world_snapshot(&[ServerPacket::ChangeQuest {
-            quest_id: 2_100_004,
-            completed: false,
-            taken: true,
-            quest_state: 1,
-            task_list: vec!["Completed daily commissions: 0/2".to_owned()],
-            new: false,
-            track_quest: false,
-        }]));
+        assert!(!super::responses_change_quest_state(&[
+            ServerPacket::ObjectShow { object_id: 42 }
+        ]));
+        assert!(super::responses_change_quest_state(&[
+            ServerPacket::CompleteQuest {
+                completed_quests: vec![]
+            }
+        ]));
+        assert!(super::responses_change_quest_state(&[
+            ServerPacket::ChangeQuest {
+                quest_id: 2_100_004,
+                completed: false,
+                taken: true,
+                quest_state: 1,
+                task_list: vec![],
+                new: false,
+                track_quest: false,
+            }
+        ]));
+        assert!(responses_require_world_snapshot(&[
+            ServerPacket::CompleteQuest {
+                completed_quests: vec![],
+            }
+        ]));
+        assert!(responses_require_world_snapshot(&[
+            ServerPacket::ChangeQuest {
+                quest_id: 2_100_004,
+                completed: false,
+                taken: true,
+                quest_state: 1,
+                task_list: vec!["Completed daily commissions: 0/2".to_owned()],
+                new: false,
+                track_quest: false,
+            }
+        ]));
     }
 
     #[test]
     fn low_latency_xp_only_kill_and_level_up_force_authoritative_snapshot() {
         let xp_only_kill = [ServerPacket::GainExperience { amount: 18 }];
         assert!(super::responses_change_player_progression(&xp_only_kill));
-        assert!(super::low_latency_responses_require_world_snapshot(&xp_only_kill));
+        assert!(super::low_latency_responses_require_world_snapshot(
+            &xp_only_kill
+        ));
 
         let level_up = [
             ServerPacket::GainExperience { amount: 18 },
@@ -13548,7 +13609,9 @@ mod tests {
             },
         ];
         assert!(super::responses_change_player_progression(&level_up));
-        assert!(super::low_latency_responses_require_world_snapshot(&level_up));
+        assert!(super::low_latency_responses_require_world_snapshot(
+            &level_up
+        ));
     }
 
     #[test]
@@ -13927,7 +13990,8 @@ mod tests {
     fn object_poisoned_event_preserves_actor_and_full_mask() {
         for poison in [0, 1, u16::MAX] {
             let event = super::server_packet_to_event(&ServerPacket::ObjectPoisoned {
-                object_id: 2001, poison,
+                object_id: 2001,
+                poison,
             });
             assert_eq!(event["packet"], "ObjectPoisoned");
             assert_eq!(event["payload"]["objectId"], 2001);
@@ -13977,12 +14041,17 @@ mod tests {
         let mut pearl_item = sample_user_item(43_122_689, 1);
         pearl_item.item_index = 658;
         let pearls = super::server_packet_to_event(&ServerPacket::NPCPearlGoods {
-            list: vec![pearl_item], rate: 1.25, panel_type: 3,
+            list: vec![pearl_item],
+            rate: 1.25,
+            panel_type: 3,
         });
         assert_eq!(pearls["packet"], "NPCPearlGoods");
         assert_eq!(pearls["payload"]["list"], goods["payload"]["list"]);
         assert_eq!(pearls["payload"]["rate"], goods["payload"]["rate"]);
-        assert_eq!(pearls["payload"]["panelType"], goods["payload"]["panelType"]);
+        assert_eq!(
+            pearls["payload"]["panelType"],
+            goods["payload"]["panelType"]
+        );
         assert!(pearls["payload"].get("hideAddedStats").is_none());
 
         let repair = super::server_packet_to_event(&ServerPacket::NPCRepair { rate: 1.5 });
@@ -16624,7 +16693,10 @@ mod tests {
         .expect("set auto pot value command should deserialize");
         assert!(matches!(
             super::browser_command_to_action(auto_pot_value).expect("auto pot value maps"),
-            SessionAction::Packet(ClientPacket::SetAutoPotValue { stat: 12, value: 80 })
+            SessionAction::Packet(ClientPacket::SetAutoPotValue {
+                stat: 12,
+                value: 80
+            })
         ));
 
         let auto_pot_item = serde_json::from_str::<BrowserCommand>(
@@ -17463,7 +17535,9 @@ mod tests {
         );
         for action in [
             SessionAction::Attack { object_id: 42 },
-            SessionAction::CastSkill { key: "battle-focus".to_string() },
+            SessionAction::CastSkill {
+                key: "battle-focus".to_string(),
+            },
             SessionAction::Packet(ClientPacket::Attack {
                 direction: MirDirection::Right,
                 spell: Spell::Thrusting,
@@ -17969,14 +18043,35 @@ mod tests {
         assert_eq!(capacity.status().current_reconnect_leases, 0);
 
         let before = serde_json::to_value(restored.session.world_snapshot()).unwrap();
-        let packets = restored.session.replay_retained_start_game_bootstrap(
-            "demo", key.character_index, true,
-        ).expect("authenticated retained StartGame must replay metadata");
-        assert!(matches!(packets.first(), Some(ServerPacket::StartGame { result: 4, .. })));
-        assert_eq!(packets.iter().filter(|packet| matches!(packet, ServerPacket::GameShopInfo { .. })).count(), 105);
-        assert_eq!(serde_json::to_value(restored.session.world_snapshot()).unwrap(), before);
-        assert!(store.take(&key).is_none(), "reconnect custody is consumed once");
-        assert!(restored.session.handle_packet(ClientPacket::StartGame { character_index: key.character_index }).is_empty());
+        let packets = restored
+            .session
+            .replay_retained_start_game_bootstrap("demo", key.character_index, true)
+            .expect("authenticated retained StartGame must replay metadata");
+        assert!(matches!(
+            packets.first(),
+            Some(ServerPacket::StartGame { result: 4, .. })
+        ));
+        assert_eq!(
+            packets
+                .iter()
+                .filter(|packet| matches!(packet, ServerPacket::GameShopInfo { .. }))
+                .count(),
+            105
+        );
+        assert_eq!(
+            serde_json::to_value(restored.session.world_snapshot()).unwrap(),
+            before
+        );
+        assert!(
+            store.take(&key).is_none(),
+            "reconnect custody is consumed once"
+        );
+        assert!(restored
+            .session
+            .handle_packet(ClientPacket::StartGame {
+                character_index: key.character_index
+            })
+            .is_empty());
 
         drop(restored);
         assert_eq!(capacity.status().current_active_sessions, 0);
@@ -20313,6 +20408,26 @@ mod tests {
         assert_eq!(
             super::server_packet_to_event(&ordinary),
             fixture["compatibilityCases"]["ordinaryAttack"]["event"]
+        );
+    }
+
+    #[test]
+    fn user_back_step_packet_projects_exact_gateway_event() {
+        let packet = ServerPacket::UserBackStep {
+            location: Point { x: 299, y: 630 },
+            direction: MirDirection::Left,
+        };
+
+        assert_eq!(
+            super::server_packet_to_event(&packet),
+            json!({
+                "type": "packet",
+                "packet": "UserBackStep",
+                "payload": {
+                    "location": {"x": 299, "y": 630},
+                    "direction": "Left"
+                }
+            })
         );
     }
 

@@ -1,0 +1,309 @@
+warning: constant `BUTTON_BG` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:35:7
+   |
+35 | const BUTTON_BG: Color = Color::srgba(0.29, 0.19, 0.11, 1.0);
+   |       ^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:37:7
+   |
+37 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:292:5
+    |
+286 | enum NativeShellButton {
+    |      ----------------- variants in this enum
+...
+292 |     CycleClass,
+    |     ^^^^^^^^^^
+293 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+299 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+300 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_text_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1812:4
+     |
+1812 | fn spawn_aux_text_button(
+     |    ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1865:4
+     |
+1865 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1901:4
+     |
+1901 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-player-journey/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:1938:4
+     |
+1938 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: `mir2-client-bevy` (lib) generated 7 warnings
+warning: `mir2-client-bevy` (lib test) generated 7 warnings (7 duplicates)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.45s
+     Running unittests src/lib.rs (mir2-web3/apps/game-client/platform-android/target/debug/deps/mir2_client_bevy-fce0f5c4e4fa4a33)
+
+running 241 tests
+test big_map::tests::map_or_session_reset_invalidates_pending_gateway_intents ... ok
+test big_map::tests::search_normalizes_draft_and_enforces_cooldown ... ok
+test big_map::tests::render_snapshot_never_invents_missing_map_or_npc_data ... ok
+test big_map::tests::search_result_is_authoritative_and_selects_only_a_known_npc ... ok
+test big_map::tests::cached_non_current_search_result_cannot_enable_teleport ... ok
+test big_map::tests::full_queue_rolls_back_local_search_submission ... ok
+test big_map::tests::session_and_map_resets_drop_stale_npcs_without_losing_connection_setup ... ok
+test big_map::tests::teleport_intent_is_server_gated_and_never_changes_map ... ok
+test chat::tests::settings_filter_channel_keeps_presentation_aliases_separate ... ok
+test chat::tests::recent_text_returns_last_n ... ok
+test big_map::tests::gateway_intents_are_bounded_deduplicated_and_never_mutate_player_map ... ok
+test crystal_ui::assets::tests::safe_key_asset_paths_cover_panel_and_all_button_states ... ok
+test crystal_ui::assets::tests::login_asset_paths_follow_crystal_spec_indexes ... ok
+test chat::tests::chat_model_trims_oldest_past_cap ... ok
+test big_map::tests::oversized_payloads_are_bounded_and_text_is_truncated ... ok
+test big_map::tests::npc_selection_and_eighteen_row_paging_are_stable ... ok
+test big_map::tests::authoritative_render_snapshot_exposes_map_image_player_and_npc_rows ... ok
+test big_map::tests::serde_is_backward_compatible_with_missing_optional_fields ... ok
+test crystal_ui::item_tooltip::tests::legacy_snapshot_is_explicitly_partial_and_never_guesses_item_type ... ok
+test crystal_ui::login::tests::login_button_specs_use_exact_crystal_hit_rects ... ok
+test crystal_ui::login::tests::login_element_set_covers_expected_crystal_scene_members ... ok
+test crystal_ui::item_tooltip::tests::common_potion_follows_crystal_section_order_and_instance_count_weight ... ok
+test crystal_ui::item_tooltip::tests::npc_shop_hide_added_stats_preserves_base_and_bind_text_but_hides_curse ... ok
+test crystal_ui::item_tooltip::tests::unidentified_item_hides_instance_and_socket_added_stats ... ok
+test crystal_ui::item_tooltip::tests::broken_socket_does_not_contribute_to_parent_added_stats ... ok
+test crystal_ui::item_tooltip::tests::weapon_uses_crystal_durability_scale_requirement_colour_and_added_stats ... ok
+test crystal_ui::item_tooltip::tests::viewer_resolved_item_drives_stats_and_authoritative_requirement_colour ... ok
+test crystal_ui::item_tooltip::tests::viewer_resolved_socket_contributes_stats_but_original_socket_names_identity ... ok
+test crystal_ui::login::tests::login_caret_uses_crystal_style_half_second_blink ... ok
+test crystal_ui::metrics::tests::dpi_profiles_preserve_logical_stage_and_control_hits ... ok
+test crystal_ui::metrics::tests::dpi_scaled_stage_preserves_logical_coordinates ... ok
+test crystal_ui::metrics::tests::hud_and_minimap_stay_inside_the_logical_stage ... ok
+test crystal_ui::metrics::tests::invalid_rects_and_viewports_never_produce_nan_or_zero_hits ... ok
+test crystal_ui::metrics::tests::letterbox_is_not_an_interactive_stage_region ... ok
+test crystal_ui::metrics::tests::native_baseline_is_identity ... ok
+test crystal_ui::item_tooltip::tests::bind_section_uses_crystal_expiry_seal_and_rental_clock_text ... ok
+test crystal_ui::metrics::tests::resized_window_letterbox_keeps_logical_stage ... ok
+test crystal_ui::metrics::tests::wide_viewport_letterboxes_horizontally ... ok
+test crystal_ui::metrics::tests::world_and_ui_hits_use_a_single_stage_transform ... ok
+test crystal_ui::preview_data::tests::all_crystal_character_preview_sets_have_sixteen_frames ... ok
+test crystal_ui::select::tests::class_and_gender_map_to_crystal_preview_bases ... ok
+test crystal_ui::select::tests::first_preview_frame_applies_crystal_use_offset_anchor ... ok
+test crystal_ui::select::tests::layered_crystal_previews_have_one_shared_clock_driver ... ok
+test crystal_ui::preview_data::tests::wizard_overlay_uses_source_plus_560_rule ... ok
+test crystal_ui::select::tests::preview_frame_paths_cover_the_resident_crystal_animation_set ... ok
+test crystal_ui::select::tests::slot_frame_maps_class_and_selection_state ... ok
+test crystal_ui::spec::tests::character_select_always_exposes_four_slots_and_five_bottom_buttons ... ok
+test crystal_ui::spec::tests::character_slot_frames_follow_crystal_class_and_selection_rule ... ok
+test crystal_ui::spec::tests::login_panel_and_controls_match_crystal_absolute_coordinates ... ok
+test crystal_ui::select::tests::crystal_last_access_formats_binary_datetime_and_preserves_never ... ok
+test crystal_ui::spec::tests::native_hud_uses_full_width_main_chat_and_minimap_frames ... ok
+test crystal_ui::spec::tests::safe_key_panel_and_controls_match_input_key_dialog_source ... ok
+test crystal_ui::widget::tests::disabled_state_uses_normal_frame_path ... ok
+test crystal_ui::widget::tests::explicit_disabled_asset_overrides_normal_frame_path ... ok
+test crystal_ui::widget::tests::hint_position_matches_crystal_offset_and_clamps_all_edges ... ok
+test crystal_ui::widget::tests::hint_position_uses_current_window_logical_bounds ... ok
+test crystal_ui::widget::tests::hit_testing_uses_control_rect_not_intrinsic_image_size ... ok
+test crystal_ui::widget::tests::oversized_button_art_stays_anchored_to_control_origin ... ok
+test crystal_ui::widget::tests::visual_state_prefers_pressed_then_hover_then_focus ... ok
+test crystal_ui::select::tests::crystal_vertical_centered_text_uses_the_source_control_alignment ... ok
+test entities::tests::body_size_grows_with_level ... ok
+test entities::tests::accent_color_is_deterministic_per_name ... ok
+test entities::tests::entity_index_keys_by_object_id ... ok
+test entities::tests::kinds_have_distinct_palette ... ok
+test game_shop::tests::disabled_reason_distinguishes_currency_stock_and_selection ... ok
+test game_shop::tests::purchase_guard_checks_payment_stock_class_balance_and_overflow ... ok
+test game_shop::tests::quantity_and_stock_follow_crystal_bounds ... ok
+test crystal_ui::typography::tests::crystal_default_matches_source_arial_eight_point_at_96_dpi ... ok
+test game_shop::tests::receipt_exact_match_releases_pending_and_late_receipt_does_not ... ok
+test game_shop::tests::request_sequence_exhaustion_fails_closed_instead_of_repeating ... ok
+test game_shop::tests::session_clear_removes_server_catalog_and_transient_selection ... ok
+test game_shop::tests::shared_ui_and_model_mirror_the_same_request_exactly ... ok
+test game_shop::tests::terminal_session_reset_marks_lost_purchase_unknown_without_replay ... ok
+test game_shop::tests::upsert_is_keyed_by_authoritative_game_shop_index ... ok
+test inventory::tests::concrete_item_image_preserves_non_amulets_unknown_shapes_and_zero_stack_size ... ok
+test inventory::tests::concrete_item_image_uses_current_count_and_base_info_not_tooltip_or_viewer_variant ... ok
+test inventory::tests::concrete_zero_image_requires_source_info_and_ignores_names_or_stale_icons ... ok
+test inventory::tests::crystal_stack_label_uses_source_stack_size_including_one_without_inventing_legacy_counts ... ok
+test game_shop::tests::bounded_pages_keep_products_after_the_first_24_selectable ... ok
+test inventory::tests::inventory_capacity_is_authoritative_and_legacy_json_fails_closed ... ok
+test inventory::tests::items_are_grouped_by_container_and_sorted_by_slot ... ok
+test inventory::tests::crystal_tooltip_source_json_preserves_catalogue_instance_and_socket_metadata ... ok
+test inventory::tests::legacy_item_json_without_instance_id_remains_compatible_but_unaddressable ... ok
+test inventory::tests::summary_is_compact_and_deterministic ... ok
+test mail::tests::mail_claim_and_delete_rules ... ok
+test inventory::tests::legacy_item_json_and_full_metadata_are_both_compatible ... ok
+test mail::tests::mail_pages_are_ten_rows_and_clamp_after_refresh_delete ... ok
+test mail::tests::stale_mail_selection_fails_closed ... ok
+test mail::tests::serde_roundtrip ... ok
+test mail::tests::user_item_metadata_roundtrips_without_string_loss ... ok
+test map::tests::later_patch_wins_over_later_when_overlapping ... ok
+test map::tests::colors_are_deterministic_and_bounded ... ok
+test map::tests::terrain_lookup_returns_kind_inside_patch ... ok
+test map::tests::tile_world_conversion_flips_y ... ok
+test native_shell::tests::account_registration_stays_on_login_and_surfaces_authoritative_result ... ok
+test native_shell::tests::change_password_banned_is_not_treated_as_success ... ok
+test native_shell::tests::change_password_requires_account_and_matching_valid_fields ... ok
+test native_shell::tests::character_create_can_be_cancelled_without_gateway_success ... ok
+test native_shell::tests::character_delete_updates_selection ... ok
+test native_shell::tests::create_character_success_transitions_back_to_select ... ok
+test game_shop::tests::one_hundred_five_products_accumulate_in_gindex_order_and_duplicate_upsert ... ok
+test native_shell::tests::debug_output_never_contains_password_and_login_clears_it ... ok
+test native_shell::tests::delete_confirmation_is_local_and_second_confirm_is_rejected ... ok
+test native_shell::tests::disconnect_and_retry_returns_to_connecting ... ok
+test native_shell::tests::disconnect_does_not_auto_reconnect_without_retry ... ok
+test native_shell::tests::duplicate_and_late_login_registration_receipts_are_ignored ... ok
+test native_shell::tests::empty_roster_is_supported_after_login_success ... ok
+test native_shell::tests::in_game_disconnect_clears_password_and_session_payload ... ok
+test native_shell::tests::in_game_logout_clears_password_and_does_not_auto_retry ... ok
+test native_shell::tests::logged_out_returns_to_login_with_server_roster ... ok
+test native_shell::tests::login_failure_then_disconnect_retry ... ok
+test native_shell::tests::login_flow_transitions_to_character_select_after_success ... ok
+test native_shell::tests::missing_fields_are_rejected_for_login ... ok
+test native_shell::tests::operation_failure_returns_starting_game_to_character_select ... ok
+test native_shell::tests::player_bootstrap_enters_game ... ok
+test native_shell::tests::registration_and_login_failure_receipts_are_operation_scoped_in_either_order ... ok
+test native_shell::tests::registration_and_login_receipts_are_operation_scoped_in_either_order ... ok
+test native_shell::tests::safe_key_permutation_is_deterministic_and_complete ... ok
+test native_shell::tests::select_and_start_only_allow_valid_indices ... ok
+test native_shell::tests::start_game_ack_does_not_enter_game ... ok
+test native_shell_ui::tests::auxiliary_fields_reject_invalid_name_and_password_characters ... ok
+test native_shell_ui::tests::change_password_submit_intent_contains_authoritative_account_and_all_fields ... ok
+test native_shell_ui::tests::connection_lost_dialog_uses_crystal_message_box_and_ok_button_geometry ... ok
+test native_shell_ui::tests::connection_notice_collapses_localized_socket_text_to_a_bounded_summary ... ok
+test native_shell_ui::tests::connection_notice_truncation_is_unicode_safe ... ok
+test native_shell_ui::tests::composed_text_does_not_turn_control_shortcuts_into_text ... ok
+test native_shell_ui::tests::delete_click_and_cancel_enqueue_no_gateway_packet ... ok
+test native_shell_ui::tests::different_gateway_commands_are_not_swallowed_by_a_nonempty_queue ... ok
+test native_shell_ui::tests::draining_does_not_reopen_a_request_before_its_ack ... ok
+test native_shell_ui::tests::duplicate_register_click_is_rejected_after_queue_drain_without_logging_password ... ok
+test native_shell_ui::tests::empty_composed_text_uses_logical_character_fallback ... ok
+test native_shell_ui::tests::focus_cycles_are_consistent ... ok
+test native_shell_ui::tests::logical_character_fallback_does_not_turn_control_shortcuts_into_text ... ok
+test mail::tests::mail_deserialization_is_backward_compatible_and_bounded ... ok
+test native_shell_ui::tests::masks_password_without_plain_chars ... ok
+test native_shell_ui::tests::new_character_class_and_gender_choices_are_limited_to_existing_backend_flow ... ok
+test native_shell_ui::tests::new_character_uses_crystal_geometry_assets_and_supported_control_bounds ... ok
+test native_shell_ui::tests::operation_failure_releases_register_and_login_for_recovery ... ok
+test native_shell_ui::tests::printable_chars_filter_control_chars ... ok
+test native_shell_ui::tests::rapid_keyboard_batch_consumes_text_and_logical_character_fallbacks_in_order ... ok
+test native_shell_ui::tests::repeated_character_create_submission_is_not_queued_twice ... ok
+test native_shell_ui::tests::login_system_applies_an_entire_rapid_character_batch_in_one_update ... ok
+test native_shell_ui::tests::rotates_class_and_gender_choices_and_dedups_gateway_intent_queue ... ok
+test native_shell_ui::tests::single_event_can_carry_multiple_composed_characters ... ok
+test pending_operations::tests::cash_game_shop_refresh_is_diagnostic_only_without_request_id ... ok
+test pending_operations::tests::decoded_refresh_advances_revisions_but_never_unlocks_any_domain ... ok
+test native_shell_ui::tests::login_system_honors_backspace_and_delete_repeat_messages ... ok
+test pending_operations::tests::exact_duplicates_are_blocked_but_distinct_resources_are_not_merged ... ok
+test pending_operations::tests::delete_receipt_releases_only_matching_instance_and_count ... ok
+test pending_operations::tests::exact_ack_or_nack_releases_only_the_correlated_inventory_key ... ok
+test pending_operations::tests::inventory_refresh_releases_only_exact_drop_move_merge_split_and_sell_evidence ... ok
+test pending_operations::tests::legacy_storage_ack_does_not_release_v2_pending ... ok
+test pending_operations::tests::mail_refresh_releases_only_proven_read_claim_and_delete_keys ... ok
+test pending_operations::tests::mail_result_releases_success_and_failure_without_refresh_guessing ... ok
+test pending_operations::tests::sell_nack_releases_only_matching_item_and_count ... ok
+test pending_operations::tests::preserving_reset_keeps_only_exact_game_shop_key_for_receipt_ingest ... ok
+test map::tests::overlapping_patches_render_one_tile_and_later_patch_wins ... ok
+test pending_operations::tests::session_reset_clears_pending_without_claiming_success ... ok
+test pending_operations::tests::pending_operations_are_bounded_and_fail_closed ... ok
+test pending_operations::tests::shop_refresh_proves_finite_stock_buy_but_not_unlimited_or_repair ... ok
+test pending_operations::tests::storage_ack_and_nack_release_only_the_correlatable_operation ... ok
+test pending_operations::tests::storage_ack_never_releases_the_other_transfer_kind ... ok
+test entities::tests::existing_entity_transform_tracks_later_snapshots ... ok
+test pending_operations::tests::storage_ack_releases_at_most_one_legacy_duplicate_slot ... ok
+test pending_operations::tests::storage_failed_ack_releases_one_and_repeated_ack_is_noop ... ok
+test pending_operations::tests::storage_request_id_generation_is_monotonic_and_fails_closed_on_overflow ... ok
+test pending_operations::tests::storage_refresh_requires_exact_transfer_or_metadata_transition ... ok
+test pending_operations::tests::storage_transfer_registration_rejects_same_coordinates_with_different_ids ... ok
+test pending_operations::tests::storage_transfer_slot_reuse_after_ack_releases_only_the_current_pending ... ok
+test pending_operations::tests::unchanged_inventory_snapshot_does_not_unlock_move_or_split ... ok
+test pending_operations::tests::storage_v2_ack_releases_exact_request_only_even_for_same_coordinates ... ok
+test crystal_ui::widget::tests::rich_item_hint_remains_active_while_the_item_cell_is_pressed ... ok
+test read_model::tests::overfull_and_negative_values_clamp ... ok
+test read_model::tests::zero_or_negative_max_produces_empty_bar ... ok
+test shop::tests::buy_disabled_when_not_enough_gold_or_stock ... ok
+test read_model::tests::wing_effect_round_trips_without_defaulting_missing_authority ... ok
+test read_model::tests::hp_and_mp_bars_normalize_to_clamped_fractions ... ok
+test shop::tests::legacy_service_mode_json_keeps_default_capability_fallbacks ... ok
+test shop::tests::malformed_repair_signal_fails_closed ... ok
+test shop::tests::quantity_clamping ... ok
+test shop::tests::sell_requires_bag_item ... ok
+test crystal_ui::widget::tests::rich_item_hint_keeps_children_across_renderer_entity_churn ... ok
+test shop::tests::service_modes_are_authoritative_and_buy_sell_can_be_combined ... ok
+test shop::tests::serde_roundtrip ... ok
+test skill_binding_ui::tests::assigning_an_occupied_slot_rebinds_both_sides_uniquely ... ok
+test skill_binding_ui::tests::assignment_is_gated_by_assign_key_and_slot_range ... ok
+test skill_binding_ui::tests::merge_changes_only_hotkey_for_known_skill ... ok
+test crystal_ui::widget::tests::position_system_never_revives_a_hidden_overlay_without_a_hover_target ... ok
+test skill_binding_ui::tests::missing_binding_row_is_added_without_touching_known_skill_data ... ok
+test skill_binding_ui::tests::refresh_imports_server_keys_and_removes_stale_entries ... ok
+test skill_binding_ui::tests::selection_requires_a_learned_skill ... ok
+test skill_binding_ui::tests::unknown_binding_fails_closed_during_assignment_and_merge ... ok
+test skill_binding_ui::tests::serde_round_trip_and_invalid_disk_state_are_bounded ... ok
+test skill_model::tests::cooldown_and_mp_metadata_survive_deserialization ... ok
+test skill_model::tests::duplicate_hotkey_uses_first_learned_entry_and_does_not_duplicate_loser ... ok
+test skill_model::tests::explicit_hotkeys_are_resolved_before_unbound_learned_order ... ok
+test skill_binding_ui::tests::refresh_scans_later_learned_skill_for_explicit_server_hotkey ... ok
+test skill_model::tests::invalid_explicit_hotkeys_fail_closed_instead_of_filling_shortcuts ... ok
+test skill_model::tests::missing_hotkeys_fall_back_to_learned_order_without_inventing_a_skill ... ok
+test skill_model::tests::name_and_key_only_skill_has_no_authoritative_spell_for_f1 ... ok
+test crystal_ui::widget::tests::hint_overlay_shows_only_one_hovered_nonempty_hint_and_preserves_layout_when_hidden ... ok
+test skill_model::tests::rich_server_skill_json_is_backward_compatible_and_selectable ... ok
+test skill_model::tests::toggle_definition_and_authoritative_enabled_state_remain_independent ... ok
+test skill_model::tests::unknown_or_missing_cast_kind_fails_closed ... ok
+test social::tests::a_different_inviter_supersedes_only_the_old_acceptance ... ok
+test social::tests::empty_guild_status_is_authoritative_leave_and_releases_guild_pending ... ok
+test social::tests::failed_or_unrelated_trade_packets_do_not_fake_completion ... ok
+test social::tests::every_authoritative_group_and_guild_operation_releases_only_on_matching_state ... ok
+test social::tests::group_roster_is_bounded_and_leader_is_authoritative ... ok
+test social::tests::group_invite_accept_is_correlated_and_allows_second_invite ... ok
+test social::tests::guild_invite_duplicate_and_roster_transition_are_idempotent ... ok
+test social::tests::guild_notice_receipt_does_not_optimistically_replace_content ... ok
+test social::tests::guild_rank_change_with_empty_member_name_releases_exact_pending ... ok
+test social::tests::guild_permissions_follow_wire_bits_and_matching_rank_options ... ok
+test social::tests::invite_failure_is_exactly_correlated_and_can_retry ... ok
+test social::tests::guild_packets_accept_server_packet_snake_case_and_camel_case_compatibility ... ok
+test social::tests::malformed_and_oversized_social_packets_fail_closed ... ok
+test social::tests::guild_storage_packets_are_bounded_correlated_and_authoritative ... ok
+test social::tests::pending_is_not_cleared_by_unchanged_snapshot_but_is_cleared_by_matching_event ... ok
+test social::tests::out_of_order_snapshot_does_not_release_unacknowledged_trade_or_group_work ... ok
+test social::tests::reset_clears_models_and_pending ... ok
+test social::tests::scene_reset_preserves_social_models_but_session_reset_clears_them ... ok
+test social::tests::trade_deposit_and_retrieve_ack_match_packet_and_both_slots ... ok
+test social::trade_source_tests::trade_completion_and_terminal_cancel_reset_both_sides_and_only_trade_pending ... ok
+test social::trade_source_tests::trade_equal_guest_offer_packets_still_release_local_lock_but_not_own_gold_request ... ok
+test social::trade_source_tests::trade_malformed_packets_are_transactional_and_do_not_advance_revision ... ok
+test social::trade_source_tests::trade_matching_failure_is_a_cell_unlock_not_an_item_success ... ok
+test social::trade_source_tests::trade_new_owner_clears_previous_offer_but_duplicate_accept_retains_current_offer ... ok
+test social::trade_source_tests::trade_own_gold_request_requires_exact_same_exchange_snapshot_delta ... ok
+test social::trade_source_tests::trade_same_partner_new_exchange_cannot_acknowledge_an_old_own_offer ... ok
+test social::trade_source_tests::trade_unlock_is_not_cancel_and_keeps_offers_partner_and_unrelated_pending ... ok
+test storage::tests::crystal_storage_is_two_real_ten_by_eight_pages ... ok
+test social::trade_source_tests::trade_wire_sparse_slots_are_not_compacted_and_zero_count_is_not_invented ... ok
+test storage::tests::deposit_requires_unlocked_and_free_slot ... ok
+test storage::tests::storage_occupied_and_free ... ok
+test storage::tests::storage_selection_requires_exact_slot_and_unique_id ... ok
+test storage::tests::serde_roundtrip ... ok
+test storage::tests::storage_serde_defaults_and_bounds_legacy_payloads ... ok
+test skill_model::tests::learned_skills_and_bindings_share_one_deterministic_bound ... ok
+test skill_model::tests::oversized_skill_and_sidecar_payloads_keep_the_same_prefix_and_order ... ok
+test game_shop::tests::malformed_catalog_and_early_stock_streams_remain_bounded ... ok
+
+test result: ok. 241 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+   Doc-tests mir2_client_bevy
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s

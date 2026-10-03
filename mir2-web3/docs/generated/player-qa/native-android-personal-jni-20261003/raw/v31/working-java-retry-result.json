@@ -1,0 +1,212 @@
+{
+  "label": "working-java-retry",
+  "bin": "./gradlew",
+  "args": [
+    "--offline",
+    "--no-daemon",
+    "--no-build-cache",
+    "--rerun-tasks",
+    "--console=plain",
+    ":app:testDebugUnitTest",
+    ":app:testUiPreviewUnitTest"
+  ],
+  "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android",
+  "xmlDirs": [
+    "mir2-web3/apps/game-client/platform-android/android/app/build/test-results/testDebugUnitTest",
+    "mir2-web3/apps/game-client/platform-android/android/app/build/test-results/testUiPreviewUnitTest"
+  ],
+  "source": "ecba88bd63e70fa9ec90b938a9779344cabca395",
+  "started": "2026-10-02T15:22:18.465Z",
+  "ended": "2026-10-02T15:23:00.204Z",
+  "code": 0,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 33253,
+      "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+      "bytes": 23059,
+      "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 75493,
+      "sha256": "61ed32636953ee7b40413901598d79696025c5488cce282b033f4edf1d21d79c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 182051,
+      "sha256": "ffc257f1fef241d25d7487f1737aee2666ca20a3dfee01940cc89b594c0dd818"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 33137,
+      "sha256": "f166a93d7d96caeece1cf72c6c709065d9247da9fcd87d20094d949d3aece18b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 60074,
+      "sha256": "9017649660b5e93b912b6fba872a79c506402dd4444a6b62c2a362858b88d4ad"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 85975,
+      "sha256": "e68349feea75a3753ab5c18adfb39025173f025f286eebc36797da91603d8f81"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+      "bytes": 21305,
+      "sha256": "3954fc6119549ea91d5855f37ba469307f24625bcdc057d9fe567ca3fe9baa18"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28741,
+      "sha256": "a642ad40b4e665ca5cecb3a02e5b8f0d3c9006b2315813ba8a06a52022853bf8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+      "bytes": 4397,
+      "sha256": "104912d0833e41842e25942c1e6beadb1af8dad60097998b0d9e573ef0c25e93"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+      "bytes": 4893,
+      "sha256": "ee5ba750d8223bc90b66f2e2830fe7731a886f8005934d20e3b4922e89c21480"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 33253,
+      "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+      "bytes": 23059,
+      "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 75493,
+      "sha256": "61ed32636953ee7b40413901598d79696025c5488cce282b033f4edf1d21d79c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 182051,
+      "sha256": "ffc257f1fef241d25d7487f1737aee2666ca20a3dfee01940cc89b594c0dd818"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 33137,
+      "sha256": "f166a93d7d96caeece1cf72c6c709065d9247da9fcd87d20094d949d3aece18b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 60074,
+      "sha256": "9017649660b5e93b912b6fba872a79c506402dd4444a6b62c2a362858b88d4ad"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 85975,
+      "sha256": "e68349feea75a3753ab5c18adfb39025173f025f286eebc36797da91603d8f81"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+      "bytes": 21305,
+      "sha256": "3954fc6119549ea91d5855f37ba469307f24625bcdc057d9fe567ca3fe9baa18"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28741,
+      "sha256": "a642ad40b4e665ca5cecb3a02e5b8f0d3c9006b2315813ba8a06a52022853bf8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+      "bytes": 4397,
+      "sha256": "104912d0833e41842e25942c1e6beadb1af8dad60097998b0d9e573ef0c25e93"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+      "bytes": 4893,
+      "sha256": "ee5ba750d8223bc90b66f2e2830fe7731a886f8005934d20e3b4922e89c21480"
+    }
+  ],
+  "sourceUnchanged": true,
+  "xml": [
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "49e2dbeef31cdccbcb82d51112ad58b7b7518077a34773941498e4c7d2de88e3"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "d5b2d75f144d13aebe856560c239fca21b507481125f596e00154de2e7a73924"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "fd58ee1b1ed8720d42498985ffbc20869394f88b21e7b307d521dace4bb0124f"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4467,
+      "sha256": "653b9c2712acdd803aabfe596a7e0da747b29b7c06d6cdab1dde2c5baa30cdaf"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "0dd6825b7573d8a891988e4ddd8b06db6a2788460588ccf13f68de55972ac187"
+    },
+    {
+      "variant": 0,
+      "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 926,
+      "sha256": "c0051fa67da46f92eb7d9200739720310dac26eef6e719c267ab4faabbc753db"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "d3e4f0f363a64a216c60633364eac2a577d434dcc6cc21dcad1ec21b0f5d0993"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "9347e87548dff0e2d7ca75e7c6eb2abd231f8356fa0827dc5ee03884b46c2c4e"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "dea99eb4b7586ea94f8b583a5f8fc40dcbf2d4ff14648aab309f61db1f01598d"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4467,
+      "sha256": "dcb9369da16748779e4c482826647dfea93a4b908f1ea1d344e70f89d375b70c"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "e317cbc7efadd11964984bc2fc21df8f5e7bf1e0187632dd7c97c3520f5b16fc"
+    },
+    {
+      "variant": 1,
+      "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 927,
+      "sha256": "70bab937028d22c2866e481872bc5a83b36c1f0dd7d968f318e9e861e739a6c4"
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+# Preserve the exact SDK AVD-name output, including its original CRLF bytes.
+v17/device/device-avd.txt -text
+v18/device/device-avd.txt -text

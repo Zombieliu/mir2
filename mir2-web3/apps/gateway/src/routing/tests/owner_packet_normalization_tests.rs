@@ -143,10 +143,16 @@ fn owner_magic_packets_rebase_caster_and_self_targets_without_rewriting_remote_a
         },
     ];
     runtime.normalize_owner_state_packets(&mut packets);
-    assert!(matches!(&packets[0], ServerPacket::ObjectMagic { object_id, target_id, secondary_target_ids, .. }
-        if *object_id == local_id && *target_id == local_id && secondary_target_ids == &vec![local_id, remote_id]));
-    assert!(matches!(&packets[1], ServerPacket::Magic { target_id, secondary_target_ids, .. }
-        if *target_id == local_id && secondary_target_ids == &vec![remote_id, local_id]));
-    assert!(matches!(&packets[2], ServerPacket::ObjectMagic { object_id, target_id, secondary_target_ids, .. }
-        if *object_id == remote_id && *target_id == local_id && secondary_target_ids == &vec![remote_id]));
+    assert!(
+        matches!(&packets[0], ServerPacket::ObjectMagic { object_id, target_id, secondary_target_ids, .. }
+        if *object_id == local_id && *target_id == local_id && secondary_target_ids == &vec![local_id, remote_id])
+    );
+    assert!(
+        matches!(&packets[1], ServerPacket::Magic { target_id, secondary_target_ids, .. }
+        if *target_id == local_id && secondary_target_ids == &vec![remote_id, local_id])
+    );
+    assert!(
+        matches!(&packets[2], ServerPacket::ObjectMagic { object_id, target_id, secondary_target_ids, .. }
+        if *object_id == remote_id && *target_id == local_id && secondary_target_ids == &vec![remote_id])
+    );
 }

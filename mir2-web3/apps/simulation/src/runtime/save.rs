@@ -203,7 +203,8 @@ fn decode_durable_skill_states(
             let skill = serde_json::from_value::<SkillState>(value.clone()).ok()?;
             let clock = match value.get(SKILL_CLOCK_METADATA_KEY) {
                 Some(metadata) => {
-                    let clock = serde_json::from_value::<DurableSkillClock>(metadata.clone()).ok()?;
+                    let clock =
+                        serde_json::from_value::<DurableSkillClock>(metadata.clone()).ok()?;
                     (clock.schema == DURABLE_SKILL_CLOCK_SCHEMA).then_some(clock)
                 }
                 None => None,
@@ -280,7 +281,7 @@ pub(super) fn snapshot_active_character_save(world: &World) -> Option<CharacterS
         hero_registry_attachment: hero_inventory.registry_attachment,
         hero_vitals: super::components::hero_entity(world)
             .and_then(|entity| entity_player_vitals(world, entity))
-            .map(|v| crate::config::HeroVitalsState {hp:v.hp,mp:v.mp})
+            .map(|v| crate::config::HeroVitalsState { hp: v.hp, mp: v.mp })
             .or(hero_inventory.saved_vitals),
         storage_items_json: encode_state_vec(&resources.storage_items),
         equipment_items_json: encode_state_vec(&resources.equipment_items),
@@ -509,13 +510,8 @@ impl SimulationSession {
         let mut save = snapshot_active_character_save(self.app.world())?;
         // Transaction rollback remains in the same runtime clock domain. Keep
         // its exact deadline instead of the wall-clock durable representation.
-        save.skill_states_json = encode_state_vec(
-            &self
-                .app
-                .world()
-                .resource::<SkillResource>()
-                .skills,
-        );
+        save.skill_states_json =
+            encode_state_vec(&self.app.world().resource::<SkillResource>().skills);
         Some(save)
     }
 
@@ -961,97 +957,120 @@ fn persist_character_save_inner(
     let touched_accounts = vec![account_id.clone()];
 
     super::shared_guild_experience::commit_source(world, &config, &touched_accounts, move |store| {
-        apply_full_character_save_mutation(store, &account_id, &active_character, save, last_access_binary_datetime)
+        apply_full_character_save_mutation(
+            store,
+            &account_id,
+            &active_character,
+            save,
+            last_access_binary_datetime,
+        )
     })
 }
 
-pub(super) fn stage_prepared_character_save(world: &World, store: &mut crate::config::AccountStore, mut save: CharacterSaveRecord) -> Result<(), String> {
+pub(super) fn stage_prepared_character_save(
+    world: &World,
+    store: &mut crate::config::AccountStore,
+    mut save: CharacterSaveRecord,
+) -> Result<(), String> {
     let session = world.resource::<SessionResource>();
-    let account_id = active_session_mutating_account_id(session).ok_or("prepared source requires authenticated identity")?;
-    let active = session.selected_character.as_ref().ok_or("prepared source requires selected character")?;
-    if !exact_character_identity_matches(&save.character, active) { return Err("prepared source character mismatch".into()); }
+    let account_id = active_session_mutating_account_id(session)
+        .ok_or("prepared source requires authenticated identity")?;
+    let active = session
+        .selected_character
+        .as_ref()
+        .ok_or("prepared source requires selected character")?;
+    if !exact_character_identity_matches(&save.character, active) {
+        return Err("prepared source character mismatch".into());
+    }
     migrate_legacy_candidate_save_record(&mut save)?;
     validate_character_save_record(&save)?;
     match apply_full_character_save_mutation(store, &account_id, active, save, None)? {
         PersistCharacterSaveResult::Full(_) => Ok(()),
-        PersistCharacterSaveResult::StaleMailStatusOnly => Err("prepared kill requires full source CAS".into()),
+        PersistCharacterSaveResult::StaleMailStatusOnly => {
+            Err("prepared kill requires full source CAS".into())
+        }
     }
 }
 
-fn apply_full_character_save_mutation(store: &mut crate::config::AccountStore, account_id: &str, active_character: &CharacterRecord,
-    mut save: CharacterSaveRecord, last_access_binary_datetime: Option<i64>) -> Result<PersistCharacterSaveResult, String> {
+fn apply_full_character_save_mutation(
+    store: &mut crate::config::AccountStore,
+    account_id: &str,
+    active_character: &CharacterRecord,
+    mut save: CharacterSaveRecord,
+    last_access_binary_datetime: Option<i64>,
+) -> Result<PersistCharacterSaveResult, String> {
     let expected_revision = save.revision;
     let character_index = active_character.index;
 
-        let account = store
-            .accounts
-            .get(account_id)
-            .ok_or_else(|| "full character save requires an existing account".to_string())?;
-        let persisted_character = account
-            .characters
-            .iter()
-            .find(|character| character.index == character_index)
-            .ok_or_else(|| "full character save requires an existing character".to_string())?;
-        if !exact_character_identity_matches(persisted_character, &active_character)
-            || !exact_character_identity_matches(&save.character, &active_character)
-        {
-            return Err("full character save identity mismatch".to_string());
-        }
-        let mut persisted_save = account
-            .saves
-            .get(&character_index)
-            .cloned()
-            .ok_or_else(|| "full character save requires an existing durable save".to_string())?;
-        if !exact_character_identity_matches(&persisted_save.character, &active_character) {
-            return Err("full character durable save identity mismatch".to_string());
-        }
-        migrate_legacy_candidate_save_record(&mut persisted_save)?;
-        if persisted_save.revision != expected_revision {
-            let durable_revision = persisted_save.revision;
-            let mut durable_save = persisted_save;
-            if !merge_stale_mail_status_into_persisted(&mut durable_save, &save)? {
-                return Err(format!(
+    let account = store
+        .accounts
+        .get(account_id)
+        .ok_or_else(|| "full character save requires an existing account".to_string())?;
+    let persisted_character = account
+        .characters
+        .iter()
+        .find(|character| character.index == character_index)
+        .ok_or_else(|| "full character save requires an existing character".to_string())?;
+    if !exact_character_identity_matches(persisted_character, &active_character)
+        || !exact_character_identity_matches(&save.character, &active_character)
+    {
+        return Err("full character save identity mismatch".to_string());
+    }
+    let mut persisted_save = account
+        .saves
+        .get(&character_index)
+        .cloned()
+        .ok_or_else(|| "full character save requires an existing durable save".to_string())?;
+    if !exact_character_identity_matches(&persisted_save.character, &active_character) {
+        return Err("full character durable save identity mismatch".to_string());
+    }
+    migrate_legacy_candidate_save_record(&mut persisted_save)?;
+    if persisted_save.revision != expected_revision {
+        let durable_revision = persisted_save.revision;
+        let mut durable_save = persisted_save;
+        if !merge_stale_mail_status_into_persisted(&mut durable_save, &save)? {
+            return Err(format!(
                     "stale full character save rejected: expected revision {expected_revision}, durable revision {durable_revision}"
                 ));
-            }
-            validate_character_save_record(&durable_save)?;
-            durable_save.revision = durable_revision
-                .checked_add(1)
-                .ok_or_else(|| "mail-status revision exhausted".to_string())?;
-            store
-                .accounts
-                .get_mut(account_id)
-                .expect("validated stale-save account should exist")
-                .saves
-                .insert(character_index, durable_save);
-            return Ok(PersistCharacterSaveResult::StaleMailStatusOnly);
         }
-
-        merge_persisted_mail_into_character_save(&mut save, &persisted_save)?;
-        validate_character_save_record(&save)?;
-        let committed_revision = expected_revision
+        validate_character_save_record(&durable_save)?;
+        durable_save.revision = durable_revision
             .checked_add(1)
-            .ok_or_else(|| "full character save revision exhausted".to_string())?;
-        save.revision = committed_revision;
-
-        let account = store
+            .ok_or_else(|| "mail-status revision exhausted".to_string())?;
+        store
             .accounts
             .get_mut(account_id)
-            .expect("validated full-save account should exist");
-        if let Some(character) = account
-            .characters
-            .iter_mut()
-            .find(|character| character.index == character_index)
-        {
-            *character = save.character.clone();
-        }
-        account.saves.insert(character_index, save);
-        if let Some(last_access_binary_datetime) = last_access_binary_datetime {
-            account
-                .character_last_access_binary_datetimes
-                .insert(character_index, last_access_binary_datetime);
-        }
-        Ok(PersistCharacterSaveResult::Full(committed_revision))
+            .expect("validated stale-save account should exist")
+            .saves
+            .insert(character_index, durable_save);
+        return Ok(PersistCharacterSaveResult::StaleMailStatusOnly);
+    }
+
+    merge_persisted_mail_into_character_save(&mut save, &persisted_save)?;
+    validate_character_save_record(&save)?;
+    let committed_revision = expected_revision
+        .checked_add(1)
+        .ok_or_else(|| "full character save revision exhausted".to_string())?;
+    save.revision = committed_revision;
+
+    let account = store
+        .accounts
+        .get_mut(account_id)
+        .expect("validated full-save account should exist");
+    if let Some(character) = account
+        .characters
+        .iter_mut()
+        .find(|character| character.index == character_index)
+    {
+        *character = save.character.clone();
+    }
+    account.saves.insert(character_index, save);
+    if let Some(last_access_binary_datetime) = last_access_binary_datetime {
+        account
+            .character_last_access_binary_datetimes
+            .insert(character_index, last_access_binary_datetime);
+    }
+    Ok(PersistCharacterSaveResult::Full(committed_revision))
 }
 
 pub(super) fn merge_persisted_mail_into_character_save(
@@ -2501,16 +2520,27 @@ fn decode_and_validate_character_save(
 ) -> Result<DecodedCharacterSavePreflight, String> {
     let (mut inventory_items, belt_items, storage_items, equipment_items, hero_inventory_items) =
         decode_and_validate_character_items(save)?;
-    let mut hero_equipment = decode_saved_item_states("hero equipment", &save.hero_equipment_items_json)?;
-    for item in &mut hero_equipment { migrate_legacy_candidate_item_state(item)?; }
+    let mut hero_equipment =
+        decode_saved_item_states("hero equipment", &save.hero_equipment_items_json)?;
+    for item in &mut hero_equipment {
+        migrate_legacy_candidate_item_state(item)?;
+    }
     validate_saved_item_states("hero equipment", &hero_equipment)?;
-    let hero_inventory = super::hero_inventory::restored_hero_inventory(save, hero_inventory_items, hero_equipment)?;
+    let hero_inventory =
+        super::hero_inventory::restored_hero_inventory(save, hero_inventory_items, hero_equipment)?;
     let hero_ids = super::hero_inventory::validate_hero_custody(&hero_inventory)?;
-    for item in inventory_items.iter().chain(belt_items.iter()).chain(storage_items.iter()) {
+    for item in inventory_items
+        .iter()
+        .chain(belt_items.iter())
+        .chain(storage_items.iter())
+    {
         super::hero_inventory::reject_cross_custody_ids(item, &hero_ids)?;
     }
     for item in &equipment_items {
-        super::hero_inventory::reject_cross_custody_ids(&item_state_from_equipment_state(item.clone(), ItemContainer::Bag1, item.slot as u8), &hero_ids)?;
+        super::hero_inventory::reject_cross_custody_ids(
+            &item_state_from_equipment_state(item.clone(), ItemContainer::Bag1, item.slot as u8),
+            &hero_ids,
+        )?;
     }
     let buff_states = decode_state_vec::<BuffState>(&save.buff_states_json)
         .ok_or_else(|| "failed to decode buff state".to_string())?;
@@ -2519,7 +2549,10 @@ fn decode_and_validate_character_save(
     let skill_states = decode_durable_skill_states(&save.skill_states_json)
         .ok_or_else(|| "failed to decode skill state".to_string())?;
     let mut stage5_systems = decode_and_validate_stage5_systems(save)?;
-    if super::item_custody::reserved_ids(&stage5_systems)?.iter().any(|id|hero_ids.contains(id)) {
+    if super::item_custody::reserved_ids(&stage5_systems)?
+        .iter()
+        .any(|id| hero_ids.contains(id))
+    {
         return Err("Hero item UID collides with held custody".into());
     }
     super::refine_oven::migrate_legacy_pending(&mut inventory_items, &mut stage5_systems.refine)?;
@@ -2586,11 +2619,8 @@ fn apply_character_save_with_timing(
                 // and rebases CastTime on login. Old saves have no clock marker;
                 // treating their absolute deadline as expired matches Crystal's
                 // database-load reset and prevents an uptime-sized cooldown.
-                skill.cooldown_ends_at = rebased_durable_cooldown_ticks(
-                    skill.cooldown_ticks,
-                    durable_clock,
-                    now_ms,
-                );
+                skill.cooldown_ends_at =
+                    rebased_durable_cooldown_ticks(skill.cooldown_ticks, durable_clock, now_ms);
                 skill.cast_time_ms = 0;
             }
             skill
@@ -2599,7 +2629,9 @@ fn apply_character_save_with_timing(
     super::refine_oven::restore_timer(&mut stage5_systems.refine)?;
     let mut custody_ids = super::item_custody::reserved_ids(&stage5_systems)?;
     for id in super::hero_inventory::validate_hero_custody(&hero_inventory)? {
-        if !custody_ids.insert(id) {return Err("saved Hero UID collides with market/refine custody".into());}
+        if !custody_ids.insert(id) {
+            return Err("saved Hero UID collides with market/refine custody".into());
+        }
     }
     let mut restored_inventory = world.resource::<InventoryResource>().clone();
     restored_inventory.reserved_item_unique_ids.clear();
@@ -2737,7 +2769,10 @@ fn apply_character_save_with_timing(
     // logged out inside an imported safe area, recover the binding from that
     // observed position instead of silently retaining the starter village.
     if save.bind_point.is_none() {
-        let position = world.resource::<PlayerRuntimeResource>().player_position.clone();
+        let position = world
+            .resource::<PlayerRuntimeResource>()
+            .player_position
+            .clone();
         super::map::refresh_player_bind_at_position(world, &position);
     }
     super::shared_guild_experience::restore(world, &save.guild_experience_journal);
@@ -3863,11 +3898,20 @@ impl SimulationSession {
     ) -> Vec<ServerPacket> {
         let session = self.app.world().resource::<SessionResource>();
         let Some(account_id) = active_session_mutating_account_id(session) else {
-            return vec![ServerPacket::StartGame { result: 1, resolution: 0 }];
+            return vec![ServerPacket::StartGame {
+                result: 1,
+                resolution: 0,
+            }];
         };
-        let Some(character) = session.selected_character.clone()
-            .filter(|character| character.index == character_index) else {
-            return vec![ServerPacket::StartGame { result: 2, resolution: 0 }];
+        let Some(character) = session
+            .selected_character
+            .clone()
+            .filter(|character| character.index == character_index)
+        else {
+            return vec![ServerPacket::StartGame {
+                result: 2,
+                resolution: 0,
+            }];
         };
         let config = &self.app.world().resource::<RuntimeConfigResource>().config;
         if let Some(ban) = active_account_ban(config, &account_id) {
@@ -3881,7 +3925,10 @@ impl SimulationSession {
         packets
     }
 
-    fn build_active_character_bootstrap(&mut self, character: &CharacterRecord) -> Vec<ServerPacket> {
+    fn build_active_character_bootstrap(
+        &mut self,
+        character: &CharacterRecord,
+    ) -> Vec<ServerPacket> {
         let visible_objects = collect_visible_objects(self.app.world());
         self.visible_objects = visible_objects.keys().copied().collect();
 
@@ -3980,13 +4027,17 @@ impl SimulationSession {
         ]);
         packets.extend(effective_crystal_quest_info_packets(self.app.world()));
         packets.extend(start_game_recipe_info_packets(&mut sent_item_info_indices));
-        packets.extend(start_game_account_social_and_shop_packets().into_iter().map(|packet| {
-            if matches!(packet, ServerPacket::ReceiveMail { .. }) {
-                super::packets::stage5_receive_mail_packet(self.app.world())
-            } else {
-                packet
-            }
-        }));
+        packets.extend(
+            start_game_account_social_and_shop_packets()
+                .into_iter()
+                .map(|packet| {
+                    if matches!(packet, ServerPacket::ReceiveMail { .. }) {
+                        super::packets::stage5_receive_mail_packet(self.app.world())
+                    } else {
+                        packet
+                    }
+                }),
+        );
         packets.extend(start_game_base_stats_packet(character.class));
         let npc_flags = self
             .app

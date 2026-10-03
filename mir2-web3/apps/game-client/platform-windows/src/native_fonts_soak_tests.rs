@@ -7,9 +7,9 @@ use bevy::{
     image::Image,
     prelude::{Color, Entity, FontSize, FontSource, TextFont, Vec2},
     text::{
-        ComputedTextBlock, DEFAULT_FONT_DATA, FontAtlasSet, FontCx, FontHinting, Justify, LayoutCx,
-        LetterSpacing, LineBreak, LineHeight, ScaleCx, TextBounds, TextLayoutInfo, TextPipeline,
-        load_font_assets_into_font_collection,
+        load_font_assets_into_font_collection, ComputedTextBlock, FontAtlasSet, FontCx,
+        FontHinting, Justify, LayoutCx, LetterSpacing, LineBreak, LineHeight, ScaleCx, TextBounds,
+        TextLayoutInfo, TextPipeline, DEFAULT_FONT_DATA,
     },
 };
 use std::collections::BTreeSet;

@@ -1,15 +1,15 @@
-#[path = "hero_transient.rs"]
-pub(super) mod hero_transient;
-#[path = "hero_cadence.rs"]
-pub(super) mod hero_cadence;
-#[path = "hero_mount.rs"]
-pub(super) mod hero_mount;
-#[path = "hero_combat_math.rs"]
-mod hero_combat_math;
 #[path = "hero_buffs.rs"]
 pub(super) mod hero_buffs;
+#[path = "hero_cadence.rs"]
+pub(super) mod hero_cadence;
 #[path = "hero_cast.rs"]
 pub(super) mod hero_cast;
+#[path = "hero_combat_math.rs"]
+mod hero_combat_math;
+#[path = "hero_mount.rs"]
+pub(super) mod hero_mount;
+#[path = "hero_transient.rs"]
+pub(super) mod hero_transient;
 use std::collections::BTreeMap;
 
 use bevy_ecs::{
@@ -118,11 +118,23 @@ struct HeroWizardSpellChoice {
     area: HeroWizardSpellArea,
 }
 
-pub(super) fn hero_attack_mode_allowed(world:&World)->bool {
-    matches!(world.resource::<Stage5SystemsResource>().stage5_systems.pet_mode,0|2|4) && hero_mount::can_attack(world)
+pub(super) fn hero_attack_mode_allowed(world: &World) -> bool {
+    matches!(
+        world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .pet_mode,
+        0 | 2 | 4
+    ) && hero_mount::can_attack(world)
 }
-fn hero_move_mode_allowed(world:&World)->bool {
-    matches!(world.resource::<Stage5SystemsResource>().stage5_systems.pet_mode,0|1|4)
+fn hero_move_mode_allowed(world: &World) -> bool {
+    matches!(
+        world
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .pet_mode,
+        0 | 1 | 4
+    )
 }
 fn stage5_hero_behaviour(world: &World) -> Option<u8> {
     world
@@ -164,8 +176,12 @@ fn hero_has_usable_learned_ranged_magic(world: &World) -> bool {
 }
 
 fn hero_learned_magic_level(world: &World, spell: Spell, _derived_level: u8) -> Option<u8> {
-    world.resource::<Stage5SystemsResource>().stage5_systems.hero_learned_magics
-        .iter().find(|magic| magic.spell == spell && magic.key > 0)
+    world
+        .resource::<Stage5SystemsResource>()
+        .stage5_systems
+        .hero_learned_magics
+        .iter()
+        .find(|magic| magic.spell == spell && magic.key > 0)
         .map(|magic| magic.level.min(3))
 }
 
@@ -320,10 +336,19 @@ fn tick_hero_ai_pending_heals(world: &mut World, tick: u64, packets: &mut Vec<Se
     }
 }
 
-fn hero_attack_damage(world:&mut World,_class:Option<MirClass>,_level:Option<u16>,spell:Spell,spell_level:u8)->i32 {
-    let damage=hero_combat_math::attack(world,CRYSTAL_STAT_MIN_DC,CRYSTAL_STAT_MAX_DC);
-    hero_damage_spell_name(spell).and_then(crystal_magic_by_spell)
-        .map(|magic|hero_combat_math::damage(world,&magic,spell_level,damage)).unwrap_or(damage).max(0)
+fn hero_attack_damage(
+    world: &mut World,
+    _class: Option<MirClass>,
+    _level: Option<u16>,
+    spell: Spell,
+    spell_level: u8,
+) -> i32 {
+    let damage = hero_combat_math::attack(world, CRYSTAL_STAT_MIN_DC, CRYSTAL_STAT_MAX_DC);
+    hero_damage_spell_name(spell)
+        .and_then(crystal_magic_by_spell)
+        .map(|magic| hero_combat_math::damage(world, &magic, spell_level, damage))
+        .unwrap_or(damage)
+        .max(0)
 }
 
 fn hero_damage_spell_name(spell: Spell) -> Option<&'static str> {
@@ -378,7 +403,9 @@ fn hero_crystal_magic_for_class(
     let magic = crystal_magic_by_spell(spell_name)?;
     let derived_level = hero_crystal_magic_level_for_template(level, &magic)?;
     let skill_level = hero_learned_magic_level(world, spell, derived_level)?;
-    if !hero_cast::available(world, spell, hero_magic_delay_ms(&magic, skill_level)) {return None;}
+    if !hero_cast::available(world, spell, hero_magic_delay_ms(&magic, skill_level)) {
+        return None;
+    }
     Some((magic, skill_level))
 }
 
@@ -401,7 +428,6 @@ fn hero_flaming_sword_skill_level(
         .then(|| hero_crystal_magic_level(world, level, "FlamingSword", Spell::FlamingSword))
         .flatten()
 }
-
 
 fn hero_magic_mana_cost(magic: &CrystalMagicTemplate, level: u8) -> i32 {
     i32::from(magic.base_cost).saturating_add(i32::from(magic.level_cost) * i32::from(level))
@@ -504,9 +530,11 @@ fn hero_try_consume_magic_mp(
     level: u8,
     packets: &mut Vec<ServerPacket>,
 ) -> bool {
-    let mut mana_cost=hero_magic_mana_cost(magic,level);
-    let penalty=hero_authoritative_stat(world,CRYSTAL_STAT_MANA_PENALTY_PERCENT).max(0);
-    mana_cost=mana_cost.saturating_add(((i64::from(mana_cost)*i64::from(penalty))/100).min(i64::from(i32::MAX)) as i32);
+    let mut mana_cost = hero_magic_mana_cost(magic, level);
+    let penalty = hero_authoritative_stat(world, CRYSTAL_STAT_MANA_PENALTY_PERCENT).max(0);
+    mana_cost = mana_cost.saturating_add(
+        ((i64::from(mana_cost) * i64::from(penalty)) / 100).min(i64::from(i32::MAX)) as i32,
+    );
     if mana_cost <= 0 {
         return true;
     }
@@ -620,9 +648,17 @@ fn hero_archer_shot_spell(
     Some((Spell::StraightShot, skill_level))
 }
 
-fn hero_heal_amount(world:&mut World,hero_level:Option<u16>,magic:&CrystalMagicTemplate,skill_level:u8)->i32 {
-    let base=hero_combat_math::attack(world,CRYSTAL_STAT_MIN_SC,CRYSTAL_STAT_MAX_SC).saturating_mul(2);
-    hero_combat_math::damage(world,magic,skill_level,base).saturating_add(i32::from(hero_level.unwrap_or(1))).max(0)
+fn hero_heal_amount(
+    world: &mut World,
+    hero_level: Option<u16>,
+    magic: &CrystalMagicTemplate,
+    skill_level: u8,
+) -> i32 {
+    let base =
+        hero_combat_math::attack(world, CRYSTAL_STAT_MIN_SC, CRYSTAL_STAT_MAX_SC).saturating_mul(2);
+    hero_combat_math::damage(world, magic, skill_level, base)
+        .saturating_add(i32::from(hero_level.unwrap_or(1)))
+        .max(0)
 }
 
 fn hero_wizard_choice_for_spell(
@@ -769,13 +805,23 @@ fn hero_wizard_spell_choices(
     choices
 }
 
-fn hero_wizard_magic_damage(world:&mut World,_level:Option<u16>,magic:&CrystalMagicTemplate,skill_level:u8)->i32 {
-    let base=hero_combat_math::attack(world,CRYSTAL_STAT_MIN_MC,CRYSTAL_STAT_MAX_MC);
-    hero_combat_math::damage(world,magic,skill_level,base).max(0)
+fn hero_wizard_magic_damage(
+    world: &mut World,
+    _level: Option<u16>,
+    magic: &CrystalMagicTemplate,
+    skill_level: u8,
+) -> i32 {
+    let base = hero_combat_math::attack(world, CRYSTAL_STAT_MIN_MC, CRYSTAL_STAT_MAX_MC);
+    hero_combat_math::damage(world, magic, skill_level, base).max(0)
 }
-fn hero_wizard_magic_shield_duration_ticks(world:&mut World,magic:&CrystalMagicTemplate,skill_level:u8)->u64 {
-    let base=hero_combat_math::attack(world,CRYSTAL_STAT_MIN_MC,CRYSTAL_STAT_MAX_MC).saturating_add(15);
-    let seconds=hero_combat_math::power(world,magic,skill_level,Some(base)).max(0) as u64;
+fn hero_wizard_magic_shield_duration_ticks(
+    world: &mut World,
+    magic: &CrystalMagicTemplate,
+    skill_level: u8,
+) -> u64 {
+    let base = hero_combat_math::attack(world, CRYSTAL_STAT_MIN_MC, CRYSTAL_STAT_MAX_MC)
+        .saturating_add(15);
+    let seconds = hero_combat_math::power(world, magic, skill_level, Some(base)).max(0) as u64;
     combat_delay_ticks(seconds.saturating_mul(1000))
 }
 
@@ -810,7 +856,9 @@ fn tick_hero_wizard_support(
     hero_entity: Entity,
     packets: &mut Vec<ServerPacket>,
 ) -> bool {
-    if !hero_attack_mode_allowed(world) {return false;}
+    if !hero_attack_mode_allowed(world) {
+        return false;
+    }
     let (hero_id, hero_position, hero_direction, class, level) = {
         let hero = world.entity(hero_entity);
         let Some(hero_id) = hero.get::<ObjectId>().map(|id| id.0) else {
@@ -841,7 +889,7 @@ fn tick_hero_wizard_support(
         return false;
     }
 
-    if !hero_buffs::has(world,HERO_BUFF_MAGIC_SHIELD) {
+    if !hero_buffs::has(world, HERO_BUFF_MAGIC_SHIELD) {
         if let Some((magic, skill_level)) = hero_crystal_magic_for_class(
             world,
             class,
@@ -899,7 +947,7 @@ fn tick_hero_wizard_support(
         }
     }
 
-    if !hero_buffs::has(world,HERO_BUFF_MAGIC_BOOSTER) {
+    if !hero_buffs::has(world, HERO_BUFF_MAGIC_BOOSTER) {
         if let Some((magic, skill_level)) = hero_crystal_magic_for_class(
             world,
             class,
@@ -1017,7 +1065,9 @@ fn tick_hero_taoist_heal(
     hero_entity: Entity,
     packets: &mut Vec<ServerPacket>,
 ) -> bool {
-    if !hero_attack_mode_allowed(world) {return false;}
+    if !hero_attack_mode_allowed(world) {
+        return false;
+    }
     let (hero_id, hero_position, hero_direction, class, level) = {
         let hero = world.entity(hero_entity);
         let Some(hero_id) = hero.get::<ObjectId>().map(|id| id.0) else {
@@ -1532,7 +1582,9 @@ fn tick_hero_attack(
     target: HeroAiTarget,
     packets: &mut Vec<ServerPacket>,
 ) -> bool {
-    if !hero_attack_mode_allowed(world) {return false;}
+    if !hero_attack_mode_allowed(world) {
+        return false;
+    }
     let (hero_id, hero_position, class, level, _next_attack_tick) = {
         let hero = world.entity(hero_entity);
         let Some(hero_id) = hero.get::<ObjectId>().map(|id| id.0) else {
@@ -1620,7 +1672,7 @@ fn tick_hero_attack(
     } else {
         tick + melee_attack_delay_ticks()
     };
-    let damage=hero_attack_damage(world,class,level,attack_spell,attack_spell_level);
+    let damage = hero_attack_damage(world, class, level, attack_spell, attack_spell_level);
     schedule_damage_to_monster(
         world,
         due_tick,
@@ -1660,7 +1712,9 @@ fn tick_hero_move_toward(
     target_position: &Point,
     packets: &mut Vec<ServerPacket>,
 ) {
-    if !hero_move_mode_allowed(world) {return;}
+    if !hero_move_mode_allowed(world) {
+        return;
+    }
     let (hero_id, hero_position, _next_move_tick) = {
         let hero = world.entity(hero_entity);
         let Some(hero_id) = hero.get::<ObjectId>().map(|id| id.0) else {
@@ -1676,7 +1730,9 @@ fn tick_hero_move_toward(
         (hero_id, hero_position, next_move_tick)
     };
 
-    if !hero_cadence::action_ready(world) || tile_distance(&hero_position, target_position) <= HERO_MELEE_RANGE {
+    if !hero_cadence::action_ready(world)
+        || tile_distance(&hero_position, target_position) <= HERO_MELEE_RANGE
+    {
         return;
     }
 
@@ -1712,21 +1768,23 @@ fn tick_hero_move_toward(
     });
 }
 
-pub(super) fn tick_stage5_hero_combat_ai(world:&mut World,tick:u64,packets:&mut Vec<ServerPacket>) {
-    packets.extend(hero_mount::refresh(world));
-    hero_buffs::tick(world,packets);
-    let start=packets.len();
-    tick_stage5_hero_combat_ai_inner(world,tick,packets);
-    hero_cast::record(world,&packets[start..]);
-    hero_buffs::capture(world,&packets[start..]);
-}
-fn tick_stage5_hero_combat_ai_inner(
+pub(super) fn tick_stage5_hero_combat_ai(
     world: &mut World,
     tick: u64,
     packets: &mut Vec<ServerPacket>,
 ) {
+    packets.extend(hero_mount::refresh(world));
+    hero_buffs::tick(world, packets);
+    let start = packets.len();
+    tick_stage5_hero_combat_ai_inner(world, tick, packets);
+    hero_cast::record(world, &packets[start..]);
+    hero_buffs::capture(world, &packets[start..]);
+}
+fn tick_stage5_hero_combat_ai_inner(world: &mut World, tick: u64, packets: &mut Vec<ServerPacket>) {
     tick_hero_ai_pending_heals(world, tick, packets);
-    if !hero_cadence::action_ready(world) { return; }
+    if !hero_cadence::action_ready(world) {
+        return;
+    }
 
     let Some(behaviour) = stage5_hero_behaviour(world) else {
         return;
@@ -1741,7 +1799,12 @@ fn tick_stage5_hero_combat_ai_inner(
     let Some(hero_entity) = hero_entity(world) else {
         return;
     };
-    if world.get::<PlayerVitals>(hero_entity).is_none_or(|v|v.hp<=0) { return; }
+    if world
+        .get::<PlayerVitals>(hero_entity)
+        .is_none_or(|v| v.hp <= 0)
+    {
+        return;
+    }
     if tick_hero_taoist_heal(world, tick, hero_entity, packets) {
         return;
     }
@@ -1778,14 +1841,49 @@ mod authoritative_magic_tests {
     use super::*;
     #[test]
     fn hero_ai_never_grants_unlearned_magic_and_keeps_real_level_three() {
-        let mut session=crate::SimulationSession::new(crate::SimulationConfig::default());
-        assert_eq!(hero_learned_magic_level(session.app.world(),Spell::FireBall,2),None);
-        assert_eq!(hero_attack_range(session.app.world(),Some(MirClass::Wizard)),HERO_MELEE_RANGE);
-        session.app.world_mut().resource_mut::<Stage5SystemsResource>().stage5_systems.hero_learned_magics.push(crate::config::Stage5HeroMagicState{spell:Spell::FireBall,key:17,level:3,experience:0});
-        assert_eq!(hero_learned_magic_level(session.app.world(),Spell::FireBall,0),Some(3));
-        assert_eq!(hero_attack_range(session.app.world(),Some(MirClass::Wizard)),HERO_VIEW_RANGE);
-        session.app.world_mut().resource_mut::<Stage5SystemsResource>().stage5_systems.hero_learned_magics[0].key=0;
-        assert_eq!(hero_learned_magic_level(session.app.world(),Spell::FireBall,2),None);
-        assert_eq!(hero_attack_range(session.app.world(),Some(MirClass::Wizard)),HERO_MELEE_RANGE);
+        let mut session = crate::SimulationSession::new(crate::SimulationConfig::default());
+        assert_eq!(
+            hero_learned_magic_level(session.app.world(), Spell::FireBall, 2),
+            None
+        );
+        assert_eq!(
+            hero_attack_range(session.app.world(), Some(MirClass::Wizard)),
+            HERO_MELEE_RANGE
+        );
+        session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .hero_learned_magics
+            .push(crate::config::Stage5HeroMagicState {
+                spell: Spell::FireBall,
+                key: 17,
+                level: 3,
+                experience: 0,
+            });
+        assert_eq!(
+            hero_learned_magic_level(session.app.world(), Spell::FireBall, 0),
+            Some(3)
+        );
+        assert_eq!(
+            hero_attack_range(session.app.world(), Some(MirClass::Wizard)),
+            HERO_VIEW_RANGE
+        );
+        session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .hero_learned_magics[0]
+            .key = 0;
+        assert_eq!(
+            hero_learned_magic_level(session.app.world(), Spell::FireBall, 2),
+            None
+        );
+        assert_eq!(
+            hero_attack_range(session.app.world(), Some(MirClass::Wizard)),
+            HERO_MELEE_RANGE
+        );
     }
 }

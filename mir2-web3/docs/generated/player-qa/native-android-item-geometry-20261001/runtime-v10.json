@@ -1,0 +1,59 @@
+{
+  "source": "452398d4ca0aca3f426acff125b78994614365f5",
+  "device": "emulator-5554",
+  "api": 31,
+  "android": "12",
+  "physicalDevice": false,
+  "authenticatedGameplay": false,
+  "gatewayConfigured": false,
+  "offlinePreview": true,
+  "records": [
+    {
+      "scene": "login",
+      "pid": 4894,
+      "log": "debug-pid4894.log",
+      "start": "start-debug.log",
+      "image": "debug-login.png",
+      "launchStatus": "timeout",
+      "waitTimeMs": 12721,
+      "capturedErrors": 0,
+      "geometryLoaded": false,
+      "inventoryIngressOfflineQueued": false,
+      "phoneLayoutAccepted": false
+    },
+    {
+      "scene": "inventory",
+      "pid": 4973,
+      "log": "preview-inventory-pid4973.log",
+      "start": "start-preview-inventory.log",
+      "image": "preview-inventory.png",
+      "launchStatus": "ok",
+      "waitTimeMs": 9393,
+      "capturedErrors": 0,
+      "geometryLoaded": true,
+      "inventoryIngressOfflineQueued": true,
+      "phoneLayoutAccepted": false
+    },
+    {
+      "scene": "character",
+      "pid": 5037,
+      "log": "preview-character-pid5037.log",
+      "start": "start-preview-character.log",
+      "image": "preview-character.png",
+      "launchStatus": "ok",
+      "waitTimeMs": 8656,
+      "capturedErrors": 0,
+      "geometryLoaded": true,
+      "inventoryIngressOfflineQueued": true,
+      "phoneLayoutAccepted": false
+    }
+  ],
+  "remaining": [
+    "normal-start-wait-timeout",
+    "inventory-covers-status-chat-and-joystick",
+    "character-window-small",
+    "whole-phone-input-sizing",
+    "actual-JNI-WSS-player-loop",
+    "physical-device"
+  ]
+}

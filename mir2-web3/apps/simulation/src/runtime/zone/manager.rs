@@ -410,11 +410,17 @@ impl ZoneManager {
             let mut transferred_clock = None;
             let mut transferred_action_clock = None;
             let mut transferred_poison_clock = None;
-            let online_map_transfer = previous_key.as_ref().is_some_and(|previous| previous != &key);
+            let online_map_transfer = previous_key
+                .as_ref()
+                .is_some_and(|previous| previous != &key);
             if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
-                transferred_poison_clock = self.zones.get(&previous_key)
+                transferred_poison_clock = self
+                    .zones
+                    .get(&previous_key)
                     .and_then(|zone| zone.player_finite_control_poison_clock(&session_id));
-                transferred_action_clock = self.zones.get(&previous_key)
+                transferred_action_clock = self
+                    .zones
+                    .get(&previous_key)
                     .and_then(|zone| zone.player_action_clock(&session_id));
                 transferred_clock = self
                     .zones
@@ -505,7 +511,9 @@ impl ZoneManager {
     }
 
     pub fn player_flaming_sword_armed(&self, session_id: &SessionId, now_ms: u64) -> bool {
-        self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
+        self.session_zones
+            .get(session_id)
+            .and_then(|key| self.zones.get(key))
             .is_some_and(|zone| zone.player_flaming_sword_armed(session_id, now_ms))
     }
 
@@ -581,7 +589,9 @@ impl ZoneManager {
         self.session_zones
             .get(session_id)
             .and_then(|key| self.zones.get(key))
-            .is_some_and(|zone| zone.melee_primary_target_present(session_id, direction, materialized))
+            .is_some_and(|zone| {
+                zone.melee_primary_target_present(session_id, direction, materialized)
+            })
     }
 
     pub fn player_last_seen_move_seq(&self, session_id: &SessionId) -> Option<u64> {

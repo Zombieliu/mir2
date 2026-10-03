@@ -1,0 +1,7 @@
+/tmp/android-belt-java.log:BUILD SUCCESSFUL in 7s
+/tmp/android-belt-build.log:BUILD SUCCESSFUL in 10s
+/tmp/android-belt-build.log:[platform-android] SHA-256: 7ccb4587544447c53fd1c5bba6ae3e6d81b24b9eb7512aeb2cb30e4c0f5baca5
+/tmp/android-belt-build.log:[platform-android] package gate passed
+/tmp/android-belt-debug-build.log:BUILD SUCCESSFUL in 10s
+/tmp/android-belt-debug-build.log:[platform-android] SHA-256: d874bb4e89c31a1f05c94d9edc1a2110e6222bcd59cef9ea7cea8291604eb498
+/tmp/android-belt-debug-build.log:[platform-android] package gate passed

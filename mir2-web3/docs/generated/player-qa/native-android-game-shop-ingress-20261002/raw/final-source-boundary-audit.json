@@ -1,0 +1,68 @@
+{
+  "at": "2026-10-02T13:32:17.806Z",
+  "sourceCommit": "92033b910cc9ddd996c416ec4024af4625e78b31",
+  "clean": true,
+  "preserved": [
+    {
+      "before": {
+        "directory": "/Users/henryliu/obelisk/numeron",
+        "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+        "branch": "codex/steam-main",
+        "status": " M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/\n"
+      },
+      "after": {
+        "directory": "/Users/henryliu/obelisk/numeron",
+        "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+        "branch": "codex/steam-main",
+        "status": " M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/\n"
+      },
+      "sameGitState": true
+    },
+    {
+      "before": {
+        "directory": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+        "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+        "branch": "codex/android-player-journey",
+        "status": ""
+      },
+      "after": {
+        "directory": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+        "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+        "branch": "codex/android-player-journey",
+        "status": ""
+      },
+      "sameGitState": true
+    }
+  ],
+  "legacyGameShopRulesSameBytes": true,
+  "untouched": [
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "workingSha256": "300263e1ae723fe79dc75f9e0a566e57e59cc463e1b5ea43ca981d370a3b7033",
+      "parentSha256": "300263e1ae723fe79dc75f9e0a566e57e59cc463e1b5ea43ca981d370a3b7033"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "workingSha256": "fa05c7d9a93254a063f845c37227cbcc32239614d8ca6072d6cbfc7a1d07a2da",
+      "parentSha256": "fa05c7d9a93254a063f845c37227cbcc32239614d8ca6072d6cbfc7a1d07a2da"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/screenshot.rs",
+      "workingSha256": "f49e4ca4f0929fc51a5c55fc002294c6009ae7a4c1c07dc6ef6c8ff737df0c5b",
+      "parentSha256": "f49e4ca4f0929fc51a5c55fc002294c6009ae7a4c1c07dc6ef6c8ff737df0c5b"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+      "workingSha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055",
+      "parentSha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055"
+    }
+  ],
+  "deviceInfoFile": "connected-devices.txt",
+  "newApkBuilt": false,
+  "newScreenshots": false,
+  "liveAuthentication": false,
+  "liveJavaJni": false,
+  "realPlayerLoop": false,
+  "physicalDeviceAccepted": false,
+  "goalStatus": "Active"
+}

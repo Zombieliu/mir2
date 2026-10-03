@@ -35,7 +35,11 @@ fn new_session_restore_rebases_remaining_skill_cooldown_and_keeps_progression() 
         .expect("source FireBall skill key");
     let mut fireball = learned_fireball(0, 0);
     fireball.key = fireball_key.clone();
-    original.app.world_mut().resource_mut::<SkillResource>().skills = vec![fireball];
+    original
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills = vec![fireball];
     set_runtime_tick(original.app.world_mut(), 3_655);
     original.apply_zone_player_magic_spend(Spell::FireBall, 0, 1_800);
     let cast_skill = original
@@ -140,8 +144,11 @@ fn same_session_checkpoint_restore_preserves_active_skill_cooldown() {
     let mut session = SimulationSession::new(SimulationConfig::default());
     enter_demo_world(&mut session);
     set_runtime_tick(session.app.world_mut(), 10_000);
-    session.app.world_mut().resource_mut::<SkillResource>().skills =
-        vec![learned_fireball(10_005, 10_000_000)];
+    session
+        .app
+        .world_mut()
+        .resource_mut::<SkillResource>()
+        .skills = vec![learned_fireball(10_005, 10_000_000)];
     let checkpoint = session
         .active_character_checkpoint()
         .expect("active character checkpoint");

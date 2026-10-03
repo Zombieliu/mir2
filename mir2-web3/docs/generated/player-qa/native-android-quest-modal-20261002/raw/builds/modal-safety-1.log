@@ -1,0 +1,663 @@
+
+running 16 tests
+test quest_ui::phone::tests::actual_phone_controls_and_text_keep_dp_metrics_in_both_independent_windows ... ok
+test quest_ui::phone::tests::canceled_owner_does_not_promote_a_second_finger_or_emit_a_click ... ok
+test quest_ui::phone::tests::default_desktop_confirmation_geometry_and_controls_remain_without_phone_opt_in ... ok
+test quest_ui::phone::tests::phone_child_entities_survive_no_op_shared_controller_frames ... ok
+test quest_ui::phone::tests::phone_modal_opening_cancels_a_press_owned_by_the_previous_diary ... ok
+test quest_ui::phone::tests::phone_modal_rejects_the_covered_diary_and_scroll_actions ... ok
+test quest_ui::phone::tests::phone_modal_reset_focus_and_other_modal_cancel_an_owned_press ... FAILED
+test quest_ui::phone::tests::phone_modal_still_accepts_its_own_close_with_an_open_npc_dialog ... ok
+test quest_ui::phone::tests::phone_presentation_does_not_offer_an_unauthorized_accept_or_drop_late_detail_lines ... ok
+test quest_ui::phone::tests::phone_quest_confirmation_buttons_survive_unchanged_frames ... ok
+test quest_ui::phone::tests::phone_quest_confirmation_cancel_and_alert_close_use_shared_release_actions ... ok
+test quest_ui::phone::tests::phone_quest_confirmation_uses_readable_text_and_48dp_controls ... ok
+test quest_ui::phone::tests::phone_quest_renderer_reflows_actual_rows_instead_of_scaling_desktop_rows ... ok
+test quest_ui::phone::tests::phone_row_acts_on_release_through_the_existing_shared_controller ... ok
+test quest_ui::phone::tests::phone_swipe_scrolls_actual_scroll_position_without_selecting_a_quest ... ok
+test quest_ui::phone::tests::reset_or_lost_focus_cancels_a_pending_phone_press ... ok
+
+failures:
+
+---- quest_ui::phone::tests::phone_modal_reset_focus_and_other_modal_cancel_an_owned_press stdout ----
+
+thread 'quest_ui::phone::tests::phone_modal_reset_focus_and_other_modal_cancel_an_owned_press' (17812044) panicked at src/quest_phone.rs:1240:13:
+assertion `left == right` failed
+  left: None
+ right: Some(7)
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    quest_ui::phone::tests::phone_modal_reset_focus_and_other_modal_cancel_an_owned_press
+
+test result: FAILED. 15 passed; 1 failed; 0 ignored; 0 measured; 1240 filtered out; finished in 0.36s
+
+   Compiling mir2-client-bevy v0.1.0 (/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy)
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:210:21
+    |
+210 |                     (32. / 3.),
+    |                     ^        ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+210 -                     (32. / 3.),
+210 +                     32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:414:29
+    |
+414 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+414 -                             (32. / 3.),
+414 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:421:29
+    |
+421 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+421 -                             (32. / 3.),
+421 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:476:25
+    |
+476 |                         (32. / 3.),
+    |                         ^        ^
+    |
+help: remove these parentheses
+    |
+476 -                         (32. / 3.),
+476 +                         32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:695:33
+    |
+695 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+695 -                                 (32. / 3.),
+695 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:702:33
+    |
+702 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+702 -                                 (32. / 3.),
+702 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:715:33
+    |
+715 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+715 -                                 (32. / 3.),
+715 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:727:33
+    |
+727 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+727 -                                 (32. / 3.),
+727 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> src/crystal_ui/hero_dialog_render.rs:831:29
+    |
+831 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+831 -                             (32. / 3.),
+831 +                             32. / 3. ,
+    |
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> src/crystal_ui/overlays.rs:76:5
+   |
+76 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `SKILL_ROW_SIZE`
+   --> src/crystal_ui/overlays.rs:127:41
+    |
+127 |     SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE, SKILL_ROW_STEP_Y,
+    |                                         ^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> src/crystal_ui/social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unnecessary parentheses around `if` condition
+    --> src/crystal_ui/overlays.rs:8064:8
+     |
+8064 |     if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |        ^
+8065 |         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                  ^
+     |
+help: remove these parentheses
+     |
+8064 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+8065 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+warning: variable does not need to be mutable
+   --> src/crystal_ui/mail_editor_tests.rs:121:9
+    |
+121 |     let mut draft = draft("abcd");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+    |
+    = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+   --> src/crystal_ui/mail_editor_tests.rs:172:9
+    |
+172 |     let mut draft = draft("letter body");
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+   --> src/crystal_ui/mail_editor_tests.rs:189:9
+    |
+189 |     let mut draft = draft(&message);
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/crystal_ui/overlays.rs:1312:5
+     |
+1312 |     mut pending: ResMut<PendingOperations>,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/crystal_ui/overlays.rs:7198:17
+     |
+7198 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/crystal_ui/overlays.rs:7199:28
+     |
+7199 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> src/crystal_ui/overlays.rs:7199:28
+     |
+7199 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> src/crystal_ui/overlays.rs:7625:18
+     |
+7625 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> src/crystal_ui/overlays.rs:8319:25
+     |
+8319 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> src/crystal_ui/overlays.rs:8320:36
+     |
+8320 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> src/crystal_ui/overlays.rs:8304:5
+     |
+8304 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> src/crystal_ui/overlays.rs:8320:36
+     |
+8320 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+     --> src/crystal_ui/overlays.rs:11789:9
+      |
+11789 |         skill_binding,
+      |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+     --> src/crystal_ui/overlays.rs:11790:9
+      |
+11790 |         skill_persistence,
+      |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: unused variable: `inventory`
+     --> src/crystal_ui/overlays.rs:16250:5
+      |
+16250 |     inventory: &InventoryModel,
+      |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_inventory`
+
+warning: unused variable: `state`
+     --> src/crystal_ui/overlays.rs:16251:5
+      |
+16251 |     state: &NativePlayerUiState,
+      |     ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `compose_ui`
+     --> src/crystal_ui/overlays.rs:16252:5
+      |
+16252 |     compose_ui: &MailComposeUi,
+      |     ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_compose_ui`
+
+warning: variable does not need to be mutable
+   --> src/crystal_ui/mail_parcel_tests.rs:254:9
+    |
+254 |     let mut state = NativePlayerUiState::default();
+    |         ----^^^^^
+    |         |
+    |         help: remove this `mut`
+
+warning: unused variable: `nearby`
+    --> src/quest_ui.rs:1939:5
+     |
+1939 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `overlays::CrystalCharacterWingMaterials` is more private than the item `hero_dialog::render::render`
+   --> src/crystal_ui/hero_dialog_render.rs:234:1
+    |
+234 | / pub fn render(
+235 | |     mut commands: Commands,
+236 | |     roots: Query<Entity, With<OverlayRoot>>,
+237 | |     old: Query<Entity, With<HeroRoot>>,
+...   |
+242 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+243 | | ) {
+    | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+    |
+note: but type `overlays::CrystalCharacterWingMaterials` is only usable at visibility `pub(self)`
+   --> src/crystal_ui/overlays.rs:196:1
+    |
+196 | struct CrystalCharacterWingMaterials([Handle<CrystalAdditiveUiMaterial>; 4]);
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `#[warn(private_interfaces)]` on by default
+
+warning: type `overlays::OverlayButton` is more private than the item `press_real_button`
+    --> src/crystal_ui/npc_shop_layout_tests.rs:107:1
+     |
+ 107 | pub(crate) fn press_real_button(app: &mut App, action: OverlayButton) {
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function `press_real_button` is reachable at visibility `pub(crate)`
+     |
+note: but type `overlays::OverlayButton` is only usable at visibility `pub(self)`
+    --> src/crystal_ui/overlays.rs:3350:1
+     |
+3350 | enum OverlayButton {
+     | ^^^^^^^^^^^^^^^^^^
+
+warning: multiple variants are never constructed
+    --> src/crystal_ui/overlays.rs:3379:5
+     |
+3350 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+3379 |     OptionsMusicVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3380 |     OptionsMusicVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3381 |     OptionsSoundVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3382 |     OptionsSoundVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3383 |     ToggleInventory,
+3384 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+3385 |     ToggleShop,
+     |     ^^^^^^^^^^
+3386 |     ToggleNpcShop,
+     |     ^^^^^^^^^^^^^
+3387 |     ToggleStorage,
+     |     ^^^^^^^^^^^^^
+...
+3390 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+3395 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+3414 |     GroupInviteNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3415 |     GroupInviteNameSubmit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3418 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+3422 |     GuildRecruitNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3426 |     GuildCancelNoticeEdit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+3427 |     SelectGuildMember(u8),
+     |     ^^^^^^^^^^^^^^^^^
+3428 |     GuildKickMember(u8),
+3429 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+3432 |     GuildAssignNextRank,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3441 |     GuildRankNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+...
+3545 |     GameShopQuantityInc,
+     |     ^^^^^^^^^^^^^^^^^^^
+3546 |     GameShopQuantityDec,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3558 |     StorageRemovePassword,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: function `fill_sized_panel` is never used
+     --> src/crystal_ui/overlays.rs:12382:4
+      |
+12382 | fn fill_sized_panel<C: Component>(
+      |    ^^^^^^^^^^^^^^^^
+
+warning: function `overlay_compact_item_button` is never used
+     --> src/crystal_ui/overlays.rs:13983:4
+      |
+13983 | fn overlay_compact_item_button(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `overlay_clickable_text_at` is never used
+     --> src/crystal_ui/overlays.rs:15667:4
+      |
+15667 | fn overlay_clickable_text_at(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_chat_draft` is never used
+     --> src/crystal_ui/overlays.rs:15904:4
+      |
+15904 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+      |    ^^^^^^^^^^^^^^^^^
+
+warning: function `render_game_shop` is never used
+     --> src/crystal_ui/overlays.rs:17612:4
+      |
+17612 | fn render_game_shop(
+      |    ^^^^^^^^^^^^^^^^
+
+warning: function `spawn_game_shop_product` is never used
+     --> src/crystal_ui/overlays.rs:17867:4
+      |
+17867 | fn spawn_game_shop_product(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> src/crystal_ui/mail_editor.rs:13:18
+   |
+13 | pub(super) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `preview_rect` is never used
+   --> src/crystal_ui/select.rs:652:4
+    |
+652 | fn preview_rect(frame: PreviewFrame) -> CrystalRect {
+    |    ^^^^^^^^^^^^
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> src/native_shell_ui.rs:40:7
+   |
+40 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: constant `AUX_CHANGE_PASSWORD_PANEL` is never used
+  --> src/native_shell_ui.rs:50:7
+   |
+50 | const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> src/native_shell_ui.rs:380:5
+    |
+374 | pub(crate) enum NativeShellButton {
+    |                 ----------------- variants in this enum
+...
+380 |     CycleClass,
+    |     ^^^^^^^^^^
+381 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+389 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+390 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_field` is never used
+    --> src/native_shell_ui.rs:2187:4
+     |
+2187 | fn spawn_aux_field(
+     |    ^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> src/native_shell_ui.rs:2307:4
+     |
+2307 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> src/native_shell_ui.rs:2343:4
+     |
+2343 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> src/native_shell_ui.rs:2380:4
+     |
+2380 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter`, `QuestHelp`, `QuestPagePrevious`, and `QuestPageNext` are never constructed
+    --> src/quest_ui.rs:1196:5
+     |
+1148 | enum QuestUiButton {
+     |      ------------- variants in this enum
+...
+1196 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1199 |     QuestHelp,
+     |     ^^^^^^^^^
+1200 |     QuestPagePrevious,
+     |     ^^^^^^^^^^^^^^^^^
+1201 |     QuestPageNext,
+     |     ^^^^^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `wrap_guidance_hint` is never used
+    --> src/quest_ui.rs:4825:4
+     |
+4825 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+    --> src/quest_ui.rs:6609:4
+     |
+6609 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> src/quest_ui.rs:6849:4
+     |
+6849 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `npc_dialog_close_button` is never used
+    --> src/quest_ui.rs:6988:4
+     |
+6988 | fn npc_dialog_close_button(parent: &mut ChildSpawnerCommands) {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> src/skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: method `file_name` is never used
+  --> src/ui_audio.rs:26:19
+   |
+25 | impl NativeUiSound {
+   | ------------------ method in this implementation
+26 |     pub(crate) fn file_name(self) -> &'static str {
+   |                   ^^^^^^^^^
+
+warning: method `clear_pending` is never used
+  --> src/ui_audio.rs:55:19
+   |
+42 | impl NativeUiAudioQueue {
+   | ----------------------- method in this implementation
+...
+55 |     pub(crate) fn clear_pending(&mut self) {
+   |                   ^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:7197:9
+     |
+7197 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:7198:9
+     |
+7198 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:7199:9
+     |
+7199 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:8318:17
+     |
+8318 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:8319:17
+     |
+8319 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> src/crystal_ui/overlays.rs:8320:17
+     |
+8320 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src/crystal_ui/mail_parcel_tests.rs:111:5
+    |
+111 |     drop(compose);
+    |     ^^^^^-------^
+    |          |
+    |          argument has type `&overlays::MailComposeUi`
+    |
+    = note: `#[warn(dropping_references)]` on by default
+help: use `let _ = ...` to ignore the expression or result
+    |
+111 -     drop(compose);
+111 +     let _ = compose;
+    |
+
+warning: calls to `std::mem::drop` with a reference instead of an owned value does nothing
+   --> src/crystal_ui/mail_parcel_tests.rs:112:5
+    |
+112 |     drop(state);
+    |     ^^^^^-----^
+    |          |
+    |          argument has type `&overlays::NativePlayerUiState`
+    |
+help: use `let _ = ...` to ignore the expression or result
+    |
+112 -     drop(state);
+112 +     let _ = state;
+    |
+
+warning: `mir2-client-bevy` (lib test) generated 66 warnings (run `cargo fix --lib -p mir2-client-bevy --tests` to apply 38 suggestions)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 15.83s
+     Running unittests src/lib.rs (mir2-web3/apps/game-client/platform-android/target/shared-sync-build-cache/debug/deps/mir2_client_bevy-459f200103c0b688)
+error: test failed, to rerun pass `--lib`

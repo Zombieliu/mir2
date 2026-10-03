@@ -1,0 +1,99 @@
+{
+  "source": "cfac6ecd4bb66ac7c4b0a2625ff178f1703335a0",
+  "versionCode": 13,
+  "deviceApi": 31,
+  "recoveredFingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys",
+  "density": 440,
+  "recoveredBootId": "149a47de-c5fc-4598-807b-7668129d112d",
+  "captures": [
+    {
+      "name": "debug-login-recovered.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "name": "preview-inventory.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 181883,
+      "sha256": "6f380cc052eec7c4d9c48a371991187147c7416bab40bc67b7db800f349f5460"
+    },
+    {
+      "name": "preview-character.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 166335,
+      "sha256": "11bb49e70a729595baac4a560ca9176a441753fd03c115f2e0fddc325a4b5a92"
+    }
+  ],
+  "logs": [
+    {
+      "name": "debug-login-recovered-pid4438.log",
+      "capturedLines": 219,
+      "errorFatalPanicSignalLines": 0,
+      "missingWeightBarLines": 0
+    },
+    {
+      "name": "preview-character-pid4748.log",
+      "capturedLines": 220,
+      "errorFatalPanicSignalLines": 0,
+      "missingWeightBarLines": 0
+    },
+    {
+      "name": "preview-inventory-pid4622.log",
+      "capturedLines": 375,
+      "errorFatalPanicSignalLines": 0,
+      "missingWeightBarLines": 0
+    }
+  ],
+  "starts": [
+    {
+      "name": "start-debug.log",
+      "status": "timeout",
+      "waitTimeMs": 13463
+    },
+    {
+      "name": "start-debug-recovered.log",
+      "status": "ok",
+      "waitTimeMs": 638
+    },
+    {
+      "name": "start-preview-inventory.log",
+      "status": "ok",
+      "waitTimeMs": 546
+    },
+    {
+      "name": "start-preview-character.log",
+      "status": "ok",
+      "waitTimeMs": 433
+    }
+  ],
+  "sourcePublicationConfirmed": false,
+  "observedRemoteHead": "f04a7439938579480b592b5d4e7381014a612dff",
+  "observationMethod": "Manually inspected original ADB capture bytes of SDK diagnostic Intent scenes; no new touch/drag/IME interaction claim.",
+  "observed": {
+    "offlineBagOriginalWeightBarVisible": true,
+    "offlineBagAvailableWeight": 34,
+    "offlineBagAndPhoneHudGold": 12352,
+    "offlineCharacterOriginalBodyAndWeaponVisible": true,
+    "weightAssetErrorsAbsentInCapturedPids": true,
+    "allFourWeightAssetBytesAccepted": true,
+    "phoneHudWeightVisualAccepted": false,
+    "alternateWeightRatiosAccepted": false,
+    "newControlsInteractionAccepted": false,
+    "fullPhoneUiAccepted": false,
+    "fullResourceReleaseAccepted": false,
+    "startupOrEmulatorStabilityAccepted": false,
+    "authenticatedGameplayAccepted": false,
+    "physicalDeviceAccepted": false
+  },
+  "retainedFailures": [
+    "First normal startup timed out13463ms; the emulator host later aborted in a gRPC callback. That is a host crash record, not proof of an Android game crash.",
+    "Background recovery did not remain running; the retained-session recovery waited at SDK crash-upload consent. CUA could not expose the standalone SDK application.",
+    "The same AVD was recovered with per-launch -crash-report-mode never -no-metrics and no snapshot load/save, no wipe/GPU/auth/global-setting change. The original macOS crash report and app/userdata remain. SDK no-upload handling removed its queued temporary minidump; no recoverable copy of that SDK dump is verified.",
+    "Later observed starts638/546/433ms do not erase earlier timeout/crash or accept full startup/stability. Phone HUD has no visually accepted weight row/bar; only BAG471 is rendered here.",
+    "Ordinary pushes failed in transport; actual GitHub ref and Draft PR still show f04a74399, not this source or local v12 evidence."
+  ]
+}

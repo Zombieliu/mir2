@@ -1,0 +1,74 @@
+[
+  {
+    "name": "android-normal-final",
+    "command": "cargo",
+    "args": [
+      "+1.95.0",
+      "test",
+      "--manifest-path",
+      "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/Cargo.toml",
+      "--lib",
+      "--locked",
+      "--offline",
+      "--",
+      "--test-threads=1"
+    ],
+    "started": "2026-10-01T23:31:27.382Z",
+    "finished": "2026-10-01T23:31:44.477Z",
+    "exitCode": 0
+  },
+  {
+    "name": "android-preview-final",
+    "command": "cargo",
+    "args": [
+      "+1.95.0",
+      "test",
+      "--manifest-path",
+      "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/Cargo.toml",
+      "--lib",
+      "--locked",
+      "--offline",
+      "--features",
+      "ui-preview",
+      "--",
+      "--test-threads=1"
+    ],
+    "started": "2026-10-01T23:31:44.479Z",
+    "finished": "2026-10-01T23:32:01.826Z",
+    "exitCode": 0
+  },
+  {
+    "name": "java-fresh",
+    "command": "./gradlew",
+    "args": [
+      "--no-daemon",
+      "--offline",
+      "--rerun-tasks",
+      "testDebugUnitTest",
+      "testUiPreviewUnitTest"
+    ],
+    "started": "2026-10-01T23:32:01.827Z",
+    "finished": "2026-10-01T23:32:36.269Z",
+    "exitCode": 0
+  },
+  {
+    "name": "api31-debug",
+    "command": "bash",
+    "args": [
+      "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/build-android.sh"
+    ],
+    "started": "2026-10-01T23:32:36.269Z",
+    "finished": "2026-10-01T23:32:38.173Z",
+    "exitCode": 0
+  },
+  {
+    "name": "api31-uiPreview",
+    "command": "bash",
+    "args": [
+      "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/build-android.sh"
+    ],
+    "started": "2026-10-01T23:32:38.174Z",
+    "finished": "2026-10-01T23:32:39.785Z",
+    "exitCode": 0
+  }
+]

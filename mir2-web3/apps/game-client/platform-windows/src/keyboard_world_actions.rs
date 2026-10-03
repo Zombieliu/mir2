@@ -66,7 +66,15 @@ pub fn keyboard_world_actions_system(
             ..Default::default()
         };
     }
-    if !gameplay_input_enabled(shell.as_deref(), ui.as_deref(), notice.as_deref(), quest.as_deref(), big_map.as_deref(), npc_dialog.as_deref(), &windows) {
+    if !gameplay_input_enabled(
+        shell.as_deref(),
+        ui.as_deref(),
+        notice.as_deref(),
+        quest.as_deref(),
+        big_map.as_deref(),
+        npc_dialog.as_deref(),
+        &windows,
+    ) {
         return;
     }
     let Some(ui) = ui.as_deref_mut() else {

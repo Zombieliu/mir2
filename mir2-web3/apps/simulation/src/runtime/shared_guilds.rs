@@ -280,7 +280,8 @@ impl SimulationConfig {
                         name: "Leader".into(),
                         options: 255,
                     }],
-                    members: vec![SharedGuildMember { membership_epoch: 1,
+                    members: vec![SharedGuildMember {
+                        membership_epoch: 1,
                         identity: identity.clone(),
                         name: next.character.name.clone(),
                         rank_index: 0,
@@ -289,7 +290,8 @@ impl SimulationConfig {
                     storage: BTreeMap::new(),
                     buffs: BTreeMap::new(),
                     last_buff_tick_ms: 0,
-                    experience_receipts: BTreeSet::new(), experience_receipt_payloads: Default::default(),
+                    experience_receipts: BTreeSet::new(),
+                    experience_receipt_payloads: Default::default(),
                 };
                 if store
                     .shared_guilds
@@ -353,8 +355,14 @@ impl SimulationConfig {
             if rank.options & 2 == 0 {
                 return Err("server.GuildPermissionDenied".into());
             }
-            if guild.members.iter().any(|member|member.identity.character_index==target.character_index){
-                return Err("ambiguous legacy public character index; account migration required".into());
+            if guild
+                .members
+                .iter()
+                .any(|member| member.identity.character_index == target.character_index)
+            {
+                return Err(
+                    "ambiguous legacy public character index; account migration required".into(),
+                );
             }
             let cap = *mir2_game_data::crystal_guild_settings()
                 .member_caps
@@ -372,7 +380,11 @@ impl SimulationConfig {
                 });
             }
             let rank_index = guild.ranks.last().ok_or("guild rank missing")?.index;
-            guild.members.push(SharedGuildMember { membership_epoch: guild.revision.checked_add(1).ok_or("guild membership epoch exhausted")?,
+            guild.members.push(SharedGuildMember {
+                membership_epoch: guild
+                    .revision
+                    .checked_add(1)
+                    .ok_or("guild membership epoch exhausted")?,
                 identity: target.clone(),
                 name: target_name,
                 rank_index,

@@ -215,9 +215,9 @@ pub fn process_ime(
             return;
         };
         window.ime_enabled = true;
-        let clicked = mouse
-            .as_deref()
-            .is_some_and(|m| m.just_pressed(MouseButton::Left) || m.just_pressed(MouseButton::Right));
+        let clicked = mouse.as_deref().is_some_and(|m| {
+            m.just_pressed(MouseButton::Left) || m.just_pressed(MouseButton::Right)
+        });
         let had_composition = editor.composition().is_some();
         if had_composition
             && (clicked
@@ -358,15 +358,21 @@ pub fn position_ime(
     )>,
 ) {
     let session_revision = reset.as_deref().map_or(0, |revision| revision.0);
-    let mail_target = match (compose.as_deref(), mail_editor.as_deref(), pending.as_deref()) {
-        (Some(compose), Some(editor), Some(pending)) => super::mail_text_adapter::active_mail_text_target(
-            &shell,
-            &ui,
-            compose,
-            editor,
-            pending,
-            session_revision,
-        ),
+    let mail_target = match (
+        compose.as_deref(),
+        mail_editor.as_deref(),
+        pending.as_deref(),
+    ) {
+        (Some(compose), Some(editor), Some(pending)) => {
+            super::mail_text_adapter::active_mail_text_target(
+                &shell,
+                &ui,
+                compose,
+                editor,
+                pending,
+                session_revision,
+            )
+        }
         _ => None,
     };
     if let Some(target) = state.mail_lease.as_ref() {

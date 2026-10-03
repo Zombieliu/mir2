@@ -1,0 +1,1 @@
+2ae6fb0dfe626bc90b41caac027a1fa219aaa11471ac27e42cc9980c286f48bd  apps/web/public/bevy-entity-atlases/manifest.json

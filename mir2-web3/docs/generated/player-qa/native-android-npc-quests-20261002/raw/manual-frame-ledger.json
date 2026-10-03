@@ -1,0 +1,262 @@
+[
+  {
+    "path": "ui-npc-quests/0-cold.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "312f06fc5bca3c79383eef1bb65aca28039a7a07de301db5e39afd05ff8186fb",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Eight manual UI-only NPC quests; quest 1 selected; list and message/reward viewports separate; header close and three footer controls visible."
+  },
+  {
+    "path": "ui-npc-quests/8-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "b873ce1f3cc23e970bda8dbd62ce71a1279029b1cb20e5f5c541bae5d12aa4bc",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual unselected Finish tap opens existing shared controller alert: You must select a reward item. No quest or reward grant is accepted."
+  },
+  {
+    "path": "ui-npc-quests/16-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "312f06fc5bca3c79383eef1bb65aca28039a7a07de301db5e39afd05ff8186fb",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual OK tap closes the alert; NPC list remains open with quest 1 selected."
+  },
+  {
+    "path": "ui-npc-quests/24-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "f97273e4fab9e3912b45e1a5550a1173b2686ff4475cc4521c81a3821d017e6e",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual quest 2 tap moves the selection marker and right-side title to quest 2; initial message lines visible."
+  },
+  {
+    "path": "ui-npc-quests/32-swipe.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "0618ff91fc5477ec50cbd5c6998e3e0c51b04d909dca2a80a7a14c6d549717c2",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual right-side upward swipe advances quest 2 message to lines 2 through 5; left list and selection remain unchanged."
+  },
+  {
+    "path": "ui-npc-quests/40-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "8f4498cd1f2dbd4e548d4e323ef4c94068de3e19e8f62c1a8cb3bf402ec1a520",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual right Down tap advances message to lines 5 through 8; left list remains unchanged."
+  },
+  {
+    "path": "ui-npc-quests/48-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "0618ff91fc5477ec50cbd5c6998e3e0c51b04d909dca2a80a7a14c6d549717c2",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual right Up tap returns message to lines 2 through 5; quest 2 remains selected."
+  },
+  {
+    "path": "ui-npc-quests/56-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "bf0b81352caa3bb2caa25cc39e6dd63629b322e0dd1703a0185373c2cd866590",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual left Down tap scrolls quest list to quests 3 through 5; right message remains quest 2 at its prior offset."
+  },
+  {
+    "path": "ui-npc-quests/64-swipe.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "86a1abf58a7282ded4babd654c8b06b55f625fcac621eace4d401d28eb8514d6",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual left-side upward swipe reaches quests 6 and 7 plus partially clipped quest 8; right quest 2 viewport unchanged."
+  },
+  {
+    "path": "ui-npc-quests/72-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "28c0b038031aa658aa1c391c4cf858ac2539e899c4526bdb05c0cb96b449649d",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual left Down tap clamps at list end; quests 6, 7 and 8 are fully visible and reachable; right quest 2 unchanged."
+  },
+  {
+    "path": "ui-npc-quests/80-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "f51e73b940a32474eb8ffc724d862c59f631c924f8ecb6ba3dd358428c9dfa38",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual quest 8 tap selects quest 8; right title changes and message offset starts at line 0; list end position retained."
+  },
+  {
+    "path": "ui-npc-quests/88-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "3ae01f7a14415463278e22edcbec282a4b76c38b7ae5fe7078291fb64103129f",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual right Down tap exposes Gold 10 and both manual reward choices A and B. This is presentation metadata, not a grant."
+  },
+  {
+    "path": "ui-npc-quests/96-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "9d82237f2b79c759d7c20312dbac3d74f46db09168c6c0e841a5d86dd10438ab",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual choice B tap shows the selection marker on UI choice B. Finish is not tapped after this selection; no grant is accepted."
+  },
+  {
+    "path": "ui-npc-quests/104-home.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "9d82237f2b79c759d7c20312dbac3d74f46db09168c6c0e841a5d86dd10438ab",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual HOME and resume retain quest 8, selected reward B, and independent viewport offsets in the same process."
+  },
+  {
+    "path": "ui-npc-quests/113-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "6a92a4ac5df5357a67a8d3564966f7179fcf8299200d4aef0c995c85a34a7ebd",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual left Up tap exposes quests 4 and 5 plus partial quest 6 while right reward B remains selected; viewport independence retained."
+  },
+  {
+    "path": "ui-npc-quests/121-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "e563553b4dd19c99f682d2c1c446224ff062c9d1a707dfe809484835e4ceaf4d",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual Leave tap closes both NPC dialog and quest-list presentation; ordinary offline phone HUD and touch controls reappear."
+  },
+  {
+    "path": "ui-npc-quests/129-home.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "e563553b4dd19c99f682d2c1c446224ff062c9d1a707dfe809484835e4ceaf4d",
+    "pid": "19449",
+    "scene": "npc-quests-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual HOME and resume retain the closed NPC/list state in the same process; offline phone HUD remains visible."
+  },
+  {
+    "path": "ui-quest-confirmation/0-cold.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "0b7b10383876ad5772e2494f3a9d2b7432b68da8726a61b643ca5f2af4679059",
+    "pid": "20005",
+    "scene": "quest-confirmation-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Manual UI-only confirmation shows Yes and No above the retained one-quest diary/detail; not a server-authorized quest."
+  },
+  {
+    "path": "ui-quest-confirmation/8-tap.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "4dcdec0df143f71071b8816ea483b607244bb1260b3097b028ac7d3b5f141c46",
+    "pid": "20005",
+    "scene": "quest-confirmation-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual No tap closes confirmation; the one-quest diary/detail remains visible with its quest preserved."
+  },
+  {
+    "path": "ui-quest-confirmation/16-home.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "4dcdec0df143f71071b8816ea483b607244bb1260b3097b028ac7d3b5f141c46",
+    "pid": "20005",
+    "scene": "quest-confirmation-manual-ui-only",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Actual HOME and resume retain the closed confirmation and one-quest diary/detail in the same process."
+  },
+  {
+    "path": "baseline-v30/login-cold.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8",
+    "pid": "20183",
+    "scene": "login",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Normal native APK login UI visible with Test server not configured; no credentials entered, authentication performed, or network acceptance claimed. Cold-start frame."
+  },
+  {
+    "path": "baseline-v30/login-resumed.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8",
+    "pid": "20183",
+    "scene": "login",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Normal native APK login UI visible with Test server not configured; no credentials entered, authentication performed, or network acceptance claimed. Actual HOME and resume retain visible UI in the same process."
+  },
+  {
+    "path": "baseline-v30/world-cold.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "3192e085e5647817c13733e6e6e42fc98087a55e4da2b98bac0269fd09b5ae75",
+    "pid": "20270",
+    "scene": "world",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Licensed offline Bichon map, entities/effects and existing phone HUD visible; not live players, gameplay, whole-resource, or performance acceptance. Cold-start frame."
+  },
+  {
+    "path": "baseline-v30/world-resumed.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "f9ec1923bd156de6a16bf06fe685fbca3bb0df818ad95c02bf34f6c2c598211e",
+    "pid": "20270",
+    "scene": "world",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Licensed offline Bichon map, entities/effects and existing phone HUD visible; not live players, gameplay, whole-resource, or performance acceptance. Actual HOME and resume retain visible UI in the same process."
+  },
+  {
+    "path": "baseline-v30/quests-cold.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "dce5a9600e7ab16b18a029e57fccd5a1a57626ffd9b748052cbfb2b9b6e69b06",
+    "pid": "20358",
+    "scene": "quests",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Offline received Daily quest metadata projects into the diary; not the manual NPC fixture and not an authenticated server receipt. Cold-start frame."
+  },
+  {
+    "path": "baseline-v30/quests-resumed.png",
+    "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+    "sha256": "dce5a9600e7ab16b18a029e57fccd5a1a57626ffd9b748052cbfb2b9b6e69b06",
+    "pid": "20358",
+    "scene": "quests",
+    "offlineOnly": true,
+    "primaryAgentViewedOriginal": true,
+    "observation": "Offline received Daily quest metadata projects into the diary; not the manual NPC fixture and not an authenticated server receipt. Actual HOME and resume retain visible UI in the same process."
+  }
+]

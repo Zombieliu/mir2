@@ -272,7 +272,9 @@ pub(super) fn equip_item(
         return vec![failure];
     };
     let mut incoming = staged.items[index].clone();
-    if super::hero_ai::hero_mount::riding(world) && slot != crate::EquipmentSlot::Torch {return vec![failure];}
+    if super::hero_ai::hero_mount::riding(world) && slot != crate::EquipmentSlot::Torch {
+        return vec![failure];
+    }
     if !item_state_can_equip_to_slot(&incoming, slot) {
         return vec![failure];
     }
@@ -1003,29 +1005,90 @@ mod tests {
         use super::super::resources::Stage5SystemsResource;
         use mir2_protocol::{MirClass, MirGender, MirGridType, ServerPacket};
         let mut session = SimulationSession::new(SimulationConfig::default());
-        session.handle_packet(ClientPacket::Login { account_id: "demo".into(), password: "demo".into() });
+        session.handle_packet(ClientPacket::Login {
+            account_id: "demo".into(),
+            password: "demo".into(),
+        });
         session.handle_packet(ClientPacket::StartGame { character_index: 0 });
-        session.handle_packet(ClientPacket::NewHero { name: "Aide".into(), gender: MirGender::Female, class: MirClass::Taoist });
-        session.app.world_mut().resource_mut::<Stage5SystemsResource>().stage5_systems.hero.as_mut().unwrap().auto_pot = true;
+        session.handle_packet(ClientPacket::NewHero {
+            name: "Aide".into(),
+            gender: MirGender::Female,
+            class: MirClass::Taoist,
+        });
+        session
+            .app
+            .world_mut()
+            .resource_mut::<Stage5SystemsResource>()
+            .stage5_systems
+            .hero
+            .as_mut()
+            .unwrap()
+            .auto_pot = true;
         for (stat, value) in [(12, 72), (13, 43)] {
-            assert!(session.handle_packet(ClientPacket::SetAutoPotValue { stat, value }).contains(&ServerPacket::SetAutoPotValue { stat, value }));
+            assert!(session
+                .handle_packet(ClientPacket::SetAutoPotValue { stat, value })
+                .contains(&ServerPacket::SetAutoPotValue { stat, value }));
         }
         for stat in [0, 1, 255] {
-            assert!(session.handle_packet(ClientPacket::SetAutoPotValue { stat, value: 99 }).is_empty());
+            assert!(session
+                .handle_packet(ClientPacket::SetAutoPotValue { stat, value: 99 })
+                .is_empty());
         }
-        let hero = session.app.world().resource::<Stage5SystemsResource>().stage5_systems.hero.as_ref().unwrap();
+        let hero = session
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .unwrap();
         assert_eq!((hero.auto_hp_percent, hero.auto_mp_percent), (72, 43));
         let catalog = mir2_game_data::crystal_item_manifest();
-        let potion = catalog.items.iter().find(|item| item.item_type == super::super::crystal_compat::CRYSTAL_ITEM_TYPE_POTION && item.shape <= 1).unwrap().item_index;
-        let other = catalog.items.iter().find(|item| item.item_type != super::super::crystal_compat::CRYSTAL_ITEM_TYPE_POTION).unwrap().item_index;
+        let potion = catalog
+            .items
+            .iter()
+            .find(|item| {
+                item.item_type == super::super::crystal_compat::CRYSTAL_ITEM_TYPE_POTION
+                    && item.shape <= 1
+            })
+            .unwrap()
+            .item_index;
+        let other = catalog
+            .items
+            .iter()
+            .find(|item| item.item_type != super::super::crystal_compat::CRYSTAL_ITEM_TYPE_POTION)
+            .unwrap()
+            .item_index;
         for grid in [MirGridType::HeroHpItem, MirGridType::HeroMpItem] {
-            let packets = session.handle_packet(ClientPacket::SetAutoPotItem { grid, item_index: potion });
-            assert!(packets.contains(&ServerPacket::SetAutoPotItem { grid: grid as u8, item_index: potion }));
-            assert!(session.handle_packet(ClientPacket::SetAutoPotItem { grid, item_index: other }).is_empty());
+            let packets = session.handle_packet(ClientPacket::SetAutoPotItem {
+                grid,
+                item_index: potion,
+            });
+            assert!(packets.contains(&ServerPacket::SetAutoPotItem {
+                grid: grid as u8,
+                item_index: potion
+            }));
+            assert!(session
+                .handle_packet(ClientPacket::SetAutoPotItem {
+                    grid,
+                    item_index: other
+                })
+                .is_empty());
         }
-        assert!(session.handle_packet(ClientPacket::SetAutoPotItem { grid: MirGridType::Inventory, item_index: potion }).is_empty());
-        let hero = session.app.world().resource::<Stage5SystemsResource>().stage5_systems.hero.as_ref().unwrap();
+        assert!(session
+            .handle_packet(ClientPacket::SetAutoPotItem {
+                grid: MirGridType::Inventory,
+                item_index: potion
+            })
+            .is_empty());
+        let hero = session
+            .app
+            .world()
+            .resource::<Stage5SystemsResource>()
+            .stage5_systems
+            .hero
+            .as_ref()
+            .unwrap();
         assert_eq!((hero.hp_item_index, hero.mp_item_index), (potion, potion));
     }
-
 }
