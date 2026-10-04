@@ -1,0 +1,10 @@
+{
+  "exitCode": 0,
+  "productionSha256": "e8602ca303ea9b8a963602cd4a53901e323106b9f3c8f1068879f1d28c330f14",
+  "testSha256": "afdaa83267f217a65ddd45060bf2a0b1cb74a66df621b15fa902216ef5bff208",
+  "targets": [
+    "shared_experience_owner_tick_life",
+    "shared_monster_ownership",
+    "shared_cross_map_drop_lifecycle"
+  ]
+}

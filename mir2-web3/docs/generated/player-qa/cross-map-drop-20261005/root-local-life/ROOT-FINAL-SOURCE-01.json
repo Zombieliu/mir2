@@ -1,0 +1,110 @@
+{
+  "schema": "mir2.p3a.root-final-source-and-focused-review.v1",
+  "rootBaseline": "753ad7895e39da779b1f453ee4a09b9f0a3c011f",
+  "files": [
+    {
+      "file": "apps/simulation/src/runtime/zone/mod.rs",
+      "sha256": "f0a639fa95bdcf11a0b45c8b08abfcc5e38029a62da8c50e62f95d0e193b5118",
+      "bytes": 1433,
+      "new": false
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/online_identity.rs",
+      "sha256": "8fc962e0c7d270081576b37477619596efedc1b7663730c9620c79b389c54e03",
+      "bytes": 4684,
+      "new": true
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/types.rs",
+      "sha256": "3d0cb53c0da4144da4e7b6969a7442c6934ef0e5833646ea8c0f95407bfb3bd6",
+      "bytes": 51349,
+      "new": false
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/manager.rs",
+      "sha256": "887b6d75e4ea513828075693e32f11c5f9c34adeb9311cf61880dd052ed56e70",
+      "bytes": 37240,
+      "new": false
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+      "sha256": "e8602ca303ea9b8a963602cd4a53901e323106b9f3c8f1068879f1d28c330f14",
+      "bytes": 22736,
+      "new": false
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime.rs",
+      "sha256": "9ab2f4cb3d138be9347b17efafe7bde654f66ab4eff95e4ea2181a7f67712fb3",
+      "bytes": 673600,
+      "new": false
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime/ground_ownership.rs",
+      "sha256": "ba03d424261d54c132bf8a097e46a1b0f556c69ec572cdc2997ad3c520aa0ef8",
+      "bytes": 6875,
+      "new": true
+    },
+    {
+      "file": "apps/simulation/src/runtime/zone/runtime/checkpoint.rs",
+      "sha256": "5c3cdd2f93b10c6052a157da2354a14e3e1f49388cf6310d0e8690d642f512f4",
+      "bytes": 86552,
+      "new": false
+    },
+    {
+      "file": "apps/simulation/src/runtime/drops.rs",
+      "sha256": "8c1adf2f6956376e407ed2f09a917bfcba0108cc97d7f7c02671499c26524851",
+      "bytes": 173405,
+      "new": false
+    },
+    {
+      "file": "apps/gateway/src/routing.rs",
+      "sha256": "bb838c99429da46e9bd4e051bd86daaeb0e88bb385cc67fe0c9875c9e631d931",
+      "bytes": 1240679,
+      "new": false
+    },
+    {
+      "file": "apps/simulation/tests/shared_cross_map_drop_lifecycle.rs",
+      "sha256": "40b35a2b11141247d49062d770c809143afc8baf9eab7f187ad210941cafe0cf",
+      "bytes": 21191,
+      "new": true
+    },
+    {
+      "file": "apps/gateway/src/routing/tests/cross_map_drop_lifecycle_tests.rs",
+      "sha256": "31cf61152aa5835255332fd979c2490cdbbd4d671935cc65e46ddb50dbb30a7b",
+      "bytes": 38114,
+      "new": true
+    },
+    {
+      "file": "docs/CROSS-MAP-DROP-LIFECYCLE-20261004.md",
+      "sha256": "cc0404b896f020a3055d627945a3f0abd94ea1f62192831dbad25c40ca74f5c5",
+      "bytes": 11433,
+      "new": true
+    },
+    {
+      "file": "apps/simulation/tests/shared_monster_ownership.rs",
+      "sha256": "7571f60473f04fdbf247364613df4ef18e6071ca8f6389ce012589c204564c33",
+      "bytes": 27240,
+      "new": false
+    },
+    {
+      "file": "apps/simulation/tests/shared_experience_owner_tick_life.rs",
+      "sha256": "afdaa83267f217a65ddd45060bf2a0b1cb74a66df621b15fa902216ef5bff208",
+      "bytes": 11352,
+      "new": true
+    }
+  ],
+  "exactFrozenPhysicalBytes": true,
+  "rootOriginalSelections": 57,
+  "rootLocalLifeAndAdjacentSelections": 52,
+  "countsOverlapAndAreNotAdded": true,
+  "workerOriginalDistinctChecks": 89,
+  "workerNewDistinctLocalLifeChecks": 3,
+  "boundedWorkerTotalDistinctChecks": 92,
+  "knownPriorEnvironmentFixtureFailureRetained": true,
+  "sameTickLocalTypedDeathChecked": true,
+  "crossZoneSameBatchLife": "OPEN",
+  "objectIdAdmissionCollision": "OPEN; source confirmed, no collision execution",
+  "liveNetworkOrNativeOrHumanOrNaturalProgression": false,
+  "publishedR18IncludesThisSource": false,
+  "servicesOrPlayerSavesChanged": false
+}

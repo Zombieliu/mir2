@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> 2026-10-05 root integrates the bounded one-manager cross-map solo ownership
+> and native ground protection slice, plus identity-matched local typed Dead
+> at actual same-tick impact. Original Manager RED0/6 becomes89 passing checks;
+> the additional genuine life RED2/1 becomes3 passing cases,92 distinct total.
+> Root selects57 original then52 related checks, all pass with overlaps retained.
+> Award source issuance, online transfer/leave epochs, strict60-second clocks,
+> custody/TTL and cold-root validation are checked in prepared local fixtures.
+> Cross-Zone same-batch life and object-ID admission collision remain OPEN;
+> party/Boss/PK, process handoff, SQL, network/native/human/progression stay open.
+> R18/source321316 artifacts and current services/saves are unchanged.
+> [Scope](CROSS-MAP-DROP-LIFECYCLE-20261004.md),
+> [root evidence](generated/player-qa/cross-map-drop-20261005/README.md).
+
+
 > 2026-10-05 exact frozen R18/source321316 completes one isolated prepared
 > ordinary-protocol run. Wizard/Taoist actual natural Death and valid dead Magic
 > inputs retain absolute MP541/260, items and life/position; normal LogOut and

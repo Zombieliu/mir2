@@ -1,0 +1,517 @@
+{
+  "plannedCount": 34,
+  "cases": [
+    {
+      "id": "xp-01",
+      "plannedTitle": "Ordinary owner stays same online object across A to B",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "owner_cross_map_retains_experience_and_source_drop",
+        "ordinary_walk_source_route_and_carried_poison_award_are_source_bound"
+      ],
+      "boundary": "Manager transfer and one-caster native Walk/poison variant, not network multi-client journey.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "xp-02",
+      "plannedTitle": "Return to source map does not act as fresh login",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "owner_return_to_source_does_not_revoke_claim",
+        "ordinary_walk_source_route_and_carried_poison_award_are_source_bound"
+      ],
+      "boundary": "Actual ordinary imported return retains proof.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "xp-03",
+      "plannedTitle": "Periodic poison renews cross-map owner",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "periodic_poison_renews_owner_after_caster_changed_map"
+      ],
+      "boundary": "Source tick after caster transfer refreshes current owner.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "xp-04",
+      "plannedTitle": "Exact five-second boundary",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "adjacent-same-map-attempt-02.log"
+      ],
+      "tests": [
+        "strict_expiration_can_be_renewed_only_by_source_legal_current_owner",
+        "exact_five_second_deadline_keeps_original_owner",
+        "strictly_after_five_seconds_next_effective_attacker_claims_owner"
+      ],
+      "boundary": "Strict five-second equality and expiry, source-legal renewal.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "xp-05",
+      "plannedTitle": "Dead owner Node survives with no later impact",
+      "status": "partial",
+      "logs": [
+        "adjacent-same-map-attempt-02.log",
+        "gateway-adjacent-05-attempt-01.log"
+      ],
+      "tests": [
+        "solo_dead_poison_owner_keeps_source_kill_credit",
+        "dead_poison_level_refills_pools_without_online_revive"
+      ],
+      "boundary": "Actual dead-owner same-map chain retained. Combined dead-owner cross-map XP journey not executed.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "xp-06",
+      "plannedTitle": "A new positive hit may replace a dead owner",
+      "status": "bounded-same-map-regression-pass",
+      "logs": [
+        "adjacent-same-map-attempt-02.log"
+      ],
+      "tests": [
+        "new_effective_attacker_replaces_dead_exp_owner"
+      ],
+      "boundary": "Dead-owner replacement positive damage regression; cross-map dead variant not executed.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "xp-07",
+      "plannedTitle": "True leave revokes from every map",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log"
+      ],
+      "tests": [
+        "true_leave_from_other_map_releases_original_ground_owner",
+        "same_map_fresh_admission_releases_old_ground_owner_and_experience"
+      ],
+      "boundary": "True all-map reference revocation.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "xp-08",
+      "plannedTitle": "Fresh login ABA identity reuse",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "gateway-tests-attempt-08.log",
+        "adjacent-same-map-attempt-02.log"
+      ],
+      "tests": [
+        "fresh_join_cannot_inherit_old_epoch_even_with_reused_ids",
+        "fresh_login_never_accepts_a_replayed_previous_online_award",
+        "fresh_same_map_join_revokes_old_claim_and_old_poison_identity"
+      ],
+      "boundary": "Old/new epoch ABA and old poison lethal tick rejection.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "xp-09",
+      "plannedTitle": "Identity namespace and counter exhaustion",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "simulation-online-identity-attempt-01.log"
+      ],
+      "tests": [
+        "encoded_owner_binds_manager_epoch_account_character_object_and_session",
+        "online_epoch_exhaustion_fails_closed_without_recycling"
+      ],
+      "boundary": "All proof fields/other manager rejected; overflow actual admit, not mirrored arithmetic.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "drop-01",
+      "plannedTitle": "Exactly one-minute owned monster item and gold",
+      "status": "bounded-boundary-pass",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "owned_native_drop_has_strict_original_one_minute_boundary",
+        "source_item_exact_payload_receives_one_uid_and_survives_normal_save_login"
+      ],
+      "boundary": "Gold tests actual relative59999/60000/60001; source-rate item verifies payload/UID. Not every planned item/time combination run.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "drop-02",
+      "plannedTitle": "Cross-map owner still protects source loot",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "owner_cross_map_retains_experience_and_source_drop",
+        "ordinary_walk_source_route_and_carried_poison_award_are_source_bound"
+      ],
+      "boundary": "Source map retains drop; stranger denied, normal owner returns/picks up.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "drop-03",
+      "plannedTitle": "Dead online owner retains protection",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log"
+      ],
+      "tests": [
+        "dead_online_owner_keeps_source_ground_protection_until_true_despawn"
+      ],
+      "boundary": "Typed full-HP corpse keeps original owner protection until true despawn.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "drop-04",
+      "plannedTitle": "Offline owner releases before timer",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log"
+      ],
+      "tests": [
+        "true_leave_from_other_map_releases_original_ground_owner"
+      ],
+      "boundary": "Offline source owner releases early; new epoch cannot inherit.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "drop-05",
+      "plannedTitle": "Repeated same-generation sync never renews",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log"
+      ],
+      "tests": [
+        "repeated_sync_does_not_restart_original_protection"
+      ],
+      "boundary": "Projection sync cannot rebase original protection.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "drop-06",
+      "plannedTitle": "Failed bag fit returns exact original custody",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "cancelled_claim_does_not_restart_original_protection",
+        "detached_custody_retains_deadline_ttl_and_stable_ledger_key",
+        "ordinary_pickup_with_a_prepared_full_bag_restores_exact_original_custody_clocks"
+      ],
+      "boundary": "Actual PickUp bag reservation/cancel and delayed manager custody variants; slot-free later network retry not executed.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "drop-07",
+      "plannedTitle": "Claim rollback after expiry is unprotected",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log"
+      ],
+      "tests": [
+        "detached_custody_retains_deadline_ttl_and_stable_ledger_key",
+        "expired_held_ground_ttl_never_resurrects_on_cancel"
+      ],
+      "boundary": "Post-owner deadline rollback opens; held expired TTL never resurrects.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "drop-08",
+      "plannedTitle": "Forged or replayed capabilities rejected",
+      "status": "partial",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "simulation-checkpoint-attempt-02.log",
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "source_issuance_binds_original_reward_before_and_after_map_membership_change",
+        "lost_proof_is_not_recreated_from_new_membership_or_fresh_login",
+        "exact_ground_drop_identity_is_checkpointed_and_state_root_protected",
+        "source_item_exact_payload_receives_one_uid_and_survives_normal_save_login"
+      ],
+      "boundary": "Source/identity/payload/generation/tamper/repeat negatives covered; not every original claim substitution combination executed.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "drop-09",
+      "plannedTitle": "Manual and player-death ground objects do not inherit monster policy",
+      "status": "partial",
+      "logs": [
+        "green-simulation-attempt-06.log"
+      ],
+      "tests": [
+        "manual_unowned_drop_projection_never_invents_native_item_owner"
+      ],
+      "boundary": "Unowned manual projection does not gain native owner; full ordinary manual/death constructor journey not executed.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "drop-10",
+      "plannedTitle": "Variable scheduling cadence does not alter wall deadline",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log"
+      ],
+      "tests": [
+        "irregular_tick_cadence_does_not_replace_birth_with_latest_sync_or_tick"
+      ],
+      "boundary": "Irregular absolute now_ms and strict boundary; not every original cadence permutation.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "fault-01",
+      "plannedTitle": "New verified checkpoint preserves same live continuation",
+      "status": "bounded-capture-pass",
+      "logs": [
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "cold_world_checkpoint_keeps_source_item_payload_and_ttl_but_revokes_all_online_owners"
+      ],
+      "boundary": "Capture retains actual live instance proof. All deserialization deliberately cold; no hot decode authority restoration.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "fault-02",
+      "plannedTitle": "Cold world recovery revokes online ownership but preserves loot",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "gateway-tests-attempt-08.log",
+        "adjacent-same-map-attempt-02.log"
+      ],
+      "tests": [
+        "cold_manager_checkpoint_never_recreates_original_online_nodes",
+        "cold_world_checkpoint_keeps_source_item_payload_and_ttl_but_revokes_all_online_owners",
+        "authenticated_cold_checkpoint_preserves_state_but_revokes_live_owner"
+      ],
+      "boundary": "Valid cold commitments keep payload/TTL and revoke live authority; fresh Join/Login cannot reclaim.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "fault-03",
+      "plannedTitle": "Legacy root verifies before new metadata migration",
+      "status": "bounded-pass",
+      "logs": [
+        "simulation-checkpoint-attempt-02.log",
+        "simulation-experience-owner-attempt-01.log"
+      ],
+      "tests": [
+        "legacy_v5_authenticates_original_item_before_ignoring_unbound_forward_owner_fields",
+        "legacy_v4_forward_claim_and_forced_impact_are_neutralized"
+      ],
+      "boundary": "Legacy1-5 selected migration fixtures/root validation and forward-owner neutralization.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "fault-04",
+      "plannedTitle": "New metadata tampering rejected",
+      "status": "bounded-negative-pass",
+      "logs": [
+        "green-simulation-attempt-06.log",
+        "simulation-checkpoint-attempt-02.log",
+        "adjacent-same-map-attempt-02.log"
+      ],
+      "tests": [
+        "encoded_owner_binds_manager_epoch_account_character_object_and_session",
+        "new_online_metadata_is_integrity_bound_but_cold_decode_never_grants_authority",
+        "checkpoint_exp_owner_tampering_cannot_bypass_root_authentication"
+      ],
+      "boundary": "Current metadata/payload tampering rejected; original complete checkpoint HP tamper rejected.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "fault-05",
+      "plannedTitle": "Unknown commit outcome retains economic receipt",
+      "status": "partial",
+      "logs": [
+        "gateway-tests-attempt-08.log",
+        "gateway-adjacent-05-attempt-01.log"
+      ],
+      "tests": [
+        "unknown_publication_retains_exact_source_receipt_without_faked_exp_success",
+        "known_reward_save_failure_keeps_source_epoch_for_one_exact_retry"
+      ],
+      "boundary": "Actual file rename/directory-sync unknown outcome freezes exact receipt and ordinary Logout; SQL lost response/recovery restart/reconnect settlement not executed.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "fault-06",
+      "plannedTitle": "Definitive save rejection before economic commit",
+      "status": "bounded-pass",
+      "logs": [
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "known_reward_save_failure_keeps_source_epoch_for_one_exact_retry",
+        "ordinary_pickup_with_a_prepared_full_bag_restores_exact_original_custody_clocks"
+      ],
+      "boundary": "Definitive reward failure retries once; rejected ordinary pickup preserves source custody clocks.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "fault-07",
+      "plannedTitle": "Both DB and recovery journal fail on teardown",
+      "status": "open",
+      "logs": [],
+      "tests": [],
+      "boundary": "Both DB and recovery journal failure not executed; existing durability extension not claimed as immediate original Disconnect parity.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "fault-08",
+      "plannedTitle": "Retained runtime resume versus true fresh login",
+      "status": "partial",
+      "logs": [
+        "gateway-adjacent-05-attempt-01.log",
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "dead_poison_retained_bootstrap_preserves_online_life",
+        "fresh_login_never_accepts_a_replayed_previous_online_award"
+      ],
+      "boundary": "Same-runtime bootstrap vs fresh local credential login checked; WS retention timeout/token rotation not executed.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "fault-09",
+      "plannedTitle": "Parallel tick deterministic cross-map resolution",
+      "status": "bounded-pass",
+      "logs": [
+        "green-simulation-attempt-06.log"
+      ],
+      "tests": [
+        "parallel_source_zone_tick_matches_sequential_cross_map_owner_and_payload"
+      ],
+      "boundary": "Four zones exercise actual parallel path; equivalent ordered reward payload/clocks/current issuance, independently random manager namespaces preclude raw-root equality.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "protocol-01",
+      "plannedTitle": "Real imported walk entry, kill and source drop receipts",
+      "status": "bounded-ordinary-variant-pass",
+      "logs": [
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "ordinary_walk_source_route_and_carried_poison_award_are_source_bound",
+        "source_item_exact_payload_receives_one_uid_and_survives_normal_save_login"
+      ],
+      "boundary": "One prepared caster departs before actual poison kill. Imported Walk/return, MapInformation, spend, source drop, EXP, UID and normal saves proven; planned rival multi-client variant/live transport not run.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "protocol-02",
+      "plannedTitle": "Rejected and accepted ordinary Logout",
+      "status": "partial",
+      "logs": [
+        "gateway-tests-attempt-08.log"
+      ],
+      "tests": [
+        "unknown_publication_retains_exact_source_receipt_without_faked_exp_success",
+        "ordinary_walk_source_route_and_carried_poison_award_are_source_bound"
+      ],
+      "boundary": "Ordinary LogOut rejects unconfirmed save and preserves proof; successful LogOut/Login revokes. Crystal combat-delay LogOutFailed packet variant not executed.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "scope-01",
+      "plannedTitle": "Original party EXP/pickup is not existing name/equal-share logic",
+      "status": "open-source-gap",
+      "logs": [],
+      "tests": [],
+      "boundary": "Candidate name/equal party split unchanged; original level-weighted object-reference party parity unaccepted.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "scope-02",
+      "plannedTitle": "Boss contribution last-hit is not source LastHitter",
+      "status": "open-source-gap",
+      "logs": [],
+      "tests": [],
+      "boundary": "Boss/PK contribution and original LastHitter not rewritten or accepted; no natural Boss/book drop result.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "scope-03",
+      "plannedTitle": "Cross-owner ZoneId/handoff is not map membership alone",
+      "status": "open-architecture-boundary",
+      "logs": [],
+      "tests": [],
+      "boundary": "One manager only. Cross-Gateway ZoneId/process handoff needs separate authority coordinator and remains unaccepted.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    },
+    {
+      "id": "life-51e8-preserve",
+      "plannedTitle": "Latest full-HP corpse boundary survives crossmap XP/drop changes",
+      "status": "bounded-regression-pass",
+      "logs": [
+        "gateway-adjacent-05-attempt-01.log",
+        "adjacent-same-map-attempt-02.log"
+      ],
+      "tests": [
+        "dead_poison_level_refills_pools_without_online_revive",
+        "native_zero_hp_death_rejects_valid_magic_without_spend_hit_or_turn",
+        "full_hp_poison_level_corpse_blocks_normal_potion_but_scroll_explicitly_revives"
+      ],
+      "boundary": "All12 frozen death18 actual ordinary Magic/poison-death cases pass unchanged; no new combined dead-crossmap network journey claim.",
+      "allOriginalPlannedStepsAccepted": false,
+      "networkAccepted": false
+    }
+  ],
+  "completeP3Accepted": false,
+  "everyPlannedScenarioPassed": false
+}

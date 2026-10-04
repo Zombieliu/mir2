@@ -1,0 +1,23 @@
+{
+  "areNewRedOrNetworkAcceptance": false,
+  "additionalApprovedExistingTest": "apps/simulation/tests/shared_monster_ownership.rs",
+  "beforeSourceReceipt": "fixture-adaptation-before/source-before.json",
+  "realFailures": [
+    "adjacent-same-map-attempt-01.log",
+    "simulation-checkpoint-attempt-01.log"
+  ],
+  "adjacentExactPatch": "approved-adjacent-fixture-adaptations.patch",
+  "gatewayExactHunks": "p3a-complete.patch: apps/gateway/src/routing.rs test section",
+  "gatewayTests": [
+    "shared_in_process_runtime_emits_gain_experience_after_kill_award_commit",
+    "shared_in_process_runtime_uses_account_inventory_service_boundary",
+    "gateway_kill_award_level_up_updates_zone_and_personal_vitals",
+    "shared_zone_state_dispatches_current_and_pending_monster_kill_awards -> shared_zone_state_rejects_unbound_legacy_monster_kill_awards"
+  ],
+  "adjacentTests": [
+    "authenticated_checkpoint_retains_owner_without_extending_deadline -> authenticated_cold_checkpoint_preserves_state_but_revokes_live_owner",
+    "fresh_same_map_join_revokes_old_claim_and_old_poison_identity",
+    "complete_zone_checkpoint_restores_authoritative_and_derived_state"
+  ],
+  "guardRationale": "Direct fake shared native awards have no source issuance. Cold integrity must not retain a live Node. Logout clears poison caster, not the active green effect/absolute timer. Existing EXP/life/vitals/payload assertions remain; new tamper/epoch/positive-damage assertions are required."
+}

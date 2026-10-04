@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.p3a.root-frozen-integration.v1",
+  "rootRevision": "1b5e64dcf43ae5b8b543cbed4becb6da285a631d",
+  "sourceFilesVerified": 14,
+  "allExactFrozenBytes": true,
+  "diffCheckPassed": true,
+  "sameTickLocalLifeReviewOpen": true,
+  "productTestsRun": false,
+  "committed": false,
+  "published": false,
+  "servicesChanged": false,
+  "playerSavesChanged": false
+}

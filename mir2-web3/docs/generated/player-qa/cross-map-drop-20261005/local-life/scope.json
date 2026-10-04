@@ -1,0 +1,15 @@
+{
+  "phase": "p3-local-life-review-fix-01",
+  "scope": [
+    "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs",
+    "apps/simulation/tests/shared_experience_owner_tick_life.rs"
+  ],
+  "baselineHead": "57729ba8c1473ca920a8ea8b3d6e11105d9d4d93",
+  "baselineProductionSha256": "c3b12a1a0685266554b911727b9c1d7c9dbc0ba1ded4818c667951f530ed5ec5",
+  "target": "C:/mir2-build/gateway-tests-r50",
+  "jobs": 2,
+  "status": "before-test-before-production-change",
+  "notNetworkAcceptance": true,
+  "crossZoneSameBatchLife": "OPEN",
+  "objectIdCollision": "read-only separate finding"
+}

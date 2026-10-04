@@ -1,0 +1,26 @@
+{
+  "command": [
+    "cargo",
+    "+1.95.0",
+    "test",
+    "--offline",
+    "--locked",
+    "--jobs",
+    "2",
+    "-p",
+    "mir2-gateway",
+    "--lib",
+    "dead_experience_chain_tests"
+  ],
+  "cwd": "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey\\mir2-web3",
+  "target": "C:/mir2-build/gateway-tests-r49",
+  "jobs": 2,
+  "startedUtc": "2026-10-04T17:50:45.547732+00:00",
+  "elapsedSeconds": 23.250051200011512,
+  "exitCode": 0,
+  "logSha256": "c0aeb1299c7b8725f12935d474d1dcadb8d1af2f40c09a56f15c6fc8257f1e5a",
+  "isolatedFaultReceiptDir": "C:\\mir2-playtest-releases\\20261004-native-r18\\p3-root-review-01",
+  "privateFixtureContentsExported": false,
+  "networkAcceptance": false,
+  "overlapsWorkerChecks": true
+}

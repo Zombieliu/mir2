@@ -2312,6 +2312,8 @@ struct ZoneMapSnapshotLayer {
     removed_drop_ids: BTreeSet<u32>,
     drop_ownership_expires_at_ms: BTreeMap<u32, u64>,
     drop_expires_at_ms: BTreeMap<u32, u64>,
+    #[serde(default, skip_serializing_if = "BTreeSet::is_empty")]
+    original_monster_owner_drop_ids: BTreeSet<u32>,
 }
 
 impl ZoneMapSnapshotLayer {
@@ -2545,6 +2547,24 @@ struct ZoneJourneyEventProgress {
     committed: BTreeSet<ZoneJourneyEventIdentity>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct PendingOwnedMonsterKillProof {
+    session_id: SessionId,
+    source: ZoneKey,
+    online_owner: String,
+}
+
+fn pending_owned_kill_proof_key(key: &ZonePresenceKey, award: &ZoneMonsterKillAward) -> String {
+    let mut payload = award.clone();
+    // Receipt preparation can enrich these fields during an unknown-outcome
+    // retry. The source-born gameplay payload and its live authority stay fixed.
+    payload.source_receipt_key = None;
+    payload.experience_selection = None;
+    let bytes = serde_json::to_vec(&(key.account_id.as_str(), key.character_index, payload))
+        .expect("owned kill payload encodes");
+    Sha256::digest(bytes).iter().map(|byte|format!("{byte:02x}")).collect()
+}
+
 #[derive(Debug)]
 struct SharedInProcessZoneState {
     next_zone_object_id: u32,
@@ -2563,6 +2583,7 @@ struct SharedInProcessZoneState {
     pending_zone_shout_consumes: BTreeMap<ZonePresenceKey, (bool, bool)>,
     pending_zone_ground_drop_claims: BTreeMap<ZonePresenceKey, Vec<GroundDropClaimTicket>>,
     pending_zone_monster_kill_awards: BTreeMap<ZonePresenceKey, Vec<ZoneMonsterKillAward>>,
+    pending_zone_monster_kill_proofs: BTreeMap<String, PendingOwnedMonsterKillProof>,
     pending_zone_player_damages: BTreeMap<ZonePresenceKey, Vec<QueuedZoneVitalDelta>>,
     pending_zone_player_heals: BTreeMap<ZonePresenceKey, Vec<i32>>,
     vital_receipt_progress: BTreeMap<ZonePresenceKey, ZoneVitalReceiptProgress>,
@@ -2630,6 +2651,8 @@ struct SharedInProcessZoneStateCheckpoint {
     pending_zone_shout_consumes: Vec<(ZonePresenceKey, (bool, bool))>,
     pending_zone_ground_drop_claims: Vec<(ZonePresenceKey, Vec<GroundDropClaimTicket>)>,
     pending_zone_monster_kill_awards: Vec<(ZonePresenceKey, Vec<ZoneMonsterKillAward>)>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pending_zone_monster_kill_proofs: BTreeMap<String, PendingOwnedMonsterKillProof>,
     pending_zone_player_damages: Vec<(ZonePresenceKey, Vec<QueuedZoneVitalDelta>)>,
     pending_zone_player_heals: Vec<(ZonePresenceKey, Vec<i32>)>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -2790,6 +2813,7 @@ impl SharedInProcessZoneStateCheckpoint {
         self.pending_zone_shout_consumes.clear();
         self.pending_zone_ground_drop_claims.clear();
         self.pending_zone_monster_kill_awards.clear();
+        self.pending_zone_monster_kill_proofs.clear();
         self.pending_zone_player_damages.clear();
         self.pending_zone_player_heals.clear();
         self.vital_receipt_progress.clear();
@@ -2869,6 +2893,7 @@ impl SharedInProcessZoneState {
             pending_zone_shout_consumes: BTreeMap::new(),
             pending_zone_ground_drop_claims: BTreeMap::new(),
             pending_zone_monster_kill_awards: BTreeMap::new(),
+            pending_zone_monster_kill_proofs: BTreeMap::new(),
             pending_zone_player_damages: BTreeMap::new(),
             pending_zone_player_heals: BTreeMap::new(),
             vital_receipt_progress: BTreeMap::new(),
@@ -2944,6 +2969,7 @@ impl SharedInProcessZoneState {
                 .clone()
                 .into_iter()
                 .collect(),
+            pending_zone_monster_kill_proofs: self.pending_zone_monster_kill_proofs.clone(),
             pending_zone_player_damages: self
                 .pending_zone_player_damages
                 .clone()
@@ -3008,6 +3034,7 @@ impl SharedInProcessZoneState {
             pending_zone_shout_consumes: Vec::new(),
             pending_zone_ground_drop_claims: Vec::new(),
             pending_zone_monster_kill_awards: Vec::new(),
+            pending_zone_monster_kill_proofs: BTreeMap::new(),
             pending_zone_player_damages: Vec::new(),
             pending_zone_player_heals: Vec::new(),
             vital_receipt_progress: Vec::new(),
@@ -3262,6 +3289,7 @@ impl SharedInProcessZoneState {
                 .pending_zone_monster_kill_awards
                 .into_iter()
                 .collect(),
+            pending_zone_monster_kill_proofs: checkpoint.pending_zone_monster_kill_proofs,
             pending_zone_player_damages: {
                 let mut deltas: BTreeMap<ZonePresenceKey, Vec<QueuedZoneVitalDelta>> =
                     checkpoint.pending_zone_player_damages.into_iter().collect();
@@ -3452,6 +3480,8 @@ impl SharedInProcessZoneState {
         self.pending_zone_shout_consumes.remove(key);
         self.pending_zone_ground_drop_claims.remove(key);
         self.pending_zone_monster_kill_awards.remove(key);
+        let departed_session = Self::zone_session_id_for_key(key);
+        self.pending_zone_monster_kill_proofs.retain(|_,proof|proof.session_id != departed_session);
         self.pending_zone_player_damages.remove(key);
         self.pending_zone_player_heals.remove(key);
         self.vital_receipt_progress.remove(key);
@@ -4179,6 +4209,7 @@ impl SharedInProcessZoneState {
             return None;
         }
         let outbounds = if committed {
+            self.zone_manager.forget_detached_ground_custody(&expected.zone_key, &expected.ticket);
             Vec::new()
         } else {
             let outbounds = self.zone_manager.restore_detached_ground_drop_claim(
@@ -4207,6 +4238,8 @@ impl SharedInProcessZoneState {
     }
 
     fn queue_zone_monster_kill_award(&mut self, key: ZonePresenceKey, award: ZoneMonsterKillAward) {
+        // Queuing cannot mint a new proof from the recipient's current map.
+        // Only the source-issued Owned envelope installs this sidecar.
         self.pending_zone_monster_kill_awards
             .entry(key)
             .or_default()
@@ -4242,13 +4275,54 @@ impl SharedInProcessZoneState {
         }
     }
 
+    fn sync_authoritative_zone_drops_for_source(&mut self, source: &ZoneKey, drops: &[GroundDropSnapshot]) {
+        let snapshots: Vec<_> = drops.iter().map(|drop| (
+            self.zone_manager.ground_drop_snapshot_for_key(source, drop.object_id).unwrap_or_else(||drop.clone()),
+            self.zone_manager.ground_drop_absolute_clocks_for_key(source, drop.object_id),
+            self.zone_manager.native_ground_drop_deadline_for_key(source, drop.object_id))).collect();
+        let map = self.maps.entry(source.map_file_name.clone()).or_default();
+        for (mut drop, clocks, native) in snapshots {
+            if map.removed_drop_ids.contains(&drop.object_id) { continue; }
+            if let Some(native_deadline) = native {
+                map.original_monster_owner_drop_ids.insert(drop.object_id);
+                match native_deadline {
+                    Some(deadline) => { map.drop_ownership_expires_at_ms.insert(drop.object_id, deadline); }
+                    None => { map.drop_ownership_expires_at_ms.remove(&drop.object_id); drop.ownership_remaining_ticks = None; }
+                }
+            } else { Self::sync_drop_ownership_deadline(map, &drop, shared_gateway_now_ms()); }
+            if let Some((_, ttl)) = clocks {
+                match ttl {
+                    Some(deadline) => { map.drop_expires_at_ms.insert(drop.object_id, deadline); }
+                    None => { map.drop_expires_at_ms.remove(&drop.object_id); }
+                }
+            }
+            map.ground_drops.insert(drop.object_id, drop);
+        }
+    }
+
     fn take_pending_zone_monster_kill_awards(
         &mut self,
         key: &ZonePresenceKey,
     ) -> Vec<ZoneMonsterKillAward> {
-        self.pending_zone_monster_kill_awards
+        let session_id = Self::zone_session_id_for_key(key);
+        let awards = self.pending_zone_monster_kill_awards
             .remove(key)
-            .unwrap_or_default()
+            .unwrap_or_default();
+        awards.into_iter().filter(|award|self.pending_zone_monster_kill_proofs
+            .get(&pending_owned_kill_proof_key(key,award))
+            .is_some_and(|proof|self.zone_manager.issued_monster_award_is_current(&proof.source,&session_id,&proof.online_owner,award)))
+            .collect()
+    }
+
+    fn forget_owned_monster_kill_proof(&mut self, key: &ZonePresenceKey, award: &ZoneMonsterKillAward) {
+        if let Some(proof) = self.pending_zone_monster_kill_proofs.remove(&pending_owned_kill_proof_key(key,award)) {
+            self.zone_manager.acknowledge_issued_monster_award(&proof.source,&proof.session_id,award);
+        }
+    }
+    fn owned_monster_kill_proof_is_current(&self, key: &ZonePresenceKey, award: &ZoneMonsterKillAward) -> bool {
+        self.pending_zone_monster_kill_proofs.get(&pending_owned_kill_proof_key(key,award))
+            .is_some_and(|proof|self.zone_manager.issued_monster_award_is_current(&proof.source,
+                &Self::zone_session_id_for_key(key),&proof.online_owner,award))
     }
 
     // Signed settled vital deltas preserve interleaved healing and damage.
@@ -4474,21 +4548,18 @@ impl SharedInProcessZoneState {
                         self.queue_zone_ground_drop_claim(key, ticket);
                     }
                 }
-                ZoneOutbound::MonsterKillAward { session_id, award } => {
-                    let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
-                        continue;
-                    };
-                    if self.teardown_fenced(&key)
-                        && !(allow_fenced_current && current_key == Some(&key))
-                    {
-                        continue;
-                    }
-                    self.sync_authoritative_zone_drops_for_key(&key, &award.drops);
-                    if current_key == Some(&key) {
-                        current_monster_kill_awards.push(award);
-                    } else {
-                        self.queue_zone_monster_kill_award(key, award);
-                    }
+                // Standalone personal compatibility has no authority over the
+                // shared manager's native experience or ground-item births.
+                ZoneOutbound::MonsterKillAward { .. } => {}
+                ZoneOutbound::OwnedMonsterKillAward { session_id, source, online_owner, award } => {
+                    if !self.zone_manager.issued_monster_award_is_current(&source,&session_id,&online_owner,&award) { continue; }
+                    let Some(key) = self.zone_session_keys.get(&session_id).cloned() else { continue; };
+                    if self.teardown_fenced(&key) && !(allow_fenced_current && current_key == Some(&key)) { continue; }
+                    self.sync_authoritative_zone_drops_for_source(&source, &award.drops);
+                    self.pending_zone_monster_kill_proofs.insert(pending_owned_kill_proof_key(&key,&award),
+                        PendingOwnedMonsterKillProof { session_id, source, online_owner });
+                    if current_key == Some(&key) { current_monster_kill_awards.push(award); }
+                    else { self.queue_zone_monster_kill_award(key, award); }
                 }
                 ZoneOutbound::MagicPractice { receipt } => {
                     let Some(key) = self.zone_session_keys.get(&receipt.session_id).cloned() else {
@@ -4745,6 +4816,7 @@ impl SharedInProcessZoneState {
         drop: &GroundDropSnapshot,
         now_ms: u64,
     ) {
+        if map.original_monster_owner_drop_ids.contains(&drop.object_id) { return; }
         map.drop_expires_at_ms
             .entry(drop.object_id)
             .or_insert_with(|| {
@@ -4772,7 +4844,9 @@ impl SharedInProcessZoneState {
         if map
             .drop_ownership_expires_at_ms
             .get(&object_id)
-            .is_some_and(|expires_at_ms| now_ms >= *expires_at_ms)
+            .is_some_and(|expires_at_ms| if map.original_monster_owner_drop_ids.contains(&object_id) {
+                now_ms > *expires_at_ms
+            } else { now_ms >= *expires_at_ms })
         {
             map.drop_ownership_expires_at_ms.remove(&object_id);
             if let Some(drop) = map.ground_drops.get_mut(&object_id) {
@@ -5501,6 +5575,16 @@ impl SharedInProcessZoneState {
     }
 
     fn restore_drop(&mut self, map_file_name: &str, drop: GroundDropSnapshot) {
+        let source = ZoneKey::for_map(map_file_name);
+        if self.zone_manager.zone(&source).is_some() {
+            // The Zone restored the exact immutable custody clocks first.
+            // Missing means the original TTL elapsed; never mirror the ticket
+            // into a newly born item with a fresh lifetime.
+            let Some(drop) = self.zone_manager.ground_drop_snapshot_for_key(&source, drop.object_id) else { return; };
+            self.maps.entry(map_file_name.into()).or_default().removed_drop_ids.remove(&drop.object_id);
+            self.sync_authoritative_zone_drops_for_source(&source, &[drop]);
+            return;
+        }
         let map = self.maps.entry(map_file_name.to_string()).or_default();
         map.removed_drop_ids.remove(&drop.object_id);
         Self::sync_drop_ownership_deadline(map, &drop, shared_gateway_now_ms());
@@ -10914,6 +10998,8 @@ impl SharedInProcessZoneSessionRuntime {
         let mut awards = awards.into_iter();
         while let Some(award) = awards.next() {
             let mut retry_award = award.clone();
+            if !self.zone_state.lock().map_err(|_|"shared zone presence mutex is poisoned".to_string())?
+                .owned_monster_kill_proof_is_current(key,&award) { continue; }
             let outcome = self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
                 identity: identity.clone(),
                 command: SharedAccountInventoryCommand::MonsterKillAward(award),
@@ -10937,6 +11023,8 @@ impl SharedInProcessZoneSessionRuntime {
                     "monster kill award economy commit failed during teardown drain".to_string(),
                 );
             }
+            self.zone_state.lock().map_err(|_|"shared zone presence mutex is poisoned".to_string())?
+                .forget_owned_monster_kill_proof(key,&retry_award);
             if receipt.packets.iter().any(|packet| matches!(packet, ServerPacket::LevelChanged { .. })) {
                 self.sync_current_zone_vitals_from_inner();
             }
@@ -10956,6 +11044,8 @@ impl SharedInProcessZoneSessionRuntime {
         let mut remaining = awards.into_iter();
         let mut packets = Vec::new();
         while let Some(mut award) = remaining.next() {
+            if !self.zone_state.lock().expect("shared zone presence mutex")
+                .owned_monster_kill_proof_is_current(&key,&award) { continue; }
             let outcome = self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
                 identity: identity.clone(),
                 command: SharedAccountInventoryCommand::MonsterKillAward(award.clone()),
@@ -10964,7 +11054,11 @@ impl SharedInProcessZoneSessionRuntime {
                 award.source_receipt_key = Some(idempotency_key.clone());
             }
             match outcome {
-                SharedAccountInventoryCommitOutcome::Confirmed(receipt) if receipt.committed => packets.extend(receipt.packets),
+                SharedAccountInventoryCommitOutcome::Confirmed(receipt) if receipt.committed => {
+                    self.zone_state.lock().expect("shared zone presence mutex")
+                        .forget_owned_monster_kill_proof(&key,&award);
+                    packets.extend(receipt.packets);
+                }
                 _ => {
                     // Keep the exact original envelope on known failure and
                     // unknown publication alike. A frozen source rejects later
@@ -15590,6 +15684,8 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "cross_map_drop_lifecycle_tests.rs"]
+    mod cross_map_drop_lifecycle_tests;
     #[path = "dead_experience_chain_tests.rs"]
     mod dead_experience_chain_tests;
     #[path = "crowded_escape_tests.rs"]
@@ -18451,7 +18547,7 @@ mod tests {
     }
 
     #[test]
-    fn shared_zone_state_dispatches_current_and_pending_monster_kill_awards() {
+    fn shared_zone_state_rejects_unbound_legacy_monster_kill_awards() {
         let mut state = SharedInProcessZoneState::new();
         let current_key = ZonePresenceKey {
             account_id: "current".to_string(),
@@ -18513,10 +18609,10 @@ mod tests {
             Some(&current_key),
         );
 
-        assert_eq!(current_awards, vec![award.clone()]);
+        assert!(current_awards.is_empty());
         assert_eq!(
             state.take_pending_zone_monster_kill_awards(&remote_key),
-            vec![award]
+            Vec::new()
         );
         state.apply_shared_entity_packets("0", &[ground_drop_spawn_packet(&drop)]);
         let shared_drop = state
@@ -18524,7 +18620,7 @@ mod tests {
             .get("0")
             .and_then(|map| map.ground_drops.get(&drop.object_id))
             .expect("kill award should replace the legacy packet snapshot");
-        assert_eq!(shared_drop, &drop);
+        assert_ne!(shared_drop, &drop, "unbound legacy award cannot replace canonical ground metadata");
     }
 
     #[test]
@@ -18534,7 +18630,7 @@ mod tests {
         start_new_runtime(&mut runtime, "zone-kill-award", "Blade");
         let before_experience = runtime.inner.world_snapshot().player_experience;
 
-        let packets = runtime.apply_zone_monster_kill_awards(vec![ZoneMonsterKillAward {
+        let input = ZoneMonsterKillAward {
             source_receipt_key: None,
             experience_selection: None,
             monster_object_id: 9100,
@@ -18543,7 +18639,9 @@ mod tests {
             experience: 6,
             drops: Vec::new(),
             boss_audit: None,
-        }]);
+        };
+        let generated = cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, input);
+        let packets = runtime.apply_zone_monster_kill_awards(generated);
 
         assert!(packets.iter().any(|packet| matches!(
             packet,
@@ -20384,7 +20482,7 @@ mod tests {
         start_new_runtime(&mut runtime, "zone-account-inventory-service", "Blade");
         let before_experience = runtime.inner.world_snapshot().player_experience;
 
-        let award_packets = runtime.apply_zone_monster_kill_awards(vec![ZoneMonsterKillAward {
+        let input = ZoneMonsterKillAward {
             source_receipt_key: None,
             experience_selection: None,
             monster_object_id: 9100,
@@ -20393,7 +20491,9 @@ mod tests {
             experience: 6,
             drops: Vec::new(),
             boss_audit: None,
-        }]);
+        };
+        let generated = cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, input);
+        let award_packets = runtime.apply_zone_monster_kill_awards(generated);
         assert_eq!(
             *monster_award_calls
                 .lock()
@@ -26669,14 +26769,16 @@ mod tests {
             drops: Vec::new(),
             boss_audit: None,
         };
-        let first_packets = runtime.apply_zone_monster_kill_awards(vec![award(95)]);
+        let generated = cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, award(95));
+        let first_packets = runtime.apply_zone_monster_kill_awards(generated);
         assert!(first_packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::GainExperience { amount } if *amount == 95
         )));
         assert_eq!(runtime.inner.world_snapshot().player_experience, 95);
 
-        let level_packets = runtime.apply_zone_monster_kill_awards(vec![award(5)]);
+        let generated = cross_map_drop_lifecycle_tests::issue_prepared_award(&mut runtime, award(5));
+        let level_packets = runtime.apply_zone_monster_kill_awards(generated);
         assert!(level_packets.iter().any(|packet| matches!(
             packet,
             ServerPacket::LevelChanged { level: 2, .. }
