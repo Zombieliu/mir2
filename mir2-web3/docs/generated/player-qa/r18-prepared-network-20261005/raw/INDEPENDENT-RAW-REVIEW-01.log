@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "C:\mir2-playtest-releases\20261004-native-r18\dense-network-r18-execution-01\audit_actual_public_01.py", line 249, in <module>
+    main()
+    ~~~~^^
+  File "C:\mir2-playtest-releases\20261004-native-r18\dense-network-r18-execution-01\audit_actual_public_01.py", line 200, in main
+    classes = [audit_caster(c) for c in death_report['classes'] if c['className'] != 'Warrior']
+               ~~~~~~~~~~~~^^^
+  File "C:\mir2-playtest-releases\20261004-native-r18\dense-network-r18-execution-01\audit_actual_public_01.py", line 156, in audit_caster
+    assert not [r for r in quiet if r['direction'] == 'sent' and r['type'] not in ['clientVersion','keepAlive']]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError

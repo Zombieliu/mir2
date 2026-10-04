@@ -1,0 +1,15 @@
+{
+  "schema": "mir2.r18-isolated-execution-coordination.v1",
+  "createdUtc": "2026-10-04T16:10:10.363495+00:00",
+  "sourceRevision": "321316b791120a6fe549e4006623e63333a5543f",
+  "frozenSha256": "b7ac4b4f33cc746248a6e6c0f2d9d97a5822fc4be5e953e5f1e08aad34dfc0c0",
+  "binarySha256": "4064f6bce2337bbd1d251b37e7219163fd524828ddb83d90031232a0b1e25ca8",
+  "remoteStaging": "/home/ubuntu/mir2-playtest-preflight-20260929/r18-dense-20261004-161010",
+  "outputChild": "r18-execution-01",
+  "inputCount": 49,
+  "uploadCount": 50,
+  "privateFilesInUpload": false,
+  "singleAuthorizedRun": true,
+  "executionAuthorizedByRootMessage": true,
+  "gatewayExecutedYet": false
+}

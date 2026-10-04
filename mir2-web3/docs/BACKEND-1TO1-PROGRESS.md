@@ -1,5 +1,18 @@
 # Backend 1:1 Progress
 
+> 2026-10-05 exact frozen R18/source321316 completes one isolated prepared
+> ordinary-protocol run. Wizard/Taoist actual natural Death and valid dead Magic
+> inputs retain absolute MP541/260, items and life/position; normal LogOut and
+> different fresh Login/StartGame restore alive128/541 and239/260 at0(288,616).
+> Quiet and alive-save/relogin pass. Root verifies93 frozen public files and
+> actual closed windows; historical R17 MP failures remain. Warrior180s death
+> is inconclusive; all10 dense cases lack seven qualified attackers (maximum4).
+> Seven-monster/native/human/fullP1/progression/load/capacity gates stay false.
+> Existing realms/Caddy/config/feed/counters are unchanged. R18 is not rolled
+> out; actual file updater/rollback passed separately, CDN login is pending.
+> [Exact public result and root review](generated/player-qa/r18-prepared-network-20261005/README.md).
+
+
 > 2026-10-05 root integrates the six-file shared Guild rank-rename authority
 > Candidate at321316: actual unchanged-source RED2/6 becomes GREEN8/0; direct5
 > and adjacent8 pass,21 unique worker checks. Root independently rechecks5+1

@@ -1,5 +1,18 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-10-05 exact frozen R18/source321316 completes one isolated prepared
+> ordinary-protocol run. Wizard/Taoist actual natural Death and valid dead Magic
+> inputs retain absolute MP541/260, items and life/position; normal LogOut and
+> different fresh Login/StartGame restore alive128/541 and239/260 at0(288,616).
+> Quiet and alive-save/relogin pass. Root verifies93 frozen public files and
+> actual closed windows; historical R17 MP failures remain. Warrior180s death
+> is inconclusive; all10 dense cases lack seven qualified attackers (maximum4).
+> Seven-monster/native/human/fullP1/progression/load/capacity gates stay false.
+> Existing realms/Caddy/config/feed/counters are unchanged. R18 is not rolled
+> out; actual file updater/rollback passed separately, CDN login is pending.
+> [Exact public result and root review](generated/player-qa/r18-prepared-network-20261005/README.md).
+
+
 > 2026-10-05原生下载实测约100 KB/s，R17仍逐文件安装；R2原生入口404。
 > R17的11个资源合包/真实R16差分/CMS与36对象闭包已准备；本机Cloudflare
 > 尚未登录，未stage/promote或做CDN速度验收。实际R17→R18文件更新、删除、

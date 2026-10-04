@@ -1,0 +1,736 @@
+{
+  "schema": "mir2.r18-independent-public-raw-review.v1",
+  "createdUtc": "2026-10-04T17:25:44.134071+00:00",
+  "sourceRevision": "321316b791120a6fe549e4006623e63333a5543f",
+  "binarySha256": "4064f6bce2337bbd1d251b37e7219163fd524828ddb83d90031232a0b1e25ca8",
+  "frozenInputsSha256": "b7ac4b4f33cc746248a6e6c0f2d9d97a5822fc4be5e953e5f1e08aad34dfc0c0",
+  "immutableInputCountVerified": 49,
+  "publicFileCountVerified": 45,
+  "offlineOnly": true,
+  "privateStoresKeysRawGatewayLogsRead": false,
+  "earlierFilesChanged": false,
+  "verificationComplete": true,
+  "singleAttemptNoRetry": true,
+  "stages": [
+    {
+      "phase": "bootstrap",
+      "ownedGatewayPid": 2710566,
+      "normalExitCode": 0,
+      "sixSettledCounters": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "normalLogoutConfirmed": true
+    },
+    {
+      "phase": "purchases",
+      "ownedGatewayPid": 2710632,
+      "normalExitCode": 0,
+      "sixSettledCounters": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "normalLogoutConfirmed": true
+    },
+    {
+      "phase": "dense",
+      "ownedGatewayPid": 2710979,
+      "normalExitCode": 0,
+      "sixSettledCounters": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "normalLogoutConfirmed": true
+    },
+    {
+      "phase": "death",
+      "ownedGatewayPid": 2711487,
+      "normalExitCode": 0,
+      "sixSettledCounters": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "normalLogoutConfirmed": true
+    }
+  ],
+  "classes": [
+    {
+      "className": "Wizard",
+      "independentRawReview": "passed",
+      "actualNaturalDeathSequence": 1063,
+      "positiveOwnerHitCount": 35,
+      "closedWindow": {
+        "fromMs": 1791132094064,
+        "endMs": 1791132100473,
+        "ownerId": 1000
+      },
+      "connectionId": "b0099e64-2b9a-4150-9ef8-e019b334827b",
+      "baselineSequence": 1076,
+      "actualMagicInputSequence": 1080,
+      "spell": "FireBall",
+      "mpCost": 3,
+      "validTargetObserved": true,
+      "absoluteMpConstant": 541,
+      "absoluteMpReceipts": [
+        {
+          "sequence": 1084,
+          "tsMs": 1791132095543,
+          "mp": 541,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1089,
+          "tsMs": 1791132096288,
+          "mp": 541,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1092,
+          "tsMs": 1791132096474,
+          "mp": 541,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1094,
+          "tsMs": 1791132096630,
+          "mp": 541,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1097,
+          "tsMs": 1791132096903,
+          "mp": 541,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1100,
+          "tsMs": 1791132097491,
+          "mp": 541,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1105,
+          "tsMs": 1791132098110,
+          "mp": 541,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1108,
+          "tsMs": 1791132098701,
+          "mp": 541,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1111,
+          "tsMs": 1791132099292,
+          "mp": 541,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1116,
+          "tsMs": 1791132099882,
+          "mp": 541,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1119,
+          "tsMs": 1791132100472,
+          "mp": 541,
+          "source": "worldSnapshot",
+          "absolute": true
+        }
+      ],
+      "itemQuantityLedgerStable": true,
+      "quantityLedger": {
+        "4": 20,
+        "5": 10,
+        "0": 1,
+        "1": 1,
+        "3": 1
+      },
+      "terminalOnlineDeadHp0": true,
+      "normalLogoutSentSequence": 1123,
+      "normalLogoutAckSequence": 1124,
+      "normalCloseEvidence": "frozen owned protocol close result in public report; no private transport log read",
+      "newOrdinaryLoginStartGameConnectionId": "ae7324b2-e1c4-42e7-a3ed-1012b10b7349",
+      "freshLoadSequence": 698,
+      "freshAliveFullCurrentCaps": [
+        128,
+        541
+      ],
+      "freshLocation": {
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "direction": "Down"
+      },
+      "quietDurationMs": 5473,
+      "quietWorldSamples": 9,
+      "terminalCleanupAtClosedEndpointSequences": [],
+      "alivePersistenceRawFingerprintMatched": true,
+      "directPrivateStoreInspection": false,
+      "directDurableHp0Verified": false,
+      "positiveHpCorpseLevelUpCaseActuallyObserved": false,
+      "retainedResumeExecuted": false,
+      "onlineTownReviveExecuted": false
+    },
+    {
+      "className": "Taoist",
+      "independentRawReview": "passed",
+      "actualNaturalDeathSequence": 1462,
+      "positiveOwnerHitCount": 67,
+      "closedWindow": {
+        "fromMs": 1791132169074,
+        "endMs": 1791132175097,
+        "ownerId": 1000
+      },
+      "connectionId": "837a4b81-ef4b-40e3-b7c9-5af59fd26888",
+      "baselineSequence": 1470,
+      "actualMagicInputSequence": 1474,
+      "spell": "Healing",
+      "mpCost": 3,
+      "validTargetObserved": true,
+      "absoluteMpConstant": 260,
+      "absoluteMpReceipts": [
+        {
+          "sequence": 1481,
+          "tsMs": 1791132170155,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1484,
+          "tsMs": 1791132170748,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1487,
+          "tsMs": 1791132170892,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1489,
+          "tsMs": 1791132171045,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1491,
+          "tsMs": 1791132171220,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1494,
+          "tsMs": 1791132171370,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1499,
+          "tsMs": 1791132172017,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1502,
+          "tsMs": 1791132172625,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1505,
+          "tsMs": 1791132173234,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1510,
+          "tsMs": 1791132173859,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1513,
+          "tsMs": 1791132174475,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        },
+        {
+          "sequence": 1516,
+          "tsMs": 1791132175066,
+          "mp": 260,
+          "source": "worldSnapshot",
+          "absolute": true
+        }
+      ],
+      "itemQuantityLedgerStable": true,
+      "quantityLedger": {
+        "4": 20,
+        "5": 10,
+        "0": 1,
+        "1": 1,
+        "3": 1
+      },
+      "terminalOnlineDeadHp0": true,
+      "normalLogoutSentSequence": 1520,
+      "normalLogoutAckSequence": 1523,
+      "normalCloseEvidence": "frozen owned protocol close result in public report; no private transport log read",
+      "newOrdinaryLoginStartGameConnectionId": "75de6be4-ddd3-4b39-b2af-54025d8662b4",
+      "freshLoadSequence": 660,
+      "freshAliveFullCurrentCaps": [
+        239,
+        260
+      ],
+      "freshLocation": {
+        "map": "0",
+        "x": 288,
+        "y": 616,
+        "direction": "Down"
+      },
+      "quietDurationMs": 5525,
+      "quietWorldSamples": 9,
+      "terminalCleanupAtClosedEndpointSequences": [
+        701
+      ],
+      "alivePersistenceRawFingerprintMatched": true,
+      "directPrivateStoreInspection": false,
+      "directDurableHp0Verified": false,
+      "positiveHpCorpseLevelUpCaseActuallyObserved": false,
+      "retainedResumeExecuted": false,
+      "onlineTownReviveExecuted": false
+    }
+  ],
+  "warrior": {
+    "status": "inconclusive",
+    "positiveOwnerHits": 122,
+    "ownerDeathCount": 0,
+    "singleNaturalDeathBudgetSeconds": 180,
+    "castAndFreshLoadNotExecuted": true
+  },
+  "denseCases": [
+    {
+      "className": "Warrior",
+      "kind": "attackEscape",
+      "status": "inconclusive",
+      "sampleCount": 54,
+      "elapsedMs": 30163,
+      "maxAdjacent": 4,
+      "maxDistinctQualifiedAttackerIds": 2,
+      "maxPositiveOwnerHitsIn6200ms": 2,
+      "samplesWithLegalExit": 30,
+      "qualifiedSamples": 0,
+      "lastReasons": [
+        "Only 1 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 0 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No corresponding exact owner HP decline observed"
+      ],
+      "escapeTrialExecuted": false
+    },
+    {
+      "className": "Warrior",
+      "kind": "heldStop",
+      "status": "inconclusive",
+      "sampleCount": 59,
+      "elapsedMs": 30465,
+      "maxAdjacent": 5,
+      "maxDistinctQualifiedAttackerIds": 4,
+      "maxPositiveOwnerHitsIn6200ms": 0,
+      "samplesWithLegalExit": 4,
+      "qualifiedSamples": 0,
+      "lastReasons": [
+        "Only 4 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 0 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No corresponding exact owner HP decline observed",
+        "No fresh empty static-walkable three-cell cardinal exit"
+      ],
+      "escapeTrialExecuted": false
+    },
+    {
+      "className": "Wizard",
+      "kind": "attackEscape",
+      "status": "inconclusive",
+      "sampleCount": 47,
+      "elapsedMs": 31541,
+      "maxAdjacent": 4,
+      "maxDistinctQualifiedAttackerIds": 1,
+      "maxPositiveOwnerHitsIn6200ms": 8,
+      "samplesWithLegalExit": 16,
+      "qualifiedSamples": 0,
+      "lastReasons": [
+        "Only 0 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 5 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No fresh empty static-walkable three-cell cardinal exit"
+      ],
+      "escapeTrialExecuted": false
+    },
+    {
+      "className": "Wizard",
+      "kind": "castEscape",
+      "status": "inconclusive",
+      "sampleCount": 50,
+      "elapsedMs": 30296,
+      "maxAdjacent": 5,
+      "maxDistinctQualifiedAttackerIds": 4,
+      "maxPositiveOwnerHitsIn6200ms": 12,
+      "samplesWithLegalExit": 17,
+      "qualifiedSamples": 0,
+      "lastReasons": [
+        "Only 4 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 10 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No fresh empty static-walkable three-cell cardinal exit"
+      ],
+      "escapeTrialExecuted": false
+    },
+    {
+      "className": "Wizard",
+      "kind": "heldStop",
+      "status": "inconclusive",
+      "sampleCount": 54,
+      "elapsedMs": 30242,
+      "maxAdjacent": 5,
+      "maxDistinctQualifiedAttackerIds": 4,
+      "maxPositiveOwnerHitsIn6200ms": 13,
+      "samplesWithLegalExit": 0,
+      "qualifiedSamples": 0,
+      "lastReasons": [
+        "Only 4 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 10 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No fresh empty static-walkable three-cell cardinal exit"
+      ],
+      "escapeTrialExecuted": false
+    },
+    {
+      "className": "Wizard",
+      "kind": "prematureRecast",
+      "status": "inconclusive",
+      "sampleCount": 54,
+      "elapsedMs": 30054,
+      "maxAdjacent": 5,
+      "maxDistinctQualifiedAttackerIds": 4,
+      "maxPositiveOwnerHitsIn6200ms": 13,
+      "samplesWithLegalExit": 0,
+      "qualifiedSamples": 0,
+      "lastReasons": [
+        "Only 3 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 10 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No fresh empty static-walkable three-cell cardinal exit"
+      ],
+      "escapeTrialExecuted": false
+    },
+    {
+      "className": "Taoist",
+      "kind": "attackEscape",
+      "status": "inconclusive",
+      "sampleCount": 55,
+      "elapsedMs": 30443,
+      "maxAdjacent": 4,
+      "maxDistinctQualifiedAttackerIds": 2,
+      "maxPositiveOwnerHitsIn6200ms": 10,
+      "samplesWithLegalExit": 16,
+      "qualifiedSamples": 0,
+      "lastReasons": [
+        "Only 2 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 8 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No fresh empty static-walkable three-cell cardinal exit"
+      ],
+      "escapeTrialExecuted": false
+    },
+    {
+      "className": "Taoist",
+      "kind": "castEscape",
+      "status": "inconclusive",
+      "sampleCount": 53,
+      "elapsedMs": 30077,
+      "maxAdjacent": 4,
+      "maxDistinctQualifiedAttackerIds": 2,
+      "maxPositiveOwnerHitsIn6200ms": 10,
+      "samplesWithLegalExit": 0,
+      "qualifiedSamples": 0,
+      "lastReasons": [
+        "Only 2 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 8 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No fresh empty static-walkable three-cell cardinal exit"
+      ],
+      "escapeTrialExecuted": false
+    },
+    {
+      "className": "Taoist",
+      "kind": "heldStop",
+      "status": "inconclusive",
+      "sampleCount": 55,
+      "elapsedMs": 30811,
+      "maxAdjacent": 4,
+      "maxDistinctQualifiedAttackerIds": 2,
+      "maxPositiveOwnerHitsIn6200ms": 12,
+      "samplesWithLegalExit": 0,
+      "qualifiedSamples": 0,
+      "lastReasons": [
+        "Only 2 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 9 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No fresh empty static-walkable three-cell cardinal exit"
+      ],
+      "escapeTrialExecuted": false
+    },
+    {
+      "className": "Taoist",
+      "kind": "prematureRecast",
+      "status": "inconclusive",
+      "sampleCount": 55,
+      "elapsedMs": 30518,
+      "maxAdjacent": 4,
+      "maxDistinctQualifiedAttackerIds": 2,
+      "maxPositiveOwnerHitsIn6200ms": 12,
+      "samplesWithLegalExit": 0,
+      "qualifiedSamples": 0,
+      "lastReasons": [
+        "Only 2 distinct live adjacent CaveBat completed two aimed attack cycles",
+        "Only 8 positive normal owner DamageIndicator receipts; Miss/zero excluded",
+        "No fresh empty static-walkable three-cell cardinal exit"
+      ],
+      "escapeTrialExecuted": false
+    }
+  ],
+  "applicableDenseCases": 10,
+  "qualifiedDenseCases": 0,
+  "purchases": [
+    {
+      "className": "Warrior",
+      "medicinePurchases": [
+        {
+          "status": "passed",
+          "name": "(HP)DrugSmall",
+          "quantity": 20,
+          "unitPrice": 40,
+          "walletBefore": 20000,
+          "walletAfter": 19200,
+          "quantityBefore": 1,
+          "quantityAfter": 21,
+          "uniqueIds": [
+            2,
+            4
+          ],
+          "sentSequence": 785,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        },
+        {
+          "status": "passed",
+          "name": "(MP)DrugSmall",
+          "quantity": 10,
+          "unitPrice": 40,
+          "walletBefore": 19200,
+          "walletAfter": 18800,
+          "quantityBefore": 0,
+          "quantityAfter": 10,
+          "uniqueIds": [
+            5
+          ],
+          "sentSequence": 791,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        }
+      ],
+      "medicineUseAckSequence": 803,
+      "skillBookPurchase": {
+        "status": "not-applicable",
+        "reason": "Warrior ordinary melee escape case has no active spell requirement"
+      },
+      "bookUseAckSequence": null,
+      "learnedSpell": null,
+      "bookEntryStatus": null,
+      "bookExitStatus": null
+    },
+    {
+      "className": "Wizard",
+      "medicinePurchases": [
+        {
+          "status": "passed",
+          "name": "(HP)DrugSmall",
+          "quantity": 20,
+          "unitPrice": 40,
+          "walletBefore": 20000,
+          "walletAfter": 19200,
+          "quantityBefore": 1,
+          "quantityAfter": 21,
+          "uniqueIds": [
+            2,
+            4
+          ],
+          "sentSequence": 747,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        },
+        {
+          "status": "passed",
+          "name": "(MP)DrugSmall",
+          "quantity": 10,
+          "unitPrice": 40,
+          "walletBefore": 19200,
+          "walletAfter": 18800,
+          "quantityBefore": 0,
+          "quantityAfter": 10,
+          "uniqueIds": [
+            5
+          ],
+          "sentSequence": 753,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        }
+      ],
+      "medicineUseAckSequence": 765,
+      "skillBookPurchase": {
+        "status": "passed",
+        "name": "FireBall",
+        "quantity": 1,
+        "unitPrice": 500,
+        "walletBefore": 18800,
+        "walletAfter": 18300,
+        "quantityBefore": 0,
+        "quantityAfter": 1,
+        "uniqueIds": [
+          6
+        ],
+        "sentSequence": 1238,
+        "merchant": {
+          "name": "Librarian_Brian",
+          "objectId": 446
+        }
+      },
+      "bookUseAckSequence": 1247,
+      "learnedSpell": "FireBall",
+      "bookEntryStatus": "passed",
+      "bookExitStatus": "passed"
+    },
+    {
+      "className": "Taoist",
+      "medicinePurchases": [
+        {
+          "status": "passed",
+          "name": "(HP)DrugSmall",
+          "quantity": 20,
+          "unitPrice": 40,
+          "walletBefore": 20000,
+          "walletAfter": 19200,
+          "quantityBefore": 1,
+          "quantityAfter": 21,
+          "uniqueIds": [
+            2,
+            4
+          ],
+          "sentSequence": 746,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        },
+        {
+          "status": "passed",
+          "name": "(MP)DrugSmall",
+          "quantity": 10,
+          "unitPrice": 40,
+          "walletBefore": 19200,
+          "walletAfter": 18800,
+          "quantityBefore": 0,
+          "quantityAfter": 10,
+          "uniqueIds": [
+            5
+          ],
+          "sentSequence": 752,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        }
+      ],
+      "medicineUseAckSequence": 764,
+      "skillBookPurchase": {
+        "status": "passed",
+        "name": "Healing",
+        "quantity": 1,
+        "unitPrice": 500,
+        "walletBefore": 18800,
+        "walletAfter": 18300,
+        "quantityBefore": 0,
+        "quantityAfter": 1,
+        "uniqueIds": [
+          6
+        ],
+        "sentSequence": 1238,
+        "merchant": {
+          "name": "Librarian_Brian",
+          "objectId": 446
+        }
+      },
+      "bookUseAckSequence": 1248,
+      "learnedSpell": "Healing",
+      "bookEntryStatus": "passed",
+      "bookExitStatus": "passed"
+    }
+  ],
+  "liveBeforeAfterUnchanged": true,
+  "r16ComparisonExecuted": false,
+  "historicalR17IndependentMpFailuresRemainPreserved": true,
+  "sevenMonsterMechanicsAccepted": false,
+  "fullP1Accepted": false,
+  "nativeInputAccepted": false,
+  "nativeVisualAccepted": false,
+  "humanAccepted": false,
+  "ordinaryProgressionAccepted": false,
+  "loadAccepted": false,
+  "capacityAccepted": false,
+  "limitations": [
+    "Prepared level-30 field staging is not ordinary long-play progression",
+    "TownRevive and optional retained resume were not executed",
+    "No natural positiveHP corpse LevelUp case occurred; it cannot be inferred from HP alone",
+    "Normal transport close is owned driver public metadata; private raw logs and durable stores were not inspected",
+    "No seven-attacker escape case qualified; wrapper exit 0 is process completion only"
+  ]
+}
