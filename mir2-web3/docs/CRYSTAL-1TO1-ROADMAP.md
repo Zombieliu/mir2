@@ -1,5 +1,11 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-05 slow native delivery is the user's immediate priority. Origin now
+> serves the exact signed R17 accelerator with no game/service/feed change.
+> Native-only read-authority CI probe/source controls are integrated; R2 upload,
+> promotion, laptop speed and shipped-executable first-install remain open.
+> [Bounded delivery scope](NATIVE-DOWNLOAD-ACCELERATION-20261005.md).
+
 > 2026-10-05 root integrates the eleven-file native Guild rank-rename slice
 > after P3/source513eb83, applying only two Gateway terminal hunks. Source7
 > merges its actual nested rank, retires exact current editor context, and is

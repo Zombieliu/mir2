@@ -1,5 +1,12 @@
 # Agent Task Queue
 
+> 2026-10-05 user prioritizes slow native downloads. Exact signed R17 bundles
+> are appended at the existing origin without Gateway/Caddy restart; bandwidth
+> and R2 publication stay open. A native-only read-authority CI probe is integrated
+> with retained RED/31-case offline controls; actual opaque CI authority is pending.
+> [Delivery scope](NATIVE-DOWNLOAD-ACCELERATION-20261005.md). New WASD/dialog/frame
+> reports are retained for the subsequent P1 round, per the user's steering.
+
 > 2026-10-05 root integrates the eleven-file native Guild rank-rename slice
 > after P3/source513eb83, applying only two Gateway terminal hunks. Source7
 > merges its actual nested rank, retires exact current editor context, and is
