@@ -1,5 +1,16 @@
 # 怪群中右键无法逃跑：源码、复现与修复
 
+> 2026-10-04 root verifies frozen v6 pure attribution88/88 and31 inputs;
+> victim-only damage and dead-level-up HP refill remain inconclusive alone,
+> while actual R17 caster MP failures remain failures. R18 first pair/source51e8
+> compiles, but overall CI37198506131 fails an unchanged R17 siege fixture after
+> real bootstrap advances beyond today's18:00. Local real TCP/WebSocket RED0/1 turns
+> GREEN1/1 when only that fixture chooses the next calendar day; source calendar
+> and stale guard are unchanged. First failed logs/build attestation are retained.
+> A clean final paired build/CI and native/ordinary dense gates remain pending.
+> [Clock scope](SABUK-TRANSPORT-CLOCK-20261004.md),
+> [v6 review](generated/player-qa/crowded-combat-escape-20261003/dense-v6-offline-20261004/README.md).
+
 > 2026-10-04 root integrates the frozen18-file transient death/EXP slice on
 > e0877a198: original meaningful RED Gateway1/5 and personal1/2 remain;
 > final worker focused15 + adjacent61 pass. Root independently rechecks the

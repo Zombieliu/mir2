@@ -1,5 +1,16 @@
 # R17 死亡施法实测与误报更正 — 2026-10-04
 
+> 2026-10-04 root verifies frozen v6 pure attribution88/88 and31 inputs;
+> victim-only damage and dead-level-up HP refill remain inconclusive alone,
+> while actual R17 caster MP failures remain failures. R18 first pair/source51e8
+> compiles, but overall CI37198506131 fails an unchanged R17 siege fixture after
+> real bootstrap advances beyond today's18:00. Local real TCP/WebSocket RED0/1 turns
+> GREEN1/1 when only that fixture chooses the next calendar day; source calendar
+> and stale guard are unchanged. First failed logs/build attestation are retained.
+> A clean final paired build/CI and native/ordinary dense gates remain pending.
+> [Clock scope](SABUK-TRANSPORT-CLOCK-20261004.md),
+> [v6 review](generated/player-qa/crowded-combat-escape-20261003/dense-v6-offline-20261004/README.md).
+
 隔离的准确 R17 Linux Gateway（源码6032ef8b3、ELF SHA256
 `1ed52738885292b734c4055a9fd7d585b79d519779084bca2a617d0a9f5eb9ab`）
 通过正常购买、学习、退出和重登得到 FireBall/Healing。角色被原始怪物真正击杀后，

@@ -131,7 +131,12 @@ fn server_fixture() -> (GatewayConfig, u64) {
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_millis() as u64;
-    let start = policy.window(epoch).unwrap().start_ms;
+    // Socket joins bootstrap the Zone at the real epoch. Replaying today's
+    // 18:00 after that hour is correctly rejected as a stale projection.
+    // Keep the source calendar and its monotonic guard; exercise the next day.
+    let transport_day = epoch.checked_add(86_400_000).unwrap();
+    let start = policy.window(transport_day).unwrap().start_ms;
+    assert!(start > epoch, "transport clock must follow the real bootstrap");
     config.conquest_policies = vec![policy];
     {
         let mut store = config.account_store.lock().unwrap();

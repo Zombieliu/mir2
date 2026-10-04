@@ -1,0 +1,76 @@
+{
+  "schema": "mir2.dense-v6-final-pure-verification.v1",
+  "createdUtc": "2026-10-04T11:23:05.527530+00:00",
+  "inputCount": 31,
+  "inputHashAndBytesVerified": true,
+  "testCounts": {
+    "nodeClassifierTestsPassed": 29,
+    "nodeDeadEffectTestsPassed": 16,
+    "nodeDeathAttributionTestsPassed": 19,
+    "nodeTransferTestsPassed": 10,
+    "pythonFileAndWrapperTestsPassed": 14
+  },
+  "testTotal": 88,
+  "failures": 0,
+  "skips": 0,
+  "allCommandsExit0": true,
+  "firstSecondaryCheckNote": "A read-only final checker initially required LF around Python OK; frozen Windows stderr uses CRLF. Normalizing only that verification string passed. Self-test processes/exit codes and all frozen bytes remained unchanged.",
+  "verifyOnly": {
+    "exitCode": 0,
+    "receipt": {
+      "frozenInputsVerified": true,
+      "fileCount": 31,
+      "noGatewayStarted": true,
+      "fullP1Accepted": false,
+      "nativeInputAccepted": false,
+      "nativeVisualAccepted": false,
+      "humanAccepted": false,
+      "ordinaryProgressionAccepted": false,
+      "loadAccepted": false
+    }
+  },
+  "hashes": {
+    "FROZEN-INPUTS.json": "091bebe3a713b3788a52e9b5bc22b1cca25b029fe24794c81a32f6cfa8386366",
+    "SELFTEST-06.json": "795f9103ec7dbfa63f9ca7ab7e31dd04b19ae2c9130b82a5f95dd7ab1f3e0c31",
+    "CHANGES-V6.json": "fb188586959e37a2e070efb3d5b8cde9cd9aebd28604f34fa7853f0e09fbd05e",
+    "RED-GREEN-06.json": "9344a29ce00e393177a215d057f94ddb15632d29383ac1adc38dedc71dc694b0",
+    "ACTUAL-V4-RECLASSIFIED-02.json": "de8d6b9dc24c00994b9713f64a1e33066bca6b69034914669b6f8f52b4248fc1"
+  },
+  "actualClasses": [
+    {
+      "className": "Warrior",
+      "status": "inconclusive",
+      "mpSequences": [],
+      "targetDamageAttributed": false
+    },
+    {
+      "className": "Wizard",
+      "status": "failed",
+      "mpSequences": [
+        1028
+      ],
+      "targetDamageAttributed": false
+    },
+    {
+      "className": "Taoist",
+      "status": "failed",
+      "mpSequences": [
+        1375
+      ],
+      "targetDamageAttributed": false
+    }
+  ],
+  "gatewayProcessesStarted": 0,
+  "networkAccess": false,
+  "repositoryMutations": false,
+  "sourceRevisionOrRuntimeChanges": false,
+  "priorInputsRawAndReportedEvidencePreserved": true,
+  "sameR17GatewayExecutionAuthorized": false,
+  "sevenMonsterMechanicsAccepted": false,
+  "fullP1Accepted": false,
+  "nativeInputAccepted": false,
+  "nativeVisualAccepted": false,
+  "humanAccepted": false,
+  "ordinaryProgressionAccepted": false,
+  "loadAccepted": false
+}

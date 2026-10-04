@@ -1,0 +1,70 @@
+{
+  "schema": "mir2.dense-v6-death-attribution-red-green.v1",
+  "createdUtc": "2026-10-04T11:09:17.036187+00:00",
+  "actualFrozenV5RedImported": true,
+  "frozenV5ManifestSha256": "9ab8f6a4cf664080be42895cc022a6efb6a2d36fe4f6cf7368161e661e0cc57e",
+  "redReceiptSha256": "8788965f82b096876793bff2c76c2de56b6d09bc47a4fe70c325272d72733508",
+  "red": [
+    {
+      "testFile": "tests/dead-effects.test.mjs",
+      "testSha256": "c8885332eea0ee017b1f9b25608bdd46e7386cf32425fec2db0d6add579c12c1",
+      "classifierPath": "C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\dense_observation.mjs",
+      "classifierSha256": "f7b9fb5a4667e6c675eadab6f6f5d9d01e0a4d4e7bd733599a3895cb885abef0",
+      "exitCode": 1,
+      "tests": 16,
+      "pass": 14,
+      "fail": 2,
+      "skipped": 0,
+      "log": "RED-V5-PROTOTYPES-01.log",
+      "logSha256": "602b3cd7315cc5893e801d8b8d5213576aa0e8a14e8bb5bd0ce43a258445b26a"
+    },
+    {
+      "testFile": "tests/death-attribution.test.mjs",
+      "testSha256": "6441f189590d7fdd46c7d061cb12080b3798e5e98061bff291684df53bd40a00",
+      "classifierPath": "C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\dense_observation.mjs",
+      "classifierSha256": "f7b9fb5a4667e6c675eadab6f6f5d9d01e0a4d4e7bd733599a3895cb885abef0",
+      "exitCode": 1,
+      "tests": 19,
+      "pass": 5,
+      "fail": 14,
+      "skipped": 0,
+      "log": "RED-V5-ATTRIBUTION-01.log",
+      "logSha256": "939f3d6fc3b3734b1f7d2e0e65f060094c3f8b2203bf384993e97e88037922e1"
+    }
+  ],
+  "green": [
+    {
+      "testFile": "tests/dead-effects.test.mjs",
+      "testSha256": "c8885332eea0ee017b1f9b25608bdd46e7386cf32425fec2db0d6add579c12c1",
+      "classifierSha256": "f78103fb5ddb1516caac0f0b088bacd01421c5d9ede603a5c75a3c2b2c95dc0d",
+      "exitCode": 0,
+      "tests": 16,
+      "pass": 16,
+      "fail": 0,
+      "skipped": 0,
+      "log": "GREEN-V6-PROTOTYPES-01.log",
+      "logSha256": "1bc409cf49503eed4e58a7b16686746bd40c5ecd8be888c8404ce3ebf44f7c0e"
+    },
+    {
+      "testFile": "tests/death-attribution.test.mjs",
+      "testSha256": "6441f189590d7fdd46c7d061cb12080b3798e5e98061bff291684df53bd40a00",
+      "classifierSha256": "f78103fb5ddb1516caac0f0b088bacd01421c5d9ede603a5c75a3c2b2c95dc0d",
+      "exitCode": 0,
+      "tests": 19,
+      "pass": 19,
+      "fail": 0,
+      "skipped": 0,
+      "log": "GREEN-V6-ATTRIBUTION-01.log",
+      "logSha256": "5d7d47b9735707855ca4cf0a41ba46171861c3a9e98033ceb785c4ed427fb3ed"
+    }
+  ],
+  "originalRuntimeSourceOrGatewayChanged": false,
+  "gatewayProcessesStarted": 0,
+  "priorFilesAndRawReportedEvidenceUnchanged": true,
+  "syntheticFixturesAreGameplayAcceptance": false,
+  "sameR17GatewayExecutionAuthorized": false,
+  "fullP1Accepted": false,
+  "nativeInputAccepted": false,
+  "nativeVisualAccepted": false,
+  "humanAccepted": false
+}

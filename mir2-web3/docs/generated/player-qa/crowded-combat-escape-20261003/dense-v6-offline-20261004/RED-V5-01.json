@@ -1,0 +1,35 @@
+{
+  "schema": "mir2.dense-v6-against-frozen-v5-red.v1",
+  "productionClassifierEditStarted": false,
+  "actualFrozenV5Imported": true,
+  "sourceRevisionRuntimeOrGatewayChanged": false,
+  "gatewayStarted": false,
+  "tests": [
+    {
+      "testFile": "tests/dead-effects.test.mjs",
+      "testSha256": "c8885332eea0ee017b1f9b25608bdd46e7386cf32425fec2db0d6add579c12c1",
+      "classifierPath": "C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\dense_observation.mjs",
+      "classifierSha256": "f7b9fb5a4667e6c675eadab6f6f5d9d01e0a4d4e7bd733599a3895cb885abef0",
+      "exitCode": 1,
+      "tests": 16,
+      "pass": 14,
+      "fail": 2,
+      "skipped": 0,
+      "log": "RED-V5-PROTOTYPES-01.log",
+      "logSha256": "602b3cd7315cc5893e801d8b8d5213576aa0e8a14e8bb5bd0ce43a258445b26a"
+    },
+    {
+      "testFile": "tests/death-attribution.test.mjs",
+      "testSha256": "6441f189590d7fdd46c7d061cb12080b3798e5e98061bff291684df53bd40a00",
+      "classifierPath": "C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\dense_observation.mjs",
+      "classifierSha256": "f7b9fb5a4667e6c675eadab6f6f5d9d01e0a4d4e7bd733599a3895cb885abef0",
+      "exitCode": 1,
+      "tests": 19,
+      "pass": 5,
+      "fail": 14,
+      "skipped": 0,
+      "log": "RED-V5-ATTRIBUTION-01.log",
+      "logSha256": "939f3d6fc3b3734b1f7d2e0e65f060094c3f8b2203bf384993e97e88037922e1"
+    }
+  ]
+}

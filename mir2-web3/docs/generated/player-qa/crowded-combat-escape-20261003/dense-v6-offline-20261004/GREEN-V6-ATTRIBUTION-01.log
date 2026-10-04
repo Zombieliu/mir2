@@ -1,0 +1,126 @@
+TAP version 13
+# Subtest: no observed other skill is not positive owner attribution for a victim-only target hit
+ok 1 - no observed other skill is not positive owner attribution for a victim-only target hit
+  ---
+  duration_ms: 2.3716
+  type: 'test'
+  ...
+# Subtest: a different player physical attack needs no ObjectMagic and cannot be turned into this owner Magic
+ok 2 - a different player physical attack needs no ObjectMagic and cannot be turned into this owner Magic
+  ---
+  duration_ms: 0.4157
+  type: 'test'
+  ...
+# Subtest: periodic poison, environment and unobserved projectile sources are observationally indistinguishable in victim-only packets
+ok 3 - periodic poison, environment and unobserved projectile sources are observationally indistinguishable in victim-only packets
+  ---
+  duration_ms: 0.487
+  type: 'test'
+  ...
+# Subtest: actual v4-style dead Attack then dead Magic at one target cannot attribute its single hit to either input
+ok 4 - actual v4-style dead Attack then dead Magic at one target cannot attribute its single hit to either input
+  ---
+  duration_ms: 0.2184
+  type: 'test'
+  ...
+# Subtest: observed prior projectile and foreign magic contexts remain raw attribution candidates, never rejection proof
+ok 5 - observed prior projectile and foreign magic contexts remain raw attribution candidates, never rejection proof
+  ---
+  duration_ms: 0.4839
+  type: 'test'
+  ...
+# Subtest: incoming damage to the Healing self-target is not proof of forbidden self Healing
+ok 6 - incoming damage to the Healing self-target is not proof of forbidden self Healing
+  ---
+  duration_ms: 0.2532
+  type: 'test'
+  ...
+# Subtest: actual absolute owner MP debit still fails despite target attribution uncertainty or foreign cast context
+ok 7 - actual absolute owner MP debit still fails despite target attribution uncertainty or foreign cast context
+  ---
+  duration_ms: 0.3428
+  type: 'test'
+  ...
+# Subtest: independent material debit or a real matching true cast still fails with victim-only target effects
+ok 8 - independent material debit or a real matching true cast still fails with victim-only target effects
+  ---
+  duration_ms: 0.2854
+  type: 'test'
+  ...
+# Subtest: source LevelUp HealthChanged before LevelChanged with Dead=true is a possible refill, not alive or a rejection pass
+ok 9 - source LevelUp HealthChanged before LevelChanged with Dead=true is a possible refill, not alive or a rejection pass
+  ---
+  duration_ms: 0.3778
+  type: 'test'
+  ...
+# Subtest: LevelChanged before refill has the same conservative conclusion without an invented packet-order gate
+ok 10 - LevelChanged before refill has the same conservative conclusion without an invented packet-order gate
+  ---
+  duration_ms: 0.3257
+  type: 'test'
+  ...
+# Subtest: HP rise alone with Dead=true or unknown life state cannot identify Healing or revival
+ok 11 - HP rise alone with Dead=true or unknown life state cannot identify Healing or revival
+  ---
+  duration_ms: 0.2936
+  type: 'test'
+  ...
+# Subtest: future, stale and foreign LevelChanged cannot supply an owner refill exception or acceptance
+ok 12 - future, stale and foreign LevelChanged cannot supply an owner refill exception or acceptance
+  ---
+  duration_ms: 0.4051
+  type: 'test'
+  ...
+# Subtest: level refill cannot erase a later real absolute MP debit after an observed MP increase
+ok 13 - level refill cannot erase a later real absolute MP debit after an observed MP increase
+  ---
+  duration_ms: 0.1479
+  type: 'test'
+  ...
+# Subtest: LevelChanged does not excuse actual Dead=false, Revived or authoritative movement/facing
+ok 14 - LevelChanged does not excuse actual Dead=false, Revived or authoritative movement/facing
+  ---
+  duration_ms: 0.3597
+  type: 'test'
+  ...
+# Subtest: foreign HealthChanged objectId must not borrow an owner cached absolute MP provenance
+ok 15 - foreign HealthChanged objectId must not borrow an owner cached absolute MP provenance
+  ---
+  duration_ms: 0.1095
+  type: 'test'
+  ...
+# Subtest: foreign HealthChanged cannot supply missing owner MP coverage or invent a mana failure
+ok 16 - foreign HealthChanged cannot supply missing owner MP coverage or invent a mana failure
+  ---
+  duration_ms: 0.113
+  type: 'test'
+  ...
+# Subtest: normal owned HealthChanged with no objectId or exact current owner still proves a real forbidden debit
+ok 17 - normal owned HealthChanged with no objectId or exact current owner still proves a real forbidden debit
+  ---
+  duration_ms: 0.1733
+  type: 'test'
+  ...
+# Subtest: missing or invalid actual learned Magic prerequisites cannot turn ambiguous HP/damage into a caster result
+ok 18 - missing or invalid actual learned Magic prerequisites cannot turn ambiguous HP/damage into a caster result
+  ---
+  duration_ms: 0.2395
+  type: 'test'
+  ...
+# Subtest: uncertain attribution, source refill or independent failures never change global acceptance flags
+ok 19 - uncertain attribution, source refill or independent failures never change global acceptance flags
+  ---
+  duration_ms: 0.4365
+  type: 'test'
+  ...
+1..19
+# tests 19
+# suites 0
+# pass 19
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 66.5323
+
+STDERR
