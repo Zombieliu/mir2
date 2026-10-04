@@ -10,6 +10,7 @@ updater/bootstrap recipe remains the frozen delivery source
 `4c60c323aed11829abae6ee5ce6e13c675a3c1c3`.
 
 The [release state](release-state.json) indexes the source evidence and hashes.
+Scoped Git attributes preserve receipt bytes, including their source line endings.
 Build-stage `published=false` or `deployed=false` fields in copied input
 receipts retain their original meaning; publication is proved separately by
 the live and public receipts, not by rewriting those historical inputs.
