@@ -3503,6 +3503,7 @@ impl SharedInProcessZoneState {
             | ZoneCommand::SyncPlayerCombatState { session_id, .. }
             | ZoneCommand::SyncPlayerTransform { session_id, .. }
             | ZoneCommand::SyncPlayerVitals { session_id, .. }
+            | ZoneCommand::SyncPlayerVitalsAndLife { session_id, .. }
             | ZoneCommand::Chat { session_id, .. }
             | ZoneCommand::BroadcastPackets { session_id, .. }
             | ZoneCommand::SyncSharedObjects { session_id, .. }
@@ -9249,9 +9250,12 @@ impl SharedInProcessZoneSessionRuntime {
             zone_state
                 .zone_sessions
                 .get(&key)
-                .and_then(|session_id| zone_state.zone_manager.player_vitals(session_id))
+                .and_then(|session_id| Some((
+                    zone_state.zone_manager.player_vitals(session_id)?,
+                    zone_state.zone_manager.player_is_dead(session_id)?,
+                )))
         };
-        let Some((hp, max_hp, mp)) = vitals else {
+        let Some(((hp, max_hp, mp), dead)) = vitals else {
             return;
         };
         let snapshot = self.inner.local_player_vitals_snapshot();
@@ -9263,16 +9267,17 @@ impl SharedInProcessZoneSessionRuntime {
         // no-op because the packet handler observed a living player. Preserve
         // the acknowledged private death until an explicit revive emits
         // ObjectRevived and synchronizes both authorities below.
-        let local_player_is_acknowledged_dead = snapshot.player_hp == Some(0)
+        let local_player_is_acknowledged_dead = snapshot.player_dead == Some(true)
             && snapshot
                 .player_object_id
                 .is_some_and(|object_id| self.owner_dead_entity_ids.contains(&object_id));
-        if local_player_is_acknowledged_dead && hp > 0 {
+        if local_player_is_acknowledged_dead && !dead {
             return;
         }
         if snapshot.player_hp != Some(hp)
             || snapshot.player_max_hp != Some(max_hp)
             || snapshot.player_mp != Some(mp)
+            || snapshot.player_dead != Some(dead)
         {
             self.inner
                 .force_authoritative_player_vitals_with_max_hp(
@@ -9280,6 +9285,7 @@ impl SharedInProcessZoneSessionRuntime {
                     Some(max_hp),
                     Some(mp),
                 );
+            self.inner.force_authoritative_player_life(dead);
         }
     }
 
@@ -9304,11 +9310,12 @@ impl SharedInProcessZoneSessionRuntime {
             .lock()
             .expect("shared zone presence mutex should not be poisoned")
             .zone_manager
-            .handle(ZoneCommand::SyncPlayerVitals {
+            .handle(ZoneCommand::SyncPlayerVitalsAndLife {
                 session_id,
                 hp,
                 max_hp,
                 mp,
+                dead: snapshot.player_dead.unwrap_or(hp <= 0),
             });
     }
 
@@ -9551,6 +9558,10 @@ impl SharedInProcessZoneSessionRuntime {
                     .zone_session_keys
                     .insert(session_id.clone(), key.clone());
                 let mut outbounds = zone_state.zone_manager.join(join.clone());
+                outbounds.extend(zone_state.zone_manager.handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                    session_id: session_id.clone(), hp: join.hp, max_hp: join.max_hp, mp: join.mp,
+                    dead: snapshot.entities.iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer).is_some_and(|entity| entity.dead),
+                }));
                 let now_ms = Self::zone_now_ms();
                 outbounds.extend(
                     zone_state
@@ -9640,11 +9651,12 @@ impl SharedInProcessZoneSessionRuntime {
             outbounds.extend(
                 zone_state
                     .zone_manager
-                    .handle(ZoneCommand::SyncPlayerVitals {
+                    .handle(ZoneCommand::SyncPlayerVitalsAndLife {
                         session_id: session_id.clone(),
                         hp: join.hp,
                         max_hp: join.max_hp,
                         mp: join.mp,
+                        dead: snapshot.entities.iter().find(|entity| entity.kind == WorldEntityKind::SelfPlayer).is_some_and(|entity| entity.dead),
                     }),
             );
             outbounds.extend(
@@ -10175,7 +10187,7 @@ impl SharedInProcessZoneSessionRuntime {
         let authoritative_transform = authoritative_transform.ok_or_else(|| {
             "fenced shared Zone presence has no authoritative transform".to_string()
         })?;
-        let authoritative_vitals = authoritative_vitals
+        authoritative_vitals
             .ok_or_else(|| "fenced shared Zone presence has no authoritative vitals".to_string())?;
 
         // Deterministic drain order is part of the persistence contract. Packet
@@ -10213,10 +10225,24 @@ impl SharedInProcessZoneSessionRuntime {
             authoritative_transform.0,
             authoritative_transform.1,
         );
-        self.inner.force_authoritative_player_vitals(
-            Some(authoritative_vitals.0),
-            Some(authoritative_vitals.2),
+        // A confirmed reward may have refreshed the pools during this fence.
+        // Re-read the same frozen owner's latest authority, not its pre-award HP.
+        let (authoritative_vitals, authoritative_dead) = {
+            let state = self.zone_state.lock()
+                .map_err(|_| "shared zone presence mutex is poisoned".to_string())?;
+            let session = state.zone_sessions.get(&key)
+                .ok_or_else(|| "fenced shared Zone presence lost its session".to_string())?;
+            (
+                state.zone_manager.player_vitals(session)
+                    .ok_or_else(|| "fenced shared Zone presence lost its vitals".to_string())?,
+                state.zone_manager.player_is_dead(session)
+                    .ok_or_else(|| "fenced shared Zone presence lost its life".to_string())?,
+            )
+        };
+        self.inner.force_authoritative_player_vitals_with_max_hp(
+            Some(authoritative_vitals.0), Some(authoritative_vitals.1), Some(authoritative_vitals.2),
         );
+        self.inner.force_authoritative_player_life(authoritative_dead);
         let checkpoint = self
             .inner
             .active_character_checkpoint()
@@ -10459,6 +10485,9 @@ impl SharedInProcessZoneSessionRuntime {
                         // instead of subtracting again from a later snapshot.
                         self.inner
                             .force_authoritative_player_vitals(Some(settlement.hp_before), None);
+                        // The authenticated same-life receipt proves its living
+                        // precondition even when the current mirror is already Dead.
+                        self.inner.force_authoritative_player_life(false);
                         if delta > 0 {
                             self.inner.apply_zone_player_damage(delta);
                         } else if let Some(heal) = delta.checked_neg() {
@@ -10486,19 +10515,22 @@ impl SharedInProcessZoneSessionRuntime {
             // This deliberately bypasses the legacy acknowledged-private-death
             // guard: these receipts originate from the shared life authority.
             if let Some(session) = self.current_zone_session_id() {
-                let current = self
-                    .zone_state
-                    .lock()
-                    .expect("shared zone presence mutex should not be poisoned")
-                    .zone_manager
-                    .player_vitals(&session);
-                if let Some((hp, _, mp)) = current {
+                let current = {
+                    let state = self.zone_state.lock()
+                        .expect("shared zone presence mutex should not be poisoned");
+                    state.zone_manager.player_vitals(&session).zip(
+                        state.zone_manager.player_is_dead(&session),
+                    )
+                };
+                if let Some(((hp, max_hp, mp), dead)) = current {
                     let snapshot = self.inner.local_player_vitals_snapshot();
-                    if snapshot.player_hp != Some(hp) || snapshot.player_mp != Some(mp) {
+                    if snapshot.player_hp != Some(hp) || snapshot.player_mp != Some(mp)
+                        || snapshot.player_max_hp != Some(max_hp) || snapshot.player_dead != Some(dead) {
                         self.inner
-                            .force_authoritative_player_vitals(Some(hp), Some(mp));
+                            .force_authoritative_player_vitals_with_max_hp(Some(hp), Some(max_hp), Some(mp));
+                        self.inner.force_authoritative_player_life(dead);
                     }
-                    if hp > 0 {
+                    if !dead {
                         if let Some(id) = snapshot.player_object_id {
                             self.owner_dead_entity_ids.remove(&id);
                         }
@@ -10715,10 +10747,10 @@ impl SharedInProcessZoneSessionRuntime {
         let Some(session) = state.zone_sessions.get(&key) else {
             return;
         };
-        let (Some(presence), Some(generation), Some((hp, _, _))) = (
+        let (Some(presence), Some(generation), Some(dead)) = (
             state.players.get(&key),
             state.zone_manager.player_life_generation(session),
-            state.zone_manager.player_vitals(session),
+            state.zone_manager.player_is_dead(session),
         ) else {
             return;
         };
@@ -10734,15 +10766,15 @@ impl SharedInProcessZoneSessionRuntime {
         let local_id = self.local_self_object_id();
         let owner = |id: u32| id == object_id || Some(id) == local_id;
         packets.retain(|packet| match packet {
-            ServerPacket::Death { .. } if hp > 0 => false,
-            ServerPacket::ObjectDied { info } if hp > 0 && owner(info.object_id) => false,
+            ServerPacket::Death { .. } if !dead => false,
+            ServerPacket::ObjectDied { info } if !dead && owner(info.object_id) => false,
             ServerPacket::ObjectHealth { info }
-                if hp > 0 && owner(info.object_id) && info.percent == 0 =>
+                if !dead && owner(info.object_id) && info.percent == 0 =>
             {
                 false
             }
-            ServerPacket::Revived if hp == 0 => false,
-            ServerPacket::ObjectRevived { info } if hp == 0 && owner(info.object_id) => false,
+            ServerPacket::Revived if dead => false,
+            ServerPacket::ObjectRevived { info } if dead && owner(info.object_id) => false,
             _ => true,
         });
     }
@@ -10904,6 +10936,9 @@ impl SharedInProcessZoneSessionRuntime {
                 return Err(
                     "monster kill award economy commit failed during teardown drain".to_string(),
                 );
+            }
+            if receipt.packets.iter().any(|packet| matches!(packet, ServerPacket::LevelChanged { .. })) {
+                self.sync_current_zone_vitals_from_inner();
             }
             packets.extend(receipt.packets);
         }
@@ -12033,7 +12068,8 @@ impl SharedInProcessZoneSessionRuntime {
         // Native Magic bypasses the personal packet handler. Keep its trusted
         // finite-status admission before materialization, item spend or Zone
         // spell deadlines; Cast=false preparation remains neutral.
-        if matches!(&attack.kind, ZoneNativePlayerAttackKind::Magic { cast: true, .. })
+        if self.inner.local_player_vitals_snapshot().player_dead == Some(true)
+            || matches!(&attack.kind, ZoneNativePlayerAttackKind::Magic { cast: true, .. })
             && self.inner.zone_magic_cast_blocked_by_status()
         {
             return self.authoritative_zone_owner_correction();
@@ -14223,7 +14259,7 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         // execute against it instead of silently turning the player alive just
         // before the packet handler checks `Dead`.
         let revives_presented_private_death =
-            is_town_revive && self.inner.world_snapshot().player_hp == Some(0);
+            is_town_revive && self.inner.local_player_vitals_snapshot().player_dead == Some(true);
         let applies_native_state = matches!(
             &command,
             WorldCommand::Stage5Command { action, .. } if action == "qa.applyNativeState"
@@ -15554,6 +15590,8 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "dead_experience_chain_tests.rs"]
+    mod dead_experience_chain_tests;
     #[path = "crowded_escape_tests.rs"]
     mod crowded_escape_tests;
     #[path = "guild_kill_source_tests.rs"]

@@ -1,5 +1,17 @@
 # Crystal Server Parity
 
+> 2026-10-04 root integrates the frozen18-file transient death/EXP slice on
+> e0877a198: original meaningful RED Gateway1/5 and personal1/2 remain;
+> final worker focused15 + adjacent61 pass. Root independently rechecks the
+> integrated Gateway12/personal3, overlapping those15. Online Dead survives
+> level-up HP/MP refill and same-epoch rollback; typed server-only life mirrors,
+> pre-spend native rejection, explicit revive and post-award teardown pools
+> are verified. Genuine HP0 login refills after RefreshStats; no saved Dead
+> schema is added. Exact published R17 MP failures remain. New paired build,
+> TCP/WSS/native/SQL/socket-resume acceptance are still open; F stays untouched.
+> [Scope](DEAD-EXPERIENCE-CHAIN-20261004.md),
+> [raw root review](generated/player-qa/crowded-combat-escape-20261003/dead-experience-chain-20261004/README.md).
+
 > 2026-10-04 Stone/BigTaoist complete-source-bound compatibility follows the
 > inferred supplied legacy numeric intent only; modern C# non-ACTIVE means
 > Completed, so this is a declared Candidate playability adaptation. Canonical

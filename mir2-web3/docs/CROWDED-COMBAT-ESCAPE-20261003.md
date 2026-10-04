@@ -1,5 +1,17 @@
 # 怪群中右键无法逃跑：源码、复现与修复
 
+> 2026-10-04 root integrates the frozen18-file transient death/EXP slice on
+> e0877a198: original meaningful RED Gateway1/5 and personal1/2 remain;
+> final worker focused15 + adjacent61 pass. Root independently rechecks the
+> integrated Gateway12/personal3, overlapping those15. Online Dead survives
+> level-up HP/MP refill and same-epoch rollback; typed server-only life mirrors,
+> pre-spend native rejection, explicit revive and post-award teardown pools
+> are verified. Genuine HP0 login refills after RefreshStats; no saved Dead
+> schema is added. Exact published R17 MP failures remain. New paired build,
+> TCP/WSS/native/SQL/socket-resume acceptance are still open; F stays untouched.
+> [Scope](DEAD-EXPERIENCE-CHAIN-20261004.md),
+> [raw root review](generated/player-qa/crowded-combat-escape-20261003/dead-experience-chain-20261004/README.md).
+
 用户补充的症状是「按住右键往空地跑也不动」，不仅是自动寻路或追怪停止。
 本轮从已发布 R16 文档提交 `ac9ea83be8880319272919bc0b7d82416c919e57`
 建立独立分支 `codex/crowded-combat-control-20261003`；对应已发布游戏源码为

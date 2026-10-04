@@ -2722,7 +2722,11 @@ pub(super) fn revive_current_player_from_resurrection_scroll(
         *vitals
     };
 
-    world.resource_mut::<PlayerRuntimeResource>().player_vitals = revived_vitals;
+    {
+        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+        runtime.player_vitals = revived_vitals;
+        runtime.player_dead = false;
+    }
 
     let mut packets = Vec::new();
     if let Some(info) = object_revived_info_for_entity(world, player, true) {

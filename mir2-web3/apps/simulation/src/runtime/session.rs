@@ -8,6 +8,7 @@ use super::combat::{
     apply_settled_damage_to_current_player, combat_delay_ticks, set_skill_toggle_state,
 };
 use super::components::{
+    current_player_is_dead,
     entity_by_object_id, entity_name, entity_object_id, entity_player_vitals, entity_position,
     player_entity, DisplayName, Facing, Hero, Monster, MonsterAgent, MonsterVitals, Npc,
     ObjectId, PlayerVitals, Position, RemotePlayer, SelfPlayer, SpawnSlotRef,
@@ -130,6 +131,7 @@ pub struct LocalPlayerVitalsSnapshot {
     pub player_hp: Option<i32>,
     pub player_max_hp: Option<i32>,
     pub player_mp: Option<i32>,
+    pub player_dead: Option<bool>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -708,6 +710,7 @@ impl SimulationSession {
             player_hp: player_vitals.map(|vitals| vitals.hp),
             player_max_hp: player_vitals.map(|vitals| vitals.max_hp),
             player_mp: player_vitals.map(|vitals| vitals.mp),
+            player_dead: player_vitals.map(|_| current_player_is_dead(world)),
         }
     }
 
@@ -979,7 +982,10 @@ impl SimulationSession {
             })
         };
         if let Some(vitals) = updated_vitals {
-            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+            let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+            runtime.player_vitals = vitals;
+            runtime.player_dead |= vitals.hp <= 0;
+            drop(runtime);
             advance_runtime_tick(world);
         }
     }
@@ -1018,9 +1024,25 @@ impl SimulationSession {
             })
         };
         if let Some(vitals) = updated_vitals {
-            world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+            let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+            runtime.player_vitals = vitals;
+            runtime.player_dead |= vitals.hp <= 0;
+            drop(runtime);
             advance_runtime_tick(world);
         }
+    }
+
+    /// Trusted shared-life reconciliation only. Positive vitals alone never
+    /// authorize a revive; the Zone's explicit life transition does.
+    pub fn force_authoritative_player_life(&mut self, dead: bool) {
+        if !is_in_world(self.app.world()) {
+            return;
+        }
+        let world = self.app.world_mut();
+        let hp_zero = player_entity(world)
+            .and_then(|entity| entity_player_vitals(world, entity))
+            .is_some_and(|vitals| vitals.hp <= 0);
+        world.resource_mut::<PlayerRuntimeResource>().player_dead = dead || hp_zero;
     }
 
     /// Land chain-confirmed ore in the active player's bag (M3, WF-4) and re-render the

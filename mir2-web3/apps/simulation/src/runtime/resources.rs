@@ -490,6 +490,9 @@ pub(super) struct PlayerRuntimeResource {
     pub(super) player_direction: MirDirection,
     pub(super) bind_point: Option<crate::config::CharacterBindPoint>,
     pub(super) player_vitals: PlayerVitals,
+    /// Crystal online Dead is independent of HP: LevelUp refills a corpse's
+    /// pools without reviving it. Transient; CharacterInfo persists HP, not Dead.
+    pub(super) player_dead: bool,
     pub(super) experience: i64,
     pub(super) max_experience: i64,
     pub(super) gold: u32,
@@ -528,6 +531,7 @@ impl PlayerRuntimeResource {
                 mp: default_mp,
                 max_mp: default_mp,
             },
+            player_dead: false,
             experience: 0,
             max_experience: 100,
             gold: 0,

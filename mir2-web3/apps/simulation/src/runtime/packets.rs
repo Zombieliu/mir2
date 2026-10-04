@@ -7926,7 +7926,7 @@ pub(super) fn collect_world_entities(
             (
                 WorldEntityKind::SelfPlayer,
                 WorldEntityDisposition::Friendly,
-                player_vitals.map(|v| v.hp <= 0).unwrap_or(false),
+                current_player_is_dead(world),
                 player_vitals.map(|v| v.hp),
                 player_vitals.map(|v| v.max_hp),
                 body.map(|v| v.level),

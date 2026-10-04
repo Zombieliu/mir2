@@ -353,7 +353,7 @@ pub(super) fn apply_damage_to_current_player(
     damage: i32,
     packets: &mut Vec<ServerPacket>,
 ) -> PlayerDamageOutcome {
-    if damage <= 0 {
+    if damage <= 0 || current_player_is_dead(world) {
         return PlayerDamageOutcome {
             applied: false,
             died: false,
@@ -385,7 +385,7 @@ pub(super) fn apply_settled_damage_to_current_player(
     damage: i32,
     packets: &mut Vec<ServerPacket>,
 ) -> PlayerDamageOutcome {
-    if damage <= 0 {
+    if damage <= 0 || current_player_is_dead(world) {
         return PlayerDamageOutcome {
             applied: false,
             died: false,
@@ -430,6 +430,7 @@ pub(super) fn apply_settled_damage_to_current_player(
         let tick = runtime_tick(world);
         let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
         runtime.player_vitals = updated_vitals;
+        runtime.player_dead |= updated_vitals.hp <= 0;
         runtime.last_damaged_tick = tick;
     }
     if let Some(info) = object_health_info_for_entity(world, player, 0) {
@@ -1602,7 +1603,7 @@ pub(super) fn tick_player_vital_regen(
     let Some(vitals) = world.entity(player).get::<PlayerVitals>().copied() else {
         return;
     };
-    if vitals.hp <= 0 {
+    if current_player_is_dead(world) {
         return;
     }
     if vitals.hp >= vitals.max_hp && vitals.mp >= vitals.max_mp {

@@ -177,6 +177,7 @@ impl SimulationSession {
             save: self
                 .active_character_checkpoint()
                 .ok_or_else(|| "prepared after checkpoint missing".to_string())?,
+            player_dead: crate::runtime::components::current_player_is_dead(self.app.world()),
             visible: self.visible_objects.clone(),
             dirty_economy: self.dirty_economy_projection_event_ids.clone(),
             buffs: self.app.world().resource::<BuffResource>().clone(),
@@ -239,6 +240,7 @@ impl SimulationSession {
         save: &crate::CharacterSaveRecord,
     ) -> Result<(), String> {
         self.restore_active_character_checkpoint(save)?;
+        self.app.world_mut().resource_mut::<crate::runtime::resources::PlayerRuntimeResource>().player_dead = snapshot.player_dead;
         *self.app.world_mut().resource_mut::<BuffResource>() = snapshot.buffs.clone();
         *self.app.world_mut().resource_mut::<NpcStateResource>() = snapshot.npc.clone();
         *self.app.world_mut().resource_mut::<RuntimeQueueResource>() = snapshot.queue.clone();

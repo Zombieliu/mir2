@@ -1,0 +1,21 @@
+{
+  "captured_at_utc": "2026-10-04T07:51:53.790343+00:00",
+  "files": {
+    "capture_source_evidence.py": {
+      "sha256": "af425d985f40a5c57e252abb5be720155acf5333e78899019bc579445276bea9",
+      "bytes": 7198
+    },
+    "PLAN.md": {
+      "sha256": "58f4e14cebdbb508d99fd243c8368066679fbf3d27886f7fa3bf25943327e978",
+      "bytes": 20294
+    },
+    "source-excerpts.txt": {
+      "sha256": "42c7a319d2d22b50aa027dd307f55d17d91cdaac54293596341fedf7182632ec",
+      "bytes": 167932
+    },
+    "source-index.json": {
+      "sha256": "b6cc56adf8cc46556234f3d814627fa55c2026b2544c86e2a76612562ff09176",
+      "bytes": 27845
+    }
+  }
+}

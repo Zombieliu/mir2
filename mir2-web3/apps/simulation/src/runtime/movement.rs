@@ -206,7 +206,7 @@ pub(super) fn town_teleport_packets(world: &mut World) -> Vec<ServerPacket> {
     teleport_to_bind_map(world, bind_map, bind_position, direction)
 }
 
-fn bound_town_destination(world: &World) -> (mir2_protocol::MapInformation, Point) {
+pub(super) fn bound_town_destination(world: &World) -> (mir2_protocol::MapInformation, Point) {
     let config = &world.resource::<RuntimeConfigResource>().config;
     let bind = world
         .resource::<PlayerRuntimeResource>()
@@ -368,7 +368,11 @@ pub(super) fn town_revive_packets(world: &mut World) -> Vec<ServerPacket> {
             current_map.file_name.clone(),
         )
     };
-    world.resource_mut::<PlayerRuntimeResource>().player_vitals = revived_vitals;
+    {
+        let mut runtime = world.resource_mut::<PlayerRuntimeResource>();
+        runtime.player_vitals = revived_vitals;
+        runtime.player_dead = false;
+    }
 
     let changes_map = normalize_map_file_name(&current_map_file_name)
         != normalize_map_file_name(&bind_map.file_name);

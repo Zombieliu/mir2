@@ -2718,6 +2718,13 @@ fn apply_character_save_with_timing(
             mp: save.mp.max(0),
             max_mp: restored_max_mp.max(save.mp.max(0)),
         };
+        if matches!(skill_timing_restore, SkillTimingRestore::ResetForNewSession) {
+            // A genuinely new Crystal PlayerObject has Dead=false. CharacterInfo
+            // stores HP/MP only; same-epoch checkpoint restores retain online life.
+            player_runtime.player_dead = false;
+        } else if save.hp <= 0 {
+            player_runtime.player_dead = true;
+        }
         player_runtime.experience = save.experience.max(0);
         player_runtime.max_experience = match config.content_profile.as_ref() {
             Some(profile)
@@ -3849,12 +3856,34 @@ impl SimulationSession {
                 resolution: 0,
             }];
         }
+        if save.hp <= 0 {
+            // Only a genuine new login uses Crystal Load's bind/full rule.
+            // Same-epoch restores and trusted native-state fixtures do not.
+            let (map, position) = super::movement::bound_town_destination(self.app.world());
+            self.app.world_mut().resource_mut::<MapRuntimeResource>().current_map = map;
+            self.app.world_mut().resource_mut::<PlayerRuntimeResource>().player_position = position;
+        }
         refresh_runtime_map_collision(self.app.world_mut());
         if recover_out_of_bounds_loaded_transform(self.app.world_mut()) {
             refresh_runtime_map_collision(self.app.world_mut());
         }
         refresh_storage_password_state(self.app.world_mut());
         rebuild_world(self.app.world_mut());
+        if save.hp <= 0 {
+            // Rebuild performs RefreshStats. Refill its current maxima, not
+            // stale saved ceilings (PlayerObject.Load refreshes before SetHP).
+            let world = self.app.world_mut();
+            if let Some(player) = player_entity(world) {
+                let restored = world.entity_mut(player).get_mut::<PlayerVitals>().map(|mut vitals| {
+                    vitals.hp = vitals.max_hp;
+                    vitals.mp = vitals.max_mp;
+                    *vitals
+                });
+                if let Some(vitals) = restored {
+                    world.resource_mut::<PlayerRuntimeResource>().player_vitals = vitals;
+                }
+            }
+        }
         if should_use_crystal_current_map_world(self.app.world()) {
             clear_non_player_world_entities(self.app.world_mut());
             spawn_visible_world_for_current_map(self.app.world_mut());

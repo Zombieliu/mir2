@@ -805,6 +805,10 @@ impl InProcessWorldRuntime {
         self.session.force_authoritative_player_vitals(hp, mp);
     }
 
+    pub fn force_authoritative_player_life(&mut self, dead: bool) {
+        self.session.force_authoritative_player_life(dead);
+    }
+
     pub fn force_authoritative_player_vitals_with_max_hp(
         &mut self,
         hp: Option<i32>,

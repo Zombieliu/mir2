@@ -161,6 +161,7 @@ use std::collections::BTreeSet;
 #[derive(Debug)]
 pub(crate) struct GuildExperienceCheckpoint {
     save: CharacterSaveRecord,
+    player_dead: bool,
     visible: BTreeSet<u32>,
     dirty_economy: BTreeSet<String>,
     buffs: BuffResource,
@@ -285,6 +286,7 @@ impl SimulationSession {
             .map_err(|_| "guild XP error state poisoned")? = None;
         Ok(Some(GuildExperienceCheckpoint {
             save,
+            player_dead: super::components::current_player_is_dead(world),
             visible: self.visible_objects.clone(),
             dirty_economy: self.dirty_economy_projection_event_ids.clone(),
             buffs: world.resource::<BuffResource>().clone(),
@@ -348,6 +350,7 @@ impl SimulationSession {
                 .ok_or("guild XP rollback source missing")?;
             if durable.revision == before.save.revision {
                 self.restore_active_character_checkpoint(&before.save)?;
+                self.app.world_mut().resource_mut::<super::resources::PlayerRuntimeResource>().player_dead = before.player_dead;
                 // Preserve original in-memory clock anchors. Deserializing the
                 // saved remaining duration alone would extend real-time buffs.
                 *self.app.world_mut().resource_mut::<BuffResource>() = before.buffs;
@@ -359,6 +362,7 @@ impl SimulationSession {
                 self.dirty_economy_projection_event_ids = before.dirty_economy;
             } else {
                 self.restore_active_character_checkpoint(&durable)?;
+                self.app.world_mut().resource_mut::<super::resources::PlayerRuntimeResource>().player_dead = before.player_dead;
             }
             return Err(error);
         }

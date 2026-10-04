@@ -1,5 +1,17 @@
 # 经典三职业玩法补齐 Goal — 2026-10-04
 
+> 2026-10-04 root integrates the frozen18-file transient death/EXP slice on
+> e0877a198: original meaningful RED Gateway1/5 and personal1/2 remain;
+> final worker focused15 + adjacent61 pass. Root independently rechecks the
+> integrated Gateway12/personal3, overlapping those15. Online Dead survives
+> level-up HP/MP refill and same-epoch rollback; typed server-only life mirrors,
+> pre-spend native rejection, explicit revive and post-award teardown pools
+> are verified. Genuine HP0 login refills after RefreshStats; no saved Dead
+> schema is added. Exact published R17 MP failures remain. New paired build,
+> TCP/WSS/native/SQL/socket-resume acceptance are still open; F stays untouched.
+> [Scope](DEAD-EXPERIENCE-CHAIN-20261004.md),
+> [raw root review](generated/player-qa/crowded-combat-escape-20261003/dead-experience-chain-20261004/README.md).
+
 用户已确认按重要性排序，并明确要求作为 Goal 开始推进。本目标没有另行指定
 时间或 token 预算。之前的容量目标保持暂停；本目标不宣称 50/100 人容量已验收。
 
@@ -30,7 +42,7 @@
 | --- | --- | --- | --- |
 | 1 | 战斗与移动稳定性 | 发布配套客户端/Gateway；正常三职业协议检查多怪受击、右键逃跑、追怪取消、施法/死亡屏障、数字键药品；保留拒绝/位置确认/显示队列诊断 | R17 已发布；三职业攻击后移动/保存烟测通过；连续受击和原生验收待办 |
 | 2 | 完整经典地图和后期打宝 | 按 `platinum_176` 路线补齐石墓、祖玛、赤月及所需过渡地图；地图图像/二进制/小地图/入口闭包；正常到达、Boss、装备和技能书获取证据 | 208 runtime/209 原生实物资源已验证并集成，尚未发布；具名条件入口根复验 13+2+44 通过；76 跳只为计划，正常联网/Boss/掉落与真人验收待办 |
-| 3 | 原版经验与掉落归属 | 比对 Crystal EXPOwner/LastHitter；共享玩家/宠物参与、超时、组队/Boss、死亡及保存恢复；不改变用户明确的自定义日常奖励 | 普通怪同图首击规则与 v5 已实现；跨图/组队/Boss/地面期限、死亡升级与真实保存待办 |
+| 3 | 原版经验与掉落归属 | 比对 Crystal EXPOwner/LastHitter；共享玩家/宠物参与、超时、组队/Boss、死亡及保存恢复；不改变用户明确的自定义日常奖励 | 普通怪同图首击/v5 及独立在线 Dead 已实现；死亡毒杀升级/复活/保存链限定检查通过；跨图/组队/Boss/地面期限与新版本联网保存待办 |
 | 4 | 道士宝宝 PK | 真实召唤物攻击玩家、护主反击、主人攻击模式/组队/公会/安全区资格；身份代、伤害/死亡、离区/保存生命周期 | 打怪已实现；完整宠物 PvP 待实现 |
 | 5 | 行会管理与普通行会战 | 成员/职位权限/公告/战争正常指令；杀怪行会经验；双账号、权限失败、并发、持久化/重启验证 | 建会/邀请/银行/Buff/沙巴克已有；公告普通包 4 项及邻接 4 项通过、File 重开通过，尚未发布或原生验收；职位/踢人/普通战争/杀怪经验待办 |
 | 6 | 挖矿与升级武器 | 导入原版矿区；普通挥镐/材料；Windows NPC 存入、精炼、检查、领取入口；完整物品身份、原版概率和失败/保存恢复 | 矿区和客户端精炼入口缺失；后台部分已有 |
@@ -86,10 +98,10 @@ Stone/BigTaoist 两个具名旧脚本已完成全来源哈希限定的兼容修�
 死亡单人毒杀在 Zone 产生奖励后，个人升级补满 HP 可能经 Gateway 同步错误地清掉 Dead；
 登出时消费排队奖励还存在提前快照覆盖升级 vitals 的路径。下一轮以原版同在线身份的
 独立 Dead 状态为依据，验证普通到账/升级、重复投递、保存失败及正常退出/复活。
-此项尚未修复，不能由 21 个 Zone 归属回归推导端到端完成。
+此项已完成限定源码修复及 15 项根复验；新配套版本的实际联网 Gate 仍开放，不能由 Zone 归属或 in-process 数量推导整条上线链完成。
 
 R17 的独立 v4 实测已用正常购书、学习、重登后的法师/道士复现死亡施法：
-法师 HP0 后火球仍扣 3 MP、改变方向，并使目标损失 8 HP；道士 HP0 后治愈术
+法师 HP0 后火球仍扣 3 MP、改变方向；同段目标损失 8 HP 的攻击者归因不明。道士 HP0 后治愈术
 也扣 3 MP。两者没有施法回包，但都不能判为拒绝成功。原冻结工具误报通过的结果
 保留；新离线分类和死亡状态修复分别验证。该短窗口没有达到七怪连续正伤害的
 资格，未执行合格压力下的逃跑命令，不据此判断逃跑算法成功或失败。

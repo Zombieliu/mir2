@@ -1225,6 +1225,10 @@ impl ZoneRuntime {
             .map(|player| player.life_generation)
     }
 
+    pub fn player_is_dead(&self, session_id: &SessionId) -> Option<bool> {
+        self.players.get(session_id).map(|player| player.dead)
+    }
+
     pub fn player_vitals(&self, session_id: &SessionId) -> Option<(i32, i32, i32)> {
         self.players
             .get(session_id)
@@ -1387,26 +1391,29 @@ impl ZoneRuntime {
         hp: i32,
         max_hp: i32,
         mp: i32,
+        dead: Option<bool>,
     ) -> Vec<ZoneOutbound> {
         let Some(player) = self.players.get_mut(session_id) else {
             return Vec::new();
         };
-        let life_changed = player.dead != (hp.clamp(0, max_hp.max(1)) == 0);
+        let hp_zero = hp.clamp(0, max_hp.max(1)) == 0;
+        let next_dead = dead.unwrap_or(player.dead || hp_zero) || hp_zero;
+        let life_changed = player.dead != next_dead;
         player.max_hp = max_hp.max(1);
         player.hp = hp.clamp(0, player.max_hp);
         player.mp = mp.max(0);
-        if player.dead != (player.hp == 0) {
+        if life_changed {
             player.clear_status_poisons();
             if player.dead {
                 player.life_generation = player.life_generation.saturating_add(1);
             }
         }
-        player.dead = player.hp == 0;
+        player.dead = next_dead;
         let object_id = player.object_id;
         if life_changed {
             self.clear_native_player_life_actions(object_id);
         }
-        if hp <= 0 {
+        if next_dead {
             return self.remove_intelligent_creature(session_id, 0);
         }
         Vec::new()
@@ -1563,7 +1570,10 @@ impl ZoneRuntime {
                 hp,
                 max_hp,
                 mp,
-            } => self.sync_player_vitals(&session_id, hp, max_hp, mp),
+            } => self.sync_player_vitals(&session_id, hp, max_hp, mp, None),
+            ZoneCommand::SyncPlayerVitalsAndLife {
+                session_id, hp, max_hp, mp, dead,
+            } => self.sync_player_vitals(&session_id, hp, max_hp, mp, Some(dead)),
             ZoneCommand::Chat {
                 session_id,
                 message,
@@ -17539,7 +17549,7 @@ mod magic_shield_lifecycle_tests {
             ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
         let session_id = join_player(&mut zone, "shielded", 101);
         zone.apply_native_player_magic_shield(&session_id, 2, 0, 10);
-        zone.sync_player_vitals(&session_id, 2, 500, 100);
+        zone.sync_player_vitals(&session_id, 2, 500, 100, None);
         let strike = (0..100)
             .find(|&index| zone_hazard_hash(index, 7) % 100 > 2)
             .expect("bounded lethal hazard seed");
@@ -17643,7 +17653,7 @@ mod hazard_tests {
     fn hazard_forwards_only_the_damage_actually_applied() {
         let mut zone = ZoneRuntime::new(ZoneKey::for_map("0"));
         let session = join_player(&mut zone, "low-hp", Point { x: 2, y: 2 });
-        zone.sync_player_vitals(&session, 2, 500, 100);
+        zone.sync_player_vitals(&session, 2, 500, 100, None);
         let id = zone.players[&session].object_id;
         let strike = (0..100)
             .find(|&i| zone_hazard_hash(i, 7) % 100 > 2)

@@ -298,6 +298,7 @@ impl ZoneManager {
             | ZoneCommand::SyncPlayerCombatState { session_id, .. }
             | ZoneCommand::SyncPlayerTransform { session_id, .. }
             | ZoneCommand::SyncPlayerVitals { session_id, .. }
+            | ZoneCommand::SyncPlayerVitalsAndLife { session_id, .. }
             | ZoneCommand::Chat { session_id, .. }
             | ZoneCommand::BroadcastPackets { session_id, .. }
             | ZoneCommand::SyncSharedObjects { session_id, .. }
@@ -634,6 +635,11 @@ impl ZoneManager {
     pub fn player_life_generation(&self, session_id: &SessionId) -> Option<u64> {
         let key = self.session_zones.get(session_id)?;
         self.zones.get(key)?.player_life_generation(session_id)
+    }
+
+    pub fn player_is_dead(&self, session_id: &SessionId) -> Option<bool> {
+        let key = self.session_zones.get(session_id)?;
+        self.zones.get(key)?.player_is_dead(session_id)
     }
 
     /// Trusted server-only Harvest admission query for the player's active

@@ -508,6 +508,15 @@ pub enum ZoneCommand {
         max_hp: i32,
         mp: i32,
     },
+    /// Trusted owner/session lifecycle mirror. Unlike ordinary pool changes,
+    /// explicit Revive can clear Dead; no client packet exposes this command.
+    SyncPlayerVitalsAndLife {
+        session_id: SessionId,
+        hp: i32,
+        max_hp: i32,
+        mp: i32,
+        dead: bool,
+    },
     Chat {
         session_id: SessionId,
         message: String,
