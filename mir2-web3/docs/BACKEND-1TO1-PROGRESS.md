@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> 2026-10-04 source-bound named NPC gates pass independent root13 ordinary
+> packet/2 proof cases, with44 route/evidence checks. q135 accepted/current,
+> q153/q146 Completed and lawful item1080 debit are confined to two full-hash
+> scripts; missing debit breaks before MOVE. True RED1/7 remains. Actual route,
+> natural drop/skill activation, raw durable stores and native gates are open.
+> The R17 audit independently verifies dead-cast absolute MP spend in both
+> casters; target8 damage alone does not identify FireBall versus earlier dead
+> Attack. Source LevelUp may fill HP while preserving Dead. Do not infer life
+> from positive pools or execution from missing animation ACKs. No new rollout.
+> [Gates](CLASSIC-LATE-ROUTES-20261004.md), [audit](R17-DEAD-CAST-AUDIT-20261004.md).
+
 > 2026-10-04 shared EditGuildNotice leaves the unavailable fallback. The
 > account/Guild transaction rechecks character, membership, current rank,
 > option64 and revision before durable success. Online updates are filtered

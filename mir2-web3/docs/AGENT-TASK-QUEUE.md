@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-10-04 named classic-route repair is integrated and independently checked:
+> prepared ordinary13 + source-proof2 + Node44 pass, preserving true RED1/7.
+> Exact Stone/BigTaoist source guards leave global numeric semantics untouched;
+> ordinary q135 reward/saved canonical1080 is debited exactly once. Main76-hop
+> routes are planned only. D10061 unbound NeedMove and Ancient missing outer
+> walking exit remain source gaps; no portal is invented. Actual network,
+> source-position, natural Boss/book/gear and native gates remain open. Offline
+> R17 v5 MP reclassification rejects both caster false passes while preserving
+> separate lifecycle evidence. Cross-map EXP/ground60-second work is read-only
+> next; transient death source repair remains with its sole assigned worker.
+> [Routes/evidence](CLASSIC-LATE-ROUTES-20261004.md), [R17 audit](R17-DEAD-CAST-AUDIT-20261004.md).
+
 > 2026-10-04 shared Guild notice is source-complete within its bounded slice:
 > authenticated EditGuildNotice, option64 authorization, max200/clear,
 > transaction-before-success and online member-only cross-Zone updates.

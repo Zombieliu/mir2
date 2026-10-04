@@ -1,5 +1,16 @@
 # Crystal Server Parity
 
+> 2026-10-04 Stone/BigTaoist complete-source-bound compatibility follows the
+> inferred supplied legacy numeric intent only; modern C# non-ACTIVE means
+> Completed, so this is a declared Candidate playability adaptation. Canonical
+> reward1080/one debit is verified with root13/2/44 bounded checks; generic
+> script mapping and original topology are unchanged. D10061 lacks inbound
+> binding and Ancient rooms lack an authored outer walking exit. Exact R17
+> dead-cast MP fails independently; victim-only target damage cannot identify
+> a particular input, and dead LevelUp positive HP is not revival. Offline
+> classifier checks/natural absence cannot imply dense or native acceptance.
+> [Limits](CLASSIC-LATE-ROUTES-20261004.md), [R17 receipts](R17-DEAD-CAST-AUDIT-20261004.md).
+
 > 2026-10-04 Guild notice follows PlayerObject/GuildObject permission64,
 > max200 and clear semantics through the shared durable authority. Terminal
 > update-1 plus extra committed-body projection is documented as native

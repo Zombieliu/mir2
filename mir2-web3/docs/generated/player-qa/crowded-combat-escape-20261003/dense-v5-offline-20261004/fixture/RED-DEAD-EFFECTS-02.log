@@ -1,0 +1,406 @@
+TAP version 13
+# Subtest: known spell without ACK still fails on explicit absolute owner MP spend, including exact R17 Wizard/Taoist pattern
+not ok 1 - known spell without ACK still fails on explicit absolute owner MP spend, including exact R17 Wizard/Taoist pattern
+  ---
+  duration_ms: 1.7026
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:36:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'passed' !== 'failed'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'failed'
+  actual: 'passed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:40:12)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.start (node:internal/test_runner/test:944:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:296:17)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+  ...
+# Subtest: target damage without ACK fails the dead action gate and never gives a passed caster barrier
+not ok 2 - target damage without ACK fails the dead action gate and never gives a passed caster barrier
+  ---
+  duration_ms: 0.4008
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:44:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:47:64)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: material consumption keeps exact cross-grid UID totals and fails without cast ACK
+not ok 3 - material consumption keeps exact cross-grid UID totals and fails without cast ACK
+  ---
+  duration_ms: 0.2208
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:50:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'passed' !== 'failed'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'failed'
+  actual: 'passed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:52:30)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: self Healing absolute HP rise or owner-life/facing mutation fails even when no cast ACK is returned
+not ok 4 - self Healing absolute HP rise or owner-life/facing mutation fails even when no cast ACK is returned
+  ---
+  duration_ms: 0.6876
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:58:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    hp
+    + actual - expected
+    
+    + 'inconclusive'
+    - 'failed'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'failed'
+  actual: 'inconclusive'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:66:32)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: unknown or percentage-only post-input MP cannot produce a passed cast-death proof
+not ok 5 - unknown or percentage-only post-input MP cannot produce a passed cast-death proof
+  ---
+  duration_ms: 0.2754
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:70:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    unknown
+    + actual - expected
+    
+    + 'passed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'passed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:79:32)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: missing/invalid input, learned cost or target cannot borrow effects or create a passed barrier
+ok 6 - missing/invalid input, learned cost or target cannot borrow effects or create a passed barrier
+  ---
+  duration_ms: 0.4659
+  type: 'test'
+  ...
+# Subtest: closed trial owner gate excludes foreign, future, before-input and wrong-target effects
+not ok 7 - closed trial owner gate excludes foreign, future, before-input and wrong-target effects
+  ---
+  duration_ms: 0.267
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:94:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'failed' !== 'passed'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'passed'
+  actual: 'failed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:100:30)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: delayed previously committed projectile damage does not relabel a new dead Magic as executed
+not ok 8 - delayed previously committed projectile damage does not relabel a new dead Magic as executed
+  ---
+  duration_ms: 0.2128
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:103:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected "actual" to be strictly unequal to:
+    
+    'failed'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'failed'
+  actual: 'failed'
+  operator: 'notStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:110:30)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: wrong-spell or cast=false receipts are excluded from committed cast proof, with no false passed barrier from wrong spell
+not ok 9 - wrong-spell or cast=false receipts are excluded from committed cast proof, with no false passed barrier from wrong spell
+  ---
+  duration_ms: 0.2807
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:113:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading '0')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:117:38)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: invalid or partial material observations cannot be called unchanged or manufacture consumption
+not ok 10 - invalid or partial material observations cannot be called unchanged or manufacture consumption
+  ---
+  duration_ms: 0.342
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:121:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    partial
+    + actual - expected
+    
+    + 'passed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'passed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:129:32)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: another actor committed before this dead input makes victim-only target damage unattributed, not this owner spell proof
+not ok 11 - another actor committed before this dead input makes victim-only target damage unattributed, not this owner spell proof
+  ---
+  duration_ms: 0.2715
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:134:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected "actual" to be strictly unequal to:
+    
+    'failed'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'failed'
+  actual: 'failed'
+  operator: 'notStrictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:138:30)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: cached owner state cannot borrow another payload owner MP or positive HP/facing as authority
+not ok 12 - cached owner state cannot borrow another payload owner MP or positive HP/facing as authority
+  ---
+  duration_ms: 0.1549
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:145:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading 'length')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:152:42)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: terminal cached or percentage zero without an absolute owner HP payload cannot pass death rejection
+not ok 13 - terminal cached or percentage zero without an absolute owner HP payload cannot pass death rejection
+  ---
+  duration_ms: 0.2275
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:155:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    missingPayload
+    + actual - expected
+    
+    + 'passed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'passed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:164:32)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: a later actual MP debit after an observed MP increase still fails, while future debit stays outside this case
+not ok 14 - a later actual MP debit after an observed MP increase still fails, while future debit stays outside this case
+  ---
+  duration_ms: 0.2067
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:169:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'passed' !== 'failed'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'failed'
+  actual: 'passed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:172:30)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: material unknown/unsafe identities cannot fabricate a debit or rejection pass; explicit identity zero is kept
+not ok 15 - material unknown/unsafe identities cannot fabricate a debit or rejection pass; explicit identity zero is kept
+  ---
+  duration_ms: 0.1964
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:178:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    unsafeUid
+    + actual - expected
+    
+    + 'passed'
+    - 'inconclusive'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'inconclusive'
+  actual: 'passed'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:188:32)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: committed owner actions before requested Magic fail generic death, without borrowing them as that spell commitment
+not ok 16 - committed owner actions before requested Magic fail generic death, without borrowing them as that spell commitment
+  ---
+  duration_ms: 0.1253
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r17\\dense-network-qa-v5\\[eval1]:196:1'
+  failureType: 'testCodeFailure'
+  error: "Cannot read properties of undefined (reading 'length')"
+  code: 'ERR_TEST_FAILURE'
+  name: 'TypeError'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r17/dense-network-qa-v5/[eval1]:199:93)
+    Test.runInAsyncScope (node:async_hooks:214:14)
+    Test.run (node:internal/test_runner/test:1047:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:744:18)
+    Test.postRun (node:internal/test_runner/test:1173:19)
+    Test.run (node:internal/test_runner/test:1101:12)
+    process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 1
+# fail 15
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 13.6207

@@ -1,0 +1,1231 @@
+{
+  "schema": "mir2.r17.dense-v4-actual-result-audit.v1",
+  "sourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "binarySha256": "1ed52738885292b734c4055a9fd7d585b79d519779084bca2a617d0a9f5eb9ab",
+  "frozenInputsSha256": "054689ac86e4b19f98bc836b1d783a5f6a60d08e0459183a233bb72891809192",
+  "downloadedProofSha256": "f1c261ae1113955400b07de14df50670e5d7b9e56602028971aca9f5572dbbf6",
+  "wrapperExitCode": 0,
+  "preparedState": true,
+  "unsafeQaEnabled": false,
+  "originalMonsterStatsClock": true,
+  "allActualFailuresAndFrozenReportedVerdictsPreserved": true,
+  "notes": [
+    "Both ordinary books, exact wallet/quantity, UseItem, known spells and normal relogin persistence were proven.",
+    "No short formation window qualified the unchanged seven attacker gate; no qualified attack/cast/held escape commands were executed.",
+    "Wizard died while forming the held trial; this is not proof of escape-algorithm failure.",
+    "After genuine owner Death, both eligible caster Magic inputs spent three absolute MP despite no cast ACKs; Wizard's target received eight damage.",
+    "Frozen classifier erroneously marked each caster castBarrier passed, and overall Taoist passed. This independent audit rejects both claims without editing those frozen inputs or reports.",
+    "Death-save, explicit town revive, quiet and revived-save receipts are preserved separately; they do not erase dead-cast failures."
+  ],
+  "ordinaryPurchaseResults": [
+    {
+      "className": "Warrior",
+      "reportedStatus": "completed",
+      "ordinaryMedicines": [
+        {
+          "status": "passed",
+          "name": "(HP)DrugSmall",
+          "quantity": 20,
+          "unitPrice": 40,
+          "walletBefore": 20000,
+          "walletAfter": 19200,
+          "quantityBefore": 1,
+          "quantityAfter": 21,
+          "uniqueIds": [
+            2,
+            4
+          ],
+          "sentSequence": 785,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        },
+        {
+          "status": "passed",
+          "name": "(MP)DrugSmall",
+          "quantity": 10,
+          "unitPrice": 40,
+          "walletBefore": 19200,
+          "walletAfter": 18800,
+          "quantityBefore": 0,
+          "quantityAfter": 10,
+          "uniqueIds": [
+            5
+          ],
+          "sentSequence": 791,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        }
+      ],
+      "actualMedicineUse": {
+        "status": "passed",
+        "name": "(HP)DrugSmall",
+        "uniqueId": 2,
+        "ackSequence": 803,
+        "before": {
+          "hp": 419,
+          "mp": 116,
+          "count": 21
+        },
+        "after": {
+          "hp": 419,
+          "mp": 116,
+          "count": 20
+        }
+      },
+      "actualSkillBook": {
+        "status": "not-applicable",
+        "reason": "Warrior ordinary melee escape case has no active spell requirement"
+      },
+      "actualBookUse": null,
+      "actualLearnedSpell": null,
+      "bookEntryStatus": null,
+      "bookExitStatus": null,
+      "retainedTransferAttempts": [],
+      "knownSpellsAfterNormalRelogin": [],
+      "persistenceMatched": true,
+      "normalLogoutConfirmed": true
+    },
+    {
+      "className": "Wizard",
+      "reportedStatus": "completed",
+      "ordinaryMedicines": [
+        {
+          "status": "passed",
+          "name": "(HP)DrugSmall",
+          "quantity": 20,
+          "unitPrice": 40,
+          "walletBefore": 20000,
+          "walletAfter": 19200,
+          "quantityBefore": 1,
+          "quantityAfter": 21,
+          "uniqueIds": [
+            2,
+            4
+          ],
+          "sentSequence": 747,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        },
+        {
+          "status": "passed",
+          "name": "(MP)DrugSmall",
+          "quantity": 10,
+          "unitPrice": 40,
+          "walletBefore": 19200,
+          "walletAfter": 18800,
+          "quantityBefore": 0,
+          "quantityAfter": 10,
+          "uniqueIds": [
+            5
+          ],
+          "sentSequence": 753,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        }
+      ],
+      "actualMedicineUse": {
+        "status": "passed",
+        "name": "(HP)DrugSmall",
+        "uniqueId": 2,
+        "ackSequence": 765,
+        "before": {
+          "hp": 128,
+          "mp": 541,
+          "count": 21
+        },
+        "after": {
+          "hp": 128,
+          "mp": 541,
+          "count": 20
+        }
+      },
+      "actualSkillBook": {
+        "status": "passed",
+        "name": "FireBall",
+        "quantity": 1,
+        "unitPrice": 500,
+        "walletBefore": 18800,
+        "walletAfter": 18300,
+        "quantityBefore": 0,
+        "quantityAfter": 1,
+        "uniqueIds": [
+          6
+        ],
+        "sentSequence": 1236,
+        "merchant": {
+          "name": "Librarian_Brian",
+          "objectId": 446
+        }
+      },
+      "actualBookUse": {
+        "status": "passed",
+        "name": "FireBall",
+        "uniqueId": 6,
+        "ackSequence": 1248,
+        "before": {
+          "hp": 128,
+          "mp": 541,
+          "count": 1
+        },
+        "after": {
+          "hp": 128,
+          "mp": 541,
+          "count": 0
+        }
+      },
+      "actualLearnedSpell": "FireBall",
+      "bookEntryStatus": "passed",
+      "bookExitStatus": "passed",
+      "retainedTransferAttempts": [
+        {
+          "sequence": 771,
+          "sourceMap": "0",
+          "targetMap": "0132",
+          "attempts": [
+            {
+              "source": {
+                "x": 282,
+                "y": 635
+              },
+              "reason": "no-legal-static-occupancy-path"
+            },
+            {
+              "source": {
+                "x": 283,
+                "y": 636
+              },
+              "reason": "ordinary-route-found",
+              "routeNodes": 46
+            }
+          ],
+          "selectedSource": {
+            "x": 283,
+            "y": 636
+          }
+        },
+        {
+          "sequence": 1258,
+          "sourceMap": "0132",
+          "targetMap": "0",
+          "attempts": [
+            {
+              "source": {
+                "x": 14,
+                "y": 16
+              },
+              "reason": "ordinary-route-found",
+              "routeNodes": 10
+            }
+          ],
+          "selectedSource": {
+            "x": 14,
+            "y": 16
+          }
+        }
+      ],
+      "knownSpellsAfterNormalRelogin": [
+        "FireBall"
+      ],
+      "persistenceMatched": true,
+      "normalLogoutConfirmed": true
+    },
+    {
+      "className": "Taoist",
+      "reportedStatus": "completed",
+      "ordinaryMedicines": [
+        {
+          "status": "passed",
+          "name": "(HP)DrugSmall",
+          "quantity": 20,
+          "unitPrice": 40,
+          "walletBefore": 20000,
+          "walletAfter": 19200,
+          "quantityBefore": 1,
+          "quantityAfter": 21,
+          "uniqueIds": [
+            2,
+            4
+          ],
+          "sentSequence": 746,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        },
+        {
+          "status": "passed",
+          "name": "(MP)DrugSmall",
+          "quantity": 10,
+          "unitPrice": 40,
+          "walletBefore": 19200,
+          "walletAfter": 18800,
+          "quantityBefore": 0,
+          "quantityAfter": 10,
+          "uniqueIds": [
+            5
+          ],
+          "sentSequence": 752,
+          "merchant": {
+            "name": "Merchant_Ruben",
+            "objectId": 8
+          }
+        }
+      ],
+      "actualMedicineUse": {
+        "status": "passed",
+        "name": "(HP)DrugSmall",
+        "uniqueId": 2,
+        "ackSequence": 764,
+        "before": {
+          "hp": 239,
+          "mp": 260,
+          "count": 21
+        },
+        "after": {
+          "hp": 239,
+          "mp": 260,
+          "count": 20
+        }
+      },
+      "actualSkillBook": {
+        "status": "passed",
+        "name": "Healing",
+        "quantity": 1,
+        "unitPrice": 500,
+        "walletBefore": 18800,
+        "walletAfter": 18300,
+        "quantityBefore": 0,
+        "quantityAfter": 1,
+        "uniqueIds": [
+          6
+        ],
+        "sentSequence": 1245,
+        "merchant": {
+          "name": "Librarian_Brian",
+          "objectId": 446
+        }
+      },
+      "actualBookUse": {
+        "status": "passed",
+        "name": "Healing",
+        "uniqueId": 6,
+        "ackSequence": 1254,
+        "before": {
+          "hp": 239,
+          "mp": 260,
+          "count": 1
+        },
+        "after": {
+          "hp": 239,
+          "mp": 260,
+          "count": 0
+        }
+      },
+      "actualLearnedSpell": "Healing",
+      "bookEntryStatus": "passed",
+      "bookExitStatus": "passed",
+      "retainedTransferAttempts": [
+        {
+          "sequence": 770,
+          "sourceMap": "0",
+          "targetMap": "0132",
+          "attempts": [
+            {
+              "source": {
+                "x": 282,
+                "y": 635
+              },
+              "reason": "no-legal-static-occupancy-path"
+            },
+            {
+              "source": {
+                "x": 283,
+                "y": 636
+              },
+              "reason": "ordinary-route-found",
+              "routeNodes": 46
+            }
+          ],
+          "selectedSource": {
+            "x": 283,
+            "y": 636
+          }
+        },
+        {
+          "sequence": 1266,
+          "sourceMap": "0132",
+          "targetMap": "0",
+          "attempts": [
+            {
+              "source": {
+                "x": 14,
+                "y": 16
+              },
+              "reason": "ordinary-route-found",
+              "routeNodes": 10
+            }
+          ],
+          "selectedSource": {
+            "x": 14,
+            "y": 16
+          }
+        }
+      ],
+      "knownSpellsAfterNormalRelogin": [
+        "Healing"
+      ],
+      "persistenceMatched": true,
+      "normalLogoutConfirmed": true
+    }
+  ],
+  "denseResults": [
+    {
+      "className": "Warrior",
+      "reportedStatus": "inconclusive",
+      "cases": [
+        {
+          "kind": "attackEscape",
+          "trial": 1,
+          "reportedStatus": "inconclusive",
+          "formationStatus": "inconclusive",
+          "reason": "Natural original spawn/lure did not meet declared geometry and real-hit preconditions within budget",
+          "formationSamples": 53,
+          "qualifiedSevenSamples": 0,
+          "maxTwoCycleAdjacentCaveBatIds": 2,
+          "maxPositiveOwnerHitsIn6200ms": 2,
+          "formationDeathAsReported": null
+        },
+        {
+          "kind": "castEscape",
+          "trial": null,
+          "reportedStatus": "not-applicable",
+          "formationStatus": null,
+          "reason": "Warrior ordinary attack is applicable; no active cast spell required",
+          "formationSamples": 0,
+          "qualifiedSevenSamples": 0,
+          "maxTwoCycleAdjacentCaveBatIds": 0,
+          "maxPositiveOwnerHitsIn6200ms": 0,
+          "formationDeathAsReported": null
+        },
+        {
+          "kind": "heldStop",
+          "trial": 1,
+          "reportedStatus": "inconclusive",
+          "formationStatus": "inconclusive",
+          "reason": "Natural original spawn/lure did not meet declared geometry and real-hit preconditions within budget",
+          "formationSamples": 58,
+          "qualifiedSevenSamples": 0,
+          "maxTwoCycleAdjacentCaveBatIds": 4,
+          "maxPositiveOwnerHitsIn6200ms": 3,
+          "formationDeathAsReported": null
+        },
+        {
+          "kind": "prematureRecast",
+          "trial": null,
+          "reportedStatus": "not-applicable",
+          "formationStatus": null,
+          "reason": "Warrior ordinary attack is applicable; no active cast spell required",
+          "formationSamples": 0,
+          "qualifiedSevenSamples": 0,
+          "maxTwoCycleAdjacentCaveBatIds": 0,
+          "maxPositiveOwnerHitsIn6200ms": 0,
+          "formationDeathAsReported": null
+        }
+      ],
+      "actualSentAttackCommands": 0,
+      "actualSentMagicCommands": 0,
+      "qualifiedEscapeAccepted": false,
+      "normalLogoutConfirmed": true,
+      "persistenceMatched": true
+    },
+    {
+      "className": "Wizard",
+      "reportedStatus": "failed",
+      "cases": [
+        {
+          "kind": "attackEscape",
+          "trial": 1,
+          "reportedStatus": "inconclusive",
+          "formationStatus": "inconclusive",
+          "reason": "Natural original spawn/lure did not meet declared geometry and real-hit preconditions within budget",
+          "formationSamples": 47,
+          "qualifiedSevenSamples": 0,
+          "maxTwoCycleAdjacentCaveBatIds": 1,
+          "maxPositiveOwnerHitsIn6200ms": 11,
+          "formationDeathAsReported": null
+        },
+        {
+          "kind": "castEscape",
+          "trial": 1,
+          "reportedStatus": "inconclusive",
+          "formationStatus": "inconclusive",
+          "reason": "Natural original spawn/lure did not meet declared geometry and real-hit preconditions within budget",
+          "formationSamples": 55,
+          "qualifiedSevenSamples": 0,
+          "maxTwoCycleAdjacentCaveBatIds": 1,
+          "maxPositiveOwnerHitsIn6200ms": 15,
+          "formationDeathAsReported": null
+        },
+        {
+          "kind": "heldStop",
+          "trial": 1,
+          "reportedStatus": "failed",
+          "formationStatus": "failed",
+          "reason": "Actual death while naturally forming group",
+          "formationSamples": 3,
+          "qualifiedSevenSamples": 0,
+          "maxTwoCycleAdjacentCaveBatIds": 1,
+          "maxPositiveOwnerHitsIn6200ms": 10,
+          "formationDeathAsReported": {
+            "status": "inconclusive",
+            "deathSequence": 2287,
+            "positiveOwnerHitCount": 0,
+            "zeroHpSequence": 2287,
+            "reason": "Require actual incoming positive damage, owner Death and exact terminal HP 0; rounded 0% is insufficient",
+            "fullP1Accepted": false,
+            "nativeInputAccepted": false,
+            "nativeVisualAccepted": false,
+            "humanAccepted": false,
+            "ordinaryProgressionAccepted": false,
+            "loadAccepted": false
+          }
+        }
+      ],
+      "actualSentAttackCommands": 0,
+      "actualSentMagicCommands": 0,
+      "qualifiedEscapeAccepted": false,
+      "normalLogoutConfirmed": true,
+      "persistenceMatched": true
+    },
+    {
+      "className": "Taoist",
+      "reportedStatus": "inconclusive",
+      "cases": [
+        {
+          "kind": "attackEscape",
+          "trial": 1,
+          "reportedStatus": "inconclusive",
+          "formationStatus": "inconclusive",
+          "reason": "Natural original spawn/lure did not meet declared geometry and real-hit preconditions within budget",
+          "formationSamples": 56,
+          "qualifiedSevenSamples": 0,
+          "maxTwoCycleAdjacentCaveBatIds": 2,
+          "maxPositiveOwnerHitsIn6200ms": 9,
+          "formationDeathAsReported": null
+        },
+        {
+          "kind": "castEscape",
+          "trial": 1,
+          "reportedStatus": "inconclusive",
+          "formationStatus": "inconclusive",
+          "reason": "Natural original spawn/lure did not meet declared geometry and real-hit preconditions within budget",
+          "formationSamples": 55,
+          "qualifiedSevenSamples": 0,
+          "maxTwoCycleAdjacentCaveBatIds": 2,
+          "maxPositiveOwnerHitsIn6200ms": 9,
+          "formationDeathAsReported": null
+        },
+        {
+          "kind": "heldStop",
+          "trial": 1,
+          "reportedStatus": "inconclusive",
+          "formationStatus": "inconclusive",
+          "reason": "Natural original spawn/lure did not meet declared geometry and real-hit preconditions within budget",
+          "formationSamples": 56,
+          "qualifiedSevenSamples": 0,
+          "maxTwoCycleAdjacentCaveBatIds": 2,
+          "maxPositiveOwnerHitsIn6200ms": 9,
+          "formationDeathAsReported": null
+        },
+        {
+          "kind": "prematureRecast",
+          "trial": 1,
+          "reportedStatus": "inconclusive",
+          "formationStatus": "inconclusive",
+          "reason": "Natural original spawn/lure did not meet declared geometry and real-hit preconditions within budget",
+          "formationSamples": 56,
+          "qualifiedSevenSamples": 0,
+          "maxTwoCycleAdjacentCaveBatIds": 2,
+          "maxPositiveOwnerHitsIn6200ms": 9,
+          "formationDeathAsReported": null
+        }
+      ],
+      "actualSentAttackCommands": 0,
+      "actualSentMagicCommands": 0,
+      "qualifiedEscapeAccepted": false,
+      "normalLogoutConfirmed": true,
+      "persistenceMatched": true
+    }
+  ],
+  "deathResults": [
+    {
+      "className": "Warrior",
+      "reportedPhaseStatus": "inconclusive",
+      "actualDeath": {
+        "status": "inconclusive",
+        "deathSequence": null,
+        "positiveOwnerHitCount": 125,
+        "zeroHpSequence": null,
+        "reason": "Require actual incoming positive damage, owner Death and exact terminal HP 0; rounded 0% is insufficient",
+        "fullP1Accepted": false,
+        "nativeInputAccepted": false,
+        "nativeVisualAccepted": false,
+        "humanAccepted": false,
+        "ordinaryProgressionAccepted": false,
+        "loadAccepted": false
+      },
+      "reportedCaseStatus": "inconclusive",
+      "reason": "Actual hostile damage/death did not form within declared budget",
+      "normalLogoutConfirmed": true,
+      "deadPersistenceMatched": null,
+      "revivedPersistenceMatched": null,
+      "revival": null,
+      "auditedCastDeathBarrierAccepted": false,
+      "auditedCaseStatus": "inconclusive"
+    },
+    {
+      "className": "Wizard",
+      "reportedPhaseStatus": "failed",
+      "actualDeath": {
+        "status": "qualified",
+        "deathSequence": 1006,
+        "positiveOwnerHitCount": 31,
+        "zeroHpSequence": 1006,
+        "reason": null,
+        "fullP1Accepted": false,
+        "nativeInputAccepted": false,
+        "nativeVisualAccepted": false,
+        "humanAccepted": false,
+        "ordinaryProgressionAccepted": false,
+        "loadAccepted": false
+      },
+      "reportedCaseStatus": "failed",
+      "reason": null,
+      "normalLogoutConfirmed": true,
+      "deadPersistenceMatched": true,
+      "revivedPersistenceMatched": true,
+      "revival": {
+        "ackSequence": 688,
+        "location": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down"
+        },
+        "hp": 128,
+        "actualAlive": true,
+        "expectedBindPoint": {
+          "map_file_name": "0",
+          "position": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        "town": true,
+        "stop": {
+          "status": "passed",
+          "durationMs": 5507,
+          "requiredMs": 5000,
+          "anchor": {
+            "map": "0",
+            "x": 288,
+            "y": 616,
+            "direction": "Down"
+          },
+          "anchorSequence": 764,
+          "window": {
+            "anchorMs": 1791102927013,
+            "endMs": 1791102932520,
+            "ownerId": 1000
+          },
+          "authoritySampleCount": 10,
+          "snapshotCount": 10,
+          "observedToEnd": true,
+          "extraInputs": [],
+          "driftReceipts": [],
+          "positiveOwnerHits": 0,
+          "deathReceiptSequence": null,
+          "allLateReceiptsRetained": true,
+          "fullP1Accepted": false,
+          "nativeInputAccepted": false,
+          "nativeVisualAccepted": false,
+          "humanAccepted": false,
+          "ordinaryProgressionAccepted": false,
+          "loadAccepted": false
+        }
+      },
+      "auditedCastDeathBarrierAccepted": false,
+      "frozenDeadActionProofUnmodified": {
+        "status": "failed",
+        "window": {
+          "fromMs": 1791102916121,
+          "endMs": 1791102921995,
+          "ownerId": 1000
+        },
+        "castBarrier": {
+          "status": "passed",
+          "spell": "FireBall",
+          "actualMagicInputSequence": 1018,
+          "baselineSnapshotSequence": 1014,
+          "eligibility": {
+            "status": "eligible",
+            "spell": "FireBall",
+            "ownerId": 1000,
+            "knownSkillObserved": true,
+            "mpCost": 3,
+            "mpCostKnown": true,
+            "beforeMp": 541,
+            "absoluteMpProvenance": {
+              "ownerId": 1000,
+              "absolute": true,
+              "source": "worldSnapshot",
+              "observedMs": 1791102916434
+            },
+            "enoughMp": true,
+            "validTarget": true,
+            "castControlClear": true,
+            "target": {
+              "objectId": 293202,
+              "kind": "monster",
+              "disposition": "hostile",
+              "x": 59,
+              "y": 55,
+              "dead": false
+            },
+            "ignoringOwnerDeathOnly": true
+          },
+          "matchingTargetInput": true,
+          "reason": null,
+          "verified": true
+        },
+        "castBarrierVerified": true,
+        "attemptedCommands": [
+          {
+            "sequence": 1015,
+            "type": "walk",
+            "spell": null,
+            "targetId": null
+          },
+          {
+            "sequence": 1016,
+            "type": "run",
+            "spell": null,
+            "targetId": null
+          },
+          {
+            "sequence": 1017,
+            "type": "attack",
+            "spell": null,
+            "targetId": 293202
+          },
+          {
+            "sequence": 1018,
+            "type": "magic",
+            "spell": "FireBall",
+            "targetId": 293202
+          }
+        ],
+        "illegalLivingReceipts": [
+          {
+            "sequence": 1032,
+            "tsMs": 1791102917753,
+            "packet": "DamageIndicator",
+            "payload": {
+              "damage": 8,
+              "damageType": 0,
+              "objectId": 293202,
+              "typed": true
+            },
+            "state": {
+              "map": "D021",
+              "x": 59,
+              "y": 56,
+              "direction": "Up",
+              "ownerId": 1000,
+              "hp": 0,
+              "maxHp": 128,
+              "mp": 538,
+              "maxMp": 541,
+              "hpProvenance": {
+                "ownerId": 1000,
+                "absolute": true,
+                "source": "worldSnapshot",
+                "observedMs": 1791102917641
+              },
+              "mpProvenance": {
+                "ownerId": 1000,
+                "absolute": true,
+                "source": "worldSnapshot",
+                "observedMs": 1791102917641
+              },
+              "exactHp": true,
+              "exactMp": true,
+              "dead": true,
+              "poison": 0,
+              "inSafeZone": false,
+              "actor": {
+                "objectId": 293202,
+                "kind": "monster",
+                "name": "CaveBat",
+                "ai": 0,
+                "disposition": "hostile",
+                "x": 59,
+                "y": 55,
+                "direction": "Down",
+                "hp": 17,
+                "dead": false
+              }
+            }
+          }
+        ],
+        "preparatoryMagicReceipts": [],
+        "revivalBeforeExplicitRequest": null,
+        "snapshotsAfterCommands": 12,
+        "exactDeadSnapshotsAfterCommands": 12,
+        "fullP1Accepted": false,
+        "nativeInputAccepted": false,
+        "nativeVisualAccepted": false,
+        "humanAccepted": false,
+        "ordinaryProgressionAccepted": false,
+        "loadAccepted": false
+      },
+      "auditedCaseStatus": "failed",
+      "reasonForIndependentVerdict": "Death-state commands changed authoritative absolute MP; absence of cast ACKs cannot prove cast rejection.",
+      "reportedCastBarrierPassedIsFalsePositive": true,
+      "actualMagicInput": {
+        "sequence": 1018,
+        "tsMs": 1791102916455,
+        "type": "magic",
+        "spell": "FireBall",
+        "objectId": 1000,
+        "targetId": 293202,
+        "x": 59,
+        "y": 55,
+        "movementDirection": "Up"
+      },
+      "actualBaselineMp": 541,
+      "actualKnownSpellMpCost": 3,
+      "absoluteDeadMpSnapshotsInClosedWindow": [
+        {
+          "sequence": 1025,
+          "tsMs": 1791102917166,
+          "hp": 0,
+          "mp": 541,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1028,
+          "tsMs": 1791102917645,
+          "hp": 0,
+          "mp": 538,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1036,
+          "tsMs": 1791102917800,
+          "hp": 0,
+          "mp": 538,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1038,
+          "tsMs": 1791102917941,
+          "hp": 0,
+          "mp": 538,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1040,
+          "tsMs": 1791102918096,
+          "hp": 0,
+          "mp": 538,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1043,
+          "tsMs": 1791102918394,
+          "hp": 0,
+          "mp": 538,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1048,
+          "tsMs": 1791102918991,
+          "hp": 0,
+          "mp": 538,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1051,
+          "tsMs": 1791102919592,
+          "hp": 0,
+          "mp": 538,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1054,
+          "tsMs": 1791102920201,
+          "hp": 0,
+          "mp": 538,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1057,
+          "tsMs": 1791102920785,
+          "hp": 0,
+          "mp": 538,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1062,
+          "tsMs": 1791102921374,
+          "hp": 0,
+          "mp": 538,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1065,
+          "tsMs": 1791102921994,
+          "hp": 0,
+          "mp": 538,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        }
+      ],
+      "firstDeadMpSpend": {
+        "sequence": 1028,
+        "tsMs": 1791102917645,
+        "hp": 0,
+        "mp": 538,
+        "dead": true,
+        "explicitAbsoluteMpSource": "worldSnapshot"
+      },
+      "additionalAbsoluteMpSpent": 3,
+      "matchingCastAckSequences": [],
+      "positiveTargetDamageReceiptsAfterDeadMagic": [
+        {
+          "sequence": 1032,
+          "tsMs": 1791102917753,
+          "packet": "DamageIndicator",
+          "payload": {
+            "damage": 8,
+            "damageType": 0,
+            "objectId": 293202,
+            "typed": true
+          },
+          "ownerHp": 0,
+          "ownerMp": 538,
+          "ownerDead": true
+        }
+      ],
+      "damageIndicatorHasVictimIdOnly": true,
+      "deathTraceSha256": "0a4b99c9d3e2a9916f464bb5eab2819f08719f851d29dc1f5145dcd63d3e5bb1",
+      "deathTraceBytes": 6118844
+    },
+    {
+      "className": "Taoist",
+      "reportedPhaseStatus": "completed",
+      "actualDeath": {
+        "status": "qualified",
+        "deathSequence": 1354,
+        "positiveOwnerHitCount": 57,
+        "zeroHpSequence": 1354,
+        "reason": null,
+        "fullP1Accepted": false,
+        "nativeInputAccepted": false,
+        "nativeVisualAccepted": false,
+        "humanAccepted": false,
+        "ordinaryProgressionAccepted": false,
+        "loadAccepted": false
+      },
+      "reportedCaseStatus": "passed",
+      "reason": null,
+      "normalLogoutConfirmed": true,
+      "deadPersistenceMatched": true,
+      "revivedPersistenceMatched": true,
+      "revival": {
+        "ackSequence": 669,
+        "location": {
+          "map": "0",
+          "x": 288,
+          "y": 616,
+          "direction": "Down"
+        },
+        "hp": 239,
+        "actualAlive": true,
+        "expectedBindPoint": {
+          "map_file_name": "0",
+          "position": {
+            "x": 288,
+            "y": 616
+          }
+        },
+        "town": true,
+        "stop": {
+          "status": "passed",
+          "durationMs": 5439,
+          "requiredMs": 5000,
+          "anchor": {
+            "map": "0",
+            "x": 288,
+            "y": 616,
+            "direction": "Down"
+          },
+          "anchorSequence": 745,
+          "window": {
+            "anchorMs": 1791102995723,
+            "endMs": 1791103001162,
+            "ownerId": 1000
+          },
+          "authoritySampleCount": 10,
+          "snapshotCount": 10,
+          "observedToEnd": true,
+          "extraInputs": [],
+          "driftReceipts": [],
+          "positiveOwnerHits": 0,
+          "deathReceiptSequence": null,
+          "allLateReceiptsRetained": true,
+          "fullP1Accepted": false,
+          "nativeInputAccepted": false,
+          "nativeVisualAccepted": false,
+          "humanAccepted": false,
+          "ordinaryProgressionAccepted": false,
+          "loadAccepted": false
+        }
+      },
+      "auditedCastDeathBarrierAccepted": false,
+      "frozenDeadActionProofUnmodified": {
+        "status": "passed",
+        "window": {
+          "fromMs": 1791102984582,
+          "endMs": 1791102990419,
+          "ownerId": 1000
+        },
+        "castBarrier": {
+          "status": "passed",
+          "spell": "Healing",
+          "actualMagicInputSequence": 1368,
+          "baselineSnapshotSequence": 1364,
+          "eligibility": {
+            "status": "eligible",
+            "spell": "Healing",
+            "ownerId": 1000,
+            "knownSkillObserved": true,
+            "mpCost": 3,
+            "mpCostKnown": true,
+            "beforeMp": 260,
+            "absoluteMpProvenance": {
+              "ownerId": 1000,
+              "absolute": true,
+              "source": "worldSnapshot",
+              "observedMs": 1791102984808
+            },
+            "enoughMp": true,
+            "validTarget": true,
+            "castControlClear": true,
+            "target": {
+              "objectId": 1000,
+              "kind": "selfPlayer",
+              "disposition": "friendly",
+              "x": 59,
+              "y": 56,
+              "dead": true
+            },
+            "ignoringOwnerDeathOnly": true
+          },
+          "matchingTargetInput": true,
+          "reason": null,
+          "verified": true
+        },
+        "castBarrierVerified": true,
+        "attemptedCommands": [
+          {
+            "sequence": 1365,
+            "type": "walk",
+            "spell": null,
+            "targetId": null
+          },
+          {
+            "sequence": 1366,
+            "type": "run",
+            "spell": null,
+            "targetId": null
+          },
+          {
+            "sequence": 1367,
+            "type": "attack",
+            "spell": null,
+            "targetId": 293202
+          },
+          {
+            "sequence": 1368,
+            "type": "magic",
+            "spell": "Healing",
+            "targetId": 1000
+          }
+        ],
+        "illegalLivingReceipts": [],
+        "preparatoryMagicReceipts": [],
+        "revivalBeforeExplicitRequest": null,
+        "snapshotsAfterCommands": 11,
+        "exactDeadSnapshotsAfterCommands": 11,
+        "fullP1Accepted": false,
+        "nativeInputAccepted": false,
+        "nativeVisualAccepted": false,
+        "humanAccepted": false,
+        "ordinaryProgressionAccepted": false,
+        "loadAccepted": false
+      },
+      "auditedCaseStatus": "failed",
+      "reasonForIndependentVerdict": "Death-state commands changed authoritative absolute MP; absence of cast ACKs cannot prove cast rejection.",
+      "reportedCastBarrierPassedIsFalsePositive": true,
+      "actualMagicInput": {
+        "sequence": 1368,
+        "tsMs": 1791102984842,
+        "type": "magic",
+        "spell": "Healing",
+        "objectId": 1000,
+        "targetId": 1000,
+        "x": 59,
+        "y": 56,
+        "movementDirection": "Down"
+      },
+      "actualBaselineMp": 260,
+      "actualKnownSpellMpCost": 3,
+      "absoluteDeadMpSnapshotsInClosedWindow": [
+        {
+          "sequence": 1372,
+          "tsMs": 1791102985538,
+          "hp": 0,
+          "mp": 260,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1375,
+          "tsMs": 1791102986052,
+          "hp": 0,
+          "mp": 257,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1379,
+          "tsMs": 1791102986201,
+          "hp": 0,
+          "mp": 257,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1383,
+          "tsMs": 1791102986354,
+          "hp": 0,
+          "mp": 257,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1386,
+          "tsMs": 1791102986839,
+          "hp": 0,
+          "mp": 257,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1389,
+          "tsMs": 1791102987421,
+          "hp": 0,
+          "mp": 257,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1392,
+          "tsMs": 1791102988010,
+          "hp": 0,
+          "mp": 257,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1397,
+          "tsMs": 1791102988599,
+          "hp": 0,
+          "mp": 257,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1400,
+          "tsMs": 1791102989215,
+          "hp": 0,
+          "mp": 257,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1403,
+          "tsMs": 1791102989796,
+          "hp": 0,
+          "mp": 257,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        },
+        {
+          "sequence": 1408,
+          "tsMs": 1791102990388,
+          "hp": 0,
+          "mp": 257,
+          "dead": true,
+          "explicitAbsoluteMpSource": "worldSnapshot"
+        }
+      ],
+      "firstDeadMpSpend": {
+        "sequence": 1375,
+        "tsMs": 1791102986052,
+        "hp": 0,
+        "mp": 257,
+        "dead": true,
+        "explicitAbsoluteMpSource": "worldSnapshot"
+      },
+      "additionalAbsoluteMpSpent": 3,
+      "matchingCastAckSequences": [],
+      "positiveTargetDamageReceiptsAfterDeadMagic": [],
+      "damageIndicatorHasVictimIdOnly": true,
+      "deathTraceSha256": "b2e2359aca9da1da38645e4d9af2886a17f85f3edf06d9f14914637168e9fc24",
+      "deathTraceBytes": 9901395
+    }
+  ],
+  "sevenContinuousHitEscapeAccepted": false,
+  "castEscapeAccepted": false,
+  "heldStopUnderSevenHitsAccepted": false,
+  "casterDeathBarrierAccepted": false,
+  "formationDeathsAreEscapeAlgorithmFailures": false,
+  "fullP1Accepted": false,
+  "nativeInputAccepted": false,
+  "nativeVisualAccepted": false,
+  "humanAccepted": false,
+  "ordinaryProgressionAccepted": false,
+  "loadAccepted": false
+}

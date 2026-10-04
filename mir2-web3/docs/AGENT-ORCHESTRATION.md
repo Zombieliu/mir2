@@ -1,5 +1,16 @@
 # Agent Orchestration
 
+> 2026-10-04 root reviews and integrates six named-route files: complete source
+> hashes guard Stone/BigTaoist predicates and canonical item1080 debit; generic
+> scripts/topology/profile remain unchanged. Independent root ordinary13,
+> source-proof2 and Node44 pass; original RED1/7 and all fixture failures remain.
+> No actual76-hop route/cohort or natural Boss/drop acceptance follows. The map
+> worker now explores cross-map EXP/drop ownership read-only at95e18e8eb.
+> Offline v5 reclassifies immutable R17 dead caster MP failures; original false
+> passes remain. Further victim-only damage/dead-level-up attribution review
+> is required before a fixed-ELF acceptance run. No new rollout or F change.
+> [Routes](CLASSIC-LATE-ROUTES-20261004.md), [actual audit](R17-DEAD-CAST-AUDIT-20261004.md).
+
 > 2026-10-04 root completes the bounded shared Guild notice slice against
 > integrated17b44e08f: four genuine ordinary-packet failures become four passes,
 > with four adjacent Guild passes in a separate managed checkout. Rank option64,

@@ -1,0 +1,9 @@
+{
+  "schema": "mir2.r17.dense-v4-downloaded-public.v1",
+  "archiveSha256": "c6c516f32e87d38b66421f4e2c8933daee2b0396ae63f2216019ff5f0ca12a29",
+  "verifiedFiles": 44,
+  "uncompressedBytes": 150012649,
+  "binarySha256": "1ed52738885292b734c4055a9fd7d585b79d519779084bca2a617d0a9f5eb9ab",
+  "frozenInputsSha256": "054689ac86e4b19f98bc836b1d783a5f6a60d08e0459183a233bb72891809192",
+  "privateStoresKeysOrRawGatewayLogsIncluded": false
+}

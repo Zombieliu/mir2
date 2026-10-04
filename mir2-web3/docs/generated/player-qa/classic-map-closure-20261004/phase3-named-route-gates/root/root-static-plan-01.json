@@ -1,0 +1,128 @@
+{
+  "schema": "mir2.classic-late-route-plan.v1",
+  "routes": {
+    "stone": [
+      "0",
+      "2",
+      "3",
+      "D710",
+      "D711",
+      "D712",
+      "D713",
+      "D714",
+      "D715",
+      "D71601",
+      "D71621",
+      "D71608",
+      "D71605",
+      "D71625",
+      "D716",
+      "D717"
+    ],
+    "stone-return": [
+      "D717",
+      "D716",
+      "D71625",
+      "D71623",
+      "D71601",
+      "D715",
+      "D714",
+      "D713",
+      "D712",
+      "D711",
+      "D710",
+      "3",
+      "2",
+      "0"
+    ],
+    "zuma": [
+      "0",
+      "2",
+      "3",
+      "0157",
+      "D501",
+      "D502",
+      "D503",
+      "D504",
+      "D505",
+      "D5061",
+      "D5068",
+      "D5071",
+      "D5072",
+      "D5073",
+      "D5074",
+      "D515"
+    ],
+    "zuma-return": [
+      "D515",
+      "D5074",
+      "D5073",
+      "D5072",
+      "D5071",
+      "D5068",
+      "D5061",
+      "D505",
+      "D504",
+      "D503",
+      "D502",
+      "D501",
+      "0157",
+      "3",
+      "2",
+      "0"
+    ],
+    "redmoon": [
+      "0",
+      "1",
+      "11",
+      "12",
+      "D10011",
+      "D1002",
+      "D10031",
+      "D1004",
+      "D10052",
+      "D10062"
+    ],
+    "redmoon-return": [
+      "D10062",
+      "D10052",
+      "D1004",
+      "D10031",
+      "D1002",
+      "D10011",
+      "12",
+      "11",
+      "1",
+      "0"
+    ]
+  },
+  "sourceHashes": {
+    "profile": "f50ef1b78e2544df4fd3a65902f6e72f4ec3cbc7693e0ee373d6ee899581e7a9",
+    "npcScripts": "7ff29f221c39e5d16b7ebdc7efcde5090daf7ff3daacf6b2b1552b5b36429e93",
+    "npcs": "dcc31e181b1f329c6da3658846ff18adb13731b18d899f8914b7628d54074105",
+    "maps": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3",
+    "mapEvents": "d68823dfff2a1cfc00afc7bf4d369bb20a025ad9af5acb89a75d571f4709ba29",
+    "monsters": "5961fe9f220cb8440833af746f4c53fd1c728803979b19dbd867f10fc3027cec",
+    "drops": "c10f5b1ac39cefe1c5b7c0ec5779547cf5b0901eaece680b7049d9dda56c1cf7",
+    "items": "b0d48ada978d8a062e993fe0425b6a724672aeea354a3b7b4508fb4c161658b7",
+    "quests": "13d6f3fd94fd9e865ab60c9f2ea50585053bd2050bff021a0379f1ed0948e0d6",
+    "magics": "ccbb31513c006860790a4c374b3f788665902cfa3fffe810695199882860153d"
+  },
+  "plannedOnly": true,
+  "executed": false,
+  "runtimeGameplayAccepted": false,
+  "preservedDefect": {
+    "from": "D10051",
+    "to": "D10061",
+    "source": {
+      "x": 178,
+      "y": 53
+    },
+    "destination": {
+      "x": 20,
+      "y": 25
+    },
+    "needMove": true
+  },
+  "resourceOnlyExcluded": "D71653"
+}

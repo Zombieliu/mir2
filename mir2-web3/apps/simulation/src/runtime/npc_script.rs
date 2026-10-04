@@ -3,6 +3,7 @@ use bevy_ecs::{
     prelude::{Resource, World},
 };
 use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 
 use crate::config::{
     CurrencyKind, ItemContainer, QuestStage, Stage5HeroState, WorldEntityDisposition,
@@ -118,6 +119,8 @@ pub(super) struct CrystalNpcExecutionState {
     pub(super) script_key: Option<String>,
     pub(super) section_label: Option<String>,
     pub(super) line_number: usize,
+    // Set only after the complete original script proof is checked at dispatch.
+    pub(super) verified_classic_route_legacy: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -763,12 +766,114 @@ pub(super) fn run_crystal_npc_script(
     run_crystal_npc_script_impl(world, context, &script, start_label)
 }
 
+const CLASSIC_STONE_SCRIPT: &str = "MongchonProvince/StoneTemple/Stone";
+const CLASSIC_BIG_TAOIST_SCRIPT: &str = "WoomyonWoods/TaoistVillage/BigTaoist";
+
+fn classic_route_script_sha256(bytes: impl AsRef<[u8]>) -> String {
+    Sha256::digest(bytes.as_ref()).iter().map(|byte| format!("{byte:02x}")).collect()
+}
+
+/// Both original raw text and the complete imported execution representation
+/// are bound. A forged path, condition, parsed section or source edit cannot
+/// inherit the reviewed compatibility. Original source/manifests are unchanged.
+fn verified_classic_route_legacy_script(script: &CrystalNpcScript) -> Result<bool, ()> {
+    const PROOFS: [(&str, &str, &str, &str); 2] = [
+        (CLASSIC_STONE_SCRIPT, "MongchonProvince/StoneTemple/Stone.txt",
+         "249ff6c6810c7f06cd52f551c2534a2e24e7cead835d6948b72101146cf154c2",
+         "f86465391544e7633c1999aea856636266456d650bbd0d56af5d66322dc39d0d"),
+        (CLASSIC_BIG_TAOIST_SCRIPT, "WoomyonWoods/TaoistVillage/BigTaoist.txt",
+         "911a5edd4dc638eedf54819d0314cbcf2b438f32ba02d6d951091146ece02ebd",
+         "e186e61b616cfb28f48611eeca19aba568cf9d9c6f39362ed932b133bcef3111"),
+    ];
+    let raw_hash = classic_route_script_sha256(script.raw_text.as_bytes());
+    let Some(&(key, path, raw_sha, execution_sha)) = PROOFS.iter().find(|(key, path, raw_sha, _)| {
+        script.script_key.eq_ignore_ascii_case(key)
+            || script.relative_path.eq_ignore_ascii_case(path) || raw_hash == *raw_sha
+    }) else { return Ok(false); };
+    let execution = serde_json::to_vec(script).map_err(|_| ())?;
+    if script.script_key != key || script.relative_path != path || raw_hash != raw_sha
+        || classic_route_script_sha256(execution) != execution_sha {
+        return Err(());
+    }
+    Ok(true)
+}
+
+fn classic_route_quest_condition(world: &World, condition: &str, state: &CrystalNpcExecutionState) -> Option<bool> {
+    if !state.verified_classic_route_legacy { return None; }
+    let (quest_id, current) = match (state.script_key.as_deref(), state.section_label.as_deref(), condition) {
+        (Some(CLASSIC_STONE_SCRIPT), Some("@MAIN"), "CHECKQUEST 135 0") => (135, true),
+        (Some(CLASSIC_STONE_SCRIPT), Some("@Check2"), "CHECKQUEST 153 1") => (153, false),
+        (Some(CLASSIC_BIG_TAOIST_SCRIPT), Some("@Next1"), "CHECKQUEST 146 1") => (146, false),
+        _ => return None,
+    };
+    Some(world.resource::<QuestResource>().quests.iter().any(|quest| {
+        quest.quest_id == quest_id && if current {
+            matches!(quest.stage, QuestStage::InProgress | QuestStage::ReadyToTurnIn)
+        } else { quest.stage == QuestStage::Completed }
+    }))
+}
+
+fn is_verified_classic_stone_item_line(state: &CrystalNpcExecutionState, line: &str, command: &str) -> bool {
+    state.verified_classic_route_legacy && state.script_key.as_deref() == Some(CLASSIC_STONE_SCRIPT)
+        && state.section_label.as_deref() == Some("@stonetomba")
+        && line == format!("{command} StoneHeart 1")
+}
+
+fn is_canonical_classic_stoneheart(item: &ItemState) -> bool {
+    item.key == "crystal-item-1080" && matches!(item.container, ItemContainer::Bag1 | ItemContainer::Bag2)
+        && validate_committed_item_state_carrier(item).is_ok()
+        && try_user_item_from_item_state(item).is_ok_and(|carrier| carrier.item_index == 1080 && carrier.unique_id != 0)
+}
+
+#[cfg(test)]
+mod classic_late_route_source_proof_tests {
+    use super::*;
+
+    #[test]
+    fn classic_late_route_source_proof_binds_complete_original_and_parsed_script() {
+        for key in [CLASSIC_STONE_SCRIPT, CLASSIC_BIG_TAOIST_SCRIPT] {
+            let original = crystal_npc_script_by_key(key).unwrap();
+            assert_eq!(verified_classic_route_legacy_script(&original), Ok(true));
+            let mut changed = original.clone();
+            changed.raw_text.push(' ');
+            assert_eq!(verified_classic_route_legacy_script(&changed), Err(()));
+            let mut forged = original.clone();
+            forged.sections[0].lines.push("SET [999] 1".into());
+            assert_eq!(verified_classic_route_legacy_script(&forged), Err(()));
+            let mut wrong_path = original.clone();
+            wrong_path.relative_path = "Other/Stone.txt".into();
+            assert_eq!(verified_classic_route_legacy_script(&wrong_path), Err(()));
+            let mut unknown_key = original.clone();
+            unknown_key.script_key = "Other/Unknown".into();
+            assert_eq!(verified_classic_route_legacy_script(&unknown_key), Err(()));
+        }
+    }
+
+    #[test]
+    fn classic_late_route_unrelated_script_and_numeric_stage_contract_remain_unchanged() {
+        let unrelated = crystal_npc_script_by_key("MongchonProvince/MudWall/MonDelegate").unwrap();
+        assert_eq!(verified_classic_route_legacy_script(&unrelated), Ok(false));
+        assert_eq!(crystal_npc_quest_stage_value(QuestStage::Available), 0);
+        assert_eq!(crystal_npc_quest_stage_value(QuestStage::InProgress), 1);
+        assert_eq!(crystal_npc_quest_stage_value(QuestStage::ReadyToTurnIn), 2);
+        assert_eq!(crystal_npc_quest_stage_value(QuestStage::Completed), 3);
+        let unverified = CrystalNpcExecutionState { script_key: Some(CLASSIC_STONE_SCRIPT.into()),
+            section_label: Some("@stonetomba".into()), ..Default::default() };
+        assert!(!is_verified_classic_stone_item_line(&unverified, "CHECKITEM StoneHeart 1", "CHECKITEM"));
+    }
+}
+
 pub(super) fn run_crystal_npc_script_impl(
     world: &mut World,
     context: &NpcInteractionContext,
     script: &CrystalNpcScript,
     start_label: &str,
 ) -> Option<CrystalNpcRunResult> {
+    // Candidate playability repair: inferred legacy Jev numeric intent for
+    // ONLY these two supplied route scripts. This is not the modern C# rule
+    // (which treats all non-ACTIVE CHECKQUEST tokens as Completed), and does
+    // not reinterpret numeric quest stages in any unrelated script.
+    let verified_classic_route_legacy = verified_classic_route_legacy_script(script).ok()?;
     let mut label = start_label.to_string();
     let mut packets = Vec::new();
     let context_state = CrystalNpcContextState {
@@ -776,6 +881,7 @@ pub(super) fn run_crystal_npc_script_impl(
     };
     let mut execution_state = CrystalNpcExecutionState {
         script_key: Some(script.script_key.clone()),
+        verified_classic_route_legacy,
         label_args: context.args.clone(),
         input: context.input.clone(),
         ..CrystalNpcExecutionState::default()
@@ -946,6 +1052,7 @@ pub(super) fn execute_crystal_npc_section(
                     world,
                     &if_conditions,
                     context_state,
+                    execution_state,
                 ));
             }
             continue;
@@ -1232,11 +1339,20 @@ pub(super) fn evaluate_crystal_npc_conditions(
     world: &mut World,
     conditions: &[String],
     context_state: &CrystalNpcContextState,
+    execution_state: &CrystalNpcExecutionState,
 ) -> bool {
     !conditions.is_empty()
         && conditions
             .iter()
-            .all(|condition| evaluate_crystal_npc_condition(world, condition, context_state))
+            .all(|condition| {
+                if let Some(result) = classic_route_quest_condition(world, condition, execution_state) { return result; }
+                // Source-specific carrier repair: the normal q135 reward is a
+                // canonical item1080, not the old unvalidated name-only key.
+                if is_verified_classic_stone_item_line(execution_state, condition, "CHECKITEM") {
+                    return world.resource::<InventoryResource>().inventory_items.iter().any(is_canonical_classic_stoneheart);
+                }
+                evaluate_crystal_npc_condition(world, condition, context_state)
+            })
 }
 
 pub(super) fn evaluate_crystal_npc_condition(
@@ -2108,6 +2224,15 @@ pub(super) fn execute_crystal_npc_action_line(
             CrystalNpcActionControl::Continue
         }
         "TAKEITEM" => {
+            if is_verified_classic_stone_item_line(execution_state, line, "TAKEITEM") {
+                let mut inventory = world.resource_mut::<InventoryResource>();
+                let Some(index) = inventory.inventory_items.iter().rposition(is_canonical_classic_stoneheart) else {
+                    // Do not execute the following MOVE without its exact debit.
+                    return CrystalNpcActionControl::Break;
+                };
+                inventory.inventory_items.remove(index); // original stack_size=1
+                return CrystalNpcActionControl::Continue;
+            }
             let _ = crystal_npc_take_item(world, &parts[1..]);
             CrystalNpcActionControl::Continue
         }

@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-04 six-file Stone/BigTaoist route slice is checked at root: ordinary
+> prepared13/source-proof2/Node44 pass. Numeric compatibility infers the supplied
+> legacy Jev text, explicitly not modern C# CHECKQUEST token parity. Canonical
+> original reward1080 works; unrelated scripts/source topology/drop tables stay
+> unchanged. Static76-hop routes do not close natural Boss/gear/book or native
+> gates. Exact R17 actual dead-cast MP failures and old wrong passes are retained
+> with offline69 tool checks. Victim-only damage and source dead level-up HP
+> refill need independent attribution; no whole-world or publication claim.
+> [Named routes](CLASSIC-LATE-ROUTES-20261004.md), [actual audit](R17-DEAD-CAST-AUDIT-20261004.md).
+
 > 2026-10-04 shared Guild notice now commits under the authenticated current
 > rank's source option64 and preserves up to200 exact lines, including clear.
 > Source invalidation-1 is followed by committed content for the existing
