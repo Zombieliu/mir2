@@ -1,0 +1,1068 @@
+diff --git a/mir2-web3/apps/gateway/src/shared_guilds.rs b/mir2-web3/apps/gateway/src/shared_guilds.rs
+index 8b6212d4a..6f986f438 100644
+--- a/mir2-web3/apps/gateway/src/shared_guilds.rs
++++ b/mir2-web3/apps/gateway/src/shared_guilds.rs
+@@ -301,6 +301,76 @@ impl SharedInProcessZoneSessionRuntime {
+                     }
+                 }
+             }
++            ClientPacket::EditGuildMember {
++                change_type: 3,
++                rank_index,
++                rank_name,
++                ..
++            } => {
++                match config.commit_shared_guild_rank_name(&identity(&key), *rank_index, rank_name) {
++                    Ok(guild) => {
++                        let actor = guild
++                            .member(&identity(&key))
++                            .expect("committed rename retains actor");
++                        let rank = guild
++                            .ranks
++                            .iter()
++                            .find(|rank| rank.index == *rank_index)
++                            .expect("committed rename retains target rank");
++                        let members = {
++                            let store = config.account_store.lock().expect("committed guild store");
++                            guild
++                                .members
++                                .iter()
++                                .filter(|member| member.rank_index == *rank_index)
++                                .map(|member| mir2_protocol::GuildMember {
++                                    name: member.name.clone(),
++                                    id: member.identity.character_index,
++                                    last_login_binary_datetime: store
++                                        .accounts
++                                        .get(&member.identity.account_id)
++                                        .and_then(|account| {
++                                            account
++                                                .character_last_access_binary_datetimes
++                                                .get(&member.identity.character_index)
++                                        })
++                                        .copied()
++                                        .unwrap_or(0),
++                                    has_voted: false,
++                                    online: presences.iter().any(|presence| {
++                                        identity(&presence.key) == member.identity
++                                    }),
++                                })
++                                .collect()
++                        };
++                        let packets = vec![ServerPacket::GuildMemberChange {
++                            name: actor.name.clone(),
++                            rank_index: 0,
++                            status: 7,
++                            ranks: vec![mir2_protocol::GuildRank {
++                                name: rank.name.clone(),
++                                options: rank.options,
++                                index: i32::from(rank.index),
++                                members,
++                            }],
++                        }];
++                        coordinator.changed();
++                        for presence in &presences {
++                            if presence.key != key
++                                && guild.member(&identity(&presence.key)).is_some()
++                            {
++                                presence
++                                    .zone
++                                    .lock()
++                                    .expect("validated guild zone")
++                                    .queue_zone_packets(presence.key.clone(), packets.clone());
++                            }
++                        }
++                        packets
++                    }
++                    Err(reason) => error(&reason),
++                }
++            }
+             ClientPacket::EditGuildNotice { notice } => {
+                 match config.commit_shared_guild_notice(&identity(&key), notice) {
+                     Ok(guild) => {
+diff --git a/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs b/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs
+index 36eb9c9d4..15c499f57 100644
+--- a/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs
++++ b/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs
+@@ -1027,5 +1027,8 @@ mod experience_tests;
+ #[path = "shared_guild_bank.rs"]
+ mod bank;
+ 
++#[path = "shared_guild_management.rs"]
++mod management;
++
+ #[path = "shared_guild_buffs.rs"]
+ pub(super) mod buffs;
+diff --git a/mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs b/mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs
+@@ -0,0 +1,73 @@
++//! Bounded shared rank-name authority. Membership and other management stay separate.
++use crate::config::{SharedGuildRecord, SimulationConfig, Stage5FriendIdentity};
++
++impl SimulationConfig {
++    /// The Gateway derives `identity` from its authenticated active presence.
++    /// Recheck all authority inside the existing scoped durable transaction.
++    pub fn commit_shared_guild_rank_name(
++        &self,
++        identity: &Stage5FriendIdentity,
++        rank_index: u8,
++        rank_name: &str,
++    ) -> Result<SharedGuildRecord, String> {
++        let guild_id = self
++            .shared_guild_for_identity(identity)?
++            .ok_or("You are not in a guild.")?
++            .id;
++        self.commit_account_store_transaction_with_guilds(
++            std::slice::from_ref(&identity.account_id),
++            std::slice::from_ref(&guild_id),
++            |store| {
++                if !store
++                    .accounts
++                    .get(&identity.account_id)
++                    .is_some_and(|account| {
++                        account
++                            .characters
++                            .iter()
++                            .any(|character| character.index == identity.character_index)
++                    })
++                {
++                    return Err("Guild character no longer exists.".into());
++                }
++                let guild = store
++                    .shared_guilds
++                    .get_mut(&guild_id)
++                    .ok_or("Guild no longer exists.")?;
++                let member = guild.member(identity).ok_or("You are not in this guild.")?;
++                let actor_rank = guild
++                    .ranks
++                    .iter()
++                    .find(|rank| rank.index == member.rank_index)
++                    .ok_or("Guild rank no longer exists.")?;
++                // Crystal CanChangeRank is bit 1; a displayed leader name is not authority.
++                if actor_rank.options & 1 == 0 {
++                    return Err("Your rank cannot change guild ranks.".into());
++                }
++                if !(3..=20).contains(&rank_name.encode_utf16().count()) || rank_name.contains('\\')
++                {
++                    return Err(
++                        "Guild rank names must contain 3 to 20 characters and no backslash.".into(),
++                    );
++                }
++                // Rename allows the actor's own rank; option editing has a different rule.
++                if actor_rank.index > rank_index {
++                    return Err("Your rank cannot rename a higher guild rank.".into());
++                }
++                let next_revision = guild
++                    .revision
++                    .checked_add(1)
++                    .ok_or("Guild revision exhausted.")?;
++                let target_rank = guild
++                    .ranks
++                    .iter_mut()
++                    .find(|rank| rank.index == rank_index)
++                    .ok_or("Guild rank no longer exists.")?;
++                // Source sets/broadcasts on every valid request, including the same name.
++                target_rank.name = rank_name.into();
++                guild.revision = next_revision;
++                Ok(guild.clone())
++            },
++        )
++    }
++}
+diff --git a/mir2-web3/apps/simulation/tests/shared_guild_rank_management.rs b/mir2-web3/apps/simulation/tests/shared_guild_rank_management.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/simulation/tests/shared_guild_rank_management.rs
+@@ -0,0 +1,273 @@
++//! Direct durable authority tests on isolated prepared stores.
++//! Ordinary typed packet RED/GREEN is separate in the Gateway test target.
++use mir2_protocol::{MirClass, MirGender};
++use mir2_simulation::{
++    AccountRecord, CharacterRecord, CharacterSaveRecord, SharedGuildMember, SharedGuildRank,
++    SharedGuildRecord, SimulationConfig, Stage5FriendIdentity,
++};
++use std::collections::BTreeMap;
++
++const GUILD_ID: &str = "1123456789abcdef0123456789abcdef";
++const OTHER_GUILD_ID: &str = "2123456789abcdef0123456789abcdef";
++
++fn identity(account_id: &str, character_index: i32) -> Stage5FriendIdentity {
++    Stage5FriendIdentity {
++        account_id: account_id.into(),
++        character_index,
++    }
++}
++
++fn fixture() -> SimulationConfig {
++    let config = SimulationConfig::default();
++    let mut store = config.account_store.lock().unwrap();
++    store.accounts.clear();
++    for (index, account, name) in [
++        (0, "leader", "Leader"),
++        (1, "officer", "Officer"),
++        (2, "member", "Member"),
++        (3, "foreign", "Foreign"),
++    ] {
++        let character = CharacterRecord {
++            index,
++            name: name.into(),
++            level: 22,
++            class: MirClass::Warrior,
++            gender: MirGender::Male,
++        };
++        let mut record = AccountRecord::empty();
++        record.characters.push(character.clone());
++        record
++            .saves
++            .insert(index, CharacterSaveRecord::new(character));
++        store.accounts.insert(account.into(), record);
++    }
++    let guild = SharedGuildRecord {
++        id: GUILD_ID.into(),
++        name: "Rank Guild".into(),
++        revision: 7,
++        level: 0,
++        experience: 41,
++        spare_points: 2,
++        gold: 99_123,
++        ranks: vec![
++            SharedGuildRank {
++                index: 0,
++                name: "Leader".into(),
++                options: 255,
++            },
++            SharedGuildRank {
++                index: 1,
++                name: "Officer".into(),
++                options: 1,
++            },
++            SharedGuildRank {
++                index: 2,
++                name: "Members".into(),
++                options: 0,
++            },
++        ],
++        members: vec![
++            SharedGuildMember {
++                membership_epoch: 4,
++                identity: identity("leader", 0),
++                name: "Leader".into(),
++                rank_index: 0,
++            },
++            SharedGuildMember {
++                membership_epoch: 5,
++                identity: identity("officer", 1),
++                name: "Officer".into(),
++                rank_index: 1,
++            },
++            SharedGuildMember {
++                membership_epoch: 6,
++                identity: identity("member", 2),
++                name: "Member".into(),
++                rank_index: 2,
++            },
++        ],
++        notice: vec!["unchanged notice".into()],
++        storage: BTreeMap::new(),
++        buffs: BTreeMap::new(),
++        last_buff_tick_ms: 0,
++        experience_receipts: Default::default(),
++        experience_receipt_payloads: Default::default(),
++    };
++    let mut foreign = guild.clone();
++    foreign.id = OTHER_GUILD_ID.into();
++    foreign.name = "Foreign Guild".into();
++    foreign.members = vec![SharedGuildMember {
++        membership_epoch: 2,
++        identity: identity("foreign", 3),
++        name: "Foreign".into(),
++        rank_index: 0,
++    }];
++    store.shared_guilds.insert(GUILD_ID.into(), guild);
++    store.shared_guilds.insert(OTHER_GUILD_ID.into(), foreign);
++    drop(store);
++    config
++}
++
++fn stored(config: &SimulationConfig) -> SharedGuildRecord {
++    config.account_store.lock().unwrap().shared_guilds[GUILD_ID].clone()
++}
++
++#[test]
++fn committed_rank_name_changes_only_selected_name_and_one_revision_in_complete_store() {
++    let config = fixture();
++    let mut expected = config.account_store.lock().unwrap().clone();
++    let guild = expected.shared_guilds.get_mut(GUILD_ID).unwrap();
++    guild.ranks[2].name = "Veterans".into();
++    guild.revision += 1;
++    let committed = config
++        .commit_shared_guild_rank_name(&identity("leader", 0), 2, "Veterans")
++        .unwrap();
++    assert_eq!(committed, expected.shared_guilds[GUILD_ID]);
++    assert_eq!(
++        serde_json::to_value(&*config.account_store.lock().unwrap()).unwrap(),
++        serde_json::to_value(expected).unwrap()
++    );
++}
++
++#[test]
++fn direct_authority_rejects_wrong_character_missing_character_rank_permission_and_target() {
++    let config = fixture();
++    let before = stored(&config);
++    for actor in [
++        identity("leader", 2),
++        identity("missing", 0),
++        identity("member", 2),
++    ] {
++        assert!(config
++            .commit_shared_guild_rank_name(&actor, 2, "Forbidden")
++            .is_err());
++        assert_eq!(stored(&config), before);
++    }
++    assert!(config
++        .commit_shared_guild_rank_name(&identity("leader", 0), 255, "Unknown")
++        .is_err());
++    assert!(config
++        .commit_shared_guild_rank_name(&identity("officer", 1), 0, "Superior")
++        .is_err());
++    assert_eq!(stored(&config), before);
++    // Fixture-only orphan tests the character check without introducing a production deletion API.
++    config
++        .account_store
++        .lock()
++        .unwrap()
++        .accounts
++        .get_mut("leader")
++        .unwrap()
++        .characters
++        .clear();
++    assert!(config
++        .commit_shared_guild_rank_name(&identity("leader", 0), 2, "Orphaned")
++        .is_err());
++    assert_eq!(stored(&config), before);
++}
++
++#[test]
++fn revision_exhaustion_rejects_without_modifying_name_or_epoch() {
++    let config = fixture();
++    config
++        .account_store
++        .lock()
++        .unwrap()
++        .shared_guilds
++        .get_mut(GUILD_ID)
++        .unwrap()
++        .revision = u64::MAX;
++    let before = stored(&config);
++    let error = config
++        .commit_shared_guild_rank_name(&identity("leader", 0), 2, "Overflow")
++        .unwrap_err();
++    assert!(error.contains("exhausted"), "unexpected refusal: {error}");
++    assert_eq!(stored(&config), before);
++}
++
++#[cfg(feature = "test-support")]
++fn file_fixture() -> (SimulationConfig, std::path::PathBuf) {
++    let config = fixture();
++    let stamp = std::time::SystemTime::now()
++        .duration_since(std::time::UNIX_EPOCH)
++        .unwrap()
++        .as_nanos();
++    let dir = std::env::temp_dir().join(format!(
++        "mir2-rank-authority-{}-{stamp}",
++        std::process::id()
++    ));
++    std::fs::create_dir(&dir).unwrap();
++    let path = dir.join("accounts.json");
++    std::fs::write(
++        &path,
++        serde_json::to_vec(&*config.account_store.lock().unwrap()).unwrap(),
++    )
++    .unwrap();
++    eprintln!("isolated rank authority fixture: {}", path.display());
++    (config.with_account_store_path(path.clone()), path)
++}
++
++#[cfg(feature = "test-support")]
++#[test]
++fn known_file_publication_refusal_preserves_live_and_file_then_retry_advances_once() {
++    use mir2_simulation::AccountStoreTransactionFault;
++    let (config, path) = file_fixture();
++    let before = stored(&config);
++    let bytes = std::fs::read(&path).unwrap();
++    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforeFileRename);
++    assert!(config
++        .commit_shared_guild_rank_name(&identity("leader", 0), 2, "Committed")
++        .is_err());
++    assert_eq!(stored(&config), before);
++    assert_eq!(std::fs::read(&path).unwrap(), bytes);
++    let after = config
++        .commit_shared_guild_rank_name(&identity("leader", 0), 2, "Committed")
++        .unwrap();
++    assert_eq!(after.revision, before.revision + 1);
++    assert_eq!(after.members, before.members);
++    drop(config);
++    let reopened = SimulationConfig::default().with_account_store_path(path);
++    assert_eq!(stored(&reopened), after);
++}
++
++#[cfg(feature = "test-support")]
++#[test]
++fn unknown_file_publication_has_no_success_and_freezes_rank_and_notice_after_reopen() {
++    use mir2_simulation::AccountStoreTransactionFault;
++    let (config, path) = file_fixture();
++    let before = stored(&config);
++    config.inject_account_store_transaction_fault(
++        AccountStoreTransactionFault::AfterFileRenameBeforeDirectorySync,
++    );
++    let result = config.commit_shared_guild_rank_name(&identity("leader", 0), 2, "Uncertain");
++    assert!(result.is_err(), "unknown commit must not report success");
++    assert_eq!(
++        stored(&config),
++        before,
++        "unconfirmed staged state must not become live authority"
++    );
++    let uncertain_bytes = std::fs::read(&path).unwrap();
++    let uncertain: serde_json::Value = serde_json::from_slice(&uncertain_bytes).unwrap();
++    assert_eq!(
++        uncertain["sharedGuilds"][GUILD_ID]["ranks"][2]["name"],
++        "Uncertain"
++    );
++    assert!(config
++        .commit_shared_guild_rank_name(&identity("leader", 0), 2, "GuessedRetry")
++        .is_err());
++    assert!(config
++        .commit_shared_guild_notice(&identity("leader", 0), &["GuessedNotice".into()])
++        .is_err());
++    assert_eq!(std::fs::read(&path).unwrap(), uncertain_bytes);
++    assert_eq!(stored(&config), before);
++    drop(config);
++    let reopened = SimulationConfig::default().with_account_store_path(path.clone());
++    assert!(reopened
++        .commit_shared_guild_rank_name(&identity("leader", 0), 2, "RestartRetry")
++        .is_err());
++    assert!(reopened
++        .commit_shared_guild_notice(&identity("leader", 0), &["RestartNotice".into()])
++        .is_err());
++    assert_eq!(std::fs::read(&path).unwrap(), uncertain_bytes);
++    // No automatic reconciliation or rollback is exercised; uncertain files are retained.
++}
+diff --git a/mir2-web3/apps/gateway/tests/shared_guild_rank_management.rs b/mir2-web3/apps/gateway/tests/shared_guild_rank_management.rs
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/apps/gateway/tests/shared_guild_rank_management.rs
+@@ -0,0 +1,438 @@
++//! Isolated prepared guilds plus ordinary authenticated typed packets.
++//! These API checks do not accept native pending/status, AOI ranks, TCP/WSS or guild creation.
++use mir2_gateway::{GatewayConfig, SharedInProcessZoneRuntimeFactory, ZoneId, ZoneRuntimeFactory};
++use mir2_protocol::{ClientPacket, MirClass, MirGender, ServerPacket};
++use mir2_simulation::{
++    AccountRecord, AccountStoreTransactionFault, CharacterRecord, CharacterSaveRecord,
++    SharedGuildMember, SharedGuildRank, SharedGuildRecord, Stage5FriendIdentity, WorldCommand,
++    ZoneRuntimeHandle,
++};
++use std::collections::BTreeMap;
++
++const GUILD_ID: &str = "1123456789abcdef0123456789abcdef";
++const OTHER_GUILD_ID: &str = "2123456789abcdef0123456789abcdef";
++
++fn identity(account_id: &str, character_index: i32) -> Stage5FriendIdentity {
++    Stage5FriendIdentity {
++        account_id: account_id.into(),
++        character_index,
++    }
++}
++
++fn fixture() -> GatewayConfig {
++    let config = GatewayConfig::default().with_crystal_world_runtime();
++    let mut store = config.account_store.lock().unwrap();
++    store.accounts.clear();
++    for (index, account_id, name) in [
++        (0, "leader", "Leader"),
++        (1, "officer", "Officer"),
++        (2, "member", "Member"),
++        (3, "outsider", "Outsider"),
++        (4, "other-leader", "Other Leader"),
++    ] {
++        let mut account = AccountRecord::empty();
++        let character = CharacterRecord {
++            index,
++            name: name.into(),
++            level: 22,
++            class: MirClass::Warrior,
++            gender: MirGender::Male,
++        };
++        let mut save = CharacterSaveRecord::new(character.clone());
++        save.map_file_name = config.map.file_name.clone();
++        save.map_title = config.map.title.clone();
++        save.position = config.spawn.clone();
++        account.characters.push(character);
++        account.saves.insert(index, save);
++        store.accounts.insert(account_id.into(), account);
++    }
++    let guild = SharedGuildRecord {
++        id: GUILD_ID.into(),
++        name: "Rank Guild".into(),
++        revision: 7,
++        level: 0,
++        experience: 41,
++        spare_points: 2,
++        gold: 99_123,
++        ranks: vec![
++            SharedGuildRank {
++                index: 0,
++                name: "Leader".into(),
++                options: 255,
++            },
++            SharedGuildRank {
++                index: 1,
++                name: "Officer".into(),
++                options: 1,
++            },
++            SharedGuildRank {
++                index: 2,
++                name: "Members".into(),
++                options: 0,
++            },
++        ],
++        members: vec![
++            SharedGuildMember {
++                membership_epoch: 4,
++                identity: identity("leader", 0),
++                name: "Leader".into(),
++                rank_index: 0,
++            },
++            SharedGuildMember {
++                membership_epoch: 5,
++                identity: identity("officer", 1),
++                name: "Officer".into(),
++                rank_index: 1,
++            },
++            SharedGuildMember {
++                membership_epoch: 6,
++                identity: identity("member", 2),
++                name: "Member".into(),
++                rank_index: 2,
++            },
++        ],
++        notice: vec!["unchanged notice".into()],
++        storage: BTreeMap::new(),
++        buffs: BTreeMap::new(),
++        last_buff_tick_ms: 0,
++        experience_receipts: Default::default(),
++        experience_receipt_payloads: Default::default(),
++    };
++    let mut other = guild.clone();
++    other.id = OTHER_GUILD_ID.into();
++    other.name = "Other Guild".into();
++    other.members = vec![SharedGuildMember {
++        membership_epoch: 2,
++        identity: identity("other-leader", 4),
++        name: "Other Leader".into(),
++        rank_index: 0,
++    }];
++    store.shared_guilds.insert(GUILD_ID.into(), guild);
++    store.shared_guilds.insert(OTHER_GUILD_ID.into(), other);
++    drop(store);
++    config
++}
++
++fn send(runtime: &mut ZoneRuntimeHandle, packet: ClientPacket) -> Vec<ServerPacket> {
++    runtime.execute(WorldCommand::ClientPacket(packet)).unwrap()
++}
++
++fn login(runtime: &mut ZoneRuntimeHandle, account: &str, index: i32) {
++    assert!(send(
++        runtime,
++        ClientPacket::Login {
++            account_id: account.into(),
++            password: "demo".into()
++        }
++    )
++    .iter()
++    .any(|p| matches!(p, ServerPacket::LoginSuccess { .. })));
++    send(
++        runtime,
++        ClientPacket::StartGame {
++            character_index: index,
++        },
++    );
++    assert!(runtime.active_identity().is_some());
++}
++
++fn edit(rank_index: u8, rank_name: &str) -> ClientPacket {
++    ClientPacket::EditGuildMember {
++        change_type: 3,
++        rank_index,
++        // This field must never supply the actor identity or display name.
++        name: "Other Leader".into(),
++        rank_name: rank_name.into(),
++    }
++}
++
++fn persisted(config: &GatewayConfig) -> SharedGuildRecord {
++    config.account_store.lock().unwrap().shared_guilds[GUILD_ID].clone()
++}
++
++fn has_rank(packets: &[ServerPacket], index: u8, name: &str) -> bool {
++    packets.iter().any(|p| {
++        matches!(p, ServerPacket::GuildMemberChange { ranks, .. }
++        if ranks.iter().any(|rank| rank.index == i32::from(index) && rank.name == name))
++    })
++}
++
++fn source_rank_event(packets: &[ServerPacket], index: u8, name: &str) -> bool {
++    packets.iter().any(|p| matches!(p, ServerPacket::GuildMemberChange { status: 7, name: actor, ranks, .. }
++        if actor == "Leader" && ranks.len() == 1 && ranks[0].index == i32::from(index) && ranks[0].name == name))
++}
++
++fn assert_only_rename(
++    before: &SharedGuildRecord,
++    after: &SharedGuildRecord,
++    index: u8,
++    name: &str,
++) {
++    let mut expected = before.clone();
++    expected
++        .ranks
++        .iter_mut()
++        .find(|rank| rank.index == index)
++        .unwrap()
++        .name = name.into();
++    expected.revision += 1;
++    assert_eq!(after, &expected);
++}
++
++#[test]
++fn ordinary_rank_rename_commits_and_reaches_only_members_across_zones_then_relogin() {
++    let config = fixture();
++    let factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("rank-a"));
++    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("rank-b"));
++    let mut outsider = factory.create_runtime(config.clone(), &ZoneId::new("rank-b"));
++    let mut foreign = factory.create_runtime(config.clone(), &ZoneId::new("rank-b"));
++    login(&mut leader, "leader", 0);
++    login(&mut member, "member", 2);
++    login(&mut outsider, "outsider", 3);
++    login(&mut foreign, "other-leader", 4);
++    let before = persisted(&config);
++    let other_before = config.account_store.lock().unwrap().shared_guilds[OTHER_GUILD_ID].clone();
++    let reply = send(&mut leader, edit(2, "Veterans"));
++    assert_only_rename(&before, &persisted(&config), 2, "Veterans");
++    // Existing routing replaces the actor terminal event with a full canonical roster.
++    // This assertion deliberately does not claim that native pending completion is fixed.
++    assert!(
++        has_rank(&reply, 2, "Veterans"),
++        "committed actor projection missing: {reply:?}"
++    );
++    let seen = member.execute(WorldCommand::Tick).unwrap();
++    assert!(
++        source_rank_event(&seen, 2, "Veterans"),
++        "committed member event missing: {seen:?}"
++    );
++    assert!(seen.iter().any(|p| matches!(p, ServerPacket::GuildStatus { guild_rank_name, .. } if guild_rank_name == "Veterans")));
++    assert!(!has_rank(
++        &outsider.execute(WorldCommand::Tick).unwrap(),
++        2,
++        "Veterans"
++    ));
++    assert!(!has_rank(
++        &foreign.execute(WorldCommand::Tick).unwrap(),
++        2,
++        "Veterans"
++    ));
++    assert_eq!(
++        config.account_store.lock().unwrap().shared_guilds[OTHER_GUILD_ID],
++        other_before
++    );
++    send(&mut member, ClientPacket::LogOut);
++    drop(member);
++    let mut rejoined = factory.create_runtime(config.clone(), &ZoneId::new("rank-c"));
++    login(&mut rejoined, "member", 2);
++    let packets = send(
++        &mut rejoined,
++        ClientPacket::RequestGuildInfo { info_type: 1 },
++    );
++    assert!(has_rank(&packets, 2, "Veterans"));
++    assert!(packets.iter().any(|p| matches!(p, ServerPacket::GuildStatus { guild_rank_name, .. } if guild_rank_name == "Veterans")));
++    assert_only_rename(&before, &persisted(&config), 2, "Veterans");
++}
++
++#[test]
++fn officer_can_rename_equal_and_lower_ranks_but_not_superior() {
++    let config = fixture();
++    let factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut officer = factory.create_runtime(config.clone(), &ZoneId::new("rank-hierarchy"));
++    login(&mut officer, "officer", 1);
++    let before = persisted(&config);
++    send(&mut officer, edit(1, "Sergeants"));
++    assert_only_rename(&before, &persisted(&config), 1, "Sergeants");
++    let before = persisted(&config);
++    send(&mut officer, edit(2, "Recruits"));
++    assert_only_rename(&before, &persisted(&config), 2, "Recruits");
++    let before = persisted(&config);
++    let denied = send(&mut officer, edit(0, "Usurpers"));
++    assert_eq!(persisted(&config), before);
++    assert!(!has_rank(&denied, 0, "Usurpers"));
++}
++
++#[test]
++fn permissions_and_utf16_boundaries_are_authoritative_without_other_mutations() {
++    let config = fixture();
++    let factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("rank-limits"));
++    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("rank-limits"));
++    let mut outsider = factory.create_runtime(config.clone(), &ZoneId::new("rank-limits"));
++    login(&mut leader, "leader", 0);
++    login(&mut member, "member", 2);
++    login(&mut outsider, "outsider", 3);
++    let before = persisted(&config);
++    for actor in [&mut member, &mut outsider] {
++        assert!(!has_rank(
++            &send(actor, edit(2, "Forbidden")),
++            2,
++            "Forbidden"
++        ));
++        assert_eq!(persisted(&config), before);
++    }
++    for invalid in [
++        String::new(),
++        "ab".into(),
++        "a\\b".into(),
++        "x".repeat(21),
++        "😀".repeat(11),
++    ] {
++        send(&mut leader, edit(2, &invalid));
++        assert_eq!(
++            persisted(&config),
++            before,
++            "invalid UTF-16/backslash value was accepted: {invalid:?}"
++        );
++    }
++    send(&mut leader, edit(255, "Unknown"));
++    assert_eq!(persisted(&config), before);
++    for valid in ["abc".to_string(), "😀a".to_string(), "😀".repeat(10)] {
++        let before = persisted(&config);
++        send(&mut leader, edit(2, &valid));
++        assert_only_rename(&before, &persisted(&config), 2, &valid);
++    }
++}
++
++#[test]
++fn unauthenticated_and_pre_startgame_rank_packets_cannot_mutate() {
++    let config = fixture();
++    let factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut runtime = factory.create_runtime(config.clone(), &ZoneId::new("rank-auth"));
++    let before = persisted(&config);
++    let _ = runtime.execute(WorldCommand::ClientPacket(edit(2, "Anonymous")));
++    assert_eq!(persisted(&config), before);
++    send(
++        &mut runtime,
++        ClientPacket::Login {
++            account_id: "leader".into(),
++            password: "demo".into(),
++        },
++    );
++    let _ = runtime.execute(WorldCommand::ClientPacket(edit(2, "TooEarly")));
++    assert_eq!(persisted(&config), before);
++}
++
++#[test]
++fn every_effective_repeated_name_and_a_b_a_request_advances_revision() {
++    let config = fixture();
++    let factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("rank-repeat-a"));
++    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("rank-repeat-b"));
++    login(&mut leader, "leader", 0);
++    login(&mut member, "member", 2);
++    for name in ["Alpha", "Alpha", "Bravo", "Alpha"] {
++        let before = persisted(&config);
++        send(&mut leader, edit(2, name));
++        assert_only_rename(&before, &persisted(&config), 2, name);
++        assert!(source_rank_event(
++            &member.execute(WorldCommand::Tick).unwrap(),
++            2,
++            name
++        ));
++    }
++}
++
++#[test]
++fn known_commit_failure_has_no_success_or_peer_event_and_retry_commits_once() {
++    let config = fixture();
++    let factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("rank-failure-a"));
++    let mut member = factory.create_runtime(config.clone(), &ZoneId::new("rank-failure-b"));
++    login(&mut leader, "leader", 0);
++    login(&mut member, "member", 2);
++    let before = persisted(&config);
++    config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforePersist);
++    let rejected = send(&mut leader, edit(2, "Committed"));
++    assert_eq!(persisted(&config), before);
++    assert!(!has_rank(&rejected, 2, "Committed"));
++    assert!(!source_rank_event(
++        &member.execute(WorldCommand::Tick).unwrap(),
++        2,
++        "Committed"
++    ));
++    send(&mut leader, edit(2, "Committed"));
++    assert_only_rename(&before, &persisted(&config), 2, "Committed");
++    assert!(source_rank_event(
++        &member.execute(WorldCommand::Tick).unwrap(),
++        2,
++        "Committed"
++    ));
++}
++
++#[test]
++fn durable_current_rank_and_membership_override_cached_login_permission() {
++    let config = fixture();
++    let factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut officer = factory.create_runtime(config.clone(), &ZoneId::new("rank-recheck"));
++    login(&mut officer, "officer", 1);
++    // Fixture-only canonical changes stand in for a separately owned management operation.
++    // This is permission revalidation evidence, not ordinary promotion/leave acceptance.
++    config
++        .account_store
++        .lock()
++        .unwrap()
++        .shared_guilds
++        .get_mut(GUILD_ID)
++        .unwrap()
++        .ranks[1]
++        .options = 0;
++    let before = persisted(&config);
++    send(&mut officer, edit(2, "OldPermission"));
++    assert_eq!(persisted(&config), before);
++    {
++        let mut store = config.account_store.lock().unwrap();
++        let guild = store.shared_guilds.get_mut(GUILD_ID).unwrap();
++        guild.ranks[1].options = 1;
++        guild
++            .members
++            .retain(|member| member.identity != identity("officer", 1));
++    }
++    let before = persisted(&config);
++    send(&mut officer, edit(2, "OldMembership"));
++    assert_eq!(persisted(&config), before);
++}
++
++#[test]
++fn file_reopen_and_new_factory_keep_exact_rank_revision_and_membership_epochs() {
++    let config = fixture();
++    let stamp = std::time::SystemTime::now()
++        .duration_since(std::time::UNIX_EPOCH)
++        .unwrap()
++        .as_nanos();
++    let dir = std::env::temp_dir().join(format!("mir2-rank-rename-{}-{stamp}", std::process::id()));
++    std::fs::create_dir(&dir).unwrap();
++    let path = dir.join("accounts.json");
++    std::fs::write(
++        &path,
++        serde_json::to_vec(&*config.account_store.lock().unwrap()).unwrap(),
++    )
++    .unwrap();
++    let config = config.with_account_store_path(path.clone());
++    let factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut leader = factory.create_runtime(config.clone(), &ZoneId::new("rank-file-a"));
++    login(&mut leader, "leader", 0);
++    let before = persisted(&config);
++    let desired = "資深😀隊員";
++    send(&mut leader, edit(2, desired));
++    assert_only_rename(&before, &persisted(&config), 2, desired);
++    send(&mut leader, ClientPacket::LogOut);
++    let after = persisted(&config);
++    drop(leader);
++    drop(factory);
++    drop(config);
++    let reopened = GatewayConfig::default()
++        .with_crystal_world_runtime()
++        .with_account_store_path(path);
++    assert_eq!(persisted(&reopened), after);
++    let fresh_factory = SharedInProcessZoneRuntimeFactory::new();
++    let mut member = fresh_factory.create_runtime(reopened.clone(), &ZoneId::new("rank-file-b"));
++    login(&mut member, "member", 2);
++    assert!(has_rank(
++        &send(&mut member, ClientPacket::RequestGuildInfo { info_type: 1 }),
++        2,
++        desired
++    ));
++    assert_eq!(persisted(&reopened), after);
++    // The isolated file is retained for failure inspection; no user store is used.
++}
+diff --git a/mir2-web3/docs/SHARED-GUILD-RANK-RENAME-20261004.md b/mir2-web3/docs/SHARED-GUILD-RANK-RENAME-20261004.md
+new file mode 100644
+--- /dev/null
++++ b/mir2-web3/docs/SHARED-GUILD-RANK-RENAME-20261004.md
+@@ -0,0 +1,170 @@
++# Shared guild rank rename — bounded authority/API Candidate
++
++This slice implements durable rank rename through ordinary typed
++`EditGuildMember { change_type: 3 }`. It is an authority/API **Candidate**, not
++native frontend, TCP/WSS, production rollout, or human acceptance. The isolated
++implementation checkout is based on `321316b791120a6fe549e4006623e63333a5543f`.
++The previously frozen R18 release is unchanged; this slice requires a separate
++root review and integration.
++
++## Scope and authority
++
++The Gateway derives the actor from its authenticated active character presence.
++The new `SimulationConfig::commit_shared_guild_rank_name` resolves the canonical
++guild and rechecks character existence, current membership, current rank,
++permission bit 1, target rank, and hierarchy inside the existing scoped durable
++transaction. Client-supplied `name` cannot impersonate the actor. Rename permits
++the actor's own rank and lower ranks; it rejects a superior rank. Names require
++3 through 20 UTF-16 code units and cannot contain a backslash. Input is not
++trimmed or translated.
++
++Only the selected rank name and one checked guild revision change. Rank indexes,
++membership identities and epochs, guild gold, notice, bank, buffs, and EXP
++receipts remain unchanged. The existing account/guild scope checks, file
++publication, PostgreSQL lock/CAS path, and unknown-outcome freeze are reused
++without modification. PostgreSQL execution and a concurrent CAS conflict were
++not run in this slice.
++
++After confirmed commit, the Gateway invalidates the shared guild projection and
++queues a source status-7 event containing one changed rank only to authenticated
++online members of that exact guild. The event actor name comes from the
++committed member record, and online flags come from actual presences. Failure
++does not advance social generation or enqueue a successful member event. The
++actor's existing routing refresh still replaces the terminal event with a full
++canonical roster; this is an open frontend contract below.
++
++Every valid request, including an identical name, commits and advances revision
++once. `Alpha`, `Alpha`, `Bravo`, `Alpha` are four valid requests. The packet has
++no command nonce: this does not distinguish a delayed old A request from a new
++A request, or claim durable command replay deduplication. A known rejected
++transaction followed by an explicit retry is tested separately from an
++ambiguous publication, which freezes writes.
++
++## Original Crystal semantics
++
++The frozen source plan is
++`C:/mir2-playtest-releases/20261004-native-r18/guild-management-plan-01/PLAN.md`.
++Its `source-index.json` and `source-excerpts.txt` retain exact source bytes,
++SHA256 values, and numbered excerpts; they were not modified by this work.
++
++| Original source | Verified rename rule |
++| --- | --- |
++| `E:/mir2/Crystal/Shared/Enums.cs:1898–1909` | `CanChangeRank` is bit 1; it is distinct from recruit, kick, and notice permission. |
++| `Server/MirObjects/PlayerObject.cs:9945–9961` | Type 3 checks that bit, UTF-16 `String.Length` minimum 3/maximum 20, and backslash rejection before calling rename. |
++| `Server/MirObjects/GuildObject.cs:377–400` | Actor index greater than target rejects; equal is allowed; target must exist. |
++| `Server/MirObjects/GuildObject.cs:403–427` | Every valid call sets the name, emits status 7 with the changed rank to online guild members, marks save needed, and broadcasts affected members' world information. There is no same-name no-op. |
++| `Server/MirNetwork/MirConnection.cs:1736–1744,1772–1776` | Ordinary guild member packets enter only in the game stage. |
++| `Client/MirScenes/GameScene.cs:5813–5857` | Status 7 is a rank delta; status 255 is a full roster. Command type 3 is not an echoed reply status 3. |
++
++Whole-file SHA256 values in that frozen plan include:
++
++- `Shared/Enums.cs`: `63c8f63b436b27dc941e90e9eece792de2d4b89dcb932f2e23fb7428a993d398`
++- `Server/MirObjects/PlayerObject.cs`: `48607c437fe56859c0fbc2a84195693395806e532e95bf5861aed9423a19ff11`
++- `Server/MirObjects/GuildObject.cs`: `d46f4c8b1527dc52f310acb4f1a04303ac52c68a4aa98c6c262a9eccb77053d7`
++
++World `BroadcastInfo` equivalence is not implemented by this independent
++module; member-only social projection is not AOI rank presentation acceptance.
++
++## RED/GREEN and focused verification
++
++All commands used Rust 1.95.0, offline locked dependencies,
++`CARGO_TARGET_DIR=C:/mir2-build/gateway-tests-r51`, and at most two build jobs.
++Tests used a prepared isolated canonical guild fixture. Gateway checks used
++ordinary authenticated typed `Login`, `StartGame`, and `EditGuildMember`
++through `SharedInProcessZoneRuntimeFactory`; no admin production command or
++personal Stage5 authority was substituted. These are in-process checks, not
++socket or native button execution.
++
++| Run | Actual result | Scope |
++| --- | --- | --- |
++| `gateway-red-01` | 2 passed / 6 failed; Cargo exit 101 | Compilable unchanged production baseline. Valid rename, permitted hierarchy, UTF-16 accepted values, repeated valid requests, successful explicit retry, and file reopen failed because type 3 was unavailable. Authentication/stale permission rejection already passed. |
++| `gateway-green-01` | 8 passed / 0 failed | Exactly the same Gateway test bytes as RED; source membership rechecks, same/lower/superior rank admission, names, actor impersonation denial, member-only cross-zone delivery, relog, repeat requests, known failure and retry. |
++| `simulation-green-01` | 5 passed / 0 failed | Complete store delta, invalid character/permission/target, revision exhaustion, known file refusal/retry/reopen, unknown publication freeze including notice writes and new config reopen. These added direct authority checks have GREEN evidence only. |
++| `guild-adjacent-01` | 4 + 4 passed / 0 failed | Existing bank, recruitment, identity replacement, NPC creation, logout/relogin, notice permission/200-line limit, known failure and file reopen. No adjacent failure was discarded. |
++
++Gateway RED and GREEN test SHA256 is
++`7a8cfe15c24149a99145401ff46d1904e33757ab5c23ae175ec0e677c48ef60e`.
++The preliminary `baseline.json` recorded the Gateway fixture before local
++formatting; the actual RED input is retained separately as
++`gateway-red-input.rs`, and each run receipt binds the executed bytes. The
++external RED runner's final console print encountered GBK encoding after
++persisting the log/receipt; the original Cargo exit 101 and all six raw failures
++remain retained. Only the external runner's console encoding was then fixed;
++RED was not rerun or relabeled.
++
++Existing fault probes are fixture-only. `BeforePersist` tests no successful
++actor/member event before an explicit retry. `BeforeFileRename` leaves both
++live and file state unchanged, then a retry commits once. With
++`AfterFileRenameBeforeDirectorySync`, the operation returns an error and does
++not publish the staged live authority, while the disk may already contain the
++new rank. Further rank and notice writes remain frozen before and after config
++reopen. No automatic reconciliation, rollback, or guessed retry is tested or
++introduced. Isolated temporary files are retained; no player store is used.
++
++The stale membership/permission case changes only the isolated fixture's
++canonical authority after login. It proves revalidation of current authority,
++not an implemented ordinary promote, kick, or leave workflow.
++
++Executed commands, from the implementation project:
++
++```powershell
++cargo +1.95.0 test --offline --locked -p mir2-gateway --test shared_guild_rank_management -- --nocapture --test-threads=1
++cargo +1.95.0 test --offline --locked -p mir2-simulation --features test-support --test shared_guild_rank_management -- --nocapture --test-threads=1
++cargo +1.95.0 test --offline --locked -p mir2-gateway --test shared_guild_management --test guild_shared_lifecycle -- --nocapture --test-threads=1
++```
++
++Raw evidence is under
++`C:/mir2-playtest-releases/20261004-native-r18/guild-rank-implementation-01`:
++
++| Raw log | SHA256 |
++| --- | --- |
++| `gateway-red-01.log` | `28dfc2fccd523dd9826e66aeba3111b614961a58a0c84598df6834209a78a22f` |
++| `gateway-green-01.log` | `ee57d6829820802f2e72a60cb6f9eb366ee2d2518618cb58436a57f731d6f05b` |
++| `simulation-green-01.log` | `ae1a9ac1569c4c6074590acb889f8213e2acca60c63ea4263f2b6ea209a40d99` |
++| `guild-adjacent-01.log` | `5371b109f9ae5d0fb1e7dc19b0fc944741f66fdaa8b209f4327ce215822a7d55` |
++
++Each corresponding `.json` records the command, checkout, target/jobs, start
++and end UTC, exit code, input SHA256 values, and unchanged source during the
++run. The final `freeze-receipt.json`, `manifest.json`, `test-results.json`,
++`final.patch`, and `final-source/` bind the delivered six-file slice. Existing
++compiler warnings are retained; unrelated warning cleanup was not attempted.
++
++## Explicit remaining gates
++
++1. **Native terminal/pending handling:** typed `GuildMemberChange` contains
++   `status`, not `changeType` (`packages/protocol/src/packets.rs:2114–2118`).
++   `social.rs:809–817,911–919` still expects the latter for pending completion.
++   Existing routing at `routing.rs:14821–14823` replaces command terminal
++   guild packets on refresh. The actor test verifies canonical rank state,
++   not successful native pending completion.
++2. **Partial-rank UI handling:** `social.rs:503–542` treats member changes as
++   full roster replacement. Source status-7 peer packets contain one rank;
++   preservation of the other ranks and members is not repaired or accepted.
++3. **World rank presentation:** shared `zone/packets.rs:22` has an empty
++   ObjectPlayer guild rank name. Source `BroadcastInfo` for affected members
++   still needs trusted Zone profile refresh and observer verification. No
++   private member roster is broadcast to AOI outsiders as a workaround.
++4. **Other guild workflows:** promote/kick/add-rank/options/ordinary leave,
++   ordinary guild war lifecycle and normal client entry, and ordinary kill
++   EXP producer/consumer closure remain separate open work. Existing notice,
++   bank, recruitment, and Sabuk/conquest are not reimplemented by this slice.
++5. **Acceptance/deployment:** no Windows native UI execution, TCP/WSS realm,
++   PostgreSQL/CAS runtime, production restart, paired installer, or human
++   acceptance was run. No release or player save was changed.
++
++The source locations for these unmodified gates are bound in the prior plan;
++this slice deliberately leaves their byte contracts unchanged. Passing 21
++focused/adjacent checks does not close those gates or establish full guild
++management parity.
++
++## Exact implementation write set
++
++- `apps/simulation/src/runtime/shared_guilds.rs`: child-module declaration only.
++- `apps/simulation/src/runtime/shared_guild_management.rs`: new scoped rename authority.
++- `apps/gateway/src/shared_guilds.rs`: only the type-3 branch.
++- `apps/simulation/tests/shared_guild_rank_management.rs`: new direct authority checks.
++- `apps/gateway/tests/shared_guild_rank_management.rs`: new ordinary typed packet checks.
++- `docs/SHARED-GUILD-RANK-RENAME-20261004.md`: this independent scope receipt.
++
++No schema, routing/Zone/checkpoint, global parity ledger, other worktree, Git
++commit/push, service, production store, or F-drive installation was modified.

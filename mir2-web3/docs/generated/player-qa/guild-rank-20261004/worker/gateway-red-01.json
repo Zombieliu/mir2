@@ -1,0 +1,39 @@
+{
+  "phase": "gateway-red-01",
+  "command": [
+    "cargo",
+    "+1.95.0",
+    "test",
+    "--offline",
+    "--locked",
+    "-p",
+    "mir2-gateway",
+    "--test",
+    "shared_guild_rank_management",
+    "--",
+    "--nocapture",
+    "--test-threads=1"
+  ],
+  "cwd": "C:/Users/Administrator/.codex/worktrees/p5/mir2-player-journey/mir2-web3",
+  "target": "C:/mir2-build/gateway-tests-r51",
+  "jobs": 2,
+  "started_utc": "2026-10-04T13:25:08.699312+00:00",
+  "inputs": {
+    "apps/simulation/src/runtime/shared_guilds.rs": {
+      "sha256": "9583c034b13a532a9d0940cbab5473a404965575c73f293e2c3ae5da208307d0",
+      "bytes": 40140
+    },
+    "apps/gateway/src/shared_guilds.rs": {
+      "sha256": "04a2a67cf1eb3116ef8fea094ff1a7ada4d8c5688df34d4f733fe0f806fcfb24",
+      "bytes": 15795
+    },
+    "apps/gateway/tests/shared_guild_rank_management.rs": {
+      "sha256": "7a8cfe15c24149a99145401ff46d1904e33757ab5c23ae175ec0e677c48ef60e",
+      "bytes": 16260
+    }
+  },
+  "exit_code": 101,
+  "ended_utc": "2026-10-04T13:32:55.159430+00:00",
+  "log_sha256": "28dfc2fccd523dd9826e66aeba3111b614961a58a0c84598df6834209a78a22f",
+  "source_unchanged_during_run": true
+}

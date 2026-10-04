@@ -1,5 +1,17 @@
 # 经典三职业玩法补齐 Goal — 2026-10-04
 
+> 2026-10-05 root integrates the six-file shared Guild rank-rename authority
+> Candidate at321316: actual unchanged-source RED2/6 becomes GREEN8/0; direct5
+> and adjacent8 pass,21 unique worker checks. Root independently rechecks5+1
+> overlapping checks. Durable permissions/current membership, source UTF-16
+> names, revision+1 per valid request and member-only cross-Zone status7 pass.
+> Native actor terminal, partial-roster merge/pending, AOI rank labels, SQL,
+> ordinary war and other management remain open. Frozen R18/source321316 paired
+> builds/Candidate/Bootstrap pass; actual updater/dense gates and rollout are
+> still pending. R17 stays live; F and real saves are unchanged.
+> [Rank scope](SHARED-GUILD-RANK-RENAME-20261004.md),
+> [root evidence](generated/player-qa/guild-rank-20261004/README.md).
+
 > 2026-10-04 source57729 paired CI/native builds pass, but clean actor preparation
 > identifies exactly225 absent Monster049 generated files (224 frames + metadata).
 > Root admits only that source-bound generated library; the action catalog remains
@@ -42,7 +54,7 @@
   本轮集成 v27 地图和同图经验归属，代码、发布、普通协议与真人验收继续分开。
 - R17 保持 32 张地图的原生图像验证范围，并携带 1,620 个原版地图布局文件。
   新源码准入 208 张 runtime 地图，另 1 张 D71653 仅携带原版资源，原生范围共 209 张；
-  67,993 项可绘制引用缺失为零，Monster049 的 224 帧与源像素/动作相符，尚未打包发布。
+  67,993 项可绘制引用缺失为零，Monster049 的 224 帧与源像素/动作相符，R18 已打包，尚未发布。
   164 图前轮证据保留；本轮见
   [资源与消费者编译](generated/player-qa/classic-map-closure-20261004/phase2-208-209/README.md)。
 - 普通怪同图首击归属、5 秒边界、宠物/毒/TurnUndead 和 v5 存档已实现；
@@ -60,10 +72,10 @@
 | 顺序 | 工作 | Candidate Gate | 当前状态 |
 | --- | --- | --- | --- |
 | 1 | 战斗与移动稳定性 | 发布配套客户端/Gateway；正常三职业协议检查多怪受击、右键逃跑、追怪取消、施法/死亡屏障、数字键药品；保留拒绝/位置确认/显示队列诊断 | R17 已发布；三职业攻击后移动/保存烟测通过；连续受击和原生验收待办 |
-| 2 | 完整经典地图和后期打宝 | 按 `platinum_176` 路线补齐石墓、祖玛、赤月及所需过渡地图；地图图像/二进制/小地图/入口闭包；正常到达、Boss、装备和技能书获取证据 | 208 runtime/209 原生实物资源已验证并集成，尚未发布；具名条件入口根复验 13+2+44 通过；76 跳只为计划，正常联网/Boss/掉落与真人验收待办 |
+| 2 | 完整经典地图和后期打宝 | 按 `platinum_176` 路线补齐石墓、祖玛、赤月及所需过渡地图；地图图像/二进制/小地图/入口闭包；正常到达、Boss、装备和技能书获取证据 | 208 runtime/209 原生实物资源已验证并集成，R18 已打包但尚未发布；具名条件入口根复验 13+2+44 通过；76 跳只为计划，正常联网/Boss/掉落与真人验收待办 |
 | 3 | 原版经验与掉落归属 | 比对 Crystal EXPOwner/LastHitter；共享玩家/宠物参与、超时、组队/Boss、死亡及保存恢复；不改变用户明确的自定义日常奖励 | 普通怪同图首击/v5 及独立在线 Dead 已实现；死亡毒杀升级/复活/保存链限定检查通过；跨图/组队/Boss/地面期限与新版本联网保存待办 |
 | 4 | 道士宝宝 PK | 真实召唤物攻击玩家、护主反击、主人攻击模式/组队/公会/安全区资格；身份代、伤害/死亡、离区/保存生命周期 | 打怪已实现；完整宠物 PvP 待实现 |
-| 5 | 行会管理与普通行会战 | 成员/职位权限/公告/战争正常指令；杀怪行会经验；双账号、权限失败、并发、持久化/重启验证 | 建会/邀请/银行/Buff/沙巴克已有；公告普通包 4 项及邻接 4 项通过、File 重开通过，尚未发布或原生验收；职位/踢人/普通战争/杀怪经验待办 |
+| 5 | 行会管理与普通行会战 | 成员/职位权限/公告/战争正常指令；杀怪行会经验；双账号、权限失败、并发、持久化/重启验证 | 建会/邀请/银行/Buff/沙巴克已有；公告及职位改名权威已实现；改名 21 项检查通过、根复验重叠 6 项通过，尚未发布；原生状态回复/名单/等待、踢人/普通战争/杀怪经验待办 |
 | 6 | 挖矿与升级武器 | 导入原版矿区；普通挥镐/材料；Windows NPC 存入、精炼、检查、领取入口；完整物品身份、原版概率和失败/保存恢复 | 矿区和客户端精炼入口缺失；后台部分已有 |
 | 7 | 原版地图活动和事件 | 逐项列出并落实当前源数据实际事件及条件/动作；正常触发、失败分支、奖励和恢复；不能用自定义日常代替 | 通用事件仅导入源数据 |
 | 8 | 后期扩展 | 依次评审全服寄售、夫妻召回/婚戒、英雄、装备觉醒；正常 Windows 入口、共享权威、跨账号资产事务和保存恢复 | 原型/部分逻辑已有；经典阶段之后推进 |

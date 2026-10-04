@@ -1027,8 +1027,5 @@ mod experience_tests;
 #[path = "shared_guild_bank.rs"]
 mod bank;
 
-#[path = "shared_guild_management.rs"]
-mod management;
-
 #[path = "shared_guild_buffs.rs"]
 pub(super) mod buffs;

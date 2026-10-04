@@ -1,0 +1,9 @@
+External freeze script first preflight, actual exit 1; no source or frozen output writes occurred.
+The porcelain paths were repository relative, including mir2-web3/, while the approved list was project relative.
+
+Traceback (most recent call last):
+  File "C:\mir2-playtest-releases\20261004-native-r18\guild-rank-implementation-01\freeze.py", line 48, in <module>
+    assert observed == set(FILES), (observed, FILES)
+AssertionError: ({'mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs', 'mir2-web3/apps/gateway/src/shared_guilds.rs', 'mir2-web3/apps/simulation/src/runtime/shared_guilds.rs', 'mir2-web3/apps/gateway/tests/shared_guild_rank_management.rs', 'mir2-web3/docs/SHARED-GUILD-RANK-RENAME-20261004.md', 'mir2-web3/apps/simulation/tests/shared_guild_rank_management.rs'}, ['apps/simulation/src/runtime/shared_guilds.rs', 'apps/simulation/src/runtime/shared_guild_management.rs', 'apps/gateway/src/shared_guilds.rs', 'apps/simulation/tests/shared_guild_rank_management.rs', 'apps/gateway/tests/shared_guild_rank_management.rs', 'docs/SHARED-GUILD-RANK-RENAME-20261004.md'])
+
+Only external script path normalization was corrected. No test rerun or source change.

@@ -1,0 +1,12 @@
+{
+  "startedUtc": "2026-10-04T14:43:53.5004665Z",
+  "completedUtc": "2026-10-04T14:48:02.1977108Z",
+  "authorityExitCode": 0,
+  "gatewayExitCode": 0,
+  "targetDir": "C:/mir2-build/gateway-tests-r49",
+  "jobs": 2,
+  "sourceBase": "321316b791120a6fe549e4006623e63333a5543f",
+  "integratedPatchSha256": "48fbcac187c23836634b2b0faf7bcc388a7bdee833453b9c6be56313722c711f",
+  "theseChecksOverlapWorker21": true,
+  "nativeExecuted": false
+}

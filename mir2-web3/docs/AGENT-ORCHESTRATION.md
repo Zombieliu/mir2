@@ -1,5 +1,17 @@
 # Agent Orchestration
 
+> 2026-10-05 root integrates the six-file shared Guild rank-rename authority
+> Candidate at321316: actual unchanged-source RED2/6 becomes GREEN8/0; direct5
+> and adjacent8 pass,21 unique worker checks. Root independently rechecks5+1
+> overlapping checks. Durable permissions/current membership, source UTF-16
+> names, revision+1 per valid request and member-only cross-Zone status7 pass.
+> Native actor terminal, partial-roster merge/pending, AOI rank labels, SQL,
+> ordinary war and other management remain open. Frozen R18/source321316 paired
+> builds/Candidate/Bootstrap pass; actual updater/dense gates and rollout are
+> still pending. R17 stays live; F and real saves are unchanged.
+> [Rank scope](SHARED-GUILD-RANK-RENAME-20261004.md),
+> [root evidence](generated/player-qa/guild-rank-20261004/README.md).
+
 > 2026-10-04 source57729 paired CI/native builds pass, but clean actor preparation
 > identifies exactly225 absent Monster049 generated files (224 frames + metadata).
 > Root admits only that source-bound generated library; the action catalog remains

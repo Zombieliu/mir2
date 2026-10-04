@@ -1,0 +1,196 @@
+{
+  "schema": "mir2.guild-rank.root-durable-proof.v1",
+  "passed": true,
+  "baseSource": "321316b791120a6fe549e4006623e63333a5543f",
+  "frozenPatchSha256": "48fbcac187c23836634b2b0faf7bcc388a7bdee833453b9c6be56313722c711f",
+  "workerFocusedAndAdjacentPasses": 21,
+  "rootPasses": 6,
+  "rootPassesOverlapWorker": true,
+  "meaningfulGatewayRed": {
+    "passed": 2,
+    "failed": 6
+  },
+  "allSixIntegratedSourceBytesVerified": true,
+  "files": [
+    {
+      "relativePath": "worker/baseline-source/mir2-web3/apps/gateway/src/shared_guilds.rs",
+      "bytes": 15795,
+      "sha256": "04a2a67cf1eb3116ef8fea094ff1a7ada4d8c5688df34d4f733fe0f806fcfb24"
+    },
+    {
+      "relativePath": "worker/baseline-source/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 40140,
+      "sha256": "9583c034b13a532a9d0940cbab5473a404965575c73f293e2c3ae5da208307d0"
+    },
+    {
+      "relativePath": "worker/baseline.json",
+      "bytes": 804,
+      "sha256": "a4046d6fa785cd5cb593e174d246da91f929680bb9e27fd670dfcd44d6244ad0"
+    },
+    {
+      "relativePath": "worker/final-source/mir2-web3/apps/gateway/src/shared_guilds.rs",
+      "bytes": 19369,
+      "sha256": "b51a93a339fae841813a67cb3782218ed75e9003869e5c2e2723d622a99afe22"
+    },
+    {
+      "relativePath": "worker/final-source/mir2-web3/apps/gateway/tests/shared_guild_rank_management.rs",
+      "bytes": 16260,
+      "sha256": "7a8cfe15c24149a99145401ff46d1904e33757ab5c23ae175ec0e677c48ef60e"
+    },
+    {
+      "relativePath": "worker/final-source/mir2-web3/apps/simulation/src/runtime/shared_guild_management.rs",
+      "bytes": 3246,
+      "sha256": "1e3beec2699b3ae5c8b7a9d87af0bc4df20c3cb926f88387ff14e054764f0a26"
+    },
+    {
+      "relativePath": "worker/final-source/mir2-web3/apps/simulation/src/runtime/shared_guilds.rs",
+      "bytes": 40196,
+      "sha256": "a2ed1cc11013cd1763d7e885557f4739d1caca31a1897abc9f26f6e3ff050356"
+    },
+    {
+      "relativePath": "worker/final-source/mir2-web3/apps/simulation/tests/shared_guild_rank_management.rs",
+      "bytes": 9539,
+      "sha256": "be8e42a9fd37bf2accc6f150c76f92fea2742123d80a8e4904107fc92d530291"
+    },
+    {
+      "relativePath": "worker/final-source/mir2-web3/docs/SHARED-GUILD-RANK-RENAME-20261004.md",
+      "bytes": 11197,
+      "sha256": "0d808c7af661e56066c9c492154beaa67fec2b566b36023b0b696d5c1af28c06"
+    },
+    {
+      "relativePath": "worker/final.patch",
+      "bytes": 46885,
+      "sha256": "48fbcac187c23836634b2b0faf7bcc388a7bdee833453b9c6be56313722c711f"
+    },
+    {
+      "relativePath": "worker/freeze-preflight-error-01.txt",
+      "bytes": 1185,
+      "sha256": "5f3b304f3532f50a7099b8bf23aaa0b925308d091c3bd43ac8fd12af257d9da8"
+    },
+    {
+      "relativePath": "worker/freeze.py",
+      "bytes": 9101,
+      "sha256": "9fb5994803b41ec6d0c703c610342e58c83bc39f54c8419ee8bc39590abe9461"
+    },
+    {
+      "relativePath": "worker/gateway-green-01.json",
+      "bytes": 1378,
+      "sha256": "a88c6ef61d4408ef7c7f6016dc9f2ee7abdcd5746ef86758a87d2609022ac956"
+    },
+    {
+      "relativePath": "worker/gateway-green-01.log",
+      "bytes": 32103,
+      "sha256": "ee57d6829820802f2e72a60cb6f9eb366ee2d2518618cb58436a57f731d6f05b"
+    },
+    {
+      "relativePath": "worker/gateway-red-01.json",
+      "bytes": 1199,
+      "sha256": "4ab7e3ad2061e35b46aeec44c7331d1be0c345cce0bbd894d12a7124519545b4"
+    },
+    {
+      "relativePath": "worker/gateway-red-01.log",
+      "bytes": 54756,
+      "sha256": "28dfc2fccd523dd9826e66aeba3111b614961a58a0c84598df6834209a78a22f"
+    },
+    {
+      "relativePath": "worker/gateway-red-input.rs",
+      "bytes": 16260,
+      "sha256": "7a8cfe15c24149a99145401ff46d1904e33757ab5c23ae175ec0e677c48ef60e"
+    },
+    {
+      "relativePath": "worker/guild-adjacent-01.json",
+      "bytes": 1598,
+      "sha256": "25f89545888acfeae4b4b52ab88120da59cd0094e8b6e49e0a98af87f3e4015b"
+    },
+    {
+      "relativePath": "worker/guild-adjacent-01.log",
+      "bytes": 32220,
+      "sha256": "5371b109f9ae5d0fb1e7dc19b0fc944741f66fdaa8b209f4327ce215822a7d55"
+    },
+    {
+      "relativePath": "worker/patch-check.log",
+      "bytes": 449,
+      "sha256": "a8d06e3ce98840bc972dbfe9b4888f2baf0c9d4ebbb73cd226993623f116434f"
+    },
+    {
+      "relativePath": "worker/run_checks.py",
+      "bytes": 3036,
+      "sha256": "8148418ac9cb5e5c41bd2da2430137e1be1d6cf0dc9faff40d84cd2ef312f2fe"
+    },
+    {
+      "relativePath": "worker/simulation-green-01.json",
+      "bytes": 1602,
+      "sha256": "9158d9bfc167b25cabd2d738052a266b6edae882b95db4ba13d7f973fa7193e9"
+    },
+    {
+      "relativePath": "worker/simulation-green-01.log",
+      "bytes": 31311,
+      "sha256": "ae1a9ac1569c4c6074590acb889f8213e2acca60c63ea4263f2b6ea209a40d99"
+    },
+    {
+      "relativePath": "worker/test-results.json",
+      "bytes": 6010,
+      "sha256": "77546224c675f26589e733f90ebcc38b72dd165a5fddfae79592f1b8ad9c7dab"
+    },
+    {
+      "relativePath": "worker/manifest.json",
+      "bytes": 4231,
+      "sha256": "e7fe70a4f829c743040aa93ba06ef6afaef1668b1aa71f9105b99f814b549398"
+    },
+    {
+      "relativePath": "worker/freeze-receipt.json",
+      "bytes": 4643,
+      "sha256": "54d13ee357c1c6a10ea95b6db699fbb84452019db2f6ef62817d28eeaee9b8e7"
+    },
+    {
+      "relativePath": "root/guild-rank-root-integration-02.json",
+      "bytes": 1694,
+      "sha256": "04c65fcb975a430db0fbd4cb906e9f0dabcb9fe2cf8c8092abf56aa8b8866e6a"
+    },
+    {
+      "relativePath": "root/guild-rank-root-authority-01.log",
+      "bytes": 30410,
+      "sha256": "71ae3037f44a5fd0a30e224c6b420f7106119e13bea843154f64c3bc06ffd7fe"
+    },
+    {
+      "relativePath": "root/guild-rank-root-gateway-01.log",
+      "bytes": 32291,
+      "sha256": "b7d4ea2520d1afcd8c5ba27bba993685d093e4adbe639f5e78cb97ac1209392b"
+    },
+    {
+      "relativePath": "root/guild-rank-root-verification-01.json",
+      "bytes": 446,
+      "sha256": "394a572b0d44cee9ec576c8fc8dda72209ca4d3f99e1db36c1aa988034150cc7"
+    },
+    {
+      "relativePath": "root/integrate-guild-rank-01.py",
+      "bytes": 2023,
+      "sha256": "8fbe26849560e63823c6e36ba6249ae6e8ab2a9b3ba7a8cb48004b1a9d4998be"
+    },
+    {
+      "relativePath": "root/integrate-guild-rank-02.py",
+      "bytes": 2037,
+      "sha256": "2c5a1e1281c79fef4f65035b958951cb4fca352ce353c196bacfb8ef8ec47b72"
+    },
+    {
+      "relativePath": "native-plan/PLAN.md",
+      "bytes": 26970,
+      "sha256": "a9e9536f61de36939ba8cb8ba8f36e96e09d4969044551a3649a9a1bcae44bac"
+    },
+    {
+      "relativePath": "native-plan/source-index.json",
+      "bytes": 20660,
+      "sha256": "9b69627b1086f869ab2479e22f60727de1b8264e8bb670da8e08fefc5a6f0d15"
+    },
+    {
+      "relativePath": "native-plan/freeze-receipt.json",
+      "bytes": 1779,
+      "sha256": "06e0cbd3e2094201223152b68cbe5987f9c633550ab5ed5916c150f9baeef602"
+    }
+  ],
+  "nativeExecuted": false,
+  "networkExecuted": false,
+  "humanAccepted": false,
+  "r18FrozenSource": "321316b791120a6fe549e4006623e63333a5543f",
+  "r18Published": false
+}
