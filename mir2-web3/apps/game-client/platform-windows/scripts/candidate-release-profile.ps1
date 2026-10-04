@@ -1,5 +1,6 @@
-# Shared release configuration and resource closure for the invited 0-30 and Sabuk build.
+# Shared release configuration and resource closure for the active classic profile.
 # This file does not sign, publish, mutate saves, or relax the Candidate gates.
+$script:CandidateContentProfilePath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../../packages/game-data/data/content_profiles/platinum_176.json'))
 
 function Resolve-CandidateGatewayWsUrl {
     param([string]$Value, [switch]$AllowFixtureHost)
@@ -83,18 +84,89 @@ function Resolve-CandidateMapNames {
     foreach ($required in Get-CandidateRequiredMapNames) {
         if (-not $result.Contains($required)) { throw "Candidate map coverage missing required journey/supply/entrance map: $required" }
     }
-    return @($result | Sort-Object)
+    $names = @($result)
+    [Array]::Sort($names, [StringComparer]::Ordinal)
+    return $names
 }
 
-function Get-CandidateDefaultMapNames {
-    # Default native terrain coverage includes Bichon town and BorderVillage
-    # merchants, the Bichon siege registrar (0122), Sabuk palace (0150), and
-    # the five adjacent Sabuk interiors (0151-0155). The public approach is map
-    # 3, already in the journey minimum. Keep the minimum separate so explicit
-    # custom lists retain their existing validation and are not expanded silently.
+function Get-CandidatePreviouslyShippedMapNames {
     $merchantMaps = @('0101', '0102', '0103', '0104', '0105', '0106', '0107', '0125', '0132', '0140')
     $siegeMaps = @('0122', '0150', '0151', '0152', '0153', '0154', '0155')
     return @(Resolve-CandidateMapNames -MapNames (@(Get-CandidateRequiredMapNames) + $merchantMaps + $siegeMaps))
+}
+
+function Get-CandidateMapListSha256 {
+    param([string[]]$MapNames)
+    $bytes = [Text.Encoding]::UTF8.GetBytes(((Resolve-CandidateMapNames -MapNames $MapNames) -join "`n") + "`n")
+    $hasher = [Security.Cryptography.SHA256]::Create()
+    try { return [BitConverter]::ToString($hasher.ComputeHash($bytes)).Replace('-', '').ToLowerInvariant() }
+    finally { $hasher.Dispose() }
+}
+
+function Resolve-CandidateMapScope {
+    param([string[]]$MapNames = @(), [string]$ProfilePath = $script:CandidateContentProfilePath)
+    $profile = Get-Content -LiteralPath $ProfilePath -Raw | ConvertFrom-Json
+    if ($null -eq $profile.PSObject.Properties['profileId'] -or [string]$profile.profileId -cne 'platinum_176' -or
+        $null -eq $profile.PSObject.Properties['version'] -or $profile.version -is [string] -or
+        [decimal]$profile.version -ne [int64]$profile.version -or [int64]$profile.version -lt 1 -or
+        $null -eq $profile.PSObject.Properties['mapWhitelist']) { throw 'Candidate map scope requires the identified platinum_176 content profile' }
+    $rawNames = @($profile.mapWhitelist | ForEach-Object { [string]$_.fileName })
+    $profileNames = @(Resolve-CandidateMapNames -MapNames $rawNames)
+    if ($profileNames.Count -ne $rawNames.Count) { throw 'Candidate content profile contains duplicate map identities' }
+    foreach ($previous in Get-CandidatePreviouslyShippedMapNames) {
+        if ($profileNames -cnotcontains $previous) { throw "Candidate content profile omitted a previously shipped map: $previous" }
+    }
+    $mode = 'profile'
+    $expected = $profileNames
+    if ($MapNames.Count -gt 0) { $mode = 'explicit'; $expected = @(Resolve-CandidateMapNames -MapNames $MapNames) }
+    return [pscustomobject]@{
+        schema = 'mir2.windows.candidate-map-scope.v1'; mode = $mode
+        profileId = [string]$profile.profileId; profileVersion = [int64]$profile.version
+        profileSha256 = (Get-FileHash -LiteralPath $ProfilePath -Algorithm SHA256).Hash.ToLowerInvariant()
+        profileMapCount = $profileNames.Count; expectedMaps = $expected
+        expectedMapsSha256 = Get-CandidateMapListSha256 -MapNames $expected
+        completeClassicWorld = $false
+    }
+}
+
+function Get-CandidateDefaultMapNames {
+    # Derive the whole admitted world, preserving the existing 32-map floor.
+    # Explicit selections still use Resolve-CandidateMapNames independently.
+    return @((Resolve-CandidateMapScope).expectedMaps)
+}
+
+function Assert-CandidateMapCoverageScope {
+    param([object]$Report, [string[]]$ExpectedMapNames = @(), [string]$ScopeMode = '')
+    if ($null -eq $Report.PSObject.Properties['scope'] -or $null -eq $Report.scope -or
+        $Report.scope.schema -cne 'mir2.windows.candidate-map-scope.v1' -or $Report.scope.mode -cnotin @('profile', 'explicit')) {
+        throw 'Candidate map coverage requires an explicit content-profile scope receipt'
+    }
+    $scope = $Report.scope
+    if ($ScopeMode -and $ScopeMode -cne $scope.mode) { throw 'Candidate map coverage scope mode differs from the requested selection' }
+    if ($scope.mode -ceq 'profile') {
+        $expected = Resolve-CandidateMapScope
+        if ($ExpectedMapNames.Count -gt 0 -and (Get-CandidateMapListSha256 -MapNames $ExpectedMapNames) -cne $expected.expectedMapsSha256) {
+            throw 'Candidate full-profile map scope differs from the requested map selection'
+        }
+    } else {
+        $selection = $ExpectedMapNames
+        if ($selection.Count -eq 0) { $selection = @($scope.expectedMaps) }
+        $expected = Resolve-CandidateMapScope -MapNames $selection
+    }
+    foreach ($field in @('schema', 'mode', 'profileId', 'profileVersion', 'profileSha256', 'profileMapCount', 'expectedMapsSha256')) {
+        if ($null -eq $scope.PSObject.Properties[$field] -or [string]$scope.$field -cne [string]$expected.$field) { throw "Candidate map coverage scope identity mismatch: $field" }
+    }
+    if ($null -eq $scope.PSObject.Properties['completeClassicWorld'] -or $scope.completeClassicWorld -isnot [bool] -or $scope.completeClassicWorld -ne $false) { throw 'Active-profile map coverage cannot claim complete classic-world acceptance' }
+    $declared = @(Resolve-CandidateMapNames -MapNames @($scope.expectedMaps))
+    $actual = @(Resolve-CandidateMapNames -MapNames @($Report.mapNames))
+    if (($declared -join "`n") -cne ($expected.expectedMaps -join "`n") -or ($actual -join "`n") -cne ($expected.expectedMaps -join "`n")) {
+        throw 'Candidate map coverage omitted or added a map outside the expected scope'
+    }
+    if ($null -eq $Report.PSObject.Properties['unexpectedMaps'] -or @($Report.unexpectedMaps).Count -ne 0) { throw 'Candidate map coverage contains an unexpected map' }
+    if ($null -eq $Report.PSObject.Properties['scopeRoutes'] -or $Report.scopeRoutes.schema -cne 'mir2.windows.candidate-map-topology.v1' -or
+        [int64]$Report.scopeRoutes.expectedMapCount -ne $expected.expectedMaps.Count -or $Report.scopeRoutes.runtimeGameplayAccepted -isnot [bool] -or $Report.scopeRoutes.runtimeGameplayAccepted -ne $false -or
+        ($scope.mode -ceq 'profile' -and @($Report.scopeRoutes.unreachableMaps).Count -ne 0)) { throw 'Candidate map topology receipt is missing, unreachable or claims gameplay acceptance' }
+    return $expected
 }
 
 function Get-CandidateActorLibraryNames {
@@ -189,14 +261,18 @@ function Assert-CandidateNativeMapClosure {
 }
 
 function Assert-CandidateMapCoverageReport {
-    param([string]$NativeMapRoot, [string]$MapAtlasRoot)
+    param([string]$NativeMapRoot, [string]$MapAtlasRoot, [string[]]$ExpectedMapNames = @(), [string]$ScopeMode = '')
     $report = Get-Content -LiteralPath (Join-Path $NativeMapRoot 'coverage-audit.json') -Raw | ConvertFrom-Json
     if ($report.schema -cne 'mir2.windows.candidate-map-coverage.v1' -or $report.passed -ne $true -or
         [int64]$report.blockingReferenceCount -ne 0 -or @($report.omittedMaps).Count -ne 0) { throw 'Candidate map coverage has an omitted map or missing drawable source frame' }
-    Resolve-CandidateMapNames -MapNames @($report.mapNames) | Out-Null
+    $scope = Assert-CandidateMapCoverageScope -Report $report -ExpectedMapNames $ExpectedMapNames -ScopeMode $ScopeMode
     $nativeHash = (Get-FileHash -LiteralPath (Join-Path $NativeMapRoot 'manifest.json') -Algorithm SHA256).Hash.ToLowerInvariant()
     $atlasHash = (Get-FileHash -LiteralPath (Join-Path $MapAtlasRoot 'manifest.json') -Algorithm SHA256).Hash.ToLowerInvariant()
     if ([string]$report.manifestSha256 -cne $nativeHash -or [string]$report.mapAtlasManifestSha256 -cne $atlasHash) { throw 'Candidate map coverage report does not match the shipped manifests' }
+    $native = Get-Content -LiteralPath (Join-Path $NativeMapRoot 'manifest.json') -Raw | ConvertFrom-Json
+    if ((Get-CandidateMapListSha256 -MapNames @($native.mapFileNames)) -cne $scope.expectedMapsSha256 -or @($native.mapFileNames).Count -ne $scope.expectedMaps.Count) {
+        throw 'Candidate native manifest maps differ from the scoped coverage report'
+    }
     $atlas = Get-Content -LiteralPath (Join-Path $MapAtlasRoot 'manifest.json') -Raw | ConvertFrom-Json
     if ([int]$atlas.schemaVersion -ne 2 -or [int]$atlas.edgeExtrusion -ne 1) { throw 'Candidate map atlas must retain owned one-pixel borders' }
     $seen = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
@@ -243,12 +319,9 @@ function Test-CandidateReleaseConfiguration {
     try { Resolve-CandidateMapNames -MapNames $missingSupply | Out-Null } catch { $rejected = $true }
     if (-not $rejected) { throw 'Candidate accepted omitted Taoist supply map' }
     $defaultMaps = @(Get-CandidateDefaultMapNames)
-    $canonicalMapBytes = [Text.Encoding]::UTF8.GetBytes(($defaultMaps -join "`n") + "`n")
-    $mapHasher = [Security.Cryptography.SHA256]::Create()
-    try { $defaultMapHash = [BitConverter]::ToString($mapHasher.ComputeHash($canonicalMapBytes)).Replace('-', '').ToLowerInvariant() }
-    finally { $mapHasher.Dispose() }
-    if ($defaultMaps.Count -ne 32 -or $canonicalMapBytes.Length -ne 148 -or $defaultMapHash -cne 'f4fa9561a574f2b1d221599430bec7203ebbf57d268d84cab61982a3790642af') {
-        throw 'Candidate default map list differs from the reviewed Bichon merchant and Sabuk closure'
+    $profileScope = Resolve-CandidateMapScope
+    if (($defaultMaps -join "`n") -cne ($profileScope.expectedMaps -join "`n") -or $defaultMaps.Count -lt 32) {
+        throw 'Candidate default map list differs from the active content-profile scope'
     }
     $explicitMaps = @(Resolve-CandidateMapNames -MapNames (Get-CandidateRequiredMapNames))
     if ($explicitMaps.Count -ne 15 -or $explicitMaps -contains '0103' -or $explicitMaps -contains '0122' -or $explicitMaps -contains '0150') { throw 'Candidate expanded an explicit legacy map list' }
@@ -271,7 +344,7 @@ function Test-CandidateReleaseConfiguration {
     foreach ($invalid in @('mir2-assets/original-ui/Monster/9/80.png', 'mir2-assets/original-ui/Monster/009/payload.exe.png', 'mir2-assets/original-ui/NPC/45/../0.png', 'mir2-assets/original-ui/Gate/04/0.png', 'mir2-assets/original-ui/MapLinkIcon/01.png')) {
         if (Test-CandidateActorFileAllowed -RelativePath $invalid) { throw 'Candidate actor allowlist accepted an invalid path' }
     }
-    Write-Host 'Candidate release configuration tests passed (endpoints, profiles, daylight, 32-map default merchant/Sabuk coverage, explicit legacy/custom coverage, actor allowlist)'
+    Write-Host "Candidate release configuration tests passed (endpoints, profiles, daylight, $($defaultMaps.Count)-map profile coverage, explicit legacy/custom coverage, actor allowlist)"
 }
 
 function Test-CandidateSpriteClosureGuards {

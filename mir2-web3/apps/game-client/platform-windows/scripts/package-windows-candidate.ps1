@@ -752,8 +752,8 @@ if ($SourceRevision -notmatch '^[0-9a-fA-F]{40}$') { $invalid += 'SourceRevision
 if ((Normalize-Thumbprint -Thumbprint $SignerThumbprint) -notmatch '^[0-9A-F]{40}$') { $invalid += 'SignerThumbprint' }
 if ($invalid.Count -gt 0) { throw ('mandatory attested inputs missing or invalid: ' + ($invalid -join ', ')) }
 $GatewayWsUrl = Resolve-CandidateGatewayWsUrl -Value $GatewayWsUrl
-if ($NativeMapFileNames.Count -eq 0) { $NativeMapFileNames = @(Get-CandidateDefaultMapNames) }
-$NativeMapFileNames = @(Resolve-CandidateMapNames -MapNames $NativeMapFileNames)
+$candidateMapScope = Resolve-CandidateMapScope -MapNames $NativeMapFileNames
+$NativeMapFileNames = @($candidateMapScope.expectedMaps)
 $candidateToml = New-CandidateClientConfiguration -GatewayWsUrl $GatewayWsUrl -QuestGuidance $QuestGuidance -ForceDaylight $ForceDaylight
 Assert-CandidateClientConfiguration -Text $candidateToml | Out-Null
 
@@ -812,11 +812,11 @@ try {
     $mapAtlasTemporaryRoot = Join-Path ([IO.Path]::GetTempPath()) ('native-keyed-map-candidate-atlas-' + [guid]::NewGuid().ToString('N'))
     $coverageScript = Join-Path $ScriptDir 'audit-candidate-map-coverage.mjs'
     $generatedMapManifest = Join-Path $nativeKeyedMapRoot 'manifest.json'
-    & node $coverageScript --manifest $generatedMapManifest --fullPackRoot $FullCrystalPackRoot --completeAtlasRoot $mapAtlasTemporaryRoot
+    & node $coverageScript --manifest $generatedMapManifest --scope $candidateMapScope.mode --expectedMaps $mapList --fullPackRoot $FullCrystalPackRoot --completeAtlasRoot $mapAtlasTemporaryRoot
     if ($LASTEXITCODE -ne 0) { throw 'Candidate floor atlas completion failed' }
-    & node $coverageScript --manifest $generatedMapManifest --atlasRoot $mapAtlasTemporaryRoot --fullPackRoot $FullCrystalPackRoot --output (Join-Path $nativeKeyedMapRoot 'coverage-audit.json')
+    & node $coverageScript --manifest $generatedMapManifest --scope $candidateMapScope.mode --expectedMaps $mapList --atlasRoot $mapAtlasTemporaryRoot --fullPackRoot $FullCrystalPackRoot --output (Join-Path $nativeKeyedMapRoot 'coverage-audit.json')
     if ($LASTEXITCODE -ne 0) { throw 'Candidate has missing drawable map resources' }
-    Assert-CandidateMapCoverageReport -NativeMapRoot $nativeKeyedMapRoot -MapAtlasRoot $mapAtlasTemporaryRoot | Out-Null
+    Assert-CandidateMapCoverageReport -NativeMapRoot $nativeKeyedMapRoot -MapAtlasRoot $mapAtlasTemporaryRoot -ExpectedMapNames $NativeMapFileNames -ScopeMode $candidateMapScope.mode | Out-Null
     $generatedMapClosure = Assert-CandidateNativeMapClosure -NativeMapRoot $nativeKeyedMapRoot -ExpectedMapNames $NativeMapFileNames
     Write-Host "generatedMapClosure=maps:$($generatedMapClosure.maps.Count),frames:$($generatedMapClosure.frameCount),missing:$($generatedMapClosure.missingSourceCount),sourceNoDraw:$($generatedMapClosure.noDrawReferenceCount)"
 
