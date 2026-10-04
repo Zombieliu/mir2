@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-04 map phase1 is integrated at ca5eee0a5: default Candidate resources
+> derive all 164 admitted profile maps, with exact scope/profile/manifest binding.
+> Actual drawable missing/omitted/unexpected counts are0; focused/adjacent60 pass.
+> No build/package/publication follows. Next bounded phase admits45 excluded
+> classical branches and Monster049 while preserving the original orphan room;
+> normal route/Boss/drop/native/save acceptance remains open.
+> [Phase1](generated/player-qa/classic-map-closure-20261004/phase1-164/README.md).
+
 > 2026-10-04 R17 paired release is published at source6032/sequence12.
 > Strict Candidate, signed R16→R17 file update/rollback and public full-byte
 > installer/feed/EXE/updater checks pass. Ordinary three-class smoke is player

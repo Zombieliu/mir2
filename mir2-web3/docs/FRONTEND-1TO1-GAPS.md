@@ -1,5 +1,12 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-04 integrated map phase1 ca5eee0a5 replaces the32-map packaging default
+> with the164 maps actually admitted by platinum_176 v26. Generated physical
+> resources have zero missing drawable references; explicit15-map selections
+> remain exact and cannot claim profile coverage.60 scoped/adjacent checks pass.
+> These are unshipped resources/source, not normal play or visual acceptance.
+> [Evidence](generated/player-qa/classic-map-closure-20261004/phase1-164/README.md).
+
 > 2026-10-04 R17 Candidate source6032 and signed sequence12 are published with
 > the paired Gateway. Exact EXE/manifest/updater and online installer pass
 > public TLS/full-hash checks; isolated signed-file update/rollback preserves

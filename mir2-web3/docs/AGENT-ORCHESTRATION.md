@@ -1,5 +1,12 @@
 # Agent Orchestration
 
+> 2026-10-04 root integrates the reviewed seven-file164-map resource phase at
+> ca5eee0a5;60 focused/adjacent and actual PNG/manifest guards pass. The next
+> bounded map phase remains separate from exact-ELF dense-hit fixture work and
+> read-only EXP/drop source exploration. No worker owns a shared runtime edit
+> yet. R17 artifacts/publication stay frozen; Goal and capacity states unchanged.
+> [Phase1 evidence](generated/player-qa/classic-map-closure-20261004/phase1-164/README.md).
+
 > 2026-10-04 paired crowded-combat R17/sequence12 is live with exact source6032,
 > normal shutdown/restart, retained save backup and unchanged original realm.
 > Public full-byte and isolated signed-file update/rollback checks pass; user

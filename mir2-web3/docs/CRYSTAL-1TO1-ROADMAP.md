@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-04 admitted-map image closure is integrated at ca5eee0a5: all164
+> profile maps are derived and guarded, covering67,554 drawable references
+> with zero drawable gaps.60 scoped/adjacent checks pass. The45 excluded
+> classical branches/049 and ordinary route/Boss/drop/native acceptance follow.
+> R17 does not include these resources. No whole-world acceptance claim.
+> [Scope](CLASSIC-MAP-CLOSURE-20261004.md).
+
 > 2026-10-04 crowded-combat R17 source6032 is packaged and published with paired
 > Gateway and signed sequence12. Exact public files/installer and isolated
 > signed R16→R17 update/rollback are verified. No new assets are downloaded.

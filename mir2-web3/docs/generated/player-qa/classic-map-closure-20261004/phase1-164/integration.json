@@ -1,0 +1,61 @@
+{
+  "schema": "mir2.classic-map-phase1.integration.v1",
+  "reviewed": true,
+  "workerCommit": "38a64de2985c82008a596a34768f36185980f62e",
+  "integrationCommit": "ca5eee0a5",
+  "sourceBase": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "sourceWriteSetFiles": 7,
+  "allHandedOffSourceHashesChecked": true,
+  "focusedAndAdjacentPasses": 60,
+  "profileVersion": 26,
+  "mapCount": 164,
+  "drawableReferencesCovered": 67554,
+  "drawableMissing": 0,
+  "omittedMaps": 0,
+  "unexpectedMaps": 0,
+  "packaged": false,
+  "published": false,
+  "ordinaryGameplayAccepted": false,
+  "humanAccepted": false,
+  "completeClassicWorld": false,
+  "remainingExcludedClassicMaps": 45,
+  "monster049Included": false,
+  "records": [
+    {
+      "path": "implementation-receipt.json",
+      "bytes": 20458,
+      "sha256": "951bd405d2f57977fe90be24b8e39137514d934ce345668b3960cf9aa6c5305f",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\implementation-receipt.json"
+    },
+    {
+      "path": "powershell-map-scope.json",
+      "bytes": 6043,
+      "sha256": "f36bf6128489839be3da56310ddc18d61e04318cf7115e0b24a761a1c4d3bcc1",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\powershell-map-scope.json"
+    },
+    {
+      "path": "powershell-generated-guards.json",
+      "bytes": 5735,
+      "sha256": "03e4a0efb4cbeddf8a934eada9da010670c2405344563e2c79a57118e2c8eade",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\powershell-generated-guards.json"
+    },
+    {
+      "path": "focused-and-adjacent-tests-passed.log",
+      "bytes": 12314,
+      "sha256": "33d1b5cd972a8acdd4ae47a8c6fcf63d6c72579ea8478df27ed57c9710025458",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\focused-and-adjacent-tests-passed.log"
+    },
+    {
+      "path": "focused-and-adjacent-tests.log",
+      "bytes": 13241,
+      "sha256": "7eec326c1b110d2bc3ffe332fe8162f5a25da28b873b16760adb01935c996f89",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\focused-and-adjacent-tests.log"
+    },
+    {
+      "path": "route-manifest-baseline-6032.log",
+      "bytes": 4181,
+      "sha256": "12590b057d69703cffa3573da7c1a76c7ec6cb46b71af15dad5f2c8619de0772",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\route-manifest-baseline-6032.log"
+    }
+  ]
+}
