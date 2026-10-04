@@ -1,0 +1,40 @@
+{
+  "name": "gateway-green-01",
+  "root": "C:/Users/Administrator/.codex/worktrees/gn/mir2-player-journey/mir2-web3",
+  "command": [
+    "cargo",
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "Cargo.toml",
+    "--offline",
+    "--locked",
+    "--jobs",
+    "2",
+    "-p",
+    "mir2-gateway",
+    "--test",
+    "shared_guild_rank_terminal",
+    "--",
+    "--nocapture"
+  ],
+  "target_dir": "C:/mir2-build/gateway-tests-r51",
+  "source_before_sha256": {
+    "apps/game-client/client-bevy/src/social.rs": "d52c2cdcbff00d6989db3b20ab337ee747fb695f1a642e60397bdfaabd910f9f",
+    "apps/game-client/client-bevy/src/social_guild_rank_tests.rs": "83a85627899c3d63f7fe50431512477ed5d0f6fd76d92a90241bbe1abe598d12",
+    "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs": "4d6827123d69c0ab53147da08760d4791780995b587abb0f893a2773427e1035",
+    "apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs": "f6cfce87e57efc1c4c67f933be7480e3b9eda7bde36559c1879574e3bde32f8a",
+    "apps/game-client/client-bevy/src/crystal_ui/overlays.rs": "95cfba1b0ddfd119c6d3115a0c3bddc0b4c05378153b146cd7245833b7a4d31b",
+    "apps/game-client/platform-windows/src/gameplay_bridge.rs": "252e57a62575060ed145b0a62698c77351c43d673616193a475dc64a9e0857b9",
+    "apps/game-client/platform-windows/src/guild_rank_wire_tests.rs": "156c5d2100180b1081355efba921930bde4baf88790da026d7da2183789c5f9a",
+    "apps/game-client/runtime/src/lib.rs": "4fc14a8b85a863b8c2ee81687cba0d7a0ff7b73b4a942182fc6ba54647446619",
+    "apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs": "3233ebf2cd92fe2833ef6bea296e533c51d75140dab6608fbcaa024c6d6cc38a",
+    "apps/game-client/runtime/src/native_ingest.rs": "3b7d5784174e19bfddf8b880b358ef668e92230305ff932e4f918b5745bbbbb7",
+    "apps/gateway/src/routing.rs": "a173a5f57db5b0d0b0d4027de69d4e881d94ad35080d01da4821a2156aca7950",
+    "apps/gateway/tests/shared_guild_rank_terminal.rs": "4a7847e1df3acea39bb85bf1a7956f09b60f7b8dcee5b287afeb765ed2fbbd0a",
+    "apps/gateway/src/shared_guilds.rs": "b51a93a339fae841813a67cb3782218ed75e9003869e5c2e2723d622a99afe22",
+    "apps/simulation/src/runtime/shared_guilds.rs": "a2ed1cc11013cd1763d7e885557f4739d1caca31a1897abc9f26f6e3ff050356",
+    "apps/simulation/src/runtime/shared_guild_management.rs": "1e3beec2699b3ae5c8b7a9d87af0bc4df20c3cb926f88387ff14e054764f0a26"
+  },
+  "started_utc": "2026-10-04T18:11:59.405027+00:00"
+}

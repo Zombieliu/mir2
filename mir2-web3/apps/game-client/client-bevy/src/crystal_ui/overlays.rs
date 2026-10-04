@@ -2704,6 +2704,11 @@ impl NativePlayerUiIntentQueue {
         if self.intents.iter().any(|queued| queued == &intent) {
             return false;
         }
+        // Rename needs the actual editor/owner/scope context, absent from this
+        // generic method. Other social pending contracts stay unchanged.
+        if matches!(&intent, NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }) {
+            return false;
+        }
         let operation = match &intent {
             NativePlayerUiIntent::GroupSwitch { allow_group } => {
                 Some(crate::social::SocialPendingOperation::GroupSwitch {
@@ -2808,6 +2813,28 @@ impl NativePlayerUiIntentQueue {
             if !social.begin_pending(operation) {
                 return false;
             }
+        }
+        self.push_intent(intent)
+    }
+
+    pub fn push_guild_rank_rename_pending(
+        &mut self,
+        social: &mut crate::social::SocialModel,
+        request: crate::social::GuildRankRenameRequest,
+    ) -> bool {
+        let intent = NativePlayerUiIntent::GuildEditMember {
+            change_type: 3,
+            rank_index: request.rank_index,
+            name: String::new(),
+            rank_name: request.rank_name.clone(),
+        };
+        if self.intents.len() >= MAX_QUEUED
+            || self.intents.iter().any(|queued| queued == &intent)
+            || !social.guild.rank_rename_scope_matches(&request)
+            || !crate::social::valid_rank_rename_name(&request.rank_name)
+            || !social.begin_pending(crate::social::SocialPendingOperation::GuildRankRename(request))
+        {
+            return false;
         }
         self.push_intent(intent)
     }
@@ -8885,15 +8912,24 @@ fn process_overlay_buttons(
                     continue;
                 };
                 state.guild_panel.rank_dropdown = false;
-                state.guild_panel.rank_name_ready_ms = 0;
                 state.selected_guild_rank = Some(rank_index);
                 state.guild_rank_name_draft = rank.name.clone();
+                let pending = social.pending.iter().find_map(|pending| match pending {
+                    crate::social::SocialPendingOperation::GuildRankRename(request)
+                        if request.rank_index == rank_index
+                            && social.guild.rank_rename_scope_matches(request) => Some(request.clone()),
+                    _ => None,
+                });
+                state.guild_panel.rank_name_ready_ms = pending.as_ref().map_or(0, |request| request.deadline_ms);
+                state.guild_panel.rank_name_unconfirmed = false;
+                if let Some(request) = &pending {
+                    state.guild_rank_name_draft = request.rank_name.clone();
+                }
+                state.guild_panel.rank_name_submission = pending;
                 state.guild_rank_name_focused = false;
             }
             OverlayButton::GuildRankNameFocus => {
-                if state.selected_guild_rank.is_some()
-                    && social_has_permission(&social.guild, "changeRank")
-                {
+                if guild_panel::rank_name_available(&state, &social.guild) {
                     state.guild_rank_name_focused = true;
                 }
             }
@@ -14578,7 +14614,7 @@ fn render_guild_ranks(
         92,
         CrystalRect::new(x + 155., y + 290., 40., 25.),
         OverlayButton::GuildRankNameSave,
-        can_change,
+        can_change && guild_panel::rank_name_available(state, guild),
     );
     for (i, label) in [
         "Edit ranks",

@@ -9187,6 +9187,9 @@ mod effect_mask_shadow_tests {
 mod native_data_path_tests {
     use super::*;
 
+    #[cfg(test)]
+    mod guild_rank_ingest_tests;
+
     fn ingest_app() -> App {
         let mut app = App::new();
         app.add_plugins(MinimalPlugins)

@@ -14715,6 +14715,12 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             is_trade_state_mutation && self.has_pending_durable_trade_projection();
         drop(predrain_stage);
         let inner_stage = GatewaySlowStage::start("shared_session.inner_execute");
+        // Only this ordinary command enters the trusted durable rename branch
+        // below. Its source status-7 reply must precede the canonical refresh.
+        let preserves_guild_rank_rename_terminal = matches!(
+            &command,
+            WorldCommand::ClientPacket(ClientPacket::EditGuildMember { change_type: 3, .. })
+        );
         let mut command_packets = if blocks_durable_trade_mutation {
             trade_item_failure.clone().into_iter().collect()
         } else if unavailable_shared_target {
@@ -14913,7 +14919,13 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             }
             command_packets.extend(marriage_updates);
             let guild_updates = self.refresh_shared_guild_packets();
-            command_packets.retain(|packet|!matches!(packet,ServerPacket::GuildStatus{..}|ServerPacket::GuildMemberChange{..}));
+            command_packets.retain(|packet| match packet {
+                ServerPacket::GuildStatus { .. } => false,
+                ServerPacket::GuildMemberChange { status: 7, .. }
+                    if preserves_guild_rank_rename_terminal => true,
+                ServerPacket::GuildMemberChange { .. } => false,
+                _ => true,
+            });
             command_packets.extend(guild_updates);
             command_packets.extend(self.refresh_shared_social_buff_packets());
             // Preserve the pre-scan generation so concurrent changes refresh on the next tick.

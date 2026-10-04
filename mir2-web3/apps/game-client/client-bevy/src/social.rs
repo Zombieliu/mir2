@@ -11,6 +11,10 @@ use serde_json::Value;
 
 use crate::inventory::CrystalItemTooltipSourceModel;
 
+#[cfg(test)]
+#[path = "social_guild_rank_tests.rs"]
+pub(crate) mod guild_rank_native_tests;
+
 pub const MAX_GROUP_MEMBERS: usize = 15;
 pub const MAX_GUILD_MEMBERS: usize = 200;
 pub const MAX_GUILD_RANKS: usize = 255;
@@ -81,6 +85,30 @@ pub struct GuildRankModel {
     pub members: Vec<GuildMemberModel>,
 }
 
+/// Client cursor evidence from an ordinary status-7 packet, not a wire nonce.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GuildRankChange {
+    pub revision: u64,
+    pub scope_epoch: u64,
+    pub actor: String,
+    pub rank_index: u8,
+    pub rank_name: String,
+}
+
+/// Exact local editor context. This is never sent as a server command or saved.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GuildRankRenameRequest {
+    pub guild_name: String,
+    pub scope_epoch: u64,
+    pub requester: String,
+    pub rank_index: u8,
+    pub rank_name: String,
+    pub observed_change_revision: u64,
+    pub deadline_ms: u64,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase", default)]
 pub struct GuildStorageItemModel {
@@ -118,6 +146,29 @@ pub struct GuildModel {
     /// Monotonic identity for distinct authoritative invitations. Repeated
     /// delivery of the same inviter does not advance this value.
     pub pending_invite_epoch: u64,
+    /// Local packet-cursor scope; advances on Guild exit/change/rejoin.
+    pub scope_epoch: u64,
+    pub rank_packet_status: Option<u8>,
+    /// Retained across metadata packets so a later refresh cannot hide a reply.
+    pub rank_change: Option<GuildRankChange>,
+}
+
+impl GuildModel {
+    pub fn rank_rename_scope_matches(&self, request: &GuildRankRenameRequest) -> bool {
+        self.name.as_deref() == Some(request.guild_name.as_str())
+            && self.scope_epoch == request.scope_epoch
+    }
+
+    pub fn confirms_rank_rename(&self, request: &GuildRankRenameRequest) -> bool {
+        self.rank_rename_scope_matches(request)
+            && self.rank_change.as_ref().is_some_and(|change| {
+                change.scope_epoch == request.scope_epoch
+                    && change.revision > request.observed_change_revision
+                    && change.actor == request.requester
+                    && change.rank_index == request.rank_index
+                    && change.rank_name == request.rank_name
+            })
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -207,6 +258,7 @@ pub enum SocialPendingOperation {
         rank_index: u8,
         name: String,
     },
+    GuildRankRename(GuildRankRenameRequest),
     GuildNotice {
         notice: Vec<String>,
     },
@@ -271,6 +323,16 @@ pub struct SocialModel {
 
 impl SocialModel {
     pub fn begin_pending(&mut self, operation: SocialPendingOperation) -> bool {
+        if let SocialPendingOperation::GuildRankRename(request) = &operation {
+            if self.pending.iter().any(|pending| matches!(pending,
+                SocialPendingOperation::GuildRankRename(existing)
+                if existing.scope_epoch == request.scope_epoch
+                    && existing.guild_name == request.guild_name
+                    && existing.rank_index == request.rank_index))
+            {
+                return false;
+            }
+        }
         if self.pending.iter().any(|item| item == &operation) {
             return false;
         }
@@ -279,6 +341,43 @@ impl SocialModel {
         }
         self.pending.push(operation);
         true
+    }
+
+    pub fn guild_rank_rename_request(
+        &self,
+        requester: &str,
+        rank_index: u8,
+        rank_name: &str,
+        deadline_ms: u64,
+    ) -> Option<GuildRankRenameRequest> {
+        let guild_name = self.guild.name.clone()?;
+        if requester.is_empty()
+            || !valid_rank_rename_name(rank_name)
+            || !self.guild.ranks.iter().any(|rank| rank.index == i32::from(rank_index))
+        {
+            return None;
+        }
+        Some(GuildRankRenameRequest {
+            guild_name,
+            scope_epoch: self.guild.scope_epoch,
+            requester: requester.to_owned(),
+            rank_index,
+            rank_name: rank_name.to_owned(),
+            observed_change_revision: self.guild.rank_change.as_ref().map_or(0, |change| change.revision),
+            deadline_ms,
+        })
+    }
+
+    /// Crystal allows retry strictly after five seconds, without claiming success.
+    /// No other social operation gains a timeout or changes its completion rule.
+    pub fn expire_guild_rank_renames(&mut self, now_ms: u64) {
+        let guild = &self.guild;
+        self.pending.retain(|pending| match pending {
+            SocialPendingOperation::GuildRankRename(request) => {
+                guild.rank_rename_scope_matches(request) && now_ms <= request.deadline_ms
+            }
+            _ => true,
+        });
     }
 
     pub fn clear_session(&mut self) {
@@ -432,8 +531,16 @@ impl SocialModel {
                 else {
                     return false;
                 };
-                if raw_name.trim().is_empty() || raw_rank.trim().is_empty() {
-                    self.guild = GuildModel::default();
+                if raw_name.trim().is_empty() || raw_rank.is_empty() {
+                    let scope_epoch = if self.guild.name.is_some() {
+                        let Some(next) = self.guild.scope_epoch.checked_add(1) else {
+                            return false;
+                        };
+                        next
+                    } else {
+                        self.guild.scope_epoch
+                    };
+                    self.guild = GuildModel { scope_epoch, ..Default::default() };
                     success = Some(true);
                     self.last_event = Some(SocialAuthoritativeEvent {
                         packet: packet.to_owned(),
@@ -451,8 +558,19 @@ impl SocialModel {
                 let Some(name) = clean_name(Some(&Value::String(raw_name.to_owned()))) else {
                     return false;
                 };
+                let Some(rank_name) = raw_rank_name(Some(&Value::String(raw_rank.to_owned()))) else {
+                    return false;
+                };
+                if self.guild.name.as_deref() != Some(name.as_str()) {
+                    let Some(next) = self.guild.scope_epoch.checked_add(1) else {
+                        return false;
+                    };
+                    self.guild.scope_epoch = next;
+                    self.guild.rank_change = None;
+                    self.guild.rank_packet_status = None;
+                }
                 self.guild.name = Some(name);
-                self.guild.rank_name = clean_name(Some(&Value::String(raw_rank.to_owned())));
+                self.guild.rank_name = Some(rank_name);
                 self.guild.spare_points =
                     value_u8(guild_field(payload, "spare_points", "sparePoints")).unwrap_or(0);
                 self.guild.level = value_u8(guild_field(payload, "level", "level")).unwrap_or(0);
@@ -507,10 +625,22 @@ impl SocialModel {
                 if ranks.len() > MAX_GUILD_RANKS {
                     return false;
                 }
+                let status = value_u8(payload.get("status"));
+                let is_rank_delta = status == Some(7);
+                if is_rank_delta && (ranks.len() != 1 || self.guild.name.is_none()) {
+                    return false;
+                }
                 let mut all = Vec::new();
                 let mut parsed_ranks = Vec::new();
                 for rank in ranks {
-                    let Some(name) = clean_name(rank.get("name")) else {
+                    if is_rank_delta && (value_i32(rank.get("index"))
+                        .and_then(|index| u8::try_from(index).ok()).is_none()
+                        || value_u8(rank.get("options")).is_none()
+                        || !rank.get("members").is_some_and(Value::is_array))
+                    {
+                        return false;
+                    }
+                    let Some(name) = raw_rank_name(rank.get("name")) else {
                         return false;
                     };
                     let members = rank
@@ -538,8 +668,42 @@ impl SocialModel {
                     });
                 }
                 let had_members = !self.guild.members.is_empty();
-                self.guild.ranks = parsed_ranks;
-                self.guild.members = all;
+                if is_rank_delta {
+                    let updated = parsed_ranks.pop().expect("validated single rank");
+                    let Ok(rank_index) = u8::try_from(updated.index) else {
+                        return false;
+                    };
+                    let Some(actor) = clean_name(payload.get("name")) else {
+                        return false;
+                    };
+                    let matching = self.guild.ranks.iter().enumerate()
+                        .filter(|(_, rank)| rank.index == updated.index)
+                        .map(|(index, _)| index).collect::<Vec<_>>();
+                    if matching.len() != 1 {
+                        return false;
+                    }
+                    let target = matching[0];
+                    let count = self.guild.ranks.iter().enumerate()
+                        .filter(|(index, _)| *index != target)
+                        .map(|(_, rank)| rank.members.len()).sum::<usize>() + updated.members.len();
+                    if count > MAX_GUILD_MEMBERS {
+                        return false;
+                    }
+                    let Some(revision) = self.guild.rank_change.as_ref().map_or(0, |change| change.revision).checked_add(1) else {
+                        return false;
+                    };
+                    self.guild.rank_change = Some(GuildRankChange {
+                        revision, scope_epoch: self.guild.scope_epoch, actor,
+                        rank_index, rank_name: updated.name.clone(),
+                    });
+                    self.guild.ranks[target] = updated;
+                    self.guild.members = self.guild.ranks.iter()
+                        .flat_map(|rank| rank.members.iter().cloned()).collect();
+                } else {
+                    self.guild.ranks = parsed_ranks;
+                    self.guild.members = all;
+                }
+                self.guild.rank_packet_status = status;
                 // GuildMemberChange carries the authoritative rank table. If
                 // the server included the viewer's rank, refresh permissions
                 // from that rank's options instead of retaining stale status
@@ -551,6 +715,9 @@ impl SocialModel {
                     .iter()
                     .find(|rank| rank.index == self.guild.my_rank_id)
                 {
+                    if is_rank_delta {
+                        self.guild.rank_name = Some(my_rank.name.clone());
+                    }
                     self.guild.my_options = my_rank.options;
                     self.guild.permissions = guild_permissions_from_options(my_rank.options);
                 }
@@ -918,6 +1085,12 @@ impl SocialModel {
                     && event.rank_index == Some(*rank_index)
                     && (name.is_empty() || event.subject.as_deref() == Some(name.as_str()))
             }),
+            SocialPendingOperation::GuildRankRename(request) => {
+                !current.guild.rank_rename_scope_matches(request)
+                    || (event.is_some_and(|event| event.packet == "GuildMemberChange")
+                        && current.guild.rank_packet_status == Some(7)
+                        && current.guild.confirms_rank_rename(request))
+            }
             SocialPendingOperation::GuildNotice { notice } => event.is_some_and(|event| {
                 (event.packet == "GuildNoticeChange" && event.success == Some(true))
                     || (event.packet == "GuildNoticeResult" && event.success.is_some())
@@ -1023,6 +1196,16 @@ mod trade_source_tests;
 fn clean_name(value: Option<&Value>) -> Option<String> {
     let text = value?.as_str()?.trim();
     (!text.is_empty() && text.chars().count() <= 32).then(|| text.to_owned())
+}
+
+fn raw_rank_name(value: Option<&Value>) -> Option<String> {
+    let text = value?.as_str()?;
+    (!text.is_empty() && text.encode_utf16().count() <= 20 && !text.contains('\\'))
+        .then(|| text.to_owned())
+}
+
+pub fn valid_rank_rename_name(text: &str) -> bool {
+    (3..=20).contains(&text.encode_utf16().count()) && !text.contains('\\')
 }
 
 fn guild_permissions_from_options(options: u8) -> Vec<String> {
@@ -1922,7 +2105,7 @@ mod tests {
         assert!(model.apply_packet("GuildStatus", &json!({"guildName":"","guildRankName":""})));
         let incoming = model.clone();
         model.apply_authoritative(incoming);
-        assert_eq!(model.guild, GuildModel::default());
+        assert_eq!(model.guild, GuildModel { scope_epoch: 1, ..GuildModel::default() });
         assert!(model.pending.is_empty());
     }
 

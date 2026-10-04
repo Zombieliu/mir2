@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "C:\mir2-playtest-releases\20261004-native-r18\guild-rank-native-implementation-01\freeze_delivery.py", line 45, in <module>
+    assert paths == set(MODIFIED + ADDED), ('Unexpected source write set', paths)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('Unexpected source write set', {'mir2-web3/apps/gateway/src/routing.rs', 'mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs', 'mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs', 'mir2-web3/apps/game-client/runtime/src/lib.rs', 'mir2-web3/apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs', 'mir2-web3/apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs', 'mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs', 'mir2-web3/apps/game-client/client-bevy/src/social_guild_rank_tests.rs', 'mir2-web3/apps/game-client/platform-windows/src/guild_rank_wire_tests.rs', 'mir2-web3/apps/game-client/client-bevy/src/social.rs', 'mir2-web3/apps/gateway/tests/shared_guild_rank_terminal.rs'})

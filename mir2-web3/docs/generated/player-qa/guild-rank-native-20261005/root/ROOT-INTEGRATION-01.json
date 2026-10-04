@@ -1,0 +1,89 @@
+{
+  "schema": "mir2.p5a.native-rank.root-integration.v1",
+  "createdUtc": "2026-10-04T19:01:44.000540+00:00",
+  "rootBase": "513eb83db8b919899d3044258e4b1e9a215cd9de",
+  "workerBase": "0e22935261beea4240b2dc32e7faf5a75cda7a08",
+  "frozenReceiptSha256": "b43c6f12369fb9912541b8aeea83f0055defa7587c86feb829e4cf1a323e5a2f",
+  "importedExactFiles": [
+    {
+      "path": "apps/game-client/client-bevy/src/social.rs",
+      "kind": "modified",
+      "bytes": 84624,
+      "sha256": "d52c2cdcbff00d6989db3b20ab337ee747fb695f1a642e60397bdfaabd910f9f",
+      "baseline_sha256": "efe22789c06888d1d65d29be68896e579fcbaffc40829f9d3618a7b54ca56ead"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_panel.rs",
+      "kind": "modified",
+      "bytes": 47220,
+      "sha256": "4d6827123d69c0ab53147da08760d4791780995b587abb0f893a2773427e1035",
+      "baseline_sha256": "8c4a4ab275d29c0a35aa723f3a9877ecc372b16158cd645373e6eaf82b2e2993"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "kind": "modified",
+      "bytes": 871132,
+      "sha256": "95cfba1b0ddfd119c6d3115a0c3bddc0b4c05378153b146cd7245833b7a4d31b",
+      "baseline_sha256": "b4e776c016acffd97950bd5adebd3cbd75ce885b092ec073c63232716d90698a"
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "kind": "modified",
+      "bytes": 345112,
+      "sha256": "252e57a62575060ed145b0a62698c77351c43d673616193a475dc64a9e0857b9",
+      "baseline_sha256": "8466f4595778f58caab6decf0aa7e609336e2709a015b420f6a0859794dc4ea3"
+    },
+    {
+      "path": "apps/game-client/runtime/src/lib.rs",
+      "kind": "modified",
+      "bytes": 420209,
+      "sha256": "4fc14a8b85a863b8c2ee81687cba0d7a0ff7b73b4a942182fc6ba54647446619",
+      "baseline_sha256": "0e43a30835e76d2ec1dcb29bf12ca4565d04822a9ef916178ce0518156fbb2e1"
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/social_guild_rank_tests.rs",
+      "kind": "new",
+      "bytes": 6584,
+      "sha256": "83a85627899c3d63f7fe50431512477ed5d0f6fd76d92a90241bbe1abe598d12",
+      "baseline_sha256": null
+    },
+    {
+      "path": "apps/game-client/client-bevy/src/crystal_ui/guild_rank_flow_tests.rs",
+      "kind": "new",
+      "bytes": 11430,
+      "sha256": "f6cfce87e57efc1c4c67f933be7480e3b9eda7bde36559c1879574e3bde32f8a",
+      "baseline_sha256": null
+    },
+    {
+      "path": "apps/game-client/platform-windows/src/guild_rank_wire_tests.rs",
+      "kind": "new",
+      "bytes": 6409,
+      "sha256": "156c5d2100180b1081355efba921930bde4baf88790da026d7da2183789c5f9a",
+      "baseline_sha256": null
+    },
+    {
+      "path": "apps/game-client/runtime/src/native_data_path_tests/guild_rank_ingest_tests.rs",
+      "kind": "new",
+      "bytes": 5396,
+      "sha256": "3233ebf2cd92fe2833ef6bea296e533c51d75140dab6608fbcaa024c6d6cc38a",
+      "baseline_sha256": null
+    },
+    {
+      "path": "apps/gateway/tests/shared_guild_rank_terminal.rs",
+      "kind": "new",
+      "bytes": 9064,
+      "sha256": "4a7847e1df3acea39bb85bf1a7956f09b60f7b8dcee5b287afeb765ed2fbbd0a",
+      "baseline_sha256": null
+    }
+  ],
+  "routingImportedByOnlyTwoForwardCheckedHunks": true,
+  "routingBeforeSha256": "bb838c99429da46e9bd4e051bd86daaeb0e88bb385cc67fe0c9875c9e631d931",
+  "combinedRoutingSha256": "cbcb1e80a610f3e747fc8d2ee246122ac3e14e5ca85451a787621f6802a88c81",
+  "wholeForwardReverseAndDiffCheckPassed": true,
+  "protectedSourcesAndLocksUnchanged": true,
+  "all12RawRunsHashesVerified": true,
+  "rootProductTestsRun": false,
+  "nativeOrNetworkOrHumanAcceptance": false,
+  "servicesOrPlayerSavesChanged": false,
+  "committedOrPublished": false
+}

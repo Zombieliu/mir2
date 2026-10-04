@@ -38,7 +38,7 @@ use mir2_client_bevy::quest_ui::{
 #[cfg(test)]
 use mir2_client_bevy::quest_ui::begin_detail_quest_turn_in;
 use mir2_client_bevy::read_model::UiReadModel;
-use mir2_client_bevy::social::{SocialModel, SocialPendingOperation};
+use mir2_client_bevy::social::{GuildRankRenameRequest, SocialModel, SocialPendingOperation};
 use serde_json::Value;
 
 use crate::gateway::GatewayCommand;
@@ -46,6 +46,9 @@ use crate::input::{
     native_input_trace_enabled, GatewayCommands, NativeKeyboardInput, WorldPointerMovementState,
 };
 use crate::native_protocol::{NativeOutboundCommand, PacketEvent};
+#[cfg(test)]
+#[path = "guild_rank_wire_tests.rs"]
+mod guild_rank_wire_tests;
 use mir2_client_bevy::crystal_ui::notice::{NoticeDialogState, NoticePacketUpdate};
 use mir2_client_bevy::crystal_ui::overlays::{
     NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
@@ -2299,6 +2302,48 @@ fn mail_attachment_indices(inventory: &InventoryModel, ids: &[u64]) -> Option<[u
     Some(indices)
 }
 
+fn queued_guild_rank_rename(
+    intent: &NativePlayerUiIntent,
+    social: Option<&SocialModel>,
+) -> Option<GuildRankRenameRequest> {
+    let NativePlayerUiIntent::GuildEditMember {
+        change_type: 3, rank_index, name, rank_name,
+    } = intent else { return None; };
+    if !name.is_empty() { return None; }
+    social?.pending.iter().find_map(|pending| match pending {
+        SocialPendingOperation::GuildRankRename(request)
+            if request.rank_index == *rank_index && request.rank_name == *rank_name =>
+        {
+            Some(request.clone())
+        }
+        _ => None,
+    })
+}
+
+fn release_unsent_guild_rank_rename(
+    request: &GuildRankRenameRequest,
+    social: Option<&mut SocialModel>,
+    ui: Option<&mut NativePlayerUiState>,
+) {
+    if let Some(social) = social {
+        social.pending.retain(|pending| !matches!(pending,
+            SocialPendingOperation::GuildRankRename(current) if current == request));
+    }
+    if let Some(ui) = ui {
+        if ui.guild_panel.rank_name_submission.as_ref() == Some(request) {
+            ui.guild_panel.rank_name_submission = None;
+            ui.guild_panel.rank_name_ready_ms = 0;
+            ui.guild_panel.rank_name_unconfirmed = ui.guild_panel.now_ms > request.deadline_ms;
+            if ui.selected_guild_rank == Some(request.rank_index)
+                && ui.guild_rank_name_draft == request.rank_name
+            {
+                ui.guild_rank_name_focused = true;
+                ui.guild_panel.rank_editor.editor_focused = true;
+            }
+        }
+    }
+}
+
 pub fn forward_quest_ui_intents(
     shell: Res<NativeShellModel>,
     mut intents: ResMut<QuestUiIntentQueue>,
@@ -2330,6 +2375,13 @@ pub fn forward_quest_ui_intents(
         .map(|mut queue| queue.drain_intents())
         .unwrap_or_default();
     if shell.screen != NativeShellScreen::InGame {
+        for intent in &player_pending {
+            if let Some(request) = queued_guild_rank_rename(intent, social.as_deref()) {
+                release_unsent_guild_rank_rename(
+                    &request, social.as_deref_mut(), player_ui_state.as_deref_mut(),
+                );
+            }
+        }
         if let Some(ui) = player_ui_state.as_deref_mut() {
             ui.social_bonds.invalidate_guild_creation();
             ui.ranking = Default::default();
@@ -2755,6 +2807,22 @@ pub fn forward_quest_ui_intents(
     }
 
     for intent in player_pending {
+        let guild_rank_rename = queued_guild_rank_rename(&intent, social.as_deref());
+        if matches!(&intent, NativePlayerUiIntent::GuildEditMember { change_type: 3, .. }) {
+            let can_dispatch = guild_rank_rename.as_ref().is_some_and(|request|
+                social.as_deref().is_some_and(|social| social.guild.rank_rename_scope_matches(request))
+                    && player_ui_state.as_deref().is_some_and(|ui|
+                        ui.guild_panel.owner_name == request.requester
+                            && ui.guild_panel.now_ms <= request.deadline_ms));
+            if !can_dispatch {
+                if let Some(request) = guild_rank_rename.as_ref() {
+                    release_unsent_guild_rank_rename(
+                        request, social.as_deref_mut(), player_ui_state.as_deref_mut(),
+                    );
+                }
+                continue;
+            }
+        }
         let bond_request = match &intent {
             NativePlayerUiIntent::SocialBondPacket(packet) => Some(packet.clone()),
             _ => None,
@@ -3248,6 +3316,11 @@ pub fn forward_quest_ui_intents(
                 .transport_result(request_id, &spell, key, old_key, sent);
         }
         if !sent {
+            if let Some(request) = guild_rank_rename.as_ref() {
+                release_unsent_guild_rank_rename(
+                    request, social.as_deref_mut(), player_ui_state.as_deref_mut(),
+                );
+            }
             if let Some(notice) = guild_notice_request {
                 if let Some(ui) = player_ui_state.as_deref_mut() {
                     if ui.guild_notice_submission.as_ref() == Some(&notice) {
@@ -3259,25 +3332,18 @@ pub fn forward_quest_ui_intents(
                     social.pending.retain(|p|!matches!(p,mir2_client_bevy::social::SocialPendingOperation::GuildNotice{notice:pending} if pending==&notice));
                 }
             }
-            if let Some((change_type, rank_index, name, rank_name)) = guild_edit_request {
+            if let Some((change_type, rank_index, name, _rank_name)) = guild_edit_request {
                 if let Some(social) = social.as_deref_mut() {
                     social.pending.retain(|p|!matches!(p,mir2_client_bevy::social::SocialPendingOperation::GuildMember{change_type:t,rank_index:i,name:n} if *t==change_type && *i==rank_index && n==&name));
                 }
                 if let Some(ui) = player_ui_state.as_deref_mut() {
-                    ui.guild_panel.create_ready_ms = 0;
+                    if change_type != 3 { ui.guild_panel.create_ready_ms = 0; }
                     match change_type {
                         0 if ui.guild_recruit_draft.is_empty() => {
                             ui.guild_recruit_draft = name;
                             ui.guild_recruit_focused = true;
                             let draft = ui.guild_recruit_draft.clone();
                             ui.guild_panel.sync_recruit(&draft);
-                        }
-                        3 if ui.selected_guild_rank == Some(rank_index)
-                            && ui.guild_rank_name_draft == rank_name =>
-                        {
-                            ui.guild_panel.rank_name_ready_ms = 0;
-                            ui.guild_rank_name_focused = true;
-                            ui.guild_panel.rank_editor.editor_focused = true;
                         }
                         5 => ui.guild_panel.rank_option_ready_ms = 0,
                         _ => {}

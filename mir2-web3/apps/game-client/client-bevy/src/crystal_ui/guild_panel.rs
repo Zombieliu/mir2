@@ -1,5 +1,8 @@
 use super::*;
 use guild_buff_dialog::*;
+#[cfg(test)]
+#[path = "guild_rank_flow_tests.rs"]
+mod guild_rank_flow_tests;
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct GuildPanelUi {
     pub buffs: GuildBuffDialog,
@@ -15,6 +18,8 @@ pub struct GuildPanelUi {
     pub rank_dropdown: bool,
     pub rank_scroll: usize,
     pub rank_name_ready_ms: u64,
+    pub rank_name_submission: Option<crate::social::GuildRankRenameRequest>,
+    pub rank_name_unconfirmed: bool,
     pub rank_option_ready_ms: u64,
     pub now_ms: u64,
     pub cursor: Option<Vec2>,
@@ -149,7 +154,7 @@ pub(super) fn process(
     mut state: ResMut<NativePlayerUiState>,
     mut host: ResMut<GuildHost>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
-    social: Res<crate::social::SocialModel>,
+    mut social: ResMut<crate::social::SocialModel>,
     time: Option<Res<Time>>,
     ui: Option<Res<crate::read_model::UiReadModel>>,
     shell: Option<Res<NativeShellModel>>,
@@ -162,10 +167,9 @@ pub(super) fn process(
         &bevy::text::TextLayoutInfo,
     )>,
 ) {
-    if let Some(ui) = ui {
-        state.guild_panel.owner_name = ui.player.name.clone().unwrap_or_default();
-    }
-    state.guild_panel.now_ms = time.map_or(0, |t| t.elapsed().as_millis() as u64);
+    let now_ms = time.map_or(0, |t| t.elapsed().as_millis() as u64);
+    state.guild_panel.now_ms = now_ms;
+    reconcile_rank_rename_editor(&mut state, &mut social);
     host.buff_hover = None;
     state.guild_panel.cursor = None;
     state.guild_panel.left_down = false;
@@ -191,6 +195,10 @@ pub(super) fn process(
             state.guild_recruit_draft.clear();
         }
         state.guild_panel.guild_name = social.guild.name.clone();
+    }
+    state.guild_panel.now_ms = now_ms;
+    if let Some(ui) = ui {
+        state.guild_panel.owner_name = ui.player.name.clone().unwrap_or_default();
     }
     if let Some(name) = social.guild.pending_invite_from.as_ref() {
         let identity = (name.clone(), social.guild.pending_invite_epoch);
@@ -391,11 +399,7 @@ pub(super) fn process(
         let local = cursor - Vec2::new(rect.left + 42., rect.top + 96.);
         if mouse.just_pressed(MouseButton::Left) {
             let focus = CrystalRect::new(0., 0., 130., 16.).contains(local.x, local.y)
-                && state
-                    .selected_guild_rank
-                    .is_some_and(|r| i32::from(r) >= social.guild.my_rank_id)
-                && social_has_permission(&social.guild, "changeRank")
-                && state.guild_panel.now_ms >= state.guild_panel.rank_name_ready_ms;
+                && rank_name_available(&state, &social.guild);
             state.guild_rank_name_focused = focus;
             state.guild_panel.rank_editor.editor_focused = focus;
             host.selection = focus;
@@ -817,34 +821,77 @@ pub(super) fn render_error(
     });
 }
 
+pub(super) fn rank_name_available(
+    state: &NativePlayerUiState,
+    guild: &crate::social::GuildModel,
+) -> bool {
+    state.selected_guild_rank.is_some_and(|index| {
+        guild.ranks.iter().any(|rank| rank.index == i32::from(index))
+            && guild.my_rank_id >= 0
+            && i32::from(index) >= guild.my_rank_id
+    }) && social_has_permission(guild, "changeRank")
+        && (state.guild_panel.rank_name_ready_ms == 0
+            || state.guild_panel.now_ms > state.guild_panel.rank_name_ready_ms)
+}
+
+/// This runs while hidden too. Only the dedicated rename key has a timeout.
+pub(super) fn reconcile_rank_rename_editor(
+    state: &mut NativePlayerUiState,
+    social: &mut crate::social::SocialModel,
+) {
+    if let Some(request) = state.guild_panel.rank_name_submission.clone() {
+        let pending = social.pending.contains(
+            &crate::social::SocialPendingOperation::GuildRankRename(request.clone()),
+        );
+        let current_scope = social.guild.rank_rename_scope_matches(&request);
+        // In the ordinary path only exact status-7 reconciliation can retire
+        // this key before its deadline. Scope/reset and local send failure are
+        // handled separately; this releases an editor, never grants success.
+        if !current_scope || !pending || state.guild_panel.now_ms > request.deadline_ms {
+            let expired = current_scope && pending && state.guild_panel.now_ms > request.deadline_ms;
+            state.guild_panel.rank_name_submission = None;
+            state.guild_panel.rank_name_ready_ms = 0;
+            state.guild_panel.rank_name_unconfirmed = expired;
+            if current_scope && !pending
+                && state.selected_guild_rank == Some(request.rank_index)
+                && state.guild_rank_name_draft == request.rank_name
+            {
+                if let Some(rank) = social.guild.ranks.iter()
+                    .find(|rank| rank.index == i32::from(request.rank_index))
+                {
+                    state.guild_rank_name_draft = rank.name.clone();
+                }
+            }
+        }
+    }
+    social.expire_guild_rank_renames(state.guild_panel.now_ms);
+}
+
 pub(super) fn save_rank_name(
     state: &mut NativePlayerUiState,
     social: &mut crate::social::SocialModel,
     intents: &mut NativePlayerUiIntentQueue,
 ) {
+    reconcile_rank_rename_editor(state, social);
     let Some(rank_index) = state.selected_guild_rank else {
         return;
     };
-    if i32::from(rank_index) < social.guild.my_rank_id
-        || !social_has_permission(&social.guild, "changeRank")
-        || state.guild_panel.now_ms < state.guild_panel.rank_name_ready_ms
-    {
+    if !rank_name_available(state, &social.guild) {
         return;
     }
     let name = state.guild_rank_name_draft.clone();
-    if name.is_empty() || name.encode_utf16().count() > 20 {
+    let Some(deadline_ms) = state.guild_panel.now_ms.checked_add(5000) else {
         return;
-    }
-    if intents.push_social_pending(
-        social,
-        NativePlayerUiIntent::GuildEditMember {
-            change_type: 3,
-            rank_index,
-            name: String::new(),
-            rank_name: name,
-        },
-    ) {
-        state.guild_panel.rank_name_ready_ms = state.guild_panel.now_ms + 5000;
+    };
+    let Some(request) = social.guild_rank_rename_request(
+        &state.guild_panel.owner_name, rank_index, &name, deadline_ms,
+    ) else {
+        return;
+    };
+    if intents.push_guild_rank_rename_pending(social, request.clone()) {
+        state.guild_panel.rank_name_submission = Some(request);
+        state.guild_panel.rank_name_ready_ms = deadline_ms;
+        state.guild_panel.rank_name_unconfirmed = false;
         state.guild_rank_name_focused = false;
         state.guild_panel.rank_editor.editor_focused = false;
     }
@@ -889,8 +936,9 @@ mod tests {
     #[test]
     fn rank_rename_uses_type_three_and_cannot_edit_a_senior_rank() {
         let mut state = NativePlayerUiState::default();
-        let mut social = crate::social::SocialModel::default();
+        let mut social = crate::social::guild_rank_native_tests::seeded(1);
         let mut queue = NativePlayerUiIntentQueue::default();
+        state.guild_panel.owner_name = "Officer".into();
         social.guild.permissions = vec!["changeRank".into()];
         social.guild.my_rank_id = 1;
         state.selected_guild_rank = Some(0);

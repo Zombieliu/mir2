@@ -1,5 +1,17 @@
 # Windows 原生可玩闭环验收清单
 
+> 2026-10-05 root integrates the eleven-file native Guild rank-rename slice
+> after P3/source513eb83, applying only two Gateway terminal hunks. Source7
+> merges its actual nested rank, retires exact current editor context, and is
+> preserved before canonical255; hidden strict5s timeout and unsent/stale cleanup
+> are checked. Root83 client/4 wire/4 FIFO/3 terminal/9 P3 checks pass, overlapping
+> retained worker checks; one existing GPU case stays ignored. Native clicks,
+> self/AOI labels, no-nonce ABA, paired network/build/rollout and fullP5 stay open.
+> Protected authority/native queue/schemas/locks and R18 artifacts are unchanged.
+> [Scope](NATIVE-GUILD-RANK-RENAME-20261005.md),
+> [root evidence](generated/player-qa/guild-rank-native-20261005/README.md).
+
+
 > 2026-10-05 exact frozen R18/source321316 completes one isolated prepared
 > ordinary-protocol run. Wizard/Taoist actual natural Death and valid dead Magic
 > inputs retain absolute MP541/260, items and life/position; normal LogOut and
