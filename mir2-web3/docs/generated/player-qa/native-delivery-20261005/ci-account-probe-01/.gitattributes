@@ -1,0 +1,3 @@
+* -text -diff
+**/* -text -diff
+README.md text eol=lf diff

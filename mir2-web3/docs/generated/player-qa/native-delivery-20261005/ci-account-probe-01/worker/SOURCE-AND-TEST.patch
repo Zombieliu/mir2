@@ -1,0 +1,53 @@
+--- a/cloudflare_read_authority_probe.py
++++ b/cloudflare_read_authority_probe.py
+@@ -1,5 +1,5 @@
+ #!/usr/bin/env python3
+-"""Fixed two-GET read-only Cloudflare probe; no raw credential/response logging.
++"""Fixed account-token two-GET read-only Cloudflare probe; no raw credential/response logging.
+ 
+ Only the opaque CI invocation reads the two named environment variables. Success
+ proves active token and readable known-bucket metadata, never upload/Worker edit.
+@@ -21,7 +21,7 @@
+ PORT = 443
+ ACCOUNT = '85bf64d86ea9221e172d26feba9fd47e'
+ BUCKET = 'mir2-web3-assets'
+-VERIFY_PATH = '/client/v4/user/tokens/verify'
++VERIFY_PATH = '/client/v4/accounts/' + ACCOUNT + '/tokens/verify'
+ BUCKET_PATH = '/client/v4/accounts/' + ACCOUNT + '/r2/buckets/' + BUCKET
+ ALLOWED_PATHS = (VERIFY_PATH, BUCKET_PATH)
+ TIMEOUT_SECONDS = 10
+--- a/test_cloudflare_read_authority_probe.py
++++ b/test_cloudflare_read_authority_probe.py
+@@ -127,6 +127,32 @@
+         if receipt.exists() and receipt.is_file() and result['receipt_status'] == 'written':
+             self.assertEqual(P.canonical(result), receipt.read_bytes())
+         return code, result, transport
++
++    def test_account_verify_literal_fixed_path_and_no_user_fallback(self):
++        literal_verify = '/client/v4/accounts/85bf64d86ea9221e172d26feba9fd47e/tokens/verify'
++        literal_bucket = '/client/v4/accounts/85bf64d86ea9221e172d26feba9fd47e/r2/buckets/mir2-web3-assets'
++        self.assertEqual(P.VERIFY_PATH, literal_verify)
++        self.assertEqual(P.BUCKET_PATH, literal_bucket)
++        self.assertEqual(P.ALLOWED_PATHS, (literal_verify, literal_bucket))
++        transport = QueueTransport()
++        result = P.probe(ENV, transport)
++        self.safe(result)
++        self.assertTrue(result['passed'])
++        self.assertEqual(transport.calls, [(literal_verify, MOCK_TOKEN), (literal_bucket, MOCK_TOKEN)])
++        self.assertEqual(result['scope']['verify_path'], literal_verify)
++        denied = QueueTransport([(401, b'not parsed ' + MOCK_TOKEN.encode())])
++        result = P.probe(ENV, denied)
++        self.safe(result)
++        self.assertFalse(result['passed'])
++        self.assertEqual(result['result'], 'http_error')
++        self.assertEqual(result['verify_http_status'], 401)
++        self.assertEqual(denied.calls, [(literal_verify, MOCK_TOKEN)])
++        self.assertIsNone(result['bucket_http_status'])
++        with patch.object(P.http.client, 'HTTPSConnection') as connection:
++            with self.assertRaises(P.SafeFailure) as failure:
++                P.FixedHttpsTransport().get('/client/v4/user/tokens/verify', MOCK_TOKEN)
++        self.assertEqual(failure.exception.code, P.Code.INTERNAL_ERROR)
++        connection.assert_not_called()
+ 
+     def test_active_and_known_bucket_two_gets_only_success_never_claims_write(self):
+         transport = QueueTransport()

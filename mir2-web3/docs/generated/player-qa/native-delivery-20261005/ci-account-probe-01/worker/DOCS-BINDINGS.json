@@ -1,0 +1,28 @@
+{
+  "accountVerify": {
+    "locations": {
+      "endpoint": 3975,
+      "fullBaseExample": 4063,
+      "result": 4029,
+      "status": 4037,
+      "success": 4026
+    },
+    "observations": [
+      "Account-token verification is a GET at the account-scoped tokens/verify resource under client/v4.",
+      "Successful response exposes status active, disabled or expired inside result.",
+      "Implementation requires success to be the boolean true and status exactly active; no token identifier or response body is emitted."
+    ],
+    "url": "https://developers.cloudflare.com/api/resources/accounts/subresources/tokens/methods/verify/"
+  },
+  "bucketGet": {
+    "binding": "unchanged original frozen DOCS-BINDINGS.json",
+    "originalSha256": "5194668c36a3c9c5549346e975f0638c746f46f06c805b86133b2b167df48c14",
+    "url": "https://developers.cloudflare.com/api/resources/r2/subresources/buckets/methods/get/"
+  },
+  "checkedDate": "2026-10-05",
+  "interpretationLimits": [
+    "User-token verification HTTP401 alone does not establish token expiry or the type of the supplied token.",
+    "Neither verification success nor known-bucket read proves R2 write, Worker edit or deployment authority."
+  ],
+  "method": "public official documentation only; no authenticated API request"
+}

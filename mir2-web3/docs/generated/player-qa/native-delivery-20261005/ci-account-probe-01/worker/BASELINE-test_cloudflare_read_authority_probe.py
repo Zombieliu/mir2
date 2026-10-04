@@ -128,32 +128,6 @@ class ProbeTests(unittest.TestCase):
             self.assertEqual(P.canonical(result), receipt.read_bytes())
         return code, result, transport
 
-    def test_account_verify_literal_fixed_path_and_no_user_fallback(self):
-        literal_verify = '/client/v4/accounts/85bf64d86ea9221e172d26feba9fd47e/tokens/verify'
-        literal_bucket = '/client/v4/accounts/85bf64d86ea9221e172d26feba9fd47e/r2/buckets/mir2-web3-assets'
-        self.assertEqual(P.VERIFY_PATH, literal_verify)
-        self.assertEqual(P.BUCKET_PATH, literal_bucket)
-        self.assertEqual(P.ALLOWED_PATHS, (literal_verify, literal_bucket))
-        transport = QueueTransport()
-        result = P.probe(ENV, transport)
-        self.safe(result)
-        self.assertTrue(result['passed'])
-        self.assertEqual(transport.calls, [(literal_verify, MOCK_TOKEN), (literal_bucket, MOCK_TOKEN)])
-        self.assertEqual(result['scope']['verify_path'], literal_verify)
-        denied = QueueTransport([(401, b'not parsed ' + MOCK_TOKEN.encode())])
-        result = P.probe(ENV, denied)
-        self.safe(result)
-        self.assertFalse(result['passed'])
-        self.assertEqual(result['result'], 'http_error')
-        self.assertEqual(result['verify_http_status'], 401)
-        self.assertEqual(denied.calls, [(literal_verify, MOCK_TOKEN)])
-        self.assertIsNone(result['bucket_http_status'])
-        with patch.object(P.http.client, 'HTTPSConnection') as connection:
-            with self.assertRaises(P.SafeFailure) as failure:
-                P.FixedHttpsTransport().get('/client/v4/user/tokens/verify', MOCK_TOKEN)
-        self.assertEqual(failure.exception.code, P.Code.INTERNAL_ERROR)
-        connection.assert_not_called()
-
     def test_active_and_known_bucket_two_gets_only_success_never_claims_write(self):
         transport = QueueTransport()
         result = P.probe(ENV, transport)

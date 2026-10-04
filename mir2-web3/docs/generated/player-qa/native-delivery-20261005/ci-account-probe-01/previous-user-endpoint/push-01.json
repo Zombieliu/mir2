@@ -1,0 +1,20 @@
+{
+  "command": [
+    "git",
+    "-c",
+    "gc.auto=0",
+    "-C",
+    "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey",
+    "-c",
+    "core.sshCommand=ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=3",
+    "push",
+    "origin",
+    "25ecb38f6ca9273304ba0f663e8533de71c51a74:refs/heads/codex/crowded-combat-control-20261003"
+  ],
+  "startedUtc": "2026-10-04T22:24:06.792190+00:00",
+  "elapsedSeconds": 5.901533099997323,
+  "exitCode": 0,
+  "targetHead": "25ecb38f6ca9273304ba0f663e8533de71c51a74",
+  "forcePush": false,
+  "persistentGitOrAuthenticationConfigChanged": false
+}

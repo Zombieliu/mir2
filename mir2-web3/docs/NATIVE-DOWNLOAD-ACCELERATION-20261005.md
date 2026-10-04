@@ -11,9 +11,14 @@ sequence12/feed、Candidate、引导器、更新引擎、游戏网关与Caddy没
 当前追加只改变分发文件，R2/CDN仍未部署。已注册Web发布工作流新增显式
 `native_delivery_operation=probe`，原Web任务排除该分支；默认行为保持。
 它以Actions现有不透明凭据进行两个固定只读Cloudflare请求，仅保存安全回执。
-根独立31项fake-transport检查通过，与worker31项重叠；真实close-error RED及
-原始失败保留。实际CI派发和权限仍待验证；读取成功不证明写入/Worker/路由权限。
-[探针与原始证明](generated/player-qa/native-delivery-20261005/ci-authority-probe-01/README.md)。
+第一轮实际CI37240009948在用户令牌验证端点返回401，未请求桶，旧Web任务均
+跳过；该结果不能单独证明令牌过期。随后按官方账户令牌端点固定路径修正，
+仅改变docstring和VERIFY_PATH；根独立32项fake-transport检查通过，与worker
+32项重叠，原31项及新增路径RED均保留。账户端点实际CI尚待执行；读取成功
+也不证明写入/Worker/路由权限。
+[原始探针](generated/player-qa/native-delivery-20261005/ci-authority-probe-01/README.md)、
+[账户端点与实际首轮CI证明](generated/player-qa/native-delivery-20261005/ci-account-probe-01/README.md)、
+[实际原源追加与36对象TLS证明](generated/player-qa/native-delivery-20261005/origin-static-01/README.md)。
 
 下列是此前测量和准备记录；原404结果保留，不再表示追加后的当前原源状态。
 

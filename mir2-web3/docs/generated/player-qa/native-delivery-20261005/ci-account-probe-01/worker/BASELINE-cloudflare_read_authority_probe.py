@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fixed account-token two-GET read-only Cloudflare probe; no raw credential/response logging.
+"""Fixed two-GET read-only Cloudflare probe; no raw credential/response logging.
 
 Only the opaque CI invocation reads the two named environment variables. Success
 proves active token and readable known-bucket metadata, never upload/Worker edit.
@@ -21,7 +21,7 @@ HOST = 'api.cloudflare.com'
 PORT = 443
 ACCOUNT = '85bf64d86ea9221e172d26feba9fd47e'
 BUCKET = 'mir2-web3-assets'
-VERIFY_PATH = '/client/v4/accounts/' + ACCOUNT + '/tokens/verify'
+VERIFY_PATH = '/client/v4/user/tokens/verify'
 BUCKET_PATH = '/client/v4/accounts/' + ACCOUNT + '/r2/buckets/' + BUCKET
 ALLOWED_PATHS = (VERIFY_PATH, BUCKET_PATH)
 TIMEOUT_SECONDS = 10
