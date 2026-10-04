@@ -1,5 +1,12 @@
 # 经典三职业玩法补齐 Goal — 2026-10-04
 
+> 2026-10-05原生下载实测约100 KB/s，R17仍逐文件安装；R2原生入口404。
+> R17的11个资源合包/真实R16差分/CMS与36对象闭包已准备；本机Cloudflare
+> 尚未登录，未stage/promote或做CDN速度验收。实际R17→R18文件更新、删除、
+> 内容缓存、个人文件与完整回滚通过；这是无加速器/无启动的隔离检查。冻结R18
+> 与实际公网R17分别记录，F/玩家存档/游戏网关保持原状。
+> [诊断与边界](NATIVE-DOWNLOAD-ACCELERATION-20261005.md)。
+
 > 2026-10-05 root integrates the six-file shared Guild rank-rename authority
 > Candidate at321316: actual unchanged-source RED2/6 becomes GREEN8/0; direct5
 > and adjacent8 pass,21 unique worker checks. Root independently rechecks5+1

@@ -1,0 +1,9 @@
+   Compiling mir2-windows-updater v1.0.0 (C:\Users\Administrator\.codex\worktrees\u18\mir2-player-journey\mir2-web3\apps\game-client\windows-updater)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.89s
+     Running tests\real_packages.rs (C:/mir2-build/updater-real-r18\debug\deps\real_packages-ce1ffec8f8fd90d2.exe)
+
+running 1 test
+test real_package_delta_preserves_personal_files_and_first_launch_rollback ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 1 filtered out; finished in 913.34s
+

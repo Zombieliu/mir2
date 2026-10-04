@@ -1,0 +1,25 @@
+{"stage": "bundle", "index": 0, "files": 1667, "bytes": 60853297}
+{"stage": "bundle", "index": 1, "files": 3564, "bytes": 58054864}
+{"stage": "bundle", "index": 2, "files": 11380, "bytes": 65945319}
+{"stage": "bundle", "index": 3, "files": 9780, "bytes": 65515198}
+{"stage": "bundle", "index": 4, "files": 23081, "bytes": 58094559}
+{"stage": "bundle", "index": 5, "files": 33996, "bytes": 49934822}
+{"stage": "bundle", "index": 6, "files": 6859, "bytes": 63353851}
+{"stage": "bundle", "index": 7, "files": 14111, "bytes": 60629129}
+{"stage": "bundle", "index": 8, "files": 17248, "bytes": 59469514}
+{"stage": "bundle", "index": 9, "files": 4278, "bytes": 42095227}
+{"stage": "bundle", "index": 10, "files": 1, "bytes": 36243793}
+{"stage": "delta", "baseSha256": "9930C82045DF5E6A25EB7201265090E690200698B18EA526CA5E66173E7C6869", "bytes": 25424169, "operationCount": 21, "copyBytes": 30818900, "literalBytes": 80194476}
+{
+  "schema": "mir2.windows.delivery-build.v1",
+  "passed": true,
+  "cmsVerified": false,
+  "candidate": "WN-CANDIDATE-20261004-invited-17",
+  "gameSourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "manifestSha256": "CEAE366BEBCA1C19C3F529EB22F016CCC80DFF5B8655694E76682E31AB12CB18",
+  "deliverySha256": "A72B61448B342656DDA4310CEB7BA5AFF6608439025775FDE2A8303F6AD62DE8",
+  "payloadFiles": 125965,
+  "payloadBytes": 753611651,
+  "compressedBundleBytes": 620189573,
+  "elapsedSeconds": 160.208
+}

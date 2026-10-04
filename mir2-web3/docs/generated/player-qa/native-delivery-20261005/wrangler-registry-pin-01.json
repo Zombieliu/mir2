@@ -1,0 +1,6 @@
+{
+  "name": "wrangler",
+  "version": "4.147.0",
+  "distIntegrity": "sha512-pQYRoiq8PTAxphaG69z8+GC1DkSGd19EDZehQ8zxjo/Ko3mRB6Qs1mTrd8ZuKAarLklIjTqr1lUdCK9r4q2hUg==",
+  "registry": "https://registry.npmjs.org/wrangler/latest"
+}

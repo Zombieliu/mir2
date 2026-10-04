@@ -1,0 +1,12 @@
+{
+  "exitCode": 1,
+  "accountMatched": false,
+  "http400": false,
+  "oauth": false,
+  "notLoggedIn": true,
+  "errorCodes": [
+    "ERROR"
+  ],
+  "credentialValuesExported": false,
+  "cloudResourcesMutated": false
+}
