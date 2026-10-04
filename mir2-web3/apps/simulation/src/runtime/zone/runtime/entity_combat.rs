@@ -2005,7 +2005,17 @@ impl ZoneRuntime {
         let result = if struck {
             self.apply_native_monster_damage(object_id, damage, None, now)
         } else {
-            self.apply_native_monster_direct_damage(object_id, damage, None, now)
+            self.apply_native_monster_damage_internal(
+                object_id,
+                damage,
+                None,
+                now,
+                NativeMonsterDamageCause::Direct,
+                Some(NativeExperienceActor::Object {
+                    object_id: source_id,
+                    force_owner: false,
+                }),
+            )
         };
         let Some(result) = result else {
             return (0, Vec::new());
@@ -2105,11 +2115,7 @@ impl ZoneRuntime {
         struck_attacker: Option<u32>,
         now: u64,
     ) -> (i32, Vec<ZoneOutbound>) {
-        let (damage, percent, killed, _, _, position, direction, owner, _, _) = result;
-        debug_assert!(
-            owner.is_none(),
-            "unattributed damage never fabricates player credit"
-        );
+        let (damage, percent, killed, name, experience, position, direction, owner, drops, audit) = result;
         let mut packets = Vec::new();
         if let Some(attacker_id) = struck_attacker {
             packets.push(ServerPacket::ObjectStruck {
@@ -2145,12 +2151,28 @@ impl ZoneRuntime {
             });
         }
         self.apply_zone_object_packets(&packets, now);
-        let out = vec![ZoneOutbound::ToMany {
+        let mut out = vec![ZoneOutbound::ToMany {
             session_ids: self.native_monster_combat_recipients(source_id, object_id, &position),
             packets,
         }];
-        // Wild→pet has Master!=null; environmental Struck has no owner.
-        // Existing EXPOwner arbitration is not invented from target/session IDs.
+        // A real Master target has no wild rewards. Environmental Struck may
+        // finish an existing player claim; it never invents one from the source.
+        if killed {
+            out.extend(self.native_monster_kill_outbounds(
+                owner,
+                &position,
+                ZoneMonsterKillAward {
+                    source_receipt_key: None,
+                    experience_selection: None,
+                    monster_object_id: object_id,
+                    killed_at_ms: now,
+                    monster_name: name,
+                    experience,
+                    drops,
+                    boss_audit: audit,
+                },
+            ));
+        }
         (damage, out)
     }
 

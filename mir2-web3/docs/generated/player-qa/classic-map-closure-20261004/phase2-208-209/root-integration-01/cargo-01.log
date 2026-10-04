@@ -1,0 +1,31 @@
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.45
+   Compiling serde_core v1.0.228
+   Compiling syn v2.0.117
+   Compiling serde v1.0.228
+   Compiling memchr v2.8.0
+   Compiling serde_derive v1.0.228
+   Compiling serde_json v1.0.149
+   Compiling mir2-protocol v0.1.0 (C:\Users\Administrator\.codex\worktrees\crowded-combat-control\mir2-player-journey\mir2-web3\packages\protocol)
+   Compiling mir2-game-data v0.1.0 (C:\Users\Administrator\.codex\worktrees\crowded-combat-control\mir2-player-journey\mir2-web3\packages\game-data)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 12.25s
+     Running tests\classic_native_resource_scope.rs (C:/mir2-build/gateway-tests-r49\debug\deps\classic_native_resource_scope-ee9be869c457f7d5.exe)
+
+running 5 tests
+test another_unreachable_runtime_branch_still_fails ... ok
+test classic_runtime_has_208_maps_and_the_209th_room_is_resource_only ... ok
+test metadata_and_summary_are_defaulted_for_older_json_consumers ... ok
+test only_the_canonical_named_resource_room_is_allowed ... ok
+test resource_only_room_does_not_bypass_the_original_runtime_reachability_error ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.91s
+
+     Running tests\platinum_176_content_loop.rs (C:/mir2-build/gateway-tests-r49\debug\deps\platinum_176_content_loop-d490eb725800a79c.exe)
+
+running 3 tests
+test platinum_176_levels_22_to_35_have_core_skills_gear_and_boss_sources ... ok
+test platinum_176_levels_36_to_50_have_endgame_boss_and_equipment_sources ... ok
+test platinum_176_levels_8_to_21_have_a_complete_natural_product_loop ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.43s
+

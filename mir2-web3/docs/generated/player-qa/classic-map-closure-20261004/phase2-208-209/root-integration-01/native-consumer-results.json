@@ -1,0 +1,18 @@
+{
+  "command": [
+    "cargo",
+    "+1.95.0",
+    "check",
+    "-p",
+    "mir2-client-bevy",
+    "-p",
+    "mir2-platform-windows"
+  ],
+  "exitCode": 101,
+  "log": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\root-integration-01\\native-consumer-01.log",
+  "bytes": 78,
+  "sha256": "105bed7728fd89d037244f6598a09d65c353bd4db746ee33d4ffbf2463ca1eaf",
+  "createdUtc": "2026-10-04T07:08:22.982552+00:00",
+  "targetDir": "C:/mir2-build/platform-windows-r33-tests",
+  "buildJobs": 2
+}

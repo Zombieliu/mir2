@@ -47,6 +47,8 @@ use crate::runtime::map_events::{
 
 pub(super) mod armadillo_ai;
 mod checkpoint;
+mod experience_ownership;
+use experience_ownership::{apply_native_experience_impact, NativeExperienceActor};
 pub(super) mod town_archer_ai;
 use town_archer_ai::*;
 pub(super) mod great_fox_ai;
@@ -409,6 +411,9 @@ struct PendingNativeMonsterHit {
     attacker_object_id: u32,
     object_id: u32,
     damage: i32,
+    /// Successful TurnUndead replaces EXPOwner at impact, unlike an ordinary hit.
+    #[serde(default, skip_serializing_if = "experience_owner_flag_is_false")]
+    force_experience_owner: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     fire_bounce: Option<PendingNativeFireBounce>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -420,6 +425,10 @@ struct PendingNativeMonsterHit {
     /// committed HP mutation.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     journey_event: Option<ZoneJourneyEventReceipt>,
+}
+
+fn experience_owner_flag_is_false(value: &bool) -> bool {
+    !*value
 }
 
 type NativeMonsterDamageResult = (
@@ -1985,6 +1994,7 @@ impl ZoneRuntime {
     }
 
     pub fn tick(&mut self, now_ms: u64) -> Vec<ZoneOutbound> {
+        self.expire_native_experience_owners(now_ms);
         let sessions = self.players.keys().cloned().collect::<Vec<_>>();
         let mut outbounds = Vec::new();
         for session_id in sessions {
@@ -2442,6 +2452,7 @@ impl ZoneRuntime {
         }
 
         let object_id = self.unique_object_id(join.object_id);
+        self.revoke_same_map_experience_owner_on_join(&join.session_id, object_id);
         let requested_position = join.position.clone();
         let requested_direction = join.direction;
         join.position = self.first_available_position(join.position.clone(), None);
@@ -4115,6 +4126,7 @@ impl ZoneRuntime {
                     resolved_damage
                 };
             self.pending_native_hits.push(PendingNativeMonsterHit {
+                force_experience_owner: false,
                 ready_at_ms: if attack_spell == Spell::TwinDrakeBlade {
                     now_ms.saturating_add(300)
                 } else {
@@ -4141,6 +4153,7 @@ impl ZoneRuntime {
             });
             if attack_spell == Spell::TwinDrakeBlade {
                 self.pending_native_hits.push(PendingNativeMonsterHit {
+                    force_experience_owner: false,
                     ready_at_ms: now_ms.saturating_add(400),
                     session_id: session_id.clone(),
                     attacker_object_id: player.object_id,
@@ -4257,6 +4270,7 @@ impl ZoneRuntime {
                     hit,
                 ) {
                     self.pending_native_hits.push(PendingNativeMonsterHit {
+                        force_experience_owner: false,
                         ready_at_ms: if secondary
                             && matches!(spell, Spell::HalfMoon | Spell::CrossHalfMoon)
                         {
@@ -4731,6 +4745,7 @@ impl ZoneRuntime {
             zone_resolve_player_physical_attack(&player, &monster, object_id, damage, now_ms)
         {
             self.pending_native_hits.push(PendingNativeMonsterHit {
+                force_experience_owner: false,
                 ready_at_ms: now_ms,
                 session_id: session_id.clone(),
                 attacker_object_id: player.object_id,
@@ -5229,6 +5244,9 @@ impl ZoneRuntime {
                     )
                 };
                 self.pending_native_hits.push(PendingNativeMonsterHit {
+                    force_experience_owner: spell == Spell::TurnUndead
+                        && hit_damage > 0
+                        && hit_damage >= hit_monster.hp,
                     ready_at_ms: now_ms,
                     session_id: session_id.clone(),
                     attacker_object_id: player.object_id,
@@ -7155,6 +7173,7 @@ impl ZoneRuntime {
         .unwrap_or_default()
         .saturating_mul(50);
         self.pending_native_hits.push(PendingNativeMonsterHit {
+            force_experience_owner: false,
             ready_at_ms: now_ms
                 .saturating_add(ZONE_FIRE_BOUNCE_INITIAL_DELAY_MS)
                 .saturating_add(travel_ms),
@@ -7900,6 +7919,7 @@ impl ZoneRuntime {
                 })
                 .flatten();
             self.pending_native_hits.push(PendingNativeMonsterHit {
+                force_experience_owner: false,
                 ready_at_ms: now_ms.saturating_add(500),
                 session_id: session_id.clone(),
                 attacker_object_id: player.object_id,
@@ -8005,6 +8025,7 @@ impl ZoneRuntime {
             });
         } else if let Some(object_id) = pushed_object_id {
             self.pending_native_hits.push(PendingNativeMonsterHit {
+                force_experience_owner: false,
                 ready_at_ms: now_ms,
                 session_id: session_id.clone(),
                 attacker_object_id: player.object_id,
@@ -8607,6 +8628,7 @@ impl ZoneRuntime {
                 );
                 outbounds.extend(self.resolve_pending_native_monster_hit(
                     PendingNativeMonsterHit {
+                        force_experience_owner: false,
                         ready_at_ms: now_ms,
                         session_id: action.caster_session_id.clone(),
                         attacker_object_id: caster.object_id,
@@ -8899,6 +8921,7 @@ impl ZoneRuntime {
             );
             outbounds.extend(self.resolve_pending_native_monster_hit(
                 PendingNativeMonsterHit {
+                    force_experience_owner: false,
                     ready_at_ms: now_ms,
                     session_id: action.caster_session_id.clone(),
                     attacker_object_id: caster.object_id,
@@ -9415,7 +9438,14 @@ impl ZoneRuntime {
             reward_owner_session_id,
             drops,
             boss_audit,
-        )) = self.apply_native_monster_damage(object_id, damage, owner_session_id.as_ref(), now_ms)
+        )) = self.apply_native_monster_damage_internal(
+            object_id,
+            damage,
+            owner_session_id.as_ref(),
+            now_ms,
+            NativeMonsterDamageCause::Indirect,
+            Some(NativeExperienceActor::PeriodicPoison { owner_object_id }),
+        )
         else {
             return Vec::new();
         };
@@ -9636,6 +9666,7 @@ impl ZoneRuntime {
                             });
                         outbounds.extend(self.resolve_pending_native_monster_hit(
                             PendingNativeMonsterHit {
+                                force_experience_owner: false,
                                 ready_at_ms: now_ms,
                                 session_id: action.caster_session_id.clone(),
                                 attacker_object_id: action.caster_object_id,
@@ -9859,11 +9890,16 @@ impl ZoneRuntime {
             reward_owner_session_id,
             drops,
             boss_audit,
-        )) = self.apply_native_monster_direct_damage(
+        )) = self.apply_native_monster_damage_internal(
             hit.object_id,
             resolved_hit_damage,
             Some(&hit.session_id),
             now_ms,
+            NativeMonsterDamageCause::Direct,
+            Some(NativeExperienceActor::Object {
+                object_id: hit.attacker_object_id,
+                force_owner: hit.force_experience_owner,
+            }),
         )
         else {
             return Vec::new();
@@ -9966,29 +10002,9 @@ impl ZoneRuntime {
         }
 
         if killed {
-            let reward_owner_session_id =
-                reward_owner_session_id.unwrap_or_else(|| hit.session_id.clone());
-            let drop_owner_object_id = self
-                .players
-                .get(&reward_owner_session_id)
-                .map(|player| player.object_id)
-                .unwrap_or_else(|| {
-                    self.native_monsters
-                        .get(&hit.attacker_object_id)
-                        .filter(|monster| zone_native_summon_owner_player_object_id(monster) != 0)
-                        .map(zone_native_summon_owner_player_object_id)
-                        .unwrap_or(hit.attacker_object_id)
-                });
-            let spawned_drops = self.spawn_native_monster_drops(
-                &monster_name,
+            outbounds.extend(self.native_monster_kill_outbounds(
+                reward_owner_session_id,
                 &position,
-                drop_owner_object_id,
-                drops,
-                now_ms,
-            );
-            outbounds.extend(self.diff_all_zone_object_visibility());
-            outbounds.extend(self.group_monster_kill_awards(
-                &reward_owner_session_id,
                 ZoneMonsterKillAward {
                     source_receipt_key: None,
                     experience_selection: None,
@@ -9996,7 +10012,7 @@ impl ZoneRuntime {
                     killed_at_ms: now_ms,
                     monster_name,
                     experience,
-                    drops: spawned_drops,
+                    drops,
                     boss_audit,
                 },
             ));
@@ -10138,6 +10154,7 @@ impl ZoneRuntime {
             .unwrap_or_default()
             .saturating_mul(50);
         self.pending_native_hits.push(PendingNativeMonsterHit {
+            force_experience_owner: false,
             ready_at_ms: now_ms.saturating_add(travel_ms),
             session_id: hit.session_id.clone(),
             attacker_object_id: hit.attacker_object_id,
@@ -10155,9 +10172,10 @@ impl ZoneRuntime {
 
     /// Split one authoritative monster reward across the killer's eligible
     /// group without creating or losing base experience. A group member must
-    /// still be present in this map-owned zone and alive when the monster dies;
-    /// offline, cross-map, and dead members receive neither experience nor
-    /// quest-kill credit. The deterministic remainder goes to the killer when
+    /// still be present in this map-owned zone. Dead grouped members receive
+    /// no reward; a spawned dead solo EXPOwner retains Crystal's kill credit.
+    /// Offline/cross-map references require the manager follow-up. The
+    /// deterministic remainder goes to the killer when
     /// eligible, otherwise to the first eligible session.
     fn group_monster_kill_awards(
         &self,
@@ -10172,10 +10190,12 @@ impl ZoneRuntime {
             .players
             .iter()
             .filter_map(|(session_id, player)| {
-                if player.dead || player.hp <= 0 {
+                let is_owner = session_id == owner_session_id;
+                if (player.dead || player.hp <= 0)
+                    && !(is_owner && owner_group_members.is_empty())
+                {
                     return None;
                 }
-                let is_owner = session_id == owner_session_id;
                 let is_named_group_member = owner_group_members
                     .iter()
                     .any(|name| name.eq_ignore_ascii_case(&player.name));
@@ -10537,6 +10557,7 @@ impl ZoneRuntime {
             let damage = zone_apply_melee_skill_damage(Spell::CounterAttack, level, base_damage);
             if damage > 0 {
                 self.pending_native_hits.push(PendingNativeMonsterHit {
+                    force_experience_owner: false,
                     ready_at_ms: now_ms.saturating_add(300),
                     session_id: target_session_id.clone(),
                     attacker_object_id: player.object_id,
@@ -11186,6 +11207,7 @@ impl ZoneRuntime {
         for target_object_id in target_object_ids {
             outbounds.extend(self.resolve_pending_native_monster_hit(
                 PendingNativeMonsterHit {
+                    force_experience_owner: false,
                     ready_at_ms: now_ms,
                     session_id: owner_session_id.clone(),
                     attacker_object_id: object_id,
@@ -11915,6 +11937,7 @@ impl ZoneRuntime {
             })
             .flatten();
         self.pending_native_hits.push(PendingNativeMonsterHit {
+            force_experience_owner: false,
             ready_at_ms: now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS),
             session_id: owner_session_id.clone(),
             attacker_object_id: object_id,
@@ -12008,6 +12031,7 @@ impl ZoneRuntime {
                 })
                 .flatten();
             self.pending_native_hits.push(PendingNativeMonsterHit {
+                force_experience_owner: false,
                 ready_at_ms: now_ms.saturating_add(hit_delay_ms),
                 session_id: owner_session_id.clone(),
                 attacker_object_id: object_id,
@@ -12250,6 +12274,7 @@ impl ZoneRuntime {
             attacker_session_id,
             now_ms,
             NativeMonsterDamageCause::Indirect,
+            None,
         )
     }
 
@@ -12266,6 +12291,7 @@ impl ZoneRuntime {
             attacker_session_id,
             now_ms,
             NativeMonsterDamageCause::Direct,
+            None,
         )
     }
 
@@ -12282,6 +12308,7 @@ impl ZoneRuntime {
             attacker_session_id,
             now_ms,
             NativeMonsterDamageCause::Repulsion,
+            None,
         )
     }
 
@@ -12298,6 +12325,7 @@ impl ZoneRuntime {
             owner,
             now_ms,
             NativeMonsterDamageCause::ScriptedDeath,
+            None,
         )
     }
 
@@ -12308,9 +12336,12 @@ impl ZoneRuntime {
         attacker_session_id: Option<&SessionId>,
         now_ms: u64,
         cause: NativeMonsterDamageCause,
+        actor: Option<NativeExperienceActor>,
     ) -> Option<NativeMonsterDamageResult> {
         let managed_conquest=self.conquest_is_defense(object_id);
         if managed_conquest && !self.conquest_defense_accepts_damage(object_id,attacker_session_id,now_ms) {return None;}
+        let experience_impact =
+            self.native_experience_impact(object_id, attacker_session_id, actor, now_ms);
         let (
             damage,
             health_percent,
@@ -12345,6 +12376,14 @@ impl ZoneRuntime {
             }
 
             let damage = damage.max(0).min(monster.hp);
+            // ProcessPoison claims/renews before PoisonDamage, even for a
+            // zero-value tick. Direct zero/rejected hits never claim. Existing
+            // public green-poison producers normalize values to at least one.
+            if damage > 0
+                || matches!(actor, Some(NativeExperienceActor::PeriodicPoison { .. }))
+            {
+                apply_native_experience_impact(monster, experience_impact, now_ms);
+            }
             let is_boss = crystal_monster_by_name(&monster.name)
                 .is_some_and(|template| template.is_boss)
                 || platinum_176_monster_is_boss(&monster.name);
@@ -12425,20 +12464,28 @@ impl ZoneRuntime {
                 respawn.due_at_ms = respawn.spawn.respawn.map(|policy| policy.due_at_ms(now_ms));
             }
         }
-        let reward_owner_session_id =
-            killed
-                .then(|| attacker_session_id.cloned())
-                .flatten()
-                .map(|last_hit_session_id| {
-                    if is_boss {
-                        self.boss_reward_owner(
-                            &last_hit_session_id,
-                            contributions.as_ref().expect("Boss contributions captured"),
-                        )
-                    } else {
-                        last_hit_session_id
-                    }
-                });
+        let has_master = self.native_monsters.get(&object_id)
+            .is_some_and(|m| m.master_object_id != 0 || m.owner_session_id.is_some());
+        let reward_owner_session_id = if killed && !has_master {
+            if is_boss {
+                // Existing contribution policy is deliberately unchanged. It
+                // remains a separate generic Crystal Boss parity gate.
+                attacker_session_id.map(|last_hit| {
+                    self.boss_reward_owner(
+                        last_hit,
+                        contributions.as_ref().expect("Boss contributions captured"),
+                    )
+                })
+            } else {
+                self.native_experience_reward_owner(object_id, now_ms)
+            }
+        } else {
+            None
+        };
+        if killed && has_master {
+            experience = 0;
+            drops.clear();
+        }
         if killed {
             let bonus = reward_owner_session_id.as_ref()
                 .and_then(|owner| self.players.get(owner))

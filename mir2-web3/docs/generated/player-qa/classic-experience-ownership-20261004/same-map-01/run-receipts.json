@@ -1,0 +1,1306 @@
+{
+  "captured_at_utc": "2026-10-04T07:04:32.132831+00:00",
+  "evidence_kind": "public trusted Zone command fixtures and scoped existing tests",
+  "native_or_live_network_acceptance": false,
+  "human_acceptance": false,
+  "full_suite_clean": false,
+  "old_baseline_failure_retained": true,
+  "raw_logs_are_not_overwritten": true,
+  "commands_are_normalized_replays": true,
+  "runs": [
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-red-01-20261004.log",
+      "log_sha256": "28298ffa07ec96f009e3b526f73ea8867a3c1c3714674497a87b92cfb8e34af2",
+      "log_bytes": 35247,
+      "log_mtime_utc": "2026-10-04T04:53:34.715415+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "pre-implementation red",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_monster_ownership",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running tests\\shared_monster_ownership.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_ownership-165e2a28bc2606fb.exe)",
+          "result": "FAILED",
+          "passed": 5,
+          "failed": 11,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.11s",
+          "result_line": "test result: FAILED. 5 passed; 11 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s"
+        }
+      ],
+      "observed_passed": 5,
+      "observed_failed": 11,
+      "observed_failed_test_names": [
+        "armour_rejected_direct_hit_never_claims_or_renews",
+        "authenticated_checkpoint_retains_owner_without_extending_deadline",
+        "checkpoint_exp_owner_tampering_cannot_bypass_root_authentication",
+        "exact_five_second_deadline_keeps_original_owner",
+        "first_effective_player_hit_retains_exp_quest_and_drop_credit_on_rival_kill",
+        "owned_summon_first_hit_keeps_master_credit_and_actual_pet_attacker_id",
+        "pet_outside_sixteen_tile_master_range_clears_credit_without_losing_damage",
+        "pet_with_master_sixteen_tiles_away_cannot_steal_rival_claim",
+        "rival_periodic_poison_does_not_steal_living_melee_owner",
+        "same_owner_effective_hit_renews_five_seconds",
+        "solo_dead_poison_owner_keeps_source_kill_credit"
+      ],
+      "expected_cargo_exit_success": false,
+      "note": "One armour fixture used the already-resolved fallback scalar; its failure is not production armour evidence. Original failure remains retained."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-red-02-20261004.log",
+      "log_sha256": "d16642c5f84c92ea0d98446a1d2837aa6d2923ccc6b9c8fab15247bba2d2c6e8",
+      "log_bytes": 34692,
+      "log_mtime_utc": "2026-10-04T04:57:53.111001+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "corrected-fixture semantic red",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_monster_ownership",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running tests\\shared_monster_ownership.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_ownership-165e2a28bc2606fb.exe)",
+          "result": "FAILED",
+          "passed": 6,
+          "failed": 10,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.10s",
+          "result_line": "test result: FAILED. 6 passed; 10 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s"
+        }
+      ],
+      "observed_passed": 6,
+      "observed_failed": 10,
+      "observed_failed_test_names": [
+        "authenticated_checkpoint_retains_owner_without_extending_deadline",
+        "checkpoint_exp_owner_tampering_cannot_bypass_root_authentication",
+        "exact_five_second_deadline_keeps_original_owner",
+        "first_effective_player_hit_retains_exp_quest_and_drop_credit_on_rival_kill",
+        "owned_summon_first_hit_keeps_master_credit_and_actual_pet_attacker_id",
+        "pet_outside_sixteen_tile_master_range_clears_credit_without_losing_damage",
+        "pet_with_master_sixteen_tiles_away_cannot_steal_rival_claim",
+        "rival_periodic_poison_does_not_steal_living_melee_owner",
+        "same_owner_effective_hit_renews_five_seconds",
+        "solo_dead_poison_owner_keeps_source_kill_credit"
+      ],
+      "expected_cargo_exit_success": false,
+      "note": "Production ownership wiring still unchanged. Authoritative DC/AC fixture correction only; ten genuine semantic failures."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-environment-red-03-20261004.log",
+      "log_sha256": "6dc0bdeda56f77c1a373615396f99c8200886ec600d8a38bb931fff1fc176bcb",
+      "log_bytes": 31737,
+      "log_mtime_utc": "2026-10-04T05:38:27.629963+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "unwired-new-types environmental red",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_monster_ownership",
+        "map_quake_lethal_damage_preserves_an_existing_player_claim",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running tests\\shared_monster_ownership.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_ownership-165e2a28bc2606fb.exe)",
+          "result": "FAILED",
+          "passed": 0,
+          "failed": 1,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 17,
+          "duration": "0.35s",
+          "result_line": "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.35s"
+        }
+      ],
+      "observed_passed": 0,
+      "observed_failed": 1,
+      "observed_failed_test_names": [
+        "map_quake_lethal_damage_preserves_an_existing_player_claim"
+      ],
+      "expected_cargo_exit_success": false,
+      "note": "Actual AI98 quake HP damage and death occurred, but the retained player claim produced no award."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-master-baseline-04-20261004.log",
+      "log_sha256": "0f00e24ce158aa21edcc0f492427ff70da6734c263af2b3d6bfdd1b09c15a15f",
+      "log_bytes": 29275,
+      "log_mtime_utc": "2026-10-04T05:41:55.505282+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "pre-wiring existing Master guard",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_monster_ownership",
+        "wild_lethal_hit_on_real_master_pet_never_becomes_a_wild_kill_reward",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running tests\\shared_monster_ownership.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_ownership-165e2a28bc2606fb.exe)",
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 17,
+          "duration": "0.08s",
+          "result_line": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 17 filtered out; finished in 0.08s"
+        }
+      ],
+      "observed_passed": 1,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": ""
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-green-01-20261004.log",
+      "log_sha256": "1faf9a9c65e76dee292212fcfe75b9cefffc626650d35d33a4c696f86919f310",
+      "log_bytes": 31181,
+      "log_mtime_utc": "2026-10-04T06:01:06.025950+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "ownership implementation green",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_monster_ownership",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running tests\\shared_monster_ownership.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_ownership-165e2a28bc2606fb.exe)",
+          "result": "ok",
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.37s",
+          "result_line": "test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.37s"
+        }
+      ],
+      "observed_passed": 21,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": ""
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-private-green-02-20261004.log",
+      "log_sha256": "fcc66630b5a383758abc76c9d865faa0a98c27a939830dc17fa2b4d2a00b2599",
+      "log_bytes": 38121,
+      "log_mtime_utc": "2026-10-04T06:05:43.760469+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "initial private rule green",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "runtime::zone::runtime::experience_ownership::tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_simulation-912d116504732e40.exe)",
+          "result": "ok",
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 2039,
+          "duration": "0.09s",
+          "result_line": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 2039 filtered out; finished in 0.09s"
+        }
+      ],
+      "observed_passed": 5,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": "Internal AI6/58/113 arbitration and v4 injection tests only; ordinary entity target selection is not verified."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-checkpoint-adjacent-03-20261004.log",
+      "log_sha256": "3c0658b538d1e8dd826c64299c95181aa6803f496de396da1b8fa836454c3aa5",
+      "log_bytes": 39250,
+      "log_mtime_utc": "2026-10-04T06:07:19.178607+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current scoped adjacent checkpoint",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "runtime::zone::runtime::checkpoint::tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_simulation-912d116504732e40.exe)",
+          "result": "ok",
+          "passed": 15,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 2029,
+          "duration": "0.70s",
+          "result_line": "test result: ok. 15 passed; 0 failed; 0 ignored; 0 measured; 2029 filtered out; finished in 0.70s"
+        }
+      ],
+      "observed_passed": 15,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": ""
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-adjacent-summon-ai-04-20261004.log",
+      "log_sha256": "a9cb204549af0328018d34cc2ed311fcb85e0d25d27236437e91bdffe5841052",
+      "log_bytes": 32581,
+      "log_mtime_utc": "2026-10-04T06:09:56.081381+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current scoped adjacent",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_entity_combat",
+        "--test",
+        "shared_monster_vampire_ai",
+        "--test",
+        "shared_monster_thunder_ai",
+        "--test",
+        "shared_monster_revival_ai",
+        "--test",
+        "shared_monster_shinsu_ai",
+        "--test",
+        "shared_monster_pet_special_ai",
+        "--test",
+        "shared_monster_hugger_ai",
+        "--test",
+        "shared_monster_spider_ai",
+        "--test",
+        "shared_monster_hell_ai",
+        "--test",
+        "shared_monster_kirin_snow_ai",
+        "--test",
+        "shared_monster_mud_boulder_ai",
+        "--test",
+        "shared_monster_horned_encounter_ai",
+        "--test",
+        "shared_monster_stone_trap_ai",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running tests\\shared_entity_combat.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_entity_combat-06d9af04401a43b3.exe)",
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.09s",
+          "result_line": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_hell_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_hell_ai-37fb5c5cb0a481ea.exe)",
+          "result": "FAILED",
+          "passed": 16,
+          "failed": 1,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.44s",
+          "result_line": "test result: FAILED. 16 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.44s"
+        }
+      ],
+      "observed_passed": 20,
+      "observed_failed": 1,
+      "observed_failed_test_names": [
+        "purification_then_same_bit_reapplication_starts_a_fresh_counted_lease"
+      ],
+      "expected_cargo_exit_success": false,
+      "note": "Cargo stopped after shared_entity_combat 4/4 and shared_monster_hell_ai 16/17. Eleven other requested targets were not executed in this run."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-adjacent-summon-ai-05-20261004.log",
+      "log_sha256": "4ba6af366bd4264edc8d2afdfeff521b8c88073d69034c6870cdabfc255cf918",
+      "log_bytes": 39954,
+      "log_mtime_utc": "2026-10-04T06:11:49.675802+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current remaining eleven adjacent targets",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_monster_vampire_ai",
+        "--test",
+        "shared_monster_thunder_ai",
+        "--test",
+        "shared_monster_revival_ai",
+        "--test",
+        "shared_monster_shinsu_ai",
+        "--test",
+        "shared_monster_pet_special_ai",
+        "--test",
+        "shared_monster_hugger_ai",
+        "--test",
+        "shared_monster_spider_ai",
+        "--test",
+        "shared_monster_kirin_snow_ai",
+        "--test",
+        "shared_monster_mud_boulder_ai",
+        "--test",
+        "shared_monster_horned_encounter_ai",
+        "--test",
+        "shared_monster_stone_trap_ai",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running tests\\shared_monster_horned_encounter_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_horned_encounter_ai-6838b02da5392b4e.exe)",
+          "result": "ok",
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.86s",
+          "result_line": "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.86s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_hugger_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_hugger_ai-68a41d1f60ffad8d.exe)",
+          "result": "ok",
+          "passed": 11,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.12s",
+          "result_line": "test result: ok. 11 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_kirin_snow_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_kirin_snow_ai-a7c5a614cbf2e5e4.exe)",
+          "result": "ok",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.11s",
+          "result_line": "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.11s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_mud_boulder_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_mud_boulder_ai-be59a5f7c5263618.exe)",
+          "result": "ok",
+          "passed": 16,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.13s",
+          "result_line": "test result: ok. 16 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.13s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_pet_special_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_pet_special_ai-d40e2010e1206c0b.exe)",
+          "result": "ok",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.09s",
+          "result_line": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_revival_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_revival_ai-aaf8790cec436dc4.exe)",
+          "result": "ok",
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.53s",
+          "result_line": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.53s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_shinsu_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_shinsu_ai-7cee20d9a05da8be.exe)",
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.09s",
+          "result_line": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_spider_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_spider_ai-cbc25cc9da8b2c53.exe)",
+          "result": "ok",
+          "passed": 17,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.56s",
+          "result_line": "test result: ok. 17 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.56s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_stone_trap_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_stone_trap_ai-2e1c0c7758ed95da.exe)",
+          "result": "ok",
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.10s",
+          "result_line": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_thunder_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_thunder_ai-f968dc53f96dfe95.exe)",
+          "result": "ok",
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.09s",
+          "result_line": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_vampire_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_vampire_ai-b81e96e9a406405f.exe)",
+          "result": "ok",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.08s",
+          "result_line": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s"
+        }
+      ],
+      "observed_passed": 92,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": "Only the eleven targets not executed by the stopped prior run; no blanket retry or test weakening."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-hell-r17-baseline-06-20261004.log",
+      "log_sha256": "0a4c6997da0b8c4b68289ac2bcccac232e162566add32a4f49106e007151d557",
+      "log_bytes": 29986,
+      "log_mtime_utc": "2026-10-04T06:27:49.067490+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/r17/mir2-player-journey/mir2-web3",
+      "base_source_commit": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+      "source_stage": "unchanged exact R17 comparison",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_monster_hell_ai",
+        "purification_then_same_bit_reapplication_starts_a_fresh_counted_lease",
+        "--",
+        "--exact",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running tests\\shared_monster_hell_ai.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_hell_ai-37fb5c5cb0a481ea.exe)",
+          "result": "FAILED",
+          "passed": 0,
+          "failed": 1,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 16,
+          "duration": "0.08s",
+          "result_line": "test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 16 filtered out; finished in 0.08s"
+        }
+      ],
+      "observed_passed": 0,
+      "observed_failed": 1,
+      "observed_failed_test_names": [
+        "purification_then_same_bit_reapplication_starts_a_fresh_counted_lease"
+      ],
+      "expected_cargo_exit_success": false,
+      "note": "Exact same failure at shared_monster_hell_ai.rs:524. Frozen checkout was read-only; no fixture/runtime/cache reset."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-current-return-07-20261004.log",
+      "log_sha256": "0ce2821ecff7cfba3e6b74e96085c67e73786d2585082884f0db5ca1185ee671",
+      "log_bytes": 59191,
+      "log_mtime_utc": "2026-10-04T06:34:23.170212+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current return after R17 comparison; final periodic-zero rule",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_monster_ownership",
+        "--lib",
+        "runtime::zone::runtime::experience_ownership::tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_simulation-912d116504732e40.exe)",
+          "result": "ok",
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 2039,
+          "duration": "0.08s",
+          "result_line": "test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 2039 filtered out; finished in 0.08s"
+        },
+        {
+          "running_target": "Running tests\\shared_monster_ownership.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_ownership-165e2a28bc2606fb.exe)",
+          "result": "ok",
+          "passed": 0,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 21,
+          "duration": "0.00s",
+          "result_line": "test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 21 filtered out; finished in 0.00s"
+        }
+      ],
+      "observed_passed": 6,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": "Global filter ran six private tests and zero public tests; all 21 public tests were filtered. Zero execution is not public acceptance."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-final-green-08-20261004.log",
+      "log_sha256": "19991e2a87ee8a061a267ae900515ce94921b21f41c507500bc91358c5fe7604",
+      "log_bytes": 31032,
+      "log_mtime_utc": "2026-10-04T06:39:49.481076+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "final public ownership green",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_monster_ownership",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running tests\\shared_monster_ownership.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_monster_ownership-165e2a28bc2606fb.exe)",
+          "result": "ok",
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 0,
+          "duration": "0.34s",
+          "result_line": "test result: ok. 21 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.34s"
+        }
+      ],
+      "observed_passed": 21,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": "Final semantic code includes trusted periodic-zero distinction. Later changed hunk layout only; no semantic edits afterward."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-lib-group_experience_tests-20261004.log",
+      "log_sha256": "1dfbf7240fec0e44ba0e14c3db2d8f9405a9c58225ef89759a3b93150fc324af",
+      "log_bytes": 38041,
+      "log_mtime_utc": "2026-10-04T06:15:39.996736+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current scoped adjacent library",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "group_experience_tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_simulation-912d116504732e40.exe)",
+          "result": "ok",
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 2039,
+          "duration": "0.08s",
+          "result_line": "test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 2039 filtered out; finished in 0.08s"
+        }
+      ],
+      "observed_passed": 5,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": ""
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-lib-summon_damage_tests-20261004.log",
+      "log_sha256": "933f16005523c6258771714fbc56a593d606548777feaa357acf3f092d571e24",
+      "log_bytes": 37529,
+      "log_mtime_utc": "2026-10-04T06:15:40.340413+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current scoped adjacent library",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "summon_damage_tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_simulation-912d116504732e40.exe)",
+          "result": "ok",
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 2043,
+          "duration": "0.01s",
+          "result_line": "test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 2043 filtered out; finished in 0.01s"
+        }
+      ],
+      "observed_passed": 1,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": ""
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-lib-soulfire_practice_tests-20261004.log",
+      "log_sha256": "d3d66368e77259e11cfbcd66f37e178c261effacb6a6f2b6236bcdc3cc4b13d2",
+      "log_bytes": 38651,
+      "log_mtime_utc": "2026-10-04T06:15:40.851861+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current scoped adjacent library",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "soulfire_practice_tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_simulation-912d116504732e40.exe)",
+          "result": "ok",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 2035,
+          "duration": "0.22s",
+          "result_line": "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 2035 filtered out; finished in 0.22s"
+        }
+      ],
+      "observed_passed": 9,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": ""
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-lib-entity_combat-tests-20261004.log",
+      "log_sha256": "0bca3999984b6c284c1686886b1e0f92838f5d558ced2b03b9a1c3f375a2fab6",
+      "log_bytes": 40764,
+      "log_mtime_utc": "2026-10-04T06:15:41.288154+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current scoped adjacent library",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "entity_combat::tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_simulation-912d116504732e40.exe)",
+          "result": "ok",
+          "passed": 25,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 2019,
+          "duration": "0.10s",
+          "result_line": "test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 2019 filtered out; finished in 0.10s"
+        }
+      ],
+      "observed_passed": 25,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": ""
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-lib-reward_rate_tests-20261004.log",
+      "log_sha256": "e3b0e2c199a84dbc89f376c2ce714eac1de1c9af1e8dd406cf59cd2a1fd121e2",
+      "log_bytes": 37648,
+      "log_mtime_utc": "2026-10-04T06:15:41.944180+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current scoped adjacent library",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--lib",
+        "reward_rate_tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_simulation-912d116504732e40.exe)",
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 2042,
+          "duration": "0.34s",
+          "result_line": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 2042 filtered out; finished in 0.34s"
+        }
+      ],
+      "observed_passed": 2,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": ""
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-shared-zone-poison-20261004.log",
+      "log_sha256": "9eddd8c19dda3d5e43a8af8de2d7fa83fe656fbdff82de0dda2ed3961e8c69ab",
+      "log_bytes": 30262,
+      "log_mtime_utc": "2026-10-04T06:39:53.892853+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "final current scoped shared-zone adjacent",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_zone",
+        "poison",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running tests\\shared_zone.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_zone-434af2e877a68d66.exe)",
+          "result": "ok",
+          "passed": 8,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 201,
+          "duration": "0.09s",
+          "result_line": "test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 201 filtered out; finished in 0.09s"
+        }
+      ],
+      "observed_passed": 8,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": ""
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-shared-zone-summon-20261004.log",
+      "log_sha256": "0a61a37a18e452b36d71e3291843f24550a12fdf6eefb14d73e30251d32f6d71",
+      "log_bytes": 30253,
+      "log_mtime_utc": "2026-10-04T06:39:54.287424+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "final current scoped shared-zone adjacent",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-simulation",
+        "--test",
+        "shared_zone",
+        "summon",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running tests\\shared_zone.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\shared_zone-434af2e877a68d66.exe)",
+          "result": "ok",
+          "passed": 9,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 200,
+          "duration": "0.09s",
+          "result_line": "test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 200 filtered out; finished in 0.09s"
+        }
+      ],
+      "observed_passed": 9,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": ""
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-gateway-kill_award-20261004.log",
+      "log_sha256": "de714701aacee72f79295ea3f81fae1146e0da1e376cb3e1b7800411704f5486",
+      "log_bytes": 31027,
+      "log_mtime_utc": "2026-10-04T06:18:46.417858+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current scoped Gateway boundary",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "kill_award",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_gateway-23e520f2c94d8714.exe)",
+          "result": "ok",
+          "passed": 3,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 896,
+          "duration": "1.94s",
+          "result_line": "test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 896 filtered out; finished in 1.94s"
+        }
+      ],
+      "observed_passed": 3,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": "Existing living-player reward/checkpoint/drop/durable-source tests; not dead-level-up end-to-end acceptance."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-gateway-world_checkpoint-20261004.log",
+      "log_sha256": "9c877140c27d862139f97f876a55f62393cf2f68d04a8de6701df2319de4bb5f",
+      "log_bytes": 30384,
+      "log_mtime_utc": "2026-10-04T06:18:48.222766+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current scoped Gateway boundary",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "world_checkpoint",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_gateway-23e520f2c94d8714.exe)",
+          "result": "ok",
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 895,
+          "duration": "1.39s",
+          "result_line": "test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 895 filtered out; finished in 1.39s"
+        }
+      ],
+      "observed_passed": 4,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": "Existing living-player reward/checkpoint/drop/durable-source tests; not dead-level-up end-to-end acceptance."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-gateway-shared_drop_aoi_tests-20261004.log",
+      "log_sha256": "a00c0c9c10ce704f3449415dd1cbf6d6f8d248dfd2cda7e31e533eb6d0537d05",
+      "log_bytes": 30219,
+      "log_mtime_utc": "2026-10-04T06:18:51.258921+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current scoped Gateway boundary",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "shared_drop_aoi_tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_gateway-23e520f2c94d8714.exe)",
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 897,
+          "duration": "2.64s",
+          "result_line": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 897 filtered out; finished in 2.64s"
+        }
+      ],
+      "observed_passed": 2,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": "Existing living-player reward/checkpoint/drop/durable-source tests; not dead-level-up end-to-end acceptance."
+    },
+    {
+      "log_path": "C:/mir2-build/shared-monster-ownership-gateway-guild_kill_source_tests-20261004.log",
+      "log_sha256": "53694948dfe6fedb14b09927330a8eb613f0544f21cc8cde828b302e20c7d270",
+      "log_bytes": 30273,
+      "log_mtime_utc": "2026-10-04T06:18:53.787472+00:00",
+      "workdir": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+      "base_source_commit": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+      "source_stage": "current scoped Gateway boundary",
+      "replay_argv": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--locked",
+        "-p",
+        "mir2-gateway",
+        "--lib",
+        "guild_kill_source_tests",
+        "--",
+        "--test-threads=1",
+        "--nocapture"
+      ],
+      "command_kind": "explicit normalized replay; not literal original shell transcript",
+      "environment": {
+        "CARGO_TARGET_DIR": "C:/mir2-build/gateway-tests-r49",
+        "CARGO_BUILD_JOBS": "2"
+      },
+      "rust_toolchain": "1.95.0",
+      "maximum_compile_jobs": 2,
+      "observed_test_blocks": [
+        {
+          "running_target": "Running unittests src\\lib.rs (C:/mir2-build/gateway-tests-r49\\debug\\deps\\mir2_gateway-23e520f2c94d8714.exe)",
+          "result": "ok",
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0,
+          "measured": 0,
+          "filtered": 897,
+          "duration": "2.15s",
+          "result_line": "test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 897 filtered out; finished in 2.15s"
+        }
+      ],
+      "observed_passed": 2,
+      "observed_failed": 0,
+      "observed_failed_test_names": [],
+      "expected_cargo_exit_success": true,
+      "note": "Existing living-player reward/checkpoint/drop/durable-source tests; not dead-level-up end-to-end acceptance."
+    }
+  ]
+}

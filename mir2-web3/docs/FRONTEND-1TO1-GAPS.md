@@ -1,5 +1,16 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-04 v27 default Candidate source derives208 runtime maps plus the
+> source-only D71653 room,209 native resources.67,993 drawable references and
+> 224 Monster049 frames are physically checked, with zero drawable gaps.
+> Root Windows host/client dependency check passes; no new native release,
+> installer/update feed or installed/human acceptance follows. R17 remains the
+> published32-image-map pair. Normal Stone/GreatTao NPC and map entries, Boss
+> loot/book provenance, repeated handoff/image retention and native crowded
+> right-hold/cast/death feel remain open. Metadata reachability is not normal
+> player traversal.
+> [Integrated resource scope](generated/player-qa/classic-map-closure-20261004/phase2-208-209/README.md).
+
 > 2026-10-04 integrated map phase1 ca5eee0a5 replaces the32-map packaging default
 > with the164 maps actually admitted by platinum_176 v26. Generated physical
 > resources have zero missing drawable references; explicit15-map selections

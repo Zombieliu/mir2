@@ -1,5 +1,19 @@
 # Crystal Server Parity
 
+> 2026-10-04 ordinary same-map EXPOwner now follows effective positive hits,
+> strict >5-second expiry, owner-only renewal, dead-owner replacement, real
+> pet Master rectangle16 and impact-time TurnUndead override. Periodic poison
+> allows a spawned dead solo owner at Zone award arbitration; private zero-value
+> arbitration does not close existing zero-poison tick paths. AI98 environmental
+> death retains prior credit. Source Node survives teleport/death, so the current
+> same-map implementation cannot claim global identity parity. Ground18-second
+> protection, equal-share party and contribution-based generic Boss policy are
+> unchanged, not user-approved source parity. Personal level-up still exposes
+> an HP/Dead risk and teardown path to be resolved before that chain is accepted.
+> Authenticated v5 world checkpoint requires matching pre-upgrade backup for
+> rollback; no new deployment has occurred.
+> [Rules/tests/remaining](CLASSIC-EXPERIENCE-OWNERSHIP-20261004.md).
+
 > 2026-10-04 R17 source6032 Gateway and native Candidate/sequence12 are paired
 > and published. Source status/Struck fixes retain their prior focused test
 > scope; new exact-ELF normal authentication/attack-Deer/escape/save smoke does

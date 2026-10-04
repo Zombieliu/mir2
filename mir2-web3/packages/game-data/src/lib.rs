@@ -29,6 +29,9 @@ pub struct ContentProfile {
     pub rate_policy: ContentRatePolicy,
     pub experience_curve: Vec<ExperienceLevel>,
     pub map_whitelist: Vec<ContentMapRule>,
+    /// Exact original rooms shipped as assets, never runtime map admission.
+    #[serde(default)]
+    pub native_resource_only_maps: Vec<String>,
     pub monster_whitelist: Vec<String>,
     pub boss_monsters: Vec<String>,
     pub boss_respawn_jitter_minutes: u16,
@@ -170,6 +173,10 @@ pub struct ContentProfileBundleFile {
 #[serde(rename_all = "camelCase")]
 pub struct ContentProfileBundleSummary {
     pub maps: usize,
+    #[serde(default)]
+    pub native_resource_only_maps: usize,
+    #[serde(default)]
+    pub native_maps: usize,
     pub monsters: usize,
     pub items: usize,
     pub skills: usize,
@@ -277,6 +284,78 @@ pub fn content_profile_respawn_overrides_for_map(
             })
         })
         .collect()
+}
+
+fn validate_native_resource_only_maps(
+    profile: &ContentProfile,
+    manifest: &CrystalRespawnManifest,
+    errors: &mut Vec<String>,
+) {
+    validate_unique_strings(
+        "nativeResourceOnlyMaps",
+        profile.native_resource_only_maps.iter().map(String::as_str),
+        errors,
+    );
+    for name in &profile.native_resource_only_maps {
+        if name != "D71653" || profile.profile_id != "platinum_176" {
+            errors.push(format!(
+                "nativeResourceOnlyMaps has no named original-room policy for {name}"
+            ));
+            continue;
+        }
+        if profile
+            .map_whitelist
+            .iter()
+            .any(|map| map.file_name.eq_ignore_ascii_case(name))
+        {
+            errors.push(format!(
+                "nativeResourceOnlyMaps room {name} must not be runtime-admitted"
+            ));
+        }
+        let rooms = manifest
+            .maps
+            .iter()
+            .filter(|map| map.map_file_name == *name)
+            .collect::<Vec<_>>();
+        let source_matches = rooms.len() == 1 && {
+            let room = rooms[0];
+            room.map_index == 235
+                && room.map_title == "TacticalMaze"
+                && room.mini_map == 0
+                && room.big_map == 0
+                && room.respawn_count == 0
+                && room.respawns.is_empty()
+                && room.safe_zones.is_empty()
+                && room.movement_count == 1
+                && room.movements.len() == 1
+                && room.movements[0]
+                    == CrystalMovementTemplate {
+                        map_index: 209,
+                        source: Point { x: 17, y: 12 },
+                        destination: Point { x: 36, y: 34 },
+                        need_hole: false,
+                        need_move: false,
+                        conquest_index: 0,
+                        show_on_big_map: false,
+                        icon: 0,
+                    }
+                && !manifest.maps.iter().any(|map| {
+                    map.movements
+                        .iter()
+                        .any(|movement| movement.map_index == 235)
+                })
+                && !serde_json::to_string(&crystal_npc_manifest())
+                    .expect("imported NPC manifest serializes")
+                    .to_ascii_lowercase()
+                    .contains("d71653")
+                && !include_str!("../data/generated/crystal_map_event_manifest.json")
+                    .to_ascii_lowercase()
+                    .contains("d71653")
+        };
+        if !source_matches {
+            errors.push(format!("nativeResourceOnlyMaps room {name} no longer matches its original no-entry source proof"));
+        }
+    }
 }
 
 pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<String>> {
@@ -465,6 +544,7 @@ pub fn validate_content_profile(profile: &ContentProfile) -> Result<(), Vec<Stri
     );
 
     let crystal_map_manifest = crystal_respawn_manifest();
+    validate_native_resource_only_maps(profile, &crystal_map_manifest, &mut errors);
     let crystal_maps: BTreeSet<_> = crystal_map_manifest
         .maps
         .iter()
@@ -3498,7 +3578,7 @@ mod tests {
         let profile = platinum_176_profile();
 
         assert_eq!(profile.profile_id, "platinum_176");
-        assert_eq!(profile.version, 26);
+        assert_eq!(profile.version, 27);
         assert_eq!(
             profile.allowed_classes,
             [MirClass::Warrior, MirClass::Wizard, MirClass::Taoist,]
@@ -3751,6 +3831,14 @@ mod tests {
             .all(|byte| byte.is_ascii_hexdigit()));
         assert_eq!(bundle.source_data.crystal_database_version, 117);
         assert_eq!(bundle.summary.maps, profile.map_whitelist.len());
+        assert_eq!(
+            bundle.summary.native_resource_only_maps,
+            profile.native_resource_only_maps.len()
+        );
+        assert_eq!(
+            bundle.summary.native_maps,
+            profile.map_whitelist.len() + profile.native_resource_only_maps.len()
+        );
         assert_eq!(bundle.summary.monsters, profile.monster_whitelist.len());
         assert_eq!(bundle.summary.items, profile.item_whitelist.len());
         assert_eq!(bundle.summary.skills, profile.skills.len());

@@ -1,21 +1,21 @@
 {
   "schema": "mir2-content-profile-bundle/1",
   "profileId": "platinum_176",
-  "profileVersion": 26,
+  "profileVersion": 27,
   "acceptanceLevel": 50,
   "source": "Crystal.Database-29.01.25/Jev with classic 1.76 world overrides and the source three-class level-50 skill set",
   "sourceData": {
     "crystalDatabaseVersion": 117,
     "crystalDatabaseCustomVersion": 0
   },
-  "builtAt": "2026-09-19T17:03:58.633Z",
+  "builtAt": "2026-10-04T04:32:22.000Z",
   "hashAlgorithm": "sha256",
-  "contentHash": "b2bb23127956c5eb7397619bb6bd6621c945eea730405c2417018cac87c6bba4",
+  "contentHash": "04cc252a8e382240cdc7cc0798e7fbc1d0db32d11711e0fa3388868c2463f54f",
   "files": [
     {
       "path": "packages/game-data/data/content_profiles/platinum_176.json",
-      "bytes": 42725,
-      "sha256": "328ecec1474f9bde809b6a57508cb9dd9d3b0be82c136fb4dabcd8bba85b66cd"
+      "bytes": 47442,
+      "sha256": "f50ef1b78e2544df4fd3a65902f6e72f4ec3cbc7693e0ee373d6ee899581e7a9"
     },
     {
       "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
@@ -79,8 +79,10 @@
     }
   ],
   "summary": {
-    "maps": 164,
-    "monsters": 174,
+    "maps": 208,
+    "nativeResourceOnlyMaps": 1,
+    "nativeMaps": 209,
+    "monsters": 176,
     "items": 195,
     "skills": 63,
     "npcScripts": 101,

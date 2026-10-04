@@ -1,0 +1,150 @@
+{
+  "schema": "mir2.classic-map-phase2-root-review.v1",
+  "createdUtc": "2026-10-04T06:48:20.833960+00:00",
+  "implementationReceiptSha256": "c2480d665e90499f3cbbdd2bd4b96a308c5b58c5bf3a1f6fb73d24aeaa8d1f02",
+  "rootSourceHead": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+  "reviewedWriteSetCount": 11,
+  "verifiedReferencedReceiptCount": 24,
+  "verifiedReferences": [
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\native-keyed-map-profile-209\\manifest.json",
+      "bytes": 11320827,
+      "sha256": "42cc002dd0f7c211916a976fadcc91af5c16cf2aa851200e464ac80aeeccb5b9"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\native-keyed-map-atlas-profile-209\\manifest.json",
+      "bytes": 419097,
+      "sha256": "32aa4e7e56550b1067a880bc29ca279f13a699aac6c71e8917154676f0092288"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\native-keyed-map-profile-209\\coverage-audit.json",
+      "bytes": 723520,
+      "sha256": "d28e2e9413ad25f13050166e1f587b3ca1d1fb729f15c51a81ac4a2e65631b05"
+    },
+    {
+      "path": "E:\\mir2\\Crystal\\Build\\Client\\Debug\\Data\\Monster\\049.Lib",
+      "bytes": 1137879,
+      "sha256": "b52c0eadaf06a015360fbf9d9e68e877b8ca912fbdea6d99d9b1c7785497c4e3"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\actor-input\\original-ui\\Monster\\049\\meta.json",
+      "bytes": 107294,
+      "sha256": "6173faeac54c9708d791c1546c0566e97af70a86c12497f7b08b63eb6a961b63"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\actor-input\\original-ui\\frame-sets.generated.json",
+      "bytes": 1375659,
+      "sha256": "280d4fee9de0864218611f54014b4bf3487c4478a39133c25ebe211d223e62e9"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\focused-node-first.log",
+      "bytes": 3000,
+      "sha256": "42e61d2ff853e9d554d29485569b72b4f914622abae7ff22eabe9560b840a46f"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\focused-and-adjacent-first.log",
+      "bytes": 13659,
+      "sha256": "f32783b7dc500f46cf77fb464cb8b093ad0675715a37bae37a76eddc22e6f466"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\focused-powershell-first.log",
+      "bytes": 612,
+      "sha256": "4ba20dff8c123a60f50be73fdcfff347da577bde79ed495f98f39527acf17794"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\focused-powershell-second.log",
+      "bytes": 407,
+      "sha256": "3ac390a642e1fcf80a1fc16ae8578171116379c96c1bf6906aa436169a7ac1d1"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\focused-rust-first.log",
+      "bytes": 1975,
+      "sha256": "9b975bc251340e586e37a7df7b5bed130871727299fa30eda0f49e6274576df3"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\profile-unit-tests.log",
+      "bytes": 871,
+      "sha256": "825113fb762cd7f2f4ad16db12ef36619ccd9435313c81b07de57d851051bd32"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\generation-input.json",
+      "bytes": 11570,
+      "sha256": "9544011b80569c6fffa73a46eb602630e884104f8e28c3e77b26a989d9711f63"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\generation-pipeline.log",
+      "bytes": 423,
+      "sha256": "fe71f30fd3d11cdba60e981f3bea5813d28be5cce5ee1d972b4db90f2f76e648"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\generate.log",
+      "bytes": 789,
+      "sha256": "2606bafcb185b3e53bc1078413a9e84ce73b4f7a7e25eb839a13b3dda08d4bf5"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\complete-floors.log",
+      "bytes": 20414,
+      "sha256": "55dc84c258f6497d032131986c02e66303aaa166d986898e9a7f622f04158e1d"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\audit.log",
+      "bytes": 20032,
+      "sha256": "eb532a06f20520dcad5f500796897d772e2e63326b868d20e67b9b2dcb647228"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\actor-049-export.log",
+      "bytes": 258,
+      "sha256": "d60d68ed6fdef0e2522308320bf16469ca13e1f5cac232d84fe6c7a711405821"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\actor-source-verify-first.log",
+      "bytes": 25971,
+      "sha256": "79095f3c49b783a8d45e7d438aa6ab82bf29f097e65556b18d63976ce4b056d8"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\actor-closure-verified.json",
+      "bytes": 1151628,
+      "sha256": "908918fc7e7e59505b11ddd060bee79e3510218cc0acc9a1ecba874f9315357a"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\actor-input-receipt.json",
+      "bytes": 3435,
+      "sha256": "6c7f41a687a72800b83dc3313f79cb530c4c673bfd7f27e0cde0c2db5eec8c74"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\powershell-generated-guards.json",
+      "bytes": 8178,
+      "sha256": "4422d316dc2562c7b51fea48f237989b59e5b30a09a46e3d0a799778b85f7873"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\final-source-checks.json",
+      "bytes": 1203,
+      "sha256": "ee6ac04b3f2d28cda5b62df4bd5f5ca5ea97c3e8c6be001be2aa8e58d3c19acc"
+    },
+    {
+      "path": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\source-diff.patch",
+      "bytes": 74779,
+      "sha256": "58addd5cae73b1e8737702c91295c62ce5161514647e7297054371e78ae21228"
+    }
+  ],
+  "patchDryRunPassed": true,
+  "actualPatchApplied": false,
+  "profileRuntimeMaps": 208,
+  "nativeResourceMaps": 209,
+  "sourceOrphanMaps": [
+    "d71653"
+  ],
+  "rootReview": [
+    "runtime reachability requirements preserved",
+    "resource-only allowance narrowed to original D71653 orphan geometry and no incoming edge",
+    "scope and source topology digests bound by Node and PowerShell",
+    "Monster049 original pixels/geometry/action checks complete",
+    "raw source omission scopes remain distinct",
+    "public R17 and phase1 inputs unchanged"
+  ],
+  "normalRoutesAccepted": false,
+  "bossAccepted": false,
+  "nativeVisualAccepted": false,
+  "published": false,
+  "integratedConsumerBuildPending": true
+}

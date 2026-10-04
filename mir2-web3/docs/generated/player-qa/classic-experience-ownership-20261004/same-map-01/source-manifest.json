@@ -1,0 +1,70 @@
+{
+  "captured_at_utc": "2026-10-04T07:04:32.132831+00:00",
+  "project": "C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3",
+  "implementation_base": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+  "runtime_r17_base": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "git_repository_prefix": "mir2-web3/",
+  "head_observed_at_capture": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+  "source_scope": "Exactly twelve authorized ownership files; unrelated integration excluded",
+  "source_frozen": true,
+  "hashes_stable_during_capture": true,
+  "files": {
+    "apps/simulation/src/runtime/zone/types.rs": {
+      "sha256": "c5afdeffcb4c09ba6d18baf52deb19debe4b04bc228ee6884e64eed786c64015",
+      "bytes": 49533
+    },
+    "apps/simulation/src/runtime/zone/runtime.rs": {
+      "sha256": "c0197140c96026d031eac1ea5289b582375f809fdbe1db330de8ff365ec94832",
+      "bytes": 669961
+    },
+    "apps/simulation/src/runtime/zone/runtime/experience_ownership.rs": {
+      "sha256": "f6f010a983e80f86b52bc67843c1b9fa06380ceaa158a9dcf6db4690669530b0",
+      "bytes": 17639
+    },
+    "apps/simulation/src/runtime/zone/runtime/checkpoint.rs": {
+      "sha256": "c8991352d5efbb536e2d0373e1d044f92daffe783cf1ea6135c52bc2e7a8269f",
+      "bytes": 77688
+    },
+    "apps/simulation/src/runtime/zone/runtime/entity_combat.rs": {
+      "sha256": "00ed0d070b9d3b188f11e2423fb8a658b5dea7a877e056113422cb44566d36c3",
+      "bytes": 105211
+    },
+    "apps/simulation/src/runtime/zone/runtime/vampire_ai.rs": {
+      "sha256": "a45d546721191f6c5557acff4cc094ec8b68897355904ca538bcb2743f838bbb",
+      "bytes": 18664
+    },
+    "apps/simulation/src/runtime/zone/runtime/thunder_ai.rs": {
+      "sha256": "1fa4d2bbb6ea6f3b7e182ad9fc8447d45d6defde01ae8eee797ddb0815b0ae5d",
+      "bytes": 17225
+    },
+    "apps/simulation/src/runtime/zone/runtime/shinsu_ai.rs": {
+      "sha256": "94fbdf013d159e713212f21f69095bcdb21e7d3b175b3fbe995b0f61e337aa41",
+      "bytes": 17270
+    },
+    "apps/simulation/src/runtime/zone/runtime/pet_special_ai.rs": {
+      "sha256": "455a9f80535a9e4465100ea674f69f648f9c8cf09d9e045f7ee868e65e10795e",
+      "bytes": 11518
+    },
+    "apps/simulation/src/runtime/zone/runtime/journey_events.rs": {
+      "sha256": "4558cee2666063868ba00771c0bfae7672009e257de4df59a40c550e54f626ae",
+      "bytes": 18092
+    },
+    "apps/simulation/tests/shared_monster_ownership.rs": {
+      "sha256": "57e4149452d05527475b452b9f2ee510a2d13cb62f4d20915474f406952fae4e",
+      "bytes": 22786
+    },
+    "docs/CLASSIC-EXPERIENCE-OWNERSHIP-20261004.md": {
+      "sha256": "a9d3f537a7b5a35002280dd47ed55a642a783d3123f35689956df9d2fcfdae9c",
+      "bytes": 11947
+    }
+  },
+  "compiler_companion_only_defaults": {
+    "apps/simulation/src/runtime/zone/runtime/shinsu_ai.rs": 1,
+    "apps/simulation/src/runtime/zone/runtime/pet_special_ai.rs": 1,
+    "apps/simulation/src/runtime/zone/runtime/journey_events.rs": 3
+  },
+  "diff": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r17/exp-drop-audit/implementation-01/implementation.diff",
+    "sha256": "0fddf9d5b49f043111db7a64e8a41c7d68f79d4948c24f696d5af48084469d96"
+  }
+}

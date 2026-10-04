@@ -1,5 +1,18 @@
 # Agent Task Queue
 
+> 2026-10-04 v27 resources and the ordinary same-map EXP owner slice are
+> integrated:208 playable-whitelist maps/209 resource maps, no fabricated
+> D71653 entrance; Monster049224 source frames match. Data8/ownership21/
+> Node12 and PS/bundle/Windows dependency/Gateway test compilation pass.
+> The exact source/RED-GREEN/failed commands are preserved. Ordinary routes,
+> Boss acquisition, cross-map ownership, source60-second ground protection,
+> party/Boss rules and dead-owner XP level-up remain open. The latter has an
+> identified HP/Dead mismatch and teardown settlement branch; do not ship it
+> as end-to-end accepted. Dense R17 prepared tests remain separate from native
+> and ordinary progression. R17/F-drive/capacity constraints remain unchanged.
+> [Resources](generated/player-qa/classic-map-closure-20261004/phase2-208-209/README.md),
+> [Ownership](CLASSIC-EXPERIENCE-OWNERSHIP-20261004.md).
+
 > 2026-10-04 map phase1 is integrated at ca5eee0a5: default Candidate resources
 > derive all 164 admitted profile maps, with exact scope/profile/manifest binding.
 > Actual drawable missing/omitted/unexpected counts are0; focused/adjacent60 pass.

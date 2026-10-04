@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-04 reviewed v27 expands classic whitelist164→208 and native scope
+> 164→209, preserving the source orphan room as resources only. Actual67,993
+> drawable references have zero missing/omitted/unexpected drawable coverage;
+> Monster049 matches224 original frames. Source/resource Candidate only:
+> normal walking/NPC predicates, Boss/rare gear/books and native acceptance
+> remain open. Same-map ordinary EXPOwner uses first effective owner, strict
+> five-second expiry, pets/poison/TurnUndead and v5 authenticated checkpoints;
+> 21 public/6 private regressions pass. Cross-map, party/Boss, ground duration
+> and real dead-owner XP/level-up are not closed. No whole-world percentage or
+> new package/publication follows.
+> [Map integration](generated/player-qa/classic-map-closure-20261004/phase2-208-209/README.md),
+> [EXP source and limits](CLASSIC-EXPERIENCE-OWNERSHIP-20261004.md).
+
 > 2026-10-04 admitted-map image closure is integrated at ca5eee0a5: all164
 > profile maps are derived and guarded, covering67,554 drawable references
 > with zero drawable gaps.60 scoped/adjacent checks pass. The45 excluded

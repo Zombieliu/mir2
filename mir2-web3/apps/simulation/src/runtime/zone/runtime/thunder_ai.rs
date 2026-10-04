@@ -167,16 +167,9 @@ impl ZoneRuntime {
                     });
                 }
                 if killed {
-                    let owner = owner.unwrap_or(hit.session_id);
-                    let owner_id = self
-                        .players
-                        .get(&owner)
-                        .map_or(hit.attacker_object_id, |p| p.object_id);
-                    let drops =
-                        self.spawn_native_monster_drops(&name, &position, owner_id, drops, now);
-                    out.extend(self.diff_all_zone_object_visibility());
-                    out.extend(self.group_monster_kill_awards(
-                        &owner,
+                    out.extend(self.native_monster_kill_outbounds(
+                        owner,
+                        &position,
                         ZoneMonsterKillAward {
                             source_receipt_key: None,
                             experience_selection: None,

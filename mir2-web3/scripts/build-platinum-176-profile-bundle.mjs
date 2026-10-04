@@ -68,6 +68,8 @@ const bundle = {
   files,
   summary: {
     maps: profile.mapWhitelist.length,
+    nativeResourceOnlyMaps: (profile.nativeResourceOnlyMaps ?? []).length,
+    nativeMaps: profile.mapWhitelist.length + (profile.nativeResourceOnlyMaps ?? []).length,
     monsters: profile.monsterWhitelist.length,
     items: profile.itemWhitelist.length,
     skills: profile.skills.length,

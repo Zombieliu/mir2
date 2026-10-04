@@ -1,5 +1,20 @@
 # Backend 1:1 Progress
 
+> 2026-10-04 first effective same-map ordinary monster ownership is implemented
+> and integrated with profile v27. Rival damage cannot steal/renew a live claim;
+> actual pet actor/master range, periodic poison, successful TurnUndead impact,
+> environmental fatal damage and genuine-Master no-wild-reward are distinct.
+> Checkpoint/root v5 commits identity/deadline/impact; old v1–v4 forward fields
+> are neutralized.21 public/6 private/15 checkpoint,92 pet/special AI,17 shared
+> poison/summon and11 Gateway boundary checks pass in their logged scopes.
+> One old/new Hell purification fixture fails identically and remains retained.
+> Root combined data8/ownership21/Gateway test-build pass. Cross-map/global
+> identity, ground60-second timeout, original party/generic Boss and actual
+> dead-owner XP level-up/teardown/save are subsequent gates. No production
+> change or full-suite clean claim.
+> [Scope](CLASSIC-EXPERIENCE-OWNERSHIP-20261004.md),
+> [Raw evidence](generated/player-qa/classic-experience-ownership-20261004/same-map-01/raw-file-index.json).
+
 > 2026-10-04 exact R17 Linux ELF source6032 is deployed to the invited realm,
 > backed up and normally stopped/restarted with exit0. Original realm,
 > configuration and capacity limits remain unchanged. Isolated ordinary

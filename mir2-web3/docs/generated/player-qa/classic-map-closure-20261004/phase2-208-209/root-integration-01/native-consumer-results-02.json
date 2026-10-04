@@ -1,0 +1,17 @@
+{
+  "command": [
+    "cargo",
+    "+1.95.0",
+    "check",
+    "--manifest-path",
+    "apps/game-client/platform-windows/Cargo.toml"
+  ],
+  "exitCode": 0,
+  "log": "C:\\mir2-playtest-releases\\20261004-native-r17\\map-implementation\\phase2-208-runtime-209-resources\\root-integration-01\\native-consumer-02.log",
+  "bytes": 62335,
+  "sha256": "e28e0021244536dd764ea31a1180c36ae2e762b9c651b794230743f0f046f45f",
+  "createdUtc": "2026-10-04T07:16:15.764847+00:00",
+  "targetDir": "C:/mir2-build/platform-windows-r33-tests",
+  "buildJobs": 2,
+  "preservedFirstFailure": "native-consumer-01.log: independent host crate is outside server workspace"
+}

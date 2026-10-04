@@ -986,6 +986,18 @@ pub struct GroundDropClaimTicket {
     pub drop: GroundDropSnapshot,
 }
 
+/// Transient spawned-player ownership, separate from combat life_generation.
+/// Same-map fresh Join revokes old references; death/revive does not replace
+/// the spawned object. Cross-map online identity is a manager-level follow-up.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub(crate) struct ZoneExperienceOwner {
+    pub session_id: SessionId,
+    pub account_id: String,
+    pub character_index: i32,
+    pub object_id: u32,
+    pub expires_at_ms: u64,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct ZoneNativeMonster {
     /// Server-authored original drop-table roll. None preserves explicit/custom loot.
@@ -1044,6 +1056,10 @@ pub(crate) struct ZoneNativeMonster {
     pub damage_poison_expires_at_ms: u64,
     pub damage_poison_owner_session_id: Option<SessionId>,
     pub damage_poison_owner_object_id: u32,
+    /// Crystal EXPOwner is retained until strictly after its five-second
+    /// deadline. Omitted legacy state never infers a claimant from a target.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub experience_owner: Option<ZoneExperienceOwner>,
     /// Authoritative damage credited to player sessions for Boss ownership.
     /// Summon and damage-over-time attacks use their owning player's session.
     #[serde(default)]
@@ -1146,6 +1162,7 @@ impl ZoneNativeMonster {
             damage_poison_expires_at_ms: 0,
             damage_poison_owner_session_id: None,
             damage_poison_owner_object_id: 0,
+            experience_owner: None,
             damage_contributions: BTreeMap::new(),
             buffs: BTreeMap::new(),
         };

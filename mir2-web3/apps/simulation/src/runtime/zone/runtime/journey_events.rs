@@ -138,6 +138,7 @@ fn journey_damage_receipt_requires_positive_committed_hit_and_preserves_delayed_
     // A pending/launch record is not an outbound receipt. Its eventual zero
     // damage result is also not proof of an exercise hit.
     let launch = PendingNativeMonsterHit {
+        force_experience_owner: false,
         ready_at_ms: 20,
         session_id: owner.clone(),
         attacker_object_id: 101,
@@ -154,6 +155,7 @@ fn journey_damage_receipt_requires_positive_committed_hit_and_preserves_delayed_
     let mut skeleton_draft = physical_draft(&zone, &owner, 30, 777);
     skeleton_draft.kind = ZoneJourneyEventKind::SummonSkeletonDamage;
     let hit = PendingNativeMonsterHit {
+        force_experience_owner: false,
         ready_at_ms: 40,
         session_id: owner.clone(),
         attacker_object_id: 777,
@@ -175,6 +177,7 @@ fn journey_damage_receipt_requires_positive_committed_hit_and_preserves_delayed_
     // A delayed hit captured for a previous owner incarnation cannot become a
     // receipt after that owner has revived/rejoined.
     let stale = PendingNativeMonsterHit {
+        force_experience_owner: false,
         ready_at_ms: 60,
         session_id: owner.clone(),
         attacker_object_id: 101,

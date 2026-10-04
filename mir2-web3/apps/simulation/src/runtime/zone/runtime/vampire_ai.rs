@@ -454,7 +454,17 @@ impl ZoneRuntime {
             reward_owner,
             drops,
             boss_audit,
-        )) = self.apply_native_monster_direct_damage(target_id, damage, Some(&owner), now)
+        )) = self.apply_native_monster_damage_internal(
+            target_id,
+            damage,
+            Some(&owner),
+            now,
+            NativeMonsterDamageCause::Direct,
+            Some(NativeExperienceActor::Object {
+                object_id: id,
+                force_owner: false,
+            }),
+        )
         else {
             return Vec::new();
         };
@@ -507,25 +517,20 @@ impl ZoneRuntime {
             packets,
         }];
         if killed {
-            let reward = reward_owner.unwrap_or(owner);
-            if let Some(player) = self.players.get(&reward) {
-                let owner_id = player.object_id;
-                let drops = self.spawn_native_monster_drops(&name, &position, owner_id, drops, now);
-                out.extend(self.diff_all_zone_object_visibility());
-                out.extend(self.group_monster_kill_awards(
-                    &reward,
-                    ZoneMonsterKillAward {
-                        source_receipt_key: None,
-                        experience_selection: None,
-                        monster_object_id: target_id,
-                        killed_at_ms: now,
-                        monster_name: name,
-                        experience,
-                        drops,
-                        boss_audit,
-                    },
-                ));
-            }
+            out.extend(self.native_monster_kill_outbounds(
+                reward_owner,
+                &position,
+                ZoneMonsterKillAward {
+                    source_receipt_key: None,
+                    experience_selection: None,
+                    monster_object_id: target_id,
+                    killed_at_ms: now,
+                    monster_name: name,
+                    experience,
+                    drops,
+                    boss_audit,
+                },
+            ));
         }
         out
     }

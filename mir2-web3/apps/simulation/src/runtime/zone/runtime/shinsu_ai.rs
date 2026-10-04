@@ -447,6 +447,7 @@ impl ZoneRuntime {
                 );
                 out.extend(self.resolve_pending_native_monster_hit(
                     PendingNativeMonsterHit {
+                        force_experience_owner: false,
                         ready_at_ms: now,
                         session_id: h.owner,
                         attacker_object_id: id,

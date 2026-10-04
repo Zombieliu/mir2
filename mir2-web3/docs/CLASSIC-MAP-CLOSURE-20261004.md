@@ -1,5 +1,17 @@
 # Classic map closure, phase 1: all 164 admitted maps
 
+> 2026-10-04 phase2 is now integrated:44 additional reachable whitelist maps
+> bring runtime scope to208; the original unreachable TacticalMaze D71653 is
+> resource-only, making209 native maps. EvilSnake/WhiteBoar0 enter the profile
+> and missing Monster049 is exported/verified. Actual coverage is67,993 drawable
+> references with zero gaps; Node64/Rust12 worker checks and root integrated
+> consumer checks pass. Full source and raw failures remain recorded.
+> This does not grant the unbound NeedMove D10061 entry or claim ordinary
+> Stone quest predicates/Boss loot/native acceptance. A bounded next route
+> round handles named legacy NPC compatibility and preserves that source gap.
+> [Phase2 report](CLASSIC-MAP-CLOSURE-PHASE2-20261004.md),
+> [Root integration](generated/player-qa/classic-map-closure-20261004/phase2-208-209/README.md).
+
 The Windows Candidate default now derives its native map list from the actual
 `platinum_176` profile instead of the former 32-map merchant/Sabuk list. It
 retains those 32 maps and the existing 15-map journey/supply minimum. Explicit

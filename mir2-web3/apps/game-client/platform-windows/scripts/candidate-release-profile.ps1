@@ -103,6 +103,72 @@ function Get-CandidateMapListSha256 {
     finally { $hasher.Dispose() }
 }
 
+function Get-CandidateResourceOnlyMapListSha256 {
+    param([string[]]$MapNames = @())
+    if ($MapNames.Count -gt 1 -or @($MapNames | Where-Object { $_ -cne 'd71653' }).Count -gt 0) { throw 'Resource-only hash requires the named original room or an empty selection' }
+    $bytes = [Text.Encoding]::UTF8.GetBytes(($MapNames -join "`n") + "`n")
+    $hasher = [Security.Cryptography.SHA256]::Create()
+    try { return [BitConverter]::ToString($hasher.ComputeHash($bytes)).Replace('-', '').ToLowerInvariant() }
+    finally { $hasher.Dispose() }
+}
+
+function Get-CandidateResourceOnlyMapNames {
+    param([object]$Profile)
+    $names = @()
+    if ($null -ne $Profile.PSObject.Properties['nativeResourceOnlyMaps']) {
+        if ($Profile.nativeResourceOnlyMaps -isnot [array]) { throw 'Only the canonical named original resource room D71653 may be declared' }
+        $raw = @($Profile.nativeResourceOnlyMaps)
+        if ($raw.Count -gt 1 -or @($raw | Where-Object { $_ -isnot [string] -or $_ -cne 'D71653' }).Count -gt 0) { throw 'Only the canonical named original resource room D71653 may be declared' }
+        $names = @($raw | ForEach-Object { $_.ToLowerInvariant() })
+    }
+    if ($names.Count -gt 0 -and $Profile.profileId -cne 'platinum_176') { throw 'Resource-only room requires platinum_176' }
+    $runtime = @($Profile.mapWhitelist | ForEach-Object { ([string]$_.fileName).ToLowerInvariant() })
+    foreach ($name in $names) { if ($runtime -ccontains $name) { throw 'Resource-only room must not be runtime-admitted' } }
+    return $names
+}
+
+function Assert-CandidateResourceOnlyRoomProof {
+    param([object]$Profile, [object]$RespawnManifest, [object]$NpcScriptManifest, [object]$MapEventManifest)
+    $names = @(Get-CandidateResourceOnlyMapNames -Profile $Profile)
+    if ($names.Count -eq 0) { return @() }
+    $npcText = ($NpcScriptManifest | ConvertTo-Json -Depth 100 -Compress).ToLowerInvariant()
+    $eventText = ($MapEventManifest | ConvertTo-Json -Depth 100 -Compress).ToLowerInvariant()
+    foreach ($name in $names) {
+        $rooms = @($RespawnManifest.maps | Where-Object { $_.map_file_name -ceq 'D71653' })
+        if ($rooms.Count -ne 1) { throw 'D71653 no longer matches its original no-entry source proof' }
+        $room = $rooms[0]
+        if ($room.map_index -ne 235 -or $room.map_title -cne 'TacticalMaze' -or $room.mini_map -ne 0 -or $room.big_map -ne 0 -or
+            $room.respawn_count -ne 0 -or @($room.respawns).Count -ne 0 -or @($room.safe_zones).Count -ne 0 -or
+            $room.movement_count -ne 1 -or @($room.movements).Count -ne 1) { throw 'D71653 no longer matches its original no-entry source proof' }
+        $move = $room.movements[0]
+        $inbound = @($RespawnManifest.maps | ForEach-Object { $_.movements } | Where-Object { $_.map_index -eq 235 })
+        if ($move.map_index -ne 209 -or $move.source.x -ne 17 -or $move.source.y -ne 12 -or $move.destination.x -ne 36 -or $move.destination.y -ne 34 -or
+            $move.need_hole -isnot [bool] -or $move.need_hole -ne $false -or $move.need_move -isnot [bool] -or $move.need_move -ne $false -or
+            $move.conquest_index -ne 0 -or $move.show_on_big_map -isnot [bool] -or $move.show_on_big_map -ne $false -or $move.icon -ne 0 -or
+            $inbound.Count -gt 0 -or $npcText.Contains($name) -or $eventText.Contains($name)) { throw 'D71653 no longer matches its original no-entry source proof' }
+        [pscustomobject]@{ map = $name; mapIndex = 235; reason = 'source-has-no-imported-entry'; runtimeAdmitted = $false
+            outgoingMapIndices = @(209); source = [pscustomobject]@{ x = 17; y = 12 }; destination = [pscustomobject]@{ x = 36; y = 34 } }
+    }
+}
+
+function Get-CandidateTopologyEvidence {
+    param([object]$Profile)
+    $paths = @('packages/game-data/data/generated/crystal_respawn_manifest.json', 'packages/game-data/data/generated/crystal_npc_manifest.json', 'packages/game-data/data/generated/crystal_map_event_manifest.json')
+    $project = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../../../..'))
+    $values = @(); $files = @()
+    foreach ($relative in $paths) {
+        $file = Join-Path $project $relative
+        $values += (Get-Content -LiteralPath $file -Raw | ConvertFrom-Json)
+        $files += [pscustomobject]@{ path = $relative; sha256 = (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLowerInvariant() }
+    }
+    $rooms = @(Assert-CandidateResourceOnlyRoomProof -Profile $Profile -RespawnManifest $values[0] -NpcScriptManifest $values[1] -MapEventManifest $values[2])
+    $inputText = ($files | ForEach-Object { $_.path + "`0" + $_.sha256 + "`n" }) -join ''
+    $hasher = [Security.Cryptography.SHA256]::Create()
+    try { $sha = [BitConverter]::ToString($hasher.ComputeHash([Text.Encoding]::UTF8.GetBytes($inputText))).Replace('-', '').ToLowerInvariant() }
+    finally { $hasher.Dispose() }
+    return [pscustomobject]@{ files = $files; sha256 = $sha; rooms = $rooms }
+}
+
 function Resolve-CandidateMapScope {
     param([string[]]$MapNames = @(), [string]$ProfilePath = $script:CandidateContentProfilePath)
     $profile = Get-Content -LiteralPath $ProfilePath -Raw | ConvertFrom-Json
@@ -113,24 +179,30 @@ function Resolve-CandidateMapScope {
     $rawNames = @($profile.mapWhitelist | ForEach-Object { [string]$_.fileName })
     $profileNames = @(Resolve-CandidateMapNames -MapNames $rawNames)
     if ($profileNames.Count -ne $rawNames.Count) { throw 'Candidate content profile contains duplicate map identities' }
+    $resourceNames = @(Get-CandidateResourceOnlyMapNames -Profile $profile)
+    $evidence = Get-CandidateTopologyEvidence -Profile $profile
+    $nativeNames = @(Resolve-CandidateMapNames -MapNames ($profileNames + $resourceNames))
     foreach ($previous in Get-CandidatePreviouslyShippedMapNames) {
         if ($profileNames -cnotcontains $previous) { throw "Candidate content profile omitted a previously shipped map: $previous" }
     }
     $mode = 'profile'
-    $expected = $profileNames
+    $expected = $nativeNames
     if ($MapNames.Count -gt 0) { $mode = 'explicit'; $expected = @(Resolve-CandidateMapNames -MapNames $MapNames) }
+    $selectedResourceNames = @($resourceNames | Where-Object { $expected -ccontains $_ })
     return [pscustomobject]@{
         schema = 'mir2.windows.candidate-map-scope.v1'; mode = $mode
         profileId = [string]$profile.profileId; profileVersion = [int64]$profile.version
         profileSha256 = (Get-FileHash -LiteralPath $ProfilePath -Algorithm SHA256).Hash.ToLowerInvariant()
         profileMapCount = $profileNames.Count; expectedMaps = $expected
         expectedMapsSha256 = Get-CandidateMapListSha256 -MapNames $expected
+        resourceOnlyMaps = $selectedResourceNames; resourceOnlyMapsSha256 = Get-CandidateResourceOnlyMapListSha256 -MapNames $selectedResourceNames
+        profileNativeMapCount = $nativeNames.Count; sourceTopology = $evidence.files; sourceTopologySha256 = $evidence.sha256
         completeClassicWorld = $false
     }
 }
 
 function Get-CandidateDefaultMapNames {
-    # Derive the whole admitted world, preserving the existing 32-map floor.
+    # Derive admitted maps plus proved resource rooms, retaining the 32-map floor.
     # Explicit selections still use Resolve-CandidateMapNames independently.
     return @((Resolve-CandidateMapScope).expectedMaps)
 }
@@ -153,10 +225,12 @@ function Assert-CandidateMapCoverageScope {
         if ($selection.Count -eq 0) { $selection = @($scope.expectedMaps) }
         $expected = Resolve-CandidateMapScope -MapNames $selection
     }
-    foreach ($field in @('schema', 'mode', 'profileId', 'profileVersion', 'profileSha256', 'profileMapCount', 'expectedMapsSha256')) {
+    foreach ($field in @('schema', 'mode', 'profileId', 'profileVersion', 'profileSha256', 'profileMapCount', 'expectedMapsSha256', 'resourceOnlyMapsSha256', 'profileNativeMapCount', 'sourceTopologySha256')) {
         if ($null -eq $scope.PSObject.Properties[$field] -or [string]$scope.$field -cne [string]$expected.$field) { throw "Candidate map coverage scope identity mismatch: $field" }
     }
     if ($null -eq $scope.PSObject.Properties['completeClassicWorld'] -or $scope.completeClassicWorld -isnot [bool] -or $scope.completeClassicWorld -ne $false) { throw 'Active-profile map coverage cannot claim complete classic-world acceptance' }
+    if ($null -eq $scope.PSObject.Properties['resourceOnlyMaps'] -or ($scope.resourceOnlyMaps -join "`n") -cne ($expected.resourceOnlyMaps -join "`n") -or
+        $null -eq $scope.PSObject.Properties['sourceTopology'] -or ($scope.sourceTopology | ConvertTo-Json -Depth 10 -Compress) -cne ($expected.sourceTopology | ConvertTo-Json -Depth 10 -Compress)) { throw 'Candidate resource-only declaration or original topology hash binding mismatch' }
     $declared = @(Resolve-CandidateMapNames -MapNames @($scope.expectedMaps))
     $actual = @(Resolve-CandidateMapNames -MapNames @($Report.mapNames))
     if (($declared -join "`n") -cne ($expected.expectedMaps -join "`n") -or ($actual -join "`n") -cne ($expected.expectedMaps -join "`n")) {
@@ -165,15 +239,21 @@ function Assert-CandidateMapCoverageScope {
     if ($null -eq $Report.PSObject.Properties['unexpectedMaps'] -or @($Report.unexpectedMaps).Count -ne 0) { throw 'Candidate map coverage contains an unexpected map' }
     if ($null -eq $Report.PSObject.Properties['scopeRoutes'] -or $Report.scopeRoutes.schema -cne 'mir2.windows.candidate-map-topology.v1' -or
         [int64]$Report.scopeRoutes.expectedMapCount -ne $expected.expectedMaps.Count -or $Report.scopeRoutes.runtimeGameplayAccepted -isnot [bool] -or $Report.scopeRoutes.runtimeGameplayAccepted -ne $false -or
-        ($scope.mode -ceq 'profile' -and @($Report.scopeRoutes.unreachableMaps).Count -ne 0)) { throw 'Candidate map topology receipt is missing, unreachable or claims gameplay acceptance' }
+        $null -eq $Report.scopeRoutes.PSObject.Properties['unreachableRuntimeMaps'] -or $null -eq $Report.scopeRoutes.PSObject.Properties['resourceOnlyRooms'] -or
+        ($scope.mode -ceq 'profile' -and (@($Report.scopeRoutes.unreachableRuntimeMaps).Count -ne 0 -or ($Report.scopeRoutes.unreachableMaps -join "`n") -cne ($expected.resourceOnlyMaps -join "`n")))) { throw 'Candidate map topology receipt is missing, unreachable or claims gameplay acceptance' }
+    $sourceProfile = Get-Content -LiteralPath $script:CandidateContentProfilePath -Raw | ConvertFrom-Json
+    $evidence = Get-CandidateTopologyEvidence -Profile $sourceProfile
+    $rooms = @($evidence.rooms | Where-Object { $expected.resourceOnlyMaps -ccontains $_.map })
+    if (@($Report.scopeRoutes.resourceOnlyRooms).Count -ne $rooms.Count -or
+        (ConvertTo-Json -InputObject @($Report.scopeRoutes.resourceOnlyRooms) -Depth 20 -Compress) -cne (ConvertTo-Json -InputObject $rooms -Depth 20 -Compress)) { throw 'Candidate topology forged a resource-only room or its original source proof' }
     return $expected
 }
 
 function Get-CandidateActorLibraryNames {
-    # Exact exported classic-profile libraries as of the September 2026
-    # newcomer candidate. Requiring every metadata file detects a silently
+    # The shipped classic libraries plus v27 EvilSnake's source Monster/049.
+    # Requiring every metadata file detects a silently
     # omitted entire library, which per-existing-directory checks cannot do.
-    $monsters = '000,003,004,005,006,007,008,009,010,011,012,013,014,015,016,017,018,019,020,021,022,023,024,025,026,027,029,030,031,032,033,034,035,036,037,038,039,040,041,042,043,044,045,046,047,048,051,052,053,054,055,056,057,058,059,060,061,062,063,064,065,066,067,068,069,070,071,072,073,074,078,081,082,083,084,085,087,088,090,091,092,094,095,097,098,099,100,103,104,105,106,107,108,109,110,111,112,114,139,152,153,154,155,163,378'
+    $monsters = '000,003,004,005,006,007,008,009,010,011,012,013,014,015,016,017,018,019,020,021,022,023,024,025,026,027,029,030,031,032,033,034,035,036,037,038,039,040,041,042,043,044,045,046,047,048,049,051,052,053,054,055,056,057,058,059,060,061,062,063,064,065,066,067,068,069,070,071,072,073,074,078,081,082,083,084,085,087,088,090,091,092,094,095,097,098,099,100,103,104,105,106,107,108,109,110,111,112,114,139,152,153,154,155,163,378'
     foreach ($name in $monsters.Split(',')) { "Monster/$name" }
     foreach ($name in '00,01,03,04,05,06,07,08,09,11,15,16,25,27,45,52,83'.Split(',')) { "NPC/$name" }
     foreach ($name in @('00','01','02','03')) { "Gate/$name" }

@@ -1,5 +1,17 @@
 # Agent Orchestration
 
+> 2026-10-04 root integrates the reviewed11-file v27 resource phase and12-file
+> same-map ordinary EXPOwner slice.208 runtime/209 native resource maps are
+> source-bound; D71653 stays resource-only. Root data8/ownership21/Node12 plus
+> PowerShell/bundle, Gateway test-build and independent Windows host dependency
+> checks pass; worker logs retain the old/new Hell fixture failure. R17 stays
+> frozen and published; no new release/human acceptance follows. Bounded map
+> worker now owns five new ordinary-route validation files and only named
+> Stone/BigTaoist legacy conditions in npc_script.rs; EXP worker is read-only
+> on the dead-XP/level-up chain. Root owns global docs/integration/rollout.
+> [Map evidence](generated/player-qa/classic-map-closure-20261004/phase2-208-209/README.md),
+> [EXP scope](CLASSIC-EXPERIENCE-OWNERSHIP-20261004.md).
+
 > 2026-10-04 root integrates the reviewed seven-file164-map resource phase at
 > ca5eee0a5;60 focused/adjacent and actual PNG/manifest guards pass. The next
 > bounded map phase remains separate from exact-ELF dense-hit fixture work and

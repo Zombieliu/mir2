@@ -1,0 +1,3694 @@
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/types.rs:353-450
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/types.rs
+353: pub struct ZoneMonsterSpawn {
+354:     /// Server-authored original drop-table roll. None preserves explicit/custom loot.
+355:     #[serde(default, skip_serializing_if = "Option::is_none")]
+356:     pub crystal_drop_seed: Option<u64>,
+357:     pub object_id: u32,
+358:     pub name: String,
+359:     pub name_colour_argb: i32,
+360:     pub image: u16,
+361:     pub ai: u8,
+362:     /// Explicit authoritative relationship to players. `None` represents an
+363:     /// old or incomplete producer and is deliberately treated as non-hostile;
+364:     /// AI controls behaviour, never combat authorization.
+365:     #[serde(default, skip_serializing_if = "Option::is_none")]
+366:     pub disposition: Option<WorldEntityDisposition>,
+367:     pub level: u16,
+368:     pub max_hp: i32,
+369:     pub hp: i32,
+370:     pub experience: u32,
+371:     /// Crystal movement cadence, kept in real milliseconds for the shared
+372:     /// Zone clock. Zero preserves compatibility with old fixtures/checkpoints
+373:     /// and falls back to template/default data in `ZoneNativeMonster`.
+374:     pub move_speed_ms: u64,
+375:     /// Crystal attack cadence in real milliseconds.
+376:     pub attack_speed_ms: u64,
+377:     /// Optional guild protected by this conquest guard. Ordinary monsters and
+378:     /// non-conquest structures leave this unset.
+379:     pub friendly_guild: Option<String>,
+380:     pub position: Point,
+381:     pub direction: MirDirection,
+382:     /// Authoritative defensive stats so the zone can resolve incoming player
+383:     /// damage (accuracy-vs-agility hit check + armour subtraction) itself. When
+384:     /// `defense.is_zero()` the zone treats the monster as having no armour/dodge
+385:     /// and applies trusted damage unchanged (legacy behaviour).
+386:     pub defense: ZoneMonsterDefense,
+387:     /// Server-authored wall-clock respawn policy. Dynamic/event monsters leave
+388:     /// this unset and therefore do not silently become persistent map spawns.
+389:     #[serde(default, skip_serializing_if = "Option::is_none")]
+390:     pub respawn: Option<ZoneMonsterRespawnPolicy>,
+391:     pub drops: Vec<GroundDropSnapshot>,
+392: }
+393: 
+394: #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+395: pub struct ZoneBossRewardAudit {
+396:     pub reward_owner_session_id: SessionId,
+397:     pub last_hit_session_id: SessionId,
+398:     pub damage_contributions: BTreeMap<SessionId, u64>,
+399: }
+400: 
+401: /// Authoritative defensive stats for a shared-zone monster.
+402: #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+403: pub struct ZoneMonsterDefense {
+404:     pub agility: i32,
+405:     pub min_ac: i32,
+406:     pub max_ac: i32,
+407:     pub min_mac: i32,
+408:     pub max_mac: i32,
+409: }
+410: 
+411: impl ZoneMonsterDefense {
+412:     /// Project a Crystal monster template's authoritative defensive stats into a
+413:     /// shared-zone defense block so the zone can run the accuracy-vs-agility hit
+414:     /// check and subtract armour itself.
+415:     pub fn from_crystal_template(template: &CrystalMonsterTemplate) -> Self {
+416:         Self {
+417:             agility: template.agility.max(0),
+418:             min_ac: template.min_ac.max(0),
+419:             max_ac: template.max_ac.max(0),
+420:             min_mac: template.min_mac.max(0),
+421:             max_mac: template.max_mac.max(0),
+422:         }
+423:     }
+424: 
+425:     pub fn is_zero(&self) -> bool {
+426:         self.agility == 0
+427:             && self.min_ac == 0
+428:             && self.max_ac == 0
+429:             && self.min_mac == 0
+430:             && self.max_mac == 0
+431:     }
+432: }
+433: 
+434: #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+435: pub struct ZoneMonsterKillAward {
+436:     /// Gateway fixes this server-only namespace before first durable delivery.
+437:     #[serde(default, skip_serializing_if = "Option::is_none")]
+438:     pub source_receipt_key: Option<String>,
+439:     /// Immutable server selection; legacy envelopes never infer a later Guild.
+440:     #[serde(default, skip_serializing_if = "Option::is_none")]
+441:     pub experience_selection: Option<super::ZoneExperienceSelection>,
+442:     pub monster_object_id: u32,
+443:     /// Authoritative time of this monster incarnation's death. Crystal reuses
+444:     /// a spawn's object id after respawn, so the object id alone cannot be an
+445:     /// idempotency key for account/quest rewards.
+446:     #[serde(default)]
+447:     pub killed_at_ms: u64,
+448:     pub monster_name: String,
+449:     pub experience: u32,
+450:     pub drops: Vec<GroundDropSnapshot>,
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/types.rs:989-1153
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/types.rs
+989: #[derive(Debug, Clone, Serialize, Deserialize)]
+990: pub(crate) struct ZoneNativeMonster {
+991:     /// Server-authored original drop-table roll. None preserves explicit/custom loot.
+992:     #[serde(default, skip_serializing_if = "Option::is_none")]
+993:     pub crystal_drop_seed: Option<u64>,
+994:     #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+995:     pub incarnation: u64,
+996:     #[serde(default, skip_serializing_if = "zone_poison_is_zero")]
+997:     pub entity_poison: u16,
+998:     /// Zone-owned special behavior state. Omitting absent state preserves the
+999:     /// canonical bytes of older checkpoints until the first shared update.
+1000:     #[serde(default, skip_serializing_if = "Option::is_none")]
+1001:     pub special_ai: Option<super::runtime::special_ai::ZoneSpecialMonsterState>,
+1002:     pub name: String,
+1003:     pub ai: u8,
+1004:     /// Retained authoritative relationship supplied by the spawn producer.
+1005:     /// Missing legacy checkpoint data fails closed.
+1006:     #[serde(default)]
+1007:     pub disposition: Option<WorldEntityDisposition>,
+1008:     #[serde(default)]
+1009:     pub hostile_to_player: bool,
+1010:     pub owner_session_id: Option<SessionId>,
+1011:     pub master_object_id: u32,
+1012:     pub owner_player_object_id: u32,
+1013:     pub visible_extra: bool,
+1014:     pub summon_skill_level: u8,
+1015:     pub level: u16,
+1016:     pub max_hp: i32,
+1017:     pub hp: i32,
+1018:     pub experience: u32,
+1019:     #[serde(default = "default_zone_monster_move_speed_ms")]
+1020:     pub move_speed_ms: u64,
+1021:     #[serde(default = "default_zone_monster_attack_speed_ms")]
+1022:     pub attack_speed_ms: u64,
+1023:     #[serde(default)]
+1024:     pub friendly_guild: Option<String>,
+1025:     pub defense: ZoneMonsterDefense,
+1026:     pub position: Point,
+1027:     pub direction: MirDirection,
+1028:     pub dead: bool,
+1029:     pub drops: Vec<GroundDropSnapshot>,
+1030:     pub next_ai_ready_at_ms: u64,
+1031:     pub next_attack_ready_at_ms: u64,
+1032:     pub control_until_ms: u64,
+1033:     pub control_poison: u16,
+1034:     /// Crystal Hallucination suppresses a monster's normal player targeting
+1035:     /// without freezing its movement or making it invulnerable.
+1036:     #[serde(default)]
+1037:     pub hallucination_until_ms: u64,
+1038:     /// Crystal Revelation temporarily exposes health to nearby observers.
+1039:     #[serde(default)]
+1040:     pub revelation_until_ms: u64,
+1041:     pub damage_poison: u16,
+1042:     pub damage_poison_value: i32,
+1043:     pub damage_poison_next_damage_at_ms: u64,
+1044:     pub damage_poison_expires_at_ms: u64,
+1045:     pub damage_poison_owner_session_id: Option<SessionId>,
+1046:     pub damage_poison_owner_object_id: u32,
+1047:     /// Authoritative damage credited to player sessions for Boss ownership.
+1048:     /// Summon and damage-over-time attacks use their owning player's session.
+1049:     #[serde(default)]
+1050:     pub damage_contributions: BTreeMap<SessionId, u64>,
+1051:     pub buffs: BTreeMap<u8, ZonePlayerBuff>,
+1052: }
+1053: 
+1054: #[derive(Debug, Clone, Serialize, Deserialize)]
+1055: pub(crate) struct ZoneNativeMonsterRespawn {
+1056:     pub spawn: ZoneMonsterSpawn,
+1057:     pub due_at_ms: Option<u64>,
+1058: }
+1059: 
+1060: #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+1061: #[serde(rename_all = "camelCase")]
+1062: pub struct ZoneNativeMonsterSnapshot {
+1063:     pub object_id: u32,
+1064:     pub name: String,
+1065:     pub position: Point,
+1066:     pub hp: i32,
+1067:     pub max_hp: i32,
+1068:     pub dead: bool,
+1069:     pub disposition: Option<WorldEntityDisposition>,
+1070:     pub hostile_to_player: bool,
+1071: }
+1072: 
+1073: impl ZoneMonsterSpawn {
+1074:     pub fn is_authoritatively_hostile_to_player(&self) -> bool {
+1075:         self.disposition == Some(WorldEntityDisposition::Hostile)
+1076:     }
+1077: 
+1078:     /// Crystal passive livestock can be struck by an adjacent physical melee
+1079:     /// attack even though it must never acquire or attack a player itself.
+1080:     /// Friendly entities and incomplete legacy records continue to fail closed.
+1081:     pub fn is_authoritatively_melee_attackable_by_player(&self) -> bool {
+1082:         self.is_authoritatively_hostile_to_player()
+1083:             || (self.disposition == Some(WorldEntityDisposition::Neutral)
+1084:                 && zone_native_monster_requires_harvest(self.ai))
+1085:     }
+1086: }
+1087: 
+1088: pub(super) fn zone_native_monster_requires_harvest(ai: u8) -> bool {
+1089:     crate::runtime::monsters::monster_ai_requires_harvest(ai)
+1090: }
+1091: 
+1092: impl ZoneNativeMonster {
+1093:     pub fn from_spawn(spawn: &ZoneMonsterSpawn, _object_id: u32) -> Self {
+1094:         let max_hp = spawn.max_hp.max(1);
+1095:         let hp = spawn.hp.clamp(0, max_hp);
+1096:         let template = crystal_monster_by_name(&spawn.name);
+1097:         let mut monster = Self {
+1098:             incarnation: 0,
+1099:             entity_poison: 0,
+1100:             special_ai: None,
+1101:             name: spawn.name.clone(),
+1102:             ai: spawn.ai,
+1103:             disposition: spawn.disposition,
+1104:             hostile_to_player: spawn.is_authoritatively_hostile_to_player(),
+1105:             owner_session_id: None,
+1106:             master_object_id: 0,
+1107:             owner_player_object_id: 0,
+1108:             visible_extra: false,
+1109:             summon_skill_level: 0,
+1110:             level: spawn.level,
+1111:             max_hp,
+1112:             hp,
+1113:             experience: spawn.experience,
+1114:             move_speed_ms: normalize_zone_monster_move_speed_ms(
+1115:                 spawn.move_speed_ms.max(
+1116:                     template
+1117:                         .as_ref()
+1118:                         .map(|value| u64::from(value.move_speed))
+1119:                         .unwrap_or_default(),
+1120:                 ),
+1121:             ),
+1122:             attack_speed_ms: normalize_zone_monster_attack_speed_ms(
+1123:                 spawn.attack_speed_ms.max(
+1124:                     template
+1125:                         .as_ref()
+1126:                         .map(|value| u64::from(value.attack_speed))
+1127:                         .unwrap_or_default(),
+1128:                 ),
+1129:             ),
+1130:             friendly_guild: spawn.friendly_guild.clone(),
+1131:             defense: spawn.defense,
+1132:             position: spawn.position.clone(),
+1133:             direction: spawn.direction,
+1134:             dead: hp == 0,
+1135:             crystal_drop_seed: spawn.crystal_drop_seed,
+1136:             drops: spawn.drops.clone(),
+1137:             next_ai_ready_at_ms: 0,
+1138:             next_attack_ready_at_ms: 0,
+1139:             control_until_ms: 0,
+1140:             control_poison: 0,
+1141:             hallucination_until_ms: 0,
+1142:             revelation_until_ms: 0,
+1143:             damage_poison: 0,
+1144:             damage_poison_value: 0,
+1145:             damage_poison_next_damage_at_ms: 0,
+1146:             damage_poison_expires_at_ms: 0,
+1147:             damage_poison_owner_session_id: None,
+1148:             damage_poison_owner_object_id: 0,
+1149:             damage_contributions: BTreeMap::new(),
+1150:             buffs: BTreeMap::new(),
+1151:         };
+1152:         super::runtime::visibility_ai::initialize_monster_visibility(&mut monster);
+1153:         monster
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/types.rs:1182-1240
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/types.rs
+1182: pub(crate) struct ZonePlayer {
+1183:     pub session_id: SessionId,
+1184:     pub account_id: String,
+1185:     pub character_index: i32,
+1186:     pub object_id: u32,
+1187:     pub name: String,
+1188:     pub name_colour_argb: i32,
+1189:     pub class: MirClass,
+1190:     pub gender: MirGender,
+1191:     pub level: u16,
+1192:     pub hp: i32,
+1193:     pub max_hp: i32,
+1194:     pub mp: i32,
+1195:     pub position: Point,
+1196:     pub direction: MirDirection,
+1197:     pub light: u8,
+1198:     pub weapon: i16,
+1199:     pub weapon_effect: i16,
+1200:     pub armour: i16,
+1201:     pub poison: u16,
+1202:     pub native_status_poison: u16,
+1203:     pub native_status_poison_expires_at_ms: Option<u64>,
+1204:     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+1205:     pub native_status_poison_deadlines: BTreeMap<u16, u64>,
+1206:     pub dead: bool,
+1207:     #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+1208:     pub life_generation: u64,
+1209:     #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+1210:     pub vital_receipt_sequence: u64,
+1211:     /// Monotonic owner-local ordering for Zone journey receipts. Kept separate
+1212:     /// from vital settlements because only the Zone event bridge consumes it.
+1213:     #[serde(default, skip_serializing_if = "zone_generation_is_zero")]
+1214:     pub journey_event_sequence: u64,
+1215:     pub hidden: bool,
+1216:     pub sneaking: bool,
+1217:     pub effect: u8,
+1218:     pub wing_effect: u8,
+1219:     pub mount_type: i16,
+1220:     pub riding_mount: bool,
+1221:     pub fishing: bool,
+1222:     pub transform_type: i16,
+1223:     pub level_effects: u16,
+1224:     pub visible_object_ids: BTreeSet<u32>,
+1225:     pub movement_actions: VecDeque<ZoneMovementAction>,
+1226:     pub last_seen_move_seq: u64,
+1227:     pub movement_ready_at_ms: u64,
+1228:     pub run_step_until_ms: u64,
+1229:     pub shout_ready_at_ms: u64,
+1230:     pub next_attack_ready_at_ms: u64,
+1231:     pub next_spell_ready_at_ms: u64,
+1232:     pub magic_ready_at_ms: BTreeMap<u8, u64>,
+1233:     #[serde(default)]
+1234:     pub flaming_sword_armed: bool,
+1235:     #[serde(default)]
+1236:     pub flaming_sword_ready_at_ms: u64,
+1237:     #[serde(default)]
+1238:     pub last_damaged_at_ms: u64,
+1239:     /// Crystal's ordinary monster-hit presentation window, independent of
+1240:     /// damage settlement and the player's action/movement deadlines.
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:2484-2535
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+2484:     fn leave(&mut self, session_id: &SessionId) -> Vec<ZoneOutbound> {
+2485:         let Some(player) = self.players.remove(session_id) else {
+2486:             return Vec::new();
+2487:         };
+2488:         self.clear_native_player_life_actions(player.object_id);
+2489:         self.pending_native_hits
+2490:             .retain(|hit| &hit.session_id != session_id);
+2491:         self.pending_native_player_hits
+2492:             .retain(|hit| &hit.target_session_id != session_id);
+2493:         self.occupancy.remove(&tile_key(&player.position));
+2494:         self.player_grid.remove(session_id);
+2495:         self.ecs.remove_player(session_id);
+2496:         let creature_outbounds = self.remove_intelligent_creature(session_id, 0);
+2497: 
+2498:         let mut observers = Vec::new();
+2499:         for (other_session_id, other) in &mut self.players {
+2500:             if other.visible_object_ids.remove(&player.object_id) {
+2501:                 observers.push(other_session_id.clone());
+2502:             }
+2503:             other.visible_object_ids.remove(&player.object_id);
+2504:         }
+2505: 
+2506:         let mut outbounds = Vec::new();
+2507:         for (other_session_id, other) in &mut self.players {
+2508:             if other
+2509:                 .reincarnation_offer
+2510:                 .as_ref()
+2511:                 .is_some_and(|offer| &offer.caster_session_id == session_id)
+2512:             {
+2513:                 other.reincarnation_offer = None;
+2514:                 outbounds.push(ZoneOutbound::ToSession {
+2515:                     session_id: other_session_id.clone(),
+2516:                     packets: vec![ServerPacket::CancelReincarnation],
+2517:                 });
+2518:             }
+2519:         }
+2520:         if !observers.is_empty() {
+2521:             outbounds.push(ZoneOutbound::ToMany {
+2522:                 session_ids: observers,
+2523:                 packets: vec![ServerPacket::ObjectRemove {
+2524:                     object_id: player.object_id,
+2525:                 }],
+2526:             });
+2527:         }
+2528:         outbounds.extend(creature_outbounds);
+2529:         outbounds.extend(self.remove_owner_generated_zone_objects(player.object_id, &player.name));
+2530:         outbounds.push(ZoneOutbound::SaveTransform {
+2531:             session_id: session_id.clone(),
+2532:             position: player.position,
+2533:             direction: player.direction,
+2534:         });
+2535:         outbounds
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:5210-5240
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+5210:                 let Some(hit_damage) = zone_direct_magic_damage_for_monster(
+5211:                     spell,
+5212:                     &player,
+5213:                     hit_monster,
+5214:                     zone_magic_hit_damage(spell, hit_object_id != object_id, native_damage),
+5215:                 ) else {
+5216:                     continue;
+5217:                 };
+5218:                 // Subtract the struck monster's magic armour, mirroring the AC
+5219:                 // subtraction the physical path applies. Each secondary target
+5220:                 // rolls against its own MAC.
+5221:                 let hit_damage = if spell == Spell::TurnUndead {
+5222:                     hit_damage
+5223:                 } else {
+5224:                     zone_magic_damage_after_monster_armour(
+5225:                         hit_monster,
+5226:                         hit_damage,
+5227:                         player.object_id,
+5228:                         now_ms,
+5229:                     )
+5230:                 };
+5231:                 self.pending_native_hits.push(PendingNativeMonsterHit {
+5232:                     ready_at_ms: now_ms,
+5233:                     session_id: session_id.clone(),
+5234:                     attacker_object_id: player.object_id,
+5235:                     object_id: hit_object_id,
+5236:                     damage: hit_damage,
+5237:                     soulfire_practice: ZoneMagicPracticeSpell::from_spell(spell)
+5238:                         .filter(|_| hit_object_id == object_id)
+5239:                         .map(|spell| ZoneMagicPracticeReceipt {
+5240:                             spell,
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:9359-9489
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+9359:     fn tick_native_monster_damage_poison(
+9360:         &mut self,
+9361:         object_id: u32,
+9362:         now_ms: u64,
+9363:     ) -> Vec<ZoneOutbound> {
+9364:         let Some(monster) = self.native_monsters.get_mut(&object_id) else {
+9365:             return Vec::new();
+9366:         };
+9367:         if monster.damage_poison == 0 || monster.dead {
+9368:             return Vec::new();
+9369:         }
+9370: 
+9371:         if now_ms >= monster.damage_poison_expires_at_ms {
+9372:             monster.damage_poison = 0;
+9373:             monster.damage_poison_value = 0;
+9374:             monster.damage_poison_next_damage_at_ms = 0;
+9375:             monster.damage_poison_expires_at_ms = 0;
+9376:             monster.damage_poison_owner_session_id = None;
+9377:             monster.damage_poison_owner_object_id = 0;
+9378:             let position = monster.position.clone();
+9379:             let packet = ServerPacket::ObjectPoisoned {
+9380:                 object_id,
+9381:                 poison: native_monster_current_poison(monster),
+9382:             };
+9383:             self.apply_zone_object_packets(std::slice::from_ref(&packet), now_ms);
+9384:             let recipients = self.native_monster_visible_recipients(object_id, &position);
+9385:             return (!recipients.is_empty())
+9386:                 .then_some(ZoneOutbound::ToMany {
+9387:                     session_ids: recipients,
+9388:                     packets: vec![packet],
+9389:                 })
+9390:                 .into_iter()
+9391:                 .collect();
+9392:         }
+9393: 
+9394:         if monster.damage_poison & CRYSTAL_POISON_GREEN == 0
+9395:             || monster.damage_poison_value <= 0
+9396:             || now_ms < monster.damage_poison_next_damage_at_ms
+9397:         {
+9398:             return Vec::new();
+9399:         }
+9400: 
+9401:         let damage = monster.damage_poison_value;
+9402:         let owner_session_id = monster.damage_poison_owner_session_id.clone();
+9403:         let owner_object_id = monster.damage_poison_owner_object_id;
+9404:         monster.damage_poison_next_damage_at_ms =
+9405:             now_ms.saturating_add(ZONE_CRYSTAL_GREEN_POISON_TICK_MS);
+9406: 
+9407:         let Some((
+9408:             applied_damage,
+9409:             health_percent,
+9410:             killed,
+9411:             monster_name,
+9412:             experience,
+9413:             position,
+9414:             monster_direction,
+9415:             reward_owner_session_id,
+9416:             drops,
+9417:             boss_audit,
+9418:         )) = self.apply_native_monster_damage(object_id, damage, owner_session_id.as_ref(), now_ms)
+9419:         else {
+9420:             return Vec::new();
+9421:         };
+9422: 
+9423:         self.conquest_delay_archer_regen(object_id,now_ms);
+9424:         let mut packets = vec![
+9425:             ServerPacket::DamageIndicator {
+9426:                 damage: applied_damage,
+9427:                 damage_type: 0,
+9428:                 object_id,
+9429:             },
+9430:             ServerPacket::ObjectHealth {
+9431:                 info: ObjectHealthInfo {
+9432:                     object_id,
+9433:                     percent: health_percent,
+9434:                     expire: 0,
+9435:                 },
+9436:             },
+9437:         ];
+9438:         if killed {
+9439:             packets.push(ServerPacket::ObjectDied {
+9440:                 info: ObjectDiedInfo {
+9441:                     object_id,
+9442:                     location: position.clone(),
+9443:                     direction: monster_direction,
+9444:                     kind: 0,
+9445:                 },
+9446:             });
+9447:         }
+9448:         self.apply_zone_object_packets(&packets, now_ms);
+9449:         let recipients = self.native_monster_visible_recipients(object_id, &position);
+9450: 
+9451:         let mut outbounds = Vec::new();
+9452:         if !recipients.is_empty() {
+9453:             outbounds.push(ZoneOutbound::ToMany {
+9454:                 session_ids: recipients,
+9455:                 packets,
+9456:             });
+9457:         }
+9458: 
+9459:         if killed {
+9460:             if let Some(reward_owner_session_id) = reward_owner_session_id {
+9461:                 let drop_owner_object_id = self
+9462:                     .players
+9463:                     .get(&reward_owner_session_id)
+9464:                     .map(|player| player.object_id)
+9465:                     .unwrap_or(owner_object_id);
+9466:                 let spawned_drops = self.spawn_native_monster_drops(
+9467:                     &monster_name,
+9468:                     &position,
+9469:                     drop_owner_object_id,
+9470:                     drops,
+9471:                     now_ms,
+9472:                 );
+9473:                 outbounds.extend(self.diff_all_zone_object_visibility());
+9474:                 outbounds.extend(self.group_monster_kill_awards(
+9475:                     &reward_owner_session_id,
+9476:                     ZoneMonsterKillAward {
+9477:                         source_receipt_key: None,
+9478:                         experience_selection: None,
+9479:                         monster_object_id: object_id,
+9480:                         killed_at_ms: now_ms,
+9481:                         monster_name,
+9482:                         experience,
+9483:                         drops: spawned_drops,
+9484:                         boss_audit,
+9485:                     },
+9486:                 ));
+9487:             }
+9488:         }
+9489: 
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:9754-9770
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+9754:     fn resolve_pending_native_monster_hit(
+9755:         &mut self,
+9756:         hit: PendingNativeMonsterHit,
+9757:         now_ms: u64,
+9758:     ) -> Vec<ZoneOutbound> {
+9759:         if !self.players.contains_key(&hit.session_id) {
+9760:             return Vec::new();
+9761:         }
+9762: 
+9763:         let practice_owner_is_current = hit.soulfire_practice.as_ref().is_some_and(|receipt| {
+9764:             self.players.get(&hit.session_id).is_some_and(|player| {
+9765:                 receipt.session_id == hit.session_id
+9766:                     && receipt.account_id == player.account_id
+9767:                     && receipt.character_index == player.character_index
+9768:                     && receipt.object_id == player.object_id
+9769:                     && receipt.object_id == hit.attacker_object_id
+9770:                     && receipt.life_generation == player.life_generation
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:9847-9867
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+9847:                     sleep_monster_on_damage(monster, hit.object_id, attacker_owner_id, now_ms);
+9848:                 }
+9849:             }
+9850:         }
+9851:         let Some((
+9852:             damage,
+9853:             health_percent,
+9854:             killed,
+9855:             monster_name,
+9856:             experience,
+9857:             position,
+9858:             monster_direction,
+9859:             reward_owner_session_id,
+9860:             drops,
+9861:             boss_audit,
+9862:         )) = self.apply_native_monster_direct_damage(
+9863:             hit.object_id,
+9864:             resolved_hit_damage,
+9865:             Some(&hit.session_id),
+9866:             now_ms,
+9867:         )
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:9967-10002
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+9967: 
+9968:         if killed {
+9969:             let reward_owner_session_id =
+9970:                 reward_owner_session_id.unwrap_or_else(|| hit.session_id.clone());
+9971:             let drop_owner_object_id = self
+9972:                 .players
+9973:                 .get(&reward_owner_session_id)
+9974:                 .map(|player| player.object_id)
+9975:                 .unwrap_or_else(|| {
+9976:                     self.native_monsters
+9977:                         .get(&hit.attacker_object_id)
+9978:                         .filter(|monster| zone_native_summon_owner_player_object_id(monster) != 0)
+9979:                         .map(zone_native_summon_owner_player_object_id)
+9980:                         .unwrap_or(hit.attacker_object_id)
+9981:                 });
+9982:             let spawned_drops = self.spawn_native_monster_drops(
+9983:                 &monster_name,
+9984:                 &position,
+9985:                 drop_owner_object_id,
+9986:                 drops,
+9987:                 now_ms,
+9988:             );
+9989:             outbounds.extend(self.diff_all_zone_object_visibility());
+9990:             outbounds.extend(self.group_monster_kill_awards(
+9991:                 &reward_owner_session_id,
+9992:                 ZoneMonsterKillAward {
+9993:                     source_receipt_key: None,
+9994:                     experience_selection: None,
+9995:                     monster_object_id: hit.object_id,
+9996:                     killed_at_ms: now_ms,
+9997:                     monster_name,
+9998:                     experience,
+9999:                     drops: spawned_drops,
+10000:                     boss_audit,
+10001:                 },
+10002:             ));
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:10162-10219
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+10162:     fn group_monster_kill_awards(
+10163:         &self,
+10164:         owner_session_id: &SessionId,
+10165:         award: ZoneMonsterKillAward,
+10166:     ) -> Vec<ZoneOutbound> {
+10167:         let Some(owner) = self.players.get(owner_session_id) else {
+10168:             return Vec::new();
+10169:         };
+10170:         let owner_group_members = &owner.chat_profile.group_members;
+10171:         let mut recipients = self
+10172:             .players
+10173:             .iter()
+10174:             .filter_map(|(session_id, player)| {
+10175:                 if player.dead || player.hp <= 0 {
+10176:                     return None;
+10177:                 }
+10178:                 let is_owner = session_id == owner_session_id;
+10179:                 let is_named_group_member = owner_group_members
+10180:                     .iter()
+10181:                     .any(|name| name.eq_ignore_ascii_case(&player.name));
+10182:                 (is_owner || (!owner_group_members.is_empty() && is_named_group_member))
+10183:                     .then(|| session_id.clone())
+10184:             })
+10185:             .collect::<Vec<_>>();
+10186:         if recipients.is_empty() {
+10187:             return Vec::new();
+10188:         }
+10189:         recipients.sort();
+10190: 
+10191:         let recipient_count = u32::try_from(recipients.len()).unwrap_or(u32::MAX).max(1);
+10192:         let base_share = award.experience / recipient_count;
+10193:         let remainder = award.experience % recipient_count;
+10194:         let remainder_recipient = recipients
+10195:             .iter()
+10196:             .find(|session_id| *session_id == owner_session_id)
+10197:             .cloned()
+10198:             .unwrap_or_else(|| recipients[0].clone());
+10199:         recipients
+10200:             .into_iter()
+10201:             .map(|session_id| {
+10202:                 let is_owner = &session_id == owner_session_id;
+10203:                 let mut recipient_award = award.clone();
+10204:                 recipient_award.experience =
+10205:                     base_share.saturating_add(if session_id == remainder_recipient {
+10206:                         remainder
+10207:                     } else {
+10208:                         0
+10209:                     });
+10210:                 if !is_owner {
+10211:                     recipient_award.drops.clear();
+10212:                     recipient_award.boss_audit = None;
+10213:                 }
+10214:                 ZoneOutbound::MonsterKillAward {
+10215:                     session_id,
+10216:                     award: recipient_award,
+10217:                 }
+10218:             })
+10219:             .collect()
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:11549-11561
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+11549:         let Some(owner_session_id) = summon.owner_session_id.clone() else {
+11550:             return Vec::new();
+11551:         };
+11552:         let owner_player_object_id = zone_native_summon_owner_player_object_id(&summon);
+11553:         let owner_present = self
+11554:             .players
+11555:             .get(&owner_session_id)
+11556:             .is_some_and(|player| player.object_id == owner_player_object_id && !player.dead);
+11557:         if !owner_present {
+11558:             if let Some(monster) = self.native_monsters.get_mut(&object_id) {
+11559:                 monster.next_ai_ready_at_ms = now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS);
+11560:             }
+11561:             return Vec::new();
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:11900-11924
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+11900:         let is_skeleton = monster.name == "BoneFamiliar";
+11901:         let journey_event = is_skeleton
+11902:             .then(|| {
+11903:                 self.players.get(owner_session_id).map(|owner| {
+11904:                     self.journey_event_draft(
+11905:                         owner,
+11906:                         ZoneJourneyEventKind::SummonSkeletonDamage,
+11907:                         now_ms,
+11908:                         object_id,
+11909:                         Some(target.object_id),
+11910:                         Some(target.position.clone()),
+11911:                         None,
+11912:                         false,
+11913:                     )
+11914:                 })
+11915:             })
+11916:             .flatten();
+11917:         self.pending_native_hits.push(PendingNativeMonsterHit {
+11918:             ready_at_ms: now_ms.saturating_add(ZONE_NATIVE_MONSTER_THINK_MS),
+11919:             session_id: owner_session_id.clone(),
+11920:             attacker_object_id: object_id,
+11921:             object_id: target.object_id,
+11922:             damage,
+11923:             soulfire_practice: None,
+11924:             journey_event,
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:12004-12019
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+12004:                             None,
+12005:                             false,
+12006:                         )
+12007:                     })
+12008:                 })
+12009:                 .flatten();
+12010:             self.pending_native_hits.push(PendingNativeMonsterHit {
+12011:                 ready_at_ms: now_ms.saturating_add(hit_delay_ms),
+12012:                 session_id: owner_session_id.clone(),
+12013:                 attacker_object_id: object_id,
+12014:                 object_id: target.object_id,
+12015:                 damage,
+12016:                 soulfire_practice: None,
+12017:                 journey_event,
+12018:                 fire_bounce: None,
+12019:             });
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:12304-12537
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+12304:     fn apply_native_monster_damage_internal(
+12305:         &mut self,
+12306:         object_id: u32,
+12307:         damage: i32,
+12308:         attacker_session_id: Option<&SessionId>,
+12309:         now_ms: u64,
+12310:         cause: NativeMonsterDamageCause,
+12311:     ) -> Option<NativeMonsterDamageResult> {
+12312:         let managed_conquest=self.conquest_is_defense(object_id);
+12313:         if managed_conquest && !self.conquest_defense_accepts_damage(object_id,attacker_session_id,now_ms) {return None;}
+12314:         let (
+12315:             damage,
+12316:             health_percent,
+12317:             killed,
+12318:             monster_name,
+12319:             mut experience,
+12320:             position,
+12321:             direction,
+12322:             mut drops,
+12323:             is_boss,
+12324:             contributions,
+12325:         ) = {
+12326:             let monster = self.native_monsters.get_mut(&object_id)?;
+12327:             if monster.dead
+12328:                 || (cause != NativeMonsterDamageCause::ScriptedDeath
+12329:                     && ((monster.ai == 81 && !managed_conquest)
+12330:                         || !football_accepts_hp_change(monster)
+12331:                         || !horned_encounter_is_attack_target(monster)
+12332:                         || !hell_accepts_attack(monster)
+12333:                         || !great_fox_accepts_hp_change(monster)
+12334:                         || !thunder_accepts_damage(
+12335:                             monster,
+12336:                             cause == NativeMonsterDamageCause::Repulsion,
+12337:                         )
+12338:                         || !trap_rock_accepts_hp_change(monster)
+12339:                         || (monster.ai == 47 && cause != NativeMonsterDamageCause::Direct)
+12340:                         || monster.dead
+12341:                         || !monster_visibility_is_attackable(monster)
+12342:                         || !sleep_monster_accepts_hp_change(monster)))
+12343:             {
+12344:                 return None;
+12345:             }
+12346: 
+12347:             let damage = damage.max(0).min(monster.hp);
+12348:             let is_boss = crystal_monster_by_name(&monster.name)
+12349:                 .is_some_and(|template| template.is_boss)
+12350:                 || platinum_176_monster_is_boss(&monster.name);
+12351:             if is_boss && damage > 0 {
+12352:                 if let Some(attacker_session_id) = attacker_session_id {
+12353:                     let credited = monster
+12354:                         .damage_contributions
+12355:                         .entry(attacker_session_id.clone())
+12356:                         .or_default();
+12357:                     *credited = credited.saturating_add(u64::try_from(damage).unwrap_or_default());
+12358:                 }
+12359:             }
+12360:             monster.hp = monster.hp.saturating_sub(damage);
+12361:             if damage > 0 {
+12362:                 spider_monster_on_damage(monster, object_id, attacker_session_id, now_ms);
+12363:                 hell_on_damage(monster, attacker_session_id, now_ms);
+12364:                 horned_encounter_on_damage(monster, attacker_session_id, now_ms);
+12365:                 hugger_on_damage(monster, object_id, attacker_session_id, now_ms);
+12366:                 kirin_snow_tag(monster, attacker_session_id, now_ms);
+12367:                 mud_boulder_on_damage(monster, object_id, attacker_session_id, now_ms);
+12368:             }
+12369:             let killed = monster.hp <= 0 && !intercept_sleep_monster_death(monster, now_ms);
+12370:             if killed {
+12371:                 monster.hp = 0;
+12372:                 monster.dead = true;
+12373:                 spider_monster_on_death(monster, object_id, now_ms);
+12374:                 mud_boulder_on_death(monster, object_id, now_ms);
+12375:             }
+12376:             (
+12377:                 damage,
+12378:                 native_monster_health_percent(monster.hp, monster.max_hp),
+12379:                 killed,
+12380:                 monster.name.clone(),
+12381:                 monster.experience,
+12382:                 monster.position.clone(),
+12383:                 monster.direction,
+12384:                 if killed {
+12385:                     monster.drops.clone()
+12386:                 } else {
+12387:                     Vec::new()
+12388:                 },
+12389:                 is_boss,
+12390:                 (killed && is_boss).then(|| monster.damage_contributions.clone()),
+12391:             )
+12392:         };
+12393:         if managed_conquest && damage > 0 {
+12394:             self.record_conquest_damage_admitted(object_id, now_ms);
+12395:         }
+12396:         if killed {
+12397:             self.clear_entity_combat_target_life(object_id);
+12398:             self.clear_statue_centipede_target_life(object_id);
+12399:             self.clear_spider_target_life(object_id);
+12400:             if !self.yimoogi_allows_drop(object_id) {
+12401:                 drops.clear();
+12402:             }
+12403:             if self
+12404:                 .native_monsters
+12405:                 .get(&object_id)
+12406:                 .is_some_and(|m| m.ai == 61 || zone_native_monster_requires_harvest(m.ai))
+12407:             {
+12408:                 // Unharvested ordinary corpses expire after Crystal DeadDelay.
+12409:                 // Harvest is not a permanent prerequisite for replenishment.
+12410:                 if let Some(object) = self.objects.get_mut(&object_id) {
+12411:                     object.expires_at_ms = Some(now_ms.saturating_add(180000));
+12412:                 }
+12413:             }
+12414:             self.mark_vampire_death(object_id, now_ms);
+12415:             self.hell_knight_died(object_id, now_ms);
+12416:             self.hugger_on_death(object_id, now_ms);
+12417:             self.kirin_snow_on_death(object_id, now_ms);
+12418:             if let Some((death_experience, death_drops)) =
+12419:                 self.revival_death_reward(object_id, now_ms)
+12420:             {
+12421:                 experience = death_experience;
+12422:                 drops = death_drops;
+12423:             }
+12424:             if let Some(respawn) = self.native_monster_respawns.get_mut(&object_id) {
+12425:                 respawn.due_at_ms = respawn.spawn.respawn.map(|policy| policy.due_at_ms(now_ms));
+12426:             }
+12427:         }
+12428:         let reward_owner_session_id =
+12429:             killed
+12430:                 .then(|| attacker_session_id.cloned())
+12431:                 .flatten()
+12432:                 .map(|last_hit_session_id| {
+12433:                     if is_boss {
+12434:                         self.boss_reward_owner(
+12435:                             &last_hit_session_id,
+12436:                             contributions.as_ref().expect("Boss contributions captured"),
+12437:                         )
+12438:                     } else {
+12439:                         last_hit_session_id
+12440:                     }
+12441:                 });
+12442:         if killed {
+12443:             let bonus = reward_owner_session_id.as_ref()
+12444:                 .and_then(|owner| self.players.get(owner))
+12445:                 .map_or(0, |owner| owner.combat_stats.item_drop_rate_percent.max(0));
+12446:             if bonus > 0 {
+12447:                 if let Some(seed) = self.native_monsters.get(&object_id).and_then(|monster| monster.crystal_drop_seed) {
+12448:                     drops = crate::runtime::drops::zone_ground_drop_snapshots_for_monster_at_tick_with_rate(
+12449:                         object_id, &monster_name, seed, bonus);
+12450:                 }
+12451:             }
+12452:             if !self.yimoogi_allows_drop(object_id)
+12453:                 || mir2_game_data::crystal_map_respawns_ref(&self.key.map_file_name)
+12454:                     .is_some_and(|map| map.no_drop_monster) {
+12455:                 drops.clear();
+12456:             }
+12457:         }
+12458:         let boss_audit = if killed && is_boss {
+12459:             reward_owner_session_id
+12460:                 .clone()
+12461:                 .zip(attacker_session_id.cloned())
+12462:                 .zip(contributions)
+12463:                 .map(
+12464:                     |((reward_owner_session_id, last_hit_session_id), damage_contributions)| {
+12465:                         ZoneBossRewardAudit {
+12466:                             reward_owner_session_id,
+12467:                             last_hit_session_id,
+12468:                             damage_contributions,
+12469:                         }
+12470:                     },
+12471:                 )
+12472:         } else {
+12473:             None
+12474:         };
+12475:         Some((
+12476:             damage,
+12477:             health_percent,
+12478:             killed,
+12479:             monster_name,
+12480:             experience,
+12481:             position,
+12482:             direction,
+12483:             reward_owner_session_id,
+12484:             drops,
+12485:             boss_audit,
+12486:         ))
+12487:     }
+12488: 
+12489:     /// Select the representative of the highest-contributing live Boss group.
+12490:     /// Group totals are derived from the representative's authoritative roster;
+12491:     /// ties prefer the larger individual contribution and then the stable
+12492:     /// session id. Pet and DoT damage already arrive under the owner's session.
+12493:     fn boss_reward_owner(
+12494:         &self,
+12495:         last_hit_session_id: &SessionId,
+12496:         contributions: &BTreeMap<SessionId, u64>,
+12497:     ) -> SessionId {
+12498:         let mut best: Option<(u64, u64, SessionId)> = None;
+12499:         for (candidate_session_id, candidate) in &self.players {
+12500:             if candidate.dead || candidate.hp <= 0 {
+12501:                 continue;
+12502:             }
+12503:             let individual = contributions
+12504:                 .get(candidate_session_id)
+12505:                 .copied()
+12506:                 .unwrap_or_default();
+12507:             let group_total = contributions
+12508:                 .iter()
+12509:                 .filter_map(|(contributor_session_id, damage)| {
+12510:                     let contributor = self.players.get(contributor_session_id)?;
+12511:                     let same_group = contributor_session_id == candidate_session_id
+12512:                         || candidate
+12513:                             .chat_profile
+12514:                             .group_members
+12515:                             .iter()
+12516:                             .any(|name| name.eq_ignore_ascii_case(&contributor.name));
+12517:                     same_group.then_some(*damage)
+12518:                 })
+12519:                 .fold(0_u64, u64::saturating_add);
+12520:             if group_total == 0 {
+12521:                 continue;
+12522:             }
+12523:             let replace =
+12524:                 best.as_ref()
+12525:                     .is_none_or(|(best_group_total, best_individual, best_session_id)| {
+12526:                         group_total > *best_group_total
+12527:                             || (group_total == *best_group_total && individual > *best_individual)
+12528:                             || (group_total == *best_group_total
+12529:                                 && individual == *best_individual
+12530:                                 && candidate_session_id < best_session_id)
+12531:                     });
+12532:             if replace {
+12533:                 best = Some((group_total, individual, candidate_session_id.clone()));
+12534:             }
+12535:         }
+12536:         best.map(|(_, _, session_id)| session_id)
+12537:             .unwrap_or_else(|| last_hit_session_id.clone())
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:12559-12592
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+12559:     fn spawn_native_monster_drops(
+12560:         &mut self,
+12561:         monster_name: &str,
+12562:         position: &Point,
+12563:         owner_object_id: u32,
+12564:         drops: Vec<GroundDropSnapshot>,
+12565:         now_ms: u64,
+12566:     ) -> Vec<GroundDropSnapshot> {
+12567:         let mut spawned = Vec::new();
+12568:         let mut packets = Vec::new();
+12569:         for mut drop in drops {
+12570:             drop.object_id = self.unique_object_id(drop.object_id);
+12571:             if drop.x == 0 && drop.y == 0 {
+12572:                 drop.x = position.x;
+12573:                 drop.y = position.y;
+12574:             }
+12575:             if drop.source_monster.is_empty() {
+12576:                 drop.source_monster = monster_name.to_string();
+12577:             }
+12578:             drop.owner_object_id = Some(owner_object_id);
+12579:             if drop.ownership_remaining_ticks.is_none() {
+12580:                 drop.ownership_remaining_ticks = Some(100);
+12581:             }
+12582:             let owner_expires_at_ms = drop
+12583:                 .ownership_remaining_ticks
+12584:                 .filter(|ticks| *ticks > 0)
+12585:                 .map(|ticks| now_ms.saturating_add(ticks.saturating_mul(300)));
+12586:             let Some(stored) = self.new_zone_ground_drop(drop.clone(), owner_expires_at_ms) else {
+12587:                 break;
+12588:             };
+12589:             self.ground_drops.insert(drop.object_id, stored);
+12590:             packets.push(ground_drop_spawn_packet(&drop));
+12591:             spawned.push(drop);
+12592:         }
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:13507-13516
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+13507:     fn expire_ground_drop_ownerships(&mut self, now_ms: u64) {
+13508:         for drop in self.ground_drops.values_mut() {
+13509:             if drop
+13510:                 .owner_expires_at_ms
+13511:                 .is_some_and(|expires_at_ms| now_ms >= expires_at_ms)
+13512:             {
+13513:                 drop.owner_expires_at_ms = None;
+13514:                 drop.drop.ownership_remaining_ticks = None;
+13515:             }
+13516:         }
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:14335-14361
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+14335:     fn ground_drop_ownership_allows(
+14336:         &self,
+14337:         drop: &GroundDropSnapshot,
+14338:         picker_object_id: u32,
+14339:         group_members: &[String],
+14340:     ) -> bool {
+14341:         if drop
+14342:             .ownership_remaining_ticks
+14343:             .is_none_or(|remaining_ticks| remaining_ticks == 0)
+14344:         {
+14345:             return true;
+14346:         }
+14347:         let Some(owner_object_id) = drop.owner_object_id else {
+14348:             return true;
+14349:         };
+14350:         if owner_object_id == picker_object_id {
+14351:             return true;
+14352:         }
+14353:         self.players
+14354:             .values()
+14355:             .find(|player| player.object_id == owner_object_id)
+14356:             .is_some_and(|owner| {
+14357:                 group_members
+14358:                     .iter()
+14359:                     .any(|member| member.eq_ignore_ascii_case(&owner.name))
+14360:             })
+14361:     }
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:15290-15303
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+15290:     spell: Spell,
+15291:     player: &ZonePlayer,
+15292:     monster: &ZoneNativeMonster,
+15293:     damage: i32,
+15294: ) -> Option<i32> {
+15295:     let undead = crystal_monster_by_name(&monster.name).is_some_and(|template| template.undead);
+15296:     match spell {
+15297:         Spell::TurnUndead if !undead => None,
+15298:         Spell::TurnUndead if player.level >= monster.level => Some(monster.hp.max(damage).max(1)),
+15299:         Spell::TurnUndead => Some(damage.max(1)),
+15300:         Spell::FlameDisruptor if !undead => Some(damage.saturating_mul(3).saturating_div(2).max(1)),
+15301:         _ => Some(damage),
+15302:     }
+15303: }
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime.rs:16691-16875
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+16691:     fn group_monster_kill_award_preserves_experience_and_excludes_ineligible_players() {
+16692:         let mut zone =
+16693:             ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+16694:         let alice = join_player(
+16695:             &mut zone,
+16696:             "Alice",
+16697:             101,
+16698:             &["Alice", "Bob", "Dead", "Offline", "CrossMap"],
+16699:         );
+16700:         let bob = join_player(&mut zone, "Bob", 102, &[]);
+16701:         let dead = join_player(&mut zone, "Dead", 103, &[]);
+16702:         let stranger = join_player(&mut zone, "Stranger", 104, &[]);
+16703:         let dead_player = zone.players.get_mut(&dead).expect("dead player joined");
+16704:         dead_player.dead = true;
+16705:         dead_player.hp = 0;
+16706: 
+16707:         let outbounds = zone.group_monster_kill_awards(&alice, test_award(101));
+16708: 
+16709:         assert_eq!(awarded_experience(&outbounds, &alice), Some(51));
+16710:         assert_eq!(awarded_experience(&outbounds, &bob), Some(50));
+16711:         assert_eq!(awarded_experience(&outbounds, &dead), None);
+16712:         assert_eq!(awarded_experience(&outbounds, &stranger), None);
+16713:         assert_eq!(
+16714:             outbounds
+16715:                 .iter()
+16716:                 .filter_map(|outbound| match outbound {
+16717:                     ZoneOutbound::MonsterKillAward { award, .. } => Some(award.experience),
+16718:                     _ => None,
+16719:                 })
+16720:                 .sum::<u32>(),
+16721:             101,
+16722:             "group split must conserve authoritative base experience"
+16723:         );
+16724:     }
+16725: 
+16726:     #[test]
+16727:     fn group_monster_kill_award_conserves_remainder_when_owner_is_dead() {
+16728:         let mut zone =
+16729:             ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+16730:         let alice = join_player(&mut zone, "Alice", 101, &["Alice", "Bob", "Carol"]);
+16731:         let bob = join_player(&mut zone, "Bob", 102, &[]);
+16732:         let carol = join_player(&mut zone, "Carol", 103, &[]);
+16733:         let owner = zone.players.get_mut(&alice).expect("owner joined");
+16734:         owner.dead = true;
+16735:         owner.hp = 0;
+16736: 
+16737:         let outbounds = zone.group_monster_kill_awards(&alice, test_award(5));
+16738: 
+16739:         assert_eq!(awarded_experience(&outbounds, &alice), None);
+16740:         assert_eq!(awarded_experience(&outbounds, &bob), Some(3));
+16741:         assert_eq!(awarded_experience(&outbounds, &carol), Some(2));
+16742:         assert_eq!(
+16743:             outbounds
+16744:                 .iter()
+16745:                 .filter_map(|outbound| match outbound {
+16746:                     ZoneOutbound::MonsterKillAward { award, .. } => Some(award.experience),
+16747:                     _ => None,
+16748:                 })
+16749:                 .sum::<u32>(),
+16750:             5
+16751:         );
+16752:     }
+16753: 
+16754:     #[test]
+16755:     fn group_monster_kill_award_keeps_solo_or_pet_owner_reward_whole() {
+16756:         let mut zone =
+16757:             ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+16758:         let owner = join_player(&mut zone, "Taoist", 101, &[]);
+16759:         let bystander = join_player(&mut zone, "Bystander", 102, &[]);
+16760: 
+16761:         // Native summon hits carry their player owner's session id into this
+16762:         // same reward path, so an ungrouped pet kill must remain a full award.
+16763:         let outbounds = zone.group_monster_kill_awards(&owner, test_award(77));
+16764: 
+16765:         assert_eq!(awarded_experience(&outbounds, &owner), Some(77));
+16766:         assert_eq!(awarded_experience(&outbounds, &bystander), None);
+16767:         assert_eq!(outbounds.len(), 1);
+16768:     }
+16769: 
+16770:     #[test]
+16771:     fn boss_reward_uses_group_contribution_instead_of_last_hit() {
+16772:         let mut zone =
+16773:             ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+16774:         let alice = join_player(&mut zone, "Alice", 101, &["Alice", "Bob"]);
+16775:         let bob = join_player(&mut zone, "Bob", 102, &["Alice", "Bob"]);
+16776:         let carol = join_player(&mut zone, "Carol", 103, &[]);
+16777:         let boss_name = platinum_176_profile()
+16778:             .boss_monsters
+16779:             .into_iter()
+16780:             .next()
+16781:             .expect("platinum profile should contain a Boss");
+16782:         let template = crystal_monster_manifest()
+16783:             .monsters
+16784:             .into_iter()
+16785:             .find(|monster| monster.name.eq_ignore_ascii_case(&boss_name))
+16786:             .expect("profile Boss should exist in Crystal data");
+16787:         let object_id = 9001;
+16788:         zone.handle(ZoneCommand::SpawnMonster {
+16789:             session_id: alice.clone(),
+16790:             monster: ZoneMonsterSpawn {
+16791:                 crystal_drop_seed: None,
+16792:                 object_id,
+16793:                 name: template.name,
+16794:                 name_colour_argb: -1,
+16795:                 image: template.image,
+16796:                 ai: template.ai,
+16797:                 disposition: Some(crate::config::WorldEntityDisposition::Hostile),
+16798:                 level: template.level,
+16799:                 max_hp: 100,
+16800:                 hp: 100,
+16801:                 experience: 1_000,
+16802:                 move_speed_ms: u64::from(template.move_speed),
+16803:                 attack_speed_ms: u64::from(template.attack_speed),
+16804:                 friendly_guild: None,
+16805:                 position: Point { x: 11, y: 10 },
+16806:                 direction: MirDirection::Down,
+16807:                 defense: Default::default(),
+16808:                 respawn: None,
+16809:                 drops: Vec::new(),
+16810:             },
+16811:             now_ms: 0,
+16812:         });
+16813: 
+16814:         let first = zone
+16815:             .apply_native_monster_damage(object_id, 30, Some(&alice), 1_000)
+16816:             .expect("Alice should damage Boss");
+16817:         assert!(!first.2);
+16818:         let second = zone
+16819:             .apply_native_monster_damage(object_id, 25, Some(&bob), 2_000)
+16820:             .expect("Bob should damage Boss");
+16821:         assert!(!second.2);
+16822:         let third = zone
+16823:             .apply_native_monster_damage(object_id, 44, Some(&carol), 3_000)
+16824:             .expect("Carol should damage Boss");
+16825:         assert!(!third.2);
+16826:         let killed = zone
+16827:             .apply_native_monster_damage(object_id, 1, Some(&carol), 4_000)
+16828:             .expect("Carol should land the final hit");
+16829: 
+16830:         assert!(killed.2);
+16831:         assert_eq!(
+16832:             killed.7,
+16833:             Some(alice.clone()),
+16834:             "Alice and Bob contributed 55 damage together, so Carol's 45 damage and final hit must not steal ownership"
+16835:         );
+16836:         let audit = killed.9.expect("Boss kill should carry an audit record");
+16837:         assert_eq!(audit.reward_owner_session_id, alice);
+16838:         assert_eq!(audit.last_hit_session_id, carol.clone());
+16839:         assert_eq!(audit.damage_contributions.get(&bob), Some(&25));
+16840:         assert_eq!(audit.damage_contributions.get(&carol), Some(&45));
+16841:         assert_eq!(
+16842:             audit.damage_contributions.values().copied().sum::<u64>(),
+16843:             100
+16844:         );
+16845:     }
+16846: 
+16847:     #[test]
+16848:     fn boss_group_keeps_contribution_from_a_member_who_dies_before_kill() {
+16849:         let mut zone =
+16850:             ZoneRuntime::new_with_collision(ZoneKey::for_map("0"), ZoneCollision::unbounded());
+16851:         let alice = join_player(&mut zone, "Alice", 101, &["Alice", "Bob"]);
+16852:         let bob = join_player(&mut zone, "Bob", 102, &["Alice", "Bob"]);
+16853:         let carol = join_player(&mut zone, "Carol", 103, &[]);
+16854:         let bob_player = zone.players.get_mut(&bob).expect("Bob joined");
+16855:         bob_player.dead = true;
+16856:         bob_player.hp = 0;
+16857: 
+16858:         let contributions = BTreeMap::from([
+16859:             (alice.clone(), 0_u64),
+16860:             (bob, 80_u64),
+16861:             (carol.clone(), 60_u64),
+16862:         ]);
+16863:         assert_eq!(
+16864:             zone.boss_reward_owner(&carol, &contributions),
+16865:             alice,
+16866:             "the live group representative should retain its dead member's pre-death contribution"
+16867:         );
+16868:     }
+16869: }
+16870: 
+16871: #[cfg(test)]
+16872: mod pvp_tests {
+16873:     use super::*;
+16874:     use crate::runtime::zone::types::{ZoneChatProfile, ZonePlayerCombatStats};
+16875:     use mir2_protocol::{MirClass, MirGender};
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/manager.rs:25-34
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/manager.rs
+25:     zones: BTreeMap<ZoneKey, ZoneRuntime>,
+26:     session_zones: BTreeMap<SessionId, ZoneKey>,
+27: }
+28: 
+29: #[derive(Debug, Clone, Serialize, Deserialize)]
+30: struct ZoneManagerCheckpoint {
+31:     version: u32,
+32:     zones: Vec<(ZoneKey, String)>,
+33:     session_zones: BTreeMap<SessionId, ZoneKey>,
+34: }
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/manager.rs:336-341
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/manager.rs
+336:     ///
+337:     /// World-level checkpoints must not resurrect Gateway sessions after a
+338:     /// process restart. The Gateway owns session recovery; the Zone manager only
+339:     /// contributes persistent map/world state to those checkpoints.
+340:     pub fn zone_key_for_session(&self, session_id: &SessionId) -> Option<ZoneKey> {
+341:         self.session_zones.get(session_id).cloned()
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/manager.rs:424-496
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/manager.rs
+424:     pub fn leave_all_sessions(&mut self) -> usize {
+425:         let session_ids = self.session_zones.keys().cloned().collect::<Vec<_>>();
+426:         let session_count = session_ids.len();
+427:         for session_id in session_ids {
+428:             let _ = self.handle(ZoneCommand::Leave { session_id });
+429:         }
+430:         session_count
+431:     }
+432: 
+433:     pub fn handle_for_key(&mut self, key: ZoneKey, command: ZoneCommand) -> Vec<ZoneOutbound> {
+434:         // All Join entry points share this transfer path. Carry the same online
+435:         // player's receipt clock before removing its old Zone incarnation;
+436:         // otherwise map changes restart sequences at one under the same ID.
+437:         if let ZoneCommand::Join(join) = command {
+438:             let session_id = join.session_id.clone();
+439:             let previous_key = self.session_zones.get(&session_id).cloned();
+440:             let mut outbounds = Vec::new();
+441:             let mut transferred_clock = None;
+442:             let mut transferred_action_clock = None;
+443:             let mut transferred_poison_clock = None;
+444:             let online_map_transfer = previous_key.as_ref().is_some_and(|previous| previous != &key);
+445:             if let Some(previous_key) = previous_key.filter(|previous| previous != &key) {
+446:                 transferred_poison_clock = self.zones.get(&previous_key)
+447:                     .and_then(|zone| zone.player_finite_control_poison_clock(&session_id));
+448:                 transferred_action_clock = self.zones.get(&previous_key)
+449:                     .and_then(|zone| zone.player_action_clock(&session_id));
+450:                 transferred_clock = self
+451:                     .zones
+452:                     .get(&previous_key)
+453:                     .and_then(|zone| zone.player_vital_clock(&session_id));
+454:                 outbounds.extend(self.handle_for_key(
+455:                     previous_key,
+456:                     ZoneCommand::Leave {
+457:                         session_id: session_id.clone(),
+458:                     },
+459:                 ));
+460:             }
+461:             self.session_zones.insert(session_id.clone(), key.clone());
+462:             let zone = self
+463:                 .zones
+464:                 .entry(key.clone())
+465:                 .or_insert_with(|| ZoneRuntime::new(key));
+466:             let mut joined = zone.handle(ZoneCommand::Join(join));
+467:             if let Some(clock) = transferred_clock {
+468:                 zone.restore_player_vital_clock(&session_id, clock);
+469:             }
+470:             if let Some(clock) = transferred_action_clock {
+471:                 zone.restore_player_action_clock(&session_id, clock);
+472:             }
+473:             if let Some(clock) = transferred_poison_clock {
+474:                 zone.restore_player_finite_control_poison_clock(&session_id, clock);
+475:             }
+476:             if online_map_transfer {
+477:                 // A same-character destination needs an explicit current mask,
+478:                 // including zero; neither missing snapshot fields nor the old
+479:                 // viewport's last ObjectPoisoned can establish that state.
+480:                 zone.calibrate_online_join_poison(&session_id, &mut joined);
+481:             }
+482:             outbounds.extend(joined);
+483:             return outbounds;
+484:         }
+485:         match &command {
+486:             ZoneCommand::Leave { session_id } => {
+487:                 self.session_zones.remove(session_id);
+488:             }
+489:             _ => {}
+490:         }
+491: 
+492:         let zone = self
+493:             .zones
+494:             .entry(key.clone())
+495:             .or_insert_with(|| ZoneRuntime::new(key));
+496:         zone.handle(command)
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs:26-40
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs
+26: const LEGACY_CANONICAL_ZONE_STATE_VERSION: u32 = 1;
+27: const LEGACY_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v1\0";
+28: const LEGACY_V2_CANONICAL_ZONE_STATE_VERSION: u32 = 2;
+29: const LEGACY_V2_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v2\0";
+30: const LEGACY_V3_CANONICAL_ZONE_STATE_VERSION: u32 = 3;
+31: const LEGACY_V3_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v3\0";
+32: const CANONICAL_ZONE_STATE_VERSION: u32 = 4;
+33: const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v4\0";
+34: const LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 1;
+35: const LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 2;
+36: const LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
+37: const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 4;
+38: 
+39: fn legacy_v2_ground_drop_claim_idempotency_key(
+40:     key: &ZoneKey,
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs:181-208
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs
+181: struct ZoneRuntimeCheckpoint {
+182:     version: u32,
+183:     state_root: String,
+184:     key: ZoneKey,
+185:     players: BTreeMap<SessionId, ZonePlayer>,
+186:     objects: BTreeMap<u32, ZoneObjectCheckpoint>,
+187:     dead_object_ids: BTreeMap<u32, ZoneObjectDeadState>,
+188:     revived_object_ids: BTreeSet<u32>,
+189:     removed_object_ids: BTreeSet<u32>,
+190:     harvested_object_ids: BTreeSet<u32>,
+191:     native_monsters: BTreeMap<u32, ZoneNativeMonster>,
+192:     #[serde(default)]
+193:     native_monster_respawns: BTreeMap<u32, ZoneNativeMonsterRespawn>,
+194:     pending_native_hits: Vec<PendingNativeMonsterHit>,
+195:     pending_native_projectiles: Vec<PendingNativeProjectile>,
+196:     pending_native_player_hits: Vec<PendingNativePlayerHit>,
+197:     pending_native_player_heals: Vec<PendingNativePlayerHeal>,
+198:     pending_native_summons: Vec<PendingNativeSummon>,
+199:     pending_native_ground_spells: Vec<PendingNativeGroundSpellAction>,
+200:     ground_drops: BTreeMap<u32, ZoneGroundDrop>,
+201:     claimed_ground_drops: BTreeMap<u32, ZoneGroundDropClaim>,
+202:     #[serde(default)]
+203:     next_ground_drop_generation: u64,
+204:     #[serde(default)]
+205:     next_ground_drop_claim_id: u64,
+206:     open_doors: BTreeMap<u8, u64>,
+207:     hazard: ZoneHazardState,
+208:     #[serde(default, skip_serializing_if = "Option::is_none")]
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs:621-656
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs
+621:     pub fn checkpoint_bytes(&self) -> Result<Vec<u8>, String> {
+622:         let checkpoint = ZoneRuntimeCheckpoint {
+623:             intelligent_creatures: self.intelligent_creatures.clone(),
+624:             intelligent_creature_intents: self.intelligent_creature_intents.clone(),
+625:             intelligent_creature_operations: self.intelligent_creature_operations.clone(),
+626:             version: ZONE_RUNTIME_CHECKPOINT_VERSION,
+627:             state_root: self.canonical_state_root()?,
+628:             key: self.key.clone(),
+629:             players: self.players.clone(),
+630:             objects: self
+631:                 .objects
+632:                 .iter()
+633:                 .map(|(object_id, object)| Ok((*object_id, ZoneObjectCheckpoint::capture(object)?)))
+634:                 .collect::<Result<BTreeMap<_, _>, String>>()?,
+635:             dead_object_ids: self.dead_object_ids.clone(),
+636:             revived_object_ids: self.revived_object_ids.clone(),
+637:             removed_object_ids: self.removed_object_ids.clone(),
+638:             harvested_object_ids: self.harvested_object_ids.clone(),
+639:             native_monsters: self.native_monsters.clone(),
+640:             native_monster_respawns: self.native_monster_respawns.clone(),
+641:             pending_native_hits: self.pending_native_hits.clone(),
+642:             pending_native_projectiles: self.pending_native_projectiles.clone(),
+643:             pending_native_player_hits: self.pending_native_player_hits.clone(),
+644:             pending_native_player_heals: self.pending_native_player_heals.clone(),
+645:             pending_native_summons: self.pending_native_summons.clone(),
+646:             pending_native_ground_spells: self.pending_native_ground_spells.clone(),
+647:             ground_drops: self.ground_drops.clone(),
+648:             claimed_ground_drops: self.claimed_ground_drops.clone(),
+649:             next_ground_drop_generation: self.next_ground_drop_generation,
+650:             next_ground_drop_claim_id: self.next_ground_drop_claim_id,
+651:             open_doors: self.open_doors.clone(),
+652:             hazard: self.hazard.clone(),
+653:             hell_world: self.hell_world.clone(),
+654:             horned_encounter_world: self.horned_encounter_world.clone(),
+655:             pet_special_world: self.pet_special_world.clone(),
+656:             entity_combat: self.entity_combat.clone(),
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs:733-753
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs
+733:         runtime.native_monsters = checkpoint.native_monsters;
+734:         runtime.native_monster_respawns = checkpoint.native_monster_respawns;
+735:         if checkpoint_version == ZONE_RUNTIME_CHECKPOINT_VERSION {
+736:             runtime.intelligent_creatures = checkpoint.intelligent_creatures;
+737:             runtime.intelligent_creature_intents = checkpoint.intelligent_creature_intents;
+738:             runtime.intelligent_creature_operations = checkpoint.intelligent_creature_operations;
+739:         }
+740:         if checkpoint_version != ZONE_RUNTIME_CHECKPOINT_VERSION {
+741:             // v1-v3 roots did not commit respawn policy/due state. Ignore any
+742:             // forward fields injected into legacy JSON before authenticating
+743:             // and re-anchoring it under the current schema.
+744:             runtime.native_monster_respawns.clear();
+745:         }
+746:         for monster in runtime.native_monsters.values_mut() {
+747:             // Legacy checkpoints had only the AI-derived boolean. Without the
+748:             // explicit authoritative disposition they must remain untargetable
+749:             // and must not target players.
+750:             monster.hostile_to_player =
+751:                 monster.disposition == Some(crate::config::WorldEntityDisposition::Hostile);
+752:         }
+753:         runtime.pending_native_hits = checkpoint.pending_native_hits;
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs:789-819
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs
+789:         for (session_id, player) in &runtime.players {
+790:             let tile = (player.position.x, player.position.y);
+791:             if runtime.occupancy.insert(tile, session_id.clone()).is_some() {
+792:                 return Err(format!(
+793:                     "zone runtime checkpoint has multiple players at {},{}",
+794:                     tile.0, tile.1
+795:                 ));
+796:             }
+797:             runtime
+798:                 .player_grid
+799:                 .insert(session_id.clone(), &player.position);
+800:             runtime
+801:                 .ecs
+802:                 .upsert_player(session_id, player.object_id, &player.position);
+803:         }
+804:         for (object_id, object) in &runtime.objects {
+805:             runtime.object_grid.insert(*object_id, &object.position);
+806:         }
+807: 
+808:         let restored_root = match checkpoint_version {
+809:             LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.legacy_canonical_state_root()?,
+810:             LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+811:                 runtime.legacy_v2_canonical_state_root()?
+812:             }
+813:             LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+814:                 runtime.legacy_v3_canonical_state_root()?
+815:             }
+816:             ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.canonical_state_root()?,
+817:             _ => unreachable!("checkpoint version was validated above"),
+818:         };
+819:         if restored_root != expected_state_root && state_root_policy == StateRootPolicy::Strict {
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/drops.rs:60-65
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/drops.rs
+60:     pub(super) drops: Vec<ResolvedDropTemplate>,
+61: }
+62: 
+63: pub(super) const CRYSTAL_DROP_OWNER_WINDOW_TICKS: u64 = 60;
+64: pub(super) const CRYSTAL_DROP_EXPIRE_TICKS: u64 = 30 * 60;
+65: pub(super) const CRYSTAL_DROP_RANGE: i32 = 4;
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/drops.rs:1595-1603
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/drops.rs
+1595:             y: 0,
+1596:             quantity,
+1597:             source_monster: monster_name.to_string(),
+1598:             owner_object_id: None,
+1599:             ownership_remaining_ticks: Some(CRYSTAL_DROP_OWNER_WINDOW_TICKS),
+1600:             loot: GroundDropLootSnapshot::Gold { amount },
+1601:         }),
+1602:         ResolvedDropTemplate::Item {
+1603:             key,
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/drops.rs:1657-1665
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/drops.rs
+1657:                 y: 0,
+1658:                 quantity,
+1659:                 source_monster: monster_name.to_string(),
+1660:                 owner_object_id: None,
+1661:                 ownership_remaining_ticks: Some(CRYSTAL_DROP_OWNER_WINDOW_TICKS),
+1662:                 loot: GroundDropLootSnapshot::InventoryItem {
+1663:                     key,
+1664:                     name,
+1665:                     description,
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/drops.rs:3404-3418
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/drops.rs
+3404:     pub fn shared_monster_kill_experience_balance_delta(&self, experience: u32) -> i64 {
+3405:         let world = self.app.world();
+3406:         if !is_in_world(world) || experience == 0 {
+3407:             return 0;
+3408:         }
+3409:         let player_level = super::leveling::player_current_level(world);
+3410:         let experience_multiplier = world
+3411:             .resource::<RuntimeConfigResource>()
+3412:             .config
+3413:             .monster_experience_multiplier(player_level);
+3414:         let experience = experience.saturating_mul(experience_multiplier);
+3415:         let experience = experience.saturating_mul(qa_natural_kill_experience_multiplier());
+3416:         let experience = super::stats::crystal_apply_social_exp_rate(world, experience);
+3417:         super::leveling::experience_balance_delta_for_gain(world, i64::from(experience))
+3418:     }
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/drops.rs:3535-3554
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/drops.rs
+3535:     pub(super) fn commit_shared_monster_kill_award_transaction_impl(
+3536:         &mut self,
+3537:         monster_object_id: u32,
+3538:         monster_name: &str,
+3539:         experience: u32,
+3540:         selected_experience: Option<u32>,
+3541:     ) -> SharedAccountInventoryTransactionReceipt {
+3542:         let world = self.app.world_mut();
+3543:         if !is_in_world(world) {
+3544:             return SharedAccountInventoryTransactionReceipt::monster_kill_award(false, Vec::new());
+3545:         }
+3546: 
+3547:         let mut packets = advance_crystal_quest_kill(world, monster_name);
+3548:         if !current_map_disallows_monster_drop(world) {
+3549:             if monster_object_id == FIELD_WASP_ID {
+3550:                 let quest = guide_quest_template();
+3551:                 let _ = try_gain_crystal_quest_drop(
+3552:                     world,
+3553:                     &quest.quest_item.key,
+3554:                     &quest.quest_item.name,
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/drops.rs:3604-3620
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/drops.rs
+3604:         if selected_experience.unwrap_or(experience) > 0 {
+3605:             let player_level = super::leveling::player_current_level(world);
+3606:             let experience_multiplier = world
+3607:                 .resource::<RuntimeConfigResource>()
+3608:                 .config
+3609:                 .monster_experience_multiplier(player_level);
+3610:             let experience = experience.saturating_mul(experience_multiplier);
+3611:             let experience = experience.saturating_mul(qa_natural_kill_experience_multiplier());
+3612:             // Marriage / mentorship / guild membership grant a Crystal-style
+3613:             // experience-rate bonus (no-op for an unattached player).
+3614:             let experience = selected_experience.unwrap_or_else(|| super::stats::crystal_apply_social_exp_rate(world, experience));
+3615:             // Crystal `PlayerObject.GainExp`: bank the experience and auto-level
+3616:             // through every threshold it clears (emits GainExperience +, on a
+3617:             // level gain, LevelChanged + ObjectHealth).
+3618:             packets.extend(super::leveling::apply_experience_gain(
+3619:                 world,
+3620:                 i64::from(experience),
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/experience.rs:1-103
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/experience.rs
+1: //! Trusted reward selection captured at death, before delayed account delivery.
+2: //! These values are never fields of a client gameplay packet. Old checkpoints
+3: //! have no selection and must not infer a guild from a later login.
+4: use serde::{Deserialize, Serialize};
+5: 
+6: #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+7: pub struct ZoneGuildExperienceMembership {
+8:     pub guild_id: String,
+9:     pub membership_epoch: u64,
+10: }
+11: 
+12: #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+13: pub struct ZoneExperienceProfile {
+14:     pub account_id: String,
+15:     pub character_index: i32,
+16:     pub guild: Option<ZoneGuildExperienceMembership>,
+17:     pub monster_multiplier: u32,
+18:     pub natural_kill_multiplier: u32,
+19:     pub lover_eligible: bool,
+20:     pub lover_rate_percent: i32,
+21:     pub mentee_eligible: bool,
+22:     pub mentee_rate_percent: i32,
+23:     pub experience_rate_percent: i32,
+24:     /// Exact source f32 bits preserve the original per-event truncation rule.
+25:     pub guild_experience_rate_bits: u32,
+26: }
+27: 
+28: #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+29: pub struct ZoneExperienceSelection {
+30:     pub source_zone: String,
+31:     pub monster_object_id: u32,
+32:     pub killed_at_ms: u64,
+33:     pub account_id: String,
+34:     pub character_index: i32,
+35:     pub guild: Option<ZoneGuildExperienceMembership>,
+36:     pub final_amount: u32,
+37:     pub guild_amount: u32,
+38: }
+39: 
+40: impl ZoneExperienceProfile {
+41:     pub(super) fn select(
+42:         &self,
+43:         source_zone: String,
+44:         monster_object_id: u32,
+45:         killed_at_ms: u64,
+46:         raw_share: u32,
+47:     ) -> Result<ZoneExperienceSelection, String> {
+48:         if self.account_id.is_empty()
+49:             || self
+50:                 .guild
+51:                 .as_ref()
+52:                 .is_some_and(|guild| guild.guild_id.is_empty())
+53:         {
+54:             return Err("reward profile has no stable identity".into());
+55:         }
+56:         let amount = raw_share
+57:             .saturating_mul(self.monster_multiplier)
+58:             .saturating_mul(self.natural_kill_multiplier);
+59:         let final_amount = crate::apply_crystal_experience_rates(
+60:             amount,
+61:             if self.lover_eligible {
+62:                 self.lover_rate_percent
+63:             } else {
+64:                 0
+65:             },
+66:             if self.mentee_eligible {
+67:                 self.mentee_rate_percent
+68:             } else {
+69:                 0
+70:             },
+71:             self.experience_rate_percent,
+72:         );
+73:         let rate = f32::from_bits(self.guild_experience_rate_bits);
+74:         if !rate.is_finite() || rate < 0.0 {
+75:             return Err("invalid captured guild experience rate".into());
+76:         }
+77:         let guild_amount = if self.guild.is_some() {
+78:             let amount = final_amount as f32 * rate;
+79:             if !amount.is_finite() || amount >= 4_294_967_296.0 {
+80:                 return Err("captured guild experience amount overflow".into());
+81:             }
+82:             amount as u32
+83:         } else {
+84:             0
+85:         };
+86:         Ok(ZoneExperienceSelection {
+87:             source_zone,
+88:             monster_object_id,
+89:             killed_at_ms,
+90:             account_id: self.account_id.clone(),
+91:             character_index: self.character_index,
+92:             guild: self.guild.clone(),
+93:             final_amount,
+94:             guild_amount,
+95:         })
+96:     }
+97: }
+98: 
+99: #[cfg(test)]
+100: mod tests {
+101:     use super::*;
+102: 
+103:     #[test]
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/shared_kill_experience.rs:28-177
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/shared_kill_experience.rs
+28:     pub fn try_commit_shared_monster_kill_award_with_receipt(
+29:         &mut self,
+30:         key: &str,
+31:         award: &ZoneMonsterKillAward,
+32:     ) -> Result<(SharedAccountInventoryTransactionReceipt, bool), SharedMonsterKillCommitFailure>
+33:     {
+34:         let rejected = || {
+35:             Ok((
+36:                 SharedAccountInventoryTransactionReceipt::monster_kill_award(false, vec![]),
+37:                 false,
+38:             ))
+39:         };
+40:         if award
+41:             .source_receipt_key
+42:             .as_deref()
+43:             .is_some_and(|source_key| source_key != key)
+44:         {
+45:             return rejected();
+46:         }
+47:         let Some(identity) = self.active_identity() else {
+48:             return rejected();
+49:         };
+50:         let hash: String = match serde_json::to_vec(award) {
+51:             Ok(bytes) => Sha256::digest(bytes)
+52:                 .iter()
+53:                 .map(|byte| format!("{byte:02x}"))
+54:                 .collect(),
+55:             Err(_) => return rejected(),
+56:         };
+57:         let permit = match GuildExperienceCommitPermit::from_verified_shared_kill(
+58:             Stage5FriendIdentity {
+59:                 account_id: identity.account_id.clone(),
+60:                 character_index: identity.character_index,
+61:             },
+62:             key.into(),
+63:             hash.clone(),
+64:             award.experience_selection.clone(),
+65:         ) {
+66:             Ok(permit) => permit,
+67:             Err(_) => return rejected(),
+68:         };
+69:         if award
+70:             .experience_selection
+71:             .as_ref()
+72:             .is_some_and(|selection| {
+73:                 selection.monster_object_id != award.monster_object_id
+74:                     || selection.killed_at_ms != award.killed_at_ms
+75:             })
+76:         {
+77:             return rejected();
+78:         }
+79:         let config = self
+80:             .app
+81:             .world()
+82:             .resource::<RuntimeConfigResource>()
+83:             .config
+84:             .clone();
+85:         config
+86:             .ensure_account_store_writable()
+87:             .map_err(SharedMonsterKillCommitFailure::Deferred)?;
+88:         let durable_receipt = match config.account_store.lock() {
+89:             Ok(store) => store
+90:                 .accounts
+91:                 .get(&identity.account_id)
+92:                 .and_then(|account| account.saves.get(&identity.character_index))
+93:                 .map(|save| {
+94:                     save.guild_experience_journal
+95:                         .applied_kill_receipts
+96:                         .get(key)
+97:                         .cloned()
+98:                 }),
+99:             Err(_) => return rejected(),
+100:         };
+101:         match durable_receipt {
+102:             None => return rejected(),
+103:             Some(Some(previous)) => {
+104:                 return Ok((
+105:                     SharedAccountInventoryTransactionReceipt::monster_kill_award(
+106:                         previous == hash,
+107:                         vec![],
+108:                     ),
+109:                     previous == hash,
+110:                 ))
+111:             }
+112:             Some(None) => {}
+113:         }
+114:         if self
+115:             .app
+116:             .world()
+117:             .contains_resource::<SharedKillExperiencePermit>()
+118:         {
+119:             return Err(SharedMonsterKillCommitFailure::Deferred(
+120:                 "shared kill source already executing".into(),
+121:             ));
+122:         }
+123:         let before = match self.begin_guild_experience_command(true) {
+124:             Ok(Some(before)) => Some(before),
+125:             Ok(None) => return rejected(),
+126:             Err(error) => return Err(SharedMonsterKillCommitFailure::Deferred(error)),
+127:         };
+128:         self.app
+129:             .world_mut()
+130:             .insert_resource(SharedKillExperiencePermit(permit));
+131:         let receipt = self.commit_shared_monster_kill_award_transaction_impl(
+132:             award.monster_object_id,
+133:             &award.monster_name,
+134:             award.experience,
+135:             award
+136:                 .experience_selection
+137:                 .as_ref()
+138:                 .map(|selection| selection.final_amount),
+139:         );
+140:         if receipt.committed {
+141:             self.app
+142:                 .world()
+143:                 .resource::<GuildExperienceResource>()
+144:                 .0
+145:                 .lock()
+146:                 .expect("guild XP journal poisoned")
+147:                 .applied_kill_receipts
+148:                 .insert(key.into(), hash);
+149:         } else {
+150:             *self
+151:                 .app
+152:                 .world()
+153:                 .resource::<GuildExperienceResource>()
+154:                 .2
+155:                 .lock()
+156:                 .expect("guild XP error poisoned") =
+157:                 Some("shared kill gameplay was rejected".into());
+158:         }
+159:         let result = self.finish_guild_experience_command(before, receipt.packets);
+160:         self.app
+161:             .world_mut()
+162:             .remove_resource::<SharedKillExperiencePermit>();
+163:         match result {
+164:             Ok(packets) => Ok((
+165:                 SharedAccountInventoryTransactionReceipt::monster_kill_award(
+166:                     true,
+167:                     self.finalize_packets(packets),
+168:                 ),
+169:                 false,
+170:             )),
+171:             Err(error) if config.ensure_account_store_writable().is_err() => {
+172:                 Err(SharedMonsterKillCommitFailure::OutcomeUnknown(error))
+173:             }
+174:             Err(error) => Err(SharedMonsterKillCommitFailure::Deferred(error)),
+175:         }
+176:     }
+177: }
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/prepared_kill_experience.rs:65-140
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/prepared_kill_experience.rs
+65:     where
+66:         F: FnOnce(
+67:             &PreparedKillAccountSource,
+68:         ) -> Result<PreparedKillPublication<T>, PreparedKillPublicationFailure>,
+69:     {
+70:         let identity = self
+71:             .active_identity()
+72:             .ok_or_else(|| "prepared kill requires active identity".to_string())?;
+73:         if award.source_receipt_key.as_deref() != Some(key) {
+74:             return Err("prepared kill requires its immutable delivery key"
+75:                 .to_string()
+76:                 .into());
+77:         }
+78:         if award
+79:             .experience_selection
+80:             .as_ref()
+81:             .is_some_and(|selection| {
+82:                 selection.monster_object_id != award.monster_object_id
+83:                     || selection.killed_at_ms != award.killed_at_ms
+84:             })
+85:         {
+86:             return Err("prepared kill source selection mismatch".to_string().into());
+87:         }
+88:         let hash: String = Sha256::digest(serde_json::to_vec(award).map_err(|e| e.to_string())?)
+89:             .iter()
+90:             .map(|b| format!("{b:02x}"))
+91:             .collect();
+92:         let permit = GuildExperienceCommitPermit::from_verified_shared_kill(
+93:             Stage5FriendIdentity {
+94:                 account_id: identity.account_id.clone(),
+95:                 character_index: identity.character_index,
+96:             },
+97:             key.into(),
+98:             hash.clone(),
+99:             award.experience_selection.clone(),
+100:         )?;
+101:         let config = self
+102:             .app
+103:             .world()
+104:             .resource::<RuntimeConfigResource>()
+105:             .config
+106:             .clone();
+107:         config.ensure_account_store_writable()?;
+108:         if self
+109:             .app
+110:             .world()
+111:             .contains_resource::<SharedKillExperiencePermit>()
+112:         {
+113:             return Err("prepared kill already active".to_string().into());
+114:         }
+115:         let before = self
+116:             .begin_guild_experience_command(true)?
+117:             .ok_or_else(|| "prepared kill checkpoint unavailable".to_string())?;
+118:         self.app
+119:             .world_mut()
+120:             .insert_resource(SharedKillExperiencePermit(permit.clone()));
+121:         let receipt = self.commit_shared_monster_kill_award_transaction_impl(
+122:             award.monster_object_id,
+123:             &award.monster_name,
+124:             award.experience,
+125:             award
+126:                 .experience_selection
+127:                 .as_ref()
+128:                 .map(|selection| selection.final_amount),
+129:         );
+130:         if receipt.committed {
+131:             self.app
+132:                 .world()
+133:                 .resource::<GuildExperienceResource>()
+134:                 .0
+135:                 .lock()
+136:                 .expect("guild source poisoned")
+137:                 .applied_kill_receipts
+138:                 .insert(key.into(), hash);
+139:         }
+140:         let source_error = self
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/spider_ai.rs:133-153
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/spider_ai.rs
+133:     owner: Option<&SessionId>,
+134:     now_ms: u64,
+135: ) {
+136:     if monster.ai != BOMB_AI {
+137:         return;
+138:     }
+139:     initialize_spider_monster(monster, object_id, now_ms);
+140:     let Some(owner) = owner else { return };
+141:     let state = monster
+142:         .special_ai
+143:         .as_mut()
+144:         .unwrap()
+145:         .spider
+146:         .as_mut()
+147:         .unwrap();
+148:     if state.reward_owner_session_id.is_none() || now_ms > state.reward_owner_until_ms {
+149:         state.reward_owner_session_id = Some(owner.clone());
+150:     }
+151:     if state.reward_owner_session_id.as_ref() == Some(owner) {
+152:         state.reward_owner_until_ms = now_ms.saturating_add(5_000);
+153:     }
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/spider_ai.rs:654-722
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/spider_ai.rs
+654:     fn kill_triggered_bomb_spider(&mut self, id: u32, now_ms: u64) -> Vec<ZoneOutbound> {
+655:         let m = &self.native_monsters[&id];
+656:         let hp = m.hp;
+657:         let reward_owner = m
+658:             .special_ai
+659:             .as_ref()
+660:             .and_then(|s| s.spider.as_ref())
+661:             .filter(|s| now_ms <= s.reward_owner_until_ms)
+662:             .and_then(|s| s.reward_owner_session_id.as_ref())
+663:             .filter(|session| {
+664:                 self.players
+665:                     .get(*session)
+666:                     .is_some_and(|p| !p.dead && p.hp > 0)
+667:             })
+668:             .cloned();
+669:         let Some((_, _, killed, name, experience, position, direction, _, drops, boss_audit)) =
+670:             self.apply_native_monster_damage(id, hp, reward_owner.as_ref(), now_ms)
+671:         else {
+672:             return Vec::new();
+673:         };
+674:         if !killed {
+675:             return Vec::new();
+676:         }
+677:         let packets = vec![
+678:             ServerPacket::ObjectDied {
+679:                 info: ObjectDiedInfo {
+680:                     object_id: id,
+681:                     location: position.clone(),
+682:                     direction,
+683:                     kind: 0,
+684:                 },
+685:             },
+686:             ServerPacket::ObjectPoisoned {
+687:                 object_id: id,
+688:                 poison: 0,
+689:             },
+690:         ];
+691:         self.apply_zone_object_packets(&packets, now_ms);
+692:         let session_ids = self.native_monster_visible_recipients(id, &position);
+693:         let mut out = Vec::new();
+694:         if !session_ids.is_empty() {
+695:             out.push(ZoneOutbound::ToMany {
+696:                 session_ids,
+697:                 packets,
+698:             });
+699:         }
+700:         // An untagged suicide has no EXP owner in Crystal and creates no loot.
+701:         if let Some(owner) = reward_owner {
+702:             let player_id = self.players[&owner].object_id;
+703:             let drops = self.spawn_native_monster_drops(&name, &position, player_id, drops, now_ms);
+704:             out.extend(self.diff_all_zone_object_visibility());
+705:             out.extend(self.group_monster_kill_awards(
+706:                 &owner,
+707:                 ZoneMonsterKillAward {
+708:                     source_receipt_key: None,
+709:                     experience_selection: None,
+710:                     monster_object_id: id,
+711:                     killed_at_ms: now_ms,
+712:                     monster_name: name,
+713:                     experience,
+714:                     drops,
+715:                     boss_audit,
+716:                 },
+717:             ));
+718:         }
+719:         out
+720:     }
+721: 
+722:     fn finish_spider_death(&mut self, id: u32, now_ms: u64) -> Vec<ZoneOutbound> {
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/hell_ai.rs:109-140
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/hell_ai.rs
+109:     let Some(owner) = owner else {
+110:         return;
+111:     };
+112:     let s = m.special_ai.as_mut().unwrap().hell.as_mut().unwrap();
+113:     if s.reward_owner.is_none() || now > s.reward_until {
+114:         s.reward_owner = Some(owner.clone());
+115:     }
+116:     if s.reward_owner.as_ref() == Some(owner) {
+117:         s.reward_until = now.saturating_add(5000);
+118:     }
+119: }
+120: impl ZoneRuntime {
+121:     // Retiring a Node must not cancel the map's delayed Spawn. Its captured
+122:     // Lord reference stays detached from any replacement with the same ID.
+123:     pub(super) fn retire_hell_parent(&mut self, id: u32) {
+124:         if let Some(world) = self.hell_world.as_mut() {
+125:             world.stage_updates.retain(|parent| *parent != id);
+126:             world.stage_update_lives.remove(&id);
+127:         }
+128:     }
+129:     pub(super) fn clear_hell_targets(&mut self, id: u32) {
+130:         let session = self
+131:             .players
+132:             .values()
+133:             .find(|p| p.object_id == id)
+134:             .map(|p| p.session_id.clone());
+135:         for m in self.native_monsters.values_mut() {
+136:             if let Some(s) = m.special_ai.as_mut().and_then(|s| s.hell.as_mut()) {
+137:                 if session.is_some() && s.reward_owner == session {
+138:                     s.reward_owner = None;
+139:                 }
+140:             }
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/hell_ai.rs:364-405
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/hell_ai.rs
+364:         let m = &self.native_monsters[&id];
+365:         let s = m.special_ai.as_ref().unwrap().hell.as_ref().unwrap();
+366:         let owner = s
+367:             .reward_owner
+368:             .clone()
+369:             .filter(|sid| now <= s.reward_until && self.players.get(sid).is_some_and(|p| !p.dead));
+370:         let Some((_, _, killed, name, experience, position, direction, _, drops, boss_audit)) =
+371:             self.apply_native_monster_damage(id, m.hp, owner.as_ref(), now)
+372:         else {
+373:             return Vec::new();
+374:         };
+375:         if !killed {
+376:             return Vec::new();
+377:         }
+378:         let mut out = self.hell_broadcast(
+379:             id,
+380:             vec![ServerPacket::ObjectDied {
+381:                 info: ObjectDiedInfo {
+382:                     object_id: id,
+383:                     location: position.clone(),
+384:                     direction,
+385:                     kind: 0,
+386:                 },
+387:             }],
+388:             now,
+389:         );
+390:         if let Some(owner) = owner {
+391:             let drops = self.spawn_native_monster_drops(
+392:                 &name,
+393:                 &position,
+394:                 self.players[&owner].object_id,
+395:                 drops,
+396:                 now,
+397:             );
+398:             out.extend(self.diff_all_zone_object_visibility());
+399:             out.extend(self.group_monster_kill_awards(
+400:                 &owner,
+401:                 ZoneMonsterKillAward {
+402:                     source_receipt_key: None,
+403:                     experience_selection: None,
+404:                     monster_object_id: id,
+405:                     killed_at_ms: now,
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/horned_encounter_ai.rs:94-125
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/horned_encounter_ai.rs
+94:         .special_ai
+95:         .as_mut()
+96:         .and_then(|s| s.horned_encounter.as_mut())
+97:     else {
+98:         return;
+99:     };
+100:     if let Some(owner) = owner {
+101:         if s.reward_owner.is_none() || now > s.reward_until {
+102:             s.reward_owner = Some(owner.clone());
+103:         }
+104:         if s.reward_owner.as_ref() == Some(owner) {
+105:             s.reward_until = now + 5000;
+106:         }
+107:     }
+108: }
+109: impl ZoneRuntime {
+110:     pub(super) fn clear_horned_encounter_targets(&mut self, id: u32) {
+111:         let session = self
+112:             .players
+113:             .values()
+114:             .find(|p| p.object_id == id)
+115:             .map(|p| p.session_id.clone());
+116:         for m in self.native_monsters.values_mut() {
+117:             if let Some(s) = m
+118:                 .special_ai
+119:                 .as_mut()
+120:                 .and_then(|s| s.horned_encounter.as_mut())
+121:             {
+122:                 if session.is_some() && s.reward_owner == session {
+123:                     s.reward_owner = None;
+124:                 }
+125:                 if s.target.as_ref().is_some_and(|(_, target)| *target == id)
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/horned_encounter_ai.rs:1108-1148
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/horned_encounter_ai.rs
+1108:                 .as_ref()
+1109:                 .and_then(|s| s.horned_encounter.as_ref())
+1110:                 .filter(|s| now <= s.reward_until)
+1111:                 .and_then(|s| s.reward_owner.clone())
+1112:                 .filter(|sid| self.players.contains_key(sid));
+1113:             let Some((_, _, killed, name, experience, position, direction, _, drops, boss_audit)) =
+1114:                 self.apply_native_monster_scripted_death_damage(slave, owner.as_ref(), now)
+1115:             else {
+1116:                 continue;
+1117:             };
+1118:             if !killed {
+1119:                 continue;
+1120:             }
+1121:             out.extend(self.encounter_emit(
+1122:                 slave,
+1123:                 vec![ServerPacket::ObjectDied {
+1124:                     info: ObjectDiedInfo {
+1125:                         object_id: slave,
+1126:                         location: position.clone(),
+1127:                         direction,
+1128:                         kind: 0,
+1129:                     },
+1130:                 }],
+1131:                 now,
+1132:             ));
+1133:             if let Some(owner) = owner {
+1134:                 let drops = self.spawn_native_monster_drops(
+1135:                     &name,
+1136:                     &position,
+1137:                     self.players[&owner].object_id,
+1138:                     drops,
+1139:                     now,
+1140:                 );
+1141:                 out.extend(self.diff_all_zone_object_visibility());
+1142:                 out.extend(self.group_monster_kill_awards(
+1143:                     &owner,
+1144:                     ZoneMonsterKillAward {
+1145:                         source_receipt_key: None,
+1146:                         experience_selection: None,
+1147:                         monster_object_id: slave,
+1148:                         killed_at_ms: now,
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/hugger_ai.rs:73-90
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/hugger_ai.rs
+73:     now: u64,
+74: ) {
+75:     if !matches!(m.ai, 69 | 70) {
+76:         return;
+77:     }
+78:     initialize_hugger(m, id, now);
+79:     let Some(owner) = owner else {
+80:         return;
+81:     };
+82:     let s = m.special_ai.as_mut().unwrap().hugger.as_mut().unwrap();
+83:     if s.reward_owner.is_none() || now > s.reward_until_ms {
+84:         s.reward_owner = Some(owner.clone());
+85:     }
+86:     if s.reward_owner.as_ref() == Some(owner) {
+87:         s.reward_until_ms = now.saturating_add(5000);
+88:     }
+89: }
+90: impl ZoneRuntime {
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/hugger_ai.rs:322-365
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/hugger_ai.rs
+322:             let reward_owner = s
+323:                 .reward_owner
+324:                 .as_ref()
+325:                 .filter(|owner| {
+326:                     now <= s.reward_until_ms
+327:                         && self
+328:                             .players
+329:                             .get(*owner)
+330:                             .is_some_and(|p| !p.dead && p.hp > 0)
+331:                 })
+332:                 .cloned();
+333:             let Some((_, _, killed, name, experience, position, direction, _, drops, boss_audit)) =
+334:                 self.apply_native_monster_damage(id, m.hp, reward_owner.as_ref(), now)
+335:             else {
+336:                 return Some(Vec::new());
+337:             };
+338:             if !killed {
+339:                 return Some(Vec::new());
+340:             }
+341:             self.hugger_on_death(id, now);
+342:             let packet = ServerPacket::ObjectDied {
+343:                 info: ObjectDiedInfo {
+344:                     object_id: id,
+345:                     location: position.clone(),
+346:                     direction,
+347:                     kind: 0,
+348:                 },
+349:             };
+350:             self.apply_zone_object_packets(std::slice::from_ref(&packet), now);
+351:             let mut out = vec![ZoneOutbound::ToMany {
+352:                 session_ids: self.native_monster_visible_recipients(id, &position),
+353:                 packets: vec![packet],
+354:             }];
+355:             if let Some(owner) = reward_owner {
+356:                 let player_id = self.players[&owner].object_id;
+357:                 let drops =
+358:                     self.spawn_native_monster_drops(&name, &position, player_id, drops, now);
+359:                 out.extend(self.diff_all_zone_object_visibility());
+360:                 out.extend(self.group_monster_kill_awards(
+361:                     &owner,
+362:                     ZoneMonsterKillAward {
+363:                         source_receipt_key: None,
+364:                         experience_selection: None,
+365:                         monster_object_id: id,
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/kirin_snow_ai.rs:44-63
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/kirin_snow_ai.rs
+44:             .get_or_insert_with(Default::default)
+45:             .kirin_snow
+46:             .get_or_insert_with(Default::default);
+47:     }
+48: }
+49: pub(super) fn kirin_snow_tag(m: &mut ZoneNativeMonster, owner: Option<&SessionId>, now: u64) {
+50:     if m.ai != 180 {
+51:         return;
+52:     }
+53:     initialize_kirin_snow(m);
+54:     let Some(owner) = owner else { return };
+55:     let s = m.special_ai.as_mut().unwrap().kirin_snow.as_mut().unwrap();
+56:     if s.reward_owner.is_none() || now > s.reward_until_ms {
+57:         s.reward_owner = Some(owner.clone());
+58:     }
+59:     if s.reward_owner.as_ref() == Some(owner) {
+60:         s.reward_until_ms = now.saturating_add(5000);
+61:     }
+62: }
+63: fn roll(s: &mut KirinSnowState, id: u32, now: u64, n: u64) -> u64 {
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/mud_boulder_ai.rs:115-132
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/mud_boulder_ai.rs
+115:     now: u64,
+116: ) {
+117:     if m.ai != 170 {
+118:         return;
+119:     }
+120:     initialize_mud_boulder(m, id, now);
+121:     let Some(owner) = owner else {
+122:         return;
+123:     };
+124:     let s = m.special_ai.as_mut().unwrap().mud_boulder.as_mut().unwrap();
+125:     if s.reward_owner.is_none() || now > s.reward_until_ms {
+126:         s.reward_owner = Some(owner.clone());
+127:     }
+128:     if s.reward_owner.as_ref() == Some(owner) {
+129:         s.reward_until_ms = now.saturating_add(5_000);
+130:     }
+131: }
+132: 
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/thunder_ai.rs:158-184
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/thunder_ai.rs
+158:                     &hit.session_id,
+159:                     hit.attacker_object_id,
+160:                     id,
+161:                     &position,
+162:                 );
+163:                 if !recipients.is_empty() {
+164:                     out.push(ZoneOutbound::ToMany {
+165:                         session_ids: recipients,
+166:                         packets,
+167:                     });
+168:                 }
+169:                 if killed {
+170:                     let owner = owner.unwrap_or(hit.session_id);
+171:                     let owner_id = self
+172:                         .players
+173:                         .get(&owner)
+174:                         .map_or(hit.attacker_object_id, |p| p.object_id);
+175:                     let drops =
+176:                         self.spawn_native_monster_drops(&name, &position, owner_id, drops, now);
+177:                     out.extend(self.diff_all_zone_object_visibility());
+178:                     out.extend(self.group_monster_kill_awards(
+179:                         &owner,
+180:                         ZoneMonsterKillAward {
+181:                             source_receipt_key: None,
+182:                             experience_selection: None,
+183:                             monster_object_id: id,
+184:                             killed_at_ms: now,
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/vampire_ai.rs:448-466
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/vampire_ai.rs
+448:             percent,
+449:             killed,
+450:             name,
+451:             experience,
+452:             position,
+453:             direction,
+454:             reward_owner,
+455:             drops,
+456:             boss_audit,
+457:         )) = self.apply_native_monster_direct_damage(target_id, damage, Some(&owner), now)
+458:         else {
+459:             return Vec::new();
+460:         };
+461:         let mut packets = vec![
+462:             ServerPacket::ObjectStruck {
+463:                 info: ObjectStruckInfo {
+464:                     object_id: target_id,
+465:                     attacker_id: id,
+466:                     location: position.clone(),
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/src/runtime/zone/runtime/vampire_ai.rs:504-531
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/src/runtime/zone/runtime/vampire_ai.rs
+504:         self.apply_zone_object_packets(&packets, now);
+505:         let mut out = vec![ZoneOutbound::ToMany {
+506:             session_ids: self.native_monster_action_recipients(&owner, id, target_id, &position),
+507:             packets,
+508:         }];
+509:         if killed {
+510:             let reward = reward_owner.unwrap_or(owner);
+511:             if let Some(player) = self.players.get(&reward) {
+512:                 let owner_id = player.object_id;
+513:                 let drops = self.spawn_native_monster_drops(&name, &position, owner_id, drops, now);
+514:                 out.extend(self.diff_all_zone_object_visibility());
+515:                 out.extend(self.group_monster_kill_awards(
+516:                     &reward,
+517:                     ZoneMonsterKillAward {
+518:                         source_receipt_key: None,
+519:                         experience_selection: None,
+520:                         monster_object_id: target_id,
+521:                         killed_at_ms: now,
+522:                         monster_name: name,
+523:                         experience,
+524:                         drops,
+525:                         boss_audit,
+526:                     },
+527:                 ));
+528:             }
+529:         }
+530:         out
+531:     }
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/gateway/src/routing.rs:1697-1730
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/gateway/src/routing.rs
+1697: }
+1698: 
+1699: impl InProcessAccountInventoryService {
+1700:     fn commit_source_aware(
+1701:         &self, runtime: &mut InProcessWorldRuntime, scope: Option<(&ZoneId, bool)>,
+1702:         envelope: SharedAccountInventoryCommandEnvelope,
+1703:     ) -> SharedAccountInventoryCommitOutcome {
+1704:         let SharedAccountInventoryCommand::MonsterKillAward(award) = &envelope.command else {
+1705:             return SharedAccountInventoryCommitOutcome::Confirmed(self.commit_in_scope(runtime, scope, envelope));
+1706:         };
+1707:         let rejected = || SharedAccountInventoryTransactionReceipt {
+1708:             kind: SharedAccountInventoryTransactionKind::MonsterKillAward, committed: false, packets: vec![],
+1709:         };
+1710:         if runtime.active_identity().as_ref() != Some(&envelope.identity) {
+1711:             return SharedAccountInventoryCommitOutcome::Confirmed(rejected());
+1712:         }
+1713:         let Some(base_key) = envelope.idempotency_key() else {
+1714:             return SharedAccountInventoryCommitOutcome::Confirmed(rejected());
+1715:         };
+1716:         let key = award.source_receipt_key.clone().unwrap_or_else(|| scope.map_or_else(|| base_key.0.clone(), |(zone, ordered)|
+1717:             serde_json::to_string(&(zone.as_str(), ordered, &base_key.0)).expect("receipt namespace serializable")));
+1718:         let mut prepared_award = award.clone();
+1719:         prepared_award.source_receipt_key = Some(key.clone());
+1720:         match runtime.try_commit_shared_monster_kill_award_with_receipt(&key, &prepared_award) {
+1721:             Ok((receipt, replayed)) => {
+1722:                 if receipt.committed && !replayed {
+1723:                     if let Some(audit) = award.boss_audit.clone() {
+1724:                         self.boss_reward_audits.lock().expect("boss audit mutex").push(audit);
+1725:                     }
+1726:                 }
+1727:                 SharedAccountInventoryCommitOutcome::Confirmed(receipt)
+1728:             }
+1729:             Err(mir2_simulation::SharedMonsterKillCommitFailure::Deferred(_)) =>
+1730:                 SharedAccountInventoryCommitOutcome::Deferred { receipt: rejected() },
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/gateway/src/routing.rs:4476-4490
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/gateway/src/routing.rs
+4476:                 ZoneOutbound::MonsterKillAward { session_id, award } => {
+4477:                     let Some(key) = self.zone_session_keys.get(&session_id).cloned() else {
+4478:                         continue;
+4479:                     };
+4480:                     if self.teardown_fenced(&key)
+4481:                         && !(allow_fenced_current && current_key == Some(&key))
+4482:                     {
+4483:                         continue;
+4484:                     }
+4485:                     self.sync_authoritative_zone_drops_for_key(&key, &award.drops);
+4486:                     if current_key == Some(&key) {
+4487:                         current_monster_kill_awards.push(award);
+4488:                     } else {
+4489:                         self.queue_zone_monster_kill_award(key, award);
+4490:                     }
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/gateway/src/routing.rs:4742-4766
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/gateway/src/routing.rs
+4742:     fn sync_drop_ownership_deadline(
+4743:         map: &mut ZoneMapSnapshotLayer,
+4744:         drop: &GroundDropSnapshot,
+4745:         now_ms: u64,
+4746:     ) {
+4747:         map.drop_expires_at_ms
+4748:             .entry(drop.object_id)
+4749:             .or_insert_with(|| {
+4750:                 now_ms
+4751:                     .saturating_add(SHARED_DROP_EXPIRE_TICKS.saturating_mul(SHARED_CRYSTAL_TICK_MS))
+4752:             });
+4753:         if let Some(remaining_ticks) = drop
+4754:             .ownership_remaining_ticks
+4755:             .filter(|remaining_ticks| *remaining_ticks > 0)
+4756:         {
+4757:             map.drop_ownership_expires_at_ms.insert(
+4758:                 drop.object_id,
+4759:                 now_ms.saturating_add(remaining_ticks.saturating_mul(SHARED_CRYSTAL_TICK_MS)),
+4760:             );
+4761:         } else {
+4762:             map.drop_ownership_expires_at_ms.remove(&drop.object_id);
+4763:         }
+4764:     }
+4765: 
+4766:     #[cfg(test)]
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/gateway/src/routing.rs:7350-7356
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/gateway/src/routing.rs
+7350: }
+7351: 
+7352: const SHARED_DEATH_DROP_RANGE: i32 = 4;
+7353: const SHARED_CRYSTAL_TICK_MS: u64 = 300;
+7354: const SHARED_DROP_EXPIRE_TICKS: u64 = 30 * 60;
+7355: const SHARED_ZONE_MOVEMENT_INGRESS_CAPACITY: usize = 64;
+7356: const SHARED_ZONE_MOVEMENT_REPLY_TIMEOUT: Duration = Duration::from_secs(5);
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/gateway/src/routing.rs:10865-10948
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/gateway/src/routing.rs
+10865:     fn apply_zone_monster_kill_awards_checked(
+10866:         &mut self,
+10867:         key: &ZonePresenceKey,
+10868:         awards: Vec<ZoneMonsterKillAward>,
+10869:     ) -> Result<Vec<ServerPacket>, String> {
+10870:         if awards.is_empty() {
+10871:             return Ok(Vec::new());
+10872:         }
+10873:         let Some(identity) = self.inner.active_identity() else {
+10874:             self.zone_state
+10875:                 .lock()
+10876:                 .map_err(|_| "shared zone presence mutex is poisoned".to_string())?
+10877:                 .prepend_zone_monster_kill_awards(key.clone(), awards);
+10878:             return Err("monster kill award drain requires an active identity".to_string());
+10879:         };
+10880: 
+10881:         let mut packets = Vec::new();
+10882:         let mut awards = awards.into_iter();
+10883:         while let Some(award) = awards.next() {
+10884:             let mut retry_award = award.clone();
+10885:             let outcome = self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
+10886:                 identity: identity.clone(),
+10887:                 command: SharedAccountInventoryCommand::MonsterKillAward(award),
+10888:             });
+10889:             if let SharedAccountInventoryCommitOutcome::LocalSourceOutcomeUnknown { idempotency_key, .. } | SharedAccountInventoryCommitOutcome::OutcomeUnknown { idempotency_key, .. } = &outcome {
+10890:                 retry_award.source_receipt_key = Some(idempotency_key.clone());
+10891:             }
+10892:             let receipt = outcome.into_receipt();
+10893:             debug_assert_eq!(
+10894:                 receipt.kind,
+10895:                 SharedAccountInventoryTransactionKind::MonsterKillAward
+10896:             );
+10897:             if !receipt.committed {
+10898:                 let mut retry = vec![retry_award];
+10899:                 retry.extend(awards);
+10900:                 self.zone_state
+10901:                     .lock()
+10902:                     .map_err(|_| "shared zone presence mutex is poisoned".to_string())?
+10903:                     .prepend_zone_monster_kill_awards(key.clone(), retry);
+10904:                 return Err(
+10905:                     "monster kill award economy commit failed during teardown drain".to_string(),
+10906:                 );
+10907:             }
+10908:             packets.extend(receipt.packets);
+10909:         }
+10910:         Ok(packets)
+10911:     }
+10912: 
+10913:     fn apply_zone_monster_kill_awards(
+10914:         &mut self,
+10915:         awards: Vec<ZoneMonsterKillAward>,
+10916:     ) -> Vec<ServerPacket> {
+10917:         let Some(identity) = self.inner.active_identity() else {
+10918:             return Vec::new();
+10919:         };
+10920:         let key = ZonePresenceKey::from_identity(&identity);
+10921:         let mut remaining = awards.into_iter();
+10922:         let mut packets = Vec::new();
+10923:         while let Some(mut award) = remaining.next() {
+10924:             let outcome = self.commit_account_inventory_outcome(SharedAccountInventoryCommandEnvelope {
+10925:                 identity: identity.clone(),
+10926:                 command: SharedAccountInventoryCommand::MonsterKillAward(award.clone()),
+10927:             });
+10928:             if let SharedAccountInventoryCommitOutcome::LocalSourceOutcomeUnknown { idempotency_key, .. } | SharedAccountInventoryCommitOutcome::OutcomeUnknown { idempotency_key, .. } = &outcome {
+10929:                 award.source_receipt_key = Some(idempotency_key.clone());
+10930:             }
+10931:             match outcome {
+10932:                 SharedAccountInventoryCommitOutcome::Confirmed(receipt) if receipt.committed => packets.extend(receipt.packets),
+10933:                 _ => {
+10934:                     // Keep the exact original envelope on known failure and
+10935:                     // unknown publication alike. A frozen source rejects later
+10936:                     // polls before any gameplay or repository attempt occurs.
+10937:                     let mut retry = vec![award];
+10938:                     retry.extend(remaining);
+10939:                     self.zone_state.lock().expect("shared zone presence mutex")
+10940:                         .prepend_zone_monster_kill_awards(key, retry);
+10941:                     break;
+10942:                 }
+10943:             }
+10944:         }
+10945:         // Ordinary awards do not change vitals. Only a trusted level-up packet
+10946:         // proves that personal stat refresh changed the HP/MP pools; avoid
+10947:         // pushing a stale personal HP back into Zone after Zone-side damage.
+10948:         if packets
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/gateway/src/routing.rs:9440-9464
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/gateway/src/routing.rs
+9440:         let session_id = SharedInProcessZoneState::zone_session_id_for_key(&key);
+9441:         let mut join_snapshot = self
+9442:             .inner
+9443:             .active_zone_join_snapshot(session_id.as_str().to_string());
+9444:         let mut packets = Vec::new();
+9445:         let mut transform = None;
+9446:         let mut shout_consume = None;
+9447:         let mut player_damages = Vec::new();
+9448:         let mut player_heals = Vec::new();
+9449:         // Read durable castle and Guild authority before taking the Zone lock.
+9450:         // Bootstrap must not leave gates absent or allegiance stale until the
+9451:         // scheduler's next 10-second capture observation.
+9452:         let conquest_config = self.inner.shared_conquest_config().filter(|config| config.conquest_policies.iter().any(|policy| policy.map_file_name.eq_ignore_ascii_case(&map_file_name) || policy.palace_file_name.eq_ignore_ascii_case(&map_file_name)));
+9453:         let actor_guild = conquest_config.as_ref().and_then(|config| config.account_store.lock().ok()).and_then(|store| store.shared_guilds.values().find(|guild| guild.members.iter().any(|member| member.identity.account_id == key.account_id && member.identity.character_index == key.character_index)).map(|guild| guild.id.clone()));
+9454:         let revision = conquest_config.as_ref().and_then(|config| config.account_store.lock().ok()).and_then(|store| store.shared_conquests.get(&1).map(|record| record.revision)).unwrap_or(1);
+9455:         let needs_castle_bootstrap = {
+9456:             let state = self.zone_state.lock().expect("shared zone presence mutex should not be poisoned");
+9457:             !state.zone_sessions.contains_key(&key) || state.players.get(&key).is_none_or(|player| player.map_file_name != map_file_name) || !state.zone_manager.conquest_projection_ready(&session_id)
+9458:                 || state.zone_manager.conquest_record_revision(&session_id) != Some(revision)
+9459:                 || !state.zone_manager.conquest_membership_matches(&session_id,actor_guild.as_deref())
+9460:         };
+9461:         let conquest_projection = conquest_config.filter(|config| needs_castle_bootstrap && config.conquest_policies.iter().any(|policy| policy.map_file_name.eq_ignore_ascii_case(&map_file_name) || policy.palace_file_name.eq_ignore_ascii_case(&map_file_name)))
+9462:             .map(|config| shared_conquest::bootstrap_projection(&config));
+9463:         if let Some(Err(error)) = &conquest_projection {
+9464:             eprintln!("[conquest-bootstrap] {error}");
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/gateway/src/routing.rs:9547-9559
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/gateway/src/routing.rs
+9547:                 zone_state
+9548:                     .zone_sessions
+9549:                     .insert(key.clone(), session_id.clone());
+9550:                 zone_state
+9551:                     .zone_session_keys
+9552:                     .insert(session_id.clone(), key.clone());
+9553:                 let mut outbounds = zone_state.zone_manager.join(join.clone());
+9554:                 let now_ms = Self::zone_now_ms();
+9555:                 outbounds.extend(
+9556:                     zone_state
+9557:                         .zone_manager
+9558:                         .handle(ZoneCommand::SyncGroundDrops {
+9559:                             session_id: session_id.clone(),
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/tests/shared_zone.rs:10621-10662
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/tests/shared_zone.rs
+10621: fn zone_ground_drop_claim_blocks_non_owner_until_owner_window_expires() {
+10622:     let mut zone = zone();
+10623:     let first = session("first");
+10624:     let second = session("second");
+10625: 
+10626:     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+10627:     zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 330, 270)));
+10628:     zone.handle(ZoneCommand::SyncGroundDrops {
+10629:         session_id: first.clone(),
+10630:         drops: vec![gold_drop(8001, 330, 270, Some(101), Some(1))],
+10631:         now_ms: 0,
+10632:     });
+10633: 
+10634:     let blocked = zone.handle(ZoneCommand::ClaimGroundDrop {
+10635:         session_id: second.clone(),
+10636:         object_id: Some(8001),
+10637:         target: Point { x: 330, y: 270 },
+10638:         group_members: Vec::new(),
+10639:         now_ms: 0,
+10640:     });
+10641:     assert!(has_packet(&blocked, &second, |packet| matches!(
+10642:         packet,
+10643:         ServerPacket::Chat { message, .. } if message == "server.CannotPickupNotOwner"
+10644:     )));
+10645: 
+10646:     let allowed = zone.handle(ZoneCommand::ClaimGroundDrop {
+10647:         session_id: second.clone(),
+10648:         object_id: Some(8001),
+10649:         target: Point { x: 330, y: 270 },
+10650:         group_members: Vec::new(),
+10651:         now_ms: 301,
+10652:     });
+10653:     assert!(allowed.iter().any(|outbound| matches!(
+10654:         outbound,
+10655:         ZoneOutbound::GroundDropClaimedWithTicket { session_id, ticket }
+10656:             if session_id == &second && ticket.object_id == 8001
+10657:     )));
+10658: }
+10659: 
+10660: #[test]
+10661: fn zone_ground_drop_owner_group_and_unowned_protection_follow_crystal_semantics() {
+10662:     let mut zone = zone();
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/tests/shared_zone.rs:10878-10928
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/tests/shared_zone.rs
+10878: fn detached_ground_drop_claim_survives_session_leave_and_restores_once() {
+10879:     // Strict Zone checkpoints reconstruct collision from the signed map
+10880:     // module. Use the canonical map collision here rather than the unbounded
+10881:     // test helper so the state-root comparison exercises a production-shaped
+10882:     // restore.
+10883:     let mut zone = ZoneRuntime::new(ZoneKey::for_map("0"));
+10884:     let first = session("first");
+10885:     let second = session("second");
+10886:     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+10887:     zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 330, 270)));
+10888:     zone.handle(ZoneCommand::SyncGroundDrops {
+10889:         session_id: first.clone(),
+10890:         drops: vec![gold_drop(8_021, 330, 270, Some(101), Some(10))],
+10891:         now_ms: 0,
+10892:     });
+10893:     let claimed = zone.handle(ZoneCommand::ClaimGroundDrop {
+10894:         session_id: first.clone(),
+10895:         object_id: Some(8_021),
+10896:         target: Point { x: 330, y: 270 },
+10897:         group_members: Vec::new(),
+10898:         now_ms: 1,
+10899:     });
+10900:     let ticket = ground_drop_claim_ticket(&claimed, &first, 8_021);
+10901: 
+10902:     assert!(zone.detach_ground_drop_claim(&first, &ticket));
+10903:     assert!(zone.pending_ground_drop_claim_tickets().is_empty());
+10904:     assert!(zone.has_detached_ground_drop_claim_ticket(&ticket));
+10905:     assert!(!zone.has_ground_drop(8_021));
+10906:     zone.handle(ZoneCommand::Leave { session_id: first });
+10907: 
+10908:     let checkpoint = zone.checkpoint_bytes().expect("detached Zone checkpoint");
+10909:     let mut restored =
+10910:         ZoneRuntime::restore_checkpoint(&checkpoint).expect("restore detached Zone checkpoint");
+10911:     assert!(restored.has_detached_ground_drop_claim_ticket(&ticket));
+10912:     let outbounds = restored
+10913:         .restore_detached_ground_drop_claim(&ticket, 10)
+10914:         .expect("definitive rejection restores detached claim");
+10915:     assert!(has_packet(&outbounds, &second, |packet| matches!(
+10916:         packet,
+10917:         ServerPacket::ObjectGold { info } if info.object_id == 8_021 && info.gold == 25
+10918:     )));
+10919:     assert!(restored.has_ground_drop(8_021));
+10920:     assert!(restored
+10921:         .restore_detached_ground_drop_claim(&ticket, 11)
+10922:         .is_none());
+10923:     assert_eq!(restored.ground_drop_count(), 1);
+10924: }
+10925: 
+10926: #[test]
+10927: fn zone_ground_drop_reclaim_uses_fresh_claim_id_and_stable_economic_key() {
+10928:     let mut zone = zone();
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/tests/shared_zone.rs:10973-10995
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/tests/shared_zone.rs
+10973: fn zone_ground_drop_ticket_tampering_and_legacy_commands_fail_closed() {
+10974:     let mut zone = zone();
+10975:     let first = session("first");
+10976:     let second = session("second");
+10977:     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+10978:     zone.handle(ZoneCommand::Join(join("second", 102, "Blade", 330, 270)));
+10979:     zone.handle(ZoneCommand::SyncGroundDrops {
+10980:         session_id: first.clone(),
+10981:         drops: vec![gold_drop(8_101, 330, 270, Some(101), Some(10))],
+10982:         now_ms: 0,
+10983:     });
+10984:     let claimed = zone.handle(ZoneCommand::ClaimGroundDrop {
+10985:         session_id: first.clone(),
+10986:         object_id: Some(8_101),
+10987:         target: Point { x: 330, y: 270 },
+10988:         group_members: Vec::new(),
+10989:         now_ms: 0,
+10990:     });
+10991:     let ticket = ground_drop_claim_ticket(&claimed, &first, 8_101);
+10992: 
+10993:     assert!(zone
+10994:         .handle(ZoneCommand::CommitGroundDropClaim {
+10995:             session_id: first.clone(),
+
+[shared] C:/Users/Administrator/.codex/worktrees/crowded-combat-control/mir2-player-journey/mir2-web3/apps/simulation/tests/shared_zone.rs:11063-11082
+git object 6032ef8b3e27dd97bad0b20c8676ef9f185db64b:mir2-web3/apps/simulation/tests/shared_zone.rs
+11063: fn zone_ground_drop_ticket_prevents_aba_and_duplicate_followups() {
+11064:     let mut zone = zone();
+11065:     let first = session("first");
+11066:     zone.handle(ZoneCommand::Join(join("first", 101, "Scout", 330, 270)));
+11067:     zone.handle(ZoneCommand::SyncGroundDrops {
+11068:         session_id: first.clone(),
+11069:         drops: vec![gold_drop(8_201, 330, 270, None, None)],
+11070:         now_ms: 0,
+11071:     });
+11072:     let first_claim = zone.handle(ZoneCommand::ClaimGroundDrop {
+11073:         session_id: first.clone(),
+11074:         object_id: Some(8_201),
+11075:         target: Point { x: 330, y: 270 },
+11076:         group_members: Vec::new(),
+11077:         now_ms: 0,
+11078:     });
+11079:     let old_ticket = ground_drop_claim_ticket(&first_claim, &first, 8_201);
+11080:     zone.handle(ZoneCommand::CancelGroundDropClaimWithTicket {
+11081:         session_id: first.clone(),
+11082:         ticket: old_ticket.clone(),
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MapObject.cs:66-67
+local comparison source, read only
+66:         public long CellTime, PKPointTime, LastHitTime, EXPOwnerTime;
+67:         public Color NameColour = Color.White;
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MapObject.cs:153-155
+local comparison source, read only
+153:         public MapObject LastHitter, EXPOwner, Owner;
+154:         public long ExpireTime, OwnerTime, OperateTime;
+155:         public int OperateDelay = 100;
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MapObject.cs:184-185
+local comparison source, read only
+184:         public LinkedListNode<MapObject> Node;
+185:         public LinkedListNode<MapObject> NodeThreaded;
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MapObject.cs:204-226
+local comparison source, read only
+204:         public virtual void Process()
+205:         {
+206:             if (Master != null && Master.Node == null) Master = null;
+207:             if (LastHitter != null && LastHitter.Node == null) LastHitter = null;
+208:             if (EXPOwner != null && EXPOwner.Node == null) EXPOwner = null;
+209:             if (Target != null && (Target.Node == null || Target.Dead)) Target = null;
+210:             if (Owner != null && Owner.Node == null) Owner = null;
+211: 
+212:             if (PKPoints > 0 && Envir.Time > PKPointTime)
+213:             {
+214:                 PKPointTime = Envir.Time + Settings.PKDelay * Settings.Second;
+215:                 PKPoints--;
+216:             }
+217: 
+218:             if (LastHitter != null && Envir.Time > LastHitTime)
+219:             {
+220:                 LastHitter = null;
+221:             }
+222: 
+223:             if (EXPOwner != null && Envir.Time > EXPOwnerTime)
+224:             {
+225:                 EXPOwner = null;
+226:             }
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MapObject.cs:339-375
+local comparison source, read only
+339:         public virtual void Spawned()
+340:         {
+341:             if (Node != null)
+342:                 throw new InvalidOperationException("Node is not null, Object already spawned");
+343: 
+344:             Node = Envir.Objects.AddLast(this);
+345:             if ((Race == ObjectType.Monster) && Settings.Multithreaded)
+346:             {
+347:                 SpawnThread = CurrentMap.Thread;
+348:                 NodeThreaded = Envir.MobThreads[SpawnThread].ObjectsList.AddLast(this);
+349:             }
+350: 
+351:             OperateTime = Envir.Time + Envir.Random.Next(OperateDelay);
+352: 
+353:             BroadcastInfo();
+354:             BroadcastHealthChange();
+355: 
+356:             InSafeZone = CurrentMap != null && CurrentMap.GetSafeZone(CurrentLocation) != null;
+357:         }
+358:         public virtual void Despawn()
+359:         {
+360:             if (Node == null)
+361:                 throw new InvalidOperationException("Node is null, Object already Despawned");
+362:             
+363:             Broadcast(new S.ObjectRemove { ObjectID = ObjectID });
+364:             Envir.Objects.Remove(Node);
+365:             if (Settings.Multithreaded && (Race == ObjectType.Monster))
+366:             {
+367:                 Envir.MobThreads[SpawnThread].ObjectsList.Remove(NodeThreaded);
+368:             }
+369: 
+370:             ActionList.Clear();
+371: 
+372:             for (int i = Pets.Count - 1; i >= 0; i--)
+373:                 Pets[i].Die();
+374: 
+375:             Node = null;
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MapObject.cs:780-800
+local comparison source, read only
+780:         public virtual bool Teleport(Map temp, Point location, bool effects = true, byte effectnumber = 0)
+781:         {
+782:             if (temp == null || !temp.ValidPoint(location)) return false;
+783: 
+784:             CurrentMap.RemoveObject(this);
+785:             if (effects) Broadcast(new S.ObjectTeleportOut {ObjectID = ObjectID, Type = effectnumber});
+786:             Broadcast(new S.ObjectRemove {ObjectID = ObjectID});
+787:             
+788:             CurrentMap = temp;
+789:             CurrentLocation = location;
+790: 
+791:             InTrapRock = false;
+792: 
+793:             CurrentMap.AddObject(this);
+794:             BroadcastInfo();
+795: 
+796:             if (effects) Broadcast(new S.ObjectTeleportIn { ObjectID = ObjectID, Type = effectnumber });
+797:             
+798:             BroadcastHealthChange();
+799:             
+800:             return true;
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs:602-603
+local comparison source, read only
+602:         public const int RegenDelay = 10000, EXPOwnerDelay = 5000, AloneDelay = 3000, SearchDelay = 3000, RoamDelay = 1000, HealDelay = 600, RevivalDelay = 2000;
+603:         public long ActionTime, MoveTime, AttackTime, RegenTime, DeadTime, AloneTime, SearchTime, RoamTime, HealTime;
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs:966-1015
+local comparison source, read only
+966:         public override void Die()
+967:         {
+968:             if (Dead) return;
+969: 
+970:             HP = 0;
+971:             Dead = true;
+972: 
+973:             DeadTime = Envir.Time + DeadDelay;
+974: 
+975:             Broadcast(new S.ObjectDied { ObjectID = ObjectID, Direction = Direction, Location = CurrentLocation });
+976: 
+977:             if (Info.HasDieScript && (Envir.MonsterNPC != null))
+978:             {
+979:                 Envir.MonsterNPC.Call(this, string.Format("[@_DIE({0})]", Info.Index));
+980:             }
+981: 
+982:             if (EXPOwner != null && EXPOwner.Node != null && Master == null && (EXPOwner.Race == ObjectType.Player || EXPOwner.Race == ObjectType.Hero))
+983:             {
+984:                 EXPOwner.WinExp(Experience, Level);
+985: 
+986:                 if (EXPOwner.Race != ObjectType.Hero)
+987:                 {
+988:                     PlayerObject playerObj = (PlayerObject)EXPOwner;
+989:                     playerObj.CheckGroupQuestKill(Info);
+990:                 }
+991: 
+992:             }
+993: 
+994:             if (Respawn != null)
+995:                 Respawn.Count--;
+996: 
+997:             if (Master == null && EXPOwner != null)
+998:                 Drop();
+999: 
+1000:             Master = null;
+1001: 
+1002:             PoisonList.Clear();
+1003:             Envir.MonsterCount--;
+1004:             if (CurrentMap != null)
+1005:             CurrentMap.MonsterCount--;
+1006:         }
+1007: 
+1008:         public MapObject GetAttacker(MapObject attacker)
+1009:         {
+1010:             return attacker switch
+1011:             {
+1012:                 HeroObject hero => hero.Owner,
+1013:                 _ => attacker
+1014:             };
+1015:         }
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs:1093-1185
+local comparison source, read only
+1093:         protected virtual void Drop()
+1094:         {
+1095:             if (CurrentMap.Info.NoDropMonster)
+1096:                 return;
+1097: 
+1098:             MonsterRarityProfile profile = GetRarityProfile();
+1099:             int ownerItemBonus = EXPOwner?.Stats[Stat.ItemDropRatePercent] ?? 0;
+1100:             int ownerGoldBonus = EXPOwner?.Stats[Stat.GoldDropRatePercent] ?? 0;
+1101:             int totalItemBonus = ownerItemBonus + profile.ItemDropBonusPercent;
+1102:             int totalGoldBonus = ownerGoldBonus + profile.GoldDropBonusPercent;
+1103: 
+1104:             for (int i = 0; i < Info.Drops.Count; i++)
+1105:             {
+1106:                 DropInfo drop = Info.Drops[i];
+1107: 
+1108:                 var reward = drop.AttemptDrop(totalItemBonus, totalGoldBonus);
+1109: 
+1110:                 if (reward != null)
+1111:                 {
+1112:                     uint scaledGold = ApplyGoldModifier(reward.Gold);
+1113: 
+1114:                     if (scaledGold > 0)
+1115:                     {
+1116:                         DropGold(scaledGold);
+1117:                     }
+1118: 
+1119:                     foreach (var dropItem in reward.Items)
+1120:                     {
+1121:                         UserItem item = Envir.CreateDropItem(dropItem);
+1122: 
+1123:                         if (item == null) continue;
+1124: 
+1125:                         if (GMMade)
+1126:                         {
+1127:                             item.GMMade = true;
+1128:                         }
+1129: 
+1130:                         if (EXPOwner != null && EXPOwner.Race == ObjectType.Player)
+1131:                         {
+1132:                             PlayerObject ob = (PlayerObject)EXPOwner;
+1133: 
+1134:                             if (ob.CheckGroupQuestItem(item))
+1135:                             {
+1136:                                 continue;
+1137:                             }
+1138:                         }
+1139: 
+1140:                         if (drop.QuestRequired) continue;
+1141:                         if (!DropItem(item)) return;
+1142:                     }
+1143:                 }
+1144:             }
+1145:         }
+1146: 
+1147:         protected virtual bool DropItem(UserItem item)
+1148:         {
+1149:             if (CurrentMap.Info.NoDropMonster)
+1150:                 return false;
+1151: 
+1152:             ItemObject ob = new ItemObject(this, item)
+1153:             {
+1154:                 Owner = EXPOwner,
+1155:                 OwnerTime = Envir.Time + Settings.Minute,
+1156:             };
+1157: 
+1158:             if (!item.Info.GlobalDropNotify)
+1159:                 return ob.Drop(Settings.DropRange);
+1160: 
+1161:             foreach (var player in Envir.Players)
+1162:             {
+1163:                 player.ReceiveChat(GameLanguage.ServerTextMap.GetLocalization((ServerTextKeys.PlayerHasDroppedItem), Name, item.FriendlyName), ChatType.System2);
+1164:             }
+1165: 
+1166:             return ob.Drop(Settings.DropRange);
+1167:         }
+1168: 
+1169:         protected virtual bool DropGold(uint gold)
+1170:         {
+1171:             if (EXPOwner != null && EXPOwner.CanGainGold(gold) && !Settings.DropGold)
+1172:             {
+1173:                 EXPOwner.WinGold(gold);
+1174:                 return true;
+1175:             }
+1176: 
+1177:             uint count = gold / Settings.MaxDropGold == 0 ? 1 : gold / Settings.MaxDropGold + 1;
+1178:             for (int i = 0; i < count; i++)
+1179:             {
+1180:                 ItemObject ob = new ItemObject(this, i != count - 1 ? Settings.MaxDropGold : gold % Settings.MaxDropGold)
+1181:                 {
+1182:                     Owner = EXPOwner,
+1183:                     OwnerTime = Envir.Time + Settings.Minute,
+1184:                 };
+1185: 
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs:1192-1198
+local comparison source, read only
+1192:         public override void Process()
+1193:         {
+1194:             base.Process();
+1195: 
+1196:             RefreshNameColour();
+1197: 
+1198:             if (Target != null && (Target.CurrentMap != CurrentMap || !Target.IsAttackTarget(this) || !Functions.InRange(CurrentLocation, Target.CurrentLocation, Globals.DataRange)))
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs:1464-1509
+local comparison source, read only
+1464:                 if (poison.Owner != null && poison.Owner.Node == null)
+1465:                 {
+1466:                     if (poison.PType == PoisonType.Slow)
+1467:                     {
+1468:                         MoveSpeed = Info.MoveSpeed;
+1469:                         AttackSpeed = Info.AttackSpeed;
+1470:                         AttackTime = Envir.Time + AttackSpeed;
+1471:                     }
+1472:                     PoisonList.RemoveAt(i);
+1473:                     continue;
+1474:                 }
+1475: 
+1476:                 if (Envir.Time > poison.TickTime)
+1477:                 {
+1478:                     poison.Time++;
+1479:                     poison.TickTime = Envir.Time + poison.TickSpeed;
+1480: 
+1481:                     if (poison.Time >= poison.Duration)
+1482:                     {
+1483:                         if (poison.PType == PoisonType.Slow)
+1484:                         {
+1485:                             MoveSpeed = Info.MoveSpeed;
+1486:                             AttackSpeed = Info.AttackSpeed;
+1487:                             AttackTime = Envir.Time + AttackSpeed;
+1488:                         }
+1489:                         PoisonList.RemoveAt(i);
+1490:                         continue;
+1491:                     }
+1492: 
+1493:                     if (poison.PType == PoisonType.Green || poison.PType == PoisonType.Bleeding)
+1494:                     {
+1495:                         if (EXPOwner == null || EXPOwner.Dead)
+1496:                         {
+1497:                             EXPOwner = poison.Owner;
+1498:                             EXPOwnerTime = Envir.Time + EXPOwnerDelay;
+1499:                         }
+1500:                         else if (EXPOwner == poison.Owner)
+1501:                             EXPOwnerTime = Envir.Time + EXPOwnerDelay;
+1502: 
+1503:                         if (poison.PType == PoisonType.Bleeding)
+1504:                         {
+1505:                             Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Bleeding, EffectType = 0 });
+1506:                         }
+1507: 
+1508:                         //ChangeHP(-poison.Value);
+1509:                         PoisonDamage(-poison.Value, poison.Owner);
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs:1596-1607
+local comparison source, read only
+1596:                             DelayedAction action = new DelayedAction(DelayedType.Magic, Envir.Time, poison.Owner, caster.GetMagic(Spell.DelayedExplosion), poison.Value, this.CurrentLocation);
+1597:                             CurrentMap.ActionList.Add(action);
+1598:                             //Attacked((PlayerObject)poison.Owner, poison.Value, DefenceType.MAC, false);
+1599:                             break;
+1600:                         case ObjectType.Monster://this is in place so it could be used by mobs if one day someone chooses to
+1601:                             Attacked((MonsterObject)poison.Owner, poison.Value, DefenceType.MAC);
+1602:                             break;
+1603:                     }
+1604:                     LastHitter = poison.Owner;
+1605:                 }
+1606:                 return false;
+1607:             }
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs:2573-2633
+local comparison source, read only
+2573:                 Target = attacker;
+2574:             }
+2575: 
+2576:             var armour = GetArmour(type, attacker, out bool hit);
+2577: 
+2578:             if (!hit)
+2579:                 return 0;
+2580: 
+2581:             armour = (int)Math.Max(int.MinValue, (Math.Min(int.MaxValue, (decimal)(armour * ArmourRate))));
+2582:             damage = (int)Math.Max(int.MinValue, (Math.Min(int.MaxValue, (decimal)(damage * DamageRate))));
+2583: 
+2584:             if (damageWeapon)
+2585:                 attacker.DamageWeapon();
+2586:             damage += attacker.Stats[Stat.AttackBonus];
+2587: 
+2588:             if (armour >= damage)
+2589:             {
+2590:                 BroadcastDamageIndicator(DamageType.Miss);
+2591:                 return 0;
+2592:             }
+2593: 
+2594:             if (Envir.Random.Next(100) < (attacker.Stats[Stat.CriticalRate] * Settings.CriticalRateWeight))
+2595:             {
+2596:                 Broadcast(new S.ObjectEffect { ObjectID = ObjectID, Effect = SpellEffect.Critical });
+2597:                 damage = Math.Min(int.MaxValue, damage + (int)Math.Floor(damage * (((double)attacker.Stats[Stat.CriticalDamage] / (double)Settings.CriticalDamageWeight) * 10)));
+2598:                 BroadcastDamageIndicator(DamageType.Critical);
+2599:             }
+2600: 
+2601:             if (Target != this && attacker.IsAttackTarget(this))
+2602:             {
+2603:                 if (attacker.Info.MentalState == 2)
+2604:                 {
+2605:                     if (Functions.MaxDistance(CurrentLocation, attacker.CurrentLocation) < (8 - attacker.Info.MentalStateLvl))
+2606:                         Target = attacker;
+2607:                 }
+2608:                 else
+2609:                     Target = attacker;
+2610:             }
+2611: 
+2612:             if (BindingShotCenter) ReleaseBindingShot();
+2613:             ShockTime = 0;
+2614: 
+2615:             for (int i = PoisonList.Count - 1; i >= 0; i--)
+2616:             {
+2617:                 if (PoisonList[i].PType != PoisonType.LRParalysis) continue;
+2618: 
+2619:                 PoisonList.RemoveAt(i);
+2620:                 OperateTime = 0;
+2621:             }
+2622: 
+2623:             if (Master != null && Master != attacker && (Master.Race != ObjectType.Hero || Master.Race == ObjectType.Hero && attacker != ((HeroObject)Master).Owner))
+2624:                 if (Envir.Time > Master.BrownTime && Master.PKPoints < 200)
+2625:                     attacker.BrownTime = Envir.Time + Settings.Minute;
+2626: 
+2627:             if (EXPOwner == null || EXPOwner.Dead)
+2628:             {
+2629:                 EXPOwner = GetAttacker(attacker);
+2630:             }
+2631: 
+2632:             if (EXPOwner == attacker)
+2633:                 EXPOwnerTime = Envir.Time + EXPOwnerDelay;
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/MonsterObject.cs:2686-2737
+local comparison source, read only
+2686:         public override int Attacked(MonsterObject attacker, int damage, DefenceType type = DefenceType.ACAgility)
+2687:         {
+2688:             if (Target == null && attacker.IsAttackTarget(this))
+2689:                 Target = attacker;
+2690: 
+2691: 
+2692:             var armour = GetArmour(type, attacker, out bool hit);
+2693:             if (!hit)
+2694:                 return 0;
+2695: 
+2696:             armour = (int)Math.Max(int.MinValue, (Math.Min(int.MaxValue, (decimal)(armour * ArmourRate))));
+2697:             damage = (int)Math.Max(int.MinValue, (Math.Min(int.MaxValue, (decimal)(damage * DamageRate))));
+2698: 
+2699:             if (armour >= damage)
+2700:             {
+2701:                 BroadcastDamageIndicator(DamageType.Miss);
+2702:                 return 0;
+2703:             }
+2704: 
+2705:             if (Target != this && attacker.IsAttackTarget(this))
+2706:                 Target = attacker;
+2707: 
+2708:             if (BindingShotCenter) ReleaseBindingShot();
+2709:             ShockTime = 0;
+2710: 
+2711:             for (int i = PoisonList.Count - 1; i >= 0; i--)
+2712:             {
+2713:                 if (PoisonList[i].PType != PoisonType.LRParalysis) continue;
+2714: 
+2715:                 PoisonList.RemoveAt(i);
+2716:                 OperateTime = 0;
+2717:             }
+2718: 
+2719:             if (attacker.Info.AI == 6 || attacker.Info.AI == 58 || attacker.Info.AI == 113)
+2720:                 EXPOwner = null;
+2721: 
+2722:             else if (attacker.Master != null)
+2723:             {
+2724:                 if (attacker.CurrentMap != attacker.Master.CurrentMap || !Functions.InRange(attacker.CurrentLocation, attacker.Master.CurrentLocation, Globals.DataRange))
+2725:                     EXPOwner = null;
+2726:                 else
+2727:                 {
+2728: 
+2729:                     if (EXPOwner == null || EXPOwner.Dead)
+2730:                         EXPOwner = attacker.Master switch
+2731:                         {
+2732:                             HeroObject hero => hero.Owner,
+2733:                             _ => attacker.Master
+2734:                         };
+2735: 
+2736:                     if (EXPOwner == attacker.Master)
+2737:                         EXPOwnerTime = Envir.Time + EXPOwnerDelay;
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/HumanObject.cs:219-220
+local comparison source, read only
+219:         public bool CanGainExp = true;
+220:         private int _fireWallCastSeq = 0;
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/HumanObject.cs:675-683
+local comparison source, read only
+675:                         PoisonList.RemoveAt(i);
+676:                     }
+677: 
+678:                     if (poison.PType == PoisonType.Green || poison.PType == PoisonType.Bleeding)
+679:                     {
+680:                         LastHitter = poison.Owner;
+681:                         LastHitTime = Envir.Time + 10000;
+682: 
+683:                         if (poison.PType == PoisonType.Bleeding)
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/HumanObject.cs:2365-2380
+local comparison source, read only
+2365:         public int ReduceExp(uint amount, uint targetLevel)
+2366:         {
+2367:             int expPoint;
+2368: 
+2369:             if (Level < targetLevel + 10 || !Settings.ExpMobLevelDifference)
+2370:             {
+2371:                 expPoint = (int)amount;
+2372:             }
+2373:             else
+2374:             {
+2375:                 expPoint = (int)amount - (int)Math.Round(Math.Max(amount / 15, 1) * ((double)Level - (targetLevel + 10)));
+2376:             }
+2377: 
+2378:             if (expPoint <= 0) expPoint = 1;
+2379: 
+2380:             return expPoint;
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/HumanObject.cs:6211-6219
+local comparison source, read only
+6211:                 case Spell.TurnUndead:
+6212:                     {
+6213:                         monster = (MonsterObject)data[1];
+6214:                         if (monster == null || !monster.IsAttackTarget(this) || monster.CurrentMap != CurrentMap || monster.Node == null) return;
+6215:                         monster.LastHitter = this;
+6216:                         monster.LastHitTime = Envir.Time + 5000;
+6217:                         monster.EXPOwner = this;
+6218:                         monster.EXPOwnerTime = Envir.Time + 5000;
+6219:                         monster.Die();
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/HumanObject.cs:7186-7199
+local comparison source, read only
+7186:             for (int i = PoisonList.Count - 1; i >= 0; i--)
+7187:             {
+7188:                 if (PoisonList[i].PType != PoisonType.LRParalysis) continue;
+7189: 
+7190:                 PoisonList.RemoveAt(i);
+7191:                 OperateTime = 0;
+7192:             }
+7193: 
+7194:             LastHitter = attacker;
+7195:             LastHitTime = Envir.Time + 10000;
+7196:             RegenTime = Envir.Time + RegenDelay;
+7197:             LogTime = Envir.Time + Globals.LogDelay;
+7198: 
+7199:             if (Envir.Time > BrownTime && PKPoints < 200 && !AtWar(attacker))
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/HumanObject.cs:7285-7301
+local comparison source, read only
+7285:             for (int i = PoisonList.Count - 1; i >= 0; i--)
+7286:             {
+7287:                 if (PoisonList[i].PType != PoisonType.LRParalysis) continue;
+7288: 
+7289:                 PoisonList.RemoveAt(i);
+7290:                 OperateTime = 0;
+7291:             }
+7292: 
+7293:             LastHitter = attacker.Master ?? attacker;
+7294:             LastHitTime = Envir.Time + 10000;
+7295:             RegenTime = Envir.Time + RegenDelay;
+7296:             LogTime = Envir.Time + Globals.LogDelay;
+7297: 
+7298:             DamageDura();
+7299:             ActiveBlizzard = false;
+7300:             ActiveReincarnation = false;
+7301: 
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/PlayerObject.cs:266-279
+local comparison source, read only
+266:         public void StopGame(byte reason)
+267:         {
+268:             if (Node == null) return;
+269: 
+270:             if (CurrentMap != null && CurrentMap.ValidPoint(CurrentLocation))
+271:             {
+272:                 CurrentMapIndex = CurrentMap.Info.Index;
+273: 
+274:                 if (!CurrentMap.Info.RequiredGroup)
+275:                 {
+276:                     LastValidMap = CurrentMap;
+277:                     LastValidLocation = CurrentLocation;
+278:                 }
+279:             }
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/PlayerObject.cs:400-407
+local comparison source, read only
+400:             Envir.Players.Remove(this);
+401: 
+402:             CurrentMap.RemoveObject(this);
+403:             Broadcast(new S.ObjectRemove { ObjectID = ObjectID });
+404: 
+405:             Despawn();
+406:             LeaveGroup();
+407:             TradeCancel();
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/PlayerObject.cs:599-644
+local comparison source, read only
+599:             if (LastHitter != null && LastHitter.Race == ObjectType.Player)
+600:             {
+601:                 PlayerObject hitter = (PlayerObject)LastHitter;
+602: 
+603:                 if (AtWar(hitter) || WarZone)
+604:                 {
+605:                     hitter.ReceiveChat(GameLanguage.ServerTextMap.GetLocalization(ServerTextKeys.ProtectedByLaw), ChatType.System);
+606:                 }
+607:                 else if (Envir.Time > BrownTime && PKPoints < 200)
+608:                 {
+609:                     UserItem weapon = hitter.Info.Equipment[(byte)EquipmentSlot.Weapon];
+610: 
+611:                     hitter.PKPoints = Math.Min(int.MaxValue, LastHitter.PKPoints + 100);
+612:                     hitter.ReceiveChat(GameLanguage.ServerTextMap.GetLocalization((ServerTextKeys.MurderPlayer), Name), ChatType.System);
+613:                     ReceiveChat(GameLanguage.ServerTextMap.GetLocalization((ServerTextKeys.MurderedByPlayer), LastHitter.Name), ChatType.System);
+614: 
+615:                     if (weapon != null && weapon.AddedStats[Stat.Luck] > (Settings.MaxLuck * -1) && Envir.Random.Next(4) == 0)
+616:                     {
+617:                         weapon.AddedStats[Stat.Luck]--;
+618:                         hitter.ReceiveChat(GameLanguage.ServerTextMap.GetLocalization(ServerTextKeys.WeaponHasBeenCursed), ChatType.System);
+619:                         hitter.Enqueue(new S.RefreshItem { Item = weapon });
+620:                     }
+621:                 }
+622:             }
+623: 
+624:             UnSummonIntelligentCreature(SummonedCreatureType);
+625: 
+626:             if (HeroSpawned)
+627:                 DespawnHero();
+628: 
+629:             for (int i = Pets.Count - 1; i >= 0; i--)
+630:             {
+631:                 if (Pets[i].Dead) continue;
+632:                 Pets[i].Die();
+633:             }
+634: 
+635:             RemoveBuff(BuffType.MagicShield);
+636:             RemoveBuff(BuffType.ElementalBarrier);
+637: 
+638:             if (PKPoints > 200)
+639:                 RedDeathDrop(LastHitter);
+640:             else if (!InSafeZone)
+641:                 DeathDrop(LastHitter);
+642: 
+643:             HP = 0;
+644:             Dead = true;
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/PlayerObject.cs:794-903
+local comparison source, read only
+794:         public override void WinExp(uint amount, uint targetLevel = 0)
+795:         {
+796:             if (CurrentMap?.Info?.NoExperience == true) return;
+797: 
+798:             int expPoint;
+799:             uint originalAmount = amount;
+800: 
+801:             expPoint = ReduceExp(amount, targetLevel);
+802:             expPoint = (int)(expPoint * Settings.ExpRate);
+803: 
+804:             //party
+805:             float[] partyExpRate = { 1.0F, 1.3F, 1.4F, 1.5F, 1.6F, 1.7F, 1.8F, 1.9F, 2F, 2.1F, 2.2F };
+806: 
+807:             if (GroupMembers != null)
+808:             {
+809:                 int sumLevel = 0;
+810:                 int nearCount = 0;
+811:                 for (int i = 0; i < GroupMembers.Count; i++)
+812:                 {
+813:                     PlayerObject player = GroupMembers[i];
+814: 
+815:                     if (Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange))
+816:                     {
+817:                         sumLevel += player.Level;
+818:                         nearCount++;
+819:                     }
+820:                 }
+821: 
+822:                 if (nearCount > partyExpRate.Length) nearCount = partyExpRate.Length;
+823: 
+824:                 for (int i = 0; i < GroupMembers.Count; i++)
+825:                 {
+826:                     PlayerObject player = GroupMembers[i];
+827:                     if (player.CurrentMap == CurrentMap &&
+828:                         Functions.InRange(player.CurrentLocation, CurrentLocation, Globals.DataRange) && !player.Dead)
+829:                     {
+830:                         player.GainExp((uint)((float)expPoint * partyExpRate[nearCount - 1] * (float)player.Level / (float)sumLevel));
+831:                     }
+832:                 }
+833:             }
+834:             else
+835:             {
+836:                 GainExp((uint)expPoint);
+837:             }
+838: 
+839:             if (HeroSpawned && !Hero.Dead)
+840:             {
+841:                 expPoint = Hero.ReduceExp(amount, targetLevel);
+842:                 expPoint = (int)(expPoint * Settings.ExpRate);
+843:                 Hero.GainExp((uint)expPoint);
+844:             }
+845:         }
+846:         public override void GainExp(uint amount)
+847:         {
+848:             if (!CanGainExp) return;
+849: 
+850:             if (amount == 0) return;
+851: 
+852:             if (CurrentMap?.Info?.NoExperience == true) return;
+853: 
+854:             if (Info.Married != 0)
+855:             {
+856:                 if (HasBuff(BuffType.Lover, out Buff buff))
+857:                 {
+858:                     CharacterInfo lover = Envir.GetCharacterInfo(Info.Married);
+859:                     PlayerObject loverPlayer = Envir.GetPlayer(lover.Name);
+860:                     if (loverPlayer != null && loverPlayer.CurrentMap == CurrentMap && Functions.InRange(loverPlayer.CurrentLocation, CurrentLocation, Globals.DataRange) && !loverPlayer.Dead)
+861:                     {
+862:                         amount += (uint)Math.Max(0, (amount * Stats[Stat.LoverExpRatePercent]) / 100);
+863:                     }
+864:                 }
+865:             }
+866: 
+867:             if (Info.Mentor != 0 && !Info.IsMentor)
+868:             {
+869:                 if (HasBuff(BuffType.Mentee, out _))
+870:                 {
+871:                     CharacterInfo mentor = Envir.GetCharacterInfo(Info.Mentor);
+872:                     PlayerObject mentorPlayer = Envir.GetPlayer(mentor.Name);
+873:                     if (mentorPlayer != null && mentorPlayer.CurrentMap == CurrentMap && Functions.InRange(mentorPlayer.CurrentLocation, CurrentLocation, Globals.DataRange) && !mentorPlayer.Dead)
+874:                     {
+875:                         if (GroupMembers != null && GroupMembers.Contains(mentorPlayer))
+876:                             amount += (uint)Math.Max(0, (amount * Stats[Stat.MentorExpRatePercent]) / 100);
+877:                     }
+878:                 }
+879:             }
+880: 
+881:             if (Stats[Stat.ExpRatePercent] > 0)
+882:             {
+883:                 amount += (uint)Math.Max(0, (amount * Stats[Stat.ExpRatePercent]) / 100);
+884:             }
+885: 
+886:             if (Info.Mentor != 0 && !Info.IsMentor)
+887:             {
+888:                 MenteeEXP += (amount * Settings.MenteeExpBank) / 100;
+889:             }
+890: 
+891:             Experience += amount;
+892: 
+893:             Enqueue(new S.GainExperience { Amount = amount });
+894: 
+895:             for (int i = 0; i < Pets.Count; i++)
+896:             {
+897:                 MonsterObject monster = Pets[i];
+898:                 if (monster.CurrentMap == CurrentMap && Functions.InRange(monster.CurrentLocation, CurrentLocation, Globals.DataRange) && !monster.Dead)
+899:                     monster.PetExp(amount);
+900:             }
+901: 
+902:             if (MyGuild != null && MyGuild.Name != Settings.NewbieGuild)
+903:                 MyGuild.GainExp(amount);
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/PlayerObject.cs:3447-3458
+local comparison source, read only
+3447: 
+3448:                         Helpers.ChatSystem.SystemMessage(chatMessage: GameLanguage.ServerTextMap.GetLocalization((ServerTextKeys.ClassChangedByGM), data.Player.Name, data.Class.ToString(), Name));
+3449: 
+3450:                         if (data.Player != null)
+3451:                             data.Player.Connection.LogOut();
+3452:                         break;
+3453: 
+3454:                     case "DIE":
+3455:                         LastHitter = null;
+3456:                         Die();
+3457:                         break;
+3458:                     case "HAIR":
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/PlayerObject.cs:4376-4390
+local comparison source, read only
+4376:                         if (cell.Objects == null) continue;
+4377: 
+4378:                         for (int i = 0; i < cell.Objects.Count; i++)
+4379:                         {
+4380:                             MapObject ob = cell.Objects[i];
+4381:                             if (ob.Race != ObjectType.Monster || !ob.Dead || ob.Harvested) continue;
+4382: 
+4383:                             if (ob.EXPOwner != null && ob.EXPOwner != this && !IsMember(ob))
+4384:                             {
+4385:                                 send = true;
+4386:                                 continue;
+4387:                             }
+4388: 
+4389:                             if (ob.Harvest(this)) return;
+4390:                         }
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/PlayerObject.cs:7519-7539
+local comparison source, read only
+7519:             if (Dead)
+7520:             {
+7521:                 //Send Fail
+7522:                 return;
+7523:             }
+7524: 
+7525:             Cell cell = CurrentMap.GetCell(CurrentLocation);
+7526: 
+7527:             bool sendFail = false;
+7528: 
+7529:             for (int i = 0; i < cell.Objects.Count; i++)
+7530:             {
+7531:                 MapObject ob = cell.Objects[i];
+7532: 
+7533:                 if (ob.Race != ObjectType.Item) continue;
+7534: 
+7535:                 if (ob.Owner != null && ob.Owner != this && !IsGroupMember(ob.Owner)) //Or Group member.
+7536:                 {
+7537:                     sendFail = true;
+7538:                     continue;
+7539:                 }
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/ItemObject.cs:129-142
+local comparison source, read only
+129:         public override void Process()
+130:         {
+131:             if (Envir.Time > ExpireTime)
+132:             {
+133:                 CurrentMap.RemoveObject(this);
+134:                 Despawn();
+135:                 return;
+136:             }
+137: 
+138:             if (Owner != null && Envir.Time > OwnerTime)
+139:                 Owner = null;
+140: 
+141:             base.Process();
+142:         }
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/Monsters/WoomaTaurus.cs:1-15
+local comparison source, read only
+1: using System.Drawing;
+2: ﻿using Server.MirDatabase;
+3: using Server.MirEnvir;
+4: 
+5: namespace Server.MirObjects.Monsters
+6: {
+7:     public class WoomaTaurus : FlamingWooma
+8:     {
+9:         private long _teleTime, _madTime;
+10:         private const long TeleDelay = 10000;
+11:         private byte _stage = 7;
+12: 
+13:         protected internal WoomaTaurus(MonsterInfo info)
+14:             : base(info)
+15:         {
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/Monsters/ZumaTaurus.cs:1-16
+local comparison source, read only
+1: using Server.MirDatabase;
+2: using S = ServerPackets;
+3: 
+4: namespace Server.MirObjects.Monsters
+5: {
+6:     public class ZumaTaurus : ZumaMonster
+7:     {
+8:         private byte _stage = 7;
+9: 
+10:         protected internal ZumaTaurus(MonsterInfo info) : base(info)
+11:         {
+12:             Direction = MirDirection.DownLeft;
+13:             AvoidFireWall = false;
+14:         }
+15: 
+16:         protected override void ProcessAI()
+
+[crystal] E:/mir2/Crystal/Server/MirObjects/Monsters/EvilMir.cs:152-181
+local comparison source, read only
+152:         public override int Attacked(MonsterObject attacker, int damage, DefenceType type = DefenceType.ACAgility)
+153:         {
+154:             return Sleeping ? 0 : base.Attacked(attacker, damage, type);
+155:         }
+156: 
+157:         public override int Attacked(HumanObject attacker, int damage, DefenceType type = DefenceType.ACAgility, bool damageWeapon = true)
+158:         {
+159:             return Sleeping ? 0 : base.Attacked(attacker, damage, type, damageWeapon);
+160:         }
+161: 
+162:         public override int Struck(int damage, DefenceType type = DefenceType.ACAgility)
+163:         {
+164:             return 0;
+165:         }
+166: 
+167:         public override void ChangeHP(int amount)
+168:         {
+169:             if (DragonLink && amount < 0) Envir.DragonSystem.GainExp(Envir.Random.Next(1, 40));
+170:             base.ChangeHP(amount);
+171:         }
+172: 
+173:         public override void Die()
+174:         {
+175:             if (Dead || Sleeping) return;
+176: 
+177:             if (!DragonLink) base.Die();
+178:             else
+179:             {
+180:                 if (Info.HasDieScript && (Envir.MonsterNPC != null))
+181:                 {
+
+[crystal] E:/mir2/Crystal/Server/Settings.cs:16-17
+local comparison source, read only
+16:         public const int Day = 24 * Hour, Hour = 60 * Minute, Minute = 60 * Second, Second = 1000;
+17: 
+
+[crystal] E:/mir2/Crystal/Server/Settings.cs:94-99
+local comparison source, read only
+94:         public static bool SafeZoneBorder = false,
+95:                            SafeZoneHealing = false,
+96:                            GameMasterEffect = false,
+97:                            GatherOrbsPerLevel = true,
+98:                            ExpMobLevelDifference = true;
+99:         public static int LineMessageTimer = 10;
+
+[crystal] E:/mir2/Crystal/Server/Settings.cs:112-113
+local comparison source, read only
+112:         public static float DropRate = 1F, ExpRate = 1F;
+113:         public static int TeleportToNPCCost = 3000;
+
+[crystal] E:/mir2/Crystal/Server/Settings.cs:228-230
+local comparison source, read only
+228:         public static uint MaxDropGold = 2000;
+229:         public static bool DropGold = true;
+230: 
+
+[crystal] E:/mir2/Crystal/Shared/Globals.cs:34-38
+local comparison source, read only
+34: 
+35:         LogDelay = 10000,
+36: 
+37:         DataRange = 16;//Was 24
+38: 
+
+[crystal] E:/mir2/Crystal/Shared/Functions/Functions.cs:71-75
+local comparison source, read only
+71:     public static bool InRange(Point a, Point b, int i)
+72:     {
+73:         return Math.Abs(a.X - b.X) <= i && Math.Abs(a.Y - b.Y) <= i;
+74:     }
+75: 

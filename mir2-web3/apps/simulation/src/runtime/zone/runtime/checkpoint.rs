@@ -29,12 +29,15 @@ const LEGACY_V2_CANONICAL_ZONE_STATE_VERSION: u32 = 2;
 const LEGACY_V2_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v2\0";
 const LEGACY_V3_CANONICAL_ZONE_STATE_VERSION: u32 = 3;
 const LEGACY_V3_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v3\0";
-const CANONICAL_ZONE_STATE_VERSION: u32 = 4;
-const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v4\0";
+const LEGACY_V4_CANONICAL_ZONE_STATE_VERSION: u32 = 4;
+const LEGACY_V4_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v4\0";
+const CANONICAL_ZONE_STATE_VERSION: u32 = 5;
+const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v5\0";
 const LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 1;
 const LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 2;
 const LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
-const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 4;
+const LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 4;
+const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 5;
 
 fn legacy_v2_ground_drop_claim_idempotency_key(
     key: &ZoneKey,
@@ -272,11 +275,24 @@ impl ZoneRuntime {
     /// BTree collections and struct field order make the JSON byte stream
     /// deterministic for a fixed signed game-module version.
     pub fn canonical_state_root(&self) -> Result<String, String> {
+        self.canonical_state_root_for_schema(
+            CANONICAL_ZONE_STATE_VERSION, CANONICAL_ZONE_STATE_DOMAIN,
+            &self.native_monsters, &self.pending_native_hits,
+        )
+    }
+
+    fn canonical_state_root_for_schema(
+        &self,
+        version: u32,
+        domain: &[u8],
+        native_monsters: &BTreeMap<u32, ZoneNativeMonster>,
+        pending_native_hits: &[PendingNativeMonsterHit],
+    ) -> Result<String, String> {
         let state = CanonicalZoneStateV4 {
             intelligent_creatures: &self.intelligent_creatures,
             intelligent_creature_intents: &self.intelligent_creature_intents,
             intelligent_creature_operations: &self.intelligent_creature_operations,
-            version: CANONICAL_ZONE_STATE_VERSION,
+            version,
             key: &self.key,
             collision: &self.collision,
             players: &self.players,
@@ -285,9 +301,9 @@ impl ZoneRuntime {
             revived_object_ids: &self.revived_object_ids,
             removed_object_ids: &self.removed_object_ids,
             harvested_object_ids: &self.harvested_object_ids,
-            native_monsters: &self.native_monsters,
+            native_monsters,
             native_monster_respawns: &self.native_monster_respawns,
-            pending_native_hits: &self.pending_native_hits,
+            pending_native_hits,
             pending_native_projectiles: &self.pending_native_projectiles,
             pending_native_player_hits: &self.pending_native_player_hits,
             pending_native_player_heals: &self.pending_native_player_heals,
@@ -311,12 +327,35 @@ impl ZoneRuntime {
         let bytes = serde_json::to_vec(&state)
             .map_err(|error| format!("failed to serialize canonical zone state: {error}"))?;
         let mut hasher = Sha256::new();
-        hasher.update(CANONICAL_ZONE_STATE_DOMAIN);
+        hasher.update(domain);
         hasher.update(bytes);
         Ok(hex_lower(&hasher.finalize()))
     }
 
+    pub(super) fn legacy_v4_canonical_state_root(&self) -> Result<String, String> {
+        let (monsters, hits) = self.legacy_ownership_free_monsters_and_hits();
+        self.canonical_state_root_for_schema(
+            LEGACY_V4_CANONICAL_ZONE_STATE_VERSION, LEGACY_V4_CANONICAL_ZONE_STATE_DOMAIN,
+            &monsters, &hits,
+        )
+    }
+
+    fn legacy_ownership_free_monsters_and_hits(
+        &self,
+    ) -> (BTreeMap<u32, ZoneNativeMonster>, Vec<PendingNativeMonsterHit>) {
+        let mut monsters = self.native_monsters.clone();
+        let mut hits = self.pending_native_hits.clone();
+        for monster in monsters.values_mut() {
+            monster.experience_owner = None;
+        }
+        for hit in &mut hits {
+            hit.force_experience_owner = false;
+        }
+        (monsters, hits)
+    }
+
     fn legacy_canonical_state_root(&self) -> Result<String, String> {
+        let (monsters, hits) = self.legacy_ownership_free_monsters_and_hits();
         let ground_drops = self
             .ground_drops
             .iter()
@@ -353,8 +392,8 @@ impl ZoneRuntime {
             revived_object_ids: &self.revived_object_ids,
             removed_object_ids: &self.removed_object_ids,
             harvested_object_ids: &self.harvested_object_ids,
-            native_monsters: &self.native_monsters,
-            pending_native_hits: &self.pending_native_hits,
+            native_monsters: &monsters,
+            pending_native_hits: &hits,
             pending_native_projectiles: &self.pending_native_projectiles,
             pending_native_player_hits: &self.pending_native_player_hits,
             pending_native_player_heals: &self.pending_native_player_heals,
@@ -375,6 +414,7 @@ impl ZoneRuntime {
     }
 
     fn legacy_v2_canonical_state_root(&self) -> Result<String, String> {
+        let (monsters, hits) = self.legacy_ownership_free_monsters_and_hits();
         // v2 committed the original claim-scoped idempotency key. Keep this
         // schema exact so a v2 checkpoint is authenticated before the
         // post-verification v3 re-anchor removes claim_id from the economic
@@ -390,8 +430,8 @@ impl ZoneRuntime {
             revived_object_ids: &self.revived_object_ids,
             removed_object_ids: &self.removed_object_ids,
             harvested_object_ids: &self.harvested_object_ids,
-            native_monsters: &self.native_monsters,
-            pending_native_hits: &self.pending_native_hits,
+            native_monsters: &monsters,
+            pending_native_hits: &hits,
             pending_native_projectiles: &self.pending_native_projectiles,
             pending_native_player_hits: &self.pending_native_player_hits,
             pending_native_player_heals: &self.pending_native_player_heals,
@@ -415,6 +455,7 @@ impl ZoneRuntime {
     }
 
     fn legacy_v3_canonical_state_root(&self) -> Result<String, String> {
+        let (monsters, hits) = self.legacy_ownership_free_monsters_and_hits();
         let state = CanonicalZoneState {
             version: LEGACY_V3_CANONICAL_ZONE_STATE_VERSION,
             key: &self.key,
@@ -425,8 +466,8 @@ impl ZoneRuntime {
             revived_object_ids: &self.revived_object_ids,
             removed_object_ids: &self.removed_object_ids,
             harvested_object_ids: &self.harvested_object_ids,
-            native_monsters: &self.native_monsters,
-            pending_native_hits: &self.pending_native_hits,
+            native_monsters: &monsters,
+            pending_native_hits: &hits,
             pending_native_projectiles: &self.pending_native_projectiles,
             pending_native_player_hits: &self.pending_native_player_hits,
             pending_native_player_heals: &self.pending_native_player_heals,
@@ -688,14 +729,16 @@ impl ZoneRuntime {
         if checkpoint.version != LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION
+            && checkpoint.version != LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != ZONE_RUNTIME_CHECKPOINT_VERSION
         {
             return Err(format!(
-                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, or {}",
+                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, {}, or {}",
                 checkpoint.version,
                 LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 ZONE_RUNTIME_CHECKPOINT_VERSION
             ));
         }
@@ -732,12 +775,12 @@ impl ZoneRuntime {
         runtime.harvested_object_ids = checkpoint.harvested_object_ids;
         runtime.native_monsters = checkpoint.native_monsters;
         runtime.native_monster_respawns = checkpoint.native_monster_respawns;
-        if checkpoint_version == ZONE_RUNTIME_CHECKPOINT_VERSION {
+        if checkpoint_version >= LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION {
             runtime.intelligent_creatures = checkpoint.intelligent_creatures;
             runtime.intelligent_creature_intents = checkpoint.intelligent_creature_intents;
             runtime.intelligent_creature_operations = checkpoint.intelligent_creature_operations;
         }
-        if checkpoint_version != ZONE_RUNTIME_CHECKPOINT_VERSION {
+        if checkpoint_version < LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION {
             // v1-v3 roots did not commit respawn policy/due state. Ignore any
             // forward fields injected into legacy JSON before authenticating
             // and re-anchoring it under the current schema.
@@ -751,6 +794,17 @@ impl ZoneRuntime {
                 monster.disposition == Some(crate::config::WorldEntityDisposition::Hostile);
         }
         runtime.pending_native_hits = checkpoint.pending_native_hits;
+        if checkpoint_version < ZONE_RUNTIME_CHECKPOINT_VERSION {
+            // v1-v4 roots never committed generic EXPOwner or the successful
+            // TurnUndead impact flag. Ignore injected forward fields before
+            // legacy authentication; they cannot become reward authority.
+            for monster in runtime.native_monsters.values_mut() {
+                monster.experience_owner = None;
+            }
+            for hit in &mut runtime.pending_native_hits {
+                hit.force_experience_owner = false;
+            }
+        }
         runtime.pending_native_projectiles = checkpoint.pending_native_projectiles;
         runtime.pending_native_player_hits = checkpoint.pending_native_player_hits;
         runtime.pending_native_player_heals = checkpoint.pending_native_player_heals;
@@ -762,7 +816,7 @@ impl ZoneRuntime {
         runtime.next_ground_drop_claim_id = checkpoint.next_ground_drop_claim_id;
         runtime.open_doors = checkpoint.open_doors;
         runtime.hazard = checkpoint.hazard;
-        if checkpoint_version == ZONE_RUNTIME_CHECKPOINT_VERSION {
+        if checkpoint_version >= LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION {
             runtime.hell_world = checkpoint.hell_world;
             runtime.horned_encounter_world = checkpoint.horned_encounter_world;
             runtime.pet_special_world = checkpoint.pet_special_world;
@@ -813,6 +867,9 @@ impl ZoneRuntime {
             LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.legacy_v3_canonical_state_root()?
             }
+            LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+                runtime.legacy_v4_canonical_state_root()?
+            }
             ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.canonical_state_root()?,
             _ => unreachable!("checkpoint version was validated above"),
         };
@@ -831,7 +888,7 @@ impl ZoneRuntime {
                 runtime.reanchor_legacy_v2_ground_drop_claim_idempotency_keys();
                 runtime.validate_ground_drop_claim_authority()?;
             }
-            LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION => {
+            LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION | LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.validate_ground_drop_claim_authority()?;
             }
             ZONE_RUNTIME_CHECKPOINT_VERSION => {

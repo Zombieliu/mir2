@@ -1,0 +1,162 @@
+{
+  "schema": "mir2.classic-map-phase2-root-integration.v1",
+  "createdUtc": "2026-10-04T07:28:52.297610+00:00",
+  "sourceBase": "3e1f9167097ff239faeffdde809a17b2c0009b6c",
+  "phase2SourceFiles": 11,
+  "ownershipSourceFiles": 12,
+  "profileVersion": 27,
+  "runtimeMapCount": 208,
+  "nativeMapCount": 209,
+  "resourceOnly": [
+    "d71653"
+  ],
+  "physicalDrawableGaps": 0,
+  "rootPassed": {
+    "scopeRustTests": 5,
+    "naturalContentMetadataTests": 3,
+    "sameMapOwnershipTests": 21,
+    "nodeMapGuardTests": 12,
+    "powershellScopeGuard": true,
+    "bundleCheck": true,
+    "gatewayTestBuild": true,
+    "windowsHostAndClientDependencyCheck": true
+  },
+  "retainedRootFailures": [
+    "one test-script CRLF raw byte mismatch repaired using reviewed source LF bytes",
+    "Windows PowerShell child module path lacked Get-FileHash; same source passes runtime pwsh",
+    "native crate lookup outside server workspace; correct host manifest check passes"
+  ],
+  "rawEvidence": [
+    {
+      "path": "implementation-receipt.json",
+      "bytes": 33852,
+      "sha256": "c2480d665e90499f3cbbdd2bd4b96a308c5b58c5bf3a1f6fb73d24aeaa8d1f02"
+    },
+    {
+      "path": "ROOT-REVIEW-01.json",
+      "bytes": 7583,
+      "sha256": "26f2b03effb74071864a45b0191cad01e7e4fbf0fba85911a5e143ac4deb00f1"
+    },
+    {
+      "path": "ROOT-APPLY-01.json",
+      "bytes": 945,
+      "sha256": "e57dd19923d899f919fa4367b03bcda1ec780e13844a704c9049fdd9a3285d66"
+    },
+    {
+      "path": "generation-input.json",
+      "bytes": 11570,
+      "sha256": "9544011b80569c6fffa73a46eb602630e884104f8e28c3e77b26a989d9711f63"
+    },
+    {
+      "path": "actor-input-receipt.json",
+      "bytes": 3435,
+      "sha256": "6c7f41a687a72800b83dc3313f79cb530c4c673bfd7f27e0cde0c2db5eec8c74"
+    },
+    {
+      "path": "powershell-generated-guards.json",
+      "bytes": 8178,
+      "sha256": "4422d316dc2562c7b51fea48f237989b59e5b30a09a46e3d0a799778b85f7873"
+    },
+    {
+      "path": "focused-and-adjacent-first.log",
+      "bytes": 13659,
+      "sha256": "f32783b7dc500f46cf77fb464cb8b093ad0675715a37bae37a76eddc22e6f466"
+    },
+    {
+      "path": "focused-powershell-first.log",
+      "bytes": 612,
+      "sha256": "4ba20dff8c123a60f50be73fdcfff347da577bde79ed495f98f39527acf17794"
+    },
+    {
+      "path": "focused-powershell-second.log",
+      "bytes": 407,
+      "sha256": "3ac390a642e1fcf80a1fc16ae8578171116379c96c1bf6906aa436169a7ac1d1"
+    },
+    {
+      "path": "focused-rust-first.log",
+      "bytes": 1975,
+      "sha256": "9b975bc251340e586e37a7df7b5bed130871727299fa30eda0f49e6274576df3"
+    },
+    {
+      "path": "profile-unit-tests.log",
+      "bytes": 871,
+      "sha256": "825113fb762cd7f2f4ad16db12ef36619ccd9435313c81b07de57d851051bd32"
+    },
+    {
+      "path": "root-integration-01/cargo-01.log",
+      "bytes": 1722,
+      "sha256": "4083e30bda0bf86ffe6ff8bd03d78a2e210de15e48e73313e54698dc44e3f5a6"
+    },
+    {
+      "path": "root-integration-01/cargo-02.log",
+      "bytes": 30661,
+      "sha256": "895f599d9c0a746f3e6b3aa7ea5ff2f337e50cff1be82c02a9d6ab9ede64d22a"
+    },
+    {
+      "path": "root-integration-01/cargo-03.log",
+      "bytes": 29653,
+      "sha256": "ecce45cd4b334abe241ff7392f06f1e8332aa809b795300596ea7a33eaeecfa0"
+    },
+    {
+      "path": "root-integration-01/cargo-results.json",
+      "bytes": 1346,
+      "sha256": "8d6c5cd716b4cb0e1bdda57441ef88b54b196d5e6d3c5d5e2be2045f457e389b"
+    },
+    {
+      "path": "root-integration-01/guard-01.log",
+      "bytes": 2916,
+      "sha256": "6d394b68efb6842de0821fe2809debd4340c86d7bc379d3cace128097a48e351"
+    },
+    {
+      "path": "root-integration-01/guard-02.log",
+      "bytes": 610,
+      "sha256": "e1299baf51a9feae312ddcb33d0fe46df98f1b02f65fe62e0bb38f7f44619dd1"
+    },
+    {
+      "path": "root-integration-01/guard-03.log",
+      "bytes": 355,
+      "sha256": "c8c56ff389642d6e3276dd8c9a2d0276f45c5646edea4d3815cbe471d10dc352"
+    },
+    {
+      "path": "root-integration-01/guard-04-pwsh.log",
+      "bytes": 407,
+      "sha256": "3ac390a642e1fcf80a1fc16ae8578171116379c96c1bf6906aa436169a7ac1d1"
+    },
+    {
+      "path": "root-integration-01/guard-results.json",
+      "bytes": 1419,
+      "sha256": "4836e00e6fb60254e2c90242d5ceb4ad574937cb4df4165115daec2171c80f56"
+    },
+    {
+      "path": "root-integration-01/guard-retry-results.json",
+      "bytes": 687,
+      "sha256": "7581281bd65a33ac1c19c43560e11dd4b6a80e8ece5622bc86caf8af4c1c9349"
+    },
+    {
+      "path": "root-integration-01/native-consumer-01.log",
+      "bytes": 78,
+      "sha256": "105bed7728fd89d037244f6598a09d65c353bd4db746ee33d4ffbf2463ca1eaf"
+    },
+    {
+      "path": "root-integration-01/native-consumer-02.log",
+      "bytes": 62335,
+      "sha256": "e28e0021244536dd764ea31a1180c36ae2e762b9c651b794230743f0f046f45f"
+    },
+    {
+      "path": "root-integration-01/native-consumer-results-02.json",
+      "bytes": 663,
+      "sha256": "cc4ba7914ff754a84b2a8eab0f0af96753a2584b2eb8d9607ee84d57489a1cea"
+    },
+    {
+      "path": "root-integration-01/native-consumer-results.json",
+      "bytes": 556,
+      "sha256": "c76ffe0836c25e15e26cb99d07c503431c2814c5eaddc4cabec79fe24d65cad8"
+    }
+  ],
+  "published": false,
+  "installed": false,
+  "normalRoutesAccepted": false,
+  "bossAcquisitionAccepted": false,
+  "nativeVisualAccepted": false,
+  "humanAccepted": false
+}
