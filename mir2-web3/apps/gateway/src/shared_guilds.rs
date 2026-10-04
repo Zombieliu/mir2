@@ -301,6 +301,38 @@ impl SharedInProcessZoneSessionRuntime {
                     }
                 }
             }
+            ClientPacket::EditGuildNotice { notice } => {
+                match config.commit_shared_guild_notice(&identity(&key), notice) {
+                    Ok(guild) => {
+                        // Preserve Crystal's terminal invalidation, then project the committed
+                        // content for native clients that do not automatically request page 0.
+                        let packets = vec![
+                            ServerPacket::GuildNoticeChange {
+                                update: -1,
+                                notice: Vec::new(),
+                            },
+                            ServerPacket::GuildNoticeChange {
+                                update: 0,
+                                notice: guild.notice.clone(),
+                            },
+                        ];
+                        coordinator.changed();
+                        for presence in &presences {
+                            if presence.key != key
+                                && guild.member(&identity(&presence.key)).is_some()
+                            {
+                                presence
+                                    .zone
+                                    .lock()
+                                    .expect("validated guild zone")
+                                    .queue_zone_packets(presence.key.clone(), packets.clone());
+                            }
+                        }
+                        packets
+                    }
+                    Err(reason) => error(&reason),
+                }
+            }
             ClientPacket::RequestGuildInfo { info_type } => {
                 let mut packets = self.inner.shared_guild_packets(
                     &presences

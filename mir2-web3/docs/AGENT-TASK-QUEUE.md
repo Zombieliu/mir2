@@ -1,5 +1,17 @@
 # Agent Task Queue
 
+> 2026-10-04 shared Guild notice is source-complete within its bounded slice:
+> authenticated EditGuildNotice, option64 authorization, max200/clear,
+> transaction-before-success and online member-only cross-Zone updates.
+> Four notice and four adjacent Guild cases pass; original four failures are
+> retained. File reopen passes; native UI/SQL, ranks/kick/war/kill-XP remain
+> separate. Actual R17 Wizard/Taoist dead Magic spends MP without cast ACK;
+> Wizard also changes facing and damages its target. Treat both as failures,
+> despite the preserved old classifier flags. Transient death/level-up/save
+> repair and stricter offline evidence classification are in progress. R17
+> remains published unchanged; no new package or human acceptance follows.
+> [Notice implementation](SHARED-GUILD-NOTICE-20261004.md).
+
 > 2026-10-04 v27 resources and the ordinary same-map EXP owner slice are
 > integrated:208 playable-whitelist maps/209 resource maps, no fabricated
 > D71653 entrance; Monster049224 source frames match. Data8/ownership21/

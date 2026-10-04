@@ -154,6 +154,61 @@ fn charge_creation_costs(save: &mut CharacterSaveRecord) -> Result<(), String> {
     Ok(())
 }
 impl SimulationConfig {
+    /// Shared notice authority: permission is rechecked inside the durable guild transaction.
+    /// The transport derives `identity` from its authenticated active character, never a packet.
+    pub fn commit_shared_guild_notice(
+        &self,
+        identity: &Stage5FriendIdentity,
+        notice: &[String],
+    ) -> Result<SharedGuildRecord, String> {
+        let guild_id = self
+            .shared_guild_for_identity(identity)?
+            .ok_or("You are not in a guild.")?
+            .id;
+        self.commit_account_store_transaction_with_guilds(
+            std::slice::from_ref(&identity.account_id),
+            std::slice::from_ref(&guild_id),
+            |store| {
+                if !store
+                    .accounts
+                    .get(&identity.account_id)
+                    .is_some_and(|account| {
+                        account
+                            .characters
+                            .iter()
+                            .any(|character| character.index == identity.character_index)
+                    })
+                {
+                    return Err("Guild character no longer exists.".into());
+                }
+                let guild = store
+                    .shared_guilds
+                    .get_mut(&guild_id)
+                    .ok_or("Guild no longer exists.")?;
+                let member = guild.member(identity).ok_or("You are not in this guild.")?;
+                let rank = guild
+                    .ranks
+                    .iter()
+                    .find(|rank| rank.index == member.rank_index)
+                    .ok_or("Guild rank no longer exists.")?;
+                // Crystal GuildRankOptions.CanChangeNotice = 64; a leader name is not authority.
+                if rank.options & 64 == 0 {
+                    return Err("Your rank cannot change the guild notice.".into());
+                }
+                if notice.len() > 200 {
+                    return Err("Guild notices can contain at most 200 lines.".into());
+                }
+                let next_revision = guild
+                    .revision
+                    .checked_add(1)
+                    .ok_or("Guild revision exhausted.")?;
+                guild.notice = notice.to_vec();
+                guild.revision = next_revision;
+                Ok(guild.clone())
+            },
+        )
+    }
+
     fn commit_shared_guild_gold(
         &self,
         identity: &Stage5FriendIdentity,

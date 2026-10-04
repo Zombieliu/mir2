@@ -1,5 +1,17 @@
 # Agent Orchestration
 
+> 2026-10-04 root completes the bounded shared Guild notice slice against
+> integrated17b44e08f: four genuine ordinary-packet failures become four passes,
+> with four adjacent Guild passes in a separate managed checkout. Rank option64,
+> durable commit, same-Guild cross-Zone projection and File reopen are verified;
+> native clicks/SQL/full Guild management are not accepted. The death/XP worker
+> is now the sole approved writer for transient life/session/Zone/Gateway files;
+> root owns only Guild notice, global docs and integration. Exact R17 natural
+> death traces expose MP spend while dead for Wizard/Taoist; frozen classifier
+> false passes are retained and corrected by a separate offline audit. No new
+> rollout, F-drive change or capacity work follows.
+> [Notice scope/evidence](SHARED-GUILD-NOTICE-20261004.md).
+
 > 2026-10-04 root integrates the reviewed11-file v27 resource phase and12-file
 > same-map ordinary EXPOwner slice.208 runtime/209 native resource maps are
 > source-bound; D71653 stays resource-only. Root data8/ownership21/Node12 plus

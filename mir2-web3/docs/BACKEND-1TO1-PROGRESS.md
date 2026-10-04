@@ -1,5 +1,16 @@
 # Backend 1:1 Progress
 
+> 2026-10-04 shared EditGuildNotice leaves the unavailable fallback. The
+> account/Guild transaction rechecks character, membership, current rank,
+> option64 and revision before durable success. Online updates are filtered
+> to members across Zones; failure sends no success or broadcast. Four focused
+> and four adjacent ordinary Guild checks pass, retaining true RED0/4. Known
+> persistence refusal/retry and independent File reopen pass; SQL/native/other
+> management remain open. Exact published R17 dead-cast traces are gameplay
+> failures, not clean passes: MP and Wizard target damage occur without ACK.
+> The separately assigned death/XP repair is not integrated or published yet.
+> [Source and raw evidence](SHARED-GUILD-NOTICE-20261004.md).
+
 > 2026-10-04 first effective same-map ordinary monster ownership is implemented
 > and integrated with profile v27. Rival damage cannot steal/renew a live claim;
 > actual pet actor/master range, periodic poison, successful TurnUndead impact,

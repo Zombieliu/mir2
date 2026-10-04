@@ -1,0 +1,61 @@
+{
+  "schema": "mir2.shared-guild-notice-source.v1",
+  "base": "17b44e08f4253bfc0905dfb951e978d82bf78ada",
+  "createdUtc": "2026-10-04T08:36:13.109030+00:00",
+  "source": [
+    {
+      "path": "E:\\mir2\\Crystal\\Server\\MirObjects\\PlayerObject.cs",
+      "bytes": 586620,
+      "sha256": "48607c437fe56859c0fbc2a84195693395806e532e95bf5861aed9423a19ff11",
+      "ranges": [
+        [
+          9992,
+          10010
+        ]
+      ]
+    },
+    {
+      "path": "E:\\mir2\\Crystal\\Server\\MirObjects\\GuildObject.cs",
+      "bytes": 36637,
+      "sha256": "d46f4c8b1527dc52f310acb4f1a04303ac52c68a4aa98c6c262a9eccb77053d7",
+      "ranges": [
+        [
+          579,
+          600
+        ]
+      ]
+    },
+    {
+      "path": "E:\\mir2\\Crystal\\Shared\\Enums.cs",
+      "bytes": 38041,
+      "sha256": "63c8f63b436b27dc941e90e9eece792de2d4b89dcb932f2e23fb7428a993d398",
+      "ranges": [
+        [
+          1898,
+          1909
+        ]
+      ]
+    },
+    {
+      "path": "E:\\mir2\\Crystal\\Server\\MirDatabase\\GuildInfo.cs",
+      "bytes": 8235,
+      "sha256": "a796f8bfaa34d0b738612cdddf700681516d3c6ae68c23860a7593af93292d2c",
+      "ranges": [
+        [
+          11,
+          35
+        ],
+        [
+          140,
+          165
+        ]
+      ]
+    }
+  ],
+  "scope": [
+    "notice only; no rank/kick/war/kill-experience changes",
+    "Crystal notice permission is option bit64; max200lines; clear allowed",
+    "Durable shared authority commit before -1 invalidation; extra authoritative content for existing native UI",
+    "Prepared guild fixtures with normal Login/StartGame/EditGuildNotice; not full NPC creation or human UI acceptance"
+  ]
+}

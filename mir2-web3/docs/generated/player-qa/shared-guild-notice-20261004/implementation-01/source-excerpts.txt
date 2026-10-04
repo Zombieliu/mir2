@@ -1,0 +1,113 @@
+FILE E:\mir2\Crystal\Server\MirObjects\PlayerObject.cs L9992-L10010
+9992:         public void EditGuildNotice(List<string> notice)
+9993:         {
+9994:             if ((MyGuild == null) || (MyGuildRank == null))
+9995:             {
+9996:                 ReceiveChat(GameLanguage.ServerTextMap.GetLocalization(ServerTextKeys.NotInGuild), ChatType.System);
+9997:                 return;
+9998:             }
+9999:             if (!MyGuildRank.Options.HasFlag(GuildRankOptions.CanChangeNotice))
+10000:             {
+10001: 
+10002:                 ReceiveChat(GameLanguage.ServerTextMap.GetLocalization(ServerTextKeys.GuildNoticeChangeNotAllowed), ChatType.System);
+10003:                 return;
+10004:             }
+10005:             if (notice.Count > 200)
+10006:             {
+10007:                 ReceiveChat(GameLanguage.ServerTextMap.GetLocalization(ServerTextKeys.GuildNoticeMaxLines), ChatType.System);
+10008:                 return;
+10009:             }
+10010:             MyGuild.NewNotice(notice);
+
+FILE E:\mir2\Crystal\Server\MirObjects\GuildObject.cs L579-L600
+579:         public void NewNotice(List<string> notice)
+580:         {
+581:             Info.Notice = notice;
+582:             NeedSave = true;
+583: 
+584:             for (int i = 0; i < Ranks.Count; i++)
+585:             {
+586:                 for (int j = 0; j < Ranks[i].Members.Count; j++)
+587:                 {
+588:                     if (Ranks[i].Members[j].Player != null)
+589:                     {
+590:                         PlayerObject player = (PlayerObject)Ranks[i].Members[j].Player;
+591:                         player.GuildNoticeChanged = true;
+592:                     }
+593:                 }
+594:             }
+595: 
+596:             SendServerPacket(new ServerPackets.GuildNoticeChange() { update = -1 });
+597:         }
+598: 
+599:         public void SendServerPacket(Packet p)
+600:         {
+
+FILE E:\mir2\Crystal\Shared\Enums.cs L1898-L1909
+1898: public enum GuildRankOptions : byte
+1899: {
+1900:     CanChangeRank = 1,
+1901:     CanRecruit = 2,
+1902:     CanKick = 4,
+1903:     CanStoreItem = 8,
+1904:     CanRetrieveItem = 16,
+1905:     CanAlterAlliance = 32,
+1906:     CanChangeNotice = 64,
+1907:     CanActivateBuff = 128
+1908: }
+1909: 
+
+FILE E:\mir2\Crystal\Server\MirDatabase\GuildInfo.cs L11-L35
+11:         public byte Level = 0;
+12:         public byte SparePoints = 0;
+13:         public long Experience = 0;
+14:         public uint Gold = 0;
+15: 
+16:         public Int32 Votes = 0;
+17:         public DateTime LastVoteAttempt;
+18:         public bool Voting = false;
+19: 
+20:         public int Membercount = 0;
+21:         public List<GuildRank> Ranks = new List<GuildRank>();
+22:         public GuildStorageItem[] StoredItems = new GuildStorageItem[112];
+23:         public List<GuildBuff> BuffList = new List<GuildBuff>();
+24:         public List<string> Notice = new List<string>();
+25: 
+26:         public long MaxExperience = 0;
+27:         public int MemberCap = 0;
+28: 
+29:         public ushort FlagImage = 1000;
+30:         public Color FlagColour = Color.White;
+31: 
+32:         public bool NeedSave = false;
+33: 
+34:         public DateTime GTRent = DateTime.MinValue;
+35:         public DateTime GTBegin = DateTime.MinValue;
+
+FILE E:\mir2\Crystal\Server\MirDatabase\GuildInfo.cs L140-L165
+140:             {
+141:                 for (int j = 0; j < buffCount; j++)
+142:                 {
+143:                     //new GuildBuff(reader);
+144:                     BuffList.Add(new GuildBuff(reader));
+145:                 }
+146:             }
+147: 
+148:             for (int j = 0; j < BuffList.Count; j++)
+149:             {
+150:                 BuffList[j].Info = Envir.FindGuildBuffInfo(BuffList[j].Id);
+151:             }
+152: 
+153:             int noticeCount = reader.ReadInt32();
+154:             for (int j = 0; j < noticeCount; j++)
+155:             {
+156:                 Notice.Add(reader.ReadString());
+157:             }
+158: 
+159:             if (Level < Settings.Guild_ExperienceList.Count)
+160:             {
+161:                 MaxExperience = Settings.Guild_ExperienceList[Level];
+162:             }
+163: 
+164:             if (Name == Settings.NewbieGuild)
+165:             {

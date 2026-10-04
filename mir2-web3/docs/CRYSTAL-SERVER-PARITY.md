@@ -1,5 +1,17 @@
 # Crystal Server Parity
 
+> 2026-10-04 Guild notice follows PlayerObject/GuildObject permission64,
+> max200 and clear semantics through the shared durable authority. Terminal
+> update-1 plus extra committed-body projection is documented as native
+> transport adaptation. Prepared ordinary notice4/adjacent4 and File reopen
+> pass; full Guild/native/SQL acceptance remains open. Real R17 death casts
+> violate CanCast before spend/effect: both casters lose3MP and Wizard deals8
+> damage while HP0/dead. Missing cast animation packets cannot prove rejection.
+> Transient life must remain independent of positive level-up HP, and normal
+> new-login revive must remain separate from retained resume/rollback. That
+> repair is still being validated; no new release follows this notice slice.
+> [Notice/source limits](SHARED-GUILD-NOTICE-20261004.md).
+
 > 2026-10-04 ordinary same-map EXPOwner now follows effective positive hits,
 > strict >5-second expiry, owner-only renewal, dead-owner replacement, real
 > pet Master rectangle16 and impact-time TurnUndead override. Periodic poison

@@ -1,5 +1,16 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-04 shared Guild notice now commits under the authenticated current
+> rank's source option64 and preserves up to200 exact lines, including clear.
+> Source invalidation-1 is followed by committed content for the existing
+> native client; this is an explicit transport adaptation, not exact packet
+> parity. Ordinary prepared Guild tests4 plus adjacent4 pass; File reopen is
+> verified. Native clicks, SQL restart and remaining Guild management remain
+> open. The actual R17 dead-cast failure is independent of notice and prior
+> smoke: both casters spend3MP while dead; Wizard's target loses8HP. No global
+> parity, new publication or dense-pressure acceptance follows.
+> [Notice scope](SHARED-GUILD-NOTICE-20261004.md).
+
 > 2026-10-04 reviewed v27 expands classic whitelist164→208 and native scope
 > 164→209, preserving the source orphan room as resources only. Actual67,993
 > drawable references have zero missing/omitted/unexpected drawable coverage;
