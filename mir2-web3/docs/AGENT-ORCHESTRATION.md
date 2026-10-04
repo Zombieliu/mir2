@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+> 2026-10-04 active classic-gameplay Goal supersedes the completed periodic
+> implementation queue. Execute the user-ranked stages, beginning with paired
+> crowded-combat delivery. Root owns integration/docs/production rollout; read-only
+> release/content explorers precede bounded writers. Do not disturb the F-drive
+> installation or resume capacity work. Follow the explicit phase gates in
+> [the Goal ledger](CLASSIC-GAMEPLAY-GOAL-20261004.md), retaining pending human
+> acceptance while continuing independent implementation.
+
 > 2026-10-02 active additive-content goal: implement two town Task Stewards,
 > three daily and two weekly slots in four level bands, server calendar,
 > durable exactly-once rewards and nine-language guidance. Root owns backend

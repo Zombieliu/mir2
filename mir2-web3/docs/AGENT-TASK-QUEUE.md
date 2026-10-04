@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-10-04 active user Goal: complete ranked classic three-class gameplay.
+> First close crowded-combat client/Gateway delivery, then classic late-game
+> maps/resources, original EXP/drop ownership, pet PvP, shared Guild management,
+> mining/refine and world events. Later Crystal extras follow those stages.
+> Preserve the existing source/test evidence; capacity remains paused and the
+> locked F-drive installation remains deferred. Source, publication and human
+> acceptance are separate gates. Root owns integration/docs/rollout; bounded
+> read-only agents prepare release and map scope before write assignment.
+> [Priorities, baseline and gates](CLASSIC-GAMEPLAY-GOAL-20261004.md).
+
 > 2026-10-03 active user task: dense-monster right-hold escape repair.
 > Sprite-hover input rejection, expired A* correction hints, historical player
 > flinches and predicted/source sequence aliasing are repaired. Shared monster
