@@ -19,6 +19,9 @@ apps/web/public/bevy-runtime/
 # Full Crystal conversion is reproducible from the local client. Do not commit
 # multi-gigabyte CAS pages or per-library manifests.
 apps/web/public/generated/crystal-packs/full/
+# Source-bound Monster049 conversion is generated input. The tracked action
+# catalog and Candidate actor closure validate its metadata and pixels.
+apps/web/public/original-ui/Monster/049/
 .tmp-full-pack-*
 apps/web/.tmp-low-tier-qa-account.txt
 apps/web/.tmp-next-build-*.pid

@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> 2026-10-04 source57729 paired CI/native builds pass, but clean actor preparation
+> identifies exactly225 absent Monster049 generated files (224 frames + metadata).
+> Root admits only that source-bound generated library; the action catalog remains
+> tracked/exact and Candidate closure is not relaxed. Failed cache preflights are
+> retained, no actors were copied by them. New exact-revision builds/package and
+> isolated dense/dead acceptance remain pending; live R17/F are unchanged.
+> [Packaging input scope](R18-ACTOR-CACHE-PREFLIGHT-20261004.md).
+
 > 2026-10-04 root verifies frozen v6 pure attribution88/88 and31 inputs;
 > victim-only damage and dead-level-up HP refill remain inconclusive alone,
 > while actual R17 caster MP failures remain failures. R18 first pair/source51e8
