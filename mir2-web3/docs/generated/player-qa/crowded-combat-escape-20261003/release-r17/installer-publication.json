@@ -1,0 +1,13 @@
+{
+  "schema": "mir2.r17.immutable-installer-publication.v1",
+  "passed": true,
+  "reused": false,
+  "url": "https://165.154.65.136.sslip.io/client-updates/releases/bootstrap-WN-CANDIDATE-20261004-invited-17/Numeron-Legend-of-Rebirth-20261004-r17-Bootstrap.exe",
+  "sizeBytes": 27482388,
+  "sha256": "aced5e53a57c0e98081f8415c5ebfb95942be7b3cbb130490db24e5f8dc15621",
+  "sequence": 12,
+  "caddyUnchanged": true,
+  "feedUnchanged": true,
+  "servicesRestarted": false,
+  "accountStoresTouched": false
+}

@@ -1,5 +1,13 @@
 # Backend 1:1 Progress
 
+> 2026-10-04 exact R17 Linux ELF source6032 is deployed to the invited realm,
+> backed up and normally stopped/restarted with exit0. Original realm,
+> configuration and capacity limits remain unchanged. Isolated ordinary
+> authentication/character/attack-Deer/escape/save smoke passes three classes,
+> with zero incoming monster hits; dense owner-hit/cast/death and native gates
+> remain. Signed sequence12 is live. Configured limits are not load acceptance.
+> [Release and protocol scope](generated/player-qa/crowded-combat-escape-20261003/release-r17/README.md).
+
 > 2026-10-03 dense-monster escape: every ordinary hit still settles damage;
 > only its player flinch packet shares Crystal's strict 500ms window. The
 > optional window survives checkpoint/online handoff and clears with life.

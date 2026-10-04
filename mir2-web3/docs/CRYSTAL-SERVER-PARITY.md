@@ -1,5 +1,13 @@
 # Crystal Server Parity
 
+> 2026-10-04 R17 source6032 Gateway and native Candidate/sequence12 are paired
+> and published. Source status/Struck fixes retain their prior focused test
+> scope; new exact-ELF normal authentication/attack-Deer/escape/save smoke does
+> not include incoming owner hits, learned casts or dense/native acceptance.
+> Normal restart, save backup, unchanged original realm and public exact bytes
+> are verified. No 100%, load-capacity or complete P1 claim.
+> [Delivery evidence](generated/player-qa/crowded-combat-escape-20261003/release-r17/README.md).
+
 > 2026-10-03 source status/struck repair: HumanObject's 500ms StruckTime gates
 > display only; every hit retains damage/vital receipts. CanMove excludes
 > STUN/DAZED, CanAttack includes DAZED, and actual CanCast includes STUN/DAZED/

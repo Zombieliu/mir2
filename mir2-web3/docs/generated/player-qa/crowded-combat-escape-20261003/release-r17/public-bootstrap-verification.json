@@ -1,0 +1,35 @@
+{
+  "schema": "mir2.r17.public-installer-download-verification.v1",
+  "passed": true,
+  "url": "https://165.154.65.136.sslip.io/client-updates/releases/bootstrap-WN-CANDIDATE-20261004-invited-17/Numeron-Legend-of-Rebirth-20261004-r17-Bootstrap.exe",
+  "candidate": "WN-CANDIDATE-20261004-invited-17",
+  "gameSourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "deliverySourceRevision": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+  "tlsVerificationEnabled": true,
+  "redirectsAllowed": false,
+  "checks": [
+    {
+      "method": "HEAD",
+      "status": 200,
+      "sizeBytes": 27482388,
+      "cacheControl": "public, max-age=31536000, immutable"
+    },
+    {
+      "method": "GET",
+      "range": "bytes=0-1023",
+      "status": 206,
+      "bytesMatchLocalInstaller": true
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "sizeBytes": 27482388,
+      "sha256": "aced5e53a57c0e98081f8415c5ebfb95942be7b3cbb130490db24e5f8dc15621",
+      "elapsedSeconds": 111.493
+    }
+  ],
+  "installed": false,
+  "gameLaunched": false,
+  "publicAuthenticode": "NotSigned",
+  "r2OrCdnClaimed": false
+}

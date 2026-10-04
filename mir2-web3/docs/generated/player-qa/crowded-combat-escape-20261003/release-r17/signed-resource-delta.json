@@ -1,0 +1,23 @@
+{
+  "changedPayload": [
+    {
+      "path": "BUILD-ATTESTATION.json",
+      "size": 1493,
+      "sha256": "7B360FED1FA6B06E8CDF2A292656E13657F8FAE3BB7577A61590E6149EC1D6F5"
+    },
+    {
+      "path": "README-START.txt",
+      "size": 49328,
+      "sha256": "BDEC963BD38D70A602F3495F1611A8F3A203E78EE77690EC77C6161EB0D7D2BF"
+    },
+    {
+      "path": "mir2-platform-windows.exe",
+      "size": 111013376,
+      "sha256": "D0780475EFA9F9C1ECD730DFCFC11E38B9B0659F05B3B1F7D93B4F80C3D734E0"
+    }
+  ],
+  "unchangedPayloadCount": 125962,
+  "changedPayloadBytes": 111064197,
+  "engineUnchanged": true,
+  "newMetadataBytes": 24365751
+}

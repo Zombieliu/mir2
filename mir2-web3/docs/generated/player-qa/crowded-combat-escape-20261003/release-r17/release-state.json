@@ -1,0 +1,181 @@
+{
+  "schema": "mir2.classic-goal.r17-release-state.v1",
+  "createdUtc": "2026-10-04T03:38:58.241730+00:00",
+  "candidate": "WN-CANDIDATE-20261004-invited-17",
+  "sequence": 12,
+  "gameSourceRevision": "6032ef8b3e27dd97bad0b20c8676ef9f185db64b",
+  "deliverySourceRevision": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+  "source": true,
+  "scopedRegressionTests": true,
+  "packaged": true,
+  "gatewayPublished": true,
+  "signedFeedPublished": true,
+  "bootstrapPublished": true,
+  "publicFullByteVerification": true,
+  "isolatedSignedUpdateRollback": true,
+  "installedIntoUserFDrive": false,
+  "installedCleanLaptop": false,
+  "nativeDenseWindowAccepted": false,
+  "continuousMonsterHitProtocolAccepted": false,
+  "sevenMonsterNetworkAccepted": false,
+  "learnedSpellNetworkAccepted": false,
+  "humanAccepted": false,
+  "fullP1Accepted": false,
+  "capacityAccepted": false,
+  "resourceCoverage": {
+    "nativeImageMapCount": 32,
+    "rawLayoutGzipCount": 1620,
+    "new164MapPhaseIncluded": false
+  },
+  "changes": {
+    "gamePayloadFiles": 3,
+    "changedPayloadBytes": 111064197,
+    "wireBytesIncludingMetadata": 135432721,
+    "unchangedPayloadFiles": 125962,
+    "engineChanged": false,
+    "mir2AssetsRedownloaded": false,
+    "binaryDifferencePatchesUsed": false
+  },
+  "bootstrap": {
+    "sizeBytes": 27482388,
+    "sha256": "aced5e53a57c0e98081f8415c5ebfb95942be7b3cbb130490db24e5f8dc15621",
+    "publicAuthenticode": "NotSigned",
+    "url": "https://165.154.65.136.sslip.io/client-updates/releases/bootstrap-WN-CANDIDATE-20261004-invited-17/Numeron-Legend-of-Rebirth-20261004-r17-Bootstrap.exe"
+  },
+  "originalRealmUnchanged": true,
+  "userSaveBackupRetained": true,
+  "localInstallConstraintRetained": true,
+  "capacityGoalStatus": "paused",
+  "r2OrCdnPromoted": false,
+  "ordinaryNetworkScope": "Fresh level-one three-class player attacks Deer then moves; zero monster-to-owner hit, no learned spell, no native input/render or dense qualification",
+  "preservedFailures": [
+    {
+      "source": "package-r17-01.log",
+      "reason": "missing locked sharp dependency; npm ci restored declared inputs"
+    },
+    {
+      "source": "package-r17-02.log",
+      "reason": "15 ignored cached assets absent; restored only signed R16-bound inputs"
+    },
+    {
+      "source": "package-r17-03.log",
+      "reason": "canonical Windows path too long for ADS enumeration; strict gate retained"
+    },
+    {
+      "source": "package-r17-04.log",
+      "reason": "DOS aliases canonicalized; no safety gate relaxation"
+    },
+    {
+      "source": "share-public-verification-01.log",
+      "reason": "verifier incorrectly retained R16 hardcoded installer URL; corrected immutable recipe 02, published bytes unchanged"
+    },
+    {
+      "source": "live-final-01.log",
+      "reason": "read-only verifier used wrong static feed path; recipe 02 uses deployed feed-current path"
+    }
+  ],
+  "evidence": [
+    {
+      "path": "strict-candidate-verification.json",
+      "source": "C:\\Users\\Administrator\\.codex\\worktrees\\r17\\mir2-player-journey\\mir2-web3\\docs\\generated\\player-qa\\windows-package-preflight\\WN-CANDIDATE-20261004-invited-17-verification.json",
+      "sizeBytes": 1826,
+      "sha256": "a21aa8c0adf7bf9c95510ed809df292a00fe2623370fe56ef862799653c597f6",
+      "exactSourceBytes": true
+    },
+    {
+      "path": "linux-ci-inputs.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\server-ci\\operator-verification.json",
+      "sizeBytes": 550,
+      "sha256": "d6c6d6791977c0bd140a4736ffa0c4e54c0b6f529a66ec3e95761be18d11355c",
+      "exactSourceBytes": true
+    },
+    {
+      "path": "signed-resource-inputs.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\SIGNED-R17-RESOURCE-INPUTS-01.json",
+      "sizeBytes": 1479,
+      "sha256": "f59ecee375fac1367f7570258330f357ff6ff00c328e59a79ad1896a0665b941",
+      "exactSourceBytes": true
+    },
+    {
+      "path": "updater-bundle-verification.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\updater\\UPDATER-BUNDLE-VERIFICATION.json",
+      "sizeBytes": 592,
+      "sha256": "be66f7313758508e5453deddf29b92bcb9e33dfa2bccbbdd46b5d02f677604bf",
+      "exactSourceBytes": true
+    },
+    {
+      "path": "bootstrap-build.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\bootstrap-01\\BUILD-BOOTSTRAP.json",
+      "sizeBytes": 1783,
+      "sha256": "449147533d1fc8885133d19dcd46571b6e7d4d77cc1845e6074537d34d32e037",
+      "exactSourceBytes": true
+    },
+    {
+      "path": "public-update-verification.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\PUBLIC-TLS-PUBLICATION-VERIFICATION-01.json",
+      "sizeBytes": 9719,
+      "sha256": "2e85e5d3af59d217ff9a9a8c6d753421aa5aeba078f07b0046379a032f39ec6b",
+      "exactSourceBytes": true
+    },
+    {
+      "path": "public-bootstrap-verification.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\SHARE-PUBLIC-VERIFICATION-02.json",
+      "sizeBytes": 1110,
+      "sha256": "7ddce2f6bbeea8758829de7ca5b28069247e6d9553931fe9d3de65cb0ef703c9",
+      "exactSourceBytes": true
+    },
+    {
+      "path": "signed-package-update-rollback.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\real-update-fixture-01\\report.json",
+      "sizeBytes": 866,
+      "sha256": "5664eb8e08d642f1df2926875220cb14ccf33aaf054cb81b4951c73b50d3f7f8",
+      "exactSourceBytes": true
+    },
+    {
+      "path": "signed-resource-delta.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\signed-resource-delta-01.json",
+      "sizeBytes": 651,
+      "sha256": "c80e2a89fccd102c8888b8e60a9a812f1812322a95f132a2a21acac3bed19af5",
+      "exactSourceBytes": true
+    },
+    {
+      "path": "ordinary-network-analysis.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\network-qa\\analysis-01.json",
+      "sizeBytes": 9438,
+      "sha256": "c419fe710f525c6494f1cb9cb28a2ced56b29cbdc9050880f0410aa996dfeb1b",
+      "exactSourceBytes": true
+    },
+    {
+      "path": "gateway-apply.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\gateway-apply-01.log",
+      "sizeBytes": 2217,
+      "sha256": "9639d3bba1c93d114c14525181b9eb5daa538de3badf80c3df4b5e74f5bfcfe2",
+      "sourceLogSha256": "7b8ef83f6c78d5604accba3791fe528e298e743194e56a92a5f1a996ab9890c5",
+      "extractedFinalJsonObject": true
+    },
+    {
+      "path": "feed-publication.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\deployment\\apply-01.log",
+      "sizeBytes": 3163,
+      "sha256": "0d3e772544d013994b7c16570b69c30c91fb90d590621c49dba39c4f724bd0b8",
+      "sourceLogSha256": "55078bd75d7977e53378a43b5875d1947a78e7474d58199e00617e62ba636cbf",
+      "extractedFinalJsonObject": true
+    },
+    {
+      "path": "installer-publication.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\share-publish-01.log",
+      "sizeBytes": 500,
+      "sha256": "70f4e9e997c9a57ff3e879fe73a2a61912de73542a5084117109ba7df37a983e",
+      "sourceLogSha256": "e98381b00eba987ba0b24338ae9720bcf1dde085b7f9534be26b8cc8d55231a0",
+      "extractedFinalJsonObject": true
+    },
+    {
+      "path": "final-live-verification.json",
+      "source": "C:\\mir2-playtest-releases\\20261004-native-r17\\live-final-02.log",
+      "sizeBytes": 2549,
+      "sha256": "13a4b30d42ba6de2a3121740c663d941ead73a835a14ba382ea0aa741a5802ca",
+      "sourceLogSha256": "86cce9cd002fad2c85513e186a2db04cc6a15f8b05927f4a965541f9e051fd9c",
+      "extractedFinalJsonObject": true
+    }
+  ]
+}

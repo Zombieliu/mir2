@@ -1,5 +1,15 @@
 # Agent Orchestration
 
+> 2026-10-04 paired crowded-combat R17/sequence12 is live with exact source6032,
+> normal shutdown/restart, retained save backup and unchanged original realm.
+> Public full-byte and isolated signed-file update/rollback checks pass; user
+> F-drive installation remains deferred. Dense continuous-hit/native acceptance
+> is separate from the fresh three-class attack-Deer/escape/save smoke. Root
+> integrates release evidence; the bounded map writer has generated/guarded
+> 164 admitted maps, with 45 branches and Monster049 still separate. Continue
+> the classic Goal; capacity remains paused.
+> [Delivery evidence](generated/player-qa/crowded-combat-escape-20261003/release-r17/README.md).
+
 > 2026-10-04 active classic-gameplay Goal supersedes the completed periodic
 > implementation queue. Execute the user-ranked stages, beginning with paired
 > crowded-combat delivery. Root owns integration/docs/production rollout; read-only

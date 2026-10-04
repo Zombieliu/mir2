@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-10-04 R17 paired release is published at source6032/sequence12.
+> Strict Candidate, signed R16→R17 file update/rollback and public full-byte
+> installer/feed/EXE/updater checks pass. Ordinary three-class smoke is player
+> attacks Deer then moves/saves; zero monster-to-owner hits and no learned spell.
+> Dense-hit/native/human gates remain open. The 164-map resource phase is
+> generated and independently guarded, not in R17; 45 excluded branches/049
+> and ordinary route/combat/drop acceptance follow. Preserve F-drive deferral,
+> original realm and paused capacity. Root is integrating delivery evidence.
+> [R17 evidence](generated/player-qa/crowded-combat-escape-20261003/release-r17/README.md).
+
 > 2026-10-04 active user Goal: complete ranked classic three-class gameplay.
 > First close crowded-combat client/Gateway delivery, then classic late-game
 > maps/resources, original EXP/drop ownership, pet PvP, shared Guild management,

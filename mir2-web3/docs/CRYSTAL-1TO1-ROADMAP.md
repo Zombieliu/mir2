@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-04 crowded-combat R17 source6032 is packaged and published with paired
+> Gateway and signed sequence12. Exact public files/installer and isolated
+> signed R16→R17 update/rollback are verified. No new assets are downloaded.
+> Three-class attack-Deer/escape/save smoke is not continuous owner-hit, native
+> or human acceptance. 164-map image closure is generated in the next isolated
+> source phase and is not included in R17. No global parity/capacity claim.
+> [Release evidence](generated/player-qa/crowded-combat-escape-20261003/release-r17/README.md).
+
 > 2026-10-03 dense-combat escape: ordinary right hold is no longer swallowed
 > by monster/NPC pixels, expired path blockers retire before A*, player flinches
 > stay bounded and real packets cannot alias local animation predictions.

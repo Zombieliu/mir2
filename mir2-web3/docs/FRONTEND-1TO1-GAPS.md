@@ -1,5 +1,14 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-04 R17 Candidate source6032 and signed sequence12 are published with
+> the paired Gateway. Exact EXE/manifest/updater and online installer pass
+> public TLS/full-hash checks; isolated signed-file update/rollback preserves
+> personal files. User F-drive and clean-laptop installation remain unaccepted;
+> publisher Authenticode is still NotSigned. Seven-monster native right hold,
+> sprite hover, reaction/cast/death ordering and human feel remain open. R17
+> retains the 32-map image scope; new 164-map resources are not shipped here.
+> [R17 receipts](generated/player-qa/crowded-combat-escape-20261003/release-r17/README.md).
+
 > 2026-10-03 Sabuk entry: the ordinary Guild-name request now opens the native
 > editable/IME dialog and submits the typed name once. Castle NPC pages use the
 > existing localized/paged dialog, with fifty strings in nine locales. Closed,
