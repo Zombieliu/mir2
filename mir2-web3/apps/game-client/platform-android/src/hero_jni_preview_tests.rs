@@ -148,6 +148,17 @@ fn hero_jni_metadata_survives_delayed_java_events_but_resets_on_next_preview() {
 fn hero_jni_observer_waits_for_original_renderer_nodes_and_does_not_reopen_a_closed_window() {
     use bevy::ecs::system::RunSystemOnce;
     use mir2_client_bevy::crystal_ui::overlays::hero_dialog::render::HeroRoot;
+    // The serialized host test gate owns this global fixture. Preserve its
+    // previous state even on assertion failure; never leave a live test host.
+    struct RestoreFfi(Option<crate::AndroidGatewayFfiState>);
+    impl Drop for RestoreFfi {
+        fn drop(&mut self) {
+            *crate::android_gateway_ffi_state().lock().unwrap_or_else(|p|p.into_inner()) = self.0.take().unwrap();
+        }
+    }
+    let _restore = RestoreFfi(Some(std::mem::take(
+        &mut *crate::android_gateway_ffi_state().lock().unwrap_or_else(|p|p.into_inner())
+    )));
     let (model,inventory,ui) = received_models("hero-inventory-jni");
     let mut world=World::new();
     world.insert_resource(OfflineHeroJniReceipt{scene:Some("hero-inventory-jni".into()),..default()});
@@ -155,11 +166,13 @@ fn hero_jni_observer_waits_for_original_renderer_nodes_and_does_not_reopen_a_clo
     world.insert_resource(crate::AndroidGatewayTransportEnabled(true));
     let mut state=NativePlayerUiState::default();state.hero.observe(&model);world.insert_resource(state);
     world.insert_resource(model);world.insert_resource(inventory);world.insert_resource(ui);
+    crate::android_gateway_ffi_state().lock().unwrap_or_else(|p|p.into_inner()).active=true;
     world.run_system_once(report_hero_jni_consumer).unwrap();
-    assert!(!world.resource::<OfflineHeroJniReceipt>().opened,"An enabled network is not an offline preview");
-    world.resource_mut::<crate::AndroidGatewayTransportEnabled>().0=false;
+    assert!(!world.resource::<OfflineHeroJniReceipt>().opened,"An actual active host is not an offline preview");
+    crate::android_gateway_ffi_state().lock().unwrap_or_else(|p|p.into_inner()).active=false;
     world.run_system_once(report_hero_jni_consumer).unwrap();
-    assert!(world.resource::<OfflineHeroJniReceipt>().opened);
+    assert!(world.resource::<OfflineHeroJniReceipt>().opened,"Android dispatch capability is not an active socket");
+    assert!(world.resource::<crate::AndroidGatewayTransportEnabled>().0,"Diagnostics must not disable native transport capability");
     assert!(!world.resource::<OfflineHeroJniReceipt>().logged,"Opening alone is not renderer observation");
     world.resource_mut::<NativePlayerUiState>().hero.toggle_inventory();
     world.spawn(HeroRoot);world.spawn(HeroRoot);

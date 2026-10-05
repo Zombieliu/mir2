@@ -207,12 +207,19 @@ fn report_hero_jni_consumer(
     roots: Query<Entity, With<mir2_client_bevy::crystal_ui::overlays::hero_dialog::render::HeroRoot>>,
 ) {
     let Some(scene) = receipt.scene.clone() else { return; };
-    if receipt.logged || enabled.0 || host.phase != "IN_GAME"
+    // Android enables the native dispatch driver even in the isolated preview
+    // package. Capability is not a connected host; inspect the actual FFI host
+    // without disabling the driver or granting any transport authorization.
+    let host_transport_active = crate::android_gateway_ffi_state()
+        .lock().unwrap_or_else(|p|p.into_inner()).active;
+    if receipt.logged || host_transport_active || host.phase != "IN_GAME"
         || !hero_jni_models_received(&scene, &model, &inventory, &ui) { return; }
     if !receipt.opened {
         if state.hero.info != model.info { return; } // wait for the original shared observer
         open_hero_jni_presentation(&scene, &mut state);
         receipt.opened = true;
+        info!(scene = scene.as_str(), native_transport_capable = enabled.0, host_transport_active,
+            "ANDROID_HERO_JNI_WINDOW_OPEN_REQUEST_NOT_LIVE");
         return; // the ordinary renderer runs on the following frame
     }
     if roots.iter().count() < 2 || !hero_jni_presentation_received(&scene, &state, &model) { return; }
@@ -220,6 +227,7 @@ fn report_hero_jni_consumer(
     let item = model.inventory_view.items.iter().find(|item| item.slot == 3).unwrap();
     let data_receipt = world_receipt.as_deref().and_then(|receipt| receipt.last);
     info!(scene = scene.as_str(), data_receipt = ?data_receipt, hero_object_id = info.object_id,
+        native_transport_capable = enabled.0, host_transport_active,
         hero_epoch = model.session_epoch, hero_generation = model.hero_generation,
         hero_name = info.name.as_str(), hero_hp = info.hp, hero_mp = info.mp, spawned = model.spawned,
         hero_capacity = 42, hero_equipment = 14, magics = info.magics.len(), first_magic_key = 17,
