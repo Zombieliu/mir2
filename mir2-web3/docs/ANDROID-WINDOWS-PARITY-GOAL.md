@@ -1,6 +1,20 @@
 # Android 对齐当前 Windows 完整度 goal
 
-2026-10-06 当前 NI-16 Hero 出站产品源码：`b5b6f4c6893cc62f6f9a9c0a1bf58887cf257605`。
+2026-10-06 当前 Android 共享 Hero 触控产品源码：`aef89f9426ab7b74d49bf8d61f05eac9f1126c24`。
+两个Android文件；429输入/427其他整文件保护，原共享UI/规则/Java/认证/Windows未改。
+原生触摸帧位置传给共享Window读者，在Winit Last前恢复；新鲜五门484/531、Java93+93、API31双门通过。
+同源双原生诊断APK/当前variant ELF/6647PNG+3metadata已核对，保留数据安装回读SHA一致。
+实际六Java/JNI Hero原窗口与普通隔离通过；7张原场景+8张触控图全部查看，四标签切换/两窗关闭/短时不重开通过。
+首版068c窗口FAIL、1b点击FAIL和本次未编译采集错误/compiled red0/2→green6/6全部保留。
+七冷启动PID仍15条GL506，零错误GPU门FAIL；touch同PID累计日志不相加。手机布局/Hero地图实体/完整操作仍OPEN。
+Gateway为空，preview禁止联网，不算真实登录/权威ACK/Zone保存/resume/全资源音频更新/真机人工接受。
+只读刷新Windows56ee063fb较冻结3d735745f仍+1提交/83文档证据/0功能路径；AP-01–21完整分母不变。
+NI-16仍PARTIAL、完整Windows对齐goal Active。只推Android独立Draft，不部署/改真实存档/推Windows/合并PR。
+[本源APK、实际JNI与触控、失败和完整未完门](generated/player-qa/native-android-touch-cursor-20261006/README.md)。
+
+下文保留旧来源的历史记录；其中“当前”仅指当时版本，不重绑到上述源码。
+
+2026-10-06 历史 NI-16 Hero 出站产品源码：`b5b6f4c6893cc62f6f9a9c0a1bf58887cf257605`。
 六功能文件；12闭合共享意图、准确pending/actor/epoch、JNI未轮询队列隔离及一行getter生产可见性已落地。
 干净精确提交十门478/519、shared1304+10原ignored、runtime296+1原ignored、fresh Java90+90、
 API31双检查和Mac-host Windows1+1+21通过；预提交聚焦31，计数重叠不相加。
@@ -759,9 +773,10 @@ PR #253 保持独立 Draft；不自动改 base、不合并 PR。分阶段验证�
 ## 6. 外部验收材料（不阻止其余安全代码工作）
 
 - Android 真实联网需获准的测试 Gateway（WSS/相关 HTTPS）、服务器版本和
-  普通测试账号。上一批已安装的是源码0a3b24efa的两种v35诊断包，Gateway地址为空，
-  uiPreview禁止联网。Hero出站预提交检查已修复历史E0599并在两变体复验通过；
-  APK及实际JNI/联网须分别证明，不能用check通过代替安装验收。
+  普通测试账号。当前已安装源码aef89f942的两种v35诊断包，Gateway地址为空，
+  uiPreview编译隔离且禁止联网。实际六Hero Java/JNI原窗口和原共享标签/关闭
+  已有独立模拟器原图证据；它们仍是离线诊断，不能替代真实登录/业务发送/权威ACK。
+  源码、构建、安装、实际JNI/触控和联网分别证明；手机布局及零错误GPU仍未通过。
   Windows 报告存在 `/playtest/ws` 不自动构成本轮访问/数据写入许可。
 - 凭据由用户在本地输入；不得从其他工作区、日志或旧文件搜密码/令牌。
 - 完整、获准的资源来源/版本仍需核对；现有 proof pack 不算正式完整共享包。

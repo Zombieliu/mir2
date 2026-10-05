@@ -1,0 +1,567 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-05T22:05:10.654Z",
+  "source": "aef89f9426ab7b74d49bf8d61f05eac9f1126c24",
+  "parent": "1b85d871483599326726ed18186ec7725ea4fa35",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "selectedWindows": {
+    "name": "codex/playtest-registration",
+    "sha": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b"
+  },
+  "windowsRemoteAt": "2026-10-05T22:02:48.265Z",
+  "WindowsDiff": {
+    "commitsAhead": 1,
+    "paths": 83,
+    "functionalPaths": 0
+  },
+  "scope": [
+    "mir2-web3/apps/game-client/platform-android/src/mobile_ui.rs",
+    "mir2-web3/apps/game-client/platform-android/src/touch_cursor_bridge_tests.rs"
+  ],
+  "inputCount": 429,
+  "inputHashListSHA": "6363f420e37773651d243df3312435c8ea8432494c00f6c551fee7a9a8b78144",
+  "protectedWholeFiles": 427,
+  "originalWorktreeGitCheckpointsPreserved": true,
+  "rawRoot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/touch-cursor-20261006-1L1L30",
+  "rawIndexes": [
+    {
+      "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-20261006-rz55ei",
+      "file": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-20261006-rz55ei/evidence-index-final.json",
+      "count": 98,
+      "rawBytes": 11837994,
+      "indexBytes": 19711,
+      "indexSha256": "fc97473fc75e6646fb6f7bf98f6bac4ab109e524e456fe300f18717f669ac7bc"
+    },
+    {
+      "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-host-20261006-HfdWF9",
+      "file": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-host-20261006-HfdWF9/evidence-index-final.json",
+      "count": 77,
+      "rawBytes": 25384870,
+      "indexBytes": 14571,
+      "indexSha256": "d0166fc8af5affc85f107feca73cb3335721e76d4812580421abdfb11f41e87c"
+    },
+    {
+      "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/touch-cursor-20261006-1L1L30",
+      "file": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/touch-cursor-20261006-1L1L30/evidence-index-final.json",
+      "count": 77,
+      "rawBytes": 24196090,
+      "indexBytes": 14632,
+      "indexSha256": "2276aa5077d55f231e798e1d8a9f7d5cc4d7702a0ef53a557af498f612b80788"
+    }
+  ],
+  "deliveryRawSHA256": "d2deb9f9b2b8731db90d53a082a66ce34c074666be01c48f6dbbe6153833e9ea",
+  "gates": [
+    {
+      "label": "bound-rust-normal-touch-cursor",
+      "code": 0,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 484,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "label": "bound-rust-preview-touch-cursor",
+      "code": 0,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 531,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "label": "bound-java-full-touch-cursor",
+      "code": 0,
+      "sourceUnchanged": true,
+      "rust": [],
+      "java": [
+        {
+          "variant": "Debug",
+          "classes": 6,
+          "tests": 93,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": "UiPreview",
+          "classes": 6,
+          "tests": 93,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "label": "bound-api31-normal-touch-cursor",
+      "code": 0,
+      "sourceUnchanged": true,
+      "rust": []
+    },
+    {
+      "label": "bound-api31-preview-touch-cursor",
+      "code": 0,
+      "sourceUnchanged": true,
+      "rust": []
+    }
+  ],
+  "artifacts": [
+    {
+      "variant": "debug",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/touch-cursor-20261006-1L1L30/final-apks/mir2-native-touch-cursor-debug-aef89f942.apk",
+      "bytes": 533784343,
+      "sha256": "ba3e83ee0893ed2d83065f08e9ce3c89fa25379b82e9e28d4838604f46c41000",
+      "nativeElfBytes": 146050128,
+      "nativeElfSha256": "a6029a9bd270d8530817d1b789e299329c6f18214050ebe34b17e5d683348225",
+      "nativeElfMatchesThisVariantOutput": true,
+      "package": "package: name='com.mir2.web3' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+      "gatewayUrl": "",
+      "uiPreview": false
+    },
+    {
+      "variant": "preview",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/touch-cursor-20261006-1L1L30/final-apks/mir2-native-touch-cursor-preview-aef89f942.apk",
+      "bytes": 542009887,
+      "sha256": "0f5c8a912394df134b9520eb681a07accb8e0fbde9f752f12c51af4c02e84184",
+      "nativeElfBytes": 150245208,
+      "nativeElfSha256": "f91e145bc0f39b3dcba990624d3ac5636698dc428ae70e5565d027f3018667b1",
+      "nativeElfMatchesThisVariantOutput": true,
+      "package": "package: name='com.mir2.web3.uipreview' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+      "gatewayUrl": "",
+      "uiPreview": true
+    }
+  ],
+  "resourceAudit": [
+    {
+      "variant": "debug",
+      "selectedUiPngCount": 6647,
+      "selectedMetadataCount": 3,
+      "frozenWeightFramesByteMatch": true,
+      "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+      "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+      "entityPackId": "android-archer-mount-bow-proof-20260912",
+      "entityManifestBytes": 2506377,
+      "atlasCount": 1,
+      "pageCount": 5,
+      "rectCount": 7848,
+      "fullResourceReleaseAccepted": false
+    },
+    {
+      "variant": "preview",
+      "selectedUiPngCount": 6647,
+      "selectedMetadataCount": 3,
+      "frozenWeightFramesByteMatch": true,
+      "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+      "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+      "entityPackId": "android-archer-mount-bow-proof-20260912",
+      "entityManifestBytes": 2506377,
+      "atlasCount": 1,
+      "pageCount": 5,
+      "rectCount": 7848,
+      "fullResourceReleaseAccepted": false
+    }
+  ],
+  "installedByteIdentity": true,
+  "device": {
+    "avd": "Mir2_API_31_ARM64\r\nOK",
+    "serial": "emulator-5554",
+    "api": "31",
+    "release": "12",
+    "abi": "arm64-v8a",
+    "model": "sdk_gphone64_arm64",
+    "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys",
+    "physicalDevices": 0
+  },
+  "runtime": {
+    "gate": "PASS_OFFLINE_OWNER_BOUND_JNI_AND_WINDOW_ONLY",
+    "originalPNGsViewed": 7,
+    "rows": [
+      {
+        "scene": "normal-hero-isolation",
+        "pid": "11069",
+        "alive": true,
+        "javaStart": false,
+        "javaSent": false,
+        "sharedHeroObserved": false,
+        "normalIsolation": true,
+        "fatal": 0,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "GL506": 1,
+        "png": "normal-hero-isolation-pid11069.png",
+        "pngSha256": "6f323797d1602445f93bd45b942ec35a6171b00d040e713930a355c49b8f064e",
+        "log": "normal-hero-isolation-pid11069.log",
+        "logSha256": "01674db61078d53ae07b81796193e02f74b4a76511287e02a27710971c301cb3"
+      },
+      {
+        "scene": "hero-inventory-jni",
+        "pid": "11152",
+        "alive": true,
+        "javaStart": true,
+        "javaSent": true,
+        "sharedHeroObserved": true,
+        "normalIsolation": null,
+        "fatal": 0,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "GL506": 0,
+        "png": "hero-inventory-jni-pid11152.png",
+        "pngSha256": "dc1e773384bb8e44b79b0986fd425adda39e4713d8fe2485194a296439e9e3f2",
+        "log": "hero-inventory-jni-pid11152.log",
+        "logSha256": "907d46a76abeb7a40c0d143e7ea45bb0d03cd64e7ee9bc062a4e94ecd9257b0d"
+      },
+      {
+        "scene": "hero-equipment-jni",
+        "pid": "11227",
+        "alive": true,
+        "javaStart": true,
+        "javaSent": true,
+        "sharedHeroObserved": true,
+        "normalIsolation": null,
+        "fatal": 0,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "GL506": 1,
+        "png": "hero-equipment-jni-pid11227.png",
+        "pngSha256": "9cb06344679ece8887a8ac1e881063347e3d06c1b60aa2bcb50a2639108ccfe9",
+        "log": "hero-equipment-jni-pid11227.log",
+        "logSha256": "6740242b4eb674fec57da98c7496ee57c78f318ea6d78a548be3fa887acd0e20"
+      },
+      {
+        "scene": "hero-status-jni",
+        "pid": "11302",
+        "alive": true,
+        "javaStart": true,
+        "javaSent": true,
+        "sharedHeroObserved": true,
+        "normalIsolation": null,
+        "fatal": 0,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "GL506": 1,
+        "png": "hero-status-jni-pid11302.png",
+        "pngSha256": "d6c25f5122a95f82874d2301b7067af92d9587b406448120583b35428a9b337a",
+        "log": "hero-status-jni-pid11302.log",
+        "logSha256": "6d3051247bf8a7b6bd71ac99cc69ed4192b4657fbe4217e44807348df5de9e83"
+      },
+      {
+        "scene": "hero-state-jni",
+        "pid": "11376",
+        "alive": true,
+        "javaStart": true,
+        "javaSent": true,
+        "sharedHeroObserved": true,
+        "normalIsolation": null,
+        "fatal": 0,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "GL506": 3,
+        "png": "hero-state-jni-pid11376.png",
+        "pngSha256": "2cac4e88c34f19fa13e0579a2599cf3dbfd7c8f268ac1c8defd1248ae7b679b3",
+        "log": "hero-state-jni-pid11376.log",
+        "logSha256": "c62dfe1ebc5488118f9262eb3ff161d74190905acb186f210f4d43e93667ba4c"
+      },
+      {
+        "scene": "hero-skills-jni",
+        "pid": "11450",
+        "alive": true,
+        "javaStart": true,
+        "javaSent": true,
+        "sharedHeroObserved": true,
+        "normalIsolation": null,
+        "fatal": 0,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "GL506": 4,
+        "png": "hero-skills-jni-pid11450.png",
+        "pngSha256": "81211010eb2ea7479406fe625a622f7df124accecd0e5f6ed545ca1ec4701f93",
+        "log": "hero-skills-jni-pid11450.log",
+        "logSha256": "0fd9167114a99d54bf295ee9eb79e99cb0aa09f5cd8add34e9e455556a01a153"
+      },
+      {
+        "scene": "hero-removed-jni",
+        "pid": "11525",
+        "alive": true,
+        "javaStart": true,
+        "javaSent": true,
+        "sharedHeroObserved": true,
+        "normalIsolation": null,
+        "fatal": 0,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "GL506": 5,
+        "png": "hero-removed-jni-pid11525.png",
+        "pngSha256": "49dda9b60d1e9feda1c9a6fdc99e53e3467c1f6596b5b1cb1fb384fd84853b9c",
+        "log": "hero-removed-jni-pid11525.log",
+        "logSha256": "821f12b2beafc75b9224963b69ee2741c4398da6495a8f089201587ebdd54e89"
+      }
+    ]
+  },
+  "touch": {
+    "gate": "PASS_OFFLINE_EMULATOR_SHARED_HERO_TAPS_ONLY",
+    "tapActions": 6,
+    "captures": 8,
+    "originalPNGsViewed": 8,
+    "visualVerdictSHA256": "6283430e7efb111f644695638ff90e8e04ffe21522f884a7d1f2997c9ea67270",
+    "rows": [
+      {
+        "label": "hero-inventory-close",
+        "pid": "11525",
+        "action": {
+          "kind": "tap",
+          "x": 888,
+          "y": 18
+        },
+        "verdict": "PASS",
+        "observation": "Hero inventory is absent; player HUD HP80/200 MP20/100 Gold777 and world remain.",
+        "png": "actual-touch/hero-inventory-close-pid11525.png",
+        "pngSha256": "7e73ac6a8c68cd3e5bb0e2834585d919051635dec1c58e12ed164891e5e2e480",
+        "log": "actual-touch/hero-inventory-close-pid11525.log",
+        "logSha256": "0ee9625e8d0ab147b24f29ee0f503d99170399e556fbe127c1e6f66aeb36e7ed"
+      },
+      {
+        "label": "hero-touch-equipment-before",
+        "pid": "11761",
+        "action": {
+          "kind": "launch",
+          "scene": "hero-equipment-jni",
+          "launch": "Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity\nTotalTime: 694\nWaitTime: 696\nComplete"
+        },
+        "verdict": "PASS_WINDOW_ONLY",
+        "observation": "Original shared Hero character Equipment page visible with female preview.",
+        "png": "actual-touch/hero-touch-equipment-before-pid11761.png",
+        "pngSha256": "914dd7c60239c0c7a42be9ce3eddfb817fc33445a24e94eb3837a2a87ce5a001",
+        "log": "actual-touch/hero-touch-equipment-before-pid11761.log",
+        "logSha256": "cf48493eb31af35ab163623d5a55597cef77be2c50e79804802e32a91b0dea8e"
+      },
+      {
+        "label": "hero-touch-status",
+        "pid": "11761",
+        "action": {
+          "kind": "tap",
+          "x": 1662,
+          "y": 113
+        },
+        "verdict": "PASS",
+        "observation": "STATS I selected; original Hero Health Points 67/180 and Mana Points 23/90 rendered, player HUD unchanged.",
+        "png": "actual-touch/hero-touch-status-pid11761.png",
+        "pngSha256": "1f698e8a61d855a50c4e3b0782256bf42ac49d5ae69d3fe09feebc01b4e26092",
+        "log": "actual-touch/hero-touch-status-pid11761.log",
+        "logSha256": "f7ee08a1dc1897a7a47eb69ca6d33eca36b822c5816ca4cbdb2cc012b69bd514"
+      },
+      {
+        "label": "hero-touch-state",
+        "pid": "11761",
+        "action": {
+          "kind": "tap",
+          "x": 1749,
+          "y": 113
+        },
+        "verdict": "PASS",
+        "observation": "STATS II selected; Hero bag7/wear3/hand2 rendered as 7/0,3/0,2/0. Fixture weight maxima absent; this is not complete stats/phone acceptance.",
+        "png": "actual-touch/hero-touch-state-pid11761.png",
+        "pngSha256": "a1d5893e0b3c571f8e10e0c7a0d65aec85a90ed2306ae1a59ffddca0d031c4da",
+        "log": "actual-touch/hero-touch-state-pid11761.log",
+        "logSha256": "87e5070f04791ee1066b1cd6f60feaebee093739558774c488198d767677c93b"
+      },
+      {
+        "label": "hero-touch-skills",
+        "pid": "11761",
+        "action": {
+          "kind": "tap",
+          "x": 1837,
+          "y": 113
+        },
+        "verdict": "PASS",
+        "observation": "SPELLS selected; JNI FireBall Lv2 Exp7/3 and JNI Healing Lv1 Exp0/2 rendered.",
+        "png": "actual-touch/hero-touch-skills-pid11761.png",
+        "pngSha256": "3e31eb450e25754f0f5298beeac421b9fea98c6e372ac9aeee8ae8fd55829904",
+        "log": "actual-touch/hero-touch-skills-pid11761.log",
+        "logSha256": "548155bac5349f63e52b745596b4c29e6e3b57ba77e61ad343171057f3cd2258"
+      },
+      {
+        "label": "hero-touch-equipment-retap",
+        "pid": "11761",
+        "action": {
+          "kind": "tap",
+          "x": 1575,
+          "y": 113
+        },
+        "verdict": "PASS",
+        "observation": "After Skills, CHAR returns to original female Hero equipment preview; distinct page transition verified.",
+        "png": "actual-touch/hero-touch-equipment-retap-pid11761.png",
+        "pngSha256": "914dd7c60239c0c7a42be9ce3eddfb817fc33445a24e94eb3837a2a87ce5a001",
+        "log": "actual-touch/hero-touch-equipment-retap-pid11761.log",
+        "logSha256": "37e10bd3236413a74ed377de4a226b0eb62aed65d9d0a036fbdeb9ffb1f617ce"
+      },
+      {
+        "label": "hero-character-close",
+        "pid": "11761",
+        "action": {
+          "kind": "tap",
+          "x": 1875,
+          "y": 19
+        },
+        "verdict": "PASS",
+        "observation": "Hero character window absent; original HUD/world remain.",
+        "png": "actual-touch/hero-character-close-pid11761.png",
+        "pngSha256": "b7ed34d5fb1f157b484bd3829193fbc6b714bc990f1858abb96c8f6515303116",
+        "log": "actual-touch/hero-character-close-pid11761.log",
+        "logSha256": "9781e1e1f4819a5bfa789e000465f19601300b90435fdd7869d07bd385c2ddf5"
+      },
+      {
+        "label": "hero-character-stays-closed",
+        "pid": "11761",
+        "action": {
+          "kind": "wait",
+          "ms": 3000
+        },
+        "verdict": "PASS_BOUNDED_WAIT",
+        "observation": "After another 3s wait window still absent; PNG identical to closed capture. Not a long-duration/session acceptance.",
+        "png": "actual-touch/hero-character-stays-closed-pid11761.png",
+        "pngSha256": "b7ed34d5fb1f157b484bd3829193fbc6b714bc990f1858abb96c8f6515303116",
+        "log": "actual-touch/hero-character-stays-closed-pid11761.log",
+        "logSha256": "0bb524bd99b1d2d16262f0658e672cb064bcb4441d74dbfe98096eb7c6cab510"
+      }
+    ]
+  },
+  "GPU": {
+    "gate": "FAIL",
+    "initialSevenDistinctPidSamples": [
+      {
+        "scene": "normal-hero-isolation",
+        "pid": "11069",
+        "GL506": 1
+      },
+      {
+        "scene": "hero-inventory-jni",
+        "pid": "11152",
+        "GL506": 0
+      },
+      {
+        "scene": "hero-equipment-jni",
+        "pid": "11227",
+        "GL506": 1
+      },
+      {
+        "scene": "hero-status-jni",
+        "pid": "11302",
+        "GL506": 1
+      },
+      {
+        "scene": "hero-state-jni",
+        "pid": "11376",
+        "GL506": 3
+      },
+      {
+        "scene": "hero-skills-jni",
+        "pid": "11450",
+        "GL506": 4
+      },
+      {
+        "scene": "hero-removed-jni",
+        "pid": "11525",
+        "GL506": 5
+      }
+    ],
+    "initialCount": 15,
+    "touchCumulativeSamePid": [
+      {
+        "label": "hero-inventory-close",
+        "pid": "11525",
+        "GL506": 5
+      },
+      {
+        "label": "hero-touch-equipment-before",
+        "pid": "11761",
+        "GL506": 1
+      },
+      {
+        "label": "hero-touch-status",
+        "pid": "11761",
+        "GL506": 1
+      },
+      {
+        "label": "hero-touch-state",
+        "pid": "11761",
+        "GL506": 1
+      },
+      {
+        "label": "hero-touch-skills",
+        "pid": "11761",
+        "GL506": 1
+      },
+      {
+        "label": "hero-touch-equipment-retap",
+        "pid": "11761",
+        "GL506": 1
+      },
+      {
+        "label": "hero-character-close",
+        "pid": "11761",
+        "GL506": 1
+      },
+      {
+        "label": "hero-character-stays-closed",
+        "pid": "11761",
+        "GL506": 1
+      }
+    ],
+    "warning": "Touch rows are cumulative same-PID logs and must not be summed as independent error samples."
+  },
+  "retainedFailures": [
+    {
+      "source": "068c6ee64c53fce21cbaed3efc7b9606aae37460",
+      "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-20261006-rz55ei",
+      "kind": "first actual Hero JNI marker/window FAIL",
+      "pid": "9725",
+      "JavaEvents": 10,
+      "GL506": 5,
+      "reason": "transport capability was mistaken for active host"
+    },
+    {
+      "source": "1b85d871483599326726ed18186ec7725ea4fa35",
+      "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-host-20261006-HfdWF9",
+      "kind": "actual window taps FAIL including 180ms hold",
+      "reason": "native CursorMoved did not update Window cursor consumed by original shared UI"
+    },
+    {
+      "source": "aef89f9426ab7b74d49bf8d61f05eac9f1126c24",
+      "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/touch-cursor-20261006-1L1L30",
+      "kind": "uncompiled E0609 harness error",
+      "file": "red-native-shared-cursor-result.json",
+      "semanticRed": false
+    },
+    {
+      "source": "aef89f9426ab7b74d49bf8d61f05eac9f1126c24",
+      "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/touch-cursor-20261006-1L1L30",
+      "kind": "compiled typed cursor regression red0/2 then green6/6",
+      "red": "red-native-shared-cursor-typed-result.json",
+      "green": "green-native-shared-cursor-result.json"
+    }
+  ],
+  "limits": [
+    "Native Rust release library in diagnostic Debug/uiPreview APKs; not store release",
+    "Gateway URL empty; no remote Web page loaded",
+    "Native strip warnings retained; variant-output equality alone is not stripping acceptance",
+    "No new shared/runtime/full Windows OS suites in these two bounded fixes; earlier tests are historical",
+    "Offline Hero Java/nativeEvent/shared window/tap proof only, no authenticated sends/server ACK or authoritative action",
+    "NI16 PARTIAL; full AP01-21 denominator unchanged; goal Active",
+    "Full phone UI, Hero world entity/full operations, real login/Zone/save/resume, resources/audio/update/GPU/device/human acceptance OPEN",
+    "No production deployment/real-save edits/Windows push/PR merge"
+  ],
+  "goal": "Active",
+  "NI16": "PARTIAL",
+  "AP01_21FullDenominatorUnchanged": true,
+  "online": false,
+  "physical": false,
+  "fullPhoneUI": false,
+  "remotePush": "Not asserted by this snapshot. Publication is recorded later as an independent post-push receipt; no self-referential commit binding."
+}

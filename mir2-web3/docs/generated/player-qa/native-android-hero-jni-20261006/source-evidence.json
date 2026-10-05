@@ -238,5 +238,71 @@
   "paths": {
     "evidence": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-20261006-rz55ei",
     "report": "mir2-web3/docs/generated/player-qa/native-android-hero-jni-20261006"
+  },
+  "followup": {
+    "precommitFieldsPreserved": true,
+    "latestSource": "aef89f9426ab7b74d49bf8d61f05eac9f1126c24",
+    "latestReport": "mir2-web3/docs/generated/player-qa/native-android-touch-cursor-20261006",
+    "chronology": [
+      {
+        "source": "068c6ee64c53fce21cbaed3efc7b9606aae37460",
+        "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-20261006-rz55ei",
+        "kind": "first actual Hero JNI marker/window FAIL",
+        "pid": "9725",
+        "JavaEvents": 10,
+        "GL506": 5,
+        "reason": "transport capability was mistaken for active host"
+      },
+      {
+        "source": "1b85d871483599326726ed18186ec7725ea4fa35",
+        "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-host-20261006-HfdWF9",
+        "kind": "actual window taps FAIL including 180ms hold",
+        "reason": "native CursorMoved did not update Window cursor consumed by original shared UI"
+      },
+      {
+        "source": "aef89f9426ab7b74d49bf8d61f05eac9f1126c24",
+        "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/touch-cursor-20261006-1L1L30",
+        "kind": "uncompiled E0609 harness error",
+        "file": "red-native-shared-cursor-result.json",
+        "semanticRed": false
+      },
+      {
+        "source": "aef89f9426ab7b74d49bf8d61f05eac9f1126c24",
+        "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/touch-cursor-20261006-1L1L30",
+        "kind": "compiled typed cursor regression red0/2 then green6/6",
+        "red": "red-native-shared-cursor-typed-result.json",
+        "green": "green-native-shared-cursor-result.json"
+      }
+    ],
+    "finalIndexes": [
+      {
+        "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-20261006-rz55ei",
+        "file": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-20261006-rz55ei/evidence-index-final.json",
+        "count": 98,
+        "rawBytes": 11837994,
+        "indexBytes": 19711,
+        "indexSha256": "fc97473fc75e6646fb6f7bf98f6bac4ab109e524e456fe300f18717f669ac7bc"
+      },
+      {
+        "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-host-20261006-HfdWF9",
+        "file": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-host-20261006-HfdWF9/evidence-index-final.json",
+        "count": 77,
+        "rawBytes": 25384870,
+        "indexBytes": 14571,
+        "indexSha256": "d0166fc8af5affc85f107feca73cb3335721e76d4812580421abdfb11f41e87c"
+      },
+      {
+        "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/touch-cursor-20261006-1L1L30",
+        "file": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/touch-cursor-20261006-1L1L30/evidence-index-final.json",
+        "count": 77,
+        "rawBytes": 24196090,
+        "indexBytes": 14632,
+        "indexSha256": "2276aa5077d55f231e798e1d8a9f7d5cc4d7702a0ef53a557af498f612b80788"
+      }
+    ],
+    "latestBoundedGate": "PASS_OFFLINE_EMULATOR_SHARED_HERO_TAPS_ONLY",
+    "latestGPU": "FAIL",
+    "NI16": "PARTIAL",
+    "goal": "Active"
   }
 }

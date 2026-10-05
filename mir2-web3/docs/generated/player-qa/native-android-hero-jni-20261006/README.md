@@ -76,3 +76,25 @@ PNG 超过 Node 默认缓冲，采集报ENOBUFS；改采集上限后完整保存
 真实登录、共享Zone/保存、nativeResume、完整手机窗口/触屏/IME、多语言、
 完整资源/音频/更新、旧零错误GPU gate、真机与人工接受继续 OPEN。
 不部署生产、不改真实存档、不绕过认证、不推Windows、不合并PR。
+
+## 后续精确提交与实际失败/修复（追加，不重写上文）
+
+上文及旧JSON的 committed=false/currentAPK=false 为当时预提交快照。
+后续已独立绑定源码 `068c6ee64c53fce21cbaed3efc7b9606aae37460`：
+五门与两个APK/安装匹配，但首次真实Hero JNI PID9725收到10条Java输入，
+因能力标志误作active host屏障而未生成完整窗口观察，GL506=5；失败原图/日志保留。
+
+后续源码 `1b85d871483599326726ed18186ec7725ea4fa35` 保留enabled=true，
+改只读核验真实host active状态；聚焦6/6及新鲜五门478/525/Java93+93/API31x2。
+两个新源码APK保留数据安装且回读哈希匹配，普通隔离/六实际Hero JNI原窗口通过，七张原图已看。
+然而实际标签/关闭均失败；追加180ms持按也失败。此FAIL不因窗口可见而关闭。
+
+源码 `aef89f9426ab7b74d49bf8d61f05eac9f1126c24` 只改Android触摸坐标桥与新测试，
+解决CursorMoved未同步原Window读者；恢复帧前cursor后Winit Last不warp系统鼠标。
+原共享UI/模型/规则不变。新鲜五门484/531/Java93+93/API31x2；
+同源双包/安装/所选资源匹配，六窗口JNI与实际四标签/两关闭及短时保持通过，
+7+8张原图全部查看；七冷启动PID仍15条GL506，零错误GPU FAIL不关闭。
+两个采集/语义red分开保留，详见[后续精确源码、双APK与原图触控结论](../native-android-touch-cursor-20261006/README.md)。
+
+三个后续原始索引98/77/77文件哈希在后续QA JSON；旧54份预提交索引不改。
+NI-16仍PARTIAL、goal Active、完整AP-01–21不变；手机布局/真实联网/Hero地图实体与完整操作/真机均未完成。
