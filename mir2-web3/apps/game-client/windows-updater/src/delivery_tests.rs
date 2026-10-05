@@ -190,6 +190,85 @@ fn bundle_streams_exact_files_into_hash_cache_and_never_into_live_installation()
 }
 
 #[test]
+fn parallel_bundle_shared_hashes_large_and_empty_entries_verify_every_body_and_join_on_cancel() {
+    let paths: Vec<_> = (0..64)
+        .map(|i| format!("mir2-assets/pipeline/{i}.png"))
+        .collect();
+    let data: Vec<Vec<u8>> = (0..64)
+        .map(|i| {
+            if i % 20 == 0 {
+                vec![17; 512 * 1024 + 1]
+            } else if i % 11 == 0 {
+                Vec::new()
+            } else {
+                vec![(i % 7) as u8; 2048]
+            }
+        })
+        .collect();
+    let entries: Vec<_> = paths
+        .iter()
+        .zip(&data)
+        .map(|(path, bytes)| entry(path, bytes))
+        .collect();
+    let pairs: Vec<_> = paths
+        .iter()
+        .zip(&data)
+        .map(|(path, bytes)| (path.as_str(), bytes.as_slice()))
+        .collect();
+    let expected: Vec<_> = entries.iter().collect();
+    let root = TempDir::new().unwrap();
+    let (path, archive) = write_artifact(root.path(), &gzip(&pack_raw(&pairs)), "m2b.gz");
+    let mut counts = Vec::new();
+    extract_bundle_observed(
+        root.path(),
+        &path,
+        &archive,
+        &expected,
+        &mut || Ok(()),
+        &mut |n| counts.push(n),
+    )
+    .unwrap();
+    assert_eq!(counts, (1..=64).collect::<Vec<_>>());
+    for entry in &entries {
+        assert!(safe::matches(&payload_cache(root.path(), entry).unwrap(), entry).unwrap());
+    }
+    // A repeated body with the same expected hash must not be silently skipped.
+    let mut corrupt = data.clone();
+    corrupt[8][0] ^= 1;
+    let pairs: Vec<_> = paths
+        .iter()
+        .zip(&corrupt)
+        .map(|(path, bytes)| (path.as_str(), bytes.as_slice()))
+        .collect();
+    let (path, archive) = write_artifact(root.path(), &gzip(&pack_raw(&pairs)), "m2b.gz");
+    assert!(extract_bundle(root.path(), &path, &archive, &expected, &mut || Ok(())).is_err());
+    assert!(!root.path().join("game").exists());
+
+    let cancelled = TempDir::new().unwrap();
+    let (path, archive) = write_artifact(cancelled.path(), &gzip(&pack_raw(&pairs)), "m2b.gz");
+    let mut checks = 0;
+    assert!(
+        extract_bundle(cancelled.path(), &path, &archive, &expected, &mut || {
+            checks += 1;
+            ensure!(checks < 24, "cancelled producer");
+            Ok(())
+        })
+        .is_err()
+    );
+    let count =
+        || fs::read_dir(cancelled.path().join(".update/downloads")).map_or(0, |r| r.count());
+    let completed = count();
+    std::thread::sleep(std::time::Duration::from_millis(30));
+    assert_eq!(
+        count(),
+        completed,
+        "no cache writer survives cancellation return"
+    );
+    assert!(!cancelled.path().join(".update/transaction.json").exists());
+    assert!(!cancelled.path().join("game").exists());
+}
+
+#[test]
 fn bundles_reject_traversal_unknown_duplicate_alias_length_count_and_size() {
     let first = entry("mir2-assets/a.json", b"a");
     let second = entry("mir2-assets/b.json", b"b");

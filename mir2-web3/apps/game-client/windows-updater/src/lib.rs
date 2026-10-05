@@ -1,5 +1,6 @@
 //! Signed per-file native updating; no commands or URLs are taken from the game server.
 pub mod fs_safe;
+mod local_io;
 pub mod model;
 #[cfg(test)]
 mod model_regression;

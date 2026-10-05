@@ -1,5 +1,13 @@
 # Agent Task Queue
 
+> 2026-10-06 user priority is local installation latency after R2 acceleration.
+> Root's four-worker scratch I/O, verified staging promotion and fresh game
+> exclusion/fallback pass74 library/CMS1 and reverse real33,996-file A/B; original failures
+> remain. Full signed first-install/rollback, clean-source engine/bootstrap,
+> signed14 and automatic delivery are next. Public13/gameR17 are current;
+> no user install replacement/Gateway restart or broader Goal completion.
+> [Performance gate](NATIVE-LOCAL-INSTALL-PERFORMANCE-20261006.md).
+
 > 2026-10-06 downloader priority closes effective authorization, fixed6 origin
 > append, real R2 stage/full36 public hashes and separate CAS promotion. Source
 > and CDN are now coherent signed13; gameR17/source6032 stays unchanged. New

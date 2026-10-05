@@ -1,5 +1,14 @@
 # Agent Orchestration
 
+> 2026-10-06 root solely owns the bounded local-updater performance and
+> publication round. Actual D file activation completes with staging459.846s,
+> preparation580.444s/activation2336.909s. Bounded I/O, staging promotion and
+> live exact-file exclusion plus serial fallback pass74 library/CMS1; reverse real33,996-file pairs
+> average73.073s baseline/35.989s Candidate. Full first-install, final engine,
+> signed14 rollout and laptop speed remain open. No user process/save/F or
+> gameR17/Gateway mutation; the broader blocked Goal is unchanged.
+> [Scope/evidence](NATIVE-LOCAL-INSTALL-PERFORMANCE-20261006.md).
+
 > 2026-10-06 root uses the newly installed Cloudflare connector as the sole
 > cloud/origin writer. Exact upload sourceafc3 and reader4c60 deploy/readback
 > pass; original upload secret is inherited without retrieval. Fixed6 origin

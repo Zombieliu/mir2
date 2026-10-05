@@ -1,5 +1,12 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-06 bounded updater performance Candidate:74 library/CMS1 pass;
+> actual33,996-file reverse pairs average73.073s/35.989s. All integrity, journal,
+> game-running and rollback gates remain. Full signed installation, final
+> engine/bootstrap, signed14 and laptop timing remain open; gameR17/Gateway,
+> saves/F and broader parity status are unchanged.
+> [Scope/evidence](NATIVE-LOCAL-INSTALL-PERFORMANCE-20261006.md).
+
 > 2026-10-06 native delivery is actually published through authorized
 > Cloudflare/R2 and a dedicated CDN reader. Stage37348106566 checks all36
 > objects/817719767 public bytes; promote37350173926 CAS succeeds. Origin and

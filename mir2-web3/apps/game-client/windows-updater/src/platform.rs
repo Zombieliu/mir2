@@ -490,6 +490,23 @@ mod windows {
             })?
             .encode_wide()
             .collect::<Vec<_>>();
+        if let Some(running) = process_probe(&target, &name)? {
+            return Ok(running);
+        }
+        // Unknown matching processes retain the original exact-file fallback.
+        match OpenOptions::new()
+            .read(true)
+            .write(true)
+            .share_mode(0)
+            .open(game_exe)
+        {
+            Ok(_) => Ok(false),
+            Err(error) if error.raw_os_error() == Some(32) => Ok(true),
+            Err(error) => Err(error),
+        }
+    }
+
+    fn process_probe(target: &[u16], name: &[u16]) -> io::Result<Option<bool>> {
         let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0) };
         if snapshot == INVALID_HANDLE_VALUE {
             return Err(io::Error::last_os_error());
@@ -502,7 +519,7 @@ mod windows {
         if unsafe { Process32FirstW(snapshot.0, &mut entry) } == 0 {
             let error = io::Error::last_os_error();
             if error.raw_os_error() == Some(18) {
-                return Ok(false);
+                return Ok(Some(false));
             } // ERROR_NO_MORE_FILES.
             return Err(error);
         }
@@ -535,7 +552,7 @@ mod windows {
                         ));
                         if let Ok(queried) = normalized_path(&queried) {
                             if equal_path(&target, &queried) {
-                                return Ok(true);
+                                return Ok(Some(true));
                             }
                         } else {
                             inaccessible_match = true;
@@ -551,22 +568,117 @@ mod windows {
                 break;
             }
         }
-        if inaccessible_match {
-            // A process from another installation must not block this one. The
-            // exact target can still be proved replaceable via a share-zero
-            // write open; inability to prove that is a safe error, not a guess.
-            match OpenOptions::new()
+        Ok(if inaccessible_match {
+            None
+        } else {
+            Some(false)
+        })
+    }
+
+    /// A live exclusion handle, not a cached process-list/absence result. A
+    /// full exact-path process probe after acquiring the handle retains the
+    /// original process/path checks, in addition to preventing new image maps.
+    pub struct GameGuard {
+        exe: std::path::PathBuf,
+        target: Vec<u16>,
+        name: Vec<u16>,
+        held: Option<std::fs::File>,
+    }
+    impl GameGuard {
+        pub fn new(exe: &Path) -> io::Result<Self> {
+            Ok(Self {
+                exe: exe.to_owned(),
+                target: normalized_path(exe)?,
+                name: exe
+                    .file_name()
+                    .ok_or_else(|| {
+                        io::Error::new(io::ErrorKind::InvalidInput, "missing executable name")
+                    })?
+                    .encode_wide()
+                    .collect(),
+                held: None,
+            })
+        }
+        pub fn release(&mut self) {
+            self.held.take();
+        }
+        pub fn excluded(&self) -> bool {
+            self.held.is_some()
+        }
+        pub fn verify_excluded(&self) -> io::Result<()> {
+            use std::os::windows::io::AsRawHandle;
+            use windows_sys::Win32::Storage::FileSystem::GetFinalPathNameByHandleW;
+            let file = self
+                .held
+                .as_ref()
+                .ok_or_else(|| io::Error::other("game is not excluded"))?;
+            file.metadata()?;
+            let mut buffer = [0u16; 512];
+            let length = unsafe {
+                GetFinalPathNameByHandleW(
+                    file.as_raw_handle(),
+                    buffer.as_mut_ptr(),
+                    buffer.len() as u32,
+                    0,
+                )
+            } as usize;
+            let prefix = [92, 92, 63, 92];
+            if length == 0 {
+                return Err(io::Error::last_os_error());
+            }
+            if length < buffer.len() {
+                let actual = buffer[..length]
+                    .strip_prefix(&prefix)
+                    .unwrap_or(&buffer[..length]);
+                if equal_path(actual, &self.target) {
+                    return Ok(());
+                }
+            } else if length < 32768 {
+                let mut buffer = vec![0u16; length + 1];
+                let length = unsafe {
+                    GetFinalPathNameByHandleW(
+                        file.as_raw_handle(),
+                        buffer.as_mut_ptr(),
+                        buffer.len() as u32,
+                        0,
+                    )
+                } as usize;
+                if length > 0 && length < buffer.len() {
+                    let actual = buffer[..length]
+                        .strip_prefix(&prefix)
+                        .unwrap_or(&buffer[..length]);
+                    if equal_path(actual, &self.target) {
+                        return Ok(());
+                    }
+                }
+            }
+            Err(io::Error::other("excluded game executable path changed"))
+        }
+        pub fn is_running(&mut self) -> io::Result<bool> {
+            if self.held.is_some() {
+                // Validate the live handle on every step. Its share-zero write
+                // access prevents read/image mapping, rename and replacement;
+                // no new game can start until release. No bytes are written.
+                self.verify_excluded()?;
+                return Ok(false);
+            }
+            if let Ok(file) = OpenOptions::new()
                 .read(true)
                 .write(true)
                 .share_mode(0)
-                .open(game_exe)
+                .open(&self.exe)
             {
-                Ok(_) => Ok(false),
-                Err(error) if error.raw_os_error() == Some(32) => Ok(true),
-                Err(error) => Err(error),
+                let result = process_probe(&self.target, &self.name);
+                if matches!(result, Ok(Some(false))) {
+                    self.held = Some(file);
+                    return Ok(false);
+                }
+                // Release before the original probe's path/fallback opens so
+                // our own handle cannot masquerade as an inaccessible game.
+                drop(file);
+                result?;
             }
-        } else {
-            Ok(false)
+            game_is_running(&self.exe)
         }
     }
 
@@ -705,6 +817,30 @@ pub fn game_is_running(_: &Path) -> io::Result<bool> {
 #[cfg(not(windows))]
 pub struct InstallLock;
 #[cfg(not(windows))]
+pub struct GameGuard;
+#[cfg(not(windows))]
+impl GameGuard {
+    pub fn new(_: &Path) -> io::Result<Self> {
+        Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "Windows game exclusion is unavailable",
+        ))
+    }
+    pub fn release(&mut self) {}
+    pub fn excluded(&self) -> bool {
+        false
+    }
+    pub fn verify_excluded(&self) -> io::Result<()> {
+        Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "Windows game exclusion is unavailable",
+        ))
+    }
+    pub fn is_running(&mut self) -> io::Result<bool> {
+        game_is_running(Path::new(""))
+    }
+}
+#[cfg(not(windows))]
 impl InstallLock {
     pub fn acquire(_: &Path) -> Result<Self, String> {
         Err("Windows install mutex is unavailable".into())
@@ -791,6 +927,55 @@ mod tests {
         let other_install = fixture.0.join(running.file_name().unwrap());
         fs::copy(&running, &other_install).unwrap();
         assert!(!game_is_running(&other_install).unwrap());
+    }
+
+    #[test]
+    fn fresh_probe_detects_a_later_image_mapping_and_keeps_locked_missing_readonly_fallbacks() {
+        use std::os::windows::process::CommandExt;
+        use std::time::{Duration, Instant};
+        const CHILD: &str = "MIR2_UPDATER_OWNED_PROCESS_PROBE";
+        if let Some(root) = std::env::var_os(CHILD) {
+            let root = PathBuf::from(root);
+            fs::write(root.join("ready"), b"owned test process ready").unwrap();
+            let deadline = Instant::now() + Duration::from_secs(10);
+            while !root.join("stop").exists() && Instant::now() < deadline {
+                std::thread::sleep(Duration::from_millis(10));
+            }
+            return;
+        }
+        let fixture = FixtureRoot::new();
+        let exe = fixture.0.join("mir2-platform-windows.exe");
+        assert!(!game_is_running(&exe).unwrap()); // Missing target retains snapshot.
+        fs::copy(std::env::current_exe().unwrap(), &exe).unwrap();
+        assert!(!game_is_running(&exe).unwrap());
+        let mut permissions = fs::metadata(&exe).unwrap().permissions();
+        permissions.set_readonly(true);
+        fs::set_permissions(&exe, permissions).unwrap();
+        assert!(!game_is_running(&exe).unwrap()); // Access denied is not "running".
+        let mut permissions = fs::metadata(&exe).unwrap().permissions();
+        permissions.set_readonly(false);
+        fs::set_permissions(&exe, permissions).unwrap();
+        let locked = std::fs::OpenOptions::new().read(true).open(&exe).unwrap();
+        assert!(!game_is_running(&exe).unwrap()); // A data handle is not an image.
+        drop(locked);
+        let mut child = std::process::Command::new(&exe)
+            .args(["--exact", "platform::tests::fresh_probe_detects_a_later_image_mapping_and_keeps_locked_missing_readonly_fallbacks", "--test-threads=1"])
+            .env(CHILD, &fixture.0)
+            .creation_flags(0x08000000) // CREATE_NO_WINDOW, only an owned test child.
+            .stdout(std::process::Stdio::null()).stderr(std::process::Stdio::null())
+            .spawn().unwrap();
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while !fixture.0.join("ready").exists() && Instant::now() < deadline {
+            std::thread::sleep(Duration::from_millis(10));
+        }
+        let ready = fixture.0.join("ready").exists();
+        let running = game_is_running(&exe);
+        let guarded_running = GameGuard::new(&exe).unwrap().is_running();
+        fs::write(fixture.0.join("stop"), b"normal owned child exit").unwrap();
+        assert!(child.wait().unwrap().success());
+        assert!(ready && running.unwrap());
+        assert!(guarded_running.unwrap());
+        assert!(!game_is_running(&exe).unwrap()); // No cached running result either.
     }
 
     #[test]

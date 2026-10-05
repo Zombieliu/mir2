@@ -570,7 +570,12 @@ fn extract_bundle_observed(
         "bundle entry count mismatch"
     );
     let mut seen = BTreeSet::new();
-    for index in 0..entries.len() {
+    let mut scheduled_hashes = BTreeSet::new();
+    // Decode on the caller thread; only bounded small-file cache publication
+    // runs concurrently. Large files retain streaming I/O and cancellation.
+    // At four workers the queue, active jobs and producer hold <= 6.5 MiB.
+    const BUFFERED_ENTRY: u64 = 512 * 1024;
+    let jobs = (0..entries.len()).map(|_| -> Result<_> {
         check()?;
         let length = u16::from_le_bytes(number(&mut reader)?) as usize;
         ensure!(length > 0 && length <= 230, "bundle path length bound");
@@ -578,15 +583,54 @@ fn extract_bundle_observed(
         reader.read_exact(&mut path)?;
         let path = std::str::from_utf8(&path)?;
         game_path(path)?;
-        let entry = entries.get(path).context("unknown bundle entry")?;
+        let entry = *entries.get(path).context("unknown bundle entry")?;
         ensure!(seen.insert(path.to_owned()), "duplicate bundle entry");
         ensure!(
             u64::from_le_bytes(number(&mut reader)?) == entry.size,
             "bundle target size mismatch"
         );
-        cache_entry(root, entry, &mut reader, check)?;
-        completed(index + 1);
-    }
+        let buffered = if !scheduled_hashes.insert(entry.sha256.as_str()) {
+            // Multiple paths can have identical content. Never dispatch two
+            // writers for one hash/part file, but still authenticate each body.
+            let mut digest = Sha256::new();
+            copy_exact(&mut reader, entry.size, None, &mut digest, check)?;
+            ensure!(
+                format!("{:X}", digest.finalize()) == entry.sha256,
+                "bundle target hash mismatch"
+            );
+            None
+        } else if entry.size > BUFFERED_ENTRY {
+            cache_entry(root, entry, &mut reader, check)?;
+            None
+        } else {
+            let mut bytes = vec![0; entry.size as usize];
+            for chunk in bytes.chunks_mut(65536) {
+                check()?;
+                reader.read_exact(chunk)?;
+            }
+            Some(bytes)
+        };
+        Ok((entry, buffered))
+    });
+    crate::local_io::run(
+        jobs,
+        crate::local_io::workers(entries.len()),
+        |(entry, buffered)| {
+            if let Some(bytes) = buffered {
+                // No UI/source crosses threads. A cancelled producer stops dispatch
+                // and joins these bounded writes before returning; valid cache may
+                // still be reused on retry, as with the serial extractor.
+                cache_entry(
+                    root,
+                    entry,
+                    &mut std::io::Cursor::new(bytes),
+                    &mut || Ok(()),
+                )?;
+            }
+            Ok(())
+        },
+        |_, count| completed(count),
+    )?;
     finish_gzip(reader)?;
     check()
 }

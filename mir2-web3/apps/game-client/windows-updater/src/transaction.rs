@@ -157,6 +157,43 @@ fn install_staged(source: &Path, target: &Path, entry: &FileEntry) -> Result<()>
     crate::platform::replace_file(&temp, target)?;
     Ok(())
 }
+/// Activation consumes expendable staging, while recovery keeps using the
+/// copying path above so its verified backups survive a failed/retried restore.
+/// The journal and every old-file backup are durable before this is called.
+fn activate_staged(source: &Path, target: &Path, entry: &FileEntry) -> Result<()> {
+    ensure!(safe::matches(source, entry)?, "staged file hash mismatch");
+    safe::ancestors(target)?;
+    fs::create_dir_all(target.parent().unwrap())?;
+    // Also covers transaction callers that did not use stage_bytes. Flush the
+    // verified source itself; copying it to another dirty file is unnecessary.
+    fs::OpenOptions::new()
+        .write(true)
+        .open(source)?
+        .sync_all()?;
+    // Windows uses same-volume MOVEFILE_WRITE_THROUGH, without COPY_ALLOWED.
+    // A crash rolls back from backups; recovery never needs new staged files.
+    crate::platform::replace_file(source, target)?;
+    Ok(())
+}
+fn activate_record(root: &Path, record: &Record) -> Result<()> {
+    let target = safe::target(root, &record.path)?;
+    if let Some(new) = &record.new {
+        activate_staged(
+            &safe::target(&root.join(".update/staging"), &record.path)?,
+            &target,
+            new,
+        )?;
+    } else if target.exists() {
+        safe::regular(&target)?;
+        fs::remove_file(target)?;
+    }
+    Ok(())
+}
+fn independent_payload(record: &Record) -> bool {
+    record.path.strip_prefix("game/").is_some_and(|path| {
+        path != "mir2-platform-windows.exe" && !crate::model::META.contains(&path)
+    })
+}
 pub fn recover(root: &Path) -> Result<bool> {
     recover_observed(root, &mut NoProgress)
 }
@@ -197,9 +234,18 @@ pub fn rollback_observed(root: &Path, observer: &mut impl ProgressObserver) -> R
             );
         }
     }
+    let exe = root.join("game/mir2-platform-windows.exe");
+    let mut game_guard = crate::platform::GameGuard::new(&exe)?;
     for (index, r) in j.records.iter().rev().enumerate() {
+        if r.path == "game/mir2-platform-windows.exe" {
+            game_guard.release();
+        }
         ensure!(
-            !crate::platform::game_is_running(&root.join("game/mir2-platform-windows.exe"))?,
+            !if r.path == "game/mir2-platform-windows.exe" {
+                crate::platform::game_is_running(&exe)?
+            } else {
+                game_guard.is_running()?
+            },
             "game started during recovery"
         );
         let target = safe::target(root, &r.path)?;
@@ -212,6 +258,9 @@ pub fn rollback_observed(root: &Path, observer: &mut impl ProgressObserver) -> R
         } else if target.exists() {
             safe::regular(&target)?;
             fs::remove_file(target)?;
+        }
+        if r.path == "game/mir2-platform-windows.exe" {
+            ensure!(!game_guard.is_running()?, "game started during recovery");
         }
         phase.advance(index + 1);
     }
@@ -271,89 +320,158 @@ pub(crate) fn apply_steps_observed(
         records: vec![],
     };
     let mut seen = std::collections::BTreeSet::new();
-    let mut required = 64 * 1024 * 1024u64;
-    let mut largest = 0;
+    // Reject all scope/alias errors before dispatching any scratch work.
     for change in changes {
         scope(&change.path)?;
         ensure!(
             seen.insert(change.path.to_ascii_lowercase()),
             "duplicate activation entry"
         );
-        let target = safe::target(root, &change.path)?;
-        let backup = if target.exists() {
-            let (size, sha256) = safe::digest_file(&target)?;
-            let entry = FileEntry {
-                path: change.path.clone(),
-                size,
-                sha256,
-            };
-            entry.validate()?;
-            required = required
-                .checked_add(size)
-                .ok_or_else(|| anyhow::anyhow!("backup space overflow"))?;
-            largest = largest.max(size);
-            Some(entry)
-        } else {
-            None
-        };
         if let Some(new) = &change.new {
             new.validate()?;
             ensure!(new.path == change.path, "activation mismatch");
+        }
+    }
+    let worker_count = crate::local_io::workers(changes.len());
+    j.records = crate::local_io::run(
+        changes.iter().map(Ok),
+        worker_count,
+        |change| {
+            let target = safe::target(root, &change.path)?;
+            let backup = if target.exists() {
+                let (size, sha256) = safe::digest_file(&target)?;
+                let entry = FileEntry {
+                    path: change.path.clone(),
+                    size,
+                    sha256,
+                };
+                entry.validate()?;
+                Some(entry)
+            } else {
+                None
+            };
+            Ok(Record {
+                path: change.path.clone(),
+                backup,
+                new: change.new.clone(),
+            })
+        },
+        |_, _| {},
+    )?;
+    let mut required = 64 * 1024 * 1024u64;
+    let mut largest = 0;
+    for record in &j.records {
+        if let Some(old) = &record.backup {
+            required = required
+                .checked_add(old.size)
+                .ok_or_else(|| anyhow::anyhow!("backup space overflow"))?;
+            largest = largest.max(old.size);
+        }
+        if let Some(new) = &record.new {
             largest = largest.max(new.size);
         }
-        j.records.push(Record {
-            path: change.path.clone(),
-            backup,
-            new: change.new.clone(),
-        });
+    }
+    // Keep metadata/pointers last. For an initial installation, putting the
+    // verified executable first permits live exclusion for subsequent assets;
+    // otherwise its missing path forces a full process snapshot per asset.
+    // The installation lock/journal still quarantine the entire mixed package.
+    if let Some(index) = j
+        .records
+        .iter()
+        .position(|r| r.path == "game/mir2-platform-windows.exe" && r.new.is_some())
+    {
+        let executable = j.records.remove(index);
+        j.records.insert(0, executable);
     }
     ensure!(
         crate::platform::free_bytes(root)? >= required + largest,
         "not enough space for activation and rollback"
     );
     // Copy and flush every backup before the journal grants permission to mutate.
-    for (index, r) in j.records.iter().enumerate() {
-        if let Some(old) = &r.backup {
-            let dest = safe::target(&root.join(".update/backup"), &r.path)?;
-            fs::create_dir_all(dest.parent().unwrap())?;
-            fs::copy(safe::target(root, &r.path)?, &dest)?;
-            fs::OpenOptions::new().write(true).open(&dest)?.sync_all()?;
-            ensure!(
-                safe::matches(&dest, old)?,
-                "backup changed during preparation"
-            );
-        }
-        if let Some(new) = &r.new {
-            ensure!(
-                safe::matches(&safe::target(&root.join(".update/staging"), &r.path)?, new)?,
-                "missing staged file"
-            );
-        }
-        preparing.advance(index + 1);
-    }
+    crate::local_io::run(
+        j.records.iter().map(Ok),
+        worker_count,
+        |r| {
+            if let Some(old) = &r.backup {
+                let dest = safe::target(&root.join(".update/backup"), &r.path)?;
+                fs::create_dir_all(dest.parent().unwrap())?;
+                fs::copy(safe::target(root, &r.path)?, &dest)?;
+                fs::OpenOptions::new().write(true).open(&dest)?.sync_all()?;
+                ensure!(
+                    safe::matches(&dest, old)?,
+                    "backup changed during preparation"
+                );
+            }
+            if let Some(new) = &r.new {
+                ensure!(
+                    safe::matches(&safe::target(&root.join(".update/staging"), &r.path)?, new)?,
+                    "missing staged file"
+                );
+            }
+            Ok(())
+        },
+        |_, completed| preparing.advance(completed),
+    )?;
     save(root, &j)?;
     preparing.finish();
     drop(preparing);
     let mut installing = Phase::new(root, observer, "installing", j.records.len());
     after(0)?;
-    for (index, r) in j.records.iter().enumerate() {
+    let exe = root.join("game/mir2-platform-windows.exe");
+    let mut game_guard = crate::platform::GameGuard::new(&exe)?;
+    let mut index = 0;
+    while index < j.records.len() {
+        let r = &j.records[index];
+        if independent_payload(r) {
+            ensure!(!game_guard.is_running()?, "game started during update");
+            let end = index
+                + j.records[index..]
+                    .iter()
+                    .take_while(|r| independent_payload(r))
+                    .count();
+            if game_guard.excluded() {
+                let excluded = &game_guard;
+                crate::local_io::try_run(
+                    j.records[index..end].iter().map(|r| {
+                        excluded.verify_excluded()?;
+                        Ok(r)
+                    }),
+                    crate::local_io::workers(end - index),
+                    |r| {
+                        // The live exclusion remains held throughout every
+                        // queued write. Validate it on the actual worker too.
+                        excluded.verify_excluded()?;
+                        activate_record(root, r)
+                    },
+                    |_, completed| {
+                        installing.advance(index + completed);
+                        after(index + completed)
+                    },
+                )?;
+                index = end;
+                continue;
+            }
+            // Read-only/locked EXEs retain serial fresh process checks. Never
+            // queue writes when a live exclusion could not be acquired.
+        }
+        if r.path == "game/mir2-platform-windows.exe" {
+            game_guard.release();
+        }
         ensure!(
-            !crate::platform::game_is_running(&root.join("game/mir2-platform-windows.exe"))?,
+            !if r.path == "game/mir2-platform-windows.exe" {
+                crate::platform::game_is_running(&exe)?
+            } else {
+                game_guard.is_running()?
+            },
             "game started during update"
         );
-        let target = safe::target(root, &r.path)?;
-        if let Some(new) = &r.new {
-            install_staged(
-                &safe::target(&root.join(".update/staging"), &r.path)?,
-                &target,
-                new,
-            )?
-        } else if target.exists() {
-            safe::regular(&target)?;
-            fs::remove_file(target)?;
+        activate_record(root, r)?;
+        if r.path == "game/mir2-platform-windows.exe" {
+            ensure!(!game_guard.is_running()?, "game started during update");
         }
         installing.advance(index + 1);
         after(index + 1)?;
+        index += 1;
     }
     j.phase = "committed".into();
     save(root, &j)?;
@@ -450,5 +568,245 @@ mod tests {
             fs::read(root.join("game/mir2-platform-windows.exe")).unwrap(),
             b"old"
         );
+    }
+    #[test]
+    fn consumed_staging_recovers_and_executable_precedes_assets_but_not_metadata() {
+        for stop in 1..=3 {
+            let dir = tempfile::tempdir().unwrap();
+            let root = dir.path();
+            safe::write_new(&root.join("game/VERSION.json"), b"old metadata").unwrap();
+            let changes = vec![
+                stage_bytes(root, "game/mir2-assets/a.png", b"new asset").unwrap(),
+                stage_bytes(root, "game/mir2-platform-windows.exe", b"new executable").unwrap(),
+                stage_bytes(root, "game/VERSION.json", b"new metadata").unwrap(),
+            ];
+            let result = apply_steps(root, &changes, |step| {
+                if step == 1 {
+                    assert_eq!(
+                        fs::metadata(root.join("game/mir2-platform-windows.exe"))?.len(),
+                        b"new executable".len() as u64
+                    );
+                    assert!(!root
+                        .join(".update/staging/game/mir2-platform-windows.exe")
+                        .exists());
+                    assert!(!root.join("game/mir2-assets/a.png").exists());
+                    assert_eq!(fs::read(root.join("game/VERSION.json"))?, b"old metadata");
+                }
+                ensure!(
+                    step != stop,
+                    "simulated process loss after consumed staging"
+                );
+                Ok(())
+            });
+            assert!(result.is_err());
+            assert!(recover(root).unwrap());
+            assert!(!root.join("game/mir2-platform-windows.exe").exists());
+            assert!(!root.join("game/mir2-assets/a.png").exists());
+            assert_eq!(
+                fs::read(root.join("game/VERSION.json")).unwrap(),
+                b"old metadata"
+            );
+            assert_eq!(
+                fs::read(root.join(".update/backup/game/VERSION.json")).unwrap(),
+                b"old metadata"
+            );
+        }
+    }
+
+    #[test]
+    fn staged_mutation_after_preparation_rejects_then_restores_consumed_predecessor() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        safe::write_new(
+            &root.join("game/mir2-platform-windows.exe"),
+            b"old executable",
+        )
+        .unwrap();
+        let changes = vec![
+            stage_bytes(root, "game/mir2-platform-windows.exe", b"new executable").unwrap(),
+            stage_bytes(root, "game/mir2-assets/a.png", b"expected bytes").unwrap(),
+        ];
+        let result = apply_steps(root, &changes, |step| {
+            if step == 1 {
+                fs::write(
+                    root.join(".update/staging/game/mir2-assets/a.png"),
+                    b"tampered bytes",
+                )?;
+            }
+            Ok(())
+        });
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("staged file hash mismatch"));
+        assert!(!root.join("game/mir2-assets/a.png").exists());
+        assert!(recover(root).unwrap());
+        assert_eq!(
+            fs::read(root.join("game/mir2-platform-windows.exe")).unwrap(),
+            b"old executable"
+        );
+    }
+
+    #[test]
+    fn parallel_partial_activation_joins_before_full_journal_rollback_and_keeps_metadata_last() {
+        for tamper in [false, true] {
+            let dir = tempfile::tempdir().unwrap();
+            let root = dir.path();
+            safe::write_new(
+                &root.join("game/mir2-platform-windows.exe"),
+                b"old executable",
+            )
+            .unwrap();
+            safe::write_new(&root.join("game/VERSION.json"), b"old metadata").unwrap();
+            safe::write_new(&root.join("game/logs/personal.log"), b"personal witness").unwrap();
+            let mut changes = Vec::new();
+            for index in 0..64 {
+                let path = format!("game/mir2-assets/parallel/{index}.png");
+                if index % 2 == 0 {
+                    safe::write_new(&root.join(&path), format!("old {index}").as_bytes()).unwrap();
+                }
+                changes.push(stage_bytes(root, &path, format!("new {index}").as_bytes()).unwrap());
+            }
+            changes.push(
+                stage_bytes(root, "game/mir2-platform-windows.exe", b"new executable").unwrap(),
+            );
+            changes.push(stage_bytes(root, "game/VERSION.json", b"new metadata").unwrap());
+            let result = apply_steps(root, &changes, |step| {
+                if step == 1 {
+                    assert_eq!(load(root)?.unwrap().records.len(), 66);
+                    if tamper {
+                        fs::write(
+                            root.join(".update/staging/game/mir2-assets/parallel/12.png"),
+                            b"bad bytes",
+                        )?;
+                    }
+                }
+                ensure!(tamper || step != 12, "interrupted parallel activation");
+                Ok(())
+            });
+            let error = result.unwrap_err().to_string();
+            assert!(error.contains(if tamper {
+                "staged file hash mismatch"
+            } else {
+                "interrupted parallel activation"
+            }));
+            assert_eq!(load(root).unwrap().unwrap().phase, "applying");
+            assert_eq!(
+                fs::read(root.join("game/VERSION.json")).unwrap(),
+                b"old metadata"
+            );
+            let snapshot = (0..64)
+                .map(|index| {
+                    fs::read(root.join(format!("game/mir2-assets/parallel/{index}.png"))).ok()
+                })
+                .collect::<Vec<_>>();
+            std::thread::sleep(std::time::Duration::from_millis(20));
+            assert_eq!(
+                snapshot,
+                (0..64)
+                    .map(|index| fs::read(
+                        root.join(format!("game/mir2-assets/parallel/{index}.png"))
+                    )
+                    .ok())
+                    .collect::<Vec<_>>()
+            );
+            assert!(snapshot
+                .iter()
+                .flatten()
+                .any(|bytes| bytes.starts_with(b"new ")));
+            assert!(recover(root).unwrap());
+            for index in 0..64 {
+                let path = format!("game/mir2-assets/parallel/{index}.png");
+                if index % 2 == 0 {
+                    let old = format!("old {index}").into_bytes();
+                    assert_eq!(fs::read(root.join(&path)).unwrap(), old);
+                    assert_eq!(
+                        fs::read(root.join(".update/backup").join(&path)).unwrap(),
+                        old
+                    );
+                } else {
+                    assert!(!root.join(&path).exists());
+                }
+            }
+            assert_eq!(
+                fs::read(root.join("game/mir2-platform-windows.exe")).unwrap(),
+                b"old executable"
+            );
+            assert_eq!(
+                fs::read(root.join("game/VERSION.json")).unwrap(),
+                b"old metadata"
+            );
+            assert_eq!(
+                fs::read(root.join("game/logs/personal.log")).unwrap(),
+                b"personal witness"
+            );
+            assert!(!recover(root).unwrap());
+        }
+    }
+
+    #[cfg(windows)]
+    #[test]
+    fn live_exclusion_blocks_game_start_and_rename_between_replacements_then_releases() {
+        use std::os::windows::process::CommandExt;
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        fs::create_dir_all(root.join("game")).unwrap();
+        fs::copy(
+            std::env::current_exe().unwrap(),
+            root.join("game/mir2-platform-windows.exe"),
+        )
+        .unwrap();
+        safe::write_new(&root.join("game/mir2-assets/a.png"), b"old asset").unwrap();
+        let changes = vec![
+            stage_bytes(root, "game/mir2-assets/a.png", b"new asset").unwrap(),
+            stage_bytes(root, "game/mir2-assets/b.png", b"second asset").unwrap(),
+        ];
+        let mut blocked_start = false;
+        let result = apply_steps(root, &changes, |step| {
+            if step == 1 {
+                let child = std::process::Command::new(root.join("game/mir2-platform-windows.exe"))
+                    .args(["--exact", "platform::tests::fresh_probe_detects_a_later_image_mapping_and_keeps_locked_missing_readonly_fallbacks", "--test-threads=1"])
+                    .env("MIR2_UPDATER_OWNED_PROCESS_PROBE", root)
+                    .creation_flags(0x08000000)
+                    .stdout(std::process::Stdio::null()).stderr(std::process::Stdio::null())
+                    .spawn();
+                blocked_start = child
+                    .as_ref()
+                    .err()
+                    .is_some_and(|e| e.raw_os_error() == Some(32));
+                if let Ok(mut child) = child {
+                    fs::write(root.join("stop"), b"normal owned unexpected child exit")?;
+                    child.wait()?;
+                }
+                ensure!(blocked_start, "owned image startup was not excluded");
+                ensure!(
+                    fs::rename(
+                        root.join("game/mir2-platform-windows.exe"),
+                        root.join("renamed.exe")
+                    )
+                    .is_err(),
+                    "live guard allowed executable rename"
+                );
+            }
+            Ok(())
+        });
+        result.unwrap();
+        assert!(blocked_start);
+        assert!(root.join("game/mir2-assets/b.png").exists());
+        assert_eq!(
+            fs::read(root.join("game/mir2-assets/a.png")).unwrap(),
+            b"new asset"
+        );
+        rollback(root).unwrap();
+        assert_eq!(
+            fs::read(root.join("game/mir2-assets/a.png")).unwrap(),
+            b"old asset"
+        );
+        assert!(!root.join("game/mir2-assets/b.png").exists());
+        assert!(fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open(root.join("game/mir2-platform-windows.exe"))
+            .is_ok());
     }
 }

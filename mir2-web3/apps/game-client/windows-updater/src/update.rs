@@ -905,10 +905,11 @@ fn stage_payloads(
     total: u64,
     transfers: &mut Transfers,
 ) -> Result<Vec<Change>> {
-    let mut changes = vec![];
     let mut done = 0;
     let mut phase = LocalPhase::new(root, status, "staging", pending.len(), (70, 84));
-    for (index, entry) in pending.iter().enumerate() {
+    let mut resolve_ms = 0;
+    let mut cache_hits = 0;
+    let jobs = pending.iter().map(|entry| -> Result<_> {
         ensure!(!status.cancelled(), "update cancelled");
         let resolve_started = Instant::now();
         let (cache, downloaded) = cached_payload(
@@ -920,30 +921,43 @@ fn stage_payloads(
             (done, total),
             transfers,
         )?;
-        phase.payload_resolve_ms += resolve_started.elapsed().as_millis();
-        phase.cache_hits += usize::from(!downloaded);
-        let copy_started = Instant::now();
-        let target = safe::target(
-            &root.join(".update/staging"),
-            &format!("game/{}", entry.path),
-        )?;
-        fs::create_dir_all(target.parent().unwrap())?;
-        fs::copy(cache, &target)?;
-        fs::OpenOptions::new()
-            .write(true)
-            .open(&target)?
-            .sync_all()?;
-        let mut new = entry.clone();
-        new.path = format!("game/{}", entry.path);
-        changes.push(Change {
-            path: new.path.clone(),
-            new: Some(new),
-        });
+        resolve_ms += resolve_started.elapsed().as_millis();
+        cache_hits += usize::from(!downloaded);
         done += entry.size;
-        phase.written_bytes += entry.size;
-        phase.copy_flush_ms += copy_started.elapsed().as_millis();
-        phase.advance(index + 1);
-    }
+        Ok((cache, entry))
+    });
+    let result = crate::local_io::run(
+        jobs,
+        crate::local_io::workers(pending.len()),
+        |(cache, entry)| {
+            let copy_started = Instant::now();
+            let target = safe::target(
+                &root.join(".update/staging"),
+                &format!("game/{}", entry.path),
+            )?;
+            fs::create_dir_all(target.parent().unwrap())?;
+            fs::copy(cache, &target)?;
+            fs::OpenOptions::new()
+                .write(true)
+                .open(&target)?
+                .sync_all()?;
+            let mut new = entry.clone();
+            new.path = format!("game/{}", entry.path);
+            let change = Change {
+                path: new.path.clone(),
+                new: Some(new),
+            };
+            Ok((change, entry.size, copy_started.elapsed().as_millis()))
+        },
+        |(_, size, elapsed), completed| {
+            phase.written_bytes += size;
+            phase.copy_flush_ms += elapsed;
+            phase.advance(completed);
+        },
+    );
+    phase.payload_resolve_ms = resolve_ms;
+    phase.cache_hits = cache_hits;
+    let changes = result?.into_iter().map(|(change, _, _)| change).collect();
     phase.finish();
     Ok(changes)
 }

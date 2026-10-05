@@ -54,6 +54,10 @@ impl Reply {
                         Err(e) => panic!("HTTP test accept: {e}"),
                     }
                 };
+                // Windows may inherit the nonblocking listener mode. This
+                // response fixture intentionally uses bounded blocking I/O;
+                // a read timeout alone does not clear nonblocking mode.
+                stream.set_nonblocking(false).unwrap();
                 stream
                     .set_read_timeout(Some(Duration::from_secs(5)))
                     .unwrap();
