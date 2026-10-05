@@ -2044,7 +2044,7 @@ mod tests {
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 51);
+        assert_eq!(SCENES.len(), 55);
     }
 
     #[test]
