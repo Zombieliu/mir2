@@ -78,6 +78,20 @@ struct TouchPointer {
     owner: Option<u64>,
     wait_for_release: bool,
     context: Option<TouchContext>,
+    native_cursor_frame: NativeTouchCursorFrame,
+}
+
+#[derive(Default)]
+struct NativeTouchCursorFrame {
+    previous: Option<(Entity, Option<Vec2>)>,
+}
+
+impl NativeTouchCursorFrame {
+    fn capture(&mut self, entity: Entity, window: &Window) {
+        if self.previous.is_none() {
+            self.previous = Some((entity, window.physical_cursor_position()));
+        }
+    }
 }
 
 #[derive(Resource, Default)]
@@ -133,6 +147,8 @@ impl JoystickState {
 }
 
 pub fn install(app: &mut App) {
+    #[cfg(target_os = "android")]
+    install_android_touch_cursor_frame(app);
     app.init_resource::<RailState>()
         .init_resource::<UiEffectQueue>()
         .init_resource::<TouchPointer>()
@@ -501,6 +517,8 @@ fn touch_pointer(
     else {
         return;
     };
+    #[cfg(target_os = "android")]
+    pointer.native_cursor_frame.capture(window_entity, &window);
     let context = TouchContext {
         rail_expanded: rail.as_deref().is_some_and(|rail| rail.expanded),
         shell_screen: shell
@@ -671,14 +689,7 @@ fn publish_touch_cursor(
 ) {
     #[cfg(target_os = "android")]
     {
-        let _ = window;
-        if let Some(cursor_moves) = cursor_moves.as_mut() {
-            cursor_moves.write(bevy::window::CursorMoved {
-                window: window_entity,
-                position,
-                delta: None,
-            });
-        }
+        publish_android_touch_cursor(window_entity, window, position, cursor_moves);
     }
     #[cfg(not(target_os = "android"))]
     {
@@ -689,9 +700,51 @@ fn publish_touch_cursor(
 
 fn clear_touch_cursor(window: &mut Window) {
     #[cfg(target_os = "android")]
-    let _ = window;
+    clear_android_touch_cursor(window);
     #[cfg(not(target_os = "android"))]
     window.set_cursor_position(None);
+}
+
+// Keep the actual Android branch callable by host regression tests; testing
+// the desktop setter does not establish the mobile shared-window contract.
+fn publish_android_touch_cursor(
+    window_entity: Entity,
+    window: &mut Window,
+    position: Vec2,
+    cursor_moves: &mut Option<MessageWriter<bevy::window::CursorMoved>>,
+) {
+    // Shared Crystal handlers read Window.cursor_position, not CursorMoved.
+    // This snapshot is visible to same-frame UI input only; restoring it in
+    // PostUpdate prevents Winit's Last stage from warping an Android OS cursor.
+    window.set_cursor_position(Some(position));
+    if let Some(cursor_moves) = cursor_moves.as_mut() {
+        cursor_moves.write(bevy::window::CursorMoved {
+            window: window_entity,
+            position,
+            delta: None,
+        });
+    }
+}
+
+fn clear_android_touch_cursor(window: &mut Window) {
+    window.set_cursor_position(None);
+}
+
+fn install_android_touch_cursor_frame(app: &mut App) {
+    app.add_systems(
+        PostUpdate,
+        restore_android_touch_cursor_frame.after(bevy::ui::UiSystems::Layout),
+    );
+}
+
+fn restore_android_touch_cursor_frame(
+    mut pointer: ResMut<TouchPointer>,
+    mut windows: Query<&mut Window>,
+) {
+    let Some((entity, previous)) = pointer.native_cursor_frame.previous.take() else { return; };
+    if let Ok(mut window) = windows.get_mut(entity) {
+        window.set_physical_cursor_position(previous.map(|position| position.as_dvec2()));
+    }
 }
 
 fn keep_drag_handles_reachable(
@@ -714,6 +767,10 @@ fn keep_drag_handles_reachable(
         state.help.top = gutter;
     }
 }
+
+#[cfg(test)]
+#[path = "touch_cursor_bridge_tests.rs"]
+mod touch_cursor_bridge_tests;
 fn spawn(mut commands: Commands) {
     spawn_npc_service_close_target(
         &mut commands,
