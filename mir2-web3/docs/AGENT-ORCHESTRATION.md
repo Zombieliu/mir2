@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+> 2026-10-05 pushed publication sourcec8fea passes actual Linux CI37292261788:
+> Node138/Python64 plus actual SIGINT2, zero skips. Root matches full artifact
+> digest and source-bound Linux receipts; all authority/stage/promote/Web jobs
+> skip. This closes portable tooling/owned INT checks, not Cloudflare or speed.
+> Existing Windows failures and raw archives remain; effective authorization,
+> six origin objects, coherent13 publication/CDN/laptop timing remain open.
+> [Actual Linux receipt](generated/player-qa/native-delivery-20261005/linux-publication-01/README.md).
+
 > 2026-10-05 the sole publication writer freezes five files and stops. Root
 > integrates only that reviewed scope, portable proof fixtures, newline-byte
 > hygiene and workflow overall termination limits. Root138/64 checks overlap

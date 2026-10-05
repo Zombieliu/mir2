@@ -1,5 +1,13 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-05 publication tooling sourcec8fea passes actual Linux CI37292261788,
+> 138 Node/64 Python and2 actual interrupt checks, zero skips. Root retained
+> complete raw logs/artifact and verified source hashes. Credential and release
+> jobs skipped; this closes portable tooling, not public R2/CDN speed or game
+> parity. Authorized coherent13 publication and matched laptop timing remain
+> open; original public12/game6032, services and real saves are unchanged.
+> [Actual Linux evidence](generated/player-qa/native-delivery-20261005/linux-publication-01/README.md).
+
 > 2026-10-05 updater13 publication tools pass root138 Node/64 Python checks
 > with worker overlap retained; one actual Windows SIGINT check passes. Fixed
 > host, separate progress/absolute budgets, late read cleanup, full-chain abort

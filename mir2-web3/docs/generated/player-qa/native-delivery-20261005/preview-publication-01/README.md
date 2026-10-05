@@ -71,6 +71,9 @@ root archive remains unchanged. Addendum SHA256:
 99ffa6aafe3f113a5df79495e9ee4983bdedf057d2bd8d1ef3b3d07e935d20cb.
 Linux CI and remote speed/publication results must be added as separate actual
 receipts, rather than changing these original local observations.
+The subsequent [actual Linux CI receipt](../linux-publication-01/README.md)
+records sourcec8fea passing138/64 and both SIGINT cases with no skipped checks;
+remote publication and speed gates remain open.
 
 The job/step timeout boundaries were checked against
 [GitHub's workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idtimeout-minutes).

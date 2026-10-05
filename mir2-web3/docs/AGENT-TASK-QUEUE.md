@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-10-05 actual Linux verify37292261788/sourcec8fea passes Node138/138,
+> Python64/64 and SIGINT2/2 with no skips. Full raw artifact SHA and source pins
+> match; old Windows observations remain. Credential probe, source/R2 staging,
+> promotion and Web jobs did not run. Next downloader gates require effective
+> Cloudflare authority, six admitted origin objects, coherent public13 and
+> matched cache/range/HTTPS/laptop timing. Public12/game6032 remain unchanged;
+> no whole Goal or public speed acceptance follows.
+> [Actual terminal Linux evidence](generated/player-qa/native-delivery-20261005/linux-publication-01/README.md).
+
 > 2026-10-05 root integrates the frozen five-file updater13 publication tools,
 > genuine root-issued CMS/object proof and portable byte-pinned fixtures.
 > Independent Node138/Python64 checks pass, overlapping worker202; Windows

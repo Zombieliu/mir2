@@ -1,5 +1,14 @@
 # 下载器耗时诊断与分发进度
 
+2026-10-05推送源码c8fea的实际Linux流水线37292261788通过：Node138、Python64、
+实际SIGINT2，均零跳过。根下载完整51,857字节artifact并匹配GitHub摘要，Linux
+原始收据绑定生产源码/测试和64106字节原始表。GNU timeout真实受控子进程
+返回124并保留不确定写入记录，没有重试或修改指针。凭据探针、stage/promote
+及Web任务全部跳过。此结果关闭Linux工具/有序INT验证，不表示R2或公网测速
+通过；有效授权、六个源对象、公开13一致发布、缓存/range及笔记本计时仍待完成。
+公开仍12，游戏6032及当前服务不变。
+[实际Linux原始回执与完整ZIP摘要](generated/player-qa/native-delivery-20261005/linux-publication-01/README.md)。
+
 2026-10-05新版13发布工具已集成。根独立Node138/138、Python64/64通过，
 与worker同202项重叠，保留原107/46回归；Windows真实SIGINT收据1通过，
 GNU timeout子进程留待LinuxCI。修复固定域名/端口、响应体无进展超时、
