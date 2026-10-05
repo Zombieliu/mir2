@@ -247,6 +247,30 @@ impl AndroidGatewayHostAdapter {
             .collect()
     }
 
+    /// Selectively defer Hero leases while their scene/focus is not ready.
+    /// Other domains keep the original lifecycle, sequence and lease behavior.
+    pub(crate) fn drain_ready_with_hero_deferrals(
+        &mut self,
+        queue: &mut AndroidGatewayOutboundQueue,
+        shell: &AndroidShellState,
+        max_entries: usize,
+        deferred: &BTreeSet<u64>,
+    ) -> Vec<AndroidGatewayOutboundLease> {
+        let available = ANDROID_GATEWAY_QUEUE_CAPACITY.saturating_sub(self.leased_sequences.len());
+        queue.drain_ready_without_hero_sequences(shell, max_entries.min(available), deferred)
+            .into_iter().filter_map(|outbound| {
+                if !outbound.is_sendable() { return None; }
+                self.leased_sequences.insert(outbound.sequence);
+                Some(AndroidGatewayOutboundLease { outbound })
+            }).collect()
+    }
+
+    /// Retire one exact Hero lease that never left the native host FIFO.
+    /// This is cancellation before a write, not a fabricated socket result.
+    pub(crate) fn retire_unwritten_hero_lease(&mut self, lease: AndroidGatewayOutboundLease) {
+        self.leased_sequences.remove(&lease.sequence());
+    }
+
     pub fn on_host_write_result(
         &mut self,
         queue: &mut AndroidGatewayOutboundQueue,
@@ -331,6 +355,9 @@ pub enum AndroidGatewayEnqueueError {
         max_bytes: usize,
     },
     OversizedNativeSocial {
+        max_bytes: usize,
+    },
+    OversizedNativeHero {
         max_bytes: usize,
     },
 }
@@ -1565,6 +1592,50 @@ impl AndroidGatewayOutboundQueue {
             json,
         });
         Ok(())
+    }
+
+    /// Closed Hero-only projection on the same bounded FIFO/lease channel.
+    /// Return its lifetime sequence for exact write-result correlation.
+    pub(crate) fn enqueue_native_hero(
+        &mut self,
+        command: &crate::hero_egress::NativeHeroCommand,
+    ) -> Result<u64, AndroidGatewayEnqueueError> {
+        const MAX_BYTES: usize = 4096;
+        let json = serde_json::to_string(command).expect("typed Hero command is serializable");
+        if json.len() > MAX_BYTES {
+            return Err(AndroidGatewayEnqueueError::OversizedNativeHero { max_bytes: MAX_BYTES });
+        }
+        if self.entries.len() >= self.capacity {
+            let command_type = command.command_type().to_owned();
+            self.overflow_count = self.overflow_count.saturating_add(1);
+            self.last_overflow_type = Some(command_type.clone());
+            return Err(AndroidGatewayEnqueueError::Full { capacity: self.capacity, command_type });
+        }
+        let sequence = self.next_sequence;
+        self.next_sequence = self.next_sequence.saturating_add(1);
+        self.entries.push_back(AndroidGatewayOutbound { sequence, kind: AndroidGatewayOutboundKind::Wire, json });
+        Ok(sequence)
+    }
+
+    /// Remove only exact unsent Hero sequences selected by the owner sidecar.
+    pub(crate) fn discard_native_hero_sequences(&mut self, stale: &BTreeSet<u64>) {
+        self.entries.retain(|entry| !stale.contains(&entry.sequence));
+    }
+
+    fn drain_ready_without_hero_sequences(
+        &mut self, shell: &AndroidShellState, max_entries: usize, deferred: &BTreeSet<u64>,
+    ) -> Vec<AndroidGatewayOutbound> {
+        if shell.lifecycle != AndroidLifecycle::Foreground || shell.network != AndroidNetwork::Available {
+            return Vec::new();
+        }
+        let mut drained = Vec::new();
+        for _ in 0..self.entries.len() {
+            let entry = self.entries.pop_front().expect("queue length was fixed");
+            if drained.len() < max_entries && !deferred.contains(&entry.sequence) {
+                drained.push(entry);
+            } else { self.entries.push_back(entry); }
+        }
+        drained
     }
 
     /// Retain only the newest unsent movement intent. Movement is ephemeral:

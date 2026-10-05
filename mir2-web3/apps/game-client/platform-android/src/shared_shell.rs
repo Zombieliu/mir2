@@ -753,6 +753,7 @@ impl Plugin for AndroidSharedShellPlugin {
         app.insert_resource(model)
             .insert_non_send(AndroidPresentationMainThread)
             .init_resource::<HostState>()
+            .init_resource::<crate::hero_egress::AndroidHeroEgressState>()
             .init_resource::<EditorTouch>()
             .add_plugins(Mir2NativeShellUiPlugin)
             .add_systems(Startup, spawn_android_shell_bleed)
@@ -767,6 +768,7 @@ impl Plugin for AndroidSharedShellPlugin {
                 PreUpdate,
                 (
                     receive,
+                    publish_native_hero_transport,
                     tick_scene_effects,
                     discard_inactive_player_commands,
                 )
@@ -789,6 +791,8 @@ impl Plugin for AndroidSharedShellPlugin {
                     forward_quest_ui_intents,
                     forward_native_mail_ui_intents,
                     forward_native_social_ui_intents,
+                    publish_native_hero_transport,
+                    forward_native_hero_ui_intents,
                     discard_inactive_player_commands,
                     keep_android_ime_owned_by_host,
                     keyboard,
@@ -2869,6 +2873,59 @@ fn forward_native_social_ui_intents(
     }
 }
 
+/// Publish the already validated host owner before the actual transport pump.
+/// Repeating after render receipts releases a barrier without guessing a frame.
+fn publish_native_hero_transport(
+    shell: Res<NativeShellModel>, host: Res<HostState>, windows: Query<&Window>,
+    lifecycle: Option<Res<crate::android_input::AndroidShellState>>,
+    mut egress: ResMut<crate::hero_egress::AndroidHeroEgressState>,
+) {
+    use crate::hero_egress::HeroAuthority;
+    let hero = host.hero.model();
+    egress.authority = (host.phase == "IN_GAME" && shell.screen == Screen::InGame)
+        .then(|| host.player.identity()).flatten()
+        .filter(|(_, name)| host.world.as_ref().is_some_and(|world| world.player_name == *name))
+        .filter(|_| hero.session_epoch != 0)
+        .map(|(owner, name)| HeroAuthority { owner, owner_name: name.to_owned(),
+            epoch: hero.session_epoch, generation: hero.hero_generation,
+            actor: hero.info.as_ref().map_or(0, |info| info.object_id) });
+    egress.ready = egress.authority.is_some()
+        && host.pending_world_request.is_none() && host.pending_render_request.is_none()
+        && !host.render_load_active && host.deferred_render_load.is_none()
+        && windows.single().is_ok_and(|window| window.focused)
+        && lifecycle.as_deref().is_some_and(|state|
+            state.lifecycle == crate::android_input::AndroidLifecycle::Foreground
+                && state.network == crate::android_input::AndroidNetwork::Available);
+}
+
+/// Forward only the original shared Hero intent/pending pair, never player keys.
+fn forward_native_hero_ui_intents(
+    shell: Res<NativeShellModel>, host: Res<HostState>,
+    mut egress: ResMut<crate::hero_egress::AndroidHeroEgressState>,
+    model: Option<Res<mir2_client_bevy::hero_model::HeroModel>>,
+    mut player_ui: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
+    mut intents: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>>,
+    mut gateway: Option<ResMut<crate::gateway_bridge::AndroidGatewayOutboundQueue>>,
+) {
+    use crate::hero_egress::HeroDispatchContext;
+    let (Some(model), Some(ui), Some(intents)) =
+        (model.as_deref(), player_ui.as_deref_mut(), intents.as_deref_mut()) else { return; };
+    if !matches!(shell.screen, Screen::StartingGame | Screen::InGame)
+        || !matches!(host.phase.as_str(), "STARTING" | "IN_GAME") {
+        intents.drain_hero_intents_bounded(usize::MAX);
+        return; // The original session reset owns old UI retirement, not a fake ACK.
+    }
+    if !egress.ready { return; }
+    let Some(authority) = egress.authority.clone() else { return; };
+    for intent in intents.drain_hero_intents_bounded(16) {
+        let Some(context) = HeroDispatchContext::capture(&authority, &intent, model, ui) else { continue; };
+        let sequence = egress.can_track().then(|| gateway.as_deref_mut()
+            .and_then(|queue| queue.enqueue_native_hero(&context.command()).ok())).flatten();
+        if let Some(sequence) = sequence { egress.track(sequence, context); }
+        else { context.release_unsent(ui); }
+    }
+}
+
 // Only unsent shared Gateway effects are invalidated. Local option persistence
 // and application effects must survive; this is not a server rollback/receipt.
 fn discard_player_commands(effects: &mut mir2_client_bevy::crystal_ui::overlays::UiEffectQueue) {
@@ -3643,6 +3700,119 @@ mod tests {
         // headless tests; neither is Android JNI, GPU or online acceptance.
     }
 
+
+    #[cfg(feature = "ui-preview")]
+    #[test]
+    fn hero_egress_actual_shell_registers_network_forwarder() {
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()));
+        app.add_plugins(AndroidSharedShellPlugin);
+        let mut schedules = app.world_mut().remove_resource::<Schedules>().unwrap();
+        let post = schedules.get_mut(PostUpdate).unwrap();
+        post.initialize(app.world_mut()).unwrap();
+        let names = post.systems().unwrap().map(|(_, system)| system.name().to_string()).collect::<Vec<_>>();
+        assert!(names.iter().any(|name| name.ends_with("forward_native_hero_ui_intents")),
+            "No Android Hero forwarder registered: {names:?}");
+        // This proves production registration, not JNI, rendering or online play.
+    }
+
+    fn hero_egress_app() -> App {
+        use crate::android_input::{AndroidLifecycle, AndroidNetwork, AndroidShellState};
+        use mir2_client_bevy::{crystal_ui::overlays::{NativePlayerUiIntentQueue, NativePlayerUiState}, hero_model::HeroModel};
+        let raw = game_shop_host_world(42, "Fixture", "0")["worldSnapshot"].as_str().unwrap().to_owned();
+        let mut host = HostState { phase: "IN_GAME".into(),
+            world: Some(HostWorldPosition { player_name: "Fixture".into(), map_file_name: "0".into(), x:10,y:20 }), ..default() };
+        host.player.snapshot(&raw).unwrap(); host.skills.snapshot(&raw).unwrap();
+        host.bind_hero_snapshot(&raw).unwrap();
+        host.accept_hero_packet(Screen::InGame, &crate::hero_ingress::tests::packet("HeroInformation",
+            json!({"info":crate::hero_ingress::tests::info()}))).unwrap();
+        let model: HeroModel = host.hero.model().clone();
+        let mut ui = NativePlayerUiState::default(); ui.hero.observe(&model);
+        let mut app = App::new();
+        app.insert_resource(host).insert_resource(model).insert_resource(ui)
+            .insert_resource(NativeShellModel { screen: Screen::InGame, ..default() })
+            .insert_resource(AndroidShellState { lifecycle: AndroidLifecycle::Foreground, network: AndroidNetwork::Available, ..default() })
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<crate::hero_egress::AndroidHeroEgressState>()
+            .init_resource::<crate::gateway_bridge::AndroidGatewayOutboundQueue>()
+            .init_resource::<crate::gateway_bridge::AndroidGatewayHostAdapter>()
+            .init_resource::<mir2_ui_core::state::UiState>()
+            .add_systems(PostUpdate, (publish_native_hero_transport,forward_native_hero_ui_intents).chain());
+        app.world_mut().spawn(Window { focused:true,..default() });
+        app
+    }
+
+    #[test]
+    fn hero_egress_host_forwards_exact_shared_pending_without_ack() {
+        use mir2_client_bevy::crystal_ui::overlays::{NativeHeroGrid as Grid, NativeHeroPacket as Packet, NativePlayerUiIntent as I, NativePlayerUiIntentQueue, NativePlayerUiState};
+        let mut app = hero_egress_app();
+        let packet = Packet::UseItem { grid: Grid::HeroInventory, unique_id:u64::MAX };
+        app.world_mut().resource_mut::<NativePlayerUiState>().hero.pending = Some(packet.clone());
+        app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().push_intent(I::HeroPacket(packet.clone()));
+        app.update();
+        assert_eq!(app.world().resource::<NativePlayerUiState>().hero.pending,Some(packet));
+        let leases = crate::drain_android_gateway_for_host(&mut app,16);
+        assert_eq!(leases.len(),1);
+        let json: Value = serde_json::from_str(&leases[0].outbound().json).unwrap();
+        assert_eq!(json,json!({"type":"useItem","grid":"HeroInventory","uniqueId":u64::MAX}));
+        assert!(!app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().iter().any(|i|matches!(i,I::HeroPacket(_))));
+    }
+
+    #[test]
+    fn hero_egress_host_render_focus_background_and_network_barriers_retain_original_intent() {
+        use mir2_client_bevy::crystal_ui::overlays::{NativeHeroPacket as Packet, NativePlayerUiIntent as I, NativePlayerUiIntentQueue};
+        use crate::android_input::{AndroidLifecycle,AndroidNetwork,AndroidShellState};
+        for barrier in 0..5 {
+            let mut app = hero_egress_app();
+            let intent=I::HeroPacket(Packet::ChangeHero{list_index:0});
+            app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().push_intent(intent.clone());
+            match barrier {
+                0=>app.world_mut().resource_mut::<HostState>().pending_world_request=Some(7),
+                1=>app.world_mut().resource_mut::<HostState>().pending_render_request=Some(7),
+                2=>app.world_mut().query::<&mut Window>().single_mut(app.world_mut()).unwrap().focused=false,
+                3=>app.world_mut().resource_mut::<AndroidShellState>().lifecycle=AndroidLifecycle::Background,
+                _=>app.world_mut().resource_mut::<AndroidShellState>().network=AndroidNetwork::Unavailable,
+            }
+            app.update(); assert_eq!(app.world().resource::<crate::gateway_bridge::AndroidGatewayOutboundQueue>().status().len,0);
+            assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(),vec![intent.clone()]);
+            app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().push_intent(intent);
+            app.world_mut().resource_mut::<HostState>().pending_world_request=None;
+            app.world_mut().resource_mut::<HostState>().pending_render_request=None;
+            app.world_mut().resource_mut::<AndroidShellState>().lifecycle=AndroidLifecycle::Foreground;
+            app.world_mut().resource_mut::<AndroidShellState>().network=AndroidNetwork::Available;
+            app.world_mut().query::<&mut Window>().single_mut(app.world_mut()).unwrap().focused=true;
+            app.update(); assert_eq!(crate::drain_android_gateway_for_host(&mut app,16).len(),1);
+        }
+    }
+
+    #[test]
+    fn hero_egress_host_budget_overflow_and_terminal_boundary_preserve_other_domains() {
+        use mir2_client_bevy::crystal_ui::overlays::{NativeHeroPacket as Packet, NativePlayerUiIntent as I, NativePlayerUiIntentQueue};
+        let mut app=hero_egress_app();
+        app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().push_intent(I::TradeCancel);
+        for list_index in 0..20 {app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().push_intent(I::HeroPacket(Packet::ChangeHero {list_index}));}
+        app.update(); assert_eq!(app.world().resource::<crate::gateway_bridge::AndroidGatewayOutboundQueue>().status().len,16);
+        assert_eq!(crate::drain_android_gateway_for_host(&mut app,16).len(),16);
+        app.update(); assert_eq!(app.world().resource::<crate::gateway_bridge::AndroidGatewayOutboundQueue>().status().len,4);
+        app.world_mut().resource_mut::<HostState>().reset_gameplay();
+        app.world_mut().resource_mut::<NativeShellModel>().screen=Screen::Login;
+        app.update(); assert!(crate::drain_android_gateway_for_host(&mut app,16).is_empty());
+        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(),vec![I::TradeCancel]);
+    }
+
+    #[test]
+    fn hero_egress_host_full_queue_releases_only_matching_unsent_item() {
+        use mir2_client_bevy::crystal_ui::overlays::{NativeHeroGrid as Grid, NativeHeroPacket as Packet, NativePlayerUiIntent as I, NativePlayerUiIntentQueue, NativePlayerUiState};
+        let mut app=hero_egress_app();
+        app.insert_resource(crate::gateway_bridge::AndroidGatewayOutboundQueue::with_capacity(1));
+        app.world_mut().resource_mut::<crate::gateway_bridge::AndroidGatewayOutboundQueue>()
+            .enqueue_native_social(&mir2_client_bevy::native_social_egress::NativeSocialCommand::TradeCancel).unwrap();
+        let packet=Packet::UseItem{grid:Grid::HeroInventory,unique_id:u64::MAX};
+        app.world_mut().resource_mut::<NativePlayerUiState>().hero.pending=Some(packet.clone());
+        app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().push_intent(I::HeroPacket(packet));
+        app.update(); assert!(app.world().resource::<NativePlayerUiState>().hero.pending.is_none());
+        assert_eq!(app.world().resource::<crate::gateway_bridge::AndroidGatewayOutboundQueue>().status().len,1);
+    }
 
     fn social_egress_app() -> App {
         use crate::android_input::{AndroidLifecycle, AndroidNetwork, AndroidShellState};

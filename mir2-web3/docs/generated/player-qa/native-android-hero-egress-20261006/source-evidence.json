@@ -1,0 +1,603 @@
+{
+  "at": "2026-10-05T18:44:03.773Z",
+  "goal": "Active",
+  "NI16": "PARTIAL",
+  "denominator": {
+    "windows": "3d735745f1117d42a7859e87604a106351dca935",
+    "requirements": "AP01-21 unchanged"
+  },
+  "source": {
+    "base": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+    "committed": false,
+    "pushed": false,
+    "inputCount": 427,
+    "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41",
+    "functionalScope": [
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "mir2-web3/apps/game-client/platform-android/src/gateway_bridge.rs",
+      "mir2-web3/apps/game-client/platform-android/src/hero_egress.rs",
+      "mir2-web3/apps/game-client/platform-android/src/hero_ingress.rs",
+      "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs"
+    ],
+    "scopeCount": 6
+  },
+  "scopeAuthorization": {
+    "basis": "User-provided AGENTS.md: proceed autonomously; AGENT-ORCHESTRATION.md Stop Conditions expressly exclude normal local refactors needed to finish an assigned item. Existing Windows-alignment goal includes native Android build implementation.",
+    "explicitHumanReplyToSixthFileQuestion": false,
+    "automaticContinuationIsNotApproval": true,
+    "skillFileCountReminderAlreadyFlagged": true,
+    "correction": "Prior skill-driven scope question was overly restrictive for this existing authorized local compilation fix; user instructions take precedence over skill guidelines.",
+    "allowedSixthChange": "Remove #[cfg(test)] from existing read-only model() getter only; preserve entire function body and all other ingress bytes."
+  },
+  "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-egress-native-20261006-5oUXMA",
+  "priorLeaf": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-egress-20261006-ktzy2n/ffi-fences-1P0J8H",
+  "results": [
+    {
+      "file": "post-fix-api31-normal-hero-egress-result.json",
+      "label": "post-fix-api31-normal-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "--platform",
+        "31",
+        "check",
+        "--lib",
+        "--locked",
+        "--offline"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "started": "2026-10-05T18:31:01.116Z",
+      "ended": "2026-10-05T18:31:06.198Z",
+      "rust": [],
+      "sourceUnchanged": true,
+      "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41"
+    },
+    {
+      "file": "post-fix-api31-preview-hero-egress-result.json",
+      "label": "post-fix-api31-preview-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "--platform",
+        "31",
+        "check",
+        "--lib",
+        "--features",
+        "ui-preview",
+        "--locked",
+        "--offline"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "started": "2026-10-05T18:31:06.224Z",
+      "ended": "2026-10-05T18:31:09.873Z",
+      "rust": [],
+      "sourceUnchanged": true,
+      "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41"
+    },
+    {
+      "file": "precommit-native-focused-hero-egress-result.json",
+      "label": "precommit-native-focused-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--features",
+        "ui-preview",
+        "--lib",
+        "--locked",
+        "--offline",
+        "hero_egress",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "started": "2026-10-05T18:33:35.828Z",
+      "ended": "2026-10-05T18:33:47.793Z",
+      "rust": [
+        {
+          "passed": 31,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41"
+    },
+    {
+      "file": "precommit-native-java-full-hero-egress-result.json",
+      "label": "precommit-native-java-full-hero-egress",
+      "bin": "./gradlew",
+      "args": [
+        "--offline",
+        "--no-daemon",
+        "--no-build-cache",
+        "--rerun-tasks",
+        ":app:testDebugUnitTest",
+        ":app:testUiPreviewUnitTest",
+        "--console=plain"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "started": "2026-10-05T18:34:27.532Z",
+      "ended": "2026-10-05T18:35:36.879Z",
+      "rust": [],
+      "java": [
+        {
+          "variant": 0,
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41"
+    },
+    {
+      "file": "precommit-native-runtime-hero-egress-result.json",
+      "label": "precommit-native-runtime-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/runtime/Cargo.toml",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "started": "2026-10-05T18:34:26.456Z",
+      "ended": "2026-10-05T18:34:27.511Z",
+      "rust": [
+        {
+          "passed": 296,
+          "failed": 0,
+          "ignored": 1
+        }
+      ],
+      "sourceUnchanged": true,
+      "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41"
+    },
+    {
+      "file": "precommit-native-rust-normal-hero-egress-result.json",
+      "label": "precommit-native-rust-normal-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "started": "2026-10-05T18:33:47.815Z",
+      "ended": "2026-10-05T18:34:02.654Z",
+      "rust": [
+        {
+          "passed": 478,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41"
+    },
+    {
+      "file": "precommit-native-rust-preview-hero-egress-result.json",
+      "label": "precommit-native-rust-preview-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--features",
+        "ui-preview",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "started": "2026-10-05T18:34:02.678Z",
+      "ended": "2026-10-05T18:34:17.854Z",
+      "rust": [
+        {
+          "passed": 519,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41"
+    },
+    {
+      "file": "precommit-native-shared-native-player-hero-egress-result.json",
+      "label": "precommit-native-shared-native-player-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+        "--features",
+        "native-player-ui",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "started": "2026-10-05T18:34:17.876Z",
+      "ended": "2026-10-05T18:34:26.435Z",
+      "rust": [
+        {
+          "passed": 1304,
+          "failed": 0,
+          "ignored": 10
+        }
+      ],
+      "sourceUnchanged": true,
+      "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41"
+    },
+    {
+      "file": "precommit-native-windows-hero-egress-fifo-result.json",
+      "label": "precommit-native-windows-hero-egress-fifo",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "hero_receipt_backpressure",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "started": "2026-10-05T18:35:36.901Z",
+      "ended": "2026-10-05T18:35:48.389Z",
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41"
+    },
+    {
+      "file": "precommit-native-windows-hero-egress-protocol-result.json",
+      "label": "precommit-native-windows-hero-egress-protocol",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "native_protocol::tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "started": "2026-10-05T18:35:48.941Z",
+      "ended": "2026-10-05T18:35:49.304Z",
+      "rust": [
+        {
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41"
+    },
+    {
+      "file": "precommit-native-windows-hero-egress-skill-fifo-result.json",
+      "label": "precommit-native-windows-hero-egress-skill-fifo",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "skill_receipt_retry",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "started": "2026-10-05T18:35:48.411Z",
+      "ended": "2026-10-05T18:35:48.916Z",
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true,
+      "inputHashListSHA": "80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41"
+    }
+  ],
+  "passingGates": 10,
+  "focusedPassed": 31,
+  "guard": {
+    "protectedWhole": 421,
+    "protectedOldFunctions": 858,
+    "ingressGetterOnly": true,
+    "frozenOracle": {
+      "command": true,
+      "variantCount": 12,
+      "variants": [
+        {
+          "name": "ChangeHero",
+          "equal": true
+        },
+        {
+          "name": "SetHeroBehaviour",
+          "equal": true
+        },
+        {
+          "name": "SetAutoPotValue",
+          "equal": true
+        },
+        {
+          "name": "SetAutoPotItem",
+          "equal": true
+        },
+        {
+          "name": "TransferHeroItem",
+          "equal": true
+        },
+        {
+          "name": "TakeBackHeroItem",
+          "equal": true
+        },
+        {
+          "name": "UseItem",
+          "equal": true
+        },
+        {
+          "name": "MoveItem",
+          "equal": true
+        },
+        {
+          "name": "EquipItem",
+          "equal": true
+        },
+        {
+          "name": "RemoveItem",
+          "equal": true
+        },
+        {
+          "name": "MergeItem",
+          "equal": true
+        },
+        {
+          "name": "MagicKey",
+          "equal": true
+        }
+      ],
+      "commandSourceSHA": "45d5332e2ea635d9b17148d44319f80380a045f46ddaf4efe21ef96dea8bb4fb",
+      "schemaSourceSHA": "3f4f57fb97dab1e527b01d31fcba6b190f12b9f01cb8214e50728c8eb172b638",
+      "adaptations": "function name and packet/grid aliases only; test-only wire enum is exact 12-variant subset"
+    },
+    "originals": [
+      {
+        "path": "/Users/henryliu/obelisk/numeron",
+        "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+        "branch": "codex/steam-main",
+        "status": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/"
+      },
+      {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+        "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+        "branch": "codex/android-player-journey",
+        "status": ""
+      }
+    ],
+    "checkpointLimits": "Git HEAD/branch/status, not recursive untracked bytes"
+  },
+  "priorFailures": {
+    "native": {
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "normal": "FAIL E0599, exit101",
+      "preview": "FAIL E0599, exit101",
+      "fixedBy": "existing getter production visibility; function body unchanged"
+    },
+    "unpolledFFI": {
+      "red": "1 pass / 3 fail compiled",
+      "green": "4 pass / 0 fail compiled",
+      "rawIndex": {
+        "path": "raw-evidence-index.json",
+        "sha256": "06f74215f88d0fbed6212bf09dfa5384bcd856a7783e28944e8be5949f2a2548",
+        "files": 41,
+        "bytes": 3354329,
+        "exclusions": "this index, subsequent collector/document/final-guard outputs; no APKs this leaf"
+      }
+    }
+  },
+  "remote": {
+    "at": "2026-10-05T18:43:10.051Z",
+    "androidHead": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+    "windowsHead": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+    "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+    "windowsAheadBy": 1,
+    "windowsFiles": 83,
+    "windowsFunctional": 0,
+    "pr": {
+      "url": "https://github.com/Zombieliu/mir2/pull/253",
+      "state": "open",
+      "draft": true,
+      "head": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "base": "codex/playtest-registration"
+    }
+  },
+  "rawIndex": {
+    "path": "precommit-raw-evidence-index.json",
+    "sha256": "10011c8c91adb1d1a462c98fc250641dd6e973b49e12ed47590657d762662e7b",
+    "files": 37,
+    "bytes": 2934578,
+    "exclusions": "this index; subsequent collector, documentation, source-commit binding, clean-source reruns and APK/runtime artifacts"
+  },
+  "acceptance": {
+    "newAPK": false,
+    "newInstall": false,
+    "actualAndroidJNI": false,
+    "newScreenshot": false,
+    "realLogin": false,
+    "onlinePlayerLoop": false,
+    "physicalDevice": false,
+    "phoneLayoutReapproval": false,
+    "explicitHumanSixthFileReply": false,
+    "zeroErrorGPU": "historical FAIL not retested"
+  },
+  "next": "Commit verified source and reports; rerun gates on clean exact source, then build/install APKs and separately verify actual Android Hero JNI/UI. Full Windows parity remains incomplete.",
+  "documentation": {
+    "kind": "precommit snapshot; postcommit binding and APK evidence are separate",
+    "paths": [
+      "mir2-web3/docs/ANDROID-WINDOWS-PARITY-GOAL.md",
+      "mir2-web3/docs/ANDROID-UI-COVERAGE.md",
+      "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "mir2-web3/docs/ANDROID-NATIVE-HOST-GAPS.md",
+      "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "mir2-web3/docs/generated/player-qa/native-android-hero-egress-wip-20261006/README.md",
+      "mir2-web3/docs/generated/player-qa/native-android-hero-egress-wip-20261006/source-evidence.json",
+      "mir2-web3/docs/generated/player-qa/native-android-hero-egress-20261006/README.md",
+      "mir2-web3/docs/generated/player-qa/native-android-hero-egress-20261006/source-evidence.json"
+    ],
+    "functionalScope": 6,
+    "gitVisibleStatusDocs": 6,
+    "newIgnoredQAReports": 4,
+    "matricesUnchanged": true
+  }
+}

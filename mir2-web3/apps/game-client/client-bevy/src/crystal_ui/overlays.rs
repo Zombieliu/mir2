@@ -23,6 +23,10 @@ use std::collections::{hash_map::DefaultHasher, VecDeque};
 use std::fmt::Write as _;
 use std::hash::Hasher;
 
+// Transparent aliases for the protocol already exposed by HeroPacket. Hosts
+// can project that typed intent without a second protocol/rules dependency.
+pub use mir2_protocol::{ClientPacket as NativeHeroPacket, MirGridType as NativeHeroGrid};
+
 use bevy::app::AppExit;
 use bevy::ecs::system::SystemParam;
 use bevy::input::keyboard::KeyboardInput;
@@ -3009,6 +3013,24 @@ impl NativePlayerUiIntentQueue {
         for _ in 0..self.intents.len() {
             let intent = self.intents.pop_front().expect("queue length was fixed");
             if drained.len() < max && crate::native_social_egress::is_native_social_intent(&intent) {
+                drained.push(intent);
+            } else {
+                self.intents.push_back(intent);
+            }
+        }
+        drained
+    }
+
+    /// Hero-only host seam. Player keys (1..=8 and their None/None no-op) are
+    /// retained for their own sender. Neither stream loses its FIFO order.
+    pub fn drain_hero_intents_bounded(&mut self, max: usize) -> Vec<NativePlayerUiIntent> {
+        let mut drained = Vec::new();
+        for _ in 0..self.intents.len() {
+            let intent = self.intents.pop_front().expect("queue length was fixed");
+            let hero = matches!(&intent, NativePlayerUiIntent::HeroPacket(_))
+                || matches!(&intent, NativePlayerUiIntent::MagicKey { key, old_key, .. }
+                    if (17..=24).contains(key) || (17..=24).contains(old_key));
+            if drained.len() < max && hero {
                 drained.push(intent);
             } else {
                 self.intents.push_back(intent);

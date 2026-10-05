@@ -295,7 +295,6 @@ impl AndroidHeroIngress {
         true
     }
 
-    #[cfg(test)]
     pub(crate) fn model(&self) -> &HeroModel {
         &self.model
     }

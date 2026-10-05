@@ -1,6 +1,18 @@
 # Android 对齐当前 Windows 完整度 goal
 
-2026-10-06 当前 NI-16 Hero 入站源码：`0a3b24efa48272b9d1a1b33a63a116b9b5e626f7`。
+2026-10-06 NI-16 Hero 出站预提交验证快照（基点 `0ebd5c66a705cd4691b92287cb10b5d7ade9126f`）。
+12种闭合意图复用原共享Hero pending/epoch/回执，256有界队列/每帧16条；
+补齐owner/Hero/场景/焦点/后台屏障，尚未交Java的旧请求准确退役，已交出的未知结果不重放。
+六功能文件；第六文件只删除既有只读getter的测试条件，其他入站字节不变。
+依据原用户自主实施要求修正此前过严停工判断，不把自动续跑或默认选项当成新增人类批准。
+427输入/421受保护整文件/858旧函数/12项冻结wire一致；聚焦31及十门通过：
+478/519、shared1304+10原ignored、runtime296+1原ignored、fresh Java90+90、
+API31普通/preview均PASS、Mac-host Windows Hero FIFO1/skill FIFO1/协议21（非Windows OS全量）。
+旧E0599双FAIL和未轮询队列1通过/3失败保留；仅关闭本批源码/编译门，不等于APK或实际Android JNI。
+NI-16仍PARTIAL、完整AP-01–21/goal Active；无本批APK/截图/联网/真机接受，旧GPU FAIL仍保留。
+[本批源码接线、红绿及后续精确提交/包证据](generated/player-qa/native-android-hero-egress-20261006/README.md)。
+
+2026-10-06 上一批已提交 NI-16 Hero 入站源码：`0a3b24efa48272b9d1a1b33a63a116b9b5e626f7`。
 接通24个公共名字到原共享HeroModel；完整HeroInformation独立512KiB上限，
 其余16KiB，角色snapshot绑定后才发布，复用现有skill epoch和物品/tooltip投影。
 原到达时钟、原子绑定、准确回执FIFO/背压、切图保留/拒绝Start清空均有回归；
@@ -734,7 +746,9 @@ PR #253 保持独立 Draft；不自动改 base、不合并 PR。分阶段验证�
 ## 6. 外部验收材料（不阻止其余安全代码工作）
 
 - Android 真实联网需获准的测试 Gateway（WSS/相关 HTTPS）、服务器版本和
-  普通测试账号。最新已安装v29两种诊断包明确为空地址，uiPreview 禁止联网。
+  普通测试账号。上一批已安装的是源码0a3b24efa的两种v35诊断包，Gateway地址为空，
+  uiPreview禁止联网。Hero出站预提交检查已修复历史E0599并在两变体复验通过；
+  APK及实际JNI/联网须分别证明，不能用check通过代替安装验收。
   Windows 报告存在 `/playtest/ws` 不自动构成本轮访问/数据写入许可。
 - 凭据由用户在本地输入；不得从其他工作区、日志或旧文件搜密码/令牌。
 - 完整、获准的资源来源/版本仍需核对；现有 proof pack 不算正式完整共享包。

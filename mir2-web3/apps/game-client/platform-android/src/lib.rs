@@ -18,6 +18,7 @@ mod form_input;
 #[cfg(any(target_os = "android", test))]
 mod game_shop_ingress;
 pub mod gateway_bridge;
+pub(crate) mod hero_egress;
 #[cfg(any(target_os = "android", test))]
 mod ground_labels;
 #[cfg(any(target_os = "android", test))]
@@ -104,6 +105,7 @@ struct AndroidGatewayFfiState {
     generation: u64,
     lost_generation: Option<u64>,
     outbound: VecDeque<AndroidGatewayOutboundLease>,
+    deferred_hero_sequences: std::collections::BTreeSet<u64>,
     in_flight: BTreeMap<u64, AndroidGatewayOutboundLease>,
     results: VecDeque<(AndroidGatewayOutboundLease, AndroidGatewayHostWriteResult)>,
 }
@@ -126,6 +128,24 @@ fn try_publish_android_gateway_leases(
     }
     state.outbound.extend(leases);
     true
+}
+
+fn fence_unpolled_android_hero_leases(
+    observed_generation: u64,
+    preparation: hero_egress::HeroTransportPreparation,
+) -> Vec<AndroidGatewayOutboundLease> {
+    let mut state = android_gateway_ffi_state().lock().unwrap_or_else(|p|p.into_inner());
+    if !state.active || state.generation != observed_generation { return Vec::new(); }
+    state.deferred_hero_sequences = preparation.deferred;
+    let mut retired = Vec::new();
+    for _ in 0..state.outbound.len() {
+        let lease = state.outbound.pop_front().expect("queue length was fixed");
+        if preparation.stale.contains(&lease.sequence()) { retired.push(lease); }
+        else { state.outbound.push_back(lease); }
+    }
+    // Never remove in_flight/results: the host may already have written them.
+    // Their original exact callback still retires its lease, with no Hero ACK.
+    retired
 }
 
 #[derive(Debug, Resource)]
@@ -160,6 +180,7 @@ impl Plugin for AndroidShellPlugin {
             .init_resource::<AndroidGatewayTransportLifecycle>()
             .init_resource::<AndroidGatewayHostAdapter>()
             .init_resource::<AndroidGatewayOutboundQueue>()
+            .init_resource::<hero_egress::AndroidHeroEgressState>()
             .init_resource::<AndroidGatewayInboundQueue>()
             .init_resource::<ButtonInput<KeyCode>>()
             .add_message::<AppExit>()
@@ -193,8 +214,9 @@ pub fn drain_android_gateway_for_host(
     app.world_mut()
         .resource_scope(|world, mut adapter: Mut<AndroidGatewayHostAdapter>| {
             let shell = *world.resource::<AndroidShellState>();
-            world.resource_scope(|_world, mut queue: Mut<AndroidGatewayOutboundQueue>| {
-                adapter.drain_ready(&mut queue, &shell, max_entries)
+            world.resource_scope(|world, mut queue: Mut<AndroidGatewayOutboundQueue>| {
+                let deferred = prepare_android_hero_transport(world, &mut queue);
+                adapter.drain_ready_with_hero_deferrals(&mut queue, &shell, max_entries, &deferred)
             })
         })
 }
@@ -204,20 +226,55 @@ pub fn drain_android_gateway_for_host(
 /// A failed Storage V2 write is terminal for that exact request: the pending
 /// state becomes unknown and is cleared, the drained command is not replayed,
 /// and the next request receives a fresh process-lifetime ID. Non-storage
-/// failures are intentionally left unchanged by this callback.
+/// failures retain their existing behavior. Hero callbacks additionally update
+/// only the exact current shared UI send state, never an authoritative ACK.
 pub fn report_android_gateway_write_result(
     app: &mut App,
     lease: AndroidGatewayOutboundLease,
     result: AndroidGatewayHostWriteResult,
 ) -> AndroidGatewayHostWriteOutcome {
+    let sequence = lease.sequence();
     app.world_mut()
         .resource_scope(|world, mut adapter: Mut<AndroidGatewayHostAdapter>| {
             world.resource_scope(|world, mut queue: Mut<AndroidGatewayOutboundQueue>| {
-                world.resource_scope(|_world, mut ui_state: Mut<UiState>| {
-                    adapter.on_host_write_result(&mut queue, &mut ui_state, lease, result)
+                world.resource_scope(|world, mut ui_state: Mut<UiState>| {
+                    let outcome = adapter.on_host_write_result(&mut queue, &mut ui_state, lease, result);
+                    apply_android_hero_write_result(world, sequence, result, outcome);
+                    outcome
                 })
             })
         })
+}
+
+fn prepare_android_hero_transport(
+    world: &mut World, queue: &mut AndroidGatewayOutboundQueue,
+) -> std::collections::BTreeSet<u64> {
+    use hero_egress::AndroidHeroEgressState;
+    use mir2_client_bevy::{crystal_ui::overlays::NativePlayerUiState, hero_model::HeroModel};
+    if !world.contains_resource::<AndroidHeroEgressState>() { return Default::default(); }
+    world.resource_scope(|world, mut hero: Mut<AndroidHeroEgressState>| {
+        if world.contains_resource::<NativePlayerUiState>() {
+            world.resource_scope(|world, mut ui: Mut<NativePlayerUiState>| {
+                hero.prepare(queue, world.get_resource::<HeroModel>(), Some(&mut ui))
+            })
+        } else { hero.prepare(queue, world.get_resource::<HeroModel>(), None) }
+    })
+}
+
+fn apply_android_hero_write_result(
+    world: &mut World, sequence: u64, result: AndroidGatewayHostWriteResult,
+    outcome: AndroidGatewayHostWriteOutcome,
+) {
+    use hero_egress::AndroidHeroEgressState;
+    use mir2_client_bevy::{crystal_ui::overlays::NativePlayerUiState, hero_model::HeroModel};
+    if !world.contains_resource::<AndroidHeroEgressState>() { return; }
+    world.resource_scope(|world, mut hero: Mut<AndroidHeroEgressState>| {
+        if world.contains_resource::<NativePlayerUiState>() {
+            world.resource_scope(|world, mut ui: Mut<NativePlayerUiState>| {
+                hero.write_result(sequence, result, outcome, world.get_resource::<HeroModel>(), Some(&mut ui));
+            });
+        } else { hero.write_result(sequence, result, outcome, world.get_resource::<HeroModel>(), None); }
+    });
 }
 
 /// Activate the production GameActivity/JNI transport bridge. The Android
@@ -297,9 +354,11 @@ pub unsafe extern "C" fn mir2_android_gateway_copy_next_outbound(
     if !state.active {
         return 0;
     }
-    let Some(lease) = state.outbound.front() else {
+    let Some(index) = state.outbound.iter().position(|lease|
+        !state.deferred_hero_sequences.contains(&lease.sequence())) else {
         return 0;
     };
+    let lease = state.outbound.get(index).expect("sendable position was checked");
     let command = match serde_json::from_str::<serde_json::Value>(&lease.outbound().json) {
         Ok(command) => command,
         Err(_) => return -1,
@@ -322,7 +381,7 @@ pub unsafe extern "C" fn mir2_android_gateway_copy_next_outbound(
     unsafe {
         std::ptr::copy_nonoverlapping(encoded.as_ptr(), buffer, encoded.len());
     }
-    let lease = state.outbound.pop_front().expect("front was checked");
+    let lease = state.outbound.remove(index).expect("sendable position was checked");
     if state.in_flight.insert(lease.sequence(), lease).is_some() {
         state.active = false;
         state.lost_generation = Some(state.generation);
@@ -438,6 +497,9 @@ fn drive_android_gateway_host_transport(
     mut queue: ResMut<AndroidGatewayOutboundQueue>,
     mut inbound: ResMut<AndroidGatewayInboundQueue>,
     mut ui_state: ResMut<UiState>,
+    mut hero: Option<ResMut<hero_egress::AndroidHeroEgressState>>,
+    hero_model: Option<Res<mir2_client_bevy::hero_model::HeroModel>>,
+    mut player_ui: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
 ) {
     if !enabled.0 {
         lifecycle.last_network = shell.network;
@@ -448,20 +510,18 @@ fn drive_android_gateway_host_transport(
         && lifecycle.last_network != AndroidNetwork::Unavailable;
     lifecycle.last_network = shell.network;
 
-    let (active, observed_generation, lost_generation, available, results) = {
+    let (active, observed_generation, lost_generation, results) = {
         let mut state = android_gateway_ffi_state()
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner());
         let active = state.active;
         let observed_generation = state.generation;
         let lost_generation = state.lost_generation.take();
-        let available = ANDROID_HOST_TRANSPORT_CAPACITY.saturating_sub(state.outbound.len());
         let results = state.results.drain(..).collect::<Vec<_>>();
         (
             active,
             observed_generation,
             lost_generation,
-            available,
             results,
         )
     };
@@ -481,21 +541,37 @@ fn drive_android_gateway_host_transport(
         drop(state);
         adapter.on_connection_lost(&mut queue, &mut ui_state);
         clear_bounded_inbound_transaction(&mut inbound);
+        if let Some(hero) = hero.as_deref_mut() { hero.clear(); }
     }
     for (lease, result) in results {
-        let _ = adapter.on_host_write_result(&mut queue, &mut ui_state, lease, result);
+        let sequence = lease.sequence();
+        let outcome = adapter.on_host_write_result(&mut queue, &mut ui_state, lease, result);
+        if let Some(hero) = hero.as_deref_mut() {
+            hero.write_result(sequence, result, outcome, hero_model.as_deref(), player_ui.as_deref_mut());
+        }
     }
 
+    let preparation = hero.as_deref_mut().map_or_else(Default::default, |hero|
+        hero.prepare_transport(&mut queue, hero_model.as_deref(), player_ui.as_deref_mut()));
+    let deferred = preparation.deferred.clone();
+    for lease in fence_unpolled_android_hero_leases(observed_generation, preparation) {
+        adapter.retire_unwritten_hero_lease(lease);
+    }
+    let available = {
+        let state = android_gateway_ffi_state().lock().unwrap_or_else(|p|p.into_inner());
+        ANDROID_HOST_TRANSPORT_CAPACITY.saturating_sub(state.outbound.len())
+    };
     if !active || shell.network != AndroidNetwork::Available || available == 0 {
         return;
     }
-    let leases = adapter.drain_ready(&mut queue, &shell, available);
+    let leases = adapter.drain_ready_with_hero_deferrals(&mut queue, &shell, available, &deferred);
     if leases.is_empty() {
         return;
     }
     if !try_publish_android_gateway_leases(observed_generation, leases) {
         adapter.on_connection_lost(&mut queue, &mut ui_state);
         clear_bounded_inbound_transaction(&mut inbound);
+        if let Some(hero) = hero.as_deref_mut() { hero.clear(); }
     }
 }
 
@@ -705,6 +781,239 @@ mod tests {
         *android_gateway_ffi_state()
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner()) = AndroidGatewayFfiState::default();
+    }
+
+    #[test]
+    fn hero_egress_production_ffi_write_result_changes_only_exact_shared_send_state() {
+        use crate::hero_egress::{AndroidHeroEgressState, tests::{fixture, key_intent, enqueue}};
+        use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
+        let _ffi_guard = ANDROID_GATEWAY_FFI_TEST_LOCK.lock().unwrap_or_else(|p|p.into_inner());
+        for sent in [true,false] {
+            reset_android_gateway_ffi_for_test();
+            let (authority,model,mut ui)=fixture();
+            let intent=key_intent(&model,&mut ui);
+            let original=serde_json::to_value(&model).unwrap();
+            let pending=ui.hero.assign.pending.clone();
+            let mut state=AndroidHeroEgressState::default();state.authority=Some(authority);state.ready=true;
+            let mut queue=AndroidGatewayOutboundQueue::default();
+            let sequence=enqueue(&mut state,&mut queue,&model,&ui,&intent);
+            let mut app=in_game_app();make_host_ready(&mut app);
+            app.insert_resource(state).insert_resource(queue).insert_resource(model).insert_resource(ui);
+            app.world_mut().resource_mut::<AndroidGatewayTransportEnabled>().0=true;
+            mir2_android_gateway_host_start();app.update();
+            assert!(!app.world().resource::<NativePlayerUiState>().hero.assign.dispatched);
+            let size=unsafe{mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(),0)};
+            assert!(size>0);let mut bytes=vec![0_u8;size as usize];
+            assert_eq!(unsafe{mir2_android_gateway_copy_next_outbound(bytes.as_mut_ptr(),bytes.len())},size);
+            let envelope:serde_json::Value=serde_json::from_slice(&bytes).unwrap();
+            assert_eq!(envelope["sequence"].as_u64(),Some(sequence));
+            assert_eq!(envelope["command"]["requestId"].as_u64(),pending.as_ref().map(|p|p.request_id));
+            assert_eq!(envelope["command"]["type"],"magicKey");
+            assert_eq!(envelope["command"]["key"],18);
+            assert!(mir2_android_gateway_report_write_result(sequence,sent));app.update();
+            let assign=&app.world().resource::<NativePlayerUiState>().hero.assign;
+            assert_eq!(assign.dispatched,sent);assert_eq!(assign.open,!sent);
+            if sent {assert_eq!(assign.pending,pending);}else{assert!(assign.pending.is_none());}
+            assert_eq!(serde_json::to_value(app.world().resource::<mir2_client_bevy::hero_model::HeroModel>()).unwrap(),original);
+            assert!(!mir2_android_gateway_report_write_result(sequence,!sent));
+            mir2_android_gateway_host_stop();app.update();
+        }
+        // Rust ABI in a headless host. Actual Android JNI/UI and online ACK remain separate gates.
+    }
+
+    #[test]
+    fn hero_egress_production_ffi_loss_never_replays_or_synthesizes_receipt() {
+        use crate::hero_egress::{AndroidHeroEgressState,tests::{fixture,key_intent,enqueue}};
+        use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
+        let _ffi_guard=ANDROID_GATEWAY_FFI_TEST_LOCK.lock().unwrap_or_else(|p|p.into_inner());
+        reset_android_gateway_ffi_for_test();
+        let (authority,model,mut ui)=fixture();let intent=key_intent(&model,&mut ui);let pending=ui.hero.assign.pending.clone();
+        let mut state=AndroidHeroEgressState::default();state.authority=Some(authority);state.ready=true;
+        let mut queue=AndroidGatewayOutboundQueue::default();let sequence=enqueue(&mut state,&mut queue,&model,&ui,&intent);
+        let mut app=in_game_app();make_host_ready(&mut app);
+        app.insert_resource(state).insert_resource(queue).insert_resource(model).insert_resource(ui);
+        app.world_mut().resource_mut::<AndroidGatewayTransportEnabled>().0=true;
+        mir2_android_gateway_host_start();app.update();
+        mir2_android_gateway_connection_lost();mir2_android_gateway_host_start();app.update();
+        assert_eq!(unsafe{mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(),0)},0);
+        assert!(!mir2_android_gateway_report_write_result(sequence,true));
+        let assign=&app.world().resource::<NativePlayerUiState>().hero.assign;
+        assert_eq!(assign.pending,pending);assert!(!assign.dispatched);
+        mir2_android_gateway_host_stop();app.update();
+    }
+
+    fn hero_egress_ffi_held_app(count: usize) -> (App, Vec<u64>) {
+        use crate::hero_egress::{AndroidHeroEgressState,tests::{fixture,key_intent,enqueue}};
+        use mir2_client_bevy::crystal_ui::overlays::{NativeHeroPacket,NativePlayerUiIntent};
+        reset_android_gateway_ffi_for_test();
+        let (authority,model,mut ui)=fixture();
+        let intent=if count==1 {key_intent(&model,&mut ui)} else {
+            NativePlayerUiIntent::HeroPacket(NativeHeroPacket::ChangeHero{list_index:0})
+        };
+        let mut state=AndroidHeroEgressState::default();state.authority=Some(authority);state.ready=true;
+        let mut queue=AndroidGatewayOutboundQueue::default();
+        let sequences=(0..count).map(|_|enqueue(&mut state,&mut queue,&model,&ui,&intent)).collect();
+        let mut app=in_game_app();make_host_ready(&mut app);
+        app.insert_resource(state).insert_resource(queue).insert_resource(model).insert_resource(ui);
+        app.world_mut().resource_mut::<AndroidGatewayTransportEnabled>().0=true;
+        mir2_android_gateway_host_start();app.update();
+        (app,sequences)
+    }
+
+    fn hero_egress_ffi_poll() -> Option<serde_json::Value> {
+        let size=unsafe{mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(),0)};
+        if size==0 {return None;}
+        assert!(size>0);let mut bytes=vec![0_u8;size as usize];
+        assert_eq!(unsafe{mir2_android_gateway_copy_next_outbound(bytes.as_mut_ptr(),bytes.len())},size);
+        Some(serde_json::from_slice(&bytes).unwrap())
+    }
+
+    #[test]
+    fn hero_egress_ffi_unpolled_owner_hero_and_logout_fences_preserve_other_domains() {
+        use crate::hero_egress::AndroidHeroEgressState;
+        use mir2_client_bevy::{crystal_ui::overlays::NativePlayerUiState,hero_model::HeroModel,native_social_egress::NativeSocialCommand};
+        let _ffi_guard=ANDROID_GATEWAY_FFI_TEST_LOCK.lock().unwrap_or_else(|p|p.into_inner());
+        for boundary in 0..3 {
+            let (mut app,sequences)=hero_egress_ffi_held_app(1);
+            app.world_mut().resource_mut::<AndroidGatewayOutboundQueue>().enqueue_native_social(&NativeSocialCommand::TradeCancel).unwrap();
+            match boundary {
+                0=>app.world_mut().resource_mut::<AndroidHeroEgressState>().authority.as_mut().unwrap().owner+=1,
+                1=>{
+                    let model={let mut model=app.world_mut().resource_mut::<HeroModel>();
+                        model.hero_generation+=1;model.info.as_mut().unwrap().object_id+=1;model.clone()};
+                    let mut state=app.world_mut().resource_mut::<AndroidHeroEgressState>();
+                    let authority=state.authority.as_mut().unwrap();authority.generation=model.hero_generation;
+                    authority.actor=model.info.as_ref().unwrap().object_id;
+                    app.world_mut().resource_mut::<NativePlayerUiState>().hero.observe(&model);
+                }
+                _=>app.world_mut().resource_mut::<AndroidHeroEgressState>().authority=None,
+            }
+            let ui_before=app.world().resource::<NativePlayerUiState>().clone();
+            app.update();
+            let envelope=hero_egress_ffi_poll().expect("unrelated social lease must survive");
+            assert_eq!(envelope["command"]["type"],"tradeCancel","old Hero lease crossed boundary {boundary}");
+            assert_ne!(envelope["sequence"].as_u64(),Some(sequences[0]));
+            assert!(hero_egress_ffi_poll().is_none());
+            assert!(!mir2_android_gateway_report_write_result(sequences[0],true));
+            assert!(mir2_android_gateway_report_write_result(envelope["sequence"].as_u64().unwrap(),true));app.update();
+            assert_eq!(app.world().resource::<NativePlayerUiState>(),&ui_before,"retirement is not an ACK");
+            for _ in 0..256 {app.world_mut().resource_mut::<AndroidGatewayOutboundQueue>().enqueue_native_social(&NativeSocialCommand::TradeCancel).unwrap();}
+            assert_eq!(drain_android_gateway_for_host(&mut app,256).len(),256,"retired Hero lease leaked adapter capacity");
+            mir2_android_gateway_host_stop();app.update();
+        }
+    }
+
+    #[test]
+    fn hero_egress_ffi_unpolled_render_focus_pause_keeps_exact_sequence_without_write() {
+        use crate::hero_egress::AndroidHeroEgressState;
+        use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
+        let _ffi_guard=ANDROID_GATEWAY_FFI_TEST_LOCK.lock().unwrap_or_else(|p|p.into_inner());
+        let (mut app,sequences)=hero_egress_ffi_held_app(1);
+        let before=app.world().resource::<NativePlayerUiState>().clone();
+        app.world_mut().resource_mut::<AndroidHeroEgressState>().ready=false;app.update();
+        assert_eq!(unsafe{mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(),0)},0,"unpolled Hero must wait at the host boundary too");
+        assert_eq!(app.world().resource::<NativePlayerUiState>(),&before);
+        app.world_mut().resource_mut::<AndroidHeroEgressState>().ready=true;app.update();
+        let envelope=hero_egress_ffi_poll().unwrap();assert_eq!(envelope["sequence"].as_u64(),Some(sequences[0]));
+        assert!(mir2_android_gateway_report_write_result(sequences[0],true));app.update();
+        assert!(app.world().resource::<NativePlayerUiState>().hero.assign.dispatched);
+        mir2_android_gateway_host_stop();app.update();
+    }
+
+    #[test]
+    fn hero_egress_ffi_unpolled_full_host_queue_still_retires_old_authority() {
+        use crate::hero_egress::AndroidHeroEgressState;
+        use mir2_client_bevy::native_social_egress::NativeSocialCommand;
+        let _ffi_guard=ANDROID_GATEWAY_FFI_TEST_LOCK.lock().unwrap_or_else(|p|p.into_inner());
+        let (mut app,sequences)=hero_egress_ffi_held_app(256);
+        app.world_mut().resource_mut::<AndroidHeroEgressState>().authority=None;app.update();
+        assert_eq!(unsafe{mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(),0)},0,"full host FIFO must not skip retirement");
+        assert!(!mir2_android_gateway_report_write_result(sequences[0],true));
+        app.world_mut().resource_mut::<AndroidGatewayOutboundQueue>().enqueue_native_social(&NativeSocialCommand::TradeCancel).unwrap();
+        app.update();let envelope=hero_egress_ffi_poll().unwrap();assert_eq!(envelope["command"]["type"],"tradeCancel");
+        assert!(mir2_android_gateway_report_write_result(envelope["sequence"].as_u64().unwrap(),true));app.update();
+        mir2_android_gateway_host_stop();app.update();
+    }
+
+    #[test]
+    fn hero_egress_ffi_already_polled_old_owner_result_never_changes_new_ui() {
+        use crate::hero_egress::AndroidHeroEgressState;
+        use mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState;
+        let _ffi_guard=ANDROID_GATEWAY_FFI_TEST_LOCK.lock().unwrap_or_else(|p|p.into_inner());
+        let (mut app,sequences)=hero_egress_ffi_held_app(1);assert!(hero_egress_ffi_poll().is_some());
+        app.world_mut().resource_mut::<AndroidHeroEgressState>().authority.as_mut().unwrap().owner+=1;
+        let before=app.world().resource::<NativePlayerUiState>().clone();app.update();
+        assert!(mir2_android_gateway_report_write_result(sequences[0],true));app.update();
+        assert_eq!(app.world().resource::<NativePlayerUiState>(),&before);
+        assert!(hero_egress_ffi_poll().is_none());
+        mir2_android_gateway_host_stop();app.update();
+        // An already copied lease may already have been written. Never invent
+        // cancellation/rollback/ACK or replay it against a replacement owner.
+    }
+
+    #[test]
+    fn hero_egress_ffi_pause_selects_other_domain_without_consuming_hero_or_short_buffer() {
+        use crate::hero_egress::AndroidHeroEgressState;
+        use mir2_client_bevy::native_social_egress::NativeSocialCommand;
+        let _ffi_guard=ANDROID_GATEWAY_FFI_TEST_LOCK.lock().unwrap_or_else(|p|p.into_inner());
+        let (mut app,sequences)=hero_egress_ffi_held_app(1);
+        app.world_mut().resource_mut::<AndroidHeroEgressState>().ready=false;
+        app.world_mut().resource_mut::<AndroidGatewayOutboundQueue>().enqueue_native_social(&NativeSocialCommand::TradeCancel).unwrap();
+        app.update();
+        let required=unsafe{mir2_android_gateway_copy_next_outbound(std::ptr::null_mut(),0)};
+        assert!(required>0);let mut short=vec![0_u8;required as usize-1];
+        assert_eq!(unsafe{mir2_android_gateway_copy_next_outbound(short.as_mut_ptr(),short.len())},required);
+        let other=hero_egress_ffi_poll().unwrap();assert_eq!(other["command"]["type"],"tradeCancel");
+        assert!(hero_egress_ffi_poll().is_none());
+        assert!(!mir2_android_gateway_report_write_result(sequences[0],true));
+        assert!(mir2_android_gateway_report_write_result(other["sequence"].as_u64().unwrap(),true));app.update();
+        app.world_mut().resource_mut::<AndroidHeroEgressState>().ready=true;app.update();
+        assert_eq!(hero_egress_ffi_poll().unwrap()["sequence"].as_u64(),Some(sequences[0]));
+        assert!(mir2_android_gateway_report_write_result(sequences[0],true));app.update();
+        mir2_android_gateway_host_stop();app.update();
+    }
+
+    #[test]
+    fn hero_egress_ffi_missing_shared_consumer_defers_unpolled_lease_until_exact_state_returns() {
+        use mir2_client_bevy::{crystal_ui::overlays::NativePlayerUiState,hero_model::HeroModel};
+        let _ffi_guard=ANDROID_GATEWAY_FFI_TEST_LOCK.lock().unwrap_or_else(|p|p.into_inner());
+        for missing_ui in [false,true] {
+            let (mut app,sequences)=hero_egress_ffi_held_app(1);
+            let model=if missing_ui {None}else{app.world_mut().remove_resource::<HeroModel>()};
+            let ui=if missing_ui {app.world_mut().remove_resource::<NativePlayerUiState>()}else{None};
+            app.update();assert!(hero_egress_ffi_poll().is_none(),"no shared state must not guess owner/pending");
+            if let Some(model)=model {app.insert_resource(model);}
+            if let Some(ui)=ui {app.insert_resource(ui);}
+            app.update();assert_eq!(hero_egress_ffi_poll().unwrap()["sequence"].as_u64(),Some(sequences[0]));
+            assert!(mir2_android_gateway_report_write_result(sequences[0],true));app.update();
+            mir2_android_gateway_host_stop();app.update();
+        }
+    }
+
+    #[test]
+    fn hero_egress_ffi_new_equal_key_draft_retires_old_unpolled_sequence_only() {
+        use crate::hero_egress::{AndroidHeroEgressState,tests::{key_intent,enqueue}};
+        use mir2_client_bevy::{crystal_ui::overlays::NativePlayerUiState,hero_model::HeroModel};
+        let _ffi_guard=ANDROID_GATEWAY_FFI_TEST_LOCK.lock().unwrap_or_else(|p|p.into_inner());
+        let (mut app,sequences)=hero_egress_ffi_held_app(1);
+        let model=app.world().resource::<HeroModel>().clone();
+        let original=serde_json::to_value(&model).unwrap();
+        let mut ui=app.world().resource::<NativePlayerUiState>().clone();
+        ui.hero.assign.pending=None;
+        let intent=key_intent(&model,&mut ui);let pending=ui.hero.assign.pending.clone();
+        let mut state=app.world_mut().remove_resource::<AndroidHeroEgressState>().unwrap();
+        let mut queue=app.world_mut().remove_resource::<AndroidGatewayOutboundQueue>().unwrap();
+        let fresh=enqueue(&mut state,&mut queue,&model,&ui,&intent);
+        assert!(fresh>sequences[0]);
+        app.insert_resource(state).insert_resource(queue).insert_resource(ui);app.update();
+        let envelope=hero_egress_ffi_poll().unwrap();assert_eq!(envelope["sequence"].as_u64(),Some(fresh));
+        assert_eq!(envelope["command"]["requestId"].as_u64(),pending.as_ref().map(|p|p.request_id));
+        assert!(hero_egress_ffi_poll().is_none());assert!(!mir2_android_gateway_report_write_result(sequences[0],true));
+        assert!(mir2_android_gateway_report_write_result(fresh,true));app.update();
+        let assign=&app.world().resource::<NativePlayerUiState>().hero.assign;
+        assert!(assign.dispatched);assert_eq!(assign.pending,pending,"write result is not an ACK");
+        assert_eq!(serde_json::to_value(app.world().resource::<HeroModel>()).unwrap(),original);
+        mir2_android_gateway_host_stop();app.update();
     }
 
     fn in_game_app() -> App {
