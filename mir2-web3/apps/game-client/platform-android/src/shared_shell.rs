@@ -187,6 +187,7 @@ pub(crate) struct HostState {
     social: crate::social_ingress::AndroidSocialIngress,
     npc: crate::npc_ingress::AndroidNpcIngress,
     player: crate::player_ingress::AndroidPlayerIngress,
+    lighting: crate::lighting_ingress::AndroidLightingIngress,
     pub(crate) quests: crate::quest_ingress::AndroidQuestIngress,
     pub(crate) phase: String,
     world: Option<HostWorldPosition>,
@@ -225,6 +226,7 @@ impl HostState {
         self.social.reset();
         self.npc.reset();
         self.player.reset();
+        self.lighting.reset();
         self.quests.reset();
     }
 
@@ -267,6 +269,25 @@ impl HostState {
             mir2_bevy_runtime::native_ingest::push_native_mail_service,
         );
         self.social.flush(mir2_bevy_runtime::native_ingest::push_native_social_model);
+        self.lighting
+            .flush(mir2_bevy_runtime::native_ingest::push_native_lighting_render_state);
+    }
+
+    fn accept_lighting_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
+        if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
+            || !matches!(screen, Screen::StartingGame | Screen::InGame)
+        {
+            return Ok(false);
+        }
+        self.lighting.packet(raw)
+    }
+
+    fn bind_lighting_snapshot(&mut self, raw: &str) -> Result<(), &'static str> {
+        let identity = self
+            .player
+            .identity()
+            .ok_or("Missing lighting player owner")?;
+        self.lighting.snapshot(raw, identity)
     }
 
     fn accept_player_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
@@ -1651,6 +1672,7 @@ fn receive(
                             || host.accept_skill_packet(model.screen, raw).is_err()
                             || host.accept_inventory_packet(model.screen, raw).is_err()
                             || host.accept_player_packet(model.screen, raw).is_err()
+                            || host.accept_lighting_packet(model.screen, raw).is_err()
                             || host.accept_chat_packet(model.screen, raw).is_err()
                             || host.accept_quest_packet(model.screen, raw).is_err()
                             || host.accept_game_shop_packet(model.screen, raw).is_err()
@@ -2004,6 +2026,7 @@ fn receive(
             host.skills.clear_scene();
             host.hero.clear_scene();
             host.player.clear_scene();
+            host.lighting.clear_scene();
             host.npc.clear_scene();
             host.quests.clear_scene();
             host.game_shop.clear_scene();
@@ -2055,6 +2078,7 @@ fn receive(
                         && host.bind_game_shop_snapshot(raw).is_ok()
                         && host.storage.snapshot(raw).is_ok()
                         && host.mail.snapshot(raw).is_ok()
+                        && host.bind_lighting_snapshot(raw).is_ok()
                     {
                         projection.ui = ui;
                     } else {
@@ -3051,6 +3075,10 @@ fn keyboard(
 #[cfg(test)]
 #[path = "chat_editor_tests.rs"]
 mod chat_editor_tests;
+
+#[cfg(test)]
+#[path = "lighting_host_tests.rs"]
+mod lighting_host_tests;
 
 #[cfg(test)]
 #[path = "npc_host_tests.rs"]

@@ -72,6 +72,7 @@ final class GatewaySession implements AutoCloseable {
     private final Consumer<View> observer;
     private final Consumer<String> receiptObserver;
     private final Consumer<String> gameplayObserver;
+    private final Consumer<String> lightingObserver;
     private final ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor();
     private ScheduledFuture<?> deadline;
     private ScheduledFuture<?> heartbeat;
@@ -106,10 +107,16 @@ final class GatewaySession implements AutoCloseable {
 
     GatewaySession(OkHttpClient client, Consumer<View> observer, Consumer<String> receiptObserver,
             Consumer<String> gameplayObserver) {
+        this(client, observer, receiptObserver, gameplayObserver, ignored -> {});
+    }
+
+    GatewaySession(OkHttpClient client, Consumer<View> observer, Consumer<String> receiptObserver,
+            Consumer<String> gameplayObserver, Consumer<String> lightingObserver) {
         this.client = client;
         this.observer = observer;
         this.receiptObserver = receiptObserver;
         this.gameplayObserver = gameplayObserver;
+        this.lightingObserver = lightingObserver;
     }
 
     static HttpUrl endpoint(String input) {
@@ -308,6 +315,7 @@ final class GatewaySession implements AutoCloseable {
         // Rust stages it until the accepted owner snapshot; it is not bootstrap.
         boolean forwardQuestMetadata = worldPending() && isQuestMetadataPacket(packet);
         boolean forwardGameShopMetadata = worldPending() && isGameShopMetadataPacket(packet);
+        boolean forwardLightingMetadata = worldPending() && isLightingMetadataPacket(packet);
         boolean forwardStorageMetadata = worldPending() && isStorageMetadataPacket(packet);
         boolean forwardMailMetadata = worldPending() && isMailMetadataPacket(packet);
         boolean forwardSocialMetadata = worldPending() && isSocialMetadataPacket(packet);
@@ -455,6 +463,11 @@ final class GatewaySession implements AutoCloseable {
                 clearMailFeedbackWait();
             }
         }
+        if (forwardLightingMetadata && worldPending()) {
+            // Additive opt-in observer: keep existing personal/entity callback
+            // traffic unchanged, while the real host routes both to nativeEvent.
+            forwardBounded(envelope, lightingObserver);
+        }
     }
 
     private void forwardOwnMailResult(String packet, JSONObject payload) {
@@ -538,6 +551,13 @@ final class GatewaySession implements AutoCloseable {
             throw new IllegalArgumentException("inbound packet size limit");
         }
         target.accept(raw);
+    }
+
+    private static boolean isLightingMetadataPacket(String packet) {
+        // Existing public native environment metadata, not authentication or
+        // owner bootstrap. The Rust adapter waits for the accepted snapshot.
+        return packet.equals("TimeOfDay") || packet.equals("MapInformation")
+                || packet.equals("MapChanged") || packet.equals("NewMapInfo");
     }
 
     private static boolean isHeroMetadataPacket(String packet, JSONObject payload) {

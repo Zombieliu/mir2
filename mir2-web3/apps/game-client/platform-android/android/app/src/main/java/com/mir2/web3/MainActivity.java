@@ -139,6 +139,8 @@ public final class MainActivity extends GameActivity {
         }, receipt -> nativeEvent(GatewaySession.object(
                 "type", "gatewayReceipt", "envelope", receipt).toString()),
                 packet -> nativeEvent(GatewaySession.object(
+                        "type", "gatewayGameplayPacket", "envelope", packet).toString()),
+                packet -> nativeEvent(GatewaySession.object(
                         "type", "gatewayGameplayPacket", "envelope", packet).toString()));
         connectivity = (ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
         networkCallback = new ConnectivityManager.NetworkCallback() {

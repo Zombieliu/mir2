@@ -11,6 +11,7 @@ use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering as AtomicOrdering};
 use std::sync::{Arc, Mutex, OnceLock};
 
+use mir2_client_bevy::native_lighting_environment::NativeLightingEnvironment;
 use serde_json::{json, Value};
 
 use super::{native_map_light_cells, MapViewport, ParsedMap};
@@ -272,86 +273,41 @@ impl NativeLightingBridge {
         }
     }
 
+    // Keep generation, source selection and force-daylight rules unchanged.
+    // Only the environment metadata reducer is shared with Android.
+    fn with_shared_environment(&mut self, update: impl FnOnce(&mut NativeLightingEnvironment)) {
+        let mut environment = NativeLightingEnvironment {
+            current_map_file_name: self.current_map_file_name.take(),
+            time_of_day_light_setting: self.time_of_day_light_setting,
+            map_light_setting: self.map_light_setting,
+            map_dark_light: self.map_dark_light,
+        };
+        update(&mut environment);
+        self.current_map_file_name = environment.current_map_file_name;
+        self.time_of_day_light_setting = environment.time_of_day_light_setting;
+        self.map_light_setting = environment.map_light_setting;
+        self.map_dark_light = environment.map_dark_light;
+    }
+
     pub fn reset_session(&mut self) {
-        self.current_map_file_name = None;
-        self.time_of_day_light_setting = None;
-        self.map_light_setting = None;
-        self.map_dark_light = 0;
+        self.with_shared_environment(|environment| environment.reset_session());
     }
 
     /// A map transition invalidates all map-specific light state immediately.
     /// The time-of-day setting belongs to the connection and is intentionally
     /// retained until the next authoritative snapshot or session reset.
     pub fn reset_scene(&mut self) {
-        self.current_map_file_name = None;
-        self.map_light_setting = None;
-        self.map_dark_light = 0;
+        self.with_shared_environment(|environment| environment.reset_scene());
     }
 
     pub fn observe_world_snapshot(&mut self, payload: &Value) {
-        let next_map = payload
-            .get("mapFileName")
-            .and_then(Value::as_str)
-            .filter(|value| !value.is_empty())
-            .map(str::to_owned);
-        if self.current_map_file_name.is_some()
-            && next_map.is_some()
-            && !same_map_file_name(
-                self.current_map_file_name.as_deref().unwrap_or_default(),
-                next_map.as_deref().unwrap_or_default(),
-            )
-        {
-            self.map_light_setting = None;
-            self.map_dark_light = 0;
-        }
-        if next_map.is_some() {
-            self.current_map_file_name = next_map;
-        }
-        if let Some(setting) = light_setting(payload.get("lightSetting")) {
-            self.time_of_day_light_setting = Some(setting);
-        }
+        self.with_shared_environment(|environment| environment.observe_world_snapshot(payload));
     }
 
     /// Observe only packet-authoritative light lifecycle data. Unknown packets
     /// are ignored; logout and reconnect generation changes fail closed.
     pub fn observe_packet(&mut self, packet: &str, payload: &Value) {
-        let body = packet_body(payload);
-        match packet {
-            "MapInformation" | "MapChanged" | "NewMapInfo" => {
-                let next_map_file_name = body
-                    .get("fileName")
-                    .or_else(|| body.get("mapFileName"))
-                    .and_then(Value::as_str)
-                    .filter(|value| !value.is_empty());
-                let map_changed = self
-                    .current_map_file_name
-                    .as_deref()
-                    .zip(next_map_file_name)
-                    .is_some_and(|(current, next)| !same_map_file_name(current, next));
-                if let Some(setting) = map_light_setting(body.get("lights")) {
-                    self.map_light_setting = Some(setting);
-                } else if map_changed {
-                    self.map_light_setting = None;
-                }
-                if let Some(darkness) = body
-                    .get("mapDarkLight")
-                    .and_then(Value::as_i64)
-                    .filter(|value| (0..=4).contains(value))
-                {
-                    self.map_dark_light = darkness as i32;
-                } else if map_changed {
-                    self.map_dark_light = 0;
-                }
-                if let Some(map_file_name) = next_map_file_name {
-                    self.current_map_file_name = Some(map_file_name.to_owned());
-                }
-            }
-            "TimeOfDay" => {
-                self.time_of_day_light_setting = light_setting(body.get("lights"));
-            }
-            "LogOutSuccess" => self.reset_session(),
-            _ => {}
-        }
+        self.with_shared_environment(|environment| environment.observe_packet(packet, payload));
     }
 
     pub fn build_render_state(
@@ -609,33 +565,9 @@ fn disabled_state() -> Value {
         "entityLights": [],
     })
 }
-
-fn light_setting(value: Option<&Value>) -> Option<i32> {
-    value
-        .and_then(Value::as_i64)
-        .filter(|value| (1..=4).contains(value))
-        .map(|value| value as i32)
-}
-
-fn map_light_setting(value: Option<&Value>) -> Option<i32> {
-    light_setting(value)
-}
-
-fn packet_body(payload: &Value) -> &Value {
-    payload.get("payload").unwrap_or(payload)
-}
-
 fn same_map_file_name(left: &str, right: &str) -> bool {
-    normalize_map_file_name(left) == normalize_map_file_name(right)
+    mir2_client_bevy::native_lighting_environment::same_map_file_name(left, right)
 }
-
-fn normalize_map_file_name(value: &str) -> String {
-    let normalized = value.trim().replace('\\', "/");
-    let file_name = normalized.rsplit('/').next().unwrap_or_default();
-    let lower = file_name.to_ascii_lowercase();
-    lower.strip_suffix(".map").unwrap_or(&lower).to_owned()
-}
-
 fn object_id_string(value: &Value) -> Option<String> {
     match value {
         Value::Number(number) => Some(number.to_string()),

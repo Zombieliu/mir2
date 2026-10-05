@@ -30,6 +30,8 @@ mod inventory_ingress;
 #[cfg(any(target_os = "android", test))]
 mod item_geometry;
 #[cfg(any(target_os = "android", test))]
+mod lighting_ingress;
+#[cfg(any(target_os = "android", test))]
 mod live_entity;
 #[cfg(any(target_os = "android", test))]
 mod mail_ingress;
