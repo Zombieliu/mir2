@@ -1,0 +1,739 @@
+{
+  "schema": "mir2-native-android-lighting-environment-evidence-v1",
+  "recordedAt": "2026-10-05T23:20:43.704Z",
+  "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+  "parent": "6413212c060744cc7c94fbd5d609c057df2bf491",
+  "goal": "Active",
+  "NI17": "PARTIAL",
+  "AP01_21FullDenominatorUnchanged": true,
+  "scope": [
+    "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/native_lighting_environment.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/native_lighting_environment_tests.rs",
+    "mir2-web3/apps/game-client/platform-windows/src/lighting.rs",
+    "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+    "mir2-web3/apps/game-client/platform-android/src/lighting_ingress.rs",
+    "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+    "mir2-web3/apps/game-client/platform-android/src/lighting_host_tests.rs",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/LightingMetadataIngressTest.java",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java"
+  ],
+  "sourceBinding": {
+    "inputs": 434,
+    "inputHashListSHA": "54874104037a1c304df7f44e57a7bb130b1c677ae2337dcdcc8249551e8d37ca",
+    "protectedWholeFiles": 423,
+    "sharedEnvironmentMethods": 4,
+    "sharedHelpers": 5,
+    "originalBodiesUnchangedIgnoringWhitespace": true,
+    "windowsOnlyThinDelegation": true,
+    "oldWindowsTestsSHA": "9d78d9173454c837c4b44390cc04605b9fb8f94f27a33be3e420e7593281006a",
+    "oldWindowsTestsByteUnchanged": true,
+    "oldHostTestsByteUnchanged": true,
+    "javaAuthSessionMethodsUnchanged": true,
+    "legacyFourArgumentObserverContractUnchanged": true,
+    "mainActivityOnlyAdditionalExistingNativeEventCallback": true
+  },
+  "environmentLeaf": {
+    "packetNames": [
+      "TimeOfDay",
+      "MapInformation",
+      "MapChanged",
+      "NewMapInfo"
+    ],
+    "packetByteCap": 16384,
+    "snapshotByteCap": 1048576,
+    "identity": "Only existing validated Android player owner/name snapshot binds.",
+    "preOwner": "One coalesced environment state; cannot publish/bootstrap; a newer valid snapshot is not followed by replay of old metadata.",
+    "mapBoundary": "Shared reset_scene retains connection time, drops map state and publication until a new validated scene. Different-map metadata cannot use the old owner scene.",
+    "retry": "Exact latest absolute model retained on rejected enqueue; newer metadata coalesces; no ACK is manufactured.",
+    "renderingEnabled": false,
+    "mapLights": [],
+    "entityLights": [],
+    "fullLightingAccepted": false
+  },
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "selectedWindows": {
+    "name": "codex/playtest-registration",
+    "sha": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b"
+  },
+  "windowsDelta": {
+    "commitsAhead": 1,
+    "paths": 83,
+    "functionalPaths": []
+  },
+  "remoteSnapshotAt": "2026-10-05T23:08:51.618Z",
+  "remotePush": "Not asserted by this pre-documentation snapshot; later post-push receipt is separate.",
+  "verification": [
+    {
+      "label": "bound-lighting-environment-android-normal",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "exitCode": 0,
+      "rust": [
+        {
+          "passed": 502,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "label": "bound-lighting-environment-android-preview",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "exitCode": 0,
+      "rust": [
+        {
+          "passed": 549,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "label": "bound-lighting-environment-shared-player-ui",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "exitCode": 0,
+      "rust": [
+        {
+          "passed": 1314,
+          "failed": 0,
+          "ignored": 10
+        }
+      ]
+    },
+    {
+      "label": "bound-lighting-environment-runtime",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "exitCode": 0,
+      "rust": [
+        {
+          "passed": 296,
+          "failed": 0,
+          "ignored": 1
+        }
+      ]
+    },
+    {
+      "label": "bound-lighting-environment-java-full",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "exitCode": 0,
+      "rust": [],
+      "java": [
+        {
+          "variant": "Debug",
+          "classes": 7,
+          "tests": 99,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": "UiPreview",
+          "classes": 7,
+          "tests": 99,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "label": "bound-lighting-environment-windows-hero-fifo",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "exitCode": 0,
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "label": "bound-lighting-environment-windows-skill-fifo",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "exitCode": 0,
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "label": "bound-lighting-environment-windows-protocol",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "exitCode": 0,
+      "rust": [
+        {
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "label": "bound-lighting-environment-windows-original",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "exitCode": 0,
+      "rust": [
+        {
+          "passed": 14,
+          "failed": 0,
+          "ignored": 0
+        }
+      ]
+    },
+    {
+      "label": "bound-lighting-environment-api31-normal",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "exitCode": 0,
+      "rust": []
+    },
+    {
+      "label": "bound-lighting-environment-api31-preview",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "exitCode": 0,
+      "rust": []
+    }
+  ],
+  "testLimits": "Focused/full counts overlap, never sum them. Existing shared ignored10/runtime ignored1 not converted to passes. Windows lighting14/protocol21/Hero FIFO1/skill FIFO1 run on Mac, not full Windows OS gate.",
+  "failureChain": [
+    {
+      "label": "red-java-lighting-metadata",
+      "note": "Initial test helper compilation failed: checked JSONException; no product-red claim.",
+      "code": 1,
+      "rust": [],
+      "xml": []
+    },
+    {
+      "label": "red-compiled-java-lighting-metadata",
+      "note": "Compiled local TLS Java fixtures: 5 tests, 3 failures. Original lighting metadata was not forwarded.",
+      "code": 1,
+      "rust": [],
+      "xml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.LightingMetadataIngressTest.xml",
+          "tests": 5,
+          "failures": 3,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "label": "focused-shared-lighting",
+      "note": "Compiled shared reducer tests: 8 passed, 1 failed. Test incorrectly treated mapDarkLight=0 as invalid; original Windows permits 0. Only new oracle corrected; original reducers unchanged.",
+      "code": 101,
+      "rust": [
+        {
+          "passed": 8,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "xml": []
+    },
+    {
+      "label": "green-java-lighting-metadata-both-v2",
+      "note": "Debug accidentally ran the full suite because the Gradle filter applied to only the last requested task. Full 98 tests/13 old callback failures revealed the real generic-observer integration regression; UiPreview did not run. All seven raw Debug XMLs were preserved separately.",
+      "code": 1,
+      "rust": [],
+      "xml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.LightingMetadataIngressTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "label": "red-dedicated-lighting-observer",
+      "note": "Compiled dedicated-observer local TLS fixtures: 5 tests/2 failures before routing fix.",
+      "code": 1,
+      "rust": [],
+      "xml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.LightingMetadataIngressTest.xml",
+          "tests": 5,
+          "failures": 2,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    },
+    {
+      "label": "green-java-full-dedicated-lighting-observer",
+      "note": "Fresh full Debug and UiPreview suites: 99 tests in each of 7 classes, zero failures/errors/skips; old 62 GatewaySession assertions byte unchanged.",
+      "code": 0,
+      "rust": [],
+      "xml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.LightingMetadataIngressTest.xml",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 15,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.LightingMetadataIngressTest.xml",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 15,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "artifacts": [
+    {
+      "variant": "debug",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/lighting-environment-20261006-nOqNqD/final-apks/mir2-native-lighting-environment-debug-8d4fd2ad9.apk",
+      "bytes": 533850007,
+      "sha256": "873c6fe040fe19fe2ae386e69a50f5ffd7af0a201bb0c28b82f2623869e100cf",
+      "nativeElfBytes": 146115792,
+      "nativeElfSha256": "e192e2525c4a4f8d823cd2624c74729c223e1b0ff698e016ea4b1a317d1d0490",
+      "nativeElfMatchesThisVariantStrippedOutput": true,
+      "package": "package: name='com.mir2.web3' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+      "gatewayUrl": "",
+      "uiPreview": false,
+      "entityPack": {
+        "schemaVersion": 1,
+        "kind": "mir2-android-entity-pack-lock",
+        "packId": "android-archer-mount-bow-proof-20260912",
+        "sourceMode": "override",
+        "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+        "manifestBytes": 2506377,
+        "atlasCount": 1,
+        "pageCount": 5,
+        "rectCount": 7848,
+        "pageBytes": 8779443
+      },
+      "installedHashMatches": true,
+      "preserveDeviceData": true,
+      "installedPackage": "com.mir2.web3",
+      "installedPath": "/data/app/~~IV_vnT_o_JjqTjamTXRiwg==/com.mir2.web3-TrPx0QWWlZHfnhtvrsBU7A==/base.apk",
+      "selectedUiPngCount": 6647,
+      "selectedMetadataCount": 3,
+      "lightingTextures": [
+        {
+          "range": 0,
+          "bytes": 24327,
+          "sha256": "8abb26b2c3568efef810e419b5c3322d90133d02c7e01a958eb1c1cd66521bc8"
+        },
+        {
+          "range": 1,
+          "bytes": 37751,
+          "sha256": "f317886b08b02f793a70cc8dd5b377acdfa78b596898524ad0963c5332fa57db"
+        },
+        {
+          "range": 2,
+          "bytes": 51065,
+          "sha256": "b1b7533de8b0e58e263b562d1af4a4cddbacc0ecca96033d3b9f011dccce132d"
+        },
+        {
+          "range": 3,
+          "bytes": 66669,
+          "sha256": "829d24301b9b989496ee0581c7a6096c6300afc15a62945a6b7700a1d56b9177"
+        },
+        {
+          "range": 4,
+          "bytes": 86918,
+          "sha256": "2d1f6370d6e9d83ab04c2ed08b13d7b2dd9ea480856710ed4ea9a35509a48edf"
+        },
+        {
+          "range": 5,
+          "bytes": 105484,
+          "sha256": "10757d7006798a497ccf7fe0284756d32905b4b4ac457d041efc0879ecd4c9db"
+        },
+        {
+          "range": 6,
+          "bytes": 127337,
+          "sha256": "1ba1a6aa32631a534cf98d7d59beed617f8d0bf9ac4ac4701ffb2d1743b258b2"
+        },
+        {
+          "range": 7,
+          "bytes": 148683,
+          "sha256": "b0e2fcd6b21d6e8c773b1312c6fdcb228446f2f0e1e595a95c9aa3b0f0168ae2"
+        },
+        {
+          "range": 8,
+          "bytes": 171964,
+          "sha256": "9ca401dce3a8c252e00ea156b5a619c16eca34fc8036d455f91c9f77bb0c2767"
+        },
+        {
+          "range": 9,
+          "bytes": 198508,
+          "sha256": "e52605b4e20f19563ec37bba8afd7aeb2ed8690fb1a25c974819e37278cb33e7"
+        }
+      ],
+      "lightingTexturesByteMatchFrozenWindows": true,
+      "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+      "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9"
+    },
+    {
+      "variant": "preview",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/lighting-environment-20261006-nOqNqD/final-apks/mir2-native-lighting-environment-preview-8d4fd2ad9.apk",
+      "bytes": 542008527,
+      "sha256": "a005810a71d9f30910144779bd89bf655302192c8c4a90cabf2e2e4e128dbf5b",
+      "nativeElfBytes": 150243848,
+      "nativeElfSha256": "b7f3daf6ee967383d07e527cc3a2c92a31ee860da2d98b4f37986bff31bd0d12",
+      "nativeElfMatchesThisVariantStrippedOutput": true,
+      "package": "package: name='com.mir2.web3.uipreview' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+      "gatewayUrl": "",
+      "uiPreview": true,
+      "entityPack": {
+        "schemaVersion": 1,
+        "kind": "mir2-android-entity-pack-lock",
+        "packId": "android-archer-mount-bow-proof-20260912",
+        "sourceMode": "override",
+        "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+        "manifestBytes": 2506377,
+        "atlasCount": 1,
+        "pageCount": 5,
+        "rectCount": 7848,
+        "pageBytes": 8779443
+      },
+      "installedHashMatches": true,
+      "preserveDeviceData": true,
+      "installedPackage": "com.mir2.web3.uipreview",
+      "installedPath": "/data/app/~~KdWfZ-6PvmyRTNnqvWDTrg==/com.mir2.web3.uipreview-sdtsie9Kt3Lrfa3Dgpj3qg==/base.apk",
+      "selectedUiPngCount": 6647,
+      "selectedMetadataCount": 3,
+      "lightingTextures": [
+        {
+          "range": 0,
+          "bytes": 24327,
+          "sha256": "8abb26b2c3568efef810e419b5c3322d90133d02c7e01a958eb1c1cd66521bc8"
+        },
+        {
+          "range": 1,
+          "bytes": 37751,
+          "sha256": "f317886b08b02f793a70cc8dd5b377acdfa78b596898524ad0963c5332fa57db"
+        },
+        {
+          "range": 2,
+          "bytes": 51065,
+          "sha256": "b1b7533de8b0e58e263b562d1af4a4cddbacc0ecca96033d3b9f011dccce132d"
+        },
+        {
+          "range": 3,
+          "bytes": 66669,
+          "sha256": "829d24301b9b989496ee0581c7a6096c6300afc15a62945a6b7700a1d56b9177"
+        },
+        {
+          "range": 4,
+          "bytes": 86918,
+          "sha256": "2d1f6370d6e9d83ab04c2ed08b13d7b2dd9ea480856710ed4ea9a35509a48edf"
+        },
+        {
+          "range": 5,
+          "bytes": 105484,
+          "sha256": "10757d7006798a497ccf7fe0284756d32905b4b4ac457d041efc0879ecd4c9db"
+        },
+        {
+          "range": 6,
+          "bytes": 127337,
+          "sha256": "1ba1a6aa32631a534cf98d7d59beed617f8d0bf9ac4ac4701ffb2d1743b258b2"
+        },
+        {
+          "range": 7,
+          "bytes": 148683,
+          "sha256": "b0e2fcd6b21d6e8c773b1312c6fdcb228446f2f0e1e595a95c9aa3b0f0168ae2"
+        },
+        {
+          "range": 8,
+          "bytes": 171964,
+          "sha256": "9ca401dce3a8c252e00ea156b5a619c16eca34fc8036d455f91c9f77bb0c2767"
+        },
+        {
+          "range": 9,
+          "bytes": 198508,
+          "sha256": "e52605b4e20f19563ec37bba8afd7aeb2ed8690fb1a25c974819e37278cb33e7"
+        }
+      ],
+      "lightingTexturesByteMatchFrozenWindows": true,
+      "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+      "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9"
+    }
+  ],
+  "versionCode": 35,
+  "versionName": "0.1.32-gameshop-phone",
+  "minimumAPI": 31,
+  "abi": "arm64-v8a",
+  "packageKind": "Native diagnostic Debug and uiPreview APKs using Rust release; no store/signed-release or strip-size acceptance.",
+  "gatewayUrl": "",
+  "remoteWebPage": "Not applicable: native Bevy, not a WebView APK.",
+  "previewNetworkForbidden": true,
+  "device": {
+    "at": "2026-10-05T23:04:45.549Z",
+    "devices": "List of devices attached\nemulator-5554          device product:sdk_gphone64_arm64 model:sdk_gphone64_arm64 device:emulator64_arm64 transport_id:5\n\n",
+    "serial": "emulator-5554",
+    "avd": "Mir2_API_31_ARM64\r\nOK",
+    "api": "31",
+    "abi": "arm64-v8a",
+    "model": "sdk_gphone64_arm64",
+    "size": "Physical size: 1080x2340",
+    "density": "Physical density: 440",
+    "storage": "Filesystem      Size Used Avail Use% Mounted on\n/dev/block/dm-4  20G 1.5G   18G   8% /storage/emulated/0/Android/obb",
+    "physicalDevices": 0
+  },
+  "runtimeBaseline": [
+    {
+      "variant": "debug",
+      "scene": "normal-hud-isolation",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "apkSha256": "873c6fe040fe19fe2ae386e69a50f5ffd7af0a201bb0c28b82f2623869e100cf",
+      "started": "2026-10-05T23:14:57.891Z",
+      "ended": "2026-10-05T23:15:07.703Z",
+      "pid": "12571",
+      "alive": true,
+      "launch": "Starting: Intent { cmp=com.mir2.web3/.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3/.MainActivity\nTotalTime: 689\nWaitTime: 690\nComplete",
+      "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/lighting-environment-20261006-nOqNqD/normal-hud-isolation-pid12571.png",
+      "width": 2340,
+      "height": 1080,
+      "pngSha256": "6f323797d1602445f93bd45b942ec35a6171b00d040e713930a355c49b8f064e",
+      "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/lighting-environment-20261006-nOqNqD/normal-hud-isolation-pid12571.log",
+      "logSha256": "30bd74f282032baa77546fb8e020d30e9b6ddc59d8572031bbc3a0ab70d93716",
+      "fatal": 0,
+      "GL506": 1,
+      "missingAsset": 0,
+      "cursorWarpErrors": 0,
+      "normalPreviewIsolated": true,
+      "previewReady": null,
+      "lightingJNIObserved": false,
+      "lightingRenderEnabled": false,
+      "visualReview": "Pending original PNG inspection",
+      "online": false,
+      "physical": false,
+      "fullPhoneUI": false
+    },
+    {
+      "variant": "preview",
+      "scene": "offline-hud-baseline",
+      "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+      "apkSha256": "a005810a71d9f30910144779bd89bf655302192c8c4a90cabf2e2e4e128dbf5b",
+      "started": "2026-10-05T23:15:08.400Z",
+      "ended": "2026-10-05T23:15:17.339Z",
+      "pid": "12638",
+      "alive": true,
+      "launch": "Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity\nTotalTime: 587\nWaitTime: 588\nComplete",
+      "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/lighting-environment-20261006-nOqNqD/offline-hud-baseline-pid12638.png",
+      "width": 2340,
+      "height": 1080,
+      "pngSha256": "4248b327443e08aa9c1534472e944dcd6d5675591368e46e76d5f83d8ff6d14c",
+      "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/lighting-environment-20261006-nOqNqD/offline-hud-baseline-pid12638.log",
+      "logSha256": "1f1ffad07a31cd6e48bac9793a9ad32a069d38e24f258fe544e19a7a7d73274a",
+      "fatal": 0,
+      "GL506": 0,
+      "missingAsset": 0,
+      "cursorWarpErrors": 0,
+      "normalPreviewIsolated": null,
+      "previewReady": true,
+      "lightingJNIObserved": false,
+      "lightingRenderEnabled": false,
+      "visualReview": "Pending original PNG inspection",
+      "online": false,
+      "physical": false,
+      "fullPhoneUI": false
+    }
+  ],
+  "visualReview": {
+    "source": "8d4fd2ad9920981947256e291b34f0816f62f805",
+    "originalImagesViewed": 2,
+    "cases": [
+      {
+        "scene": "normal-hud-isolation",
+        "pid": "12571",
+        "image": "normal-hud-isolation-pid12571.png",
+        "verdict": "PASS bounded login-page preview isolation only",
+        "observed": "Crystal login panel, empty credential fields and visible Test server not configured. No mock HUD/player/world.",
+        "limits": "Desktop-scale login layout, keyboard/touch/login actions not accepted."
+      },
+      {
+        "scene": "offline-hud-baseline",
+        "pid": "12638",
+        "image": "offline-hud-baseline-pid12638.png",
+        "verdict": "PASS bounded existing HUD fixture display only",
+        "observed": "Explicit OFFLINE UI PREVIEW banner; black background, Lv22/HP160-of-200/MP60-of-100/Gold12345 fixture, joystick, belt and action controls. No map or player is visible.",
+        "limits": "This is not map entry, a player entity, lighting JNI, light sources, world rendering or gameplay acceptance."
+      }
+    ],
+    "sampleAfterLaunchMs": 8000,
+    "fatal": 0,
+    "independentPidGL506": [
+      {
+        "pid": "12571",
+        "count": 1
+      },
+      {
+        "pid": "12638",
+        "count": 0
+      }
+    ],
+    "GPUZeroError": "FAIL",
+    "historicalGPUFailuresRetained": true,
+    "fullPhoneUI": false,
+    "lightingRenderAccepted": false,
+    "actualOnline": false,
+    "physicalAccepted": false,
+    "goal": "Active",
+    "AP01_21FullDenominatorUnchanged": true,
+    "reviewRecordedAt": "2026-10-05T23:18:45.509Z",
+    "timestampNote": "This is the final review-record time after both original images were inspected. First review file retained; its hardcoded timestamp was only an estimate and is not used as exact capture/view time."
+  },
+  "rawEvidence": {
+    "localRoot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/lighting-environment-20261006-nOqNqD",
+    "index": "evidence-index-final.json",
+    "indexSha256": "28c547557e41a2cf147873c4d9740f2b9138dafb78833566e2e8d996035a80aa",
+    "indexBytes": 22218,
+    "files": 111,
+    "rawBytes": 8823080,
+    "excludes": "APK files, this index itself and later delivery/documentation/push verification receipts. Those have separately recorded hashes and are not claimed covered here.",
+    "deliveryShaNotIncludedInIndex": true,
+    "fullRawFilesCommitted": false
+  },
+  "originalWorktrees": [
+    {
+      "path": "/Users/henryliu/obelisk/numeron",
+      "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+      "branch": "codex/steam-main",
+      "status": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/"
+    },
+    {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+      "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+      "branch": "codex/android-player-journey",
+      "status": ""
+    }
+  ],
+  "originalGitCheckpointsUnchanged": true,
+  "recursiveUntrackedBytesClaimed": false,
+  "acceptance": {
+    "buildAndInstall": true,
+    "boundedMetadataRegressions": true,
+    "baselineImagesViewed": 2,
+    "actualLightingJNI": false,
+    "fullMapObjectEffectLightSources": false,
+    "lightingGPU": false,
+    "GPUZeroError": "FAIL",
+    "realLogin": false,
+    "onlinePlayerLoop": false,
+    "nativeResume": false,
+    "fullPhoneUI": false,
+    "fullResourcesAudioUpdate": false,
+    "physicalDevice": false,
+    "humanFinalAcceptance": false
+  },
+  "next": [
+    "Share and wire original map/object/effect light-source production without duplicating range/palette/material rules.",
+    "Add actual source-bound Android JNI lighting cases and map-transition/light-source screenshot checks; keep GPU errors visible.",
+    "Complete remaining UI/resources/audio/focus/resume and approved real-network/cross-platform/physical acceptance without shrinking AP-01–21."
+  ]
+}

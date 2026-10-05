@@ -1,6 +1,27 @@
 # Android 对齐当前 Windows 完整度 goal
 
-2026-10-06 当前 Android 共享 Hero 触控产品源码：`aef89f9426ab7b74d49bf8d61f05eac9f1126c24`。
+2026-10-06 当前原生 Android 光照环境元数据源码：`8d4fd2ad9920981947256e291b34f0816f62f805`；不是完整光照完成。
+抽取原 Windows 四个环境方法/五个 helper，Windows 仅薄委托；原14光照测试及旧测试字节不变。
+四公共名字 TimeOfDay/MapInformation/MapChanged/NewMapInfo 经独立 Java observer→原 MainActivity/nativeEvent；
+旧个人/实体 callback、认证/会话/宿主旧断言未改。只由已核验 player owner/name/map snapshot 绑定，
+16KiB packet/1MiB snapshot；预 owner 单状态聚合，场景清地图保留连接时间，断开清空，准确背压重试。
+本叶 render enabled=false、map/entity lights为空；不复制光照 range/palette/material 或战斗/交易/存档规则。
+11代码文件、434稳定输入/423受保护整文件，两原 worktree Git checkpoints 保留。
+干净精确提交11门502/549、shared1314+10原ignored、runtime296+1原ignored、fresh Java99+99、
+API31双check/Mac-host Windows14+21+1+1通过；聚焦计数不相加，不算完整Windows OS验收。
+双原生诊断APK/当前variant ELF/6647PNG+3metadata/10原Lighting贴图逐字节对齐已核对，保留数据安装回读SHA一致。
+两新原图已查看；仅普通登录隔离及黑底HUD样例（无地图/角色），8秒冷启动PID12571/12638 fatal0。
+独立PID GL506=1/0，GPU零错误仍FAIL；没有本叶实际 lighting JNI、灯源或GPU画面验收。
+初始编译错误、错误0黑暗值断言、generic observer Debug98/13 FAIL、dedicated observer red5/2均保留；
+原62网络断言未改，独立通道修复后双变体99/99。GraphQL EOF/REST备用核验也单列保留。
+Gateway为空、preview禁止联网，非WebView；真实登录/玩家闭环/Zone保存/resume/全手机UI/资源音频更新/真机人工仍OPEN。
+只读Windows来源仍56ee063fb，较冻结3d735745f +1提交/83文档证据/0功能路径；AP-01–21完整分母不变。
+NI-17仍PARTIAL、完整goal Active。下一轮补原地图/对象/效果灯源和实际JNI/GPU证据；仅推Android独立Draft。
+[本源APK、十一门、失败、资源与启动边界](generated/player-qa/native-android-lighting-environment-20261006/README.md)。
+
+下文保留对应旧来源的历史记录；不重绑到本叶，也不把旧实测自动计为本叶验收。
+
+2026-10-06 历史 Android 共享 Hero 触控产品源码：`aef89f9426ab7b74d49bf8d61f05eac9f1126c24`。
 两个Android文件；429输入/427其他整文件保护，原共享UI/规则/Java/认证/Windows未改。
 原生触摸帧位置传给共享Window读者，在Winit Last前恢复；新鲜五门484/531、Java93+93、API31双门通过。
 同源双原生诊断APK/当前variant ELF/6647PNG+3metadata已核对，保留数据安装回读SHA一致。
