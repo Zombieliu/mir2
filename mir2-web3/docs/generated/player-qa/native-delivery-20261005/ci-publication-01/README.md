@@ -28,6 +28,19 @@ method-count accounting remain in the archive. Its 211 regular tar members retai
 192 original regular files, 18 inert negative-link metadata records and the
 original freeze. Links are verified by readlink and never followed or restored.
 
+Actual Linux CI 37250860949 on source `8e1acedbb` attempts 46 tests: 37 pass and
+nine encounter the same missing fixture-parent harness error, with no product
+assertion failures. The raw receipt/artifact are also unavailable due to that
+parent error; the complete failure log and job metadata are retained separately.
+Credential, stage/promote and old Web jobs are skipped. Root corrects one test
+factory line to create parents, preserves every assertion and the original frozen
+test, and independently reruns Windows46/46. The production helper's byte SHA
+remains unchanged; actual Linux retry is pending.
+
+Source `8e1acedbb` is pushed and its actual GitHub ref is confirmed through the
+authenticated Git ref API. The SSH push/read timeout receipts are retained;
+the earlier unverified SSH result does not imply a rejected remote commit.
+
 The fake successful model uses two tiny original feed objects and 34 synthetic
 bodies; it is not a successful real 36-object stage. The 111 MB synthetic stream
 deliberately fails the real EXE hash. Linux/opaque CI, remote R2 authorization,

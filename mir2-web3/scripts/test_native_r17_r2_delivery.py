@@ -195,7 +195,7 @@ class FakeConnection:
 
 class DeliveryTests(unittest.TestCase):
     def fixture(self, label):
-        FIXTURES.mkdir(exist_ok=True)
+        FIXTURES.mkdir(parents=True, exist_ok=True)
         path = Path(tempfile.mkdtemp(prefix=label + '-', dir=FIXTURES))
         RETAINED.append({'label': label, 'directory': str(path)})
         return path

@@ -8,6 +8,9 @@ exact-game守卫不变。新进度尚未打包进公开引擎，不能宣称用�
 
 固定R17 stage/promote脚本已集成，根与worker各46项fake检查通过且重叠；注册
 工作流新增独立verify/stage/promote选择，保留默认Web流程，尚未执行真实stage。
+实际LinuxCI37250860949是37通过/9个缺少夹具父目录的harness错误，原始日志保留，
+没有产品断言失败，凭据及发布/Web任务跳过；根只修测试入口mkdir的parents参数，
+Windows46项复验通过，Linux重试待执行。生产脚本未改，source8e1已由GitHub实际ref确认。
 实际本地workerd/R2原生流、checksum和条件创建已验证；14个选定用例/152断言，
 原10/11与3/4失败及后续真实边界说明保留。它们不能替代Cloudflare授权、远端
 36对象完整SHA、CAS指针、公网缓存/range或下载测速；两种实际401仍需有效授权。
