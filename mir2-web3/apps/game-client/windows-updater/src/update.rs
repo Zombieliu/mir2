@@ -5,7 +5,10 @@ use crate::{
 };
 #[path = "delivery.rs"]
 pub mod delivery;
+#[path = "download.rs"]
+mod download;
 use anyhow::{ensure, Context, Result};
+pub use download::DownloadProgress;
 use std::{
     collections::BTreeMap,
     fs,
@@ -42,6 +45,26 @@ pub trait Source {
         destination: &Path,
         progress: &mut dyn FnMut(u64) -> Result<()>,
     ) -> Result<()>;
+    /// Legacy adapters restart from zero; only the pinned HTTPS source retains
+    /// partial payloads. Discovery and metadata never use this entry point.
+    fn permits_partial_resume(&self) -> bool {
+        false
+    }
+    fn download_resuming(
+        &self,
+        path: &str,
+        file: &FileEntry,
+        destination: &Path,
+        progress: &mut dyn FnMut(DownloadProgress) -> Result<()>,
+    ) -> Result<u64> {
+        self.download(path, file, destination, &mut |received| {
+            progress(DownloadProgress {
+                received,
+                reused: 0,
+            })
+        })?;
+        Ok(0)
+    }
 }
 fn discovery_object(
     fetch: impl FnOnce(&mut dyn FnMut(u64) -> Result<()>) -> Result<Vec<u8>>,
@@ -230,35 +253,20 @@ impl Source for HttpsSource {
         destination: &Path,
         progress: &mut dyn FnMut(u64) -> Result<()>,
     ) -> Result<()> {
-        let r = self.open(path)?;
-        if let Some(len) = r.header("Content-Length") {
-            ensure!(len.parse::<u64>()? == entry.size, "payload length mismatch");
-        }
-        safe::ancestors(destination)?;
-        fs::create_dir_all(destination.parent().unwrap())?;
-        let mut file = fs::OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(destination)?;
-        let mut reader = r.into_reader().take(entry.size + 1);
-        let mut total = 0u64;
-        let mut buffer = [0u8; 65536];
-        loop {
-            let n = reader.read(&mut buffer)?;
-            if n == 0 {
-                break;
-            }
-            total += n as u64;
-            progress(total)?;
-            ensure!(total <= entry.size, "oversized payload");
-            file.write_all(&buffer[..n])?;
-        }
-        file.sync_all()?;
-        ensure!(
-            total == entry.size && safe::matches(destination, entry)?,
-            "truncated/corrupt download"
-        );
-        Ok(())
+        self.download_resuming(path, entry, destination, &mut |p| progress(p.received))
+            .map(|_| ())
+    }
+    fn permits_partial_resume(&self) -> bool {
+        true
+    }
+    fn download_resuming(
+        &self,
+        path: &str,
+        entry: &FileEntry,
+        destination: &Path,
+        progress: &mut dyn FnMut(DownloadProgress) -> Result<()>,
+    ) -> Result<u64> {
+        download::resume(self, path, entry, destination, progress)
     }
 }
 pub trait Status {
@@ -710,6 +718,7 @@ pub(super) fn cached_payload(
     download_progress: (u64, u64),
     transfers: &mut Transfers,
 ) -> Result<(PathBuf, bool)> {
+    ensure!(!status.cancelled(), "update cancelled");
     let (done, total) = download_progress;
     let cache = safe::target(root, &format!(".update/downloads/{}", entry.sha256))?;
     if cache.exists() && safe::matches(&cache, entry)? {
@@ -720,13 +729,38 @@ pub(super) fn cached_payload(
         fs::remove_file(&cache)?;
     }
     let part = cache.with_extension("part");
+    let mut resume_limit = 0;
     if part.exists() {
-        safe::regular(&part)?;
-        fs::remove_file(&part)?;
+        let size = safe::regular(&part)?.len();
+        if source.permits_partial_resume() && size == entry.size && safe::matches(&part, entry)? {
+            crate::platform::replace_file(&part, &cache)?;
+            log(
+                root,
+                "download-prefix-recovered",
+                serde_json::json!({"sha256":entry.sha256,"bytes":entry.size}),
+            );
+            return Ok((cache, false));
+        }
+        if source.permits_partial_resume() && size > 0 && size < entry.size {
+            resume_limit = size;
+        } else {
+            fs::remove_file(&part)?;
+        }
     }
     let mut received = 0;
+    let mut prefix = None;
     transfers.downloaded_files += 1;
-    let result = source.download(path, entry, &part, &mut |bytes| {
+    let result = source.download_resuming(path, entry, &part, &mut |p| {
+        ensure!(
+            p.reused <= resume_limit,
+            "source reuse exceeds retained prefix"
+        );
+        ensure!(
+            prefix.is_none_or(|value| value == p.reused),
+            "source reuse changed mid-response"
+        );
+        prefix = Some(p.reused);
+        let bytes = p.received;
         ensure!(
             bytes <= entry.size.saturating_add(1),
             "source payload progress exceeds read bound"
@@ -735,30 +769,59 @@ pub(super) fn cached_payload(
         received = received.max(bytes);
         transfers.downloaded_bytes += advanced;
         transfers.wire_bytes += advanced;
-        ensure!(bytes <= entry.size, "source payload exceeds bound");
+        ensure!(
+            bytes <= entry.size.saturating_sub(p.reused),
+            "source payload exceeds bound"
+        );
         progress(
             status,
             "downloading",
-            (30 + ((done + bytes) * 45 / total.max(1)) as u32).min(75),
+            (30 + ((done + p.reused + bytes) * 45 / total.max(1)) as u32).min(75),
         )
     });
-    let result = result.and_then(|()| {
+    let result = result.and_then(|reused| {
+        ensure!(
+            reused <= resume_limit && prefix.is_none_or(|value| value == reused),
+            "source resume receipt mismatch"
+        );
         ensure!(safe::matches(&part, entry)?, "download hash mismatch");
-        Ok(())
+        Ok(reused)
     });
-    if let Err(e) = result {
-        if part.exists() {
-            safe::regular(&part)?;
-            fs::remove_file(&part)?;
+    let reused = match result {
+        Ok(reused) => reused,
+        Err(e) => {
+            if part.exists() {
+                let size = safe::regular(&part)?.len();
+                if source.permits_partial_resume()
+                    && download::interrupted(&e)
+                    && size > 0
+                    && size <= entry.size
+                {
+                    log(
+                        root,
+                        "download-prefix-retained",
+                        serde_json::json!({"sha256":entry.sha256,"bytes":size,"size":entry.size}),
+                    );
+                } else {
+                    fs::remove_file(&part)?;
+                }
+            }
+            return Err(e);
         }
-        return Err(e);
-    }
+    };
     // Source adapters should report streaming bytes. A successful bounded,
     // hash-verified adapter that omits the final callback still has exact size.
-    let remaining = entry.size.saturating_sub(received);
+    let remaining = entry.size.saturating_sub(reused).saturating_sub(received);
     transfers.downloaded_bytes += remaining;
     transfers.wire_bytes += remaining;
     crate::platform::replace_file(&part, &cache)?;
+    if reused != 0 {
+        log(
+            root,
+            "download-prefix-resumed",
+            serde_json::json!({"sha256":entry.sha256,"reusedBytes":reused,"networkBytes":entry.size-reused}),
+        );
+    }
     Ok((cache, true))
 }
 fn optional_delivery(
@@ -1220,3 +1283,7 @@ mod receipt_tests;
 #[cfg(test)]
 #[path = "progress_trace_tests.rs"]
 mod progress_trace_tests;
+
+#[cfg(test)]
+#[path = "resume_tests.rs"]
+mod resume_tests;

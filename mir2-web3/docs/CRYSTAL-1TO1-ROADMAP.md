@@ -1,5 +1,15 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-05 native slow-download source now retains interrupted immutable
+> payload prefixes and stops transient bundle failures before individual-file
+> fallback. Strict ranges, full signed SHA, actual Windows handle/Unicode/long
+> paths and wire-only counters pass; two genuine loopback RED0/1s turn GREEN.
+> Final Windows65 includes14 new checks,0fail/4 existing signed fixture ignores;
+> both entrypoints check. New release engine, actual HTTPS/CMS/laptop throughput
+> and R2 stage/promote remain OPEN pending effective authorization. No service,
+> feed, F installation or real-save change, and no new speed result is claimed.
+> [Exact source Candidate boundary](generated/player-qa/native-delivery-20261005/resume-source-01/README.md).
+
 > 2026-10-05 slow native delivery is the user's immediate priority. Origin now
 > serves the exact signed R17 accelerator with no game/service/feed change.
 > Actual opaque CI user/account token probes both return401 before bucket reads.

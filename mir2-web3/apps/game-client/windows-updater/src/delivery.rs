@@ -171,10 +171,15 @@ fn fallback(
     stats: &mut Stats,
     kind: &str,
     path: &str,
-    error: &anyhow::Error,
+    error: anyhow::Error,
     wire_bytes: u64,
 ) -> Result<()> {
     ensure!(!status.cancelled(), "update cancelled");
+    // An interrupted accelerator is still usable on retry. Do not turn one
+    // connection failure into tens of thousands of individual asset requests.
+    if super::download::interrupted(&error) {
+        return Err(error);
+    }
     stats.fallbacks += 1;
     super::log(
         root,
@@ -281,7 +286,7 @@ impl<S: super::Source, T: super::Status> Acceleration<'_, S, T> {
                             stats,
                             "delivery-delta-fallback",
                             &delta.patch.path,
-                            &error,
+                            error,
                             transfers.wire_bytes - before,
                         )?,
                     }
@@ -367,7 +372,7 @@ impl<S: super::Source, T: super::Status> Acceleration<'_, S, T> {
                     stats,
                     "delivery-bundle-fallback",
                     &bundle.archive.path,
-                    &error,
+                    error,
                     transfers.wire_bytes - before,
                 )?,
             }

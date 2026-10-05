@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-10-05 download-priority source adds interrupted immutable payload resume.
+> Actual writable-handle offsets, synchronized scratch, strict206/200/416 and
+> wire-only counters are checked; interrupted accelerators stop before raw-file
+> fallback. Two genuine loopback RED0/1s become GREEN. Final Windows65 pass,
+> 0 fail/4 existing signed fixture ignores includes14 new overlapping checks;
+> entrypoint check passes. Parser fixture boundaries and helper refusal remain.
+> New engine/public HTTPS/CMS/laptop speed and R2 stage/promote stay OPEN; effective
+> Cloudflare authorization is pending. Current services, feed/F/saves stay unchanged.
+> [Bounded source and exact receipts](generated/player-qa/native-delivery-20261005/resume-source-01/README.md).
+
 > 2026-10-05 user prioritizes slow native downloads. Exact signed R17 bundles
 > are appended at the existing origin without Gateway/Caddy restart; bandwidth
 > and R2 publication stay open. Actual opaque CI user/account token probes both

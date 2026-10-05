@@ -54,6 +54,111 @@ pub fn regular(path: &Path) -> Result<fs::Metadata> {
     }
     Ok(meta)
 }
+/// Open updater scratch bytes without truncation. Validate the actual writable
+/// handle before mutation; the Windows handle denies concurrent write/delete.
+pub fn open_download(path: &Path) -> Result<File> {
+    ancestors(path)?;
+    let parent = path.parent().unwrap();
+    fs::create_dir_all(parent)?;
+    ancestors(parent)?;
+    let existing = path.exists();
+    if existing {
+        regular(path)?;
+    }
+    let mut options = OpenOptions::new();
+    options.read(true).write(true).create_new(!existing);
+    #[cfg(windows)]
+    {
+        use std::os::windows::fs::OpenOptionsExt;
+        use windows_sys::Win32::Storage::FileSystem::FILE_FLAG_OPEN_REPARSE_POINT;
+        options
+            .share_mode(0)
+            .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT);
+    }
+    let file = options.open(path)?;
+    let meta = file.metadata()?;
+    ensure!(meta.is_file(), "nonregular download handle");
+    ancestors(parent)?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::MetadataExt;
+        let current = fs::symlink_metadata(path)?;
+        ensure!(
+            current.is_file()
+                && !current.file_type().is_symlink()
+                && meta.nlink() == 1
+                && current.nlink() == 1
+                && meta.dev() == current.dev()
+                && meta.ino() == current.ino(),
+            "linked or replaced download handle"
+        );
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::{ffi::OsStrExt, io::AsRawHandle};
+        use windows_sys::Win32::Storage::FileSystem::{
+            GetFileInformationByHandle, GetFinalPathNameByHandleW, BY_HANDLE_FILE_INFORMATION,
+            FILE_NAME_NORMALIZED,
+        };
+        let handle = file.as_raw_handle();
+        let mut info: BY_HANDLE_FILE_INFORMATION = unsafe { std::mem::zeroed() };
+        ensure!(
+            unsafe { GetFileInformationByHandle(handle, &mut info) } != 0,
+            "download handle information failed"
+        );
+        ensure!(
+            info.nNumberOfLinks == 1 && info.dwFileAttributes & 0x400 == 0,
+            "linked download handle"
+        );
+        let mut name = vec![0u16; 512];
+        let mut length = unsafe {
+            GetFinalPathNameByHandleW(
+                handle,
+                name.as_mut_ptr(),
+                name.len() as u32,
+                FILE_NAME_NORMALIZED,
+            )
+        } as usize;
+        if length >= name.len() && length < 32768 {
+            name.resize(length + 1, 0);
+            length = unsafe {
+                GetFinalPathNameByHandleW(
+                    handle,
+                    name.as_mut_ptr(),
+                    name.len() as u32,
+                    FILE_NAME_NORMALIZED,
+                )
+            } as usize;
+        }
+        ensure!(
+            length > 0 && length < name.len(),
+            "download handle path failed"
+        );
+        let expected = fs::canonicalize(parent)?.join(path.file_name().unwrap());
+        // Compare original UTF-16, without lossy replacement of path characters.
+        let expected: Vec<u16> = expected.as_os_str().encode_wide().collect();
+        let prefix = [92, 92, 63, 92]; // extended local path prefix: \\?\
+        let actual = &name[..length];
+        let actual = actual.strip_prefix(&prefix).unwrap_or(actual);
+        let expected = expected.strip_prefix(&prefix).unwrap_or(&expected);
+        let fold = |value: u16| {
+            if value <= 127 {
+                (value as u8).to_ascii_lowercase() as u16
+            } else {
+                value
+            }
+        };
+        ensure!(
+            actual.len() == expected.len()
+                && actual
+                    .iter()
+                    .zip(expected)
+                    .all(|(a, b)| fold(*a) == fold(*b)),
+            "download handle path changed"
+        );
+    }
+    Ok(file)
+}
 pub fn read_bounded(path: &Path, limit: u64) -> Result<Vec<u8>> {
     ensure!(regular(path)?.len() <= limit, "file too large");
     let mut data = Vec::new();
