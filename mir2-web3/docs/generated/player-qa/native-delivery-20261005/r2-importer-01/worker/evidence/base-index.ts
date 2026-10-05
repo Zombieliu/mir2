@@ -1,5 +1,3 @@
-import { nativeR17Fetch } from "./native-r17-publication.mjs";
-
 export interface Env {
   MIR2_ASSETS: R2Bucket;
   MIR2_R2_UPLOAD_SECRET: string;
@@ -9,9 +7,6 @@ const MAX_OBJECT_BYTES = 300 * 1024 * 1024;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    if (new URL(request.url).pathname.startsWith("/upload/native-r17")) {
-      return nativeR17Fetch(request, env);
-    }
     if (request.method !== "PUT") {
       return json({ ok: false, error: "method_not_allowed" }, 405);
     }
@@ -29,9 +24,6 @@ export default {
     const key = normalizeObjectKey(url.searchParams.get("key") ?? "");
     if (!key) {
       return json({ ok: false, error: "invalid_key" }, 400);
-    }
-    if (key.startsWith("mir2/native/windows-invited/")) {
-      return json({ ok: false, error: "reserved_native_prefix" }, 403);
     }
 
     const contentLength = Number(request.headers.get("content-length") ?? 0);

@@ -14,11 +14,27 @@ sequence12/feed、Candidate、引导器、更新引擎、游戏网关与Caddy没
 第一轮实际CI37240009948在用户令牌验证端点返回401，未请求桶，旧Web任务均
 跳过；该结果不能单独证明令牌过期。随后按官方账户令牌端点固定路径修正，
 仅改变docstring和VERIFY_PATH；根独立32项fake-transport检查通过，与worker
-32项重叠，原31项及新增路径RED均保留。账户端点实际CI尚待执行；读取成功
-也不证明写入/Worker/路由权限。
+32项重叠，原31项及新增路径RED均保留。账户端点实际CI37243580805也返回401，
+未请求桶且旧Web任务跳过；当前现有凭据无法通过验证，需要有效授权后再执行
+账户/桶/Worker/路由预检。两次401均保留，不能断言令牌过期。读取成功本身也
+不证明写入/Worker/路由权限。
 [原始探针](generated/player-qa/native-delivery-20261005/ci-authority-probe-01/README.md)、
 [账户端点与实际首轮CI证明](generated/player-qa/native-delivery-20261005/ci-account-probe-01/README.md)、
 [实际原源追加与36对象TLS证明](generated/player-qa/native-delivery-20261005/origin-static-01/README.md)。
+
+已集成四文件固定R17上传器，限定36个原始对象及其SHA，逐流条件创建，完整
+公共字节验收后才能推进独立CAS指针。Worker模型107项与根独立重跑107项通过
+且相互重叠；实际Cloudflare/R2及公共CDN仍未部署。既有Web上传语义保留，原生
+前缀拒绝无条件覆盖。
+[源码、原始RED与根审阅](generated/player-qa/native-delivery-20261005/r2-importer-01/README.md)。
+
+实际本机Windows库流程已验收：首次安装取消后复用两个完整分包，重试只请求
+剩余九包，125,965目标SHA/size全过；旧R16升级使用真实25,424,169字节EXE差分
+及两个小文件，无全EXE下载。两条实际隔离回滚均保留六个合成个人文件见证。
+这些是dev-profile库与本地文件映射源，不能表示发行EXE、互联网或另一台笔记本
+的速度。fresh retry约41.16分钟，其中九包综合事件约230秒，其他时间未拆解；
+UI在本地安装阶段缺少进度，发行4c60引擎的阶段进度与计时修复正在独立实现。
+[精确84-file原始QA与边界](generated/player-qa/native-delivery-20261005/windows-library-qa-01/README.md)。
 
 下列是此前测量和准备记录；原404结果保留，不再表示追加后的当前原源状态。
 
@@ -36,9 +52,9 @@ R2 Web素材服务不能替代尚未部署的原生下载入口。生产 updater
 
 | 阶段 | 已核对结果 | 尚未完成 |
 | --- | --- | --- |
-| R17资源合包 | 11块、620,189,573压缩字节；全部125,965目标还原及CMS绑定通过；原源已追加且完整HTTPS字节通过 | 真实首次安装磁盘/总耗时 |
-| R16→R17 EXE差分 | 25,424,169字节；真实R16源与真实R17目标SHA/size相符 | 实际 signed updater 使用差分 |
-| R2发布准备 | 36个不可变对象，CMS与对象闭包通过，原game source6032不变；安全只读CI探针已集成 | 现有Actions权限验证、账户/桶/路由预检、stage、公网逐hash、MISS/HIT/range、独立CAS promote |
+| R17资源合包 | 11块、620,189,573压缩字节；全部125,965目标还原及CMS绑定通过；原源已追加，完整HTTPS字节及本地Windows库cancel/retry通过 | 发行release引擎、实际HTTPS/笔记本首次安装耗时 |
+| R16→R17 EXE差分 | 25,424,169字节；真实R16源与真实R17目标SHA/size相符，实际Windows库使用及完整旧版回滚通过 | 发行EXE/HTTPS/正常启动验收 |
+| R2发布准备 | 36个不可变对象，CMS与对象闭包通过，原game source6032不变；固定条件创建上传器107项通过；实际两种CI令牌验证401 | 有效授权、账户/桶/路由预检、真实stage、公网逐hash、MISS/HIT/range、独立CAS promote |
 | R17→R18隔离更新 | 28,618变化路径+2删除；28,616个唯一内容请求、342,513,399载荷字节；完整新/旧hash、个人文件、pending/quarantine/回滚通过 | R18发布、实际首次启动、CDN/加速器/人类验收 |
 
 下载加速使用独立冻结工具源码4c60。资源合包不能消除100 KB/s链路瓶颈；

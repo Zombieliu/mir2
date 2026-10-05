@@ -1,0 +1,7 @@
+{
+  "reason": "selected provenance mtimeNs exceeds JavaScript safe integer; use exact decimal string, original proof unchanged",
+  "beforeSha256": "3d994ede8b6d1f09fc05488cc271b9dbad1ae2b12503f991931d3c2f409ba94b",
+  "afterSha256": "4a7eda51fd375b64a250faa8d1709f8b611af8d60172aabf7c1032b864e490fc",
+  "canonicalSha256": "1786ca53c2ef03e142419feefa3184070bfacd570c1b3a9495f79e3c50eb3929",
+  "cmsReverified": false
+}

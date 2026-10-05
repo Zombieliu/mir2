@@ -2,8 +2,11 @@
 
 > 2026-10-05 slow native delivery is the user's immediate priority. Origin now
 > serves the exact signed R17 accelerator with no game/service/feed change.
-> Native-only read-authority CI probe/source controls are integrated; R2 upload,
-> promotion, laptop speed and shipped-executable first-install remain open.
+> Actual opaque CI user/account token probes both return401 before bucket reads.
+> Fixed-origin importer107 offline checks and local Windows library cancel/retry/
+> delta/rollback pass, with root overlaps retained. Effective authorization, real
+> R2 upload/public promotion, laptop speed and shipped-executable install remain
+> open. Issued4c60 phase progress/timing is the bounded current client write round.
 > [Bounded delivery scope](NATIVE-DOWNLOAD-ACCELERATION-20261005.md).
 
 > 2026-10-05 root integrates the eleven-file native Guild rank-rename slice

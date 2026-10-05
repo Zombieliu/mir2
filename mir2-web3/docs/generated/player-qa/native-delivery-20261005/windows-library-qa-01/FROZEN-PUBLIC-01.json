@@ -1,0 +1,441 @@
+{
+  "schema": "mir2.origin-updater-qa-public-freeze.v1",
+  "files": [
+    {
+      "path": "commands/build-harness-01.command.json",
+      "size": 1196,
+      "sha256": "3617f6ae20f2a5deaf59b29a2cf935fa5810e168bd543c9c51f143de32731fb8"
+    },
+    {
+      "path": "commands/build-harness-01.stderr.log",
+      "size": 3160,
+      "sha256": "1808ab527053f25ab938ef339e761ef4b6c8ca078efb83ad6e183f85d508bf37"
+    },
+    {
+      "path": "commands/build-harness-01.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/build-harness-02.command.json",
+      "size": 1190,
+      "sha256": "d87f8653acd734152a124f0ebddf51f06c066d24ce66aa2fa901a1ec047099a4"
+    },
+    {
+      "path": "commands/build-harness-02.stderr.log",
+      "size": 192,
+      "sha256": "712b0a0db650bf325cd6ca2017608bd28a10fd9b42b4bcf4f533e113a968fda5"
+    },
+    {
+      "path": "commands/build-harness-02.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/build-harness-03.command.json",
+      "size": 1192,
+      "sha256": "2a8f7f133d08f11804e75451f5e2a325b8031379df8269970091276b47ceb63a"
+    },
+    {
+      "path": "commands/build-harness-03.stderr.log",
+      "size": 192,
+      "sha256": "cedb12f632b8617122279c15633eb78604de3a1f20c881d5cd7be8fe289e394a"
+    },
+    {
+      "path": "commands/build-harness-03.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/freeze-source-01.command.json",
+      "size": 1132,
+      "sha256": "c97e7803c50b87aaba21d59ba4b474cb13f5b02aa4f6521e3561f5f9d8e04fd2"
+    },
+    {
+      "path": "commands/freeze-source-01.stderr.log",
+      "size": 825,
+      "sha256": "d38714b5f611e4b12dc171db05c4be256137fc37aebc5202fb480b91454cc217"
+    },
+    {
+      "path": "commands/freeze-source-01.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/freeze-source-02.command.json",
+      "size": 1132,
+      "sha256": "e7a5c211754c4000ec6345632e4613e4aafa81a67b2ace067df10814c740d6f9"
+    },
+    {
+      "path": "commands/freeze-source-02.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/freeze-source-02.stdout.log",
+      "size": 819,
+      "sha256": "82f385cf06cbe405b8aa354cad685ba5cc420a94c00059fb3c7bdb56497bca25"
+    },
+    {
+      "path": "commands/freeze-source-postfresh-01.command.json",
+      "size": 1135,
+      "sha256": "9568fc9f299df15628b0ebad747170d1b6ef99f5d109cf671d98b441beb764f1"
+    },
+    {
+      "path": "commands/freeze-source-postfresh-01.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/freeze-source-postfresh-01.stdout.log",
+      "size": 819,
+      "sha256": "82f385cf06cbe405b8aa354cad685ba5cc420a94c00059fb3c7bdb56497bca25"
+    },
+    {
+      "path": "commands/fresh-coherent-01.command.json",
+      "size": 1136,
+      "sha256": "4f06da8642c82dbd4d0f240d808552e036b4dfe34f9d8f8b8946bb60821c4a6c"
+    },
+    {
+      "path": "commands/fresh-coherent-01.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/fresh-coherent-01.stdout.log",
+      "size": 6510,
+      "sha256": "f1fef60a507eb34662f999806247ebd6a28eb4731abd61a4234c714e756d710a"
+    },
+    {
+      "path": "commands/lock-verify-01.command.json",
+      "size": 1109,
+      "sha256": "22d33c0a8357dea1f2c9a9491033410fd34906c624f5768fcb35eebe7bd84ac9"
+    },
+    {
+      "path": "commands/lock-verify-01.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/lock-verify-01.stdout.log",
+      "size": 406,
+      "sha256": "c245d302f1dca9b676f156697ce1e9be68c2e1be3d9463beab35a665c41e42f4"
+    },
+    {
+      "path": "commands/offline-lock-01.command.json",
+      "size": 1087,
+      "sha256": "d5ca6db066947c6deec72bba90415f70a61ac0cb2b9f6de58ec96fd13cb4abc3"
+    },
+    {
+      "path": "commands/offline-lock-01.stderr.log",
+      "size": 55,
+      "sha256": "6102fd0ec8b8acc051cc0eef434baae81b777fb2831f0cac2f2c3a4824ed3aa3"
+    },
+    {
+      "path": "commands/offline-lock-01.stdout.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/old-delta-coherent-01.command.json",
+      "size": 1143,
+      "sha256": "6e1fb640857e9d01426181a001b171597ecf2a669dc0024c9d3b20fd53316414"
+    },
+    {
+      "path": "commands/old-delta-coherent-01.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/old-delta-coherent-01.stdout.log",
+      "size": 5142,
+      "sha256": "fda4598b9858c5edd376c46707098f6c3d2bcf2c2f5f8105904410c1a3c05ec3"
+    },
+    {
+      "path": "commands/prepare-inputs-01.command.json",
+      "size": 1135,
+      "sha256": "6877f39feb6822af9d04c0327cc99fa006468ec89b1b1414733e0df0fee9763d"
+    },
+    {
+      "path": "commands/prepare-inputs-01.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/prepare-inputs-01.stdout.log",
+      "size": 401,
+      "sha256": "6aede7c87116e315a63bbbbe3903cf530bae76a96207341e4bfe755c2a86fb3d"
+    },
+    {
+      "path": "commands/rustc-version-01.command.json",
+      "size": 1082,
+      "sha256": "75b444b9234f7661d9b24f564c6aa9116c93f34871f999a7bd7db148f45cc068"
+    },
+    {
+      "path": "commands/rustc-version-01.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/rustc-version-01.stdout.log",
+      "size": 194,
+      "sha256": "185aa337caf524a621d7b1ce7b21a4d6f92f3ea592d009e481fea0e00e0d0434"
+    },
+    {
+      "path": "commands/verify-harness-01.command.json",
+      "size": 1078,
+      "sha256": "2a78692b1aea3d39db72b2bdba2c9ab4380dd8960641ae3abf5599000e74b0c1"
+    },
+    {
+      "path": "commands/verify-harness-01.stderr.log",
+      "size": 59,
+      "sha256": "d0b8a897cfea1ea9bf00fd88515b1f49ce66a99b7566e4bc9ad96d424c21ab45"
+    },
+    {
+      "path": "commands/verify-harness-01.stdout.log",
+      "size": 535,
+      "sha256": "c8bddc507c855868f1566d2d312937da8ffe59dcedf87c3a517ded7c615a745a"
+    },
+    {
+      "path": "commands/verify-harness-02.command.json",
+      "size": 1088,
+      "sha256": "f146e1570bd1718b327fe1dfc65a637bbe19a8ddd89de85b898446fd073c2c0f"
+    },
+    {
+      "path": "commands/verify-harness-02.stderr.log",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "commands/verify-harness-02.stdout.log",
+      "size": 815,
+      "sha256": "3295551c7bc9bc603652b4afc49f3b4dfa26049c046da044e85d446b5bbf7988"
+    },
+    {
+      "path": "FINAL-REVIEW-01.json",
+      "size": 11403,
+      "sha256": "4eff5d86aa66e0e3e3a987357617436549fc999d24f68a2d285d66d1727d6796"
+    },
+    {
+      "path": "freeze_source.py",
+      "size": 2771,
+      "sha256": "fccb69a251c64fee4598b43fd64090757209f99c57420df6eb032baf5636b38b"
+    },
+    {
+      "path": "FROZEN-SOURCE-01.json",
+      "size": 3357,
+      "sha256": "96a34ffb6305c736463fc01d2d4b030407c9157791972877b646400112e02234"
+    },
+    {
+      "path": "harness/bin/mir2-origin-updater-qa.exe",
+      "size": 2547200,
+      "sha256": "58b33b9f1045765bec79aeee6cadb08f47879b10fe452ca18bbafe31f0c97530"
+    },
+    {
+      "path": "harness/Cargo.lock",
+      "size": 20069,
+      "sha256": "c672100620403928f9b716ff077f347962aa5dd1b1b98b27e902f555c91e3711"
+    },
+    {
+      "path": "harness/Cargo.toml",
+      "size": 405,
+      "sha256": "ecac2eba6e1ac87fbe640da944053cc7380c3a7338e97d0c3c2afa95df5a8c79"
+    },
+    {
+      "path": "harness/src/main.rs",
+      "size": 28866,
+      "sha256": "5b9446d3e1b3d7c5f264a59e248c19e2df01dafc6f872ae0d8045093e1385de8"
+    },
+    {
+      "path": "INPUTS-01.json",
+      "size": 20403,
+      "sha256": "a29f999609eb8c32239cf906d5c962667154c05b781defe075444b22167f6017"
+    },
+    {
+      "path": "prepare_inputs.py",
+      "size": 7685,
+      "sha256": "54f6b60833d373787989703657208e680fae5d10190e1db893ff16249d866d27"
+    },
+    {
+      "path": "RAW-FAILURES-01.json",
+      "size": 1321,
+      "sha256": "80e48fc424ccbfcee83ef2bccaad57256019676f5f27bd85350c46a5f2693908"
+    },
+    {
+      "path": "RAW-FAILURES-02.json",
+      "size": 1413,
+      "sha256": "239089f09aa394ccc932df746b9aa5a75c23789a7f62fb7761f68e27436388bd"
+    },
+    {
+      "path": "README.md",
+      "size": 2457,
+      "sha256": "e18242131a3da31011dcc016d2b7c4c26df6690b5f893b7ef56f97ee8f4363a1"
+    },
+    {
+      "path": "reports/delta-native-delivery-events-01.jsonl",
+      "size": 244,
+      "sha256": "2a62179d285fd5792772a7f703cedac9b8fb17cee626d7629d14c2561e2b4204"
+    },
+    {
+      "path": "reports/delta-pending-recheck-status.jsonl",
+      "size": 49,
+      "sha256": "2dd76e88ff1ac919f0bc9c917b10e856ab6eed4fd242af70640b323e286d406f"
+    },
+    {
+      "path": "reports/delta-pending-recheck.json",
+      "size": 461,
+      "sha256": "f88d14a8975ab58757bc99b422d1fa95b3e02f777f9cac93afde092de76a0a26"
+    },
+    {
+      "path": "reports/delta-quarantine-check-source.jsonl",
+      "size": 511,
+      "sha256": "c2cbc102f21ed62bcdf0731db1728f370be843ec706ecaf0b8501e331a62cb9d"
+    },
+    {
+      "path": "reports/delta-quarantine-check-status.jsonl",
+      "size": 98,
+      "sha256": "f29e02c540463c9a15a2bd976a66709a97a87ab7bede8ab51ed681d7e4a7edf2"
+    },
+    {
+      "path": "reports/delta-quarantine-check.json",
+      "size": 809,
+      "sha256": "913f53f126141a40a1a733f2b1c4e255ae3e13b446283a86971dd7b939cd00df"
+    },
+    {
+      "path": "reports/delta-result-01.json",
+      "size": 3467,
+      "sha256": "1c29a3150c677dc5db34101f91fd2b662d0df4afaffe1d3c8e95b39f7d7714c2"
+    },
+    {
+      "path": "reports/delta-update-source.jsonl",
+      "size": 3976,
+      "sha256": "052c4652ac898f168f20307294ed3c31b919f3c4140652d9522dc331decc77fb"
+    },
+    {
+      "path": "reports/delta-update-status.jsonl",
+      "size": 1497,
+      "sha256": "e16615667aad844941d160a3db30f450b3ebcd2b1bba297b04b4b4f47ac6dce5"
+    },
+    {
+      "path": "reports/delta-update.json",
+      "size": 5056,
+      "sha256": "4d76015f538e81835f357ed2a4776a40c4252b4f0d8635a6410874306d9cf379"
+    },
+    {
+      "path": "reports/fresh-cancel-gates.json",
+      "size": 2359,
+      "sha256": "35f0c140036ceafc7b933375abb5ee6a99a4fa0a1e7fc7834308900958788c85"
+    },
+    {
+      "path": "reports/fresh-cancel-source.jsonl",
+      "size": 4133,
+      "sha256": "c3de38e27e6e6bdcfe1bab6d7e81522d2bba655a14b1e00011edc4ddfa64f967"
+    },
+    {
+      "path": "reports/fresh-cancel-status.jsonl",
+      "size": 1287,
+      "sha256": "bff30834b348f4294abce4c02de9fd2d37f5205a7b70f46dbafff1eca6c3e97f"
+    },
+    {
+      "path": "reports/fresh-cancel.json",
+      "size": 4904,
+      "sha256": "c4833adabc972e90741c91bd90230832f19ecd429e1e1d0cef695057afea9801"
+    },
+    {
+      "path": "reports/fresh-native-delivery-events-01.jsonl",
+      "size": 2233,
+      "sha256": "d6b8ddeef4bb98686f818643f551ff71d7fd490660444335da8d53ecaa1e2709"
+    },
+    {
+      "path": "reports/fresh-pending-recheck-status.jsonl",
+      "size": 49,
+      "sha256": "2dd76e88ff1ac919f0bc9c917b10e856ab6eed4fd242af70640b323e286d406f"
+    },
+    {
+      "path": "reports/fresh-pending-recheck.json",
+      "size": 461,
+      "sha256": "c0b5fa12edb6bb12924bf91435a5a6095566541e55a18525080e37c9e34face0"
+    },
+    {
+      "path": "reports/fresh-quarantine-check-source.jsonl",
+      "size": 511,
+      "sha256": "c2cbc102f21ed62bcdf0731db1728f370be843ec706ecaf0b8501e331a62cb9d"
+    },
+    {
+      "path": "reports/fresh-quarantine-check-status.jsonl",
+      "size": 98,
+      "sha256": "f29e02c540463c9a15a2bd976a66709a97a87ab7bede8ab51ed681d7e4a7edf2"
+    },
+    {
+      "path": "reports/fresh-quarantine-check.json",
+      "size": 809,
+      "sha256": "6e6064b53082ba2864db036ce40066388e961059f8f2ae933c90ac75a27bef80"
+    },
+    {
+      "path": "reports/fresh-result-01.json",
+      "size": 3548,
+      "sha256": "33960cb0aa0ce44a6df1ff7fcb3bde9e17afcd60866e8a6b7fc9aec49ebc9cb4"
+    },
+    {
+      "path": "reports/fresh-retry-source.jsonl",
+      "size": 6435,
+      "sha256": "78fca8365aa5bbbb875d1ef32e549c8fc8064f166bee162d9696e8e4eb60b8be"
+    },
+    {
+      "path": "reports/fresh-retry-status.jsonl",
+      "size": 3018,
+      "sha256": "36761ad11408f3c9d689277a078a57352c25a99902289e2f268bbed1b7383561"
+    },
+    {
+      "path": "reports/fresh-retry.json",
+      "size": 7805,
+      "sha256": "26ace9206888fd244af2625a15c9eaa742fc049ce87958d4726cfab8ae923d36"
+    },
+    {
+      "path": "reports/fresh.authenticated-targets.jsonl",
+      "size": 22092254,
+      "sha256": "04240097f338a38479c6a2029b3536862904dd3b2c8cbe163193e92c2748864f"
+    },
+    {
+      "path": "reports/verify-result-02.json",
+      "size": 814,
+      "sha256": "bdd98c102a001319b7d523c2740dbecc93f565d51821c759d88f8ec75f5b1e88"
+    },
+    {
+      "path": "reports/verify-result.json",
+      "size": 534,
+      "sha256": "45111da623052544ea8604e7148ed54845b05c02de2796927c015b99643ed621"
+    },
+    {
+      "path": "run_command.py",
+      "size": 2501,
+      "sha256": "6b75311d710ca446524457da1ed6e0452c85c0bf6925346dcfb2eb623838bac1"
+    },
+    {
+      "path": "summarize_results.py",
+      "size": 8525,
+      "sha256": "f9c1c3725ec1f2f5596f77522c6f150ae90b1f45e9a1d3daa8935583db0d3a5f"
+    },
+    {
+      "path": "verify_lock.py",
+      "size": 1255,
+      "sha256": "2409674628919bd4ea02ead58208092bcf03735616d0e8254267c04ba3a1e4db"
+    }
+  ],
+  "externalReadOnlyInputs": "INPUTS-01.json",
+  "originalInputCount": 72,
+  "fixturePayloadFilesExcluded": true,
+  "allTargetHashesBoundByReport": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01/reports/fresh.authenticated-targets.jsonl",
+    "size": 22092254,
+    "sha256": "04240097f338a38479c6a2029b3536862904dd3b2c8cbe163193e92c2748864f"
+  },
+  "newSummary": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01/FINAL-REVIEW-01.json",
+    "size": 11403,
+    "sha256": "4eff5d86aa66e0e3e3a987357617436549fc999d24f68a2d285d66d1727d6796"
+  },
+  "oldReceiptsAndFrozenSourceUnmodified": true,
+  "completedFinalExecutionNoFurtherWrites": true,
+  "freezeCommandOutput": "Tool stdout only; no in-progress log included in its own inventory"
+}

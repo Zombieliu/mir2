@@ -1,0 +1,60 @@
+TAP version 13
+# Subtest: legacy PUT rejects reserved native prefix: mir2/native/windows-invited/releases/protected.exe
+not ok 1 - legacy PUT rejects reserved native prefix: mir2/native/windows-invited/releases/protected.exe
+  ---
+  duration_ms: 13.9554
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r18\\r17-native-r2-importer-worker-01\\test\\native-r17-publication.test.mjs:11:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    200 !== 403
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 403
+  actual: 200
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r18/r17-native-r2-importer-worker-01/test/native-r17-publication.test.mjs:18:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:296:3)
+  ...
+# Subtest: legacy PUT rejects reserved native prefix:   ///mir2/native/windows-invited/channels/invited.json  
+not ok 2 - legacy PUT rejects reserved native prefix:   ///mir2/native/windows-invited/channels/invited.json  
+  ---
+  duration_ms: 0.3879
+  type: 'test'
+  location: 'C:\\mir2-playtest-releases\\20261004-native-r18\\r17-native-r2-importer-worker-01\\test\\native-r17-publication.test.mjs:11:3'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    200 !== 403
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 403
+  actual: 200
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///C:/mir2-playtest-releases/20261004-native-r18/r17-native-r2-importer-worker-01/test/native-r17-publication.test.mjs:18:12)
+    async Test.run (node:internal/test_runner/test:1054:7)
+    async Test.processPendingSubtests (node:internal/test_runner/test:744:7)
+  ...
+# Subtest: unrelated legacy Web PUT retains its existing behavior
+ok 3 - unrelated legacy Web PUT retains its existing behavior
+  ---
+  duration_ms: 0.3559
+  type: 'test'
+  ...
+1..3
+# tests 3
+# suites 0
+# pass 1
+# fail 2
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 99.827

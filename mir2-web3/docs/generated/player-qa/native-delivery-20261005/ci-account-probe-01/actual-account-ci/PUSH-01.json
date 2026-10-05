@@ -1,0 +1,21 @@
+{
+  "schema": "mir2.native-ci-account-probe-push.v1",
+  "head": "0250695126be552009d81a8e0b951ba85746a70d",
+  "command": [
+    "git",
+    "-c",
+    "gc.auto=0",
+    "-C",
+    "C:\\Users\\Administrator\\.codex\\worktrees\\crowded-combat-control\\mir2-player-journey",
+    "-c",
+    "core.sshCommand=ssh -o ServerAliveInterval=15 -o ServerAliveCountMax=3",
+    "push",
+    "origin",
+    "0250695126be552009d81a8e0b951ba85746a70d:refs/heads/codex/crowded-combat-control-20261003"
+  ],
+  "exitCode": 128,
+  "startedUtc": "2026-10-04T23:17:33.849821+00:00",
+  "elapsedSeconds": 66.65764130000025,
+  "forcePush": false,
+  "credentialsExported": false
+}

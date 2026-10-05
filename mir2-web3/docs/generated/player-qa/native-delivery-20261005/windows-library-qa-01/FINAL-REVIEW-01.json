@@ -1,0 +1,304 @@
+{
+  "schema": "mir2.origin-updater-library-review.v1",
+  "passed": true,
+  "updaterSourceRevision": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+  "sourceFreeze": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01/FROZEN-SOURCE-01.json",
+    "size": 3357,
+    "sha256": "96a34ffb6305c736463fc01d2d4b030407c9157791972877b646400112e02234"
+  },
+  "sourceFreezeAfterStart": true,
+  "actualStartedUtc": "2026-10-04T21:38:28.749494+00:00",
+  "sourceFrozenUtc": "2026-10-04T21:42:51.784803+00:00",
+  "fresh": {
+    "cancelledPartialBundle": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/567dfae85cc7e726e99dfe74f7c9b6a3e1ab868f6c6727f5153a1d5abeac92c1.m2b.gz",
+    "completedUniqueSignedBundles": 11,
+    "elapsedSeconds": 3555.5190692,
+    "firstInstallRollback": {
+      "elapsedSeconds": 887.6439393,
+      "gameLaunchableAfterRollback": false,
+      "highestSeenSequence": 12,
+      "oldPlayableGameExisted": false,
+      "passed": true,
+      "restoredBootstrapMetadata": true,
+      "sameFeedQuarantined": true
+    },
+    "gameHealthAccepted": false,
+    "initialState": "issued-r16-bootstrap-without-game-payload",
+    "passed": true,
+    "pendingFirstLaunchRecheckNoDownloads": true,
+    "personal": {
+      "allPreserved": true,
+      "files": [
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\fixtures/fresh-install\\game/logs/player.log",
+          "sha256": "6269996547F9D5BE48179DB5ECFF870B652C830C21665E95B635AD06CFA5FC59",
+          "size": 39
+        },
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\fixtures/fresh-install\\game/personal-file.txt",
+          "sha256": "CFB7B00E952FB98484433210E4B9C7D387E653916624BE0849046BD96A8D7580",
+          "size": 37
+        },
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\fixtures/fresh-install\\screenshots/local-user.txt",
+          "sha256": "F8CABD80548C220275C86320D62A801009D78E185E3F07BFF92FE99E6005A12B",
+          "size": 39
+        },
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\preferences/fresh\\roaming/mir2-web3/locale.json",
+          "sha256": "DC84556B72DACD74DE10C7668CB25AD039C537E0AC407A9D2878F49CD0C2C2DF",
+          "size": 29
+        },
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\preferences/fresh\\roaming/mir2-web3/window-preferences.json",
+          "sha256": "A447688454CF24BF273216BF12FCC126617B22B4B9F6157B6A381BD4B9031E26",
+          "size": 38
+        },
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\preferences/fresh\\local/mir2-web3/locale.json",
+          "sha256": "5392F3548E1675F51D36DA16F8534B2D8383BC8FAD47D49FF33201FF12518007",
+          "size": 29
+        }
+      ],
+      "syntheticOnly": true
+    },
+    "rawPayloadDownloads": 0,
+    "retryBundleDownloads": 9,
+    "targetHashes": {
+      "bytes": 753611651,
+      "elapsedSeconds": 66.5476545,
+      "evidenceBytes": 22092254,
+      "evidencePath": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\reports\\fresh.authenticated-targets.jsonl",
+      "evidenceSha256": "04240097F338A38479C6A2029B3536862904DD3B2C8CBE163193E92C2748864F",
+      "fileCount": 125965,
+      "manifestAggregateSha256": "94B2C68146E9CAD35A36F9EE9802CDE3291C6C87C07FE075C1BAA3D1AAA9A9EB",
+      "passed": true
+    }
+  },
+  "oldInstalledDelta": {
+    "bundleRequests": 0,
+    "changedGamePayloads": [
+      "BUILD-ATTESTATION.json",
+      "README-START.txt",
+      "mir2-platform-windows.exe"
+    ],
+    "copyElapsedSeconds": 180.7197249,
+    "elapsedSeconds": 307.1991523,
+    "fullExeRequests": 0,
+    "gameHealthAccepted": false,
+    "initialState": "full-r16-installed",
+    "oldPayloadFilesCopiedAndVerified": 125965,
+    "passed": true,
+    "patchRequests": [
+      {
+        "complete": true,
+        "error": null,
+        "method": "payload",
+        "partialBeforeCancel": null,
+        "path": "releases/game-WN-CANDIDATE-20261004-invited-17/delivery/d528c7149953768ed25b77f5da5d84a4f514ee7ab1e7b8c1684cab25e1823a63.m2d.gz",
+        "readBytes": 25424169,
+        "sha256": "D528C7149953768ED25B77F5DA5D84A4F514EE7AB1E7B8C1684CAB25E1823A63",
+        "size": 25424169,
+        "writtenBytes": 25424169
+      }
+    ],
+    "pendingFirstLaunchRecheckNoDownloads": true,
+    "personal": {
+      "allPreserved": true,
+      "files": [
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\fixtures/old-full-install\\game/logs/player.log",
+          "sha256": "6269996547F9D5BE48179DB5ECFF870B652C830C21665E95B635AD06CFA5FC59",
+          "size": 39
+        },
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\fixtures/old-full-install\\game/personal-file.txt",
+          "sha256": "CFB7B00E952FB98484433210E4B9C7D387E653916624BE0849046BD96A8D7580",
+          "size": 37
+        },
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\fixtures/old-full-install\\screenshots/local-user.txt",
+          "sha256": "F8CABD80548C220275C86320D62A801009D78E185E3F07BFF92FE99E6005A12B",
+          "size": 39
+        },
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\preferences/old\\roaming/mir2-web3/locale.json",
+          "sha256": "DC84556B72DACD74DE10C7668CB25AD039C537E0AC407A9D2878F49CD0C2C2DF",
+          "size": 29
+        },
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\preferences/old\\roaming/mir2-web3/window-preferences.json",
+          "sha256": "A447688454CF24BF273216BF12FCC126617B22B4B9F6157B6A381BD4B9031E26",
+          "size": 38
+        },
+        {
+          "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01\\preferences/old\\local/mir2-web3/locale.json",
+          "sha256": "5392F3548E1675F51D36DA16F8534B2D8383BC8FAD47D49FF33201FF12518007",
+          "size": 29
+        }
+      ],
+      "syntheticOnly": true
+    },
+    "rollback": {
+      "elapsedSeconds": 8.9454723,
+      "oldCandidateVerified": "WN-CANDIDATE-20261003-invited-16",
+      "oldPlayableGameExisted": true,
+      "passed": true,
+      "sameFeedQuarantined": true
+    },
+    "unchangedPayloads": 125962
+  },
+  "signedArchiveTransfers": {
+    "uniqueCompleted": 11,
+    "partialAttempts": 1,
+    "totalPayloadRequestAttempts": 12,
+    "completeArchiveBodyBytes": 620189573,
+    "cancelledBodyReadBytes": 1048576,
+    "retainedCompletedArchiveCaches": 2,
+    "retryArchiveDownloads": 9,
+    "rawGameAssetRequests": 0,
+    "notByteRangeResume": true,
+    "firstTwoCompleteArchivesNeverRequestedAgain": true
+  },
+  "targetManifestAudit": {
+    "fileCount": 125965,
+    "totalBytes": 753611651,
+    "aggregateSha256": "94B2C68146E9CAD35A36F9EE9802CDE3291C6C87C07FE075C1BAA3D1AAA9A9EB",
+    "receiptSize": 22092254,
+    "receiptSha256": "04240097f338a38479c6a2029b3536862904dd3b2c8cbe163193e92c2748864f"
+  },
+  "firstLaunch": {
+    "pendingRecheckVerified": true,
+    "bothRechecksZeroSourceRequests": true,
+    "realGameHealthAcceptanceExecuted": false,
+    "normalHealthyAcceptedRefreshExecuted": false,
+    "quarantineDecisionInjectedByHarness": true,
+    "actualFirstGameLaunchExecuted": false,
+    "freshRollbackHasNoOldPlayableGame": true,
+    "oldInstalledRollbackRestoresVerifiedOldCandidate": true
+  },
+  "syntheticPersonalWitnessCountPerFixture": 6,
+  "realUserPreferencesReadOrWritten": false,
+  "nativeBundleEventSource": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01/reports/fresh-native-delivery-events-01.jsonl",
+    "size": 2233,
+    "sha256": "d6b8ddeef4bb98686f818643f551ff71d7fd490660444335da8d53ecaa1e2709"
+  },
+  "nativeDeltaEventSource": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01/reports/delta-native-delivery-events-01.jsonl",
+    "size": 244,
+    "sha256": "2a62179d285fd5792772a7f703cedac9b8fb17cee626d7629d14c2561e2b4204"
+  },
+  "rawCommands": [
+    {
+      "path": "commands/build-harness-01.command.json",
+      "exitCode": 101,
+      "elapsedSeconds": 15.929
+    },
+    {
+      "path": "commands/build-harness-02.command.json",
+      "exitCode": 0,
+      "elapsedSeconds": 0.9
+    },
+    {
+      "path": "commands/build-harness-03.command.json",
+      "exitCode": 0,
+      "elapsedSeconds": 0.576
+    },
+    {
+      "path": "commands/freeze-source-01.command.json",
+      "exitCode": 1,
+      "elapsedSeconds": 0.962
+    },
+    {
+      "path": "commands/freeze-source-02.command.json",
+      "exitCode": 0,
+      "elapsedSeconds": 0.983
+    },
+    {
+      "path": "commands/freeze-source-postfresh-01.command.json",
+      "exitCode": 0,
+      "elapsedSeconds": 1.006
+    },
+    {
+      "path": "commands/fresh-coherent-01.command.json",
+      "exitCode": 0,
+      "elapsedSeconds": 3570.209
+    },
+    {
+      "path": "commands/lock-verify-01.command.json",
+      "exitCode": 0,
+      "elapsedSeconds": 0.054
+    },
+    {
+      "path": "commands/offline-lock-01.command.json",
+      "exitCode": 0,
+      "elapsedSeconds": 0.195
+    },
+    {
+      "path": "commands/old-delta-coherent-01.command.json",
+      "exitCode": 0,
+      "elapsedSeconds": 322.006
+    },
+    {
+      "path": "commands/prepare-inputs-01.command.json",
+      "exitCode": 0,
+      "elapsedSeconds": 2.013
+    },
+    {
+      "path": "commands/rustc-version-01.command.json",
+      "exitCode": 0,
+      "elapsedSeconds": 0.056
+    },
+    {
+      "path": "commands/verify-harness-01.command.json",
+      "exitCode": 2,
+      "elapsedSeconds": 14.841
+    },
+    {
+      "path": "commands/verify-harness-02.command.json",
+      "exitCode": 0,
+      "elapsedSeconds": 15.621
+    }
+  ],
+  "originalInputsPostRun": {
+    "passed": true,
+    "files": 72,
+    "gitBefore": {
+      "revision": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+      "clean": true
+    },
+    "gitAfter": {
+      "revision": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+      "clean": true
+    },
+    "input": {
+      "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01/INPUTS-01.json",
+      "size": 20403,
+      "sha256": "a29f999609eb8c32239cf906d5c962667154c05b781defe075444b22167f6017"
+    }
+  },
+  "rustcVersionReceipt": {
+    "path": "C:/mir2-playtest-releases/20261004-native-r18/origin-acceleration-client-qa-01/commands/rustc-version-01.stdout.log",
+    "size": 194,
+    "sha256": "185aa337caf524a621d7b1ce7b21a4d6f92f3ea592d009e481fea0e00e0d0434"
+  },
+  "limits": {
+    "libraryProfile": "dev; debug=0; opt-level=0",
+    "localOperationTimeOnly": true,
+    "shippedLauncherOrUpdaterExecuted": false,
+    "nativeGameOrUIAcceptance": false,
+    "humanAcceptance": false,
+    "issuedInstallerExecuted": false,
+    "msvcPrerequisiteInstallationTested": false,
+    "actualHttpsOrLaptopSpeedMeasured": false,
+    "r2Delivered": false,
+    "liveFeedOrServerChanged": false
+  },
+  "preparationFailures": [
+    "RAW-FAILURES-01.json",
+    "RAW-FAILURES-02.json"
+  ],
+  "elapsedAuditSeconds": 1.325
+}

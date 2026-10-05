@@ -2,8 +2,12 @@
 
 > 2026-10-05 user prioritizes slow native downloads. Exact signed R17 bundles
 > are appended at the existing origin without Gateway/Caddy restart; bandwidth
-> and R2 publication stay open. A native-only read-authority CI probe is integrated
-> with retained RED/31-case offline controls; actual opaque CI authority is pending.
+> and R2 publication stay open. Actual opaque CI user/account token probes both
+> return401 before bucket reads, old Web jobs skipped; effective authorization is
+> requested. Fixed-origin importer107 model/root-overlapping checks pass, with
+> remote deploy/public stage/promote open. Local Windows library cancel/retry/
+> delta/rollback passes; release/HTTPS/laptop speed is separate. Issued4c60 phase
+> progress/timing is the current bounded client write round.
 > [Delivery scope](NATIVE-DOWNLOAD-ACCELERATION-20261005.md). New WASD/dialog/frame
 > reports are retained for the subsequent P1 round, per the user's steering.
 
