@@ -1,5 +1,18 @@
 # Frontend 1:1 Gaps
 
+2026-10-06 当前 NI-16 Hero 出站产品源码：`b5b6f4c6893cc62f6f9a9c0a1bf58887cf257605`。
+六功能文件；12闭合共享意图、准确pending/actor/epoch、JNI未轮询队列隔离及一行getter生产可见性已落地。
+干净精确提交十门478/519、shared1304+10原ignored、runtime296+1原ignored、fresh Java90+90、
+API31双检查和Mac-host Windows1+1+21通过；预提交聚焦31，计数重叠不相加。
+两个原生诊断APK已保留数据安装到专用API31模拟器，回读SHA/当前variant ELF/选定6647PNG+3metadata匹配。
+两张新原图已查看；仅普通登录页隔离及默认离线hud冷启动，PID8803/8866存活/fatal0；
+各约6秒样本GL506=0不关闭历史零错误GPU FAIL，不算Hero实际JNI/窗口/操作或真实网络验收。
+普通包显示Test server not configured；两个Gateway为空，preview禁止联网。Native strip warning保留，非release体积承诺。
+NI-16仍PARTIAL、完整AP-01–21/goal Active；完整手机UI/资源/音频/更新/resume/Zone保存/实际在线/真机人工仍OPEN。
+[精确源码、双APK SHA、默认画面、红绿及剩余门槛](generated/player-qa/native-android-hero-egress-20261006/README.md)。
+
+下文为预提交及更早版本的历史快照，不重绑到当前产品源码。
+
 2026-10-06 NI-16 Hero 出站预提交验证快照（基点 `0ebd5c66a705cd4691b92287cb10b5d7ade9126f`）。
 12种闭合意图复用原共享Hero pending/epoch/回执，256有界队列/每帧16条；
 补齐owner/Hero/场景/焦点/后台屏障，尚未交Java的旧请求准确退役，已交出的未知结果不重放。

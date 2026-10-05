@@ -1,7 +1,52 @@
 # Android NI-16 Hero 出站 — 2026-10-06
 
-预提交源码验证快照；完整 Windows 对齐 goal 保持 Active、AP-01–21 不缩减、NI-16 为 PARTIAL。
+本页分别保存预提交快照和后续精确源码/安装包证据；完整 Windows 对齐 goal 保持 Active、AP-01–21 不缩减、NI-16 为 PARTIAL。
 本页记录本批源码、编译和宿主回归。APK、实际Android JNI/UI、真实网络与真机分别验收，不能由本页测试代替。
+
+## 精确提交、APK及安装交付
+
+产品源码：`b5b6f4c6893cc62f6f9a9c0a1bf58887cf257605`。干净精确提交重跑十门通过，
+427输入摘要仍为 `80ff854b7126d4d82b936ab0f72d685f356aeeaa21eae08d40c217e513dace41`。
+源码已普通非强制推送并核验PR #253 open Draft，base不改；后续文档提交不是APK的源码SHA。
+
+| 包 | 本机APK | SHA-256 | 字节 |
+| --- | --- | --- | --- |
+| debug | `/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-egress-native-20261006-5oUXMA/final-apks/mir2-native-hero-egress-debug-b5b6f4c68.apk` | `da053ff928ac9e62b69786b5537cfdc2d965dd658db8b39524c316ac96d5dd97` | 533809759 |
+| preview | `/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-egress-native-20261006-5oUXMA/final-apks/mir2-native-hero-egress-preview-b5b6f4c68.apk` | `bd3176f16d9e5d617c068d59662678e09a466b6912c1118bda2f263dd7167ffa` | 541898095 |
+
+两包Code35/name0.1.32-gameshop-phone/min31/compile35；Rust release、诊断Debug/uiPreview，不是商店release。
+两Gateway为空；普通UIPREVIEW=false、preview=true且禁止联网。内嵌当前variant ELF匹配：
+- debug：146075544字节，`cdd02c464fdc2372d44f5bc141bfc9ec48d36baed2cc4982a27bc0028f3e8cba`
+- preview：150133416字节，`7d1ba2e5473dc0ed77a8b354c7eb91cb93ced410327cf6426fccd2d1a0cd2247`
+Gradle的native strip warning保留；“匹配strip任务输出”不表示真的成功去符号，更不是release体积通过。
+
+实体proof pack仍为android-archer-mount-bow-proof-20260912，
+manifest `929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9`；
+两包选定6647PNG/3metadata匹配批准本地来源和冻结权重帧，仅为选定资源字节验收，非正式全资源包。
+
+设备：既有Mir2_API_31_ARM64、Android12/API31/arm64、emulator-5554；0真机。
+安装-r保留数据，分别回读安装base.apk并与发布前hash一致。未wipe、未重启或扩容原AVD。
+
+两个新原图已查看，2340×1080横屏：
+[普通登录页](</Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-egress-native-20261006-5oUXMA/startup-debug-hero-egress.png>)，
+[默认preview HUD](</Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-egress-native-20261006-5oUXMA/startup-preview-hero-egress.png>)。
+普通登录页显示Test server not configured；preview为OFFLINE UI PREVIEW — hud/NOT LIVE GAMEPLAY，
+背景黑场是该hud-only诊断默认场景，不能称为实际地图或Hero显示。
+冷启动PID8803/8866均存活、fatal0，约6秒样本各GL506=0；
+这不关闭既有GL0x0506/完整world/反复切场/持续GPU门FAIL，不是Hero Java→JNI或业务操作实测。
+
+原始交付索引：96文件/2,160,856,601字节，
+`raw-delivery-evidence-index.json` SHA-256
+`33c86dcbf21bdc7c3cfb868d2d015e67bd9da5b2497b4098a2ca1c692bb04bf1`。
+包含当前bound十门、双APK/回读包、资源核验、安装、两个PID日志/原图和源码推送证据；
+不含索引自身及其后的summary/文档/最终guard/文档推送产物。
+APK、原始PNG/日志、缓存、密钥均不入Git。
+
+已关闭：本批源码/实际Android编译、诊断包构建、选定资源、保留数据安装、默认冷启动。
+未关闭：实际Hero Android Java→JNI→共享model/UI/窗口/按钮/pending；真实登录和在线流程；
+完整手机布局、九语言/IME、多指触控、全资源/音频/cache/update、resume、Zone保存、真机与人工接受。
+历史GPU FAIL和交易锁定UI差异保留。NI-16仍PARTIAL，完整AP21项与goal Active不变。
+下一批直接补实际Hero Android JNI/UI独立证据，不借用这里的默认HUD或Mac C ABI当作完成。
 
 ## 根因与修补
 
