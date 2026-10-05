@@ -1,5 +1,17 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-06 native delivery is actually published through authorized
+> Cloudflare/R2 and a dedicated CDN reader. Stage37348106566 checks all36
+> objects/817719767 public bytes; promote37350173926 CAS succeeds. Origin and
+> CDN latest signed13 match, retaining game6032 with new engine48454. Same
+> 27.5MB Bootstrap measures15.858s origin and5.133s CDN HIT. Actual HTTPS
+> resume, CMS and production Windows discovery checks pass; narrowly scoped
+> source compression/BIC fixes preserve original failures. Reader4c60 files
+> are integrated byte-exact. Full installer/laptop timing, R18/human/gameplay
+> acceptance remain OPEN. No game launch/Gateway restart/F/save change and
+> no whole Goal completion follows from this delivery result.
+> [Actual publication proof](generated/player-qa/native-delivery-20261006/cloudflare-publication-01/README.md).
+
 > 2026-10-05 publication tooling sourcec8fea passes actual Linux CI37292261788,
 > 138 Node/64 Python and2 actual interrupt checks, zero skips. Root retained
 > complete raw logs/artifact and verified source hashes. Credential and release

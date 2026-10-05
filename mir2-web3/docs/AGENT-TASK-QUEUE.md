@@ -1,5 +1,19 @@
 # Agent Task Queue
 
+> 2026-10-06 downloader priority closes effective authorization, fixed6 origin
+> append, real R2 stage/full36 public hashes and separate CAS promotion. Source
+> and CDN are now coherent signed13; gameR17/source6032 stays unchanged. New
+> public Bootstrap seeds engine48454 resume/progress. Dedicated reader/route,
+> cache MISS/HIT, actual TLS206 resume/416/If-Range and native Windows
+> HttpsSource/ureq2.12.1/CMS checks pass. Compression-length502 and BIC403
+> failures are retained and fixed without weakening integrity checks or
+> disabling zone-wide security. Same27.5MB origin15.858s/CDN HIT5.133s is
+> measured; full installer/affected-laptop timing remains OPEN. No Gateway
+> restart/F/save mutation. Broader Goal stays blocked; this publication does
+> not accept R18 or complete gameplay parity. WASD/dialog/frame reports remain
+> queued for the user's subsequent P1 round.
+> [Deployment, original failures and exact proof](generated/player-qa/native-delivery-20261006/cloudflare-publication-01/README.md).
+
 > 2026-10-05 actual Linux verify37292261788/sourcec8fea passes Node138/138,
 > Python64/64 and SIGINT2/2 with no skips. Full raw artifact SHA and source pins
 > match; old Windows observations remain. Credential probe, source/R2 staging,

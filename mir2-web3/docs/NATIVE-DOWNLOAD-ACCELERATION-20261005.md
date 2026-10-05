@@ -1,5 +1,34 @@
 # 下载器耗时诊断与分发进度
 
+2026-10-06：用户安装的 Cloudflare 连接器授权已实际验证。原生更新专用 Worker
+和路由已上线，R2 的 36 个不可变对象共 817,719,767 字节逐个公网完整 SHA
+校验通过。实际 stage 37348106566 与独立 CAS promote 37350173926 都成功；
+源站和 CDN 当前均为签名 sequence13。新启动器内置 source48454 的续传和
+阶段进度引擎，游戏仍为原 R17/source6032。以下旧记录中的“公开12／待授权”
+是当时状态，不再代表现状。
+
+[现在可分享的 Windows 下载器](https://assets.mir2.obelisk.build/client-updates/installers/6175bd72f273c2f00d96117183fc1bf4d1f987c15455a1064e4f0e975ca70af5/Mir2Setup.exe)
+为 27,496,643 字节，SHA 为
+`6175bd72f273c2f00d96117183fc1bf4d1f987c15455a1064e4f0e975ca70af5`。
+本机同文件、同参数、完整 TLS/SHA 对照：源站15.858秒，CDN MISS5.405秒、
+HIT5.133秒（SIN节点），暖缓存约3.09倍。实际续传只传剩余26,448,067字节，
+重建完整文件 SHA 相符；后缀、416及失效 If-Range 返回完整文件均通过。
+这些计时只覆盖该下载器文件，不是完整游戏安装或另一台笔记本的计时。
+
+原首轮 stage 的502来自源站压缩移除 Content-Length；只给更新文件关闭该
+HTTP 压缩后，Worker 实际读取长度恢复且第二轮完整校验通过。严格长度/SHA
+门未放宽。另捕获 Browser Integrity Check 的403/1010，仅对下载域名下公开
+更新路径的 GET/HEAD 设置 `bic:false`；全站检查仍为 on、security_level仍为
+medium，私有指针和写方法不豁免。真实 Windows Rust/ureq2.12.1读取 CDN、
+生产 HttpsSource discovery、Windows CMS 验证、完整引擎 SHA 与 HTTPS206
+通过；Python默认请求也从403恢复200。原失败及更正归因均保留。
+
+追加六个原源对象、两个经验证的 Caddy 配置重载与 feed 原子切换已记录；
+网关未重启，逐操作 PID 核对通过。未运行游戏、替换 F 安装或修改真实存档。
+更新文件分发与游戏网关分离，不需要为这次 CDN 发布重新编译游戏。
+完整安装器实机／受影响笔记本首次安装速度、人类验收及 R18 上线仍待完成。
+[实际部署、失败、原始 CI ZIP、测速、续传与本机 HTTPS/CMS 证据](generated/player-qa/native-delivery-20261006/cloudflare-publication-01/README.md)。
+
 2026-10-05推送源码c8fea的实际Linux流水线37292261788通过：Node138、Python64、
 实际SIGINT2，均零跳过。根下载完整51,857字节artifact并匹配GitHub摘要，Linux
 原始收据绑定生产源码/测试和64106字节原始表。GNU timeout真实受控子进程

@@ -1,5 +1,19 @@
 # Agent Orchestration
 
+> 2026-10-06 root uses the newly installed Cloudflare connector as the sole
+> cloud/origin writer. Exact upload sourceafc3 and reader4c60 deploy/readback
+> pass; original upload secret is inherited without retrieval. Fixed6 origin
+> append passes11 actual Linux negative checks. Actual CI stage37348106566
+> verifies36 immutable public objects/817719767 bytes, then separate CAS
+> promote37350173926 advances CDN13; origin13 atomically matches. Source
+> compression and narrowly scoped BIC compatibility fixes retain original
+> failures. Same27.5MB bootstrap measures15.858s origin,5.405s MISS/5.133s HIT;
+> actual TLS resume and unchanged source48454 native HTTPS/CMS pass. Reader
+> production/test/config files are admitted byte-exact from pushed4c60.
+> No Gateway restart/game launch/F/save change. Full installer/laptop timing,
+> R18 rollout, human acceptance and the broader blocked Goal remain open.
+> [Actual public evidence](generated/player-qa/native-delivery-20261006/cloudflare-publication-01/README.md).
+
 > 2026-10-05 pushed publication sourcec8fea passes actual Linux CI37292261788:
 > Node138/Python64 plus actual SIGINT2, zero skips. Root matches full artifact
 > digest and source-bound Linux receipts; all authority/stage/promote/Web jobs
