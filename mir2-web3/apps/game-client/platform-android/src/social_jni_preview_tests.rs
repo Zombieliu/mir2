@@ -91,8 +91,14 @@ fn received_models(
                 if [2,9].contains(&slot) {json!({"unique_id":u64::MAX-slot,"item_index":1000,"count":if slot==2 {9} else {5}})}
                 else {serde_json::Value::Null}
             }).collect::<Vec<_>>() })));
-            let snapshot = json!({"inventoryItems":[{"uniqueId":u64::MAX,"slot":0,"count":201,"name":"JNI first"},
-                {"uniqueId":80011,"slot":11,"count":3,"name":"JNI last"}],
+            let source = |id: u64, count: u16| {
+                json!({
+                "info":{"item_index":1000,"image":100,"item_type":0,"shape":0,"stack_size":500},
+                "userItem":{"unique_id":id,"item_index":1000,"count":count,"identified":true}})
+            };
+            let snapshot = json!({"inventoryItems":[{"uniqueId":u64::MAX,"slot":0,"count":201,"name":"JNI first",
+                    "tooltipSource":source(u64::MAX,201)},
+                {"uniqueId":80011,"slot":11,"count":3,"name":"JNI last","tooltipSource":source(80011,3)}],
                 "stage5Systems":{"trade":{"partner":"JNI Guest","settlementNonce":"jni-offer-1","offeredCurrency":"gold",
                     "offeredSlots":{"1":0,"8":11},"offeredUniqueIds":{"1":u64::MAX,"8":80011},
                     "offeredGold":125,"locked":true,"completed":false}}});
@@ -194,4 +200,76 @@ fn social_jni_metadata_retains_delayed_observation_and_resets_between_requests()
         apply(&mut world);
         assert!(world.resource::<OfflineSocialJniReceipt>().scene.is_none());
     }
+}
+
+#[test]
+fn social_jni_trade_observer_matches_original_inventory_and_two_window_presentation() {
+    let mut state = NativePlayerUiState::default();
+    // The unchanged shared trade_dialog::sync opens Inventory on TradeAccept.
+    // This predicate test models that documented output; it is not JNI or GPU.
+    state.core.panel = UiPanel::Inventory;
+    state.trade_dialog.open = true;
+    assert!(social_jni_presentation_received("trade-jni", &state));
+    assert!(!social_jni_presentation_received(
+        "trade-closed-jni",
+        &state
+    ));
+    state.trade_dialog.open = false;
+    assert!(!social_jni_presentation_received("trade-jni", &state));
+    assert!(social_jni_presentation_received("trade-closed-jni", &state));
+    state.core.panel = UiPanel::Trade;
+    assert!(!social_jni_presentation_received("trade-jni", &state));
+    assert!(!social_jni_presentation_received(
+        "trade-closed-jni",
+        &state
+    ));
+    assert!(!social_jni_presentation_received(
+        "unlisted-social-jni",
+        &state
+    ));
+}
+
+#[test]
+fn social_jni_own_trade_rows_require_metadata_and_use_original_icon_calculation() {
+    let (social, inventory, ui) = received_models("trade-jni");
+    for slot in [1, 8] {
+        let row = social.trade.my_items[slot].as_ref().unwrap();
+        assert_eq!(
+            mir2_client_bevy::inventory::concrete_item_image_index(
+                0,
+                u32::from(row.count),
+                row.tooltip_source.as_ref()
+            ),
+            Some(100)
+        );
+        let mut missing = social.clone();
+        missing.trade.my_items[slot]
+            .as_mut()
+            .unwrap()
+            .tooltip_source = None;
+        assert!(!social_jni_models_received(
+            "trade-jni",
+            &missing,
+            &inventory,
+            &ui
+        ));
+        let mut wrong = social.clone();
+        wrong.trade.my_items[slot]
+            .as_mut()
+            .unwrap()
+            .tooltip_source
+            .as_mut()
+            .unwrap()
+            .user_item
+            .as_mut()
+            .unwrap()
+            .unique_id = 99;
+        assert!(!social_jni_models_received(
+            "trade-jni",
+            &wrong,
+            &inventory,
+            &ui
+        ));
+    }
+    // Read-only original reducer/icon calculation, not a rendered Android frame.
 }

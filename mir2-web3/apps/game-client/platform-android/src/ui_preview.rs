@@ -139,8 +139,16 @@ fn social_jni_models_received(
             && social.trade.my_gold == 125 && social.trade.my_confirmed
             && social.trade.my_items.len() == 10
             && social.trade.my_items.iter().enumerate().all(|(slot, item)| match slot {
-                1 => item.as_ref().is_some_and(|item| item.unique_id == Some(u64::MAX) && item.count == 201),
-                8 => item.as_ref().is_some_and(|item| item.unique_id == Some(80011) && item.count == 3),
+                1 | 8 => item.as_ref().is_some_and(|item| {
+                    let (id, count) = if slot == 1 {(u64::MAX, 201)} else {(80011, 3)};
+                    item.unique_id == Some(id) && item.count == count && item.item_index == Some(1000)
+                        && item.tooltip_source.as_ref().is_some_and(|source| {
+                            source.info.image == 100 && source.info.stack_size == 500
+                                && source.user_item.as_ref().is_some_and(|user| {
+                                    user.unique_id == id && user.item_index == 1000 && user.count == count
+                                })
+                        })
+                }),
                 _ => item.is_none(),
             })
             && social.trade.partner_gold == 17 && social.trade.partner_items.len() == 10
@@ -157,6 +165,18 @@ fn social_jni_models_received(
     }
 }
 
+fn social_jni_presentation_received(scene: &str, state: &NativePlayerUiState) -> bool {
+    match scene {
+        "group-jni" => state.core.panel == UiPanel::Group,
+        "guild-jni" => state.core.panel == UiPanel::Guild,
+        // Original shared TradeAccept opens Inventory AND both trade windows.
+        // UiPanel::Trade is only the initial preview request, not this result.
+        "trade-jni" => state.core.panel == UiPanel::Inventory && state.trade_dialog.open,
+        "trade-closed-jni" => state.core.panel == UiPanel::Inventory && !state.trade_dialog.open,
+        _ => false,
+    }
+}
+
 fn report_social_jni_consumer(
     mut receipt: ResMut<OfflineSocialJniReceipt>,
     host: Res<crate::shared_shell::HostState>,
@@ -168,7 +188,7 @@ fn report_social_jni_consumer(
 ) {
     let Some(scene) = receipt.scene.clone() else { return; };
     if receipt.logged || host.phase != "IN_GAME"
-        || (scene != "trade-closed-jni" && state.core.panel != preview_panel_for_scene(&scene))
+        || !social_jni_presentation_received(&scene, &state)
         || !social_jni_models_received(&scene, &social, &inventory, &ui)
     { return; }
     // IDs/names are admitted by the unchanged private Host cursor. This

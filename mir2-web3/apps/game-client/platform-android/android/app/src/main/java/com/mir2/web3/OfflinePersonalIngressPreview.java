@@ -111,6 +111,13 @@ final class OfflinePersonalIngressPreview {
                 JSONObject first = snapshot.getJSONArray("inventoryItems").getJSONObject(0);
                 first.put("uniqueId", max);
                 first.put("count", 201);
+                // Only these offline own-offer rows need the shared trade
+                // renderer's explicit original item metadata. A bag icon by
+                // itself is not a tooltip source, item grant or operation ACK.
+                first.put("tooltipSource", socialTradeItemSource(max, 201, first.getString("name")));
+                JSONObject last = snapshot.getJSONArray("inventoryItems").getJSONObject(11);
+                last.put("tooltipSource", socialTradeItemSource(java.math.BigInteger.valueOf(80011), 3,
+                        last.getString("name")));
                 snapshot.put("stage5Systems", GatewaySession.object("trade",
                         GatewaySession.object("settlementNonce", "jni-offer-1", "partner", "JNI Guest",
                                 "offeredSlots", GatewaySession.object("1", 0, "8", 11),
@@ -127,6 +134,13 @@ final class OfflinePersonalIngressPreview {
             events.add(packet("TradeCancel", GatewaySession.object("unlock", false)));
         }
         return Collections.unmodifiableList(events);
+    }
+
+    private static JSONObject socialTradeItemSource(java.math.BigInteger uniqueId, int count, String name) {
+        return GatewaySession.object("info", GatewaySession.object("item_index", 1000, "name", name,
+                "image", 100, "item_type", 0, "shape", 0, "stack_size", 500),
+                "userItem", GatewaySession.object("unique_id", uniqueId, "item_index", 1000,
+                "count", count, "identified", true));
     }
 
     private static boolean isMailScene(String scene) {

@@ -244,6 +244,34 @@ public class OfflinePersonalIngressPreviewTest {
         }
     }
 
+    @Test public void socialJniOwnTradeItemsCarryOriginalRendererMetadata() throws Exception {
+        for (String scene : new String[]{"trade-jni", "trade-closed-jni"}) {
+            List<String> events = OfflinePersonalIngressPreview.events(true, scene);
+            JSONObject world = WireJson.decode(WireJson.decode(events.get(4)).getString("worldSnapshot"));
+            JSONArray bag = world.getJSONArray("inventoryItems");
+            for (int slot : new int[]{0, 11}) {
+                JSONObject item = bag.getJSONObject(slot);
+                JSONObject source = item.getJSONObject("tooltipSource");
+                JSONObject info = source.getJSONObject("info"), user = source.getJSONObject("userItem");
+                assertEquals(1000, info.getInt("item_index"));
+                assertEquals(100, info.getInt("image"));
+                assertEquals(0, info.getInt("item_type"));
+                assertEquals(500, info.getInt("stack_size"));
+                assertEquals(info.getInt("item_index"), user.getInt("item_index"));
+                assertEquals(item.get("uniqueId").toString(), user.get("unique_id").toString());
+                assertEquals(slot == 0 ? 201 : 3, item.getInt("count"));
+                assertEquals(item.getInt("count"), user.getInt("count"));
+                assertTrue(user.getBoolean("identified"));
+            }
+            // No generic bag, other scene, account or operation is altered.
+            assertFalse(bag.getJSONObject(1).has("tooltipSource"));
+        }
+        JSONObject group = WireJson.decode(WireJson.decode(
+                OfflinePersonalIngressPreview.events(true, "group-jni").get(5)).getString("worldSnapshot"));
+        assertFalse(group.getJSONArray("inventoryItems").getJSONObject(0).has("tooltipSource"));
+        assertTrue(OfflinePersonalIngressPreview.events(false, "trade-jni").isEmpty());
+    }
+
     @Test public void independentResizeTestFollowsOwnerSnapshotAndFullItems() throws Exception {
         List<String> events = OfflinePersonalIngressPreview.events(true, "storage-jni");
         int world = -1, items = -1, resize = -1;
