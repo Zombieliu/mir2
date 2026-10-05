@@ -1,6 +1,27 @@
 # Agent Task Queue
 
-2026-10-03 当前 NI-15 本人报价共享投影源码：`a9698682322d27bab6be8bab69327841f540f89c`。
+2026-10-05 当前 NI-15 社交出站源码：`0665a4f4ecc5449ca100d613561f78b40c4a9e76`。
+补齐原 AndroidSharedShellPlugin 缺失的 Group/Guild/Trade UI 转发注册；
+17种闭合协议字段与冻结Windows相同，沿原共享pending规则捕获准确操作，
+只恢复确定未发送的对应草稿/邀请；拒绝旧邀请代次，缺失关联走原断线/DataReset边界。
+切图/render-ready/owner/前后台/网络/焦点屏障保留；队列满不覆盖旧项，每帧至多16条。
+入队或socket写入不构成权威ACK，不改成员/权限/钱包/物品/锁定/结算规则。
+五功能文件仅新增，68输入在干净提交十门/双APK前后稳定；63受保护整文件、
+57旧Java断言/10认证会话方法/5冻结物品helper未改，两原worktree Git checkpoint保留。
+生产调度注册compiled red0/1→green；最终431/465、shared1304+10原ignored、
+runtime296+1原ignored、fresh Java81+81/API31双检查、Mac上Windows5+1+21通过，
+不是完整Windows OS gate，也不是实际Android触控/JNI/在线发送验收。
+新两APK/ELF与选定6647PNG+3metadata已核对，未安装、无本源新截图；
+当前在线设备0模拟器/0真机，历史2be65cc9邮件JNI与GPU FAIL不重绑。
+实际社交JNI/原overlay/网络写失败/真实登录权限邀请报价结算/完整手机UI/真机仍OPEN；
+NI-15仍PARTIAL、完整AP-01–21/goal Active；UI修补待明确重新批准。
+只读刷新Windows来源仍56ee063fb，较冻结3d735745f仅+1提交/83文档证据/0功能源，
+SSH ls-remote中断未算成功，以已fetch对象和GitHub只读API一致性核验。
+[社交出站精确源码、双APK、十门与剩余验收](generated/player-qa/native-android-social-egress-20261005/README.md)。
+
+下文只记录对应历史源码/安装包，不重绑到当前本叶。
+
+2026-10-03 历史 NI-15 本人报价共享投影源码：`a9698682322d27bab6be8bab69327841f540f89c`。
 将冻结 Windows 的 OwnOffer 字段及纯展示函数抽入共享 native_trade_ingress，
 Windows 仅薄委托且原5测试/fixture字节未改；Android在既有核验角色snapshot后调用。
 服务端自己的nonce/10槽位/u64实例/计数/tooltip/金额/锁定与guest报价保持分离；
