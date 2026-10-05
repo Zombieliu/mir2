@@ -3002,6 +3002,21 @@ impl NativePlayerUiIntentQueue {
         drained
     }
 
+    /// Social-only host seam. Selection and retained domains each stay FIFO;
+    /// it cannot steal mail, hero, buffs, equipment or world-control intents.
+    pub fn drain_social_intents_bounded(&mut self, max: usize) -> Vec<NativePlayerUiIntent> {
+        let mut drained = Vec::new();
+        for _ in 0..self.intents.len() {
+            let intent = self.intents.pop_front().expect("queue length was fixed");
+            if drained.len() < max && crate::native_social_egress::is_native_social_intent(&intent) {
+                drained.push(intent);
+            } else {
+                self.intents.push_back(intent);
+            }
+        }
+        drained
+    }
+
     /// Queue a server-authoritative operation only when the same logical key
     /// is not already awaiting readback.
     pub fn push_pending_intent(

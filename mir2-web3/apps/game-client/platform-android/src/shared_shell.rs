@@ -758,6 +758,7 @@ impl Plugin for AndroidSharedShellPlugin {
                     forward_intents,
                     forward_quest_ui_intents,
                     forward_native_mail_ui_intents,
+                    forward_native_social_ui_intents,
                     discard_inactive_player_commands,
                     keep_android_ime_owned_by_host,
                     keyboard,
@@ -2758,6 +2759,80 @@ fn forward_native_mail_ui_intents(
     }
 }
 
+/// Only the original Group/Guild/Trade UI queue may enter this closed channel.
+/// An enqueue or a socket write is not an authoritative receipt.
+fn forward_native_social_ui_intents(
+    mut shell: ResMut<NativeShellModel>,
+    mut host: ResMut<HostState>,
+    windows: Query<&Window>,
+    lifecycle: Option<Res<crate::android_input::AndroidShellState>>,
+    mut intents: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>>,
+    mut social: Option<ResMut<mir2_client_bevy::social::SocialModel>>,
+    mut player_ui: Option<ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
+    mut gateway: Option<ResMut<crate::gateway_bridge::AndroidGatewayOutboundQueue>>,
+    mut adapter: Option<ResMut<crate::gateway_bridge::AndroidGatewayHostAdapter>>,
+    mut ui_state: Option<ResMut<mir2_ui_core::state::UiState>>,
+) {
+    use mir2_client_bevy::native_social_egress::{
+        NativeSocialDispatchContext, project_native_social_intent,
+    };
+    let (Some(intents), Some(social), Some(player_ui)) = (
+        intents.as_deref_mut(), social.as_deref_mut(), player_ui.as_deref_mut(),
+    ) else { return; };
+    if !matches!(shell.screen, Screen::StartingGame | Screen::InGame)
+        || !matches!(host.phase.as_str(), "STARTING" | "IN_GAME")
+    {
+        for intent in intents.drain_social_intents_bounded(usize::MAX) {
+            NativeSocialDispatchContext::capture(&intent, social, player_ui)
+                .release_unsent(&intent, social, player_ui);
+        }
+        return;
+    }
+    let owner_ready = host.world.as_ref().is_some_and(|world| {
+        host.player.identity().is_some_and(|(_, name)| name == world.player_name)
+    });
+    let ready = shell.screen == Screen::InGame && host.phase == "IN_GAME" && owner_ready
+        && host.pending_world_request.is_none() && host.pending_render_request.is_none()
+        && !host.render_load_active && host.deferred_render_load.is_none()
+        && windows.single().is_ok_and(|window| window.focused)
+        && lifecycle.as_deref().is_some_and(|state| {
+            state.lifecycle == crate::android_input::AndroidLifecycle::Foreground
+                && state.network == crate::android_input::AndroidNetwork::Available
+        });
+    if !ready { return; }
+    for intent in intents.drain_social_intents_bounded(16) {
+        let context = NativeSocialDispatchContext::capture(&intent, social, player_ui);
+        if !context.correlation_known() {
+            // A boolean reply cannot identify its inviter. Do not send it
+            // against a guessed/new invitation or fabricate a local ACK.
+            host.reset_gameplay();
+            shell.apply_gateway_event(Event::Disconnect {
+                reason: Some("Social invitation context lost; reconnect".into()),
+            });
+            intents.clear();
+            if let Some(queue) = gateway.as_deref_mut() {
+                if let (Some(adapter), Some(ui_state)) = (adapter.as_deref_mut(), ui_state.as_deref_mut()) {
+                    adapter.on_connection_lost(queue, ui_state);
+                } else { queue.mark_terminal_reset(); }
+            }
+            crate::mir2_android_gateway_connection_lost();
+            mir2_bevy_runtime::native_ingest::push_native_data_reset();
+            OUTBOX.lock().unwrap_or_else(|e| e.into_inner()).clear();
+            send(json!({"type":"disconnect"}));
+            return;
+        }
+        let accepted = context.invitation_current(social)
+            && project_native_social_intent(&intent).ok().is_some_and(|command| {
+                gateway.as_deref_mut().is_some_and(|queue| queue.enqueue_native_social(&command).is_ok())
+            });
+        if !accepted {
+            // Definitely unsent: release only this shared pending operation,
+            // preserving a newer draft/invitation and all authoritative state.
+            context.release_unsent(&intent, social, player_ui);
+        }
+    }
+}
+
 // Only unsent shared Gateway effects are invalidated. Local option persistence
 // and application effects must survive; this is not a server rollback/receipt.
 fn discard_player_commands(effects: &mut mir2_client_bevy::crystal_ui::overlays::UiEffectQueue) {
@@ -3387,6 +3462,238 @@ mod tests {
         .init_resource::<NativeUiIntentQueue>()
         .add_systems(PreUpdate, receive);
         app
+    }
+
+    #[cfg(feature = "ui-preview")]
+    #[test]
+    fn social_egress_actual_shell_registers_network_forwarder() {
+        let mut app = App::new();
+        app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()));
+        app.add_plugins(AndroidSharedShellPlugin);
+        let mut schedules = app.world_mut().remove_resource::<Schedules>().unwrap();
+        let post = schedules.get_mut(PostUpdate).unwrap();
+        post.initialize(app.world_mut()).unwrap();
+        let names = post.systems().unwrap().map(|(_, system)| system.name().to_string()).collect::<Vec<_>>();
+        assert!(names.iter().any(|name| name.ends_with("forward_native_social_ui_intents")),
+            "No Android social forwarder registered: {names:?}");
+        // Registration only. Actual producer/lease behavior has separate
+        // headless tests; neither is Android JNI, GPU or online acceptance.
+    }
+
+
+    fn social_egress_app() -> App {
+        use crate::android_input::{AndroidLifecycle, AndroidNetwork, AndroidShellState};
+        let mut app = App::new();
+        app.add_plugins(mir2_bevy_runtime::Mir2NativeSessionBoundaryPlugin);
+        mir2_bevy_runtime::native_ingest::install_native_ingestion(&mut app);
+        let mut host = HostState {
+            phase: "IN_GAME".into(),
+            world: Some(HostWorldPosition { player_name: "Fixture".into(), map_file_name: "0".into(), x: 10, y: 20 }),
+            ..default()
+        };
+        host.player.snapshot(&json!({"playerObjectId":42,"entities":[
+            {"kind":"selfPlayer","objectId":42,"name":"Fixture"}]}).to_string()).unwrap();
+        host.bind_social_owner().unwrap();
+        app.insert_resource(NativeShellModel { screen: Screen::InGame, ..default() })
+            .insert_resource(host)
+            .insert_resource(AndroidShellState { lifecycle: AndroidLifecycle::Foreground, network: AndroidNetwork::Available, ..default() })
+            .init_resource::<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>()
+            .init_resource::<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>()
+            .init_resource::<mir2_client_bevy::social::SocialModel>()
+            .init_resource::<crate::gateway_bridge::AndroidGatewayOutboundQueue>()
+            .init_resource::<crate::gateway_bridge::AndroidGatewayHostAdapter>()
+            .init_resource::<mir2_ui_core::state::UiState>()
+            .add_systems(PostUpdate, forward_native_social_ui_intents);
+        app.world_mut().spawn(Window { focused: true, ..default() });
+        app
+    }
+
+    fn social_egress_push(app: &mut App, intent: mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntent) {
+        use mir2_client_bevy::{crystal_ui::overlays::NativePlayerUiIntentQueue, social::SocialModel};
+        app.world_mut().resource_scope(|world, mut social: Mut<SocialModel>| {
+            assert!(world.resource_mut::<NativePlayerUiIntentQueue>().push_social_pending(&mut social, intent));
+        });
+    }
+
+    fn social_egress_take(app: &mut App) -> Vec<crate::gateway_bridge::AndroidGatewayOutboundLease> {
+        use crate::gateway_bridge::{AndroidGatewayHostAdapter, AndroidGatewayOutboundQueue};
+        let state = app.world().resource::<crate::android_input::AndroidShellState>().clone();
+        app.world_mut().resource_scope(|world, mut adapter: Mut<AndroidGatewayHostAdapter>| {
+            adapter.drain_ready(&mut world.resource_mut::<AndroidGatewayOutboundQueue>(), &state, 256)
+        })
+    }
+
+    #[test]
+    fn social_egress_actual_forwarder_enqueues_but_sent_write_never_acknowledges() {
+        use crate::gateway_bridge::*;
+        use mir2_client_bevy::{crystal_ui::overlays::NativePlayerUiIntent, social::SocialModel};
+        let mut app = social_egress_app();
+        social_egress_push(&mut app, NativePlayerUiIntent::GroupSwitch { allow_group: true });
+        let before = app.world().resource::<SocialModel>().clone();
+        app.update();
+        let lease = social_egress_take(&mut app).pop().unwrap();
+        assert_eq!(serde_json::from_str::<Value>(&lease.outbound().json).unwrap(), json!({"type":"switchGroup","allowGroup":true}));
+        assert_eq!(app.world().resource::<SocialModel>(), &before);
+        let outcome = app.world_mut().resource_scope(|world, mut adapter: Mut<AndroidGatewayHostAdapter>| {
+            world.resource_scope(|world, mut ui: Mut<mir2_ui_core::state::UiState>| {
+                adapter.on_host_write_result(&mut world.resource_mut::<AndroidGatewayOutboundQueue>(), &mut ui, lease, AndroidGatewayHostWriteResult::Sent)
+            })
+        });
+        assert_eq!(outcome, AndroidGatewayHostWriteOutcome::Sent);
+        assert_eq!(app.world().resource::<SocialModel>(), &before);
+        let mut authoritative = SocialModel::default();
+        assert!(authoritative.apply_packet("SwitchGroup", &json!({"allowGroup":true})));
+        app.world_mut().resource_mut::<SocialModel>().apply_authoritative(authoritative);
+        assert!(app.world().resource::<SocialModel>().pending.is_empty());
+        // Headless real producer/lease only, not Android JNI or live server.
+    }
+
+    #[test]
+    fn social_egress_actual_forwarder_keeps_gold_guest_and_lock_server_authoritative() {
+        use mir2_client_bevy::{crystal_ui::overlays::NativePlayerUiIntent, social::SocialModel};
+        let mut app = social_egress_app();
+        {
+            let mut social = app.world_mut().resource_mut::<SocialModel>();
+            assert!(social.apply_packet("TradeAccept", &json!({"name":"Alice"})));
+            social.trade.my_gold = 50;
+            social.trade.partner_gold = 17;
+        }
+        social_egress_push(&mut app, NativePlayerUiIntent::TradeGold { amount: 125 });
+        let before = app.world().resource::<SocialModel>().clone();
+        app.update();
+        let lease = social_egress_take(&mut app).pop().unwrap();
+        assert_eq!(serde_json::from_str::<Value>(&lease.outbound().json).unwrap(), json!({"type":"tradeGold","amount":125}));
+        assert_eq!(app.world().resource::<SocialModel>(), &before);
+        assert_eq!(app.world().resource::<SocialModel>().trade.my_gold, 50);
+        assert_eq!(app.world().resource::<SocialModel>().trade.partner_gold, 17);
+        assert!(!app.world().resource::<SocialModel>().trade.my_confirmed);
+    }
+
+    #[test]
+    fn social_egress_actual_forwarder_respects_owner_render_focus_and_lifecycle_barriers() {
+        use mir2_client_bevy::{crystal_ui::overlays::NativePlayerUiIntent, social::SocialModel};
+        use crate::android_input::*;
+        for barrier in 0..9 {
+            let mut app = social_egress_app();
+            social_egress_push(&mut app, NativePlayerUiIntent::GroupSwitch { allow_group: true });
+            let before = app.world().resource::<SocialModel>().clone();
+            match barrier {
+                0 => app.world_mut().resource_mut::<HostState>().player.reset(),
+                1 => app.world_mut().resource_mut::<HostState>().pending_world_request = Some(7),
+                2 => app.world_mut().resource_mut::<HostState>().pending_render_request = Some(7),
+                3 => app.world_mut().resource_mut::<HostState>().render_load_active = true,
+                4 => app.world_mut().resource_mut::<AndroidShellState>().lifecycle = AndroidLifecycle::Background,
+                5 => app.world_mut().resource_mut::<AndroidShellState>().network = AndroidNetwork::Unavailable,
+                6 => {
+                    let world = app.world_mut();
+                    let mut query = world.query::<&mut Window>();
+                    query.single_mut(world).unwrap().focused = false;
+                }
+                7 => app.world_mut().resource_mut::<NativeShellModel>().screen = Screen::StartingGame,
+                8 => app.world_mut().resource_mut::<HostState>().world.as_mut().unwrap().player_name = "Other".into(),
+                _ => unreachable!(),
+            }
+            app.update();
+            assert!(social_egress_take(&mut app).is_empty(), "barrier {barrier}");
+            assert_eq!(app.world().resource::<SocialModel>(), &before);
+        }
+    }
+
+    #[test]
+    fn social_egress_actual_forwarder_full_queue_restores_only_unsent_operation_and_draft() {
+        use crate::gateway_bridge::AndroidGatewayOutboundQueue;
+        use mir2_client_bevy::{crystal_ui::overlays::{NativePlayerUiIntent, NativePlayerUiState}, social::{SocialModel, SocialPendingOperation}};
+        let mut app = social_egress_app();
+        app.insert_resource(AndroidGatewayOutboundQueue::with_capacity(1));
+        app.world_mut().resource_mut::<AndroidGatewayOutboundQueue>()
+            .enqueue(mir2_ui_core::effect::GatewayCommand::SendChat { message: "older".into() }).unwrap();
+        social_egress_push(&mut app, NativePlayerUiIntent::GroupAddMember { name: "Alice".into() });
+        app.world_mut().resource_mut::<SocialModel>().begin_pending(SocialPendingOperation::TradeGold { amount: 125 });
+        app.world_mut().resource_mut::<NativePlayerUiState>().group_dialog.submitted = Some((false, "Alice".into()));
+        let mut expected = app.world().resource::<SocialModel>().clone();
+        expected.pending.retain(|op| !matches!(op, SocialPendingOperation::GroupAdd { name } if name == "Alice"));
+        app.update();
+        assert_eq!(app.world().resource::<SocialModel>(), &expected);
+        assert_eq!(app.world().resource::<NativePlayerUiState>().group_dialog.editor.editor.as_ref().unwrap().text(), "Alice");
+        assert_eq!(app.world().resource::<NativeShellModel>().screen, Screen::InGame);
+        let leases = social_egress_take(&mut app);
+        assert_eq!(leases.len(), 1);
+        assert_eq!(serde_json::from_str::<Value>(&leases[0].outbound().json).unwrap()["type"], "chat");
+    }
+
+    #[test]
+    fn social_egress_actual_forwarder_does_not_send_stale_invitation_against_new_epoch() {
+        use mir2_client_bevy::{crystal_ui::overlays::{NativePlayerUiIntent, NativePlayerUiState}, social::SocialModel};
+        let mut app = social_egress_app();
+        app.world_mut().resource_mut::<SocialModel>().apply_packet("GroupInvite", &json!({"name":"Alice"}));
+        let epoch = app.world().resource::<SocialModel>().group.pending_invite_epoch;
+        app.world_mut().resource_mut::<NativePlayerUiState>().group_dialog.answered = Some(("Alice".into(), epoch));
+        social_egress_push(&mut app, NativePlayerUiIntent::GroupInvite { accept_invite: true });
+        app.world_mut().resource_mut::<SocialModel>().apply_packet("GroupInvite", &json!({"name":"Bob"}));
+        let epoch = app.world().resource::<SocialModel>().group.pending_invite_epoch;
+        app.world_mut().resource_mut::<NativePlayerUiState>().group_dialog.invitation = Some(("Bob".into(), epoch));
+        app.update();
+        assert!(social_egress_take(&mut app).is_empty());
+        assert_eq!(app.world().resource::<NativePlayerUiState>().group_dialog.invitation, Some(("Bob".into(), epoch)));
+        assert!(app.world().resource::<SocialModel>().pending.is_empty());
+    }
+
+    #[test]
+    fn social_egress_actual_forwarder_unknown_invitation_context_uses_terminal_boundary() {
+        use mir2_client_bevy::{crystal_ui::overlays::NativePlayerUiIntent, social::SocialModel};
+        let mut app = social_egress_app();
+        app.world_mut().resource_mut::<SocialModel>().apply_packet("GroupInvite", &json!({"name":"Alice"}));
+        social_egress_push(&mut app, NativePlayerUiIntent::GroupInvite { accept_invite: true });
+        app.update();
+        assert!(social_egress_take(&mut app).is_empty());
+        assert_eq!(app.world().resource::<NativeShellModel>().screen, Screen::ConnectionLost);
+        assert_eq!(app.world().resource::<HostState>().phase, "DISCONNECTED");
+        app.update();
+        assert!(app.world().resource::<SocialModel>().pending.is_empty());
+    }
+
+    #[test]
+    fn social_egress_actual_forwarder_defers_while_loading_then_keeps_16_command_budget() {
+        use mir2_client_bevy::crystal_ui::overlays::{NativePlayerUiIntent, NativePlayerUiIntentQueue};
+        let mut app = social_egress_app();
+        app.world_mut().resource_mut::<HostState>().pending_render_request = Some(7);
+        for id in 0..17 {
+            assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>()
+                .push_transient_unique(NativePlayerUiIntent::GroupAddMember { name: format!("N{id}") }));
+        }
+        assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>()
+            .push_transient_unique(NativePlayerUiIntent::ReadMail { mail_id: 7 }));
+        app.update();
+        assert!(social_egress_take(&mut app).is_empty());
+        app.world_mut().resource_mut::<HostState>().pending_render_request = None;
+        app.update();
+        let first = social_egress_take(&mut app);
+        assert_eq!(first.len(), 16);
+        for (i, lease) in first.iter().enumerate() {
+            assert_eq!(serde_json::from_str::<Value>(&lease.outbound().json).unwrap()["name"], format!("N{i}"));
+        }
+        let other = app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_mail_intents_bounded(1);
+        assert_eq!(other, vec![NativePlayerUiIntent::ReadMail { mail_id: 7 }]);
+        app.update();
+        let last = social_egress_take(&mut app);
+        assert_eq!(last.len(), 1);
+        assert_eq!(serde_json::from_str::<Value>(&last[0].outbound().json).unwrap()["name"], "N16");
+    }
+
+    #[test]
+    fn social_egress_actual_forwarder_inactive_screen_discards_only_its_unsent_domain() {
+        use mir2_client_bevy::{crystal_ui::overlays::{NativePlayerUiIntent, NativePlayerUiIntentQueue}, social::SocialModel};
+        let mut app = social_egress_app();
+        social_egress_push(&mut app, NativePlayerUiIntent::GroupSwitch { allow_group: true });
+        app.world_mut().resource_mut::<NativePlayerUiIntentQueue>()
+            .push_transient_unique(NativePlayerUiIntent::ReadMail { mail_id: 7 });
+        app.world_mut().resource_mut::<NativeShellModel>().screen = Screen::Login;
+        app.world_mut().resource_mut::<HostState>().phase = "READY".into();
+        app.update();
+        assert!(social_egress_take(&mut app).is_empty());
+        assert!(app.world().resource::<SocialModel>().pending.is_empty());
+        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(),
+            vec![NativePlayerUiIntent::ReadMail { mail_id: 7 }]);
     }
 
     fn game_shop_host_metadata(packet: &str, payload: Value) -> Value {

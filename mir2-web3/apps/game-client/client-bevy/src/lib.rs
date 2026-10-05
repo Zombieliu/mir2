@@ -61,6 +61,8 @@ pub mod native_shell_ui;
 #[cfg(feature = "native-player-ui")]
 pub mod native_skill_ingress;
 #[cfg(feature = "native-player-ui")]
+pub mod native_social_egress;
+#[cfg(feature = "native-player-ui")]
 pub mod native_trade_ingress;
 #[cfg(feature = "native-player-ui")]
 pub mod options_effects;

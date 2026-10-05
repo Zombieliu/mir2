@@ -32,6 +32,8 @@ use crate::android_input::{
 pub const ANDROID_GATEWAY_QUEUE_CAPACITY: usize = 256;
 /// Leave room for the lease wrapper in the existing 64-KiB JNI copy buffer.
 pub const ANDROID_NATIVE_MAIL_COMMAND_MAX_BYTES: usize = 48 * 1024;
+/// Same existing 64-KiB JNI lease buffer, with room for its wrapper.
+pub const ANDROID_NATIVE_SOCIAL_COMMAND_MAX_BYTES: usize = 48 * 1024;
 pub const ANDROID_GATEWAY_INBOUND_CAPACITY: usize = 32;
 /// A receipt is a small control message, not an arbitrary Android payload.
 /// Keep this comfortably above the shared request/code limits while bounding
@@ -326,6 +328,9 @@ pub enum AndroidGatewayEnqueueError {
         reason: &'static str,
     },
     OversizedNativeMail {
+        max_bytes: usize,
+    },
+    OversizedNativeSocial {
         max_bytes: usize,
     },
 }
@@ -1525,6 +1530,43 @@ impl AndroidGatewayOutboundQueue {
         Ok(())
     }
 
+    /// Closed public social subset on the original sequence/lease channel.
+    /// No auth/debug JSON and no optimistic membership, offer or settlement.
+    pub fn enqueue_native_social(
+        &mut self,
+        command: &mir2_client_bevy::native_social_egress::NativeSocialCommand,
+    ) -> Result<(), AndroidGatewayEnqueueError> {
+        if !command.valid_shared_bounds() {
+            return Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
+                command_type: command.command_type(),
+                reason: "outside the shared guild-storage contract",
+            });
+        }
+        let json = serde_json::to_string(command).expect("typed social command is serializable");
+        if json.len() > ANDROID_NATIVE_SOCIAL_COMMAND_MAX_BYTES {
+            return Err(AndroidGatewayEnqueueError::OversizedNativeSocial {
+                max_bytes: ANDROID_NATIVE_SOCIAL_COMMAND_MAX_BYTES,
+            });
+        }
+        if self.entries.len() >= self.capacity {
+            let command_type = command.command_type().to_owned();
+            self.overflow_count = self.overflow_count.saturating_add(1);
+            self.last_overflow_type = Some(command_type.clone());
+            return Err(AndroidGatewayEnqueueError::Full {
+                capacity: self.capacity,
+                command_type,
+            });
+        }
+        let sequence = self.next_sequence;
+        self.next_sequence = self.next_sequence.saturating_add(1);
+        self.entries.push_back(AndroidGatewayOutbound {
+            sequence,
+            kind: AndroidGatewayOutboundKind::Wire,
+            json,
+        });
+        Ok(())
+    }
+
     /// Retain only the newest unsent movement intent. Movement is ephemeral:
     /// reconnecting must never replay an old joystick direction after the
     /// authoritative server state has already moved on.
@@ -2228,6 +2270,44 @@ mod tests {
             serde_json::from_str::<Value>(&entry.json).unwrap(),
             expected
         );
+    }
+
+
+    #[test]
+    fn social_egress_gateway_closed_typed_commands_share_leases_and_byte_caps() {
+        use mir2_client_bevy::native_social_egress::NativeSocialCommand;
+        let mut queue = AndroidGatewayOutboundQueue::with_capacity(2);
+        queue.enqueue_native_social(&NativeSocialCommand::TradeGold { amount: u32::MAX }).unwrap();
+        let lease = AndroidGatewayHostAdapter::default().drain_ready(
+            &mut queue, &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available), 1).pop().unwrap();
+        assert_eq!(serde_json::from_str::<Value>(&lease.outbound().json).unwrap(), json!({"type":"tradeGold","amount":u32::MAX}));
+        assert_eq!(lease.sequence(), 1);
+        let large = NativeSocialCommand::EditGuildNotice { notice: vec!["文".repeat(32); 200] };
+        queue.enqueue_native_social(&large).unwrap();
+        let before = queue.status();
+        assert_eq!(queue.enqueue_native_social(&NativeSocialCommand::EditGuildNotice { notice: vec!["x".repeat(ANDROID_NATIVE_SOCIAL_COMMAND_MAX_BYTES)] }),
+            Err(AndroidGatewayEnqueueError::OversizedNativeSocial { max_bytes: ANDROID_NATIVE_SOCIAL_COMMAND_MAX_BYTES }));
+        assert_eq!(queue.status(), before);
+        let lease = AndroidGatewayHostAdapter::default().drain_ready(
+            &mut queue, &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available), 1).pop().unwrap();
+        assert_eq!(lease.sequence(), 2);
+        assert!(lease.outbound().json.len() > 16 * 1024 && lease.outbound().json.len() < 64 * 1024);
+    }
+
+    #[test]
+    fn social_egress_gateway_full_or_invalid_command_preserves_existing_fifo() {
+        use mir2_client_bevy::native_social_egress::NativeSocialCommand;
+        let mut queue = AndroidGatewayOutboundQueue::with_capacity(1);
+        queue.enqueue_native_social(&NativeSocialCommand::TradeCancel).unwrap();
+        assert!(matches!(queue.enqueue_native_social(&NativeSocialCommand::TradeRequest), Err(AndroidGatewayEnqueueError::Full { .. })));
+        let before = queue.status();
+        assert!(matches!(queue.enqueue_native_social(&NativeSocialCommand::GuildStorageItemChange { change_type: 0, from: 255, to: 112 }),
+            Err(AndroidGatewayEnqueueError::InvalidGuildStorage { .. })));
+        assert_eq!(queue.status(), before);
+        let leases = AndroidGatewayHostAdapter::default().drain_ready(
+            &mut queue, &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available), 2);
+        assert_eq!(leases.len(), 1);
+        assert_eq!(serde_json::from_str::<Value>(&leases[0].outbound().json).unwrap(), json!({"type":"tradeCancel"}));
     }
 
     fn change_password_request() -> SecurityRequest {
