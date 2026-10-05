@@ -272,6 +272,85 @@ public class OfflinePersonalIngressPreviewTest {
         assertTrue(OfflinePersonalIngressPreview.events(false, "trade-jni").isEmpty());
     }
 
+    @Test public void heroJniScenesAreIsolatedDataAndBindTheOriginalOwner() throws Exception {
+        Set<String> allowed = Set.of("HeroInformation", "UpdateHeroSpawnState", "HeroHealthChanged",
+                "SetAutoPotValue", "SetAutoPotItem", "MagicLeveled");
+        for (String scene : new String[]{"hero-inventory-jni", "hero-equipment-jni", "hero-status-jni",
+                "hero-state-jni", "hero-skills-jni", "hero-removed-jni"}) {
+            assertTrue(OfflinePersonalIngressPreview.events(false, scene).isEmpty());
+            List<String> events = OfflinePersonalIngressPreview.events(true, scene);
+            assertFalse("Hero has no actual Java/JNI stream: " + scene, events.isEmpty());
+            assertEquals("STARTING", WireJson.decode(events.get(0)).getString("phase"));
+            assertEquals("HeroInformation", packet(events.get(1)).getString("packet"));
+            JSONObject world = WireJson.decode(events.get(2));
+            assertEquals("IN_GAME", world.getString("phase"));
+            JSONObject owner = WireJson.decode(world.getString("worldSnapshot"));
+            assertEquals(42, owner.getInt("playerObjectId"));
+            assertEquals("OFFLINE JAVA JNI", owner.getJSONArray("entities").getJSONObject(0).getString("name"));
+            assertEquals(777, owner.getInt("gold"));
+            assertEquals(33, owner.getInt("credit"));
+            assertEquals(12, owner.getJSONArray("inventoryItems").length());
+            for (String raw : events) {
+                JSONObject outer = WireJson.decode(raw);
+                assertFalse(outer.has("account_id"));assertFalse(outer.has("password"));assertFalse(outer.has("command"));
+                if (!outer.has("envelope")) continue;
+                JSONObject envelope = WireJson.decode(outer.getString("envelope"));
+                assertEquals("packet", envelope.getString("type"));
+                assertTrue(allowed.contains(envelope.getString("packet")));
+                assertTrue(outer.getString("envelope").getBytes(StandardCharsets.UTF_8).length <= 16 * 1024);
+            }
+            try { events.clear();fail("Hero stream must be immutable"); }
+            catch (UnsupportedOperationException expected) {}
+        }
+        assertTrue(OfflinePersonalIngressPreview.events(true, "hero").isEmpty());
+        assertTrue(OfflinePersonalIngressPreview.events(true, "qa.hero").isEmpty());
+    }
+
+    @Test public void heroJniKeepsUnsignedHeroItemsSeparateFromThePlayerBag() throws Exception {
+        List<String> events = OfflinePersonalIngressPreview.events(true, "hero-inventory-jni");
+        assertFalse("Missing Hero Java stream", events.isEmpty());
+        JSONObject info = WireJson.decode(WireJson.decode(events.get(1)).getString("envelope"))
+                .getJSONObject("payload").getJSONObject("info");
+        assertEquals(12, info.getInt("object_id"));
+        assertEquals("OFFLINE JNI Hero", info.getString("name"));
+        assertEquals("Wizard", info.getString("class"));assertEquals("Female", info.getString("gender"));
+        JSONArray bag = info.getJSONArray("inventory"), gear = info.getJSONArray("equipment");
+        assertEquals(42, bag.length());assertEquals(14, gear.length());
+        assertEquals("18446744073709551615", bag.getJSONObject(3).get("unique_id").toString());
+        assertEquals(201, bag.getJSONObject(3).getInt("count"));
+        assertEquals(27, bag.getJSONObject(3).getInt("item_index"));
+        assertEquals(123, bag.getJSONObject(3).getInt("current_dura"));
+        assertEquals(456, bag.getJSONObject(3).getInt("max_dura"));
+        assertEquals(90003, bag.getJSONObject(3).getJSONArray("slots").getJSONObject(0).getLong("unique_id"));
+        assertEquals(80006, bag.getJSONObject(6).getLong("unique_id"));
+        assertEquals(70001, gear.getJSONObject(0).getLong("unique_id"));
+        assertTrue(info.getBoolean("auto_pot"));
+        assertEquals(17, info.getJSONArray("magics").getJSONObject(0).getInt("key"));
+        assertEquals(18, info.getJSONArray("magics").getJSONObject(1).getInt("key"));
+        JSONObject owner = WireJson.decode(WireJson.decode(events.get(2)).getString("worldSnapshot"));
+        assertEquals(80003, owner.getJSONArray("inventoryItems").getJSONObject(3).getLong("uniqueId"));
+        assertEquals(3, owner.getJSONArray("inventoryItems").getJSONObject(3).getInt("count"));
+    }
+
+    @Test public void heroJniHasRealPostBootstrapDeltasAndWrongOwnerSentinel() throws Exception {
+        for (String scene : new String[]{"hero-inventory-jni", "hero-equipment-jni", "hero-status-jni",
+                "hero-state-jni", "hero-skills-jni", "hero-removed-jni"}) {
+            List<String> events = OfflinePersonalIngressPreview.events(true, scene);
+            assertFalse("Missing Hero Java stream", events.isEmpty());
+            assertEquals(10, events.size());
+            assertEquals("UpdateHeroSpawnState", packet(events.get(3)).getString("packet"));
+            assertEquals(scene.equals("hero-removed-jni") ? 1 : 2,
+                    packet(events.get(3)).getJSONObject("payload").getInt("state"));
+            JSONObject health = packet(events.get(4)).getJSONObject("payload");
+            assertEquals(67, health.getInt("hp"));assertEquals(23, health.getInt("mp"));
+            assertEquals(42, health.getInt("ownerObjectId"));
+            assertEquals("MagicLeveled", packet(events.get(7)).getString("packet"));
+            JSONObject wrong = packet(events.get(9)).getJSONObject("payload");
+            assertEquals(43, wrong.getInt("ownerObjectId"));assertEquals(9999, wrong.getInt("hp"));
+            assertEquals("OFFLINE JAVA JNI", wrong.getString("characterName"));
+        }
+    }
+
     @Test public void independentResizeTestFollowsOwnerSnapshotAndFullItems() throws Exception {
         List<String> events = OfflinePersonalIngressPreview.events(true, "storage-jni");
         int world = -1, items = -1, resize = -1;

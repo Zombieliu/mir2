@@ -1,0 +1,242 @@
+{
+  "at": "2026-10-05T20:04:54.498Z",
+  "parent": "275b6fc5b768a1f20696cdba9f4daec49c9f5806",
+  "committed": false,
+  "inputCount": 428,
+  "inputHashListSHA": "bf1907cb739e4a163c89e066938a9bc4d0889262a38c929a937168afe26e99db",
+  "scope": [
+    "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+    "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+    "mir2-web3/apps/game-client/platform-android/src/hero_jni_preview_tests.rs"
+  ],
+  "protectedWholeFiles": 424,
+  "oldJavaFixtureAndTestsPreserved": true,
+  "oldPreviewBodiesPreservedExceptExactSceneCount": true,
+  "oldScenes": 55,
+  "newScenes": 6,
+  "totalScenes": 61,
+  "originalWorktreeGitCheckpointsPreserved": true,
+  "gates": [
+    {
+      "label": "green-rust-normal-hero-jni",
+      "code": 0,
+      "rust": [
+        {
+          "passed": 478,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true
+    },
+    {
+      "label": "green-rust-preview-hero-jni",
+      "code": 0,
+      "rust": [
+        {
+          "passed": 525,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceUnchanged": true
+    },
+    {
+      "label": "green-java-full-hero-jni",
+      "code": 0,
+      "rust": [],
+      "xml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 15,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 15,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "sourceUnchanged": true
+    },
+    {
+      "label": "green-api31-normal-hero-jni",
+      "code": 0,
+      "rust": [],
+      "sourceUnchanged": true
+    },
+    {
+      "label": "green-api31-preview-hero-jni",
+      "code": 0,
+      "rust": [],
+      "sourceUnchanged": true
+    }
+  ],
+  "focusedRust": {
+    "passed": 6,
+    "failed": 0,
+    "overlapsFullPreview": true
+  },
+  "red": {
+    "java": {
+      "freshDebug": {
+        "variant": 0,
+        "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+        "tests": 15,
+        "failures": 3,
+        "errors": 0,
+        "skipped": 0
+      },
+      "previewTaskNotReached": true,
+      "otherCopiedXMLIsStaleAndExcluded": true
+    },
+    "rust": {
+      "compiled": true,
+      "passed": 0,
+      "failed": 2
+    },
+    "installedPreview": {
+      "at": "2026-10-05T20:03:16.700Z",
+      "source": "b5b6f4c6893cc62f6f9a9c0a1bf58887cf257605",
+      "installedSha256": "bd3176f16d9e5d617c068d59662678e09a466b6912c1118bda2f263dd7167ffa",
+      "requestedScene": "hero-inventory-jni",
+      "observedReadyScenes": [],
+      "serial": "emulator-5554",
+      "pid": "9281",
+      "captureHarnessFailures": [
+        {
+          "exit": 1,
+          "error": "Old unlisted scene did not fall back to HUD",
+          "correction": "No HUD fallback is required for an unrecognized scene; saved actual logs instead."
+        },
+        {
+          "exit": 1,
+          "error": "ENOBUFS on screencap at default Node maxBuffer",
+          "correction": "Read binary original PNG with explicit 32MiB maximum; no app/source change."
+        }
+      ],
+      "heroStream": false,
+      "heroSharedModel": false,
+      "expectedMissingHero": true,
+      "fatal": 0,
+      "GL506": 0,
+      "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-20261006-rz55ei/red-installed-preview-b5-hero-inventory.log",
+      "screenshot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-20261006-rz55ei/red-installed-preview-b5-hero-inventory.png",
+      "online": false,
+      "physical": false
+    },
+    "screenshotViewed": true
+  },
+  "rawIndex": {
+    "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-20261006-rz55ei/precommit-raw-evidence-index.json",
+    "files": 54,
+    "bytes": 5628209,
+    "sha256": "e86c918fe613ec2bc317159d7e0ef6b76258b28a5fe8182320fc42ec043bf024"
+  },
+  "goal": "Active",
+  "NI16": "PARTIAL",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "AP": "AP01-21 full denominator unchanged",
+  "acceptance": {
+    "currentAPK": false,
+    "currentActualJNI": false,
+    "currentScreenshots": false,
+    "online": false,
+    "physical": false,
+    "fullPhoneUI": false,
+    "GPUZeroError": false
+  },
+  "next": "Bind exact source commit, build/install preserving data, test actual six Java/JNI original Hero windows. Do not infer outbound, online, nativeResume, physical or full UI acceptance.",
+  "sourceBinding": "precommit only; exact commit/APK/JNI evidence will be appended separately",
+  "paths": {
+    "evidence": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-jni-20261006-rz55ei",
+    "report": "mir2-web3/docs/generated/player-qa/native-android-hero-jni-20261006"
+  }
+}

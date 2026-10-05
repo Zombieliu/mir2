@@ -63,6 +63,12 @@ pub const SCENES: &[&str] = &[
     "help",
     "inventory-amount",
     "mail-compose",
+    "hero-inventory-jni",
+    "hero-equipment-jni",
+    "hero-status-jni",
+    "hero-state-jni",
+    "hero-skills-jni",
+    "hero-removed-jni",
 ];
 
 #[derive(Resource, Default)]
@@ -95,6 +101,135 @@ struct OfflineMailJniReceipt {
 struct OfflineSocialJniReceipt {
     scene: Option<String>,
     logged: bool,
+}
+
+#[derive(Resource, Default)]
+struct OfflineHeroJniReceipt {
+    scene: Option<String>,
+    opened: bool,
+    logged: bool,
+}
+
+fn is_hero_jni_preview(scene: &str) -> bool {
+    matches!(scene, "hero-inventory-jni" | "hero-equipment-jni" | "hero-status-jni"
+        | "hero-state-jni" | "hero-skills-jni" | "hero-removed-jni")
+}
+
+fn hero_jni_page(scene: &str) -> Option<mir2_client_bevy::crystal_ui::overlays::hero_dialog::HeroPage> {
+    use mir2_client_bevy::crystal_ui::overlays::hero_dialog::HeroPage;
+    match scene {
+        "hero-equipment-jni" => Some(HeroPage::Equipment),
+        "hero-status-jni" => Some(HeroPage::Status),
+        "hero-state-jni" => Some(HeroPage::State),
+        "hero-skills-jni" => Some(HeroPage::Skills),
+        _ => None,
+    }
+}
+
+/// Read-only Java sentinels AFTER normal owner-bound ingest. Never creates a
+/// Hero, receipt, pending operation, resource grant or transport authorization.
+fn hero_jni_models_received(
+    scene: &str,
+    model: &mir2_client_bevy::hero_model::HeroModel,
+    inventory: &mir2_client_bevy::inventory::InventoryModel,
+    ui: &UiReadModel,
+) -> bool {
+    if !is_hero_jni_preview(scene) || model.session_epoch == 0 || model.hero_generation == 0
+        || ui.player.name.as_deref() != Some("OFFLINE JAVA JNI")
+        || ui.player.gold != 777 || ui.player.credit != 33 || ui.player.hp != 80 || ui.player.mp != 20
+        || inventory.items.len() != 12
+        || !inventory.items.iter().enumerate().all(|(index, item)| item.unique_id == Some(80000 + index as u64) && item.quantity == 3)
+    { return false; }
+    let Some(info) = model.info.as_ref() else { return false; };
+    let (Some(bag), Some(gear)) = (info.inventory.as_ref(), info.equipment.as_ref()) else { return false; };
+    info.object_id == 12 && info.name == "OFFLINE JNI Hero" && format!("{:?}", info.class) == "Wizard"
+        && format!("{:?}", info.gender) == "Female" && info.level == 20 && info.hp == 67 && info.mp == 23
+        && info.auto_pot && info.auto_hp_percent == 35 && info.auto_mp_percent == 45
+        && info.hp_item_index == 27 && info.mp_item_index == 17
+        && bag.len() == 42 && gear.len() == 14
+        && bag[0].as_ref().is_some_and(|item| item.unique_id == 60000 && item.count == 5)
+        && bag[3].as_ref().is_some_and(|item| item.unique_id == u64::MAX && item.item_index == 27
+            && item.count == 201 && item.current_dura == 123 && item.max_dura == 456
+            && item.slots.len() == 1 && item.slots[0].as_ref().is_some_and(|socket| socket.unique_id == 90003))
+        && bag[6].as_ref().is_some_and(|item| item.unique_id == 80006 && item.count == 3)
+        && gear[0].as_ref().is_some_and(|item| item.unique_id == 70001 && item.count == 1)
+        && info.magics.len() == 2
+        && info.magics.iter().any(|magic| format!("{:?}", magic.spell) == "FireBall" && magic.key == 17 && magic.level == 2 && magic.experience == 7)
+        && info.magics.iter().any(|magic| format!("{:?}", magic.spell) == "Healing" && magic.key == 18 && magic.level == 1)
+        && model.spawned == (scene != "hero-removed-jni")
+        && model.weights.is_some_and(|weights| weights.bag == 7 && weights.wear == 3 && weights.hand == 2)
+        && model.stats.as_ref().is_some_and(|stats| stats.len() == 2 && stats[0].stat == 12 && stats[0].value == 180
+            && stats[1].stat == 13 && stats[1].value == 90)
+        && model.item_result_serial == 3
+        && model.inventory_view.items.iter().find(|item| item.slot == 3).is_some_and(|item| {
+            item.unique_id == Some(u64::MAX) && item.quantity == 201
+                && item.tooltip_source.as_ref().is_some_and(|source| {
+                    source.info.item_index == 27 && source.user_item.as_ref().is_some_and(|item| item.unique_id == u64::MAX && item.count == 201)
+                })
+        })
+        && model.auto_pot_view.items.len() == 2
+}
+
+fn open_hero_jni_presentation(scene: &str, state: &mut NativePlayerUiState) {
+    // Only window visibility uses the original shared toggle entry. No model,
+    // draft, key assignment, item operation or ACK is fabricated here.
+    if !is_hero_jni_preview(scene) { return; }
+    if let Some(page) = hero_jni_page(scene) {
+        state.hero.toggle_page(page);
+    } else {
+        state.hero.toggle_inventory();
+    }
+}
+
+fn hero_jni_presentation_received(
+    scene: &str,
+    state: &NativePlayerUiState,
+    model: &mir2_client_bevy::hero_model::HeroModel,
+) -> bool {
+    is_hero_jni_preview(scene) && state.core.panel == UiPanel::None
+        && state.hero.info == model.info && state.hero.observed_revision == model.revision
+        && state.hero.epoch == model.session_epoch && state.hero.hero_generation == model.hero_generation
+        && state.hero.spawned == model.spawned && state.hero.belt_visible
+        && if let Some(page) = hero_jni_page(scene) {
+            state.hero.character_open && state.hero.page == page
+        } else { state.hero.inventory_open }
+}
+
+fn report_hero_jni_consumer(
+    mut receipt: ResMut<OfflineHeroJniReceipt>,
+    host: Res<crate::shared_shell::HostState>,
+    enabled: Res<crate::AndroidGatewayTransportEnabled>,
+    world_receipt: Option<Res<mir2_bevy_runtime::native_world_receipt::NativeWorldReceipt>>,
+    mut state: ResMut<NativePlayerUiState>,
+    model: Res<mir2_client_bevy::hero_model::HeroModel>,
+    inventory: Res<mir2_client_bevy::inventory::InventoryModel>,
+    ui: Res<UiReadModel>,
+    roots: Query<Entity, With<mir2_client_bevy::crystal_ui::overlays::hero_dialog::render::HeroRoot>>,
+) {
+    let Some(scene) = receipt.scene.clone() else { return; };
+    if receipt.logged || enabled.0 || host.phase != "IN_GAME"
+        || !hero_jni_models_received(&scene, &model, &inventory, &ui) { return; }
+    if !receipt.opened {
+        if state.hero.info != model.info { return; } // wait for the original shared observer
+        open_hero_jni_presentation(&scene, &mut state);
+        receipt.opened = true;
+        return; // the ordinary renderer runs on the following frame
+    }
+    if roots.iter().count() < 2 || !hero_jni_presentation_received(&scene, &state, &model) { return; }
+    let info = model.info.as_ref().unwrap();
+    let item = model.inventory_view.items.iter().find(|item| item.slot == 3).unwrap();
+    let data_receipt = world_receipt.as_deref().and_then(|receipt| receipt.last);
+    info!(scene = scene.as_str(), data_receipt = ?data_receipt, hero_object_id = info.object_id,
+        hero_epoch = model.session_epoch, hero_generation = model.hero_generation,
+        hero_name = info.name.as_str(), hero_hp = info.hp, hero_mp = info.mp, spawned = model.spawned,
+        hero_capacity = 42, hero_equipment = 14, magics = info.magics.len(), first_magic_key = 17,
+        hp_percent = info.auto_hp_percent, mp_percent = info.auto_mp_percent, item_result_serial = model.item_result_serial,
+        unsigned_item_id = u64::MAX, item_count = item.quantity, icon_width = item.icon_width, icon_height = item.icon_height,
+        ui_inventory_open = state.hero.inventory_open, ui_character_open = state.hero.character_open,
+        ui_page = ?state.hero.page, shared_hero_roots = roots.iter().count(),
+        player_hp = ui.player.hp, player_gold = ui.player.gold, player_bag = inventory.items.len(),
+        "ANDROID_HERO_JNI_SHARED_MODEL_AND_WINDOW_NOT_LIVE");
+    receipt.logged = true;
 }
 
 fn is_social_jni_preview(scene: &str) -> bool {
@@ -224,6 +359,7 @@ fn is_personal_jni_preview(scene: &str) -> bool {
     matches!(scene, "gameshop-jni" | "storage-jni" | "storage-locked-jni")
         || mail_jni_expected(scene).is_some()
         || is_social_jni_preview(scene)
+        || is_hero_jni_preview(scene)
 }
 
 pub fn install(app: &mut App) {
@@ -232,6 +368,7 @@ pub fn install(app: &mut App) {
         .init_resource::<OfflinePersonalJniReceipt>()
         .init_resource::<OfflineMailJniReceipt>()
         .init_resource::<OfflineSocialJniReceipt>()
+        .init_resource::<OfflineHeroJniReceipt>()
         .add_systems(Update, report_mail_jni_consumer
             .after(mir2_client_bevy::pending_operations::PendingLifecycleSet::Ingest)
             .after(mir2_client_bevy::pending_operations::PendingLifecycleSet::UiReset)
@@ -243,7 +380,7 @@ pub fn install(app: &mut App) {
         .add_systems(Update, report_world_render_motion_pose)
         .add_systems(
             PostUpdate,
-            (apply, report_npc_preview_consumer, report_personal_jni_consumer, report_social_jni_consumer).chain(),
+            (apply, report_npc_preview_consumer, report_personal_jni_consumer, report_social_jni_consumer, report_hero_jni_consumer).chain(),
         );
 }
 
@@ -952,6 +1089,8 @@ fn apply(world: &mut World) {
         *world.resource_mut::<OfflineMailJniReceipt>() = OfflineMailJniReceipt::default();
         world.init_resource::<OfflineSocialJniReceipt>();
         *world.resource_mut::<OfflineSocialJniReceipt>() = OfflineSocialJniReceipt::default();
+        world.init_resource::<OfflineHeroJniReceipt>();
+        *world.resource_mut::<OfflineHeroJniReceipt>() = OfflineHeroJniReceipt::default();
         // UI fixtures are not Gateway events and do not invoke auth/StartGame.
         let mut shell = NativeShellModel::default();
         shell.screen = match scene.as_str() {
@@ -1027,6 +1166,9 @@ fn apply(world: &mut World) {
         }
         if is_social_jni_preview(&scene) {
             world.resource_mut::<OfflineSocialJniReceipt>().scene = Some(scene.clone());
+        }
+        if is_hero_jni_preview(&scene) {
+            world.resource_mut::<OfflineHeroJniReceipt>().scene = Some(scene.clone());
         }
         info!("ANDROID_UI_PREVIEW_READY scene={scene} waiting_for_offline_java_jni");
         return;
@@ -1879,6 +2021,10 @@ mod mail_jni_preview_tests;
 mod social_jni_preview_tests;
 
 #[cfg(test)]
+#[path = "hero_jni_preview_tests.rs"]
+mod hero_jni_preview_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
     use mir2_client_bevy::shop::{NpcShopServiceMode, ShopModel};
@@ -2064,7 +2210,7 @@ mod tests {
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 55);
+        assert_eq!(SCENES.len(), 61);
     }
 
     #[test]

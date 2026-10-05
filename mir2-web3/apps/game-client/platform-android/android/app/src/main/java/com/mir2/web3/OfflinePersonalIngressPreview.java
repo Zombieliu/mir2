@@ -16,6 +16,7 @@ final class OfflinePersonalIngressPreview {
 
     static List<String> events(boolean enabled, String scene) {
         if (!enabled) return Collections.emptyList();
+        if (isHeroScene(scene)) return heroEvents(scene);
         if (isSocialScene(scene)) return socialEvents(scene);
         if (isMailScene(scene)) return mailEvents(scene);
         if (!("gameshop-jni".equals(scene) || "storage-jni".equals(scene)
@@ -54,6 +55,82 @@ final class OfflinePersonalIngressPreview {
             events.add(packet("StorageUnlockResult", GatewaySession.object("result", 0, "hasPassword", true)));
         }
         return Collections.unmodifiableList(events);
+    }
+
+    private static boolean isHeroScene(String scene) {
+        return "hero-inventory-jni".equals(scene) || "hero-equipment-jni".equals(scene)
+                || "hero-status-jni".equals(scene) || "hero-state-jni".equals(scene)
+                || "hero-skills-jni".equals(scene) || "hero-removed-jni".equals(scene);
+    }
+
+    private static List<String> heroEvents(String scene) {
+        List<String> events = new ArrayList<>();
+        events.add(GatewaySession.object("phase", "STARTING", "message",
+                "OFFLINE Hero Java/JNI data, NOT login or a socket operation.").toString());
+        events.add(packet("HeroInformation", GatewaySession.object("info", heroInformation())));
+        JSONObject snapshot = ownerSnapshot();
+        try {
+            snapshot.put("stage5Systems", GatewaySession.object("heroLearnedMagics", new JSONArray()
+                    .put(GatewaySession.object("spell", "FireBall", "key", 17))
+                    .put(GatewaySession.object("spell", "Healing", "key", 18))));
+            snapshot.put("heroStats", new JSONArray().put(GatewaySession.object("stat", 12, "value", 180))
+                    .put(GatewaySession.object("stat", 13, "value", 90)));
+            snapshot.put("heroWeights", GatewaySession.object("bag", 7, "wear", 3, "hand", 2));
+        } catch (org.json.JSONException error) { throw new IllegalArgumentException(error); }
+        events.add(GatewaySession.object("phase", "IN_GAME", "message",
+                "OFFLINE Hero Java/JNI world, NOT authenticated gameplay.",
+                "world", GatewaySession.object("playerName", "OFFLINE JAVA JNI",
+                "mapFileName", "0", "x", 302, "y", 634), "worldSnapshot", snapshot.toString()).toString());
+        events.add(packet("UpdateHeroSpawnState", GatewaySession.object("state",
+                "hero-removed-jni".equals(scene) ? 1 : 2)));
+        events.add(packet("HeroHealthChanged", GatewaySession.object("ownerObjectId", 42,
+                "characterName", "OFFLINE JAVA JNI", "hp", 67, "mp", 23)));
+        events.add(packet("SetAutoPotValue", GatewaySession.object("stat", 12, "value", 35)));
+        events.add(packet("SetAutoPotItem", GatewaySession.object("grid", 24, "item_index", 17)));
+        events.add(packet("MagicLeveled", GatewaySession.object("objectId", 12, "spell", "FireBall",
+                "level", 2, "experience", 7)));
+        events.add(packet("SetAutoPotValue", GatewaySession.object("stat", 13, "value", 45)));
+        // A wrong-owner delta must not replace the accepted Hero health.
+        events.add(packet("HeroHealthChanged", GatewaySession.object("ownerObjectId", 43,
+                "characterName", "OFFLINE JAVA JNI", "hp", 9999, "mp", 9999)));
+        return Collections.unmodifiableList(events);
+    }
+
+    private static JSONObject heroInformation() {
+        JSONArray inventory = new JSONArray(), equipment = new JSONArray();
+        java.math.BigInteger max = new java.math.BigInteger("18446744073709551615");
+        for (int slot = 0; slot < 42; slot++) {
+            if (slot == 0) inventory.put(heroItem(java.math.BigInteger.valueOf(60000), 27, 5, false));
+            else if (slot == 3) inventory.put(heroItem(max, 27, 201, true));
+            else if (slot == 6) inventory.put(heroItem(java.math.BigInteger.valueOf(80006), 17, 3, false));
+            else inventory.put(JSONObject.NULL);
+        }
+        for (int slot = 0; slot < 14; slot++) equipment.put(slot == 0
+                ? heroItem(java.math.BigInteger.valueOf(70001), 17, 1, false) : JSONObject.NULL);
+        return GatewaySession.object("object_id", 12, "name", "OFFLINE JNI Hero", "class", "Wizard",
+                "gender", "Female", "level", 20, "hair", 0, "hp", 100, "mp", 30,
+                "experience", 10, "max_experience", 100, "inventory", inventory, "equipment", equipment,
+                "magics", new JSONArray().put(heroMagic("FireBall", 17)).put(heroMagic("Healing", 18)),
+                "auto_pot", true, "auto_hp_percent", 30, "auto_mp_percent", 40,
+                "hp_item_index", 27, "mp_item_index", 17);
+    }
+
+    private static JSONObject heroItem(java.math.BigInteger id, int index, int count, boolean socket) {
+        JSONArray slots = new JSONArray();
+        if (socket) slots.put(heroItem(java.math.BigInteger.valueOf(90003), 17, 1, false));
+        return GatewaySession.object("unique_id", id, "item_index", index, "count", count,
+                "current_dura", 123, "max_dura", 456, "soul_bound_id", -1, "identified", true,
+                "cursed", false, "slots", slots, "gem_count", 0, "added_stats", new JSONArray(),
+                "awake_type", 0, "awake_values", new JSONArray(), "refined_value", 0, "refine_added", 0,
+                "refine_success_chance", 0, "wedding_ring", -1, "expire_info", JSONObject.NULL,
+                "rental_information", JSONObject.NULL, "is_shop_item", false,
+                "sealed_info", JSONObject.NULL, "gm_made", false);
+    }
+
+    private static JSONObject heroMagic(String spell, int key) {
+        return GatewaySession.object("name", "JNI " + spell, "spell", spell, "base_cost", 1, "level_cost", 0,
+                "icon", 1, "level1", 1, "level2", 2, "level3", 3, "need1", 1, "need2", 2, "need3", 3,
+                "level", 1, "key", key, "experience", 0, "delay", 3400, "range", 8, "cast_time", -1000);
     }
 
     private static boolean isSocialScene(String scene) {
