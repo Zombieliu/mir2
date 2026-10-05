@@ -8,8 +8,10 @@
 > R2 upload/public promotion, laptop speed and shipped-executable install remain
 > open. Issued4c60 phase progress/timing is integrated with18 root selected checks.
 > Fixed stage/promote tooling46 and actual local workerd selected14 pass, with
-> model/platform boundaries and failures retained. Linux CI/new engine release,
-> real stage/promote and public cache/range/speed gates stay open.
+> model/platform boundaries and failures retained. Actual Linux CI37251484195
+> passes46/46; its initial fixture-parent failure is retained, live/credential
+> jobs skipped. New engine release, effective authorization, real stage/promote
+> and public cache/range/speed gates stay open.
 > [Bounded delivery scope](NATIVE-DOWNLOAD-ACCELERATION-20261005.md).
 
 > 2026-10-05 root integrates the eleven-file native Guild rank-rename slice

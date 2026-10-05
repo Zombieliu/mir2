@@ -9,8 +9,10 @@
 > delta/rollback passes; release/HTTPS/laptop speed is separate. Issued4c60 phase
 > progress/timing is integrated with18 root selected checks. Fixed native CI
 > stage/promote tooling46 and actual local workerd selected14 pass; raw failures
-> and model/platform boundaries are retained. Linux CI, real R2 stage/promote,
-> public caches/ranges, new engine release and speed gates remain open.
+> and model/platform boundaries are retained. Actual Linux CI37251484195 passes
+> 46/46 after retaining the first fixture-parent failure; no credential or live
+> publication job runs. Real R2 stage/promote, public caches/ranges, new engine
+> release and speed gates remain open, waiting for effective authorization.
 > [Delivery scope](NATIVE-DOWNLOAD-ACCELERATION-20261005.md). New WASD/dialog/frame
 > reports are retained for the subsequent P1 round, per the user's steering.
 

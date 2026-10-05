@@ -35,7 +35,11 @@ parent error; the complete failure log and job metadata are retained separately.
 Credential, stage/promote and old Web jobs are skipped. Root corrects one test
 factory line to create parents, preserves every assertion and the original frozen
 test, and independently reruns Windows46/46. The production helper's byte SHA
-remains unchanged; actual Linux retry is pending.
+remains unchanged. Actual Linux retry37251484195 on `bb4679272` passes46/46,
+zero errors/skips. Its artifact and raw source-bound receipt are downloaded and
+hashed without ZIP extraction; the actual POSIX branches pass. Credential,
+stage/promote and old Web jobs all stay skipped. These are fake transport tests,
+not Cloudflare or download-throughput acceptance.
 
 Source `8e1acedbb` is pushed and its actual GitHub ref is confirmed through the
 authenticated Git ref API. The SSH push/read timeout receipts are retained;
@@ -43,7 +47,7 @@ the earlier unverified SSH result does not imply a rejected remote commit.
 
 The fake successful model uses two tiny original feed objects and 34 synthetic
 bodies; it is not a successful real 36-object stage. The 111 MB synthetic stream
-deliberately fails the real EXE hash. Linux/opaque CI, remote R2 authorization,
+deliberately fails the real EXE hash. Opaque live publication, remote R2 authorization,
 real stage/promote, full public TLS hashes, cache/range behavior and affected
 laptop throughput remain open until separate actual evidence. Both prior opaque
 Cloudflare token probes returned 401 before bucket reads. No credentials, player
