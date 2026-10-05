@@ -12,7 +12,8 @@ pub struct SkillBarsUi {
     pub armed_slot: Option<u8>,
     pub visible: [bool; 2],
     epoch: Option<(u64, u32)>,
-    cast_starts: HashMap<u32, (u64, Instant)>,
+    clock: crate::skill_page_state::SkillCooldownClock,
+    origin: Option<Instant>,
 }
 impl SkillBarsUi {
     pub fn has_skill(skills: &SkillModel, bar: usize) -> bool {
@@ -21,48 +22,33 @@ impl SkillBarsUi {
                 .is_some_and(|key| key >= bar as i32 * 8 + 1 && key <= (bar as i32 + 1) * 8 + 1)
         })
     }
+    fn now_ms(&self, now: Instant) -> u64 {
+        self.origin
+            .map(|origin| {
+                now.saturating_duration_since(origin)
+                    .as_millis()
+                    .min(u64::MAX as u128) as u64
+            })
+            .unwrap_or(0)
+    }
     pub fn observe(&mut self, skills: &SkillModel, now: Instant) {
         let epoch = (
             skills.authority.session_epoch,
             skills.authority.player_object_id,
         );
         if self.epoch != Some(epoch) {
-            self.cast_starts.clear();
             self.pending_casts.clear();
             self.epoch = Some(epoch);
         }
-        self.cast_starts
-            .retain(|id, _| skills.skills.iter().any(|s| s.id == *id));
-        for binding in &skills.bindings {
-            if binding.cast_sequence != 0
-                && self
-                    .cast_starts
-                    .get(&binding.skill_id)
-                    .is_none_or(|(seq, _)| *seq != binding.cast_sequence)
-            {
-                self.cast_starts
-                    .insert(binding.skill_id, (binding.cast_sequence, now));
-            }
-        }
+        self.origin.get_or_insert(now);
+        let elapsed = self.now_ms(now);
+        self.clock.observe(skills, elapsed);
     }
     pub fn remaining_ms(&self, id: u32, skills: &SkillModel, now: Instant) -> u32 {
-        let Some((_, started)) = self.cast_starts.get(&id) else {
-            return 0;
-        };
-        let delay = skills.binding_for(id).delay_ms.unwrap_or(0);
-        delay.saturating_sub(
-            now.saturating_duration_since(*started)
-                .as_millis()
-                .min(u32::MAX as u128) as u32,
-        )
+        self.clock.remaining_ms(id, skills, self.now_ms(now))
     }
     pub fn cooldown_frame(&self, id: u32, skills: &SkillModel, now: Instant) -> Option<u16> {
-        let remaining = self.remaining_ms(id, skills, now);
-        let delay = skills.binding_for(id).delay_ms?;
-        if remaining < 100 || delay < 22 {
-            return None;
-        }
-        Some((1260 + 22 - (remaining / (delay / 22)).min(22)) as u16)
+        self.clock.frame(id, skills, self.now_ms(now), 1260, 22)
     }
     pub fn queue_cast(&mut self, slot: u8) {
         if (1..=16).contains(&slot) && self.pending_casts.len() < 16 {

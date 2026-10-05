@@ -375,6 +375,7 @@ pub(super) fn sync(
     }
     if state.trade_dialog.observe(&model) {
         // TradeAccept shows both trade windows AND the original inventory.
+        state.withdraw_bound_npc_gold_buy();
         state.core.panel = mir2_ui_core::state::UiPanel::Inventory;
         state.inventory_window.left = 708.0;
         state.inventory_window.top = 0.0;

@@ -1,6 +1,8 @@
 "use client";
 
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PwaGameShell } from "./components/pwa-game-shell";
+
+import { startTransition, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   ExtraWindows,
   adaptHero,
@@ -40,6 +42,62 @@ import {
   type Mir2Language,
 } from "../lib/localization";
 import { localizeQuestLog } from "../lib/quest-localization";
+import { withQuestRewardTooltipSources, type QuestRewardsPresentation } from "../lib/quest-reward-presentation";
+import { nextQuestRequestId, nextQuestUiGeneration, projectBevyQuestDialog, projectBevyQuests, readBevyQuestPresentation,
+  type BevyQuestUiIntent, type BevyQuestUiIntentResult, type BevyQuestUiRuntime } from "../lib/bevy-quest-ui";
+import { useBevyHudUi } from "../lib/use-bevy-hud-ui";
+import { useBevyCharacterUi } from "../lib/use-bevy-character-ui";
+import { useBevySpellsUi } from "../lib/use-bevy-spells-ui";
+import { useBevyMailUi } from "../lib/use-bevy-mail-ui";
+import {sameComposeRaw,type ComposeInput,type ComposeIntent,type ComposeRuntime,type ComposeRaw,type MailComposeHost} from "../lib/bevy-mail-text-input";
+import { MailDispatcher,MailParcelController,mailContentKey,sameMailOwner,type MailRuntime,type MailOwner,type MailIntent,type MailOutcome,type MailSendProof,type MailCommandType,type MailComposeProof,type MailDraftState,type MailQuoteProof,type MailLockProof } from "../lib/bevy-mail-ui";
+import {projectMailParcelSnapshot,mailMutationAllowed,mailInventoryMutationPacket,isMailItemMutation} from "../lib/mail-parcel-gateway-adapter";
+import type { MailPresentation } from "./components/original-client-mail-window";
+import { useBevyCombatInput } from "../lib/use-bevy-combat-input";
+import type { CombatRuntime,CombatProof,CombatFacts,CombatActor,CombatAction,CombatOwner } from "../lib/bevy-combat-input";
+import type { SpellsRuntime, SpellsIntent, SpellsProof, SpellsOutcome, SpellsOwner, SpellsRawSnapshot } from "../lib/bevy-spells-ui";
+import { projectCharacterModel } from "../lib/bevy-character-model";
+import { type CharacterRuntime, type CharacterIntent, type CharacterCommandProof, type EquipmentOwnerProof as SharedEquipmentOwnerProof } from "../lib/bevy-character-ui";
+import { projectSelfAppearance, sameSelfAppearance, type SelfAppearance } from "../lib/world-model/character-appearance";
+import { projectAuthoritativeHudPlayer, supportsHud, readHudGeometry, projectHudSnapshotFields, sameHudSnapshotFields, nextHudNavigationRevision, type HudAction, type HudRuntime } from "../lib/bevy-hud-ui";
+import { useBevyQuestUi } from "../lib/use-bevy-quest-ui";
+import { readBevyHpOrbSlot } from "../lib/bevy-hp-orb";
+import { advanceExperienceAuthority, experienceAuthorityFromPacket, matchingExperienceAuthority,
+  readBevyExperienceBarSlot, type ExperienceAuthority } from "../lib/bevy-experience-bar";
+import { matchingWeightAuthority, movementSnapshotWeightMatches, projectSnapshotWeightPair,
+  readBevyWeightBarSlot, type WeightAuthority } from "../lib/bevy-weight-bar";
+import { hudBarCommonIdentity } from "../lib/bevy-hud-bar-draw-plan";
+import { useBevyBagUi } from "../lib/use-bevy-bag-ui";
+import { exactFirstRawQueryValue, sharedCanvasUsesWebGl2, sharedUiCanvasId } from "../lib/bevy-shared-canvas-mode";
+import { projectBevyBagModel } from "../lib/bevy-bag-model";
+import { NpcGoldBuyDispatcher, NpcGoldBuyInventoryReadiness, npcGoldBuyInventoryMutationPacket, type NpcGoldBuyCurrent, type NpcGoldBuyRuntime,
+  type NpcGoldBuyProof, type NpcGoldBuyQuote, type NpcGoldBuyGood } from "../lib/bevy-npc-shop-buy";
+import { sameBagOwner, type BagCommandToken, type BagOwnerToken, type BevyBagUiIntent, type BevyBagUiRuntime } from "../lib/bevy-bag-ui";
+import { useBevyStorageUi } from "../lib/use-bevy-storage-ui";
+import { useBevyNpcShopUi } from "../lib/use-bevy-npc-shop-ui";
+import type { NpcShopRuntime, NpcShopHostInput, NpcShopIntent, NpcShopStatus } from "../lib/bevy-npc-shop-ui";
+type NpcShopSendProof = Readonly<{ intent: NpcShopIntent; currentJson: string; sourceJson: string;
+  presentation: NonNullable<NpcShopHostInput["presentation"]> }>;
+import { projectBevyStorageModel } from "../lib/bevy-storage-model";
+import { type StorageRuntime, type StorageIntent, type StorageCommandProof } from "../lib/bevy-storage-ui";
+type EquipmentOwnerProof = SharedEquipmentOwnerProof | StorageCommandProof;
+import { loadClientCoreRuntime, type ClientCoreRuntime, type QuestActionDecision } from "../lib/client-core-runtime";
+import { EquipmentSessionController, type EquipmentSessionStatus } from "../lib/equipment-session-controller";
+import {
+  classifyEquipmentUse, currentEquipmentCommandItem, equipmentGatewayOperation,
+  projectEquipmentGatewaySnapshot, type EquipmentGatewaySnapshot,
+} from "../lib/equipment-gateway-adapter";
+import { prepareStorageTransfer, storageMutationAllowed, storageTransferStillCurrent,
+  type StorageTransferProof, type StorageTransferReservation } from "../lib/storage-gateway-adapter";
+import {
+  questActionInput,
+  questEndpoint,
+  questGuidanceProfile,
+  hasPendingQuestAction,
+  matchingQuestOperationAck,
+  resolveQuestHostAction,
+  type PendingQuestAction,
+} from "../lib/quest-action-policy";
 import { localizeCrystalMapTitle } from "../lib/crystal-content-localization";
 import { questIdsFromPacket } from "../lib/quest-entity-binding";
 import {
@@ -64,12 +122,22 @@ import {
   wideMobileVirtualWidth,
 } from "./components/original-client-stage-presentation";
 import {
+  authoritativeItemUniqueId,
+  currentAuthoritativeItem,
+  equipmentSourceGrid,
   createSnapshotEmitter,
   createWorldStore,
+  projectInventoryItemIdentity,
+  projectStoragePacketItemIdentity,
+  sameAuthoritativeItemIdentities,
+  planEquipmentRemoval,
   resetWorldPopulationForStartGame,
   useWorldSelector,
 } from "../lib/world-model";
 import type { SnapshotEmitter, WorldStore } from "../lib/world-model";
+import type { NpcGoldTradeCapacity } from "../lib/world-model/types";
+import { crystalInventoryCapacities, planBagMove } from "../lib/world-model/item-identity";
+import { projectItemPresentation, type GatewayItemPresentationSource, type ItemPresentationMetadata } from "../lib/world-model/item-presentation";
 import {
   createBevyMovementShadowBridge,
   type BevyMovementShadowBridge,
@@ -174,15 +242,26 @@ import {
   mailResultMessage,
   normalizeFriendList,
   normalizeMailList,
+  parseMailList,
+  mergeMailList,
+  parseGatewayMailDates,
   normalizeUserItem,
   patchItemsByUniqueId,
   petModeChatMessage,
   petModeLabel,
   removeItemByUniqueId,
 } from "../lib/extended-server-packets";
-import bevyRuntimeVersion from "../lib/generated/bevy_runtime_version.json";
+import bevyRuntimeVersion from "../lib/bevy-runtime-build-manifest";
 import { isAbortError, signalAssetFirstPlayable } from "../lib/asset-orchestrator";
 import { createBevyRuntimeUrls } from "../lib/bevy-runtime-url";
+import {
+  selectBevyRuntimeStartup,
+  getBevyRuntimePackageForBackend,
+  assertBevyRuntimeStartupAgreement,
+  createBevyRuntimeBootGate,
+  runBevyRuntimeBootOnce,
+  type BevyRuntimeStartup,
+} from "../lib/bevy-runtime-package-selection";
 import {
   isBevyRuntimeNetworkFailure,
   resolveBevyRuntimeBootDecision,
@@ -285,10 +364,11 @@ type RuntimeStatus = {
   imageKeys?: string[];
 };
 
-type RuntimeModule = {
+type RuntimeModule = BevyQuestUiRuntime & BevyBagUiRuntime & StorageRuntime & HudRuntime & CharacterRuntime & SpellsRuntime & MailRuntime & CombatRuntime & NpcGoldBuyRuntime & NpcShopRuntime & {
   default?: (input?: { module_or_path: string | URL | Request } | string | URL | Request) => Promise<unknown>;
   bootMir2Runtime?: () => void;
   getMir2RendererBackend?: () => string;
+  getMir2RuntimeUiCapabilities?: () => string;
   setMir2WorldState?: (snapshotJson: string) => void;
   setMir2EntityRenderState?: (snapshotJson: string) => void;
   resolveMir2EntityAnimationPoses?: (snapshotJson: string) => string;
@@ -318,6 +398,7 @@ type RuntimeModule = {
   setMir2PresentationPoseSink?: (callback: (json: string) => void) => void;
   clearMir2PresentationPoseSink?: () => void;
   setMir2StatusSink?: (callback: (payload: RuntimeStatus) => void) => void;
+  clearMir2StatusSink?: () => void;
 };
 
 type BevyRuntimeBackend = "webgpu" | "webgl2";
@@ -330,6 +411,7 @@ type BevyRuntimeSupport = {
 type BevyRuntimeDebug = {
   requestedBackend: string | null;
   selectedBackend: BevyRuntimeBackend;
+  packageId?: string;
   compiledBackend: string | null;
   fallbackFrom?: BevyRuntimeBackend;
   webgpuSupported: boolean;
@@ -454,6 +536,9 @@ type GatewayWorldEntity = {
   direction: string;
   class?: string | number | null;
   gender?: string | number | null;
+  hair?: number | null;
+  wingEffect?: number | null;
+  wing_effect?: number | null;
   level?: number | null;
   hp?: number | null;
   maxHp?: number | null;
@@ -485,11 +570,11 @@ type GatewayGroundDrop = {
   sourceMonster: string;
 };
 
-type GatewayWorldItem = {
+type GatewayWorldItem = GatewayItemPresentationSource & {
   key: string;
   name: string;
   icon: number;
-  uniqueId?: number;
+  uniqueId?: number | null;
   slot: number;
   container: ItemContainer;
   quantity: number;
@@ -502,7 +587,7 @@ type GatewayWorldItem = {
   addedDefence?: number;
 };
 
-type GatewayEquipmentItem = {
+type GatewayEquipmentItem = GatewayItemPresentationSource & {
   slot: EquipmentSlot;
   key?: string;
   uniqueId?: number | null;
@@ -620,6 +705,7 @@ type GatewayNpcDialog = {
   links?: Array<{
     text?: unknown;
     target?: unknown;
+    enabled?: unknown;
   }>;
   input?: {
     target: string;
@@ -646,6 +732,8 @@ type GatewayWorldSnapshot = {
   playerMaxHp?: number | null;
   playerMp?: number | null;
   playerMaxMp?: number | null;
+  playerCrystalStats?: Array<{ stat: number; value: number }> | null;
+  playerWeights?: { bag: number; wear: number; hand: number } | null;
   playerPkPoints?: number;
   playerExperience: number;
   playerMaxExperience: number;
@@ -661,6 +749,7 @@ type GatewayWorldSnapshot = {
   freeBagSlots: number;
   maxBagSlots: number;
   inventoryCapacity?: number;
+  npcGoldTradeCapacity?: NpcGoldTradeCapacity | null;
   storageSize?: number;
   hasExpandedStorage?: boolean;
   hasStoragePassword?: boolean;
@@ -677,9 +766,11 @@ type GatewayWorldSnapshot = {
   storageItems?: GatewayWorldItem[];
   equipmentItems: GatewayEquipmentItem[];
   questLog: GatewayQuestEntry[];
+  questOperationAck?: unknown;
   activeNpcDialog?: GatewayNpcDialog | null;
   npcScriptDiagnostics?: GatewayNpcScriptDiagnostic[];
   knownSkills: GatewayKnownSkill[];
+  skillKeyAck?: unknown;
   activeBuffs: GatewayActiveBuff[];
   stage5Systems?: Stage5SystemsState;
   mapTransfers: GatewayMapTransfer[];
@@ -687,6 +778,8 @@ type GatewayWorldSnapshot = {
 };
 
 type WorldEntity = {
+  hair?: number;
+  wingEffect?: number;
   objectId: string;
   kind: EntityKind;
   name: string;
@@ -787,11 +880,13 @@ type DamageFloater = {
   expiresAt: number;
 };
 
-type WorldItem = {
+type WorldItem = ItemPresentationMetadata & {
   key: string;
   name: string;
   icon: number;
   uniqueId: number;
+  /** Original server instance ID; absent when uniqueId is only a display slot alias. */
+  authoritativeUniqueId?: number;
   slot: number;
   container: ItemContainer;
   quantity: number;
@@ -806,16 +901,19 @@ type WorldItem = {
 type ItemCommandRef = {
   key: string;
   uniqueId: number;
+  authoritativeUniqueId?: number;
   slot: number;
   container: ItemContainer;
 };
 
 type EquipmentCommandRef = {
   slot: EquipmentSlot;
+  authoritativeUniqueId?: number;
 };
 
 type ItemMoveRef = {
   uniqueId?: number;
+  authoritativeUniqueId?: number;
   slot: number;
   container: ItemContainer;
 };
@@ -826,10 +924,11 @@ type ItemMergeRef = {
   container: ItemContainer;
 };
 
-type EquipmentItem = {
+type EquipmentItem = ItemPresentationMetadata & {
   slot: EquipmentSlot;
   key?: string;
   uniqueId?: number;
+  authoritativeUniqueId?: number;
   quantity?: number;
   name: string;
   icon: number;
@@ -848,6 +947,8 @@ type EquipmentItem = {
 
 type QuestEntry = {
   questId: number;
+  acceptNpcIndex?: number;
+  finishNpcIndex?: number;
   title: string;
   summary: string;
   objective: string;
@@ -860,21 +961,13 @@ type QuestEntry = {
   tracked?: boolean;
   // B-wave-2 enriched fields (structurally match the quest window's optional props).
   descriptionLines?: string[];
+  group?: string;
+  minLevelNeeded?: number;
+  taskDescriptionLines?: string[];
+  returnDescriptionLines?: string[];
+  completionDescriptionLines?: string[];
   objectives?: Array<{ label: string; current?: number; required?: number; done?: boolean }>;
-  rewards?: {
-    gold?: number;
-    experience?: number;
-    credit?: number;
-    items?: Array<{ name: string; icon?: number; count?: number; itemIndex?: number; selectable?: boolean }>;
-    selectItems?: Array<{
-      name: string;
-      icon?: number;
-      count?: number;
-      itemIndex?: number;
-      selectionIndex?: number;
-      selectable?: boolean;
-    }>;
-  };
+  rewards?: QuestRewardsPresentation;
   timeLimit?: string;
 };
 
@@ -887,6 +980,7 @@ type NpcDialog = {
   links: Array<{
     text: string;
     target: string;
+    enabled?: boolean;
   }>;
   input?: {
     target: string;
@@ -957,6 +1051,8 @@ type WorldState = {
   playerMaxHp?: number;
   playerMp?: number;
   playerMaxMp?: number;
+  playerCrystalStats?: Array<{ stat: number; value: number }> | null;
+  playerWeights?: { bag: number; wear: number; hand: number } | null;
   playerPkPoints: number;
   playerExperience: number;
   playerMaxExperience: number;
@@ -969,6 +1065,7 @@ type WorldState = {
   freeBagSlots: number;
   maxBagSlots: number;
   inventoryCapacity: number;
+  npcGoldTradeCapacity?: NpcGoldTradeCapacity | null;
   storageSize: number;
   hasExpandedStorage: boolean;
   hasStoragePassword: boolean;
@@ -1265,7 +1362,7 @@ const ONCHAIN_MINE_SWING_INTERVAL_MS = Math.max(
   200,
   Number(process.env.NEXT_PUBLIC_ONCHAIN_MINE_SWING_INTERVAL_MS ?? "900"),
 );
-// The runtime manifest version is already derived from the four JS/WASM bytes.
+// The version binds every declared JS/WASM pair and schema2 compiled capabilities.
 // Do not append the web commit SHA: unchanged runtime bytes must keep one public
 // URL across frontend deploys, and the edge Worker validates this exact value.
 const BEVY_RUNTIME_VERSION = bevyRuntimeVersion.version || "local";
@@ -1851,6 +1948,14 @@ function toBevyWorldSnapshot(world: WorldState): Record<string, unknown> {
   };
 }
 
+function withdrawHudBarDrawPlanOutputs(experience = true, weight = true) {
+  if ((experience || weight) && typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("mir2:hud-bar-raw-edge", {
+      detail: { experience, weight },
+    }));
+  }
+}
+
 export default function HomePage() {
   const clientProfile = useOriginalClientDeviceProfile();
   const [wideMobileViewport, setWideMobileViewport] = useState({ width: 1024, height: 768 });
@@ -1897,9 +2002,59 @@ export default function HomePage() {
     movementShadowBridgeRef.current = createBevyMovementShadowBridge(() => runtimeRef.current);
   }
   const socketRef = useRef<WebSocket | null>(null);
+  const equipmentControllerRef = useRef<EquipmentSessionController | null>(null);
+  const equipmentConnectionGenerationRef = useRef(0);
+  const equipmentSessionGenerationRef = useRef(0);
+  const equipmentHostSuspendReasonRef = useRef<"socketClosed" | "logoutPending" | "connectionUnavailable" | null>("connectionUnavailable");
+  const equipmentBagOwnerRef = useRef<BagOwnerToken>({ runGeneration: 0, connectionGeneration: 0,
+    sessionGeneration: 0, ownerRevision: 0, owner: "react" });
+  const selfAppearanceAuthorityRef = useRef<SelfAppearance | null>(null);
+  const bevyCharacterSendGateRef = useRef<(proof: CharacterCommandProof, ownReservation?: number) => boolean>(() => false);
+  const bevySpellsSendGateRef = useRef<(proof: SpellsProof) => boolean>(() => false);
+  const mailIngressRef=useRef<ReturnType<typeof useBevyMailUi>|null>(null);
+  const mailRawRef=useRef<{mail:unknown;owner:MailOwner;catalogResolved:boolean}|null>(null);
+  const mailSceneRevisionRef=useRef(1);
+  const mailOpenRef=useRef(false);
+  const mailRustOwnsRef=useRef(false);
+  const mailCompatRef=useRef<(MailPresentation&{owner:MailOwner;sceneRevision:number})|null>(null);
+  const mailComposePromptRef=useRef<{owner:MailOwner;key:string;generation:string;base:ComposeRaw;kind:'recipient'|'gold';raw:string}|null>(null);
+  const mailPresentationSequenceRef=useRef(0);
+  const mailReadAttemptRef=useRef<{owner:MailOwner;sceneRevision:number;content:string}|null>(null);
+  const mailDispatcherRef=useRef<MailDispatcher|null>(null);
+  const mailParcelRef=useRef<MailParcelController|null>(null);
+  const mailParcelRawRef=useRef<{owner:MailOwner;snapshot:unknown}|null>(null);
+  const spellsRawSnapshotRef = useRef<{snapshot:SpellsRawSnapshot;owner:SpellsOwner}|null>(null);
+  const spellsIngressRef = useRef<{observeSnapshot:(s:SpellsRawSnapshot,o:SpellsOwner)=>boolean;observePacket:(p:string,v:Record<string,unknown>,o:SpellsOwner)=>boolean;withdraw:()=>void;pointerContext:()=>{modal:boolean}|null}|null>(null);
+  const combatIngressRef=useRef<ReturnType<typeof useBevyCombatInput>|null>(null);
+  const combatRawRef=useRef<{snapshot:Pick<GatewayWorldSnapshot,"playerObjectId"|"knownSkills"|"entities"|"mapFileName">;owner:CombatOwner}|null>(null);
+  const combatPointerRef=useRef<{cursor:[number,number]|null;hovered:string|null;lock:boolean}>({cursor:null,hovered:null,lock:false});
+  const combatMastersRef=useRef(new Map<string,{owner:CombatOwner;master:number}>());
+  const combatRouteCacheRef=useRef<{key:string;region:unknown;rows:CombatFacts["neighbours"]}|null>(null);
+  const bevyBagSendGateRef = useRef<(token: BagCommandToken) => boolean>(() => false);
+  const storageUiIngressRef = useRef<ReturnType<typeof useBevyStorageUi> | null>(null);
+  const npcShopUiIngressRef = useRef<ReturnType<typeof useBevyNpcShopUi> | null>(null);
+  const storageServiceActiveRef = useRef(false);
+  const storageServiceRevisionRef = useRef(0);
+  const storageCompatibilityRef = useRef(false);
+  const [storageServiceActive, setStorageServiceActive] = useState(false);
+  const [storageCompatibility, setStorageCompatibility] = useState(false);
+  const [storagePasswordOpenVersion, setStoragePasswordOpenVersion] = useState(0);
+  const [, renderBagOwner] = useState(0);
+  // A callback retained by an old menu must keep its render's session identity.
+  const equipmentRenderConnectionGeneration = equipmentConnectionGenerationRef.current;
+  const equipmentRenderSessionGeneration = equipmentSessionGenerationRef.current;
+  const equipmentRenderOwnerToken: BagCommandToken = { ...equipmentBagOwnerRef.current,
+    connectionGeneration: equipmentRenderConnectionGeneration, sessionGeneration: equipmentRenderSessionGeneration };
+  const equipmentStartGameRef = useRef<{
+    connectionGeneration: number; sessionGeneration: number; afterSnapshotVersion: number;
+  } | null>(null);
+  const equipmentSnapshotRef = useRef<{
+    connectionGeneration: number; sessionGeneration: number; snapshot: EquipmentGatewaySnapshot;
+  } | null>(null);
+  const npcGoldBuyInventoryRef = useRef(new NpcGoldBuyInventoryReadiness());
   const storageRequestSequenceRef = useRef(1);
   const pendingStorageRequestsRef = useRef<
-    Map<string, { operation: "deposit" | "withdraw"; from: number; to: number }>
+    Map<string, StorageTransferReservation>
   >(new Map());
   const worldRef = useRef<WorldState>(DEFAULT_WORLD_STATE);
   // NewQuestInfo is a static definition stream, while world snapshots contain
@@ -1907,6 +2062,17 @@ export default function HomePage() {
   // questLog so a prerequisite-locked quest can disappear and later reappear
   // without losing selectable reward metadata or its full Crystal copy.
   const questDefinitionByIdRef = useRef<Map<number, Partial<QuestEntry>>>(new Map());
+  const questAuthoritativeStageByIdRef = useRef<Map<number, QuestStage>>(new Map());
+  const questCoreRuntimeRef = useRef<ClientCoreRuntime | null>(null);
+  const questCoreEvaluationFailedRef = useRef(false);
+  const pendingQuestActionsRef = useRef<Map<string, PendingQuestAction>>(new Map());
+  const bevyQuestGenerationRef = useRef(0);
+  if (bevyQuestGenerationRef.current === 0) bevyQuestGenerationRef.current = nextQuestUiGeneration();
+  const experienceAuthorityRef = useRef<ExperienceAuthority | null>(null);
+  const weightAuthorityRef = useRef<WeightAuthority | null>(null);
+  const bevyQuestRequestGenerationsRef = useRef(new Map<string, number>());
+  const completedQuestHistoryRef = useRef<{ known: boolean; ids: number[] }>({ known: false, ids: [] });
+  const bevyQuestAuthoritativeRef = useRef(false);
   // Shared-zone packets address this client with its authoritative zone object
   // id, while the local Crystal-compatible snapshot keeps self at object 1000.
   // Learn that alias from the first struck packet at the self position.
@@ -2047,6 +2213,32 @@ export default function HomePage() {
   const [bevyEntityRendererReady, setBevyEntityRendererReady] = useState(false);
   const [bevyRuntimeBackend, setBevyRuntimeBackend] = useState<BevyRuntimeBackend | null>(null);
   const [bevyRuntimeGeneration, setBevyRuntimeGeneration] = useState(0);
+  // The primary canvas's DOM parent is fixed before the Shell first mounts.
+  const [bevyRuntimeStartup] = useState(() => selectBevyRuntimeStartup(
+    bevyRuntimeVersion, typeof window === "undefined" ? "" : window.location.search,
+  ));
+  const webGl2SharedCanvasPrototype = bevyRuntimeStartup.sharedCanvasPrototype;
+  const [bevyQuestUiRequested, setBevyQuestUiRequested] = useState(false);
+  const [bevyBagUiRequested, setBevyBagUiRequested] = useState(false);
+  const [bagCompatibilityMode, setBagCompatibilityMode] = useState<"fullInventory" | "delete" | null>(null);
+  const bagCompatibilityModeRef = useRef<"fullInventory" | "delete" | null>(null);
+  const [bevyQuestReactModalOpen, setBevyQuestReactModalOpen] = useState(false);
+  const [bevyHpLocalOverlayOpen, setBevyHpLocalOverlayOpen] = useState(false);
+  const bevyHpLocalOverlayOpenRef = useRef(false);
+  const handleHpOrbLocalOverlayChange = (open: boolean) => {
+    bevyHpLocalOverlayOpenRef.current = open;
+    if (open) {combatIngressRef.current?.withdraw();mailIngressRef.current?.withdraw();mailDispatcherRef.current?.withdraw();}
+    setBevyHpLocalOverlayOpen(open);
+  };
+  useEffect(() => {
+    const search = window.location.search;
+    setBevyQuestUiRequested(webGl2SharedCanvasPrototype
+      ? exactFirstRawQueryValue(search, "bevyQuestUi", "1")
+      : new URLSearchParams(search).get("bevyQuestUi") === "1");
+    setBevyBagUiRequested(webGl2SharedCanvasPrototype
+      ? exactFirstRawQueryValue(search, "bevyBagUi", "1")
+      : new URLSearchParams(search).get("bevyBagUi") === "1");
+  }, [webGl2SharedCanvasPrototype]);
   const [bevyMapImageResidencyVersion, setBevyMapImageResidencyVersion] = useState(0);
   const bevyMapRuntimeReady =
     bevyRuntimeStarted &&
@@ -2106,6 +2298,8 @@ export default function HomePage() {
           ? (updater as (current: WorldState) => WorldState)(worldRef.current)
           : updater;
       worldRef.current = next;
+      // Observe each authoritative packet before React coalesces A→B→A updates.
+      if (npcShopServiceRef.current) npcBuyDispatcherRef.current?.observe();
       worldStoreRef.current?.set(() => next);
       if (worldFlushFrameRef.current === 0) {
         worldFlushFrameRef.current = window.requestAnimationFrame(() => {
@@ -2167,14 +2361,102 @@ export default function HomePage() {
   const [aiLiveAudioEnabled, setAiLiveAudioEnabled] = useState(false);
   const [aiLiveStatus, setAiLiveStatus] = useState<AiLiveStatus | null>(null);
   const [realmInfo, setRealmInfo] = useState<GatewayRealmInfo | null>(null);
+  const [questCoreStatus, setQuestCoreStatus] = useState<"loading" | "ready" | "error">("loading");
+  const [questCoreLoadAttempt, setQuestCoreLoadAttempt] = useState(0);
+  const [, setQuestActionRevision] = useState(0);
+  useEffect(() => {
+    let active = true;
+    questCoreEvaluationFailedRef.current = false;
+    npcBuyDispatcherRef.current?.withdraw();
+    questCoreRuntimeRef.current = null;
+    setQuestCoreStatus("loading");
+    loadClientCoreRuntime().then((runtime) => {
+      if (!active) return;
+      questCoreRuntimeRef.current = runtime;
+      setQuestCoreStatus("ready");
+      // Renderer changes and Quest retries must not replace a live equipment
+      // ledger. If WASM arrived late, replay only this session's raw snapshot.
+      equipmentControllerRef.current ??= new EquipmentSessionController(runtime);
+      equipmentControllerRef.current.setOwnerRevision(equipmentBagOwnerRef.current.ownerRevision);
+      syncEquipmentSnapshot();
+      try{mailParcelRef.current??=new MailParcelController(runtime.createMailParcelLedger());syncMailParcel();}
+      catch{/* Existing letter/Quest/equipment capability remains available. */}
+      // Late capability load observes only the actually current, already OPEN socket.
+      if(socketRef.current?.readyState===WebSocket.OPEN)observeMailSocketOpen(socketRef.current);
+      npcBuyDispatcherRef.current?.observe();
+    }).catch((error: unknown) => {
+      if (!active) return;
+      questCoreRuntimeRef.current = null;
+      setQuestCoreStatus("error");
+      console.error("[mir2] shared quest client unavailable", error);
+      appendLog(t("ui.questClientUnavailable", [], "Quest actions are temporarily unavailable. Please retry."), "system");
+    });
+    return () => { active = false; };
+  }, [questCoreLoadAttempt]);
   const [reconnectStatus, setReconnectStatus] = useState<ReconnectStatus>(() => createIdleReconnectStatus());
-  const [showInventory, setShowInventory] = useState(false);
-  const [showCharacter, setShowCharacter] = useState(false);
+  const [showInventory, setShowInventoryState] = useState(false);
+  const bagOpenRef = useRef(false);
+  const bagYieldRef = useRef<() => void>(() => undefined);
+  function setShowInventory(open: boolean) {
+    if (sharedHudNavigationRef.current.ready && !hudProjectionRef.current) { navigateSharedHud({ type: open ? "openBag" : "closeBag" }); return; }
+    if (!hudProjectionRef.current) fallbackHudNavigationRevisionRef.current = nextHudNavigationRevision();
+    bagOpenRef.current = open;
+    if (!open) {
+      endStorageService();
+      bagYieldRef.current();
+      bagCompatibilityModeRef.current = null;
+      setBagCompatibilityMode(null);
+      // This is only the UI's one-shot NPCStorage open signal. Transport
+      // request IDs and pendingStorageRequests remain owned by their session.
+      if (bevyBagUiRequested) setStorageServiceOpenVersion(0);
+    }
+    setShowInventoryState(open);
+  }
+  const [showCharacter, setShowCharacterState] = useState(false);
+  const hudProjectionRef = useRef(false);
+  const fallbackHudNavigationRevisionRef = useRef(0);
+  function setShowCharacter(open: boolean) {
+    if (sharedHudNavigationRef.current.ready && !hudProjectionRef.current) { navigateSharedHud({ type: open ? "selectCharacterPage" : "closeCharacter", ...(open ? { page: activeCharacterTab === "char" ? "character" : activeCharacterTab } : {}) } as HudAction); return; }
+    if (!hudProjectionRef.current) fallbackHudNavigationRevisionRef.current = nextHudNavigationRevision();
+    setShowCharacterState(open);
+  }
+  const sharedHudNavigationRef = useRef<{ ready: boolean; dispatch: (action: HudAction) => boolean }>({ ready: false, dispatch: () => false });
+  const navigateSharedHud = (action: HudAction) => {
+    if (!sharedHudNavigationRef.current.ready) return false;
+    sharedHudNavigationRef.current.dispatch(action);
+    return true;
+  };
   const [npcShopService, setNpcShopService] = useState<DisplayNpcShopService | null>(null);
   const npcShopServiceRef = useRef<DisplayNpcShopService | null>(null);
+  const npcShopClockRef = useRef({ service: 0, catalog: 0 });
+  const [npcShopTabBinding, setNpcShopTabBinding] = useState<{ service: DisplayNpcShopService; tab: "buy" | "sell" } | null>(null);
+  const npcShopTabBindingRef = useRef(npcShopTabBinding);
+  npcShopTabBindingRef.current = npcShopTabBinding;
+  const npcBuySelectedRef = useRef<number | null>(null);
+  const npcBuyDispatcherRef = useRef<NpcGoldBuyDispatcher | null>(null);
+  const npcLegacyBuyProofsRef = useRef(new WeakMap<object, { currentJson: string; wireJson: string; used: boolean }>());
+  if (npcBuyDispatcherRef.current === null) {
+    npcBuyDispatcherRef.current = new NpcGoldBuyDispatcher({
+      runtime: { get getMir2NpcGoldBuyPlan() { return runtimeRef.current?.getMir2NpcGoldBuyPlan; } },
+      read: readNpcGoldBuyCurrent,
+      getAttemptSlot: () => questCoreRuntimeRef.current?.getNpcGoldBuyAttemptSlot() ?? null,
+      readSocket: () => { const socket = socketRef.current; return socket ? { socket, isOpen: socket.readyState === WebSocket.OPEN } : null; },
+    });
+  }
+  useEffect(() => {
+    const dispatcher = npcBuyDispatcherRef.current!;
+    dispatcher.activate();
+    return () => dispatcher.dispose();
+  }, []);
   const npcServiceNameRef = useRef("");
   const [npcRepairService, setNpcRepairService] = useState<"repair" | "special" | null>(null);
-  const [showQuestLog, setShowQuestLog] = useState(false);
+  const [showQuestLog, setShowQuestLogState] = useState(false);
+  function setShowQuestLog(open: boolean) {
+    if (sharedHudNavigationRef.current.ready && !hudProjectionRef.current) { navigateSharedHud({ type: open ? "openQuest" : "closeQuest" }); return; }
+    if (!hudProjectionRef.current) fallbackHudNavigationRevisionRef.current = nextHudNavigationRevision();
+    setShowQuestLogState(open);
+  }
+  const toggleQuestLogRef = useRef<() => void>(() => undefined);
   // Net-new interactive beginner tutorial overlay (no Crystal equivalent).
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialInput, setTutorialInput] = useState<TutorialInputProfile>("keyboardMouse");
@@ -2192,6 +2474,15 @@ export default function HomePage() {
   const [showTrade, setShowTrade] = useState(false);
   const [showBuffs, setShowBuffs] = useState(false);
   const [showMail, setShowMail] = useState(false);
+  const [mailCompatibility,setMailCompatibility]=useState<(MailPresentation&{owner:MailOwner;sceneRevision:number})|null>(null);
+  const [,setMailComposeRevision]=useState(0);
+  if(!mailDispatcherRef.current)mailDispatcherRef.current=new MailDispatcher(()=>{
+    const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),captured=mailRawRef.current;
+    return{owner,mail:captured&&owner&&sameMailOwner(captured.owner,owner)?captured.mail:null,
+      enabled:mailOpenRef.current&&screenRef.current==="game"&&worldRef.current.connected&&equipmentHostSuspendReasonRef.current===null
+        &&validMailCompatibility(mailCompatRef.current)};
+  },()=>questCoreRuntimeRef.current?.getMailSendSlot()??null);
+  useEffect(()=>()=>{mailIngressRef.current?.withdraw();mailDispatcherRef.current?.withdraw();mailRawRef.current=null;mailOpenRef.current=false;mailCompatRef.current=null;},[]);
   const [showWorldMap, setShowWorldMap] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [showHotkeys, setShowHotkeys] = useState(false);
@@ -2291,10 +2582,11 @@ export default function HomePage() {
       return { ...(summary as Record<string, unknown>), movementGate, mapGpu };
     });
     const onExtraWindowHotkey = (event: KeyboardEvent) => {
+      if (spellsIngressRef.current?.pointerContext()?.modal) { event.preventDefault(); return; }
       if (!event.altKey || event.ctrlKey || event.metaKey) return;
       const key = event.key.toLowerCase();
       const matchesKey = (letter: string) => key === letter || event.code === `Key${letter.toUpperCase()}`;
-      if (matchesKey("q")) { event.preventDefault(); setShowQuestLog((value) => !value); }
+      if (matchesKey("q")) { event.preventDefault(); toggleQuestLogRef.current(); }
       else if (matchesKey("h")) { event.preventDefault(); setShowHeroPet((value) => !value); }
       else if (matchesKey("g")) { event.preventDefault(); setShowGuild((value) => !value); }
       else if (matchesKey("p")) { event.preventDefault(); setShowGroup((value) => !value); }
@@ -2309,7 +2601,7 @@ export default function HomePage() {
       else if (matchesKey("j")) { event.preventDefault(); setShowHelp((value) => !value); }
       else if (matchesKey("y")) { event.preventDefault(); setShowHotkeys((value) => !value); }
       else if (matchesKey("c")) { event.preventDefault(); setShowChatSettings((value) => !value); }
-      else if (matchesKey("l")) { event.preventDefault(); setShowMail((value) => !value); }
+      else if (matchesKey("l")) { event.preventDefault(); setMailboxOpen(!mailOpenRef.current); }
       else if (matchesKey("d")) { event.preventDefault(); downloadSnapshot("manual"); }
     };
     window.addEventListener("keydown", onExtraWindowHotkey);
@@ -2333,7 +2625,7 @@ export default function HomePage() {
     setShowConquest(false);
     setShowTrade(false);
     setShowBuffs(false);
-    setShowMail(false);
+    setMailboxOpen(false);
     setShowWorldMap(false);
     setShowHelp(false);
     setShowHotkeys(false);
@@ -2390,6 +2682,17 @@ export default function HomePage() {
   const [isClientReady, setIsClientReady] = useState(false);
   const t = useMemo(() => buildTranslator(language), [language]);
   const locale = languageLocale(language);
+  useEffect(function syncPageDocumentLanguage() {
+    const element = document.documentElement;
+    const previousLanguage = element.lang;
+    element.lang = locale;
+    let released = false;
+    return () => {
+      if (released) return;
+      released = true;
+      if (element.lang === locale) element.lang = previousLanguage;
+    };
+  }, [locale]);
   const localizedQuestLog = useMemo(
     () =>
       localizeQuestLog(world.questLog, (key, params = [], fallback) =>
@@ -4522,6 +4825,8 @@ export default function HomePage() {
         const runtimeWindow = window as typeof window & {
           __mir2BevyRuntime?: RuntimeModule;
           __mir2BevyRuntimeBooted?: boolean;
+          __mir2BevyRuntimeBootAttempted?: boolean;
+          __mir2BevyRuntimeFailed?: boolean;
           __mir2BevyRuntimeBackend?: BevyRuntimeBackend;
           __mir2BevyRuntimeDebug?: BevyRuntimeDebug;
         };
@@ -4553,9 +4858,20 @@ export default function HomePage() {
           });
           return;
         }
+        if (!bevyRuntimeStartup.runtimeAllowed) {
+          setRuntimePhase("dom-only");
+          setRuntimeMessage("Compatibility renderer active; runtime metadata is unavailable.");
+          markMir2CacheMilestone("bevyRuntimeSkipped", { reason: bevyRuntimeStartup.reason });
+          return;
+        }
         if (runtimeWindow.__mir2BevyRuntimeBooted && runtimeWindow.__mir2BevyRuntime) {
+          const reusedBackend = runtimeWindow.__mir2BevyRuntimeBackend;
+          if (!reusedBackend) throw new Error("Booted runtime has no declared backend");
+          assertBevyRuntimeStartupAgreement(bevyRuntimeStartup, reusedBackend,
+            runtimeWindow.__mir2BevyRuntime.getMir2RuntimeUiCapabilities, window.location.search);
           runtimeRef.current = runtimeWindow.__mir2BevyRuntime;
           runtimeWindow.__mir2BevyRuntime.setMir2StatusSink?.(handleBevyRuntimeStatus);
+          withdrawHudBarDrawPlanOutputs();
           setBevyRuntimeGeneration((generation) => generation + 1);
           lastBevyEntityRenderStateJsonRef.current = null;
           lastBevyMapRenderStateJsonRef.current = null;
@@ -4574,6 +4890,9 @@ export default function HomePage() {
             backend: runtimeWindow.__mir2BevyRuntimeBackend ?? null,
           });
           return;
+        }
+        if (runtimeWindow.__mir2BevyRuntimeBootAttempted || runtimeWindow.__mir2BevyRuntimeFailed) {
+          throw new Error("Runtime startup previously failed; reload to retry");
         }
         const runtimeSupport = await detectBevyRuntimeSupport();
         if (disposed) return;
@@ -4602,7 +4921,7 @@ export default function HomePage() {
         let fallbackFrom: BevyRuntimeBackend | undefined;
         let runtime: RuntimeModule;
         try {
-          runtime = await loadBevyRuntimeModule(runtimeBackend);
+          runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup);
         } catch (error) {
           if (shouldRetryBevyRuntimeWithWebGl2(runtimeBackend, runtimeSupport.webgl2, error)) {
             fallbackFrom = runtimeBackend;
@@ -4615,24 +4934,24 @@ export default function HomePage() {
               stage: "module-load",
               message: error instanceof Error ? error.message : String(error),
             });
-            runtime = await loadBevyRuntimeModule(runtimeBackend);
+            runtime = await loadBevyRuntimeModule(runtimeBackend, bevyRuntimeStartup);
           } else {
             throw error;
           }
         }
         if (disposed) return;
 
-        // Wire a loaded runtime module into refs / React state / window globals and hand
-        // off to the Bevy app loop. The bootMir2Runtime() call can panic synchronously when
-        // the chosen GPU backend turns out to be unusable at device-creation time (the
-        // WebGPU adapter probe can pass yet device/surface creation still fail), so the
-        // caller wraps this to recover on WebGL2 instead of surfacing a black boot-error.
+        // The fixed canvas placement must agree with the initialized bytes before
+        // handing control to an App. A failed boot needs a fresh document to retry.
         const wireAndBootRuntime = (
           loadedRuntime: RuntimeModule,
           backend: BevyRuntimeBackend,
           recoveredFrom: BevyRuntimeBackend | undefined,
         ) => {
           const compiledBackend = loadedRuntime.getMir2RendererBackend?.() ?? null;
+          if (compiledBackend !== backend) throw new Error("Runtime compiled backend disagrees with selected package");
+          if (typeof loadedRuntime.bootMir2Runtime !== "function") throw new Error("Runtime boot export missing");
+          const selectedPackage = getBevyRuntimePackageForBackend(bevyRuntimeStartup, backend);
           markMir2CacheMilestone("bevyRuntimeModuleReady", {
             backend,
             compiledBackend,
@@ -4643,6 +4962,7 @@ export default function HomePage() {
 
           loadedRuntime.setMir2WorldState?.(JSON.stringify(DEFAULT_WORLD_STATE));
           runtimeRef.current = loadedRuntime;
+          withdrawHudBarDrawPlanOutputs();
           setBevyRuntimeGeneration((generation) => generation + 1);
           lastBevyEntityRenderStateJsonRef.current = null;
           lastBevyMapRenderStateJsonRef.current = null;
@@ -4654,6 +4974,7 @@ export default function HomePage() {
           runtimeWindow.__mir2BevyRuntimeDebug = {
             requestedBackend,
             selectedBackend: backend,
+            packageId: selectedPackage?.id,
             compiledBackend,
             fallbackFrom: recoveredFrom,
             webgpuSupported: runtimeSupport.webgpu,
@@ -4663,7 +4984,13 @@ export default function HomePage() {
           };
           setBevyEntityRendererReady(Boolean(loadedRuntime.setMir2EntityRenderState));
           setBevyRuntimeBackend(backend);
-          loadedRuntime.bootMir2Runtime?.();
+          runBevyRuntimeBootOnce(createBevyRuntimeBootGate(), () => {
+            // No await or callback runs between the read-only agreement and boot.
+            assertBevyRuntimeStartupAgreement(bevyRuntimeStartup, backend,
+              loadedRuntime.getMir2RuntimeUiCapabilities, window.location.search);
+            runtimeWindow.__mir2BevyRuntimeBootAttempted = true;
+            loadedRuntime.bootMir2Runtime!();
+          });
           runtimeWindow.__mir2BevyRuntimeBooted = true;
           setBevyRuntimeStarted(true);
           clearBevyMovementShadow();
@@ -4673,36 +5000,30 @@ export default function HomePage() {
             backend,
             compiledBackend,
             fallbackFrom: recoveredFrom ?? null,
+            packageId: selectedPackage?.id ?? null,
           });
         };
 
-        try {
-          wireAndBootRuntime(runtime, runtimeBackend, fallbackFrom);
-        } catch (bootError) {
-          // A GPU-init panic inside bootMir2Runtime ("Unable to find a GPU", from
-          // bevy_render) lands here. If we booted WebGPU and WebGL2 is available, recover by
-          // loading + booting the WebGL2 backend rather than black-screening on boot-error.
-          if (!shouldRetryBevyRuntimeWithWebGl2(runtimeBackend, runtimeSupport.webgl2, bootError)) {
-            throw bootError;
-          }
-          const bootMessage = bootError instanceof Error ? bootError.message : String(bootError);
-          const recoveredFrom = runtimeBackend;
-          runtimeBackend = "webgl2";
-          // A stale persisted preference must not pin the broken backend on reload.
-          safeLocalStorageRemove("mir2-bevy-backend");
-          markMir2CacheMilestone("bevyRuntimeFallback", {
-            from: recoveredFrom,
-            to: runtimeBackend,
-            stage: "boot",
-            message: bootMessage,
-          });
-          appendLog(t("runtime.loadingModule"), "network");
-          const webgl2Runtime = await loadBevyRuntimeModule(runtimeBackend);
-          if (disposed) return;
-          wireAndBootRuntime(webgl2Runtime, runtimeBackend, recoveredFrom);
-        }
+        wireAndBootRuntime(runtime, runtimeBackend, fallbackFrom);
       } catch (error) {
+        if (disposed) return;
         const message = error instanceof Error ? error.message : String(error);
+        const failedWindow = window as typeof window & {
+          __mir2BevyRuntime?: RuntimeModule;
+          __mir2BevyRuntimeBooted?: boolean;
+          __mir2BevyRuntimeFailed?: boolean;
+          __mir2BevyRuntimeBackend?: BevyRuntimeBackend;
+        };
+        runtimeRef.current?.clearMir2StatusSink?.();
+        runtimeRef.current = null;
+        failedWindow.__mir2BevyRuntime = undefined;
+        failedWindow.__mir2BevyRuntimeBooted = false;
+        failedWindow.__mir2BevyRuntimeFailed = true;
+        failedWindow.__mir2BevyRuntimeBackend = undefined;
+        setBevyQuestUiRequested(false);
+        setBevyBagUiRequested(false);
+        withdrawHudBarDrawPlanOutputs();
+        setBevyRuntimeGeneration((generation) => generation + 1);
         resetBevyMapImageResidency();
         setRuntimePhase("dom-only");
         setRuntimeMessage("Compatibility renderer active; high-performance runtime is unavailable.");
@@ -4725,15 +5046,18 @@ export default function HomePage() {
     return () => {
       disposed = true;
     };
-  }, [clientProfile.input, clientProfile.layout, screen, shouldBootBevyRuntime]);
+  }, [bevyRuntimeStartup, clientProfile.input, clientProfile.layout, screen, shouldBootBevyRuntime]);
 
   useEffect(() => {
     return () => {
+      retireEquipmentSession();
       socketRef.current?.close();
       socketRef.current = null;
       // Storage mutations are never replayed across a reconnect. Their exact
       // request ids remain spent; snapshots reconcile any unknown outcome.
       pendingStorageRequestsRef.current.clear();
+      pendingQuestActionsRef.current.clear();
+      questAuthoritativeStageByIdRef.current.clear();
     };
   }, []);
 
@@ -5331,12 +5655,196 @@ export default function HomePage() {
     );
   }
 
-  function send(command: Record<string, unknown>, options?: { quiet?: boolean }) {
+  function syncEquipmentSnapshot() {
+    const controller = equipmentControllerRef.current;
+    const cached = equipmentSnapshotRef.current;
+    const session = equipmentStartGameRef.current;
+    if (!controller || !cached || !session || equipmentHostSuspendReasonRef.current !== null
+      || cached.connectionGeneration !== equipmentConnectionGenerationRef.current
+      || cached.connectionGeneration !== session.connectionGeneration
+      || cached.sessionGeneration !== session.sessionGeneration) return;
+    const status = controller.status();
+    if (status.connectionGeneration === cached.connectionGeneration && status.sessionGeneration === cached.sessionGeneration) {
+      controller.observeSnapshot({ ...cached, complete: true });
+    } else {
+      controller.establishBaseline({ ...cached, startGameConfirmed: true, complete: true });
+    }
+  }
+
+  function suspendEquipmentConnection(reason: "socketClosed" | "logoutPending" | "connectionUnavailable") {
+    npcGoldBuyInventoryRef.current.invalidate();
+    storageUiIngressRef.current?.withdraw();
+    setMailboxOpen(false);mailRawRef.current=null;
+    combatIngressRef.current?.withdraw();
+    spellsIngressRef.current?.withdraw();
+    // This gate exists before WASM/baseline readiness and survives late loading.
+    retireNpcShopService();
+    equipmentHostSuspendReasonRef.current = reason;
+    const controller = equipmentControllerRef.current;
+    const identity = controller?.status();
+    if (controller && identity) controller.suspendConnection({ ...identity, reason });
+  }
+
+  function retireEquipmentSession() {
+    npcGoldBuyInventoryRef.current.invalidate();
+    retireNpcShopService();
+    endStorageService();
+    // This is a confirmed session end, not a transient suspension. Old storage
+    // cells and receipts cannot own the next character; request IDs stay spent.
+    pendingStorageRequestsRef.current.clear();
+    setMailboxOpen(false);mailRawRef.current=null;
+    combatIngressRef.current?.withdraw();combatRawRef.current=null;combatMastersRef.current.clear();combatPointerRef.current={cursor:null,hovered:null,lock:false};
+    spellsIngressRef.current?.withdraw();
+    spellsRawSnapshotRef.current=null;
+    equipmentHostSuspendReasonRef.current = "connectionUnavailable";
+    const controller = equipmentControllerRef.current;
+    const identity = controller?.status();
+    if (controller && identity) controller.terminateSession(identity);
+    equipmentStartGameRef.current = null;
+    equipmentSnapshotRef.current = null;
+  }
+
+  function observeEquipmentSnapshot(snapshot: GatewayWorldSnapshot, connectionGeneration: number) {
+    const session = equipmentStartGameRef.current;
+    if (!session || connectionGeneration !== equipmentConnectionGenerationRef.current
+      || session.connectionGeneration !== connectionGeneration
+      || worldSnapshotVersionRef.current <= session.afterSnapshotVersion) return;
+    const projection = projectEquipmentGatewaySnapshot(snapshot);
+    if (!projection) {
+      equipmentSnapshotRef.current = null;
+      equipmentControllerRef.current?.invalidateSnapshot(session);
+      return;
+    }
+    equipmentSnapshotRef.current = { ...session, snapshot: projection };
+    syncEquipmentSnapshot();
+  }
+
+  function rejectEquipmentCommand(reason: string) {
+    const pending = reason === "instanceBusy" || reason === "equipmentSlotBusy";
+    appendLog(pending
+      ? t("ui.itemActionPending", [], "An equipment change is still waiting for the server.")
+      : t("ui.itemStateSync", [], "Item state is not ready. Wait for it to sync, then try again."), "system");
+    return false;
+  }
+
+  function currentEquipmentOwner(token: EquipmentOwnerProof, ownReservation?: number): boolean {
+    const current = { ...equipmentBagOwnerRef.current, connectionGeneration: equipmentConnectionGenerationRef.current,
+      sessionGeneration: equipmentSessionGenerationRef.current };
+    if ("surface" in token && token.surface === "character") return sameBagOwner(token, current) && bevyCharacterSendGateRef.current(token, ownReservation);
+    if ("surface" in token && token.surface === "storage") return sameBagOwner(token, current)
+      && storageUiIngressRef.current?.allows(token.intent) === true;
+    return sameBagOwner(token, current) && (token.owner !== "bevy" || bevyBagSendGateRef.current(token));
+  }
+
+  function itemCommandRequiresOwner(command: Record<string, unknown>): boolean {
+    return ["useItem", "equipItem", "removeItem", "moveItem", "dropItem", "mergeItem", "splitItem",
+      "sellItem", "dropGold", "storeItemV2", "takeBackItemV2"].includes(String(command.type));
+  }
+
+  /** Every UI and compatibility command enters this session-owned send gate. */
+  function send(command: Record<string, unknown>, options?: { quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof }): boolean {
+    // Supported ordinary combat enters through Rust outputs with a live local proof.
+    if(combatIngressRef.current?.supported()&&["attack","rangeAttack","magic","spellToggle"].includes(String(command.type)))return false;
+    // Preserve the original callback/intent token through every synchronous
+    // callback, including the last check immediately before socket.send.
+    options = { ...options, ownerToken: options?.ownerToken ?? equipmentRenderOwnerToken };
+    const type = command.type;
+    if (type === "interact" || type === "selectNpcDialog" || type === "submitNpcInput") retireNpcShopService();
+    if ((type === "storeItemV2" || type === "takeBackItemV2") && !options.storageProof) return false;
+    if (itemCommandRequiresOwner(command)
+      && (!currentEquipmentOwner(options.ownerToken!)
+        || equipmentHostSuspendReasonRef.current !== null)) {
+      return rejectEquipmentCommand("staleSession");
+    }
+    if (type === "useItem") {
+      const grid = typeof command.grid === "string" ? command.grid.toLowerCase() : "inventory";
+      const uniqueId = authoritativeItemUniqueId(grid === "equipment" ? command.equipmentInstanceId : command.uniqueId);
+      const item = uniqueId === undefined ? null : currentEquipmentCommandItem(worldRef.current, uniqueId, grid);
+      if (!item || uniqueId === undefined) return rejectEquipmentCommand("invalidIdentity");
+      const controller = equipmentControllerRef.current;
+      const status = controller?.status();
+      const session = equipmentStartGameRef.current;
+      const snapshot = equipmentSnapshotRef.current;
+      if (!session || !snapshot
+        || snapshot.connectionGeneration !== equipmentConnectionGenerationRef.current
+        || snapshot.connectionGeneration !== session.connectionGeneration
+        || snapshot.sessionGeneration !== session.sessionGeneration) return rejectEquipmentCommand("notReady");
+      const pending = controller?.hasPendingInstance(uniqueId);
+      if (pending?.reserved || (status?.pending && !pending?.ok)) return rejectEquipmentCommand("instanceBusy");
+      if (grid === "equipment") {
+        // Crystal mount Use addresses equipment slot 13 on the wire. The
+        // separate instance ID above only proves this UI selection is current.
+        if (item.slot !== "mount" || command.slot !== 13) return rejectEquipmentCommand("invalidIdentity");
+        return sendRaw({ type: "useItem", grid: "equipment", slot: 13 }, options);
+      }
+      const classification = classifyEquipmentUse(item);
+      if (grid === "inventory" && classification.kind === "equipment") {
+        command = { type: "equipItem", uniqueId, grid, to: classification.to };
+      } else {
+        // A metadata-free bag Use could secretly equip on the server and skip
+        // the ledger. Do not grant a first-request exception for unknown gear.
+        if (grid === "inventory" && classification.kind === "unknown") return rejectEquipmentCommand("invalidMetadata");
+        // Unknown type metadata cannot prove that this Use avoids an occupied
+        // equipment destination. Known consumables keep their ordinary Use.
+        if (classification.kind === "unknown" && status?.pending) return rejectEquipmentCommand("equipmentSlotBusy");
+        return sendRaw(command, options);
+      }
+    }
+    if (command.type === "equipItem" || command.type === "removeItem") {
+      const operation = equipmentGatewayOperation(command);
+      const controller = equipmentControllerRef.current;
+      const session = equipmentStartGameRef.current;
+      if (!operation || !controller || !session) return rejectEquipmentCommand("notReady");
+      const source = operation.kind === "remove" ? "equipment" : operation.grid;
+      if (!currentEquipmentCommandItem(worldRef.current, operation.uniqueId, source)) return rejectEquipmentCommand("invalidIdentity");
+      const reservation = controller.reserve({ ...session, ownerRevision: options.ownerToken!.ownerRevision, operation });
+      if (!reservation.ok || !reservation.ticket) return rejectEquipmentCommand(reservation.error ?? "notReady");
+      try {
+        const sent = sendRaw(command, { ...options, reservedCharacterSource: "surface" in options.ownerToken! && options.ownerToken!.surface === "character" ? operation.uniqueId : undefined });
+        if (sent) controller.markSent(reservation.ticket);
+        else controller.cancelDefinitelyUnsent(reservation.ticket);
+        return sent;
+      } catch (error) {
+        controller.markOutcomeUnknown(reservation.ticket);
+        console.error("[mir2] equipment send outcome is unknown", error);
+        return rejectEquipmentCommand("sendOutcomeUnknown");
+      }
+    }
+    if (command.type === "logOut") {
+      try {
+        const sent = sendRaw(command, options);
+        if (sent) suspendEquipmentConnection("logoutPending");
+        return sent;
+      } catch (error) {
+        suspendEquipmentConnection("logoutPending");
+        throw error;
+      }
+    }
+    return sendRaw(command, options);
+  }
+
+  function sendRaw(command: Record<string, unknown>, options?: { quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof }) {
     // Spectator sockets are structurally read-only and accept only the explicit
     // controls sent through sendSpectatorControl below. Drop every gameplay
     // command before it reaches the network or local prediction pipeline.
     if (isSpectatorBrowserMode()) return false;
-    if (socketRef.current?.readyState !== WebSocket.OPEN) return false;
+    const npcBuyDispatcher = options?.npcBuyProof ? npcBuyDispatcherRef.current : null;
+    const socket = socketRef.current;
+    if (socket?.readyState !== WebSocket.OPEN) return false;
+    if ((command.type === "storeItemV2" || command.type === "takeBackItemV2") && !options?.storageProof) return false;
+    const serialized=options?.combatBody??JSON.stringify(command);
+    if(command.type==='mailCost'&&!options?.mailQuoteProof||command.type==='mailLockedItem'&&!options?.mailLockProof)return false;
+    if(["readMail","collectParcel","deleteMail","sendMail","lockMail"].includes(String(command.type))&&(!options?.mailProof||!mailDispatcherRef.current?.allows(options.mailProof)))return false;
+    if(options?.combatProof&&(!combatIngressRef.current?.allows(options.combatProof)||JSON.stringify(command)!==serialized))return false;
+    if (options?.npcUi && (!options.npcBuyProof || !npcShopIntentMatchesCommand(options.npcUi.intent, command)
+      || npcShopUiIngressRef.current?.allows(options.npcUi.intent) !== true)) return false;
+    if (command.type === "buyItem" && !options?.npcUi && npcShopUiIngressRef.current?.blocksInput()) return false;
+    if ((options?.npcBuyProof || options?.npcLegacyBuyProof) && command.type !== "buyItem") return false;
+    if (command.type === "buyItem") {
+      if (Boolean(options?.npcBuyProof) === Boolean(options?.npcLegacyBuyProof)) return false;
+      if (options?.npcBuyProof && !npcBuyDispatcher?.allows(options.npcBuyProof, command)) return false;
+      if (options?.npcLegacyBuyProof && !legacyNpcBuyAllowed(options.npcLegacyBuyProof, command)) return false;
+    }
     lastCommandRef.current = command;
     const commandNow = Date.now();
     if (isMovementPredictionBlockingCommand(command)) {
@@ -5397,7 +5905,68 @@ export default function HomePage() {
     if (typeof command.type === "string" && typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("mir2:action", { detail: { type: command.type } }));
     }
-    socketRef.current.send(JSON.stringify(command));
+    // The synchronous event may change connections or request logout on this
+    // same socket. Recheck item ownership immediately before sending.
+    if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN) return false;
+    if (options?.ownerToken && "surface" in options.ownerToken && options.ownerToken.surface === "storage"
+      && !currentEquipmentOwner(options.ownerToken)) return false;
+    // Inspect the exact immutable DTO that will cross the socket. Synchronous
+    // listeners may alter type, UID or either cell on the caller's object.
+    const wireCommand=JSON.parse(serialized) as Record<string,unknown>;
+    if(JSON.stringify(command)!==serialized)return false;
+    if(mailParcelRef.current?.state?.blockedUniqueIds.length&&!syncMailParcel())return false;
+    if(!mailMutationAllowed(wireCommand,mailParcelRef.current?.snapshot??null,mailParcelRef.current?.state?.blockedUniqueIds??[]))return false;
+    if(isMailItemMutation(wireCommand)&&mailParcelRef.current?.state?.blockedUniqueIds.length&&(!currentEquipmentOwner(options?.ownerToken??equipmentRenderOwnerToken,options?.reservedCharacterSource)||equipmentHostSuspendReasonRef.current!==null))return false;
+    if (itemCommandRequiresOwner(command)
+      && (!currentEquipmentOwner(options?.ownerToken ?? equipmentRenderOwnerToken, options?.reservedCharacterSource)
+        || equipmentHostSuspendReasonRef.current !== null)) return false;
+    const storageReservation = options?.storageProof
+      ? pendingStorageRequestsRef.current.get(options.storageProof.requestId) : undefined;
+    if (options?.storageProof && (!storageReservation || storageReservation.proof !== options.storageProof
+      || storageReservation.enteredSocket || (equipmentControllerRef.current?.status().pending ?? 0) > 0
+      || !storageTransferStillCurrent(worldRef.current, wireCommand, options.storageProof))) return false;
+    if (!storageMutationAllowed(worldRef.current, wireCommand,
+      pendingStorageRequestsRef.current.values(), options?.storageProof)) return false;
+    if (options?.skillProof && (command.type!=="magicKey" || !bevySpellsSendGateRef.current(options.skillProof)
+      || ["requestId","spell","key","oldKey"].some(key=>command[key]!==options.skillProof![key as keyof SpellsProof]))) return false;
+    if(options?.combatProof&&(!combatIngressRef.current?.allows(options.combatProof)
+      ||!combatIngressRef.current.claim(options.combatProof,serialized)))return false;
+    if(options?.mailProof){const p=options.mailProof;
+      if(command.type!==p.commandType||p.mailId!==null&&command.mailId!==p.mailId||p.commandType==="lockMail"&&command.lock!==p.lock||!mailDispatcherRef.current?.allows(p)
+        ||p.rust&&!mailIngressRef.current?.allows(p.rust))return false;
+      // Claim once, after every synchronous listener and immediately before socket.send.
+      if(p.rust&&!mailIngressRef.current?.claim(p.rust)||!mailDispatcherRef.current.claim(p))return false;
+      if(p.commandType==='sendMail'){
+        const payload=wireCommand as unknown as import('../lib/client-core-runtime').MailWirePayload;
+        if(payload.gold>0||payload.itemsIdx.some(id=>id!==0)||payload.stamped){
+          if(!syncMailParcel(payload.gold)||!sameMailOwner(currentSpellsOwner(Number(worldRef.current.playerObjectId)),p.owner)||!mailParcelRef.current?.allowsSend(p.owner,payload)||!mailParcelItemsIdle([...payload.itemsIdx,...(mailParcelRef.current.state?.blockedUniqueIds??[])]))return false;
+        }
+      }
+    }
+    if(options?.mailQuoteProof){const p=options.mailQuoteProof;if(!syncMailParcel(Number(wireCommand.gold))||!sameMailOwner(currentSpellsOwner(Number(worldRef.current.playerObjectId)),p.owner)||!mailParcelRef.current?.enter(p,serialized))return false;}
+    if(options?.mailLockProof){const p=options.mailLockProof;if(!sameMailOwner(currentSpellsOwner(Number(worldRef.current.playerObjectId)),p.owner)||!mailParcelRef.current?.enterLock(p,serialized))return false;}
+    // All listeners, owner/parcel/UID and immutable DTO checks precede Core entry.
+    // No callback/await occurs between irreversible entry and this exact socket.send.
+    if(options?.mailProof?.commandType==='sendMail'&&(!options.mailProof.compose||!mailDispatcherRef.current?.composer.enterSocket(options.mailProof.compose,serialized,socket)))return false;
+    if (options?.ownerToken && "surface" in options.ownerToken && options.ownerToken.surface === "storage"
+      && (!storageIntentMatchesCommand(options.ownerToken.intent, wireCommand)
+        || storageUiIngressRef.current?.claim(options.ownerToken.intent) !== true)) return false;
+    if (storageReservation) storageReservation.enteredSocket = true;
+    if (wireCommand.type === "buyItem" && options?.npcLegacyBuyProof
+      && !legacyNpcBuyAllowed(options.npcLegacyBuyProof, wireCommand, true)) return false;
+    if (wireCommand.type === "buyItem" && !options?.npcUi && npcShopUiIngressRef.current?.blocksInput()) return false;
+    if (options?.npcUi && (!npcShopIntentMatchesCommand(options.npcUi.intent, wireCommand)
+      || npcShopUiIngressRef.current?.claim(options.npcUi.intent) !== true)) return false;
+    if (options?.npcBuyProof && !npcBuyDispatcher?.claim(options.npcBuyProof, wireCommand, serialized, socket,
+      options.npcUi ? () => npcShopUiSendCurrent(options.npcUi!, socket)
+        : () => !npcShopUiIngressRef.current?.blocksInput() && socketRef.current === socket && socket.readyState === WebSocket.OPEN)) return false;
+    try { socket.send(serialized); } catch (error) {
+      if (!options?.npcBuyProof) throw error;
+      npcBuyDispatcher?.transportResult(options.npcBuyProof, "unknown");
+      console.error("[mir2] NPC purchase send outcome is unknown", error);
+      return false;
+    }
+    if (options?.npcBuyProof) npcBuyDispatcher?.transportResult(options.npcBuyProof, "flushed");
     if (isMovementCommand(command)) {
       scheduleMovementConfirmTick();
     }
@@ -5575,6 +6144,7 @@ export default function HomePage() {
           inventoryItems: WorldItem[];
           storageItems: WorldItem[];
           equipmentItems: EquipmentItem[];
+          equipmentOperations: EquipmentSessionStatus | null;
           questLog: QuestEntry[];
           activeNpcDialog: NpcDialog | null;
           gold: number;
@@ -5716,6 +6286,9 @@ export default function HomePage() {
         freeBagSlots: world.freeBagSlots,
         maxBagSlots: world.maxBagSlots,
         inventoryCapacity: world.inventoryCapacity,
+        get equipmentOperations() {
+          return equipmentControllerRef.current?.status() ?? null;
+        },
         lightSetting: world.lightSetting,
         timeOfDayLightSetting: world.timeOfDayLightSetting,
         mapLightSetting: world.mapLightSetting,
@@ -6002,11 +6575,17 @@ export default function HomePage() {
     manualSocketCloseRef.current = false;
     gatewayProtocolReadyRef.current = false;
     const socket = new WebSocket(gatewayUrl);
+    suspendEquipmentConnection("connectionUnavailable");
+    pendingStorageRequestsRef.current.clear();
+    const connectionGeneration = ++equipmentConnectionGenerationRef.current;
+    equipmentStartGameRef.current = null;
+    equipmentSnapshotRef.current = null;
     socketRef.current = socket;
     setWsState("connecting");
 
     socket.addEventListener("open", () => {
-      if (socketRef.current !== socket) return;
+      if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN) return;
+      observeMailSocketOpen(socket);
       setWsState("open");
       markMir2CacheMilestone("gatewayConnected");
       updateWorld((current) => ({ ...current, connected: true }));
@@ -6015,11 +6594,15 @@ export default function HomePage() {
 
     socket.addEventListener("close", () => {
       if (socketRef.current !== socket) return;
+      suspendEquipmentConnection("socketClosed");
       cancelPendingEntitySounds();
       const closedManually = manualSocketCloseRef.current;
       socketRef.current = null;
       manualSocketCloseRef.current = false;
       pendingStorageRequestsRef.current.clear();
+      clearPendingQuestActions();
+      questAuthoritativeStageByIdRef.current.clear();
+      questDefinitionByIdRef.current.clear();
       if (closedManually) {
         pendingGatewayProtocolActionRef.current = null;
       }
@@ -6052,7 +6635,7 @@ export default function HomePage() {
     socket.addEventListener("message", (event) => {
       if (socketRef.current !== socket) return;
       try {
-        handleGatewayEvent(JSON.parse(event.data as string) as GatewayEvent);
+        handleGatewayEvent(parseGatewayMailDates(event.data as string) as GatewayEvent, connectionGeneration, socket);
       } catch (error) {
         appendLog(t("log.invalidGatewayPayload", [String(error)]), "system");
       }
@@ -6373,6 +6956,7 @@ export default function HomePage() {
   }
 
   function resetClient() {
+    retireEquipmentSession();
     cancelPendingEntitySounds();
     const socketToClose = socketRef.current;
     manualSocketCloseRef.current = Boolean(
@@ -6439,6 +7023,9 @@ export default function HomePage() {
     setActiveInventoryTab("bag1");
     setActiveCharacterTab("char");
     setCharacters([fallbackCharacter(language, accountId)]);
+    questDefinitionByIdRef.current.clear();
+    questAuthoritativeStageByIdRef.current.clear();
+    clearPendingQuestActions();
     setLogs([]);
     updateWorld((current) => ({
       ...DEFAULT_WORLD_STATE,
@@ -6692,6 +7279,7 @@ export default function HomePage() {
   }
 
   function cancelLockedMonsterAttack() {
+    if(combatIngressRef.current?.supported())combatIngressRef.current.edge({type:"cancel"});
     if (!lockedMonsterAttackRef.current) {
       return;
     }
@@ -6702,6 +7290,7 @@ export default function HomePage() {
   }
 
   function continueLockedMonsterAttack(now = Date.now()) {
+    if(combatIngressRef.current?.supported())return;
     const lock = lockedMonsterAttackRef.current;
     if (!lock) {
       return;
@@ -6759,6 +7348,12 @@ export default function HomePage() {
   lockedMonsterAttackTickRef.current = continueLockedMonsterAttack;
 
   function lockMonsterAttack(objectId: string) {
+    if(combatIngressRef.current?.supported()){
+      lockedMonsterAttackRef.current=null;pendingNpcInteractRef.current=null;pendingPickupRef.current=null;pendingTransferRef.current=null;
+      pendingOnchainMineRef.current=false;stopOnchainMining();
+      updateWorld(current=>({...current,selectedObjectId:objectId}));
+      combatIngressRef.current.edge({type:"select",objectId:Number(objectId)});return;
+    }
     const currentWorld = worldRef.current;
     const target = currentWorld.entities.find((entity) => entity.objectId === objectId) ?? null;
     if (!target || target.kind !== "monster" || target.dead) {
@@ -6804,6 +7399,7 @@ export default function HomePage() {
   }
 
   function attackTarget(objectId: string) {
+    if(combatIngressRef.current?.supported()){lockMonsterAttack(objectId);return true;}
     stopOnchainMining();
     if (!beginLocalPlayerMeleeAttack(objectId)) {
       return false;
@@ -7142,7 +7738,13 @@ export default function HomePage() {
     send({ type: "deleteCharacter", characterIndex: selected.index });
   }
 
-  function useItem(item: ItemCommandRef) {
+  function useItem(item: ItemCommandRef, ownerToken?: BagCommandToken): boolean {
+    const uniqueId = authoritativeItemUniqueId(item.authoritativeUniqueId);
+    const currentItem = uniqueId === undefined ? null : currentAuthoritativeItem(
+      [...worldRef.current.inventoryItems, ...worldRef.current.beltItems, ...worldRef.current.storageItems],
+      { container: item.container, slot: item.slot, uniqueId },
+    );
+    if (!currentItem) return rejectEquipmentCommand("invalidIdentity");
     (window as typeof window & { __mir2LastUseItem?: Record<string, unknown> }).__mir2LastUseItem = {
       key: item.key,
       uniqueId: item.uniqueId,
@@ -7150,13 +7752,13 @@ export default function HomePage() {
       container: item.container,
       at: Date.now(),
     };
-    send({
+    return send({
       type: "useItem",
       key: item.key,
-      uniqueId: item.uniqueId,
-      slot: item.slot,
+      uniqueId,
+      slot: item.container === "bag2" ? 40 + item.slot : item.slot,
       grid: item.container === "belt" ? "belt" : item.container === "quest" ? "questInventory" : "inventory",
-    });
+    }, { ownerToken });
   }
 
   function dropItem(item: ItemCommandRef) {
@@ -7169,42 +7771,84 @@ export default function HomePage() {
     });
   }
 
-  function equipItem(item: ItemCommandRef, slot: EquipmentSlot) {
-    send({
+  function equipItem(item: ItemCommandRef, slot: EquipmentSlot, ownerToken?: BagCommandToken): boolean {
+    const uniqueId = authoritativeItemUniqueId(item.authoritativeUniqueId);
+    const currentWorld = worldRef.current;
+    const currentItem = uniqueId === undefined ? null : currentAuthoritativeItem(
+      [...currentWorld.inventoryItems, ...currentWorld.beltItems, ...currentWorld.storageItems],
+      { container: item.container, slot: item.slot, uniqueId },
+    );
+    if (!currentItem) {
+      appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+      return false;
+    }
+    return send({
       type: "equipItem",
-      uniqueId: item.uniqueId,
-      grid:
-        item.container === "belt"
-          ? "belt"
-          : item.container === "quest"
-            ? "questInventory"
-            : "inventory",
+      uniqueId,
+      grid: equipmentSourceGrid(currentItem.container),
       to: equipmentSlotIndex(slot),
-    });
+    }, { ownerToken });
+  }
+
+  function dispatchBevyCharacterIntent(intent: CharacterIntent, proof: CharacterCommandProof): boolean {
+    if (intent.type !== "removeEquipment" || intent.source.container !== 2 || !currentEquipmentOwner(proof)) return false;
+    const item = worldRef.current.equipmentItems.find(item => equipmentSlotIndex(item.slot) === intent.source.slot
+      && authoritativeItemUniqueId(item.authoritativeUniqueId) === intent.source.uniqueId);
+    if (!item) return false;
+    const command = planEquipmentRemoval(worldRef.current.equipmentItems, worldRef.current.inventoryItems,
+      worldRef.current.maxBagSlots, { slot: item.slot, uniqueId: intent.source.uniqueId });
+    return Boolean(command && send(command, { ownerToken: proof }));
   }
 
   function removeItem(item: EquipmentCommandRef) {
-    const occupiedBagSlots = new Set(
-      world.inventoryItems.filter((entry) => entry.container === "bag1").map((entry) => entry.slot),
+    const uniqueId = authoritativeItemUniqueId(item.authoritativeUniqueId);
+    const currentWorld = worldRef.current;
+    const command = uniqueId === undefined ? null : planEquipmentRemoval(
+      currentWorld.equipmentItems,
+      currentWorld.inventoryItems,
+      currentWorld.maxBagSlots,
+      { slot: item.slot, uniqueId },
     );
-    const targetSlot =
-      Array.from({ length: Math.max(world.maxBagSlots, 1) }, (_, slot) => slot).find(
-        (slot) => !occupiedBagSlots.has(slot),
-      ) ?? 0;
-    send({
-      type: "removeItem",
-      uniqueId: equipmentSlotIndex(item.slot),
-      grid: "inventory",
-      to: targetSlot,
-    });
+    if (!command) {
+      appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+      return;
+    }
+    send(command);
   }
 
-  function moveItem(item: ItemMoveRef, toSlot: number) {
-    const from =
-      item.container === "bag1" || item.container === "bag2" || item.container === "quest"
-        ? (item.uniqueId ?? (item.container === "bag2" ? 40 + item.slot : item.slot))
-        : item.slot;
-    send({
+  function moveItem(item: ItemMoveRef, toSlot: number, toContainer?: ItemContainer, ownerToken?: BagCommandToken): boolean {
+    if (item.container === "bag1" || item.container === "bag2") {
+      const session = equipmentStartGameRef.current;
+      const snapshot = equipmentSnapshotRef.current;
+      if (!currentEquipmentOwner(ownerToken ?? equipmentRenderOwnerToken)
+        || equipmentHostSuspendReasonRef.current !== null
+        || !session || !snapshot
+        || snapshot.connectionGeneration !== equipmentConnectionGenerationRef.current
+        || snapshot.connectionGeneration !== session.connectionGeneration
+        || snapshot.sessionGeneration !== session.sessionGeneration) {
+        appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+        return false;
+      }
+      // A missing destination page is not evidence that the source page is intended.
+      const plan = planBagMove(worldRef.current.inventoryItems, worldRef.current.maxBagSlots, item, toSlot, toContainer);
+      if (!plan) {
+        appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+        return false;
+      }
+      const controller = equipmentControllerRef.current;
+      const pendingCount = controller?.status().pending ?? 0;
+      for (const uniqueId of plan.affectedUniqueIds) {
+        const pending = controller?.hasPendingInstance(uniqueId);
+        if (pending?.reserved || (pendingCount > 0 && !pending?.ok)) {
+          appendLog(t("ui.itemActionPending", [], "An equipment change is still waiting for the server."), "system");
+          return false;
+        }
+      }
+      return send(plan.command, { ownerToken });
+    }
+    // Keep the already established non-bag routes unchanged in this slice.
+    const from = item.container === "quest" ? (item.uniqueId ?? item.slot) : item.slot;
+    return send({
       type: "moveItem",
       grid:
         item.container === "belt"
@@ -7216,7 +7860,7 @@ export default function HomePage() {
             : "inventory",
       from,
       to: toSlot,
-    });
+    }, { ownerToken });
   }
 
   function mergeItem(from: ItemMergeRef, to: ItemMergeRef) {
@@ -7259,42 +7903,44 @@ export default function HomePage() {
     });
   }
 
-  function storeItem(item: ItemMoveRef, toSlot: number) {
+  function submitStorageTransfer(operation: "deposit" | "withdraw", item: ItemMoveRef,
+    toSlot: number, toContainer: ItemContainer, ownerToken?: StorageCommandProof): boolean {
     const sequence = storageRequestSequenceRef.current;
-    if (!Number.isSafeInteger(sequence) || sequence <= 0) return;
+    if (!Number.isSafeInteger(sequence) || sequence <= 0) return false;
     const requestId = `st-${sequence.toString().padStart(16, "0")}`;
-    if (!send({
-      type: "storeItemV2",
-      requestId,
-      from: item.slot,
-      to: toSlot,
-    })) return;
-    pendingStorageRequestsRef.current.set(requestId, {
-      operation: "deposit",
-      from: item.slot,
-      to: toSlot,
-    });
+    const transfer = prepareStorageTransfer(worldRef.current, operation, requestId, item,
+      { container: toContainer, slot: toSlot });
+    if (!transfer || (equipmentControllerRef.current?.status().pending ?? 0) > 0
+      || !storageMutationAllowed(worldRef.current, transfer.command, pendingStorageRequestsRef.current.values())) return false;
+    // Reserve before mir2:action can synchronously reenter. Burn this ID even
+    // when the final owner/identity fence proves that the request was unsent.
     storageRequestSequenceRef.current =
       sequence === Number.MAX_SAFE_INTEGER ? 0 : sequence + 1;
+    const reservation: StorageTransferReservation = { proof: transfer.proof, enteredSocket: false };
+    pendingStorageRequestsRef.current.set(requestId, reservation);
+    try {
+      const sent = send(transfer.command, { storageProof: transfer.proof, ownerToken });
+      if (!sent && !reservation.enteredSocket && pendingStorageRequestsRef.current.get(requestId) === reservation) {
+        pendingStorageRequestsRef.current.delete(requestId);
+      }
+      return sent;
+    } catch (error) {
+      if (!reservation.enteredSocket && pendingStorageRequestsRef.current.get(requestId) === reservation) {
+        pendingStorageRequestsRef.current.delete(requestId);
+      }
+      // Once socket.send is entered, a throw cannot prove that the server did
+      // not receive it. Keep the reservation until the exact receipt/session end.
+      console.error("[mir2] storage send failed", error);
+      return false;
+    }
   }
 
-  function takeBackItem(item: ItemMoveRef, toSlot: number) {
-    const sequence = storageRequestSequenceRef.current;
-    if (!Number.isSafeInteger(sequence) || sequence <= 0) return;
-    const requestId = `st-${sequence.toString().padStart(16, "0")}`;
-    if (!send({
-      type: "takeBackItemV2",
-      requestId,
-      from: item.slot,
-      to: toSlot,
-    })) return;
-    pendingStorageRequestsRef.current.set(requestId, {
-      operation: "withdraw",
-      from: item.slot,
-      to: toSlot,
-    });
-    storageRequestSequenceRef.current =
-      sequence === Number.MAX_SAFE_INTEGER ? 0 : sequence + 1;
+  function storeItem(item: ItemMoveRef, toSlot: number): boolean {
+    return submitStorageTransfer("deposit", item, toSlot, "storage");
+  }
+
+  function takeBackItem(item: ItemMoveRef, toSlot: number, toContainer: ItemContainer): boolean {
+    return submitStorageTransfer("withdraw", item, toSlot, toContainer);
   }
 
   function unlockStorage(storagePassword: string) {
@@ -7334,14 +7980,211 @@ export default function HomePage() {
     });
   }
 
+  function retireNpcShopService() {
+    npcBuyDispatcherRef.current?.withdraw();
+    npcShopClockRef.current.service += 1;
+    npcBuySelectedRef.current = null;
+    npcShopServiceRef.current = null;
+    setNpcShopService(null);
+  }
+
+  function npcGoldBuyCurrent(service: DisplayNpcShopService | null, current: WorldState,
+    owner: Pick<BagCommandToken, "connectionGeneration" | "sessionGeneration" | "ownerRevision">,
+    selectedId: number | null): NpcGoldBuyCurrent | null {
+    const playerObjectId = typeof current.playerObjectId === "string" && /^[1-9][0-9]*$/.test(current.playerObjectId)
+      ? Number(current.playerObjectId) : NaN;
+    if (!service || !service.supportsBuy || !Number.isSafeInteger(playerObjectId) || playerObjectId <= 0 || playerObjectId > 0xffff_ffff) return null;
+    const inventory = projectBevyBagModel(current, { npcGoldTrade: true });
+    if (!inventory.ok) return null;
+    const player = current.entities.find(entity => entity.objectId === current.playerObjectId);
+    const ledger = equipmentControllerRef.current?.status();
+    return {
+      owner: { connectionGeneration: owner.connectionGeneration, sessionGeneration: owner.sessionGeneration, ownerRevision: owner.ownerRevision, playerObjectId },
+      serviceRevision: service.serviceRevision, catalogRevision: service.catalogRevision,
+      presentation: { mapFileName: current.mapFileName, playerObjectId: current.playerObjectId,
+        x: player?.x ?? null, y: player?.y ?? null },
+      shop: { goods: service.buyItems.map(item => ({
+        unique_id: item.id, name: item.name, price: item.price, use_pearls: false,
+        requires_gold_buy_plan: item.requiresGoldBuyPlan === true,
+        count: item.count ?? 0, stock: item.stock ?? -1, panel_type: service.panelType,
+        icon: item.icon, icon_width: 0, icon_height: 0, description: item.description ?? "",
+        tooltip_source: (item.tooltipSource ?? null) as NpcGoldBuyGood["tooltip_source"],
+        purchase_rate: item.purchaseRate ?? null,
+      })), selected_id: selectedId, hide_added_stats: service.hideAddedStats,
+        selected_bag_slot_for_sell: null, selected_bag_slot_for_repair: null,
+        service_mode: "buy", supports_buy: service.supportsBuy, supports_sell: service.supportsSell, repair_rate: null },
+      inventory: inventory.model,
+      blocked: screenRef.current !== "game" || !current.connected || !player || player.dead || current.playerHp === 0
+        || !npcGoldBuyInventoryRef.current.matches({ connectionGeneration: owner.connectionGeneration,
+          sessionGeneration: owner.sessionGeneration, playerObjectId }, inventory.model)
+        || equipmentHostSuspendReasonRef.current !== null || !equipmentStartGameRef.current || !ledger?.ready
+        || ledger.pending > 0 || pendingStorageRequestsRef.current.size > 0
+        || (mailParcelRef.current?.state?.blockedUniqueIds.length ?? 0) > 0,
+    };
+  }
+
+  function readNpcGoldBuyCurrent(): NpcGoldBuyCurrent | null {
+    return npcGoldBuyCurrent(npcShopServiceRef.current, worldRef.current, {
+      connectionGeneration: equipmentConnectionGenerationRef.current, sessionGeneration: equipmentSessionGenerationRef.current,
+      ownerRevision: equipmentBagOwnerRef.current.ownerRevision,
+    }, npcBuySelectedRef.current);
+  }
+
+  function currentNpcShopTab(service = npcShopServiceRef.current): "buy" | "sell" {
+    const binding = npcShopTabBindingRef.current;
+    return service && binding?.service === service ? binding.tab : service?.supportsBuy ? "buy" : "sell";
+  }
+
+  function setNpcShopCompatibilityTab(service: DisplayNpcShopService, tab: "buy" | "sell"): boolean {
+    if (npcShopServiceRef.current !== service || tab === "buy" && !service.supportsBuy || tab === "sell" && !service.supportsSell) return false;
+    const binding = { service, tab };
+    npcShopTabBindingRef.current = binding;
+    setNpcShopTabBinding(binding);
+    return true;
+  }
+
+  function readNpcShopUiInput(observeCore = true): NpcShopHostInput {
+    const current = worldRef.current, player = current.entities.find(entity => entity.objectId === current.playerObjectId);
+    const service = npcShopServiceRef.current, buy = readNpcGoldBuyCurrent();
+    const dispatcher = npcBuyDispatcherRef.current;
+    // The existing producer observes authority; UI status reads never attach a producer.
+    if (observeCore) dispatcher?.observe();
+    const otherModal = bevyQuestReactModalOpen || showQuestLog || showCharacter || showHeroPet || showGuild || showGroup || showFriends
+      || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap
+      || showHelp || showHotkeys || showChatSettings || Boolean(current.activeNpcDialog || npcRepairService);
+    return {
+      connectionGeneration: equipmentConnectionGenerationRef.current, sessionGeneration: equipmentSessionGenerationRef.current,
+      ownerRevision: equipmentBagOwnerRef.current.ownerRevision, playerObjectId: buy?.owner.playerObjectId ?? 0,
+      serviceRevision: service?.serviceRevision ?? 0, catalogRevision: service?.catalogRevision ?? 0,
+      open: Boolean(service), showBuy: Boolean(service?.supportsBuy && currentNpcShopTab(service) === "buy"),
+      eligible: bevyQuestUiRequested && (bevyRuntimeBackend === "webgpu" || sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype, bevyRuntimeBackend))
+        && Boolean(buy && !buy.blocked) && initialSceneAssetsReadyRef.current && !otherModal
+        && document.visibilityState === "visible" && document.hasFocus(),
+      presentation: readBevyQuestPresentation(document.querySelector<HTMLElement>(".client-stage-frame"),
+        document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`), clientProfile.input === "touch"),
+      shop: buy?.shop ?? null, inventory: buy?.inventory ?? null,
+      player: {
+        hp: current.playerHp ?? NaN, maxHp: current.playerMaxHp ?? NaN, mp: current.playerMp ?? NaN, maxMp: current.playerMaxMp ?? NaN,
+        gold: current.gold, credit: current.credit, level: player?.level ?? NaN,
+        crystalStats: current.playerCrystalStats ?? null, experience: current.playerExperience, maxExperience: current.playerMaxExperience,
+        currentWeight: current.currentWeight, maxWeight: current.maxWeight, currentWeightKnown: current.playerWeights != null,
+        weights: current.playerWeights ?? null, name: player?.name ?? null, className: player?.classKey ?? null,
+        gender: player?.genderKey ?? null, hair: player?.hair ?? null, wingEffect: player?.wingEffect ?? null,
+        guildName: null, guildRankName: null, mapName: current.mapTitle, inSafeZone: current.inSafeZone,
+      },
+      language, coreStatus: observeCore ? dispatcher?.status() ?? null : null,
+    };
+  }
+
+  function npcShopIntentMatchesStatus(intent: NpcShopIntent, status: NpcShopStatus | null): boolean {
+    const proof = intent.proof;
+    return Boolean(status?.ready && status.inputEnabled && status.error === null
+      && status.runGeneration === proof.runGeneration && status.connectionGeneration === proof.connectionGeneration
+      && status.sessionGeneration === proof.sessionGeneration && status.ownerRevision === proof.ownerRevision
+      && status.playerObjectId === proof.playerObjectId && status.appliedRevision === proof.revision
+      && status.appliedModelRevision === proof.modelRevision && status.appliedPresentationRevision === proof.presentationRevision
+      && status.appliedServiceRevision === proof.serviceRevision && status.appliedCatalogRevision === proof.catalogRevision
+      && status.coreAuthorityRevision === proof.coreAuthorityRevision && status.controlRevision === proof.controlRevision
+      && status.selectedId === intent.selectedId && status.quantity === intent.quantity && status.startIndex === intent.startIndex);
+  }
+
+  function npcShopIntentMatchesCommand(intent: NpcShopIntent, command: Record<string, unknown>): boolean {
+    const expected = intent.command;
+    return intent.action.type === "buy" && !intent.preentryWithdraw && expected !== null
+      && Object.keys(command).sort().join("|") === "count|itemIndex|panelType|type"
+      && command.type === "buyItem" && command.itemIndex === expected.itemIndex
+      && command.count === expected.count && command.panelType === expected.panelType && expected.panelType === 0;
+  }
+
+  function npcShopUiSendCurrent(proof: NpcShopSendProof, socket: WebSocket): boolean {
+    const ui = npcShopUiIngressRef.current, service = npcShopServiceRef.current;
+    if (!ui?.blocksInput() || !service || currentNpcShopTab(service) !== "buy"
+      || !npcShopIntentMatchesStatus(proof.intent, ui.readStatus())) return false;
+    const input = readNpcShopUiInput(false);
+    return input.eligible && input.open && input.showBuy && JSON.stringify(input.presentation) === JSON.stringify(proof.presentation)
+      && JSON.stringify(input) === proof.sourceJson && JSON.stringify(readNpcGoldBuyCurrent()) === proof.currentJson
+      && socketRef.current === socket && socket.readyState === WebSocket.OPEN && ui.claimCurrent(proof.intent);
+  }
+
+  function dispatchBevyNpcShopIntent(intent: NpcShopIntent): boolean {
+    const ui = npcShopUiIngressRef.current, dispatcher = npcBuyDispatcherRef.current, service = npcShopServiceRef.current;
+    if (!ui || !dispatcher || !service || currentNpcShopTab(service) !== "buy" || !ui.allows(intent)
+      || !npcShopIntentMatchesStatus(intent, ui.readStatus())) return false;
+    // Selection/quantity/page remain in Rust. This adapter reads its current selection for the existing planner.
+    npcBuySelectedRef.current = intent.selectedId;
+    const captured = readNpcGoldBuyCurrent();
+    if (!captured || captured.blocked || captured.serviceRevision !== intent.proof.serviceRevision
+      || captured.catalogRevision !== intent.proof.catalogRevision || captured.owner.connectionGeneration !== intent.proof.connectionGeneration
+      || captured.owner.sessionGeneration !== intent.proof.sessionGeneration || captured.owner.ownerRevision !== intent.proof.ownerRevision
+      || captured.owner.playerObjectId !== intent.proof.playerObjectId) return false;
+    const currentJson = JSON.stringify(captured), source = readNpcShopUiInput(false);
+    if (!source.eligible || !source.presentation || !source.open || !source.showBuy) return false;
+    if (intent.action.type === "buy") {
+      if (!intent.command || !npcShopIntentMatchesCommand(intent, intent.command)) return false;
+      const prepared = dispatcher.prepare(captured, intent.quantity);
+      if (!prepared) return false;
+      try {
+        if (!npcShopIntentMatchesCommand(intent, prepared.wire)) return false;
+        return sendRaw(prepared.wire, { npcBuyProof: prepared.proof,
+          npcUi: { intent, currentJson, sourceJson: JSON.stringify(source), presentation: source.presentation } });
+      } catch (error) { console.error("[mir2] Shared NPC purchase rejected", error); return false; }
+      finally { dispatcher.rejectIfUnentered(prepared.proof); }
+    }
+    if (!intent.preentryWithdraw || intent.command !== null || !dispatcher.withdrawAt(intent.proof.coreAuthorityRevision)
+      || npcShopServiceRef.current !== service || currentNpcShopTab(service) !== "buy"
+      || !ui.allows(intent) || !npcShopIntentMatchesStatus(intent, ui.readStatus())
+      || JSON.stringify(readNpcShopUiInput(false)) !== JSON.stringify(source) || JSON.stringify(readNpcGoldBuyCurrent()) !== currentJson) return false;
+    if (intent.action.type === "close" || intent.action.type === "handoffSell") {
+      if (intent.action.type === "handoffSell" && !service.supportsSell || !ui.deferRetirement(intent)) return false;
+      if (intent.action.type === "close") retireNpcShopService();
+      else if (!setNpcShopCompatibilityTab(service, "sell")) return false;
+      return true;
+    }
+    return ui.claim(intent);
+  }
+
+  function quoteNpcShopItem(id: number, quantity: number): NpcGoldBuyQuote | null {
+    if (npcShopUiIngressRef.current?.blocksInput() || npcShopServiceRef.current !== npcShopService) return null;
+    npcBuySelectedRef.current = id;
+    return npcBuyDispatcherRef.current?.preview(npcGoldBuyCurrent(npcShopService, world, equipmentRenderOwnerToken, id), quantity) ?? null;
+  }
+
+  function legacyNpcBuyAllowed(proof: object, wire: Record<string, unknown>, claim = false): boolean {
+    const lease = npcLegacyBuyProofsRef.current.get(proof);
+    if (!lease || lease.used) return false;
+    if (claim) lease.used = true;
+    const live = readNpcGoldBuyCurrent();
+    const good = live?.shop.goods.find(item => item.unique_id === live.shop.selected_id);
+    return Boolean(live && !live.blocked && good && !good.requires_gold_buy_plan
+      && JSON.stringify(live) === lease.currentJson && JSON.stringify(wire) === lease.wireJson);
+  }
+
   function buyNpcShopItem(id: number, quantity: number, panelType: number) {
-    if (!Number.isFinite(id) || !Number.isFinite(quantity) || quantity <= 0) return;
-    send({
-      type: "buyItem",
-      itemIndex: Math.trunc(id),
-      count: Math.max(1, Math.min(99, Math.trunc(quantity))),
-      panelType: Math.max(0, Math.trunc(panelType)),
-    });
+    if (npcShopUiIngressRef.current?.blocksInput() || npcShopServiceRef.current !== npcShopService) return;
+    if (!Number.isSafeInteger(id) || id < 0 || !Number.isSafeInteger(quantity) || quantity <= 0
+      || !npcShopService || panelType !== npcShopService.panelType) return;
+    npcBuySelectedRef.current = id;
+    const captured = npcGoldBuyCurrent(npcShopService, world, equipmentRenderOwnerToken, id);
+    if (!captured || captured.blocked) return;
+    const good = captured.shop.goods.find(item => item.unique_id === id);
+    if (!good) return;
+    if (good.requires_gold_buy_plan) {
+      const dispatcher = npcBuyDispatcherRef.current;
+      const prepared = dispatcher?.prepare(captured, quantity);
+      if (prepared) {
+        try { sendRaw(prepared.wire, { npcBuyProof: prepared.proof }); }
+        catch (error) { console.error("[mir2] NPC purchase rejected before transport", error); }
+        finally { dispatcher!.rejectIfUnentered(prepared.proof); }
+      }
+      return;
+    }
+    // Retain the earlier resale/other catalogue route with its captured service.
+    const wire = Object.freeze({ type: "buyItem", itemIndex: id, count: Math.min(99, quantity), panelType });
+    const live = readNpcGoldBuyCurrent();
+    if (!live || live.blocked || JSON.stringify(live) !== JSON.stringify(captured)) return;
+    const proof = Object.freeze({});
+    npcLegacyBuyProofsRef.current.set(proof, { currentJson: JSON.stringify(captured), wireJson: JSON.stringify(wire), used: false });
+    sendRaw(wire, { npcLegacyBuyProof: proof });
   }
 
   function dropGold(amount: number) {
@@ -7395,6 +8238,7 @@ export default function HomePage() {
   }
 
   function castSkill(skillKey: string) {
+    if(combatIngressRef.current?.supported()){combatIngressRef.current.edge({type:"skillKey",skillKey});return;}
     const skill = world.knownSkills.find((entry) => entry.key === skillKey);
     if (!skill) {
       send({ type: "castSkill", key: skillKey });
@@ -7448,12 +8292,11 @@ export default function HomePage() {
   function claimMail(mailId: number) {
     // The dedicated Crystal packets operate on the same authoritative mailbox
     // as GameShop delivery. Normal players must never need generic Stage5 access.
-    send({ type: "readMail", mailId }, { quiet: true });
-    send({ type: "collectParcel", mailId });
+    if(dispatchMailRead(mailId,true))dispatchMailCommand("collectParcel",mailId);
   }
 
   function deleteMail(mailId: number) {
-    send({ type: "deleteMail", mailId });
+    dispatchMailCommand("deleteMail",mailId);
   }
 
   function buyGameShopItem(gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") {
@@ -7696,58 +8539,177 @@ export default function HomePage() {
     send({ type: "abandonQuest", questIndex: questId });
   }
 
-  function activeQuestDialogTarget(
+  function questActionPending(questId: number, action: "accept" | "finish") {
+    const operation = action === "accept" ? "acceptQuest" : "finishQuest";
+    return hasPendingQuestAction(
+      pendingQuestActionsRef.current.values(),
+      questId,
+      operation,
+    );
+  }
+
+  function reportQuestCoreEvaluationFailure() {
+    if (questCoreEvaluationFailedRef.current) return;
+    questCoreEvaluationFailedRef.current = true;
+    // Eligibility can be evaluated during React render. Defer the state update
+    // until after that render and stop calling the faulty runtime meanwhile.
+    queueMicrotask(() => {
+      if (!questCoreEvaluationFailedRef.current) return;
+      questCoreRuntimeRef.current = null;
+      setQuestCoreStatus("error");
+      appendLog(t("ui.questClientUnavailable", [], "Quest actions are temporarily unavailable. Please retry."), "system");
+    });
+  }
+
+  function questActionDecision(
     questId: number,
-    operation: "accept" | "finish",
+    action: "accept" | "finish",
     selectedItemIndex?: number,
-  ) {
-    const targets = operation === "accept"
-      ? [`@AcceptQuest:${questId}`, `@quest:accept:${questId}`]
-      : [
-          ...(selectedItemIndex === undefined ? [] : [`@quest:finish:${questId}:${selectedItemIndex}`]),
-          `@FinishQuest:${questId}`,
-          `@quest:finish:${questId}`,
-        ];
-    const normalizedTargets = new Set(targets.map((target) => target.toLowerCase()));
-    return worldRef.current.activeNpcDialog?.links.find((link) =>
-      normalizedTargets.has(link.target.trim().toLowerCase()))?.target ?? null;
+  ): QuestActionDecision | null {
+    const runtime = questCoreRuntimeRef.current;
+    if (!runtime || questCoreEvaluationFailedRef.current || questCoreStatus !== "ready" || !Number.isSafeInteger(questId)) return null;
+    const currentQuest = worldRef.current.questLog.find((quest) => quest.questId === questId);
+    const definition = questDefinitionByIdRef.current.get(questId);
+    const quest = currentQuest || definition
+      ? { ...currentQuest, ...definition, stage: questAuthoritativeStageByIdRef.current.get(questId) }
+      : null;
+    const input = questActionInput({
+      action,
+      profile: questGuidanceProfile(process.env.NEXT_PUBLIC_MIR2_QUEST_GUIDANCE),
+      questId,
+      quest,
+      dialog: worldRef.current.activeNpcDialog,
+      selectedRewardIndex: selectedItemIndex,
+      pending: questActionPending(questId, action),
+    });
+    if (!input) return { eligible: false, rejection: "invalidInput" };
+    const decision = resolveQuestHostAction(runtime, input);
+    if (!decision) reportQuestCoreEvaluationFailure();
+    return decision;
+  }
+
+  function questActionFeedback(decision: QuestActionDecision | null): string {
+    switch (decision?.rejection) {
+      case "pending":
+        return t("ui.questActionPending", [], "Your request is being processed. Please wait.");
+      case "rewardSelectionRequired":
+        return t("ui.questActionRewardRequired", [], "Select a reward first.");
+      case "missingEndpoint":
+      case "actionUnavailable":
+      case "profileDisabled":
+        return t("ui.questActionTalkToNpc", [], "Talk to the quest NPC to continue.");
+      case "wrongStatus":
+      case "invalidInput":
+        return t("ui.questActionStateChanged", [], "The quest has changed. Review it and try again.");
+      default:
+        return t("ui.questClientUnavailable", [], "Quest actions are temporarily unavailable. Please retry.");
+    }
+  }
+
+  function submitQuestAction(questId: number, action: "accept" | "finish", selectedItemIndex?: number) {
+    const decision = questActionDecision(questId, action, selectedItemIndex);
+    if (!decision?.eligible) {
+      appendLog(questActionFeedback(decision), "system");
+      return;
+    }
+    const operation = action === "accept" ? "acceptQuest" : "finishQuest";
+    if (action === "accept" && questEndpoint(decision.npcIndex) === undefined) return;
+    const requestId = nextQuestRequestId();
+    const selected = selectedItemIndex ?? -1;
+    const command = action === "accept"
+      ? { type: operation, requestId, npcIndex: decision.npcIndex, questIndex: questId }
+      : { type: operation, requestId, questIndex: questId, selectedItemIndex: selected };
+    if (!send(command)) return;
+    pendingQuestActionsRef.current.set(requestId, {
+      requestId,
+      operation,
+      questIndex: questId,
+      ...(action === "accept" ? { npcIndex: decision.npcIndex } : { selectedItemIndex: selected }),
+    });
+    setQuestActionRevision((revision) => revision + 1);
+    return requestId;
   }
 
   function acceptQuest(questId: number) {
-    const target = activeQuestDialogTarget(questId, "accept");
-    const npcIndex = Number(worldRef.current.activeNpcDialog?.npcObjectId);
-    if (!target || !Number.isSafeInteger(npcIndex) || npcIndex <= 0) {
-      appendLog(
-        t(
-          "content.quest.generic.stage.available.objective",
-          [],
-          "Talk to the quest giver to accept this quest.",
-        ),
-        "system",
-      );
-      return;
-    }
-    send({ type: "acceptQuest", npcIndex, questIndex: questId });
+    submitQuestAction(questId, "accept");
   }
 
   function finishQuest(questId: number, selectedItemIndex?: number) {
-    const target = activeQuestDialogTarget(questId, "finish", selectedItemIndex);
-    if (!target) {
-      appendLog(
-        t(
-          "content.quest.generic.stage.readyToTurnIn.objective",
-          [],
-          "Return to the quest NPC to turn in this quest.",
-        ),
-        "system",
-      );
-      return;
+    submitQuestAction(questId, "finish", selectedItemIndex);
+  }
+
+  function dispatchBevyQuestIntent(intent: BevyQuestUiIntent): BevyQuestUiIntentResult {
+    const rejected = (error: string): BevyQuestUiIntentResult => ({ accepted: false, error });
+    if (intent.generation !== bevyQuestGenerationRef.current || screenRef.current !== "game") {
+      return rejected("The game session changed.");
     }
-    send({
-      type: "finishQuest",
-      questIndex: questId,
-      selectedItemIndex: selectedItemIndex ?? -1,
-    });
+    if (intent.type === "selectNpcDialog") {
+      const dialog = worldRef.current.activeNpcDialog;
+      const option = dialog?.links.find((link) => link.target === intent.target && link.enabled !== false);
+      // Crystal's close control emits @Exit even if the current service page
+      // has no explicit exit link. It still travels through the normal server.
+      const target = option?.target ?? (dialog && intent.target === "@Exit" ? "@Exit" : null);
+      return target && send({ type: "selectNpcDialog", target })
+        ? { accepted: true } : rejected("The NPC dialogue changed.");
+    }
+    const questId = intent.questIndex;
+    if (typeof questId !== "number" || !Number.isSafeInteger(questId)
+      || !questAuthoritativeStageByIdRef.current.has(questId)) return rejected("The quest changed.");
+    let requestId: string | undefined;
+    if (intent.type === "acceptQuest") {
+      const decision = questActionDecision(questId, "accept");
+      if (!decision?.eligible || decision.npcIndex !== intent.npcIndex) return rejected(questActionFeedback(decision));
+      requestId = submitQuestAction(questId, "accept");
+    } else if (intent.type === "finishQuest") {
+      const selection = intent.selectedItemIndex === -1 ? undefined : intent.selectedItemIndex;
+      requestId = submitQuestAction(questId, "finish", selection);
+    } else if (intent.type === "abandonQuest") {
+      if (hasPendingQuestAction(pendingQuestActionsRef.current.values(), questId, "abandonQuest")) {
+        return rejected(t("ui.questActionPending", [], "Your request is being processed. Please wait."));
+      }
+      requestId = nextQuestRequestId();
+      if (!send({ type: "abandonQuest", requestId, questIndex: questId })) return rejected("The request could not be sent.");
+      pendingQuestActionsRef.current.set(requestId, { operation: "abandonQuest", questIndex: questId, requestId });
+    } else if (intent.type === "shareQuest") {
+      return { accepted: send({ type: "shareQuest", questIndex: questId }) };
+    } else {
+      return rejected(`Unsupported shared quest action: ${intent.type}`);
+    }
+    if (!requestId) return rejected(t("ui.questActionStateChanged", [], "The quest has changed. Review it and try again."));
+    bevyQuestRequestGenerationsRef.current.set(requestId, intent.generation);
+    return { accepted: true, requestId };
+  }
+
+  function clearPendingQuestActions() {
+    withdrawHudBarDrawPlanOutputs();
+    bevyQuestGenerationRef.current = nextQuestUiGeneration();
+    experienceAuthorityRef.current = null;
+    weightAuthorityRef.current = null;
+    bevyQuestRequestGenerationsRef.current.clear();
+    completedQuestHistoryRef.current = { known: false, ids: [] };
+    bevyQuestAuthoritativeRef.current = false;
+    if (pendingQuestActionsRef.current.size === 0) return;
+    pendingQuestActionsRef.current.clear();
+    setQuestActionRevision((revision) => revision + 1);
+  }
+
+  function applyQuestOperationAck(raw: unknown) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return;
+    const ack = raw as Record<string, unknown>;
+    if (typeof ack.requestId !== "string") return;
+    const pending = pendingQuestActionsRef.current.get(ack.requestId);
+    const matched = matchingQuestOperationAck(ack, pending);
+    if (!matched) return;
+    const generation = bevyQuestRequestGenerationsRef.current.get(ack.requestId);
+    if (generation === bevyQuestGenerationRef.current) {
+      runtimeRef.current?.setMir2QuestUiOperationAck?.(JSON.stringify({ ...ack, generation }));
+    }
+    bevyQuestRequestGenerationsRef.current.delete(ack.requestId);
+    pendingQuestActionsRef.current.delete(ack.requestId);
+    setQuestActionRevision((revision) => revision + 1);
+    if (!matched.success) {
+      appendLog(t("ui.questActionStateChanged", [], "The quest has changed. Review it and try again."), "system");
+    }
   }
 
   // Hero summon rides ClientPacket::ChangeHero, which spawns the recruited hero
@@ -7908,30 +8870,249 @@ export default function HomePage() {
   }
 
   // Mail actions (ReadMail / CollectParcel / DeleteMail / SendMail).
+  function observeMailSocketOpen(source:WebSocket){
+    if(socketRef.current!==source||source.readyState!==WebSocket.OPEN)return false;
+    return mailDispatcherRef.current?.composer.observeOpen(source,socketRef.current,true)??false;
+  }
+  function setMailboxOpen(open:boolean){
+    if(!open)cancelMailParcel();
+    mailOpenRef.current=open;mailIngressRef.current?.withdraw();mailIngressRef.current?.composeWithdraw?.();mailDispatcherRef.current?.withdraw();
+    mailCompatRef.current=null;mailReadAttemptRef.current=null;setMailCompatibility(null);setShowMail(open);
+    if(open)combatIngressRef.current?.withdraw();
+    if(open){const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),draft=mailDispatcherRef.current?.composer.draft(owner);
+      if(draft)presentMailCompatibility("compose",null,draft.to,false,draft.subject);}
+  }
+  function validMailCompatibility(p:(MailPresentation&{owner:MailOwner;sceneRevision:number})|null){
+    if(!p)return true;const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),raw=mailRawRef.current;
+    return Boolean(owner&&raw&&sameMailOwner(owner,p.owner)&&sameMailOwner(raw.owner,p.owner)&&p.sceneRevision===mailSceneRevisionRef.current
+      &&(p.selectedId===null||parseMailList(raw.mail)?.some(m=>m.mailId===p.selectedId&&mailContentKey(m)===p.contentKey)));
+  }
+  function dispatchMailCommand(type:MailCommandType,mailId:number|null,quiet=false,rust:MailIntent|null=null,fields:Record<string,unknown>={},compose:MailComposeProof|null=null):boolean{
+    const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),row=mailId===null?null:parseMailList(mailRawRef.current?.mail)?.find(m=>m.mailId===mailId);
+    // Retained callbacks keep the owner and content from the render that created them.
+    if(!owner||!mailRenderOwner||!sameMailOwner(owner,mailRenderOwner)||mailId!==null&&(!row||!mailRenderRows?.some(m=>m.mailId===mailId&&mailContentKey(m)===mailContentKey(row))))return false;
+    if(rust&&!mailIngressRef.current?.allows(rust))return false;
+    const dispatcher=mailDispatcherRef.current,proof=dispatcher?.prepare(type,mailId,rust,compose);if(!proof||!dispatcher)return false;
+    try{return sendRaw({...fields,type,...(mailId===null?{}:{mailId})},{quiet,mailProof:proof});}finally{dispatcher.retire(proof);}
+  }
+  function dispatchMailRead(mailId:number,quiet=false,rust:MailIntent|null=null){
+    const row=parseMailList(mailRawRef.current?.mail)?.find(m=>m.mailId===mailId),owner=currentSpellsOwner(Number(worldRef.current.playerObjectId));
+    if(!row||!owner)return false;
+    const prior=mailReadAttemptRef.current;
+    // This token only suppresses the same reader handoff/quiet pre-collect read. It is not an ACK.
+    if(row.opened||quiet&&prior&&sameMailOwner(prior.owner,owner)&&prior.sceneRevision===mailSceneRevisionRef.current&&prior.content===mailContentKey(row))return true;
+    if(!dispatchMailCommand("readMail",mailId,quiet,rust))return false;
+    mailReadAttemptRef.current={owner:{...owner},sceneRevision:mailSceneRevisionRef.current,content:mailContentKey(row)};return true;
+  }
+  function presentMailCompatibility(view:MailPresentation["view"],id:number|null,recipient="",readDispatched=false,subject=""){
+    const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),raw=mailRawRef.current,row=id===null?null:parseMailList(raw?.mail)?.find(m=>m.mailId===id);
+    if(!mailOpenRef.current||!owner||!raw||!sameMailOwner(raw.owner,owner)||id!==null&&!row)return;
+    if(mailDispatcherRef.current?.composer.pending(owner)&&view!=="compose")return;
+    if(view!=='compose'||mailDispatcherRef.current?.composer.draft(owner)?.to!==recipient)cancelMailParcel();
+    mailIngressRef.current?.withdraw();mailDispatcherRef.current?.withdraw();
+    if(view==="inbox")mailReadAttemptRef.current=null;
+    const prior=mailReadAttemptRef.current;
+    const corePresentation=view==='compose'?mailDispatcherRef.current?.composer.beginPresentation(owner):null;
+    const p={key:corePresentation?`mail-core-${corePresentation}`:`mail-${++mailPresentationSequenceRef.current}`,view,selectedId:id,recipient,subject,contentKey:row?mailContentKey(row):null,
+      readDispatched:view==="read"&&(readDispatched||Boolean(row?.opened)||Boolean(row&&prior&&sameMailOwner(prior.owner,owner)&&prior.sceneRevision===mailSceneRevisionRef.current&&prior.content===mailContentKey(row))),
+      owner:{...owner},sceneRevision:mailSceneRevisionRef.current};
+    if(view==="compose"){
+      const sender=mailDispatcherRef.current?.composer,saved=sender?.draft(owner);
+      sender?.remember(owner,p.key,saved&&saved.to===recipient?saved:{to:recipient,subject,body:"",goldText:"",items:[]});
+    }
+    mailCompatRef.current=p;setMailCompatibility(p);
+  }
+  function dispatchBevyMailIntent(intent:MailIntent):MailOutcome{
+    if(!mailIngressRef.current?.allows(intent))return "definitelyUnsent";
+    const row=parseMailList(mailRawRef.current?.mail)?.find(m=>m.mailId===intent.mailId);
+    if(intent.action==="read")return intent.mailId!==null&&dispatchMailRead(intent.mailId,false,intent)?"confirmedSend":"definitelyUnsent";
+    if(intent.action==="lock")return intent.mailId!==null&&dispatchMailCommand("lockMail",intent.mailId,false,intent,{lock:intent.lock})?"confirmedSend":"definitelyUnsent";
+    if(intent.action==="close"){setMailboxOpen(false);return "definitelyUnsent";}
+    if(intent.action==="compose"){presentMailCompatibility("compose",null);return "definitelyUnsent";}
+    if(!row)return "definitelyUnsent";
+    if(intent.action==="reply")presentMailCompatibility("compose",row.mailId,row.senderName,false,row.subject?`RE: ${row.subject}`:"");
+    else presentMailCompatibility("read",row.mailId);
+    return "definitelyUnsent";
+  }
+  function readMailComposeInput():ComposeInput|null{
+    const current=worldRef.current,owner=currentSpellsOwner(Number(current.playerObjectId)),p=mailCompatRef.current;
+    const core=mailDispatcherRef.current?.composer.composeSnapshot(owner??null);
+    const presentation=readBevyQuestPresentation(document.querySelector<HTMLElement>(".client-stage-frame"),
+      document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`),clientProfile.input==="touch");
+    const incarnation=core?Number(core.incarnation):0;
+    if(!owner||!p||p.view!=="compose"||!core||core.key!==p.key||core.gold===null||!presentation||!Number.isSafeInteger(incarnation)||incarnation<=0||
+      !sameMailOwner(p.owner,owner)||!mailRawRef.current||!sameMailOwner(mailRawRef.current.owner,owner))return null;
+    let prompt=mailComposePromptRef.current;
+    if(prompt&&(!sameMailOwner(prompt.owner,owner)||prompt.key!==p.key||prompt.generation!==core.generation||!sameComposeRaw(prompt.base,core.raw))){
+      mailComposePromptRef.current=null;prompt=null;
+    }
+    const state=mailParcelRef.current?.state,ids=state?.attachmentUniqueIds??[];
+    const cells=ids.map(id=>{const item=current.inventoryItems.find(i=>i.authoritativeUniqueId===id);
+      return{uniqueId:id,image:item&&Number.isInteger(item.icon)&&item.icon>=0&&item.icon<=65535?item.icon:null,
+        countLabel:item?String(item.quantity):""};});
+    const competing=bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showInventory||showCharacter||showQuestLog||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showWorldMap||showHelp||showHotkeys||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService);
+    return{owner:{...owner,sceneRevision:mailSceneRevisionRef.current,hudGeneration:bevyQuestGenerationRef.current},
+      incarnation,draftEpoch:incarnation,draftGeneration:core.generation,open:mailOpenRef.current,kind:ids.length||state?.stamped||core.raw.goldText.trim()?"parcel":"letter",
+      presentation,raw:core.raw,gold:core.gold,
+      parcel:{stamped:state?.stamped??false,stampAvailable:true,quoteReady:state?.quoteReady??false,
+        postage:state?.postage??null,quoteError:mailParcelRef.current?.error??null,cells},
+      notice:mailDispatcherRef.current?.composer.notice??state?.notice??null,
+      recipientPrompt:prompt?.kind==='recipient'?prompt.raw:null,feedback:null,
+      goldPrompt:prompt?.kind==='gold'?{draft:prompt.raw,maxAmount:Math.max(0,Math.min(0xffffffff,Math.trunc(current.gold))),amount:null}:null,
+      eligible:mailIngressRef.current?.withdrawn===true&&mailRawRef.current.catalogResolved===true&&bevyQuestUiRequested&&(bevyRuntimeBackend==="webgpu"||sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype,bevyRuntimeBackend))
+        &&screenRef.current==="game"&&current.connected&&initialSceneAssetsReadyRef.current&&equipmentHostSuspendReasonRef.current===null&&!competing
+        &&bevyHudUi.readCurrent()?.ready===true&&document.visibilityState==="visible"&&document.hasFocus()};
+  }
+  function dispatchComposeIntent(intent:ComposeIntent,host:MailComposeHost){
+    const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),p=mailCompatRef.current,sender=mailDispatcherRef.current?.composer;
+    const core=sender?.composeSnapshot(owner??null);
+    if(!owner||!p||p.view!=="compose"||!sameMailOwner(p.owner,owner)||!core||core.key!==p.key||core.generation!==intent.proof.draftGeneration||
+      Number(core.incarnation)!==intent.proof.incarnation||!sameComposeRaw(core.raw,intent.baseRaw))return;
+    if(intent.action==="clipboardRequest"){void mailIngressRef.current?.composeClipboardIntent(intent);return;}
+    const existingPrompt=mailComposePromptRef.current;
+    if(intent.action==='recipient'||intent.action==='gold'){
+      mailComposePromptRef.current={owner:{...owner},key:p.key,generation:core.generation,base:core.raw,
+        kind:intent.action,raw:intent.action==='recipient'?core.raw.to:core.raw.goldText};
+      host.tick();setMailComposeRevision(n=>n+1);return;
+    }
+    if(intent.action==='promptEdit'&&intent.promptMutation&&existingPrompt&&sameMailOwner(existingPrompt.owner,owner)&&
+      existingPrompt.key===p.key&&existingPrompt.generation===core.generation&&sameComposeRaw(existingPrompt.base,core.raw)&&
+      existingPrompt.kind===intent.promptMutation.target){
+      mailComposePromptRef.current={...existingPrompt,raw:intent.promptMutation.text};host.tick();setMailComposeRevision(n=>n+1);return;
+    }
+    if((intent.action==='recipientCancel'||intent.action==='goldCancel')&&existingPrompt&&
+      existingPrompt.kind===(intent.action==='recipientCancel'?'recipient':'gold')){
+      mailComposePromptRef.current=null;host.tick();setMailComposeRevision(n=>n+1);return;
+    }
+    if((intent.action==='recipientSubmit'||intent.action==='goldConfirm')&&existingPrompt&&
+      existingPrompt.kind===(intent.action==='recipientSubmit'?'recipient':'gold')&&
+      intent.promptMutation?.target===existingPrompt.kind&&intent.promptMutation.text===existingPrompt.raw){
+      if(intent.action==='goldConfirm'&&(intent.promptValue===null||!Number.isSafeInteger(intent.promptValue)||intent.promptValue<0||intent.promptValue>0xffffffff)){
+        sender?.error('Invalid mail gold amount; draft kept');setMailComposeRevision(n=>n+1);return;
+      }
+      const next:ComposeRaw={...core.raw,...(existingPrompt.kind==='recipient'?{to:existingPrompt.raw}:{goldText:existingPrompt.raw})};
+      if(!sender?.rememberRaw(owner,p.key,next)){sender?.error('Mail draft changed; prompt kept');setMailComposeRevision(n=>n+1);return;}
+      mailComposePromptRef.current=null;
+      if(existingPrompt.kind==='gold')syncMailParcel(intent.promptValue!);
+      host.tick();setMailComposeRevision(n=>n+1);queueMicrotask(pumpMailParcelQuote);return;
+    }
+    if(intent.action==="edit"&&(intent.bodyMutation!==null||intent.recipientMutation!==null)){
+      const next:ComposeRaw={...core.raw,body:intent.bodyMutation??core.raw.body,to:intent.recipientMutation??core.raw.to};
+      if(!sender?.rememberRaw(owner,p.key,next))return;
+      syncMailParcel();const accepted=sender.composeSnapshot(owner);if(!accepted)return;
+      host.edges.ownEdit(accepted.raw,accepted.generation);host.tick();setMailComposeRevision(n=>n+1);queueMicrotask(pumpMailParcelQuote);return;
+    }
+    if(intent.action==="submit"){
+      if(host.edges.pendingCount>0){sender?.error('Mail text is still applying; click Send again');setMailComposeRevision(n=>n+1);return;}
+      const gold=core.gold;
+      if(gold===null){sender?.error("Shared mail gold amount is unavailable; draft kept");setMailComposeRevision(n=>n+1);return;}
+      const draft:MailComposeDraft={to:core.raw.to,subject:core.raw.subject,body:core.raw.body,gold,
+        items:[...core.raw.items],...(core.raw.attachmentUniqueIdsPresent?{attachmentUniqueIds:core.raw.attachmentUniqueIds.map(Number)}:{}),
+        ...(core.raw.stampedPresent?{stamped:core.raw.stamped}:{})};
+      sendMailMessage(draft,true);return;
+    }
+    if(intent.action==="close"){setMailboxOpen(false);return;}
+    if(intent.action==="cancel"){presentMailCompatibility("inbox",null);return;}
+    if(intent.action==="stamp"){changeMailParcel("stamp");return;}
+    if(intent.action==="slot"&&intent.requestId!==null){changeMailParcel("detach",intent.requestId);return;}
+    if(intent.action==="rejected"&&intent.error){sender?.error(intent.error);setMailComposeRevision(n=>n+1);}
+  }
   function openMailMessage(mailId: number) {
-    send({ type: "readMail", mailId });
+    // Explicit opens can retry; no timer or mailbox refresh resends a read.
+    mailReadAttemptRef.current=null;dispatchMailRead(mailId);
   }
   function claimMailAttachment(mailId: number) {
-    send({ type: "collectParcel", mailId });
+    claimMail(mailId);
   }
   function deleteMailMessage(mailId: number) {
-    send({ type: "deleteMail", mailId });
+    deleteMail(mailId);
   }
-  function sendMailMessage(draft: MailComposeDraft) {
-    const name = draft.to.trim();
-    if (!name) return;
-    send({
-      type: "sendMail",
-      name,
-      message: draft.body ?? "",
-      gold: Math.max(0, Math.floor(draft.gold ?? 0)),
-      itemsIdx: [0, 0, 0, 0, 0],
-      stamped: false,
-    });
+  function rememberMailDraft(draft:MailDraftState){
+    const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId));
+    if(!owner||!mailRenderOwner||!sameMailOwner(owner,mailRenderOwner)||!validMailCompatibility(mailCompatRef.current)||mailCompatRef.current?.key!==mailPresentation.key)return;
+    if(mailDispatcherRef.current?.composer.remember(owner,mailPresentation.key,draft)){setMailComposeRevision(n=>n+1);syncMailParcel();queueMicrotask(pumpMailParcelQuote);}
+  }
+  function mailParcelItemsIdle(ids:readonly number[]):boolean {
+    if(!storageMutationAllowed(worldRef.current,{type:'sendMail',itemsIdx:ids},pendingStorageRequestsRef.current.values()))return false;
+    for(const id of ids){if(id===0)continue;const pending=equipmentControllerRef.current?.hasPendingInstance(id);if(!pending?.ok||pending.reserved)return false;}return true;
+  }
+  function cancelMailParcel(){
+    const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),sender=mailDispatcherRef.current?.composer,parcel=mailParcelRef.current;
+    if(!owner||!parcel||sender?.pending(owner))return;
+    const result=parcel.call({action:'cancel'});if(result.ok){sender?.syncParcelDraft(owner,[],false);sendMailParcelLocks(result.locks);}
+  }
+  function sendMailParcelLocks(locks:Array<{uniqueId:number;locked:boolean}>){
+    const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),parcel=mailParcelRef.current;if(!owner||!parcel)return;
+    for(const lock of locks){const request=parcel.lock(owner,lock.uniqueId,lock.locked);if(!request)continue;
+      try{sendRaw(request.payload,{quiet:true,mailLockProof:request.proof});}catch{/* Locks are local reservations; receipt cannot grant send ownership. */}finally{parcel.retireLock(request.proof);}}
+  }
+  function syncMailParcel(goldOverride?:number):boolean {
+    const parcel=mailParcelRef.current;if(!parcel)return false;
+    const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),raw=mailParcelRawRef.current,draft=mailDispatcherRef.current?.composer.draft(owner);
+    const gold=goldOverride??(draft?.goldText.trim()?Number(draft.goldText):0);
+    if(!Number.isSafeInteger(gold)||gold<0||gold>0xffffffff)return false;
+    const snapshot=owner&&raw&&sameMailOwner(owner,raw.owner)?projectMailParcelSnapshot(raw.snapshot):null;
+    const result=parcel.sync(owner,snapshot,gold,Date.now());if(!result.ok)return false;
+    if(owner&&draft&&(JSON.stringify(draft.attachmentUniqueIds??[])!==JSON.stringify(result.state.attachmentUniqueIds)||(draft.stamped??false)!==result.state.stamped)){
+      mailDispatcherRef.current?.composer.syncParcelDraft(owner,result.state.attachmentUniqueIds,result.state.stamped);
+    }
+    sendMailParcelLocks(result.locks);
+    return true;
+  }
+  function pumpMailParcelQuote(){
+    const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),parcel=mailParcelRef.current,sender=mailDispatcherRef.current?.composer;
+    if(!owner||!parcel||!mailOpenRef.current||mailCompatRef.current?.view!=='compose'||sender?.pending(owner)||!syncMailParcel())return;
+    const draft=sender?.draft(owner),gold=draft?.goldText.trim()?Number(draft.goldText):0;
+    if(gold===0&&!parcel.state?.attachmentUniqueIds.length&&!parcel.state?.stamped)return;
+    const request=parcel.quote(owner,Date.now());if(!request)return;
+    try{sendRaw(request.payload,{quiet:true,mailQuoteProof:request.proof});}catch{/* Entered flight remains unknown in Rust; no timed retry. */}finally{parcel.finish(request.proof);setMailComposeRevision(n=>n+1);}
+  }
+  function changeMailParcel(action:'attach'|'detach'|'stamp'|'review',value?:number){
+    const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),sender=mailDispatcherRef.current?.composer,parcel=mailParcelRef.current;
+    if(!owner||!mailRenderOwner||!sameMailOwner(owner,mailRenderOwner)||mailCompatRef.current?.key!==mailPresentation.key||sender?.pending(owner)||!parcel||!syncMailParcel())return;
+    if(action==='attach'&&(!value||!mailParcelItemsIdle([value]))){sender?.error('Attachment is busy or unavailable');setMailComposeRevision(n=>n+1);return;}
+    const result=parcel.call({action,...(action==='attach'?{uniqueId:value}:action==='detach'?{slot:value}:{})});
+    if(!result.ok){sender?.error(result.error);setMailComposeRevision(n=>n+1);return;}
+    sender?.syncParcelDraft(owner,result.state.attachmentUniqueIds,result.state.stamped);sendMailParcelLocks(result.locks);
+    setMailComposeRevision(n=>n+1);queueMicrotask(pumpMailParcelQuote);
+  }
+  function normalizeMailDraftMessage(message:string){
+    let result;
+    try{result=questCoreRuntimeRef.current?.normalizeMailMessage(message)??{ok:false as const,error:"Shared mail rules are loading; please retry"};}
+    catch{result={ok:false as const,error:"Shared mail rules are unavailable; draft kept"};}
+    if(!result.ok){mailDispatcherRef.current?.composer.error(result.error);setMailComposeRevision(n=>n+1);}
+    return result;
+  }
+  function sendMailMessage(draft: MailComposeDraft,fromCommon=false):MailOutcome {
+    const owner=currentSpellsOwner(Number(worldRef.current.playerObjectId)),dispatcher=mailDispatcherRef.current;
+    if(!owner||!mailRenderOwner||!sameMailOwner(owner,mailRenderOwner)||!dispatcher||!validMailCompatibility(mailCompatRef.current)||mailCompatRef.current?.key!==mailPresentation.key)return "definitelyUnsent";
+    const sender=dispatcher.composer;
+    if(sender.pending(owner))return "definitelyUnsent";
+    const remembered=sender.draft(owner);
+    if(!fromCommon)sender.remember(owner,mailPresentation.key,{to:draft.to,subject:draft.subject,body:draft.body,
+      goldText:remembered?.goldText??String(draft.gold??""),items:[...(draft.items??[])],...(draft.attachmentUniqueIds?{attachmentUniqueIds:[...draft.attachmentUniqueIds],stamped:draft.stamped??false}:{})});
+    // Parcel selection/locks/quotes are M14b. Never discard unresolved references.
+    if(draft.items?.length){sender.error("Mail attachment references are unavailable; draft kept");setMailComposeRevision(n=>n+1);return "definitelyUnsent";}
+    const ids=draft.attachmentUniqueIds??[],stamped=draft.stamped??false;
+    if((draft.gold??0)>0||ids.length||stamped){
+      if(!syncMailParcel(draft.gold??0)||!mailParcelRef.current?.allowsSend(owner,{name:draft.to,message:draft.body,gold:draft.gold??0,itemsIdx:[...ids,...Array(Math.max(0,5-ids.length)).fill(0)],stamped})||!mailParcelItemsIdle(ids)){
+        sender.error(mailParcelRef.current?.state?.notice??mailParcelRef.current?.error??'Postage quote is not ready; draft kept');setMailComposeRevision(n=>n+1);queueMicrotask(pumpMailParcelQuote);return 'definitelyUnsent';}
+    }
+    let decision;
+    try{decision=questCoreRuntimeRef.current?.prepareMailSend({recipient:draft.to,message:draft.body,
+      gold:draft.gold??0,attachmentUniqueIds:ids,stamped});}
+    catch{sender.error("Shared mail rules are unavailable; draft kept");setMailComposeRevision(n=>n+1);return "definitelyUnsent";}
+    if(!decision?.ok){sender.error(decision?.error??"Shared mail rules are loading; please retry");setMailComposeRevision(n=>n+1);return "definitelyUnsent";}
+    const proof=sender.reserve(owner,mailPresentation.key,decision.payload);
+    if(!proof){setMailComposeRevision(n=>n+1);return "definitelyUnsent";}
+    let outcome:MailOutcome;
+    try{outcome=dispatchMailCommand("sendMail",null,false,null,decision.payload,proof)?"confirmedSend":"definitelyUnsent";}
+    catch{outcome="outcomeUnknown";}
+    outcome=sender.finish(proof,outcome);setMailComposeRevision(n=>n+1);return outcome;
   }
   // Friend "mail" affordance just opens the mail window (compose recipient typed there).
-  function openMailWindow(_name?: string) {
-    setShowMail(true);
+  function openMailWindow(name?: string) {
+    setMailboxOpen(true);if(name?.trim())presentMailCompatibility("compose",null,name.trim());
   }
 
   function transferKeyForTile(x: number, y: number) {
@@ -8012,30 +9193,163 @@ export default function HomePage() {
   }
 
   function openCharacter(tab: "char" | "stats1" | "stats2" | "spells") {
+    if (navigateSharedHud({ type: "selectCharacterPage", page: tab === "char" ? "character" : tab })) return;
     closeTouchSecondaryWindows("character");
     setActiveCharacterTab(tab);
     setShowCharacter(true);
   }
 
   function openInventory(tab: "bag1" | "bag2" | "quest") {
+    if (sharedHudNavigationRef.current.ready) {
+      navigateSharedHud({ type: "openBag" });
+      setActiveInventoryTab(tab);
+      return;
+    }
     closeTouchSecondaryWindows("inventory");
+    // Changing tabs inside the compatibility window keeps its selected owner.
+    // A new explicit open starts a fresh, selection-free handoff attempt.
+    if (!bagOpenRef.current) {
+      bagCompatibilityModeRef.current = null;
+      setBagCompatibilityMode(null);
+    }
     setActiveInventoryTab(tab);
     setShowInventory(true);
   }
 
   function toggleCharacterWindow() {
+    if (navigateSharedHud({ type: "character" })) return;
+    if (showCharacter && activeCharacterTab !== "char") { setActiveCharacterTab("char"); setShowCharacter(true); return; }
     const opening = !showCharacter;
     if (opening) closeTouchSecondaryWindows("character");
     setShowCharacter(opening);
   }
 
   function toggleInventoryWindow() {
+    if (navigateSharedHud({ type: "bag" })) return;
     const opening = !showInventory;
     if (opening) {
       closeTouchSecondaryWindows("inventory");
+      bagCompatibilityModeRef.current = null;
+      setBagCompatibilityMode(null);
       setActiveInventoryTab("bag1");
     }
     setShowInventory(opening);
+  }
+
+  function toggleQuestLogWindow() {
+    if (navigateSharedHud({ type: "quest" })) return;
+    const opening = !showQuestLog;
+    if (opening && clientProfile.layout === "touch") closeTouchSecondaryWindows();
+    setShowQuestLog(opening);
+  }
+  toggleQuestLogRef.current = toggleQuestLogWindow;
+
+  function requestBagCompatibility(mode: "fullInventory" | "delete") {
+    bagCompatibilityModeRef.current = mode;
+    bagYieldRef.current();
+    setBagCompatibilityMode(mode);
+  }
+
+  function endStorageService() {
+    storageUiIngressRef.current?.withdraw();
+    storageServiceActiveRef.current = false;
+    storageCompatibilityRef.current = false;
+    setStorageServiceActive(false);
+    setStorageCompatibility(false);
+    setStoragePasswordOpenVersion(0);
+    setStorageServiceOpenVersion(0);
+  }
+
+  function storageIntentMatchesCommand(intent: StorageIntent, command: Record<string, unknown>): boolean {
+    if (intent.type === "rent") return command.type === "chat" && command.message === "@ADDSTORAGE";
+    if (intent.type === "close" || intent.type === "password") return false;
+    const grid = (container: 0 | 4) => container === 4 ? "storage" : "inventory";
+    if (intent.type === "storeItem" || intent.type === "takeBackItem") return command.type === (intent.type === "storeItem" ? "storeItemV2" : "takeBackItemV2")
+      && command.from === intent.source.slot && command.to === intent.target.slot;
+    if (intent.type === "moveItem") return command.type === "moveItem" && command.grid === grid(intent.source.container)
+      && command.from === intent.source.slot && command.to === intent.target.slot;
+    return command.type === "mergeItem" && command.gridFrom === grid(intent.source.container)
+      && command.gridTo === grid(intent.target.container) && command.idFrom === intent.source.uniqueId && command.idTo === intent.target.uniqueId;
+  }
+
+  function dispatchBevyStorageIntent(intent: StorageIntent): boolean {
+    if (!storageServiceActiveRef.current || storageCompatibilityRef.current || !bagOpenRef.current
+      || intent.serviceRevision !== storageServiceRevisionRef.current || !storageUiIngressRef.current?.allows(intent)) return false;
+    const token: StorageCommandProof = { runGeneration: intent.runGeneration, connectionGeneration: intent.connectionGeneration,
+      sessionGeneration: intent.sessionGeneration, ownerRevision: intent.ownerRevision, owner: "bevy", surface: "storage", intent };
+    if (!currentEquipmentOwner(token)) return false;
+    if (intent.type === "close") {
+      if (!storageUiIngressRef.current.claim(intent)) return false;
+      endStorageService();
+      bagCompatibilityModeRef.current = null; setBagCompatibilityMode(null);
+      return true;
+    }
+    if (intent.type === "password") {
+      if (!storageUiIngressRef.current.claim(intent)) return false;
+      storageUiIngressRef.current.withdraw();
+      storageCompatibilityRef.current = true; setStorageCompatibility(true);
+      setStoragePasswordOpenVersion(intent.serviceRevision);
+      requestBagCompatibility("fullInventory");
+      return true;
+    }
+    if (intent.type === "rent") {
+      const sent = send({ type: "chat", message: "@ADDSTORAGE" }, { ownerToken: token });
+      if (sent) { storageUiIngressRef.current?.withdraw(); storageCompatibilityRef.current = true; setStorageCompatibility(true); }
+      return sent;
+    }
+    const current = worldRef.current, source = intent.source;
+    const location = { container: source.container === 4 ? "storage" as const : source.slot < 40 ? "bag1" as const : "bag2" as const,
+      slot: source.container === 4 ? source.slot : source.slot % 40, uniqueId: source.uniqueId };
+    const item = currentAuthoritativeItem(source.container === 4 ? current.storageItems : current.inventoryItems, location);
+    if (!item || (equipmentControllerRef.current?.status().pending ?? 0) > 0) return false;
+    if (intent.type === "storeItem") return submitStorageTransfer("deposit", item, intent.target.slot, "storage", token);
+    if (intent.type === "takeBackItem") return submitStorageTransfer("withdraw", item, intent.target.slot % 40,
+      intent.target.slot < 40 ? "bag1" : "bag2", token);
+    if (intent.type === "moveItem") {
+      if (source.container === 0) return moveItem(item, intent.target.slot % 40, intent.target.slot < 40 ? "bag1" : "bag2", token);
+      return send({ type: "moveItem", grid: "storage", from: source.slot, to: intent.target.slot }, { ownerToken: token });
+    }
+    const target = currentAuthoritativeItem(intent.target.container === 4 ? current.storageItems : current.inventoryItems,
+      { container: intent.target.container === 4 ? "storage" : intent.target.slot < 40 ? "bag1" : "bag2",
+        slot: intent.target.container === 4 ? intent.target.slot : intent.target.slot % 40, uniqueId: intent.target.uniqueId });
+    return Boolean(target && send({ type: "mergeItem", gridFrom: source.container === 4 ? "storage" : "inventory",
+      gridTo: intent.target.container === 4 ? "storage" : "inventory", idFrom: source.uniqueId, idTo: intent.target.uniqueId }, { ownerToken: token }));
+  }
+
+  function retainReactBagInteraction() {
+    if (bevyBagUiRequested && bagOpenRef.current && bagCompatibilityModeRef.current === null) {
+      requestBagCompatibility("fullInventory");
+    }
+  }
+
+  function dispatchBevyBagIntent(intent: BevyBagUiIntent) {
+    const token: BagCommandToken = { ...intent, owner: "bevy" };
+    if (!currentEquipmentOwner(token) || !bagOpenRef.current) return { accepted: false };
+    if (intent.type === "close") { if (!navigateSharedHud({ type: "closeBag" })) setShowInventory(false); return { accepted: true }; }
+    if (intent.type === "handoff") { requestBagCompatibility(intent.mode); return { accepted: true }; }
+    if (intent.type === "selectPage") {
+      // Rust cannot carry an old page selection across this layout boundary.
+      bagYieldRef.current();
+      setActiveInventoryTab(intent.page);
+      return { accepted: true };
+    }
+    const source = intent.source;
+    const current = worldRef.current;
+    const projection = projectBevyBagModel(current);
+    if (!projection.ok || source.slot >= current.maxBagSlots) return { accepted: false };
+    const item = currentAuthoritativeItem(current.inventoryItems, {
+      container: source.slot < 40 ? "bag1" : "bag2", slot: source.slot % 40, uniqueId: source.uniqueId,
+    });
+    if (!item) return { accepted: false };
+    if (intent.type === "moveItem") {
+      return { accepted: moveItem(item, intent.target.slot % 40, intent.target.slot < 40 ? "bag1" : "bag2", token) };
+    }
+    if (intent.type === "equipItem") {
+      const classification = classifyEquipmentUse(item);
+      return { accepted: classification.kind === "equipment" && send({ type: "equipItem", grid: "inventory",
+        uniqueId: source.uniqueId, to: classification.to }, { ownerToken: token }) };
+    }
+    return { accepted: useItem(item, token) };
   }
 
   function handleViewportTileAction(x: number, y: number, mode: "walk" | "run") {
@@ -8352,7 +9666,136 @@ export default function HomePage() {
     return confirmedActionReadyAt > 0 && now < confirmedActionReadyAt;
   }
 
-  function handleGatewayEvent(event: GatewayEvent) {
+  function currentSpellsOwner(playerObjectId:number|null):SpellsOwner|null {
+    const session=equipmentStartGameRef.current;
+    if(!session||equipmentHostSuspendReasonRef.current!==null||session.connectionGeneration!==equipmentConnectionGenerationRef.current
+      ||session.sessionGeneration!==equipmentSessionGenerationRef.current||!Number.isSafeInteger(playerObjectId)||!playerObjectId||playerObjectId<0||playerObjectId>0xffffffff)return null;
+    return {connectionGeneration:session.connectionGeneration,sessionGeneration:session.sessionGeneration,
+      ownerRevision:equipmentBagOwnerRef.current.ownerRevision,playerObjectId};
+  }
+  function captureSpellsGatewayEvent(event:GatewayEvent,connectionGeneration:number) {
+    if(connectionGeneration!==equipmentConnectionGenerationRef.current)return;
+    if(event.type==="packet"&&event.packet){
+      const owner=currentSpellsOwner(combatRawRef.current?.snapshot.playerObjectId??Number(worldRef.current.playerObjectId)),payload=event.payload??{};
+      if(owner&&["ObjectMonster","NewMonsterInfo"].includes(event.packet)&&Number.isInteger(payload.objectId)&&Number(payload.objectId)>0&&Number.isInteger(payload.masterObjectId)&&Number(payload.masterObjectId)>=0&&Number(payload.masterObjectId)<=0xffffffff){
+        if(combatMastersRef.current.size<512||combatMastersRef.current.has(String(payload.objectId)))combatMastersRef.current.set(String(payload.objectId),{owner:{...owner},master:Number(payload.masterObjectId)});
+      }
+      if(["ObjectRemove","ObjectHide"].includes(event.packet))combatMastersRef.current.delete(String(payload.objectId));
+    }
+    if(event.type==="worldSnapshot") {
+      const snapshot=event.payload as GatewayWorldSnapshot,owner=currentSpellsOwner(snapshot.playerObjectId);
+      if(owner) {
+        const raw:SpellsRawSnapshot={playerObjectId:snapshot.playerObjectId,knownSkills:snapshot.knownSkills,skillKeyAck:snapshot.skillKeyAck};
+        // Detach from subsequent projections while retaining absent/null/zero raw fields.
+        const captured=JSON.parse(JSON.stringify(raw)) as SpellsRawSnapshot;
+        spellsRawSnapshotRef.current={snapshot:captured,owner:{...owner}};
+        spellsIngressRef.current?.observeSnapshot(captured,owner);
+        if(worldRef.current.playerObjectId===String(snapshot.playerObjectId)){
+          combatRawRef.current={snapshot:JSON.parse(JSON.stringify({playerObjectId:snapshot.playerObjectId,knownSkills:snapshot.knownSkills,entities:snapshot.entities,mapFileName:snapshot.mapFileName})),owner:{...owner}};
+          combatIngressRef.current?.observeSnapshot({playerObjectId:snapshot.playerObjectId,knownSkills:snapshot.knownSkills},owner);
+        }
+      }
+    } else if(event.type==="packet"&&event.packet&&["Magic","MagicCast","MagicDelay"].includes(event.packet)) {
+      const owner=currentSpellsOwner(spellsRawSnapshotRef.current?.snapshot.playerObjectId??null);
+      if(owner)spellsIngressRef.current?.observePacket(event.packet,event.payload??{},owner);
+      const combatOwner=currentSpellsOwner(Number(worldRef.current.playerObjectId));
+      if(combatOwner)combatIngressRef.current?.observePacket(event.packet,event.payload??{},combatOwner);
+    }
+  }
+  function captureMailGatewayEvent(event:GatewayEvent,connectionGeneration:number,source:WebSocket){
+    if(connectionGeneration!==equipmentConnectionGenerationRef.current)return;
+    if(event.type==="packet"&&event.packet==="MapChanged"||event.type==="packet"&&event.packet==="MapInformation"&&typeof event.payload?.fileName==="string"&&normalizeMapFileName(event.payload.fileName)!==normalizeMapFileName(worldRef.current.mapFileName)){
+      if(mailSceneRevisionRef.current<Number.MAX_SAFE_INTEGER)++mailSceneRevisionRef.current;else mailRawRef.current=null;
+      setMailboxOpen(false);
+    }
+    const owner=currentSpellsOwner(event.type==="worldSnapshot"?(event.payload as GatewayWorldSnapshot).playerObjectId:Number(worldRef.current.playerObjectId));
+    mailDispatcherRef.current?.composer.sync(owner);
+    if(event.type==='packet'&&typeof event.packet==='string'&&mailInventoryMutationPacket(event.packet)){
+      mailParcelRawRef.current=null;syncMailParcel();setMailComposeRevision(n=>n+1);
+    }
+    if(event.type==='packet'&&(event.packet==='MailCost'||event.packet==='MailLockedItem')){
+      if(owner){
+        syncMailParcel();const parcel=mailParcelRef.current;
+        if(event.packet==='MailCost')parcel?.call({action:'cost',cost:event.payload?.cost});
+        else parcel?.call({action:'lock',uniqueId:event.payload?.uniqueId,locked:event.payload?.locked});
+        setMailComposeRevision(n=>n+1);queueMicrotask(pumpMailParcelQuote);
+      }else if(event.packet==='MailCost'&&syncMailParcel()&&mailParcelRef.current?.retireCost(connectionGeneration,event.payload?.cost)){
+        // Retired response only: no new quote, lock mutation or inbox transition.
+        setMailComposeRevision(n=>n+1);
+      }
+    }
+    if(event.type==="packet"&&event.packet==="MailSent"){
+      const result=event.payload?.result;
+      if(typeof result==="number"){
+        const completion=owner?mailDispatcherRef.current?.composer.acknowledge(owner,result,source):mailDispatcherRef.current?.composer.retireAcknowledgement(connectionGeneration,result,source);
+        if(completion==="success"){const result=mailParcelRef.current?.call({action:'complete'});if(result?.ok)sendMailParcelLocks(result.locks);presentMailCompatibility("inbox",null);}
+        if(completion)setMailComposeRevision(n=>n+1);
+      }
+    }
+    if(!owner)return;
+    let raw:unknown;
+    if(event.type==="packet"&&event.packet==="ReceiveMail")raw=event.payload?.mail;
+    else if(event.type==="worldSnapshot"){
+      const snapshot=event.payload as GatewayWorldSnapshot;
+      if(normalizeMapFileName(snapshot.mapFileName??null)!==normalizeMapFileName(worldRef.current.mapFileName)&&mailOpenRef.current){++mailSceneRevisionRef.current;setMailboxOpen(false);}
+      if(!snapshot.stage5Systems||!Object.hasOwn(snapshot.stage5Systems,"mail"))return;raw=snapshot.stage5Systems.mail;
+    }else return;
+    const previous=mailRawRef.current;const prior=previous&&sameMailOwner(previous.owner,owner)?previous.mail:null;const resolver=runtimeRef.current?.resolveMir2MailUiRows;const resolved=resolver?mergeMailList(raw,prior,resolver):null;const mail=resolved??mergeMailList(raw,prior);mailRawRef.current={owner:{...owner},mail,catalogResolved:resolved!==null};
+    if(resolved===null)mailIngressRef.current?.withdraw();
+    if(!mail||!validMailCompatibility(mailCompatRef.current)){mailIngressRef.current?.withdraw();mailDispatcherRef.current?.withdraw();mailCompatRef.current=null;setMailCompatibility(null);}
+  }
+  function dispatchBevySpellsIntent(intent:SpellsIntent,proof:SpellsProof):SpellsOutcome {
+    if(!bevySpellsSendGateRef.current(proof))return "definitelyUnsent";
+    try{return sendRaw({type:"magicKey",requestId:intent.requestId,spell:intent.spell,key:intent.key,oldKey:intent.oldKey},{skillProof:proof})?"confirmedSend":"definitelyUnsent";}
+    catch{return "outcomeUnknown";}
+  }
+  function dispatchBevyCombat(proof:CombatProof,body:string):"confirmedSend"|"definitelyUnsent"|"outcomeUnknown" {
+    if(!combatIngressRef.current?.allows(proof))return "definitelyUnsent";
+    const pace=()=>{nextMoveSendAtRef.current=Math.max(nextMoveSendAtRef.current,Date.now()+proof.movementBlockMs);};
+    try{if(!sendRaw(proof.command,{combatProof:proof,combatBody:body}))return "definitelyUnsent";pace();return "confirmedSend";}catch{pace();return "outcomeUnknown";}
+  }
+  function invalidateNpcGoldBuyGatewayPacket(event: GatewayEvent) {
+    if (event.type === "worldSnapshot") {
+      npcGoldBuyInventoryRef.current.invalidate();
+      npcBuyDispatcherRef.current?.withdraw();
+    }
+    if (event.type === "packet" && typeof event.packet === "string" && npcGoldBuyInventoryMutationPacket(event.packet)) {
+      // Some handlers only log a receipt. Retire availability before any handler
+      // or callback can reuse the previous full inventory and stack evidence.
+      npcGoldBuyInventoryRef.current.invalidate();
+      npcBuyDispatcherRef.current?.withdraw();
+    }
+  }
+
+  function applyNpcGoldBuyGatewaySnapshot(snapshot: GatewayWorldSnapshot, connectionGeneration: number) {
+    const beforeInventorySnapshot = equipmentSnapshotRef.current;
+    const stage = npcGoldBuyInventoryRef.current.begin(currentSpellsOwner(snapshot.playerObjectId));
+    let complete = false;
+    let inventory: ReturnType<typeof projectBevyBagModel> | null = null;
+    try {
+      applyGatewayWorldSnapshot(snapshot, connectionGeneration);
+      const session = equipmentSnapshotRef.current;
+      inventory = projectBevyBagModel(worldRef.current, { npcGoldTrade: true });
+      complete = connectionGeneration === equipmentConnectionGenerationRef.current
+        && session !== beforeInventorySnapshot
+        && session?.connectionGeneration === connectionGeneration
+        && session?.sessionGeneration === equipmentSessionGenerationRef.current
+        && worldRef.current.playerObjectId === String(snapshot.playerObjectId)
+        && inventory.ok;
+    } finally {
+      // A packet or session replacement during projection retires this stage.
+      npcGoldBuyInventoryRef.current.finish(stage, currentSpellsOwner(Number(worldRef.current.playerObjectId)), complete,
+        inventory?.ok ? inventory.model : null);
+      npcBuyDispatcherRef.current?.observe();
+    }
+  }
+
+  function handleGatewayEvent(event: GatewayEvent, connectionGeneration: number, source:WebSocket) {
+    if (connectionGeneration !== equipmentConnectionGenerationRef.current) return;
+    invalidateNpcGoldBuyGatewayPacket(event);
+    // Keep the complete raw learned/ACK snapshot before diagnostics, React or movement coalescing.
+    captureSpellsGatewayEvent(event,connectionGeneration);
+    captureMailGatewayEvent(event,connectionGeneration,source);
     const debugWindow = window as typeof window & {
       __mir2LastGatewayEvent?: Record<string, unknown>;
       __mir2GatewayEventHistory?: Array<Record<string, unknown>>;
@@ -8441,7 +9884,7 @@ export default function HomePage() {
           : null,
         before: captureMovementDiagnosticSample(),
       });
-      applyGatewayWorldSnapshot(event.payload as GatewayWorldSnapshot);
+      applyNpcGoldBuyGatewaySnapshot(event.payload as GatewayWorldSnapshot, connectionGeneration);
       return;
     }
     if (event.type !== "packet" || !event.packet) return;
@@ -8490,6 +9933,10 @@ export default function HomePage() {
         }
         break;
       case "Disconnect":
+        retireEquipmentSession();
+        questDefinitionByIdRef.current.clear();
+        questAuthoritativeStageByIdRef.current.clear();
+        clearPendingQuestActions();
         setIdentitySessionToken(null);
         gatewayProtocolReadyRef.current = false;
         resetGatewayReconnectState();
@@ -8635,6 +10082,20 @@ export default function HomePage() {
             "system",
           );
         } else {
+          suspendEquipmentConnection("connectionUnavailable");
+          pendingStorageRequestsRef.current.clear();
+          equipmentStartGameRef.current = {
+            connectionGeneration,
+            sessionGeneration: ++equipmentSessionGenerationRef.current,
+            afterSnapshotVersion: worldSnapshotVersionRef.current,
+          };
+          equipmentHostSuspendReasonRef.current = null;
+          equipmentSnapshotRef.current = null;
+          // Unmount old item selections before the next character can act.
+          setShowInventory(false);
+          setShowCharacter(false);
+          clearPendingQuestActions();
+          questAuthoritativeStageByIdRef.current.clear();
           // StartGame begins a new authoritative object population even when
           // the pre-auth snapshot and character map are both map 0.
           packetRuntimeObjectTombstonesRef.current.clear();
@@ -8645,6 +10106,8 @@ export default function HomePage() {
         applyRankingPacket(payload);
         break;
       case "MapInformation": {
+        const nextNpcMap = stringOrNull(payload.fileName);
+        if (nextNpcMap && normalizeMapFileName(nextNpcMap) !== normalizeMapFileName(worldRef.current.mapFileName)) retireNpcShopService();
         const miniMapIndex = numberOrUndefined(payload.miniMapIndex);
         const bigMapIndex = numberOrUndefined(payload.bigMapIndex);
         const mapLightSetting = numberOrUndefined(payload.lights);
@@ -8712,6 +10175,21 @@ export default function HomePage() {
       }
       case "UserInformation": {
         const objectId = stringifyId(payload.objectId);
+        const appearanceOwner = `${equipmentConnectionGenerationRef.current}:${equipmentSessionGenerationRef.current}:${bevyQuestGenerationRef.current}:${objectId}`;
+        const packetAppearance = projectSelfAppearance(selfAppearanceAuthorityRef.current, appearanceOwner,
+          [{ objectId, kind: "selfPlayer", hair: payload.hair, wingEffect: payload.wingEffect, wing_effect: payload.wing_effect }], objectId);
+        selfAppearanceAuthorityRef.current = packetAppearance;
+        const beforeExperienceAuthority = experienceAuthorityRef.current;
+        const beforeHudWorld = worldRef.current;
+        const nextExperienceAuthority = experienceAuthorityFromPacket(bevyQuestGenerationRef.current,
+          objectId, payload.experience, payload.maxExperience);
+        const identityChanged = beforeHudWorld.playerObjectId !== objectId;
+        withdrawHudBarDrawPlanOutputs(identityChanged
+          || beforeHudWorld.playerExperience !== numberOrZero(payload.experience)
+          || beforeHudWorld.playerMaxExperience !== Math.max(numberOrZero(payload.maxExperience), 1)
+          || JSON.stringify(beforeExperienceAuthority) !== JSON.stringify(nextExperienceAuthority),
+        identityChanged);
+        experienceAuthorityRef.current = nextExperienceAuthority;
         const location = payload.location as { x?: number; y?: number } | undefined;
         const userX = numberOrZero(location?.x);
         const userY = numberOrZero(location?.y);
@@ -8764,6 +10242,8 @@ export default function HomePage() {
             nameColourArgb: -1,
             disposition: "friendly",
             sprite: playerSpriteFromPacket(payload),
+            hair: packetAppearance.hair,
+            wingEffect: packetAppearance.wingEffect,
           }),
         }));
         resetBevyMovementShadow(objectId, userX, userY, userDirection, userInfoNow);
@@ -9249,11 +10729,7 @@ export default function HomePage() {
                 key: currentEntry?.key ?? `storage-slot-${slot}`,
                 name: currentEntry?.name ?? `Storage Item ${slot}`,
                 icon: currentEntry?.icon ?? 0,
-                uniqueId:
-                  numberOrUndefined(userItem.uniqueId) ??
-                  numberOrUndefined(userItem.unique_id) ??
-                  currentEntry?.uniqueId ??
-                  slot,
+                ...projectStoragePacketItemIdentity(userItem, slot, currentEntry?.uniqueId),
                 slot,
                 container: currentEntry?.container ?? "storage",
                 quantity: numberOrUndefined(userItem.count) ?? currentEntry?.quantity ?? 1,
@@ -9273,7 +10749,15 @@ export default function HomePage() {
         break;
       }
       case "NPCStorage":
+        retireNpcShopService();
         updateWorld((current) => ({ ...current, activeNpcDialog: null }));
+        requestBagCompatibility("fullInventory");
+        storageServiceActiveRef.current = true;
+        storageCompatibilityRef.current = false;
+        storageServiceRevisionRef.current += 1;
+        setStorageServiceActive(true);
+        setStorageCompatibility(false);
+        setStoragePasswordOpenVersion(0);
         setShowInventory(true);
         setActiveInventoryTab("bag1");
         setStorageServiceOpenVersion((current) => current + 1);
@@ -9307,6 +10791,10 @@ export default function HomePage() {
         break;
       }
       case "LogOutSuccess":
+        retireEquipmentSession();
+        questDefinitionByIdRef.current.clear();
+        questAuthoritativeStageByIdRef.current.clear();
+        clearPendingQuestActions();
         cancelPendingEntitySounds();
         setIdentitySessionToken(null);
         resetGatewayReconnectState();
@@ -9335,6 +10823,15 @@ export default function HomePage() {
         }));
         break;
       case "LogOutFailed":
+        {
+          const session = equipmentStartGameRef.current;
+          if (session && socketRef.current?.readyState === WebSocket.OPEN
+            && equipmentHostSuspendReasonRef.current === "logoutPending") {
+            equipmentHostSuspendReasonRef.current = null;
+            equipmentControllerRef.current?.resumeSameSession({ ...session, logoutFailed: true });
+            syncEquipmentSnapshot();
+          }
+        }
         appendLog(t("ui.logoutFailed", [], "Log out failed."), "system");
         break;
       case "StartGameBanned":
@@ -9457,6 +10954,15 @@ export default function HomePage() {
       // Player / hero progression ---------------------------------------------
       case "GainExperience": {
         const amount = numberOrZero(payload.amount);
+        const beforeExperienceAuthority = experienceAuthorityRef.current;
+        const beforeExperienceWorld = worldRef.current;
+        const nextExperienceAuthority = advanceExperienceAuthority(beforeExperienceAuthority,
+          bevyQuestGenerationRef.current, worldRef.current.playerObjectId,
+          worldRef.current.playerExperience, worldRef.current.playerMaxExperience, payload.amount);
+        withdrawHudBarDrawPlanOutputs((amount > 0
+          && beforeExperienceWorld.playerExperience + amount !== beforeExperienceWorld.playerExperience)
+          || JSON.stringify(beforeExperienceAuthority) !== JSON.stringify(nextExperienceAuthority), false);
+        experienceAuthorityRef.current = nextExperienceAuthority;
         if (amount > 0) {
           updateWorld((current) => ({
             ...current,
@@ -9465,7 +10971,15 @@ export default function HomePage() {
         }
         break;
       }
-      case "LevelChanged":
+      case "LevelChanged": {
+        const beforeExperienceAuthority = experienceAuthorityRef.current;
+        const beforeExperienceWorld = worldRef.current;
+        const nextExperienceAuthority = experienceAuthorityFromPacket(bevyQuestGenerationRef.current,
+          worldRef.current.playerObjectId, payload.experience, payload.maxExperience);
+        withdrawHudBarDrawPlanOutputs(beforeExperienceWorld.playerExperience !== numberOrZero(payload.experience)
+          || beforeExperienceWorld.playerMaxExperience !== Math.max(numberOrZero(payload.maxExperience), 1)
+          || JSON.stringify(beforeExperienceAuthority) !== JSON.stringify(nextExperienceAuthority), false);
+        experienceAuthorityRef.current = nextExperienceAuthority;
         gameBusRef.current!.emit({ type: "uiSound", event: "levelUp" });
         updateWorld((current) => ({
           ...current,
@@ -9478,6 +10992,7 @@ export default function HomePage() {
           "announcement",
         );
         break;
+      }
       case "HealthChanged": {
         const hp = numberOrUndefined(payload.hp);
         const mp = numberOrUndefined(payload.mp);
@@ -9665,11 +11180,11 @@ export default function HomePage() {
         break;
       }
       case "ResizeInventory": {
-        const size = numberOrZero(payload.size);
-        if (size > 0) {
+        const capacities = crystalInventoryCapacities(payload.size);
+        if (capacities) {
           updateWorld((current) => ({
             ...current,
-            maxBagSlots: size,
+            ...capacities,
           }));
         }
         break;
@@ -10049,7 +11564,7 @@ export default function HomePage() {
           const item = value as Record<string, unknown>;
           const id = Number(item.id ?? item.uniqueId ?? item.unique_id);
           const itemIndex = Number(item.itemIndex ?? item.item_index);
-          if (!Number.isFinite(id) || !Number.isFinite(itemIndex)) return [];
+          if (!Number.isSafeInteger(id) || id < 0 || !Number.isSafeInteger(itemIndex) || itemIndex < 0) return [];
           const gradeNumber = Number(item.grade ?? 0);
           const grade: DisplayNpcShopGood["grade"] =
             gradeNumber >= 4
@@ -10067,7 +11582,12 @@ export default function HomePage() {
             name: stringOrFallback(item.name, `Item #${itemIndex}`),
             icon: numberOrZero(item.icon),
             price: numberOrZero(item.price),
-            count: Math.max(1, numberOrZero(item.count)),
+            count: numberOrZero(item.count),
+            tooltipSource: item.tooltipSource,
+            requiresGoldBuyPlan: item.is_shop_item === true
+              || (item.tooltipSource as { userItem?: { is_shop_item?: boolean } } | undefined)?.userItem?.is_shop_item === true,
+            ...(typeof payload.rate === "number" ? { purchaseRate: payload.rate } : {}),
+            ...(typeof item.stock === "number" ? { stock: item.stock } : {}),
             grade,
             description: stringOrFallback(item.description, ""),
           } satisfies DisplayNpcShopGood];
@@ -10079,15 +11599,23 @@ export default function HomePage() {
           npcServiceNameRef.current ||
           t("ui.shopTitle", [], "Shop");
         npcServiceNameRef.current = npcName;
+        npcShopClockRef.current.service += 1;
+        npcShopClockRef.current.catalog += 1;
         const nextShop: DisplayNpcShopService = {
+          serviceRevision: npcShopClockRef.current.service,
+          catalogRevision: npcShopClockRef.current.catalog,
+          hideAddedStats: payload.hideAddedStats === true,
           npcName,
-          panelType: numberOrZero(payload.panelType),
+          panelType: typeof payload.panelType === "number" && Number.isInteger(payload.panelType)
+            && payload.panelType >= 0 && payload.panelType <= 255 ? payload.panelType : 255,
           buyItems: goods,
           supportsBuy: true,
           supportsSell: existing?.supportsSell ?? false,
         };
+        npcBuyDispatcherRef.current?.withdraw();
         npcShopServiceRef.current = nextShop;
         setNpcShopService(nextShop);
+        npcBuyDispatcherRef.current?.observe();
         updateWorld((current) => ({ ...current, activeNpcDialog: null }));
         setNpcRepairService(null);
         setShowInventory(false);
@@ -10102,11 +11630,15 @@ export default function HomePage() {
           npcServiceNameRef.current ||
           t("ui.shopTitle", [], "Shop");
         npcServiceNameRef.current = npcName;
+        npcShopClockRef.current.service += 1;
         const nextShop: DisplayNpcShopService = existing
-          ? { ...existing, npcName, supportsSell: true }
-          : { npcName, panelType: 0, buyItems: [], supportsBuy: false, supportsSell: true };
+          ? { ...existing, npcName, supportsSell: true, serviceRevision: npcShopClockRef.current.service }
+          : { npcName, panelType: 0, buyItems: [], supportsBuy: false, supportsSell: true,
+              serviceRevision: npcShopClockRef.current.service, catalogRevision: npcShopClockRef.current.catalog, hideAddedStats: false };
+        npcBuyDispatcherRef.current?.withdraw();
         npcShopServiceRef.current = nextShop;
         setNpcShopService(nextShop);
+        npcBuyDispatcherRef.current?.observe();
         updateWorld((current) => ({ ...current, activeNpcDialog: null }));
         setNpcRepairService(null);
         setShowInventory(false);
@@ -10116,9 +11648,11 @@ export default function HomePage() {
       case "NPCPearlGoods":
       case "NPCRefine":
       case "NPCReplaceWedRing":
+        retireNpcShopService();
         // Opening an NPC service panel: reuse the inventory surface used by NPCStorage.
         updateWorld((current) => ({ ...current, activeNpcDialog: null }));
         setNpcRepairService(null);
+        requestBagCompatibility("fullInventory");
         setShowInventory(true);
         setActiveInventoryTab("bag1");
         break;
@@ -10127,13 +11661,14 @@ export default function HomePage() {
         // Crystal repairs are NPC-driven. Surface the dedicated repair list
         // instead of the generic inventory/character windows.
         updateWorld((current) => ({ ...current, activeNpcDialog: null }));
-        npcShopServiceRef.current = null;
-        setNpcShopService(null);
+        retireNpcShopService();
         setNpcRepairService(event.packet === "NPCSRepair" ? "special" : "repair");
         setShowInventory(false);
         setShowCharacter(false);
         break;
       case "NPCResponse": {
+        // A processed response replaces the service before its Goods/snapshot arrives.
+        retireNpcShopService();
         const page = Array.isArray(payload.page)
           ? (payload.page as unknown[]).filter((line): line is string => typeof line === "string")
           : [];
@@ -10363,6 +11898,10 @@ export default function HomePage() {
               (id): id is number => typeof id === "number",
             )
           : [];
+        completedQuestHistoryRef.current = {
+          known: Array.isArray(payload.completedQuests),
+          ids: [...new Set(completed.filter((id) => Number.isSafeInteger(id) && id > 0 && id <= 0x7fff_ffff))].slice(0, 4096),
+        };
         if (completed.length > 0) {
           updateWorld((current) => ({
             ...current,
@@ -10431,6 +11970,7 @@ export default function HomePage() {
       case "MapChanged": {
         const fileName = stringOrNull(payload.fileName);
         if (normalizeMapFileName(fileName) !== normalizeMapFileName(worldRef.current.mapFileName)) {
+          retireNpcShopService();
           cancelPendingEntitySounds();
         }
         const miniMap = numberOrUndefined(payload.miniMap);
@@ -10518,8 +12058,19 @@ export default function HomePage() {
 
       // Item move/equip acknowledgements (server grid indices) -----------------
       case "EquipItem":
+      case "RemoveItem": {
+        const operation = equipmentGatewayOperation({
+          type: event.packet === "EquipItem" ? "equipItem" : "removeItem",
+          uniqueId: payload.uniqueId, grid: payload.grid, to: payload.to,
+        });
+        const session = equipmentStartGameRef.current;
+        if (session && operation && typeof payload.success === "boolean") {
+          equipmentControllerRef.current?.applyAck({ ...session, operation, success: payload.success });
+        }
+        if (payload.success === false) appendLog(t("ui.itemActionFailed", [], "Item action failed."), "system");
+        break;
+      }
       case "MoveItem":
-      case "RemoveItem":
       case "RemoveSlotItem":
       case "StoreItem":
       case "TakeBackItem":
@@ -10542,12 +12093,14 @@ export default function HomePage() {
       case "TakeBackItemV2": {
         const requestId = typeof payload.requestId === "string" ? payload.requestId : "";
         const pending = pendingStorageRequestsRef.current.get(requestId);
-        const expectedOperation = event.packet === "StoreItemV2" ? "deposit" : "withdraw";
+        const expectedType = event.packet === "StoreItemV2" ? "storeItemV2" : "takeBackItemV2";
         if (
           pending &&
-          pending.operation === expectedOperation &&
-          pending.from === payload.from &&
-          pending.to === payload.to
+          pending.enteredSocket &&
+          pending.proof.type === expectedType &&
+          pending.proof.from === payload.from &&
+          pending.proof.to === payload.to &&
+          typeof payload.success === "boolean"
         ) {
           pendingStorageRequestsRef.current.delete(requestId);
           if (payload.success === false) {
@@ -10569,6 +12122,7 @@ export default function HomePage() {
         }
         break;
       case "ReturnToLogin":
+        retireEquipmentSession();
         pendingStorageRequestsRef.current.clear();
         screenRef.current = "login";
         setScreen("login");
@@ -10729,15 +12283,24 @@ export default function HomePage() {
               ? (info.taskDescription as unknown[]).filter((line): line is string => typeof line === "string")
               : [];
           const enrichedObjectives = parseQuestObjectives(payload.objectives);
-          const enrichedRewards = parseQuestRewards(payload.rewards);
+          const enrichedRewards = withQuestRewardTooltipSources(parseQuestRewards(payload.rewards), info);
           const enrichedDescription = Array.isArray(payload.descriptionLines)
             ? (payload.descriptionLines as unknown[]).filter((line): line is string => typeof line === "string")
             : description;
           const definition: Partial<QuestEntry> = {
+            acceptNpcIndex: questEndpoint(info.npc_index),
+            finishNpcIndex: questEndpoint(info.finish_npc_index),
             title: name,
             summary: description[0] ?? "",
             objective: taskDescription[0] ?? "",
             tracker: stringOrFallback(info.group, ""),
+            group: stringOrFallback(info.group, ""),
+            minLevelNeeded: numberOrUndefined(info.min_level_needed ?? info.minLevelNeeded),
+            taskDescriptionLines: taskDescription,
+            returnDescriptionLines: Array.isArray(info.return_description ?? info.returnDescription)
+              ? ((info.return_description ?? info.returnDescription) as unknown[]).filter((line): line is string => typeof line === "string") : [],
+            completionDescriptionLines: Array.isArray(info.completion_description ?? info.completionDescription)
+              ? ((info.completion_description ?? info.completionDescription) as unknown[]).filter((line): line is string => typeof line === "string") : [],
             ...(enrichedDescription.length > 0 ? { descriptionLines: enrichedDescription } : {}),
             ...(enrichedObjectives ? { objectives: enrichedObjectives } : {}),
             ...(enrichedRewards ? { rewards: enrichedRewards } : {}),
@@ -10766,9 +12329,16 @@ export default function HomePage() {
                     ? {
                         ...quest,
                         title: nextEntry.title,
+                        acceptNpcIndex: nextEntry.acceptNpcIndex,
+                        finishNpcIndex: nextEntry.finishNpcIndex,
                         summary: nextEntry.summary,
                         objective: nextEntry.objective,
                         tracker: nextEntry.tracker,
+                        group: nextEntry.group,
+                        minLevelNeeded: nextEntry.minLevelNeeded,
+                        taskDescriptionLines: nextEntry.taskDescriptionLines,
+                        returnDescriptionLines: nextEntry.returnDescriptionLines,
+                        completionDescriptionLines: nextEntry.completionDescriptionLines,
                         ...(nextEntry.descriptionLines ? { descriptionLines: nextEntry.descriptionLines } : {}),
                         ...(nextEntry.objectives ? { objectives: nextEntry.objectives } : {}),
                         ...(nextEntry.rewards ? { rewards: nextEntry.rewards } : {}),
@@ -10936,6 +12506,7 @@ export default function HomePage() {
       case "NPCReset":
       case "NPCCheckRefine":
         // Opening an item-service NPC panel; reuse the inventory surface.
+        requestBagCompatibility("fullInventory");
         setShowInventory(true);
         setActiveInventoryTab("bag1");
         break;
@@ -11297,6 +12868,7 @@ export default function HomePage() {
         restoreObjectSelection(stringifyId(payload.npcId));
         break;
       case "NPCConsign":
+        requestBagCompatibility("fullInventory");
         setShowInventory(true);
         setActiveInventoryTab("bag1");
         break;
@@ -12256,8 +13828,57 @@ export default function HomePage() {
     });
   }
 
-  function applyGatewayWorldSnapshot(snapshot: GatewayWorldSnapshot) {
+  function applyGatewayWorldSnapshot(snapshot: GatewayWorldSnapshot, connectionGeneration: number) {
+    const beforeHudWorld = worldRef.current;
+    const beforeExperienceAuthority = experienceAuthorityRef.current;
+    const beforeWeightAuthority = weightAuthorityRef.current;
+    // Equipment ACK barriers must observe this raw full layout even when the
+    // movement fast path below skips React's ordinary model reconstruction.
+    observeEquipmentSnapshot(snapshot, connectionGeneration);
+    const parcelOwner=currentSpellsOwner(Number(snapshot.playerObjectId));
+    const parcelSession=equipmentSnapshotRef.current;
+    if(parcelOwner&&parcelSession&&parcelSession.connectionGeneration===connectionGeneration&&parcelSession.sessionGeneration===parcelOwner.sessionGeneration){
+      // Capture raw tooltip/pricing even when React's movement fast path reuses world.
+      const prior=JSON.stringify(mailParcelRef.current?.state);
+      mailParcelRawRef.current={owner:{...parcelOwner},snapshot};syncMailParcel();if(prior!==JSON.stringify(mailParcelRef.current?.state))setMailComposeRevision(n=>n+1);queueMicrotask(pumpMailParcelQuote);
+    }else{mailParcelRawRef.current=null;syncMailParcel();}
+    bevyQuestAuthoritativeRef.current = snapshot.playerObjectId !== null;
+    // A quest ACK can arrive on a movement-only snapshot. Consume its exact
+    // request before the fast path can skip the full world-model refresh.
+    applyQuestOperationAck(snapshot.questOperationAck);
+    questAuthoritativeStageByIdRef.current = new Map(
+      snapshot.questLog.map((quest) => [quest.questId, quest.stage]),
+    );
     const playerObjectId = snapshot.playerObjectId === null ? null : String(snapshot.playerObjectId);
+    const appearanceOwner = `${equipmentConnectionGenerationRef.current}:${equipmentSessionGenerationRef.current}:${bevyQuestGenerationRef.current}:${playerObjectId}`;
+    const projectedSelfAppearance = projectSelfAppearance(selfAppearanceAuthorityRef.current, appearanceOwner, snapshot.entities, snapshot.playerObjectId);
+    selfAppearanceAuthorityRef.current = projectedSelfAppearance;
+    const rawExperiencePresent = Object.prototype.hasOwnProperty.call(snapshot, "playerExperience");
+    const rawMaxExperiencePresent = Object.prototype.hasOwnProperty.call(snapshot, "playerMaxExperience");
+    if (rawExperiencePresent || rawMaxExperiencePresent) {
+      experienceAuthorityRef.current = experienceAuthorityFromPacket(bevyQuestGenerationRef.current,
+        playerObjectId, snapshot.playerExperience, snapshot.playerMaxExperience);
+    } else if (experienceAuthorityRef.current?.generation !== bevyQuestGenerationRef.current
+      || experienceAuthorityRef.current?.playerObjectId !== playerObjectId) {
+      experienceAuthorityRef.current = null;
+    }
+    const projectedWeight = projectSnapshotWeightPair(snapshot, weightAuthorityRef.current,
+      bevyQuestGenerationRef.current, playerObjectId);
+    weightAuthorityRef.current = projectedWeight.authority;
+    // Withdraw changed raw bars before a movement shortcut or deferred React
+    // commit can leave the previous bitmap in the passive canvas.
+    const identityChanged = beforeHudWorld.playerObjectId !== playerObjectId;
+    const experienceChanged = identityChanged
+      || ((rawExperiencePresent || rawMaxExperiencePresent) &&
+        (!rawExperiencePresent || !rawMaxExperiencePresent
+          || snapshot.playerExperience !== beforeHudWorld.playerExperience
+          || snapshot.playerMaxExperience !== beforeHudWorld.playerMaxExperience))
+      || JSON.stringify(beforeExperienceAuthority) !== JSON.stringify(experienceAuthorityRef.current);
+    const weightChanged = identityChanged
+      || projectedWeight.currentWeight !== beforeHudWorld.currentWeight
+      || projectedWeight.maxWeight !== beforeHudWorld.maxWeight
+      || JSON.stringify(beforeWeightAuthority) !== JSON.stringify(weightAuthorityRef.current);
+    withdrawHudBarDrawPlanOutputs(experienceChanged, weightChanged);
     const snapshotNow = Date.now();
     // ── Fast-path：成功 ACK 仅解锁下一步，不触发整套 world/map/entity 重刷新 ──
     // 对应 Crystal 原版 MoveTime 解锁，复刻此前每 snapshot 都重建 entities/groundDrops/inventory/belt/storage/quest 等全量是重链主因。
@@ -12278,7 +13899,10 @@ export default function HomePage() {
         );
       };
       const itemIdentity = (item: Record<string, unknown>) => ({
+        ...projectItemPresentation(item as GatewayItemPresentationSource),
         key: item.key ?? null,
+        name: item.name ?? null,
+        description: item.description ?? null,
         uniqueId: item.uniqueId ?? null,
         slot: item.slot ?? null,
         container: item.container ?? null,
@@ -12288,12 +13912,19 @@ export default function HomePage() {
         durabilityMax: item.durabilityMax ?? null,
       });
       const equipmentIdentity = (item: Record<string, unknown>) => ({
+        ...projectItemPresentation(item as GatewayItemPresentationSource),
         key: item.key ?? null,
+        name: item.name ?? null,
+        description: item.description ?? null,
         uniqueId: item.uniqueId ?? null,
         slot: item.slot ?? null,
         quantity: item.quantity ?? null,
         icon: item.icon ?? null,
         shape: item.shape ?? null,
+        attack: item.attack ?? null,
+        defence: item.defence ?? null,
+        addedLuck: item.addedLuck ?? null,
+        socketSlots: item.socketSlots ?? null,
         durabilityCurrent: item.durabilityCurrent ?? null,
         durabilityMax: item.durabilityMax ?? null,
       });
@@ -12318,6 +13949,8 @@ export default function HomePage() {
       });
       const snapshotSystems = snapshot.stage5Systems ?? {};
       const staticStateMatches =
+        sameHudSnapshotFields(snapshot, currentWorldFast) &&
+        !snapshot.activeNpcDialog && !currentWorldFast.activeNpcDialog &&
         snapshot.gold === currentWorldFast.gold &&
         snapshot.credit === currentWorldFast.credit &&
         snapshot.playerHp === currentWorldFast.playerHp &&
@@ -12326,14 +13959,21 @@ export default function HomePage() {
         snapshot.playerMaxMp === currentWorldFast.playerMaxMp &&
         snapshot.playerExperience === currentWorldFast.playerExperience &&
         snapshot.playerMaxExperience === currentWorldFast.playerMaxExperience &&
+        movementSnapshotWeightMatches(projectedWeight, currentWorldFast) &&
         (snapshot.inventoryCapacity ?? 46) === currentWorldFast.inventoryCapacity &&
+        JSON.stringify(snapshot.npcGoldTradeCapacity ?? null) === JSON.stringify(currentWorldFast.npcGoldTradeCapacity ?? null) &&
         sameProjectedList(snapshot.inventoryItems, currentWorldFast.inventoryItems, itemIdentity) &&
+        sameAuthoritativeItemIdentities(snapshot.inventoryItems, currentWorldFast.inventoryItems) &&
         sameProjectedList(snapshot.beltItems, currentWorldFast.beltItems, itemIdentity) &&
+        sameAuthoritativeItemIdentities(snapshot.beltItems, currentWorldFast.beltItems) &&
         sameProjectedList(snapshot.storageItems, currentWorldFast.storageItems, itemIdentity) &&
+        sameAuthoritativeItemIdentities(snapshot.storageItems, currentWorldFast.storageItems) &&
         sameProjectedList(snapshot.equipmentItems, currentWorldFast.equipmentItems, equipmentIdentity) &&
+        sameAuthoritativeItemIdentities(snapshot.equipmentItems, currentWorldFast.equipmentItems) &&
         sameProjectedList(snapshot.questLog, currentWorldFast.questLog, questIdentity) &&
         sameProjectedList(snapshot.knownSkills, currentWorldFast.knownSkills, skillIdentity) &&
         sameProjectedList(snapshot.activeBuffs, currentWorldFast.activeBuffs, buffIdentity) &&
+        sameSelfAppearance(projectedSelfAppearance, curSelf) &&
         snapshotSystems.appearance?.hair === currentWorldFast.stage5Systems.appearance?.hair &&
         snapshotSystems.attackMode === currentWorldFast.stage5Systems.attackMode &&
         snapshotSystems.petMode === currentWorldFast.stage5Systems.petMode &&
@@ -12380,6 +14020,7 @@ export default function HomePage() {
       kind: entity.kind,
       name: entity.name,
       ownerName: entity.ownerName ?? undefined,
+      ...(String(entity.objectId) === playerObjectId || entity.kind === "selfPlayer" ? { hair: projectedSelfAppearance.hair, wingEffect: projectedSelfAppearance.wingEffect } : {}),
       ai: entity.ai ?? undefined,
       x: entity.x,
       y: entity.y,
@@ -12426,10 +14067,11 @@ export default function HomePage() {
       sourceMonster: drop.sourceMonster,
     }));
     const inventoryItems = snapshot.inventoryItems.map((item) => ({
+      ...projectItemPresentation(item),
       key: item.key,
       name: item.name,
       icon: item.icon,
-      uniqueId: item.uniqueId ?? (item.container === "bag2" ? 40 + item.slot : item.slot),
+      ...projectInventoryItemIdentity(item.uniqueId, item.container, item.slot),
       slot: item.slot,
       container: item.container,
       quantity: item.quantity,
@@ -12442,10 +14084,11 @@ export default function HomePage() {
       defence: item.addedDefence ?? 0,
     }));
     const beltItems = snapshot.beltItems.map((item) => ({
+      ...projectItemPresentation(item),
       key: item.key,
       name: item.name,
       icon: item.icon,
-      uniqueId: item.uniqueId ?? item.slot,
+      ...projectInventoryItemIdentity(item.uniqueId, item.container, item.slot),
       slot: item.slot,
       container: item.container,
       quantity: item.quantity,
@@ -12455,10 +14098,11 @@ export default function HomePage() {
       sellValue: item.sellValue ?? 0,
     }));
     const storageItems = (snapshot.storageItems ?? []).map((item) => ({
+      ...projectItemPresentation(item),
       key: item.key,
       name: item.name,
       icon: item.icon,
-      uniqueId: item.uniqueId ?? item.slot,
+      ...projectInventoryItemIdentity(item.uniqueId, item.container, item.slot),
       slot: item.slot,
       container: item.container,
       quantity: item.quantity,
@@ -12468,9 +14112,11 @@ export default function HomePage() {
       sellValue: item.sellValue ?? 0,
     }));
     const equipmentItems = snapshot.equipmentItems.map((item) => ({
+      ...projectItemPresentation(item),
       slot: item.slot,
       key: item.key,
       uniqueId: item.uniqueId ?? undefined,
+      authoritativeUniqueId: authoritativeItemUniqueId(item.uniqueId),
       quantity: item.quantity,
       name: item.name,
       icon: item.icon,
@@ -12493,8 +14139,8 @@ export default function HomePage() {
       const objectives = parseQuestObjectives(quest.objectives);
       const definition = questDefinitionByIdRef.current.get(quest.questId);
       return {
-        ...(definition ?? {}),
         ...(previousQuestById.get(quest.questId) ?? {}),
+        ...(definition ?? {}),
         questId: quest.questId,
         title: quest.title,
         summary: quest.summary,
@@ -12555,11 +14201,12 @@ export default function HomePage() {
           links: Array.isArray(snapshot.activeNpcDialog.links)
             ? snapshot.activeNpcDialog.links.flatMap((link) => {
                 if (!link || typeof link !== "object") return [];
-                const value = link as { text?: unknown; target?: unknown };
+                const value = link as { text?: unknown; target?: unknown; enabled?: unknown };
                 return [
                   {
                     text: stringOrFallback(value.text, ""),
                     target: stringOrFallback(value.target, ""),
+                    ...(value.enabled === undefined ? {} : { enabled: value.enabled === true }),
                   },
                 ].filter((entry) => entry.text && entry.target);
               })
@@ -12567,6 +14214,9 @@ export default function HomePage() {
           input: snapshot.activeNpcDialog.input ?? null,
         }
       : null;
+
+    if (normalizeMapFileName(snapshot.mapFileName ?? worldRef.current.mapFileName) !== normalizeMapFileName(worldRef.current.mapFileName)
+      || (activeNpcDialog && JSON.stringify(activeNpcDialog) !== JSON.stringify(worldRef.current.activeNpcDialog))) retireNpcShopService();
 
     let followUpEntities = entities;
     let followUpMapTransfers = mapTransfers;
@@ -12747,17 +14397,19 @@ export default function HomePage() {
         playerMaxHp: snapshot.playerMaxHp ?? undefined,
         playerMp: snapshot.playerMp ?? undefined,
         playerMaxMp: snapshot.playerMaxMp ?? undefined,
+        ...projectHudSnapshotFields(snapshot),
         playerPkPoints: snapshot.playerPkPoints ?? current.playerPkPoints,
         playerExperience: snapshot.playerExperience,
-        playerMaxExperience: Math.max(snapshot.playerMaxExperience, 1),
+        playerMaxExperience: snapshot.playerMaxExperience,
         gold: snapshot.gold,
         credit: snapshot.credit,
         cityCurrencies: snapshot.cityCurrencies ?? current.cityCurrencies,
-        currentWeight: snapshot.currentWeight,
-        maxWeight: snapshot.maxWeight,
+        currentWeight: projectedWeight.currentWeight,
+        maxWeight: projectedWeight.maxWeight,
         freeBagSlots: snapshot.freeBagSlots,
         maxBagSlots: snapshot.maxBagSlots,
         inventoryCapacity: snapshot.inventoryCapacity ?? current.inventoryCapacity,
+        npcGoldTradeCapacity: snapshot.npcGoldTradeCapacity ?? null,
         storageSize: snapshot.storageSize ?? current.storageSize,
         hasExpandedStorage: snapshot.hasExpandedStorage ?? current.hasExpandedStorage,
         hasStoragePassword: snapshot.hasStoragePassword ?? current.hasStoragePassword,
@@ -12800,6 +14452,7 @@ export default function HomePage() {
         stage5Systems: snapshot.stage5Systems
           ? {
               ...snapshot.stage5Systems,
+              mail: Object.hasOwn(snapshot.stage5Systems,"mail") ? (mailRawRef.current&&sameMailOwner(mailRawRef.current.owner,currentSpellsOwner(snapshot.playerObjectId))?parseMailList(mailRawRef.current.mail)??[]:[]) : current.stage5Systems.mail,
               // Social packets are emitted before the following world snapshot.
               // A snapshot captured just before AddMember may therefore carry an
               // empty roster and must not erase the newer packet-authoritative
@@ -14042,9 +15695,334 @@ export default function HomePage() {
     [],
   );
 
+  const bevyNpcShopUi = useBevyNpcShopUi({
+    requested: bevyQuestUiRequested && Boolean(npcShopService?.supportsBuy) && currentNpcShopTab(npcShopService) === "buy",
+    runtimeGeneration: bevyRuntimeGeneration, runtimeRef,
+    read: readNpcShopUiInput,
+    // NPC UI consumes the current equipment owner without acquiring or changing it.
+    onOwner: () => undefined,
+    onIntent: dispatchBevyNpcShopIntent,
+  });
+  npcShopUiIngressRef.current = bevyNpcShopUi;
+
+  const bevyStorageUi = useBevyStorageUi({
+    requested: bevyQuestUiRequested && storageServiceActive && !storageCompatibility,
+    runtimeGeneration: bevyRuntimeGeneration, runtimeRef,
+    read: () => {
+      const current = worldRef.current, player = current.entities.find(e => e.objectId === current.playerObjectId);
+      const projection = projectBevyStorageModel(current), controller = equipmentControllerRef.current, ledger = controller?.status();
+      const blockedUniqueIds = new Set<number>(mailParcelRef.current?.state?.blockedUniqueIds ?? []);
+      const pendingCells: Array<{ container: 0 | 4; slot: number }> = [];
+      let readable = true;
+      if (projection.ok && controller) for (const item of [...projection.inventory.items, ...projection.storage.items]) {
+        if (item.uniqueId === null) continue;
+        const pending = controller.hasPendingInstance(item.uniqueId);
+        if (!pending.ok) readable = false;
+        if (pending.reserved) blockedUniqueIds.add(item.uniqueId);
+      }
+      for (const reservation of pendingStorageRequestsRef.current.values()) for (const cell of [reservation.proof.source, reservation.proof.target]) {
+        pendingCells.push({ container: cell.container === "storage" ? 4 : 0,
+          slot: cell.container === "bag2" ? 40 + cell.slot : cell.slot });
+        if (cell.uniqueId !== null) blockedUniqueIds.add(cell.uniqueId);
+      }
+      const otherModal = bevyQuestReactModalOpen || showQuestLog || showCharacter || showHeroPet || showGuild || showGroup || showFriends
+        || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap
+        || showHelp || showHotkeys || showChatSettings || Boolean(current.activeNpcDialog || npcShopService || npcRepairService);
+      return { connectionGeneration: equipmentConnectionGenerationRef.current, sessionGeneration: equipmentSessionGenerationRef.current,
+        ownerRevision: equipmentBagOwnerRef.current.ownerRevision, serviceRevision: storageServiceRevisionRef.current,
+        open: storageServiceActiveRef.current && bagOpenRef.current && !storageCompatibilityRef.current,
+        eligible: bevyQuestUiRequested && (bevyRuntimeBackend === "webgpu" || sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype, bevyRuntimeBackend))
+          && screenRef.current === "game" && current.connected && Boolean(player) && initialSceneAssetsReadyRef.current
+          && equipmentHostSuspendReasonRef.current === null && Boolean(ledger?.ready) && readable && !otherModal
+          && !(current.requireStoragePassword && !current.hasStoragePassword)
+          && document.visibilityState === "visible" && document.hasFocus(),
+        presentation: readBevyQuestPresentation(document.querySelector<HTMLElement>(".client-stage-frame"),
+          document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`), clientProfile.input === "touch"),
+        inventory: projection.ok ? projection.inventory : null, storage: projection.ok ? projection.storage : null,
+        player: { hp: current.playerHp, maxHp: current.playerMaxHp, mp: current.playerMp, maxMp: current.playerMaxMp,
+          gold: current.gold, credit: current.credit, level: player?.level, name: player?.name,
+          className: player?.classKey, gender: player?.genderKey, currentWeightKnown: false },
+        blockedUniqueIds: [...blockedUniqueIds], pendingCells, language,
+      };
+    },
+    onOwner: (owner, runGeneration, ownerRevision) => {
+      if (!storageServiceActiveRef.current || storageCompatibilityRef.current) return;
+      equipmentBagOwnerRef.current = { owner, runGeneration, ownerRevision,
+        connectionGeneration: equipmentConnectionGenerationRef.current, sessionGeneration: equipmentSessionGenerationRef.current };
+      equipmentControllerRef.current?.setOwnerRevision(ownerRevision); renderBagOwner(ownerRevision);
+    },
+    onIntent: dispatchBevyStorageIntent,
+  });
+  storageUiIngressRef.current = bevyStorageUi;
+
+  const bevyBagUi = useBevyBagUi({
+    requested: bevyBagUiRequested && !storageServiceActive,
+    runtimeGeneration: bevyRuntimeGeneration,
+    runtimeRef,
+    read: () => {
+      const current = worldRef.current;
+      const player = current.entities.find((entity) => entity.objectId === current.playerObjectId);
+      const projection = projectBevyBagModel(current);
+      const controller = equipmentControllerRef.current;
+      const ledger = controller?.status();
+      const blockedUniqueIds: number[] = [];
+      let readable = true;
+      if (projection.ok && controller) for (const item of projection.model.items) {
+        if (item.uniqueId === null) continue;
+        const pending = controller.hasPendingInstance(item.uniqueId);
+        if (!pending.ok) readable = false;
+        if (pending.reserved) blockedUniqueIds.push(item.uniqueId);
+      }
+      const otherModal = bevyQuestReactModalOpen || showQuestLog || showCharacter || showHeroPet || showGuild || showGroup || showFriends
+        || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail
+        || showWorldMap || showHelp || showHotkeys || showChatSettings || Boolean(current.activeNpcDialog || npcShopService || npcRepairService);
+      return {
+        connectionGeneration: equipmentConnectionGenerationRef.current,
+        sessionGeneration: equipmentSessionGenerationRef.current,
+        ownerRevision: equipmentBagOwnerRef.current.ownerRevision,
+        eligible: bevyBagUiRequested && (bevyRuntimeBackend === "webgpu"
+          || sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype, bevyRuntimeBackend))
+          && screenRef.current === "game" && current.connected && Boolean(player)
+          && initialSceneAssetsReadyRef.current && equipmentHostSuspendReasonRef.current === null
+          && Boolean(ledger?.ready) && readable && !otherModal && bagCompatibilityModeRef.current === null
+          && document.visibilityState === "visible" && document.hasFocus(),
+        bagOpen: bagOpenRef.current,
+        page: activeInventoryTab,
+        presentation: readBevyQuestPresentation(document.querySelector<HTMLElement>(".client-stage-frame"),
+          document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`), clientProfile.input === "touch"),
+        model: projection.ok ? projection.model : null,
+        player: { hp: current.playerHp, maxHp: current.playerMaxHp, mp: current.playerMp, maxMp: current.playerMaxMp,
+          gold: current.gold, credit: current.credit, level: player?.level, name: player?.name,
+          className: player?.classKey, gender: player?.genderKey, currentWeightKnown: false },
+        blockedUniqueIds,
+      };
+    },
+    onOwner: (owner, runGeneration, ownerRevision) => {
+      if (storageServiceActiveRef.current) return;
+      equipmentBagOwnerRef.current = { owner, runGeneration, ownerRevision,
+        connectionGeneration: equipmentConnectionGenerationRef.current, sessionGeneration: equipmentSessionGenerationRef.current };
+      equipmentControllerRef.current?.setOwnerRevision(ownerRevision);
+      renderBagOwner(ownerRevision);
+    },
+    onIntent: dispatchBevyBagIntent,
+  });
+  const bevyCharacterUi = useBevyCharacterUi({
+    requested: bevyQuestUiRequested, runtimeGeneration: bevyRuntimeGeneration, runtimeRef,
+    read: metadata => {
+      const current = worldRef.current;
+      const player = current.entities.find(e => e.objectId === current.playerObjectId) ?? null;
+      const projected = projectBevyBagModel(current);
+      const controller = equipmentControllerRef.current, ledger = controller?.status();
+      const blockedUniqueIds: number[] = []; let readable = true;
+      if (projected.ok && controller) for (const item of projected.model.items) {
+        if (item.uniqueId === null) continue;
+        const pending = controller.hasPendingInstance(item.uniqueId);
+        if (!pending.ok) readable = false;
+        if (pending.reserved) blockedUniqueIds.push(item.uniqueId);
+      }
+      const modal = bevyQuestReactModalOpen || showQuestLog || showHeroPet || showGuild || showGroup || showFriends
+        || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap
+        || showHelp || showHotkeys || showChatSettings || Boolean(current.activeNpcDialog || npcShopService || npcRepairService);
+      return { owner: { ...equipmentBagOwnerRef.current, connectionGeneration: equipmentConnectionGenerationRef.current,
+          sessionGeneration: equipmentSessionGenerationRef.current }, hudGeneration: bevyQuestGenerationRef.current,
+        open: showCharacter && activeCharacterTab === "char",
+        eligible: bevyQuestUiRequested && (bevyRuntimeBackend === "webgpu" || sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype, bevyRuntimeBackend))
+          && screenRef.current === "game" && current.connected && Boolean(player) && initialSceneAssetsReadyRef.current
+          && equipmentHostSuspendReasonRef.current === null && Boolean(ledger?.ready) && readable && !modal
+          && bevyHudUi.readCurrent()?.ready === true
+          && document.visibilityState === "visible" && document.hasFocus(),
+        model: projectCharacterModel(projected.ok ? projected.model : null, metadata), player: projectAuthoritativeHudPlayer(current, player), blockedUniqueIds,
+        presentation: readBevyQuestPresentation(document.querySelector<HTMLElement>(".client-stage-frame"),
+          document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`), clientProfile.input === "touch"),
+        metadataVersion: metadata?.version ?? null };
+    },
+    onIntent: dispatchBevyCharacterIntent,
+  });
+  bevyCharacterSendGateRef.current = bevyCharacterUi.allows;
+  const bevySpellsUi=useBevySpellsUi({
+    requested:bevyQuestUiRequested,runtimeGeneration:bevyRuntimeGeneration,runtimeRef,
+    readBaseline:()=>spellsRawSnapshotRef.current,
+    read:metadata=>{
+      const current=worldRef.current,player=current.entities.find(e=>e.objectId===current.playerObjectId)??null;
+      const owner=currentSpellsOwner(spellsRawSnapshotRef.current?.snapshot.playerObjectId??null)??{connectionGeneration:0,sessionGeneration:0,ownerRevision:0,playerObjectId:0};
+      const modal=bevyQuestReactModalOpen||showQuestLog||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||showHelp||showHotkeys||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService);
+      return {owner,hudGeneration:bevyQuestGenerationRef.current,open:showCharacter&&activeCharacterTab==="spells",
+        eligible:bevyQuestUiRequested&&(bevyRuntimeBackend==="webgpu"||sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype,bevyRuntimeBackend))
+          &&screenRef.current==="game"&&current.connected&&Boolean(player)&&Number(current.playerObjectId)===owner.playerObjectId&&initialSceneAssetsReadyRef.current&&equipmentHostSuspendReasonRef.current===null&&!modal
+          &&bevyHudUi.readCurrent()?.ready===true&&document.visibilityState==="visible"&&document.hasFocus(),
+        player:projectAuthoritativeHudPlayer(current,player),iconMetadata:metadata,
+        presentation:readBevyQuestPresentation(document.querySelector<HTMLElement>(".client-stage-frame"),document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`),clientProfile.input==="touch")};
+    },onIntent:dispatchBevySpellsIntent,
+  });
+  bevySpellsSendGateRef.current=bevySpellsUi.allows;
+  spellsIngressRef.current=bevySpellsUi;
+  const mailRenderOwner=currentSpellsOwner(Number(worldRef.current.playerObjectId));
+  const mailRenderRows=mailRenderOwner&&mailRawRef.current&&sameMailOwner(mailRenderOwner,mailRawRef.current.owner)?parseMailList(mailRawRef.current.mail):null;
+  const currentMailCompatibility=mailCompatibility&&validMailCompatibility(mailCompatibility)?mailCompatibility:null;
+  const bevyMailUi=useBevyMailUi({requested:bevyQuestUiRequested,runtimeGeneration:bevyRuntimeGeneration,runtimeRef,
+    read:()=>{
+      const current=worldRef.current,owner=currentSpellsOwner(Number(current.playerObjectId))??{connectionGeneration:0,sessionGeneration:0,ownerRevision:0,playerObjectId:0};
+      const competing=bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showInventory||showCharacter||showQuestLog||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showWorldMap||showHelp||showHotkeys||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService);
+      return {owner,sceneRevision:mailSceneRevisionRef.current,hudGeneration:bevyQuestGenerationRef.current,
+        open:mailOpenRef.current&&mailCompatRef.current===null,rustOwns:mailRustOwnsRef.current&&mailCompatRef.current===null,
+        eligible:mailRawRef.current?.catalogResolved===true&&bevyQuestUiRequested&&(bevyRuntimeBackend==="webgpu"||sharedCanvasUsesWebGl2(webGl2SharedCanvasPrototype,bevyRuntimeBackend))
+          &&screenRef.current==="game"&&current.connected&&initialSceneAssetsReadyRef.current&&equipmentHostSuspendReasonRef.current===null&&!competing
+          &&bevyHudUi.readCurrent()?.ready===true&&document.visibilityState==="visible"&&document.hasFocus(),
+        mail:mailRawRef.current?.mail??null,mailboxOwner:mailRawRef.current?.owner??null,
+        presentation:readBevyQuestPresentation(document.querySelector<HTMLElement>(".client-stage-frame"),document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`),clientProfile.input==="touch")};
+    },onIntent:dispatchBevyMailIntent,
+    compose:{read:readMailComposeInput,onIntent:dispatchComposeIntent},
+  });
+  mailIngressRef.current=bevyMailUi;
+  mailRustOwnsRef.current=bevyMailUi.ready&&mailCompatRef.current===null;
+  const mailPresentation=currentMailCompatibility??{key:`mail-fallback-${mailRenderOwner?.connectionGeneration}-${mailRenderOwner?.sessionGeneration}-${mailRenderOwner?.ownerRevision}-${mailSceneRevisionRef.current}`,
+    view:"inbox" as const,selectedId:null,contentKey:null,recipient:"",readDispatched:false};
+  const bevyCombatInput=useBevyCombatInput({runtimeGeneration:bevyRuntimeGeneration,runtimeRef,
+    readBaseline:()=>combatRawRef.current?{snapshot:{playerObjectId:combatRawRef.current.snapshot.playerObjectId,knownSkills:combatRawRef.current.snapshot.knownSkills},owner:combatRawRef.current.owner}:null,
+    read:()=>{
+      const current=worldRef.current,raw=combatRawRef.current,owner=currentSpellsOwner(Number(current.playerObjectId)),self=currentAuthoritativeSelf(current);
+      if(!owner||!self||!raw||Number(current.playerObjectId)!==owner.playerObjectId||!current.mapFileName||current.mapFileName!==raw.snapshot.mapFileName)return {owner,facts:null};
+      const sources=new Map(raw.snapshot.entities.map(e=>[String(e.objectId),e as unknown as Record<string,unknown>]));
+      const actor=(e:WorldEntity):CombatActor=>{const source=sources.get(e.objectId),master=combatMastersRef.current.get(e.objectId);return {objectId:e.objectId,kind:e.kind,x:e.x,y:e.y,direction:e.direction??null,dead:e.dead===true,ai:e.ai??0,masterObjectId:master&&master.owner.connectionGeneration===owner.connectionGeneration&&master.owner.sessionGeneration===owner.sessionGeneration&&master.owner.ownerRevision===owner.ownerRevision&&master.owner.playerObjectId===owner.playerObjectId?master.master:Number.isInteger(source?.masterObjectId)?Number(source!.masterObjectId):0};};
+      const source=sources.get(self.objectId),flag=(key:string)=>typeof source?.[key]==="boolean"?source[key] as boolean:null;
+      const active=document.activeElement,editing=active instanceof HTMLElement&&(active.isContentEditable||/^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName));
+      const modal=combatIngressRef.current?.hasUiHeld()===true||bevyHpLocalOverlayOpenRef.current||bevyQuestReactModalOpen||showQuestLog||showCharacter||showHeroPet||showGuild||showGroup||showFriends||showBonds||showRanking||showMarket||showConquest||showTrade||showBuffs||showMail||showWorldMap||showHelp||showHotkeys||showChatSettings||Boolean(current.activeNpcDialog||npcShopService||npcRepairService)||spellsIngressRef.current?.pointerContext()?.modal===true;
+      // The GPU/lean backend draws its scene on the existing map canvas, independently of shared UI.
+      const visible=Array.from(document.querySelectorAll<HTMLCanvasElement>("#mir2-web3-canvas, .webgl2-map-atlas-canvas")).some(canvas=>{const rect=canvas.getBoundingClientRect(),style=getComputedStyle(canvas);return rect.width>0&&rect.height>0&&style.display!=="none"&&style.visibility!=="hidden"&&Number(style.opacity)>0;});
+      const target=current.entities.find(e=>e.objectId===current.selectedObjectId);
+      const routeKey=JSON.stringify({map:current.mapFileName,source:[self.x,self.y],target:target?[target.objectId,target.x,target.y]:null,occupancy:current.entities.map(e=>[e.objectId,e.x,e.y,e.dead]),blocked:movementBlockedStepsRef.current});
+      let cache=combatRouteCacheRef.current,neighbours:CombatFacts["neighbours"]=cache?.key===routeKey&&cache.region===current.originalMapRegion?cache.rows:[];
+      // Platform path finder supplies reachability/cost; Rust chooses among the exact adjacent cells.
+      if(!cache||cache.key!==routeKey||cache.region!==current.originalMapRegion){
+        if(target)for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){if(!dx&&!dy)continue;const point={x:target.x+dx,y:target.y+dy};if(point.x===self.x&&point.y===self.y){neighbours.push({...point,cost:0});continue;}const route=crystalMovementWalkRoute(self,point,movementBlockedStepsRef.current,current);const last=route?.at(-1);if(last?.x===point.x&&last.y===point.y)neighbours.push({...point,cost:route!.length});}
+        combatRouteCacheRef.current={key:routeKey,region:current.originalMapRegion,rows:neighbours};
+      }
+      const now=Date.now(),actors=current.entities.map(actor),plan=movementPlanRef.current;
+      const facts:CombatFacts={map:current.mapFileName,enabled:screenRef.current==="game"&&current.connected&&initialSceneAssetsReadyRef.current&&visible&&!editing&&!modal&&equipmentHostSuspendReasonRef.current===null&&document.visibilityState==="visible"&&document.hasFocus(),
+        player:actor(self),hp:current.playerHp??self.hp??0,maxHp:current.playerMaxHp??self.maxHp??0,mp:current.playerMp??0,level:self.level??0,attackSpeed:current.playerCrystalStats?.find(s=>s.stat===14)?.value??0,actors,
+        clickTargets:current.entities.map(e=>({kind:e.kind,objectId:Number(e.objectId),x:e.x,y:e.y,dead:typeof e.dead==="boolean"?e.dead:null,ai:e.ai??null,harvestable:typeof sources.get(e.objectId)?.harvestable==="boolean"?sources.get(e.objectId)!.harvestable as boolean:null})),
+        selectedObjectId:current.selectedObjectId?Number(current.selectedObjectId):null,hoveredObjectId:combatPointerRef.current.hovered,cursor:combatPointerRef.current.cursor,
+        class:self.classKey??null,hasClassWeapon:flag("hasClassWeapon"),ridingMount:flag("ridingMount"),fishing:flag("fishing"),dazed:flag("dazed"),
+        motionRemainingMs:Math.max(0,Math.min(0xffffffff,Math.ceil(Math.max(self.attackUntil??0,self.movementUntil??0,nextMoveSendAtRef.current)-now))),movementReady:!isMovementBusy(),planningPosition:plan?[plan.targetX,plan.targetY]:null,neighbours,spellLockKey:"None",pointerSpellLock:combatPointerRef.current.lock,bindings:null};
+      return {owner,facts};
+    },onWire:dispatchBevyCombat,onApproach:(x,y)=>moveToTile(x,y,"run","direction","locked-monster"),onClear:()=>{lockedMonsterAttackRef.current=null;if(queuedMoveIntentRef.current?.kind==="target")queuedMoveIntentRef.current=null;}});
+  combatIngressRef.current=bevyCombatInput;
+
+  bevyBagSendGateRef.current = bevyBagUi.allows;
+  bagYieldRef.current = bevyBagUi.yieldToReact;
+
+  const hpOrbPageBlocked = Boolean(bevyHpLocalOverlayOpen || bevyQuestReactModalOpen || showInventory || showQuestLog
+    || showCharacter || showHeroPet || showGuild || showGroup || showFriends || showBonds || showRanking
+    || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap || showHelp
+    || showHotkeys || showChatSettings || showTutorial || world.activeNpcDialog || npcShopService || npcRepairService);
+  const bevyQuestUi = useBevyQuestUi({
+    requested: bevyQuestUiRequested,
+    runtimeGeneration: bevyRuntimeGeneration,
+    runtimeRef,
+    snapshot: () => {
+      const current = worldRef.current;
+      const player = current.entities.find((entity) => entity.objectId === current.playerObjectId);
+      const active = typeof document !== "undefined" ? document.activeElement : null;
+      const editingText = active instanceof HTMLElement && (active.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName));
+      const otherModal = bevyQuestReactModalOpen || showInventory || showCharacter || showHeroPet || showGuild || showGroup || showFriends
+        || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail
+        || showWorldMap || showHelp || showHotkeys || showChatSettings || Boolean(npcShopService || npcRepairService);
+      const inGame = screenRef.current === "game" && current.connected && bevyQuestAuthoritativeRef.current && Boolean(player);
+      const frame = document.querySelector<HTMLElement>(".client-stage-frame");
+      const presentation = readBevyQuestPresentation(
+        frame,
+        document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`),
+        clientProfile.input === "touch",
+      );
+      const experiencePair = matchingExperienceAuthority(experienceAuthorityRef.current,
+        bevyQuestGenerationRef.current, current.playerObjectId,
+        current.playerExperience, current.playerMaxExperience);
+      const weightPair = matchingWeightAuthority(weightAuthorityRef.current,
+        bevyQuestGenerationRef.current, current.playerObjectId,
+        current.currentWeight, current.maxWeight);
+      const mainHudGeometry = readHudGeometry(runtimeRef.current);
+      const mainHudSupported = mainHudGeometry !== null;
+      return {
+        generation: bevyQuestGenerationRef.current,
+        language,
+        hudBarPlayerObjectId: current.playerObjectId,
+        hudBarRuntimeLifetime: bevyRuntimeGeneration,
+        inGame,
+        hostVisible: bevyQuestUiRequested && initialSceneAssetsReadyRef.current && (!otherModal || mainHudSupported) && questCoreStatus === "ready",
+        questLogOpen: showQuestLog,
+        blocksGameplayKeys: editingText || otherModal,
+        turnInBlocked: !inGame || otherModal,
+        presentation,
+        hpOrbSlot: mainHudSupported && inGame ? { left: mainHudGeometry!.orb.left, top: mainHudGeometry!.orb.top } : inGame && !hpOrbPageBlocked && !current.activeNpcDialog ? readBevyHpOrbSlot(frame,
+          frame?.querySelector<HTMLElement>(".main-hud-shell .hud-orb-fill.hp img") ?? null, presentation) : null,
+        experienceBarSlot: mainHudSupported && inGame && experiencePair ? mainHudGeometry!.experienceBar : inGame && experiencePair && !hpOrbPageBlocked && !current.activeNpcDialog
+          ? readBevyExperienceBarSlot(frame,
+            frame?.querySelector<HTMLElement>(".main-hud-shell .hud-exp-bar") ?? null, presentation) : null,
+        weightBarSlot: mainHudSupported && inGame && weightPair ? mainHudGeometry!.weightBar : inGame && weightPair && !hpOrbPageBlocked && !current.activeNpcDialog
+          ? readBevyWeightBarSlot(frame,
+            frame?.querySelector<HTMLElement>(".main-hud-shell .hud-weight-bar") ?? null, presentation) : null,
+        profile: questGuidanceProfile(process.env.NEXT_PUBLIC_MIR2_QUEST_GUIDANCE),
+        quests: projectBevyQuests(localizeQuestLog(current.questLog, t), questAuthoritativeStageByIdRef.current),
+        completedKnown: completedQuestHistoryRef.current.known,
+        completedQuestIds: completedQuestHistoryRef.current.ids,
+        dialog: projectBevyQuestDialog(current.activeNpcDialog),
+        player: { hp: current.playerHp ?? player?.hp ?? 0, maxHp: current.playerMaxHp ?? player?.maxHp ?? 0,
+          mp: current.playerMp, maxMp: current.playerMaxMp,
+          experience: experiencePair?.experience ?? null,
+          maxExperience: experiencePair?.maxExperience ?? null,
+          currentWeight: weightPair?.currentWeight ?? null,
+          maxWeight: weightPair?.maxWeight ?? null,
+          level: player?.level ?? 0, name: player?.name, className: player?.classKey },
+      };
+    },
+    onIntent: dispatchBevyQuestIntent,
+    onOpenChange: (open) => { if (!navigateSharedHud({ type: open ? "openQuest" : "closeQuest" })) setShowQuestLog(open); },
+  });
+  useLayoutEffect(() => { bevyQuestUi.refresh(); }, [bevyQuestUi.refresh, hpOrbPageBlocked,
+    world.playerExperience, world.playerMaxExperience, world.currentWeight, world.maxWeight, language]);
+
+
+  const bevyHudUi = useBevyHudUi({
+    requested: bevyQuestUiRequested,
+    runtimeGeneration: bevyRuntimeGeneration,
+    runtimeRef,
+    snapshot: () => {
+      const current = worldRef.current;
+      const player = current.entities.find(entity => entity.objectId === current.playerObjectId) ?? null;
+      const presentation = readBevyQuestPresentation(document.querySelector<HTMLElement>(".client-stage-frame"),
+        document.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`), clientProfile.input === "touch");
+      if (!presentation || presentation.logicalWidth < 1024 || presentation.logicalHeight < 768) return null;
+      return { generation: bevyQuestGenerationRef.current, inGame: screenRef.current === "game" && current.connected,
+        hostVisible: bevyQuestUiRequested && initialSceneAssetsReadyRef.current && document.visibilityState === "visible",
+        player: projectAuthoritativeHudPlayer(current, player),
+        navigation: { characterOpen: showCharacter, characterPage: activeCharacterTab === "char" ? "character" : activeCharacterTab,
+          bagOpen: showInventory, questOpen: showQuestLog }, navigationRevision: fallbackHudNavigationRevisionRef.current, ...presentation };
+    },
+    onNavigation: navigation => {
+      hudProjectionRef.current = true;
+      setShowCharacter(navigation.characterOpen);
+      setActiveCharacterTab(navigation.characterPage === "character" ? "char" : navigation.characterPage);
+      setShowInventory(navigation.bagOpen);
+      setShowQuestLog(navigation.questOpen);
+      hudProjectionRef.current = false;
+    },
+  });
+  const bevyHudSourceGeometry = useMemo(() => readHudGeometry(runtimeRef.current), [bevyRuntimeGeneration]);
+  sharedHudNavigationRef.current = { ready: bevyHudUi.ready, dispatch: bevyHudUi.dispatch };
+  useLayoutEffect(() => { bevyHudUi.refresh(); }, [bevyHudUi.refresh, world.playerCrystalStats, world.playerWeights,
+    world.playerHp, world.playerMaxHp, world.playerMp, world.playerMaxMp, world.gold, world.credit, screen]);
+
+  const currentExperienceAuthority = matchingExperienceAuthority(experienceAuthorityRef.current,
+    bevyQuestGenerationRef.current, worldRef.current.playerObjectId,
+    worldRef.current.playerExperience, worldRef.current.playerMaxExperience);
+  const currentWeightAuthority = matchingWeightAuthority(weightAuthorityRef.current,
+    bevyQuestGenerationRef.current, worldRef.current.playerObjectId,
+    worldRef.current.currentWeight, worldRef.current.maxWeight);
+
   return (
     !isClientReady ? null :
     <>
+    <PwaGameShell language={language} />
     <OriginalClientShell
       language={language}
       screen={screen}
@@ -14052,7 +16030,7 @@ export default function HomePage() {
       runtimeMessage={runtimeMessage}
       wsState={wsState}
       reconnectStatus={reconnectStatus}
-      world={presentationWorld}
+      world={{...presentationWorld,mailLockedUniqueIds:mailParcelRef.current?.state?.blockedUniqueIds??[]} as typeof presentationWorld}
       worldStore={worldStoreRef.current ?? undefined}
       selectorHud={selectorHudEnabled}
       player={self}
@@ -14060,6 +16038,71 @@ export default function HomePage() {
       sceneInteractionReady={screen !== "game" || initialSceneAssetsReady}
       bevyEntityRendererReady={bevyEntityRendererReady}
       bevyRuntimeBackend={bevyRuntimeBackend}
+      webGl2SharedCanvasPrototype={webGl2SharedCanvasPrototype}
+      bevyHudUiReady={bevyHudUi.ready}
+      bevyHudSourceGeometry={bevyHudSourceGeometry}
+      bevyCharacterStatsReady={bevyHudUi.characterStatsReady}
+      bevyCharacterPageReady={bevyCharacterUi.ready}
+      bevySpellsPageReady={bevySpellsUi.ready}
+      getBevySpellsPointerContext={bevySpellsUi.pointerContext}
+      bevyMailPageReady={(bevyMailUi.ready&&mailCompatRef.current===null)||bevyMailUi.composeReady}
+      getBevyMailPointerContext={bevyMailUi.pointerContext}
+      onBevyMailPointer={bevyMailUi.pointer}
+      bevyMailComposeReady={bevyMailUi.composeReady}
+      bevyMailComposePending={bevyMailUi.composeRequested&&!bevyMailUi.composeReady}
+      getBevyMailComposeBusy={bevyMailUi.composeBusy}
+      bevyMailTextContext={bevyMailUi.composeText}
+      onBevyMailTextEdge={bevyMailUi.composeEdge}
+      onBevyMailClipboard={bevyMailUi.composeClipboard}
+      onBevyMailComposeAction={bevyMailUi.composeAction}
+      onBevyMailComposePointer={bevyMailUi.composePointer}
+      onBevyMailComposePointerCancel={bevyMailUi.composeCancelPointer}
+      mailOpen={showMail}
+      onToggleMail={()=>setMailboxOpen(!mailOpenRef.current)}
+      onBevySpellsPointer={bevySpellsUi.pointer}
+      getBevyCharacterPointerContext={bevyCharacterUi.pointerContext}
+      onBevyCharacterPointer={bevyCharacterUi.pointer}
+      readBevyHudStatus={bevyHudUi.readCurrent}
+      dispatchBevyHudNavigation={bevyHudUi.dispatch}
+      bevyQuestUiReady={bevyQuestUi.ready && !showInventory}
+      bevyQuestUiCapturesPointer={bevyQuestUi.capturesPointer && !showInventory}
+      bevyHpOrb={hpOrbPageBlocked ? null : bevyQuestUi.hpOrb}
+      bevyMpOrb={hpOrbPageBlocked ? null : bevyQuestUi.mpOrb}
+      bevyExperienceBar={hpOrbPageBlocked || !currentExperienceAuthority ? null : bevyQuestUi.experienceBar}
+      bevyWeightBar={hpOrbPageBlocked || !currentWeightAuthority ? null : bevyQuestUi.weightBar}
+      bevyHudBarIdentity={bevyRuntimeStarted ? hudBarCommonIdentity(bevyRuntimeGeneration,
+        bevyQuestGenerationRef.current, world.playerObjectId) : null}
+      bevyHudBarReadLivePlans={bevyQuestUi.readLiveHudBarPlans}
+      bevyHudBarPlans={hpOrbPageBlocked || !bevyQuestUi.hudBarPlans ? null : {
+        ...bevyQuestUi.hudBarPlans,
+        experience: currentExperienceAuthority ? bevyQuestUi.hudBarPlans.experience : null,
+        weight: currentWeightAuthority ? bevyQuestUi.hudBarPlans.weight : null,
+      }}
+      onHpOrbLocalOverlayChange={handleHpOrbLocalOverlayChange}
+      bevyBagUiActive={bevyBagUi.active && showInventory}
+      bevyNpcShopUiActive={bevyNpcShopUi.active}
+      bevyNpcShopUiTransitioning={bevyNpcShopUi.transitioning}
+      getBevyNpcShopInputBlocked={bevyNpcShopUi.blocksInput}
+      getBevyNpcShopPointerContext={bevyNpcShopUi.pointerContext}
+      onBevyNpcShopPointer={bevyNpcShopUi.pointer}
+      npcShopTab={currentNpcShopTab(npcShopService)}
+      onNpcShopTabChange={(tab) => {
+        if (!npcShopService || npcShopServiceRef.current !== npcShopService || npcShopUiIngressRef.current?.blocksInput()) return;
+        npcBuyDispatcherRef.current?.withdraw();
+        setNpcShopCompatibilityTab(npcShopService, tab);
+      }}
+      bevyStorageUiActive={bevyStorageUi.active && showInventory}
+      bevyStorageUiTransitioning={bevyStorageUi.transitioning && showInventory}
+      bevyStorageOwnerRevision={bevyStorageUi.ownerRevision}
+      getBevyStoragePointerContext={bevyStorageUi.pointerContext}
+      onBevyStoragePointer={bevyStorageUi.pointer}
+      bevyBagOwnerRevision={bevyBagUi.ownerRevision}
+      getBevyBagPointerContext={bevyBagUi.pointerContext}
+      onBevyBagPointer={bevyBagUi.pointer}
+      onBevyBagTouchFallback={() => requestBagCompatibility("fullInventory")}
+      inventoryInitialDeleteMode={bagCompatibilityMode === "delete"}
+      onInventoryCompatibilityInteraction={retainReactBagInteraction}
+      onQuestUiModalChange={setBevyQuestReactModalOpen}
       bevyMapRuntimeGeneration={bevyRuntimeGeneration}
       bevyMapRuntimeReady={bevyMapRuntimeReady}
       bevyMapPresentedImageKeys={presentedBevyMapImageKeysRef.current}
@@ -14127,6 +16170,7 @@ export default function HomePage() {
       activeInventoryTab={activeInventoryTab}
       activeCharacterTab={activeCharacterTab}
       storageServiceOpenVersion={storageServiceOpenVersion}
+      storagePasswordOpenVersion={storagePasswordOpenVersion}
       npcShopService={npcShopService}
       npcRepairService={npcRepairService}
       onAccountIdChange={setAccountId}
@@ -14163,10 +16207,15 @@ export default function HomePage() {
       onRemoveStoragePassword={removeStoragePassword}
       onSellItem={sellItem}
       onBuyNpcShopItem={buyNpcShopItem}
+      onQuoteNpcShopItem={quoteNpcShopItem}
       onDropGold={dropGold}
       onRepairItem={repairItem}
       onSpecialRepairItem={specialRepairItem}
       onCastSkill={castSkill}
+      onCombatKey={(action,repeat)=>({supported:bevyCombatInput.supported(),handled:bevyCombatInput.supported()&&bevyCombatInput.edge({...action,repeat})})}
+      onCombatPointer={(cursor,hovered)=>{combatPointerRef.current={...combatPointerRef.current,cursor,hovered};}}
+      onCombatCancel={cancelLockedMonsterAttack}
+      onCombatUiHeld={bevyCombatInput.setUiHeld}
       onClaimMail={claimMail}
       onDeleteMail={deleteMail}
       onBuyGameShopItem={buyGameShopItem}
@@ -14174,12 +16223,12 @@ export default function HomePage() {
       onStartTutorial={startTutorial}
       onToggleCharacter={toggleCharacterWindow}
       onToggleInventory={toggleInventoryWindow}
-      onToggleQuestLog={() => setShowQuestLog((current) => !current)}
-      onCloseCharacter={() => setShowCharacter(false)}
-      onCloseInventory={() => setShowInventory(false)}
+      onToggleQuestLog={toggleQuestLogWindow}
+      onCloseCharacter={() => { if (!navigateSharedHud({ type: "closeCharacter" })) setShowCharacter(false); }}
+      onCloseInventory={() => { if (!navigateSharedHud({ type: "closeBag" })) setShowInventory(false); }}
+      onCloseStorage={() => { endStorageService(); bagCompatibilityModeRef.current = null; setBagCompatibilityMode(null); }}
       onCloseNpcShopService={() => {
-        npcShopServiceRef.current = null;
-        setNpcShopService(null);
+        if (npcShopServiceRef.current === npcShopService && !npcShopUiIngressRef.current?.blocksInput()) retireNpcShopService();
       }}
       onCloseNpcRepairService={() => setNpcRepairService(null)}
       onOpenCharacterTab={openCharacter}
@@ -14206,8 +16255,8 @@ export default function HomePage() {
     <ExtraWindows
       t={t}
       questLog={{
-        open: showQuestLog,
-        onClose: () => setShowQuestLog(false),
+        open: showQuestLog && !bevyQuestUi.ready,
+        onClose: () => { if (!navigateSharedHud({ type: "closeQuest" })) setShowQuestLog(false); },
         quests: localizedQuestLog,
         playerClass: self?.classKey ?? null,
         playerLevel: self?.level,
@@ -14216,9 +16265,12 @@ export default function HomePage() {
         onShareQuest: shareQuest,
         onAcceptQuest: acceptQuest,
         onFinishQuest: finishQuest,
-        canAcceptQuest: (questId) => activeQuestDialogTarget(questId, "accept") !== null,
+        questClientStatus: questCoreStatus,
+        isQuestActionPending: questActionPending,
+        onRetryQuestClient: () => setQuestCoreLoadAttempt((attempt) => attempt + 1),
+        canAcceptQuest: (questId) => questActionDecision(questId, "accept")?.eligible === true,
         canFinishQuest: (questId, selectedItemIndex) =>
-          activeQuestDialogTarget(questId, "finish", selectedItemIndex) !== null,
+          questActionDecision(questId, "finish", selectedItemIndex)?.eligible === true,
       }}
       heroPet={{ open: showHeroPet, onClose: () => setShowHeroPet(false), hero: extraWindowData.hero, creatures: extraWindowData.creatures, onSummonHero: summonHero, onSummonCreature: summonCreature, onReleaseCreature: releaseCreature, onCyclePickupMode: cycleCreaturePickupMode, onSetHeroBehaviour: setHeroBehaviour, onRecallHero: recallHero }}
       guild={{ open: showGuild, onClose: () => setShowGuild(false), guild: world.stage5Systems?.guild ?? null, playerName: self?.name ?? null, onEditNotice: editGuildNotice, onInviteMember: inviteGuildMember, onKickMember: kickGuildMember, onSendGuildChat: sendGuildChat, onChangeMemberRank: changeGuildMemberRank, onSaveRank: saveGuildRank, onDepositGold: guildDepositGold, onWithdrawGold: guildWithdrawGold }}
@@ -14230,7 +16282,18 @@ export default function HomePage() {
       conquest={{ open: showConquest, onClose: () => setShowConquest(false), conquest: extraWindowData.conquest, territory: extraWindowData.guildTerritory, guildName: world.stage5Systems?.guild?.name ?? null }}
       trade={{ open: showTrade, onClose: () => setShowTrade(false), trade: extraWindowData.trade, myGold: world.gold, onAccept: acceptTrade, onConfirm: confirmTrade, onCancel: cancelTrade, onSetGold: setTradeGold }}
       buffs={{ open: showBuffs, onClose: () => setShowBuffs(false), buffs: extraWindowData.buffs }}
-      mail={{ open: showMail, onClose: () => setShowMail(false), mail: extraWindowData.mail, gold: world.gold, onOpen: openMailMessage, onClaimAttachment: claimMailAttachment, onDeleteMail: deleteMailMessage, onSendMail: sendMailMessage }}
+      mail={{ open: showMail&&!bevyMailUi.composeRequested&&bevyMailUi.composeWithdrawn&&!bevyMailUi.ready&&bevyMailUi.withdrawn, onClose: () => setMailboxOpen(false),
+        mail:adaptMailMessages(mailRenderRows??[]),gold:world.gold,onOpen:openMailMessage,onClaimAttachment:claimMailAttachment,onDeleteMail:deleteMailMessage,onSendMail:sendMailMessage,
+        parcelState:mailParcelRef.current?.state??null,parcelItems:world.inventoryItems.filter(i=>i.container==='bag1'||i.container==='bag2').map(i=>({uniqueId:i.authoritativeUniqueId??null,name:i.name,quantity:i.quantity})),
+        onParcelAction:changeMailParcel,
+        composeState:{draft:mailDispatcherRef.current?.composer.draft(mailRenderOwner)??null,pending:mailDispatcherRef.current?.composer.pending(mailRenderOwner)??false,
+          notice:mailDispatcherRef.current?.composer.notice??null},onDraftChange:rememberMailDraft,normalizeMessage:normalizeMailDraftMessage,
+        presentation:mailPresentation,onPresentationChange:next=>{
+          if(!mailRenderOwner||!currentSpellsOwner(Number(worldRef.current.playerObjectId))||!sameMailOwner(mailRenderOwner,currentSpellsOwner(Number(worldRef.current.playerObjectId))!))return;
+          if(mailCompatRef.current&&mailCompatRef.current.key!==mailPresentation.key)return;
+          if(next.selectedId!==null&&!mailRenderRows?.some(m=>m.mailId===next.selectedId&&mailContentKey(m)===next.contentKey))return;
+          presentMailCompatibility(next.view,next.selectedId,next.recipient,next.readDispatched,next.subject);
+        } }}
       worldMap={{ open: showWorldMap, onClose: () => setShowWorldMap(false), currentMap: localizeCrystalMapTitle(world.mapTitle, t), markers: extraWindowData.worldMapMarkers }}
       help={{ open: showHelp, onClose: () => setShowHelp(false) }}
       hotkeys={{ open: showHotkeys, onClose: () => setShowHotkeys(false) }}
@@ -14432,25 +16495,11 @@ function OnchainMinePanelWithStore({
   return <OnchainMinePanel {...rest} veinLocation={veinLocation} veinStage={veinStage} />;
 }
 
-// Maps the normalized mail records (extended-server-packets normalizeMailList)
-// to the Mail window's MailMessageSummary shape. The list packet only carries a
-// item *count*, so attachments are surfaced as placeholder slots for the parcel
-// badge; full item detail arrives when the message is opened (ReadMail).
+// Compatibility is a projection of the same loss-aware authoritative mailbox.
 function adaptMailMessages(raw: Array<Record<string, unknown>> | undefined): MailMessageSummary[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.map((entry) => {
-    const itemCount = Number(entry.itemCount ?? 0);
-    return {
-      id: Number(entry.mailId ?? 0),
-      from: typeof entry.senderName === "string" ? entry.senderName : "",
-      body: typeof entry.message === "string" ? entry.message : "",
-      gold: Number(entry.gold ?? 0),
-      read: Boolean(entry.opened),
-      locked: Boolean(entry.locked),
-      claimed: Boolean(entry.collected),
-      items: itemCount > 0 ? Array.from({ length: itemCount }, (_, index) => `#${index + 1}`) : undefined,
-    };
-  });
+  return (parseMailList(raw)??[]).map(m=>({id:m.mailId,from:m.senderName,subject:m.subject,body:m.message,gold:m.gold,
+    read:m.opened,locked:m.locked,claimed:m.collected,canReply:m.canReply,contentKey:mailContentKey(m),date:"",
+    items:m.items.map(i=>i.name||i.key||(i.itemIndex!==null?`Item #${i.itemIndex}`:"Item"))}));
 }
 
 // B-wave-2: parse the enriched quest objectives/rewards the gateway now emits.
@@ -14498,7 +16547,13 @@ function parseQuestRewards(
         ...(selectable
           ? {
               selectable: true,
-              selectionIndex: questNumber(itemRecord.selectionIndex),
+              // Preserve malformed on-wire selection metadata as invalid so the
+              // shared action boundary cannot mistake it for an omitted index.
+              selectionIndex: itemRecord.selectionIndex === undefined
+                ? undefined
+                : typeof itemRecord.selectionIndex === "number"
+                  ? itemRecord.selectionIndex
+                  : NaN,
             }
           : {}),
       }];
@@ -14691,9 +16746,8 @@ function upsertGroundDropInList(list: GroundDrop[], nextDrop: GroundDrop) {
  */
 async function waitForBevyCanvas(timeoutMs = 15000): Promise<void> {
   if (typeof document === "undefined") return;
-  const w = window as Window & { __mir2BevyCanvasReady?: boolean };
   const isReady = () =>
-    w.__mir2BevyCanvasReady === true || document.querySelector("#mir2-web3-canvas") !== null;
+    document.querySelector("#mir2-web3-canvas") !== null && document.querySelector("#mir2-quest-ui-canvas") !== null;
   if (isReady()) return;
   await new Promise<void>((resolve, reject) => {
     let settled = false;
@@ -14718,12 +16772,24 @@ async function waitForBevyCanvas(timeoutMs = 15000): Promise<void> {
   });
 }
 
-async function loadBevyRuntimeModule(backend: BevyRuntimeBackend): Promise<RuntimeModule> {
+const bevyRuntimeModuleLoads = new Map<string, Promise<RuntimeModule>>();
+
+async function loadBevyRuntimeModule(backend: BevyRuntimeBackend, startup: BevyRuntimeStartup): Promise<RuntimeModule> {
+  const selectedPackage = getBevyRuntimePackageForBackend(startup, backend);
+  if (!selectedPackage || !startup.manifest) throw new Error("Runtime package is unavailable for fixed startup mode");
   const { moduleUrl: runtimePath, wasmUrl: runtimeWasmPath } = createBevyRuntimeUrls(
-    BEVY_RUNTIME_VERSION,
-    backend,
+    startup.manifest.version,
+    selectedPackage.id,
     BEVY_RUNTIME_ASSET_BASE_URL,
   );
+  const existing = bevyRuntimeModuleLoads.get(runtimePath);
+  if (existing) return existing;
+  const loading = initializeBevyRuntimeModule(runtimePath, runtimeWasmPath);
+  bevyRuntimeModuleLoads.set(runtimePath, loading);
+  return loading;
+}
+
+async function initializeBevyRuntimeModule(runtimePath: string, runtimeWasmPath: string): Promise<RuntimeModule> {
   const runtime = (await import(
     /* webpackIgnore: true */ runtimePath
   )) as RuntimeModule;

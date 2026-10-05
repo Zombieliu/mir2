@@ -10,7 +10,7 @@ use bevy::ui::{BackgroundColor, Node, PositionType, Val};
 
 use crate::chat::{ChatChannel, ChatLine, ChatModel};
 use crate::crystal_ui::overlays::{
-    dispatch_ui_action, NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
+    dispatch_native_ui_action, NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
     UiEffectQueue,
 };
 use crate::native_shell::{NativeShellModel, NativeShellScreen};
@@ -523,6 +523,7 @@ fn consume_chat_actions(
     if queue.is_empty() {
         return;
     }
+    player_ui.bind_npc_gold_buy_gate(intents.npc_gold_buy_gate());
     let actions = queue.drain();
     if player_ui.amount_modal_open() {
         return;
@@ -578,7 +579,7 @@ fn consume_chat_actions(
             _ => None,
         };
         if let Some(shared_action) = shared_action {
-            dispatch_ui_action(&mut player_ui.core, &mut effects, shared_action);
+            dispatch_native_ui_action(&mut player_ui, &mut effects, shared_action);
         }
         if matches!(action, CrystalChatAction::SettingsTab(_)) && !settings_open {
             continue;

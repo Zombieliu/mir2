@@ -358,3 +358,32 @@ fn escape_closes_reader_and_session_reset_clears_it() {
     state.reset_session();
     assert!(state.mail_reader.is_none());
 }
+
+#[test]
+fn native_shared_mail_painter_preserves_reader_controls_and_locked_parcel_visuals() {
+    for kind in [MailReaderKind::Letter, MailReaderKind::Parcel] {
+        let mut app = super::tests::overlay_render_test_app();
+        let parcel = kind == MailReaderKind::Parcel;
+        app.world_mut().resource_mut::<MailModel>().mails.push(message(70, parcel, true, true));
+        app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {mail_id: 70, kind});
+        app.update();
+        let world = app.world_mut();
+        let controls = world.query::<(&OverlayButton, Option<&Button>, &CrystalImageButton)>().iter(world).collect::<Vec<_>>();
+        assert_eq!(controls.iter().filter(|(action, _, _)|matches!(action, OverlayButton::MailReaderClose)).count(), 2);
+        if parcel {
+            let (_, button, visual) = controls.iter().find(|(action, _, _)|matches!(action, OverlayButton::MailReaderClaim)).unwrap();
+            assert!(button.is_none());
+            assert!(!visual.enabled);
+            assert_eq!(visual.assets.disabled.as_deref(), Some("original-ui/Title/683.png"));
+            assert!(!controls.iter().any(|(action, _, _)|matches!(action, OverlayButton::MailReaderDelete | OverlayButton::MailReaderLock)));
+        } else {
+            for wanted in [OverlayButton::MailReaderDelete, OverlayButton::MailReaderLock] {
+                assert!(controls.iter().any(|(action, button, visual)|std::mem::discriminant(*action)==std::mem::discriminant(&wanted) && button.is_some() && visual.enabled));
+            }
+            assert!(!controls.iter().any(|(action, _, _)|matches!(action, OverlayButton::MailReaderClaim)));
+        }
+        let frame = if parcel {"original-ui/Title/675.png"} else {"original-ui/Title/672.png"};
+        assert!(world.query::<(&ImageNode, &Node)>().iter(world).any(|(image, node)|image.image.path().is_some_and(|path|path.to_string()==frame) && node.width==Val::Px(236.) && node.height==Val::Px(if parcel {384.} else {300.})));
+        assert!(world.query::<(&Text, &TextLayout, &Node)>().iter(world).any(|(text, layout, node)|text.0=="first\r\nsecond" && layout.linebreak==LineBreak::WordOrCharacter && node.overflow==Overflow::clip()));
+    }
+}

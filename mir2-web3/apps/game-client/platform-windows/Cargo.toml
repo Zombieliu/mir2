@@ -38,7 +38,7 @@ futures-util = "0.3"
 mir2-bevy-runtime = { path = "../runtime", features = ["native-font-atlas-telemetry"] }
 mir2-client-bevy = { path = "../client-bevy", features = ["native-ui"] }
 mir2-game-data = { path = "../../../packages/game-data" }
-mir2-protocol = { path = "../../../packages/protocol" }
+mir2-protocol = { path = "../../../packages/protocol", features = ["catalog-gzip"] }
 mir2-ui-core = { path = "../ui-core" }
 png = "0.18"
 serde = { version = "1", features = ["derive"] }

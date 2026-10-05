@@ -4,7 +4,8 @@ use super::*;
 use crate::big_map::BigMapModel;
 use crate::entities::EntityKind;
 use crate::quest_model::QuestStatus;
-use std::time::{Duration, Instant};
+use std::time::Duration;
+use web_time::Instant;
 
 const NPC_DATA_RANGE: u32 = 16;
 const DIALOG_TIMEOUT: Duration = Duration::from_secs(5);

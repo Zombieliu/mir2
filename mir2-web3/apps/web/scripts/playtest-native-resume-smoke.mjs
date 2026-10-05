@@ -7,6 +7,7 @@ import { pathToFileURL } from 'node:url';
 import { PlaytestClient, authenticate, exposesAuthenticatedGameplay, inventoryFingerprint,
   outsideRepository, redact, resumeCredentials, validateEndpoint } from './playtest-multiplayer-smoke.mjs';
 import { findProtocolWalkPath, loadProtocolCollisionMap } from './quest-agent/protocol-navigation.mjs';
+import { CATALOG_GZIP_CAPABILITY } from './playtest-catalog-transport.mjs';
 
 const PROTOCOL = 'nativeResumeV1';
 const REQUIRED = ['ordinaryLogin', 'stepBeforeDrop', 'uncleanTransportLoss', 'nativeResume',
@@ -18,7 +19,8 @@ const self = snapshot => (snapshot?.entities ?? []).find(entity =>
 export function validateResumeControl(command) {
   const keys = Object.keys(command).sort().join(',');
   if (command.type === 'clientCapabilities' && keys === 'capabilities,type' &&
-      JSON.stringify(command.capabilities) === JSON.stringify([PROTOCOL])) return;
+      [JSON.stringify([PROTOCOL]), JSON.stringify([PROTOCOL, CATALOG_GZIP_CAPABILITY])]
+        .includes(JSON.stringify(command.capabilities))) return;
   if (command.type === 'resumeSession' && keys === 'credential,type' &&
       typeof command.credential === 'string' && /^[A-Za-z0-9_-]{43}$/.test(command.credential) &&
       Buffer.from(command.credential, 'base64url').length === 32 &&
@@ -94,6 +96,7 @@ export class NativeResumeClient extends PlaytestClient {
     validateResumeControl(command);
     this.record('sent', command);
     this.ws.send(JSON.stringify(command));
+    if (command.type === 'clientCapabilities') this.catalogGzipOptedIn = command.capabilities.includes(CATALOG_GZIP_CAPABILITY);
   }
   async loseTransport() {
     if (this.ws?.readyState !== 1 || !this.inGame) throw new Error('Transport loss requires a live authenticated game');

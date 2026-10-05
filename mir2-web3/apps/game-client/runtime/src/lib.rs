@@ -1,10 +1,23 @@
 mod additive_material;
+#[cfg(feature = "web-quest-ui")]
+mod bag_ui_host;
 pub mod capture_context;
+#[cfg(feature = "web-quest-ui")]
+pub mod character_ui_host;
+pub mod combat_input_host;
 pub mod entity_animation;
 mod entity_animation_bridge;
+#[cfg(test)]
+#[path = "fallback_hierarchy_tests.rs"]
+mod fallback_hierarchy_tests;
+#[cfg(feature = "web-quest-ui")]
+pub mod hud_ui_host;
 mod interpolation;
 mod lighting;
 mod local_motion;
+#[cfg(test)]
+#[path = "mail_service_runtime_tests.rs"]
+mod mail_service_runtime_tests;
 mod motion;
 mod movement_shadow;
 #[cfg(not(target_arch = "wasm32"))]
@@ -12,18 +25,25 @@ pub mod native_ingest;
 #[cfg(target_arch = "wasm32")]
 #[path = "native_ingest_wasm.rs"]
 mod native_ingest;
-#[cfg(test)]
-#[path = "mail_service_runtime_tests.rs"]
-mod mail_service_runtime_tests;
-#[cfg(test)]
-#[path = "fallback_hierarchy_tests.rs"]
-mod fallback_hierarchy_tests;
 mod presentation_pose;
+#[cfg(feature = "web-quest-ui")]
+mod quest_ui_host;
 mod remote_motion;
 #[cfg(not(target_arch = "wasm32"))]
 mod render_diagnostics;
+mod runtime_ui_capabilities;
+#[cfg(feature = "web-quest-ui")]
+pub mod spells_ui_host;
+#[cfg(feature = "web-quest-ui")]
+mod npc_shop_ui_host;
+#[cfg(feature = "web-quest-ui")]
+mod storage_ui_host;
+#[cfg(feature = "web-quest-ui")]
+pub mod mail_ui_host;
+#[cfg(feature = "web-quest-ui")]
+mod webgl2_shared_ui;
 #[cfg(not(target_arch = "wasm32"))]
-pub use render_diagnostics::{record_native_render_marker, native_render_diagnostics_enabled};
+pub use render_diagnostics::{native_render_diagnostics_enabled, record_native_render_marker};
 
 pub use presentation_pose::PresentationPoseBuffer;
 
@@ -51,6 +71,8 @@ use mir2_client_bevy::pending_operations::{
 };
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::JsCast;
 
 const TILE_SIZE: f32 = 32.0;
 const FLOOR_COLOR: Color = Color::srgba(0.0, 0.0, 0.0, 0.0);
@@ -202,6 +224,20 @@ struct RuntimeEffectShadowCleanupTracker(u64);
 /// state-machine tests can exercise the exact same reset and receipt systems
 /// without creating a renderer/window.
 pub struct Mir2NativeSessionBoundaryPlugin;
+
+/// Production typed parcel ingress, usable with the session-boundary plugin
+/// on a plain App. Its parent runtime retains the original model ordering.
+pub struct Mir2NativeMailServiceIngestPlugin;
+#[derive(Debug,Clone,Copy,PartialEq,Eq,Hash,SystemSet)]
+struct NativeMailServiceIngestSet;
+impl Plugin for Mir2NativeMailServiceIngestPlugin {
+    fn build(&self, app:&mut App) {
+        app.init_resource::<mir2_client_bevy::mail_service::MailServiceInbox>()
+            .init_resource::<native_ingest::NativeInbound>()
+            .add_systems(Update,ingest_pending_mail_service.in_set(PendingLifecycleSet::Ingest)
+                .in_set(NativeMailServiceIngestSet).after(apply_session_reset_to_runtime_models));
+    }
+}
 
 impl Plugin for Mir2NativeSessionBoundaryPlugin {
     fn build(&self, app: &mut App) {
@@ -1303,6 +1339,89 @@ pub fn get_mir2_renderer_backend() -> String {
     COMPILED_RENDER_BACKEND.to_owned()
 }
 
+#[wasm_bindgen(js_name = getMir2RuntimeUiCapabilities)]
+pub fn get_mir2_runtime_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_json()
+}
+
+#[wasm_bindgen(js_name = getMir2HudUiCapabilities)]
+pub fn get_mir2_hud_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_hud_json()
+}
+
+#[wasm_bindgen(js_name = getMir2CharacterUiCapabilities)]
+pub fn get_mir2_character_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_character_json()
+}
+
+#[wasm_bindgen(js_name = getMir2SpellsUiCapabilities)]
+pub fn get_mir2_spells_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_spells_json()
+}
+
+#[wasm_bindgen(js_name = getMir2StorageUiCapabilities)]
+pub fn get_mir2_storage_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_storage_json()
+}
+
+#[wasm_bindgen(js_name = getMir2NpcShopUiCapabilities)]
+pub fn get_mir2_npc_shop_ui_capabilities() -> String {
+    runtime_ui_capabilities::current_npc_shop_json()
+}
+
+/// Pure shared NPC Gold Buy decision; it does not send or mutate player state.
+#[wasm_bindgen(js_name = getMir2NpcGoldBuyPlan)]
+pub fn get_mir2_npc_gold_buy_plan(input_json: &str) -> String {
+    mir2_client_bevy::npc_shop_buy::plan_npc_gold_buy_json(input_json)
+}
+
+#[cfg(test)]
+#[test]
+fn npc_gold_buy_query_is_data_only_and_rejects_incomplete_models() {
+    let result: serde_json::Value = serde_json::from_str(&get_mir2_npc_gold_buy_plan("{}")).unwrap();
+    assert_eq!(result["canBuy"], false);
+    assert_eq!(result["blockReason"], "invalidInput");
+    assert!(result["command"].is_null());
+}
+
+#[wasm_bindgen(js_name = getMir2MailUiCapabilities)]
+pub fn get_mir2_mail_ui_capabilities() -> String {
+    let compiled = cfg!(all(target_arch = "wasm32", feature = "web-quest-ui"))
+        && (COMPILED_RENDER_BACKEND == "webgpu"
+            || (COMPILED_RENDER_BACKEND == "webgl2" && cfg!(feature = "webgl2-shared-ui")));
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    let startup = { let mode = quest_ui_host::startup_mode();
+        compiled && mode.requested && (COMPILED_RENDER_BACKEND == "webgpu" || mode.shared_webgl2) };
+    #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
+    let startup = false;
+    serde_json::json!({"schemaVersion":1,"mailPageAbiVersion":u8::from(compiled),
+        "mailIntentAbiVersion":u8::from(compiled),"compiled":compiled,"startup":startup}).to_string()
+}
+
+#[wasm_bindgen(js_name = getMir2MailComposeUiCapabilities)]
+pub fn get_mir2_mail_compose_ui_capabilities() -> String {
+    let compiled = cfg!(all(target_arch = "wasm32", feature = "web-quest-ui"))
+        && (COMPILED_RENDER_BACKEND == "webgpu"
+            || (COMPILED_RENDER_BACKEND == "webgl2" && cfg!(feature = "webgl2-shared-ui")));
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    let startup = { let mode = quest_ui_host::startup_mode();
+        compiled && mode.requested && (COMPILED_RENDER_BACKEND == "webgpu" || mode.shared_webgl2) };
+    #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
+    let startup = false;
+    serde_json::json!({"schemaVersion":1,"mailComposeUiAbiVersion":u8::from(compiled),
+        "textAdapterAbiVersion":u8::from(compiled),"compiled":compiled,"startup":startup}).to_string()
+}
+#[wasm_bindgen(js_name = getMir2HudSourceGeometry)]
+pub fn get_mir2_hud_source_geometry() -> String {
+    #[cfg(feature = "web-quest-ui")]
+    return serde_json::to_string(&mir2_client_bevy::crystal_ui::shared_hud::main_hud_plan(
+        &mir2_client_bevy::read_model::UiReadModel::default(),
+    ))
+    .unwrap_or_default();
+    #[cfg(not(feature = "web-quest-ui"))]
+    return "null".to_owned();
+}
+
 #[wasm_bindgen(js_name = resolveMir2EntityAnimationPoses)]
 pub fn resolve_mir2_entity_animation_poses(snapshot_json: String) -> String {
     entity_animation_bridge::resolve_json(&snapshot_json)
@@ -1579,6 +1698,15 @@ pub struct RuntimeWindowSpec {
 impl RuntimeWindowSpec {
     /// Web WASM host: transparent overlay over the DOM map/floor/UI layers.
     pub fn web() -> Self {
+        // The ordinary world canvas shares React's mouse routing. Cancelling
+        // pointerdown in winit suppresses the compatibility mousedown/up events
+        // that route requires. Only the fixed primary shared-UI surface owns
+        // those gestures; secondary UI windows keep their own prevention.
+        #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+        let prevent_default_event_handling = quest_ui_host::startup_mode().shared_webgl2;
+        #[cfg(not(all(target_arch = "wasm32", feature = "web-quest-ui")))]
+        let prevent_default_event_handling = false;
+
         Self {
             canvas_selector: Some("#mir2-web3-canvas".to_owned()),
             title: "mir2-web3".to_owned(),
@@ -1586,7 +1714,7 @@ impl RuntimeWindowSpec {
             height: 720,
             transparent: true,
             fit_canvas_to_parent: true,
-            prevent_default_event_handling: true,
+            prevent_default_event_handling,
             close_when_requested: true,
             composite_alpha_mode: WINDOW_COMPOSITE_ALPHA_MODE,
             asset_root: ".".to_owned(),
@@ -1673,6 +1801,9 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                         composite_alpha_mode: spec.composite_alpha_mode,
                         fit_canvas_to_parent: spec.fit_canvas_to_parent,
                         prevent_default_event_handling: spec.prevent_default_event_handling,
+                        // The web canvas is a fixed virtual stage. Browser DPR changes
+                        // must not halve its logical size while keeping its backing
+                        // dimensions unchanged. Desktop windows retain the OS scale.
                         resolution: WindowResolution::new(spec.width, spec.height),
                         title: spec.title,
                         transparent: spec.transparent,
@@ -1683,6 +1814,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         )
         .add_plugins((
             Mir2NativeSessionBoundaryPlugin,
+            Mir2NativeMailServiceIngestPlugin,
             additive_material::CrystalAdditiveMaterialPlugin,
             lighting::CrystalMultiplyMaterialPlugin,
             motion::CrystalMoveClockPlugin,
@@ -1695,6 +1827,8 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
             Update,
             PendingLifecycleSet::Ingest.before(PendingLifecycleSet::UiReset),
         )
+        .configure_sets(Update,NativeMailServiceIngestSet.after(ingest_pending_mail_model)
+            .before(ingest_pending_shop_model))
         .add_systems(
             Update,
             (
@@ -1749,7 +1883,6 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 ingest_pending_inventory_operation_ack,
                 ingest_pending_wallet_patch,
                 ingest_pending_mail_model,
-                ingest_pending_mail_service,
                 ingest_pending_shop_model,
                 ingest_pending_game_shop_info,
                 ingest_pending_game_shop_stock,
@@ -1785,6 +1918,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 .in_set(RuntimePresentationSet),
         );
     app.add_systems(Update, capture_context::sync.after(RuntimePresentationSet));
+    combat_input_host::install(&mut app);
     #[cfg(not(target_arch = "wasm32"))]
     app.add_systems(Last, render_diagnostics::capture_committed_frame);
     #[cfg(not(target_arch = "wasm32"))]
@@ -1792,6 +1926,21 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         Update,
         emit_native_soak_metrics.after(publish_presentation_pose_frame),
     );
+    #[cfg(all(target_arch = "wasm32", feature = "web-quest-ui"))]
+    {
+        let ui_mode = quest_ui_host::startup_mode();
+        if ui_mode.requested {
+            if ui_mode.shared_webgl2 {
+                #[cfg(feature = "webgl2-shared-ui")]
+                app.insert_resource(webgl2_shared_ui::WebGl2SharedUiPrototype);
+            }
+            quest_ui_host::install(&mut app, ui_mode.shared_webgl2);
+            #[cfg(not(all(feature = "webgl2", not(feature = "webgpu"), not(feature = "webgl2-shared-ui"))))]
+            storage_ui_host::install(&mut app);
+            #[cfg(not(all(feature = "webgl2", not(feature = "webgpu"), not(feature = "webgl2-shared-ui"))))]
+            npc_shop_ui_host::install(&mut app);
+        }
+    }
     app
 }
 
@@ -1807,9 +1956,57 @@ pub fn boot_mir2_runtime() {
     app.run();
 }
 
-fn setup_scene(mut commands: Commands) {
-    commands.spawn((Camera2d, MainCamera));
+fn setup_scene(
+    mut commands: Commands,
+    #[cfg(feature = "webgl2-shared-ui")] prototype: Option<
+        Res<webgl2_shared_ui::WebGl2SharedUiPrototype>,
+    >,
+) {
+    commands.spawn((
+        Camera2d,
+        Camera {
+            is_active: {
+                #[cfg(feature = "webgl2-shared-ui")]
+                {
+                    prototype.is_none()
+                }
+                #[cfg(not(feature = "webgl2-shared-ui"))]
+                {
+                    true
+                }
+            },
+            ..Default::default()
+        },
+        MainCamera,
+    ));
     publish_status("scene-ready", "Camera ready");
+}
+
+#[cfg(all(test, feature = "web-quest-ui"))]
+mod shared_ui_camera_tests {
+    use super::*;
+
+    #[test]
+    fn ordinary_world_camera_remains_active() {
+        let mut app = App::new();
+        app.add_systems(Startup, setup_scene);
+        app.update();
+        let world = app.world_mut();
+        let mut query = world.query_filtered::<&Camera, With<MainCamera>>();
+        assert!(query.single(world).unwrap().is_active);
+    }
+
+    #[cfg(feature = "webgl2-shared-ui")]
+    #[test]
+    fn world_camera_is_inactive_for_fixed_shared_prototype() {
+        let mut app = App::new();
+        app.insert_resource(webgl2_shared_ui::WebGl2SharedUiPrototype);
+        app.add_systems(Startup, setup_scene);
+        app.update();
+        let world = app.world_mut();
+        let mut query = world.query_filtered::<&Camera, With<MainCamera>>();
+        assert!(!query.single(world).unwrap().is_active);
+    }
 }
 
 fn ingest_pending_world_state(
@@ -1964,6 +2161,7 @@ fn ingest_pending_entity_render_atlases(
 fn ingest_pending_ui_read_model(
     mut ui: ResMut<mir2_client_bevy::read_model::UiReadModel>,
     native: Res<native_ingest::NativeInbound>,
+    ingress: Option<Res<mir2_client_bevy::read_model::UiReadModelIngress>>,
 ) {
     native.drain_matching(
         |message| matches!(message, native_ingest::NativeInboundMessage::UiReadModel(_)),
@@ -1971,6 +2169,9 @@ fn ingest_pending_ui_read_model(
             if let native_ingest::NativeInboundMessage::UiReadModel(json) = message {
                 match serde_json::from_str::<mir2_client_bevy::read_model::UiReadModel>(&json) {
                     Ok(model) => {
+                        if cfg!(target_arch = "wasm32") && ingress.is_some() {
+                            return;
+                        }
                         *ui = model;
                     }
                     Err(error) => {
@@ -1999,6 +2200,7 @@ fn ingest_pending_wallet_patch(
     mut ui: ResMut<mir2_client_bevy::read_model::UiReadModel>,
     mut inventory: ResMut<mir2_client_bevy::inventory::InventoryModel>,
     native: Res<native_ingest::NativeInbound>,
+    ingress: Option<Res<mir2_client_bevy::read_model::UiReadModelIngress>>,
 ) {
     native.drain_matching(
         |message| matches!(message, native_ingest::NativeInboundMessage::WalletPatch(_)),
@@ -2006,6 +2208,9 @@ fn ingest_pending_wallet_patch(
             if let native_ingest::NativeInboundMessage::WalletPatch(json) = message {
                 match serde_json::from_str::<WalletPatch>(&json) {
                     Ok(patch) if patch.gold.is_some() || patch.credit.is_some() => {
+                        if cfg!(target_arch = "wasm32") && ingress.is_some() {
+                            return;
+                        }
                         if let Some(gold) = patch.gold {
                             ui.player.gold = gold;
                             inventory.gold = gold;
@@ -2342,10 +2547,12 @@ fn apply_session_reset_to_runtime_models(
         ResMut<InventoryOperationFeedback>,
         ResMut<SessionResetGameShopPreservation>,
         Option<ResMut<local_motion::LocalMotionPresentationShadow>>,
+        Option<Res<mir2_client_bevy::read_model::UiReadModelIngress>>,
     ),
 ) {
     let (mut skills, mut receipts, mut hero, mut hero_receipts) = skill_state;
-    let (mut inventory_feedback, mut preservation, mut local_motion) = runtime_reset_state;
+    let (mut inventory_feedback, mut preservation, mut local_motion, ui_ingress) =
+        runtime_reset_state;
     if tracker.0 == reset.0 {
         return;
     }
@@ -2353,14 +2560,18 @@ fn apply_session_reset_to_runtime_models(
     if let Some(receipts) = receipts.as_deref_mut() {
         receipts.0.clear();
     }
-    *ui = mir2_client_bevy::read_model::UiReadModel::default();
+    // Portable complete/legacy snapshots use one generation-controlled ingress.
+    // A native protocol reset cannot mutate its player outside that owner.
+    if !cfg!(target_arch = "wasm32") || ui_ingress.is_none() {
+        *ui = mir2_client_bevy::read_model::UiReadModel::default();
+    }
     surface_signals.npc_shop_open_requested = false;
     *map = mir2_client_bevy::map::MapModel::default();
     *entities = mir2_client_bevy::entities::EntityModelSet::default();
     *inventory = mir2_client_bevy::inventory::InventoryModel::default();
     *chat = mir2_client_bevy::chat::ChatModel::default();
     *mail = mir2_client_bevy::mail::MailModel::default();
-    mail_service.clear();
+    mail_service.clear_session();
     *shop = mir2_client_bevy::shop::ShopModel::default();
     let preserved_receipt = preservation.receipt_for(reset.0).cloned();
     if let Some(receipt) = preserved_receipt.as_ref() {
@@ -2462,27 +2673,39 @@ fn ingest_pending_mail_service(
     mut inbox: ResMut<mir2_client_bevy::mail_service::MailServiceInbox>,
     native: Res<native_ingest::NativeInbound>,
 ) {
+    if let Some(epoch)=native.mail_stream_failure(){inbox.fail_stream(epoch);}
     native.drain_matching(
-        |message| matches!(message, native_ingest::NativeInboundMessage::MailService(_)),
+        |message| matches!(message, native_ingest::NativeInboundMessage::MailService(_)
+            | native_ingest::NativeInboundMessage::MailServiceStreamStarted(_)
+            | native_ingest::NativeInboundMessage::MailQuoteReceipt(_)
+            | native_ingest::NativeInboundMessage::MailSendReceipt(_)
+            | native_ingest::NativeInboundMessage::MailSendAcknowledgement(_)),
         |message| {
-            if let native_ingest::NativeInboundMessage::MailService(json) = message {
-                match serde_json::from_str::<mir2_client_bevy::mail_service::MailServiceEvent>(
-                    &json,
-                ) {
-                    Ok(event) => {
-                        if !inbox.push(event) {
-                            publish_status("native-mail-service-overflow", "mail service inbox is full");
-                            eprintln!("[runtime] mail service inbox is full");
-                        }
-                    }
-                    Err(error) => {
-                        publish_status("native-decode-error", "invalid native mail service event");
-                        eprintln!("[runtime] mail service decode error: {error}");
-                    }
-                }
+            let critical_epoch=match &message{
+                native_ingest::NativeInboundMessage::MailQuoteReceipt(receipt)=>Some(receipt.ticket.epoch()),
+                native_ingest::NativeInboundMessage::MailSendReceipt(receipt)=>Some(receipt.ticket.epoch()),
+                native_ingest::NativeInboundMessage::MailSendAcknowledgement(ack)=>Some(ack.ticket.epoch()),
+                native_ingest::NativeInboundMessage::MailService(delivery) if matches!(delivery.event,mir2_client_bevy::mail_service::MailServiceEvent::Cost{..})=>Some(delivery.epoch),
+                _=>None,
+            };
+            let accepted = match message {
+                native_ingest::NativeInboundMessage::MailServiceStreamStarted(marker) => inbox.start_stream(marker),
+                native_ingest::NativeInboundMessage::MailService(delivery) => inbox.push_delivery(delivery),
+                native_ingest::NativeInboundMessage::MailQuoteReceipt(receipt)=>inbox.push_quote_receipt(receipt),
+                native_ingest::NativeInboundMessage::MailSendReceipt(receipt)=>inbox.push_send_receipt(receipt),
+                native_ingest::NativeInboundMessage::MailSendAcknowledgement(ack)=>inbox.push_send_acknowledgement(ack),
+                _ => return,
+            };
+            if !accepted {
+                if let Some(epoch)=critical_epoch{native.fail_mail_stream(epoch);inbox.fail_stream(epoch);}
+                publish_status("native-mail-service-overflow", "mail service delivery rejected");
+                eprintln!("[runtime] mail service delivery rejected");
             }
         },
     );
+    // A marker drained in this same pass must not erase an already-poisoned
+    // producing stream merely because the inbox had not seen its epoch yet.
+    if let Some(epoch)=native.mail_stream_failure(){inbox.fail_stream(epoch);}
 }
 
 fn ingest_pending_shop_model(
@@ -3952,8 +4175,8 @@ fn animate_map_tiles(
     mut trace_interval: Local<u64>,
 ) {
     #[cfg(not(target_arch = "wasm32"))]
-    let diagnostic_started = render_diagnostics::native_render_diagnostics_enabled()
-        .then(std::time::Instant::now);
+    let diagnostic_started =
+        render_diagnostics::native_render_diagnostics_enabled().then(std::time::Instant::now);
     let count = crystal_map_animation_count(time.elapsed());
     let mut phase_count = 0;
     let mut changed_count = 0;
@@ -3974,11 +4197,14 @@ fn animate_map_tiles(
     if let Some(started) = diagnostic_started {
         let duration_ms = started.elapsed().as_secs_f64() * 1000.0;
         if interval != *trace_interval || duration_ms >= 2.0 {
-            render_diagnostics::record_native_render_marker("cpuStage", serde_json::json!({
-                "stage":"mapAnimationVisibility", "durationMs":duration_ms,
-                "preloadedPhases":phase_count, "changedPhases":changed_count,
-                "measurement":"cpuElapsedNotGpuPresent",
-            }));
+            render_diagnostics::record_native_render_marker(
+                "cpuStage",
+                serde_json::json!({
+                    "stage":"mapAnimationVisibility", "durationMs":duration_ms,
+                    "preloadedPhases":phase_count, "changedPhases":changed_count,
+                    "measurement":"cpuElapsedNotGpuPresent",
+                }),
+            );
         }
     }
     #[cfg(target_arch = "wasm32")]
@@ -4095,25 +4321,50 @@ mod map_animation_tests {
         for _ in 0..25 {
             for phase in 0..8 {
                 app.world_mut().spawn((
-                    MapAnimationFrame { phase, frame_count: 8, animation_tick: 0 },
-                    if phase == 0 { Visibility::Visible } else { Visibility::Hidden },
+                    MapAnimationFrame {
+                        phase,
+                        frame_count: 8,
+                        animation_tick: 0,
+                    },
+                    if phase == 0 {
+                        Visibility::Visible
+                    } else {
+                        Visibility::Hidden
+                    },
                 ));
             }
         }
         app.update();
         for _ in 0..6 {
-            app.world_mut().resource_mut::<Time>().advance_by(std::time::Duration::from_millis(16));
+            app.world_mut()
+                .resource_mut::<Time>()
+                .advance_by(std::time::Duration::from_millis(16));
             app.update();
         }
-        app.world_mut().resource_mut::<Time>().advance_by(std::time::Duration::from_millis(4));
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_millis(4));
         app.update();
-        app.world_mut().resource_mut::<Time>().advance_by(std::time::Duration::from_millis(16));
+        app.world_mut()
+            .resource_mut::<Time>()
+            .advance_by(std::time::Duration::from_millis(16));
         app.update();
-        assert_eq!(app.world().resource::<Changes>().0, [200, 0, 0, 0, 0, 0, 0, 50, 0]);
-        let visible = app.world_mut().query::<(&MapAnimationFrame, &Visibility)>()
-            .iter(app.world()).filter(|(_, visibility)| **visibility == Visibility::Visible)
-            .map(|(frame, _)| frame.phase).collect::<Vec<_>>();
-        assert_eq!(visible, vec![1; 25], "only the two changed phases per family affect rendering");
+        assert_eq!(
+            app.world().resource::<Changes>().0,
+            [200, 0, 0, 0, 0, 0, 0, 50, 0]
+        );
+        let visible = app
+            .world_mut()
+            .query::<(&MapAnimationFrame, &Visibility)>()
+            .iter(app.world())
+            .filter(|(_, visibility)| **visibility == Visibility::Visible)
+            .map(|(frame, _)| frame.phase)
+            .collect::<Vec<_>>();
+        assert_eq!(
+            visible,
+            vec![1; 25],
+            "only the two changed phases per family affect rendering"
+        );
     }
 }
 
@@ -5011,9 +5262,18 @@ fn sync_entity_render_layers(
         // with the camera. Waiting for producer synchronization must not pause
         // every movement command, or expose a camera-only frame.
         if let Some(self_entity) = snapshot.entities.iter().find(|entity| entity.is_self) {
-            if let Some(previous) = registry.entity_render_actor_roots.get(&self_entity.object_id).copied() {
+            if let Some(previous) = registry
+                .entity_render_actor_roots
+                .get(&self_entity.object_id)
+                .copied()
+            {
                 let offset = presentation_poses.self_entity_offset();
-                let current = retained_self_root(snapshot.stage_width, snapshot.stage_height, offset, previous.z);
+                let current = retained_self_root(
+                    snapshot.stage_width,
+                    snapshot.stage_height,
+                    offset,
+                    previous.z,
+                );
                 let delta = current - previous;
                 for (key, handle) in &registry.entity_render_layers {
                     if entity_render_key_is_actor(&self_entity.object_id, key) {
@@ -5022,8 +5282,14 @@ fn sync_entity_render_layers(
                         }
                     }
                 }
-                registry.entity_render_actor_roots.insert(self_entity.object_id.clone(), current);
-                presentation_poses.record_entity(&self_entity.object_id, offset, presentation_pose::EntityPoseSource::LocalCommand);
+                registry
+                    .entity_render_actor_roots
+                    .insert(self_entity.object_id.clone(), current);
+                presentation_poses.record_entity(
+                    &self_entity.object_id,
+                    offset,
+                    presentation_pose::EntityPoseSource::LocalCommand,
+                );
             }
         }
         return;
@@ -5068,7 +5334,10 @@ fn sync_entity_render_layers(
                 // Path and committed-center validation above still applies;
                 // smooth display deliberately differs from the stepped fallback.
                 presentation_poses.set_local_self_motion(motion);
-                presentation_poses.set_camera(-candidate, presentation_pose::CameraPoseSource::LocalCommand);
+                presentation_poses.set_camera(
+                    -candidate,
+                    presentation_pose::CameraPoseSource::LocalCommand,
+                );
             } else {
                 presentation_poses.reconcile_local_command_for_applied_center(candidate, motion);
             }
@@ -5394,7 +5663,7 @@ fn sync_entity_render_layers(
 
     presentation_poses.set_applied_entity_center(entity_center);
     #[cfg(not(target_arch = "wasm32"))]
-    render_diagnostics::record_applied_entity_center(entity_center.map(|c| [c.x,c.y]));
+    render_diagnostics::record_applied_entity_center(entity_center.map(|c| [c.x, c.y]));
 }
 
 struct EntityRenderImageBinding {
@@ -5633,8 +5902,11 @@ fn clear_entity_render_layers(
 fn retained_self_root(stage_width: f32, stage_height: f32, offset: Vec2, depth: f32) -> Vec3 {
     let origin_x = (stage_width * 0.5 / 48.0).floor() * 48.0;
     let origin_y = ((stage_height * 0.5 / 32.0).floor() - 1.0) * 32.0;
-    Vec3::new(origin_x - stage_width * 0.5 + offset.x,
-        stage_height * 0.5 - origin_y - offset.y, depth)
+    Vec3::new(
+        origin_x - stage_width * 0.5 + offset.x,
+        stage_height * 0.5 - origin_y - offset.y,
+        depth,
+    )
 }
 
 fn entity_render_actor_root(
@@ -5772,9 +6044,12 @@ fn self_camera_screen_offset(
         started_ms,
         expires_ms,
     };
-    let Some(camera_offset) =
-        self_camera_offset_for_applied_center_mode(window, motion_table.now_ms, applied_map_center, smooth_display)
-    else {
+    let Some(camera_offset) = self_camera_offset_for_applied_center_mode(
+        window,
+        motion_table.now_ms,
+        applied_map_center,
+        smooth_display,
+    ) else {
         return (Vec2::ZERO, presentation_pose::CameraPoseSource::Static);
     };
     (
@@ -5809,19 +6084,25 @@ fn self_camera_offset_for_applied_center_mode(
     // the animation deadline. The motion function clamps at the endpoint;
     // centre compensation below then reaches zero when the map commits.
     let mut entity_offset = if smooth_display {
-        let progress = ((now_ms - window.started_ms) / (window.expires_ms - window.started_ms)).clamp(0.0, 1.0) as f32;
-        Vec2::new((window.from_x - window.to_x) * 48.0, (window.from_y - window.to_y) * 32.0) * (1.0 - progress)
-    } else { motion::compute_motion_offset_fractional(
-        window.from_x,
-        window.from_y,
-        window.to_x,
-        window.to_y,
-        window.started_ms,
-        window.expires_ms,
-        now_ms,
-        48.0,
-        32.0,
-    ) };
+        let progress = ((now_ms - window.started_ms) / (window.expires_ms - window.started_ms))
+            .clamp(0.0, 1.0) as f32;
+        Vec2::new(
+            (window.from_x - window.to_x) * 48.0,
+            (window.from_y - window.to_y) * 32.0,
+        ) * (1.0 - progress)
+    } else {
+        motion::compute_motion_offset_fractional(
+            window.from_x,
+            window.from_y,
+            window.to_x,
+            window.to_y,
+            window.started_ms,
+            window.expires_ms,
+            now_ms,
+            48.0,
+            32.0,
+        )
+    };
     if let Some(center) = applied_map_center {
         let center_matches_window = (center.x == window.from_x.round() as i32
             && center.y == window.from_y.round() as i32)
@@ -5869,21 +6150,28 @@ mod self_camera_motion_tests {
     #[test]
     fn smooth_fallback_does_not_jump_one_sprite_phase_before_command_takeover() {
         let window = run_window();
-        let source = Some(presentation_pose::PresentationGridCenter { x:10, y:5 });
-        let target = Some(presentation_pose::PresentationGridCenter { x:12, y:5 });
+        let source = Some(presentation_pose::PresentationGridCenter { x: 10, y: 5 });
+        let target = Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 });
         let mut previous = 0.0;
         for now in [0.0, 10.0, 20.0, 30.0, 40.0, 100.0, 600.0, 900.0] {
-            let offset = self_camera_offset_for_applied_center_mode(window, now, source, true).unwrap();
+            let offset =
+                self_camera_offset_for_applied_center_mode(window, now, source, true).unwrap();
             let expected = 96.0 * (now / 600.0).min(1.0) as f32;
             assert!((-offset.x - expected).abs() < 0.001);
             assert!(-offset.x >= previous);
             previous = -offset.x;
-            let recentered = self_camera_offset_for_applied_center_mode(window, now, target, true).unwrap();
+            let recentered =
+                self_camera_offset_for_applied_center_mode(window, now, target, true).unwrap();
             assert!(((-recentered.x + 96.0) - expected).abs() < 0.001);
         }
         // Old fallback exposed phase zero immediately: a 16 px jump followed
         // by a rollback when the smooth command arrived a few ticks later.
-        assert_eq!(self_camera_offset_for_applied_center_mode(window, 0.0, source, false).unwrap().x, -16.0);
+        assert_eq!(
+            self_camera_offset_for_applied_center_mode(window, 0.0, source, false)
+                .unwrap()
+                .x,
+            -16.0
+        );
     }
 
     fn run_window() -> local_motion::LocalTsMotionWindow {
@@ -5960,13 +6248,17 @@ mod self_camera_motion_tests {
     fn completed_prediction_keeps_camera_at_endpoint_until_map_commit() {
         for now_ms in [600.0, 750.0, 1_500.0] {
             let old_center = self_camera_offset_for_applied_center(
-                run_window(), now_ms,
+                run_window(),
+                now_ms,
                 Some(presentation_pose::PresentationGridCenter { x: 10, y: 5 }),
-            ).unwrap();
+            )
+            .unwrap();
             let committed = self_camera_offset_for_applied_center(
-                run_window(), now_ms,
+                run_window(),
+                now_ms,
                 Some(presentation_pose::PresentationGridCenter { x: 12, y: 5 }),
-            ).unwrap();
+            )
+            .unwrap();
             assert_eq!(old_center, Vec2::new(-96.0, 0.0));
             assert_eq!(committed, Vec2::ZERO);
             assert_eq!(committed.x - old_center.x, 96.0);
@@ -5976,10 +6268,16 @@ mod self_camera_motion_tests {
             let mut poses = presentation_pose::PresentationPoseBuffer::default();
             poses.begin_frame(now_ms, true);
             poses.set_camera(old_center, presentation_pose::CameraPoseSource::SelfWindow);
-            assert_eq!(poses.self_entity_offset() + poses.camera_screen_offset(), Vec2::ZERO);
+            assert_eq!(
+                poses.self_entity_offset() + poses.camera_screen_offset(),
+                Vec2::ZERO
+            );
             let world_before = (30.0 - 10.0) * 48.0 + poses.camera_screen_offset().x;
             poses.set_camera(committed, presentation_pose::CameraPoseSource::SelfWindow);
-            assert_eq!(poses.self_entity_offset() + poses.camera_screen_offset(), Vec2::ZERO);
+            assert_eq!(
+                poses.self_entity_offset() + poses.camera_screen_offset(),
+                Vec2::ZERO
+            );
             let world_after = (30.0 - 12.0) * 48.0 + poses.camera_screen_offset().x;
             assert_eq!(world_before, world_after);
         }
@@ -6019,10 +6317,13 @@ fn begin_presentation_pose_frame(
     let previous_camera = presentation_poses.camera_screen_offset();
     let previous_source = presentation_poses.camera_source();
     presentation_poses.begin_frame(motion_table.now_ms, renderer_enabled);
-    let incoming_center = entity_render_state.snapshot.as_ref()
+    let incoming_center = entity_render_state
+        .snapshot
+        .as_ref()
         .and_then(|snapshot| snapshot.center_x.zip(snapshot.center_y))
         .map(|(x, y)| presentation_pose::PresentationGridCenter { x, y });
-    if !local_motion.smooth_display_enabled() && matches!((presentation_poses.applied_map_center(), incoming_center),
+    if !local_motion.smooth_display_enabled()
+        && matches!((presentation_poses.applied_map_center(), incoming_center),
         (Some(map), Some(entity)) if map != entity)
     {
         // sync_entity_render_layers retains the entire previous actor frame
@@ -6034,8 +6335,11 @@ fn begin_presentation_pose_frame(
     // `sync_map_render` runs immediately before this system. Use the centre it
     // actually committed, not the newer requested snapshot centre, so a local
     // movement window has the same screen pose before and after its fast ACK.
-    let (ts_camera_offset, ts_source) =
-        self_camera_screen_offset(&motion_table, presentation_poses.applied_map_center(), local_motion.smooth_display_enabled());
+    let (ts_camera_offset, ts_source) = self_camera_screen_offset(
+        &motion_table,
+        presentation_poses.applied_map_center(),
+        local_motion.smooth_display_enabled(),
+    );
     let mut selected_camera_offset = ts_camera_offset;
     let mut selected_source = ts_source;
     let mut selected_motion = None;
@@ -6895,14 +7199,24 @@ mod entity_atlas_tests {
         let snapshot: EntityRenderState = serde_json::from_value(serde_json::json!({
             "enabled": true, "stageWidth":1024, "stageHeight":768,
             "centerX":304, "centerY":447, "entities":[]
-        })).unwrap();
+        }))
+        .unwrap();
         let mut state = RuntimeEntityRenderState::default();
         state.snapshot = Some(snapshot);
         let mut poses = presentation_pose::PresentationPoseBuffer::default();
         poses.begin_frame(0.0, true);
-        poses.set_applied_map_provenance(Some(presentation_pose::PresentationGridCenter {x:302,y:445}), Some(1));
-        poses.set_applied_entity_center(Some(presentation_pose::PresentationGridCenter {x:302,y:445}));
-        poses.set_camera(Vec2::new(-16.0,16.0), presentation_pose::CameraPoseSource::LocalCommand);
+        poses.set_applied_map_provenance(
+            Some(presentation_pose::PresentationGridCenter { x: 302, y: 445 }),
+            Some(1),
+        );
+        poses.set_applied_entity_center(Some(presentation_pose::PresentationGridCenter {
+            x: 302,
+            y: 445,
+        }));
+        poses.set_camera(
+            Vec2::new(-16.0, 16.0),
+            presentation_pose::CameraPoseSource::LocalCommand,
+        );
         app.insert_resource(state)
             .insert_resource(poses)
             .insert_resource(motion::EntityMotionTable::default())
@@ -6911,10 +7225,16 @@ mod entity_atlas_tests {
         // Repeat the delay: neither a later phase nor a repeated tick may move
         // the camera while sync_entity_render_layers keeps the old body.
         for now in [120.0, 140.0, 240.0] {
-            app.world_mut().resource_mut::<motion::EntityMotionTable>().now_ms = now;
+            app.world_mut()
+                .resource_mut::<motion::EntityMotionTable>()
+                .now_ms = now;
             app.update();
-            assert_eq!(app.world().resource::<presentation_pose::PresentationPoseBuffer>()
-                .camera_screen_offset(), Vec2::new(-16.0,16.0));
+            assert_eq!(
+                app.world()
+                    .resource::<presentation_pose::PresentationPoseBuffer>()
+                    .camera_screen_offset(),
+                Vec2::new(-16.0, 16.0)
+            );
         }
     }
 
@@ -6945,32 +7265,55 @@ mod entity_atlas_tests {
     #[test]
     fn retained_self_advances_during_center_wait_without_changing_its_screen_anchor() {
         let mut app = entity_sync_test_app();
-        let state = |center| serde_json::from_value::<EntityRenderState>(serde_json::json!({
-            "enabled":true,"stageWidth":1024,"stageHeight":768,"centerX":center,"centerY":10,
-            "entities":[{"objectId":"self","isSelf":true,"gridX":center,"gridY":10,
-                "layers":[{"key":"self:body","path":"/original-ui/CArmour/00/body.png",
-                    "left":478,"top":350,"width":32,"height":48,"z":101005}]}]
-        })).unwrap();
-        app.world_mut().resource_mut::<RuntimeEntityRenderState>().snapshot = Some(state(10));
+        let state = |center| {
+            serde_json::from_value::<EntityRenderState>(serde_json::json!({
+                "enabled":true,"stageWidth":1024,"stageHeight":768,"centerX":center,"centerY":10,
+                "entities":[{"objectId":"self","isSelf":true,"gridX":center,"gridY":10,
+                    "layers":[{"key":"self:body","path":"/original-ui/CArmour/00/body.png",
+                        "left":478,"top":350,"width":32,"height":48,"z":101005}]}]
+            }))
+            .unwrap()
+        };
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state(10));
         {
-            let mut poses = app.world_mut().resource_mut::<presentation_pose::PresentationPoseBuffer>();
+            let mut poses = app
+                .world_mut()
+                .resource_mut::<presentation_pose::PresentationPoseBuffer>();
             poses.begin_frame(0.0, true);
-            poses.set_applied_map_provenance(Some(presentation_pose::PresentationGridCenter{x:10,y:10}),Some(1));
+            poses.set_applied_map_provenance(
+                Some(presentation_pose::PresentationGridCenter { x: 10, y: 10 }),
+                Some(1),
+            );
         }
         app.update();
         let body = app.world().resource::<SceneRegistry>().entity_render_layers["self:body"].entity;
         let old_body = app.world().get::<Transform>(body).unwrap().translation;
-        app.world_mut().resource_mut::<RuntimeEntityRenderState>().snapshot = Some(state(12));
+        app.world_mut()
+            .resource_mut::<RuntimeEntityRenderState>()
+            .snapshot = Some(state(12));
         for distance in [1.6, 3.2, 4.8] {
-            app.world_mut().resource_mut::<presentation_pose::PresentationPoseBuffer>()
-                .set_camera(Vec2::new(-distance,0.0), presentation_pose::CameraPoseSource::LocalCommand);
+            app.world_mut()
+                .resource_mut::<presentation_pose::PresentationPoseBuffer>()
+                .set_camera(
+                    Vec2::new(-distance, 0.0),
+                    presentation_pose::CameraPoseSource::LocalCommand,
+                );
             app.update();
-            let root = app.world().resource::<SceneRegistry>().entity_render_actor_roots["self"];
+            let root = app
+                .world()
+                .resource::<SceneRegistry>()
+                .entity_render_actor_roots["self"];
             assert!((root.x - distance + 32.0).abs() < 0.001);
             let moved = app.world().get::<Transform>(body).unwrap().translation;
             assert!((moved.x - old_body.x - distance).abs() < 0.001);
-            assert_eq!(app.world().resource::<presentation_pose::PresentationPoseBuffer>().coherent_applied_center(),
-                Some(presentation_pose::PresentationGridCenter{x:10,y:10}));
+            assert_eq!(
+                app.world()
+                    .resource::<presentation_pose::PresentationPoseBuffer>()
+                    .coherent_applied_center(),
+                Some(presentation_pose::PresentationGridCenter { x: 10, y: 10 })
+            );
         }
     }
 
@@ -8942,38 +9285,65 @@ mod effect_mask_shadow_tests {
                 {"key":"left", "drawX":100, "drawY":100, "kind":"player", "light":3},
                 {"key":"right", "drawX":200, "drawY":100, "kind":"player", "light":3}
             ]
-        })).unwrap();
-        app.world_mut().resource_mut::<RuntimeLightingRenderState>().snapshot = Some(state);
+        }))
+        .unwrap();
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot = Some(state);
         app.update();
         let (left, right) = {
             let registry = app.world().resource::<SceneRegistry>();
-            (registry.lighting_layers["entity:left"].entity,
-                registry.lighting_layers["entity:right"].entity)
+            (
+                registry.lighting_layers["entity:left"].entity,
+                registry.lighting_layers["entity:right"].entity,
+            )
         };
         let binding = |app: &App, entity| {
-            app.world().get::<MeshMaterial2d<additive_material::CrystalAdditiveMaterial>>(entity)
-                .unwrap().0.clone()
+            app.world()
+                .get::<MeshMaterial2d<additive_material::CrystalAdditiveMaterial>>(entity)
+                .unwrap()
+                .0
+                .clone()
         };
         let original = binding(&app, left);
         assert_eq!(original, binding(&app, right));
-        app.world_mut().resource_mut::<RuntimeLightingRenderState>().snapshot
-            .as_mut().unwrap().entity_lights[0].light = Some(18); // Same range, brighter torch.
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot
+            .as_mut()
+            .unwrap()
+            .entity_lights[0]
+            .light = Some(18); // Same range, brighter torch.
         app.update();
         let brighter = binding(&app, left);
         assert_ne!(brighter, original);
         assert_eq!(binding(&app, right), original);
-        let materials = app.world().resource::<Assets<additive_material::CrystalAdditiveMaterial>>();
+        let materials = app
+            .world()
+            .resource::<Assets<additive_material::CrystalAdditiveMaterial>>();
         assert_eq!(materials.get(&original).unwrap().opacity(), 60.0 / 255.0);
         assert_eq!(materials.get(&brighter).unwrap().opacity(), 120.0 / 255.0);
-        app.world_mut().resource_mut::<RuntimeLightingRenderState>().snapshot
-            .as_mut().unwrap().entity_lights.pop();
+        app.world_mut()
+            .resource_mut::<RuntimeLightingRenderState>()
+            .snapshot
+            .as_mut()
+            .unwrap()
+            .entity_lights
+            .pop();
         app.update();
-        let materials = app.world().resource::<Assets<additive_material::CrystalAdditiveMaterial>>();
+        let materials = app
+            .world()
+            .resource::<Assets<additive_material::CrystalAdditiveMaterial>>();
         assert!(!materials.contains(original.id()));
         assert!(materials.contains(brighter.id()));
         app.world_mut().resource_mut::<SceneResetRevision>().0 = 1;
         app.update();
-        assert_eq!(app.world().resource::<Assets<additive_material::CrystalAdditiveMaterial>>().len(), 0);
+        assert_eq!(
+            app.world()
+                .resource::<Assets<additive_material::CrystalAdditiveMaterial>>()
+                .len(),
+            0
+        );
     }
 
     #[test]
@@ -9280,7 +9650,10 @@ mod native_data_path_tests {
         ));
         app.update();
 
-        let mail = &app.world().resource::<mir2_client_bevy::mail::MailModel>().mails[0];
+        let mail = &app
+            .world()
+            .resource::<mir2_client_bevy::mail::MailModel>()
+            .mails[0];
         assert_eq!(mail.body, "snapshot");
         assert!(mail.claimed && mail.locked && mail.read);
         assert!(mail.can_reply);
@@ -9303,7 +9676,10 @@ mod native_data_path_tests {
         ));
         app.update();
 
-        let mail = &app.world().resource::<mir2_client_bevy::mail::MailModel>().mails[0];
+        let mail = &app
+            .world()
+            .resource::<mir2_client_bevy::mail::MailModel>()
+            .mails[0];
         assert!(!mail.can_reply);
         assert_eq!(mail.date_sent_binary_datetime, 0);
         assert!(mail.metadata_known);
@@ -9319,12 +9695,15 @@ mod native_data_path_tests {
         ));
         app.update();
         assert!(native_ingest::push_native_mail_model(
-            r#"{"mails":[{"id":73,"sender":"Impostor"},{"id":75,"sender":"Guide"}]}"#
-                .to_owned()
+            r#"{"mails":[{"id":73,"sender":"Impostor"},{"id":75,"sender":"Guide"}]}"#.to_owned()
         ));
         app.update();
 
-        for mail in &app.world().resource::<mir2_client_bevy::mail::MailModel>().mails {
+        for mail in &app
+            .world()
+            .resource::<mir2_client_bevy::mail::MailModel>()
+            .mails
+        {
             assert!(!mail.can_reply);
             assert_eq!(mail.date_sent_binary_datetime, 0);
             assert!(!mail.metadata_known);
@@ -9342,13 +9721,20 @@ mod native_data_path_tests {
         app.update();
         assert!(native_ingest::push_native_data_reset());
         app.update();
-        assert!(app.world().resource::<mir2_client_bevy::mail::MailModel>().mails.is_empty());
+        assert!(app
+            .world()
+            .resource::<mir2_client_bevy::mail::MailModel>()
+            .mails
+            .is_empty());
         assert!(native_ingest::push_native_mail_model(
             r#"{"mails":[{"id":76,"sender":"GM"}]}"#.to_owned()
         ));
         app.update();
 
-        let mail = &app.world().resource::<mir2_client_bevy::mail::MailModel>().mails[0];
+        let mail = &app
+            .world()
+            .resource::<mir2_client_bevy::mail::MailModel>()
+            .mails[0];
         assert!(!mail.can_reply);
         assert_eq!(mail.date_sent_binary_datetime, 0);
         assert!(!mail.metadata_known);
@@ -9675,8 +10061,14 @@ mod native_data_path_tests {
             &before,
             "a receipt without storage fields must not fabricate a model update"
         );
-        assert!(!app.world().resource::<PendingOperations>().contains(&unlock));
-        let lines = &app.world().resource::<mir2_client_bevy::chat::ChatModel>().lines;
+        assert!(!app
+            .world()
+            .resource::<PendingOperations>()
+            .contains(&unlock));
+        let lines = &app
+            .world()
+            .resource::<mir2_client_bevy::chat::ChatModel>()
+            .lines;
         assert_eq!(
             lines,
             &[mir2_client_bevy::chat::ChatLine {
@@ -9684,7 +10076,9 @@ mod native_data_path_tests {
                 channel: "system".to_owned(),
             }]
         );
-        assert!(lines.iter().all(|line| !line.text.contains("never-render-or-log-this")));
+        assert!(lines
+            .iter()
+            .all(|line| !line.text.contains("never-render-or-log-this")));
     }
 
     #[test]
@@ -9695,14 +10089,17 @@ mod native_data_path_tests {
         // The ingest chain runs the receipt patch before the following storage
         // snapshot, so this is a first set rather than a false "changed" notice.
         assert!(native_ingest::push_native_storage_patch(
-            r#"{"has_password":true,"password_result":{"operation":"password","result":4}}"#.to_owned()
+            r#"{"has_password":true,"password_result":{"operation":"password","result":4}}"#
+                .to_owned()
         ));
         assert!(native_ingest::push_native_storage_model(
             r#"{"items":[],"has_password":true,"unlocked":true}"#.to_owned()
         ));
         app.update();
         assert_eq!(
-            app.world().resource::<mir2_client_bevy::chat::ChatModel>().lines,
+            app.world()
+                .resource::<mir2_client_bevy::chat::ChatModel>()
+                .lines,
             vec![mir2_client_bevy::chat::ChatLine {
                 text: "Storage password set.".to_owned(),
                 channel: "system".to_owned(),
@@ -9714,7 +10111,10 @@ mod native_data_path_tests {
         ));
         app.update();
         assert_eq!(
-            app.world().resource::<mir2_client_bevy::chat::ChatModel>().lines.len(),
+            app.world()
+                .resource::<mir2_client_bevy::chat::ChatModel>()
+                .lines
+                .len(),
             1,
             "ordinary snapshots are not password-result feedback"
         );
@@ -9794,9 +10194,14 @@ mod native_data_path_tests {
                 .close_requested,
             "the native host closes only StorageDialog from this explicit receipt"
         );
-        assert!(!app.world().resource::<PendingOperations>().contains(&remove));
+        assert!(!app
+            .world()
+            .resource::<PendingOperations>()
+            .contains(&remove));
         assert_eq!(
-            app.world().resource::<mir2_client_bevy::chat::ChatModel>().lines,
+            app.world()
+                .resource::<mir2_client_bevy::chat::ChatModel>()
+                .lines,
             vec![mir2_client_bevy::chat::ChatLine {
                 text: "Storage password removed.".to_owned(),
                 channel: "system".to_owned(),
@@ -9837,7 +10242,10 @@ mod native_data_path_tests {
                 .resource::<mir2_client_bevy::storage::StorageUiFeedback>()
                 .close_requested
         );
-        assert!(!app.world().resource::<PendingOperations>().contains(&remove));
+        assert!(!app
+            .world()
+            .resource::<PendingOperations>()
+            .contains(&remove));
     }
 
     #[test]
@@ -10101,7 +10509,8 @@ mod native_data_path_tests {
         ));
 
         local_motion::enqueue_local_motion_event_json(
-            r#"{"type":"reset","atMs":0.0,"objectId":"self","x":10,"y":10,"direction":"Right"}"#.to_owned(),
+            r#"{"type":"reset","atMs":0.0,"objectId":"self","x":10,"y":10,"direction":"Right"}"#
+                .to_owned(),
         );
         local_motion::enqueue_local_motion_event_json(
             r#"{"type":"commandSent","atMs":0.0,"direction":"Right","mode":"run","fromX":10,"fromY":10,"toX":12,"toY":10,"phaseCount":6}"#.to_owned(),

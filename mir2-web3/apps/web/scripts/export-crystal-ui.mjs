@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import sharp from "sharp";
+import { synchronizeOriginalSceneSpriteKeyIndex } from "./lib/original-scene-sprite-key-index.mjs";
 
 import {
   collectItemIconRequirements,
@@ -240,6 +241,13 @@ async function main() {
     `${JSON.stringify(summary, null, 2)}\n`,
     "utf8",
   );
+
+  if (publicDir === DEFAULT_PUBLIC_DIR) {
+    await synchronizeOriginalSceneSpriteKeyIndex({
+      manifestPath: summaryPath,
+      outputPath: path.join(WORKSPACE_ROOT, "lib", "generated", "original_scene_sprite_library_keys.json"),
+    });
+  }
 
   console.log(`Exported UI assets to ${publicDir}`);
 }

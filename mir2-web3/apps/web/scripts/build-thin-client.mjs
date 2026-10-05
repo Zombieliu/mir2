@@ -4,6 +4,14 @@ import { spawnSync } from "node:child_process";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readImmutableBevyRuntimeRelease } from "./lib/bevy-runtime-release-files.mjs";
+import { readClientCoreRelease, assertCompiledClientCoreManifest } from "./lib/client-core-release-files.mjs";
+import { assertCompiledBevyRuntimeManifest, resolveNextBuildDistDirectory } from "./lib/bevy-runtime-build-identity.mjs";
+import {
+  auditPortableTree, copyPortableStandalone, copySelectedPublic, copyVerifiedRequiredServerFiles,
+  materializeStandaloneDependencies,
+  selectThinPublicEntry, selectMapAtlasClosure,
+} from "./lib/portable-next-standalone.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const defaultWebRoot = path.resolve(scriptDir, "..");
@@ -19,38 +27,6 @@ const reportPath = path.resolve(
 const skipBuild = booleanArg(args.skipBuild, false);
 const reportOnly = booleanArg(args.reportOnly, false);
 const budgetBytes = numberArg(args.budgetMb, 360) * 1024 * 1024;
-const R2_UI_ROOTS = new Set([
-  "AArmour",
-  "AHair",
-  "ARArmour",
-  "ARHair",
-  "ARWeapon",
-  "AWeapon",
-  "CArmour",
-  "CHair",
-  "ChrSel",
-  "CWeapon",
-  "Cursors",
-  "Items",
-  "MMap",
-  "MapLinkIcon",
-  "Monster",
-  "NPC",
-  "Prguse",
-  "Prguse2",
-  "Sound",
-  "Title",
-]);
-const LOCAL_UI_FALLBACKS = new Set([
-  "original-ui/Prguse/2092.png",
-  "original-ui/Prguse/2094.png",
-  "original-ui/Prguse/2095.png",
-]);
-const LOCAL_DEBUG_RUNTIME_FILES = new Set([
-  "debug/map-samples/smtile-72.png",
-  "debug/map-samples/smtile-80.png",
-]);
-
 assertSafeOutput(webRoot, outputRoot);
 
 if (!skipBuild) {
@@ -69,6 +45,32 @@ if (!skipBuild) {
   });
 }
 
+const pinnedRuntime = readImmutableBevyRuntimeRelease({ webRoot });
+const runtimeManifestRaw = pinnedRuntime.manifest;
+const runtimeManifest = pinnedRuntime.normalized;
+const sourceRequiredServerFilesPath = path.join(nextRoot, "required-server-files.json");
+const sourceRequiredServerFilesBytes = await fs.readFile(sourceRequiredServerFilesPath);
+const sourceRequiredServerFiles = JSON.parse(sourceRequiredServerFilesBytes.toString("utf8"));
+const compiledRuntimeManifest = assertCompiledBevyRuntimeManifest(sourceRequiredServerFiles, runtimeManifestRaw);
+const pinnedCore = readClientCoreRelease({ webRoot });
+const compiledCoreManifest = assertCompiledClientCoreManifest(sourceRequiredServerFiles, pinnedCore.manifest);
+const coreFilePaths = new Set(pinnedCore.files.map((entry) => entry.relativePath));
+const compiledEnv = sourceRequiredServerFiles.config?.env ?? {};
+const mapAtlasClosure = await selectMapAtlasClosure(publicRoot, {
+  pinnedManifestPath: compiledEnv.MIR2_PINNED_MAP_ATLAS_MANIFEST_PATH ?? "",
+  pinnedContentHash: compiledEnv.MIR2_PINNED_MAP_ATLAS_CONTENT_HASH ?? "",
+  pinnedEnabled: compiledEnv.MIR2_PINNED_MAP_ATLAS_ENABLED === "1",
+});
+const runtimeReleasePrefix = `bevy-runtime-releases/${runtimeManifest.version}`;
+const runtimeFilePaths = new Set(runtimeManifest.files.map((entry) =>
+  entry.path.replace(/^public\/bevy-runtime/, runtimeReleasePrefix)));
+runtimeFilePaths.add(`${runtimeReleasePrefix}/runtime-manifest.json`);
+const publicSelection = (relative, isDirectory) => selectThinPublicEntry(relative, isDirectory, {
+  runtimeVersion: runtimeManifest.version, runtimeFiles: runtimeFilePaths,
+  mapAtlasFiles: mapAtlasClosure.files,
+  coreVersion: pinnedCore.manifest.version, coreFiles: coreFilePaths,
+});
+
 const sourceStats = {
   public: await collectStats(publicRoot),
   nextTotal: await collectStats(nextRoot),
@@ -81,6 +83,11 @@ const sourceStats = {
 let packageStats = await collectStats(outputRoot);
 let serverEntry = null;
 let excluded = [];
+let copyStats = null;
+let dependencyStats = null;
+let publicCopyStats = null;
+let jsonCompaction = null;
+let packagedCoreClosure = null;
 
 if (!reportOnly) {
   const standaloneRoot = path.join(nextRoot, "standalone");
@@ -91,15 +98,67 @@ if (!reportOnly) {
     );
   }
 
-  await fs.rm(outputRoot, { recursive: true, force: true });
-  await fs.mkdir(outputRoot, { recursive: true });
-  await fs.cp(standaloneRoot, outputRoot, { recursive: true, force: true });
-
-  const serverPath = await findServerEntry(outputRoot);
-  serverEntry = path.relative(outputRoot, serverPath).split(path.sep).join("/");
-  const appRoot = path.dirname(serverPath);
-  await copyTree(path.join(nextRoot, "static"), path.join(appRoot, ".next", "static"));
-  excluded = await copyThinPublic(publicRoot, path.join(appRoot, "public"));
+  const sourceServerPath = await findServerEntry(standaloneRoot);
+  const sourceAppRoot = path.dirname(sourceServerPath);
+  serverEntry = path.relative(standaloneRoot, sourceServerPath).split(path.sep).join("/");
+  const appRelativePath = path.relative(standaloneRoot, sourceAppRoot).split(path.sep).join("/");
+  copyStats = await copyPortableStandalone({
+    sourceRoot: standaloneRoot, destinationRoot: outputRoot, appRelativePath,
+    publicSelection,
+  });
+  const appRoot = path.join(outputRoot, appRelativePath);
+  const copiedNextRoot = resolveNextBuildDistDirectory(sourceRequiredServerFiles, appRoot);
+  const copiedRequiredServerFilesPath = path.join(copiedNextRoot, "required-server-files.json");
+  const copiedRequiredServerFiles = await copyVerifiedRequiredServerFiles({
+    sourcePath: sourceRequiredServerFilesPath, destinationPath: copiedRequiredServerFilesPath,
+    sourceBytes: sourceRequiredServerFilesBytes,
+  });
+  if (resolveNextBuildDistDirectory(copiedRequiredServerFiles, appRoot) !== copiedNextRoot) {
+    throw new Error("Copied Next distDir differs from the source build");
+  }
+  assertCompiledBevyRuntimeManifest(
+    copiedRequiredServerFiles, runtimeManifestRaw,
+  );
+  assertCompiledClientCoreManifest(copiedRequiredServerFiles, pinnedCore.manifest);
+  const sourceNextDirectory = resolveNextBuildDistDirectory(sourceRequiredServerFiles, sourceAppRoot);
+  dependencyStats = await materializeStandaloneDependencies({
+    sourceAppRoot, destinationAppRoot: appRoot, sourceStandaloneRoot: standaloneRoot,
+    sourceDependencyRoot: path.join(sourceAppRoot, "node_modules"),
+    distDir: path.relative(sourceAppRoot, sourceNextDirectory),
+  });
+  await copyTree(path.join(nextRoot, "static"), path.join(copiedNextRoot, "static"));
+  publicCopyStats = await copySelectedPublic({
+    sourceRoot: publicRoot, destinationRoot: path.join(appRoot, "public"), selection: publicSelection,
+  });
+  const packagedCore = readClientCoreRelease({ webRoot: appRoot,
+    manifest: compiledCoreManifest, requireExactClosure: true });
+  // Reject a Core publication that raced the copy; the compiled closure must stay exact.
+  assertCompiledClientCoreManifest(sourceRequiredServerFiles, readClientCoreRelease({ webRoot }).manifest);
+  packagedCoreClosure = { version: packagedCore.manifest.version, abiVersion: packagedCore.manifest.abiVersion,
+    files: packagedCore.files.map(({ relativePath, bytes, sha256 }) => ({ relativePath, bytes, sha256 })),
+    exactTwoLeafClosure: true };
+  const compactionDetails = new Map();
+  for (const detail of [...copyStats.jsonCompactions, ...publicCopyStats.jsonCompactions]) {
+    compactionDetails.set(detail.path, detail);
+  }
+  const details = [...compactionDetails.values()].sort((a, b) => a.path < b.path ? -1 : a.path > b.path ? 1 : 0);
+  const detailsPath = path.join(path.dirname(reportPath),
+    `${path.basename(reportPath, path.extname(reportPath))}.json-compaction-details.json`);
+  await fs.mkdir(path.dirname(detailsPath), { recursive: true });
+  await fs.writeFile(detailsPath, `${JSON.stringify(details, null, 2)}\n`, "utf8");
+  const sourceBytes = details.reduce((sum, entry) => sum + entry.sourceBytes, 0);
+  const outputBytes = details.reduce((sum, entry) => sum + entry.outputBytes, 0);
+  jsonCompaction = { files: details.length, sourceBytes, outputBytes,
+    savedBytes: sourceBytes - outputBytes, detailsPath };
+  delete copyStats.jsonCompactions;
+  delete publicCopyStats.jsonCompactions;
+  excluded = Object.entries(copyStats.skipped).map(([reason, entries]) => ({ reason, entries }));
+  await fs.mkdir(path.join(appRoot, "public", "bevy-runtime"), { recursive: true });
+  await fs.writeFile(path.join(appRoot, "public", "bevy-runtime", "runtime-manifest.json"), JSON.stringify(runtimeManifestRaw, null, 2) + "\n");
+  const packagedRuntime = readImmutableBevyRuntimeRelease({
+    webRoot: appRoot, manifestPath: path.join(appRoot, "public", "bevy-runtime", "runtime-manifest.json"),
+  });
+  if (packagedRuntime.normalized.version !== runtimeManifest.version) throw new Error("Packaged runtime version changed during copy");
 
   await fs.writeFile(
     path.join(outputRoot, "THIN-CLIENT-README.txt"),
@@ -108,19 +167,22 @@ if (!reportOnly) {
       "",
       `Start: node ${serverEntry}`,
       "Build-time environment: NEXT_PUBLIC_MIR2_ASSET_BASE_URL and MIR2_ASSET_VERSION",
-      "Runtime environment: MIR2_ASSET_BASE_URL and MIR2_R2_PROXY_BASE",
-      "Large original UI/entity media remains in the source checkout and is fetched from versioned R2 at runtime.",
+      "Runtime environment: MIR2_R2_PROXY_BASE serves same-origin original-ui misses; MIR2_ASSET_BASE_URL separately describes asset-manifest/browser delivery.",
+      "Original-ui Mount, Pet and Gate media is omitted; configure MIR2_R2_PROXY_BASE to serve every omitted path from an immutable asset origin.",
+      "The audited source original-asset-manifest has Mount entries but no Pet or Gate entries; that manifest alone is not a complete remote inventory.",
+      "This package does not prove riding, pet or door gameplay, public release coverage or device acceptance.",
       "The packed map atlas remains inside this package; raw map PNGs are used only by the DOM compatibility fallback.",
       "",
     ].join("\n"),
     "utf8",
   );
-  packageStats = await collectStats(outputRoot);
+  packageStats = await auditPortableTree(outputRoot);
 }
 
 const runtimeStats = {
-  webgpu: await collectStats(path.join(publicRoot, "bevy-runtime", "pkg-webgpu")),
-  webgl2: await collectStats(path.join(publicRoot, "bevy-runtime", "pkg-webgl2")),
+  ...Object.fromEntries(await Promise.all(runtimeManifest.packages.map(async (entry) => [
+    entry.id, await collectStats(path.join(pinnedRuntime.versionDirectory, entry.packageDir)),
+  ]))),
   removedLegacyMirror: await collectStats(path.join(publicRoot, "bevy-runtime", "pkg")),
 };
 
@@ -136,11 +198,23 @@ const report = {
   runtimeStats,
   package: packageStats,
   excluded,
+  copyStats,
+  dependencyStats,
+  publicCopyStats,
+  mapAtlasSelection: { manifests: mapAtlasClosure.manifests, pages: mapAtlasClosure.pages,
+    selectedPaths: mapAtlasClosure.files.size },
+  jsonCompaction,
+  coreSelection: { compiledManifest: compiledCoreManifest, selectedPaths: [...coreFilePaths],
+    packagedClosure: packagedCoreClosure },
+  remoteOriginalUiMediaRootsAdded: ["Mount", "Pet", "Gate"],
+  remoteAssetOriginRequired: "Configure MIR2_R2_PROXY_BASE to serve omitted original-ui media paths through the same-origin miss proxy from an immutable asset origin.",
   notes: [
     ".next/cache and .next/dev are compiler caches, not player distribution files.",
     "The source public directory stays complete for deterministic generation and offline development.",
     "A browser downloads only the selected WebGPU or WebGL2 runtime, never both backends.",
-    "Original map and allowlisted UI/entity media are fetched from versioned R2 and cached by mir2-asset-worker.js.",
+    "Original map and allowlisted UI/entity media, including Mount, Pet and Gate non-JSON files, require MIR2_R2_PROXY_BASE for same-origin misses and are cached by mir2-asset-worker.js.",
+    "The audited source original-asset-manifest has Mount entries but no Pet or Gate entries; it is not a complete remote inventory and public release coverage is unverified.",
+    "Selected original-ui JSON and exact root original-asset-manifest.generated.json retain parsed data and token spelling after compaction; output physical sizes change the deterministic asset-version namespace.",
     "Promote this package only after release:doctor and browser smoke pass against the configured immutable R2 prefix.",
   ],
 };
@@ -155,54 +229,13 @@ if (!report.ok) {
   );
 }
 
-async function copyThinPublic(sourceRoot, destinationRoot) {
-  const excludedEntries = [];
-  await copyTree(sourceRoot, destinationRoot, (relativePath, entry) => {
-    const normalized = relativePath.split(path.sep).join("/");
-    const first = normalized.split("/")[0];
-    const parts = normalized.split("/");
-
-    if (first === "debug") {
-      if (entry.isDirectory()) return true;
-      if (LOCAL_DEBUG_RUNTIME_FILES.has(normalized)) return true;
-      if (!excludedEntries.some((item) => item.path === "debug")) {
-        excludedEntries.push({ path: "debug", reason: "QA-only debug fixtures" });
-      }
-      return false;
-    }
-
-    const remoteUiRoot = first === "original-ui" && R2_UI_ROOTS.has(parts[1]);
-    if (remoteUiRoot) {
-      if (entry.isDirectory()) return true;
-      if (LOCAL_UI_FALLBACKS.has(normalized)) return true;
-      const rootPath = `original-ui/${parts[1]}`;
-      if (!excludedEntries.some((item) => item.path === rootPath)) {
-        excludedEntries.push({ path: rootPath, reason: "versioned R2 UI/media root" });
-      }
-      return false;
-    }
-
-    const exclusion =
-      first.startsWith(".")
-        ? "temporary or hidden build directory"
-        : normalized === "bevy-runtime/pkg" || normalized.startsWith("bevy-runtime/pkg/")
-          ? "unused legacy WebGL2 mirror"
-          : first === "original-map"
-            ? "versioned R2 map media"
-            : null;
-
-    if (exclusion && (entry.isDirectory() || entry.isFile())) {
-      if (!excludedEntries.some((item) => item.path === normalized)) {
-        excludedEntries.push({ path: normalized, reason: exclusion });
-      }
-      return false;
-    }
-    return entry.name !== ".DS_Store";
-  });
-  return excludedEntries;
-}
-
 async function copyTree(sourceRoot, destinationRoot, filter = () => true) {
+  try {
+    if ((await fs.lstat(sourceRoot)).isSymbolicLink()) throw new Error(`Refusing linked static tree: ${sourceRoot}`);
+  } catch (error) {
+    if (error?.code === "ENOENT") return;
+    throw error;
+  }
   const sourceStats = await collectStats(sourceRoot);
   if (!sourceStats.exists) return;
   await fs.mkdir(destinationRoot, { recursive: true });
@@ -212,6 +245,7 @@ async function copyTree(sourceRoot, destinationRoot, filter = () => true) {
     const destinationPath = path.join(destinationRoot, entry.name);
     const relativePath = path.relative(publicRoot, sourcePath);
     if (!filter(relativePath, entry)) continue;
+    if (entry.isSymbolicLink()) throw new Error(`Refusing to copy a linked static entry: ${sourcePath}`);
     if (entry.isDirectory()) {
       await copyTree(sourcePath, destinationPath, filter);
     } else if (entry.isFile()) {
@@ -225,6 +259,7 @@ async function findServerEntry(root) {
   async function visit(directory) {
     for (const entry of await fs.readdir(directory, { withFileTypes: true })) {
       const candidate = path.join(directory, entry.name);
+      if (entry.isSymbolicLink() || entry.name === "public" || entry.name === "node_modules") continue;
       if (entry.isDirectory()) await visit(candidate);
       else if (entry.isFile() && entry.name === "server.js") candidates.push(candidate);
     }
@@ -242,24 +277,27 @@ async function findServerEntry(root) {
 
 async function collectStats(targetPath) {
   try {
-    const stat = await fs.stat(targetPath);
-    if (stat.isFile()) return { exists: true, bytes: stat.size, files: 1, directories: 0 };
-    if (!stat.isDirectory()) return { exists: true, bytes: 0, files: 0, directories: 0 };
+    const stat = await fs.lstat(targetPath);
+    if (stat.isSymbolicLink()) return { exists: true, bytes: 0, files: 0, directories: 0, links: 1 };
+    if (stat.isFile()) return { exists: true, bytes: stat.size, files: 1, directories: 0, links: 0 };
+    if (!stat.isDirectory()) return { exists: true, bytes: 0, files: 0, directories: 0, links: 0 };
   } catch (error) {
-    if (error?.code === "ENOENT") return { exists: false, bytes: 0, files: 0, directories: 0 };
+    if (error?.code === "ENOENT") return { exists: false, bytes: 0, files: 0, directories: 0, links: 0 };
     throw error;
   }
 
   let bytes = 0;
   let files = 0;
   let directories = 1;
+  let links = 0;
   for (const entry of await fs.readdir(targetPath, { withFileTypes: true })) {
     const child = await collectStats(path.join(targetPath, entry.name));
     bytes += child.bytes;
     files += child.files;
     directories += child.directories;
+    links += child.links;
   }
-  return { exists: true, bytes, files, directories };
+  return { exists: true, bytes, files, directories, links };
 }
 
 function run(command, commandArgs, options) {
@@ -270,8 +308,8 @@ function run(command, commandArgs, options) {
 
 function assertSafeOutput(root, candidate) {
   const relative = path.relative(root, candidate);
-  if (!relative || relative.startsWith("..") || path.isAbsolute(relative)) {
-    throw new Error(`Refusing to replace output outside web root: ${candidate}`);
+  if (!relative || relative.startsWith("..") || path.isAbsolute(relative) || path.dirname(candidate) !== root) {
+    throw new Error(`Portable output must be a new direct child of web root: ${candidate}`);
   }
 }
 

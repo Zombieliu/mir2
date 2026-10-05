@@ -30,6 +30,17 @@ export type {
   QuestStage,
 } from "./types";
 export { DEFAULT_WORLD_STATE } from "./types";
+export {
+  authoritativeItemUniqueId,
+  currentAuthoritativeEquipmentItem,
+  currentAuthoritativeItem,
+  equipmentSourceGrid,
+  planEquipmentRemoval,
+  projectInventoryItemIdentity,
+  projectStoragePacketItemIdentity,
+  sameAuthoritativeItemIdentities,
+} from "./item-identity";
+export type { AuthoritativeItemSelection } from "./item-identity";
 
 export type { WorldStore } from "./store";
 export { createWorldStore } from "./store";

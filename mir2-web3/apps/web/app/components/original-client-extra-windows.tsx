@@ -166,6 +166,9 @@ export type ExtraWindowsProps = {
       | "onFinishQuest"
       | "canAcceptQuest"
       | "canFinishQuest"
+      | "isQuestActionPending"
+      | "questClientStatus"
+      | "onRetryQuestClient"
       | "playerClass"
       | "playerLevel"
     >;
@@ -267,6 +270,14 @@ export type ExtraWindowsProps = {
       | "onClaimAttachment"
       | "onDeleteMail"
       | "onSendMail"
+      | "composeState"
+      | "onDraftChange"
+      | "normalizeMessage"
+      | "parcelState"
+      | "parcelItems"
+      | "onParcelAction"
+      | "presentation"
+      | "onPresentationChange"
     >;
 
   conquest?: WindowToggle &
@@ -348,6 +359,9 @@ function ExtraWindowsInner({
           onFinishQuest={questLog.onFinishQuest}
           canAcceptQuest={questLog.canAcceptQuest}
           canFinishQuest={questLog.canFinishQuest}
+          isQuestActionPending={questLog.isQuestActionPending}
+          questClientStatus={questLog.questClientStatus}
+          onRetryQuestClient={questLog.onRetryQuestClient}
           onClose={questLog.onClose}
         />
       ) : null}
@@ -460,6 +474,7 @@ function ExtraWindowsInner({
 
       {mail?.open ? (
         <MailWindow
+          key={mail.presentation?.key}
           t={t}
           mail={mail.mail}
           gold={mail.gold}
@@ -468,7 +483,15 @@ function ExtraWindowsInner({
           onClaimAttachment={mail.onClaimAttachment}
           onDeleteMail={mail.onDeleteMail}
           onSendMail={mail.onSendMail}
+          composeState={mail.composeState}
+          onDraftChange={mail.onDraftChange}
+          normalizeMessage={mail.normalizeMessage}
+          parcelState={mail.parcelState}
+          parcelItems={mail.parcelItems}
+          onParcelAction={mail.onParcelAction}
           onClose={mail.onClose}
+          presentation={mail.presentation}
+          onPresentationChange={mail.onPresentationChange}
         />
       ) : null}
 

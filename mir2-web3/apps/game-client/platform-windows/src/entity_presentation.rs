@@ -1281,7 +1281,7 @@ fn native_hover_cursor(
     use mir2_client_bevy::native_shell::NativeShellScreen;
 
     if shell.is_none_or(|shell| shell.screen != NativeShellScreen::InGame)
-        || player_ui.is_some_and(|ui| ui.blocks_world_click())
+        || player_ui.is_some_and(|ui| ui.blocks_world_click_except_quest_log())
     {
         return None;
     }

@@ -23,7 +23,7 @@ pub use config::{
     AccountStoreRuntimeBackend, BuffSnapshot, CharacterBindPoint, CharacterRecord, CharacterSaveRecord,
     EquipmentItemSnapshot, EquipmentSlot, FileAccountStoreRepository, GroundDropItemPayload,
     GroundDropLootSnapshot, GroundDropSnapshot, ItemContainer, MapTransferRecord,
-    MonsterSpawnSource, NpcDialogLinkSnapshot, NpcDialogSnapshot, PostgresAccountStoreRepository,
+    MonsterSpawnSource, NpcDialogLinkSnapshot, NpcDialogSnapshot, NpcGoldTradeCapacity, PostgresAccountStoreRepository,
     QuestObjectiveSnapshot, QuestSnapshot, QuestStage, SafeZoneRecord, SimulationConfig,
     SkillSnapshot, Stage5AuctionListing, Stage5ConquestState, Stage5FriendIdentity,
     Stage5GroupState, Stage5GuildState, Stage5HeroState, Stage5MailDelivery,
@@ -36,6 +36,8 @@ pub use config::{
 };
 pub use runtime::{
     SharedMonsterKillCommitFailure,
+    NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBuyBeforeExecution,
+    NpcGoldBuyProcessingOutcome, NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution,
     CreatureOperation, CreatureOwner, CreaturePickupIntent,
     crystal_world_respawn_spawns, gate5_demo_scenario, intelligent_creature_allows_ground_drop,
     reset_account_password_after_recovery, run_zone_replay_scenario,

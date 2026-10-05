@@ -3,8 +3,8 @@
 use std::{
     collections::BTreeSet,
     sync::OnceLock,
-    time::{SystemTime, UNIX_EPOCH},
 };
+use web_time::{SystemTime, UNIX_EPOCH};
 
 use crate::{
     inventory::{InventoryModel, ItemModel},
@@ -604,6 +604,21 @@ mod tests {
             ..Default::default()
         });
         item
+    }
+
+    #[test]
+    fn live_supply_clock_stays_within_observed_utc_ticks() {
+        fn ticks_since_unix_epoch() -> i64 {
+            let elapsed = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+            621_355_968_000_000_000_i64
+                + i64::try_from(elapsed.as_secs()).unwrap() * 10_000_000
+                + i64::from(elapsed.subsec_nanos() / 100)
+        }
+
+        let before = ticks_since_unix_epoch();
+        let actual = dotnet_ticks_now();
+        let after = ticks_since_unix_epoch();
+        assert!((before..=after).contains(&actual));
     }
 
     #[test]

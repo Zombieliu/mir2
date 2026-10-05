@@ -1,5 +1,75 @@
 # Agent Run Log
 
+## Progress66 · 2026-10-04 UTC · Web普通商店共同控件接线
+
+Web普通Gold/unlimited/panel0商店已接入Windows同一Rust controller/painter与既有持久Core购买dispatcher；完整584×334布局及两块实际输入区域确认就绪后，才交接整棵React Buy树。arming期间旧树可见但不可输入，键盘、场景定时移动、手柄和移动控件均使用实时阻断；较窄触屏及混合/特殊目录仍整棵legacy。
+
+购买在实际socket.send前核验完整当前owner/service/catalog/source/布局和精确wire，先消费唯一UI proof，最后通过Core entry前checkpoint；状态变化/关闭/换面板/旧pointer terminal不可发送或清除新hold。renderer不创建Core token/slot/ACK，Flushed/Unknown不表示服务端购买成功。Close/Sell延迟退役避免同步回调改写ABI状态，Sell/Repair仍既有入口。
+
+最终选定Node249项通过：Source04新执行仓库接线20+相邻82=102；NPC03 99与Storage03 48在其余986输入及实际消费依赖逐字节未变条件下限定承接，严格TSC03亦限定承接，均无skip。NPC99包含53项新增（buy8/host24/Page-Shell21）。Source02真实NPC/TSC失败与Source03旧夹具16项失败保留，修复未削弱原断言。组合553/Rust812/Web988，联合979；10既有授权/4新增，前批974输入中965保护，9旧变+5新图输入；Rust未改未重跑，仅限定承接Progress65证据。
+
+下一批复用既有有限runner，按固定预算重建Windows EXE、生产Core、三种renderer、Next及独立包。用户“继续代码，暂不操作界面”持续有效；本批无WASM Instance/JS sink真实调用、浏览器/原生窗口/HTTP/玩家/移动真机或新生产组合验收。完整NPC商店、无专用购买ACK恢复、服务端容量/元数据一致性、最终frontend/Candidate与整体goal保持open/active。详见 [Progress66 QA](generated/player-qa/client-core-20260930/web-npc-shop-ui/README.md)。
+
+
+## Progress65 · 2026-10-04 UTC · portable/runtime普通商店共同host
+
+portable/runtime普通NPC商店已复用Native共同Rust controller/painter，新增独立host与7个ABI出口；原有精确能力对象保持。指针仅提交冻结proof/gesture，Runtime同步回调前后核验完整owner/source、ingress与sink状态，接受后才修改共同选择/数量/分页；renderer只读取既有Core authority/feedback，不创建token/slot/ACK。
+
+最终Source02实际19项portable（含真实字体CPU布局、touch1.28/DPR2、完整584px范围）、17项runtime host、6项能力回归和20项Native共同商店回归通过，合计62次跨配置执行，36项新增；shared WASM编译检查通过。Source01测试所有权编译失败/零执行保留，精确两处as_ref借用修复，未削弱断言。548组合/812Rust输入含同一公共字体，union974；每次fresh actual C≥50GiB Guard PolicyB与child/outer close完成，18个已知自有PID实际查询absent。
+
+下一批接Web唯一共同商店控件树与既有持久Core dispatcher。较窄触屏布局仍整体legacy，混合目录整体交接；Sell/Repair/BUYBACK/USED、无专用购买ACK恢复、服务端容量/元数据一致性保持open。用户“暂不操作界面”持续有效；本批无JS sink实际调用、界面/浏览器/玩家/移动真机或生产组合验收，最终frontend/Candidate及goal保持open/active。详见 [Progress65 QA](generated/player-qa/client-core-20260930/portable-npc-shop-ui/README.md)。
+
+
+## Progress64 · 2026-10-04 UTC · Native普通商店共同控件接线
+
+Source03完成Native共同商店接线。原Source02 Native20成功与painter9/1失败真实回执保留，不计入最终88；仅新增scale fixture漏Bevy默认物理像素rounding，188B单块修复同时校验unrounded307.5与computed308，generic near0.1/原断言保留、inverse全文相等，生产绘制尺寸未改。
+
+最终Source03实际七组88次通过：Native controller/接线20、painter10、购买入口5、NPC对话7、聊天29，portable controller7/painter10。跨配置执行次数不等于独立场景；新controller7、真实Native系统13、真实painter10项。543源码/配置+字体=544，Rust807+字体=808，union970；4既有授权变更/4新增，535/799保护，完整before匹配。每组fresh actual C≥50GiB .NETGuard PolicyB与child/外层close0，27已知PID实际查询absent。
+
+下一批先接portable/runtime普通商店host，再接Web唯一控件树与既有持久Core dispatcher；规范decimal-string Core revision不可转JS Number，renderer不创建新的token/slot。混合目录保留整棵legacy；Sell/Repair/BUYBACK/USED、无专用购买ACK恢复及服务端容量/元数据一致性仍open。用户“暂不操作界面”持续有效，本批无生产组合重建/界面/浏览器/移动真机验收，最终frontend/Candidate及goal保持open/active。详见 [Progress64 QA](generated/player-qa/client-core-20260930/shared-npc-shop-ui/README.md)。
+
+
+## Progress63 · 2026-10-04 UTC · Web购买与Core构建有限验证
+
+选定有限检查：Node237（最终Web03新执行38，其余199及严格TSC按未变有效依赖限定承接），Rust51次跨配置通过（最终803图新执行29、Core/Native22限定承接，3项Mail回放ignored）。组合539/Rust803/Web156/Core派生805，联合970唯一输入；12既有变更、525保护、2新Rust，完整before与失败历史保留。
+
+当前QA Core完整WASM258772B/JS19003B，原严格WASM<262144B和JS≤204800B预算不变。固定Binaryen131优化及正式optimizer API均实际通过，产物字节一致；38项构建库测试/语法通过，正式builder已加入发布前/verify预算与优化库指纹。仅QA构建步骤和metadata验证，完整生产Builder/publish、组合产物及实际玩家流程未验收。
+
+保留Storage01/Adjacent01真实夹具失败及最小修复；Core预算01在Cargo前失败、02 raw270097和03 raw268657均超限，未计通过。正式API实际优化258772B，30个本批明确receipt PID收尾瞬时查询为空；closure02错误假定不使用，closure03/04保留实际纠正与新查询。旧Native/launcher未查询，最终代码diff通过仅既有CRLF提示。
+
+下一批先接Native普通商店共同controller/painter，修复数量热键遗漏Bound未entry撤销，再接portable/runtime/Web host。混合特殊货币/有限库存/resale保留整体旧入口；Sell/Repair/BUYBACK/USED、无专用购买ACK结果恢复与服务端容量/元数据插入不一致仍open。用户“暂不操作界面”持续有效，触屏/移动真机、最终frontend/Candidate与goal保持open/active。详见 [Progress63 QA](generated/player-qa/client-core-20260930/web-npc-gold-buy-attempt/README.md)。
+
+
+## Progress62 · 2026-10-04 · 购买attempt有限源码检查
+
+有限检查通过：Core17、Windows网关28、Native商店64/购买入口5/对话7/聊天29/交易25、portable商店41/购买状态4、Runtime1，以及shared WASM编译检查。合计221次跨配置测试执行，并非221个独立场景；其中Source04新执行176次，Core17与Windows28仅按未变有效依赖图承接，未冒称整图Source04重新执行。
+
+保留Windows首次E0616编译失败；仅修正新测试两处私有字段断言，使用既有公开drain接口。保留NativeShop 60通过/4panic；仅给旧cfg(test)共用ECS夹具补齐必需队列资源59B，所有断言及生产代码不变，随后64项通过。Trade03错筛选实际0匹配，只记编译；仅修正runner的一处字典literal，Trade04实际25项通过。
+
+Source04记录537个组合输入与801个Rust输入（联合963个唯一文件），9个既有变更、524个保护输入和4个新增文件；完整修改前备份、两次真实失败及一次零匹配编译记录保留。当前仅源码/有限检查，未重建购买生产组合产物、未操作界面。45个本批明确guard/Cargo/probe PID在执行关闭后查询均不存在；旧Native/launcher未查询、未操作。最终diff检查通过，只有既有CRLF提示。
+
+下一批先让Web购买状态接入持久共享Core，再接共同商店controller/painter和portable/runtime host；保留既有价格planner与Native传输边界。用户“暂不操作界面”持续有效，实际玩家流程、触屏和Android/iOS真机、完整NPC商店、最终frontend/Candidate及整体goal保持open/active。详见 [Progress62 QA](generated/player-qa/client-core-20260930/npc-gold-buy-attempt/README.md)。
+
+## Progress61 · 2026-10-04 · 普通 NPC 金币购买共享规则
+
+Native 两个购买入口与 Web 实际页面已接入同一 Rust planner，使用 catalog UID、原始 price/rate、合法容量和完整 raw 来源；Web 在实际 sendRaw 最终一次性 claim，旧目录、owner/模型变化和同步重入不能发送旧凭据。关闭 Native 默认补齐字段/行覆盖 panel、Web 移动快路径漏新对话三处缺陷。
+
+实际 Web 180/180；Rust 各配置 Native64、portable41、Runtime1、Windows投影3、Gateway投影2 均通过，严格 TSC 和 shared WASM check 通过。533 源输入（15既有变更、514保护、4新增），797 声明 Rust 输入经独立复核；原失败与精确夹具修复记录保留。本轮仅源码/有限检查，前轮组合产物不代表新购买接口已构建或玩家验收。
+
+下一项先闭合 Native 确定未入 transport 却遗留 Buy 锁的精确 attempt 生命周期，再做共同 Rust controller/painter/portable host 与无专用 ACK 的观察/未知反馈；另排服务端容量预检和元数据插入不一致的修复。用户“暂不操作界面”持续有效；生产组合、实际玩家流程、移动真机、最终 frontend/Candidate 与整体 goal 保持 open/active。详见 [Progress61 QA](generated/player-qa/client-core-20260930/npc-gold-buy/README.md)。
+
+
+## Progress60 · 2026-10-04 · 普通仓库组合产物
+
+当前仓库共享源码已构建新的Windows开发profile EXE、三种release+QUEST renderer、Next01和独立包。小Core19输入/完整14个Rust成员/两叶产物未变，限定复用已验收b17版本；新增Storage导出静态校验实际16/16，三种renderer及复制后的三对产物均通过7接口检查。Next Webpack/TSC/13页面通过，独立包376,489,742 B（359.05 MiB）/7,299文件/775目录/零链接，原360 MiB预算余997,618 B。Source529与备份、旧Core6/renderer152保留；新增renderer恰好7叶，现有renderer159。完整Next/依赖43,897文件摘要稳定；独立实际复核0个确认blocker。
+
+下一项代码推进普通NPC金币买入的共同planner/painter/host，先关闭原始price/rate、catalog UID、堆叠容量与无专用ACK的恢复边界。用户“暂不操作界面”持续有效；实际玩家仓库/登录战斗/保存重登、移动真机、媒体覆盖、最终frontend/Candidate与整体goal保持open/active。详见 [Progress60 QA](generated/player-qa/client-core-20260930/shared-storage-combined-build/README.md)。
+
+
+## Progress59 · 2026-10-04 · 普通仓库共享源码回归
+
+完成共同 Storage painter、portable/runtime host 和 Web 接入，Source490（16 变更、464 保护、10 新增）。实际 Node 150/150、Native 113/113、portable 56/56、runtime 20/20、严格 TSC 与 shared WASM check 通过；每次 Cargo 顺序执行且保留 50 GiB 守卫/Policy B 完成证据。未操作 UI、HTTP、renderer Instance 或真实账号，未重建生产包，goal active。原失败证据保留，下一轮组合构建。详见 [Progress59 QA](generated/player-qa/client-core-20260930/shared-storage-ui/README.md)。
+
 > Latest fresh-native visual parity sync: 2026-07-18. Logged the local Crystal
 > QA character into Bichon `0 @ 332,275` through the rebuilt Release Gateway,
 > confirmed Day setting 2 plus Lime/White NPC labels, and captured live r05

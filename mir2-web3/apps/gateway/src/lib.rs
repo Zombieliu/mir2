@@ -42,6 +42,7 @@ pub mod node_identity {
     pub use dubhe_network_core::identity::*;
 }
 pub mod node_security;
+pub mod npc_gold_buy_route;
 pub mod operator;
 pub mod regional;
 mod resume;
@@ -97,6 +98,7 @@ pub use control_plane::{
     ZoneHostSnapshot, ZonePlacementEndpoint, ZonePlacementLease, ZoneRebalanceMove,
 };
 pub use economy::PostgresEconomyAccountInventoryService;
+pub use npc_gold_buy_route::{NpcGoldBuyRouteError, NpcGoldBuyRouteExecution};
 pub use events::{
     default_gameplay_event_sink_from_env, gameplay_event_sink_status, GameplayEventSink,
     GameplayEventSinkStatus, GatewayGameplayEvent, InMemoryGameplayEventSink,

@@ -1,27 +1,42 @@
 //! Source LetterDialog message editing backed by the same shaped text layout
 //! primitives as native friend/memo input.  Draft offsets stay UTF-8 byte
 //! boundaries while the user-facing limit follows Crystal/.NET UTF-16 units.
-use super::*;
-use friend_dialog::text_editor::{CaretStop, EditResult, FriendTextEditor, TextLayout as EditorTextLayout, VisualLine};
+use bevy::prelude::*;
+use bevy::input::{ButtonState, keyboard::KeyboardInput};
+use bevy::ui::FocusPolicy;
+use super::spec::CrystalRect;
+const TEXT: Color = Color::srgb(0.95, 0.92, 0.82);
+use super::text_editor::{CaretStop, EditResult, FriendTextEditor, TextLayout as EditorTextLayout, VisualLine};
 
-pub(super) const MAIL_LETTER_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 92.0, 202.0, 165.0);
+pub(crate) const MAIL_LETTER_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 92.0, 202.0, 165.0);
 /// `MailComposeParcelDialog` uses the same 202×165 edit viewport six pixels
 /// lower than LetterDialog.  Keep layout shaping shared while the source
 /// frame owns each control's real local origin.
-pub(super) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+pub(crate) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
 // Crystal's SendMail validation counts .NET string.Length (UTF-16 units).
-pub(super) const MAIL_LETTER_BODY_LIMIT: usize = 500;
-pub(super) const MAIL_LETTER_CONTENT_INSET: Vec2 = Vec2::splat(2.0);
-pub(super) const MAIL_LETTER_CONTENT_SIZE: Vec2 = Vec2::new(
+pub(crate) const MAIL_LETTER_BODY_LIMIT: usize = 500;
+pub(crate) const MAIL_LETTER_CONTENT_INSET: Vec2 = Vec2::splat(2.0);
+const MAIL_LETTER_BORDER_WIDTH: f32 = 1.0;
+pub(crate) const MAIL_LETTER_CONTENT_SIZE: Vec2 = Vec2::new(
     MAIL_LETTER_BODY_RECT.width - MAIL_LETTER_CONTENT_INSET.x * 2.0,
     MAIL_LETTER_BODY_RECT.height - MAIL_LETTER_CONTENT_INSET.y * 2.0,
 );
 
+#[derive(Component)] pub struct MailEditorViewport;
+#[derive(Component)] pub struct MailEditorCaret;
+#[derive(Component)] pub struct MailEditorSelection;
+/// Ordering boundary after the canonical editor captures actual shaped UI text.
+/// Hosts may publish geometry after this set without calling the private system.
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct MailEditorLayoutSet;
 #[derive(Component)]
 pub struct MailLetterEditText {
     pub revision: u64,
     pub text: String,
     pub viewport: [f32; 2],
+    pub layout_revision: u64,
+    pub focus_generation: u64,
+    pub paint_revision: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -32,8 +47,17 @@ pub struct MailComposition {
 
 #[derive(Debug, Clone, Default, Resource, PartialEq)]
 pub struct MailLetterEditor {
+    draft_clock: mir2_client_core::mail_compose::MailDraftClock,
     editor: Option<FriendTextEditor>,
     revision: u64,
+    focus_generation: u64,
+    paint_revision: u64,
+    layout_revision: u64,
+    content_size: Option<Vec2>,
+    external_generation: Option<u64>,
+    revision_exhausted: bool,
+    focus_exhausted: bool,
+    paint_exhausted: bool,
     focused: bool,
     layout: EditorTextLayout,
     layout_text: String,
@@ -49,6 +73,96 @@ pub struct MailLetterEditor {
 }
 
 impl MailLetterEditor {
+    fn bump_revision(&mut self) {
+        self.bump_paint();
+        if self.revision_exhausted { return; }
+        match self.revision.checked_add(1).filter(|n|*n<=super::mail_compose_shared::SAFE) { Some(n) => self.revision=n, None => {self.revision=0;self.revision_exhausted=true;self.focused=false;} }
+    }
+    fn bump_selection_revision(&mut self, before: Option<FriendTextEditor>) {
+        if before != self.editor { self.bump_revision(); }
+    }
+    fn bump_paint(&mut self) {
+        if self.paint_exhausted{return;}
+        match self.paint_revision.checked_add(1).filter(|n|*n<=super::mail_compose_shared::SAFE) {Some(n)=>self.paint_revision=n,None=>{self.paint_revision=0;self.paint_exhausted=true;self.focused=false;}}
+    }
+    pub fn paint_revision(&self)->u64 {self.paint_revision}
+    pub fn focus_generation(&self) -> u64 { self.focus_generation }
+    pub fn layout_revision(&self) -> u64 { self.layout_revision }
+    pub fn content_size(&self) -> Vec2 { self.content_size.unwrap_or(MAIL_LETTER_CONTENT_SIZE) }
+    pub fn mount_external(&mut self,message:&str,generation:u64,body_rect:CrystalRect,layout_revision:u64)->bool {
+        if generation==0{return false;}self.bind_external_generation(generation);self.sync(true,Some(message));self.configure_view(body_rect,layout_revision)
+    }
+    pub fn common_pointer(&mut self,point:Vec2,extend:bool){self.pointer(point,extend);}
+    pub fn retire_host(&mut self){self.clear();}
+    pub fn layout_ready(&self)->bool {self.editor.as_ref().is_some_and(|e|self.layout_text==e.text()&&self.layout.valid_for(e))}
+    pub fn scroll_offset(&self) -> Vec2 { self.scroll }
+    /// External Web generation belongs to Core. This does not seed/reset/advance
+    /// a second clock; Native continues to bind its accepted Arc clock.
+    pub fn bind_external_generation(&mut self, generation: u64) { self.external_generation=Some(generation); }
+    pub fn set_focused(&mut self, focused: bool) {
+        if self.focus_exhausted||self.revision_exhausted||self.paint_exhausted {self.focused=false;return;}
+        if self.focused != focused {
+            match self.focus_generation.checked_add(1).filter(|n|*n<=super::mail_compose_shared::SAFE) {Some(n)=>self.focus_generation=n,None=>{self.focus_generation=0;self.focus_exhausted=true;}}
+            self.focused = focused && self.focus_generation != 0;
+            self.bump_paint();
+            self.clear_composition();
+            self.selecting=false;
+        }
+    }
+    /// Prompt target switches retire old asynchronous captures even when body
+    /// focus stays false. This never changes the accepted content clock.
+    pub fn retire_focus_capture(&mut self) {
+        if self.focus_exhausted{return;}
+        match self.focus_generation.checked_add(1).filter(|n|*n<=super::mail_compose_shared::SAFE) {
+            Some(n)=>self.focus_generation=n,
+            None=>{self.focus_generation=0;self.focus_exhausted=true;self.focused=false;}
+        }
+        self.clear_composition();self.selecting=false;self.bump_paint();
+    }
+    /// Transient prompt raw/limit changes invalidate text captures while the
+    /// same body Resource and accepted full-raw content clock remain intact.
+    pub fn retire_text_capture(&mut self){self.bump_revision();self.clear_composition();self.selecting=false;}
+    /// Host must supply a newer layout revision on resize/font/style change.
+    /// Invalidation never changes accepted raw or its complete-draft clock.
+    pub fn configure_view(&mut self, body_rect: CrystalRect, revision: u64) -> bool {
+        let size=Vec2::new(body_rect.width,body_rect.height)-MAIL_LETTER_CONTENT_INSET*2.;
+        if !body_rect.is_valid_hit_target() || !size.is_finite() || size.min_element()<=0.
+            || revision==0 || revision<self.layout_revision
+            || revision==self.layout_revision && self.content_size!=Some(size) {return false;}
+        if revision!=self.layout_revision || self.content_size!=Some(size) {
+            self.content_size=Some(size);self.layout_revision=revision;self.bump_paint();
+            self.layout=EditorTextLayout::default();self.layout_text.clear();
+            self.display_layout=EditorTextLayout::default();self.display_layout_text.clear();
+            self.captured_caret=None;self.preferred_x=None;self.scroll=Vec2::ZERO;
+        } true
+    }
+    pub fn set_dom_selection(&mut self, anchor: usize, caret: usize) -> Option<()> {
+        let editor=self.editor.as_mut()?;
+        let anchor=super::mail_compose_shared::utf16_to_byte(editor.text(),anchor)?;
+        let caret=super::mail_compose_shared::utf16_to_byte(editor.text(),caret)?;
+        if !editor.is_boundary(anchor)||!editor.is_boundary(caret){return None;}
+        let before=editor.clone();editor.set_caret(anchor,false);editor.set_caret(caret,true);
+        if before!=*editor {self.bump_revision();}
+        self.sync_visual_line_for_caret();self.keep_caret_visible();Some(())
+    }
+    /// A whole replacement retains every raw byte even when Submit rejects its
+    /// normalized UTF16 budget. Interactive paste is explicitly FitPrefix.
+    pub fn replace_body_raw(&mut self, draft: &mut mir2_ui_core::state::MailComposeDraft, raw: &str) {
+        if draft.message!=raw {
+            if self.external_generation.is_none(){self.draft_clock.advance();}
+            draft.message=raw.into();self.sync(true,Some(raw));
+        }
+    }
+    pub fn common_key(&mut self,key:&str,control:bool,shift:bool,draft:&mut mir2_ui_core::state::MailComposeDraft)->Option<()> {
+        let code=match key {"left"=>KeyCode::ArrowLeft,"right"=>KeyCode::ArrowRight,"up"=>KeyCode::ArrowUp,"down"=>KeyCode::ArrowDown,
+            "home"=>KeyCode::Home,"end"=>KeyCode::End,"backspace"=>KeyCode::Backspace,"delete"=>KeyCode::Delete,"enter"=>KeyCode::Enter,
+            "selectAll"=>KeyCode::KeyA,_=>return None};
+        self.modifiers=[control,false,shift,false];
+        self.edit_key(&KeyboardInput{key_code:code,logical_key:bevy::input::keyboard::Key::Character("".into()),state:ButtonState::Pressed,
+            text:None,repeat:false,window:Entity::PLACEHOLDER},draft);
+        self.modifiers=[false;4];Some(())
+    }
+    pub(crate) fn bind_draft_clock(&mut self,clock:mir2_client_core::mail_compose::MailDraftClock){self.draft_clock=clock;self.external_generation=None;}
     pub fn active_editor(&self) -> Option<&FriendTextEditor> {
         self.editor.as_ref()
     }
@@ -67,12 +181,14 @@ impl MailLetterEditor {
 
     pub fn set_composition(&mut self, value: String, cursor: Option<(usize, usize)>) {
         self.modifiers = [false; 4];
-        self.composition = (!value.is_empty()).then_some(MailComposition { value, cursor });
+        let next=(!value.is_empty()).then_some(MailComposition { value, cursor });
+        if self.composition!=next {self.bump_paint();}
+        self.composition=next;
     }
 
     pub fn clear_composition(&mut self) {
         self.modifiers = [false; 4];
-        self.composition = None;
+        if self.composition.take().is_some(){self.bump_paint();}
         self.display_layout = EditorTextLayout::default();
         self.display_layout_text.clear();
     }
@@ -85,7 +201,7 @@ impl MailLetterEditor {
             .as_mut()
             .map(|editor| editor.insert_with_policy(
                 text,
-                friend_dialog::text_editor::InsertPolicy::FitPrefix,
+                super::text_editor::InsertPolicy::FitPrefix,
             ))
             .unwrap_or(EditResult::Unchanged);
         self.commit(draft, result);
@@ -94,9 +210,9 @@ impl MailLetterEditor {
     }
 
     pub fn select_all(&mut self) {
-        if let Some(editor) = self.editor.as_mut() {
-            editor.select_all();
-        }
+        let before = self.editor.clone();
+        if let Some(editor) = self.editor.as_mut() { editor.select_all(); }
+        self.bump_selection_revision(before);
     }
 
     pub fn selected_text(&self) -> &str {
@@ -104,6 +220,10 @@ impl MailLetterEditor {
     }
 
     pub fn cut_selection(&mut self, draft: &mut mir2_ui_core::state::MailComposeDraft) {
+        // Cut deletes only copied selection; Delete retains forward-delete semantics.
+        if self.editor.as_ref().is_none_or(|editor| editor.selection().is_empty()) {
+            return;
+        }
         let result = self
             .editor
             .as_mut()
@@ -144,20 +264,20 @@ impl MailLetterEditor {
         }).flatten()
     }
 
-    pub(super) fn sync(&mut self, active: bool, message: Option<&str>) {
+    pub(crate) fn sync(&mut self, active: bool, message: Option<&str>) {
         let Some(message) = active.then_some(message).flatten() else {
             self.clear();
             return;
         };
         if self.editor.as_ref().is_none_or(|editor| editor.text() != message) {
-            static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
+
             self.editor = Some(FriendTextEditor::new(
                 message.to_owned(),
                 MAIL_LETTER_BODY_LIMIT,
                 true,
             ));
-            self.revision = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
-            self.focused = true;
+            self.bump_revision();
+            self.set_focused(true);
             self.layout = EditorTextLayout::default();
             self.layout_text.clear();
             self.visual_line = 0;
@@ -172,9 +292,11 @@ impl MailLetterEditor {
         }
     }
 
-    pub(super) fn clear(&mut self) {
+    pub(crate) fn clear(&mut self) {
+        if self.editor.is_some(){self.bump_revision();}
         self.editor = None;
-        self.focused = false;
+        self.content_size=None;self.layout_revision=0;
+        self.set_focused(false);
         self.layout = EditorTextLayout::default();
         self.layout_text.clear();
         self.visual_line = 0;
@@ -183,7 +305,7 @@ impl MailLetterEditor {
         self.scroll = Vec2::ZERO;
         self.modifiers = [false; 4];
         self.selecting = false;
-        self.composition = None;
+        if self.composition.take().is_some(){self.bump_paint();}
         self.display_layout = EditorTextLayout::default();
         self.display_layout_text.clear();
     }
@@ -191,17 +313,22 @@ impl MailLetterEditor {
     fn commit(&mut self, draft: &mut mir2_ui_core::state::MailComposeDraft, result: EditResult) {
         if result == EditResult::Changed {
             if let Some(editor) = self.editor.as_ref() {
-                draft.message = editor.text().to_owned();
+                if draft.message != editor.text() {
+                    if self.external_generation.is_none() { self.draft_clock.advance(); }
+                    draft.message = editor.text().to_owned();
+                    self.bump_revision();
+                }
             }
             self.preferred_x = None;
         }
     }
 
-    pub(super) fn edit_key(
+    pub(crate) fn edit_key(
         &mut self,
         event: &KeyboardInput,
         draft: &mut mir2_ui_core::state::MailComposeDraft,
     ) {
+        let before = self.editor.clone();
         let pressed = event.state == ButtonState::Pressed;
         match event.key_code {
             KeyCode::ControlLeft => self.modifiers[0] = pressed,
@@ -264,19 +391,21 @@ impl MailLetterEditor {
                 if let bevy::input::keyboard::Key::Character(chars) = &event.logical_key {
                     result = editor.insert_with_policy(
                         chars,
-                        friend_dialog::text_editor::InsertPolicy::FitPrefix,
+                        super::text_editor::InsertPolicy::FitPrefix,
                     );
                 }
             }
             _ => {}
         }
         self.commit(draft, result);
+        if result != EditResult::Changed { self.bump_selection_revision(before); }
         self.sync_visual_line_for_caret();
         self.keep_caret_visible();
     }
 
-    pub(super) fn pointer(&mut self, point: Vec2, extend: bool) {
-        self.focused = true;
+    pub(crate) fn pointer(&mut self, point: Vec2, extend: bool) {
+        self.set_focused(true);
+        let before = self.editor.clone();
         let point = point + self.scroll;
         let Some(editor) = self.editor.as_mut() else {
             return;
@@ -294,20 +423,21 @@ impl MailLetterEditor {
                 self.keep_caret_visible();
             }
         }
+        self.bump_selection_revision(before);
     }
 
-    pub(super) fn set_selecting(&mut self, selecting: bool) {
+    pub(crate) fn set_selecting(&mut self, selecting: bool) {
         self.selecting = selecting;
     }
 
-    pub(super) fn selecting(&self) -> bool {
+    pub(crate) fn selecting(&self) -> bool {
         self.selecting
     }
 
     /// Scrolls by source text lines without changing the authoritative caret
     /// or selection. The extent comes from the shaped layout, not a character
     /// count or guessed line height.
-    pub(super) fn scroll_wheel_lines(&mut self, upward_lines: f32) -> bool {
+    pub(crate) fn scroll_wheel_lines(&mut self, upward_lines: f32) -> bool {
         let Some(height) = self.visible_line_height() else {
             return false;
         };
@@ -315,7 +445,7 @@ impl MailLetterEditor {
     }
 
     /// `upward_pixels` is already in Crystal logical-stage units.
-    pub(super) fn scroll_wheel_pixels(&mut self, upward_pixels: f32) -> bool {
+    pub(crate) fn scroll_wheel_pixels(&mut self, upward_pixels: f32) -> bool {
         if !upward_pixels.is_finite() || upward_pixels == 0.0 {
             return false;
         }
@@ -327,19 +457,29 @@ impl MailLetterEditor {
             return false;
         }
         self.scroll.y = next;
+        self.bump_paint();
         true
     }
 
-    pub(super) fn render(&self, parent: &mut ChildSpawnerCommands) {
+    pub(crate) fn render(&self, parent: &mut ChildSpawnerCommands) {
         self.render_at(parent, MAIL_LETTER_BODY_RECT);
     }
 
-    pub(super) fn render_at(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect) {
+    pub(crate) fn render_at(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect) {
+        self.render_with_style(parent, body_rect, crate::crystal_ui::typography::crystal_text_font(crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX), TEXT);
+    }
+    pub fn render_with_style(&self, parent: &mut ChildSpawnerCommands, body_rect: CrystalRect, font: TextFont, color: Color) {
         let Some(editor) = self.editor.as_ref() else {
             return;
         };
+        let expected = Vec2::new(body_rect.width, body_rect.height) - MAIL_LETTER_CONTENT_INSET * 2.0;
+        if !expected.is_finite() || expected.min_element() <= 0.0 || expected != self.content_size() { return; }
+        let empty_caret_height=if self.layout_revision==0 {14.} else {match font.font_size {FontSize::Px(n)=>n,_=>14.}};
         let display = self.displayed_editor().unwrap_or_else(|| editor.clone());
         let scroll = self.scroll;
+        // Absolute children start inside the border; keep shaped text and host
+        // pointer/IME geometry at the same two-pixel viewport inset.
+        let content_origin = MAIL_LETTER_CONTENT_INSET - Vec2::splat(MAIL_LETTER_BORDER_WIDTH);
         parent
             .spawn((
                 Node {
@@ -348,7 +488,7 @@ impl MailLetterEditor {
                     top: Val::Px(body_rect.top),
                     width: Val::Px(body_rect.width),
                     height: Val::Px(body_rect.height),
-                    border: UiRect::all(Val::Px(1.0)),
+                    border: UiRect::all(Val::Px(MAIL_LETTER_BORDER_WIDTH)),
                     overflow: Overflow::clip(),
                     ..default()
                 },
@@ -358,20 +498,23 @@ impl MailLetterEditor {
                 } else {
                     Color::NONE
                 }),
+                MailEditorViewport,
                 FocusPolicy::Block,
             ))
             .with_children(|field| {
                 if self.composition.is_none() && self.layout_text == editor.text() {
                     for rect in self.layout.selection_rects(editor.selection()) {
+                        let Some(rect) = self.visible_paint_rect(rect.x - scroll.x, rect.y - scroll.y, rect.width, rect.height) else { continue; };
                         field.spawn((
                             Node {
                                 position_type: PositionType::Absolute,
-                                left: Val::Px(MAIL_LETTER_CONTENT_INSET.x + rect.x - scroll.x),
-                                top: Val::Px(MAIL_LETTER_CONTENT_INSET.y + rect.y - scroll.y),
+                                left: Val::Px(content_origin.x + rect.left),
+                                top: Val::Px(content_origin.y + rect.top),
                                 width: Val::Px(rect.width),
                                 height: Val::Px(rect.height),
                                 ..default()
                             },
+                            MailEditorSelection,
                             BackgroundColor(Color::srgb_u8(35, 85, 145)),
                         ));
                     }
@@ -380,21 +523,22 @@ impl MailLetterEditor {
                     MailLetterEditText {
                         revision: self.revision,
                         text: display.text().to_owned(),
-                        viewport: [MAIL_LETTER_CONTENT_SIZE.x, MAIL_LETTER_CONTENT_SIZE.y],
+                        viewport: [self.content_size().x, self.content_size().y],
+                        layout_revision: self.layout_revision,
+                        focus_generation: self.focus_generation,
+                        paint_revision: self.paint_revision,
                     },
                     Node {
                         position_type: PositionType::Absolute,
-                        left: Val::Px(MAIL_LETTER_CONTENT_INSET.x - scroll.x),
-                        top: Val::Px(MAIL_LETTER_CONTENT_INSET.y - scroll.y),
-                        width: Val::Px(MAIL_LETTER_CONTENT_SIZE.x),
-                        min_width: Val::Px(MAIL_LETTER_CONTENT_SIZE.x),
+                        left: Val::Px(content_origin.x - scroll.x),
+                        top: Val::Px(content_origin.y - scroll.y),
+                        width: Val::Px(self.content_size().x),
+                        min_width: Val::Px(self.content_size().x),
                         ..default()
                     },
                     Text::new(display.text()),
-                    crate::crystal_ui::typography::crystal_text_font(
-                        crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX,
-                    ),
-                    TextColor(TEXT),
+                    font.clone(),
+                    TextColor(color),
                     TextLayout::new(Justify::Left, LineBreak::AnyCharacter),
                 ));
                 if self.focused {
@@ -413,22 +557,39 @@ impl MailLetterEditor {
                                         .map(|stop| (stop.x, line.y, line.height))
                                 })
                         })
-                        .or_else(|| editor.text().is_empty().then_some((0.0, 0.0, 14.0)));
-                    if let Some((x, y, height)) = caret {
+                        .or_else(|| editor.text().is_empty().then_some((0.0, 0.0, empty_caret_height)));
+                    // Shaped line boxes may have negative leading. Paint only
+                    // their visible fragment; glyph/layout coordinates stay intact.
+                    if let Some(rect) = caret.and_then(|(x, y, height)| {
+                        let width = 1.0_f32.min(self.content_size().x);
+                        let x = (x - scroll.x).clamp(0.0, (self.content_size().x - width).max(0.0));
+                        self.visible_paint_rect(x, y - scroll.y, width, height)
+                    }) {
                         field.spawn((
                             Node {
                                 position_type: PositionType::Absolute,
-                                left: Val::Px(MAIL_LETTER_CONTENT_INSET.x + x - scroll.x),
-                                top: Val::Px(MAIL_LETTER_CONTENT_INSET.y + y - scroll.y),
-                                width: Val::Px(1.0),
-                                height: Val::Px(height),
+                                left: Val::Px(content_origin.x + rect.left),
+                                top: Val::Px(content_origin.y + rect.top),
+                                width: Val::Px(rect.width),
+                                height: Val::Px(rect.height),
                                 ..default()
                             },
+                            MailEditorCaret,
                             BackgroundColor(Color::WHITE),
                         ));
                     }
                 }
             });
+    }
+
+    fn visible_paint_rect(&self, x: f32, y: f32, width: f32, height: f32) -> Option<CrystalRect> {
+        if ![x, y, width, height].into_iter().all(f32::is_finite) { return None; }
+        let size = self.content_size();
+        let left = x.max(0.0);
+        let top = y.max(0.0);
+        let right = (x + width).min(size.x);
+        let bottom = (y + height).min(size.y);
+        (right > left && bottom > top).then_some(CrystalRect::new(left, top, right - left, bottom - top))
     }
 
     fn keep_caret_visible(&mut self) {
@@ -451,8 +612,8 @@ impl MailLetterEditor {
         if line.y < self.scroll.y {
             self.scroll.y = line.y;
         }
-        if line.y + line.height > self.scroll.y + MAIL_LETTER_CONTENT_SIZE.y {
-            self.scroll.y = line.y + line.height - MAIL_LETTER_CONTENT_SIZE.y;
+        if line.y + line.height > self.scroll.y + self.content_size().y {
+            self.scroll.y = line.y + line.height - self.content_size().y;
         }
         self.scroll.y = self.scroll.y.max(0.0);
     }
@@ -468,7 +629,7 @@ impl MailLetterEditor {
             .iter()
             .map(|line| line.y + line.height)
             .fold(0.0_f32, f32::max);
-        Some((bottom - MAIL_LETTER_CONTENT_SIZE.y).max(0.0))
+        Some((bottom - self.content_size().y).max(0.0))
     }
 
     fn visible_line_height(&self) -> Option<f32> {
@@ -569,13 +730,14 @@ impl MailLetterEditor {
         layout
     }
 
-    pub(super) fn capture_layout(
+    pub(crate) fn capture_layout(
         &mut self,
         tag: &MailLetterEditText,
         block: &bevy::text::ComputedTextBlock,
         info: &bevy::text::TextLayoutInfo,
     ) {
-        if tag.revision != self.revision {
+        if tag.revision != self.revision || tag.layout_revision != self.layout_revision || tag.focus_generation != self.focus_generation || tag.paint_revision != self.paint_revision
+            || tag.viewport != [self.content_size().x, self.content_size().y] {
             return;
         }
         let Some(display) = self.displayed_editor() else {
@@ -615,6 +777,7 @@ impl MailLetterEditor {
         // should restore caret visibility; otherwise it would undo a manual
         // wheel position immediately after rendering.
         let caret_changed = self.captured_caret != Some(caret) || self.layout_text != text;
+        if self.layout!=layout||self.layout_text!=text {self.bump_paint();}
         self.layout = layout;
         self.layout_text = text;
         if caret_changed {
@@ -630,6 +793,7 @@ impl MailLetterEditor {
         text: String,
         caret: usize,
     ) {
+        if self.display_layout!=layout||self.display_layout_text!=text {self.bump_paint();}
         self.display_layout = layout;
         self.display_layout_text = text;
         let Some(line) = self
@@ -643,8 +807,8 @@ impl MailLetterEditor {
         if line.y < self.scroll.y {
             self.scroll.y = line.y;
         }
-        if line.y + line.height > self.scroll.y + MAIL_LETTER_CONTENT_SIZE.y {
-            self.scroll.y = line.y + line.height - MAIL_LETTER_CONTENT_SIZE.y;
+        if line.y + line.height > self.scroll.y + self.content_size().y {
+            self.scroll.y = line.y + line.height - self.content_size().y;
         }
         let bottom = self
             .display_layout
@@ -655,7 +819,7 @@ impl MailLetterEditor {
         self.scroll.y = self
             .scroll
             .y
-            .clamp(0.0, (bottom - MAIL_LETTER_CONTENT_SIZE.y).max(0.0));
+            .clamp(0.0, (bottom - self.content_size().y).max(0.0));
     }
 
     fn display_caret(&self, display: &FriendTextEditor) -> Option<(f32, f32, f32)> {
@@ -679,7 +843,7 @@ impl MailLetterEditor {
     }
 
     #[cfg(test)]
-    pub(super) fn install_layout(&mut self, lines: Vec<VisualLine>) {
+    pub(crate) fn install_layout(&mut self, lines: Vec<VisualLine>) {
         let text = self.editor.as_ref().map_or_else(String::new, |editor| editor.text().to_owned());
         // Test fixtures install already-shaped layout without reproducing the
         // renderer's initial caret-visibility transition.
@@ -689,12 +853,12 @@ impl MailLetterEditor {
     }
 
     #[cfg(test)]
-    pub(super) fn scroll(&self) -> Vec2 {
+    pub(crate) fn scroll(&self) -> Vec2 {
         self.scroll
     }
 }
 
-pub(super) fn capture_layout_system(
+pub(crate) fn capture_layout_system(
     mut editor: ResMut<MailLetterEditor>,
     texts: Query<(
         &MailLetterEditText,

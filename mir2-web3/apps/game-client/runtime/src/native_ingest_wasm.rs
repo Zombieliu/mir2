@@ -25,7 +25,11 @@ pub(crate) enum NativeInboundMessage {
     DataResetPreservingExactGameShopReceipt(mir2_client_bevy::game_shop::GameShopReceipt),
     SceneReset,
     MailModel(String),
-    MailService(String),
+    MailService(mir2_client_bevy::mail_service::MailServiceDelivery),
+    MailServiceStreamStarted(mir2_client_bevy::mail_service::MailServiceStreamStarted),
+    MailQuoteReceipt(mir2_client_bevy::mail_service::MailQuoteReceipt),
+    MailSendReceipt(mir2_client_bevy::mail_service::MailSendReceipt),
+    MailSendAcknowledgement(mir2_client_bevy::mail_service::MailSendAcknowledgement),
     ShopModel(String),
     GameShopInfo(String),
     GameShopStock(String),
@@ -51,6 +55,8 @@ pub(crate) enum NativeInboundMessage {
 pub(crate) struct NativeInbound;
 
 impl NativeInbound {
+    pub(crate) fn mail_stream_failure(&self)->Option<mir2_client_bevy::mail_service::MailServiceStreamEpoch>{None}
+    pub(crate) fn fail_mail_stream(&self,_epoch:mir2_client_bevy::mail_service::MailServiceStreamEpoch){}
     pub(crate) fn new() -> Self {
         Self
     }

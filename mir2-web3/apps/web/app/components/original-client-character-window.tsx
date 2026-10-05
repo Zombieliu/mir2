@@ -45,6 +45,7 @@ type DisplayEntity = {
 
 type DisplayEquipmentItem = {
   slot: EquipmentSlot;
+  authoritativeUniqueId?: number;
   name: string;
   icon: number;
   description: string;
@@ -82,7 +83,7 @@ type DisplayWorld = {
   knownSkills: DisplayKnownSkill[];
 };
 
-type EquipmentActionRef = Pick<DisplayEquipmentItem, "slot">;
+type EquipmentActionRef = Pick<DisplayEquipmentItem, "slot" | "authoritativeUniqueId">;
 
 type StatRangeValue = { min?: number; max?: number };
 
@@ -268,7 +269,7 @@ export function CharacterWindow({
                     type="button"
                     className="character-slot-card"
                     aria-label={item.name}
-                    onClick={() => onRemoveItem({ slot: item.slot })}
+                    onClick={() => onRemoveItem({ slot: item.slot, authoritativeUniqueId: item.authoritativeUniqueId })}
                   >
                     <img
                       className="original-item-icon character-item-icon"

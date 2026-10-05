@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { ORIGINAL_UI, type InventoryTabKey } from "../../lib/original-ui";
 import {
@@ -36,21 +36,25 @@ import type {
 } from "./original-client-types";
 
 type InventoryWindowProps = {
+  initialDeleteMode?: boolean;
+  onCompatibilityInteraction?: () => void;
   t: TranslateFn;
   locale: string;
   activeTab: InventoryTabKey;
   world: DisplayWorld;
   storageServiceOpenVersion: number;
+  storagePasswordOpenVersion?: number;
   onClose: () => void;
+  onCloseStorage?: () => void;
   onTabChange: (tab: InventoryTabKey) => void;
   onUseItem: (item: ItemActionRef) => void;
   onDropItem: (item: ItemActionRef) => void;
   onEquipItem: (item: ItemActionRef, slot: EquipmentSlot) => void;
-  onMoveItem: (item: MoveItemRef, toSlot: number) => void;
+  onMoveItem: (item: MoveItemRef, toSlot: number, toContainer?: ItemContainer) => boolean;
   onMergeItem: (from: MergeItemRef, to: MergeItemRef) => void;
   onSplitItem: (item: ItemActionRef, count: number) => void;
-  onStoreItem: (item: MoveItemRef, toSlot: number) => void;
-  onTakeBackItem: (item: MoveItemRef, toSlot: number) => void;
+  onStoreItem: (item: MoveItemRef, toSlot: number) => boolean;
+  onTakeBackItem: (item: MoveItemRef, toSlot: number, toContainer: ItemContainer) => boolean;
   onRentExpandedStorage: () => void;
   onUnlockStorage: (password: string) => void;
   onSetStoragePassword: (currentPassword: string, newPassword: string) => void;
@@ -67,12 +71,16 @@ type InventoryWindowProps = {
 };
 
 export function InventoryWindow({
+  initialDeleteMode = false,
+  onCompatibilityInteraction,
   t,
   locale,
   activeTab,
   world,
   storageServiceOpenVersion,
+  storagePasswordOpenVersion = 0,
   onClose,
+  onCloseStorage,
   onTabChange,
   onUseItem,
   onDropItem,
@@ -91,7 +99,7 @@ export function InventoryWindow({
   onSortBag,
   onAutoArrangeBag,
 }: InventoryWindowProps) {
-  const [deleteMode, setDeleteMode] = useState(false);
+  const [deleteMode, setDeleteMode] = useState(initialDeleteMode);
   const [itemFilter, setItemFilter] = useState<InventoryItemFilter>("all");
   const [contextMenu, setContextMenu] = useState<{ item: DisplayItem; x: number; y: number } | null>(null);
   const [dragOverSlot, setDragOverSlot] = useState<number | null>(null);
@@ -106,6 +114,8 @@ export function InventoryWindow({
   const storageProtectionEnabled = world.requireStoragePassword || world.hasStoragePassword;
   const storageLocked = storageProtectionEnabled && !world.storageSessionUnlocked;
   const visibleItems = world.inventoryItems.filter((item) => item.container === activeTab);
+  const mailLocks=(world as DisplayWorld&{mailLockedUniqueIds?:number[]}).mailLockedUniqueIds??[];
+  function mailItemLocked(item:DisplayItem){return mailLocks.length>0&&(item.authoritativeUniqueId===undefined||mailLocks.includes(item.authoritativeUniqueId));}
   const storagePageStart = storagePageIndex * 80;
   const storagePageEnd = storagePageStart + 80;
   const storagePageLocked = storagePageIndex === 1 && !world.hasExpandedStorage;
@@ -123,7 +133,7 @@ export function InventoryWindow({
   const [goldDropAmount, setGoldDropAmount] = useState("100");
 
   useEffect(() => {
-    if (storageServiceOpenVersion <= 0) {
+    if (storageServiceOpenVersion <= 0 || initialDeleteMode) {
       return;
     }
 
@@ -150,7 +160,7 @@ export function InventoryWindow({
       setNewStoragePassword("");
       setConfirmStoragePassword("");
     }
-  }, [storageServiceOpenVersion, storageLocked, world.hasStoragePassword, world.requireStoragePassword]);
+  }, [initialDeleteMode, storageServiceOpenVersion, storageLocked, world.hasStoragePassword, world.requireStoragePassword]);
 
   useEffect(() => {
     if (!deleteFeedback) {
@@ -255,6 +265,7 @@ export function InventoryWindow({
     newStoragePassword !== confirmStoragePassword;
 
   function closeStorageWindow() {
+    onCloseStorage?.();
     setStorageMode(null);
     setPendingMoveItem(null);
     setPendingSplitItem(null);
@@ -277,6 +288,14 @@ export function InventoryWindow({
     }
     setShowStoragePasswordPanel(true);
   }
+
+  // One consumed service handoff opens the existing set/change/unlock form.
+  const consumedStoragePasswordVersionRef = useRef(0);
+  useEffect(() => {
+    if (storagePasswordOpenVersion <= 0 || consumedStoragePasswordVersionRef.current === storagePasswordOpenVersion) return;
+    consumedStoragePasswordVersionRef.current = storagePasswordOpenVersion;
+    openStoragePasswordPanel();
+  }, [storagePasswordOpenVersion]);
 
   function closeStoragePasswordPanel() {
     setShowStoragePasswordPanel(false);
@@ -321,6 +340,7 @@ export function InventoryWindow({
   }
 
   function activateInventoryItem(item: DisplayItem) {
+    if(mailItemLocked(item))return;
     (window as typeof window & { __mir2LastInventoryActivation?: Record<string, unknown> }).__mir2LastInventoryActivation = {
       key: item.key,
       name: item.name,
@@ -378,14 +398,21 @@ export function InventoryWindow({
           },
         );
       } else {
-        onMoveItem(
+        const submitted = onMoveItem(
           {
             uniqueId: pendingMoveItem.uniqueId,
+            authoritativeUniqueId: pendingMoveItem.authoritativeUniqueId,
             slot: pendingMoveItem.slot,
             container: pendingMoveItem.container,
           },
           item.slot,
+          item.container,
         );
+        if (!submitted) {
+          setDeleteFeedback(t("ui.itemActionFailed", [], "Item action failed."));
+          setPendingMoveItem(null);
+          return;
+        }
       }
       setDeleteFeedback(`${t("ui.inventory")}: ${pendingMoveItem.name} -> ${item.name}`);
       setPendingMoveItem(null);
@@ -398,6 +425,7 @@ export function InventoryWindow({
         {
           key: item.key,
           uniqueId: item.uniqueId,
+          authoritativeUniqueId: item.authoritativeUniqueId,
           slot: item.slot,
           container: item.container,
         },
@@ -407,6 +435,7 @@ export function InventoryWindow({
       onUseItem({
         key: item.key,
         uniqueId: item.uniqueId,
+        authoritativeUniqueId: item.authoritativeUniqueId,
         slot: item.slot,
         container: item.container,
       });
@@ -414,6 +443,7 @@ export function InventoryWindow({
   }
 
   function confirmSellItem(item: DisplayItem) {
+    if(mailItemLocked(item))return;
     (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
       action: "sell",
       key: item.key,
@@ -438,6 +468,7 @@ export function InventoryWindow({
   }
 
   function confirmDeleteItem(item: DisplayItem) {
+    if(mailItemLocked(item))return;
     (window as typeof window & { __mir2LastInventoryConfirmation?: Record<string, unknown> }).__mir2LastInventoryConfirmation = {
       action: "drop",
       key: item.key,
@@ -459,6 +490,7 @@ export function InventoryWindow({
   }
 
   function confirmSplitItem(item: DisplayItem) {
+    if(mailItemLocked(item))return;
     const count = Number.parseInt(splitCount, 10);
     if (!Number.isFinite(count) || count <= 0) {
       return;
@@ -502,9 +534,11 @@ export function InventoryWindow({
   }
 
   function runContextAction(item: DisplayItem, action: InventoryContextAction) {
+    if(mailItemLocked(item))return;
     const ref: ItemActionRef = {
       key: item.key,
       uniqueId: item.uniqueId,
+      authoritativeUniqueId: item.authoritativeUniqueId,
       slot: item.slot,
       container: item.container,
     };
@@ -541,7 +575,8 @@ export function InventoryWindow({
   const activeSortContainer: ItemContainer = activeTab === "quest" ? "bag1" : activeTab;
 
   return (
-    <div className={`window-shell inventory-window ${showStorageWindow ? "with-storage" : ""}`}>
+    <div className={`window-shell inventory-window ${showStorageWindow ? "with-storage" : ""}`}
+      onPointerDownCapture={onCompatibilityInteraction} onKeyDownCapture={onCompatibilityInteraction}>
       <img className="window-frame" src={ORIGINAL_UI.inventory.frame} alt="" draggable={false} />
 
       <div className="inventory-tab tab-one">
@@ -647,14 +682,20 @@ export function InventoryWindow({
 	                    ? (visibleStorageItems[0] ?? null)
 	                    : null;
 	              if (storageMode === "takeBack" && takeBackItem) {
-	                onTakeBackItem(
+	                const submitted = onTakeBackItem(
 	                  {
 	                    uniqueId: takeBackItem.uniqueId,
+	                    authoritativeUniqueId: takeBackItem.authoritativeUniqueId,
 	                    slot: takeBackItem.slot,
 	                    container: takeBackItem.container,
 	                  },
 	                  slotIndex,
+	                  activeTab,
 	                );
+	                if (!submitted) {
+	                  setDeleteFeedback(t("ui.itemActionFailed", [], "Item action failed."));
+	                  return;
+	                }
 	                setDeleteFeedback(`${t("ui.takeBackItem", [], "Take Back")}: ${takeBackItem.name} -> ${slot.key}`);
 	                setPendingMoveItem(null);
 	                return;
@@ -664,15 +705,19 @@ export function InventoryWindow({
                 setPendingMoveItem(null);
                 return;
               }
-              onMoveItem(
+              const submitted = onMoveItem(
                 {
                   uniqueId: pendingMoveItem.uniqueId,
+                  authoritativeUniqueId: pendingMoveItem.authoritativeUniqueId,
                   slot: pendingMoveItem.slot,
                   container: pendingMoveItem.container,
                 },
                 slotIndex,
+                activeTab,
               );
-              setDeleteFeedback(`${t("ui.inventory")}: ${pendingMoveItem.name} -> ${slot.key}`);
+              setDeleteFeedback(submitted
+                ? `${t("ui.inventory")}: ${pendingMoveItem.name} -> ${slot.key}`
+                : t("ui.itemActionFailed", [], "Item action failed."));
               setPendingMoveItem(null);
             }}
           />
@@ -688,6 +733,7 @@ export function InventoryWindow({
               key={`${item.container}-${item.slot}-${item.uniqueId}-${item.key}`}
               type="button"
               className="inventory-item-card"
+              disabled={mailItemLocked(item)}
               style={{ left: slot.x, top: slot.y, ...(dimmed ? { opacity: 0.28 } : null) }}
               data-filtered-out={dimmed ? "true" : undefined}
               aria-label={item.name}
@@ -1004,14 +1050,19 @@ export function InventoryWindow({
                       !storageLocked &&
                       !storagePageLocked
                     ) {
-                      onStoreItem(
+                      const submitted = onStoreItem(
                         {
                           uniqueId: pendingMoveItem.uniqueId,
+                          authoritativeUniqueId: pendingMoveItem.authoritativeUniqueId,
                           slot: pendingMoveItem.slot,
                           container: pendingMoveItem.container,
                         },
                         absoluteSlot,
                       );
+                      if (!submitted) {
+                        setDeleteFeedback(t("ui.itemActionFailed", [], "Item action failed."));
+                        return;
+                      }
                       setDeleteFeedback(
                         `${t("ui.storeItem", [], "Store Item")}: ${pendingMoveItem.name} -> ${absoluteSlot + 1}`,
                       );
@@ -1030,16 +1081,20 @@ export function InventoryWindow({
                         setPendingMoveItem(null);
                         return;
                       }
-                      onMoveItem(
+                      const submitted = onMoveItem(
                         {
                           uniqueId: pendingMoveItem.uniqueId,
+                          authoritativeUniqueId: pendingMoveItem.authoritativeUniqueId,
                           slot: pendingMoveItem.slot,
                           container: pendingMoveItem.container,
                         },
                         absoluteSlot,
+                        "storage",
                       );
                       setDeleteFeedback(
-                        `${t("ui.storageMode", [], "Storage items")}: ${pendingMoveItem.name} -> ${absoluteSlot + 1}`,
+                        submitted
+                          ? `${t("ui.storageMode", [], "Storage items")}: ${pendingMoveItem.name} -> ${absoluteSlot + 1}`
+                          : t("ui.itemActionFailed", [], "Item action failed."),
                       );
                       setPendingMoveItem(null);
                     }

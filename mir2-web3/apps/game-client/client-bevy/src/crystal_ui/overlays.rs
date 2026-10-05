@@ -1,7 +1,6 @@
 //! Operable native player windows: bag, equipment, inspect, death, menu, chat, mail, bigmap, shop, storage.
 
-#[path = "character_stats.rs"]
-pub mod character_stats;
+pub use super::character_stats;
 #[path = "game_shop_dialog.rs"]
 pub mod game_shop_dialog;
 #[path = "hero_dialog.rs"]
@@ -20,16 +19,13 @@ mod big_map_coordinates;
 use std::collections::VecDeque;
 
 use bevy::app::AppExit;
-use bevy::asset::{load_internal_asset, uuid_handle};
 use bevy::ecs::system::SystemParam;
 use bevy::input::keyboard::KeyboardInput;
 use bevy::input::mouse::{MouseScrollUnit, MouseWheel};
 use bevy::input::ButtonState;
 use bevy::prelude::*;
-use bevy::render::render_resource::{
-    AsBindGroup, BlendComponent, BlendFactor, BlendOperation, BlendState, RenderPipelineDescriptor,
-};
-use bevy::shader::{Shader, ShaderRef};
+#[cfg(test)]
+use bevy::render::render_resource::{BlendComponent, BlendFactor, BlendOperation, BlendState, RenderPipelineDescriptor};
 use bevy::text::{Justify, LineBreak, TextLayout};
 use bevy::ui::{
     AlignItems, BackgroundColor, Display, FlexDirection, FocusPolicy, Interaction, JustifyContent,
@@ -49,7 +45,12 @@ use crate::mail::{
     mail_claim_enabled, mail_date_label, mail_delete_enabled, MailAttachment, MailMessage,
     MailModel, MailOperationKind, MailPageCursor, MAX_MAIL_ATTACHMENTS,
 };
-use crate::mail_service::{MailServiceEvent, MailServiceInbox};
+use crate::mail_service::{MailServiceEvent, MailServiceInbox, MailServiceInboxMessage, MailServiceStreamEpoch, MailQuoteTicket, MailQuoteReceipt, MailQuoteOutcome, MailSendTicket, MailSendReceipt, MailSendOutcome, MailSendAcknowledgement};
+pub use mir2_client_core::mail_parcel::NativeQuoteToken;
+// Native host admission/controlled fixtures use these existing pure types
+// through client-bevy; the host needs no additional dependency or wire DTO.
+pub use mir2_client_core::mail_compose::{MailSendToken,MailSendDraft,prepare_send as prepare_native_mail_send};
+use mir2_client_core::mail_compose::{MailDraftClock,MailSendSlot,MailSendStream,MailSendPayload};
 use crate::map::MapModel;
 use crate::native_shell::{
     NativeShellModel, NativeShellScreen, NativeUiIntent, NativeUiIntentQueue,
@@ -62,7 +63,8 @@ use crate::pending_operations::{
 use crate::quest_model::NpcDialogModel;
 use crate::read_model::{UiReadModel, UiSurfaceSignals};
 use crate::shop::{
-    shop_buy_enabled, shop_buy_enabled_with_pearls, shop_quantity_clamped, shop_quantity_dec,
+    shop_buy_enabled, shop_buy_enabled_with_pearls, shop_buy_item_command, shop_buy_quantity_max,
+    shop_quantity_clamped, shop_quantity_dec,
     shop_quantity_inc, shop_sell_enabled, NpcShopServiceMode, NpcShopServiceSignal, ShopGood,
     ShopModel,
 };
@@ -86,8 +88,7 @@ use super::amount_input::{AmountKeyAction, CrystalAmountInput};
 mod mail_reader_drag;
 #[path = "mail_compose_drag.rs"]
 mod mail_compose_drag;
-#[path = "mail_editor.rs"]
-pub mod mail_editor;
+pub use super::mail_editor;
 #[path = "mail_text_adapter.rs"]
 pub mod mail_text_adapter;
 #[path = "mail_parcel.rs"]
@@ -97,6 +98,11 @@ mod options_volume;
 #[path = "mail_list.rs"]
 mod mail_list;
 use super::assets::CrystalButtonAssetSet;
+use super::bag_paint::{self, BagCellPolicy, BagPaintAction, BagPaintCellInfo, BagPaintOptions};
+use super::bag_paint::{
+    format_crystal_gold, inventory_second_tab_index, inventory_weight_bar_asset,
+    inventory_weight_bar_width, BagPaintGridViewport as OverlayInventoryGridViewport,
+};
 use super::guild_storage::{self, GuildGoldAction, GuildGoldPrompt, GuildStorageUi};
 use super::hud::{free_inventory_slots, CrystalHudAction};
 #[cfg(test)]
@@ -179,69 +185,11 @@ const NPC_GOODS_CELL_HEIGHT: f32 = 32.0;
 const NPC_GOODS_ICON_AREA_WIDTH: i32 = 40;
 const NPC_GOODS_NEW_ICON_ASSET: &str = "original-ui/Prguse/550.png";
 
-const CRYSTAL_ADDITIVE_UI_SHADER_HANDLE: Handle<Shader> =
-    uuid_handle!("7842d484-2b55-4b54-989d-cda47cd4c40a");
-
-/// Crystal `DXManager.SetBlend(true)` uses SourceAlpha + One for RGB. This
-/// material keeps CharacterDialog's `Prguse2.DrawBlend` wing layer distinct
-/// from the ordinary alpha-blended armour, weapon and hair images.
-#[derive(AsBindGroup, Asset, TypePath, Debug, Clone)]
-struct CrystalAdditiveUiMaterial {
-    #[texture(0)]
-    #[sampler(1)]
-    image: Handle<Image>,
-}
-
-/// Hold the four immutable material handles across per-frame overlay rebuilds
-/// so the render asset is not recreated before the GPU can prepare it.
-#[derive(Resource)]
-struct CrystalCharacterWingMaterials([Handle<CrystalAdditiveUiMaterial>; 4]);
-
-impl CrystalCharacterWingMaterials {
-    fn get(&self, index: u16) -> Option<&Handle<CrystalAdditiveUiMaterial>> {
-        self.0.get(usize::from(index.checked_sub(1202)?))
-    }
-}
-
-fn load_character_wing_materials(
-    mut commands: Commands,
-    asset_server: Res<AssetServer>,
-    mut materials: ResMut<Assets<CrystalAdditiveUiMaterial>>,
-) {
-    commands.insert_resource(CrystalCharacterWingMaterials(std::array::from_fn(
-        |offset| {
-            materials.add(CrystalAdditiveUiMaterial {
-                image: asset_server.load(format!("original-ui/Prguse2/{}.png", 1202 + offset)),
-            })
-        },
-    )));
-}
-
-const CRYSTAL_DRAW_BLEND_STATE: BlendState = BlendState {
-    color: BlendComponent {
-        src_factor: BlendFactor::SrcAlpha,
-        dst_factor: BlendFactor::One,
-        operation: BlendOperation::Add,
-    },
-    alpha: BlendComponent::OVER,
-};
-
-impl UiMaterial for CrystalAdditiveUiMaterial {
-    fn fragment_shader() -> ShaderRef {
-        CRYSTAL_ADDITIVE_UI_SHADER_HANDLE.into()
-    }
-
-    fn specialize(descriptor: &mut RenderPipelineDescriptor, _key: UiMaterialKey<Self>) {
-        if let Some(target) = descriptor
-            .fragment
-            .as_mut()
-            .and_then(|fragment| fragment.targets.first_mut())
-            .and_then(Option::as_mut)
-        {
-            target.blend = Some(CRYSTAL_DRAW_BLEND_STATE);
-        }
-    }
-}
+use super::character_materials::{CrystalCharacterWingMaterials, Mir2CharacterMaterialsPlugin};
+#[cfg(test)]
+use super::character_materials::{CRYSTAL_DRAW_BLEND_STATE, CRYSTAL_ADDITIVE_UI_SHADER_HANDLE, CrystalAdditiveUiMaterial};
+#[cfg(test)]
+use bevy::shader::ShaderRef;
 
 /// Overlay mutation must run before any `Res<NativePlayerUiState>` readers in
 /// the same Update. Unordered Res + ResMut on this resource panics Bevy B0001.
@@ -262,14 +210,7 @@ pub const HELP_PAGE_COUNT: u8 = 45;
 
 /// Pages exposed by Crystal's CharacterDialog.  The page is local UI state;
 /// values shown on each page still come from the authoritative read models.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-pub enum CharacterPage {
-    #[default]
-    Character,
-    Stats1,
-    Stats2,
-    Spells,
-}
+pub use super::panel_navigation::CharacterPage;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum GuildLeftPage {
@@ -464,68 +405,18 @@ pub const CRYSTAL_HELP_PANEL_RECT: CrystalRect = CrystalRect::new(244.0, 129.0, 
 /// `CharacterDialog.Location = (ScreenWidth - 264, 0)` at Crystal's fixed
 /// 1024x768 stage.
 pub const CRYSTAL_CHARACTER_PANEL_RECT: CrystalRect = CrystalRect::new(760.0, 0.0, 264.0, 380.0);
-const CRYSTAL_CHARACTER_PAGE_RECT: CrystalRect = CrystalRect::new(8.0, 90.0, 248.0, 284.0);
+const CRYSTAL_CHARACTER_PAGE_RECT: CrystalRect = super::panel_navigation::CHARACTER_PAGE_RECT;
 // CharacterDialog.cs:229-348 uses MirItemCell's default 36x32 hit size.
-const CRYSTAL_CHARACTER_EQUIPMENT_SLOTS: [(u32, CrystalRect); 14] = [
-    (0, CrystalRect::new(131.0, 97.0, 36.0, 32.0)),
-    (1, CrystalRect::new(171.0, 97.0, 36.0, 32.0)),
-    (2, CrystalRect::new(211.0, 97.0, 36.0, 32.0)),
-    (13, CrystalRect::new(211.0, 152.0, 36.0, 32.0)),
-    (4, CrystalRect::new(211.0, 188.0, 36.0, 32.0)),
-    (3, CrystalRect::new(211.0, 224.0, 36.0, 32.0)),
-    (5, CrystalRect::new(16.0, 260.0, 36.0, 32.0)),
-    (6, CrystalRect::new(211.0, 260.0, 36.0, 32.0)),
-    (7, CrystalRect::new(16.0, 296.0, 36.0, 32.0)),
-    (8, CrystalRect::new(211.0, 296.0, 36.0, 32.0)),
-    (9, CrystalRect::new(16.0, 332.0, 36.0, 32.0)),
-    (11, CrystalRect::new(56.0, 332.0, 36.0, 32.0)),
-    (10, CrystalRect::new(96.0, 332.0, 36.0, 32.0)),
-    (12, CrystalRect::new(136.0, 332.0, 36.0, 32.0)),
-];
-const CRYSTAL_MALE_HAIR_RECTS: [CrystalRect; 9] = [
-    CrystalRect::new(131.0, 173.0, 16.0, 14.0),
-    CrystalRect::new(127.0, 170.0, 20.0, 33.0),
-    CrystalRect::new(127.0, 174.0, 24.0, 16.0),
-    CrystalRect::new(118.0, 157.0, 36.0, 37.0),
-    CrystalRect::new(118.0, 157.0, 36.0, 37.0),
-    CrystalRect::new(118.0, 157.0, 36.0, 37.0),
-    CrystalRect::new(128.0, 173.0, 20.0, 23.0),
-    CrystalRect::new(128.0, 173.0, 20.0, 23.0),
-    CrystalRect::new(128.0, 173.0, 20.0, 22.0),
-];
-const CRYSTAL_ASSASSIN_MALE_HAIR_RECTS: [CrystalRect; 9] = [
-    CrystalRect::new(125.0, 147.0, 16.0, 21.0),
-    CrystalRect::new(120.0, 146.0, 28.0, 31.0),
-    CrystalRect::new(118.0, 150.0, 28.0, 26.0),
-    CrystalRect::new(104.0, 126.0, 44.0, 46.0),
-    CrystalRect::new(104.0, 126.0, 44.0, 46.0),
-    CrystalRect::new(104.0, 126.0, 44.0, 46.0),
-    CrystalRect::new(123.0, 149.0, 20.0, 26.0),
-    CrystalRect::new(123.0, 149.0, 20.0, 26.0),
-    CrystalRect::new(123.0, 149.0, 20.0, 26.0),
-];
-const CRYSTAL_FEMALE_HAIR_RECTS: [CrystalRect; 9] = [
-    CrystalRect::new(126.0, 171.0, 24.0, 25.0),
-    CrystalRect::new(128.0, 171.0, 20.0, 24.0),
-    CrystalRect::new(116.0, 160.0, 40.0, 38.0),
-    CrystalRect::new(126.0, 161.0, 28.0, 29.0),
-    CrystalRect::new(126.0, 161.0, 28.0, 29.0),
-    CrystalRect::new(126.0, 161.0, 28.0, 29.0),
-    CrystalRect::new(116.0, 167.0, 44.0, 31.0),
-    CrystalRect::new(116.0, 167.0, 44.0, 31.0),
-    CrystalRect::new(118.0, 168.0, 40.0, 30.0),
-];
-const CRYSTAL_ASSASSIN_FEMALE_HAIR_RECTS: [CrystalRect; 9] = [
-    CrystalRect::new(122.0, 156.0, 24.0, 24.0),
-    CrystalRect::new(125.0, 155.0, 20.0, 23.0),
-    CrystalRect::new(122.0, 149.0, 24.0, 32.0),
-    CrystalRect::new(122.0, 139.0, 32.0, 37.0),
-    CrystalRect::new(122.0, 139.0, 32.0, 37.0),
-    CrystalRect::new(122.0, 139.0, 32.0, 37.0),
-    CrystalRect::new(114.0, 149.0, 40.0, 33.0),
-    CrystalRect::new(114.0, 149.0, 40.0, 33.0),
-    CrystalRect::new(114.0, 149.0, 40.0, 33.0),
-];
+use super::character_page::{
+    crystal_character_page_index, crystal_character_paper_doll_layers,
+    crystal_character_wing_frame, render_character_paper_doll, spawn_character_layer,
+    CrystalCharacterBlend, CRYSTAL_CHARACTER_EQUIPMENT_SLOTS,
+};
+#[cfg(test)]
+use super::character_page::{
+    crystal_character_gender_offset, crystal_character_hair_frame,
+    crystal_character_state_item_frame,
+};
 const CRYSTAL_HELP_DRAG_HEADER_RECT: CrystalRect = CrystalRect::new(0.0, 0.0, 509.0, 35.0);
 const CRYSTAL_HELP_TITLE_RECT: CrystalRect = CrystalRect::new(18.0, 9.0, 45.0, 14.0);
 const HELP_MAX_LEFT: f32 = 1024.0 - CRYSTAL_HELP_PANEL_RECT.width - 1.0;
@@ -635,6 +526,7 @@ pub use crate::storage::{STORAGE_BASE_SIZE, STORAGE_EXPANDED_SIZE, STORAGE_EXPAN
 pub struct ItemInspect {
     pub container: u8,
     pub slot: u32,
+    pub unique_id: Option<u64>,
     pub key: String,
     pub name: String,
     pub quantity: u32,
@@ -809,6 +701,9 @@ fn queue_group_invite_by_name(
 
 #[derive(Debug, Clone, Resource, PartialEq)]
 pub struct NativePlayerUiState {
+    pub mail_draft_clock: MailDraftClock,
+    /// A shared revocation handle; the attempt slot remains owned by the queue.
+    pub(crate) npc_gold_buy_gate: Option<crate::npc_gold_buy_attempt::NpcGoldBuyGate>,
     /// The single authoritative core UI state used by the native adapter.
     /// `quest_ui` reads and writes this same field; it does not own another
     /// `UiState` resource.
@@ -1045,6 +940,7 @@ fn store_active_mail_draft(state: &mut NativePlayerUiState, compose: &mut MailCo
     let Some(draft) = state.core.mail_compose.take() else {
         return;
     };
+    state.mail_draft_clock.advance();
     match compose.kind {
         MailComposeKind::Letter => compose.letter_draft = Some(letter_draft(draft)),
         MailComposeKind::Parcel => compose.parcel_draft = Some(draft),
@@ -1058,14 +954,14 @@ fn activate_mail_compose(
     kind: MailComposeKind,
 ) {
     store_active_mail_draft(state, compose);
+    state.mail_draft_clock.advance();
     compose.kind = kind;
     state.core.mail_compose = match kind {
         MailComposeKind::Letter => compose.letter_draft.take().map(letter_draft),
         MailComposeKind::Parcel => compose.parcel_draft.take(),
     };
     compose.advance_draft_epoch();
-    dispatch_ui_action(
-        &mut state.core,
+    dispatch_native_ui_action(state,
         effects,
         mir2_ui_core::action::UiAction::OpenMailCompose,
     );
@@ -1087,6 +983,7 @@ fn begin_mail_recipient_prompt_with_parent(
 ) {
     let suspended_kind = compose.kind;
     let suspended_draft = state.core.mail_compose.take();
+    if suspended_draft.is_some(){state.mail_draft_clock.advance();}
     compose.recipient_prompt = Some(MailRecipientPrompt {
         recipient: String::new(),
         target_kind,
@@ -1101,6 +998,7 @@ fn begin_mail_recipient_prompt_with_parent(
 fn cancel_mail_recipient_prompt(state: &mut NativePlayerUiState, compose: &mut MailComposeUi) {
     if let Some(prompt) = compose.recipient_prompt.take() {
         compose.kind = prompt.suspended_kind;
+        state.mail_draft_clock.advance();
         state.core.mail_compose = prompt.suspended_draft;
         compose.advance_draft_epoch();
         if prompt.close_parent_on_cancel {
@@ -1134,8 +1032,7 @@ fn confirm_mail_recipient_prompt(
         }
     }
     activate_mail_compose(state, compose, effects, prompt.target_kind);
-    dispatch_ui_action(
-        &mut state.core,
+    dispatch_native_ui_action(state,
         effects,
         mir2_ui_core::action::UiAction::SetMailRecipient { recipient },
     );
@@ -1164,8 +1061,7 @@ fn process_queued_mail_letter_request(
     let mut fallback = UiEffectQueue::default();
     let effects = effects.as_deref_mut().unwrap_or(&mut fallback);
     activate_mail_compose(&mut state, &mut compose, effects, MailComposeKind::Letter);
-    dispatch_ui_action(
-        &mut state.core,
+    dispatch_native_ui_action(&mut state,
         effects,
         mir2_ui_core::action::UiAction::SetMailRecipient { recipient },
     );
@@ -1258,6 +1154,157 @@ pub struct StorageUiState {
 #[derive(Debug, Clone, Default, Resource, PartialEq, Eq)]
 pub struct ShopUiState {
     pub start_index: usize,
+    pub common: crate::npc_shop_ui::NpcShopUiState,
+    common_initialized: bool,
+    common_gate: Option<crate::npc_gold_buy_attempt::NpcGoldBuyGate>,
+}
+
+/// Host ownership is independent from the shared presentation/source stamp.
+#[derive(Component, Clone, Debug)]
+struct NativeNpcShopSource {
+    gate: crate::npc_gold_buy_attempt::NpcGoldBuyGate,
+}
+
+fn native_npc_shop_context(
+    state: &NativePlayerUiState,
+    shop: &ShopModel,
+    gate: &crate::npc_gold_buy_attempt::NpcGoldBuyGate,
+) -> crate::npc_shop_ui::NpcShopUiContext {
+    crate::npc_shop_ui::NpcShopUiContext {
+        source_revision: gate.ui_authority_revision(),
+        open: state.npc_shop_open(),
+        input_enabled: !state.amount_modal_open()
+            && !state.hero.input_consumed
+            && state.storage_password_prompt.is_none()
+            && !state.storage_password_input_consumed
+            && state.storage_rental_confirmation.is_none()
+            && !state.storage_rental_input_consumed
+            && !state.mail_delete_input_consumed
+            && state.mail_feedback_prompt.is_none()
+            && !state.mail_feedback_input_consumed
+            && !state.mail_recipient_prompt_active
+            && !state.mail_recipient_input_consumed
+            && state.mail_reader.is_none()
+            && !state.mail_reader_input_consumed
+            && state.game_shop_dialog.confirmation.is_none()
+            && !state.menu_pointer_consumed
+            && !state.keyboard.open
+            && !state.keyboard.input_consumed,
+        show_buy: shop.allows_buy() && (!shop.allows_sell() || state.npc_shop_buy_tab),
+    }
+}
+
+fn reconcile_native_npc_shop_ui(
+    state: &mut NativePlayerUiState,
+    shop_ui: &mut ShopUiState,
+    shop: &mut ShopModel,
+    inventory: &InventoryModel,
+    gate: &crate::npc_gold_buy_attempt::NpcGoldBuyGate,
+) -> crate::npc_shop_ui::NpcShopUiContext {
+    let context = native_npc_shop_context(state, shop, gate);
+    let previous_stamp = shop_ui.common.stamp();
+    let previous_gate = shop_ui.common_gate.clone();
+    let gate_changed = previous_gate.as_ref() != Some(gate);
+    // Preview changes before withdrawing. No local state changes ahead of the
+    // exact preentry cancellation, and no old presentation cancels a new owner.
+    let mut next = shop_ui.common.clone();
+    if gate_changed {
+        next.selected_id = None;
+        next.quantity = SHOP_QUANTITY_MIN;
+        next.start_index = 0;
+        next.invalidate_presentation();
+    }
+    let effect = next.reconcile(context, shop, inventory);
+    if let Some(previous) = &previous_gate {
+        if gate_changed {
+            previous.withdraw();
+        } else if effect.preentry_withdraw
+            && previous_stamp.is_some_and(|stamp| Some(stamp.source_revision) == context.source_revision)
+        {
+            // A new Core observation already retires the preceding source.
+            // Do not withdraw a request belonging to that newer observation.
+            previous.withdraw();
+        }
+    }
+    if !shop_ui.common_initialized
+        && crate::npc_shop_ui::ordinary_gold_surface(shop, context.show_buy)
+        && context.open && context.source_revision.is_some()
+    {
+        // One-time adoption of an already-open Native panel. Never seed again
+        // after catalog/owner/authority changes or reopen.
+        next.selected_id = shop.selected_id;
+        next.quantity = state.shop_quantity;
+        next.start_index = shop_ui.start_index;
+        next.invalidate_presentation();
+        shop_ui.common_initialized = true;
+    }
+    if shop_ui.common != next { shop_ui.common = next; }
+    if gate_changed { shop_ui.common_gate = Some(gate.clone()); }
+    if crate::npc_shop_ui::ordinary_gold_surface(shop, context.show_buy) && context.open {
+        if shop.selected_id != shop_ui.common.selected_id {
+            shop.selected_id = shop_ui.common.selected_id;
+        }
+        if state.shop_quantity != shop_ui.common.quantity {
+            state.shop_quantity = shop_ui.common.quantity;
+        }
+        if shop_ui.start_index != shop_ui.common.start_index {
+            shop_ui.start_index = shop_ui.common.start_index;
+        }
+    }
+    context
+}
+
+fn npc_shop_action(button: OverlayButton) -> Option<crate::npc_shop_ui::NpcShopUiAction> {
+    use crate::npc_shop_ui::NpcShopUiAction as Action;
+    Some(match button {
+        OverlayButton::SelectShopGood(id) => Action::Select(id),
+        OverlayButton::ShopQuantityInc => Action::QuantityInc,
+        OverlayButton::ShopQuantityDec => Action::QuantityDec,
+        OverlayButton::ShopPageUp => Action::PageUp,
+        OverlayButton::ShopPageDown => Action::PageDown,
+        OverlayButton::ShopBuy | OverlayButton::ShopConfirm => Action::Buy,
+        OverlayButton::CloseShop | OverlayButton::ShopCancel => Action::Close,
+        OverlayButton::ShopShowSell => Action::HandoffSell,
+        _ => return None,
+    })
+}
+
+fn npc_shop_overlay_action(action: crate::npc_shop_ui::NpcShopUiAction) -> OverlayButton {
+    use crate::npc_shop_ui::NpcShopUiAction as Action;
+    match action {
+        Action::Select(id) => OverlayButton::SelectShopGood(id),
+        Action::QuantityInc => OverlayButton::ShopQuantityInc,
+        Action::QuantityDec => OverlayButton::ShopQuantityDec,
+        Action::PageUp => OverlayButton::ShopPageUp,
+        Action::PageDown => OverlayButton::ShopPageDown,
+        Action::Buy => OverlayButton::ShopBuy,
+        Action::Close => OverlayButton::CloseShop,
+        Action::HandoffSell => OverlayButton::ShopShowSell,
+    }
+}
+
+fn apply_native_npc_shop_action(
+    action: crate::npc_shop_ui::NpcShopUiAction,
+    context: crate::npc_shop_ui::NpcShopUiContext,
+    state: &mut NativePlayerUiState,
+    shop_ui: &mut ShopUiState,
+    shop: &mut ShopModel,
+    inventory: &InventoryModel,
+    intents: &mut NativePlayerUiIntentQueue,
+) -> crate::npc_shop_ui::NpcShopUiEffect {
+    if crate::npc_shop_ui::action_retires_preentry(action) {
+        intents.withdraw_npc_gold_buy();
+    }
+    let effect = shop_ui.common.apply(action, context, shop, inventory, intents.npc_gold_buy_feedback());
+    shop.selected_id = shop_ui.common.selected_id;
+    state.shop_quantity = shop_ui.common.quantity;
+    shop_ui.start_index = shop_ui.common.start_index;
+    if let Some(command) = &effect.buy {
+        // The same planner is checked again by the existing reservation Gate.
+        // The controller does not allocate tokens or decide transport success.
+        let _ = intents.push_npc_gold_buy(shop, inventory, command.count);
+    }
+    effect
 }
 
 #[derive(SystemParam)]
@@ -1276,6 +1323,8 @@ impl Eq for NativePlayerUiState {}
 impl Default for NativePlayerUiState {
     fn default() -> Self {
         Self {
+            mail_draft_clock: MailDraftClock::default(),
+            npc_gold_buy_gate: None,
             core: mir2_ui_core::state::UiState {
                 screen: mir2_ui_core::state::UiScreen::InGame,
                 panel: mir2_ui_core::state::UiPanel::None,
@@ -1373,7 +1422,22 @@ impl Default for NativePlayerUiState {
 }
 
 impl NativePlayerUiState {
+    pub fn bind_npc_gold_buy_gate(&mut self, gate: crate::npc_gold_buy_attempt::NpcGoldBuyGate) {
+        if self.npc_gold_buy_gate.as_ref().is_some_and(|old| old != &gate) {
+            self.withdraw_bound_npc_gold_buy();
+        }
+        self.npc_gold_buy_gate = Some(gate);
+    }
+    pub(crate) fn withdraw_bound_npc_gold_buy(&self) {
+        if let Some(gate) = &self.npc_gold_buy_gate { gate.withdraw(); }
+    }
+    fn withdraw_npc_gold_buy_before_panel(&self, next: &mir2_ui_core::state::UiState) {
+        if self.npc_shop_open() && !next.npc_shop_open() { self.withdraw_bound_npc_gold_buy(); }
+    }
     fn apply(&mut self, action: mir2_ui_core::action::UiAction) {
+        let before=self.core.mail_compose.clone();
+        let was_mail_open=self.mail_open();
+        let replacement=matches!(&action,mir2_ui_core::action::UiAction::OpenMailCompose|mir2_ui_core::action::UiAction::CancelMailCompose);
         let is_panel = matches!(
             action,
             mir2_ui_core::action::UiAction::OpenInventory
@@ -1398,7 +1462,10 @@ impl NativePlayerUiState {
         if is_panel && self.core.screen != mir2_ui_core::state::UiScreen::InGame {
             self.core.screen = mir2_ui_core::state::UiScreen::InGame;
         }
-        self.core = mir2_ui_core::reducer::reduce(&self.core, action).state;
+        let next = mir2_ui_core::reducer::reduce(&self.core, action).state;
+        self.withdraw_npc_gold_buy_before_panel(&next);
+        self.core = next;
+        if replacement||before!=self.core.mail_compose||(before.is_some()&&was_mail_open!=self.mail_open()){self.mail_draft_clock.advance();}
     }
 
     pub fn inventory_open(&self) -> bool {
@@ -1472,7 +1539,8 @@ impl NativePlayerUiState {
             self.inventory_item_drag = None;
             return;
         }
-        self.apply(mir2_ui_core::action::UiAction::OpenInventory);
+        let next = self.shared_navigation(super::panel_navigation::PanelAction::Bag);
+        if next.bag_open != self.inventory_open() { self.apply(mir2_ui_core::action::UiAction::OpenInventory); }
         if !self.inventory_open() {
             self.inventory_window.end_drag();
             self.inventory_window.clear_cursor();
@@ -1487,7 +1555,7 @@ impl NativePlayerUiState {
             self.equipment_item_drag = None;
             return;
         }
-        self.apply(mir2_ui_core::action::UiAction::OpenCharacter);
+        self.activate_character_hud_button();
     }
     fn activate_character_hud_button(&mut self) {
         // Crystal's main Character button closes only when the dialog is
@@ -1503,14 +1571,14 @@ impl NativePlayerUiState {
             self.equipment_item_drag = None;
             return;
         }
-        if self.equipment_open() && self.character_page == CharacterPage::Character {
+        let next = super::panel_navigation::reduce(super::panel_navigation::PanelNavigation {
+            character_open:self.equipment_open(),character_page:self.character_page,
+            bag_open:self.inventory_open(),quest_open:self.quest_open(),
+        }, super::panel_navigation::PanelAction::Character);
+        if next.character_open != self.equipment_open() {
             self.apply(mir2_ui_core::action::UiAction::OpenCharacter);
-            return;
         }
-        if !self.equipment_open() {
-            self.apply(mir2_ui_core::action::UiAction::OpenCharacter);
-        }
-        self.character_page = CharacterPage::Character;
+        self.character_page = next.character_page;
     }
     pub fn toggle_menu(&mut self) {
         self.apply(mir2_ui_core::action::UiAction::OpenMenu);
@@ -1538,7 +1606,14 @@ impl NativePlayerUiState {
         self.character_page = CharacterPage::Spells;
     }
     pub fn toggle_quest(&mut self) {
-        self.apply(mir2_ui_core::action::UiAction::OpenQuestLog);
+        let next = self.shared_navigation(super::panel_navigation::PanelAction::Quest);
+        if next.quest_open != self.quest_open() { self.apply(mir2_ui_core::action::UiAction::OpenQuestLog); }
+    }
+    fn shared_navigation(&self, action:super::panel_navigation::PanelAction)->super::panel_navigation::PanelNavigation {
+        super::panel_navigation::reduce(super::panel_navigation::PanelNavigation {
+            character_open:self.equipment_open(),character_page:self.character_page,
+            bag_open:self.inventory_open(),quest_open:self.quest_open(),
+        },action)
     }
     pub fn toggle_options(&mut self) {
         self.apply(mir2_ui_core::action::UiAction::OpenOptions);
@@ -1618,11 +1693,35 @@ impl NativePlayerUiState {
         self.blocks_world_click_with_panel(self.core.blocks_world_click())
     }
 
+    /// The Quest Diary is a window, not a full-world pointer modal. The
+    /// native sender checks its actual Bevy panel geometry before issuing a
+    /// world command; the hover producer must retain the cursor outside it.
+    /// Every other UI blocker remains shared with `blocks_world_click`.
+    pub fn blocks_world_click_except_quest_log(&self) -> bool {
+        self.blocks_world_click_with_panel(self.panel_blocks_world_except_quest_log())
+    }
+
+    fn panel_blocks_world_except_quest_log(&self) -> bool {
+        if self.quest_open() {
+            self.core.chat_focused()
+        } else {
+            self.core.blocks_world_click()
+        }
+    }
+
     /// Inventory is non-modal: its visible bounds capture the pointer, not
     /// the entire world. Item transactions and other dialogs remain guarded.
     pub fn blocks_world_pointer_at(&self, x: f32, y: f32) -> bool {
+        self.blocks_world_pointer_at_with_panel(x, y, self.core.blocks_world_click())
+    }
+
+    pub fn blocks_world_pointer_at_except_quest_log(&self, x: f32, y: f32) -> bool {
+        self.blocks_world_pointer_at_with_panel(x, y, self.panel_blocks_world_except_quest_log())
+    }
+
+    fn blocks_world_pointer_at_with_panel(&self, x: f32, y: f32, panel_blocks: bool) -> bool {
         if !self.inventory_open() {
-            return self.blocks_world_click();
+            return self.blocks_world_click_with_panel(panel_blocks);
         }
         if self.storage_open()
             && x >= 0.0
@@ -1731,6 +1830,8 @@ impl NativePlayerUiState {
         self.core.chat_focused()
     }
     pub fn close_windows(&mut self) {
+        self.withdraw_bound_npc_gold_buy();
+        if self.mail_open()&&self.core.mail_compose.is_some(){self.mail_draft_clock.advance();}
         self.skill_assign = Default::default();
         self.core.panel = mir2_ui_core::state::UiPanel::None;
         self.core.options_draft = None;
@@ -1865,6 +1966,9 @@ impl NativePlayerUiState {
     }
 
     pub fn reset_session(&mut self) {
+        self.withdraw_bound_npc_gold_buy();
+        let npc_gold_buy_gate = self.npc_gold_buy_gate.clone();
+        let mail_clock=self.mail_draft_clock.clone();mail_clock.advance();
         let options = self.core.options.clone();
         let chat_settings = self.core.chat_settings;
         let game_shop_had_pending = self.core.game_shop_pending.is_some();
@@ -1872,6 +1976,8 @@ impl NativePlayerUiState {
         keyboard.spell_target_lock = false;
         keyboard.hide();
         *self = Self::default();
+        self.mail_draft_clock=mail_clock;
+        self.npc_gold_buy_gate = npc_gold_buy_gate;
         self.keyboard = keyboard;
         // Options are application-scoped rather than character/session-scoped.
         // Keep the loaded/applied values when the shell leaves InGame so a
@@ -1884,12 +1990,17 @@ impl NativePlayerUiState {
         &mut self,
         receipt: &crate::game_shop::GameShopReceipt,
     ) {
+        self.withdraw_bound_npc_gold_buy();
+        let npc_gold_buy_gate = self.npc_gold_buy_gate.clone();
+        let mail_clock=self.mail_draft_clock.clone();mail_clock.advance();
         let options = self.core.options.clone();
         let chat_settings = self.core.chat_settings;
         let mut keyboard = std::mem::take(&mut self.keyboard);
         keyboard.spell_target_lock = false;
         keyboard.hide();
         *self = Self::default();
+        self.mail_draft_clock=mail_clock;
+        self.npc_gold_buy_gate = npc_gold_buy_gate;
         self.keyboard = keyboard;
         self.core.options = options;
         self.core.chat_settings = chat_settings;
@@ -2018,6 +2129,16 @@ impl UiEffectQueue {
 }
 
 /// Apply a shared action and retain every typed adapter effect for the host.
+pub(crate) fn dispatch_native_ui_action(state:&mut NativePlayerUiState,effects:&mut UiEffectQueue,action:mir2_ui_core::action::UiAction)->mir2_ui_core::reducer::Transition {
+    let before=state.core.mail_compose.clone();
+    let was_mail_open=state.mail_open();
+    let replacement=matches!(&action,mir2_ui_core::action::UiAction::OpenMailCompose|mir2_ui_core::action::UiAction::CancelMailCompose);
+    let mut next = state.core.clone();
+    let transition=dispatch_ui_action(&mut next,effects,action);
+    state.withdraw_npc_gold_buy_before_panel(&next);
+    state.core = next;
+    if replacement||before!=state.core.mail_compose||(before.is_some()&&was_mail_open!=state.mail_open()){state.mail_draft_clock.advance();}transition
+}
 pub fn dispatch_ui_action(
     core: &mut mir2_ui_core::state::UiState,
     effects: &mut UiEffectQueue,
@@ -2283,6 +2404,8 @@ pub enum NativePlayerUiIntent {
         item_index: u64,
         count: u16,
     },
+    /// Internal local correlation only; BuyItem wire is unchanged.
+    NpcGoldBuy {token:crate::npc_gold_buy_attempt::NpcGoldBuyAttemptToken,item_index:u64,count:u16},
     SellItem {
         unique_id: u64,
         count: u16,
@@ -2384,7 +2507,8 @@ impl NativePlayerUiIntent {
             | Self::DeleteMail { .. }
             | Self::LockMail { .. }
             | Self::MailCost { .. }
-            | Self::MailLockItem { .. } => None,
+            | Self::MailLockItem { .. }
+            | Self::NpcGoldBuy { .. } => None,
             Self::ClaimMail { mail_id } => Some(PendingOperationKey::ClaimMail(*mail_id)),
             Self::SendMail {
                 recipient,
@@ -2535,9 +2659,141 @@ pub struct NativePlayerUiIntentQueue {
     storage_request_ids: StorageRequestIdGenerator,
     /// Crystal GameScene.UseItemTime is shared by player and Hero entry points.
     use_item_until_ms: u64,
+    mail_quote:Option<NativeMailQuotePublication>,
+    mail_send:MailSendSlot<NativeMailSendPublication>,
+    npc_gold_buy:crate::npc_gold_buy_attempt::NpcGoldBuyGate,
+}
+
+#[derive(Debug,Clone,PartialEq,Eq)]
+struct NativeMailSendPublication {
+    draft:MailSendDraft,payload:MailSendPayload,ticket:Option<MailSendTicket>,
+    queued:bool,queue_position:usize,gateway_drained:bool,local_unsent:bool,
+}
+
+#[derive(Debug)]
+struct NativeMailQuotePublication {
+    token:NativeQuoteToken,epoch:MailServiceStreamEpoch,ticket:Option<MailQuoteTicket>,queued:bool,local_unsent:bool,
 }
 
 impl NativePlayerUiIntentQueue {
+    pub fn npc_gold_buy_gate(&self) -> crate::npc_gold_buy_attempt::NpcGoldBuyGate { self.npc_gold_buy.clone() }
+    pub fn npc_gold_buy_feedback(&self) -> crate::npc_gold_buy_attempt::NpcGoldBuyFeedback { self.npc_gold_buy.feedback() }
+    pub fn observe_npc_gold_buy_connection(&self, epoch:crate::npc_gold_buy_attempt::NpcGoldBuyConnectionEpoch)->bool {
+        self.npc_gold_buy.observe_connection(epoch)
+    }
+    pub fn observe_npc_gold_buy(&self, owner:&str, revision:u64, model:&str, available:bool)->bool {
+        self.npc_gold_buy.observe(owner,revision,model,available)
+    }
+    pub fn withdraw_npc_gold_buy(&self) { self.npc_gold_buy.withdraw(); }
+    pub fn reject_unpublished_npc_gold_buy(&self,token:crate::npc_gold_buy_attempt::NpcGoldBuyAttemptToken)->bool {
+        self.npc_gold_buy.reject_unpublished(token)
+    }
+    pub fn push_npc_gold_buy(&mut self,shop:&ShopModel,inventory:&InventoryModel,quantity:u16)->bool {
+        if self.intents.len()>=MAX_QUEUED { return false; }
+        let Some((token,command))=self.npc_gold_buy.reserve(shop,inventory,quantity) else{return false;};
+        // This is a local attempt, not a server-ACK PendingOperationKey::Buy.
+        self.intents.push_back(NativePlayerUiIntent::NpcGoldBuy {token,item_index:command.item_index,count:command.count}); true
+    }
+    pub fn drain_for_gateway_with_npc_gold_buy(&mut self)->Vec<(NativePlayerUiIntent,Option<NativeQuoteToken>,Option<MailSendToken>,Option<crate::npc_gold_buy_attempt::NpcGoldBuyAttemptToken>)> {
+        let publication=&mut self.mail_quote;
+        let send=&mut self.mail_send;
+        self.intents.drain(..).enumerate().map(|(index,intent)|{
+            let buy_token=match &intent{NativePlayerUiIntent::NpcGoldBuy{token,..}=>Some(*token),_=>None};
+            let send_token=send.flight_mut().and_then(|flight|{
+                if flight.value.queued&&flight.value.queue_position==index{flight.value.queued=false;flight.value.gateway_drained=true;Some(flight.token)}else{None}
+            });
+            let token=publication.as_mut().and_then(|quote|{
+                if quote.queued&&matches!(intent,NativePlayerUiIntent::MailCost{..}){quote.queued=false;Some(quote.token)}else{None}
+            });(intent,token,send_token,buy_token)
+        }).collect()
+    }
+
+    pub fn mail_send_token(&self)->Option<MailSendToken>{self.mail_send.flight().map(|flight|flight.token)}
+    pub fn mail_send_ticket(&self)->Option<MailSendTicket>{self.mail_send.flight()?.value.ticket}
+    fn observe_mail_send_stream(&mut self,epoch:Option<MailServiceStreamEpoch>,pending:&mut PendingOperations){
+        let Some(epoch)=epoch.filter(|epoch|epoch.is_valid())else{return;};
+        let stream=MailSendStream{run:epoch.run,connection:epoch.connection};
+        if let Some(old)=self.mail_send.flight().filter(|flight|stream>flight.stream){pending.settle_native_mail_send(old.token.value(),old.value.ticket);self.intents.retain(|intent|!matches!(intent,NativePlayerUiIntent::SendMail{..}));}
+        self.mail_send.start_stream(stream);
+    }
+    pub fn push_mail_send(&mut self,pending:&mut PendingOperations,epoch:MailServiceStreamEpoch,owner:u64,draft:MailSendDraft,payload:MailSendPayload,intent:NativePlayerUiIntent)->bool {
+        if self.intents.len()>=MAX_QUEUED||draft.generation==0||!matches!(intent,NativePlayerUiIntent::SendMail{..}){return false;}
+        if mir2_client_core::mail_compose::prepare_send(&draft.recipient,&draft.message,draft.gold,&draft.attachment_unique_ids).as_ref()!=Ok(&payload)||draft.stamped&&!draft.parcel{return false;}
+        if !matches!(&intent,NativePlayerUiIntent::SendMail{recipient,message,gold,attachment_unique_ids,stamped} if recipient==&payload.recipient&&message==&payload.message&&gold==&payload.gold&&attachment_unique_ids==&payload.attachment_unique_ids&&stamped==&draft.stamped){return false;}
+        self.observe_mail_send_stream(Some(epoch),pending);
+        let Some(key)=intent.pending_key()else{return false;};
+        let Some(token)=self.mail_send.reserve(MailSendStream{run:epoch.run,connection:epoch.connection},owner,NativeMailSendPublication{draft,payload,ticket:None,queued:true,queue_position:self.intents.len(),gateway_drained:false,local_unsent:false})else{return false;};
+        if !pending.begin_native_mail_send(token.value(),key){self.mail_send.cancel_unsent(token);return false;}
+        self.intents.push_back(intent);true
+    }
+    pub fn take_drained_mail_send_token(&mut self)->Option<MailSendToken>{
+        let flight=self.mail_send.flight_mut()?;if !flight.value.gateway_drained{return None;}flight.value.gateway_drained=false;Some(flight.token)
+    }
+    pub fn bind_mail_send(&mut self,token:MailSendToken,ticket:MailSendTicket,pending:&mut PendingOperations)->bool {
+        let Some(flight)=self.mail_send.flight_mut()else{return false;};
+        if flight.token!=token||flight.value.queued||flight.value.local_unsent||flight.value.ticket.is_some()||!ticket.is_valid()||ticket.local_send_token!=token.value()||flight.stream!=(MailSendStream{run:ticket.run,connection:ticket.connection}){return false;}
+        if !pending.bind_native_mail_send(token.value(),ticket){return false;}flight.value.ticket=Some(ticket);flight.value.gateway_drained=false;true
+    }
+    pub fn reject_unpublished_mail_send(&mut self,token:MailSendToken)->bool {
+        let Some(flight)=self.mail_send.flight_mut()else{return false;};if flight.token!=token||flight.value.ticket.is_some(){return false;}flight.value.local_unsent=true;flight.value.queued=false;true
+    }
+    pub fn rollback_mail_send(&mut self,token:MailSendToken,ticket:MailSendTicket,pending:&mut PendingOperations)->bool{
+        if !self.mail_send.flight().is_some_and(|flight|flight.token==token&&flight.value.ticket==Some(ticket)&&!flight.entered){return false;}
+        pending.settle_native_mail_send(token.value(),Some(ticket));self.mail_send.cancel_unsent(token);true
+    }
+    fn settle_local_unsent_mail_send(&mut self,pending:&mut PendingOperations){
+        let Some(token)=self.mail_send.flight().filter(|flight|flight.value.local_unsent&&flight.value.ticket.is_none()).map(|flight|flight.token)else{return;};
+        if self.mail_send.cancel_unsent(token).is_some(){pending.settle_native_mail_send(token.value(),None);}
+    }
+    fn apply_mail_send_receipt(&mut self,receipt:MailSendReceipt,pending:&mut PendingOperations){
+        let Some(token)=self.mail_send.flight().filter(|flight|flight.value.ticket==Some(receipt.ticket)).map(|flight|flight.token)else{return;};
+        match receipt.outcome {MailSendOutcome::DefinitelyUnsent=>{if self.mail_send.cancel_unsent(token).is_some(){pending.settle_native_mail_send(token.value(),Some(receipt.ticket));}},MailSendOutcome::Entered=>{self.mail_send.enter(token);},MailSendOutcome::Flushed|MailSendOutcome::Unknown=>{}}
+    }
+    pub fn mail_quote_token(&self)->Option<NativeQuoteToken>{self.mail_quote.as_ref().map(|quote|quote.token)}
+    pub fn mail_quote_ticket(&self)->Option<MailQuoteTicket>{self.mail_quote.as_ref()?.ticket}
+    pub fn push_mail_quote(&mut self,token:NativeQuoteToken,epoch:MailServiceStreamEpoch,intent:NativePlayerUiIntent)->bool {
+        if self.mail_quote.is_some()||!epoch.is_valid()||!matches!(intent,NativePlayerUiIntent::MailCost{..}){return false;}
+        if !self.push_transient_unique(intent){return false;}
+        self.mail_quote=Some(NativeMailQuotePublication{token,epoch,ticket:None,queued:true,local_unsent:false});true
+    }
+    /// The token is attached by queue position, never by draft/amount matching.
+    pub fn drain_for_gateway(&mut self)->Vec<(NativePlayerUiIntent,Option<NativeQuoteToken>)> {
+        self.drain_for_gateway_with_send().into_iter().map(|(intent,quote,_)|(intent,quote)).collect()
+    }
+    pub fn drain_for_gateway_with_send(&mut self)->Vec<(NativePlayerUiIntent,Option<NativeQuoteToken>,Option<MailSendToken>)> {
+        self.drain_for_gateway_with_npc_gold_buy().into_iter().map(|(intent,quote,send,buy)|{
+            if let Some(token)=buy{self.npc_gold_buy.reject_unpublished(token);} (intent,quote,send)
+        }).collect()
+    }
+    pub fn bind_mail_quote(&mut self,token:NativeQuoteToken,ticket:MailQuoteTicket)->bool {
+        let Some(quote)=self.mail_quote.as_mut()else{return false;};
+        if quote.token!=token||quote.queued||quote.local_unsent||quote.ticket.is_some()||!ticket.is_valid()||ticket.local_quote_token!=token.value()||ticket.epoch()!=quote.epoch{return false;}
+        quote.ticket=Some(ticket);true
+    }
+    pub fn reject_unpublished_mail_quote(&mut self,token:NativeQuoteToken)->bool {
+        let Some(quote)=self.mail_quote.as_mut()else{return false;};
+        if quote.token!=token||quote.ticket.is_some(){return false;}
+        quote.local_unsent=true;true
+    }
+    pub fn rollback_mail_quote(&mut self,token:NativeQuoteToken,ticket:MailQuoteTicket)->bool {
+        let Some(quote)=self.mail_quote.as_mut()else{return false;};
+        if quote.token!=token||quote.ticket!=Some(ticket){return false;}
+        quote.ticket=None;quote.local_unsent=true;true
+    }
+    fn take_local_unsent_mail_quote(&mut self)->Option<NativeQuoteToken> {
+        if !self.mail_quote.as_ref().is_some_and(|quote|quote.local_unsent&&quote.ticket.is_none()){return None;}
+        self.mail_quote.take().map(|quote|quote.token)
+    }
+    fn claim_mail_quote_receipt(&mut self,receipt:MailQuoteReceipt)->Option<NativeQuoteToken> {
+        let quote=self.mail_quote.as_ref()?;
+        if quote.ticket!=Some(receipt.ticket)||quote.token.value()!=receipt.ticket.local_quote_token||quote.epoch!=receipt.ticket.epoch(){return None;}
+        self.mail_quote.take().map(|quote|quote.token)
+    }
+    fn observe_mail_stream(&mut self,epoch:Option<MailServiceStreamEpoch>) {
+        if epoch.is_some_and(|epoch|epoch.is_valid()&&self.mail_quote.as_ref().is_some_and(|quote|epoch>quote.epoch)){
+            self.intents.retain(|intent|!matches!(intent,NativePlayerUiIntent::MailCost{..}));self.mail_quote=None;
+        }
+    }
     pub fn use_item_ready(&self, now: u64) -> bool {
         now >= self.use_item_until_ms
     }
@@ -2609,8 +2865,14 @@ impl NativePlayerUiIntentQueue {
             }) else {
                 return false;
             };
-            self.intents.remove(index);
+            let removed=self.intents.remove(index);
+            if let Some(NativePlayerUiIntent::NpcGoldBuy{token,..})=removed.as_ref(){self.npc_gold_buy.reject_unpublished(*token);}
+            if let Some(flight)=self.mail_send.flight_mut(){if flight.value.queued{if index==flight.value.queue_position{flight.value.queued=false;flight.value.local_unsent=true;}else if index<flight.value.queue_position{flight.value.queue_position-=1;}}}
+            if matches!(removed,Some(NativePlayerUiIntent::MailCost{..})) {
+                if let Some(quote)=self.mail_quote.as_mut(){if quote.queued&&quote.ticket.is_none(){quote.queued=false;quote.local_unsent=true;}}
+            }
         }
+        if uses_item{self.npc_gold_buy.withdraw();}
         self.intents.push_back(intent);
         if uses_item {
             self.commit_item_use(now, delay);
@@ -2754,6 +3016,11 @@ impl NativePlayerUiIntentQueue {
     }
 
     pub fn drain_intents(&mut self) -> Vec<NativePlayerUiIntent> {
+        // A non-gateway drain cannot publish the tracked request. Retire only
+        // its never-bound token; an already published ticket stays unresolved.
+        if let Some(quote)=self.mail_quote.as_mut(){if quote.queued&&quote.ticket.is_none(){quote.queued=false;quote.local_unsent=true;}}
+        if let Some(flight)=self.mail_send.flight_mut(){if flight.value.queued&&flight.value.ticket.is_none(){flight.value.queued=false;flight.value.local_unsent=true;}}
+        for intent in &self.intents{if let NativePlayerUiIntent::NpcGoldBuy{token,..}=intent{self.npc_gold_buy.reject_unpublished(*token);}}
         self.intents.drain(..).collect()
     }
 
@@ -2783,6 +3050,7 @@ impl NativePlayerUiIntentQueue {
         if !pending.try_begin(key.clone()) {
             return false;
         }
+        self.npc_gold_buy.withdraw();
         if !self.push_intent(intent) {
             pending.release(&key);
             return false;
@@ -2907,7 +3175,10 @@ impl NativePlayerUiIntentQueue {
     }
 
     pub fn clear(&mut self) {
+        self.npc_gold_buy.withdraw();
         self.intents.clear();
+        if let Some(quote)=self.mail_quote.as_mut(){if quote.ticket.is_none(){quote.queued=false;quote.local_unsent=true;}}
+        if let Some(flight)=self.mail_send.flight_mut(){if flight.value.ticket.is_none(){flight.value.queued=false;flight.value.local_unsent=true;}}
     }
 }
 
@@ -3049,9 +3320,6 @@ struct OverlayShop;
 
 #[derive(Component)]
 struct OverlayGameShop;
-
-#[derive(Component)]
-struct OverlayInventoryGridViewport;
 
 #[derive(Component)]
 struct OverlaySkillListViewport;
@@ -3215,8 +3483,10 @@ enum OverlayButton {
     ArmMergeInspected,
     CancelInventoryOperation,
     InspectBag(u32),
+    InspectBagSnapshot { slot: u32, unique_id: Option<u64> },
     InspectQuest(u32),
     InspectEquip(u32),
+    InspectEquipSnapshot { slot: u32, unique_id: Option<u64> },
     SelectCharacterPage(CharacterPage),
     SelectInventoryPage(u8),
     SelectSkill(u32),
@@ -3306,17 +3576,21 @@ enum OverlayButton {
 
 #[derive(SystemParam)]
 struct OverlayButtonControls<'w, 's> {
+    mail_inbox: Option<Res<'w,MailServiceInbox>>,
+    mail_reset: Option<Res<'w,SessionResetRevision>>,
     big_map: BigMapControls<'w>,
     mail_ui: ResMut<'w, MailUiState>,
     parcel_ui: Option<ResMut<'w, mail_parcel::MailParcelUi>>,
     storage_ui: ResMut<'w, StorageUiState>,
     shop_ui: ResMut<'w, ShopUiState>,
     ui_audio: ResMut<'w, crate::audio::NativeUiAudioQueue>,
-    buttons: Query<'w, 's, (&'static Interaction, &'static OverlayButton), Changed<Interaction>>,
+    buttons: Query<'w, 's, (&'static Interaction, &'static OverlayButton, Option<&'static crate::npc_shop_ui::NpcShopUiStamp>, Option<&'static NativeNpcShopSource>), Changed<Interaction>>,
 }
 
 #[derive(SystemParam)]
 pub(crate) struct OverlayKeyboardControls<'w> {
+    shop: Option<ResMut<'w, ShopModel>>,
+    shop_ui: Option<ResMut<'w, ShopUiState>>,
     surface_signals: Option<ResMut<'w, UiSurfaceSignals>>,
     ui_audio: ResMut<'w, crate::audio::NativeUiAudioQueue>,
     ui: Option<Res<'w, UiReadModel>>,
@@ -3361,9 +3635,41 @@ fn process_mail_service_inbox(
     mut compose: ResMut<MailComposeUi>,
     inventory: Res<InventoryModel>,
     mut parcel: ResMut<mail_parcel::MailParcelUi>,
-    pending: Res<PendingOperations>,
+    mut pending: ResMut<PendingOperations>,
+    reset: Option<Res<SessionResetRevision>>,
+    mut intents:ResMut<NativePlayerUiIntentQueue>,
 ) {
-    for event in inbox.drain() {
+    // Establish socket identity before owner reset AND receipts. A newer
+    // stream resets the ledger once; same-stream resets retain its tombstone.
+    parcel.bind_draft_clock(state.mail_draft_clock.clone());
+    parcel.observe_stream(inbox.stream_epoch());
+    parcel.observe_stream_failure(inbox.is_stream_failed());
+    intents.observe_mail_stream(inbox.stream_epoch());
+    intents.observe_mail_send_stream(inbox.stream_epoch(),&mut pending);
+    intents.mail_send.retire_owner(reset.as_deref().map_or(0,|revision|revision.0));
+    intents.settle_local_unsent_mail_send(&mut pending);
+    if let Some(token)=intents.take_local_unsent_mail_quote(){parcel.reject_native_unsent_quote(token);}
+    let _=parcel.session_reset(reset.as_deref().map_or(0,|revision|revision.0));
+    for message in inbox.drain_ordered() {
+        let delivery = match message {
+            MailServiceInboxMessage::StreamStarted(marker) => { parcel.observe_stream(Some(marker.epoch)); continue; }
+            MailServiceInboxMessage::Delivery(delivery) => delivery,
+            MailServiceInboxMessage::QuoteReceipt(receipt)=>{
+                if parcel.stream_epoch()==Some(receipt.ticket.epoch()) {
+                    if let Some(token)=intents.claim_mail_quote_receipt(receipt){match receipt.outcome {
+                        MailQuoteOutcome::DefinitelyUnsent=>{parcel.reject_native_unsent_quote(token);}
+                        MailQuoteOutcome::Entered{at_ms}=>{parcel.enter_native_quote(token,at_ms);}
+                    }}
+                }
+                continue;
+            }
+            MailServiceInboxMessage::SendReceipt(receipt)=>{intents.apply_mail_send_receipt(receipt,&mut pending);continue;}
+            MailServiceInboxMessage::SendAcknowledgement(ack)=>{
+                consume_native_mail_send_ack(ack,&mut intents,&mut pending,&mut state,&mut compose,&mut parcel,reset.as_deref().map_or(0,|revision|revision.0));continue;
+            }
+        };
+        if parcel.stream_epoch()!=Some(delivery.epoch){continue;}
+        let event=delivery.event;
         match event {
             MailServiceEvent::OpenParcel => {
                 if pending.has_pending_mail_operation() {
@@ -3409,16 +3715,43 @@ fn process_mail_service_inbox(
     }
 }
 
+fn native_mail_send_draft(state:&NativePlayerUiState,compose:&MailComposeUi,parcel:&mail_parcel::MailParcelUi)->Option<MailSendDraft>{
+    if !state.mail_open(){return None;}
+    let draft=state.core.mail_compose.as_ref()?;
+    Some(MailSendDraft{recipient:draft.recipient.clone(),message:draft.message.clone(),gold:draft.gold,attachment_unique_ids:draft.attachment_unique_ids.clone(),stamped:compose.kind==MailComposeKind::Parcel&&parcel.stamped(),parcel:compose.kind==MailComposeKind::Parcel,generation:state.mail_draft_clock.generation()?})
+}
+fn consume_native_mail_send_ack(ack:MailSendAcknowledgement,intents:&mut NativePlayerUiIntentQueue,pending:&mut PendingOperations,state:&mut NativePlayerUiState,compose:&mut MailComposeUi,parcel:&mut mail_parcel::MailParcelUi,owner:u64){
+    let Some(token)=intents.mail_send.flight().filter(|flight|flight.value.ticket==Some(ack.ticket)).map(|flight|flight.token)else{return;};
+    let Some(flight)=intents.mail_send.acknowledge(token,ack.result)else{return;};
+    // Transport settlement is independent of the current draft effect gate.
+    pending.settle_native_mail_send(token.value(),Some(ack.ticket));
+    if flight.retired||flight.owner!=owner||native_mail_send_draft(state,compose,parcel).as_ref()!=Some(&flight.value.draft){return;}
+    if ack.result==1 {
+        complete_mail_parcel_send(parcel,intents);
+        state.mail_draft_clock.advance();state.core.mail_compose=None;
+        compose.kind=MailComposeKind::Letter;state.mail_inventory_visible=false;
+        clear_mail_recipient_prompt(state,compose);clear_mail_feedback(state,compose);
+    }else{show_mail_feedback(state,compose,"Mail was rejected; draft kept");}
+}
+
 fn sync_mail_parcel_quote(
     shell: Res<NativeShellModel>,
     mut state: ResMut<NativePlayerUiState>,
     compose: Res<MailComposeUi>,
     inventory: Res<InventoryModel>,
+    inbox: Res<MailServiceInbox>,
     reset: Option<Res<SessionResetRevision>>,
     pending: Res<PendingOperations>,
     mut parcel: ResMut<mail_parcel::MailParcelUi>,
     mut intents: ResMut<NativePlayerUiIntentQueue>,
 ) {
+    // Also observe before reservation if this system is driven on its own.
+    // No trustworthy stream means no production quote request.
+    if !parcel.observe_stream(inbox.stream_epoch()){return;}
+    parcel.bind_draft_clock(state.mail_draft_clock.clone());
+    parcel.observe_stream_failure(inbox.is_stream_failed());
+    intents.observe_mail_stream(inbox.stream_epoch());
+    if let Some(token)=intents.take_local_unsent_mail_quote(){parcel.reject_native_unsent_quote(token);}
     let revision = reset.as_deref().map_or(0, |revision| revision.0);
     if parcel.session_reset(revision).is_some() {
         // The native session boundary clears the outbound queue. Never emit a
@@ -3429,12 +3762,8 @@ fn sync_mail_parcel_quote(
         && state.mail_open()
         && compose.kind == MailComposeKind::Parcel
         && state.core.mail_compose.is_some();
-    if !active {
-        if parcel.selected_ids().next().is_some() {
-            release_mail_parcel_locks(&mut parcel, &mut intents);
-        }
-        return;
-    }
+    for unique_id in parcel.observe_active(active){let _=intents.push_transient_unique(NativePlayerUiIntent::MailLockItem{unique_id,locked:false});}
+    if !active {return;}
     let Some(draft) = state.core.mail_compose.as_mut() else {
         return;
     };
@@ -3456,12 +3785,14 @@ fn sync_mail_parcel_quote(
     }
     let now = crate::hero_model::hero_clock_ms();
     parcel.tick_quote_timeout(now);
-    if let Some(fingerprint) = parcel.begin_quote(draft, &inventory, now) {
-        let _ = intents.push_transient_unique(NativePlayerUiIntent::MailCost {
+    if let Some(reservation) = parcel.reserve_native_quote(draft, &inventory, now) {
+        let fingerprint=&reservation.fingerprint;
+        let queued = intents.push_mail_quote(reservation.token,parcel.stream_epoch().unwrap(),NativePlayerUiIntent::MailCost {
             gold: fingerprint.gold,
-            attachment_unique_ids: fingerprint.attachment_unique_ids,
+            attachment_unique_ids: fingerprint.attachment_unique_ids.clone(),
             stamped: fingerprint.stamped,
         });
+        if !queued {parcel.reject_native_unsent_quote(reservation.token);}
     }
 }
 
@@ -3489,6 +3820,7 @@ struct OverlayRenderModels<'w> {
     ui: Res<'w, UiReadModel>,
     shop: Res<'w, ShopModel>,
     shop_ui: Res<'w, ShopUiState>,
+    player_intents:Res<'w,NativePlayerUiIntentQueue>,
     game_shop: Res<'w, GameShopModel>,
     storage: Res<'w, StorageModel>,
     storage_ui: Res<'w, StorageUiState>,
@@ -3501,23 +3833,51 @@ struct OverlayRenderModels<'w> {
 
 pub struct Mir2CrystalOverlayPlugin;
 
+/// The production parcel consumers can run on a plain App without creating
+/// the renderer, a window, audio, or input devices. The parent overlay plugin
+/// installs these same systems with its existing ordering constraints.
+pub struct Mir2NativeMailParcelServicePlugin;
+#[derive(Debug,Clone,Copy,PartialEq,Eq,Hash,SystemSet)]
+struct NativeMailParcelServiceSet;
+impl Plugin for Mir2NativeMailParcelServicePlugin {
+    fn build(&self, app:&mut App) {
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MailServiceInbox>()
+            .init_resource::<mail_parcel::MailParcelUi>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeShellModel>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .configure_sets(Update,PendingLifecycleSet::UiReset.before(NativePlayerUiSet::Mutate))
+            .add_systems(Update,(process_mail_service_inbox,sync_mail_parcel_quote).chain()
+                .in_set(NativePlayerUiSet::Mutate).in_set(NativeMailParcelServiceSet));
+    }
+}
+
+/// Read-only diagnostic projection of the actual parcel ledger. This lets
+/// transport integration tests inspect the consumer without exposing its UI.
+#[derive(Debug,Clone,Copy,PartialEq,Eq)]
+pub struct NativeMailParcelQuoteState {
+    pub stream_epoch:Option<MailServiceStreamEpoch>,
+    pub pending:bool,
+    pub postage:Option<u32>,
+    pub current:bool,
+}
+pub fn native_mail_parcel_quote_state(world:&World)->Option<NativeMailParcelQuoteState> {
+    let parcel=world.get_resource::<mail_parcel::MailParcelUi>()?;
+    let state=world.get_resource::<NativePlayerUiState>()?;
+    let inventory=world.get_resource::<InventoryModel>()?;
+    Some(NativeMailParcelQuoteState {stream_epoch:parcel.stream_epoch(),pending:parcel.has_pending_quote(),postage:parcel.postage(),
+        current:state.core.mail_compose.as_ref().is_some_and(|draft|parcel.quote_is_current(draft,inventory))})
+}
+
 impl Plugin for Mir2CrystalOverlayPlugin {
     fn build(&self, app: &mut App) {
-        // Unit-only Apps intentionally omit AssetPlugin/RenderPlugin. Keep the
-        // pure interaction systems usable there, while every real renderer
-        // registers the exact Crystal DrawBlend material and embedded shader.
-        if app.world().contains_resource::<AssetServer>()
-            && app.world().contains_resource::<Assets<Shader>>()
-        {
-            load_internal_asset!(
-                app,
-                CRYSTAL_ADDITIVE_UI_SHADER_HANDLE,
-                "crystal_additive_ui.wgsl",
-                Shader::from_wgsl
-            );
-            app.add_plugins(UiMaterialPlugin::<CrystalAdditiveUiMaterial>::default())
-                .add_systems(Startup, load_character_wing_materials);
-        }
+        app.add_plugins(Mir2NativeMailParcelServicePlugin)
+            .configure_sets(Update,NativeMailParcelServiceSet.after(sync_mail_letter_editor)
+                .before(consume_hud_buttons).before(process_overlay_keyboard));
+        app.add_plugins(Mir2CharacterMaterialsPlugin);
         app.init_resource::<NativePlayerUiState>()
             .init_resource::<keyboard_dialog::host::KeyboardHost>()
             .init_resource::<equipment_creature_host::MenuHost>()
@@ -3584,11 +3944,12 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                 PostUpdate,
                 text_input::position_ime
                     .after(bevy::ui::UiSystems::Layout)
-                    .after(mail_editor::capture_layout_system),
+                    .after(mail_editor::MailEditorLayoutSet),
             )
             .add_systems(
                 PostUpdate,
-                mail_editor::capture_layout_system.after(bevy::ui::UiSystems::Layout),
+                mail_editor::capture_layout_system.in_set(mail_editor::MailEditorLayoutSet)
+                    .after(bevy::ui::UiSystems::PostLayout),
             )
             .add_systems(Startup, spawn_overlay_root)
             .add_systems(
@@ -3625,8 +3986,6 @@ impl Plugin for Mir2CrystalOverlayPlugin {
                     sync_guild_storage_ui,
                     trade_dialog::sync,
                     sync_mail_letter_editor,
-                    process_mail_service_inbox,
-                    sync_mail_parcel_quote,
                 )
                     .chain()
                     .in_set(NativePlayerUiSet::Mutate)
@@ -3810,8 +4169,9 @@ fn sync_local_panel_models(
     inventory: Res<InventoryModel>,
     mut storage: ResMut<StorageModel>,
     mut storage_ui: ResMut<StorageUiState>,
-    shop: Res<ShopModel>,
+    mut shop: ResMut<ShopModel>,
     mut shop_ui: ResMut<ShopUiState>,
+    shop_intents: Option<Res<NativePlayerUiIntentQueue>>,
     mut skill_binding: ResMut<SkillBindingUi>,
     mut skills: ResMut<SkillModel>,
     mut skill_receipts: Option<ResMut<crate::skill_model::SkillModelReceipts>>,
@@ -3849,6 +4209,7 @@ fn sync_local_panel_models(
         // cannot reappear after the Mail panel has been closed.
         clear_mail_recipient_prompt(&mut state, &mut compose_ui);
         state.mail_recipient_input_consumed = true;
+        if state.core.mail_compose.is_some(){state.mail_draft_clock.advance();}
         state.core.mail_compose = None;
     }
     if !state.mail_open() || state.core.mail_compose.is_none() {
@@ -3880,6 +4241,11 @@ fn sync_local_panel_models(
         .storage_selection
         .filter(|selection| storage.item_for_selection(*selection).is_some());
     shop_ui.start_index = shop_ui.start_index.min(shop.goods.len().saturating_sub(8));
+    if let Some(queue) = shop_intents.as_deref() {
+        let gate = queue.npc_gold_buy_gate();
+        state.bind_npc_gold_buy_gate(gate.clone());
+        reconcile_native_npc_shop_ui(&mut state, &mut shop_ui, &mut shop, &inventory, &gate);
+    }
     if state.npc_service_notice.is_some()
         && state.npc_service_notice_mode != Some(shop.service_mode)
     {
@@ -4095,50 +4461,7 @@ pub fn item_unique_id(item: &ItemModel) -> Option<u64> {
     item.unique_id
 }
 
-pub fn equip_destination_for_name(name: &str) -> i32 {
-    let lowered = name.to_ascii_lowercase();
-    if lowered.contains("pendant") || lowered.contains("necklace") {
-        4
-    } else if lowered.contains("ring") {
-        7
-    } else if lowered.contains("bracelet") {
-        5
-    } else if lowered.contains("helmet") {
-        2
-    } else if lowered.contains("boot") {
-        11
-    } else if lowered.contains("belt") {
-        10
-    } else if lowered.contains("armour") || lowered.contains("armor") {
-        1
-    } else {
-        0
-    }
-}
-
-fn equip_destination_for_item(item: &ItemModel) -> i32 {
-    let authoritative_slot =
-        item.equip_slot
-            .as_deref()
-            .and_then(|slot| match slot.to_ascii_lowercase().as_str() {
-                "weapon" => Some(0),
-                "armour" | "armor" => Some(1),
-                "helmet" => Some(2),
-                "torch" => Some(3),
-                "necklace" => Some(4),
-                "braceletleft" => Some(5),
-                "braceletright" => Some(6),
-                "ringleft" => Some(7),
-                "ringright" => Some(8),
-                "amulet" => Some(9),
-                "belt" => Some(10),
-                "boots" => Some(11),
-                "stone" => Some(12),
-                "mount" => Some(13),
-                _ => None,
-            });
-    authoritative_slot.unwrap_or_else(|| equip_destination_for_name(&item.name))
-}
+pub use crate::bag_ui::equip_destination_for_name;
 
 pub fn equipment_slot_name(slot: u32) -> &'static str {
     match slot {
@@ -4770,16 +5093,28 @@ fn hud_pointer_sound(action: CrystalHudAction) -> Option<crate::audio::NativeUiS
     }
 }
 
+/// Only old explicitly installed local fixtures can exercise untyped Send
+/// feedback. Production Send terminals use the exact typed inbox consumer.
+#[cfg(test)]
+#[derive(Resource)]
+struct LegacyMailSendFeedbackFixture;
 fn consume_mail_operation_feedback(
     mut mail: ResMut<MailModel>,
     mut state: ResMut<NativePlayerUiState>,
     mut compose: ResMut<MailComposeUi>,
     mut parcel: Option<ResMut<mail_parcel::MailParcelUi>>,
     mut intents: Option<ResMut<NativePlayerUiIntentQueue>>,
+    #[cfg(test)] legacy_send:Option<Res<LegacyMailSendFeedbackFixture>>,
 ) {
     let Some(feedback) = mail.operation_feedback().cloned() else {
         return;
     };
+    if feedback.kind==MailOperationKind::Send {
+        #[cfg(not(test))]
+        {mail.mails.retain(|message|message.operation.is_none());return;}
+        #[cfg(test)]
+        if legacy_send.is_none()||intents.as_deref().is_some_and(|queue|queue.mail_send_token().is_some()){mail.mails.retain(|message|message.operation.is_none());return;}
+    }
     match (feedback.kind, feedback.success) {
         // Crystal's MailSent handler closes the compose dialog rather than
         // showing a success box. Candidate rejection keeps the exact draft
@@ -4788,7 +5123,8 @@ fn consume_mail_operation_feedback(
             if let (Some(parcel), Some(intents)) = (parcel.as_deref_mut(), intents.as_deref_mut()) {
                 complete_mail_parcel_send(parcel, intents);
             }
-            state.core.mail_compose = None;
+            if state.core.mail_compose.is_some(){state.mail_draft_clock.advance();}
+        state.core.mail_compose = None;
             compose.kind = MailComposeKind::Letter;
             state.mail_inventory_visible = false;
             clear_mail_recipient_prompt(&mut state, &mut compose);
@@ -5061,6 +5397,7 @@ fn sync_mail_letter_editor(
     mut editor: ResMut<mail_editor::MailLetterEditor>,
     mut last_reset_revision: Local<Option<u64>>,
 ) {
+    editor.bind_draft_clock(state.mail_draft_clock.clone());
     let revision = reset.as_deref().map_or(0, |value| value.0);
     if last_reset_revision.is_some_and(|previous| previous != revision) {
         editor.clear();
@@ -5311,36 +5648,12 @@ fn equipment_item_drag_at_cursor(
     })
 }
 
-fn complete_live_storage_template_index(item: &ItemModel) -> Option<i32> {
-    let source = item.tooltip_source.as_ref()?;
-    let user_item = source.user_item.as_ref()?;
-    (item.unique_id == Some(user_item.unique_id)
-        && user_item.item_index == source.info.item_index
-        && u16::try_from(item.quantity).ok() == Some(user_item.count))
-        .then_some(source.info.item_index)
-}
-
 fn compatible_storage_stack(source: &ItemModel, target: &ItemModel) -> bool {
-    complete_live_storage_template_index(source)
-        .zip(complete_live_storage_template_index(target))
-        .is_some_and(|(from_index, to_index)| {
-            from_index == to_index
-                && target
-                    .tooltip_source
-                    .as_ref()
-                    .is_some_and(|source| {
-                        target.quantity < u32::from(source.info.stack_size)
-                    })
-        })
+    crate::storage_interaction::compatible_storage_stack(source, target)
 }
 
 fn first_empty_bag_slot(inventory: &InventoryModel) -> Option<u32> {
-    (0..u32::from(inventory.bag_slot_capacity())).find(|slot| {
-        !inventory
-            .items_in(0)
-            .into_iter()
-            .any(|item| item.slot == *slot)
-    })
+    crate::storage_interaction::first_empty_bag_slot(inventory)
 }
 
 fn push_storage_drag_merge(
@@ -5380,46 +5693,79 @@ fn push_equipment_storage_pending_intent(
     intents.push_pending_intent(pending, intent)
 }
 
+fn enqueue_storage_plan(
+    plan: crate::storage_interaction::StorageTransferPlan,
+    intents: &mut NativePlayerUiIntentQueue,
+    pending: &mut PendingOperations,
+) -> bool {
+    use crate::storage_interaction::StorageTransferPlan;
+    match plan {
+        StorageTransferPlan::Store { unique_id, from, to }
+        | StorageTransferPlan::TakeBack { unique_id, from, to } => {
+            intents.push_storage_drag_pending_intent(
+                pending,
+                matches!(plan, StorageTransferPlan::Store { .. }),
+                unique_id,
+                i32::try_from(from).unwrap_or(i32::MAX),
+                i32::try_from(to).unwrap_or(i32::MAX),
+            )
+        }
+        StorageTransferPlan::Merge {
+            grid_from,
+            grid_to,
+            id_from,
+            id_to,
+        } => push_storage_drag_merge(
+            intents,
+            pending,
+            grid_from.wire_name(),
+            grid_to.wire_name(),
+            id_from,
+            id_to,
+        ),
+        StorageTransferPlan::Move { unique_id, from, to } => {
+            let intent = NativePlayerUiIntent::MoveItem {
+                grid: "storage".to_owned(),
+                unique_id,
+                from: i32::try_from(from).unwrap_or(i32::MAX),
+                to: i32::try_from(to).unwrap_or(i32::MAX),
+            };
+            let Some(key) = intent.pending_key() else {
+                return false;
+            };
+            if pending.has_storage_drag_conflict(&key) {
+                return false;
+            }
+            intents.push_pending_intent(pending, intent)
+        }
+    }
+}
+
 fn enqueue_bag_to_storage_drag(
     source: &ItemModel,
     source_slot: u32,
     target_slot: u32,
+    inventory: &InventoryModel,
     storage: &StorageModel,
     intents: &mut NativePlayerUiIntentQueue,
     pending: &mut PendingOperations,
 ) -> bool {
-    if !storage.transfers_unlocked() || !storage.is_valid_slot(target_slot) {
-        return false;
-    }
-    let Some(source_id) = item_unique_id(source) else {
+    let Some(unique_id) = item_unique_id(source) else {
         return false;
     };
-    let target = storage.item_in_storage(target_slot);
-    if let Some(target_id) = target.filter(|item| compatible_storage_stack(source, item)).and_then(item_unique_id) {
-        return push_storage_drag_merge(
-            intents,
-            pending,
-            "inventory",
-            "storage",
-            source_id,
-            target_id,
-        );
-    }
-    let destination = if target.is_none() {
-        Some(target_slot)
-    } else {
-        storage.first_empty_storage_slot()
+    let selection = StorageItemSelection {
+        slot: source_slot,
+        unique_id,
     };
-    let Some(destination) = destination else {
+    let Some(plan) = crate::storage_interaction::plan_bag_to_storage(
+        inventory,
+        storage,
+        selection,
+        target_slot,
+    ) else {
         return false;
     };
-    intents.push_storage_drag_pending_intent(
-        pending,
-        true,
-        source_id,
-        i32::try_from(source_slot).unwrap_or(i32::MAX),
-        i32::try_from(destination).unwrap_or(i32::MAX),
-    )
+    enqueue_storage_plan(plan, intents, pending)
 }
 
 fn enqueue_storage_to_storage_drag(
@@ -5430,43 +5776,21 @@ fn enqueue_storage_to_storage_drag(
     intents: &mut NativePlayerUiIntentQueue,
     pending: &mut PendingOperations,
 ) -> bool {
-    if !storage.transfers_unlocked()
-        || !storage.is_valid_slot(source_slot)
-        || !storage.is_valid_slot(target_slot)
-        || source_slot == target_slot
-    {
-        return false;
-    }
-    let Some(source_id) = item_unique_id(source) else {
+    let Some(unique_id) = item_unique_id(source) else {
         return false;
     };
-    let target = storage.item_in_storage(target_slot);
-    if let Some(target_id) = target
-        .filter(|item| compatible_storage_stack(source, item))
-        .and_then(item_unique_id)
-    {
-        return push_storage_drag_merge(
-            intents,
-            pending,
-            "storage",
-            "storage",
-            source_id,
-            target_id,
-        );
-    }
-    let intent = NativePlayerUiIntent::MoveItem {
-        grid: "storage".to_owned(),
-        unique_id: source_id,
-        from: i32::try_from(source_slot).unwrap_or(i32::MAX),
-        to: i32::try_from(target_slot).unwrap_or(i32::MAX),
+    let selection = StorageItemSelection {
+        slot: source_slot,
+        unique_id,
     };
-    let Some(key) = intent.pending_key() else {
+    let Some(plan) = crate::storage_interaction::plan_storage_to_storage(
+        storage,
+        selection,
+        target_slot,
+    ) else {
         return false;
     };
-    if pending.has_storage_drag_conflict(&key) {
-        return false;
-    }
-    intents.push_pending_intent(pending, intent)
+    enqueue_storage_plan(plan, intents, pending)
 }
 
 fn enqueue_storage_to_bag_drag(
@@ -5478,44 +5802,22 @@ fn enqueue_storage_to_bag_drag(
     intents: &mut NativePlayerUiIntentQueue,
     pending: &mut PendingOperations,
 ) -> bool {
-    if !storage.transfers_unlocked()
-        || !storage.is_valid_slot(source_slot)
-        || target_slot >= u32::from(inventory.bag_slot_capacity())
-    {
-        return false;
-    }
-    let Some(source_id) = item_unique_id(source) else {
+    let Some(unique_id) = item_unique_id(source) else {
         return false;
     };
-    let target = inventory
-        .items_in(0)
-        .into_iter()
-        .find(|item| item.slot == target_slot);
-    if let Some(target_id) = target.filter(|item| compatible_storage_stack(source, item)).and_then(item_unique_id) {
-        return push_storage_drag_merge(
-            intents,
-            pending,
-            "storage",
-            "inventory",
-            source_id,
-            target_id,
-        );
-    }
-    let destination = if target.is_none() {
-        Some(target_slot)
-    } else {
-        first_empty_bag_slot(inventory)
+    let selection = StorageItemSelection {
+        slot: source_slot,
+        unique_id,
     };
-    let Some(destination) = destination else {
+    let Some(plan) = crate::storage_interaction::plan_storage_to_bag(
+        inventory,
+        storage,
+        selection,
+        target_slot,
+    ) else {
         return false;
     };
-    intents.push_storage_drag_pending_intent(
-        pending,
-        false,
-        source_id,
-        i32::try_from(source_slot).unwrap_or(i32::MAX),
-        i32::try_from(destination).unwrap_or(i32::MAX),
-    )
+    enqueue_storage_plan(plan, intents, pending)
 }
 
 /// `MirItemCell.ToStorage` uses RemoveItem with Storage as the destination
@@ -5629,6 +5931,7 @@ fn finish_inventory_item_drag(
     pending: &mut PendingOperations,
     diagnostics: Option<&InventoryBeltDiagnostics>,
 ) {
+    if let Some(parcel)=parcel.as_deref_mut(){parcel.bind_draft_clock(state.mail_draft_clock.clone());}
     let Some(drag) = state.inventory_item_drag.take() else {
         belt_diagnostic(diagnostics, || "drag release without source".to_owned());
         return;
@@ -5678,6 +5981,7 @@ fn finish_inventory_item_drag(
                 source,
                 drag.source_slot,
                 target_slot,
+                inventory,
                 storage,
                 intents,
                 pending,
@@ -6501,9 +6805,12 @@ fn sync_npc_dialog_inventory_location(
     mut state: ResMut<NativePlayerUiState>,
     npc_dialog: Option<Res<NpcDialogModel>>,
     mut shop: Option<ResMut<ShopModel>>,
+    intents: Option<Res<NativePlayerUiIntentQueue>>,
     mut was_open: Local<bool>,
 ) {
+    if let Some(intents) = intents { state.bind_npc_gold_buy_gate(intents.npc_gold_buy_gate()); }
     let is_open = npc_dialog.is_some_and(|dialog| dialog.is_open);
+    if !is_open { state.withdraw_bound_npc_gold_buy(); }
     if is_open == *was_open {
         return;
     }
@@ -6574,10 +6881,12 @@ pub(crate) fn process_overlay_keyboard(
         // correlation after runtime receipt ingest.
         return;
     }
+    state.bind_npc_gold_buy_gate(intents.npc_gold_buy_gate());
     if state.ime_frame_consumed {
         typed.clear();
         return;
     }
+    let mail_clock=state.mail_draft_clock.clone();
     let BigMapControls {
         model: mut big_map,
         intents: mut big_map_intents,
@@ -6588,6 +6897,8 @@ pub(crate) fn process_overlay_keyboard(
         skill_persistence: mut skill_persistence,
     } = big_map_controls;
     let OverlayKeyboardControls {
+        mut shop,
+        mut shop_ui,
         mut surface_signals,
         mut ui_audio,
         ui,
@@ -6832,7 +7143,7 @@ pub(crate) fn process_overlay_keyboard(
                     .and_then(CrystalAmountInput::amount)
                 {
                     if let Some(draft) = state.core.mail_compose.as_mut() {
-                        draft.gold = amount;
+                        if draft.gold!=amount{mail_clock.advance();draft.gold=amount;}
                     }
                 }
                 state.parcel_gold_prompt = None;
@@ -7125,8 +7436,7 @@ pub(crate) fn process_overlay_keyboard(
                 typed.clear();
                 return;
             }
-            dispatch_ui_action(
-                &mut state.core,
+            dispatch_native_ui_action(&mut state,
                 &mut UiEffectQueue::default(),
                 mir2_ui_core::action::UiAction::CancelMailCompose,
             );
@@ -7153,6 +7463,7 @@ pub(crate) fn process_overlay_keyboard(
                 return;
             };
             if let Some(editor) = letter_editor.as_deref_mut() {
+                editor.bind_draft_clock(mail_clock.clone());
                 editor.sync(true, Some(&draft.message));
                 for event in typed.read() {
                     editor.edit_key(event, draft);
@@ -7172,7 +7483,7 @@ pub(crate) fn process_overlay_keyboard(
                     } else if let Some(text) = event.text.as_deref() {
                         value.insert_with_policy(text, friend_dialog::text_editor::InsertPolicy::FitPrefix);
                     }
-                    draft.message = value.text().to_owned();
+                    if draft.message!=value.text(){mail_clock.advance();draft.message=value.text().to_owned();}
                 }
             }
             return;
@@ -7190,15 +7501,15 @@ pub(crate) fn process_overlay_keyboard(
                     MailComposeFocus::Recipient => {
                         let mut value = draft.recipient.clone();
                         value.pop();
-                        state.core.mail_compose.as_mut().unwrap().recipient = value;
+                        if draft.recipient!=value{mail_clock.advance();state.core.mail_compose.as_mut().unwrap().recipient=value;}
                     }
                     MailComposeFocus::Message => {
                         let mut value = draft.message.clone();
                         value.pop();
-                        state.core.mail_compose.as_mut().unwrap().message = value;
+                        if draft.message!=value{mail_clock.advance();state.core.mail_compose.as_mut().unwrap().message=value;}
                     }
                     MailComposeFocus::Gold => {
-                        state.core.mail_compose.as_mut().unwrap().gold /= 10;
+                        if draft.gold!=draft.gold/10{mail_clock.advance();state.core.mail_compose.as_mut().unwrap().gold/=10;}
                     }
                 }
             }
@@ -7221,8 +7532,7 @@ pub(crate) fn process_overlay_keyboard(
                         .map(|draft| draft.recipient.clone())
                         .unwrap_or_default();
                     value.extend(text.chars().filter(|ch| !ch.is_control()));
-                    dispatch_ui_action(
-                        &mut state.core,
+                    dispatch_native_ui_action(&mut state,
                         &mut UiEffectQueue::default(),
                         mir2_ui_core::action::UiAction::SetMailRecipient { recipient: value },
                     );
@@ -7239,8 +7549,7 @@ pub(crate) fn process_overlay_keyboard(
                     } else {
                         value.extend(text.chars().filter(|ch| !ch.is_control()));
                     }
-                    dispatch_ui_action(
-                        &mut state.core,
+                    dispatch_native_ui_action(&mut state,
                         &mut UiEffectQueue::default(),
                         mir2_ui_core::action::UiAction::SetMailMessage { message: value },
                     );
@@ -7250,7 +7559,7 @@ pub(crate) fn process_overlay_keyboard(
                         for digit in text.chars().filter(|ch| ch.is_ascii_digit()) {
                             if let Some(value) = draft.gold.checked_mul(10)
                                 .and_then(|value| value.checked_add(digit as u32 - '0' as u32)) {
-                                draft.gold = value;
+                                if draft.gold!=value{mail_clock.advance();draft.gold=value;}
                             }
                         }
                     }
@@ -7666,11 +7975,30 @@ pub(crate) fn process_overlay_keyboard(
             }
         }
     } else if state.npc_shop_open() {
-        if keys.just_pressed(KeyCode::BracketRight) || keys.just_pressed(KeyCode::Equal) {
-            state.shop_quantity_inc();
-        }
-        if keys.just_pressed(KeyCode::BracketLeft) || keys.just_pressed(KeyCode::Minus) {
-            state.shop_quantity_dec();
+        for (pressed, action) in [
+            (keys.just_pressed(KeyCode::BracketRight) || keys.just_pressed(KeyCode::Equal),
+             crate::npc_shop_ui::NpcShopUiAction::QuantityInc),
+            (keys.just_pressed(KeyCode::BracketLeft) || keys.just_pressed(KeyCode::Minus),
+             crate::npc_shop_ui::NpcShopUiAction::QuantityDec),
+        ] {
+            if !pressed { continue; }
+            let handled = if let (Some(shop), Some(shop_ui)) = (shop.as_deref_mut(), shop_ui.as_deref_mut()) {
+                let gate = intents.npc_gold_buy_gate();
+                let context = reconcile_native_npc_shop_ui(&mut state, shop_ui, shop, &inventory, &gate);
+                if crate::npc_shop_ui::ordinary_gold_surface(shop, context.show_buy) {
+                    apply_native_npc_shop_action(action, context, &mut state, shop_ui, shop, &inventory, &mut intents);
+                    true
+                } else { false }
+            } else { false };
+            if !handled {
+                // Even the legacy hotkey path must cancel Bound before editing.
+                intents.withdraw_npc_gold_buy();
+                match action {
+                    crate::npc_shop_ui::NpcShopUiAction::QuantityInc => state.shop_quantity_inc(),
+                    crate::npc_shop_ui::NpcShopUiAction::QuantityDec => state.shop_quantity_dec(),
+                    _ => {}
+                }
+            }
         }
     }
 }
@@ -7696,7 +8024,10 @@ fn process_overlay_buttons(
     if shell.screen != NativeShellScreen::InGame {
         return;
     }
+    state.bind_npc_gold_buy_gate(intents.npc_gold_buy_gate());
+    let mail_clock=state.mail_draft_clock.clone();
     let OverlayButtonControls {
+        mail_inbox, mail_reset,
         big_map:
             BigMapControls {
                 model: mut big_map,
@@ -7716,10 +8047,13 @@ fn process_overlay_buttons(
     } = button_controls;
     let mut fallback_effects = UiEffectQueue::default();
     let mut effects = effects.as_deref_mut().unwrap_or(&mut fallback_effects);
+    let shop_gate = intents.npc_gold_buy_gate();
+    reconcile_native_npc_shop_ui(&mut state, &mut shop_ui, &mut shop, &inventory, &shop_gate);
     // Focused panel tests can exercise storage controls without mounting the
     // optional Parcel surface. Keep those controls independent from mail.
     let mut fallback_parcel_ui = mail_parcel::MailParcelUi::default();
     let mut parcel_ui = parcel_ui.as_deref_mut().unwrap_or(&mut fallback_parcel_ui);
+    parcel_ui.bind_draft_clock(mail_clock.clone());
     let mut game_shop = game_shop;
     if let Some(expected) = state.guild_notice_submission.clone() {
         let still_pending = social.pending.iter().any(|operation| {
@@ -7778,7 +8112,7 @@ fn process_overlay_buttons(
     let game_shop_modal_was_open = state.game_shop_dialog.confirmation.is_some();
     let storage_rental_modal_was_open = state.storage_rental_confirmation.is_some();
     let parcel_gold_modal_was_open = state.parcel_gold_prompt.is_some();
-    for (interaction, button) in buttons.iter() {
+    for (interaction, button, shop_stamp, shop_source) in buttons.iter() {
         if state.hero.modal() {
             continue;
         }
@@ -8030,7 +8364,54 @@ fn process_overlay_buttons(
         {
             continue;
         }
-        match *button {
+        let action = match *button {
+            OverlayButton::InspectBagSnapshot { slot, unique_id } => {
+                let page = if slot < u32::from(crate::inventory::CRYSTAL_FIRST_BAG_PAGE_SLOTS) {
+                    crate::bag_ui::BagPage::First
+                } else {
+                    crate::bag_ui::BagPage::Second
+                };
+                if !page.slots(&inventory).contains(&slot) { continue; }
+                let mut matches = inventory.items.iter()
+                    .filter(|item| item.container == 0 && item.slot == slot);
+                let current = matches.next().and_then(item_unique_id);
+                if matches.next().is_some() { continue; }
+                if current != unique_id { continue; }
+                if let Some(unique_id) = unique_id {
+                    if crate::bag_ui::selection_at_slot(&inventory, page, slot)
+                        .is_none_or(|selection| selection.unique_id != unique_id) {
+                        continue;
+                    }
+                }
+                OverlayButton::InspectBag(slot)
+            }
+            OverlayButton::InspectEquipSnapshot { slot, unique_id } => {
+                let mut matches = inventory.items.iter()
+                    .filter(|item| item.container == 2 && item.slot == slot);
+                let current = matches.next().and_then(item_unique_id);
+                if matches.next().is_some() { continue; }
+                if current != unique_id { continue; }
+                OverlayButton::InspectEquip(slot)
+            }
+            other => other,
+        };
+        if let Some(shop_action) = npc_shop_action(action) {
+            let context = native_npc_shop_context(&state, &shop, &shop_gate);
+            let ordinary = crate::npc_shop_ui::ordinary_gold_surface(&shop, context.show_buy);
+            if ordinary || shop_stamp.is_some() || shop_source.is_some() {
+                // Every common control, including Close/Select/Sell, proves
+                // ownership before it can cancel or change the current owner.
+                let valid = ordinary && context.open && context.input_enabled
+                    && shop_source.is_some_and(|source| source.gate == shop_gate)
+                    && shop_stamp.is_some_and(|stamp| Some(*stamp) == shop_ui.common.stamp());
+                if !valid { continue; }
+                let effect = apply_native_npc_shop_action(shop_action, context, &mut state, &mut shop_ui,
+                    &mut shop, &inventory, &mut intents);
+                if !effect.close && !effect.handoff_sell { continue; }
+                // Validated Close/Sell retain the existing full service cleanup.
+            }
+        }
+        match action {
             OverlayButton::CastSkillBar(slot) => {
                 if state.core.options.skill_bar
                     && skills
@@ -8163,6 +8544,7 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::CloseShop => {
+                intents.withdraw_npc_gold_buy();
                 if state.npc_shop_open() {
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
@@ -8195,23 +8577,20 @@ fn process_overlay_buttons(
             }
             OverlayButton::CloseOptions => {
                 if state.options_open() {
-                    dispatch_ui_action(
-                        &mut state.core,
+                    dispatch_native_ui_action(&mut state,
                         &mut effects,
                         mir2_ui_core::action::UiAction::ClosePanel,
                     );
                 }
             }
             OverlayButton::SetCrystalOption(option, enabled) => {
-                dispatch_ui_action(
-                    &mut state.core,
+                dispatch_native_ui_action(&mut state,
                     &mut effects,
                     mir2_ui_core::action::UiAction::SetCrystalOption { option, enabled },
                 );
             }
             OverlayButton::OptionsObserve(allow) => {
-                dispatch_ui_action(
-                    &mut state.core,
+                dispatch_native_ui_action(&mut state,
                     &mut effects,
                     mir2_ui_core::action::UiAction::RequestObserve { allow },
                 );
@@ -8223,32 +8602,28 @@ fn process_overlay_buttons(
             }
             OverlayButton::OptionsMusicVolumeDown => {
                 let value = state.core.options.music_volume.saturating_sub(10);
-                dispatch_ui_action(
-                    &mut state.core,
+                dispatch_native_ui_action(&mut state,
                     &mut effects,
                     mir2_ui_core::action::UiAction::SetMusicVolume { volume: value },
                 );
             }
             OverlayButton::OptionsMusicVolumeUp => {
                 let value = state.core.options.music_volume.saturating_add(10).min(100);
-                dispatch_ui_action(
-                    &mut state.core,
+                dispatch_native_ui_action(&mut state,
                     &mut effects,
                     mir2_ui_core::action::UiAction::SetMusicVolume { volume: value },
                 );
             }
             OverlayButton::OptionsSoundVolumeDown => {
                 let value = state.core.options.sound_volume.saturating_sub(10);
-                dispatch_ui_action(
-                    &mut state.core,
+                dispatch_native_ui_action(&mut state,
                     &mut effects,
                     mir2_ui_core::action::UiAction::SetSoundVolume { volume: value },
                 );
             }
             OverlayButton::OptionsSoundVolumeUp => {
                 let value = state.core.options.sound_volume.saturating_add(10).min(100);
-                dispatch_ui_action(
-                    &mut state.core,
+                dispatch_native_ui_action(&mut state,
                     &mut effects,
                     mir2_ui_core::action::UiAction::SetSoundVolume { volume: value },
                 );
@@ -8805,15 +9180,33 @@ fn process_overlay_buttons(
             }
             OverlayButton::UseInspected => {
                 if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
-                    if let Some(intent) = inspected_use_intent(&state, &inventory) {
-                        intents.push_intent(intent);
+                    if let Some(item) = inspected_use_item(&state, &inventory) {
+                        if item.container == 0 {
+                            if let Some(to) = reliable_equipment_destination(item) {
+                                if let Some(mut plan) = inspected_exact_selection(&state, &inventory)
+                                    .and_then(|selection| crate::bag_ui::plan_equipment(
+                                        &inventory, selection, &pending)) {
+                                    plan.to = to;
+                                    if intents.push_pending_intent(&mut pending,
+                                        native_equipment_intent(plan)) {
+                                        state.inspect = None;
+                                    }
+                                }
+                                continue;
+                            }
+                        }
+                        if let Some(intent) = inspected_use_intent(&state, &inventory) {
+                            intents.push_intent(intent);
+                        }
                     }
                 }
             }
             OverlayButton::EquipInspected => {
                 if !inspected_bag_item_is_mail_locked(&state, &inventory, parcel_ui) {
-                    if let Some(intent) = inspected_equip_intent(&state, &inventory) {
-                        if intents.push_intent(intent) {
+                    if let Some(plan) = inspected_exact_selection(&state, &inventory)
+                        .and_then(|selection| crate::bag_ui::plan_equipment(&inventory,
+                            selection, &pending)) {
+                        if intents.push_pending_intent(&mut pending, native_equipment_intent(plan)) {
                             // Crystal disposes the item action menu as soon as the
                             // equip request is accepted. Keeping this selection
                             // alive renders the pre-swap bag item after the server
@@ -8824,8 +9217,11 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::UnequipInspected => {
-                if let Some(intent) = inspected_remove_intent(&state, &inventory) {
-                    intents.push_intent(intent);
+                if let Some(plan) = inspected_exact_selection(&state, &inventory)
+                    .filter(|selection| selection.container == 2)
+                    .and_then(|selection| crate::bag_ui::plan_equipment(&inventory,
+                        selection, &pending)) {
+                    let _ = intents.push_pending_intent(&mut pending, native_equipment_intent(plan));
                 }
             }
             OverlayButton::InventoryDeleteToggle => {
@@ -9057,6 +9453,8 @@ fn process_overlay_buttons(
                     state.drop_confirmation = None;
                 }
             },
+            OverlayButton::InspectBagSnapshot { .. } => {}
+            OverlayButton::InspectEquipSnapshot { .. } => {}
             OverlayButton::InspectQuest(slot) => {
                 if state.inventory_delete_mode {
                     // Crystal consumes the click while delete mode is active,
@@ -9093,7 +9491,16 @@ fn process_overlay_buttons(
             }
             OverlayButton::AssignSkillKey(hotkey) => state.skill_assign.choose(hotkey),
             OverlayButton::ClearSkillBinding => state.skill_assign.choose(0),
-            OverlayButton::CloseSkillAssign => state.skill_assign.save(&mut intents),
+            OverlayButton::CloseSkillAssign => {
+                if skills.as_deref().is_some_and(|m| state.skill_assign.valid(m)) {
+                    state.skill_assign.save(&mut intents);
+                } else {
+                    state.skill_assign = Default::default();
+                    if let Some(binding) = skill_binding.as_deref_mut() {
+                        binding.set_assign_key(false);
+                    }
+                }
+            }
             OverlayButton::SelectCharacterPage(page) => {
                 // Crystal CharacterDialog page buttons inherit
                 // MirButton.Sound = SoundList.ButtonA. Keep the cue on the
@@ -9178,8 +9585,7 @@ fn process_overlay_buttons(
                         &mut effects,
                         MailComposeKind::Letter,
                     );
-                    dispatch_ui_action(
-                        &mut state.core,
+                    dispatch_native_ui_action(&mut state,
                         &mut effects,
                         mir2_ui_core::action::UiAction::SetMailRecipient { recipient },
                     );
@@ -9325,8 +9731,7 @@ fn process_overlay_buttons(
                     } else {
                         draft.gold.saturating_sub(100)
                     };
-                    dispatch_ui_action(
-                        &mut state.core,
+                    dispatch_native_ui_action(&mut state,
                         &mut effects,
                         mir2_ui_core::action::UiAction::SetMailGold { gold },
                     );
@@ -9347,8 +9752,7 @@ fn process_overlay_buttons(
                         }
                     }
                 } else if mail_attachment_is_current(&inventory, unique_id) {
-                    dispatch_ui_action(
-                        &mut state.core,
+                    dispatch_native_ui_action(&mut state,
                         &mut effects,
                         mir2_ui_core::action::UiAction::AddMailAttachment { unique_id },
                     );
@@ -9368,8 +9772,7 @@ fn process_overlay_buttons(
                         }
                     }
                 } else {
-                    dispatch_ui_action(
-                        &mut state.core,
+                    dispatch_native_ui_action(&mut state,
                         &mut effects,
                         mir2_ui_core::action::UiAction::RemoveMailAttachment { unique_id },
                     );
@@ -9419,7 +9822,7 @@ fn process_overlay_buttons(
                     .and_then(CrystalAmountInput::amount)
                 {
                     if let Some(draft) = state.core.mail_compose.as_mut() {
-                        draft.gold = amount;
+                        if draft.gold!=amount{mail_clock.advance();draft.gold=amount;}
                     }
                 }
                 state.parcel_gold_prompt = None;
@@ -9430,14 +9833,23 @@ fn process_overlay_buttons(
                 state.parcel_gold_input_consumed = true;
             }
             OverlayButton::SubmitMail => {
+                if pending.has_pending_mail_send() {
+                    compose_ui.last_notice = Some("Sending mail…".to_owned());
+                    continue;
+                }
                 if compose_ui.kind == MailComposeKind::Letter {
                     if let Some(draft) = state.core.mail_compose.as_mut() {
-                        let clean = letter_draft(std::mem::take(draft));
-                        *draft = clean;
+                        let clean = letter_draft(draft.clone());
+                        if *draft!=clean{mail_clock.advance();*draft=clean;}
                     }
                 }
                 let Some(draft) = state.core.mail_compose.clone() else {
                     continue;
+                };
+                let payload=match mir2_client_core::mail_compose::prepare_send(
+                    &draft.recipient, &draft.message, draft.gold, &draft.attachment_unique_ids,
+                ) {
+                    Ok(payload)=>payload,Err(error)=>{show_mail_feedback(&mut state,&mut compose_ui,error.message());continue;}
                 };
                 if compose_ui.kind == MailComposeKind::Parcel
                     && (!parcel_ui.quote_is_current(&draft, &inventory)
@@ -9467,33 +9879,13 @@ fn process_overlay_buttons(
                     );
                     continue;
                 }
-                dispatch_ui_action(
-                    &mut state.core,
-                    &mut effects,
-                    mir2_ui_core::action::UiAction::SubmitMail,
-                );
-                for command in effects.drain_mail_commands() {
-                    if let mir2_ui_core::effect::GatewayCommand::SendMail {
-                        recipient,
-                        message,
-                        gold,
-                        ..
-                    } = command
-                    {
-                        let intent = NativePlayerUiIntent::SendMail {
-                            recipient,
-                            message,
-                            gold,
-                            attachment_unique_ids: ids.clone(),
-                            stamped: compose_ui.kind == MailComposeKind::Parcel && parcel_ui.stamped(),
-                        };
-                        if !intents.push_pending_intent(&mut pending, intent) {
-                            compose_ui.last_notice = Some("Mail is already being sent".to_owned());
-                        } else {
-                            compose_ui.last_notice = Some("Sending mail…".to_owned());
-                        }
-                    }
-                }
+                let Some(inbox)=mail_inbox.as_deref().filter(|inbox|!inbox.is_stream_failed())else{compose_ui.last_notice=Some("Mail transport is unavailable".to_owned());continue;};
+                let Some(epoch)=inbox.stream_epoch()else{compose_ui.last_notice=Some("Mail transport is unavailable".to_owned());continue;};
+                let Some(owner)=mail_reset.as_deref().map(|revision|revision.0)else{compose_ui.last_notice=Some("Mail owner is unavailable".to_owned());continue;};
+                let Some(snapshot)=native_mail_send_draft(&state,&compose_ui,&parcel_ui)else{compose_ui.last_notice=Some("Mail draft authorization unavailable".to_owned());continue;};
+                let intent=NativePlayerUiIntent::SendMail{recipient:payload.recipient.clone(),message:payload.message.clone(),gold:payload.gold,attachment_unique_ids:ids,stamped:snapshot.stamped};
+                if !intents.push_mail_send(&mut pending,epoch,owner,snapshot,payload,intent){compose_ui.last_notice=Some("Mail is already being sent".to_owned());}
+                else{compose_ui.last_notice=Some("Sending mail…".to_owned());}
             }
             OverlayButton::CancelMailCompose => {
                 if pending.has_pending_mail_send() {
@@ -9501,8 +9893,7 @@ fn process_overlay_buttons(
                     continue;
                 }
                 release_mail_parcel_locks(&mut parcel_ui, &mut intents);
-                dispatch_ui_action(
-                    &mut state.core,
+                dispatch_native_ui_action(&mut state,
                     &mut effects,
                     mir2_ui_core::action::UiAction::CancelMailCompose,
                 );
@@ -9699,8 +10090,12 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::SelectShopGood(id) => {
+                intents.withdraw_npc_gold_buy();
                 if state.npc_shop_open() && shop.allows_buy() {
                     shop.selected_id = Some(id);
+                    if shop.selected().is_some_and(ShopGood::uses_gold_buy_plan) {
+                        state.shop_quantity = SHOP_QUANTITY_MIN;
+                    }
                 }
             }
             OverlayButton::ShopShowBuy => {
@@ -9709,28 +10104,27 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::ShopShowSell => {
+                intents.withdraw_npc_gold_buy();
                 if state.npc_shop_open() && shop.allows_sell() {
                     state.npc_shop_buy_tab = false;
                 }
             }
             OverlayButton::ShopBuy => {
-                if state.npc_shop_open()
-                    && shop.allows_buy()
-                    && shop_buy_enabled_with_pearls(
-                        &shop,
-                        &inventory,
-                        state.shop_quantity,
-                        state.creature.pearls.max(0) as u32,
-                    )
-                {
-                    let id = shop.selected_id.unwrap();
-                    intents.push_pending_intent(
-                        &mut pending,
-                        NativePlayerUiIntent::BuyItem {
-                            item_index: id,
-                            count: shop_quantity_clamped(state.shop_quantity),
-                        },
-                    );
+                if state.npc_shop_open() && shop.allows_buy() {
+                    if let Some(command) = shop_buy_item_command(
+                        &shop, &inventory, state.shop_quantity, state.creature.pearls.max(0) as u32,
+                    ) {
+                        if shop.selected().is_some_and(ShopGood::uses_gold_buy_plan) {
+                            intents.push_npc_gold_buy(&shop,&inventory,state.shop_quantity);
+                        } else {
+                        intents.push_pending_intent(
+                            &mut pending,
+                            NativePlayerUiIntent::BuyItem {
+                                item_index: command.item_index, count: command.count,
+                            },
+                        );
+                        }
+                    }
                 }
             }
             OverlayButton::ShopToggleHold => {
@@ -9754,16 +10148,24 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::ShopQuantityInc => {
+                intents.withdraw_npc_gold_buy();
                 if state.npc_shop_open()
                     && matches!(
                         shop.service_mode,
                         NpcShopServiceMode::Buy | NpcShopServiceMode::Sell
                     )
                 {
-                    state.shop_quantity_inc();
+                    if shop.allows_buy() && (!shop.allows_sell() || state.npc_shop_buy_tab)
+                        && shop.selected().is_some_and(ShopGood::uses_gold_buy_plan) {
+                        let max_quantity = shop_buy_quantity_max(&shop, &inventory);
+                        if state.shop_quantity < max_quantity { state.shop_quantity_inc(); }
+                    } else {
+                        state.shop_quantity_inc();
+                    }
                 }
             }
             OverlayButton::ShopQuantityDec => {
+                intents.withdraw_npc_gold_buy();
                 if state.npc_shop_open()
                     && matches!(
                         shop.service_mode,
@@ -9774,12 +10176,14 @@ fn process_overlay_buttons(
                 }
             }
             OverlayButton::ShopPageUp => {
+                intents.withdraw_npc_gold_buy();
                 if state.npc_shop_open() && shop.allows_buy() {
                     shop_ui.start_index = shop_ui.start_index.saturating_sub(1);
                     shop.selected_id = None;
                 }
             }
             OverlayButton::ShopPageDown => {
+                intents.withdraw_npc_gold_buy();
                 if state.npc_shop_open() && shop.allows_buy() {
                     shop_ui.start_index =
                         (shop_ui.start_index + 1).min(shop.goods.len().saturating_sub(8));
@@ -9793,25 +10197,25 @@ fn process_overlay_buttons(
                 if shop.allows_repair() || shop.allows_special_repair()
                     || (shop.allows_sell() && (!shop.allows_buy() || !state.npc_shop_buy_tab)) {
                     npc_item_service::submit_selection(&mut shop, &inventory, &mut state, &mut intents, &mut pending);
-                } else if shop.allows_buy()
-                    && shop_buy_enabled_with_pearls(
-                        &shop,
-                        &inventory,
-                        state.shop_quantity,
-                        state.creature.pearls.max(0) as u32,
-                    )
-                {
-                    let id = shop.selected_id.unwrap();
-                    intents.push_pending_intent(
-                        &mut pending,
-                        NativePlayerUiIntent::BuyItem {
-                            item_index: id,
-                            count: shop_quantity_clamped(state.shop_quantity),
-                        },
-                    );
+                } else if shop.allows_buy() {
+                    if let Some(command) = shop_buy_item_command(
+                        &shop, &inventory, state.shop_quantity, state.creature.pearls.max(0) as u32,
+                    ) {
+                        if shop.selected().is_some_and(ShopGood::uses_gold_buy_plan) {
+                            intents.push_npc_gold_buy(&shop,&inventory,state.shop_quantity);
+                        } else {
+                        intents.push_pending_intent(
+                            &mut pending,
+                            NativePlayerUiIntent::BuyItem {
+                                item_index: command.item_index, count: command.count,
+                            },
+                        );
+                        }
+                    }
                 }
             }
             OverlayButton::ShopCancel => {
+                intents.withdraw_npc_gold_buy();
                 if state.npc_shop_open() {
                     state.core.panel = mir2_ui_core::state::UiPanel::None;
                 }
@@ -9949,6 +10353,7 @@ fn inspect_from_item(item: &ItemModel) -> ItemInspect {
     ItemInspect {
         container: item.container,
         slot: item.slot,
+        unique_id: item.unique_id,
         key: item.key.clone(),
         name: item.name.clone(),
         quantity: item.quantity,
@@ -9961,10 +10366,23 @@ fn inspected_inventory_item<'a>(
 ) -> Option<&'a ItemModel> {
     let inspect = state.inspect.as_ref()?;
     (inspect.container == 0).then_some(())?;
-    inventory
-        .items
-        .iter()
-        .find(|item| item.container == 0 && item.slot == inspect.slot && item.key == inspect.key)
+    let selection = inspected_exact_selection(state, inventory)?;
+    crate::bag_ui::resolve_exact(inventory, selection)
+}
+
+fn inspected_exact_selection(
+    state: &NativePlayerUiState,
+    inventory: &InventoryModel,
+) -> Option<crate::bag_ui::BagSelection> {
+    let inspect = state.inspect.as_ref()?;
+    let selection = crate::bag_ui::BagSelection {
+        container: inspect.container,
+        slot: inspect.slot,
+        unique_id: inspect.unique_id?,
+    };
+    crate::bag_ui::resolve_exact(inventory, selection)
+        .filter(|item| item.key == inspect.key)
+        .map(|_| selection)
 }
 
 fn bag_slot_is_mail_locked(
@@ -10026,17 +10444,51 @@ fn clear_mail_locked_inventory_interaction(
     }
 }
 
+fn inspected_use_item<'a>(
+    state: &NativePlayerUiState,
+    inventory: &'a InventoryModel,
+) -> Option<&'a ItemModel> {
+    let inspect = state.inspect.as_ref()?;
+    if inspect.container == 3 { return None; }
+    let mut matches = inventory.items.iter()
+        .filter(|item| item.container == inspect.container && item.slot == inspect.slot);
+    let item = matches.next()?;
+    matches.next().is_none().then_some(())?;
+    (item.key == inspect.key
+        && inspect.unique_id.is_none_or(|unique_id| item.unique_id == Some(unique_id)))
+        .then_some(item)
+}
+
+/// Only metadata that identifies a Crystal equipment type may divert Use into
+/// the shared Equip path. Display names never classify a consumable as gear.
+fn reliable_equipment_destination(item: &ItemModel) -> Option<i32> {
+    if let Some(slot) = item.equip_slot.as_deref() {
+        match slot.to_ascii_lowercase().as_str() {
+            "weapon" | "armour" | "armor" | "helmet" | "torch" | "necklace"
+            | "braceletleft" | "braceletright" | "ringleft" | "ringright"
+            | "amulet" | "belt" | "boots" | "stone" | "mount" =>
+                return Some(crate::bag_ui::equip_destination_for_item(item)),
+            _ => {}
+        }
+    }
+    let item_type = item.tooltip_source.as_ref()?.info.item_type;
+    match item_type {
+        1 => Some(0), 2 => Some(1), 4 => Some(2), 5 => Some(4),
+        6 => Some(5), 7 => Some(7), 8 => Some(9), 9 => Some(10),
+        10 => Some(11), 11 => Some(12), 12 => Some(3), 19 => Some(13),
+        _ => None,
+    }
+}
+
 fn inspected_use_intent(
     state: &NativePlayerUiState,
     inventory: &InventoryModel,
 ) -> Option<NativePlayerUiIntent> {
-    let inspect = state.inspect.as_ref()?;
-    if inspect.container == 3 {
+    let item = inspected_use_item(state, inventory)?;
+    if item.container == 0 && reliable_equipment_destination(item).is_some()
+        && item.unique_id.is_none() {
         return None;
     }
-    let item = inventory.items.iter().find(|item| {
-        item.container == inspect.container && item.slot == inspect.slot && item.key == inspect.key
-    })?;
     Some(NativePlayerUiIntent::UseItem {
         key: Some(item.key.clone()),
         unique_id: item_unique_id(item),
@@ -10049,55 +10501,30 @@ fn inspected_equip_intent(
     state: &NativePlayerUiState,
     inventory: &InventoryModel,
 ) -> Option<NativePlayerUiIntent> {
-    let inspect = state.inspect.as_ref()?;
-    if inspect.container == 3 {
-        return None;
-    }
-    if inspect.container == 2 {
-        return inspected_remove_intent(state, inventory);
-    }
-    let item = inventory.items.iter().find(|item| {
-        item.container == inspect.container && item.slot == inspect.slot && item.key == inspect.key
-    })?;
-    Some(NativePlayerUiIntent::EquipItem {
-        unique_id: item_unique_id(item)?,
-        grid: container_name(item.container).to_owned(),
-        to: equip_destination_for_item(item),
-    })
+    let selection = inspected_exact_selection(state, inventory)?;
+    let plan = crate::bag_ui::plan_equipment(inventory, selection, &PendingOperations::default())?;
+    Some(native_equipment_intent(plan))
 }
 
 fn inspected_remove_intent(
     state: &NativePlayerUiState,
     inventory: &InventoryModel,
 ) -> Option<NativePlayerUiIntent> {
-    let inspect = state.inspect.as_ref()?;
-    if inspect.container != 2 {
-        return None;
+    let selection = inspected_exact_selection(state, inventory)?;
+    (selection.container == 2).then_some(())?;
+    let plan = crate::bag_ui::plan_equipment(inventory, selection, &PendingOperations::default())?;
+    Some(native_equipment_intent(plan))
+}
+
+fn native_equipment_intent(plan: crate::bag_ui::BagEquipmentPlan) -> NativePlayerUiIntent {
+    match plan.kind {
+        crate::bag_ui::BagEquipmentKind::Equip => NativePlayerUiIntent::EquipItem {
+            unique_id: plan.unique_id, grid: plan.grid.to_owned(), to: plan.to,
+        },
+        crate::bag_ui::BagEquipmentKind::Remove => NativePlayerUiIntent::RemoveItem {
+            unique_id: plan.unique_id, grid: plan.grid.to_owned(), to: plan.to,
+        },
     }
-    let item = inventory
-        .items
-        .iter()
-        .find(|item| item.container == 2 && item.slot == inspect.slot && item.key == inspect.key)?;
-    // Crystal MirItemCell.RemoveItem selects the first free bag cell, whose
-    // raw Inventory-array index starts at 6. This host's WebSocket contract
-    // (Simulation::remove_item_destination) uses a normalized 0-based bag
-    // index instead. Do not send the raw +6 or the worn item's source grid.
-    // Belt-first amulet removal/merging remains a separate protocol gap:
-    // that endpoint cannot address a belt destination, so never alias one
-    // to an unrelated bag cell.
-    let free_bag = (0..inventory.bag_slot_capacity())
-        .find(|slot| {
-            !inventory
-                .items
-                .iter()
-                .any(|candidate| candidate.container == 0 && candidate.slot == u32::from(*slot))
-        })
-        .map(i32::from);
-    Some(NativePlayerUiIntent::RemoveItem {
-        unique_id: item_unique_id(item)?,
-        grid: "inventory".to_owned(),
-        to: free_bag?,
-    })
 }
 
 fn inventory_delete_prompt_for_item(item: &ItemModel) -> Option<InventoryDeletePrompt> {
@@ -10610,50 +11037,9 @@ fn render_mail_feedback_modal(
     asset_server: Option<&AssetServer>,
     message: &str,
 ) {
-    parent
-        .spawn((
-            OverlayMailFeedbackDialog,
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.left),
-                top: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.top),
-                width: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.width),
-                height: Val::Px(CRYSTAL_DELETE_CONFIRM_RECT.height),
-                overflow: Overflow::clip(),
-                ..default()
-            },
-            BackgroundColor(Color::NONE),
-        ))
-        .with_children(|dialog| {
-            if let Some(asset_server) = asset_server {
-                spawn_overlay_frame(
-                    dialog,
-                    asset_server,
-                    "original-ui/Prguse/360.png",
-                    CRYSTAL_DELETE_CONFIRM_RECT.width,
-                    CRYSTAL_DELETE_CONFIRM_RECT.height,
-                );
-                spawn_overlay_crystal_button(
-                    dialog,
-                    asset_server,
-                    "Title",
-                    200,
-                    201,
-                    202,
-                    CrystalRect::new(360.0, 157.0, 76.0, 25.0),
-                    OverlayButton::MailFeedbackAcknowledge,
-                );
-            }
-            overlay_text_at(
-                dialog,
-                message,
-                CrystalRect::new(35.0, 35.0, 390.0, 110.0),
-                10.0,
-                TEXT,
-            );
-        });
+    super::mail_compose_shared::paint_feedback(parent,asset_server,message,CRYSTAL_DELETE_CONFIRM_RECT,
+        &super::typography::crystal_text_font(10.),OverlayMailFeedbackDialog,OverlayButton::MailFeedbackAcknowledge);
 }
-
 fn storage_password_caption(stage: StoragePasswordStage) -> &'static str {
     match stage {
         StoragePasswordStage::Unlock => "Enter storage password",
@@ -11059,6 +11445,7 @@ fn render_overlays(
         ui,
         shop,
         shop_ui,
+        player_intents,
         game_shop,
         storage,
         storage_ui,
@@ -11199,6 +11586,7 @@ fn render_overlays(
                     &inventory,
                     &state,
                     &ui.player,
+                    player_intents.npc_gold_buy_feedback(),
                 )
             },
         );
@@ -11422,17 +11810,10 @@ fn render_overlays(
                         state.guild_gold_prompt.as_ref(),
                     );
                 } else if let Some(input) = state.parcel_gold_prompt.as_ref() {
-                    render_gold_amount_modal(
-                        parent,
-                        asset_server.as_deref(),
-                        "Gold Amount:",
-                        input,
-                        [
-                            OverlayButton::MailParcelGoldConfirm,
-                            OverlayButton::MailParcelGoldCancel,
-                            OverlayButton::MailParcelGoldCancel,
-                        ],
-                    );
+                    super::mail_compose_shared::paint_gold(parent,asset_server.as_deref(),
+                        &super::mail_compose_shared::GoldPaint{draft:input.draft.clone(),max_amount:input.max_amount,amount:input.amount()},
+                        CrystalRect::new(CRYSTAL_DELETE_AMOUNT_RECT.left,CRYSTAL_DELETE_AMOUNT_RECT.top,204.,109.),
+                        &super::typography::crystal_text_font(10.),OverlayGuildGoldInput,common_mail_action);
                 }
             },
         );
@@ -11756,197 +12137,58 @@ fn render_inventory(
     parcel: Option<&mail_parcel::MailParcelUi>,
 ) {
     if let Some(asset_server) = asset_server {
-        spawn_overlay_frame(
-            parent,
-            asset_server,
-            "original-ui/Title/196.png",
-            INVENTORY_PANEL_SIZE.width as f32,
-            INVENTORY_PANEL_SIZE.height as f32,
-        );
-        spawn_inventory_tab(
-            parent,
-            asset_server,
-            6.0,
-            7.0,
-            197,
-            737,
-            state.inventory_page == 0,
-            OverlayButton::SelectInventoryPage(0),
-        );
-        let second_tab_index = inventory_second_tab_index(inventory, state.inventory_page == 1);
-        spawn_inventory_tab(
-            parent,
-            asset_server,
-            76.0,
-            7.0,
-            second_tab_index,
-            second_tab_index,
-            state.inventory_page == 1,
-            OverlayButton::SelectInventoryPage(1),
-        );
-        spawn_inventory_tab(
-            parent,
-            asset_server,
-            146.0,
-            7.0,
-            198,
-            739,
-            state.inventory_page == 2,
-            OverlayButton::SelectInventoryPage(2),
-        );
-        spawn_overlay_crystal_button(
-            parent,
-            asset_server,
-            "Prguse2",
-            360,
-            361,
-            362,
-            CrystalRect::new(289.0, 3.0, 24.0, 21.0),
-            OverlayButton::CloseWindows,
-        );
-        overlay_text_at(
-            parent,
-            &format_crystal_gold(inventory.gold),
-            CrystalRect::new(
-                INVENTORY_GOLD_LABEL_ORIGIN.x as f32,
-                INVENTORY_GOLD_LABEL_ORIGIN.y as f32,
-                INVENTORY_GOLD_LABEL_SIZE.width as f32,
-                INVENTORY_GOLD_LABEL_SIZE.height as f32,
-            ),
-            10.0,
-            TEXT,
-        );
-        spawn_inventory_weight_bar(parent, asset_server, ui.player.normalized_weight());
-        overlay_text_at(
-            parent,
-            &free_inventory_slots(inventory).to_string(),
-            CrystalRect::new(
-                INVENTORY_FREE_SLOT_LABEL_ORIGIN.x as f32,
-                INVENTORY_FREE_SLOT_LABEL_ORIGIN.y as f32,
-                INVENTORY_FREE_SLOT_LABEL_SIZE.width as f32,
-                INVENTORY_FREE_SLOT_LABEL_SIZE.height as f32,
-            ),
-            10.0,
-            TEXT,
-        );
-        spawn_overlay_crystal_button_enabled(
-            parent,
-            asset_server,
-            "Prguse2",
-            if state.inventory_delete_mode {
-                368
-            } else {
-                366
-            },
-            if state.inventory_delete_mode {
-                368
-            } else {
-                367
-            },
-            368,
-            CrystalRect::new(
-                INVENTORY_DELETE_BUTTON_ORIGIN.x as f32,
-                INVENTORY_DELETE_BUTTON_ORIGIN.y as f32,
-                INVENTORY_DELETE_BUTTON_SIZE.width as f32,
-                INVENTORY_DELETE_BUTTON_SIZE.height as f32,
-            ),
-            OverlayButton::InventoryDeleteToggle,
-            true,
-        );
-        let (container, page_offset) = if state.inventory_page == 2 {
-            (3, 0)
-        } else {
-            (0, usize::from(state.inventory_page) * INVENTORY_PAGE_SIZE)
+        let options = BagPaintOptions {
+            page: state.inventory_page,
+            delete_mode: state.inventory_delete_mode,
+            weight_ratio: Some(ui.player.normalized_weight()),
+            free_slots: Some(free_inventory_slots(inventory)),
+            font: crate::crystal_ui::typography::crystal_text_font(10.0),
+            stack_split_hint: Default::default(),
         };
-        parent
-            .spawn((
-                OverlayInventoryGridViewport,
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(INVENTORY_GRID_ORIGIN.x as f32),
-                    top: Val::Px(INVENTORY_GRID_ORIGIN.y as f32),
-                    width: Val::Px(
-                        (INVENTORY_GRID_STEP.x as usize * (INVENTORY_PAGE_COLUMNS - 1)
-                            + INVENTORY_CELL_SIZE.width as usize) as f32,
-                    ),
-                    height: Val::Px(
-                        (INVENTORY_GRID_STEP.y as usize
-                            * (INVENTORY_PAGE_SIZE / INVENTORY_PAGE_COLUMNS - 1)
-                            + INVENTORY_CELL_SIZE.height as usize) as f32,
-                    ),
-                    ..default()
-                },
-                BackgroundColor(Color::NONE),
-            ))
-            .with_children(|grid| {
-                let page_items = inventory.items_in(container);
-                for local_slot in 0..INVENTORY_PAGE_SIZE {
-                    let slot = (page_offset + local_slot) as u32;
-                    if container == 0 && slot >= u32::from(inventory.bag_slot_capacity()) {
-                        continue;
+        bag_paint::paint_crystal_inventory(
+            parent,
+            asset_server,
+            inventory,
+            &ui.player,
+            &options,
+            |action| match action {
+                BagPaintAction::SelectPage(page) => OverlayButton::SelectInventoryPage(page),
+                BagPaintAction::Close => OverlayButton::CloseWindows,
+                BagPaintAction::ToggleDelete => OverlayButton::InventoryDeleteToggle,
+                BagPaintAction::InspectCell { container: 3, slot, .. } => OverlayButton::InspectQuest(slot),
+                BagPaintAction::InspectCell { slot, unique_id, .. } =>
+                    OverlayButton::InspectBagSnapshot { slot, unique_id },
+            },
+            |cell: BagPaintCellInfo<'_>| {
+                let item = cell.item.filter(|item| {
+                    cell.container != 0 || !trade_dialog::offered_bag_item(social, item)
+                });
+                let mail_locked = cell.container == 0
+                    && item.and_then(item_unique_id).is_some_and(|unique_id| {
+                        parcel.is_some_and(|parcel| parcel.blocks_item(unique_id))
+                    });
+                let enabled = !mail_locked && if cell.container == 3 {
+                    item.is_some()
+                } else {
+                    match &state.inventory_operation {
+                        Some(InventoryOperationDraft::Move { source_slot, .. }) =>
+                            *source_slot != cell.slot,
+                        Some(InventoryOperationDraft::Merge { source_slot, .. }) =>
+                            *source_slot != cell.slot && item.and_then(item_unique_id).is_some(),
+                        None => item.is_some(),
                     }
-                    let item = page_items
-                        .iter()
-                        .copied()
-                        .find(|item| item.slot == slot)
-                        .filter(|item| {
-                            container != 0 || !trade_dialog::offered_bag_item(social, item)
-                        });
-                    let mail_locked = container == 0
-                        && item
-                            .and_then(item_unique_id)
-                            .is_some_and(|unique_id| parcel.is_some_and(|parcel| parcel.blocks_item(unique_id)));
-                    let enabled = !mail_locked && if container == 3 {
-                        item.is_some()
-                    } else {
-                        match &state.inventory_operation {
-                            Some(InventoryOperationDraft::Move { source_slot, .. }) => {
-                                *source_slot != slot
-                            }
-                            Some(InventoryOperationDraft::Merge { source_slot, .. }) => {
-                                *source_slot != slot && item.and_then(item_unique_id).is_some()
-                            }
-                            None => item.is_some(),
-                        }
-                    };
-                    let x =
-                        (local_slot % INVENTORY_PAGE_COLUMNS) as f32 * INVENTORY_GRID_STEP.x as f32;
-                    let y =
-                        (local_slot / INVENTORY_PAGE_COLUMNS) as f32 * INVENTORY_GRID_STEP.y as f32;
-                    let rect = CrystalRect::new(
-                        x,
-                        y,
-                        INVENTORY_CELL_SIZE.width as f32,
-                        INVENTORY_CELL_SIZE.height as f32,
-                    );
-                    let button = if container == 3 {
-                        OverlayButton::InspectQuest(slot)
-                    } else {
-                        OverlayButton::InspectBag(slot)
-                    };
-                    if let Some(item) = item {
-                        overlay_absolute_item_button(
-                            grid,
-                            asset_server,
-                            item,
-                            rect,
-                            button,
-                            enabled,
-                            mail_locked,
-                            &ui.player,
-                        );
-                    } else {
-                        overlay_absolute_inventory_cell(grid, rect, button, enabled);
-                    }
-                    if container == 0 {
-                        trade_dialog::draw_selection(grid, state, true, slot as usize, rect);
-                        hero_dialog::cross::draw_player_selection(grid, state, slot, rect);
-                    }
+                };
+                BagCellPolicy::new(item.is_some(), enabled, mail_locked)
+            },
+            |grid, cell| {
+                if cell.container == 0 {
+                    trade_dialog::draw_selection(grid, state, true, cell.slot as usize, cell.rect);
+                    hero_dialog::cross::draw_player_selection(grid, state, cell.slot, cell.rect);
                 }
-            });
+            },
+        );
         return;
     }
-
     title(parent, "Bag");
     body(parent, &format!("{} Gold", inventory.gold));
     if let Some(draft) = &state.inventory_operation {
@@ -12008,300 +12250,17 @@ fn render_inventory(
                     }
                     None => item.is_some(),
                 };
-                overlay_button(grid, &label, OverlayButton::InspectBag(slot), enabled);
+                overlay_button(grid, &label, OverlayButton::InspectBagSnapshot {
+                    slot,
+                    unique_id: item.and_then(item_unique_id),
+                }, enabled);
             }
         });
     overlay_button(parent, "Close", OverlayButton::CloseWindows, true);
 }
 
-fn format_crystal_gold(gold: u32) -> String {
-    let digits = gold.to_string();
-    let mut output = String::with_capacity(digits.len() + digits.len() / 3);
-    for (index, digit) in digits.chars().enumerate() {
-        if index > 0 && (digits.len() - index) % 3 == 0 {
-            output.push(',');
-        }
-        output.push(digit);
-    }
-    output
-}
-
-fn inventory_weight_bar_asset(ratio: f32) -> (&'static str, u16) {
-    if ratio <= 0.50 {
-        ("Prguse", 24)
-    } else if ratio <= 0.75 {
-        ("UI_32bit", 471)
-    } else {
-        ("UI_32bit", 470)
-    }
-}
-
-fn inventory_weight_bar_width(ratio: f32) -> f32 {
-    ((INVENTORY_WEIGHT_BAR_SIZE.width as f32 - 3.0) * ratio.clamp(0.0, 1.0)).floor()
-}
-
-fn spawn_inventory_weight_bar(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: &AssetServer,
-    ratio: f32,
-) {
-    let width = inventory_weight_bar_width(ratio);
-    if width <= 0.0 {
-        return;
-    }
-    let (library, index) = inventory_weight_bar_asset(ratio);
-    parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(INVENTORY_WEIGHT_BAR_ORIGIN.x as f32),
-            top: Val::Px(INVENTORY_WEIGHT_BAR_ORIGIN.y as f32),
-            width: Val::Px(width),
-            height: Val::Px(INVENTORY_WEIGHT_BAR_SIZE.height as f32),
-            overflow: Overflow::clip(),
-            ..default()
-        },
-        ImageNode {
-            image: asset_server.load(format!("original-ui/{library}/{index}.png")),
-            rect: Some(bevy::math::Rect {
-                min: Vec2::ZERO,
-                max: Vec2::new(width, INVENTORY_WEIGHT_BAR_SIZE.height as f32),
-            }),
-            ..default()
-        },
-    ));
-}
-
-fn crystal_character_gender_offset(gender: Option<&str>) -> Option<u16> {
-    let gender = gender?.trim();
-    if gender.eq_ignore_ascii_case("male") {
-        Some(0)
-    } else if gender.eq_ignore_ascii_case("female") {
-        Some(1)
-    } else {
-        None
-    }
-}
-
-fn crystal_character_page_index(gender: Option<&str>) -> u16 {
-    // A missing legacy gender keeps the structural page usable, while the
-    // actual appearance layers below remain fail-closed.
-    340 + crystal_character_gender_offset(gender).unwrap_or_default()
-}
-
-fn crystal_character_class_image_index(class_name: Option<&str>) -> Option<u16> {
-    let class_name = class_name?.trim();
-    if class_name.eq_ignore_ascii_case("warrior") {
-        Some(100)
-    } else if class_name.eq_ignore_ascii_case("wizard") {
-        Some(101)
-    } else if class_name.eq_ignore_ascii_case("taoist") {
-        Some(102)
-    } else if class_name.eq_ignore_ascii_case("assassin") {
-        Some(103)
-    } else if class_name.eq_ignore_ascii_case("archer") {
-        Some(104)
-    } else {
-        None
-    }
-}
-
-fn crystal_character_guild_label(ui: &UiReadModel) -> String {
-    [
-        ui.player.guild_name.as_deref(),
-        ui.player.guild_rank_name.as_deref(),
-    ]
-    .into_iter()
-    .flatten()
-    .map(str::trim)
-    .filter(|value| !value.is_empty())
-    .collect::<Vec<_>>()
-    .join(" ")
-}
-
-fn crystal_character_hair_frame(
-    class_name: Option<&str>,
-    gender: Option<&str>,
-    hair: Option<u8>,
-) -> Option<CrystalFrameSpec> {
-    let gender_offset = crystal_character_gender_offset(gender)?;
-    let hair = usize::from(hair?);
-    if hair >= CRYSTAL_MALE_HAIR_RECTS.len() {
-        return None;
-    }
-    let assassin = class_name
-        .map(str::trim)
-        .is_some_and(|value| value.eq_ignore_ascii_case("assassin"));
-    let (base, mut rect) = match (gender_offset, assassin) {
-        (0, false) => (441, CRYSTAL_MALE_HAIR_RECTS[hair]),
-        (0, true) => (461, CRYSTAL_ASSASSIN_MALE_HAIR_RECTS[hair]),
-        (1, false) => (481, CRYSTAL_FEMALE_HAIR_RECTS[hair]),
-        (1, true) => (501, CRYSTAL_ASSASSIN_FEMALE_HAIR_RECTS[hair]),
-        _ => return None,
-    };
-    // CharacterDialog.cs applies these offsets on top of the source frame's
-    // intrinsic `useOffset=true` x/y for Assassin hair only.
-    if assassin {
-        rect.left += if gender_offset == 0 { 6.0 } else { 4.0 };
-        rect.top += if gender_offset == 0 { 25.0 } else { 18.0 };
-    }
-    Some(CrystalFrameSpec::new("Prguse", base + hair as u16, rect))
-}
-
-fn crystal_character_state_item_frame(item: &ItemModel) -> Option<CrystalFrameSpec> {
-    if item.state_image == 0 || item.state_image_width == 0 || item.state_image_height == 0 {
-        return None;
-    }
-    Some(CrystalFrameSpec::new(
-        "StateItem",
-        item.state_image,
-        CrystalRect::new(
-            item.state_image_x as f32,
-            item.state_image_y as f32,
-            item.state_image_width as f32,
-            item.state_image_height as f32,
-        ),
-    ))
-}
-
-fn crystal_character_wing_frame(
-    wing_effect: Option<u8>,
-    gender: Option<&str>,
-) -> Option<CrystalFrameSpec> {
-    let gender_offset = crystal_character_gender_offset(gender)?;
-    let wing_offset = match wing_effect? {
-        1 => 2,
-        2 => 4,
-        _ => return None,
-    };
-    let index = 1200 + wing_offset + gender_offset;
-    // Exact `Prguse2` intrinsic rectangles (`useOffset=true`) exported from
-    // the same Crystal library consumed by CharacterDialog.cs.
-    let rect = match index {
-        1202 => CrystalRect::new(64.0, 138.0, 148.0, 139.0),
-        1203 => CrystalRect::new(64.0, 145.0, 148.0, 144.0),
-        1204 => CrystalRect::new(55.0, 140.0, 156.0, 185.0),
-        1205 => CrystalRect::new(56.0, 144.0, 156.0, 185.0),
-        _ => return None,
-    };
-    Some(CrystalFrameSpec::new("Prguse2", index, rect))
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum CrystalCharacterBlend {
-    Alpha,
-    DrawBlend,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-struct CrystalCharacterLayer {
-    frame: CrystalFrameSpec,
-    blend: CrystalCharacterBlend,
-}
-
-impl CrystalCharacterLayer {
-    const fn alpha(frame: CrystalFrameSpec) -> Self {
-        Self {
-            frame,
-            blend: CrystalCharacterBlend::Alpha,
-        }
-    }
-
-    const fn draw_blend(frame: CrystalFrameSpec) -> Self {
-        Self {
-            frame,
-            blend: CrystalCharacterBlend::DrawBlend,
-        }
-    }
-}
-
-fn spawn_character_layer(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: &AssetServer,
-    wing_materials: Option<&CrystalCharacterWingMaterials>,
-    layer: CrystalCharacterLayer,
-) {
-    match layer.blend {
-        CrystalCharacterBlend::Alpha => {
-            spawn_static_overlay_sprite(
-                parent,
-                asset_server,
-                layer.frame.asset_path(),
-                layer.frame.rect,
-            );
-        }
-        CrystalCharacterBlend::DrawBlend => {
-            let Some(material) =
-                wing_materials.and_then(|materials| materials.get(layer.frame.index))
-            else {
-                return;
-            };
-            parent.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(layer.frame.rect.left),
-                    top: Val::Px(layer.frame.rect.top),
-                    width: Val::Px(layer.frame.rect.width),
-                    height: Val::Px(layer.frame.rect.height),
-                    ..default()
-                },
-                MaterialNode(material.clone()),
-            ));
-        }
-    }
-}
-
-fn crystal_character_paper_doll_layers(
-    inventory: &InventoryModel,
-    ui: &UiReadModel,
-) -> Vec<CrystalCharacterLayer> {
-    let equipped = |slot| {
-        inventory
-            .items
-            .iter()
-            .find(|item| item.container == 2 && item.slot == slot)
-    };
-    let mut layers = Vec::with_capacity(4);
-
-    // Exact CharacterPage.AfterDraw condition and order: a wing is legal only
-    // while an armour item exists, then armour, weapon, and helmet-or-hair.
-    if let Some(armour) = equipped(1) {
-        if let Some(frame) =
-            crystal_character_wing_frame(ui.player.wing_effect, ui.player.gender.as_deref())
-        {
-            layers.push(CrystalCharacterLayer::draw_blend(frame));
-        }
-        if let Some(frame) = crystal_character_state_item_frame(armour) {
-            layers.push(CrystalCharacterLayer::alpha(frame));
-        }
-    }
-    if let Some(frame) = equipped(0).and_then(crystal_character_state_item_frame) {
-        layers.push(CrystalCharacterLayer::alpha(frame));
-    }
-    if let Some(helmet) = equipped(2) {
-        if let Some(frame) = crystal_character_state_item_frame(helmet) {
-            layers.push(CrystalCharacterLayer::alpha(frame));
-        }
-    } else if let Some(frame) = crystal_character_hair_frame(
-        ui.player.class_name.as_deref(),
-        ui.player.gender.as_deref(),
-        ui.player.hair,
-    ) {
-        layers.push(CrystalCharacterLayer::alpha(frame));
-    }
-    layers
-}
-
-fn render_character_paper_doll(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: &AssetServer,
-    wing_materials: Option<&CrystalCharacterWingMaterials>,
-    inventory: &InventoryModel,
-    ui: &UiReadModel,
-) {
-    for layer in crystal_character_paper_doll_layers(inventory, ui) {
-        spawn_character_layer(parent, asset_server, wing_materials, layer);
-    }
-}
+use super::character_stats::class_image_index as crystal_character_class_image_index;
+fn crystal_character_guild_label(ui:&UiReadModel)->String {super::character_stats::guild_label(&ui.player)}
 
 fn render_equipment(
     parent: &mut ChildSpawnerCommands,
@@ -12341,15 +12300,10 @@ fn render_equipment(
             page_rect,
         );
 
-        for (page, left, index) in [
-            (CharacterPage::Character, 8.0, 500),
-            (CharacterPage::Stats1, 70.0, 501),
-            (CharacterPage::Stats2, 132.0, 502),
-            (CharacterPage::Spells, 194.0, 503),
-        ] {
+        for (page, rect, index) in super::panel_navigation::character_tabs() {
             spawn_invisible_overlay_button(
                 parent,
-                CrystalRect::new(left, 70.0, 64.0, 20.0),
+                rect,
                 OverlayButton::SelectCharacterPage(page),
             );
             if state.character_page == page {
@@ -12357,7 +12311,7 @@ fn render_equipment(
                     parent,
                     asset_server,
                     format!("original-ui/Title/{index}.png"),
-                    CrystalRect::new(left, 70.0, 64.0, 20.0),
+                    rect,
                 );
             }
         }
@@ -12368,31 +12322,10 @@ fn render_equipment(
             360,
             361,
             362,
-            CrystalRect::new(241.0, 3.0, 24.0, 21.0),
+            super::panel_navigation::CHARACTER_CLOSE_RECT,
             OverlayButton::CloseCharacter,
         );
-        overlay_centered_text_at(
-            parent,
-            ui.player.name.as_deref().unwrap_or(""),
-            CrystalRect::new(0.0, 12.0, 264.0, 20.0),
-            12.0,
-            TEXT,
-        );
-        overlay_centered_text_at(
-            parent,
-            &crystal_character_guild_label(ui),
-            CrystalRect::new(0.0, 33.0, 264.0, 30.0),
-            10.0,
-            TEXT,
-        );
-        if let Some(index) = crystal_character_class_image_index(ui.player.class_name.as_deref()) {
-            spawn_static_overlay_sprite(
-                parent,
-                asset_server,
-                format!("original-ui/Prguse/{index}.png"),
-                CrystalRect::new(15.0, 33.0, 32.0, 32.0),
-            );
-        }
+        super::character_stats::spawn_character_header(parent,Some(asset_server),&ui.player,None);
 
         match state.character_page {
             CharacterPage::Character => {
@@ -12407,7 +12340,10 @@ fn render_equipment(
                             asset_server,
                             item,
                             rect,
-                            OverlayButton::InspectEquip(slot),
+                            OverlayButton::InspectEquipSnapshot {
+                                slot,
+                                unique_id: item_unique_id(item),
+                            },
                             true,
                             false,
                             &ui.player,
@@ -12418,28 +12354,8 @@ fn render_equipment(
                 render_character_paper_doll(parent, asset_server, wing_materials, inventory, ui);
             }
             CharacterPage::Stats1 | CharacterPage::Stats2 => {
-                let weights = ui
-                    .player
-                    .weights
-                    .map(|weights| character_stats::Weights {
-                        bag: Some(i64::from(weights.bag)),
-                        wear: Some(i64::from(weights.wear)),
-                        hand: Some(i64::from(weights.hand)),
-                    })
-                    .unwrap_or_default();
-                for (text, top) in character_stats::lines(
-                    &ui.player,
-                    state.character_page == CharacterPage::Stats2,
-                    weights,
-                ) {
-                    overlay_text_at(
-                        parent,
-                        &text,
-                        CrystalRect::new(134., top, 105., 16.),
-                        32. / 3.,
-                        TEXT,
-                    );
-                }
+                character_stats::spawn_authoritative_rows(parent, &ui.player,
+                    state.character_page == CharacterPage::Stats2, None);
             }
             CharacterPage::Spells => skill_page::render(parent, Some(asset_server), skills, state),
         }
@@ -12492,7 +12408,10 @@ fn render_equipment(
         overlay_button(
             parent,
             &line,
-            OverlayButton::InspectEquip(slot),
+            OverlayButton::InspectEquipSnapshot {
+                slot,
+                unique_id: item.and_then(item_unique_id),
+            },
             item.is_some(),
         );
     }
@@ -12520,39 +12439,6 @@ fn spawn_overlay_frame(
             ..default()
         },
     ));
-}
-
-fn spawn_inventory_tab(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: &AssetServer,
-    left: f32,
-    top: f32,
-    active_index: u16,
-    idle_index: u16,
-    active: bool,
-    action: OverlayButton,
-) {
-    let index = if active { active_index } else { idle_index };
-    spawn_overlay_crystal_button(
-        parent,
-        asset_server,
-        "Title",
-        index,
-        index,
-        index,
-        CrystalRect::new(left, top, 72.0, 23.0),
-        action,
-    );
-}
-
-fn inventory_second_tab_index(inventory: &InventoryModel, active: bool) -> u16 {
-    if !inventory.second_bag_unlocked() {
-        169
-    } else if active {
-        168
-    } else {
-        738
-    }
 }
 
 fn overlay_text_at(
@@ -12670,108 +12556,22 @@ fn overlay_absolute_item_button(
     mail_locked: bool,
     player: &crate::read_model::PlayerStats,
 ) {
-    let mut entity = parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(rect.left),
-            top: Val::Px(rect.top),
-            width: Val::Px(rect.width),
-            height: Val::Px(rect.height),
-            ..default()
-        },
-        BackgroundColor(Color::NONE),
-        Button,
-        CrystalItemHint(crystal_item_tooltip_document(item, player)),
-    ));
-    if enabled {
-        entity.insert(action);
-    }
-    entity.with_children(|cell| {
-        if let Some(index) = item.user_item_image_index() {
-            if mail_locked {
-                crate::crystal_ui::item_image::spawn_original_item_image_tinted(
-                    cell,
-                    asset_server,
-                    index,
-                    rect.width as i32,
-                    rect.height as i32,
-                    Color::srgba(105.0 / 255.0, 105.0 / 255.0, 105.0 / 255.0, 0.8),
-                );
-            } else {
-                let (marker, node, mut image) = original_item_image_bundle(
-                    asset_server,
-                    Some(index),
-                    rect.width as i32,
-                    rect.height as i32,
-                );
-                image.color = if enabled {
-                    Color::WHITE
-                } else {
-                    Color::srgba(0.412, 0.412, 0.412, 0.8)
-                };
-                cell.spawn((marker, node, image));
-            }
-        }
-        let detail = inventory_cell_stack_label(item);
-        if !detail.is_empty() {
-            overlay_inventory_count(cell, &detail, rect.width, rect.height);
-        }
-    });
+    bag_paint::paint_original_item_cell(
+        parent, asset_server, item, rect, action, (), enabled, mail_locked,
+        player, &crate::crystal_ui::typography::crystal_text_font(10.0),
+    );
 }
-
-fn overlay_absolute_inventory_cell(
-    parent: &mut ChildSpawnerCommands,
-    rect: CrystalRect,
-    action: OverlayButton,
-    enabled: bool,
-) {
-    let mut entity = parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(rect.left),
-            top: Val::Px(rect.top),
-            width: Val::Px(rect.width),
-            height: Val::Px(rect.height),
-            ..default()
-        },
-        BackgroundColor(Color::NONE),
-    ));
-    if enabled {
-        entity.insert((Button, action));
-    }
-}
-
 fn overlay_inventory_count(
     parent: &mut ChildSpawnerCommands,
     text: &str,
     cell_width: f32,
     cell_height: f32,
 ) {
-    parent
-        .spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(0.0),
-                top: Val::Px(0.0),
-                width: Val::Px(cell_width),
-                height: Val::Px(cell_height),
-                align_items: AlignItems::FlexEnd,
-                justify_content: JustifyContent::FlexEnd,
-                overflow: Overflow::clip(),
-                ..default()
-            },
-            BackgroundColor(Color::NONE),
-        ))
-        .with_children(|label| {
-            label.spawn((
-                Text::new(text.to_owned()),
-                crate::crystal_ui::typography::crystal_text_font(10.0),
-                TextColor(Color::srgb(1.0, 1.0, 0.0)),
-                TextLayout::new(Justify::Right, LineBreak::NoWrap),
-            ));
-        });
+    bag_paint::paint_stack_count(
+        parent, text, cell_width, cell_height,
+        &crate::crystal_ui::typography::crystal_text_font(10.0),
+    );
 }
-
 fn crystal_npc_goods_cell_rect(row: usize) -> CrystalRect {
     CrystalRect::new(
         10.0,
@@ -12850,7 +12650,7 @@ fn overlay_absolute_shop_good_button(
         u32::from(good.count),
         good.tooltip_source.as_ref(),
         player,
-        CrystalItemTooltipOptions { hide_added_stats },
+        CrystalItemTooltipOptions { hide_added_stats, ..Default::default() },
     ) {
         entity.insert(CrystalItemHint(document));
     }
@@ -14837,389 +14637,20 @@ fn mail_reader_message<'a>(
     })
 }
 
-fn mail_reader_text(message: &MailMessage) -> String {
-    message.body.replace("\\r\\n", "\r\n")
+fn map_mail_paint_action(action: super::mail_page_shared::MailPaintAction) -> OverlayButton {
+    use super::mail_page_shared::MailPaintAction as A;
+    match action {A::Close=>OverlayButton::CloseMail,A::Prev=>OverlayButton::MailPagePrev,A::Next=>OverlayButton::MailPageNext,A::Select(id)=>OverlayButton::SelectMail(id),A::Compose=>OverlayButton::OpenMailCompose,A::Reply(id)=>OverlayButton::MailReply(id),A::Read(id)=>OverlayButton::ReadMail(id),A::Delete(id)=>OverlayButton::DeleteMail(id),A::ReaderClose=>OverlayButton::MailReaderClose,A::ReaderDelete=>OverlayButton::MailReaderDelete,A::ReaderLock=>OverlayButton::MailReaderLock,A::ReaderClaim=>OverlayButton::MailReaderClaim}
 }
-
-fn overlay_wrapped_text_at(
-    parent: &mut ChildSpawnerCommands,
-    text: &str,
-    rect: CrystalRect,
-    font_size: f32,
-    color: Color,
-) {
-    parent.spawn((
-        Node {
-            position_type: PositionType::Absolute,
-            left: Val::Px(rect.left),
-            top: Val::Px(rect.top),
-            width: Val::Px(rect.width),
-            height: Val::Px(rect.height),
-            overflow: Overflow::clip(),
-            ..default()
-        },
-        Text::new(text.to_owned()),
-        crate::crystal_ui::typography::crystal_text_font(font_size),
-        TextColor(color),
-        TextLayout::new(Justify::Left, LineBreak::WordOrCharacter),
-    ));
+#[cfg(test)]
+use super::mail_page_shared::reader_text as mail_reader_text;
+fn render_mail_reader_letter(parent: &mut ChildSpawnerCommands, assets: Option<&AssetServer>, message: &MailMessage) {
+    super::mail_page_shared::paint_reader(parent,assets,message,super::mail_page_shared::MailReaderKind::Letter,None,map_mail_paint_action);
 }
-
-fn spawn_mail_reader_button(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
-    library: &'static str,
-    normal: u16,
-    hover: u16,
-    pressed: u16,
-    disabled: u16,
-    rect: CrystalRect,
-    action: OverlayButton,
-    enabled: bool,
-) {
-    if let Some(asset_server) = asset_server {
-        spawn_overlay_crystal_button_enabled_with_disabled(
-            parent,
-            asset_server,
-            library,
-            normal,
-            hover,
-            pressed,
-            Some(disabled),
-            rect,
-            action,
-            enabled,
-        );
-    } else if enabled {
-        spawn_invisible_overlay_button(parent, rect, action);
-    }
+fn render_mail_reader_parcel(parent: &mut ChildSpawnerCommands, assets: Option<&AssetServer>, message: &MailMessage) {
+    super::mail_page_shared::paint_reader(parent,assets,message,super::mail_page_shared::MailReaderKind::Parcel,None,map_mail_paint_action);
 }
-
-fn render_mail_reader_header(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
-    message: &MailMessage,
-    frame: &'static str,
-    height: f32,
-) {
-    if let Some(asset_server) = asset_server {
-        spawn_overlay_frame(parent, asset_server, frame, 236.0, height);
-    }
-    spawn_mail_reader_button(
-        parent,
-        asset_server,
-        "Prguse2",
-        360,
-        361,
-        362,
-        362,
-        CrystalRect::new(209.0, 3.0, 24.0, 21.0),
-        OverlayButton::MailReaderClose,
-        true,
-    );
-    overlay_text_at(
-        parent,
-        &message.sender,
-        CrystalRect::new(70.0, 35.0, 150.0, 15.0),
-        10.0,
-        TEXT,
-    );
-    overlay_text_at(
-        parent,
-        &mail_date_label(message.date_sent_binary_datetime),
-        CrystalRect::new(70.0, 56.0, 150.0, 15.0),
-        10.0,
-        TEXT,
-    );
-}
-
-fn render_mail_reader_letter(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
-    message: &MailMessage,
-) {
-    render_mail_reader_header(
-        parent,
-        asset_server,
-        message,
-        "original-ui/Title/672.png",
-        300.0,
-    );
-    overlay_wrapped_text_at(
-        parent,
-        &mail_reader_text(message),
-        CrystalRect::new(15.0, 92.0, 202.0, 165.0),
-        10.0,
-        TEXT,
-    );
-    // Source handlers guard delete against Locked; retain the source button
-    // but repeat that guard at the action boundary.
-    spawn_mail_reader_button(
-        parent,
-        asset_server,
-        "Title",
-        540,
-        541,
-        542,
-        542,
-        CrystalRect::new(12.0, 265.0, 64.0, 25.0),
-        OverlayButton::MailReaderDelete,
-        true,
-    );
-    spawn_mail_reader_button(
-        parent,
-        asset_server,
-        "Title",
-        686,
-        687,
-        688,
-        688,
-        CrystalRect::new(81.0, 265.0, 64.0, 25.0),
-        OverlayButton::MailReaderLock,
-        true,
-    );
-    spawn_mail_reader_button(
-        parent,
-        asset_server,
-        "Title",
-        193,
-        194,
-        195,
-        195,
-        CrystalRect::new(154.0, 265.0, 68.0, 25.0),
-        OverlayButton::MailReaderClose,
-        true,
-    );
-}
-
-fn render_mail_reader_parcel(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
-    message: &MailMessage,
-) {
-    render_mail_reader_header(
-        parent,
-        asset_server,
-        message,
-        "original-ui/Title/675.png",
-        384.0,
-    );
-    overlay_wrapped_text_at(
-        parent,
-        &mail_reader_text(message),
-        CrystalRect::new(15.0, 98.0, 202.0, 165.0),
-        10.0,
-        TEXT,
-    );
-    overlay_text_at(
-        parent,
-        &format_crystal_gold(message.gold),
-        CrystalRect::new(63.0, 290.0, 143.0, 15.0),
-        10.0,
-        TEXT,
-    );
-    for (index, attachment) in message.items.iter().take(5).enumerate() {
-        let left = 27.0 + index as f32 * 36.0;
-        parent.spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(left),
-                top: Val::Px(311.0),
-                width: Val::Px(35.0),
-                height: Val::Px(31.0),
-                border: UiRect::all(Val::Px(1.0)),
-                ..default()
-            },
-            BorderColor::all(Color::srgb(0.0, 1.0, 0.0)),
-            BackgroundColor(Color::NONE),
-        ));
-        if let (Some(asset_server), Some(image)) = (
-            asset_server,
-            attachment.image.and_then(|image| u16::try_from(image).ok()),
-        ) {
-            parent.spawn(Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(left),
-                top: Val::Px(311.0),
-                width: Val::Px(35.0),
-                height: Val::Px(31.0),
-                ..default()
-            }).with_children(|cell| {
-                spawn_original_item_image(cell, asset_server, image, 35, 31);
-            });
-        }
-        if attachment.count > 1 {
-            overlay_text_at(
-                parent,
-                &attachment.count.to_string(),
-                CrystalRect::new(left + 18.0, 327.0, 16.0, 12.0),
-                9.0,
-                Color::srgb(1.0, 1.0, 0.0),
-            );
-        }
-    }
-    let collect_enabled = mail_claim_enabled(message);
-    spawn_mail_reader_button(
-        parent,
-        asset_server,
-        "Title",
-        680,
-        681,
-        682,
-        683,
-        CrystalRect::new(30.0, 350.0, 72.0, 25.0),
-        OverlayButton::MailReaderClaim,
-        collect_enabled,
-    );
-    spawn_mail_reader_button(
-        parent,
-        asset_server,
-        "Title",
-        193,
-        194,
-        195,
-        195,
-        CrystalRect::new(135.0, 350.0, 68.0, 25.0),
-        OverlayButton::MailReaderClose,
-        true,
-    );
-}
-
-fn render_mail(
-    parent: &mut ChildSpawnerCommands,
-    asset_server: Option<&AssetServer>,
-    mail: &MailModel,
-    mail_ui: &MailUiState,
-    inventory: &InventoryModel,
-    state: &NativePlayerUiState,
-    compose_ui: &MailComposeUi,
-) {
-    if let Some(asset_server) = asset_server {
-        spawn_overlay_frame(
-            parent,
-            asset_server,
-            "original-ui/Title/670.png",
-            312.0,
-            444.0,
-        );
-        spawn_overlay_crystal_button(
-            parent,
-            asset_server,
-            "Prguse2",
-            360,
-            361,
-            362,
-            CrystalRect::new(288.0, 3.0, 24.0, 21.0),
-            OverlayButton::CloseMail,
-        );
-        // This is MailDialog's context-help control, not MenuDialog's global
-        // HelpDialog button. Its source handler remains unimplemented here.
-        spawn_overlay_crystal_button_enabled(
-            parent,
-            asset_server,
-            "Prguse2",
-            257,
-            258,
-            259,
-            CrystalRect::new(262.0, 3.0, 24.0, 21.0),
-            OverlayButton::CloseMail,
-            false,
-        );
-    }
-    let page = mail.page(mail_ui.cursor.page);
-    if let Some(assets) = asset_server {
-        spawn_static_overlay_sprite(parent, assets, "original-ui/Title/7.png".into(), CrystalRect::new(18.0, 9.0, 43.0, 14.0));
-    }
-    for (label, left, width) in [("Type", 8.0, 37.0), ("Sender", 47.0, 132.0), ("Message", 181.0, 122.0)] {
-        overlay_text_at(parent, label, CrystalRect::new(left, 34.0, width, 19.0), 10.0, TEXT);
-    }
-    for (row, msg) in page.entries.iter().enumerate() {
-        mail_list::row(parent, asset_server, msg, row, mail.selected_id == Some(msg.id));
-    }
-
-    if let Some(asset_server) = asset_server {
-        spawn_overlay_crystal_button_enabled(
-            parent,
-            asset_server,
-            "Prguse2",
-            240,
-            241,
-            242,
-            CrystalRect::new(102.0, 389.0, 16.0, 16.0),
-            OverlayButton::MailPagePrev,
-            page.page > 0,
-        );
-        spawn_overlay_crystal_button_enabled(
-            parent,
-            asset_server,
-            "Prguse2",
-            243,
-            244,
-            245,
-            CrystalRect::new(192.0, 389.0, 16.0, 16.0),
-            OverlayButton::MailPageNext,
-            page.page + 1 < page.page_count,
-        );
-    }
-    overlay_text_at(
-        parent,
-        &format!("{}/{}", page.page + 1, page.page_count),
-        CrystalRect::new(120.0, 389.0, 67.0, 15.0),
-        9.0,
-        TEXT,
-    );
-
-    let selected = mail.selected();
-    let selected_id = selected.map(|message| message.id).unwrap_or_default();
-    if let Some(asset_server) = asset_server {
-        spawn_overlay_crystal_button(
-            parent,
-            asset_server,
-            "Prguse",
-            563,
-            564,
-            565,
-            CrystalRect::new(75.0, 414.0, 28.0, 25.0),
-            OverlayButton::OpenMailCompose,
-        );
-        if selected.is_some_and(|message| message.can_reply) { spawn_overlay_crystal_button_enabled(
-            parent,
-            asset_server,
-            "Prguse",
-            569,
-            570,
-            571,
-            CrystalRect::new(102.0, 414.0, 28.0, 25.0),
-            OverlayButton::MailReply(selected_id),
-            selected.is_some_and(|message| message.can_reply),
-        ); }
-        spawn_overlay_crystal_button_enabled(
-            parent,
-            asset_server,
-            "Prguse",
-            572,
-            573,
-            574,
-            CrystalRect::new(129.0, 414.0, 28.0, 25.0),
-            OverlayButton::ReadMail(selected_id),
-            selected.is_some(),
-        );
-        spawn_overlay_crystal_button_enabled(
-            parent,
-            asset_server,
-            "Prguse",
-            557,
-            558,
-            559,
-            CrystalRect::new(156.0, 414.0, 28.0, 25.0),
-            OverlayButton::DeleteMail(selected_id),
-            selected.is_some_and(mail_delete_enabled),
-        );
-        for (index, left) in [(520, 183.0), (523, 210.0)] {
-            spawn_overlay_crystal_button_enabled(parent, asset_server, "Prguse", index, index + 1, index + 2,
-                CrystalRect::new(left, 414.0, 28.0, 25.0), OverlayButton::CloseMail, false);
-        }
-    }
+fn render_mail(parent: &mut ChildSpawnerCommands, asset_server: Option<&AssetServer>, mail: &MailModel, mail_ui: &MailUiState, _inventory: &InventoryModel, _state: &NativePlayerUiState, _compose_ui: &MailComposeUi) {
+    super::mail_page_shared::paint_list(parent,asset_server,mail,mail_ui.cursor.page,None,map_mail_paint_action);
     // The explicit action is retained for ordinary mail access, but now uses
     // the same source `MailComposeParcelDialog` + recipient prompt as an NPC
     // MailSendRequest rather than a separate generic attachment form.
@@ -15330,6 +14761,23 @@ fn render_mail_compose(
 /// Crystal `MailComposeLetterDialog`: recipient is chosen by the preceding
 /// input box and is display-only here; the message remains a real multiline
 /// field instead of the list adapter's shortened preview.
+fn common_mail_action(action: super::mail_compose_shared::ComposeAction) -> OverlayButton {
+    use super::mail_compose_shared::ComposeAction as A;
+    match action {
+        A::Close | A::Cancel => OverlayButton::CancelMailCompose,
+        A::Submit => OverlayButton::SubmitMail,
+        A::Body => OverlayButton::MailMessageFocus,
+        A::Recipient => OverlayButton::MailRecipientFocus,
+        A::Gold => OverlayButton::MailGoldFocus,
+        A::Stamp => OverlayButton::MailParcelStamp,
+        A::Slot(slot) => OverlayButton::MailParcelSlot(slot),
+        A::RecipientSubmit => OverlayButton::MailRecipientSubmit,
+        A::RecipientCancel => OverlayButton::MailRecipientCancel,
+        A::Feedback => OverlayButton::MailFeedbackAcknowledge,
+        A::GoldConfirm => OverlayButton::MailParcelGoldConfirm,
+        A::GoldCancel => OverlayButton::MailParcelGoldCancel,
+    }
+}
 fn render_mail_compose_letter(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
@@ -15337,152 +14785,19 @@ fn render_mail_compose_letter(
     compose_ui: &MailComposeUi,
     letter_editor: Option<&mail_editor::MailLetterEditor>,
 ) {
-    if let Some(asset_server) = asset_server {
-        spawn_overlay_frame(parent, asset_server, "original-ui/Title/671.png", 236.0, 300.0);
-        spawn_overlay_crystal_button(
-            parent,
-            asset_server,
-            "Prguse2",
-            360,
-            361,
-            362,
-            CrystalRect::new(209.0, 3.0, 24.0, 21.0),
-            OverlayButton::CancelMailCompose,
-        );
-        spawn_overlay_crystal_button(
-            parent,
-            asset_server,
-            "Title",
-            607,
-            608,
-            609,
-            CrystalRect::new(30.0, 265.0, 76.0, 25.0),
-            OverlayButton::SubmitMail,
-        );
-        spawn_overlay_crystal_button(
-            parent,
-            asset_server,
-            "Title",
-            193,
-            194,
-            195,
-            CrystalRect::new(135.0, 265.0, 68.0, 25.0),
-            OverlayButton::CancelMailCompose,
-        );
-    }
-    overlay_text_at(
-        parent,
-        &draft.recipient,
-        CrystalRect::new(70.0, 35.0, 150.0, 15.0),
-        crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX,
-        TEXT,
-    );
-    if let Some(editor) = letter_editor {
-        editor.render(parent);
-    } else {
-        // Lightweight renderer-only test apps may omit the editing resource.
-        // The real overlay plugin initializes it before this panel can open.
-        overlay_text_at(
-            parent,
-            &draft.message,
-            mail_editor::MAIL_LETTER_BODY_RECT,
-            crate::crystal_ui::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX,
-            TEXT,
-        );
-    }
-    if let Some(notice) = compose_ui.last_notice.as_deref() {
-        overlay_text_at(
-            parent,
-            notice,
-            CrystalRect::new(15.0, 72.0, 202.0, 15.0),
-            8.0,
-            TEXT,
-        );
-    }
+    use super::mail_compose_shared::{self, ComposeKind, ComposeLayout, ParcelPaint};
+    mail_compose_shared::paint_compose(parent,asset_server,ComposeKind::Letter,draft,&ParcelPaint::default(),
+        compose_ui.last_notice.as_deref(),letter_editor,&ComposeLayout::desktop(ComposeKind::Letter),
+        &super::typography::crystal_text_font(super::typography::CRYSTAL_DEFAULT_FONT_SIZE_PX),common_mail_action);
 }
-
 fn render_mail_recipient_prompt(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
     prompt: &MailRecipientPrompt,
 ) {
-    parent
-        .spawn((
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.left),
-                top: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.top),
-                width: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.width),
-                height: Val::Px(CRYSTAL_STORAGE_PASSWORD_RECT.height),
-                overflow: Overflow::clip(),
-                ..default()
-            },
-            BackgroundColor(PANEL_BG),
-        ))
-        .with_children(|dialog| {
-            if let Some(asset_server) = asset_server {
-                spawn_overlay_frame(
-                    dialog,
-                    asset_server,
-                    "original-ui/Prguse/660.png",
-                    CRYSTAL_STORAGE_PASSWORD_RECT.width,
-                    CRYSTAL_STORAGE_PASSWORD_RECT.height,
-                );
-                spawn_overlay_crystal_button(
-                    dialog,
-                    asset_server,
-                    "Title",
-                    200,
-                    201,
-                    202,
-                    CrystalRect::new(60.0, 123.0, 76.0, 25.0),
-                    OverlayButton::MailRecipientSubmit,
-                );
-                spawn_overlay_crystal_button(
-                    dialog,
-                    asset_server,
-                    "Title",
-                    203,
-                    204,
-                    205,
-                    CrystalRect::new(160.0, 123.0, 76.0, 25.0),
-                    OverlayButton::MailRecipientCancel,
-                );
-            }
-            overlay_centered_text_at(
-                dialog,
-                "Enter mail recipient name",
-                CrystalRect::new(25.0, 25.0, 235.0, 40.0),
-                10.0,
-                TEXT,
-            );
-            dialog
-                .spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(23.0),
-                        top: Val::Px(86.0),
-                        width: Val::Px(240.0),
-                        height: Val::Px(19.0),
-                        border: UiRect::all(Val::Px(1.0)),
-                        padding: UiRect::axes(Val::Px(2.0), Val::Px(0.0)),
-                        overflow: Overflow::clip(),
-                        ..default()
-                    },
-                    BackgroundColor(Color::BLACK),
-                    BorderColor::all(Color::srgb(0.0, 1.0, 0.0)),
-                ))
-                .with_children(|input| {
-                    input.spawn((
-                        Text::new(prompt.recipient.clone()),
-                        crate::crystal_ui::typography::crystal_text_font(10.0),
-                        TextColor(TEXT),
-                        TextLayout::new(Justify::Left, LineBreak::NoWrap),
-                    ));
-                });
-        });
+    super::mail_compose_shared::paint_recipient(parent,asset_server,&prompt.recipient,
+        CRYSTAL_STORAGE_PASSWORD_RECT,&super::typography::crystal_text_font(10.),common_mail_action);
 }
-
 fn render_bigmap(
     parent: &mut ChildSpawnerCommands,
     asset_server: Option<&AssetServer>,
@@ -15864,18 +15179,36 @@ fn render_shop(
     inventory: &InventoryModel,
     state: &NativePlayerUiState,
     player: &crate::read_model::PlayerStats,
+    attempt:crate::npc_gold_buy_attempt::NpcGoldBuyFeedback,
 ) {
     let show_buy = shop.allows_buy() && (!shop.allows_sell() || state.npc_shop_buy_tab);
     if !show_buy {
         npc_item_service::render(parent, asset_server, shop, inventory, state);
         return;
     }
-    let buy_enabled = shop_buy_enabled_with_pearls(
-        shop,
-        inventory,
-        state.shop_quantity,
-        state.creature.pearls.max(0) as u32,
+    if crate::npc_shop_ui::ordinary_gold_surface(shop, show_buy) {
+        if let Some(gate) = &shop_ui.common_gate {
+            let context = native_npc_shop_context(state, shop, gate);
+            let view = shop_ui.common.view(context, shop, inventory, attempt);
+            crate::crystal_ui::shop_paint::paint_npc_gold_shop(
+                parent, asset_server, shop, player, &view,
+                &crate::crystal_ui::shop_paint::ShopPaintOptions::default(),
+                |action| (npc_shop_overlay_action(action), NativeNpcShopSource { gate: gate.clone() }),
+            );
+        }
+        return;
+    }
+    let gold_plan = shop.selected().filter(|good| good.uses_gold_buy_plan())
+        .map(|_| crate::npc_shop_buy::plan_npc_gold_buy(shop, inventory, state.shop_quantity));
+    let buy_enabled = gold_plan.as_ref().map_or_else(
+        || shop_buy_enabled_with_pearls(shop, inventory, state.shop_quantity, state.creature.pearls.max(0) as u32),
+        |plan| plan.can_buy&&attempt.can_reserve,
     );
+    let max_quantity = gold_plan.as_ref().map_or(SHOP_QUANTITY_MAX, |plan| plan.max_quantity);
+    let quantity_label = if gold_plan.is_some() { state.shop_quantity } else { shop_quantity_clamped(state.shop_quantity) };
+    let gold_label = gold_plan.as_ref().and_then(|plan| plan.total_gold)
+        .map(|total| format!("Gold {} / Total {}", inventory.gold, total))
+        .unwrap_or_else(|| format!("Gold {}", inventory.gold));
 
     if let Some(asset_server) = asset_server {
         // Crystal NPCGoodsDialog uses the intrinsic Prguse/1000 frame size.
@@ -16004,8 +15337,8 @@ fn render_shop(
     }
     overlay_text_at(
         parent,
-        &crate::player_text::text(&format!("Gold {}", inventory.gold)),
-        CrystalRect::new(10.0, 8.0, 150.0, 16.0),
+        &crate::player_text::text(&gold_label),
+        CrystalRect::new(10.0, 8.0, if gold_plan.is_some() { 205.0 } else { 150.0 }, 16.0),
         10.0,
         GOLD,
     );
@@ -16018,7 +15351,7 @@ fn render_shop(
     );
     overlay_text_at(
         parent,
-        &format!("x{}", shop_quantity_clamped(state.shop_quantity)),
+        &format!("x{}", quantity_label),
         CrystalRect::new(34.0, 306.0, 36.0, 18.0),
         10.0,
         TEXT,
@@ -16028,7 +15361,7 @@ fn render_shop(
         "+",
         CrystalRect::new(58.0, 304.0, 18.0, 22.0),
         OverlayButton::ShopQuantityInc,
-        state.shop_quantity < SHOP_QUANTITY_MAX,
+        state.shop_quantity < max_quantity,
     );
     if shop.allows_sell() {
         overlay_absolute_button(
@@ -16087,192 +15420,31 @@ fn render_storage(
     _state: &NativePlayerUiState,
     player: &crate::read_model::PlayerStats,
 ) {
-    let Some(asset_server) = asset_server else {
-        return;
+    use super::storage_paint::{paint_storage, StoragePaintAction, StoragePaintOptions};
+
+    let options = StoragePaintOptions {
+        page: storage_ui.cursor.page,
+        selection: storage_ui.storage_selection,
+        ..Default::default()
     };
-    spawn_overlay_frame(
-        parent,
-        asset_server,
-        "original-ui/Prguse/586.png",
-        388.0,
-        346.0,
-    );
-    spawn_static_overlay_sprite(
-        parent,
-        asset_server,
-        "original-ui/Title/0.png".to_owned(),
-        CrystalRect::new(18.0, 8.0, 71.0, 15.0),
-    );
-    let page = storage.page(storage_ui.cursor.page);
-    spawn_overlay_crystal_button(
-        parent,
-        asset_server,
-        "Title",
-        if page.page == 0 { 743 } else { 744 },
-        if page.page == 0 { 743 } else { 744 },
-        744,
-        CrystalRect::new(8.0, 36.0, 72.0, 20.0),
-        OverlayButton::StoragePage(0),
-    );
-    // RefreshStorage2 is always a live MirButton. An un-rented page is shown
-    // by the LockedPage cover below instead of disabling this tab.
-    spawn_overlay_crystal_button(
-        parent,
-        asset_server,
-        "Title",
-        if page.page == 1 { 745 } else { 746 },
-        if page.page == 1 { 745 } else { 746 },
-        746,
-        CrystalRect::new(80.0, 36.0, 72.0, 20.0),
-        OverlayButton::StoragePage(1),
-    );
-    spawn_overlay_crystal_button(
-        parent,
-        asset_server,
-        "Prguse2",
-        360,
-        361,
-        362,
-        CrystalRect::new(363.0, 3.0, 24.0, 21.0),
-        OverlayButton::CloseStorage,
-    );
-
-    if page.rental_locked {
-        // NPCDialogs.RefreshStorage2: hide all cells and cover the second
-        // page with Prguse[2443] until the rental becomes authoritative.
-        spawn_static_overlay_sprite(
-            parent,
-            asset_server,
-            "original-ui/Prguse/2443.png".to_owned(),
-            CrystalRect::new(8.0, 59.0, 372.0, 265.0),
-        );
-        overlay_centered_text_at(
-            parent,
-            "Expanded Storage Locked",
-            CrystalRect::new(40.0, 322.0, 300.0, 16.0),
-            10.0,
-            Color::srgb(0.95, 0.20, 0.20),
-        );
-    } else {
-        for (offset, slot) in page.slots.iter().enumerate() {
-            let column = offset % 10;
-            let row = offset / 10;
-            let rect = CrystalRect::new(
-                9.0 + column as f32 * 37.0,
-                60.0 + row as f32 * 33.0,
-                36.0,
-                32.0,
-            );
-            if let Some(item) = slot.item {
-                let selected = storage_ui.storage_selection
-                    == slot.unique_id.map(|unique_id| StorageItemSelection {
-                        slot: slot.slot,
-                        unique_id,
-                    });
-                overlay_absolute_item_button(
-                    parent,
-                    asset_server,
-                    item,
-                    rect,
-                    OverlayButton::SelectStorage(slot.slot),
-                    !slot.locked && item.unique_id.is_some(),
-                    false,
-                    player,
-                );
-                if selected {
-                    overlay_text_at(parent, "▶", rect, 10.0, GOLD);
-                }
-            } else {
-                parent.spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(rect.left),
-                        top: Val::Px(rect.top),
-                        width: Val::Px(rect.width),
-                        height: Val::Px(rect.height),
-                        ..default()
-                    },
-                    BackgroundColor(if slot.locked {
-                        Color::srgba(0.20, 0.16, 0.11, 0.70)
-                    } else {
-                        Color::srgba(0.06, 0.04, 0.02, 0.35)
-                    }),
-                ));
+    paint_storage(parent, asset_server, storage, player, &options, |action| {
+        match action {
+            StoragePaintAction::Close => OverlayButton::CloseStorage,
+            StoragePaintAction::Page(page) => OverlayButton::StoragePage(page),
+            StoragePaintAction::Cell { slot, .. } => OverlayButton::SelectStorage(slot),
+            StoragePaintAction::Password if storage.has_password && !storage.unlocked => {
+                OverlayButton::StorageUnlock
             }
+            StoragePaintAction::Password => OverlayButton::StorageSetPassword,
+            StoragePaintAction::Rent => OverlayButton::StorageExpand,
         }
-    }
-
-    if page.page == 1 {
-        spawn_overlay_crystal_button(
-            parent,
-            asset_server,
-            "Title",
-            483,
-            484,
-            485,
-            CrystalRect::new(283.0, 33.0, 48.0, 25.0),
-            OverlayButton::StorageExpand,
-        );
-        if !page.rental_locked {
-            let label = storage_expiry_label(page.expiry)
-                .map(|expiry| format!("Expanded Storage Expires On{expiry}"))
-                .unwrap_or_else(|| "Expanded Storage Expires On".to_owned());
-            overlay_centered_text_at(
-                parent,
-                &label,
-                CrystalRect::new(40.0, 322.0, 300.0, 16.0),
-                10.0,
-                TEXT,
-            );
-        }
-    }
-    spawn_overlay_crystal_button(
-        parent,
-        asset_server,
-        "Title",
-        113,
-        114,
-        115,
-        CrystalRect::new(328.0, 33.0, 48.0, 25.0),
-        if storage.has_password && !storage.unlocked {
-            OverlayButton::StorageUnlock
-        } else {
-            OverlayButton::StorageSetPassword
-        },
-    );
+    });
 }
 
 /// Safely decodes the .NET DateTime binary value carried by ResizeStorage.
 /// Invalid/zero values retain the source label without exposing raw ticks.
 fn storage_expiry_label(binary_datetime: i64) -> Option<String> {
-    const DOTNET_TICKS_MASK: u64 = 0x3fff_ffff_ffff_ffff;
-    const DOTNET_KIND_MASK: u64 = 0xc000_0000_0000_0000;
-    const DOTNET_KIND_LOCAL: u64 = 0x8000_0000_0000_0000;
-    const DOTNET_UNIX_EPOCH_TICKS: i128 = 621_355_968_000_000_000;
-    const DOTNET_MAX_TICKS: i128 = 3_155_378_975_999_999_999;
-    const DOTNET_TICKS_PER_SECOND: i128 = 10_000_000;
-    if binary_datetime == 0 {
-        return None;
-    }
-    let bits = binary_datetime as u64;
-    let ticks = i128::from(bits & DOTNET_TICKS_MASK);
-    if ticks > DOTNET_MAX_TICKS {
-        return None;
-    }
-    let unix_ticks = ticks - DOTNET_UNIX_EPOCH_TICKS;
-    let seconds = unix_ticks.div_euclid(DOTNET_TICKS_PER_SECOND);
-    let nanos = unix_ticks.rem_euclid(DOTNET_TICKS_PER_SECOND).saturating_mul(100);
-    let (Ok(seconds), Ok(nanos)) = (i64::try_from(seconds), u32::try_from(nanos)) else {
-        return None;
-    };
-    let utc = chrono::DateTime::<chrono::Utc>::from_timestamp(seconds, nanos)?;
-    Some(if bits & DOTNET_KIND_MASK == DOTNET_KIND_LOCAL {
-        utc.with_timezone(&chrono::Local)
-            .format("%Y/%m/%d %H:%M:%S")
-            .to_string()
-    } else {
-        utc.format("%Y/%m/%d %H:%M:%S").to_string()
-    })
+    super::storage_paint::storage_expiry_label(binary_datetime)
 }
 
 fn spawn_invisible_overlay_button(
@@ -17564,7 +16736,9 @@ mod tests {
             .expect("concurrent warehouse bag must remain a rich item hover target");
         assert!(hint.0.source_complete);
         assert!(hint.0.plain_text().contains("Potion"));
-        assert!(matches!(action, Some(OverlayButton::InspectBag(0))));
+        assert!(matches!(action, Some(OverlayButton::InspectBagSnapshot {
+            slot: 0, unique_id: Some(43),
+        })));
     }
 
     fn surface_tooltip_source(
@@ -17821,18 +16995,15 @@ mod tests {
     fn options_adapter_applies_immediately_and_close_does_not_roll_back() {
         let mut state = NativePlayerUiState::default();
         let mut effects = UiEffectQueue::default();
-        dispatch_ui_action(
-            &mut state.core,
+        dispatch_native_ui_action(&mut state,
             &mut effects,
             mir2_ui_core::action::UiAction::OpenOptions,
         );
-        dispatch_ui_action(
-            &mut state.core,
+        dispatch_native_ui_action(&mut state,
             &mut effects,
             mir2_ui_core::action::UiAction::SetMusicVolume { volume: 25 },
         );
-        dispatch_ui_action(
-            &mut state.core,
+        dispatch_native_ui_action(&mut state,
             &mut effects,
             mir2_ui_core::action::UiAction::ClosePanel,
         );
@@ -18091,6 +17262,7 @@ mod tests {
         app.add_plugins((MinimalPlugins, bevy::asset::AssetPlugin::default()))
             .init_asset::<Image>()
             .init_resource::<NativePlayerUiState>()
+            .init_resource::<NativePlayerUiIntentQueue>()
             .init_resource::<InventoryModel>()
             .init_resource::<InventoryOperationFeedback>()
             .init_resource::<MailModel>()
@@ -18365,7 +17537,9 @@ mod tests {
             app.world_mut()
                 .query_filtered::<&OverlayButton, With<Button>>()
                 .iter(app.world())
-                .filter(|button| **button == OverlayButton::InspectBag(2))
+                .filter(|button| **button == OverlayButton::InspectBagSnapshot {
+                    slot: 2, unique_id: Some(7),
+                })
                 .count(),
             1,
             "the visible source bag cell owns the normal inventory action"
@@ -18929,6 +18103,22 @@ mod tests {
             7,
             "missing metadata keeps the legacy name fallback"
         );
+    }
+
+    #[test]
+    fn equipment_use_classification_requires_slot_or_crystal_type_metadata() {
+        let mut item = ItemModel { name: "Sword-shaped Potion".into(),
+            ..Default::default() };
+        assert_eq!(reliable_equipment_destination(&item), None);
+        let mut source = crate::inventory::CrystalItemTooltipSourceModel::default();
+        source.info.item_type = 13;
+        item.tooltip_source = Some(source.clone());
+        assert_eq!(reliable_equipment_destination(&item), None);
+        source.info.item_type = 1;
+        item.tooltip_source = Some(source);
+        assert_eq!(reliable_equipment_destination(&item), Some(0));
+        item.equip_slot = Some("ringright".into());
+        assert_eq!(reliable_equipment_destination(&item), Some(8));
     }
 
     #[test]
@@ -20408,6 +19598,146 @@ mod tests {
     }
 
     #[test]
+    fn rendered_bag_instance_and_equipment_press_recheck_uid_and_pending() {
+        let mut app = App::new();
+        app.init_resource::<NativePlayerUiState>()
+            .init_resource::<MailComposeUi>()
+            .init_resource::<NativePlayerUiIntentQueue>()
+            .init_resource::<PendingOperations>()
+            .init_resource::<NativeUiIntentQueue>()
+            .init_resource::<InventoryModel>()
+            .init_resource::<MailModel>()
+            .init_resource::<ShopModel>()
+            .init_resource::<StorageModel>()
+            .init_resource::<crate::social::SocialModel>();
+        app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame,
+            ..Default::default() });
+        app.world_mut().resource_mut::<InventoryModel>().items.push(ItemModel {
+            unique_id: Some(42), key: "same-sword".into(), name: "Sword".into(),
+            slot: 4, container: 0, quantity: 1, equip_slot: Some("weapon".into()),
+            ..Default::default()
+        });
+        init_overlay_button_test_resources(&mut app);
+        app.add_systems(Update, process_overlay_buttons);
+        fn press(app: &mut App, button: OverlayButton) {
+            let entity = app.world_mut().spawn((Interaction::Pressed, button, Button)).id();
+            app.update();
+            app.world_mut().despawn(entity);
+        }
+
+        press(&mut app, OverlayButton::InspectBagSnapshot { slot: 4, unique_id: Some(42) });
+        assert_eq!(app.world().resource::<NativePlayerUiState>().inspect.as_ref()
+            .and_then(|inspect| inspect.unique_id), Some(42));
+        app.world_mut().resource_mut::<InventoryModel>().items[0].unique_id = Some(0);
+        press(&mut app, OverlayButton::EquipInspected);
+        assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().is_empty());
+        press(&mut app, OverlayButton::InspectBagSnapshot { slot: 4, unique_id: Some(42) });
+        assert_eq!(app.world().resource::<NativePlayerUiState>().inspect.as_ref()
+            .and_then(|inspect| inspect.unique_id), Some(42), "stale rendered action is ignored");
+
+        press(&mut app, OverlayButton::InspectBagSnapshot { slot: 4, unique_id: Some(0) });
+        press(&mut app, OverlayButton::EquipInspected);
+        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(),
+            vec![NativePlayerUiIntent::EquipItem {
+                unique_id: 0, grid: "inventory".into(), to: 0,
+            }]);
+        let key = PendingOperationKey::Equip { grid: "inventory".into(), unique_id: 0, to: 0 };
+        assert!(app.world().resource::<PendingOperations>().contains(&key));
+        press(&mut app, OverlayButton::InspectBagSnapshot { slot: 4, unique_id: Some(0) });
+        press(&mut app, OverlayButton::EquipInspected);
+        assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().is_empty());
+        assert!(app.world().resource::<PendingOperations>().contains(&key));
+        app.world_mut().resource_mut::<InventoryModel>().items.push(ItemModel {
+            unique_id: Some(55), key: "other-sword".into(), name: "Other sword".into(),
+            slot: 5, container: 0, quantity: 1, equip_slot: Some("weapon".into()),
+            ..Default::default()
+        });
+        press(&mut app, OverlayButton::InspectBagSnapshot { slot: 5, unique_id: Some(55) });
+        press(&mut app, OverlayButton::UseInspected);
+        assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().is_empty(),
+            "equipment Use cannot bypass another item's pending destination slot");
+
+        let mut pending = app.world_mut().resource_mut::<PendingOperations>();
+        let mut feedback = InventoryOperationFeedback::default();
+        assert_eq!(crate::pending_operations::apply_inventory_operation_ack(&mut pending,
+            &mut feedback, crate::pending_operations::InventoryOperationAck::Equip {
+                grid: "inventory".into(), unique_id: 42, to: 0, success: false,
+            }), 0);
+        assert!(pending.contains(&key));
+        assert_eq!(crate::pending_operations::apply_inventory_operation_ack(&mut pending,
+            &mut feedback, crate::pending_operations::InventoryOperationAck::Equip {
+                grid: "inventory".into(), unique_id: 0, to: 0, success: false,
+            }), 1);
+        assert!(!pending.contains(&key));
+        drop(pending);
+
+        press(&mut app, OverlayButton::UseInspected);
+        assert_eq!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents(),
+            vec![NativePlayerUiIntent::EquipItem {
+                unique_id: 55, grid: "inventory".into(), to: 0,
+            }], "equipment Use shares the Equip plan and pending queue");
+        let mut pending = app.world_mut().resource_mut::<PendingOperations>();
+        assert_eq!(crate::pending_operations::apply_inventory_operation_ack(&mut pending,
+            &mut feedback, crate::pending_operations::InventoryOperationAck::Equip {
+                grid: "inventory".into(), unique_id: 55, to: 0, success: false,
+            }), 1);
+        drop(pending);
+
+        app.world_mut().resource_mut::<InventoryModel>().items[0].container = 2;
+        app.world_mut().resource_mut::<InventoryModel>().items[0].slot = 0;
+        app.world_mut().resource_mut::<NativePlayerUiState>().inspect = None;
+        press(&mut app, OverlayButton::InspectEquipSnapshot { slot: 0, unique_id: Some(42) });
+        assert_eq!(app.world().resource::<NativePlayerUiState>().inspect.as_ref()
+            .and_then(|inspect| inspect.unique_id), None,
+            "a stale equipment button cannot select the replacement instance");
+        press(&mut app, OverlayButton::InspectEquipSnapshot { slot: 0, unique_id: Some(0) });
+        assert_eq!(app.world().resource::<NativePlayerUiState>().inspect.as_ref()
+            .and_then(|inspect| inspect.unique_id), Some(0));
+        app.world_mut().resource_mut::<InventoryModel>().items.push(ItemModel {
+            unique_id: Some(77), key: "same-sword".into(), name: "Sword".into(),
+            slot: 0, container: 2, quantity: 1, ..Default::default()
+        });
+        app.world_mut().resource_mut::<NativePlayerUiState>().inspect = None;
+        press(&mut app, OverlayButton::InspectEquipSnapshot { slot: 0, unique_id: Some(0) });
+        assert!(app.world().resource::<NativePlayerUiState>().inspect.is_none(),
+            "duplicate authoritative equipment rows cannot select an arbitrary instance");
+
+        app.world_mut().resource_mut::<InventoryModel>().capacity = 54;
+        app.world_mut().resource_mut::<InventoryModel>().items.push(ItemModel {
+            unique_id: Some(88), key: "expanded".into(), name: "Expanded".into(),
+            slot: 40, container: 0, quantity: 1, ..Default::default()
+        });
+        press(&mut app, OverlayButton::InspectBagSnapshot { slot: 40, unique_id: Some(88) });
+        assert_eq!(app.world().resource::<NativePlayerUiState>().inspect.as_ref()
+            .and_then(|inspect| inspect.unique_id), Some(88));
+        app.world_mut().resource_mut::<NativePlayerUiState>().inspect = None;
+        app.world_mut().resource_mut::<InventoryModel>().capacity = 46;
+        press(&mut app, OverlayButton::InspectBagSnapshot { slot: 40, unique_id: Some(88) });
+        assert!(app.world().resource::<NativePlayerUiState>().inspect.is_none(),
+            "a stale page-two button fails after authoritative capacity shrinks");
+
+        app.world_mut().resource_mut::<InventoryModel>().items.push(ItemModel {
+            unique_id: None, key: "unknown-gear".into(), name: "Gear".into(),
+            slot: 6, container: 0, quantity: 1, equip_slot: Some("weapon".into()),
+            ..Default::default()
+        });
+        press(&mut app, OverlayButton::InspectBagSnapshot { slot: 6, unique_id: None });
+        press(&mut app, OverlayButton::UseInspected);
+        assert!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents().is_empty(),
+            "equipment Use without an instance id cannot bypass the shared planner");
+        app.world_mut().resource_mut::<InventoryModel>().items.push(ItemModel {
+            unique_id: Some(89), key: "potion".into(), name: "Sword-shaped Potion".into(),
+            slot: 7, container: 0, quantity: 1, ..Default::default()
+        });
+        press(&mut app, OverlayButton::InspectBagSnapshot { slot: 7, unique_id: Some(89) });
+        press(&mut app, OverlayButton::UseInspected);
+        assert!(matches!(app.world_mut().resource_mut::<NativePlayerUiIntentQueue>()
+            .drain_intents().as_slice(), [NativePlayerUiIntent::UseItem {
+                unique_id: Some(89), ..
+            }]), "ordinary consumables retain UseItem semantics");
+    }
+
+    #[test]
     fn inventory_delete_mode_uses_exact_stack_or_single_item_flow() {
         let mut app = App::new();
         app.init_resource::<NativePlayerUiState>()
@@ -20770,6 +20100,7 @@ mod tests {
         state.inspect = Some(ItemInspect {
             container: 0,
             slot: 4,
+            unique_id: None,
             key: "stale".to_owned(),
             name: "Stale".to_owned(),
             quantity: 1,
@@ -21278,6 +20609,70 @@ mod tests {
         };
         assert_eq!(inventory_second_tab_index(&expanded, false), 738);
         assert_eq!(inventory_second_tab_index(&expanded, true), 168);
+    }
+
+    #[test]
+    fn shared_bag_painter_preserves_native_cells_and_action_mapping() {
+        let mut app = overlay_render_test_app();
+        app.world_mut().resource_mut::<InventoryModel>().items = vec![
+            ItemModel {
+                unique_id: Some(0),
+                key: "wooden-sword".into(),
+                name: "Wooden Sword".into(),
+                slot: 0,
+                container: 0,
+                ..Default::default()
+            },
+            ItemModel {
+                unique_id: Some(7),
+                key: "quest-leaf".into(),
+                name: "Quest Leaf".into(),
+                slot: 0,
+                container: 3,
+                ..Default::default()
+            },
+        ];
+        app.world_mut().resource_mut::<InventoryModel>().capacity = 54;
+        app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
+            mir2_ui_core::state::UiPanel::Inventory;
+        app.update();
+
+        let world = app.world_mut();
+        let mut cells = world.query::<(&bag_paint::BagPaintCell, &Node, Option<&OverlayButton>)>();
+        let rendered: Vec<_> = cells.iter(world).map(|(cell, node, action)| (*cell, node.left, node.top, action.copied())).collect();
+        assert_eq!(rendered.len(), 40);
+        assert!(rendered.contains(&(
+            bag_paint::BagPaintCell { container: 0, slot: 0, unique_id: Some(0) },
+            Val::Px(0.0), Val::Px(0.0),
+            Some(OverlayButton::InspectBagSnapshot { slot: 0, unique_id: Some(0) }),
+        )));
+        assert!(rendered.iter().any(|(cell, left, top, _)|
+            cell.slot == 39 && *left == Val::Px(259.0) && *top == Val::Px(132.0)));
+        let mut controls = world.query::<(&BagPaintAction, &OverlayButton)>();
+        assert!(controls.iter(world).any(|(paint, native)|
+            *paint == BagPaintAction::Close && *native == OverlayButton::CloseWindows));
+        assert!(controls.iter(world).any(|(paint, native)|
+            *paint == BagPaintAction::ToggleDelete && *native == OverlayButton::InventoryDeleteToggle));
+
+        app.world_mut().resource_mut::<NativePlayerUiState>().inventory_page = 1;
+        app.update();
+        let world = app.world_mut();
+        let mut cells = world.query::<&bag_paint::BagPaintCell>();
+        let page_two: Vec<_> = cells.iter(world).copied().collect();
+        assert_eq!(page_two.len(), 8, "capacity 54 exposes only eight second-page cells");
+        assert_eq!(page_two.first().map(|cell| cell.slot), Some(40));
+        assert_eq!(page_two.last().map(|cell| cell.slot), Some(47));
+
+        app.world_mut().resource_mut::<NativePlayerUiState>().inventory_page = 2;
+        app.update();
+        let world = app.world_mut();
+        let mut cells = world.query::<(&bag_paint::BagPaintCell, Option<&OverlayButton>)>();
+        let quest_cells: Vec<_> = cells.iter(world).map(|(cell, action)| (*cell, action.copied())).collect();
+        assert_eq!(quest_cells.len(), 40);
+        assert!(quest_cells.contains(&(
+            bag_paint::BagPaintCell { container: 3, slot: 0, unique_id: Some(7) },
+            Some(OverlayButton::InspectQuest(0)),
+        )));
     }
 
     #[test]
@@ -22068,6 +21463,97 @@ mod tests {
     }
 
     #[test]
+    fn native_ordinary_gold_buy_buttons_consume_the_same_raw_plan() {
+        fn press(app: &mut App, button: OverlayButton) {
+            press_npc_shop_button_fixture(app, button);
+        }
+        for (submit, close) in [
+            (OverlayButton::ShopBuy, OverlayButton::CloseWindows),
+            (OverlayButton::ShopConfirm, OverlayButton::CloseWindows),
+            (OverlayButton::ShopBuy, OverlayButton::ToggleNpcShop),
+            (OverlayButton::ShopConfirm, OverlayButton::ToggleNpcShop),
+            (OverlayButton::ShopBuy, OverlayButton::ToggleStorage),
+            (OverlayButton::ShopConfirm, OverlayButton::ToggleStorage),
+        ] {
+            let mut app = App::new();
+            app.init_resource::<NativePlayerUiState>()
+                .init_resource::<MailComposeUi>()
+                .init_resource::<NativePlayerUiIntentQueue>()
+                .init_resource::<PendingOperations>()
+                .init_resource::<NativeUiIntentQueue>()
+                .init_resource::<InventoryModel>()
+                .init_resource::<MailModel>()
+                .init_resource::<MapModel>()
+                .init_resource::<ShopModel>()
+                .init_resource::<StorageModel>()
+                .init_resource::<crate::social::SocialModel>();
+            app.insert_resource(NativeShellModel { screen: NativeShellScreen::InGame, ..Default::default() });
+            init_overlay_button_test_resources(&mut app);
+            app.add_systems(Update, process_overlay_buttons);
+            {
+                let mut source = surface_tooltip_source(658, "Potion", 7, 0, 1);
+                source.info.price = 1;
+                source.info.stack_size = 2;
+                source.user_item.as_mut().unwrap().is_shop_item = true;
+                let mut shop = app.world_mut().resource_mut::<ShopModel>();
+                shop.service_mode = NpcShopServiceMode::Buy;
+                shop.goods = vec![ShopGood {
+                    unique_id: 0, price: 1, purchase_rate: Some(1.5), count: 1,
+                    stock: -1, requires_gold_buy_plan: true,
+                    tooltip_source: Some(source), ..Default::default()
+                }];
+            }
+            {
+                let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+                state.toggle_npc_shop();
+                state.shop_quantity = 99;
+            }
+            press(&mut app, OverlayButton::SelectShopGood(0));
+            assert_eq!(app.world().resource::<NativePlayerUiState>().shop_quantity, 1);
+            press(&mut app, OverlayButton::ShopQuantityInc);
+            press(&mut app, OverlayButton::ShopQuantityInc);
+            assert_eq!(app.world().resource::<NativePlayerUiState>().shop_quantity, 2);
+            app.world_mut().resource_mut::<InventoryModel>().gold = 2;
+            let model = crate::npc_gold_buy_attempt::npc_gold_buy_model_authority(
+                app.world().resource::<ShopModel>(), app.world().resource::<InventoryModel>()).unwrap();
+            assert!(app.world().resource::<NativePlayerUiIntentQueue>()
+                .observe_npc_gold_buy_connection(crate::npc_gold_buy_attempt::NpcGoldBuyConnectionEpoch { run: 1, connection: 1 }));
+            assert!(app.world().resource::<NativePlayerUiIntentQueue>()
+                .observe_npc_gold_buy("actual-button-owner", 1, &model, true));
+            // A new authoritative source requires a fresh explicit UI choice.
+            press(&mut app, OverlayButton::SelectShopGood(0));
+            press(&mut app, OverlayButton::ShopQuantityInc);
+            // The real gameplay bridge refreshes this same applied source each frame.
+            assert!(app.world().resource::<NativePlayerUiIntentQueue>()
+                .observe_npc_gold_buy("actual-button-owner", 1, &model, true));
+            press(&mut app, submit);
+            assert!(app.world().resource::<NativePlayerUiIntentQueue>().intents.is_empty());
+            app.world_mut().resource_mut::<InventoryModel>().gold = 3;
+            let model = crate::npc_gold_buy_attempt::npc_gold_buy_model_authority(
+                app.world().resource::<ShopModel>(), app.world().resource::<InventoryModel>()).unwrap();
+            assert!(app.world().resource::<NativePlayerUiIntentQueue>()
+                .observe_npc_gold_buy("actual-button-owner", 2, &model, true));
+            // A new authoritative source requires a fresh explicit UI choice.
+            press(&mut app, OverlayButton::SelectShopGood(0));
+            press(&mut app, OverlayButton::ShopQuantityInc);
+            // The real gameplay bridge refreshes this same applied source each frame.
+            assert!(app.world().resource::<NativePlayerUiIntentQueue>()
+                .observe_npc_gold_buy("actual-button-owner", 2, &model, true));
+            press(&mut app, submit);
+            let intents = &app.world().resource::<NativePlayerUiIntentQueue>().intents;
+            assert_eq!(intents.len(), 1);
+            assert!(matches!(intents[0], NativePlayerUiIntent::NpcGoldBuy { token, item_index: 0, count: 2 }
+                if token.value() > 0));
+            assert_eq!(intents[0].pending_key(), None);
+            assert_eq!(app.world().resource::<PendingOperations>().len(), 0);
+            press(&mut app, close);
+            let feedback = app.world().resource::<NativePlayerUiIntentQueue>().npc_gold_buy_feedback();
+            assert!(!feedback.pending);
+            assert_eq!(feedback.phase, Some(crate::npc_gold_buy_attempt::NpcGoldBuyAttemptPhase::DefinitelyUnsent));
+        }
+    }
+
+    #[test]
     fn overlay_buttons_shop_storage_flow_generates_intents() {
         let mut app = App::new();
         app.init_resource::<NativePlayerUiState>()
@@ -22659,6 +22145,26 @@ mod tests {
     }
 
     #[test]
+    fn quest_log_pointer_exception_preserves_other_input_owners() {
+        let mut state = NativePlayerUiState::default();
+        state.core.panel = mir2_ui_core::state::UiPanel::QuestLog;
+        assert!(state.blocks_world_click());
+        assert!(!state.blocks_world_click_except_quest_log());
+        assert!(!state.blocks_world_pointer_at_except_quest_log(700.0, 600.0));
+
+        state.core.chat_focused = true;
+        assert!(state.blocks_world_click_except_quest_log());
+        assert!(state.blocks_world_pointer_at_except_quest_log(700.0, 600.0));
+        state.core.chat_focused = false;
+        state.menu_pointer_consumed = true;
+        assert!(state.blocks_world_click_except_quest_log());
+        state.menu_pointer_consumed = false;
+
+        state.core.panel = mir2_ui_core::state::UiPanel::Skill;
+        assert!(state.blocks_world_click_except_quest_log());
+    }
+
+    #[test]
     fn any_window_blocks_world_click_and_action() {
         let mut state = NativePlayerUiState::default();
         assert!(!state.blocks_world_click());
@@ -22693,6 +22199,7 @@ mod tests {
         state.inspect = Some(ItemInspect {
             container: 0,
             slot: 0,
+            unique_id: None,
             key: "k".into(),
             name: "n".into(),
             quantity: 1,
@@ -23379,4 +22886,49 @@ mod tests {
             .iter(world)
             .any(|text| text.0 == "45 / 45"));
     }
+}
+
+#[cfg(test)]
+#[path = "../npc_shop_ui_tests.rs"]
+mod npc_shop_ui_tests;
+
+#[cfg(test)]
+pub(super) fn prepare_npc_shop_button_fixture(
+    app: &mut App,
+) -> Option<(crate::npc_shop_ui::NpcShopUiStamp, NativeNpcShopSource)> {
+    let world = app.world_mut();
+    let inventory = world.resource::<InventoryModel>().clone();
+    let gate = world.resource::<NativePlayerUiIntentQueue>().npc_gold_buy_gate();
+    // The fixture supplies the same observed projection that the Native
+    // gameplay bridge normally supplies. It never substitutes a token/clock.
+    if gate.ui_authority_revision().is_none() {
+        let shop = world.resource::<ShopModel>();
+        if crate::npc_shop_ui::ordinary_gold_surface(shop, true) {
+            let model = crate::npc_gold_buy_attempt::npc_gold_buy_model_authority(shop, &inventory)?;
+            if gate.connection_epoch().is_none() && !gate.observe_connection(
+                crate::npc_gold_buy_attempt::NpcGoldBuyConnectionEpoch { run: 1, connection: 1 }) { return None; }
+            if !gate.observe("npc-shop-widget-fixture", 1, &model, true) { return None; }
+        }
+    }
+    world.resource_scope(|world, mut state: Mut<NativePlayerUiState>| {
+        world.resource_scope(|world, mut shop_ui: Mut<ShopUiState>| {
+            let mut shop = world.resource_mut::<ShopModel>();
+            state.bind_npc_gold_buy_gate(gate.clone());
+            let context = reconcile_native_npc_shop_ui(&mut state, &mut shop_ui, &mut shop, &inventory, &gate);
+            if !context.open || !crate::npc_shop_ui::ordinary_gold_surface(&shop, context.show_buy) {
+                return None;
+            }
+            Some((shop_ui.common.stamp()?, NativeNpcShopSource { gate: gate.clone() }))
+        })
+    })
+}
+
+#[cfg(test)]
+pub(super) fn press_npc_shop_button_fixture(app: &mut App, action: OverlayButton) {
+    let proof = prepare_npc_shop_button_fixture(app);
+    let mut button = app.world_mut().spawn((Button, Interaction::Pressed, action));
+    if let Some((stamp, source)) = proof { button.insert((stamp, source)); }
+    let entity = button.id();
+    app.update();
+    app.world_mut().despawn(entity);
 }

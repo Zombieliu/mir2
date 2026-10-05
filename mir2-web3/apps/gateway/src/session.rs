@@ -10,11 +10,15 @@ use mir2_protocol::{ChatType, ClientPacket, Point, ServerPacket};
 #[cfg(test)]
 use mir2_simulation::CharacterSaveRecord;
 use mir2_simulation::{
-    ActiveSessionIdentity, SimulationConfig, WorldCommand, WorldCommandExecution, WorldEntityKind,
+    ActiveSessionIdentity, NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingError,
+    NpcGoldBuyRequest, SimulationConfig, WorldCommand, WorldCommandExecution, WorldEntityKind,
     WorldSnapshot, ZoneRuntimeHandle,
 };
 
 use crate::events::{GatewayGameplayEventPublisher, SharedGameplayEventSink};
+use crate::npc_gold_buy_route::{
+    npc_gold_buy_command, npc_gold_buy_route_failure, NpcGoldBuyRouteError, NpcGoldBuyRouteExecution,
+};
 use crate::routing::{
     shared_zone_movement_ingress, sync_zone_movement_transform, GlobalZoneMessageBus,
     GlobalZoneMessageRegistration, InProcessZoneOwnerCommandClient, PreparedZoneTeardown,
@@ -565,6 +569,70 @@ impl GatewaySession {
     pub fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
         self.zone_owner_command_client
             .supports_typed_game_shop_purchase_outcome(&self.runtime)
+    }
+
+    /// Local owner-path capability only; this does not advertise a transport receipt.
+    pub fn supports_typed_npc_gold_buy_outcome(&self) -> bool {
+        self.zone_owner_command_client.supports_typed_npc_gold_buy_outcome(&self.runtime)
+    }
+
+    pub fn execute_production_npc_gold_buy_requiring_typed_outcome(
+        &mut self,
+        authenticated: bool,
+        purchase: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyRouteExecution, NpcGoldBuyRouteError> {
+        let lease = self.zone_owner_lease.clone();
+        self.execute_production_npc_gold_buy_requiring_typed_outcome_with_zone_owner_lease(
+            &lease, authenticated, purchase,
+        )
+    }
+
+    pub fn execute_production_npc_gold_buy_requiring_typed_outcome_with_zone_owner_lease(
+        &mut self,
+        lease: &ZoneOwnerLease,
+        authenticated: bool,
+        purchase: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyRouteExecution, NpcGoldBuyRouteError> {
+        self.validate_zone_owner_lease(lease)
+            .map_err(|detail| NpcGoldBuyRouteError::BeforeExecution { detail })?;
+        if !authenticated {
+            return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotAuthenticated,
+            )));
+        }
+        let mut processing_outcome = None;
+        let result = catch_gateway_panic("typed NPC gateway owner route", || {
+            if !self.supports_typed_npc_gold_buy_outcome() {
+                return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                    NpcGoldBuyBeforeExecution::UnsupportedRuntime,
+                )));
+            }
+            let request = ZoneOwnerCommandRequest::production_player(
+                lease.clone(), authenticated, npc_gold_buy_command(purchase),
+            );
+            let mut routed = match self.zone_owner_command_client
+                .execute_production_npc_gold_buy_requiring_typed_outcome(&mut self.runtime, request, purchase)
+            {
+                Ok(routed) => routed,
+                Err(error) => return Err(error),
+            };
+            processing_outcome = Some(routed.processing_outcome.clone());
+            let execution = &mut routed.execution;
+            self.publish_gameplay_event(execution);
+            self.active_identity_binding = execution.outcome.active_identity.clone();
+            self.refresh_global_message_identity(execution.outcome.active_identity.as_ref());
+            if is_global_message_execution(&execution.packets) {
+                if let Some(bus) = self.global_message_bus.as_ref() {
+                    bus.publish_to_other_zones(&self.session_id, &self.zone_id, &execution.packets);
+                }
+            }
+            if let Some(bus) = self.global_message_bus.as_ref() {
+                execution.packets.extend(bus.drain(&self.session_id));
+                execution.outcome.packet_count = execution.packets.len();
+            }
+            Ok(routed)
+        });
+        result.unwrap_or_else(|detail| Err(npc_gold_buy_route_failure(detail, processing_outcome)))
     }
 
     pub fn execute_with_zone_owner_lease(
@@ -1325,6 +1393,10 @@ fn first_json_difference(
 #[cfg(test)]
 #[path = "save_fail_closed_tests.rs"]
 mod save_fail_closed_tests;
+
+#[cfg(test)]
+#[path = "npc_gold_buy_route_tests.rs"]
+mod npc_gold_buy_route_tests;
 
 #[cfg(test)]
 mod abnormal_teardown_persistence_tests {

@@ -1,178 +1,25 @@
-//! Crystal CharacterDialog.SkillPage and MainDialogs.MagicButton.
+//! Native wrapper around the one shared learned-page painter.
 use super::*;
-
-fn key_label(key: Option<i32>) -> String {
-    match key {
-        Some(key @ 1..=8) => format!("F{key}"),
-        Some(key @ 9..=16) => format!("CTRL\nF{}", key - 8),
-        _ => String::new(),
-    }
-}
-
-fn experience_label(level: u8, binding: &crate::skill_model::SkillBinding) -> String {
-    let needed = match level {
-        0 => binding.need1,
-        1 => binding.need2,
-        2 => binding.need3,
-        3 => return "-".into(),
-        _ => return String::new(),
-    };
-    match (binding.experience, needed) {
-        (Some(exp), Some(needed)) => format!("{exp}/{needed}"),
-        _ => String::new(),
-    }
-}
-
+use crate::crystal_ui::skill_page_shared::{SkillPagePlan, experience_label, key_label};
 pub(super) fn render(
     parent: &mut ChildSpawnerCommands,
     assets: Option<&AssetServer>,
     skills: &SkillModel,
     state: &NativePlayerUiState,
 ) {
-    parent
-        .spawn((
-            OverlaySkillListViewport,
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(8.),
-                top: Val::Px(90.),
-                width: Val::Px(248.),
-                height: Val::Px(241.),
-                ..default()
-            },
-        ))
-        .with_children(|rows| render_rows(rows, assets, skills, state));
-    // Coordinates include SkillPage's (8,90) offset. Original buttons remain
-    // visible at both ends; the click handler guards the page bounds.
-    if let Some(assets) = assets {
-        for (x, index, action) in [
-            (98., 398, OverlayButton::SkillPagePrev),
-            (148., 396, OverlayButton::SkillPageNext),
-        ] {
-            // Prguse 396..399 stores 16x14 art with 13x14 nontransparent
-            // bounds. Crystal AutoSize uses those bounds for pointer hits,
-            // while DrawControl draws the original image at the same origin.
-            let spec = CrystalButtonSpec::new(
-                "Prguse",
-                index,
-                index,
-                index + 1,
-                CrystalRect::new(x, 340., 13., 14.),
-                16.,
-                14.,
-            );
-            spawn_crystal_image_button(
-                parent,
-                assets,
-                spec,
-                CrystalButtonAssetSet::from_spec(spec),
-                action,
-                false,
-                true,
-            );
-        }
-    }
+    let now = std::time::Instant::now();
+    let plan = SkillPagePlan::new(skills, state.skill_page, |id| {
+        state.skill_bars.remaining_ms(id, skills, now)
+    });
+    crate::crystal_ui::skill_page_shared::paint_page(
+        parent,
+        assets,
+        &plan,
+        None,
+        OverlaySkillListViewport,
+        skill_assign_dialog::map_action,
+    );
 }
-
-fn render_rows(
-    parent: &mut ChildSpawnerCommands,
-    assets: Option<&AssetServer>,
-    skills: &SkillModel,
-    state: &NativePlayerUiState,
-) {
-    let page = state
-        .skill_page
-        .min(native_skill_page_count(skills.skills.len()).saturating_sub(1));
-    for (row, skill) in skills
-        .skills
-        .iter()
-        .skip(page * SKILL_PAGE_SIZE)
-        .take(SKILL_PAGE_SIZE)
-        .enumerate()
-    {
-        let binding = skills.binding_for(skill.id);
-        let x = (SKILL_ROW_ORIGIN.x - 8) as f32;
-        let y = (SKILL_ROW_ORIGIN.y - 90 + row as i32 * SKILL_ROW_STEP_Y) as f32;
-        // Only the icon is the assign-key button. Passive skills and insufficient
-        // MP do not turn this configuration control into a cast/disabled button.
-        if let (Some(assets), Some(icon)) = (assets, binding.icon) {
-            let index = u16::from(icon) * 2;
-            spawn_overlay_crystal_button(
-                parent,
-                assets,
-                "MagIcon2",
-                index,
-                index,
-                index + 1,
-                CrystalRect::new(x + 36., y, 36., 34.),
-                OverlayButton::SelectSkill(skill.id),
-            );
-            let remaining =
-                state
-                    .skill_bars
-                    .remaining_ms(skill.id, skills, std::time::Instant::now());
-            let delay = binding.delay_ms.unwrap_or(0);
-            if remaining >= 100 && delay >= 34 {
-                let frame = 1290 + 34 - (remaining / (delay / 34)).min(34) as u16;
-                parent.spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(x + 36.),
-                        top: Val::Px(y),
-                        width: Val::Px(36.),
-                        height: Val::Px(34.),
-                        ..default()
-                    },
-                    ImageNode {
-                        image: assets.load(format!("original-ui/Prguse2/{frame}.png")),
-                        color: Color::srgba(1., 1., 1., 0.6),
-                        ..default()
-                    },
-                    FocusPolicy::Pass,
-                ));
-            }
-        }
-        if let Some(assets) = assets {
-            for (index, dy, height) in [(516, 7., 9.), (517, 19., 11.)] {
-                spawn_static_overlay_sprite(
-                    parent,
-                    assets,
-                    format!("original-ui/Title/{index}.png"),
-                    CrystalRect::new(x + 73., y + dy, 24., height),
-                );
-            }
-        }
-        overlay_text_at(
-            parent,
-            &skill.level.to_string(),
-            CrystalRect::new(x + 88., y + 2., 21., 14.),
-            32. / 3.,
-            Color::WHITE,
-        );
-        overlay_text_at(
-            parent,
-            &skill.name,
-            CrystalRect::new(x + 109., y + 2., 131., 14.),
-            32. / 3.,
-            Color::WHITE,
-        );
-        overlay_text_at(
-            parent,
-            &experience_label(skill.level, &binding),
-            CrystalRect::new(x + 109., y + 15., 131., 14.),
-            32. / 3.,
-            Color::WHITE,
-        );
-        overlay_text_at(
-            parent,
-            &key_label(binding.hotkey),
-            CrystalRect::new(x + 2., y + 2., 34., 31.),
-            32. / 3.,
-            Color::WHITE,
-        );
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

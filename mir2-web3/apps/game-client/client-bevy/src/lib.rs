@@ -17,13 +17,15 @@
 
 #[cfg(feature = "native-ui")]
 pub mod audio;
+pub mod bag_ui;
 pub mod big_map;
 #[cfg(feature = "native-ui")]
 pub mod character;
 pub mod chat;
 #[cfg(feature = "native-ui")]
 pub mod chat_settings_effects;
-#[cfg(feature = "native-ui")]
+pub mod combat_input;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod crystal_ui;
 pub mod entities;
 pub mod game_shop;
@@ -32,40 +34,71 @@ pub mod hero_model;
 pub mod hud;
 pub mod inventory;
 pub mod mail;
-pub mod map;
 pub mod mail_service;
-#[cfg(feature = "native-ui")]
+pub mod map;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod native_shell;
 #[cfg(feature = "native-ui")]
 pub mod native_shell_ui;
 #[cfg(feature = "native-ui")]
 pub mod options_effects;
 pub mod pending_operations;
-#[cfg(feature = "native-ui")]
-pub mod quest_guidance;
-#[cfg(feature = "native-ui")]
-pub mod quest_hunt_regions;
-#[cfg(feature = "native-ui")]
-pub mod quest_practice;
-#[cfg(feature = "native-ui")]
-pub mod quest_supplies;
-#[cfg(feature = "native-ui")]
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod player_text;
-#[cfg(feature = "native-ui")]
-pub mod quest_journey;
-#[cfg(feature = "native-ui")]
-pub mod quest_model;
-#[cfg(feature = "native-ui")]
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_bag_ui;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_character_ui;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_experience_bar_ui;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_hp_orb_ui;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_hud_bar_draw_plan;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_quest_ui;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_spells_ui;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_storage_ui;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_npc_shop_ui;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_mail_ui;
+#[cfg(all(feature = "portable-quest-ui", not(feature = "native-ui")))]
+pub mod portable_weight_bar_ui;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod quest_destination;
-#[cfg(feature = "native-ui")]
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+pub mod quest_guidance;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+pub mod quest_hunt_regions;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+pub mod quest_intents;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+pub mod quest_journey;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+pub mod quest_model;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+pub mod quest_practice;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+pub mod quest_presentation_text;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
+pub mod quest_supplies;
+#[cfg(any(feature = "native-ui", feature = "portable-quest-ui"))]
 pub mod quest_ui;
 pub mod read_model;
 pub mod shop;
+pub mod npc_shop_buy;
+pub mod npc_shop_ui;
+pub mod npc_gold_buy_attempt;
 #[cfg(feature = "native-ui")]
 pub mod skill_binding_persistence;
 pub mod skill_binding_ui;
 pub mod skill_model;
+pub mod skill_page_state;
 pub mod social;
 pub mod storage;
+pub mod storage_interaction;
 
 pub use read_model::{PlayerStats, UiReadModel};

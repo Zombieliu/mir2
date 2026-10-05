@@ -1,6 +1,10 @@
 import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import type { Mir2Language } from "../../lib/localization";
+import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
+import type { BagPointerContext, BagPointerEdge } from "../../lib/bevy-bag-ui";
+import type { BevyHpOrbStatus, BevyMpOrbStatus } from "../../lib/bevy-hp-orb";
 import type { WorldStore } from "../../lib/world-model";
+import type { CombatAction } from "../../lib/bevy-combat-input";
 import type { SuiWalletSummary } from "../../lib/client-login-runtime";
 import type { Mir2InputProfile } from "./original-client-device-profile";
 import type { Mir2GamepadFamily } from "./original-client-gamepad-input";
@@ -15,6 +19,7 @@ import type {
   EquipmentActionRef,
   EquipmentSlot,
   ItemActionRef,
+  ItemContainer,
   MergeItemRef,
   MoveItemRef,
   PredictedPlayerMotion,
@@ -183,6 +188,48 @@ export type OriginalClientShellProps = {
   sceneInteractionReady: boolean;
   bevyEntityRendererReady: boolean;
   bevyRuntimeBackend: "webgpu" | "webgl2" | null;
+  webGl2SharedCanvasPrototype?: boolean;
+  bevyHudUiReady?: boolean;
+  bevyHudSourceGeometry?: import("../../lib/bevy-hud-ui").MainHudPlan | null;
+  bevyCharacterStatsReady?: boolean;
+  bevyCharacterPageReady?: boolean;
+  bevySpellsPageReady?: boolean;
+  getBevySpellsPointerContext?:()=>import("../../lib/bevy-spells-ui").SpellsPointerContext|null;
+  onBevySpellsPointer?:(edge:import("../../lib/bevy-spells-ui").SpellsPointerEdge)=>boolean;
+  getBevyCharacterPointerContext?: () => import("../../lib/bevy-character-ui").CharacterPointerContext | null;
+  onBevyCharacterPointer?: (edge: import("../../lib/bevy-character-ui").CharacterPointerEdge) => boolean;
+  readBevyHudStatus?: () => import("../../lib/bevy-hud-ui").HudStatus | null;
+  dispatchBevyHudNavigation?: (action: import("../../lib/bevy-hud-ui").HudAction) => boolean;
+  bevyQuestUiReady?: boolean;
+  bevyQuestUiCapturesPointer?: boolean;
+  bevyHpOrb?: BevyHpOrbStatus | null;
+  bevyMpOrb?: BevyMpOrbStatus | null;
+  bevyExperienceBar?: import("../../lib/bevy-experience-bar").BevyExperienceBarStatus | null;
+  bevyWeightBar?: import("../../lib/bevy-weight-bar").BevyWeightBarStatus | null;
+  bevyHudBarIdentity?: string | null;
+  bevyHudBarPlans?: import("../../lib/bevy-hud-bar-draw-plan").CurrentHudBarPlans | null;
+  bevyHudBarReadLivePlans?: () => import("../../lib/bevy-hud-bar-draw-plan").CurrentHudBarPlans | null;
+  onHpOrbLocalOverlayChange?: (blocked: boolean) => void;
+  bevyBagUiActive?: boolean;
+  bevyNpcShopUiActive?: boolean;
+  bevyNpcShopUiTransitioning?: boolean;
+  getBevyNpcShopInputBlocked?: () => boolean;
+  getBevyNpcShopPointerContext?: () => import("../../lib/bevy-npc-shop-ui").NpcShopPointerContext | null;
+  onBevyNpcShopPointer?: (edge: import("../../lib/bevy-npc-shop-ui").NpcShopPointerEdge) => boolean;
+  npcShopTab?: "buy" | "sell";
+  onNpcShopTabChange?: (tab: "buy" | "sell") => void;
+  bevyStorageUiActive?: boolean;
+  bevyStorageUiTransitioning?: boolean;
+  bevyStorageOwnerRevision?: number;
+  getBevyStoragePointerContext?: () => import("../../lib/bevy-storage-ui").StoragePointerContext | null;
+  onBevyStoragePointer?: (edge: import("../../lib/bevy-storage-ui").StoragePointerEdge) => boolean;
+  bevyBagOwnerRevision?: number;
+  getBevyBagPointerContext?: () => BagPointerContext | null;
+  onBevyBagPointer?: (edge: BagPointerEdge) => boolean;
+  onBevyBagTouchFallback?: () => void;
+  inventoryInitialDeleteMode?: boolean;
+  onInventoryCompatibilityInteraction?: () => void;
+  onQuestUiModalChange?: (blocked: boolean) => void;
   bevyMapRuntimeGeneration: number;
   bevyMapRuntimeReady: boolean;
   bevyMapPresentedImageKeys: ReadonlySet<string>;
@@ -211,6 +258,7 @@ export type OriginalClientShellProps = {
   activeInventoryTab: InventoryTabKey;
   activeCharacterTab: CharacterTabKey;
   storageServiceOpenVersion: number;
+  storagePasswordOpenVersion?: number;
   npcShopService: DisplayNpcShopService | null;
   npcRepairService: "repair" | "special" | null;
   onLanguageChange: (language: Mir2Language) => void;
@@ -237,20 +285,24 @@ export type OriginalClientShellProps = {
   onDropItem: (item: ItemActionRef) => void;
   onEquipItem: (item: ItemActionRef, slot: EquipmentSlot) => void;
   onRemoveItem: (item: EquipmentActionRef) => void;
-  onMoveItem: (item: MoveItemRef, toSlot: number) => void;
+  onMoveItem: (item: MoveItemRef, toSlot: number, toContainer?: ItemContainer) => boolean;
   onMergeItem: (from: MergeItemRef, to: MergeItemRef) => void;
   onSplitItem: (item: ItemActionRef, count: number) => void;
-  onStoreItem: (item: MoveItemRef, toSlot: number) => void;
-  onTakeBackItem: (item: MoveItemRef, toSlot: number) => void;
+  onStoreItem: (item: MoveItemRef, toSlot: number) => boolean;
+  onTakeBackItem: (item: MoveItemRef, toSlot: number, toContainer: ItemContainer) => boolean;
   onUnlockStorage: (password: string) => void;
   onSetStoragePassword: (currentPassword: string, newPassword: string) => void;
   onRemoveStoragePassword: (currentPassword: string) => void;
   onSellItem: (item: ItemActionRef, count: number) => void;
   onBuyNpcShopItem: (id: number, quantity: number, panelType: number) => void;
+  onQuoteNpcShopItem: (id: number, quantity: number) => NpcGoldBuyQuote | null;
   onDropGold: (amount: number) => void;
   onRepairItem: (item: EquipmentActionRef) => void;
   onSpecialRepairItem: (item: EquipmentActionRef) => void;
   onCastSkill: (skillKey: string) => void;
+  onCombatKey?: (action:Extract<CombatAction,{type:"key"}>,repeat:boolean)=>{supported:boolean;handled:boolean};
+  onCombatPointer?: (cursor:[number,number]|null,hovered:string|null)=>void;
+  onCombatCancel?: ()=>void;
   onClaimMail: (mailId: number) => void;
   onDeleteMail: (mailId: number) => void;
   onBuyGameShopItem: (gameShopIndex: number, quantity: number, paymentType: "gold" | "credit") => void;
@@ -261,6 +313,7 @@ export type OriginalClientShellProps = {
   onToggleQuestLog: () => void;
   onCloseCharacter: () => void;
   onCloseInventory: () => void;
+  onCloseStorage?: () => void;
   onCloseNpcShopService: () => void;
   onCloseNpcRepairService: () => void;
   onOpenCharacterTab: (tab: CharacterTabKey) => void;

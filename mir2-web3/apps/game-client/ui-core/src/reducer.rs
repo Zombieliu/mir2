@@ -395,7 +395,12 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
         }
         UiAction::SetMailMessage { message } => {
             if let Some(compose) = next.mail_compose.as_mut() {
-                compose.message = message.chars().take(256).collect();
+                match mir2_client_core::mail_compose::normalize_message(&message) {
+                    Ok(message) => compose.message = message,
+                    Err(error) => effects.push(UiEffect::ShowNotice {
+                        message: error.message().into(), is_error: true,
+                    }),
+                }
             }
         }
         UiAction::SetMailGold { gold } => {
@@ -421,27 +426,20 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
                     effects,
                 };
             };
-            let recipient = compose.recipient.trim();
-            let message = compose.message.trim();
-            if recipient.is_empty() || message.is_empty() {
-                effects.push(UiEffect::ShowNotice {
-                    message: "recipient and message required".into(),
-                    is_error: true,
-                });
-            } else if compose.attachment_unique_ids.len() > crate::state::MAIL_MAX_ATTACHMENTS
-                || compose.attachment_unique_ids.iter().any(|id| *id == 0)
-            {
-                effects.push(UiEffect::ShowNotice {
-                    message: "invalid mail attachment selection".into(),
-                    is_error: true,
-                });
-            } else {
+            match mir2_client_core::mail_compose::prepare_send(
+                &compose.recipient, &compose.message, compose.gold, &compose.attachment_unique_ids,
+            ) {
+                Ok(payload) => {
                 effects.push(UiEffect::GatewayCommand(GatewayCommand::SendMail {
-                    recipient: recipient.to_owned(),
-                    message: message.to_owned(),
-                    gold: compose.gold,
-                    attachment_unique_ids: compose.attachment_unique_ids.clone(),
+                    recipient: payload.recipient,
+                    message: payload.message,
+                    gold: payload.gold,
+                    attachment_unique_ids: payload.attachment_unique_ids,
                 }));
+                }
+                Err(error) => effects.push(UiEffect::ShowNotice {
+                    message: error.message().into(), is_error: true,
+                }),
             }
         }
         UiAction::CancelMailCompose => {
@@ -1338,6 +1336,26 @@ mod tests {
                 .mail_compose,
             None
         );
+    }
+
+    #[test]
+    fn shared_mail_message_edit_rejects_whole_overflow_and_submit_revalidates_bypassed_drafts() {
+        let mut state = reduce(&game(), UiAction::OpenMailCompose).state;
+        state.mail_compose.as_mut().unwrap().recipient = " R ".into();
+        state = reduce(&state, UiAction::SetMailMessage { message: "😀".repeat(250) }).state;
+        let rejected = reduce(&state, UiAction::SetMailMessage { message: "😀".repeat(251) });
+        assert_eq!(rejected.state.mail_compose, state.mail_compose);
+        assert!(matches!(rejected.effects.as_slice(), [UiEffect::ShowNotice { is_error: true, .. }]));
+        state.mail_compose.as_mut().unwrap().message = "a\r\nb\rc\t".into();
+        state.mail_compose.as_mut().unwrap().gold = 700;
+        let sent = reduce(&state, UiAction::SubmitMail);
+        assert_eq!(sent.effects, vec![UiEffect::GatewayCommand(GatewayCommand::SendMail {
+            recipient:"R".into(),message:"a\nb\nc".into(),gold:700,attachment_unique_ids:vec![],
+        })]);
+        state.mail_compose.as_mut().unwrap().attachment_unique_ids = vec![7,7];
+        let rejected = reduce(&state, UiAction::SubmitMail);
+        assert_eq!(rejected.state.mail_compose, state.mail_compose);
+        assert!(matches!(rejected.effects.as_slice(), [UiEffect::ShowNotice { is_error: true, .. }]));
     }
 
     #[test]

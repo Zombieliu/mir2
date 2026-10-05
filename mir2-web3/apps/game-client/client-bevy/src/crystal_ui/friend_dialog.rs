@@ -1,8 +1,7 @@
 //! Crystal FriendDialog.cs and MemoDialog: selection is an authoritative character
 //! identity. Modal targets never follow a subsequently selected row.
 use mir2_protocol::{ClientFriend, ClientPacket, ServerPacket};
-#[path = "friend_text_editor.rs"]
-pub mod text_editor;
+pub use super::super::text_editor;
 use text_editor::{EditResult, FriendTextEditor};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum EditorTarget {

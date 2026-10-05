@@ -38,6 +38,10 @@ mod monster_ai;
 mod monsters;
 mod movement;
 mod npc;
+mod npc_gold_buy_outcome;
+pub use npc_gold_buy_outcome::{NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBuyBeforeExecution,
+    NpcGoldBuyProcessingOutcome, NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution};
+mod npc_gold_trade_expiry;
 mod npc_script;
 mod onchain;
 mod packets;

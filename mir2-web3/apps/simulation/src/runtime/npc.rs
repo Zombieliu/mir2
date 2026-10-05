@@ -30,12 +30,14 @@ use super::equipment::{crystal_item_added_stat_weight, crystal_item_current_pric
 use super::inventory::{
     add_or_increment_item_with_durability_and_stats, binary_datetime_ticks, can_gain_item_quantity,
     current_binary_datetime, future_binary_datetime_minutes, item_matches_inventory_unique_id,
+    plan_npc_gold_trade_gain,
 };
 use super::items::{
     crystal_item_key_for_template, crystal_item_template_for_item_key, merged_user_item_stats,
     user_item_added_attack_defence, user_item_from_item_state, ItemState,
 };
 use super::movement::tile_distance;
+use super::npc_gold_trade_expiry::capture_npc_trade_utc_ticks;
 use super::npc_script::{crystal_npc_label_base, crystal_npc_labels_match, crystal_npc_section};
 use super::resources::{
     InventoryResource, NpcStateResource, PlayerRuntimeResource, RuntimeConfigResource,
@@ -923,36 +925,74 @@ pub(super) fn active_crystal_buy_service(service: &ActiveNpcServiceState) -> boo
     )
 }
 
+// The authoritative UTC instant is captured once, only for ordinary Gold Trade.
+fn npc_gold_trade_utc_ticks(world: &World, service: &ActiveNpcServiceState) -> Option<i64> {
+    #[cfg(test)]
+    if let Some(fixture) = world.get_resource::<NpcGoldTradeExpiryFixture>() {
+        if fixture.script_key == service.script_key { return Some(fixture.now_utc_ticks); }
+    }
+    #[cfg(not(test))]
+    let _ = (world, service);
+    capture_npc_trade_utc_ticks().ok()
+}
+
+use super::npc_gold_buy_outcome::{NpcGoldBuyRequest, NpcGoldBuyRejection, NpcGoldBuyProcessingOutcome};
+
 pub(super) fn buy_item_impl(
     world: &mut World,
     item_index: u64,
     count: u16,
     panel_type: u8,
 ) -> Vec<ServerPacket> {
+    let mut outcome = None;
+    buy_item_recording_impl(world, NpcGoldBuyRequest { item_index, count, panel_type }, false, &mut outcome)
+}
+
+pub(super) fn buy_item_with_processing_outcome(
+    world: &mut World, request: NpcGoldBuyRequest, outcome: &mut Option<NpcGoldBuyProcessingOutcome>,
+) -> Vec<ServerPacket> {
+    buy_item_recording_impl(world, request, true, outcome)
+}
+
+fn reject_gold_buy(request: NpcGoldBuyRequest, reason: NpcGoldBuyRejection,
+    outcome: &mut Option<NpcGoldBuyProcessingOutcome>) -> Vec<ServerPacket> {
+    *outcome = Some(NpcGoldBuyProcessingOutcome::Rejected { request, reason });
+    Vec::new()
+}
+
+fn buy_item_recording_impl(world: &mut World, request: NpcGoldBuyRequest,
+    ordinary_only: bool, outcome: &mut Option<NpcGoldBuyProcessingOutcome>) -> Vec<ServerPacket> {
+    let NpcGoldBuyRequest { item_index, count, panel_type } = request;
     if count == 0 || panel_type != CRYSTAL_PANEL_BUY {
-        return Vec::new();
+        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidRequest, outcome);
     }
     if current_player_is_dead(world) {
-        return Vec::new();
+        return reject_gold_buy(request, NpcGoldBuyRejection::PlayerDead, outcome);
     }
 
     let Some(service) =
         current_crystal_npc_service_in_range(world).filter(active_crystal_buy_service)
     else {
-        return Vec::new();
+        return reject_gold_buy(request, NpcGoldBuyRejection::ServiceUnavailable, outcome);
     };
 
+    if ordinary_only && matches!(service.label_key.as_str(), "PEARLBUY" | "BUYBACK" | "BUYUSED") {
+        return reject_gold_buy(request, NpcGoldBuyRejection::UnsupportedService, outcome);
+    }
     process_crystal_npc_goods_expiry(world);
     let rate = crystal_npc_info_by_script_key(&service.script_key)
         .map(|npc| npc.price_rate)
         .unwrap_or(1.0);
     let Some(purchase_item) = crystal_npc_service_item_for_purchase(world, &service, item_index)
     else {
-        return Vec::new();
+        return reject_gold_buy(request, NpcGoldBuyRejection::UnknownGood, outcome);
     };
+    if ordinary_only && !matches!(purchase_item.source, CrystalNpcPurchaseSource::Trade) {
+        return reject_gold_buy(request, NpcGoldBuyRejection::UnsupportedService, outcome);
+    }
     let source_item = purchase_item.item.clone();
     let Some(template) = crystal_item_by_index(source_item.item_index) else {
-        return Vec::new();
+        return reject_gold_buy(request, NpcGoldBuyRejection::UnknownGood, outcome);
     };
 
     let requested_count = u32::from(count);
@@ -966,7 +1006,7 @@ pub(super) fn buy_item_impl(
         requested_count
     };
     if buy_count == 0 || buy_count > u32::from(template.stack_size.max(1)) {
-        return Vec::new();
+        return reject_gold_buy(request, NpcGoldBuyRejection::InvalidQuantity, outcome);
     }
 
     let key = crystal_item_key_for_template(&template);
@@ -984,10 +1024,36 @@ pub(super) fn buy_item_impl(
             world.resource::<super::resources::Stage5SystemsResource>().stage5_systems.intelligent_creature_pearls.max(0) as u32
         } else { world.resource::<PlayerRuntimeResource>().gold };
         if balance < cost {
-            return Vec::new();
+            return reject_gold_buy(request, NpcGoldBuyRejection::InsufficientGold, outcome);
         }
+        if matches!(purchase_item.source, CrystalNpcPurchaseSource::Trade) && !uses_pearls {
+            let Some(now_utc_ticks) = npc_gold_trade_utc_ticks(world, &service) else {
+                return reject_gold_buy(request, NpcGoldBuyRejection::ClockUnavailable, outcome);
+            };
+            let Some((staged, incoming)) = plan_npc_gold_trade_gain(
+                resources,
+                &template,
+                count,
+                source_item.unique_id,
+                now_utc_ticks,
+            ) else {
+                return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
+            };
+            // All capacity, identity and wire conversions completed on the clone.
+            // No callback or other fallible work separates these two live writes.
+            world.resource_mut::<PlayerRuntimeResource>().gold -= cost;
+            *world.resource_mut::<InventoryResource>() = staged;
+            *outcome = Some(NpcGoldBuyProcessingOutcome::Committed {
+                request, gold_spent: cost, incoming_unique_id: incoming.unique_id,
+            });
+            return vec![
+                ServerPacket::LoseGold { gold: cost },
+                ServerPacket::GainedItem { item: incoming },
+            ];
+        }
+
         if !can_gain_item_quantity(&resources, ItemContainer::Bag1, &key, buy_count) {
-            return Vec::new();
+            return reject_gold_buy(request, NpcGoldBuyRejection::InvalidDelivery, outcome);
         }
     }
 
@@ -1086,10 +1152,17 @@ pub(super) fn crystal_npc_service_item_for_purchase(
     }
 
     if service.label_key != "BUYUSED" {
-        if let Some(item) = crystal_npc_script_by_key(&service.script_key)
+        let trade_goods = crystal_npc_script_by_key(&service.script_key)
             .map(|script| crystal_npc_trade_goods_for_script(&script))
-            .unwrap_or_default()
-            .into_iter()
+            .unwrap_or_default();
+        // Current natural Trade catalogues contain no timed templates. Tests use
+        // a World-local catalogue while retaining the real BuyItem handler and
+        // service/range/currency guards; production has no override or new API.
+        #[cfg(test)]
+        let trade_goods = world.get_resource::<NpcGoldTradeExpiryFixture>()
+            .filter(|fixture| fixture.script_key == service.script_key && service.label_key != "PEARLBUY")
+            .map(|fixture| fixture.trade_goods.clone()).unwrap_or(trade_goods);
+        if let Some(item) = trade_goods.into_iter()
             .filter(|item| crystal_npc_profile_allows_item(world, item))
             .find(|item| item.unique_id == item_index)
         {
@@ -1277,6 +1350,22 @@ pub(super) fn crystal_sell_value_for_item(item: &ItemState) -> u32 {
         })
         .unwrap_or_else(|| u32::from(item.weight.max(1)) * item.quantity.max(1))
 }
+
+#[cfg(test)]
+#[derive(bevy_ecs::prelude::Resource)]
+struct NpcGoldTradeExpiryFixture {
+    script_key: String,
+    trade_goods: Vec<UserItem>,
+    now_utc_ticks: i64,
+}
+
+#[cfg(test)]
+#[path = "npc_gold_trade_expiry_tests.rs"]
+mod gold_trade_expiry_tests;
+
+#[cfg(test)]
+#[path = "npc_gold_trade_capacity_tests.rs"]
+mod gold_trade_capacity_tests;
 
 #[cfg(test)]
 #[path = "npc_pearl_tests.rs"]

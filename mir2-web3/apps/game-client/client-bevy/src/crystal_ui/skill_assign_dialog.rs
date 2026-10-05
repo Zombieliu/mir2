@@ -1,147 +1,25 @@
 use super::*;
-// Crystal AssignKeyPanel uses fixed labels, independent of configured action keys.
-fn assignment_label(key: u8) -> String {
-    match key {
-        1..=8 => format!("F{key}"),
-        9..=16 => format!("Ctrl\nF{}", key - 8),
-        _ => String::new(),
-    }
-}
-
-#[derive(Debug, Clone, Default, PartialEq)]
-pub struct SkillAssignUi {
-    pub open: bool,
-    pub request_id: u64,
-    pub skill_id: u32,
-    pub key: u8,
-    pub old_key: u8,
-    pub spell: String,
-    pub pending: bool,
-    pub result: Option<bool>,
-    pub notice: Option<String>,
-}
+use crate::crystal_ui::skill_page_shared::{SkillPageAction, assignment_label};
+pub use crate::skill_page_state::{SkillAssignUi, SkillAuthorityUi};
 impl SkillAssignUi {
-    pub fn show(&mut self, id: u32, skills: &SkillModel) {
-        let Some(skill) = skills.skills.iter().find(|s| s.id == id) else {
-            return;
-        };
-        let binding = skills.binding_for(skill.id);
-        let Some(spell) = binding.spell.filter(|s| !s.is_empty()) else {
-            return;
-        };
-        let old_key = binding
-            .hotkey
-            .and_then(|v| u8::try_from(v).ok())
-            .filter(|v| *v <= 16)
-            .unwrap_or(0);
-        *self = Self {
-            open: true,
-            skill_id: id,
-            key: old_key,
-            old_key,
-            spell,
-            ..default()
-        };
-    }
-    pub fn choose(&mut self, key: u8) {
-        if !self.pending && key <= 16 {
-            self.key = key;
-        }
-    }
+    // Native alone retains the existing process-wide player/Hero namespace.
     pub fn save(&mut self, queue: &mut NativePlayerUiIntentQueue) {
         if !self.open || self.pending {
             return;
         }
         self.request_id = crate::skill_model::next_skill_key_request_id();
-        if queue.push_intent(NativePlayerUiIntent::MagicKey {
+        let accepted = queue.push_intent(NativePlayerUiIntent::MagicKey {
             request_id: self.request_id,
             spell: self.spell.clone(),
             key: self.key,
             old_key: self.old_key,
-        }) {
-            self.pending = true;
-            self.notice = None;
-        } else {
-            self.notice = Some("Unable to send. Please try again.".into());
-        }
-    }
-    pub fn dispatched(
-        &mut self,
-        request_id: u64,
-        spell: &str,
-        key: u8,
-        old_key: u8,
-        success: bool,
-    ) {
-        if self.pending
-            && self.request_id == request_id
-            && self.spell == spell
-            && self.key == key
-            && self.old_key == old_key
-        {
-            self.result = Some(success);
-        }
-    }
-}
-#[derive(Debug, Clone, Default, PartialEq)]
-pub struct SkillAuthorityUi {
-    pending: Option<SkillKeyPending>,
-}
-#[derive(Debug, Clone, PartialEq)]
-struct SkillKeyPending {
-    base: crate::skill_model::SkillModelAuthority,
-    draft: SkillAssignUi,
-}
-impl SkillAuthorityUi {
-    fn begin(&mut self, skills: &SkillModel, draft: SkillAssignUi) {
-        self.pending = Some(SkillKeyPending {
-            base: skills.authority,
-            draft,
         });
-    }
-    pub fn reconcile(&mut self, skills: &mut SkillModel) -> Option<SkillAssignUi> {
-        let p = self.pending.as_ref()?;
-        if skills.authority.session_epoch != p.base.session_epoch
-            || skills.authority.player_object_id != p.base.player_object_id
-            || !skills.skills.iter().any(|s| s.id == p.draft.skill_id)
-        {
-            self.pending = None;
-            return None;
-        }
-        if let Some(ack) = skills.skill_key_ack.as_ref().filter(|ack| {
-            ack.request_id == p.draft.request_id
-                && ack.spell == p.draft.spell
-                && ack.key == p.draft.key
-                && ack.old_key == p.draft.old_key
-        }) {
-            let restore = if ack.accepted {
-                None
-            } else {
-                let mut draft = p.draft.clone();
-                draft.pending = false;
-                draft.result = None;
-                draft.notice = Some("Unable to save this key. Please try again.".into());
-                Some(draft)
-            };
-            self.pending = None;
-            return restore;
-        }
-        // Only an exact request-scoped receipt can retire this overlay.
-        // Neither arrival order nor any count of conflicting snapshots proves
-        // that the ack-less Crystal command has reached server processing.
-        apply_source_key(skills, p.draft.skill_id, p.draft.key);
-        None
+        self.queued(accepted);
     }
 }
 fn apply_source_key(skills: &mut SkillModel, id: u32, key: u8) {
-    for entry in &mut skills.bindings {
-        if entry.skill_id == id || (key > 0 && entry.hotkey == Some(i32::from(key))) {
-            entry.hotkey = Some(if entry.skill_id == id {
-                i32::from(key)
-            } else {
-                0
-            });
-        }
+    if let Some(spell) = skills.binding_for(id).spell {
+        crate::skill_page_state::apply_source_key(skills, id, &spell, key);
     }
 }
 pub(super) fn process(
@@ -158,13 +36,10 @@ pub(super) fn process(
     if !state.skill_assign.open {
         return;
     }
-    if !skills
-        .skills
-        .iter()
-        .any(|s| s.id == state.skill_assign.skill_id)
-    {
+    if !state.skill_assign.valid(&skills) {
         state.skill_assign = Default::default();
         binding.set_assign_key(false);
+        binding.refresh(&skills);
         return;
     }
     let Some(success) = state.skill_assign.result.take() else {
@@ -175,19 +50,25 @@ pub(super) fn process(
         state.skill_assign.notice = Some("Unable to send. Please try again.".into());
         return;
     }
-    let id = state.skill_assign.skill_id;
-    let key = state.skill_assign.key;
     let draft = state.skill_assign.clone();
-    state.skill_authority.begin(&skills, draft);
-    apply_source_key(&mut skills, id, key);
+    state.skill_authority.begin(&skills, draft.clone());
+    crate::skill_page_state::apply_source_key(&mut skills, draft.skill_id, &draft.spell, draft.key);
     binding.refresh(&skills);
     binding.set_assign_key(false);
-    // Skill keys belong to the character's server state. Never rewrite the
-    // legacy global local file or use it as an authority across characters.
     state.skill_assign = Default::default();
 }
 #[derive(Component)]
 pub(super) struct AssignRoot;
+pub(super) fn map_action(a: SkillPageAction) -> OverlayButton {
+    match a {
+        SkillPageAction::Prev => OverlayButton::SkillPagePrev,
+        SkillPageAction::Next => OverlayButton::SkillPageNext,
+        SkillPageAction::Select(id) => OverlayButton::SelectSkill(id),
+        SkillPageAction::Choose(key) => OverlayButton::AssignSkillKey(key),
+        SkillPageAction::Clear => OverlayButton::ClearSkillBinding,
+        SkillPageAction::Save => OverlayButton::CloseSkillAssign,
+    }
+}
 pub(super) fn render(
     mut commands: Commands,
     roots: Query<Entity, With<OverlayRoot>>,
@@ -199,115 +80,21 @@ pub(super) fn render(
     for e in &old {
         commands.entity(e).despawn();
     }
-    let (true, Some(assets), Ok(root)) = (state.skill_assign.open, assets, roots.single()) else {
+    let (true, Some(assets), Ok(root)) =
+        (state.skill_assign.valid(&skills), assets, roots.single())
+    else {
         return;
     };
-    let assign = &state.skill_assign;
-    let name = skills
-        .skills
-        .iter()
-        .find(|s| s.id == assign.skill_id)
-        .map(|s| s.name.as_str())
-        .unwrap_or("");
     commands.entity(root).with_children(|p| {
-        p.spawn((
+        crate::crystal_ui::skill_page_shared::paint_assignment(
+            p,
+            &assets,
+            &skills,
+            &state.skill_assign,
+            None,
             AssignRoot,
-            Node {
-                position_type: PositionType::Absolute,
-                left: Val::Px(322.),
-                top: Val::Px(312.),
-                width: Val::Px(380.),
-                height: Val::Px(144.),
-                ..default()
-            },
-            GlobalZIndex(1100),
-            FocusPolicy::Block,
-        ))
-        .with_children(|p| {
-            spawn_overlay_frame(p, &assets, "original-ui/Prguse/710.png", 380., 144.);
-            if let Some(icon) = skills.binding_for(assign.skill_id).icon {
-                p.spawn((
-                    Node {
-                        position_type: PositionType::Absolute,
-                        left: Val::Px(16.),
-                        top: Val::Px(16.),
-                        ..default()
-                    },
-                    ImageNode::new(
-                        assets.load(format!("original-ui/MagIcon2/{}.png", u16::from(icon) * 2)),
-                    ),
-                    FocusPolicy::Pass,
-                ));
-            }
-            p.spawn((
-                Node {
-                    position_type: PositionType::Absolute,
-                    left: Val::Px(49.),
-                    top: Val::Px(17.),
-                    width: Val::Px(230.),
-                    height: Val::Px(32.),
-                    ..default()
-                },
-                Text::new(format!("Select the Key for: {name}")),
-                crate::crystal_ui::typography::crystal_text_font(32. / 3.),
-                TextColor(Color::WHITE),
-                TextLayout::new(Justify::Center, LineBreak::WordBoundary),
-            ));
-            for key in 1..=16u8 {
-                let i = key - 1;
-                let selected = assign.key == key;
-                let rect = CrystalRect::new(
-                    17. + 32. * f32::from(i % 8) + 5. * f32::from((i % 8) / 4),
-                    58. + 37. * f32::from(i / 8),
-                    32.,
-                    32.,
-                );
-                spawn_overlay_crystal_button_enabled(
-                    p,
-                    &assets,
-                    "Prguse",
-                    if selected { 1658 } else { 1656 },
-                    if selected { 1658 } else { 1657 },
-                    1658,
-                    rect,
-                    OverlayButton::AssignSkillKey(key),
-                    !assign.pending,
-                );
-                let label = assignment_label(key);
-                overlay_text_at(
-                    p,
-                    &label,
-                    CrystalRect::new(rect.left + 1., rect.top, rect.width - 1., rect.height),
-                    32. / 3.,
-                    Color::WHITE,
-                );
-            }
-            for (frame, x, y, action) in [
-                (287, 284., 64., OverlayButton::ClearSkillBinding),
-                (156, 284., 101., OverlayButton::CloseSkillAssign),
-            ] {
-                spawn_overlay_crystal_button_enabled(
-                    p,
-                    &assets,
-                    "Title",
-                    frame,
-                    frame + 1,
-                    frame + 2,
-                    CrystalRect::new(x, y, if frame == 287 { 76. } else { 60. }, 25.),
-                    action,
-                    !assign.pending,
-                );
-            }
-            if let Some(notice) = &assign.notice {
-                overlay_text_at(
-                    p,
-                    notice,
-                    CrystalRect::new(16., 130., 260., 14.),
-                    8.,
-                    Color::WHITE,
-                );
-            }
-        });
+            map_action,
+        );
     });
 }
 #[cfg(test)]
@@ -495,11 +282,12 @@ mod tests {
             app.world().resource::<SkillModel>().binding_for(2).hotkey,
             Some(0)
         );
-        assert!(app
-            .world()
-            .resource::<SkillModel>()
-            .skill_for_shortcut(1)
-            .is_none());
+        assert!(
+            app.world()
+                .resource::<SkillModel>()
+                .skill_for_shortcut(1)
+                .is_none()
+        );
         let skills = app.world().resource::<SkillModel>().clone();
         {
             let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
@@ -512,11 +300,12 @@ mod tests {
             app.world().resource::<SkillModel>().binding_for(1).hotkey,
             Some(0)
         );
-        assert!(app
-            .world()
-            .resource::<SkillModel>()
-            .skill_for_shortcut(16)
-            .is_none());
+        assert!(
+            app.world()
+                .resource::<SkillModel>()
+                .skill_for_shortcut(16)
+                .is_none()
+        );
         let path = app
             .world()
             .resource::<SkillBindingPersistenceRuntime>()

@@ -33,10 +33,57 @@ fn input_app() -> App {
     app
 }
 
+fn install_trusted_mail_submit_fixture(app:&mut App){
+    app.init_resource::<MailServiceInbox>().insert_resource(SessionResetRevision(1));
+    assert!(app.world_mut().resource_mut::<MailServiceInbox>().start_stream(crate::mail_service::MailServiceStreamStarted{epoch:MailServiceStreamEpoch{run:1,connection:1}}));
+}
+
 fn press(app: &mut App, button: OverlayButton) {
     let entity = app.world_mut().spawn((Interaction::Pressed, button, Button)).id();
     app.update();
     app.world_mut().despawn(entity);
+}
+
+#[test]
+fn real_native_submit_uses_shared_utf16_rejection_and_preserves_draft_until_ack() {
+    for (body, allowed) in [("😀".repeat(250),true),("😀".repeat(251),false)] {
+        let mut app=input_app();install_trusted_mail_submit_fixture(&mut app);
+        let draft=mir2_ui_core::state::MailComposeDraft{recipient:" R ".into(),message:body.clone(),..default()};
+        {let mut state=app.world_mut().resource_mut::<NativePlayerUiState>();
+            state.core.panel=mir2_ui_core::state::UiPanel::Mail;state.core.mail_compose=Some(draft.clone());}
+        press(&mut app,OverlayButton::SubmitMail);
+        assert_eq!(app.world().resource::<NativePlayerUiState>().core.mail_compose.as_ref(),Some(&draft));
+        assert_eq!(app.world().resource::<PendingOperations>().has_pending_mail_send(),allowed);
+        let sent=app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents();
+        if allowed {assert_eq!(sent,vec![NativePlayerUiIntent::SendMail{recipient:"R".into(),message:body,
+            gold:0,attachment_unique_ids:vec![],stamped:false}]);}
+        else {assert!(sent.is_empty());assert_eq!(app.world().resource::<MailComposeUi>().last_notice.as_deref(),
+            Some("Mail message exceeds 500 UTF-16 units; draft kept"));}
+    }
+}
+
+#[test]
+fn real_native_parcel_submit_normalizes_gold_and_uid_and_rejects_duplicate_before_quote() {
+    for duplicate in [false,true] {
+        let mut app=input_app();install_trusted_mail_submit_fixture(&mut app);app.init_resource::<mail_parcel::MailParcelUi>();
+        let inventory=InventoryModel{items:vec![ItemModel{unique_id:Some(7),container:0,slot:0,quantity:1,
+            tooltip_source:Some(crate::inventory::CrystalItemTooltipSourceModel{
+                info:crate::inventory::CrystalItemInfoModel{item_index:9,price:100,..default()},
+                user_item:Some(crate::inventory::CrystalUserItemModel{unique_id:7,item_index:9,count:1,..default()}),..default()}),..default()}],..default()};
+        let draft=mir2_ui_core::state::MailComposeDraft{recipient:" R ".into(),message:" hello\r\n世界\t ".into(),
+            gold:700,attachment_unique_ids:if duplicate{vec![7,7]}else{vec![7]}};
+        if !duplicate {let mut parcel=app.world_mut().resource_mut::<mail_parcel::MailParcelUi>();
+            assert!(parcel.begin_quote(&draft,&inventory,1).is_some());parcel.apply_cost(1,Some(&draft),&inventory);}
+        app.insert_resource(inventory);app.world_mut().resource_mut::<MailComposeUi>().kind=MailComposeKind::Parcel;
+        {let mut state=app.world_mut().resource_mut::<NativePlayerUiState>();state.core.panel=mir2_ui_core::state::UiPanel::Mail;state.core.mail_compose=Some(draft.clone());}
+        press(&mut app,OverlayButton::SubmitMail);
+        assert_eq!(app.world().resource::<NativePlayerUiState>().core.mail_compose.as_ref(),Some(&draft));
+        let sent=app.world_mut().resource_mut::<NativePlayerUiIntentQueue>().drain_intents();
+        if duplicate {assert!(sent.is_empty());assert!(!app.world().resource::<PendingOperations>().has_pending_mail_send());
+            assert_eq!(app.world().resource::<MailComposeUi>().last_notice.as_deref(),Some("Invalid mail attachment selection"));}
+        else {assert_eq!(sent,vec![NativePlayerUiIntent::SendMail{recipient:"R".into(),message:"hello\n世界".into(),gold:700,
+            attachment_unique_ids:vec![7],stamped:false}]);assert!(app.world().resource::<PendingOperations>().has_pending_mail_send());}
+    }
 }
 
 fn type_text(app: &mut App, key_code: KeyCode, text: &str) {
@@ -223,6 +270,7 @@ fn write_recipient_prompt_confirms_exact_recipient_and_consumes_covered_parcel_a
 #[test]
 fn recipient_cancel_and_letter_send_keep_input_isolated_and_draft_authoritative() {
     let mut app = input_app();
+    install_trusted_mail_submit_fixture(&mut app);
     {
         let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
         state.core.panel = mir2_ui_core::state::UiPanel::Mail;
@@ -261,6 +309,7 @@ fn recipient_cancel_and_letter_send_keep_input_isolated_and_draft_authoritative(
 #[test]
 fn parcel_to_letter_or_reply_never_sends_hidden_gold_or_items_and_keeps_parcel_draft() {
     let mut app = input_app();
+    install_trusted_mail_submit_fixture(&mut app);
     let parcel = mir2_ui_core::state::MailComposeDraft {
         recipient: "Parcel recipient".into(),
         message: "Parcel message".into(),
@@ -323,6 +372,7 @@ fn parcel_to_letter_or_reply_never_sends_hidden_gold_or_items_and_keeps_parcel_d
 #[test]
 fn submitted_letter_body_is_frozen_until_the_uncorrelated_send_receipt() {
     let mut app = input_app();
+    install_trusted_mail_submit_fixture(&mut app);
     {
         let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
         state.core.panel = mir2_ui_core::state::UiPanel::Mail;

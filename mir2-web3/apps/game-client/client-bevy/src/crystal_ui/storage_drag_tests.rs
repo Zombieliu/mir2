@@ -588,3 +588,21 @@ fn warehouse_open_close_and_npc_reopen_keep_their_source_bag_positions() {
         (393.0, 0.0),
     );
 }
+
+#[test]
+fn warehouse_adapter_replans_with_current_source_count_and_rejects_reused_slot() {
+    let stale_source = bag_item(2, 10, 1, 2);
+    let mut current_source = stale_source.clone();
+    current_source.quantity = 3; // Carrier no longer matches: it must not merge.
+    let mut inventory = InventoryModel { items: vec![current_source], ..Default::default() };
+    let storage = StorageModel { items: vec![storage_item(3, 20, 1, 5)], ..StorageModel::new() };
+    let mut intents = NativePlayerUiIntentQueue::default();
+    let mut pending = PendingOperations::default();
+    assert!(enqueue_bag_to_storage_drag(&stale_source, 2, 3, &inventory, &storage, &mut intents, &mut pending));
+    assert!(matches!(intents.drain_intents().as_slice(), [NativePlayerUiIntent::StoreItem { unique_id: 10, from: 2, to: 0, .. }]));
+    let mut intents = NativePlayerUiIntentQueue::default();
+    let mut pending = PendingOperations::default();
+    inventory.items[0].unique_id = Some(11);
+    assert!(!enqueue_bag_to_storage_drag(&stale_source, 2, 3, &inventory, &storage, &mut intents, &mut pending));
+    assert!(intents.drain_intents().is_empty());
+}

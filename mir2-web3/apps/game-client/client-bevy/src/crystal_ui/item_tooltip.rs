@@ -10,7 +10,7 @@ use crate::inventory::{
     CrystalUserItemModel, ItemModel,
 };
 use crate::read_model::PlayerStats;
-use std::time::{SystemTime, UNIX_EPOCH};
+use web_time::{SystemTime, UNIX_EPOCH};
 
 const DOTNET_TICKS_PER_SECOND: i64 = 10_000_000;
 const DOTNET_TICKS_AT_UNIX_EPOCH: i64 = 621_355_968_000_000_000;
@@ -114,8 +114,16 @@ impl CrystalItemTooltipDocument {
 /// NPC shops can suppress mutable added stats without changing inventory,
 /// equipment, storage, trade, or reward tooltips.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum CrystalStackSplitHint {
+    #[default]
+    ShiftClick,
+    MoreActions,
+}
+
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct CrystalItemTooltipOptions {
     pub hide_added_stats: bool,
+    pub stack_split_hint: CrystalStackSplitHint,
 }
 
 /// Build the source-ordered tooltip document from authoritative inputs.
@@ -239,7 +247,7 @@ fn crystal_item_tooltip_document_at_with_options(
         &mut sections,
         bind_section(info, user, now_dotnet_ticks, options.hide_added_stats),
     );
-    push_nonempty(&mut sections, overlap_section(real_info));
+    push_nonempty(&mut sections, overlap_section(real_info, options.stack_split_hint));
     push_nonempty(&mut sections, story_section(info, real_info));
     push_nonempty(&mut sections, gm_section(user));
 
@@ -1089,7 +1097,10 @@ fn bind_section(
     section
 }
 
-fn overlap_section(info: &CrystalItemInfoModel) -> CrystalItemTooltipSection {
+fn overlap_section(
+    info: &CrystalItemInfoModel,
+    split_hint: CrystalStackSplitHint,
+) -> CrystalItemTooltipSection {
     let mut section = CrystalItemTooltipSection::new(CrystalItemTooltipSectionKind::Overlap);
     if info.item_type == 18 {
         let text = match info.shape {
@@ -1107,7 +1118,10 @@ fn overlap_section(info: &CrystalItemInfoModel) -> CrystalItemTooltipSection {
         }
     } else if info.stack_size > 1 {
         section.push_white(format!("Max Combine Count : {}", info.stack_size));
-        section.push_white("Shift + Left click to split the stack");
+        section.push_white(match split_hint {
+            CrystalStackSplitHint::ShiftClick => "Shift + Left click to split the stack",
+            CrystalStackSplitHint::MoreActions => "Use More actions to split the stack",
+        });
     }
     section
 }
@@ -1739,6 +1753,41 @@ mod tests {
     }
 
     #[test]
+    fn stack_split_hint_describes_only_the_hosts_available_action() {
+        let item = potion();
+        let portable = crystal_item_tooltip_document_with_options(
+            &item,
+            &PlayerStats::default(),
+            CrystalItemTooltipOptions {
+                stack_split_hint: CrystalStackSplitHint::MoreActions,
+                ..Default::default()
+            },
+        )
+        .plain_text();
+        assert!(portable.contains("Max Combine Count : 20"));
+        assert!(portable.contains("Use More actions to split the stack"));
+        assert!(!portable.contains("Shift + Left click"));
+
+        let native = crystal_item_tooltip_document(&item, &PlayerStats::default()).plain_text();
+        assert!(native.contains("Shift + Left click to split the stack"));
+        assert!(!native.contains("More actions"));
+    }
+
+    #[test]
+    fn npc_gold_expiry_exact_json_max_value_does_not_wrap_to_expired() {
+        let now = DOTNET_TICKS_AT_UNIX_EPOCH;
+        for ticks in [3_155_378_975_999_999_999_i64, 7_767_064_994_427_387_903] {
+            let encoded = format!("{{\"expiry_binary_datetime\":\"{ticks}\"}}");
+            let expiry: CrystalUserItemExpireModel = serde_json::from_str(&encoded).unwrap();
+            let mut item = potion();
+            item.tooltip_source.as_mut().unwrap().user_item.as_mut().unwrap().expire_info = Some(expiry);
+            let text = crystal_item_tooltip_document_at(&item,&PlayerStats::default(),now).plain_text();
+            assert!(text.contains("Expires in"));
+            assert!(!text.contains("Expired"), "exact MaxTicks must not enter Local wrap");
+        }
+    }
+
+    #[test]
     fn bind_section_uses_crystal_expiry_seal_and_rental_clock_text() {
         let now = DOTNET_TICKS_AT_UNIX_EPOCH + 1_000_000 * DOTNET_TICKS_PER_SECOND;
         let binary_after = |seconds: i64| {
@@ -1912,6 +1961,7 @@ mod tests {
             &PlayerStats::default(),
             CrystalItemTooltipOptions {
                 hide_added_stats: true,
+                ..Default::default()
             },
         )
         .plain_text();

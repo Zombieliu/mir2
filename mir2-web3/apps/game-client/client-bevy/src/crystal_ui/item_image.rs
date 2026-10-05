@@ -6,10 +6,15 @@ use bevy::prelude::*;
 /// Source cell bounds, independent of the full image's dimensions and alpha
 /// origin. Also used by the persistent HUD belt, not only rebuilt dialogs.
 #[derive(Component)]
-pub(super) struct OriginalItemImage {
+pub struct OriginalItemImage {
     pub cell_width: i32,
     pub cell_height: i32,
 }
+
+/// Bag-only presentation scale. Other item surfaces retain their original
+/// pixel geometry when this component is absent.
+#[derive(Component, Debug, Clone, Copy)]
+pub struct OriginalItemPaintScale(pub f32);
 
 pub(super) fn original_item_image_bundle(
     asset_server: &AssetServer,
@@ -66,15 +71,15 @@ pub(super) fn spawn_original_item_image_tinted(
     parent.spawn((cell, node, image));
 }
 
-pub(super) fn layout_original_item_images(
+pub fn layout_original_item_images(
     images: Option<Res<Assets<Image>>>,
-    mut icons: Query<(&OriginalItemImage, &ImageNode, &mut Node)>,
+    mut icons: Query<(&OriginalItemImage, &ImageNode, Option<&OriginalItemPaintScale>, &mut Node)>,
     mut true_sizes: Local<
         std::collections::HashMap<bevy::asset::AssetId<Image>, Option<(i32, i32)>>,
     >,
 ) {
     let Some(images) = images else {
-        for (_, _, mut node) in &mut icons {
+        for (_, _, _, mut node) in &mut icons {
             node.display = Display::None;
         }
         return;
@@ -83,7 +88,7 @@ pub(super) fn layout_original_item_images(
     if images.is_changed() {
         true_sizes.clear();
     }
-    for (cell, image_node, mut node) in &mut icons {
+    for (cell, image_node, paint_scale, mut node) in &mut icons {
         // Bevy can install a real white texture for the default image handle.
         // An empty belt cell must never turn that into a fabricated item.
         if image_node.image == Handle::<Image>::default() {
@@ -127,10 +132,23 @@ pub(super) fn layout_original_item_images(
         };
         // C# divides integers toward zero. GetTrueSize returns alpha-bounds
         // SIZE only: Draw neither crops nor subtracts the alpha/library origin.
-        node.left = Val::Px(((cell.cell_width - true_width) / 2) as f32);
-        node.top = Val::Px(((cell.cell_height - true_height) / 2) as f32);
-        node.width = Val::Px(width as f32);
-        node.height = Val::Px(height as f32);
+        let scale = paint_scale.map_or(1.0, |scale| scale.0);
+        if !scale.is_finite() || scale <= 0.0 {
+            node.display = Display::None;
+            continue;
+        }
+        node.left = Val::Px(if scale == 1.0 {
+            ((cell.cell_width - true_width) / 2) as f32
+        } else {
+            (cell.cell_width as f32 - true_width as f32 * scale) * 0.5
+        });
+        node.top = Val::Px(if scale == 1.0 {
+            ((cell.cell_height - true_height) / 2) as f32
+        } else {
+            (cell.cell_height as f32 - true_height as f32 * scale) * 0.5
+        });
+        node.width = Val::Px(width as f32 * scale);
+        node.height = Val::Px(height as f32 * scale);
         node.display = Display::Flex;
     }
 }
@@ -173,6 +191,40 @@ pub(super) fn crystal_true_size_rgba8(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn bag_paint_scale_changes_icon_pixels_without_changing_default_item_geometry() {
+        let mut app = App::new();
+        app.init_resource::<Assets<Image>>()
+            .add_systems(Update, layout_original_item_images);
+        let image = Image::new_fill(
+            bevy::render::render_resource::Extent3d {
+                width: 32, height: 30, depth_or_array_layers: 1,
+            },
+            bevy::render::render_resource::TextureDimension::D2,
+            &[255, 255, 255, 255],
+            bevy::render::render_resource::TextureFormat::Rgba8UnormSrgb,
+            bevy::asset::RenderAssetUsages::default(),
+        );
+        let handle = app.world_mut().resource_mut::<Assets<Image>>().add(image);
+        let default_icon = app.world_mut().spawn((
+            OriginalItemImage { cell_width: 36, cell_height: 32 },
+            ImageNode { image: handle.clone(), ..default() }, Node::default(),
+        )).id();
+        let touch_icon = app.world_mut().spawn((
+            OriginalItemImage { cell_width: 96, cell_height: 85 },
+            OriginalItemPaintScale(2.67),
+            ImageNode { image: handle, ..default() }, Node::default(),
+        )).id();
+        app.update();
+        let original = app.world().get::<Node>(default_icon).unwrap();
+        assert_eq!((original.left, original.top, original.width, original.height),
+            (Val::Px(2.0), Val::Px(1.0), Val::Px(32.0), Val::Px(30.0)));
+        let touch = app.world().get::<Node>(touch_icon).unwrap();
+        assert_eq!((touch.width, touch.height), (Val::Px(32.0 * 2.67), Val::Px(30.0 * 2.67)));
+        assert!(matches!(touch.left, Val::Px(left) if left > 5.0));
+        assert!(matches!(touch.top, Val::Px(top) if top > 2.0));
+    }
 
     #[test]
     fn true_size_uses_any_nonzero_alpha_not_rgb_and_does_not_return_trim_origin() {

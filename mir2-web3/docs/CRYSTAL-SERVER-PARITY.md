@@ -1,5 +1,121 @@
 # Crystal Server Parity
 
+## Progress74：本地 NPC 金币购买 owner 路由已通过有限检查（2026-10-06）
+
+本批 Source03 已通过独立源代码与实际结果审查，0 blocker；现有串行 CargoGuard 下 **3/3 组、53/53 项执行通过**（购买 18、会话 34、商城 1），其中 **16 项新增测试**。两轮历史测试失败保留，不计入 53 项通过数；修正仅涉及新增测试夹具和预期，产品代码保持一致。
+
+网关将本次 Committed / Rejected / Unknown 结果沿真实本地 owner 调用传递；身份、租约和能力检查在执行前完成。提交后的元数据、事件或协调异常保留本次已知结果，捕获前异常保持 Unknown。原 804 行共享通道可逐字节逆向恢复；现有 BuyItem 三字段、四键 JSON、GameShop 及共享尾部处理保持原契约。
+
+个人会话身份与权威 owner 边界继续分离；失效租约、未登录/未进游戏、错误模式/请求及不支持的 RPC/Hosted owner 在执行前拒绝。没有改写 Zone、战斗或经济模块。
+
+本批不计网络购买 ACK、幂等性、客户端恢复、新生产组合、UI/玩家/移动设备验收、Candidate 或总 goal 完成。详见 [本批 QA 及剩余工作](generated/player-qa/client-core-20260930/npc-gold-buy-owner-route/README.md)。
+
+## Progress73：连接内未决购买保护已通过有限检查（2026-10-05）
+
+Windows 与 Web 共用 Core 的 entered/flushed/unknown 保护：同一实际连接上的角色、完整模型、目录、界面关闭和 HMR 变化不能清除未决请求；严格更新的可信连接才可退役旧请求，仍要求新的完整模型和玩家新的明确意图，不自动重发或推断成交/拒绝。旧 holder 契约缺失会 poison 并拒绝；最后来源复核必须是真实完整 checkpoint。
+
+本批 11/11 组完成：Rust 286 次跨配置执行、14 项新增 distinct；Node 256 项、13 项新增 distinct；严格 TSC 与 shared WASM 编译检查退出 0。994 项声明输入中 13 项既有授权变更、981 项保护、0 新源码文件，Source02/实际回执经独立只读复核 0 blocker；Source01 缺陷与原执行证据保留。Node Core 响应是夹具，完整 TSC 消费依赖图未冻结；未运行 WASM Instance。Progress72 的 155 次服务端执行仅限定承接，不算本批新执行。
+
+下一项贯通 Gateway owner lease 的 typed NPC outcome，再接关联/幂等购买回执和完整投影到两端 Core，随后构建新的生产组合。本批不提高整体 parity 百分比；此前“整体 35%”缺少固定验收分母，不再使用。实际客户端、浏览器、移动真机、生产组合及 Candidate 仍未验收，整体 goal 未完成；用户“继续代码，暂不操作界面”的限制持续有效。详见 [Progress73 QA](generated/player-qa/client-core-20260930/npc-gold-buy-connection-barrier/README.md)。
+
+
+## Progress72 · 2026-10-05 UTC · 普通金币购买 typed 本地处理结果
+
+Session / InProcess Runtime 新入口要求 canonical 认证和 StartGame，默认 unsupported 不执行旧购买；普通 BUY 实际解析 Used 也被 typed 路径拒绝。每笔局部 capture 在真实校验或金币、库存两次提交后产生 Rejected / Committed，incoming_unique_id 仅为入包增量身份。已知结果经后处理 Err 或 unwind panic 仍保留；缺结果为 Unknown，不推断拒绝或自动重发。旧 Buy 内层四字段、binary、特殊经济、GameShop 与原完整收尾保持。
+
+Source02 994 current / 994 after / 992 before，5既有变更＋2新增、987保护；Source01 panic审查问题原样保留且未执行。实际 Simulation153＋Gateway2＝155次测试执行通过，15项新增全执行，独立复核0 blocker；每次 fresh actual C≥50GiB 与原 Guard PolicyB 退出闭环齐全。Web243 / TSC / 共同客户端与WASM仅以未变有效输入限定承接71历史通过，不计新执行。
+
+本批是领域接口与有限检查，未发行公开 processing receipt，未解决客户端 Unknown 恢复、未重建生产组合。下一项同连接未决屏障，再接精确请求关联与两端回执；实际界面按用户“继续代码，暂不操作界面”暂缓。玩家/保存重登/移动真机/最终 frontend / Candidate 未验收，goal active。
+
+详见 [Progress72 QA](generated/player-qa/client-core-20260930/npc-gold-buy-processing-outcome/README.md)。
+
+
+## Progress71 · 2026-10-05 UTC · 普通金币购买有效期与共同日期精度
+
+服务端普通 Gold Trade fresh 物品按 Crystal 名称标签创建有效期：首个成功括号匹配、Int32 前缀及溢出归零，m/h/d 使用时长，M/y 按日历钳制月末，未知单位使用 Unspecified MaxValue。一次 UTC 捕获用于本笔购买；完整交付载体与 live sidecar 一致，日期超界、距离/金币不足或容量失败均在金币和库存提交前拒绝。带标签模板仅占格，不贡献客户端 fresh-compatible 容量证明。Pearl/BuyBack/Used 保持原路径。
+
+公共 Rust 的 plain UserItemExpireInfo JSON 改为规范 signed i64 十进制字符串，同时读取旧整数；原 Crystal binary i64 不变。Windows/portable 共用同一编解码与严格完整载体门槛。Web 仅在 expiry 单字段形状下用原始 JSON source 恢复旧 unsafe 整数，无 source 时保留 unknown；新字符串原样透传，不放松 UID/count/dura。安全 legacy 数字仍保留既有 JSON 语义，Rental/Sealed 未在本批迁移。
+
+Source01 联合992输入及完整 current/after/before核对：12既有改动＋2新增、978原文件保护。实际 Rust 138＋112＋73＋32＋19＋2＝376次跨配置测试通过，shared WASM 编译通过；17项新增 Rust 具名测试已执行，Native/portable 的5项重复不加成独立场景。Web Node 实际111＋84＋48＝243项通过，parser 的35内部断言组已含于一项文件测试，不另加总；9项新增 Node 与实际严格 TSC 通过。每次 Cargo 使用 fresh actual C≥50GiB、原 immutable Guard PolicyB，首个漏建收据目录的 pre-Cargo 拒绝保留且不计通过。
+
+当前自然 Trade 目录没有 timed 商品，新增事务由 test-only World-local 目录经真实 Session BuyItem 入口验证。本批是源码与有限检查；Progress70 的 EXE/renderer/Next/独立包不能视为包含新代码。下一项先增加服务端直接返回的 typed 普通金币购买处理结果，再接精确请求关联与客户端恢复；完整 NPC 服务与后续组合重建继续排队。用户“继续代码，暂不操作界面”持续有效，实际玩家/保存重登/UI/移动真机/最终 frontend/Candidate 未验收，整体 goal active。
+
+详见 [Progress71 QA](generated/player-qa/client-core-20260930/npc-gold-trade-expiry/README.md)。
+
+
+## Progress69 · 2026-10-05 UTC · 共同NPC金币买入容量证据
+
+服务端完整快照提供可空的 `npcGoldTradeCapacity` 两字段证据，Windows/Web 原样传入共同 Rust planner。None 保留旧严格身份与仅空格准入，false 禁用；true 只让 listed、身份无歧义且完整 raw Info/载体与 canonical fresh 相容的现代 Bag/Belt 堆叠贡献容量。Bag1/Bag2 同为 container0；Native 保留完整 u64，Web 限安全整数，旧跨 grid alias 仅在 NPC 专用证据门槛内允许。
+
+局部物品/金币 mutation 在任何 handler 前同步撤销可用性，完整同 owner、当前 source stage 与库存指纹匹配才恢复；完整请求与发送 proof 保留证据，只有持久 Core authority 排除它，证据变化不释放 Entered/Unknown 屏障。没有新增购买 ACK、超时重试或 JS 容量算法。
+
+Source02 的 990 当前源码/after 备份及 989 before 完整核对，25 旧文件变更＋1 新文件、964 旧文件保护。实际 Rust 五组 128＋107＋68＋32＋19＝354 次跨配置执行及 shared WASM 编译检查通过；Node 108＋83＋48＝239 项通过，新增 Rust28/Node10。TSC 仅限定承接 Source01 实际通过：Source02 只改四个 mjs 夹具，生产 TS/TSX 与编译有效输入未变，不称新 TSC 执行。Source01 的 19/1/1 失败及原日志保留，夹具精确修复且原断言未弱化。
+
+下一项 Progress70 复用既有有限 builders，按原预算重建 Native、三 renderer、Next 与 Thin；Core24 输入/18 Rust 未改，仅限定承接。生产组合本轮尚未重建；name-tag expiry、无购买 ACK 恢复与完整 NPC 服务边界仍 open。用户“继续代码，暂不操作界面”持续有效，实际 UI/JS sink/HTTP/移动真机/最终 frontend/Candidate 未验收，goal active。详见 [Progress69 QA](generated/player-qa/client-core-20260930/shared-npc-gold-capacity/README.md)。
+
+
+## Progress68 · 2026-10-05 UTC · 普通Gold Trade整笔购买修复
+
+服务端普通Trade/Gold购买先在库存克隆中完成真实格位、自身数量上限、完整载体及身份检查；兼容的完整现代堆叠依合法Bag/Belt分区吸收数量，剩余量必须有真实空格。全部转换和容量规划成功后才一起写入金币与库存；fresh交付排除catalog UID与0，模板基础属性不写入AddedStats，失败不扣款、不保留部分合并。旧sidecarless根保留各packet grid内的编号，真实exact/nested/reserved冲突继续拒绝，旧物品只占格。Pearl/BuyBack/Used原路径保持。
+
+最终Source04实际购买16/16、相邻NPC115/115通过（115已包含全部16，两个命令131次执行），独立复核0个确认blocker；两次真实失败原日志保留，旧runtime/tests.rs及全局allocator/codec/兼容谓词未改。813 Rust输入与备份匹配，前端553输入未改。
+
+下一项接共同Rust客户端的兼容堆叠容量：由服务端完整快照提供可空roster/compatible-UID证据，Windows/Web原样透传，局部物品包同步撤销可用性，保持Core的Entered/Unknown屏障。客户端满包准入、name-tag expiry创建、无专用购买ACK恢复及生产组合仍需继续；用户“继续代码，暂不操作界面”持续有效，实际玩家/移动真机/最终frontend/Candidate与整体goal保持open/active。详见 [Progress68 QA](generated/player-qa/client-core-20260930/npc-gold-trade-capacity/README.md)。
+
+
+## Progress67 · 2026-10-05 UTC · 客户端普通NPC商店组合构建
+
+本批完成Windows开发EXE、生产Core、三renderer、Next与359.68 MiB独立包的有限构建复核；未修改后端、Zone、协议或购买规则，不增加backend/server parity百分比。下一项修普通Gold Trade容量预检与元数据入包不一致，避免失败购买扣款或占用格重复；客户端兼容堆叠准入仍需后续同步。用户“暂不操作界面”持续有效，实际玩家/移动真机/最终Candidate及整体goal仍open/active。详见 [Progress67 QA](generated/player-qa/client-core-20260930/shared-npc-shop-combined-build/README.md)。
+
+
+## Progress66 · 2026-10-04 UTC · Web普通商店共同控件接线
+
+本批仅Web前端共同NPC控件/现有Core dispatcher接线及回归夹具，未改后端、Zone、协议、价格或购买规则，不增加backend/server parity百分比。当前普通Gold/unlimited/panel0目录复用Native Rust controller/painter；最终249项Node与严格TSC限定选定证据通过，Rust812未改未重跑。服务端容量预检/元数据插入一致性、无专用购买ACK恢复与完整NPC商店仍open。
+
+用户“暂不操作界面”持续有效：当前只验收源码/有限检查，未构建或接受本批生产组合、实际JS sink/玩家/移动真机，最终frontend/Candidate未完成，goal active。下一项固定预算组合构建。详见 [Progress66 QA](generated/player-qa/client-core-20260930/web-npc-shop-ui/README.md)。
+
+
+## Progress65 · 2026-10-04 UTC · portable/runtime普通商店共同host
+
+本批仅前端portable/runtime普通NPC共同商店host，未改后端、Zone、协议或购买规则，不增加backend/server parity百分比。复用Native共同controller/painter及原planner；实际19 portable+17 runtime+6能力+20 Native=62次有限测试执行与shared WASM编译检查通过，Source01零测试编译失败保留。
+
+Web唯一控件树接线尚待下一批；服务端容量预检/带元数据插入一致性及无专用购买ACK恢复仍open。用户“暂不操作界面”持续有效，无实际JS sink/界面/玩家/真机或生产组合验收；最终frontend/Candidate未完成，goal active。详见 [Progress65 QA](generated/player-qa/client-core-20260930/portable-npc-shop-ui/README.md)。
+
+
+## Progress64 · 2026-10-04 UTC · Native普通商店共同控件接线
+
+本批仅前端Native普通NPC商店共同controller/painter与数量热键接线，未更改服务端、Zone或协议，也不增加服务端parity百分比。最终Native/portable七组88次有限回归通过；全目录Gold/unlimited/panel0边界、原planner与Core entry屏障保留。服务端容量预检/元数据插入一致性、无专用购买ACK结果恢复仍open。实际玩家/移动真机/生产组合与最终Candidate未验收；goal active。详见 [Progress64 QA](generated/player-qa/client-core-20260930/shared-npc-shop-ui/README.md)。
+
+
+## Progress63 · 2026-10-04 UTC · Web客户端普通买入状态
+
+本批仅客户端持久Core slot、严格Web ABI与最终socket发送边界；未增加购买ACK、改动服务器价格/容量/库存或宣称服务器购买成功。已观察到的owner/service/catalog/inventory变化阻止旧凭据，Flushed/Unknown是本地观察。服务端容量预检/带元数据插入不一致仍排队。
+
+选定Rust51（29新执行/22限定承接、3ignored）及Node237、QA小Core258772B、生产未发布与实际玩家/真机未验收范围详见 [Progress63 QA](generated/player-qa/client-core-20260930/web-npc-gold-buy-attempt/README.md)。共同商店controller/painter/host、完整NPC商店、最终frontend/Candidate及goal保持open/active，用户暂不操作界面的约束持续有效。
+
+
+## Progress62 · 2026-10-04 · 客户端购买准入与来源退役
+
+Native在实际最终start_send前检查完整owner、service、catalog和inventory来源；缺失/null/无效原始NPC对话或完整对话内容变化退役旧目录，正常Response→snapshot→Goods与Response→Goods→snapshot顺序可用。实际Windows生产通道/内存Sink及投影过滤器合计28项通过；原始对话fixture只证明完整Value身份和处理顺序，不替代真实服务器投影/玩家验收。
+
+BuyItem仍只有type/itemIndex/count/panelType四字段；本批无服务端协议、价格、容量或购买结果语义变更。已观察到的来源变化会阻止旧请求；出站future仍占用网关读取循环，尚未读取的入站变化不在此证明范围。Flushed/Unknown不会当作购买成功，也不自动重试。
+
+服务端key-based容量预检与带耐久元数据插入不一致仍待修；无专用Buy ACK的结果恢复、有限库存/resale/Pearl/Sell/Repair、生产组合和实际玩家/真机仍open。源码/有限检查整体详情见 [Progress62 QA](generated/player-qa/client-core-20260930/npc-gold-buy-attempt/README.md)，goal保持active。
+
+## Progress61 · 2026-10-04 · NPC 商品原始来源投影
+
+Gateway NPCGoods/NPCPearlGoods 现附带完整 tooltipSource，保留原始 UserItem 与 ItemInfo/socket carrier，供 Native/Web 共同金币购买规则核验。实际 Gateway 两项纯投影回归通过；客户端 Native64、portable41、Runtime1、Windows投影3 与 Web180、严格 TSC/shared WASM check 通过。协议 BuyItem 的既有四字段、服务端价格规则和购买 ACK 语义未变；本批是加性投影/客户端准入检查，完整购买和服务器 parity 不据此关闭。
+
+待修：key-based 容量预检可预测合并，实际带耐久元数据的插入却禁止合并，两处判断不一致。客户端本批保守要求合法空格；后续须服务端修复和回归。无专用 Buy ACK 的结果恢复、Native 本地拒绝遗留 pending、共同 painter/host、生产组合及实际玩家/真机验收仍 open，goal active。详见 [Progress61 QA](generated/player-qa/client-core-20260930/npc-gold-buy/README.md)。
+
+
+> 2026-09-29 optional transport compression changes no Crystal gameplay or
+> catalog semantics. Certificate-verified TLS delivers482 identical directory
+> envelopes in both modes; only clients declaring serverCatalogGzipV1 receive
+> bounded binary batches. Native legacy dispatch and resume quarantine pass.
+> Deployment and public50/100-player capacity acceptance remain pending.
+> [Transport evidence](generated/player-qa/server-capacity-20260929/catalog-transport.md).
+
 > 2026-09-29 final ordering regression passes845/0 with18 ignored in a complete
 > second serial run. The one first-run failure was an old test expecting direct
 > owner ACK delivery; only its assertion changed. Candidate9ac is deployed with
@@ -158,6 +274,17 @@
 > Additional ordinary functional recheck verifies 40/78 after normal logout;
 > levels 24/19/18, with Warrior N15 and Taoist N10 newly completed.
 > All three pass N5/N6; saves match normal logout. Original two-hour clocks have expired.
+
+## Progress70 · 2026-10-05 UTC · 共同NPC容量两端组合构建
+
+本批将 Progress68/69 的普通金币购买与共同容量证据修复构建进 Windows 开发 EXE、三种 Web renderer、Next 与独立包，并完成独立实际产物复核。未改服务端购买规则、协议或 Zone，不据此增加 backend/server parity 百分比。Core 完整24输入及18 Rust成员逐字节未变，仅限定承接既有实际生产构建；不称新的 Core 构建。
+
+Windows EXE 104599040B 已归档且未启动。GPU/GL/shared WASM 为30547434/21966635/31510131B，gzip 为5902438/5384473/6243678B，原 WASM/gzip/JS预算不变。每对当前及复制后的 Storage/NPC 各7静态导出检查通过；Module 检查不代表 Instance 或 JS sink运行。Next实际严格TSC与13页面通过，双编译manifest绑定 Core9191/Bevy1808。
+
+独立包实际377189647B（359.72 MiB）/7299文件/775目录含根/零链接，原360 MiB上限余297713B。完整 Next与依赖43897文件实际流式哈希及最终成员稳定；553源和完整备份匹配，Native814输入、Core8/Bevy173历史保留。Next实际仅改tsconfig与next-env两项生成元数据；无未授权漂移。
+
+下一项修 name-tag expiry创建及 Web JSON日期精度，再处理无专用购买ACK恢复与完整NPC服务边界。用户“继续代码，暂不操作界面”持续有效，实际登录/战斗/保存重登、UI/JS sink/HTTP、移动真机、最终frontend/Candidate未验收；整体goal active。详见 [Progress70 QA](generated/player-qa/client-core-20260930/shared-npc-gold-capacity-combined-build/README.md)。
+
 > Recovery ledgers retain 0/3/1; no clock or revival allowance has been reset.
 > Earlier 33/78 and paused V1 evidence remain independent; clean human time is unverified.
 > Actual Gateway N4 self-Healing 1/1 and N5 arrival/autosave/rejection 4/4 pass;

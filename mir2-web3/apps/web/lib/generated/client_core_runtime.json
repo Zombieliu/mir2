@@ -1,0 +1,15 @@
+{
+  "abiVersion": 1,
+  "version": "9191e74ce0905e56e549bcf6af40dd0ea9f29eb3aa1e6e6523e6154c04c7ccdd",
+  "sourceSha256": "97ba286fc16dc6068e3626f34b16b96e6a82b033a88cf877e8eafd0f4798fbd9",
+  "files": {
+    "mir2_platform_web.js": {
+      "bytes": 19003,
+      "sha256": "738816edfcdd8d7e7890f716346cd4ddd51df24bbc140492af9915e211a9585f"
+    },
+    "mir2_platform_web_bg.wasm": {
+      "bytes": 258772,
+      "sha256": "2bcf36bd31cb6ae29bee31602ddae24a189502e52922fa8496fbacdf0bf65707"
+    }
+  }
+}

@@ -86,6 +86,18 @@ impl PlayerStats {
     }
 
     pub fn normalized_weight(&self) -> f32 {
+        if let Some((weights, stats)) = self.weights.zip(self.crystal_stats.as_ref()) {
+            return ratio_i64(
+                i64::from(weights.bag),
+                i64::from(
+                    stats
+                        .iter()
+                        .find(|s| s.stat == 16)
+                        .map_or(0, |s| s.value)
+                        .max(0),
+                ),
+            );
+        }
         ratio_i64(i64::from(self.current_weight), i64::from(self.max_weight))
     }
 
@@ -118,6 +130,82 @@ impl PlayerStats {
 #[derive(Debug, Clone, Default, Resource, Serialize, Deserialize)]
 pub struct UiReadModel {
     pub player: PlayerStats,
+}
+
+/// The portable host has one read-model ingress. Complete HUD snapshots own
+/// player data for their generation; strict ABI1 Quest players are compatibility
+/// patches only and cannot erase or supersede that complete authority.
+#[derive(Debug, Default, Resource)]
+pub struct UiReadModelIngress {
+    pub generation: u64,
+    pub revision: u64,
+    pub navigation_revision: u64,
+    complete: bool,
+}
+
+impl UiReadModelIngress {
+    pub fn has_complete_generation(&self, generation: u64) -> bool {
+        self.complete && self.generation == generation
+    }
+    pub fn apply_full(
+        &mut self,
+        model: &mut UiReadModel,
+        generation: u64,
+        revision: u64,
+        player: Option<PlayerStats>,
+    ) -> bool {
+        if generation == 0
+            || generation < self.generation
+            || (generation == self.generation && self.complete && revision <= self.revision)
+        {
+            return false;
+        }
+        if generation != self.generation {
+            self.navigation_revision = 0;
+        }
+        self.generation = generation;
+        self.revision = revision;
+        self.complete = true;
+        model.player = player.unwrap_or_default();
+        true
+    }
+    pub fn apply_legacy_quest(
+        &mut self,
+        model: &mut UiReadModel,
+        generation: u64,
+        revision: u64,
+        player: PlayerStats,
+    ) -> bool {
+        if generation == 0
+            || generation < self.generation
+            || (generation == self.generation && (self.complete || revision <= self.revision))
+        {
+            return false;
+        }
+        if generation > self.generation {
+            model.player = PlayerStats::default();
+            self.navigation_revision = 0;
+        }
+        self.generation = generation;
+        self.revision = revision;
+        self.complete = false;
+        // ABI1 never supplied these fields. Preserve them on partial updates.
+        let saved = &model.player;
+        model.player = PlayerStats {
+            gold: saved.gold,
+            credit: saved.credit,
+            crystal_stats: saved.crystal_stats.clone(),
+            weights: saved.weights,
+            current_weight_known: player.current_weight_known,
+            gender: saved.gender.clone(),
+            hair: saved.hair,
+            wing_effect: saved.wing_effect,
+            guild_name: saved.guild_name.clone(),
+            guild_rank_name: saved.guild_rank_name.clone(),
+            ..player
+        };
+        true
+    }
 }
 
 /// Host-to-UI surface requests that are not part of the persistent world

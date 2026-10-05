@@ -17,6 +17,7 @@ use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine as _;
 use futures_util::{SinkExt, StreamExt};
 use mir2_game_data::crystal_item_by_index;
+use mir2_protocol::catalog_transport::CATALOG_GZIP_CAPABILITY;
 use mir2_protocol::{
     crystal_stat_label, packet_payload_hex, server_packet_display_name,
     server_packet_raw_display_name, ClientAuction, ClientFriend, ClientIntelligentCreature,
@@ -80,6 +81,8 @@ use crate::tcp::chat_broadcast::{
     recv_optional_chat, ChatBroadcastHub, ChatPresence, ChatProtocol,
 };
 use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
+
+mod catalog_transport;
 
 type WebSocketSender = futures_util::stream::SplitSink<WebSocket, Message>;
 type SharedWebSocketSender = Arc<AsyncMutex<WebSocketSender>>;
@@ -839,6 +842,7 @@ fn finish_native_game_shop_pre_execution_receipt(
 struct NativeClientCapabilities {
     native_resume_v1: bool,
     native_game_shop_receipt_v1: bool,
+    server_catalog_gzip_v1: bool,
 }
 
 impl NativeResumeConnectionState {
@@ -5318,6 +5322,7 @@ async fn handle_socket_work(
     let mut authenticated_account_id: Option<String> = None;
     let mut active_identity_session: Option<VerifiedIdentitySession> = None;
     let mut native_game_shop = NativeGameShopConnectionState::default();
+    let mut server_catalog_gzip_v1 = false;
     let mut first_post_resume_identity_check_pending = false;
     let mut last_identity_revocation_check = Instant::now();
     let mut last_identity_database_check = Instant::now();
@@ -5428,6 +5433,7 @@ async fn handle_socket_work(
                                 native_resume.opted_in = capabilities.native_resume_v1;
                                 native_game_shop.opted_in =
                                     capabilities.native_game_shop_receipt_v1;
+                                server_catalog_gzip_v1 = capabilities.server_catalog_gzip_v1;
                                 if !native_game_shop.opted_in {
                                     native_game_shop.pending = None;
                                 }
@@ -6225,6 +6231,7 @@ async fn handle_socket_work(
                         save_queue,
                         route_refresh,
                         responses,
+                        server_catalog_gzip_v1,
                         quest_operation_ack.as_ref(),
                         should_send_snapshot_by_action,
                         low_latency_action,
@@ -6359,6 +6366,7 @@ async fn handle_socket_work(
                     save_queue,
                     route_refresh,
                     responses,
+                    server_catalog_gzip_v1,
                     None,
                     true,
                     false,
@@ -6579,6 +6587,7 @@ async fn handle_socket_work(
                         save_queue,
                         route_refresh,
                         responses,
+                        server_catalog_gzip_v1,
                         None,
                         false,
                         true,
@@ -6685,6 +6694,7 @@ async fn flush_session_updates(
     save_queue: &mut WebSessionSaveQueue,
     route_refresh: &mut WebSessionRouteRefresh,
     responses: Vec<ServerPacket>,
+    server_catalog_gzip_v1: bool,
     quest_operation_ack: Option<&QuestOperationAck>,
     should_send_snapshot_by_action: bool,
     low_latency_action: bool,
@@ -6697,12 +6707,10 @@ async fn flush_session_updates(
 
     {
         let _slow_stage = GatewaySlowStage::start("flush.responses");
-        for response in responses {
-            send_server_packet(sender, &response)
-                .await
-                .map_err(|error| error.to_string())?;
-        }
+        catalog_transport::send_session_packets(sender, &responses, server_catalog_gzip_v1)
+            .await?;
     }
+    drop(responses);
 
     if low_latency_action {
         // Calendar/kill progress and committed player progression are folded
@@ -9213,6 +9221,9 @@ fn validate_native_client_capabilities(
         native_game_shop_receipt_v1: capabilities
             .iter()
             .any(|capability| capability == NATIVE_GAME_SHOP_RECEIPT_PROTOCOL),
+        server_catalog_gzip_v1: capabilities
+            .iter()
+            .any(|capability| capability == CATALOG_GZIP_CAPABILITY),
     })
 }
 
@@ -9652,6 +9663,14 @@ fn npc_goods_item_json(item: &UserItem, rate: f32) -> Value {
             "price".into(),
             json!(((template.price as f32) * rate).floor() as u32),
         );
+        // The displayed unit price cannot reconstruct a multi-item f32 total.
+        let socket_infos: Vec<_> = item.slots.iter().map(|slot| {
+            slot.as_ref().and_then(|socket| crystal_item_by_index(socket.item_index))
+        }).collect();
+        entry.insert("tooltipSource".into(), json!({
+            "info": &template, "realInfo": null, "userItem": item,
+            "socketInfos": socket_infos, "realSocketInfos": [],
+        }));
         entry.insert("grade".into(), json!(template.grade));
         if let Some(description) = template.tooltip.filter(|value| !value.trim().is_empty()) {
             entry.insert("description".into(), json!(description));
@@ -13967,6 +13986,13 @@ mod tests {
         assert_eq!(goods["payload"]["list"][0]["icon"], 398);
         assert_eq!(goods["payload"]["list"][0]["price"], 50);
         assert_eq!(goods["payload"]["list"][0]["item_index"], 658);
+        let source = &goods["payload"]["list"][0]["tooltipSource"];
+        assert_eq!(source["info"]["item_index"], 658);
+        assert_eq!(source["info"]["price"], 40);
+        assert_eq!(source["userItem"]["unique_id"], 43_122_689_u64);
+        assert_eq!(source["userItem"]["item_index"], source["info"]["item_index"]);
+        assert_eq!(source["userItem"]["count"], 1);
+        assert!(source["socketInfos"].is_array());
 
         let mut pearl_item = sample_user_item(43_122_689, 1);
         pearl_item.item_index = 658;
@@ -13994,6 +14020,48 @@ mod tests {
         let craft = super::server_packet_to_event(&ServerPacket::CraftItem { success: false });
         assert_eq!(craft["packet"], "CraftItem");
         assert_eq!(craft["payload"]["success"], false);
+    }
+
+    #[test]
+    fn npc_gold_expiry_gained_item_event_serializes_exact_signed_decimal() {
+        for ticks in [3_155_378_975_999_999_999_i64, 7_767_064_994_427_387_903, i64::MIN, i64::MAX] {
+            let mut item = sample_user_item(77,1);
+            item.expire_info = Some(mir2_protocol::UserItemExpireInfo {expiry_binary_datetime:ticks});
+            let frame = super::server_packet_to_event(&ServerPacket::GainedItem {item:item.clone()});
+            let text = serde_json::to_string(&frame).unwrap();
+            let parsed: Value = serde_json::from_str(&text).unwrap();
+            assert_eq!(parsed["type"],"packet");
+            assert_eq!(parsed["packet"],"GainedItem");
+            assert_eq!(parsed["payload"]["item"]["expire_info"]["expiry_binary_datetime"],ticks.to_string());
+            assert_eq!(serde_json::from_value::<UserItem>(parsed["payload"]["item"].clone()).unwrap(),item);
+        }
+    }
+
+    #[test]
+    fn npc_gold_expiry_world_snapshot_carrier_keeps_exact_date_json() {
+        let mut session = mir2_simulation::SimulationSession::new(Default::default());
+        session.handle_packet(ClientPacket::Login {account_id:"demo".into(),password:"demo".into()});
+        session.handle_packet(ClientPacket::StartGame {character_index:0});
+        for expiry in [3_155_378_975_999_999_999_i64, 7_767_064_994_427_387_903] {
+            let mut snapshot = session.world_snapshot();
+            let row = snapshot.inventory_items.iter_mut()
+                .find(|row| row.tooltip_source.as_ref().is_some_and(|source| source.user_item.is_some()))
+                .expect("actual in-memory starter snapshot supplies owned raw carrier");
+            let slot = row.slot;
+            let unique_id = row.unique_id;
+            row.tooltip_source.as_mut().unwrap().user_item.as_mut().unwrap().expire_info =
+                Some(mir2_protocol::UserItemExpireInfo {expiry_binary_datetime:expiry});
+            // Same typed WorldSnapshot JSON serializer as the production sender;
+            // no socket or live gateway is run by this finite projection test.
+            let text = serde_json::to_string(&json!({"type":"worldSnapshot","payload":snapshot})).unwrap();
+            let frame: Value = serde_json::from_str(&text).unwrap();
+            let raw = frame["payload"]["inventoryItems"].as_array().unwrap().iter()
+                .find(|row| row["slot"] == slot && row["uniqueId"] == unique_id).unwrap();
+            let user = &raw["tooltipSource"]["userItem"];
+            assert_eq!(user["expire_info"]["expiry_binary_datetime"],expiry.to_string());
+            assert_eq!(serde_json::from_value::<UserItem>(user.clone()).unwrap().expire_info.unwrap().expiry_binary_datetime,
+                expiry);
+        }
     }
 
     #[test]

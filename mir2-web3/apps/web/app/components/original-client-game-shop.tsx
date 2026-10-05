@@ -9,6 +9,7 @@ import {
 } from "../../lib/generated/crystal-game-shop-data";
 import { originalItemIconPath } from "./original-client-inventory-utils";
 import type { ItemTooltipGrade } from "./original-client-item-tooltip";
+import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
 import { SpriteButton } from "./original-client-overlays";
 
 type TranslateFn = (
@@ -468,6 +469,8 @@ export type NpcShopGood = {
   /** Optional remaining stock; undefined / <0 renders as unlimited. */
   stock?: number;
   description?: string;
+  /** Legacy resale/other services keep their existing controls. */
+  requiresGoldBuyPlan?: boolean;
   /** Marks an offer the player cannot afford / is not allowed to buy. */
   disabled?: boolean;
 };
@@ -497,6 +500,10 @@ export type NpcShopWindowProps = {
   gold?: number;
   /** Initial tab; defaults to "buy". */
   initialTab?: NpcShopTab;
+  tab?: NpcShopTab;
+  onTabChange?: (tab: NpcShopTab) => void;
+  inputBlocked?: boolean;
+  getInputBlocked?: () => boolean;
   /** Which tabs the merchant supports; defaults to all four. */
   availableTabs?: NpcShopTab[];
 
@@ -509,6 +516,7 @@ export type NpcShopWindowProps = {
 
   onBuy?: (id: number | string, quantity: number) => void;
   onBuyBack?: (id: number | string, quantity: number) => void;
+  onQuoteBuy?: (id: number | string, quantity: number) => NpcGoldBuyQuote | null;
   onSell?: (id: number | string, quantity: number) => void;
   onRepair?: (id: number | string) => void;
   onSpecialRepair?: (id: number | string) => void;
@@ -546,6 +554,7 @@ export function NpcShopWindow({
   npcName,
   gold,
   initialTab = "buy",
+  tab: controlledTab, onTabChange, inputBlocked = false, getInputBlocked,
   availableTabs = ["buy", "sell", "repair", "special"],
   buyItems,
   buyBackItems,
@@ -553,14 +562,16 @@ export function NpcShopWindow({
   repairItems,
   specialRepairItems,
   onBuy,
-  onBuyBack,
+  onBuyBack, onQuoteBuy,
   onSell,
   onRepair,
   onSpecialRepair,
   onClose,
 }: NpcShopWindowProps) {
   const tabs = availableTabs.length ? availableTabs : (["buy"] as NpcShopTab[]);
-  const [tab, setTab] = useState<NpcShopTab>(tabs.includes(initialTab) ? initialTab : tabs[0]);
+  const [localTab, setLocalTab] = useState<NpcShopTab>(tabs.includes(initialTab) ? initialTab : tabs[0]);
+  const tab = controlledTab !== undefined && tabs.includes(controlledTab) ? controlledTab : localTab;
+  const blocked = () => inputBlocked || getInputBlocked?.() === true;
   const [showBuyBack, setShowBuyBack] = useState(false);
   const [selectedId, setSelectedId] = useState<number | string | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -577,17 +588,21 @@ export function NpcShopWindow({
     [rows, selectedId],
   );
 
-  // Clamp quantity to the selected stack (sell) — buy quantity is 1..99.
-  const maxQuantity = tab === "sell" ? Math.max(1, (selected as NpcShopOwnedItem | null)?.count ?? 1) : 99;
+  const sharedBuy = tab === "buy" && !showBuyBack && Boolean(onQuoteBuy)
+    && (selected as NpcShopGood | null)?.requiresGoldBuyPlan !== false;
+  const firstQuote = sharedBuy && selected && !blocked() ? onQuoteBuy?.(selected.id, quantity) : null;
+  const maxQuantity = tab === "sell" ? Math.max(1, (selected as NpcShopOwnedItem | null)?.count ?? 1)
+    : sharedBuy ? Math.max(1, firstQuote?.maxQuantity ?? 1) : 99;
   const effectiveQuantity = Math.max(1, Math.min(maxQuantity, quantity));
   const supportsQuantity = tab === "buy" || tab === "sell";
-
-  const total = selected ? Math.max(0, Math.trunc(selected.price)) * (supportsQuantity ? effectiveQuantity : 1) : 0;
+  const buyQuote = sharedBuy && selected && !blocked() ? onQuoteBuy?.(selected.id, effectiveQuantity) : null;
+  const total = sharedBuy ? buyQuote?.totalGold ?? null
+    : selected ? Math.max(0, Math.trunc(selected.price)) * (supportsQuantity ? effectiveQuantity : 1) : 0;
   const goldKnown = typeof gold === "number";
-  const affordable = !goldKnown || tab !== "buy" || total <= gold!;
+  const affordable = !goldKnown || tab !== "buy" || total !== null && total <= gold!;
 
   function confirm() {
-    if (!selected) return;
+    if (blocked() || !selected || sharedBuy && !buyQuote?.canBuy) return;
     switch (tab) {
       case "buy":
         if (showBuyBack) onBuyBack?.(selected.id, effectiveQuantity);
@@ -625,14 +640,15 @@ export function NpcShopWindow({
         : tab === "repair"
           ? t("ui.shopRepair", [], "Repair")
           : t("ui.shopSpecialRepair", [], "Special Repair");
-  const confirmEnabled = Boolean(actionHandler) && Boolean(selected) && !selected?.disabled && affordable;
+  const confirmEnabled = !inputBlocked && Boolean(actionHandler) && Boolean(selected) && !selected?.disabled && affordable
+    && (!sharedBuy || buyQuote?.canBuy === true);
 
   return (
-    <section className="npc-shop-window" aria-label={t("ui.shopTitle", [], "Shop")} data-shop-tab={tab} style={shopStyle.window}>
+    <section className="npc-shop-window" aria-label={t("ui.shopTitle", [], "Shop")} data-shop-tab={tab} aria-disabled={inputBlocked} inert={inputBlocked || undefined} style={shopStyle.window}>
       <div style={shopStyle.header}>
         <strong style={shopStyle.title}>{npcName?.trim() || t("ui.shopTitle", [], "Shop")}</strong>
         <div className="npc-shop-close" style={shopStyle.close}>
-          <SpriteButton sprite={ORIGINAL_UI.inventory.closeButton} label={t("ui.close", [], "Close")} onClick={onClose} />
+          <SpriteButton sprite={ORIGINAL_UI.inventory.closeButton} label={t("ui.close", [], "Close")} onClick={() => { if (!blocked()) onClose(); }} />
         </div>
       </div>
 
@@ -646,7 +662,8 @@ export function NpcShopWindow({
             style={{ ...shopStyle.tab, ...(entry === tab ? shopStyle.tabOn : null) }}
             aria-pressed={entry === tab}
             onClick={() => {
-              setTab(entry);
+              if (blocked()) return;
+              if (controlledTab !== undefined) onTabChange?.(entry); else setLocalTab(entry);
               setSelectedId(null);
               setQuantity(1);
               if (entry !== "buy") setShowBuyBack(false);
@@ -663,6 +680,7 @@ export function NpcShopWindow({
             type="button"
             style={{ ...shopStyle.subTab, ...(!showBuyBack ? shopStyle.subTabOn : null) }}
             onClick={() => {
+              if (blocked()) return;
               setShowBuyBack(false);
               setSelectedId(null);
             }}
@@ -673,6 +691,7 @@ export function NpcShopWindow({
             type="button"
             style={{ ...shopStyle.subTab, ...(showBuyBack ? shopStyle.subTabOn : null) }}
             onClick={() => {
+              if (blocked()) return;
               setShowBuyBack(true);
               setSelectedId(null);
             }}
@@ -712,12 +731,14 @@ export function NpcShopWindow({
                   ...(rowDisabled ? shopStyle.rowDisabled : null),
                 }}
                 aria-pressed={isSelected}
-                disabled={rowDisabled}
+                disabled={inputBlocked || rowDisabled}
                 onClick={() => {
+                  if (blocked()) return;
                   setSelectedId(row.id);
                   setQuantity(1);
                 }}
                 onDoubleClick={() => {
+                  if (blocked()) return;
                   setSelectedId(row.id);
                   if (confirmEnabledFor(row, tab, showBuyBack, gold)) {
                     if (tab === "buy") (showBuyBack ? onBuyBack : onBuy)?.(row.id, 1);
@@ -773,7 +794,7 @@ export function NpcShopWindow({
               style={shopStyle.stepButton}
               disabled={effectiveQuantity <= 1}
               aria-label={t("ui.splitDecrease", [], "Less")}
-              onClick={() => setQuantity((current) => Math.max(1, Math.min(maxQuantity, current) - 1))}
+              onClick={() => { if (!blocked()) setQuantity((current) => Math.max(1, Math.min(maxQuantity, current) - 1)); }}
             >
               −
             </button>
@@ -785,6 +806,7 @@ export function NpcShopWindow({
               aria-label={t("ui.shopQuantity", [], "Quantity")}
               style={shopStyle.quantityInput}
               onChange={(event) => {
+                if (blocked()) return;
                 const parsed = Number.parseInt(event.target.value, 10);
                 setQuantity(Number.isFinite(parsed) ? parsed : 1);
               }}
@@ -794,7 +816,7 @@ export function NpcShopWindow({
               style={shopStyle.stepButton}
               disabled={effectiveQuantity >= maxQuantity}
               aria-label={t("ui.splitIncrease", [], "More")}
-              onClick={() => setQuantity((current) => Math.min(maxQuantity, Math.max(1, current) + 1))}
+              onClick={() => { if (!blocked()) setQuantity((current) => Math.min(maxQuantity, Math.max(1, current) + 1)); }}
             >
               +
             </button>
@@ -817,7 +839,7 @@ export function NpcShopWindow({
 
       <div style={shopStyle.footer}>
         <span style={shopStyle.footerLabel}>{t("ui.shopTotal", [], "Total")}</span>
-        <span style={{ ...shopStyle.footerValue, ...(!affordable ? shopStyle.rowPriceBad : null) }}>{formatGold(total)}</span>
+        <span style={{ ...shopStyle.footerValue, ...(!affordable ? shopStyle.rowPriceBad : null) }}>{total === null ? "—" : formatGold(total)}</span>
         <span style={shopStyle.footerSpacer} />
         <span style={shopStyle.footerLabel}>{t("client.Gold", [], "Gold")}</span>
         <span style={shopStyle.footerValue}>{goldKnown ? formatGold(gold!) : "—"}</span>

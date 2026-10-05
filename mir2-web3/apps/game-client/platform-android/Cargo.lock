@@ -2987,6 +2987,7 @@ name = "mir2-ui-core"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "mir2-client-core",
  "serde",
 ]
 

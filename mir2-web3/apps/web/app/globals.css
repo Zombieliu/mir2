@@ -148,6 +148,103 @@ html[data-display-mode="standalone"] .mir-client-page {
   pointer-events: none;
 }
 
+/* WebGL2 prototype: the primary GL surface is a fixed stage child for its
+   entire lifetime, laid out for UI while the DOM scene owns world painting. */
+#mir2-web3-canvas.bevy-shared-ui-canvas {
+  z-index: 9;
+  visibility: hidden;
+  pointer-events: none;
+  touch-action: none;
+}
+
+#mir2-web3-canvas.bevy-shared-ui-canvas.shared-quest-ui-visible {
+  visibility: visible;
+}
+
+/* A second Window of the same Bevy App keeps shared UI above DOM world
+   lighting/weather/nameplates without lifting the world renderer over HUD. */
+#mir2-quest-ui-canvas {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9;
+  background: transparent;
+  visibility: hidden;
+  touch-action: none;
+}
+
+#mir2-quest-ui-canvas.shared-quest-ui-visible {
+  visibility: visible;
+}
+
+.hud-bar-draw-plan {
+  position: absolute;
+  z-index: 9;
+  visibility: hidden;
+  pointer-events: none;
+  image-rendering: pixelated;
+  background: transparent;
+}
+
+.client-stage-frame[data-experience-bar-owner="canvas2d"] .hud-bar-draw-plan-experience,
+.client-stage-frame[data-weight-bar-owner="canvas2d"] .hud-bar-draw-plan-weight {
+  visibility: visible;
+}
+
+/* A ready HUD image painter sits between retained HUD artwork and its contents.
+   The UI canvas stays non-interactive until Bag/Quest owns input. */
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .game-ui-scene,
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .main-hud-shell {
+  z-index: auto;
+}
+
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .main-hud > :not(.hud-base):not(.hud-cap) {
+  z-index: 10;
+}
+
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .hud-base,
+:is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .hud-cap {
+  z-index: 8;
+}
+
+.client-stage-frame[data-hp-orb-owner="bevy"] .hud-orb-fill.hp {
+  visibility: hidden;
+}
+
+.client-stage-frame[data-mp-orb-owner="bevy"] .hud-orb-fill.mp {
+  visibility: hidden;
+}
+
+/* Touch quest sheets use the full readable height, including the desktop HUD
+   area. Keep their footer and close controls above the retained HUD. */
+[data-shared-touch-quest-open="true"] #mir2-quest-ui-canvas {
+  z-index: 40;
+}
+
+[data-shared-touch-quest-open="true"] #mir2-web3-canvas.bevy-shared-ui-canvas {
+  z-index: 40;
+}
+
+/* The active touch bag owns this canvas above the mobile control deck. */
+[data-shared-touch-bag-open="true"] #mir2-quest-ui-canvas {
+  z-index: 90;
+}
+
+[data-shared-touch-bag-open="true"] #mir2-web3-canvas.bevy-shared-ui-canvas {
+  z-index: 90;
+}
+
+[data-shared-touch-bag-open="true"] .mir-mobile-controls {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="true"]) .mir-pwa-shell {
+  visibility: hidden;
+}
+
 .webgl2-entity-atlas-canvas {
   position: absolute;
   inset: 0;
@@ -4629,10 +4726,14 @@ button.character-spell-value:hover {
 .hud-exp-bar {
   left: 9px;
   top: 143px;
+  width: 1004px;
   height: 8px;
-  overflow: hidden;
   pointer-events: none;
 }
+
+.hud-exp-bar-clip { height: 8px; overflow: hidden; }
+.client-stage-frame[data-experience-bar-owner="bevy"] .hud-exp-bar-fill,
+.client-stage-frame[data-experience-bar-owner="canvas2d"] .hud-exp-bar-fill { visibility: hidden; }
 
 .hud-exp-bar-fill {
   display: block;
@@ -4660,6 +4761,8 @@ button.character-spell-value:hover {
   height: 12px;
   max-width: none;
 }
+.client-stage-frame[data-weight-bar-owner="bevy"] .hud-weight-bar-fill,
+.client-stage-frame[data-weight-bar-owner="canvas2d"] .hud-weight-bar-fill { visibility: hidden; }
 
 .hud-cap { display: none; bottom: 0; }
 .hud-cap.left { left: -67px; }
@@ -4676,6 +4779,9 @@ button.character-spell-value:hover {
 
 .hud-orb-fill.hp {
   left: 0;
+  /* Native Crystal moves the clipped destination down as HP drains. Keep the
+     full 80px child image at its fixed layout origin for host measurement. */
+  transform: translateY(calc(80px - 100%));
 }
 
 .hud-orb-fill.hp-only {
@@ -5142,6 +5248,14 @@ button.character-spell-value:hover {
   overscroll-behavior: none;
 }
 
+/* Short landscape stages put the centered HUD Quest button under the lower
+   left action. Keep both touch actions reachable by stacking Approach above Pick. */
+@media (orientation: landscape) and (max-height: 430px) {
+  .mir-client-page[data-layout-profile="touch"][data-input-profile="touch"] .mir-mobile-action.approach {
+    bottom: calc(var(--mir-mobile-pick-bottom, 48px) + var(--mir-mobile-action-size, 44px) + 8px);
+  }
+}
+
 /* Experimental wide-mobile shell: keep the captured 4:3 HUD cluster centered
    while edge-anchored controls (mini-map, status, etc.) can use the expanded
    virtual stage. The flag is opt-in and does not alter the default client. */
@@ -5151,6 +5265,12 @@ button.character-spell-value:hover {
   .mir-client-page[data-wide-mobile="true"] .game-ui-scene .chat-filter-bar,
   .mir-client-page[data-wide-mobile="true"] .game-ui-scene .belt-dialog.horizontal {
     transform: translateX(var(--mir-wide-hud-offset-x, 0px));
+  }
+
+  /* transform would isolate the HUD labels behind the shared image layer. */
+  .mir-client-page[data-wide-mobile="true"] :is(.client-stage-frame[data-hp-orb-owner="bevy"], .client-stage-frame[data-mp-orb-owner="bevy"], .client-stage-frame[data-experience-bar-owner="bevy"], .client-stage-frame[data-weight-bar-owner="bevy"], .client-stage-frame[data-experience-bar-owner="canvas2d"], .client-stage-frame[data-weight-bar-owner="canvas2d"]) .main-hud-shell {
+    left: var(--mir-wide-hud-offset-x, 0px);
+    transform: none;
   }
 }
 

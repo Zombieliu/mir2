@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { AssetCacheRegistrar } from "./components/asset-cache-registrar";
 import { ChunkReloadGuard } from "./lib/chunk-reload-guard";
-import { PwaGameShell } from "./components/pwa-game-shell";
+import { PwaGameShellCapture } from "./components/pwa-game-shell";
 import "./globals.css";
 import "./pwa-game-shell.css";
 
@@ -48,8 +48,7 @@ export default function RootLayout({
       <body translate="no" className="notranslate" suppressHydrationWarning>
         <ChunkReloadGuard />
         <AssetCacheRegistrar />
-        <PwaGameShell />
-        {children}
+        <PwaGameShellCapture>{children}</PwaGameShellCapture>
       </body>
     </html>
   );

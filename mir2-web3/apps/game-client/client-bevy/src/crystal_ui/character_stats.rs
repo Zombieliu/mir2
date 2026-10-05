@@ -6,6 +6,103 @@ pub struct Weights {
     pub wear: Option<i64>,
     pub hand: Option<i64>,
 }
+pub fn class_image_index(class_name: Option<&str>) -> Option<u16> {
+    let class_name = class_name?.trim();
+    ["warrior", "wizard", "taoist", "assassin", "archer"]
+        .iter()
+        .position(|name| class_name.eq_ignore_ascii_case(name))
+        .map(|index| 100 + index as u16)
+}
+pub fn guild_label(player: &PlayerStats) -> String {
+    [
+        player.guild_name.as_deref(),
+        player.guild_rank_name.as_deref(),
+    ]
+    .into_iter()
+    .flatten()
+    .map(str::trim)
+    .filter(|s| !s.is_empty())
+    .collect::<Vec<_>>()
+    .join(" ")
+}
+pub fn spawn_character_header(
+    parent: &mut bevy::prelude::ChildSpawnerCommands,
+    server: Option<&bevy::prelude::AssetServer>,
+    player: &PlayerStats,
+    font: Option<&bevy::prelude::Handle<bevy::prelude::Font>>,
+) {
+    use super::spec::CrystalRect;
+    use bevy::prelude::*;
+    for (text, rect, size) in [
+        (
+            player.name.clone().unwrap_or_default(),
+            CrystalRect::new(0., 12., 264., 20.),
+            12.,
+        ),
+        (
+            guild_label(player),
+            CrystalRect::new(0., 33., 264., 30.),
+            10.,
+        ),
+    ] {
+        let mut node = super::shared_hud::absolute_node(rect);
+        node.align_items = AlignItems::Center;
+        node.justify_content = JustifyContent::Center;
+        node.overflow = Overflow::clip();
+        parent
+            .spawn((node, BackgroundColor(Color::NONE)))
+            .with_children(|p| {
+                p.spawn((
+                    Text::new(text),
+                    super::shared_hud::hud_font(font, size),
+                    TextColor(Color::srgb(0.95, 0.92, 0.82)),
+                    TextLayout::new(Justify::Center, bevy::text::LineBreak::NoWrap),
+                ));
+            });
+    }
+    if let Some((server, index)) = server.zip(class_image_index(player.class_name.as_deref())) {
+        parent.spawn((
+            super::shared_hud::absolute_node(CrystalRect::new(15., 33., 32., 32.)),
+            bevy::ui::FocusPolicy::Pass,
+            ImageNode {
+                image: server.load(format!("original-ui/Prguse/{index}.png")),
+                image_mode: bevy::ui::widget::NodeImageMode::Stretch,
+                ..Default::default()
+            },
+        ));
+    }
+}
+pub fn authoritative_lines(player: &PlayerStats, state_page: bool) -> Vec<(String, f32)> {
+    let weights = player
+        .weights
+        .map(|w| Weights {
+            bag: Some(i64::from(w.bag)),
+            wear: Some(i64::from(w.wear)),
+            hand: Some(i64::from(w.hand)),
+        })
+        .unwrap_or_default();
+    lines(player, state_page, weights)
+}
+
+/// The native overlay and the portable sheet call this exact row painter.
+pub fn spawn_authoritative_rows(
+    parent: &mut bevy::prelude::ChildSpawnerCommands,
+    player: &PlayerStats,
+    state_page: bool,
+    font: Option<&bevy::prelude::Handle<bevy::prelude::Font>>,
+) {
+    use bevy::prelude::*;
+    for (text, top) in authoritative_lines(player, state_page) {
+        parent.spawn((
+            super::shared_hud::absolute_node(super::spec::CrystalRect::new(134., top, 105., 16.)),
+            bevy::ui::FocusPolicy::Pass,
+            Text::new(text),
+            super::shared_hud::hud_font(font, 32. / 3.),
+            TextColor(Color::srgb(0.95, 0.92, 0.82)),
+            TextLayout::new(Justify::Left, bevy::text::LineBreak::NoWrap),
+        ));
+    }
+}
 pub fn lines(player: &PlayerStats, state_page: bool, weights: Weights) -> Vec<(String, f32)> {
     let Some(stats) = player.crystal_stats.as_ref() else {
         return vec![];

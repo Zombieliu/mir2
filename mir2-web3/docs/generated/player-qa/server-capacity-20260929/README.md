@@ -551,3 +551,14 @@ passed stages are distinct. Sixteen focused checks pass, including preservation
 of the standard mixed-workload gates and stopping on a later transport failure.
 The ordinary standard profile still requires10–25% fighters and real positive
 damage; this component run cannot complete the user's stable-playability goal.
+
+The subsequent movement run `1790663876703-ab6f6d9c` admitted14 actors before
+its AOI guard stopped it. Cross-connection stale owner confirmations explain
+at least one invalid expected-visible pair; all failed verdicts remain. Public
+TCP send queues/retransmissions correlate with multi-second bootstrap delays.
+The next candidate adds explicit bounded lossless catalog compression, retaining
+old-client Text compatibility. Local TLS comparison reduces the same482
+catalog envelopes from563,202 to71,376 bytes. Shared/native/Node/Gateway focused
+tests pass; clean paired packages, public revalidation and stable50/100 remain
+open. The approximate twelve-hour window ended without the requested stable
+playability goal. [Detailed evidence](catalog-transport.md).

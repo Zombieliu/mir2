@@ -25,6 +25,7 @@ use mir2_client_bevy::pending_operations::{InventoryOperationAck, QuestOperation
 use mir2_client_bevy::skill_model::MAX_LEARNED_SKILLS;
 use mir2_client_bevy::social::SocialModel;
 use mir2_game_data::{crystal_item_manifest, crystal_real_item_for_player, CrystalItemTemplate};
+use mir2_protocol::catalog_transport::CATALOG_GZIP_CAPABILITY;
 use mir2_protocol::MirClass;
 use serde::Deserialize;
 use serde_json::{json, Value};
@@ -41,6 +42,9 @@ use crate::session_config::NativeReconnectConfig;
 
 #[path = "trade_projection.rs"]
 mod trade_projection;
+
+#[path = "gateway_catalog_transport.rs"]
+mod catalog_transport;
 
 /// The gateway WebSocket endpoint for the local development gateway.
 pub const LOCAL_GATEWAY_WS_URL: &str = "ws://127.0.0.1:7110/ws";
@@ -158,6 +162,42 @@ where
     }
 }
 
+fn process_connected_server_frame<T, A, F>(
+    frame: &Message,
+    gate: &mut GameShopReceiptGate,
+    mut apply: A,
+    mut push_data_reset: F,
+) -> Result<Vec<T>, String>
+where
+    A: FnMut(&str, &mut GameShopReceiptGate) -> Result<T, String>,
+    F: FnMut() -> bool,
+{
+    let texts: Vec<std::borrow::Cow<'_, str>> = match frame {
+        Message::Text(text) => vec![std::borrow::Cow::Borrowed(text.as_ref())],
+        Message::Binary(bytes) => match catalog_transport::decode_validated_catalog_batch(bytes) {
+            Ok(texts) => texts.into_iter().map(std::borrow::Cow::Owned).collect(),
+            Err(error) => {
+                let _ = terminate_written_game_shop_unknown(gate, &mut push_data_reset);
+                return Err(error);
+            }
+        },
+        _ => return Err("unsupported catalog transport frame".to_owned()),
+    };
+    // The decoder validates every envelope before this first callback. Each
+    // callback is the exact legacy text path, including resume quarantine and
+    // transaction boundaries; batching never grants an early world entry.
+    let mut results = Vec::with_capacity(texts.len());
+    for text in texts {
+        results.push(process_connected_text_frame(
+            &text,
+            gate,
+            |text, gate| apply(text, gate),
+            &mut push_data_reset,
+        )?);
+    }
+    Ok(results)
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum ConnectedSocketEnd {
     Disconnected,
@@ -211,6 +251,703 @@ pub enum GatewayCommand {
     Wire(NativeOutboundCommand),
     Player(PlayerIntent),
     Shutdown,
+    Owned(Box<OwnedGatewayCommand>),
+}
+
+
+/// Immutable producer provenance. Unknown map is None; map zero is a real map.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) struct NativeCommandStamp {
+    run: u64,
+    connection: u64,
+    procedure: u64,
+    owner_epoch: u64,
+    scene_epoch: u64,
+    cancellation: u64,
+    actor: Option<u32>,
+    map: Option<i32>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum NativeCommandScope { Procedure, Personal, World, Leave, Shutdown }
+
+/// Exhaustive local classification. This does not change any wire field.
+pub(crate) fn native_command_scope(command: &GatewayCommand) -> NativeCommandScope {
+    use NativeCommandScope as S;
+    use NativeOutboundCommand as C;
+    match command {
+        GatewayCommand::Owned(owned) => native_command_scope(&owned.command),
+        GatewayCommand::Connect => S::Procedure,
+        GatewayCommand::Shutdown => S::Shutdown,
+        GatewayCommand::Player(_) => S::World,
+        GatewayCommand::Wire(wire) => match wire {
+            C::ClientVersion | C::ClientCapabilities { .. } | C::ResumeSession { .. }
+            | C::Login { .. } | C::ChangePassword { .. } | C::NewAccount { .. }
+            | C::NewCharacter { .. } | C::DeleteCharacter { .. } | C::StartGame { .. } => S::Procedure,
+            C::LogOut | C::Disconnect => S::Leave,
+            C::Walk { .. } | C::Run { .. } | C::Turn { .. } | C::Attack { .. }
+            | C::AttackDirection { .. } | C::RangeAttack { .. } | C::Magic { .. }
+            | C::SpellToggle { .. } | C::Harvest { .. } | C::PickUp { .. } | C::PickUpTile
+            | C::Interact { .. } | C::SelectNpcDialog { .. } | C::AcceptQuest { .. }
+            | C::FinishQuest { .. } | C::FishingCast { .. } | C::FishingChangeAutocast { .. }
+            | C::IntelligentCreaturePickup { .. } | C::Observe { .. } | C::RequestMapInfo { .. }
+            | C::SearchMap { .. } | C::TeleportToNpc { .. } | C::TownRevive
+            | C::DropItem { .. } | C::BuyItem { .. } | C::SellItem { .. } | C::RepairItem { .. }
+            | C::SpecialRepairItem { .. } | C::StoreItem { .. } | C::TakeBackItem { .. }
+            | C::UnlockStorage { .. } | C::SetStoragePassword { .. } | C::RemoveStoragePassword { .. }
+            | C::Chat { .. } | C::GuildStorageGoldChange { .. } | C::GuildStorageItemChange { .. }
+            | C::TradeRequest | C::TradeReply { .. } | C::TradeGold { .. } | C::DepositTradeItem { .. }
+            | C::RetrieveTradeItem { .. } | C::TradeConfirm { .. } | C::TradeCancel => S::World,
+            C::Inspect { ranking: false, .. } => S::World,
+            C::Inspect { ranking: true, .. }
+            | C::AllowMentor | C::AddMentor { .. } | C::CancelMentor | C::MentorReply { .. }
+            | C::ChangeMarriage | C::MarriageRequest | C::MarriageReply { .. }
+            | C::DivorceRequest | C::DivorceReply { .. } | C::EquipSlotItem { .. } | C::RemoveSlotItem { .. }
+            | C::RequestIntelligentCreatureUpdates { .. } | C::UpdateIntelligentCreature { .. }
+            | C::RefreshFriends | C::RemoveFriend { .. } | C::AddMemo { .. } | C::AddFriend { .. }
+            | C::GetRanking { .. } | C::AbandonQuest { .. } | C::ShareQuest { .. }
+            | C::ChangeHero { .. } | C::SetHeroBehaviour { .. } | C::SetAutoPotValue { .. }
+            | C::SetAutoPotItem { .. } | C::TransferHeroItem { .. } | C::TakeBackHeroItem { .. }
+            | C::UseItem { .. } | C::EquipItem { .. } | C::RemoveItem { .. } | C::DeleteItem { .. }
+            | C::MoveItem { .. } | C::MergeItem { .. } | C::SplitItem { .. }
+            | C::ChangeAMode { .. } | C::ChangePMode { .. } | C::MagicKey { .. } | C::GameShopBuy { .. }
+            | C::ReadMail { .. } | C::LockMail { .. } | C::CollectParcel { .. } | C::DeleteMail { .. }
+            | C::MailCost { .. } | C::MailLockedItem { .. } | C::SendMail { .. } | C::SwitchGroup { .. }
+            | C::AddMember { .. } | C::DelMember { .. } | C::GroupInvite { .. } | C::GuildBuffUpdate { .. }
+            | C::RequestGuildInfo { .. } | C::EditGuildMember { .. } | C::EditGuildNotice { .. }
+            | C::GuildInvite { .. } => S::Personal,
+        },
+    }
+}
+
+impl NativeCommandStamp {
+    #[cfg(test)]
+    pub(crate) fn test_mail_epoch(self)->mir2_client_bevy::mail_service::MailServiceStreamEpoch{mir2_client_bevy::mail_service::MailServiceStreamEpoch{run:self.run,connection:self.connection}}
+    pub(crate) fn same_owner(self,other:Self)->bool {self.run==other.run&&self.connection==other.connection&&self.owner_epoch==other.owner_epoch&&self.actor==other.actor}
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct OwnedGatewayCommand {
+    command: GatewayCommand,
+    stamp: NativeCommandStamp,
+    sequence: u64,
+    commit_revision:u64,
+    fence: NativeCommandFence,
+    mail_quote:Option<Arc<NativeMailQuoteProof>>,
+    mail_send:Option<Arc<NativeMailSendProof>>,
+    npc_gold_buy:Option<Arc<NativeNpcGoldBuyProof>>,
+    npc_gold_buy_required:bool,
+}
+
+#[derive(Clone)]
+struct NativeMailSendPublisher(Arc<dyn Fn(mir2_client_bevy::mail_service::MailServiceInboxMessage)->bool+Send+Sync>);
+impl std::fmt::Debug for NativeMailSendPublisher {fn fmt(&self,f:&mut std::fmt::Formatter<'_>)->std::fmt::Result{f.write_str("NativeMailSendPublisher")}}
+impl NativeMailSendPublisher {fn native()->Self{Self(Arc::new(|message|match message{
+    mir2_client_bevy::mail_service::MailServiceInboxMessage::SendReceipt(receipt)=>mir2_bevy_runtime::native_ingest::push_native_mail_send_receipt(receipt),
+    mir2_client_bevy::mail_service::MailServiceInboxMessage::SendAcknowledgement(ack)=>mir2_bevy_runtime::native_ingest::push_native_mail_send_acknowledgement(ack),_=>false}))}}
+#[derive(Debug)]
+struct NativeMailSendProof {
+    ticket:mir2_client_bevy::mail_service::MailSendTicket,publisher:NativeMailSendPublisher,
+    fence:std::sync::Weak<Mutex<NativeCommandFenceState>>,stamp:NativeCommandStamp,
+    state:std::sync::atomic::AtomicU8,write_reported:std::sync::atomic::AtomicBool,
+}
+impl NativeMailSendProof {
+    fn mark_entered(&self)->bool{self.state.compare_exchange(1,5,std::sync::atomic::Ordering::SeqCst,std::sync::atomic::Ordering::SeqCst).is_ok()}
+    fn deliver(&self,message:mir2_client_bevy::mail_service::MailServiceInboxMessage)->bool {
+        let accepted=(self.publisher.0)(message);
+        if !accepted{if let Some(fence)=self.fence.upgrade(){if let Ok(mut state)=fence.lock(){state.mail_quote_delivery_failed=Some(self.ticket.epoch());}}}accepted
+    }
+    fn publish(&self,outcome:mir2_client_bevy::mail_service::MailSendOutcome)->bool {
+        use mir2_client_bevy::mail_service::{MailSendOutcome,MailSendReceipt,MailServiceInboxMessage};use std::sync::atomic::Ordering;
+        match outcome {
+            MailSendOutcome::DefinitelyUnsent=>{if self.state.compare_exchange(1,3,Ordering::SeqCst,Ordering::SeqCst).is_err(){return true;}}
+            MailSendOutcome::Entered=>{if self.state.compare_exchange(5,2,Ordering::SeqCst,Ordering::SeqCst).is_err(){return true;}}
+            MailSendOutcome::Flushed|MailSendOutcome::Unknown=>{if self.state.load(Ordering::SeqCst)!=2||self.write_reported.swap(true,Ordering::SeqCst){return true;}}
+        }
+        self.deliver(MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket:self.ticket,outcome}))
+    }
+}
+impl Drop for NativeMailSendProof {
+    fn drop(&mut self){
+        if self.state.load(std::sync::atomic::Ordering::SeqCst)!=1{return;}
+        if let Some(fence)=self.fence.upgrade(){if let Ok(mut state)=fence.lock(){if state.outstanding.get(&self.ticket.sequence)==Some(&self.stamp){state.outstanding.remove(&self.ticket.sequence);state.waiters.remove(&self.ticket.sequence);}}}
+        self.publish(mir2_client_bevy::mail_service::MailSendOutcome::DefinitelyUnsent);
+    }
+}
+
+#[derive(Clone)]
+struct NativeMailQuotePublisher(Arc<dyn Fn(mir2_client_bevy::mail_service::MailQuoteReceipt)->bool+Send+Sync>);
+impl std::fmt::Debug for NativeMailQuotePublisher {fn fmt(&self,f:&mut std::fmt::Formatter<'_>)->std::fmt::Result{f.write_str("NativeMailQuotePublisher")}}
+impl NativeMailQuotePublisher {
+    fn native()->Self{Self(Arc::new(mir2_bevy_runtime::native_ingest::push_native_mail_quote_receipt))}
+}
+#[derive(Debug)]
+struct NativeMailQuoteProof {
+    ticket:mir2_client_bevy::mail_service::MailQuoteTicket,publisher:NativeMailQuotePublisher,
+    fence:std::sync::Weak<Mutex<NativeCommandFenceState>>,stamp:NativeCommandStamp,
+    // 1=published, 2=entered receipt dispatched, 3=unsent,
+    // 4=failed admission, 5=start_send entered (receipt not yet dispatched).
+    state:std::sync::atomic::AtomicU8,
+}
+impl NativeMailQuoteProof {
+    fn mark_entered(&self)->bool{
+        // Only local atomic state changes under the fence lock. A retire or
+        // final-envelope drop cannot downgrade entry before its callback runs.
+        self.state.compare_exchange(1,5,std::sync::atomic::Ordering::SeqCst,std::sync::atomic::Ordering::SeqCst).is_ok()
+    }
+    fn publish(&self,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome)->bool{
+        use std::sync::atomic::Ordering;
+        let (previous,next)=match outcome{mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent=>(1,3),mir2_client_bevy::mail_service::MailQuoteOutcome::Entered{..}=>(5,2)};
+        if self.state.compare_exchange(previous,next,Ordering::SeqCst,Ordering::SeqCst).is_err(){return true;}
+        let accepted=(self.publisher.0)(mir2_client_bevy::mail_service::MailQuoteReceipt{ticket:self.ticket,outcome});
+        if !accepted{if let Some(fence)=self.fence.upgrade(){if let Ok(mut state)=fence.lock(){state.mail_quote_delivery_failed=Some(self.ticket.epoch());}}}
+        accepted
+    }
+}
+impl Drop for NativeMailQuoteProof {
+    fn drop(&mut self){
+        // Last published-envelope disappearance (including receiver/channel
+        // closure) is exact unsent. Entered proofs never become unsent.
+        if self.state.load(std::sync::atomic::Ordering::SeqCst)!=1{return;}
+        if let Some(fence)=self.fence.upgrade(){if let Ok(mut state)=fence.lock(){
+            if state.outstanding.get(&self.ticket.sequence)==Some(&self.stamp){state.outstanding.remove(&self.ticket.sequence);state.waiters.remove(&self.ticket.sequence);}
+        }}
+        self.publish(mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent);
+    }
+}
+impl OwnedGatewayCommand {
+    fn publish_mail_quote(&self,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome)->bool {
+        let Some(quote)=self.mail_quote.as_ref()else{return true;};
+        // Never called under the ownership mutex; the publisher can lock the
+        // independent inbound queue or synchronously inspect this fence.
+        quote.publish(outcome)
+    }
+}
+#[cfg(test)]
+pub(crate) fn is_test_mail_quote(owned:&OwnedGatewayCommand)->bool{owned.mail_quote.is_some()}
+#[cfg(test)]
+pub(crate) fn is_test_mail_send(owned:&OwnedGatewayCommand)->bool{owned.mail_send.is_some()}
+#[cfg(test)]
+pub(crate) fn test_owned_wire(owned:&OwnedGatewayCommand)->Option<NativeOutboundCommand>{match &owned.command{GatewayCommand::Wire(command)=>Some(command.clone()),_=>None}}
+
+impl GatewayCommand {
+    fn payload(&self) -> &GatewayCommand {
+        match self { Self::Owned(owned) => &owned.command, raw => raw }
+    }
+    fn into_parts(self) -> (GatewayCommand, Option<OwnedGatewayCommand>) {
+        match self {
+            Self::Owned(owned) => (owned.command.clone(), Some(*owned)),
+            raw => (raw, None),
+        }
+    }
+}
+
+/// Local-only terminal identity; no credential, packet or server ACK field.
+pub(crate) fn native_transport_key(command:&NativeOutboundCommand)->Option<String> {
+    use NativeOutboundCommand as C;
+    match command {
+        C::Login {..}=>Some("control:login".into()),C::StartGame {..}=>Some("control:start_game".into()),
+        C::NewAccount {..}=>Some("control:new_account".into()),C::ChangePassword {..}=>Some("control:change_password".into()),
+        C::NewCharacter {..}=>Some("control:new_character".into()),C::DeleteCharacter {..}=>Some("control:delete_character".into()),
+        C::GameShopBuy {request_id,..}=>Some(format!("shop:{request_id}")),
+        C::StoreItem {request_id,..}|C::TakeBackItem {request_id,..}=>Some(format!("storage:{request_id}")),
+        C::LogOut=>Some("control:logout".into()),C::Disconnect=>Some("control:disconnect".into()),
+        _=>None,
+    }
+}
+
+#[derive(Debug)]
+struct NativeCommandFenceState {
+    current: NativeCommandStamp,
+    connected: bool,
+    connection_entry_revision:Option<u64>,
+    retired: bool,
+    next_sequence: Option<u64>,
+    outstanding: HashMap<u64, NativeCommandStamp>,
+    entry_requested: bool,
+    entry_authorized: bool,
+    terminals: VecDeque<(NativeCommandStamp,u64,NativeOutboundCommand)>,
+    waiters: HashMap<u64,std::task::Waker>,
+    mail_quote_delivery_failed:Option<mir2_client_bevy::mail_service::MailServiceStreamEpoch>,
+    mail_send_flight:Option<Arc<NativeMailSendProof>>,
+    npc_gold_buy:NativeNpcGoldBuySourceState,
+}
+
+
+#[derive(Debug)]
+struct NativeNpcGoldBuySourceState {
+    revision: u64, stamp: Option<NativeCommandStamp>,
+    inventory: Option<mir2_client_bevy::inventory::InventoryModel>, inventory_ready: bool,
+    shop: mir2_client_bevy::shop::ShopModel, shop_ready: bool,
+    snapshot_dialog: Option<Value>, dialog_retired_since_snapshot: bool,
+}
+impl Default for NativeNpcGoldBuySourceState {
+    fn default() -> Self { Self { revision: 1, stamp: None, inventory: None,
+        inventory_ready: false, shop: Default::default(), shop_ready: false,
+        snapshot_dialog: None, dialog_retired_since_snapshot: false } }
+}
+impl NativeNpcGoldBuySourceState {
+    fn advance(&mut self) {
+        if self.revision == 0 { return; }
+        self.revision = self.revision.checked_add(1).unwrap_or(0);
+        if self.revision == 0 { self.inventory_ready = false; self.shop_ready = false; }
+    }
+    fn sync_owner(&mut self, stamp: NativeCommandStamp) {
+        if self.stamp != Some(stamp) {
+            self.advance(); self.stamp = Some(stamp); self.inventory = None;
+            self.inventory_ready = false; self.shop = Default::default(); self.shop_ready = false;
+            self.snapshot_dialog = None; self.dialog_retired_since_snapshot = false;
+        }
+    }
+    fn ready(&self, stamp: NativeCommandStamp) -> bool {
+        self.revision > 0 && self.stamp == Some(stamp) && self.inventory_ready && self.shop_ready
+            && self.shop.allows_buy() && self.inventory.is_some()
+    }
+}
+#[derive(Debug, Clone)]
+pub(crate) struct NativeNpcGoldBuySource {
+    pub(crate) stamp: NativeCommandStamp, pub(crate) revision: u64, pub(crate) model: String,
+    pub(crate) connection: mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyConnectionEpoch,
+}
+
+#[derive(Debug)]
+struct NativeNpcGoldBuyProof {
+    ticket: mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyTicket,
+    gate: mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyGate,
+    fence: std::sync::Weak<Mutex<NativeCommandFenceState>>, stamp: NativeCommandStamp,
+    inventory: Value,
+}
+impl NativeNpcGoldBuyProof {
+    fn publish(&self, outcome: mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome) {
+        self.gate.receipt(self.ticket, outcome);
+    }
+}
+impl Drop for NativeNpcGoldBuyProof {
+    fn drop(&mut self) {
+        // Last envelope loss is unsent only while the exact Core flight is Bound.
+        if let Some(fence) = self.fence.upgrade() {
+            if let Ok(mut state) = fence.lock() {
+                if state.outstanding.get(&self.ticket.sequence) == Some(&self.stamp) {
+                    state.outstanding.remove(&self.ticket.sequence); state.waiters.remove(&self.ticket.sequence);
+                }
+            }
+        }
+        self.publish(mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::DefinitelyUnsent);
+    }
+}
+
+/// Revocation and final start_send share this one short critical section.
+#[derive(Debug, Clone)]
+pub(crate) struct NativeCommandFence(Arc<Mutex<NativeCommandFenceState>>);
+
+impl NativeCommandFence {
+    pub(crate) fn npc_gold_buy_source(&self) -> Option<NativeNpcGoldBuySource> {
+        let mut state = self.0.lock().ok()?;
+        let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+        if !Self::matches(&state, stamp, NativeCommandScope::World) || !state.npc_gold_buy.ready(stamp) { return None; }
+        let model = mir2_client_bevy::npc_gold_buy_attempt::npc_gold_buy_model_authority(
+            &state.npc_gold_buy.shop, state.npc_gold_buy.inventory.as_ref()?)?;
+        Some(NativeNpcGoldBuySource { stamp, revision: state.npc_gold_buy.revision, model,
+            connection: mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyConnectionEpoch { run: stamp.run, connection: stamp.connection } })
+    }
+    pub(crate) fn withdraw_npc_gold_buy_service(&self) {
+        if let Ok(mut state) = self.0.lock() {
+            let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+            state.npc_gold_buy.advance(); state.npc_gold_buy.shop = Default::default();
+            state.npc_gold_buy.shop_ready = false;
+            state.npc_gold_buy.dialog_retired_since_snapshot = true;
+            for waker in state.waiters.values(){waker.wake_by_ref();}
+        }
+    }
+    /// Compare the complete raw parent dialog before any cursor/default merge.
+    /// A known dialog/request retirement already cleared the old catalog; retain
+    /// only a subsequently delivered catalog when that same transition reaches
+    /// its snapshot. A closed/missing parent never authorizes a service.
+    fn begin_npc_gold_buy_snapshot(&self, payload: Option<&Value>) {
+        if let Ok(mut state) = self.0.lock() {
+            let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+            let dialog = payload.and_then(|value| value.get("activeNpcDialog"));
+            let valid = dialog.is_some_and(|value| value.is_object()
+                && value.get("npcObjectId").and_then(Value::as_u64)
+                    .is_some_and(|id| id > 0 && id <= u32::MAX as u64));
+            let changed = state.npc_gold_buy.snapshot_dialog.as_ref() != dialog;
+            state.npc_gold_buy.inventory_ready = false;
+            if !valid || changed {
+                state.npc_gold_buy.advance();
+                if !valid || !state.npc_gold_buy.dialog_retired_since_snapshot {
+                    state.npc_gold_buy.shop = Default::default();
+                    state.npc_gold_buy.shop_ready = false;
+                }
+            }
+            state.npc_gold_buy.snapshot_dialog = dialog.cloned();
+            state.npc_gold_buy.dialog_retired_since_snapshot = false;
+            for waker in state.waiters.values() { waker.wake_by_ref(); }
+        }
+    }
+    fn invalidate_npc_gold_buy_packet(&self, packet: &str) {
+        if let Ok(mut state) = self.0.lock() {
+            let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+            if matches!(packet, "NPCDialog" | "NPCResponse") {
+                state.npc_gold_buy.dialog_retired_since_snapshot = true;
+            }
+            match packet {
+                "NPCGoods" | "NPCPearlGoods" | "NPCDialog" | "NPCResponse" | "NPCRepair" | "NPCSRepair"
+                | "NPCStorage" | "NPCRefine" | "NPCCheckRefine" | "NPCCollectRefine" | "NPCReplaceWedRing"
+                | "NPCConsign" | "NPCMarket" | "NPCMarketPage" | "NPCRequestInput" | "NPCAwakening"
+                | "NPCDisassemble" | "NPCDowngrade" | "NPCReset" => {
+                    state.npc_gold_buy.advance(); state.npc_gold_buy.shop = Default::default();
+                    state.npc_gold_buy.shop_ready = false;
+                }
+                "NPCSell" => { state.npc_gold_buy.advance(); }
+                "GainedGold" | "LoseGold" | "UserInformation" | "GainedItem" | "DeleteItem" | "DeleteItems"
+                | "ItemChanged" | "ItemDurability" | "MoveItem" | "MergeItem" | "SplitItem" | "SplitItem1"
+                | "DropItem" | "SellItem" | "EquipItem" | "RemoveItem" | "StoreItem" | "StoreItemV2"
+                | "TakeBackItem" | "TakeBackItemV2" | "ResizeInventory" | "NewItem"
+                | "UserSlotsRefresh" | "UseItem" | "RemoveSlotItem" | "EquipSlotItem" | "DepositRefineItem"
+                | "RetrieveRefineItem" | "DepositTradeItem" | "RetrieveTradeItem" | "TakeBackHeroItem"
+                | "TransferHeroItem" | "CombineItem" | "ItemUpgraded" | "RefreshItem" | "DuraChanged"
+                | "ItemRepaired" | "ItemSlotSizeChanged" | "ItemSealChanged" | "DepositRentalItem"
+                | "RetrieveRentalItem" | "UpdateRentalItem" | "ConfirmItemRental" | "MailLockedItem"
+                | "AwakeningLockedItem" | "Awakening" => {
+                    // A local packet withdraws readiness, not the last complete authority.
+                    state.npc_gold_buy.inventory_ready = false;
+                }
+                _ => {}
+            }
+            for waker in state.waiters.values(){waker.wake_by_ref();}
+        }
+    }
+    fn stage_npc_gold_buy_inventory(&self, value: &Value) -> Option<(NativeCommandStamp, u64)> {
+        let mut state = self.0.lock().ok()?;
+        let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+        state.npc_gold_buy.inventory_ready = false;
+        for waker in state.waiters.values(){waker.wake_by_ref();}
+        let model = serde_json::from_value::<mir2_client_bevy::inventory::InventoryModel>(value.clone()).ok()?;
+        let authority = |inventory: &mir2_client_bevy::inventory::InventoryModel| {
+            let mut inventory = inventory.clone(); inventory.npc_gold_trade_capacity = None;
+            serde_json::to_value(inventory).ok()
+        };
+        if state.npc_gold_buy.inventory.as_ref().and_then(authority) != authority(&model) {
+            state.npc_gold_buy.advance();
+        }
+        state.npc_gold_buy.inventory = Some(model);
+        (state.npc_gold_buy.revision > 0).then_some((stamp, state.npc_gold_buy.revision))
+    }
+    fn finish_npc_gold_buy_inventory(&self, staged: Option<(NativeCommandStamp, u64)>, delivered: bool) {
+        if let Ok(mut state) = self.0.lock() {
+            if staged == Some((state.current, state.npc_gold_buy.revision)) { state.npc_gold_buy.inventory_ready = delivered;for waker in state.waiters.values(){waker.wake_by_ref();} }
+        }
+    }
+    fn stage_npc_gold_buy_catalog(&self, value: &Value, catalog_packet:bool) -> Option<(NativeCommandStamp, u64)> {
+        let mut state = self.0.lock().ok()?;
+        let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+        state.npc_gold_buy.shop_ready = false;
+        for waker in state.waiters.values(){waker.wake_by_ref();}
+        let model = serde_json::from_value::<mir2_client_bevy::shop::ShopModel>(value.clone()).ok()?;
+        if state.npc_gold_buy.shop.goods != model.goods || state.npc_gold_buy.shop.hide_added_stats != model.hide_added_stats {
+            state.npc_gold_buy.advance();
+            if !catalog_packet {
+                state.npc_gold_buy.shop=Default::default();return None;
+            }
+        }
+        state.npc_gold_buy.shop.goods = model.goods; state.npc_gold_buy.shop.hide_added_stats = model.hide_added_stats;
+        (state.npc_gold_buy.revision > 0).then_some((stamp, state.npc_gold_buy.revision))
+    }
+    fn finish_npc_gold_buy_catalog(&self, staged: Option<(NativeCommandStamp, u64)>, delivered: bool) {
+        if let Ok(mut state) = self.0.lock() {
+            if staged == Some((state.current, state.npc_gold_buy.revision)) { state.npc_gold_buy.shop_ready = delivered;for waker in state.waiters.values(){waker.wake_by_ref();} }
+        }
+    }
+    fn observe_npc_gold_buy_service(&self, signal: mir2_client_bevy::shop::NpcShopServiceSignal, delivered: bool) {
+        if let Ok(mut state) = self.0.lock() {
+            let stamp = state.current; state.npc_gold_buy.sync_owner(stamp);
+            let old = state.npc_gold_buy.shop.clone();
+            if !delivered || !state.npc_gold_buy.shop.apply_service_signal(signal) {
+                state.npc_gold_buy.shop_ready = false;for waker in state.waiters.values(){waker.wake_by_ref();} return;
+            }
+            if old != state.npc_gold_buy.shop { state.npc_gold_buy.advance(); }
+            // Catalog receipt is independent; a service signal cannot repair its failed delivery.
+        }
+    }
+
+    fn new() -> Self {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static NEXT_RUN: AtomicU64 = AtomicU64::new(1);
+        let run = NEXT_RUN.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |n| n.checked_add(1)).ok();
+        Self(Arc::new(Mutex::new(NativeCommandFenceState {
+            current: NativeCommandStamp { run:run.unwrap_or(0),connection:1,procedure:1,owner_epoch:1,scene_epoch:1,cancellation:1,actor:None,map:None },
+            connected:false,connection_entry_revision:None,retired:run.is_none(),next_sequence:Some(1),outstanding:HashMap::new(),
+            entry_requested:false,entry_authorized:false,terminals:VecDeque::new(),waiters:HashMap::new(),mail_quote_delivery_failed:None,mail_send_flight:None,npc_gold_buy:Default::default(),
+        })))
+    }
+    pub(crate) fn stamp(&self) -> Option<NativeCommandStamp> {
+        let state=self.0.lock().ok()?; (!state.retired).then_some(state.current)
+    }
+    fn matches(state: &NativeCommandFenceState, stamp: NativeCommandStamp, scope: NativeCommandScope) -> bool {
+        if state.retired || stamp.run!=state.current.run { return false; }
+        if scope==NativeCommandScope::Shutdown { return true; }
+        if stamp.connection!=state.current.connection || stamp.procedure!=state.current.procedure
+            || stamp.owner_epoch!=state.current.owner_epoch { return false; }
+        if scope==NativeCommandScope::Leave { return state.connected; }
+        if stamp.cancellation!=state.current.cancellation{return false;}
+        if !state.connected { return false; }
+        if scope==NativeCommandScope::Procedure { return true; }
+        if stamp.actor.is_none() || stamp.actor!=state.current.actor { return false; }
+        scope==NativeCommandScope::Personal || (stamp.scene_epoch==state.current.scene_epoch
+            && stamp.map.is_some() && stamp.map==state.current.map)
+    }
+    pub(crate) fn is_current(&self,stamp:NativeCommandStamp)->bool {self.stamp()==Some(stamp)}
+    pub(crate) fn accepts_control_event(&self,stamp:NativeCommandStamp)->bool{self.stamp().is_some_and(|current|current.run==stamp.run&&current.connection==stamp.connection&&current.procedure==stamp.procedure&&current.cancellation==stamp.cancellation)}
+    pub(crate) fn is_retired(&self)->bool {self.0.lock().map(|s|s.retired).unwrap_or(true)}
+    fn mail_quote_delivery_failed(&self)->bool {self.0.lock().map(|s|s.mail_quote_delivery_failed==Some(mir2_client_bevy::mail_service::MailServiceStreamEpoch{run:s.current.run,connection:s.current.connection})).unwrap_or(true)}
+    pub(crate) fn accepts(&self, stamp: NativeCommandStamp, world: bool) -> bool {
+        self.0.lock().ok().is_some_and(|s| Self::matches(&s,stamp,if world {NativeCommandScope::World} else {NativeCommandScope::Procedure}))
+    }
+    pub(crate) fn revoke_local_leave(&self,stamp:NativeCommandStamp)->bool{
+        let Ok(mut state)=self.0.lock() else{return false;};
+        if !Self::matches(&state,stamp,NativeCommandScope::Leave){return false;}
+        let Some(revision)=state.current.cancellation.checked_add(1) else{state.retired=true;for waker in state.waiters.values(){waker.wake_by_ref();}return false;};
+        state.current.cancellation=revision;
+        state.current.actor=None;state.current.map=None;state.entry_requested=false;state.entry_authorized=false;
+        for waker in state.waiters.values(){waker.wake_by_ref();}true
+    }
+    fn prepare(&self, stamp: NativeCommandStamp, command: GatewayCommand) -> Result<GatewayCommand,()> {
+        let mut state=self.0.lock().map_err(|_|())?;
+        let scope=native_command_scope(&command);
+        // Connect is a local attempt request. No stale connection/procedure is promoted.
+        let valid=if matches!(command,GatewayCommand::Connect) {
+            !state.retired && stamp==state.current
+        } else { Self::matches(&state,stamp,scope) };
+        if !valid { return Err(()); }
+
+        if scope==NativeCommandScope::Leave {
+            let Some(revision)=state.current.cancellation.checked_add(1) else{state.retired=true;for waker in state.waiters.values(){waker.wake_by_ref();}return Err(());};
+            state.current.cancellation=revision;
+            state.current.actor=None;state.current.map=None;
+            state.entry_requested=false;state.entry_authorized=false;
+        }
+        if scope==NativeCommandScope::Shutdown { state.retired=true;state.connected=false; }
+        if matches!(scope,NativeCommandScope::Leave|NativeCommandScope::Shutdown){for waker in state.waiters.values(){waker.wake_by_ref();}}
+        let sequence=state.next_sequence.ok_or(())?;
+        state.next_sequence=sequence.checked_add(1);
+        if state.outstanding.len()>=MAX_COMMANDS_PER_POLL+8 { return Err(()); }
+        state.outstanding.insert(sequence,stamp);
+        let npc_gold_buy_required=matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::BuyItem{item_index,..})
+            if state.npc_gold_buy.shop.goods.iter().any(|good|good.unique_id==*item_index&&good.uses_gold_buy_plan()));
+        Ok(GatewayCommand::Owned(Box::new(OwnedGatewayCommand {command,stamp,sequence,commit_revision:state.current.cancellation,fence:self.clone(),mail_quote:None,mail_send:None,npc_gold_buy:None,npc_gold_buy_required})))
+    }
+    fn allows(&self, owned:&OwnedGatewayCommand) -> bool {
+        self.0.lock().ok().is_some_and(|s| s.outstanding.get(&owned.sequence)==Some(&owned.stamp)
+            && (native_command_scope(&owned.command)==NativeCommandScope::Shutdown
+                || (matches!(owned.command,GatewayCommand::Connect)&&!s.retired&&s.current==owned.stamp)
+                || Self::matches(&s,owned.stamp,native_command_scope(&owned.command))))
+    }
+    fn retire(&self, owned:&OwnedGatewayCommand) {
+        let notify=if let Ok(mut state)=self.0.lock() {
+            state.waiters.remove(&owned.sequence);
+            if state.outstanding.remove(&owned.sequence)==Some(owned.stamp) {
+                if let GatewayCommand::Wire(command)=&owned.command {
+                    if native_transport_key(command).is_some() { state.terminals.push_back((owned.stamp,owned.sequence,command.clone())); }
+                }
+                owned.mail_quote.is_some()||owned.mail_send.is_some()||owned.npc_gold_buy.is_some()
+            }else{false}
+        }else{false};
+        if notify{owned.publish_mail_quote(mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent);if let Some(send)=&owned.mail_send{send.publish(mir2_client_bevy::mail_service::MailSendOutcome::DefinitelyUnsent);}if let Some(buy)=&owned.npc_gold_buy{buy.publish(mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::DefinitelyUnsent);}}
+    }
+    pub(crate) fn take_terminals(&self) -> Vec<(NativeCommandStamp,u64,NativeOutboundCommand)> {
+        self.0.lock().map(|mut s|s.terminals.drain(..).collect()).unwrap_or_default()
+    }
+    fn begin_connection(&self) -> Result<(),String> {
+        let mut s=self.0.lock().map_err(|_|"ownership fence poisoned")?;
+        if s.retired { return Err("command channel retired".into()); }
+        s.connected=true;s.connection_entry_revision=Some(s.current.cancellation);Ok(())
+    }
+    fn socket_lost(&self) {
+        if let Ok(mut s)=self.0.lock() {
+            for waker in s.waiters.values(){waker.wake_by_ref();}
+            s.connected=false;s.connection_entry_revision=None;s.current.actor=None;s.current.map=None;s.entry_requested=false;s.entry_authorized=false;
+            if let (Some(c),Some(o),Some(e),Some(p))=(s.current.connection.checked_add(1),s.current.owner_epoch.checked_add(1),s.current.scene_epoch.checked_add(1),s.current.procedure.checked_add(1)) {
+                s.current.connection=c;s.current.owner_epoch=o;s.current.scene_epoch=e;s.current.procedure=p;
+                s.mail_send_flight=None;
+            } else {s.retired=true;}
+        }
+    }
+    fn authorize_entry(&self, resumed:bool) {
+        if let Ok(mut s)=self.0.lock() {
+            if (resumed&&s.connection_entry_revision==Some(s.current.cancellation)) || (!resumed&&s.entry_requested) {s.entry_authorized=true;s.entry_requested=false;}
+        }
+    }
+    fn observe_scene(&self, map:i32, boundary:bool) {
+        if let Ok(mut s)=self.0.lock() {
+            if boundary || s.current.map.is_some_and(|old|old!=map) {
+                for waker in s.waiters.values(){waker.wake_by_ref();}
+                if let Some(epoch)=s.current.scene_epoch.checked_add(1) {s.current.scene_epoch=epoch;} else {s.retired=true;}
+            }
+            s.current.map=Some(map);
+        }
+    }
+    fn revoke_owner(&self) {
+        if let Ok(mut s)=self.0.lock() {
+            for waker in s.waiters.values(){waker.wake_by_ref();}
+            s.current.actor=None;s.current.map=None;s.entry_requested=false;s.entry_authorized=false;
+            if let (Some(o),Some(p),Some(e))=(s.current.owner_epoch.checked_add(1),s.current.procedure.checked_add(1),s.current.scene_epoch.checked_add(1)) {
+                s.current.owner_epoch=o;s.current.procedure=p;s.current.scene_epoch=e;
+            } else {s.retired=true;}
+        }
+    }
+    #[cfg(test)]
+    pub(crate) fn test_owner_change(&self,actor:u32,map:i32)->NativeCommandStamp{self.revoke_owner();self.test_world_ready(actor,map)}
+    #[cfg(test)]
+    pub(crate) fn test_reconnect(&self,actor:u32,map:i32)->NativeCommandStamp{self.socket_lost();self.test_world_ready(actor,map)}
+    #[cfg(test)]
+    pub(crate) fn test_world_ready(&self,actor:u32,map:i32)->NativeCommandStamp{self.begin_connection().unwrap();self.authorize_entry(true);self.observe_scene(map,false);self.confirm_owner(actor).unwrap()}
+    #[cfg(test)]
+    pub(crate) fn test_scene_boundary(&self,map:i32){self.observe_scene(map,true);}
+    fn confirm_owner(&self,actor:u32) -> Option<NativeCommandStamp> {
+        let mut s=self.0.lock().ok()?;
+        if s.retired || !s.connected || actor==0 {return None;}
+        if s.current.actor!=Some(actor) {
+            if !s.entry_authorized {return None;}
+            let Some(epoch)=s.current.owner_epoch.checked_add(1) else {s.retired=true;for waker in s.waiters.values(){waker.wake_by_ref();}return None;};
+            s.current.owner_epoch=epoch;
+            s.current.actor=Some(actor);s.entry_authorized=false;
+        }
+        Some(s.current)
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum NativeSinkCommit { DefinitelyUnsent, Flushed, Unknown(String), Unavailable(String), MailQuoteReceiptUnavailable }
+
+/// Flush is irreversible transport progress, not permission to resurrect an
+/// entry whose local cancellation revision changed after start_send.
+fn apply_flushed_control_context(proof:Option<&OwnedGatewayCommand>,wire:&NativeOutboundCommand,context:&mut GatewaySessionContext,resume:&mut NativeResumeClientState)->bool{
+    if let Some(proof)=proof {
+        let Ok(mut state)=proof.fence.0.lock() else{return false;};
+        if state.current.cancellation!=proof.commit_revision
+            || !NativeCommandFence::matches(&state,proof.stamp,native_command_scope(&proof.command)){return false;}
+        update_session_context(context,wire);
+        if matches!(wire,NativeOutboundCommand::StartGame {..}){state.entry_requested=true;}
+        if matches!(wire,NativeOutboundCommand::LogOut|NativeOutboundCommand::Disconnect){resume.clear();}
+        true
+    }else{
+        #[cfg(test)] {update_session_context(context,wire);if matches!(wire,NativeOutboundCommand::LogOut|NativeOutboundCommand::Disconnect){resume.clear();}return true;}
+        #[cfg(not(test))] {let _=(wire,context,resume);false}
+    }
+}
+
+/// Real production writer helper: readiness may await, the ownership/claim/
+/// start_send interval cannot. A sequence is consumed even if start_send fails.
+async fn commit_owned_frame<S>(sink:&mut S, proof:Option<&OwnedGatewayCommand>,frame:Message) -> NativeSinkCommit
+where S:futures_util::Sink<Message>+Unpin, S::Error:std::fmt::Display {
+    use std::pin::Pin;
+    if let Some(owned)=proof{if matches!(&owned.command,GatewayCommand::Wire(NativeOutboundCommand::SendMail{..}))&&owned.mail_send.is_none(){owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;}}
+    let ready=std::future::poll_fn(|cx| {
+        if let Some(owned)=proof {
+            let Ok(mut state)=owned.fence.0.lock() else{return std::task::Poll::Ready(None);};
+            if state.outstanding.get(&owned.sequence)!=Some(&owned.stamp)
+                || !NativeCommandFence::matches(&state,owned.stamp,native_command_scope(&owned.command)) {
+                return std::task::Poll::Ready(None);
+            }
+            if let Some(buy)=&owned.npc_gold_buy{
+                if !state.npc_gold_buy.ready(owned.stamp)||state.npc_gold_buy.revision!=buy.ticket.source_revision
+                    || state.npc_gold_buy.inventory.as_ref().and_then(|inventory|serde_json::to_value(inventory).ok()).as_ref()!=Some(&buy.inventory)
+                    || !buy.gate.watch(buy.ticket,cx.waker()){return std::task::Poll::Ready(None);}
+            }
+            state.waiters.insert(owned.sequence,cx.waker().clone());
+        }
+        Pin::new(&mut *sink).poll_ready(cx).map(Some)
+    }).await;
+    if let Some(owned)=proof {if let Ok(mut state)=owned.fence.0.lock(){state.waiters.remove(&owned.sequence);}if let Some(buy)=&owned.npc_gold_buy{buy.gate.forget_waiter(buy.ticket);}}
+    match ready {
+        None=>{if let Some(owned)=proof{owned.fence.retire(owned);}return NativeSinkCommit::DefinitelyUnsent;},
+        Some(Err(error))=>{if let Some(owned)=proof{owned.fence.retire(owned);}return NativeSinkCommit::Unavailable(error.to_string());},
+        Some(Ok(()))=>{},
+    }
+    let (start_result,entered_at_ms)=if let Some(owned)=proof {
+        let Ok(mut state)=owned.fence.0.lock() else {return NativeSinkCommit::DefinitelyUnsent;};
+        if state.outstanding.get(&owned.sequence)!=Some(&owned.stamp)
+            || !NativeCommandFence::matches(&state,owned.stamp,native_command_scope(&owned.command)) {
+            drop(state);owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;
+        }
+        if owned.mail_send.is_some()&&(state.mail_send_flight.is_some()||state.mail_quote_delivery_failed==Some(mir2_client_bevy::mail_service::MailServiceStreamEpoch{run:owned.stamp.run,connection:owned.stamp.connection})){
+            drop(state);owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;
+        }
+        if let Some(buy)=&owned.npc_gold_buy {
+            if !state.npc_gold_buy.ready(owned.stamp)||state.npc_gold_buy.revision!=buy.ticket.source_revision
+                || state.npc_gold_buy.inventory.as_ref().and_then(|inventory|serde_json::to_value(inventory).ok()).as_ref()!=Some(&buy.inventory) {
+                drop(state);owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;
+            }
+        } else if let GatewayCommand::Wire(NativeOutboundCommand::BuyItem{item_index,..})=&owned.command {
+            if owned.npc_gold_buy_required||!state.npc_gold_buy.shop_ready||!state.npc_gold_buy.shop.allows_buy()
+                || !state.npc_gold_buy.shop.goods.iter().any(|good|good.unique_id==*item_index&&!good.uses_gold_buy_plan()) {
+                drop(state);owned.fence.retire(owned);return NativeSinkCommit::DefinitelyUnsent;
+            }
+        }
+        state.outstanding.remove(&owned.sequence);
+        // Final authorization and the local irreversible phase precede the
+        // call with no await/callback between them. Calling start_send itself
+        // enters, even when it returns Err; an observer cannot win mid-call.
+        if owned.mail_quote.as_ref().is_some_and(|quote|!quote.mark_entered()){return NativeSinkCommit::DefinitelyUnsent;}
+        if let Some(send)=owned.mail_send.as_ref(){if !send.mark_entered(){return NativeSinkCommit::DefinitelyUnsent;}state.mail_send_flight=Some(send.clone());}
+        let entered_at_ms=owned.mail_quote.as_ref().map(|_|mir2_client_bevy::hero_model::hero_clock_ms());
+        let result=if let Some(buy)=&owned.npc_gold_buy {
+            let Some(result)=buy.gate.commit(buy.ticket,||Pin::new(&mut *sink).start_send(frame).map_err(|error|error.to_string())) else {
+                drop(state);buy.publish(mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::DefinitelyUnsent);return NativeSinkCommit::DefinitelyUnsent;
+            };result
+        } else {Pin::new(&mut *sink).start_send(frame).map_err(|error|error.to_string())};
+        (result,entered_at_ms)
+    } else {(Pin::new(&mut *sink).start_send(frame).map_err(|error|error.to_string()),None)};
+    if let (Some(owned),Some(at_ms))=(proof,entered_at_ms) {
+        if !owned.publish_mail_quote(mir2_client_bevy::mail_service::MailQuoteOutcome::Entered{at_ms}){return NativeSinkCommit::MailQuoteReceiptUnavailable;}
+    }
+    let buy=proof.and_then(|owned|owned.npc_gold_buy.as_ref());
+    let send=proof.and_then(|owned|owned.mail_send.as_ref());
+    if send.is_some_and(|send|!send.publish(mir2_client_bevy::mail_service::MailSendOutcome::Entered)){return NativeSinkCommit::MailQuoteReceiptUnavailable;}
+    if let Err(error)=start_result{if let Some(buy)=buy{buy.publish(mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::Unknown);}if send.is_some_and(|send|!send.publish(mir2_client_bevy::mail_service::MailSendOutcome::Unknown)){return NativeSinkCommit::MailQuoteReceiptUnavailable;}return NativeSinkCommit::Unknown(error);}
+    let outcome=match std::future::poll_fn(|cx|Pin::new(&mut *sink).poll_flush(cx)).await {
+        Ok(())=>NativeSinkCommit::Flushed,Err(error)=>NativeSinkCommit::Unknown(error.to_string()),
+    };
+    if let Some(send)=send{let written=if matches!(&outcome,NativeSinkCommit::Flushed){mir2_client_bevy::mail_service::MailSendOutcome::Flushed}else{mir2_client_bevy::mail_service::MailSendOutcome::Unknown};if !send.publish(written){return NativeSinkCommit::MailQuoteReceiptUnavailable;}}
+    if let Some(buy)=buy{buy.publish(if matches!(&outcome,NativeSinkCommit::Flushed){mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::Flushed}else{mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptOutcome::Unknown});}
+    outcome
+}
+
+/// Local event wrapper, not a shared protocol/NativeGatewayEvent change.
+#[derive(Debug, Clone)]
+pub(crate) struct NativeShellEnvelope {
+    pub(crate) stamp:Option<NativeCommandStamp>,
+    pub(crate) event:ShellGatewayEvent,
+}
+#[derive(Clone)]
+pub(crate) enum NativeShellEventSender {
+    Owned {sender:std::sync::mpsc::Sender<NativeShellEnvelope>,fence:NativeCommandFence},
+    #[cfg(test)]
+    Legacy(std::sync::mpsc::Sender<ShellGatewayEvent>),
+}
+pub(crate) trait NativeShellEventSink {
+    fn send_event(&self,event:ShellGatewayEvent)->Result<(),()>;
+}
+impl NativeShellEventSink for NativeShellEventSender {
+    fn send_event(&self,event:ShellGatewayEvent)->Result<(),()> {
+        match self {
+            Self::Owned {sender,fence}=>{
+                let Ok(state)=fence.0.lock() else{return Err(());};
+                if state.retired{return Err(());}
+                if matches!(&event,ShellGatewayEvent::StartGameAck {..})&&!(state.entry_requested||state.entry_authorized){return Ok(());}
+                sender.send(NativeShellEnvelope {stamp:Some(state.current),event}).map_err(|_|())
+            },
+            #[cfg(test)] Self::Legacy(sender)=>sender.send(event).map_err(|_|()),
+        }
+    }
+}
+#[cfg(test)]
+impl From<std::sync::mpsc::Sender<ShellGatewayEvent>> for NativeShellEventSender {
+    fn from(sender:std::sync::mpsc::Sender<ShellGatewayEvent>)->Self {Self::Legacy(sender)}
+}
+#[cfg(test)]
+impl NativeShellEventSink for std::sync::mpsc::Sender<ShellGatewayEvent> {
+    fn send_event(&self,event:ShellGatewayEvent)->Result<(),()> {self.send(event).map_err(|_|())}
 }
 
 /// Non-blocking producer handle for the sole WebSocket writer. Production uses
@@ -219,6 +956,7 @@ pub enum GatewayCommand {
 #[derive(Clone)]
 pub struct GatewayCommandSender {
     inner: Arc<GatewayCommandSenderInner>,
+    fence: Option<NativeCommandFence>,
 }
 
 enum GatewayCommandSenderInner {
@@ -227,10 +965,12 @@ enum GatewayCommandSenderInner {
         priority: Arc<Mutex<VecDeque<GatewayCommand>>>,
         transaction: Arc<Mutex<Option<GatewayCommand>>>,
     },
+    #[cfg(test)]
     Test(std::sync::mpsc::Sender<GatewayCommand>),
 }
 
 pub struct GatewayCommandReceiver {
+    fence: Option<NativeCommandFence>,
     receiver: std::sync::mpsc::Receiver<GatewayCommand>,
     priority: Option<Arc<Mutex<VecDeque<GatewayCommand>>>>,
     transaction: Option<Arc<Mutex<Option<GatewayCommand>>>>,
@@ -238,11 +978,13 @@ pub struct GatewayCommandReceiver {
 
 /// Create the production command pair. No producer call blocks the UI thread.
 pub fn command_channel(capacity: usize) -> (GatewayCommandSender, GatewayCommandReceiver) {
+    let fence=NativeCommandFence::new();
     let (sender, receiver) = std::sync::mpsc::sync_channel(capacity.max(8));
     let priority = Arc::new(Mutex::new(VecDeque::with_capacity(3)));
     let transaction = Arc::new(Mutex::new(None));
     (
         GatewayCommandSender {
+            fence:Some(fence.clone()),
             inner: Arc::new(GatewayCommandSenderInner::Bounded {
                 sender,
                 priority: priority.clone(),
@@ -250,6 +992,7 @@ pub fn command_channel(capacity: usize) -> (GatewayCommandSender, GatewayCommand
             }),
         },
         GatewayCommandReceiver {
+            fence:Some(fence),
             receiver,
             priority: Some(priority),
             transaction: Some(transaction),
@@ -257,17 +1000,118 @@ pub fn command_channel(capacity: usize) -> (GatewayCommandSender, GatewayCommand
     )
 }
 
+#[cfg(test)]
+pub(crate) fn test_command_channel(capacity:usize)->(GatewayCommandSender,GatewayCommandReceiver){
+    let (mut sender,mut receiver)=command_channel(capacity);
+    sender.fence=None;receiver.fence=None;(sender,receiver)
+}
+
+#[cfg(test)]
 impl From<std::sync::mpsc::Sender<GatewayCommand>> for GatewayCommandSender {
     fn from(sender: std::sync::mpsc::Sender<GatewayCommand>) -> Self {
         Self {
+            fence:None,
             inner: Arc::new(GatewayCommandSenderInner::Test(sender)),
         }
     }
 }
 
 impl GatewayCommandSender {
+    pub(crate) fn send_npc_gold_buy_with_bind<F>(
+        &self, command:GatewayCommand, stamp:Option<NativeCommandStamp>,
+        token:mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyAttemptToken, source_revision:u64,
+        gate:mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyGate, mut bind:F,
+    )->Result<mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyTicket,()>
+    where F:FnMut(mir2_client_bevy::npc_gold_buy_attempt::NpcGoldBuyTicket)->bool {
+        use mir2_client_bevy::npc_gold_buy_attempt::{NpcGoldBuyTicket,NpcGoldBuyAttemptOutcome};
+        let expected=gate.command(token).ok_or(())?;
+        if !matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::BuyItem{item_index,count,panel_type})
+            if *item_index==expected.item_index&&*count==expected.count&&*panel_type==expected.panel_type) {return Err(());}
+        let fence=self.fence.as_ref().ok_or(())?;
+        let GatewayCommand::Owned(mut owned)=fence.prepare(stamp.ok_or(())?,command)?else{return Err(());};
+        let s=owned.stamp;
+        let ticket=NpcGoldBuyTicket {run:s.run,connection:s.connection,procedure:s.procedure,
+            owner_epoch:s.owner_epoch,scene_epoch:s.scene_epoch,cancellation:s.cancellation,
+            actor:s.actor,map:s.map,sequence:owned.sequence,local_attempt_token:token.value(),source_revision};
+        let inventory=fence.0.lock().ok().and_then(|state| {
+            if !state.npc_gold_buy.ready(s)||state.npc_gold_buy.revision!=source_revision{return None;}
+            let current=state.npc_gold_buy.inventory.as_ref()?;
+            if !gate.matches_inventory(token,current){return None;}
+            serde_json::to_value(current).ok()
+        });
+        let Some(inventory)=inventory else{fence.retire(&owned);return Err(());};
+        if !ticket.is_valid()||!bind(ticket){fence.retire(&owned);return Err(());}
+        owned.npc_gold_buy=Some(Arc::new(NativeNpcGoldBuyProof{ticket,gate,
+            fence:Arc::downgrade(&fence.0),stamp:s,inventory}));
+        let rejected=owned.clone();
+        if self.send_enveloped(GatewayCommand::Owned(owned)).is_err() {
+            fence.retire(&rejected);
+            if let Some(proof)=&rejected.npc_gold_buy{proof.publish(NpcGoldBuyAttemptOutcome::DefinitelyUnsent);}
+            return Err(());
+        }
+        Ok(ticket)
+    }
+
+    pub(crate) fn send_mail_send_with_bind<F>(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>,token:u64,bind:F)->Result<mir2_client_bevy::mail_service::MailSendTicket,()>
+    where F:FnMut(mir2_client_bevy::mail_service::MailSendTicket)->bool {
+        self.send_mail_send_with_publisher(command,stamp,token,bind,NativeMailSendPublisher::native())
+    }
+    fn send_mail_send_with_publisher<F>(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>,token:u64,mut bind:F,publisher:NativeMailSendPublisher)->Result<mir2_client_bevy::mail_service::MailSendTicket,()>
+    where F:FnMut(mir2_client_bevy::mail_service::MailSendTicket)->bool {
+        use mir2_client_bevy::mail_service::MailSendTicket;
+        if token==0||!matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::SendMail{..})){return Err(());}
+        let fence=self.fence.as_ref().ok_or(())?;
+        let GatewayCommand::Owned(mut owned)=fence.prepare(stamp.ok_or(())?,command)?else{return Err(());};let s=owned.stamp;
+        let ticket=MailSendTicket{run:s.run,connection:s.connection,procedure:s.procedure,owner_epoch:s.owner_epoch,scene_epoch:s.scene_epoch,cancellation:s.cancellation,actor:s.actor,map:s.map,sequence:owned.sequence,local_send_token:token};
+        if !ticket.is_valid()||!bind(ticket){fence.retire(&owned);return Err(());}
+        owned.mail_send=Some(Arc::new(NativeMailSendProof{ticket,publisher,fence:Arc::downgrade(&fence.0),stamp:s,state:std::sync::atomic::AtomicU8::new(1),write_reported:std::sync::atomic::AtomicBool::new(false)}));
+        let mut rejected=owned.clone();
+        if self.send_enveloped(GatewayCommand::Owned(owned)).is_err(){if let Some(send)=&rejected.mail_send{send.state.store(4,std::sync::atomic::Ordering::SeqCst);}rejected.mail_send=None;fence.retire(&rejected);return Err(());}Ok(ticket)
+    }
+    pub(crate) fn send_mail_quote_with_bind<F>(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>,token:u64,bind:F)->Result<mir2_client_bevy::mail_service::MailQuoteTicket,()>
+    where F:FnMut(mir2_client_bevy::mail_service::MailQuoteTicket)->bool {
+        self.send_mail_quote_with_publisher(command,stamp,token,bind,NativeMailQuotePublisher::native())
+    }
+    fn send_mail_quote_with_publisher<F>(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>,token:u64,mut bind:F,publisher:NativeMailQuotePublisher)->Result<mir2_client_bevy::mail_service::MailQuoteTicket,()>
+    where F:FnMut(mir2_client_bevy::mail_service::MailQuoteTicket)->bool {
+        use mir2_client_bevy::mail_service::MailQuoteTicket;
+        if token==0||!matches!(&command,GatewayCommand::Wire(NativeOutboundCommand::MailCost{..})){return Err(());}
+        let fence=self.fence.as_ref().ok_or(())?;
+        let prepared=fence.prepare(stamp.ok_or(())?,command)?;
+        let GatewayCommand::Owned(mut owned)=prepared else{return Err(());};
+        let s=owned.stamp;
+        let ticket=MailQuoteTicket{run:s.run,connection:s.connection,procedure:s.procedure,owner_epoch:s.owner_epoch,scene_epoch:s.scene_epoch,cancellation:s.cancellation,actor:s.actor,map:s.map,sequence:owned.sequence,local_quote_token:token};
+        if !ticket.is_valid()||!bind(ticket){fence.retire(&owned);return Err(());}
+        owned.mail_quote=Some(Arc::new(NativeMailQuoteProof{ticket,publisher,fence:Arc::downgrade(&fence.0),stamp:owned.stamp,state:std::sync::atomic::AtomicU8::new(1)}));
+        let mut rejected=owned.clone();
+        if self.send_enveloped(GatewayCommand::Owned(owned)).is_err(){
+            // Never admitted: caller rolls back this exact prebound ticket.
+            if let Some(quote)=rejected.mail_quote.as_ref(){quote.state.store(4,std::sync::atomic::Ordering::SeqCst);}
+            rejected.mail_quote=None;fence.retire(&rejected);return Err(());
+        }
+        Ok(ticket)
+    }
+    pub(crate) fn ownership_fence(&self)->Option<NativeCommandFence>{self.fence.clone()}
+    pub(crate) fn initial_stamp(&self)->Option<NativeCommandStamp>{self.fence.as_ref().and_then(NativeCommandFence::stamp)}
+    pub(crate) fn send_with_stamp(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>)->Result<(),()>{self.send_with_ticket(command,stamp).map(|_|())}
+    pub(crate) fn send_with_ticket(&self,command:GatewayCommand,stamp:Option<NativeCommandStamp>)->Result<Option<(NativeCommandStamp,u64)>,()>{
+        let command=if let Some(fence)=&self.fence {
+            if matches!(command,GatewayCommand::Owned(_)){return Err(());}
+            fence.prepare(stamp.ok_or(())?,command)?
+        }else{command};
+        let ticket=match &command {GatewayCommand::Owned(owned)=>Some((owned.stamp,owned.sequence)),_=>None};
+        let rejected=command.clone();
+        let result=self.send_enveloped(command);
+        if result.is_err(){if let GatewayCommand::Owned(owned)=rejected {owned.fence.retire(&owned);}}
+        result.map(|_|ticket)
+    }
     pub fn send(&self, command: GatewayCommand) -> Result<(), ()> {
+        if self.fence.is_some() && !matches!(command,GatewayCommand::Shutdown) {return Err(());}
+        self.send_with_stamp(command,self.initial_stamp())
+    }
+    fn send_enveloped(&self, command: GatewayCommand) -> Result<(), ()> {
         match self.inner.as_ref() {
+            #[cfg(test)]
             GatewayCommandSenderInner::Test(sender) => sender.send(command).map_err(|_| ()),
             GatewayCommandSenderInner::Bounded {
                 sender,
@@ -277,18 +1121,19 @@ impl GatewayCommandSender {
                 if is_priority_command(&command) {
                     let mut queue = priority
                         .lock()
-                        .unwrap_or_else(|poisoned| poisoned.into_inner());
-                    if !queue
+                        .map_err(|_|())?;
+                    if matches!(command,GatewayCommand::Owned(_)) || !queue
                         .iter()
                         .any(|queued| same_priority_kind(queued, &command))
                     {
+                        if queue.len()>=3{return Err(());}
                         queue.push_back(command);
                     }
                     Ok(())
                 } else if is_correlated_transaction(&command) {
                     let mut slot = transaction
                         .lock()
-                        .unwrap_or_else(|poisoned| poisoned.into_inner());
+                        .map_err(|_|())?;
                     if slot.is_some() {
                         return Err(());
                     }
@@ -309,7 +1154,20 @@ impl GatewayCommandSender {
 }
 
 impl GatewayCommandReceiver {
-    fn try_recv(&mut self) -> Result<GatewayCommand, std::sync::mpsc::TryRecvError> {
+    #[cfg(test)]
+    pub(crate) fn try_recv_for_test(&mut self)->Result<GatewayCommand,std::sync::mpsc::TryRecvError>{self.try_recv()}
+    fn try_recv(&mut self)->Result<GatewayCommand,std::sync::mpsc::TryRecvError>{
+        for _ in 0..MAX_COMMANDS_PER_POLL+8 {
+            let command=self.take_next()?;
+            #[cfg(test)] if self.fence.is_none(){return Ok(command);}
+            if let GatewayCommand::Owned(owned)=&command {
+                if owned.fence.allows(owned){return Ok(command);}
+                owned.fence.retire(owned);
+            }
+        }
+        Err(std::sync::mpsc::TryRecvError::Empty)
+    }
+    fn take_next(&mut self) -> Result<GatewayCommand, std::sync::mpsc::TryRecvError> {
         if let Some(priority) = &self.priority {
             if let Some(command) = priority
                 .lock()
@@ -334,7 +1192,7 @@ impl GatewayCommandReceiver {
 
 fn is_priority_command(command: &GatewayCommand) -> bool {
     matches!(
-        command,
+        command.payload(),
         GatewayCommand::Shutdown
             | GatewayCommand::Wire(NativeOutboundCommand::LogOut)
             | GatewayCommand::Wire(NativeOutboundCommand::Disconnect)
@@ -343,14 +1201,14 @@ fn is_priority_command(command: &GatewayCommand) -> bool {
 
 fn is_game_shop_transaction(command: &GatewayCommand) -> bool {
     matches!(
-        command,
+        command.payload(),
         GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy { .. })
     )
 }
 
 fn is_storage_transaction(command: &GatewayCommand) -> bool {
     matches!(
-        command,
+        command.payload(),
         GatewayCommand::Wire(
             NativeOutboundCommand::StoreItem { .. } | NativeOutboundCommand::TakeBackItem { .. }
         )
@@ -361,13 +1219,17 @@ fn is_correlated_transaction(command: &GatewayCommand) -> bool {
     is_game_shop_transaction(command) || is_storage_transaction(command)
 }
 
+pub(crate) fn game_shop_request_from_wire(wire:&NativeOutboundCommand)->Option<GameShopRequest>{
+    game_shop_request_from_command(&GatewayCommand::Wire(wire.clone()))
+}
+
 fn game_shop_request_from_command(command: &GatewayCommand) -> Option<GameShopRequest> {
     let GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
         request_id,
         g_index,
         quantity,
         price_type,
-    }) = command
+    }) = command.payload()
     else {
         return None;
     };
@@ -387,6 +1249,11 @@ where
 {
     if !is_correlated_transaction(command) {
         return false;
+    }
+    if let GatewayCommand::Owned(owned)=command {
+        // Exact local terminal; an old queued request cannot reset current runtime models.
+        owned.fence.retire(owned);
+        return true;
     }
     if is_game_shop_transaction(command) {
         gate.clear_terminal();
@@ -412,8 +1279,9 @@ where
 }
 
 fn same_priority_kind(left: &GatewayCommand, right: &GatewayCommand) -> bool {
-    matches!(
-        (left, right),
+    let same_owner=match (left,right){(GatewayCommand::Owned(a),GatewayCommand::Owned(b))=>a.stamp==b.stamp,(GatewayCommand::Owned(_),_)|(_,GatewayCommand::Owned(_))=>false,_=>true};
+    same_owner && matches!(
+        (left.payload(), right.payload()),
         (GatewayCommand::Shutdown, GatewayCommand::Shutdown)
             | (
                 GatewayCommand::Wire(NativeOutboundCommand::LogOut),
@@ -427,15 +1295,18 @@ fn same_priority_kind(left: &GatewayCommand, right: &GatewayCommand) -> bool {
 }
 
 pub trait CommandSource {
+    fn ownership_fence(&self)->Option<NativeCommandFence>{None}
     fn try_command(&mut self) -> Result<GatewayCommand, std::sync::mpsc::TryRecvError>;
 }
 
 impl CommandSource for GatewayCommandReceiver {
+    fn ownership_fence(&self)->Option<NativeCommandFence>{self.fence.clone()}
     fn try_command(&mut self) -> Result<GatewayCommand, std::sync::mpsc::TryRecvError> {
         self.try_recv()
     }
 }
 
+#[cfg(test)]
 impl CommandSource for std::sync::mpsc::Receiver<GatewayCommand> {
     fn try_command(&mut self) -> Result<GatewayCommand, std::sync::mpsc::TryRecvError> {
         self.try_recv()
@@ -596,6 +1467,95 @@ impl NativeLightingPublisher {
 struct GatewaySessionContext {
     account_id: Option<String>,
     character_index: Option<i32>,
+    mail_stream: Option<NativeMailServiceStream>,
+}
+
+/// The publisher is selected at entry, never inferred from a missing runtime.
+/// Only the explicit cfg(test) loopback seam can substitute controlled delivery.
+#[derive(Clone)]
+enum NativeMailServicePublisher {
+    Native,
+    #[cfg(test)]
+    Controlled {
+        run: u64,
+        publish: Arc<dyn Fn(mir2_client_bevy::mail_service::MailServiceInboxMessage) -> bool + Send + Sync>,
+    },
+}
+
+#[derive(Clone)]
+struct NativeMailServiceStream {
+    epoch: mir2_client_bevy::mail_service::MailServiceStreamEpoch,
+    publisher: NativeMailServicePublisher,
+    fence:Option<NativeCommandFence>,
+}
+
+impl NativeMailServicePublisher {
+    fn publish(&self, message: mir2_client_bevy::mail_service::MailServiceInboxMessage) -> bool {
+        use mir2_client_bevy::mail_service::MailServiceInboxMessage;
+        match self {
+            Self::Native => match message {
+                MailServiceInboxMessage::StreamStarted(marker) => mir2_bevy_runtime::native_ingest::push_native_mail_service_stream_started(marker),
+                MailServiceInboxMessage::Delivery(delivery) => mir2_bevy_runtime::native_ingest::push_native_mail_service(delivery),
+                MailServiceInboxMessage::QuoteReceipt(receipt)=>mir2_bevy_runtime::native_ingest::push_native_mail_quote_receipt(receipt),
+                MailServiceInboxMessage::SendReceipt(receipt)=>mir2_bevy_runtime::native_ingest::push_native_mail_send_receipt(receipt),
+                MailServiceInboxMessage::SendAcknowledgement(ack)=>mir2_bevy_runtime::native_ingest::push_native_mail_send_acknowledgement(ack),
+            },
+            #[cfg(test)]
+            Self::Controlled { publish, .. } => publish(message),
+        }
+    }
+
+    fn start_socket(&self, fence: Option<&NativeCommandFence>, _generation: u64) -> Result<NativeMailServiceStream, String> {
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage, MailServiceStreamEpoch, MailServiceStreamStarted};
+        // Called once, after begin_connection and the successful handshake,
+        // before any socket.next(). Owner/procedure changes do not relabel it.
+        let epoch = if let Some(fence) = fence {
+            let state=fence.0.lock().map_err(|_| "native mail stream fence poisoned".to_owned())?;
+            if !state.connected || state.retired { return Err("native mail stream fence is not connected".to_owned()); }
+            let stamp=state.current;
+            MailServiceStreamEpoch { run: stamp.run, connection: stamp.connection }
+        } else {
+            match self {
+                Self::Native => return Err("native mail stream requires a trusted command fence".to_owned()),
+                #[cfg(test)]
+                Self::Controlled { run, .. } => MailServiceStreamEpoch { run: *run, connection: _generation },
+            }
+        };
+        if !epoch.is_valid() { return Err("native mail stream epoch is invalid".to_owned()); }
+        if !self.publish(MailServiceInboxMessage::StreamStarted(MailServiceStreamStarted { epoch })) {
+            return Err("native mail stream marker was not accepted".to_owned());
+        }
+        Ok(NativeMailServiceStream { epoch, publisher: self.clone(),fence:fence.cloned() })
+    }
+}
+
+impl NativeMailServiceStream {
+    fn has_send_flight(&self)->bool{self.fence.as_ref().is_some_and(|fence|fence.0.lock().ok().is_some_and(|state|state.mail_send_flight.as_ref().is_some_and(|send|send.ticket.epoch()==self.epoch)))}
+    fn acknowledge_send(&self,result:i32)->bool{
+        use mir2_client_bevy::mail_service::{MailSendAcknowledgement,MailServiceInboxMessage};
+        if !matches!(result,1|-1){return true;}
+        let Some(fence)=self.fence.as_ref()else{return true;};
+        let send=match fence.0.lock(){Ok(mut state)=>{
+            if !state.mail_send_flight.as_ref().is_some_and(|send|send.ticket.epoch()==self.epoch){return true;}state.mail_send_flight.take()
+        },Err(_)=>return false};
+        let Some(send)=send else{return true;};
+        // Captured exact old ticket; no owner reset or latest stamp relabels it.
+        send.deliver(MailServiceInboxMessage::SendAcknowledgement(MailSendAcknowledgement{ticket:send.ticket,result}))
+    }
+    fn deliver(&self, event: mir2_client_bevy::mail_service::MailServiceEvent) -> bool {
+        use mir2_client_bevy::mail_service::{MailServiceDelivery, MailServiceInboxMessage};
+        self.publisher.publish(MailServiceInboxMessage::Delivery(MailServiceDelivery { epoch: self.epoch, event }))
+    }
+}
+
+#[cfg(test)]
+fn controlled_mail_service_publisher(
+    publish: impl Fn(mir2_client_bevy::mail_service::MailServiceInboxMessage) -> bool + Send + Sync + 'static,
+) -> NativeMailServicePublisher {
+    // Isolated logic fixtures have no NativeInbound resource or ownership
+    // channel. Allocate a positive test run explicitly; production cannot use it.
+    let run = NativeCommandFence::new().stamp().expect("controlled test run").run;
+    NativeMailServicePublisher::Controlled { run, publish: Arc::new(publish) }
 }
 
 #[derive(Default)]
@@ -764,6 +1724,9 @@ struct WalletState {
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 struct NativeUiPlayerCursor {
     npc_shop_uses_pearls: bool,
+    // Raw f32 bits retain Eq on the cursor and survive partial snapshots.
+    npc_shop_purchase_rate_bits: Option<u32>,
+    npc_shop_panel_type: u8,
     npc_shop_hide_added_stats: bool,
     hp: Option<i32>,
     max_hp: Option<i32>,
@@ -1885,36 +2848,55 @@ fn apply_skill_patch(skill: &mut Value, patch: &SkillPacketPatch) {
 /// connection that already received a resume credential retries inside the
 /// bounded reconnect window; a normal Web-compatible connection still waits
 /// for the visible Retry action after it fails.
-pub async fn run_gateway_client<R: CommandSource + Send>(
+pub async fn run_gateway_client<R: CommandSource + Send, E:Into<NativeShellEventSender>>(
     base_url: &str,
     commands: R,
-    shell_events: std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: E,
     gameplay_events: std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     reconnect_config: NativeReconnectConfig,
 ) -> Result<(), String> {
-    run_gateway_client_with_world_ingest(
+    run_gateway_client_with_ingest_and_mail_publisher(
         base_url,
         commands,
         shell_events,
         gameplay_events,
         reconnect_config,
         mir2_bevy_runtime::native_ingest::push_native_world_state,
+        NativeMailServicePublisher::Native,
     )
     .await
 }
 
-async fn run_gateway_client_with_world_ingest<R, F>(
+#[cfg(test)]
+async fn run_gateway_client_with_world_ingest<R, F, E:Into<NativeShellEventSender>>(
+    base_url: &str,
+    commands: R,
+    shell_events: E,
+    gameplay_events: std::sync::mpsc::Sender<NativeGameplaySnapshot>,
+    reconnect_config: NativeReconnectConfig,
+    push_world_state: F,
+) -> Result<(), String>
+where R: CommandSource + Send, F: FnMut(String) -> bool {
+    run_gateway_client_with_ingest_and_mail_publisher(base_url, commands, shell_events,
+        gameplay_events, reconnect_config, push_world_state,
+        controlled_mail_service_publisher(|_| true)).await
+}
+
+async fn run_gateway_client_with_ingest_and_mail_publisher<R, F, E:Into<NativeShellEventSender>>(
     base_url: &str,
     mut commands: R,
-    shell_events: std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: E,
     gameplay_events: std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     reconnect_config: NativeReconnectConfig,
     mut push_world_state: F,
+    mail_publisher: NativeMailServicePublisher,
 ) -> Result<(), String>
 where
     R: CommandSource + Send,
     F: FnMut(String) -> bool,
 {
+    let shell_events:NativeShellEventSender=shell_events.into();
+    let ownership=commands.ownership_fence();
     let mut should_connect = true;
     let mut generation = 0_u64;
     let mut resume_state = NativeResumeClientState::default();
@@ -1941,7 +2923,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some("native reconnect cancelled".to_owned()),
                     });
                     should_connect = false;
@@ -1954,7 +2936,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some("gateway reconnect deadline expired".to_owned()),
                     });
                     should_connect = false;
@@ -1985,7 +2967,7 @@ where
                     &mut resume_state,
                     &mut game_shop_receipt_gate,
                 );
-                let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                     reason: Some("gateway reconnect deadline expired".to_owned()),
                 });
                 should_connect = false;
@@ -2015,7 +2997,7 @@ where
                     &mut resume_state,
                     &mut game_shop_receipt_gate,
                 );
-                let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                     reason: Some("native reconnect cancelled".to_owned()),
                 });
                 should_connect = false;
@@ -2028,7 +3010,7 @@ where
                     &mut resume_state,
                     &mut game_shop_receipt_gate,
                 );
-                let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                     reason: Some("gateway reconnect deadline expired".to_owned()),
                 });
                 should_connect = false;
@@ -2053,7 +3035,7 @@ where
                             &mut resume_state,
                             &mut game_shop_receipt_gate,
                         );
-                        let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                        let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                             reason: Some("gateway reconnect unavailable".to_owned()),
                         });
                         should_connect = false;
@@ -2064,7 +3046,7 @@ where
                             &mut resume_state,
                             &mut game_shop_receipt_gate,
                         );
-                        let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                        let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                             reason: Some(format!("gateway connect failed: {error}")),
                         });
                         should_connect = false;
@@ -2074,7 +3056,8 @@ where
             }
         };
 
-        generation = generation.wrapping_add(1);
+        generation = generation.checked_add(1).ok_or_else(||"connection generation exhausted".to_owned())?;
+        if let Some(fence)=&ownership {fence.begin_connection()?;}
         crate::timing::report(
             &format!("websocket_connected:generation{generation}"),
             connect_started,
@@ -2101,6 +3084,7 @@ where
         )
         .await;
         if !matches!(handshake_result, ResumeLifecycle::Complete(())) {
+            if let Some(fence)=&ownership {fence.socket_lost();}
             let error = match handshake_result {
                 ResumeLifecycle::Cancel => {
                     let _ = apply_outer_terminal_transition(
@@ -2108,7 +3092,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some("native reconnect cancelled".to_owned()),
                     });
                     should_connect = false;
@@ -2121,7 +3105,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some("gateway reconnect deadline expired".to_owned()),
                     });
                     should_connect = false;
@@ -2148,7 +3132,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some("gateway reconnect handshake unavailable".to_owned()),
                     });
                     should_connect = false;
@@ -2159,7 +3143,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some(format!("gateway handshake failed: {error}")),
                     });
                     should_connect = false;
@@ -2167,8 +3151,15 @@ where
             }
             continue;
         }
+        let mail_stream = match mail_publisher.start_socket(ownership.as_ref(), generation) {
+            Ok(stream) => stream,
+            Err(error) => {
+                if let Some(fence) = &ownership { fence.socket_lost(); }
+                return Err(error);
+            }
+        };
         if !attempting_resume {
-            let _ = shell_events.send(ShellGatewayEvent::Connected);
+            let _ = shell_events.send_event(ShellGatewayEvent::Connected);
         }
         let exit = run_connected_gateway(
             socket,
@@ -2182,8 +3173,10 @@ where
             &mut resume_scene_reset_sent,
             &mut game_shop_receipt_gate,
             &mut push_world_state,
+            mail_stream,
         )
         .await;
+        if let Some(fence)=&ownership {fence.socket_lost();}
         match exit {
             Ok(ConnectedExit::Shutdown) => return Ok(()),
             Ok(ConnectedExit::ResumeRejected) => {
@@ -2192,7 +3185,7 @@ where
                     &mut resume_state,
                     &mut game_shop_receipt_gate,
                 );
-                let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                     reason: Some("session resume unavailable".to_owned()),
                 });
                 should_connect = false;
@@ -2203,7 +3196,7 @@ where
                     &mut resume_state,
                     &mut game_shop_receipt_gate,
                 );
-                let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                     reason: Some("gateway reconnect deadline expired".to_owned()),
                 });
                 should_connect = false;
@@ -2219,7 +3212,7 @@ where
                             &mut resume_state,
                             &mut game_shop_receipt_gate,
                         );
-                        let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                        let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                             reason: Some("gateway reconnect unavailable".to_owned()),
                         });
                         should_connect = false;
@@ -2232,7 +3225,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: reason.or_else(|| Some("connection closed".to_owned())),
                     });
                     should_connect = false;
@@ -2248,7 +3241,7 @@ where
                         &mut resume_state,
                         &mut game_shop_receipt_gate,
                     );
-                    let _ = shell_events.send(ShellGatewayEvent::Disconnect {
+                    let _ = shell_events.send_event(ShellGatewayEvent::Disconnect {
                         reason: Some(reason),
                     });
                     should_connect = false;
@@ -2285,11 +3278,12 @@ where
     let mut poll = tokio::time::interval(Duration::from_millis(25));
     loop {
         poll.tick().await;
-        let batch = drain_command_batch(commands, batch_limit);
+        let batch = unsent_command_batch(drain_command_batch(commands, batch_limit));
+        if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed before socket entry".into());}
         // Scan transactions before honoring Connect/Leave from the same
         // batch; drain_command_batch deliberately appends reserved lanes and
         // a control command may otherwise return first.
-        for command in &batch {
+        for command in &batch.0 {
             let _ = discard_correlated_before_socket_write(
                 command,
                 game_shop_receipt_gate,
@@ -2300,14 +3294,16 @@ where
             if is_game_shop_transaction(&command) {
                 continue;
             }
-            match command {
+            retire_unsent_command(&command);
+            match command.payload() {
                 GatewayCommand::Connect => return Ok(true),
                 GatewayCommand::Shutdown => return Ok(false),
                 GatewayCommand::Wire(NativeOutboundCommand::LogOut)
                 | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => return Ok(false),
-                GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {}
+                GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::Owned(_) => {}
             }
         }
+        if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed before socket entry".into());}
     }
 }
 
@@ -2375,8 +3371,9 @@ where
             _ = &mut resume_timeout => return Ok(RetryWait::Deadline),
             _ = &mut deadline => return Ok(RetryWait::Elapsed),
             _ = poll.tick() => {
-                let batch = drain_command_batch(commands, batch_limit);
-                for command in &batch {
+                let batch = unsent_command_batch(drain_command_batch(commands, batch_limit));
+                if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed during recovery".into());}
+                for command in &batch.0 {
                     let _ = discard_correlated_before_socket_write(
                         command,
                         game_shop_receipt_gate,
@@ -2387,19 +3384,34 @@ where
                     if is_game_shop_transaction(&command) {
                         continue;
                     }
-                    match command {
+                    retire_unsent_command(&command);
+                    match command.payload() {
                         GatewayCommand::Shutdown => return Ok(RetryWait::Shutdown),
                         GatewayCommand::Connect => return Ok(RetryWait::Connect),
                         GatewayCommand::Wire(NativeOutboundCommand::LogOut)
                         | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
                             return Ok(RetryWait::Leave)
                         }
-                        GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {}
+                        GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::Owned(_) => {}
                     }
                 }
+                if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed during recovery".into());}
             }
         }
     }
+}
+
+fn retire_unsent_command(command:&GatewayCommand){if let GatewayCommand::Owned(owned)=command{owned.fence.retire(owned);}}
+
+/// Every not-yet-visited tail remains definitely unsent on an early return.
+struct NativeUnsentCommandBatch(VecDeque<GatewayCommand>);
+impl Iterator for NativeUnsentCommandBatch {type Item=GatewayCommand;fn next(&mut self)->Option<Self::Item>{self.0.pop_front()}}
+impl Drop for NativeUnsentCommandBatch {fn drop(&mut self){for command in &self.0{retire_unsent_command(command);}}}
+fn unsent_command_batch(batch:Vec<GatewayCommand>)->NativeUnsentCommandBatch{NativeUnsentCommandBatch(batch.into())}
+fn mail_quote_delivery_failed<R:CommandSource>(commands:&R)->bool {
+    commands.ownership_fence().is_some_and(|fence|{
+        fence.mail_quote_delivery_failed()||fence.stamp().is_some_and(|stamp|mir2_bevy_runtime::native_ingest::native_mail_stream_failed_epoch()==Some(mir2_client_bevy::mail_service::MailServiceStreamEpoch{run:stamp.run,connection:stamp.connection}))
+    })
 }
 
 fn drain_command_batch<R: CommandSource>(
@@ -2421,20 +3433,20 @@ fn drain_command_batch<R: CommandSource>(
         let Ok(command) = commands.try_command() else {
             break;
         };
-        match command {
-            GatewayCommand::Shutdown => return vec![GatewayCommand::Shutdown],
+        match command.payload() {
+            GatewayCommand::Shutdown => {for old in &batch{retire_unsent_command(old);}if let Some(old)=latest_player.as_ref(){retire_unsent_command(old);}if let Some(old)=leave.as_ref(){retire_unsent_command(old);}return vec![command];},
             GatewayCommand::Connect => {
                 if batch.len() < limit {
-                    batch.push(GatewayCommand::Connect);
-                }
+                    batch.push(command);
+                } else {retire_unsent_command(&command);}
             }
-            GatewayCommand::Player(intent) => latest_player = Some(GatewayCommand::Player(intent)),
+            GatewayCommand::Player(_) => {if let Some(old)=latest_player.replace(command){retire_unsent_command(&old);}},
             GatewayCommand::Wire(NativeOutboundCommand::LogOut)
             | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
-                leave = Some(command);
+                if let Some(old)=leave.replace(command){retire_unsent_command(&old);}
             }
-            other if is_correlated_transaction(&other) => {
-                transaction = Some(other);
+            _ if is_correlated_transaction(&command) => {
+                transaction = Some(command);
                 // A bounded receiver takes the reserved transaction slot
                 // atomically. Stop this drain immediately so a second
                 // transaction concurrently inserted after that take remains
@@ -2442,28 +3454,28 @@ fn drain_command_batch<R: CommandSource>(
                 // silently discarded in this batch.
                 break;
             }
-            other if batch.len() < limit => batch.push(other),
-            _ => {}
+            _ if batch.len() < limit => batch.push(command),
+            _ => {retire_unsent_command(&command);}
         }
     }
     let reserved = usize::from(transaction.is_some())
         .saturating_add(usize::from(leave.is_some()))
         .saturating_add(usize::from(latest_player.is_some()));
     while batch.len().saturating_add(reserved) > limit && !batch.is_empty() {
-        batch.pop();
+        if let Some(old)=batch.pop(){retire_unsent_command(&old);}
     }
     if let Some(transaction) = transaction {
         batch.push(transaction);
     }
     if let Some(leave) = leave {
         if batch.len() == limit && reserved <= limit {
-            batch.pop();
+            if let Some(old)=batch.pop(){retire_unsent_command(&old);}
         }
         batch.push(leave);
     }
     if let Some(player) = latest_player {
         if batch.len() == limit && reserved <= limit {
-            batch.pop();
+            if let Some(old)=batch.pop(){retire_unsent_command(&old);}
         }
         batch.push(player);
     }
@@ -2534,7 +3546,9 @@ where
     R: CommandSource,
     F: FnMut() -> bool,
 {
-    for command in drain_command_batch(commands, batch_limit) {
+    let batch=unsent_command_batch(drain_command_batch(commands,batch_limit));
+    if mail_quote_delivery_failed(commands){return ResumeLifecycle::Failed("native MailCost receipt delivery failed during recovery".into());}
+    for command in batch {
         if discard_correlated_before_socket_write(
             &command,
             game_shop_receipt_gate,
@@ -2542,6 +3556,7 @@ where
         ) {
             continue;
         }
+        retire_unsent_command(&command);
         match awaiting_resume_command_action(&command) {
             AwaitingResumeCommandAction::Shutdown => return ResumeLifecycle::Shutdown,
             AwaitingResumeCommandAction::Cancel => return ResumeLifecycle::Cancel,
@@ -2550,6 +3565,7 @@ where
             AwaitingResumeCommandAction::Ignore => {}
         }
     }
+    if mail_quote_delivery_failed(commands){return ResumeLifecycle::Failed("native MailCost receipt delivery failed during recovery".into());}
     ResumeLifecycle::Complete(())
 }
 
@@ -2711,6 +3727,7 @@ async fn send_resume_handshake(
         capabilities: vec![
             NATIVE_RESUME_PROTOCOL.to_owned(),
             NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            CATALOG_GZIP_CAPABILITY.to_owned(),
         ],
     }
     .to_wire_json();
@@ -2781,6 +3798,7 @@ async fn send_resume_handshake_with_resume_controls<R: CommandSource>(
         capabilities: vec![
             NATIVE_RESUME_PROTOCOL.to_owned(),
             NATIVE_GAME_SHOP_RECEIPT_PROTOCOL.to_owned(),
+            CATALOG_GZIP_CAPABILITY.to_owned(),
         ],
     }
     .to_wire_json();
@@ -2828,13 +3846,13 @@ enum AwaitingResumeCommandAction {
 }
 
 fn awaiting_resume_command_action(command: &GatewayCommand) -> AwaitingResumeCommandAction {
-    match command {
+    match command.payload() {
         GatewayCommand::Shutdown => AwaitingResumeCommandAction::Shutdown,
         GatewayCommand::Wire(NativeOutboundCommand::LogOut)
         | GatewayCommand::Wire(NativeOutboundCommand::Disconnect) => {
             AwaitingResumeCommandAction::Cancel
         }
-        GatewayCommand::Connect | GatewayCommand::Wire(_) | GatewayCommand::Player(_) => {
+        GatewayCommand::Connect | GatewayCommand::Wire(_) | GatewayCommand::Player(_) | GatewayCommand::Owned(_) => {
             AwaitingResumeCommandAction::Ignore
         }
     }
@@ -2860,7 +3878,7 @@ async fn run_connected_gateway<R, F>(
         tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
     >,
     commands: &mut R,
-    shell_events: &std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: &impl NativeShellEventSink,
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     generation: u64,
     reconnect_config: NativeReconnectConfig,
@@ -2869,6 +3887,7 @@ async fn run_connected_gateway<R, F>(
     resume_scene_reset_sent: &mut bool,
     game_shop_receipt_gate: &mut GameShopReceiptGate,
     push_world_state: &mut F,
+    mail_stream: NativeMailServiceStream,
 ) -> Result<ConnectedExit, String>
 where
     R: CommandSource,
@@ -2885,9 +3904,10 @@ where
         }
     };
     tokio::pin!(resume_timeout);
-    let mut context = GatewaySessionContext::default();
+    let mut context = GatewaySessionContext { mail_stream: Some(mail_stream), ..Default::default() };
     let mut gameplay_adapter = NativeGameplayAdapter::default();
     gameplay_adapter.set_generation(generation);
+    gameplay_adapter.command_fence=commands.ownership_fence();
     // Every WebSocket generation owns an isolated lighting lifecycle. A
     // reconnect must never retain the previous map's darkness or emitters.
     let mut lighting_publisher = NativeLightingPublisher::for_connection(generation);
@@ -2940,11 +3960,17 @@ where
                 }
             }
             _ = input_poll.tick() => {
+                if commands.ownership_fence().is_some_and(|fence|fence.is_retired()){return Ok(ConnectedExit::Shutdown);}
                 if *phase==ConnectionPhase::Normal {skill_cursor.flush_hero_model();skill_cursor.flush_skill_models_with(mir2_bevy_runtime::native_ingest::push_native_skill_model);}
-                for command in drain_command_batch(commands, reconnect_config.command_batch_limit) {
+                let batch=unsent_command_batch(drain_command_batch(commands,reconnect_config.command_batch_limit));
+                if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed".into());}
+                for enveloped_command in batch {
+                    let (command,ownership_proof)=enveloped_command.clone().into_parts();
+                    if commands.ownership_fence().is_some() && ownership_proof.is_none(){continue;}
+                    if let Some(proof)=ownership_proof.as_ref(){if !proof.fence.allows(proof){proof.fence.retire(proof);continue;}}
                     if *phase != ConnectionPhase::Normal {
                         if discard_correlated_before_socket_write(
-                            &command,
+                            &enveloped_command,
                             game_shop_receipt_gate,
                             mir2_bevy_runtime::native_ingest::push_native_data_reset,
                         ) {
@@ -2961,7 +3987,7 @@ where
                                     "native reconnect cancelled".to_owned(),
                                 )));
                             }
-                            AwaitingResumeCommandAction::Ignore => continue,
+                            AwaitingResumeCommandAction::Ignore => {retire_unsent_command(&enveloped_command);continue;},
                         }
                     }
                     let explicit_leave = matches!(
@@ -2979,19 +4005,21 @@ where
                         &command,
                         GatewayCommand::Wire(NativeOutboundCommand::SendMail { .. })
                     );
+                    if is_send_mail&&ownership_proof.as_ref().is_none_or(|proof|proof.mail_send.is_none()){retire_unsent_command(&enveloped_command);continue;}
                     // Crystal's mail commands have no request id. Keep one
                     // in-flight command per operation class even if callers
                     // enqueue different mail ids/drafts in the same frame.
                     if !mail_command_allowed(
                         &command,
                         in_flight_claim_mail_id,
-                        send_mail_in_flight,
+                        send_mail_in_flight||context.mail_stream.as_ref().is_some_and(NativeMailServiceStream::has_send_flight),
                         !pending_mail_feedback.is_empty(),
                     ) {
-                        continue;
+                        retire_unsent_command(&enveloped_command);continue;
                     }
                     let game_shop_request = game_shop_request_from_command(&command);
                     if game_shop_request.is_some() && game_shop_receipt_gate.pending.is_some() {
+                        if let Some(proof)=ownership_proof.as_ref(){proof.fence.retire(proof);continue;}
                         // The UI and command transaction lanes both enforce a
                         // single purchase. Treat any violation at the sole
                         // writer as an ambiguous terminal operation instead of
@@ -3006,46 +4034,49 @@ where
                         _ => None,
                     };
                     let trace_player_command = matches!(&command, GatewayCommand::Player(_));
+                    let context_command=match &command {GatewayCommand::Wire(wire)=>Some(wire.clone()),_=>None};
                     let payload = match command {
-                        GatewayCommand::Connect => continue,
+                        GatewayCommand::Connect => {if let Some(owned)=ownership_proof.as_ref(){owned.fence.retire(owned);}continue;},
                         GatewayCommand::Shutdown => {
                             reset_native_data_models();
                             return Ok(ConnectedExit::Shutdown);
                         }
                         GatewayCommand::Player(intent) => intent.to_json(),
                         GatewayCommand::Wire(command) => {
-                            update_session_context(&mut context, &command);
                             command.to_wire_json()
                         }
+                        GatewayCommand::Owned(_)=>unreachable!("only normalized queue payload reaches serialization"),
                     };
                     if trace_player_command
                         && std::env::var_os("MIR2_NATIVE_TRACE_RENDER").is_some()
                     {
                         eprintln!("[gateway-client] sending player command {payload}");
                     }
-                    if explicit_leave {
-                        resume_state.clear();
-                        // Do not leave stale darkness visible while the
-                        // server processes logout/disconnect. The eventual
-                        // packet reset is idempotent and will retry if this
-                        // enqueue was backpressured.
-                        lighting_publisher.reset_session();
-                        lighting_publisher.push_clear_state();
-                    }
                     let send_started = Instant::now();
-                    if let Err(error) = socket
-                        .send(Message::Text(payload.to_string().into()))
-                        .await
-                    {
-                        let terminated_written = terminate_written_game_shop_unknown(
-                            game_shop_receipt_gate,
-                            mir2_bevy_runtime::native_ingest::push_native_data_reset,
-                        );
-                        if game_shop_request.is_some() && !terminated_written {
-                            game_shop_receipt_gate.clear_terminal();
-                            let _ = mir2_bevy_runtime::native_ingest::push_native_data_reset();
+                    let outcome=commit_owned_frame(&mut socket,ownership_proof.as_ref(),Message::Text(payload.to_string().into())).await;
+                    match outcome {
+                        NativeSinkCommit::MailQuoteReceiptUnavailable=>{
+                            return Err("native MailCost entry receipt delivery failed".into());
                         }
-                        return Err(format!("gateway command send failed: {error}"));
+                        NativeSinkCommit::DefinitelyUnsent=>continue,
+                        NativeSinkCommit::Unavailable(error)=>{
+                            if let Some(proof)=ownership_proof.as_ref(){proof.fence.retire(proof);}
+                            return Err(format!("gateway command readiness failed before commit: {error}"));
+                        }
+                        NativeSinkCommit::Unknown(error)=>{
+                            // start_send was called; the frame is irreversible and never replayed.
+                            let terminated=terminate_written_game_shop_unknown(game_shop_receipt_gate,mir2_bevy_runtime::native_ingest::push_native_data_reset);
+                            if game_shop_request.is_some()&&!terminated {
+                                game_shop_receipt_gate.clear_terminal();let _=mir2_bevy_runtime::native_ingest::push_native_data_reset();
+                            }
+                            return Err(format!("gateway command commit/flush unknown: {error}"));
+                        }
+                        NativeSinkCommit::Flushed=>{}
+                    }
+                    // These local procedure transitions belong only to the frame actually committed.
+                    let control_still_current=context_command.as_ref().is_none_or(|wire|apply_flushed_control_context(ownership_proof.as_ref(),wire,&mut context,resume_state));
+                    if explicit_leave&&control_still_current {
+                        lighting_publisher.reset_session();lighting_publisher.push_clear_state();
                     }
                     crate::timing::sent(timed_request, send_started);
                     if let Some(request) = game_shop_request {
@@ -3061,12 +4092,13 @@ where
                         send_mail_in_flight = true;
                     }
                 }
+                if mail_quote_delivery_failed(commands){return Err("native MailCost receipt delivery failed".into());}
             }
             message = socket.next() => {
                 match message {
-                    Some(Ok(Message::Text(text))) => {
-                        let disposition = process_connected_text_frame(
-                            &text,
+                    Some(Ok(frame @ (Message::Text(_) | Message::Binary(_)))) => {
+                        let dispositions = process_connected_server_frame(
+                            &frame,
                             game_shop_receipt_gate,
                             |text, gate| {
                                 let disposition = handle_gateway_text_for_connection(
@@ -3105,11 +4137,13 @@ where
                             },
                             mir2_bevy_runtime::native_ingest::push_native_data_reset,
                         )?;
-                        match disposition {
-                            InboundDisposition::ResumeRejected => {
-                                return Ok(ConnectedExit::ResumeRejected);
+                        for disposition in dispositions {
+                            match disposition {
+                                InboundDisposition::ResumeRejected => {
+                                    return Ok(ConnectedExit::ResumeRejected);
+                                }
+                                InboundDisposition::Applied | InboundDisposition::Quarantined => {}
                             }
-                            InboundDisposition::Applied | InboundDisposition::Quarantined => {}
                         }
                     }
                     Some(Ok(Message::Close(_))) | None => {
@@ -3117,15 +4151,6 @@ where
                             ConnectedSocketEnd::Disconnected,
                             game_shop_receipt_gate,
                             mir2_bevy_runtime::native_ingest::push_native_data_reset,
-                        ));
-                    }
-                    Some(Ok(Message::Binary(bytes))) if bytes.len() > MAX_GATEWAY_FRAME_BYTES => {
-                        let _ = terminate_written_game_shop_unknown(
-                            game_shop_receipt_gate,
-                            mir2_bevy_runtime::native_ingest::push_native_data_reset,
-                        );
-                        return Err(format!(
-                            "gateway binary frame exceeds {MAX_GATEWAY_FRAME_BYTES} bytes"
                         ));
                     }
                     Some(Ok(_)) => continue,
@@ -3292,7 +4317,7 @@ fn handle_gateway_text_for_connection<F>(
     text: &str,
     snapshot_log_counter: &mut u32,
     context: &GatewaySessionContext,
-    shell_events: &std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: &impl NativeShellEventSink,
     gameplay_adapter: &mut NativeGameplayAdapter,
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
@@ -3338,6 +4363,7 @@ where
                 apply_reconnect_reset_policy(session_resumed_reset_policy());
                 *resume_scene_reset_sent = true;
             }
+            if let Some(fence)=&gameplay_adapter.command_fence {fence.authorize_entry(true);}
             *phase = ConnectionPhase::Resumed;
             return Ok(InboundDisposition::Applied);
         }
@@ -3389,9 +4415,21 @@ where
     // lifetime. Logout/character selection may reuse this connection.
     if matches!(&parsed, InboundEvent::Packet(PacketEvent::StartGameAck(ack)) if ack.result == Some(4))
     {
+        if let Some(fence)=&gameplay_adapter.command_fence {fence.authorize_entry(false);}
         *connection_bootstrap_sent = false;
     }
 
+    // Revoke at authoritative ingress, before any map-only or full publication.
+    if let Some(fence)=&gameplay_adapter.command_fence {
+        match &parsed {
+            InboundEvent::Packet(PacketEvent::MapInformation(identity))=>fence.observe_scene(identity.map_index,false),
+            InboundEvent::Packet(PacketEvent::MapChanged(identity))=>fence.observe_scene(identity.map_index,true),
+            _=>{}
+        }
+        if let Ok(envelope)=serde_json::from_str::<GatewayEnvelope>(text) {
+            if envelope.packet.as_deref().and_then(packet_native_reset_scope)==Some(NativeResetScope::Session){fence.revoke_owner();}
+        }
+    }
     let is_world_snapshot = text_kind(text).as_deref() == Some("worldSnapshot");
     let snapshot_ingest = handle_gateway_text_with_world_ingest(
         text,
@@ -3412,7 +4450,8 @@ where
         push_world_state,
     )?;
 
-    if is_world_snapshot && snapshot_ingest == WorldSnapshotIngestOutcome::Applied {
+    let producer_entry_ready=gameplay_adapter.command_fence.as_ref().is_none_or(|fence|gameplay_adapter.last_full_producer_stamp.is_some_and(|stamp|fence.accepts(stamp,true)));
+    if is_world_snapshot && snapshot_ingest == WorldSnapshotIngestOutcome::Applied && producer_entry_ready {
         let value: Value = serde_json::from_str(text)
             .map_err(|error| format!("invalid gateway payload: {error}"))?;
         let payload = value.get("payload").unwrap_or(&Value::Null);
@@ -3423,7 +4462,7 @@ where
                 context.character_index
             };
             if let Some(character) = resumed_character_from_snapshot(payload, character_index) {
-                let _ = shell_events.send(ShellGatewayEvent::PlayerBootstrapped { character });
+                let _ = shell_events.send_event(ShellGatewayEvent::PlayerBootstrapped { character });
                 *connection_bootstrap_sent = true;
             }
         }
@@ -3496,7 +4535,7 @@ fn handle_gateway_text(
     text: &str,
     snapshot_log_counter: &mut u32,
     context: &GatewaySessionContext,
-    shell_events: &std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: &impl NativeShellEventSink,
     gameplay_adapter: &mut NativeGameplayAdapter,
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
@@ -3533,7 +4572,7 @@ fn handle_gateway_text_with_world_ingest<F>(
     text: &str,
     snapshot_log_counter: &mut u32,
     context: &GatewaySessionContext,
-    shell_events: &std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: &impl NativeShellEventSink,
     gameplay_adapter: &mut NativeGameplayAdapter,
     gameplay_events: &std::sync::mpsc::Sender<NativeGameplaySnapshot>,
     last_world_payload: &mut Option<Value>,
@@ -3552,7 +4591,14 @@ where
 {
     let event: GatewayEnvelope =
         serde_json::from_str(text).map_err(|error| format!("invalid gateway payload: {error}"))?;
-    let parsed = parse_inbound_event(text).map_err(|error| error.to_string())?;
+    if let Some(fence)=&gameplay_adapter.command_fence{
+        if let Some(packet)=event.packet.as_deref(){fence.invalidate_npc_gold_buy_packet(packet);}
+        else if event.kind=="worldSnapshot"{fence.begin_npc_gold_buy_snapshot(event.payload.as_ref());}
+    }
+    let mut parsed = parse_inbound_event(text).map_err(|error| error.to_string())?;
+    if let InboundEvent::Packet(packet) = &mut parsed {
+        add_packet_item_tooltip_sources(packet, ui_cursor);
+    }
     dispatch_shell_event(&parsed, context, shell_events);
     let packet_updates_world = if let InboundEvent::Packet(packet) = &parsed {
         gameplay_adapter.observe_packet(packet)
@@ -3735,9 +4781,24 @@ where
                 .payload
                 .ok_or_else(|| "worldSnapshot missing payload".to_owned())?;
             let mut payload = payload;
+            let npc_buy_raw_inventory=full_npc_gold_buy_inventory_snapshot(&payload);
             validate_quest_operation_ack(&payload)?;
             map_packet_cursor.trace_snapshot_identity(&payload);
-            if map_packet_cursor.snapshot_is_from_previous_map(&payload) {
+            // Source identity is checked before cursor metadata can overwrite
+            // it. Same file names do not prove the packet's current map index.
+            let source_index_mismatch=gameplay_adapter.command_fence.is_some()
+                && value_i32(map_packet_cursor.identity_metadata.get("mapIndex"))
+                    .is_some_and(|index|{
+                        if let Some(raw_index)=payload.get("mapIndex"){
+                            value_i32(Some(raw_index))!=Some(index)
+                        }else{
+                            // Current server WorldSnapshot has no mapIndex.
+                            // Its original file identity must match before overlay.
+                            !map_packet_cursor.map_file_name.as_deref().zip(map_file_name(&payload))
+                                .is_some_and(|(current,incoming)|normalize_map_file_name(current)==normalize_map_file_name(incoming))
+                        }
+                    });
+            if map_packet_cursor.snapshot_is_from_previous_map(&payload)||source_index_mismatch {
                 // An explicitly named source-map snapshot cannot supersede a
                 // newer transfer packet or repopulate destination UI/actors.
                 forward_stale_map_receipts(
@@ -3766,11 +4827,13 @@ where
             skill_cursor.flush_hero_model();
             // Skill receipts use their own critical channel, before ECS/world
             // ingestion. Keep the complete snapshot on retry, never just ACK.
-            let _ = skill_cursor.queue_skill_model(&payload)?;
+            let mut skill_source_model=transform_skill_model(&payload);
+            if skill_source_model.get("skillKeyAck").is_some_and(|ack|ack["key"].as_u64().unwrap_or(0)>16||ack["oldKey"].as_u64().unwrap_or(0)>16){skill_source_model["skillKeyAck"]=Value::Null;}
+            let skill_ingest=skill_cursor.queue_skill_model(&payload)?;
             if let Some(object) = payload.as_object_mut() {
                 object.remove("skillKeyAck");
             }
-            let _ = gameplay_events.send(gameplay_adapter.snapshot(&payload));
+            let mut owned_gameplay_snapshot=gameplay_adapter.snapshot(&payload);
             strip_one_shot_quest_operation_ack(&mut payload);
             let runtime_snapshot = transform_world_snapshot(&payload);
             let json = serde_json::to_string(&runtime_snapshot).map_err(|e| e.to_string())?;
@@ -3805,12 +4868,12 @@ where
             ui_cursor.observe_world_snapshot(&payload);
             let ui_model = ui_cursor.to_read_model_json();
             let ui_json = serde_json::to_string(&ui_model).map_err(|e| e.to_string())?;
-            let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui_json);
+            let ui_ingest=mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui_json);
 
             // Feed the shared map model so client-bevy renders terrain tiles.
             let map_model = transform_map_model(&payload);
             let map_json = serde_json::to_string(&map_model).map_err(|e| e.to_string())?;
-            let _ = mir2_bevy_runtime::native_ingest::push_native_map_model(map_json);
+            let map_ingest=mir2_bevy_runtime::native_ingest::push_native_map_model(map_json);
 
             // When a local map pack + atlas are available, render the real map
             // textures via MapRenderState instead of the colored terrain. The
@@ -3820,7 +4883,7 @@ where
             // Feed the shared entity model set so client-bevy renders entities.
             let entity_model = transform_entity_model_set(&payload);
             let entity_json = serde_json::to_string(&entity_model).map_err(|e| e.to_string())?;
-            let _ = mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entity_json);
+            let entity_ingest=mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entity_json);
 
             // The main-thread Windows entity presentation resource owns real
             // sprite render-state production so its Crystal frame clock keeps
@@ -3834,7 +4897,7 @@ where
                 let _ = mir2_bevy_runtime::native_ingest::push_native_social_model(social_json);
             }
             let inventory_json = serde_json::to_string(&inventory).map_err(|e| e.to_string())?;
-            let _ = mir2_bevy_runtime::native_ingest::push_native_inventory_model(inventory_json);
+            let inventory_ingest = mir2_bevy_runtime::native_ingest::push_native_inventory_model(inventory_json);
 
             // Skills are a separate Bevy resource, not part of UiReadModel.
             // Keep it synchronized with every accepted authoritative snapshot;
@@ -3851,12 +4914,27 @@ where
                     serde_json::to_string(&storage).map_err(|error| error.to_string())?;
                 let _ = mir2_bevy_runtime::native_ingest::push_native_storage_model(storage_json);
             }
+            let mut npc_buy_shop_delivery=None;
             if payload_has_valid_shop_array(&payload) {
                 let shop = transform_shop_model_from_snapshot(&payload, ui_cursor);
                 let shop_json = serde_json::to_string(&shop).map_err(|error| error.to_string())?;
-                let _ = mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+                let delivered = mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+                npc_buy_shop_delivery=Some((shop,delivered));
             }
 
+            if world_ingest==WorldSnapshotIngestOutcome::Applied && ui_ingest&&map_ingest&&entity_ingest&&skill_ingest {
+                attach_native_producer_provenance(&mut owned_gameplay_snapshot,gameplay_adapter,&payload,&ui_model,&map_model,&entity_model,Some(&skill_source_model),true)?;
+                gameplay_adapter.last_full_producer_stamp=owned_gameplay_snapshot.command_stamp;
+                gameplay_adapter.last_full_producer_models=owned_gameplay_snapshot.producer_models.clone();
+            }
+            if let Some(fence)=&gameplay_adapter.command_fence{
+                let staged=if npc_buy_raw_inventory{fence.stage_npc_gold_buy_inventory(&inventory)}else{None};
+                fence.finish_npc_gold_buy_inventory(staged,npc_buy_raw_inventory&&inventory_ingest&&world_ingest==WorldSnapshotIngestOutcome::Applied&&owned_gameplay_snapshot.producer_models.is_some());
+                if let Some((shop,delivered))=npc_buy_shop_delivery{let staged=fence.stage_npc_gold_buy_catalog(&shop,false);fence.finish_npc_gold_buy_catalog(staged,delivered);}
+            }
+            // Legacy adapters preserve established fixture delivery; production never
+            // presents a backpressured snapshot as an applied producer grant.
+            if gameplay_adapter.command_fence.is_none() || owned_gameplay_snapshot.command_stamp.is_some(){let _=gameplay_events.send(owned_gameplay_snapshot);}
             Ok(world_ingest)
         }
         "packet" => {
@@ -3934,18 +5012,21 @@ where
                         {
                             let shop_json =
                                 serde_json::to_string(&shop).map_err(|error| error.to_string())?;
-                            let _ =
-                                mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+                            let staged=gameplay_adapter.command_fence.as_ref().and_then(|fence|fence.stage_npc_gold_buy_catalog(&shop,true));
+                            let delivered=mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+                            if let Some(fence)=&gameplay_adapter.command_fence{fence.finish_npc_gold_buy_catalog(staged,delivered);}
                             let signal = npc_shop_service_from_packet(packet, payload)
                                 .ok_or_else(|| "invalid NPCGoods service signal".to_owned())?;
-                            push_native_npc_shop_service(signal)?;
+                            let delivered=push_native_npc_shop_service(signal)?;
+                            if let Some(fence)=&gameplay_adapter.command_fence{fence.observe_npc_gold_buy_service(signal,delivered);}
                         }
                     }
                 }
                 "NPCSell" => {
                     let signal = npc_shop_service_from_packet(packet, &Value::Null)
                         .ok_or_else(|| "invalid NPCSell service signal".to_owned())?;
-                    push_native_npc_shop_service(signal)?;
+                    let delivered=push_native_npc_shop_service(signal)?;
+                    if let Some(fence)=&gameplay_adapter.command_fence{fence.observe_npc_gold_buy_service(signal,delivered);}
                 }
                 "NPCRepair" | "NPCSRepair" => {
                     let Some(signal) = event
@@ -3956,7 +5037,8 @@ where
                         eprintln!("[gateway-client] ignored malformed {packet} service rate");
                         return Ok(WorldSnapshotIngestOutcome::NotSnapshot);
                     };
-                    push_native_npc_shop_service(signal)?;
+                    let delivered=push_native_npc_shop_service(signal)?;
+                    if let Some(fence)=&gameplay_adapter.command_fence{fence.observe_npc_gold_buy_service(signal,delivered);}
                 }
                 "DropItem" | "MoveItem" | "MergeItem" | "SplitItem1" | "SellItem"
                 | "EquipItem" | "RemoveItem" => {
@@ -4027,7 +5109,7 @@ where
                 }
                 "MailSendRequest" | "MailCost" | "MailLockedItem" => {
                     let payload = event.payload.as_ref().unwrap_or(&Value::Null);
-                    if !push_native_mail_service_event(packet, payload)? {
+                    if !push_native_mail_service_event(context.mail_stream.as_ref(), packet, payload)? {
                         eprintln!("[gateway-client] ignored malformed {packet} parcel service packet");
                     }
                 }
@@ -4056,8 +5138,8 @@ where
                 "MailSent" => {
                     if let Some(payload) = event.payload.as_ref() {
                         if let Some(feedback) = mail_operation_feedback(packet, payload, None) {
+                            if let Some(stream)=context.mail_stream.as_ref(){if !stream.acknowledge_send(if feedback.success{1}else{-1}){return Err("native MailSent ACK delivery failed".into());}}
                             *send_mail_in_flight = false;
-                            let _ = enqueue_mail_feedback(pending_mail_feedback, feedback);
                         }
                     }
                 }
@@ -4486,6 +5568,42 @@ fn packet_updates_big_map(packet: &PacketEvent) -> bool {
 /// snapshot leaves a successfully moved native player looking frozen in place.
 /// Inventory remains on the periodic snapshot path because Zone deltas do not
 /// mutate it.
+fn normalized_producer_model<T:serde::de::DeserializeOwned+serde::Serialize>(value:&Value)->Result<Value,String>{
+    let model:T=serde_json::from_value(value.clone()).map_err(|e|e.to_string())?;
+    serde_json::to_value(model).map_err(|e|e.to_string())
+}
+fn attach_native_producer_provenance(
+    snapshot:&mut NativeGameplaySnapshot,adapter:&NativeGameplayAdapter,payload:&Value,
+    ui:&Value,map:&Value,entities:&Value,skills:Option<&Value>,confirm_entry:bool,
+)->Result<(),String>{
+    let Some(fence)=&adapter.command_fence else{return Ok(());};
+    let self_actor=payload.get("entities").and_then(Value::as_array).and_then(|rows|rows.iter().find(|row|row.get("kind").and_then(Value::as_str)==Some("selfPlayer")))
+        .and_then(|row|row.get("objectId")).and_then(|value|value_u32(Some(value))).filter(|id|*id!=0);
+    let Some(actor)=self_actor else{return Ok(());};
+    if value_u32(payload.get("playerObjectId")).is_some_and(|id|id!=actor){return Ok(());}
+    if let Some(map_index)=value_i32(payload.get("mapIndex")){fence.observe_scene(map_index,false);}
+    let inherited_skills=if !confirm_entry {
+        let current=fence.stamp();
+        let inherited=adapter.last_full_producer_models.as_ref().and_then(|models|models.skills.as_ref());
+        if adapter.last_full_producer_stamp!=current||inherited.is_none(){
+            // Keep map/ACK presentation, but an old retained payload cannot be
+            // promoted into the new scene's complete producer source.
+            snapshot.command_stamp=current;snapshot.big_map_only=true;snapshot.producer_models=None;return Ok(());
+        }
+        inherited
+    }else{skills};
+    let stamp=if confirm_entry {fence.confirm_owner(actor)} else {fence.stamp()};
+    let Some(stamp)=stamp.filter(|stamp|stamp.actor==Some(actor)&&fence.accepts(*stamp,true)) else{return Ok(());};
+    snapshot.command_stamp=Some(stamp);
+    snapshot.producer_models=Some(crate::gameplay_bridge::NativeProducerModels {
+        ui:normalized_producer_model::<mir2_client_bevy::read_model::UiReadModel>(ui)?,
+        entities:normalized_producer_model::<mir2_client_bevy::entities::EntityModelSet>(entities)?,
+        map:normalized_producer_model::<mir2_client_bevy::map::MapModel>(map)?,
+        skills:inherited_skills.map(normalized_producer_model::<mir2_client_bevy::skill_model::SkillModel>).transpose()?,
+    });
+    Ok(())
+}
+
 fn forward_packet_first_world(
     payload: &Value,
     gameplay_adapter: &NativeGameplayAdapter,
@@ -4497,12 +5615,10 @@ fn forward_packet_first_world(
     let mut gameplay_snapshot = gameplay_adapter.snapshot(payload);
     gameplay_snapshot.authoritative_self_movement =
         native_self_movement_ack(source_packet, payload);
-    let _ = gameplay_events.send(gameplay_snapshot);
-
     let runtime_snapshot = transform_world_snapshot(payload);
     let runtime_json =
         serde_json::to_string(&runtime_snapshot).map_err(|error| error.to_string())?;
-    let _ = mir2_bevy_runtime::native_ingest::push_native_world_state(runtime_json);
+    let world_ingest=mir2_bevy_runtime::native_ingest::push_native_world_state(runtime_json);
 
     // Movement/map packet refreshes clone a partial retained world snapshot.
     // Merge it into the packet-first cursor so UserInformation-only appearance
@@ -4510,18 +5626,22 @@ fn forward_packet_first_world(
     ui_cursor.observe_world_snapshot(payload);
     let ui_model = ui_cursor.to_read_model_json();
     let ui_json = serde_json::to_string(&ui_model).map_err(|error| error.to_string())?;
-    let _ = mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui_json);
+    let ui_ingest=mir2_bevy_runtime::native_ingest::push_native_ui_read_model(ui_json);
 
     let map_model = transform_map_model(payload);
     let map_json = serde_json::to_string(&map_model).map_err(|error| error.to_string())?;
-    let _ = mir2_bevy_runtime::native_ingest::push_native_map_model(map_json);
+    let map_ingest=mir2_bevy_runtime::native_ingest::push_native_map_model(map_json);
 
     push_local_map_render_state(payload)?;
 
     let entity_model = transform_entity_model_set(payload);
     let entity_json = serde_json::to_string(&entity_model).map_err(|error| error.to_string())?;
-    let _ = mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entity_json);
+    let entity_ingest=mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entity_json);
 
+    if world_ingest&&ui_ingest&&map_ingest&&entity_ingest {
+        attach_native_producer_provenance(&mut gameplay_snapshot,gameplay_adapter,payload,&ui_model,&map_model,&entity_model,None,false)?;
+    }
+    if gameplay_adapter.command_fence.is_none()||gameplay_snapshot.command_stamp.is_some(){let _=gameplay_events.send(gameplay_snapshot);}
     // A successful Crystal movement acknowledgement only advances the local
     // scene/camera and releases the pending action. Inventory, learned skills,
     // mail, storage and shop are unrelated immutable models on this packet and
@@ -4540,7 +5660,9 @@ fn forward_packet_first_world(
     if payload_has_valid_shop_array(payload) {
         let shop = transform_shop_model_from_snapshot(payload, ui_cursor);
         let shop_json = serde_json::to_string(&shop).map_err(|error| error.to_string())?;
-        let _ = mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+        let staged=gameplay_adapter.command_fence.as_ref().and_then(|fence|fence.stage_npc_gold_buy_catalog(&shop,false));
+        let delivered=mir2_bevy_runtime::native_ingest::push_native_shop_model(shop_json);
+        if let Some(fence)=&gameplay_adapter.command_fence{fence.finish_npc_gold_buy_catalog(staged,delivered);}
     }
 
     Ok(())
@@ -4628,7 +5750,7 @@ fn native_self_movement_ack(
 fn dispatch_shell_event(
     event: &InboundEvent,
     context: &GatewaySessionContext,
-    shell_events: &std::sync::mpsc::Sender<ShellGatewayEvent>,
+    shell_events: &impl NativeShellEventSink,
 ) {
     let shell_event = match event {
         InboundEvent::Packet(PacketEvent::NewAccountResult(result)) => match result.result {
@@ -4782,7 +5904,7 @@ fn dispatch_shell_event(
     };
 
     if let Some(event) = shell_event {
-        let _ = shell_events.send(event);
+        let _ = shell_events.send_event(event);
     }
 }
 
@@ -5239,16 +6361,27 @@ fn npc_shop_service_from_packet(
 
 fn push_native_npc_shop_service(
     signal: mir2_client_bevy::shop::NpcShopServiceSignal,
-) -> Result<(), String> {
+) -> Result<bool, String> {
     if !signal.is_valid() {
         return Err("invalid NPC shop service signal".to_owned());
     }
     let json = serde_json::to_string(&signal).map_err(|error| error.to_string())?;
-    let _ = mir2_bevy_runtime::native_ingest::push_native_npc_shop_service(json);
-    Ok(())
+    Ok(mir2_bevy_runtime::native_ingest::push_native_npc_shop_service(json))
+}
+
+fn npc_catalog_projection_cursor(payload: &Value, cursor: &NativeUiPlayerCursor) -> NativeUiPlayerCursor {
+    let mut projected = cursor.clone();
+    projected.npc_shop_purchase_rate_bits = payload.get("rate").and_then(Value::as_f64)
+        .map(|rate| rate as f32).filter(|rate| rate.is_finite() && *rate >= 0.0)
+        .map(f32::to_bits);
+    projected.npc_shop_panel_type = value_u32(payload.get("panelType").or_else(|| payload.get("panel_type")))
+        .and_then(|value| u8::try_from(value).ok()).unwrap_or(u8::MAX);
+    projected
 }
 
 fn transform_shop_model_from_packet(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value {
+    let projected = npc_catalog_projection_cursor(payload, cursor);
+    let cursor = &projected;
     let goods: Vec<Value> = payload
         .get("list")
         .and_then(Value::as_array)
@@ -5290,18 +6423,28 @@ fn transform_shop_model_from_snapshot(payload: &Value, cursor: &NativeUiPlayerCu
     })
 }
 
-fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) -> Option<Value> {
+fn shop_good_json(item: &Value, _fallback: usize, cursor: &NativeUiPlayerCursor) -> Option<Value> {
+    let supplied = item.get("tooltipSource");
+    let ordinary_raw = item.get("is_shop_item").and_then(Value::as_bool) == Some(true)
+        || supplied.and_then(|source| source.get("userItem"))
+            .and_then(|raw| raw.get("is_shop_item")).and_then(Value::as_bool) == Some(true);
     let id = value_u64(
         item.get("uniqueId")
             .or_else(|| item.get("unique_id"))
             .or_else(|| item.get("id"))
-            .or_else(|| item.get("itemIndex"))
-            .or_else(|| item.get("item_index")),
+            .or_else(|| (!ordinary_raw).then(|| item.get("itemIndex").or_else(|| item.get("item_index"))).flatten()),
     )?;
-    let tooltip_source = item
-        .get("tooltipSource")
-        .cloned()
-        .or_else(|| crystal_tooltip_source_for_user_item(item, cursor).map(|source| json!(source)));
+
+    // Check original presence before legacy serde defaults can fill a carrier.
+    let tooltip_source = if ordinary_raw {
+        if let Some(source) = supplied {
+            mir2_client_bevy::npc_shop_buy::full_npc_gold_tooltip_source(source).then(|| source.clone())
+        } else if mir2_client_bevy::npc_shop_buy::full_npc_gold_user_item(item) {
+            crystal_tooltip_source_for_user_item(item, cursor).map(|source| json!(source))
+        } else { None }
+    } else {
+        supplied.cloned().or_else(|| crystal_tooltip_source_for_user_item(item, cursor).map(|source| json!(source)))
+    };
     let count = value_u32(item.get("count").or_else(|| item.get("quantity"))).unwrap_or(1);
     let icon = crystal_user_item_icon(item, count).or_else(|| {
         value_u32(item.get("icon"))
@@ -5309,16 +6452,17 @@ fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) 
             .filter(|value| *value != 0)
     });
     let icon_geometry = icon.and_then(item_frame_geometry);
+
     Some(json!({
         "unique_id": id,
         "use_pearls": cursor.npc_shop_uses_pearls,
+        "requires_gold_buy_plan": ordinary_raw && !cursor.npc_shop_uses_pearls,
+        "purchase_rate": if ordinary_raw && tooltip_source.is_some() { cursor.npc_shop_purchase_rate_bits.map(f32::from_bits) } else { None },
         "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),
         "price": value_u32(item.get("price")).unwrap_or_default(),
         "count": u16::try_from(count).unwrap_or(1),
         "stock": value_i32(item.get("stock")).unwrap_or(-1),
-        "panel_type": value_u32(item.get("panelType").or_else(|| item.get("panel_type")))
-            .and_then(|value| u8::try_from(value).ok())
-            .unwrap_or(u8::try_from(fallback).unwrap_or_default()),
+        "panel_type": cursor.npc_shop_panel_type,
         "icon": icon.unwrap_or_default(),
         "icon_width": icon_geometry.map(|frame| frame.width).unwrap_or_default(),
         "icon_height": icon_geometry.map(|frame| frame.height).unwrap_or_default(),
@@ -5350,7 +6494,10 @@ fn transform_npc_catalog_packet(
     if !matches!(packet, "NPCGoods" | "NPCPearlGoods") {
         return None;
     }
-    let previous = cursor.npc_shop_uses_pearls;
+    let previous = (cursor.npc_shop_uses_pearls, cursor.npc_shop_purchase_rate_bits, cursor.npc_shop_panel_type);
+    let projected = npc_catalog_projection_cursor(payload, cursor);
+    cursor.npc_shop_purchase_rate_bits = projected.npc_shop_purchase_rate_bits;
+    cursor.npc_shop_panel_type = projected.npc_shop_panel_type;
     cursor.npc_shop_uses_pearls = packet == "NPCPearlGoods";
     let mut model = try_transform_shop_model_from_packet(payload, cursor);
     if let Some(model) = model.as_mut() {
@@ -5361,7 +6508,7 @@ fn transform_npc_catalog_packet(
             cursor.npc_shop_hide_added_stats = shop_hide_added_stats(payload);
         }
     } else {
-        cursor.npc_shop_uses_pearls = previous;
+        (cursor.npc_shop_uses_pearls, cursor.npc_shop_purchase_rate_bits, cursor.npc_shop_panel_type) = previous;
     }
     model
 }
@@ -5523,6 +6670,7 @@ fn mail_service_event_from_packet(
     }
 }
 
+#[cfg(test)]
 fn push_native_mail_service_event_with(
     packet: &str,
     payload: &Value,
@@ -5535,12 +6683,10 @@ fn push_native_mail_service_event_with(
     Ok(deliver(json))
 }
 
-fn push_native_mail_service_event(packet: &str, payload: &Value) -> Result<bool, String> {
-    push_native_mail_service_event_with(
-        packet,
-        payload,
-        mir2_bevy_runtime::native_ingest::push_native_mail_service,
-    )
+fn push_native_mail_service_event(stream: Option<&NativeMailServiceStream>, packet: &str, payload: &Value) -> Result<bool, String> {
+    let Some(event) = mail_service_event_from_packet(packet, payload) else { return Ok(false); };
+    let stream = stream.ok_or_else(|| "native mail packet arrived without a trusted stream marker".to_owned())?;
+    Ok(stream.deliver(event))
 }
 
 fn mail_operation_feedback(
@@ -6230,6 +7376,32 @@ mod ranking_projection_tests {
     }
 }
 
+
+fn full_npc_gold_buy_inventory_snapshot(payload:&Value)->bool {
+    use mir2_client_bevy::inventory::InventoryModel;
+    let Some(capacity)=payload.get("inventoryCapacity").and_then(Value::as_u64)
+        .and_then(|value|u16::try_from(value).ok()) else{return false;};
+    if InventoryModel::canonical_capacity(capacity)!=capacity
+        || payload.get("gold").and_then(Value::as_u64).and_then(|value|u32::try_from(value).ok()).is_none(){return false;}
+    for (name,limit) in [("inventoryItems",usize::from(capacity-6)),("beltItems",6),("equipmentItems",32)] {
+        let Some(items)=payload.get(name).and_then(Value::as_array)else{return false;};
+        if items.len()>256{return false;}
+        for item in items {
+            if !item.is_object(){return false;}
+            let Some(slot)=item.get("slot").and_then(Value::as_u64)else{return false;};
+            let container=item.get("container").and_then(Value::as_str).unwrap_or("");
+            let valid_slot=if name=="inventoryItems" {
+                match container {"bag2"=>slot<40&&slot+40<(limit as u64),"quest"=>slot<80,
+                    ""|"bag"|"bag1"=>slot<(limit as u64),_=>false}
+            } else {slot<(limit as u64)};
+            if !valid_slot||item.get("uniqueId").or_else(||item.get("unique_id")).and_then(Value::as_u64).is_none()
+                || item.get("quantity").or_else(||item.get("count")).and_then(Value::as_u64)
+                    .and_then(|value|u32::try_from(value).ok()).filter(|count|*count>0).is_none(){return false;}
+        }
+    }
+    mir2_client_bevy::npc_shop_buy::full_npc_gold_buy_inventory(&transform_inventory_model(payload))
+}
+
 fn transform_inventory_model(payload: &Value) -> Value {
     let gold = value_u32_or(payload.get("gold"), 0);
     // Only an explicit Crystal-array length can unlock page two. Occupied
@@ -6291,7 +7463,11 @@ fn transform_inventory_model(payload: &Value) -> Value {
     items.extend(map_items(payload.get("beltItems"), 1));
     items.extend(map_items(payload.get("equipmentItems"), 2));
 
-    json!({ "capacity": capacity, "gold": gold, "items": items })
+    let mut model = json!({ "capacity": capacity, "gold": gold, "items": items });
+    if let Some(evidence) = payload.get("npcGoldTradeCapacity") {
+        model["npcGoldTradeCapacity"] = evidence.clone();
+    }
+    model
 }
 
 /// Copy the item fields that the simulation already exposes into the shared
@@ -6605,6 +7781,10 @@ mod map_identity_tests;
 mod handshake_tests;
 
 #[cfg(test)]
+#[path = "gateway_quest_tooltip_tests.rs"]
+mod quest_tooltip_tests;
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
@@ -6825,6 +8005,82 @@ mod tests {
         cursor.npc_shop_uses_pearls = true;
         cursor.reset();
         assert!(!cursor.npc_shop_uses_pearls);
+    }
+
+    #[test]
+    fn npc_gold_catalog_keeps_raw_rate_uid_and_packet_panel_for_every_row() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        let mut raw = CrystalUserItemModel {
+            unique_id: 43122689, item_index: 658, count: 1, is_shop_item: true,
+            ..Default::default()
+        };
+        let mut first = json!(raw); first["price"] = json!(53);
+        raw.unique_id += 1;
+        let mut second = json!(raw); second["price"] = json!(53);
+        let payload = json!({"list":[first, second], "rate":1.337_f32, "panelType":0});
+        let model = transform_npc_catalog_packet("NPCGoods", &payload, &mut cursor).unwrap();
+        let mut shop: mir2_client_bevy::shop::ShopModel = serde_json::from_value(model).unwrap();
+        shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal {
+            mode: mir2_client_bevy::shop::NpcShopServiceMode::Buy, repair_rate: None,
+        });
+        shop.selected_id = Some(raw.unique_id);
+        assert_eq!(shop.goods[1].panel_type, 0, "row index is not a packet panel");
+        assert_eq!(shop.goods[1].purchase_rate, Some(1.337_f32));
+        let inv = mir2_client_bevy::inventory::InventoryModel { gold:1000, ..Default::default() };
+        let plan = mir2_client_bevy::npc_shop_buy::plan_npc_gold_buy(&shop, &inv, 3);
+        assert!(plan.can_buy); assert_eq!(plan.total_gold, Some(160));
+        assert_eq!(plan.command.unwrap().item_index, raw.unique_id);
+        let recovered = transform_shop_model_from_snapshot(&json!({"npc_goods":payload["list"]}), &cursor);
+        assert_eq!(recovered["goods"][1]["purchase_rate"], json!(1.337_f32));
+        let before = (cursor.npc_shop_purchase_rate_bits, cursor.npc_shop_panel_type);
+        assert!(transform_npc_catalog_packet("NPCGoods", &json!({"list":[{}],"rate":2,"panelType":3}), &mut cursor).is_none());
+        assert_eq!((cursor.npc_shop_purchase_rate_bits, cursor.npc_shop_panel_type), before);
+        cursor.reset(); assert!(cursor.npc_shop_purchase_rate_bits.is_none());
+    }
+
+    #[test]
+    fn npc_gold_catalog_missing_rate_cannot_reuse_previous_quote_rate() {
+        let mut cursor = NativeUiPlayerCursor::default();
+        let raw = CrystalUserItemModel { unique_id:19, item_index:658, count:1, is_shop_item:true, ..Default::default() };
+        let mut item = json!(raw); item["price"] = json!(40);
+        transform_npc_catalog_packet("NPCGoods", &json!({"list":[item.clone()],"rate":1.0,"panelType":0}), &mut cursor).unwrap();
+        let model = transform_npc_catalog_packet("NPCGoods", &json!({"list":[item],"panelType":0}), &mut cursor).unwrap();
+        let mut shop: mir2_client_bevy::shop::ShopModel = serde_json::from_value(model).unwrap();
+        shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal { mode:mir2_client_bevy::shop::NpcShopServiceMode::Buy, repair_rate:None });
+        shop.selected_id = Some(19);
+        assert!(shop.goods[0].purchase_rate.is_none());
+        assert!(!mir2_client_bevy::npc_shop_buy::plan_npc_gold_buy(&shop, &mir2_client_bevy::inventory::InventoryModel {gold:1000, ..Default::default()}, 1).can_buy);
+    }
+
+    #[test]
+    fn npc_gold_catalog_original_missing_fields_and_panel_overrides_fail_closed() {
+        let raw = CrystalUserItemModel { unique_id:29, item_index:658, count:1, is_shop_item:true, ..Default::default() };
+        let full = json!(raw);
+        for field in ["unique_id", "current_dura", "max_dura", "slots", "added_stats", "soul_bound_id"] {
+            let mut item = full.clone(); item.as_object_mut().unwrap().remove(field);
+            item["price"] = json!(40);
+            let mut cursor = NativeUiPlayerCursor::default();
+            let model = transform_npc_catalog_packet("NPCGoods", &json!({"list":[item],"rate":1.0,"panelType":0}), &mut cursor);
+            if field == "unique_id" { assert!(model.is_none()); continue; }
+            let mut shop: mir2_client_bevy::shop::ShopModel = serde_json::from_value(model.unwrap()).unwrap();
+            shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal { mode:mir2_client_bevy::shop::NpcShopServiceMode::Buy, repair_rate:None });
+            shop.selected_id = Some(29);
+            assert!(shop.goods[0].requires_gold_buy_plan);
+            assert!(shop.goods[0].tooltip_source.is_none(), "raw missing {field} must not be filled");
+            assert!(mir2_client_bevy::shop::shop_buy_item_command(&shop, &mir2_client_bevy::inventory::InventoryModel { gold:1000,..Default::default() }, 1, 0).is_none());
+        }
+        for panel in [None, Some(json!(-1)), Some(json!(256)), Some(json!(1))] {
+            let mut item = full.clone(); item["price"] = json!(40); item["panelType"] = json!(0);
+            let mut payload = json!({"list":[item],"rate":1.0});
+            if let Some(panel) = panel { payload["panelType"] = panel; }
+            let mut cursor = NativeUiPlayerCursor::default();
+            let model = transform_npc_catalog_packet("NPCGoods", &payload, &mut cursor).unwrap();
+            let mut shop: mir2_client_bevy::shop::ShopModel = serde_json::from_value(model).unwrap();
+            shop.apply_service_signal(mir2_client_bevy::shop::NpcShopServiceSignal { mode:mir2_client_bevy::shop::NpcShopServiceMode::Buy, repair_rate:None });
+            shop.selected_id = Some(29);
+            assert_ne!(shop.goods[0].panel_type, 0, "row panel must not overwrite catalogue authority");
+            assert!(!mir2_client_bevy::shop::shop_buy_enabled(&shop, &mir2_client_bevy::inventory::InventoryModel {gold:1000,..Default::default()}, 1));
+        }
     }
 
     #[test]
@@ -7451,7 +8707,7 @@ mod tests {
 
     #[test]
     fn production_command_queue_is_bounded_and_priority_leave_survives_full_normal_lane() {
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         let mut accepted = 0;
         let mut rejected = 0;
         for _ in 0..256 {
@@ -7726,7 +8982,7 @@ mod tests {
 
     #[test]
     fn command_drain_leaves_reliable_wire_overflow_for_the_next_batch() {
-        let (sender, mut receiver) = command_channel(16);
+        let (sender, mut receiver) = test_command_channel(16);
         for index in 0..8 {
             sender
                 .send(GatewayCommand::Wire(NativeOutboundCommand::Chat {
@@ -7758,7 +9014,7 @@ mod tests {
 
     #[test]
     fn game_shop_transaction_lane_survives_normal_saturation_and_delivers_exactly_once() {
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         for _ in 0..256 {
             let _ = sender.send(GatewayCommand::Player(PlayerIntent::Walk {
                 direction: "up".to_owned(),
@@ -7799,7 +9055,7 @@ mod tests {
 
     #[test]
     fn storage_transaction_lane_survives_normal_saturation_and_delivers_exactly_once() {
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         for _ in 0..256 {
             let _ = sender.send(GatewayCommand::Player(PlayerIntent::Walk {
                 direction: "up".to_owned(),
@@ -7832,7 +9088,7 @@ mod tests {
 
     #[test]
     fn second_correlated_transaction_fails_closed_while_lane_is_occupied() {
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         let store = |request_id: &str| {
             GatewayCommand::Wire(NativeOutboundCommand::StoreItem {
                 request_id: request_id.to_owned(),
@@ -7881,7 +9137,7 @@ mod tests {
             }
         }
 
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         sender
             .send(GatewayCommand::Wire(NativeOutboundCommand::StoreItem {
                 request_id: "st-0000000000000001".to_owned(),
@@ -7914,7 +9170,7 @@ mod tests {
 
     #[test]
     fn second_game_shop_transaction_fails_closed_while_lane_is_occupied() {
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         let purchase = |request_id: &str| {
             GatewayCommand::Wire(NativeOutboundCommand::GameShopBuy {
                 request_id: request_id.to_owned(),
@@ -7954,7 +9210,7 @@ mod tests {
     #[tokio::test]
     async fn prewrite_transaction_in_retry_wait_resets_once_and_is_not_replayed() {
         let request = GameShopRequest::new("gs-retry".to_owned(), 31, 1, 1).unwrap();
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         sender.send(purchase_command(&request)).unwrap();
         sender.send(GatewayCommand::Connect).unwrap();
         let mut gate = GameShopReceiptGate::default();
@@ -7984,7 +9240,7 @@ mod tests {
     #[tokio::test]
     async fn prewrite_transaction_in_connect_wait_resets_once_and_is_not_replayed() {
         let request = GameShopRequest::new("gs-connect".to_owned(), 31, 1, 1).unwrap();
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         sender.send(purchase_command(&request)).unwrap();
         sender.send(GatewayCommand::Connect).unwrap();
         let mut gate = GameShopReceiptGate::default();
@@ -8015,7 +9271,7 @@ mod tests {
             })
         };
 
-        let (retry_sender, mut retry_receiver) = command_channel(8);
+        let (retry_sender, mut retry_receiver) = test_command_channel(8);
         retry_sender.send(storage()).unwrap();
         retry_sender.send(GatewayCommand::Connect).unwrap();
         let mut retry_gate = GameShopReceiptGate::default();
@@ -8037,7 +9293,7 @@ mod tests {
         assert_eq!(retry_resets, 1);
         assert!(drain_command_batch(&mut retry_receiver, 8).is_empty());
 
-        let (connect_sender, mut connect_receiver) = command_channel(8);
+        let (connect_sender, mut connect_receiver) = test_command_channel(8);
         connect_sender.send(storage()).unwrap();
         connect_sender.send(GatewayCommand::Connect).unwrap();
         let mut connect_gate = GameShopReceiptGate::default();
@@ -8067,7 +9323,7 @@ mod tests {
             })
         };
 
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         sender.send(storage()).unwrap();
         let mut gate = GameShopReceiptGate::default();
         let mut resume_resets = 0;
@@ -8139,7 +9395,7 @@ mod tests {
         let mut pending = PendingOperations::default();
         assert!(pending.try_begin(key));
 
-        let (sender, mut receiver) = command_channel(8);
+        let (sender, mut receiver) = test_command_channel(8);
         sender.send(purchase_command(&request)).unwrap();
         let batch = drain_command_batch(&mut receiver, 8);
         assert_eq!(batch.len(), 1);
@@ -10089,6 +11345,9 @@ mod tests {
             assert!(capabilities["capabilities"]
                 .as_array()
                 .is_some_and(|values| values.iter().any(|value| value == NATIVE_RESUME_PROTOCOL)));
+            assert!(capabilities["capabilities"]
+                .as_array()
+                .is_some_and(|values| values.iter().any(|value| value == CATALOG_GZIP_CAPABILITY)));
             socket
                 .send(Message::Text(
                     json!({
@@ -10114,6 +11373,15 @@ mod tests {
             };
             assert_eq!(start_game["type"], json!("startGame"));
             assert_eq!(start_game["characterIndex"], json!(3));
+            let catalog = catalog_transport::tests::catalog_fixture_texts();
+            let catalog_refs: Vec<&str> = catalog.iter().map(String::as_str).collect();
+            let compressed_catalog = mir2_protocol::catalog_transport::encode_catalog_batch(
+                &catalog_refs,
+            ).expect("encode all four catalog envelopes");
+            socket
+                .send(Message::Binary(compressed_catalog.clone().into()))
+                .await
+                .expect("send negotiated catalog before the ordinary snapshot");
             socket
                 .send(Message::Text(
                     loopback_world_snapshot("initial-authority", 10, 20, 3)
@@ -10143,6 +11411,9 @@ mod tests {
                 .expect("upgrade resume socket");
             let capabilities = loopback_receive_json(&mut socket).await;
             assert_eq!(capabilities["type"], json!("clientCapabilities"));
+            assert!(capabilities["capabilities"]
+                .as_array()
+                .is_some_and(|values| values.iter().any(|value| value == CATALOG_GZIP_CAPABILITY)));
             let resume = loopback_receive_json(&mut socket).await;
             assert_eq!(resume["type"], json!("resumeSession"));
             assert_eq!(resume["credential"], json!(credential));
@@ -10166,6 +11437,10 @@ mod tests {
                 ))
                 .await
                 .expect("send quarantined pre-resume snapshot");
+            socket
+                .send(Message::Binary(compressed_catalog.into()))
+                .await
+                .expect("catalog batch must obey the same pre-resume quarantine");
             socket
                 .send(Message::Text(
                     json!({
@@ -10885,6 +12160,7 @@ mod tests {
         let context = GatewaySessionContext {
             account_id: Some("player-one".to_owned()),
             character_index: Some(3),
+            ..Default::default()
         };
         let (sender, receiver) = std::sync::mpsc::channel();
         let login = parse_inbound_event(
@@ -10926,6 +12202,7 @@ mod tests {
         let context = GatewaySessionContext {
             account_id: Some("player-one".to_owned()),
             character_index: Some(3),
+            ..Default::default()
         };
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
@@ -11643,7 +12920,7 @@ mod tests {
             let _ = second.close(None).await;
         });
 
-        let (command_sender, command_receiver) = command_channel(8);
+        let (command_sender, command_receiver) = test_command_channel(8);
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, gameplay_receiver) = std::sync::mpsc::channel();
         let client_url = format!("ws://{address}");
@@ -11865,7 +13142,7 @@ mod tests {
             );
         });
 
-        let (command_sender, command_receiver) = command_channel(8);
+        let (command_sender, command_receiver) = test_command_channel(8);
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
         let client_url = format!("ws://{address}");
@@ -12055,7 +13332,7 @@ mod tests {
                 .expect("send resume rejection");
         });
 
-        let (command_sender, command_receiver) = command_channel(8);
+        let (command_sender, command_receiver) = test_command_channel(8);
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
         let client_url = format!("ws://{address}");
@@ -12189,7 +13466,7 @@ mod tests {
             );
         });
 
-        let (command_sender, command_receiver) = command_channel(8);
+        let (command_sender, command_receiver) = test_command_channel(8);
         let (shell_sender, shell_receiver) = std::sync::mpsc::channel();
         let (gameplay_sender, _gameplay_receiver) = std::sync::mpsc::channel();
         let client_url = format!("ws://{address}");
@@ -12315,3 +13592,697 @@ mod guild_wire_tests {
         }
     }
 }
+
+#[cfg(test)]
+pub(crate) fn native_queue_test_guard() -> std::sync::MutexGuard<'static, ()> {
+    static LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    LOCK.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
+}
+
+#[cfg(test)]
+mod ownership_tests {
+    use super::*;
+    use futures_util::Sink;
+    use bevy::prelude::IntoScheduleConfigs;
+    use std::{pin::Pin,task::{Context,Poll},sync::{Arc,Mutex}};
+    #[derive(Default)]
+    struct SinkState {pending:bool,ready_error:bool,flush_pending:bool,flush_waker:Option<std::task::Waker>,start_error:bool,flush_error:bool,starts:usize,flushes:usize,frames:Vec<Message>,after_start:Option<Box<dyn FnOnce()+Send>>}
+    #[derive(Clone,Default)]
+    struct ControlledSink(Arc<Mutex<SinkState>>);
+    impl Sink<Message> for ControlledSink {
+        type Error=&'static str;
+        fn poll_ready(self:Pin<&mut Self>,_:&mut Context<'_>)->Poll<Result<(),Self::Error>>{let state=self.0.lock().unwrap();if state.pending{Poll::Pending}else{Poll::Ready(if state.ready_error{Err("ready failure")}else{Ok(())})}}
+        fn start_send(self:Pin<&mut Self>,frame:Message)->Result<(),Self::Error>{let mut s=self.0.lock().unwrap();s.starts+=1;s.frames.push(frame);let result=if s.start_error{Err("start failure")}else{Ok(())};let hook=s.after_start.take();drop(s);if let Some(hook)=hook{hook();}result}
+        fn poll_flush(self:Pin<&mut Self>,cx:&mut Context<'_>)->Poll<Result<(),Self::Error>>{let mut s=self.0.lock().unwrap();s.flushes+=1;if s.flush_pending{s.flush_waker=Some(cx.waker().clone());Poll::Pending}else{Poll::Ready(if s.flush_error{Err("flush failure")}else{Ok(())})}}
+        fn poll_close(self:Pin<&mut Self>,cx:&mut Context<'_>)->Poll<Result<(),Self::Error>>{self.poll_flush(cx)}
+    }
+    fn prepared_world()->(GatewayCommandSender,GatewayCommandReceiver,NativeCommandFence,NativeCommandStamp){
+        let (sender,receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();let stamp=fence.test_world_ready(7,0);(sender,receiver,fence,stamp)
+    }
+    fn frame()->Message{Message::Text("{}".into())}
+    fn attack()->GatewayCommand{GatewayCommand::Wire(NativeOutboundCommand::Attack {object_id:19})}
+    fn owned(command:GatewayCommand)->OwnedGatewayCommand{match command{GatewayCommand::Owned(p)=>*p,_=>panic!("actual bounded envelope required")}}
+    fn mail_cost()->GatewayCommand{GatewayCommand::Wire(NativeOutboundCommand::MailCost{gold:700,items_idx:[0;5],stamped:false})}
+    fn mail_quote_publisher(fence:NativeCommandFence,receipts:Arc<Mutex<Vec<mir2_client_bevy::mail_service::MailQuoteReceipt>>>)->NativeMailQuotePublisher {
+        NativeMailQuotePublisher(Arc::new(move|receipt|{assert!(fence.0.try_lock().is_ok(),"receipt callback must run outside the fence lock");receipts.lock().unwrap().push(receipt);true}))
+    }
+    fn mail_send_command()->GatewayCommand{GatewayCommand::Wire(NativeOutboundCommand::SendMail{name:"R".into(),message:"body".into(),gold:0,items_idx:[0;5],stamped:false})}
+    fn mail_send_publisher(fence:NativeCommandFence,messages:Arc<Mutex<Vec<mir2_client_bevy::mail_service::MailServiceInboxMessage>>>)->NativeMailSendPublisher{
+        NativeMailSendPublisher(Arc::new(move|message|{assert!(fence.0.try_lock().is_ok(),"Send receipt/ACK callback is outside the short fence lock");messages.lock().unwrap().push(message);true}))
+    }
+    #[tokio::test]
+    async fn mail_send_actual_sink_prebind_entry_and_write_outcomes_are_exact(){
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendReceipt,MailSendOutcome};
+        for case in 0..4{
+            let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));let mut bound=None;
+            let ticket=sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|ticket|{assert!(receiver.try_recv().is_err());assert!(fence.0.try_lock().is_ok());bound=Some(ticket);true},mail_send_publisher(fence.clone(),messages.clone())).unwrap();
+            assert_eq!(bound,Some(ticket));let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();
+            let GatewayCommand::Wire(wire)=&proof.command else{panic!("wire SendMail required");};
+            assert_eq!(serde_json::to_value(wire).unwrap(),json!({"type":"sendMail","name":"R","message":"body","gold":0,"itemsIdx":[0,0,0,0,0],"stamped":false}),"local ticket/token never enters the stable command JSON");
+            {let mut state=sink.0.lock().unwrap();state.ready_error=case==0;state.start_error=case==1;state.flush_error=case==2;}
+            let outcome=commit_owned_frame(&mut sink,Some(&proof),frame()).await;
+            let expected=if case==0{vec![MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::DefinitelyUnsent})]}else{vec![MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::Entered}),MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:if case==3{MailSendOutcome::Flushed}else{MailSendOutcome::Unknown}})]};
+            assert_eq!(*messages.lock().unwrap(),expected);assert_eq!(sink.0.lock().unwrap().starts,usize::from(case!=0));
+            if case==0{assert!(matches!(outcome,NativeSinkCommit::Unavailable(_)));assert!(fence.0.lock().unwrap().mail_send_flight.is_none());}
+            else{assert_eq!(matches!(outcome,NativeSinkCommit::Flushed),case==3);assert!(fence.0.lock().unwrap().mail_send_flight.is_some());}
+            fence.retire(&proof);assert_eq!(*messages.lock().unwrap(),expected);
+        }
+    }
+    #[tokio::test]
+    async fn mail_send_entry_phase_precedes_sink_call_and_concurrent_retire_cannot_report_unsent(){
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendOutcome};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));
+        sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());let rival=proof.clone();
+        let retire=Arc::new(Mutex::new(None));let handle=retire.clone();
+        let mut sink=ControlledSink::default();sink.0.lock().unwrap().after_start=Some(Box::new(move||{
+            assert!(rival.fence.0.try_lock().is_err());
+            assert!(rival.mail_send.as_ref().unwrap().publish(MailSendOutcome::DefinitelyUnsent));
+            *handle.lock().unwrap()=Some(std::thread::spawn(move||{rival.fence.retire(&rival);}));
+        }));
+        assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        retire.lock().unwrap().take().unwrap().join().unwrap();
+        let messages=messages.lock().unwrap();assert_eq!(messages.len(),2);assert!(matches!(messages[0],MailServiceInboxMessage::SendReceipt(receipt) if receipt.outcome==MailSendOutcome::Entered));assert!(matches!(messages[1],MailServiceInboxMessage::SendReceipt(receipt) if receipt.outcome==MailSendOutcome::Flushed));
+    }
+    #[tokio::test]
+    async fn mail_send_same_stream_owner_reset_keeps_ack_barrier_and_valid_old_ack_only_retires_it(){
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendAcknowledgement};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));
+        let stream=controlled_mail_service_publisher(|_|true).start_socket(Some(&fence),1).unwrap();
+        let old=sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());assert_eq!(commit_owned_frame(&mut ControlledSink::default(),Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        let fresh=fence.test_owner_change(8,0);assert_eq!(old.epoch(),fresh.test_mail_epoch());assert!(stream.has_send_flight());
+        assert!(stream.acknowledge_send(0));assert!(stream.acknowledge_send(-2));assert!(stream.has_send_flight());
+        sender.send_mail_send_with_publisher(mail_send_command(),Some(fresh),30,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let blocked=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();assert_eq!(commit_owned_frame(&mut sink,Some(&blocked),frame()).await,NativeSinkCommit::DefinitelyUnsent);assert_eq!(sink.0.lock().unwrap().starts,0);
+        assert!(stream.acknowledge_send(1));assert!(!stream.has_send_flight());assert!(matches!(messages.lock().unwrap().last(),Some(MailServiceInboxMessage::SendAcknowledgement(MailSendAcknowledgement{ticket,result:1})) if *ticket==old));
+        let count=messages.lock().unwrap().len();assert!(stream.acknowledge_send(1));assert_eq!(messages.lock().unwrap().len(),count);
+        sender.send_mail_send_with_publisher(mail_send_command(),Some(fresh),31,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let next=owned(receiver.try_recv().unwrap());assert_eq!(commit_owned_frame(&mut sink,Some(&next),frame()).await,NativeSinkCommit::Flushed);
+    }
+    #[tokio::test]
+    async fn mail_send_receiver_recovery_and_unvisited_batch_tails_emit_exact_unsent(){
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendReceipt,MailSendOutcome};
+        for case in 0..4{
+            let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));
+            if case<3{sender.send_with_stamp(GatewayCommand::Connect,Some(stamp)).unwrap();}
+            let ticket=sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();
+            match case{0=>{assert!(wait_for_connect_request_with_reset(&mut receiver,8,&mut GameShopReceiptGate::default(),||true).await.unwrap());},1=>{assert_eq!(wait_for_retry_or_leave_with_reset(&mut receiver,Duration::from_secs(5),8,&mut GameShopReceiptGate::default(),None,||true).await.unwrap(),RetryWait::Connect);},2=>{assert!(matches!(drain_resume_lifecycle_commands_with_reset(&mut receiver,8,&mut GameShopReceiptGate::default(),||true),ResumeLifecycle::Complete(())));},_=>{drop(receiver);}}
+            assert_eq!(*messages.lock().unwrap(),vec![MailServiceInboxMessage::SendReceipt(MailSendReceipt{ticket,outcome:MailSendOutcome::DefinitelyUnsent})]);assert!(fence.0.lock().unwrap().outstanding.is_empty());
+        }
+    }
+    #[tokio::test]
+    async fn mail_send_untracked_owned_command_fails_closed_and_poison_only_recovers_on_new_stream(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(mail_send_command(),Some(stamp)).unwrap();let untracked=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();assert_eq!(commit_owned_frame(&mut sink,Some(&untracked),frame()).await,NativeSinkCommit::DefinitelyUnsent);assert_eq!(sink.0.lock().unwrap().starts,0);
+        let probe=fence.clone();sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,NativeMailSendPublisher(Arc::new(move |_|{assert!(probe.0.try_lock().is_ok());false}))).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::MailQuoteReceiptUnavailable);assert!(mail_quote_delivery_failed(&receiver));assert!(fence.accepts(stamp,true));
+        fence.test_owner_change(8,0);assert!(mail_quote_delivery_failed(&receiver),"same-stream ownership reset cannot rehabilitate a missing critical terminal");
+        fence.socket_lost();fence.test_world_ready(8,0);assert!(!mail_quote_delivery_failed(&receiver),"a real newer transport pair supersedes the failed epoch");
+    }
+    #[tokio::test]
+    async fn mail_send_entered_receipt_is_outside_lock_before_waiting_for_flush(){
+        use mir2_client_bevy::mail_service::{MailServiceInboxMessage,MailSendOutcome};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let messages=Arc::new(Mutex::new(Vec::new()));sender.send_mail_send_with_publisher(mail_send_command(),Some(stamp),29,|_|true,mail_send_publisher(fence.clone(),messages.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        let mut sink=ControlledSink::default();let sink_state=sink.0.clone();sink_state.lock().unwrap().flush_pending=true;
+        let future=commit_owned_frame(&mut sink,Some(&proof),frame());tokio::pin!(future);
+        tokio::select!{result=&mut future=>panic!("controlled flush must remain pending: {result:?}"),_=tokio::time::sleep(Duration::from_millis(1))=>{}}
+        assert!(fence.0.try_lock().is_ok());assert_eq!(messages.lock().unwrap().len(),1);assert!(matches!(messages.lock().unwrap()[0],MailServiceInboxMessage::SendReceipt(receipt) if receipt.outcome==MailSendOutcome::Entered));
+        fence.revoke_owner();assert!(proof.mail_send.as_ref().unwrap().publish(MailSendOutcome::DefinitelyUnsent));assert_eq!(messages.lock().unwrap().len(),1);
+        {let mut state=sink_state.lock().unwrap();state.flush_pending=false;state.flush_waker.take().unwrap().wake();}
+        assert_eq!(future.await,NativeSinkCommit::Flushed);assert_eq!(messages.lock().unwrap().len(),2);
+    }
+    #[tokio::test]
+    async fn native_mail_send_actual_bridge_sink_buffer_runtime_ui_keeps_reset_tombstone_and_settles_exact_ack(){
+        use bevy::prelude::*;
+        use bevy::ecs::system::RunSystemOnce;
+        use mir2_client_bevy::crystal_ui::overlays::{Mir2NativeMailParcelServicePlugin,NativePlayerUiState,NativePlayerUiIntentQueue,NativePlayerUiIntent,MailComposeUi,UiEffectQueue};
+        use mir2_client_bevy::native_shell::{NativeShellModel,NativeShellScreen,NativeUiIntentQueue};
+        use mir2_client_bevy::pending_operations::{PendingOperations,PendingLifecycleSet,SessionResetRevision,OverlayResetTracker,apply_overlay_session_reset};
+        use mir2_client_bevy::crystal_ui::overlays::{MailSendDraft,prepare_native_mail_send as prepare_send};
+        use mir2_bevy_runtime::{Mir2NativeSessionBoundaryPlugin,Mir2NativeMailServiceIngestPlugin,native_ingest};
+        use mir2_client_bevy::mail_service::MailServiceStreamStarted;
+        let _guard=super::native_queue_test_guard();
+        // Pure App, local channels and ControlledSink exercise the production
+        // bridge/publisher/buffer/ingest/UI systems, without a socket or Window.
+        for reset_before_entry in [false,true]{for preserve_shop in [false,true]{
+            let (sender,mut receiver,fence,stamp)=prepared_world();
+            let commands=crate::input::GatewayCommands::new(sender);assert!(commands.activate_world_stamp(stamp));
+            let mut app=App::new();app.add_plugins((Mir2NativeSessionBoundaryPlugin,Mir2NativeMailServiceIngestPlugin,Mir2NativeMailParcelServicePlugin));
+            app.insert_resource(commands).init_resource::<mir2_client_bevy::quest_ui::QuestUiIntentQueue>()
+                .init_resource::<OverlayResetTracker>().init_resource::<NativeUiIntentQueue>().init_resource::<UiEffectQueue>()
+                .add_systems(Update,apply_overlay_session_reset.in_set(PendingLifecycleSet::UiReset));
+            app.world_mut().resource_mut::<NativeShellModel>().screen=NativeShellScreen::InGame;
+            let stream=NativeMailServicePublisher::Native.start_socket(Some(&fence),1).unwrap();app.update();
+            let admit=|app:&mut App,message:&str|{
+                let generation={let mut state=app.world_mut().resource_mut::<NativePlayerUiState>();state.core.panel=mir2_ui_core::state::UiPanel::Mail;state.core.mail_compose=Some(mir2_ui_core::state::MailComposeDraft{recipient:" R ".into(),message:message.into(),..Default::default()});state.mail_draft_clock.advance();state.mail_draft_clock.generation().unwrap()};
+                let draft=MailSendDraft{recipient:" R ".into(),message:message.into(),gold:0,attachment_unique_ids:vec![],stamped:false,parcel:false,generation};
+                let payload=prepare_send(&draft.recipient,&draft.message,0,&[]).unwrap();
+                let owner=app.world().resource::<SessionResetRevision>().0;
+                let mut queue=app.world_mut().remove_resource::<NativePlayerUiIntentQueue>().unwrap();
+                let accepted=queue.push_mail_send(&mut app.world_mut().resource_mut::<PendingOperations>(),stream.epoch,owner,draft,payload.clone(),NativePlayerUiIntent::SendMail{recipient:payload.recipient,message:payload.message,gold:0,attachment_unique_ids:vec![],stamped:false});
+                let token=queue.mail_send_token();app.insert_resource(queue);(accepted,token)
+            };
+            let (accepted,old_token)=admit(&mut app," old\r\n draft ");assert!(accepted);let old_token=old_token.unwrap();
+            app.world_mut().run_system_once(crate::gameplay_bridge::forward_quest_ui_intents).unwrap();
+            let old_ticket=app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket().unwrap();
+            assert_eq!(old_ticket.local_send_token,old_token.value());let old_proof=owned(receiver.try_recv().unwrap());
+            let reset=|app:&mut App|{
+                if preserve_shop{assert!(native_ingest::push_native_data_reset_preserving_exact_game_shop_receipt(serde_json::from_value(json!({"protocol":"nativeGameShopReceiptV1","requestId":"gs-send-reset","success":false,"gIndex":31,"quantity":2,"priceType":1,"code":"insufficientCurrency"})).unwrap()));}
+                else{assert!(native_ingest::push_native_data_reset());}app.update();
+                assert!(app.world().resource::<NativePlayerUiState>().core.mail_compose.is_none());
+                assert!(app.world().resource::<PendingOperations>().has_pending_mail_send());
+                assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket(),Some(old_ticket));
+            };
+            if reset_before_entry{reset(&mut app);}
+            assert_eq!(commit_owned_frame(&mut ControlledSink::default(),Some(&old_proof),frame()).await,NativeSinkCommit::Flushed);
+            if reset_before_entry{app.update();}else{reset(&mut app);}
+            assert!(native_ingest::push_native_mail_service_stream_started(MailServiceStreamStarted{epoch:stream.epoch}));app.update();
+            assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket(),Some(old_ticket),"same marker/reset retains the prebound or entered old flight");
+            let fresh=fence.test_owner_change(8,0);assert!(app.world().resource::<crate::input::GatewayCommands>().activate_world_stamp(fresh));
+            let (accepted,still_old)=admit(&mut app,"new draft");assert!(!accepted);assert_eq!(still_old,Some(old_token));
+            app.world_mut().resource_mut::<MailComposeUi>().last_notice=Some("new draft notice".into());
+            assert!(stream.acknowledge_send(0));assert!(stream.has_send_flight());
+            assert!(stream.acknowledge_send(1));app.update();
+            assert!(!app.world().resource::<PendingOperations>().has_pending_mail_send());
+            assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_token(),None);
+            assert_eq!(app.world().resource::<NativePlayerUiState>().core.mail_compose.as_ref().unwrap().message,"new draft");
+            assert_eq!(app.world().resource::<MailComposeUi>().last_notice.as_deref(),Some("new draft notice"));
+            let (accepted,next_token)=admit(&mut app,"new draft");assert!(accepted);let next_token=next_token.unwrap();assert_ne!(next_token,old_token);
+            app.world_mut().run_system_once(crate::gameplay_bridge::forward_quest_ui_intents).unwrap();let next_ticket=app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket().unwrap();
+            let next_proof=owned(receiver.try_recv().unwrap());assert_eq!(commit_owned_frame(&mut ControlledSink::default(),Some(&next_proof),frame()).await,NativeSinkCommit::Flushed);app.update();
+            assert!(native_ingest::push_native_mail_send_acknowledgement(mir2_client_bevy::mail_service::MailSendAcknowledgement{ticket:old_ticket,result:1}));app.update();
+            assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_ticket(),Some(next_ticket));assert!(app.world().resource::<PendingOperations>().has_pending_mail_send());
+            assert!(stream.acknowledge_send(1));app.update();assert!(!app.world().resource::<PendingOperations>().has_pending_mail_send());assert!(app.world().resource::<NativePlayerUiState>().core.mail_compose.is_none());
+            // A newly published provisional flight also survives ordinary clear;
+            // only a genuine new pair discards it and releases its exact binding.
+            let (accepted,last_token)=admit(&mut app,"stream replacement");assert!(accepted);app.world_mut().run_system_once(crate::gameplay_bridge::forward_quest_ui_intents).unwrap();let last=receiver.try_recv().unwrap();
+            fence.socket_lost();let new_stamp=fence.test_world_ready(8,0);assert!(app.world().resource::<crate::input::GatewayCommands>().activate_world_stamp(new_stamp));
+            let newer=NativeMailServicePublisher::Native.start_socket(Some(&fence),1).unwrap();assert!(newer.epoch>stream.epoch);app.update();
+            assert_eq!(app.world().resource::<NativePlayerUiIntentQueue>().mail_send_token(),None);assert!(!app.world().resource::<PendingOperations>().has_pending_mail_send());drop(last);app.update();
+            let (accepted,token)=admit(&mut app,"stream replacement");assert!(!accepted,"the controlled old-stream admission cannot relabel a new stream");assert_eq!(token,None);assert!(last_token.unwrap().value()>next_token.value());
+        }}
+    }
+    #[test]
+    fn mail_quote_ticket_is_bound_before_publish_and_rejection_never_publishes(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));let publisher=mail_quote_publisher(fence.clone(),receipts.clone());
+        let mut bound=None;let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|ticket|{assert!(receiver.try_recv().is_err());assert!(fence.0.try_lock().is_ok());bound=Some(ticket);true},publisher.clone()).unwrap();
+        assert_eq!(bound,Some(ticket));let proof=owned(receiver.try_recv().unwrap());assert_eq!(proof.mail_quote.as_ref().unwrap().ticket,ticket);fence.retire(&proof);
+        assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent}]);
+        assert!(fence.take_terminals().is_empty(),"MailCost must not join static inventory/shop/storage terminal keys");
+        assert!(sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),20,|_|false,publisher).is_err());assert!(receiver.try_recv().is_err());assert!(fence.0.lock().unwrap().outstanding.is_empty());assert_eq!(receipts.lock().unwrap().len(),1);
+    }
+    #[test]
+    fn mail_quote_local_metadata_keeps_wire_json_and_entry_phase_cannot_downgrade(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+        let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        let GatewayCommand::Wire(wire)=&proof.command else{panic!("wire MailCost required");};
+        assert_eq!(serde_json::to_value(wire).unwrap(),serde_json::json!({"type":"mailCost","gold":700,"itemsIdx":[0,0,0,0,0],"stamped":false}));
+        // Focused phase-state fixture: actual commit marks this same atomic
+        // state under its short lock, before publishing outside that lock.
+        assert!(proof.mail_quote.as_ref().unwrap().mark_entered());fence.retire(&proof);
+        assert!(proof.publish_mail_quote(mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent));assert!(receipts.lock().unwrap().is_empty());
+        assert!(proof.publish_mail_quote(mir2_client_bevy::mail_service::MailQuoteOutcome::Entered{at_ms:500}));
+        assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome::Entered{at_ms:500}}]);
+    }
+    #[tokio::test]
+    async fn mail_quote_actual_start_send_retire_barrier_never_reports_unsent(){
+        use mir2_client_bevy::mail_service::MailQuoteOutcome;
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));let observed=receipts.clone();let probe=fence.clone();
+        let (done,wait)=std::sync::mpsc::channel();let wait=Mutex::new(wait);
+        let publisher=NativeMailQuotePublisher(Arc::new(move|receipt|{
+            assert!(probe.0.try_lock().is_ok());assert!(matches!(receipt.outcome,MailQuoteOutcome::Entered{..}));
+            wait.lock().unwrap().recv_timeout(Duration::from_secs(1)).unwrap();observed.lock().unwrap().push(receipt);true
+        }));
+        let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,publisher).unwrap();let proof=owned(receiver.try_recv().unwrap());let rival=proof.clone();
+        let mut sink=ControlledSink::default();sink.0.lock().unwrap().after_start=Some(Box::new(move||{
+            // Exercise an atomic observer during the actual sink call too.
+            // It must lose without invoking the publisher under commit's lock.
+            assert!(rival.publish_mail_quote(MailQuoteOutcome::DefinitelyUnsent));
+            std::thread::spawn(move||{
+                // Blocks on commit's actual fence lock until start_send and
+                // its irreversible local entry phase are both complete.
+                rival.fence.retire(&rival);assert!(rival.publish_mail_quote(MailQuoteOutcome::DefinitelyUnsent));done.send(()).unwrap();
+            });
+        }));
+        assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        let receipts=receipts.lock().unwrap();assert_eq!(receipts.len(),1);assert_eq!(receipts[0].ticket,ticket);assert!(matches!(receipts[0].outcome,MailQuoteOutcome::Entered{..}));
+    }
+    #[test]
+    fn mail_quote_receiver_close_or_last_envelope_drop_has_one_unsent_terminal(){
+        for close_receiver in [false,true]{
+            let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+            let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+            if close_receiver{drop(receiver);}else{let command=receiver.try_recv().unwrap();let clone=command.clone();drop(command);assert!(receipts.lock().unwrap().is_empty());drop(clone);}
+            assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent}]);assert!(fence.0.lock().unwrap().outstanding.is_empty());
+        }
+    }
+    #[test]
+    fn mail_quote_sequence_exhaustion_and_stale_receiver_drop_have_exact_terminals(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));let publisher=mail_quote_publisher(fence.clone(),receipts.clone());
+        fence.0.lock().unwrap().next_sequence=Some(u64::MAX);
+        let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,publisher.clone()).unwrap();assert_eq!(ticket.sequence,u64::MAX);
+        assert!(sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),20,|_|panic!("exhausted sequence cannot bind"),publisher).is_err());
+        fence.revoke_owner();assert!(receiver.try_recv().is_err());assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:mir2_client_bevy::mail_service::MailQuoteOutcome::DefinitelyUnsent}]);
+        assert!(fence.0.lock().unwrap().outstanding.is_empty());
+    }
+    #[tokio::test]
+    async fn mail_quote_readiness_revoke_start_error_flush_error_and_success_are_exact(){
+        use mir2_client_bevy::mail_service::MailQuoteOutcome;
+        for case in 0..5{
+            let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+            let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());
+            let mut sink=ControlledSink::default();{let mut state=sink.0.lock().unwrap();state.ready_error=case==0;state.start_error=case==2;state.flush_error=case==3;}
+            if case==1{fence.revoke_owner();}
+            let outcome=commit_owned_frame(&mut sink,Some(&proof),frame()).await;
+            assert_eq!(sink.0.lock().unwrap().starts,usize::from(case>=2));
+            match case{0=>assert!(matches!(outcome,NativeSinkCommit::Unavailable(_))),1=>assert_eq!(outcome,NativeSinkCommit::DefinitelyUnsent),2|3=>assert!(matches!(outcome,NativeSinkCommit::Unknown(_))),_=>assert_eq!(outcome,NativeSinkCommit::Flushed)}
+            let receipts=receipts.lock().unwrap();assert_eq!(receipts.len(),1);assert_eq!(receipts[0].ticket,ticket);
+            if case<2{assert_eq!(receipts[0].outcome,MailQuoteOutcome::DefinitelyUnsent);}else{assert!(matches!(receipts[0].outcome,MailQuoteOutcome::Entered{..}));}
+            drop(receipts);fence.retire(&proof);assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::DefinitelyUnsent);
+        }
+    }
+    #[tokio::test]
+    async fn mail_quote_entry_precedes_delayed_flush_and_failure_is_terminal(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+        sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().flush_pending=true;
+        {let future=commit_owned_frame(&mut sink,Some(&proof),frame());tokio::pin!(future);
+        tokio::select!{result=&mut future=>panic!("unexpected {result:?}"),_=tokio::task::yield_now()=>{}}
+        assert_eq!(receipts.lock().unwrap().len(),1,"entry is published before an arbitrarily delayed flush");fence.revoke_owner();
+        {let mut state=state.lock().unwrap();state.flush_pending=false;state.flush_waker.take().unwrap().wake();}assert_eq!(future.await,NativeSinkCommit::Flushed);}
+        assert_eq!(receipts.lock().unwrap().len(),1);fence.retire(&proof);assert_eq!(receipts.lock().unwrap().len(),1);
+        let (sender,mut receiver,fence,stamp)=prepared_world();let probe=fence.clone();
+        sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),20,|_|true,NativeMailQuotePublisher(Arc::new(move |_|{assert!(probe.0.try_lock().is_ok());false}))).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        assert_eq!(commit_owned_frame(&mut ControlledSink::default(),Some(&proof),frame()).await,NativeSinkCommit::MailQuoteReceiptUnavailable);assert!(mail_quote_delivery_failed(&receiver));
+        assert!(fence.accepts(stamp,true),"delivery failure must not rewrite ownership decisions");
+    }
+    #[tokio::test]
+    async fn mail_quote_recovery_connect_tail_and_connected_error_tail_retire_exactly(){
+        use mir2_client_bevy::mail_service::MailQuoteOutcome;
+        let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+        sender.send_with_stamp(GatewayCommand::Connect,Some(stamp)).unwrap();let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+        assert!(wait_for_connect_request_with_reset(&mut receiver,8,&mut GameShopReceiptGate::default(),||true).await.unwrap());
+        assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:MailQuoteOutcome::DefinitelyUnsent}]);
+        let first=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),20,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+        let tail=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),21,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+        let mut sink=ControlledSink::default();sink.0.lock().unwrap().start_error=true;
+        for command in unsent_command_batch(drain_command_batch(&mut receiver,8)){let proof=owned(command);if matches!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Unknown(_)){break;}}
+        let receipts=receipts.lock().unwrap();assert_eq!(receipts.len(),3);assert_eq!(receipts[1].ticket,first);assert!(matches!(receipts[1].outcome,MailQuoteOutcome::Entered{..}));assert_eq!(receipts[2],mir2_client_bevy::mail_service::MailQuoteReceipt{ticket:tail,outcome:MailQuoteOutcome::DefinitelyUnsent});
+    }
+    #[tokio::test]
+    async fn mail_quote_retry_connect_tail_and_resume_ignored_commands_retire_exactly(){
+        use mir2_client_bevy::mail_service::MailQuoteOutcome;
+        for retry in [false,true]{
+            let (sender,mut receiver,fence,stamp)=prepared_world();let receipts=Arc::new(Mutex::new(Vec::new()));
+            sender.send_with_stamp(GatewayCommand::Connect,Some(stamp)).unwrap();let ticket=sender.send_mail_quote_with_publisher(mail_cost(),Some(stamp),19,|_|true,mail_quote_publisher(fence.clone(),receipts.clone())).unwrap();
+            if retry{assert_eq!(wait_for_retry_or_leave_with_reset(&mut receiver,Duration::from_secs(5),8,&mut GameShopReceiptGate::default(),None,||true).await.unwrap(),RetryWait::Connect);}
+            else{assert!(matches!(drain_resume_lifecycle_commands_with_reset(&mut receiver,8,&mut GameShopReceiptGate::default(),||true),ResumeLifecycle::Complete(())));}
+            assert_eq!(receipts.lock().unwrap().as_slice(),&[mir2_client_bevy::mail_service::MailQuoteReceipt{ticket,outcome:MailQuoteOutcome::DefinitelyUnsent}]);assert!(fence.0.lock().unwrap().outstanding.is_empty());
+        }
+    }
+    pub(super) async fn drain_entered_native_mail_fixture(app:&mut bevy::prelude::App,receiver:&mut GatewayCommandReceiver)->Vec<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntent>{
+        use mir2_client_bevy::crystal_ui::overlays::{NativePlayerUiIntentQueue,NativePlayerUiIntent};
+        let mut queue=app.world_mut().remove_resource::<NativePlayerUiIntentQueue>().unwrap();let drained=queue.drain_for_gateway();
+        for (intent,token) in &drained{if let (NativePlayerUiIntent::MailCost{gold,stamped,..},Some(token))=(intent,token){assert!(app.world().resource::<crate::input::GatewayCommands>().send_mail_quote(NativeOutboundCommand::MailCost{gold:*gold,items_idx:[0;5],stamped:*stamped},*token,&mut queue));}}
+        app.insert_resource(queue);
+        while let Ok(command)=receiver.try_recv(){let proof=owned(command);assert_eq!(commit_owned_frame(&mut ControlledSink::default(),Some(&proof),frame()).await,NativeSinkCommit::Flushed);}
+        drained.into_iter().map(|(intent,_)|intent).collect()
+    }
+    #[tokio::test]
+    async fn pending_sink_is_woken_and_canceled_without_becoming_ready(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();sender.send_with_stamp(attack(),Some(stamp)).unwrap();let proof=owned(receiver.try_recv().unwrap());
+        let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().pending=true;
+        let pending=commit_owned_frame(&mut sink,Some(&proof),frame());tokio::pin!(pending);
+        tokio::select!{outcome=&mut pending=>panic!("premature {outcome:?}"),_=tokio::task::yield_now()=>{}}
+        fence.observe_scene(0,true);
+        assert_eq!(tokio::time::timeout(Duration::from_millis(100),pending).await.unwrap(),NativeSinkCommit::DefinitelyUnsent);
+        assert_eq!(state.lock().unwrap().starts,0);
+    }
+    #[tokio::test]
+    async fn production_sink_claim_is_one_use_and_unknown_is_never_replayed(){
+        for (start_error,flush_error) in [(false,false),(true,false),(false,true)]{
+            let (sender,mut receiver,_,stamp)=prepared_world();sender.send_with_stamp(attack(),Some(stamp)).unwrap();let proof=owned(receiver.try_recv().unwrap());
+            let mut sink=ControlledSink::default();{let mut state=sink.0.lock().unwrap();state.start_error=start_error;state.flush_error=flush_error;}
+            let first=commit_owned_frame(&mut sink,Some(&proof),frame()).await;
+            assert_eq!(matches!(first,NativeSinkCommit::Unknown(_)),start_error||flush_error);
+            assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::DefinitelyUnsent);
+            assert_eq!(sink.0.lock().unwrap().starts,1);
+        }
+    }
+    #[tokio::test]
+    async fn full_bounded_queue_logout_revokes_old_batch_before_socket_commit(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();
+        for _ in 0..8{sender.send_with_stamp(attack(),Some(stamp)).unwrap();}
+        assert!(sender.send_with_stamp(attack(),Some(stamp)).is_err());
+        sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::LogOut),Some(stamp)).unwrap();
+        assert!(!fence.accepts(stamp,true));
+        let proof=owned(receiver.try_recv().unwrap());assert!(matches!(proof.command,GatewayCommand::Wire(NativeOutboundCommand::LogOut)));
+        let mut sink=ControlledSink::default();assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        assert!(receiver.try_recv().is_err());assert_eq!(sink.0.lock().unwrap().starts,1);
+    }
+    #[test]
+    fn exhaustion_leave_revokes_and_old_cleanup_cannot_revoke_successor(){
+        let (sender,_,fence,old)=prepared_world();fence.0.lock().unwrap().next_sequence=None;
+        assert!(sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::LogOut),Some(old)).is_err());assert!(!fence.accepts(old,true));
+        let (sender,_,fence,old)=prepared_world();fence.socket_lost();let fresh=fence.test_world_ready(7,0);
+        assert!(sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::Disconnect),Some(old)).is_err());assert!(fence.accepts(fresh,true));
+        fence.0.lock().unwrap().current.scene_epoch=u64::MAX;fence.observe_scene(0,true);assert!(fence.is_retired());
+    }
+    #[test]
+    fn scene_and_personal_classification_and_refresh_preserve_exact_identity(){
+        let (sender,_receiver,fence,old)=prepared_world();assert_eq!(old.map,Some(0));
+        fence.observe_scene(0,false);assert_eq!(fence.confirm_owner(7),Some(old));
+        fence.observe_scene(0,true);assert!(!fence.accepts(old,true));
+        assert!(sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::MagicKey {request_id:1,spell:"FireBall".into(),key:1,old_key:0}),Some(old)).is_ok());
+        assert!(sender.send_with_stamp(GatewayCommand::Wire(NativeOutboundCommand::Chat {message:"old map".into()}),Some(old)).is_err());
+        assert!(fence.confirm_owner(8).is_none());
+    }
+    #[test]
+    fn exact_local_terminal_survives_resume_but_not_same_id_successor(){
+        let (sender,mut receiver,fence,stamp)=prepared_world();let commands=crate::input::GatewayCommands::new(sender);
+        assert!(commands.activate_world_stamp(stamp));
+        let original=NativeOutboundCommand::GameShopBuy {request_id:"m12-pending".into(),g_index:1,quantity:1,price_type:1};
+        assert!(commands.send_command(GatewayCommand::Wire(original.clone())));let old=owned(receiver.try_recv().unwrap());
+        fence.socket_lost();let fresh=fence.test_world_ready(7,0);assert!(commands.activate_world_stamp(fresh));fence.retire(&old);
+        let terminal=fence.take_terminals().pop().unwrap();assert!(commands.claim_local_terminal(terminal.0,terminal.1,&terminal.2).is_some());
+        assert!(commands.send_command(GatewayCommand::Wire(original.clone())));let old=owned(receiver.try_recv().unwrap());
+        fence.socket_lost();let fresh=fence.test_world_ready(7,0);assert!(commands.activate_world_stamp(fresh));
+        let mut successor=original.clone();if let NativeOutboundCommand::GameShopBuy {g_index,..}=&mut successor{*g_index=2;}
+        assert!(commands.send_command(GatewayCommand::Wire(successor)));fence.retire(&old);
+        let terminal=fence.take_terminals().pop().unwrap();assert!(commands.claim_local_terminal(terminal.0,terminal.1,&terminal.2).is_none());
+    }
+    #[tokio::test]
+    async fn owned_shell_batch_ack_then_confirmed_owner_bootstrap_enters_game(){
+        use mir2_client_bevy::native_shell::{NativeShellModel,NativeShellScreen};
+        let (sender,mut receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();fence.begin_connection().unwrap();
+        let request=NativeOutboundCommand::StartGame {character_index:3};sender.send_with_stamp(GatewayCommand::Wire(request.clone()),fence.stamp()).unwrap();
+        let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        assert!(apply_flushed_control_context(Some(&proof),&request,&mut GatewaySessionContext::default(),&mut NativeResumeClientState::default()));
+        let (events,inbox)=std::sync::mpsc::channel();let events=NativeShellEventSender::Owned {sender:events,fence:fence.clone()};
+        let old=fence.stamp().unwrap();events.send_event(ShellGatewayEvent::StartGameAck {accepted:true,reason:None}).unwrap();
+        fence.authorize_entry(false);fence.observe_scene(0,false);let new=fence.confirm_owner(7).unwrap();assert_ne!(old.owner_epoch,new.owner_epoch);
+        events.send_event(ShellGatewayEvent::PlayerBootstrapped {character:CharacterSummary::new(3,"authority",8,"Wizard","Male")}).unwrap();
+        let mut shell=NativeShellModel::default();shell.screen=NativeShellScreen::StartingGame;shell.start_game_request_in_flight=true;
+        let mut app=bevy::prelude::App::new();app.insert_resource(shell);app.insert_resource(crate::input::GatewayCommands::new(sender));app.insert_resource(crate::shell_bridge::GatewayEventInbox::new_owned(inbox));app.init_resource::<crate::shell_bridge::NativeAutoLoginFlow>();app.add_systems(bevy::app::Update,crate::shell_bridge::drain_gateway_events);app.update();
+        assert_eq!(app.world().resource::<NativeShellModel>().screen,NativeShellScreen::InGame);
+        fence.socket_lost();events.send_event(ShellGatewayEvent::Disconnect {reason:Some("closed".into())}).unwrap();app.update();assert_eq!(app.world().resource::<NativeShellModel>().screen,NativeShellScreen::ConnectionLost);
+    }
+    #[test]
+    fn full_source_models_apply_before_world_stamp_and_map_only_never_readies(){
+        use mir2_client_bevy::{read_model::UiReadModel,entities::EntityModelSet,map::MapModel,skill_model::SkillModel};
+        let (sender,_receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();fence.begin_connection().unwrap();
+        fence.0.lock().unwrap().entry_requested=true;fence.authorize_entry(false);fence.observe_scene(0,false);
+        let mut adapter=NativeGameplayAdapter::default();adapter.command_fence=Some(fence.clone());
+        let payload=json!({"mapIndex":0,"mapFileName":"scene-zero","playerObjectId":7,"entities":[{"kind":"selfPlayer","objectId":7,"name":"authority","x":10,"y":20,"direction":"right"}],"_nativeSkillAuthority":{"sessionEpoch":1,"snapshotSerial":1,"playerObjectId":7}});
+        let mut snapshot=adapter.snapshot(&payload);
+        attach_native_producer_provenance(&mut snapshot,&adapter,&payload,&transform_ui_read_model(&payload),&transform_map_model(&payload),&transform_entity_model_set(&payload),Some(&transform_skill_model(&payload)),true).unwrap();
+        let stamp=snapshot.command_stamp.unwrap();let models=snapshot.producer_models.unwrap();
+        let commands=crate::input::GatewayCommands::new(sender);assert!(commands.applied_world_stamp().is_none());
+        *commands.pending_provenance.lock().unwrap()=Some((stamp,models.clone()));
+        let mut app=bevy::prelude::App::new();app.insert_resource(commands);app.init_resource::<UiReadModel>();app.init_resource::<EntityModelSet>();app.init_resource::<MapModel>();app.init_resource::<crate::gameplay_bridge::NativeWorldProducerStamp>();
+        app.insert_resource(serde_json::from_value::<SkillModel>(models.skills.clone().unwrap()).unwrap());app.add_systems(bevy::app::Update,crate::gameplay_bridge::activate_native_command_provenance);app.update();
+        assert_eq!(app.world().resource::<crate::input::GatewayCommands>().applied_world_stamp(),Some(stamp));
+        assert_eq!(serde_json::to_value(app.world().resource::<EntityModelSet>()).unwrap(),models.entities);
+        fence.observe_scene(0,true);app.world().resource::<crate::input::GatewayCommands>().clear_world_stamp();
+        let map_only=adapter.big_map_snapshot();assert!(map_only.producer_models.is_none());app.update();assert!(app.world().resource::<crate::input::GatewayCommands>().applied_world_stamp().is_none());
+    }
+
+    #[tokio::test]
+    async fn submitted_start_game_flush_after_failed_local_leave_cannot_reopen_entry(){
+        let (sender,mut receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();fence.begin_connection().unwrap();
+        let commands=crate::input::GatewayCommands::new(sender);let request=NativeOutboundCommand::StartGame {character_index:3};
+        assert!(commands.send_command(GatewayCommand::Wire(request.clone())));let proof=owned(receiver.try_recv().unwrap());
+        let mut sink=ControlledSink::default();let state=sink.0.clone();state.lock().unwrap().flush_pending=true;
+        {let future=commit_owned_frame(&mut sink,Some(&proof),frame());tokio::pin!(future);
+        tokio::select!{result=&mut future=>panic!("unexpected {result:?}"),_=tokio::task::yield_now()=>{}}
+        assert_eq!(state.lock().unwrap().starts,1);assert!(state.lock().unwrap().flush_waker.is_some());
+        // Even a definitely-unsent leave revokes local entry before allocation.
+        fence.0.lock().unwrap().next_sequence=None;assert!(!commands.send_command(GatewayCommand::Wire(NativeOutboundCommand::LogOut)));
+        {let mut state=state.lock().unwrap();state.flush_pending=false;state.flush_waker.take().unwrap().wake();}
+        assert_eq!(future.await,NativeSinkCommit::Flushed);}
+        let mut context=GatewaySessionContext::default();let mut resume=NativeResumeClientState::default();
+        assert!(!apply_flushed_control_context(Some(&proof),&request,&mut context,&mut resume));assert!(context.character_index.is_none());
+        fence.authorize_entry(false);assert!(fence.confirm_owner(7).is_none());
+        let (events,inbox)=std::sync::mpsc::channel();let events=NativeShellEventSender::Owned {sender:events,fence:fence.clone()};
+        events.send_event(ShellGatewayEvent::StartGameAck {accepted:true,reason:None}).unwrap();assert!(inbox.try_recv().is_err());
+        // Resume completion from this canceled connection is also not a grant.
+        fence.authorize_entry(true);assert!(fence.confirm_owner(7).is_none());
+        assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::DefinitelyUnsent);
+        assert_eq!(state.lock().unwrap().starts,1);assert!(receiver.try_recv().is_err());
+    }
+
+
+    #[tokio::test]
+    async fn handler_packet_first_inherits_full_skill_gate_and_changed_map_cannot_regrant_retained_entities(){
+        for invalidation in ["positive","scene","owner","connection","leave","retired"] {
+        use mir2_client_bevy::{native_shell::{NativeShellModel,NativeShellScreen},read_model::UiReadModel,entities::EntityModelSet,map::MapModel,skill_model::SkillModel,pending_operations::{PendingOperations,AuthoritativeModelRevisions},quest_model::{QuestTracker,CompletedQuestTracker,NpcDialogModel,NearbyNpcModel,CombatTargetModel,GroundPickupModel},crystal_ui::notice::NoticeDialogState};
+        // Registers the real bounded ingress queue without renderer, window or
+        // GPU. This plugin does not run private Ui/Skill typed consumers here.
+        let mut runtime=bevy::prelude::App::new();runtime.add_plugins(mir2_bevy_runtime::Mir2NativeSessionBoundaryPlugin);
+        let (sender,mut receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();fence.begin_connection().unwrap();
+        let request=NativeOutboundCommand::StartGame {character_index:3};sender.send_with_stamp(GatewayCommand::Wire(request.clone()),fence.stamp()).unwrap();let proof=owned(receiver.try_recv().unwrap());let mut sink=ControlledSink::default();assert_eq!(commit_owned_frame(&mut sink,Some(&proof),frame()).await,NativeSinkCommit::Flushed);
+        let mut context=GatewaySessionContext {account_id:Some("bounded-test".into()),character_index:None,..Default::default()};let mut resume=NativeResumeClientState::default();assert!(apply_flushed_control_context(Some(&proof),&request,&mut context,&mut resume));
+        let (shell_sender,_shell_receiver)=std::sync::mpsc::channel();let shell_sender=NativeShellEventSender::Owned {sender:shell_sender,fence:fence.clone()};let (gameplay_sender,gameplay_receiver)=std::sync::mpsc::channel();
+        let mut counter=0;let mut adapter=NativeGameplayAdapter::default();adapter.command_fence=Some(fence.clone());let mut last_world=None;let mut wallet=None;let mut map_cursor=NativeMapPacketCursor::default();let mut ui_cursor=NativeUiPlayerCursor::default();let mut claim=None;let mut send_mail=false;let mut mail_feedback=VecDeque::new();let mut skill_cursor=SkillPacketCursor::default();let mut social=SocialModel::default();let mut phase=ConnectionPhase::Normal;let mut scene_reset=false;let mut bootstrapped=false;let mut shop_gate=GameShopReceiptGate::default();
+        let mut push_world=mir2_bevy_runtime::native_ingest::push_native_world_state;
+        macro_rules! ingest {($value:expr)=>{handle_gateway_text_for_connection(&$value.to_string(),&mut counter,&context,&shell_sender,&mut adapter,&gameplay_sender,&mut last_world,&mut wallet,&mut map_cursor,&mut ui_cursor,&mut claim,&mut send_mail,&mut mail_feedback,&mut skill_cursor,&mut social,&mut phase,&mut resume,&mut scene_reset,&mut bootstrapped,&mut shop_gate,&mut push_world).unwrap()};}
+        ingest!(json!({"type":"packet","packet":"StartGame","payload":{"result":4}}));
+        let world=json!({"type":"worldSnapshot","payload":{"mapIndex":401,"mapFileName":"scene-zero","mapTitle":"Scene Zero","playerObjectId":7,"playerHp":10,"playerMaxHp":10,"sceneView":{"center":{"x":10,"y":20}},"entities":[{"kind":"selfPlayer","objectId":7,"name":"authority","class":"Wizard","level":8,"x":10,"y":20,"direction":"Down"},{"kind":"monster","objectId":19,"name":"old-target","x":11,"y":20}],"knownSkills":[],"inventoryItems":[],"beltItems":[],"equipmentItems":[]}});
+        // Real server schema omits mapIndex. Packet-first MapInformation
+        // supplies the destination; raw matching mapFileName keeps bootstrap compatible.
+        ingest!(json!({"type":"packet","packet":"MapInformation","payload":{"mapIndex":401,"fileName":"scene-zero","miniMapIndex":0}}));
+        let mut server_schema=world.clone();server_schema["payload"].as_object_mut().unwrap().remove("mapIndex");assert!(server_schema["payload"].get("mapIndex").is_none());
+        assert_eq!(ingest!(server_schema),InboundDisposition::Applied);assert!(bootstrapped);
+        let original_stamp=adapter.last_full_producer_stamp.unwrap();let expected=adapter.last_full_producer_models.as_ref().unwrap().skills.clone().unwrap();
+        ingest!(json!({"type":"packet","packet":"UserLocation","payload":{"x":10,"y":20,"direction":"Down"}}));
+        let snapshots=gameplay_receiver.try_iter().collect::<Vec<_>>();let latest=snapshots.iter().rev().find(|snapshot|!snapshot.big_map_only).unwrap();assert_eq!(latest.command_stamp,Some(original_stamp));assert_eq!(latest.producer_models.as_ref().unwrap().skills.as_ref(),Some(&expected));
+        // Re-deliver the actual full+packet batch to the production drain. Its
+        // reverse-last coalescing must retain the full skill authority gate.
+        let (batch,inbox)=std::sync::mpsc::channel();for snapshot in snapshots{batch.send(snapshot).unwrap();}
+        let commands=crate::input::GatewayCommands::new(sender);let mut shell=NativeShellModel::default();shell.screen=NativeShellScreen::InGame;
+        let mut app=bevy::prelude::App::new();app.insert_resource(commands);app.insert_resource(shell);app.insert_resource(crate::gameplay_bridge::GameplayEventInbox::new(inbox));app.init_resource::<bevy::prelude::Time>();app.init_resource::<UiReadModel>();app.init_resource::<EntityModelSet>();app.init_resource::<MapModel>();app.init_resource::<SkillModel>();app.init_resource::<crate::gameplay_bridge::NativeWorldProducerStamp>();app.init_resource::<QuestTracker>();app.init_resource::<CompletedQuestTracker>();app.init_resource::<NpcDialogModel>();app.init_resource::<NearbyNpcModel>();app.init_resource::<CombatTargetModel>();app.init_resource::<GroundPickupModel>();app.init_resource::<NoticeDialogState>();app.init_resource::<crate::entity_presentation::NativeEntityPresentation>();app.init_resource::<crate::entity_overlays::NativeEntityOverlays>();app.init_resource::<crate::effects::NativeEffects>();app.init_resource::<AuthoritativeModelRevisions>();app.init_resource::<PendingOperations>();
+        app.add_systems(bevy::app::PreUpdate,(crate::gameplay_bridge::withdraw_invalid_native_world_producers,crate::gameplay_bridge::drain_gameplay_events).chain());app.add_systems(bevy::app::Update,crate::gameplay_bridge::activate_native_command_provenance);app.update();
+        assert!(app.world().resource::<crate::input::GatewayCommands>().applied_world_stamp().is_none());assert!(app.world().resource::<crate::input::GatewayCommands>().pending_provenance.lock().unwrap().as_ref().unwrap().1.skills.is_some());
+        let exact_skills=serde_json::from_value::<SkillModel>(expected.clone()).unwrap();
+        let expected_models=app.world().resource::<crate::input::GatewayCommands>().pending_provenance.lock().unwrap().as_ref().unwrap().1.clone();
+        let assert_waiting=|app:&bevy::prelude::App|{
+            let commands=app.world().resource::<crate::input::GatewayCommands>();
+            assert!(commands.applied_world_stamp().is_none());
+            let pending=commands.pending_provenance.lock().unwrap();let (stamp,models)=pending.as_ref().expect("current complete source survives empty inbox");
+            assert_eq!(*stamp,original_stamp);assert_eq!(models.ui,expected_models.ui);assert_eq!(models.entities,expected_models.entities);assert_eq!(models.map,expected_models.map);assert_eq!(models.skills,Some(expected.clone()));
+            assert!(!commands.send_command(attack()));
+        };
+        for _ in 0..3{app.update();assert_waiting(&app);}
+        for wrong_authority in ["session","player","serial"]{
+            let mut wrong=exact_skills.clone();
+            match wrong_authority {
+                "session"=>wrong.authority.session_epoch=wrong.authority.session_epoch.checked_add(1).unwrap(),
+                "player"=>wrong.authority.player_object_id=8,
+                "serial"=>wrong.authority.snapshot_serial=wrong.authority.snapshot_serial.checked_sub(1).expect("actual full snapshot has positive serial"),
+                _=>unreachable!(),
+            }
+            app.insert_resource(wrong);for _ in 0..2{app.update();assert_waiting(&app);}
+        }
+        if invalidation!="positive"{
+            match invalidation {
+                "scene"=>fence.observe_scene(401,true),
+                "owner"=>fence.revoke_owner(),
+                "connection"=>fence.socket_lost(),
+                "leave"=>assert!(fence.revoke_local_leave(original_stamp)),
+                "retired"=>{fence.0.lock().unwrap().current.scene_epoch=u64::MAX;fence.observe_scene(401,true);assert!(fence.is_retired());},
+                _=>unreachable!(),
+            }
+            // A now-matching Skill cannot revive the stale complete source.
+            app.insert_resource(exact_skills);for _ in 0..2{
+                app.update();let commands=app.world().resource::<crate::input::GatewayCommands>();
+                assert!(commands.applied_world_stamp().is_none());assert!(commands.pending_provenance.lock().unwrap().is_none());assert!(!commands.send_command(attack()));
+            }
+            assert!(receiver.try_recv().is_err());continue;
+        }
+        // Apply the exact typed source value explicitly. This exercises the
+        // real readiness gate, not the private runtime ingestion schedule.
+        app.insert_resource(exact_skills);app.update();assert_eq!(app.world().resource::<crate::input::GatewayCommands>().applied_world_stamp(),Some(original_stamp));
+        assert!(app.world().resource::<crate::input::GatewayCommands>().pending_provenance.lock().unwrap().is_none());
+        assert_eq!(serde_json::to_value(app.world().resource::<UiReadModel>()).unwrap(),expected_models.ui);
+        assert_eq!(serde_json::to_value(app.world().resource::<EntityModelSet>()).unwrap(),expected_models.entities);
+        assert_eq!(serde_json::to_value(app.world().resource::<MapModel>()).unwrap(),expected_models.map);
+        ingest!(json!({"type":"packet","packet":"MapInformation","payload":{"mapIndex":402,"fileName":"scene-one","miniMapIndex":8}}));
+        ingest!(json!({"type":"packet","packet":"UserLocation","payload":{"x":10,"y":20,"direction":"Down"}}));
+        assert_ne!(fence.stamp(),Some(original_stamp));assert_eq!(adapter.last_full_producer_stamp,Some(original_stamp));
+        // Delayed explicit old full source must not become scene-one through
+        // metadata overlay, including two scene identities with the same file.
+        assert_eq!(ingest!(world),InboundDisposition::Applied); // Wrapper preserves ordinary non-snapshot disposition.
+        assert_eq!(adapter.last_full_producer_stamp,Some(original_stamp));
+        ingest!(json!({"type":"packet","packet":"MapInformation","payload":{"mapIndex":402,"fileName":"scene-zero","miniMapIndex":8}}));
+        assert_eq!(ingest!(world),InboundDisposition::Applied);assert_eq!(adapter.last_full_producer_stamp,Some(original_stamp));
+        let changed=gameplay_receiver.try_iter().collect::<Vec<_>>();assert!(!changed.is_empty());for snapshot in changed {assert!(snapshot.big_map_only);assert!(snapshot.producer_models.is_none());batch.send(snapshot).unwrap();}
+        app.update();assert!(app.world().resource::<crate::input::GatewayCommands>().applied_world_stamp().is_none());assert!(app.world().resource::<crate::input::GatewayCommands>().pending_provenance.lock().unwrap().is_none());
+        assert!(!app.world().resource::<crate::input::GatewayCommands>().send_command(attack()));assert!(receiver.try_recv().is_err());
+        }
+    }
+
+    #[test]
+    fn owned_terminal_settlement_cancels_original_pending_after_resume(){
+        use mir2_client_bevy::{native_shell::NativeShellModel,pending_operations::{PendingOperations,PendingOperationKey},game_shop::GameShopModel,crystal_ui::overlays::NativePlayerUiState};
+        let (sender,mut receiver,fence,stamp)=prepared_world();let commands=crate::input::GatewayCommands::new(sender);commands.activate_world_stamp(stamp);
+        let wire=NativeOutboundCommand::GameShopBuy {request_id:"owned-terminal".into(),g_index:1,quantity:1,price_type:1};
+        let request=game_shop_request_from_wire(&wire).unwrap();assert!(commands.send_command(GatewayCommand::Wire(wire)));let old=owned(receiver.try_recv().unwrap());
+        fence.socket_lost();commands.activate_world_stamp(fence.test_world_ready(7,0));fence.retire(&old);
+        let mut pending=PendingOperations::default();let key=PendingOperationKey::GameShop(request.request_id.clone());assert!(pending.try_begin(key.clone()));
+        let mut shop=GameShopModel::default();shop.pending_purchase=Some(request.clone());let mut ui=NativePlayerUiState::default();ui.core.game_shop_pending=Some(request);
+        let mut app=bevy::prelude::App::new();app.insert_resource(commands);app.insert_resource(pending);app.insert_resource(shop);app.insert_resource(ui);app.init_resource::<NativeShellModel>();app.add_systems(bevy::app::Update,crate::gameplay_bridge::settle_native_command_terminals);app.update();
+        assert!(!app.world().resource::<PendingOperations>().contains(&key));assert!(app.world().resource::<GameShopModel>().pending_purchase.is_none());assert!(app.world().resource::<GameShopModel>().last_receipt.is_none());assert!(app.world().resource::<NativePlayerUiState>().core.game_shop_pending.is_none());
+    }
+
+}
+
+#[cfg(test)]
+mod native_mail_stream_tests {
+    use super::*;
+    use mir2_client_bevy::mail_service::{MailServiceDelivery, MailServiceEvent, MailServiceInbox, MailServiceInboxMessage, MailServiceStreamEpoch, MailServiceStreamStarted};
+
+    #[test]
+    fn native_mail_producer_captures_socket_epoch_and_never_relabels_using_latest_fence() {
+        let fence=NativeCommandFence::new();
+        let delivered=Arc::new(Mutex::new(Vec::new())); let captured=delivered.clone();
+        let publisher=controlled_mail_service_publisher(move |message| {captured.lock().unwrap().push(message);true});
+        assert!(publisher.start_socket(Some(&fence),1).is_err(),"begin_connection is required");
+        fence.begin_connection().unwrap();
+        let stream=publisher.start_socket(Some(&fence),1).unwrap(); let epoch=stream.epoch;
+        fence.socket_lost(); fence.begin_connection().unwrap();
+        assert_ne!(fence.stamp().unwrap().connection,epoch.connection);
+        assert!(push_native_mail_service_event(Some(&stream),"MailCost",&json!({"cost":125})).unwrap());
+        assert_eq!(*delivered.lock().unwrap(),vec![
+            MailServiceInboxMessage::StreamStarted(MailServiceStreamStarted{epoch}),
+            MailServiceInboxMessage::Delivery(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:125}}),
+        ]);
+    }
+
+    #[test]
+    fn native_mail_production_has_no_missing_marker_or_invalid_epoch_fallback() {
+        assert!(NativeMailServicePublisher::Native.start_socket(None,1).is_err());
+        assert!(push_native_mail_service_event(None,"MailCost",&json!({"cost":125})).is_err());
+        let fence=NativeCommandFence::new(); fence.begin_connection().unwrap();
+        assert!(controlled_mail_service_publisher(|_|false).start_socket(Some(&fence),1).is_err());
+        let publisher=controlled_mail_service_publisher(|_|true);
+        for (run,connection) in [(0,1),(1,0)] {
+            {let mut state=fence.0.lock().unwrap();state.current.run=run;state.current.connection=connection;}
+            assert!(publisher.start_socket(Some(&fence),1).is_err());
+        }
+        {let mut state=fence.0.lock().unwrap();state.current.run=u64::MAX;state.current.connection=u64::MAX;}
+        assert_eq!(publisher.start_socket(Some(&fence),1).unwrap().epoch,MailServiceStreamEpoch{run:u64::MAX,connection:u64::MAX});
+    }
+
+    #[tokio::test]
+    async fn native_mail_actual_socket_handshake_publishes_marker_before_first_packet() {
+        use tokio::time::timeout;
+        let listener=tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap(); let address=listener.local_addr().unwrap();
+        let (finish_tx,finish_rx)=tokio::sync::oneshot::channel();
+        let server=tokio::spawn(async move {
+            let (tcp,_)=listener.accept().await.unwrap(); let mut socket=tokio_tungstenite::accept_async(tcp).await.unwrap();
+            // The packet may already be waiting while the client finishes its
+            // capability write. It still cannot overtake the local marker.
+            socket.send(Message::Text(json!({"type":"packet","packet":"MailCost","payload":{"cost":125}}).to_string().into())).await.unwrap();
+            let _=finish_rx.await; let _=socket.close(None).await;
+        });
+        let (sender,receiver)=command_channel(8); let fence=sender.ownership_fence().unwrap(); let observer_fence=fence.clone();
+        let delivered=Arc::new(Mutex::new(Vec::new())); let captured=delivered.clone();
+        let (seen_tx,seen_rx)=tokio::sync::oneshot::channel(); let seen_tx=Arc::new(Mutex::new(Some(seen_tx)));
+        let publisher=controlled_mail_service_publisher(move |message| {
+            if let MailServiceInboxMessage::StreamStarted(marker)=&message {
+                let state=observer_fence.0.lock().unwrap(); assert!(state.connected);
+                assert_eq!(marker.epoch,MailServiceStreamEpoch{run:state.current.run,connection:state.current.connection});
+            }
+            let is_delivery=matches!(&message,MailServiceInboxMessage::Delivery(_));
+            captured.lock().unwrap().push(message);
+            if is_delivery {if let Some(tx)=seen_tx.lock().unwrap().take(){let _=tx.send(());}}
+            true
+        });
+        let (shell_tx,_shell_rx)=std::sync::mpsc::channel(); let (game_tx,_game_rx)=std::sync::mpsc::channel();
+        let client=tokio::spawn(async move {run_gateway_client_with_ingest_and_mail_publisher(&format!("ws://{address}"),receiver,shell_tx,game_tx,NativeReconnectConfig::default(),|_|true,publisher).await});
+        timeout(Duration::from_secs(2),seen_rx).await.unwrap().unwrap();
+        let epoch=MailServiceStreamEpoch{run:fence.stamp().unwrap().run,connection:fence.stamp().unwrap().connection};
+        assert_eq!(*delivered.lock().unwrap(),vec![MailServiceInboxMessage::StreamStarted(MailServiceStreamStarted{epoch}),MailServiceInboxMessage::Delivery(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:125}})]);
+        sender.send_with_stamp(GatewayCommand::Shutdown,fence.stamp()).unwrap();
+        timeout(Duration::from_secs(2),client).await.unwrap().unwrap().unwrap();
+        let _=finish_tx.send(()); timeout(Duration::from_secs(2),server).await.unwrap().unwrap();
+    }
+
+    #[tokio::test]
+    async fn native_mail_marker_rejection_terminates_actual_socket_before_packet_delivery() {
+        use tokio::time::timeout;
+        let listener=tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap(); let address=listener.local_addr().unwrap();
+        let server=tokio::spawn(async move {
+            let (tcp,_)=listener.accept().await.unwrap(); let mut socket=tokio_tungstenite::accept_async(tcp).await.unwrap();
+            let _=socket.send(Message::Text(json!({"type":"packet","packet":"MailCost","payload":{"cost":125}}).to_string().into())).await;
+            while let Some(Ok(_))=socket.next().await {}
+        });
+        let (_sender,receiver)=command_channel(8);
+        let (shell_tx,_shell_rx)=std::sync::mpsc::channel(); let (game_tx,_game_rx)=std::sync::mpsc::channel();
+        let delivered=Arc::new(Mutex::new(Vec::new())); let captured=delivered.clone();
+        let publisher=controlled_mail_service_publisher(move |message|{captured.lock().unwrap().push(message);false});
+        let result=timeout(Duration::from_secs(2),run_gateway_client_with_ingest_and_mail_publisher(&format!("ws://{address}"),receiver,shell_tx,game_tx,NativeReconnectConfig::default(),|_|true,publisher)).await.unwrap();
+        assert!(result.unwrap_err().contains("marker was not accepted"));
+        let delivered=delivered.lock().unwrap(); assert_eq!(delivered.len(),1); assert!(matches!(&delivered[0],MailServiceInboxMessage::StreamStarted(_))); drop(delivered);
+        timeout(Duration::from_secs(2),server).await.unwrap().unwrap();
+    }
+
+    #[tokio::test]
+    async fn native_mail_real_buffer_runtime_and_parcel_consumer_retire_old_owner_quote_after_every_reset() {
+        use bevy::prelude::*;
+        use mir2_client_bevy::crystal_ui::overlays::{Mir2NativeMailParcelServicePlugin,NativePlayerUiState,MailComposeUi,MailComposeKind,NativePlayerUiIntentQueue,NativePlayerUiIntent,native_mail_parcel_quote_state};
+        use mir2_client_bevy::native_shell::{NativeShellModel,NativeShellScreen};
+        use mir2_bevy_runtime::{Mir2NativeSessionBoundaryPlugin,Mir2NativeMailServiceIngestPlugin,native_ingest};
+        let _guard=super::native_queue_test_guard();
+        for already_in_inbox in [false,true] { for reserve_cost in [false,true] { for preserve_shop in [false,true] {
+            let (sender,mut receiver)=command_channel(8);let fence=sender.ownership_fence().unwrap();let stamp=fence.test_world_ready(7,0);
+            let epoch=MailServiceStreamEpoch{run:stamp.run,connection:stamp.connection};
+            let mut app=App::new();
+            app.add_plugins((Mir2NativeSessionBoundaryPlugin,Mir2NativeMailServiceIngestPlugin,Mir2NativeMailParcelServicePlugin));
+            let commands=crate::input::GatewayCommands::new(sender);assert!(commands.activate_world_stamp(stamp));app.insert_resource(commands);
+            app.world_mut().resource_mut::<NativeShellModel>().screen=NativeShellScreen::InGame;
+            {let mut state=app.world_mut().resource_mut::<NativePlayerUiState>();state.core.panel=mir2_ui_core::state::UiPanel::Mail;state.core.mail_compose=Some(mir2_ui_core::state::MailComposeDraft{gold:700,..Default::default()});}
+            app.world_mut().resource_mut::<MailComposeUi>().kind=MailComposeKind::Parcel;
+            assert!(native_ingest::push_native_mail_service_stream_started(MailServiceStreamStarted{epoch})); app.update();
+            assert_eq!(super::ownership_tests::drain_entered_native_mail_fixture(&mut app,&mut receiver).await,vec![NativePlayerUiIntent::MailCost{gold:700,attachment_unique_ids:vec![],stamped:false}]);
+            app.update();
+            assert!(native_mail_parcel_quote_state(app.world()).unwrap().pending);
+            if already_in_inbox {
+                // Runtime tests separately prove real buffer -> already-drained
+                // inbox retention. Here exercise that same inbox before the
+                // actual runtime reset + production parcel consumers run.
+                let mut inbox=app.world_mut().resource_mut::<MailServiceInbox>();
+                assert!(inbox.push_delivery(MailServiceDelivery{epoch,event:MailServiceEvent::OpenParcel}));
+                assert!(inbox.push_delivery(MailServiceDelivery{epoch,event:MailServiceEvent::LockedItem{unique_id:77,locked:true}}));
+                if reserve_cost {for _ in 2..mir2_client_bevy::mail_service::MAIL_SERVICE_INBOX_CAPACITY {assert!(inbox.push_delivery(MailServiceDelivery{epoch,event:MailServiceEvent::OpenParcel}));}}
+                assert!(inbox.push_delivery(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:70}}));
+            } else {
+                assert!(native_ingest::push_native_mail_service(MailServiceDelivery{epoch,event:MailServiceEvent::OpenParcel}));
+                assert!(native_ingest::push_native_mail_service(MailServiceDelivery{epoch,event:MailServiceEvent::LockedItem{unique_id:77,locked:true}}));
+                if reserve_cost {for index in 2..256 {assert!(native_ingest::push_native_social_model(index.to_string()));}}
+                assert!(native_ingest::push_native_mail_service(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:70}}));
+            }
+            if preserve_shop {assert!(native_ingest::push_native_data_reset_preserving_exact_game_shop_receipt(serde_json::from_value(json!({"protocol":"nativeGameShopReceiptV1","requestId":"gs-parcel-reset","success":false,"gIndex":31,"quantity":2,"priceType":1,"code":"insufficientCurrency"})).unwrap()));}
+            else {assert!(native_ingest::push_native_data_reset());}
+            app.update();
+            let quote=native_mail_parcel_quote_state(app.world()).unwrap();
+            assert_eq!(quote.stream_epoch,Some(epoch)); assert_eq!(quote.postage,None); assert!(!quote.current);
+            assert!(quote.pending,"old Cost retires its tombstone; exactly one new quote becomes pending");
+            assert_eq!(super::ownership_tests::drain_entered_native_mail_fixture(&mut app,&mut receiver).await.len(),1);
+            assert!(native_ingest::push_native_mail_service(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:140}})); app.update();
+            let quote=native_mail_parcel_quote_state(app.world()).unwrap(); assert!(quote.current); assert_eq!(quote.postage,Some(140));
+            assert!(super::ownership_tests::drain_entered_native_mail_fixture(&mut app,&mut receiver).await.is_empty());
+            // A true new stream clears old postage/slot once. Late old socket
+            // replies cannot authorize the freshly reserved new-stream quote.
+            fence.socket_lost();let fresh=fence.test_world_ready(7,0);assert!(app.world().resource::<crate::input::GatewayCommands>().activate_world_stamp(fresh));
+            let newer=MailServiceStreamEpoch{run:fresh.run,connection:fresh.connection};
+            assert!(native_ingest::push_native_mail_service_stream_started(MailServiceStreamStarted{epoch:newer}));
+            assert!(!native_ingest::push_native_mail_service(MailServiceDelivery{epoch,event:MailServiceEvent::Cost{cost:999}})); app.update();
+            assert_eq!(super::ownership_tests::drain_entered_native_mail_fixture(&mut app,&mut receiver).await.len(),1);
+            assert!(native_ingest::push_native_mail_service_stream_started(MailServiceStreamStarted{epoch:newer})); app.update();
+            assert!(super::ownership_tests::drain_entered_native_mail_fixture(&mut app,&mut receiver).await.is_empty());
+            assert!(native_ingest::push_native_mail_service(MailServiceDelivery{epoch:newer,event:MailServiceEvent::Cost{cost:210}})); app.update();
+            let quote=native_mail_parcel_quote_state(app.world()).unwrap(); assert!(quote.current); assert_eq!(quote.postage,Some(210));
+        }}}
+    }
+}
+
+#[cfg(test)]
+#[path = "npc_gold_buy_transport_tests.rs"]
+mod npc_gold_buy_transport_tests;

@@ -7,6 +7,7 @@ use std::time::{Duration, Instant};
 #[derive(Default)]
 pub struct WorldShortcutState {
     owner: Option<String>,
+    stamp:Option<crate::gateway::NativeCommandStamp>,
     pickup_ready: Option<Instant>,
 }
 impl WorldShortcutState {
@@ -55,12 +56,15 @@ pub fn keyboard_world_actions_system(
         .iter()
         .find(|e| e.kind == EntityKind::SelfPlayer);
     let identity = owner.map(|e| e.object_id.clone());
-    if state.owner != identity {
+    let stamp=commands.applied_world_stamp();
+    if state.owner != identity || state.stamp!=stamp {
         *state = WorldShortcutState {
             owner: identity,
+            stamp,
             ..Default::default()
         };
     }
+    if commands.ownership_fence().is_some()&&stamp.is_none(){return;}
     if !gameplay_input_enabled(shell.as_deref(), ui.as_deref(), notice.as_deref(), &windows) {
         return;
     }

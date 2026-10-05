@@ -50,12 +50,18 @@ impl NpcShopServiceSignal {
     }
 }
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct ShopGood {
     pub unique_id: u64,
     pub name: String,
     pub price: u32,
+    /// Original NPCGoods f32 rate. A display unit price cannot recover it.
+    pub purchase_rate: Option<f32>,
+    /// Positive client admission marker, not proof of the server market source.
+    /// Preserve it when an ordinary raw row cannot be fully projected.
+    #[serde(default)]
+    pub requires_gold_buy_plan: bool,
     /// Authoritative NPCPearlGoods currency; never inferred from item identity.
     pub use_pearls: bool,
     pub count: u16,
@@ -74,6 +80,14 @@ pub struct ShopGood {
 }
 
 impl ShopGood {
+    /// Known raw gold goods must use the strict planner; incomplete authority
+    /// must not silently enter the legacy display-price compatibility path.
+    pub fn uses_gold_buy_plan(&self) -> bool {
+        !self.use_pearls && self.stock < 0
+            && (self.requires_gold_buy_plan || self.purchase_rate.is_some() || self.tooltip_source.as_ref()
+                .and_then(|source| source.user_item.as_ref()).is_some_and(|user| user.is_shop_item))
+    }
+
     pub fn price_label(&self) -> String {
         if self.use_pearls {
             format!(
@@ -218,6 +232,9 @@ pub fn shop_buy_enabled_with_pearls(
     let Some(good) = shop.selected() else {
         return false;
     };
+    if good.uses_gold_buy_plan() {
+        return crate::npc_shop_buy::plan_npc_gold_buy(shop, inventory, quantity).can_buy;
+    }
     let qty = shop_quantity_clamped(quantity) as u32;
     if qty == 0 {
         return false;
@@ -239,6 +256,32 @@ pub fn shop_buy_enabled_with_pearls(
         return false;
     }
     true
+}
+
+/// Native dispatch consumes the admitted count rather than reclamping a quote.
+pub fn shop_buy_item_command(
+    shop: &ShopModel, inventory: &InventoryModel, quantity: u16, pearls: u32,
+) -> Option<crate::npc_shop_buy::NpcGoldBuyCommand> {
+    let good = shop.selected()?;
+    if !shop.allows_buy() { return None; }
+    if good.uses_gold_buy_plan() {
+        return crate::npc_shop_buy::plan_npc_gold_buy(shop, inventory, quantity).command;
+    }
+    shop_buy_enabled_with_pearls(shop, inventory, quantity, pearls).then_some(
+        crate::npc_shop_buy::NpcGoldBuyCommand {
+            command_type: crate::npc_shop_buy::NpcGoldBuyCommandType::BuyItem,
+            item_index: good.unique_id, count: shop_quantity_clamped(quantity), panel_type: 0,
+        },
+    )
+}
+
+/// Quantity widgets use the same raw template limit as ordinary gold dispatch.
+pub fn shop_buy_quantity_max(shop: &ShopModel, inventory: &InventoryModel) -> u16 {
+    if shop.selected().is_some_and(ShopGood::uses_gold_buy_plan) {
+        crate::npc_shop_buy::plan_npc_gold_buy(shop, inventory, 1).max_quantity
+    } else {
+        SHOP_QUANTITY_MAX
+    }
 }
 
 pub fn shop_sell_enabled(inventory: &InventoryModel, slot: Option<u32>) -> bool {

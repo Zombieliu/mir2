@@ -9,6 +9,7 @@ import { pathToFileURL } from 'node:url';
 import { applyProtocolObservation, hasAuthoritativePlayerDeath } from './quest-agent/protocol-observation.mjs';
 import { loadProtocolCollisionMap, findProtocolWalkPath } from './quest-agent/protocol-navigation.mjs';
 import { createNavigator, equipStarterGear } from './quest-agent/protocol-play.mjs';
+import { decodePlaytestFrame } from './playtest-catalog-transport.mjs';
 
 const REPO_ROOT = path.resolve(import.meta.dirname, '../../../..');
 // Same pinned Next bundled transport used by the existing capture scripts.
@@ -152,7 +153,7 @@ export class PlaytestClient {
   constructor(url, label, tracePath, secrets = []) {
     this.url = validateEndpoint(url); this.label = label; this.tracePath = tracePath; this.secrets = [...secrets];
     this.events = []; this.sequence = 0; this.snapshot = null; this.writeQueue = Promise.resolve();
-    this.lastWalkAt = 0; this.inGame = false; this.closed = false;
+    this.lastWalkAt = 0; this.inGame = false; this.closed = false; this.catalogGzipOptedIn = false;
   }
   record(direction, value) {
     // Tokens are never reused: reconnect acceptance deliberately logs in again.
@@ -188,8 +189,14 @@ export class PlaytestClient {
   async connect() {
     this.ws = new WebSocketTransport(this.url, { origin: endpointOrigin(this.url), handshakeTimeout: 10000 });
     this.ws.addEventListener('message', event => {
-      try { this.observe(JSON.parse(event.data)); }
-      catch (error) { this.failure = error; }
+      if (this.failure) return;
+      try {
+        // Validate the whole compressed batch before applying its first entry.
+        for (const message of decodePlaytestFrame(event.data, this.catalogGzipOptedIn)) this.observe(message);
+      } catch (error) {
+        this.failure = error;
+        this.ws.close(1002, 'Invalid gateway frame');
+      }
     });
     this.ws.addEventListener('error', () => { this.failure = new Error('WebSocket connection failed'); });
     this.ws.addEventListener('close', () => { this.closed = true; });

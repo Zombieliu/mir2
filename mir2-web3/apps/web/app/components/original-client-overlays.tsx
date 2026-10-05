@@ -719,6 +719,28 @@ export type MainHudProps = {
   onToggleMenu: () => void;
 };
 
+/** Unmigrated passive information, retained after the shared main HUD handoff. */
+export function HudSpriteFallback({ plan, experienceOwned, weightOwned }: {
+  plan: import("../../lib/bevy-hud-ui").MainHudPlan | null; experienceOwned: boolean; weightOwned: boolean;
+}) {
+  if (!plan) return null;
+  return <>{([[plan.experienceSprite, experienceOwned], [plan.weightSprite, weightOwned]] as const).map(([sprite, owned], index) =>
+    !owned && sprite?.image && sprite.source.width > 0 ? <div key={index} data-shared-hud-sprite-fallback={index === 0 ? "experience" : "weight"}
+      style={{ position: "absolute", left: sprite.destination.left, top: sprite.destination.top, width: sprite.destination.width,
+        height: sprite.destination.height, overflow: "hidden", pointerEvents: "none" }}>
+      <img src={`/${sprite.image}`} alt="" draggable={false} style={{ position: "absolute", left: -sprite.source.left, top: -sprite.source.top, maxWidth: "none" }} />
+    </div> : null)}</>;
+}
+
+export function MainHudStatus({ t, mapTitle, world }: Pick<MainHudProps, "t" | "mapTitle" | "world">) {
+  const buffLabel = world.activeBuffs.slice(0, 2).map(buff => `${buff.name}:${buff.remainingTicks}`).join("  ");
+  return <div className="hud-passive-compat" style={{ position: "absolute", left: 0, top: 618, width: 1024, height: 152, pointerEvents: "none" }}>
+    <div className="hud-map-label">{mapTitle ?? world.mapTitle ?? ""}{world.inSafeZone ? ` ${t("ui.safeZone", [], "Safe Zone")}` : ""}</div>
+    {buffLabel ? <div className="hud-buff-label">{buffLabel}</div> : null}
+    <div className="hud-space-label">{crystalMainHudFreeSlots(world)}</div>
+  </div>;
+}
+
 export function MainHud({
   t,
   connected,
@@ -777,19 +799,19 @@ export function MainHud({
           className="hud-exp-bar"
           data-experience-ratio={experienceRatio.toFixed(4)}
           data-fill-width={experienceBarFillWidth}
-          style={{ width: `${experienceBarFillWidth}px` }}
+          data-experience={world.playerExperience}
+          data-max-experience={world.playerMaxExperience}
         >
-          {experienceBarFillWidth > 0 ? (
-            <img
-              className="hud-exp-bar-fill"
-              src={ORIGINAL_UI.hud.experienceBar}
-              alt=""
-              draggable={false}
-            />
-          ) : null}
+          <div className="hud-exp-bar-clip" style={{ width: `${experienceBarFillWidth}px` }}>
+            {experienceBarFillWidth > 0 ? (
+              <img className="hud-exp-bar-fill" src={ORIGINAL_UI.hud.experienceBar} alt="" draggable={false} />
+            ) : null}
+          </div>
         </div>
         <div
           className="hud-weight-bar"
+          data-current-weight={world.currentWeight}
+          data-max-weight={world.maxWeight}
           data-weight-ratio={bagWeightRatio.toFixed(4)}
           data-fill-width={weightBarFillWidth}
           data-mir2-original-src={weightBarSprite}

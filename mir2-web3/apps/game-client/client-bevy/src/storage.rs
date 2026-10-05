@@ -321,11 +321,7 @@ pub fn storage_withdraw_enabled(storage: &StorageModel, inventory: &InventoryMod
     if item.unique_id.is_none() {
         return false;
     }
-    let occupied = inventory.items.iter().filter(|i| i.container == 0).count() as u32;
-    if occupied >= BAG_SLOTS {
-        return false;
-    }
-    true
+    crate::storage_interaction::first_empty_bag_slot(inventory).is_some()
 }
 
 pub fn storage_withdraw_enabled_for_selection(
@@ -339,8 +335,7 @@ pub fn storage_withdraw_enabled_for_selection(
     if storage.item_for_selection(selection).is_none() {
         return false;
     }
-    let occupied = inventory.items.iter().filter(|i| i.container == 0).count() as u32;
-    occupied < BAG_SLOTS
+    crate::storage_interaction::first_empty_bag_slot(inventory).is_some()
 }
 
 pub fn storage_unlock_enabled(storage: &StorageModel) -> bool {

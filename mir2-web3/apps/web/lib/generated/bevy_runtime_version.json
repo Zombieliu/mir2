@@ -1,21 +1,56 @@
 {
-  "version": "bevy-5046abca14947f40",
+  "schemaVersion": 2,
+  "version": "bevy-18086335d8911bc6",
+  "packages": [
+    {
+      "id": "webgpu",
+      "backend": "webgpu",
+      "packageDir": "pkg-webgpu",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": false
+    },
+    {
+      "id": "webgl2",
+      "backend": "webgl2",
+      "packageDir": "pkg-webgl2",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": false
+    },
+    {
+      "id": "webgl2-shared",
+      "backend": "webgl2",
+      "packageDir": "pkg-webgl2-shared",
+      "questUiAbiVersion": 1,
+      "bagUiAbiVersion": 1,
+      "primarySharedUiCompiled": true
+    }
+  ],
   "files": [
     {
       "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime.js",
-      "sha256": "79e73d73f7d7f7376c515bad4493ded1d491c62da73b1e76f34e01306c4aa2b4"
+      "sha256": "7759ea2816bbde15eb6887a8293d5eb944ab0fae1f3d5b361cdbf2f69c12820a"
     },
     {
       "path": "public/bevy-runtime/pkg-webgpu/mir2_bevy_runtime_bg.wasm",
-      "sha256": "1810c3b55008fe7e2109d4b1cd441efc3321786b0d26e7df98fd29fc54330298"
+      "sha256": "f31db83536ee785bfc9066e1f0f17699d466eb7eebb243ae2901b8971c39a776"
     },
     {
       "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime.js",
-      "sha256": "c5a7f33b5ffe7385e1d9155a03c853b7ebbf327dd11bd7d0b91b6705a7a164dc"
+      "sha256": "85da0c83f6f5ea2e7fd51119f0ac09db6643223bad9bf6c96ef100e136ccf36d"
     },
     {
       "path": "public/bevy-runtime/pkg-webgl2/mir2_bevy_runtime_bg.wasm",
-      "sha256": "47193e61209c87eef1c0727696a6d6a237e17dea221b4d252b1d6cdb9390f57e"
+      "sha256": "ccc1aa55a93a19cd8f428409f0c5cc1940318513ed502d5475c0fa578689493a"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime.js",
+      "sha256": "5f92a9103b582a59cf732aa413ff7de8178db47ba7ce1b2106f932cf8e0a7f75"
+    },
+    {
+      "path": "public/bevy-runtime/pkg-webgl2-shared/mir2_bevy_runtime_bg.wasm",
+      "sha256": "e5884820db99aa34cb610f025f95add4d325121fc4de5781ff4974af017f6996"
     }
   ]
 }

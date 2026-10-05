@@ -826,6 +826,8 @@ dependencies = [
  "bevy_text",
  "bevy_time",
  "bevy_transform",
+ "bevy_ui",
+ "bevy_ui_render",
  "bevy_utils",
  "bevy_window",
  "bevy_winit",
@@ -2983,17 +2985,28 @@ dependencies = [
  "bevy",
  "chrono",
  "mir2-client-core",
+ "mir2-game-data",
  "mir2-protocol",
  "mir2-ui-core",
  "serde",
  "serde_json",
  "unicode-segmentation",
  "unicode-width",
+ "web-time",
 ]
 
 [[package]]
 name = "mir2-client-core"
 version = "0.1.0"
+
+[[package]]
+name = "mir2-game-data"
+version = "0.1.0"
+dependencies = [
+ "mir2-protocol",
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "mir2-protocol"
@@ -3007,6 +3020,7 @@ name = "mir2-ui-core"
 version = "0.1.0"
 dependencies = [
  "bevy",
+ "mir2-client-core",
  "serde",
 ]
 

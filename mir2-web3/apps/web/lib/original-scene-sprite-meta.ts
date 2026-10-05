@@ -1,4 +1,4 @@
-import originalSceneSpriteManifest from "../public/original-ui/manifest.generated.json";
+import originalSceneSpriteLibraryKeys from "./generated/original_scene_sprite_library_keys.json";
 import originalSceneSpriteSourceIndex from "../public/original-ui/source-libraries.generated.json";
 
 export type OriginalSceneSpriteFrameMeta = {
@@ -44,6 +44,12 @@ type OriginalSceneSpriteManifestPayload = {
   libraries?: Record<string, unknown>;
 };
 
+type OriginalSceneSpriteLibraryKeyIndex = {
+  schemaVersion: number;
+  sourceSha256: string;
+  keys: string[];
+};
+
 export type OriginalSceneSpriteLibraryMeta = OriginalSceneSpriteLibraryPayload & {
   frameSet: OriginalSceneFrameSet | null;
   frameMap: Map<number, OriginalSceneSpriteFrameMeta>;
@@ -66,9 +72,7 @@ let frameSetCatalogPromise: Promise<OriginalSceneFrameSetCatalog | null> | null 
 // stay retryable.
 const missingSceneSpriteLibraries = new Set<string>();
 const availableSceneSpriteLibraries = new Set(
-  Object.keys((originalSceneSpriteManifest as OriginalSceneSpriteManifestPayload).libraries ?? {}).map(
-    normalizeSceneSpriteLibraryKey,
-  ),
+  (originalSceneSpriteLibraryKeys as OriginalSceneSpriteLibraryKeyIndex).keys.map(normalizeSceneSpriteLibraryKey),
 );
 const sourceSceneSpriteLibraries = new Set(
   Object.keys((originalSceneSpriteSourceIndex as OriginalSceneSpriteManifestPayload).libraries ?? {})

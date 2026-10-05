@@ -4,7 +4,8 @@ use crate::runtime::{
     GameShopPurchaseOutcome, SharedAccountInventoryTransactionReceipt, SharedItemRentalDelivery,
     SharedItemRentalFeeOffer, SharedItemRentalItemOffer, SharedNpcSavedValue,
     SharedSkillItemConsumptionComponent, SharedTradeOffer, ZoneMonsterSpawn, ZonePlayerCombatStats,
-    LocalPlayerVitalsSnapshot,
+    LocalPlayerVitalsSnapshot, NpcGoldBuyRequest, NpcGoldBuyBeforeExecution,
+    NpcGoldBuyProcessingError, NpcGoldBuyProcessingExecution,
 };
 use crate::{
     ActiveSessionIdentity, CharacterSaveRecord, ChatPacketPreparation, GroundDropSnapshot,
@@ -328,6 +329,16 @@ pub trait WorldRuntime: Send + Sync {
     /// can reject the command before any purchase mutation occurs.
     fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
         false
+    }
+
+    /// Local domain capability only; this does not advertise a network receipt ABI.
+    fn supports_typed_npc_gold_buy_outcome(&self) -> bool { false }
+
+    /// Unsupported implementations must never fall back to execute/legacy BuyItem.
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(&mut self,
+        _authenticated: bool, _request: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+        Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::UnsupportedRuntime))
     }
 
     fn execute_production_player_command(
@@ -1117,6 +1128,17 @@ impl WorldRuntime for InProcessWorldRuntime {
 
     fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
         true
+    }
+
+    fn supports_typed_npc_gold_buy_outcome(&self) -> bool { true }
+
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(&mut self,
+        authenticated: bool, request: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+        if !authenticated {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::NotAuthenticated));
+        }
+        self.session.try_npc_gold_buy_with_outcome(request)
     }
 
     fn world_snapshot(&self) -> WorldSnapshot {

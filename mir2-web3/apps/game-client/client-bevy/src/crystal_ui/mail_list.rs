@@ -1,70 +1,8 @@
-//! Crystal MailItemRow: original columns, full-bitmap icon centering and badges.
+//! Native compatibility registration and regression tests; all row painting is shared.
 use super::*;
-
-#[derive(Component)]
-pub(super) struct RowIcon;
-
-pub(super) fn layout_icons(images: Option<Res<Assets<Image>>>, mut icons: Query<(&ImageNode, &mut Node), With<RowIcon>>) {
-    let Some(images) = images else { return };
-    for (image, mut node) in &mut icons {
-        let Some(bitmap) = images.get(&image.image) else {
-            node.display = Display::None;
-            continue;
-        };
-        let size = bitmap.texture_descriptor.size;
-        node.left = Val::Px(((34 - size.width as i32) / 2) as f32);
-        node.top = Val::Px(((32 - size.height as i32) / 2) as f32);
-        node.width = Val::Px(size.width as f32);
-        node.height = Val::Px(size.height as f32);
-        node.display = Display::Flex;
-    }
-}
-
-fn preview(message: &MailMessage) -> String {
-    format!("{}{}", if message.locked { "[*] " } else { "" }, message.body.replace("\r\n", " "))
-}
-
-pub(super) fn row(parent: &mut ChildSpawnerCommands, assets: Option<&AssetServer>, message: &MailMessage, index: usize, selected: bool) {
-    parent.spawn((Button, OverlayButton::SelectMail(message.id), FocusPolicy::Block, Node {
-        position_type: PositionType::Absolute,
-        left: Val::Px(10.0), top: Val::Px(55.0 + index as f32 * 33.0),
-        width: Val::Px(290.0), height: Val::Px(33.0),
-        ..default()
-    }, BackgroundColor(Color::NONE))).with_children(|row| {
-        if let Some(assets) = assets {
-            let path = if let Some(item) = message.items.first() {
-                item.image.map(|image| format!("original-ui/Items/{image}.png"))
-            } else {
-                Some(format!("original-ui/Prguse/{}.png", if message.gold > 0 { 541 } else { 540 }))
-            };
-            if let Some(path) = path {
-                row.spawn((RowIcon, Node { position_type: PositionType::Absolute, display: Display::None, ..default() }, ImageNode::new(assets.load(path))));
-            }
-            if !message.read {
-                spawn_static_overlay_sprite(row, assets, "original-ui/Prguse/550.png".into(), CrystalRect::new(if !message.claimed || message.locked {20.0} else {5.0}, 17.0, 12.0, 9.0));
-            }
-            if message.locked {
-                spawn_static_overlay_sprite(row, assets, "original-ui/Prguse/551.png".into(), CrystalRect::new(5.0, 17.0, 12.0, 10.0));
-            }
-            if !message.claimed {
-                spawn_static_overlay_sprite(row, assets, "original-ui/Prguse/552.png".into(), CrystalRect::new(5.0, 17.0, 12.0, 11.0));
-            }
-            if selected {
-                spawn_static_overlay_sprite(row, assets, "original-ui/Prguse/545.png".into(), CrystalRect::new(-5.0, -3.0, 296.0, 38.0));
-            }
-        }
-        for (text, left, width) in [(message.sender.clone(), 35.0, 130.0), (preview(message), 170.0, 115.0)] {
-            row.spawn(Node {
-                position_type: PositionType::Absolute, left: Val::Px(left), top: Val::Px(0.0),
-                width: Val::Px(width), height: Val::Px(31.0), align_items: AlignItems::Center,
-                overflow: Overflow::clip(), ..default()
-            }).with_children(|label| {
-                label.spawn((Text::new(text), crate::crystal_ui::typography::crystal_text_font(10.0),
-                    TextColor(TEXT), TextLayout::new(Justify::Left, LineBreak::NoWrap)));
-            });
-        }
-    });
-}
+pub(super) use super::super::mail_page_shared::layout_mail_row_icons as layout_icons;
+#[cfg(test)]
+use super::super::mail_page_shared::preview;
 
 #[cfg(test)]
 mod tests {

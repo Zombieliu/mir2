@@ -2,12 +2,21 @@ import type { NextConfig } from "next";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { rewriteStandaloneFullPackTrace } from "./lib/standalone-full-pack-tracing";
 
 const isDevelopment = process.env.NODE_ENV === "development";
+const isStandaloneProduction = process.env.MIR2_NEXT_STANDALONE === "1" && !isDevelopment;
 const isVercelProduction =
   process.env.VERCEL === "1" && process.env.VERCEL_ENV === "production";
 const configDir = path.dirname(fileURLToPath(import.meta.url));
 const monorepoRoot = path.resolve(configDir, "../../..");
+const compiledRuntimeManifest = readFileSync(
+  path.resolve(configDir, "lib/generated/bevy_runtime_version.json"), "utf8",
+);
+// Only the public Core release identity is captured; this is independent of Bevy.
+const compiledCoreManifest = readFileSync(
+  path.resolve(configDir, "lib/generated/client_core_runtime.json"), "utf8",
+);
 const productionAssetRelease = isVercelProduction
   ? JSON.parse(
       readFileSync(
@@ -62,14 +71,11 @@ const buildRevision =
 // (the /api/scene/crystal function was reported ~819MB before this). The earlier
 // excludes missed public/bevy-runtime/**/*.wasm (~106MB) and other public media.
 //
-// Patterns are matched relative to Next's outputFileTracingRoot. Locally that is
-// apps/web, so "./public/**" matches; but Vercel's monorepo build sets the root
-// higher (this app imports ../game-client), tracing files as
-// mir2-web3/apps/web/public/..., which "./public/**" does NOT match — that is why
-// the function stayed huge on Vercel while local `next build` traced ~11.5MB. The
-// "**/public/**" patterns match regardless of the traced prefix so the excludes
-// apply in both environments. JSON/meta under public/ is intentionally NOT
-// excluded because /api/original-ui-meta reads it at runtime.
+// Next joins route excludes against this Web project's directory. Its separate
+// shared next-server trace uses outputFileTracingRoot. Keep the established
+// route patterns for existing media rules; the standalone full-pack rule below
+// applies only to the shared trace. JSON/meta under public/ is intentionally
+// not generally excluded because /api/original-ui-meta reads it at runtime.
 const heavyPublicMediaTracingExcludes = [
   "./public/**/*.png",
   "./public/**/*.wav",
@@ -90,6 +96,7 @@ const localCrystalSourceTracingExcludes = ["../../../downloads/**/*"];
 const localDiagnosticsTracingExcludes = ["../../docs/generated/**/*"];
 
 const nextConfig: NextConfig = {
+  distDir: process.env.MIR2_NEXT_DIST_DIR || ".next",
   reactStrictMode: true,
   devIndicators: false,
   allowedDevOrigins: ["127.0.0.1", "localhost"],
@@ -97,6 +104,8 @@ const nextConfig: NextConfig = {
   // secret, and capturing it here keeps /version trustworthy even when a host
   // does not expose its system variables to server functions at runtime.
   env: {
+    MIR2_BEVY_RUNTIME_BUILD_MANIFEST: compiledRuntimeManifest,
+    MIR2_CLIENT_CORE_BUILD_MANIFEST: compiledCoreManifest,
     MIR2_BUILD_REVISION: buildRevision,
     MIR2_PINNED_ASSET_VERSION: productionAssetRelease?.version ?? "",
     MIR2_PINNED_ASSET_OBJECT_PREFIX: productionAssetRelease?.objectPrefix ?? "",
@@ -132,8 +141,18 @@ const nextConfig: NextConfig = {
   // Normal local/Vercel builds keep incremental caches. Downloadable bundles
   // opt into standalone output so only traced runtime dependencies ship.
   output: process.env.MIR2_NEXT_STANDALONE === "1" ? "standalone" : undefined,
+  ...(isStandaloneProduction ? {
+    compiler: {
+      async runAfterProductionCompile(metadata: { projectDir: string; distDir: string }) {
+        const audit = await rewriteStandaloneFullPackTrace(metadata, configDir);
+        console.log(`[mir2-full-pack-trace] ${JSON.stringify(audit)}`);
+      },
+    },
+    experimental: { parallelServerBuildTraces: false },
+  } : {}),
   outputFileTracingRoot: monorepoRoot,
   outputFileTracingExcludes: {
+    ...(isStandaloneProduction ? { "next-server": ["**/generated/crystal-packs/full/**"] } : {}),
     "/api/asset-manifest": heavyPublicMediaTracingExcludes,
     "/api/original-ui-meta": heavyPublicMediaTracingExcludes,
     "/api/scene/crystal": [
@@ -177,6 +196,13 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/client-core/:version/:path*",
+        headers: [
+          { key: "Cache-Control", value: immutableVersionedRuntimeCache },
+          clearAltSvcHeader,
+        ],
+      },
       {
         source: "/bootstrap/:path*",
         headers: [
@@ -263,12 +289,8 @@ const nextConfig: NextConfig = {
     // hotlink protection then 403s it. The handler does its own server-side fetch
     // (Node fetch sends no Referer) so R2 returns 200.
     return {
-      beforeFiles: [
-        {
-          source: "/bevy-runtime/v/:version/:backend/:path*",
-          destination: "/bevy-runtime/:backend/:path*",
-        },
-      ],
+      // proxy.ts validates the current version and declared package before rewrite.
+      beforeFiles: [],
       fallback: assetPrefixes.map((prefix) => ({
         source: `/${prefix}/:path*`,
         destination: `/api/r2-proxy/${prefix}/:path*`,

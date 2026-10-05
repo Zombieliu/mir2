@@ -5,13 +5,15 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { constants as zlibConstants, gzipSync } from "node:zlib";
 import { fileURLToPath } from "node:url";
+import { readImmutableBevyRuntimeRelease } from "./lib/bevy-runtime-release-files.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const webRoot = path.resolve(scriptDir, "..");
 const repoRoot = path.resolve(webRoot, "..", "..");
 const args = parseArgs(process.argv.slice(2));
 const runtimeManifestPath = path.join(webRoot, "lib", "generated", "bevy_runtime_version.json");
-const runtimeManifest = JSON.parse(await fs.readFile(runtimeManifestPath, "utf8"));
+const pinnedRuntime = readImmutableBevyRuntimeRelease({ webRoot, manifestPath: runtimeManifestPath });
+const runtimeManifest = pinnedRuntime.normalized;
 const runtimeVersion = String(runtimeManifest.version ?? "").trim();
 const assetVersion = normalizeVersion(args.assetVersion ?? process.env.MIR2_ASSET_VERSION ?? "");
 const objectPrefix = normalizePrefix(args.objectPrefix ?? process.env.MIR2_ASSET_OBJECT_PREFIX ?? "");
@@ -35,22 +37,16 @@ const gzipOptions = {
   mtime: 0,
 };
 const files = [];
-for (const entry of runtimeManifest.files ?? []) {
-  const manifestPath = String(entry.path ?? "");
-  const relativePath = manifestPath.replace(/^public\//, "");
-  if (!/^bevy-runtime\/pkg-(?:webgpu|webgl2)\/mir2_bevy_runtime(?:_bg\.wasm|\.js)$/.test(relativePath)) {
-    throw new Error(`Unexpected runtime path: ${manifestPath}`);
-  }
-  const stagePath = path.join(webRoot, ...manifestPath.split("/"));
+for (const entry of pinnedRuntime.files) {
+  const stagePath = entry.localPath;
   const bytes = await fs.readFile(stagePath);
   const sha256 = hash(bytes);
   if (sha256 !== entry.sha256) {
-    throw new Error(`${manifestPath} differs from the runtime manifest`);
+    throw new Error(entry.path + " differs from the runtime manifest");
   }
-  const wasm = relativePath.endsWith(".wasm");
+  const wasm = entry.relativePath.endsWith(".wasm");
   const encoded = wasm ? gzipSync(bytes, gzipOptions) : null;
-  const packagePath = relativePath.replace(/^bevy-runtime\//, "");
-  const versionedRelativePath = `bevy-runtime/v/${runtimeVersion}/${packagePath}`;
+  const versionedRelativePath = entry.relativePath;
   files.push({
     path: `/${versionedRelativePath}`,
     relativePath: versionedRelativePath,
@@ -71,10 +67,6 @@ for (const entry of runtimeManifest.files ?? []) {
   });
 }
 
-if (files.length !== 4) {
-  throw new Error(`Expected four runtime files, found ${files.length}`);
-}
-
 const release = {
   schemaVersion: 1,
   kind: "mir2-bevy-runtime-r2-release",
@@ -87,6 +79,8 @@ const release = {
   bevyRuntime: {
     enabled: true,
     version: runtimeVersion,
+    schemaVersion: runtimeManifest.schemaVersion,
+    packages: runtimeManifest.packages,
     contentEncoding: "gzip",
     logicalBytes: files.reduce((sum, file) => sum + file.size, 0),
     storageBytes: files.reduce((sum, file) => sum + (file.encodedSize ?? file.size), 0),

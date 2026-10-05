@@ -3,17 +3,18 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{
     AccountRecord, CharacterRecord, EquipmentSlot, GroundDropItemPayload, ItemContainer, ItemGrade,
-    SimulationConfig, crystal_bag_slot_capacity,
+    SimulationConfig, NpcGoldTradeCapacity, crystal_bag_slot_capacity,
 };
 use bevy_ecs::prelude::World;
-use mir2_game_data::{crystal_item_by_index, crystal_item_manifest, localized_text_or_fallback};
+use mir2_game_data::{crystal_item_by_index, crystal_item_manifest, localized_text_or_fallback, CrystalItemTemplate};
 use mir2_protocol::{
     ChatType, MirClass, MirGender, MirGridType, ServerPacket, UserItem, UserItemStat,
 };
 
 use super::components::current_player_is_dead;
 use super::crystal_compat::{
-    BASE_STORAGE_SLOTS, CRYSTAL_BIND_DONT_STORE, CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_STAT_MAX_AC,
+    BASE_STORAGE_SLOTS, CRYSTAL_BIND_DONT_STORE, CRYSTAL_FISHING_ROD_SHAPES,
+    CRYSTAL_ITEM_TYPE_AMULET, CRYSTAL_ITEM_TYPE_MOUNT, CRYSTAL_ITEM_TYPE_WEAPON, CRYSTAL_STAT_MAX_AC,
     CRYSTAL_STAT_MAX_DC, DOTNET_DATETIME_KIND_LOCAL, DOTNET_TICKS_AT_UNIX_EPOCH,
     EXPANDED_STORAGE_SLOTS,
 };
@@ -28,6 +29,7 @@ use super::items::{
     validate_committed_user_item_carrier,
 };
 use super::npc::active_crystal_storage_service;
+use super::npc_gold_trade_expiry::{fresh_expire_info, has_expiry_tag};
 use super::resources::{
     InventoryResource, PlayerRuntimeResource, RuntimeConfigResource, SessionResource,
 };
@@ -1827,6 +1829,248 @@ pub(super) fn additional_slots_needed_for_item_quantity(
     }
 
     remaining.div_ceil(max_stack)
+}
+
+fn validate_npc_gold_trade_carried_roster(resources: &InventoryResource) -> Option<()> {
+    if !crate::config::is_valid_crystal_inventory_capacity(resources.inventory_capacity) {
+        return None;
+    }
+    fn unique_tree_ids(item: &UserItem, ids: &mut BTreeSet<u64>) -> bool {
+        ids.insert(item.unique_id)
+            && item.slots.iter().flatten().all(|child| unique_tree_ids(child, ids))
+    }
+
+    fn carried_tree_ids(
+        item: &ItemState,
+        wire: &UserItem,
+        grid: u8,
+        roots: &mut BTreeSet<(u8, u64)>,
+        ids: &mut BTreeSet<u64>,
+        legacy_ids: &mut BTreeSet<u64>,
+    ) -> bool {
+        if !roots.insert((grid, wire.unique_id)) {
+            return false;
+        }
+        if item.user_item_metadata.is_some() {
+            unique_tree_ids(wire, ids)
+        } else {
+            legacy_ids.insert(wire.unique_id);
+            wire.slots.iter().flatten().all(|child| unique_tree_ids(child, ids))
+        }
+    }
+
+    // Only sidecarless roots are grid-scoped aliases. Every captured root,
+    // nested identity and reservation retains global ownership.
+    let mut cells = BTreeSet::new();
+    let mut roots = BTreeSet::new();
+    let mut ids = resources.reserved_item_unique_ids.clone();
+    let mut legacy_ids = BTreeSet::new();
+    for item in resources.storage_items.iter().chain(
+        resources.inventory_items.iter().filter(|item| item.container == ItemContainer::Quest),
+    ) {
+        if item.user_item_metadata.is_some() {
+            ids.insert(inventory_item_unique_id(item));
+        } else {
+            legacy_ids.insert(inventory_item_unique_id(item));
+        }
+        collect_metadata_unique_ids(item.user_item_metadata.as_ref(), &mut ids);
+        collect_item_tree_unique_ids(&item.socketed, &mut ids);
+    }
+    for equipment in &resources.equipment_items {
+        if let Some(id) = equipment.user_item_unique_id {
+            ids.insert(id);
+        } else {
+            legacy_ids.insert(equipment_root_unique_id(equipment));
+        }
+        collect_metadata_unique_ids(equipment.user_item_metadata.as_ref(), &mut ids);
+        collect_item_tree_unique_ids(&equipment.socketed, &mut ids);
+    }
+    for item in &resources.belt_items {
+        let (start, end) = crystal_belt_slot_range_for_item_key(&item.key)?;
+        if item.container != ItemContainer::Belt
+            || !(start..end).contains(&item.slot)
+            || !cells.insert(u16::from(item.slot))
+        {
+            return None;
+        }
+        validate_committed_item_state_carrier(item).ok()?;
+        let wire = try_user_item_from_item_state(item).ok()?;
+        if !carried_tree_ids(item, &wire, 1, &mut roots, &mut ids, &mut legacy_ids) {
+            return None;
+        }
+    }
+    for item in &resources.inventory_items {
+        if item.container == ItemContainer::Quest {
+            continue;
+        }
+        let index = match item.container {
+            ItemContainer::Bag1 if item.slot < 40 => item.slot,
+            ItemContainer::Bag2 if item.slot < 40 => 40 + item.slot,
+            _ => return None,
+        };
+        if !is_valid_inventory_slot(index, resources.inventory_capacity)
+            || !cells.insert(6 + u16::from(index))
+        {
+            return None;
+        }
+        validate_committed_item_state_carrier(item).ok()?;
+        let wire = try_user_item_from_item_state(item).ok()?;
+        if !carried_tree_ids(item, &wire, 0, &mut roots, &mut ids, &mut legacy_ids) {
+            return None;
+        }
+    }
+    if !ids.is_disjoint(&legacy_ids) {
+        return None;
+    }
+
+    Some(())
+}
+
+fn canonical_npc_gold_trade_fresh(
+    template: &CrystalItemTemplate,
+    count: u16,
+    unique_id: u64,
+    expire_info: Option<mir2_protocol::UserItemExpireInfo>,
+) -> Option<(ItemState, UserItem)> {
+    let mut fresh = embedded_item_state_from_template(template, ItemContainer::Bag1, 0);
+    fresh.unique_id = unique_id;
+    fresh.quantity = u32::from(count);
+    fresh.durability_current = Some(template.durability);
+    fresh.durability_max = Some(template.durability);
+    fresh.identified = Some(false);
+    fresh.added_attack = 0;
+    fresh.added_defence = 0;
+    fresh.added_stats.clear();
+    fresh.socket_slots = match template.item_type {
+        CRYSTAL_ITEM_TYPE_MOUNT if template.shape < 7 => 4,
+        CRYSTAL_ITEM_TYPE_MOUNT if template.shape < 12 => 5,
+        CRYSTAL_ITEM_TYPE_WEAPON if CRYSTAL_FISHING_ROD_SHAPES.contains(&template.shape) => 5,
+        _ => template.slots,
+    };
+    // Complete the wire carrier before assigning expiry; the fallible reverse
+    // conversion then captures exactly the same ExpireInfo in the live sidecar.
+    let mut incoming = try_user_item_from_item_state(&fresh).ok()?;
+    incoming.expire_info = expire_info;
+    validate_committed_user_item_carrier(&incoming).ok()?;
+    let canonical = try_item_state_from_user_item(fresh, &incoming).ok()?;
+    validate_committed_item_state_carrier(&canonical).ok()?;
+    Some((canonical, incoming))
+}
+
+/// Snapshot-only purchase capacity evidence. External identities participate
+/// in the carried conflict check; this is not an external-tree uniqueness audit.
+pub(super) fn npc_gold_trade_capacity_evidence(resources: &InventoryResource) -> NpcGoldTradeCapacity {
+    let mut evidence = NpcGoldTradeCapacity {
+        roster_valid: false,
+        fresh_compatible_unique_ids: Vec::new(),
+    };
+    if validate_npc_gold_trade_carried_roster(resources).is_none() {
+        return evidence;
+    }
+    for item in resources.belt_items.iter().chain(resources.inventory_items.iter()) {
+        if item.user_item_metadata.is_none()
+            || !matches!(item.container, ItemContainer::Belt | ItemContainer::Bag1 | ItemContainer::Bag2)
+        {
+            continue;
+        }
+        let Some(template) = try_user_item_from_item_state(item).ok()
+            .and_then(|wire| crystal_item_by_index(wire.item_index)) else {
+            evidence.fresh_compatible_unique_ids.clear();
+            return evidence;
+        };
+        // Time-sensitive (including unknown/empty) tags never grant merge slack.
+        // This snapshot evidence is independent of any clock or future purchase.
+        if has_expiry_tag(&template.name) { continue; }
+        let Some((fresh, _)) = canonical_npc_gold_trade_fresh(&template, 1, 0, None) else {
+            evidence.fresh_compatible_unique_ids.clear();
+            return evidence;
+        };
+        if item_stack_identity_compatible(item, &fresh) {
+            evidence.fresh_compatible_unique_ids.push(inventory_item_unique_id(item));
+        }
+    }
+    evidence.fresh_compatible_unique_ids.sort_unstable();
+    evidence.roster_valid = true;
+    evidence
+}
+
+/// Plan ordinary Gold Trade delivery without changing live inventory or money.
+/// The incoming wire item remains the purchased delta even when existing stacks
+/// absorb it completely. Catalog selectors are never delivered item identities.
+pub(super) fn plan_npc_gold_trade_gain(
+    resources: &InventoryResource,
+    template: &CrystalItemTemplate,
+    count: u16,
+    catalog_uid: u64,
+    now_utc_ticks: i64,
+) -> Option<(InventoryResource, UserItem)> {
+    let max_stack = u32::from(template.stack_size.max(1));
+    if count == 0
+        || u32::from(count) > max_stack
+        || !crate::config::is_valid_crystal_inventory_capacity(resources.inventory_capacity)
+    {
+        return None;
+    }
+
+    validate_npc_gold_trade_carried_roster(resources)?;
+    let expire_info = fresh_expire_info(&template.name, now_utc_ticks).ok()?;
+    let mut staged = resources.clone();
+    // This exclusion exists only in the private allocation view. It is restored
+    // before return, including when the catalog selector was already reserved.
+    staged.reserved_item_unique_ids.insert(catalog_uid);
+    staged.reserved_item_unique_ids.insert(0);
+    let (canonical, incoming) = canonical_npc_gold_trade_fresh(
+        template, count, allocate_item_unique_id(&staged, ItemContainer::Bag1, 0), expire_info,
+    )?;
+    if incoming.unique_id == 0 || incoming.unique_id == catalog_uid {
+        return None;
+    }
+
+    let mut remaining = u32::from(count);
+    let belt_range = crystal_belt_slot_range_for_item_key(&canonical.key);
+    if max_stack > 1 {
+        for existing in staged.belt_items.iter_mut().chain(staged.inventory_items.iter_mut()) {
+            let legal_target = match existing.container {
+                ItemContainer::Belt => belt_range
+                    .is_some_and(|(start, end)| (start..end).contains(&existing.slot)),
+                ItemContainer::Bag1 | ItemContainer::Bag2 => true,
+                _ => false,
+            };
+            if remaining == 0 {
+                break;
+            }
+            if !legal_target
+                || existing.user_item_metadata.is_none()
+                || existing.quantity >= max_stack
+                || !item_stack_identity_compatible(existing, &canonical)
+            {
+                continue;
+            }
+            let added = remaining.min(max_stack - existing.quantity);
+            existing.quantity += added;
+            remaining -= added;
+            validate_committed_item_state_carrier(existing).ok()?;
+            try_user_item_from_item_state(existing).ok()?;
+        }
+    }
+    if remaining > 0 {
+        let (container, slot) = crystal_empty_add_item_slots(&staged, ItemContainer::Bag1, &canonical.key)
+            .into_iter()
+            .next()?;
+        let mut remainder = canonical;
+        remainder.container = container;
+        remainder.slot = slot;
+        remainder.quantity = remaining;
+        validate_committed_item_state_carrier(&remainder).ok()?;
+        try_user_item_from_item_state(&remainder).ok()?;
+        if container == ItemContainer::Belt {
+            staged.belt_items.push(remainder);
+        } else {
+            staged.inventory_items.push(remainder);
+        }
+    }
+    staged.reserved_item_unique_ids = resources.reserved_item_unique_ids.clone();
+    Some((staged, incoming))
 }
 
 pub(super) fn can_gain_item_quantity(
@@ -4845,3 +5089,7 @@ mod stack_identity_tests {
         assert_ne!(fresh_child_uid, fresh.unique_id);
     }
 }
+
+#[cfg(test)]
+#[path = "npc_gold_trade_evidence_tests.rs"]
+mod npc_gold_trade_evidence_tests;

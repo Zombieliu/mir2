@@ -26,7 +26,9 @@ use mir2_simulation::{
     intelligent_creature_allows_ground_drop, world_entity_sprite_from_object_player,
     zone_ground_drop_snapshots_for_monster_at_tick, ActiveSessionIdentity, CharacterSaveRecord,
     ChatPacketPreparation, GameShopPurchaseOutcome, GroundDropClaimTicket, GroundDropLootSnapshot,
-    GroundDropSnapshot, InProcessWorldRuntime, SessionId, SharedAccountInventoryTransactionKind,
+    GroundDropSnapshot, InProcessWorldRuntime, NpcGoldBuyBeforeExecution, NpcGoldBuyProcessingError,
+    NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingOutcome, NpcGoldBuyRequest,
+    SessionId, SharedAccountInventoryTransactionKind,
     SharedAccountInventoryTransactionReceipt, SharedInventoryItemDrop, SharedItemRentalAgreement,
     SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
     SharedNpcSavedValue, SharedSkillItemConsumptionComponent, SharedTradeOffer, WorldCommand,
@@ -43,6 +45,10 @@ use tokio::sync::mpsc::{error::TrySendError as TokioTrySendError, Sender as Toki
 
 use crate::web::GatewaySlowStage;
 use crate::GatewayConfig;
+use crate::npc_gold_buy_route::{
+    finish_npc_gold_buy_packets, npc_gold_buy_route_failure, NpcGoldBuyRouteError,
+    NpcGoldBuyRouteExecution,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 #[serde(transparent)]
@@ -293,6 +299,23 @@ pub trait ZoneOwnerCommandClient: fmt::Debug + Send + Sync {
         runtime: &mut ZoneRuntimeHandle,
         request: ZoneOwnerCommandRequest,
     ) -> Result<WorldCommandExecution, String>;
+
+    /// Explicit local capability. A local shadow runtime cannot establish remote support.
+    fn supports_typed_npc_gold_buy_outcome(&self, _runtime: &ZoneRuntimeHandle) -> bool {
+        false
+    }
+
+    /// Unsupported owner routes never fall back to the generic BuyItem command.
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(
+        &self,
+        _runtime: &mut ZoneRuntimeHandle,
+        _request: ZoneOwnerCommandRequest,
+        _purchase: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyRouteExecution, NpcGoldBuyRouteError> {
+        Err(NpcGoldBuyRouteError::Processing(
+            NpcGoldBuyProcessingError::BeforeExecution(NpcGoldBuyBeforeExecution::UnsupportedRuntime),
+        ))
+    }
 
     /// Execute one native-receipt purchase only after proving that this exact
     /// command path can return the authoritative typed transaction outcome.
@@ -652,6 +675,118 @@ impl InProcessZoneOwnerCommandClient {
 }
 
 impl ZoneOwnerCommandClient for InProcessZoneOwnerCommandClient {
+    fn supports_typed_npc_gold_buy_outcome(&self, runtime: &ZoneRuntimeHandle) -> bool {
+        runtime.supports_typed_npc_gold_buy_outcome()
+    }
+
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(
+        &self,
+        runtime: &mut ZoneRuntimeHandle,
+        request: ZoneOwnerCommandRequest,
+        purchase: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyRouteExecution, NpcGoldBuyRouteError> {
+        if let Some(authority) = &self.owner_lease_authority {
+            authority.validate_owner_lease(request.owner_lease())
+                .map_err(|detail| NpcGoldBuyRouteError::BeforeExecution { detail })?;
+        }
+        let ZoneOwnerCommandMode::ProductionPlayer { authenticated } = request.mode() else {
+            return Err(NpcGoldBuyRouteError::BeforeExecution {
+                detail: "typed NPC gold purchase requires the production player route".into(),
+            });
+        };
+        if !matches!(request.command(), WorldCommand::ClientPacket(ClientPacket::BuyItem {
+            item_index, count, panel_type,
+        }) if *item_index == purchase.item_index && *count == purchase.count
+            && *panel_type == purchase.panel_type)
+        {
+            return Err(NpcGoldBuyRouteError::BeforeExecution {
+                detail: "typed NPC gold purchase requires its exact ordinary BuyItem tuple".into(),
+            });
+        }
+        if !authenticated {
+            return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotAuthenticated,
+            )));
+        }
+        let mut processing_outcome = None;
+        let result = crate::session::catch_gateway_panic("typed NPC gold owner execution", || {
+            if !runtime.supports_typed_npc_gold_buy_outcome() {
+                return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                    NpcGoldBuyBeforeExecution::UnsupportedRuntime,
+                )));
+            }
+            let identity = runtime.active_identity();
+            if identity.as_ref().is_some_and(|identity| {
+                identity.account_id.is_empty() || identity.account_id != identity.account_id.trim()
+            }) {
+                return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                    NpcGoldBuyBeforeExecution::NotAuthenticated,
+                )));
+            }
+            if identity.as_ref().is_some_and(|identity| {
+                identity.character_index < 0 || identity.character_name.is_empty()
+            }) {
+                return Err(NpcGoldBuyRouteError::Processing(NpcGoldBuyProcessingError::BeforeExecution(
+                    NpcGoldBuyBeforeExecution::NotInGame,
+                )));
+            }
+            // With no active character, use the actual runtime's guarded typed
+            // entry once, before any economy context or shared pipeline. Its
+            // Session distinguishes unlogged from pre-StartGame state.
+            if identity.is_some() {
+                if let Some(shared) = runtime.as_mut().as_any_mut()
+                    .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+                {
+                    if shared.inner.current_map_file_name().is_some() {
+                        let context = shared.next_in_process_economy_execution_context(request.owner_lease());
+                        shared.set_economy_execution_context(context);
+                    }
+                }
+            }
+            let processed = match runtime.execute_production_npc_gold_buy_requiring_typed_outcome(
+                authenticated, purchase,
+            ) {
+                Ok(processed) => processed,
+                Err(error) => {
+                    if let NpcGoldBuyProcessingError::PostProcessing { outcome, .. } = &error {
+                        processing_outcome = Some(outcome.clone());
+                    }
+                    return Err(NpcGoldBuyRouteError::Processing(error));
+                }
+            };
+            processing_outcome = Some(processed.outcome.clone());
+            // Metadata is from this same owner runtime after the full pipeline.
+            // A metadata panic cannot erase the captured economic outcome.
+            let snapshot_tick = runtime.world_snapshot().tick;
+            let active_identity = runtime.active_identity();
+            let packet_count = processed.packets.len();
+            Ok(NpcGoldBuyRouteExecution {
+                execution: WorldCommandExecution {
+                    packets: processed.packets,
+                    outcome: WorldCommandOutcome {
+                        command_kind: request.command().kind(),
+                        packet_count,
+                        snapshot_tick,
+                        active_identity,
+                    },
+                    game_shop_purchase_outcome: None,
+                },
+                processing_outcome: processed.outcome,
+            })
+        });
+        let clear = crate::session::catch_gateway_panic("typed NPC gold economy context clear", || {
+            if let Some(shared) = runtime.as_mut().as_any_mut()
+                .downcast_mut::<SharedInProcessZoneSessionRuntime>()
+            {
+                shared.set_economy_execution_context(None);
+            }
+        });
+        if let Err(detail) = clear {
+            return Err(npc_gold_buy_route_failure(detail, processing_outcome));
+        }
+        result.unwrap_or_else(|detail| Err(npc_gold_buy_route_failure(detail, processing_outcome)))
+    }
+
     fn execute(
         &self,
         runtime: &mut ZoneRuntimeHandle,
@@ -8102,6 +8237,8 @@ impl ZoneRuntimeFactory for SharedInProcessZoneRuntimeFactory {
             last_game_shop_purchase_outcome: None,
             #[cfg(test)]
             fail_next_npc_teleport_checkpoint_restore: false,
+            #[cfg(test)]
+            npc_gold_buy_after_capture_hook: None,
         })
     }
 }
@@ -8763,6 +8900,8 @@ struct SharedInProcessZoneSessionRuntime {
     last_game_shop_purchase_outcome: Option<GameShopPurchaseOutcome>,
     #[cfg(test)]
     fail_next_npc_teleport_checkpoint_restore: bool,
+    #[cfg(test)]
+    npc_gold_buy_after_capture_hook: Option<fn(&mut SharedInProcessZoneSessionRuntime)>,
 }
 
 pub(crate) fn shared_zone_movement_ingress(
@@ -8773,6 +8912,60 @@ pub(crate) fn shared_zone_movement_ingress(
         .as_any()
         .downcast_ref::<SharedInProcessZoneSessionRuntime>()
         .map(|runtime| runtime.movement_ingress.clone())
+}
+
+/// Test-only access to the real shared pipeline. No NPC result is stored here.
+#[cfg(test)]
+pub(crate) mod npc_gold_buy_test_access {
+    use super::*;
+
+    fn shared(runtime: &mut ZoneRuntimeHandle) -> &mut SharedInProcessZoneSessionRuntime {
+        runtime.as_mut().as_any_mut().downcast_mut().expect("real shared fixture")
+    }
+
+    fn poison_zone(shared: &mut SharedInProcessZoneSessionRuntime) {
+        let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let _guard = shared.zone_state.lock().unwrap();
+            panic!("controlled shared Zone poison");
+        }));
+    }
+
+    pub(crate) fn poison_before_capture(runtime: &mut ZoneRuntimeHandle) {
+        poison_zone(shared(runtime));
+    }
+
+    pub(crate) fn poison_after_capture(runtime: &mut ZoneRuntimeHandle) {
+        shared(runtime).npc_gold_buy_after_capture_hook = Some(poison_zone);
+    }
+
+    pub(crate) fn require_tail_after_capture(runtime: &mut ZoneRuntimeHandle) {
+        shared(runtime).npc_gold_buy_after_capture_hook = Some(|shared| {
+            shared.force_next_zone_transform_sync = true;
+        });
+    }
+
+    pub(crate) fn capture_hook_and_tail_consumed(runtime: &mut ZoneRuntimeHandle) -> bool {
+        let shared = shared(runtime);
+        shared.npc_gold_buy_after_capture_hook.is_none() && !shared.force_next_zone_transform_sync
+    }
+
+    pub(crate) fn clear_poison(runtime: &mut ZoneRuntimeHandle) {
+        shared(runtime).zone_state.clear_poison();
+    }
+
+    pub(crate) fn context_is_clear(runtime: &mut ZoneRuntimeHandle) -> bool {
+        shared(runtime).economy_execution_context.is_none()
+    }
+
+    pub(crate) fn queue_pending(runtime: &mut ZoneRuntimeHandle, packet: ServerPacket) {
+        let shared = shared(runtime);
+        let key = shared.current_presence_key().expect("active shared fixture");
+        shared.zone_state.lock().unwrap().pending_zone_packets.entry(key).or_default().push(packet);
+    }
+
+    pub(crate) fn economy_sequence(runtime: &mut ZoneRuntimeHandle) -> u64 {
+        shared(runtime).zone_state.lock().unwrap().next_economy_source_sequence
+    }
 }
 
 pub(crate) fn sync_zone_movement_transform(runtime: &mut ZoneRuntimeHandle) -> Result<(), String> {
@@ -14000,23 +14193,12 @@ impl Drop for SharedInProcessZoneSessionRuntime {
     }
 }
 
-impl WorldRuntime for SharedInProcessZoneSessionRuntime {
-    fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
-        self.inner.supports_magic_key_assignment(spell,key,old_key)
-    }
-    fn as_any(&self) -> &dyn std::any::Any {
-        self
-    }
-
-    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
-        self
-    }
-
-    fn on_connect(&self) -> Vec<ServerPacket> {
-        self.inner.on_connect()
-    }
-
-    fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+impl SharedInProcessZoneSessionRuntime {
+    fn execute_shared_pipeline(
+        &mut self,
+        command: WorldCommand,
+        mut npc_gold_buy_outcome: Option<&mut Option<NpcGoldBuyProcessingOutcome>>,
+    ) -> Result<Vec<ServerPacket>, String> {
         self.validate_shared_magic_actor(&command)?;
         self.inner.enable_shared_guild_authority();
         if matches!(&command,WorldCommand::ClientPacket(ClientPacket::StartGame{..})){self.inner.refresh_shared_guild_authority()?;}
@@ -14563,6 +14745,30 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             let execution = self.inner.execute_with_outcome(command)?;
             self.last_game_shop_purchase_outcome = execution.game_shop_purchase_outcome;
             execution.packets
+        } else if let Some(capture) = npc_gold_buy_outcome.as_deref_mut() {
+            let WorldCommand::ClientPacket(ClientPacket::BuyItem {
+                item_index, count, panel_type,
+            }) = &command else {
+                return Err("typed NPC purchase pipeline requires ordinary BuyItem".into());
+            };
+            let request = NpcGoldBuyRequest {
+                item_index: *item_index, count: *count, panel_type: *panel_type,
+            };
+            match self.inner.execute_production_npc_gold_buy_requiring_typed_outcome(true, request) {
+                Ok(processed) => {
+                    *capture = Some(processed.outcome);
+                    #[cfg(test)]
+                    if let Some(hook) = self.npc_gold_buy_after_capture_hook.take() {
+                        hook(self);
+                    }
+                    processed.packets
+                }
+                Err(NpcGoldBuyProcessingError::PostProcessing { outcome, detail }) => {
+                    *capture = Some(outcome);
+                    return Err(detail);
+                }
+                Err(error) => return Err(format!("typed NPC purchase leaf failed: {error:?}")),
+            }
         } else if let WorldCommand::ClientPacket(packet) = &command {
             if let Some(zone_packets) = self.execute_zone_player_packet(packet) {
                 zone_packets
@@ -14819,6 +15025,28 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
         Ok(packets)
     }
 
+}
+
+impl WorldRuntime for SharedInProcessZoneSessionRuntime {
+    fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
+        self.inner.supports_magic_key_assignment(spell,key,old_key)
+    }
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn std::any::Any {
+        self
+    }
+
+    fn on_connect(&self) -> Vec<ServerPacket> {
+        self.inner.on_connect()
+    }
+
+    fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+        self.execute_shared_pipeline(command, None)
+    }
+
     fn execute_with_outcome(
         &mut self,
         command: WorldCommand,
@@ -14854,6 +15082,53 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
 
     fn supports_typed_game_shop_purchase_outcome(&self) -> bool {
         self.inner.supports_typed_game_shop_purchase_outcome()
+    }
+
+    fn supports_typed_npc_gold_buy_outcome(&self) -> bool {
+        self.inner.supports_typed_npc_gold_buy_outcome()
+    }
+
+    fn execute_production_npc_gold_buy_requiring_typed_outcome(
+        &mut self,
+        authenticated: bool,
+        request: NpcGoldBuyRequest,
+    ) -> Result<NpcGoldBuyProcessingExecution, NpcGoldBuyProcessingError> {
+        if !authenticated {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotAuthenticated,
+            ));
+        }
+        if !self.inner.supports_typed_npc_gold_buy_outcome() {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::UnsupportedRuntime,
+            ));
+        }
+        let Some(identity) = self.inner.active_identity() else {
+            // This is the real Session guard, before any shared predrain. Do
+            // not repeat the request if it unexpectedly returns an outcome.
+            return self.inner.execute_production_npc_gold_buy_requiring_typed_outcome(true, request);
+        };
+        if identity.account_id.is_empty() || identity.account_id != identity.account_id.trim() {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotAuthenticated,
+            ));
+        }
+        if identity.character_index < 0 || identity.character_name.is_empty() {
+            return Err(NpcGoldBuyProcessingError::BeforeExecution(
+                NpcGoldBuyBeforeExecution::NotInGame,
+            ));
+        }
+        if self.inner.current_map_file_name().is_none() {
+            // active_identity alone is not the Session's in-world gate.
+            return self.inner.execute_production_npc_gold_buy_requiring_typed_outcome(true, request);
+        }
+        let mut outcome = None;
+        let packets = crate::session::catch_gateway_panic("typed NPC shared pipeline", || {
+            self.execute_shared_pipeline(
+                crate::npc_gold_buy_route::npc_gold_buy_command(request), Some(&mut outcome),
+            )
+        }).and_then(|packets| packets);
+        finish_npc_gold_buy_packets(packets, outcome)
     }
 
     fn world_snapshot(&self) -> WorldSnapshot {
@@ -29627,6 +29902,7 @@ mod tests {
             owner_dead_entity_ids: Default::default(),
             last_game_shop_purchase_outcome: None,
             fail_next_npc_teleport_checkpoint_restore: false,
+            npc_gold_buy_after_capture_hook: None,
         }
     }
 

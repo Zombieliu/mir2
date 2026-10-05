@@ -209,6 +209,7 @@ export type DisplayItem = {
   name: string;
   icon: number;
   uniqueId: number;
+  authoritativeUniqueId?: number;
   slot: number;
   container: ItemContainer;
   quantity: number;
@@ -219,13 +220,14 @@ export type DisplayItem = {
   equipSlot?: EquipmentSlot | null;
 };
 
-export type ItemActionRef = Pick<DisplayItem, "key" | "uniqueId" | "slot" | "container">;
-export type EquipmentActionRef = Pick<DisplayEquipmentItem, "slot">;
-export type MoveItemRef = Pick<DisplayItem, "uniqueId" | "slot" | "container">;
+export type ItemActionRef = Pick<DisplayItem, "key" | "uniqueId" | "authoritativeUniqueId" | "slot" | "container">;
+export type EquipmentActionRef = Pick<DisplayEquipmentItem, "slot" | "authoritativeUniqueId">;
+export type MoveItemRef = Pick<DisplayItem, "uniqueId" | "slot" | "container" | "authoritativeUniqueId">;
 export type MergeItemRef = Pick<DisplayItem, "uniqueId" | "slot" | "container">;
 
 export type DisplayEquipmentItem = {
   slot: EquipmentSlot;
+  authoritativeUniqueId?: number;
   name: string;
   icon: number;
   description: string;
@@ -293,12 +295,22 @@ export type DisplayNpcShopGood = {
   name: string;
   icon: number;
   price: number;
+  /** Positive ordinary-gold scope; incomplete raw remains read-only. */
+  requiresGoldBuyPlan?: boolean;
+  /** Complete packet carrier; price is display-only and rate remains raw. */
+  tooltipSource?: unknown;
+  purchaseRate?: number;
+  stock?: number;
   count?: number;
   grade?: "common" | "rare" | "heroic" | "legendary" | "mythical";
   description?: string;
 };
 
 export type DisplayNpcShopService = {
+  /** Local service/catalog clocks, never server purchase receipts. */
+  serviceRevision: number;
+  catalogRevision: number;
+  hideAddedStats: boolean;
   npcName: string;
   panelType: number;
   buyItems: DisplayNpcShopGood[];

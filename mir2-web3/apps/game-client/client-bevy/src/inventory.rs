@@ -160,6 +160,7 @@ impl Default for CrystalUserItemModel {
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(default)]
 pub struct CrystalUserItemExpireModel {
+    #[serde(with = "mir2_protocol::types::item_expiry_json")]
     pub expiry_binary_datetime: i64,
 }
 
@@ -340,6 +341,33 @@ pub fn item_durability_label(item: &ItemModel) -> Option<String> {
     }
 }
 
+/// A complete same-owner server snapshot attests this roster, not a Buy ACK.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NpcGoldTradeCapacity {
+    pub roster_valid: bool,
+    pub fresh_compatible_unique_ids: Vec<u64>,
+}
+impl NpcGoldTradeCapacity {
+    pub fn valid(&self) -> bool {
+        let mut ids = std::collections::HashSet::new();
+        self.fresh_compatible_unique_ids.len() <= 86
+            && (self.roster_valid || self.fresh_compatible_unique_ids.is_empty())
+            && self.fresh_compatible_unique_ids.iter().all(|id| ids.insert(*id))
+    }
+}
+impl<'de> Deserialize<'de> for NpcGoldTradeCapacity {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        #[serde(deny_unknown_fields, rename_all = "camelCase")]
+        struct Raw { roster_valid: bool, fresh_compatible_unique_ids: Vec<u64> }
+        let raw = Raw::deserialize(deserializer)?;
+        let value = Self { roster_valid: raw.roster_valid, fresh_compatible_unique_ids: raw.fresh_compatible_unique_ids };
+        if !value.valid() { return Err(serde::de::Error::custom("invalid NPC gold capacity evidence")); }
+        Ok(value)
+    }
+}
+
 /// The renderer-neutral inventory read model.
 #[derive(Debug, Clone, Resource, Serialize, Deserialize)]
 pub struct InventoryModel {
@@ -350,6 +378,8 @@ pub struct InventoryModel {
     pub capacity: u16,
     pub gold: u32,
     pub items: Vec<ItemModel>,
+    #[serde(default, rename = "npcGoldTradeCapacity", skip_serializing_if = "Option::is_none")]
+    pub npc_gold_trade_capacity: Option<NpcGoldTradeCapacity>,
 }
 
 const fn default_inventory_capacity() -> u16 {
@@ -362,6 +392,7 @@ impl Default for InventoryModel {
             capacity: default_inventory_capacity(),
             gold: 0,
             items: Vec::new(),
+            npc_gold_trade_capacity: None,
         }
     }
 }

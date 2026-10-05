@@ -306,6 +306,12 @@ pub fn mail_attachment_label(item: &MailAttachment) -> String {
     item.label()
 }
 
+fn mail_date_components<T: chrono::Datelike + chrono::Timelike>(date: &T) -> String {
+    format!("{:02}/{:02}/{:02} {}:{:02}:{:02}",
+        date.day(), date.month(), date.year().rem_euclid(100),
+        date.hour(), date.minute(), date.second())
+}
+
 /// Crystal DateTime.FromBinary display; unknown/invalid dates remain blank.
 pub fn mail_date_label(binary: i64) -> String {
     const EPOCH_TICKS: i64 = 621_355_968_000_000_000;
@@ -321,9 +327,9 @@ pub fn mail_date_label(binary: i64) -> String {
         (unix_ticks.rem_euclid(10_000_000) * 100) as u32,
     ) else { return String::new(); };
     if bits >> 62 >= 2 {
-        date.with_timezone(&chrono::Local).format("%d/%m/%y %-H:%M:%S").to_string()
+        mail_date_components(&date.with_timezone(&chrono::Local))
     } else {
-        date.format("%d/%m/%y %-H:%M:%S").to_string()
+        mail_date_components(&date)
     }
 }
 
@@ -338,6 +344,111 @@ pub fn mail_delete_enabled(msg: &MailMessage) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn legacy_mail_date_label(binary: i64) -> String {
+        const EPOCH_TICKS: i64 = 621_355_968_000_000_000;
+        const MAX_TICKS: u64 = 3_155_378_975_999_999_999;
+        let bits = binary as u64;
+        let ticks = bits & 0x3fff_ffff_ffff_ffff;
+        if ticks == 0 || ticks > MAX_TICKS {
+            return String::new();
+        }
+        let unix_ticks = ticks as i64 - EPOCH_TICKS;
+        let Some(date) = chrono::DateTime::from_timestamp(
+            unix_ticks.div_euclid(10_000_000),
+            (unix_ticks.rem_euclid(10_000_000) * 100) as u32,
+        ) else { return String::new(); };
+        if bits >> 62 >= 2 {
+            date.with_timezone(&chrono::Local).format("%d/%m/%y %-H:%M:%S").to_string()
+        } else {
+            date.format("%d/%m/%y %-H:%M:%S").to_string()
+        }
+    }
+
+    fn date_ticks(year: i32, month: u32, day: u32, hour: u32, minute: u32, second: u32) -> u64 {
+        let date = chrono::NaiveDate::from_ymd_opt(year, month, day).unwrap()
+            .and_hms_opt(hour, minute, second).unwrap().and_utc();
+        (date.timestamp() * 10_000_000 + 621_355_968_000_000_000) as u64
+    }
+
+    #[test]
+    fn mail_dates_numeric_output_matches_legacy_for_all_binary_kinds_and_boundaries() {
+        let mut ticks = vec![0, 1, 9_999_999, 10_000_000,
+            621_355_967_999_999_999, 621_355_968_000_000_000, 621_355_968_000_000_001,
+            3_155_378_975_999_999_998, 3_155_378_975_999_999_999,
+            3_155_378_976_000_000_000, 0x3fff_ffff_ffff_ffff];
+        for (year, month, day, hour, minute, second) in [
+            (1, 1, 1, 0, 0, 0), (1, 1, 1, 23, 59, 59),
+            (1899, 12, 31, 23, 59, 59), (1900, 1, 1, 0, 0, 0),
+            (1900, 2, 28, 23, 59, 59), (1900, 3, 1, 0, 0, 0),
+            (1999, 12, 31, 23, 59, 59), (2000, 1, 1, 0, 0, 0),
+            (2000, 2, 29, 9, 5, 7), (2000, 3, 1, 10, 15, 17),
+            (2024, 3, 31, 0, 59, 59), (2024, 3, 31, 1, 0, 0),
+            (2024, 10, 27, 0, 59, 59), (2024, 10, 27, 1, 0, 0),
+            (2099, 12, 31, 23, 59, 59), (2100, 1, 1, 0, 0, 0),
+            (9999, 12, 31, 23, 59, 59),
+        ] {
+            let base = date_ticks(year, month, day, hour, minute, second);
+            ticks.extend([base, base + 1, base + 9_999_999]);
+        }
+        for ticks in ticks {
+            for kind in 0..4u64 {
+                let binary = (ticks | (kind << 62)) as i64;
+                assert_eq!(mail_date_label(binary), legacy_mail_date_label(binary),
+                    "ticks={ticks} kind={kind}");
+            }
+        }
+        for binary in [i64::MIN, i64::MAX, -1] {
+            assert_eq!(mail_date_label(binary), legacy_mail_date_label(binary));
+        }
+    }
+
+    #[test]
+    fn mail_dates_numeric_output_has_independent_literal_matrix() {
+        for (ticks, expected) in [
+            (1, "01/01/01 0:00:00"),
+            (date_ticks(1969, 12, 31, 23, 59, 59), "31/12/69 23:59:59"),
+            (date_ticks(1970, 1, 1, 0, 0, 0), "01/01/70 0:00:00"),
+            (date_ticks(1999, 12, 31, 23, 59, 59), "31/12/99 23:59:59"),
+            (date_ticks(2000, 1, 1, 0, 0, 0), "01/01/00 0:00:00"),
+            (date_ticks(2000, 2, 29, 9, 5, 7), "29/02/00 9:05:07"),
+            (date_ticks(2000, 3, 1, 10, 15, 17), "01/03/00 10:15:17"),
+            (date_ticks(2100, 3, 1, 0, 0, 0), "01/03/00 0:00:00"),
+            (3_155_378_975_999_999_999, "31/12/99 23:59:59"),
+        ] {
+            for kind in 0..2u64 {
+                assert_eq!(mail_date_label((ticks | (kind << 62)) as i64), expected);
+            }
+        }
+        let leap = date_ticks(2000, 2, 29, 9, 5, 7);
+        for fraction in [1, 1_234_567, 9_999_999] {
+            assert_eq!(mail_date_label((leap + fraction) as i64), "29/02/00 9:05:07");
+        }
+        for ticks in [0, 3_155_378_976_000_000_000, 0x3fff_ffff_ffff_ffff] {
+            for kind in 0..4u64 {
+                assert_eq!(mail_date_label((ticks | (kind << 62)) as i64), "");
+            }
+        }
+    }
+
+    #[test]
+    fn mail_date_components_preserve_local_year_rollover_and_signed_year_modulo() {
+        let first = chrono::NaiveDate::from_ymd_opt(1, 1, 1).unwrap()
+            .and_hms_opt(0, 0, 0).unwrap().and_utc();
+        let last = chrono::NaiveDate::from_ymd_opt(9999, 12, 31).unwrap()
+            .and_hms_opt(23, 59, 59).unwrap().and_utc();
+        let before = first.with_timezone(&chrono::FixedOffset::west_opt(12 * 3600).unwrap());
+        let after = last.with_timezone(&chrono::FixedOffset::east_opt(14 * 3600).unwrap());
+        assert_eq!(mail_date_components(&before), "31/12/00 12:00:00");
+        assert_eq!(mail_date_components(&after), "01/01/00 13:59:59");
+        for date in [before, after] {
+            assert_eq!(mail_date_components(&date), date.format("%d/%m/%y %-H:%M:%S").to_string());
+        }
+        let negative = chrono::NaiveDate::from_ymd_opt(-1, 2, 3).unwrap()
+            .and_hms_opt(4, 5, 6).unwrap();
+        assert_eq!(mail_date_components(&negative), "03/02/99 4:05:06");
+        assert_eq!(mail_date_components(&negative), negative.format("%d/%m/%y %-H:%M:%S").to_string());
+    }
 
     #[test]
     fn mail_dates_follow_source_format_and_leave_unknown_values_blank() {

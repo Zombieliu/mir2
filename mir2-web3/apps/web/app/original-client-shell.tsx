@@ -1,4 +1,9 @@
 "use client";
+import { CharacterPointerRouter } from "../lib/bevy-character-ui";
+import { SpellsPointerRouter } from "../lib/bevy-spells-ui";
+import { MailPointerRouter,type MailPointerContext,type MailPointerEdge } from "../lib/bevy-mail-ui";
+import {composeStagePoint,sameComposeAuthority,sameComposeScope,type ClipboardGesture,type ComposeProof,type ComposeTextOperation,type MailComposeHost} from "../lib/bevy-mail-text-input";
+import { HudPointerRouter } from "../lib/bevy-hud-ui";
 
 import {
   memo,
@@ -10,6 +15,7 @@ import {
   useState,
   type CSSProperties,
   type MouseEvent,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 
 import {
@@ -19,6 +25,15 @@ import {
   type InventoryTabKey,
 } from "../lib/original-ui";
 import { createAssetResidency } from "../lib/asset-residency";
+import { BagPointerRouter } from "../lib/bevy-bag-ui";
+import { StoragePointerRouter } from "../lib/bevy-storage-ui";
+import { NpcShopPointerRouter } from "../lib/bevy-npc-shop-ui";
+import { matchesBevyHpOrbView, matchesBevyMpOrbView, readBevyHpOrbSlot } from "../lib/bevy-hp-orb";
+import { matchesBevyExperienceBarView, readBevyExperienceBarSlot } from "../lib/bevy-experience-bar";
+import { matchesBevyWeightBarView, readBevyWeightBarSlot } from "../lib/bevy-weight-bar";
+import { HudBarCanvasController } from "../lib/bevy-hud-bar-draw-plan";
+import { readBevyQuestPresentation } from "../lib/bevy-quest-ui";
+import { sharedUiCanvasId } from "../lib/bevy-shared-canvas-mode";
 import { createBrowserAtlasFetcher } from "../lib/asset-residency/browser-adapters";
 import type { AtlasPagePayload, PersistentStore } from "../lib/asset-residency/types";
 import { preloadSceneAssetUrls } from "../lib/scene-asset-preloader";
@@ -496,6 +511,59 @@ export function OriginalClientShell({
   sceneInteractionReady,
   bevyEntityRendererReady,
   bevyRuntimeBackend,
+  webGl2SharedCanvasPrototype = false,
+  bevyHudUiReady = false,
+  bevyHudSourceGeometry = null,
+  bevyCharacterStatsReady = false,
+  bevyCharacterPageReady = false,
+  bevySpellsPageReady = false,
+  bevyMailPageReady = false,
+  getBevyMailPointerContext,
+  onBevyMailPointer,
+  bevyMailComposeReady = false,
+  bevyMailComposePending = false,
+  getBevyMailComposeBusy,
+  bevyMailTextContext,
+  onBevyMailTextEdge,
+  onBevyMailClipboard,
+  onBevyMailComposeAction,
+  onBevyMailComposePointer,
+  onBevyMailComposePointerCancel,
+  mailOpen = false,
+  onToggleMail,
+  getBevySpellsPointerContext,
+  onBevySpellsPointer,
+  getBevyCharacterPointerContext,
+  onBevyCharacterPointer,
+  readBevyHudStatus,
+  dispatchBevyHudNavigation,
+  bevyQuestUiReady = false,
+  bevyQuestUiCapturesPointer = false,
+  bevyHpOrb = null,
+  bevyMpOrb = null,
+  bevyExperienceBar = null,
+  bevyWeightBar = null,
+  bevyHudBarIdentity = null,
+  bevyHudBarPlans = null,
+  bevyHudBarReadLivePlans,
+  onHpOrbLocalOverlayChange,
+  bevyBagUiActive = false,
+  bevyNpcShopUiActive = false,
+  bevyNpcShopUiTransitioning = false,
+  getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer,
+  npcShopTab, onNpcShopTabChange,
+  bevyStorageUiActive = false,
+  bevyStorageUiTransitioning = false,
+  bevyStorageOwnerRevision = 0,
+  getBevyStoragePointerContext,
+  onBevyStoragePointer,
+  bevyBagOwnerRevision = 0,
+  getBevyBagPointerContext,
+  onBevyBagPointer,
+  onBevyBagTouchFallback,
+  inventoryInitialDeleteMode = false,
+  onInventoryCompatibilityInteraction,
+  onQuestUiModalChange,
   bevyMapRuntimeGeneration,
   bevyMapRuntimeReady,
   bevyMapPresentedImageKeys,
@@ -524,6 +592,7 @@ export function OriginalClientShell({
   activeInventoryTab,
   activeCharacterTab,
   storageServiceOpenVersion,
+  storagePasswordOpenVersion = 0,
   npcShopService,
   npcRepairService,
   onLanguageChange,
@@ -559,11 +628,12 @@ export function OriginalClientShell({
   onSetStoragePassword,
   onRemoveStoragePassword,
   onSellItem,
-  onBuyNpcShopItem,
+  onBuyNpcShopItem, onQuoteNpcShopItem,
   onDropGold,
   onRepairItem,
   onSpecialRepairItem,
   onCastSkill,
+  onCombatKey,onCombatPointer,onCombatCancel,onCombatUiHeld,
   onClaimMail,
   onDeleteMail,
   onBuyGameShopItem,
@@ -574,6 +644,7 @@ export function OriginalClientShell({
   onToggleQuestLog,
   onCloseCharacter,
   onCloseInventory,
+  onCloseStorage,
   onCloseNpcShopService,
   onCloseNpcRepairService,
   onOpenCharacterTab,
@@ -596,7 +667,15 @@ export function OriginalClientShell({
   onEnterWorld,
   targetDistance,
   entityKindClassName,
-}: OriginalClientShellProps) {
+}: OriginalClientShellProps & {onCombatUiHeld?: (channel:"bag"|"character"|"hud"|"spells"|"storage"|"npcShop",token:object,held:boolean)=>void;
+  bevyMailPageReady?:boolean;getBevyMailPointerContext?:()=>MailPointerContext|null;onBevyMailPointer?:(edge:MailPointerEdge)=>boolean;
+  bevyMailComposeReady?:boolean;bevyMailComposePending?:boolean;bevyMailTextContext?:ReturnType<MailComposeHost['textContext']>;
+  getBevyMailComposeBusy?:()=>number;
+  onBevyMailTextEdge?:(edge:ComposeTextOperation)=>boolean;onBevyMailClipboard?:(kind:'copy'|'cut'|'paste',gesture:ClipboardGesture)=>boolean;
+  onBevyMailComposeAction?:(action:string)=>boolean;
+  onBevyMailComposePointer?:(pointerId:number,phase:'down'|'move'|'up'|'cancel',x:number,y:number,shift:boolean)=>boolean;
+  onBevyMailComposePointerCancel?:()=>void;
+  mailOpen?:boolean;onToggleMail?:()=>void}) {
   // Memoize t and locale so stable references are passed to memo'd child components
   // (GameUiScene, LoginOverlay, SelectOverlay, OriginalClientMobileControls). Without
   // this, buildTranslator returns a new function on every render — invalidating the
@@ -712,7 +791,237 @@ export function OriginalClientShell({
   // shell's existing motion clock without any dedicated timer.
   const chatBubbleStateRef = useRef<Map<string, ChatBubbleRecord>>(new Map());
   const stageFrameRef = useRef<HTMLDivElement | null>(null);
+  const [questLocalModalOpen, setQuestLocalModalOpen] = useState(false);
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  useLayoutEffect(() => {
+    onHpOrbLocalOverlayChange?.(questLocalModalOpen || mobileMoreOpen);
+  }, [mobileMoreOpen, onHpOrbLocalOverlayChange, questLocalModalOpen]);
+  const [hpOrbOwner, setHpOrbOwner] = useState(false);
+  const [mpOrbOwner, setMpOrbOwner] = useState(false);
+  const [experienceBarOwner, setExperienceBarOwner] = useState(false);
+  const [weightBarOwner, setWeightBarOwner] = useState(false);
+  const [experienceDrawPlanOwner, setExperienceDrawPlanOwner] = useState(false);
+  const [weightDrawPlanOwner, setWeightDrawPlanOwner] = useState(false);
+  const experienceDrawCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const weightDrawCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const hudBarControllerRef = useRef<HudBarCanvasController | null>(null);
+  if (!hudBarControllerRef.current) {
+    hudBarControllerRef.current = new HudBarCanvasController((name, owns) => {
+      const frame = stageFrameRef.current;
+      if (name === "experience") {
+        if (frame && (owns || frame.dataset.experienceBarOwner === "canvas2d")) {
+          frame.dataset.experienceBarOwner = owns ? "canvas2d" : "react";
+        }
+        setExperienceDrawPlanOwner(owns);
+      } else {
+        if (frame && (owns || frame.dataset.weightBarOwner === "canvas2d")) {
+          frame.dataset.weightBarOwner = owns ? "canvas2d" : "react";
+        }
+        setWeightDrawPlanOwner(owns);
+      }
+    });
+  }
+  useEffect(() => () => hudBarControllerRef.current?.dispose(), []);
+  useEffect(() => {
+    const onRawEdge = (event: Event) => {
+      const detail = (event as CustomEvent<{ experience?: boolean; weight?: boolean }>).detail;
+      if (detail?.experience) hudBarControllerRef.current?.withdraw("experience");
+      if (detail?.weight) hudBarControllerRef.current?.withdraw("weight");
+    };
+    window.addEventListener("mir2:hud-bar-raw-edge", onRawEdge);
+    return () => window.removeEventListener("mir2:hud-bar-raw-edge", onRawEdge);
+  }, []);
+  useLayoutEffect(() => {
+    const frame = stageFrameRef.current;
+    const image = bevyHudSourceGeometry ? null : frame?.querySelector<HTMLElement>(".main-hud-shell .hud-orb-fill.hp img") ?? null;
+    const update = () => {
+      const canvas = frame?.querySelector<HTMLCanvasElement>(`#${sharedUiCanvasId(webGl2SharedCanvasPrototype)}`) ?? null;
+      const presentation = readBevyQuestPresentation(frame, canvas, clientProfile.input === "touch");
+      const slot = bevyHudSourceGeometry ? { left: bevyHudSourceGeometry.orb.left, top: bevyHudSourceGeometry.orb.top } : readBevyHpOrbSlot(frame, image, presentation);
+      const imageMayOwn = screen === "game" && (bevyHudSourceGeometry !== null || !questLocalModalOpen && !mobileMoreOpen
+        && !bevyQuestUiCapturesPointer && !bevyBagUiActive && !bevyStorageUiActive && !bevyStorageUiTransitioning
+        && !showInventory && !showCharacter && !showQuestLog && !world.activeNpcDialog);
+      const hpOnly = (player?.classKey ?? "warrior") === "warrior" && (player?.level ?? 1) < 26;
+      setHpOrbOwner(imageMayOwn && matchesBevyHpOrbView(bevyHpOrb, slot,
+        world.playerHp ?? player?.hp ?? 0, world.playerMaxHp ?? player?.maxHp ?? 0,
+        hpOnly));
+      setMpOrbOwner(imageMayOwn && matchesBevyMpOrbView(bevyMpOrb, slot,
+        world.playerMp, world.playerMaxMp, hpOnly));
+      const experienceAnchor = bevyHudSourceGeometry ? null : frame?.querySelector<HTMLElement>(".main-hud-shell .hud-exp-bar") ?? null;
+      const experienceSlot = bevyHudSourceGeometry?.experienceBar ?? readBevyExperienceBarSlot(frame, experienceAnchor, presentation);
+      setExperienceBarOwner(imageMayOwn && matchesBevyExperienceBarView(bevyExperienceBar, experienceSlot,
+        world.playerExperience, world.playerMaxExperience, experienceAnchor));
+      const weightAnchor = bevyHudSourceGeometry ? null : frame?.querySelector<HTMLElement>(".main-hud-shell .hud-weight-bar") ?? null;
+      const weightSlot = bevyHudSourceGeometry?.weightBar ?? readBevyWeightBarSlot(frame, weightAnchor, presentation);
+      setWeightBarOwner(imageMayOwn && matchesBevyWeightBarView(bevyWeightBar, weightSlot,
+        world.currentWeight, world.maxWeight, weightAnchor));
+      hudBarControllerRef.current?.update({
+        lifetime: bevyHudBarIdentity,
+        presentation: imageMayOwn ? presentation : null,
+        readLivePlans: bevyHudBarReadLivePlans ?? (() => null),
+        experience: { canvas: experienceDrawCanvasRef.current, anchor: experienceAnchor, sourceGeometry: bevyHudSourceGeometry !== null,
+          current: world.playerExperience, maximum: world.playerMaxExperience, slot: experienceSlot,
+          readSlot: () => bevyHudSourceGeometry?.experienceBar ?? readBevyExperienceBarSlot(frame, experienceAnchor, presentation),
+          plan: imageMayOwn && bevyHudBarPlans?.lifetime === bevyHudBarIdentity
+            && (!bevyHudSourceGeometry || readBevyHudStatus?.()?.plan?.experienceSprite?.current === world.playerExperience
+              && readBevyHudStatus?.()?.plan?.experienceSprite?.maximum === world.playerMaxExperience)
+            ? bevyHudBarPlans.experience : null },
+        weight: { canvas: weightDrawCanvasRef.current, anchor: weightAnchor, sourceGeometry: bevyHudSourceGeometry !== null,
+          current: world.currentWeight, maximum: world.maxWeight, slot: weightSlot,
+          readSlot: () => bevyHudSourceGeometry?.weightBar ?? readBevyWeightBarSlot(frame, weightAnchor, presentation),
+          plan: imageMayOwn && bevyHudBarPlans?.lifetime === bevyHudBarIdentity
+            && (!bevyHudSourceGeometry || readBevyHudStatus?.()?.plan?.weightSprite?.current === world.currentWeight
+              && readBevyHudStatus?.()?.plan?.weightSprite?.maximum === world.maxWeight)
+            ? bevyHudBarPlans.weight : null },
+      });
+      if (frame?.dataset.experienceBarOwner === "canvas2d"
+        && experienceDrawCanvasRef.current?.style.visibility !== "visible") frame.dataset.experienceBarOwner = "react";
+      if (frame?.dataset.weightBarOwner === "canvas2d"
+        && weightDrawCanvasRef.current?.style.visibility !== "visible") frame.dataset.weightBarOwner = "react";
+    };
+    update();
+    if (!frame) return;
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(update);
+    observer?.observe(frame);
+    if (image) observer?.observe(image);
+    const weightAnchor = frame.querySelector<HTMLElement>(".main-hud-shell .hud-weight-bar");
+    if (weightAnchor) observer?.observe(weightAnchor);
+    const experienceAnchor = frame.querySelector<HTMLElement>(".main-hud-shell .hud-exp-bar");
+    const modelObserver = typeof MutationObserver === "undefined" ? null : new MutationObserver(update);
+    if (experienceAnchor) modelObserver?.observe(experienceAnchor, {
+      attributes: true, attributeFilter: ["data-experience", "data-max-experience"],
+    });
+    if (weightAnchor) modelObserver?.observe(weightAnchor, {
+      attributes: true, attributeFilter: ["data-current-weight", "data-max-weight"],
+    });
+    return () => { observer?.disconnect(); modelObserver?.disconnect(); };
+  }, [bevyHudSourceGeometry, bevyBagUiActive, bevyStorageUiActive, bevyStorageUiTransitioning, bevyHpOrb, bevyMpOrb, bevyExperienceBar, bevyWeightBar, bevyHudBarIdentity, bevyHudBarPlans,
+    bevyHudBarReadLivePlans,
+    bevyQuestUiCapturesPointer, clientProfile.input, mobileMoreOpen,
+    player?.classKey, player?.hp, player?.level,
+    player?.maxHp, questLocalModalOpen, screen, showCharacter, showInventory, showQuestLog,
+    stagePresentation.scale, stagePresentation.virtualHeight, stagePresentation.virtualWidth,
+    webGl2SharedCanvasPrototype, world.activeNpcDialog, world.playerHp, world.playerMaxHp,
+    world.playerMp, world.playerMaxMp, world.playerExperience, world.playerMaxExperience, world.currentWeight, world.maxWeight]);
   const heldScenePointerRef = useRef<HeldScenePointer | null>(null);
+  const bagPointerRouterRef = useRef(new BagPointerRouter());
+  const storagePointerRouterRef = useRef(new StoragePointerRouter());
+  const npcShopPointerRouterRef = useRef(new NpcShopPointerRouter());
+  const characterPointerRouterRef = useRef(new CharacterPointerRouter());
+  const spellsPointerRouterRef=useRef(new SpellsPointerRouter());
+  const mailPointerRouterRef=useRef(new MailPointerRouter());
+  const heldComposePointerRef=useRef<number|null>(null);
+  const mailComposePointerCallbacksRef=useRef({onBevyMailComposePointer,onBevyMailComposePointerCancel});
+  mailComposePointerCallbacksRef.current={onBevyMailComposePointer,onBevyMailComposePointerCancel};
+  const mailPointerCallbacksRef=useRef({getBevyMailPointerContext,onBevyMailPointer});
+  mailPointerCallbacksRef.current={getBevyMailPointerContext,onBevyMailPointer};
+  const mailTextRef=useRef<HTMLTextAreaElement|null>(null);
+  function isCurrentMailTextTarget(target:EventTarget|null){const text=mailTextRef.current;
+    return bevyMailComposeReady&&!bevyMailComposePending&&text!==null&&target===text&&document.activeElement===text;}
+  const mailTextInputCallbacksRef=useRef({context:bevyMailTextContext,onEdge:onBevyMailTextEdge});
+  mailTextInputCallbacksRef.current={context:bevyMailTextContext,onEdge:onBevyMailTextEdge};
+  const mailCompositionIdRef=useRef(0),mailCompositionActiveRef=useRef<number|null>(null);
+  const mailCompositionEchoRef=useRef<{compositionId:number;proof:ComposeProof}|null>(null);
+  const mailDomCompositionRef=useRef<{target:'body'|'recipient'|'gold';proof:ComposeProof|null;element:HTMLTextAreaElement}|null>(null);
+  function retireMailDomComposition(){const active=mailDomCompositionRef.current;
+    const buffered=bufferedMailPromptRef.current,pending=pendingMailPromptConfirmRef.current;
+    const belongs=(entry:{proof:ComposeProof;element:HTMLTextAreaElement}|null)=>Boolean(active?.proof&&entry&&
+      entry.element===active.element&&sameComposeScope(entry.proof,active.proof)&&entry.proof.draftGeneration===active.proof.draftGeneration);
+    if(belongs(buffered)&&bufferedMailPromptRef.current===buffered)bufferedMailPromptRef.current=null;
+    if(belongs(pending)&&pendingMailPromptConfirmRef.current===pending)pendingMailPromptConfirmRef.current=null;
+    mailDomCompositionRef.current=null;mailCompositionActiveRef.current=null;mailCompositionEchoRef.current=null;mailKeyBeforeInputRef.current=null;}
+  function currentMailDomComposition(context:typeof bevyMailTextContext){const active=mailDomCompositionRef.current,proof=context?.status.proof;
+    return Boolean(active&&proof&&active.proof&&bevyMailComposeReady&&!bevyMailComposePending&&context?.status.modal&&context.status.inputEnabled&&
+      context.status.textTarget===active.target&&mailTextRef.current===active.element&&sameComposeScope(active.proof,proof)&&
+      active.proof.draftGeneration===proof.draftGeneration);}
+  const mailKeyBeforeInputRef=useRef<string|null>(null);
+  const pendingMailPromptConfirmRef=useRef<{target:'recipient'|'gold';text:string;proof:ComposeProof;element:HTMLTextAreaElement}|null>(null);
+  const bufferedMailPromptRef=useRef<{target:'recipient'|'gold';text:string;proof:ComposeProof;element:HTMLTextAreaElement}|null>(null);
+  const [mailTextInputNotice,setMailTextInputNotice]=useState<string|null>(null);
+  const [mailDomRetireKey,setMailDomRetireKey]=useState(false);
+  function handleMailNativeBeforeInput(event:Event){const target=mailTextRef.current,{context,onEdge}=mailTextInputCallbacksRef.current;
+    if(!target||event.target!==target||context?.status.textTarget!=='body')return;
+    const input=event as InputEvent,type=input.inputType;
+    if(typeof type!=='string'||!type){event.preventDefault();setMailTextInputNotice('Mail text input is unavailable; retry');return;}
+    if(input.isComposing||mailDomCompositionRef.current!==null){if(type==='insertFromComposition')event.preventDefault();return;}
+    event.preventDefault();
+    if(type==='insertFromComposition'){
+      const echo=mailCompositionEchoRef.current;mailCompositionEchoRef.current=null;
+      if(!echo||!context.status.proof||!sameComposeAuthority(echo.proof,context.status.proof)||echo.proof.sequence!==context.status.proof.sequence)
+        setMailTextInputNotice('Mail editor is updating; retry input');
+      return;
+    }
+    const duplicate=type==='insertLineBreak'||type==='insertParagraph'?'enter':
+      type==='deleteContentBackward'?'backspace':type==='deleteContentForward'?'delete':null;
+    if(duplicate&&mailKeyBeforeInputRef.current===duplicate){mailKeyBeforeInputRef.current=null;return;}
+    if(type==='insertFromPaste'||type==='deleteByCut')return;
+    const operation:ComposeTextOperation|null=
+      type==='insertText'||type==='insertReplacementText'||type==='insertFromDrop'?
+        typeof input.data==='string'?{op:'insert',text:input.data}:null:
+      type==='insertLineBreak'||type==='insertParagraph'?{op:'key',key:'enter',control:false,shift:false}:
+      type==='deleteContentBackward'?{op:'key',key:'backspace',control:false,shift:false}:
+      type==='deleteContentForward'?{op:'key',key:'delete',control:false,shift:false}:null;
+    if(!operation||!onEdge?.(operation)){setMailTextInputNotice('Mail editor is updating; retry input');return;}
+    setMailTextInputNotice(null);
+  }
+  const mailNativeBeforeInputRef=useRef(handleMailNativeBeforeInput);
+  mailNativeBeforeInputRef.current=handleMailNativeBeforeInput;
+  const [mailTextPosition,setMailTextPosition]=useState<CSSProperties|null>(null);
+  useLayoutEffect(()=>{
+    const context=bevyMailTextContext,frame=stageFrameRef.current,canvas=document.getElementById(sharedUiCanvasId(webGl2SharedCanvasPrototype));
+    if(mailDomCompositionRef.current&&!currentMailDomComposition(context)){
+      retireMailDomComposition();setMailDomRetireKey(value=>!value);return;
+    }
+    if(!bevyMailComposeReady||!context||!frame||!canvas){setMailTextPosition(null);return;}
+    const frameRect=frame.getBoundingClientRect(),canvasRect=canvas.getBoundingClientRect(),caret=context.status.caret;
+    const source=context.status.textTarget==='body'?caret??context.status.bodyViewport:
+      context.status.promptViewport;if(!source){setMailTextPosition(null);return;}
+    const scale=context.presentation.stageCssScale;
+    setMailTextPosition({position:'absolute',left:canvasRect.left-frameRect.left+source.left*scale,
+      top:canvasRect.top-frameRect.top+source.top*scale,width:Math.max(2,Math.min(8,source.width*scale)),
+      height:Math.max(16,source.height*scale),opacity:0,pointerEvents:'none',zIndex:30,padding:0,border:0,resize:'none',overflow:'hidden'});
+    const target=mailTextRef.current;
+    const value=context.status.textTarget==='body'?context.raw.body:context.status.promptText??'';
+    const buffered=bufferedMailPromptRef.current,proof=context.status.proof;
+    const keepBrowserPrompt=Boolean(buffered&&target&&buffered.element===target&&proof&&context.status.textTarget===buffered.target&&
+      sameComposeScope(buffered.proof,proof)&&buffered.proof.draftGeneration===proof.draftGeneration&&
+      (context.pendingEdges>0||proof.sequence===buffered.proof.sequence));
+    if(buffered&&!keepBrowserPrompt&&bufferedMailPromptRef.current===buffered)bufferedMailPromptRef.current=null;
+    const domComposing=currentMailDomComposition(context);
+    if(target&&!keepBrowserPrompt&&!domComposing&&target.value!==value)target.value=value;
+    const pending=pendingMailPromptConfirmRef.current;
+    if(pending&&!domComposing&&context.status.proof){
+      if(pending.element!==target||!sameComposeScope(pending.proof,context.status.proof)||
+        pending.proof.draftGeneration!==context.status.proof.draftGeneration||context.status.textTarget!==pending.target){
+        if(pendingMailPromptConfirmRef.current===pending)pendingMailPromptConfirmRef.current=null;
+      }else if(context.pendingEdges===0&&context.status.promptText===pending.text){
+        if(pendingMailPromptConfirmRef.current===pending)pendingMailPromptConfirmRef.current=null;
+        onBevyMailComposeAction?.(pending.target==='recipient'?'recipientSubmit':'goldConfirm');}
+    }
+    if(domComposing)return;
+    if(caret&&target){if(document.activeElement!==target)target.focus({preventScroll:true});
+      const start=Math.min(caret.anchorUtf16,caret.caretUtf16),end=Math.max(caret.anchorUtf16,caret.caretUtf16);
+      const direction=caret.anchorUtf16>caret.caretUtf16?'backward':'forward';
+      if(target.selectionStart!==start||target.selectionEnd!==end||target.selectionDirection!==direction)
+        target.setSelectionRange(start,end,direction);}
+    else if(context.status.textTarget!==null&&target&&document.activeElement!==target)target.focus({preventScroll:true});
+  },[bevyMailComposeReady,bevyMailTextContext,webGl2SharedCanvasPrototype,mailDomRetireKey]);
+  useLayoutEffect(()=>{const target=mailTextRef.current;if(screen!=='game'||!bevyMailComposeReady||!mailTextPosition||!target)return;
+    const listener=(event:Event)=>mailNativeBeforeInputRef.current(event);
+    target.addEventListener('beforeinput',listener);
+    return()=>target.removeEventListener('beforeinput',listener);
+  });
+  const spellsPointerCallbacksRef=useRef({getBevySpellsPointerContext,onBevySpellsPointer});
+  spellsPointerCallbacksRef.current={getBevySpellsPointerContext,onBevySpellsPointer};
+  const characterPointerCallbacksRef = useRef({ getBevyCharacterPointerContext, onBevyCharacterPointer });
+  characterPointerCallbacksRef.current = { getBevyCharacterPointerContext, onBevyCharacterPointer };
+  const hudPointerRouterRef = useRef(new HudPointerRouter());
+  const bagPointerCallbacksRef = useRef({ getBevyBagPointerContext, onBevyBagPointer });
+  bagPointerCallbacksRef.current = { getBevyBagPointerContext, onBevyBagPointer };
+  const npcShopPointerCallbacksRef = useRef({ getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer });
+  npcShopPointerCallbacksRef.current = { getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer };
+  const storagePointerCallbacksRef = useRef({ getBevyStoragePointerContext, onBevyStoragePointer });
+  storagePointerCallbacksRef.current = { getBevyStoragePointerContext, onBevyStoragePointer };
   const heldKeyboardMoveKeysRef = useRef<Set<KeyboardMoveDirection>>(new Set());
   const heldKeyboardRunModeRef = useRef(false);
   const latestMoveInputRef = useRef<{
@@ -955,6 +1264,16 @@ export function OriginalClientShell({
     }
   }, [loginTransitionFrame, playLoginEffect]);
 
+  const combatTildeRef=useRef(false);
+  const combatCancelRef=useRef(onCombatCancel);combatCancelRef.current=onCombatCancel;
+  useEffect(()=>{
+    const down=(e:KeyboardEvent)=>{if(e.code==="Backquote")combatTildeRef.current=true;};
+    const up=(e:KeyboardEvent)=>{if(e.code==="Backquote")combatTildeRef.current=false;};
+    const pointers=new Set<number>(),pointerDown=(e:PointerEvent)=>{pointers.add(e.pointerId);if(pointers.size>1){heldScenePointerRef.current=null;combatCancelRef.current?.();}},pointerUp=(e:PointerEvent)=>pointers.delete(e.pointerId);
+    const cancel=()=>{combatTildeRef.current=false;pointers.clear();heldScenePointerRef.current=null;combatCancelRef.current?.();};
+    window.addEventListener("keydown",down,true);window.addEventListener("keyup",up,true);window.addEventListener("pointerdown",pointerDown,true);window.addEventListener("pointerup",pointerUp,true);window.addEventListener("pointercancel",cancel,true);window.addEventListener("blur",cancel);
+    return()=>{window.removeEventListener("keydown",down,true);window.removeEventListener("keyup",up,true);window.removeEventListener("pointerdown",pointerDown,true);window.removeEventListener("pointerup",pointerUp,true);window.removeEventListener("pointercancel",cancel,true);window.removeEventListener("blur",cancel);};
+  },[]);
   // Portrait idle animation moved into SelectOverlay so its 120ms tick re-renders
   // only that overlay, not this ~3000-line shell.
 
@@ -1008,6 +1327,14 @@ export function OriginalClientShell({
     }
 
     function handleShortcutKey(event: KeyboardEvent) {
+      if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
+      if (bevyStorageUiActive || bevyStorageUiTransitioning) { event.preventDefault(); return; }
+      if(bevyMailComposeReady||bevyMailComposePending){if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
+      if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) { event.preventDefault(); return; }
+      if (bevyQuestUiCapturesPointer) return;
+      if (keyboardInputTargetIsEditable(event.target)) return;
+      const combat=onCombatKey?.({type:"key",key:event.key,modifiers:{alt:event.altKey,ctrl:event.ctrlKey,shift:event.shiftKey,tilde:combatTildeRef.current}},event.repeat);
+      if(combat?.handled){event.preventDefault();return;}
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
         return;
       }
@@ -1041,7 +1368,7 @@ export function OriginalClientShell({
       // the known-skills list (the order shown in the character window's spell tab),
       // so the bar is usable before any slots are explicitly assigned.
       const skillBarMatch = /^F([1-8])$/.exec(event.key);
-      if (skillBarMatch) {
+      if (skillBarMatch && !combat?.supported) {
         const slot = Number.parseInt(skillBarMatch[1], 10);
         const skill =
           world.knownSkills.find((entry) => entry.hotkey === slot) ??
@@ -1068,6 +1395,7 @@ export function OriginalClientShell({
       onUseItem({
         key: item.key,
         uniqueId: item.uniqueId,
+        authoritativeUniqueId: item.authoritativeUniqueId,
         slot: item.slot,
         container: item.container,
       });
@@ -1083,13 +1411,38 @@ export function OriginalClientShell({
     onApproachTarget,
     onPrimaryTargetAction,
     onCastSkill,
+    onCombatKey,
     onUseItem,
+    bevyQuestUiCapturesPointer,
+    bevyStorageUiActive, bevyStorageUiTransitioning,
+    bevyMailComposeReady,bevyMailComposePending,
   ]);
 
+  function npcShopBlocksWorldInput(): boolean {
+    return npcShopPointerCallbacksRef.current.getBevyNpcShopInputBlocked?.() === true;
+  }
+
+  function stopNpcShopWorldInput() {
+    heldKeyboardMoveKeysRef.current.clear(); heldKeyboardRunModeRef.current = false;
+    heldScenePointerRef.current = null; onViewportDirectionStop(); onCombatPointer?.(null, null);
+  }
+
+  function guardNpcShopGameplay<Args extends unknown[]>(callback: (...args: Args) => void): (...args: Args) => void {
+    return (...args) => { if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; } callback(...args); };
+  }
+
   function dispatchKeyboardMoveInput(source: "edge" | "held" = "held") {
+    if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
+    if (bevyStorageUiActive || bevyStorageUiTransitioning || storagePointerCallbacksRef.current.getBevyStoragePointerContext?.()) {
+      heldKeyboardMoveKeysRef.current.clear(); heldKeyboardRunModeRef.current = false; onViewportDirectionStop(); return;
+    }
+    if(bevyMailComposeReady||bevyMailComposePending){heldKeyboardMoveKeysRef.current.clear();heldKeyboardRunModeRef.current=false;onViewportDirectionStop();return;}
+    if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) {
+      heldKeyboardMoveKeysRef.current.clear(); heldKeyboardRunModeRef.current = false; onViewportDirectionStop(); return;
+    }
     const latest = latestMoveInputRef.current;
     if (latest.screen !== "game") return;
-    if (!sceneInteractionReady) return;
+    if (!sceneInteractionReady || bevyQuestUiCapturesPointer) return;
     if (!latest.renderPlayer && !latest.player) return;
 
     const heldKeys = heldKeyboardMoveKeysRef.current;
@@ -1109,7 +1462,8 @@ export function OriginalClientShell({
   }
 
   useEffect(() => {
-    if (screen !== "game") {
+    if (screen !== "game" || bevyQuestUiCapturesPointer || bevyStorageUiActive || bevyStorageUiTransitioning
+      || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || npcShopBlocksWorldInput()) {
       onViewportDirectionStop();
       heldKeyboardMoveKeysRef.current.clear();
       heldKeyboardRunModeRef.current = false;
@@ -1117,6 +1471,11 @@ export function OriginalClientShell({
     }
 
     function handleKeyboardMoveDown(event: KeyboardEvent) {
+      if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
+      if (bevyStorageUiActive || bevyStorageUiTransitioning) { event.preventDefault(); return; }
+      if(bevyMailComposeReady||bevyMailComposePending){heldKeyboardMoveKeysRef.current.clear();heldKeyboardRunModeRef.current=false;onViewportDirectionStop();
+        if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
+      if (spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()?.modal) { event.preventDefault(); return; }
       if (event.altKey || event.ctrlKey || event.metaKey || keyboardInputTargetIsEditable(event.target)) {
         return;
       }
@@ -1148,6 +1507,9 @@ export function OriginalClientShell({
     }
 
     function handleKeyboardMoveUp(event: KeyboardEvent) {
+      if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); event.preventDefault(); return; }
+      if(bevyMailComposeReady||bevyMailComposePending){heldKeyboardMoveKeysRef.current.clear();heldKeyboardRunModeRef.current=false;onViewportDirectionStop();
+        if(isCurrentMailTextTarget(event.target))return;event.preventDefault();return;}
       if (event.key === "Shift") {
         heldKeyboardRunModeRef.current = false;
         if (heldKeyboardMoveKeysRef.current.size === 0) {
@@ -1188,7 +1550,7 @@ export function OriginalClientShell({
       window.removeEventListener("keyup", handleKeyboardMoveUp);
       window.removeEventListener("blur", stop);
     };
-  }, [screen, sceneInteractionReady, onViewportDirectionIntent, onViewportDirectionStop]);
+  }, [screen, sceneInteractionReady, bevyQuestUiCapturesPointer, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, bevyMailComposeReady, bevyMailComposePending, onViewportDirectionIntent, onViewportDirectionStop]);
 
   const lastMotionNowRef = useRef(0);
   useEffect(() => {
@@ -1268,6 +1630,7 @@ export function OriginalClientShell({
 
   const presentationOwnsPlayerInterpolation =
     screen === "game" &&
+    !webGl2SharedCanvasPrototype &&
     bevyEntityRendererReady &&
     bevyMapRuntimeReady &&
     Boolean(bevyRuntimeBackend) &&
@@ -1594,13 +1957,14 @@ export function OriginalClientShell({
   // Service Worker resolves its pages through the immutable R2 release. If capability validation or
   // GPU drawing fails, mapGpuFailed/empty index force the DOM tile path — the map is never blank.
   const mapAtlasRequested = useMemo(() => {
+    if (webGl2SharedCanvasPrototype) return false;
     if (typeof window === "undefined") return false;
     const params = new URLSearchParams(window.location.search);
     if (params.get("mapAtlas") === "0") return false;
     if (params.get("mapAtlas") === "1") return true;
     if (window.localStorage.getItem("mir2-map-atlas") === "0") return false;
     return true;
-  }, []);
+  }, [webGl2SharedCanvasPrototype]);
   // Bevy-native map renderer (Stages 1-3, DEFAULT ON). The same packed map-atlas
   // tiles the DOM WebGl2MapAtlasLayer would draw are pushed into the Bevy runtime
   // and rendered in a UNIFIED y-sort band with the entities (map objects occlude
@@ -1608,6 +1972,7 @@ export function OriginalClientShell({
   // map sprites are disabled so the map is never drawn twice. Mirrors the
   // foldWebgl2ToBevy / mapAtlas flags.
   const bevyMapRequested = useMemo(() => {
+    if (webGl2SharedCanvasPrototype) return false;
     if (typeof window === "undefined") return false;
     const params = new URLSearchParams(window.location.search);
     // Stage 3: Bevy is the DEFAULT map renderer (it is already the default ENTITY
@@ -1619,7 +1984,7 @@ export function OriginalClientShell({
     if (params.get("bevyMap") === "0") return false;
     if (params.get("bevyMap") === "1") return true;
     return window.localStorage.getItem("mir2-bevy-map") !== "0";
-  }, []);
+  }, [webGl2SharedCanvasPrototype]);
   const [mapAtlasIndex, setMapAtlasIndex] = useState<MapAtlasIndex | null>(null);
   const [mapGpuFailed, setMapGpuFailed] = useState(false);
   useEffect(() => {
@@ -1790,10 +2155,10 @@ export function OriginalClientShell({
     return window.localStorage.getItem("mir2-bevy-fold-webgl2") !== "0";
   }, []);
   const hideBevyCanvasForDomEntityFallback =
-    screen === "game" &&
+    !webGl2SharedCanvasPrototype && screen === "game" &&
     ((bevyRuntimeBackend === "webgl2" && !foldWebgl2ToBevy) || domEntityFallbackRequested);
   const bevyEntityRendererSuppressed =
-    domEntityFallbackRequested || runtimePhase === "dom-only" || runtimePhase === "boot-error";
+    webGl2SharedCanvasPrototype || domEntityFallbackRequested || runtimePhase === "dom-only" || runtimePhase === "boot-error";
   const bevyEntityRendererWanted =
     screen === "game" && !bevyEntityRendererSuppressed && shouldUseBevyEntityRenderer();
   const gpuEntityRendererRuntimePending =
@@ -1943,6 +2308,7 @@ export function OriginalClientShell({
   );
   const bevyEntityAtlasPolicy = shouldUseBevyEntityAtlas();
   const useWebGl2EntityAtlasRenderer =
+    !webGl2SharedCanvasPrototype &&
     entityRendererRequested &&
     !foldWebgl2ToBevy &&
     bevyRuntimeBackend === "webgl2" &&
@@ -2972,7 +3338,7 @@ export function OriginalClientShell({
     };
   }, [screen, sceneAssetReadinessKey]);
 
-  function scenePointFromMouseEvent(event: MouseEvent<HTMLElement>) {
+  function scenePointFromMouseEvent(event: { clientX: number; clientY: number; currentTarget: HTMLElement }) {
     const rect = stageFrameRef.current?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
     const scaleX = stagePresentation.virtualWidth / Math.max(rect.width, 1);
     const scaleY = stagePresentation.virtualHeight / Math.max(rect.height, 1);
@@ -3007,6 +3373,7 @@ export function OriginalClientShell({
   }
 
   function dispatchSceneMoveInput(pointer: HeldScenePointer) {
+    if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
     if (latestMoveInputRef.current.screen !== "game") return;
     if (!sceneInteractionReady) return;
     const tile = tileFromScenePoint(pointer.sceneX, pointer.sceneY);
@@ -3020,6 +3387,7 @@ export function OriginalClientShell({
   }
 
   function dispatchSceneClickInput(pointer: HeldScenePointer) {
+    if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
     if (latestMoveInputRef.current.screen !== "game") return;
     if (!sceneInteractionReady) return;
     const tile =
@@ -3035,8 +3403,453 @@ export function OriginalClientShell({
     }
   }
 
+  const combatUiHoldRef=useRef(new Map<"bag"|"character"|"hud"|"spells"|"storage"|"npcShop",{pointerId:number;token:object;notify:typeof onCombatUiHeld}>());
+  function beginCombatUiHold(channel:"bag"|"character"|"hud"|"spells"|"storage"|"npcShop",pointerId:number){
+    const prior=combatUiHoldRef.current.get(channel);if(prior)prior.notify?.(channel,prior.token,false);
+    const token={};combatUiHoldRef.current.set(channel,{pointerId,token,notify:onCombatUiHeld});onCombatUiHeld?.(channel,token,true);
+  }
+  function endCombatUiHold(channel:"bag"|"character"|"hud"|"spells"|"storage"|"npcShop",prior:{token:object}|undefined){
+    const held=combatUiHoldRef.current.get(channel);if(!held||held.token!==prior?.token)return;combatUiHoldRef.current.delete(channel);held.notify?.(channel,held.token,false);
+  }
+  function cancelSharedBagPointer(phase: "cancel" | "blur" = "cancel") {
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("bag"):undefined;
+    const edge = bagPointerRouterRef.current.cancel(phase);
+    try { if(edge)bagPointerCallbacksRef.current.onBevyBagPointer?.(edge); }
+    finally {
+      if(combatHold)endCombatUiHold("bag",combatHold);
+      if(edge||combatHold){heldScenePointerRef.current=null;onViewportDirectionStop();}
+    }
+  }
+
+
+  function cancelSharedSpellsPointer() {
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("spells"):undefined;
+    const edge=spellsPointerRouterRef.current.cancel();
+    try { if(edge)spellsPointerCallbacksRef.current.onBevySpellsPointer?.(edge); }
+    finally { if(combatHold)endCombatUiHold("spells",combatHold);if(edge||combatHold){heldScenePointerRef.current=null;onViewportDirectionStop();} }
+  }
+  function handleSharedSpellsPointer(event:{target:EventTarget|null;pointerId:number;pointerType:string;button:number;clientX:number;clientY:number;preventDefault:()=>void},phase:"down"|"move"|"up"|"cancel"):boolean {
+    const router=spellsPointerRouterRef.current,prior=router.held;
+    const context=spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()??null;
+    if(prior&&(!router.matches(context)||phase==="down"&&prior.pointerId!==event.pointerId)){event.preventDefault();cancelSharedSpellsPointer();return true;}
+    if(phase!=="down"&&!prior)return Boolean(context?.modal);
+    if(prior&&prior.pointerId!==event.pointerId){event.preventDefault();return true;}
+    const frame=stageFrameRef.current;
+    if(!frame||!context||!sceneInteractionReady||questLocalModalOpen||mobileMoreOpen||bevyQuestUiCapturesPointer){if(prior){event.preventDefault();cancelSharedSpellsPointer();return true;}return false;}
+    const point=scenePointFromMouseEvent({clientX:event.clientX,clientY:event.clientY,currentTarget:frame});
+    if(phase==="down"){
+      const onCanvas=event.target instanceof HTMLElement&&event.target.id===sharedUiCanvasId(webGl2SharedCanvasPrototype);
+      if(!onCanvas||!bevySpellsPageReady)return false;
+      if(context.modal){cancelSharedCharacterPointer();cancelSharedBagPointer();cancelSharedHudPointer();heldScenePointerRef.current=null;onViewportDirectionStop();}
+      const bag=bagPointerCallbacksRef.current.getBevyBagPointerContext?.()??null;
+      const bagForeground=!context.modal&&bag?.inputRegions.some(r=>point.sceneX>=r.left&&point.sceneY>=r.top&&point.sceneX<r.left+r.width&&point.sceneY<r.top+r.height);
+      if(bagForeground||bagPointerRouterRef.current.held||hudPointerRouterRef.current.held||characterPointerRouterRef.current.held)return false;
+      if(event.button!==0||event.pointerType!=="mouse"&&!(event.pointerType==="touch"&&context.presentation.touch))return context.modal;
+      if(!router.contains(context,point.sceneX,point.sceneY)){if(context.modal)event.preventDefault();return context.modal;}
+      frame.focus({preventScroll:true});
+    }
+    const edge=phase==="down"?router.down(context,event.pointerId,point.sceneX,point.sceneY):router.edge(phase,event.pointerId,point.sceneX,point.sceneY);
+    if(!edge)return Boolean(prior)||context.modal;
+    if(typeof onCombatUiHeld==="function"&&phase==="down"&&router.held)beginCombatUiHold("spells",event.pointerId);
+    event.preventDefault();heldScenePointerRef.current=null;onViewportDirectionStop();
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("spells"):undefined;
+    const callbackLease=router.held;let accepted=false;
+    try { accepted=Boolean(spellsPointerCallbacksRef.current.onBevySpellsPointer?.(edge)); }
+    finally { if(!accepted&&router.held===callbackLease)cancelSharedSpellsPointer();if((!router.held||router.held!==callbackLease)&&combatHold)endCombatUiHold("spells",combatHold); }
+    if(phase==="down")try{(event.target as HTMLElement).setPointerCapture(event.pointerId);}catch{/* Window terminal edges also cancel. */}
+    return true;
+  }
+  function cancelSharedNpcShopPointer(phase: "cancel" | "blur" = "cancel") {
+    const router = npcShopPointerRouterRef.current, prior = router.held, sceneHold = heldScenePointerRef.current;
+    const hold = combatUiHoldRef.current.get("npcShop"), edge = router.cancel(phase);
+    try { if (edge) npcShopPointerCallbacksRef.current.onBevyNpcShopPointer?.(edge); }
+    finally {
+      if (hold) endCombatUiHold("npcShop", hold);
+      if ((edge || hold) && (!router.held || router.held === prior) && heldScenePointerRef.current === sceneHold) {
+        heldScenePointerRef.current = null; onViewportDirectionStop();
+      }
+    }
+  }
+
+  function handleSharedNpcShopPointer(event: Parameters<typeof handleSharedBagPointer>[0] & { stopPropagation?: () => void }, phase: "down" | "move" | "up" | "cancel"): boolean {
+    const router = npcShopPointerRouterRef.current, prior = router.held, blocked = npcShopBlocksWorldInput();
+    const context = npcShopPointerCallbacksRef.current.getBevyNpcShopPointerContext?.() ?? null;
+    if (prior && (!router.matches(context) || phase === "down" && prior.pointerId !== event.pointerId)) {
+      event.preventDefault(); event.stopPropagation?.(); cancelSharedNpcShopPointer(); return true;
+    }
+    if (prior && prior.pointerId !== event.pointerId) { event.preventDefault(); event.stopPropagation?.(); return true; }
+    const frame = stageFrameRef.current;
+    if (phase === "down" && (!blocked || !frame || !context || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen || bevyQuestUiCapturesPointer)) {
+      if (blocked) { event.preventDefault(); event.stopPropagation?.(); stopNpcShopWorldInput(); return true; }
+      return false;
+    }
+    if (phase === "down") {
+      if (!(event.target instanceof HTMLElement) || event.target.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype)
+        || event.button !== 0 && event.button !== 2
+        || event.pointerType !== "mouse" && !(event.pointerType === "touch" && context!.presentation.touch)
+        || bagPointerRouterRef.current.held || storagePointerRouterRef.current.held || characterPointerRouterRef.current.held
+        || hudPointerRouterRef.current.held || spellsPointerRouterRef.current.held) {
+        event.preventDefault(); event.stopPropagation?.(); stopNpcShopWorldInput(); return true;
+      }
+      frame!.focus({ preventScroll: true }); stopNpcShopWorldInput();
+    }
+    const point = frame ? scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame }) : { sceneX: 0, sceneY: 0 };
+    const edge = phase === "down" ? router.down(context!, event.pointerId, event.button as 0 | 2, point.sceneX, point.sceneY)
+      : router.edge(phase, event.pointerId, point.sceneX, point.sceneY);
+    if (!edge) { if (blocked || prior) { event.preventDefault(); event.stopPropagation?.(); return true; } return false; }
+    event.preventDefault(); event.stopPropagation?.();
+    const ownsLease = phase === "down" || Boolean(prior && edge.downSequence === prior.downSequence && edge.pointerId === prior.pointerId);
+    if (phase === "down" && edge.origin === "shop") beginCombatUiHold("npcShop", event.pointerId);
+    const lease = router.held, hold = combatUiHoldRef.current.get("npcShop"); let accepted = false;
+    try { accepted = npcShopPointerCallbacksRef.current.onBevyNpcShopPointer?.(edge) === true; }
+    finally {
+      try {
+        if (!accepted && ownsLease && lease && router.held === lease) cancelSharedNpcShopPointer();
+        else if (!accepted && ownsLease && !lease && !router.held) {
+          const cancel = router.cancelTerminal(edge);
+          if (cancel) npcShopPointerCallbacksRef.current.onBevyNpcShopPointer?.(cancel);
+        }
+      } finally {
+        if (ownsLease && (!router.held || router.held !== lease) && hold) endCombatUiHold("npcShop", hold);
+      }
+    }
+    if (accepted && phase === "down" && router.held === lease) {
+      try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Window terminal also cancels. */ }
+    }
+    return true;
+  }
+
+  function handleSharedUiPointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:"down"|"move"|"up"|"cancel"){
+    if(handleSharedNpcShopPointer(event,phase))return;
+    if(handleSharedComposePointer(event,phase))return;
+    if(handleSharedMailPointer(event,phase))return;
+    if(handleSharedStoragePointer(event,phase))return;
+    if(handleSharedSpellsPointer(event,phase))return;
+    handleSharedBagPointer(event,phase);
+  }
+
+  function cancelSharedStoragePointer(phase: "cancel" | "blur" = "cancel") {
+    const router = storagePointerRouterRef.current, prior = router.held;
+    const sceneHold = heldScenePointerRef.current;
+    const hold = combatUiHoldRef.current.get("storage"), edge = router.cancel(phase);
+    try { if (edge) storagePointerCallbacksRef.current.onBevyStoragePointer?.(edge); }
+    finally {
+      if (hold) endCombatUiHold("storage", hold);
+      if ((edge || hold) && (!router.held || router.held === prior) && heldScenePointerRef.current === sceneHold) {
+        heldScenePointerRef.current = null; onViewportDirectionStop();
+      }
+    }
+  }
+
+  function handleSharedStoragePointer(event: Parameters<typeof handleSharedBagPointer>[0], phase: "down" | "move" | "up" | "cancel"): boolean {
+    const router = storagePointerRouterRef.current, prior = router.held;
+    const context = storagePointerCallbacksRef.current.getBevyStoragePointerContext?.() ?? null;
+    if (prior && (!router.matches(context) || phase === "down" && prior.pointerId !== event.pointerId)) {
+      event.preventDefault(); cancelSharedStoragePointer(); return true;
+    }
+    if (phase !== "down" && !prior) return false;
+    if (prior && prior.pointerId !== event.pointerId) { event.preventDefault(); return true; }
+    const frame = stageFrameRef.current;
+    if (!frame || !context || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen || bevyQuestUiCapturesPointer) {
+      if (prior) { event.preventDefault(); cancelSharedStoragePointer(); return true; }
+      if (bevyStorageUiTransitioning && phase === "down") { event.preventDefault(); return true; }
+      return false;
+    }
+    const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame });
+    if (phase === "down") {
+      if (!(event.target instanceof HTMLElement) || event.target.id !== sharedUiCanvasId(webGl2SharedCanvasPrototype) || !bevyStorageUiActive) return false;
+      if ((event.button !== 0 && event.button !== 2) || event.pointerType !== "mouse" && !(event.pointerType === "touch" && context.presentation.touch)) return false;
+      if (bagPointerRouterRef.current.held || characterPointerRouterRef.current.held || hudPointerRouterRef.current.held || spellsPointerRouterRef.current.held) return false;
+      frame.focus({ preventScroll: true });
+    }
+    const edge = phase === "down" ? router.down(context, event.pointerId, event.button as 0 | 2, point.sceneX, point.sceneY)
+      : router.edge(phase, event.pointerId, point.sceneX, point.sceneY);
+    if (!edge) return Boolean(prior);
+    if (phase === "down" && edge.origin === "storage") beginCombatUiHold("storage", event.pointerId);
+    event.preventDefault();
+    const lease = router.held, hold = combatUiHoldRef.current.get("storage"), sceneHold = heldScenePointerRef.current; let accepted = false;
+    try { accepted = storagePointerCallbacksRef.current.onBevyStoragePointer?.(edge) === true; }
+    finally {
+      if (!accepted && router.held === lease) cancelSharedStoragePointer();
+      if ((!router.held || router.held !== lease) && hold) endCombatUiHold("storage", hold);
+    }
+    if (!accepted) return true;
+    if (router.held && router.held !== lease || heldScenePointerRef.current !== sceneHold) return true;
+    if (phase === "down") {
+      try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Window release is also routed. */ }
+      heldScenePointerRef.current = edge.origin === "world" && event.pointerType === "mouse"
+        ? { button: edge.button, sceneX: edge.x, sceneY: edge.y, startedAt: Date.now(), dispatched: false } : null;
+      if (edge.origin === "storage") onViewportDirectionStop();
+    } else if (phase === "move" && edge.origin === "world" && heldScenePointerRef.current) {
+      heldScenePointerRef.current.sceneX = edge.x; heldScenePointerRef.current.sceneY = edge.y;
+    } else if (phase === "up") { if (edge.origin === "world") stopHeldScenePointer(); else heldScenePointerRef.current = null; onViewportDirectionStop(); }
+    else if (phase === "cancel") { heldScenePointerRef.current = null; onViewportDirectionStop(); }
+    return true;
+  }
+  function cancelSharedComposePointer(){if(heldComposePointerRef.current!==null){heldComposePointerRef.current=null;
+    mailComposePointerCallbacksRef.current.onBevyMailComposePointerCancel?.();heldScenePointerRef.current=null;onViewportDirectionStop();}}
+  function handleSharedComposePointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:'down'|'move'|'up'|'cancel'):boolean{
+    const held=heldComposePointerRef.current,context=bevyMailTextContext;
+    if(phase==='cancel'){if(held!==null){event.preventDefault();cancelSharedComposePointer();return true;}return false;}
+    if(phase!=='down'&&held===null)return false;
+    if(held!==null&&held!==event.pointerId){event.preventDefault();if(phase==='down')cancelSharedComposePointer();return true;}
+    const canvas=document.getElementById(sharedUiCanvasId(webGl2SharedCanvasPrototype));
+    if(!canvas||!context||!bevyMailComposeReady||!context.status.modal||!sceneInteractionReady||questLocalModalOpen||mobileMoreOpen){
+      if(held!==null){event.preventDefault();cancelSharedComposePointer();return true;}
+      if(bevyMailComposePending&&phase==='down'){event.preventDefault();return true;}return false;
+    }
+    if((getBevyMailComposeBusy?.()??context.pendingEdges)>0){if(held!==null)cancelSharedComposePointer();event.preventDefault();return true;}
+    const rect=canvas.getBoundingClientRect();if(rect.width<=0||rect.height<=0){if(held!==null)cancelSharedComposePointer();return false;}
+    const point=composeStagePoint(rect,context.presentation,event.clientX,event.clientY);
+    if(!point){if(held!==null)cancelSharedComposePointer();return false;}
+    const {x,y}=point;
+    if(phase==='down'){
+      if(!(event.target instanceof HTMLElement)||event.target.id!==canvas.id)return false;
+      event.preventDefault();
+      if(event.button!==0||event.pointerType!=='mouse'&&!(event.pointerType==='touch'&&context.presentation.touch))return true;
+      if(!context.status.inputRegions.some(r=>x>=r.left&&y>=r.top&&x<r.left+r.width&&y<r.top+r.height))return true;
+      cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer();cancelSharedBagPointer();cancelSharedHudPointer();
+    }
+    const accepted=mailComposePointerCallbacksRef.current.onBevyMailComposePointer?.(event.pointerId,phase,x,y,event.shiftKey===true)??false;
+    event.preventDefault();heldScenePointerRef.current=null;onViewportDirectionStop();
+    if(phase==='down'&&accepted){heldComposePointerRef.current=event.pointerId;
+      try{(event.target as HTMLElement).setPointerCapture(event.pointerId);}catch{/* Window terminal edge also cancels. */}}
+    if(phase==='up'||!accepted)heldComposePointerRef.current=null;
+    return true;
+  }
+  function cancelSharedMailPointer(){const edge=mailPointerRouterRef.current.cancel();if(edge){mailPointerCallbacksRef.current.onBevyMailPointer?.(edge);heldScenePointerRef.current=null;onViewportDirectionStop();}}
+  function handleSharedMailPointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:"down"|"move"|"up"|"cancel"):boolean{
+    const router=mailPointerRouterRef.current,prior=router.held,context=mailPointerCallbacksRef.current.getBevyMailPointerContext?.()??null;
+    if(prior&&(!router.matches(context)||phase==="down"&&prior.pointerId!==event.pointerId)){event.preventDefault();cancelSharedMailPointer();return true;}
+    if(phase!=="down"&&!prior)return false;if(prior&&prior.pointerId!==event.pointerId){event.preventDefault();return true;}
+    const frame=stageFrameRef.current;
+    if(!frame||!context||!sceneInteractionReady||questLocalModalOpen||mobileMoreOpen||bevyQuestUiCapturesPointer){if(prior){event.preventDefault();cancelSharedMailPointer();return true;}return false;}
+    const point=scenePointFromMouseEvent({clientX:event.clientX,clientY:event.clientY,currentTarget:frame});
+    if(phase==="down"){
+      const canvas=event.target instanceof HTMLElement&&event.target.id===sharedUiCanvasId(webGl2SharedCanvasPrototype);
+      if(!canvas||!bevyMailPageReady)return false;
+      if(!router.contains(context,point.sceneX,point.sceneY)){if(context.modal){event.preventDefault();return true;}return false;}
+      if(event.button!==0||event.pointerType!=="mouse"&&!(event.pointerType==="touch"&&context.presentation.touch))return false;
+      cancelSharedSpellsPointer();cancelSharedCharacterPointer();cancelSharedBagPointer();cancelSharedHudPointer();frame.focus({preventScroll:true});
+    }
+    const edge=phase==="down"?router.down(context,event.pointerId,point.sceneX,point.sceneY):router.edge(phase,event.pointerId,point.sceneX,point.sceneY);
+    if(!edge)return Boolean(prior)||context.modal;
+    event.preventDefault();heldScenePointerRef.current=null;onViewportDirectionStop();const lease=router.held;let accepted=false;
+    try{accepted=Boolean(mailPointerCallbacksRef.current.onBevyMailPointer?.(edge));}finally{if(!accepted&&router.held===lease)cancelSharedMailPointer();}
+    if(phase==="down")try{(event.target as HTMLElement).setPointerCapture(event.pointerId);}catch{/* Window listeners own the terminal. */}return true;
+  }
+  function cancelSharedCharacterPointer() {
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("character"):undefined;
+    const edge = characterPointerRouterRef.current.cancel();
+    try { if(edge)characterPointerCallbacksRef.current.onBevyCharacterPointer?.(edge); }
+    finally { if(combatHold)endCombatUiHold("character",combatHold);if(edge||combatHold){heldScenePointerRef.current=null;onViewportDirectionStop();} }
+  }
+  function handleSharedCharacterPointer(event: {
+    target: EventTarget | null; pointerId: number; pointerType: string; button: number;
+    clientX: number; clientY: number; preventDefault: () => void;
+  }, phase: "down" | "move" | "up" | "cancel"): boolean {
+    const router = characterPointerRouterRef.current, prior = router.held;
+    const context = characterPointerCallbacksRef.current.getBevyCharacterPointerContext?.() ?? null;
+    if (prior && (!router.matches(context) || phase === "down" && prior.pointerId !== event.pointerId)) {
+      event.preventDefault(); cancelSharedCharacterPointer(); return true;
+    }
+    if (phase !== "down" && !prior) return false;
+    if (prior && prior.pointerId !== event.pointerId) { event.preventDefault(); return true; }
+    const frame = stageFrameRef.current;
+    if (!frame || !context || !sceneInteractionReady || questLocalModalOpen || mobileMoreOpen || bevyQuestUiCapturesPointer) {
+      if (prior) { event.preventDefault(); cancelSharedCharacterPointer(); return true; } return false;
+    }
+    const point = scenePointFromMouseEvent({ clientX:event.clientX, clientY:event.clientY, currentTarget:frame });
+    if (phase === "down") {
+      const onCanvas = event.target instanceof HTMLElement && event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype);
+      const bag = bagPointerCallbacksRef.current.getBevyBagPointerContext?.() ?? null;
+      const bagForeground = bag?.inputRegions.some(r => point.sceneX >= r.left && point.sceneY >= r.top && point.sceneX < r.left+r.width && point.sceneY < r.top+r.height);
+      if (!onCanvas || !bevyCharacterPageReady || bagForeground || bagPointerRouterRef.current.held || hudPointerRouterRef.current.held
+        || !router.contains(context,point.sceneX,point.sceneY) || ![0,2].includes(event.button)
+        || event.pointerType !== "mouse" && !(event.pointerType === "touch" && context.presentation.touch)) return false;
+      frame.focus({preventScroll:true});
+    }
+    const edge = phase === "down" ? router.down(context,event.pointerId,event.button as 0|2,point.sceneX,point.sceneY)
+      : router.edge(phase,event.pointerId,point.sceneX,point.sceneY);
+    if (!edge) return Boolean(prior);
+    if(typeof onCombatUiHeld==="function"&&phase==="down"&&router.held)beginCombatUiHold("character",event.pointerId);
+    event.preventDefault(); heldScenePointerRef.current = null; onViewportDirectionStop();
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("character"):undefined;
+    const callbackLease=router.held;let accepted=false;
+    try { accepted=Boolean(characterPointerCallbacksRef.current.onBevyCharacterPointer?.(edge)); }
+    finally { if(!accepted&&router.held===callbackLease)cancelSharedCharacterPointer();if((!router.held||router.held!==callbackLease)&&combatHold)endCombatUiHold("character",combatHold); }
+    if (phase === "down") try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Window terminal edges also cancel. */ }
+    return true;
+  }
+
+  function cancelSharedHudPointer() {
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("hud"):undefined;
+    const prior=hudPointerRouterRef.current.cancel();
+    if(combatHold)endCombatUiHold("hud",combatHold);
+    if(!prior&&!combatHold)return;
+    heldScenePointerRef.current = null; onViewportDirectionStop();
+  }
+  function handleSharedHudPointer(event: {
+    target: EventTarget | null; pointerId: number; pointerType: string; button: number;
+    clientX: number; clientY: number; preventDefault: () => void;
+  }, phase: "down" | "move" | "up" | "cancel") {
+    const router = hudPointerRouterRef.current, prior = router.held;
+    const onCanvas = event.target instanceof HTMLElement && event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype);
+    if (phase === "down" && (!onCanvas || !bevyHudUiReady || bagPointerRouterRef.current.held)) return false;
+    if (phase !== "down" && (!prior || prior.pointerId !== event.pointerId)) return false;
+    const rawStatus = readBevyHudStatus?.() ?? null;
+    const characterContext = characterPointerCallbacksRef.current.getBevyCharacterPointerContext?.() ?? null;
+    const spellsContext=spellsPointerCallbacksRef.current.getBevySpellsPointerContext?.()??null;
+    const status = rawStatus && (characterContext||spellsContext) ? { ...rawStatus, characterStatsReady: true } : rawStatus;
+    if (prior && !router.matches(status)) { cancelSharedHudPointer(); return true; }
+    const frame = stageFrameRef.current;
+    if (!frame || !status || !sceneInteractionReady) { cancelSharedHudPointer(); return false; }
+    const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame });
+    const bagForeground = bagPointerCallbacksRef.current.getBevyBagPointerContext?.()?.inputRegions.some(rect =>
+      point.sceneX >= rect.left && point.sceneY >= rect.top && point.sceneX < rect.left + rect.width && point.sceneY < rect.top + rect.height) ?? false;
+    const lease = phase === "down" ? router.down(status, event.pointerId, point.sceneX, point.sceneY,
+      bagForeground || questLocalModalOpen || mobileMoreOpen) : prior;
+    if (!lease) return false;
+    if(typeof onCombatUiHeld==="function"&&phase==="down"&&lease.origin==="ui")beginCombatUiHold("hud",event.pointerId);
+    event.preventDefault();
+    if (phase === "down") {
+      frame.focus({ preventScroll: true });
+      try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* window up/cancel also releases */ }
+      heldScenePointerRef.current = lease.origin === "world"
+        ? { button: event.button === 2 ? 2 : 0, sceneX: point.sceneX, sceneY: point.sceneY, startedAt: Date.now(), dispatched: false } : null;
+      if (lease.origin === "ui" && event.button === 0 && lease.action) {
+        if (typeof lease.action !== "string") dispatchBevyHudNavigation?.(lease.action);
+        else if (lease.action === "character" || lease.action === "bag" || lease.action === "quest") dispatchBevyHudNavigation?.({ type: lease.action });
+        else if (lease.action === "skill") dispatchBevyHudNavigation?.({ type: "selectCharacterPage", page: "spells" });
+        else if (lease.action !== "option") window.dispatchEvent(new CustomEvent("mir2:hud-host-action", { detail: lease.action }));
+      }
+    } else if (phase === "move" && lease.origin === "world" && heldScenePointerRef.current) {
+      heldScenePointerRef.current.sceneX = point.sceneX; heldScenePointerRef.current.sceneY = point.sceneY;
+    } else if (phase === "up") {
+      if (lease.origin === "world") stopHeldScenePointer();
+      cancelSharedHudPointer();
+    } else if (phase === "cancel") cancelSharedHudPointer();
+    return true;
+  }
+
+  function handleSharedBagPointer(event: {
+    target: EventTarget | null; pointerId: number; pointerType: string; button: number;
+    clientX: number; clientY: number; shiftKey?:boolean; preventDefault: () => void;
+  }, phase: "down" | "move" | "up" | "cancel") {
+    if (handleSharedCharacterPointer(event, phase)) return;
+    if (handleSharedHudPointer(event, phase)) return;
+    const router = bagPointerRouterRef.current;
+    const onCanvas = event.target instanceof HTMLElement
+      && event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype);
+    const wasHeld = router.held;
+    if (phase === "down" && (!onCanvas || !bevyBagUiActive)) return;
+    if (phase === "move" && !wasHeld) return;
+    const context = bagPointerCallbacksRef.current.getBevyBagPointerContext?.() ?? null;
+    if (wasHeld && !router.matches(context)) cancelSharedBagPointer();
+    const frame = stageFrameRef.current;
+    if (!frame) { cancelSharedBagPointer(); return; }
+    const point = scenePointFromMouseEvent({ clientX: event.clientX, clientY: event.clientY, currentTarget: frame });
+    if (phase === "down") {
+      if (event.pointerType !== "mouse" && (event.pointerType !== "touch" || !context?.presentation.touch)) {
+        onBevyBagTouchFallback?.(); return;
+      }
+      if (!context || !sceneInteractionReady || bevyQuestUiCapturesPointer
+        || (event.button !== 0 && event.button !== 2)) return;
+      // A second finger belongs to this foreground surface until it lifts.
+      // It must neither replace the first lease nor become a world gesture.
+      if (event.pointerType === "touch") event.preventDefault();
+      if (router.held) return;
+      frame.focus({ preventScroll: true });
+    }
+    const edge = phase === "down" && context
+      ? router.down(context, event.pointerId, event.button as 0 | 2, point.sceneX, point.sceneY)
+      : router.edge(phase === "down" ? "cancel" : phase, event.pointerId, point.sceneX, point.sceneY);
+    if (!edge) return;
+    if(typeof onCombatUiHeld==="function"&&phase==="down"&&edge.origin==="bag")beginCombatUiHold("bag",event.pointerId);
+    event.preventDefault();
+    const ownsHeld = phase === "down" || wasHeld?.pointerId === event.pointerId;
+    const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("bag"):undefined;
+    const callbackLease=router.held;let accepted=false;
+    try { accepted=Boolean(bagPointerCallbacksRef.current.onBevyBagPointer?.(edge)); }
+    finally { if(!accepted&&ownsHeld&&router.held===callbackLease)cancelSharedBagPointer();if((!router.held||router.held!==callbackLease)&&combatHold)endCombatUiHold("bag",combatHold); }
+    if(!accepted){if(ownsHeld){heldScenePointerRef.current=null;onViewportDirectionStop();}return;}
+    if (phase !== "down" && (!wasHeld || wasHeld.pointerId !== event.pointerId)) return;
+    // Both owners see the same ordered edge, but only its down-origin owner
+    // may act. In particular a world drag entering the painted bag stays world.
+    if (phase === "down") {
+      try { (event.target as HTMLElement).setPointerCapture(event.pointerId); } catch { /* Window release still cancels. */ }
+      heldScenePointerRef.current = edge.origin === "world" && event.pointerType === "mouse"
+        ? { button: edge.button, sceneX: edge.x, sceneY: edge.y, startedAt: Date.now(), dispatched: false } : null;
+    } else if (edge.origin === "world" && phase === "move" && heldScenePointerRef.current) {
+      heldScenePointerRef.current.sceneX = edge.x;
+      heldScenePointerRef.current.sceneY = edge.y;
+    } else if (phase === "up") {
+      if (edge.origin === "world" && event.pointerType === "mouse") stopHeldScenePointer();
+      else heldScenePointerRef.current = null;
+      onViewportDirectionStop();
+    } else if (phase === "cancel") {
+      heldScenePointerRef.current = null;
+      onViewportDirectionStop();
+    }
+  }
+
+  const sharedBagPointerHandlerRef = useRef(handleSharedUiPointer);
+  // Native window release listeners must use the geometry from the committed
+  // DOM, not a concurrent render that has not updated the stage yet.
+  useLayoutEffect(() => { sharedBagPointerHandlerRef.current = handleSharedUiPointer; });
+  useLayoutEffect(() => {
+    cancelSharedNpcShopPointer();
+    cancelSharedStoragePointer();
+    cancelSharedComposePointer();
+    cancelSharedMailPointer();
+    cancelSharedHudPointer();
+    cancelSharedCharacterPointer();
+    cancelSharedSpellsPointer();
+    if (bevyBagOwnerRevision === 0 && !bevyBagUiActive && !bevyStorageUiActive && !bevyStorageUiTransitioning
+      && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning) return;
+    cancelSharedBagPointer();
+    // The preceding owner may have started an ordinary world mouse hold
+    // before the shared canvas became interactive.
+    heldScenePointerRef.current = null;
+    onViewportDirectionStop();
+  }, [bevyMailPageReady,bevyMailComposeReady,bevyMailComposePending,mailOpen,bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player?.objectId, bevyBagOwnerRevision, bevyBagUiActive, bevyStorageOwnerRevision, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, stagePresentation.virtualWidth, stagePresentation.virtualHeight, stagePresentation.scale]);
+  useEffect(() => {
+    const up = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "up");
+    const cancel = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "cancel");
+    const blur = () => { cancelSharedNpcShopPointer("blur"); cancelSharedStoragePointer("blur"); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer("blur"); cancelSharedHudPointer(); };
+    const resize = () => { cancelSharedNpcShopPointer(); cancelSharedStoragePointer(); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer(); cancelSharedHudPointer(); };
+    window.addEventListener("pointerup", up, true);
+    window.addEventListener("pointercancel", cancel, true);
+    window.addEventListener("blur", blur);
+    window.addEventListener("resize", resize);
+    return () => {
+      window.removeEventListener("pointerup", up, true);
+      window.removeEventListener("pointercancel", cancel, true);
+      window.removeEventListener("blur", blur);
+      window.removeEventListener("resize", resize);
+      cancelSharedNpcShopPointer();
+      cancelSharedStoragePointer();
+      cancelSharedComposePointer();
+      cancelSharedSpellsPointer();
+      cancelSharedMailPointer();
+      cancelSharedCharacterPointer();
+      cancelSharedBagPointer();
+      cancelSharedHudPointer();
+    };
+  }, []);
+
+  function isSharedBagCompatibilityMouse(event: MouseEvent<HTMLElement>) {
+    if (npcShopBlocksWorldInput() || npcShopPointerRouterRef.current.held) return true;
+    return Boolean(storagePointerRouterRef.current.held)||bevyMailComposeReady||bevyMailComposePending||Boolean(mailPointerRouterRef.current.held)||Boolean(characterPointerRouterRef.current.held) || Boolean(hudPointerRouterRef.current.held) || Boolean(bagPointerRouterRef.current.held)
+      || (event.target instanceof HTMLElement
+        && event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype));
+  }
+
   function handleScenePointerAction(event: MouseEvent<HTMLDivElement>) {
-    if (screen !== "game" || !player || !sceneInteractionReady) {
+    if (npcShopBlocksWorldInput()) { event.preventDefault(); stopNpcShopWorldInput(); return; }
+    if (isSharedBagCompatibilityMouse(event)) return;
+    if (screen !== "game" || !player || !sceneInteractionReady || bevyQuestUiCapturesPointer) {
+      heldScenePointerRef.current = null;
       return;
     }
 
@@ -3065,6 +3878,13 @@ export function OriginalClientShell({
   }
 
   function handleScenePointerMove(event: MouseEvent<HTMLDivElement>) {
+    if (npcShopBlocksWorldInput()) { event.preventDefault(); stopNpcShopWorldInput(); return; }
+    const hoverTarget=event.target instanceof Element?event.target.closest<HTMLElement>("[data-object-id]"):null;
+    const pointForCombat=scenePointFromMouseEvent(event),tileForCombat=tileFromScenePoint(pointForCombat.sceneX,pointForCombat.sceneY);
+    const blocked=event.target instanceof Element&&Boolean(event.target.closest(".game-ui-scene, .login-overlay, .select-overlay"));
+    onCombatPointer?.(blocked||!tileForCombat?null:[tileForCombat.x,tileForCombat.y],blocked?null:hoverTarget?.dataset.objectId??null);
+    if (isSharedBagCompatibilityMouse(event)) return;
+    if (bevyQuestUiCapturesPointer) { heldScenePointerRef.current = null; return; }
     const held = heldScenePointerRef.current;
       if (!held || screen !== "game" || !sceneInteractionReady) {
         return;
@@ -3079,19 +3899,21 @@ export function OriginalClientShell({
   }
 
   function stopHeldScenePointer() {
+    if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
     const held = heldScenePointerRef.current;
     heldScenePointerRef.current = null;
-    if (!held || held.dispatched) return;
+    if (!held || held.dispatched || bevyQuestUiCapturesPointer) return;
     dispatchSceneClickInput(held);
   }
 
   useEffect(() => {
-    if (screen !== "game") {
+    if (screen !== "game" || bevyQuestUiCapturesPointer) {
       heldScenePointerRef.current = null;
       return;
     }
 
     const timer = window.setInterval(() => {
+      if (npcShopBlocksWorldInput()) { stopNpcShopWorldInput(); return; }
       const held = heldScenePointerRef.current;
       if (!held) return;
       if (!held.dispatched && Date.now() - held.startedAt < CRYSTAL_MOVE_INPUT_INTERVAL_MS) {
@@ -3113,7 +3935,7 @@ export function OriginalClientShell({
       window.removeEventListener("mouseup", stop);
       window.removeEventListener("blur", stop);
     };
-  }, [screen, sceneInteractionReady, onViewportDirectionStep, onViewportDirectionStop]);
+  }, [screen, sceneInteractionReady, bevyQuestUiCapturesPointer, onViewportDirectionStep, onViewportDirectionStop]);
 
   // Normal play uses the stage-level coordinate handlers. Keep the 1,155-button
   // hit grid only for legacy QA scripts that still query per-tile aria labels.
@@ -3136,6 +3958,7 @@ export function OriginalClientShell({
             }}
             data-ui-interactive="true"
             onMouseDown={(event) => {
+              if (npcShopBlocksWorldInput()) { event.preventDefault(); event.stopPropagation(); stopNpcShopWorldInput(); return; }
               if (event.button !== 0 && event.button !== 2) {
                 return;
               }
@@ -3161,6 +3984,7 @@ export function OriginalClientShell({
               }
             }}
             onMouseMove={(event) => {
+              if (npcShopBlocksWorldInput()) { event.preventDefault(); stopNpcShopWorldInput(); return; }
               const held = heldScenePointerRef.current;
               if (!held) return;
               const point = scenePointFromMouseEvent(event);
@@ -3193,9 +4017,18 @@ export function OriginalClientShell({
       className={`mir-client-page ${clientProfile.layout === "touch" && clientProfile.input === "touch" ? "force-mobile-controls" : ""}`}
       data-layout-profile={clientProfile.layout}
       data-input-profile={clientProfile.input}
+      data-shared-touch-quest-open={
+        screen === "game" && clientProfile.input === "touch" && bevyQuestUiReady && bevyQuestUiCapturesPointer
+          ? "true" : undefined
+      }
+      data-shared-touch-bag-open={
+        screen === "game" && clientProfile.input === "touch" && bevyBagUiActive ? "true" : undefined
+      }
       data-gamepad-family={clientProfile.gamepad.family}
       data-client-screen={screen}
       data-wide-mobile={stagePresentation.wideMobile ? "true" : "false"}
+      data-webgl2-shared-canvas-mode={webGl2SharedCanvasPrototype ? "primary" : undefined}
+      data-shared-ui-surface={sharedUiCanvasId(webGl2SharedCanvasPrototype)}
       style={stageScaleStyle}
     >
       <section
@@ -3221,9 +4054,21 @@ export function OriginalClientShell({
           data-viewport-cell-height={VIEWPORT_CELL_HEIGHT}
           data-viewport-scene-width={stagePresentation.virtualWidth}
           data-viewport-scene-height={stagePresentation.virtualHeight}
+          data-quest-ui-owner={bevyQuestUiReady ? "bevy" : "react"}
+          data-bag-ui-owner={bevyBagUiActive ? "bevy" : "react"}
+          data-hp-orb-owner={hpOrbOwner ? "bevy" : "react"}
+          data-mp-orb-owner={mpOrbOwner ? "bevy" : "react"}
+          data-experience-bar-owner={experienceDrawPlanOwner ? "canvas2d" : experienceBarOwner ? "bevy" : "react"}
+          data-weight-bar-owner={weightDrawPlanOwner ? "canvas2d" : weightBarOwner ? "bevy" : "react"}
+          data-bag-owner-revision={bevyBagOwnerRevision}
+          onPointerDownCapture={(event: ReactPointerEvent<HTMLDivElement>) => handleSharedUiPointer(event, "down")}
+          onPointerMoveCapture={(event: ReactPointerEvent<HTMLDivElement>) => handleSharedUiPointer(event, "move")}
+          onLostPointerCapture={(event: ReactPointerEvent<HTMLDivElement>) => handleSharedUiPointer(event, "cancel")}
+          onWheelCapture={event=>{if(bevyMailComposeReady&&bevyMailTextContext?.status.modal){event.preventDefault();
+            onBevyMailTextEdge?.({op:'wheel',upwardPixels:-event.deltaY});}else if(bevyMailComposePending)event.preventDefault();}}
           tabIndex={-1}
           onMouseDownCapture={(event) => {
-            if (screen === "game") {
+            if (screen === "game"&&!bevyMailComposeReady&&!bevyMailComposePending) {
               stageFrameRef.current?.focus({ preventScroll: true });
             }
             if (screen === "game" && event.button === 2) {
@@ -3232,7 +4077,8 @@ export function OriginalClientShell({
           }}
           onMouseDown={handleScenePointerAction}
           onMouseMove={handleScenePointerMove}
-          onMouseUp={stopHeldScenePointer}
+          onMouseUp={(event) => { if (!isSharedBagCompatibilityMouse(event)) stopHeldScenePointer(); }}
+          onMouseLeave={()=>onCombatPointer?.(null,null)}
           onContextMenuCapture={(event) => {
             if (screen === "game") {
               event.preventDefault();
@@ -3278,10 +4124,12 @@ export function OriginalClientShell({
             aria-hidden={screen !== "game"}
           >
             {showSyntheticScene ? <div className="game-scene-underlay" /> : null}
-            <canvas
-              id="mir2-web3-canvas"
-              className={hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
-            />
+            {!webGl2SharedCanvasPrototype ? (
+              <canvas
+                id="mir2-web3-canvas"
+                className={hideBevyCanvasForDomEntityFallback ? "bevy-canvas-hidden" : undefined}
+              />
+            ) : null}
             <WebGl2MapAtlasLayer
               enabled={mapGpuActive}
               stageWidth={stagePresentation.virtualWidth}
@@ -3356,6 +4204,129 @@ export function OriginalClientShell({
             entityKindClassName={entityKindClassName}
             viewportLayout={viewportLayout}
           />
+          <canvas ref={experienceDrawCanvasRef} className="hud-bar-draw-plan hud-bar-draw-plan-experience"
+            width={1004} height={8} aria-hidden="true" tabIndex={-1} />
+          <canvas ref={weightDrawCanvasRef} className="hud-bar-draw-plan hud-bar-draw-plan-weight"
+            width={76} height={12} aria-hidden="true" tabIndex={-1} />
+          {webGl2SharedCanvasPrototype ? (
+            <canvas
+              id="mir2-web3-canvas"
+              className={`bevy-shared-ui-canvas${screen === "game" && (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady || hpOrbOwner || mpOrbOwner || experienceBarOwner || weightBarOwner)
+                ? " shared-quest-ui-visible" : ""}`}
+              data-ui-interactive={bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive ? "true" : undefined}
+              style={{ pointerEvents: screen === "game" && (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "auto" : "none" }}
+              aria-label="Shared game windows"
+              tabIndex={-1}
+            />
+          ) : null}
+          <canvas
+            id="mir2-quest-ui-canvas"
+            className={!webGl2SharedCanvasPrototype && (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyHudUiReady || bevyQuestUiReady || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || hpOrbOwner || mpOrbOwner || experienceBarOwner || weightBarOwner) && screen === "game" ? "shared-quest-ui-visible" : undefined}
+            data-ui-interactive={!webGl2SharedCanvasPrototype && (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "true" : undefined}
+            style={{ pointerEvents: !webGl2SharedCanvasPrototype && (bevyMailPageReady || bevyCharacterPageReady || bevySpellsPageReady || bevyQuestUiCapturesPointer || bevyBagUiActive || bevyNpcShopUiActive || bevyNpcShopUiTransitioning || bevyStorageUiActive || bevyStorageUiTransitioning || bevyHudUiReady) ? "auto" : "none" }}
+            aria-label="Shared game windows"
+            tabIndex={-1}
+          />
+          {screen==='game'&&bevyMailComposeReady&&bevyMailTextContext&&mailTextPosition?<textarea
+            key={JSON.stringify([bevyMailTextContext.status.proof?.owner,bevyMailTextContext.status.proof?.incarnation,
+              bevyMailTextContext.status.proof?.draftEpoch,bevyMailTextContext.status.proof?.focusGeneration,
+              bevyMailTextContext.status.proof?.presentationRevision,bevyMailTextContext.status.proof?.layoutRevision,
+              bevyMailTextContext.status.textTarget,bevyMailTextContext.status.modal,bevyMailTextContext.status.inputEnabled,
+              mailDomRetireKey])}
+            ref={mailTextRef} aria-label={bevyMailTextContext.status.textTarget==='body'?'Mail message':'Mail prompt'} autoComplete="off" spellCheck={false}
+            data-mail-text-adapter="shared" style={mailTextPosition} defaultValue={bevyMailTextContext.status.textTarget==='body'?bevyMailTextContext.raw.body:bevyMailTextContext.status.promptText??''}
+            onChange={()=>{/* Rust or the existing Page prompt owner accepts input. */}}
+            onFocus={event=>{if(event.currentTarget===mailTextRef.current&&bevyMailTextContext.status.textTarget==='body')onBevyMailTextEdge?.({op:'focus',focused:true});}}
+            onBlur={event=>{if(mailDomCompositionRef.current?.element===event.currentTarget)retireMailDomComposition();
+              if(event.currentTarget===mailTextRef.current&&bevyMailTextContext.status.textTarget==='body')onBevyMailTextEdge?.({op:'focus',focused:false});}}
+            onKeyDown={event=>{
+              if(event.currentTarget!==mailTextRef.current)return;
+              if(mailDomCompositionRef.current!==null||event.nativeEvent.isComposing||event.nativeEvent.keyCode===229)return;
+              const target=bevyMailTextContext.status.textTarget;
+              if(target==='recipient'||target==='gold'){
+                if(event.key==='Enter'){event.preventDefault();const text=event.currentTarget.value,proof=bevyMailTextContext.status.proof;
+                  if(proof&&(bevyMailTextContext.status.promptText!==text||bevyMailTextContext.pendingEdges>0)){
+                    const pending={target,text,proof,element:event.currentTarget};pendingMailPromptConfirmRef.current=pending;
+                    if(bevyMailTextContext.pendingEdges===0&&!onBevyMailTextEdge?.({op:'promptReplace',target,text})&&
+                      pendingMailPromptConfirmRef.current===pending)pendingMailPromptConfirmRef.current=null;
+                  }else onBevyMailComposeAction?.(target==='recipient'?'recipientSubmit':'goldConfirm');}
+                else if(event.key==='Escape'){event.preventDefault();onBevyMailComposeAction?.(target==='recipient'?'recipientCancel':'goldCancel');}
+                return;
+              }
+              const key=event.key==='ArrowLeft'?'left':event.key==='ArrowRight'?'right':event.key==='ArrowUp'?'up':event.key==='ArrowDown'?'down':
+                event.key==='Home'?'home':event.key==='End'?'end':event.key==='Backspace'?'backspace':event.key==='Delete'?'delete':event.key==='Enter'?'enter':
+                (event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='a'?'selectAll':null;
+              if(key){event.preventDefault();mailKeyBeforeInputRef.current=key;
+                queueMicrotask(()=>{if(mailKeyBeforeInputRef.current===key)mailKeyBeforeInputRef.current=null;});
+                onBevyMailTextEdge?.({op:'key',key,control:event.ctrlKey||event.metaKey,shift:event.shiftKey});}
+            }}
+            onInput={event=>{if(event.currentTarget!==mailTextRef.current||mailDomCompositionRef.current!==null||
+              (event.nativeEvent as InputEvent).isComposing)return;
+              const target=bevyMailTextContext.status.textTarget;
+              if(target==='recipient'||target==='gold'){
+                const proof=bevyMailTextContext.status.proof,text=event.currentTarget.value;
+                const buffered=bufferedMailPromptRef.current;
+                const sameBuffered=Boolean(buffered&&buffered.element===event.currentTarget&&buffered.target===target&&proof&&
+                  sameComposeScope(buffered.proof,proof)&&buffered.proof.draftGeneration===proof.draftGeneration);
+                if(buffered&&!sameBuffered&&bufferedMailPromptRef.current===buffered)bufferedMailPromptRef.current=null;
+                if(sameBuffered&&buffered?.text===text)return;
+                const next=proof?{target,text,proof,element:event.currentTarget}:null;
+                if(next)bufferedMailPromptRef.current=next;
+                if(!onBevyMailTextEdge?.({op:'promptReplace',target,text})&&bufferedMailPromptRef.current===next)
+                  bufferedMailPromptRef.current=null;
+              }}}
+            onCompositionStart={event=>{if(event.currentTarget!==mailTextRef.current)return;
+              const target=bevyMailTextContext.status.textTarget,proof=bevyMailTextContext.status.proof;
+              if(target===null)return;
+              const prior=mailDomCompositionRef.current;
+              if(prior?.element===event.currentTarget&&prior.target===target&&prior.proof&&proof&&
+                sameComposeScope(prior.proof,proof)&&prior.proof.draftGeneration===proof.draftGeneration)return;
+              if(prior)retireMailDomComposition();
+              pendingMailPromptConfirmRef.current=null;mailKeyBeforeInputRef.current=null;
+              mailDomCompositionRef.current={target,proof,element:event.currentTarget};
+              if(target!=='body')return;
+              if(mailCompositionIdRef.current>=Number.MAX_SAFE_INTEGER){setMailTextInputNotice('Mail editor is updating; retry input');return;}
+              const id=++mailCompositionIdRef.current;mailCompositionActiveRef.current=id;mailCompositionEchoRef.current=null;
+              onBevyMailTextEdge?.({op:'imeStart',compositionId:id});}}
+            onCompositionUpdate={event=>{const id=mailCompositionActiveRef.current;if(event.currentTarget===mailDomCompositionRef.current?.element&&
+              currentMailDomComposition(bevyMailTextContext)&&bevyMailTextContext.status.textTarget==='body'&&id!==null)
+              onBevyMailTextEdge?.({op:'imePreview',compositionId:id,text:event.data,cursorUtf16:[event.data.length,event.data.length]});}}
+            onCompositionEnd={event=>{const active=mailDomCompositionRef.current,id=mailCompositionActiveRef.current;
+              if(!active||active.element!==event.currentTarget)return;
+              const current=currentMailDomComposition(bevyMailTextContext);
+              mailDomCompositionRef.current=null;mailCompositionActiveRef.current=null;
+              if(!current)return;
+              if(active?.target==='recipient'||active?.target==='gold'){
+                const target=active.target,text=event.currentTarget.value,proof=bevyMailTextContext.status.proof;
+                const next=proof?{target,text,proof,element:event.currentTarget}:null;
+                if(next)bufferedMailPromptRef.current=next;
+                if(!onBevyMailTextEdge?.({op:'promptReplace',target,text})){
+                  if(bufferedMailPromptRef.current===next)bufferedMailPromptRef.current=null;
+                  setMailTextInputNotice('Mail editor is updating; retry input');}
+                return;
+              }
+              if(id!==null&&active?.target==='body'){
+                const proof=bevyMailTextContext.status.proof;
+                if(onBevyMailTextEdge?.({op:'imeCommit',compositionId:id,text:event.data})&&proof)mailCompositionEchoRef.current={compositionId:id,proof};
+                else setMailTextInputNotice('Mail editor is updating; retry input');}}}
+            onSelect={event=>{if(event.currentTarget!==mailTextRef.current||mailDomCompositionRef.current!==null||
+              (event.nativeEvent as InputEvent).isComposing)return;
+              const current=bevyMailTextContext.status.caret,target=event.currentTarget;
+              const anchor=target.selectionDirection==='backward'?target.selectionEnd:target.selectionStart;
+              const caret=target.selectionDirection==='backward'?target.selectionStart:target.selectionEnd;
+              if(bevyMailTextContext.status.textTarget==='body'&&current&&(anchor!==current.anchorUtf16||caret!==current.caretUtf16))
+                onBevyMailTextEdge?.({op:'selection',anchorUtf16:anchor,caretUtf16:caret});}}
+            onCopy={event=>{if(bevyMailTextContext.status.textTarget!=='body')return;if(!onBevyMailClipboard?.('copy',{setData:(format,text)=>event.clipboardData.setData(format,text),
+              getData:format=>event.clipboardData.getData(format),preventDefault:()=>event.preventDefault()}))event.preventDefault();}}
+            onCut={event=>{if(bevyMailTextContext.status.textTarget!=='body')return;if(!onBevyMailClipboard?.('cut',{setData:(format,text)=>event.clipboardData.setData(format,text),
+              getData:format=>event.clipboardData.getData(format),preventDefault:()=>event.preventDefault()}))event.preventDefault();}}
+            onPaste={event=>{if(bevyMailTextContext.status.textTarget!=='body')return;if(!onBevyMailClipboard?.('paste',{setData:(format,text)=>event.clipboardData.setData(format,text),
+              getData:format=>{if(!Array.from(event.clipboardData.types).includes(format))throw Error('Synchronous clipboard text unavailable');
+                return event.clipboardData.getData(format);},preventDefault:()=>event.preventDefault()}))event.preventDefault();}}
+          />:null}
+          {screen==='game'&&(bevyMailComposePending||bevyMailTextContext?.pendingEdges)?<div role="status" className="mail-shared-loading">
+            {bevyMailComposePending?'Mail editor is loading…':'Applying mail edit…'}</div>:null}
+          {screen==='game'&&bevyMailComposeReady&&mailTextInputNotice?<div role="alert" className="mail-shared-loading">{mailTextInputNotice}</div>:null}
           {screen === "login" ? (
             <LoginOverlay
               language={language}
@@ -3418,9 +4389,22 @@ export function OriginalClientShell({
                   showInventory,
                   showCharacter,
                   showQuestLog,
+                  sharedQuestUiActive: bevyQuestUiReady,
+                  sharedBagUiActive: bevyBagUiActive,
+                  sharedStorageUiActive: bevyStorageUiActive || bevyStorageUiTransitioning,
+                  sharedHudUiActive: bevyHudUiReady,
+                  sharedHudPlan: bevyHudUiReady ? readBevyHudStatus?.()?.plan ?? null : null,
+                  experienceSpriteOwned: experienceDrawPlanOwner || experienceBarOwner,
+                  weightSpriteOwned: weightDrawPlanOwner || weightBarOwner,
+                  sharedCharacterStatsActive: bevyCharacterStatsReady || bevyCharacterPageReady || bevySpellsPageReady,
+                  inventoryInitialDeleteMode,
+                  onInventoryCompatibilityInteraction,
+                  onQuestUiModalChange,
+                  onHpOrbModalChange: setQuestLocalModalOpen,
                   activeInventoryTab,
                   activeCharacterTab,
                   storageServiceOpenVersion,
+                  storagePasswordOpenVersion,
                   npcShopService,
                   npcRepairService,
                   defaultChatExpanded: clientProfile.layout !== "touch",
@@ -3434,6 +4418,8 @@ export function OriginalClientShell({
                   onToggleQuestLog,
                   onCloseCharacter,
                   onCloseInventory,
+                  onCloseStorage,
+                  bevyNpcShopUiActive, bevyNpcShopUiTransitioning, getBevyNpcShopInputBlocked, npcShopTab, onNpcShopTabChange,
                   onCloseNpcShopService,
                   onCloseNpcRepairService,
                   onOpenCharacterTab,
@@ -3453,12 +4439,14 @@ export function OriginalClientShell({
                   onSetStoragePassword,
                   onRemoveStoragePassword,
                   onSellItem,
-                  onBuyNpcShopItem,
+                  onBuyNpcShopItem, onQuoteNpcShopItem,
                   onDropGold,
                   onRepairItem,
                   onSpecialRepairItem,
                   onCastSkill,
                   onClaimMail,
+                  mailOpen,
+                  onToggleMail,
                   onDeleteMail,
                   onBuyGameShopItem,
                   onSendClientCommand,
@@ -3525,40 +4513,42 @@ export function OriginalClientShell({
         </div>
       ) : null}
       <OriginalClientMobileControls
-        enabled={screen === "game" && sceneInteractionReady}
+        enabled={screen === "game" && sceneInteractionReady && !bevyQuestUiCapturesPointer && !bevyBagUiActive && !bevyStorageUiActive && !bevyStorageUiTransitioning && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !npcShopBlocksWorldInput()}
         forceVisible={clientProfile.layout === "touch" && clientProfile.input === "touch"}
         t={t}
         world={world}
         player={player}
         selectedEntity={selectedEntity}
-        onDirectionIntent={onViewportDirectionIntent}
+        onDirectionIntent={guardNpcShopGameplay(onViewportDirectionIntent)}
         onDirectionStop={onViewportDirectionStop}
-        onPrimaryTargetAction={onPrimaryTargetAction}
-        onApproachTarget={onApproachTarget}
-        onPickGroundDrop={onPickGroundDrop}
-        onToggleInventory={onToggleInventory}
-        onToggleCharacter={onToggleCharacter}
-        onCastSkill={onCastSkill}
-        onUseItem={onUseItem}
+        onPrimaryTargetAction={guardNpcShopGameplay(onPrimaryTargetAction)}
+        onApproachTarget={guardNpcShopGameplay(onApproachTarget)}
+        onPickGroundDrop={guardNpcShopGameplay(onPickGroundDrop)}
+        onToggleInventory={guardNpcShopGameplay(onToggleInventory)}
+        onToggleCharacter={guardNpcShopGameplay(onToggleCharacter)}
+        onToggleQuestLog={guardNpcShopGameplay(onToggleQuestLog)}
+        onSecondaryOpenChange={(open) => { if (!open || !npcShopBlocksWorldInput()) setMobileMoreOpen(open); }}
+        onCastSkill={guardNpcShopGameplay(onCastSkill)}
+        onUseItem={guardNpcShopGameplay(onUseItem)}
       />
       <OriginalClientGamepadControls
-        enabled={clientProfile.input === "gamepad"}
+        enabled={clientProfile.input === "gamepad" && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !npcShopBlocksWorldInput()}
         t={t}
         expectedProfile={clientProfile.gamepad}
         screen={screen}
-        gameplayReady={screen === "game" && sceneInteractionReady}
+        gameplayReady={screen === "game" && sceneInteractionReady && !bevyQuestUiCapturesPointer && !bevyNpcShopUiActive && !bevyNpcShopUiTransitioning && !npcShopBlocksWorldInput()}
         stageRootRef={stageFrameRef}
         world={world}
         player={player}
-        onDirectionIntent={onViewportDirectionIntent}
+        onDirectionIntent={guardNpcShopGameplay(onViewportDirectionIntent)}
         onDirectionStop={onViewportDirectionStop}
-        onPrimaryTargetAction={onPrimaryTargetAction}
-        onApproachTarget={onApproachTarget}
-        onPickGroundDrop={onPickGroundDrop}
-        onToggleInventory={onToggleInventory}
-        onToggleCharacter={onToggleCharacter}
-        onCastSkill={onCastSkill}
-        onUseItem={onUseItem}
+        onPrimaryTargetAction={guardNpcShopGameplay(onPrimaryTargetAction)}
+        onApproachTarget={guardNpcShopGameplay(onApproachTarget)}
+        onPickGroundDrop={guardNpcShopGameplay(onPickGroundDrop)}
+        onToggleInventory={guardNpcShopGameplay(onToggleInventory)}
+        onToggleCharacter={guardNpcShopGameplay(onToggleCharacter)}
+        onCastSkill={guardNpcShopGameplay(onCastSkill)}
+        onUseItem={guardNpcShopGameplay(onUseItem)}
       />
     </main>
   );

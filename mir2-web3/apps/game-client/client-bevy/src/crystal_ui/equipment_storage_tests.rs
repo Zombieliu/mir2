@@ -168,7 +168,7 @@ fn concurrent_storage_character_render_keeps_all_source_character_tabs_and_equip
     app.world_mut()
         .resource_mut::<InventoryModel>()
         .items
-        .push(item(2, 0, 9001, 100, 1, 2));
+        .push(item(2, 0, 0, 100, 1, 2));
     app.update();
 
     let world = app.world_mut();
@@ -191,7 +191,9 @@ fn concurrent_storage_character_render_keeps_all_source_character_tabs_and_equip
     assert!(world
         .query::<&OverlayButton>()
         .iter(world)
-        .any(|button| matches!(button, OverlayButton::InspectEquip(0))));
+        .any(|button| matches!(button, OverlayButton::InspectEquipSnapshot {
+            slot: 0, unique_id: Some(0),
+        })));
 }
 
 #[test]

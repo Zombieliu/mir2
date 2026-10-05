@@ -150,34 +150,119 @@ export function normalizeFriendList(raw: unknown): NormalizedFriend[] {
   });
 }
 
-/** Normalised mail record for the mailbox panel (stored in stage5Systems.mail). */
-export function normalizeMailList(raw: unknown): Array<Record<string, unknown>> {
-  if (!Array.isArray(raw)) {
-    return [];
+export type NormalizedMailAttachment = {uniqueId:number|null;itemIndex:number|null;name:string|null;key:string|null;
+  count:number;currentDura:number;maxDura:number;soulBoundId:number;identified:boolean|null;cursed:boolean;gemCount:number};
+export type NormalizedMail = {mailId:number;senderName:string;message:string;subject:string;opened:boolean;locked:boolean;
+  canReply:boolean;collected:boolean;gold:number;items:NormalizedMailAttachment[];itemCount:number;
+  dateSentBinaryDatetime:string|null;metadataKnown:boolean};
+const mailObject=(v:unknown):v is Record<string,unknown>=>Boolean(v)&&typeof v==="object"&&!Array.isArray(v);
+const mailInt=(v:unknown,min:number,max:number):v is number=>typeof v==="number"&&Number.isSafeInteger(v)&&v>=min&&v<=max;
+/** ClientMail and the existing Stage5 bootstrap use one loss-aware representation.
+ * Unsafe numeric identities cannot be recovered by converting the rounded number to text. */
+export function parseMailList(raw:unknown):NormalizedMail[]|null {
+  if(!Array.isArray(raw)||raw.length>256)return null;
+  const ids=new Set<number>(),out:NormalizedMail[]=[];
+  for(const entry of raw){
+    if(!mailObject(entry))return null;
+    if(entry.deleted===true)continue;
+    const id=entry.mailId??entry.mail_id??entry.id;
+    if(!mailInt(id,1,Number.MAX_SAFE_INTEGER)||ids.has(id))return null;ids.add(id);
+    const sender=entry.senderName??entry.sender_name??entry.sender??entry.from??"",subjectSource=entry.subject??"",bodySource=entry.body??"";
+    const body=entry.message??(typeof subjectSource==="string"&&subjectSource&&typeof bodySource==="string"?bodySource?`${subjectSource}\n${bodySource}`:subjectSource:bodySource);
+    if(typeof sender!=="string"||typeof body!=="string"||sender.length>256||body.length>65536)return null;
+    let sourceItems:unknown=entry.items??[];
+    const states=entry.itemStatesJson??entry.item_states_json;
+    if(states!==undefined){
+      if(!Array.isArray(states)||states.length>5)return null;
+      if(states.length){const decoded=[];for(const rawState of states){
+        if(typeof rawState!=="string"||rawState.length>262144)return null;
+        let state:unknown;try{state=JSON.parse(rawState);}catch{return null;}
+        if(!mailObject(state)||!mailInt(state.unique_id,1,Number.MAX_SAFE_INTEGER)||typeof state.name!=="string"||typeof state.key!=="string")return null;
+        const metadata=state.user_item_metadata;if(metadata!==undefined&&metadata!==null&&!mailObject(metadata))return null;
+        decoded.push({unique_id:state.unique_id,item_index:mailObject(metadata)?metadata.item_index??null:null,name:state.name,key:state.key,count:state.quantity,
+          current_dura:state.durability_current??0,max_dura:state.durability_max??0,soul_bound_id:state.soul_bound_id??-1,gem_count:state.gem_count??0,
+          identified:typeof state.identified==="boolean"?state.identified:null,cursed:state.cursed===true});
+      }sourceItems=decoded;}
+    }
+    if(!Array.isArray(sourceItems)||sourceItems.length>5)return null;
+    const items:NormalizedMailAttachment[]=[];
+    for(const item of sourceItems){
+      if(typeof item==="string"){if(item.length>512)return null;items.push({uniqueId:null,itemIndex:null,name:item,key:item,count:1,currentDura:0,maxDura:0,soulBoundId:0,identified:false,cursed:false,gemCount:0});continue;}
+      if(!mailObject(item))return null;
+      const uid=item.unique_id??item.uniqueId??null,index=item.item_index??item.itemIndex??null;
+      if(uid!==null&&!mailInt(uid,1,Number.MAX_SAFE_INTEGER)||index!==null&&!mailInt(index,-2147483648,2147483647))return null;
+      const count=item.count??0,current=item.current_dura??item.currentDura??0,max=item.max_dura??item.maxDura??0,
+        soul=item.soul_bound_id??item.soulBoundId??0,gem=item.gem_count??item.gemCount??0;
+      if(![count,current,max,gem].every(v=>mailInt(v,0,65535))||!mailInt(soul,-2147483648,2147483647))return null;
+      const name=item.name??null,key=item.key??null;
+      if(name!==null&&(typeof name!=="string"||name.length>512)||key!==null&&(typeof key!=="string"||key.length>512))return null;
+      items.push({uniqueId:uid as number|null,itemIndex:index as number|null,name:name as string|null,key:key as string|null,count:count as number,
+        currentDura:current as number,maxDura:max as number,soulBoundId:soul,gemCount:gem as number,identified:typeof item.identified==="boolean"?item.identified:null,cursed:item.cursed===true});
+    }
+    const gold=entry.gold??0;if(!mailInt(gold,0,0xffffffff))return null;
+    const date=entry.dateSentBinaryDatetime??entry.date_sent_binary_datetime;
+    // Decimal text is lossless only when it was received as text. A JS-safe integer is also exact.
+    let dateText:string|null=null;
+    if(typeof date==="string"&&/^-?\d{1,19}$/.test(date)){try{const n=BigInt(date);if(n>=BigInt("-9223372036854775808")&&n<=BigInt("9223372036854775807"))dateText=date;}catch{/* unknown */}}
+    else if(mailInt(date,Number.MIN_SAFE_INTEGER,Number.MAX_SAFE_INTEGER))dateText=String(date);
+    const reply=entry.canReply??entry.can_reply;
+    const subject=entry.subject??"";if(typeof subject!=="string"||subject.length>4096)return null;
+    out.push({mailId:id,senderName:sender,message:body,subject,opened:(entry.opened??entry.read)===true,locked:entry.locked===true,
+      canReply:reply===true,collected:(entry.collected??entry.claimed)===true,gold,items,itemCount:items.length,dateSentBinaryDatetime:dateText,
+      metadataKnown:entry.metadataKnown!==false&&typeof reply==="boolean"&&dateText!==null});
   }
-  return raw.flatMap((entry) => {
-    if (!entry || typeof entry !== "object") {
-      return [];
-    }
-    const record = entry as PacketRecord;
-    const mailId = packetNumber(record.mailId) ?? packetNumber(record.mail_id);
-    if (typeof mailId !== "number") {
-      return [];
-    }
-    return [
-      {
-        mailId,
-        senderName:
-          packetString(record.senderName) ?? packetString(record.sender_name) ?? "",
-        message: packetString(record.message) ?? "",
-        opened: packetBool(record.opened) ?? false,
-        locked: packetBool(record.locked) ?? false,
-        canReply: packetBool(record.canReply) ?? packetBool(record.can_reply) ?? false,
-        collected: packetBool(record.collected) ?? false,
-        gold: packetNumber(record.gold) ?? 0,
-        itemCount: Array.isArray(record.items) ? record.items.length : 0,
-      },
-    ];
+  return out;
+}
+/** The caller must qualify the same connection/session/player before providing previous rows.
+ * Only absent Stage5 metadata is retained; authoritative flags/items always come from this payload. */
+export type MailRowsResolver=(json:string)=>string|null|undefined;
+/** A nullable flag is a CURRENT template default. Only the Rust catalogue facade can resolve it. */
+export function mergeMailList(raw:unknown,previous:unknown,resolver?:MailRowsResolver):NormalizedMail[]|null {
+  let next=parseMailList(raw),old=parseMailList(previous);if(!next)return null;
+  if(resolver){try{
+    const result=resolver(JSON.stringify(next));if(typeof result!=="string")return null;
+    const resolved=parseMailList(JSON.parse(result));
+    if(!resolved||resolved.length!==next.length||resolved.some((m,n)=>m.mailId!==next![n].mailId))return null;
+    next=resolved;
+    if(old){const prior=resolver(JSON.stringify(old));old=typeof prior==="string"?parseMailList(JSON.parse(prior)):null;}
+  }catch{return null;}}
+  if(!old)return next;
+  const stableAttachment=(a:NormalizedMailAttachment,b:NormalizedMailAttachment)=>a.uniqueId===b.uniqueId
+    &&(a.uniqueId!==null||a.name===b.name&&a.key===b.key)&&a.itemIndex!==null&&a.itemIndex===b.itemIndex
+    &&a.identified!==null&&a.identified===b.identified&&a.count===b.count&&a.currentDura===b.currentDura
+    &&a.maxDura===b.maxDura&&a.soulBoundId===b.soulBoundId&&a.gemCount===b.gemCount&&a.cursed===b.cursed
+    // Before actual catalogue resolution a changed canonical key cannot be hidden by the old explicit index.
+    &&(Boolean(resolver)||a.key===b.key||!a.key&&!b.key);
+  return next.map(row=>{const source=(raw as unknown[]).find(v=>mailObject(v)&&(v.mailId??v.mail_id??v.id)===row.mailId) as Record<string,unknown>|undefined;
+    const prior=old.find(m=>m.mailId===row.mailId&&m.senderName===row.senderName&&m.message===row.message&&m.gold===row.gold&&m.items.length===row.items.length
+      &&m.items.every((i,n)=>stableAttachment(i,row.items[n])));
+    if(!prior||!source||!prior.metadataKnown||Object.hasOwn(source,"canReply")||Object.hasOwn(source,"can_reply")||Object.hasOwn(source,"dateSentBinaryDatetime")||Object.hasOwn(source,"date_sent_binary_datetime"))return row;
+    return{...row,canReply:prior.canReply,dateSentBinaryDatetime:prior.dateSentBinaryDatetime,metadataKnown:true};
+  });
+}
+/** Invalid current payload withdraws the mailbox, rather than retaining stale actionable rows. */
+export function normalizeMailList(raw:unknown):Array<Record<string,unknown>> {return parseMailList(raw)??[];}
+
+/** Recover only the single-field UserItemExpireInfo carrier. The value remains
+ * JSON data; interpretation and validation belong to the shared Rust codec. */
+function gatewayItemExpiryReviver(this:Record<string,unknown>,key:string,value:unknown,context?:{source?:string}):unknown {
+  if(key!=="expiry_binary_datetime"||!mailObject(this)||Object.keys(this).length!==1||!Object.hasOwn(this,key)
+    ||typeof value!=="number"||Number.isSafeInteger(value))return value;
+  const source=context?.source;
+  if(typeof source!=="string"||!/^(?:0|[1-9]\d{0,18}|-[1-9]\d{0,18})$/.test(source))return null;
+  try{const n=BigInt(source);return n>=-9223372036854775808n&&n<=9223372036854775807n?source:null;}catch{return null;}
+}
+
+/** Preserve plain item expiry on every packet and the existing ReceiveMail date.
+ * Without reviver source support, an unsafe plain expiry becomes unknown. */
+export function parseGatewayMailDates(text:string):unknown {
+  const parse=JSON.parse as (text:string,reviver:(this:Record<string,unknown>,key:string,value:unknown,context?:{source?:string})=>unknown)=>unknown;
+  const parsed:unknown=parse(text,gatewayItemExpiryReviver);
+  if(!mailObject(parsed)||parsed.type!=="packet"||parsed.packet!=="ReceiveMail")return parsed;
+  return parse(text,function(key,value,context){
+    if((key==="dateSentBinaryDatetime"||key==="date_sent_binary_datetime")&&typeof value==="number"&&mailInt(this.mailId??this.mail_id,1,Number.MAX_SAFE_INTEGER)&&typeof context?.source==="string"&&/^-?\d{1,19}$/.test(context.source)){
+      try{const n=BigInt(context.source);return n>=BigInt("-9223372036854775808")&&n<=BigInt("9223372036854775807")?context.source:null;}catch{return null;}
+    }return gatewayItemExpiryReviver.call(this,key,value,context);
   });
 }
 

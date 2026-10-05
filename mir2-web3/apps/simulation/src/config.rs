@@ -7473,6 +7473,57 @@ pub struct HeroWeightsSnapshot { pub bag:u32, pub wear:u32, pub hand:u32 }
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PlayerWeightsSnapshot { pub bag:u32, pub wear:u32, pub hand:u32 }
+/// Read-only capacity evidence from one complete authoritative owned roster.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NpcGoldTradeCapacity {
+    pub roster_valid: bool,
+    pub fresh_compatible_unique_ids: Vec<u64>,
+}
+
+fn deserialize_npc_gold_trade_compatible_ids<'de, D>(deserializer: D) -> Result<Vec<u64>, D::Error>
+where D: serde::Deserializer<'de> {
+    struct Ids;
+    impl<'de> serde::de::Visitor<'de> for Ids {
+        type Value = Vec<u64>;
+        fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+            formatter.write_str("at most 86 distinct carried item identities")
+        }
+        fn visit_seq<A: serde::de::SeqAccess<'de>>(self, mut sequence: A) -> Result<Vec<u64>, A::Error> {
+            let mut values = Vec::new();
+            let mut seen = BTreeSet::new();
+            while let Some(id) = sequence.next_element::<u64>()? {
+                if values.len() >= usize::from(CRYSTAL_MAX_INVENTORY_CAPACITY) || !seen.insert(id) {
+                    return Err(serde::de::Error::custom("invalid NPC Gold capacity identities"));
+                }
+                values.push(id);
+            }
+            Ok(values)
+        }
+    }
+    deserializer.deserialize_seq(Ids)
+}
+
+impl<'de> Deserialize<'de> for NpcGoldTradeCapacity {
+    fn deserialize<D: serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        #[derive(Deserialize)]
+        #[serde(rename_all = "camelCase", deny_unknown_fields)]
+        struct Fields {
+            roster_valid: bool,
+            #[serde(deserialize_with = "deserialize_npc_gold_trade_compatible_ids")]
+            fresh_compatible_unique_ids: Vec<u64>,
+        }
+        let fields = Fields::deserialize(deserializer)?;
+        if !fields.roster_valid && !fields.fresh_compatible_unique_ids.is_empty() {
+            return Err(serde::de::Error::custom("invalid NPC Gold capacity roster"));
+        }
+        Ok(Self {
+            roster_valid: fields.roster_valid,
+            fresh_compatible_unique_ids: fields.fresh_compatible_unique_ids,
+        })
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct WorldSnapshot {
@@ -7513,6 +7564,9 @@ pub struct WorldSnapshot {
     /// Authoritative Crystal inventory-array length, including six belt cells.
     #[serde(default = "default_inventory_capacity")]
     pub inventory_capacity: u16,
+    /// Missing on older snapshots; only this full snapshot can grant merge evidence.
+    #[serde(default)]
+    pub npc_gold_trade_capacity: Option<NpcGoldTradeCapacity>,
     pub storage_size: u16,
     pub has_expanded_storage: bool,
     pub has_storage_password: bool,

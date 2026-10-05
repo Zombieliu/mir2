@@ -29,8 +29,7 @@ const QUESTS: &[QuestCopy] = &[
     QuestCopy { id: 2110013, source_title: "Enter the Dead Mine", title: "进入死亡矿区", description: "沿地图入口路线进入死亡矿区一层。进矿前准备红药、蓝药；道士按技能需要携带护身符。" },
     QuestCopy { id: 2110014, source_title: "Clear the mine entrance", title: "清理矿区入口", description: "在死亡矿区一层消灭 3 只僵尸（二型）和 2 只僵尸（三型），补足消耗品后再继续深入。" },
     QuestCopy { id: 2110015, source_title: "Fight and reposition", title: "战斗并重新站位", description: "在死亡矿区一层消灭 1 只僵尸（二型），并完成职业练习：战士使用刺杀剑术，法师造成法术伤害后移动，道士准备毒粉后施毒。" },
-    // The current authoritative quest uses Zombie2; the old English hint still
-    // says Zombie3. Display the current objective without modifying that data.
+    // The authoritative quest and shared guidance both target Zombie2.
     QuestCopy { id: 2110016, source_title: "Complete the mine patrol", title: "完成矿区巡逻", description: "在死亡矿区一层消灭 3 只僵尸（二型）并完成职业练习，然后向比奇城墙公告板（334,259）报告。" },
     QuestCopy { id: 2110017, source_title: "Prepare for the expedition", title: "准备远征", description: "装备符合自身职业和等级要求的盔甲，并向比奇城墙公告板（334,259）报告远征准备情况。" },
     QuestCopy { id: 2110018, source_title: "Reach Wooma Temple", title: "抵达沃玛寺庙", description: "沿地图入口路线抵达沃玛寺庙入口，并完成职业练习。战士准备半月弯刀，法师准备雷电术，道士准备召唤骷髅及所需材料。" },

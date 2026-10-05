@@ -58,6 +58,7 @@ type ItemContainer = "bag1" | "bag2" | "quest" | "belt" | "storage";
 type DisplayItemLike = {
   key: string;
   uniqueId: number;
+  authoritativeUniqueId?: number;
   name: string;
   icon: number;
   slot: number;
@@ -68,7 +69,7 @@ type DisplayItemLike = {
   durabilityMax?: number;
 };
 
-type ItemActionRef = Pick<DisplayItemLike, "key" | "uniqueId" | "slot" | "container">;
+type ItemActionRef = Pick<DisplayItemLike, "key" | "uniqueId" | "authoritativeUniqueId" | "slot" | "container">;
 
 type EquipmentSlot =
   | "weapon"
@@ -294,9 +295,9 @@ export function ChatFrame({
         aria-label={t("ui.worldChatPlaceholder")}
         onChange={(event) => onChatMessageChange(event.target.value)}
         onKeyDown={(event) => {
-          if (event.key === "Enter") {
-            onSendChat();
-          }
+          if (event.key !== "Enter") return;
+          if (event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
+          onSendChat();
         }}
       />
     </section>
@@ -407,6 +408,7 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem }:
     onUseItem({
       key: item.key,
       uniqueId: item.uniqueId,
+      authoritativeUniqueId: item.authoritativeUniqueId,
       slot: item.slot,
       container: item.container,
     });
