@@ -160,6 +160,90 @@ public class OfflinePersonalIngressPreviewTest {
         return new JSONObject(new JSONObject(event).getString("envelope"));
     }
 
+    @Test public void socialJniDiagnosticsMustHaveARealJavaEventStream() throws Exception {
+        for (String scene : new String[]{"group-jni", "guild-jni", "trade-jni", "trade-closed-jni"}) {
+            List<String> events = OfflinePersonalIngressPreview.events(true, scene);
+            assertFalse("Social JNI stream is missing: " + scene, events.isEmpty());
+            assertEquals("STARTING", WireJson.decode(events.get(0)).getString("phase"));
+        }
+        // JVM fixture contract only; no native library, TLS or real account.
+    }
+
+    @Test public void socialJniStreamsStayBoundedImmutableAndDisabledInNormalBuilds() throws Exception {
+        Set<String> allowed = Set.of("SwitchGroup", "GroupMemberInfo", "GroupMembersMap", "GroupInvite",
+                "GuildStatus", "GuildNoticeChange", "GuildMemberChange", "GuildStorageList", "GuildStorageGoldChange",
+                "TradeAccept", "TradeGold", "TradeItem", "TradeCancel");
+        for (String scene : new String[]{"group-jni", "guild-jni", "trade-jni", "trade-closed-jni"}) {
+            assertTrue(OfflinePersonalIngressPreview.events(false, scene).isEmpty());
+            List<String> events = OfflinePersonalIngressPreview.events(true, scene);
+            assertTrue(events.size() <= 8);
+            int owner = -1;
+            for (int index = 0; index < events.size(); index++) {
+                JSONObject outer = WireJson.decode(events.get(index));
+                assertFalse(outer.has("accountId"));assertFalse(outer.has("account_id"));assertFalse(outer.has("password"));
+                if (outer.has("worldSnapshot")) {
+                    assertEquals(-1, owner);
+                    owner = index;
+                    JSONObject snapshot = WireJson.decode(outer.getString("worldSnapshot"));
+                    assertEquals(42, snapshot.getInt("playerObjectId"));
+                    assertEquals("OFFLINE JAVA JNI", snapshot.getJSONArray("entities").getJSONObject(0).getString("name"));
+                    assertEquals(777, snapshot.getInt("gold"));
+                    assertEquals(12, snapshot.getJSONArray("inventoryItems").length());
+                    assertTrue(outer.getString("worldSnapshot").getBytes(StandardCharsets.UTF_8).length <= 1024 * 1024);
+                } else if (outer.has("envelope")) {
+                    JSONObject inner = WireJson.decode(outer.getString("envelope"));
+                    assertEquals("packet", inner.getString("type"));
+                    assertTrue(allowed.contains(inner.getString("packet")));
+                    assertTrue(outer.getString("envelope").getBytes(StandardCharsets.UTF_8).length <= 512 * 1024);
+                    if (owner >= 0) assertEquals("TradeCancel", inner.getString("packet"));
+                }
+            }
+            assertTrue(owner > 0);
+            assertThrows(UnsupportedOperationException.class, events::clear);
+            assertTrue(OfflinePersonalIngressPreview.events(true, scene + "-bypass").isEmpty());
+        }
+    }
+
+    @Test public void socialJniFullDomainDataKeepsOwnGuestAndWalletSeparate() throws Exception {
+        List<String> group = OfflinePersonalIngressPreview.events(true, "group-jni");
+        JSONObject members = packet(group.get(2)).getJSONObject("payload");
+        assertEquals(15, members.getJSONArray("members").length());
+        assertEquals("OFFLINE JAVA JNI", members.getString("leaderName"));
+        assertEquals("JNI BORDER", packet(group.get(3)).getJSONObject("payload").getString("playerMap"));
+        assertEquals("JNI Inviter", packet(group.get(4)).getJSONObject("payload").getString("name"));
+        List<String> guild = OfflinePersonalIngressPreview.events(true, "guild-jni");
+        assertEquals(200, packet(guild.get(2)).getJSONObject("payload").getJSONArray("notice").length());
+        JSONObject rank = packet(guild.get(3)).getJSONObject("payload").getJSONArray("ranks").getJSONObject(0);
+        assertEquals(200, rank.getJSONArray("members").length());
+        assertEquals(136, rank.getInt("options"));
+        JSONArray slots = WireJson.decode(WireJson.decode(guild.get(4)).getString("envelope"))
+                .getJSONObject("payload").getJSONArray("items");
+        assertEquals(112, slots.length());
+        java.math.BigInteger max = new java.math.BigInteger("18446744073709551615");
+        for (int slot = 0; slot < 112; slot++) {
+            assertEquals(max.subtract(java.math.BigInteger.valueOf(slot)).toString(),
+                    slots.getJSONObject(slot).getJSONObject("item").get("unique_id").toString());
+            assertEquals(slot + 1, slots.getJSONObject(slot).getJSONObject("item").getInt("count"));
+        }
+        for (String scene : new String[]{"trade-jni", "trade-closed-jni"}) {
+            List<String> trade = OfflinePersonalIngressPreview.events(true, scene);
+            JSONObject world = WireJson.decode(WireJson.decode(trade.get(4)).getString("worldSnapshot"));
+            assertEquals(777, world.getInt("gold"));
+            assertEquals(max.toString(), world.getJSONArray("inventoryItems").getJSONObject(0).get("uniqueId").toString());
+            JSONObject own = world.getJSONObject("stage5Systems").getJSONObject("trade");
+            assertEquals(125, own.getInt("offeredGold"));assertTrue(own.getBoolean("locked"));assertFalse(own.getBoolean("completed"));
+            assertEquals(max.toString(), own.getJSONObject("offeredUniqueIds").get("1").toString());
+            assertEquals(17, packet(trade.get(2)).getJSONObject("payload").getInt("amount"));
+            JSONArray guest = WireJson.decode(WireJson.decode(trade.get(3)).getString("envelope"))
+                    .getJSONObject("payload").getJSONArray("tradeItems");
+            assertEquals(10, guest.length());assertTrue(guest.isNull(1));assertEquals(9, guest.getJSONObject(2).getInt("count"));
+            if (scene.equals("trade-closed-jni")) {
+                assertEquals(6, trade.size());assertEquals("TradeCancel", packet(trade.get(5)).getString("packet"));
+                assertFalse(packet(trade.get(5)).getJSONObject("payload").getBoolean("unlock"));
+            } else assertEquals(5, trade.size());
+        }
+    }
+
     @Test public void independentResizeTestFollowsOwnerSnapshotAndFullItems() throws Exception {
         List<String> events = OfflinePersonalIngressPreview.events(true, "storage-jni");
         int world = -1, items = -1, resize = -1;

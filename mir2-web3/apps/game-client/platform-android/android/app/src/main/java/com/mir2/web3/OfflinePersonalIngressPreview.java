@@ -16,6 +16,7 @@ final class OfflinePersonalIngressPreview {
 
     static List<String> events(boolean enabled, String scene) {
         if (!enabled) return Collections.emptyList();
+        if (isSocialScene(scene)) return socialEvents(scene);
         if (isMailScene(scene)) return mailEvents(scene);
         if (!("gameshop-jni".equals(scene) || "storage-jni".equals(scene)
                 || "storage-locked-jni".equals(scene))) return Collections.emptyList();
@@ -51,6 +52,79 @@ final class OfflinePersonalIngressPreview {
                 "hasExpandedStorage", true, "expiryTimeBinaryDatetime", 635000000000000000L)));
         if (!"storage-locked-jni".equals(scene)) {
             events.add(packet("StorageUnlockResult", GatewaySession.object("result", 0, "hasPassword", true)));
+        }
+        return Collections.unmodifiableList(events);
+    }
+
+    private static boolean isSocialScene(String scene) {
+        return "group-jni".equals(scene) || "guild-jni".equals(scene)
+                || "trade-jni".equals(scene) || "trade-closed-jni".equals(scene);
+    }
+
+    private static List<String> socialEvents(String scene) {
+        List<String> events = new ArrayList<>();
+        events.add(GatewaySession.object("phase", "STARTING", "message",
+                "OFFLINE social Java/JNI data, NOT login or a socket operation.").toString());
+        JSONObject snapshot = ownerSnapshot();
+        java.math.BigInteger max = new java.math.BigInteger("18446744073709551615");
+        if ("group-jni".equals(scene)) {
+            JSONArray members = new JSONArray();
+            for (int index = 0; index < 15; index++) {
+                members.put(GatewaySession.object("name", index == 0 ? "OFFLINE JAVA JNI" : "JNI Group " + index,
+                        "leader", index == 0, "online", true, "level", 22 + index,
+                        "class", index % 3, "hp", 80 + index, "maxHp", 200, "map", "0"));
+            }
+            events.add(packet("SwitchGroup", GatewaySession.object("allowGroup", true)));
+            events.add(packet("GroupMemberInfo", GatewaySession.object("leaderName", "OFFLINE JAVA JNI", "members", members)));
+            events.add(packet("GroupMembersMap", GatewaySession.object("playerName", "JNI Group 14", "playerMap", "JNI BORDER")));
+            events.add(packet("GroupInvite", GatewaySession.object("name", "JNI Inviter")));
+        } else if ("guild-jni".equals(scene)) {
+            events.add(packet("GuildStatus", GatewaySession.object("guildName", "JNI GUILD", "guildRankName", "JNI Rank",
+                    "level", 7, "gold", 4096, "memberCount", 200, "maxMembers", 200, "myOptions", 136, "myRankId", 4)));
+            JSONArray notice = new JSONArray(), members = new JSONArray(), slots = new JSONArray();
+            for (int index = 0; index < 200; index++) {
+                notice.put(String.format(java.util.Locale.ROOT, "JNI notice %03d", index));
+                members.put(GatewaySession.object("name", index == 0 ? "OFFLINE JAVA JNI" : "JNI Member " + index,
+                        "id", index + 1, "online", index % 2 == 0, "lastLoginBinaryDatetime", 635000000000000000L));
+            }
+            for (int slot = 0; slot < 112; slot++) {
+                slots.put(GatewaySession.object("userId", 77000L + slot, "item",
+                        GatewaySession.object("unique_id", max.subtract(java.math.BigInteger.valueOf(slot)),
+                                "item_index", 1000, "count", slot + 1, "identified", true)));
+            }
+            events.add(packet("GuildNoticeChange", GatewaySession.object("notice", notice, "update", 0)));
+            events.add(packet("GuildMemberChange", GatewaySession.object("ranks", new JSONArray().put(
+                    GatewaySession.object("name", "JNI Rank", "index", 4, "options", 136, "members", members)))));
+            events.add(packet("GuildStorageList", GatewaySession.object("items", slots)));
+            events.add(packet("GuildStorageGoldChange", GatewaySession.object("changeType", 0, "amount", 9)));
+        } else {
+            events.add(packet("TradeAccept", GatewaySession.object("name", "JNI Guest")));
+            events.add(packet("TradeGold", GatewaySession.object("amount", 17)));
+            JSONArray guest = new JSONArray();
+            for (int slot = 0; slot < 10; slot++) {
+                guest.put(slot == 2 || slot == 9 ? GatewaySession.object("unique_id",
+                        max.subtract(java.math.BigInteger.valueOf(slot)), "item_index", 1000,
+                        "count", slot == 2 ? 9 : 5, "identified", true) : JSONObject.NULL);
+            }
+            events.add(packet("TradeItem", GatewaySession.object("tradeItems", guest)));
+            try {
+                JSONObject first = snapshot.getJSONArray("inventoryItems").getJSONObject(0);
+                first.put("uniqueId", max);
+                first.put("count", 201);
+                snapshot.put("stage5Systems", GatewaySession.object("trade",
+                        GatewaySession.object("settlementNonce", "jni-offer-1", "partner", "JNI Guest",
+                                "offeredSlots", GatewaySession.object("1", 0, "8", 11),
+                                "offeredUniqueIds", GatewaySession.object("1", max, "8", 80011),
+                                "offeredGold", 125, "offeredCurrency", "gold", "locked", true, "completed", false)));
+            } catch (org.json.JSONException error) { throw new IllegalArgumentException(error); }
+        }
+        events.add(GatewaySession.object("phase", "IN_GAME", "message",
+                "OFFLINE social Java/JNI owner, NOT authenticated gameplay.",
+                "world", GatewaySession.object("playerName", "OFFLINE JAVA JNI",
+                "mapFileName", "0", "x", 302, "y", 634), "worldSnapshot", snapshot.toString()).toString());
+        if ("trade-closed-jni".equals(scene)) {
+            // Public authoritative close, NOT a settlement or inventory grant.
+            events.add(packet("TradeCancel", GatewaySession.object("unlock", false)));
         }
         return Collections.unmodifiableList(events);
     }

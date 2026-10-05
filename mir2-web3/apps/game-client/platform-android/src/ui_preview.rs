@@ -49,8 +49,12 @@ pub const SCENES: &[&str] = &[
     "storage-jni",
     "storage-locked-jni",
     "group",
+    "group-jni",
     "guild",
+    "guild-jni",
     "trade",
+    "trade-jni",
+    "trade-closed-jni",
     "chat-settings",
     "npc",
     "npc-ingress",
@@ -87,6 +91,104 @@ struct OfflineMailJniReceipt {
     feedback_this_frame: bool,
 }
 
+#[derive(Resource, Default)]
+struct OfflineSocialJniReceipt {
+    scene: Option<String>,
+    logged: bool,
+}
+
+fn is_social_jni_preview(scene: &str) -> bool {
+    matches!(scene, "group-jni" | "guild-jni" | "trade-jni" | "trade-closed-jni")
+}
+
+/// Exact Java-only sentinels, after normal ingestion. This observer neither
+/// injects models nor produces an ACK, pending operation or transport enable.
+fn social_jni_models_received(
+    scene: &str,
+    social: &mir2_client_bevy::social::SocialModel,
+    inventory: &mir2_client_bevy::inventory::InventoryModel,
+    ui: &UiReadModel,
+) -> bool {
+    if !is_social_jni_preview(scene) || ui.player.name.as_deref() != Some("OFFLINE JAVA JNI")
+        || ui.player.gold != 777 || ui.player.credit != 33 || inventory.items.len() != 12
+        || inventory.items.last().and_then(|item| item.unique_id) != Some(80011)
+    { return false; }
+    match scene {
+        "group-jni" => social.group.active && social.group.allow_invites
+            && social.group.leader_name.as_deref() == Some("OFFLINE JAVA JNI")
+            && social.group.members.len() == 15
+            && social.group.members[0].name == "OFFLINE JAVA JNI"
+            && social.group.members[14].name == "JNI Group 14"
+            && social.group.member_maps.get("JNI Group 14").is_some_and(|map| map == "JNI BORDER")
+            && social.group.pending_invite_from.as_deref() == Some("JNI Inviter")
+            && social.group.pending_invite_epoch > 0,
+        "guild-jni" => social.guild.name.as_deref() == Some("JNI GUILD")
+            && social.guild.notice.len() == 200 && social.guild.notice[199] == "JNI notice 199"
+            && social.guild.members.len() == 200 && social.guild.members[199].name == "JNI Member 199"
+            && social.guild.ranks.len() == 1 && social.guild.my_rank_id == 4
+            && social.guild.my_options == 136
+            && social.guild.permissions == ["CanStoreItem", "CanActivateBuff"]
+            && social.guild.gold == 4105 && social.guild.storage_items.len() == 112
+            && social.guild.storage_items.iter().enumerate().all(|(slot, item)| {
+                item.as_ref().is_some_and(|item| item.unique_id == u64::MAX - slot as u64
+                    && item.count == slot as u16 + 1 && item.user_id == 77000 + slot as i64)
+            }),
+        "trade-jni" => social.trade.state == "open"
+            && social.trade.partner.as_deref() == Some("JNI Guest")
+            && social.trade.my_offer_nonce.as_deref() == Some("jni-offer-1")
+            && social.trade.my_gold == 125 && social.trade.my_confirmed
+            && social.trade.my_items.len() == 10
+            && social.trade.my_items.iter().enumerate().all(|(slot, item)| match slot {
+                1 => item.as_ref().is_some_and(|item| item.unique_id == Some(u64::MAX) && item.count == 201),
+                8 => item.as_ref().is_some_and(|item| item.unique_id == Some(80011) && item.count == 3),
+                _ => item.is_none(),
+            })
+            && social.trade.partner_gold == 17 && social.trade.partner_items.len() == 10
+            && social.trade.partner_items.iter().enumerate().all(|(slot, item)| match slot {
+                2 | 9 => item.as_ref().is_some_and(|item| item.unique_id == Some(u64::MAX - slot as u64)
+                    && item.count == if slot == 2 {9} else {5}),
+                _ => item.is_none(),
+            }),
+        "trade-closed-jni" => social.trade.state != "open" && social.trade.partner.is_none()
+            && social.trade.my_offer_nonce.is_none() && social.trade.my_gold == 0
+            && social.trade.partner_gold == 0 && social.trade.my_items.iter().all(Option::is_none)
+            && social.trade.partner_items.iter().all(Option::is_none) && social.trade.cancel_revision > 0,
+        _ => false,
+    }
+}
+
+fn report_social_jni_consumer(
+    mut receipt: ResMut<OfflineSocialJniReceipt>,
+    host: Res<crate::shared_shell::HostState>,
+    world_receipt: Option<Res<mir2_bevy_runtime::native_world_receipt::NativeWorldReceipt>>,
+    state: Res<NativePlayerUiState>,
+    social: Res<mir2_client_bevy::social::SocialModel>,
+    inventory: Res<mir2_client_bevy::inventory::InventoryModel>,
+    ui: Res<UiReadModel>,
+) {
+    let Some(scene) = receipt.scene.clone() else { return; };
+    if receipt.logged || host.phase != "IN_GAME"
+        || (scene != "trade-closed-jni" && state.core.panel != preview_panel_for_scene(&scene))
+        || !social_jni_models_received(&scene, &social, &inventory, &ui)
+    { return; }
+    // IDs/names are admitted by the unchanged private Host cursor. This
+    // observer reads its shared output/receipt, never extends host visibility.
+    let data_receipt = world_receipt.as_deref().and_then(|receipt| receipt.last);
+    info!(scene = scene.as_str(), group_members = social.group.members.len(),
+        data_receipt = ?data_receipt,
+        invite_epoch = social.group.pending_invite_epoch, guild_members = social.guild.members.len(),
+        notice_lines = social.guild.notice.len(), guild_slots = social.guild.storage_items.len(),
+        guild_gold = social.guild.gold, own_gold = social.trade.my_gold, guest_gold = social.trade.partner_gold,
+        own_nonce = ?social.trade.my_offer_nonce, own_locked = social.trade.my_confirmed,
+        trade_state = social.trade.state.as_str(), cancel_revision = social.trade.cancel_revision,
+        actual_panel = ?state.core.panel, ui_trade_open = state.trade_dialog.open,
+        ui_trade_locked = state.trade_dialog.locked(&social.trade),
+        group_ui_invitation = ?state.group_dialog.invitation, guild_ui_name = ?state.guild_panel.guild_name,
+        player_gold = ui.player.gold, bag_items = inventory.items.len(),
+        "ANDROID_SOCIAL_JNI_SHARED_MODEL_NOT_LIVE");
+    receipt.logged = true;
+}
+
 fn mail_jni_expected(scene: &str) -> Option<(mir2_client_bevy::mail::MailOperationKind, bool)> {
     use mir2_client_bevy::mail::MailOperationKind::{Collect, Send};
     match scene {
@@ -101,6 +203,7 @@ fn mail_jni_expected(scene: &str) -> Option<(mir2_client_bevy::mail::MailOperati
 fn is_personal_jni_preview(scene: &str) -> bool {
     matches!(scene, "gameshop-jni" | "storage-jni" | "storage-locked-jni")
         || mail_jni_expected(scene).is_some()
+        || is_social_jni_preview(scene)
 }
 
 pub fn install(app: &mut App) {
@@ -108,6 +211,7 @@ pub fn install(app: &mut App) {
         .init_resource::<OfflineNpcPreviewReceipt>()
         .init_resource::<OfflinePersonalJniReceipt>()
         .init_resource::<OfflineMailJniReceipt>()
+        .init_resource::<OfflineSocialJniReceipt>()
         .add_systems(Update, report_mail_jni_consumer
             .after(mir2_client_bevy::pending_operations::PendingLifecycleSet::Ingest)
             .after(mir2_client_bevy::pending_operations::PendingLifecycleSet::UiReset)
@@ -119,7 +223,7 @@ pub fn install(app: &mut App) {
         .add_systems(Update, report_world_render_motion_pose)
         .add_systems(
             PostUpdate,
-            (apply, report_npc_preview_consumer, report_personal_jni_consumer).chain(),
+            (apply, report_npc_preview_consumer, report_personal_jni_consumer, report_social_jni_consumer).chain(),
         );
 }
 
@@ -826,6 +930,8 @@ fn apply(world: &mut World) {
         personal.last_observation.clear();
         world.init_resource::<OfflineMailJniReceipt>();
         *world.resource_mut::<OfflineMailJniReceipt>() = OfflineMailJniReceipt::default();
+        world.init_resource::<OfflineSocialJniReceipt>();
+        *world.resource_mut::<OfflineSocialJniReceipt>() = OfflineSocialJniReceipt::default();
         // UI fixtures are not Gateway events and do not invoke auth/StartGame.
         let mut shell = NativeShellModel::default();
         shell.screen = match scene.as_str() {
@@ -898,6 +1004,9 @@ fn apply(world: &mut World) {
             // PreviewRequest retires after this frame. Delayed Java/JNI inputs
             // need persistent, preview-only observation metadata, not data seeds.
             world.resource_mut::<OfflineMailJniReceipt>().scene = Some(scene.clone());
+        }
+        if is_social_jni_preview(&scene) {
+            world.resource_mut::<OfflineSocialJniReceipt>().scene = Some(scene.clone());
         }
         info!("ANDROID_UI_PREVIEW_READY scene={scene} waiting_for_offline_java_jni");
         return;
@@ -1023,9 +1132,9 @@ fn preview_panel_for_scene(scene: &str) -> UiPanel {
             | "mail-send-jni" | "mail-send-failure-jni" => UiPanel::Mail,
         "bigmap" => UiPanel::BigMap,
         "storage" | "storage-locked" | "storage-jni" | "storage-locked-jni" => UiPanel::Storage,
-        "group" => UiPanel::Group,
-        "guild" => UiPanel::Guild,
-        "trade" => UiPanel::Trade,
+        "group" | "group-jni" => UiPanel::Group,
+        "guild" | "guild-jni" => UiPanel::Guild,
+        "trade" | "trade-jni" | "trade-closed-jni" => UiPanel::Trade,
         "chat-settings" => UiPanel::ChatSettings,
         "npc" => UiPanel::NpcDialog,
         // The received model owns this dialog's visibility. A pinned manual
@@ -1744,6 +1853,10 @@ fn populate_specimens(world: &mut World, scene: &str) {
 #[cfg(test)]
 #[path = "mail_jni_preview_tests.rs"]
 mod mail_jni_preview_tests;
+
+#[cfg(test)]
+#[path = "social_jni_preview_tests.rs"]
+mod social_jni_preview_tests;
 
 #[cfg(test)]
 mod tests {
