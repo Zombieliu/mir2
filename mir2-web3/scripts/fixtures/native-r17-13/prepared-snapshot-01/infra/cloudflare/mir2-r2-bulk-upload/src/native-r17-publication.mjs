@@ -1,9 +1,9 @@
 import definition from './native-r17-publication-plan.json' with {type: 'json'};
 
-// Fixed preview13 binds the root-issued actual source/CMS receipt. The original
-// prepared snapshot remains immutable outside this source. CMS admission does
-// not prove origin/R2/publication/network or game acceptance; those stay open.
-export const NATIVE_PLAN_SHA256 = 'aa29c7a79fc5196677228f7ed476a42db9eb4ce4ef9ad6e74292b72cde750f9e';
+// Prepared fixed preview13. The default admission gate remains CLOSED until
+// actual source/CMS verifiers issue a fresh bound publication receipt. Hashes
+// and a successful build do not supply CMS or production authority.
+export const NATIVE_PLAN_SHA256 = 'fcbb13c08ff8c9f5d3ab1e7d4f7504914f2d01cfc5e7cd43a31e332fcdfd8ce4';
 export const STAGE_SCHEMA = 'mir2.windows.r2-native-stage.v2';
 const PREFIX = '/upload/native-r17';
 const POINTER = 'channels/invited.json';
@@ -275,8 +275,8 @@ function validateStageEnvelope(envelope) {
 }
 
 // Dependency injection is internal unit scaffolding only. The default exported
-// nativeR17Fetch always calls validateNativePlan against exact actual receipt
-// bytes. No env/client setting can choose admission, URLs, scope or deadlines.
+// nativeR17Fetch always calls validateNativePlan and is CLOSED for this prepared
+// snapshot. No env/client setting can choose admission, URLs, scope or deadlines.
 // Injected fetch/stream/timer models exercise policy only after the REAL literal
 // admission gate succeeds; they never provide CMS authority.
 export function createNativeR17Handler(dependencies = {}) {
@@ -315,13 +315,7 @@ export function createNativeR17Handler(dependencies = {}) {
     requestSignal?.addEventListener('abort', clientCancelled, {once: true});
     if (requestSignal?.aborted) clientCancelled();
     return {signal: controller.signal, progress, storageWait, fail,
-      run(promise, cancelLateRead = undefined) {
-        const pending = Promise.resolve(promise);
-        if (cancelLateRead) pending.then(value => {
-          if (fault) {try {cancelLateRead(value);} catch {}}
-        }, () => {}).catch(() => {});
-        return Promise.race([pending, failed]);
-      },
+      run(promise) {return Promise.race([Promise.resolve(promise), failed]);},
       dispose() {
         clearTimeout(totalTimer); clearTimeout(idleTimer);
         requestSignal?.removeEventListener('abort', clientCancelled);
@@ -369,13 +363,12 @@ export function createNativeR17Handler(dependencies = {}) {
         },
         flush() {requireValue(size === entry.size, 'existing_size_mismatch', 409);},
       });
-      await budget.run(record.body.pipeThrough(limiter, {signal: budget.signal})
-        .pipeTo(digestStream, {signal: budget.signal}));
+      await budget.run(record.body.pipeThrough(limiter).pipeTo(digestStream, {signal: budget.signal}));
       requireValue(hex(await budget.run(digestResult)) === entry.sha256, 'existing_hash_mismatch', 409);
     } catch (error) {cancelBody(record.body); throw error;}
   }
   async function importObject(bucket, entry, progress, budget) {
-    const existing = await budget.run(bucket.get(entry.r2Key), record => cancelBody(record?.body)); budget.progress();
+    const existing = await budget.run(bucket.get(entry.r2Key)); budget.progress();
     if (existing !== null) {
       await hashExisting(existing, entry, budget);
       return json({ok: true, mode: 'import', index: entry.index, path: entry.path,
@@ -395,8 +388,7 @@ export function createNativeR17Handler(dependencies = {}) {
       },
       flush() {requireValue(size === entry.size, 'origin_size_rejected', 502);},
     });
-    const pipe = origin.body.pipeThrough(limiter, {signal: budget.signal})
-      .pipeTo(fixed.writable, {signal: budget.signal});
+    const pipe = origin.body.pipeThrough(limiter).pipeTo(fixed.writable, {signal: budget.signal});
     pipe.then(() => budget.storageWait(), () => {}).catch(() => {});
     pipe.catch(() => {});
     let conditionalMiss = false;
@@ -434,7 +426,7 @@ export function createNativeR17Handler(dependencies = {}) {
     }
   }
   async function readPointer(bucket, budget) {
-    const record = await budget.run(bucket.get(definition.r2Prefix + POINTER), record => cancelBody(record?.body)); budget.progress();
+    const record = await budget.run(bucket.get(definition.r2Prefix + POINTER)); budget.progress();
     if (record === null) return null;
     try {
       requireValue(Number.isSafeInteger(record.size) && record.size > 0 && record.size <= MAX_POINTER,
@@ -535,8 +527,7 @@ export function createNativeR17Handler(dependencies = {}) {
       requireValue(typeof env.MIR2_R2_UPLOAD_SECRET === 'string' && env.MIR2_R2_UPLOAD_SECRET.length > 0
         && request.headers.get('authorization') === 'Bearer ' + env.MIR2_R2_UPLOAD_SECRET, 'unauthorized', 401);
       const url = new URL(request.url);
-      requireValue(url.protocol === 'https:' && url.hostname === 'assets.mir2.obelisk.build'
-        && (url.port === '' || url.port === '443') && !url.username && !url.password && !url.search && !url.hash
+      requireValue(url.protocol === 'https:' && !url.username && !url.password && !url.search && !url.hash
         && !request.url.includes('?') && !/%|\\|\/\.\.?\//.test(url.pathname), 'invalid_native_path');
       await validate();
       requireValue(env.MIR2_ASSETS && typeof env.MIR2_ASSETS.get === 'function'
@@ -564,8 +555,7 @@ export function createNativeR17Handler(dependencies = {}) {
       if (match) {
         requireValue(request.method === 'GET' || request.method === 'HEAD', 'method_not_allowed', 405);
         const entry = definition.objects[Number(match[1])]; requireValue(entry, 'literal_object_required');
-        const record = await budget.run(env.MIR2_ASSETS[request.method === 'HEAD' ? 'head' : 'get'](entry.r2Key),
-          request.method === 'GET' ? late => cancelBody(late?.body) : undefined);
+        const record = await budget.run(env.MIR2_ASSETS[request.method === 'HEAD' ? 'head' : 'get'](entry.r2Key));
         budget.progress();
         if (record === null) return new Response(null, {status: 404, headers: responseHeaders()});
         try {verifyMetadata(record, entry);} catch (error) {cancelBody(record.body); throw error;}
@@ -591,3 +581,4 @@ export function createNativeR17Handler(dependencies = {}) {
 }
 
 export const nativeR17Fetch = createNativeR17Handler();
+

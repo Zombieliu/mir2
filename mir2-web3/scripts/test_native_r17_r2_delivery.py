@@ -1,9 +1,349 @@
+"""Offline policy fixtures: no sockets, credentials, CMS verification or R2.
+
+The literal13 table and real two small feed bytes are used. Modeled stage receipt
+shapes are ONLY validator inputs and never written as actual publication proof.
+The CLI gate remains prepared/unadmitted. No admission function is patched.
+"""
+from __future__ import annotations
+
+import copy
+import importlib.util
+import io
+import json
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+
+sys.dont_write_bytecode = True
+BASE = Path(__file__).resolve().parents[1]
+SPEC = importlib.util.spec_from_file_location('native13_policy_fixture', BASE / 'scripts/native_r17_r2_delivery.py')
+P = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = P
+SPEC.loader.exec_module(P)
+FIXTURE_ROOT = BASE / 'scripts/fixtures/native-r17-13'
+PREPARED_ROOT = FIXTURE_ROOT / 'prepared-snapshot-01'
+PREPARED_SPEC = importlib.util.spec_from_file_location('immutable_prepared13_fixture',
+    PREPARED_ROOT / 'scripts/native_r17_r2_delivery.py')
+PREPARED_P = importlib.util.module_from_spec(PREPARED_SPEC)
+sys.modules[PREPARED_SPEC.name] = PREPARED_P
+PREPARED_SPEC.loader.exec_module(PREPARED_P)
+PREPARED_RAW = PREPARED_P.PLAN_FILE.read_bytes()
+RAW = P.PLAN_FILE.read_bytes()
+PLAN = P.read_prepared_plan_bytes(RAW)  # Structural proof only, NOT load_plan_bytes admission.
+FIXTURES = FIXTURE_ROOT / 'preview/artifacts/feed'
+FEED = (FIXTURES / 'latest.json').read_bytes()
+CMS = (FIXTURES / 'latest.p7s').read_bytes()
+FAKE_SECRET = 'public_fake_fixture_secret_only'
+NOW = json.loads(FEED)['createdUnix'] + 100
+
+
+def private_base():
+    return {'cache-control': 'no-store', 'x-content-type-options': 'nosniff',
+        'x-mir2-native-plan-sha256': P.NATIVE_SHA,
+        'x-mir2-source-plan-sha256': P.SOURCE_PLAN_SHA or 'unadmitted',
+        'x-mir2-root-verification-sha256': P.ROOT_SHA or 'unadmitted', 'x-mir2-objects-sha256': P.OBJECTS_SHA}
+
+
+def private_object(entry):
+    return {**private_base(), 'content-length': str(entry['size']), 'content-type': entry['contentType'],
+        'etag': '"unit-etag-only"', 'x-mir2-stored-sha256': entry['sha256'],
+        'x-mir2-custom-sha256': entry['sha256'], 'x-mir2-stored-cache-control': entry['cacheControl'],
+        'x-mir2-stored-content-encoding': 'identity'}
+
+
+def public_object(entry, candidate=None):
+    headers = {'content-length': str(entry['size']), 'content-type': P.public_mime(entry['path']),
+        'cache-control': 'no-store' if candidate else P.IMMUTABLE,
+        'etag': '"unit-public-etag"', 'accept-ranges': 'bytes', 'x-content-type-options': 'nosniff',
+        'access-control-allow-origin': '*', 'x-mir2-native-cache': 'BYPASS' if candidate else 'MISS'}
+    if candidate:
+        directory = 'feeds/s' + str(candidate['sequence']) + '-' + candidate['feedSha256'] + '/'
+        headers.update({'x-mir2-sequence': str(candidate['sequence']),
+            'x-mir2-feed-sha256': candidate['feedSha256'], 'x-mir2-feed-path': directory + 'latest.json',
+            'x-mir2-signature-path': directory + 'latest.p7s'})
+    return headers
+
+
+class Response:
+    def __init__(self, status, headers, body=b'', error=None):
+        self.status, self.headers, self.body, self.error = status, headers, body, error
+        self.offset, self.closed = 0, False
+    def getheaders(self):
+        return list(self.headers.items())
+    def read(self, maximum):
+        assert 0 < maximum <= P.CHUNK
+        if self.error:
+            raise self.error
+        raw = self.body[self.offset:self.offset + maximum]
+        self.offset += len(raw)
+        return raw
+    def close(self):
+        self.closed = True
+
+
+class TinyTransport:
+    """Only real feed/CMS have body bytes. No whole36 or CMS success is modeled."""
+    def __init__(self, current=None):
+        self.current, self.calls, self.records = current, [], set()
+        self.lose_import_ack, self.lose_promote_ack = False, False
+        self.pointer_race, self.promote_error = False, None
+    def open(self, method, path, *, token=None, body=None):
+        self.calls.append((method, path))
+        if path == P.PRIVATE_PREFIX + '/pointer':
+            assert method == 'GET' and token == FAKE_SECRET and body is None
+            if self.current is None:
+                return Response(404, private_base())
+            raw = P.canonical(self.current)
+            return Response(200, private_object(P.pointer_entry(PLAN, self.current)), raw)
+        if path.startswith(P.PRIVATE_PREFIX + '/objects/'):
+            index = int(path.rsplit('/', 1)[1])
+            assert method == 'HEAD' and token == FAKE_SECRET
+            return Response(200 if index in self.records else 404,
+                private_object(PLAN['objects'][index]) if index in self.records else private_base())
+        if path == P.PRIVATE_PREFIX + '/import':
+            index = P.strict_json(body)['index']
+            if index > 1:
+                raise P.Fault('request_deadline')
+            assert token == FAKE_SECRET and method == 'POST'
+            was_present = index in self.records
+            self.records.add(index)
+            if self.lose_import_ack:
+                raise P.Fault('request_deadline')
+            entry = PLAN['objects'][index]
+            reply = {'ok': True, 'mode': 'import', 'index': index, 'path': entry['path'],
+                'size': entry['size'], 'sha256': entry['sha256'], 'resumed': was_present, 'pointerChanged': False}
+            return Response(200 if was_present else 201,
+                {**private_base(), 'content-type': 'application/json'}, P.canonical(reply))
+        if path == P.PRIVATE_PREFIX + '/promote':
+            assert method == 'POST' and token == FAKE_SECRET
+            envelope = P.strict_json(body)
+            assert envelope == P.expected_envelope(PLAN, envelope['expectedCurrent'])
+            if self.pointer_race or self.promote_error:
+                flags = {'pointerAttempted': self.pointer_race, 'pointerChanged': False,
+                    'pointerOutcomeUnknown': False, 'objectWriteAttempted': False, 'objectOutcomeUnknown': False}
+                return Response(412 if self.pointer_race else 409,
+                    {**private_base(), 'content-type': 'application/json'},
+                    P.canonical({'ok': False, 'error': self.promote_error or 'pointer_compare_and_swap_failed', **flags}))
+            already = self.current == PLAN['candidate']
+            self.current = copy.deepcopy(PLAN['candidate'])
+            if self.lose_promote_ack:
+                raise P.Fault('request_deadline')
+            reply = {'ok': True, 'mode': 'promote', 'candidate': PLAN['candidate'],
+                'pointerAttempted': not already, 'pointerChanged': not already, 'pointerOutcomeUnknown': False,
+                'objectWriteAttempted': False, 'objectOutcomeUnknown': False,
+                'alreadyPromoted': already, 'privatePointerVerified': True,
+                'aliasesVerified': False, 'publicVerificationRequired': True}
+            return Response(200, {**private_base(), 'content-type': 'application/json'}, P.canonical(reply))
+        for index, raw in enumerate((FEED, CMS)):
+            entry = PLAN['objects'][index]
+            if path == P.PUBLIC_PREFIX + entry['path']:
+                assert method == 'GET' and token is None
+                return Response(200, public_object(entry), raw)
+        raise AssertionError('No arbitrary endpoint or fabricated large bytes allowed')
+
+
+def modeled_stage_input(current=None):
+    """Synthetic schema-validator input, never proof of real streams/publication."""
+    receipt = P.empty_receipt('stage')
+    receipt.update(passed=True, result='ok', candidate=PLAN['candidate'], observedCurrent=current,
+        verifiedObjects=P.closure(PLAN), verifiedObjectCount=36,
+        publicVerifiedBytes=sum(e['size'] for e in PLAN['objects']), publicVerified=True,
+        stageEnvelope=P.expected_envelope(PLAN, current), receiptStatus='written',
+        objectWriteAttempted=True, objectOutcomeUnknown=False)
+    calls = [{'method': 'GET', 'route': '/pointer', 'index': None,
+        'status': 404 if current is None else 200,
+        'receivedBytes': 0 if current is None else P.pointer_entry(PLAN, current)['size']}]
+    for entry in PLAN['objects']:
+        index = entry['index']
+        calls.extend([
+            {'method': 'HEAD', 'route': '/objects/' + str(index), 'index': index, 'status': 404, 'receivedBytes': 0},
+            {'method': 'POST', 'route': '/import', 'index': index, 'status': 201, 'receivedBytes': 200},
+            {'method': 'HEAD', 'route': '/objects/' + str(index), 'index': index, 'status': 200, 'receivedBytes': 0},
+            {'method': 'GET', 'route': 'public', 'index': index, 'status': 200, 'receivedBytes': entry['size']},
+        ])
+    receipt['calls'] = [{**c, 'headersVerified': True, 'complete': True,
+        'writeAttempted': c['method'] == 'POST', 'elapsedMs': 1} for c in calls]
+    return receipt
+
+
+class PreviewPreparationTests(unittest.TestCase):
+    def test_exact13_table_real_feed_and_original30_game_hashes(self):
+        self.assertEqual(P.digest(RAW), P.LITERAL_SHA)
+        self.assertEqual(P.digest(P.canonical(PLAN)), P.NATIVE_SHA)
+        self.assertEqual(P.digest(FEED), PLAN['objects'][0]['sha256'])
+        self.assertEqual(P.digest(CMS), PLAN['objects'][1]['sha256'])
+        self.assertEqual(PLAN['candidate']['sequence'], 13)
+        self.assertEqual(len(PLAN['objects']), 36)
+        self.assertEqual(sum(e['size'] for e in PLAN['objects']), 817719767)
+        self.assertEqual(sum(e['path'].startswith('releases/game-') for e in PLAN['objects']), 30)
+
+    def test_prepared_default_gate_and_old_proof_cannot_admit13(self):
+        with self.assertRaisesRegex(PREPARED_P.Fault, 'prepared_release_unadmitted'):
+            PREPARED_P.load_plan_bytes(PREPARED_RAW)
+        altered = copy.deepcopy(PLAN)
+        altered.update(admission='admitted', rootVerificationBase64=PLAN['predecessorProof']['rootVerificationBase64'],
+            rootVerificationSha256=PLAN['predecessorProof']['rootVerificationSha256'])
+        with self.assertRaisesRegex(P.Fault, 'plan_invalid'):
+            P.load_plan_bytes(P.canonical(altered))
+
+    def test_cli_blocks_before_secret_lookup_transport_or_network(self):
+        class SecretTripwire(dict):
+            def get(self, *_args):
+                raise AssertionError('Do not read credentials before real admission')
+        class TransportTripwire:
+            def open(self, *_args, **_kwargs):
+                raise AssertionError('No network call allowed')
+        with tempfile.TemporaryDirectory() as folder:
+            target = Path(folder) / 'refusal.json'
+            status = PREPARED_P.main(['--mode', 'stage', '--receipt', str(target)],
+                environ=SecretTripwire(), transport=TransportTripwire(), output=io.StringIO())
+            data = P.strict_json(target.read_bytes(), P.RECEIPT_LIMIT)
+            self.assertEqual(status, 2)
+            self.assertEqual(data['result'], 'prepared_release_unadmitted')
+            self.assertFalse(data['passed']); self.assertEqual(data['calls'], [])
+            self.assertFalse(data['cmsReverified']); self.assertFalse(data['pointerAttempted'])
+
+    def test_hash_mismatch_and_duplicate_key_fail_closed(self):
+        changed = copy.deepcopy(PLAN); changed['objects'][35]['size'] += 1
+        for raw in (P.canonical(changed), RAW + b' ', b'{"admission":"prepared","admission":"admitted"}'):
+            with self.assertRaises(P.Fault):
+                P.read_prepared_plan_bytes(raw)
+
+    def test_new_alias_sequence_headers_require13(self):
+        headers = public_object(PLAN['objects'][0], PLAN['candidate'])
+        P.public_headers(headers, PLAN['objects'][0], PLAN['candidate'])
+        headers['x-mir2-sequence'] = '12'
+        with self.assertRaisesRegex(P.Fault, 'headers_rejected'):
+            P.public_headers(headers, PLAN['objects'][0], PLAN['candidate'])
+
+    def test_fixed_transport_deadlines_and_no_arbitrary_endpoint(self):
+        seen = []
+        def response(*args):
+            seen.append(args)
+            return object()
+        transport = P.FixedHttpsTransport(PLAN)
+        with patch.object(P, 'NetworkResponse', response):
+            transport.open('GET', P.PRIVATE_PREFIX + '/pointer', token=FAKE_SECRET)
+            transport.open('POST', P.PRIVATE_PREFIX + '/import', token=FAKE_SECRET, body=P.canonical({'index': 0}))
+            transport.open('POST', P.PRIVATE_PREFIX + '/promote', token=FAKE_SECRET,
+                body=P.canonical(P.expected_envelope(PLAN, PLAN['knownPrevious'])))
+            transport.open('GET', P.PUBLIC_PREFIX + PLAN['objects'][0]['path'])
+            self.assertEqual([args[-1] for args in seen], [150, 2460, 360, 2460])
+            for method, path, body in [('POST', P.PRIVATE_PREFIX + '/import', b'{"index":0,"url":"https://x"}'),
+                ('GET', '/other', None), ('GET', P.PRIVATE_PREFIX + '/objects/00', None),
+                ('POST', P.PRIVATE_PREFIX + '/promote', b'{"expectedCurrent":{"sequence":11}}')]:
+                with self.assertRaises(P.Fault):
+                    transport.open(method, path, token=FAKE_SECRET, body=body)
+        self.assertEqual(P.CHUNK, 65536)
+        self.assertGreater(P.IMPORT_CONTROL_SECONDS * 1000, PLAN['operationPolicy']['importMs'])
+        self.assertFalse(PLAN['operationPolicy']['measuredSpeed'])
+
+    def test_only_actual_null_exact12_exact13_pointer_reads_are_allowed(self):
+        for value in (None, PLAN['knownPrevious'], PLAN['candidate']):
+            transport = TinyTransport(value)
+            receipt = P.empty_receipt('stage')
+            self.assertEqual(P.check_pointer(transport, receipt, PLAN, FAKE_SECRET), value)
+        for value in ({**PLAN['knownPrevious'], 'sequence': 11},
+            {**PLAN['knownPrevious'], 'feedSha256': '0' * 64}):
+            with self.assertRaisesRegex(P.Fault, 'pointer_rejected'):
+                P.check_pointer(TinyTransport(value), P.empty_receipt('stage'), PLAN, FAKE_SECRET)
+
+    def test_partial_actual_feed_streams_do_not_mint36_object_pass(self):
+        transport = TinyTransport(PLAN['knownPrevious'])
+        with patch.object(P.time, 'time', return_value=NOW):
+            receipt = P.deliver('stage', PLAN, transport, FAKE_SECRET)
+        self.assertFalse(receipt['passed'])
+        self.assertEqual(receipt['verifiedObjectCount'], 2)
+        self.assertEqual(receipt['publicVerifiedBytes'], len(FEED) + len(CMS))
+        self.assertEqual(receipt['observedCurrent'], PLAN['knownPrevious'])
+        self.assertIsNone(receipt['stageEnvelope'])
+        self.assertTrue(receipt['objectOutcomeUnknown'])
+        self.assertFalse(receipt['pointerAttempted'])
+        self.assertEqual(sum(path == P.PRIVATE_PREFIX + '/import' for _, path in transport.calls), 3)
+
+    def test_lost_import_ack_keeps_unknown_without_blind_retry_or_raw_fallback(self):
+        transport = TinyTransport(); transport.lose_import_ack = True
+        receipt = P.deliver('stage', PLAN, transport, FAKE_SECRET)
+        self.assertFalse(receipt['passed']); self.assertTrue(receipt['objectOutcomeUnknown'])
+        self.assertTrue(receipt['objectWriteAttempted'])
+        self.assertEqual(transport.records, {0})
+        self.assertEqual(sum(path == P.PRIVATE_PREFIX + '/import' for _, path in transport.calls), 1)
+        self.assertFalse(any(path.startswith(P.PUBLIC_PREFIX) for _, path in transport.calls))
+
+    def test_modeled_stage_schema_binds_observed12_and_rejects_old_or_forged_receipts(self):
+        for current in (None, PLAN['knownPrevious'], PLAN['candidate']):
+            P.validate_stage_receipt(modeled_stage_input(current), PLAN)
+        base = modeled_stage_input(PLAN['knownPrevious'])
+        mutations = [
+            lambda r: r.update(schema='mir2.windows.r2-native-ci.v1'),
+            lambda r: r['stageEnvelope'].update(schema='mir2.windows.r2-native-stage.v1'),
+            lambda r: r.update(observedCurrent=None),
+            lambda r: r.update(objectOutcomeUnknown=True),
+            lambda r: r['calls'][0].update(status=404, receivedBytes=0),
+            lambda r: r['calls'][4].update(receivedBytes=0),
+            lambda r: r['bindings'].update(rootVerificationSha256=PLAN['predecessorProof']['rootVerificationSha256']),
+        ]
+        for change in mutations:
+            other = copy.deepcopy(base); change(other)
+            with self.assertRaises(P.Fault):
+                P.validate_stage_receipt(other, PLAN)
+
+    def test_pointer_race_response_prevents_success_and_no_retry(self):
+        transport = TinyTransport(PLAN['knownPrevious']); transport.pointer_race = True
+        receipt = P.empty_receipt('promote')
+        with self.assertRaises(P.Fault):
+            P.promote_pointer(transport, receipt, PLAN, FAKE_SECRET, modeled_stage_input(PLAN['knownPrevious']))
+        self.assertTrue(receipt['pointerAttempted']); self.assertFalse(receipt['pointerOutcomeUnknown'])
+        self.assertEqual(transport.current, PLAN['knownPrevious'])
+        self.assertEqual(sum(path.endswith('/promote') for _, path in transport.calls), 1)
+
+    def test_lost_promote_ack_unknown_then_independent_reconcile_without_second_write(self):
+        transport = TinyTransport(PLAN['knownPrevious']); transport.lose_promote_ack = True
+        stage = modeled_stage_input(PLAN['knownPrevious']); receipt = P.empty_receipt('promote')
+        with self.assertRaisesRegex(P.Fault, 'request_deadline'):
+            P.promote_pointer(transport, receipt, PLAN, FAKE_SECRET, stage)
+        self.assertTrue(receipt['pointerOutcomeUnknown']); self.assertEqual(transport.current, PLAN['candidate'])
+        self.assertEqual(sum(path.endswith('/promote') for _, path in transport.calls), 1)
+        # A later separate call verifies an exact already-promoted13 response.
+        # This is a transport model, NOT actual R2 authority or replay acceptance.
+        transport.lose_promote_ack = False
+        other = P.empty_receipt('promote')
+        P.promote_pointer(transport, other, PLAN, FAKE_SECRET, stage)
+        self.assertFalse(other['pointerAttempted']); self.assertFalse(other['pointerOutcomeUnknown'])
+        self.assertTrue(other['privatePointerVerified'])
+
+    def test_current_origin12_error_cannot_pass_promote_even_with_immutable13_stage(self):
+        transport = TinyTransport(PLAN['knownPrevious']); transport.promote_error = 'origin_feed_pair_changed'
+        receipt = P.empty_receipt('promote')
+        with self.assertRaises(P.Fault):
+            P.promote_pointer(transport, receipt, PLAN, FAKE_SECRET, modeled_stage_input(PLAN['knownPrevious']))
+        self.assertFalse(receipt['pointerAttempted']); self.assertFalse(receipt['pointerOutcomeUnknown'])
+        self.assertEqual(transport.current, PLAN['knownPrevious'])
+
+    def test_changed_pointer_since_stage_rejects_before_send(self):
+        transport = TinyTransport(PLAN['knownPrevious'])
+        with self.assertRaisesRegex(P.Fault, 'stage_pointer_changed'):
+            P.promote_pointer(transport, P.empty_receipt('promote'), PLAN, FAKE_SECRET, modeled_stage_input(None))
+        self.assertFalse(any(path.endswith('/promote') for _, path in transport.calls))
+
+    def test_feed_expiry_and_signature_pair_binding_stay_separate_from_cms(self):
+        with patch.object(P.time, 'time', return_value=NOW):
+            P.verify_feed(FEED, PLAN)
+        with patch.object(P.time, 'time', return_value=json.loads(FEED)['expiresUnix']):
+            with self.assertRaisesRegex(P.Fault, 'feed_expired_or_invalid'):
+                P.verify_feed(FEED, PLAN)
+        self.assertFalse(P.empty_receipt('stage')['cmsReverified'])
+
+
+
+# Retained original46 protected-path/TLS/stream/receipt regressions; modeled remaining34.
 """Offline CI delivery tests. All secrets/transports/stores are synthetic.
 
 The real literal plan and two tiny source-feed objects are bound. Other object
 bytes are a toy internal table, never a successful R2/CDN/source36 publication.
 """
-from __future__ import annotations
 
 import base64
 import copy
@@ -29,12 +369,11 @@ SPEC = importlib.util.spec_from_file_location('native_r17_delivery_fixture', BAS
 P = importlib.util.module_from_spec(SPEC)
 sys.modules[SPEC.name] = P
 SPEC.loader.exec_module(P)
-INPUT_PLAN = P.PLAN_FILE if P.PLAN_FILE.exists() else Path(
-    'C:/mir2-playtest-releases/20261004-native-r18/r17-native-r2-importer-worker-01/src/native-r17-publication-plan.json')
+INPUT_PLAN = P.PLAN_FILE
 PLAN_RAW = INPUT_PLAN.read_bytes()
 REAL_PLAN = P.load_plan_bytes(PLAN_RAW)
-FEED = base64.b64decode('eyJzY2hlbWEiOiJtaXIyLndpbmRvd3MudXBkYXRlLWZlZWQudjEiLCJjaGFubmVsIjoiaW52aXRlZCIsInBsYXRmb3JtIjoid2luZG93cy14NjQiLCJzZXF1ZW5jZSI6MTIsImNyZWF0ZWRVbml4IjoxNzkxMDgwMzA1LCJleHBpcmVzVW5peCI6MTc5MzY3MjMwNSwibWluQm9vdHN0cmFwIjoxLCJwcm90b2NvbCI6ImNyeXN0YWwtbWlyMi12MSIsImNvbnRlbnQiOiJtaXIyLndpbmRvd3MucGFja2FnZS1tYW5pZmVzdC52NCIsImdhbWUiOnsiZGlyZWN0b3J5IjoicmVsZWFzZXMvZ2FtZS1XTi1DQU5ESURBVEUtMjAyNjEwMDQtaW52aXRlZC0xNyIsImlkZW50aXR5IjoiV04tQ0FORElEQVRFLTIwMjYxMDA0LWludml0ZWQtMTciLCJtZXRhZGF0YSI6W3sicGF0aCI6IlBBQ0tBR0UtTUFOSUZFU1QuanNvbiIsInNpemUiOjI0MzYwMTc0LCJzaGEyNTYiOiJDRUFFMzY2QkVCQ0ExQzE5QzNGNTI5RUIyMkYwMTZDQ0M4MERGRjVCODY1NTY5NEU3NjY4MkUzMUFCMTJDQjE4In0seyJwYXRoIjoiVkVSU0lPTi5qc29uIiwic2l6ZSI6MTIyMSwic2hhMjU2IjoiMTQwOUUyMUM5RjFBRTdBMDRCNzE2MDNDRTEyMjBGRTM4QzM3RjIyMkQ1NDg1OUFGMjU5MkNERDcyQ0U5OUIxNiJ9LHsicGF0aCI6IlJFTEVBU0UtU1RBVEVNRU5ULmpzb24iLCJzaXplIjo3MDcsInNoYTI1NiI6IkU2NEE4RUY0RkM2MkU2RTlGNkZFMTY2MjUzMjFGQzhBODhBMEM4QzI5QTY2MUFFREE0NjAyNUIwODAxNURBODIifSx7InBhdGgiOiJSRUxFQVNFLVNUQVRFTUVOVC5wN3MiLCJzaXplIjoxNjE0LCJzaGEyNTYiOiJCRUU4NEI1NzRGNDNGNjQxMUVCMUJDM0FCMjNBM0NFMEMzODlCODUzRkIwRjhCNjNGNkFEOUJEQjEyODc4NTZFIn1dfSwiZW5naW5lIjp7ImRpcmVjdG9yeSI6InJlbGVhc2VzL3VwZGF0ZXItRkIzNTA1RDZEODREOTk3Qy1zMTIiLCJpZGVudGl0eSI6IjEiLCJtZXRhZGF0YSI6W3sicGF0aCI6IkVOR0lORS5qc29uIiwic2l6ZSI6NDIxLCJzaGEyNTYiOiIzMTQ2MTY5RkM2MTc2QTVFQUVBNDJCQUFBMDQzMEUzNDVGNUI3RTYxNDcwOTk3MUEwMEIwRDdEMEM0NzMyQkNGIn0seyJwYXRoIjoiRU5HSU5FLnA3cyIsInNpemUiOjE2MTQsInNoYTI1NiI6IjcwREMyREMxMUMzMTA1RkQ0REQyQjgwQkQ3RjlGQjMwRjdBN0Y0QjNCQkJGRTJBQTEzOTdDMDM4QzlCM0MxNEEifV19fQ==')
-CMS = base64.b64decode('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')
+FEED = (FIXTURE_ROOT / 'preview/artifacts/feed/latest.json').read_bytes()
+CMS = (FIXTURE_ROOT / 'preview/artifacts/feed/latest.p7s').read_bytes()
 MOCK_SECRET = 'MOCK_SECRET_ONLY_c41d60ff813abdec'
 BODY_MARKER = 'MOCK_HTTP_BODY_ONLY_b887139fe44fbe0a'
 ENV = {'MIR2_R2_UPLOAD_SECRET': MOCK_SECRET}
@@ -61,8 +400,8 @@ def public_object(entry, candidate=None):
         'etag': '"offline-etag"', 'accept-ranges': 'bytes', 'x-content-type-options': 'nosniff',
         'access-control-allow-origin': '*', 'x-mir2-native-cache': 'BYPASS' if candidate else 'MISS'}
     if candidate:
-        directory = 'feeds/s12-' + candidate['feedSha256'] + '/'
-        result.update({'x-mir2-sequence': '12', 'x-mir2-feed-sha256': candidate['feedSha256'],
+        directory = 'feeds/s' + str(candidate['sequence']) + '-' + candidate['feedSha256'] + '/'
+        result.update({'x-mir2-sequence': str(candidate['sequence']), 'x-mir2-feed-sha256': candidate['feedSha256'],
             'x-mir2-feed-path': directory + 'latest.json', 'x-mir2-signature-path': directory + 'latest.p7s'})
     return result
 
@@ -134,11 +473,12 @@ class StoreTransport:
             response = Response(status=200 if resumed else 201,
                 headers={**private_base(), 'content-type': 'application/json; charset=utf-8'}, body=P.canonical(reply))
         elif path == P.PRIVATE_PREFIX + '/promote':
-            assert P.strict_json(body) == P.expected_envelope(self.plan), 'POST direct envelope, not wrapper'
+            assert P.strict_json(body) == P.expected_envelope(self.plan, P.strict_json(body)['expectedCurrent']), 'POST direct envelope, not wrapper'
             already = self.pointer
             self.pointer = True
             reply = {'ok': True, 'mode': 'promote', 'candidate': self.plan['candidate'],
                 'pointerAttempted': not already, 'pointerChanged': not already, 'pointerOutcomeUnknown': False,
+                'objectWriteAttempted': False, 'objectOutcomeUnknown': False,
                 'alreadyPromoted': already, 'privatePointerVerified': True,
                 'aliasesVerified': False, 'publicVerificationRequired': True}
             response = Response(headers={**private_base(), 'content-type': 'application/json; charset=utf-8'}, body=P.canonical(reply))
@@ -239,10 +579,10 @@ class DeliveryTests(unittest.TestCase):
         return code, summary, transport
 
     def test_literal_plan_and_two_real_tiny_objects_bound(self):
-        self.assertEqual(P.digest(PLAN_RAW), '4a7eda51fd375b64a250faa8d1709f8b611af8d60172aabf7c1032b864e490fc')
+        self.assertEqual(P.digest(PLAN_RAW), P.LITERAL_SHA)
         self.assertEqual(P.digest(P.canonical(REAL_PLAN)), P.NATIVE_SHA)
         self.assertEqual(len(REAL_PLAN['objects']), 36)
-        self.assertEqual(sum(e['size'] for e in REAL_PLAN['objects']), 817657896)
+        self.assertEqual(sum(e['size'] for e in REAL_PLAN['objects']), 817719767)
         self.assertEqual(P.digest(FEED), REAL_PLAN['objects'][0]['sha256'])
         self.assertEqual(P.digest(CMS), REAL_PLAN['objects'][1]['sha256'])
 
@@ -403,7 +743,8 @@ class DeliveryTests(unittest.TestCase):
         for status, unknown in ((502, True), (412, False)):
             transport = StoreTransport(); stage = self.passed_stage(transport); transport.calls.clear()
             reply = {'ok': False, 'error': BODY_MARKER + MOCK_SECRET, 'pointerAttempted': True,
-                     'pointerChanged': False, 'pointerOutcomeUnknown': unknown}
+                     'pointerChanged': False, 'pointerOutcomeUnknown': unknown,
+                     'objectWriteAttempted': False, 'objectOutcomeUnknown': False}
             transport.failures[('POST', P.PRIVATE_PREFIX + '/promote')] = lambda r, status=status: Response(status, r.headers, P.canonical(reply))
             receipt = P.deliver('promote', transport.plan, transport, MOCK_SECRET, stage=stage, stage_sha=P.digest(P.canonical(stage)))
             self.safe(receipt)
@@ -451,7 +792,7 @@ class DeliveryTests(unittest.TestCase):
         self.assertEqual(P.strict_json(b'{"x":[1,true,null]}'), {'x': [1, True, None]})
 
     def test_changed_plan_or_attestation_is_rejected_before_http(self):
-        for raw in (PLAN_RAW.replace(b'"sequence": 12', b'"sequence": 13', 1), PLAN_RAW + b' ',
+        for raw in (PLAN_RAW.replace(b'"sequence": 13', b'"sequence": 14', 1), PLAN_RAW + b' ',
                     PLAN_RAW.replace(b'assets.mir2.obelisk.build', b'attacker.mir2.obelisk.build', 1)):
             with self.assertRaises(P.Fault) as failure:
                 P.load_plan_bytes(raw)
@@ -795,7 +1136,7 @@ class DeliveryTests(unittest.TestCase):
         context = types.SimpleNamespace(verify_mode=ssl.CERT_REQUIRED, check_hostname=True)
         with patch.object(P, 'verified_tls_context', return_value=context), \
              patch.object(P.http.client, 'HTTPSConnection', return_value=connection), \
-             patch.object(P, 'CONTROL_SECONDS', 0.025):
+             patch.object(P, 'IMPORT_CONTROL_SECONDS', 0.025):
             with self.assertRaises(P.Fault) as failure:
                 P.FixedHttpsTransport(REAL_PLAN).open('POST', P.PRIVATE_PREFIX + '/import',
                     token=MOCK_SECRET, body=P.canonical({'index': 0}))
@@ -902,8 +1243,72 @@ class DeliveryTests(unittest.TestCase):
         self.assertFalse(destination.exists())
 
 
+
+class NetworkIdlePolicyTests(unittest.TestCase):
+    def test_after_header_body_idle_uses_progress_read_and_cancels_before_absolute_deadline(self):
+        class ProgressThenStall(Response):
+            progress_read_called = False
+            def read(self, maximum):
+                if not self.offset:
+                    self.offset = 16
+                    return FEED[:16]
+                self.socket.cancelled.wait(2)
+                raise OSError('public fake stalled body')
+            def read1(self, maximum):
+                self.progress_read_called = True
+                return self.read(maximum)
+        body = ProgressThenStall(headers=public_object(REAL_PLAN['objects'][0]))
+        connection = FakeConnection(body); body.socket = connection.sock
+        context = P.verified_tls_context()
+        with patch.object(P, 'NO_PROGRESS_SECONDS', 0.04, create=True), \
+             patch.object(P, 'PUBLIC_HEADER_SECONDS', 0.04, create=True), \
+             patch.object(P, 'verified_tls_context', return_value=context), \
+             patch.object(P.http.client, 'HTTPSConnection', return_value=connection):
+            response = P.NetworkResponse('GET', P.PUBLIC_PREFIX + REAL_PLAN['objects'][0]['path'], None, None, 0.4)
+            started = time.monotonic()
+            try:
+                self.assertEqual(response.read(P.CHUNK), FEED[:16])
+                with self.assertRaisesRegex(P.Fault, 'request_deadline'):
+                    response.read(P.CHUNK)
+            finally:
+                response.close()
+            self.assertLess(time.monotonic() - started, 0.2)
+            self.assertTrue(body.progress_read_called)
+            self.assertTrue(connection.sock.shutdowns)
+    def test_public_stalled_headers_obey_fixed_header_budget(self):
+        connection = FakeConnection(Response(body=FEED), wait_headers=True)
+        context = P.verified_tls_context()
+        with patch.object(P, 'NO_PROGRESS_SECONDS', 0.04, create=True), \
+             patch.object(P, 'PUBLIC_HEADER_SECONDS', 0.04, create=True), \
+             patch.object(P, 'verified_tls_context', return_value=context), \
+             patch.object(P.http.client, 'HTTPSConnection', return_value=connection):
+            started = time.monotonic()
+            with self.assertRaisesRegex(P.Fault, 'request_deadline'):
+                P.NetworkResponse('GET', P.PUBLIC_PREFIX + REAL_PLAN['objects'][0]['path'], None, None, 0.4)
+            self.assertLess(time.monotonic() - started, 0.2)
+            self.assertTrue(connection.sock.shutdowns)
+    def test_private_import_can_wait_for_worker_headers_beyond_body_idle_budget(self):
+        class SlowHeaderConnection(FakeConnection):
+            def getresponse(self):
+                time.sleep(0.08)
+                return self.response
+        connection = SlowHeaderConnection(Response(headers=private_base(), body=b'{}'))
+        context = P.verified_tls_context()
+        with patch.object(P, 'NO_PROGRESS_SECONDS', 0.02, create=True), \
+             patch.object(P, 'PUBLIC_HEADER_SECONDS', 0.02, create=True), \
+             patch.object(P, 'verified_tls_context', return_value=context), \
+             patch.object(P.http.client, 'HTTPSConnection', return_value=connection):
+            response = P.NetworkResponse('POST', P.PRIVATE_PREFIX + '/import',
+                MOCK_SECRET, P.canonical({'index': 0}), 0.4)
+            try:
+                self.assertEqual(response.read(P.CHUNK), b'{}')
+            finally:
+                response.close()
+            self.assertEqual(len(connection.requests), 1)
+
+
 if __name__ == '__main__':
-    suite = unittest.defaultTestLoader.loadTestsFromTestCase(DeliveryTests)
+    suite = unittest.defaultTestLoader.loadTestsFromModule(sys.modules[__name__])
     result = unittest.TextTestRunner(verbosity=2).run(suite)
     failed_methods = {getattr(test, 'test_case', test).id()
                       for test, _trace in [*result.failures, *result.errors]}

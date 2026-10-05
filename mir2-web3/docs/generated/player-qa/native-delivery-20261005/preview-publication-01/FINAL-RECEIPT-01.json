@@ -1,0 +1,256 @@
+{
+  "schema": "mir2.native.preview-publication-handoff.v1",
+  "state": "admitted-from-actual-root-proof; offline-tested; not-published",
+  "writeScope": [
+    "scripts/native_r17_r2_delivery.py",
+    "scripts/test_native_r17_r2_delivery.py",
+    "infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication.mjs",
+    "infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication-plan.json",
+    "infra/cloudflare/mir2-r2-bulk-upload/test/native-r17-publication.test.mjs"
+  ],
+  "hashes": {
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\FINAL-HASHES-01.json",
+    "bytes": 20674,
+    "sha256": "e46e3291e7cb01ebf2c9e60dd43d57beebb1651fc481c21a4e6826be2fd0a2c2"
+  },
+  "patch": {
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\FINAL-FIVE-FILE.patch",
+    "bytes": 240034,
+    "sha256": "38d274aa52ce2839e913016a57224841e7b2e3c3f7bf72a9adfdf0ffd9a4edd9"
+  },
+  "coverage": {
+    "path": "C:\\mir2-playtest-releases\\20261004-native-r18\\native-updater-preview-publication-01\\FINAL-TEST-COVERAGE-01.json",
+    "bytes": 16315,
+    "sha256": "acd8e9356473e30104056d122b403ff7f521b616c5a3159190291ed40e9662d0"
+  },
+  "genuineProofAuthority": {
+    "rootReceiptSha256": "00984e502e2bcbe3fd32d6f6cf14818f8f46b57a1ba6294f6c8c06621b1f8fff",
+    "sourcePlanSha256": "335e80d1692c105e9423fb53a54d000fe3bffc6bc24ef71bfeedbdbe9a6f8a16",
+    "issuer": "Parent actual pinned detached CMS + closed36 verifier, terminal0/28.860s; this phase only validates exact raw copies and cryptographic bindings.",
+    "rootReceiptFields": [
+      "schema",
+      "passed",
+      "candidateVerified",
+      "cmsVerified",
+      "sourceRevision",
+      "sequence",
+      "feedSha256",
+      "signatureSha256",
+      "objectsSha256"
+    ],
+    "selfIssuedCmsAdmission": false
+  },
+  "nativeLiteralSha256": "9fd816a5fdf26a937d3d94a5b031c9e992fbb104f49832ba31a703587a0385f8",
+  "nativeCanonicalSha256": "aa29c7a79fc5196677228f7ed476a42db9eb4ce4ef9ad6e74292b72cde750f9e",
+  "candidate": {
+    "schema": "mir2.windows.r2-channel.v1",
+    "channel": "invited",
+    "platform": "windows-x64",
+    "sequence": 13,
+    "sourceRevision": "48454bba7623694ca7432613af52bee28e83970e",
+    "feedSha256": "5b2a6d21874fabe9d405388f6793e2f6673f9ce7e0c9ce967b0e327a28058c16",
+    "signatureSha256": "1227f6b40f103cbd4d29cdf989ddb1cb70f4d972b79c681ba7d0a2746493b003"
+  },
+  "knownPrevious": {
+    "schema": "mir2.windows.r2-channel.v1",
+    "channel": "invited",
+    "platform": "windows-x64",
+    "sequence": 12,
+    "sourceRevision": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+    "feedSha256": "7efdddf34fbf58ffa0bf8c4f7fcb1a9ad2bac869cb3f003cea0a0c9c53356c88",
+    "signatureSha256": "7dd131dddcef9107ea0c80363cc9ca44746603c586a1e23e00ff6aa178006916"
+  },
+  "objectCount": 36,
+  "totalBytes": 817719767,
+  "unchangedGameObjects": 30,
+  "sixPreparationOnlyNewObjects": [
+    {
+      "index": 0,
+      "path": "feeds/s13-5b2a6d21874fabe9d405388f6793e2f6673f9ce7e0c9ce967b0e327a28058c16/latest.json",
+      "size": 1159,
+      "sha256": "5b2a6d21874fabe9d405388f6793e2f6673f9ce7e0c9ce967b0e327a28058c16",
+      "originRelativePath": "feeds/s13-5b2a6d21874fabe9d405388f6793e2f6673f9ce7e0c9ce967b0e327a28058c16/latest.json"
+    },
+    {
+      "index": 1,
+      "path": "feeds/s13-5b2a6d21874fabe9d405388f6793e2f6673f9ce7e0c9ce967b0e327a28058c16/latest.p7s",
+      "size": 1614,
+      "sha256": "1227f6b40f103cbd4d29cdf989ddb1cb70f4d972b79c681ba7d0a2746493b003",
+      "originRelativePath": "feeds/s13-5b2a6d21874fabe9d405388f6793e2f6673f9ce7e0c9ce967b0e327a28058c16/latest.p7s"
+    },
+    {
+      "index": 2,
+      "path": "installers/6175bd72f273c2f00d96117183fc1bf4d1f987c15455a1064e4f0e975ca70af5/Mir2Setup.exe",
+      "size": 27496643,
+      "sha256": "6175bd72f273c2f00d96117183fc1bf4d1f987c15455a1064e4f0e975ca70af5",
+      "originRelativePath": "installers/6175bd72f273c2f00d96117183fc1bf4d1f987c15455a1064e4f0e975ca70af5/Mir2Setup.exe"
+    },
+    {
+      "index": 33,
+      "path": "releases/updater-50F99917916F10E8-s13/ENGINE.json",
+      "size": 421,
+      "sha256": "74ceb55740d0cf6fa83d1d044092c967602b631fee68f88e0a5718b2b65af38e",
+      "originRelativePath": "releases/updater-50F99917916F10E8-s13/ENGINE.json"
+    },
+    {
+      "index": 34,
+      "path": "releases/updater-50F99917916F10E8-s13/ENGINE.p7s",
+      "size": 1614,
+      "sha256": "5f40d755fe824ddd0f530e93626289636ec44813589f5f9ea5436911c18ded24",
+      "originRelativePath": "releases/updater-50F99917916F10E8-s13/ENGINE.p7s"
+    },
+    {
+      "index": 35,
+      "path": "releases/updater-50F99917916F10E8-s13/Mir2Updater.exe",
+      "size": 1859072,
+      "sha256": "50f99917916f10e8e8f7e906de1d6e1fa7edb9a735f0ce95873bf5d196d426cf",
+      "originRelativePath": "releases/updater-50F99917916F10E8-s13/Mir2Updater.exe"
+    }
+  ],
+  "newOriginUploadedOrVerified": false,
+  "stageExecuted": false,
+  "promoteExecuted": false,
+  "actualCloudflareAuthUsed": false,
+  "actualR2Acceptance": false,
+  "actualNetworkRequests": 0,
+  "measuredDownloadAcceleration": false,
+  "updaterOrGameSourceChanged": false,
+  "deadlines": {
+    "originHeaderMs": 30000,
+    "noProgressMs": 90000,
+    "importMs": 2400000,
+    "r2SettleAllowanceMs": 120000,
+    "promoteMs": 300000,
+    "controlSeconds": 150,
+    "importControlSeconds": 2460,
+    "promoteControlSeconds": 360,
+    "publicSeconds": 2460,
+    "slowStreamPolicyBytesPerSecond": 65536,
+    "measuredSpeed": false
+  },
+  "rawAttempts": [
+    {
+      "name": "red-authority-late-01",
+      "outcome": "interrupted; fixture/harness only, not terminal9 outcome",
+      "note": "Unexpected accepted GET body was not cancelled before assertion. Partial authority failures retained; only owned process interrupted."
+    },
+    {
+      "name": "red-authority-late-02",
+      "exitCode": 1,
+      "count": 9,
+      "pass": 0,
+      "fail": 9,
+      "skipped": 0,
+      "note": "Real unchanged-production exacthost/port and lateGET failures."
+    },
+    {
+      "name": "red-network-idle-01",
+      "exitCode": 1,
+      "count": 3,
+      "pass": 1,
+      "fail": 2,
+      "note": "Real pre-fix body/header finite deadline failures; private longheader control passed."
+    },
+    {
+      "name": "green-authority-late-01",
+      "exitCode": 0,
+      "count": 9,
+      "pass": 9,
+      "fail": 0
+    },
+    {
+      "name": "green-network-idle-01",
+      "exitCode": 1,
+      "count": 3,
+      "pass": 2,
+      "error": 1,
+      "note": "Artificial20ms connect budget included real system CA setup. Preserved. Fixture subsequently builds actual verified SSLContext before measured header/body phase."
+    },
+    {
+      "name": "green-network-idle-02",
+      "exitCode": 0,
+      "count": 3,
+      "pass": 3,
+      "fail": 0
+    },
+    {
+      "name": "full-node-01",
+      "exitCode": 1,
+      "count": 138,
+      "pass": 137,
+      "fail": 1,
+      "note": "Initially diagnosed immediate sourcecancel expectation as asynchronous fixture assumption. That diagnosis proved incomplete in the next bounded observation."
+    },
+    {
+      "name": "full-python-01",
+      "exitCode": 1,
+      "count": 64,
+      "pass": 61,
+      "fail": 3,
+      "note": "Old total bytes; old general CONTROL_SECONDS versus new import-specific budget; immutable prepared CLI expects failure exit2."
+    },
+    {
+      "name": "full-node-02",
+      "exitCode": 1,
+      "count": 138,
+      "pass": 137,
+      "fail": 1,
+      "note": "Meaningful 250ms sourcecancel observation still failed: actual intermediate pipeThrough had no AbortSignal. Earlier fixture-only assumption rejected."
+    },
+    {
+      "name": "full-python-02",
+      "exitCode": 0,
+      "count": 64,
+      "pass": 64,
+      "fail": 0
+    },
+    {
+      "name": "green-early-create-01",
+      "exitCode": 0,
+      "count": 1,
+      "pass": 1,
+      "fail": 0,
+      "note": "After same budget.signal connected to intermediate limiter link; no delete/retry."
+    },
+    {
+      "name": "full-node-03",
+      "exitCode": 0,
+      "count": 138,
+      "pass": 138,
+      "fail": 0,
+      "skipped": 0
+    }
+  ],
+  "narrowFixtureAdaptations": [
+    {
+      "name": "early create race cancels blocked source and never retries unconditionally",
+      "change": "Immediate bool assertion -> bounded250ms independent source cancellation observer. The observer produced a second RED and required a real signal propagation repair; no assertion removed."
+    },
+    {
+      "name": "test_literal_plan_and_two_real_tiny_objects_bound",
+      "change": "Original12 total817657896 -> exact signed13 total817719767; real tiny SHA and literal proof guards preserved."
+    },
+    {
+      "name": "test_cancelled_connect_never_sends_auth_after_deadline",
+      "change": "Patch IMPORT_CONTROL_SECONDS instead of now unrelated CONTROL_SECONDS; after-deadline zero authenticated requests and lateconnectclose preserved."
+    },
+    {
+      "name": "test_cli_blocks_before_secret_lookup_transport_or_network",
+      "change": "Frozen prepared helper documented failure exit2; secret/transport tripwires and no-call refusal assertions preserved."
+    }
+  ],
+  "productRepairs": [
+    "Exact authenticated authority before fetch/storage.",
+    "Read-only late bucket.get body cancellation; never put/delete reconciliation.",
+    "Python connect/header/after-header body finite policies using progress read1; private import41min preheader allowed.",
+    "Same AbortSignal applied to both intermediate limiter and terminal pipe links for import/existing read."
+  ],
+  "openGates": [
+    "Six new immutable origin objects and current origin13 feedpair must be appended/verified by parent before any promotion.",
+    "Real opaque Cloudflare authorization/deployment and R2 native condition/checksum behavior remain parent gates.",
+    "Full36 public stored byte verification, range/cache behavior and desktop throughput require real deployment; offline models do not establish them.",
+    "40min import/41min client/90s bodyidle is declared finite slowstream policy, not measured rate. CI overall stage deadline must cover import plus public reads.",
+    "External tests use the approved exact root router and external public fixture paths. Root must keep/provide fixture layout or adapt only test input locations when integrating; source hashes bind this run."
+  ],
+  "status": "FROZEN; parent review/integration only"
+}

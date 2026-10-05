@@ -1,5 +1,17 @@
 # Agent Orchestration
 
+> 2026-10-05 the sole publication writer freezes five files and stops. Root
+> integrates only that reviewed scope, portable proof fixtures, newline-byte
+> hygiene and workflow overall termination limits. Root138/64 checks overlap
+> worker results; Windows SIGINT1 passes and Linux child check is pending.
+> Read-handle performance candidate stays unintegrated after mixed A/B results.
+> Original raw failures and genuine CMS/library receipts remain archived.
+> Effective Cloudflare authorization, six origin append objects, actual R2
+> stage/promote/cache/range and laptop speed are open. Public12/game6032,
+> service state, F installation and all real player saves are unchanged.
+> [Delivery scope](NATIVE-DOWNLOAD-ACCELERATION-20261005.md),
+> [root/publication evidence](generated/player-qa/native-delivery-20261005/preview-publication-01/README.md).
+
 > 2026-10-05 root integrates the eleven-file native Guild rank-rename slice
 > after P3/source513eb83, applying only two Gateway terminal hunks. Source7
 > merges its actual nested rank, retires exact current editor context, and is

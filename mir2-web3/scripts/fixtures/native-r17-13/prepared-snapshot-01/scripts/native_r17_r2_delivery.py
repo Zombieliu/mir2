@@ -29,10 +29,10 @@ PUBLIC_PREFIX = '/client-updates/'
 PUBLIC_BASE = 'https://' + HOST + PUBLIC_PREFIX
 PRIVATE_PREFIX = '/upload/native-r17'
 IMMUTABLE = 'public, max-age=31536000, immutable'
-SOURCE_PLAN_SHA = '335e80d1692c105e9423fb53a54d000fe3bffc6bc24ef71bfeedbdbe9a6f8a16'
-ROOT_SHA = '00984e502e2bcbe3fd32d6f6cf14818f8f46b57a1ba6294f6c8c06621b1f8fff'
-NATIVE_SHA = 'aa29c7a79fc5196677228f7ed476a42db9eb4ce4ef9ad6e74292b72cde750f9e'
-LITERAL_SHA = '9fd816a5fdf26a937d3d94a5b031c9e992fbb104f49832ba31a703587a0385f8'
+SOURCE_PLAN_SHA = None  # A new actual verifier receipt is a separate admission gate.
+ROOT_SHA = None
+NATIVE_SHA = 'fcbb13c08ff8c9f5d3ab1e7d4f7504914f2d01cfc5e7cd43a31e332fcdfd8ce4'
+LITERAL_SHA = '73620830ecca19a5acdbef44dad5cd21b3a8f17e0bf5bf5c66ac1593abb813e5'
 OBJECTS_SHA = '1084f10c192a0f0751352898c9a8f2caab3a3f32e506a5fd1f0a7650713fcdaa'
 PLAN_FILE = Path(__file__).resolve().parents[1] / 'infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication-plan.json'
 CHUNK = 65536
@@ -42,8 +42,6 @@ CONTROL_SECONDS = 150
 IMPORT_CONTROL_SECONDS = 2460
 PROMOTE_CONTROL_SECONDS = 360
 PUBLIC_SECONDS = 2460
-NO_PROGRESS_SECONDS = 90
-PUBLIC_HEADER_SECONDS = 30
 MAX_CALL_MS = 2460000
 SHA_RE = re.compile(r'[0-9a-f]{64}\Z')
 ETAG_RE = re.compile(r'"[^"\x00-\x20\x7f]{1,254}"\Z')
@@ -139,10 +137,10 @@ def closure(plan):
 def read_prepared_plan_bytes(raw):
     """Literal/table proof only. It does NOT admit this prepared release."""
     try:
-        require(len(raw) == 64106 and digest(raw) == LITERAL_SHA, 'plan_invalid')
+        require(len(raw) == 44116 and digest(raw) == LITERAL_SHA, 'plan_invalid')
         plan = strict_json(raw)
         require(digest(canonical(plan)) == NATIVE_SHA
-                and plan['schema'] == 'mir2.native.r17.fixed-origin-plan.v1'
+                and plan['schema'] == 'mir2.windows.r2-native-publication-preparation.v1'
                 and plan['candidate']['sequence'] == 13
                 and plan['candidate']['sourceRevision'] == '48454bba7623694ca7432613af52bee28e83970e'
                 and plan['preparation']['requiredGameSourceRevision'] == '6032ef8b3e27dd97bad0b20c8676ef9f185db64b'
@@ -176,8 +174,6 @@ def read_prepared_plan_bytes(raw):
                 and operation['importControlSeconds'] == IMPORT_CONTROL_SECONDS
                 and operation['promoteControlSeconds'] == PROMOTE_CONTROL_SECONDS
                 and operation['publicSeconds'] == PUBLIC_SECONDS
-                and operation['noProgressMs'] == NO_PROGRESS_SECONDS * 1000
-                and operation['originHeaderMs'] == PUBLIC_HEADER_SECONDS * 1000
                 and operation['measuredSpeed'] is False, 'plan_invalid')
         for index, entry in enumerate(plan['objects']):
             require(type(entry['index']) is int and entry['index'] == index
@@ -194,8 +190,8 @@ def read_prepared_plan_bytes(raw):
 
 def load_plan_bytes(raw):
     plan = read_prepared_plan_bytes(raw)
-    # Admission binds the root-issued actual CMS/closed36 proof bytes. A test
-    # mock, hash-only build receipt or old12 proof cannot admit a different plan.
+    # This snapshot cannot be admitted by hashing or a test mock. New actual
+    # source/root verifier output, hash anchors and a reviewed literal are needed.
     require(plan['admission'] == 'admitted' and isinstance(SOURCE_PLAN_SHA, str)
             and isinstance(ROOT_SHA, str) and SHA_RE.fullmatch(SOURCE_PLAN_SHA)
             and SHA_RE.fullmatch(ROOT_SHA), 'prepared_release_unadmitted')
@@ -337,15 +333,7 @@ class NetworkResponse:
     must retain the unknown outcome rather than retry it.
     """
     def __init__(self, method, path, token, body, seconds):
-        started = time.monotonic()
-        self.deadline = started + seconds
-        self.budget_lock = threading.Lock()
-        self.idle_deadline = started + min(NO_PROGRESS_SECONDS, seconds)
-        # The Worker completes origin->R2 before import JSON headers. A private
-        # import/promote header wait has its route's finite overall allowance;
-        # connect, ordinary headers and every body still have progress fences.
-        self.header_seconds = seconds if method == 'POST' and path in (
-            PRIVATE_PREFIX + '/import', PRIVATE_PREFIX + '/promote') else min(PUBLIC_HEADER_SECONDS, seconds)
+        self.deadline = time.monotonic() + seconds
         self.cancelled = threading.Event()
         self.messages = queue.Queue(maxsize=2)
         self.connection = None
@@ -357,13 +345,8 @@ class NetworkResponse:
         require(kind == 'headers', 'transport_failed')
         self.status, self._headers = value
 
-    def _progress_budget(self, seconds):
-        with self.budget_lock:
-            self.idle_deadline = min(self.deadline, time.monotonic() + seconds)
-
     def _remaining(self):
-        with self.budget_lock:
-            remaining = min(self.deadline, self.idle_deadline) - time.monotonic()
+        remaining = self.deadline - time.monotonic()
         require(not self.cancelled.is_set(), 'request_cancelled')
         require(remaining > 0, 'request_deadline')
         return remaining
@@ -397,23 +380,16 @@ class NetworkResponse:
                 headers['Content-Length'] = str(len(body))
             self._remaining()
             connection.request(method, path, body=body, headers=headers)
-            self._progress_budget(self.header_seconds)
             connection.sock.settimeout(self._remaining())
             response = connection.getresponse()
-            self._progress_budget(NO_PROGRESS_SECONDS)
             self._send('headers', (response.status, response.getheaders()))
             if method != 'HEAD' and response.status in (200, 201, 409, 412, 499, 502, 503, 504):
                 while True:
                     connection.sock.settimeout(self._remaining())
-                    # HTTPResponse.read1 returns currently available progress,
-                    # rather than waiting to fill a whole64KiB read.
-                    read_progress = getattr(response, 'read1', response.read)
-                    chunk = read_progress(CHUNK)
+                    chunk = response.read(CHUNK)
                     self._remaining()
-                    require(isinstance(chunk, bytes) and len(chunk) <= CHUNK, 'transport_failed')
                     if not chunk:
                         break
-                    self._progress_budget(NO_PROGRESS_SECONDS)
                     self._send('chunk', chunk)
         except Fault as failure:
             terminal = ('error', failure.code)
@@ -432,17 +408,10 @@ class NetworkResponse:
 
     def _next(self):
         try:
-            while True:
-                try:
-                    # Poll only the bounded queue, allowing the connect/header
-                    # phase to change its deadline without a stale long wait.
-                    message = self.messages.get(timeout=min(self._remaining(), 0.1))
-                    break
-                except queue.Empty:
-                    continue
-        except Fault:
+            message = self.messages.get(timeout=self._remaining())
+        except queue.Empty:
             self.close()
-            raise
+            raise Fault('request_deadline') from None
         if message[0] == 'error':
             self.close()
             raise Fault(message[1])

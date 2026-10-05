@@ -1,11 +1,378 @@
-import test from 'node:test';
+// Unit policy fixtures only. Real immutable preview13 feed/CMS bytes are read,
+// but crypto.DigestStream, FixedLengthStream, R2 and fetch below are Node models.
+// No CMS admission is injected. Positive handler tests explicitly skip until a
+// genuine new receipt has been issued and reviewed anchors/literal are rebound.
+import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {createHash, webcrypto} from 'node:crypto';
-import worker from '../src/index.ts';
+import {readFileSync} from 'node:fs';
 import definition from '../src/native-r17-publication-plan.json' with {type: 'json'};
-import {createNativeR17Handler, validateNativePlan, stageEnvelopeTemplate,
-  NATIVE_PLAN_SHA256} from '../src/native-r17-publication.mjs';
+import preparedDefinition from '../../../../scripts/fixtures/native-r17-13/prepared-snapshot-01/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication-plan.json' with {type: 'json'};
+import {validateNativePlan as validatePreparedSnapshot, createNativeR17Handler as createPreparedSnapshotHandler} from '../../../../scripts/fixtures/native-r17-13/prepared-snapshot-01/infra/cloudflare/mir2-r2-bulk-upload/src/native-r17-publication.mjs';
+import {NATIVE_PLAN_SHA256, OPERATION_POLICY, STAGE_SCHEMA, validatePreparedPlan,
+  validateNativePlan, stageEnvelopeTemplate, createNativeR17Handler} from '../src/native-r17-publication.mjs';
 
+globalThis.fetch = async () => {throw new Error('outbound network disabled in unit fixtures');};
+const FIXTURES = new URL('../../../../scripts/fixtures/native-r17-13/preview/', import.meta.url);
+const FEED_BYTES = new Uint8Array(readFileSync(new URL('artifacts/feed/latest.json', FIXTURES)));
+const CMS_BYTES = new Uint8Array(readFileSync(new URL('artifacts/feed/latest.p7s', FIXTURES)));
+const FEED = JSON.parse(new TextDecoder().decode(FEED_BYTES));
+const NOW = (FEED.createdUnix + 100) * 1000;
+const MOCK_SECRET = 'public-fake-unit-secret-only';
+const SKIP_PENDING_PROOF = definition.admission !== 'admitted'
+  ? 'prepared/unadmitted: actual CMS/root receipt and reviewed anchors required' : false;
+const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+const buffer = hash => Uint8Array.from(Buffer.from(hash, 'hex')).buffer;
+const clone = value => JSON.parse(JSON.stringify(value));
+function canonical(value) {
+  const sort = v => Array.isArray(v) ? v.map(sort) : v && typeof v === 'object'
+    ? Object.fromEntries(Object.keys(v).sort().map(k => [k, sort(v[k])])) : v;
+  return new TextEncoder().encode(JSON.stringify(sort(value)) + '\n');
+}
+function request(route, body = {index: 0}, method = 'POST', auth = true) {
+  return new Request('https://assets.mir2.obelisk.build/upload/native-r17' + route, {
+    method, headers: {authorization: auth ? 'Bearer ' + MOCK_SECRET : 'wrong',
+      'content-type': 'application/json'},
+    ...(method === 'GET' || method === 'HEAD' ? {} : {body: JSON.stringify(body)}),
+  });
+}
+function metadata(entry, bytes) {
+  return {key: entry.r2Key, size: entry.size, httpEtag: '"' + entry.sha256.slice(0, 24) + '"',
+    httpMetadata: {contentType: entry.contentType, cacheControl: entry.cacheControl},
+    customMetadata: {sha256: entry.sha256}, checksums: {sha256: buffer(entry.sha256)}, bytes};
+}
+function pointerEntry(value) {
+  const bytes = canonical(value);
+  return {entry: {r2Key: definition.r2Prefix + 'channels/invited.json',
+    size: bytes.length, sha256: sha(bytes), contentType: 'application/json', cacheControl: 'no-store'}, bytes};
+}
+class BucketModel {
+  records = new Map(); calls = []; mutateBeforePointerPut; losePointerAck = false;
+  loseObjectAck = false; hangPut = false; consumedBytes = 0; maxChunk = 0;
+  seed(entry, bytes) {this.records.set(entry.r2Key, metadata(entry, bytes));}
+  seedClosure() {for (const entry of definition.objects) this.seed(entry,
+    entry.index === 0 ? FEED_BYTES : entry.index === 1 ? CMS_BYTES : undefined);}
+  pointer(value) {const {entry, bytes} = pointerEntry(value); this.seed(entry, bytes);}
+  async head(key) {this.calls.push({op: 'head', key}); const r = this.records.get(key); return r ? {...r} : null;}
+  async get(key) {
+    this.calls.push({op: 'get', key}); const r = this.records.get(key);
+    if (!r) return null;
+    return {...r, body: new Response(r.bytes ?? new Uint8Array()).body};
+  }
+  async put(key, body, options) {
+    this.calls.push({op: 'put', key, options});
+    assert.ok(options.sha256 instanceof ArrayBuffer && options.sha256.byteLength === 32);
+    if (key.endsWith('/channels/invited.json')) this.mutateBeforePointerPut?.();
+    const existing = this.records.get(key);
+    if (options.onlyIf.get('if-none-match') === '*') {if (existing) return null;}
+    else {
+      assert.ok(key.endsWith('/channels/invited.json'), 'immutable object must remain create-only');
+      assert.equal(options.onlyIf.get('if-none-match'), null);
+      assert.ok(options.onlyIf.get('if-match'));
+      if (!existing || existing.httpEtag !== options.onlyIf.get('if-match')) return null;
+    }
+    if (this.hangPut) return new Promise(() => {});
+    const hash = createHash('sha256'); let size = 0; const kept = [];
+    const consume = chunk => {
+      assert.ok(chunk instanceof Uint8Array); size += chunk.length;
+      this.consumedBytes += chunk.length; this.maxChunk = Math.max(this.maxChunk, chunk.length);
+      hash.update(chunk);
+      if (size <= 4096) kept.push(chunk.slice());
+    };
+    if (body instanceof ReadableStream) {
+      const reader = body.getReader();
+      try {while (true) {const r = await reader.read(); if (r.done) break; consume(r.value);}}
+      finally {reader.releaseLock();}
+    } else consume(body);
+    const actual = hash.digest('hex');
+    if (actual !== Buffer.from(options.sha256).toString('hex')) throw new Error('modeled R2 checksum rejection');
+    // Model backend conditional check at COMMIT as well as at invocation.
+    const latest = this.records.get(key);
+    if (options.onlyIf.get('if-none-match') === '*') {if (latest) return null;}
+    else if (!latest || latest.httpEtag !== options.onlyIf.get('if-match')) return null;
+    const bytes = size <= 4096 ? Buffer.concat(kept) : undefined;
+    const record = {key, size, httpEtag: '"' + actual.slice(0, 24) + '"',
+      httpMetadata: options.httpMetadata, customMetadata: options.customMetadata,
+      checksums: {sha256: buffer(actual)}, bytes};
+    this.records.set(key, record);
+    if ((this.losePointerAck && key.endsWith('/channels/invited.json'))
+      || (this.loseObjectAck && !key.endsWith('/channels/invited.json'))) {
+      throw new Error('modeled committed write with lost acknowledgment');
+    }
+    return {...record};
+  }
+}
+function streamModels(stats) {
+  return {
+    fixedLengthStream(size) {
+      stats.fixedLengths.push(size); let count = 0;
+      return new TransformStream({
+        transform(chunk, controller) {count += chunk.length; if (count > size) throw new Error('overrun'); controller.enqueue(chunk);},
+        flush() {if (count !== size) throw new Error('underrun');},
+      });
+    },
+    digestStream() {
+      const hash = createHash('sha256'); let resolve, reject;
+      const digest = new Promise((ok, bad) => {resolve = ok; reject = bad;});
+      const stream = new WritableStream({
+        write(bytes) {hash.update(bytes);},
+        close() {resolve(Uint8Array.from(hash.digest()).buffer);}, abort(error) {reject(error);},
+      });
+      stream.digest = digest; return stream;
+    },
+  };
+}
+function fixture({originOverride, policy, now = NOW} = {}) {
+  const bucket = new BucketModel(), calls = [], stats = {fixedLengths: [], aborted: 0};
+  const fetch = async (url, options) => {
+    calls.push(url);
+    assert.equal(options.method, 'GET'); assert.equal(options.redirect, 'manual');
+    assert.deepEqual(options.headers, {'accept-encoding': 'identity', 'cache-control': 'no-store'});
+    options.signal.addEventListener('abort', () => {stats.aborted++;}, {once: true});
+    const immutable = definition.objects.find(e => definition.originBase + e.originRelativePath === url);
+    const current = url === definition.originBase + 'latest.json' ? definition.objects[0]
+      : url === definition.originBase + 'latest.p7s' ? definition.objects[1] : null;
+    const entry = immutable ?? current;
+    assert.ok(entry, 'fixed source URLs only');
+    if (originOverride) return originOverride(entry, options, !!current);
+    assert.ok(entry.index === 0 || entry.index === 1, 'no fabricated artifact source bodies');
+    const response = new Response(entry.index === 0 ? FEED_BYTES : CMS_BYTES,
+      {headers: {'content-length': String(entry.size)}});
+    response.arrayBuffer = response.text = response.json = response.clone = () => {
+      throw new Error('artifact buffering/cloning forbidden');
+    };
+    return response;
+  };
+  const handle = createNativeR17Handler({crypto: webcrypto, fetch, now: () => now,
+    ...streamModels(stats), ...(policy ? {policy} : {})});
+  return {bucket, calls, stats, handle, env: {MIR2_R2_UPLOAD_SECRET: MOCK_SECRET, MIR2_ASSETS: bucket}};
+}
+function policyTest(name, body) {test(name, {skip: SKIP_PENDING_PROOF}, body);}
+
+test('fixed13 closure and previous proof bind30 original game objects plus6 new objects', async () => {
+  assert.equal(await validatePreparedPlan(definition, webcrypto), true);
+  assert.equal(sha(canonical(definition)), NATIVE_PLAN_SHA256);
+  assert.equal(definition.objects.length, 36);
+  assert.equal(definition.objects.filter(e => e.path.startsWith('releases/game-')).length, 30);
+  assert.equal(definition.candidate.sequence, 13);
+  assert.equal(sha(FEED_BYTES), definition.objects[0].sha256);
+  assert.equal(sha(CMS_BYTES), definition.objects[1].sha256);
+  assert.equal(definition.preparation.requiredGameSourceRevision, '6032ef8b3e27dd97bad0b20c8676ef9f185db64b');
+  assert.equal(definition.objects.reduce((n, e) => n + e.size, 0), 817719767);
+});
+test('default admission is closed; no fake passed/CMS or old receipt can admit13', async () => {
+  await assert.rejects(validatePreparedSnapshot(preparedDefinition, webcrypto), /prepared_release_unadmitted/);
+  for (const alteration of [
+    p => {p.admission = 'prepared';},
+    p => {p.rootVerificationBase64 = p.predecessorProof.rootVerificationBase64;
+      p.rootVerificationSha256 = p.predecessorProof.rootVerificationSha256;},
+    p => {p.objects[35].sha256 = '0'.repeat(64);},
+  ]) {
+    const other = clone(definition); alteration(other);
+    await assert.rejects(validateNativePlan(other, webcrypto), /native_plan_hash_mismatch/);
+  }
+});
+test('authentication precedes storage/fetch/admission and authorized prepared operation fails closed', async () => {
+  const f = fixture();
+  assert.equal((await f.handle(request('/import', {index: 0}, 'POST', false), f.env)).status, 401);
+  assert.equal(f.calls.length, 0); assert.equal(f.bucket.calls.length, 0);
+  {
+    const handle = createPreparedSnapshotHandler({crypto: webcrypto,
+      fetch: () => {throw new Error('Prepared admission must precede fetch');}});
+    const denied = await handle(request('/import'), f.env);
+    assert.equal(denied.status, 503); assert.equal((await denied.json()).error, 'prepared_release_unadmitted');
+    assert.equal(f.calls.length, 0); assert.equal(f.bucket.calls.length, 0);
+  }
+});
+test('stage template permits only null/exact12/exact13; old and forged stage scope stay distinct', () => {
+  for (const value of [null, definition.knownPrevious, definition.candidate]) {
+    assert.equal(stageEnvelopeTemplate(value).schema, STAGE_SCHEMA);
+    assert.deepEqual(stageEnvelopeTemplate(value).expectedCurrent, value);
+  }
+  assert.throws(() => stageEnvelopeTemplate({...definition.knownPrevious, feedSha256: '0'.repeat(64)}),
+    /unknown_observed_current/);
+});
+test('fixed111MB deadline policy is finite and transport margin exceeds worker budget', () => {
+  const largest = Math.max(...definition.objects.map(e => e.size));
+  assert.equal(largest, 111013376);
+  assert.ok(largest / OPERATION_POLICY.slowStreamPolicyBytesPerSecond * 1000
+    + OPERATION_POLICY.originHeaderMs + OPERATION_POLICY.r2SettleAllowanceMs < OPERATION_POLICY.importMs);
+  assert.ok(OPERATION_POLICY.importControlSeconds * 1000 > OPERATION_POLICY.importMs);
+  assert.ok(OPERATION_POLICY.promoteControlSeconds * 1000 > OPERATION_POLICY.promoteMs);
+  assert.equal(OPERATION_POLICY.measuredSpeed, false);
+  assert.equal(definition.preparation.actualDeadlinePolicyAccepted, false);
+});
+
+policyTest('first object import201 is create-only; actual small full-hash resume200 does not refetch', async () => {
+  const f = fixture(); let response = await f.handle(request('/import'), f.env);
+  assert.equal(response.status, 201); assert.equal((await response.json()).resumed, false);
+  const writes = f.bucket.calls.filter(c => c.op === 'put');
+  assert.equal(writes.length, 1); assert.equal(writes[0].options.onlyIf.get('if-none-match'), '*');
+  assert.equal(f.bucket.consumedBytes, FEED_BYTES.length);
+  response = await f.handle(request('/import'), f.env);
+  assert.equal(response.status, 200); assert.equal((await response.json()).resumed, true);
+  assert.equal(f.calls.length, 1);
+});
+policyTest('bad existing body or wrong stored checksum cannot count as immutable resume', async () => {
+  const f = fixture(); f.bucket.seed(definition.objects[0], new Uint8Array(FEED_BYTES.length));
+  const response = await f.handle(request('/import'), f.env);
+  assert.equal(response.status, 409); assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 0);
+  assert.equal(f.calls.length, 0);
+});
+policyTest('lost object ACK retains unknown and never retries; independent later stage hashes existing bytes', async () => {
+  const f = fixture(); f.bucket.loseObjectAck = true;
+  const response = await f.handle(request('/import'), f.env), result = await response.json();
+  assert.equal(response.status, 502); assert.equal(result.objectWriteAttempted, true);
+  assert.equal(result.objectOutcomeUnknown, true);
+  assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 1);
+  f.bucket.loseObjectAck = false;
+  const reconciled = await f.handle(request('/import'), f.env);
+  assert.equal(reconciled.status, 200); assert.equal((await reconciled.json()).resumed, true);
+  assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 1);
+});
+policyTest('source redirect/encoding/length fail before any immutable write', async () => {
+  for (const headers of [{status: 302}, {encoding: 'gzip'}, {length: 1158}]) {
+    const f = fixture({originOverride: () => new Response(FEED_BYTES, {
+      status: headers.status ?? 200, headers: {'content-length': String(headers.length ?? FEED_BYTES.length),
+        ...(headers.encoding ? {'content-encoding': headers.encoding} : {})}})});
+    const response = await f.handle(request('/import'), f.env);
+    assert.equal(response.status, 502); assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 0);
+  }
+});
+policyTest('scaled header deadline cancels upstream and never changes pointer', async () => {
+  const f = fixture({policy: {...OPERATION_POLICY, originHeaderMs: 20, noProgressMs: 80, importMs: 120},
+    originOverride: () => new Promise(() => {})});
+  const response = await f.handle(request('/import'), f.env), result = await response.json();
+  assert.equal(response.status, 504); assert.equal(result.error, 'origin_header_deadline');
+  assert.equal(result.objectWriteAttempted, false); assert.ok(f.stats.aborted > 0);
+  assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 0);
+});
+policyTest('scaled total timeout bounds a stalled R2 put; cancellation cannot claim it never committed', async () => {
+  const f = fixture({policy: {...OPERATION_POLICY, importMs: 50, noProgressMs: 30,
+    originHeaderMs: 20, r2SettleAllowanceMs: 30}});
+  f.bucket.hangPut = true;
+  const response = await f.handle(request('/import'), f.env), result = await response.json();
+  assert.equal(response.status, 504); assert.equal(result.objectWriteAttempted, true);
+  assert.equal(result.objectOutcomeUnknown, true); assert.ok(f.stats.aborted > 0);
+  assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 1);
+});
+policyTest('null pointer creation uses only If-None-Match and reads exact13 after commit', async () => {
+  const f = fixture(); f.bucket.seedClosure();
+  const response = await f.handle(request('/promote', stageEnvelopeTemplate(null)), f.env);
+  assert.equal(response.status, 200); const result = await response.json();
+  assert.equal(result.pointerChanged, true); assert.equal(result.pointerOutcomeUnknown, false);
+  const write = f.bucket.calls.find(c => c.op === 'put');
+  assert.equal(write.options.onlyIf.get('if-none-match'), '*');
+  assert.equal(write.options.onlyIf.get('if-match'), null);
+  assert.deepEqual(f.calls, [definition.originBase + 'latest.json', definition.originBase + 'latest.p7s']);
+});
+policyTest('observed exact12 upgrade uses that actual ETag If-Match;13 is idempotent', async () => {
+  const f = fixture(); f.bucket.seedClosure(); f.bucket.pointer(definition.knownPrevious);
+  const {entry} = pointerEntry(definition.knownPrevious);
+  const oldEtag = f.bucket.records.get(entry.r2Key).httpEtag;
+  let response = await f.handle(request('/promote', stageEnvelopeTemplate(definition.knownPrevious)), f.env);
+  assert.equal(response.status, 200);
+  const writes = f.bucket.calls.filter(c => c.op === 'put');
+  assert.equal(writes[0].options.onlyIf.get('if-match'), oldEtag);
+  assert.equal(writes[0].options.onlyIf.get('if-none-match'), null);
+  response = await f.handle(request('/promote', stageEnvelopeTemplate(definition.knownPrevious)), f.env);
+  assert.equal(response.status, 200); assert.equal((await response.json()).alreadyPromoted, true);
+  assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 1);
+});
+policyTest('unknown/conflicting pointer or changed actual stage state rejects before put', async () => {
+  for (const actual of [{...definition.knownPrevious, sequence: 11}, definition.knownPrevious]) {
+    const f = fixture(); f.bucket.seedClosure(); f.bucket.pointer(actual);
+    const response = await f.handle(request('/promote', stageEnvelopeTemplate(null)), f.env);
+    assert.equal(response.status, 409); assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 0);
+  }
+});
+policyTest('pointer race gets412 and preserves raced pointer; no overwrite retry', async () => {
+  const f = fixture(); f.bucket.seedClosure(); f.bucket.pointer(definition.knownPrevious);
+  f.bucket.mutateBeforePointerPut = () => {
+    f.bucket.mutateBeforePointerPut = undefined; f.bucket.pointer({...definition.knownPrevious, sequence: 99});
+  };
+  const response = await f.handle(request('/promote', stageEnvelopeTemplate(definition.knownPrevious)), f.env);
+  assert.equal(response.status, 412); const result = await response.json();
+  assert.equal(result.pointerAttempted, true); assert.equal(result.pointerOutcomeUnknown, false);
+  const records = [...f.bucket.records.values()].find(r => r.key.endsWith('/channels/invited.json'));
+  assert.equal(JSON.parse(new TextDecoder().decode(records.bytes)).sequence, 99);
+  assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 1);
+});
+policyTest('lost pointer ACK retains unknown; separate retry reconciles exact13 without second write', async () => {
+  const f = fixture(); f.bucket.seedClosure(); f.bucket.pointer(definition.knownPrevious); f.bucket.losePointerAck = true;
+  let response = await f.handle(request('/promote', stageEnvelopeTemplate(definition.knownPrevious)), f.env);
+  assert.equal(response.status, 502); const uncertain = await response.json();
+  assert.equal(uncertain.pointerAttempted, true); assert.equal(uncertain.pointerOutcomeUnknown, true);
+  assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 1);
+  f.bucket.losePointerAck = false;
+  response = await f.handle(request('/promote', stageEnvelopeTemplate(definition.knownPrevious)), f.env);
+  assert.equal(response.status, 200); assert.equal((await response.json()).alreadyPromoted, true);
+  assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 1);
+});
+policyTest('immutable13 preview cannot promote when current origin latest pair is still12', async () => {
+  const prior = JSON.parse(Buffer.from(definition.predecessorProof.sourcePlanBase64, 'base64'));
+  const oldFeed = readFileSync(new URL('../../../../scripts/fixtures/native-r17-13/predecessor12/latest.json', import.meta.url));
+  assert.equal(sha(oldFeed), definition.knownPrevious.feedSha256);
+  const f = fixture({originOverride: (entry, _options, current) => new Response(current
+    ? oldFeed : (entry.index === 0 ? FEED_BYTES : CMS_BYTES),
+    {headers: {'content-length': String(entry.size)}})});
+  f.bucket.seedClosure(); f.bucket.pointer(prior.candidate);
+  const response = await f.handle(request('/promote', stageEnvelopeTemplate(definition.knownPrevious)), f.env);
+  assert.equal(response.status, 409); assert.equal((await response.json()).error, 'origin_feed_pair_changed');
+  assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 0);
+  assert.deepEqual(f.calls, [definition.originBase + 'latest.json']);
+});
+policyTest('old v1 receipt/changed candidate is rejected before heads or source fetch', async () => {
+  for (const change of [e => {e.schema = 'mir2.windows.r2-native-stage.v1';},
+    e => {e.candidate.sequence = 12;}, e => {e.rootVerificationSha256 = definition.predecessorProof.rootVerificationSha256;}]) {
+    const f = fixture(), envelope = clone(stageEnvelopeTemplate(null)); change(envelope);
+    const response = await f.handle(request('/promote', envelope), f.env);
+    assert.equal(response.status, 400); assert.equal(f.bucket.calls.length, 0); assert.equal(f.calls.length, 0);
+  }
+});
+policyTest('caller cannot select arbitrary URL/body/hash/key or normalized/query escape', async () => {
+  for (const [route, body] of [['/import', {index: 0, url: 'https://other.invalid'}],
+    ['/import', {path: 'https://other.invalid'}], ['/import?arbitrary=1', {index: 0}]]) {
+    const f = fixture(); const response = await f.handle(request(route, body), f.env);
+    assert.equal(response.status, 400); assert.equal(f.bucket.calls.length, 0); assert.equal(f.calls.length, 0);
+  }
+});
+
+policyTest('fresh wrong SHA body cannot publish even with correct declared length', async () => {
+  const f = fixture({originOverride: entry => new Response(new Uint8Array(entry.size),
+    {headers: {'content-length': String(entry.size)}})});
+  const response = await f.handle(request('/import'), f.env);
+  assert.equal(response.status, 502); assert.equal(f.bucket.records.has(definition.objects[0].r2Key), false);
+  const result = await response.json(); assert.equal(result.pointerChanged, false);
+  assert.equal(result.objectOutcomeUnknown, true); // Reconcile required, even for a modeled rejection.
+});
+policyTest('concurrent same immutable key creates exactly once and never overwrites', async () => {
+  const f = fixture();
+  const responses = await Promise.all([f.handle(request('/import'), f.env), f.handle(request('/import'), f.env)]);
+  assert.deepEqual(responses.map(r => r.status).sort(), [201, 412]);
+  assert.equal(f.bucket.records.size, 1);
+  const stored = f.bucket.records.get(definition.objects[0].r2Key);
+  assert.equal(sha(stored.bytes), definition.objects[0].sha256);
+  assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 2);
+  for (const call of f.bucket.calls.filter(c => c.op === 'put')) assert.equal(call.options.onlyIf.get('if-none-match'), '*');
+});
+policyTest('no-progress source cancels partial stream with unknown put and no pointer writes', async () => {
+  let cancelled = false;
+  const f = fixture({policy: {...OPERATION_POLICY, noProgressMs: 30, importMs: 120,
+    originHeaderMs: 20, r2SettleAllowanceMs: 30},
+    originOverride: entry => new Response(new ReadableStream({
+      start(controller) {controller.enqueue(FEED_BYTES.slice(0, 16));},
+      cancel() {cancelled = true;},
+    }), {headers: {'content-length': String(entry.size)}})});
+  const response = await f.handle(request('/import'), f.env), result = await response.json();
+  assert.equal(response.status, 504); assert.equal(result.error, 'operation_no_progress');
+  assert.equal(result.objectOutcomeUnknown, true); assert.equal(result.pointerAttempted, false);
+  assert.ok(cancelled); assert.equal(f.bucket.records.size, 0);
+});
+
+// Retained original107 cases, adapted only fixed release/approved policy fixtures.
+{
+const {default: worker} = await import('../src/index.ts');
 // No test may reach real HTTP or a credential. These are platform behavior
 // models; native Workers/R2/CMS/network acceptance is deliberately separate.
 globalThis.fetch = async () => {throw new Error('network disabled in offline fixtures');};
@@ -41,8 +408,8 @@ test('unrelated legacy Web PUT retains its existing behavior', async () => {
   assert.equal(writes[0][2].onlyIf, undefined);
 });
 
-const feedBytes = Uint8Array.from(Buffer.from('eyJzY2hlbWEiOiJtaXIyLndpbmRvd3MudXBkYXRlLWZlZWQudjEiLCJjaGFubmVsIjoiaW52aXRlZCIsInBsYXRmb3JtIjoid2luZG93cy14NjQiLCJzZXF1ZW5jZSI6MTIsImNyZWF0ZWRVbml4IjoxNzkxMDgwMzA1LCJleHBpcmVzVW5peCI6MTc5MzY3MjMwNSwibWluQm9vdHN0cmFwIjoxLCJwcm90b2NvbCI6ImNyeXN0YWwtbWlyMi12MSIsImNvbnRlbnQiOiJtaXIyLndpbmRvd3MucGFja2FnZS1tYW5pZmVzdC52NCIsImdhbWUiOnsiZGlyZWN0b3J5IjoicmVsZWFzZXMvZ2FtZS1XTi1DQU5ESURBVEUtMjAyNjEwMDQtaW52aXRlZC0xNyIsImlkZW50aXR5IjoiV04tQ0FORElEQVRFLTIwMjYxMDA0LWludml0ZWQtMTciLCJtZXRhZGF0YSI6W3sicGF0aCI6IlBBQ0tBR0UtTUFOSUZFU1QuanNvbiIsInNpemUiOjI0MzYwMTc0LCJzaGEyNTYiOiJDRUFFMzY2QkVCQ0ExQzE5QzNGNTI5RUIyMkYwMTZDQ0M4MERGRjVCODY1NTY5NEU3NjY4MkUzMUFCMTJDQjE4In0seyJwYXRoIjoiVkVSU0lPTi5qc29uIiwic2l6ZSI6MTIyMSwic2hhMjU2IjoiMTQwOUUyMUM5RjFBRTdBMDRCNzE2MDNDRTEyMjBGRTM4QzM3RjIyMkQ1NDg1OUFGMjU5MkNERDcyQ0U5OUIxNiJ9LHsicGF0aCI6IlJFTEVBU0UtU1RBVEVNRU5ULmpzb24iLCJzaXplIjo3MDcsInNoYTI1NiI6IkU2NEE4RUY0RkM2MkU2RTlGNkZFMTY2MjUzMjFGQzhBODhBMEM4QzI5QTY2MUFFREE0NjAyNUIwODAxNURBODIifSx7InBhdGgiOiJSRUxFQVNFLVNUQVRFTUVOVC5wN3MiLCJzaXplIjoxNjE0LCJzaGEyNTYiOiJCRUU4NEI1NzRGNDNGNjQxMUVCMUJDM0FCMjNBM0NFMEMzODlCODUzRkIwRjhCNjNGNkFEOUJEQjEyODc4NTZFIn1dfSwiZW5naW5lIjp7ImRpcmVjdG9yeSI6InJlbGVhc2VzL3VwZGF0ZXItRkIzNTA1RDZEODREOTk3Qy1zMTIiLCJpZGVudGl0eSI6IjEiLCJtZXRhZGF0YSI6W3sicGF0aCI6IkVOR0lORS5qc29uIiwic2l6ZSI6NDIxLCJzaGEyNTYiOiIzMTQ2MTY5RkM2MTc2QTVFQUVBNDJCQUFBMDQzMEUzNDVGNUI3RTYxNDcwOTk3MUEwMEIwRDdEMEM0NzMyQkNGIn0seyJwYXRoIjoiRU5HSU5FLnA3cyIsInNpemUiOjE2MTQsInNoYTI1NiI6IjcwREMyREMxMUMzMTA1RkQ0REQyQjgwQkQ3RjlGQjMwRjdBN0Y0QjNCQkJGRTJBQTEzOTdDMDM4QzlCM0MxNEEifV19fQ==', 'base64'));
-const signatureBytes = Uint8Array.from(Buffer.from('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', 'base64'));
+const feedBytes = FEED_BYTES;
+const signatureBytes = CMS_BYTES;
 const feed = JSON.parse(new TextDecoder().decode(feedBytes));
 const NOW = (feed.createdUnix + 100) * 1000;
 const bytesFor = entry => entry.index === 0 ? feedBytes : entry.index === 1 ? signatureBytes : undefined;
@@ -142,7 +509,9 @@ function fixture({originOverride, now = NOW, fixedLengthStream} = {}) {
   const stats = {fixedSizes: [], digestBytes: 0};
   const fetch = async (url, options) => {
     calls.push({url, options});
-    const entry = definition.objects.find(item => definition.originBase + item.originRelativePath === url);
+    const entry = definition.objects.find(item => definition.originBase + item.originRelativePath === url)
+      ?? (url === definition.originBase + 'latest.json' ? definition.objects[0]
+        : url === definition.originBase + 'latest.p7s' ? definition.objects[1] : undefined);
     assert.ok(entry, 'only a literal fixed-origin object may be fetched');
     assert.equal(options.method, 'GET'); assert.equal(options.redirect, 'manual');
     assert.deepEqual(options.headers, {'accept-encoding': 'identity', 'cache-control': 'no-store'});
@@ -168,7 +537,7 @@ test('source proof and actual small feed/signature match literal closure', async
   assert.equal(await validateNativePlan(definition, webcrypto), true);
   assert.equal(definition.objects.length, 36);
   assert.equal(definition.objects.filter(entry => entry.path.startsWith('installers/'))[0].originRelativePath,
-    'releases/bootstrap-WN-CANDIDATE-20261004-invited-17/Numeron-Legend-of-Rebirth-20261004-r17-Bootstrap.exe');
+    definition.objects[2].path);
 });
 
 for (const change of ['candidate', 'object', 'root', 'origin', 'installer']) {
@@ -305,16 +674,25 @@ for (const failure of ['301', '302', '307', '206', '404', 'gzip', 'missing-lengt
 }
 test('early create race cancels blocked source and never retries unconditionally', {timeout: 3000}, async () => {
   let cancelled = false;
+  let observedCancel;
+  const cancellation = new Promise(resolve => {observedCancel = resolve;});
   const f = fixture({originOverride(entry) {
     let emitted = false;
     return new Response(new ReadableStream({
       pull(controller) {if (!emitted) {emitted = true; controller.enqueue(new Uint8Array([0]));}},
-      cancel() {cancelled = true;},
+      cancel() {cancelled = true; observedCancel();},
     }), {headers: {'content-length': String(entry.size)}});
   }});
   f.bucket.forcedConflict.add(definition.objects[0].r2Key);
   const response = await f.handle(request('/import'), f.env);
-  assert.equal(response.status, 412); assert.ok(cancelled);
+  assert.equal(response.status, 412);
+  // Bounded cleanup must not delay the response on an unsettled storage call.
+  // Observe the source cancellation independently, with a finite test deadline.
+  await new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error('source cancellation deadline')), 250);
+    cancellation.then(() => {clearTimeout(timeout); resolve();}, reject);
+  });
+  assert.ok(cancelled);
   assert.equal(f.bucket.calls.filter(call => call.operation === 'put').length, 1);
   assert.equal(f.bucket.records.size, 0);
 });
@@ -374,8 +752,8 @@ for (const change of ['missing', 'not-passed', 'mode', 'plan', 'root', 'table', 
     if (change === 'root') stage.rootVerificationSha256 = '0'.repeat(64);
     if (change === 'table') stage.nativePlanSha256 = '0'.repeat(64);
     if (change === 'closure') stage.objectsSha256 = '0'.repeat(64);
-    if (change === 'candidate') stage.candidate.sequence = 13;
-    if (change === 'expected-current') stage.expectedCurrent = clone(stage.candidate);
+    if (change === 'candidate') stage.candidate.sequence++;
+    if (change === 'expected-current') stage.expectedCurrent = {...clone(stage.candidate), feedSha256: '0'.repeat(64)};
     if (change === 'pointer-changed') stage.pointerChanged = true;
     if (change === 'public-false') stage.publicVerified = false;
     if (change === 'public-host') stage.publicBase = 'https://attacker.invalid/';
@@ -476,4 +854,33 @@ test('concurrent prepared promotions have one winner and no unconditional overwr
   assert.deepEqual(responses.map(response => response.status).sort(), [200, 412]);
   assert.equal(f.bucket.records.size, 37);
   assert.equal(f.bucket.calls.filter(call => call.operation === 'put').length, 2);
+});
+}
+
+
+for (const authority of ['wrong.invalid', 'assets.mir2.obelisk.build:444']) {
+  for (const route of ['/import', '/promote', '/objects/0', '/pointer']) {
+    test('exact authority rejects authenticated wronghost/port before side effects: ' + authority + route, async () => {
+      const f = fixture(); f.bucket.seedClosure();
+      const read = route === '/objects/0' || route === '/pointer';
+      const req = new Request('https://' + authority + '/upload/native-r17' + route, {
+        method: read ? 'GET' : 'POST', headers: {'authorization': 'Bearer ' + MOCK_SECRET,
+          'content-type': 'application/json'},
+        ...(read ? {} : {body: JSON.stringify(route === '/promote' ? stageEnvelopeTemplate(null) : {index: 0})}),
+      });
+      const response = await f.handle(req, f.env);
+      if (response.body) await response.body.cancel(); // Release an unexpectedly accepted GET before assertion.
+      assert.equal(response.status, 400); assert.equal(f.calls.length, 0); assert.equal(f.bucket.calls.length, 0);
+    });
+  }
+}
+test('late read-only R2 get resolution cancels orphaned body after operation deadline', async () => {
+  let cancelled = false;
+  const f = fixture({policy: {...OPERATION_POLICY, importMs: 20, noProgressMs: 100}});
+  f.bucket.get = () => new Promise(resolve => setTimeout(() => resolve({...metadata(definition.objects[0], FEED_BYTES),
+    body: new ReadableStream({cancel() {cancelled = true;}})}), 40));
+  const response = await f.handle(request('/objects/0', null, 'GET'), f.env);
+  assert.equal(response.status, 504);
+  await new Promise(resolve => setTimeout(resolve, 50));
+  assert.equal(cancelled, true); assert.equal(f.bucket.calls.filter(c => c.op === 'put').length, 0);
 });

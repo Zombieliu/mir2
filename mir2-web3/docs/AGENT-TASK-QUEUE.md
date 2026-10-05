@@ -1,5 +1,31 @@
 # Agent Task Queue
 
+> 2026-10-05 root integrates the frozen five-file updater13 publication tools,
+> genuine root-issued CMS/object proof and portable byte-pinned fixtures.
+> Independent Node138/Python64 checks pass, overlapping worker202; Windows
+> actual SIGINT1 passes while Linux GNU timeout stays open. Exact host/port,
+> body progress fences, late read cleanup and both limiter AbortSignals are
+> checked. Whole-stage330-minute INT/30-second kill is separate from per-object
+> budgets; raw native-table Git bytes are protected. Old failures/interruptions
+> remain. Six new origin objects, effective auth, stage/promote and CDN/range/
+> laptop speed stay open; public12/game6032 and services are unchanged. No new
+> build/rollout or full Goal acceptance follows.
+> [Source and evidence](generated/player-qa/native-delivery-20261005/preview-publication-01/README.md).
+
+> 2026-10-05 root completes the other two existing signed-package selections
+> against unchanged release-profile updater inputs: fresh1/0 and R16delta1/0.
+> Actual125965 targets,11 bundles, pending zero-payload recheck, quarantine and
+> complete old/new hash rollback pass in owned file-mapped fixtures. Fresh update
+> API2383.185s contains staging618.834/prepare85.638/install1429.363; the3310.507s
+> whole test separately includes recovery884.554s. R16delta27,334,062 payload bytes
+> and tampered-descriptor full fallback pass. Actual pinned CMS/closed36 preview13
+> verification succeeds. Checked-read Candidate77 library passes and12 balanced
+> API measurements have mixed results; it stays unintegrated/unshipped. Full
+> installer/health/HTTPS/laptop speed and authorized R2/CDN rollout remain OPEN.
+> Current feed12/services/F/real saves are unchanged. A public13 Bootstrap link
+> must wait for coherent publication; fixed13 upload-tool integration is next.
+> [Raw terminal library/CMS proof and rejected speed Candidate](generated/player-qa/native-delivery-20261005/current-signed-library-01/README.md).
+
 > 2026-10-05 exact pushed updater source48454 now builds a pinned-CMS verified
 > release engine/launcher and 27,496,643-byte R17 Bootstrap. Original game6032
 > stays unchanged; local preview sequence13 is not published (public12). Two

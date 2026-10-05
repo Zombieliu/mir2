@@ -128,7 +128,7 @@ jobs:
   native-download-tooling-check:
     if: ${{ github.event_name == 'workflow_dispatch' && (inputs.native_delivery_operation == 'verify' || inputs.native_delivery_operation == 'stage' || inputs.native_delivery_operation == 'promote') }}
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Checkout native tooling without persisted credentials
         uses: actions/checkout@v4
@@ -140,9 +140,22 @@ jobs:
         with:
           python-version: '3.13'
 
+      - name: Use the root-verified Node version for native Worker checks
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+
+      - name: Check immutable imports, stream cancellation and pointer CAS
+        working-directory: mir2-web3
+        run: node --experimental-strip-types --test infra/cloudflare/mir2-r2-bulk-upload/test/native-r17-publication.test.mjs
+
       - name: Check fixed routes, stream bounds, receipts and POSIX permissions
         working-directory: mir2-web3
         run: python3 -B scripts/test_native_r17_r2_delivery.py
+
+      - name: Check SIGINT termination retains uncertain write receipts
+        working-directory: mir2-web3
+        run: python3 -B scripts/test_native_r17_interrupt.py
 
       - name: Retain raw offline checks
         if: ${{ always() }}
@@ -157,7 +170,7 @@ jobs:
     if: ${{ github.event_name == 'workflow_dispatch' && inputs.native_delivery_operation == 'stage' }}
     needs: native-download-tooling-check
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 360
     steps:
       - name: Checkout fixed native publication source
         uses: actions/checkout@v4
@@ -166,12 +179,15 @@ jobs:
 
       - name: Stage immutable objects and verify complete public bytes
         working-directory: mir2-web3
+        timeout-minutes: 345
         env:
           MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
         run: |
           set -euo pipefail
           install -d -m 700 "$RUNNER_TEMP/mir2-native-r17-stage"
-          python3 -B scripts/native_r17_r2_delivery.py --mode stage --receipt "$RUNNER_TEMP/mir2-native-r17-stage/receipt.json"
+          # Whole-stage budget is separate from per-object budgets. Interrupt
+          # first so Python can retain unknown outcomes before the hard cap.
+          timeout --signal=INT --kill-after=30s 330m python3 -B scripts/native_r17_r2_delivery.py --mode stage --receipt "$RUNNER_TEMP/mir2-native-r17-stage/receipt.json"
           sha256sum "$RUNNER_TEMP/mir2-native-r17-stage/receipt.json" > "$RUNNER_TEMP/mir2-native-r17-stage/receipt.sha256"
 
       - name: Retain the stage receipt including failures
@@ -228,13 +244,14 @@ jobs:
 
       - name: Promote the verified stage once and check public aliases
         working-directory: mir2-web3
+        timeout-minutes: 9
         env:
           MIR2_R2_UPLOAD_SECRET: ${{ secrets.MIR2_R2_UPLOAD_SECRET }}
           MIR2_NATIVE_STAGE_SHA: ${{ inputs.native_stage_sha256 }}
         run: |
           set -euo pipefail
           chmod 600 "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json"
-          python3 -B scripts/native_r17_r2_delivery.py --mode promote --receipt "$RUNNER_TEMP/mir2-native-r17-promote/receipt.json" --stage-receipt "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json" --stage-sha256 "$MIR2_NATIVE_STAGE_SHA"
+          timeout --signal=INT --kill-after=30s 8m python3 -B scripts/native_r17_r2_delivery.py --mode promote --receipt "$RUNNER_TEMP/mir2-native-r17-promote/receipt.json" --stage-receipt "$RUNNER_TEMP/mir2-native-r17-promote/stage/receipt.json" --stage-sha256 "$MIR2_NATIVE_STAGE_SHA"
 
       - name: Retain promotion and unknown-outcome receipts
         if: ${{ always() }}

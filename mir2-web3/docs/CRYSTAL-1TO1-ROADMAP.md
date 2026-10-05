@@ -1,5 +1,28 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-05 updater13 publication tools pass root138 Node/64 Python checks
+> with worker overlap retained; one actual Windows SIGINT check passes. Fixed
+> host, separate progress/absolute budgets, late read cleanup, full-chain abort
+> and observed ETag CAS remain bounded. Git preserves the admitted raw table;
+> workflow adds separate whole-stage INT/hard fallback limits. Linux process
+> checks and actual auth/R2/public bytes/CDN/laptop speed are still pending.
+> Actual source13 CMS/36-object closure is bound; six new origin objects and
+> publication remain open. This is delivery preparation, not frontend/gameplay
+> parity or a new live release. Public12/game6032 are unchanged.
+> [Scope/evidence](generated/player-qa/native-delivery-20261005/preview-publication-01/README.md).
+
+> 2026-10-05 the remaining real signed release-library selections both pass1/0:
+> full metadata-only13 seed/all125965 targets/11 bundles/actual quarantine rollback,
+> and realR16 delta27,334,062 payload bytes/full old+new hashes/tampered fallback.
+> Actual fresh check_update2383.185s includes stage618.834/prepare85.638/install
+> 1429.363s; its3310.507s command also includes full verification and recovery.
+> These are owned Windows file-mapped library flows, not public network/installer
+> or game-health acceptance. Genuine pinned CMS binds36 objects to preview13;
+> no public feed/source/R2/service change. Mixed12-round checked-read Candidate
+> stays unintegrated. Authorized R2/CDN, coherent publication and matched laptop
+> speed gates remain OPEN; source48454 engine and game6032 are kept distinct.
+> [Exact terminal proof and timing limits](generated/player-qa/native-delivery-20261005/current-signed-library-01/README.md).
+
 > 2026-10-05 exact updater source48454 produces a verified release bundle and
 > new 27,496,643-byte Bootstrap, retaining original gameR17/source6032. Local
 > preview sequence13 is unpublished; public12 stays unchanged. Two real signed
