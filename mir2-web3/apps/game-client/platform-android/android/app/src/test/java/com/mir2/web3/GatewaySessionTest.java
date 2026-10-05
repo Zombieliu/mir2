@@ -914,6 +914,141 @@ public class GatewaySessionTest {
         }
     }
 
+    @Test public void heroMetadataRequiresListedStartAndPreservesPublicPackets() throws Exception {
+        String[] packets = {"HeroInformation", "HeroBaseStatsInfo", "HeroHealthChanged",
+                "UpdateHeroSpawnState", "TransferHeroItem", "TakeBackHeroItem",
+                "SetAutoPotValue", "SetAutoPotItem", "UseItem", "DeleteItem",
+                "MoveItem", "EquipItem", "RemoveItem", "MergeItem", "ObjectHero",
+                "ObjectRemove", "ObjectDied", "MountUpdate", "FishingUpdate", "ObjectPoisoned",
+                "NewMagic", "ObjectMagic", "MagicDelay", "MagicLeveled"};
+        connect();
+        for (String packet : packets) peer.send(GatewaySession.object("type", "packet", "packet", packet,
+                "payload", new JSONObject()).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        roster();
+        for (String packet : packets) peer.send(GatewaySession.object("type", "packet", "packet", packet,
+                "payload", new JSONObject()).toString());
+        assertNull(gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+        session.start(7); commands.poll(3, TimeUnit.SECONDS);
+        assertNull("Hero metadata is not owner/bootstrap authority", phase(GatewaySession.Phase.STARTING).world);
+        for (String packet : packets) {
+            JSONObject envelope = GatewaySession.object("type", "packet", "packet", packet,
+                    "payload", GatewaySession.object("marker", packet, "grid", "HeroInventory",
+                            "gridFrom", "HeroInventory", "gridTo", "Inventory", "hero", true));
+            peer.send(envelope.toString());
+            String raw = gameplayPackets.poll(3, TimeUnit.SECONDS);
+            assertNotNull("Public Hero packet missing from Android host: " + packet, raw);
+            assertEquals(envelope.toString(), WireJson.decode(raw).toString());
+        }
+        assertNull("Hero information is not a storage transfer receipt", receipts.poll(100, TimeUnit.MILLISECONDS));
+        for (String unsupported : new String[]{"HeroModel", "heroInventory", "stage5Command", "qa.giveItem"}) {
+            peer.send(GatewaySession.object("type", "packet", "packet", unsupported,
+                    "payload", new JSONObject()).toString());
+            assertNull(gameplayPackets.poll(100, TimeUnit.MILLISECONDS));
+        }
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":1}}");
+        phase(GatewaySession.Phase.CHARACTERS);
+        peer.send(GatewaySession.object("type", "packet", "packet", "HeroInformation",
+                "payload", new JSONObject()).toString());
+        assertNull("Rejected Start retires Hero forwarding", gameplayPackets.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+
+    private static JSONObject heroWireItem(Object id) {
+        return GatewaySession.object("unique_id",id,"item_index",27,"current_dura",123,"max_dura",456,
+                "count",201,"soul_bound_id",-1,"identified",true,"cursed",false,
+                "slots",new org.json.JSONArray(),"gem_count",0,"added_stats",new org.json.JSONArray(),
+                "awake_type",0,"awake_values",new org.json.JSONArray(),"refined_value",0,"refine_added",0,
+                "refine_success_chance",0,"wedding_ring",-1,"expire_info",JSONObject.NULL,
+                "rental_information",JSONObject.NULL,"is_shop_item",false,"sealed_info",JSONObject.NULL,"gm_made",false);
+    }
+
+    @Test public void fullHeroInformationPreserves42Cells14EquipmentAndUnsignedNestedItems() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3,TimeUnit.SECONDS);
+        phase(GatewaySession.Phase.STARTING);
+        org.json.JSONArray inventory=new org.json.JSONArray(), equipment=new org.json.JSONArray();
+        for (int i=0;i<42;i++) {
+            JSONObject item=heroWireItem(i==3 ? new java.math.BigInteger("18446744073709551615") : Long.valueOf(19000+i));
+            org.json.JSONArray sockets=item.getJSONArray("slots");
+            for (int j=0;j<3;j++) sockets.put(heroWireItem(21000+i*3+j));
+            inventory.put(item);
+        }
+        for (int i=0;i<14;i++) equipment.put(i==0 ? heroWireItem(70001) : JSONObject.NULL);
+        JSONObject info=GatewaySession.object("object_id",12,"name","OFFLINE TLS Hero","class","Wizard",
+                "gender","Female","level",20,"hair",0,"hp",100,"mp",30,"experience",10,"max_experience",100,
+                "inventory",inventory,"equipment",equipment,"magics",new org.json.JSONArray(),
+                "auto_pot",false,"auto_hp_percent",30,"auto_mp_percent",40,"hp_item_index",27,"mp_item_index",17);
+        JSONObject envelope=GatewaySession.object("type","packet","packet","HeroInformation",
+                "payload",GatewaySession.object("info",info));
+        int bytes=envelope.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8).length;
+        assertTrue(bytes > 65536 && bytes < 512*1024);
+        peer.send(envelope.toString());
+        String raw=gameplayPackets.poll(3,TimeUnit.SECONDS);
+        assertNotNull("Full Hero information must reach the typed Rust decoder",raw);
+        assertEquals(envelope.toString(),WireJson.decode(raw).toString());
+        JSONObject actual=WireJson.decode(raw).getJSONObject("payload").getJSONObject("info");
+        assertEquals(42,actual.getJSONArray("inventory").length());
+        assertEquals(14,actual.getJSONArray("equipment").length());
+        JSONObject carried=actual.getJSONArray("inventory").getJSONObject(3);
+        assertEquals("18446744073709551615",carried.opt("unique_id").toString());
+        assertEquals(201,carried.getInt("count"));
+        assertEquals(3,carried.getJSONArray("slots").length());
+        assertNull("Hero info is not a private transfer ACK",receipts.poll(100,TimeUnit.MILLISECONDS));
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":1}}");
+        phase(GatewaySession.Phase.CHARACTERS);
+    }
+
+    @Test public void oversizedHeroInformationFailsClosedBeforeOwnerBootstrap() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3,TimeUnit.SECONDS);
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(GatewaySession.object("type","packet","packet","HeroInformation",
+                "payload",GatewaySession.object("info",new JSONObject(),"probe","文".repeat(180000))).toString());
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+        assertNull(receipts.poll(100,TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void smallHeroReceiptDoesNotAcquireLargeInformationByteBudget() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3,TimeUnit.SECONDS);
+        phase(GatewaySession.Phase.STARTING);
+        peer.send(GatewaySession.object("type","packet","packet","HeroHealthChanged",
+                "payload",GatewaySession.object("hp",80,"mp",20,"probe","文".repeat(7000))).toString());
+        phase(GatewaySession.Phase.DISCONNECTED);
+        assertNull(gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+        assertNull(receipts.poll(100,TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void heroMetadataSurvivesSameOwnerMapLoadWithoutOpeningPlayerReceiptRoutes() throws Exception {
+        connect(); roster(); session.start(7); commands.poll(3,TimeUnit.SECONDS);
+        peer.send("{\"type\":\"packet\",\"packet\":\"StartGame\",\"payload\":{\"result\":4}}");
+        peer.send("{\"type\":\"worldSnapshot\",\"payload\":{\"playerObjectId\":42,\"mapFileName\":\"0\",\"entities\":["
+                + "{\"objectId\":42,\"kind\":\"selfPlayer\",\"name\":\"Fixture\",\"x\":302,\"y\":634}]}}");
+        phase(GatewaySession.Phase.IN_GAME);
+        peer.send("{\"type\":\"packet\",\"packet\":\"MapChanged\",\"payload\":{\"fileName\":\"1\"}}");
+        assertNull(phase(GatewaySession.Phase.STARTING).worldSnapshot);
+        for (String name:new String[]{"HeroHealthChanged","SetAutoPotValue","TakeBackHeroItem"}) {
+            JSONObject envelope=GatewaySession.object("type","packet","packet",name,
+                    "payload",GatewaySession.object("hp",80,"mp",20,"success",false,"stat",12,"value",40));
+            peer.send(envelope.toString());
+            String raw=gameplayPackets.poll(3,TimeUnit.SECONDS);
+            assertNotNull(raw);
+            assertEquals(envelope.toString(),WireJson.decode(raw).toString());
+        }
+        JSONObject playerDeletion=GatewaySession.object("type","packet","packet","DeleteItem","payload",
+                GatewaySession.object("grid","Inventory","heroInventory",false,"uniqueId",99,"count",1));
+        peer.send(playerDeletion.toString());
+        assertNull("Hero route must not enable player DeleteItem",gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+        peer.send(GatewaySession.object("type","packet","packet","DeleteItem","payload",
+                GatewaySession.object("uniqueId",new java.math.BigInteger("18446744073709551615"),"count",1)).toString());
+        assertEquals("18446744073709551615",WireJson.decode(gameplayPackets.poll(3,TimeUnit.SECONDS))
+                .getJSONObject("payload").opt("uniqueId").toString());
+        assertNull(receipts.poll(100,TimeUnit.MILLISECONDS));
+        session.disconnect("OFFLINE Hero fixture end");phase(GatewaySession.Phase.DISCONNECTED);
+        peer.send(GatewaySession.object("type","packet","packet","HeroHealthChanged",
+                "payload",new JSONObject()).toString());
+        assertNull(gameplayPackets.poll(200,TimeUnit.MILLISECONDS));
+    }
+
     @Test public void questMetadataStagesOnlyDuringAuthenticatedSelectedStart() throws Exception {
         JSONObject definition = GatewaySession.object("type", "packet", "packet", "NewQuestInfo",
                 "payload", GatewaySession.object("id", 2100004, "name", "OFFLINE TLS quest"));

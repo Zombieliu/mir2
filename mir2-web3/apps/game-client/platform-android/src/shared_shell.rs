@@ -114,8 +114,9 @@ fn large_personal_host_payload_bytes(value: &Value) -> usize {
         .filter(|raw| raw.len() <= crate::social_ingress::MAX_SOCIAL_PACKET_BYTES)
     else { return 0; };
     if serde_json::from_str::<Value>(raw).ok().is_some_and(|event|
-        event["type"] == "packet" && event["packet"].as_str()
-            .is_some_and(crate::social_ingress::is_large_social_packet_name))
+        event["type"] == "packet" && (event["packet"] == "HeroInformation"
+            || event["packet"].as_str()
+                .is_some_and(crate::social_ingress::is_large_social_packet_name)))
     {
         raw.len()
     } else {
@@ -124,13 +125,14 @@ fn large_personal_host_payload_bytes(value: &Value) -> usize {
 }
 
 fn scene_render_packet(raw: &str) -> Option<&str> {
-    // Personal mail/social already passed dedicated phase/owner decoders.
+    // Personal mail/social/Hero already passed dedicated phase/owner decoders.
     // A host-only receipt is not a public scene envelope, and a full mailbox
     // exceeds the scene decoders' small caps. Neither can affect world objects.
     // Unknown or malformed other input retains fail-closed scene validation.
     // Classification does not authorize personal-data admission.
     (!crate::mail_ingress::is_mail_packet(raw)
-        && !crate::social_ingress::is_social_packet(raw)).then_some(raw)
+        && !crate::social_ingress::is_social_packet(raw)
+        && !crate::hero_ingress::is_large_hero_packet(raw)).then_some(raw)
 }
 
 #[cfg(target_os = "android")]
@@ -177,6 +179,7 @@ fn send(value: Value) {
 pub(crate) struct HostState {
     chat: crate::chat_ingress::AndroidChatIngress,
     skills: crate::skill_ingress::AndroidSkillIngress,
+    hero: crate::hero_ingress::AndroidHeroIngress,
     inventory: crate::inventory_ingress::AndroidInventoryIngress,
     game_shop: crate::game_shop_ingress::AndroidGameShopIngress,
     storage: crate::storage_ingress::AndroidStorageIngress,
@@ -214,6 +217,7 @@ impl HostState {
     fn reset_personal(&mut self) {
         self.chat.reset();
         self.skills.reset();
+        self.hero.reset();
         self.inventory.reset();
         self.game_shop.reset();
         self.storage.reset();
@@ -239,6 +243,8 @@ impl HostState {
             .flush(mir2_bevy_runtime::native_ingest::push_native_chat_line);
         self.skills
             .flush(mir2_bevy_runtime::native_ingest::push_native_skill_model);
+        self.hero
+            .flush(mir2_bevy_runtime::native_ingest::push_native_hero_model);
         self.inventory.flush(
             mir2_bevy_runtime::native_ingest::push_native_inventory_model,
             mir2_bevy_runtime::native_ingest::push_native_inventory_operation_ack,
@@ -385,6 +391,30 @@ impl HostState {
             return Ok(false);
         }
         self.social.packet(raw, self.player.presentation_cursor())
+    }
+
+    fn accept_hero_packet(&mut self, screen: Screen, raw: &str) -> Result<bool, &'static str> {
+        if !matches!(self.phase.as_str(), "STARTING" | "IN_GAME")
+            || !matches!(screen, Screen::StartingGame | Screen::InGame)
+        {
+            return Ok(false);
+        }
+        self.hero.packet(raw, self.player.presentation_cursor())
+    }
+
+    fn bind_hero_snapshot(&mut self, raw: &str) -> Result<(), &'static str> {
+        // The validated skill producer already owns this connection/character
+        // epoch. Read its typed output; do not invent a second Hero epoch or
+        // accept a session id supplied by the server/client JSON. Admission
+        // failure still retains the skill FIFO for the usual flush retry.
+        let mut session_epoch = None;
+        self.skills.flush(|model| {
+            session_epoch = serde_json::from_str::<mir2_client_bevy::skill_model::SkillModel>(&model)
+                .ok().map(|model| model.authority.session_epoch);
+            mir2_bevy_runtime::native_ingest::push_native_skill_model(model)
+        });
+        self.hero.snapshot(raw, self.player.presentation_cursor(),
+            session_epoch.filter(|epoch| *epoch != 0).ok_or("Missing Hero skill-owner epoch")?)
     }
 
     fn bind_social_owner(&mut self) -> Result<(), &'static str> {
@@ -1610,8 +1640,11 @@ fn receive(
                         host.accept_mail_packet(model.screen, raw).is_err()
                     } else if crate::social_ingress::is_social_packet(raw) {
                         host.accept_social_packet(model.screen, raw).is_err()
+                    } else if crate::hero_ingress::is_large_hero_packet(raw) {
+                        host.accept_hero_packet(model.screen, raw).is_err()
                     } else {
-                        host.accept_skill_packet(model.screen, raw).is_err()
+                        host.accept_hero_packet(model.screen, raw).is_err()
+                            || host.accept_skill_packet(model.screen, raw).is_err()
                             || host.accept_inventory_packet(model.screen, raw).is_err()
                             || host.accept_player_packet(model.screen, raw).is_err()
                             || host.accept_chat_packet(model.screen, raw).is_err()
@@ -1965,6 +1998,7 @@ fn receive(
             mir2_bevy_runtime::native_ingest::push_native_data_reset();
         } else if map_changed || (phase == "STARTING" && host.phase == "IN_GAME") {
             host.skills.clear_scene();
+            host.hero.clear_scene();
             host.player.clear_scene();
             host.npc.clear_scene();
             host.quests.clear_scene();
@@ -2011,6 +2045,7 @@ fn receive(
                     if host.bind_chat_owner().is_ok()
                         && host.bind_social_owner().is_ok()
                         && host.social.snapshot(raw).is_ok()
+                        && host.bind_hero_snapshot(raw).is_ok()
                         && host.bind_npc_snapshot(raw).is_ok()
                         && host.bind_quest_snapshot(raw).is_ok()
                         && host.bind_game_shop_snapshot(raw).is_ok()
@@ -2176,6 +2211,7 @@ fn receive(
                 host.storage.reset();
                 host.mail.reset();
                 host.social.reset();
+                host.hero.reset();
                 model.apply_gateway_event(Event::StartGameAck {
                     accepted: false,
                     reason: Some(message),
@@ -2977,6 +3013,133 @@ mod mail_egress_tests;
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn hero_actual_host_stages_binds_and_forwards_without_render_acceptance() {
+        let mut app=game_shop_receive_app();
+        INBOX.lock().unwrap().extend([
+            game_shop_host_metadata("ObjectHero",json!({"objectId":12,"name":"OFFLINE Hero",
+                "class":"Wizard","gender":"Female","ridingMount":true})),
+            game_shop_host_metadata("HeroInformation",json!({"info":crate::hero_ingress::tests::info()})),
+        ]);
+        app.update();
+        assert_eq!(app.world().resource::<HostState>().hero.pending_count(),2);
+        assert!(app.world().resource::<HostState>().hero.model().info.is_none());
+        assert!(app.world().resource::<HostState>().pending_render_request.is_none());
+        INBOX.lock().unwrap().push_back(game_shop_host_world(42,"Fixture","0"));
+        app.update();
+        let host=app.world().resource::<HostState>();
+        let hero=host.hero.model();
+        assert_eq!(hero.info.as_ref().unwrap().name,"OFFLINE Hero");
+        assert_eq!(hero.info.as_ref().unwrap().inventory.as_ref().unwrap().len(),42);
+        assert_eq!(hero.info.as_ref().unwrap().inventory.as_ref().unwrap()[3].as_ref().unwrap().unique_id,u64::MAX);
+        assert_eq!(hero.info.as_ref().unwrap().magics[0].key,17);
+        assert_ne!(hero.session_epoch,0);
+        assert!(hero.spawned);
+        assert_eq!(host.hero.pending_count(),0,"Actual native producer did not accept the Hero model");
+        assert!(host.pending_render_request.is_some());
+        assert_eq!(app.world().resource::<NativeShellModel>().screen,Screen::StartingGame);
+        // This host fixture stops at the real typed native producer. It does
+        // not install the renderer's private Hero consumer or simulate JNI.
+        assert!(app.world().resource::<mir2_client_bevy::hero_model::HeroModel>().info.is_none());
+    }
+
+    #[test]
+    fn hero_owner_epoch_comes_from_exact_existing_skill_producer_even_under_backpressure() {
+        let mut app=game_shop_receive_app();
+        let raw=game_shop_host_world(42,"Fixture","0")["worldSnapshot"].as_str().unwrap().to_owned();
+        let mut host=app.world_mut().resource_mut::<HostState>();
+        host.skills.snapshot(&raw).unwrap();
+        host.player.snapshot(&raw).unwrap();
+        let mut expected=None;
+        assert!(!host.skills.flush(|json| {
+            expected=Some(serde_json::from_str::<mir2_client_bevy::skill_model::SkillModel>(&json).unwrap().authority.session_epoch);
+            false
+        }));
+        host.bind_hero_snapshot(&raw).unwrap();
+        assert_eq!(host.hero.model().session_epoch,expected.unwrap());
+        assert_ne!(expected.unwrap(),0);
+    }
+
+    #[test]
+    fn hero_host_phase_and_render_failure_retire_all_bootstrap_and_receipts() {
+        let raw=crate::hero_ingress::tests::packet("HeroInformation",json!({"info":crate::hero_ingress::tests::info()}));
+        let mut host=HostState::default();
+        for phase in ["READY","CHARACTERS","DISCONNECTED","CONNECTING"] {
+            host.phase=phase.into();
+            assert!(!host.accept_hero_packet(Screen::StartingGame,&raw).unwrap());
+        }
+        host.phase="STARTING".into();
+        for screen in [Screen::Login,Screen::CharacterSelect,Screen::ConnectionLost] {
+            assert!(!host.accept_hero_packet(screen,&raw).unwrap());
+        }
+        assert!(host.accept_hero_packet(Screen::StartingGame,&raw).unwrap());
+        assert_eq!(host.hero.pending_count(),1);
+        host.pending_render_request=Some(7);
+        let mut model=NativeShellModel {screen:Screen::StartingGame,..default()};
+        assert!(fail_current_render_load(&mut host,&mut model,7,"OFFLINE Hero fixture failure"));
+        assert_eq!(host.hero.pending_count(),0);
+        assert!(host.hero.model().info.is_none());
+        assert!(!host.hero.flush(|_|panic!("Retired Hero leaked")));
+        assert!(!host.accept_hero_packet(Screen::StartingGame,&raw).unwrap());
+    }
+
+    #[test]
+    fn hero_actual_host_map_transition_preserves_owner_generation_but_rejected_start_retires_it() {
+        let mut app=game_shop_receive_app();
+        INBOX.lock().unwrap().extend([
+            game_shop_host_metadata("HeroInformation",json!({"info":crate::hero_ingress::tests::info()})),
+            game_shop_host_world(42,"Fixture","0"),
+        ]);
+        app.update();
+        let model=app.world().resource::<HostState>().hero.model();
+        let epoch=model.session_epoch;
+        let generation=model.hero_generation;
+        app.world_mut().resource_mut::<NativeShellModel>().screen=Screen::InGame;
+        INBOX.lock().unwrap().push_back(game_shop_host_world(42,"Fixture","1"));
+        app.update();
+        let host=app.world().resource::<HostState>();
+        assert_eq!((host.hero.model().session_epoch,host.hero.model().hero_generation),(epoch,generation));
+        assert_eq!(host.hero.model().info.as_ref().unwrap().name,"OFFLINE Hero");
+        assert_eq!(host.phase,"IN_GAME");
+        assert_eq!(app.world().resource::<NativeShellModel>().screen,Screen::StartingGame);
+        INBOX.lock().unwrap().push_back(json!({"phase":"CHARACTERS","message":"Rejected Start"}));
+        app.update();
+        assert!(app.world().resource::<HostState>().hero.model().info.is_none());
+        assert_eq!(app.world().resource::<HostState>().hero.pending_count(),0);
+    }
+
+    #[test]
+    fn hero_actual_host_invalid_typed_information_fails_closed_before_other_domains() {
+        let mut app=game_shop_receive_app();
+        INBOX.lock().unwrap().push_back(game_shop_host_metadata("HeroInformation",json!({"info":{},"probe":"x".repeat(70_000)})));
+        app.update();
+        assert_eq!(app.world().resource::<HostState>().phase,"DISCONNECTED");
+        assert!(app.world().resource::<HostState>().hero.model().info.is_none());
+        assert_eq!(app.world().resource::<NativeShellModel>().screen,Screen::ConnectionLost);
+        let commands=OUTBOX.lock().unwrap().drain(..).collect::<Vec<_>>();
+        assert!(commands.iter().any(|raw|serde_json::from_str::<Value>(raw).unwrap()["type"]=="disconnect"));
+    }
+
+    #[test]
+    fn hero_large_information_resides_without_entering_scene_decoders() {
+        let payload = json!({"info":{
+            "object_id":12,"name":"OFFLINE Hero","class":"Wizard","gender":"Female",
+            "level":20,"hair":0,"hp":100,"mp":30,"experience":10,"max_experience":100,
+            "inventory":vec![Value::Null;42],"equipment":vec![Value::Null;14],"magics":[],
+            "auto_pot":false,"auto_hp_percent":30,"auto_mp_percent":40,
+            "hp_item_index":0,"mp_item_index":0},"probe":"x".repeat(70_000)});
+        assert!(mir2_client_bevy::hero_model::HeroModel::default()
+            .apply_packet("HeroInformation", &payload), "Valid shared Hero information fixture");
+        let event = game_shop_host_metadata("HeroInformation", payload);
+        let raw = event["envelope"].as_str().unwrap();
+        assert!(raw.len() > 65536 && raw.len() < 512 * 1024);
+        let mut queue = VecDeque::new();
+        enqueue_host_event(&mut queue, &event.to_string());
+        assert!(queue.front() == Some(&event), "Hero information lost at JNI host envelope cap");
+        assert!(scene_render_packet(raw).is_none(), "Personal Hero information entered scene decoders");
+    }
+
     #[test]
     fn social_large_read_models_reside_without_entering_scene_decoders() {
         let event = game_shop_host_metadata("GuildNoticeChange", json!({

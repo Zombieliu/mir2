@@ -23,6 +23,8 @@ mod ground_labels;
 #[cfg(any(target_os = "android", test))]
 mod ground_pickups;
 #[cfg(any(target_os = "android", test))]
+mod hero_ingress;
+#[cfg(any(target_os = "android", test))]
 mod inventory_ingress;
 #[cfg(any(target_os = "android", test))]
 mod item_geometry;

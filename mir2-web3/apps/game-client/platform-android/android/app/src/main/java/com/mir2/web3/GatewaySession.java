@@ -311,6 +311,8 @@ final class GatewaySession implements AutoCloseable {
         boolean forwardStorageMetadata = worldPending() && isStorageMetadataPacket(packet);
         boolean forwardMailMetadata = worldPending() && isMailMetadataPacket(packet);
         boolean forwardSocialMetadata = worldPending() && isSocialMetadataPacket(packet);
+        boolean forwardHeroMetadata = worldPending()
+                && isHeroMetadataPacket(packet, envelope.optJSONObject("payload"));
         if (packet.equals("StoreItemV2") || packet.equals("TakeBackItemV2")
                 || packet.equals("ChangePassword") || packet.equals("ChangePasswordBanned")) {
             forwardReceipt(envelope);
@@ -444,7 +446,8 @@ final class GatewaySession implements AutoCloseable {
                 || (forwardGameShopMetadata && worldPending())
                 || (forwardStorageMetadata && worldPending())
                 || (forwardMailMetadata && worldPending())
-                || (forwardSocialMetadata && worldPending())) {
+                || (forwardSocialMetadata && worldPending())
+                || (forwardHeroMetadata && worldPending())) {
             forwardBounded(envelope, gameplayObserver);
             if (forwardMailMetadata && packet.equals("ReceiveMail")
                     && payload.optJSONArray("mail") != null && mailOwnerMatches()
@@ -525,15 +528,50 @@ final class GatewaySession implements AutoCloseable {
 
     private static void forwardBounded(JSONObject envelope, Consumer<String> target) {
         String raw = envelope.toString();
-        // Only full mailbox/social read models get this larger hard bound.
+        // Only full mailbox/social/Hero read models get this larger hard bound.
         // Small receipts, services and arbitrary packets retain 16 KiB.
         int limit = "packet".equals(envelope.optString("type"))
                 && ("ReceiveMail".equals(envelope.optString("packet"))
+                        || "HeroInformation".equals(envelope.optString("packet"))
                         || isLargeSocialMetadataPacket(envelope.optString("packet"))) ? 512 * 1024 : 16 * 1024;
         if (raw.getBytes(StandardCharsets.UTF_8).length > limit) {
             throw new IllegalArgumentException("inbound packet size limit");
         }
         target.accept(raw);
+    }
+
+    private static boolean isHeroMetadataPacket(String packet, JSONObject payload) {
+        // Public shared HeroModel surface, during a listed-character Start.
+        // Rust binds it to the accepted owner/epoch; none of these packets
+        // authenticate, StartGame, grant inventory or acknowledge a send.
+        if (payload == null) return false;
+        if (packet.equals("NewMagic")) return Boolean.TRUE.equals(payload.opt("hero"));
+        if (packet.equals("MoveItem") || packet.equals("EquipItem")
+                || packet.equals("RemoveItem") || packet.equals("UseItem")) {
+            return "HeroInventory".equals(payload.opt("grid"));
+        }
+        if (packet.equals("MergeItem")) {
+            return "HeroInventory".equals(payload.opt("gridFrom"))
+                    || "HeroEquipment".equals(payload.opt("gridFrom"))
+                    || "HeroInventory".equals(payload.opt("gridTo"))
+                    || "HeroEquipment".equals(payload.opt("gridTo"));
+        }
+        if (packet.equals("DeleteItem")) {
+            // Crystal's public receipt has only uid/count. Explicit player
+            // grid markers must not open the disabled player DeleteItem route.
+            // Rust still matches an unmarked uid against the owned Hero only.
+            return !Boolean.FALSE.equals(payload.opt("heroInventory"))
+                    && (!payload.has("grid") || "HeroInventory".equals(payload.opt("grid")));
+        }
+        return packet.equals("HeroInformation") || packet.equals("HeroBaseStatsInfo")
+                || packet.equals("HeroHealthChanged") || packet.equals("UpdateHeroSpawnState")
+                || packet.equals("TransferHeroItem") || packet.equals("TakeBackHeroItem")
+                || packet.equals("SetAutoPotValue") || packet.equals("SetAutoPotItem")
+                || packet.equals("ObjectHero") || packet.equals("ObjectRemove")
+                || packet.equals("ObjectDied") || packet.equals("MountUpdate")
+                || packet.equals("FishingUpdate") || packet.equals("ObjectPoisoned")
+                || packet.equals("ObjectMagic")
+                || packet.equals("MagicDelay") || packet.equals("MagicLeveled");
     }
 
     private static boolean isSocialMetadataPacket(String packet) {
