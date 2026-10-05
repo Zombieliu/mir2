@@ -6,7 +6,61 @@ use crate::{
 };
 use anyhow::{ensure, Result};
 use serde::{Deserialize, Serialize};
-use std::{fs, path::Path};
+use std::{fs, path::Path, time::Instant};
+
+/// Display-only observer; no fallible/cancellation result can interrupt commit.
+pub trait ProgressObserver {
+    fn observe(&mut self, phase: &'static str, completed: usize, total: usize, boundary: bool);
+}
+struct NoProgress;
+impl ProgressObserver for NoProgress {
+    fn observe(&mut self, _: &'static str, _: usize, _: usize, _: bool) {}
+}
+struct Phase<'a, O: ProgressObserver> {
+    root: &'a Path,
+    observer: &'a mut O,
+    phase: &'static str,
+    total: usize,
+    completed: usize,
+    started: Instant,
+    complete: bool,
+}
+impl<'a, O: ProgressObserver> Phase<'a, O> {
+    fn new(root: &'a Path, observer: &'a mut O, phase: &'static str, total: usize) -> Self {
+        let started = Instant::now();
+        observer.observe(phase, 0, total, true);
+        Self {
+            root,
+            observer,
+            phase,
+            total,
+            completed: 0,
+            started,
+            complete: false,
+        }
+    }
+    fn advance(&mut self, completed: usize) {
+        self.completed = completed;
+        self.observer
+            .observe(self.phase, self.completed, self.total, false);
+    }
+    fn finish(&mut self) {
+        self.complete = true;
+    }
+}
+impl<O: ProgressObserver> Drop for Phase<'_, O> {
+    fn drop(&mut self) {
+        self.observer
+            .observe(self.phase, self.completed, self.total, true);
+        crate::update::log(
+            self.root,
+            "local-phase-end",
+            serde_json::json!({"phase":self.phase,
+            "completed":self.completed,"total":self.total,"elapsedMs":self.started.elapsed().as_millis(),
+            "outcome":if self.complete {"complete"} else {"unfinished"}}),
+        );
+    }
+}
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Change {
@@ -104,9 +158,12 @@ fn install_staged(source: &Path, target: &Path, entry: &FileEntry) -> Result<()>
     Ok(())
 }
 pub fn recover(root: &Path) -> Result<bool> {
+    recover_observed(root, &mut NoProgress)
+}
+pub fn recover_observed(root: &Path, observer: &mut impl ProgressObserver) -> Result<bool> {
     if let Some(j) = load(root)? {
         if j.phase == "applying" {
-            rollback(root)?;
+            rollback_observed(root, observer)?;
             return Ok(true);
         }
     }
@@ -116,6 +173,9 @@ pub fn pending_activation(root: &Path) -> Result<bool> {
     Ok(load(root)?.is_some_and(|j| j.phase == "committed"))
 }
 pub fn rollback(root: &Path) -> Result<()> {
+    rollback_observed(root, &mut NoProgress)
+}
+pub fn rollback_observed(root: &Path, observer: &mut impl ProgressObserver) -> Result<()> {
     ensure!(
         !crate::platform::game_is_running(&root.join("game/mir2-platform-windows.exe"))?,
         "close the game before recovery"
@@ -127,6 +187,7 @@ pub fn rollback(root: &Path) -> Result<()> {
         j.phase == "applying" || j.phase == "committed",
         "rollback unavailable"
     );
+    let mut phase = Phase::new(root, observer, "recovering", j.records.len());
     // Check every backup before changing anything; retained journal permits retry.
     for r in &j.records {
         if let Some(old) = &r.backup {
@@ -136,7 +197,7 @@ pub fn rollback(root: &Path) -> Result<()> {
             );
         }
     }
-    for r in j.records.iter().rev() {
+    for (index, r) in j.records.iter().rev().enumerate() {
         ensure!(
             !crate::platform::game_is_running(&root.join("game/mir2-platform-windows.exe"))?,
             "game started during recovery"
@@ -152,9 +213,11 @@ pub fn rollback(root: &Path) -> Result<()> {
             safe::regular(&target)?;
             fs::remove_file(target)?;
         }
+        phase.advance(index + 1);
     }
     j.phase = "rolled-back".into();
     save(root, &j)?;
+    phase.finish();
     Ok(())
 }
 pub fn accept(root: &Path) -> Result<()> {
@@ -167,12 +230,28 @@ pub fn accept(root: &Path) -> Result<()> {
     Ok(())
 }
 pub fn prepare_and_apply(root: &Path, changes: &[Change]) -> Result<()> {
-    apply_steps(root, changes, |_| Ok(()))
+    prepare_and_apply_observed(root, changes, &mut NoProgress)
 }
+pub fn prepare_and_apply_observed(
+    root: &Path,
+    changes: &[Change],
+    observer: &mut impl ProgressObserver,
+) -> Result<()> {
+    apply_steps_observed(root, changes, |_| Ok(()), observer)
+}
+#[cfg(test)]
 fn apply_steps(
     root: &Path,
     changes: &[Change],
+    after: impl FnMut(usize) -> Result<()>,
+) -> Result<()> {
+    apply_steps_observed(root, changes, after, &mut NoProgress)
+}
+pub(crate) fn apply_steps_observed(
+    root: &Path,
+    changes: &[Change],
     mut after: impl FnMut(usize) -> Result<()>,
+    observer: &mut impl ProgressObserver,
 ) -> Result<()> {
     ensure!(
         !crate::platform::game_is_running(&root.join("game/mir2-platform-windows.exe"))?,
@@ -184,6 +263,7 @@ fn apply_steps(
             "recovery/first-launch acceptance required"
         );
     }
+    let mut preparing = Phase::new(root, observer, "preparing", changes.len());
     safe::clear_scratch(root, "backup")?;
     let mut j = Journal {
         schema: 1,
@@ -232,7 +312,7 @@ fn apply_steps(
         "not enough space for activation and rollback"
     );
     // Copy and flush every backup before the journal grants permission to mutate.
-    for r in &j.records {
+    for (index, r) in j.records.iter().enumerate() {
         if let Some(old) = &r.backup {
             let dest = safe::target(&root.join(".update/backup"), &r.path)?;
             fs::create_dir_all(dest.parent().unwrap())?;
@@ -249,8 +329,12 @@ fn apply_steps(
                 "missing staged file"
             );
         }
+        preparing.advance(index + 1);
     }
     save(root, &j)?;
+    preparing.finish();
+    drop(preparing);
+    let mut installing = Phase::new(root, observer, "installing", j.records.len());
     after(0)?;
     for (index, r) in j.records.iter().enumerate() {
         ensure!(
@@ -268,10 +352,12 @@ fn apply_steps(
             safe::regular(&target)?;
             fs::remove_file(target)?;
         }
+        installing.advance(index + 1);
         after(index + 1)?;
     }
     j.phase = "committed".into();
     save(root, &j)?;
+    installing.finish();
     Ok(())
 }
 pub fn stage_bytes(root: &Path, path: &str, bytes: &[u8]) -> Result<Change> {

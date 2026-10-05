@@ -1,0 +1,367 @@
+{
+  "schema": "mir2.updater-progress-root-integration.v1",
+  "rootBefore": "b86a71c6a6924d8d4ef4296cf4fdc06d9e392155",
+  "issuedRuntimeRevision": "4c60c323aed11829abae6ee5ce6e13c675a3c1c3",
+  "commonAncestor": "f3c30036e36441b8e306aaac9b5e8d35488d8f85",
+  "rootUpdaterDiffSinceCommonEmpty": true,
+  "baselineRuntimeFiles": [
+    "Cargo.lock",
+    "Cargo.toml",
+    "src/lib.rs",
+    "src/update.rs",
+    "src/delivery.rs",
+    "src/delivery_tests.rs"
+  ],
+  "workerOverlayFiles": [
+    "src/update.rs",
+    "src/delivery.rs",
+    "src/transaction.rs",
+    "src/ui.rs",
+    "src/progress_trace_tests.rs"
+  ],
+  "workerFreezeSha256": "dd97b3b41ac0744f8ab2401e99c316cc1ff34b6511cde34e34da97529205fb21",
+  "workerFrozenFilesRehashed": 98,
+  "issuedTrackedPublicInputs": [
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/Cargo.lock",
+      "bytes": 21776,
+      "sha256": "9c21e4d1edf0915ab46f1c3673ab3a2355f1f3be1406d5eff0fd6e054882a70a",
+      "gitBlobSha256": "9c21e4d1edf0915ab46f1c3673ab3a2355f1f3be1406d5eff0fd6e054882a70a",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/Cargo.toml",
+      "bytes": 1074,
+      "sha256": "3b48def4e3976149ce3977fc9a818effe67cfc4a534b5a963bc2479c28a4b355",
+      "gitBlobSha256": "3b48def4e3976149ce3977fc9a818effe67cfc4a534b5a963bc2479c28a4b355",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/README.md",
+      "bytes": 5833,
+      "sha256": "869e439f4754314f9c7d57238076a67404a7861a718f3888305e20bb5849541f",
+      "gitBlobSha256": "869e439f4754314f9c7d57238076a67404a7861a718f3888305e20bb5849541f",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/archive-update-release.py",
+      "bytes": 24993,
+      "sha256": "9d9803cf35462bb781e91088c385adec6af33d74244cebff162162df96d13bac",
+      "gitBlobSha256": "2fb281283d42c232307ea7e682da8e9c4a46078de396aba233cc4037faf68a3b",
+      "checkoutCRLFDifference": true
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/build-bootstrap-installer.ps1",
+      "bytes": 16720,
+      "sha256": "902e7bd7782605c8adca50b719354ec8126d3edbd7b41e98de268b255db21922",
+      "gitBlobSha256": "902e7bd7782605c8adca50b719354ec8126d3edbd7b41e98de268b255db21922",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/build-updater-release.ps1",
+      "bytes": 11689,
+      "sha256": "534fb39eed773c38f28d2fdb2095ad99eece59384af90cdfaa208855765c7427",
+      "gitBlobSha256": "8f05816fff77e6d1919316cec35531e558bd211596dca0e066738bc0edbf9c57",
+      "checkoutCRLFDifference": true
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/deploy-prepare-plan.py",
+      "bytes": 6924,
+      "sha256": "a2a84978d9afb8faa40da38ee6ef1dc945b2eedb8610501ecc8a3dd247b49bfc",
+      "gitBlobSha256": "7ae508484586e16ce2cccdf7a1424cac69cad227cae74e9b76d3342d0d3e7c6c",
+      "checkoutCRLFDifference": true
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/deploy-script-tests.py",
+      "bytes": 13075,
+      "sha256": "04caac5d7e303a1484fc8e7ec2a28ef7e877db69ab3bb335ca941f4b4b2b00fc",
+      "gitBlobSha256": "438fb27c5bdc0e1fb8be5e4f46b9d6fb356e68438169036009b00fbc33cc4249",
+      "checkoutCRLFDifference": true
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/deploy-server-release.py",
+      "bytes": 26020,
+      "sha256": "8675d4ee025aeb33e2580a5367362a0e3e90933856c28f176b7915aebdc50b3d",
+      "gitBlobSha256": "34d36d30cbe0a85092ac877e4c5a6c78026fb0d2f5edc767e8e93f26b2b2216b",
+      "checkoutCRLFDifference": true
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/make-test-crypto-fixtures.ps1",
+      "bytes": 4954,
+      "sha256": "6ada402d0a0e81c89cdbb84e1eb3749d1c6d035c2f0e1d9dfb05ee3b75b3f3ea",
+      "gitBlobSha256": "f0c1a2eeb70718b2de26a38702ed37a5848f6f1e156198b51995716431b68606",
+      "checkoutCRLFDifference": true
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/prepare-bootstrap-installer.py",
+      "bytes": 21455,
+      "sha256": "49acc3aeb06204d16bd6426fcc133d34c3282ce15008139290d0bac4ae41a174",
+      "gitBlobSha256": "49acc3aeb06204d16bd6426fcc133d34c3282ce15008139290d0bac4ae41a174",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/prepare-native-delivery.py",
+      "bytes": 14617,
+      "sha256": "a21b98a6efbe7b78e178ffafa7520779e6246e71c44e9545a98224de31f21950",
+      "gitBlobSha256": "a21b98a6efbe7b78e178ffafa7520779e6246e71c44e9545a98224de31f21950",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/prepare-native-publication.py",
+      "bytes": 14961,
+      "sha256": "da2bfe2c8358fe28aee10396c1b173f7d81e1a998d4a3f2ea024c0e7a9cd5535",
+      "gitBlobSha256": "da2bfe2c8358fe28aee10396c1b173f7d81e1a998d4a3f2ea024c0e7a9cd5535",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/prepare-signed-native-publication.ps1",
+      "bytes": 8069,
+      "sha256": "8d0ff91ad3dde7bd706c4a208e092e8ebb0fcafdd3a79441fc561b18426e9ee0",
+      "gitBlobSha256": "8d0ff91ad3dde7bd706c4a208e092e8ebb0fcafdd3a79441fc561b18426e9ee0",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/prepare-updater-input.py",
+      "bytes": 2406,
+      "sha256": "74805e0750becfb69bc471de0412d22fe79ce998013b865bbe61f78d1bad6053",
+      "gitBlobSha256": "d79236ce6bd20a9ddfe7c820d81437dc01d50249a333571e19cfd041b78d6a49",
+      "checkoutCRLFDifference": true
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/publish-native-r2.py",
+      "bytes": 26095,
+      "sha256": "994d230aecbf3ceb4ed79183a7974a56853cd07202e5663e2b8be7c7a2ebba7d",
+      "gitBlobSha256": "994d230aecbf3ceb4ed79183a7974a56853cd07202e5663e2b8be7c7a2ebba7d",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/sign-native-delivery.ps1",
+      "bytes": 7622,
+      "sha256": "54027f1803d20a735253fb27147cda477c9745d8b01e290f4b0c9938e5446297",
+      "gitBlobSha256": "54027f1803d20a735253fb27147cda477c9745d8b01e290f4b0c9938e5446297",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/test-archive-update-release.py",
+      "bytes": 17747,
+      "sha256": "43c324a2131eaf8a88cd60122ba3594eef0d29a839f63e3ade5587b473342149",
+      "gitBlobSha256": "5724b53faa9aac919457213aea460c18f977cc3f166d839192e1874479efe86b",
+      "checkoutCRLFDifference": true
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/test-bootstrap-installer.py",
+      "bytes": 21319,
+      "sha256": "2b800cb83f6fd979c923a68cb0b828fd2fe18d5ccb8bd875ce22887ba1e62b1f",
+      "gitBlobSha256": "2b800cb83f6fd979c923a68cb0b828fd2fe18d5ccb8bd875ce22887ba1e62b1f",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/test-native-delivery.py",
+      "bytes": 6721,
+      "sha256": "c359ed3fa8a59765697942f3547df56754e7b0e68e2ec250fb302e53d4f4fe93",
+      "gitBlobSha256": "c359ed3fa8a59765697942f3547df56754e7b0e68e2ec250fb302e53d4f4fe93",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/test-prepare-native-publication.py",
+      "bytes": 10905,
+      "sha256": "88e4624818d8e55646a53f639b3f4564febdaca090c2009d1da9ec85f8e5c8d0",
+      "gitBlobSha256": "88e4624818d8e55646a53f639b3f4564febdaca090c2009d1da9ec85f8e5c8d0",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/test-publish-native-r2.py",
+      "bytes": 18267,
+      "sha256": "e2d03d9627d5a389c940ef923975e1291eaea1766101fa545901c354599b00f7",
+      "gitBlobSha256": "e2d03d9627d5a389c940ef923975e1291eaea1766101fa545901c354599b00f7",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/test-verify-native-delivery.py",
+      "bytes": 8685,
+      "sha256": "8a1d4d8b371632a15b2edf43137195c4afb20cd24b07d0a86a6e93b89bdb2752",
+      "gitBlobSha256": "8a1d4d8b371632a15b2edf43137195c4afb20cd24b07d0a86a6e93b89bdb2752",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/verify-native-delivery.py",
+      "bytes": 18013,
+      "sha256": "a2457e3897b07ea3929879d7c1460dad3a0032d43f14b609a3ddd649bdb3514f",
+      "gitBlobSha256": "a2457e3897b07ea3929879d7c1460dad3a0032d43f14b609a3ddd649bdb3514f",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/scripts/verify-updater-bundle.ps1",
+      "bytes": 5643,
+      "sha256": "ee1e4d373d38da4473da339e96007327538a7e9f6944d42699d14406186b8d88",
+      "gitBlobSha256": "6d4c94a3253614d71dd005e525de365a871ed9c4b4bd1b039ba4a56602909675",
+      "checkoutCRLFDifference": true
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/bin/launcher.rs",
+      "bytes": 2567,
+      "sha256": "035f334548562c27ef46ffd8c6d6fa78990b9d58d81a9c41e34efb223b94532d",
+      "gitBlobSha256": "035f334548562c27ef46ffd8c6d6fa78990b9d58d81a9c41e34efb223b94532d",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/bin/updater.rs",
+      "bytes": 4587,
+      "sha256": "c53eaa57ac0dc96b2ad4e921375e35d4d7e01f1f5f86f84d3f4f553f4f16b7e4",
+      "gitBlobSha256": "c53eaa57ac0dc96b2ad4e921375e35d4d7e01f1f5f86f84d3f4f553f4f16b7e4",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/delivery.rs",
+      "bytes": 22991,
+      "sha256": "fb8bd8bd66cab5b777973b6fc072f803fdd3de06e81ec9732177915af3f233ea",
+      "gitBlobSha256": "fb8bd8bd66cab5b777973b6fc072f803fdd3de06e81ec9732177915af3f233ea",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/delivery_tests.rs",
+      "bytes": 53101,
+      "sha256": "02cb5d77ea1ae8d6dc206374665b8daf95f2d0b60e1d557a239bc247b5091482",
+      "gitBlobSha256": "02cb5d77ea1ae8d6dc206374665b8daf95f2d0b60e1d557a239bc247b5091482",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/fs_safe.rs",
+      "bytes": 5599,
+      "sha256": "805c9b7c75999f71ea1579360ecf2bb4ad06eeafc89daa5be20d200f32eb4210",
+      "gitBlobSha256": "805c9b7c75999f71ea1579360ecf2bb4ad06eeafc89daa5be20d200f32eb4210",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/lib.rs",
+      "bytes": 3571,
+      "sha256": "348b24aeb2398870960665cc65edac5e9dd32412c4554a4f7fe2ad706788d5d7",
+      "gitBlobSha256": "348b24aeb2398870960665cc65edac5e9dd32412c4554a4f7fe2ad706788d5d7",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/model.rs",
+      "bytes": 14369,
+      "sha256": "a7f8ae7ad38e5c2a2e1cae769514729b675f4a8310e1ce0336333cf642c5cd66",
+      "gitBlobSha256": "a7f8ae7ad38e5c2a2e1cae769514729b675f4a8310e1ce0336333cf642c5cd66",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/model_regression.rs",
+      "bytes": 4039,
+      "sha256": "73948ef628469709c2871637f53e53752606fc0a327277057393e13341e516cb",
+      "gitBlobSha256": "73948ef628469709c2871637f53e53752606fc0a327277057393e13341e516cb",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/platform.rs",
+      "bytes": 31000,
+      "sha256": "8cfda6e5afa1d0b793416aab1cd9a1b352f871a5631fe56fc9f81fc73af2ca77",
+      "gitBlobSha256": "8cfda6e5afa1d0b793416aab1cd9a1b352f871a5631fe56fc9f81fc73af2ca77",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/transaction.rs",
+      "bytes": 12541,
+      "sha256": "c6d03141a0f73696305578f7d23da4511880ba52f236cfc1ff87687e586e0312",
+      "gitBlobSha256": "c6d03141a0f73696305578f7d23da4511880ba52f236cfc1ff87687e586e0312",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/ui.rs",
+      "bytes": 30837,
+      "sha256": "f784733f2b4d933f76a82ddd8213a18e6e3df0452e8ff80dc0b5373c040d807b",
+      "gitBlobSha256": "f784733f2b4d933f76a82ddd8213a18e6e3df0452e8ff80dc0b5373c040d807b",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/update.rs",
+      "bytes": 35807,
+      "sha256": "6d14a55f50cdbd826d121939bd6e77c3349a7fa9d323d570736c225a0f95cc69",
+      "gitBlobSha256": "6d14a55f50cdbd826d121939bd6e77c3349a7fa9d323d570736c225a0f95cc69",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/update_receipt_tests.rs",
+      "bytes": 4802,
+      "sha256": "e1f0b38ad46299a3185b5df717d702549677eda605e1e7e434fe79b09752ba74",
+      "gitBlobSha256": "e1f0b38ad46299a3185b5df717d702549677eda605e1e7e434fe79b09752ba74",
+      "checkoutCRLFDifference": false
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/tests/real_packages.rs",
+      "bytes": 8697,
+      "sha256": "efab9f9498eaa79bcd98843cb9971874d8a7a5378c0367ab241870f40713c840",
+      "gitBlobSha256": "efab9f9498eaa79bcd98843cb9971874d8a7a5378c0367ab241870f40713c840",
+      "checkoutCRLFDifference": false
+    }
+  ],
+  "plannedChanges": [
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/Cargo.lock",
+      "beforeBytes": 21470,
+      "beforeSha256": "4ce3f717dd02699f4a62c47bb105ea0c2191920b37afbe46ef47a77629710e26",
+      "afterBytes": 21776,
+      "afterSha256": "9c21e4d1edf0915ab46f1c3673ab3a2355f1f3be1406d5eff0fd6e054882a70a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/Cargo.toml",
+      "beforeBytes": 990,
+      "beforeSha256": "b5a062b2f85556cd601e04d3bb8d934313b19e66a41d3465a813e5269172ab4c",
+      "afterBytes": 1074,
+      "afterSha256": "3b48def4e3976149ce3977fc9a818effe67cfc4a534b5a963bc2479c28a4b355"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/lib.rs",
+      "beforeBytes": 3476,
+      "beforeSha256": "d88adbc27064a9478a883b39814ccd54f285be903ba64b9f667cfd4208299619",
+      "afterBytes": 3571,
+      "afterSha256": "348b24aeb2398870960665cc65edac5e9dd32412c4554a4f7fe2ad706788d5d7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/update.rs",
+      "beforeBytes": 24118,
+      "beforeSha256": "c9ae989dfa9e996823eea36f8a7a26aba30597bd896436c34063d29a50c6441f",
+      "afterBytes": 41221,
+      "afterSha256": "dba4cc4d37c7353301e5faa6bc5ad1f977361e2b2de3c5a6eb891142e228b085"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/delivery.rs",
+      "beforeBytes": null,
+      "beforeSha256": null,
+      "afterBytes": 23697,
+      "afterSha256": "1b7be437b91ab6b9b4018dc8c1fba26368363dd091934b46dbe7fbcd2113e3af"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/delivery_tests.rs",
+      "beforeBytes": null,
+      "beforeSha256": null,
+      "afterBytes": 53101,
+      "afterSha256": "02cb5d77ea1ae8d6dc206374665b8daf95f2d0b60e1d557a239bc247b5091482"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/transaction.rs",
+      "beforeBytes": 12541,
+      "beforeSha256": "c6d03141a0f73696305578f7d23da4511880ba52f236cfc1ff87687e586e0312",
+      "afterBytes": 15224,
+      "afterSha256": "2e6b601c84e9aab89986a95eb58b3cb68953b2e6dd176b61d4e169cb0d7800af"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/ui.rs",
+      "beforeBytes": 30837,
+      "beforeSha256": "f784733f2b4d933f76a82ddd8213a18e6e3df0452e8ff80dc0b5373c040d807b",
+      "afterBytes": 35144,
+      "afterSha256": "69e49a3429a6072c8a26e5fed06f9be1c2692031cbff47a5ec4b1c4158f604ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/windows-updater/src/progress_trace_tests.rs",
+      "beforeBytes": null,
+      "beforeSha256": null,
+      "afterBytes": 15294,
+      "afterSha256": "a2fb83c1bec252e5c4d3f74b0612f62e89d587c10f9ea8381a77c39f52867464"
+    }
+  ],
+  "localPlayerInstallOrGameWritten": false,
+  "publishedEngineWritten": false,
+  "createdUtc": "2026-10-05T00:38:01.774488+00:00"
+}

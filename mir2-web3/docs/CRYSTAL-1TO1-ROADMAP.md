@@ -6,7 +6,10 @@
 > Fixed-origin importer107 offline checks and local Windows library cancel/retry/
 > delta/rollback pass, with root overlaps retained. Effective authorization, real
 > R2 upload/public promotion, laptop speed and shipped-executable install remain
-> open. Issued4c60 phase progress/timing is the bounded current client write round.
+> open. Issued4c60 phase progress/timing is integrated with18 root selected checks.
+> Fixed stage/promote tooling46 and actual local workerd selected14 pass, with
+> model/platform boundaries and failures retained. Linux CI/new engine release,
+> real stage/promote and public cache/range/speed gates stay open.
 > [Bounded delivery scope](NATIVE-DOWNLOAD-ACCELERATION-20261005.md).
 
 > 2026-10-05 root integrates the eleven-file native Guild rank-rename slice

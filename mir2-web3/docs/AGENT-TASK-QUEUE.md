@@ -7,7 +7,10 @@
 > requested. Fixed-origin importer107 model/root-overlapping checks pass, with
 > remote deploy/public stage/promote open. Local Windows library cancel/retry/
 > delta/rollback passes; release/HTTPS/laptop speed is separate. Issued4c60 phase
-> progress/timing is the current bounded client write round.
+> progress/timing is integrated with18 root selected checks. Fixed native CI
+> stage/promote tooling46 and actual local workerd selected14 pass; raw failures
+> and model/platform boundaries are retained. Linux CI, real R2 stage/promote,
+> public caches/ranges, new engine release and speed gates remain open.
 > [Delivery scope](NATIVE-DOWNLOAD-ACCELERATION-20261005.md). New WASD/dialog/frame
 > reports are retained for the subsequent P1 round, per the user's steering.
 

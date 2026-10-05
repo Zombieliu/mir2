@@ -25,6 +25,8 @@
 # Preserve the frozen read-only CI security probe bytes.
 mir2-web3/scripts/cloudflare_read_authority_probe.py -text
 mir2-web3/scripts/test_cloudflare_read_authority_probe.py -text
+mir2-web3/scripts/native_r17_r2_delivery.py -text
+mir2-web3/scripts/test_native_r17_r2_delivery.py -text
 
 *.gif binary
 *.ico binary

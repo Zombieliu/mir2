@@ -1,5 +1,19 @@
 # 下载器耗时诊断与分发进度
 
+2026-10-05后续源码：已集成发行4c60运行时基线及解包、检查、暂存、准备备份、
+安装/恢复的真实文件计数、200ms显示节流和阶段耗时。根独立18项相关检查及
+Windows入口check通过，与worker重叠；原SHA/fsync、事务schema1及四处fresh
+exact-game守卫不变。新进度尚未打包进公开引擎，不能宣称用户已看到或安装提速。
+[进度源码和原始回执](generated/player-qa/native-delivery-20261005/updater-progress-01/README.md)。
+
+固定R17 stage/promote脚本已集成，根与worker各46项fake检查通过且重叠；注册
+工作流新增独立verify/stage/promote选择，保留默认Web流程，尚未执行真实stage。
+实际本地workerd/R2原生流、checksum和条件创建已验证；14个选定用例/152断言，
+原10/11与3/4失败及后续真实边界说明保留。它们不能替代Cloudflare授权、远端
+36对象完整SHA、CAS指针、公网缓存/range或下载测速；两种实际401仍需有效授权。
+[CI工具及安全回执](generated/player-qa/native-delivery-20261005/ci-publication-01/README.md)、
+[实际本地平台边界](generated/player-qa/native-delivery-20261005/workerd-platform-01/README.md)。
+
 2026-10-05：原源站现已追加 R17 的11个压缩资源包、1个 EXE 差分及原始
 签名描述文件，共14个不可变对象。Linux严格条件追加和31项负向检查通过；
 实际HTTPS回环读取全部652,887,693字节及公网描述/范围采样通过。原signed
@@ -33,7 +47,8 @@ sequence12/feed、Candidate、引导器、更新引擎、游戏网关与Caddy没
 及两个小文件，无全EXE下载。两条实际隔离回滚均保留六个合成个人文件见证。
 这些是dev-profile库与本地文件映射源，不能表示发行EXE、互联网或另一台笔记本
 的速度。fresh retry约41.16分钟，其中九包综合事件约230秒，其他时间未拆解；
-UI在本地安装阶段缺少进度，发行4c60引擎的阶段进度与计时修复正在独立实现。
+UI在本地安装阶段缺少进度；发行4c60引擎的阶段进度与计时修复已在源码集成，
+新引擎发布与同条件完整安装计时仍未完成。
 [精确84-file原始QA与边界](generated/player-qa/native-delivery-20261005/windows-library-qa-01/README.md)。
 
 下列是此前测量和准备记录；原404结果保留，不再表示追加后的当前原源状态。

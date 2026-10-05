@@ -22,7 +22,82 @@ fn locale_index(locale: &str) -> usize {
 
 /// These small native strings are independent of the game catalog version.
 pub fn stage(locale: &str, key: &str) -> String {
+    if let Some((phase, counts)) = key.split_once(':') {
+        if let Some((done, total)) = counts.split_once('/') {
+            if let (Ok(done), Ok(total)) = (done.parse::<usize>(), total.parse::<usize>()) {
+                if done <= total
+                    && total <= 200010
+                    && matches!(
+                        phase,
+                        "extracting"
+                            | "staging"
+                            | "preparing"
+                            | "installing"
+                            | "checking-installed"
+                            | "recovering"
+                    )
+                {
+                    return format!("{}  ({} / {})", stage(locale, phase), done, total);
+                }
+            }
+        }
+    }
     let strings: [&str; 9] = match key {
+        "extracting" => [
+            "Unpacking and verifying files…",
+            "正在解壓並驗證檔案…",
+            "Descompactando e verificando arquivos…",
+            "Распаковка и проверка файлов…",
+            "फ़ाइलें खोलकर जाँची जा रही हैं…",
+            "Mengekstrak dan memverifikasi file…",
+            "Đang giải nén và xác minh tệp…",
+            "กำลังแตกไฟล์และตรวจสอบไฟล์…",
+            "جارٍ فك الملفات والتحقق منها…",
+        ],
+        "staging" => [
+            "Preparing verified files locally…",
+            "正在本機暫存已驗證的檔案…",
+            "Preparando arquivos verificados no computador…",
+            "Подготовка проверенных файлов на компьютере…",
+            "जाँची गई फ़ाइलें इस कंप्यूटर पर तैयार हो रही हैं…",
+            "Menyiapkan file terverifikasi di komputer…",
+            "Đang chuẩn bị tệp đã xác minh trên máy…",
+            "กำลังเตรียมไฟล์ที่ตรวจสอบแล้วในเครื่อง…",
+            "جارٍ تجهيز الملفات المتحقق منها على الجهاز…",
+        ],
+        "preparing" => [
+            "Preparing rollback and checking staged files…",
+            "正在準備還原備份並檢查暫存檔案…",
+            "Preparando restauração e verificando arquivos locais…",
+            "Подготовка резервных копий и проверка файлов…",
+            "बहाली की प्रतियाँ और स्थानीय फ़ाइलें तैयार हो रही हैं…",
+            "Menyiapkan pemulihan dan memeriksa file lokal…",
+            "Đang chuẩn bị khôi phục và kiểm tra tệp cục bộ…",
+            "กำลังเตรียมการย้อนกลับและตรวจสอบไฟล์ในเครื่อง…",
+            "جارٍ تجهيز الاستعادة وفحص الملفات المحلية…",
+        ],
+        "installing" => [
+            "Installing verified files locally…",
+            "正在本機安裝已驗證的檔案…",
+            "Instalando arquivos verificados no computador…",
+            "Установка проверенных файлов на компьютере…",
+            "जाँची गई फ़ाइलें इस कंप्यूटर पर इंस्टॉल हो रही हैं…",
+            "Menginstal file terverifikasi di komputer…",
+            "Đang cài đặt tệp đã xác minh trên máy…",
+            "กำลังติดตั้งไฟล์ที่ตรวจสอบแล้วในเครื่อง…",
+            "جارٍ تثبيت الملفات المتحقق منها على الجهاز…",
+        ],
+        "checking-installed" => [
+            "Checking installed files…",
+            "正在檢查已安裝的檔案…",
+            "Verificando arquivos instalados…",
+            "Проверка установленных файлов…",
+            "इंस्टॉल की गई फ़ाइलें जाँची जा रही हैं…",
+            "Memeriksa file yang terinstal…",
+            "Đang kiểm tra các tệp đã cài đặt…",
+            "กำลังตรวจสอบไฟล์ที่ติดตั้งแล้ว…",
+            "جارٍ فحص الملفات المثبتة…",
+        ],
         "checking" => [
             "Checking for updates…",
             "正在檢查更新…",

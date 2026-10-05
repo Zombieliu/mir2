@@ -1,0 +1,9 @@
+
+running 4 tests
+test transaction::tests::bad_staging_is_rejected_before_original_replacement ... ok
+test transaction::tests::committed_update_can_roll_back_after_failed_first_launch ... ok
+test transaction::tests::interruption_at_every_commit_step_recovers_before_launch ... ok
+test transaction::tests::invalid_or_corrupted_recovery_never_touches_external_files ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 51 filtered out; finished in 0.80s
+
