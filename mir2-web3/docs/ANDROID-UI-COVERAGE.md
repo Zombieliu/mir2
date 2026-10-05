@@ -1,6 +1,25 @@
 # Android native UI coverage — 2026-09-08
 
-2026-10-05 当前 NI-15 离线社交 JNI 诊断源码：`3f27e8e9e9a41679eaacebaa3891daf0e5a05b56`。
+2026-10-06 当前 NI-16 Hero 入站源码：`0a3b24efa48272b9d1a1b33a63a116b9b5e626f7`。
+接通24个公共名字到原共享HeroModel；完整HeroInformation独立512KiB上限，
+其余16KiB，角色snapshot绑定后才发布，复用现有skill epoch和物品/tooltip投影。
+原到达时钟、原子绑定、准确回执FIFO/背压、切图保留/拒绝Start清空均有回归；
+没有复制英雄AI/战斗/物品/技能规则，没有改共享UI、认证、Windows或服务器。
+五功能文件；426输入/421受保护整文件、57旧Java测试、10认证方法、140旧Host函数核对。
+完整十门448/488、shared1304+10原ignored、runtime296+1原ignored、fresh Java90+90、
+API31双门、Mac-host Windows Hero FIFO1/skill FIFO1/协议21通过；不是Windows OS全量门。
+两新原生诊断APK保留数据安装并回读SHA一致；选定6647PNG+3metadata匹配。
+专用API31 emulator1/physical0，两新截图已看；只复测普通包隔离及既有trade-jni，
+不是Hero实际JNI/UI验收。正常PID7409 GL506=1，零错误GPU仍FAIL；
+交易模型锁定与UI显示差异保留。Hero入站NI-16为PARTIAL，实际JNI/完整操作、
+手机UI重启批准/真实登录与Zone保存/NI17–20/完整资源音频更新/真机人工仍OPEN。
+Windows只读来源56ee063fb较冻结3d735745f仍仅+1提交/83文档证据/0功能源；
+完整AP-01–21/goal Active保留，不推Windows、不部署或改真实存档。
+[本批源码、APK、十门、失败与剩余验收](generated/player-qa/native-android-hero-ingress-20261006/README.md)。
+
+下文只记录对应历史源码/安装包，不重绑到当前本叶。
+
+2026-10-05 历史 NI-15 离线社交 JNI 诊断源码：`3f27e8e9e9a41679eaacebaa3891daf0e5a05b56`。
 在单独preview包添加4个精确Java流，经原MainActivity/nativeEvent/owner边界和共享reducer；
 正常包不注入，不启用认证、socket或操作/结算。15组员、200行会成员/公告、112仓库槽、
 本人125/guest17、u64实例/201与3数量、取消后清空，四场景均实测观测Applied。

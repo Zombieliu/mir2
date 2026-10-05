@@ -1,0 +1,912 @@
+{
+  "schemaVersion": 1,
+  "at": "2026-10-05T16:28:31.561Z",
+  "reportDateLocal": "2026-10-06 Asia/Shanghai",
+  "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+  "parent": "7cf975c81932443b57c9a5af43c92611914960e5",
+  "branch": "codex/android-shared-sync",
+  "worktree": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "denominator": "AP-01–21 unchanged; full Windows alignment",
+  "scope": [
+    "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+    "mir2-web3/apps/game-client/platform-android/src/hero_ingress.rs",
+    "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+    "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs"
+  ],
+  "sourceProtection": {
+    "inputCount": 426,
+    "protectedWholeFiles": 421,
+    "oldJavaTests": 57,
+    "authMethods": 10,
+    "oldHostFunctions": 140,
+    "guard": {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/source-guard-final.json",
+      "sha256": "8d0f463ec630ecaba39abebadaca9710b0a7b93964caa4baaf8112f26a49abab"
+    },
+    "binding": {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/source-commit-binding-final.json",
+      "sha256": "e70993d2b5d1a3989202321c12012ee15230c8068fb771467950d071f91a9588"
+    },
+    "originalWorktreeGitCheckpoints": [
+      {
+        "path": "/Users/henryliu/obelisk/numeron",
+        "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+        "branch": "codex/steam-main",
+        "status": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/",
+        "equal": true
+      },
+      {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+        "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+        "branch": "codex/android-player-journey",
+        "status": "",
+        "equal": true
+      }
+    ],
+    "checkpointLimits": "Git HEAD/branch/status, not recursive untracked byte preservation",
+    "windowsHeroFunctions": [
+      {
+        "name": "hero_inventory_view",
+        "rawEqual": true,
+        "equal": true,
+        "frozenBodySha256": "6127fc8857799ce4d46905a610926fca6b7fac8e17554d687181b2d1207a516b"
+      },
+      {
+        "name": "hero_auto_pot_view",
+        "rawEqual": true,
+        "equal": true,
+        "frozenBodySha256": "8333b708c4f9bc3c43b5e87f688fa943887122baab452cc627cbeb8e37ce0d64"
+      },
+      {
+        "name": "observe_hero_packet",
+        "rawEqual": false,
+        "equal": true,
+        "frozenBodySha256": "71f1ed711d80e24c1e872735eeafea883ae542390760ebe4744c33ddefb6354e"
+      },
+      {
+        "name": "flush_hero_models_with",
+        "rawEqual": true,
+        "equal": true,
+        "frozenBodySha256": "35766fa62067228b6b7d41ba58ac860fc0615f9e2bf7c60cf7eb00634337e7e6"
+      }
+    ],
+    "sharedHeroFiles": {
+      "count": 13,
+      "rawEqual": 12,
+      "adaptations": [
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_buff_hud.rs",
+          "rawEqual": false,
+          "equal": true,
+          "preExistingAdaptation": "two audio queue/sound namespace references only",
+          "sha256": "b31050c3fac7e3e055e36eb1f3b780f99c7b46361efa7fde11c7f82fd16a8d9b"
+        }
+      ]
+    },
+    "frozenOracles": {
+      "inventoryBody": true,
+      "autoPotBody": true,
+      "adaptations": "test signatures/shared helper names/geometry callback only"
+    }
+  },
+  "gates": [
+    {
+      "label": "bound-rust-normal-hero-ingress",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "headAfter": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "started": "2026-10-05T16:08:23.906Z",
+      "ended": "2026-10-05T16:08:29.493Z",
+      "exitCode": 0,
+      "bound": true,
+      "sourceUnchanged": true,
+      "inputCount": 426,
+      "inputListSha256": "4fa2949cce8c5501026cd498b7b77b52fc6e55840a1c9639a0cc53027118f738",
+      "rust": [
+        {
+          "passed": 448,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/bound-rust-normal-hero-ingress-result.json",
+        "sha256": "af2f27f6fc06cf0aef9e28368330b8402f8471212f8bce3bc2d4b20a9eefdae4"
+      }
+    },
+    {
+      "label": "bound-rust-preview-hero-ingress",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--features",
+        "ui-preview",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "headAfter": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "started": "2026-10-05T16:08:29.650Z",
+      "ended": "2026-10-05T16:08:52.757Z",
+      "exitCode": 0,
+      "bound": true,
+      "sourceUnchanged": true,
+      "inputCount": 426,
+      "inputListSha256": "4fa2949cce8c5501026cd498b7b77b52fc6e55840a1c9639a0cc53027118f738",
+      "rust": [
+        {
+          "passed": 488,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/bound-rust-preview-hero-ingress-result.json",
+        "sha256": "30f3708984eb021f2f0def32d0f5a2c3b41488d3eb48062e3e95abb8a06de880"
+      }
+    },
+    {
+      "label": "bound-shared-native-player-hero-ingress",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+        "--features",
+        "native-player-ui",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "headAfter": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "started": "2026-10-05T16:08:52.934Z",
+      "ended": "2026-10-05T16:09:01.964Z",
+      "exitCode": 0,
+      "bound": true,
+      "sourceUnchanged": true,
+      "inputCount": 426,
+      "inputListSha256": "4fa2949cce8c5501026cd498b7b77b52fc6e55840a1c9639a0cc53027118f738",
+      "rust": [
+        {
+          "passed": 1304,
+          "failed": 0,
+          "ignored": 10
+        }
+      ],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/bound-shared-native-player-hero-ingress-result.json",
+        "sha256": "a64fcd8f213c02491fe1905b914a711eca083209b97c3a8c5c7e4197ab416efb"
+      }
+    },
+    {
+      "label": "bound-runtime-hero-ingress",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/runtime/Cargo.toml",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "headAfter": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "started": "2026-10-05T16:09:02.122Z",
+      "ended": "2026-10-05T16:09:03.157Z",
+      "exitCode": 0,
+      "bound": true,
+      "sourceUnchanged": true,
+      "inputCount": 426,
+      "inputListSha256": "4fa2949cce8c5501026cd498b7b77b52fc6e55840a1c9639a0cc53027118f738",
+      "rust": [
+        {
+          "passed": 296,
+          "failed": 0,
+          "ignored": 1
+        }
+      ],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/bound-runtime-hero-ingress-result.json",
+        "sha256": "917ddaa8980455585178919b19a18c62162260897360ad28f88577300567d370"
+      }
+    },
+    {
+      "label": "bound-api31-normal-hero-ingress",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "--platform",
+        "31",
+        "check",
+        "--lib",
+        "--locked",
+        "--offline"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android",
+      "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "headAfter": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "started": "2026-10-05T16:09:03.302Z",
+      "ended": "2026-10-05T16:09:23.530Z",
+      "exitCode": 0,
+      "bound": true,
+      "sourceUnchanged": true,
+      "inputCount": 426,
+      "inputListSha256": "4fa2949cce8c5501026cd498b7b77b52fc6e55840a1c9639a0cc53027118f738",
+      "rust": [],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/bound-api31-normal-hero-ingress-result.json",
+        "sha256": "73cf48c5f7f497c94800149896537bb0f643c779b69636fa9b2c7b4fb23d89d0"
+      }
+    },
+    {
+      "label": "bound-api31-preview-hero-ingress",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "--platform",
+        "31",
+        "check",
+        "--lib",
+        "--features",
+        "ui-preview",
+        "--locked",
+        "--offline"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android",
+      "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "headAfter": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "started": "2026-10-05T16:09:23.680Z",
+      "ended": "2026-10-05T16:09:26.898Z",
+      "exitCode": 0,
+      "bound": true,
+      "sourceUnchanged": true,
+      "inputCount": 426,
+      "inputListSha256": "4fa2949cce8c5501026cd498b7b77b52fc6e55840a1c9639a0cc53027118f738",
+      "rust": [],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/bound-api31-preview-hero-ingress-result.json",
+        "sha256": "181214864bde64a007a5a9f60011491380bc94721cadebcf0b12e76099f127b3"
+      }
+    },
+    {
+      "label": "bound-java-full-hero-ingress",
+      "command": [
+        "./gradlew",
+        "--offline",
+        "--no-daemon",
+        "--no-build-cache",
+        "--rerun-tasks",
+        ":app:testDebugUnitTest",
+        ":app:testUiPreviewUnitTest",
+        "--console=plain"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android",
+      "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "headAfter": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "started": "2026-10-05T16:09:27.048Z",
+      "ended": "2026-10-05T16:10:36.701Z",
+      "exitCode": 0,
+      "bound": true,
+      "sourceUnchanged": true,
+      "inputCount": 426,
+      "inputListSha256": "4fa2949cce8c5501026cd498b7b77b52fc6e55840a1c9639a0cc53027118f738",
+      "rust": [],
+      "javaXml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/bound-java-full-hero-ingress-result.json",
+        "sha256": "63b7f1f107d8a18cc3f9e7c5a81a40d60c7bdb2e9c7da8e036470a4faa9eae3f"
+      }
+    },
+    {
+      "label": "bound-windows-hero-ingress-fifo",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "hero_receipt_backpressure",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "headAfter": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "started": "2026-10-05T16:10:36.870Z",
+      "ended": "2026-10-05T16:10:56.091Z",
+      "exitCode": 0,
+      "bound": true,
+      "sourceUnchanged": true,
+      "inputCount": 426,
+      "inputListSha256": "4fa2949cce8c5501026cd498b7b77b52fc6e55840a1c9639a0cc53027118f738",
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/bound-windows-hero-ingress-fifo-result.json",
+        "sha256": "c16f53f2abbe4464bdcef835b943664b9718fb382e64534cdf4129ad2935ad06"
+      }
+    },
+    {
+      "label": "bound-windows-hero-ingress-skill-fifo",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "skill_receipt_retry",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "headAfter": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "started": "2026-10-05T16:10:56.261Z",
+      "ended": "2026-10-05T16:10:56.777Z",
+      "exitCode": 0,
+      "bound": true,
+      "sourceUnchanged": true,
+      "inputCount": 426,
+      "inputListSha256": "4fa2949cce8c5501026cd498b7b77b52fc6e55840a1c9639a0cc53027118f738",
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/bound-windows-hero-ingress-skill-fifo-result.json",
+        "sha256": "163f1d0ca57c0405175ed428ed08405a15c3bf76e80e8f2fb827b6fd82e28042"
+      }
+    },
+    {
+      "label": "bound-windows-hero-ingress-protocol",
+      "command": [
+        "cargo",
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "native_protocol::tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "headAfter": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+      "started": "2026-10-05T16:10:56.925Z",
+      "ended": "2026-10-05T16:10:57.322Z",
+      "exitCode": 0,
+      "bound": true,
+      "sourceUnchanged": true,
+      "inputCount": 426,
+      "inputListSha256": "4fa2949cce8c5501026cd498b7b77b52fc6e55840a1c9639a0cc53027118f738",
+      "rust": [
+        {
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/bound-windows-hero-ingress-protocol-result.json",
+        "sha256": "210a92a8e6df873aea07c5bfb96d2fe63ad6db6d9a1a15b99d6da27c360093d5"
+      }
+    }
+  ],
+  "javaTotals": [
+    {
+      "tests": 90,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "tests": 90,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "failures": [
+    {
+      "label": "red-hero-host-envelope",
+      "exitCode": 101,
+      "rust": [
+        {
+          "passed": 0,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/red-hero-host-envelope-result.json",
+        "sha256": "18beba4380a86cc4f19660c7e09d17bf4a76bb53f43289ac2ce1b140f7b728c1"
+      }
+    },
+    {
+      "label": "red-hero-java-public-route",
+      "exitCode": 1,
+      "rust": [],
+      "javaXml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/red-hero-java-public-route-result.json",
+        "sha256": "d1d0572f49ea68bd8dd8a7e19e715adb7be30a1349a3630dce205398402e3940"
+      }
+    },
+    {
+      "label": "green-hero-host-and-ingress",
+      "exitCode": 101,
+      "rust": [
+        {
+          "passed": 24,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "raw": {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/green-hero-host-and-ingress-result.json",
+        "sha256": "8378891ec977cb84525143e78f52341dff90dc33bdcb0bb321678fa8c8e5bbcb"
+      }
+    }
+  ],
+  "diagnosticPreparation": {
+    "referenceGuard": {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/source-reference-audit-failures.json",
+      "sha256": "65722a8a9ff5496420324c87dc95d2b199748d4389e8dfa49e0ad8e005a85b52"
+    },
+    "apkFilenameCorrection": {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/apk-filename-correction.json",
+      "sha256": "691034f5f8fb0b9f00eec8ed29852e4124cc420f3e8564138dfbaf838f52c1ac"
+    },
+    "runtimeLauncher": "Initial shell launcher used JSON double quoting and failed SyntaxError before executing JS; retried with POSIX-safe single quoting. Tool output records it; not a product test or verbatim file archive."
+  },
+  "apk": {
+    "versionCode": 35,
+    "versionName": "0.1.32-gameshop-phone",
+    "gatewayUrl": "",
+    "webPageVersion": null,
+    "rustProfile": "release",
+    "distribution": "diagnostic Debug/uiPreview; not signed store Release acceptance",
+    "artifacts": [
+      {
+        "variant": "debug",
+        "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/final-apks/mir2-native-hero-ingress-debug-0a3b24efa.apk",
+        "bytes": 533715343,
+        "sha256": "78b1a8648fa8b352b172952c7873ccd8a9bdedfd3f5d5688a7a5fb1235bcc8da",
+        "nativeElfBytes": 145981128,
+        "nativeElfSha256": "f8841ae7f24716921d78593692784ab7bf69216fd392d4a0d09fb82db6a8ba89",
+        "nativeElfMatchesThisVariantStrippedOutput": true,
+        "package": "package: name='com.mir2.web3' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+        "gatewayUrl": "",
+        "uiPreview": false,
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        }
+      },
+      {
+        "variant": "preview",
+        "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/final-apks/mir2-native-hero-ingress-preview-0a3b24efa.apk",
+        "bytes": 541874335,
+        "sha256": "7619c3ed9eb3420f0b1a31753e1ab704eeebf2b6e089af090e9e318ca7da5de1",
+        "nativeElfBytes": 150109656,
+        "nativeElfSha256": "d272a98f576550c34996663b83c356d9ea59568ce0156b251d7a2711b9481df9",
+        "nativeElfMatchesThisVariantStrippedOutput": true,
+        "package": "package: name='com.mir2.web3.uipreview' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+        "gatewayUrl": "",
+        "uiPreview": true,
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        }
+      }
+    ],
+    "raw": {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/package-baseline.json",
+      "sha256": "b8431c632f42fa2da1a830adb7fde4556a3685ce6d63f722e607b92931503685"
+    }
+  },
+  "resources": {
+    "raw": {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/selected-apk-resources.json",
+      "sha256": "8cd3e48c77bbfac8bf418554b0151079268f92a80d6d89680ccf57030909deba"
+    },
+    "selectedCounts": [
+      {
+        "variant": "debug",
+        "selectedUiPngCount": 6647,
+        "selectedMetadataCount": 3,
+        "selectedLibrariesByteMatch": true,
+        "frozenWeightFramesByteMatch": true,
+        "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+        "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9"
+      },
+      {
+        "variant": "preview",
+        "selectedUiPngCount": 6647,
+        "selectedMetadataCount": 3,
+        "selectedLibrariesByteMatch": true,
+        "frozenWeightFramesByteMatch": true,
+        "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+        "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9"
+      }
+    ],
+    "fullReleaseAccepted": false
+  },
+  "installation": {
+    "raw": {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/installation.json",
+      "sha256": "3efadd56bdd7dce51af99c2d6aa37b31eeac511f0e0872989e165665a7a6004c"
+    },
+    "variants": [
+      {
+        "variant": "debug",
+        "pkg": "com.mir2.web3",
+        "bytes": 533715343,
+        "sha256": "78b1a8648fa8b352b172952c7873ccd8a9bdedfd3f5d5688a7a5fb1235bcc8da",
+        "preserveData": true
+      },
+      {
+        "variant": "preview",
+        "pkg": "com.mir2.web3.uipreview",
+        "bytes": 541874335,
+        "sha256": "7619c3ed9eb3420f0b1a31753e1ab704eeebf2b6e089af090e9e318ca7da5de1",
+        "preserveData": true
+      }
+    ]
+  },
+  "device": {
+    "at": "2026-10-05T16:17:21.457Z",
+    "devices": "List of devices attached\nemulator-5554          device product:sdk_gphone64_arm64 model:sdk_gphone64_arm64 device:emulator64_arm64 transport_id:5",
+    "serial": "emulator-5554",
+    "avd": "Mir2_API_31_ARM64\r\nOK",
+    "props": {
+      "ro.build.version.release": "12",
+      "ro.build.version.sdk": "31",
+      "ro.product.cpu.abi": "arm64-v8a",
+      "ro.product.model": "sdk_gphone64_arm64",
+      "ro.build.fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys"
+    },
+    "display": "Physical size: 1080x2340",
+    "density": "Physical density: 440",
+    "dataCapacity": "Filesystem      Size Used Avail Use% Mounted on\n/dev/block/dm-4  20G 2.0G   17G  11% /storage/emulated/0/Android/obb",
+    "deviceTime": "Tue Oct  6 00:17:20 CST 2026",
+    "emulatorCount": 1,
+    "physicalDeviceCount": 0,
+    "limits": "Existing dedicated AVD; no wipe, clear, config change or fresh AVD cold-boot claim. Inventory at this instant only."
+  },
+  "runtime": {
+    "raw": {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/runtime-results.json",
+      "sha256": "eb34f53abf06fa32e8403a29c9abcb46832023ce1dfd13afa2137ad50e082909"
+    },
+    "results": [
+      {
+        "name": "normal-preview-isolation",
+        "scene": "group-jni",
+        "pkg": "com.mir2.web3",
+        "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+        "pid": "7409",
+        "started": "2026-10-05T16:23:01.611Z",
+        "ended": "2026-10-05T16:23:13.645Z",
+        "status": "DIAGNOSTIC_ABSENT",
+        "alive": true,
+        "expectedEvents": 0,
+        "gl506Lines": 1,
+        "rboLines": 1,
+        "fatalLines": 0,
+        "log": {
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/runtime/normal-preview-isolation-pid-7409.log",
+          "sha256": "451d1f43dc87c6c4fde94fd5b063f022756732301da0fd52e6d0a61f23d202c7"
+        },
+        "screenshot": {
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/runtime/normal-preview-isolation-pid-7409.png",
+          "sha256": "6f323797d1602445f93bd45b942ec35a6171b00d040e713930a355c49b8f064e",
+          "bytes": 3433641,
+          "viewed": true
+        },
+        "limits": "Inherited social JNI regression on Hero-ingress source only; this does not exercise actual Hero JNI. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance."
+      },
+      {
+        "name": "trade-jni",
+        "scene": "trade-jni",
+        "pkg": "com.mir2.web3.uipreview",
+        "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+        "pid": "7493",
+        "started": "2026-10-05T16:23:13.958Z",
+        "ended": "2026-10-05T16:23:25.446Z",
+        "status": "OBSERVED",
+        "alive": true,
+        "expectedEvents": 5,
+        "gl506Lines": 0,
+        "rboLines": 0,
+        "fatalLines": 0,
+        "log": {
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/runtime/trade-jni-pid-7493.log",
+          "sha256": "c8b3930cd2a5f2038182aed8ba666a2e6fd6afe6e00d1955a31a99b9a0b1b80b"
+        },
+        "screenshot": {
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/runtime/trade-jni-pid-7493.png",
+          "sha256": "fb33be6b84ee7dc6c932f3e6aac5af253ca02de0829d2ff3ede73088693c603b",
+          "bytes": 1116722,
+          "viewed": true
+        },
+        "limits": "Inherited social JNI regression on Hero-ingress source only; this does not exercise actual Hero JNI. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance."
+      }
+    ]
+  },
+  "screenshotInspection": {
+    "source": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+    "at": "2026-10-05T16:24:53.179Z",
+    "method": "Main agent viewed both original local PNG files with view_image after capture",
+    "views": [
+      {
+        "name": "normal-preview-isolation",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/runtime/normal-preview-isolation-pid-7409.png",
+        "sha256": "6f323797d1602445f93bd45b942ec35a6171b00d040e713930a355c49b8f064e",
+        "viewed": true,
+        "observations": [
+          "Shared original login panel is visible with empty ID/PASS.",
+          "Test server not configured text visible.",
+          "No offline social scene is shown.",
+          "This is not authenticated login or phone-layout acceptance."
+        ]
+      },
+      {
+        "name": "trade-jni",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/runtime/trade-jni-pid-7493.png",
+        "sha256": "fb33be6b84ee7dc6c932f3e6aac5af253ca02de0829d2ff3ede73088693c603b",
+        "viewed": true,
+        "observations": [
+          "Banner explicitly says OFFLINE UI PREVIEW trade-jni NOT LIVE GAMEPLAY.",
+          "Inventory wallet 777 and item samples are visible.",
+          "Own trade 125 with 201 and 3 stack counts; guest 17 with separate book samples.",
+          "These are inherited social JNI diagnostics, not Hero display, touch, lock presentation or settlement acceptance."
+        ]
+      }
+    ],
+    "limitations": [
+      "Hero JNI not exercised.",
+      "New normal PID has one GL0x0506, so GPU zero-error FAIL remains.",
+      "Trade PID zero GL entries in this short sample does not reverse historical GPU failure.",
+      "No phone UI, real online or physical device acceptance."
+    ]
+  },
+  "remoteAudit": {
+    "raw": {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/remote-before-package.json",
+      "sha256": "ff0ea1ce13e5f8a1d2d8cf1d2350b0c4a649eac8595e713b54985483ba71e089"
+    },
+    "at": "2026-10-05T16:10:27.102Z",
+    "androidHead": "8a307e16c665ad52fa6b2d17261b57c8b59332e0",
+    "localHead": "0a3b24efa48272b9d1a1b33a63a116b9b5e626f7",
+    "windowsHead": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+    "windowsComparison": {
+      "aheadBy": 1,
+      "behindBy": 0,
+      "totalCommits": 1,
+      "files": 83,
+      "functional": 0
+    },
+    "pr": {
+      "url": "https://github.com/Zombieliu/mir2/pull/253",
+      "state": "open",
+      "draft": true,
+      "head": "8a307e16c665ad52fa6b2d17261b57c8b59332e0",
+      "base": "codex/playtest-registration"
+    },
+    "deliveryAcceptedAtThisAudit": false
+  },
+  "acceptance": {
+    "goal": "Active",
+    "NI16": "PARTIAL",
+    "sourceHeroIngress": true,
+    "typedHeroHostProducer": true,
+    "exactReceiptFifoSource": true,
+    "frozenPresentationReference": true,
+    "fullTenSourceGates": true,
+    "newApksInstalled": true,
+    "inheritedSocialJniOfflineRegression": true,
+    "normalBuildIsolation": true,
+    "actualHeroJavaJni": false,
+    "actualHeroSharedUi": false,
+    "heroCommandEgress": false,
+    "completePhoneUi": false,
+    "phoneUiRepairHumanReapproval": "pending",
+    "realAuthHttpsWss": false,
+    "onlineHeroOperations": false,
+    "onlineSharedZoneAndSave": false,
+    "fullAssetsAudioCacheDelivery": false,
+    "nativeResume": false,
+    "physicalDevice": false,
+    "humanFrontend": false,
+    "gpuZeroErrorGate": "FAIL: new normal PID7409 GL0x0506=1; trade PID7493=0 in short sample does not reverse historical failures",
+    "oldTradeLockPresentation": "OPEN: model own_locked true, ui_trade_locked false"
+  },
+  "rawEvidence": {
+    "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA",
+    "manifestPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-ingress-20261005-q5sBAA/raw-evidence-index.json",
+    "manifestSha256": "ec862bea0521404f2d485d5d4fb8509a2530fc822016f454aaea9cc9998e8c78",
+    "regularFiles": 94,
+    "totalBytes": 2160621102
+  }
+}
