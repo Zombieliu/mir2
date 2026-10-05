@@ -1,0 +1,3534 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-05T14:58:36.235Z",
+  "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+  "branch": "codex/android-shared-sync",
+  "originalLeafParent": "8a307e16c665ad52fa6b2d17261b57c8b59332e0",
+  "previousProducts": [
+    "73909efa4a069fbd6b5bdf0d7761f53fdc20d2dc",
+    "17aebd06fbb317151e8349f9127cffc1ba80fb20"
+  ],
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "windowsRefresh": {
+    "at": "2026-10-05T14:42:18.879Z",
+    "method": "GitHub authenticated read-only API after successful fetch; SSH ls-remote failure not treated as success",
+    "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+    "remote": [
+      {
+        "sha": "8a307e16c665ad52fa6b2d17261b57c8b59332e0",
+        "ref": "refs/heads/codex/android-shared-sync"
+      },
+      {
+        "sha": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+        "ref": "refs/heads/codex/playtest-registration"
+      },
+      {
+        "sha": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4",
+        "ref": "refs/heads/codex/windows-player-journey"
+      }
+    ],
+    "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+    "windowsSource": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+    "windowsCommitsAfterFrozen": 1,
+    "changedPaths": [
+      "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/README.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/.gitattributes",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/README.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/actual-native-update-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/actual-native-update.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/native-installed-update-r9.py",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/run-actual-native-update.ps1",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/WN-CANDIDATE-20261001-invited-09-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-attested-client.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-package-process-attempt5.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-package-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate-final-verification.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate-verification-reuse.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/BUILD-ATTESTATION.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/RELEASE-STATEMENT.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/VERSION.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-input-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-input.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-template-copy.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/inventory.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/package-client.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt2.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt3.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt4.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt2-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt3-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt4-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt1.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt2.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt3.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt4.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/prepare-real-fixtures-final.py",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-fixture-preflight-attempt1.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-input-long-path-diagnostic.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-helper-attempt2.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-helper-attempt3.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt2.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt3.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-helper-preflight-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-manifest-delta-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-old-r8-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-integration-final-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-package-integration-final.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-r8-r9-final-fixtures.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-update-qa-evidence.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-update-qa-final.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/r9-release-receipt.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/release-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/short-worktree-input-preparation.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/short-worktree-staging-path-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/update-archive.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-build.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-bundle-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-bundle-verification.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-installer-input.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/BUILD-UPDATER.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/bundle/UPDATER-BUNDLE.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/engine-release/ENGINE.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/feed/latest.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/apply.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/create-stage.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-apply.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-create-stage.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-plan.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-preflight.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/preflight.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/upload.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/inventory.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/public-https-publication-report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/publish-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/publish-r9.ps1",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/shop-lifecycle-20261001.md"
+    ],
+    "changedPathCount": 83,
+    "functional": [],
+    "pr": {
+      "baseRefName": "codex/playtest-registration",
+      "headRefName": "codex/android-shared-sync",
+      "headRefOid": "8a307e16c665ad52fa6b2d17261b57c8b59332e0",
+      "isDraft": true,
+      "number": 253,
+      "state": "OPEN",
+      "url": "https://github.com/Zombieliu/mir2/pull/253"
+    }
+  },
+  "scope": [
+    "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+    "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+    "mir2-web3/apps/game-client/platform-android/src/social_jni_preview_tests.rs"
+  ],
+  "sourceInputs": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/big_map.rs",
+      "bytes": 46169,
+      "sha256": "0a1f91a1ef552b996445495cd19f16ebd33a72e4a306ff404b2fe419bca2ee97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74468,
+      "sha256": "86eced1102947319ad26c04e53ab8b845a659401c6254855312098a4ebbb3a2d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+      "bytes": 10200,
+      "sha256": "d8c9024b39d89363dbe35ec67eda5cd7d8a91276e5ad785fef54cee6d6f08138"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+      "bytes": 69639,
+      "sha256": "59d5ebf8b3d2f5fd28a9f058ece77efd5e2171ac6afbe0cb7af84af9c6d614ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "bytes": 42293,
+      "sha256": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 947245,
+      "sha256": "ffe7b1fda30a2db9ad46e0050b89002f27e4af82299e56bae692d86d1d019769"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "bytes": 67126,
+      "sha256": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "bytes": 60408,
+      "sha256": "c7f9f40be0caf3cfc37edd5a18ff24e76a795dc5d4183b33adf6501800de54cc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+      "bytes": 37415,
+      "sha256": "25becf5d258dba0c25f619ffecf818db997260a9439e295ddccd432df8bd9032"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 3034,
+      "sha256": "0d6568a3b1f0ea9daa70d7e51a28bd47f39776f74096846deb1ac5371556672b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "bytes": 23201,
+      "sha256": "8b45f76f8974b21f0fe8729965e89d979955eca4f8da831c4aaebb205d2384ac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_egress.rs",
+      "bytes": 11698,
+      "sha256": "7f487f260692b1e983a01f1f7ec644de844efa9dfc7690c0b950569f16d0cf3c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_ingress.rs",
+      "bytes": 13402,
+      "sha256": "fbed53a162e45cd93a65e2619a5a9debbd45d0e0f23bbffdddf4038a6f5a5a67"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "bytes": 13160,
+      "sha256": "38ff1c5220d259b7e609090031219047524b80636e1450a40b28fd7898ba302f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_quest_ingress.rs",
+      "bytes": 22705,
+      "sha256": "ca0d25fd5ce014ab0e8cdaacdf8334001df1f491299d417d18fc0ab32612d5a0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_social_egress.rs",
+      "bytes": 29102,
+      "sha256": "41be6b508899136174f656203954fa1b4f4e84a0164f7a0643fda18c086458d7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_trade_ingress.rs",
+      "bytes": 12436,
+      "sha256": "bc82fbe75c8274598ee543836aefa619345892f472450e9daac4ca71609c9438"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+      "bytes": 76211,
+      "sha256": "62872e48f74dcfbdc746b56b65bee6aebf3dc2837be3d4fdfb85ca3d27988575"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "bytes": 368258,
+      "sha256": "ff3ed519f0087de4583e0891f24039ba16c612aee0d027886be85f9c98b67850"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+      "bytes": 9075,
+      "sha256": "25326f497aabe20bb7300b6e3cacdec21c5851b1eb957bb8fc6300279b429979"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+      "bytes": 15596,
+      "sha256": "71bdbf1637176190cb93703fc94a59af047cf8326f8f88a8093ae8e98f130495"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/social.rs",
+      "bytes": 76619,
+      "sha256": "efe22789c06888d1d65d29be68896e579fcbaffc40829f9d3618a7b54ca56ead"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 33253,
+      "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+      "bytes": 123990,
+      "sha256": "470969816b029c95a8a222700510a423dcd7201e955aef27a655a6b434dc6f3d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28735,
+      "sha256": "25cb70ed959e853e2a27da09264b7362e5395c94149972b320daa00f5f12eff2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 41149,
+      "sha256": "5b9ed72dbb0e606e07669c57d131c9cb431e9ecf21260f22e955555d566bd98c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+      "bytes": 21307,
+      "sha256": "023e2af8b86c2e08d4ddef767465e6c7c49c403242490b557c952d2b0292a5e6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+      "bytes": 14546,
+      "sha256": "da6a6e7c2bbfe0e082daac0d244f47e20ba5fe5c7438d710626d625b55e3f5ad"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/WireJson.java",
+      "bytes": 3855,
+      "sha256": "682026d344ad6bcb4f4046deb896cb13646e70fb5ca6d90e4871107eaf848c8a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 93798,
+      "sha256": "6d223055d248c2d49a8896042a3524314106365ebd5a9bc4621a44722382241d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+      "bytes": 19073,
+      "sha256": "63e6860eeb15d37e3638955306ba2788869d06ec91418ddacec21013e2484d8b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+      "bytes": 5853,
+      "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+      "bytes": 22413,
+      "sha256": "031b9a406e0df4ac8bf588fb674a435d9cc4d8e4ad2505e3dc504cb354f18796"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/gateway_bridge.rs",
+      "bytes": 130775,
+      "sha256": "50ee193fd42a7a9a5e871602ef376b5a337c2a7847b918cb42277a9e76018809"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/item_geometry.rs",
+      "bytes": 9207,
+      "sha256": "f30ff2524a5febc632a095b14cdb1bfaadf9f0cbb866bafc14340febd1898fce"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 75613,
+      "sha256": "2c515da5462c958fcc99a4fdeb1a03a95da4532ea1967c966cf8c458b35751c2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_egress_tests.rs",
+      "bytes": 22594,
+      "sha256": "94d76826ffee12d55c7d413681fac3b144c65ff0c4e455a45007ded81976ccd5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_host_tests.rs",
+      "bytes": 12532,
+      "sha256": "4a2004c997198bdceec1a3f807a84d7ef707dab3e255509543931c5d11ba4810"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_ingress.rs",
+      "bytes": 31534,
+      "sha256": "66a32131633cf425dfd2b84d682f7202f10834f9fa160bd88fecde4d883c41e8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_jni_preview_tests.rs",
+      "bytes": 6346,
+      "sha256": "5cc0dfb95048b6e6dd5bc4981e54efcdb5690aa4ede77292a3e03e06e800b64a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mobile_ui.rs",
+      "bytes": 91921,
+      "sha256": "a09f30d587ace87d3cbbc3eaf1c445e73d76aacc2bc112a2026f0925d7dc8d7f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_host_tests.rs",
+      "bytes": 5208,
+      "sha256": "507be77c53a8e139c73b47a02414d01545a3598dcafbfae05907baa4287f31ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_ingress.rs",
+      "bytes": 20887,
+      "sha256": "1544b4dbe37e86dddcc90b04db6b09818c02a871978f4f237d2b3d8ebb501a75"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+      "bytes": 29603,
+      "sha256": "acf81d18dd9c1b3df062cf2dc8d268e680ac358d8ff9cdd665258bd23f1b9837"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+      "bytes": 4789,
+      "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+      "bytes": 20595,
+      "sha256": "7a8a6e6734446b9d7395700694aa4e17847cf36972b9adcc319de1e28fbd64bf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+      "bytes": 10548,
+      "sha256": "230f7b9746254e8598ca99ad846c4b96b3f29a6e1945913ddef89725618510fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_host_tests.rs",
+      "bytes": 8715,
+      "sha256": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_ingress.rs",
+      "bytes": 32437,
+      "sha256": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_preview.rs",
+      "bytes": 6222,
+      "sha256": "b9640e921983930e2fb757d33c886363630c4e109cb3fdcd06e548df664ed65a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 227952,
+      "sha256": "07163a8fceb3238e945d4140ac641d4f22948e989a7cea702f55044f90cc7d48"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/social_ingress.rs",
+      "bytes": 40202,
+      "sha256": "8f9e10a6b9c1d957a0c29af006d1f07eb16cd2506bd9695c67e655e6c95ecafa"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/social_jni_preview_tests.rs",
+      "bytes": 10840,
+      "sha256": "20b766d96f7a567177ee52d7822b5a5d1714bd0fe904f6a1eb1a321c7ba0bf90"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+      "bytes": 23059,
+      "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/text_input.rs",
+      "bytes": 10918,
+      "sha256": "5305f310cb666e2ca608a957c47f8161a192008d265a13bc6e0efec3f63b848b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 100630,
+      "sha256": "d0033f6ec1d0c917eb7b16023cd74f4f4d08bf9eff2c571b149cc96ec644972d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/world_input.rs",
+      "bytes": 5009,
+      "sha256": "b45aadb88962376b40181026009ade36019d7dc26095a19295d8e892db7fd4a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+      "bytes": 149003,
+      "sha256": "974d1b00d3673b226e9e0f71c460660d2f640010ee144b48d2c786868b53d4f4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+      "bytes": 2062,
+      "sha256": "d22a6037b05a4baff1694fca1a796c1f49ab990fb496f65ec8e083a6b2d97a20"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 323202,
+      "sha256": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 449445,
+      "sha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+      "bytes": 20604,
+      "sha256": "72bd28372023ed3ea210b5f5849055b34cc22dea25b38ea3b4a2963c013b2fba"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/native_protocol.rs",
+      "bytes": 83806,
+      "sha256": "31982f0a315ce10e4c00cd66748f41a10aaaa09eb6fa213f2bc8079ab0a240ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/trade_projection.rs",
+      "bytes": 8144,
+      "sha256": "4448a154b6370e16505d2227767d0e199f9c0ff31c87a24bbb52f09c37b7e3d4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 450375,
+      "sha256": "2f306d818fc809412a52e69312dddcc3ce30772ab1fd6174b0d19c79558651e0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 82471,
+      "sha256": "8702d0ccf872aa6a943c9ed40692ce5c233bfc6d4233b1854f4521142871ce95"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/ui-core/src/effect.rs",
+      "bytes": 7369,
+      "sha256": "9ac4779907ebf8791f5680a7718cc7db49c121faf0033a6b3f8d0e4962db33d1"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+      "bytes": 13568,
+      "sha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+      "bytes": 27032,
+      "sha256": "3d79af27b4809a3a063f39c4c95efc1b8d37ad6a8d46691b3bfbeb3d6b80086f"
+    }
+  ],
+  "sourceInputSha256": "8c7c12d88bd3a8ffa4867d1ac9db9abab7a0b4845b0901b78702cc11ee8184ca",
+  "rawEvidence": {
+    "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc",
+    "corrected": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction",
+    "manifestPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/raw-index.json",
+    "manifestSha256": "b536ea5934627a0da097a46d68f6a5082cac329c034f2083a047b3711518ec9d",
+    "regularFiles": 222,
+    "bytes": 4317078847,
+    "excludedPostSnapshot": [
+      "raw-index.json",
+      "collection-result.json",
+      "correction/qa-evidence-prepared.json",
+      "correction/documentation-stage-proof.json",
+      "correction/documentation-commit.json",
+      "correction/remote-after-delivery.json",
+      "correction/push-result.json",
+      "correction/readme-open.json"
+    ]
+  },
+  "guard": {
+    "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+    "protectedWholeFiles": 65,
+    "helpers": [
+      {
+        "name": "enrich_guild_storage_item",
+        "windows": "5e515eced50d71f34a8e36dd83404a95b183c1ca6bd03e5d846cb1aa774a0592",
+        "android": "5e515eced50d71f34a8e36dd83404a95b183c1ca6bd03e5d846cb1aa774a0592",
+        "equal": true
+      },
+      {
+        "name": "add_social_item_tooltip_sources",
+        "windows": "2f2b82263fbdd3948fbaf381982638ba82d095304a407116be6bb532e5d735b4",
+        "android": "2f2b82263fbdd3948fbaf381982638ba82d095304a407116be6bb532e5d735b4",
+        "equal": true
+      },
+      {
+        "name": "value_i32",
+        "windows": "e6e48322f7b5aba51d054878a05570f97bec577d45be4834d170fec6d4476b48",
+        "android": "e6e48322f7b5aba51d054878a05570f97bec577d45be4834d170fec6d4476b48",
+        "equal": true
+      },
+      {
+        "name": "value_u64",
+        "windows": "fb8ae78a3b312f246ea225ef0bf0571c0ec9705927a813cfddc9aae29716f74a",
+        "android": "fb8ae78a3b312f246ea225ef0bf0571c0ec9705927a813cfddc9aae29716f74a",
+        "equal": true
+      },
+      {
+        "name": "value_u64_ref",
+        "windows": "98ab3fc7db4d5fecd5fe92007b7105f36588b732c5112473d62266b98e4e73ff",
+        "android": "98ab3fc7db4d5fecd5fe92007b7105f36588b732c5112473d62266b98e4e73ff",
+        "equal": true
+      }
+    ],
+    "authMethods": [
+      {
+        "name": "endpoint",
+        "equal": true,
+        "sha256": "4f61af3abe942c436b2fae84c2d3df75a5c5892718b3c6c22d95111ce3d181e3"
+      },
+      {
+        "name": "login",
+        "equal": true,
+        "sha256": "4f999ead03041383f8c886143f6f8e315c9a3ca5f7121bf74ead9a046576ff12"
+      },
+      {
+        "name": "createCharacter",
+        "equal": true,
+        "sha256": "293869bdb5e35bb796a90cc8488b92e3e03826022840324fdf1f31efee4cc740"
+      },
+      {
+        "name": "deleteCharacter",
+        "equal": true,
+        "sha256": "1e4adff00ea671bc1068fdd94e3a703fe09fc5a23a5c9f59859b95d45d3456af"
+      },
+      {
+        "name": "start",
+        "equal": true,
+        "sha256": "1100fc2732cfd92b3a8d05088334208bb559f5efe964e83da5edcc24193e40b3"
+      },
+      {
+        "name": "disconnect",
+        "equal": true,
+        "sha256": "82ed7b5333fc39856d52d16db179138259ed202c6a3e7da39bdcc7bf165930ee"
+      },
+      {
+        "name": "resetWorld",
+        "equal": true,
+        "sha256": "a2fb57475cd319ba76ca0298002518a8c8f0b082aa1ac327a38b345ed33695e6"
+      },
+      {
+        "name": "personalGameplayPhase",
+        "equal": true,
+        "sha256": "88c6e7e393e05310a987fd80f467afb3f81c4f4b01aa1781723ae443e110007a"
+      },
+      {
+        "name": "forwardOwnMailResult",
+        "equal": true,
+        "sha256": "eaa16ea5afa8ce76034c53bbacbe8021563d8982d7df65b333d69c636377fa63"
+      },
+      {
+        "name": "forwardReceipt",
+        "equal": true,
+        "sha256": "e4ecdb9c8d3c2af453923ed7b215d7a92d73cea2d2d5e911e5c52dff7d3e0543"
+      }
+    ],
+    "oldGatewayTests": [
+      {
+        "name": "tlsLoginStartAndAuthoritativePosition",
+        "equal": true
+      },
+      {
+        "name": "startCannotBypassLoginOrSelectUnlistedCharacter",
+        "equal": true
+      },
+      {
+        "name": "characterCreateAndDeleteUseDedicatedRosterPhaseCommands",
+        "equal": true
+      },
+      {
+        "name": "characterOperationFailuresAreBoundedAndRetryable",
+        "equal": true
+      },
+      {
+        "name": "rejectedLoginNeverEntersCharacterSelection",
+        "equal": true
+      },
+      {
+        "name": "unsolicitedLocationDoesNotProduceWorld",
+        "equal": true
+      },
+      {
+        "name": "rejectsCleartextAndCredentialBearingEndpoints",
+        "equal": true
+      },
+      {
+        "name": "untrustedTlsCertificateFailsClosed",
+        "equal": true
+      },
+      {
+        "name": "snapshotMustWaitForStartAckAndMatchSelfObject",
+        "equal": true
+      },
+      {
+        "name": "renderDeadlineRemainsArmedUntilAWorldSnapshotIsDelivered",
+        "equal": true
+      },
+      {
+        "name": "malformedPositionInvalidatesSession",
+        "equal": true
+      },
+      {
+        "name": "gameplayWritesRequireAnAuthenticatedInGameSession",
+        "equal": true
+      },
+      {
+        "name": "nativeMailWritesUseTheAuthenticatedSocketAndKeepAllSevenPublicShapes",
+        "equal": true
+      },
+      {
+        "name": "mailResultClaimBindsOnlyTheActualWriteAndNotThePayloadId",
+        "equal": true
+      },
+      {
+        "name": "mailResultSendRejectsForgedInternalEventsAndSurvivesSameOwnerScene",
+        "equal": true
+      },
+      {
+        "name": "mailResultFailedSocketWriteNeverRecordsAnOperation",
+        "equal": true
+      },
+      {
+        "name": "mailResultReconnectRetiresPreviousOperationAndEpoch",
+        "equal": true
+      },
+      {
+        "name": "mailResultRefusesRoundedClaimAndWrongOwnerWithoutLosingOwnPending",
+        "equal": true
+      },
+      {
+        "name": "mailResultClaimPreservesTheFullUnsignedIdOnTheActualWrite",
+        "equal": true
+      },
+      {
+        "name": "wireDecoderPreservesUnsignedIntegersThroughNestedCloneAndEncoding",
+        "equal": true
+      },
+      {
+        "name": "nativeWireEnvelopeSendsTheExactUnsignedIdAndCorrelatesItsOwnAck",
+        "equal": true
+      },
+      {
+        "name": "wireIdentityNeverAcceptsStringsFloatsOrOutOfRangeValues",
+        "equal": true
+      },
+      {
+        "name": "wireDecoderRejectsOutOfRangeAndMalformedNumericLiterals",
+        "equal": true
+      },
+      {
+        "name": "wireDecoderBoundsDepthBytesAndIntegerAllocation",
+        "equal": true
+      },
+      {
+        "name": "mailResultRejectsUnrepresentableIdentityWithoutRecordingAnOperation",
+        "equal": true
+      },
+      {
+        "name": "wireReadOnlyMailAndWorldSnapshotRetainTheFullUnsignedId",
+        "equal": true
+      },
+      {
+        "name": "wireOutOfRangeNetworkIntegerDisconnectsWithoutForwarding",
+        "equal": true
+      },
+      {
+        "name": "mailResultNumericStringUsesTheFrozenWindowsScalarPath",
+        "equal": true
+      },
+      {
+        "name": "nativeParcelWriterPreservesBothStampChoicesAndAllFiveAttachments",
+        "equal": true
+      },
+      {
+        "name": "forwardsOnlyBoundedAuthoritativeTransactionReceipts",
+        "equal": true
+      },
+      {
+        "name": "inventoryReceiptsRequireOwnerBootstrapAndSurviveMapLoading",
+        "equal": true
+      },
+      {
+        "name": "userInformationCannotMutatePublishedWorldBeforeOwnerValidation",
+        "equal": true
+      },
+      {
+        "name": "playerWalletPacketsRequireOwnerBootstrapAndSurviveMapLoading",
+        "equal": true
+      },
+      {
+        "name": "integerOwnerIdSupportsFullUnsignedRangeAcrossMapLoading",
+        "equal": true
+      },
+      {
+        "name": "receivedChatRequiresOwnerBootstrapAndPreservesOrderedPeerAndSystemPayloads",
+        "equal": true
+      },
+      {
+        "name": "personalSkillPacketsForwardOnlyInsideAuthenticatedGameAndPreservePayload",
+        "equal": true
+      },
+      {
+        "name": "personalSkillPacketsSurviveMapTransitionButNotInitialBootstrap",
+        "equal": true
+      },
+      {
+        "name": "npcPacketsRequireAnAuthenticatedCurrentSceneAndKeepTheirPayload",
+        "equal": true
+      },
+      {
+        "name": "questMetadataStagesOnlyDuringAuthenticatedSelectedStart",
+        "equal": true
+      },
+      {
+        "name": "mailMetadataStagesOnlyDuringAuthenticatedSelectedStart",
+        "equal": true
+      },
+      {
+        "name": "mailMetadataSurvivesSameOwnerMapTransitionWithoutBootstrap",
+        "equal": true
+      },
+      {
+        "name": "fullMailMetadataRetains256RowsAndAllFiveAttachments",
+        "equal": true
+      },
+      {
+        "name": "oversizedMailServiceKeepsTheExistingSmallPacketLimit",
+        "equal": true
+      },
+      {
+        "name": "oversizedMailMetadataTerminatesInsteadOfSilentlyDroppingInbox",
+        "equal": true
+      },
+      {
+        "name": "storageMetadataStagesOnlyDuringAuthenticatedSelectedStart",
+        "equal": true
+      },
+      {
+        "name": "oversizedStorageMetadataFailsClosedBeforeOwnerBootstrap",
+        "equal": true
+      },
+      {
+        "name": "socialMetadataRequiresListedStartAndPreservesEveryPublicPacket",
+        "equal": true
+      },
+      {
+        "name": "socialLargeReadModelsHaveOnlyTheirOwnBoundedRoute",
+        "equal": true
+      },
+      {
+        "name": "socialReadModelAboveHardCapFailsClosed",
+        "equal": true
+      },
+      {
+        "name": "socialMetadataSurvivesAcceptedOwnerMapTransitionWithoutAuthorizingScene",
+        "equal": true
+      },
+      {
+        "name": "storageMetadataSurvivesOwnerMapTransitionWithoutDuplicatingTransferReceipts",
+        "equal": true
+      },
+      {
+        "name": "gameShopMetadataStagesOnlyDuringAuthenticatedSelectedStart",
+        "equal": true
+      },
+      {
+        "name": "gameShopMetadataSurvivesAcceptedOwnerMapTransitionWithoutBootstrap",
+        "equal": true
+      },
+      {
+        "name": "oversizedGameShopMetadataFailsClosedBeforeOwnerBootstrap",
+        "equal": true
+      },
+      {
+        "name": "oversizedQuestMetadataFailsClosedBeforeOwnerBootstrap",
+        "equal": true
+      },
+      {
+        "name": "oversizedNpcPacketFailsClosedAtTheJniBoundary",
+        "equal": true
+      },
+      {
+        "name": "entityPacketsForwardOnlyAfterAuthoritativeWorldEntry",
+        "equal": true
+      }
+    ],
+    "oldPreviewTests": [
+      {
+        "name": "normalBuildAndUnrecognizedSceneCannotGeneratePreviewInputs",
+        "equal": true
+      },
+      {
+        "name": "catalogueAndStockArriveBeforeExactOwnerWorld",
+        "equal": true
+      },
+      {
+        "name": "full160SlotsRemainLockedUnlessExplicitOfflineResultFollows",
+        "equal": true
+      },
+      {
+        "name": "inputsAreBoundedDataNotAuthOrGameplayCommands",
+        "equal": true
+      },
+      {
+        "name": "mailJniVariantsProvideOwnerBoundResultFollowedByAuthoritativeMailbox",
+        "equal": true
+      },
+      {
+        "name": "mailJniFullMailboxKeepsAllFiveUnsignedAttachmentsWithoutInventingSettlement",
+        "equal": true
+      },
+      {
+        "name": "mailJniInputsStayBoundedImmutableAndAbsentInNormalOrUnlistedScenes",
+        "equal": true
+      },
+      {
+        "name": "independentResizeTestFollowsOwnerSnapshotAndFullItems",
+        "equal": true
+      }
+    ],
+    "unchangedPreviewFunctions": [
+      {
+        "name": "mail_jni_expected",
+        "equal": true
+      },
+      {
+        "name": "mail_jni_models_received",
+        "equal": true
+      },
+      {
+        "name": "report_mail_jni_consumer",
+        "equal": true
+      },
+      {
+        "name": "report_mail_jni_ui_result",
+        "equal": true
+      },
+      {
+        "name": "personal_jni_models_received",
+        "equal": true
+      },
+      {
+        "name": "report_personal_jni_consumer",
+        "equal": true
+      },
+      {
+        "name": "report_npc_preview_consumer",
+        "equal": true
+      },
+      {
+        "name": "report_owned_hero_mana_visible",
+        "equal": true
+      },
+      {
+        "name": "start_world_render_motion_specimen",
+        "equal": true
+      },
+      {
+        "name": "apply_offline_entity_packet",
+        "equal": true
+      },
+      {
+        "name": "apply_offline_object_metadata_specimen",
+        "equal": true
+      },
+      {
+        "name": "apply_offline_object_poison_specimen",
+        "equal": true
+      },
+      {
+        "name": "apply_offline_object_hidden_specimen",
+        "equal": true
+      },
+      {
+        "name": "apply_offline_owned_hero_vitals_specimen",
+        "equal": true
+      },
+      {
+        "name": "report_world_render_motion_pose",
+        "equal": true
+      },
+      {
+        "name": "report_world_render_ready",
+        "equal": true
+      },
+      {
+        "name": "initialize_panel",
+        "equal": true
+      },
+      {
+        "name": "initialize_player_panel",
+        "equal": true
+      },
+      {
+        "name": "offline_skill_ingress_model",
+        "equal": true
+      },
+      {
+        "name": "offline_personal_snapshot",
+        "equal": true
+      },
+      {
+        "name": "offline_inventory_ingress_model",
+        "equal": true
+      },
+      {
+        "name": "offline_player_ingress_model",
+        "equal": true
+      },
+      {
+        "name": "offline_received_chat_lines",
+        "equal": true
+      },
+      {
+        "name": "is_npc_service_preview",
+        "equal": true
+      },
+      {
+        "name": "begin_offline_npc_preview_request",
+        "equal": true
+      },
+      {
+        "name": "offline_npc_ingress_messages",
+        "equal": true
+      },
+      {
+        "name": "populate_specimens",
+        "equal": true
+      },
+      {
+        "name": "chat_settings_preview_opens_with_an_applicable_draft",
+        "equal": true
+      },
+      {
+        "name": "item_specimens_have_identity_for_shared_local_dialogs",
+        "equal": true
+      },
+      {
+        "name": "inventory_specimen_uses_typed_owner_ingress_and_original_equipment_index",
+        "equal": true
+      },
+      {
+        "name": "character_specimen_uses_validated_shared_stats_and_absolute_wallet",
+        "equal": true
+      },
+      {
+        "name": "player_specimen_is_confined_to_character_and_bag_preview_scenes",
+        "equal": true
+      },
+      {
+        "name": "locked_storage_scene_exposes_only_a_secure_local_draft",
+        "equal": true
+      },
+      {
+        "name": "game_shop_and_big_map_scenes_have_navigable_offline_fixtures",
+        "equal": true
+      },
+      {
+        "name": "skill_preview_uses_typed_owner_ingress_not_an_unbound_placeholder",
+        "equal": true
+      },
+      {
+        "name": "skills_specimen_opens_shared_spell_page_directly",
+        "equal": true
+      },
+      {
+        "name": "received_chat_specimen_uses_public_packet_adapter_and_shared_model",
+        "equal": true
+      },
+      {
+        "name": "java_jni_personal_scenes_register_the_received_panel",
+        "equal": true
+      },
+      {
+        "name": "java_jni_personal_scene_identity_matches_the_declared_java_sender",
+        "equal": true
+      },
+      {
+        "name": "java_jni_personal_scenes_never_replace_received_models_with_manual_specimens",
+        "equal": true
+      },
+      {
+        "name": "npc_received_preview_releases_actual_shared_action_guard_after_dialog_exit",
+        "equal": true
+      },
+      {
+        "name": "quest_received_preview_uses_production_model_without_authorizing_main_host",
+        "equal": true
+      },
+      {
+        "name": "modal_specimens_only_change_offline_view_state_not_main_host_authorization",
+        "equal": true
+      },
+      {
+        "name": "npc_quests_specimen_only_changes_view_state_not_host_authorization_or_rewards",
+        "equal": true
+      },
+      {
+        "name": "multitouch_scene_exposes_exact_offline_action_targets",
+        "equal": true
+      },
+      {
+        "name": "npc_preview_waits_for_received_messages_without_inventing_shop_state",
+        "equal": true
+      },
+      {
+        "name": "npc_service_preview_scenes_expose_each_authoritative_service_mode",
+        "equal": true
+      },
+      {
+        "name": "npc_preview_receipt_cannot_report_an_old_same_mode_window_as_new",
+        "equal": true
+      },
+      {
+        "name": "npc_preview_retains_current_map_after_an_accepted_request",
+        "equal": true
+      },
+      {
+        "name": "npc_buy_preview_uses_exact_ingress_identity_currency_and_fifo",
+        "equal": true
+      },
+      {
+        "name": "npc_preview_request_does_not_force_open_the_panel_or_connect",
+        "equal": true
+      },
+      {
+        "name": "social_preview_scenes_expose_bounded_offline_models",
+        "equal": true
+      }
+    ],
+    "sceneInventoryChange": {
+      "oldCount": 51,
+      "currentCount": 55,
+      "onlyFourNewEntries": true,
+      "allOriginalEntriesPreserved": true,
+      "oldUniqueAssertionPreserved": true,
+      "countAssertionOnlyChanged": true
+    },
+    "originals": [
+      {
+        "path": "/Users/henryliu/obelisk/numeron",
+        "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+        "branch": "codex/steam-main",
+        "status": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/",
+        "equal": true
+      },
+      {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+        "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+        "branch": "codex/android-player-journey",
+        "status": "",
+        "equal": true
+      }
+    ],
+    "checkpointLimits": "Git HEAD/branch/status only; not a recursive untracked-byte proof",
+    "normalTransportAndAuthUnchanged": true
+  },
+  "full": [
+    {
+      "label": "bound3-rust-normal-social-jni",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "started": "2026-10-05T14:40:17.173Z",
+      "ended": "2026-10-05T14:40:32.346Z",
+      "exit": 0,
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "sourceUnchanged": true,
+      "inputsCount": 69,
+      "inputsSha256": "8c7c12d88bd3a8ffa4867d1ac9db9abab7a0b4845b0901b78702cc11ee8184ca",
+      "rust": [
+        {
+          "passed": 431,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/bound3-rust-normal-social-jni.log",
+      "logSha256": "315f15bcfa87924e312b5f1e2530dc9c2784b6df15aee8d9f96ad710832674fa"
+    },
+    {
+      "label": "bound3-rust-preview-social-jni",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--features",
+        "ui-preview",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "started": "2026-10-05T14:40:32.520Z",
+      "ended": "2026-10-05T14:40:47.180Z",
+      "exit": 0,
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "sourceUnchanged": true,
+      "inputsCount": 69,
+      "inputsSha256": "8c7c12d88bd3a8ffa4867d1ac9db9abab7a0b4845b0901b78702cc11ee8184ca",
+      "rust": [
+        {
+          "passed": 471,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/bound3-rust-preview-social-jni.log",
+      "logSha256": "50cd675b975d4c2037b5694fe6182524b6aff2a97e0044bcecbe7b942109326b"
+    },
+    {
+      "label": "bound3-shared-native-player-social-jni",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+        "--features",
+        "native-player-ui",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "started": "2026-10-05T14:40:47.320Z",
+      "ended": "2026-10-05T14:40:56.382Z",
+      "exit": 0,
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "sourceUnchanged": true,
+      "inputsCount": 69,
+      "inputsSha256": "8c7c12d88bd3a8ffa4867d1ac9db9abab7a0b4845b0901b78702cc11ee8184ca",
+      "rust": [
+        {
+          "passed": 1304,
+          "failed": 0,
+          "ignored": 10
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/bound3-shared-native-player-social-jni.log",
+      "logSha256": "8f83d62cbaca08870fa6bc5331c3babb0754af2f350e9708182be8d567632f9e"
+    },
+    {
+      "label": "bound3-runtime-social-jni",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/runtime/Cargo.toml",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "started": "2026-10-05T14:40:56.525Z",
+      "ended": "2026-10-05T14:40:58.131Z",
+      "exit": 0,
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "sourceUnchanged": true,
+      "inputsCount": 69,
+      "inputsSha256": "8c7c12d88bd3a8ffa4867d1ac9db9abab7a0b4845b0901b78702cc11ee8184ca",
+      "rust": [
+        {
+          "passed": 296,
+          "failed": 0,
+          "ignored": 1
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/bound3-runtime-social-jni.log",
+      "logSha256": "f7973ac1ebabca7ca63b10cd309c55da48896b8d335d8df31b16900adb321a9f"
+    },
+    {
+      "label": "bound3-api31-normal-social-jni",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "--platform",
+        "31",
+        "check",
+        "--lib",
+        "--locked",
+        "--offline"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android",
+      "started": "2026-10-05T14:40:58.267Z",
+      "ended": "2026-10-05T14:40:58.915Z",
+      "exit": 0,
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "sourceUnchanged": true,
+      "inputsCount": 69,
+      "inputsSha256": "8c7c12d88bd3a8ffa4867d1ac9db9abab7a0b4845b0901b78702cc11ee8184ca",
+      "rust": [],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/bound3-api31-normal-social-jni.log",
+      "logSha256": "e76d195adbdd8f45692fa0f3f532cf489ed24f869072126dcd6c99005c89d8a0"
+    },
+    {
+      "label": "bound3-api31-preview-social-jni",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "--platform",
+        "31",
+        "check",
+        "--lib",
+        "--features",
+        "ui-preview",
+        "--locked",
+        "--offline"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android",
+      "started": "2026-10-05T14:40:59.047Z",
+      "ended": "2026-10-05T14:41:15.406Z",
+      "exit": 0,
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "sourceUnchanged": true,
+      "inputsCount": 69,
+      "inputsSha256": "8c7c12d88bd3a8ffa4867d1ac9db9abab7a0b4845b0901b78702cc11ee8184ca",
+      "rust": [],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/bound3-api31-preview-social-jni.log",
+      "logSha256": "1c2d9d2df5f2bfe1d3bdc59601fd50cd825b811b08ef07e77e6cf81c7d08d76c"
+    },
+    {
+      "label": "bound3-java-full-social-jni",
+      "bin": "./gradlew",
+      "args": [
+        "--offline",
+        "--no-daemon",
+        "--no-build-cache",
+        "--rerun-tasks",
+        ":app:testDebugUnitTest",
+        ":app:testUiPreviewUnitTest",
+        "--console=plain"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android",
+      "started": "2026-10-05T14:41:15.567Z",
+      "ended": "2026-10-05T14:42:20.341Z",
+      "exit": 0,
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "sourceUnchanged": true,
+      "inputsCount": 69,
+      "inputsSha256": "8c7c12d88bd3a8ffa4867d1ac9db9abab7a0b4845b0901b78702cc11ee8184ca",
+      "rust": [],
+      "javaXml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 57,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 57,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/bound3-java-full-social-jni.log",
+      "logSha256": "6ed6905459ea045061f3b6567180fe7e314e733163719cb02f6387021c622b02"
+    },
+    {
+      "label": "bound3-windows-social-jni",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "own_trade_snapshot",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "started": "2026-10-05T14:42:20.524Z",
+      "ended": "2026-10-05T14:42:33.573Z",
+      "exit": 0,
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "sourceUnchanged": true,
+      "inputsCount": 69,
+      "inputsSha256": "8c7c12d88bd3a8ffa4867d1ac9db9abab7a0b4845b0901b78702cc11ee8184ca",
+      "rust": [
+        {
+          "passed": 5,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/bound3-windows-social-jni.log",
+      "logSha256": "f649629706967f70f6302a68ab7812d1da5915f5bf9d03fe1466673f6d6ce181"
+    },
+    {
+      "label": "bound3-windows-social-jni-partner-tooltip",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "trade_item_tooltip_adapter",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "started": "2026-10-05T14:42:33.759Z",
+      "ended": "2026-10-05T14:42:34.508Z",
+      "exit": 0,
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "sourceUnchanged": true,
+      "inputsCount": 69,
+      "inputsSha256": "8c7c12d88bd3a8ffa4867d1ac9db9abab7a0b4845b0901b78702cc11ee8184ca",
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/bound3-windows-social-jni-partner-tooltip.log",
+      "logSha256": "17ee18400a04d691f2d164b82410061b250531ba7ed5a616ebc291b43e505f2c"
+    },
+    {
+      "label": "bound3-windows-social-jni-protocol",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "native_protocol::tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+      "started": "2026-10-05T14:42:34.645Z",
+      "ended": "2026-10-05T14:42:35.031Z",
+      "exit": 0,
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "sourceUnchanged": true,
+      "inputsCount": 69,
+      "inputsSha256": "8c7c12d88bd3a8ffa4867d1ac9db9abab7a0b4845b0901b78702cc11ee8184ca",
+      "rust": [
+        {
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/bound3-windows-social-jni-protocol.log",
+      "logSha256": "c00b232341dbe47303e315ff9fdc27ca72c509c6502c807d79592d5edb2f120b"
+    }
+  ],
+  "history": [
+    {
+      "label": "red-social-jni-scene-contract",
+      "source": "8a307e16c665ad52fa6b2d17261b57c8b59332e0",
+      "bound": false,
+      "sourceUnchanged": true,
+      "exit": 101,
+      "rust": [
+        {
+          "passed": 0,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "javaXml": [],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/red-social-jni-scene-contract.log",
+      "logSha256": "10e5960278f180a0679c8a0649f961577c08186857e7fa08391e96b00b438207"
+    },
+    {
+      "label": "red-social-jni-java-stream",
+      "source": "8a307e16c665ad52fa6b2d17261b57c8b59332e0",
+      "bound": false,
+      "sourceUnchanged": true,
+      "exit": 1,
+      "rust": [],
+      "javaXml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 1,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/red-social-jni-java-stream.log",
+      "logSha256": "abc1db4d81a1c4174563d2acdd17b0652ed2139d22141d2f4ba7f23d5f364812"
+    },
+    {
+      "label": "green-social-jni-preview-focused",
+      "source": "8a307e16c665ad52fa6b2d17261b57c8b59332e0",
+      "bound": false,
+      "sourceUnchanged": true,
+      "exit": 101,
+      "rust": [],
+      "javaXml": [],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/green-social-jni-preview-focused.log",
+      "logSha256": "d96d0ca437a859dc9bdde1bc005d6d326a8d0c8e69529ba6d45287c2e947c265",
+      "limits": "Rust E0616 compile failure, not a compiled failed test."
+    },
+    {
+      "label": "green2-social-jni-preview-focused",
+      "source": "8a307e16c665ad52fa6b2d17261b57c8b59332e0",
+      "bound": false,
+      "sourceUnchanged": true,
+      "exit": 0,
+      "rust": [
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "javaXml": [],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/green2-social-jni-preview-focused.log",
+      "logSha256": "185fbf5aee497866bd8d3a20e2972eb5aaa7be76e359b4c15eb30508f9296522"
+    },
+    {
+      "label": "green2-social-jni-java-focused",
+      "source": "8a307e16c665ad52fa6b2d17261b57c8b59332e0",
+      "bound": false,
+      "sourceUnchanged": true,
+      "exit": 0,
+      "rust": [],
+      "javaXml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 57,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 11,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 57,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 11,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/green2-social-jni-java-focused.log",
+      "logSha256": "dffc351c5016e71b8053a0499788e940c08c2cfe313dbfd81bd60a947878eb3b"
+    },
+    {
+      "label": "bound-rust-normal-social-jni",
+      "source": "73909efa4a069fbd6b5bdf0d7761f53fdc20d2dc",
+      "bound": true,
+      "sourceUnchanged": true,
+      "exit": 0,
+      "rust": [
+        {
+          "passed": 431,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "javaXml": [],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/bound-rust-normal-social-jni.log",
+      "logSha256": "865804c9e1fb2748d0595e4bcbe4c4efee4dd5419ee26100fa8611b073a9424c"
+    },
+    {
+      "label": "bound-rust-preview-social-jni",
+      "source": "73909efa4a069fbd6b5bdf0d7761f53fdc20d2dc",
+      "bound": true,
+      "sourceUnchanged": true,
+      "exit": 101,
+      "rust": [
+        {
+          "passed": 468,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "javaXml": [],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/bound-rust-preview-social-jni.log",
+      "logSha256": "df12f2b78f9e140fc7341eeda21e911501cb7b0edb487d3008c2b291119b8d27"
+    },
+    {
+      "label": "green3-social-jni-preview-full",
+      "source": "73909efa4a069fbd6b5bdf0d7761f53fdc20d2dc",
+      "bound": false,
+      "sourceUnchanged": true,
+      "exit": 0,
+      "rust": [
+        {
+          "passed": 469,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "javaXml": [],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/green3-social-jni-preview-full.log",
+      "logSha256": "c365e00d3981ce153e3a0f9575874598556bb0fed2758312598b2ccf6df05a35"
+    },
+    {
+      "label": "red-trade-jni-presentation-observer",
+      "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+      "bound": false,
+      "sourceUnchanged": true,
+      "exit": 101,
+      "rust": [
+        {
+          "passed": 0,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "javaXml": [],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/red-trade-jni-presentation-observer.log",
+      "logSha256": "f24d4933a2603d4b0988182e96151ca59828603a3b1c2162650beda841551d11"
+    },
+    {
+      "label": "red-trade-jni-renderer-metadata",
+      "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+      "bound": false,
+      "sourceUnchanged": true,
+      "exit": 1,
+      "rust": [],
+      "javaXml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 57,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 12,
+          "failures": 1,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 57,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 11,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/red-trade-jni-renderer-metadata.log",
+      "logSha256": "43f2153b4ee5b2eb50600251b12727f8c6caf234423196fcf23f324bde3fc1ad",
+      "limits": "Only Debug 85-test JVM ran; UiPreview XML copied by generic runner is stale and not a red execution. compiled flag is a Rust-only heuristic."
+    },
+    {
+      "label": "green4-social-jni-observer-focused",
+      "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+      "bound": false,
+      "sourceUnchanged": true,
+      "exit": 0,
+      "rust": [
+        {
+          "passed": 6,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "javaXml": [],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/green4-social-jni-observer-focused.log",
+      "logSha256": "731369889d0d570fbc7c390d4358bd40aaf28e262dccfd898e2c81245ca5fe15"
+    },
+    {
+      "label": "green4-social-jni-java-metadata",
+      "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+      "bound": false,
+      "sourceUnchanged": true,
+      "exit": 0,
+      "rust": [],
+      "javaXml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 57,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 57,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/green4-social-jni-java-metadata.log",
+      "logSha256": "40afa36e920defde901eaa55521aeb6e13743ff31acab0f57320c9fd956ed41c"
+    }
+  ],
+  "diagnosticCorrections": {
+    "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+    "parent": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+    "at": "2026-10-05T14:39:28.548Z",
+    "correctionEvidence": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction",
+    "roots": [
+      "Original shared trade_dialog::sync opens Inventory and two windows; the original diagnostic incorrectly waited for UiPanel::Trade.",
+      "Own-offer Java fixture rows omitted tooltipSource required by unchanged trade renderer; the diagnostic now supplies explicit offline metadata only."
+    ],
+    "regressions": [
+      "red-trade-jni-presentation-observer",
+      "red-trade-jni-renderer-metadata"
+    ],
+    "green": [
+      "green4-social-jni-observer-focused",
+      "green4-social-jni-java-metadata"
+    ],
+    "javaRedXmlLimits": "Debug JVM compiled/executed 85 tests, one failure. Gradle stopped there; UiPreview XML copied by the generic runner was stale from the previous 84-test run and is NOT red-case UiPreview execution. Generic compiled field is a Rust-summary heuristic, not a Java compilation result.",
+    "historyPreserved": true,
+    "phoneLayoutReapproval": "No answer received; layout changes remain out of scope.",
+    "gpu": "Original PID5990 recorded one GL0x0506; still FAIL, not fixed by diagnostic changes."
+  },
+  "preparationFailures": {
+    "initial": {
+      "at": "2026-10-05T14:20:00.686Z",
+      "limits": "Facts retained from tool outputs; this is not a verbatim archive of all preparation stderr. Product red/compile/full logs remain separate.",
+      "failures": [
+        {
+          "step": "install AV D name preflight",
+          "cause": "Emulator console returned CRLF; strict LF prefix did not match. No installation executed before this failure.",
+          "remedy": "Exact first line after CRLF-aware split, same dedicated AVD, no relaxed target."
+        },
+        {
+          "step": "runtime first normal package log snapshot",
+          "cause": "ADB remote shell split unquoted date format; -T received 10-05 only. Normal package started PID5494, no runtime case result/JNI pass recorded.",
+          "remedy": "Quote static device date/logcat timestamp; validate full timestamp, restart per-case fresh PID. No product/source change."
+        }
+      ]
+    },
+    "additional": {
+      "at": "2026-10-05T14:56:29.163Z",
+      "issues": [
+        {
+          "operation": "reuse remote read-only API script",
+          "result": "EEXIST guarded write to old egress directory; original evidence unchanged. Retried in current correction directory.",
+          "productFailure": false
+        },
+        {
+          "operation": "offline background diagnostic date precheck",
+          "result": "Overescaped regex rejected valid date before KEYCODE_HOME; only orchestration script corrected, then separate complete run.",
+          "productFailure": false
+        }
+      ],
+      "rawStderrLimits": "Summaries of tool outputs, not a claimed verbatim stderr archive."
+    }
+  },
+  "package": {
+    "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+    "inputs": [
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/big_map.rs",
+        "bytes": 46169,
+        "sha256": "0a1f91a1ef552b996445495cd19f16ebd33a72e4a306ff404b2fe419bca2ee97"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+        "bytes": 74468,
+        "sha256": "86eced1102947319ad26c04e53ab8b845a659401c6254855312098a4ebbb3a2d"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+        "bytes": 10200,
+        "sha256": "d8c9024b39d89363dbe35ec67eda5cd7d8a91276e5ad785fef54cee6d6f08138"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+        "bytes": 69639,
+        "sha256": "59d5ebf8b3d2f5fd28a9f058ece77efd5e2171ac6afbe0cb7af84af9c6d614ab"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+        "bytes": 42293,
+        "sha256": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+        "bytes": 947245,
+        "sha256": "ffe7b1fda30a2db9ad46e0050b89002f27e4af82299e56bae692d86d1d019769"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+        "bytes": 67126,
+        "sha256": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+        "bytes": 60408,
+        "sha256": "c7f9f40be0caf3cfc37edd5a18ff24e76a795dc5d4183b33adf6501800de54cc"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+        "bytes": 37415,
+        "sha256": "25becf5d258dba0c25f619ffecf818db997260a9439e295ddccd432df8bd9032"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+        "bytes": 3034,
+        "sha256": "0d6568a3b1f0ea9daa70d7e51a28bd47f39776f74096846deb1ac5371556672b"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+        "bytes": 23201,
+        "sha256": "8b45f76f8974b21f0fe8729965e89d979955eca4f8da831c4aaebb205d2384ac"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_egress.rs",
+        "bytes": 11698,
+        "sha256": "7f487f260692b1e983a01f1f7ec644de844efa9dfc7690c0b950569f16d0cf3c"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_ingress.rs",
+        "bytes": 13402,
+        "sha256": "fbed53a162e45cd93a65e2619a5a9debbd45d0e0f23bbffdddf4038a6f5a5a67"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+        "bytes": 13160,
+        "sha256": "38ff1c5220d259b7e609090031219047524b80636e1450a40b28fd7898ba302f"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_quest_ingress.rs",
+        "bytes": 22705,
+        "sha256": "ca0d25fd5ce014ab0e8cdaacdf8334001df1f491299d417d18fc0ab32612d5a0"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_social_egress.rs",
+        "bytes": 29102,
+        "sha256": "41be6b508899136174f656203954fa1b4f4e84a0164f7a0643fda18c086458d7"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_trade_ingress.rs",
+        "bytes": 12436,
+        "sha256": "bc82fbe75c8274598ee543836aefa619345892f472450e9daac4ca71609c9438"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+        "bytes": 76211,
+        "sha256": "62872e48f74dcfbdc746b56b65bee6aebf3dc2837be3d4fdfb85ca3d27988575"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+        "bytes": 368258,
+        "sha256": "ff3ed519f0087de4583e0891f24039ba16c612aee0d027886be85f9c98b67850"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+        "bytes": 9075,
+        "sha256": "25326f497aabe20bb7300b6e3cacdec21c5851b1eb957bb8fc6300279b429979"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+        "bytes": 15596,
+        "sha256": "71bdbf1637176190cb93703fc94a59af047cf8326f8f88a8093ae8e98f130495"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/social.rs",
+        "bytes": 76619,
+        "sha256": "efe22789c06888d1d65d29be68896e579fcbaffc40829f9d3618a7b54ca56ead"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+        "bytes": 33253,
+        "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+        "bytes": 123990,
+        "sha256": "470969816b029c95a8a222700510a423dcd7201e955aef27a655a6b434dc6f3d"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+        "bytes": 28735,
+        "sha256": "25cb70ed959e853e2a27da09264b7362e5395c94149972b320daa00f5f12eff2"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+        "bytes": 41149,
+        "sha256": "5b9ed72dbb0e606e07669c57d131c9cb431e9ecf21260f22e955555d566bd98c"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+        "bytes": 21307,
+        "sha256": "023e2af8b86c2e08d4ddef767465e6c7c49c403242490b557c952d2b0292a5e6"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+        "bytes": 14546,
+        "sha256": "da6a6e7c2bbfe0e082daac0d244f47e20ba5fe5c7438d710626d625b55e3f5ad"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/WireJson.java",
+        "bytes": 3855,
+        "sha256": "682026d344ad6bcb4f4046deb896cb13646e70fb5ca6d90e4871107eaf848c8a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+        "bytes": 93798,
+        "sha256": "6d223055d248c2d49a8896042a3524314106365ebd5a9bc4621a44722382241d"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+        "bytes": 19073,
+        "sha256": "63e6860eeb15d37e3638955306ba2788869d06ec91418ddacec21013e2484d8b"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+        "bytes": 5853,
+        "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+        "bytes": 22413,
+        "sha256": "031b9a406e0df4ac8bf588fb674a435d9cc4d8e4ad2505e3dc504cb354f18796"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/gateway_bridge.rs",
+        "bytes": 130775,
+        "sha256": "50ee193fd42a7a9a5e871602ef376b5a337c2a7847b918cb42277a9e76018809"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/item_geometry.rs",
+        "bytes": 9207,
+        "sha256": "f30ff2524a5febc632a095b14cdb1bfaadf9f0cbb866bafc14340febd1898fce"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+        "bytes": 75613,
+        "sha256": "2c515da5462c958fcc99a4fdeb1a03a95da4532ea1967c966cf8c458b35751c2"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/mail_egress_tests.rs",
+        "bytes": 22594,
+        "sha256": "94d76826ffee12d55c7d413681fac3b144c65ff0c4e455a45007ded81976ccd5"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/mail_host_tests.rs",
+        "bytes": 12532,
+        "sha256": "4a2004c997198bdceec1a3f807a84d7ef707dab3e255509543931c5d11ba4810"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/mail_ingress.rs",
+        "bytes": 31534,
+        "sha256": "66a32131633cf425dfd2b84d682f7202f10834f9fa160bd88fecde4d883c41e8"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/mail_jni_preview_tests.rs",
+        "bytes": 6346,
+        "sha256": "5cc0dfb95048b6e6dd5bc4981e54efcdb5690aa4ede77292a3e03e06e800b64a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/mobile_ui.rs",
+        "bytes": 91921,
+        "sha256": "a09f30d587ace87d3cbbc3eaf1c445e73d76aacc2bc112a2026f0925d7dc8d7f"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/npc_host_tests.rs",
+        "bytes": 5208,
+        "sha256": "507be77c53a8e139c73b47a02414d01545a3598dcafbfae05907baa4287f31ea"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/npc_ingress.rs",
+        "bytes": 20887,
+        "sha256": "1544b4dbe37e86dddcc90b04db6b09818c02a871978f4f237d2b3d8ebb501a75"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+        "bytes": 29603,
+        "sha256": "acf81d18dd9c1b3df062cf2dc8d268e680ac358d8ff9cdd665258bd23f1b9837"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+        "bytes": 4789,
+        "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+        "bytes": 20595,
+        "sha256": "7a8a6e6734446b9d7395700694aa4e17847cf36972b9adcc319de1e28fbd64bf"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+        "bytes": 10548,
+        "sha256": "230f7b9746254e8598ca99ad846c4b96b3f29a6e1945913ddef89725618510fc"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/quest_host_tests.rs",
+        "bytes": 8715,
+        "sha256": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/quest_ingress.rs",
+        "bytes": 32437,
+        "sha256": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/quest_preview.rs",
+        "bytes": 6222,
+        "sha256": "b9640e921983930e2fb757d33c886363630c4e109cb3fdcd06e548df664ed65a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+        "bytes": 227952,
+        "sha256": "07163a8fceb3238e945d4140ac641d4f22948e989a7cea702f55044f90cc7d48"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/social_ingress.rs",
+        "bytes": 40202,
+        "sha256": "8f9e10a6b9c1d957a0c29af006d1f07eb16cd2506bd9695c67e655e6c95ecafa"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/social_jni_preview_tests.rs",
+        "bytes": 10840,
+        "sha256": "20b766d96f7a567177ee52d7822b5a5d1714bd0fe904f6a1eb1a321c7ba0bf90"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+        "bytes": 23059,
+        "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/text_input.rs",
+        "bytes": 10918,
+        "sha256": "5305f310cb666e2ca608a957c47f8161a192008d265a13bc6e0efec3f63b848b"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+        "bytes": 100630,
+        "sha256": "d0033f6ec1d0c917eb7b16023cd74f4f4d08bf9eff2c571b149cc96ec644972d"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-android/src/world_input.rs",
+        "bytes": 5009,
+        "sha256": "b45aadb88962376b40181026009ade36019d7dc26095a19295d8e892db7fd4a5"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+        "bytes": 149003,
+        "sha256": "974d1b00d3673b226e9e0f71c460660d2f640010ee144b48d2c786868b53d4f4"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "bytes": 2062,
+        "sha256": "d22a6037b05a4baff1694fca1a796c1f49ab990fb496f65ec8e083a6b2d97a20"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+        "bytes": 323202,
+        "sha256": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+        "bytes": 449445,
+        "sha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+        "bytes": 20604,
+        "sha256": "72bd28372023ed3ea210b5f5849055b34cc22dea25b38ea3b4a2963c013b2fba"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/native_protocol.rs",
+        "bytes": 83806,
+        "sha256": "31982f0a315ce10e4c00cd66748f41a10aaaa09eb6fa213f2bc8079ab0a240ab"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/trade_projection.rs",
+        "bytes": 8144,
+        "sha256": "4448a154b6370e16505d2227767d0e199f9c0ff31c87a24bbb52f09c37b7e3d4"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+        "bytes": 450375,
+        "sha256": "2f306d818fc809412a52e69312dddcc3ce30772ab1fd6174b0d19c79558651e0"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+        "bytes": 82471,
+        "sha256": "8702d0ccf872aa6a943c9ed40692ce5c233bfc6d4233b1854f4521142871ce95"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/ui-core/src/effect.rs",
+        "bytes": 7369,
+        "sha256": "9ac4779907ebf8791f5680a7718cc7db49c121faf0033a6b3f8d0e4962db33d1"
+      },
+      {
+        "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+        "bytes": 13568,
+        "sha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055"
+      },
+      {
+        "path": "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+        "bytes": 27032,
+        "sha256": "3d79af27b4809a3a063f39c4c95efc1b8d37ad6a8d46691b3bfbeb3d6b80086f"
+      }
+    ],
+    "versionCode": 35,
+    "versionName": "0.1.32-gameshop-phone",
+    "gatewayUrl": "",
+    "environment": {
+      "MIR2_ANDROID_UI_ASSET_ROOT": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/weight-assets-KtITw2/shared-ui-assets",
+      "MIR2_ANDROID_WORLD_ASSET_ROOT": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/shared-sync-build-cache/local-world-20260911-objects",
+      "MIR2_ANDROID_ENTITY_ASSET_ROOT": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/shared-sync-build-cache/entity-proof-assets-with-archer-bow-20260912",
+      "MIR2_ANDROID_ENTITY_ASSET_PACK_ID": "android-archer-mount-bow-proof-20260912"
+    },
+    "artifacts": [
+      {
+        "variant": "debug",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/final-apks/mir2-native-social-jni-debug-3f27e8e9e.apk",
+        "bytes": 533340431,
+        "sha256": "25450fcbc4eff0f7484e6857d9ab0e75d32961af7eafe006fdcde5af5db18842",
+        "nativeElfBytes": 145606216,
+        "nativeElfSha256": "e38f61ce5fc285f30b96f38e897d986ee638859eb564d564d576c90929aa1cac",
+        "nativeElfMatchesThisVariantStrippedOutput": true,
+        "package": "package: name='com.mir2.web3' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+        "gatewayUrl": "",
+        "uiPreview": false,
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        }
+      },
+      {
+        "variant": "preview",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/final-apks/mir2-native-social-jni-preview-3f27e8e9e.apk",
+        "bytes": 541445919,
+        "sha256": "5029492813c970309a1c0e94cfec57dc42816d0e2d6afddf0bea4a62d7295c5e",
+        "nativeElfBytes": 149681240,
+        "nativeElfSha256": "9eb3fae3671d41f91f1af4bbd486ab761697e3f69825a704e485134d06a182a9",
+        "nativeElfMatchesThisVariantStrippedOutput": true,
+        "package": "package: name='com.mir2.web3.uipreview' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+        "gatewayUrl": "",
+        "uiPreview": true,
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        }
+      }
+    ]
+  },
+  "resources": {
+    "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+    "artifacts": [
+      {
+        "variant": "debug",
+        "apkSha256": "25450fcbc4eff0f7484e6857d9ab0e75d32961af7eafe006fdcde5af5db18842",
+        "nativeElfSha256": "e38f61ce5fc285f30b96f38e897d986ee638859eb564d564d576c90929aa1cac",
+        "selectedUiPngCount": 6647,
+        "selectedMetadataCount": 3,
+        "libraries": [
+          {
+            "library": "Items",
+            "pngCount": 1003,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe",
+            "entryHashListSha256": "9b631445514b2f41c54d3607ce2e9cd529b6da5aba48412d8bc12aae680233a3"
+          },
+          {
+            "library": "StateItem",
+            "pngCount": 5192,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a",
+            "entryHashListSha256": "aa4f05c5d4ee057566a1ef8b34a97dc73302e77568115e1a0b306d6290651d13"
+          },
+          {
+            "library": "MagIcon",
+            "pngCount": 224,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": null,
+            "entryHashListSha256": "f3a467b56e3ff3b88806208cbd531bc65616100c17eb81579daee8b1dd25cf43"
+          },
+          {
+            "library": "MagIcon2",
+            "pngCount": 224,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": null,
+            "entryHashListSha256": "e31e0fd0b447d4579636bb15b1570219957a9475f42a70515aade5c41a786142"
+          },
+          {
+            "library": "UI_32bit",
+            "pngCount": 4,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9",
+            "entryHashListSha256": "fee27a48da6053e1a8a84cbe4db0b3bcb5e2c1002cc16b63ec9926bbb3138201"
+          }
+        ],
+        "frozenWeightFramesByteMatch": true,
+        "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+        "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        },
+        "approvedFullResourceReleaseAccepted": false
+      },
+      {
+        "variant": "preview",
+        "apkSha256": "5029492813c970309a1c0e94cfec57dc42816d0e2d6afddf0bea4a62d7295c5e",
+        "nativeElfSha256": "9eb3fae3671d41f91f1af4bbd486ab761697e3f69825a704e485134d06a182a9",
+        "selectedUiPngCount": 6647,
+        "selectedMetadataCount": 3,
+        "libraries": [
+          {
+            "library": "Items",
+            "pngCount": 1003,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe",
+            "entryHashListSha256": "9b631445514b2f41c54d3607ce2e9cd529b6da5aba48412d8bc12aae680233a3"
+          },
+          {
+            "library": "StateItem",
+            "pngCount": 5192,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a",
+            "entryHashListSha256": "aa4f05c5d4ee057566a1ef8b34a97dc73302e77568115e1a0b306d6290651d13"
+          },
+          {
+            "library": "MagIcon",
+            "pngCount": 224,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": null,
+            "entryHashListSha256": "f3a467b56e3ff3b88806208cbd531bc65616100c17eb81579daee8b1dd25cf43"
+          },
+          {
+            "library": "MagIcon2",
+            "pngCount": 224,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": null,
+            "entryHashListSha256": "e31e0fd0b447d4579636bb15b1570219957a9475f42a70515aade5c41a786142"
+          },
+          {
+            "library": "UI_32bit",
+            "pngCount": 4,
+            "allSelectedBytesMatch": true,
+            "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9",
+            "entryHashListSha256": "fee27a48da6053e1a8a84cbe4db0b3bcb5e2c1002cc16b63ec9926bbb3138201"
+          }
+        ],
+        "frozenWeightFramesByteMatch": true,
+        "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+        "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        },
+        "approvedFullResourceReleaseAccepted": false
+      }
+    ]
+  },
+  "installation": {
+    "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+    "at": "2026-10-05T14:46:40.410Z",
+    "serial": "emulator-5554",
+    "avd": "Mir2_API_31_ARM64\r\nOK",
+    "artifacts": [
+      {
+        "variant": "debug",
+        "pkg": "com.mir2.web3",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "started": "2026-10-05T14:46:26.091Z",
+        "ended": "2026-10-05T14:46:33.381Z",
+        "output": "Performing Streamed Install\nSuccess",
+        "path": "/data/app/~~pGRqmQbJ6mnSCPyXlIf2FQ==/com.mir2.web3-Ky3x_prtMD-n-pDI3-g82g==/base.apk",
+        "pulled": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/installed-debug-3f27e8e9e.apk",
+        "pull": "/data/app/~~pGRqmQbJ6mnSCPyXlIf2FQ==/com.mir2.web3-Ky3x_prtMD-n-pDI3-g82g==/base.apk: 1 file pulled, 0 skipped. 149.4 MB/s (533340431 bytes in 3.404s)",
+        "bytes": 533340431,
+        "sha256": "25450fcbc4eff0f7484e6857d9ab0e75d32961af7eafe006fdcde5af5db18842",
+        "preserveData": true
+      },
+      {
+        "variant": "preview",
+        "pkg": "com.mir2.web3.uipreview",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "started": "2026-10-05T14:46:33.718Z",
+        "ended": "2026-10-05T14:46:40.410Z",
+        "output": "Performing Streamed Install\nSuccess",
+        "path": "/data/app/~~T_ylJ75lTYK03FxVvRg8Ug==/com.mir2.web3.uipreview-Rgb79OhTUB_bNH5kT7debQ==/base.apk",
+        "pulled": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/installed-preview-3f27e8e9e.apk",
+        "pull": "/data/app/~~T_ylJ75lTYK03FxVvRg8Ug==/com.mir2.web3.uipreview-Rgb79OhTUB_bNH5kT7debQ==/base.apk: 1 file pulled, 0 skipped. 176.2 MB/s (541445919 bytes in 2.931s)",
+        "bytes": 541445919,
+        "sha256": "5029492813c970309a1c0e94cfec57dc42816d0e2d6afddf0bea4a62d7295c5e",
+        "preserveData": true
+      }
+    ],
+    "limits": "Preserve-data install and installed-byte identity only; not runtime, login, JNI or GPU acceptance."
+  },
+  "deviceFacts": {
+    "at": "2026-10-05T14:44:15.407Z",
+    "devices": [
+      {
+        "serial": "emulator-5554",
+        "details": "emulator-5554          device product:sdk_gphone64_arm64 model:sdk_gphone64_arm64 device:emulator64_arm64 transport_id:5"
+      }
+    ],
+    "emulators": 1,
+    "physical": 0,
+    "serial": "emulator-5554",
+    "avd": "Mir2_API_31_ARM64",
+    "android": "12",
+    "sdk": "31",
+    "abi": "arm64-v8a",
+    "model": "sdk_gphone64_arm64",
+    "boot": "1",
+    "dimensions": "Physical size: 1080x2340",
+    "density": "Physical density: 440",
+    "limits": "Existing dedicated Mir2_API_31_ARM64 loaded default_boot snapshot; no wipe, configuration change or snapshot save. App force-stop launches are not cold AVD boot or physical acceptance."
+  },
+  "runtime": {
+    "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+    "at": "2026-10-05T14:48:24.102Z",
+    "serial": "emulator-5554",
+    "results": [
+      {
+        "name": "normal-preview-isolation",
+        "scene": "group-jni",
+        "pkg": "com.mir2.web3",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "started": "2026-10-05T14:47:24.812Z",
+        "ended": "2026-10-05T14:47:37.095Z",
+        "deviceTime": "10-05 22:47:23.000",
+        "pid": "6256",
+        "alive": true,
+        "launch": "Starting: Intent { cmp=com.mir2.web3/.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3/.MainActivity\nTotalTime: 738\nWaitTime: 739\nComplete",
+        "status": "DIAGNOSTIC_ABSENT",
+        "expectedEvents": 0,
+        "sentLines": [],
+        "modelLines": [],
+        "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/normal-preview-isolation-pid-6256.log",
+        "logSha256": "c1f29b2f8ee72d0ecf31930c84f30fadfa4a20ae46ad6b5560a88e28f13021f2",
+        "screenshotPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/normal-preview-isolation-pid-6256.png",
+        "screenshotSha256": "6f323797d1602445f93bd45b942ec35a6171b00d040e713930a355c49b8f064e",
+        "screenshotBytes": 3433641,
+        "gl506Lines": 0,
+        "rboLines": 0,
+        "fatalLines": 0,
+        "limits": "Offline installed Java→nativeEvent→shared-model observation only. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance.",
+        "viewRecordsAuthoritative": "screenshot-inspection.json, not mutable raw screenshotViewed field"
+      },
+      {
+        "name": "group-jni",
+        "scene": "group-jni",
+        "pkg": "com.mir2.web3.uipreview",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "started": "2026-10-05T14:47:37.384Z",
+        "ended": "2026-10-05T14:47:48.769Z",
+        "deviceTime": "10-05 22:47:36.000",
+        "pid": "6336",
+        "alive": true,
+        "launch": "Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity\nTotalTime: 594\nWaitTime: 595\nComplete",
+        "status": "OBSERVED",
+        "expectedEvents": 6,
+        "sentLines": [
+          "10-05 22:47:38.572  6336  6336 I Mir2UiPreview: PERSONAL_JNI_OFFLINE_SENT scene=group-jni events=6 NOT_LIVE_NOT_AUTHENTICATED"
+        ],
+        "modelLines": [
+          "10-05 22:47:38.598  6336  6362 I event src/ui_preview.rs:197: ANDROID_SOCIAL_JNI_SHARED_MODEL_NOT_LIVEscene = \"group-jni\"; group_members = 15; data_receipt = Some((1, Applied)); invite_epoch = 1; guild_members = 0; notice_lines = 0; guild_slots = 0; guild_gold = 0; own_gold = 0; guest_gold = 0; own_nonce = None; own_locked = false; trade_state = \"\"; cancel_revision = 0; actual_panel = Group; ui_trade_open = false; ui_trade_locked = false; group_ui_invitation = Some((\"JNI Inviter\", 1)); guild_ui_name = None; player_gold = 777; bag_items = 12;"
+        ],
+        "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/group-jni-pid-6336.log",
+        "logSha256": "e42f45e782ae57dff93049c9a0d738d5ae062a7a2df2ad3086a68b8313bd0107",
+        "screenshotPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/group-jni-pid-6336.png",
+        "screenshotSha256": "62963f1fa323248df86cf4553eb39b483b206dedd33c3fba8742b0d0b9348b48",
+        "screenshotBytes": 1055820,
+        "gl506Lines": 1,
+        "rboLines": 1,
+        "fatalLines": 0,
+        "limits": "Offline installed Java→nativeEvent→shared-model observation only. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance.",
+        "viewRecordsAuthoritative": "screenshot-inspection.json, not mutable raw screenshotViewed field"
+      },
+      {
+        "name": "guild-jni",
+        "scene": "guild-jni",
+        "pkg": "com.mir2.web3.uipreview",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "started": "2026-10-05T14:47:49.062Z",
+        "ended": "2026-10-05T14:48:00.486Z",
+        "deviceTime": "10-05 22:47:48.000",
+        "pid": "6422",
+        "alive": true,
+        "launch": "Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity\nTotalTime: 638\nWaitTime: 641\nComplete",
+        "status": "OBSERVED",
+        "expectedEvents": 7,
+        "sentLines": [
+          "10-05 22:47:50.405  6422  6422 I Mir2UiPreview: PERSONAL_JNI_OFFLINE_SENT scene=guild-jni events=7 NOT_LIVE_NOT_AUTHENTICATED"
+        ],
+        "modelLines": [
+          "10-05 22:47:50.462  6422  6447 I event src/ui_preview.rs:197: ANDROID_SOCIAL_JNI_SHARED_MODEL_NOT_LIVEscene = \"guild-jni\"; group_members = 0; data_receipt = Some((1, Applied)); invite_epoch = 0; guild_members = 200; notice_lines = 200; guild_slots = 112; guild_gold = 4105; own_gold = 0; guest_gold = 0; own_nonce = None; own_locked = false; trade_state = \"\"; cancel_revision = 0; actual_panel = Guild; ui_trade_open = false; ui_trade_locked = false; group_ui_invitation = None; guild_ui_name = Some(\"JNI GUILD\"); player_gold = 777; bag_items = 12;"
+        ],
+        "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/guild-jni-pid-6422.log",
+        "logSha256": "3dec03d3f9e7c2e745d2ff7aa2b9cc41737d5da54c20a11d32e0a8edcf3f3e43",
+        "screenshotPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/guild-jni-pid-6422.png",
+        "screenshotSha256": "aa10c56afcfc18fae6949226034174e9424daa1d0fafad8eaae07d580d8838a6",
+        "screenshotBytes": 829138,
+        "gl506Lines": 0,
+        "rboLines": 0,
+        "fatalLines": 0,
+        "limits": "Offline installed Java→nativeEvent→shared-model observation only. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance.",
+        "viewRecordsAuthoritative": "screenshot-inspection.json, not mutable raw screenshotViewed field"
+      },
+      {
+        "name": "trade-jni",
+        "scene": "trade-jni",
+        "pkg": "com.mir2.web3.uipreview",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "started": "2026-10-05T14:48:00.768Z",
+        "ended": "2026-10-05T14:48:12.300Z",
+        "deviceTime": "10-05 22:47:59.000",
+        "pid": "6506",
+        "alive": true,
+        "launch": "Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity\nTotalTime: 696\nWaitTime: 698\nComplete",
+        "status": "OBSERVED",
+        "expectedEvents": 5,
+        "sentLines": [
+          "10-05 22:48:01.982  6506  6506 I Mir2UiPreview: PERSONAL_JNI_OFFLINE_SENT scene=trade-jni events=5 NOT_LIVE_NOT_AUTHENTICATED"
+        ],
+        "modelLines": [
+          "10-05 22:48:02.013  6506  6533 I event src/ui_preview.rs:197: ANDROID_SOCIAL_JNI_SHARED_MODEL_NOT_LIVEscene = \"trade-jni\"; group_members = 0; data_receipt = Some((1, Applied)); invite_epoch = 0; guild_members = 0; notice_lines = 0; guild_slots = 0; guild_gold = 0; own_gold = 125; guest_gold = 17; own_nonce = Some(\"jni-offer-1\"); own_locked = true; trade_state = \"open\"; cancel_revision = 0; actual_panel = Inventory; ui_trade_open = true; ui_trade_locked = false; group_ui_invitation = None; guild_ui_name = None; player_gold = 777; bag_items = 12;"
+        ],
+        "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/trade-jni-pid-6506.log",
+        "logSha256": "d0e4fe72bbf8abafc99d7d676d5319dd828d71fb0bda13d39870f8c592f52689",
+        "screenshotPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/trade-jni-pid-6506.png",
+        "screenshotSha256": "c4d046d38b35d532392bdad6c0d81a1fc16f3ae035eba02b4e1755fba5331fb5",
+        "screenshotBytes": 1116780,
+        "gl506Lines": 0,
+        "rboLines": 0,
+        "fatalLines": 0,
+        "limits": "Offline installed Java→nativeEvent→shared-model observation only. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance.",
+        "viewRecordsAuthoritative": "screenshot-inspection.json, not mutable raw screenshotViewed field"
+      },
+      {
+        "name": "trade-closed-jni",
+        "scene": "trade-closed-jni",
+        "pkg": "com.mir2.web3.uipreview",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "started": "2026-10-05T14:48:12.571Z",
+        "ended": "2026-10-05T14:48:23.956Z",
+        "deviceTime": "10-05 22:48:11.000",
+        "pid": "6590",
+        "alive": true,
+        "launch": "Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity\nTotalTime: 644\nWaitTime: 645\nComplete",
+        "status": "OBSERVED",
+        "expectedEvents": 6,
+        "sentLines": [
+          "10-05 22:48:13.794  6590  6590 I Mir2UiPreview: PERSONAL_JNI_OFFLINE_SENT scene=trade-closed-jni events=6 NOT_LIVE_NOT_AUTHENTICATED"
+        ],
+        "modelLines": [
+          "10-05 22:48:13.833  6590  6617 I event src/ui_preview.rs:197: ANDROID_SOCIAL_JNI_SHARED_MODEL_NOT_LIVEscene = \"trade-closed-jni\"; group_members = 0; data_receipt = Some((1, Applied)); invite_epoch = 0; guild_members = 0; notice_lines = 0; guild_slots = 0; guild_gold = 0; own_gold = 0; guest_gold = 0; own_nonce = None; own_locked = false; trade_state = \"\"; cancel_revision = 5; actual_panel = Inventory; ui_trade_open = false; ui_trade_locked = false; group_ui_invitation = None; guild_ui_name = None; player_gold = 777; bag_items = 12;"
+        ],
+        "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/trade-closed-jni-pid-6590.log",
+        "logSha256": "0902e772338079cb88638b479ca88435256b403efb870e20c032e1fe49f27774",
+        "screenshotPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/trade-closed-jni-pid-6590.png",
+        "screenshotSha256": "caa11360220ec0fa90cc3b868e884355afccf94ba90bb4510f99ac2c733562d8",
+        "screenshotBytes": 1016490,
+        "gl506Lines": 1,
+        "rboLines": 1,
+        "fatalLines": 0,
+        "limits": "Offline installed Java→nativeEvent→shared-model observation only. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance.",
+        "viewRecordsAuthoritative": "screenshot-inspection.json, not mutable raw screenshotViewed field"
+      }
+    ]
+  },
+  "screenshotInspection": {
+    "at": "2026-10-05T14:50:31.983Z",
+    "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+    "views": [
+      {
+        "case": "normal-preview-isolation",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "pid": "6256",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/normal-preview-isolation-pid-6256.png",
+        "sha256": "6f323797d1602445f93bd45b942ec35a6171b00d040e713930a355c49b8f064e",
+        "viewed": true,
+        "viewTool": "view_image",
+        "notes": "Normal login form and test-server-not-configured notice; fixture marker/events absent. No auth acceptance.",
+        "acceptance": "Offline model and selected presentation only. Complete phone UI, real account/transport/settlement, zero-error GPU and physical acceptance remain OPEN."
+      },
+      {
+        "case": "group-jni",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "pid": "6336",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/group-jni-pid-6336.png",
+        "sha256": "62963f1fa323248df86cf4553eb39b483b206dedd33c3fba8742b0d0b9348b48",
+        "viewed": true,
+        "viewTool": "view_image",
+        "notes": "Original 15-member group and JNI Inviter modal over map. Dialog/buttons still desktop-scaled and small. One GL0x0506 line in same-PID log.",
+        "acceptance": "Offline model and selected presentation only. Complete phone UI, real account/transport/settlement, zero-error GPU and physical acceptance remain OPEN."
+      },
+      {
+        "case": "guild-jni",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "pid": "6422",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/guild-jni-pid-6422.png",
+        "sha256": "aa10c56afcfc18fae6949226034174e9424daa1d0fafad8eaae07d580d8838a6",
+        "viewed": true,
+        "viewTool": "view_image",
+        "notes": "JNI GUILD statistics level7/members200/200 and first notice rows shown over map. Does not verify all roster/storage scrolls, permissions or actions.",
+        "acceptance": "Offline model and selected presentation only. Complete phone UI, real account/transport/settlement, zero-error GPU and physical acceptance remain OPEN."
+      },
+      {
+        "case": "trade-jni",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "pid": "6506",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/trade-jni-pid-6506.png",
+        "sha256": "c4d046d38b35d532392bdad6c0d81a1fc16f3ae035eba02b4e1755fba5331fb5",
+        "viewed": true,
+        "viewTool": "view_image",
+        "notes": "Two original windows and Inventory; own slots1/8 show icon and counts201/3, own125 vs guest17, wallet777. Trace own_locked=true but ui_trade_locked=false: complete locked presentation remains OPEN.",
+        "acceptance": "Offline model and selected presentation only. Complete phone UI, real account/transport/settlement, zero-error GPU and physical acceptance remain OPEN."
+      },
+      {
+        "case": "trade-closed-jni",
+        "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+        "pid": "6590",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/runtime/trade-closed-jni-pid-6590.png",
+        "sha256": "caa11360220ec0fa90cc3b868e884355afccf94ba90bb4510f99ac2c733562d8",
+        "viewed": true,
+        "viewTool": "view_image",
+        "notes": "Both trade windows closed, original cancel modal and Inventory, first stack201/wallet777 unchanged. Not settlement. One GL0x0506 line.",
+        "acceptance": "Offline model and selected presentation only. Complete phone UI, real account/transport/settlement, zero-error GPU and physical acceptance remain OPEN."
+      }
+    ],
+    "rawResultsUnchanged": true
+  },
+  "offlineBackground": {
+    "raw": {
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "scene": "trade-closed-jni",
+      "start": "2026-10-05T14:53:24.611Z",
+      "end": "2026-10-05T14:53:35.919Z",
+      "deviceTime": "10-05 22:53:23.000",
+      "pid": "6590",
+      "backgroundPid": "6590",
+      "resumedPid": "6590",
+      "samePid": true,
+      "launch": "Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity }\nWarning: Activity not started, its current task has been brought to the front\nStatus: ok\nLaunchState: HOT\nActivity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity\nTotalTime: 63\nWaitTime: 80\nComplete",
+      "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/offline-background-pid-6590.log",
+      "logSha256": "4fdba64c5a5ec2580eca3c7e81860f00a4ead7c581828425bf1767984798d394",
+      "screenshotPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/offline-background-pid-6590.png",
+      "screenshotSha256": "1c2c7c4c6c01fbb2d7098df29b748de99e48e7193d95b136cf7dac0617a60d0e",
+      "gl506Lines": 0,
+      "fatalLines": 0,
+      "replayedFixtureLines": [],
+      "screenshotViewed": false,
+      "limits": "Offline preview deliberately uses the existing UI_PREVIEW background policy, which bypasses normal transport disconnect/relogin. Same PID/render survival cannot prove authenticated foreground recovery, nativeResumeV1, token or socket behavior."
+    },
+    "view": {
+      "at": "2026-10-05T14:56:29.162Z",
+      "source": "3f27e8e9e9a41679eaacebaa3891daf0e5a05b56",
+      "pid": "6590",
+      "screenshot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/correction/offline-background-pid-6590.png",
+      "sha256": "1c2c7c4c6c01fbb2d7098df29b748de99e48e7193d95b136cf7dac0617a60d0e",
+      "viewed": true,
+      "notes": "Original Inventory/cancel modal, map and unchanged wallet777/stack201 visible after HOT return; same PID6590, no fixture replay lines. Preview-specific lifecycle policy only, not authenticated recovery."
+    }
+  },
+  "historicalRuntime": {
+    "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+    "package": {
+      "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+      "inputs": [
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/big_map.rs",
+          "bytes": 46169,
+          "sha256": "0a1f91a1ef552b996445495cd19f16ebd33a72e4a306ff404b2fe419bca2ee97"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+          "bytes": 74468,
+          "sha256": "86eced1102947319ad26c04e53ab8b845a659401c6254855312098a4ebbb3a2d"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+          "bytes": 10200,
+          "sha256": "d8c9024b39d89363dbe35ec67eda5cd7d8a91276e5ad785fef54cee6d6f08138"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+          "bytes": 69639,
+          "sha256": "59d5ebf8b3d2f5fd28a9f058ece77efd5e2171ac6afbe0cb7af84af9c6d614ab"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+          "bytes": 42293,
+          "sha256": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+          "bytes": 947245,
+          "sha256": "ffe7b1fda30a2db9ad46e0050b89002f27e4af82299e56bae692d86d1d019769"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+          "bytes": 67126,
+          "sha256": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+          "bytes": 60408,
+          "sha256": "c7f9f40be0caf3cfc37edd5a18ff24e76a795dc5d4183b33adf6501800de54cc"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+          "bytes": 37415,
+          "sha256": "25becf5d258dba0c25f619ffecf818db997260a9439e295ddccd432df8bd9032"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+          "bytes": 3034,
+          "sha256": "0d6568a3b1f0ea9daa70d7e51a28bd47f39776f74096846deb1ac5371556672b"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+          "bytes": 23201,
+          "sha256": "8b45f76f8974b21f0fe8729965e89d979955eca4f8da831c4aaebb205d2384ac"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_egress.rs",
+          "bytes": 11698,
+          "sha256": "7f487f260692b1e983a01f1f7ec644de844efa9dfc7690c0b950569f16d0cf3c"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_ingress.rs",
+          "bytes": 13402,
+          "sha256": "fbed53a162e45cd93a65e2619a5a9debbd45d0e0f23bbffdddf4038a6f5a5a67"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+          "bytes": 13160,
+          "sha256": "38ff1c5220d259b7e609090031219047524b80636e1450a40b28fd7898ba302f"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/native_quest_ingress.rs",
+          "bytes": 22705,
+          "sha256": "ca0d25fd5ce014ab0e8cdaacdf8334001df1f491299d417d18fc0ab32612d5a0"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/native_social_egress.rs",
+          "bytes": 29102,
+          "sha256": "41be6b508899136174f656203954fa1b4f4e84a0164f7a0643fda18c086458d7"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/native_trade_ingress.rs",
+          "bytes": 12436,
+          "sha256": "bc82fbe75c8274598ee543836aefa619345892f472450e9daac4ca71609c9438"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+          "bytes": 76211,
+          "sha256": "62872e48f74dcfbdc746b56b65bee6aebf3dc2837be3d4fdfb85ca3d27988575"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+          "bytes": 368258,
+          "sha256": "ff3ed519f0087de4583e0891f24039ba16c612aee0d027886be85f9c98b67850"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+          "bytes": 9075,
+          "sha256": "25326f497aabe20bb7300b6e3cacdec21c5851b1eb957bb8fc6300279b429979"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+          "bytes": 15596,
+          "sha256": "71bdbf1637176190cb93703fc94a59af047cf8326f8f88a8093ae8e98f130495"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/social.rs",
+          "bytes": 76619,
+          "sha256": "efe22789c06888d1d65d29be68896e579fcbaffc40829f9d3618a7b54ca56ead"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+          "bytes": 33253,
+          "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+          "bytes": 123990,
+          "sha256": "470969816b029c95a8a222700510a423dcd7201e955aef27a655a6b434dc6f3d"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+          "bytes": 28735,
+          "sha256": "25cb70ed959e853e2a27da09264b7362e5395c94149972b320daa00f5f12eff2"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+          "bytes": 41149,
+          "sha256": "5b9ed72dbb0e606e07669c57d131c9cb431e9ecf21260f22e955555d566bd98c"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+          "bytes": 21307,
+          "sha256": "023e2af8b86c2e08d4ddef767465e6c7c49c403242490b557c952d2b0292a5e6"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+          "bytes": 13523,
+          "sha256": "ee3a87c4288dd6a5135b880588d97b48af8b932c259aeb8900c74a45e84c342f"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/WireJson.java",
+          "bytes": 3855,
+          "sha256": "682026d344ad6bcb4f4046deb896cb13646e70fb5ca6d90e4871107eaf848c8a"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+          "bytes": 93798,
+          "sha256": "6d223055d248c2d49a8896042a3524314106365ebd5a9bc4621a44722382241d"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+          "bytes": 17200,
+          "sha256": "711186b94b7943e9f66affa08fe0ae7cf455f0d785d75047888c3c899185e4a4"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+          "bytes": 5853,
+          "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+          "bytes": 22413,
+          "sha256": "031b9a406e0df4ac8bf588fb674a435d9cc4d8e4ad2505e3dc504cb354f18796"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/gateway_bridge.rs",
+          "bytes": 130775,
+          "sha256": "50ee193fd42a7a9a5e871602ef376b5a337c2a7847b918cb42277a9e76018809"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/item_geometry.rs",
+          "bytes": 9207,
+          "sha256": "f30ff2524a5febc632a095b14cdb1bfaadf9f0cbb866bafc14340febd1898fce"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+          "bytes": 75613,
+          "sha256": "2c515da5462c958fcc99a4fdeb1a03a95da4532ea1967c966cf8c458b35751c2"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/mail_egress_tests.rs",
+          "bytes": 22594,
+          "sha256": "94d76826ffee12d55c7d413681fac3b144c65ff0c4e455a45007ded81976ccd5"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/mail_host_tests.rs",
+          "bytes": 12532,
+          "sha256": "4a2004c997198bdceec1a3f807a84d7ef707dab3e255509543931c5d11ba4810"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/mail_ingress.rs",
+          "bytes": 31534,
+          "sha256": "66a32131633cf425dfd2b84d682f7202f10834f9fa160bd88fecde4d883c41e8"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/mail_jni_preview_tests.rs",
+          "bytes": 6346,
+          "sha256": "5cc0dfb95048b6e6dd5bc4981e54efcdb5690aa4ede77292a3e03e06e800b64a"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/mobile_ui.rs",
+          "bytes": 91921,
+          "sha256": "a09f30d587ace87d3cbbc3eaf1c445e73d76aacc2bc112a2026f0925d7dc8d7f"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/npc_host_tests.rs",
+          "bytes": 5208,
+          "sha256": "507be77c53a8e139c73b47a02414d01545a3598dcafbfae05907baa4287f31ea"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/npc_ingress.rs",
+          "bytes": 20887,
+          "sha256": "1544b4dbe37e86dddcc90b04db6b09818c02a871978f4f237d2b3d8ebb501a75"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+          "bytes": 29603,
+          "sha256": "acf81d18dd9c1b3df062cf2dc8d268e680ac358d8ff9cdd665258bd23f1b9837"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+          "bytes": 4789,
+          "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+          "bytes": 20595,
+          "sha256": "7a8a6e6734446b9d7395700694aa4e17847cf36972b9adcc319de1e28fbd64bf"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+          "bytes": 10548,
+          "sha256": "230f7b9746254e8598ca99ad846c4b96b3f29a6e1945913ddef89725618510fc"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/quest_host_tests.rs",
+          "bytes": 8715,
+          "sha256": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/quest_ingress.rs",
+          "bytes": 32437,
+          "sha256": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/quest_preview.rs",
+          "bytes": 6222,
+          "sha256": "b9640e921983930e2fb757d33c886363630c4e109cb3fdcd06e548df664ed65a"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+          "bytes": 227952,
+          "sha256": "07163a8fceb3238e945d4140ac641d4f22948e989a7cea702f55044f90cc7d48"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/social_ingress.rs",
+          "bytes": 40202,
+          "sha256": "8f9e10a6b9c1d957a0c29af006d1f07eb16cd2506bd9695c67e655e6c95ecafa"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/social_jni_preview_tests.rs",
+          "bytes": 8120,
+          "sha256": "0c40df038e89417febeff65d8a6d81b323a79ebc1942c0ddf0ee9b7bd436132a"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+          "bytes": 23059,
+          "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/text_input.rs",
+          "bytes": 10918,
+          "sha256": "5305f310cb666e2ca608a957c47f8161a192008d265a13bc6e0efec3f63b848b"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+          "bytes": 99593,
+          "sha256": "22c19f4277aad42b441e94a676037451569e99ca442e87a7846a66137f03abbc"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-android/src/world_input.rs",
+          "bytes": 5009,
+          "sha256": "b45aadb88962376b40181026009ade36019d7dc26095a19295d8e892db7fd4a5"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-windows/Cargo.lock",
+          "bytes": 149003,
+          "sha256": "974d1b00d3673b226e9e0f71c460660d2f640010ee144b48d2c786868b53d4f4"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+          "bytes": 2062,
+          "sha256": "d22a6037b05a4baff1694fca1a796c1f49ab990fb496f65ec8e083a6b2d97a20"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+          "bytes": 323202,
+          "sha256": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+          "bytes": 449445,
+          "sha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-windows/src/main.rs",
+          "bytes": 20604,
+          "sha256": "72bd28372023ed3ea210b5f5849055b34cc22dea25b38ea3b4a2963c013b2fba"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-windows/src/native_protocol.rs",
+          "bytes": 83806,
+          "sha256": "31982f0a315ce10e4c00cd66748f41a10aaaa09eb6fa213f2bc8079ab0a240ab"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/platform-windows/src/trade_projection.rs",
+          "bytes": 8144,
+          "sha256": "4448a154b6370e16505d2227767d0e199f9c0ff31c87a24bbb52f09c37b7e3d4"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+          "bytes": 450375,
+          "sha256": "2f306d818fc809412a52e69312dddcc3ce30772ab1fd6174b0d19c79558651e0"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+          "bytes": 82471,
+          "sha256": "8702d0ccf872aa6a943c9ed40692ce5c233bfc6d4233b1854f4521142871ce95"
+        },
+        {
+          "path": "mir2-web3/apps/game-client/ui-core/src/effect.rs",
+          "bytes": 7369,
+          "sha256": "9ac4779907ebf8791f5680a7718cc7db49c121faf0033a6b3f8d0e4962db33d1"
+        },
+        {
+          "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+          "bytes": 13568,
+          "sha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055"
+        },
+        {
+          "path": "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+          "bytes": 27032,
+          "sha256": "3d79af27b4809a3a063f39c4c95efc1b8d37ad6a8d46691b3bfbeb3d6b80086f"
+        }
+      ],
+      "versionCode": 35,
+      "versionName": "0.1.32-gameshop-phone",
+      "gatewayUrl": "",
+      "environment": {
+        "MIR2_ANDROID_UI_ASSET_ROOT": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/weight-assets-KtITw2/shared-ui-assets",
+        "MIR2_ANDROID_WORLD_ASSET_ROOT": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/shared-sync-build-cache/local-world-20260911-objects",
+        "MIR2_ANDROID_ENTITY_ASSET_ROOT": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/shared-sync-build-cache/entity-proof-assets-with-archer-bow-20260912",
+        "MIR2_ANDROID_ENTITY_ASSET_PACK_ID": "android-archer-mount-bow-proof-20260912"
+      },
+      "artifacts": [
+        {
+          "variant": "debug",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/final-apks/mir2-native-social-jni-debug-17aebd06f.apk",
+          "bytes": 533340431,
+          "sha256": "d2c48343b6bad216a00550e86f707335d19fb09a1e82a52fcf19231da41113e3",
+          "nativeElfBytes": 145606216,
+          "nativeElfSha256": "e38f61ce5fc285f30b96f38e897d986ee638859eb564d564d576c90929aa1cac",
+          "nativeElfMatchesThisVariantStrippedOutput": true,
+          "package": "package: name='com.mir2.web3' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+          "gatewayUrl": "",
+          "uiPreview": false,
+          "entityPack": {
+            "schemaVersion": 1,
+            "kind": "mir2-android-entity-pack-lock",
+            "packId": "android-archer-mount-bow-proof-20260912",
+            "sourceMode": "override",
+            "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+            "manifestBytes": 2506377,
+            "atlasCount": 1,
+            "pageCount": 5,
+            "rectCount": 7848,
+            "pageBytes": 8779443
+          }
+        },
+        {
+          "variant": "preview",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/final-apks/mir2-native-social-jni-preview-17aebd06f.apk",
+          "bytes": 541440495,
+          "sha256": "887d8e7ecaa91013541923bdf237278fcda64a5b14c758a433b10c07fd81b138",
+          "nativeElfBytes": 149675816,
+          "nativeElfSha256": "c6e9efe9a3e029450e1a76e552523eebdf4aa3474a92ae2b4fac0153381e962b",
+          "nativeElfMatchesThisVariantStrippedOutput": true,
+          "package": "package: name='com.mir2.web3.uipreview' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+          "gatewayUrl": "",
+          "uiPreview": true,
+          "entityPack": {
+            "schemaVersion": 1,
+            "kind": "mir2-android-entity-pack-lock",
+            "packId": "android-archer-mount-bow-proof-20260912",
+            "sourceMode": "override",
+            "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+            "manifestBytes": 2506377,
+            "atlasCount": 1,
+            "pageCount": 5,
+            "rectCount": 7848,
+            "pageBytes": 8779443
+          }
+        }
+      ]
+    },
+    "runtime": {
+      "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+      "at": "2026-10-05T14:21:21.335Z",
+      "serial": "emulator-5554",
+      "results": [
+        {
+          "name": "normal-preview-isolation",
+          "scene": "group-jni",
+          "pkg": "com.mir2.web3",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "started": "2026-10-05T14:20:07.999Z",
+          "ended": "2026-10-05T14:20:20.424Z",
+          "deviceTime": "10-05 22:20:07.000",
+          "pid": "5612",
+          "alive": true,
+          "launch": "Starting: Intent { cmp=com.mir2.web3/.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3/.MainActivity\nTotalTime: 598\nWaitTime: 604\nComplete",
+          "status": "DIAGNOSTIC_ABSENT",
+          "expectedEvents": 0,
+          "sentLines": [],
+          "modelLines": [],
+          "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/normal-preview-isolation-pid-5612.log",
+          "logSha256": "cdb568389e112d510d7f886c8ad073d6ce781eb83fa6ff2bf3d2905776fff954",
+          "screenshotPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/normal-preview-isolation-pid-5612.png",
+          "screenshotSha256": "422c00c025f0ce0edc263e8b7b1e3d610b6e4f68fdae59f46b2e04a0ff175fb7",
+          "screenshotBytes": 3433599,
+          "gl506Lines": 0,
+          "rboLines": 0,
+          "fatalLines": 0,
+          "limits": "Offline installed Java→nativeEvent→shared-model observation only. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance.",
+          "viewRecordsAuthoritative": "screenshot-inspection.json, not mutable raw screenshotViewed field"
+        },
+        {
+          "name": "group-jni",
+          "scene": "group-jni",
+          "pkg": "com.mir2.web3.uipreview",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "started": "2026-10-05T14:20:20.712Z",
+          "ended": "2026-10-05T14:20:23.817Z",
+          "deviceTime": "10-05 22:20:19.000",
+          "pid": "5694",
+          "alive": true,
+          "launch": "Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity\nTotalTime: 640\nWaitTime: 642\nComplete",
+          "status": "OBSERVED",
+          "expectedEvents": 6,
+          "sentLines": [
+            "10-05 22:20:21.928  5694  5694 I Mir2UiPreview: PERSONAL_JNI_OFFLINE_SENT scene=group-jni events=6 NOT_LIVE_NOT_AUTHENTICATED"
+          ],
+          "modelLines": [
+            "10-05 22:20:21.960  5694  5721 I event src/ui_preview.rs:177: ANDROID_SOCIAL_JNI_SHARED_MODEL_NOT_LIVEscene = \"group-jni\"; group_members = 15; data_receipt = Some((1, Applied)); invite_epoch = 1; guild_members = 0; notice_lines = 0; guild_slots = 0; guild_gold = 0; own_gold = 0; guest_gold = 0; own_nonce = None; own_locked = false; trade_state = \"\"; cancel_revision = 0; actual_panel = Group; ui_trade_open = false; ui_trade_locked = false; group_ui_invitation = Some((\"JNI Inviter\", 1)); guild_ui_name = None; player_gold = 777; bag_items = 12;"
+          ],
+          "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/group-jni-pid-5694.log",
+          "logSha256": "194a8cb8a3deed6c42461de1bb4036943d6e1ca69be0de241511675579fff8d0",
+          "screenshotPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/group-jni-pid-5694.png",
+          "screenshotSha256": "502b629bdee5e7232ee5be76a793d0030606bd2cde221cf13db8cb9c9d7c95d9",
+          "screenshotBytes": 208980,
+          "gl506Lines": 0,
+          "rboLines": 0,
+          "fatalLines": 0,
+          "limits": "Offline installed Java→nativeEvent→shared-model observation only. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance.",
+          "viewRecordsAuthoritative": "screenshot-inspection.json, not mutable raw screenshotViewed field"
+        },
+        {
+          "name": "guild-jni",
+          "scene": "guild-jni",
+          "pkg": "com.mir2.web3.uipreview",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "started": "2026-10-05T14:20:24.082Z",
+          "ended": "2026-10-05T14:20:27.167Z",
+          "deviceTime": "10-05 22:20:23.000",
+          "pid": "5764",
+          "alive": true,
+          "launch": "Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity\nTotalTime: 647\nWaitTime: 649\nComplete",
+          "status": "OBSERVED",
+          "expectedEvents": 7,
+          "sentLines": [
+            "10-05 22:20:25.388  5764  5764 I Mir2UiPreview: PERSONAL_JNI_OFFLINE_SENT scene=guild-jni events=7 NOT_LIVE_NOT_AUTHENTICATED"
+          ],
+          "modelLines": [
+            "10-05 22:20:25.447  5764  5790 I event src/ui_preview.rs:177: ANDROID_SOCIAL_JNI_SHARED_MODEL_NOT_LIVEscene = \"guild-jni\"; group_members = 0; data_receipt = Some((1, Applied)); invite_epoch = 0; guild_members = 200; notice_lines = 200; guild_slots = 112; guild_gold = 4105; own_gold = 0; guest_gold = 0; own_nonce = None; own_locked = false; trade_state = \"\"; cancel_revision = 0; actual_panel = Guild; ui_trade_open = false; ui_trade_locked = false; group_ui_invitation = None; guild_ui_name = Some(\"JNI GUILD\"); player_gold = 777; bag_items = 12;"
+          ],
+          "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/guild-jni-pid-5764.log",
+          "logSha256": "df0647ac0307aecb487ade2b15ce31e9055cabf671f934fbe98929daabb0d5f8",
+          "screenshotPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/guild-jni-pid-5764.png",
+          "screenshotSha256": "5dec487f7d8468568b39a545b3cb77faad096ff4305f8a2b6f129deb5d0cfceb",
+          "screenshotBytes": 182376,
+          "gl506Lines": 0,
+          "rboLines": 0,
+          "fatalLines": 0,
+          "limits": "Offline installed Java→nativeEvent→shared-model observation only. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance.",
+          "viewRecordsAuthoritative": "screenshot-inspection.json, not mutable raw screenshotViewed field"
+        },
+        {
+          "name": "trade-jni",
+          "scene": "trade-jni",
+          "pkg": "com.mir2.web3.uipreview",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "started": "2026-10-05T14:20:27.435Z",
+          "ended": "2026-10-05T14:21:17.593Z",
+          "deviceTime": "10-05 22:20:26.000",
+          "pid": "5832",
+          "alive": true,
+          "launch": "Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity\nTotalTime: 666\nWaitTime: 671\nComplete",
+          "status": "NOT_OBSERVED",
+          "expectedEvents": 5,
+          "sentLines": [
+            "10-05 22:20:28.564  5832  5832 I Mir2UiPreview: PERSONAL_JNI_OFFLINE_SENT scene=trade-jni events=5 NOT_LIVE_NOT_AUTHENTICATED"
+          ],
+          "modelLines": [],
+          "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/trade-jni-pid-5832.log",
+          "logSha256": "a0a75862021ed89ee03271bda206e064653218530ccf2df5a3f4383e4bb98a8b",
+          "screenshotPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/trade-jni-pid-5832.png",
+          "screenshotSha256": "75eb887eb142914d94b23c00cfc5c61ac9b97f8b775162ed8539fd9466bed7be",
+          "screenshotBytes": 1113093,
+          "gl506Lines": 0,
+          "rboLines": 0,
+          "fatalLines": 0,
+          "limits": "Offline installed Java→nativeEvent→shared-model observation only. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance.",
+          "viewRecordsAuthoritative": "screenshot-inspection.json, not mutable raw screenshotViewed field"
+        },
+        {
+          "name": "trade-closed-jni",
+          "scene": "trade-closed-jni",
+          "pkg": "com.mir2.web3.uipreview",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "started": "2026-10-05T14:21:17.888Z",
+          "ended": "2026-10-05T14:21:21.184Z",
+          "deviceTime": "10-05 22:21:16.000",
+          "pid": "5990",
+          "alive": true,
+          "launch": "Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }\nStatus: ok\nLaunchState: COLD\nActivity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity\nTotalTime: 704\nWaitTime: 706\nComplete",
+          "status": "OBSERVED",
+          "expectedEvents": 6,
+          "sentLines": [
+            "10-05 22:21:19.145  5990  5990 I Mir2UiPreview: PERSONAL_JNI_OFFLINE_SENT scene=trade-closed-jni events=6 NOT_LIVE_NOT_AUTHENTICATED"
+          ],
+          "modelLines": [
+            "10-05 22:21:19.172  5990  6017 I event src/ui_preview.rs:177: ANDROID_SOCIAL_JNI_SHARED_MODEL_NOT_LIVEscene = \"trade-closed-jni\"; group_members = 0; data_receipt = Some((1, Applied)); invite_epoch = 0; guild_members = 0; notice_lines = 0; guild_slots = 0; guild_gold = 0; own_gold = 0; guest_gold = 0; own_nonce = None; own_locked = false; trade_state = \"\"; cancel_revision = 5; actual_panel = Inventory; ui_trade_open = false; ui_trade_locked = false; group_ui_invitation = None; guild_ui_name = None; player_gold = 777; bag_items = 12;"
+          ],
+          "logPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/trade-closed-jni-pid-5990.log",
+          "logSha256": "efc91934744da6490d0a5d21dd89b317499c862f8f6e49eae07fd38ec8983f82",
+          "screenshotPath": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/trade-closed-jni-pid-5990.png",
+          "screenshotSha256": "0452eb89b3e019bd47c561f2fdf588114dae0cf37f55fffa7105c8decb4e6878",
+          "screenshotBytes": 1005594,
+          "gl506Lines": 1,
+          "rboLines": 1,
+          "fatalLines": 0,
+          "limits": "Offline installed Java→nativeEvent→shared-model observation only. UI fields are diagnostics, not PASS. No authenticated login/socket, operation/pending, settlement, full render or physical acceptance.",
+          "viewRecordsAuthoritative": "screenshot-inspection.json, not mutable raw screenshotViewed field"
+        }
+      ]
+    },
+    "views": {
+      "recordedAt": "2026-10-05T14:34:36.309Z",
+      "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+      "views": [
+        {
+          "case": "normal-preview-isolation",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "pid": "5612",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/normal-preview-isolation-pid-5612.png",
+          "sha256": "422c00c025f0ce0edc263e8b7b1e3d610b6e4f68fdae59f46b2e04a0ff175fb7",
+          "viewed": true,
+          "viewTool": "view_image",
+          "notes": "Normal login controls and test-server-not-configured notice; no offline fixture world. Does not prove authentication.",
+          "acceptance": "Diagnostic inspection only; phone UI, real account, online operation, stable GPU and physical device not accepted."
+        },
+        {
+          "case": "group-jni",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "pid": "5694",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/group-jni-pid-5694.png",
+          "sha256": "502b629bdee5e7232ee5be76a793d0030606bd2cde221cf13db8cb9c9d7c95d9",
+          "viewed": true,
+          "viewTool": "view_image",
+          "notes": "15-member group shown with JNI Inviter modal. Small desktop-scaled controls and initial black world. Phone layout and rendering acceptance OPEN.",
+          "acceptance": "Diagnostic inspection only; phone UI, real account, online operation, stable GPU and physical device not accepted."
+        },
+        {
+          "case": "guild-jni",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "pid": "5764",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/guild-jni-pid-5764.png",
+          "sha256": "5dec487f7d8468568b39a545b3cb77faad096ff4305f8a2b6f129deb5d0cfceb",
+          "viewed": true,
+          "viewTool": "view_image",
+          "notes": "JNI GUILD, level 7, member count 200/200 and notice lines displayed. Desktop-scaled tabs. Does not prove scrolling all 200 rows, permissions or actions.",
+          "acceptance": "Diagnostic inspection only; phone UI, real account, online operation, stable GPU and physical device not accepted."
+        },
+        {
+          "case": "trade-jni",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "pid": "5832",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/trade-jni-pid-5832.png",
+          "sha256": "75eb887eb142914d94b23c00cfc5c61ac9b97f8b775162ed8539fd9466bed7be",
+          "viewed": true,
+          "viewTool": "view_image",
+          "notes": "Two original trade windows plus Inventory; own 125, guest 17, wallet 777. Guest icons shown, own item cells visibly empty. Open-trade marker NOT_OBSERVED.",
+          "acceptance": "Diagnostic inspection only; phone UI, real account, online operation, stable GPU and physical device not accepted."
+        },
+        {
+          "case": "trade-closed-jni",
+          "source": "17aebd06fbb317151e8349f9127cffc1ba80fb20",
+          "pid": "5990",
+          "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/social-jni-20261005-lSQucc/runtime/trade-closed-jni-pid-5990.png",
+          "sha256": "0452eb89b3e019bd47c561f2fdf588114dae0cf37f55fffa7105c8decb4e6878",
+          "viewed": true,
+          "viewTool": "view_image",
+          "notes": "Inventory and original cancellation modal; trade windows closed, first stack 201 and wallet 777. Not settlement. One GL 0x0506 log line.",
+          "acceptance": "Diagnostic inspection only; phone UI, real account, online operation, stable GPU and physical device not accepted."
+        }
+      ],
+      "rawResultsUnchanged": true
+    }
+  },
+  "acceptance": {
+    "goal": "Active",
+    "NI15": "PARTIAL",
+    "fullAPMatrixRows": 21,
+    "closedSocialIntentSource": true,
+    "newApkInstalled": true,
+    "actualJavaJniSocialOffline": true,
+    "normalBuildIsolation": true,
+    "selectedOriginalUiPresentation": "OBSERVED, not complete phone UI",
+    "ownTradeLockedPresentation": "OPEN: own_locked=true versus ui_trade_locked=false; unchanged shared local unlock precedence, no rule mutation",
+    "gpuZeroErrorGate": "FAIL: corrected PID6336 and6590 each one GL0x0506, historicalPID5990 also retained",
+    "authenticatedLogin": false,
+    "realHttpsWss": false,
+    "onlineSocialOperations": false,
+    "pendingOperationSettlement": false,
+    "fullPhoneUi": false,
+    "completeResourceAudioUpdate": false,
+    "physicalDevice": false,
+    "humanFrontendAcceptance": false,
+    "uiReapproval": "Pending explicit human response after three failed layout attempts; no layout work restarted.",
+    "background": "Offline HOT same-PID survival only; UI_PREVIEW bypasses normal disconnect/relogin policy, not nativeResumeV1 or online recovery."
+  },
+  "next": [
+    "NI16: audit frozen Windows Hero inventory/equipment/skills and owner-bound receipts; reuse original shared models/protocol.",
+    "Continue NI17–20 and full AP01–21; permitted test environment and physical device remain separate gates.",
+    "Investigate original trade lock presentation during actual normal operation; no speculative local rule fork.",
+    "Full phone layout waits for explicit reapproval; GPU error history preserved."
+  ]
+}

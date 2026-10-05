@@ -1,6 +1,27 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
-2026-10-05 当前 NI-15 社交出站源码：`0665a4f4ecc5449ca100d613561f78b40c4a9e76`。
+2026-10-05 当前 NI-15 离线社交 JNI 诊断源码：`3f27e8e9e9a41679eaacebaa3891daf0e5a05b56`。
+在单独preview包添加4个精确Java流，经原MainActivity/nativeEvent/owner边界和共享reducer；
+正常包不注入，不启用认证、socket或操作/结算。15组员、200行会成员/公告、112仓库槽、
+本人125/guest17、u64实例/201与3数量、取消后清空，四场景均实测观测Applied。
+修正诊断把TradeAccept误等Trade页的问题：原共享UI实际打开Inventory与两交易窗；
+只为离线本人样本补tooltip图标资料，未改共享UI/权限/交易/认证或Windows规则。
+四功能文件、69输入在干净提交十门/双APK/安装/JNI前后稳定；65整文件/57旧Java测试/
+10认证方法/5冻结helper/8旧preview测试/52旧preview函数不改，旧51场景顺序/唯一性保留。
+十门431/471、shared1304+10原ignored、runtime296+1原ignored、fresh Java85+85/API31双门、
+Mac-host Windows5+1+21通过；旧compile失败、469场景计数回归、17a交易未观测及红绿保留。
+双APK回读安装哈希一致、6647PNG+3metadata匹配，5新截图及同PID离线后台截图已查看；
+专用API31 emulator1/physical0。后台采用preview策略，不是正常登录或nativeResume验收。
+NI-15仍PARTIAL：模型own_locked=true而ui_trade_locked=false尚未接受，
+新PID6336/6590各1条GL0x0506，零错误门仍FAIL；完整手机UI待明确重新批准，
+真实登录/在线操作pending/权限邀请报价结算/NI16–20/全资源音频更新/真机与人工仍OPEN。
+Windows只读来源56ee063fb较冻结3d735745f仅+1提交/83文档证据/0功能源；
+完整AP-01–21与goal Active保留，继续NI16 Hero接线，不推Windows、不部署或改真实存档。
+[精确源码、安装APK、JNI画面、失败及剩余门槛](generated/player-qa/native-android-social-jni-20261005/README.md)。
+
+下文只记录对应历史源码/安装包，不重绑到当前本叶。
+
+2026-10-05 历史 NI-15 社交出站源码：`0665a4f4ecc5449ca100d613561f78b40c4a9e76`。
 补齐原 AndroidSharedShellPlugin 缺失的 Group/Guild/Trade UI 转发注册；
 17种闭合协议字段与冻结Windows相同，沿原共享pending规则捕获准确操作，
 只恢复确定未发送的对应草稿/邀请；拒绝旧邀请代次，缺失关联走原断线/DataReset边界。
