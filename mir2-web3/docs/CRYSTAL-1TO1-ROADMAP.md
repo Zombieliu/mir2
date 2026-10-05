@@ -1,5 +1,20 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-05 exact updater source48454 produces a verified release bundle and
+> new 27,496,643-byte Bootstrap, retaining original gameR17/source6032. Local
+> preview sequence13 is unpublished; public12 stays unchanged. Two real signed
+> fixture cases pass, two others unrun. Actual prepared warm-cache repair/full
+> target verification/rollback executes, but the original harness exits1 on a
+> wrong receipt-format assumption; original failure and unexecuted branches stay
+> preserved. Additive audit verifies CMS/old baseline and actual quarantine and
+> downgrade rejections, with2066 specified paths unchanged. Current81.170s update
+> API timing is not fresh-install/public speed acceptance. Local official CLI
+> remains not logged in (expired OAuth); old CI token401 cause stays unknown.
+> Effective Cloudflare authorization, remote stage/promote, public coherent feed,
+> cache/range/HTTPS resume and laptop speed gates remain OPEN. No service/feed,
+> F or real-save change; preview is not ready for public distribution.
+> [Release Candidate proof and exact boundaries](generated/player-qa/native-delivery-20261005/release-preview-01/README.md).
+
 > 2026-10-05 native slow-download source now retains interrupted immutable
 > payload prefixes and stops transient bundle failures before individual-file
 > fallback. Strict ranges, full signed SHA, actual Windows handle/Unicode/long

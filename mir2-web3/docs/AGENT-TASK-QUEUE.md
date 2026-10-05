@@ -1,5 +1,22 @@
 # Agent Task Queue
 
+> 2026-10-05 exact pushed updater source48454 now builds a pinned-CMS verified
+> release engine/launcher and 27,496,643-byte R17 Bootstrap. Original game6032
+> stays unchanged; local preview sequence13 is not published (public12). Two
+> previously ignored signed fixtures actually pass; two others remain unrun.
+> Prepared release-profile warm-cache 2048-file repair, full target verification
+> and rollback execute, but original harness exits1 on a wrong highest.txt
+> numeric-format assertion; unchanged failure/unevaluated branches are retained.
+> Additive audit validates real CMS receipt/journal/baseline/witnesses and actual
+> check_update quarantine/downgrade rejections, with2066 selected state paths
+> unchanged. check_update81.170s includes47.593s installed checking; this is not
+> fresh-install/public-throughput evidence. Local Wrangler whoami still exits1:
+> not logged in, local OAuth expired; separate from opaque CI token401s. Effective
+> authorization, R2/public coherent feed, CDN and speed gates stay OPEN. Do not
+> give preview Bootstrap to users before publishing its feed. Old Bootstrap's
+> first empty install uses old engine. No service/feed/F/real-save change.
+> [Exact release preview and failure boundary](generated/player-qa/native-delivery-20261005/release-preview-01/README.md).
+
 > 2026-10-05 download-priority source adds interrupted immutable payload resume.
 > Actual writable-handle offsets, synchronized scratch, strict206/200/416 and
 > wire-only counters are checked; interrupted accelerators stop before raw-file
