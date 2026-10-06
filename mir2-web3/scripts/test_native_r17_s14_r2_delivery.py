@@ -1,8 +1,9 @@
 """Offline policy fixtures: no sockets, credentials, CMS verification or R2.
 
-The literal13 table and real two small feed bytes are used. Modeled stage receipt
+The literal14 table and real two small feed bytes are used. Modeled stage receipt
 shapes are ONLY validator inputs and never written as actual publication proof.
-The CLI gate remains prepared/unadmitted. No admission function is patched.
+Actual root/CMS admission is bound; prepared13 negative fixtures stay frozen.
+No admission function is patched.
 """
 from __future__ import annotations
 
@@ -1112,6 +1113,36 @@ class DeliveryTests(unittest.TestCase):
             self.assertFalse(receipt['passed'])
             self.assertIsNone(receipt['stageEnvelope'])
             self.assertEqual(receipt['verifiedObjectCount'], 0)
+
+    def test_real_cdn_cache_timing_lines_preserve_object_validation(self):
+        entry = PLAN['objects'][19]
+        response = Response()
+        response.headers = [*public_object(entry).items(),
+            ('Server-Timing', 'cfCacheStatus;desc="HIT"'),
+            ('Server-Timing', 'cfEdge;dur=38,cfOrigin;dur=0,cfWorker;dur=32')]
+        headers = P.header_map(response)
+        P.public_headers(headers, entry)
+        self.assertEqual(headers['content-length'], str(entry['size']))
+        self.assertIn('cfCacheStatus;desc="HIT"', headers['server-timing'])
+        self.assertIn('cfWorker;dur=32', headers['server-timing'])
+
+    def test_cdn_timing_exception_keeps_critical_duplicates_and_bounds_rejected(self):
+        entry = PLAN['objects'][19]
+        for name, value in [('Content-Length', str(entry['size'])),
+                            ('Content-Type', P.public_mime(entry['path'])),
+                            ('Cache-Control', P.IMMUTABLE), ('ETag', '"unit-public-etag"'),
+                            ('X-Mir2-Native-Cache', 'HIT')]:
+            with self.subTest(name=name):
+                response = Response()
+                response.headers = [*public_object(entry).items(), (name, value)]
+                with self.assertRaisesRegex(P.Fault, 'headers_rejected'):
+                    P.header_map(response)
+        for timing in [[('Server-Timing', 'bad\r\nContent-Length: 0')],
+                       [('Server-Timing', 'x' * 16384)], [('Server-Timing', 'x')] * 81]:
+            response = Response()
+            response.headers = [*public_object(entry).items(), *timing]
+            with self.assertRaisesRegex(P.Fault, 'headers_rejected'):
+                P.header_map(response)
 
     def test_reflected_secret_in_permitted_etag_is_never_persisted(self):
         transport = StoreTransport(); transport.stored.add(0)

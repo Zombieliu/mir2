@@ -264,8 +264,12 @@ def header_map(response):
             require(isinstance(key, str) and isinstance(value, str), 'headers_rejected')
             key = key.lower()
             size += len(key) + len(value)
-            require(size <= 16384 and key not in result and not any(c in value for c in '\r\n\x00'), 'headers_rejected')
-            result[key] = value
+            require(size <= 16384 and not any(c in value for c in '\r\n\x00'), 'headers_rejected')
+            # Cloudflare cache hits emit separate Server-Timing metric lines.
+            # This list-valued diagnostic never authorizes content or release.
+            # All other duplicate fields, including integrity/framing, fail.
+            require(key not in result or key == 'server-timing', 'headers_rejected')
+            result[key] = result[key] + ', ' + value if key in result else value
         require(result.get('content-encoding', 'identity') == 'identity'
                 and 'content-range' not in result, 'headers_rejected')
         return result
