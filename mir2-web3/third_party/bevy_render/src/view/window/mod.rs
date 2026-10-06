@@ -24,6 +24,9 @@ use wgpu::{
 
 pub mod screenshot;
 
+#[cfg(any(target_os = "android", test))]
+mod android_gpu_probe;
+
 use screenshot::ScreenshotPlugin;
 
 pub struct WindowRenderPlugin;
@@ -81,6 +84,8 @@ impl ExtractedWindow {
         frame: wgpu::SurfaceTexture,
         texture_view_format: Option<TextureFormat>,
     ) {
+        #[cfg(target_os = "android")]
+        android_gpu_probe::texture("acquired", &frame.texture, texture_view_format);
         // The camera pipeline still needs a concrete target format when this
         // adapter cannot reinterpret the surface as sRGB. Only the view
         // descriptor must omit the unsupported alternate format.
@@ -102,6 +107,12 @@ impl ExtractedWindow {
 
     pub fn present(&mut self) {
         if let Some(surface_texture) = self.swap_chain_texture.take() {
+            #[cfg(target_os = "android")]
+            android_gpu_probe::texture(
+                "present",
+                &surface_texture.texture,
+                self.swap_chain_texture_view_format,
+            );
             // TODO(clean): winit docs recommends calling pre_present_notify before this.
             // though `present()` doesn't present the frame, it schedules it to be presented
             // by wgpu.
@@ -166,7 +177,15 @@ fn extract_windows(
     // extraction runs before the new surface is configured, and falling back
     // to the default sRGB format for that single frame can reuse an sRGB mesh
     // pipeline against the resumed GLES surface's linear attachment.
-    if lifecycle.read().any(|state| {
+    if lifecycle.read().inspect(|_state| {
+        #[cfg(target_os = "android")]
+        android_gpu_probe::record(|sequence| {
+            info!(sequence, phase = "lifecycle_read", state = ?_state,
+                thread = ?std::thread::current().id(),
+                surfaces = window_surfaces.surfaces.len(),
+                "ANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCE");
+        });
+    }).any(|state| {
         matches!(
             state,
             AppLifecycle::Running
@@ -523,6 +542,16 @@ pub fn create_surfaces(
                     },
                 };
 
+                #[cfg(target_os = "android")]
+                android_gpu_probe::record(|sequence| {
+                    info!(sequence, phase = "configure_new",
+                        thread = ?std::thread::current().id(),
+                        width = configuration.width, height = configuration.height,
+                        format = ?configuration.format,
+                        size_changed = window.size_changed,
+                        present_mode_changed = window.present_mode_changed,
+                        "ANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCE");
+                });
                 render_device.configure_surface(&surface, &configuration);
 
                 SurfaceData {
@@ -556,6 +585,16 @@ pub fn create_surfaces(
             data.configuration.height = window.physical_height;
             let caps = data.surface.get_capabilities(&render_adapter);
             data.configuration.present_mode = present_mode(window, &caps);
+            #[cfg(target_os = "android")]
+            android_gpu_probe::record(|sequence| {
+                info!(sequence, phase = "configure_changed",
+                    thread = ?std::thread::current().id(),
+                    width = data.configuration.width, height = data.configuration.height,
+                    format = ?data.configuration.format,
+                    size_changed = window.size_changed,
+                    present_mode_changed = window.present_mode_changed,
+                    "ANDROID_GPU_SURFACE_PROBE_NOT_ACCEPTANCE");
+            });
             render_device.configure_surface(&data.surface, &data.configuration);
         }
 

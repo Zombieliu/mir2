@@ -1,6 +1,9 @@
 mod additive_material;
 #[cfg(any(target_os = "android", test))]
 mod android_schedule_cleanup;
+#[cfg(all(test, not(target_os = "android")))]
+#[path = "../../../../third_party/bevy_render/src/view/window/android_gpu_probe.rs"]
+mod android_gpu_probe_bounds_tests;
 pub mod capture_context;
 pub mod entity_animation;
 mod entity_animation_bridge;
