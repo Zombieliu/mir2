@@ -154,6 +154,8 @@ impl OutputColorAttachment {
     /// the provided `clear_color` if this is the first time calling this function, otherwise it
     /// will be loaded.
     pub fn get_attachment(&self, clear_color: Option<LinearRgba>) -> RenderPassColorAttachment<'_> {
+        #[cfg(target_os = "android")]
+        crate::view::window::android_gpu_probe::output_view(&self.view);
         let first_call = self.is_first_call.fetch_and(false, Ordering::SeqCst);
 
         RenderPassColorAttachment {

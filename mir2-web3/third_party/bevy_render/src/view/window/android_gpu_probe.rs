@@ -94,6 +94,11 @@ pub(crate) fn render_pass(descriptor: &wgpu::RenderPassDescriptor<'_>) {
 }
 
 #[cfg(target_os = "android")]
+pub(crate) fn output_view(texture_view: &wgpu::TextureView) {
+    view("output_color_attachment", None, 0, texture_view);
+}
+
+#[cfg(target_os = "android")]
 fn view(
     phase: &'static str,
     pass_label: Option<&str>,
