@@ -1,5 +1,16 @@
 # Agent Orchestration
 
+> 2026-10-06 root final b4390ee4 signed first-install/rollback passes1/1;
+> all125,965 target hashes and four synthetic personal witnesses pass, no game
+> launch. Production check_update1,141,646ms on owned C scratch is not a controlled
+> comparison with historical D. Clean-source signed14 engine/bootstrap and actual
+>29-file seed install/hash pass. Fixed AppId altered HKCU uninstall anchors;
+> root restores actual D path/version, with no prior byte snapshot. D/F files and
+> saves untouched. New fixed14 plan/source tests pass and six origin objects append;
+> CDN stage/promote/native HTTPS remain open. Root solely owns publication; no
+> Gateway restart or broader blocked Goal change.
+> [Final validation limits](NATIVE-LOCAL-INSTALL-PERFORMANCE-20261006.md).
+
 > 2026-10-06 root solely owns the bounded local-updater performance and
 > publication round. Actual D file activation completes with staging459.846s,
 > preparation580.444s/activation2336.909s. Bounded I/O, staging promotion and

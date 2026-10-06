@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-06 final b4390ee4 signed first-install/rollback passes all125,965
+> target hashes; owned C scratch check_update19m1.646s is not a controlled D
+> comparison or laptop acceptance. Signed14 updater/bootstrap built,29 installed
+> seed hashes pass, HKCU test-installer anchor side effect/restoration documented.
+> Exact old30 game objects remain. Fixed14 tools and six origin append pass;
+> actual R2 stage, separate source/CDN14 promotion and native HTTPS remain open.
+> GameR17/Gateway/files/saves/F and broader parity status unchanged.
+> [Evidence and limits](NATIVE-LOCAL-INSTALL-PERFORMANCE-20261006.md).
+
 > 2026-10-06 bounded updater performance Candidate:74 library/CMS1 pass;
 > actual33,996-file reverse pairs average73.073s/35.989s. All integrity, journal,
 > game-running and rollback gates remain. Full signed installation, final

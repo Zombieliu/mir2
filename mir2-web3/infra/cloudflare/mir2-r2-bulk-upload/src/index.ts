@@ -1,4 +1,5 @@
 import { nativeR17Fetch } from "./native-r17-publication.mjs";
+import { nativeR17S14Fetch } from "./native-r17-s14-publication.mjs";
 
 export interface Env {
   MIR2_ASSETS: R2Bucket;
@@ -9,6 +10,10 @@ const MAX_OBJECT_BYTES = 300 * 1024 * 1024;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const path = new URL(request.url).pathname;
+    if (path === "/upload/native-r17-s14" || path.startsWith("/upload/native-r17-s14/")) {
+      return nativeR17S14Fetch(request, env);
+    }
     if (new URL(request.url).pathname.startsWith("/upload/native-r17")) {
       return nativeR17Fetch(request, env);
     }

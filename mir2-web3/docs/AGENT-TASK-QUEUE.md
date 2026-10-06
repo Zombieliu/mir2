@@ -1,5 +1,15 @@
 # Agent Task Queue
 
+> 2026-10-06 final signed first-install/rollback b4390ee4 passes all125,965
+> target hashes; production check_update19m1.646s in owned C scratch. This is
+> not a controlled full-install speed comparison or laptop acceptance. Signed14
+> engine and Bootstrap built;29 native seed hashes pass. Actual test installer
+> HKCU anchor side effect/restoration limits are documented. New fixed14 Node138/
+> Python64 and actual origin append pass; next are actual CI36-object public stage,
+> separate source/CDN14 promotion and production native HTTPS verification. User
+> D/F game files/saves and Gateway unchanged; broader blocked Goal unchanged.
+> [Final validation](NATIVE-LOCAL-INSTALL-PERFORMANCE-20261006.md).
+
 > 2026-10-06 user priority is local installation latency after R2 acceleration.
 > Root's four-worker scratch I/O, verified staging promotion and fresh game
 > exclusion/fallback pass74 library/CMS1 and reverse real33,996-file A/B; original failures

@@ -1,7 +1,7 @@
 # Local installation performance Candidate
 
 The reported installation is on this development computer at D:/Mir2Invite.
-Root only read its updater log; its original signed13/R17 file activation
+Root read its updater log; its original signed13/R17 file activation
 completed. No root action stopped/replaced the installer/game, touched F,
 or edited a player save. Original phase times: checking10.616s, extraction
 473.018s, staging459.846s, preparation580.444s, activation2336.909s. Bundle
@@ -50,6 +50,38 @@ and an in-use test-EXE linker failure are retained, not credited as functional R
 RAW-BENCHMARK.zip:121,907 bytes, SHA256
 `3baa0b9dd8eaf9a057a08d3df18c9fb20752200699a94c52d64869b108c2881d`.
 The47 members and actual results are indexed in BENCHMARK.json. Large resources,
-EXEs, private keys and real user data are excluded. Full genuine signed first
-install/rollback, clean-source engine/bootstrap, signed14 publication, automatic
-upgrade and laptop timing are separate pending gates. Game R17/Gateway unchanged.
+EXEs, private keys and real user data are excluded.
+
+Final b4390ee4 release-profile test image SHA256
+`385ad1c5c9ea0387dc280c3ece6ec1e41cffc1464f04d4ccf945677bf5f339c7`
+passes the explicit genuine signed first-install/rollback fixture1/1. All125,965
+targets pass independent SHA verification; zero fallback requests, all125,965
+cache hits, no payload request for pending-launch recheck, four synthetic personal
+witnesses retained, game not launched. Production check_update takes1,141,646ms;
+whole test1,323.62s also includes independent verification and recovery. Staging
+177,316ms, preparation33,442ms, activation684,864ms, recovery98,101ms. C-volume
+scratch and historical D-volume user installation are not a controlled full-install
+comparison; concurrent build/verifier work also limits attribution. The earlier
+unshipped Candidate whole-install run and mistaken zero-test final filter remain
+retained and are not credited as final acceptance.
+
+FINAL-VALIDATION.zip:96,204 bytes, SHA256
+`1a4eb7aee8306dca12a9d13e2381618c6d36d4dc95c5363178e14d0f1abc5d52`,60
+members. Its JSON is an immutable freeze-time inventory, not a build attestation;
+its native installed-hash/publication flags were still false when frozen. Later
+29-file native seed verification is retained separately in owned release storage:
+NATIVE-SEED14-HASHES-01.json (26,794,264 bytes verified). Actual silent Inno install
+used the fixed production AppId and inadvertently repointed HKCU uninstall anchors.
+Those anchors and DisplayVersion were restored to actual D:/Mir2Invite/2026.10.5.17;
+no prior registry byte snapshot exists, so full byte restoration is not claimed.
+D/F game files and player saves were not changed. No further real Inno rerun or
+uninstall is authorized by this proof.
+
+Clean-source signed engine b4390ee4 and20261006-r17 Bootstrap have been built;
+actual root-pinned Windows CMS publication verification binds all36 objects and
+817,841,942 bytes. Sequence14 is updater-only, with original30 game objects exact.
+New frozen14 Node138/Python64 pass; frozen13 Node138/Python64 remain passing. Windows
+interrupt1 passes/1 Linux case awaits actual CI. Fixed six immutable origin14
+objects appended after11 actual Linux negatives; current source feed remains13.
+Signed14 CDN stage/promotion, native public discovery and laptop timing remain
+pending at this freeze. Game R17/Gateway unchanged.
