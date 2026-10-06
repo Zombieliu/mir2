@@ -1,6 +1,8 @@
 "use client";
 
 import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
+import type { ChatUiControls, CashPreviewLayerDocument } from "../../lib/client-core-runtime";
+import type { MapImageRouteSource, MapImageRouteIntent } from "../../lib/client-map-input";
 
 import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 
@@ -80,6 +82,11 @@ type GameUiSceneProps = {
   npcShopService: DisplayNpcShopService | null;
   npcRepairService: "repair" | "special" | null;
   defaultChatExpanded?: boolean;
+  chatUi?: ChatUiControls;
+  mapImageRouteSource?: MapImageRouteSource | null;
+  onMapImageRoute?: (intent: MapImageRouteIntent) => void;
+  onMapImageRoutePress?: (source: MapImageRouteSource | null) => void;
+  onMapRouteModalChange?: (blocked: boolean) => void;
   onChatMessageChange: (value: string) => void;
   onSendChat: (message: string) => void;
   onRequestTrade: () => void;
@@ -134,6 +141,9 @@ type GameUiSceneProps = {
   cashGameShopPending?: boolean;
   onConfirmCashGameShopPurchase?: (confirmation: CashGameShopConfirmation) => void;
   onReadCashGameShopItemTooltip?: (item: CashGameShopEntry) => CrystalTooltipDocument | null;
+  cashPreviewSourceKey?: string | null;
+  onReadCashPreviewLayers?: (item: CashGameShopEntry, direction: number, elapsedMs: number) => CashPreviewLayerDocument | null;
+  onTurnCashPreview?: (direction: number, right: boolean) => number | null;
   onGameShopVisibilityChange?: (open: boolean) => void;
   onSendClientCommand: (command: Record<string, unknown>) => void;
   inputProfile: Mir2InputProfile;
@@ -173,6 +183,7 @@ function GameUiSceneInner({
   npcShopService,
   npcRepairService,
   defaultChatExpanded = true,
+  chatUi, mapImageRouteSource, onMapImageRoute, onMapImageRoutePress, onMapRouteModalChange,
   onChatMessageChange,
   onSendChat,
   onRequestTrade,
@@ -217,6 +228,7 @@ function GameUiSceneInner({
   onDeleteMail,
   onBuyGameShopItem,
   cashGameShopSource, cashGameShopPending, onConfirmCashGameShopPurchase, onReadCashGameShopItemTooltip, onGameShopVisibilityChange,
+  cashPreviewSourceKey, onReadCashPreviewLayers, onTurnCashPreview,
   onSendClientCommand,
   inputProfile,
   gamepadFamily,
@@ -230,6 +242,10 @@ function GameUiSceneInner({
   const [transparentChat, setTransparentChat] = useState(false);
   const [chatExpanded, setChatExpanded] = useState(defaultChatExpanded);
   const [showChatSettings, setShowChatSettings] = useState(false);
+  const effectiveChatSettingsOpen=chatUi?.document.open??showChatSettings;
+  const chatUiEpoch=chatUi?.document.epoch;
+  const chatUiRef=useRef(chatUi);chatUiRef.current=chatUi;
+  const [chatPointerHeld,setChatPointerHeld]=useState(false);const chatPointerHeldRef=useRef(false);
   const showMailPanel = mailOpen;
   const [showBigMap, setShowBigMap] = useState(false);
   const [showMinimap, setShowMinimap] = useState(true);
@@ -274,7 +290,8 @@ function GameUiSceneInner({
       else if (action === "bigmap") setShowBigMap(current => !current);
       else if (action === "closeAll") {
         changeGameShopOpen(false); setShowBigMap(false); setShowSystemMenu(false); setShowSystemMenuFeaturePanel(null);
-        setShowReportPanel(false); setShowChatSettings(false); setShowDuraPanel(false);
+        setShowReportPanel(false); const chat=chatUiRef.current;if(chat?.document.open)chat.cancel(chat.document.epoch);
+        setShowChatSettings(false); setShowDuraPanel(false);
       }
     };
     window.addEventListener("mir2:hud-host-action", handler);
@@ -306,8 +323,14 @@ function GameUiSceneInner({
     !sharedQuestUiActive && world.activeNpcDialog && dialogKey !== dismissedDialogKey ? world.activeNpcDialog : null;
   // Mail has one Page-owned presentation; do not report its own-open as a competing modal.
   const questUiModalBlocked = Boolean(showBigMap || showReportPanel || showSystemMenu
-    || showSystemMenuFeaturePanel || showGameShop || showChatSettings || storageRentalPrompt);
+    || showSystemMenuFeaturePanel || showGameShop || effectiveChatSettingsOpen || chatPointerHeld || storageRentalPrompt);
   const hpOrbModalBlocked = Boolean(questUiModalBlocked || showDuraPanel || visibleDialog);
+  const mapRouteModalBlocked = Boolean(showReportPanel || showSystemMenu || showSystemMenuFeaturePanel
+    || showGameShop || effectiveChatSettingsOpen || chatPointerHeld || storageRentalPrompt || visibleDialog);
+  useLayoutEffect(() => {
+    onMapRouteModalChange?.(mapRouteModalBlocked);
+    return () => onMapRouteModalChange?.(false);
+  }, [mapRouteModalBlocked, onMapRouteModalChange]);
   useLayoutEffect(() => {
     onHpOrbModalChange?.(hpOrbModalBlocked);
     return () => onHpOrbModalChange?.(false);
@@ -329,6 +352,26 @@ function GameUiSceneInner({
       showCharacter ||
       showQuestLog,
   );
+
+
+  function changeChatSettings(open:boolean) {
+    const ui=chatUi;
+    if(open){onHpOrbModalChange?.(true);onQuestUiModalChange?.(true);onMapRouteModalChange?.(true);}
+    if(ui&&chatUiEpoch!==undefined) {if(open&&!effectiveChatSettingsOpen)ui.open(chatUiEpoch);else if(!open&&effectiveChatSettingsOpen)ui.cancel(chatUiEpoch);}
+    else setShowChatSettings(open);
+  }
+  function resizeChatWindow() {
+    if(chatUi&&chatUiEpoch!==undefined){chatUi.resize(chatUiEpoch);setChatExpanded(true);}
+    else setChatExpanded(current=>!current);
+  }
+  function changeChatPointerHold(held:boolean) {
+    chatPointerHeldRef.current=held;setChatPointerHeld(held);
+    const base=Boolean(showBigMap||showReportPanel||showSystemMenu||showSystemMenuFeaturePanel||showGameShop||effectiveChatSettingsOpen||storageRentalPrompt);
+    onQuestUiModalChange?.(held||base);
+    onHpOrbModalChange?.(held||base||showDuraPanel||Boolean(visibleDialog));
+    onMapRouteModalChange?.(held||Boolean(showReportPanel||showSystemMenu||showSystemMenuFeaturePanel
+      ||showGameShop||effectiveChatSettingsOpen||storageRentalPrompt||visibleDialog));
+  }
 
   function selectChatFilter(filter: ChatFilterKey) {
     const previousPrefix = chatPrefixForFilter(activeChatFilter);
@@ -387,6 +430,9 @@ function GameUiSceneInner({
         t={t}
         world={world}
         player={player}
+        routeSource={mapImageRouteSource}
+        onImageRoute={onMapImageRoute}
+        onImageRoutePress={onMapImageRoutePress}
         showMailPanel={showMailPanel}
         showBigMap={showBigMap}
         onToggleMail={() => onToggleMail?.()}
@@ -413,11 +459,12 @@ function GameUiSceneInner({
         t={t}
         activeFilter={activeChatFilter}
         chatExpanded={chatExpanded}
-        showSettings={showChatSettings}
+        chatUi={chatUi}
+        showSettings={effectiveChatSettingsOpen}
         onSelectFilter={selectChatFilter}
         onRequestTrade={onRequestTrade}
-        onToggleExpanded={() => setChatExpanded((current) => !current)}
-        onToggleSettings={() => setShowChatSettings((current) => !current)}
+        onToggleExpanded={resizeChatWindow}
+        onToggleSettings={()=>changeChatSettings(!effectiveChatSettingsOpen)}
         onToggleReport={() => setShowReportPanel((current) => !current)}
       />
       <ChatFrame
@@ -428,12 +475,13 @@ function GameUiSceneInner({
         hints={world.interactionHints}
         activeFilter={activeChatFilter}
         hiddenFilters={hiddenChatFilters}
+        chatUi={chatUi} onInputHoldChange={changeChatPointerHold}
         expanded={chatExpanded}
-        showSettings={showChatSettings}
+        showSettings={effectiveChatSettingsOpen}
         transparent={transparentChat}
         onChatMessageChange={onChatMessageChange}
         onSendChat={sendActiveChatMessage}
-        onCloseSettings={() => setShowChatSettings(false)}
+        onCloseSettings={()=>changeChatSettings(false)}
         onToggleHiddenFilter={toggleHiddenChatFilter}
         onToggleAllHiddenFilters={toggleAllHiddenChatFilters}
         onToggleTransparent={() => setTransparentChat((current) => !current)}
@@ -470,6 +518,9 @@ function GameUiSceneInner({
           t={t}
           world={world}
           player={player}
+          routeSource={mapImageRouteSource}
+          onImageRoute={onMapImageRoute}
+          onImageRoutePress={onMapImageRoutePress}
           onClose={() => setShowBigMap(false)}
         />
       ) : null}
@@ -525,6 +576,9 @@ function GameUiSceneInner({
           purchasePending={cashGameShopPending}
           onConfirmPurchase={onConfirmCashGameShopPurchase}
           onReadItemTooltip={onReadCashGameShopItemTooltip}
+          previewSourceKey={cashPreviewSourceKey}
+          onReadPreviewLayers={onReadCashPreviewLayers}
+          onTurnPreview={onTurnCashPreview}
           onClose={() => changeGameShopOpen(false)}
         />
       ) : null}

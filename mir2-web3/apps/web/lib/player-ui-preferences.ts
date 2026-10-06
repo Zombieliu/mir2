@@ -16,6 +16,19 @@ export type PlayerUiPreferences = Record<CrystalOptionKey, boolean> & {
 export const PLAYER_UI_PREFERENCES_STORAGE_KEY = "mir2.playerUiPreferences.v1";
 export const CRYSTAL_KEY_BINDINGS_STORAGE_KEY = "mir2.crystalKeyBindings.v1";
 export const CRYSTAL_HELP_STATE_STORAGE_KEY = "mir2.crystalHelpState.v1";
+export const CRYSTAL_CHAT_SETTINGS_STORAGE_KEY = "mir2.crystalChatSettings.v1";
+export function parseCrystalChatSettings(text: string): number | null {
+  if (typeof text !== "string" || text.length > 128) return null;
+  try {
+    const value: unknown = JSON.parse(text);
+    return record(value) && Object.keys(value).length === 2 && value.version === 1
+      && Number.isInteger(value.mask) && Number(value.mask) >= 0 && Number(value.mask) <= 1023
+      ? value.mask as number : null;
+  } catch { return null; }
+}
+export function serializeCrystalChatSettings(mask: number): string | null {
+  return Number.isInteger(mask) && mask >= 0 && mask <= 1023 ? JSON.stringify({ version: 1, mask }) : null;
+}
 export const DEFAULT_PLAYER_UI_PREFERENCES: Readonly<PlayerUiPreferences> = Object.freeze({
   skillMode: false, skillBar: true, effect: true, dropView: true, nameView: true, hpView: true, newMove: false,
   musicEnabled: true, musicVolume: 80, soundEnabled: true, soundVolume: 80,

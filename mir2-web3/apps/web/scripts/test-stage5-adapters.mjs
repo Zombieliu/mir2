@@ -2834,6 +2834,16 @@ assert.equal(ts.isIfStatement(paritySendStatements[parityDtoIndex + 2]),true);
 const parityCollectClaim = paritySendStatements.filter(statement => ts.isIfStatement(statement)
   && statement.expression.getText(parityPageAst) === 'options?.mailProof?.commandType === "collectParcel"');
 assert.equal(parityCollectClaim.length,1,"sole actual final parcel collection barrier claim");
+// sendRaw's ordinary-command final slice also reads the real Auth classifier.
+// Extract that sole pure declaration, without loading wallet/network modules or
+// replacing any final claim. All parity commands naturally classify as null.
+const parityAuthUrl = new URL("../lib/client-login-runtime.ts", import.meta.url);
+const parityAuthAst = ts.createSourceFile(fileURLToPath(parityAuthUrl), readFileSync(parityAuthUrl,"utf8"), ts.ScriptTarget.Latest, true);
+const parityAuthClassifiers = parityAuthAst.statements.filter(node => ts.isFunctionDeclaration(node) && node.name?.text === "preauthCommandKind");
+assert.equal(parityAuthClassifiers.length, 1, "sole actual preauth command classifier");
+const parityAuthClassifierText = parityAuthClassifiers[0].getText(parityAuthAst);
+assert.match(parityAuthClassifierText, /^export function preauthCommandKind\(/);
+parityDeclarations.set("preauthCommandKind", parityAuthClassifierText.replace(/^export /, ""));
 const parityPageJs = ts.transpileModule([...parityDeclarations.values()].join("\n")
   + "\nfunction parityIngress(command, options) {\n"
   + paritySendStatements.slice(parityPreflightStart, parityPreflightEnd).map(n => n.getText(parityPageAst)).join("\n")
@@ -2865,6 +2875,8 @@ function parityPageFixture(owner, world = {}) {
     heroWindowEpochsRef:ref({inventory:1,character:1,belt:1}), heroWindowsRef:ref({inventoryOpen:true,characterOpen:false,characterPage:"equipment",beltVisible:true,beltVertical:false}),
     heroWindowActorRef:ref(null), heroRestockScheduledRef:ref(false), setHeroWindows:()=>{}, sameHeroSession:heroUi.sameHeroSession,
     observeBootstrapRef:ref(null), observePreferenceRef:ref(null),
+    authSendRef:ref(null), chatUiRuntimeRef:ref(null), questCoreRuntimeRef:ref(null),
+    mapImageRouteRef:ref(null), mapRouteLocalModalRef:ref(false),
     questSceneRevisionRef:ref(owner.sceneRevision), combatModePhysicalRef:ref(null),
     combatModeRawRef:ref(null), combatModeRevisionRef:ref(0), combatModeHostRef:ref(null),
     normalizeQuestMapFileName:questWorldDocument.normalizeQuestMapFileName,
@@ -4153,6 +4165,275 @@ check("Quest name getter rejects stale full stamp foreign or dead entities dupli
   assert.equal(questNameDocument.readBevyQuestNameTargets({getMir2QuestNameTargetsVersion:()=>1,getMir2QuestNameTargets:()=>{throw Error("getter");}},questNameContext),null);
   assert.equal(questNameDocument.readBevyQuestNameTargets({getMir2QuestNameTargetsVersion:()=>1,getMir2QuestNameTargets:()=>"x".repeat(16385)},questNameContext),null);
   assert.equal(questNameDocument.readBevyQuestNameTargets(runtime,{...questNameContext,revision:0}),null);
+});
+
+
+// ---------------------------------------------------------------------------
+// Shared presentation adapter boundary fixtures. These load the real TS adapter
+// through the existing transpiler. WASM methods below are data mocks, not Rust
+// execution, route-search coverage, pricing proof, or player/UI acceptance.
+// ---------------------------------------------------------------------------
+const presentationRuntime = loadTypeScriptModule(new URL("../lib/client-presentation-runtime.ts", import.meta.url));
+const presentationChatDocument = {
+  version:1, epoch:7, open:false, size:0, lineCount:4, frameIndex:0, countBarIndex:0,
+  top:500, height:100, controlTop:600, inputTop:650, track:80, knobTop:0, index:0,
+  historyCount:20, appliedMask:341, draftMask:null,
+};
+const presentationCashInput = { itemType:1, shape:9, requiredGender:1, armourShape:0,
+  female:false, direction:2, elapsedMs:150 };
+const presentationRepairInput = {
+  uniqueId:41, tooltipSource:{info:{item_index:77,price:1000,durability:1000},
+    userItem:{unique_id:41,item_index:77,count:9,current_dura:900,max_dura:1100,
+      added_stats:[{stat:5,value:5},{stat:6,value:-3}],rental_information:null}},
+  count:2,currentDura:250,maxDura:1000,rate:0.1,special:false,gold:18,
+};
+
+check("presentation map ABI forwards exact geometry and edge bytes and validates an immutable diagonal route", () => {
+  const edges = new Uint8Array(9); edges[0]=8; edges[4]=8;
+  let argumentsSeen;
+  const module={getMir2MapRouteVersion:()=>1,getMir2MapRoutePlan:(...args)=>{argumentsSeen=args;return Int32Array.of(0,1,1,2,2);}};
+  const result=presentationRuntime.searchSharedMapRoute(module,{width:3,height:3,origin:{x:0,y:0},goal:{x:2,y:2},edges});
+  assert.deepEqual(argumentsSeen,[3,3,0,0,2,2,edges]); assert.equal(argumentsSeen[6],edges);
+  assert.deepEqual(result,{status:"ok",steps:[{x:1,y:1},{x:2,y:2}]});
+  assert.equal(Object.isFrozen(result.steps),true); assert.equal(Object.isFrozen(result.steps[0]),true);
+  module.getMir2MapRoutePlan=()=>Int32Array.of(0);
+  assert.deepEqual(presentationRuntime.searchSharedMapRoute(module,{width:1,height:1,origin:{x:0,y:0},goal:{x:0,y:0},edges:new Uint8Array(1)}),{status:"ok",steps:[]});
+});
+check("presentation map ABI accepts only odd typed responses and the three exact rejection codes", () => {
+  const input={width:2,height:2,origin:{x:0,y:0},goal:{x:1,y:1},edges:Uint8Array.of(8,0,0,0)};
+  let reply=Int32Array.of(1);
+  const module={getMir2MapRouteVersion:()=>1,getMir2MapRoutePlan:()=>reply};
+  for(const [code,status] of [[1,"outside"],[2,"budget"],[3,"unreachable"]]){
+    reply=Int32Array.of(code); assert.deepEqual(presentationRuntime.searchSharedMapRoute(module,input),{status});
+  }
+  for(const bad of [[],[0,1,1],Float32Array.of(0,1,1),new Int32Array(),Int32Array.of(0,1),Int32Array.of(4),Int32Array.of(1,1,1),new Int32Array(500002)]){
+    reply=bad; assert.throws(()=>presentationRuntime.searchSharedMapRoute(module,input),/Invalid shared route/);
+  }
+  assert.throws(()=>presentationRuntime.searchSharedMapRoute({},input),/unavailable/);
+  assert.throws(()=>presentationRuntime.searchSharedMapRoute({...module,getMir2MapRouteVersion:()=>2},input),/unavailable/);
+});
+check("presentation map rejects leaps stationary points blocked source edges and a different terminal goal", () => {
+  const edges=new Uint8Array(9);edges[0]=8;edges[4]=8;
+  const input={width:3,height:3,origin:{x:0,y:0},goal:{x:2,y:2},edges};
+  let reply;
+  const module={getMir2MapRouteVersion:()=>1,getMir2MapRoutePlan:()=>reply};
+  for(const points of [[0,0,0],[0,2,2],[0,1,1,3,3],[0,1,1]]){
+    reply=Int32Array.from(points);assert.throws(()=>presentationRuntime.searchSharedMapRoute(module,input),/shared route/);
+  }
+  reply=Int32Array.of(0,1,1,2,2);edges[4]=0;
+  assert.throws(()=>presentationRuntime.searchSharedMapRoute(module,input),/Invalid shared route step/);
+  edges[4]=8;assert.throws(()=>presentationRuntime.searchSharedMapRoute(module,{...input,goal:{x:2,y:1}}),/Incomplete shared route/);
+});
+check("presentation map input rejection never calls Rust with malformed dimensions origin goal or edge shape", () => {
+  let calls=0;
+  const module={getMir2MapRouteVersion:()=>1,getMir2MapRoutePlan:()=>{calls++;return Int32Array.of(3);}};
+  const good={width:2,height:2,origin:{x:0,y:0},goal:{x:1,y:1},edges:new Uint8Array(4)};
+  for(const delta of [{width:0},{width:1.5},{width:16777217},{width:16777216,height:2},{edges:new Uint8Array(3)},
+    {edges:[0,0,0,0]},{origin:null},{origin:{x:-1,y:0}},{goal:{x:2,y:1}},{goal:{x:NaN,y:1}}]){
+    assert.deepEqual(presentationRuntime.searchSharedMapRoute(module,{...good,...delta}),{status:"outside"});
+  }
+  assert.equal(calls,0);
+});
+
+check("presentation chat strict documents reject extra keys wrong mask epoch geometry and draft state", () => {
+  let raw=JSON.stringify(presentationChatDocument),free=0;
+  class RawChat { document(){return raw;} free(){free++;} }
+  const ui=presentationRuntime.createSharedChatUi({chat_ui_abi_version:()=>1,ChatUiBridge:RawChat},341);
+  assert.deepEqual(ui.document(),presentationChatDocument);assert.equal(Object.isFrozen(ui.document()),true);
+  for(const bad of [null,[],{...presentationChatDocument,extra:1},{...presentationChatDocument,version:2},
+    {...presentationChatDocument,epoch:0},{...presentationChatDocument,lineCount:5},{...presentationChatDocument,size:3},
+    {...presentationChatDocument,open:true},{...presentationChatDocument,draftMask:0},{...presentationChatDocument,appliedMask:1024},
+    {...presentationChatDocument,historyCount:1000001},{...presentationChatDocument,index:20},
+    {...presentationChatDocument,top:769},{...presentationChatDocument,height:0},{...presentationChatDocument,track:769}]){
+    raw=JSON.stringify(bad);assert.throws(()=>ui.document(),/Invalid shared chat/);
+  }
+  raw="{";assert.throws(()=>ui.document());raw="x".repeat(2049);assert.throws(()=>ui.document(),/Invalid shared chat/);
+  ui.dispose();ui.dispose();assert.equal(free,1);
+});
+check("presentation chat calls preserve exact action epoch and raw stale-epoch refusal", () => {
+  const calls=[];let expectedEpoch=7;
+  class RawChat {
+    constructor(mask){calls.push(["constructor",mask]);}
+    document(){return JSON.stringify({...presentationChatDocument,epoch:expectedEpoch});}
+    scroll(action,epoch){calls.push(["scroll",action,epoch]);return epoch===expectedEpoch;}
+    drag(y,grab,epoch){calls.push(["drag",y,grab,epoch]);return epoch===expectedEpoch;}
+    resize(epoch){calls.push(["resize",epoch]);return epoch===expectedEpoch;}
+    open(epoch){calls.push(["open",epoch]);return epoch===expectedEpoch;}
+    edit_filter(channel,value,epoch){calls.push(["filter",channel,value,epoch]);return epoch===expectedEpoch;}
+    edit_all(value,epoch){calls.push(["all",value,epoch]);return epoch===expectedEpoch;}
+    edit_transparent(value,epoch){calls.push(["transparent",value,epoch]);return epoch===expectedEpoch;}
+    observe(count){calls.push(["observe",count]);return count===20;}
+    apply(epoch){calls.push(["apply",epoch]);return epoch===expectedEpoch?682:-1;}
+    cancel(epoch){calls.push(["cancel",epoch]);return epoch===expectedEpoch;}
+    defaults(epoch){calls.push(["defaults",epoch]);return epoch===expectedEpoch;}
+    retire(){calls.push(["retire"]);return true;}
+    restore(mask){calls.push(["restore",mask]);return mask===341;}
+    free(){calls.push(["free"]);}
+  }
+  const ui=presentationRuntime.createSharedChatUi({chat_ui_abi_version:()=>1,ChatUiBridge:RawChat},341);
+  assert.equal(ui.observe(20),true);assert.equal(ui.observe(21),false);
+  for(const [name,wire] of [["home",0],["up",1],["down",2],["end",3]]){
+    assert.equal(ui.scroll(name,7),true);assert.deepEqual(calls.at(-1),["scroll",wire,7]);
+  }
+  assert.equal(ui.drag(12.5,-2,7),true);assert.deepEqual(calls.at(-1),["drag",12.5,-2,7]);
+  assert.equal(ui.editFilter(8,false,7),true);assert.deepEqual(calls.at(-1),["filter",8,false,7]);
+  assert.equal(ui.editAll(false,7),true);assert.deepEqual(calls.at(-1),["all",false,7]);
+  assert.equal(ui.editTransparent(true,7),true);assert.deepEqual(calls.at(-1),["transparent",true,7]);
+  assert.equal(ui.resize(7),true);assert.equal(ui.open(7),true);assert.equal(ui.apply(7),682);
+  assert.equal(ui.cancel(7),true);assert.equal(ui.defaults(7),true);
+  assert.equal(ui.retire(),true);
+  // A recorded new native epoch is supplied explicitly, not computed by a JS policy mirror.
+  expectedEpoch=8;assert.equal(ui.document().epoch,8);
+  assert.equal(ui.scroll("down",7),false);assert.deepEqual(calls.at(-1),["scroll",2,7]);
+  assert.equal(ui.apply(7),-1);assert.equal(ui.restore(341),true);
+  ui.dispose();const afterFree=calls.length;
+  assert.equal(ui.observe(20),false);assert.equal(ui.scroll("down",8),false);assert.equal(ui.drag(0,0,8),false);
+  assert.equal(ui.resize(8),false);assert.equal(ui.open(8),false);assert.equal(ui.editFilter(0,true,8),false);
+  assert.equal(ui.editAll(true,8),false);assert.equal(ui.editTransparent(true,8),false);assert.equal(ui.apply(8),-1);
+  assert.equal(ui.cancel(8),false);assert.equal(ui.defaults(8),false);assert.equal(ui.retire(),false);assert.equal(ui.restore(341),false);
+  assert.throws(()=>ui.document(),/retired/);ui.dispose();assert.equal(calls.length,afterFree);
+  assert.equal(calls.filter(row=>row[0]==="free").length,1);
+});
+check("presentation chat bounds reject invalid commands before touching the bridge and source identities are distinct", () => {
+  let calls=0,constructors=0,frees=0;
+  class RawChat {
+    constructor(mask){constructors++;assert.equal(mask,341);}
+    document(){return JSON.stringify(presentationChatDocument);}
+    observe(){calls++;return false;} scroll(){calls++;return false;} drag(){calls++;return false;}
+    resize(){calls++;return false;} open(){calls++;return false;} edit_filter(){calls++;return false;}
+    edit_all(){calls++;return false;} edit_transparent(){calls++;return false;} apply(){calls++;return -1;}
+    cancel(){calls++;return false;} defaults(){calls++;return false;} retire(){calls++;return false;}
+    restore(){calls++;return false;} free(){frees++;}
+  }
+  const module={chat_ui_abi_version:()=>1,ChatUiBridge:RawChat};
+  const one=presentationRuntime.createSharedChatUi(module,341),two=presentationRuntime.createSharedChatUi(module,341);
+  assert.notEqual(one.source,two.source);assert.equal(Object.isFrozen(one.source),true);
+  for(const bad of [0,-1,1.5,4294967296,NaN]){
+    assert.equal(one.scroll("home",bad),false);assert.equal(one.resize(bad),false);assert.equal(one.open(bad),false);
+    assert.equal(one.apply(bad),-1);assert.equal(one.cancel(bad),false);assert.equal(one.defaults(bad),false);
+  }
+  assert.equal(one.scroll("__proto__",7),false);assert.equal(one.drag(Infinity,0,7),false);assert.equal(one.drag(0,1000001,7),false);
+  assert.equal(one.editFilter(9,true,7),false);assert.equal(one.editFilter(0,1,7),false);
+  assert.equal(one.editAll("true",7),false);assert.equal(one.editTransparent(1,7),false);
+  assert.equal(one.observe(1000001),false);assert.equal(one.restore(1024),false);assert.equal(calls,0);
+  for(const mask of [-1,1024,0.5])assert.throws(()=>presentationRuntime.createSharedChatUi(module,mask),/Invalid chat preference/);
+  assert.equal(constructors,2);one.dispose();two.dispose();assert.equal(frees,2);
+  assert.throws(()=>presentationRuntime.createSharedChatUi({},341),/unavailable/);
+});
+check("presentation chat refuses malformed native apply replies instead of inventing committed settings", () => {
+  let reply=-1;
+  class RawChat { apply(){return reply;} free(){} }
+  const ui=presentationRuntime.createSharedChatUi({chat_ui_abi_version:()=>1,ChatUiBridge:RawChat},341);
+  assert.equal(ui.apply(7),-1);reply=0;assert.equal(ui.apply(7),0);reply=1023;assert.equal(ui.apply(7),1023);
+  for(const bad of [1024,-2,0.5,NaN,true]){reply=bad;assert.throws(()=>ui.apply(7),/Invalid shared chat commit/);}
+  ui.dispose();
+});
+
+check("presentation cash sends only shared layer inputs with exact bigint elapsed and preserves ordered immutable output", () => {
+  let args;
+  const reply={version:1,known:true,direction:2,layers:[{library:"AWeaponL/09",frame:39},{library:"CArmour/00",frame:39},{library:"AWeaponR/09",frame:39}]};
+  const module={cash_preview_abi_version:()=>1,cash_preview_layers:(...values)=>{args=values;return JSON.stringify(reply);}};
+  const result=presentationRuntime.readSharedCashPreview(module,presentationCashInput);
+  assert.deepEqual(args,[1,9,1,0,false,2,150n]);assert.deepEqual(result,reply);
+  assert.equal(Object.isFrozen(result),true);assert.equal(Object.isFrozen(result.layers),true);assert.equal(Object.isFrozen(result.layers[0]),true);
+  module.cash_preview_layers=()=>JSON.stringify({version:1,known:false,direction:2,layers:[]});
+  assert.deepEqual(presentationRuntime.readSharedCashPreview(module,presentationCashInput),{version:1,known:false,direction:2,layers:[]});
+});
+check("presentation cash rejects malformed complete or unknown documents library aliases duplicates and oversized layers", () => {
+  let reply;const good={version:1,known:true,direction:2,layers:[{library:"CArmour/00",frame:39}]};
+  const module={cash_preview_abi_version:()=>1,cash_preview_layers:()=>JSON.stringify(reply)};
+  for(const bad of [null,[],{...good,extra:true},{...good,version:2},{...good,known:1},{...good,direction:3},
+    {...good,layers:[]},{...good,known:false},{...good,layers:Array(4).fill(good.layers[0])},
+    {...good,layers:[good.layers[0],good.layers[0]]},
+    ...["CArmour/000","CArmour/32768","CArmour/../00","Monster/00","/CArmour/00"].map(library=>({...good,layers:[{library,frame:39}]})),
+    ...[-1,65536,0.5].map(frame=>({...good,layers:[{library:"CArmour/00",frame}]})),
+    {...good,layers:[{library:"CArmour/00",frame:39,extra:1}]}]){
+    reply=bad;assert.equal(presentationRuntime.readSharedCashPreview(module,presentationCashInput),null);
+  }
+  module.cash_preview_layers=()=>"{";assert.equal(presentationRuntime.readSharedCashPreview(module,presentationCashInput),null);
+  module.cash_preview_layers=()=>"x".repeat(2049);assert.equal(presentationRuntime.readSharedCashPreview(module,presentationCashInput),null);
+});
+check("presentation cash invalid real-domain inputs and unsupported ABI never invoke layer policy", () => {
+  let calls=0;const module={cash_preview_abi_version:()=>1,cash_preview_layers:()=>{calls++;return "{}";}};
+  for(const delta of [{shape:-1},{shape:32768},{itemType:256},{requiredGender:-1},{armourShape:-32769},{armourShape:32768},
+    {female:1},{direction:0},{direction:9},{elapsedMs:-1},{elapsedMs:Number.MAX_SAFE_INTEGER+1},{elapsedMs:1.5}]){
+    assert.equal(presentationRuntime.readSharedCashPreview(module,{...presentationCashInput,...delta}),null);
+  }
+  assert.equal(presentationRuntime.readSharedCashPreview({...module,cash_preview_abi_version:()=>0},presentationCashInput),null);
+  assert.equal(presentationRuntime.readSharedCashPreview({},presentationCashInput),null);assert.equal(calls,0);
+});
+check("presentation cash turning delegates only to local shared turn and never invokes layers or gameplay callbacks", () => {
+  const calls=[];let output=1;
+  const module={cash_preview_abi_version:()=>1,cash_preview_turn:(direction,right)=>{calls.push([direction,right]);return output;},
+    cash_preview_layers:()=>{throw Error("turn must not create layers");},sendRaw:()=>{throw Error("no wire");},
+    buy:()=>{throw Error("no purchase");},equip:()=>{throw Error("no equipment");}};
+  assert.equal(presentationRuntime.turnSharedCashPreview(module,8,true),1);assert.deepEqual(calls,[[8,true]]);
+  output=8;assert.equal(presentationRuntime.turnSharedCashPreview(module,1,false),8);assert.deepEqual(calls.at(-1),[1,false]);
+  for(const bad of [0,9,1.5,NaN]){output=bad;assert.equal(presentationRuntime.turnSharedCashPreview(module,6,true),null);}
+  const before=calls.length;assert.equal(presentationRuntime.turnSharedCashPreview(module,0,true),null);
+  assert.equal(presentationRuntime.turnSharedCashPreview(module,6,1),null);
+  assert.equal(presentationRuntime.turnSharedCashPreview({...module,cash_preview_abi_version:()=>0},6,true),null);assert.equal(calls.length,before);
+  const syntax=ts.createSourceFile("client-presentation-runtime.ts",readFileSync(new URL("../lib/client-presentation-runtime.ts",import.meta.url),"utf8"),ts.ScriptTarget.Latest,true);
+  const fn=syntax.statements.find(node=>ts.isFunctionDeclaration(node)&&node.name?.text==="turnSharedCashPreview");assert.ok(fn?.body);
+  const moduleCalls=[];function walk(node){if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&ts.isIdentifier(node.expression.expression)&&node.expression.expression.text==="module")moduleCalls.push(node.expression.name.text);ts.forEachChild(node,walk);}walk(fn.body);
+  assert.deepEqual(moduleCalls,["cash_preview_abi_version","cash_preview_turn"]);
+});
+
+check("presentation repair forwards fourteen exact Rust fields raw signed stats rental and live fields without pricing", () => {
+  let args;const quote={repairPrice:188,displayedTotal:18.80000114440918,totalPrice:18,affordable:false};
+  const module={npc_repair_quote_abi_version:()=>1,npc_repair_quote:(...values)=>{args=values;return JSON.stringify({version:1,known:true,quote});}};
+  const result=presentationRuntime.readSharedNpcRepairQuote(module,presentationRepairInput);
+  assert.equal(args.length,14);assert.deepEqual(args.slice(0,9),[41n,41n,77,77,1000,1000,2,250,1000]);
+  assert.ok(args[9] instanceof Int32Array);assert.deepEqual(Array.from(args[9]),[5,-3]);
+  assert.deepEqual(args.slice(10),[false,0.1,false,18]);assert.deepEqual(result,quote);assert.equal(Object.isFrozen(result),true);
+  const rented=structuredClone(presentationRepairInput);rented.tooltipSource.userItem.rental_information={};rented.special=true;
+  presentationRuntime.readSharedNpcRepairQuote(module,rented);assert.equal(args[10],true);assert.equal(args[12],true);
+  const zeroUid=structuredClone(presentationRepairInput);zeroUid.uniqueId=0;zeroUid.tooltipSource.userItem.unique_id=0;
+  presentationRuntime.readSharedNpcRepairQuote(module,zeroUid);assert.equal(args[0],0n);assert.equal(args[1],0n);
+});
+check("presentation repair unsafe identity missing source fields and invalid live fields stay unknown without Rust calls", () => {
+  let calls=0;const module={npc_repair_quote_abi_version:()=>1,npc_repair_quote:()=>{calls++;return "{}";}};
+  const bad=[];
+  for(const delta of [{uniqueId:Number.MAX_SAFE_INTEGER+1},{uniqueId:-1},{count:0},{count:65536},{currentDura:undefined},
+    {maxDura:undefined},{currentDura:65536},{gold:4294967296},{rate:-1},{rate:Infinity},{rate:Number.MAX_VALUE},{special:1},{tooltipSource:null}])bad.push({...presentationRepairInput,...delta});
+  for(const path of [["info","price"],["info","durability"],["info","item_index"],["userItem","unique_id"],
+    ["userItem","item_index"],["userItem","added_stats"],["userItem","rental_information"]]){
+    const item=structuredClone(presentationRepairInput);delete item.tooltipSource[path[0]][path[1]];bad.push(item);
+  }
+  const mismatch=structuredClone(presentationRepairInput);mismatch.tooltipSource.userItem.unique_id=42;bad.push(mismatch);
+  const wrongIndex=structuredClone(presentationRepairInput);wrongIndex.tooltipSource.userItem.item_index=78;bad.push(wrongIndex);
+  const statsAlias=structuredClone(presentationRepairInput);statsAlias.tooltipSource.userItem.added_stats=[{stat:5,value:1,alias:true}];bad.push(statsAlias);
+  const statsUnsafe=structuredClone(presentationRepairInput);statsUnsafe.tooltipSource.userItem.added_stats=[{stat:5,value:2147483648}];bad.push(statsUnsafe);
+  const statsBudget=structuredClone(presentationRepairInput);statsBudget.tooltipSource.userItem.added_stats=Array(257).fill({stat:5,value:1});bad.push(statsBudget);
+  for(const item of bad)assert.equal(presentationRuntime.readSharedNpcRepairQuote(module,item),null);
+  assert.equal(presentationRuntime.readSharedNpcRepairQuote({},presentationRepairInput),null);assert.equal(calls,0);
+});
+check("presentation repair preserves opaque Rust float affordability instead of computing a JS gold or rounding gate", () => {
+  // Deliberately chosen opaque mock outcomes prove forwarding only. These values
+  // are not claimed to be a real Rust price or authority to send a repair action.
+  let answer={repairPrice:188,displayedTotal:18.80000114440918,totalPrice:18,affordable:true};
+  const module={npc_repair_quote_abi_version:()=>1,npc_repair_quote:()=>JSON.stringify({version:1,known:true,quote:answer})};
+  assert.equal(presentationRuntime.readSharedNpcRepairQuote(module,presentationRepairInput).affordable,true);
+  answer={...answer,affordable:false};assert.equal(presentationRuntime.readSharedNpcRepairQuote(module,{...presentationRepairInput,gold:999999}).affordable,false);
+  const syntax=ts.createSourceFile("client-presentation-runtime.ts",readFileSync(new URL("../lib/client-presentation-runtime.ts",import.meta.url),"utf8"),ts.ScriptTarget.Latest,true);
+  const fn=syntax.statements.find(node=>ts.isFunctionDeclaration(node)&&node.name?.text==="readSharedNpcRepairQuote");assert.ok(fn?.body);
+  const pricingOperators=[],roundingCalls=[];
+  function walk(node){if(ts.isBinaryExpression(node)&&[ts.SyntaxKind.AsteriskToken,ts.SyntaxKind.SlashToken].includes(node.operatorToken.kind))pricingOperators.push(node.getText(syntax));
+    if(ts.isCallExpression(node)&&ts.isPropertyAccessExpression(node.expression)&&["floor","ceil","round","reduce"].includes(node.expression.name.text))roundingCalls.push(node.expression.name.text);ts.forEachChild(node,walk);}walk(fn.body);
+  assert.deepEqual(pricingOperators,[]);assert.deepEqual(roundingCalls,[]);
+});
+check("presentation repair unknown malformed exceptional or nonfinite output never grants a fabricated quote", () => {
+  const good={version:1,known:true,quote:{repairPrice:188,displayedTotal:18.80000114440918,totalPrice:18,affordable:false}};
+  let answer;const module={npc_repair_quote_abi_version:()=>1,npc_repair_quote:()=>JSON.stringify(answer)};
+  for(const bad of [{version:1,known:false,quote:null},null,[],{...good,extra:1},{...good,version:2},{...good,known:1},
+    {...good,quote:{...good.quote,extra:1}},...[-1,1.5,4294967296].map(totalPrice=>({...good,quote:{...good.quote,totalPrice}})),
+    {...good,quote:{...good.quote,displayedTotal:-1}},{...good,quote:{...good.quote,displayedTotal:Infinity}},
+    {...good,quote:{...good.quote,displayedTotal:4294967552}},{...good,quote:{...good.quote,affordable:1}}]){
+    answer=bad;assert.equal(presentationRuntime.readSharedNpcRepairQuote(module,presentationRepairInput),null);
+  }
+  module.npc_repair_quote=()=>"{";assert.equal(presentationRuntime.readSharedNpcRepairQuote(module,presentationRepairInput),null);
+  module.npc_repair_quote=()=>"x".repeat(1025);assert.equal(presentationRuntime.readSharedNpcRepairQuote(module,presentationRepairInput),null);
+  module.npc_repair_quote=()=>{throw Error("mock ABI failure");};assert.equal(presentationRuntime.readSharedNpcRepairQuote(module,presentationRepairInput),null);
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

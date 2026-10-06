@@ -68,7 +68,7 @@ export function selectThinPublicEntry(relativePath, isDirectory, { runtimeVersio
   const [root, second] = segments;
   if (root === "client-core") {
     return isDirectory
-      ? segments.length === 1 || (second === coreVersion && [...coreFiles].some((file) => file.startsWith(`${normalized}/`)))
+      ? segments.length === 1 || ([...coreFiles].some((file) => file.startsWith(`${normalized}/`)))
       : coreFiles.has(normalized);
   }
   if (root === "bevy-runtime-releases") {

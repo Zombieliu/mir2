@@ -561,15 +561,15 @@ test("actual Core sourceFingerprint includes optimizer bytes and retains LF norm
   const source = fs.readFileSync(new URL("./build-client-core.mjs", import.meta.url), "utf8");
   const start = source.indexOf("function sourceFingerprint() {"), end = source.indexOf("\nfunction run(", start);
   assert(start >= 0 && end > start); const declaration = source.slice(start, end);
-  assert.equal((declaration.match(/import\.meta\.url/g) ?? []).length, 2);
+  assert.equal((declaration.match(/import\.meta\.url/g) ?? []).length, 3);
   // Only this complete function runs, against an exact virtual source tree.
   const executable = declaration.replaceAll("import.meta.url", "builderUrl");
   const projectRoot = path.resolve("virtual-core-fingerprint"), webRoot = path.join(projectRoot, "apps", "web"), crateRoot = path.join(projectRoot, "apps", "game-client", "platform-web"), coreRoot = path.join(projectRoot, "apps", "game-client", "client-core");
-  const builderFile = path.join(webRoot, "scripts", "build-client-core.mjs"), optimizerFile = path.join(webRoot, "scripts", "lib", "renderer-wasm-opt.mjs");
+  const builderFile = path.join(webRoot, "scripts", "build-client-core.mjs"), optimizerFile = path.join(webRoot, "scripts", "lib", "renderer-wasm-opt.mjs"), releaseHelperFile = path.join(webRoot, "scripts", "lib", "client-core-release-files.mjs");
   const data = new Map([
     [path.join(crateRoot, "Cargo.toml"), "platform crate\n"], [path.join(crateRoot, "Cargo.lock"), "locked\n"],
     [path.join(crateRoot, "rust-toolchain.toml"), "pinned toolchain\n"], [path.join(coreRoot, "Cargo.toml"), "core crate\n"],
-    [builderFile, "builder bytes\n"], [optimizerFile, "optimizer bytes\n"],
+    [builderFile, "builder bytes\n"], [optimizerFile, "optimizer bytes\n"], [releaseHelperFile, "release helper bytes\n"],
     [path.join(coreRoot, "src", "z.rs"), "z\n"], [path.join(coreRoot, "src", "a.rs"), "a\n"],
     [path.join(coreRoot, "src", "nested", "b.rs"), "b\n"],
     [path.join(crateRoot, "src", "z.rs"), "web z\n"], [path.join(crateRoot, "src", "a.rs"), "web a\n"],
@@ -589,4 +589,7 @@ test("actual Core sourceFingerprint includes optimizer bytes and retains LF norm
   assert.equal(invoke(), baseline); // Existing LF-normalized byte recipe.
   data.set(optimizerFile, "optimizer changed\r\n"); assert.notEqual(invoke(), baseline);
   assert.equal(JSON.parse(hashInput).filter(row => row.name === "apps/web/scripts/lib/renderer-wasm-opt.mjs").length, 1);
+  data.set(optimizerFile, "optimizer bytes\r\n"); assert.equal(invoke(), baseline);
+  data.set(releaseHelperFile, "release helper changed\r\n"); assert.notEqual(invoke(), baseline);
+  assert.equal(JSON.parse(hashInput).filter(row => row.name === "apps/web/scripts/lib/client-core-release-files.mjs").length, 1);
 });

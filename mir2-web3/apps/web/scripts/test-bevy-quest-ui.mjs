@@ -756,7 +756,7 @@ test("actual Page queued movement preserves replacement intent and retires stale
     const sends = [], marker = {}, ref = current => ({ current });
     const route = { queued, lifetime, action: { mapIndex: 39 } };
     const deps = {
-      queuedMoveIntentRef: ref(queued), questRouteRunRef: ref(route), pendingPickupRef: ref(null),
+      queuedMoveIntentRef: ref(queued), questRouteRunRef: ref(route), mapImageRouteRef: ref(null), pendingPickupRef: ref(null),
       questAttackHandoffRef: ref(null), questMapAuthorityRef: ref({ ...questIdentity, mapIndex: 39 }),
       movementPlanRef: ref(marker), worldRef: ref({ entities: [], groundDrops: [], mapTransfers: [], mapFileName: "0" }),
       questWindowOpenRef: ref(false), runtimeRef: ref({}), bevyQuestGenerationRef: ref(7), questWorldBlockedRef: ref(false),
@@ -837,6 +837,153 @@ test("actual Page queued movement preserves replacement intent and retires stale
     if (["observeLifetime", "observeMap", "observeStaleReplacement"].includes(scenario) || scenario.startsWith("predictionLifetime:"))
       assert.equal(deps.questRouteRunRef.current, null, scenario + " retires old route authority");
   }
+});
+
+test("actual Page map-image press and route ownership retire only the captured source and preserve sent movement", () => {
+  const source = readFileSync(new URL("../app/page.tsx", import.meta.url), "utf8");
+  const ast = ts.createSourceFile("page.tsx", source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+  const runtimeNames = ["currentMapImageSource", "pressMapImage", "cancelMapImageRoute", "mapImageRouteCurrent", "mapImageRouteMovement"];
+  const inspectedNames = [...runtimeNames, "beginMapImageRoute", "refreshMapImageRoute", "queueCrystalMoveIntent", "observeQuestWorldActions"];
+  const declarations = new Map();
+  function visit(node) {
+    if (ts.isFunctionDeclaration(node) && node.name && inspectedNames.includes(node.name.text))
+      declarations.set(node.name.text, node.getText(ast));
+    ts.forEachChild(node, visit);
+  }
+  visit(ast);
+  assert.equal(declarations.size, inspectedNames.length);
+  const code = ts.transpileModule(runtimeNames.map(name => declarations.get(name)).join("\n"),
+    { compilerOptions: { target: ts.ScriptTarget.ES2022 } }).outputText;
+  const ref = current => ({ current });
+  const identity = { connectionGeneration: 2, sessionGeneration: 3, sceneRevision: 4, playerObjectId: 1000, mapFileName: "0" };
+  const core = { searchMapRoute: () => ({ status: "unreachable" }) };
+  const blockedGeometry = { width: 32, height: 32, mapFileName: "0", blockedBits: new Uint8Array(128) };
+  const world = { connected: true, originalMapRegion: { mapFileName: "0.map", mapWidth: 32, mapHeight: 32 },
+    miniMapIndex: 2, bigMapIndex: 3 };
+  let blocked = false, occupied = [{ x: 2, y: 0 }], retired = 0, refreshes = 0;
+  const deps = {
+    mapImageRouteRef: ref(null), mapImageSourceRef: ref(null), queuedMoveIntentRef: ref(null), movementPlanRef: ref({ old: true }),
+    pendingSelfMoveRef: ref(null), document: { visibilityState: "visible", hasFocus: () => true },
+    queuedDirectionStepRef: ref(null), queuedDirectionStepBacklogRef: ref([]), movementBlockedStepsRef: ref([]),
+    worldRef: ref(world), socketRef: ref({ readyState: 1 }), questCoreRuntimeRef: ref(core), runtimeRef: ref(null),
+    questMapAuthorityRef: ref({}), screenRef: ref("game"), equipmentHostSuspendReasonRef: ref(null), questRuntimeLifetimeRef: ref(7),
+    currentQuestWorldIdentity: () => identity, currentQuestMapIndex: () => 39, currentAuthoritativeSelf: () => ({ dead: false }),
+    normalizeQuestMapFileName: value => String(value).replace(/\\/g, "/").split("/").pop().replace(/\.map$/i, "").toLowerCase(),
+    sameQuestWorldIdentity: (left, right) => JSON.stringify(left) === JSON.stringify(right), WebSocket: { OPEN: 1 },
+    mapRouteInputBlocked: () => blocked,
+    retireQuestWorldActions: () => { retired++; api.cancelMapImageRoute(); },
+    cancelLockedMonsterAttack() {}, stopOnchainMining() {},
+    cancelMapImageRoute() {}, questRouteOccupancy: () => occupied, questRouteRejectedEdges: () => [],
+    crystalSelfMovementProfile: () => ({ distance: 3 }), nextQuestRouteStep: routeExecution.nextQuestRouteStep,
+    recentMovementBlockedSteps: () => [], movementStepBlockedByRecentCorrection: () => false,
+    refreshMapImageRoute: () => { refreshes++; },
+  };
+  const api = new Function(...Object.keys(deps), code + ";return {" + runtimeNames.join(",") + "};")(...Object.values(deps));
+  deps.cancelMapImageRoute = api.cancelMapImageRoute;
+  const sourceNow = api.currentMapImageSource();
+  assert.ok(sourceNow && deps.runtimeRef.current === null && typeof deps.questCoreRuntimeRef.current.searchMapRoute === "function",
+    "DOM-only Page source works without a renderer when shared Core supplies map routing");
+  assert.equal(api.currentMapImageSource(), sourceNow, "an unchanged socket Core renderer and map preserve the same source lease");
+  const oldQueued = { kind: "target", targetX: 8, targetY: 9 };
+  const oldRoute = { source: sourceNow, queued: oldQueued, planning: false, geometry: blockedGeometry,
+    plan: { origin: { x: 0, y: 0 }, destination: { x: 3, y: 0 }, radius: 0,
+      steps: [{ x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }] } };
+  const pendingSent = { sentAt: 5, to: { x: 1, y: 0 } };
+  deps.mapImageRouteRef.current = oldRoute;
+  deps.queuedMoveIntentRef.current = oldQueued;
+  deps.pendingSelfMoveRef.current = pendingSent;
+
+  api.pressMapImage({ ...sourceNow, owner: {} });
+  assert.equal(retired, 0, "a press from the retired physical map source cannot cancel the current route");
+  assert.equal(deps.mapImageRouteRef.current, oldRoute);
+  assert.equal(api.mapImageRouteCurrent(oldRoute), true);
+
+  api.pressMapImage(sourceNow);
+  assert.equal(retired, 1, "a real current-source press retires map routing synchronously");
+  assert.equal(deps.mapImageRouteRef.current, null);
+  assert.equal(deps.queuedMoveIntentRef.current, null);
+  assert.deepEqual(deps.pendingSelfMoveRef.current, pendingSent, "retiring unsent route work cannot retract an already-sent movement");
+
+  const route = { ...oldRoute, queued: null };
+  deps.mapImageRouteRef.current = route;
+  const run = api.mapImageRouteMovement(route, { x: 0, y: 0 }, "run", 20);
+  assert.deepEqual(run, { point: { x: 1, y: 0 }, direction: "right", mode: "walk" },
+    "the shared route executor falls back to a validated one-tile walk when a run intermediate tile is occupied");
+  occupied = [];
+  route.geometry.blockedBits[4] = 1;
+  const replan = api.mapImageRouteMovement(route, { x: 0, y: 0 }, "run", 20);
+  assert.equal(replan, null);
+  assert.equal(refreshes, 1, "blocked route steps replan through the shared route path");
+  blocked = true;
+  assert.equal(api.mapImageRouteCurrent(route), false, "modal or focus gates retire route authority at the final check");
+  blocked = false;
+  world.originalMapRegion = { ...world.originalMapRegion, mapWidth: 33 };
+  const changedMapSource = api.currentMapImageSource();
+  assert.ok(changedMapSource && changedMapSource !== sourceNow, "a map dimension change creates a new route source");
+  assert.equal(api.mapImageRouteCurrent(route), false, "a changed map cannot keep the old route");
+  deps.questCoreRuntimeRef.current = { searchMapRoute: () => ({ status: "unreachable" }) };
+  const changedCoreSource = api.currentMapImageSource();
+  assert.ok(changedCoreSource && changedCoreSource !== changedMapSource, "a Core replacement creates a new route source");
+  assert.equal(api.mapImageRouteCurrent(route), false, "a replaced Core cannot keep the old route");
+  deps.runtimeRef.current = { generation: 8 };
+  const replacementSource = api.currentMapImageSource();
+  assert.ok(replacementSource && replacementSource !== changedCoreSource, "a renderer appearance creates a fresh map source lease");
+  assert.equal(api.mapImageRouteCurrent(route), false, "the changed renderer instance cannot reuse the old route");
+  const replacementQueued = { kind: "target", targetX: 7, targetY: 6 };
+  const replacementRoute = { ...route, source: replacementSource, queued: replacementQueued };
+  deps.mapImageRouteRef.current = replacementRoute;
+  deps.queuedMoveIntentRef.current = replacementQueued;
+  api.pressMapImage(sourceNow);
+  assert.equal(retired, 1, "a callback retained by the old renderer cannot retire its successor route");
+  assert.equal(deps.mapImageRouteRef.current, replacementRoute);
+  api.pressMapImage(replacementSource);
+  assert.equal(retired, 2, "a press captured from the replacement renderer retires its own route");
+  assert.equal(deps.mapImageRouteRef.current, null);
+  assert.equal(deps.queuedMoveIntentRef.current, null);
+  assert.deepEqual(deps.pendingSelfMoveRef.current, pendingSent);
+  deps.questCoreRuntimeRef.current = {};
+  assert.equal(api.currentMapImageSource(), null, "a Core without shared map routing disables map route input");
+
+  const currentMapSource = source.slice(source.indexOf("function currentMapImageSource()"), source.indexOf("function mapRouteInputBlocked()"));
+  const coreRuntimeSource = readFileSync(new URL("../lib/client-core-runtime.ts", import.meta.url), "utf8");
+  const presentationRuntimeSource = readFileSync(new URL("../lib/client-presentation-runtime.ts", import.meta.url), "utf8");
+  const refreshMapRoute = declarations.get("refreshMapImageRoute");
+  const beginMapRoute = declarations.get("beginMapImageRoute");
+  const pressMapRoute = declarations.get("pressMapImage");
+  const observeMapRoute = declarations.get("observeQuestWorldActions");
+  assert.match(currentMapSource, /before\.socket === socket && before\.core === core && before\.renderer === renderer/);
+  assert.match(currentMapSource, /before\.rendererGeneration === questRuntimeLifetimeRef\.current/);
+  assert.match(currentMapSource, /typeof core\.searchMapRoute !== "function"/);
+  assert.match(currentMapSource, /sameQuestWorldIdentity\(before\.identity, identity\)/);
+  assert.match(currentMapSource, /old\.mapIndex === mapIndex && old\.mapWidth === region\.mapWidth && old\.mapHeight === region\.mapHeight/);
+  assert.match(refreshMapRoute, /captured\.core\.searchMapRoute\(/,
+    "the accepted route is searched through the shared Core facade");
+  assert.match(coreRuntimeSource, /searchMapRoute\(input: MapRouteInput\) \{ return searchSharedMapRoute\(presentation, input\); \}/,
+    "the Core facade delegates routing to the separately loaded presentation policy");
+  assert.match(presentationRuntimeSource, /getMir2MapRouteVersion\?\.\(\) !== 1 \|\| !module\.getMir2MapRoutePlan/,
+    "the presentation adapter retains the Rust Map ABI check");
+  assert.match(beginMapRoute, /intent\.source !== source/);
+  assert.match(beginMapRoute, /asset\.path !== intent\.imageSrc/);
+  assert.match(beginMapRoute, /return refreshMapImageRoute\(route\)/,
+    "begin accepts the captured source and delegates planning without directly queuing movement");
+  assert.doesNotMatch(beginMapRoute, /queueCrystalMoveIntent\(/,
+    "begin does not queue a target before collision geometry and route planning complete");
+  assert.match(refreshMapRoute, /route\.queued = \{ kind: "target"/);
+  assert.match(refreshMapRoute, /mapImageRouteCurrent\(route\)/);
+  assert.match(refreshMapRoute, /if \(!edges \|\| !self\)/);
+  assert.match(refreshMapRoute, /result\.status !== "ok"/);
+  assert.match(refreshMapRoute, /if \(!result\.steps\.length\)/);
+  assert.match(refreshMapRoute, /queueCrystalMoveIntent\(route\.queued\)/,
+    "refresh queues only after current-source guards, edge construction, and a complete route plan");
+  assert.ok(refreshMapRoute.indexOf("result.status !== \"ok\"") < refreshMapRoute.indexOf("queueCrystalMoveIntent(route.queued)"));
+  assert.ok(refreshMapRoute.indexOf("if (!result.steps.length)") < refreshMapRoute.indexOf("queueCrystalMoveIntent(route.queued)"));
+  assert.match(pressMapRoute, /currentMapImageSource\(\) !== source/);
+  assert.match(observeMapRoute, /if \(mapRoute && !mapImageRouteCurrent\(mapRoute\)\) cancelMapImageRoute\(\)/,
+    "projection-time observation retires routes after source replacement");
+  assert.match(source, /window\.addEventListener\("blur", retire\)/);
+  assert.match(source, /document\.addEventListener\("visibilitychange", retire\)/);
+  assert.match(source, /send\(\{ type: alignedPending\.mode === "run" \? "run" : "walk", direction: alignedPending\.direction \}\)/,
+    "map-route movement reaches only the ordinary directional Walk/Run wire");
 });
 
 test("packaged CJK font matches its pinned upstream bytes and retains its license", () => {

@@ -2,14 +2,14 @@
 
 ## 当前执行：Web 追平 Windows 新 goal（2026-10-06）
 
-Windows固定基线f72与原Web审计f1cf保留317条有界源码记录：103 shared、188 legacy、18 open、8共同限制；不是完整验收分母，不报整体百分比。F01完整注册、改密与SafeKey七条代码候选已接入共享Rust规则；Rust四目标39次执行、有限Node171/171/0 skip及严格非增量TSC通过。Source12新Core WASM252,167 B/JS24,393 B、Windows开发EXE、三renderer、Next严格TypeScript＋13静态页及Thin独立包均已实际构建；包7,299文件/372,506,754 B/0链接，原360 MiB cap余4,980,606 B。独立源码、输入及静态产物复核零确认P0/P1。44条warning与上一包的内容和重复次数相同，运行语义及Pet/Gate远端覆盖仍未验。实际服务/HTTP/UI/账号与玩家流程、移动真机验收均未进行，goal active。见 [行为矩阵](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix03.md)、[认证组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/auth-source12-combined-build-result01.json) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+Windows固定基线f72与原Web审计f1cf保留317条有界源码记录：103 shared、197 legacy、9 open、8共同限制；不是完整验收分母，不报整体百分比。Source18补齐大/小地图图像寻路、聊天拖动/4-7-11行/settings draft和Cash预览/转向九条源码候选，规则与控制器共用Rust，Web绘制仍为DOM。选定Rust跨组212次通过、3次ignored仅按有效输入限定承接；11个有限Node脚本218/218、0失败/0跳过及严格非增量TSC通过。Core/PUI两个轻量包、Windows开发EXE、三renderer、Next严格TypeScript＋13静态页及Thin均已实际构建；独立包7,301文件/776目录（含根）/372,680,891 B/0链接，原360 MiB cap余4,806,469 B。源码、输入及静态产物独立复核零确认P0/P1。44条warning内容与重复次数保持，231份JSON仅在source/output逐对字节一致条件下承接历史token结论，未新跑parser/lexer。真实服务/HTTP/UI/WASM实例/账号、玩家流程及移动真机均未验，goal active。见 [行为矩阵04](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix04.md)、[Source18组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/presentation-source18-combined-build-result01.json) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
 
-当前认证闭环：注册/改密/SafeKey七条源码候选、共享Rust与有限检查、新Core/Native/renderer/Next/Thin静态构建。后续顺序：
+当前Source18代码与静态构建已闭合：认证七条、地图/聊天/Cash九条源码候选；剩余九条已确认差距继续推进，未审范围保留。后续顺序：
 
 1. F01：注册全字段、修改密码及SafeKey代码/构建候选已完成；成功码6/8、失败焦点与精确banned expiry、物理socket单用lane及epoch屏障已修，真实账号与UI仍未验。认证前沿模型主导审查保持。
-2. F02：大/小地图图像寻路、世界钓鱼点击；F04：历史拖动、4/7/11行及聊天设置draft。
-3. F05：兼容tooltip和Bag→Belt；F09：Pearl、普通/特殊维修真实目标与报价、Cash sprite预览；F11：Ranking Inspect入口与共同服务限制分开。
-4. W0继续补注册→控件→host→wire链及未知范围；25只是记录集剩余已确认缺口。W6按用户界面暂缓保留，不请求例行确认。
+2. F02大/小地图图像寻路、F04历史拖动/4-7-11行/settings draft和F09 Cash预览/转向九条已通过源码、有限检查及当前五阶段构建；DOM呈现和玩家行为待验。
+3. 下一轮先补F09普通/特殊维修：使用真实Bag UID、NPC rate与共享报价，贯通当前owner和邮件锁校验；已提取的纯报价不等于服务接线完成。随后F05轻量共享tooltip、Bag→Belt，F02钓鱼、F09 Pearl与F11 Ranking Inspect。
+4. W0继续核对控件→host→wire和未知范围；九条只是317记录集剩余已确认源码缺口，不能用作整体分母。W6按用户界面暂缓保留，不请求例行确认。
 
 ## Progress74：本地 NPC 金币购买 owner 路由已通过有限检查（2026-10-06）
 

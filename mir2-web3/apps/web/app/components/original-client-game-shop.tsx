@@ -3,6 +3,10 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 import { ORIGINAL_UI } from "../../lib/original-ui";
+import { originalAssetPath } from "../../lib/asset-url";
+import { loadOriginalSceneSpriteLibrary, type OriginalSceneSpriteLibraryMeta } from "../../lib/original-scene-sprite-meta";
+import { composeCashPreviewFrames, readCashPreviewLayerDocument, type CashPreviewLayerDocument } from "../../lib/cash-preview-rendering";
+import { handleSceneAssetImageError, handleSceneAssetImageLoad } from "./original-client-scene-rendering";
 import { cashGameShopConfirmationCurrent, cashGameShopQuantityLimit, makeCashGameShopConfirmation,
   type CashGameShopConfirmation, type CashGameShopEntry, type CashGameShopSource } from "../../lib/cash-game-shop-ui";
 import { originalItemIconPath } from "./original-client-inventory-utils";
@@ -44,6 +48,9 @@ export function GameShopWindow({
   purchasePending = false,
   onConfirmPurchase,
   onReadItemTooltip,
+  previewSourceKey = null,
+  onReadPreviewLayers,
+  onTurnPreview,
   onClose,
 }: {
   t: TranslateFn;
@@ -56,6 +63,10 @@ export function GameShopWindow({
   purchasePending?: boolean;
   onConfirmPurchase?: (confirmation: CashGameShopConfirmation) => void;
   onReadItemTooltip?: (item: CashGameShopEntry) => CrystalTooltipDocument | null;
+  /** Identity of the current owner, selected catalogue and verified equipment source. */
+  previewSourceKey?: string | null;
+  onReadPreviewLayers?: (item: CashGameShopEntry, direction: number, elapsedMs: number) => CashPreviewLayerDocument | null;
+  onTurnPreview?: (direction: number, right: boolean) => number | null;
   onClose: () => void;
 }) {
   const [sectionFilter, setSectionFilter] = useState<GameShopSectionFilter>("all");
@@ -65,7 +76,8 @@ export function GameShopWindow({
   const [page, setPage] = useState(0);
   const [paymentType, setPaymentType] = useState<GameShopPaymentType>("gold");
   const [quantities, setQuantities] = useState<Record<number, number>>({});
-  const [preview, setPreview] = useState<{ item: CrystalGameShopEntry; cellLeft: number } | null>(null);
+  const [preview, setPreview] = useState<{ item: CrystalGameShopEntry; cellLeft: number; epoch: number } | null>(null);
+  const previewEpochRef = useRef(0);
   const [activeTooltip, setActiveTooltip] = useState<CrystalGameShopEntry | null>(null);
   const [confirmation, setConfirmation] = useState<CashGameShopConfirmation | null>(null);
   const submittedConfirmation = useRef<CashGameShopConfirmation | null>(null);
@@ -127,6 +139,7 @@ export function GameShopWindow({
     }
   }, [page, pageCount]);
   useEffect(() => { setActiveTooltip(null); }, [source?.entries, sectionFilter, classFilter, categoryFilter, currentPage, search]);
+  useEffect(() => { setPreview(null); }, [sectionFilter, classFilter, categoryFilter, search]);
 
   const setQuantity = (gameShopIndex: number, nextQuantity: number) => {
     const item = catalog.find((candidate) => candidate.game_shop_index === gameShopIndex);
@@ -137,7 +150,8 @@ export function GameShopWindow({
   };
 
   const showPreview = (item: CrystalGameShopEntry, cellLeft: number) => {
-    setPreview({ item, cellLeft });
+    if (!source?.entries.includes(item) || previewEpochRef.current >= Number.MAX_SAFE_INTEGER) return;
+    setPreview({ item, cellLeft, epoch: ++previewEpochRef.current });
   };
   const requestConfirmation = (item: CrystalGameShopEntry) => {
     if (purchasePending || !onConfirmPurchase) return;
@@ -234,7 +248,11 @@ export function GameShopWindow({
       </div> : null}
       {preview ? (
         <GameShopViewer
+          key={`${preview.item.game_shop_index}:${preview.epoch}`}
           item={preview.item}
+          previewSourceKey={previewSourceKey}
+          onReadPreviewLayers={onReadPreviewLayers}
+          onTurnPreview={onTurnPreview}
           left={preview.cellLeft < 350 ? 416 : 151}
           top={115}
           t={t}
@@ -371,62 +389,114 @@ function GameShopCell({
 }
 
 function GameShopViewer({
-  item,
-  left,
-  top,
-  t,
-  onClose,
+  item, left, top, t, previewSourceKey, onReadPreviewLayers, onTurnPreview, onClose,
 }: {
   item: CrystalGameShopEntry;
   left: number;
   top: number;
   t: TranslateFn;
+  previewSourceKey: string | null;
+  onReadPreviewLayers?: (item: CashGameShopEntry, direction: number, elapsedMs: number) => CashPreviewLayerDocument | null;
+  onTurnPreview?: (direction: number, right: boolean) => number | null;
   onClose: () => void;
 }) {
   const [direction, setDirection] = useState(6);
-  const info = gameShopItemInfo(item);
-
+  const [elapsedMs, setElapsedMs] = useState(0);
+  const [loaded, setLoaded] = useState<{ key: string; libraries: ReadonlyMap<string, OriginalSceneSpriteLibraryMeta> } | null>(null);
+  useEffect(() => {
+    const tick = () => {
+      if (document.visibilityState === "visible") setElapsedMs(Math.floor(performance.now()));
+    };
+    tick();
+    const timer = window.setInterval(tick, 150);
+    document.addEventListener("visibilitychange", tick);
+    return () => { window.clearInterval(timer); document.removeEventListener("visibilitychange", tick); };
+  }, []);
+  const layerDocument = useMemo(() => {
+    if (!previewSourceKey || !onReadPreviewLayers) return null;
+    try { return readCashPreviewLayerDocument(onReadPreviewLayers(item, direction, elapsedMs), direction); }
+    catch { return null; }
+  }, [item, direction, elapsedMs, previewSourceKey, onReadPreviewLayers]);
+  const libraries = Array.from(new Set(layerDocument?.layers.map(layer => layer.library) ?? [])).sort();
+  const metadataKey = previewSourceKey && layerDocument?.known ? JSON.stringify([previewSourceKey, libraries]) : "";
+  useEffect(() => {
+    if (!metadataKey) return;
+    let current = true;
+    const names: string[] = JSON.parse(metadataKey)[1];
+    void Promise.all(names.map(async library => {
+      try { return [library, await loadOriginalSceneSpriteLibrary(library)] as const; }
+      catch { return null; }
+    })).then(results => {
+      if (!current) return;
+      const next = new Map<string, OriginalSceneSpriteLibraryMeta>();
+      for (const result of results) if (result) next.set(result[0], result[1]);
+      setLoaded({ key: metadataKey, libraries: next });
+    });
+    return () => { current = false; };
+  }, [metadataKey]);
+  const drawing = composeCashPreviewFrames(layerDocument,
+    loaded && loaded.key === metadataKey ? loaded.libraries : new Map<string, OriginalSceneSpriteLibraryMeta>());
+  const [imageStates, setImageStates] = useState<ReadonlyMap<string, "ready" | "failed">>(new Map());
+  const imageKey = (layer: typeof drawing.layers[number]) => JSON.stringify([metadataKey, layer.library, layer.frame,
+    layer.path, layer.width, layer.height]);
+  const liveImagesRef = useRef({ active: true, metadataKey, keys: new Set<string>() });
+  liveImagesRef.current.metadataKey = metadataKey;
+  liveImagesRef.current.keys = new Set(drawing.layers.map(imageKey));
+  useEffect(() => { liveImagesRef.current.active = true; return () => { liveImagesRef.current.active = false; }; }, []);
+  function recordPreviewImage(key: string, state: "ready" | "failed") {
+    const live = liveImagesRef.current;
+    if (!live.active || live.metadataKey !== metadataKey || !live.keys.has(key)) return;
+    setImageStates(before => {
+      if (before.get(key) === state) return before;
+      const next = new Map(before.size < 256 ? before : [...before].filter(([entry]) => live.keys.has(entry)));
+      next.set(key, state); return next;
+    });
+  }
+  const previewComplete = drawing.complete && drawing.layers.every(layer => imageStates.get(imageKey(layer)) === "ready");
+  const turn = (right: boolean) => {
+    if (!previewSourceKey || !onTurnPreview) return;
+    try {
+      const next = onTurnPreview(direction, right);
+      if (typeof next === "number" && Number.isInteger(next) && next >= 1 && next <= 8) setDirection(next);
+    } catch { /* Unsupported shared facade keeps the current local direction. */ }
+  };
   return (
-    <div
-      className="game-shop-viewer"
-      style={{ left, top }}
-      data-item-name={item.item_name}
-      data-game-shop-index={item.game_shop_index}
-      data-direction={direction}
-    >
-      <button type="button" className="game-shop-viewer-close" onClick={onClose} aria-label={t("ui.close")}>
-        x
-      </button>
-      <div className="game-shop-viewer-stage">
-        {info ? (
-          <img
-            className="game-shop-viewer-item-icon"
-            src={originalItemIconPath(info.image)}
-            alt=""
-            draggable={false}
-          />
-        ) : null}
-        <div className="game-shop-viewer-figure" data-direction={direction}>
-          <div className="game-shop-viewer-head" />
-          <div className="game-shop-viewer-body" />
-          <div className="game-shop-viewer-item-glow" />
-        </div>
+    <div className="game-shop-viewer" style={{ left, top, width: 260, height: 308,
+      border: 0, background: "transparent" }} role="dialog" aria-label={t("ui.preview", [], "Preview")}
+      data-item-name={item.item_name} data-game-shop-index={item.game_shop_index}
+      data-direction={direction} data-preview-complete={previewComplete}>
+      <img src={originalAssetPath("/original-ui/Title/785.png")} alt="" draggable={false}
+        style={{ position: "absolute", inset: 0, width: 260, height: 308, pointerEvents: "none", imageRendering: "pixelated" }} />
+      <div style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }} aria-hidden="true">
+        {drawing.layers.map((layer, index) => (
+          <img key={imageKey(layer)} src={originalAssetPath(layer.path)} alt="" draggable={false}
+            data-mir2-original-src={originalAssetPath(layer.path)} onError={event => {
+              recordPreviewImage(imageKey(layer), "failed"); handleSceneAssetImageError(event);
+            }}
+            onLoad={event => {
+              handleSceneAssetImageLoad(event);
+               const matches = event.currentTarget.naturalWidth === layer.width
+                 && event.currentTarget.naturalHeight === layer.height;
+               if (!matches) event.currentTarget.style.visibility = "hidden";
+               recordPreviewImage(imageKey(layer), matches ? "ready" : "failed");
+            }} style={{ position: "absolute", left: layer.left, top: layer.top,
+               width: layer.width, height: layer.height, zIndex: index, imageRendering: "pixelated",
+               visibility: imageStates.get(imageKey(layer)) === "ready" ? "visible" : "hidden" }} />
+        ))}
       </div>
-      <div className="game-shop-viewer-name">{truncateGameShopName(item.item_name)}</div>
+      {!previewComplete ? <div role="status" style={{ position: "absolute", left: 12, top: 244, width: 236,
+        fontSize: 11, color: "#fff4c8", textAlign: "center", pointerEvents: "none" }}>
+        {t("ui.gameShopPreviewUnknown", [], "Preview frames are unavailable.")}
+      </div> : null}
+      <button type="button" className="game-shop-viewer-close" onClick={onClose} aria-label={t("ui.close")}>x</button>
       <div className="game-shop-viewer-controls">
         <div className="game-shop-viewer-left">
-          <SpriteButton
-            sprite={ORIGINAL_UI.gameShop.previousButton}
-            label={t("ui.previous", [], "Previous")}
-            onClick={() => setDirection((current) => (current === 1 ? 8 : current - 1))}
-          />
+          <SpriteButton sprite={ORIGINAL_UI.gameShop.previousButton} label={t("ui.previous", [], "Previous")}
+            disabled={!previewSourceKey || !onTurnPreview} onClick={() => turn(false)} />
         </div>
         <div className="game-shop-viewer-right">
-          <SpriteButton
-            sprite={ORIGINAL_UI.gameShop.nextButton}
-            label={t("ui.next", [], "Next")}
-            onClick={() => setDirection((current) => (current === 8 ? 1 : current + 1))}
-          />
+          <SpriteButton sprite={ORIGINAL_UI.gameShop.nextButton} label={t("ui.next", [], "Next")}
+            disabled={!previewSourceKey || !onTurnPreview} onClick={() => turn(true)} />
         </div>
       </div>
     </div>

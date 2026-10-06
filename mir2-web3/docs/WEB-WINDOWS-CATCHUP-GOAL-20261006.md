@@ -15,26 +15,26 @@
 
 | ID | 工作项 | 代码 | 构建 | 实际玩家验证 |
 | --- | --- | --- | --- | --- |
-| W0 | 固定Windows功能清单，逐项核对共享实现、旧入口及差距 | 317条有界记录与9类更正；46个基线blob实际匹配；仍有18条已确认代码差距和未审范围，分母不冻结 | 源码分类与构建证据分开 | 全部待验证 |
-| W1 | 支持的桌面路径默认请求共享任务/HUD/角色/技能/邮件/仓库/普通商店与背包，保留显式关闭和 readiness 降级 | 默认请求接线完成；Node 22/22、严格 TSC 通过 | 已纳入 Source09 候选包；Native09 / renderer07 / Next03 / Thin05 build-only 闭合，行为待 W6 | 待验证 |
-| W2 | 九类任务动作接入共同 controller / Web host，不新增客户端世界权威 | 九类均有代码候选；Rust Source02 27 distinct 测试和 4 项编译/检查闭合，见本轮状态 | 已纳入 Source09 当前候选包；Native09 / renderer07 / Next03 / Thin05 build-only 闭合，行为待 W6 | 待验证 |
+| W0 | 固定Windows功能清单，逐项核对共享实现、旧入口及差距 | 317条有界记录与9类更正；46个基线blob实际匹配；仍有9条已确认代码差距和未审范围，分母不冻结 | 源码分类与构建证据分开 | 全部待验证 |
+| W1 | 支持的桌面路径默认请求共享任务/HUD/角色/技能/邮件/仓库/普通商店与背包，保留显式关闭和 readiness 降级 | 默认请求接线完成；Node 22/22、严格 TSC 通过 | Source09历史构建保留；当前Source18五阶段build-only通过；Native09 / renderer07 / Next03 / Thin05 build-only 闭合，行为待 W6 | 待验证 |
+| W2 | 九类任务动作接入共同 controller / Web host，不新增客户端世界权威 | 九类均有代码候选；Rust Source02 27 distinct 测试和 4 项编译/检查闭合，见本轮状态 | Source09历史构建保留；当前Source18五阶段build-only通过；Native09 / renderer07 / Next03 / Thin05 build-only 闭合，行为待 W6 | 待验证 |
 | W3 | 常规 WebGPU / WebGL2 入口选择共享表现，固定首屏 canvas / ABI / package / 单次启动关系 | Node 155/155、严格 TSC、Rust 启动/画布 10/10 通过；可选依赖修复回归通过，三套 WASM 编译检查退出 0 | 已纳入 Source09 当前候选包；renderer07 / Next03 / Thin05 build-only 闭合，运行时与行为待 W6 | 待验证 |
-| W4 | 对齐功能、输入、资源及生命周期 | 原七项W4b和配偶候选保留；认证七条代码/构建与171项有限检查完成；地图、聊天、物品和商店差距继续排队 | 认证新增Web代码纳入NextBuild01 / ThinBuild02 | 待验证 |
-| W5 | 重建源码对应Core/renderer/Next/独立包并保持预算 | Rust Source12、有限171/171与严格TSC已通过；新Core/Native/三renderer及NextBuild01严格TypeScript＋13静态页 | Auth ThinBuild02 7,299文件、372,506,754 B、0链接；原360 MiB cap余4,980,606 B；44 warning保留，运行语义未验 | 待验证 |
+| W4 | 对齐功能、输入、资源及生命周期 | 原七项W4b、配偶与认证候选保留；地图/聊天/Cash九条新增源码候选已通过有限检查；修理、tooltip、Bag→Belt、钓鱼、Pearl与Ranking继续 | Source18当前五阶段静态构建通过 | 待验证 |
+| W5 | 重建源码对应Core/renderer/Next/独立包并保持预算 | Source18限定选定Rust212次通过/3ignored、Node218/218及严格非增量TSC；两个轻量包/Native/三renderer/Next/Thin实际构建通过 | 当前Thin01 7,301文件、776目录含根、372,680,891 B、0链接；原360 MiB cap余4,806,469 B；44 warning保留，运行语义未验 | 待验证 |
 | W6 | 登录→任务/战斗→保存→重登及平台间行为比较 | 不以夹具替代 | 不以编译替代 | 用户暂缓界面操作 |
 
 W0 审计闭合前不报告整体百分比。此表是执行阶段，不是功能数量或完成率分母。F11 原 44 项行为分母尚未闭合，不冻结。最终功能矩阵将独立列出当前实现、有限检查、当前构建及实际流程证据；两端源码都有功能不能直接勾选“已可玩”。
 
 
-## 当前状态快照（2026-10-06）
+## 当前状态快照（2026-10-07）
 
-Windows固定基线f72与原Web审计f1cf保留317条有界源码记录：103 shared、188 legacy、18 open、8共同限制；不是完整验收分母，不报整体百分比。F01完整注册、改密与SafeKey七条代码候选已接入共享Rust规则；Rust四目标39次执行、有限Node171/171/0 skip及严格非增量TSC通过。Source12新Core WASM252,167 B/JS24,393 B、Windows开发EXE、三renderer、Next严格TypeScript＋13静态页及Thin独立包均已实际构建；包7,299文件/372,506,754 B/0链接，原360 MiB cap余4,980,606 B。独立源码、输入及静态产物复核零确认P0/P1。44条warning与上一包的内容和重复次数相同，运行语义及Pet/Gate远端覆盖仍未验。实际服务/HTTP/UI/账号与玩家流程、移动真机验收均未进行，goal active。见 [行为矩阵](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix03.md)、[认证组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/auth-source12-combined-build-result01.json) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
+Windows固定基线f72与原Web审计f1cf保留317条有界源码记录：103 shared、197 legacy、9 open、8共同限制；不是完整验收分母，不报整体百分比。Source18补齐大/小地图图像寻路、聊天拖动/4-7-11行/settings draft和Cash预览/转向九条源码候选，规则与控制器共用Rust，Web绘制仍为DOM。选定Rust跨组212次通过、3次ignored仅按有效输入限定承接；11个有限Node脚本218/218、0失败/0跳过及严格非增量TSC通过。Core/PUI两个轻量包、Windows开发EXE、三renderer、Next严格TypeScript＋13静态页及Thin均已实际构建；独立包7,301文件/776目录（含根）/372,680,891 B/0链接，原360 MiB cap余4,806,469 B。源码、输入及静态产物独立复核零确认P0/P1。44条warning内容与重复次数保持，231份JSON仅在source/output逐对字节一致条件下承接历史token结论，未新跑parser/lexer。真实服务/HTTP/UI/WASM实例/账号、玩家流程及移动真机均未验，goal active。见 [行为矩阵04](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/feature-matrix04.md)、[Source18组合结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/presentation-source18-combined-build-result01.json) 与 [QA索引](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/README.md)。
 
-配偶Mail仅开启具名本地草稿，Whisper仅填入Native精确文本`:)`；名字/map、物理owner、scene/map、Bonds epoch/open及完整关系投影在捕获与执行时复核，开Mail后再复核，不自动发送。配偶Online/Offline展示与Whisper可用性共用收到的map。当前四文件独立review02零确认P0/P1；这是源码审查，玩家流程仍待验。
+历史配偶批次：Mail仅开启具名本地草稿，Whisper仅填入Native精确文本`:)`；名字/map、物理owner、scene/map、Bonds epoch/open及完整关系投影在捕获与执行时复核，开Mail后再复核，不自动发送。配偶Online/Offline展示与Whisper可用性共用收到的map。当前四文件独立review02零确认P0/P1；这是源码审查，玩家流程仍待验。
 
-Thin05原样携带Core版本`c4952ff102f1fe1a35cc48b456e68adb33ede425f657d75fa25e6b811e6f979e`及renderer`bevy-e31f4cb651a7b4ef`；全包文件hash核对通过，3,366公共文件与Thin03字节相同，79 atlas PNG相同。231 JSON的原token保持证据只在当前source/output逐对完全相同的条件下限定承接，未新跑parser/lexer。44 warning内容和重复次数与Thin04相同，28源码pin复核相同；编译config仅distDir/distDirRoot变化，不能据此豁免RSC/构建分支/native加载的真实运行检查。
+历史Thin05原样携带Core版本`c4952ff102f1fe1a35cc48b456e68adb33ede425f657d75fa25e6b811e6f979e`及renderer`bevy-e31f4cb651a7b4ef`；全包文件hash核对通过，3,366公共文件与Thin03字节相同，79 atlas PNG相同。231 JSON的原token保持证据只在当前source/output逐对完全相同的条件下限定承接，未新跑parser/lexer。44 warning内容和重复次数与Thin04相同，28源码pin复核相同；编译config仅distDir/distDirRoot变化，不能据此豁免RSC/构建分支/native加载的真实运行检查。
 
-F01七条已完成源码、有限检查与当前组合构建：[Source12认证结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/auth-source12-combined-build-result01.json)。Native/Web共用注册、改密与SafeKey规则；Web表单仍为DOM候选，未宣称共同painter。Core252,167 B保持原cap，余9,977 B。下一轮优先F02地图图像寻路/钓鱼及F04聊天拖动/4-7-11行/settings draft，其后F05/F09/F11。真实UI/WASM实例/账号、完整玩家和移动验收仍未进行；历史失败、旧Source及旧包回执全部保留，F11原44项分母未恢复/未冻结。
+历史Source12：F01七条已完成当时源码、有限检查与组合构建：[Source12认证结果](generated/player-qa/client-core-20260930/web-windows-catchup-20261006/auth-source12-combined-build-result01.json)。Native/Web共用注册、改密与SafeKey规则；Web表单仍为DOM候选，未宣称共同painter。Core252,167 B保持原cap，余9,977 B。Source18已补齐地图、聊天和Cash九条源码候选；当前下一轮为真实修理接线与物品tooltip/Bag→Belt，钓鱼、Pearl与Ranking继续排队。真实UI/WASM实例/账号、完整玩家和移动验收仍未进行；历史失败、旧Source及旧包回执全部保留，F11原44项分母未恢复/未冻结。
 
 ## 固定源码功能清单：11 组初查
 

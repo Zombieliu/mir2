@@ -1,4 +1,6 @@
 import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
+import type { ChatUiControls, CashPreviewLayerDocument } from "../../lib/client-core-runtime";
+import type { MapImageRouteSource, MapImageRouteIntent } from "../../lib/client-map-input";
 import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import type { Mir2Language } from "../../lib/localization";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
@@ -250,6 +252,11 @@ export type OriginalClientShellProps = {
   accountId: string;
   password: string;
   chatMessage: string;
+  chatUi?: ChatUiControls;
+  mapImageRouteSource?: MapImageRouteSource | null;
+  onMapImageRoute?: (intent: MapImageRouteIntent) => void;
+  onMapImageRoutePress?: (source: MapImageRouteSource | null) => void;
+  onMapRouteModalChange?: (blocked: boolean) => void;
   loginBusy: boolean;
   loginError: string | null;
   loginAuth: LoginAuthControls;
@@ -322,6 +329,9 @@ export type OriginalClientShellProps = {
   cashGameShopPending?: boolean;
   onConfirmCashGameShopPurchase?: (confirmation: CashGameShopConfirmation) => void;
   onReadCashGameShopItemTooltip?: (item: CashGameShopEntry) => CrystalTooltipDocument | null;
+  cashPreviewSourceKey?: string | null;
+  onReadCashPreviewLayers?: (item: CashGameShopEntry, direction: number, elapsedMs: number) => CashPreviewLayerDocument | null;
+  onTurnCashPreview?: (direction: number, right: boolean) => number | null;
   onGameShopVisibilityChange?: (open: boolean) => void;
   onHeroShortcut?: (key: string, ctrl: boolean, alt: boolean, shift: boolean, repeat: boolean) => boolean;
   parityUiBlocksGameplay?: () => boolean;

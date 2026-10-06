@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import type { ChatUiControls } from "../../lib/client-core-runtime";
 
 import {
   CrystalChatHistory,
@@ -146,12 +147,30 @@ export function formatChatMessageForFilter(filter: ChatFilterKey, value: string)
   return `${prefix}${message}`;
 }
 
+
+type CrystalChatDragLease = Readonly<{source:object;epoch:number;pointerId:number;grabY:number;capture:HTMLDivElement}>;
+export function crystalChatLocalY(clientY:number,rect:Readonly<{top:number;width:number;height:number}>,height:number):number|null {
+  if (![clientY,rect.top,rect.width,rect.height,height].every(Number.isFinite)
+    ||rect.width<=0||rect.height<=0||height<=0
+    ||Math.abs(rect.width/632-rect.height/height)>0.002) return null;
+  return (clientY-rect.top)*height/rect.height;
+}
+export function crystalChatDragCurrent(lease:CrystalChatDragLease|null,source:object,epoch:number,pointerId:number,visible:boolean,settingsOpen:boolean):boolean {
+  return Boolean(lease&&lease.source===source&&lease.epoch===epoch&&lease.pointerId===pointerId&&visible&&!settingsOpen);
+}
+const CHAT_MASK_CHANNELS:ChatOptionFilterKey[]=["normal","whisper","shout","system","lover","mentor","group","guild"];
+export function crystalChatHiddenFilters(mask:number):ChatOptionFilterKey[] {
+  return CHAT_MASK_CHANNELS.filter((_key,index)=>(mask&(1<<index))!==0);
+}
+
 export type ChatFrameProps = {
   t: TranslateFn;
   runtimeMessage: string;
   logs: DisplayLogLineLike[];
   chatMessage: string;
   hints: string[];
+  chatUi?: ChatUiControls;
+  onInputHoldChange?: (held:boolean)=>void;
   activeFilter: ChatFilterKey;
   hiddenFilters: ChatOptionFilterKey[];
   expanded: boolean;
@@ -169,6 +188,7 @@ export function ChatFrame({
   t,
   logs,
   chatMessage,
+  chatUi,onInputHoldChange,
   activeFilter,
   hiddenFilters,
   expanded,
@@ -181,20 +201,86 @@ export function ChatFrame({
   onToggleAllHiddenFilters,
   onToggleTransparent,
 }: ChatFrameProps) {
-  const lines = playerFacingChatLines(logs, hiddenFilters);
+  const shared=chatUi?.document;
+  const appliedFilters=shared?crystalChatHiddenFilters(shared.appliedMask):hiddenFilters;
+  const lines = playerFacingChatLines(logs,appliedFilters,!shared);
   const activePrefix = chatPrefixForFilter(activeFilter);
-  const hiddenFilterSet = new Set(hiddenFilters);
+  const settingsMask=shared?.draftMask??shared?.appliedMask;
+  const displayHiddenFilters=settingsMask===undefined?hiddenFilters:crystalChatHiddenFilters(settingsMask);
+  const hiddenFilterSet = new Set(displayHiddenFilters);
   const [scrollOffset, setScrollOffset] = useState(0);
   const previousMaxScrollOffsetRef = useRef(0);
   const previousActiveFilterRef = useRef(activeFilter);
   const previousExpandedRef = useRef(expanded);
-  const visibleLineCount = 4;
+  const visibleLineCount = shared?.lineCount??4;
   const maxScrollOffset = Math.max(lines.length - visibleLineCount, 0);
-  const visibleLines = lines.slice(scrollOffset, scrollOffset + visibleLineCount);
-  const knobTop = maxScrollOffset === 0 ? 16 : 16 + Math.round((scrollOffset / maxScrollOffset) * 28);
+  const liveScroll=shared?.index??scrollOffset;
+  const visibleLines = lines.slice(liveScroll,liveScroll+visibleLineCount);
+  const knobTop = shared?.knobTop??(maxScrollOffset === 0 ? 16 : 16 + Math.round((scrollOffset / maxScrollOffset) * 28));
   const chatTextBoxVisible = chatMessage.length > 0;
-
+  const settingsVisible=shared?.open??showSettings;
+  const backgroundTransparent=shared?Boolean(shared.appliedMask&512):transparent;
+  const draftTransparent=settingsMask===undefined?transparent:Boolean(settingsMask&512);
+  const frameRef=useRef<HTMLElement>(null),settingsRef=useRef<HTMLDivElement>(null);
+  const dragRef=useRef<CrystalChatDragLease|null>(null);
+  const liveRef=useRef({chatUi,expanded,settingsVisible,onInputHoldChange});
+  liveRef.current={chatUi,expanded,settingsVisible,onInputHoldChange};
+  function endChatDrag() {
+    const held=dragRef.current;dragRef.current=null;
+    if(held){
+      try {if(held.capture.hasPointerCapture(held.pointerId))held.capture.releasePointerCapture(held.pointerId);}catch{}
+      if(!dragRef.current)liveRef.current.onInputHoldChange?.(false);
+    }
+  }
+  function closeChatSettings() {if(chatUi&&shared)chatUi.cancel(shared.epoch);else onCloseSettings();}
+  function scroll(action:"home"|"up"|"down"|"end") {
+    if(chatUi&&shared) {chatUi.scroll(action,shared.epoch);return;}
+    setScrollOffset(current=>action==="home"?0:action==="end"?maxScrollOffset:action==="up"?Math.max(current-1,0):Math.min(current+1,maxScrollOffset));
+  }
+  function chatDragDown(event:ReactPointerEvent<HTMLDivElement>) {
+    if(!chatUi||!shared||shared.open||!expanded||shared.historyCount!==lines.length||event.button!==0||dragRef.current) return;
+    const live=liveRef.current;
+    if(!live.chatUi||live.chatUi.source!==chatUi.source||live.chatUi.document.epoch!==shared.epoch||!live.expanded||live.settingsVisible)return;
+    const rect=frameRef.current?.getBoundingClientRect();
+    const y=rect?crystalChatLocalY(event.clientY,rect,shared.height):null;
+    if(y===null||document.visibilityState!=="visible")return;
+    const lease={source:chatUi.source,epoch:shared.epoch,pointerId:event.pointerId,grabY:y-shared.knobTop,capture:event.currentTarget};
+    try {event.currentTarget.setPointerCapture(event.pointerId);}catch{return;}
+    dragRef.current=lease;onInputHoldChange?.(true);event.preventDefault();event.stopPropagation();
+  }
+  function chatDragMove(event:ReactPointerEvent<HTMLDivElement>) {
+    const live=liveRef.current,ui=live.chatUi,lease=dragRef.current;
+    if(!ui||!crystalChatDragCurrent(lease,ui.source,ui.document.epoch,event.pointerId,
+      live.expanded&&document.visibilityState==="visible",live.settingsVisible)) {if(lease?.pointerId===event.pointerId)endChatDrag();return;}
+    const rect=frameRef.current?.getBoundingClientRect();
+    const y=rect?crystalChatLocalY(event.clientY,rect,ui.document.height):null;
+    if(y===null){endChatDrag();return;}
+    event.preventDefault();event.stopPropagation();ui.drag(y,lease!.grabY,lease!.epoch);
+  }
+  function chatDragEnd(event:ReactPointerEvent<HTMLDivElement>) {
+    if(dragRef.current?.pointerId!==event.pointerId)return;
+    event.preventDefault();event.stopPropagation();endChatDrag();
+    if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
+  }
+  useEffect(()=>{
+    chatUi?.observe(lines.length);
+  },[chatUi?.source,lines.length,shared?.appliedMask,shared?.epoch]);
+  useEffect(()=>{
+    if(dragRef.current&&(!chatUi||dragRef.current.source!==chatUi.source||dragRef.current.epoch!==shared?.epoch||!expanded||settingsVisible))endChatDrag();
+  },[chatUi?.source,shared?.epoch,expanded,settingsVisible]);
+  useEffect(()=>{
+    const clear=()=>endChatDrag(),visibility=()=>{if(document.visibilityState!=="visible")clear();};
+    window.addEventListener("blur",clear);document.addEventListener("visibilitychange",visibility);
+    return()=>{window.removeEventListener("blur",clear);document.removeEventListener("visibilitychange",visibility);clear();};
+  },[]);
+  useEffect(()=>{
+    if(!settingsVisible)return;
+    const previous=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    const panel=settingsRef.current;panel?.querySelector<HTMLButtonElement>("button")?.focus();
+    return()=>{if(previous?.isConnected)previous.focus();};
+  },[settingsVisible,shared?.epoch]);
   useEffect(() => {
+    if(shared)return;
     setScrollOffset((current) => {
       const previousMaxScrollOffset = previousMaxScrollOffsetRef.current;
       const filterChanged = previousActiveFilterRef.current !== activeFilter;
@@ -202,26 +288,29 @@ export function ChatFrame({
       previousMaxScrollOffsetRef.current = maxScrollOffset;
       previousActiveFilterRef.current = activeFilter;
       previousExpandedRef.current = expanded;
-
-      if (filterChanged || expandedChanged || current >= previousMaxScrollOffset) {
-        return maxScrollOffset;
-      }
-
+      if (filterChanged || expandedChanged || current >= previousMaxScrollOffset) return maxScrollOffset;
       return Math.min(current, maxScrollOffset);
     });
-  }, [activeFilter, expanded, maxScrollOffset]);
+  }, [activeFilter, expanded, maxScrollOffset,Boolean(shared)]);
 
   return (
-    <section className={`chat-frame ${expanded ? "" : "collapsed"} ${transparent ? "transparent" : ""}`}>
-      <img className="chat-frame-bg" src={ORIGINAL_UI.game.chatDialog} alt="" draggable={false} />
+    <section ref={frameRef} data-chat-size={shared?.size} data-chat-epoch={shared?.epoch}
+      className={`chat-frame ${expanded ? "" : "collapsed"} ${backgroundTransparent ? "transparent" : ""}`}
+      style={shared?{top:shared.top,height:shared.height}:undefined}>
+      <img className="chat-frame-bg" src={shared?`/original-ui/Prguse/${shared.frameIndex}.png`:ORIGINAL_UI.game.chatDialog} alt="" draggable={false} />
       <div className="chat-scroll-buttons">
-        <SpriteButton sprite={ORIGINAL_UI.game.chatScrollButtons.home} label={t("ui.home")} onClick={() => setScrollOffset(0)} />
-        <SpriteButton sprite={ORIGINAL_UI.game.chatScrollButtons.up} label={t("ui.up")} onClick={() => setScrollOffset((current) => Math.max(current - 1, 0))} />
-        <SpriteButton sprite={ORIGINAL_UI.game.chatScrollButtons.down} label={t("ui.down")} onClick={() => setScrollOffset((current) => Math.min(current + 1, maxScrollOffset))} />
-        <SpriteButton sprite={ORIGINAL_UI.game.chatScrollButtons.end} label={t("ui.end")} onClick={() => setScrollOffset(maxScrollOffset)} />
+        <SpriteButton sprite={ORIGINAL_UI.game.chatScrollButtons.home} label={t("ui.home")} onClick={() => scroll("home")} />
+        <SpriteButton sprite={ORIGINAL_UI.game.chatScrollButtons.up} label={t("ui.up")} onClick={() => scroll("up")} />
+        <SpriteButton sprite={ORIGINAL_UI.game.chatScrollButtons.down} label={t("ui.down")} onClick={() => scroll("down")} />
+        <SpriteButton sprite={ORIGINAL_UI.game.chatScrollButtons.end} label={t("ui.end")} onClick={() => scroll("end")} />
       </div>
-      <img className="chat-count-bar" src={ORIGINAL_UI.game.chatCountBar} alt="" draggable={false} />
-      <div className="chat-position-knob" style={{ top: knobTop }}>
+      <img className="chat-count-bar" src={shared?`/original-ui/Prguse/${shared.countBarIndex}.png`:ORIGINAL_UI.game.chatCountBar} alt="" draggable={false} />
+      <div className="chat-position-knob" style={{top:knobTop,touchAction:"none"}}
+        role={shared?"slider":undefined} tabIndex={shared?0:undefined} aria-label={t("ui.chatHistory",[],"Chat history")}
+        aria-valuemin={0} aria-valuemax={shared?Math.max(shared.historyCount-1,0):undefined} aria-valuenow={shared?.index}
+        onPointerDown={chatDragDown} onPointerMove={chatDragMove} onPointerUp={chatDragEnd} onPointerCancel={chatDragEnd} onLostPointerCapture={chatDragEnd}
+        onKeyDown={event=>{const action=event.key==="Home"?"home":event.key==="End"?"end":event.key==="ArrowUp"?"up":event.key==="ArrowDown"?"down":null;
+          if(action&&shared){event.preventDefault();event.stopPropagation();scroll(action);}}}>
         <img src={ORIGINAL_UI.game.chatScrollButtons.knob.base} alt="" draggable={false} />
       </div>
       <div className={`chat-feed ${expanded ? "" : "hidden"}`}>
@@ -234,7 +323,7 @@ export function ChatFrame({
           });
           return (
             <div
-              key={`chat-line-${activeFilter}-${scrollOffset + index}-${line.text}`}
+              key={`chat-line-${activeFilter}-${liveScroll + index}-${line.text}`}
               className={`chat-feed-line ${line.tone === "system" ? "system" : ""} channel-${line.channel}`}
               style={{ color: line.foreground, backgroundColor: line.background }}
             >
@@ -245,16 +334,20 @@ export function ChatFrame({
           );
         })}
       </div>
-      {showSettings ? (
-        <div className="chat-settings-panel">
+      {settingsVisible ? (
+        <div ref={settingsRef} className="chat-settings-panel" role="dialog" aria-modal="true" aria-label={t("ui.chatSettings",[],"Chat Settings")}
+          onKeyDown={event=>{if(event.key==="Escape"){event.preventDefault();event.stopPropagation();closeChatSettings();}
+            else if(event.key==="Tab"){const buttons=Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"));
+              const first=buttons[0],last=buttons.at(-1);if(event.shiftKey&&document.activeElement===first&&last){event.preventDefault();last.focus();}
+              else if(!event.shiftKey&&document.activeElement===last&&first){event.preventDefault();first.focus();}}}}>
           <div className="chat-settings-title">{t("ui.settings")}</div>
           <OriginalAudioSettingsControls t={t} className="chat-audio-settings" />
           <div className="chat-settings-tabs">
             <button type="button" className="active">
               {t("ui.filter", [], "Filter")}
             </button>
-            <button type="button" onClick={onToggleTransparent} data-chat-transparent={transparent}>
-              {transparent ? t("ui.on", [], "On") : t("ui.off", [], "Off")}
+            <button type="button" onClick={()=>shared&&chatUi?chatUi.editTransparent(!draftTransparent,shared.epoch):onToggleTransparent()} data-chat-transparent={draftTransparent}>
+              {draftTransparent ? t("ui.on", [], "On") : t("ui.off", [], "Off")}
             </button>
           </div>
           <div className="chat-settings-grid">
@@ -262,8 +355,8 @@ export function ChatFrame({
               type="button"
               className="chat-settings-option"
               data-chat-option-filter="all"
-              data-chat-option-hidden={hiddenFilters.length === CHAT_OPTION_FILTER_BUTTONS.length}
-              onClick={onToggleAllHiddenFilters}
+              data-chat-option-hidden={displayHiddenFilters.length === CHAT_OPTION_FILTER_BUTTONS.length}
+              onClick={()=>shared&&chatUi?chatUi.editAll(displayHiddenFilters.length>0,shared.epoch):onToggleAllHiddenFilters()}
             >
               {t("client.Chat_All", [], "All")}
             </button>
@@ -274,20 +367,26 @@ export function ChatFrame({
                 className="chat-settings-option"
                 data-chat-option-filter={key}
                 data-chat-option-hidden={hiddenFilterSet.has(key)}
-                onClick={() => onToggleHiddenFilter(key)}
+                onClick={()=>shared&&chatUi?chatUi.editFilter(CHAT_MASK_CHANNELS.indexOf(key),hiddenFilterSet.has(key),shared.epoch):onToggleHiddenFilter(key)}
               >
                 {t(labelKey, [], fallback)}
               </button>
             ))}
           </div>
           <div className="chat-settings-copy">{`${t("ui.size")}: ${expanded ? t("ui.down") : t("ui.up")}`}</div>
-          <button type="button" className="chat-settings-close" onClick={onCloseSettings}>
+          {shared&&chatUi?<div className="chat-settings-actions">
+            <button type="button" data-chat-settings-action="defaults" onClick={()=>chatUi.defaults(shared.epoch)}>{t("ui.defaults",[],"Defaults")}</button>
+            <button type="button" data-chat-settings-action="cancel" onClick={closeChatSettings}>{t("ui.cancel",[],"Cancel")}</button>
+            <button type="button" data-chat-settings-action="apply" onClick={()=>chatUi.apply(shared.epoch)}>{t("ui.apply",[],"Apply")}</button>
+          </div>:null}
+          <button type="button" className="chat-settings-close" onClick={closeChatSettings}>
             {t("ui.close")}
           </button>
         </div>
       ) : null}
       <input
         className="chat-textbox"
+        style={shared?{top:shared.inputTop}:undefined}
         value={chatMessage}
         data-chat-prefix={activePrefix}
         data-chat-visible={chatTextBoxVisible}
@@ -308,6 +407,7 @@ export type ChatFilterBarProps = {
   t: TranslateFn;
   activeFilter: ChatFilterKey;
   chatExpanded: boolean;
+  chatUi?: ChatUiControls;
   showSettings: boolean;
   onSelectFilter: (filter: ChatFilterKey) => void;
   onRequestTrade: () => void;
@@ -320,6 +420,7 @@ export function ChatFilterBar({
   t,
   activeFilter,
   chatExpanded,
+  chatUi,
   showSettings,
   onSelectFilter,
   onRequestTrade,
@@ -328,7 +429,7 @@ export function ChatFilterBar({
   onToggleReport,
 }: ChatFilterBarProps) {
   return (
-    <section className="chat-filter-bar">
+    <section className="chat-filter-bar" style={chatUi?{top:chatUi.document.controlTop}:undefined}>
       <img className="chat-filter-bg" src={ORIGINAL_UI.game.chatControlBar} alt="" draggable={false} />
       {VISIBLE_CHAT_FILTER_BUTTONS.map(({ key, left, labelKey }) => (
         <div
@@ -563,7 +664,7 @@ export function DuraPanel({ t, visible, equipmentItems, onToggle }: DuraPanelPro
   );
 }
 
-function playerFacingChatLines(logs: DisplayLogLineLike[], hiddenFilters: ChatOptionFilterKey[]) {
+function playerFacingChatLines(logs: DisplayLogLineLike[], hiddenFilters: ChatOptionFilterKey[], emptyPadding=true) {
   const history = new CrystalChatHistory(measureCrystalChatText, {
     FilterNormalChat: hiddenFilters.includes("normal"),
     FilterWhisperChat: hiddenFilters.includes("whisper"),
@@ -586,7 +687,7 @@ function playerFacingChatLines(logs: DisplayLogLineLike[], hiddenFilters: ChatOp
     background: argbToCss(line.BackColour),
   }));
 
-  return lines.length
+  return lines.length || !emptyPadding
     ? lines
     : Array.from({ length: 6 }, () => ({
         text: "",

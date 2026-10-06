@@ -12,28 +12,40 @@ function exactKeys(value, keys, label) {
     throw new Error(label + " has missing or undeclared fields");
   }
 }
-export function verifyClientCoreManifest(manifest) {
-  exactKeys(manifest, ["abiVersion", "version", "sourceSha256", "files"], "Core manifest");
+function verifyBundle(manifest, label) {
+  exactKeys(manifest, ["abiVersion", "version", "sourceSha256", "files"], label + " manifest");
   if (manifest.abiVersion !== 1 || typeof manifest.version !== "string" || !HEX.test(manifest.version) ||
       typeof manifest.sourceSha256 !== "string" || !HEX.test(manifest.sourceSha256)) {
-    throw new Error("Invalid Core ABI/version/source identity");
+    throw new Error("Invalid " + label + " ABI/version/source identity");
   }
-  exactKeys(manifest.files, NAMES, "Core files");
+  exactKeys(manifest.files, NAMES, label + " files");
   const files = {};
   for (const name of NAMES) {
     const entry = manifest.files[name];
-    exactKeys(entry, ["bytes", "sha256"], "Core file " + name);
+    exactKeys(entry, ["bytes", "sha256"], label + " file " + name);
     if (!Number.isSafeInteger(entry.bytes) || entry.bytes <= 0 ||
         typeof entry.sha256 !== "string" || !HEX.test(entry.sha256)) {
-      throw new Error("Invalid Core file size/hash: " + name);
+      throw new Error("Invalid " + label + " file size/hash: " + name);
     }
     if (name.endsWith(".wasm") ? entry.bytes >= 262144 : entry.bytes > 204800) {
-      throw new Error("Core file exceeds its byte budget: " + name);
+      throw new Error(label + " file exceeds its byte budget: " + name);
     }
     files[name] = Object.freeze({ bytes: entry.bytes, sha256: entry.sha256 });
   }
   return Object.freeze({ abiVersion: 1, version: manifest.version,
     sourceSha256: manifest.sourceSha256, files: Object.freeze(files) });
+}
+/** Legacy single-bundle manifests remain readable; newly built releases carry both. */
+export function verifyClientCoreManifest(manifest) {
+  const hasPresentation = !!manifest && Object.hasOwn(manifest, "presentation");
+  exactKeys(manifest, ["abiVersion", "version", "sourceSha256", "files", ...(hasPresentation ? ["presentation"] : [])], "Core manifest");
+  const core = verifyBundle({ abiVersion: manifest.abiVersion, version: manifest.version,
+    sourceSha256: manifest.sourceSha256, files: manifest.files }, "Core");
+  if (!hasPresentation) return core;
+  const presentation = verifyBundle(manifest.presentation, "Presentation");
+  if (presentation.sourceSha256 !== core.sourceSha256) throw new Error("Shared client source changed: Presentation source differs from Core");
+  if (presentation.version === core.version) throw new Error("Core and Presentation must have distinct immutable versions");
+  return Object.freeze({ ...core, presentation });
 }
 export function assertCompiledClientCoreManifest(requiredServerFiles, expectedManifest) {
   const serialized = requiredServerFiles?.config?.env?.[CLIENT_CORE_BUILD_MANIFEST_ENV];
@@ -79,20 +91,28 @@ export function readClientCoreRelease({ webRoot, manifest, requireExactClosure =
   const normalized = verifyClientCoreManifest(manifest ?? JSON.parse(regularBytes(
     path.join(root, "lib", "generated", "client_core_runtime.json")).toString("utf8")));
   const parent = directory(path.join(root, "public", "client-core"));
-  const versionDirectory = directory(path.join(parent, normalized.version));
-  if (requireExactClosure) { entries(parent, [normalized.version]); entries(versionDirectory, NAMES); }
-  const artifacts = [];
-  const files = NAMES.map((name) => {
-    const localPath = path.join(versionDirectory, name);
-    const bytes = regularBytes(localPath);
-    const expected = normalized.files[name];
-    if (bytes.length !== expected.bytes || hash(bytes) !== expected.sha256) {
-      throw new Error("Core artifact size/hash mismatch: " + name);
-    }
-    artifacts.push(bytes);
-    return Object.freeze({ name, relativePath: "client-core/" + normalized.version + "/" + name,
-      localPath, bytes: bytes.length, sha256: expected.sha256 });
+  const bundles = [normalized, ...(normalized.presentation ? [normalized.presentation] : [])];
+  const versionDirectories = bundles.map((bundle) => directory(path.join(parent, bundle.version)));
+  if (requireExactClosure) {
+    entries(parent, bundles.map((bundle) => bundle.version));
+    for (const versionDirectory of versionDirectories) entries(versionDirectory, NAMES);
+  }
+  const files = bundles.flatMap((bundle, index) => {
+    const artifacts = [];
+    const leaves = NAMES.map((name) => {
+      const localPath = path.join(versionDirectories[index], name);
+      const bytes = regularBytes(localPath);
+      const expected = bundle.files[name];
+      if (bytes.length !== expected.bytes || hash(bytes) !== expected.sha256) {
+        throw new Error("client-core artifact mismatch (size/hash mismatch): " + name);
+      }
+      artifacts.push(bytes);
+      return Object.freeze({ name, relativePath: "client-core/" + bundle.version + "/" + name,
+        localPath, bytes: bytes.length, sha256: expected.sha256 });
+    });
+    if (hash(Buffer.concat(artifacts)) !== bundle.version) throw new Error("Core bundle hash differs from immutable version URL");
+    return leaves;
   });
-  if (hash(Buffer.concat(artifacts)) !== normalized.version) throw new Error("Core bundle hash differs from immutable version");
-  return Object.freeze({ manifest: normalized, versionDirectory, files: Object.freeze(files) });
+  return Object.freeze({ manifest: normalized, versionDirectory: versionDirectories[0],
+    versionDirectories: Object.freeze(versionDirectories), files: Object.freeze(files) });
 }

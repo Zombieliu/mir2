@@ -9,6 +9,8 @@ import { fileURLToPath } from "node:url";
 import { optimizeClientCoreReleaseWasm, resolveClientCoreWasmOptConfig, assertClientCoreReleaseBudget,
   assertClientCoreStagingRoot, formatRendererOptimizationError } from "./lib/renderer-wasm-opt.mjs";
 
+import { readClientCoreRelease, verifyClientCoreManifest } from "./lib/client-core-release-files.mjs";
+
 const webRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const crateRoot = path.resolve(webRoot, "../game-client/platform-web");
 const targetRoot = path.resolve(process.env.MIR2_CLIENT_CORE_TARGET_DIR || path.join(crateRoot, "target"));
@@ -22,7 +24,8 @@ function sourceFingerprint() {
   const projectRoot = path.resolve(webRoot, "../..");
   const sources = [path.join(crateRoot, "Cargo.toml"), path.join(crateRoot, "Cargo.lock"),
     path.join(crateRoot, "rust-toolchain.toml"), path.join(coreRoot, "Cargo.toml"),
-    fileURLToPath(import.meta.url), fileURLToPath(new URL("./lib/renderer-wasm-opt.mjs", import.meta.url))];
+    fileURLToPath(import.meta.url), fileURLToPath(new URL("./lib/renderer-wasm-opt.mjs", import.meta.url)),
+    fileURLToPath(new URL("./lib/client-core-release-files.mjs", import.meta.url))];
   function collect(directory) {
     for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
       const filename = path.join(directory, entry.name);
@@ -46,26 +49,84 @@ function run(command, args) {
 }
 
 function verify() {
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-  if (manifest.abiVersion !== 1 || !/^[a-f0-9]{64}$/.test(manifest.version)) {
-    throw new Error("Invalid client-core manifest; run npm run client-core:build");
+  const manifest = verifyClientCoreManifest(JSON.parse(fs.readFileSync(manifestPath, "utf8")));
+  if (!manifest.presentation) throw new Error("Client-core manifest requires its Presentation bundle; run npm run client-core:build");
+  const sourceSha256 = sourceFingerprint();
+  if (manifest.sourceSha256 !== sourceSha256 || manifest.presentation.sourceSha256 !== sourceSha256) {
+    throw new Error("Shared client source changed; rebuild and commit its small WASM packages before publishing");
   }
-  if (manifest.sourceSha256 !== sourceFingerprint()) {
-    throw new Error("Shared client source changed; rebuild and commit its small WASM package before publishing");
+  const release = readClientCoreRelease({ webRoot, manifest });
+  for (let index = 0; index < release.files.length; index += files.length) {
+    assertClientCoreReleaseBudget({ wasmBytes: fs.readFileSync(release.files[index + 1].localPath),
+      jsBytes: fs.readFileSync(release.files[index].localPath) });
   }
-  const artifacts = [];
-  for (const name of files) {
-    const bytes = fs.readFileSync(path.join(publicRoot, manifest.version, name));
-    if (hash(bytes) !== manifest.files[name].sha256 || bytes.length !== manifest.files[name].bytes) {
-      throw new Error(`client-core artifact mismatch: ${name}`);
+  console.log("[client-core] verified " + manifest.version + "; wasm=" + manifest.files[files[1]].bytes +
+    " bytes; presentation=" + manifest.presentation.version + "; wasm=" + manifest.presentation.files[files[1]].bytes + " bytes");
+}
+
+function buildBundle(label, features, toolConfig, bindgen) {
+  run(process.env.CARGO_BIN || "cargo", ["+1.95.0", "build", "--locked", "--release",
+    "--target", "wasm32-unknown-unknown", "--target-dir", targetRoot, ...features]);
+  const temporaryRoot = path.resolve(os.tmpdir());
+  const staging = fs.mkdtempSync(path.join(temporaryRoot, "mir2-client-core-"));
+  let failure = null, bytes;
+  try {
+    assertClientCoreStagingRoot(staging, temporaryRoot);
+    run(bindgen, [path.join(targetRoot, "wasm32-unknown-unknown/release/mir2_platform_web.wasm"),
+      "--target", "web", "--out-dir", staging, "--out-name", "mir2_platform_web",
+      // Release downloads do not need the debugging function-name section.
+      "--remove-name-section"]);
+    const optimization = optimizeClientCoreReleaseWasm({
+      wasmPath: path.join(staging, files[1]), jsPath: path.join(staging, files[0]),
+      stagingRoot: staging, toolConfig,
+    });
+    console.log("[client-core:" + label + "] wasm-opt=" + JSON.stringify(optimization));
+    bytes = files.map((name) => fs.readFileSync(path.join(staging, name)));
+    assertClientCoreReleaseBudget({ wasmBytes: bytes[1], jsBytes: bytes[0] });
+  } catch (error) { failure = error; }
+  finally {
+    try {
+      // Recheck the direct mkdtemp name and every ordinary ancestor after tools.
+      const owned = assertClientCoreStagingRoot(staging, temporaryRoot);
+      fs.rmSync(owned, { recursive: true, force: false });
+    } catch (error) {
+      const cleanupError = new Error("Client-core staging cleanup refused or failed; residual may remain: " + staging, { cause: error });
+      failure = failure ? new AggregateError([failure, cleanupError], "Client-core build and staging cleanup failed") : cleanupError;
     }
-    artifacts.push(bytes);
   }
-  if (hash(Buffer.concat(artifacts)) !== manifest.version) {
-    throw new Error("client-core content does not match its immutable version URL");
+  if (failure) throw failure;
+  return { version: hash(Buffer.concat(bytes)), bytes };
+}
+
+function ordinaryDirectory(candidate) {
+  const resolved = path.resolve(candidate);
+  let cursor = path.parse(resolved).root;
+  for (const part of ["", ...path.relative(cursor, resolved).split(path.sep).filter(Boolean)]) {
+    cursor = part ? path.join(cursor, part) : cursor;
+    const stat = fs.lstatSync(cursor);
+    if (stat.isSymbolicLink() || !stat.isDirectory()) throw new Error("Client-core publication directory is linked or irregular");
   }
-  assertClientCoreReleaseBudget({ wasmBytes: artifacts[1], jsBytes: artifacts[0] });
-  console.log(`[client-core] verified ${manifest.version}; wasm=${manifest.files[files[1]].bytes} bytes`);
+}
+function publishBundle(bundle) {
+  fs.mkdirSync(publicRoot, { recursive: true });
+  ordinaryDirectory(publicRoot);
+  const destination = path.join(publicRoot, bundle.version);
+  fs.mkdirSync(destination, { recursive: true });
+  ordinaryDirectory(destination);
+  files.forEach((name, index) => {
+    const output = path.join(destination, name);
+    if (fs.existsSync(output)) {
+      const stat = fs.lstatSync(output);
+      if (stat.isSymbolicLink() || !stat.isFile() || !fs.readFileSync(output).equals(bundle.bytes[index])) {
+        throw new Error("Client-core immutable publication collision: " + name);
+      }
+    } else fs.writeFileSync(output, bundle.bytes[index], { flag: "wx" });
+  });
+}
+function describeBundle(bundle, sourceSha256) {
+  return { abiVersion: 1, version: bundle.version, sourceSha256,
+    files: Object.fromEntries(files.map((name, index) => [name,
+      { bytes: bundle.bytes[index].length, sha256: hash(bundle.bytes[index]) }])) };
 }
 
 function main() {
@@ -81,53 +142,28 @@ if (process.argv[2] === "--verify" || (process.argv.length === 2 && prebuilt)) {
   if (bindgenVersion.status !== 0 || bindgenVersion.stdout.trim() !== "wasm-bindgen 0.2.118") {
     throw new Error("platform-web requires wasm-bindgen 0.2.118, matching its Cargo.lock");
   }
-  run(process.env.CARGO_BIN || "cargo", ["+1.95.0", "build", "--locked", "--release",
-    "--target", "wasm32-unknown-unknown", "--target-dir", targetRoot]);
-  const temporaryRoot = path.resolve(os.tmpdir());
-  const staging = fs.mkdtempSync(path.join(temporaryRoot, "mir2-client-core-"));
-  let failure = null;
-  try {
-    assertClientCoreStagingRoot(staging, temporaryRoot);
-    run(bindgen, [path.join(targetRoot, "wasm32-unknown-unknown/release/mir2_platform_web.wasm"),
-      "--target", "web", "--out-dir", staging, "--out-name", "mir2_platform_web",
-      // Release downloads do not need the debugging function-name section.
-      "--remove-name-section"]);
-    const optimization = optimizeClientCoreReleaseWasm({
-      wasmPath: path.join(staging, files[1]), jsPath: path.join(staging, files[0]),
-      stagingRoot: staging, toolConfig,
-    });
-    console.log(`[client-core] wasm-opt=${JSON.stringify(optimization)}`);
-    const bytes = files.map((name) => fs.readFileSync(path.join(staging, name)));
-    assertClientCoreReleaseBudget({ wasmBytes: bytes[1], jsBytes: bytes[0] });
-    const version = hash(Buffer.concat(bytes));
-    const destination = path.join(publicRoot, version);
-    fs.mkdirSync(destination, { recursive: true });
-    // Versioned URLs never point at a half-published module: publish the small
-    // build-time manifest only after both content-addressed files are ready.
-    files.forEach((name, index) => fs.writeFileSync(path.join(destination, name), bytes[index]));
-    const manifest = { abiVersion: 1, version, sourceSha256: sourceFingerprint(),
-      files: Object.fromEntries(files.map((name, index) => [name,
-        { bytes: bytes[index].length, sha256: hash(bytes[index]) }])) };
-    const json = `${JSON.stringify(manifest, null, 2)}\n`;
-    fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
-    if (!fs.existsSync(manifestPath) || fs.readFileSync(manifestPath, "utf8") !== json) {
-      const temporaryManifest = `${manifestPath}.${process.pid}.tmp`;
-      fs.writeFileSync(temporaryManifest, json);
-      fs.renameSync(temporaryManifest, manifestPath);
-    }
-    verify();
-  } catch (error) { failure = error; }
-  finally {
-    try {
-      // Recheck the direct mkdtemp name and every ordinary ancestor after tools.
-      const owned = assertClientCoreStagingRoot(staging, temporaryRoot);
-      fs.rmSync(owned, { recursive: true, force: false });
-    } catch (error) {
-      const cleanupError = new Error("Client-core staging cleanup refused or failed; residual may remain: " + staging, { cause: error });
-      failure = failure ? new AggregateError([failure, cleanupError], "Client-core build and staging cleanup failed") : cleanupError;
-    }
+  const sourceSha256 = sourceFingerprint();
+  // Both builds use the same guarded Cargo executable. Capture Core bytes before
+  // the feature build replaces the target artifact; neither package is published yet.
+  const core = buildBundle("core", [], toolConfig, bindgen);
+  const presentation = buildBundle("presentation", ["--features", "presentation-ui"], toolConfig, bindgen);
+  if (sourceFingerprint() !== sourceSha256) throw new Error("Shared client source changed during the two builds");
+  const manifest = { ...describeBundle(core, sourceSha256),
+    presentation: describeBundle(presentation, sourceSha256) };
+  verifyClientCoreManifest(manifest);
+  // All optimization, metadata, budget and cleanup checks have passed for both.
+  // Only then write immutable leaves, and publish their shared manifest last.
+  publishBundle(core);
+  publishBundle(presentation);
+  readClientCoreRelease({ webRoot, manifest });
+  const json = JSON.stringify(manifest, null, 2) + "\n";
+  fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
+  if (!fs.existsSync(manifestPath) || fs.readFileSync(manifestPath, "utf8") !== json) {
+    const temporaryManifest = manifestPath + "." + process.pid + ".tmp";
+    fs.writeFileSync(temporaryManifest, json);
+    fs.renameSync(temporaryManifest, manifestPath);
   }
-  if (failure) throw failure;
+  verify();
 }
 }
 try { main(); }

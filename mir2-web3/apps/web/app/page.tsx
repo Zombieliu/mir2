@@ -67,6 +67,8 @@ import { isQuestWorldAction, parseQuestWorldAction, type QuestRouteAction } from
 import { planBevyQuestRoute, type QuestRouteRuntime, type QuestRoutePlan, type QuestRoutePoint, type QuestRouteEdge } from "../lib/bevy-quest-route-plan";
 import { QuestCollisionCache, type QuestCollisionGeometry } from "../lib/quest-collision-cache";
 import { nextQuestRouteStep } from "../lib/quest-route-execution";
+import { buildMapRouteEdges, type MapImageRouteSource, type MapImageRouteIntent } from "../lib/client-map-input";
+import mapRouteRasterMeta from "../public/original-ui/MMap/meta.json";
 import { observeQuestMapPacket, currentQuestMapIndex, sameQuestWorldLifetime, questAttackTargetCurrent,
   type QuestMapAuthority, type QuestWorldLifetime } from "../lib/quest-world-lifecycle";
 import { readBevyHpOrbSlot } from "../lib/bevy-hp-orb";
@@ -89,6 +91,7 @@ import type { HeroCharacterPage, HeroManagementPage, HeroManagementWindows, Hero
 import {
   DEFAULT_PLAYER_UI_PREFERENCES, PLAYER_UI_PREFERENCES_STORAGE_KEY, CRYSTAL_KEY_BINDINGS_STORAGE_KEY,
   CRYSTAL_HELP_STATE_STORAGE_KEY, DEFAULT_CRYSTAL_HELP_STATE, defaultCrystalKeyBindings,
+  CRYSTAL_CHAT_SETTINGS_STORAGE_KEY, parseCrystalChatSettings, serializeCrystalChatSettings,
   parsePlayerUiPreferences, serializePlayerUiPreferences, parseCrystalKeyBindings, serializeCrystalKeyBindings,
   parseCrystalHelpState, serializeCrystalHelpState, applyCrystalSkillMode, playerUiPreferencesAudioSettings,
   type PlayerUiPreferences, type CrystalKeyBinding, type CrystalHelpWindowState,
@@ -128,7 +131,8 @@ type SocialTradeSendProof = Readonly<{owner: SocialReplyOwner; incarnation: numb
 import { projectBevyStorageModel } from "../lib/bevy-storage-model";
 import { type StorageRuntime, type StorageIntent, type StorageCommandProof } from "../lib/bevy-storage-ui";
 type EquipmentOwnerProof = SharedEquipmentOwnerProof | StorageCommandProof;
-import { loadClientCoreRuntime, type AuthUiRuntime, type ClientCoreRuntime, type QuestActionDecision } from "../lib/client-core-runtime";
+import { loadClientCoreRuntime, type AuthUiRuntime, type ClientCoreRuntime, type QuestActionDecision,
+  type ChatUiRuntime, type ChatUiDocument, type ChatUiControls, type CashPreviewLayerDocument } from "../lib/client-core-runtime";
 import { EquipmentSessionController, type EquipmentSessionStatus } from "../lib/equipment-session-controller";
 import {
   classifyEquipmentUse, currentEquipmentCommandItem, equipmentGatewayOperation,
@@ -2202,6 +2206,13 @@ export default function HomePage() {
   const questDefinitionByIdRef = useRef<Map<number, Partial<QuestEntry>>>(new Map());
   const questAuthoritativeStageByIdRef = useRef<Map<number, QuestStage>>(new Map());
   const questCoreRuntimeRef = useRef<ClientCoreRuntime | null>(null);
+  const chatUiRuntimeRef = useRef<{ core: ClientCoreRuntime; owner: SocialReplyOwner; ui: ChatUiRuntime } | null>(null);
+  const chatSettingsMaskRef = useRef(0);
+  const cashPreviewSourceRef = useRef<{ owner: SocialReplyOwner; core: ClientCoreRuntime;
+    entries: readonly CashGameShopEntry[]; revision: number; armourShape: number; female: boolean; gearKey: string; key: string } | null>(null);
+  const cashPreviewRevisionRef = useRef(0);
+  const chatPublishedRef = useRef("");
+  const [chatUiDocument, setChatUiDocument] = useState<ChatUiDocument | null>(null);
   const questCoreEvaluationFailedRef = useRef(false);
   const pendingQuestActionsRef = useRef<Map<string, PendingQuestAction>>(new Map());
   const bevyQuestGenerationRef = useRef(0);
@@ -2220,6 +2231,12 @@ export default function HomePage() {
   if (!questCollisionCacheRef.current) questCollisionCacheRef.current = new QuestCollisionCache();
   const questRouteRunRef = useRef<{ lifetime: QuestWorldLifetime; action: QuestRouteAction; acceptedAt: number;
     geometry: QuestCollisionGeometry | null; plan: QuestRoutePlan | null; queued: QueuedMoveIntent | null } | null>(null);
+  const mapImageSourceRef = useRef<{ source: MapImageRouteSource; identity: QuestWorldIdentity;
+    socket: WebSocket; core: ClientCoreRuntime; renderer: RuntimeModule | null; rendererGeneration: number } | null>(null);
+  const mapImageRouteRef = useRef<{ source: MapImageRouteSource; goal: QuestRoutePoint; acceptedAt: number;
+    geometry: QuestCollisionGeometry | null; plan: QuestRoutePlan | null; queued: QueuedMoveIntent | null; planning: boolean } | null>(null);
+  const mapRouteLocalModalRef = useRef(false);
+  const mapRoutePageBlockedRef = useRef(true);
   const questAttackHandoffRef = useRef<{ lifetime: QuestWorldLifetime; objectId: number;
     role: "attackTarget" | "attackQuestTarget"; name: string; acceptedAt: number } | null>(null);
   const questWorldBlockedRef = useRef(true);
@@ -2538,6 +2555,7 @@ export default function HomePage() {
     questCoreRuntimeRef.current = null;
     setQuestCoreStatus("loading");
     authCoreRef.current?.dispose(); authCoreRef.current = null; setAuthCoreReady(false);
+    disposeChatUi();
     loadClientCoreRuntime().then((runtime) => {
       if (!active) return;
       questCoreRuntimeRef.current = runtime;
@@ -2562,7 +2580,7 @@ export default function HomePage() {
       console.error("[mir2] shared quest client unavailable", error);
       appendLog(t("ui.questClientUnavailable", [], "Quest actions are temporarily unavailable. Please retry."), "system");
     });
-    return () => { active = false; authCoreRef.current?.dispose(); authCoreRef.current = null; };
+    return () => { active = false; authCoreRef.current?.dispose(); authCoreRef.current = null; disposeChatUi(); };
   }, [questCoreLoadAttempt]);
   const [reconnectStatus, setReconnectStatus] = useState<ReconnectStatus>(() => createIdleReconnectStatus());
   const [showInventory, setShowInventoryState] = useState(false);
@@ -2727,6 +2745,8 @@ export default function HomePage() {
       const bindings = parseCrystalKeyBindings(localStorage.getItem(CRYSTAL_KEY_BINDINGS_STORAGE_KEY) ?? "");
       const help = parseCrystalHelpState(localStorage.getItem(CRYSTAL_HELP_STATE_STORAGE_KEY) ?? "");
       const skillPositions = parseCrystalSkillBarPositions(localStorage.getItem(CRYSTAL_SKILL_BAR_POSITIONS_STORAGE_KEY) ?? "");
+      const chatMask = parseCrystalChatSettings(localStorage.getItem(CRYSTAL_CHAT_SETTINGS_STORAGE_KEY) ?? "");
+      if (chatMask !== null) chatSettingsMaskRef.current = chatMask;
       if (preferences) { playerUiPreferencesRef.current = preferences; setPlayerUiPreferences(preferences); }
       if (bindings) { crystalKeyBindingsRef.current = bindings; setCrystalKeyBindings(bindings); }
       else if (preferences?.skillMode) {
@@ -2744,6 +2764,26 @@ export default function HomePage() {
     window.addEventListener("blur", cancel);
     return () => { window.removeEventListener("keydown", down, true); window.removeEventListener("keyup", up, true);
       window.removeEventListener("blur", cancel); };
+  }, []);
+  // A draft and every retained callback belong to one physical connection and scene.
+  useEffect(() => {
+    const core = questCoreRuntimeRef.current, owner = currentSocialReplyOwner(false), before = chatUiRuntimeRef.current;
+    if (!core || !owner) { if (before) disposeChatUi(); return; }
+    if (before && before.core === core && sameSocialPhysicalOwner(before.owner, owner)
+      && before.owner.sceneRevision === owner.sceneRevision && before.owner.mapFileName === owner.mapFileName) return;
+    disposeChatUi();
+    try { chatUiRuntimeRef.current = { core, owner, ui: core.createChatUi(chatSettingsMaskRef.current) }; publishChatUi(); }
+    catch { /* An older Core keeps its existing compatibility controls. */ }
+  });
+  useEffect(() => {
+    const retire = () => {
+      const entry = chatUiRuntimeRef.current;
+      if (entry) { try { entry.ui.retire(); publishChatUi(); } catch { disposeChatUi(); } }
+    };
+    window.addEventListener("blur", retire); window.addEventListener("focus", retire);
+    document.addEventListener("visibilitychange", retire);
+    return () => { window.removeEventListener("blur", retire); window.removeEventListener("focus", retire);
+      document.removeEventListener("visibilitychange", retire); };
   }, []);
   const [showChatSettings, setShowChatSettings, chatSettingsOpenRef] = useImmediateUiState(false);
   // Death → town-revive prompt: tracks an in-flight request so the button reads
@@ -7488,6 +7528,7 @@ export default function HomePage() {
   }
 
   function queueCrystalMoveIntent(intent: QueuedMoveIntent) {
+    if (mapImageRouteRef.current?.queued !== intent) cancelMapImageRoute();
     if (questRouteRunRef.current?.queued !== intent) cancelQuestRoute();
     if (pendingPickupRef.current?.queued !== intent) cancelPendingPickup();
     questAttackHandoffRef.current = null;
@@ -7544,6 +7585,7 @@ export default function HomePage() {
     }
     observeQuestWorldActions();
     const ownedQuestRoute = questRouteRunRef.current?.queued === queued ? questRouteRunRef.current : null;
+    const ownedMapRoute = mapImageRouteRef.current?.queued === queued ? mapImageRouteRef.current : null;
     if (queuedMoveIntentRef.current !== queued) return false;
     const ownedPickup = pendingPickupRef.current?.queued === queued ? pendingPickupRef.current : null;
     if ((ownedQuestRoute || ownedPickup) && (questWindowOpenRef.current
@@ -7551,6 +7593,7 @@ export default function HomePage() {
       scheduleMovementConfirmTick(); return false;
     }
     if (ownedQuestRoute && (questWorldBlockedRef.current || document.visibilityState === "hidden" || !document.hasFocus())) { cancelQuestRoute(); return false; }
+    if (ownedMapRoute && !mapImageRouteCurrent(ownedMapRoute)) { cancelMapImageRoute(); return false; }
     const currentWorld = worldRef.current;
     const serverSelf = currentAuthoritativeSelf(currentWorld);
     if (!serverSelf) {
@@ -7584,7 +7627,7 @@ export default function HomePage() {
     const intentAge = now - queued.requestedAt;
     const maxIntentAge =
       queued.kind === "target" ? MOVEMENT_PENDING_ACTION_MAX_AGE_MS * 4 : MOVEMENT_QUEUED_DIRECTION_MAX_AGE_MS;
-    if (!ownedQuestRoute && intentAge > maxIntentAge) {
+    if (!ownedQuestRoute && !ownedMapRoute && intentAge > maxIntentAge) {
       queuedMoveIntentRef.current = null;
       return false;
     }
@@ -7600,6 +7643,7 @@ export default function HomePage() {
     // the router steers around recently-rejected tiles.
     const nextAction = ownedQuestRoute
       ? questRouteMovement(ownedQuestRoute, serverSelf, effectiveMode, now)
+      : ownedMapRoute ? mapImageRouteMovement(ownedMapRoute, serverSelf, effectiveMode, now)
       : queued.kind === "direction" && queued.direction
         ? crystalMovementActionForDirection(serverSelf, queued.direction, effectiveMode, [], currentWorld)
         : queued.kind === "target" &&
@@ -7616,6 +7660,9 @@ export default function HomePage() {
           : null;
 
     if (!nextAction) {
+      if (ownedMapRoute && mapImageRouteRef.current === ownedMapRoute && ownedMapRoute.planning) {
+        scheduleMovementConfirmTick(); return false;
+      }
       queuedMoveIntentRef.current = null;
       return false;
     }
@@ -7723,6 +7770,9 @@ export default function HomePage() {
     if (ownedPickup && (pendingPickupRef.current !== ownedPickup
       || !sameQuestWorldLifetime(ownedPickup.lifetime, currentQuestWorldLifetime()))) {
       pendingSelfMoveRef.current = null; clearLocalSelfPrediction(); cancelPendingPickup(); return false;
+    }
+    if (ownedMapRoute && !mapImageRouteCurrent(ownedMapRoute)) {
+      pendingSelfMoveRef.current = null; clearLocalSelfPrediction(); cancelMapImageRoute(); return false;
     }
     if (queued.consumeAfterSend) queuedMoveIntentRef.current = null;
     const sent = send({ type: alignedPending.mode === "run" ? "run" : "walk", direction: alignedPending.direction });
@@ -9090,6 +9140,51 @@ export default function HomePage() {
     try { localStorage.setItem(PLAYER_UI_PREFERENCES_STORAGE_KEY, text); setPreferencesNotice(""); }
     catch { setPreferencesNotice("Settings apply now, but could not be saved."); }
   }
+  function disposeChatUi() {
+    const entry = chatUiRuntimeRef.current;
+    chatUiRuntimeRef.current = null;
+    entry?.ui.dispose();
+    if (chatPublishedRef.current) { chatPublishedRef.current = ""; setChatUiDocument(null); }
+  }
+  function publishChatUi() {
+    const entry = chatUiRuntimeRef.current;
+    if (!entry) return;
+    const document = entry.ui.document(), text = JSON.stringify(document);
+    if (text !== chatPublishedRef.current) { chatPublishedRef.current = text; setChatUiDocument(document); }
+  }
+  function makeChatUiControls(entry: NonNullable<typeof chatUiRuntimeRef.current>, document: ChatUiDocument): ChatUiControls {
+    const current = () => {
+      const owner = currentSocialReplyOwner();
+      return chatUiRuntimeRef.current === entry && questCoreRuntimeRef.current === entry.core
+        && sameSocialPhysicalOwner(entry.owner, owner) && owner?.sceneRevision === entry.owner.sceneRevision
+        && owner.mapFileName === entry.owner.mapFileName && globalThis.document.hasFocus();
+    };
+    const change = (action: () => boolean) => {
+      if (!current()) return;
+      try { if (action() && current()) publishChatUi(); } catch { if (chatUiRuntimeRef.current === entry) disposeChatUi(); }
+    };
+    return { source: entry.ui.source, document,
+      observe: count => change(() => entry.ui.document().epoch === document.epoch && entry.ui.observe(count)),
+      scroll: (action, epoch) => change(() => entry.ui.scroll(action, epoch)),
+      drag: (y, grab, epoch) => change(() => entry.ui.drag(y, grab, epoch)),
+      resize: epoch => change(() => entry.ui.resize(epoch)), open: epoch => change(() => entry.ui.open(epoch)),
+      editFilter: (channel, visible, epoch) => change(() => entry.ui.editFilter(channel, visible, epoch)),
+      editAll: (visible, epoch) => change(() => entry.ui.editAll(visible, epoch)),
+      editTransparent: (value, epoch) => change(() => entry.ui.editTransparent(value, epoch)),
+      cancel: epoch => change(() => entry.ui.cancel(epoch)), defaults: epoch => change(() => entry.ui.defaults(epoch)),
+      apply: epoch => {
+        if (!current()) return;
+        try {
+          const mask = entry.ui.apply(epoch);
+          if (mask < 0 || !current()) return;
+          chatSettingsMaskRef.current = mask; publishChatUi();
+          const text = serializeCrystalChatSettings(mask);
+          if (text) { try { localStorage.setItem(CRYSTAL_CHAT_SETTINGS_STORAGE_KEY, text); }
+            catch { setPreferencesNotice("Chat settings apply now, but could not be saved."); } }
+        } catch { if (chatUiRuntimeRef.current === entry) disposeChatUi(); }
+      },
+    };
+  }
   function changeCrystalHelpState(next: CrystalHelpWindowState) {
     const text = serializeCrystalHelpState(next), state = parseCrystalHelpState(text); if (!state) return;
     setCrystalHelpState(state);
@@ -9212,6 +9307,55 @@ export default function HomePage() {
     if (!owner || !raw || !sameSocialPhysicalOwner(raw.owner, owner)) return null;
     const player = current.entities.find(e => e.objectId === current.playerObjectId);
     return makeCashGameShopSource(raw.catalog, {gold:current.gold, credit:current.credit, className:player?.classKey}, owner, raw.revision, cashReceiptSocketRef.current === owner.socket);
+  }
+  function currentCashPreviewSource() {
+    const source = currentCashGameShopSource(), core = questCoreRuntimeRef.current;
+    const current = worldRef.current, baseline = equipmentSnapshotRef.current, status = equipmentControllerRef.current?.status();
+    const player = current.entities.find(entity => entity.objectId === current.playerObjectId);
+    if (!source || !core || !baseline || !status?.ready || status.suspended
+      || baseline.connectionGeneration !== source.owner.connectionGeneration || baseline.sessionGeneration !== source.owner.sessionGeneration
+      || player?.genderKey !== "male" && player?.genderKey !== "female") { cashPreviewSourceRef.current = null; return null; }
+    const placements = baseline.snapshot.placements.filter(item => item.container === 2 && item.slot === 1);
+    if (placements.length > 1) { cashPreviewSourceRef.current = null; return null; }
+    const armourRows = current.equipmentItems.filter(item => item.slot === "armour");
+    const placement = placements[0], armour = armourRows[0];
+    let armourShape = 0, gearKey = "empty";
+    if (placement?.uniqueId !== null && placement?.uniqueId !== undefined) {
+      const tooltip = armour?.tooltipSource as { info?: Record<string, unknown>; userItem?: Record<string, unknown> } | undefined;
+      const shape = tooltip?.info?.shape;
+      if (armourRows.length !== 1 || armour?.authoritativeUniqueId !== placement.uniqueId
+        || tooltip?.userItem?.unique_id !== placement.uniqueId || tooltip.userItem.item_index !== tooltip.info?.item_index
+        || typeof shape !== "number" || !Number.isSafeInteger(shape) || shape < -32768 || shape > 32767) {
+        cashPreviewSourceRef.current = null; return null;
+      }
+      armourShape = shape; gearKey = JSON.stringify([placement.uniqueId, tooltip.info?.item_index, shape]);
+    } else if (armourRows.some(item => item.authoritativeUniqueId !== undefined)) { cashPreviewSourceRef.current = null; return null; }
+    const before = cashPreviewSourceRef.current, female = player.genderKey === "female";
+    if (before && before.core === core && sameSocialPhysicalOwner(before.owner, source.owner)
+      && before.owner.sceneRevision === source.owner.sceneRevision && before.owner.mapFileName === source.owner.mapFileName
+      && before.entries === source.entries && before.revision === source.revision && before.female === female && before.gearKey === gearKey) return before;
+    if (cashPreviewRevisionRef.current >= Number.MAX_SAFE_INTEGER) { cashPreviewSourceRef.current = null; return null; }
+    const next = Object.freeze({ owner: source.owner, core, entries: source.entries, revision: source.revision,
+      armourShape, female, gearKey, key: `cash-preview-${++cashPreviewRevisionRef.current}` });
+    cashPreviewSourceRef.current = next; return next;
+  }
+  function readCashPreviewLayers(source: NonNullable<ReturnType<typeof currentCashPreviewSource>>, item: CashGameShopEntry,
+    direction: number, elapsedMs: number): CashPreviewLayerDocument | null {
+    if (!cashShopOpenRef.current || !document.hasFocus() || currentCashPreviewSource() !== source || !source.entries.includes(item)) return null;
+    const shape = item.info.shape, requiredGender = item.info.required_gender;
+    if (typeof shape !== "number" || typeof requiredGender !== "number" || shape !== item.item_shape) return null;
+    try {
+      const result = source.core.readCashPreviewLayers({ itemType: item.info.item_type, shape, requiredGender,
+        armourShape: source.armourShape, female: source.female, direction, elapsedMs });
+      return cashShopOpenRef.current && currentCashPreviewSource() === source ? result : null;
+    } catch { return null; }
+  }
+  function turnCashPreview(source: NonNullable<ReturnType<typeof currentCashPreviewSource>>, direction: number, right: boolean): number | null {
+    if (!cashShopOpenRef.current || !document.hasFocus() || currentCashPreviewSource() !== source) return null;
+    try {
+      const result = source.core.turnCashPreview(direction, right);
+      return cashShopOpenRef.current && currentCashPreviewSource() === source ? result : null;
+    } catch { return null; }
   }
   function confirmCashGameShopPurchase(confirmation: CashGameShopConfirmation) {
     if (!cashShopOpenRef.current || cashRequestIdRef.current >= Number.MAX_SAFE_INTEGER) return;
@@ -9741,6 +9885,130 @@ export default function HomePage() {
         profile: questGuidanceProfile(process.env.NEXT_PUBLIC_MIR2_QUEST_GUIDANCE) }) };
   }
 
+  function currentMapImageSource(): MapImageRouteSource | null {
+    const identity = currentQuestWorldIdentity(), current = worldRef.current, region = current.originalMapRegion;
+    const socket = socketRef.current, core = questCoreRuntimeRef.current, renderer = runtimeRef.current;
+    const mapIndex = currentQuestMapIndex(questMapAuthorityRef.current, identity);
+    const self = currentAuthoritativeSelf(current);
+    if (!identity || mapIndex === null || !region || !socket || socket.readyState !== WebSocket.OPEN || !core
+      || typeof core.searchMapRoute !== "function"
+      || screenRef.current !== "game" || !current.connected || equipmentHostSuspendReasonRef.current !== null
+      || !self || self.dead === true || normalizeQuestMapFileName(region.mapFileName) !== identity.mapFileName
+      || !Number.isSafeInteger(region.mapWidth) || !Number.isSafeInteger(region.mapHeight)
+      || region.mapWidth <= 0 || region.mapHeight <= 0 || region.mapWidth * region.mapHeight > 16_777_216) {
+      mapImageSourceRef.current = null; return null;
+    }
+    const before = mapImageSourceRef.current, old = before?.source;
+    if (before && old && before.socket === socket && before.core === core && before.renderer === renderer
+      && before.rendererGeneration === questRuntimeLifetimeRef.current && sameQuestWorldIdentity(before.identity, identity)
+      && old.mapIndex === mapIndex && old.mapWidth === region.mapWidth && old.mapHeight === region.mapHeight
+      && old.miniMapIndex === current.miniMapIndex && old.bigMapIndex === current.bigMapIndex) return old;
+    const source: MapImageRouteSource = Object.freeze({ owner: Object.freeze({}), mapIndex,
+      mapFileName: identity.mapFileName, playerObjectId: String(identity.playerObjectId),
+      mapWidth: region.mapWidth, mapHeight: region.mapHeight, miniMapIndex: current.miniMapIndex, bigMapIndex: current.bigMapIndex });
+    mapImageSourceRef.current = { source, identity, socket, core, renderer, rendererGeneration: questRuntimeLifetimeRef.current };
+    return source;
+  }
+  function mapRouteInputBlocked(): boolean {
+    return mapRouteLocalModalRef.current || mapRoutePageBlockedRef.current || skillBarPointerHeldRef.current
+      || heroManagementOpenRef.current || cashShopOpenRef.current || referenceWindowsBlockGameplay()
+      || worldMapOpenRef.current || questWindowOpenRef.current || sceneInputDeferredForInitialAssets()
+      || document.visibilityState !== "visible" || !document.hasFocus();
+  }
+  function cancelMapImageRoute() {
+    const route = mapImageRouteRef.current;
+    mapImageRouteRef.current = null;
+    if (route?.queued && queuedMoveIntentRef.current === route.queued) {
+      queuedMoveIntentRef.current = null; movementPlanRef.current = null;
+    }
+  }
+  function mapImageRouteCurrent(route: NonNullable<typeof mapImageRouteRef.current>): boolean {
+    return mapImageRouteRef.current === route && currentMapImageSource() === route.source && !mapRouteInputBlocked();
+  }
+  async function refreshMapImageRoute(route: NonNullable<typeof mapImageRouteRef.current>) {
+    if (!route.geometry || !mapImageRouteCurrent(route)) return;
+    route.planning = true;
+    const geometry = route.geometry, captured = mapImageSourceRef.current;
+    if (!captured || captured.source !== route.source || geometry.mapFileName !== route.source.mapFileName
+      || geometry.width !== route.source.mapWidth || geometry.height !== route.source.mapHeight) { cancelMapImageRoute(); return; }
+    try {
+      const edges = await buildMapRouteEdges(geometry, questRouteOccupancy(), questRouteRejectedEdges(Date.now()),
+        () => mapImageRouteCurrent(route));
+      if (!mapImageRouteCurrent(route)) { if (mapImageRouteRef.current === route) cancelMapImageRoute(); return; }
+      const self = currentAuthoritativeSelf();
+      if (!edges || !self) { cancelMapImageRoute(); return; }
+      const origin = { x: self.x, y: self.y };
+      const result = captured.core.searchMapRoute({ width: geometry.width, height: geometry.height, origin, goal: route.goal, edges });
+      if (!mapImageRouteCurrent(route)) { if (mapImageRouteRef.current === route) cancelMapImageRoute(); return; }
+      if (result.status !== "ok") {
+        cancelMapImageRoute(); appendLog(t("ui.mapRouteUnavailable", [], "No complete route is available."), "system"); return;
+      }
+      route.plan = { origin, destination: route.goal, radius: 0, steps: result.steps }; route.planning = false;
+      if (!result.steps.length) { cancelMapImageRoute(); return; }
+      if (!route.queued) {
+        route.queued = { kind: "target", targetX: route.goal.x, targetY: route.goal.y,
+          requestedMode: "run", requestedAt: Date.now(), consumeAfterSend: false };
+        queueCrystalMoveIntent(route.queued);
+      } else if (queuedMoveIntentRef.current === route.queued) void trySendQueuedCrystalMove();
+    } catch {
+      if (mapImageRouteRef.current !== route) return;
+      cancelMapImageRoute(); appendLog(t("ui.mapRouteUnavailable", [], "No complete route is available."), "system");
+    }
+  }
+  function beginMapImageRoute(intent: MapImageRouteIntent) {
+    const source = currentMapImageSource();
+    const index = intent.kind === "big" ? source?.bigMapIndex : source?.miniMapIndex;
+    const asset = mapRouteRasterMeta.frames.find(frame => frame.index === index);
+    if (!source || intent.source !== source || mapRouteInputBlocked() || !asset || index === null || index === undefined || index <= 0
+      || asset.path !== intent.imageSrc || asset.width !== intent.imageWidth || asset.height !== intent.imageHeight
+      || !Number.isSafeInteger(intent.x) || !Number.isSafeInteger(intent.y)
+      || intent.x < 0 || intent.y < 0 || intent.x >= source.mapWidth || intent.y >= source.mapHeight) return;
+    retireQuestWorldActions(); cancelLockedMonsterAttack(); stopOnchainMining();
+    queuedMoveIntentRef.current = null; movementPlanRef.current = null;
+    const route = { source, goal: Object.freeze({ x: intent.x, y: intent.y }), acceptedAt: Date.now(),
+      geometry: null as QuestCollisionGeometry | null, plan: null as QuestRoutePlan | null,
+      queued: null as QueuedMoveIntent | null, planning: true };
+    mapImageRouteRef.current = route;
+    void questCollisionCacheRef.current!.load(source.mapFileName).then(geometry => {
+      if (!mapImageRouteCurrent(route) || Date.now() - route.acceptedAt > 30_000) {
+        if (mapImageRouteRef.current === route) cancelMapImageRoute(); return;
+      }
+      route.geometry = geometry; return refreshMapImageRoute(route);
+    }).catch(() => {
+      if (mapImageRouteRef.current !== route) return;
+      cancelMapImageRoute(); appendLog(t("ui.mapRouteUnavailable", [], "No complete route is available."), "system");
+    });
+  }
+  function pressMapImage(source: MapImageRouteSource | null) {
+    if (!source || currentMapImageSource() !== source || document.visibilityState !== "visible" || !document.hasFocus()) return;
+    retireQuestWorldActions(); cancelLockedMonsterAttack(); stopOnchainMining();
+    queuedMoveIntentRef.current = null; movementPlanRef.current = null;
+    queuedDirectionStepRef.current = null; queuedDirectionStepBacklogRef.current = [];
+  }
+  function mapImageRouteMovement(route: NonNullable<typeof mapImageRouteRef.current>, self: WorldEntity, mode: "walk" | "run", now: number) {
+    if (!mapImageRouteCurrent(route)) { cancelMapImageRoute(); return null; }
+    if (route.planning) return null;
+    const geometry = route.geometry, plan = route.plan;
+    if (!geometry || !plan) { cancelMapImageRoute(); return null; }
+    const occupied = questRouteOccupancy(), rejected = questRouteRejectedEdges(now);
+    const blocked = (from: QuestRoutePoint, to: QuestRoutePoint) => {
+      if (to.x < 0 || to.y < 0 || to.x >= geometry.width || to.y >= geometry.height) return true;
+      const bit = to.x * geometry.height + to.y;
+      return Boolean(geometry.blockedBits[bit >>> 3] & 1 << (bit & 7))
+        || occupied.some(tile => tile.x === to.x && tile.y === to.y)
+        || rejected.some(edge => edge.from.x === from.x && edge.from.y === from.y && edge.to.x === to.x && edge.to.y === to.y);
+    };
+    const distance = mode === "run" ? crystalSelfMovementProfile(worldRef.current, mode).distance : 1;
+    let step = nextQuestRouteStep(plan, self, distance, blocked);
+    if (step.type === "replan") { void refreshMapImageRoute(route); return null; }
+    if (step.type !== "move") { cancelMapImageRoute(); return null; }
+    if (movementStepBlockedByRecentCorrection(self, step.direction, step.mode, recentMovementBlockedSteps(movementBlockedStepsRef.current, now))) {
+      step = nextQuestRouteStep(plan, self, 1, blocked);
+      if (step.type !== "move") { void refreshMapImageRoute(route); return null; }
+    }
+    return { point: step.point, direction: step.direction, mode: step.mode };
+  }
+
   function cancelQuestRoute() {
     const route = questRouteRunRef.current;
     questRouteRunRef.current = null;
@@ -9760,11 +10028,14 @@ export default function HomePage() {
   }
 
   function retireQuestWorldActions() {
+    cancelMapImageRoute();
     cancelQuestRoute(); cancelPendingPickup(); questAttackHandoffRef.current = null;
   }
 
   /** Called synchronously for every world projection, before React can coalesce remove/reappear edges. */
   function observeQuestWorldActions() {
+    const mapRoute = mapImageRouteRef.current;
+    if (mapRoute && !mapImageRouteCurrent(mapRoute)) cancelMapImageRoute();
     const lifetime = currentQuestWorldLifetime(), current = worldRef.current;
     const route = questRouteRunRef.current;
     if (route && (!sameQuestWorldLifetime(route.lifetime, lifetime)
@@ -17661,6 +17932,10 @@ export default function HomePage() {
     || showInventory || showCharacter || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends || showBonds
     || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap
     || referenceWindowsBlockGameplay() || showChatSettings || showTutorial || world.activeNpcDialog || npcShopService || npcRepairService);
+  mapRoutePageBlockedRef.current = Boolean(screenRef.current !== "game" || showInventory || showCharacter || showQuestLog
+    || heroManagementPage !== null || showHeroPet || showGuild || showGroup || showFriends || showBonds || showRanking
+    || showMarket || showConquest || showTrade || showBuffs || showMail || showWorldMap || showChatSettings || showTutorial
+    || world.activeNpcDialog || npcShopService || npcRepairService);
   useEffect(() => {
     const retire = () => retireQuestWorldActions();
     const tick = () => {
@@ -17784,6 +18059,10 @@ export default function HomePage() {
     worldRef.current.currentWeight, worldRef.current.maxWeight);
 
   const currentSkillBarDocument = readCurrentSkillBarDocument();
+  const currentChatEntry = chatUiRuntimeRef.current;
+  const sharedChatControls = currentChatEntry && chatUiDocument ? makeChatUiControls(currentChatEntry, chatUiDocument) : undefined;
+  const renderedMapImageSource = currentMapImageSource();
+  const renderedCashPreviewSource = currentCashPreviewSource();
   const authRenderEpoch = loginAuthState.epoch;
   const loginAuthControls: LoginAuthControls = {
     state: loginAuthState, ready: authCoreReady, pending: loginBusy,
@@ -17933,6 +18212,11 @@ export default function HomePage() {
       accountId={accountId}
       password={password}
       chatMessage={chatMessage}
+      chatUi={sharedChatControls}
+      mapImageRouteSource={renderedMapImageSource}
+      onMapImageRoute={beginMapImageRoute}
+      onMapImageRoutePress={pressMapImage}
+      onMapRouteModalChange={blocked => { mapRouteLocalModalRef.current = blocked; if (blocked) cancelMapImageRoute(); }}
       loginBusy={loginBusy}
       loginAuth={loginAuthControls}
       loginError={loginErrorKey ? t(loginErrorKey) : null}
@@ -18006,6 +18290,10 @@ export default function HomePage() {
       cashGameShopPending={Boolean(cashPurchasesRef.current.pending())}
       onConfirmCashGameShopPurchase={confirmCashGameShopPurchase}
       onReadCashGameShopItemTooltip={readCashGameShopItemTooltip}
+      cashPreviewSourceKey={renderedCashPreviewSource?.key ?? null}
+      onReadCashPreviewLayers={(item, direction, elapsedMs) => renderedCashPreviewSource
+        ? readCashPreviewLayers(renderedCashPreviewSource, item, direction, elapsedMs) : null}
+      onTurnCashPreview={(direction, right) => renderedCashPreviewSource ? turnCashPreview(renderedCashPreviewSource, direction, right) : null}
       onGameShopVisibilityChange={open => {cashShopOpenRef.current = open; renderParityServices(n => n + 1);}}
       crystalKeyBindings={crystalKeyBindings}
       playerUiPreferences={playerUiPreferences}

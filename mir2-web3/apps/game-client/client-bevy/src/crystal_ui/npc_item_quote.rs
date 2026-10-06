@@ -6,17 +6,8 @@
 
 use crate::inventory::ItemModel;
 
-/// Source-faithful repair price before and after the current NPC multiplier.
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub(crate) struct NpcRepairQuote {
-    /// Crystal `UserItem.RepairPrice()` before the NPC rate/service factor.
-    pub repair_price: u32,
-    /// The float Crystal renders in `NPCDropDialog.InfoLabel` and compares
-    /// against the player's gold before it sends a repair packet.
-    pub displayed_total: f32,
-    /// The `uint` cost used by the server after the client-side float check.
-    pub total_price: u32,
-}
+/// Shared source-faithful repair result; sale calculations below stay native.
+pub(crate) use mir2_client_core::npc_repair_quote::NpcRepairQuote;
 
 /// Crystal's sale amount: adjusted `ItemData.Price` is multiplied by the
 /// selected stack count before NPCDropDialog divides the total by two. Keeping
@@ -42,57 +33,24 @@ pub(crate) fn crystal_npc_repair_quote(
     rate: f32,
     special: bool,
 ) -> Option<NpcRepairQuote> {
-    if !rate.is_finite() || rate < 0.0 {
-        return None;
-    }
-
+    if !rate.is_finite() || rate < 0.0 { return None; }
     let (source, user) = concrete_tooltip_source(item)?;
-    if source.info.durability == 0 {
-        return None;
-    }
-
-    // Snapshot metadata is the only authority for values that change after a
-    // repair or stack update. Do not fall back to stale tooltip dura/count.
-    let count = u16::try_from(item.quantity).ok()?;
-    if count == 0 {
-        return None;
-    }
-    let current_dura = item.durability_current?;
-    let max_dura = item.durability_max?;
-    if current_dura > max_dura {
-        return None;
-    }
-
-    let stat_weight = crystal_added_stat_weight(user)?;
-    let factor = 1.0 + stat_weight as f32 * 0.1;
-    let template_price = source.info.price as f32;
-    let template_durability = source.info.durability as f32;
-    let max_dura_f = max_dura as f32;
-
-    // `UserItem.RepairPrice`: full value is floor'd, then its added-stat
-    // factor is cast to uint (truncated).
-    let full_base = (max_dura_f * ((template_price / 2.0) / template_durability)
-        + template_price / 2.0)
-        .floor();
-    let full_unit = source_u32(full_base * factor)?;
-
-    let current_unit = crystal_current_unit_price(item, source, user)?;
-    let count = u32::from(count);
-    let full_price = full_unit.checked_mul(count)?;
-    let current_price = current_unit.checked_mul(count)?;
-    let mut repair_price = full_price.checked_sub(current_price)?;
-    if user.rental_information.is_some() {
-        repair_price = repair_price.checked_mul(2)?;
-    }
-
-    let service_multiplier = if special { 3.0 } else { 1.0 };
-    let displayed_total = repair_price as f32 * service_multiplier * rate;
-    let total_price = source_u32(displayed_total)?;
-    Some(NpcRepairQuote {
-        repair_price,
-        displayed_total,
-        total_price,
-    })
+    let values: Vec<i32> = user.added_stats.iter().map(|stat| stat.value).collect();
+    mir2_client_core::npc_repair_quote::repair_quote(
+        Some(mir2_client_core::npc_repair_quote::NpcRepairSource {
+            live_unique_id: item.unique_id,
+            source_unique_id: user.unique_id,
+            template_item_index: source.info.item_index,
+            source_item_index: user.item_index,
+            template_price: source.info.price,
+            template_durability: source.info.durability,
+            live_count: item.quantity,
+            live_current_dura: item.durability_current,
+            live_max_dura: item.durability_max,
+            added_stat_values: &values,
+            rental: user.rental_information.is_some(),
+        }), rate, special,
+    )
 }
 
 fn concrete_tooltip_source(

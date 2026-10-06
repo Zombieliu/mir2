@@ -23,8 +23,10 @@ function fixture(t) {
     fs.rmSync(root, { recursive: true, force: true });
   });
   for (const relative of [
-    `${webPath}/scripts/build-client-core.mjs`, manifestRelative,
+    `${webPath}/scripts/build-client-core.mjs`,
+    `${webPath}/scripts/lib/renderer-wasm-opt.mjs`, `${webPath}/scripts/lib/client-core-release-files.mjs`, manifestRelative,
     `${webPath}/public/client-core/${manifest.version}`,
+    ...(manifest.presentation ? [`${webPath}/public/client-core/${manifest.presentation.version}`] : []),
     `${corePath}/Cargo.toml`, `${corePath}/src`,
     `${bridgePath}/Cargo.toml`, `${bridgePath}/Cargo.lock`,
     `${bridgePath}/rust-toolchain.toml`, `${bridgePath}/src`,
@@ -80,4 +82,56 @@ test("artifact hashes cannot bless bytes under the wrong immutable URL", (t) => 
   const result = run(root);
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /immutable version URL/);
+});
+
+// These are data-only --verify checks: no WASM API or module instantiation.
+test("new builder requires Presentation even though the legacy release reader supports old Core", (t) => {
+  const root = fixture(t); const legacy = { ...manifest }; delete legacy.presentation;
+  fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify(legacy));
+  const result = run(root);
+  assert.notEqual(result.status, 0); assert.match(result.stderr, /requires its Presentation bundle/);
+});
+
+test("Presentation source fingerprint cannot reuse a stale prebuilt sibling", (t) => {
+  assert.ok(manifest.presentation, "run the guarded dual build before this package verifier");
+  const root = fixture(t); const changed = JSON.parse(JSON.stringify(manifest));
+  changed.presentation.sourceSha256 = changed.sourceSha256 === "0".repeat(64) ? "1".repeat(64) : "0".repeat(64);
+  fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify(changed));
+  const result = run(root);
+  assert.notEqual(result.status, 0); assert.match(result.stderr, /Shared client source changed/);
+});
+
+test("Presentation byte drift is rejected independently of an intact Core", (t) => {
+  assert.ok(manifest.presentation);
+  const root = fixture(t);
+  fs.appendFileSync(path.join(root, webPath, "public/client-core", manifest.presentation.version, "mir2_platform_web_bg.wasm"), "bad");
+  const result = run(root);
+  assert.notEqual(result.status, 0); assert.match(result.stderr, /artifact mismatch/);
+});
+
+test("Presentation hashes cannot bless bytes under an incorrect immutable URL", (t) => {
+  assert.ok(manifest.presentation);
+  const root = fixture(t); const wrong = "0".repeat(64) === manifest.version || "0".repeat(64) === manifest.presentation.version
+    ? "1".repeat(64) : "0".repeat(64);
+  const packages = path.join(root, webPath, "public/client-core");
+  fs.cpSync(path.join(packages, manifest.presentation.version), path.join(packages, wrong), { recursive: true });
+  fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify({ ...manifest, presentation: { ...manifest.presentation, version: wrong } }));
+  const result = run(root);
+  assert.notEqual(result.status, 0); assert.match(result.stderr, /immutable version URL/);
+});
+
+test("builder rejects undeclared Presentation metadata and exact per-package byte boundaries", (t) => {
+  assert.ok(manifest.presentation);
+  const root = fixture(t);
+  for (const mutate of [
+    (value) => { value.presentation.extra = true; },
+    (value) => { value.presentation.version = value.version; },
+    (value) => { value.presentation.files["mir2_platform_web_bg.wasm"].bytes = 262144; },
+    (value) => { value.presentation.files["mir2_platform_web.js"].bytes = 204801; },
+  ]) {
+    const value = JSON.parse(JSON.stringify(manifest)); mutate(value);
+    fs.writeFileSync(path.join(root, manifestRelative), JSON.stringify(value));
+    const result = run(root);
+    assert.notEqual(result.status, 0); assert.match(result.stderr, /undeclared fields|distinct immutable versions|byte budget/);
+  }
 });

@@ -2019,6 +2019,14 @@ body:has([data-shared-touch-quest-open="true"], [data-shared-touch-bag-open="tru
   overflow: hidden;
 }
 
+.chat-frame[data-chat-size="1"] .chat-feed { height: 91px; }
+.chat-frame[data-chat-size="2"] .chat-feed { height: 143px; }
+.chat-frame[data-chat-size] .chat-feed { overflow: hidden; }
+.chat-frame[data-chat-size="1"] .chat-scroll-buttons { grid-template-rows: 8px 78px 6px 8px; }
+.chat-frame[data-chat-size="2"] .chat-scroll-buttons { grid-template-rows: 8px 126px 6px 8px; }
+.chat-frame[data-chat-size] .chat-position-knob { cursor: ns-resize; }
+.chat-settings-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
 .chat-feed-line.system {
   color: #c00000;
 }

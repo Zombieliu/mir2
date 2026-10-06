@@ -1,10 +1,22 @@
 # Web / Windows 固定基线追赶 QA
 
-Windows比较基线为`f72e36fb84c3574fff0aeb2abed856454b14289d`，原审计父提交`f1cf96324c7da62e57d5fd0fa4146be010adbba5`，当前认证改动父提交`80c8e1d80dc17c269991f61c992bb75b36c49d98`。本页记录源码、有限代码检查和静态构建；没有运行服务、HTTP、WASM实例、浏览器、原生窗口、实际账号/存档或玩家流程。Goal仍active，Candidate及可玩性未验收。
+Windows比较基线为`f72e36fb84c3574fff0aeb2abed856454b14289d`，原Web审计父提交`f1cf96324c7da62e57d5fd0fa4146be010adbba5`；本轮Source18父提交`2e574054a7734fa75efea9378e831a8ee476cc8a`。本页区分源码、有限代码检查、静态构建和玩家行为；没有运行服务、HTTP、WASM实例、浏览器、原生窗口、真实账号或存档。Goal仍active，Candidate及可玩性未验收。
 
-当前Web包：[.mir2-thin-client-web-windows-catchup-20261006-05](E:/mir2-player-journey/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-20261006-05)。体积372,506,754 B（355.25 MiB），7,299文件、775目录、0链接，原360 MiB预算余4,980,606 B。对应新认证Source12，Core与renderer的8个发布文件及Next编译manifest精确匹配，未启动。
+当前Web包：[.mir2-thin-client-web-windows-catchup-20261007-01](E:/mir2-player-journey/mir2-web3/apps/web/.mir2-thin-client-web-windows-catchup-20261007-01)。体积372,680,891 B（355.42 MiB），7,301文件、776目录（含根目录；不含根为775）、0链接，原360 MiB预算余4,806,469 B。对应Source18，Core/PUI四个和renderer六个发布文件与Next编译manifest精确匹配，未启动。
 
-## F01 当前认证批次
+## 当前Source18地图、聊天与Cash批次
+
+[有限检查](presentation-source18-finite-result01.json)与[五阶段组合构建](presentation-source18-combined-build-result01.json)分别保存实际结果和产物闭包。大/小地图图像寻路、聊天历史拖动、4/7/11行、settings Apply/Cancel/Defaults和Cash sprite预览/转向九条已成为源码候选。Native/Web共用Rust规则与控制器；Web继续使用DOM绘制，未计为共享painter。纯修理报价已提取，普通/特殊维修的真实Bag UID及NPC rate接线仍未闭合。移动端可复用独立presentation-ui轻量包，无需依赖Bevy renderer；移动真机行为未验证。
+
+选定Rust跨组212次通过、3次ignored，仅按逐项有效输入图承接：Source16 Core85、Source17默认ABI44＋PUI ABI10，以及Source13 Native聊天32/商城11/报价6/UI-core24；不是212个独立场景，也不是Source18全部新执行。Node05实际11脚本218/218、0失败/0跳过；Stage5的276内部组只贡献一个文件级Node测试。TSC04严格非增量编译退出0。历史有限/TSC/Core失败保留在结果中。
+
+Core05、Native01、Renderer01、Next01与Thin01五阶段实际构建通过，原CargoGuard和各项预算保持。Core固定-Oz后WASM252,205 B/JS24,393 B，独立PUI WASM70,277 B/JS14,472 B，各包仍满足WASM严格小于262,144 B和JS≤204,800 B；四次旧单包超限保留。Windows开发EXE104,710,144 B已归档，未启动。三renderer版本`bevy-984e8f644cf26319`，原WASM/gzip/JS上限保持。
+
+Next01严格TypeScript与13静态页通过：19,007 regular产物、61 NFT/37,094 unique引用（37,092文件＋2目录）且0缺失。原source node_modules junction只作为声明来源，不遍历链接；Thin包完整7,301个文件hash已核对、0链接，四个Core/PUI和六个renderer叶文件与编译manifest一致。独立只读源码及静态产物复核零确认P0/P1，不证明启动、资源请求、玩家或移动设备行为。44条warning内容及重复次数和Source12上一包相同，实际运行语义仍未验；231份JSON当前source/output全部逐对字节相同，仅在此条件下承接旧token保持结论，本轮未新跑parser/lexer。远端资源miss仍需配置immutable origin，Pet/Gate完整库存和覆盖未验。
+
+[当前矩阵04](feature-matrix04.md) / [完整JSON](feature-matrix04.json)保留317稳定ID、原始审计、Native证据、overlap与unknown：103 shared、197 legacy、9 open、8共同限制。九条新增候选从open转为legacy，不以共用规则代替共同绘制或行为验收；190具名fixture行关联/104独立声明不等于实际执行或玩家行为。全部317行player为not-run，整体验收分母和百分比仍为null。当前指纹见[索引04](current-evidence04.json)。下一轮真实普通/特殊修理与报价，其后Bag/Belt tooltip与Bag→Belt、钓鱼、Pearl和Ranking Inspect；未审范围和共同限制继续保留。
+
+## 历史Source12认证批次
 
 [有限检查结果](auth-source12-finite-result01.json)和[完整组合构建结果](auth-source12-combined-build-result01.json)分别记录实际执行和产物，不互相替代。共享Rust注册/改密/SafeKey规则已接入Native与Web；完整8字段注册、Native返回码6/8、失败焦点、精确封禁日期、真实SafeKey控件与物理socket单用lane/epoch屏障为代码候选，Web表单仍是DOM。Rust四目标39次执行通过，Node04 171/171/0 skip、严格非增量TSC03退出0。Core固定-Oz后WASM252,167 B/JS24,393 B，原262,144/204,800预算保留。Windows开发EXE104,720,384 B，未启动。
 
@@ -12,7 +24,7 @@ Windows比较基线为`f72e36fb84c3574fff0aeb2abed856454b14289d`，原审计父�
 
 三阶段及Source12由独立只读审查确认，限定源码/编译/静态产物范围零确认P0/P1。44条warning内容与重复次数和此前Thin05相同，运行语义仍未验；231份JSON当前source/output字节与此前逐对相同，token保持仅限定承接，不新跑parser/lexer。ThinBuild01 report参数反斜线在child前被原guard拒绝，实际22d42d exit1；仅修配置路径，原guard和体积预算未放宽。前序有限/TSC/Core失败及错误Native目标0测试均保留于有限结果，不计通过。
 
-[当前矩阵03](feature-matrix03.md) / [完整JSON](feature-matrix03.json)保留全部317稳定ID及原始审计、Native证据、overlap和unknown：103 shared、188 legacy、18 open、8共同限制；181具名fixture行关联/98声明不等于执行或玩家行为。Auth七行仍legacy，未把共用规则说成共用painter。当前证据指纹见[索引03](current-evidence03.json)。地图/钓鱼3、聊天5、物品3、特殊NPC/Cash6和Ranking1继续，未审范围和共同限制保留。
+[历史矩阵03](feature-matrix03.md) / [完整JSON](feature-matrix03.json)保留全部317稳定ID及原始审计、Native证据、overlap和unknown：103 shared、188 legacy、18 open、8共同限制；181具名fixture行关联/98声明不等于执行或玩家行为。Auth七行仍legacy，未把共用规则说成共用painter。当时证据指纹见[历史索引03](current-evidence03.json)。矩阵03当时的剩余工作为地图/钓鱼3、聊天5、物品3、特殊NPC/Cash6和Ranking1；当前九条剩余项见矩阵04。
 
 ## 历史配偶批次实际结果
 

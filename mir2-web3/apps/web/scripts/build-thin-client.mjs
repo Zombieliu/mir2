@@ -135,8 +135,9 @@ if (!reportOnly) {
   // Reject a Core publication that raced the copy; the compiled closure must stay exact.
   assertCompiledClientCoreManifest(sourceRequiredServerFiles, readClientCoreRelease({ webRoot }).manifest);
   packagedCoreClosure = { version: packagedCore.manifest.version, abiVersion: packagedCore.manifest.abiVersion,
+    activeVersions: packagedCore.versionDirectories.map((directory) => path.basename(directory)),
     files: packagedCore.files.map(({ relativePath, bytes, sha256 }) => ({ relativePath, bytes, sha256 })),
-    exactTwoLeafClosure: true };
+    exactActiveBundleClosure: true, leavesPerBundle: 2 };
   const compactionDetails = new Map();
   for (const detail of [...copyStats.jsonCompactions, ...publicCopyStats.jsonCompactions]) {
     compactionDetails.set(detail.path, detail);

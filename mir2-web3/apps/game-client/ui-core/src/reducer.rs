@@ -85,6 +85,17 @@ fn chat_draft(next: &mut UiState) -> Option<&mut UiChatSettings> {
     next.chat_settings_draft.as_mut()
 }
 
+
+fn reduce_chat_settings(next:&mut UiState,action:mir2_client_core::chat_ui::SettingsAction)->Option<UiChatSettings> {
+    use mir2_client_core::chat_ui::{settings_transition,SettingsAction};
+    if next.panel!=UiPanel::ChatSettings {return None;}
+    if !matches!(action,SettingsAction::Apply|SettingsAction::Cancel) {let _=chat_draft(next);}
+    let transition=settings_transition(next.chat_settings.to_mask(),next.chat_settings_draft.map(UiChatSettings::to_mask),action);
+    next.chat_settings=UiChatSettings::from_mask(transition.committed);
+    next.chat_settings_draft=transition.draft.map(UiChatSettings::from_mask);
+    transition.applied.map(UiChatSettings::from_mask)
+}
+
 fn noop(effects: &mut Vec<UiEffect>) {
     effects.push(UiEffect::Noop);
 }
@@ -540,41 +551,31 @@ pub fn reduce(state: &UiState, action: UiAction) -> Transition {
         | UiAction::CancelOptions
         | UiAction::ResetOptionsToDefaults => {}
         UiAction::SetChatFilterVisibility { channel, visible } => {
-            if let Some(settings) = chat_draft(&mut next) {
-                settings.set_filter_visible(channel, visible);
-            }
+            let _=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::Filter {channel:channel as u8,visible});
         }
         UiAction::SetAllChatFilterVisibility { visible } => {
-            if let Some(settings) = chat_draft(&mut next) {
-                for channel in crate::state::UiChatChannel::settings() {
-                    settings.set_filter_visible(*channel, visible);
-                }
-            }
+            let _=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::All {visible});
         }
         UiAction::SetChatTransparency { transparent } => {
-            if let Some(settings) = chat_draft(&mut next) {
-                settings.transparent = transparent;
-            }
+            let _=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::Transparent(transparent));
         }
         UiAction::ApplyChatSettings => {
-            if state.panel == UiPanel::ChatSettings {
-                if let Some(settings) = next.chat_settings_draft.take() {
-                    next.chat_settings = settings;
-                    next.panel = UiPanel::None;
-                    effects.push(UiEffect::ApplyChatSettings { settings });
-                    effects.push(UiEffect::PersistChatSettings { settings });
+            if state.panel==UiPanel::ChatSettings {
+                if let Some(settings)=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::Apply) {
+                    next.panel=UiPanel::None;
+                    effects.push(UiEffect::ApplyChatSettings {settings});
+                    effects.push(UiEffect::PersistChatSettings {settings});
                 }
             }
         }
         UiAction::CancelChatSettings | UiAction::CloseChatSettings => {
-            if state.panel == UiPanel::ChatSettings {
+            if state.panel==UiPanel::ChatSettings {
+                let _=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::Cancel);
                 close_panels(&mut next);
             }
         }
         UiAction::ResetChatSettingsToDefaults => {
-            if let Some(settings) = chat_draft(&mut next) {
-                *settings = UiChatSettings::default();
-            }
+            let _=reduce_chat_settings(&mut next,mir2_client_core::chat_ui::SettingsAction::Defaults);
         }
         UiAction::ClosePanel => close_panels(&mut next),
         UiAction::CloseAllPanels => close_panels(&mut next),

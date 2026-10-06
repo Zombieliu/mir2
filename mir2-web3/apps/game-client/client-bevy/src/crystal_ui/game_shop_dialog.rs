@@ -93,64 +93,19 @@ pub fn preview_layers(
     let Some(info) = item.tooltip_source.as_ref().map(|source| &source.info) else {
         return vec![];
     };
-    let Ok(shape) = u16::try_from(info.shape) else {
-        return vec![];
-    };
-    let d = u16::from(direction.clamp(1, 8) - 1);
-    let anim = ((ms / 150) % 6) as u16;
-    let female = gender.is_some_and(|gender| gender.eq_ignore_ascii_case("female"));
-    let body_shape = inventory
-        .items
-        .iter()
+    let armour_shape = inventory.items.iter()
         .find(|item| item.container == 2 && item.slot == 1)
         .and_then(|item| item.tooltip_source.as_ref())
-        .map_or(0, |source| source.info.shape.max(0) as u16);
-    let body = |frame| (format!("CArmour/{body_shape:02}"), frame);
-    match info.item_type {
-        1 => {
-            let armour = body(if female { 840 } else { 32 } + d * 6 + anim);
-            let frame = 32 + d * 6 + anim;
-            if (100..200).contains(&shape) {
-                let right = (format!("AWeaponR/{:02}", shape - 100), frame);
-                let left = (format!("AWeaponL/{:02}", shape - 100), frame);
-                if matches!(direction, 2 | 3) {
-                    vec![left, armour, right]
-                } else if matches!(direction, 7 | 8) {
-                    vec![right, armour, left]
-                } else {
-                    vec![left, right, armour]
-                }
-            } else {
-                let weapon = if shape >= 200 {
-                    (format!("ARWeapon/{:02}", shape - 200), frame)
-                } else {
-                    (format!("CWeapon/{shape:02}"), frame)
-                };
-                if if shape >= 200 {
-                    matches!(direction, 6..=8)
-                } else {
-                    matches!(direction, 2..=4)
-                } {
-                    vec![armour, weapon]
-                } else {
-                    vec![weapon, armour]
-                }
-            }
-        }
-        2 => vec![(
-            format!("CArmour/{shape:02}"),
-            if info.required_gender == 1 { 32 } else { 840 } + d * 6 + anim,
-        )],
-        19 => {
-            let anim = ((ms / 150) % 8) as u16;
-            vec![
-                (format!("Mount/{shape:02}"), 32 + d * 8 + anim),
-                body(if female { 1256 } else { 448 } + d * 8 + anim),
-            ]
-        }
-        37 => vec![(format!("Transform/{shape:02}"), 32 + d * 6 + anim)],
-        _ => vec![],
-    }
+        .map_or(0, |source| i32::from(source.info.shape));
+    mir2_client_core::cash_preview::preview_layers(mir2_client_core::cash_preview::CashPreviewInput {
+        item_type: info.item_type,
+        shape: i32::from(info.shape),
+        required_gender: info.required_gender,
+        armour_shape,
+        female: gender.is_some_and(|gender| gender.eq_ignore_ascii_case("female")),
+        direction,
+        elapsed_ms: ms,
+    }).into_iter().map(|layer| (layer.library, layer.frame)).collect()
 }
 
 fn preview(

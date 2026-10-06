@@ -346,6 +346,21 @@ impl Default for UiChatSettings {
 }
 
 impl UiChatSettings {
+    /// Exact data projection for the shared Core chat reducer; bit8 remains Trade.
+    pub fn to_mask(self)->u16 {
+        (self.filter_normal as u16) | ((self.filter_whisper as u16)<<1)
+        | ((self.filter_shout as u16)<<2) | ((self.filter_system as u16)<<3)
+        | ((self.filter_lover as u16)<<4) | ((self.filter_mentor as u16)<<5)
+        | ((self.filter_group as u16)<<6) | ((self.filter_guild as u16)<<7)
+        | ((self.filter_trade as u16)<<8) | ((self.transparent as u16)<<9)
+    }
+    pub fn from_mask(mask:u16)->Self {
+        Self {filter_normal:mask&1!=0,filter_whisper:mask&2!=0,filter_shout:mask&4!=0,
+            filter_system:mask&8!=0,filter_lover:mask&16!=0,filter_mentor:mask&32!=0,
+            filter_group:mask&64!=0,filter_guild:mask&128!=0,filter_trade:mask&256!=0,
+            transparent:mask&512!=0}
+    }
+
     pub fn is_filter_hidden(self, channel: UiChatChannel) -> bool {
         match channel {
             UiChatChannel::Normal => self.filter_normal,

@@ -11,6 +11,9 @@ license = "MIT"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+presentation-ui = []
+
 [dependencies]
 mir2-client-core = { path = "../client-core" }
 serde = { version = "1", features = ["derive"] }

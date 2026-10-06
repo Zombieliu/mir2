@@ -1,5 +1,10 @@
 import manifest from "./generated/client_core_runtime.json";
 import type { RegistrationDraft, ChangePasswordDraft } from "./client-login-runtime";
+import { createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote,
+  type PresentationWasmModule, type MapRouteWasmModule, type ChatUiRuntime, type MapRouteInput, type MapRouteDecision,
+  type CashPreviewInput, type CashPreviewLayerDocument, type NpcRepairQuoteInput, type NpcRepairQuote } from "./client-presentation-runtime";
+export type { ChatUiDocument, ChatUiControls, ChatUiRuntime, MapRouteInput, MapRouteDecision,
+  CashPreviewInput, CashPreviewLayerDocument, NpcRepairQuoteInput, NpcRepairQuote } from "./client-presentation-runtime";
 
 export type AuthValidation = { ok: true; birthDateBinary?: string } |
   { ok: false; code: number; field: string; error: string };
@@ -144,6 +149,11 @@ export type EquipmentPendingRuntime = {
 export type ClientCoreRuntime = {
   /** Optional ABI; older bundles keep their existing capabilities. */
   createAuthUi(seed: bigint): AuthUiRuntime;
+  createChatUi(mask: number): ChatUiRuntime;
+  searchMapRoute(input: MapRouteInput): MapRouteDecision;
+  readCashPreviewLayers(input: CashPreviewInput): CashPreviewLayerDocument | null;
+  turnCashPreview(direction: number, right: boolean): number | null;
+  readNpcRepairQuote(input: NpcRepairQuoteInput): NpcRepairQuote | null;
   resolveQuestAction(input: QuestActionInput): QuestActionDecision;
   /** Additive capability; old Quest-only bundles throw only when requested. */
   createEquipmentPendingLedger(): EquipmentPendingRuntime;
@@ -461,9 +471,33 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
     if (module.client_core_abi_version() !== manifest.abiVersion) {
       throw new Error("Client core version mismatch; reload the client");
     }
+    // Presentation rules are a separate small package so compatibility/touch
+    // clients use the same Rust policy without loading a renderer.
+    const presentationRelease = (manifest as typeof manifest & { presentation?: {
+      abiVersion: number; version: string; sourceSha256: string;
+    } }).presentation;
+    if (!presentationRelease || presentationRelease.abiVersion !== 1
+      || !/^[a-f0-9]{64}$/.test(presentationRelease.version)
+      || presentationRelease.sourceSha256 !== manifest.sourceSha256) {
+      throw new Error("Client presentation package mismatch; rebuild the client");
+    }
+    const presentationBase = new URL(`/client-core/${presentationRelease.version}/`, window.location.origin);
+    const presentationUrl = new URL("mir2_platform_web.js", presentationBase);
+    if (attempt > 0) presentationUrl.searchParams.set("retry", String(attempt));
+    const presentation = await import(/* webpackIgnore: true */ presentationUrl.href) as
+      PresentationWasmModule & MapRouteWasmModule & { default: WasmModule["default"]; client_presentation_abi_version: () => number };
+    await presentation.default({ module_or_path: new URL("mir2_platform_web_bg.wasm", presentationBase) });
+    if (presentation.client_presentation_abi_version() !== presentationRelease.abiVersion) {
+      throw new Error("Client presentation version mismatch; reload the client");
+    }
     let mailSendSlot:MailSendSlotRuntime|null=null;
     return {
       createAuthUi(seed: bigint) { return createAuthUiRuntime(module, seed); },
+      createChatUi(mask: number) { return createSharedChatUi(presentation, mask); },
+      searchMapRoute(input: MapRouteInput) { return searchSharedMapRoute(presentation, input); },
+      readCashPreviewLayers(input: CashPreviewInput) { return readSharedCashPreview(presentation, input); },
+      turnCashPreview(direction: number, right: boolean) { return turnSharedCashPreview(presentation, direction, right); },
+      readNpcRepairQuote(input: NpcRepairQuoteInput) { return readSharedNpcRepairQuote(presentation, input); },
       getMailSendSlot():MailSendSlotRuntime {return mailSendSlot??=createMailSendSlotRuntime(module);},
       getNpcGoldBuyAttemptSlot():NpcGoldBuyAttemptSlotRuntime {return persistentNpcGoldBuyAttemptSlot(module,document,manifest.version);},
       resolveQuestAction(input: QuestActionInput): QuestActionDecision {
