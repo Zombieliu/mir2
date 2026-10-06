@@ -1,5 +1,58 @@
 # Android native host ingress audit
 
+## 2026-10-06 实际连接的能力协商修补（完整 goal 仍 Active）
+
+产品源码：`697d6b545e3f61796568c9da1438bea9bed05343`，父提交 `59487ba7a`。
+症状/根因：Rust 辅助函数声明了两种能力，但真实 Java socket 只发送 clientVersion；
+Gateway 未收到精确商城回执 opt-in。恢复凭据、恢复结果及原生重新加载边界尚未接通，
+所以不能上报 nativeResumeV1。通用 gameplay 写入口也未隔离这两种宿主控制命令。
+修补只涉及四个 Android 源/测试文件：真实连接在版本包之后发送且仅发送一次
+nativeGameShopReceiptV1；新连接重新协商；通用 gameplay 拒绝 clientCapabilities/
+resumeSession。Rust helper 与真实连接保持同一已实现能力集合，不改认证或交易规则。
+
+失败先行：新增 Java TLS 五用例 compiled 0/5 → 5/5，Rust 合同 compiled 0/1 → 1/1。
+本地 TLS socket 验证了包顺序、每连接次数、未授权游戏输入、控制命令隔离和条件 opt-in
+后的精确商城拒绝四元组；它不是实际 Gateway、真实账号、购买成功或实际 receipt JNI 验收。
+原 62 个 GatewaySession/6 个 Lighting 用例正文逐字节保留；仅两个 connect helper
+增加第二包断言。旧 Rust 能力 oracle 明确去掉未实现的恢复声明，原失败结果保留。
+447 输入绑定，443 个非本叶整文件受保护；十四个干净同源门全通过：
+Android529/preview577、shared1324+10原ignored、runtime309+1原ignored、
+Java两种各108（8类，failure/error/skipped均0）、API31两种，以及Mac宿主Windows
+原光照14/地图4/效果2/协议21/Hero FIFO1/技能FIFO1与实际比奇资源1。
+计数有交叠，不相加，也不是完整 Windows OS gate。
+
+两个 APK 均 Rust release-profile + Android Debug/uiPreview，code35/name0.1.32-gameshop-phone未变；
+不是商店 Release。Gateway为空，preview禁止联网，GPU诊断开关关闭（实测记录0条）。
+
+| 包 | 字节数 | SHA-256 |
+| --- | ---: | --- |
+| `mir2-native-capability-host-normal-697d6b545.apk` | 533992799 | `5873b81bea5ae47dfb2d52c39ce63c16479187a84a3f7490573d60f62fd99ac7` |
+| `mir2-native-capability-host-preview-697d6b545.apk` | 542061335 | `cf1ff6bfb0298a5ecf9e6ef1fc8f580926dca0178a2dfb39385abf405a220fae` |
+
+本机交付目录从 mir2-web3 解析：
+`apps/game-client/platform-android/target/native-capability-host-20261006-QrBWwM/`。
+APK在 `final-apks/`；`publication-evidence.json` 汇总源码/门槛/素材/安装/设备/原图及哈希。
+目标文件均在生成目录，不提交 APK、缓存、密钥或任何真实凭据。
+两包保留数据安装并回读SHA一致，各自ELF与对应variant的strip产物一致；
+6647 UI PNG、3份metadata、10个原Lighting帧逐字节核验。DEX字符串是辅助证据，
+真实包顺序仍以TLS测试为准。首个ZIP全目录输出超限是工具失败，限定DEX条目后通过；
+首次普通权限ADB只读EPERM在限定权限下通过，未kill-server/清数据/改全局网络。
+
+API31/Android12/ARM64专用模拟器，两次独立8秒前台PID16665/16743，
+fatal/render-validation/AppExit均0；两张2340×1080原图已查看。
+正常包虽带lighting-night-jni启动参数，仍只显示原登录及Test server not configured；
+预览是明确OFFLINE/NOT LIVE的本地比奇、角色、怪、FireWall和灯光。
+旧手机登录目标偏小、大黑诊断HP面板及空快捷格仍未解决，不是UI验收。
+正常/预览新PID分别1/5条GL506，零错误GPU门仍FAIL，旧错误保持各自源码归属。
+
+04:01 UTC只读远端：Windows56ee063fb较冻结3d735745f仍+1提交/83文档/0功能；
+原工作区Git检查点不变。investigate指导了失败先行和五文件边界（含本文件），
+待确认的同版本wgpu-hal83文件修补未实施；此前整套UI三轮失败后的重新批准仍待人类答复。
+NI-17 PARTIAL、NI-18 OPEN、完整AP-01–21/goal Active不变。真实登录/在线玩家闭环/
+Zone保存、完整恢复、全手机UI/多指/IME/九语言、完整资源/音频/更新、真机0台及人工验收
+全部仍OPEN。下一步必须接通完整恢复控制和原生加载/数据边界，不能只打开能力位；
+图形修补与UI继续分别遵守尚未解除的确认条件。Status: DONE_WITH_CONCERNS（仅本协商叶）。
+
 2026-10-06 最新诊断源码：`58a92eb7b`（绘制通道）→ `1fbc63f87`（最终屏幕附件）；均默认关闭/显式开关/每进程128条。
 两版本各自446输入绑定和十四新鲜适用门通过；其他整文件分别443/444受保护，未改渲染行为或游戏规则。
 58版五次新前台启动仍5条GL506，因缺最终输出记录不能判断旧附件假设；1f版五次仍9条GL506，两个失败帧最终附件均为新RBO5。
@@ -626,7 +679,7 @@ still missing. Neither label is an online acceptance result.
 | NI-15 | `push_native_social_model` | PARTIAL: source3f27e8e9e retains previous25 ingress/own-offer and17 shared outbound types. Four preview-only Java→nativeEvent scenes now observe actual owner-bound shared group15, guild200 members/200 notices/112 slots, exact own125 vs guest17/u64 stacks201+3 and authoritative cancel/unchanged wallet777; normal build isolation and five selected screenshots checked. Original shared Inventory+two-trade-window behavior preserved; only offline item metadata/diagnostic predicate corrected. 69 stable inputs/65 protected whole files, clean ten gates431/471,shared1304+10 ignored,runtime296+1 ignored,Java85+85/API31x2/Mac Windows5+1+21; exact-source dual APKs installed and pulled hashes match. Historical failures kept. Locked UI presentation mismatch OPEN; new PID6336/6590 each GL0x0506, zero-error GPU gate FAIL. Offline same-PID background is not normal authentication/resume. Full UI reapproval pending; actual buttons/pump/socket failures/online permissions/invitations/offers/settlement/reconnect, physical and NI16–20/AP01–21 OPEN; goal Active. [Installed offline JNI evidence and open gates](generated/player-qa/native-android-social-jni-20261005/README.md) |
 | NI-16 | `push_native_hero_model` / Hero receipts | PARTIAL: current sourceaef89f942 retains earlier 24 ingress/12 shared outbound contracts, owner/epoch/pending/FIFO safeguards; no shared Hero/UI/Java/auth/Windows rules changed in this touch leaf. Two Android files;429 stable inputs/427 protected whole files. Exact-source five gates484/531,fresh Java93+93/API31x2; no new shared/runtime/full Windows OS rerun. Both diagnostic APKs preserve-data installed, pulled hashes/current-variant ELF/selected6647PNG+3metadata match. Six actual preview Java/nativeEvent owner-bound Hero models/original windows plus normal isolation observed;7 original scene and8 actual touch PNGs reviewed. Four tab transitions,two closes and bounded3s closed wait pass; never count these as online actions. First068c window FAIL,1b actual tap/180ms FAIL and new harness/compiled red0/2 retained. Seven new cold-start PIDs total15 GL0x0506; zero-error GPU FAIL, same-PID touch logs not summed. Phone layout/Hero map entity/full operations/actual socket send/server ACK/real login/Zone-save/nativeResume/resources/audio/update/physical/human/AP01–21 remain OPEN; goal Active. [Bounded native JNI and actual shared touch evidence](generated/player-qa/native-android-touch-cursor-20261006/README.md) |
 | NI-17 | `push_native_lighting_render_state` and effects | PARTIAL: current source1f01c1351 includes shared sourcec57a3cf06. Original Windows producer/map hook is shared with thin delegates and byte-unchanged14/4/2 old tests; real pack cells/optional effect metadata, matching asset request/render-ready/committed pose, bounded generation/reset/retry and same-frame consumer scheduling are wired. First actual night/dawn/forced-dark GPU runs exited on unsupported VIEW_FORMATS while PID stayed alive; two-file capability fix preserves the original sRGB render/sample view and supported-device descriptor, without shader/palette/rule changes. Final445-input clean fourteen gates529/577,shared1324+10 existing ignored,runtime301+1 existing ignored,fresh Java103+103,API31x2,Mac Windows14+4+2+21+1+1 and actual-resource gate pass, not full Windows OS acceptance. Dual diagnostic APK/variant ELF/selected6647PNG+3metadata+10 original Lighting frames match, preserve-data install/pulled SHA match. Five new8s cold PIDs13707/13787/13865/13954/14032 stay foreground without render-validation AppExit; four actual offline Java/nativeEvent world-light scenes and normal login isolation observed, all12 original PNGs including7 first-source failures reviewed. Consumer reports6 map/3 entity sources,9 layers/10 loaded original textures in dark scenes; daylight retains0 layers. Producer/consumer markers are not enqueue ACK/GPU fences/exact Windows pixel parity. New five PIDs total8 GL0x0506 retain zero-error GPU FAIL. First13-test red7/6, new-oracle12/1 and descriptor2/1 red retained; original catalogue61->65 exact append is explicit, not weakened. Full light-action variants/map/object coverage, audio/focus/nativeResume, real auth/network/Zone-save, full phone UI,2969 whole-map missing references/full resources-update, physical/human/AP01–21 remain OPEN; goal Active. [Current exact-source packages, failures and bounded JNI/GPU images](generated/player-qa/native-android-lighting-sources-20261006/README.md) |
-| NI-18 | native resume negotiation | OPEN: Rust helper advertises `nativeResumeV1`, but actual Java connection sends clientVersion/heartbeat and relogin behavior. Verify negotiation, token ownership and reconnect semantics before claiming resume |
+| NI-18 | native resume negotiation | OPEN: source697d6b545 connects only the implemented `nativeGameShopReceiptV1` negotiation on the actual Java socket, once after clientVersion per connection; helper no longer claims unwired `nativeResumeV1`, and gameplay cannot inject capability/resume controls. Compiled Java red0/5→green5/5 and Rust0/1→1/1, clean fourteen applicable gates, exact dual APK/install/resource and two original startup images are documented above. This does not implement native resume: endpoint-bound in-memory credential ownership, expiry/generation/rejection/cancellation/deadline, background/network retry and native post-resume data/render-ready boundaries remain OPEN. No actual Gateway login/receipt JNI/online resume/save or physical acceptance; zero-error GPU still FAIL and full AP01–21 goal Active |
 | NI-19 | data/scene reset and queue backpressure | PARTIAL: existing native resets and bounded JNI/receipt queues. Test every new domain through reconnect, logout, character switch, scene reset, stale receipt and overflow |
 | NI-20 | native atlas/version/cache delivery | PARTIAL: frozen UI_32bit470..473 sparse guard20/item13/magic7/Java36+36 pass. Exactcfac6ecd4 v13 APKs install,6647 PNG+3metadata each match; four originals match frozen Git; actual offline BAG471 restored. Phone HUD weight/other ratios/full aligned release still OPEN. Host crash/first timeout retained, not stability acceptance. [Evidence](generated/player-qa/native-android-weight-bars-20261001/README.md) |
 
