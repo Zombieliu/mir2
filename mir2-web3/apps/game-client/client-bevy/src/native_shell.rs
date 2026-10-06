@@ -630,6 +630,7 @@ impl ShellNotice {
 
 #[derive(Clone, Default, PartialEq, Eq, Resource)]
 pub struct NativeShellModel {
+    pub monthly_card: crate::native_monthly_card::MonthlyCardPanel,
     pub screen: NativeShellScreen,
     pub login_opening_elapsed: Duration,
     pub login: LoginForm,
@@ -719,6 +720,7 @@ impl NativeShellModel {
     }
 
     fn clear_session_payload(&mut self) {
+        self.monthly_card = Default::default();
         self.login_opening_elapsed = Duration::ZERO;
         self.characters.clear();
         self.selected_character_index = None;
@@ -781,6 +783,9 @@ impl NativeShellModel {
 /// User intents from Bevy UI widgets.
 #[derive(Clone, PartialEq, Eq)]
 pub enum NativeUiIntent {
+    OpenMonthlyCard,
+    RedeemMonthlyCard,
+    CloseMonthlyCard,
     Login,
     OpenRegistration,
     SubmitRegistration {
@@ -836,6 +841,9 @@ pub enum NativeUiIntent {
 impl fmt::Debug for NativeUiIntent {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
+            Self::OpenMonthlyCard => f.write_str("OpenMonthlyCard"),
+            Self::RedeemMonthlyCard => f.write_str("RedeemMonthlyCard"),
+            Self::CloseMonthlyCard => f.write_str("CloseMonthlyCard"),
             Self::SubmitRegistration { account_id, .. } => f
                 .debug_struct("SubmitRegistration")
                 .field("account_id", account_id)
@@ -926,6 +934,7 @@ impl fmt::Debug for NativeUiIntent {
 /// Gateway callbacks for shell transitions.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum NativeGatewayEvent {
+    MonthlyCardReply(crate::native_monthly_card::MonthlyCardReply),
     Connected,
     AccountCreated,
     AccountCreationFailed {
@@ -1009,6 +1018,24 @@ impl NativeShellModel {
 
     pub fn apply_ui_intent(&mut self, intent: NativeUiIntent) -> bool {
         match (self.screen, intent) {
+            (NativeShellScreen::CharacterSelect, NativeUiIntent::OpenMonthlyCard) => {
+                self.monthly_card.open = true;
+                self.monthly_card.focus = crate::native_monthly_card::MonthlyCardFocus::Code;
+                true
+            }
+            (NativeShellScreen::CharacterSelect, NativeUiIntent::CloseMonthlyCard) => {
+                self.monthly_card.open = false; true
+            }
+            (NativeShellScreen::CharacterSelect, NativeUiIntent::RedeemMonthlyCard)
+                if self.monthly_card.open && self.monthly_card.can_submit() => {
+                let Some(request_id) = self.monthly_card.request_id.checked_add(1) else { return false; };
+                self.monthly_card.request_id = request_id;
+                self.monthly_card.submitted_code = self.monthly_card.code.clone();
+                self.monthly_card.pending = true;
+                self.monthly_card.command_sent = false;
+                self.monthly_card.request_started_at_ms = SystemTime::now().duration_since(UNIX_EPOCH).map_or(0, |d| d.as_millis() as u64);
+                self.monthly_card.message = None; true
+            }
             (NativeShellScreen::Login, NativeUiIntent::Login) => self.begin_login(),
             (NativeShellScreen::Login, NativeUiIntent::OpenRegistration) => {
                 if self.register_request_in_flight {
@@ -1121,6 +1148,12 @@ impl NativeShellModel {
                 true
             }
             (NativeShellScreen::CharacterSelect, NativeUiIntent::StartGame) => {
+                if self.monthly_card.open { return false; }
+                if self.monthly_card.status.as_ref().is_some_and(|status| !status.can_enter_game) {
+                    self.monthly_card.open = true;
+                    self.monthly_card.message = Some("monthlyCardRequired".into());
+                    return false;
+                }
                 if self.start_game_request_in_flight {
                     self.set_error("start game request is still pending");
                     return false;
@@ -1340,6 +1373,14 @@ impl NativeShellModel {
 
     pub fn apply_gateway_event(&mut self, event: NativeGatewayEvent) -> bool {
         match (self.screen, event) {
+            (_, NativeGatewayEvent::MonthlyCardReply(reply)) => {
+                self.monthly_card.accept(reply);
+                if self.screen == NativeShellScreen::CharacterSelect
+                    && self.monthly_card.status.as_ref().is_some_and(|status| !status.can_enter_game) {
+                    self.monthly_card.open = true;
+                }
+                true
+            }
             (_, NativeGatewayEvent::Disconnect { reason }) => {
                 self.screen = NativeShellScreen::ConnectionLost;
                 self.clear_session_payload();

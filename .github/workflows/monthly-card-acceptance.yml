@@ -1,0 +1,54 @@
+name: Mir2 Monthly Card Acceptance
+
+on:
+  push:
+    branches: ["codex/**"]
+    paths:
+      - "mir2-web3/apps/simulation/**/monthly_card*"
+      - "mir2-web3/apps/gateway/**/web_monthly_card*"
+      - "mir2-web3/apps/game-client/client-bevy/src/native_monthly_card.rs"
+      - ".github/workflows/monthly-card-acceptance.yml"
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  monthly-access:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: mir2_monthly_qa_20261006_owned
+          POSTGRES_USER: monthly_qa
+          POSTGRES_PASSWORD: ci-only-monthly-isolated
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      MIR2_MONTHLY_CARD_TEST_ISOLATED: "1"
+      MIR2_MONTHLY_CARD_TEST_DATABASE_URL: postgres://monthly_qa:ci-only-monthly-isolated@127.0.0.1:5432/mir2_monthly_qa_20261006_owned
+      CARGO_BUILD_JOBS: "2"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup toolchain install 1.89.0 --profile minimal
+      - name: Account ledger, calendar and durable rollback
+        working-directory: mir2-web3
+        run: cargo +1.89.0 test --locked -p mir2-simulation --features test-support --test monthly_card -- --test-threads=1
+      - name: PostgreSQL competing gateways and persistent renewal
+        working-directory: mir2-web3
+        run: cargo +1.89.0 test --locked -p mir2-simulation --test monthly_card_postgres -- --ignored --test-threads=1
+      - name: Real HTTP and native WebSocket flow
+        working-directory: mir2-web3
+        run: cargo +1.89.0 test --locked -p mir2-gateway --lib monthly_card -- --test-threads=1

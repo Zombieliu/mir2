@@ -1,5 +1,14 @@
 # Backend 1:1 Progress
 
+> 2026-10-06 monthly access Candidate adds AccountStore schema7 and an atomic
+> account ledger, hashed codes, idempotent operator orders, calendar renewal,
+> authenticated redemption and server-authoritative expiry/admission. Ledger9
+> and actual shared HTTP/WS/resume3 pass; independent PostgreSQL writer proof
+> is prepared, not yet accepted. No production writer/schema/feed was changed.
+> The earlier time-card gap is closed in source only, not online payment or
+> public realm activation. Older classic Goal/P6 acceptance stays unchanged.
+> [Runbook and verification](MONTHLY-CARD-ACCESS-20261006.md).
+
 > 2026-10-06 root adds only opt-in cold-seven test preparation, preserving
 > all151 original D021 slots and non-position native/respawn fields. Six fixture
 > checks and default libraries pass. Owned network06 Wizard/Taoist real attack

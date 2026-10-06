@@ -1,4 +1,5 @@
 mod config;
+pub mod monthly_card;
 pub mod conquest;
 pub mod db_projection;
 mod runtime;

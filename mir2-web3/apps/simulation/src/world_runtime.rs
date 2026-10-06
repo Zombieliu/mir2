@@ -426,6 +426,9 @@ impl InProcessWorldRuntime {
     pub fn into_session(self) -> SimulationSession {
         self.session
     }
+    pub fn monthly_card_access_expired(&self) -> Result<bool, String> {
+        self.session.monthly_card_access_expired()
+    }
 
     pub fn ranking_with_online_characters(
         &self,
@@ -1017,6 +1020,10 @@ impl WorldRuntime for InProcessWorldRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+        if !matches!(&command, WorldCommand::ClientPacket(ClientPacket::LogOut | ClientPacket::Disconnect))
+            && self.session.monthly_card_access_expired()? {
+            return self.execute(WorldCommand::ClientPacket(ClientPacket::LogOut));
+        }
         let xp_source = matches!(&command, WorldCommand::Attack{..}|WorldCommand::Interact{..}
             |WorldCommand::SelectNpcDialog{..}|WorldCommand::SubmitNpcInput{..}|WorldCommand::CastSkill{..});
         let force_periodic=match &command {

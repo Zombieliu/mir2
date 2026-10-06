@@ -24136,6 +24136,191 @@
         "Log out ({0})",
         "小退 ({0})"
       ]
+    },
+    {
+      "key": "monthly.Title",
+      "en": "Monthly Card",
+      "zh-TW": "月卡",
+      "pt-BR": "Cartão mensal",
+      "aliases": [
+        "Monthly Card"
+      ]
+    },
+    {
+      "key": "monthly.Rules",
+      "en": "Each card adds 30 days. All characters share the account's expiry; offline time counts.",
+      "zh-TW": "每張增加 30 天，帳號內所有角色共用期限；離線也計時。",
+      "pt-BR": "Cada cartão adiciona 30 dias para todos os personagens da conta. O tempo offline também conta.",
+      "aliases": [
+        "Each card adds 30 days. All characters share the account's expiry; offline time counts."
+      ]
+    },
+    {
+      "key": "monthly.Checking",
+      "en": "Checking monthly card...",
+      "zh-TW": "正在查詢月卡…",
+      "pt-BR": "Consultando cartão mensal...",
+      "aliases": [
+        "Checking monthly card..."
+      ]
+    },
+    {
+      "key": "monthly.Optional",
+      "en": "Monthly card is optional on this server.",
+      "zh-TW": "此伺服器目前不要求月卡。",
+      "pt-BR": "Este servidor não exige cartão mensal.",
+      "aliases": [
+        "Monthly card is optional on this server."
+      ]
+    },
+    {
+      "key": "monthly.Active",
+      "en": "Monthly card active",
+      "zh-TW": "月卡使用中",
+      "pt-BR": "Cartão mensal ativo",
+      "aliases": [
+        "Monthly card active"
+      ]
+    },
+    {
+      "key": "monthly.Required",
+      "en": "Monthly card required or expired",
+      "zh-TW": "尚未啟用月卡或已到期",
+      "pt-BR": "Cartão mensal ausente ou vencido",
+      "aliases": [
+        "Monthly card required or expired",
+        "monthlyCardRequired"
+      ]
+    },
+    {
+      "key": "monthly.Expires",
+      "en": "Expires: {0}",
+      "zh-TW": "有效期限：{0}",
+      "pt-BR": "Válido até: {0}",
+      "aliases": [
+        "Expires: {0}"
+      ]
+    },
+    {
+      "key": "monthly.Paste",
+      "en": "Paste activation code (Ctrl+V)",
+      "zh-TW": "貼上啟用碼 (Ctrl+V)",
+      "pt-BR": "Cole o código de ativação (Ctrl+V)",
+      "aliases": [
+        "Paste activation code (Ctrl+V)"
+      ]
+    },
+    {
+      "key": "monthly.Redeeming",
+      "en": "Redeeming...",
+      "zh-TW": "正在兌換…",
+      "pt-BR": "Ativando...",
+      "aliases": [
+        "Redeeming..."
+      ]
+    },
+    {
+      "key": "monthly.Redeem",
+      "en": "Redeem",
+      "zh-TW": "兌換",
+      "pt-BR": "Ativar",
+      "aliases": [
+        "Redeem"
+      ]
+    },
+    {
+      "key": "monthly.Refresh",
+      "en": "Check status",
+      "zh-TW": "查詢狀態",
+      "pt-BR": "Consultar status",
+      "aliases": [
+        "Check status"
+      ]
+    },
+    {
+      "key": "monthly.Activated",
+      "en": "Monthly card activated. Your expiry has been updated.",
+      "zh-TW": "月卡已啟用，有效期限已更新。",
+      "pt-BR": "Cartão ativado. A validade foi atualizada.",
+      "aliases": [
+        "Monthly card activated. Your expiry has been updated.",
+        "monthlyCardRedeemed"
+      ]
+    },
+    {
+      "key": "monthly.AlreadyUsed",
+      "en": "This code was already redeemed; it will not add time again.",
+      "zh-TW": "此啟用碼已兌換，不會重複增加時間。",
+      "pt-BR": "Este código já foi ativado e não adicionará tempo novamente.",
+      "aliases": [
+        "This code was already redeemed; it will not add time again.",
+        "monthlyCardAlreadyRedeemed"
+      ]
+    },
+    {
+      "key": "monthly.Unconfirmed",
+      "en": "Result not confirmed. Check status or retry the same code.",
+      "zh-TW": "結果尚未確認，請查詢狀態或重試同一啟用碼。",
+      "pt-BR": "Resultado não confirmado. Consulte o status ou tente o mesmo código novamente.",
+      "aliases": [
+        "Result not confirmed. Check status or retry the same code.",
+        "monthlyCardResultUnconfirmed"
+      ]
+    },
+    {
+      "key": "monthly.InvalidCode",
+      "en": "Activation code is invalid or belongs to another account.",
+      "zh-TW": "啟用碼無效或不屬於此帳號。",
+      "pt-BR": "Código inválido ou vinculado a outra conta.",
+      "aliases": [
+        "Activation code is invalid or belongs to another account.",
+        "monthlyCardCodeInvalid"
+      ]
+    },
+    {
+      "key": "monthly.CodeExpired",
+      "en": "Activation code has expired. Contact the operator.",
+      "zh-TW": "啟用碼已到期，請聯絡管理員。",
+      "pt-BR": "O código venceu. Contate o administrador.",
+      "aliases": [
+        "Activation code has expired. Contact the operator.",
+        "monthlyCardCodeExpired"
+      ]
+    },
+    {
+      "key": "monthly.LoginRequired",
+      "en": "Please log in again to manage your monthly card.",
+      "zh-TW": "請重新登入以管理月卡。",
+      "pt-BR": "Entre novamente para gerenciar o cartão mensal.",
+      "aliases": [
+        "Please log in again to manage your monthly card.",
+        "monthlyCardAuthenticationRequired",
+        "monthlyCardAccountMissing"
+      ]
+    },
+    {
+      "key": "monthly.Banned",
+      "en": "Account is blocked. Contact the operator.",
+      "zh-TW": "帳號已停用，請聯絡管理員。",
+      "pt-BR": "Conta bloqueada. Contate o administrador.",
+      "aliases": [
+        "Account is blocked. Contact the operator.",
+        "monthlyCardAccountBanned"
+      ]
+    },
+    {
+      "key": "monthly.Unavailable",
+      "en": "Monthly card service is unavailable. Please try again later.",
+      "zh-TW": "月卡服務暫時不可用，請稍後再試。",
+      "pt-BR": "Serviço de cartão mensal indisponível. Tente mais tarde.",
+      "aliases": [
+        "Monthly card service is unavailable. Please try again later.",
+        "monthlyCardServiceUnavailable",
+        "monthlyCardIssuanceUnavailable",
+        "monthlyCardIssuanceKeyChanged",
+        "monthlyCardLedgerFull",
+        "monthlyCardRequestIdInvalid"
+      ]
     }
   ]
 }

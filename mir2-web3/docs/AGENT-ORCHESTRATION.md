@@ -1,5 +1,13 @@
 # Agent Orchestration
 
+> 2026-10-06 user authorizes account monthly access. Root remains the sole
+> writer in the isolated classic lane. Server ledger9/9, real shared HTTP/WS
+> and expired-resume3/3, native wire1/1 and nine-locale modal state5/5 pass.
+> GPU layout and isolated PostgreSQL acceptance are in progress. Required
+> access defaults OFF; no public feed, live Gateway, D/F install or player-save
+> mutation. This additive feature does not complete the prior P1–P8 Goal.
+> [Rules, operator flow and verification](MONTHLY-CARD-ACCESS-20261006.md).
+
 > 2026-10-06 root completes the isolated cold-seven test-support slice.
 > Original151 D021 slots and all non-position fields/respawn policies stay
 > intact; six fixture checks pass. Exact owned network06 qualifies Wizard/

@@ -56,6 +56,7 @@ fn panic_payload_message(payload: &(dyn Any + Send)) -> String {
 
 #[derive(Clone)]
 pub(crate) struct GatewayZoneMovementIngress {
+    monthly_access: Option<(GatewayConfig, String)>,
     ingress: SharedZoneMovementIngress,
     zone_owner_lease: ZoneOwnerLease,
     zone_owner_lease_authority: Option<SharedZoneOwnerLeaseAuthority>,
@@ -69,6 +70,13 @@ impl GatewayZoneMovementIngress {
     ) -> Result<Option<WorldCommandExecution>, String> {
         if let Some(authority) = &self.zone_owner_lease_authority {
             authority.validate_owner_lease(&self.zone_owner_lease)?;
+        }
+        if let Some((config, account_id)) = &self.monthly_access {
+            if !config.monthly_card_can_enter_cached(account_id, mir2_simulation::monthly_card::monthly_card_now_ms())? {
+                // Fall back to the serial owner path so expiry saves and leaves
+                // the Zone; a fast-path packet cannot extend expired access.
+                return Ok(None);
+            }
         }
         let execution = self.ingress.try_execute(packet)?;
         if let (Some(publisher), Some(execution)) =
@@ -173,6 +181,15 @@ impl fmt::Debug for GatewaySession {
 }
 
 impl GatewaySession {
+    pub(crate) fn monthly_card_config(&self) -> Result<&GatewayConfig, String> {
+        self.routing_context.as_ref().map(|context| &context.config).ok_or_else(|| "monthlyCardServiceUnavailable".into())
+    }
+    pub(crate) fn monthly_card_expiry_pending(&self, account_id: Option<&str>) -> bool {
+        self.routing_context.as_ref().filter(|context| context.config.monthly_card_policy.required)
+            .zip(account_id).is_some_and(|(context, account)| !context.config.monthly_card_can_enter_cached(
+                account, mir2_simulation::monthly_card::monthly_card_now_ms(),
+            ).unwrap_or(false))
+    }
     pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
         self.runtime.supports_magic_key_assignment(spell,key,old_key)
     }
@@ -422,6 +439,8 @@ impl GatewaySession {
         // on the owner cadence; topology-changing movement still runs the atomic
         // rebind transaction before the next command.
         shared_zone_movement_ingress(&self.runtime).map(|ingress| GatewayZoneMovementIngress {
+            monthly_access: self.routing_context.as_ref().filter(|context| context.config.monthly_card_policy.required)
+                .and_then(|context| self.active_identity().map(|identity| (context.config.clone(), identity.account_id))),
             ingress,
             zone_owner_lease: self.zone_owner_lease.clone(),
             zone_owner_lease_authority: self.zone_owner_lease_authority.clone(),

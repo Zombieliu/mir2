@@ -371,6 +371,10 @@ struct NativeShellContent;
 
 #[derive(Component)]
 pub(crate) enum NativeShellButton {
+    OpenMonthlyCard,
+    RedeemMonthlyCard,
+    CloseMonthlyCard,
+    FocusMonthlyCard,
     CancelCreate,
     SubmitCreate,
     SelectCreateClass(u8),
@@ -612,7 +616,7 @@ fn shell_pointer_input(
 
     for (interaction, action) in select_interactions.iter() {
         if *interaction != Interaction::Pressed
-            || shell.screen != NativeShellScreen::CharacterSelect
+            || shell.screen != NativeShellScreen::CharacterSelect || shell.monthly_card.open
         {
             continue;
         }
@@ -680,7 +684,13 @@ fn shell_pointer_input(
             continue;
         }
 
+        if shell.monthly_card.open && !matches!(action, NativeShellButton::OpenMonthlyCard
+            | NativeShellButton::RedeemMonthlyCard | NativeShellButton::CloseMonthlyCard | NativeShellButton::FocusMonthlyCard) { continue; }
         match action {
+            NativeShellButton::OpenMonthlyCard => { apply_and_queue(&mut shell, &mut queue, NativeUiIntent::OpenMonthlyCard); }
+            NativeShellButton::RedeemMonthlyCard => { apply_and_queue(&mut shell, &mut queue, NativeUiIntent::RedeemMonthlyCard); }
+            NativeShellButton::CloseMonthlyCard => { let _ = shell.apply_ui_intent(NativeUiIntent::CloseMonthlyCard); }
+            NativeShellButton::FocusMonthlyCard => { shell.monthly_card.focus = crate::native_monthly_card::MonthlyCardFocus::Code; }
             NativeShellButton::CancelCreate => {
                 let _ = shell.apply_ui_intent(NativeUiIntent::CancelCharacterCreate);
             }
@@ -806,6 +816,31 @@ fn shell_keyboard_input(
         return;
     }
     let shifted = keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight);
+    shell.monthly_card.expire_pending_request(std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH).map_or(0, |d| d.as_millis() as u64));
+    if shell.screen == NativeShellScreen::CharacterSelect && shell.monthly_card.open {
+        use crate::native_monthly_card::MonthlyCardFocus;
+        if keys.just_pressed(KeyCode::Escape) {
+            shell.apply_ui_intent(NativeUiIntent::CloseMonthlyCard); return;
+        }
+        if keys.just_pressed(KeyCode::Tab) {
+            shell.monthly_card.focus = shell.monthly_card.focus.next(shifted); return;
+        }
+        if keys.just_pressed(KeyCode::Enter) {
+            match shell.monthly_card.focus {
+                MonthlyCardFocus::Close => { shell.apply_ui_intent(NativeUiIntent::CloseMonthlyCard); },
+                MonthlyCardFocus::Refresh => { apply_and_queue(&mut shell, &mut queue, NativeUiIntent::OpenMonthlyCard); },
+                _ => { apply_and_queue(&mut shell, &mut queue, NativeUiIntent::RedeemMonthlyCard); },
+            }
+            return;
+        }
+        if !shell.monthly_card.pending && shell.monthly_card.focus == MonthlyCardFocus::Code {
+            if modifiers.control && keys.just_pressed(KeyCode::KeyA) { shell.monthly_card.code.clear(); }
+            pop_editable_tail(&mut shell.monthly_card.code, edit_delete_count);
+            shell.monthly_card.append(&typed_text);
+        }
+        return;
+    }
 
     match shell.screen {
         NativeShellScreen::Login => {
@@ -1270,6 +1305,7 @@ fn render_shell_ui(
             }
             NativeShellScreen::CharacterSelect => {
                 spawn_character_select_screen(screen, &asset_server, &model);
+                render_monthly_card(screen, &model);
             }
             NativeShellScreen::CharacterCreate => {
                 render_character_create(screen, &asset_server, &model);
@@ -2376,6 +2412,54 @@ fn action_button(
     });
 }
 
+fn render_monthly_card(parent: &mut ChildSpawnerCommands, model: &NativeShellModel) {
+    use crate::native_monthly_card::MonthlyCardFocus;
+    spawn_aux_text_button(parent, spec::CrystalRect::new(774.0, 58.0, 226.0, 36.0),
+        "Monthly Card".into(), NativeShellButton::OpenMonthlyCard, true, false);
+    if !model.monthly_card.open { return; }
+    let card = &model.monthly_card;
+    parent.spawn((absolute_node(spec::CrystalRect::new(0.0, 0.0, 1024.0, 768.0)),
+        BackgroundColor(Color::srgba(0.0, 0.0, 0.0, 0.75)), GlobalZIndex(100)))
+        .with_children(|layer| {
+            spawn_localized_frame(layer, spec::CrystalRect::new(202.0, 190.0, 620.0, 390.0));
+            spawn_aux_text(layer, "Monthly Card", spec::CrystalRect::new(222.0, 207.0, 580.0, 34.0), 22.0, GOLD, Justify::Center);
+            spawn_aux_text(layer, "Each card adds 30 days. All characters share the account's expiry; offline time counts.",
+                spec::CrystalRect::new(224.0, 252.0, 576.0, 60.0), 14.0, CREAM, Justify::Left);
+            let status = match &card.status {
+                None => crate::native_i18n::tr("Checking monthly card..."),
+                Some(status) => {
+                    let label = if !status.required { "Monthly card is optional on this server." }
+                        else if status.active { "Monthly card active" } else { "Monthly card required or expired" };
+                    let mut text = crate::native_i18n::tr(label);
+                    if let Some(expires) = status.expires_at_ms.and_then(|ms| i64::try_from(ms).ok())
+                        .and_then(chrono::DateTime::<chrono::Utc>::from_timestamp_millis) {
+                        text.push('\n');
+                        text.push_str(&crate::native_i18n::tr("Expires: {0}").replace("{0}", &expires.format("%Y-%m-%d %H:%M UTC").to_string()));
+                    }
+                    text
+                }
+            };
+            spawn_aux_text(layer, &status, spec::CrystalRect::new(224.0, 318.0, 576.0, 58.0), 14.0, CREAM, Justify::Left);
+            layer.spawn((absolute_node(spec::CrystalRect::new(224.0, 384.0, 576.0, 42.0)),
+                BackgroundColor(Color::BLACK), BorderColor::all(GOLD), Button, NativeShellButton::FocusMonthlyCard))
+                .with_children(|field| {
+                    field.spawn((Node { padding: UiRect::all(Val::Px(8.0)), ..default() },
+                        Text::new(if card.code.is_empty() { crate::native_i18n::tr("Paste activation code (Ctrl+V)") } else { card.code.clone() }),
+                        body_font(15.0), TextColor(CREAM)));
+                });
+            if let Some(message) = &card.message {
+                spawn_aux_text(layer, message, spec::CrystalRect::new(224.0, 439.0, 576.0, 65.0), 14.0, GOLD, Justify::Left);
+            }
+            spawn_aux_text_button(layer, spec::CrystalRect::new(224.0, 523.0, 180.0, 36.0),
+                if card.pending { "Redeeming..." } else { "Redeem" }.into(), NativeShellButton::RedeemMonthlyCard,
+                card.can_submit(), card.focus == MonthlyCardFocus::Redeem);
+            spawn_aux_text_button(layer, spec::CrystalRect::new(422.0, 523.0, 182.0, 36.0), "Check status".into(),
+                NativeShellButton::OpenMonthlyCard, !card.pending, card.focus == MonthlyCardFocus::Refresh);
+            spawn_aux_text_button(layer, spec::CrystalRect::new(622.0, 523.0, 180.0, 36.0), "Close".into(),
+                NativeShellButton::CloseMonthlyCard, true, card.focus == MonthlyCardFocus::Close);
+        });
+}
+
 fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
     let mut button = parent.spawn((
         Node {
@@ -2441,6 +2525,33 @@ mod tests {
             .iter(app.world())
             .map(|text| text.0.clone())
             .collect()
+    }
+
+    #[test]
+    fn monthly_card_modal_is_localized_in_all_nine_languages_and_preserves_the_code() {
+        use crate::native_i18n::{self, Locale};
+        let mut model = NativeShellModel::default();
+        model.screen = NativeShellScreen::CharacterSelect;
+        model.monthly_card.open = true;
+        model.monthly_card.code = format!("MC1-{}", "A".repeat(43));
+        let expected = model.clone();
+        let mut app = multilingual_shell_app(model);
+        for locale in Locale::ALL {
+            native_i18n::with_locale(locale, || {
+                app.update();
+                let texts = shell_texts(&mut app);
+                for text in ["Monthly Card", "Redeem", "Check status", "Checking monthly card..."] {
+                    assert!(texts.contains(&native_i18n::tr(text)), "missing {text} in {locale:?}");
+                }
+                assert!(texts.contains(&expected.monthly_card.code));
+                assert_eq!(app.world().resource::<NativeShellModel>(), &expected);
+                assert!(app.world_mut().query::<&GlobalZIndex>().iter(app.world()).any(|z| z.0 == 100));
+            });
+        }
+        let mut model = expected;
+        model.characters = vec![CharacterSummary::new(5, "OwnHero", 7, "Warrior", "Male")];
+        model.selected_character_index = Some(5);
+        assert!(!model.apply_ui_intent(NativeUiIntent::StartGame));
     }
 
     #[test]

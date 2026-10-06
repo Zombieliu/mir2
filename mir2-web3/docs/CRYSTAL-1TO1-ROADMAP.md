@@ -1,5 +1,14 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-06 additive monthly access Candidate: account-wide30days, offline
+> calendar, deterministic operator order/code, atomic spent receipt, native
+> expiry/redeem/status modal and server StartGame/resume/idle/fast-path checks.
+> Ledger9/9, real HTTP/shared WS/resume3/3, native wire1/1 and modal state5/5
+> pass; GPU and isolated PostgreSQL proof remain in progress. It does not
+> grant classic parity or close mining/weapon-upgrade P6. Public feed/realm
+> and REQUIRED=0 remain unchanged; online cash payment is not integrated.
+> [Monthly implementation evidence](MONTHLY-CARD-ACCESS-20261006.md).
+
 > 2026-10-06 prepared P1 network06 qualifies seven genuine attackers for normal
 > Wizard/Taoist melee escape at531/496ms with actual pending damage and5s quiet.
 > Warrior remains unqualified; all native/Magic/held/save/rollout/fullP1 gates

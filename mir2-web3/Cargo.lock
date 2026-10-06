@@ -4803,6 +4803,7 @@ dependencies = [
  "bevy_ecs 0.17.3",
  "bevy_tasks 0.17.3",
  "flate2",
+ "hmac 0.13.0",
  "libc",
  "mir2-game-data",
  "mir2-protocol",

@@ -14282,6 +14282,12 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
     }
 
     fn execute(&mut self, command: WorldCommand) -> Result<Vec<ServerPacket>, String> {
+        if !matches!(&command, WorldCommand::ClientPacket(ClientPacket::LogOut | ClientPacket::Disconnect))
+            && self.inner.monthly_card_access_expired()? {
+            // Keep the shared departure, trade rollback, authoritative transform
+            // synchronization and durable save together on the existing path.
+            return self.execute(WorldCommand::ClientPacket(ClientPacket::LogOut));
+        }
         self.validate_shared_magic_actor(&command)?;
         let conquest_npc_action = matches!(&command, WorldCommand::ClientPacket(ClientPacket::CallNpc { key, .. }) if key.starts_with("@sabuk:"));
         self.inner.enable_shared_guild_authority();

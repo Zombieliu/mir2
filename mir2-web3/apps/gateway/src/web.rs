@@ -83,6 +83,8 @@ use crate::{GatewayConfig, GatewaySession, ZoneRegistry, ZoneTopology};
 
 type WebSocketSender = futures_util::stream::SplitSink<WebSocket, Message>;
 type SharedWebSocketSender = Arc<AsyncMutex<WebSocketSender>>;
+#[path = "web_monthly_card.rs"]
+mod monthly_card;
 type WebSocketReceiver = futures_util::stream::SplitStream<WebSocket>;
 type SharedZoneMovementIngressSlot = Arc<RwLock<Option<GatewayZoneMovementIngress>>>;
 type SharedSerialExecutionGate = Arc<AsyncRwLock<()>>;
@@ -1570,6 +1572,8 @@ impl ReconnectSessionStore {
 #[derive(Debug, Deserialize)]
 #[serde(tag = "type", rename_all = "camelCase")]
 enum BrowserCommand {
+    MonthlyCardStatus,
+    RedeemMonthlyCard { code: monthly_card::RedeemCode, #[serde(rename = "requestId")] request_id: u64 },
     ClientVersion,
     ClientCapabilities {
         capabilities: Vec<String>,
@@ -2237,6 +2241,8 @@ enum QaControlAction {
 
 #[derive(Debug, Clone)]
 enum SessionAction {
+    MonthlyCardStatus,
+    RedeemMonthlyCard { code: monthly_card::RedeemCode, request_id: u64 },
     Packet(ClientPacket),
     GameShopBuy {
         request_id: Option<String>,
@@ -2704,6 +2710,7 @@ pub async fn serve_web_gateway_with_zone_registry(
             post(ai_distribution_heartbeat),
         )
         .route("/ai-live/audio/{clip}", get(ai_live_audio))
+        .merge(monthly_card::router())
         .route("/ws", get(ws_upgrade))
         .with_state(state);
 
@@ -5319,6 +5326,9 @@ async fn handle_socket_work(
     }
     let mut runtime_tick = tokio::time::interval(gateway_runtime_tick_interval());
     runtime_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let monthly_access_enabled = session.monthly_card_config().is_ok_and(|config| config.monthly_card_policy.required);
+    let mut monthly_access_tick = tokio::time::interval(Duration::from_secs(1));
+    monthly_access_tick.set_missed_tick_behavior(MissedTickBehavior::Delay);
     let mut spectator_publish_tick = tokio::time::interval(Duration::from_millis(
         spectator.config().capture_interval_ms,
     ));
@@ -5635,6 +5645,14 @@ async fn handle_socket_work(
                 if !first_post_resume_identity_check_pending {
                     socket_authenticated.store(authenticated, Ordering::Release);
                 }
+                if matches!(&action, SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. }) {
+                    let reply = tokio::task::block_in_place(|| monthly_card::socket_reply(
+                        session, &identity, active_identity_session.as_ref(), authenticated,
+                        authenticated_account_id.as_deref(), &action,
+                    ));
+                    if sender.lock().await.send(Message::Text(reply.to_string().into())).await.is_err() { return; }
+                    continue;
+                }
                 let native_game_shop_request = if native_game_shop.opted_in {
                     match native_game_shop_request_from_action(&action) {
                         Some(Ok(request)) => {
@@ -5687,7 +5705,8 @@ async fn handle_socket_work(
                     &action,
                     SessionAction::Packet(ClientPacket::StartGame { .. })
                 );
-                let leaves_world = is_explicit_session_leave_action(&action);
+                let leaves_world = is_explicit_session_leave_action(&action)
+                    || session.monthly_card_expiry_pending(authenticated_account_id.as_deref());
                 let disconnects = matches!(&action, SessionAction::Packet(ClientPacket::Disconnect));
                 let leaving_route = leaves_world.then(|| {
                     tokio::task::block_in_place(|| OwnedSessionRoute::capture(session))
@@ -6105,7 +6124,7 @@ async fn handle_socket_work(
                 if starts_game && active_identity.is_some() {
                     *explicit_world_leave = ExplicitWorldLeaveState::default();
                 }
-                if leaves_world || active_identity.is_none() {
+                if explicit_world_leave.completed || active_identity.is_none() {
                     chat_presence = None;
                 }
                 drop(action_capacity_permit);
@@ -6119,6 +6138,9 @@ async fn handle_socket_work(
                 if pending_active_session_permit.is_some() && active_identity.is_some() {
                     *active_session_permit = pending_active_session_permit.take();
                 }
+                // A denied StartGame must release its reservation before any
+                // socket flush can block on a slow reader.
+                drop(pending_active_session_permit.take());
                 let force_route_refresh = start_game_character_index.is_some();
                 let next_authenticated = update_authenticated_state(authenticated, &responses);
                 if !authenticated && !next_authenticated {
@@ -6208,6 +6230,7 @@ async fn handle_socket_work(
                     _injection_registration = None;
                 }
                 authenticated = next_authenticated;
+                let send_monthly_status = authenticated && (login_identity_context.is_some() || starts_game || responses.iter().any(|p| matches!(p, ServerPacket::LogOutSuccess { .. })));
                 socket_authenticated.store(authenticated, Ordering::Release);
                 // Keep the live registration stable for the lifetime of one
                 // viewport. MapInformation is the ordinary portal/scroll
@@ -6265,6 +6288,11 @@ async fn handle_socket_work(
                     )
                     .await;
                     return;
+                }
+                if send_monthly_status {
+                    if let Some(account) = authenticated_account_id.as_deref() {
+                        if monthly_card::send_status(&sender, session, account).await.is_err() { return; }
+                    }
                 }
                 if send_world_snapshot_with_skill_ack(&sender, session, skill_key_request.as_ref(), skill_key_permitted).await.is_err() {
                     return;
@@ -6456,7 +6484,12 @@ async fn handle_socket_work(
                     last_ai_live_segment_id = latest_segment_id;
                 }
             }
-            _ = runtime_tick.tick() => {
+            _ = async {
+                tokio::select! {
+                    _ = runtime_tick.tick() => {},
+                    _ = monthly_access_tick.tick(), if monthly_access_enabled && active_session_permit.is_some() => {},
+                }
+            } => {
                 let now = Instant::now();
                 if authenticated
                     && now.duration_since(last_identity_revocation_check) >= Duration::from_secs(5)
@@ -6524,13 +6557,16 @@ async fn handle_socket_work(
                     let _ = send_error_message(&sender, &error).await;
                     return;
                 }
-                if now < runtime_tick_deferred_until {
+                let monthly_expiry_pending = session.monthly_card_expiry_pending(authenticated_account_id.as_deref());
+                if now < runtime_tick_deferred_until && !monthly_expiry_pending {
                     continue;
                 }
                 // Tick can complete a queued portal movement and rebuild the
                 // viewport. Serialize its bootstrap/re-registration/flush just
                 // like a player action so live ACKs cannot precede the landing.
                 let _serial_execution = serial_execution_gate.write().await;
+                let monthly_expiry_route = monthly_expiry_pending
+                    .then(|| tokio::task::block_in_place(|| OwnedSessionRoute::capture(session))).flatten();
                 let responses = match catch_gateway_panic("web session tick", || {
                     let _slow_stage = GatewaySlowStage::start("runtime_tick.execute");
                     tokio::task::block_in_place(|| {
@@ -6552,6 +6588,20 @@ async fn handle_socket_work(
                         return;
                     }
                 };
+                let monthly_logged_out = monthly_expiry_route.is_some()
+                    && responses.iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. }));
+                if monthly_logged_out {
+                    let release = tokio::task::block_in_place(|| explicit_world_leave.finish(
+                        session_cache.as_ref(), session, monthly_expiry_route, &responses,
+                        &background_route_refresh_record,
+                    ));
+                    if let Err(error) = release { let _ = send_error_message(&sender, &error).await; return; }
+                    native_resume.disable_and_revoke(reconnect_sessions.as_ref());
+                    active_session_permit.take(); chat_presence = None;
+                    if tokio::task::block_in_place(|| refresh_zone_live_outbound(session, authenticated, true,
+                        &movement_ingress, &zone_outbound_sender, active_zone_outbound_registration_id.as_ref(),
+                        &mut _zone_live_outbound_registration)).is_err() { return; }
+                }
                 let map_changed = responses_require_resume_rotation(&responses);
                 if responses_begin_zone_bootstrap(&responses) {
                     if let Err(error) = tokio::task::block_in_place(|| {
@@ -6607,6 +6657,11 @@ async fn handle_socket_work(
                 if let Err(error) = flush_result {
                     let _ = send_error_message(&sender, &error).await;
                     return;
+                }
+                if monthly_logged_out {
+                    if let Some(account) = authenticated_account_id.as_deref() {
+                        if monthly_card::send_status(&sender, session, account).await.is_err() { return; }
+                    }
                 }
                 if map_changed
                     && maybe_issue_native_resume_credential(
@@ -7333,6 +7388,7 @@ fn execute_session_action(
         SessionAction::QaControl { token, action } => {
             execute_qa_control_action(session, &token, action)
         }
+        SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. } => Err("monthly cards require the authenticated socket seam".into()),
         SessionAction::SetLanguage { language } => session.set_language(&language).map(|_| vec![]),
         SessionAction::Tick => Ok(session.tick()),
     }
@@ -7463,6 +7519,7 @@ fn execute_production_session_action(
         SessionAction::QaControl { .. } => {
             return Err("QA control is not allowed on the production player path".to_string());
         }
+        SessionAction::MonthlyCardStatus | SessionAction::RedeemMonthlyCard { .. } => return Err("monthly cards require the authenticated socket seam".into()),
         SessionAction::SetLanguage { language } => session
             .execute_production_player_command_with_zone_owner_lease(
                 &zone_owner_lease,
@@ -8524,6 +8581,8 @@ fn browser_command_to_action(command: BrowserCommand) -> Result<SessionAction, S
         BrowserCommand::QaControl { token, action } => {
             Ok(SessionAction::QaControl { token, action })
         }
+        BrowserCommand::MonthlyCardStatus => Ok(SessionAction::MonthlyCardStatus),
+        BrowserCommand::RedeemMonthlyCard { code, request_id } => Ok(SessionAction::RedeemMonthlyCard { code, request_id }),
         BrowserCommand::SetLanguage { language } => Ok(SessionAction::SetLanguage { language }),
         BrowserCommand::Tick => Ok(SessionAction::Tick),
         BrowserCommand::LogOut => Ok(SessionAction::Packet(ClientPacket::LogOut)),
@@ -9301,6 +9360,10 @@ fn validate_and_prepare_native_resume<'a, PreparedZone>(
     let reservation = reconnect_sessions
         .reserve_by_credential(credential, &binding, now_ms)
         .ok_or(NativeResumePrepareError::Unavailable)?;
+    if !native_resume_monthly_card_is_active(reservation.session(), &binding.account_id, now_ms) {
+        reservation.discard_and_revoke();
+        return Err(NativeResumePrepareError::Unavailable);
+    }
     prepare_route(reservation.session()).map_err(NativeResumePrepareError::Route)?;
     let prepared_zone =
         prepare_zone(reservation.session()).map_err(NativeResumePrepareError::Zone)?;
@@ -9391,7 +9454,8 @@ fn revalidate_and_commit_prepared_native_resume_with_hooks<PreparedZone>(
     ),
     NativeResumeCommitError,
 > {
-    if !native_resume_identity_is_active(session_cache, identity, &verified, now_ms) {
+    if !native_resume_identity_is_active(session_cache, identity, &verified, now_ms)
+        || !native_resume_monthly_card_is_active(reservation.session(), &verified.account_id, now_ms) {
         // Identity revocation is terminal for this credential family. The
         // prepared Zone value drops normally, while the reservation explicitly
         // discards its unusable lease and releases both capacity permits.
@@ -9427,12 +9491,17 @@ fn revalidate_and_commit_prepared_native_resume_with_hooks<PreparedZone>(
         identity,
         &verified,
         gateway_unix_ms().max(now_ms),
-    ) {
+    ) || !native_resume_monthly_card_is_active(&restore.session, &verified.account_id, gateway_unix_ms().max(now_ms)) {
         drop(prepared_zone);
         drop(restore);
         return Err(NativeResumeCommitError::IdentityUnavailable);
     }
     Ok((restore, binding, verified, prepared_zone))
+}
+
+fn native_resume_monthly_card_is_active(session: &GatewaySession, account: &str, now_ms: u64) -> bool {
+    session.monthly_card_config().is_ok_and(|config| !config.monthly_card_policy.required
+        || config.refresh_monthly_card_status(account, now_ms).is_ok_and(|status| status.can_enter_game))
 }
 
 fn enforce_first_post_resume_action_identity(
@@ -12573,6 +12642,8 @@ mod tests {
     use tokio_tungstenite::{MaybeTlsStream, WebSocketStream};
 
     static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
+
+    include!("web_monthly_card_tests.rs");
 
     fn snapshot_test_spectator(enabled: bool) -> crate::spectator::SpectatorHub {
         crate::spectator::SpectatorHub::new(crate::spectator::SpectatorConfig {

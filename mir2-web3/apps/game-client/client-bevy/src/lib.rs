@@ -37,6 +37,8 @@ pub mod mail_service;
 #[cfg(feature = "native-ui")]
 pub mod native_shell;
 #[cfg(feature = "native-ui")]
+pub mod native_monthly_card;
+#[cfg(feature = "native-ui")]
 pub mod native_shell_ui;
 #[cfg(feature = "native-ui")]
 pub mod native_i18n;

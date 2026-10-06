@@ -4834,6 +4834,7 @@ fn dispatch_shell_event(
             }),
             _ => None,
         },
+        InboundEvent::MonthlyCard(reply) => Some(ShellGatewayEvent::MonthlyCardReply(reply.clone())),
         InboundEvent::Error(error) => Some(ShellGatewayEvent::OperationFailure {
             message: account_feedback::gateway_error_message(error),
         }),

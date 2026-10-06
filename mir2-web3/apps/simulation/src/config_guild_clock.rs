@@ -354,6 +354,12 @@ pub(super) fn validate_store(store: &AccountStore) -> Result<(), String> {
     if store.schema_version > ACCOUNT_STORE_SCHEMA_VERSION {
         return Err("unsupported future account-store schema".into());
     }
+    for account in store.accounts.values() {
+        if let Some(card) = &account.monthly_card {
+            if store.schema_version < 7 { return Err("legacy account store cannot contain monthly card authority".into()); }
+            card.validate()?;
+        }
+    }
     if store.schema_version < 4 && store.guild_clock.is_some() {
         return Err("legacy account store cannot contain guild clock authority".into());
     }

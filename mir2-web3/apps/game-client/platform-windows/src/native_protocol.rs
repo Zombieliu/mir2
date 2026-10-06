@@ -131,6 +131,8 @@ pub enum NativeOutboundCommand {
         hero: bool,
     },
     ClientVersion,
+    MonthlyCardStatus,
+    RedeemMonthlyCard { code: String, #[serde(rename = "requestId")] request_id: u64 },
     ClientCapabilities {
         capabilities: Vec<String>,
     },
@@ -636,6 +638,8 @@ impl NativeOutboundCommand {
             Self::Observe { .. } => "observe",
             Self::Inspect { .. } => "inspect",
             Self::ClientVersion => "clientVersion",
+            Self::MonthlyCardStatus => "monthlyCardStatus",
+            Self::RedeemMonthlyCard { .. } => "redeemMonthlyCard",
             Self::ClientCapabilities { .. } => "clientCapabilities",
             Self::ResumeSession { .. } => "resumeSession",
             Self::Login { .. } => "login",
@@ -955,6 +959,7 @@ pub enum PacketEvent {
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum InboundEvent {
+    MonthlyCard(mir2_client_bevy::native_monthly_card::MonthlyCardReply),
     Packet(PacketEvent),
     Error(ErrorEvent),
     ResumeCredential(ResumeCredentialEvent),
@@ -1013,6 +1018,8 @@ pub fn parse_inbound_value(value: Value) -> Result<InboundEvent, ParseInboundErr
         .map(str::to_owned);
 
     match event_type.as_str() {
+        "monthlyCard" => serde_json::from_value(payload).map(InboundEvent::MonthlyCard)
+            .map_err(|error| ParseInboundError::InvalidJson(format!("invalid monthly card response: {error}"))),
         "packet" => parse_packet(packet.as_deref(), payload),
         "error" => {
             // The public Gateway sends flat error envelopes. Keep the older
@@ -2515,5 +2522,20 @@ mod tests {
 
         let malformed = parse_inbound_event("{not json");
         assert!(malformed.is_err());
+    }
+
+    #[test]
+    fn monthly_card_wire_keeps_request_correlation_and_redacts_vouchers() {
+        let code = format!("MC1-{}", "A".repeat(43));
+        let command = NativeOutboundCommand::RedeemMonthlyCard { code: code.clone(), request_id: 7 };
+        let wire = serde_json::to_value(&command).unwrap();
+        assert_eq!(wire["type"], "redeemMonthlyCard");
+        assert_eq!(wire["requestId"], 7);
+        assert_eq!(wire["code"], code);
+        assert!(!format!("{command:?}").contains(&code));
+        let event = parse_inbound_event(r#"{"type":"monthlyCard","payload":{"operation":"redeem","requestId":7,"replayed":false,"status":{"required":true,"active":true,"expiresAtMs":9999,"serverNowMs":1,"remainingMs":9998,"canEnterGame":true}}}"#).unwrap();
+        let InboundEvent::MonthlyCard(reply) = event else { panic!("monthly card reply missing"); };
+        assert_eq!(reply.request_id, Some(7));
+        assert!(reply.status.unwrap().can_enter_game);
     }
 }

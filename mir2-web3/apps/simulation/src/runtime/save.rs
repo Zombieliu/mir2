@@ -3839,6 +3839,11 @@ impl SimulationSession {
                     expiry_binary_datetime: ban.ban_until_ms.unwrap_or_default() as i64,
                 }];
             }
+            if config.monthly_card_policy.required && !config.refresh_monthly_card_status(
+                &account_id, crate::monthly_card::monthly_card_now_ms(),
+            ).is_ok_and(|status| status.can_enter_game) {
+                return vec![ServerPacket::StartGame { result: 2, resolution: 0 }];
+            }
             character_save_for_start(&config, &account_id, character_index)
         };
 
@@ -3913,6 +3918,11 @@ impl SimulationSession {
                 reason: ban.reason,
                 expiry_binary_datetime: ban.ban_until_ms.unwrap_or_default() as i64,
             }];
+        }
+        if config.monthly_card_policy.required && !config.refresh_monthly_card_status(
+            &account_id, crate::monthly_card::monthly_card_now_ms(),
+        ).is_ok_and(|status| status.can_enter_game) {
+            return vec![ServerPacket::StartGame { result: 2, resolution: 0 }];
         }
         let mut packets = self.build_active_character_bootstrap(&character);
         super::packets::apply_start_game_dynamic_game_shop_stock(self.app.world(), &mut packets);

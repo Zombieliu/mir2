@@ -1,5 +1,14 @@
 # Crystal Server Parity
 
+> 2026-10-06 monthly access is now an additive Candidate feature rather than
+> an absent source capability: account-wide30-day wall clock, atomic receipts,
+> renewals, protected issuance and authenticated native/HTTP redemption;
+> StartGame/resume/fast movement and idle saved logout enforce required access.
+> Ledger9 and real shared HTTP/WS/resume3 pass. PostgreSQL acceptance is pending;
+> no original Crystal parity percentage or public realm acceptance is gained.
+> REQUIRED defaults OFF; currency credits remain separate from access time.
+> [Implementation details](MONTHLY-CARD-ACCESS-20261006.md).
+
 > 2026-10-06 bounded cold-seven fixture/network verification does not increase
 > production parity. Test-support only activates78 dormant original D021 slots
 > and prepares original actor positions, leaving all native/respawn fields intact.

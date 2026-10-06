@@ -1,5 +1,14 @@
 # Agent Task Queue
 
+> 2026-10-06 user requests a monthly time card. Candidate implements account-
+> wide30-day calendar access, code issuance/redemption, renewal, server world
+> admission and saved expiry logout. Ledger9, actual shared HTTP/WS/resume3,
+> native wire1 and nine-language modal state5 pass. GPU/isolated PostgreSQL
+> verification remain in progress; REQUIRED=0 and public versions unchanged.
+> Earlier point-card-absent audit is superseded for this Candidate only.
+> Original mining/Windows weapon-upgrade P6 remains open.
+> [Implementation and remaining activation scope](MONTHLY-CARD-ACCESS-20261006.md).
+
 > 2026-10-06 bounded P1 cold-geometry network06 now has two qualified normal
 > attack escapes: Wizard531ms/Taoist496ms, actual pending damage and5s quiet.
 > Warrior has no qualifying positive-damage window with ordinary starter gear;

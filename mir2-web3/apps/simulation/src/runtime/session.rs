@@ -204,6 +204,18 @@ pub enum SharedItemRentalDelivery {
 }
 
 impl SimulationSession {
+    /// Checked before gameplay, including idle ticks. The shared wrapper applies
+    /// its existing authoritative logout/save path when this becomes true.
+    pub fn monthly_card_access_expired(&self) -> Result<bool, String> {
+        let config = &self.app.world().resource::<RuntimeConfigResource>().config;
+        if !config.monthly_card_policy.required { return Ok(false); }
+        let Some(identity) = self.active_identity() else { return Ok(false); };
+        let now = crate::monthly_card::monthly_card_now_ms();
+        if config.monthly_card_can_enter_cached(&identity.account_id, now)? { return Ok(false); }
+        // A renewal on another Gateway must be observed before logging out an
+        // otherwise eligible player. The database is read only at this boundary.
+        Ok(!config.refresh_monthly_card_status(&identity.account_id, now)?.can_enter_game)
+    }
     pub fn supports_magic_key_assignment(&self,spell:mir2_protocol::Spell,key:u8,old_key:u8)->bool{
         super::skills::supports_magic_key_assignment(self.app.world(),spell,key,old_key)
     }

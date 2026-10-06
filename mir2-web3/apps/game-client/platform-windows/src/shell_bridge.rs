@@ -242,6 +242,11 @@ pub fn forward_native_ui_intents(
                     character_index: idx,
                 })
             }
+            NativeUiIntent::OpenMonthlyCard => Some(NativeOutboundCommand::MonthlyCardStatus),
+            NativeUiIntent::RedeemMonthlyCard if shell.monthly_card.pending && !shell.monthly_card.command_sent => {
+                shell.monthly_card.command_sent = true;
+                Some(NativeOutboundCommand::RedeemMonthlyCard { code: shell.monthly_card.code.clone(), request_id: shell.monthly_card.request_id })
+            }
             NativeUiIntent::StartGame
                 if shell.start_game_request_in_flight && !start_game_command_sent =>
             {
@@ -283,7 +288,9 @@ pub fn forward_native_ui_intents(
             | NativeUiIntent::SafeKeyRandom
             | NativeUiIntent::SafeKeyEnter
             | NativeUiIntent::ConfirmDeleteCharacter
-            | NativeUiIntent::CancelDeleteCharacter => None,
+            | NativeUiIntent::CancelDeleteCharacter
+            | NativeUiIntent::CloseMonthlyCard
+            | NativeUiIntent::RedeemMonthlyCard => None,
         };
 
         if let Some(command) = command {

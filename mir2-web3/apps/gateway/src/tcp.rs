@@ -174,6 +174,8 @@ async fn handle_client_inner(
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
     let mut authenticated_account_id: Option<String> = None;
+    let mut monthly_access_tick = tokio::time::interval(std::time::Duration::from_secs(1));
+    monthly_access_tick.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Delay);
 
     loop {
         let frame = {
@@ -183,6 +185,18 @@ async fn handle_client_inner(
                 tokio::select! {
                     biased;
 
+                    _ = monthly_access_tick.tick() => {
+                        if session.monthly_card_expiry_pending(authenticated_account_id.as_deref()) {
+                            let responses = gateway_blocking(|| session.execute_with_outcome(mir2_simulation::WorldCommand::Tick))
+                                .map_err(session_panic_io_error)?.packets;
+                            if responses.iter().any(|packet| matches!(packet, ServerPacket::LogOutSuccess { .. })) {
+                                active_zone_outbound_registration_id = 0;
+                                _zone_live_outbound_registration = None;
+                                chat_presence = None;
+                            }
+                            for response in responses { send_packet(&mut writer, &response).await?; }
+                        }
+                    }
                     frame = &mut next_frame => break frame,
                     outbound = owner_location_outbound_rx.recv() => {
                         let Some(outbound) = outbound else {

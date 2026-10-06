@@ -68,6 +68,9 @@ fn paste_shortcut_pressed<'a>(
 /// keyboard input.  This helper is platform-neutral so its safety properties
 /// can be tested without accessing the host clipboard.
 pub fn apply_shell_clipboard(shell: &mut NativeShellModel, clipboard: &str) -> bool {
+    if shell.screen == NativeShellScreen::CharacterSelect && shell.monthly_card.open {
+        return shell.monthly_card.append(clipboard);
+    }
     if shell.screen == NativeShellScreen::Registration && shell.register_request_in_flight {
         return false;
     }

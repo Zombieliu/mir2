@@ -196,7 +196,7 @@ mod guild_clock_driver;
 #[path = "config_guild_experience.rs"]
 pub(crate) mod guild_experience;
 pub use guild_experience::{GuildExperienceJournal, GuildExperienceEvent};
-const ACCOUNT_STORE_SCHEMA_VERSION: u16 = 6;
+const ACCOUNT_STORE_SCHEMA_VERSION: u16 = 7;
 
 #[path = "config_shared_conquests.rs"]
 mod shared_conquest_store;
@@ -349,7 +349,8 @@ impl AccountStore {
         let impossible_clock=self.schema_version<4 && self.guild_clock.is_some();
         let impossible_heroes=self.schema_version<5 && (!self.shared_heroes.is_empty() || self.hero_id_high_watermark != 0);
         let impossible_conquests=self.schema_version<6 && !self.shared_conquests.is_empty();
-        if self.schema_version<ACCOUNT_STORE_SCHEMA_VERSION && !impossible_guilds && !impossible_clock && !impossible_heroes && !impossible_conquests {
+        let impossible_monthly_cards = self.schema_version < 7 && self.accounts.values().any(|account| account.monthly_card.is_some());
+        if self.schema_version<ACCOUNT_STORE_SCHEMA_VERSION && !impossible_guilds && !impossible_clock && !impossible_heroes && !impossible_conquests && !impossible_monthly_cards {
             self.schema_version=ACCOUNT_STORE_SCHEMA_VERSION;
         }
         self.normalize_next_character_index();
@@ -1602,6 +1603,8 @@ fn replace_file_atomically(
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountRecord {
+    #[serde(rename = "monthlyCard", default, skip_serializing_if = "Option::is_none")]
+    pub monthly_card: Option<crate::monthly_card::MonthlyCardLedger>,
     #[serde(default = "default_account_password")]
     pub password: String,
     #[serde(default = "default_storage_size")]
@@ -1654,6 +1657,7 @@ impl AccountRecord {
         );
         Self {
             password: default_account_password(),
+            monthly_card: None,
             storage_size: default_storage_size(),
             has_expanded_storage: false,
             expanded_storage_expiry_time_binary_datetime: 0,
@@ -1673,6 +1677,7 @@ impl AccountRecord {
     pub fn empty() -> Self {
         Self {
             password: default_account_password(),
+            monthly_card: None,
             storage_size: default_storage_size(),
             has_expanded_storage: false,
             expanded_storage_expiry_time_binary_datetime: 0,
@@ -3768,6 +3773,7 @@ fn default_crystal_login_notice() -> Notice {
 
 #[derive(Debug, Clone)]
 pub struct SimulationConfig {
+    pub monthly_card_policy: crate::monthly_card::MonthlyCardPolicy,
     pub map: MapInformation,
     pub spawn: Point,
     pub scene_view: SceneView,
@@ -4008,6 +4014,7 @@ impl SimulationConfig {
             onchain_mine_nodes: Vec::new(),
             map_hazards: Vec::new(),
             account_store: Arc::new(Mutex::new(AccountStore::new(default_character))),
+            monthly_card_policy: crate::monthly_card::MonthlyCardPolicy::default(),
             account_store_path: None,
             account_store_database_url: None,
             account_store_database_mode: AccountStoreDatabaseMode::Mirror,
