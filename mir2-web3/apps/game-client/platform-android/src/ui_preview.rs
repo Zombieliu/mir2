@@ -69,6 +69,10 @@ pub const SCENES: &[&str] = &[
     "hero-state-jni",
     "hero-skills-jni",
     "hero-removed-jni",
+    "lighting-night-jni",
+    "lighting-dawn-jni",
+    "lighting-day-jni",
+    "lighting-map-jni",
 ];
 
 #[derive(Resource, Default)]
@@ -108,6 +112,36 @@ struct OfflineHeroJniReceipt {
     scene: Option<String>,
     opened: bool,
     logged: bool,
+}
+
+#[derive(Resource, Default)]
+struct OfflineLightingJniReceipt {
+    scene: Option<String>,
+    last_observation: String,
+}
+
+fn is_lighting_jni_preview(scene: &str) -> bool {
+    matches!(scene, "lighting-night-jni" | "lighting-dawn-jni" | "lighting-day-jni" | "lighting-map-jni")
+}
+
+fn report_lighting_jni_consumer(
+    mut receipt: ResMut<OfflineLightingJniReceipt>,
+    diagnostics: Option<Res<mir2_bevy_runtime::native_lighting_diagnostics::NativeLightingDiagnostics>>,
+    shell: Res<NativeShellModel>,
+) {
+    let (Some(scene), Some(observation)) = (receipt.scene.as_deref(), diagnostics.as_deref()) else { return; };
+    let label = format!("{:?}:{}:{:?}:{}:{}:{}:{}:{}", shell.screen, observation.source_enabled,
+        observation.effective_light_setting, observation.material_enabled, observation.map_source_count,
+        observation.entity_source_count, observation.retained_light_layers, observation.original_textures_loaded);
+    if label == receipt.last_observation { return; }
+    info!(scene, screen = ?shell.screen, map = ?observation.map_file_name,
+        source_enabled = observation.source_enabled, effective_setting = ?observation.effective_light_setting,
+        map_dark_light = observation.map_dark_light, material_enabled = observation.material_enabled,
+        map_sources = observation.map_source_count, entity_sources = observation.entity_source_count,
+        retained_light_layers = observation.retained_light_layers,
+        original_textures_loaded = observation.original_textures_loaded,
+        "ANDROID_LIGHTING_JNI_NATIVE_CONSUMER_NOT_LIVE");
+    receipt.last_observation = label;
 }
 
 fn is_hero_jni_preview(scene: &str) -> bool {
@@ -368,6 +402,7 @@ fn is_personal_jni_preview(scene: &str) -> bool {
         || mail_jni_expected(scene).is_some()
         || is_social_jni_preview(scene)
         || is_hero_jni_preview(scene)
+        || is_lighting_jni_preview(scene)
 }
 
 pub fn install(app: &mut App) {
@@ -377,6 +412,8 @@ pub fn install(app: &mut App) {
         .init_resource::<OfflineMailJniReceipt>()
         .init_resource::<OfflineSocialJniReceipt>()
         .init_resource::<OfflineHeroJniReceipt>()
+        .init_resource::<OfflineLightingJniReceipt>()
+        .add_systems(Update, report_lighting_jni_consumer.after(mir2_bevy_runtime::RuntimePresentationSet))
         .add_systems(Update, report_mail_jni_consumer
             .after(mir2_client_bevy::pending_operations::PendingLifecycleSet::Ingest)
             .after(mir2_client_bevy::pending_operations::PendingLifecycleSet::UiReset)
@@ -1099,6 +1136,8 @@ fn apply(world: &mut World) {
         *world.resource_mut::<OfflineSocialJniReceipt>() = OfflineSocialJniReceipt::default();
         world.init_resource::<OfflineHeroJniReceipt>();
         *world.resource_mut::<OfflineHeroJniReceipt>() = OfflineHeroJniReceipt::default();
+        world.init_resource::<OfflineLightingJniReceipt>();
+        *world.resource_mut::<OfflineLightingJniReceipt>() = OfflineLightingJniReceipt::default();
         // UI fixtures are not Gateway events and do not invoke auth/StartGame.
         let mut shell = NativeShellModel::default();
         shell.screen = match scene.as_str() {
@@ -1177,6 +1216,9 @@ fn apply(world: &mut World) {
         }
         if is_hero_jni_preview(&scene) {
             world.resource_mut::<OfflineHeroJniReceipt>().scene = Some(scene.clone());
+        }
+        if is_lighting_jni_preview(&scene) {
+            world.resource_mut::<OfflineLightingJniReceipt>().scene = Some(scene.clone());
         }
         info!("ANDROID_UI_PREVIEW_READY scene={scene} waiting_for_offline_java_jni");
         return;
@@ -2218,7 +2260,19 @@ mod tests {
     fn scene_inventory_is_unique_and_bounded() {
         let set: std::collections::BTreeSet<_> = SCENES.iter().collect();
         assert_eq!(set.len(), SCENES.len());
-        assert_eq!(SCENES.len(), 61);
+        assert_eq!(SCENES.len(), 65);
+    }
+
+    #[test]
+    fn lighting_diagnostics_extend_the_catalogue_without_seeding_personal_models() {
+        let added = ["lighting-night-jni", "lighting-dawn-jni", "lighting-day-jni", "lighting-map-jni"];
+        assert_eq!(&SCENES[61..], &added);
+        for scene in added {
+            assert!(is_lighting_jni_preview(scene));
+            assert!(is_personal_jni_preview(scene));
+        }
+        assert!(!is_lighting_jni_preview("world-render"));
+        assert!(!is_lighting_jni_preview("hud"));
     }
 
     #[test]

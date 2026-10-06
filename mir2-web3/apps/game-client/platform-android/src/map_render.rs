@@ -43,6 +43,7 @@ struct MapCell {
     tile_animation_image: i16,
     tile_animation_offset: i16,
     tile_animation_frames: u8,
+    light: u8,
 }
 
 #[derive(Debug, Clone)]
@@ -156,6 +157,7 @@ pub(crate) struct MapRenderProduct {
     pub(crate) map_height: u16,
     pub(crate) atlas_keys: Vec<String>,
     pub(crate) standalone_source_keys: Vec<String>,
+    pub(crate) light_cells: Vec<mir2_client_bevy::native_lighting_sources::NativeMapLightCell>,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -290,6 +292,7 @@ fn parse_type100_map(bytes: &[u8]) -> Result<ParsedMap, WorldAssetError> {
             tile_animation_image: i16::from_le_bytes([bytes[offset + 20], bytes[offset + 21]]),
             tile_animation_offset: i16::from_le_bytes([bytes[offset + 22], bytes[offset + 23]]),
             tile_animation_frames: bytes[offset + 24],
+            light: bytes[offset + 25],
         });
         offset += 26;
     }
@@ -808,6 +811,7 @@ fn build_render_state(
         retained_image_keys: Vec::new(),
     };
     Ok(MapRenderProduct {
+        light_cells: map_light_cells(map, viewport, map_objects),
         tile_count: state.tiles.len(),
         standalone_tile_count: state.standalone_tiles.len(),
         atlas_count: state.atlases.len(),
@@ -823,6 +827,32 @@ fn build_render_state(
         json: serde_json::to_string(&state)
             .map_err(|error| WorldAssetError::new(format!("map render state rejected: {error}")))?,
     })
+}
+
+/// Source offsets come from the same admitted keyed frame metadata as map
+/// objects; no synthetic offset or animation clock is introduced here.
+fn map_light_cells(
+    map: &ParsedMap, viewport: Viewport, objects: &MapObjectPack,
+) -> Vec<mir2_client_bevy::native_lighting_sources::NativeMapLightCell> {
+    use mir2_client_bevy::native_lighting_sources::{native_map_light_cells, NativeMapLightInput};
+    if map.width == 0 || map.height == 0 { return Vec::new(); }
+    let mut offsets = HashMap::new();
+    for (index, cell) in map.cells.iter().enumerate() {
+        if !(1..10).contains(&cell.light) || cell.front_animation_frame == 0
+            || cell.front_index == -1 { continue; }
+        let frame = (i32::from(cell.front_image) & 0x7fff) - 1;
+        if frame < 0 { continue; }
+        let key = format!("{}#{frame}", library_key_for_index(cell.front_index));
+        if let Some(offset) = objects.entries.get(&key).and_then(|entry| entry.offset) {
+            offsets.insert((index as i32 / i32::from(map.height), index as i32 % i32::from(map.height)), offset);
+        }
+    }
+    native_map_light_cells(map.width, map.height, map.cells.iter().map(|cell| NativeMapLightInput {
+        front_index: cell.front_index, front_image: cell.front_image,
+        front_animation_frame: cell.front_animation_frame, light: cell.light,
+    }), &offsets).into_iter().filter(|cell| {
+        cell.x.abs_diff(viewport.center_x) <= 40 && cell.y.abs_diff(viewport.center_y) <= 41
+    }).collect()
 }
 
 pub(crate) fn load_map_render_state<F>(
@@ -846,6 +876,10 @@ where
     let map = parse_type100_map(&bytes)?;
     build_render_state(&map, scene, descriptors, map_objects, &stem, request_id)
 }
+
+#[cfg(test)]
+#[path = "lighting_map_tests.rs"]
+mod lighting_map_tests;
 
 #[cfg(test)]
 mod tests {

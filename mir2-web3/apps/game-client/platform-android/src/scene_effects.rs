@@ -93,6 +93,8 @@ struct SubSpec {
     repeat: Option<bool>,
     #[serde(default)]
     offset: Option<EffectOffset>,
+    #[serde(default)]
+    light: Option<i32>,
 }
 
 #[derive(Clone, Debug, Deserialize)]
@@ -135,6 +137,8 @@ struct EffectSpec {
     impact: Option<SubSpec>,
     #[serde(default, rename = "returnEffect")]
     return_effect: Option<SubSpec>,
+    #[serde(default)]
+    light: Option<i32>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -169,6 +173,7 @@ struct Animation {
     opacity: f32,
     repeat: bool,
     offset: EffectOffset,
+    light: Option<i32>,
 }
 
 impl Animation {
@@ -312,6 +317,7 @@ impl EffectCatalog {
             spec.rate,
             spec.repeat,
             spec.offset,
+            spec.light,
         )
     }
 
@@ -337,6 +343,7 @@ impl EffectCatalog {
             spec.rate,
             spec.repeat,
             spec.offset,
+            spec.light,
         )
     }
 
@@ -352,6 +359,7 @@ impl EffectCatalog {
         rate: Option<f32>,
         repeat: Option<bool>,
         offset: Option<EffectOffset>,
+        light: Option<i32>,
     ) -> Option<Animation> {
         let interval_ms = u64::try_from(interval).ok()?.max(1);
         let frames = self.resolve_frames(library, base, count)?;
@@ -365,6 +373,7 @@ impl EffectCatalog {
             opacity: rate.unwrap_or(1.0).clamp(0.0, 1.0),
             repeat: repeat.unwrap_or(false),
             offset: offset.unwrap_or_default(),
+            light,
         })
     }
 
@@ -816,6 +825,25 @@ impl SceneEffects {
         self.last_state = Some(state.clone());
         Some(state)
     }
+
+    /// Read exactly the active visible animation phase and its source-manifest
+    /// intensity. The shared producer supplies generation/priority/placement.
+    pub(crate) fn light_snapshots(
+        &self, now_ms: u64, generation: u64, visible: bool,
+    ) -> Vec<mir2_client_bevy::native_lighting_sources::NativeEffectLightSnapshot> {
+        if !visible { return Vec::new(); }
+        self.active.iter().filter_map(|effect| {
+            let (animation, start) = active_phase(effect, now_ms)?;
+            let light = animation.light.filter(|light| *light > 0)?;
+            let elapsed = now_ms.saturating_sub(start);
+            animation.frame_at(elapsed, effect.persistent)?;
+            let (tile_x, tile_y) = effect_tile(effect, animation, elapsed)?;
+            if !tile_x.is_finite() || !tile_y.is_finite() { return None; }
+            Some(mir2_client_bevy::native_lighting_sources::NativeEffectLightSnapshot {
+                generation, key: effect.key.clone(), tile_x, tile_y, light,
+            })
+        }).collect()
+    }
 }
 
 fn preload_image_urls(effects: &[ActiveEffect]) -> Vec<String> {
@@ -863,23 +891,7 @@ fn render_entry(effect: &ActiveEffect, now_ms: u64, center: (i32, i32)) -> Optio
     let (animation, phase_start) = active_phase(effect, now_ms)?;
     let elapsed = now_ms.saturating_sub(phase_start);
     let frame = animation.frame_at(elapsed, effect.persistent)?;
-    let (tile_x, tile_y) = if animation.kind == "projectile" {
-        let from = effect.from?;
-        let progress = (elapsed as f32 / animation.duration_ms.max(1) as f32).clamp(0.0, 1.0);
-        (
-            from.0 + (effect.to.0 - from.0) * progress,
-            from.1 + (effect.to.1 - from.1) * progress,
-        )
-    } else if animation.kind == "return" {
-        let from = effect.from?;
-        let progress = (elapsed as f32 / animation.duration_ms.max(1) as f32).clamp(0.0, 1.0);
-        (
-            effect.to.0 + (from.0 - effect.to.0) * progress,
-            effect.to.1 + (from.1 - effect.to.1) * progress,
-        )
-    } else {
-        effect.to
-    };
+    let (tile_x, tile_y) = effect_tile(effect, animation, elapsed)?;
     let left =
         ENTITY_ORIGIN_X + (tile_x - center.0 as f32) * CELL_WIDTH + frame.x + animation.offset.x;
     let top =
@@ -923,6 +935,27 @@ fn render_entry(effect: &ActiveEffect, now_ms: u64, center: (i32, i32)) -> Optio
         entry.insert("shadowY".into(), json!(y));
     }
     Some(Value::Object(entry))
+}
+
+/// Shared within this producer by both visible frames and light snapshots.
+fn effect_tile(effect: &ActiveEffect, animation: &Animation, elapsed: u64) -> Option<(f32, f32)> {
+    Some(if animation.kind == "projectile" {
+        let from = effect.from?;
+        let progress = (elapsed as f32 / animation.duration_ms.max(1) as f32).clamp(0.0, 1.0);
+        (
+            from.0 + (effect.to.0 - from.0) * progress,
+            from.1 + (effect.to.1 - from.1) * progress,
+        )
+    } else if animation.kind == "return" {
+        let from = effect.from?;
+        let progress = (elapsed as f32 / animation.duration_ms.max(1) as f32).clamp(0.0, 1.0);
+        (
+            effect.to.0 + (from.0 - effect.to.0) * progress,
+            effect.to.1 + (from.1 - effect.to.1) * progress,
+        )
+    } else {
+        effect.to
+    })
 }
 
 fn unsigned_u32(body: &Map<String, Value>, key: &str) -> Option<u32> {
@@ -969,6 +1002,10 @@ fn projectile_direction16(source: (i32, i32), destination: (i32, i32)) -> u32 {
 pub(crate) fn install(app: &mut App) {
     app.init_resource::<SceneEffects>();
 }
+
+#[cfg(test)]
+#[path = "lighting_effect_tests.rs"]
+mod lighting_effect_tests;
 
 #[cfg(test)]
 mod tests {

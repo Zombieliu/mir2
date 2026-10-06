@@ -16,6 +16,7 @@ final class OfflinePersonalIngressPreview {
 
     static List<String> events(boolean enabled, String scene) {
         if (!enabled) return Collections.emptyList();
+        if (isLightingScene(scene)) return lightingEvents(scene);
         if (isHeroScene(scene)) return heroEvents(scene);
         if (isSocialScene(scene)) return socialEvents(scene);
         if (isMailScene(scene)) return mailEvents(scene);
@@ -54,6 +55,41 @@ final class OfflinePersonalIngressPreview {
         if (!"storage-locked-jni".equals(scene)) {
             events.add(packet("StorageUnlockResult", GatewaySession.object("result", 0, "hasPassword", true)));
         }
+        return Collections.unmodifiableList(events);
+    }
+
+    private static boolean isLightingScene(String scene) {
+        return "lighting-night-jni".equals(scene) || "lighting-dawn-jni".equals(scene)
+                || "lighting-day-jni".equals(scene) || "lighting-map-jni".equals(scene);
+    }
+
+    private static List<String> lightingEvents(String scene) {
+        int time = "lighting-dawn-jni".equals(scene) ? 1
+                : ("lighting-day-jni".equals(scene) || "lighting-map-jni".equals(scene)) ? 2 : 4;
+        int map = "lighting-map-jni".equals(scene) ? 4 : time;
+        List<String> events = new ArrayList<>();
+        events.add(GatewaySession.object("phase", "STARTING", "message",
+                "OFFLINE lighting Java/JNI data, NOT login or a socket.").toString());
+        events.add(packet("TimeOfDay", GatewaySession.object("lights", time)));
+        events.add(packet("MapInformation", GatewaySession.object("fileName", "0", "lights", map,
+                "mapDarkLight", "lighting-map-jni".equals(scene) ? 2 : 0)));
+        JSONObject snapshot = ownerSnapshot();
+        try {
+            snapshot.put("lightSetting", time);
+            snapshot.put("sceneView", GatewaySession.object("center", GatewaySession.object("x",302,"y",634),
+                    "width",22,"height",18));
+            JSONArray actors = snapshot.getJSONArray("entities");
+            actors.getJSONObject(0).put("light",3);
+            actors.put(GatewaySession.object("kind","monster","objectId",43,"name","JNI torch monster",
+                    "x",304,"y",634,"direction","Right","light",2,
+                    "sprite",GatewaySession.object("bodyLibrary","Monster/003","frameBaseOffset",0,"directionStride",4)));
+        } catch (org.json.JSONException error) { throw new IllegalArgumentException(error); }
+        events.add(GatewaySession.object("phase","IN_GAME","message",
+                "OFFLINE lighting world, NOT authenticated gameplay.",
+                "world",GatewaySession.object("playerName","OFFLINE JAVA JNI","mapFileName","0","x",302,"y",634),
+                "worldSnapshot",snapshot.toString()).toString());
+        events.add(packet("ObjectSpell",GatewaySession.object("objectId",9201,
+                "location",GatewaySession.object("x",300,"y",633),"spell",39,"direction","Down","param",0)));
         return Collections.unmodifiableList(events);
     }
 

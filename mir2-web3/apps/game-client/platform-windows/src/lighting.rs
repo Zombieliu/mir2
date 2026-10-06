@@ -5,7 +5,7 @@
 //! world/map packet data plus explicit presentation-motion offsets and emits
 //! the JSON contract accepted by `push_native_lighting_render_state`.
 
-use std::cmp::Ordering;
+
 use std::collections::HashMap;
 use std::path::Path;
 use std::sync::atomic::{AtomicBool, Ordering as AtomicOrdering};
@@ -25,8 +25,7 @@ pub const ENTITY_ORIGIN_X: f32 = 480.0;
 pub const ENTITY_ORIGIN_Y: f32 = 352.0;
 pub const MAX_NATIVE_LIGHTS: usize = 200;
 const LIGHT_TEXTURE_COUNT: usize = 10;
-const MAP_LIGHT_RANGE_X: i32 = 40;
-const MAP_LIGHT_RANGE_Y: i32 = 41;
+
 
 // Set once by native startup, before the WebSocket lighting producer starts.
 // Rendering never reads a file or changes the server's time/map state.
@@ -83,13 +82,7 @@ impl NativeLightAssets {
 /// applied to map and entity anchors; an object-specific offset is then applied
 /// to that entity only. This keeps lighting on the same sub-cell motion path as
 /// map/entity sprites instead of deriving motion from wall-clock time twice.
-#[derive(Debug, Clone, Default, PartialEq)]
-pub struct NativeLightingMotion {
-    pub camera_offset_x: f32,
-    pub camera_offset_y: f32,
-    pub entity_offsets: HashMap<String, (f32, f32)>,
-}
-
+pub use mir2_client_bevy::native_lighting_sources::NativeLightingMotion;
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct NativeLightingBridge {
     force_daylight: bool,
@@ -100,49 +93,6 @@ pub struct NativeLightingBridge {
     map_dark_light: i32,
 }
 
-#[derive(Debug, Clone)]
-struct EntityLightCandidate {
-    priority: u8,
-    key: String,
-    draw_x: f32,
-    draw_y: f32,
-    kind: String,
-    light: i32,
-    dead: bool,
-    is_self: bool,
-}
-
-fn entity_candidate_cmp(left: &EntityLightCandidate, right: &EntityLightCandidate) -> Ordering {
-    left.priority
-        .cmp(&right.priority)
-        .then_with(|| left.key.cmp(&right.key))
-        .then_with(|| left.draw_x.total_cmp(&right.draw_x))
-        .then_with(|| left.draw_y.total_cmp(&right.draw_y))
-        .then_with(|| left.kind.cmp(&right.kind))
-        .then_with(|| left.light.cmp(&right.light))
-        .then_with(|| left.dead.cmp(&right.dead))
-        .then_with(|| left.is_self.cmp(&right.is_self))
-}
-
-fn retain_best_entity_candidate(
-    candidates: &mut Vec<EntityLightCandidate>,
-    candidate: EntityLightCandidate,
-) {
-    if candidates.len() < MAX_NATIVE_LIGHTS {
-        candidates.push(candidate);
-        return;
-    }
-    let Some((worst_index, worst)) = candidates
-        .iter()
-        .enumerate()
-        .max_by(|left, right| entity_candidate_cmp(left.1, right.1))
-    else {
-        return;
-    };
-    if entity_candidate_cmp(&candidate, worst) == Ordering::Less {
-        candidates[worst_index] = candidate;
-    }
-}
 
 // Both the immutable world context and its parsed map are shared. Cloning a
 // Bichon map here copied 700 * 700 * 24 bytes on every effect-light frame.
@@ -344,227 +294,24 @@ impl NativeLightingBridge {
         assets: &NativeLightAssets,
         effect_lights: &[NativeEffectLightSnapshot],
     ) -> Value {
+        let environment = NativeLightingEnvironment {
+            current_map_file_name: self.current_map_file_name.clone(),
+            time_of_day_light_setting: self.time_of_day_light_setting,
+            map_light_setting: self.map_light_setting,
+            map_dark_light: self.map_dark_light,
+        };
         let viewport = MapViewport::from_gateway_payload(payload);
-        let payload_map = payload.get("mapFileName").and_then(Value::as_str);
-        let map_matches = payload_map.is_some_and(|payload| {
-            self.current_map_file_name
-                .as_deref()
-                .is_none_or(|current| same_map_file_name(current, payload))
-        });
-        if self.force_daylight && map_matches && motion_is_finite(motion) {
-            return json!({
-                "enabled": true,
-                "mapFileName": self.current_map_file_name,
-                "stageWidth": STAGE_WIDTH,
-                "stageHeight": STAGE_HEIGHT,
-                "timeOfDayLightSetting": 2,
-                "mapLightSetting": 2,
-                "mapDarkLight": 0,
-                "mapLights": [],
-                "entityLights": [],
-            });
-        }
-        let enabled = assets.complete()
-            && self
-                .map_light_setting
-                .or(self.time_of_day_light_setting)
-                .is_some();
-
-        if !enabled || !map_matches || !motion_is_finite(motion) {
-            return disabled_state();
-        }
-
-        // Entity lights are authoritative and always outrank transient effect
-        // lights. Keep only the best 200 candidates while scanning, so a large
-        // gateway snapshot cannot create an unbounded clone/sort buffer.
-        let mut entity_candidates: Vec<EntityLightCandidate> =
-            Vec::with_capacity(MAX_NATIVE_LIGHTS);
-        let player_object_id = payload.get("playerObjectId").and_then(object_id_string);
-        if let Some(entities) = payload.get("entities").and_then(Value::as_array) {
-            for entity in entities {
-                let Some(key) = entity.get("objectId").and_then(object_id_string) else {
-                    continue;
-                };
-                if key.is_empty() || key.len() > 128 || key.chars().any(char::is_control) {
-                    continue;
-                }
-                let kind = entity
-                    .get("kind")
-                    .and_then(Value::as_str)
-                    .unwrap_or("monster");
-                let is_self = kind.eq_ignore_ascii_case("selfPlayer")
-                    || player_object_id.as_deref() == Some(key.as_str());
-                let is_spell = kind.eq_ignore_ascii_case("spell");
-                if entity.get("dead").and_then(Value::as_bool).unwrap_or(false)
-                    && !is_self
-                    && !is_spell
-                {
-                    continue;
-                }
-                let raw_light =
-                    if kind.eq_ignore_ascii_case("npc") || kind.eq_ignore_ascii_case("merchant") {
-                        10
-                    } else {
-                        entity
-                            .get("light")
-                            .and_then(Value::as_i64)
-                            .and_then(|value| i32::try_from(value).ok())
-                            .unwrap_or(if is_self { 3 } else { 0 })
-                    };
-                if raw_light <= 0 || !assets.contains(entity_light_range(raw_light)) {
-                    continue;
-                }
-                let (Some(x), Some(y)) = (
-                    entity.get("x").and_then(Value::as_i64),
-                    entity.get("y").and_then(Value::as_i64),
-                ) else {
-                    continue;
-                };
-                let (entity_offset_x, entity_offset_y) =
-                    motion.entity_offsets.get(&key).copied().unwrap_or_default();
-                let draw_x = ENTITY_ORIGIN_X
-                    + (x - i64::from(viewport.center_x)) as f32 * CELL_WIDTH
-                    + motion.camera_offset_x
-                    + entity_offset_x;
-                let draw_y = ENTITY_ORIGIN_Y
-                    + (y - i64::from(viewport.center_y)) as f32 * CELL_HEIGHT
-                    + motion.camera_offset_y
-                    + entity_offset_y;
-                if !draw_x.is_finite() || !draw_y.is_finite() {
-                    continue;
-                }
-                let priority = if is_self {
-                    0
-                } else if kind.eq_ignore_ascii_case("npc") || kind.eq_ignore_ascii_case("merchant")
-                {
-                    1
-                } else {
-                    2
-                };
-                retain_best_entity_candidate(
-                    &mut entity_candidates,
-                    EntityLightCandidate {
-                        priority,
-                        key,
-                        draw_x,
-                        draw_y,
-                        kind: kind.to_owned(),
-                        light: raw_light,
-                        dead: entity.get("dead").and_then(Value::as_bool).unwrap_or(false),
-                        is_self,
-                    },
-                );
-            }
-        }
-
-        entity_candidates.sort_by(entity_candidate_cmp);
-        let mut entity_lights = entity_candidates
-            .into_iter()
-            .map(|candidate| {
-                json!({
-                    "key": candidate.key,
-                    "drawX": candidate.draw_x,
-                    "drawY": candidate.draw_y,
-                    "kind": candidate.kind,
-                    "light": candidate.light,
-                    "dead": candidate.dead,
-                    "isSelf": candidate.is_self,
-                })
-            })
-            .collect::<Vec<_>>();
-
-        // Effect snapshots are published by NativeEffects after every event
-        // and animation tick. They are tile anchored or fractional projectile
-        // positions, so they share the exact viewport/camera transform as map
-        // and entity lights. Their stable key and explicit sort make the
-        // result deterministic even when snapshots arrive in another order.
-        let mut effect_candidates = effect_lights
-            .iter()
-            .cloned()
-            .into_iter()
-            .filter(|effect| {
-                effect.light > 0
-                    && effect.key.len() <= 128
-                    && !effect.key.chars().any(char::is_control)
-                    && effect.tile_x.is_finite()
-                    && effect.tile_y.is_finite()
-                    && self
-                        .generation
-                        .map_or(true, |generation| effect.generation == generation)
-                    && assets.contains(entity_light_range(effect.light))
-            })
-            .collect::<Vec<_>>();
-        effect_candidates.sort_by(|left, right| left.key.cmp(&right.key));
-        let effect_capacity = MAX_NATIVE_LIGHTS.saturating_sub(entity_lights.len());
-        for effect in effect_candidates.into_iter().take(effect_capacity) {
-            let dx = effect.tile_x - viewport.center_x as f32;
-            let dy = effect.tile_y - viewport.center_y as f32;
-            let draw_x = ENTITY_ORIGIN_X + dx * CELL_WIDTH + motion.camera_offset_x;
-            let draw_y = ENTITY_ORIGIN_Y + dy * CELL_HEIGHT + motion.camera_offset_y;
-            if !draw_x.is_finite() || !draw_y.is_finite() {
-                continue;
-            }
-            entity_lights.push(json!({
-                "key": format!("effect:{}", effect.key),
-                "drawX": draw_x,
-                "drawY": draw_y,
-                "kind": "effect",
-                "light": effect.light,
-                "dead": false,
-                "isSelf": false,
-            }));
-        }
-
-        let remaining = MAX_NATIVE_LIGHTS.saturating_sub(entity_lights.len());
-        let mut map_lights = Vec::new();
-        if let Some(map) = map {
-            for source in native_map_light_cells(map, map_frame_offsets) {
-                if map_lights.len() == remaining {
-                    break;
-                }
-                let dx = source.x - viewport.center_x;
-                let dy = source.y - viewport.center_y;
-                if dx.abs() > MAP_LIGHT_RANGE_X || dy.abs() > MAP_LIGHT_RANGE_Y {
-                    continue;
-                }
-                let range = ((i32::from(source.light) % 10) * 3).min(9) as usize;
-                if !assets.contains(range) {
-                    continue;
-                }
-                map_lights.push(json!({
-                    "key": source.key,
-                    "drawX": ENTITY_ORIGIN_X + dx as f32 * CELL_WIDTH + motion.camera_offset_x,
-                    "drawY": ENTITY_ORIGIN_Y + dy as f32 * CELL_HEIGHT + motion.camera_offset_y,
-                    "light": source.light,
-                    "offsetX": source.offset_x,
-                    "offsetY": source.offset_y,
-                }));
-            }
-        }
-
-        json!({
-            "enabled": true,
-            "mapFileName": self.current_map_file_name,
-            "stageWidth": STAGE_WIDTH,
-            "stageHeight": STAGE_HEIGHT,
-            "timeOfDayLightSetting": self.time_of_day_light_setting,
-            "mapLightSetting": self.map_light_setting,
-            "mapDarkLight": self.map_dark_light,
-            "mapLights": map_lights,
-            "entityLights": entity_lights,
-        })
+        let map_lights = map.into_iter().flat_map(|map| native_map_light_cells(map, map_frame_offsets));
+        mir2_client_bevy::native_lighting_sources::build_native_lighting_render_state(
+            &environment, self.generation, self.force_daylight, payload,
+            (viewport.center_x, viewport.center_y), map_lights, motion,
+            &mir2_client_bevy::native_lighting_sources::NativeLightAssets::from_presence(assets.ranges),
+            effect_lights,
+        )
     }
 }
 
-fn disabled_state() -> Value {
-    json!({
-        "enabled": false,
-        "stageWidth": STAGE_WIDTH,
-        "stageHeight": STAGE_HEIGHT,
-        "mapLights": [],
-        "entityLights": [],
-    })
-}
+
 fn same_map_file_name(left: &str, right: &str) -> bool {
     mir2_client_bevy::native_lighting_environment::same_map_file_name(left, right)
 }
@@ -576,18 +323,9 @@ fn object_id_string(value: &Value) -> Option<String> {
     }
 }
 
-fn entity_light_range(light: i32) -> usize {
-    (light.rem_euclid(15) as usize).min(LIGHT_TEXTURE_COUNT - 1)
-}
 
-fn motion_is_finite(motion: &NativeLightingMotion) -> bool {
-    motion.camera_offset_x.is_finite()
-        && motion.camera_offset_y.is_finite()
-        && motion
-            .entity_offsets
-            .values()
-            .all(|(x, y)| x.is_finite() && y.is_finite())
-}
+
+
 
 #[cfg(test)]
 mod tests {

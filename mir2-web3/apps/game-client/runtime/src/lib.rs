@@ -21,6 +21,7 @@ pub mod native_ingest;
 #[path = "native_ingest_wasm.rs"]
 mod native_ingest;
 pub mod native_render_receipt;
+pub mod native_lighting_diagnostics;
 pub mod native_world_receipt;
 mod presentation_pose;
 mod remote_motion;
@@ -80,6 +81,26 @@ const COMPILED_RENDER_BACKEND: &str = "native";
 /// overlays schedule after this set so they never observe a mixed-center frame.
 #[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RuntimePresentationSet;
+
+/// Native source producers consume this frame's committed map/entity poses
+/// before the lighting queue and material systems consume their output.
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct NativeLightingProducerSet;
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct RuntimeLightingPoseReadySet;
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct RuntimeLightingConsumeSet;
+
+fn configure_native_lighting_presentation(app: &mut App) {
+    app.configure_sets(Update, NativeLightingProducerSet
+        .in_set(RuntimePresentationSet)
+        .after(RuntimeLightingPoseReadySet)
+        .before(RuntimeLightingConsumeSet));
+}
+
+#[cfg(test)]
+#[path = "lighting_schedule_tests.rs"]
+mod lighting_schedule_tests;
 
 /// Native packets and input publish movement before its presentation consumer
 /// runs in the same PreUpdate. Registration order alone provides no ordering.
@@ -1853,6 +1874,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
     // cannot silently select the broken emulator Vulkan bridge.
     std::env::set_var("WGPU_BACKEND", "gl");
     let mut app = App::new();
+    configure_native_lighting_presentation(&mut app);
     app.insert_resource(ClearColor(FLOOR_COLOR))
         .init_resource::<native_world_receipt::NativeWorldReceipt>()
         .init_resource::<native_render_receipt::NativeRenderReceipt>()
@@ -1863,6 +1885,7 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
         .insert_resource(RuntimeMapRenderAtlases::default())
         .insert_resource(RuntimeEffectRenderState::default())
         .insert_resource(RuntimeLightingRenderState::default())
+        .init_resource::<native_lighting_diagnostics::NativeLightingDiagnostics>()
         .init_resource::<capture_context::RenderedCaptureContext>()
         .insert_resource(RuntimeLightingSceneResetTracker::default())
         .insert_resource(RuntimeMapCameraOffset::default())
@@ -1942,7 +1965,6 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
             (
                 ingest_pending_map_render_images,
                 ingest_pending_effect_render_state,
-                ingest_pending_lighting_render_state,
             )
                 .chain()
                 .after(ingest_pending_map_render_state)
@@ -1987,15 +2009,17 @@ pub fn build_runtime_app(spec: RuntimeWindowSpec) -> App {
                 animate_map_tiles,
                 sync_map_scene,
                 sync_effect_render,
-                sync_lighting_render,
                 sync_entities,
                 sync_mine_nodes,
                 begin_presentation_pose_frame,
                 sync_entity_render_layers,
                 publish_native_render_receipt,
                 follow_player,
+                publish_presentation_pose_frame.in_set(RuntimeLightingPoseReadySet),
+                ingest_pending_lighting_render_state.in_set(RuntimeLightingConsumeSet),
+                sync_lighting_render,
                 follow_lighting_camera,
-                publish_presentation_pose_frame,
+                publish_native_lighting_diagnostics,
             )
                 .chain()
                 .in_set(RuntimePresentationSet),
@@ -3613,6 +3637,28 @@ fn sync_lighting_render(
             additive_cache.evict(&lighting_material_cache_key(&key), &mut additive_materials);
         }
     }
+}
+
+/// Read the retained consumer state and actual loaded original image handles.
+/// No packet/model/resource is created to make a diagnostic pass.
+fn publish_native_lighting_diagnostics(
+    state: Res<RuntimeLightingRenderState>, registry: Res<SceneRegistry>,
+    images: Res<Assets<Image>>,
+    mut observation: ResMut<native_lighting_diagnostics::NativeLightingDiagnostics>,
+) {
+    let snapshot = state.snapshot.as_ref();
+    *observation = native_lighting_diagnostics::NativeLightingDiagnostics {
+        updates_observed: observation.updates_observed.saturating_add(1),
+        map_file_name: snapshot.and_then(|snapshot| snapshot.map_file_name.clone()),
+        source_enabled: snapshot.is_some_and(|snapshot| snapshot.enabled),
+        effective_light_setting: snapshot.and_then(lighting::effective_light_setting).map(|setting| setting as i32),
+        map_dark_light: snapshot.map_or(0, |snapshot| snapshot.map_dark_light),
+        map_source_count: snapshot.map_or(0, |snapshot| snapshot.map_lights.len()),
+        entity_source_count: snapshot.map_or(0, |snapshot| snapshot.entity_lights.len()),
+        material_enabled: registry.lighting_darkness.is_some(),
+        retained_light_layers: registry.lighting_layers.len(),
+        original_textures_loaded: registry.lighting_images.iter().filter(|handle| images.get(*handle).is_some()).count(),
+    };
 }
 
 fn lighting_material_cache_key(source_key: &str) -> String {

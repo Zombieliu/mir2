@@ -429,55 +429,20 @@ fn parse_crystal_map(bytes: &[u8]) -> Option<ParsedMap> {
 /// The map binary itself has no pixel offset: callers provide the resolved
 /// front-frame offset exported from the Crystal library, which is exactly what
 /// Web's `lightOffsetX/Y` supplies before `DrawLights` placement.
-#[derive(Debug, Clone, PartialEq, Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct NativeMapLightCell {
-    pub key: String,
-    pub x: i32,
-    pub y: i32,
-    pub light: u8,
-    pub offset_x: i32,
-    pub offset_y: i32,
-}
+pub use mir2_client_bevy::native_lighting_sources::NativeMapLightCell;
 
-/// Extract Crystal-renderable map lights in the parser's native x-major cell
-/// order. `frame_offsets` is keyed by map coordinate and can be empty while the
-/// map-frame metadata bridge is not yet attached.
+/// Same shared x-major cell-light extraction on both native platforms.
 pub fn native_map_light_cells(
     map: &ParsedMap,
     frame_offsets: &HashMap<(i32, i32), (i32, i32)>,
 ) -> Vec<NativeMapLightCell> {
-    if map.width == 0 || map.height == 0 {
-        return Vec::new();
-    }
-    let height = i32::from(map.height);
-    map.cells
-        .iter()
-        .take(usize::from(map.width) * usize::from(map.height))
-        .enumerate()
-        .filter_map(|(index, cell)| {
-            let front_image_index = (cell.front_image & 0x7fff) - 1;
-            if !(1..10).contains(&cell.light) || cell.front_index == -1 || front_image_index == -1 {
-                return None;
-            }
-            let index = i32::try_from(index).ok()?;
-            let x = index / height;
-            let y = index % height;
-            let (offset_x, offset_y) = if cell.front_animation_frame > 0 {
-                frame_offsets.get(&(x, y)).copied().unwrap_or((0, 0))
-            } else {
-                (0, 0)
-            };
-            Some(NativeMapLightCell {
-                key: format!("{x}:{y}:{}", cell.light),
-                x,
-                y,
-                light: cell.light,
-                offset_x,
-                offset_y,
-            })
-        })
-        .collect()
+    use mir2_client_bevy::native_lighting_sources::{native_map_light_cells as shared_cells, NativeMapLightInput};
+    shared_cells(map.width, map.height, map.cells.iter().map(|cell| NativeMapLightInput {
+        front_index: cell.front_index,
+        front_image: cell.front_image,
+        front_animation_frame: cell.front_animation_frame,
+        light: cell.light,
+    }), frame_offsets)
 }
 
 /// Resolve the intrinsic X/Y offset of every animated front-frame that can

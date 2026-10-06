@@ -17,11 +17,14 @@ pub(crate) struct AndroidLightingIngress {
     identity: Option<(u32, String)>,
     bound_map: Option<String>,
     latest: Option<String>,
+    pub(crate) render: crate::lighting_render::AndroidLightingRender,
 }
 
 impl AndroidLightingIngress {
     pub(crate) fn reset(&mut self) {
-        *self = Self::default();
+        let mut render = std::mem::take(&mut self.render);
+        render.clear_scene();
+        *self = Self { render, ..Self::default() };
     }
 
     pub(crate) fn clear_scene(&mut self) {
@@ -29,6 +32,7 @@ impl AndroidLightingIngress {
         self.identity = None;
         self.bound_map = None;
         self.latest = None;
+        self.render.clear_scene();
     }
 
     pub(crate) fn packet(&mut self, raw: &str) -> Result<bool, &'static str> {
@@ -123,7 +127,13 @@ impl AndroidLightingIngress {
         self.identity = Some(identity);
         self.bound_map = Some(map.to_owned());
         self.latest = Some(latest);
+        if changed { self.render.clear_scene(); }
+        self.render.stage_world(world);
         Ok(())
+    }
+
+    pub(crate) fn render_environment(&self) -> &NativeLightingEnvironment {
+        &self.environment
     }
 
     fn model_for(

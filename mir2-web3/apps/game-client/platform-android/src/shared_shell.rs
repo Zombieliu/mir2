@@ -847,6 +847,8 @@ impl Plugin for AndroidSharedShellPlugin {
         app.add_systems(PostUpdate, report_game_shop_phone
             .after(bevy::ui::UiSystems::PostLayout));
         crate::scene_effects::install(app);
+        app.add_systems(Update, tick_native_lighting
+            .in_set(mir2_bevy_runtime::NativeLightingProducerSet));
     }
 }
 
@@ -1582,6 +1584,7 @@ fn receive(
             crate::world_assets::PackagedMapAtlasLoadEvent::Ready {
                 request_id,
                 summary,
+                lighting,
             } => {
                 info!(
                     request_id,
@@ -1604,11 +1607,16 @@ fn receive(
                     entity_compressed_bytes = summary.entity_compressed_bytes,
                     entity_rgba_bytes = summary.entity_rgba_bytes,
                     entity_manifest_sha256 = summary.entity_manifest_sha256,
+                    map_light_cells = summary.map_light_cell_count,
+                    lighting_assets_complete = summary.lighting_assets_complete,
                     "packaged Android world frame queued"
                 );
                 if host.pending_render_request == Some(request_id)
                     && matches!(model.screen, Screen::StartingGame | Screen::InGame)
                 {
+                    if !host.lighting.render.admit_sources(lighting) {
+                        warn!(request_id, "Android lighting rejected stale or unbound source result");
+                    }
                     model.notice = Some(ShellNotice::info(format!(
                         "World frame queued: {} map tiles and {} entity layers ({} unresolved map draws, {} unresolved entities).",
                         summary.map_tile_count + summary.map_standalone_tile_count,
@@ -2119,6 +2127,7 @@ fn receive(
                     && mir2_bevy_runtime::native_ingest::push_native_map_model(map)
                     && mir2_bevy_runtime::native_ingest::push_native_entity_model_set(entities);
                 if queued {
+                    host.lighting.render.expect_render(request_id, (scene.center_x, scene.center_y));
                     if let (Some(overlays), Some(projected_overlays)) =
                         (actor_overlays.as_deref_mut(), projected_overlays)
                     {
@@ -2308,6 +2317,64 @@ fn tick_scene_effects(
             *preview_effect_reported = true;
         }
     }
+}
+
+/// Uses exact renderer-owned entity offsets after the current pose commits.
+/// The light buffer follows the main camera in the shared runtime, so camera
+/// offset is deliberately not folded in a second time.
+fn tick_native_lighting(
+    time: Option<Res<Time>>,
+    shell: Res<NativeShellModel>,
+    mut host: ResMut<HostState>,
+    poses: Option<Res<mir2_bevy_runtime::PresentationPoseBuffer>>,
+    receipt: Option<Res<mir2_bevy_runtime::native_render_receipt::NativeRenderReceipt>>,
+    effects: Option<Res<crate::scene_effects::SceneEffects>>,
+    player: Option<Res<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiState>>,
+    #[cfg(feature = "ui-preview")] mut reported: Local<Option<String>>,
+) {
+    let center = poses.as_deref().and_then(|poses| poses.native_overlay_center());
+    let mut motion = mir2_client_bevy::native_lighting_sources::NativeLightingMotion::default();
+    if let Some(poses) = poses.as_deref() {
+        for id in host.lighting.render.actor_ids() {
+            if let Some(offset) = poses.native_overlay_entity_offset(&id) {
+                motion.entity_offsets.insert(id, offset);
+            }
+        }
+    }
+    let now_ms = time.as_deref()
+        .map(|time| u64::try_from(time.elapsed().as_millis()).unwrap_or(u64::MAX)).unwrap_or_default();
+    let visible = shell.screen == Screen::InGame && host.phase == "IN_GAME" && host.world.is_some();
+    let effect_visible = visible && player.as_deref().is_none_or(|player| player.core.options.effect);
+    let effect_lights = effects.as_deref()
+        .map(|effects| effects.light_snapshots(now_ms, host.lighting.render.generation(), effect_visible))
+        .unwrap_or_default();
+    let environment = host.lighting.render_environment().clone();
+    if let Err(reason) = host.lighting.render.produce(
+        &environment, visible, center,
+        |request| receipt.as_deref().is_some_and(|receipt| receipt.ready_for(request).is_some()),
+        &motion, &effect_lights,
+    ) {
+        warn!(reason, "Android lighting frame rejected");
+        return;
+    }
+    host.lighting.render.flush(|raw| {
+        #[cfg(feature = "ui-preview")]
+        {
+            let value: Value = serde_json::from_str(&raw).unwrap_or(Value::Null);
+            let label = format!("{}:{}:{}:{}", value["enabled"], value["timeOfDayLightSetting"],
+                value["mapLightSetting"], value["mapDarkLight"]);
+            if reported.as_ref() != Some(&label) {
+                info!(enabled = value["enabled"].as_bool().unwrap_or(false),
+                    setting = ?value["timeOfDayLightSetting"], map_setting = ?value["mapLightSetting"],
+                    map_dark_light = ?value["mapDarkLight"], center = ?center,
+                    map_lights = value["mapLights"].as_array().map_or(0, Vec::len),
+                    entity_lights = value["entityLights"].as_array().map_or(0, Vec::len),
+                    "ANDROID_LIGHTING_SOURCE_FRAME_NOT_LIVE");
+                *reported = Some(label);
+            }
+        }
+        mir2_bevy_runtime::native_ingest::push_native_lighting_render_state(raw)
+    });
 }
 
 fn matching_world_receipt(
@@ -3079,6 +3146,10 @@ mod chat_editor_tests;
 #[cfg(test)]
 #[path = "lighting_host_tests.rs"]
 mod lighting_host_tests;
+
+#[cfg(test)]
+#[path = "lighting_frame_host_tests.rs"]
+mod lighting_frame_host_tests;
 
 #[cfg(test)]
 #[path = "npc_host_tests.rs"]

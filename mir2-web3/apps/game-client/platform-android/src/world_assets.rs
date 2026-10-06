@@ -128,6 +128,8 @@ pub(crate) struct PackagedMapAtlasSummary {
     pub(crate) entity_compressed_bytes: usize,
     pub(crate) entity_rgba_bytes: usize,
     pub(crate) entity_manifest_sha256: String,
+    pub(crate) map_light_cell_count: usize,
+    pub(crate) lighting_assets_complete: bool,
 }
 
 #[cfg(target_os = "android")]
@@ -136,6 +138,7 @@ pub(crate) enum PackagedMapAtlasLoadEvent {
     Ready {
         request_id: u64,
         summary: PackagedMapAtlasSummary,
+        lighting: crate::lighting_render::AndroidLightingAssetFrame,
     },
     Failed {
         request_id: u64,
@@ -545,6 +548,13 @@ pub(crate) fn request_packaged_map_atlas_load(
         });
         let event = match loaded {
             Ok((mut bundle, map_render, map_object_images, entity_render)) => {
+                let lighting = crate::lighting_render::AndroidLightingAssetFrame {
+                    request_id,
+                    map_file_name: scene.map_file_name.clone(),
+                    center: (scene.center_x, scene.center_y),
+                    cells: map_render.light_cells,
+                    assets: crate::lighting_render::load_light_assets(read_packaged_asset),
+                };
                 let active_map_atlases = map_render
                     .atlas_keys
                     .iter()
@@ -583,6 +593,8 @@ pub(crate) fn request_packaged_map_atlas_load(
                     entity_compressed_bytes: entity_render.compressed_bytes,
                     entity_rgba_bytes: entity_render.rgba_bytes,
                     entity_manifest_sha256: entity_render.manifest_sha256,
+                    map_light_cell_count: lighting.cells.len(),
+                    lighting_assets_complete: lighting.assets.complete(),
                 };
                 // Publish the render-state pair before its image batch. The
                 // runtime deliberately clears map images while no active map
@@ -651,6 +663,7 @@ pub(crate) fn request_packaged_map_atlas_load(
                     state.event = Some(PackagedMapAtlasLoadEvent::Ready {
                         request_id,
                         summary,
+                        lighting,
                     });
                     return;
                 } else {
