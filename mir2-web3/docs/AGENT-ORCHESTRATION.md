@@ -1,5 +1,18 @@
 # Agent Orchestration
 
+> 2026-10-07 shared mining Candidate now uses original23-map/two-set data,
+> admitting14 current-profile mines and eight ore identities. Authenticated
+> equipped UID, shared wall counts/clocks, ordinary Attack/None and atomic
+> ore/tool persistence replace the formal Gateway's absent mining path.
+> Seven ordinary Gateway cases and one real WebSocket repeat pass; Windows
+> gesture10, adjacent8, queue1 and explicit GPU1/96 source geometries pass.
+> Initial fixture/Login/link/GPU failures remain recorded. Actual original
+> D401 strict checkpoint and corrected atomic restore pass; default repo
+> fixture WebSocket also passes. Public gameR17/feed14, D/F and player saves
+> remain unchanged. Weapon refining, mining audio and fullP6/P1–P8 stay open.
+> [Scope and actual evidence](SHARED-CRYSTAL-MINING-20261007.md).
+>
+
 > 2026-10-06 user authorizes account monthly access. Root remains the sole
 > writer in the isolated classic lane. Server ledger9/9, real shared HTTP/WS
 > and expired-resume3/3, native wire1/1 and nine-locale modal state5/5 pass.

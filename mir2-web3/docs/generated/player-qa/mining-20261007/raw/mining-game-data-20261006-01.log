@@ -1,0 +1,94 @@
+   Compiling proc-macro2 v1.0.106
+   Compiling quote v1.0.45
+   Compiling serde_core v1.0.228
+   Compiling syn v2.0.117
+   Compiling serde v1.0.228
+   Compiling serde_derive v1.0.228
+   Compiling memchr v2.8.0
+   Compiling serde_json v1.0.149
+   Compiling mir2-protocol v0.1.0 (C:\Users\Administrator\.codex\worktrees\native-packed-resources\mir2-player-journey\mir2-web3\packages\protocol)
+   Compiling mir2-game-data v0.1.0 (C:\Users\Administrator\.codex\worktrees\native-packed-resources\mir2-player-journey\mir2-web3\packages\game-data)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 38.13s
+     Running unittests src\lib.rs (C:/mir2-build/gateway-tests-r51\debug\deps\mir2_game_data-f7d317b682c196a8.exe)
+
+running 62 tests
+test crystal_creature_settings::tests::creature_drop_rate_matches_current_source ... ok
+test crystal_creature_settings::tests::creature_drop_rate_rejects_invalid_f32_values ... ok
+test crystal_guild_settings::tests::guild_buff_catalog_is_complete_unique_and_server_owned ... ok
+test crystal_guild_settings::tests::guild_settings_preserve_source_costs_and_int64_threshold ... ok
+test crystal_hero_settings::tests::hero_base_formulas_use_original_class_stats_and_max_rule ... ok
+test crystal_hero_settings::tests::hero_rules_match_original_creation_item_and_luck_configuration ... ok
+test crystal_hero_settings::tests::hero_settings_import_five_classes_and_int64_experience_without_rounding ... ok
+test crystal_hero_settings::tests::hero_settings_reject_invalid_class_formula_and_experience ... ok
+test crystal_item_image::tests::complete_catalogue_only_changes_the_three_source_stack_shapes ... ok
+test crystal_item_image::tests::every_wire_count_matches_the_source_image_bands ... ok
+test crystal_item_image::tests::guards_and_non_stack_previews_retain_the_catalogue_image ... ok
+test crystal_mining::tests::classic_profile_carries_all_admitted_mines_and_original_minerals ... ok
+test crystal_mining::tests::mineral_name_repair_uses_only_the_original_item_identities ... ok
+test crystal_mining::tests::original_mining_metadata_matches_database_and_legal_mines ... ok
+test crystal_mining::tests::overlapping_mine_rectangles_use_last_source_override_and_exclusive_edges ... ok
+test manifest_lookup_tests::item_and_monster_lookups_preserve_first_match_and_ascii_case ... ok
+test manifest_lookup_tests::manifest_lookup_benchmark ... ignored, explicit before/after timing; run release with --ignored --nocapture --test-threads=1
+test manifest_lookup_tests::other_lookups_preserve_order_and_original_case_rules ... ok
+test manifest_lookup_tests::owned_manifests_and_lookup_results_do_not_mutate_shared_catalogues ... ok
+test manifest_lookup_tests::real_item_selection_matches_old_algorithm_for_all_catalogue_origins ... ok
+test manifest_lookup_tests::real_item_selection_preserves_ties_filters_and_origin_fallback ... ok
+test periodic_quests::tests::every_supported_band_has_five_slots_and_only_experience_gold_rewards ... ok
+test periodic_quests::tests::invalid_periodic_slot_objective_and_duplicate_npc_are_rejected ... ok
+test periodic_quests::tests::periodic_additions_do_not_reuse_imported_npc_quest_ids_or_tiles ... ok
+test periodic_quests::tests::periodic_hunts_reference_existing_profile_monsters_and_respawns ... ok
+test tests::crystal_base_stats_packet_manifest_loads ... ok
+test tests::crystal_buff_manifest_loads ... ok
+test tests::crystal_drop_entry_deserializes_group_shape ... ok
+test tests::crystal_drop_lookup_preserves_special_entry_shapes ... ok
+test tests::crystal_drop_manifest_loads ... ok
+test tests::crystal_game_shop_packet_manifest_loads ... ok
+test tests::crystal_guild_buff_packet_manifest_loads ... ok
+test tests::crystal_item_manifest_loads ... ok
+test tests::crystal_magic_manifest_contains_only_unique_enabled_spells ... ok
+test tests::crystal_magic_manifest_loads ... ok
+test tests::crystal_monster_ai_summary_classifies_manifest_families ... ok
+test tests::crystal_monster_drop_path_resolves_imported_drop_table ... ok
+test tests::crystal_monster_manifest_loads ... ok
+test tests::crystal_npc_command_summary_classifies_runtime_coverage ... ok
+test tests::crystal_npc_info_manifest_loads ... ok
+test tests::crystal_npc_manifest_loads ... ok
+test tests::crystal_quest_packet_manifest_loads ... ok
+test tests::crystal_random_item_stats_manifest_loads ... ok
+test tests::crystal_real_item_selection_matches_class_and_level_variants ... ok
+test tests::crystal_recipe_packet_manifest_loads ... ok
+test tests::crystal_recipes_decode_every_payload ... ok
+test tests::crystal_recipes_decode_per_ingredient_counts ... ok
+test tests::crystal_respawn_manifest_loads ... ok
+test tests::crystal_starter_region_respawns_include_expected_monsters ... ok
+test tests::localization_bundle_loads ... ok
+test tests::localization_formatter_replaces_placeholders ... ok
+test tests::localization_lookup_uses_selected_language ... ok
+test tests::monster_accuracy_preserves_source_stat_and_legacy_manifest_compatibility ... ok
+test tests::platinum_176_exposes_every_source_three_class_book_through_level_50 ... ok
+test tests::platinum_176_prajna_island_requires_the_visible_round_trip_sailor_scripts ... ok
+test tests::platinum_176_profile_bundle_matches_the_compiled_profile ... FAILED
+test tests::platinum_176_profile_is_reference_complete_and_has_a_1_to_50_curve ... ok
+test tests::portuguese_language_is_wired ... ok
+test tests::starter_map_collision_loads ... ok
+test tests::starter_runtime_data_maps_into_crystal_manifests ... ok
+test tests::starter_scene_loads ... ok
+test tests::starter_server_data_loads ... ok
+
+failures:
+
+---- tests::platinum_176_profile_bundle_matches_the_compiled_profile stdout ----
+
+thread 'tests::platinum_176_profile_bundle_matches_the_compiled_profile' panicked at packages\game-data\src\lib.rs:3858:9:
+assertion `left == right` failed
+  left: 14
+ right: 13
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    tests::platinum_176_profile_bundle_matches_the_compiled_profile
+
+test result: FAILED. 60 passed; 1 failed; 1 ignored; 0 measured; 0 filtered out; finished in 7.24s
+
+error: test failed, to rerun pass `-p mir2-game-data --lib`

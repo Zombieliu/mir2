@@ -653,6 +653,15 @@ impl InProcessWorldRuntime {
         self.session.shared_skill_item_param(spell)
     }
 
+    pub fn shared_mining_tool(&self)->Option<crate::runtime::zone::ZoneMiningTool> {
+        self.session.shared_mining_tool()
+    }
+
+    pub fn apply_shared_mining_swing(&mut self,swing:&crate::runtime::zone::ZoneMiningSwing)
+        ->Result<Vec<ServerPacket>,String> {
+        self.session.apply_shared_mining_swing(swing)
+    }
+
     pub fn zone_monster_spawn_snapshot(&self, object_id: u32) -> Option<ZoneMonsterSpawn> {
         self.session.zone_monster_spawn_snapshot(object_id)
     }

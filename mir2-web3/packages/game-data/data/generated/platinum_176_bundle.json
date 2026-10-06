@@ -8,19 +8,24 @@
     "crystalDatabaseVersion": 117,
     "crystalDatabaseCustomVersion": 0
   },
-  "builtAt": "2026-10-04T04:32:22.000Z",
+  "builtAt": "2026-10-06T15:05:23.176Z",
   "hashAlgorithm": "sha256",
-  "contentHash": "04cc252a8e382240cdc7cc0798e7fbc1d0db32d11711e0fa3388868c2463f54f",
+  "contentHash": "4b95ee1a25df34185d94240613c36673a093a8ee27ca80509bbe0b7acb5beaf4",
   "files": [
     {
       "path": "packages/game-data/data/content_profiles/platinum_176.json",
-      "bytes": 47442,
-      "sha256": "f50ef1b78e2544df4fd3a65902f6e72f4ec3cbc7693e0ee373d6ee899581e7a9"
+      "bytes": 47571,
+      "sha256": "7ee7a6de1c253e8ba3831e3455d6ba0c59bc9dc00ef90841947d5ec58989395d"
     },
     {
       "path": "packages/game-data/data/generated/crystal_respawn_manifest.json",
       "bytes": 6741323,
       "sha256": "5303f8093be7f15ddd9f860e6db1787ac96606508db3086bab38bdc4c6353dd3"
+    },
+    {
+      "path": "packages/game-data/data/generated/crystal_mining_manifest.json",
+      "bytes": 5976,
+      "sha256": "e0b316ed8172ac1f0d3f1577fc06df126682563ff019612e7cd4663eccff3c28"
     },
     {
       "path": "packages/game-data/data/generated/crystal_monster_manifest.json",
@@ -83,7 +88,7 @@
     "nativeResourceOnlyMaps": 1,
     "nativeMaps": 209,
     "monsters": 176,
-    "items": 195,
+    "items": 203,
     "skills": 63,
     "npcScripts": 101,
     "respawnOverrides": 2,

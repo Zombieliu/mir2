@@ -120,6 +120,11 @@ impl ZoneCollision {
             || self.blocked_cells.contains(&(point.x, point.y))
     }
 
+    pub(crate) fn is_mineable_wall(&self,point:&Point)->bool {
+        self.bounds.is_some_and(|bounds|bounds.contains(point))
+            && self.blocked_cells.contains(&(point.x,point.y))
+    }
+
     pub(crate) fn bounds(&self) -> Option<ZoneBounds> {
         self.bounds
     }

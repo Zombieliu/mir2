@@ -34,14 +34,16 @@ const LEGACY_V3_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v
 const LEGACY_V4_CANONICAL_ZONE_STATE_VERSION: u32 = 4;
 const LEGACY_V4_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v4\0";
 const LEGACY_V5_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v5\0";
-const CANONICAL_ZONE_STATE_VERSION: u32 = 6;
-const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v6\0";
+const LEGACY_V6_CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v6\0";
+const CANONICAL_ZONE_STATE_VERSION: u32 = 7;
+const CANONICAL_ZONE_STATE_DOMAIN: &[u8] = b"obelisk.mir2.zone-state.v7\0";
 const LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 1;
 const LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 2;
 const LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 3;
 const LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 4;
 const LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 5;
-const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 6;
+const LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 6;
+const ZONE_RUNTIME_CHECKPOINT_VERSION: u32 = 7;
 
 fn legacy_v2_ground_drop_claim_idempotency_key(
     key: &ZoneKey,
@@ -151,6 +153,8 @@ struct CanonicalZoneStateV4<'a> {
     detached_ground_drop_custody: Option<&'a BTreeMap<u32, ZoneGroundDropCustody>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     issued_native_monster_awards: Option<&'a BTreeMap<String, OnlineOwner>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    mining: Option<&'a super::mining::ZoneMiningState>,
 }
 
 #[derive(Serialize)]
@@ -245,6 +249,8 @@ struct ZoneRuntimeCheckpoint {
     detached_ground_drop_custody: Option<BTreeMap<u32, ZoneGroundDropCustody>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     issued_native_monster_awards: Option<BTreeMap<String, OnlineOwner>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    mining: Option<super::mining::ZoneMiningState>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -312,6 +318,7 @@ impl ZoneRuntime {
             self.legacy_ground_metadata_free_state()
         } else { (self.ground_drops.clone(), self.claimed_ground_drops.clone()) };
         let state = CanonicalZoneStateV4 {
+            mining: (version >= 7).then_some(&self.mining),
             online_presence: (version >= 6).then_some(&self.online_presence),
             detached_ground_drop_custody: (version >= 6).then_some(&self.detached_ground_drop_custody),
             issued_native_monster_awards: (version >= 6).then_some(&self.issued_native_monster_awards),
@@ -369,6 +376,10 @@ impl ZoneRuntime {
     fn legacy_v5_canonical_state_root(&self) -> Result<String, String> {
         self.canonical_state_root_for_schema(5, LEGACY_V5_CANONICAL_ZONE_STATE_DOMAIN,
             &self.native_monsters, &self.pending_native_hits)
+    }
+    fn legacy_v6_canonical_state_root(&self)->Result<String,String> {
+        self.canonical_state_root_for_schema(6,LEGACY_V6_CANONICAL_ZONE_STATE_DOMAIN,
+            &self.native_monsters,&self.pending_native_hits)
     }
     fn legacy_ground_metadata_free_state(&self)
         -> (BTreeMap<u32, ZoneGroundDrop>, BTreeMap<u32, ZoneGroundDropClaim>) {
@@ -702,6 +713,7 @@ impl ZoneRuntime {
 
     pub fn checkpoint_bytes(&self) -> Result<Vec<u8>, String> {
         let checkpoint = ZoneRuntimeCheckpoint {
+            mining: Some(self.mining.clone()),
             online_presence: Some(self.online_presence.clone()),
             detached_ground_drop_custody: Some(self.detached_ground_drop_custody.clone()),
             issued_native_monster_awards: Some(self.issued_native_monster_awards.clone()),
@@ -775,16 +787,18 @@ impl ZoneRuntime {
             && checkpoint.version != LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION
+            && checkpoint.version != LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION
             && checkpoint.version != ZONE_RUNTIME_CHECKPOINT_VERSION
         {
             return Err(format!(
-                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, {}, {}, or {}",
+                "unsupported zone runtime checkpoint version {}, expected {}, {}, {}, {}, {}, {}, or {}",
                 checkpoint.version,
                 LEGACY_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V2_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION,
+                LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION,
                 ZONE_RUNTIME_CHECKPOINT_VERSION
             ));
         }
@@ -809,6 +823,9 @@ impl ZoneRuntime {
         }
 
         let mut runtime = Self::new(checkpoint.key);
+        // Legacy roots never committed mining fields. Discard any injected
+        // forward data before authenticating their old schema commitment.
+        if checkpoint_version>=7 {runtime.mining=checkpoint.mining.unwrap_or_default();}
         runtime.players = checkpoint.players;
         runtime.objects = checkpoint
             .objects
@@ -920,6 +937,7 @@ impl ZoneRuntime {
                 runtime.legacy_v4_canonical_state_root()?
             }
             LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.legacy_v5_canonical_state_root()?,
+            LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.legacy_v6_canonical_state_root()?,
             ZONE_RUNTIME_CHECKPOINT_VERSION => runtime.canonical_state_root()?,
             _ => unreachable!("checkpoint version was validated above"),
         };
@@ -931,7 +949,7 @@ impl ZoneRuntime {
         }
         // Only now has the ORIGINAL legacy canonical shape been verified.
         // New-looking metadata on v1-v5 bytes was never committed by that root.
-        if checkpoint_version < ZONE_RUNTIME_CHECKPOINT_VERSION {
+        if checkpoint_version < LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION {
             for stored in runtime.ground_drops.values_mut() { stored.native_owner = None; }
             for claim in runtime.claimed_ground_drops.values_mut() { claim.custody = None; }
             runtime.detached_ground_drop_custody.clear();
@@ -950,7 +968,7 @@ impl ZoneRuntime {
             LEGACY_V3_ZONE_RUNTIME_CHECKPOINT_VERSION | LEGACY_V4_ZONE_RUNTIME_CHECKPOINT_VERSION | LEGACY_V5_ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.validate_ground_drop_claim_authority()?;
             }
-            ZONE_RUNTIME_CHECKPOINT_VERSION => {
+            LEGACY_V6_ZONE_RUNTIME_CHECKPOINT_VERSION | ZONE_RUNTIME_CHECKPOINT_VERSION => {
                 runtime.validate_ground_drop_claim_authority()?;
             }
             _ => unreachable!("checkpoint version was validated above"),
@@ -982,6 +1000,62 @@ mod tests {
         ZoneMonsterSpawn, ZoneOutbound, ZonePlayerCombatStats,
     };
     use mir2_protocol::{MirClass, MirDirection, MirGender};
+
+    #[test]
+    fn mining_schema_seven_round_trip_and_integrity() {
+        // Use the map's own collision identity; checkpoint recovery must never
+        // substitute a synthetic test collision for a signed map's collision.
+        let mut runtime = ZoneRuntime::new(ZoneKey::for_map("mining-checkpoint-fixture"));
+        runtime.mining = serde_json::from_value(serde_json::json!({
+            "spots": {"5,4": {"stones_left":27,"regen_at_ms":300_001}},
+            "sequence":3,"effects":[]
+        })).unwrap();
+        let bytes = runtime.checkpoint_bytes().unwrap();
+        let restored = ZoneRuntime::restore_checkpoint(&bytes).unwrap();
+        assert_eq!(serde_json::to_value(&restored.mining).unwrap(), serde_json::to_value(&runtime.mining).unwrap());
+        for field in ["sequence", "stones_left", "regen_at_ms"] {
+            let mut altered: serde_json::Value = serde_json::from_slice(&bytes).unwrap();
+            if field == "sequence" { altered["mining"][field] = serde_json::json!(4); }
+            else { altered["mining"]["spots"]["5,4"][field] = serde_json::json!(99); }
+            assert!(ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&altered).unwrap())
+                .unwrap_err().contains("state root mismatch"));
+        }
+    }
+
+    #[test]
+    fn legacy_v6_retains_authenticated_custody_and_discards_unbound_mining() {
+        let mut runtime = ZoneRuntime::new(ZoneKey::for_map("legacy-v6-mining-policy"));
+        runtime.handle(ZoneCommand::Join(ZoneJoin {
+            session_id: SessionId::new("v6-owner"), account_id: "v6-account".into(),
+            character_index: 1, object_id: 501, name: "Owner".into(), class: MirClass::Warrior,
+            gender: MirGender::Male, level: 20, hp: 100, max_hp: 100, mp: 0,
+            map_file_name: "legacy-v6-mining-policy".into(), position: Point { x: 11, y: 34 },
+            direction: MirDirection::Right, chat_profile: Default::default(),
+            combat_stats: Default::default(),
+        }));
+        let mut drop = checkpoint_gold_drop(703);
+        drop.owner_object_id = Some(501);
+        let mut stored = runtime.new_zone_ground_drop(drop, Some(60_100)).unwrap();
+        stored.native_owner = runtime.bind_native_ground_owner(501, 100);
+        let custody = runtime.capture_ground_drop_custody(&stored);
+        assert!(custody.native_owner.is_some());
+        runtime.detached_ground_drop_custody.insert(703, custody.clone());
+        runtime.removed_object_ids.insert(703);
+        let mut fixture: serde_json::Value = serde_json::from_slice(&runtime.checkpoint_bytes().unwrap()).unwrap();
+        fixture["version"] = serde_json::json!(6);
+        fixture["state_root"] = serde_json::json!(runtime.legacy_v6_canonical_state_root().unwrap());
+        fixture["mining"] = serde_json::json!({"spots":{"5,4":{"stones_left":79,"regen_at_ms":999}},
+            "sequence":999,"effects":[]});
+        let restored = ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&fixture).unwrap()).unwrap();
+        assert_eq!(serde_json::to_value(&restored.mining).unwrap(),
+            serde_json::json!({"spots":{},"sequence":0,"effects":[]}));
+        assert_eq!(serde_json::to_value(&restored.detached_ground_drop_custody[&703]).unwrap(),
+            serde_json::to_value(&custody).unwrap());
+        assert!(restored.online_presence.is_empty(), "cold recovery cannot mint online authority");
+        fixture["detached_ground_drop_custody"]["703"]["payload_digest"] = serde_json::json!("tampered");
+        assert!(ZoneRuntime::restore_checkpoint(&serde_json::to_vec(&fixture).unwrap())
+            .unwrap_err().contains("state root mismatch"));
+    }
 
     #[test]
     fn legacy_v5_authenticates_original_item_before_ignoring_unbound_forward_owner_fields() {

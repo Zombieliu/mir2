@@ -10026,6 +10026,18 @@ impl SharedInProcessZoneSessionRuntime {
         &mut self,
         session_id: &SessionId,
     ) -> Option<Vec<ServerPacket>> {
+        let commands = self.authoritative_zone_combat_commands(session_id)?;
+        let mut packets = Vec::new();
+        for command in commands {
+            packets.extend(self.dispatch_zone_player_command(command, false));
+        }
+        Some(packets)
+    }
+
+    fn authoritative_zone_combat_commands(
+        &self,
+        session_id: &SessionId,
+    ) -> Option<[ZoneCommand; 2]> {
         // `inner` is the authenticated personal SimulationSession runtime. Its
         // WorldSnapshot is rebuilt from current ECS/resources on every call;
         // optional predicates stay fail-closed rather than becoming `false`.
@@ -10052,31 +10064,27 @@ impl SharedInProcessZoneSessionRuntime {
             )
         });
         let combat_stats = self.inner.zone_player_combat_stats();
-        let mut packets = self.dispatch_zone_player_command(
-            ZoneCommand::sync_player_combat_state(
-                session_id.clone(),
-                class,
-                has_class_weapon,
-                riding_mount,
-                mount_attack_allowed,
-                dead,
-                attack_blocked,
-                fishing,
-            ),
-            false,
+        let admission = ZoneCommand::sync_player_combat_state(
+            session_id.clone(),
+            class,
+            has_class_weapon,
+            riding_mount,
+            mount_attack_allowed,
+            dead,
+            attack_blocked,
+            fishing,
         );
         // Passive skill progression, equipment, and buffs live in the trusted
         // personal session. Native attacks skip the broad tail snapshot, so
         // refresh the complete stat block here before the Zone resolves this
         // attack. This changes no vitals and cannot overwrite Zone damage.
-        packets.extend(self.dispatch_zone_player_command(
+        Some([
+            admission,
             ZoneCommand::UpdatePlayerCombatStats {
                 session_id: session_id.clone(),
                 stats: combat_stats,
             },
-            false,
-        ));
-        Some(packets)
+        ])
     }
 
     fn sync_current_shared_ground_drops_to_zone(&mut self, session_id: &SessionId) {
@@ -12147,6 +12155,77 @@ impl SharedInProcessZoneSessionRuntime {
             monster,
             kind,
         })
+    }
+
+    fn execute_zone_native_mining(&mut self, direction: MirDirection) -> Vec<ServerPacket> {
+        let Some(session) = self.current_zone_session_id() else {
+            return Vec::new();
+        };
+        self.force_inner_to_current_zone_transform();
+        let Some(tool) = self.inner.shared_mining_tool() else {
+            return self.authoritative_zone_owner_correction();
+        };
+        let Some(mut packets) = self.sync_authoritative_zone_combat_state(&session) else {
+            return self.authoritative_zone_owner_correction();
+        };
+        let now_ms = Self::zone_now_ms();
+        let Some(key) = self.current_presence_key() else {
+            return packets;
+        };
+        let (shared, transform, _, _, _, _, _) = {
+            // The cadence owner also ticks this Zone. Keep the existing Zone
+            // writer lock through the personal commit, so a hit/leave/move
+            // cannot invalidate an admitted ticket between the two halves.
+            let shared_state = self.zone_state.clone();
+            let mut state = shared_state.lock().expect("shared zone presence mutex");
+            let Some(swing) = state
+                .zone_manager
+                .prepare_mining_swing(&session, direction, &tool, now_ms)
+            else {
+                drop(state);
+                return self.authoritative_zone_owner_correction();
+            };
+            // Cadence damage can land after ingress drained its owner events.
+            // Snapshot the current Zone vitals while the same writer lock is
+            // held, so the durable personal award never saves pre-hit HP.
+            if let Some((hp, max_hp, mp)) = state.zone_manager.player_vitals(&session) {
+                self.inner.force_authoritative_player_vitals_with_max_hp(
+                    Some(hp), Some(max_hp), Some(mp),
+                );
+            }
+            match self.inner.apply_shared_mining_swing(&swing) {
+                Ok(personal) => packets.extend(personal),
+                Err(error) => {
+                    eprintln!("[shared-mining] personal transaction failed: {error}");
+                    drop(state);
+                    return self.authoritative_zone_owner_correction();
+                }
+            }
+            let mut out = state.zone_manager.commit_mining_swing(&session, &swing)
+                .expect("single-writer mining capability changed during personal commit");
+            if swing.tool_damage() >= tool.durability {
+                // Breaking the pick removes its stats immediately. Do this
+                // before releasing the writer lock; the native attack path
+                // deliberately skips broad personal→Zone snapshot refreshes.
+                if let Some(commands) = self.authoritative_zone_combat_commands(&session) {
+                    for command in commands {
+                        out.extend(state.zone_manager.handle(command));
+                    }
+                }
+                let vitals = self.inner.local_player_vitals_snapshot();
+                if let (Some(hp), Some(max_hp), Some(mp), Some(dead)) = (
+                    vitals.player_hp, vitals.player_max_hp, vitals.player_mp, vitals.player_dead,
+                ) {
+                    out.extend(state.zone_manager.handle(ZoneCommand::SyncPlayerVitalsAndLife {
+                        session_id: session.clone(), hp, max_hp, mp, dead,
+                    }));
+                }
+            }
+            state.dispatch_zone_outbounds(out, Some(&key))
+        };
+        self.apply_zone_transform(transform);
+        packets.extend(shared);
+        packets
     }
 
     fn execute_zone_native_player_attack(
@@ -14560,7 +14639,12 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             self.sync_zone_flaming_sword_state();
         }
         let zone_native_player_attack = self.prepare_zone_native_player_attack(&command);
-        let routes_zone_native_player_attack = zone_native_player_attack.is_some();
+        let zone_mining_direction=match &command {
+            WorldCommand::ClientPacket(ClientPacket::Attack {direction,spell:Spell::None})
+                if zone_native_player_attack.is_none() && self.current_zone_session_id().is_some() => Some(*direction),
+            _=>None,
+        };
+        let routes_zone_native_player_attack = zone_native_player_attack.is_some() || zone_mining_direction.is_some();
         // Native Zone combat already updates the shared map through its
         // authoritative outbounds, so rebuilding the full local map snapshot
         // after every attack is redundant and serializes the hot path.
@@ -14828,6 +14912,8 @@ impl WorldRuntime for SharedInProcessZoneSessionRuntime {
             self.inner.execute(command)?
         } else if let Some(attack) = zone_native_player_attack {
             self.execute_zone_native_player_attack(attack)
+        } else if let Some(direction) = zone_mining_direction {
+            self.execute_zone_native_mining(direction)
         } else if matches!(&command, WorldCommand::ClientPacket(ClientPacket::Attack { .. }))
             && self.current_zone_session_id().is_some()
         {
@@ -15702,6 +15788,8 @@ impl fmt::Debug for ZoneRegistry {
 
 #[cfg(test)]
 mod tests {
+    #[path = "mining_tests.rs"]
+    mod mining_tests;
     #[path = "cross_map_drop_lifecycle_tests.rs"]
     mod cross_map_drop_lifecycle_tests;
     #[path = "dead_experience_chain_tests.rs"]
@@ -15837,6 +15925,9 @@ mod tests {
             .unwrap()
             .next_zone_object_id = 91_337;
         let original_bytes = factory.world_checkpoint_bytes().unwrap();
+        // Cold world images intentionally rotate the online identity namespace.
+        // Compare the stable live image to prove no authority changed on error.
+        let original_live_bytes = factory.checkpoint_bytes().unwrap();
 
         let mut candidate: SharedInProcessZoneFactoryCheckpoint =
             serde_json::from_slice(&original_bytes).unwrap();
@@ -15856,7 +15947,7 @@ mod tests {
             .install_world_checkpoint_bytes_atomically(&candidate_bytes)
             .expect_err("an invalid later Zone must reject the entire factory restore");
         assert!(error.contains("unsupported shared Zone state checkpoint version"));
-        assert_eq!(factory.world_checkpoint_bytes().unwrap(), original_bytes);
+        assert_eq!(factory.checkpoint_bytes().unwrap(), original_live_bytes);
         assert_eq!(factory.active_zone_count(), 1);
     }
 

@@ -47,6 +47,7 @@ use crate::runtime::map_events::{
 
 pub(super) mod armadillo_ai;
 mod checkpoint;
+pub(super) mod mining;
 #[cfg(any(test, feature = "test-support"))]
 mod crowded_fixture;
 mod experience_ownership;
@@ -326,6 +327,7 @@ pub(super) struct ZonePlayerFiniteControlPoisonClock {
 // (the derive was vestigial). See docs/L2-ECS-ZONE-DESIGN.md.
 #[derive(Debug)]
 pub struct ZoneRuntime {
+    mining: mining::ZoneMiningState,
     conquest: Option<ZoneConquestProjection>,
     intelligent_creatures: BTreeMap<SessionId, CreatureHost>,
     intelligent_creature_intents: Vec<super::intelligent_creatures::CreaturePickupIntent>,
@@ -623,6 +625,7 @@ impl ZoneRuntime {
         npc_teleport_config: ZoneNpcTeleportConfig,
     ) -> Self {
         Self {
+            mining: mining::ZoneMiningState::default(),
             key,
             collision,
             journey_evidence_enabled:
@@ -684,6 +687,7 @@ impl ZoneRuntime {
             self.npc_teleport_config.clone(),
         );
         fork.players = self.players.clone();
+        fork.mining = self.mining.clone();
         fork.conquest = self.conquest.clone();
         fork.journey_evidence_enabled = self.journey_evidence_enabled;
         fork.objects = self.objects.clone();
@@ -2026,6 +2030,7 @@ impl ZoneRuntime {
         for session_id in sessions {
             outbounds.extend(self.expire_player_flaming_sword(&session_id, now_ms));
         }
+        outbounds.extend(self.tick_mining_effects(now_ms));
         outbounds.extend(self.tick_native_periodic_player_poisons(now_ms));
         outbounds.extend(self.expire_zone_player_status_poisons(now_ms));
         outbounds.extend(self.tick_pending_movement(now_ms));

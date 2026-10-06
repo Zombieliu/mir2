@@ -13,6 +13,7 @@ const checkMode = process.argv.includes("--check");
 const dependencyPaths = [
   "packages/game-data/data/content_profiles/platinum_176.json",
   "packages/game-data/data/generated/crystal_respawn_manifest.json",
+  "packages/game-data/data/generated/crystal_mining_manifest.json",
   "packages/game-data/data/generated/crystal_monster_manifest.json",
   "packages/game-data/data/generated/crystal_monster_ai_summary.json",
   "packages/game-data/data/generated/crystal_item_manifest.json",

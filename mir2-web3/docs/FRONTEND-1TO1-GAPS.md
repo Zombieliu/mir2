@@ -1,5 +1,15 @@
 # Frontend 1:1 Gaps
 
+> 2026-10-07 native mining now has a current held directional gesture, actual
+> equipped CanMine/UID/durability and complete input/UI/movement invalidation.
+> Owner fresh matching confirmation uses source Mine/Attack2; observers retain
+> ordinary Attack1. Input10/adjacent8/queue1 and explicit GPU1 pass with96
+> source geometry cases and four actual PNGs. Runtime world renderer/live
+> acceptance are explicitly false in the offscreen fixture. Normal paired
+> Windows press-and-hold, disconnect, human review and source10091 audio stay
+> open; public packages remain unchanged.
+> [Implementation and visual proof](SHARED-CRYSTAL-MINING-20261007.md).
+
 > 2026-10-06 monthly-card native Candidate has a character-selection modal,
 > localized rules, expiry, code input/paste, redeem and refresh in all nine locales.
 > Wire1/state5 and actual nine-locale offscreen GPU visibility/layout pass with

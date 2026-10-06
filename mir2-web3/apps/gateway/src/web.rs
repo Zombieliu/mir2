@@ -12644,6 +12644,7 @@ mod tests {
     static ENV_LOCK: OnceLock<Mutex<()>> = OnceLock::new();
 
     include!("web_monthly_card_tests.rs");
+    include!("web_mining_tests.rs");
 
     fn snapshot_test_spectator(enabled: bool) -> crate::spectator::SpectatorHub {
         crate::spectator::SpectatorHub::new(crate::spectator::SpectatorConfig {

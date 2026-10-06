@@ -2271,6 +2271,7 @@ pub struct NativeQuestWorldInput<'w> {
     big_map: Option<Res<'w, BigMapModel>>,
     big_map_ui: Option<Res<'w, mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
     movement: Option<ResMut<'w, WorldPointerMovementState>>,
+    presentation: Option<ResMut<'w, crate::entity_presentation::NativeEntityPresentation>>,
 }
 
 /// Crystal's mail target accepts `MirGridType.Inventory`, which covers Bag1
@@ -2369,6 +2370,7 @@ pub fn forward_quest_ui_intents(
         big_map,
         big_map_ui,
         mut movement,
+        mut presentation,
     } = world;
     let pending = intents.drain_intents();
     let player_pending = player_ui_intents
@@ -2448,9 +2450,9 @@ pub fn forward_quest_ui_intents(
     // most recent target is still the player's selected intent.
     let latest_attack_index = pending
         .iter()
-        .rposition(|intent| matches!(intent, QuestUiIntent::AttackTarget { .. }));
+        .rposition(|intent| matches!(intent, QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }));
     for (index, intent) in pending.into_iter().enumerate() {
-        if matches!(&intent, QuestUiIntent::AttackTarget { .. })
+        if matches!(&intent, QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. })
             && Some(index) != latest_attack_index
         {
             continue;
@@ -2607,6 +2609,29 @@ pub fn forward_quest_ui_intents(
                     direction: direction.to_owned(),
                 }
             }
+            QuestUiIntent::AttackDirection { direction, mining, gesture_id } => {
+                if world_actions_blocked
+                    || !read_model.as_deref().is_some_and(|model| model.player.max_hp > 0 && model.player.hp > 0)
+                    || !click_state.as_deref().is_some_and(|state| state.riding_mount == Some(false)
+                        && state.dazed == Some(false) && state.fishing == Some(false))
+                {
+                    continue;
+                }
+                let Some(gesture) = movement.as_deref().and_then(WorldPointerMovementState::current_directional_attack) else {
+                    continue;
+                };
+                let current_map = presentation.as_deref().and_then(|model| model.current_map_file_name());
+                let Some(current_origin) = entities.as_deref().and_then(|model| model.entities.iter()
+                    .find(|entity| entity.kind == EntityKind::SelfPlayer)
+                    .map(|entity| (entity.x, entity.y))) else { continue; };
+                if gesture.id != gesture_id || gesture.direction != direction || gesture.mining() != mining
+                    || !gesture.remains_current(current_map, current_origin, inventory.as_deref())
+                {
+                    continue;
+                }
+                let Some(direction) = crystal_harvest_direction(&direction) else { continue; };
+                NativeOutboundCommand::AttackDirection { direction: direction.to_owned(), spell: None }
+            }
             QuestUiIntent::AttackTarget { object_id } => {
                 // Passive HUD hover can occur while a selected monster is
                 // still being pursued. Only a real modal/drag or a different
@@ -2752,6 +2777,17 @@ pub fn forward_quest_ui_intents(
             Some(context)
         } else { None };
         let sent = commands.send_command(GatewayCommand::Wire(command));
+        if sent && matches!(&retry_intent, QuestUiIntent::AttackDirection { mining: true, .. }) {
+            if let (Some(gesture), Some(presentation), Some(object_id)) = (
+                movement.as_deref().and_then(WorldPointerMovementState::current_directional_attack),
+                presentation.as_deref_mut(),
+                entities.as_deref().and_then(|model| model.entities.iter()
+                    .find(|entity| entity.kind == EntityKind::SelfPlayer).map(|entity| entity.object_id.as_str())),
+            ) {
+                presentation.mark_local_mining_request(object_id, gesture.origin, gesture.direction,
+                    crate::entity_presentation::native_motion_clock_ms());
+            }
+        }
         if let Some(ui) = player_ui_state.as_deref_mut() {
             if exits_npc_service {
                 ui.social_bonds.invalidate_guild_creation();
@@ -2789,7 +2825,7 @@ pub fn forward_quest_ui_intents(
                 );
             }
         }
-        if !sent && !matches!(&retry_intent, QuestUiIntent::AttackTarget { .. }) {
+        if !sent && !matches!(&retry_intent, QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }) {
             retry_intents.push(retry_intent);
         }
     }

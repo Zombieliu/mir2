@@ -1,0 +1,46 @@
+name: Mir2 Shared Mining Acceptance
+
+on:
+  push:
+    branches: ["codex/**"]
+    paths:
+      - "mir2-web3/apps/simulation/src/runtime/mining_player.rs"
+      - "mir2-web3/apps/simulation/src/runtime/zone/runtime/mining.rs"
+      - "mir2-web3/apps/simulation/src/runtime/zone/runtime/checkpoint.rs"
+      - "mir2-web3/apps/simulation/tests/mining.rs"
+      - "mir2-web3/apps/gateway/src/routing/tests/mining_tests.rs"
+      - "mir2-web3/apps/gateway/src/routing/tests/fixtures/mining-map-pack/**"
+      - "mir2-web3/apps/gateway/src/web_mining_tests.rs"
+      - "mir2-web3/packages/game-data/src/crystal_mining.rs"
+      - "mir2-web3/packages/game-data/data/generated/crystal_mining_manifest.json"
+      - ".github/workflows/mining-acceptance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  original-mining:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CARGO_BUILD_JOBS: "2"
+    steps:
+      - name: Checkout exact source and original fixtures
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup toolchain install 1.89.0 --profile minimal
+      - name: Source tables and content scope
+        working-directory: mir2-web3
+        run: cargo +1.89.0 test --locked -p mir2-game-data -- --test-threads=1
+      - name: Shared wall rules and checkpoint compatibility
+        working-directory: mir2-web3
+        run: cargo +1.89.0 test --locked -p mir2-simulation mining -- --test-threads=1
+      - name: Three classes, durable inventory and real WebSocket
+        working-directory: mir2-web3
+        run: cargo +1.89.0 test --locked -p mir2-gateway --lib mining -- --test-threads=1
+      - name: Rejected cold restore preserves the entire live authority
+        working-directory: mir2-web3
+        run: cargo +1.89.0 test --locked -p mir2-gateway --lib atomic_world_checkpoint_restore_preserves -- --test-threads=1

@@ -1,5 +1,18 @@
 # Crystal / Mir2 1:1 Project Roadmap
 
+> 2026-10-07 shared mining Candidate now uses original23-map/two-set data,
+> admitting14 current-profile mines and eight ore identities. Authenticated
+> equipped UID, shared wall counts/clocks, ordinary Attack/None and atomic
+> ore/tool persistence replace the formal Gateway's absent mining path.
+> Seven ordinary Gateway cases and one real WebSocket repeat pass; Windows
+> gesture10, adjacent8, queue1 and explicit GPU1/96 source geometries pass.
+> Initial fixture/Login/link/GPU failures remain recorded. Actual original
+> D401 strict checkpoint and corrected atomic restore pass; default repo
+> fixture WebSocket also passes. Public gameR17/feed14, D/F and player saves
+> remain unchanged. Weapon refining, mining audio and fullP6/P1–P8 stay open.
+> [Scope and actual evidence](SHARED-CRYSTAL-MINING-20261007.md).
+>
+
 > 2026-10-06 additive monthly access Candidate: account-wide30days, offline
 > calendar, deterministic operator order/code, atomic spent receipt, native
 > expiry/redeem/status modal and server StartGame/resume/idle/fast-path checks.

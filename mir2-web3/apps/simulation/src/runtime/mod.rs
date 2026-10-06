@@ -34,6 +34,7 @@ mod leveling;
 mod map;
 mod map_events;
 mod mining;
+mod mining_player;
 mod monster_ai;
 mod monsters;
 mod movement;
@@ -99,6 +100,7 @@ pub use zone::{
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
     ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
     ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement,
+    ZoneMiningTool, ZoneMinedOre, ZoneMiningSwing,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

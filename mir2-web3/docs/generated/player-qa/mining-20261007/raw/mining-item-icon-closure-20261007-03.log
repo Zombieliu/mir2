@@ -1,0 +1,23 @@
+(node:76920) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("file%3A///C%3A/mir2-build/mining-sharp-loader-20261007.mjs", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+node:internal/modules/run_main:123
+    triggerUncaughtException(
+    ^
+Error [ERR_MODULE_NOT_FOUND]: Cannot find module 'C:\mir2-build\r10-src\mir2-web3\apps\web\node_modules\sharp\lib\index.js' imported from C:\Users\Administrator\.codex\worktrees\native-packed-resources\mir2-player-journey\mir2-web3\apps\web\scripts\asset-pipeline\item-icon-closure.mjs
+    at finalizeResolution (node:internal/modules/esm/resolve:274:11)
+    at moduleResolve (node:internal/modules/esm/resolve:859:10)
+    at defaultResolve (node:internal/modules/esm/resolve:983:11)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at resolve (file:///C:/mir2-build/mining-sharp-loader-20261007.mjs:4:12)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at Hooks.resolve (node:internal/modules/esm/hooks:240:30)
+    at handleMessage (node:internal/modules/esm/worker:199:24)
+    at Immediate.checkForMessages (node:internal/modules/esm/worker:141:28)
+    at process.processImmediate (node:internal/timers:485:21) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/mir2-build/r10-src/mir2-web3/apps/web/node_modules/sharp/lib/index.js'
+}
+
+Node.js v22.18.0

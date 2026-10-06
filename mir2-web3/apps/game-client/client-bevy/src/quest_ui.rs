@@ -369,6 +369,13 @@ pub enum QuestUiIntent {
     AttackTarget {
         object_id: u32,
     },
+    /// Windows current held world gesture. The host revalidates this context;
+    /// a canceled or superseded gesture must never be retried later.
+    AttackDirection {
+        direction: String,
+        mining: bool,
+        gesture_id: u64,
+    },
     /// Host-resolved Crystal Alt+world-click on a tile without a target.
     /// The gateway/server remains authoritative over nearby carcass selection.
     HarvestDirection {
@@ -545,6 +552,7 @@ impl QuestUiIntent {
             | Self::SelectNpcDialog { .. }
             | Self::ShareQuest { .. }
             | Self::AttackTarget { .. }
+            | Self::AttackDirection { .. }
             | Self::HarvestDirection { .. }
             | Self::PickUpObject { .. }
             | Self::PickUpTile => None,
@@ -639,9 +647,18 @@ impl QuestUiIntentQueue {
     pub fn clear_attack_intents(&mut self) -> usize {
         let before = self.len();
         self.retry_intents
-            .retain(|intent| !matches!(intent, QuestUiIntent::AttackTarget { .. }));
+            .retain(|intent| !matches!(intent, QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }));
         self.intents
-            .retain(|intent| !matches!(intent, QuestUiIntent::AttackTarget { .. }));
+            .retain(|intent| !matches!(intent, QuestUiIntent::AttackTarget { .. } | QuestUiIntent::AttackDirection { .. }));
+        before - self.len()
+    }
+
+    /// Cancel a held directional gesture without changing an established
+    /// monster selection or unrelated NPC/quest operations.
+    pub fn clear_directional_attack_intents(&mut self) -> usize {
+        let before = self.len();
+        self.retry_intents.retain(|intent| !matches!(intent, QuestUiIntent::AttackDirection { .. }));
+        self.intents.retain(|intent| !matches!(intent, QuestUiIntent::AttackDirection { .. }));
         before - self.len()
     }
 
@@ -7203,6 +7220,22 @@ mod tests {
             QuestUiIntent::PickUpObject { object_id: 8 },
             QuestUiIntent::InteractNpc { npc_object_id: 10 },
         ]);
+    }
+
+    #[test]
+    fn mining_directional_cancellation_clears_both_lanes_without_losing_npc_work() {
+        let mining = QuestUiIntent::AttackDirection {direction: "left".into(), mining: true, gesture_id: 1};
+        let mut queue = QuestUiIntentQueue::default();
+        queue.retain_failed_intents([mining.clone(), QuestUiIntent::InteractNpc {npc_object_id: 10}]);
+        queue.push_intent(mining.clone());
+        queue.push_intent(QuestUiIntent::AttackTarget {object_id: 20});
+        assert_eq!(queue.clear_directional_attack_intents(), 2);
+        assert_eq!(queue.drain_intents(), vec![QuestUiIntent::InteractNpc {npc_object_id: 10},
+            QuestUiIntent::AttackTarget {object_id: 20}]);
+        queue.retain_failed_intents([mining.clone()]); queue.push_intent(mining);
+        queue.push_intent(QuestUiIntent::PickUpTile);
+        assert_eq!(queue.clear_attack_intents(), 2);
+        assert_eq!(queue.drain_intents(), vec![QuestUiIntent::PickUpTile]);
     }
 
     #[test]

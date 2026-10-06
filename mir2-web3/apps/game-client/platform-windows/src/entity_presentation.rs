@@ -17,6 +17,10 @@ use mir2_bevy_runtime::entity_animation::{
 use serde_json::Value;
 
 #[cfg(test)]
+#[path = "mining_visual_tests.rs"]
+mod mining_visual_tests;
+
+#[cfg(test)]
 #[path = "buried_monster_replay_tests.rs"]
 mod buried_monster_replay_tests;
 
@@ -82,7 +86,18 @@ pub struct NativeEntityPresentation {
     last_positions: HashMap<String, (i32, i32)>,
     motion_windows: HashMap<String, NativeMotionWindow>,
     last_attack_motion_overlap: Option<(u64, u64)>,
+    local_mining_request: Option<LocalMiningRequest>,
     payload_dirty: bool,
+}
+
+#[derive(Debug)]
+struct LocalMiningRequest {
+    object_id: String,
+    map_file: String,
+    origin: (i32, i32),
+    direction: String,
+    source_sequence_floor: u64,
+    expires_ms: u64,
 }
 
 impl Default for NativeEntityPresentation {
@@ -106,6 +121,7 @@ impl Default for NativeEntityPresentation {
             last_positions: HashMap::new(),
             motion_windows: HashMap::new(),
             last_attack_motion_overlap: None,
+            local_mining_request: None,
             payload_dirty: false,
         }
     }
@@ -195,6 +211,54 @@ impl NativeEntityPresentation {
 
     pub(crate) fn current_map_file_name(&self) -> Option<&str> {
         self.latest_payload.as_ref()?.get("mapFileName")?.as_str()
+    }
+
+    pub(crate) fn mark_local_mining_request(
+        &mut self, object_id: &str, origin: (i32, i32), direction: &str, now_ms: u64,
+    ) {
+        let Some(map_file) = self.current_map_file_name().map(str::to_owned) else { return; };
+        self.local_mining_request = Some(LocalMiningRequest {
+            object_id: object_id.to_owned(), map_file, origin, direction: direction.to_owned(),
+            source_sequence_floor: self.last_source_sequence.get(object_id).copied().unwrap_or(0),
+            expires_ms: now_ms.saturating_add(3_000),
+        });
+    }
+
+    pub(crate) fn clear_local_mining_request(&mut self) {
+        self.local_mining_request = None;
+    }
+
+    fn map_confirmed_local_mine(&mut self, payload: &mut Value, now_ms: u64) {
+        let Some(request) = self.local_mining_request.as_ref() else { return; };
+        if now_ms >= request.expires_ms
+            || payload.get("mapFileName").and_then(Value::as_str) != Some(request.map_file.as_str())
+        {
+            self.local_mining_request = None;
+            return;
+        }
+        let Some(owner) = payload.get_mut("entities").and_then(Value::as_array_mut)
+            .and_then(|entities| entities.iter_mut().find(|entity| {
+                entity.get("kind").and_then(Value::as_str) == Some("selfPlayer")
+                    && entity.get("objectId").and_then(value_object_id).as_deref() == Some(request.object_id.as_str())
+            })) else { return; };
+        let position = owner.get("x").and_then(Value::as_i64)
+            .zip(owner.get("y").and_then(Value::as_i64));
+        if position != Some((i64::from(request.origin.0), i64::from(request.origin.1)))
+            || owner.get("dead").and_then(Value::as_bool) == Some(true)
+        {
+            self.local_mining_request = None;
+            return;
+        }
+        if owner.get("_nativeAnimationAction").and_then(Value::as_str) == Some("attack1")
+            && owner.get("direction").and_then(Value::as_str) == Some(request.direction.as_str())
+            && owner.get("_nativeAnimationSequence").and_then(Value::as_u64)
+                .is_some_and(|sequence| sequence > request.source_sequence_floor)
+        {
+            // Crystal's own Mine action uses the exact Attack2 body/weapon
+            // frames. Observers still consume ordinary ObjectAttack(None).
+            owner["_nativeAnimationAction"] = Value::String("mine".into());
+            self.local_mining_request = None;
+        }
     }
 
     /// Packet payload after native movement reconciliation.
@@ -611,6 +675,7 @@ impl NativeEntityPresentation {
         let Some(mut payload) = self.pending_payload.take() else {
             return;
         };
+        self.map_confirmed_local_mine(&mut payload, motion_now_ms);
         // Source echoes can be normalized to the active predicted action by
         // motion reconciliation. Capture their adapter numbers beforehand so
         // a local animation number can never retire a later real packet.
@@ -1489,6 +1554,7 @@ fn parse_action(action: &str) -> Option<AnimationAction> {
         "running" => Some(AnimationAction::Running),
         "attack1" => Some(AnimationAction::Attack1),
         "attack2" => Some(AnimationAction::Attack2),
+        "mine" => Some(AnimationAction::Attack2),
         "attack3" => Some(AnimationAction::Attack3),
         "attack4" => Some(AnimationAction::Attack4),
         "attackRange1" => Some(AnimationAction::AttackRange1),
@@ -1735,6 +1801,59 @@ mod tests {
                 }
             }]
         })
+    }
+
+    #[test]
+    fn mining_owner_confirmation_uses_crystal_attack2_but_observer_stays_attack1() {
+        let mut presentation = NativeEntityPresentation::default();
+        let mut initial = player_payload(1);
+        initial["mapFileName"] = json!("D401");
+        initial["entities"][0]["_nativeAnimationAction"] = json!("standing");
+        presentation.replace_payload(initial.clone());
+        presentation.sync_pending_payload_with(900, |_, _, _| AnimationCatalog::crystal_player());
+        presentation.mark_local_mining_request("1", (10, 10), "down", 1_000);
+        let mut attack = initial.clone();
+        attack["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+        attack["entities"][0]["_nativeAnimationSequence"] = json!(2);
+        let mut observer = attack["entities"][0].clone();
+        observer["kind"] = json!("player"); observer["objectId"] = json!(2);
+        attack["entities"].as_array_mut().unwrap().push(observer);
+        presentation.replace_payload(attack);
+        presentation.sync_pending_payload_with(1_001, |_, _, _| AnimationCatalog::crystal_player());
+        assert_eq!(presentation.world.active_state("1").unwrap().pose().action, AnimationAction::Attack2);
+        assert_eq!(presentation.world.active_state("1").unwrap().pose().draw_frame_index, 208,
+            "Crystal Mine = 184 + direction(Down) * 6");
+        assert_eq!(presentation.world.active_state("2").unwrap().pose().action, AnimationAction::Attack1);
+        assert_eq!(presentation.latest_payload.as_ref().unwrap()["entities"][1]["_nativeAnimationAction"], "attack1");
+        assert!(presentation.local_mining_request.is_none());
+        let mut next = initial; next["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+        next["entities"][0]["_nativeAnimationSequence"] = json!(3);
+        presentation.map_confirmed_local_mine(&mut next, 1_002);
+        assert_eq!(next["entities"][0]["_nativeAnimationAction"], "attack1", "only one matching confirmation consumes the marker");
+    }
+
+    #[test]
+    fn mining_animation_marker_cannot_reuse_stale_or_moved_or_canceled_attack() {
+        for case in ["stale", "move", "map", "cancel", "timeout"] {
+            let mut presentation = NativeEntityPresentation::default();
+            let mut initial = player_payload(1); initial["mapFileName"] = json!("D401");
+            initial["entities"][0]["_nativeAnimationAction"] = json!("standing");
+            presentation.replace_payload(initial.clone());
+            presentation.sync_pending_payload_with(900, |_, _, _| AnimationCatalog::crystal_player());
+            presentation.mark_local_mining_request("1", (10, 10), "down", 1_000);
+            let mut attack = initial;
+            attack["entities"][0]["_nativeAnimationAction"] = json!("attack1");
+            attack["entities"][0]["_nativeAnimationSequence"] = json!(2);
+            match case {
+                "stale" => attack["entities"][0]["_nativeAnimationSequence"] = json!(1),
+                "move" => attack["entities"][0]["x"] = json!(11),
+                "map" => attack["mapFileName"] = json!("D402"),
+                "cancel" => presentation.clear_local_mining_request(),
+                "timeout" => (), _ => unreachable!(),
+            }
+            presentation.map_confirmed_local_mine(&mut attack, if case == "timeout" {4_000} else {1_001});
+            assert_eq!(attack["entities"][0]["_nativeAnimationAction"], "attack1", "{case}");
+        }
     }
 
     #[test]

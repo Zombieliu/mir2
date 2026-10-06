@@ -1,0 +1,48 @@
+
+running 1 test
+test gameplay_bridge::tests::attack_target_forwarding_applies_crystal_alt_shift_and_normal_click_order ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 878 filtered out; finished in 0.00s
+
+
+running 1 test
+test gameplay_bridge::tests::combat_batch_keeps_latest_target_and_saturated_lane_never_replays_old_attack ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 878 filtered out; finished in 0.00s
+
+
+running 1 test
+test input::tests::attack_waits_for_visible_self_motion_but_not_delayed_ack ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 878 filtered out; finished in 0.01s
+
+
+running 1 test
+test input::tests::new_world_press_discards_old_queued_attack_without_releasing_pending_move ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 878 filtered out; finished in 0.00s
+
+
+running 1 test
+test input::tests::harvest_hold_clears_on_alt_loss_focus_ui_or_hover_target_change ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 878 filtered out; finished in 0.01s
+
+
+running 1 test
+test input::tests::crowded_right_press_over_monster_or_npc_pixels_keeps_legal_escape_direction ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 878 filtered out; finished in 0.00s
+
+
+running 1 test
+test input::tests::classic_right_hold_tracks_cursor_without_path_and_stops_on_release ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 878 filtered out; finished in 0.01s
+
+
+running 1 test
+test input::tests::shift_direction_starts_with_one_matching_walk ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 878 filtered out; finished in 0.00s
+

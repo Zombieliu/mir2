@@ -626,6 +626,18 @@ impl ZoneManager {
         self.zones.get(key)
     }
 
+    pub fn prepare_mining_swing(&self,session:&SessionId,direction:MirDirection,
+        tool:&super::ZoneMiningTool,now_ms:u64)->Option<super::ZoneMiningSwing> {
+        let key=self.session_zones.get(session)?;
+        self.zones.get(key)?.prepare_mining_swing(session,direction,tool,now_ms)
+    }
+
+    pub fn commit_mining_swing(&mut self,session:&SessionId,swing:&super::ZoneMiningSwing)
+        ->Option<Vec<ZoneOutbound>> {
+        let key=self.session_zones.get(session)?.clone();
+        self.zones.get_mut(&key)?.commit_mining_swing(swing)
+    }
+
     pub fn player_flaming_sword_armed(&self, session_id: &SessionId, now_ms: u64) -> bool {
         self.session_zones.get(session_id).and_then(|key| self.zones.get(key))
             .is_some_and(|zone| zone.player_flaming_sword_armed(session_id, now_ms))

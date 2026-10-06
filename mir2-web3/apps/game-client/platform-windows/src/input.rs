@@ -43,6 +43,8 @@ use crate::native_protocol::NativeOutboundCommand;
 mod big_map_input;
 #[path = "minimap_input.rs"]
 mod minimap_input;
+#[path = "mining_input.rs"]
+pub(crate) mod mining_input;
 
 pub(crate) const NATIVE_INPUT_TRACE_ENV: &str = "MIR2_NATIVE_INPUT_TRACE";
 
@@ -324,6 +326,8 @@ pub struct WorldPointerMovementState {
     /// different actor cannot retarget an old press.
     harvest_direction: Option<&'static str>,
     next_harvest_request_at_ms: f64,
+    directional_attack: Option<mining_input::DirectionalAttackGesture>,
+    directional_attack_epoch: u64,
     pending: VecDeque<PendingSelfMove>,
     movement_stall_reported: bool,
     self_object_id: Option<String>,
@@ -358,6 +362,12 @@ impl WorldPointerMovementState {
         self.attack_target
     }
 
+    pub(crate) fn current_directional_attack(
+        &self,
+    ) -> Option<&mining_input::DirectionalAttackGesture> {
+        self.directional_attack.as_ref()
+    }
+
     /// Arm the same target pursuit used by an ordinary unmodified monster
     /// click. Quest UI buttons call this through the host bridge so they keep
     /// following a moving monster until it is in attack range.
@@ -375,10 +385,12 @@ impl WorldPointerMovementState {
         self.harvest_target = None;
         self.harvest_direction = None;
         self.next_harvest_request_at_ms = 0.0;
+        self.directional_attack = None;
         self.last_plan_block_trace_at_ms = None;
     }
 
     fn begin(&mut self, mode: WorldPointerMovementMode, at_ms: f64) {
+        self.directional_attack = None;
         if self.active != Some(mode) {
             crate::movement_trace::record(serde_json::json!({
                 "type": "movementHoldStarted",
@@ -391,6 +403,7 @@ impl WorldPointerMovementState {
     }
 
     fn stop_hold(&mut self, at_ms: f64, reason: &'static str) {
+        self.directional_attack = None;
         if let Some(mode) = self.active.take() {
             crate::movement_trace::record(serde_json::json!({
                 "type": "movementHoldStopped",
@@ -562,6 +575,7 @@ impl WorldPointerMovementState {
         self.harvest_target = None;
         self.harvest_direction = None;
         self.next_harvest_request_at_ms = 0.0;
+        self.directional_attack = None;
         self.auto_path_destination = None;
         self.pointer_auto_path = false;
         self.map_auto_path = None;
@@ -1593,7 +1607,7 @@ pub fn mouse_world_interaction_system(
     mut player_ui: Option<ResMut<NativePlayerUiState>>,
     notice: Option<Res<NoticeDialogState>>,
     dialog: Option<Res<NpcDialogModel>>,
-    (ui_read_model, click_state, big_map, mut map_chat, big_map_ui, mini_map_view, map_model): (
+    (ui_read_model, click_state, big_map, mut map_chat, big_map_ui, mini_map_view, map_model, inventory): (
         Option<Res<UiReadModel>>,
         Option<Res<NativeWorldClickState>>,
         Option<Res<mir2_client_bevy::big_map::BigMapModel>>,
@@ -1601,6 +1615,7 @@ pub fn mouse_world_interaction_system(
         Option<Res<mir2_client_bevy::crystal_ui::overlays::BigMapUiState>>,
         Option<Res<mir2_client_bevy::crystal_ui::minimap::MiniMapViewState>>,
         Option<Res<mir2_client_bevy::map::MapModel>>,
+        Option<Res<InventoryModel>>,
     ),
     entities: Option<Res<EntityModelSet>>,
     mut presentation: Option<ResMut<NativeEntityPresentation>>,
@@ -1625,6 +1640,21 @@ pub fn mouse_world_interaction_system(
     let left_released = mouse.just_released(MouseButton::Left);
     let right_released = mouse.just_released(MouseButton::Right);
     let now_ms = movement_now_ms(time.as_deref(), real_time.as_deref());
+    let cancels_directional_attack = !mouse.pressed(MouseButton::Left)
+        || mouse.pressed(MouseButton::Right)
+        || modifiers.alt
+        || keys.is_some_and(|keys| keys.just_pressed(KeyCode::Escape)
+            || walk_key_map().iter().any(|(key, _)| keys.pressed(*key)
+                && player_ui.as_deref().is_none_or(|ui| !key_owned_by_binding(&ui.keyboard, keys, *key))));
+    if cancels_directional_attack || left_pressed || right_pressed {
+        movement.directional_attack = None;
+        if let Some(presentation) = presentation.as_deref_mut() {
+            presentation.clear_local_mining_request();
+        }
+        if let Some(queue) = queue.as_deref_mut() {
+            queue.clear_directional_attack_intents();
+        }
+    }
     let new_move = player_ui
         .as_deref()
         .is_some_and(|ui| ui.core.options.new_move);
@@ -1676,6 +1706,7 @@ pub fn mouse_world_interaction_system(
         && movement.attack_target.is_none()
         && movement.harvest_target.is_none()
         && movement.harvest_direction.is_none()
+        && movement.directional_attack.is_none()
         && movement.pending.is_empty()
         && !ack_waiting
         && route_navigation
@@ -1844,6 +1875,7 @@ pub fn mouse_world_interaction_system(
     }
 
     if !window.focused {
+        presentation.clear_local_mining_request();
         if let Some(queue) = queue.as_deref_mut() {
             queue.clear_attack_intents();
         }
@@ -1905,6 +1937,8 @@ pub fn mouse_world_interaction_system(
         })
     });
     if (left_pressed || right_pressed) && cursor_over_native_hud_button(window, minimap_expanded) {
+        presentation.clear_local_mining_request();
+        if let Some(queue) = queue.as_deref_mut() { queue.clear_directional_attack_intents(); }
         movement.stop_hold(now_ms, "hudButtonPress");
         // Crystal view buttons consume their own pointer edge. Opening the
         // Character/Spells/bag/options/menu view doesn't select a new world
@@ -2130,6 +2164,8 @@ pub fn mouse_world_interaction_system(
         && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
         && player_ui.as_deref().is_some_and(|ui| !ui.blocks_world_action(false, false))
     {
+        presentation.clear_local_mining_request();
+        if let Some(queue) = queue.as_deref_mut() { queue.clear_directional_attack_intents(); }
         movement.stop_hold(now_ms, "nonmodalPanelPointer");
         return;
     }
@@ -2157,6 +2193,7 @@ pub fn mouse_world_interaction_system(
         None
     };
     if let Some(blocker) = blocker {
+        presentation.clear_local_mining_request();
         if let Some(queue) = queue.as_deref_mut() {
             queue.clear_attack_intents();
         }
@@ -2423,6 +2460,27 @@ pub fn mouse_world_interaction_system(
         if let Some(ui) = player_ui.as_deref_mut() {
             ui.local_keys.set_auto_run(false);
         }
+    }
+    if !right_pressed && !mouse.pressed(MouseButton::Right)
+        && mining_input::handle_directional_attack(
+            &mut movement,
+            queue.as_deref_mut(),
+            presentation,
+            mining_input::DirectionalAttackInput {
+                object_id: &object_id,
+                origin: entity_position,
+                inventory: inventory.as_deref(),
+                read_model: ui_read_model.as_deref(),
+                click_state: click_state.as_deref(),
+                left_pressed,
+                left_held: mouse.pressed(MouseButton::Left),
+                shift: modifiers.shift,
+                now_ms,
+                motion_now_ms: crate::entity_presentation::native_motion_clock_ms(),
+            },
+        )
+    {
+        return;
     }
     let auto_run = player_ui
         .as_deref()
@@ -3729,6 +3787,9 @@ fn walk_key_map() -> [(KeyCode, &'static str); 8] {
 
 #[cfg(test)]
 mod tests {
+    mod mining_input_tests {
+        include!("mining_input_tests.rs");
+    }
     mod hotkey_intent_tests {
         include!("hotkey_intent_tests.rs");
     }

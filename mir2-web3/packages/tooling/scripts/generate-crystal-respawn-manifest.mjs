@@ -1,5 +1,6 @@
 import { mkdirSync, readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { createHash } from "node:crypto";
 
 const repoRoot = resolve(import.meta.dirname, "..", "..", "..");
 const serverDbPath = process.argv[2] ?? resolve(repoRoot, "..", "Crystal", "Build", "Server", "Debug", "Server.MirDB");
@@ -117,6 +118,52 @@ function main() {
   }
 
   const maps = parseMaps(reader);
+  // Export the original mining metadata independently: no respawn, item or
+  // timestamp rewrites are needed when repairing this previously omitted field.
+  if (process.env.MIR2_CRYSTAL_MINING_ONLY) {
+    const minesPath = resolve(configRoot, "Mines.ini");
+    const ini = readFileSync(minesPath, "utf8");
+    const sections = new Map();
+    let section;
+    for (const raw of ini.split(/\r?\n/)) {
+      const line = raw.trim();
+      const match = /^\[Mine(\d+)\]$/.exec(line);
+      if (match) { section = {}; sections.set(Number(match[1]), section); continue; }
+      const equals = line.indexOf("=");
+      if (section && equals > 0) section[line.slice(0, equals)] = line.slice(equals + 1);
+    }
+    const mine_sets = [];
+    for (const [index, values] of sections) {
+      if (Number(values.SpotRegenRate) === 255) break;
+      const drops = [];
+      for (let drop = 0; drop < 255; drop++) {
+        const prefix = `D${drop}-`;
+        if (Number(values[`${prefix}MinSlot`]) === 255 || !(prefix + "ItemName" in values)) break;
+        drops.push({ item_name: values[`${prefix}ItemName`],
+          min_slot: Number(values[`${prefix}MinSlot`]), max_slot: Number(values[`${prefix}MaxSlot`]),
+          min_dura: Number(values[`${prefix}MinDura`]), max_dura: Number(values[`${prefix}MaxDura`]),
+          bonus_chance: Number(values[`${prefix}BonusChance`]), max_bonus_dura: Number(values[`${prefix}MaxBonusDura`]) });
+      }
+      mine_sets.push({ mine_index: index + 1, name: values.Name,
+        spot_regen_rate_minutes: Number(values.SpotRegenRate), max_stones: Number(values.MaxStones),
+        hit_rate: Number(values.HitRate), drop_rate: Number(values.DropRate),
+        total_slots: Number(values.TotalSlots), drops });
+    }
+    const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
+    const manifest = { schema_version: 1, crystal_db_version: version,
+      crystal_db_custom_version: customVersion, source_map_count: maps.length,
+      source_db_sha256: hash(readFileSync(serverDbPath)), source_mines_sha256: hash(Buffer.from(ini)),
+      maps: maps.filter(map => map.mine_index > 0 || map.mine_zones.length > 0).map(map => ({
+        map_index: map.map_index, map_file_name: map.map_file_name, map_title: map.map_title,
+        mine_index: map.mine_index, mine_zones: map.mine_zones })), mine_sets };
+    const outputPath = resolve(repoRoot, "packages/game-data/data/generated/crystal_mining_manifest.json");
+    const bytes = `${JSON.stringify(manifest, null, 2)}\n`;
+    if (process.env.MIR2_CRYSTAL_MINING_ONLY === "check") {
+      if (readFileSync(outputPath, "utf8") !== bytes) throw new Error("Mining manifest differs from original DB/Mines.ini");
+    } else { writeFileSync(outputPath, bytes); }
+    console.log(`Verified ${manifest.maps.length} mining maps and ${mine_sets.length} mine sets from original DB/Mines.ini`);
+    return;
+  }
   // Narrow map-rule repair: preserve existing generated content and timestamps.
   if (process.env.MIR2_CRYSTAL_CREATURE_MAP_RULE_ONLY) {
     const byIndex = new Map(maps.map((map) => [map.map_index, map]));
@@ -483,14 +530,13 @@ function parseMaps(reader) {
     const map_dark_light = reader.readUInt8();
 
     const mineZoneCount = reader.readInt32();
+    const mine_zones = [];
     for (let mineIndex = 0; mineIndex < mineZoneCount; mineIndex += 1) {
-      reader.readInt32();
-      reader.readInt32();
-      reader.readUInt16();
-      reader.readUInt8();
+      mine_zones.push({ x: reader.readInt32(), y: reader.readInt32(),
+        size: reader.readUInt16(), mine_index: reader.readUInt8() });
     }
 
-    reader.readUInt8();
+    const mine_index = reader.readUInt8();
     const no_mount = reader.readBoolean();
     const need_bridle = reader.readBoolean();
     reader.readBoolean();
@@ -514,6 +560,8 @@ function parseMaps(reader) {
       map_index,
       map_file_name,
       map_title,
+      mine_index,
+      mine_zones,
       mini_map,
       big_map,
       light,

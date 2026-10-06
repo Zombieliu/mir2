@@ -4261,9 +4261,9 @@ impl SimulationConfig {
     /// are reachable, and entering any named map spawns that map's entire
     /// Crystal respawn set. The starter map keeps its real manifest NPCs
     /// (spawned per-map from the manifest), so no hand-authored starter
-    /// blacksmith/mine overlays are injected here — NOTE that `mine_zones`
-    /// stays EMPTY on this path (Crystal stores mine zones in the Map DB, not
-    /// the map manifest), so P0 veins only exist where config seeds them.
+    /// blacksmith/mine overlays are injected here. The production shared Zone
+    /// imports original MapInfo.MineIndex/MineZones from the separately hashed
+    /// mining manifest; `mine_zones` remains a legacy single-session fixture.
     ///
     /// [`with_crystal_map_runtime`]: Self::with_crystal_map_runtime
     pub fn with_crystal_world_runtime(mut self) -> Self {

@@ -64,6 +64,7 @@ pub use runtime::{
     ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
     ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
     ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement, CRYSTAL_OBJECT_DATA_RANGE,
+    ZoneMiningTool, ZoneMinedOre, ZoneMiningSwing,
 };
 pub use world_runtime::{
     validate_production_player_command, InProcessWorldRuntime, NativeGameShopPurchaseRequest,

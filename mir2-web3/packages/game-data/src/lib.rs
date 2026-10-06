@@ -3855,7 +3855,9 @@ mod tests {
             bundle.summary.quest_reward_overrides,
             profile.quest_reward_overrides.len()
         );
-        assert_eq!(bundle.files.len(), 13);
+        assert_eq!(bundle.files.len(), 14);
+        assert!(bundle.files.iter().any(|file| file.path ==
+            "packages/game-data/data/generated/crystal_mining_manifest.json"));
     }
 
     #[test]
@@ -4901,3 +4903,6 @@ mod tests {
         }));
     }
 }
+mod crystal_mining;
+pub use crystal_mining::{crystal_mine_set, crystal_mining_manifest, crystal_mining_map, crystal_mining_item,
+    CrystalMineDrop, CrystalMineSet, CrystalMineZone, CrystalMiningMap, CrystalMiningManifest};
