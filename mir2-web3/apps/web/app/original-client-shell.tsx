@@ -30,6 +30,7 @@ import {
 } from "../lib/original-ui";
 import { createAssetResidency } from "../lib/asset-residency";
 import { BagPointerRouter } from "../lib/bevy-bag-ui";
+import { bagBeltTargetAtClientPoint, sameBagBeltGeometry, validBagBeltDropGeometry, type BagBeltCallbacks, type BagBeltButtonBinding, type BagBeltGeometry, type BagBeltGestureProof, type BagBeltRect } from "../lib/bag-belt-gesture";
 import type { NpcRepairView, NpcRepairSelection, NpcRepairDrag, NpcRepairDragGeometry } from "../lib/npc-repair-service";
 import { StoragePointerRouter } from "../lib/bevy-storage-ui";
 import { NpcShopPointerRouter } from "../lib/bevy-npc-shop-ui";
@@ -607,6 +608,7 @@ export function OriginalClientShell({
   npcRepairService,
   npcRepairView, onSelectNpcRepair, onConfirmNpcRepair, onToggleNpcRepairHold,
   onBeginNpcRepairDrag, onCancelNpcRepairDrag, onDropNpcRepairDrag,
+  onBagBeltDropGeometry, onBeginBagToBeltGesture, onArmBagToBeltGesture, onBagToBeltMove, onCancelBagToBeltGesture,
   onLanguageChange,
   onAccountIdChange,
   onPasswordChange,
@@ -811,6 +813,20 @@ export function OriginalClientShell({
   // shell's existing motion clock without any dedicated timer.
   const chatBubbleStateRef = useRef<Map<string, ChatBubbleRecord>>(new Map());
   const stageFrameRef = useRef<HTMLDivElement | null>(null);
+  const bagBeltButtonsRef = useRef<readonly BagBeltButtonBinding[] | null>(null);
+  const bagBeltGeometryRef = useRef<BagBeltGeometry | null>(null);
+  const bagBeltGeometryRevisionRef = useRef(0);
+  const bagBeltCallbacksRef = useRef<BagBeltCallbacks>({});
+  const bagBeltContextRef = useRef<{ page: InventoryTabKey; open: boolean; screen: ClientScreen; virtualWidth: number; virtualHeight: number; scale: number; repair: boolean } | null>(null);
+  type BagBeltPointerLease = { proof: BagBeltGestureProof; geometry: BagBeltGeometry; source: Readonly<ItemActionRef> | null;
+    node: HTMLElement; sourceRect: BagBeltRect; pointerId: number; pointerType: string; startedAt: number; x: number; y: number;
+    owner: "react" | "bevy"; callbacks: BagBeltCallbacks; activate?: () => void; hold?: { token: object };
+    sharedPointerCallback: typeof onBevyBagPointer; sharedContextCallback: typeof getBevyBagPointerContext };
+  const bagBeltPointerRef = useRef<BagBeltPointerLease | null>(null);
+  const bagBeltArmedSharedRef = useRef<BagBeltPointerLease | null>(null);
+  const bagBeltQuarantineRef = useRef(new Map<number, number>());
+  const bagBeltRejectedTerminalRef = useRef<{ pointerId: number; startedAt: number } | null>(null);
+  const bagBeltClickFenceRef = useRef(new Map<number, { startedAt: number; nodes: Set<HTMLElement> }>());
   const npcRepairTargetRef = useRef<{ view: NpcRepairView; node: HTMLElement } | null>(null);
   const npcRepairQuarantineRef = useRef(new Map<number, number>());
   const npcRepairClickFenceRef = useRef(new Map<number, { startedAt: number; target: EventTarget | null }>());
@@ -1091,7 +1107,7 @@ export function OriginalClientShell({
   characterPointerCallbacksRef.current = { getBevyCharacterPointerContext, onBevyCharacterPointer };
   const hudPointerRouterRef = useRef(new HudPointerRouter());
   const bagPointerCallbacksRef = useRef({ getBevyBagPointerContext, onBevyBagPointer });
-  bagPointerCallbacksRef.current = { getBevyBagPointerContext, onBevyBagPointer };
+  useLayoutEffect(() => { bagPointerCallbacksRef.current = { getBevyBagPointerContext, onBevyBagPointer }; });
   const npcShopPointerCallbacksRef = useRef({ getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer });
   npcShopPointerCallbacksRef.current = { getBevyNpcShopInputBlocked, getBevyNpcShopPointerContext, onBevyNpcShopPointer };
   const storagePointerCallbacksRef = useRef({ getBevyStoragePointerContext, onBevyStoragePointer });
@@ -3536,6 +3552,9 @@ export function OriginalClientShell({
     const held=combatUiHoldRef.current.get(channel);if(!held||held.token!==prior?.token)return;combatUiHoldRef.current.delete(channel);held.notify?.(channel,held.token,false);
   }
   function cancelSharedBagPointer(phase: "cancel" | "blur" = "cancel") {
+    const bagBeltLease = bagBeltPointerRef.current;
+    if (bagBeltLease?.owner === "bevy") cancelBagBeltPointer(bagBeltLease);
+    cancelBagBeltPointer(bagBeltArmedSharedRef.current);
     const combatHold=typeof onCombatUiHeld==="function"?combatUiHoldRef.current.get("bag"):undefined;
     const edge = bagPointerRouterRef.current.cancel(phase);
     try { if(edge)bagPointerCallbacksRef.current.onBevyBagPointer?.(edge); }
@@ -3671,6 +3690,161 @@ export function OriginalClientShell({
     return true;
   }
 
+  const bagBeltRect = (node: HTMLElement): BagBeltRect => { const r = node.getBoundingClientRect(); return Object.freeze([r.left, r.top, r.width, r.height]); };
+  function rememberBagBeltClick(pointerId: number, startedAt: number, node: HTMLElement) {
+    const nodes = new Set<HTMLElement>([node, ...(bagBeltGeometryRef.current?.buttons ?? [])]);
+    bagBeltClickFenceRef.current.set(pointerId, { startedAt, nodes });
+  }
+  function fenceBagBeltMouse(event: { target: EventTarget | null; type?: string; detail?: number; timeStamp: number; preventDefault(): void; stopPropagation(): void }): boolean {
+    if (event.type === "click" && event.detail === 0 || !(event.target instanceof Element)) return false;
+    const node = event.target.closest<HTMLElement>("button"); if (!node) return false;
+    const pointerId = (event as { pointerId?: number }).pointerId;
+    const records = typeof pointerId === "number" ? [[pointerId, bagBeltClickFenceRef.current.get(pointerId)] as const] : [...bagBeltClickFenceRef.current.entries()];
+    const match = records.find(([, record]) => record && record.nodes.has(node) && event.timeStamp >= record.startedAt);
+    if (!match) return false;
+    event.preventDefault(); event.stopPropagation();
+    // Keep mousedown custody through the following click and through canceled gestures.
+    if (event.type === "click") bagBeltClickFenceRef.current.delete(match[0]);
+    return true;
+  }
+  function cancelBagBeltPointer(expected = bagBeltPointerRef.current) {
+    if (!expected || bagBeltPointerRef.current !== expected && bagBeltArmedSharedRef.current !== expected) return;
+    const physical = bagBeltPointerRef.current === expected;
+    if (physical) { bagBeltPointerRef.current = null; bagBeltQuarantineRef.current.set(expected.pointerId, expected.startedAt); }
+    if (bagBeltArmedSharedRef.current === expected) bagBeltArmedSharedRef.current = null;
+    try { expected.callbacks.onCancelBagToBeltGesture?.(expected.proof); }
+    finally {
+      if (expected.hold) endCombatUiHold("bag", expected.hold);
+      try { if (expected.node.hasPointerCapture(expected.pointerId)) expected.node.releasePointerCapture(expected.pointerId); } catch { /* Custody is already retired. */ }
+    }
+  }
+  function refreshBagBeltGeometry(): BagBeltGeometry | null {
+    const context = bagBeltContextRef.current, stage = stageFrameRef.current, bindings = bagBeltButtonsRef.current;
+    let next: BagBeltGeometry | null = null;
+    if (context && context.screen === "game" && context.open && !context.repair && (context.page === "bag1" || context.page === "bag2")
+      && document.visibilityState === "visible" && document.hasFocus() && stage?.isConnected && bindings?.length === 6
+      && Number.isFinite(context.scale) && context.scale > 0 && Number.isFinite(window.devicePixelRatio) && window.devicePixelRatio > 0
+      && bindings.every(b => b.node.isConnected && stage.contains(b.node))) {
+      const stageRect = bagBeltRect(stage), buttons = bindings.map(b => b.node);
+      if (stageRect.every(Number.isFinite) && stageRect[2] > 0 && stageRect[3] > 0 && new Set(buttons).size === 6) {
+        const targets = bindings.map(b => { const r = bagBeltRect(b.node); return Object.freeze({ slot: b.slot,
+          uniqueId: b.item === null ? null : b.item.authoritativeUniqueId ?? NaN,
+          left: (r[0] - stageRect[0]) / context.scale, top: (r[1] - stageRect[1]) / context.scale,
+          width: r[2] / context.scale, height: r[3] / context.scale }); });
+        const candidate: BagBeltGeometry = { revision: Math.max(1, bagBeltGeometryRevisionRef.current), targets: Object.freeze(targets), stage,
+          stageRect, buttons: Object.freeze(buttons), scale: context.scale, virtualWidth: context.virtualWidth, virtualHeight: context.virtualHeight,
+          devicePixelRatio: window.devicePixelRatio, page: context.page };
+        if (validBagBeltDropGeometry(candidate) && targets.every(t => t.left >= 0 && t.top >= 0
+          && t.left + t.width <= context.virtualWidth && t.top + t.height <= context.virtualHeight)) next = candidate;
+      }
+    }
+    const prior = bagBeltGeometryRef.current;
+    if (sameBagBeltGeometry(prior, next)) return prior;
+    if (!prior && !next) return null;
+    cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+    if (next) next = Object.freeze({ ...next, revision: ++bagBeltGeometryRevisionRef.current });
+    bagBeltGeometryRef.current = next;
+    bagBeltCallbacksRef.current.onBagBeltDropGeometry?.(next);
+    return next;
+  }
+  const registerBeltTargets = useCallback((targets: readonly BagBeltButtonBinding[]) => {
+    const binding = Object.freeze([...targets]); bagBeltButtonsRef.current = binding; refreshBagBeltGeometry();
+    return () => { if (bagBeltButtonsRef.current === binding) { bagBeltButtonsRef.current = null; refreshBagBeltGeometry(); } };
+  }, []);
+  function bagBeltCallbacksMatch(lease: BagBeltPointerLease): boolean {
+    const current = bagBeltCallbacksRef.current;
+    return (lease.owner !== "bevy" || lease.sharedPointerCallback === bagPointerCallbacksRef.current.onBevyBagPointer
+      && lease.sharedContextCallback === bagPointerCallbacksRef.current.getBevyBagPointerContext)
+      && ["onBeginBagToBeltGesture", "onArmBagToBeltGesture", "onBagToBeltMove", "onCancelBagToBeltGesture"].every(key =>
+      current[key as keyof BagBeltCallbacks] === lease.callbacks[key as keyof BagBeltCallbacks]);
+  }
+  function beginBagBeltPointer(event: Parameters<typeof handleSharedBagPointer>[0], node: HTMLElement, source: Readonly<ItemActionRef> | null,
+    owner: "react" | "bevy", activate?: () => void): boolean {
+    if (bagBeltPointerRef.current || bagBeltQuarantineRef.current.has(event.pointerId)) return false;
+    cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+    const geometry = refreshBagBeltGeometry(), callbacks = bagBeltCallbacksRef.current;
+    if (!geometry || !node.isConnected || !geometry.stage.contains(node) || event.button !== 0
+      || event.pointerType !== "mouse" && event.pointerType !== "touch") return false;
+    const sourceRect = bagBeltRect(node);
+    let proof: BagBeltGestureProof | null = null;
+    try { proof = callbacks.onBeginBagToBeltGesture?.(source, geometry, owner) ?? null; }
+    catch { event.preventDefault(); return true; }
+    if (!proof) return false;
+    const lease: BagBeltPointerLease = { proof, geometry, source, node, sourceRect, pointerId: event.pointerId,
+      pointerType: event.pointerType, startedAt: event.timeStamp, x: event.clientX, y: event.clientY, owner, callbacks: { ...callbacks }, activate,
+      sharedPointerCallback: bagPointerCallbacksRef.current.onBevyBagPointer, sharedContextCallback: bagPointerCallbacksRef.current.getBevyBagPointerContext };
+    if (bagBeltPointerRef.current || bagBeltArmedSharedRef.current || !sameBagBeltGeometry(geometry, refreshBagBeltGeometry())
+      || bagBeltGeometryRef.current?.revision !== geometry.revision || !bagBeltCallbacksMatch(lease)
+      || !node.isConnected || !sourceRect.every((n, i) => n === bagBeltRect(node)[i])) {
+      callbacks.onCancelBagToBeltGesture?.(proof); event.preventDefault(); return true;
+    }
+    bagBeltPointerRef.current = lease; rememberBagBeltClick(event.pointerId, event.timeStamp, node);
+    event.preventDefault(); heldScenePointerRef.current = null; onViewportDirectionStop();
+    if (owner === "react") {
+      try { node.setPointerCapture(event.pointerId); } catch { cancelBagBeltPointer(lease); return true; }
+      beginCombatUiHold("bag", event.pointerId); lease.hold = combatUiHoldRef.current.get("bag");
+    }
+    return true;
+  }
+  function beginCompatBagBeltPointer(event: ReactPointerEvent<HTMLButtonElement>, item: ItemActionRef, activate: () => void): boolean {
+    if (npcRepairService || !event.isPrimary || bevyBagUiActive || !showInventory) return false;
+    return beginBagBeltPointer(event, event.currentTarget, Object.freeze({ ...item }), "react", activate);
+  }
+  function finishBagBeltPointer(event: Parameters<typeof handleSharedBagPointer>[0], phase: "up" | "cancel"): boolean {
+    const lease = bagBeltPointerRef.current; if (!lease || lease.pointerId !== event.pointerId) return false;
+    bagBeltPointerRef.current = null; // Burn physical terminal before any synchronous Page callback.
+    if (lease.owner === "react") event.preventDefault();
+    const geometry = refreshBagBeltGeometry(), distance = Math.hypot(event.clientX - lease.x, event.clientY - lease.y) / lease.geometry.scale;
+    const current = phase === "up" && event.timeStamp >= lease.startedAt && event.pointerType === lease.pointerType
+      && sameBagBeltGeometry(lease.geometry, geometry) && lease.geometry.revision === geometry?.revision
+      && lease.node.isConnected && lease.sourceRect.every((n, i) => n === bagBeltRect(lease.node)[i]) && bagBeltCallbacksMatch(lease);
+    const target = current && geometry && distance >= 4 ? bagBeltTargetAtClientPoint(geometry, event.clientX, event.clientY) : null;
+    let armed = false;
+    try {
+      if (target && geometry) {
+        armed = lease.callbacks.onArmBagToBeltGesture?.(lease.proof, geometry, target,
+          Object.freeze({ clientX: event.clientX, clientY: event.clientY })) === true;
+        armed = armed && !bagBeltPointerRef.current && !bagBeltArmedSharedRef.current
+          && sameBagBeltGeometry(geometry, refreshBagBeltGeometry()) && bagBeltCallbacksMatch(lease);
+      }
+      if (lease.owner === "bevy" && (!current || distance >= 4 && !armed)) bagBeltRejectedTerminalRef.current = { pointerId: lease.pointerId, startedAt: lease.startedAt };
+      if (armed && lease.owner === "bevy") bagBeltArmedSharedRef.current = lease;
+      else if (armed && lease.source && geometry && target) lease.callbacks.onBagToBeltMove?.(lease.source, target, lease.proof, geometry);
+      else if (current && lease.owner === "react" && distance < 4 && event.clientX >= lease.sourceRect[0] && event.clientX < lease.sourceRect[0] + lease.sourceRect[2]
+        && event.clientY >= lease.sourceRect[1] && event.clientY < lease.sourceRect[1] + lease.sourceRect[3]) lease.activate?.();
+    } finally {
+      try { if (lease.owner !== "bevy" || !armed) lease.callbacks.onCancelBagToBeltGesture?.(lease.proof); }
+      finally {
+        if (lease.hold) endCombatUiHold("bag", lease.hold);
+        try { if (lease.node.hasPointerCapture(event.pointerId)) lease.node.releasePointerCapture(event.pointerId); } catch { /* Already released. */ }
+      }
+    }
+    return lease.owner === "react";
+  }
+  function handleBagBeltPointer(event: Parameters<typeof handleSharedBagPointer>[0], phase: "down" | "move" | "up" | "cancel"): boolean {
+    const quarantine = bagBeltQuarantineRef.current, lease = bagBeltPointerRef.current;
+    if (quarantine.has(event.pointerId)) {
+      event.preventDefault();
+      if (phase === "down" && event.target instanceof HTMLElement) rememberBagBeltClick(event.pointerId, event.timeStamp, event.target.closest<HTMLElement>("button") ?? event.target);
+      if ((phase === "up" || phase === "cancel") && event.timeStamp >= quarantine.get(event.pointerId)!) quarantine.delete(event.pointerId);
+      return true;
+    }
+    if (!lease) return false;
+    if (event.pointerId !== lease.pointerId) {
+      if (phase === "down") {
+        cancelBagBeltPointer(lease); quarantine.set(event.pointerId, event.timeStamp);
+        if (event.target instanceof HTMLElement) rememberBagBeltClick(event.pointerId, event.timeStamp, event.target.closest<HTMLElement>("button") ?? event.target);
+        if (lease.owner === "bevy") cancelSharedBagPointer();
+      }
+      event.preventDefault(); return true;
+    }
+    if (event.timeStamp < lease.startedAt) { event.preventDefault(); return true; }
+    if (phase === "down") { cancelBagBeltPointer(lease); if (lease.owner === "bevy") cancelSharedBagPointer(); event.preventDefault(); return true; }
+    if (phase === "up" || phase === "cancel") return finishBagBeltPointer(event, phase);
+    if (lease.owner === "react") { event.preventDefault(); return true; }
+    return false;
+  }
+
   function repairGeometry(item: HTMLElement, target: HTMLElement, pointerId: number, pointerType: "mouse" | "touch"): NpcRepairDragGeometry | null {
     const stage = stageFrameRef.current;
     if (!stage || !stage.isConnected || !item.isConnected || !target.isConnected || !stage.contains(item) || !stage.contains(target)
@@ -3786,6 +3960,7 @@ export function OriginalClientShell({
 
   function handleSharedUiPointer(event:Parameters<typeof handleSharedBagPointer>[0],phase:"down"|"move"|"up"|"cancel"){
     if (handleNpcRepairPointer(event, phase)) return;
+    if (handleBagBeltPointer(event, phase)) return;
     if (heldQuestControlPointersRef.current.has(event.pointerId)) { handleSharedQuestWorldPointer(event,phase); return; }
     // Skill DOM owns new gestures; existing canvas leases still receive their terminal edges.
     if (phase === "down" && event.target instanceof HTMLElement && event.target.closest(".original-skill-bar")) return;
@@ -4004,7 +4179,7 @@ export function OriginalClientShell({
 
   function handleSharedBagPointer(event: {
     target: EventTarget | null; pointerId: number; pointerType: string; button: number; timeStamp: number;
-    clientX: number; clientY: number; shiftKey?:boolean; preventDefault: () => void;
+    clientX: number; clientY: number; shiftKey?:boolean; isPrimary?: boolean; preventDefault: () => void;
   }, phase: "down" | "move" | "up" | "cancel") {
     if (handleSharedCharacterPointer(event, phase)) return;
     if (handleSharedQuestWorldPointer(event, phase)) return;
@@ -4014,6 +4189,7 @@ export function OriginalClientShell({
       && event.target.id === sharedUiCanvasId(webGl2SharedCanvasPrototype);
     const wasHeld = router.held;
     if (phase === "down" && (!onCanvas || !bevyBagUiActive)) return;
+    if (phase === "down") cancelBagBeltPointer(bagBeltArmedSharedRef.current);
     if (phase === "move" && !wasHeld) return;
     const context = bagPointerCallbacksRef.current.getBevyBagPointerContext?.() ?? null;
     if (wasHeld && !router.matches(context)) cancelSharedBagPointer();
@@ -4032,10 +4208,17 @@ export function OriginalClientShell({
       if (router.held) return;
       frame.focus({ preventScroll: true });
     }
+    const rejectedTerminal = bagBeltRejectedTerminalRef.current;
+    const cancelTerminal = phase === "up" && rejectedTerminal?.pointerId === event.pointerId && event.timeStamp >= rejectedTerminal.startedAt;
+    if (cancelTerminal) bagBeltRejectedTerminalRef.current = null;
     const edge = phase === "down" && context
       ? router.down(context, event.pointerId, event.button as 0 | 2, point.sceneX, point.sceneY)
-      : router.edge(phase === "down" ? "cancel" : phase, event.pointerId, point.sceneX, point.sceneY);
+      : router.edge(phase === "down" || cancelTerminal ? "cancel" : phase, event.pointerId, point.sceneX, point.sceneY);
     if (!edge) return;
+    if (phase === "down" && edge.origin === "bag" && event.button === 0 && event.isPrimary !== false
+      && context?.beltDropGeometry && bagBeltGeometryRef.current?.revision === context.beltDropGeometry.revision) {
+      beginBagBeltPointer(event, event.target as HTMLElement, null, "bevy");
+    }
     if(typeof onCombatUiHeld==="function"&&phase==="down"&&edge.origin==="bag")beginCombatUiHold("bag",event.pointerId);
     event.preventDefault();
     const ownsHeld = phase === "down" || wasHeld?.pointerId === event.pointerId;
@@ -4043,7 +4226,7 @@ export function OriginalClientShell({
     const callbackLease=router.held;let accepted=false;
     try { accepted=Boolean(bagPointerCallbacksRef.current.onBevyBagPointer?.(edge)); }
     finally { if(!accepted&&ownsHeld&&router.held===callbackLease)cancelSharedBagPointer();if((!router.held||router.held!==callbackLease)&&combatHold)endCombatUiHold("bag",combatHold); }
-    if(!accepted){if(ownsHeld){heldScenePointerRef.current=null;onViewportDirectionStop();}return;}
+    if(!accepted){cancelBagBeltPointer(bagBeltArmedSharedRef.current);if(ownsHeld){heldScenePointerRef.current=null;onViewportDirectionStop();}return;}
     if (phase !== "down" && (!wasHeld || wasHeld.pointerId !== event.pointerId)) return;
     // Both owners see the same ordered edge, but only its down-origin owner
     // may act. In particular a world drag entering the painted bag stays world.
@@ -4067,10 +4250,23 @@ export function OriginalClientShell({
   const sharedBagPointerHandlerRef = useRef(handleSharedUiPointer);
   // Native window release listeners must use the geometry from the committed
   // DOM, not a concurrent render that has not updated the stage yet.
-  useLayoutEffect(() => { sharedBagPointerHandlerRef.current = handleSharedUiPointer; });
+  useLayoutEffect(() => {
+    const callbacks: BagBeltCallbacks = { onBagBeltDropGeometry, onBeginBagToBeltGesture, onArmBagToBeltGesture, onBagToBeltMove, onCancelBagToBeltGesture };
+    const prior = bagBeltCallbacksRef.current;
+    const physical = bagBeltPointerRef.current, armed = bagBeltArmedSharedRef.current;
+    bagBeltCallbacksRef.current = callbacks;
+    bagBeltContextRef.current = { page: activeInventoryTab, open: showInventory, screen, repair: npcRepairService !== null,
+      virtualWidth: stagePresentation.virtualWidth, virtualHeight: stagePresentation.virtualHeight, scale: stagePresentation.scale };
+    if (physical && !bagBeltCallbacksMatch(physical)) cancelBagBeltPointer(physical);
+    if (armed && !bagBeltCallbacksMatch(armed)) cancelBagBeltPointer(armed);
+    const geometry = refreshBagBeltGeometry();
+    if (prior.onBagBeltDropGeometry !== callbacks.onBagBeltDropGeometry && geometry) callbacks.onBagBeltDropGeometry?.(geometry);
+    sharedBagPointerHandlerRef.current = handleSharedUiPointer;
+  });
   useLayoutEffect(() => {
     const repairLease = npcRepairPointerRef.current;
     if (repairLease) cancelNpcRepairPointer(repairLease);
+    cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current);
     cancelSharedNpcShopPointer();
     cancelSharedStoragePointer();
     cancelSharedComposePointer();
@@ -4088,6 +4284,13 @@ export function OriginalClientShell({
   }, [npcRepairView?.stamp, npcRepairService, showInventory, activeInventoryTab, bevyMailPageReady,bevyMailComposeReady,bevyMailComposePending,mailOpen,bevySpellsPageReady, showCharacter, activeCharacterTab, bevyCharacterPageReady, bevyHudUiReady, bevyMapRuntimeGeneration, screen, player?.objectId, bevyBagOwnerRevision, bevyBagUiActive, bevyStorageOwnerRevision, bevyStorageUiActive, bevyStorageUiTransitioning, bevyNpcShopUiActive, bevyNpcShopUiTransitioning, stagePresentation.virtualWidth, stagePresentation.virtualHeight, stagePresentation.scale]);
   useEffect(() => {
     const down = (event: globalThis.PointerEvent) => {
+      if (!bagBeltPointerRef.current && !bagBeltQuarantineRef.current.has(event.pointerId)) {
+        cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+        const ledger = bagBeltClickFenceRef.current, node = event.target instanceof Element ? event.target.closest<HTMLElement>("button") : null;
+        ledger.delete(event.pointerId);
+        for (const [id, record] of ledger) if (node && record.nodes.has(node) && !bagBeltQuarantineRef.current.has(id)) ledger.delete(id);
+      }
+      if (bagBeltPointerRef.current || bagBeltQuarantineRef.current.has(event.pointerId)) sharedBagPointerHandlerRef.current(event, "down");
       if (!npcRepairPointerRef.current && !npcRepairQuarantineRef.current.has(event.pointerId)) {
         const ledger = npcRepairClickFenceRef.current, control = npcRepairControlTarget(event.target);
         ledger.delete(event.pointerId);
@@ -4097,15 +4300,17 @@ export function OriginalClientShell({
       }
       if (npcRepairPointerRef.current || npcRepairQuarantineRef.current.has(event.pointerId)) sharedBagPointerHandlerRef.current(event, "down");
     };
-    const click = (event: globalThis.MouseEvent) => fenceNpcRepairClick(event);
+    const click = (event: globalThis.MouseEvent) => { if (fenceBagBeltMouse(event)) event.stopImmediatePropagation(); else fenceNpcRepairClick(event); };
+    const mousedown = (event: globalThis.MouseEvent) => { if (fenceBagBeltMouse(event)) event.stopImmediatePropagation(); };
     const up = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "up");
     const cancel = (event: globalThis.PointerEvent) => sharedBagPointerHandlerRef.current(event, "cancel");
-    const blur = () => { cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer("blur"); cancelSharedStoragePointer("blur"); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer("blur"); cancelSharedHudPointer(); };
-    const resize = () => { cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer(); cancelSharedStoragePointer(); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer(); cancelSharedHudPointer(); };
-    const hidden = () => { if (document.visibilityState === "hidden") cancelNpcRepairPointer(); };
-    const pagehide = () => cancelNpcRepairPointer();
+    const blur = () => { cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer("blur"); cancelSharedStoragePointer("blur"); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer("blur"); cancelSharedHudPointer(); };
+    const resize = () => { cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); heldQuestControlPointersRef.current.clear(); cancelSharedNpcShopPointer(); cancelSharedStoragePointer(); cancelSharedComposePointer();cancelSharedMailPointer();cancelSharedSpellsPointer();cancelSharedCharacterPointer(); cancelSharedBagPointer(); cancelSharedHudPointer(); };
+    const hidden = () => { if (document.visibilityState === "hidden") { cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); } };
+    const pagehide = () => { cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current); cancelNpcRepairPointer(); };
     window.addEventListener("pointerdown", down, true);
     window.addEventListener("click", click, true);
+    window.addEventListener("mousedown", mousedown, true);
     window.addEventListener("pointerup", up, true);
     window.addEventListener("pointercancel", cancel, true);
     window.addEventListener("blur", blur);
@@ -4115,12 +4320,16 @@ export function OriginalClientShell({
     return () => {
       window.removeEventListener("pointerdown", down, true);
       window.removeEventListener("click", click, true);
+      window.removeEventListener("mousedown", mousedown, true);
       window.removeEventListener("pointerup", up, true);
       window.removeEventListener("pointercancel", cancel, true);
       window.removeEventListener("blur", blur);
       window.removeEventListener("resize", resize);
       document.removeEventListener("visibilitychange", hidden);
       window.removeEventListener("pagehide", pagehide);
+      cancelBagBeltPointer(); cancelBagBeltPointer(bagBeltArmedSharedRef.current);
+      bagBeltButtonsRef.current = null;
+      if (bagBeltGeometryRef.current) { bagBeltGeometryRef.current = null; bagBeltCallbacksRef.current.onBagBeltDropGeometry?.(null); }
       cancelNpcRepairPointer();
       heldQuestControlPointersRef.current.clear();
       cancelSharedNpcShopPointer();
@@ -4715,6 +4924,9 @@ export function OriginalClientShell({
                   npcRepairTargetSelection: npcRepairTargetSelection?.stamp === npcRepairView?.stamp ? npcRepairTargetSelection : null,
                   onRegisterNpcRepairTarget: registerNpcRepairTarget,
                   onNpcRepairBagPointerDown: beginNpcRepairPointer,
+                  onBagBeltPointerDown: beginCompatBagBeltPointer,
+                  onRegisterBeltTargets: registerBeltTargets,
+                  onFenceBeltMouse: fenceBagBeltMouse,
                   defaultChatExpanded: clientProfile.layout !== "touch",
                   onChatMessageChange,
                   onSendChat,

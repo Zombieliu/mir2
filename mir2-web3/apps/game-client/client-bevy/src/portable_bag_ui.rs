@@ -3,7 +3,7 @@
 //! This tree owns only presentation and instance-pinned intentions. The page
 //! owns the Gateway socket and the equipment reservation ledger.
 
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use bevy::prelude::*;
 use bevy::ecs::system::SystemParam;
@@ -19,7 +19,9 @@ use crate::crystal_ui::item_image::{layout_original_item_images, OriginalItemIma
 use crate::crystal_ui::item_tooltip::{CrystalItemTooltipDocument, CrystalItemTooltipLine, CrystalItemTooltipSection};
 use crate::crystal_ui::widget::{spawn_crystal_item_hint_document, CrystalItemHint,
     CrystalItemHintOverlayText, CRYSTAL_HINT_Z_INDEX};
-use crate::inventory::InventoryModel;
+use crate::inventory::{InventoryModel, ItemModel};
+use mir2_client_core::equipment_pending::InventoryPlacement;
+use mir2_client_core::intent::plan_bag_to_belt_move;
 use crate::portable_quest_ui::{QuestUiFont, QuestUiTargetCamera};
 use crate::pending_operations::PendingLifecycleSet;
 use crate::read_model::PlayerStats;
@@ -111,6 +113,71 @@ pub struct BagUiReadModel {
     pub inventory: InventoryModel,
     pub player: PlayerStats,
     pub blocked_unique_ids: HashSet<u64>,
+    /// Measured external Belt cells in the same logical stage as this Bag tree.
+    pub belt_drop_geometry: Option<BagBeltDropGeometry>,
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BagBeltDropGeometry {
+    pub revision: u64,
+    pub targets: Vec<BagBeltDropTarget>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, serde::Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct BagBeltDropTarget {
+    pub slot: u8,
+    pub unique_id: Option<u64>,
+    pub left: f32,
+    pub top: f32,
+    pub width: f32,
+    pub height: f32,
+}
+
+impl BagBeltDropTarget {
+    fn contains(self, point: Vec2) -> bool {
+        point.x >= self.left && point.x < self.left + self.width
+            && point.y >= self.top && point.y < self.top + self.height
+    }
+}
+
+impl BagBeltDropGeometry {
+    pub fn matches_inventory_and_stage(&self, inventory: &InventoryModel,
+        presentation: Option<BagUiPresentation>) -> bool {
+        let Some(presentation) = presentation else { return false; };
+        if !(1..=9_007_199_254_740_991).contains(&self.revision) || self.targets.len() != 6 {
+            return false;
+        }
+        let mut slots = HashSet::new();
+        for (index, target) in self.targets.iter().enumerate() {
+            if target.slot >= 6 || !slots.insert(target.slot)
+                || ![target.left, target.top, target.width, target.height,
+                    presentation.logical_width, presentation.logical_height]
+                    .into_iter().all(f32::is_finite)
+                || !(1.0..=16_384.0).contains(&presentation.logical_width)
+                || !(1.0..=16_384.0).contains(&presentation.logical_height)
+                || target.left < 0.0 || target.top < 0.0 || target.width <= 0.0 || target.height <= 0.0
+                || target.left + target.width > presentation.logical_width
+                || target.top + target.height > presentation.logical_height
+            { return false; }
+            let mut occupants = inventory.items.iter()
+                .filter(|item| item.container == 1 && item.slot == u32::from(target.slot));
+            match (target.unique_id, occupants.next(), occupants.next()) {
+                (None, None, None) => {}
+                (Some(uid), Some(item), None) if uid <= 9_007_199_254_740_991
+                    && item.unique_id == Some(uid)
+                    && inventory.items.iter().filter(|item| item.unique_id == Some(uid)).count() == 1 => {}
+                _ => return false,
+            }
+            if self.targets[..index].iter().any(|other|
+                target.left < other.left + other.width && other.left < target.left + target.width
+                    && target.top < other.top + other.height && other.top < target.top + target.height) {
+                return false;
+            }
+        }
+        true
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -118,6 +185,8 @@ pub enum BagUiIntentKind {
     UseItem { source: BagSelection },
     EquipItem { source: BagSelection },
     MoveItem { source: BagSelection, target_slot: u32 },
+    MoveToBelt { source: BagSelection, target_slot: u8, target_unique_id: Option<u64>,
+        belt_geometry_revision: u64 },
     Close,
     SelectPage(BagPage),
     HandoffFullInventory,
@@ -723,19 +792,26 @@ pub enum BagUiAction {
     DetailNext,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 struct PointerLease {
     pointer_id: u64,
     identity: BagIdentity,
     presentation_revision: u64,
     origin: BagPointerOrigin,
     start: Option<BagUiAction>,
+    start_position: Vec2,
+    source_item: Option<ItemModel>,
+    belt_geometry: Option<BagBeltDropGeometry>,
+    belt_items: Vec<ItemModel>,
+    retired_belt_targets: HashSet<u8>,
 }
 
 #[derive(Resource, Default)]
 struct PointerState {
     lease: Option<PointerLease>,
     quarantined: HashSet<u64>,
+    /// Multi-pointer gestures require real terminal edges before reuse.
+    terminal_quarantined: HashMap<u64, (BagIdentity, u64)>,
     last_sequence: u64,
 }
 
@@ -789,13 +865,23 @@ fn apply_bag_context(
     mut queue: ResMut<BagUiIntentQueue>,
 ) {
     let old_identity = state.last_identity;
-    let old_presentation = pointer.lease.map(|lease| lease.presentation_revision);
+    let old_presentation = pointer.lease.as_ref().map(|lease| lease.presentation_revision);
     let had_detail = state.detail.is_some();
     let changed = state.apply_context(&context, &model);
+    if let Some(lease) = pointer.lease.as_mut() {
+        if let Some(geometry) = lease.belt_geometry.as_ref() {
+            for target in &geometry.targets {
+                if target.unique_id.is_some_and(|uid| model.blocked_unique_ids.contains(&uid)) {
+                    lease.retired_belt_targets.insert(target.slot);
+                }
+            }
+        }
+    }
     if model.is_changed() { state.detail = None; }
     if changed || old_presentation.is_some_and(|revision| revision != context.presentation_revision)
         || (had_detail && state.detail.is_none())
         || !context.input_enabled || !context.bag_open || !context.presentation_ready
+        || pointer.lease.as_ref().is_some_and(|lease| !bag_to_belt_source_current(lease, &context, &model))
     {
         if let Some(lease) = pointer.lease.take() {
             pointer.quarantined.insert(lease.pointer_id);
@@ -884,8 +970,12 @@ fn process_bag_pointer_edges(
             // Old-owner termination is cleanup only; it must not poison the
             // new epoch's sequence or become a click in its geometry.
             if matches!(edge.phase, BagPointerPhase::Up | BagPointerPhase::Cancel | BagPointerPhase::Blur) {
+                if pointer.terminal_quarantined.get(&edge.pointer_id)
+                    == Some(&(edge.identity, edge.presentation_revision)) {
+                    pointer.terminal_quarantined.remove(&edge.pointer_id);
+                }
                 pointer.quarantined.remove(&edge.pointer_id);
-                if pointer.lease.is_some_and(|lease| lease.pointer_id == edge.pointer_id
+                if pointer.lease.as_ref().is_some_and(|lease| lease.pointer_id == edge.pointer_id
                     && lease.identity == edge.identity
                     && lease.presentation_revision == edge.presentation_revision) {
                     pointer.lease = None;
@@ -905,8 +995,17 @@ fn process_bag_pointer_edges(
             && edge.presentation_revision == context.presentation_revision;
         if !current && matches!(edge.phase, BagPointerPhase::Up | BagPointerPhase::Cancel) {
             pointer.quarantined.remove(&edge.pointer_id);
-            if pointer.lease.is_some_and(|lease| lease.pointer_id == edge.pointer_id) {
+            pointer.terminal_quarantined.remove(&edge.pointer_id);
+            if pointer.lease.as_ref().is_some_and(|lease| lease.pointer_id == edge.pointer_id) {
                 pointer.lease = None;
+            }
+            continue;
+        }
+        if pointer.terminal_quarantined.get(&edge.pointer_id)
+            == Some(&(edge.identity, edge.presentation_revision)) {
+            if matches!(edge.phase, BagPointerPhase::Up | BagPointerPhase::Cancel) {
+                pointer.terminal_quarantined.remove(&edge.pointer_id);
+                pointer.quarantined.remove(&edge.pointer_id);
             }
             continue;
         }
@@ -925,31 +1024,55 @@ fn process_bag_pointer_edges(
             if edge.phase == BagPointerPhase::Down { pointer.quarantined.insert(edge.pointer_id); }
             continue;
         }
+        if edge.phase == BagPointerPhase::Down && pointer.terminal_quarantined.values()
+            .any(|(identity, revision)| *identity == edge.identity && *revision == edge.presentation_revision) {
+            pointer.terminal_quarantined.insert(edge.pointer_id, (edge.identity, edge.presentation_revision));
+            pointer.quarantined.insert(edge.pointer_id);
+            continue;
+        }
         match edge.phase {
             BagPointerPhase::Down => {
-                if pointer.lease.is_some() {
+                if let Some(lease) = pointer.lease.take() {
+                    pointer.terminal_quarantined.insert(lease.pointer_id,
+                        (lease.identity, lease.presentation_revision));
+                    pointer.terminal_quarantined.insert(edge.pointer_id,
+                        (edge.identity, edge.presentation_revision));
+                    pointer.quarantined.insert(lease.pointer_id);
                     pointer.quarantined.insert(edge.pointer_id);
+                    state.move_source = None;
                     continue;
                 }
+                let start = (edge.origin == BagPointerOrigin::Bag && edge.button == 0)
+                    .then(|| action_at(Vec2::new(edge.x, edge.y), &actions, &parents,
+                        details.iter().find(|(_, detail)| state.detail.as_ref() == Some(*detail))
+                            .map(|(entity, _)| entity), state.detail.is_some())).flatten();
+                let source_item = match start {
+                    Some(BagUiAction::Paint(BagPaintAction::InspectCell { container: 0, slot, unique_id: Some(uid) })) =>
+                        resolve_exact(&model.inventory, BagSelection { container: 0, slot, unique_id: uid }).cloned(),
+                    _ => None,
+                };
                 pointer.lease = Some(PointerLease {
                     pointer_id: edge.pointer_id,
                     identity: edge.identity,
                     presentation_revision: edge.presentation_revision,
                     origin: edge.origin,
-                    start: (edge.origin == BagPointerOrigin::Bag && edge.button == 0)
-                        .then(|| action_at(Vec2::new(edge.x, edge.y), &actions, &parents,
-                            details.iter().find(|(_, detail)| state.detail.as_ref() == Some(*detail))
-                                .map(|(entity, _)| entity), state.detail.is_some())).flatten(),
+                    start, start_position: Vec2::new(edge.x, edge.y), source_item,
+                    belt_geometry: model.belt_drop_geometry.clone(),
+                    belt_items: model.inventory.items.iter().filter(|item| item.container == 1).cloned().collect(),
+                    retired_belt_targets: model.belt_drop_geometry.as_ref().map(|geometry|
+                        geometry.targets.iter().filter(|target| target.unique_id.is_some_and(|uid|
+                            model.blocked_unique_ids.contains(&uid))).map(|target| target.slot).collect())
+                        .unwrap_or_default(),
                 });
             }
             BagPointerPhase::Move => {}
             BagPointerPhase::Cancel => {
-                if pointer.lease.is_some_and(|lease| lease.pointer_id == edge.pointer_id) {
+                if pointer.lease.as_ref().is_some_and(|lease| lease.pointer_id == edge.pointer_id) {
                     pointer.lease = None;
                 }
             }
             BagPointerPhase::Up => {
-                if !pointer.lease.is_some_and(|lease| lease.pointer_id == edge.pointer_id) { continue; }
+                if !pointer.lease.as_ref().is_some_and(|lease| lease.pointer_id == edge.pointer_id) { continue; }
                 let Some(lease) = pointer.lease.take() else { continue; };
                 if lease.origin != BagPointerOrigin::Bag || lease.identity != context.identity
                     || lease.presentation_revision != context.presentation_revision || edge.button != 0
@@ -957,6 +1080,14 @@ fn process_bag_pointer_edges(
                 let end = action_at(Vec2::new(edge.x, edge.y), &actions, &parents,
                     details.iter().find(|(_, detail)| state.detail.as_ref() == Some(*detail))
                         .map(|(entity, _)| entity), state.detail.is_some());
+                // The lease is consumed before validating or queuing any callback.
+                if end.is_none() && state.detail.is_none() {
+                    if let Some(kind) = bag_to_belt_drop(&lease, Vec2::new(edge.x, edge.y), &context, &model) {
+                        let _ = queue.push(&context, kind);
+                    }
+                    state.move_source = None;
+                    continue;
+                }
                 let (Some(start), Some(end)) = (lease.start, end) else { continue; };
                 if let (BagUiAction::Paint(BagPaintAction::InspectCell {container:0, slot:from, unique_id:Some(uid)}),
                     BagUiAction::Paint(BagPaintAction::InspectCell {container:0, slot:to, ..})) = (start, end)
@@ -986,6 +1117,45 @@ fn process_bag_pointer_edges(
             BagPointerPhase::Blur => unreachable!(),
         }
     }
+}
+
+/// Once a held source becomes unknown, restoring equal bytes cannot revive it.
+/// Equivalent player-only refreshes keep a continuously valid item lease.
+fn bag_to_belt_source_current(lease: &PointerLease, context: &BagUiHostContext,
+    model: &BagUiReadModel) -> bool {
+    let Some(pinned_geometry) = lease.belt_geometry.as_ref() else { return true; };
+    let Some(BagUiAction::Paint(BagPaintAction::InspectCell { container: 0, slot, unique_id: Some(uid) })) = lease.start
+        else { return true; };
+    let source = BagSelection { container: 0, slot, unique_id: uid };
+    let Some(current) = resolve_exact(&model.inventory, source) else { return false; };
+    if lease.source_item.as_ref() != Some(current)
+        || model.inventory.items.iter().filter(|item| item.unique_id == Some(uid)).count() != 1
+        || model.blocked_unique_ids.contains(&uid) { return false; }
+    let Some(geometry) = model.belt_drop_geometry.as_ref() else { return false; };
+    if pinned_geometry != geometry
+        || !geometry.matches_inventory_and_stage(&model.inventory, context.presentation)
+        || lease.belt_items != model.inventory.items.iter().filter(|item| item.container == 1)
+            .cloned().collect::<Vec<_>>()
+    { return false; }
+    plan_bag_to_belt_move(model.inventory.capacity,
+        InventoryPlacement { container: 0, slot, unique_id: Some(uid) }, 0).is_some()
+}
+
+fn bag_to_belt_drop(lease: &PointerLease, point: Vec2, context: &BagUiHostContext,
+    model: &BagUiReadModel) -> Option<BagUiIntentKind> {
+    if lease.belt_geometry.is_none() || !point.is_finite() || point.distance_squared(lease.start_position) < 16.0
+        || !bag_to_belt_source_current(lease, context, model) { return None; }
+    let BagUiAction::Paint(BagPaintAction::InspectCell { container: 0, slot, unique_id: Some(uid) }) = lease.start?
+        else { return None; };
+    let source = BagSelection { container: 0, slot, unique_id: uid };
+    let geometry = model.belt_drop_geometry.as_ref()?;
+    let target = geometry.targets.iter().find(|target| target.contains(point))?;
+    if lease.retired_belt_targets.contains(&target.slot)
+        || target.unique_id.is_some_and(|uid| model.blocked_unique_ids.contains(&uid)) { return None; }
+    plan_bag_to_belt_move(model.inventory.capacity,
+        InventoryPlacement { container: 0, slot, unique_id: Some(uid) }, target.slot)?;
+    Some(BagUiIntentKind::MoveToBelt { source, target_slot: target.slot,
+        target_unique_id: target.unique_id, belt_geometry_revision: geometry.revision })
 }
 
 fn activate_action(
@@ -1944,7 +2114,7 @@ mod tests {
         let context = app.world().resource::<BagUiHostContext>().clone();
         app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(edge(&context, 1, BagPointerPhase::Down));
         app.update();
-        assert_eq!(app.world().resource::<PointerState>().lease.unwrap().pointer_id, 1);
+        assert_eq!(app.world().resource::<PointerState>().lease.as_ref().unwrap().pointer_id, 1);
         app.world_mut().resource_mut::<BagUiHostContext>().model_revision = 2;
         app.world_mut().resource_mut::<BagUiReadModel>().player.hp = 10;
         app.update();
@@ -2082,5 +2252,329 @@ mod tests {
         ]);
         app.update();
         assert_eq!(app.world().resource::<BagUiState>().selected.unwrap().unique_id, 0);
+    }
+
+    fn belt_fixture(source_slot: u32, target_uid: Option<u64>) -> App {
+        let mut app = fixture();
+        {
+            let mut context = app.world_mut().resource_mut::<BagUiHostContext>();
+            context.presentation = Some(BagUiPresentation {
+                logical_width: 1024.0, logical_height: 768.0, stage_css_scale: 1.0, touch: false,
+            });
+        }
+        {
+            let mut read = app.world_mut().resource_mut::<BagUiReadModel>();
+            read.inventory.capacity = if source_slot >= 40 { 54 } else { 46 };
+            read.inventory.items[0].slot = source_slot;
+            read.inventory.items[0].quantity = 1;
+            if let Some(uid) = target_uid {
+                read.inventory.items.push(ItemModel {
+                    container: 1, slot: 5, unique_id: Some(uid), quantity: 1, ..default()
+                });
+            }
+            read.belt_drop_geometry = Some(BagBeltDropGeometry {
+                revision: 1,
+                targets: (0..6).map(|slot| BagBeltDropTarget {
+                    slot, unique_id: if slot == 5 { target_uid } else { None },
+                    left: 300.0 + f32::from(slot) * 50.0, top: 100.0, width: 40.0, height: 40.0,
+                }).collect(),
+            });
+        }
+        let mut actions = app.world_mut().query::<&mut BagUiAction>();
+        for mut action in actions.iter_mut(app.world_mut()) {
+            if let BagUiAction::Paint(BagPaintAction::InspectCell { slot, .. }) = &mut *action {
+                *slot = source_slot;
+            }
+        }
+        app.update();
+        app
+    }
+
+    fn belt_release(context: &BagUiHostContext, sequence: u64) -> BagUiPointerEdge {
+        BagUiPointerEdge { x: 570.0, y: 120.0, ..edge(context, sequence, BagPointerPhase::Up) }
+    }
+
+    #[test]
+    fn bag_to_belt_preserves_zero_source_bag2_and_empty_or_occupied_target() {
+        for source_slot in [0, 40] {
+            for target_uid in [None, Some(7), Some(0)] {
+                let mut app = belt_fixture(source_slot, target_uid);
+                let source_uid = if target_uid == Some(0) { 9 } else { 0 };
+                if source_uid != 0 {
+                    app.world_mut().resource_mut::<BagUiReadModel>().inventory.items[0].unique_id = Some(source_uid);
+                    let mut actions = app.world_mut().query::<&mut BagUiAction>();
+                    for mut action in actions.iter_mut(app.world_mut()) {
+                        if let BagUiAction::Paint(BagPaintAction::InspectCell { unique_id, .. }) = &mut *action {
+                            *unique_id = Some(source_uid);
+                        }
+                    }
+                    app.update();
+                }
+                let context = app.world().resource::<BagUiHostContext>().clone();
+                app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([
+                    edge(&context, 1, BagPointerPhase::Down), belt_release(&context, 2),
+                ]);
+                app.update();
+                assert!(app.world().resource::<PointerState>().lease.is_none());
+                let intents = app.world_mut().resource_mut::<BagUiIntentQueue>().drain();
+                assert_eq!(intents.len(), 1);
+                assert_eq!(intents[0].kind, BagUiIntentKind::MoveToBelt {
+                    source: BagSelection { container: 0, slot: source_slot, unique_id: source_uid },
+                    target_slot: 5, target_unique_id: target_uid, belt_geometry_revision: 1,
+                });
+                assert_eq!(intents[0].model_revision, context.model_revision);
+                app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(belt_release(&context, 3));
+                app.update();
+                assert!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn bag_to_belt_rejects_changed_geometry_source_target_or_blocked_instance() {
+        for case in ["revision", "same_revision_rect", "missing_geometry", "missing_source", "source_uid",
+            "source_count", "source_dura", "source_carrier", "duplicate_source", "duplicate_source_cell", "target_uid",
+            "target_count", "unknown_target", "blocked_source", "blocked_target", "locked_bag2"] {
+            let mut app = belt_fixture(40, Some(7));
+            let context = app.world().resource::<BagUiHostContext>().clone();
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(edge(&context, 1, BagPointerPhase::Down));
+            app.update();
+            {
+                let mut read = app.world_mut().resource_mut::<BagUiReadModel>();
+                match case {
+                    "revision" => read.belt_drop_geometry.as_mut().unwrap().revision += 1,
+                    "same_revision_rect" => read.belt_drop_geometry.as_mut().unwrap().targets[5].left += 1.0,
+                    "missing_geometry" => read.belt_drop_geometry = None,
+                    "missing_source" => { read.inventory.items.remove(0); },
+                    "source_uid" => read.inventory.items[0].unique_id = Some(9),
+                    "source_count" => read.inventory.items[0].quantity += 1,
+                    "source_dura" => read.inventory.items[0].durability_current = Some(4),
+                    "source_carrier" => read.inventory.items[0].tooltip_source = Some(Default::default()),
+                    "duplicate_source" => {
+                        let mut duplicate = read.inventory.items[0].clone();
+                        duplicate.slot = 41;
+                        read.inventory.items.push(duplicate);
+                    },
+                    "duplicate_source_cell" => {
+                        let mut duplicate = read.inventory.items[0].clone();
+                        duplicate.unique_id = Some(8);
+                        read.inventory.items.push(duplicate);
+                    },
+                    "target_uid" => read.inventory.items[1].unique_id = Some(8),
+                    "target_count" => read.inventory.items[1].quantity += 1,
+                    "unknown_target" => read.inventory.items[1].unique_id = None,
+                    "blocked_source" => { read.blocked_unique_ids.insert(0); },
+                    "blocked_target" => { read.blocked_unique_ids.insert(7); },
+                    "locked_bag2" => read.inventory.capacity = 46,
+                    _ => unreachable!(),
+                }
+            }
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(belt_release(&context, 2));
+            app.update();
+            assert!(app.world().resource::<PointerState>().lease.is_none(), "{case}");
+            assert!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().is_empty(), "{case}");
+        }
+    }
+
+    #[test]
+    fn bag_to_belt_observed_invalid_interval_never_revives_an_old_pointer() {
+        for case in ["missing_geometry", "changed_geometry", "missing_source", "source_count",
+            "source_dura", "source_carrier", "blocked_source", "target_count", "capacity"] {
+            let mut app = belt_fixture(40, Some(7));
+            let context = app.world().resource::<BagUiHostContext>().clone();
+            let pinned = app.world().resource::<BagUiReadModel>().clone();
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(edge(&context, 1, BagPointerPhase::Down));
+            app.update();
+            assert!(app.world().resource::<PointerState>().lease.is_some(), "{case}: down");
+            {
+                let mut read = app.world_mut().resource_mut::<BagUiReadModel>();
+                match case {
+                    "missing_geometry" => read.belt_drop_geometry = None,
+                    "changed_geometry" => read.belt_drop_geometry.as_mut().unwrap().targets[5].left += 1.0,
+                    "missing_source" => { read.inventory.items.remove(0); },
+                    "source_count" => read.inventory.items[0].quantity += 1,
+                    "source_dura" => read.inventory.items[0].durability_current = Some(4),
+                    "source_carrier" => read.inventory.items[0].tooltip_source = Some(Default::default()),
+                    "blocked_source" => { read.blocked_unique_ids.insert(0); },
+                    "target_count" => read.inventory.items[1].quantity += 1,
+                    "capacity" => read.inventory.capacity = 46,
+                    _ => unreachable!(),
+                }
+            }
+            app.update();
+            assert!(app.world().resource::<PointerState>().lease.is_none(), "{case}: invalid frame consumes down");
+            *app.world_mut().resource_mut::<BagUiReadModel>() = pinned;
+            app.update();
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(belt_release(&context, 2));
+            app.update();
+            assert!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().is_empty(), "{case}: equal restoration cannot send");
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([
+                edge(&context, 3, BagPointerPhase::Down), belt_release(&context, 4),
+            ]);
+            app.update();
+            assert!(matches!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().as_slice(),
+                [BagUiIntent { kind: BagUiIntentKind::MoveToBelt { .. }, .. }]), "{case}: fresh explicit gesture remains usable");
+        }
+    }
+
+    #[test]
+    fn bag_to_belt_missing_at_down_cannot_acquire_geometry_on_release() {
+        let mut app = belt_fixture(40, Some(7));
+        let context = app.world().resource::<BagUiHostContext>().clone();
+        let geometry = app.world_mut().resource_mut::<BagUiReadModel>().belt_drop_geometry.take();
+        app.update();
+        app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(edge(&context, 1, BagPointerPhase::Down));
+        app.update();
+        assert!(app.world().resource::<PointerState>().lease.as_ref().unwrap().belt_geometry.is_none());
+        app.world_mut().resource_mut::<BagUiReadModel>().belt_drop_geometry = geometry;
+        app.update();
+        app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(belt_release(&context, 2));
+        app.update();
+        assert!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().is_empty());
+        app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([
+            edge(&context, 3, BagPointerPhase::Down), belt_release(&context, 4),
+        ]);
+        app.update();
+        assert!(matches!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().as_slice(),
+            [BagUiIntent { kind: BagUiIntentKind::MoveToBelt { .. }, .. }]));
+    }
+
+    #[test]
+    fn bag_to_belt_target_lock_retires_only_that_endpoint_until_a_fresh_down() {
+        for drop_locked_target in [false, true] {
+            let mut app = belt_fixture(40, Some(7));
+            let context = app.world().resource::<BagUiHostContext>().clone();
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(edge(&context, 1, BagPointerPhase::Down));
+            app.update();
+            app.world_mut().resource_mut::<BagUiReadModel>().blocked_unique_ids.insert(7);
+            app.update();
+            assert!(app.world().resource::<PointerState>().lease.is_some());
+            app.world_mut().resource_mut::<BagUiReadModel>().blocked_unique_ids.remove(&7);
+            app.update();
+            let release = if drop_locked_target { belt_release(&context, 2) }
+                else { BagUiPointerEdge { x: 320.0, y: 120.0, ..belt_release(&context, 2) } };
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(release);
+            app.update();
+            let intents = app.world_mut().resource_mut::<BagUiIntentQueue>().drain();
+            if drop_locked_target {
+                assert!(intents.is_empty(), "an observed lock cannot revive the same endpoint");
+            } else {
+                assert!(matches!(intents.as_slice(), [BagUiIntent {
+                    kind: BagUiIntentKind::MoveToBelt { target_slot: 0, .. }, ..
+                }]), "an unrelated locked Belt cell does not disable an empty endpoint");
+            }
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([
+                edge(&context, 3, BagPointerPhase::Down), belt_release(&context, 4),
+            ]);
+            app.update();
+            assert!(matches!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().as_slice(),
+                [BagUiIntent { kind: BagUiIntentKind::MoveToBelt { target_slot: 5, .. }, .. }]));
+        }
+    }
+
+    #[test]
+    fn bag_to_belt_requires_four_logical_pixels_and_real_bag_origin() {
+        let mut app = belt_fixture(0, None);
+        let context = app.world().resource::<BagUiHostContext>().clone();
+        app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(edge(&context, 1, BagPointerPhase::Down));
+        app.update();
+        let mut lease = app.world().resource::<PointerState>().lease.clone().unwrap();
+        let point = Vec2::new(570.0, 120.0);
+        let model = app.world().resource::<BagUiReadModel>();
+        lease.start_position = point - Vec2::new(3.9, 0.0);
+        assert!(bag_to_belt_drop(&lease, point, &context, model).is_none());
+        lease.start_position = point - Vec2::new(4.0, 0.0);
+        assert!(matches!(bag_to_belt_drop(&lease, point, &context, model), Some(BagUiIntentKind::MoveToBelt { .. })));
+        lease.start = Some(BagUiAction::Paint(BagPaintAction::InspectCell { container: 3, slot: 0, unique_id: Some(0) }));
+        assert!(bag_to_belt_drop(&lease, point, &context, model).is_none());
+        for origin in [BagPointerOrigin::World, BagPointerOrigin::Bag] {
+            let mut app = belt_fixture(0, None);
+            let context = app.world().resource::<BagUiHostContext>().clone();
+            let mut down = edge(&context, 1, BagPointerPhase::Down);
+            down.origin = origin;
+            if origin == BagPointerOrigin::Bag { down.button = 2; }
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([down, belt_release(&context, 2)]);
+            app.update();
+            assert!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().is_empty());
+        }
+    }
+
+    #[test]
+    fn bag_to_belt_second_pointer_cancels_both_until_their_terminal_edges() {
+        let mut app = belt_fixture(0, None);
+        let context = app.world().resource::<BagUiHostContext>().clone();
+        let second = BagUiPointerEdge { pointer_id: 2, ..edge(&context, 2, BagPointerPhase::Down) };
+        app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([
+            edge(&context, 1, BagPointerPhase::Down), second,
+            edge(&context, 3, BagPointerPhase::Down),
+            BagUiPointerEdge { pointer_id: 2, ..edge(&context, 4, BagPointerPhase::Down) },
+        ]);
+        app.update();
+        assert!(app.world().resource::<PointerState>().lease.is_none());
+        assert_eq!(app.world().resource::<PointerState>().terminal_quarantined.len(), 2);
+        app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([
+            belt_release(&context, 5),
+            BagUiPointerEdge { pointer_id: 2, ..edge(&context, 6, BagPointerPhase::Cancel) },
+        ]);
+        app.update();
+        assert!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().is_empty());
+        assert!(app.world().resource::<PointerState>().terminal_quarantined.is_empty());
+        app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([
+            edge(&context, 7, BagPointerPhase::Down), belt_release(&context, 8),
+        ]);
+        app.update();
+        assert_eq!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().len(), 1);
+    }
+
+    #[test]
+    fn bag_to_belt_cancel_blur_outside_or_missing_geometry_never_leaks_use() {
+        for case in ["cancel", "blur", "outside", "missing", "detail"] {
+            let mut app = belt_fixture(0, None);
+            let context = app.world().resource::<BagUiHostContext>().clone();
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(edge(&context, 1, BagPointerPhase::Down));
+            app.update();
+            let mut release = belt_release(&context, 3);
+            match case {
+                "cancel" => app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(edge(&context, 2, BagPointerPhase::Cancel)),
+                "blur" => app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(edge(&context, 2, BagPointerPhase::Blur)),
+                "outside" => release.y = 500.0,
+                "missing" => app.world_mut().resource_mut::<BagUiReadModel>().belt_drop_geometry = None,
+                "detail" => {
+                    app.world_mut().resource_mut::<BagUiHostContext>().presentation.as_mut().unwrap().touch = true;
+                    app.world_mut().resource_mut::<BagUiState>().detail = Some(BagDetailState {
+                        cell: BagPaintCell { container: 0, slot: 0, unique_id: Some(0) },
+                        stamp: BagUiTreeBuildStamp { identity: context.identity, model_revision: 1,
+                            presentation_revision: 1, page: BagPage::Bag1, visible_items: 1 },
+                        document: source_document(), page: 0,
+                    });
+                },
+                _ => unreachable!(),
+            }
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.push(release);
+            app.update();
+            assert!(app.world_mut().resource_mut::<BagUiIntentQueue>().drain().is_empty(), "{case}");
+            assert!(app.world().resource::<PointerState>().lease.is_none(), "{case}");
+        }
+    }
+
+    #[test]
+    fn bag_to_belt_queue_bound_still_consumes_terminal_once() {
+        for saturated_sequence in [false, true] {
+            let mut app = belt_fixture(0, None);
+            let context = app.world().resource::<BagUiHostContext>().clone();
+            {
+                let mut queue = app.world_mut().resource_mut::<BagUiIntentQueue>();
+                if saturated_sequence { queue.next_sequence = 9_007_199_254_740_991; }
+                else { for _ in 0..64 { assert!(queue.push(&context, BagUiIntentKind::Close)); } }
+            }
+            app.world_mut().resource_mut::<BagUiPointerEdges>().0.extend([
+                edge(&context, 1, BagPointerPhase::Down), belt_release(&context, 2), belt_release(&context, 3),
+            ]);
+            app.update();
+            assert!(app.world().resource::<PointerState>().lease.is_none());
+            let intents = app.world_mut().resource_mut::<BagUiIntentQueue>().drain();
+            assert_eq!(intents.len(), if saturated_sequence { 0 } else { 64 });
+            assert!(intents.iter().all(|intent| intent.kind == BagUiIntentKind::Close));
+        }
     }
 }

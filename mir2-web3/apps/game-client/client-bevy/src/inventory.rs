@@ -401,13 +401,7 @@ impl InventoryModel {
     /// Fail-closed normalization for Crystal's actual inventory-array lengths:
     /// the first expansion is +8, then each later expansion is +4.
     pub fn canonical_capacity(value: u16) -> u16 {
-        if value == CRYSTAL_BASE_INVENTORY_CAPACITY
-            || ((54..=CRYSTAL_MAX_INVENTORY_CAPACITY).contains(&value) && (value - 54) % 4 == 0)
-        {
-            value
-        } else {
-            CRYSTAL_BASE_INVENTORY_CAPACITY
-        }
+        mir2_client_core::intent::canonical_inventory_capacity(value)
     }
 
     /// Explicit authoritative capacity. Occupied item count and slot values do

@@ -22,6 +22,13 @@ export function projectMailParcelSnapshot(raw:unknown):MailParcelSnapshot|null {
   }items.push({uniqueId:id,container:placement.container,slot:placement.slot,pricing,stamp});
  }}return{bagCapacity:layout.capacity-6,items};
 }
+/** Item mutations preserve authoritative UID 0; parcel attachment IDs keep their existing sentinel rules. */
+export function projectMailItemMutationSnapshot(raw:unknown):MailParcelSnapshot|null {
+ const layout=projectEquipmentGatewaySnapshot(raw);if(!layout)return null;
+ return{bagCapacity:layout.capacity-6,items:layout.placements.map(placement=>({
+  uniqueId:placement.uniqueId,container:placement.container,slot:placement.slot,pricing:null,stamp:false,
+ }))};
+}
 const mutationTypes=new Set(['useItem','equipItem','removeItem','moveItem','mergeItem','splitItem','dropItem','sellItem','storeItem','takeBackItem','storeItemV2','takeBackItemV2','depositTradeItem','retrieveTradeItem','repairItem','specialRepairItem','combineItem','refineItem','awakenItem','sealItem','unsealItem','disassembleItem','upgradeItem','downgradeItem','lockItem','unlockItem','buyItem','sortBag','autoArrangeBag']);
 export function isMailItemMutation(command:Record<string,unknown>):boolean{if(command.type==='mailLockedItem')return false;return mutationTypes.has(String(command.type))||/item/i.test(String(command.type))&&(Object.hasOwn(command,'uniqueId')||Object.hasOwn(command,'from')||Object.hasOwn(command,'to'));}
 /** Decode both touched cells from the immutable wire DTO against raw authority. */
@@ -37,7 +44,16 @@ export function mailMutationAllowed(command:Record<string,unknown>,snapshot:Mail
   return matches.length===1&&(container===undefined||container===matches[0].container)&&!blocked.includes(id)&&!blockedCells.some(c=>c.container===matches[0].container&&c.slot===matches[0].slot);
  };
  switch(command.type){
-  case 'moveItem':return cell(grid(command.grid),command.from,true)&&cell(grid(command.grid),command.to);
+  case 'moveItem':{
+   if(String(command.grid).toLowerCase()==='belt'){
+    // Belt's MoveItem endpoints address Crystal's unified inventory: the first
+    // six cells are Belt, followed by the global Bag index. Decode both ends.
+    const unified=(slot:unknown,required=false)=>integer(snapshot.bagCapacity,80)&&integer(slot,85)
+     &&slot<snapshot.bagCapacity+6&&cell(slot<6?1:0,slot<6?slot:slot-6,required);
+    return unified(command.from,true)&&unified(command.to);
+   }
+   return cell(grid(command.grid),command.from,true)&&cell(grid(command.grid),command.to);
+  }
   case 'storeItem':case 'storeItemV2':return cell(0,command.from,true)&&cell(4,command.to);
   case 'takeBackItem':case 'takeBackItemV2':return cell(4,command.from,true)&&cell(0,command.to);
   case 'depositTradeItem':return cell(0,command.from,true);

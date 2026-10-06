@@ -26,6 +26,7 @@ import { ObjectiveTracker } from "./original-client-objective-tracker";
 import { BigMapDialog, MiniMapPanel, hasOriginalMiniMapAsset } from "./original-client-map-panels";
 import { GameShopWindow, NpcShopWindow } from "./original-client-game-shop";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
+import type { BagBeltButtonBinding } from "../../lib/bag-belt-gesture";
 import type { NpcRepairView, NpcRepairSelection } from "../../lib/npc-repair-service";
 import type { CashGameShopSource, CashGameShopConfirmation, CashGameShopEntry } from "../../lib/cash-game-shop-ui";
 import { InventoryWindow } from "./original-client-inventory-window";
@@ -91,6 +92,9 @@ type GameUiSceneProps = {
   npcRepairTargetSelection?: NpcRepairSelection | null;
   onRegisterNpcRepairTarget?: (view: NpcRepairView, node: HTMLElement) => () => void;
   onNpcRepairBagPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef) => void;
+  onBagBeltPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef, activate: () => void) => boolean;
+  onRegisterBeltTargets?: (targets: readonly BagBeltButtonBinding[]) => () => void;
+  onFenceBeltMouse?: (event: { target: EventTarget | null; detail?: number; timeStamp: number; preventDefault(): void; stopPropagation(): void }) => boolean;
   defaultChatExpanded?: boolean;
   chatUi?: ChatUiControls;
   mapImageRouteSource?: MapImageRouteSource | null;
@@ -196,6 +200,7 @@ function GameUiSceneInner({
   npcRepairService,
   npcRepairView, onSelectNpcRepair, onConfirmNpcRepair,
   onToggleNpcRepairHold, npcRepairTargetSelection, onRegisterNpcRepairTarget, onNpcRepairBagPointerDown,
+  onBagBeltPointerDown, onRegisterBeltTargets, onFenceBeltMouse,
   defaultChatExpanded = true,
   chatUi, mapImageRouteSource, onMapImageRoute, onMapImageRoutePress, onMapRouteModalChange,
   onChatMessageChange,
@@ -463,6 +468,8 @@ function GameUiSceneInner({
         <BeltDialog
           t={t}
           items={world.beltItems}
+          onRegisterBeltTargets={onRegisterBeltTargets}
+          onFenceBeltMouse={onFenceBeltMouse}
           vertical={beltVertical}
           onClose={() => setShowBelt(false)}
           onRotate={() => setBeltVertical((current) => !current)}
@@ -702,6 +709,7 @@ function GameUiSceneInner({
           onCompatibilityInteraction={onInventoryCompatibilityInteraction}
           repairMode={npcRepairService !== null}
           onRepairPointerDown={onNpcRepairBagPointerDown}
+          onBagBeltPointerDown={onBagBeltPointerDown}
           t={t}
           locale={locale}
           activeTab={activeInventoryTab}

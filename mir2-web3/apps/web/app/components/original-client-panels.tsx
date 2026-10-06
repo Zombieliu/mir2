@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import type { BagBeltButtonBinding } from "../../lib/bag-belt-gesture";
 import type { CrystalTooltipDocument } from "../../lib/shared-item-tooltip";
 import type { DisplayItem } from "./original-client-types";
 import { OriginalCrystalItemTooltip } from "./original-client-crystal-item-tooltip";
@@ -531,6 +532,8 @@ export function useActiveItemTooltip<Item>(items: readonly Item[],
 }
 
 export type BeltDialogProps = {
+  onRegisterBeltTargets?: (targets: readonly BagBeltButtonBinding[]) => () => void;
+  onFenceBeltMouse?: (event: { target: EventTarget | null; detail?: number; timeStamp: number; preventDefault(): void; stopPropagation(): void }) => boolean;
   t: TranslateFn;
   items: DisplayItemLike[];
   onReadItemTooltip?: (item: Readonly<DisplayItem>) => CrystalTooltipDocument | null;
@@ -540,9 +543,22 @@ export type BeltDialogProps = {
   onUseItem: (item: ItemActionRef) => void;
 };
 
-export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem, onReadItemTooltip }: BeltDialogProps) {
+export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem, onReadItemTooltip, onRegisterBeltTargets, onFenceBeltMouse }: BeltDialogProps) {
   const tooltip = useActiveItemTooltip(items, onReadItemTooltip);
   const itemBySlot = new Map(items.map((item) => [item.slot, item]));
+  const beltButtons = useRef<Array<HTMLButtonElement | null>>([]);
+  const beltBindingKey = JSON.stringify(Array.from({ length: 6 }, (_, slot) => {
+    const item = itemBySlot.get(slot);
+    return [slot, !!item, item ? item.authoritativeUniqueId ?? "unknown" : null];
+  }));
+  useLayoutEffect(() => {
+    const targets = Array.from({ length: 6 }, (_, slot) => {
+      const item = itemBySlot.get(slot);
+      return { slot, node: beltButtons.current[slot], item: item
+        ? Object.freeze({ authoritativeUniqueId: item.authoritativeUniqueId }) : null };
+    });
+    if (targets.every(target => target.node !== null && target.node !== undefined)) return onRegisterBeltTargets?.(targets.map(target => ({ ...target, node: target.node! })));
+  }, [beltBindingKey, vertical, onRegisterBeltTargets]);
   const useBeltItem = (item: DisplayItemLike) => {
     (window as typeof window & { __mir2LastBeltActivation?: Record<string, unknown> }).__mir2LastBeltActivation = {
       key: item.key,
@@ -600,27 +616,28 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem, o
               top: vertical ? slot.verticalY : slot.horizontalY,
             }}
           >
-            {item ? (
               <button
                 type="button"
+                ref={node => { beltButtons.current[index] = node; }}
                 className={`belt-item ${vertical ? "vertical" : "horizontal"}`}
-                aria-label={item.name}
-                onPointerEnter={event => { if (event.pointerType !== "touch") tooltip.activate(item, event.currentTarget); }}
-                onPointerLeave={event => { if (event.pointerType === "touch" || document.activeElement !== event.currentTarget) tooltip.release(item, event.currentTarget); }}
-                onFocus={event => tooltip.activate(item, event.currentTarget)}
-                onBlur={event => { if (!event.currentTarget.matches(":hover")) tooltip.release(item, event.currentTarget); }}
-                onPointerCancel={event => tooltip.release(item, event.currentTarget)}
-                onPointerDown={event => { if (event.pointerType === "touch") { tooltip.activate(item, event.currentTarget); event.stopPropagation(); } }}
+                aria-label={item?.name ?? `${t("ui.belt", [], "Belt")} ${index + 1}`}
+                onPointerEnter={event => { if (item && event.pointerType !== "touch") tooltip.activate(item, event.currentTarget); }}
+                onPointerLeave={event => { if (item && (event.pointerType === "touch" || document.activeElement !== event.currentTarget)) tooltip.release(item, event.currentTarget); }}
+                onFocus={event => { if (item) tooltip.activate(item, event.currentTarget); }}
+                onBlur={event => { if (item && !event.currentTarget.matches(":hover")) tooltip.release(item, event.currentTarget); }}
+                onPointerCancel={event => { if (item) tooltip.release(item, event.currentTarget); }}
+                onPointerDown={event => { if (item && event.pointerType === "touch") { tooltip.activate(item, event.currentTarget); event.stopPropagation(); } }}
                 onMouseDown={(event) => {
-                  if (event.button !== 0) return;
+                  if (onFenceBeltMouse?.(event) || !item || event.button !== 0) return;
                   event.preventDefault();
                   useBeltItem(item);
                 }}
                 onClick={(event) => {
-                  if (event.detail !== 0) return;
+                  if (onFenceBeltMouse?.(event) || !item || event.detail !== 0) return;
                   useBeltItem(item);
                 }}
               >
+                {item ? <>
                 <img
                   className="original-item-icon belt-item-icon"
                   src={originalItemIconPath(item.icon)}
@@ -639,8 +656,8 @@ export function BeltDialog({ t, items, vertical, onClose, onRotate, onUseItem, o
                   align={vertical ? "right" : "top"}
                 />
                 )}
+                </> : null}
               </button>
-            ) : null}
           </div>
         );
       })}

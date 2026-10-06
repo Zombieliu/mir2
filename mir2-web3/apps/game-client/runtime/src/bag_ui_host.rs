@@ -18,10 +18,10 @@ use mir2_client_bevy::inventory::InventoryModel;
 use mir2_client_bevy::portable_bag_ui::{
     BagIdentity, BagPage, BagPointerOrigin, BagPointerPhase, BagUiHostContext,
     BagUiIntent, BagUiIntentKind, BagUiPointerEdge, BagUiReadModel,
+    BagBeltDropGeometry, BagUiPresentation,
 };
 #[cfg(target_arch = "wasm32")]
 use mir2_client_bevy::portable_bag_ui::{
-    BagUiPresentation,
     BagUiIntentQueue, BagUiPanel, BagUiInspector, BagUiDetail, BagUiPointerEdges, BagUiRoot,
     BagTreeObserver, BagUiState, Mir2PortableBagUiPlugin, PORTABLE_BAG_REQUIRED_SKINS,
 };
@@ -84,6 +84,13 @@ struct WebBagPresentation {
     touch: bool,
 }
 
+impl From<WebBagPresentation> for BagUiPresentation {
+    fn from(value: WebBagPresentation) -> Self {
+        Self { logical_width: value.logical_width, logical_height: value.logical_height,
+            stage_css_scale: value.stage_css_scale, touch: value.touch }
+    }
+}
+
 impl WebBagPresentation {
     fn matches_window(self, width: f32, height: f32) -> bool {
         [self.logical_width, self.logical_height, width, height]
@@ -134,6 +141,8 @@ struct WebBagSnapshot {
     model: InventoryModel,
     player: PlayerStats,
     blocked_unique_ids: Vec<u64>,
+    #[serde(default)]
+    belt_drop_geometry: Option<BagBeltDropGeometry>,
 }
 
 impl WebBagSnapshot {
@@ -151,6 +160,15 @@ impl WebBagSnapshot {
             let item = item.as_object().ok_or("invalid bag item")?;
             for key in ["uniqueId", "key", "name", "quantity", "slot", "container", "icon", "description"] {
                 if !item.contains_key(key) { return Err("incomplete bag item"); }
+            }
+        }
+        if let Some(geometry) = root.get("beltDropGeometry").filter(|value| !value.is_null()) {
+            let geometry = geometry.as_object().ok_or("invalid belt geometry")?;
+            let targets = geometry.get("targets").and_then(serde_json::Value::as_array)
+                .ok_or("missing belt targets")?;
+            for target in targets {
+                let target = target.as_object().ok_or("invalid belt target")?;
+                if !target.contains_key("uniqueId") { return Err("missing belt target identity"); }
             }
         }
         let snapshot: Self = serde_json::from_value(value).map_err(|_| "invalid bag fields")?;
@@ -194,6 +212,11 @@ impl WebBagSnapshot {
         for id in &self.blocked_unique_ids {
             if *id > MAX_SAFE_JS_INTEGER || !blocked.insert(*id) {
                 return Err("invalid blocked item identity");
+            }
+        }
+        if let Some(geometry) = &self.belt_drop_geometry {
+            if !geometry.matches_inventory_and_stage(&self.model, self.presentation.map(|p| p.into())) {
+                return Err("invalid belt geometry or inventory identity");
             }
         }
         Ok(())
@@ -277,6 +300,8 @@ struct WebBagStatus {
     applied_revision: u64,
     applied_model_revision: u64,
     applied_presentation_revision: u64,
+    supports_bag_to_belt: bool,
+    applied_belt_geometry_revision: Option<u64>,
     input_regions: Vec<BagInputRegion>,
     diagnostics: BagTreeDiagnostics,
     error: Option<String>,
@@ -329,7 +354,8 @@ impl Default for WebBagStatus {
         Self {
             identity: WebBagIdentity::default(), frame: 0, ready: false,
             input_enabled: false, applied_revision: 0, applied_model_revision: 0,
-            applied_presentation_revision: 0, input_regions: Vec::new(),
+            applied_presentation_revision: 0, supports_bag_to_belt: true,
+            applied_belt_geometry_revision: None, input_regions: Vec::new(),
             diagnostics: BagTreeDiagnostics::default(), error: None,
         }
     }
@@ -465,6 +491,7 @@ fn ingest_snapshot(
         inventory: snapshot.model,
         player: snapshot.player,
         blocked_unique_ids: snapshot.blocked_unique_ids.into_iter().collect(),
+        belt_drop_geometry: snapshot.belt_drop_geometry,
     };
     context.identity = identity;
     context.model_revision = snapshot.model_revision;
@@ -655,6 +682,7 @@ fn publish_status(
         status.applied_revision = applied.revision;
         status.applied_model_revision = applied.model_revision;
         status.applied_presentation_revision = applied.presentation_revision;
+        status.applied_belt_geometry_revision = model.belt_drop_geometry.as_ref().map(|g| g.revision);
         status.diagnostics = diagnostics;
         status.error = REJECTED_SNAPSHOT.with(|error| error.borrow().clone())
             .or_else(|| applied.icon_metadata_error.then(|| "bag item icon metadata unavailable".to_owned()))
@@ -670,7 +698,7 @@ fn publish_status(
     });
 }
 
-#[cfg(target_arch = "wasm32")]
+#[cfg(any(target_arch = "wasm32", test))]
 fn encode_intent(intent: BagUiIntent) -> String {
     use serde_json::json;
     let identity: WebBagIdentity = intent.identity.into();
@@ -697,6 +725,12 @@ fn encode_intent(intent: BagUiIntent) -> String {
             object.insert("type".to_owned(), json!("moveItem"));
             object.insert("source".to_owned(), json!({"container": 0, "slot": source.slot, "uniqueId": source.unique_id}));
             object.insert("target".to_owned(), json!({"container": 0, "slot": target_slot}));
+        }
+        BagUiIntentKind::MoveToBelt { source, target_slot, target_unique_id, belt_geometry_revision } => {
+            object.insert("type".to_owned(), json!("moveToBelt"));
+            object.insert("source".to_owned(), json!({"container": 0, "slot": source.slot, "uniqueId": source.unique_id}));
+            object.insert("target".to_owned(), json!({"container": 1, "slot": target_slot, "uniqueId": target_unique_id}));
+            object.insert("beltGeometryRevision".to_owned(), json!(belt_geometry_revision));
         }
         BagUiIntentKind::Close => { object.insert("type".to_owned(), json!("close")); }
         BagUiIntentKind::SelectPage(page) => {
@@ -726,6 +760,9 @@ fn forward_intents(mut queue: ResMut<BagUiIntentQueue>) {
             || intent.model_revision != active.applied_model_revision
             || intent.presentation_revision != active.applied_presentation_revision
         { continue; }
+        if let BagUiIntentKind::MoveToBelt { belt_geometry_revision, .. } = intent.kind {
+            if active.applied_belt_geometry_revision != Some(belt_geometry_revision) { continue; }
+        }
         if let Some(sink) = sink.as_ref() {
             let _ = sink.call1(&JsValue::NULL, &JsValue::from_str(&encode_intent(intent)));
         }
@@ -989,5 +1026,105 @@ mod tests {
             assert!(!WebBagPresentation { logical_width: width, logical_height: height,
                 stage_css_scale: scale, touch: true }.matches_window(width, height));
         }
+    }
+
+    fn with_belt_geometry() -> serde_json::Value {
+        let mut snapshot = valid();
+        snapshot["blockedUniqueIds"] = json!([]);
+        snapshot["model"]["items"][0]["uniqueId"] = json!(7);
+        snapshot["model"]["items"].as_array_mut().unwrap().push(json!({
+            "uniqueId":0,"key":"belt","name":"Belt item","quantity":2,"slot":5,"container":1,
+            "icon":2,"description":""
+        }));
+        snapshot["beltDropGeometry"] = json!({
+            "revision":1,
+            "targets":(0..6).map(|slot| json!({
+                "slot":slot,"uniqueId":if slot == 5 { Some(0) } else { None },
+                "left":300.0 + slot as f32 * 50.0,"top":100.0,"width":40.0,"height":40.0
+            })).collect::<Vec<_>>()
+        });
+        snapshot
+    }
+
+    #[test]
+    fn optional_belt_geometry_preserves_old_snapshot_and_exact_empty_or_zero_target() {
+        let old = WebBagSnapshot::parse(&valid().to_string()).unwrap();
+        assert!(old.belt_drop_geometry.is_none());
+        let occupied = WebBagSnapshot::parse(&with_belt_geometry().to_string()).unwrap();
+        assert_eq!(occupied.belt_drop_geometry.unwrap().targets[5].unique_id, Some(0));
+        let mut empty = with_belt_geometry();
+        empty["model"]["items"].as_array_mut().unwrap().pop();
+        empty["beltDropGeometry"]["targets"][5]["uniqueId"] = serde_json::Value::Null;
+        assert!(WebBagSnapshot::parse(&empty.to_string()).is_ok());
+        let mut missing = empty;
+        missing["beltDropGeometry"]["targets"][5].as_object_mut().unwrap().remove("uniqueId");
+        assert!(WebBagSnapshot::parse(&missing.to_string()).is_err());
+    }
+
+    #[test]
+    fn strict_belt_geometry_rejects_partial_ambiguous_unknown_and_unbounded_targets() {
+        for case in ["five", "seven", "duplicate_slot", "slot6", "zero_revision", "unsafe_revision",
+            "overlap", "zero_width", "negative_left", "outside", "unknown_identity", "wrong_identity",
+            "missing_presentation", "occupied_as_empty", "duplicate_uid", "unsafe_uid", "unknown_field"] {
+            let mut snapshot = with_belt_geometry();
+            match case {
+                "five" => { snapshot["beltDropGeometry"]["targets"].as_array_mut().unwrap().pop(); },
+                "seven" => {
+                    let target = snapshot["beltDropGeometry"]["targets"][0].clone();
+                    snapshot["beltDropGeometry"]["targets"].as_array_mut().unwrap().push(target);
+                },
+                "duplicate_slot" => snapshot["beltDropGeometry"]["targets"][5]["slot"] = json!(0),
+                "slot6" => snapshot["beltDropGeometry"]["targets"][5]["slot"] = json!(6),
+                "zero_revision" => snapshot["beltDropGeometry"]["revision"] = json!(0),
+                "unsafe_revision" => snapshot["beltDropGeometry"]["revision"] = json!(MAX_SAFE_JS_INTEGER + 1),
+                "overlap" => snapshot["beltDropGeometry"]["targets"][5]["left"] = json!(300),
+                "zero_width" => snapshot["beltDropGeometry"]["targets"][5]["width"] = json!(0),
+                "negative_left" => snapshot["beltDropGeometry"]["targets"][5]["left"] = json!(-1),
+                "outside" => snapshot["beltDropGeometry"]["targets"][5]["left"] = json!(1024),
+                "unknown_identity" => snapshot["model"]["items"][1]["uniqueId"] = serde_json::Value::Null,
+                "wrong_identity" => snapshot["beltDropGeometry"]["targets"][5]["uniqueId"] = json!(1),
+                "missing_presentation" => snapshot["presentation"] = serde_json::Value::Null,
+                "occupied_as_empty" => snapshot["beltDropGeometry"]["targets"][5]["uniqueId"] = serde_json::Value::Null,
+                "duplicate_uid" => snapshot["model"]["items"][0]["uniqueId"] = json!(0),
+                "unsafe_uid" => snapshot["beltDropGeometry"]["targets"][5]["uniqueId"] = json!(MAX_SAFE_JS_INTEGER + 1),
+                "unknown_field" => snapshot["beltDropGeometry"]["targets"][5]["fabricated"] = json!(true),
+                _ => unreachable!(),
+            }
+            assert!(WebBagSnapshot::parse(&snapshot.to_string()).is_err(), "{case}");
+        }
+        let mut snapshot = WebBagSnapshot::parse(&with_belt_geometry().to_string()).unwrap();
+        snapshot.belt_drop_geometry.as_mut().unwrap().targets[0].left = f32::NAN;
+        assert!(snapshot.validate().is_err());
+    }
+
+    #[test]
+    fn bag_to_belt_capability_and_serialization_are_additive_to_abi_one() {
+        let status = serde_json::to_value(WebBagStatus::default()).unwrap();
+        assert_eq!(status["supportsBagToBelt"], true);
+        assert!(status["appliedBeltGeometryRevision"].is_null());
+        let source = mir2_client_bevy::bag_ui::BagSelection { container: 0, slot: 40, unique_id: 0 };
+        let intent = BagUiIntent {
+            identity: BagIdentity { run_generation: 1, connection_generation: 2,
+                session_generation: 3, owner_revision: 4 },
+            intent_sequence: 5, model_revision: 6, presentation_revision: 7,
+            kind: BagUiIntentKind::MoveToBelt { source, target_slot: 5,
+                target_unique_id: Some(8), belt_geometry_revision: 9 },
+        };
+        let value: serde_json::Value = serde_json::from_str(&encode_intent(intent)).unwrap();
+        assert_eq!(value, json!({
+            "runGeneration":1,"connectionGeneration":2,"sessionGeneration":3,"ownerRevision":4,
+            "intentSequence":5,"modelRevision":6,"presentationRevision":7,
+            "type":"moveToBelt","source":{"container":0,"slot":40,"uniqueId":0},
+            "target":{"container":1,"slot":5,"uniqueId":8},"beltGeometryRevision":9
+        }));
+        let empty = BagUiIntent { kind: BagUiIntentKind::MoveToBelt { source,
+            target_slot: 0, target_unique_id: None, belt_geometry_revision: 9 }, ..intent };
+        let value: serde_json::Value = serde_json::from_str(&encode_intent(empty)).unwrap();
+        assert!(value["target"]["uniqueId"].is_null());
+        let legacy = BagUiIntent { kind: BagUiIntentKind::MoveItem { source, target_slot: 2 }, ..intent };
+        let value: serde_json::Value = serde_json::from_str(&encode_intent(legacy)).unwrap();
+        assert_eq!(value["type"], "moveItem");
+        assert_eq!(value["target"], json!({"container":0,"slot":2}));
+        assert!(value.get("beltGeometryRevision").is_none());
     }
 }

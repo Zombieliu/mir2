@@ -38,6 +38,8 @@ export type CashPreviewLayerDocument = Readonly<{ version: 1; known: boolean; di
 export type NpcRepairQuoteInput = Readonly<{ uniqueId: number; tooltipSource: unknown; count: number;
   currentDura: number | undefined; maxDura: number | undefined; rate: number; special: boolean; gold: number }>;
 export type NpcRepairQuote = Readonly<{ repairPrice: number; displayedTotal: number; totalPrice: number; affordable: boolean }>;
+export type BagToBeltMoveInput = Readonly<{ inventoryCapacity: number; source: Readonly<{ container: number; slot: number; uniqueId: number }>; targetSlot: number }>;
+export type BagToBeltMovePlan = Readonly<{ uniqueId: number; from: number; to: number }>;
 type RawChatUi = { document(): string; observe(count: number): boolean;
   scroll(action: number, epoch: number): boolean; drag(y: number, grab: number, epoch: number): boolean;
   resize(epoch: number): boolean; open(epoch: number): boolean;
@@ -51,6 +53,8 @@ export type MapRouteWasmModule = {
     edges: Uint8Array) => Int32Array;
 };
 export type PresentationWasmModule = {
+  bag_to_belt_move_abi_version?: () => number;
+  bag_to_belt_move_plan?: (json: string) => string;
   item_tooltip_abi_version?: () => number;
   item_tooltip_document?: (json: string, nowDotnetTicks: string) => string;
   chat_ui_abi_version?: () => number; ChatUiBridge?: new (mask: number) => RawChatUi;
@@ -245,5 +249,31 @@ export function readSharedPresentationItemTooltip(module: PresentationWasmModule
     }
     const document = readSharedItemTooltip(adapter.runtime, item, player, nowMs);
     return module.item_tooltip_abi_version === abi && module.item_tooltip_document === getter && abi.call(module) === 1 ? document : null;
+  } catch { return null; }
+}
+
+/** Optional shared planner; wire source offset and capacity policy remain in Rust. */
+export function readSharedBagToBeltMovePlan(module: PresentationWasmModule, input: BagToBeltMoveInput): BagToBeltMovePlan | null {
+  try {
+    const abi = module.bag_to_belt_move_abi_version, planner = module.bag_to_belt_move_plan;
+    if (typeof abi !== "function" || typeof planner !== "function" || abi.call(module) !== 1
+      || !boundedInteger(input.inventoryCapacity, 0, Number.MAX_SAFE_INTEGER)
+      || !input.source || !boundedInteger(input.source.container, 0, 255)
+      || !boundedInteger(input.source.slot, 0, Number.MAX_SAFE_INTEGER)
+      || !boundedInteger(input.source.uniqueId, 0, Number.MAX_SAFE_INTEGER)
+      || !boundedInteger(input.targetSlot, 0, 255)) return null;
+    const request = JSON.stringify({ version: 1, inventoryCapacity: input.inventoryCapacity,
+      source: { container: input.source.container, slot: input.source.slot, uniqueId: input.source.uniqueId }, targetSlot: input.targetSlot });
+    if (module.bag_to_belt_move_abi_version !== abi || module.bag_to_belt_move_plan !== planner || abi.call(module) !== 1) return null;
+    const text = planner.call(module, request);
+    if (module.bag_to_belt_move_abi_version !== abi || module.bag_to_belt_move_plan !== planner || abi.call(module) !== 1
+      || typeof text !== "string" || text.length > 1024) return null;
+    const result: unknown = JSON.parse(text);
+    if (!exactKeys(result, ["version", "ok", "plan"]) || result.version !== 1 || result.ok !== true
+      || !exactKeys(result.plan, ["uniqueId", "from", "to"])) return null;
+    const plan = result.plan;
+    if (plan.uniqueId !== input.source.uniqueId || !boundedInteger(plan.uniqueId, 0, Number.MAX_SAFE_INTEGER)
+      || !boundedInteger(plan.from, 0, 255) || !boundedInteger(plan.to, 0, 5) || plan.to !== input.targetSlot) return null;
+    return Object.freeze({ uniqueId: plan.uniqueId, from: plan.from, to: plan.to });
   } catch { return null; }
 }

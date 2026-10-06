@@ -4,6 +4,7 @@ import type { MapImageRouteSource, MapImageRouteIntent } from "../../lib/client-
 import type { ClientScreen, CharacterTabKey, InventoryTabKey } from "../../lib/original-ui";
 import type { Mir2Language } from "../../lib/localization";
 import type { NpcGoldBuyQuote } from "../../lib/bevy-npc-shop-buy";
+import type { BagBeltCallbacks } from "../../lib/bag-belt-gesture";
 import type { NpcRepairView, NpcRepairSelection, NpcRepairDrag, NpcRepairDragGeometry, NpcRepairDrop } from "../../lib/npc-repair-service";
 import type { BagPointerContext, BagPointerEdge } from "../../lib/bevy-bag-ui";
 import type { BevyHpOrbStatus, BevyMpOrbStatus } from "../../lib/bevy-hp-orb";
@@ -171,7 +172,7 @@ export type BevyMapRenderState = {
   cameraOffset?: { x: number; y: number };
 };
 
-export type OriginalClientShellProps = {
+export type OriginalClientShellProps = BagBeltCallbacks & {
   language: Mir2Language;
   screen: ClientScreen;
   runtimePhase: string;

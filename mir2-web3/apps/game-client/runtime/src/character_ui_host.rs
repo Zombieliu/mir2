@@ -282,6 +282,7 @@ mod web {
                     inventory: s.model.clone(),
                     player: s.player.clone(),
                     blocked_unique_ids: s.blocked_unique_ids.iter().copied().collect(),
+                    belt_drop_geometry: None,
                 };
                 let paths = required_assets(&read);
                 if applied.paths != paths {

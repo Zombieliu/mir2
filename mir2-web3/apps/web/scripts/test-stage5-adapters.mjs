@@ -2779,6 +2779,8 @@ check("GuildBuff leave/rejoin same-name generation cannot clear old unknown and 
 // Extract only the parity service boundary from the actual Page. Each selected
 // statement is retained whole; the large unrelated movement/storage pipeline is
 // covered by its existing finite scripts rather than duplicated here.
+const bagBeltDispatcherModule = loadTypeScriptModule(new URL("../lib/bag-belt-move-dispatcher.ts", import.meta.url), {"./mail-parcel-gateway-adapter":mailParcelGateway});
+const bagBeltGeometryModule = loadTypeScriptModule(new URL("../lib/bag-belt-gesture.ts", import.meta.url));
 const parityPageUrl = new URL("../app/page.tsx", import.meta.url);
 const parityPageText = readFileSync(parityPageUrl, "utf8");
 const parityPageAst = ts.createSourceFile(fileURLToPath(parityPageUrl), parityPageText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
@@ -2914,6 +2916,7 @@ function parityPageFixture(owner, world = {}) {
     equipmentControllerRef:ref(null), pendingStorageRequestsRef:ref(new Map()), socialItemOperationsRef:ref(new socialOperations.SocialWindowOperations()),
     storageRentalRef:ref(new storageRental.StorageRentalConfirmation()), mailCollectBarrierRef:ref(null), mailDispatcherRef:ref(null),
     mailParcelRef:ref(null), npcBuyDispatcherRef:ref(null), worldSnapshotVersionRef:ref(1), equipmentSnapshotRef:ref({...owner}),
+    bagBeltMovesRef:ref(new bagBeltDispatcherModule.BagBeltMoveDispatcher()), bagBeltInventoryReadyRef:ref(null),
     renderParityServices:()=>{}, appendLog:()=>{}, t:(_key,_args,fallback)=>fallback,
     isMailItemMutation:mailParcelGateway.isMailItemMutation,
     makeCreaturePlayerSource:creatureUi.makeCreaturePlayerSource, upsertCreaturePlayerRecord:creatureUi.upsertCreaturePlayerRecord,
@@ -4916,7 +4919,13 @@ function visitRepairShell(node){
 }
 visitRepairShell(repairShellAst);
 assert.equal(repairShellDeclarations.size,repairShellNames.size);assert.ok(repairTargetRegistration);assert.ok(repairListenerEffect);assert.ok(repairLostCapture);
-const repairShellJs=ts.transpileModule([...repairShellDeclarations.values()].join("\n")+
+// Existing repair fixtures have no Bag-to-Belt gesture. Supply inactive custody
+// records while retaining the real newly shared event routes and click fences.
+const inactiveBagBeltNames=new Set(["rememberBagBeltClick","fenceBagBeltMouse","cancelBagBeltPointer","handleBagBeltPointer","finishBagBeltPointer"]),inactiveBagBeltDeclarations=[];
+(function visit(node){if(ts.isFunctionDeclaration(node)&&inactiveBagBeltNames.has(node.name?.text))inactiveBagBeltDeclarations.push(node.getText(repairShellAst));ts.forEachChild(node,visit);})(repairShellAst);
+assert.equal(inactiveBagBeltDeclarations.length,inactiveBagBeltNames.size);
+const repairShellJs=ts.transpileModule([...repairShellDeclarations.values(),...inactiveBagBeltDeclarations].join("\n")+
+  "\nconst bagBeltPointerRef={current:null},bagBeltArmedSharedRef={current:null},bagBeltQuarantineRef={current:new Map()},bagBeltClickFenceRef={current:new Map()},bagBeltGeometryRef={current:null},bagBeltButtonsRef={current:null},bagBeltCallbacksRef={current:{}};\n"+
   "\nconst registerNpcRepairTarget="+repairTargetRegistration+";\nconst lostRepairCapture="+repairLostCapture+
   ";\nfunction installRepairPointerListeners(){return ("+repairListenerEffect+")();}",{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
 
@@ -5066,6 +5075,7 @@ check("NPC repair actual capture listeners quarantine second pointer through com
   const inventoryTooltipScope={useRef:current=>({current}),useState:initial=>[initial,()=>{}],useEffect:callback=>{assert.equal(callback(),undefined);},window:{},document:{visibilityState:"visible"}};
   const inventoryTooltipKeys=Object.keys(inventoryTooltipScope),inventoryTooltip=new Function(...inventoryTooltipKeys,tooltipHookJs+"\nreturn useActiveItemTooltip;")(...inventoryTooltipKeys.map(key=>inventoryTooltipScope[key]))([inventoryItem]);
   const inventoryScope={repairMode:true,item:inventoryItem,tooltip:inventoryTooltip,window:{},mailLocks:[],storageMode:null,deleteMode:false,sellMode:false,pendingMoveItem:null,
+    activeTab:"bag1",bagBeltActivationGenerationRef:{current:1},pendingSplitItem:null,pendingGoldDrop:null,contextMenu:null,onBagBeltPointerDown:undefined,
     equipmentSlotForItem:repairInventoryEquipment.equipmentSlotForItem,onRepairPointerDown:event=>repairDowns.push(event.pointerId),onUseItem:value=>activated.push(value)};
   const inventoryKeys=Object.keys(inventoryScope),inventoryApi=new Function(...inventoryKeys,repairInventoryJs+
     "\nreturn {onPointerDown,onMouseDown,onClick,setRepair:value=>repairMode=value,consumedRepairPointerRef};")(...inventoryKeys.map(key=>inventoryScope[key]));
@@ -5259,7 +5269,9 @@ check("Actual Bag Belt Equipment tooltip events are read only and active timer c
   const originalReader=reader;
   for(const surface of ["bag","belt","equipment"]){
     const item={uniqueId:0,itemIndex:-1,name:"Owned",icon:1,count:1},node={isConnected:true,matches:()=>false};currentItems=[item];visible=true;reader=originalReader;render();
-    const eventScope={item,tooltip:nowApi,document:scope.document,repairMode:false,consumedRepairPointerRef:{current:new WeakSet()},onRepairPointerDown:()=>{actions++;}};
+    const eventScope={item,tooltip:nowApi,document:scope.document,repairMode:false,consumedRepairPointerRef:{current:new WeakSet()},onRepairPointerDown:()=>{actions++;},
+      activeTab:"bag1",bagBeltActivationGenerationRef:{current:1},deleteMode:false,sellMode:false,storageMode:null,pendingMoveItem:null,pendingSplitItem:null,pendingGoldDrop:null,contextMenu:null,
+      mailItemLocked:new Function("mailLocks",ts.transpileModule(repairInventoryDeclarations.get("mailItemLocked"),{compilerOptions:{target:ts.ScriptTarget.ES2022}}).outputText+"\nreturn mailItemLocked;")([]),onBagBeltPointerDown:undefined};
     const eventKeys=Object.keys(eventScope),handlers=new Function(...eventKeys,tooltipSurfaceNodes.get(surface).js+"\nreturn {onPointerEnter,onPointerLeave,onFocus,onBlur,onPointerCancel,onPointerDown};")(...eventKeys.map(key=>eventScope[key]));
     const event={pointerType:"mouse",isPrimary:true,button:0,currentTarget:node,defaultPrevented:false,stopped:false,stopPropagation(){this.stopped=true;},preventDefault(){this.defaultPrevented=true;}};
     const before=reads;handlers.onPointerEnter({...event,pointerType:"touch"});render();assert.equal(reads,before,"touch enter alone is not an item read");
@@ -5331,6 +5343,415 @@ check("Actual movement snapshot item projection keeps sale value changes out of 
   assert.equal(snapshots.length,1);assert.ok(ts.isBinaryExpression(snapshots[0].initializer));
   const comparisonCalls=[];(function visit(node){if(ts.isCallExpression(node)&&node.expression.getText(parityPageAst)==="sameProjectedList")comparisonCalls.push(node.arguments.map(arg=>arg.getText(parityPageAst)));ts.forEachChild(node,visit);})(snapshots[0]);
   for(const source of ["inventoryItems","beltItems","storageItems"])assert.ok(comparisonCalls.some(args=>args[0]==="snapshot."+source&&args[1]==="currentWorldFast."+source&&args[2]==="itemIdentity"),source+" actual fast-path predicate");
+});
+
+// Source22: actual TS modules and whole production boundary declarations. The
+// planner replies below are Rust ABI-shaped fixtures, never WASM execution or a
+// JavaScript implementation of Crystal's unified-index planner.
+check("Bag-to-Belt optional PUI forwards UID zero and Bag2 capacity without JS index planning",()=>{
+  const input={inventoryCapacity:54,source:{container:0,slot:40,uniqueId:0},targetSlot:5};
+  let reads=0;const requests=[],module={bag_to_belt_move_abi_version:()=>1,bag_to_belt_move_plan(json){reads++;requests.push(JSON.parse(json));
+    return JSON.stringify({version:1,ok:true,plan:{uniqueId:0,from:46,to:5}});}};
+  const plan=presentationRuntime.readSharedBagToBeltMovePlan(module,input);
+  assert.deepEqual(plan,{uniqueId:0,from:46,to:5});assert.equal(Object.isFrozen(plan),true);
+  assert.deepEqual(requests,[{version:1,...input}]);assert.equal(reads,1);
+  for(const missing of [{},{bag_to_belt_move_abi_version:()=>1},{bag_to_belt_move_plan:module.bag_to_belt_move_plan},{...module,bag_to_belt_move_abi_version:()=>2}])
+    assert.equal(presentationRuntime.readSharedBagToBeltMovePlan(missing,input),null);
+  for(const change of [{inventoryCapacity:NaN},{inventoryCapacity:-1},{source:{...input.source,uniqueId:Number.MAX_SAFE_INTEGER+1}},
+    {source:{...input.source,container:256}},{source:{...input.source,slot:0.5}},{targetSlot:-1}])
+    assert.equal(presentationRuntime.readSharedBagToBeltMovePlan(module,{...input,...change}),null);
+  assert.equal(reads,1,"invalid adapter inputs never enter the optional planner");
+  const methodNodes=[];(function visit(node){if(ts.isMethodDeclaration(node)&&node.name.getText(tooltipCoreAst)==="planBagToBeltMove")methodNodes.push(node);ts.forEachChild(node,visit);})(tooltipCoreAst);
+  assert.equal(methodNodes.length,1);const js=ts.transpileModule("const facade={"+methodNodes[0].getText(tooltipCoreAst)+"};",{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+  const facade=new Function("presentation","readSharedBagToBeltMovePlan",js+"\nreturn facade;")(module,presentationRuntime.readSharedBagToBeltMovePlan);
+  assert.deepEqual(facade.planBagToBeltMove(input),plan);assert.equal(reads,2);
+});
+check("Bag-to-Belt optional PUI rejects malformed results and reentrant ABI getter replacement",()=>{
+  const input={inventoryCapacity:54,source:{container:0,slot:40,uniqueId:0},targetSlot:0},reply={version:1,ok:true,plan:{uniqueId:0,from:46,to:0}};
+  for(const result of [{version:1,ok:false},{...reply,extra:1},{...reply,version:2},{...reply,plan:{...reply.plan,extra:1}},
+    {...reply,plan:{...reply.plan,uniqueId:1}},{...reply,plan:{...reply.plan,to:1}},{...reply,plan:{...reply.plan,from:0.5}},
+    {...reply,plan:{...reply.plan,to:6}},"x".repeat(1025),"{bad"]){
+    const module={bag_to_belt_move_abi_version:()=>1,bag_to_belt_move_plan:()=>typeof result==="string"?result:JSON.stringify(result)};
+    assert.equal(presentationRuntime.readSharedBagToBeltMovePlan(module,input),null);
+  }
+  for(const edge of ["abi-before","planner-before","abi-during","planner-during","throw"]){
+    let calls=0,abiCalls=0;const module={bag_to_belt_move_abi_version(){abiCalls++;if(abiCalls===1&&edge==="abi-before")module.bag_to_belt_move_abi_version=()=>1;
+      if(abiCalls===1&&edge==="planner-before")module.bag_to_belt_move_plan=()=>JSON.stringify(reply);return 1;},
+      bag_to_belt_move_plan(){calls++;if(edge==="abi-during")module.bag_to_belt_move_abi_version=()=>1;if(edge==="planner-during")module.bag_to_belt_move_plan=()=>JSON.stringify(reply);
+        if(edge==="throw")throw Error("fixture getter");return JSON.stringify(reply);}};
+    assert.equal(presentationRuntime.readSharedBagToBeltMovePlan(module,input),null,edge);assert.equal(calls,edge.endsWith("before")?0:1);
+  }
+});
+
+function bagBeltLedgerFixture(occupied=false) {
+  const owner={socket:{},connectionGeneration:1,sessionGeneration:1,playerObjectId:17},dispatcher=new bagBeltDispatcherModule.BagBeltMoveDispatcher();
+  assert.equal(dispatcher.retireConnection(owner.socket,1),true);
+  const command={type:"moveItem",grid:"belt",from:46,to:0},layout={capacity:54,placements:[{container:0,slot:40,uniqueId:0},
+    {container:0,slot:1,uniqueId:10},...(occupied?[{container:1,slot:0,uniqueId:11}]:[])]};
+  const proof=dispatcher.reserve(owner,command,40,0,occupied?11:null,4,layout);assert.ok(proof);
+  const moved={...layout,placements:[{container:1,slot:0,uniqueId:0},{container:0,slot:1,uniqueId:10},...(occupied?[{container:0,slot:40,uniqueId:11}]:[])]};
+  return {owner,dispatcher,command,layout,proof,moved,ack:{grid:"belt",from:46,to:0,success:true}};
+}
+check("Bag-to-Belt dispatcher protects UID zero both identities and empty destination cells",()=>{
+  for(const occupied of [false,true]){
+    const f=bagBeltLedgerFixture(occupied),d=f.dispatcher;assert.deepEqual(d.blockedUniqueIds(),occupied?[0,11]:[0]);
+    assert.equal(d.isCellReserved(0,40),true);assert.equal(d.isCellReserved(1,0),true);assert.equal(d.isCellReserved(1,1),false);
+    assert.equal(d.mutationAllowed(f.command,f.layout),false);assert.equal(d.mutationAllowed(f.command,f.layout,f.proof),true);
+    assert.equal(d.mutationAllowed({type:"moveItem",grid:"belt",from:7,to:0},f.layout),false,"empty target cell is still reserved");
+    assert.equal(d.mutationAllowed({type:"moveItem",grid:"belt",from:7,to:1},f.layout),true);
+    assert.equal(d.mutationAllowed({type:"moveItem",grid:"belt",from:7,to:1},null),false);
+    assert.equal(d.mutationAllowed({type:"chat",message:"unrelated"},null),true);
+    assert.equal(d.allows({...f.proof},f.owner,f.command),false);assert.equal(d.allows(f.proof,f.owner,{...f.command,uniqueId:0}),false);
+    assert.equal(d.enter(f.proof,f.owner,{...f.command,to:1}),false);assert.equal(d.cancelDefinitelyUnsent(f.proof),true);assert.equal(d.pending,0);
+  }
+});
+check("Bag-to-Belt dispatcher entered transport throw stays blocked without owner layout or timeout release",()=>{
+  const f=bagBeltLedgerFixture(true),d=f.dispatcher;assert.equal(d.enter(f.proof,f.owner,f.command),true);
+  assert.throws(()=>{throw Error("socket transport fixture");},/transport fixture/);
+  assert.equal(d.cancelDefinitelyUnsent(f.proof),false);assert.equal(d.enter(f.proof,f.owner,f.command),false);
+  for(const owner of [f.owner,{...f.owner,sessionGeneration:2},{...f.owner,playerObjectId:18}]){
+    d.observe(owner,f.layout,Number.MAX_SAFE_INTEGER);assert.equal(d.pending,1);
+  }
+  assert.equal(d.retireConnection(f.owner.socket,2),false,"a newer logical generation on the same physical socket cannot retire");
+  assert.equal(d.retireConnection({},1),false);assert.equal(d.retireConnection({},0),false);assert.equal(d.pending,1);
+  const next={};assert.equal(d.retireConnection(next,2),true);assert.equal(d.pending,0);assert.equal(d.allows(f.proof,{...f.owner,socket:next,connectionGeneration:2},f.command),false);
+});
+check("Bag-to-Belt exact ACK ignores wrong tuple session and physical connection",()=>{
+  const f=bagBeltLedgerFixture(),d=f.dispatcher;assert.equal(d.acknowledge(f.owner,f.ack),false,"unentered flight cannot be ACKed");
+  assert.equal(d.enter(f.proof,f.owner,f.command),true);
+  for(const ack of [{...f.ack,grid:"inventory"},{...f.ack,from:40},{...f.ack,to:1},{...f.ack,success:1},{uniqueId:0,success:true}])
+    assert.equal(d.acknowledge(f.owner,ack),false);
+  for(const change of [{socket:{}},{connectionGeneration:2},{sessionGeneration:2},{playerObjectId:18}])assert.equal(d.acknowledge({...f.owner,...change},f.ack),false);
+  assert.equal(d.pending,1);assert.equal(d.acknowledge(f.owner,{...f.ack,success:false}),true);assert.equal(d.pending,0);
+  assert.equal(d.acknowledge(f.owner,f.ack),false,"released ACK cannot replay a command");
+});
+check("Bag-to-Belt success requires exact ACK and newer complete empty or occupied exchange in either order",()=>{
+  for(const occupied of [false,true])for(const ackFirst of [false,true]){
+    const f=bagBeltLedgerFixture(occupied),d=f.dispatcher;assert.equal(d.enter(f.proof,f.owner,f.command),true);
+    if(ackFirst)assert.equal(d.acknowledge(f.owner,f.ack),true);
+    assert.equal(d.observe(f.owner,f.moved,4),false,"same version cannot prove movement");assert.equal(d.pending,1);
+    for(const placements of [f.layout.placements,[],[...f.moved.placements,{container:0,slot:2,uniqueId:0}],
+      occupied?f.moved.placements.filter(p=>p.uniqueId!==11):[...f.moved.placements,{container:0,slot:40,uniqueId:12}]]){
+      assert.equal(d.observe(f.owner,{...f.moved,placements},5),false);assert.equal(d.pending,1);
+    }
+    assert.equal(d.observe(f.owner,f.moved,5),ackFirst);assert.equal(d.pending,ackFirst?0:1);
+    if(!ackFirst){assert.equal(d.acknowledge(f.owner,f.ack),true);assert.equal(d.pending,0);}
+  }
+});
+check("Mail actual Belt decoder resolves from six and global Bag2 forty and protects both touched cells",()=>{
+  const snapshot={bagCapacity:48,items:[{container:0,slot:0,uniqueId:7},{container:0,slot:40,uniqueId:8},{container:1,slot:0,uniqueId:9}]};
+  const allowed=(command,ids=[],cells=[],snap=snapshot)=>mailParcelGateway.mailMutationAllowed(command,snap,ids,cells),a={type:"moveItem",grid:"belt",from:6,to:0},b={...a,from:46,to:1};
+  assert.equal(allowed(a,[7]),false);assert.equal(allowed(a,[9]),false);assert.equal(allowed(a,[8]),true);
+  assert.equal(allowed(b,[8]),false);assert.equal(allowed(b,[7]),true);assert.equal(allowed(b,[],[{container:1,slot:1}]),false);
+  assert.equal(allowed(b,[],[{container:0,slot:40}]),false);assert.equal(allowed(b,[],[{container:0,slot:0}]),true);
+  for(const from of [40,54,Number.MAX_SAFE_INTEGER,-1,6.5])assert.equal(allowed({...b,from},[9]),false);
+  for(const snap of [null,{...snapshot,items:[]},{...snapshot,items:[...snapshot.items,{container:0,slot:40,uniqueId:99}]},
+    {...snapshot,items:snapshot.items.map(p=>p.slot===40?{...p,uniqueId:null}:p)}])assert.equal(allowed(b,[9],[],snap),false);
+  assert.equal(allowed({type:"chat",message:"unrelated"},[9],[],null),true);
+});
+
+const bagBeltGeometryJs=ts.transpileModule(readFileSync(new URL("../lib/bag-belt-gesture.ts",import.meta.url),"utf8"),
+  {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
+function bagBeltGeometryFixture() {
+  class MemoryNode {
+    constructor(rect){this.rect=rect;this.isConnected=true;this.hidden=false;this.disabled=false;this.tagName="BUTTON";this.captures=new Set();}
+    getBoundingClientRect(){const [left,top,width,height]=this.rect;return {left,top,width,height};}
+    contains(node){return node===this||this.children?.some(child=>child.contains(node))===true;}
+    closest(selector){return selector==="button"?this:null;}
+    setPointerCapture(id){this.captures.add(id);}hasPointerCapture(id){return this.captures.has(id);}releasePointerCapture(id){this.captures.delete(id);}
+  }
+  const stage=new MemoryNode([10,20,800,600]),buttons=Array.from({length:6},(_,slot)=>new MemoryNode([30+slot*50,120,40,40]));stage.children=[...buttons];
+  const targets=buttons.map((button,slot)=>({slot,uniqueId:slot===0?0:null,left:10+slot*25,top:50,width:20,height:20}));
+  const geometry={revision:1,targets,stage,stageRect:[10,20,800,600],buttons,scale:2,virtualWidth:400,virtualHeight:300,devicePixelRatio:2,page:"bag2"};
+  const state={hit:buttons[0],style:{display:"block",visibility:"visible",pointerEvents:"auto",opacity:"1"},focus:true},
+    document={visibilityState:"visible",hasFocus:()=>state.focus,elementFromPoint:()=>state.hit},window={devicePixelRatio:2,getComputedStyle:()=>state.style};
+  const exports={};new Function("exports","document","window",bagBeltGeometryJs)(exports,document,window);
+  return {MemoryNode,stage,buttons,geometry,state,document,window,api:exports};
+}
+check("Bag-to-Belt geometry requires six actual painted unobscured targets and exact release point",()=>{
+  const f=bagBeltGeometryFixture(),g=f.geometry,a=f.api,point={clientX:31,clientY:121},target={slot:0,uniqueId:0};
+  assert.equal(a.validBagBeltDropGeometry(g),true);assert.equal(a.bagBeltGeometryIsCurrent(g),true);
+  assert.deepEqual(a.bagBeltTargetAtClientPoint(g,31,121),target);assert.equal(a.bagBeltReleasePointIsCurrent(g,target,point),true);
+  f.state.hit={};assert.equal(a.bagBeltTargetAtClientPoint(g,31,121),null);f.state.hit=null;assert.equal(a.bagBeltTargetAtClientPoint(g,31,121),null);
+  const child=new f.MemoryNode([31,121,1,1]);f.buttons[0].children=[child];f.state.hit=child;assert.deepEqual(a.bagBeltTargetAtClientPoint(g,31,121),target);
+  for(const style of [{display:"none"},{visibility:"hidden"},{visibility:"collapse"},{pointerEvents:"none"},{opacity:"0"}]){
+    const old=f.state.style;f.state.style={...old,...style};assert.equal(a.bagBeltTargetAtClientPoint(g,31,121),null);f.state.style=old;
+  }
+  for(const flag of ["disabled","hidden","isConnected"]){const old=f.buttons[0][flag];f.buttons[0][flag]=flag!=="isConnected";
+    assert.equal(a.bagBeltTargetAtClientPoint(g,31,121),null);f.buttons[0][flag]=old;}
+  assert.equal(a.bagBeltReleasePointIsCurrent(g,target,{clientX:70,clientY:121}),false,"half-open painted edge cannot drift");
+  assert.equal(a.bagBeltReleasePointIsCurrent(g,{slot:0,uniqueId:null},point),false);
+  for(const invalid of [{targets:g.targets.slice(0,5)},{targets:g.targets.map((t,i)=>i===1?{...t,slot:0}:t)},
+    {targets:g.targets.map((t,i)=>i===1?{...t,uniqueId:0}:t)},{targets:g.targets.map((t,i)=>i===1?{...t,left:10}:t)}])assert.equal(a.validBagBeltDropGeometry({...g,...invalid}),false);
+});
+check("Bag-to-Belt geometry rejects DPR hidden node identity and measured rect changes",()=>{
+  const f=bagBeltGeometryFixture(),a=f.api,g=f.geometry;
+  f.window.devicePixelRatio=1;assert.equal(a.bagBeltGeometryIsCurrent(g),false);f.window.devicePixelRatio=2;
+  f.document.visibilityState="hidden";assert.equal(a.bagBeltGeometryIsCurrent(g),false);f.document.visibilityState="visible";
+  f.state.focus=false;assert.equal(a.bagBeltGeometryIsCurrent(g),false);f.state.focus=true;
+  f.buttons[1].rect[0]++;assert.equal(a.bagBeltGeometryIsCurrent(g),false);f.buttons[1].rect[0]--;
+  f.stage.rect[0]++;assert.equal(a.bagBeltGeometryIsCurrent(g),false);f.stage.rect[0]--;
+  const replacement=new f.MemoryNode([...f.buttons[0].rect]);assert.equal(a.sameBagBeltGeometry(g,{...g,buttons:[replacement,...g.buttons.slice(1)]}),false);
+  assert.equal(a.bagBeltGeometryIsCurrent({...g,buttons:[replacement,...g.buttons.slice(1)]}),false,"replacement is not inside measured stage");
+  assert.equal(a.sameBagBeltGeometry(g,{...g,targets:g.targets.map(t=>({...t}))}),true,"equivalent values preserve actual node binding");
+});
+
+check("Belt actual layout effect retains equivalent bindings and registers all six empty or occupied buttons",()=>{
+  const beltNodes=tooltipPanelsAst.statements.filter(n=>ts.isFunctionDeclaration(n)&&n.name?.text==="BeltDialog");assert.equal(beltNodes.length,1);
+  const selected=new Map();let effect,button;
+  (function visit(node){if(ts.isVariableDeclaration(node)&&["itemBySlot","beltBindingKey"].includes(node.name.getText(tooltipPanelsAst)))selected.set(node.name.getText(tooltipPanelsAst),"const "+node.getText(tooltipPanelsAst)+";");
+    if(ts.isCallExpression(node)&&node.expression.getText(tooltipPanelsAst)==="useLayoutEffect"&&node.arguments[0].getText(tooltipPanelsAst).includes("onRegisterBeltTargets"))effect=node;
+    if(ts.isJsxOpeningElement(node)&&node.tagName.getText(tooltipPanelsAst)==="button"&&node.attributes.getText(tooltipPanelsAst).includes('className={`belt-item '))button=node;
+    ts.forEachChild(node,visit);})(beltNodes[0]);
+  assert.equal(selected.size,2);assert.ok(effect&&button);assert.deepEqual(effect.arguments[1].elements.map(n=>n.getText(tooltipPanelsAst)),["beltBindingKey","vertical","onRegisterBeltTargets"]);
+  assert.equal(ts.isJsxElement(button.parent),true,"actual button is unconditional within each mapped Belt slot");
+  const refAttr=button.attributes.properties.find(p=>ts.isJsxAttribute(p)&&p.name.getText(tooltipPanelsAst)==="ref");assert.ok(refAttr.initializer.expression.getText(tooltipPanelsAst).includes("beltButtons.current[index] = node"));
+  const js=ts.transpileModule([...selected.values()].join("\n")+"\n"+effect.getText(tooltipPanelsAst)+";",{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+  const f=bagBeltGeometryFixture(),beltButtons={current:f.buttons};let deps,cleanup,registrations=0,retires=0,latest;
+  const register=targets=>{registrations++;latest=targets;return()=>retires++;};
+  const useLayoutEffect=(callback,next)=>{if(deps&&next.every((value,i)=>Object.is(value,deps[i])))return;cleanup?.();deps=next;cleanup=callback();};
+  const render=items=>new Function("items","vertical","beltButtons","onRegisterBeltTargets","useLayoutEffect",js)(items,false,beltButtons,register,useLayoutEffect);
+  render([{slot:0,authoritativeUniqueId:0}]);assert.equal(registrations,1);assert.equal(latest.length,6);assert.equal(latest[0].item.authoritativeUniqueId,0);assert.equal(latest[1].item,null);
+  render([{slot:0,authoritativeUniqueId:0,name:"equivalent replaced object"}]);assert.equal(registrations,1);assert.equal(retires,0);
+  render([{slot:0,authoritativeUniqueId:9}]);assert.equal(registrations,2);assert.equal(retires,1);assert.equal(latest[0].item.authoritativeUniqueId,9);
+  render([]);assert.equal(registrations,3);assert.ok(latest.every(target=>target.item===null));cleanup();assert.equal(retires,3);
+});
+
+const bagBeltShellNames=new Set(["rememberBagBeltClick","fenceBagBeltMouse","cancelBagBeltPointer","refreshBagBeltGeometry","bagBeltCallbacksMatch",
+  "beginBagBeltPointer","beginCompatBagBeltPointer","finishBagBeltPointer","handleBagBeltPointer"]),bagBeltShellDeclarations=new Map();let bagBeltShellRect,bagBeltShellRegistration;
+(function visit(node){if(ts.isFunctionDeclaration(node)&&bagBeltShellNames.has(node.name?.text))bagBeltShellDeclarations.set(node.name.text,node.getText(repairShellAst));
+  if(ts.isVariableDeclaration(node)&&node.name.getText(repairShellAst)==="bagBeltRect")bagBeltShellRect="const "+node.getText(repairShellAst)+";";
+  if(ts.isVariableDeclaration(node)&&node.name.getText(repairShellAst)==="registerBeltTargets")bagBeltShellRegistration=node.initializer.arguments[0].getText(repairShellAst);
+  ts.forEachChild(node,visit);})(repairShellAst);
+assert.equal(bagBeltShellDeclarations.size,bagBeltShellNames.size);assert.ok(bagBeltShellRect&&bagBeltShellRegistration);
+const bagBeltShellJs=ts.transpileModule([...bagBeltShellDeclarations.values(),bagBeltShellRect,"const registerBeltTargets="+bagBeltShellRegistration+";"].join("\n"),
+  {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+check("Bag-to-Belt actual Shell terminal burns before callback keeps four pixel threshold and fences compatibility clicks",()=>{
+  for(const variant of ["drop","click","four","obscured","cancel","reentrant","bevy"]){
+    // The threshold case starts inside its own source immediately beside Belt:
+    // physical x23 -> x31 at scale2 is exactly four logical pixels.
+    const f=bagBeltGeometryFixture(),node=new f.MemoryNode(variant==="four"?[20,120,10,40]:[350,300,40,40]);f.stage.children.push(node);
+    const ref=current=>({current}),events=[],scope={...f.api,Element:f.MemoryNode,HTMLElement:f.MemoryNode,document:f.document,window:f.window,
+      stageFrameRef:ref(f.stage),bagBeltButtonsRef:ref(null),bagBeltGeometryRef:ref(null),bagBeltGeometryRevisionRef:ref(0),
+      bagBeltContextRef:ref({page:"bag2",open:true,screen:"game",repair:false,scale:2,virtualWidth:400,virtualHeight:300}),
+      bagBeltPointerRef:ref(null),bagBeltArmedSharedRef:ref(null),bagBeltQuarantineRef:ref(new Map()),bagBeltRejectedTerminalRef:ref(null),bagBeltClickFenceRef:ref(new Map()),
+      bagBeltCallbacksRef:ref({}),bagPointerCallbacksRef:ref({}),heldScenePointerRef:ref(null),combatUiHoldRef:ref(new Map()),
+      onViewportDirectionStop:()=>{},beginCombatUiHold:(kind,id)=>scope.combatUiHoldRef.current.set(kind,{pointerId:id}),
+      endCombatUiHold:(kind,hold)=>{if(scope.combatUiHoldRef.current.get(kind)===hold)scope.combatUiHoldRef.current.delete(kind);},cancelSharedBagPointer:()=>events.push("shared-cancel"),
+      npcRepairService:null,bevyBagUiActive:false,showInventory:true};let api;
+    const source={key:"Owned",container:"bag2",slot:0,authoritativeUniqueId:900},event=(id,time,x=351,y=301)=>({pointerId:id,timeStamp:time,clientX:x,clientY:y,
+      pointerType:"mouse",isPrimary:true,button:0,currentTarget:node,target:node,preventDefault(){this.prevented=true;},stopPropagation(){this.stopped=true;}});
+    scope.bagBeltCallbacksRef.current={onBeginBagToBeltGesture:()=>({token:{}}),onCancelBagToBeltGesture:()=>events.push("cancel"),
+      onArmBagToBeltGesture:()=>{assert.equal(scope.bagBeltPointerRef.current,null,"physical terminal is spent before Page callback");events.push("arm");
+        if(variant==="reentrant")assert.equal(api.beginBagBeltPointer(event(2,30),node,source,"react",()=>events.push("activate")),true);return true;},
+      onBagToBeltMove:()=>{assert.equal(scope.bagBeltPointerRef.current,null);events.push("move");return true;}};
+    const keys=Object.keys(scope);api=new Function(...keys,bagBeltShellJs+"\nreturn {registerBeltTargets,beginBagBeltPointer,beginCompatBagBeltPointer,handleBagBeltPointer,cancelBagBeltPointer,fenceBagBeltMouse};")(...keys.map(k=>scope[k]));
+    const cleanup=api.registerBeltTargets(f.buttons.map((button,slot)=>({slot,node:button,item:slot===0?{authoritativeUniqueId:0}:null})));
+    assert.ok(scope.bagBeltGeometryRef.current,"actual registered geometry before "+variant);
+    assert.equal(scope.bagBeltGeometryRef.current.stage.contains(node),true,"actual source node containment before "+variant);
+    assert.equal(typeof scope.bagBeltCallbacksRef.current.onBeginBagToBeltGesture,"function","committed begin callback before "+variant);
+    const bevy=variant==="bevy",down=variant==="four"?event(1,10,23,121):event(1,10);
+    assert.equal(api.beginBagBeltPointer(down,node,bevy?null:source,bevy?"bevy":"react",()=>events.push("activate")),true,"actual begin variant "+variant);
+    const lease=scope.bagBeltPointerRef.current;assert.ok(lease);
+    if(variant==="obscured")f.state.hit={};
+    const up=variant==="click"?event(1,20,352,301):event(1,20,31,121);
+    assert.equal(api.handleBagBeltPointer(up,variant==="cancel"?"cancel":"up"),!bevy);
+    if(variant==="click")assert.deepEqual(events,["activate","cancel"]);
+    else if(["drop","four"].includes(variant))assert.deepEqual(events,["arm","move","cancel"]);
+    else if(variant==="bevy"){assert.deepEqual(events,["arm"]);assert.equal(scope.bagBeltArmedSharedRef.current,lease);api.cancelBagBeltPointer(lease);}
+    else if(variant==="reentrant"){assert.deepEqual(events,["arm","cancel"]);assert.equal(scope.bagBeltPointerRef.current.pointerId,2);api.cancelBagBeltPointer();}
+    else assert.deepEqual(events,["cancel"]);
+    const mouse={...event(1,40),type:"mousedown"};assert.equal(api.fenceBagBeltMouse(mouse),true);assert.equal(mouse.prevented,true);
+    assert.equal(api.fenceBagBeltMouse({...event(1,41),type:"click",detail:0}),false,"keyboard activation is independent");
+    assert.equal(api.fenceBagBeltMouse({...event(1,42),type:"click",detail:1}),true);assert.equal(api.fenceBagBeltMouse({...event(1,43),type:"click",detail:1}),false);
+    cleanup();assert.equal(scope.bagBeltGeometryRef.current,null);assert.equal(scope.combatUiHoldRef.current.size,0);
+  }
+});
+check("Bag-to-Belt actual Shell second pointer quarantines through terminal without successor cleanup erasure",()=>{
+  const f=bagBeltGeometryFixture(),node=new f.MemoryNode([350,300,40,40]);f.stage.children.push(node);const ref=current=>({current});let cancels=0;
+  const scope={...f.api,Element:f.MemoryNode,HTMLElement:f.MemoryNode,document:f.document,window:f.window,stageFrameRef:ref(f.stage),
+    bagBeltButtonsRef:ref(null),bagBeltGeometryRef:ref(null),bagBeltGeometryRevisionRef:ref(0),bagBeltContextRef:ref({page:"bag2",open:true,screen:"game",repair:false,scale:2,virtualWidth:400,virtualHeight:300}),
+    bagBeltPointerRef:ref(null),bagBeltArmedSharedRef:ref(null),bagBeltQuarantineRef:ref(new Map()),bagBeltRejectedTerminalRef:ref(null),bagBeltClickFenceRef:ref(new Map()),
+    bagBeltCallbacksRef:ref({onBeginBagToBeltGesture:()=>({token:{}}),onCancelBagToBeltGesture:()=>cancels++}),bagPointerCallbacksRef:ref({}),heldScenePointerRef:ref(null),combatUiHoldRef:ref(new Map()),
+    onViewportDirectionStop:()=>{},beginCombatUiHold:(kind,id)=>scope.combatUiHoldRef.current.set(kind,{pointerId:id}),endCombatUiHold:kind=>scope.combatUiHoldRef.current.delete(kind),cancelSharedBagPointer:()=>{},
+    npcRepairService:null,bevyBagUiActive:false,showInventory:true};
+  const keys=Object.keys(scope),api=new Function(...keys,bagBeltShellJs+"\nreturn {registerBeltTargets,beginBagBeltPointer,handleBagBeltPointer,cancelBagBeltPointer,fenceBagBeltMouse};")(...keys.map(k=>scope[k])),
+    bindings=f.buttons.map((button,slot)=>({slot,node:button,item:null})),event=(id,time)=>({pointerId:id,timeStamp:time,clientX:351,clientY:301,pointerType:"mouse",button:0,currentTarget:node,target:node,preventDefault(){this.prevented=true;},stopPropagation(){}});
+  const oldCleanup=api.registerBeltTargets(bindings);assert.equal(api.beginBagBeltPointer(event(1,10),node,{},"react"),true);const oldLease=scope.bagBeltPointerRef.current;
+  assert.equal(api.handleBagBeltPointer(event(2,11),"down"),true);assert.equal(scope.bagBeltPointerRef.current,null);assert.equal(cancels,1);
+  assert.equal(scope.bagBeltQuarantineRef.current.has(1),true);assert.equal(scope.bagBeltQuarantineRef.current.has(2),true);
+  assert.equal(api.handleBagBeltPointer(event(2,10),"up"),true);assert.equal(scope.bagBeltQuarantineRef.current.has(2),true);
+  assert.equal(api.handleBagBeltPointer(event(2,12),"up"),true);assert.equal(scope.bagBeltQuarantineRef.current.has(2),false);
+  assert.equal(api.fenceBagBeltMouse({...event(2,13),type:"click",detail:1}),true);
+  api.handleBagBeltPointer(event(1,14),"up");const nextCleanup=api.registerBeltTargets(bindings);
+  assert.equal(api.beginBagBeltPointer(event(3,20),node,{},"react"),true);const successor=scope.bagBeltPointerRef.current;
+  oldCleanup();api.cancelBagBeltPointer(oldLease);assert.equal(scope.bagBeltPointerRef.current,successor);assert.ok(scope.bagBeltGeometryRef.current);
+  nextCleanup();assert.equal(scope.bagBeltPointerRef.current,null);assert.equal(cancels,2);
+});
+
+const bagBeltPageNames=new Set(["currentEquipmentOwner","itemCommandRequiresOwner","socialItemMutationAllowed","bagBeltPhysicalOwner","cancelBagToBeltGesture",
+  "invalidateBagBeltInventory","observeBagBeltInventorySnapshot","receiveBagBeltDropGeometry","readBagBeltContext","resolveBagBeltSource","bagBeltTargetCurrent",
+  "beginBagToBeltGesture","bagBeltRecordCurrent","armBagToBeltGesture","bagBeltFinalCurrent","submitBagToBeltMove"]),bagBeltPageDeclarations=new Map();
+(function visit(node){if(ts.isFunctionDeclaration(node)&&bagBeltPageNames.has(node.name?.text))bagBeltPageDeclarations.set(node.name.text,node.getText(parityPageAst));ts.forEachChild(node,visit);})(parityPageAst);
+assert.equal(bagBeltPageDeclarations.size,bagBeltPageNames.size);
+const bagBeltEntryNodes=paritySendStatements.filter(node=>ts.isIfStatement(node)&&node.expression.getText(parityPageAst)==="options?.bagBeltProof");
+assert.equal(bagBeltEntryNodes.length,1,"sole actual Bag-to-Belt irreversible entry");
+assert.equal(paritySendStatements.indexOf(bagBeltEntryNodes[0])+1,paritySocketIndex,"actual enter is adjacent to socket.send");
+// Retain whole actual serialization/DTO statements and the complete Bag-specific
+// entry through socket.send. All Bag-specific owner/source/mail/storage/social
+// guards execute in the actual bagBeltFinalCurrent; no gate is replaced by true.
+const bagBeltPageJs=ts.transpileModule([...bagBeltPageDeclarations.values()].join("\n")+
+  "\nfunction bagBeltSocketEntry(command,options,socket,beforeFinal){"+
+  paritySendStatements.slice(paritySerializeIndex,paritySerializeIndex+2).map(n=>n.getText(parityPageAst)).join("\n")+
+  "\nif(beforeFinal)beforeFinal();\n"+
+  paritySendStatements.slice(parityDtoIndex,parityDtoIndex+2).map(n=>n.getText(parityPageAst)).join("\n")+
+  "\n"+bagBeltEntryNodes[0].getText(parityPageAst)+"\n"+paritySendStatements[paritySocketIndex].getText(parityPageAst)+"\nreturn true;}",
+  {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.None}}).outputText;
+const bagBeltOwnerModule=loadTypeScriptModule(new URL("../lib/bevy-bag-ui.ts",import.meta.url),{
+  "./bag-belt-gesture":bagBeltGeometryModule,"./world-model/item-identity":itemIdentity});
+const bagBeltStorageModule=loadTypeScriptModule(new URL("../lib/storage-gateway-adapter.ts",import.meta.url),{
+  "./equipment-gateway-adapter":equipmentGateway,"./world-model/item-identity":itemIdentity,"./mail-parcel-gateway-adapter":mailParcelGateway});
+function bagBeltPageFixture(occupied=false,extraInventory=[]) {
+  const geometryFixture=bagBeltGeometryFixture(),g=geometryFixture.geometry;g.targets[0].uniqueId=occupied?11:null;
+  const owner=npcRepairOwner(),row={...npcRepairItem(0,0,"bag2"),authoritativeUniqueId:0,key:"Owned"},
+    belt=occupied?[{...npcRepairItem(11,0,"belt"),authoritativeUniqueId:11}]:[],raw=npcRepairSnapshot({inventoryItems:[row,...extraInventory],beltItems:belt,equipmentItems:[],storageItems:[],maxBagSlots:48});
+  const page=parityPageFixture(owner,raw),ref=current=>({current}),layout=equipmentGateway.projectEquipmentGatewaySnapshot(raw);assert.ok(layout);
+  const bagOwner={owner:"react",runGeneration:2,ownerRevision:3};page.scope.equipmentBagOwnerRef.current=bagOwner;
+  page.scope.equipmentSnapshotRef.current={...owner,snapshot:layout};page.scope.bagOpenRef.current=true;
+  const plannerRequests=[],plannerModule={bag_to_belt_move_abi_version:()=>1,bag_to_belt_move_plan(json){plannerRequests.push(JSON.parse(json));
+    return JSON.stringify({version:1,ok:true,plan:{uniqueId:0,from:46,to:0}});}};
+  // Mock only the Core ABI-shaped pending metadata. The complete Page guards,
+  // transport dispatcher, owner comparison, source lookup and geometry are real.
+  let pendingRead=null,beforeFinal=null,throwTransport=false,pendingReads=0;const errors=[];
+  page.scope.questCoreRuntimeRef.current={planBagToBeltMove:input=>presentationRuntime.readSharedBagToBeltMovePlan(plannerModule,input)};
+  page.scope.equipmentControllerRef.current={status:()=>({ready:true,pending:0}),hasPendingInstance:id=>{pendingReads++;pendingRead?.(id);return {ok:true,reserved:false};}};
+  page.scope.bagBeltInventoryReadyRef.current={layout,raw,signature:JSON.stringify([raw.inventoryCapacity,raw.inventoryItems,raw.beltItems]),epoch:1,snapshotVersion:1};
+  const scope={...page.scope,...geometryFixture.api,document:geometryFixture.document,window:geometryFixture.window,
+    sameBagOwner:bagBeltOwnerModule.sameBagOwner,...itemIdentity,storageMutationAllowed:bagBeltStorageModule.storageMutationAllowed,
+    projectMailItemMutationSnapshot:mailParcelGateway.projectMailItemMutationSnapshot,
+    parityItemMutationAllowed:page.api.parityItemMutationAllowed,equipmentRenderOwnerToken:{...bagOwner,connectionGeneration:owner.connectionGeneration,sessionGeneration:owner.sessionGeneration},
+    bagBeltGeometryRef:ref(g),bagBeltGestureRegistryRef:ref(new WeakMap()),bagBeltArmedGestureRef:ref(null),bagBeltInventoryEpochRef:ref(1),
+    bagBeltLastInventorySignatureRef:ref(null),renderBagOwner:()=>{},console:{error:(...args)=>errors.push(args)},
+    sendRaw:(command,options)=>api.bagBeltSocketEntry(command,options,page.socket,beforeFinal)};
+  const keys=Object.keys(scope),api=new Function(...keys,bagBeltPageJs+"\nreturn {beginBagToBeltGesture,armBagToBeltGesture,submitBagToBeltMove,bagBeltSocketEntry,bagBeltFinalCurrent,observeBagBeltInventorySnapshot,receiveBagBeltDropGeometry,invalidateBagBeltInventory};")(...keys.map(k=>scope[k]));
+  page.socket.send=body=>{if(throwTransport)throw Error("fixture socket throw");page.sentBodies.push(body);page.sent.push(JSON.parse(body));};
+  const item={key:"Owned",uniqueId:0,authoritativeUniqueId:0,container:"bag2",slot:0},target={slot:0,uniqueId:occupied?11:null},point={clientX:31,clientY:121};
+  const arm=()=>{const gesture=api.beginBagToBeltGesture(item,g,"react");assert.ok(gesture);assert.equal(api.armBagToBeltGesture(gesture,g,target,point),true);return gesture;};
+  return {...page,...geometryFixture,scope,api,item,target,layout,raw,owner,plannerModule,plannerRequests,errors,arm,
+    setPendingRead:value=>pendingRead=value,setBeforeFinal:value=>beforeFinal=value,setThrow:value=>throwTransport=value,getPendingReads:()=>pendingReads};
+}
+check("Bag-to-Belt Page actual UID zero Bag2 gesture sends exactly four keys once and retains transport throw barrier",()=>{
+  for(const throws of [false,true]){
+    const f=bagBeltPageFixture(),proof=f.arm();f.setThrow(throws);
+    assert.equal(f.api.submitBagToBeltMove(f.item,f.target,proof,f.geometry),!throws);
+    assert.deepEqual(f.plannerRequests,[{version:1,inventoryCapacity:54,source:{container:0,slot:40,uniqueId:0},targetSlot:0}]);
+    assert.equal(f.api.submitBagToBeltMove(f.item,f.target,proof,f.geometry),false,"spent gesture cannot retry");
+    assert.equal(f.plannerRequests.length,1);assert.equal(f.scope.bagBeltMovesRef.current.pending,1);
+    if(throws){assert.equal(f.sent.length,0);assert.equal(f.errors.length,1);}
+    else {assert.deepEqual(f.sent,[{type:"moveItem",grid:"belt",from:46,to:0}]);assert.equal(Object.keys(f.sent[0]).length,4);}
+    assert.equal(f.scope.bagBeltMovesRef.current.mutationAllowed({type:"moveItem",grid:"belt",from:46,to:0},f.layout),false);
+  }
+});
+check("Bag-to-Belt Page final entry rechecks reentrant owner source geometry mail and actual mutation gates",()=>{
+  for(const edge of ["planner","pending","listener"])for(const change of ["socket","session","owner","source","inventory","epoch","mail","geometry","obscured","hidden","core","storage","social"]){
+    const f=bagBeltPageFixture(),proof=f.arm(),mutate=()=>{
+      if(change==="socket")f.scope.socketRef.current={readyState:1};if(change==="session")f.scope.equipmentSessionGenerationRef.current++;
+      if(change==="owner")f.scope.equipmentBagOwnerRef.current={...f.scope.equipmentBagOwnerRef.current,ownerRevision:99};
+      if(change==="source")f.scope.worldRef.current.inventoryItems[0].authoritativeUniqueId=2;
+      if(change==="inventory")f.scope.bagBeltInventoryReadyRef.current={...f.scope.bagBeltInventoryReadyRef.current,layout:{...f.layout}};
+      if(change==="epoch")f.scope.bagBeltInventoryEpochRef.current++;
+      if(change==="mail")f.scope.mailParcelRef.current={snapshot:{bagCapacity:48,items:f.layout.placements},state:{blockedUniqueIds:[0]}};
+      if(change==="geometry")f.buttons[0].rect[0]++;if(change==="obscured")f.state.hit={};if(change==="hidden")f.document.visibilityState="hidden";
+      if(change==="core")f.scope.questCoreRuntimeRef.current={planBagToBeltMove:()=>null};
+      if(change==="storage")f.scope.pendingStorageRequestsRef.current.set("flight",{proof:{type:"storeItemV2",from:40,to:0,source:{uniqueId:0},target:{uniqueId:null}}});
+      if(change==="social")Object.defineProperty(f.scope.socialItemOperationsRef.current,"pending",{value:{entered:true,proof:{}},configurable:true});
+    };
+    if(edge==="planner"){const original=f.plannerModule.bag_to_belt_move_plan;f.plannerModule.bag_to_belt_move_plan=json=>{const reply=original(json);mutate();return reply;};}
+    if(edge==="pending"){let once=false;f.setPendingRead(()=>{if(!once){once=true;mutate();}});}
+    if(edge==="listener")f.setBeforeFinal(mutate);
+    assert.equal(f.api.submitBagToBeltMove(f.item,f.target,proof,f.geometry),false,edge+" "+change);
+    assert.equal(f.sent.length,0,edge+" "+change);assert.equal(f.scope.bagBeltMovesRef.current.pending,0,"definitely unentered proof released");
+    assert.equal(f.api.submitBagToBeltMove(f.item,f.target,proof,f.geometry),false,"failed terminal remains spent");
+  }
+});
+check("Bag-to-Belt Page final Core getter reentry cannot add mail social or storage ownership after last gate",()=>{
+  for(const change of ["mail","social","storage","source"]){
+    const f=bagBeltPageFixture(),proof=f.arm(),core=f.scope.questCoreRuntimeRef.current,planner=core.planBagToBeltMove;let reads=0;
+    f.setBeforeFinal(()=>Object.defineProperty(core,"planBagToBeltMove",{configurable:true,get(){
+      reads++;if(reads===2){
+        if(change==="mail")f.scope.mailParcelRef.current={snapshot:{bagCapacity:48,items:f.layout.placements},state:{blockedUniqueIds:[0]}};
+        if(change==="social")Object.defineProperty(f.scope.socialItemOperationsRef.current,"pending",{value:{entered:true,proof:{}},configurable:true});
+        if(change==="storage")f.scope.pendingStorageRequestsRef.current.set("flight",{proof:{type:"storeItemV2",from:40,to:0,source:{uniqueId:0},target:{uniqueId:null}}});
+        if(change==="source")f.scope.worldRef.current.inventoryItems[0].authoritativeUniqueId=7;
+      }return planner;}}));
+    assert.equal(f.api.submitBagToBeltMove(f.item,f.target,proof,f.geometry),false,change);assert.ok(reads>=2);
+    assert.equal(f.sent.length,0);assert.equal(f.scope.bagBeltMovesRef.current.pending,0);
+  }
+});
+check("Bag-to-Belt Page actual complete snapshot observation and exact ACK release occupied exchange in both orders",()=>{
+  for(const ackFirst of [false,true]){
+    const f=bagBeltPageFixture(true),proof=f.arm();assert.equal(f.api.submitBagToBeltMove(f.item,f.target,proof,f.geometry),true);
+    const d=f.scope.bagBeltMovesRef.current,ack={grid:"belt",from:46,to:0,success:true},physical={socket:f.socket,connectionGeneration:f.owner.connectionGeneration,sessionGeneration:f.owner.sessionGeneration,playerObjectId:17};
+    if(ackFirst)assert.equal(d.acknowledge(physical,ack),true);assert.equal(d.pending,1);
+    f.api.observeBagBeltInventorySnapshot(f.raw,f.owner.connectionGeneration,f.scope.equipmentSnapshotRef.current);
+    assert.equal(d.pending,1,"partial or unreplaced baseline cannot release entered flight");
+    const moved=npcRepairSnapshot({inventoryItems:[{...npcRepairItem(11,0,"bag2"),authoritativeUniqueId:11}],beltItems:[{...npcRepairItem(0,0,"belt"),authoritativeUniqueId:0}],equipmentItems:[]}),
+      old=f.scope.equipmentSnapshotRef.current,next=equipmentGateway.projectEquipmentGatewaySnapshot(moved);assert.ok(next);
+    f.scope.worldRef.current={...f.scope.worldRef.current,...moved};f.scope.worldSnapshotVersionRef.current=2;f.scope.equipmentSnapshotRef.current={...f.owner,snapshot:next};
+    f.api.observeBagBeltInventorySnapshot(moved,f.owner.connectionGeneration,old);assert.equal(d.pending,ackFirst?0:1);
+    if(!ackFirst){assert.equal(d.acknowledge(physical,ack),true);assert.equal(d.pending,0);}
+    assert.equal(f.sent.length,1,"observation and ACK never retry the spent terminal");
+    f.api.invalidateBagBeltInventory();assert.equal(f.scope.bagBeltInventoryReadyRef.current,null);
+  }
+});
+
+check("Mail actual item mutation projection preserves known UID zero while parcel attachment sentinel remains null",()=>{
+  const raw=npcRepairSnapshot({inventoryItems:[npcRepairItem(0,0,"bag2"),npcRepairItem(7,1)],beltItems:[npcRepairItem(11,0,"belt")],equipmentItems:[]}),
+    command={type:"moveItem",grid:"belt",from:46,to:0},mutation=mailParcelGateway.projectMailItemMutationSnapshot(raw),parcel=mailParcelGateway.projectMailParcelSnapshot(raw);
+  assert.ok(mutation&&parcel);assert.equal(mutation.bagCapacity,48);assert.equal(mutation.items[0].uniqueId,0);assert.equal(mutation.items[0].slot,40);
+  assert.equal(parcel.items[0].uniqueId,null,"original positive parcel attachment identity remains unchanged");
+  assert.equal(mailParcelGateway.mailMutationAllowed(command,mutation,[7]),true,"unrelated locked mail UID does not prevent known zero exchange");
+  assert.equal(mailParcelGateway.mailMutationAllowed(command,mutation,[0]),false);assert.equal(mailParcelGateway.mailMutationAllowed(command,mutation,[11]),false);
+  assert.equal(mailParcelGateway.mailMutationAllowed(command,mutation,[],[{container:0,slot:40}]),false);
+  assert.equal(mailParcelGateway.mailMutationAllowed(command,mutation,[],[{container:1,slot:0}]),false);
+  assert.equal(mailParcelGateway.mailMutationAllowed(command,parcel,[7]),false,"parcel's zero sentinel cannot authorize a move");
+  const empty={...raw,beltItems:[]},emptyMutation=mailParcelGateway.projectMailItemMutationSnapshot(empty);
+  assert.equal(mailParcelGateway.mailMutationAllowed(command,emptyMutation,[7]),true);
+  assert.equal(mailParcelGateway.mailMutationAllowed(command,emptyMutation,[],[{container:1,slot:0}]),false,"known empty target remains reservable");
+  for(const changed of [{...raw,inventoryItems:raw.inventoryItems.slice(1)},
+    {...raw,inventoryItems:[{...raw.inventoryItems[0],uniqueId:null},raw.inventoryItems[1]]},
+    {...raw,inventoryItems:[{...raw.inventoryItems[0],uniqueId:undefined},raw.inventoryItems[1]]},
+    {...raw,inventoryItems:[...raw.inventoryItems,{...raw.inventoryItems[0]}]},
+    {...raw,beltItems:[...raw.beltItems,{...raw.beltItems[0]}]}]){
+    const projected=mailParcelGateway.projectMailItemMutationSnapshot(changed);
+    assert.equal(mailParcelGateway.mailMutationAllowed(command,projected,[7]),false,"unknown missing or ambiguous touched row cannot become permission");
+  }
+  for(const changed of [{...raw,inventoryItems:undefined},{...raw,beltItems:undefined},{...raw,inventoryCapacity:47}])assert.equal(mailParcelGateway.projectMailItemMutationSnapshot(changed),null);
+});
+check("Bag-to-Belt Page uses actual zero preserving projection under unrelated mail locks for empty and occupied Belt",()=>{
+  for(const occupied of [false,true]){
+    const f=bagBeltPageFixture(occupied,[{...npcRepairItem(7,1),authoritativeUniqueId:7}]),parcel=mailParcelGateway.projectMailParcelSnapshot(f.raw);
+    assert.equal(parcel.items[0].uniqueId,null);f.scope.mailParcelRef.current={snapshot:parcel,state:{blockedUniqueIds:[7]}};
+    const gesture=f.arm();assert.equal(f.api.submitBagToBeltMove(f.item,f.target,gesture,f.geometry),true);
+    assert.deepEqual(f.sent,[{type:"moveItem",grid:"belt",from:46,to:0}]);assert.equal(f.scope.bagBeltMovesRef.current.pending,1);
+  }
+  for(const blocked of [[0],[11]]){
+    const f=bagBeltPageFixture(true),gesture=f.arm();f.scope.mailParcelRef.current={snapshot:mailParcelGateway.projectMailParcelSnapshot(f.raw),state:{blockedUniqueIds:blocked}};
+    assert.equal(f.api.submitBagToBeltMove(f.item,f.target,gesture,f.geometry),false);assert.equal(f.sent.length,0);assert.equal(f.scope.bagBeltMovesRef.current.pending,0);
+  }
+});
+check("Bag-to-Belt Page rejects duplicate global UID zero and missing raw source despite display identity",()=>{
+  for(const change of ["duplicateUid","duplicateCell","missingUid","missingGroup"]){
+    const f=bagBeltPageFixture();
+    if(change==="duplicateUid")f.raw.inventoryItems.push({...npcRepairItem(0,1),authoritativeUniqueId:0});
+    if(change==="duplicateCell")f.raw.inventoryItems.push({...npcRepairItem(8,0,"bag2"),authoritativeUniqueId:8});
+    if(change==="missingUid")delete f.raw.inventoryItems[0].uniqueId;
+    if(change==="missingGroup")f.raw.inventoryItems=undefined;
+    const layout=equipmentGateway.projectEquipmentGatewaySnapshot(f.raw);f.scope.worldRef.current={...f.scope.worldRef.current,...f.raw};
+    if(layout){f.scope.equipmentSnapshotRef.current={...f.owner,snapshot:layout};f.scope.bagBeltInventoryReadyRef.current={...f.scope.bagBeltInventoryReadyRef.current,layout,raw:f.raw};}
+    else f.scope.bagBeltInventoryReadyRef.current=null;
+    assert.equal(f.api.beginBagToBeltGesture(f.item,f.geometry,"react"),null,change);assert.equal(f.sent.length,0);assert.equal(f.plannerRequests.length,0);
+  }
 });
 
 console.log(`stage5 adapter tests passed (${passed} groups)`);

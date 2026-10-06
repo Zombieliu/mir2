@@ -5,13 +5,13 @@ import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
 // Strictly pure source dependencies; no WASM/runtime loader or filesystem fixture writes.
-const sources = { identity: "../lib/world-model/item-identity.ts",
+const sources = { bagBeltMove: "../lib/bag-belt-move-dispatcher.ts", identity: "../lib/world-model/item-identity.ts",
   equipment: "../lib/equipment-gateway-adapter.ts", parcel: "../lib/mail-parcel-gateway-adapter.ts",
   storage: "../lib/storage-gateway-adapter.ts", social: "../lib/social-incoming-replies.ts",
   operations: "../lib/social-window-operations.ts", rental: "../lib/storage-rental-confirmation.ts",
   bag: "../lib/bevy-bag-model.ts", socialItems: "../lib/social-item-window-model.ts",
   stage5:"../lib/stage5-window-adapters.ts", tooltip:"../lib/shared-item-tooltip.ts", guildBuff:"../lib/guild-buff-ui.ts", socialActions: "../lib/social-parity-actions.ts", extended: "../lib/extended-server-packets.ts" };
-const allow = { identity: {}, equipment: { "./world-model/item-identity": "identity" },
+const allow = { bagBeltMove: { "./mail-parcel-gateway-adapter": "parcel" }, identity: {}, equipment: { "./world-model/item-identity": "identity" },
   parcel: { "./equipment-gateway-adapter": "equipment" },
   storage: { "./equipment-gateway-adapter": "equipment", "./world-model/item-identity": "identity",
     "./mail-parcel-gateway-adapter": "parcel" }, social: {}, operations: {},
@@ -257,6 +257,9 @@ function harness({ identity = session, sequenceRef = { current: 1 }, pendingRef 
     linkSuiIdentity:(...args)=>scope.linkProvider(...args),
     guildBuffAuthorityRef:{current:new (loadPure("guildBuff").GuildBuffAuthority)()},
     heroOperationsRef: {current: {pending:null}}, mailCollectBarrierRef: {current:null},
+    // Actual empty transport custody; no Bag/Belt surface or readiness exists in this fixture.
+    bagBeltMovesRef: {current: new (loadPure("bagBeltMove").BagBeltMoveDispatcher)()},
+    bagBeltInventoryReadyRef: {current: null}, bagBeltGeometryRef: {current: null},
     observePreferenceRef:{current:null},observeBootstrapRef:{current:null},combatModeRawRef:{current:null},
     heroWindowEpochsRef:{current:{inventory:1,character:1,belt:1}},skillBarPointerHeldRef:{current:false},skillBarDocumentCacheRef:{current:null},
     ...pureAuth, ...loadPure("stage5"), ...adapter, ...pureSocial, ...pureOperations, ...pureSocialItems, ...pureSocialActions, ...pureExtended,

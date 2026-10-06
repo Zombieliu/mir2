@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type PointerEvent } from "react";
 
 import { ORIGINAL_UI, type InventoryTabKey } from "../../lib/original-ui";
 import {
@@ -43,6 +43,7 @@ type InventoryWindowProps = {
   onCompatibilityInteraction?: () => void;
   repairMode?: boolean;
   onRepairPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef) => void;
+  onBagBeltPointerDown?: (event: PointerEvent<HTMLButtonElement>, item: ItemActionRef, activate: () => void) => boolean;
   t: TranslateFn;
   locale: string;
   activeTab: InventoryTabKey;
@@ -79,7 +80,7 @@ type InventoryWindowProps = {
 export function InventoryWindow({
   initialDeleteMode = false,
   onCompatibilityInteraction,
-  repairMode = false, onRepairPointerDown,
+  repairMode = false, onRepairPointerDown, onBagBeltPointerDown,
   t,
   locale,
   activeTab,
@@ -140,6 +141,8 @@ export function InventoryWindow({
   const [splitCount, setSplitCount] = useState("1");
   const [pendingGoldDrop, setPendingGoldDrop] = useState(false);
   const [goldDropAmount, setGoldDropAmount] = useState("100");
+  const bagBeltActivationGenerationRef = useRef(0);
+  useLayoutEffect(() => { bagBeltActivationGenerationRef.current++; }, [activeTab, world.inventoryItems, repairMode, deleteMode, sellMode, storageMode, pendingMoveItem, pendingSplitItem, pendingGoldDrop, contextMenu]);
 
   useEffect(() => {
     if (!repairMode) return;
@@ -774,7 +777,13 @@ export function InventoryWindow({
                   consumedRepairPointerRef.current.add(event.currentTarget);
                   onRepairPointerDown?.(event, item);
                 } else if (!event.defaultPrevented && event.isPrimary && event.button === 0
-                  && (event.pointerType === "mouse" || event.pointerType === "touch")) consumedRepairPointerRef.current.delete(event.currentTarget);
+                  && (event.pointerType === "mouse" || event.pointerType === "touch")) {
+                  consumedRepairPointerRef.current.delete(event.currentTarget);
+                  const activationGeneration = bagBeltActivationGenerationRef.current;
+                  if ((activeTab === "bag1" || activeTab === "bag2") && !deleteMode && !sellMode && storageMode === null
+                    && !pendingMoveItem && !pendingSplitItem && !pendingGoldDrop && !contextMenu && !mailItemLocked(item)
+                    && onBagBeltPointerDown?.(event, item, () => { if (bagBeltActivationGenerationRef.current === activationGeneration) activateInventoryItem(item); })) consumedRepairPointerRef.current.add(event.currentTarget);
+                }
               }}
               onMouseDown={(event) => {
                 if (event.button !== 0) return;

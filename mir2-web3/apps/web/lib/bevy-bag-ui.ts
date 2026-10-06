@@ -1,3 +1,4 @@
+import { validBagBeltDropGeometry, type BagBeltDropGeometry } from "./bag-belt-gesture";
 import type { BevyInventoryModel } from "./bevy-bag-model";
 import type { BevyQuestUiPresentation } from "./bevy-quest-ui";
 import { crystalInventoryCapacities } from "./world-model/item-identity";
@@ -25,11 +26,13 @@ export type BevyBagUiSnapshot = BagIdentity & {
   bagOpen: boolean; page: BagPage; inputEnabled: boolean;
   presentation: BevyQuestUiPresentation | null;
   model: BevyInventoryModel; player: BevyBagPlayer; blockedUniqueIds: number[];
+  beltDropGeometry?: BagBeltDropGeometry | null;
 };
 export type BevyBagUiStatus = BagIdentity & {
   frame: number; ready: boolean; inputEnabled: boolean;
   appliedRevision: number; appliedModelRevision: number; appliedPresentationRevision: number;
   inputRegions: BagInputRegion[]; error: string | null;
+  supportsBagToBelt?: boolean; appliedBeltGeometryRevision?: number | null;
 };
 export type BagSource = { container: 0; slot: number; uniqueId: number };
 export type BevyBagUiIntent = BagIdentity & {
@@ -37,6 +40,7 @@ export type BevyBagUiIntent = BagIdentity & {
 } & (
   | { type: "useItem" | "equipItem"; source: BagSource }
   | { type: "moveItem"; source: BagSource; target: { container: 0; slot: number } }
+  | { type: "moveToBelt"; source: BagSource; target: { container: 1; slot: number; uniqueId: number | null }; beltGeometryRevision: number }
   | { type: "close" }
   | { type: "selectPage"; page: BagPage }
   | { type: "handoff"; mode: "fullInventory" | "delete" }
@@ -51,6 +55,7 @@ export type BagPointerContext = BagIdentity & {
   presentationRevision: number;
   presentation: BevyQuestUiPresentation;
   inputRegions: BagInputRegion[];
+  beltDropGeometry?: BagBeltDropGeometry | null;
 };
 export type BevyBagUiRuntime = {
   getMir2BagUiAbiVersion?: () => number;
@@ -98,6 +103,9 @@ export function parseBagIntent(json: string): BevyBagUiIntent | null {
       || (v.type === "handoff" && (v.mode === "fullInventory" || v.mode === "delete"))) return v as BevyBagUiIntent;
     if (!sourceValid(v.source)) return null;
     if (v.type === "useItem" || v.type === "equipItem") return v as BevyBagUiIntent;
+    if (v.type === "moveToBelt" && record(v.target) && v.target.container === 1
+      && integer(v.target.slot) && v.target.slot < 6 && (v.target.uniqueId === null || integer(v.target.uniqueId))
+      && integer(v.beltGeometryRevision) && v.beltGeometryRevision > 0) return v as BevyBagUiIntent;
     if (v.type === "moveItem" && record(v.target) && v.target.container === 0
       && integer(v.target.slot) && v.target.slot < 80) return v as BevyBagUiIntent;
   } catch { /* Invalid input never becomes an item action. */ }
@@ -112,7 +120,9 @@ export function readBagStatus(runtime: BevyBagUiRuntime): BevyBagUiStatus | null
       || !(v.error === null || typeof v.error === "string") || !Array.isArray(v.inputRegions)
       || !v.inputRegions.every((r) => record(r) && [r.left, r.top, r.width, r.height].every((n) => typeof n === "number" && Number.isFinite(n))
         && Number(r.width) > 0 && Number(r.height) > 0)) return null;
-    return v as BevyBagUiStatus;
+    if (v.supportsBagToBelt !== undefined && typeof v.supportsBagToBelt !== "boolean"
+      || v.appliedBeltGeometryRevision !== undefined && v.appliedBeltGeometryRevision !== null && !integer(v.appliedBeltGeometryRevision)) return null;
+    return { ...v, supportsBagToBelt: v.supportsBagToBelt === true, appliedBeltGeometryRevision: v.appliedBeltGeometryRevision ?? 0 } as BevyBagUiStatus;
   } catch { return null; }
 }
 
@@ -232,7 +242,8 @@ export class BevyBagHost {
   }
 
   private layoutFingerprint(input: BagHostInput) {
-    return JSON.stringify([input.connectionGeneration, input.sessionGeneration, input.bagOpen, input.page, input.presentation]);
+    return JSON.stringify([input.connectionGeneration, input.sessionGeneration, input.bagOpen, input.page, input.presentation,
+      readBagStatus(this.options.runtime)?.supportsBagToBelt === true ? input.beltDropGeometry ?? null : null]);
   }
 
   private publish(input: BagHostInput, enabled: boolean) {
@@ -243,10 +254,11 @@ export class BevyBagHost {
         revision: ++this.revision, ownerRevision: this.ownerRevision, bagOpen: false, inputEnabled: false }));
       return;
     }
-    const { eligible: _eligible, ...data } = input;
+    const { eligible: _eligible, beltDropGeometry, ...data } = input;
     const snapshot = { ...data, model, runGeneration: this.runGeneration, ownerRevision: this.ownerRevision,
       bagOpen: this.eligible(input), inputEnabled: enabled,
-      modelRevision: this.modelRevision, presentationRevision: this.presentationRevision };
+      modelRevision: this.modelRevision, presentationRevision: this.presentationRevision,
+      ...(readBagStatus(this.options.runtime)?.supportsBagToBelt === true && validBagBeltDropGeometry(beltDropGeometry) ? { beltDropGeometry } : {}) };
     const key = JSON.stringify(snapshot);
     if (key === this.sentKey) return;
     const sent = { ...snapshot, revision: ++this.revision };
@@ -341,7 +353,9 @@ export class BevyBagHost {
     return { runGeneration: this.runGeneration, connectionGeneration: input.connectionGeneration,
       sessionGeneration: input.sessionGeneration, ownerRevision: this.ownerRevision,
       presentationRevision: this.presentationRevision, presentation: this.sent.presentation,
-      inputRegions: status.inputRegions };
+      inputRegions: status.inputRegions,
+      ...(status.supportsBagToBelt === true && validBagBeltDropGeometry(this.sent.beltDropGeometry)
+        && status.appliedBeltGeometryRevision === this.sent.beltDropGeometry.revision ? { beltDropGeometry: this.sent.beltDropGeometry } : {}) };
   }
 
   pointer(edge: BagPointerEdge): boolean {
@@ -375,6 +389,11 @@ export class BevyBagHost {
     if (!intent || !context || !sameBagIdentity(intent, context) || intent.intentSequence <= this.intentSequence
       || intent.presentationRevision !== this.presentationRevision || intent.modelRevision !== this.modelRevision
       || this.modelFingerprint(input) !== this.modelKey) return { accepted: false, error: "The bag selection changed." };
+    if (intent.type === "moveToBelt") {
+      const geometry = context.beltDropGeometry;
+      if (!validBagBeltDropGeometry(geometry) || intent.beltGeometryRevision !== geometry.revision
+        || !geometry.targets.some(t => t.slot === intent.target.slot && t.uniqueId === intent.target.uniqueId)) return { accepted: false, error: "The Belt layout changed." };
+    }
     this.intentSequence = intent.intentSequence;
     try { return this.options.onIntent(intent); } catch { return { accepted: false, error: "The item action could not be sent." }; }
   }

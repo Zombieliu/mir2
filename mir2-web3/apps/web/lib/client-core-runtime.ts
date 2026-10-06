@@ -1,11 +1,11 @@
 import type { CrystalTooltipItem, CrystalTooltipDocument } from "./shared-item-tooltip";
 import manifest from "./generated/client_core_runtime.json";
 import type { RegistrationDraft, ChangePasswordDraft } from "./client-login-runtime";
-import { createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote, readSharedPresentationItemTooltip,
+import { createSharedChatUi, searchSharedMapRoute, readSharedCashPreview, turnSharedCashPreview, readSharedNpcRepairQuote, readSharedPresentationItemTooltip, readSharedBagToBeltMovePlan,
   type PresentationWasmModule, type MapRouteWasmModule, type ChatUiRuntime, type MapRouteInput, type MapRouteDecision,
-  type CashPreviewInput, type CashPreviewLayerDocument, type NpcRepairQuoteInput, type NpcRepairQuote } from "./client-presentation-runtime";
+  type CashPreviewInput, type CashPreviewLayerDocument, type NpcRepairQuoteInput, type NpcRepairQuote, type BagToBeltMoveInput, type BagToBeltMovePlan } from "./client-presentation-runtime";
 export type { ChatUiDocument, ChatUiControls, ChatUiRuntime, MapRouteInput, MapRouteDecision,
-  CashPreviewInput, CashPreviewLayerDocument, NpcRepairQuoteInput, NpcRepairQuote } from "./client-presentation-runtime";
+  CashPreviewInput, CashPreviewLayerDocument, NpcRepairQuoteInput, NpcRepairQuote, BagToBeltMoveInput, BagToBeltMovePlan } from "./client-presentation-runtime";
 
 export type AuthValidation = { ok: true; birthDateBinary?: string } |
   { ok: false; code: number; field: string; error: string };
@@ -155,6 +155,7 @@ export type ClientCoreRuntime = {
   readCashPreviewLayers(input: CashPreviewInput): CashPreviewLayerDocument | null;
   turnCashPreview(direction: number, right: boolean): number | null;
   readNpcRepairQuote(input: NpcRepairQuoteInput): NpcRepairQuote | null;
+  planBagToBeltMove(input: BagToBeltMoveInput): BagToBeltMovePlan | null;
   readItemTooltip(item: CrystalTooltipItem, player: Readonly<Record<string, unknown>>, nowMs?: number): CrystalTooltipDocument | null;
   resolveQuestAction(input: QuestActionInput): QuestActionDecision;
   /** Additive capability; old Quest-only bundles throw only when requested. */
@@ -500,6 +501,7 @@ export function loadClientCoreRuntime(): Promise<ClientCoreRuntime> {
       readCashPreviewLayers(input: CashPreviewInput) { return readSharedCashPreview(presentation, input); },
       turnCashPreview(direction: number, right: boolean) { return turnSharedCashPreview(presentation, direction, right); },
       readNpcRepairQuote(input: NpcRepairQuoteInput) { return readSharedNpcRepairQuote(presentation, input); },
+      planBagToBeltMove(input: BagToBeltMoveInput) { return readSharedBagToBeltMovePlan(presentation, input); },
       readItemTooltip(item: CrystalTooltipItem, player: Readonly<Record<string, unknown>>, nowMs?: number) {
         return readSharedPresentationItemTooltip(presentation, item, player, nowMs);
       },

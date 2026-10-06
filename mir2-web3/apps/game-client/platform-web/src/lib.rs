@@ -34,3 +34,8 @@ pub fn client_presentation_abi_version() -> u32 { 1 }
 pub mod item_tooltip;
 #[cfg(feature = "presentation-ui")]
 pub use item_tooltip::{item_tooltip_abi_version, item_tooltip_document};
+
+#[cfg(feature = "presentation-ui")]
+pub mod bag_to_belt;
+#[cfg(feature = "presentation-ui")]
+pub use bag_to_belt::{bag_to_belt_move_abi_version, bag_to_belt_move_plan};

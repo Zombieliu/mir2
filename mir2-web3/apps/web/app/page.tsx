@@ -51,7 +51,7 @@ import { useBevySpellsUi } from "../lib/use-bevy-spells-ui";
 import { useBevyMailUi } from "../lib/use-bevy-mail-ui";
 import {sameComposeRaw,type ComposeInput,type ComposeIntent,type ComposeRuntime,type ComposeRaw,type MailComposeHost} from "../lib/bevy-mail-text-input";
 import { MailDispatcher,MailParcelController,mailContentKey,sameMailOwner,type MailRuntime,type MailOwner,type MailIntent,type MailOutcome,type MailSendProof,type MailCommandType,type MailComposeProof,type MailDraftState,type MailQuoteProof,type MailLockProof } from "../lib/bevy-mail-ui";
-import {projectMailParcelSnapshot,mailMutationAllowed,mailInventoryMutationPacket,isMailItemMutation} from "../lib/mail-parcel-gateway-adapter";
+import {projectMailParcelSnapshot,projectMailItemMutationSnapshot,mailMutationAllowed,mailInventoryMutationPacket,isMailItemMutation} from "../lib/mail-parcel-gateway-adapter";
 import { NpcRepairService, type NpcRepairOwner, type NpcRepairView, type NpcRepairSelection, type NpcRepairProof,
   type NpcRepairDrag, type NpcRepairDragGeometry, type NpcRepairDrop } from "../lib/npc-repair-service";
 import type { ItemActionRef, DisplayItem, DisplayEquipmentItem } from "./components/original-client-types";
@@ -116,6 +116,10 @@ import { SocialWindowOperations, socialWindowItemCommand, guildPermissionsFromOp
 import { NpcGoldBuyDispatcher, NpcGoldBuyInventoryReadiness, npcGoldBuyInventoryMutationPacket, type NpcGoldBuyCurrent, type NpcGoldBuyRuntime,
   type NpcGoldBuyProof, type NpcGoldBuyQuote, type NpcGoldBuyGood } from "../lib/bevy-npc-shop-buy";
 import { sameBagOwner, type BagCommandToken, type BagOwnerToken, type BevyBagUiIntent, type BevyBagUiRuntime } from "../lib/bevy-bag-ui";
+import { bagBeltGeometryIsCurrent, bagBeltReleasePointIsCurrent, sameBagBeltGeometry, type BagBeltGeometry, type BagBeltDropTarget,
+  type BagBeltGestureProof, type BagBeltReleasePoint, type BagBeltCallbacks } from "../lib/bag-belt-gesture";
+import { BagBeltMoveDispatcher, type BagBeltMoveOwner, type BagBeltMoveReservation,
+  type BagBeltMoveCommand } from "../lib/bag-belt-move-dispatcher";
 import { useBevyStorageUi } from "../lib/use-bevy-storage-ui";
 import { useBevyNpcShopUi } from "../lib/use-bevy-npc-shop-ui";
 import type { NpcShopRuntime, NpcShopHostInput, NpcShopIntent, NpcShopStatus } from "../lib/bevy-npc-shop-ui";
@@ -1003,6 +1007,16 @@ type ItemMoveRef = {
   slot: number;
   container: ItemContainer;
 };
+
+type BagBeltGestureRecord = {
+  owner: "react" | "bevy"; ownerToken: BagCommandToken; physicalOwner: BagBeltMoveOwner;
+  geometry: BagBeltGeometry; source: Readonly<ItemCommandRef> | null; sourceSignature: string | null;
+  core: ClientCoreRuntime; inventoryEpoch: number; inventorySignature: string; sceneKey: string;
+  startedAt: number; armedAt: number | null; target: BagBeltDropTarget | null; releasePoint: BagBeltReleasePoint | null;
+};
+type BagBeltFinalProof = Readonly<{ record: BagBeltGestureRecord; source: Readonly<ItemCommandRef>;
+  command: BagBeltMoveCommand; reservation: BagBeltMoveReservation;
+  planner: ClientCoreRuntime["planBagToBeltMove"] }>;
 
 type ItemMergeRef = {
   uniqueId: number;
@@ -2207,6 +2221,37 @@ export default function HomePage() {
     Map<string, StorageTransferReservation>
   >(new Map());
   const worldRef = useRef<WorldState>(DEFAULT_WORLD_STATE);
+  const bagBeltGeometryRef = useRef<BagBeltGeometry | null>(null);
+  const bagBeltGestureRegistryRef = useRef(new WeakMap<BagBeltGestureProof, BagBeltGestureRecord>());
+  const bagBeltArmedGestureRef = useRef<BagBeltGestureProof | null>(null);
+  const bagBeltMovesRef = useRef(new BagBeltMoveDispatcher());
+  const bagBeltInventoryEpochRef = useRef(1);
+  const bagBeltLastInventorySignatureRef = useRef<string | null>(null);
+  const bagBeltInventoryReadyRef = useRef<{ layout: EquipmentGatewaySnapshot; raw: GatewayWorldSnapshot;
+    signature: string; epoch: number; snapshotVersion: number } | null>(null);
+  const bagBeltCallbacksRef = useRef<BagBeltCallbacks>({});
+  useLayoutEffect(() => { bagBeltCallbacksRef.current = {
+    onBagBeltDropGeometry: receiveBagBeltDropGeometry, onBeginBagToBeltGesture: beginBagToBeltGesture,
+    onArmBagToBeltGesture: armBagToBeltGesture, onBagToBeltMove: submitBagToBeltMove,
+    onCancelBagToBeltGesture: cancelBagToBeltGesture,
+  }; });
+  const bagBeltStableCallbacks = {
+    onBagBeltDropGeometry: useCallback((...args: Parameters<NonNullable<BagBeltCallbacks["onBagBeltDropGeometry"]>>) =>
+      bagBeltCallbacksRef.current.onBagBeltDropGeometry?.(...args), []),
+    onBeginBagToBeltGesture: useCallback((...args: Parameters<NonNullable<BagBeltCallbacks["onBeginBagToBeltGesture"]>>) =>
+      bagBeltCallbacksRef.current.onBeginBagToBeltGesture?.(...args) ?? null, []),
+    onArmBagToBeltGesture: useCallback((...args: Parameters<NonNullable<BagBeltCallbacks["onArmBagToBeltGesture"]>>) =>
+      bagBeltCallbacksRef.current.onArmBagToBeltGesture?.(...args) ?? false, []),
+    onBagToBeltMove: useCallback((...args: Parameters<NonNullable<BagBeltCallbacks["onBagToBeltMove"]>>) =>
+      bagBeltCallbacksRef.current.onBagToBeltMove?.(...args) ?? false, []),
+    onCancelBagToBeltGesture: useCallback((...args: Parameters<NonNullable<BagBeltCallbacks["onCancelBagToBeltGesture"]>>) =>
+      bagBeltCallbacksRef.current.onCancelBagToBeltGesture?.(...args), []),
+  };
+  useEffect(() => () => {
+    bagBeltCallbacksRef.current = {};
+    bagBeltGeometryRef.current = null;
+    invalidateBagBeltInventory();
+  }, []);
   // NewQuestInfo is a static definition stream, while world snapshots contain
   // only quests currently visible for this character. Keep definitions outside
   // questLog so a prerequisite-locked quest can disappear and later reappear
@@ -6131,11 +6176,14 @@ export default function HomePage() {
     return sendRaw(command, options);
   }
 
-  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof }) {
+  function sendRaw(command: Record<string, unknown>, options?: { authProof?: PreauthProof; modeProof?: CombatModeProof; guildBuffProof?: GuildBuffProof; heroProof?: HeroOperationProof; cashProof?: CashGameShopProof; creatureProof?: CreaturePlayerProof; quiet?: boolean; ownerToken?: EquipmentOwnerProof; reservedCharacterSource?: number; storageProof?: StorageTransferProof; socialReplyProof?: SocialReplyProof; storageRentalProof?: StorageRentalProof; socialItemProof?: SocialWindowOperationProof; socialTradeProof?: SocialTradeSendProof; guildListProof?: Readonly<{owner: SocialReplyOwner; guildName: string}>; rankingProof?: RankingQueryProof; socialRosterProof?: SocialRosterSendProof; skillProof?:SpellsProof;combatProof?:CombatProof;combatBody?:string;mailProof?:MailSendProof;mailQuoteProof?:MailQuoteProof;mailLockProof?:MailLockProof;npcBuyProof?:NpcGoldBuyProof;npcLegacyBuyProof?:object;npcUi?:NpcShopSendProof;npcRepairProof?:NpcRepairProof;bagBeltProof?:BagBeltFinalProof }) {
     // Spectator sockets are structurally read-only and accept only the explicit
     // controls sent through sendSpectatorControl below. Drop every gameplay
     // command before it reaches the network or local prediction pipeline.
     if (isSpectatorBrowserMode()) return false;
+    if (command.type === "moveItem" && String(command.grid).toLowerCase() === "belt"
+      && typeof command.from === "number" && command.from >= 6 && !options?.bagBeltProof) return false;
+    if (options?.bagBeltProof && !bagBeltFinalCurrent(options.bagBeltProof, command)) return false;
     if (["repairItem", "specialRepairItem"].includes(String(command.type)) && !options?.npcRepairProof) return false;
     if (options?.npcRepairProof && !["repairItem", "specialRepairItem"].includes(String(command.type))) return false;
     if (["changeAMode", "changePMode"].includes(String(command.type)) && !options?.modeProof) return false;
@@ -6146,7 +6194,7 @@ export default function HomePage() {
     if (command.type === "guildBuffUpdate" && !options?.guildBuffProof) return false;
     if (options?.guildBuffProof) {const source = currentGuildBuffSource();
       if (!socialItemWindowsRef.current.guild || !source || !guildBuffOperationsRef.current.allows(options.guildBuffProof,source,command)) return false;}
-    if (!parityItemMutationAllowed(command, options?.heroProof)) return false;
+    if (!parityItemMutationAllowed(command, options?.heroProof, options?.bagBeltProof?.reservation)) return false;
     if (options?.heroProof && !heroProofCurrent(options.heroProof, command)) return false;
     if (options?.cashProof && (!cashShopOpenRef.current || !cashPurchasesRef.current.allows(options.cashProof, currentCashGameShopSource(), command))) return false;
     if (options?.creatureProof && (!heroPetOpenRef.current || !creatureOperationsRef.current.allows(options.creatureProof, currentCreatureSource(), command))) return false;
@@ -6237,9 +6285,11 @@ export default function HomePage() {
     // listeners may alter type, UID or either cell on the caller's object.
     const wireCommand=options?.creatureProof ? command : JSON.parse(serialized) as Record<string,unknown>;
     if((options?.creatureProof ? creaturePlayerCommandJson(command) : JSON.stringify(command))!==serialized)return false;
-    if (!parityItemMutationAllowed(wireCommand, options?.heroProof)) return false;
+    if (!parityItemMutationAllowed(wireCommand, options?.heroProof, options?.bagBeltProof?.reservation)) return false;
     if(mailParcelRef.current?.state?.blockedUniqueIds.length&&!syncMailParcel())return false;
-    if(!mailMutationAllowed(wireCommand,mailParcelRef.current?.snapshot??null,mailParcelRef.current?.state?.blockedUniqueIds??[]))return false;
+    if(!mailMutationAllowed(wireCommand,options?.bagBeltProof
+      ?projectMailItemMutationSnapshot(bagBeltInventoryReadyRef.current?.raw):mailParcelRef.current?.snapshot??null,
+      mailParcelRef.current?.state?.blockedUniqueIds??[]))return false;
     if(isMailItemMutation(wireCommand)&&mailParcelRef.current?.state?.blockedUniqueIds.length&&(!currentEquipmentOwner(options?.ownerToken??equipmentRenderOwnerToken,options?.reservedCharacterSource)||equipmentHostSuspendReasonRef.current!==null))return false;
     if (!options?.heroProof && itemCommandRequiresOwner(command)
       && (!currentEquipmentOwner(options?.ownerToken ?? equipmentRenderOwnerToken, options?.reservedCharacterSource)
@@ -6349,6 +6399,12 @@ export default function HomePage() {
     }
     if (isMailItemMutation(wireCommand) || ["dropGold", "tradeGold", "gameShopBuy", "sendMail", "collectParcel"].includes(String(wireCommand.type))) {
       npcRepairAuthorityRef.current.invalidateInventory();
+    }
+    if (options?.bagBeltProof) {
+      const proof = options.bagBeltProof, owner = bagBeltPhysicalOwner();
+      if (!owner || socketRef.current !== socket || socket.readyState !== WebSocket.OPEN
+        || !bagBeltFinalCurrent(proof, wireCommand)
+        || !bagBeltMovesRef.current.enter(proof.reservation, owner, wireCommand)) return false;
     }
     try { socket.send(serialized); } catch (error) {
       if (options?.modeProof) combatModeHostRef.current?.outcomeUnknown(options.modeProof);
@@ -6973,6 +7029,7 @@ export default function HomePage() {
     socket.addEventListener("open", () => {
       if (socketRef.current !== socket || socket.readyState !== WebSocket.OPEN) return;
       observeMailSocketOpen(socket);
+      bagBeltMovesRef.current.retireConnection(socket, connectionGeneration);
       cashPurchasesRef.current.retireConnection(socket, connectionGeneration);
       creatureOperationsRef.current.retireConnection(socket, connectionGeneration);
       cashReceiptSocketRef.current = null;
@@ -8381,6 +8438,223 @@ export default function HomePage() {
     send(command);
   }
 
+  function bagBeltPhysicalOwner(): BagBeltMoveOwner | null {
+    const socket = socketRef.current, session = equipmentStartGameRef.current;
+    const playerObjectId = Number(worldRef.current.playerObjectId);
+    if (!socket || !session || session.connectionGeneration !== equipmentConnectionGenerationRef.current
+      || session.sessionGeneration !== equipmentSessionGenerationRef.current
+      || !Number.isSafeInteger(playerObjectId) || playerObjectId <= 0 || playerObjectId > 0xffff_ffff) return null;
+    return { socket, connectionGeneration: session.connectionGeneration,
+      sessionGeneration: session.sessionGeneration, playerObjectId };
+  }
+
+  function cancelBagToBeltGesture(proof: BagBeltGestureProof) {
+    bagBeltGestureRegistryRef.current.delete(proof);
+    if (bagBeltArmedGestureRef.current === proof) bagBeltArmedGestureRef.current = null;
+  }
+
+  function invalidateBagBeltInventory() {
+    bagBeltInventoryReadyRef.current = null;
+    if (bagBeltInventoryEpochRef.current < Number.MAX_SAFE_INTEGER) bagBeltInventoryEpochRef.current += 1;
+    const proof = bagBeltArmedGestureRef.current;
+    if (proof) cancelBagToBeltGesture(proof);
+  }
+
+  function observeBagBeltInventorySnapshot(snapshot: GatewayWorldSnapshot, connectionGeneration: number,
+    previous: typeof equipmentSnapshotRef.current) {
+    const baseline = equipmentSnapshotRef.current, owner = bagBeltPhysicalOwner();
+    if (!owner || !baseline || baseline === previous || connectionGeneration !== owner.connectionGeneration
+      || baseline.connectionGeneration !== owner.connectionGeneration || baseline.sessionGeneration !== owner.sessionGeneration
+      || snapshot.playerObjectId !== owner.playerObjectId || equipmentHostSuspendReasonRef.current !== null) {
+      invalidateBagBeltInventory(); return;
+    }
+    const signature = JSON.stringify([snapshot.inventoryCapacity, snapshot.inventoryItems, snapshot.beltItems]);
+    if (bagBeltLastInventorySignatureRef.current !== null && bagBeltLastInventorySignatureRef.current !== signature) {
+      invalidateBagBeltInventory();
+    }
+    bagBeltLastInventorySignatureRef.current = signature;
+    bagBeltInventoryReadyRef.current = { layout: baseline.snapshot, raw: snapshot, signature,
+      epoch: bagBeltInventoryEpochRef.current, snapshotVersion: worldSnapshotVersionRef.current };
+    if (bagBeltMovesRef.current.observe(owner, baseline.snapshot, worldSnapshotVersionRef.current)) renderBagOwner(n => n + 1);
+  }
+
+  function receiveBagBeltDropGeometry(geometry: BagBeltGeometry | null) {
+    const prior = bagBeltGeometryRef.current;
+    if (prior === geometry) return;
+    if (!sameBagBeltGeometry(prior, geometry) || prior?.revision !== geometry?.revision) {
+      const proof = bagBeltArmedGestureRef.current;
+      if (proof) cancelBagToBeltGesture(proof);
+    }
+    bagBeltGeometryRef.current = geometry;
+  }
+
+  function readBagBeltContext(geometry: BagBeltGeometry, token: BagCommandToken) {
+    const owner = bagBeltPhysicalOwner(), baseline = bagBeltInventoryReadyRef.current;
+    const core = questCoreRuntimeRef.current, socket = socketRef.current, current = worldRef.current;
+    if (!owner || !baseline || !core || !socket || socket.readyState !== WebSocket.OPEN
+      || !bagOpenRef.current || screenRef.current !== "game" || !current.connected || isSpectatorBrowserMode()
+      || equipmentHostSuspendReasonRef.current !== null || !initialSceneAssetsReadyRef.current
+      || baseline.layout !== equipmentSnapshotRef.current?.snapshot || baseline.epoch !== bagBeltInventoryEpochRef.current
+      || baseline.epoch === Number.MAX_SAFE_INTEGER || bagBeltGeometryRef.current !== geometry
+      || !bagBeltGeometryIsCurrent(geometry) || !currentEquipmentOwner(token)
+      || !bagBeltMovesRef.current.retireConnection(socket, owner.connectionGeneration)
+      || !equipmentControllerRef.current?.status().ready) return null;
+    const sceneKey = JSON.stringify([owner.connectionGeneration, owner.sessionGeneration, owner.playerObjectId,
+      token.owner, token.runGeneration, token.ownerRevision, questSceneRevisionRef.current, current.mapFileName, geometry.page]);
+    const inventorySignature = JSON.stringify([baseline.signature, current.inventoryCapacity,
+      current.inventoryItems, current.beltItems]);
+    if (socketRef.current !== socket || questCoreRuntimeRef.current !== core || bagBeltInventoryReadyRef.current !== baseline
+      || equipmentSnapshotRef.current?.snapshot !== baseline.layout || !sameBagOwner(token, {
+        ...equipmentBagOwnerRef.current, connectionGeneration: equipmentConnectionGenerationRef.current,
+        sessionGeneration: equipmentSessionGenerationRef.current }) || bagBeltGeometryRef.current !== geometry
+      || !bagBeltGeometryIsCurrent(geometry)) return null;
+    return { owner, baseline, core, current, sceneKey, inventorySignature };
+  }
+
+  function resolveBagBeltSource(item: Readonly<ItemCommandRef>, context: NonNullable<ReturnType<typeof readBagBeltContext>>) {
+    const uniqueId = authoritativeItemUniqueId(item.authoritativeUniqueId);
+    if (uniqueId === undefined || item.container !== "bag1" && item.container !== "bag2") return null;
+    const current = currentAuthoritativeItem(context.current.inventoryItems,
+      { container: item.container, slot: item.slot, uniqueId });
+    const matches = context.baseline.layout.placements.filter(p => p.container === 0 && p.uniqueId === uniqueId);
+    if (!current || matches.length !== 1 || context.baseline.layout.placements.filter(p => p.uniqueId === uniqueId).length !== 1
+      || matches[0].slot !== (item.container === "bag2" ? 40 : 0) + item.slot) return null;
+    return { uniqueId, placement: matches[0], item: current };
+  }
+
+  function bagBeltTargetCurrent(target: BagBeltDropTarget, geometry: BagBeltGeometry,
+    context: NonNullable<ReturnType<typeof readBagBeltContext>>) {
+    if (!Number.isSafeInteger(target.slot) || target.slot < 0 || target.slot >= 6) return false;
+    const measured = geometry.targets.filter(t => t.slot === target.slot);
+    const rows = context.baseline.layout.placements.filter(p => p.container === 1 && p.slot === target.slot);
+    const displayed = context.current.beltItems.filter(item => item.slot === target.slot && item.container === "belt");
+    return measured.length === 1 && measured[0].uniqueId === target.uniqueId
+      && (target.uniqueId === null ? rows.length === 0 && displayed.length === 0
+        : rows.length === 1 && rows[0].uniqueId === target.uniqueId && displayed.length === 1
+          && authoritativeItemUniqueId(displayed[0].authoritativeUniqueId) === target.uniqueId
+          && context.baseline.layout.placements.filter(p => p.uniqueId === target.uniqueId).length === 1);
+  }
+
+  function beginBagToBeltGesture(source: Readonly<ItemCommandRef> | null, geometry: BagBeltGeometry,
+    owner: "react" | "bevy"): BagBeltGestureProof | null {
+    const token = Object.freeze({ ...equipmentRenderOwnerToken });
+    const context = readBagBeltContext(geometry, token);
+    if (!context || token.owner !== owner || source === null && owner !== "bevy"
+      || typeof context.core.planBagToBeltMove !== "function") return null;
+    const selected = source ? resolveBagBeltSource(source, context) : null;
+    if (source && (!selected || bagBeltMovesRef.current.isCellReserved(0, selected.placement.slot))) return null;
+    const record: BagBeltGestureRecord = { owner, ownerToken: token, physicalOwner: context.owner, geometry,
+      source: source ? Object.freeze({ ...source }) : null, sourceSignature: selected ? JSON.stringify(selected.item) : null,
+      core: context.core, inventoryEpoch: context.baseline.epoch, inventorySignature: context.inventorySignature,
+      sceneKey: context.sceneKey, startedAt: Date.now(), armedAt: null, target: null, releasePoint: null };
+    const latest = readBagBeltContext(geometry, token);
+    if (!latest || latest.core !== record.core || latest.sceneKey !== record.sceneKey
+      || latest.inventorySignature !== record.inventorySignature || latest.baseline.epoch !== record.inventoryEpoch) return null;
+    const proof = Object.freeze({ token: Object.freeze({}) });
+    bagBeltGestureRegistryRef.current.set(proof, record);
+    return proof;
+  }
+
+  function bagBeltRecordCurrent(record: BagBeltGestureRecord) {
+    const context = readBagBeltContext(record.geometry, record.ownerToken);
+    const now = Date.now();
+    if (!context || now < record.startedAt || record.armedAt !== null && (now < record.armedAt || now - record.armedAt > 2000)
+      || context.core !== record.core
+      || context.sceneKey !== record.sceneKey || context.inventorySignature !== record.inventorySignature
+      || context.baseline.epoch !== record.inventoryEpoch || context.owner.socket !== record.physicalOwner.socket) return null;
+    if (record.source) {
+      const source = resolveBagBeltSource(record.source, context);
+      if (!source || JSON.stringify(source.item) !== record.sourceSignature) return null;
+    }
+    return context;
+  }
+
+  function armBagToBeltGesture(proof: BagBeltGestureProof, geometry: BagBeltGeometry, target: BagBeltDropTarget,
+    point: BagBeltReleasePoint): boolean {
+    const record = bagBeltGestureRegistryRef.current.get(proof);
+    if (!record || record.target || record.geometry !== geometry) return false;
+    const context = bagBeltRecordCurrent(record);
+    if (!context || bagBeltMovesRef.current.isCellReserved(1, target.slot) || !bagBeltTargetCurrent(target, geometry, context)
+      || !bagBeltReleasePointIsCurrent(geometry, target, point)) { cancelBagToBeltGesture(proof); return false; }
+    record.target = Object.freeze({ ...target }); record.armedAt = Date.now();
+    record.releasePoint = Object.freeze({ ...point });
+    if (record.owner === "bevy") {
+      const previous = bagBeltArmedGestureRef.current;
+      if (previous && previous !== proof) cancelBagToBeltGesture(previous);
+      bagBeltArmedGestureRef.current = proof;
+    }
+    return true;
+  }
+
+  function bagBeltFinalCurrent(proof: BagBeltFinalProof, command: Record<string, unknown>): boolean {
+    const context = bagBeltRecordCurrent(proof.record), target = proof.record.target;
+    if (!context || !target || !proof.record.releasePoint || !bagBeltTargetCurrent(target, proof.record.geometry, context)
+      || !bagBeltReleasePointIsCurrent(proof.record.geometry, target, proof.record.releasePoint)
+      || context.core.planBagToBeltMove !== proof.planner || !resolveBagBeltSource(proof.source, context)
+      || !bagBeltMovesRef.current.allows(proof.reservation, context.owner, command)) return false;
+    const source = resolveBagBeltSource(proof.source, context)!;
+    const ids = target.uniqueId === null ? [source.uniqueId] : [source.uniqueId, target.uniqueId];
+    for (const id of ids) {
+      const pending = equipmentControllerRef.current?.hasPendingInstance(id);
+      if (!pending?.ok || pending.reserved) return false;
+    }
+    // Complete all Core reads before checking local mutation locks.
+    const latest = bagBeltRecordCurrent(proof.record);
+    const planner = latest?.core.planBagToBeltMove;
+    if (!latest || latest.baseline !== context.baseline || latest.core !== context.core || planner !== proof.planner
+      || !parityItemMutationAllowed(command, undefined, proof.reservation)
+      || !mailMutationAllowed(command, projectMailItemMutationSnapshot(bagBeltInventoryReadyRef.current?.raw),
+        mailParcelRef.current?.state?.blockedUniqueIds ?? [])
+      || !socialItemMutationAllowed(command)
+      || !storageMutationAllowed(worldRef.current, command, pendingStorageRequestsRef.current.values())) return false;
+    return !!resolveBagBeltSource(proof.source, latest)
+      && bagBeltTargetCurrent(target, proof.record.geometry, latest)
+      && bagBeltMovesRef.current.allows(proof.reservation, latest.owner, command)
+      && worldRef.current === latest.current && questCoreRuntimeRef.current === latest.core
+      && bagOpenRef.current && screenRef.current === "game" && initialSceneAssetsReadyRef.current
+      && equipmentHostSuspendReasonRef.current === null
+      && sameBagOwner(proof.record.ownerToken, { ...equipmentBagOwnerRef.current,
+        connectionGeneration: equipmentConnectionGenerationRef.current, sessionGeneration: equipmentSessionGenerationRef.current })
+      && socketRef.current === latest.owner.socket && bagBeltInventoryReadyRef.current === latest.baseline
+      && bagBeltGeometryRef.current === proof.record.geometry && bagBeltGeometryIsCurrent(proof.record.geometry);
+  }
+
+  function submitBagToBeltMove(item: Readonly<ItemCommandRef>, target: BagBeltDropTarget,
+    gesture: BagBeltGestureProof, geometry: BagBeltGeometry): boolean {
+    const record = bagBeltGestureRegistryRef.current.get(gesture);
+    cancelBagToBeltGesture(gesture); // Spend the gesture before Core or any synchronous callback.
+    if (!record || !record.target || record.geometry !== geometry || record.target.slot !== target.slot
+      || record.target.uniqueId !== target.uniqueId) return false;
+    const context = bagBeltRecordCurrent(record);
+    if (!context || !bagBeltTargetCurrent(target, geometry, context)) return false;
+    const source = resolveBagBeltSource(item, context);
+    if (!source) return false;
+    const planner = context.core.planBagToBeltMove;
+    let plan: ReturnType<typeof planner>;
+    try { plan = planner.call(context.core, { inventoryCapacity: context.baseline.layout.capacity,
+      source: { container: 0, slot: source.placement.slot, uniqueId: source.uniqueId }, targetSlot: target.slot }); }
+    catch { return false; }
+    const latest = bagBeltRecordCurrent(record);
+    if (!plan || !latest || latest.core.planBagToBeltMove !== planner || plan.uniqueId !== source.uniqueId
+      || plan.to !== target.slot || !Number.isSafeInteger(plan.from) || plan.from < 6
+      || plan.from >= latest.baseline.layout.capacity || !bagBeltTargetCurrent(target, geometry, latest)) return false;
+    const command: BagBeltMoveCommand = Object.freeze({ type: "moveItem", grid: "belt", from: plan.from, to: plan.to });
+    if (!parityItemMutationAllowed(command) || !mailMutationAllowed(command, projectMailItemMutationSnapshot(bagBeltInventoryReadyRef.current?.raw),
+      mailParcelRef.current?.state?.blockedUniqueIds ?? [])) return false;
+    const reservation = bagBeltMovesRef.current.reserve(latest.owner, command, source.placement.slot,
+      source.uniqueId, target.uniqueId, latest.baseline.snapshotVersion, latest.baseline.layout);
+    if (!reservation) return false;
+    const proof: BagBeltFinalProof = Object.freeze({ record, source: Object.freeze({ ...item }), command, reservation, planner });
+    let sent = false;
+    try { sent = bagBeltFinalCurrent(proof, command) && sendRaw(command, { ownerToken: record.ownerToken, bagBeltProof: proof }); }
+    catch (error) { console.error("[mir2] Bag-to-Belt move outcome is unknown", error); }
+    finally {
+      if (!sent) bagBeltMovesRef.current.cancelDefinitelyUnsent(reservation);
+      renderBagOwner(n => n + 1);
+    }
+    return sent;
+  }
+
   function moveItem(item: ItemMoveRef, toSlot: number, toContainer?: ItemContainer, ownerToken?: BagCommandToken): boolean {
     if (item.container === "bag1" || item.container === "bag2") {
       const session = equipmentStartGameRef.current;
@@ -9331,8 +9605,12 @@ export default function HomePage() {
       }
     } catch { observePreferenceRef.current = { ...state, pending: true }; renderParityServices(n => n + 1); }
   }
-  function parityItemMutationAllowed(command: Record<string, unknown>, ownHeroProof?: HeroOperationProof): boolean {
+  function parityItemMutationAllowed(command: Record<string, unknown>, ownHeroProof?: HeroOperationProof,
+    ownBagMove?: BagBeltMoveReservation): boolean {
+    if (!bagBeltMovesRef.current.mutationAllowed(command, bagBeltInventoryReadyRef.current?.layout
+      ?? equipmentSnapshotRef.current?.snapshot ?? null, ownBagMove)) return false;
     if (command.type === "collectParcel" && (socialItemOperationsRef.current.pending
+      || bagBeltMovesRef.current.pending
       || (equipmentControllerRef.current?.status().pending ?? 0) > 0 || pendingStorageRequestsRef.current.size
       || storageRentalRef.current.pending || npcBuyDispatcherRef.current?.status()?.flight
       || (mailParcelRef.current?.state?.blockedUniqueIds.length ?? 0) > 0
@@ -11124,6 +11402,13 @@ export default function HomePage() {
       container: source.slot < 40 ? "bag1" : "bag2", slot: source.slot % 40, uniqueId: source.uniqueId,
     });
     if (!item) return { accepted: false };
+    if (intent.type === "moveToBelt") {
+      const proof = bagBeltArmedGestureRef.current, record = proof && bagBeltGestureRegistryRef.current.get(proof);
+      if (!proof || !record || record.owner !== "bevy" || !sameBagOwner(token, record.ownerToken)
+        || intent.beltGeometryRevision !== record.geometry.revision || !record.target
+        || record.target.slot !== intent.target.slot || record.target.uniqueId !== intent.target.uniqueId) return { accepted: false };
+      return { accepted: submitBagToBeltMove(item, intent.target, proof, record.geometry) };
+    }
     if (intent.type === "moveItem") {
       return { accepted: moveItem(item, intent.target.slot % 40, intent.target.slot < 40 ? "bag1" : "bag2", token) };
     }
@@ -11872,6 +12157,8 @@ export default function HomePage() {
   }
   function invalidateNpcGoldBuyGatewayPacket(event: GatewayEvent) {
     if (event.type === "worldSnapshot") {
+      // Projection staging is not a new gesture epoch when its raw inventory is equal.
+      bagBeltInventoryReadyRef.current = null;
       npcRepairAuthorityRef.current.prepareSnapshot(readNpcRepairOwner(), event.payload);
       const dialog = (event.payload as GatewayWorldSnapshot).activeNpcDialog, binding = npcRepairDialogBindingRef.current;
       if (dialog && binding && JSON.stringify(dialog) !== binding.key) closeNpcRepairService();
@@ -11879,6 +12166,7 @@ export default function HomePage() {
       npcBuyDispatcherRef.current?.withdraw();
     }
     if (event.type === "packet" && typeof event.packet === "string" && npcGoldBuyInventoryMutationPacket(event.packet)) {
+      invalidateBagBeltInventory();
       npcRepairAuthorityRef.current.invalidateInventory();
       // Some handlers only log a receipt. Retire availability before any handler
       // or callback can reuse the previous full inventory and stack evidence.
@@ -11917,6 +12205,7 @@ export default function HomePage() {
       // A packet or session replacement during projection retires this stage.
       npcGoldBuyInventoryRef.current.finish(stage, currentSpellsOwner(Number(worldRef.current.playerObjectId)), complete,
         inventory?.ok ? inventory.model : null);
+      observeBagBeltInventorySnapshot(snapshot, connectionGeneration, beforeInventorySnapshot);
       if (complete) {
         const owner = readNpcRepairOwner();
         npcRepairAuthorityRef.current.observeSnapshot(owner, snapshot);
@@ -11928,6 +12217,10 @@ export default function HomePage() {
 
   function handleGatewayEvent(event: GatewayEvent, connectionGeneration: number, source:WebSocket) {
     if (connectionGeneration !== equipmentConnectionGenerationRef.current || socketRef.current !== source) return;
+    if (event.type === "packet" && event.packet === "MoveItem") {
+      const owner = bagBeltPhysicalOwner();
+      if (owner && bagBeltMovesRef.current.acknowledge(owner, event.payload ?? {})) renderBagOwner(n => n + 1);
+    }
     if (event.type === "packet" && event.packet === "ItemRepaired") {
       npcRepairAuthorityRef.current.acknowledge(source, event.packet, event.payload);
     }
@@ -18030,6 +18323,8 @@ export default function HomePage() {
         if (!pending.ok) readable = false;
         if (pending.reserved) blockedUniqueIds.push(item.uniqueId);
       }
+      blockedUniqueIds.push(...bagBeltMovesRef.current.blockedUniqueIds(),
+        ...(mailParcelRef.current?.state?.blockedUniqueIds ?? []));
       const otherModal = bevyQuestReactModalOpen || showQuestLog || showCharacter || heroManagementPage !== null || cashShopOpenRef.current || showHeroPet || showGuild || showGroup || showFriends
         || showBonds || showRanking || showMarket || showConquest || showTrade || showBuffs || showMail
         || showWorldMap || referenceWindowsBlockGameplay() || showChatSettings || Boolean(current.activeNpcDialog || npcShopService || npcRepairService);
@@ -18052,6 +18347,8 @@ export default function HomePage() {
           gold: current.gold, credit: current.credit, level: player?.level, name: player?.name,
           className: player?.classKey, gender: player?.genderKey, currentWeightKnown: false },
         blockedUniqueIds,
+        beltDropGeometry: bagBeltGeometryRef.current && bagBeltGeometryIsCurrent(bagBeltGeometryRef.current)
+          ? { revision: bagBeltGeometryRef.current.revision, targets: bagBeltGeometryRef.current.targets } : null,
       };
     },
     onOwner: (owner, runGeneration, ownerRevision) => {
@@ -18527,6 +18824,7 @@ export default function HomePage() {
       onDeleteCharacter={deleteSelectedCharacter}
       onExitSelect={() => setScreen("login")}
       onReadItemTooltip={ownedItemTooltipReaders.readItem}
+      {...bagBeltStableCallbacks}
       onReadEquipmentItemTooltip={ownedItemTooltipReaders.readEquipment}
       onUseItem={useItem}
       onDropItem={dropItem}

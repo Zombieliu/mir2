@@ -4506,19 +4506,27 @@ pub fn belt_item_use_intent(inventory: &InventoryModel, slot: u8) -> Option<Nati
 }
 
 fn inventory_bag_to_belt_move_intent(
+    inventory_capacity: u16,
     source_slot: u32,
     unique_id: u64,
     belt_slot: u8,
-) -> NativePlayerUiIntent {
-    NativePlayerUiIntent::MoveItem {
+) -> Option<NativePlayerUiIntent> {
+    let plan = mir2_client_core::intent::plan_bag_to_belt_move(
+        inventory_capacity,
+        mir2_client_core::equipment_pending::InventoryPlacement {
+            unique_id: Some(unique_id), container: 0, slot: source_slot,
+        },
+        belt_slot,
+    )?;
+    Some(NativePlayerUiIntent::MoveItem {
         // Inventory moves in the existing web/native contract use normalized
         // bag indices. Belt marks the unambiguous compatibility path whose
         // endpoints use Crystal's unified raw inventory indices.
         grid: "belt".to_owned(),
-        unique_id,
-        from: i32::try_from(source_slot.saturating_add(6)).unwrap_or(i32::MAX),
-        to: i32::from(belt_slot),
-    }
+        unique_id: plan.unique_id,
+        from: plan.from,
+        to: plan.to,
+    })
 }
 
 fn spawn_overlay_root(mut commands: Commands) {
@@ -5054,10 +5062,14 @@ fn consume_hud_buttons(
                     let Some(pending) = pending.as_deref_mut() else {
                         continue;
                     };
-                    let queued = intents.push_pending_intent(
-                        pending,
-                        inventory_bag_to_belt_move_intent(source_slot, unique_id, *slot),
-                    );
+                    // The HUD path keeps the existing armed draft behavior;
+                    // the drag path below independently rechecks its live source.
+                    let Some(intent) = inventory_bag_to_belt_move_intent(
+                        inventory.effective_capacity(), source_slot, unique_id, *slot,
+                    ) else {
+                        continue;
+                    };
+                    let queued = intents.push_pending_intent(pending, intent);
                     belt_diagnostic(diagnostics.as_deref(), || {
                         format!("hud slot={slot} move_queue={queued}")
                     });
@@ -6052,7 +6064,12 @@ fn finish_inventory_item_drag(
             }
         }
     } else if let Some(belt_slot) = belt_slot_at_cursor(belt, cursor) {
-        inventory_bag_to_belt_move_intent(drag.source_slot, drag.unique_id, belt_slot)
+        let Some(intent) = inventory_bag_to_belt_move_intent(
+            inventory.effective_capacity(), drag.source_slot, drag.unique_id, belt_slot,
+        ) else {
+            return;
+        };
+        intent
     } else {
         return;
     };
@@ -18177,6 +18194,34 @@ mod tests {
         // identity; a previously pressed HUD node must fail closed.
         inventory.items.clear();
         assert!(belt_item_use_intent(&inventory, 0).is_none());
+    }
+
+    #[test]
+    fn bag_to_belt_native_adapter_keeps_shared_raw_indices_and_rejects_bad_ranges() {
+        for (capacity, source_slot, unique_id, target_slot, from) in [
+            (46, 0, 0, 0, 6), (46, 2, 7001, 0, 8), (46, 39, 42, 5, 45),
+            (54, 40, 43, 0, 46), (54, 47, 44, 5, 53), (86, 79, u64::MAX, 5, 85),
+        ] {
+            let core = mir2_client_core::intent::plan_bag_to_belt_move(capacity,
+                mir2_client_core::equipment_pending::InventoryPlacement {
+                    unique_id: Some(unique_id), container: 0, slot: source_slot,
+                }, target_slot).unwrap();
+            assert_eq!(core.from, from);
+            assert_eq!(inventory_bag_to_belt_move_intent(capacity, source_slot, unique_id, target_slot),
+                Some(NativePlayerUiIntent::MoveItem {
+                    grid: "belt".to_owned(), unique_id, from, to: i32::from(target_slot),
+                }));
+        }
+        for (capacity, source_slot, target_slot) in [
+            (46, 40, 0), (47, 40, 0), (54, 48, 0), (86, 80, 0),
+            (86, u32::MAX, 0), (46, 0, 6), (46, 0, u8::MAX),
+        ] {
+            assert_eq!(inventory_bag_to_belt_move_intent(capacity, source_slot, 0, target_slot), None);
+        }
+        let legacy = InventoryModel { capacity: 47, ..Default::default() };
+        assert_eq!(inventory_bag_to_belt_move_intent(legacy.effective_capacity(), 0, 0, 0),
+            Some(NativePlayerUiIntent::MoveItem { grid: "belt".into(), unique_id: 0, from: 6, to: 0 }));
+        assert_eq!(inventory_bag_to_belt_move_intent(legacy.effective_capacity(), 40, 0, 0), None);
     }
 
     #[test]
