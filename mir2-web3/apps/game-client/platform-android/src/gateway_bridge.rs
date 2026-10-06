@@ -52,10 +52,11 @@ pub const ANDROID_GUILD_STORAGE_SLOT_COUNT: i32 = GUILD_STORAGE_SLOT_COUNT;
 
 /// The Android Activity/transport host sends this envelope when it opens its
 /// WebSocket. This module intentionally does not own or declare a WebSocket.
+/// Advertise only wired host contracts; native resume is still unimplemented.
 pub fn native_game_shop_capabilities_json() -> Value {
     json!({
         "type": "clientCapabilities",
-        "capabilities": ["nativeResumeV1", NATIVE_GAME_SHOP_RECEIPT_CAPABILITY]
+        "capabilities": [NATIVE_GAME_SHOP_RECEIPT_CAPABILITY]
     })
 }
 
@@ -2949,7 +2950,7 @@ mod tests {
             native_game_shop_capabilities_json(),
             json!({
                 "type": "clientCapabilities",
-                "capabilities": ["nativeResumeV1", "nativeGameShopReceiptV1"]
+                "capabilities": ["nativeGameShopReceiptV1"]
             })
         );
         let receipt = parse_native_game_shop_receipt(

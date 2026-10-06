@@ -143,6 +143,11 @@ final class GatewaySession implements AutoCloseable {
                     if (attempt != generation) { ws.cancel(); return; }
                     // The gateway validates the normal version packet before account operations.
                     if (!send(object("type", "clientVersion"))) return;
+                    // Negotiate only implemented host contracts, once per socket.
+                    // nativeResumeV1 stays disabled until its credential and
+                    // post-resume render-loading path are actually connected.
+                    if (!send(object("type", "clientCapabilities", "capabilities",
+                            new JSONArray().put("nativeGameShopReceiptV1")))) return;
                     heartbeat = timer.scheduleAtFixedRate(() -> {
                         synchronized (GatewaySession.this) {
                             if (attempt == generation && phase != Phase.DISCONNECTED) {
@@ -236,7 +241,8 @@ final class GatewaySession implements AutoCloseable {
         if (phase != Phase.IN_GAME || socket == null) return false;
         String type = command.optString("type", "");
         if (type.isEmpty() || type.length() > 64
-                || type.equals("clientVersion") || type.equals("keepAlive")
+                || type.equals("clientVersion") || type.equals("clientCapabilities")
+                || type.equals("resumeSession") || type.equals("keepAlive")
                 || type.equals("login") || type.equals("newAccount")
                 || type.equals("newCharacter") || type.equals("deleteCharacter")
                 || type.equals("startGame") || type.equals("passkeyLogin")) {

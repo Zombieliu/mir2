@@ -78,6 +78,12 @@ public class LightingMetadataIngressTest {
         session.connect(server.url("/ws").toString().replace("https://", "wss://"));
         phase(GatewaySession.Phase.READY);
         assertEquals("clientVersion", commands.poll(3, TimeUnit.SECONDS).getString("type"));
+        JSONObject capabilities = commands.poll(3, TimeUnit.SECONDS);
+        assertNotNull(capabilities);
+        assertEquals("clientCapabilities", capabilities.getString("type"));
+        assertEquals(2, capabilities.length());
+        assertEquals(1, capabilities.getJSONArray("capabilities").length());
+        assertEquals("nativeGameShopReceiptV1", capabilities.getJSONArray("capabilities").getString(0));
     }
 
     private void roster() throws Exception {

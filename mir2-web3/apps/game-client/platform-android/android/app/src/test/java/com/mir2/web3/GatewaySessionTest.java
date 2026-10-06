@@ -27,6 +27,7 @@ public class GatewaySessionTest {
     private final BlockingQueue<String> receipts = new LinkedBlockingQueue<>();
     private final BlockingQueue<String> gameplayPackets = new LinkedBlockingQueue<>();
     private volatile WebSocket peer;
+    private volatile boolean exactShopReceiptsNegotiated;
 
     @Before public void setUp() throws Exception {
         HeldCertificate cert = new HeldCertificate.Builder().commonName("localhost")
@@ -46,6 +47,17 @@ public class GatewaySessionTest {
                     commands.add(value);
                     if (value.getString("type").equals("clientVersion")) {
                         socket.send("{\"type\":\"packet\",\"packet\":\"Connected\",\"payload\":{}}");
+                    } else if (value.getString("type").equals("clientCapabilities")) {
+                        exactShopReceiptsNegotiated = value.getJSONArray("capabilities").length() == 1
+                                && "nativeGameShopReceiptV1".equals(value.getJSONArray("capabilities").getString(0));
+                    } else if (value.getString("type").equals("gameShopBuy") && exactShopReceiptsNegotiated) {
+                        // Local TLS fixture models the real Gateway's opt-in boundary;
+                        // this rejection is not a purchase or real-account acceptance.
+                        socket.send(GatewaySession.object("type", "gameShopReceipt",
+                                "protocol", "nativeGameShopReceiptV1", "requestId", value.getString("requestId"),
+                                "gIndex", value.getInt("gIndex"), "quantity", value.getInt("quantity"),
+                                "priceType", value.getInt("priceType"), "success", false,
+                                "code", "insufficientCurrency").toString());
                     }
                 } catch (Exception error) { throw new AssertionError(error); }
             }
@@ -83,6 +95,7 @@ public class GatewaySessionTest {
         session.connect(server.url("/ws").toString().replace("https://", "wss://"));
         phase(GatewaySession.Phase.READY);
         assertEquals("clientVersion", commands.poll(3, TimeUnit.SECONDS).getString("type"));
+        assertImplementedCapabilities(commands.poll(3, TimeUnit.SECONDS));
     }
 
     private void roster() throws Exception {
@@ -94,6 +107,90 @@ public class GatewaySessionTest {
         assertEquals(3, login.length());
         peer.send("{\"type\":\"packet\",\"packet\":\"LoginSuccess\",\"payload\":{\"characters\":[{\"index\":7,\"name\":\"Fixture\"}]}}");
         assertEquals(7, phase(GatewaySession.Phase.CHARACTERS).characters.get(0).index);
+    }
+
+    private void assertImplementedCapabilities(JSONObject command) throws Exception {
+        assertNotNull("The real Java socket must negotiate its implemented native receipt contract", command);
+        assertEquals("clientCapabilities", command.getString("type"));
+        assertEquals(2, command.length());
+        assertEquals(1, command.getJSONArray("capabilities").length());
+        assertEquals("nativeGameShopReceiptV1", command.getJSONArray("capabilities").getString(0));
+        assertFalse(command.toString().contains("nativeResumeV1"));
+    }
+
+    @Test public void nativeCapabilitySocketNegotiatesAfterVersionWithoutUnimplementedResume() throws Exception {
+        session.connect(server.url("/ws").toString().replace("https://", "wss://"));
+        phase(GatewaySession.Phase.READY);
+        JSONObject version = commands.poll(3, TimeUnit.SECONDS);
+        assertNotNull(version);
+        assertEquals("clientVersion", version.getString("type"));
+        assertEquals(1, version.length());
+        assertImplementedCapabilities(commands.poll(2, TimeUnit.SECONDS));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type", "attack", "objectId", 99)));
+    }
+
+    @Test public void nativeCapabilitySocketNegotiatesOncePerConnectionNotPerConnectedPacket() throws Exception {
+        session.connect(server.url("/ws").toString().replace("https://", "wss://"));
+        phase(GatewaySession.Phase.READY);
+        assertEquals("clientVersion", commands.poll(3, TimeUnit.SECONDS).getString("type"));
+        assertImplementedCapabilities(commands.poll(2, TimeUnit.SECONDS));
+        peer.send("{\"type\":\"packet\",\"packet\":\"Connected\",\"payload\":{}}");
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+        session.disconnect("Local reconnect fixture");
+        phase(GatewaySession.Phase.DISCONNECTED);
+        server.enqueue(new MockResponse().withWebSocketUpgrade(new WebSocketListener() {
+            @Override public void onOpen(WebSocket socket, Response response) { peer = socket; }
+            @Override public void onMessage(WebSocket socket, String text) {
+                try {
+                    JSONObject value = new JSONObject(text);
+                    commands.add(value);
+                    if ("clientVersion".equals(value.getString("type"))) {
+                        socket.send("{\"type\":\"packet\",\"packet\":\"Connected\",\"payload\":{}}");
+                    }
+                } catch (Exception error) { throw new AssertionError(error); }
+            }
+        }));
+        session.connect(server.url("/ws").toString().replace("https://", "wss://"));
+        phase(GatewaySession.Phase.READY);
+        assertEquals("clientVersion", commands.poll(3, TimeUnit.SECONDS).getString("type"));
+        assertImplementedCapabilities(commands.poll(2, TimeUnit.SECONDS));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void nativeCapabilityGameplayCannotRenegotiateHostCapabilities() throws Exception {
+        enterMailResultWorld();
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type", "clientCapabilities",
+                "capabilities", new org.json.JSONArray().put("nativeResumeV1"))));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void nativeCapabilityGameplayCannotInjectAResumeCredential() throws Exception {
+        enterMailResultWorld();
+        assertFalse(session.sendAuthenticated(GatewaySession.object("type", "resumeSession",
+                "credential", "A".repeat(43))));
+        assertNull(commands.poll(200, TimeUnit.MILLISECONDS));
+    }
+
+    @Test public void nativeCapabilityNegotiatedSocketReceivesExactRejectedShopRequest() throws Exception {
+        enterMailResultWorld();
+        JSONObject request = GatewaySession.object("type", "gameShopBuy", "requestId", "gs-capability-fixture",
+                "gIndex", 31, "quantity", 2, "priceType", 1);
+        assertTrue(session.sendAuthenticated(request));
+        assertEquals(request.toString(), commands.poll(3, TimeUnit.SECONDS).toString());
+        String raw = receipts.poll(2, TimeUnit.SECONDS);
+        assertNotNull("The opt-in fixture must deliver the exact authoritative rejection", raw);
+        JSONObject result = new JSONObject(raw);
+        assertEquals("gameShopReceipt", result.getString("type"));
+        assertEquals("nativeGameShopReceiptV1", result.getString("protocol"));
+        assertEquals("gs-capability-fixture", result.getString("requestId"));
+        assertEquals(31, result.getInt("gIndex"));
+        assertEquals(2, result.getInt("quantity"));
+        assertEquals(1, result.getInt("priceType"));
+        assertFalse(result.getBoolean("success"));
+        assertEquals("insufficientCurrency", result.getString("code"));
+        assertFalse(result.has("accountId"));
+        assertNull(receipts.poll(200, TimeUnit.MILLISECONDS));
     }
 
     @Test public void tlsLoginStartAndAuthoritativePosition() throws Exception {
