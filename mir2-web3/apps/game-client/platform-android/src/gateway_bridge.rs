@@ -24,9 +24,16 @@ use mir2_ui_core::state::UiState;
 use mir2_ui_core::storage::{StorageOperation, StorageReceipt, StorageRequest};
 use serde_json::{json, Value};
 
-use crate::android_input::{AndroidLifecycle, AndroidNetwork, AndroidShellState};
+use crate::android_input::{
+    AndroidDirection, AndroidLifecycle, AndroidMotionIntent, AndroidMoveMode, AndroidNetwork,
+    AndroidShellState,
+};
 
 pub const ANDROID_GATEWAY_QUEUE_CAPACITY: usize = 256;
+/// Leave room for the lease wrapper in the existing 64-KiB JNI copy buffer.
+pub const ANDROID_NATIVE_MAIL_COMMAND_MAX_BYTES: usize = 48 * 1024;
+/// Same existing 64-KiB JNI lease buffer, with room for its wrapper.
+pub const ANDROID_NATIVE_SOCIAL_COMMAND_MAX_BYTES: usize = 48 * 1024;
 pub const ANDROID_GATEWAY_INBOUND_CAPACITY: usize = 32;
 /// A receipt is a small control message, not an arbitrary Android payload.
 /// Keep this comfortably above the shared request/code limits while bounding
@@ -45,10 +52,11 @@ pub const ANDROID_GUILD_STORAGE_SLOT_COUNT: i32 = GUILD_STORAGE_SLOT_COUNT;
 
 /// The Android Activity/transport host sends this envelope when it opens its
 /// WebSocket. This module intentionally does not own or declare a WebSocket.
+/// Advertise only wired host contracts; native resume is still unimplemented.
 pub fn native_game_shop_capabilities_json() -> Value {
     json!({
         "type": "clientCapabilities",
-        "capabilities": ["nativeResumeV1", NATIVE_GAME_SHOP_RECEIPT_CAPABILITY]
+        "capabilities": [NATIVE_GAME_SHOP_RECEIPT_CAPABILITY]
     })
 }
 
@@ -240,6 +248,30 @@ impl AndroidGatewayHostAdapter {
             .collect()
     }
 
+    /// Selectively defer Hero leases while their scene/focus is not ready.
+    /// Other domains keep the original lifecycle, sequence and lease behavior.
+    pub(crate) fn drain_ready_with_hero_deferrals(
+        &mut self,
+        queue: &mut AndroidGatewayOutboundQueue,
+        shell: &AndroidShellState,
+        max_entries: usize,
+        deferred: &BTreeSet<u64>,
+    ) -> Vec<AndroidGatewayOutboundLease> {
+        let available = ANDROID_GATEWAY_QUEUE_CAPACITY.saturating_sub(self.leased_sequences.len());
+        queue.drain_ready_without_hero_sequences(shell, max_entries.min(available), deferred)
+            .into_iter().filter_map(|outbound| {
+                if !outbound.is_sendable() { return None; }
+                self.leased_sequences.insert(outbound.sequence);
+                Some(AndroidGatewayOutboundLease { outbound })
+            }).collect()
+    }
+
+    /// Retire one exact Hero lease that never left the native host FIFO.
+    /// This is cancellation before a write, not a fabricated socket result.
+    pub(crate) fn retire_unwritten_hero_lease(&mut self, lease: AndroidGatewayOutboundLease) {
+        self.leased_sequences.remove(&lease.sequence());
+    }
+
     pub fn on_host_write_result(
         &mut self,
         queue: &mut AndroidGatewayOutboundQueue,
@@ -275,10 +307,25 @@ impl AndroidGatewayHostAdapter {
         ui_state: &mut UiState,
     ) {
         self.leased_sequences.clear();
-        queue.mark_game_shop_unknown();
-        queue.mark_storage_unknown();
+        let change_password_pending =
+            queue.change_password_in_flight() && ui_state.security.change_password_pending;
+        // A replacement generation is not the old authenticated session.
+        // Drop every unsent old-generation command, not only movement, so a
+        // map transition or reconnect cannot replay an action against a new
+        // map, character, or account. Correlated mutations become unknown.
+        queue.mark_terminal_reset();
         ui_state.mark_game_shop_unknown();
         ui_state.mark_storage_unknown();
+        if change_password_pending {
+            *ui_state = reduce(
+                ui_state,
+                UiAction::ChangePasswordResult {
+                    success: false,
+                    message: "Password change response was not received.".to_owned(),
+                },
+            )
+            .state;
+        }
     }
 }
 
@@ -304,6 +351,15 @@ pub enum AndroidGatewayEnqueueError {
     InvalidGuildStorage {
         command_type: &'static str,
         reason: &'static str,
+    },
+    OversizedNativeMail {
+        max_bytes: usize,
+    },
+    OversizedNativeSocial {
+        max_bytes: usize,
+    },
+    OversizedNativeHero {
+        max_bytes: usize,
     },
 }
 
@@ -1471,6 +1527,152 @@ impl AndroidGatewayOutboundQueue {
         Ok(())
     }
 
+    /// Closed mail-only shared UI seam. Uses the same queue/sequence/leases;
+    /// no arbitrary JSON, authentication command, or optimistic result.
+    pub fn enqueue_native_mail(
+        &mut self,
+        command: &mir2_client_bevy::native_mail_egress::NativeMailCommand,
+    ) -> Result<(), AndroidGatewayEnqueueError> {
+        let json = serde_json::to_string(command).expect("typed mail command is serializable");
+        if json.len() > ANDROID_NATIVE_MAIL_COMMAND_MAX_BYTES {
+            return Err(AndroidGatewayEnqueueError::OversizedNativeMail {
+                max_bytes: ANDROID_NATIVE_MAIL_COMMAND_MAX_BYTES,
+            });
+        }
+        if self.entries.len() >= self.capacity {
+            let command_type = command.command_type().to_owned();
+            self.overflow_count = self.overflow_count.saturating_add(1);
+            self.last_overflow_type = Some(command_type.clone());
+            return Err(AndroidGatewayEnqueueError::Full {
+                capacity: self.capacity,
+                command_type,
+            });
+        }
+        let sequence = self.next_sequence;
+        self.next_sequence = self.next_sequence.saturating_add(1);
+        self.entries.push_back(AndroidGatewayOutbound {
+            sequence,
+            kind: AndroidGatewayOutboundKind::Wire,
+            json,
+        });
+        Ok(())
+    }
+
+    /// Closed public social subset on the original sequence/lease channel.
+    /// No auth/debug JSON and no optimistic membership, offer or settlement.
+    pub fn enqueue_native_social(
+        &mut self,
+        command: &mir2_client_bevy::native_social_egress::NativeSocialCommand,
+    ) -> Result<(), AndroidGatewayEnqueueError> {
+        if !command.valid_shared_bounds() {
+            return Err(AndroidGatewayEnqueueError::InvalidGuildStorage {
+                command_type: command.command_type(),
+                reason: "outside the shared guild-storage contract",
+            });
+        }
+        let json = serde_json::to_string(command).expect("typed social command is serializable");
+        if json.len() > ANDROID_NATIVE_SOCIAL_COMMAND_MAX_BYTES {
+            return Err(AndroidGatewayEnqueueError::OversizedNativeSocial {
+                max_bytes: ANDROID_NATIVE_SOCIAL_COMMAND_MAX_BYTES,
+            });
+        }
+        if self.entries.len() >= self.capacity {
+            let command_type = command.command_type().to_owned();
+            self.overflow_count = self.overflow_count.saturating_add(1);
+            self.last_overflow_type = Some(command_type.clone());
+            return Err(AndroidGatewayEnqueueError::Full {
+                capacity: self.capacity,
+                command_type,
+            });
+        }
+        let sequence = self.next_sequence;
+        self.next_sequence = self.next_sequence.saturating_add(1);
+        self.entries.push_back(AndroidGatewayOutbound {
+            sequence,
+            kind: AndroidGatewayOutboundKind::Wire,
+            json,
+        });
+        Ok(())
+    }
+
+    /// Closed Hero-only projection on the same bounded FIFO/lease channel.
+    /// Return its lifetime sequence for exact write-result correlation.
+    pub(crate) fn enqueue_native_hero(
+        &mut self,
+        command: &crate::hero_egress::NativeHeroCommand,
+    ) -> Result<u64, AndroidGatewayEnqueueError> {
+        const MAX_BYTES: usize = 4096;
+        let json = serde_json::to_string(command).expect("typed Hero command is serializable");
+        if json.len() > MAX_BYTES {
+            return Err(AndroidGatewayEnqueueError::OversizedNativeHero { max_bytes: MAX_BYTES });
+        }
+        if self.entries.len() >= self.capacity {
+            let command_type = command.command_type().to_owned();
+            self.overflow_count = self.overflow_count.saturating_add(1);
+            self.last_overflow_type = Some(command_type.clone());
+            return Err(AndroidGatewayEnqueueError::Full { capacity: self.capacity, command_type });
+        }
+        let sequence = self.next_sequence;
+        self.next_sequence = self.next_sequence.saturating_add(1);
+        self.entries.push_back(AndroidGatewayOutbound { sequence, kind: AndroidGatewayOutboundKind::Wire, json });
+        Ok(sequence)
+    }
+
+    /// Remove only exact unsent Hero sequences selected by the owner sidecar.
+    pub(crate) fn discard_native_hero_sequences(&mut self, stale: &BTreeSet<u64>) {
+        self.entries.retain(|entry| !stale.contains(&entry.sequence));
+    }
+
+    fn drain_ready_without_hero_sequences(
+        &mut self, shell: &AndroidShellState, max_entries: usize, deferred: &BTreeSet<u64>,
+    ) -> Vec<AndroidGatewayOutbound> {
+        if shell.lifecycle != AndroidLifecycle::Foreground || shell.network != AndroidNetwork::Available {
+            return Vec::new();
+        }
+        let mut drained = Vec::new();
+        for _ in 0..self.entries.len() {
+            let entry = self.entries.pop_front().expect("queue length was fixed");
+            if drained.len() < max_entries && !deferred.contains(&entry.sequence) {
+                drained.push(entry);
+            } else { self.entries.push_back(entry); }
+        }
+        drained
+    }
+
+    /// Retain only the newest unsent movement intent. Movement is ephemeral:
+    /// reconnecting must never replay an old joystick direction after the
+    /// authoritative server state has already moved on.
+    pub fn enqueue_motion(
+        &mut self,
+        intent: AndroidMotionIntent,
+    ) -> Result<(), AndroidGatewayEnqueueError> {
+        self.clear_motion();
+        let command_type = motion_type(intent.mode).to_owned();
+        if self.entries.len() >= self.capacity {
+            self.overflow_count = self.overflow_count.saturating_add(1);
+            self.last_overflow_type = Some(command_type.clone());
+            return Err(AndroidGatewayEnqueueError::Full {
+                capacity: self.capacity,
+                command_type,
+            });
+        }
+
+        let sequence = self.next_sequence;
+        self.next_sequence = self.next_sequence.saturating_add(1);
+        self.entries.push_back(AndroidGatewayOutbound {
+            sequence,
+            kind: AndroidGatewayOutboundKind::Wire,
+            json: serde_json::to_string(&motion_to_wire(intent))
+                .expect("wire JSON values are serializable"),
+        });
+        Ok(())
+    }
+
+    /// Drop all movement that has not yet reached the Android host.
+    pub fn clear_motion(&mut self) {
+        self.entries.retain(|entry| !outbound_is_motion(entry));
+    }
+
     /// Compatibility helper for Android hosts that still call the adapter
     /// directly. The actual UI path uses the shared typed GatewayCommand.
     pub fn enqueue_guild_storage_gold_change(
@@ -1645,6 +1847,40 @@ fn outbound_is_change_password(entry: &AndroidGatewayOutbound) -> bool {
         .and_then(|value| value.get("type").and_then(Value::as_str).map(str::to_owned))
         .as_deref()
         == Some("changePassword")
+}
+
+fn outbound_is_motion(entry: &AndroidGatewayOutbound) -> bool {
+    serde_json::from_str::<Value>(&entry.json)
+        .ok()
+        .and_then(|value| value.get("type").and_then(Value::as_str).map(str::to_owned))
+        .is_some_and(|kind| matches!(kind.as_str(), "walk" | "run" | "turn"))
+}
+
+fn motion_type(mode: AndroidMoveMode) -> &'static str {
+    match mode {
+        AndroidMoveMode::Walk => "walk",
+        AndroidMoveMode::Run => "run",
+    }
+}
+
+fn motion_direction(direction: AndroidDirection) -> &'static str {
+    match direction {
+        AndroidDirection::Up => "Up",
+        AndroidDirection::UpRight => "UpRight",
+        AndroidDirection::Right => "Right",
+        AndroidDirection::DownRight => "DownRight",
+        AndroidDirection::Down => "Down",
+        AndroidDirection::DownLeft => "DownLeft",
+        AndroidDirection::Left => "Left",
+        AndroidDirection::UpLeft => "UpLeft",
+    }
+}
+
+fn motion_to_wire(intent: AndroidMotionIntent) -> Value {
+    json!({
+        "type": motion_type(intent.mode),
+        "direction": motion_direction(intent.direction),
+    })
 }
 
 fn outbound_matches_game_shop_request(entry: &AndroidGatewayOutbound, request_id: &str) -> bool {
@@ -2108,6 +2344,44 @@ mod tests {
         );
     }
 
+
+    #[test]
+    fn social_egress_gateway_closed_typed_commands_share_leases_and_byte_caps() {
+        use mir2_client_bevy::native_social_egress::NativeSocialCommand;
+        let mut queue = AndroidGatewayOutboundQueue::with_capacity(2);
+        queue.enqueue_native_social(&NativeSocialCommand::TradeGold { amount: u32::MAX }).unwrap();
+        let lease = AndroidGatewayHostAdapter::default().drain_ready(
+            &mut queue, &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available), 1).pop().unwrap();
+        assert_eq!(serde_json::from_str::<Value>(&lease.outbound().json).unwrap(), json!({"type":"tradeGold","amount":u32::MAX}));
+        assert_eq!(lease.sequence(), 1);
+        let large = NativeSocialCommand::EditGuildNotice { notice: vec!["文".repeat(32); 200] };
+        queue.enqueue_native_social(&large).unwrap();
+        let before = queue.status();
+        assert_eq!(queue.enqueue_native_social(&NativeSocialCommand::EditGuildNotice { notice: vec!["x".repeat(ANDROID_NATIVE_SOCIAL_COMMAND_MAX_BYTES)] }),
+            Err(AndroidGatewayEnqueueError::OversizedNativeSocial { max_bytes: ANDROID_NATIVE_SOCIAL_COMMAND_MAX_BYTES }));
+        assert_eq!(queue.status(), before);
+        let lease = AndroidGatewayHostAdapter::default().drain_ready(
+            &mut queue, &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available), 1).pop().unwrap();
+        assert_eq!(lease.sequence(), 2);
+        assert!(lease.outbound().json.len() > 16 * 1024 && lease.outbound().json.len() < 64 * 1024);
+    }
+
+    #[test]
+    fn social_egress_gateway_full_or_invalid_command_preserves_existing_fifo() {
+        use mir2_client_bevy::native_social_egress::NativeSocialCommand;
+        let mut queue = AndroidGatewayOutboundQueue::with_capacity(1);
+        queue.enqueue_native_social(&NativeSocialCommand::TradeCancel).unwrap();
+        assert!(matches!(queue.enqueue_native_social(&NativeSocialCommand::TradeRequest), Err(AndroidGatewayEnqueueError::Full { .. })));
+        let before = queue.status();
+        assert!(matches!(queue.enqueue_native_social(&NativeSocialCommand::GuildStorageItemChange { change_type: 0, from: 255, to: 112 }),
+            Err(AndroidGatewayEnqueueError::InvalidGuildStorage { .. })));
+        assert_eq!(queue.status(), before);
+        let leases = AndroidGatewayHostAdapter::default().drain_ready(
+            &mut queue, &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available), 2);
+        assert_eq!(leases.len(), 1);
+        assert_eq!(serde_json::from_str::<Value>(&leases[0].outbound().json).unwrap(), json!({"type":"tradeCancel"}));
+    }
+
     fn change_password_request() -> SecurityRequest {
         SecurityRequest::ChangePassword {
             account: "demo".to_owned(),
@@ -2211,6 +2485,67 @@ mod tests {
 
         // A duplicate authoritative packet cannot close or mutate a new
         // transaction because there is no matching in-flight request.
+        enqueue_native_change_password_result(
+            &mut inbound,
+            r#"{"type":"packet","packet":"ChangePassword","payload":{"result":6}}"#,
+        )
+        .unwrap();
+        drain_bounded_inbound_into_models(&mut inbound, &mut state, &mut outbound);
+        assert!(!state.security.change_password_pending);
+        assert_eq!(inbound.status().unmatched_count, 1);
+    }
+
+    #[test]
+    fn connection_loss_closes_change_password_and_rejects_late_result() {
+        use mir2_ui_core::state::{UiScreen, UiSecurityPanel};
+
+        let mut state = UiState::default();
+        state.screen = UiScreen::Login;
+        state = reduce(&state, UiAction::ChangePassword).state;
+        assert_eq!(state.security.panel, UiSecurityPanel::ChangePassword);
+        let transition = reduce(
+            &state,
+            UiAction::SubmitChangePassword {
+                account: "demo".to_owned(),
+                old_password: mir2_ui_core::effect::SecretText::new("old-secret"),
+                new_password: mir2_ui_core::effect::SecretText::new("new-secret"),
+                confirm_password: mir2_ui_core::effect::SecretText::new("new-secret"),
+            },
+        );
+        let request = match transition.effects.into_iter().next() {
+            Some(UiEffect::SecurityRequest(request)) => request,
+            other => panic!("expected security request, got {other:?}"),
+        };
+        state = transition.state;
+
+        let mut outbound = AndroidGatewayOutboundQueue::default();
+        let mut inbound = AndroidGatewayInboundQueue::default();
+        enqueue_security_request(&mut outbound, &mut inbound, request).unwrap();
+        let mut adapter = AndroidGatewayHostAdapter::default();
+        let lease = adapter
+            .drain_ready(
+                &mut outbound,
+                &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
+                1,
+            )
+            .pop()
+            .expect("host leases the change-password request");
+        assert!(state.security.change_password_pending);
+
+        adapter.on_connection_lost(&mut outbound, &mut state);
+        assert!(!state.security.change_password_pending);
+        assert!(!outbound.change_password_in_flight());
+        assert!(outbound.is_empty());
+
+        assert_eq!(
+            adapter.on_host_write_result(
+                &mut outbound,
+                &mut state,
+                lease,
+                AndroidGatewayHostWriteResult::Sent,
+            ),
+            AndroidGatewayHostWriteOutcome::UnknownLease
+        );
         enqueue_native_change_password_result(
             &mut inbound,
             r#"{"type":"packet","packet":"ChangePassword","payload":{"result":6}}"#,
@@ -2615,7 +2950,7 @@ mod tests {
             native_game_shop_capabilities_json(),
             json!({
                 "type": "clientCapabilities",
-                "capabilities": ["nativeResumeV1", "nativeGameShopReceiptV1"]
+                "capabilities": ["nativeGameShopReceiptV1"]
             })
         );
         let receipt = parse_native_game_shop_receipt(
@@ -3181,5 +3516,77 @@ mod tests {
             .sequence,
             1
         );
+    }
+
+    #[test]
+    fn motion_uses_browser_command_shape_and_coalesces_unsent_intents() {
+        let mut queue = AndroidGatewayOutboundQueue::with_capacity(3);
+        queue.enqueue(GatewayCommand::TownRevive).unwrap();
+        queue
+            .enqueue_motion(AndroidMotionIntent {
+                direction: AndroidDirection::Up,
+                mode: AndroidMoveMode::Walk,
+            })
+            .unwrap();
+        queue
+            .enqueue_motion(AndroidMotionIntent {
+                direction: AndroidDirection::DownRight,
+                mode: AndroidMoveMode::Run,
+            })
+            .unwrap();
+
+        let entries = queue.drain_ready(
+            &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
+            3,
+        );
+        assert_eq!(entries.len(), 2);
+        assert_eq!(entries[0].sequence, 1);
+        assert_eq!(entries[1].sequence, 3);
+        assert_eq!(
+            serde_json::from_str::<Value>(&entries[1].json).unwrap(),
+            json!({"type":"run","direction":"DownRight"})
+        );
+    }
+
+    #[test]
+    fn motion_cannot_evict_non_motion_when_queue_is_full() {
+        let mut queue = AndroidGatewayOutboundQueue::with_capacity(1);
+        queue.enqueue(GatewayCommand::TownRevive).unwrap();
+        assert_eq!(
+            queue
+                .enqueue_motion(AndroidMotionIntent {
+                    direction: AndroidDirection::Left,
+                    mode: AndroidMoveMode::Walk,
+                })
+                .unwrap_err(),
+            AndroidGatewayEnqueueError::Full {
+                capacity: 1,
+                command_type: "walk".into(),
+            }
+        );
+        assert_eq!(queue.status().overflow_count, 1);
+        assert_eq!(queue.status().last_overflow_type.as_deref(), Some("walk"));
+        assert_eq!(queue.len(), 1);
+    }
+
+    #[test]
+    fn connection_loss_discards_all_old_generation_commands() {
+        let mut queue = AndroidGatewayOutboundQueue::default();
+        queue.enqueue(GatewayCommand::TownRevive).unwrap();
+        queue
+            .enqueue_motion(AndroidMotionIntent {
+                direction: AndroidDirection::UpLeft,
+                mode: AndroidMoveMode::Run,
+            })
+            .unwrap();
+        let mut adapter = AndroidGatewayHostAdapter::default();
+        let mut ui_state = UiState::default();
+        adapter.on_connection_lost(&mut queue, &mut ui_state);
+
+        let entries = queue.drain_ready(
+            &shell(AndroidLifecycle::Foreground, AndroidNetwork::Available),
+            2,
+        );
+        assert!(entries.is_empty());
     }
 }

@@ -1,0 +1,1173 @@
+{
+  "versions": [
+    "v18-failed",
+    "v19"
+  ],
+  "originalBytesPreserved": true,
+  "excluded": [
+    "APK files",
+    "resource-proof-*",
+    "build caches",
+    "licensed source image inputs"
+  ],
+  "files": [
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/after-600ms-hold-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/after-600ms-hold-pid.log",
+      "bytes": 32883,
+      "sha256": "fd78aa6f8f6e38f3b40eb2ed524dd8847660e1464a4c17fd2cbdd06aa2edf0e5"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/after-600ms-hold-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/after-600ms-hold-resumed.txt",
+      "bytes": 27349,
+      "sha256": "47344722a0f7ec4df66f3df62b5087359e8c4c07d583153f9cf925e83323eab6"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/after-600ms-hold.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/after-600ms-hold.png",
+      "bytes": 142492,
+      "sha256": "13eae57ea5a2c4d98e02440a93fc414f9294cba58d5f510fcd3ec5a550211f30"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/after-short-tap-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/after-short-tap-pid.log",
+      "bytes": 32458,
+      "sha256": "2df89ad66ae67eb635580a8b5d899532d0291c337dece6ad181d20a1310d3238"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/after-short-tap-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/after-short-tap-resumed.txt",
+      "bytes": 27350,
+      "sha256": "6348cfa5eb1cfcf51cb8e387891a17646c4c55ce4fefc9f11f56f3ee0a189e3a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/after-short-tap.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/after-short-tap.png",
+      "bytes": 142492,
+      "sha256": "13eae57ea5a2c4d98e02440a93fc414f9294cba58d5f510fcd3ec5a550211f30"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/avd.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/before-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/before-pid.log",
+      "bytes": 30943,
+      "sha256": "340c466e9491d3b32ed049c3341026595b933ed8fe0cd71177b6c9ce40976c2a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/before-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/before-resumed.txt",
+      "bytes": 27347,
+      "sha256": "30b8f23efbb801b3cdde21ae647bf657ebae25992b242c8e2a6f323b378d62a5"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/before.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/before.png",
+      "bytes": 142492,
+      "sha256": "13eae57ea5a2c4d98e02440a93fc414f9294cba58d5f510fcd3ec5a550211f30"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/capture.mjs",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/capture.mjs",
+      "bytes": 2474,
+      "sha256": "bd451ea0f491f992b7128ceae9448149272ca6f52336ec529053be511ae84f93"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/commands.json",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/commands.json",
+      "bytes": 3055,
+      "sha256": "ea91a961c8d5b0e71e820ff10433894faa0c4b3c5cc5e8c0159550ad003d38b4"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/density.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/display.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/display.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/hidden-target-red.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/hidden-target-red.log",
+      "bytes": 43599,
+      "sha256": "6cd078227c3ec9d7fb4e4a386fc9b596a5ef88a1e3a176d9a8625f7ad47a0a28"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/hold.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/hold.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/missing-close-red.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/missing-close-red.log",
+      "bytes": 43737,
+      "sha256": "8af515faf3227f1789912063f34b7abacfc5c0fd233079cc492cce5c13ad8fdb"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/missing-item-frame-exact-red.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/missing-item-frame-exact-red.log",
+      "bytes": 43630,
+      "sha256": "da85a66866b45d508869df071080ff4bf8448d08435b1d91a535a9dd6e9fc020"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/missing-item-frame-red.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/missing-item-frame-red.log",
+      "bytes": 43498,
+      "sha256": "fb92df3ab634388bdc8e10cf06697b04657f5ed198a93dae31e658c1d1db9cb9"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/npc-focused-green.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/npc-focused-green.log",
+      "bytes": 34079,
+      "sha256": "161cdedbd57561e765bdfa2d8b2bc2a193d6c6d0be2191011a901a9f98d77d99"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/package.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/package.txt",
+      "bytes": 10047,
+      "sha256": "8eec2c12b48ca1445e8678103f1062fa6e44568b240f76663240d0ac6e577f95"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/pid.txt",
+      "bytes": 6,
+      "sha256": "8fbc9b7c7f739453b8e866859a0e89db15a82bd811c1b74f005739e44e2d7e75"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/start.txt",
+      "bytes": 217,
+      "sha256": "0805c691bac700da89efe48b4998e980d0081747c6b6756b950de79dbd311148"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/stop-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/stop-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v18-20261002/tap.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v18-failed/tap.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/android-normal-final.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/android-normal-final.log",
+      "bytes": 68858,
+      "sha256": "9e6db49a1bbdeed3ca51be6ef98db1bd3b1ec543307602034d30e1bf8b751f58"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/android-preview-final.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/android-preview-final.log",
+      "bytes": 73036,
+      "sha256": "6bfd576099428d4bb271f99e83ff35eec7164e82aae60d9310c586b0326fceb0"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/api31-debug.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/api31-debug.log",
+      "bytes": 33405,
+      "sha256": "1ceb6d7f5ef285437ef3720909ed60418a457cdf9d71a3e61ed4be56c6c7a6bb"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/api31-uiPreview.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/api31-uiPreview.log",
+      "bytes": 33408,
+      "sha256": "d1fb033424a4c67746ac0bc1bb6ab1e0b9e40f597b83dab2eeee2900f490f2e2"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/audit.mjs",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/audit.mjs",
+      "bytes": 8647,
+      "sha256": "9e06b0dbd206a2f12c1e71df4d538bf861cdb8a660889525b6be8729fb13ca37"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/build-pair.mjs",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/build-pair.mjs",
+      "bytes": 3409,
+      "sha256": "843dbbc7f75557f0f1753478e7c394427788f1dad4c23a813cf05e2fe55d4a3d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/debug-BuildConfig.java.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/debug-BuildConfig.java.txt",
+      "bytes": 573,
+      "sha256": "36e6a5327541d69ef10b0af74387f1c80c7443cf2413b3b34d4c8914a9e3ffa9"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/debug-badging.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/debug-badging.txt",
+      "bytes": 4624,
+      "sha256": "a1df072d29b9d2a2e7911d2555e3c858bc4141934ef270dfb40fb2429b267284"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/debug-build-end.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/debug-build-end.txt",
+      "bytes": 25,
+      "sha256": "13a3a2bb4b876c136219d0b2d43b7dec710bc6b466bf984a432bd45916c82595"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/debug-build-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/debug-build-start.txt",
+      "bytes": 25,
+      "sha256": "73b6cd137a39e03d2067a5a698ef6bbceb775e0c9af53e736fb6c3f04fbc5a43"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/debug-build.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/debug-build.log",
+      "bytes": 36423,
+      "sha256": "c62bb5084849298dc33f1c0e9bb3b2ea8be5a0b0700a5c20536965dc17eed3c9"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/debug-source-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/debug-source-after.txt",
+      "bytes": 41,
+      "sha256": "6bba910193b619cf366f77db046a18ed70d7eaf1d80862713ca989326f62b662"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/debug-source-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/debug-source-before.txt",
+      "bytes": 41,
+      "sha256": "6bba910193b619cf366f77db046a18ed70d7eaf1d80862713ca989326f62b662"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/debug-status-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/debug-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/debug-status-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/debug-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/gate-commands.json",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/gate-commands.json",
+      "bytes": 1921,
+      "sha256": "9f41684dfe307533c78b113fc5a5b1b555cf46e1ca52eeccbc7d1908a8470764"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/install-capture.mjs",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/install-capture.mjs",
+      "bytes": 3185,
+      "sha256": "56dfc29bb9dc25fa2520305c8a10c9a5a7561d6abe8fd3d7c6b2eb70d66d8467"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/java-fresh.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/java-fresh.log",
+      "bytes": 3149,
+      "sha256": "ed3938dac38a709274f20e4a46c43070b3c95fe8bfd9f708eb8315fc502b9c06"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/package-audit.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/package-audit.log",
+      "bytes": 3850,
+      "sha256": "75f474e7ac06e2d662fd8c952bd47797206afdf74279dd90cbf75835a2644f98"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/package-v19.json",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/package-v19.json",
+      "bytes": 3850,
+      "sha256": "75f474e7ac06e2d662fd8c952bd47797206afdf74279dd90cbf75835a2644f98"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/preview-BuildConfig.java.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/preview-BuildConfig.java.txt",
+      "bytes": 590,
+      "sha256": "bba56571a863fb62dd832a9ad15d92a516f6a3920b8d0a556d644fa6b0151310"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/preview-badging.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/preview-badging.txt",
+      "bytes": 4644,
+      "sha256": "b569756f63023cba882b511455fb6c4dcc7515a5478b481eb4ffea9b18399ab1"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/preview-build-end.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/preview-build-end.txt",
+      "bytes": 25,
+      "sha256": "75cc0b33f9fc9801b98dd03ca51e5073a1b987c937736e40835922f2aadd7c66"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/preview-build-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/preview-build-start.txt",
+      "bytes": 25,
+      "sha256": "aeb8e33ec294f94a716bf94faeee0ad609c947c85a598cdf70c7a7f3715db411"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/preview-build.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/preview-build.log",
+      "bytes": 36642,
+      "sha256": "37d60b093b117e819f790b89abefcb1f8da999a2682fd0fe8fe1e76caacd35cf"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/preview-source-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/preview-source-after.txt",
+      "bytes": 41,
+      "sha256": "6bba910193b619cf366f77db046a18ed70d7eaf1d80862713ca989326f62b662"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/preview-source-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/preview-source-before.txt",
+      "bytes": 41,
+      "sha256": "6bba910193b619cf366f77db046a18ed70d7eaf1d80862713ca989326f62b662"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/preview-status-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/preview-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/preview-status-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/preview-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/run-gates.mjs",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/run-gates.mjs",
+      "bytes": 2489,
+      "sha256": "c0d23058536f9671ad087d21f74049962005a1035332832ab34b70abbc2cd47d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/source-audit.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/source-audit.log",
+      "bytes": 8089,
+      "sha256": "e77dc6737e0a003241220b94323d8de82118815304aa2a3b08dc557728cec683"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/source-v19.json",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/source-v19.json",
+      "bytes": 8089,
+      "sha256": "e77dc6737e0a003241220b94323d8de82118815304aa2a3b08dc557728cec683"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/tap-capture.mjs",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/tap-capture.mjs",
+      "bytes": 4046,
+      "sha256": "8514ba1c8be2e3af3b6950102ad538f67000b2c89e5e20c528b13e290ba3fb2a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/tap-run-v3.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/tap-run-v3.log",
+      "bytes": 803,
+      "sha256": "3c662b82f6df76e93834be74c4b12475b49054cfb3e3121a199cac4d2e586881"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/Debug-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/Debug-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "43afd13348d4ed6c807b98ed58bf6a7d5b1b96b08ae4b7272735f4bd5515ab2f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/Debug-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/Debug-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "8756d6e7896ac9b47743c5bee4e59c35c4fae3767d40d76ea5374e441bb8a23d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/Debug-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/Debug-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "c67de3e4234859e8cb13282a3bb4c2287be12b4e126fc742755e8d299038339f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/Debug-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/Debug-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3354,
+      "sha256": "1adb026f7851e3dcf32996b4c84b27d8d0bf71e94e91af2f54a8f08b98a6efe7"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/Debug-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/Debug-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "3ad125d8523df2e6d1d5999d3bdfc78c5c71655ad2a4904685325b6f2120407c"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/UiPreview-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/UiPreview-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 963,
+      "sha256": "55c65943787ffdc8bba05218ff840ea0b05c387ad10e89fe93de74621af56fe2"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/UiPreview-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/UiPreview-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "e98c241a89c2a50195670fbb2ccc430555ba2540f8709e9906c81c866d4be17b"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/UiPreview-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/UiPreview-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "a9ea0aeb378c9d004f6fd113041c624ef8c4eeafa79cd1694d80e4a66f6e4883"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/UiPreview-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/UiPreview-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3355,
+      "sha256": "03843039f082c3ec56bde319b642f7c8405644b0dd4c3e0301c9ea815d057889"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/UiPreview-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/UiPreview-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "817b51ff1b4b25ff96d14142b739ca601965f1ee0ed622623ec72bd5916e3da1"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/android-normal-final.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/android-normal-final.log",
+      "bytes": 68950,
+      "sha256": "82325eba2ffef703f614ebd608c272b2ab82e11a91d410f9c216d60496109dbc"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/android-preview-final.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/android-preview-final.log",
+      "bytes": 73128,
+      "sha256": "f819253831ddb93bc41015e584c817999e980fd6169afb3ef83e8fa659d4f17f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/api31-debug.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/api31-debug.log",
+      "bytes": 33404,
+      "sha256": "ff3849da35c2dec6a66e538d0ea0ff14ea8a9a5864b95407d93b253807a00f4e"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/api31-uiPreview.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/api31-uiPreview.log",
+      "bytes": 33408,
+      "sha256": "f91466e097e7f52601258e6e9b54ee5da202b9e77855672f37a0f7a0a02c1a57"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/gate-commands.json",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/gate-commands.json",
+      "bytes": 1921,
+      "sha256": "4758f64c3d30a0cd1d97f0198b804f6bf45bbabde04cf76c9986856b30509e16"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/final-source/java-fresh.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/final-source/java-fresh.log",
+      "bytes": 3149,
+      "sha256": "8fee74572a490971cea45405928f4f272f6239c05489d1d366f8db8284557092"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/api.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/api.txt",
+      "bytes": 3,
+      "sha256": "32c2643e0dc65524c9f1f6f9f00937322fd68d59986bc381d9ff2285d23e353d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/avd.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/commands.json",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/commands.json",
+      "bytes": 8518,
+      "sha256": "e84b73272b1d40e02e1d17cd3a7c954448bd44bf4b40c3dcd48a5eff300cdea7"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/debug-install.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/debug-install.txt",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/debug-login-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/debug-login-ime.txt",
+      "bytes": 289668,
+      "sha256": "e9a107746623fad4c163a1b71e4be7275c173e6e45c45d1f295d756ca8479c80"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/debug-login-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/debug-login-pid.log",
+      "bytes": 31036,
+      "sha256": "37495915a29ddc3ccb64ee71f068dedc95e3621dedf0edd7995a8a5eeda5c23f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/debug-login-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/debug-login-pid.txt",
+      "bytes": 6,
+      "sha256": "811ecd76b206668f2ee4be0641ab46d9857b53868d69f0f569fded00c9e15915"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/debug-login-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/debug-login-resumed.txt",
+      "bytes": 26784,
+      "sha256": "c379a7493de6b999291c5e661fc20c72b698aa037da218a4790c194beb660863"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/debug-login-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/debug-login-start.txt",
+      "bytes": 158,
+      "sha256": "22203bd894c688d3c697284ea1c6867cf838d418e60afef971d3d47b2a9ad34a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/debug-login-stop-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/debug-login-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/debug-login-stop.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/debug-login-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/debug-login.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/debug-login.png",
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/debug-package.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/debug-package.txt",
+      "bytes": 9276,
+      "sha256": "7c573d97f618a87aa30ef858de07477514339940b4c272956f87730c5e1db0bc"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/debug-stop-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/debug-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/density.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/display.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/display.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-ime.txt",
+      "bytes": 288681,
+      "sha256": "63f44d093c70357fbe7e8da2b25290b114470d9d67f4d1baafe69c4a71229538"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-pid.log",
+      "bytes": 33933,
+      "sha256": "dd2816022a599ea92270ca8882fc19f38239745c51abbf9cf140e37abc020880"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-pid.txt",
+      "bytes": 6,
+      "sha256": "4fa5d32eaca6a642859ee2398567fcb9f4a429e7e4ede00eb6f3776cc9733ffc"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-repair-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-repair-ime.txt",
+      "bytes": 288695,
+      "sha256": "f5ff001671ad9ecd604bf94a29a8934abc5b0dab0758fb0cb92d0d2bb165e500"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-repair-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-repair-pid.log",
+      "bytes": 30923,
+      "sha256": "c9d828c14932fc8fe79206f3edf21a26f43b9e5b54443ef263be43f0faee92d9"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-repair-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-repair-pid.txt",
+      "bytes": 6,
+      "sha256": "67cee1c0ce8c8b4015717c4c3b2e033963d10aca3554e0a1ea6f76eb6fbda14d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-repair-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-repair-resumed.txt",
+      "bytes": 27350,
+      "sha256": "c8aaa2e343cb61b2d2ba71d18596462873befe37075ad4b2046b0720f49f0486"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-repair-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-repair-start.txt",
+      "bytes": 217,
+      "sha256": "94164a3d714784a68e80a6337c7396e9510f80068f642ef9e21400e4ddc97170"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-repair-stop-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-repair-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-repair-stop.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-repair-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-repair.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-repair.png",
+      "bytes": 142447,
+      "sha256": "1bfa47903d21f1cdce43c76d891673e2c40062760d72ce7c35d62af24b168a68"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-resumed.txt",
+      "bytes": 27352,
+      "sha256": "c60e54886d2e661d285928f8269fdfbc7ae5e960d6fb6d8b75baf47997028c99"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-sell-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-sell-ime.txt",
+      "bytes": 288700,
+      "sha256": "88b8fa938a00dc2145c62b92f40444b690a833ec5cc95be5741d900c93d3c7b0"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-sell-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-sell-pid.log",
+      "bytes": 55099,
+      "sha256": "34d118e3494762f83f6b0f062eb73be5cce4ff6e37d876f188449f6e1b86bf0b"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-sell-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-sell-pid.txt",
+      "bytes": 6,
+      "sha256": "de0e555e4ebb1b19ce59a7de03c03579b903ca3191fad06e1ba9092f50315cda"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-sell-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-sell-resumed.txt",
+      "bytes": 27352,
+      "sha256": "d86133e4c59be01cd2930fe633dbbef7f85b9a78ac0ad8db0dd2c34d996e688b"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-sell-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-sell-start.txt",
+      "bytes": 217,
+      "sha256": "d96182726478d60bb3cfdf507d3992bb27f292c7e88c980cb661078ca253f05d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-sell-stop-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-sell-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-sell-stop.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-sell-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-sell.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-sell.png",
+      "bytes": 140574,
+      "sha256": "24d3c496138044dbcf683ae7a3ebc204f3c160205b9e63a12f5561dec4dd34f4"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-srepair-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-srepair-ime.txt",
+      "bytes": 288672,
+      "sha256": "b31443428f1f141329c2d5fa29f04fe0d269e067cbe4762d36e30d9199ac8a73"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-srepair-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-srepair-pid.log",
+      "bytes": 30943,
+      "sha256": "e615116d582209e8fd853a77bb1741f73df93b688820a49e3c58fdb3a7fe74be"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-srepair-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-srepair-pid.txt",
+      "bytes": 6,
+      "sha256": "1362a4ff772d79c85efcf019f8dea915b15b5dbd1cb0a7b7cb5b8c96727a9a06"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-srepair-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-srepair-resumed.txt",
+      "bytes": 27352,
+      "sha256": "5ea2d61741be18d803f0d911e89f2fa8232be6763d73dc25017184417b2816d3"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-srepair-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-srepair-start.txt",
+      "bytes": 217,
+      "sha256": "d726ce27f72f6273f57eac8f3512ccd6b30e9e632213e5131eed14a4798ef86a"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-srepair-stop-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-srepair-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-srepair-stop.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-srepair-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-srepair.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-srepair.png",
+      "bytes": 142492,
+      "sha256": "13eae57ea5a2c4d98e02440a93fc414f9294cba58d5f510fcd3ec5a550211f30"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-start.txt",
+      "bytes": 217,
+      "sha256": "7ea758067a87276aa11475bb5048545f39d79f53b71b4a7278fa41c55b3e2abf"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-stop-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop-stop.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/npcshop.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/npcshop.png",
+      "bytes": 160463,
+      "sha256": "a8b4b752033d9da4f858ed207b33b182c6eb532d3c491e3f3e57eba824445850"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/os.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/os.txt",
+      "bytes": 89,
+      "sha256": "9e2f1f3d18da07932a4b18c12a1ec39c77234bf650bfd4f821ca991c4c0a90c8"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/preview-install.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/preview-install.txt",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/preview-package.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/preview-package.txt",
+      "bytes": 9571,
+      "sha256": "c2d54632bc66fbf52477a9f3476809ed897b8aca0550806b710e0e9187af7eb6"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/device/preview-stop-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/device/preview-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device/api.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device/api.txt",
+      "bytes": 3,
+      "sha256": "32c2643e0dc65524c9f1f6f9f00937322fd68d59986bc381d9ff2285d23e353d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device/avd.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device/avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device/display.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device/display.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v2/api.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v2/api.txt",
+      "bytes": 3,
+      "sha256": "32c2643e0dc65524c9f1f6f9f00937322fd68d59986bc381d9ff2285d23e353d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v2/avd.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v2/avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v2/density.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v2/density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v2/display.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v2/display.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v2/os.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v2/os.txt",
+      "bytes": 89,
+      "sha256": "9e2f1f3d18da07932a4b18c12a1ec39c77234bf650bfd4f821ca991c4c0a90c8"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v2/package-path.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v2/package-path.txt",
+      "bytes": 103,
+      "sha256": "22aac3911294391ba48ec342e7d37797346c2ca41b0792d81379a68ec1e44222"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v2/package.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v2/package.txt",
+      "bytes": 10044,
+      "sha256": "8491729b57983acfe553cbc8d6ef8f1b5498ef0231df0775d986ddd9b4fbf872"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/api.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/api.txt",
+      "bytes": 3,
+      "sha256": "32c2643e0dc65524c9f1f6f9f00937322fd68d59986bc381d9ff2285d23e353d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/avd.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/commands.json",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/commands.json",
+      "bytes": 10098,
+      "sha256": "f954e96ec50b41727cf9f143b305a3ff4584125d7355c9ff05fd50ef6e34592f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/debug-final-stop.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/debug-final-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/density.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/display.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/display.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/installed-apk-sha256.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/installed-apk-sha256.txt",
+      "bytes": 161,
+      "sha256": "335ee951f5a8a46394a819449e2fcccfeabfccccfacc612a1e588e18bcfbec46"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-after-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-after-pid.log",
+      "bytes": 35773,
+      "sha256": "247ec3f33cd74909d62b0260c7ff84ffe807548a4786fe058dd886b962fcb33c"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-after.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-after.png",
+      "bytes": 87129,
+      "sha256": "4720c1a2693dbb3c150753d1180489e47b2ffc7a3cc1ab54bfd3b72e279a280b"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-before-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-before-pid.log",
+      "bytes": 33932,
+      "sha256": "e1b80a282a37697f0cfd5a14a2ae93b4d6793ea8c894b0c750dbf017996f6f53"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-before.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-before.png",
+      "bytes": 160463,
+      "sha256": "a8b4b752033d9da4f858ed207b33b182c6eb532d3c491e3f3e57eba824445850"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-ime.txt",
+      "bytes": 289060,
+      "sha256": "616eea65d42035846645f0afd1778a6b671938fa40ceeca3ec18b99273434bcb"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-pid.txt",
+      "bytes": 6,
+      "sha256": "fd40ef597db67fe9e3a32a1c53939433cefc43e8ab27906e2b05d6c4b4003e5f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-repair-after-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-repair-after-pid.log",
+      "bytes": 32859,
+      "sha256": "5182f55a1ed74ba5ea3d26d615657d36b58fc1e722b52a94ef48a8fdf84513f9"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-repair-after.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-repair-after.png",
+      "bytes": 87935,
+      "sha256": "1202772b2b0a420f82012cb49464768dfa4dbc6811e0c360568be3d962aaaf90"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-repair-before-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-repair-before-pid.log",
+      "bytes": 30922,
+      "sha256": "c57334f2b1a508b39e1314fbf0a70518fc04e467935a17f39f7802306f0bd4c5"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-repair-before.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-repair-before.png",
+      "bytes": 142447,
+      "sha256": "1bfa47903d21f1cdce43c76d891673e2c40062760d72ce7c35d62af24b168a68"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-repair-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-repair-ime.txt",
+      "bytes": 288594,
+      "sha256": "8fe84ff2849d61bcd338cb6b65223271de11c493172cf991dcb9b1927a0dfbda"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-repair-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-repair-pid.txt",
+      "bytes": 6,
+      "sha256": "41fd75770e8cac0c868fb7ac29d1c26d199f3fc39c95a917a85b8f66584de70e"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-repair-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-repair-resumed.txt",
+      "bytes": 27353,
+      "sha256": "dde269276e9ee5c7526ad7efe68c7b0a2fa6440062253eb38633bd041f526922"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-repair-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-repair-start.txt",
+      "bytes": 217,
+      "sha256": "0fd2f6c249d8a1143ac6e3bc074fb829b3b3756dc22e1073ea3653484abe9cb3"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-repair-stop-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-repair-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-repair-stop-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-repair-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-repair-tap.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-repair-tap.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-resumed.txt",
+      "bytes": 27350,
+      "sha256": "37abdd6372a116ba154c90167e0f084ba7f2c8922ad77da91716cb9b60bbee79"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-sell-after-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-sell-after-pid.log",
+      "bytes": 42827,
+      "sha256": "f12ed203ff77ad6fcf7bae2ece6521d84d243e0296ef263a36179de1b6807204"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-sell-after.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-sell-after.png",
+      "bytes": 87529,
+      "sha256": "85d2ae27e66860406256fc038f0652429cdf0d0e012e92374d342704ee6ae00f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-sell-before-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-sell-before-pid.log",
+      "bytes": 40987,
+      "sha256": "a96b4016a8b3ee02716f0dd639f8d194b70a7da93d831b19f5091624892b942f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-sell-before.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-sell-before.png",
+      "bytes": 140574,
+      "sha256": "24d3c496138044dbcf683ae7a3ebc204f3c160205b9e63a12f5561dec4dd34f4"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-sell-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-sell-ime.txt",
+      "bytes": 288579,
+      "sha256": "66d420cfc42ac3ab6474ea83e759444153a5d6ef107d09778aae15be6439603c"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-sell-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-sell-pid.txt",
+      "bytes": 6,
+      "sha256": "9bda5cb707cd7549b2cd079ddc31a7215814fe7fbcfd68520f955c07ed4508ff"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-sell-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-sell-resumed.txt",
+      "bytes": 27347,
+      "sha256": "6e2adcb161d2f70000fee54b29990bce0e9847c4eef2006dddb6d5aea9355b81"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-sell-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-sell-start.txt",
+      "bytes": 217,
+      "sha256": "d162592e967aff9a05e6f501b55390e3c48c83f5daf3e687a1cb4bbeb51b30bc"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-sell-stop-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-sell-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-sell-stop-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-sell-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-sell-tap.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-sell-tap.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-srepair-after-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-srepair-after-pid.log",
+      "bytes": 43871,
+      "sha256": "3ab25cd167ffbeb8967fc1764eb3ea65ddbe5c365bbb9ba4a6645d8c460eb942"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-srepair-after.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-srepair-after.png",
+      "bytes": 87986,
+      "sha256": "2411ef51c45d6a8c3496bca5ed9a0056f493043b2763ebe6f4ac969119088789"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-srepair-before-pid.log",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-srepair-before-pid.log",
+      "bytes": 42031,
+      "sha256": "fc683a09b05eecd04f021207f7f8523aa52618e33b62dbfdf0a964417da2ba88"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-srepair-before.png",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-srepair-before.png",
+      "bytes": 142492,
+      "sha256": "13eae57ea5a2c4d98e02440a93fc414f9294cba58d5f510fcd3ec5a550211f30"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-srepair-ime.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-srepair-ime.txt",
+      "bytes": 288592,
+      "sha256": "62b816083e03546bb0a56e0d3098d832b1349cfbb548b4570382f495d44e6d65"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-srepair-pid.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-srepair-pid.txt",
+      "bytes": 6,
+      "sha256": "1f61c3e8aa39a2910b2fced586ac8b405e2e4e26d059182b706cff3e9a0d3a2f"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-srepair-resumed.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-srepair-resumed.txt",
+      "bytes": 27353,
+      "sha256": "d26fd82366012f379ac567435ef1233349526c1c6cfa18904f6b28dd1a912b87"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-srepair-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-srepair-start.txt",
+      "bytes": 217,
+      "sha256": "782222d4dd1d34e77fdaea4e901bce2adad4a5a1b81714167baa083c572e0e53"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-srepair-stop-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-srepair-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-srepair-stop-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-srepair-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-srepair-tap.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-srepair-tap.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-start.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-start.txt",
+      "bytes": 217,
+      "sha256": "9826d43788ad40c1a1e37a0202c2e29a5166fac03080c4bf7044587203c7985d"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-stop-after.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-stop-before.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/npcshop-tap.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/npcshop-tap.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/os.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/os.txt",
+      "bytes": 89,
+      "sha256": "9e2f1f3d18da07932a4b18c12a1ec39c77234bf650bfd4f821ca991c4c0a90c8"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/package-path.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/package-path.txt",
+      "bytes": 103,
+      "sha256": "22aac3911294391ba48ec342e7d37797346c2ca41b0792d81379a68ec1e44222"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/package.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/package.txt",
+      "bytes": 10044,
+      "sha256": "eebfefba24e4fd4000f7870739a53c378e1bfed6fa63ec4f19ba75a119936ed2"
+    },
+    {
+      "source": "mir2-web3/apps/game-client/platform-android/target/npc-touch-v19-20261002/touch-device-v3/preview-final-stop.txt",
+      "target": "mir2-web3/docs/generated/player-qa/native-android-npc-touch-20261002/v19/touch-device-v3/preview-final-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

@@ -20,8 +20,8 @@ use mir2_client_bevy::inventory::InventoryModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
 use mir2_client_bevy::quest_model::{CombatTargetModel, NpcDialogModel, QuestTracker};
 use mir2_client_bevy::quest_ui::{
-    QuestRouteNavigationIntent, QuestRouteNavigationIntentQueue, QuestRouteTarget, QuestUiIntent, QuestUiIntentQueue,
-    QuestUiState,
+    QuestRouteNavigationIntent, QuestRouteNavigationIntentQueue, QuestRouteTarget, QuestUiIntent,
+    QuestUiIntentQueue, QuestUiState,
 };
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::skill_model::SkillModel;
@@ -662,7 +662,11 @@ fn gameplay_input_enabled(
     if quest.is_some_and(QuestUiState::blocks_world_input) {
         return false;
     }
-    if is_world_click_blocked(player_ui, npc_dialog.is_some_and(|dialog| dialog.is_open), false) {
+    if is_world_click_blocked(
+        player_ui,
+        npc_dialog.is_some_and(|dialog| dialog.is_open),
+        false,
+    ) {
         return false;
     }
     true
@@ -736,15 +740,23 @@ fn cursor_over_nonmodal_view_hud_button(window: &Window, minimap_expanded: bool)
         return false;
     };
     let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
-        window.resolution.width(), window.resolution.height(),
+        window.resolution.width(),
+        window.resolution.height(),
     );
     if !transform.contains_physical_point(cursor.x, cursor.y) {
         return false;
     }
     let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-    [spec::hud::CHARACTER.rect, spec::hud::INVENTORY.rect, spec::hud::SKILL.rect,
-        spec::hud::OPTION.rect, spec::hud::MENU.rect, spec::hud::QUEST.rect]
-        .into_iter().any(|rect| rect.contains(x, y))
+    [
+        spec::hud::CHARACTER.rect,
+        spec::hud::INVENTORY.rect,
+        spec::hud::SKILL.rect,
+        spec::hud::OPTION.rect,
+        spec::hud::MENU.rect,
+        spec::hud::QUEST.rect,
+    ]
+    .into_iter()
+    .any(|rect| rect.contains(x, y))
 }
 
 pub fn is_world_click_blocked(
@@ -755,7 +767,9 @@ pub fn is_world_click_blocked(
     // This is the pointer-independent action gate. Visible nonmodal windows
     // are hit-tested separately by the caller; they must not disable F-keys,
     // belt items or keyboard movement everywhere on the screen.
-    player_ui.map_or(dialog_open || dead, |ui| ui.blocks_world_action(dialog_open, dead))
+    player_ui.map_or(dialog_open || dead, |ui| {
+        ui.blocks_world_action(dialog_open, dead)
+    })
 }
 
 pub fn is_pointer_captured_for_movement(
@@ -792,7 +806,7 @@ fn hovered_world_intent(
         EntityKind::Npc => Some(QuestUiIntent::InteractNpc {
             npc_object_id: object_id,
         }),
-        EntityKind::Player | EntityKind::SelfPlayer => None,
+        EntityKind::Player | EntityKind::Hero | EntityKind::SelfPlayer => None,
     }
 }
 
@@ -944,8 +958,11 @@ fn auto_path_step_blocked(
         || movement.step_was_rejected(origin, direction, WorldPointerMovementMode::Run)
         || entity_blocks_movement(entities, presentation, self_object_id, destination)
         || map_file_name.is_some_and(|map_file_name| {
-            crate::map_parser::map_cell_blocks_player_movement(map_file_name, destination.0, destination.1)
-                == Some(true)
+            crate::map_parser::map_cell_blocks_player_movement(
+                map_file_name,
+                destination.0,
+                destination.1,
+            ) == Some(true)
         })
 }
 
@@ -1358,8 +1375,7 @@ fn quest_route_matches_current_map(
     model: Option<&mir2_client_bevy::big_map::BigMapModel>,
 ) -> bool {
     model.is_some_and(|model| {
-        model.reset_epoch == intent.reset_epoch
-            && model.current_map_index == Some(intent.map_index)
+        model.reset_epoch == intent.reset_epoch && model.current_map_index == Some(intent.map_index)
     })
 }
 
@@ -1383,7 +1399,9 @@ fn begin_quest_route_navigation(
             QuestRouteTarget::HuntRegion { .. } => "狩猎区域导航已过期；请按当前地图重新选择。",
         });
     }
-    if matches!(intent.target, QuestRouteTarget::Supply { .. }) && !intent.matches_supply_destination() {
+    if matches!(intent.target, QuestRouteTarget::Supply { .. })
+        && !intent.matches_supply_destination()
+    {
         return Err("补给地点已更新，请重新选择商店。");
     }
     if matches!(intent.target, QuestRouteTarget::HuntRegion { .. })
@@ -1413,16 +1431,42 @@ fn begin_quest_route_navigation(
     let destination = (intent.x, intent.y);
     let hunt_area = match intent.target {
         QuestRouteTarget::Entrance | QuestRouteTarget::Supply { .. } => None,
-        QuestRouteTarget::HuntRegion { radius, .. } => Some(big_map_input::HuntArea { center: destination, radius }),
+        QuestRouteTarget::HuntRegion { radius, .. } => Some(big_map_input::HuntArea {
+            center: destination,
+            radius,
+        }),
     };
     let supply_area = if let QuestRouteTarget::Supply { vendor } = intent.target {
-        vendor.route(intent.map_index).filter(|route| !route.is_entrance)
-            .map(|_| big_map_input::HuntArea { center: destination, radius: 2 })
-    } else { None };
-    let steps = if let Some(area) = hunt_area.or(supply_area) {
-        big_map_input::plan_hunt_region(movement, entities, presentation, self_id, map_file, origin, area)?
+        vendor
+            .route(intent.map_index)
+            .filter(|route| !route.is_entrance)
+            .map(|_| big_map_input::HuntArea {
+                center: destination,
+                radius: 2,
+            })
     } else {
-        big_map_input::plan(movement, entities, presentation, self_id, map_file, origin, destination)?
+        None
+    };
+    let steps = if let Some(area) = hunt_area.or(supply_area) {
+        big_map_input::plan_hunt_region(
+            movement,
+            entities,
+            presentation,
+            self_id,
+            map_file,
+            origin,
+            area,
+        )?
+    } else {
+        big_map_input::plan(
+            movement,
+            entities,
+            presentation,
+            self_id,
+            map_file,
+            origin,
+            destination,
+        )?
     };
     movement.stop_hold(now_ms, "questRouteStarted");
     movement.stop_auto_path(now_ms, "questRouteStarted");
@@ -1459,7 +1503,10 @@ fn begin_quest_route_navigation(
     Ok(destination)
 }
 
-fn quest_hunt_arrival_feedback(movement: &mut WorldPointerMovementState, state: Option<&mut QuestUiState>) {
+fn quest_hunt_arrival_feedback(
+    movement: &mut WorldPointerMovementState,
+    state: Option<&mut QuestUiState>,
+) {
     if let Some(route) = movement.map_auto_path.as_ref() {
         if let Some(area) = route.hunt_area {
             movement.hunt_arrival = Some(HuntArrival {
@@ -1500,7 +1547,8 @@ fn hunt_arrival_is_valid(
         || big_map.and_then(|map| map.current_map_index) != Some(arrival.map_index)
         || (position.0 - arrival.area.center.0)
             .abs()
-            .max((position.1 - arrival.area.center.1).abs()) > arrival.area.radius
+            .max((position.1 - arrival.area.center.1).abs())
+            > arrival.area.radius
     {
         return false;
     }
@@ -1519,7 +1567,9 @@ fn clear_stale_hunt_arrival_feedback(
     position: (i32, i32),
     tracker: Option<&QuestTracker>,
 ) {
-    let pinned_primary = state.as_ref().and_then(|state| state.pinned_primary_quest_index);
+    let pinned_primary = state
+        .as_ref()
+        .and_then(|state| state.pinned_primary_quest_index);
     if movement.hunt_arrival.as_ref().is_some_and(|arrival| {
         !hunt_arrival_is_valid(
             arrival,
@@ -1534,7 +1584,11 @@ fn clear_stale_hunt_arrival_feedback(
     }
     if movement.hunt_arrival.is_none() {
         if let Some(state) = state {
-            if state.feedback.as_ref().is_some_and(|feedback| feedback.message == HUNT_ARRIVAL_FEEDBACK) {
+            if state
+                .feedback
+                .as_ref()
+                .is_some_and(|feedback| feedback.message == HUNT_ARRIVAL_FEEDBACK)
+            {
                 state.clear_feedback();
             }
         }
@@ -1827,8 +1881,12 @@ pub fn mouse_world_interaction_system(
             .and_then(|model| big_map_input::image_position(window, model))
             .is_some();
     let mini_map_image_press = (left_pressed || right_pressed)
-        && player_ui.as_deref().zip(map_model.as_deref())
-            .is_some_and(|(ui, map)| minimap_input::contains(window, ui, map, mini_map_view.as_deref()));
+        && player_ui
+            .as_deref()
+            .zip(map_model.as_deref())
+            .is_some_and(|(ui, map)| {
+                minimap_input::contains(window, ui, map, mini_map_view.as_deref())
+            });
     if movement.map_auto_path.as_ref().is_some_and(|route| {
         presentation.current_map_file_name() != Some(route.map_file.as_str())
             || !big_map.as_deref().is_some_and(|model| {
@@ -1856,7 +1914,10 @@ pub fn mouse_world_interaction_system(
     let minimap_expanded = player_ui.as_deref().is_none_or(|ui| {
         map_model.as_deref().map_or(ui.minimap_visible(), |map| {
             mir2_client_bevy::crystal_ui::hud::minimap_is_expanded(
-                ui.minimap_visible(), map.mini_map_index, map.map_width, map.map_height,
+                ui.minimap_visible(),
+                map.mini_map_index,
+                map.map_width,
+                map.map_height,
             )
         })
     });
@@ -1903,10 +1964,11 @@ pub fn mouse_world_interaction_system(
     let over_hero_window = player_ui.as_deref().is_some_and(|ui| {
         ui.hero.interactive
             && window.cursor_position().is_some_and(|cursor| {
-                let transform = mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
-                    window.resolution.width(),
-                    window.resolution.height(),
-                );
+                let transform =
+                    mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
+                        window.resolution.width(),
+                        window.resolution.height(),
+                    );
                 let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
                 mir2_client_bevy::crystal_ui::overlays::hero_dialog::geometry::hit(
                     &ui.hero,
@@ -1944,7 +2006,9 @@ pub fn mouse_world_interaction_system(
         && !over_skill_bar
         && !over_hero_window
         && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
-        && !quest_ui_state.as_deref().is_some_and(QuestUiState::blocks_world_input)
+        && !quest_ui_state
+            .as_deref()
+            .is_some_and(QuestUiState::blocks_world_input)
         && !dialog_open
         && !dead
         && !map_open
@@ -1966,17 +2030,21 @@ pub fn mouse_world_interaction_system(
                 if !quest_ui_state.as_deref().is_some_and(|state| state.supply_open && state.supply_vendor == Some(vendor)));
             let result = if stale_supply {
                 Err("补给选择已变更，请重新选择商店。")
-            } else { begin_quest_route_navigation(
-                &mut movement,
-                &entities,
-                presentation,
-                &object_id,
-                big_map.as_deref(),
-                intent,
-                quest_tracker.as_deref(),
-                quest_ui_state.as_deref().and_then(|state| state.pinned_primary_quest_index),
-                now_ms,
-            ) };
+            } else {
+                begin_quest_route_navigation(
+                    &mut movement,
+                    &entities,
+                    presentation,
+                    &object_id,
+                    big_map.as_deref(),
+                    intent,
+                    quest_tracker.as_deref(),
+                    quest_ui_state
+                        .as_deref()
+                        .and_then(|state| state.pinned_primary_quest_index),
+                    now_ms,
+                )
+            };
             crate::movement_trace::record(serde_json::json!({
                 "type": "questRouteNavigation", "atMs": now_ms,
                 "questIndex": intent.quest_index, "mapIndex": intent.map_index,
@@ -1993,13 +2061,28 @@ pub fn mouse_world_interaction_system(
                         ui.core.panel = mir2_ui_core::state::UiPanel::None;
                     }
                     if let Some(state) = quest_ui_state.as_deref_mut() {
-                        state.set_feedback(if movement.map_auto_path.is_none() {
-                            format!("已到达{}{}", intent.target.label(), if matches!(intent.target, QuestRouteTarget::HuntRegion { .. }) {
-                                "，请选择怪物战斗"
-                            } else { "" })
-                        } else {
-                            format!("已设置{}路线 ({},{}) · 按 Esc 可停止", intent.target.label(), destination.0, destination.1)
-                        }, false);
+                        state.set_feedback(
+                            if movement.map_auto_path.is_none() {
+                                format!(
+                                    "已到达{}{}",
+                                    intent.target.label(),
+                                    if matches!(intent.target, QuestRouteTarget::HuntRegion { .. })
+                                    {
+                                        "，请选择怪物战斗"
+                                    } else {
+                                        ""
+                                    }
+                                )
+                            } else {
+                                format!(
+                                    "已设置{}路线 ({},{}) · 按 Esc 可停止",
+                                    intent.target.label(),
+                                    destination.0,
+                                    destination.1
+                                )
+                            },
+                            false,
+                        );
                     }
                 }
                 Err(message) => {
@@ -2029,57 +2112,84 @@ pub fn mouse_world_interaction_system(
         && !mouse.pressed(MouseButton::Right);
     let continuing_auto_action = continuing_map_route || continuing_attack;
     let keyboard_movement_requested = keys.is_some_and(|keys| {
-        walk_key_map().iter().any(|(key, _)| keys.pressed(*key)
-            && player_ui.as_deref().is_none_or(|ui| !key_owned_by_binding(&ui.keyboard, keys, *key)))
+        walk_key_map().iter().any(|(key, _)| {
+            keys.pressed(*key)
+                && player_ui
+                    .as_deref()
+                    .is_none_or(|ui| !key_owned_by_binding(&ui.keyboard, keys, *key))
+        })
     });
     let ui_state_blocks = player_ui.as_deref().is_some_and(|ui| {
-            if keyboard_movement_requested {
-                return ui.blocks_world_action(false, false);
-            }
-            if continuing_auto_action {
-                return ui.blocks_route_navigation();
-            }
-            if map_open && (map_image_press || mini_map_image_press || movement.map_auto_path.is_some()) {
-                return big_map_input::ui_blocks_except_map(ui);
-            }
-            window.cursor_position().map_or_else(
-                || ui.blocks_world_click(),
-                |cursor| {
-                    let transform =
-                        mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
-                            window.resolution.width(),
-                            window.resolution.height(),
-                        );
-                    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-                    ui.blocks_world_pointer_at(x, y)
-                },
-            )
-        }) || (!continuing_auto_action && !keyboard_movement_requested
-            && quest_ui_state.as_deref().is_some_and(|quest| {
-                window.cursor_position().is_some_and(|cursor| {
-                    let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
-                        window.resolution.width(), window.resolution.height(),
+        if keyboard_movement_requested {
+            return ui.blocks_world_action(false, false);
+        }
+        if continuing_auto_action {
+            return ui.blocks_route_navigation();
+        }
+        if map_open && (map_image_press || mini_map_image_press || movement.map_auto_path.is_some())
+        {
+            return big_map_input::ui_blocks_except_map(ui);
+        }
+        window.cursor_position().map_or_else(
+            || ui.blocks_world_click(),
+            |cursor| {
+                let transform =
+                    mir2_client_bevy::crystal_ui::metrics::CrystalStageTransform::fit_native(
+                        window.resolution.width(),
+                        window.resolution.height(),
                     );
-                    let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-                    quest.captures_world_pointer_at(x, y, player_ui.as_deref().is_some_and(|ui| ui.quest_open()))
-                })
-            }));
-    let quest_modal = quest_ui_state.as_deref().is_some_and(QuestUiState::blocks_world_input);
+                let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+                ui.blocks_world_pointer_at(x, y)
+            },
+        )
+    }) || (!continuing_auto_action
+        && !keyboard_movement_requested
+        && quest_ui_state.as_deref().is_some_and(|quest| {
+            window.cursor_position().is_some_and(|cursor| {
+                let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
+                    window.resolution.width(),
+                    window.resolution.height(),
+                );
+                let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
+                quest.captures_world_pointer_at(
+                    x,
+                    y,
+                    player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
+                )
+            })
+        }));
+    let quest_modal = quest_ui_state
+        .as_deref()
+        .is_some_and(QuestUiState::blocks_world_input);
     // A pointer edge in an ordinary view is consumed by that view. It isn't
     // a new world destination and must not revoke an existing target/route.
     let over_nonmodal_view = window.cursor_position().is_some_and(|cursor| {
         let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
-            window.resolution.width(), window.resolution.height(),
+            window.resolution.width(),
+            window.resolution.height(),
         );
         let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-        player_ui.as_deref().is_some_and(|ui| ui.captures_nonmodal_pointer_at(x, y))
-            || quest_ui_state.as_deref().is_some_and(|quest| quest.captures_world_pointer_at(
-                x, y, player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
-            ))
+        player_ui
+            .as_deref()
+            .is_some_and(|ui| ui.captures_nonmodal_pointer_at(x, y))
+            || quest_ui_state.as_deref().is_some_and(|quest| {
+                quest.captures_world_pointer_at(
+                    x,
+                    y,
+                    player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
+                )
+            })
     });
-    if ui_state_blocks && over_nonmodal_view && !keyboard_movement_requested && !dead && !dialog_open && !quest_modal
+    if ui_state_blocks
+        && over_nonmodal_view
+        && !keyboard_movement_requested
+        && !dead
+        && !dialog_open
+        && !quest_modal
         && !notice.as_deref().is_some_and(NoticeDialogState::is_open)
-        && player_ui.as_deref().is_some_and(|ui| !ui.blocks_world_action(false, false))
+        && player_ui
+            .as_deref()
+            .is_some_and(|ui| !ui.blocks_world_action(false, false))
     {
         movement.stop_hold(now_ms, "nonmodalPanelPointer");
         return;
@@ -2098,7 +2208,8 @@ pub fn mouse_world_interaction_system(
         Some("heroPointer")
     } else if (!continuing_auto_action && !keyboard_movement_requested && over_skill_bar)
         || player_ui.as_deref().is_some_and(|ui| {
-            (!continuing_auto_action && !keyboard_movement_requested && ui.skill_bars.hovered) || ui.skill_bars.dragging.is_some()
+            (!continuing_auto_action && !keyboard_movement_requested && ui.skill_bars.hovered)
+                || ui.skill_bars.dragging.is_some()
         })
     {
         Some("skillPointer")
@@ -2128,8 +2239,11 @@ pub fn mouse_world_interaction_system(
             }));
             if let Some(state) = quest_ui_state.as_deref_mut() {
                 state.set_feedback(
-                    if dead { "自动寻路已停止：角色已死亡。" }
-                    else { "自动寻路已停止：界面正在接收操作，结束操作后可重新点击前往入口。" },
+                    if dead {
+                        "自动寻路已停止：角色已死亡。"
+                    } else {
+                        "自动寻路已停止：界面正在接收操作，结束操作后可重新点击前往入口。"
+                    },
                     true,
                 );
             }
@@ -2208,9 +2322,15 @@ pub fn mouse_world_interaction_system(
 
     // Title, frame and coordinates are UI surfaces too. A failed/hidden map
     // image must never start a world gesture through the HUD beneath it.
-    if (left_pressed || right_pressed) && !mini_map_image_press
-        && minimap_input::frame_contains(window, minimap_expanded
-            || mini_map_view.as_deref().is_some_and(|view| view.displayed.is_some()))
+    if (left_pressed || right_pressed)
+        && !mini_map_image_press
+        && minimap_input::frame_contains(
+            window,
+            minimap_expanded
+                || mini_map_view
+                    .as_deref()
+                    .is_some_and(|view| view.displayed.is_some()),
+        )
     {
         movement.stop_hold(now_ms, "miniMapFrame");
         movement.stop_auto_path(now_ms, "miniMapFrame");
@@ -2223,7 +2343,11 @@ pub fn mouse_world_interaction_system(
     if map_image_press || mini_map_image_press {
         // Consume the image press before interpreting world actors beneath it.
         // Crystal BigMap.OnMouseClick accepts both left and right buttons.
-        let reason = if mini_map_image_press { "miniMapClick" } else { "bigMapClick" };
+        let reason = if mini_map_image_press {
+            "miniMapClick"
+        } else {
+            "bigMapClick"
+        };
         movement.stop_hold(now_ms, reason);
         movement.stop_auto_path(now_ms, reason);
         movement.attack_target = None;
@@ -2237,21 +2361,35 @@ pub fn mouse_world_interaction_system(
             let model = big_map.as_deref().ok_or("地图信息尚未加载。");
             let model = model?;
             let (map_index, destination, dimensions) = if mini_map_image_press {
-                if player_ui.as_deref().is_some_and(|ui| !ui.minimap_visible() || ui.local_keys.camera_hidden) {
+                if player_ui
+                    .as_deref()
+                    .is_some_and(|ui| !ui.minimap_visible() || ui.local_keys.camera_hidden)
+                {
                     return Err("小地图已隐藏。");
                 }
                 let map = map_model.as_deref().ok_or("小地图信息尚未加载。");
                 let map = map?;
-                let (index, tile) = minimap_input::destination(
-                    window, mini_map_view.as_deref(), map, model,
-                )?;
-                (index, tile, (i32::from(map.map_width.unwrap()), i32::from(map.map_height.unwrap())))
+                let (index, tile) =
+                    minimap_input::destination(window, mini_map_view.as_deref(), map, model)?;
+                (
+                    index,
+                    tile,
+                    (
+                        i32::from(map.map_width.unwrap()),
+                        i32::from(map.map_height.unwrap()),
+                    ),
+                )
             } else {
                 let tile = big_map_input::destination(
-                    model, big_map_input::image_position(window, model).unwrap(),
+                    model,
+                    big_map_input::image_position(window, model).unwrap(),
                 )?;
                 let info = &model.active_map().unwrap().info;
-                (model.current_map_index.unwrap(), tile, (info.width, info.height))
+                (
+                    model.current_map_index.unwrap(),
+                    tile,
+                    (info.width, info.height),
+                )
             };
             let map_file = presentation
                 .current_map_file_name()
@@ -3147,7 +3285,15 @@ pub fn keyboard_hero_skill_system(
     if !HERO_SHARED_MANUAL_CAST_VERIFIED {
         return;
     }
-    if !gameplay_input_enabled(shell.as_deref(), ui.as_deref(), notice.as_deref(), quest.as_deref(), big_map.as_deref(), npc_dialog.as_deref(), &windows) {
+    if !gameplay_input_enabled(
+        shell.as_deref(),
+        ui.as_deref(),
+        notice.as_deref(),
+        quest.as_deref(),
+        big_map.as_deref(),
+        npc_dialog.as_deref(),
+        &windows,
+    ) {
         return;
     }
     let (Some(hero), Some(ui), Some(presentation)) = (hero, ui, presentation) else {
@@ -3262,7 +3408,9 @@ pub fn keyboard_skill_system(
         ResMut<mir2_client_bevy::crystal_ui::overlays::NativePlayerUiIntentQueue>,
     >,
     mut magic_target: bevy::prelude::Local<spell_targeting::SpellTargetMemory>,
-    mut fallback_skill_clocks: bevy::prelude::Local<mir2_client_bevy::crystal_ui::overlays::skill_bars::SkillBarsUi>,
+    mut fallback_skill_clocks: bevy::prelude::Local<
+        mir2_client_bevy::crystal_ui::overlays::skill_bars::SkillBarsUi,
+    >,
 ) {
     if !shell
         .as_deref()
@@ -3381,10 +3529,13 @@ pub fn keyboard_skill_system(
         if selection.cast_kind.as_deref() == Some("passive") {
             continue;
         }
-        let clocks = player_ui.as_deref().map_or(&*fallback_skill_clocks, |ui| &ui.skill_bars);
-        if skills.skill_for_shortcut(skill_slot).is_some_and(|skill| {
-            clocks.readiness_remaining_ms(skill.id, skills, now) > 0
-        }) {
+        let clocks = player_ui
+            .as_deref()
+            .map_or(&*fallback_skill_clocks, |ui| &ui.skill_bars);
+        if skills
+            .skill_for_shortcut(skill_slot)
+            .is_some_and(|skill| clocks.readiness_remaining_ms(skill.id, skills, now) > 0)
+        {
             continue;
         }
         let Some(ui) = ui_read_model.as_deref() else {
@@ -4138,7 +4289,11 @@ mod tests {
 
     #[test]
     fn rendered_hover_identity_maps_only_authoritative_npcs_and_monsters() {
-        let entities = world_entities();
+        let mut entities = world_entities();
+        let mut hero = entities.entities[0].clone();
+        hero.object_id = "3002".to_owned();
+        hero.kind = EntityKind::Hero;
+        entities.entities.push(hero);
         assert_eq!(
             hovered_world_intent(Some("77"), &entities),
             Some(QuestUiIntent::InteractNpc { npc_object_id: 77 })
@@ -4148,6 +4303,7 @@ mod tests {
             Some(QuestUiIntent::AttackTarget { object_id: 2001 })
         );
         assert_eq!(hovered_world_intent(Some("1000"), &entities), None);
+        assert_eq!(hovered_world_intent(Some("3002"), &entities), None);
         assert_eq!(hovered_world_intent(Some("9999"), &entities), None);
         assert_eq!(hovered_world_intent(Some("invalid"), &entities), None);
         assert_eq!(
@@ -4925,15 +5081,18 @@ mod tests {
         ui.skill_bars.hovered = true;
         app.insert_resource(ui);
         let mut click_state = NativeWorldClickState::default();
-        click_state.targets.insert(2001, crate::gameplay_bridge::CrystalWorldClickTarget {
-            kind: EntityKind::Monster,
-            object_id: 2001,
-            x: 10,
-            y: 11,
-            dead: None, // a partial refresh is not evidence the monster died
-            ai: Some(0),
-            harvestable: Some(false),
-        });
+        click_state.targets.insert(
+            2001,
+            crate::gameplay_bridge::CrystalWorldClickTarget {
+                kind: EntityKind::Monster,
+                object_id: 2001,
+                x: 10,
+                y: 11,
+                dead: None, // a partial refresh is not evidence the monster died
+                ai: Some(0),
+                harvestable: Some(false),
+            },
+        );
         app.insert_resource(click_state);
         app.init_resource::<QuestUiIntentQueue>();
         {
@@ -4941,7 +5100,10 @@ mod tests {
             state.observe_identity("1000", (10, 10), "right");
             state.attack_target = Some(2001);
             state.pending.push_back(pending_test_move(
-                (10, 10), (11, 10), WorldPointerMovementMode::Walk, 0.0,
+                (10, 10),
+                (11, 10),
+                WorldPointerMovementMode::Walk,
+                0.0,
             ));
             state.next_move_send_at_ms = 600.0;
         }
@@ -4949,28 +5111,59 @@ mod tests {
         advance_movement_clock(&mut app, 600);
         app.update();
         assert_eq!(
-            app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
             vec![QuestUiIntent::AttackTarget { object_id: 2001 }],
             "a delayed movement ACK and passive HUD hover must not freeze combat"
         );
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().pending.len(), 1);
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, Some(2001));
-        assert!(receiver.try_recv().is_err(), "do not resend an unconfirmed move");
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .pending
+                .len(),
+            1
+        );
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target,
+            Some(2001)
+        );
+        assert!(
+            receiver.try_recv().is_err(),
+            "do not resend an unconfirmed move"
+        );
 
         // The old walk stays owned by the server; subsequent attacks obey
         // attack speed and stop once the target is explicitly dead.
         advance_movement_clock(&mut app, 1400);
         app.update();
         assert_eq!(
-            app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents(),
+            app.world_mut()
+                .resource_mut::<QuestUiIntentQueue>()
+                .drain_intents(),
             vec![QuestUiIntent::AttackTarget { object_id: 2001 }]
         );
-        app.world_mut().resource_mut::<NativeWorldClickState>()
-            .targets.get_mut(&2001).unwrap().dead = Some(true);
+        app.world_mut()
+            .resource_mut::<NativeWorldClickState>()
+            .targets
+            .get_mut(&2001)
+            .unwrap()
+            .dead = Some(true);
         advance_movement_clock(&mut app, 1400);
         app.update();
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, None);
-        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target,
+            None
+        );
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
     }
 
     #[test]
@@ -4991,17 +5184,40 @@ mod tests {
             }]
         }), 0);
         assert!(presentation.begin_local_self_motion(
-            "1000", (10, 10), (12, 10), "right", true, 100, 1_000,
+            "1000",
+            (10, 10),
+            (12, 10),
+            "right",
+            true,
+            100,
+            1_000,
         ));
         let mut movement = WorldPointerMovementState::default();
         movement.next_move_send_at_ms = 600.0;
         movement.pending.push_back(pending_test_move(
-            (10, 10), (12, 10), WorldPointerMovementMode::Run, 0.0,
+            (10, 10),
+            (12, 10),
+            WorldPointerMovementMode::Run,
+            0.0,
         ));
-        assert!(!attack_request_ready(&movement, &presentation, 599.0, 1_599));
-        assert!(!attack_request_ready(&movement, &presentation, 600.0, 1_599));
+        assert!(!attack_request_ready(
+            &movement,
+            &presentation,
+            599.0,
+            1_599
+        ));
+        assert!(!attack_request_ready(
+            &movement,
+            &presentation,
+            600.0,
+            1_599
+        ));
         assert!(attack_request_ready(&movement, &presentation, 600.0, 1_600));
-        assert_eq!(movement.pending.len(), 1, "ACK remains outstanding when visual motion ends");
+        assert_eq!(
+            movement.pending.len(),
+            1,
+            "ACK remains outstanding when visual motion ends"
+        );
     }
 
     #[test]
@@ -5017,19 +5233,42 @@ mod tests {
             state.observe_identity("1000", (10, 10), "right");
             state.attack_target = Some(2001);
             state.pending.push_back(pending_test_move(
-                (10, 10), (11, 10), WorldPointerMovementMode::Walk, 0.0,
+                (10, 10),
+                (11, 10),
+                WorldPointerMovementMode::Walk,
+                0.0,
             ));
         }
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 2001 });
-        app.world_mut().resource_mut::<ButtonInput<MouseButton>>()
+        app.world_mut()
+            .resource_mut::<ButtonInput<MouseButton>>()
             .press(MouseButton::Right);
         app.add_systems(bevy::prelude::Update, mouse_world_interaction_system);
         app.update();
-        assert!(app.world_mut().resource_mut::<QuestUiIntentQueue>().drain_intents().is_empty());
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target, None);
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().pending.len(), 1);
-        assert!(receiver.try_recv().is_err(), "old movement still awaits server ACK");
+        assert!(app
+            .world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
+            .drain_intents()
+            .is_empty());
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target,
+            None
+        );
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .pending
+                .len(),
+            1
+        );
+        assert!(
+            receiver.try_recv().is_err(),
+            "old movement still awaits server ACK"
+        );
     }
 
     #[test]
@@ -5570,15 +5809,21 @@ mod tests {
     #[test]
     fn native_hud_pointer_geometry_uses_source_button_rectangles_and_leaves_empty_world_open() {
         let (menu_x, menu_y) = spec::hud::MENU.rect.center();
-        assert!(cursor_over_native_hud_button(&stage_window(
-            bevy::prelude::Vec2::new(menu_x, menu_y),
-        ), true));
-        assert!(!cursor_over_native_hud_button(&stage_window(
-            bevy::prelude::Vec2::new(spec::hud::MENU.rect.left - 0.1, menu_y),
-        ), true));
-        assert!(!cursor_over_native_hud_button(&stage_window(
-            bevy::prelude::Vec2::new(512.0, 400.0),
-        ), true));
+        assert!(cursor_over_native_hud_button(
+            &stage_window(bevy::prelude::Vec2::new(menu_x, menu_y),),
+            true
+        ));
+        assert!(!cursor_over_native_hud_button(
+            &stage_window(bevy::prelude::Vec2::new(
+                spec::hud::MENU.rect.left - 0.1,
+                menu_y
+            ),),
+            true
+        ));
+        assert!(!cursor_over_native_hud_button(
+            &stage_window(bevy::prelude::Vec2::new(512.0, 400.0),),
+            true
+        ));
     }
 
     #[test]

@@ -111,9 +111,13 @@ pub fn resolve(current_map_index: Option<i32>, target_map_indices: &[i32]) -> Qu
 fn ordinary_entrances(
     map: &mir2_game_data::CrystalRespawnMap,
 ) -> Vec<&mir2_game_data::CrystalMovementTemplate> {
-    let mut entrances = map.movements.iter().filter(|movement| {
-        !movement.need_hole && !movement.need_move && movement.conquest_index == 0
-    }).collect::<Vec<_>>();
+    let mut entrances = map
+        .movements
+        .iter()
+        .filter(|movement| {
+            !movement.need_hole && !movement.need_move && movement.conquest_index == 0
+        })
+        .collect::<Vec<_>>();
     // Big-map-visible edges are preferable for player guidance, but a normal
     // source edge remains valid when Crystal does not draw its map icon.
     entrances.sort_by_key(|movement| !movement.show_on_big_map);
@@ -155,31 +159,45 @@ mod tests {
     fn target_switch_and_authoritative_map_change_recompute_the_next_step() {
         let bichon = map_index("0");
         let oma = map_index("D001");
-        assert!(matches!(resolve(Some(bichon), &[oma]), QuestRoute::NextStep(_)));
+        assert!(matches!(
+            resolve(Some(bichon), &[oma]),
+            QuestRoute::NextStep(_)
+        ));
         assert_eq!(
             resolve(Some(oma), &[oma]),
             QuestRoute::AtDestination {
                 map_title: "OmaCave_1F".into()
             }
         );
-        assert_eq!(resolve(Some(bichon), &[bichon]), QuestRoute::AtDestination {
-            map_title: "BichonProvince".into()
-        });
+        assert_eq!(
+            resolve(Some(bichon), &[bichon]),
+            QuestRoute::AtDestination {
+                map_title: "BichonProvince".into()
+            }
+        );
     }
 
     #[test]
     fn hidden_normal_exit_remains_legal_but_visible_exit_is_preferred() {
-        let oma = mir2_game_data::crystal_respawn_manifest_ref().maps.iter()
-            .find(|map| map.map_file_name == "D001").unwrap();
+        let oma = mir2_game_data::crystal_respawn_manifest_ref()
+            .maps
+            .iter()
+            .find(|map| map.map_file_name == "D001")
+            .unwrap();
         let entrances = ordinary_entrances(oma);
         assert!(entrances.iter().any(|movement| !movement.show_on_big_map));
         assert!(entrances.iter().any(|movement| movement.show_on_big_map));
-        assert!(entrances.first().is_some_and(|movement| movement.show_on_big_map));
+        assert!(entrances
+            .first()
+            .is_some_and(|movement| movement.show_on_big_map));
     }
 
     #[test]
     fn unknown_or_unroutable_targets_never_fabricate_an_entrance() {
         assert_eq!(resolve(None, &[39]), QuestRoute::Unavailable);
-        assert_eq!(resolve(Some(map_index("0")), &[i32::MAX]), QuestRoute::Unavailable);
+        assert_eq!(
+            resolve(Some(map_index("0")), &[i32::MAX]),
+            QuestRoute::Unavailable
+        );
     }
 }

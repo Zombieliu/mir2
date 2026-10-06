@@ -1,0 +1,177 @@
+Activity Resolver Table:
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        b297a23 com.mir2.web3/.MainActivity filter df1db20
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      androidx.profileinstaller.action.SAVE_PROFILE:
+        b7e3cd9 com.mir2.web3/androidx.profileinstaller.ProfileInstallReceiver filter 1e9894c
+          Action: "androidx.profileinstaller.action.SAVE_PROFILE"
+      androidx.profileinstaller.action.INSTALL_PROFILE:
+        b7e3cd9 com.mir2.web3/androidx.profileinstaller.ProfileInstallReceiver filter 420369e
+          Action: "androidx.profileinstaller.action.INSTALL_PROFILE"
+      androidx.profileinstaller.action.SKIP_FILE:
+        b7e3cd9 com.mir2.web3/androidx.profileinstaller.ProfileInstallReceiver filter e8f957f
+          Action: "androidx.profileinstaller.action.SKIP_FILE"
+      androidx.profileinstaller.action.BENCHMARK_OPERATION:
+        b7e3cd9 com.mir2.web3/androidx.profileinstaller.ProfileInstallReceiver filter 50ccd95
+          Action: "androidx.profileinstaller.action.BENCHMARK_OPERATION"
+
+Domain verification status:
+
+Permissions:
+  Permission [com.mir2.web3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (18c8fb8):
+    sourcePackage=com.mir2.web3
+    uid=10147 gids=[] type=0 prot=signature
+    perm=PermissionInfo{da9216e com.mir2.web3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}
+
+Registered ContentProviders:
+  com.mir2.web3/androidx.startup.InitializationProvider:
+    Provider{246f00f com.mir2.web3/androidx.startup.InitializationProvider}
+
+ContentProvider Authorities:
+  [com.mir2.web3.androidx-startup]:
+    Provider{246f00f com.mir2.web3/androidx.startup.InitializationProvider}
+      applicationInfo=ApplicationInfo{cf37191 com.mir2.web3}
+
+Key Set Manager:
+  [com.mir2.web3]
+      Signing KeySets: 36
+
+Packages:
+  Package [com.mir2.web3] (a5f2875):
+    userId=10147
+    pkg=Package{6db92a5 com.mir2.web3}
+    codePath=/data/app/~~wrCZQffI2p4lfcsgNFAGlA==/com.mir2.web3-GHFvLMs_FFbiR-RWH4aO7Q==
+    resourcePath=/data/app/~~wrCZQffI2p4lfcsgNFAGlA==/com.mir2.web3-GHFvLMs_FFbiR-RWH4aO7Q==
+    legacyNativeLibraryDir=/data/app/~~wrCZQffI2p4lfcsgNFAGlA==/com.mir2.web3-GHFvLMs_FFbiR-RWH4aO7Q==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+    cpuAbiOverride=null
+    versionCode=29 minSdk=31 targetSdk=35
+    minExtensionVersions=[]
+    versionName=0.1.26-phone-quest-modal
+    usesNonSdkApi=false
+    splits=[base]
+    apkSigningVersion=2
+    applicationInfo=PackageImpl{6db92a5 com.mir2.web3}
+    flags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    queriesPackages=[]
+    dataDir=/data/user/0/com.mir2.web3
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    timeStamp=2026-10-02 18:24:01
+    firstInstallTime=2026-09-14 06:31:04
+    lastUpdateTime=2026-10-02 18:24:01
+    signatures=PackageSignatures{744107b version:2, signatures:[a4a9828c], past signatures:[]}
+    installPermissionsFixed=true
+    pkgFlags=[ DEBUGGABLE HAS_CODE ALLOW_CLEAR_USER_DATA ]
+    declared permissions:
+      com.mir2.web3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature, INSTALLED
+    requested permissions:
+      android.permission.INTERNET
+      android.permission.ACCESS_NETWORK_STATE
+      com.mir2.web3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+    install permissions:
+      android.permission.INTERNET: granted=true
+      com.mir2.web3.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true
+      android.permission.ACCESS_NETWORK_STATE: granted=true
+    User 0: ceDataInode=147457 installed=true hidden=false suspended=false distractionFlags=0 stopped=true notLaunched=false enabled=0 instant=false virtual=false
+      overlay paths:
+        /product/overlay/EmulationPixel5/EmulationPixel5Overlay.apk
+      legacy overlay paths:
+        /product/overlay/EmulationPixel5/EmulationPixel5Overlay.apk
+      gids=[3003]
+      runtime permissions:
+
+Queries:
+  system apps queryable: false
+  queries via package name:
+  queries via intent:
+    com.google.android.settings.intelligence:
+      com.mir2.web3
+  queryable via interaction:
+    User 0:
+      [com.android.dynsystem,com.android.settings,com.android.server.telecom,com.android.localtransport,com.android.providers.settings,com.android.inputdevices,com.android.keychain,com.android.emulator.multidisplay,com.android.wallpaperbackup,com.android.location.fused,android]:
+        com.mir2.web3
+      [com.google.android.gms,com.google.android.gsf]:
+        com.mir2.web3
+      com.google.android.inputmethod.latin:
+        com.mir2.web3
+  queryable via uses-library:
+
+Package Changes:
+  Sequence number=38
+  User 0:
+    seq=3, package=com.google.android.gms
+    seq=12, package=com.google.android.apps.docs
+    seq=36, package=com.mir2.web3
+    seq=37, package=com.mir2.web3.uipreview
+
+
+Dexopt state:
+  [com.mir2.web3]
+    path: /data/app/~~wrCZQffI2p4lfcsgNFAGlA==/com.mir2.web3-GHFvLMs_FFbiR-RWH4aO7Q==/base.apk
+      arm64: [status=run-from-apk] [reason=unknown]
+
+
+Compiler stats:
+  [com.mir2.web3]
+     base.apk - 85
+
+APEX session state:
+
+Active APEX packages:
+
+
+Inactive APEX packages:
+
+
+Factory APEX packages:
+
+
+Snapshot statistics
+   Unrecorded-hits: 41  Cork-level: 0
+   Summary stats               TotBlds     TotUsed     TotCork     BigBlds    ShortLvd     TotTime     MaxTime
+          0:43         now          16       19098           0           0           5           1           0
+          1:43        0:43           0           0           0           0           0           0           0
+          2:43        1:43           0           0           0           0           0           0           0
+          3:43        2:43           4       25689           0           0           0           1           0
+          4:43        3:43           0           0           0           0           0           0           0
+          5:43        4:43           0           0           0           0           0           0           0
+          6:43        5:43           0           0           0           0           0           0           0
+          7:43        6:43           0           0           0           0           0           0           0
+          8:43        7:43           0           0           0           0           0           0           0
+          9:43        8:43           0           0           0           0           0           0           0
+      20:25:47         now         540      688292           0           0          62          79           1
+
+   Build times                  <= 1ms      <= 2ms      <= 5ms     <= 10ms     <= 20ms     <= 50ms    <= 100ms     > 100ms
+          0:43         now          16           0           0           0           0           0           0           0
+          1:43        0:43           0           0           0           0           0           0           0           0
+          2:43        1:43           0           0           0           0           0           0           0           0
+          3:43        2:43           4           0           0           0           0           0           0           0
+          4:43        3:43           0           0           0           0           0           0           0           0
+          5:43        4:43           0           0           0           0           0           0           0           0
+          6:43        5:43           0           0           0           0           0           0           0           0
+          7:43        6:43           0           0           0           0           0           0           0           0
+          8:43        7:43           0           0           0           0           0           0           0           0
+          9:43        8:43           0           0           0           0           0           0           0           0
+      20:25:47         now         540           0           0           0           0           0           0           0
+
+   Use counters                   <= 1        <= 2        <= 5       <= 10       <= 20       <= 50      <= 100       > 100
+          0:43         now           1           0           4           0           0           2           2           7
+          1:43        0:43           0           0           0           0           0           0           0           0
+          2:43        1:43           0           0           0           0           0           0           0           0
+          3:43        2:43           0           0           0           1           0           1           0           2
+          4:43        3:43           0           0           0           0           0           0           0           0
+          5:43        4:43           0           0           0           0           0           0           0           0
+          6:43        5:43           0           0           0           0           0           0           0           0
+          7:43        6:43           0           0           0           0           0           0           0           0
+          8:43        7:43           0           0           0           0           0           0           0           0
+          9:43        8:43           0           0           0           0           0           0           0           0
+      20:25:47         now          31           1          29          33          25          63          59         298

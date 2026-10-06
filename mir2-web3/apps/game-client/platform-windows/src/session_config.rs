@@ -311,7 +311,9 @@ fn parse_client_toml(text: &str) -> Result<ClientFileConfig, String> {
                     }
                     let profile = parse_toml_string(value, "gameplay.quest_guidance")?;
                     if !matches!(profile.as_str(), "crystal" | "newcomer-v1" | "newcomer-v2") {
-                        return Err(format!("{CONFIG_FILE_NAME} unsupported quest guidance {profile}"));
+                        return Err(format!(
+                            "{CONFIG_FILE_NAME} unsupported quest guidance {profile}"
+                        ));
                     }
                     config.quest_guidance = Some(profile);
                 }
@@ -481,7 +483,10 @@ mod tests {
         assert_eq!(config.auto_login, None);
         assert_eq!(config.window_width, 1024);
         assert_eq!(config.window_height, 768);
-        assert!(config.force_daylight, "development launches default to daylight");
+        assert!(
+            config.force_daylight,
+            "development launches default to daylight"
+        );
     }
 
     #[test]
@@ -621,7 +626,12 @@ force_daylight = false
         assert_eq!(parsed.window_width, Some(1024));
         assert_eq!(parsed.window_height, Some(768));
         assert_eq!(parsed.force_daylight, Some(false));
-        assert_eq!(parse_client_toml("[display]\nforce_daylight = true").unwrap().force_daylight, Some(true));
+        assert_eq!(
+            parse_client_toml("[display]\nforce_daylight = true")
+                .unwrap()
+                .force_daylight,
+            Some(true)
+        );
         assert!(parse_client_toml("[display]\nforce_daylight = 'false'").is_err());
         validate_gateway_url(parsed.gateway_ws_url.as_deref().unwrap()).unwrap();
     }

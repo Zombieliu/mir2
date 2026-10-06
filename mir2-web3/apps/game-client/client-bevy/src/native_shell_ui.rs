@@ -109,7 +109,7 @@ const NEW_ACCOUNT_OK: spec::CrystalRect = spec::CrystalRect::new(353.0, 579.0, 7
 const NEW_ACCOUNT_CANCEL: spec::CrystalRect = spec::CrystalRect::new(627.0, 579.0, 76.0, 25.0);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Component)]
-pub(crate) enum NativeShellField {
+pub enum NativeShellField {
     CharacterName,
     ChangePassword(ChangePasswordFocus),
     Registration(RegistrationFocus),
@@ -364,7 +364,8 @@ pub fn cycle_change_password_focus(
 }
 
 #[derive(Component)]
-struct NativeShellRoot;
+/// Platform hosts may fit the shared 1024x768 stage to their safe viewport.
+pub struct NativeShellRoot;
 
 #[derive(Component)]
 struct NativeShellContent;
@@ -431,7 +432,7 @@ fn animate_login_door(
 
 impl Plugin for Mir2NativeShellUiPlugin {
     fn build(&self, app: &mut App) {
-        crate::crystal_ui::overlays::register_crystal_additive_ui(app);
+        crate::crystal_ui::additive_ui::register_crystal_additive_ui(app);
         app.init_resource::<NativeUiIntentQueue>()
             .init_resource::<NativeShellAuxFocus>()
             .init_resource::<NativeShellTextModifiers>()
@@ -1174,7 +1175,7 @@ fn pop_editable_tail(text: &mut String, count: usize) {
     }
 }
 
-fn append_editable_field(text: &mut String, c: char, max: usize) {
+pub fn append_editable_field(text: &mut String, c: char, max: usize) {
     if !is_printable_char(c) {
         return;
     }
@@ -1184,7 +1185,7 @@ fn append_editable_field(text: &mut String, c: char, max: usize) {
     text.push(c);
 }
 
-fn append_name_field(text: &mut String, c: char, max: usize) {
+pub fn append_name_field(text: &mut String, c: char, max: usize) {
     if !is_printable_char(c) || c.is_whitespace() {
         return;
     }
@@ -1194,7 +1195,7 @@ fn append_name_field(text: &mut String, c: char, max: usize) {
     text.push(c);
 }
 
-fn append_alphanumeric_field(text: &mut String, c: char, max: usize) {
+pub fn append_alphanumeric_field(text: &mut String, c: char, max: usize) {
     if !c.is_ascii_alphanumeric() {
         return;
     }

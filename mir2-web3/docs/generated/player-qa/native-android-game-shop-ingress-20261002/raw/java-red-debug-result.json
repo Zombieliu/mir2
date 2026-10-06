@@ -1,0 +1,17 @@
+{
+  "started": "2026-10-02T13:03:19.812Z",
+  "ended": "2026-10-02T13:03:37.177Z",
+  "args": [
+    ":app:testDebugUnitTest",
+    "--tests",
+    "com.mir2.web3.GatewaySessionTest.gameShopMetadataStagesOnlyDuringAuthenticatedSelectedStart",
+    "--tests",
+    "com.mir2.web3.GatewaySessionTest.oversizedGameShopMetadataFailsClosedBeforeOwnerBootstrap",
+    "--rerun-tasks",
+    "--console=plain",
+    "--offline"
+  ],
+  "code": 1,
+  "signal": null,
+  "xmlCopied": true
+}

@@ -1,0 +1,18 @@
+{
+  "source": "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6",
+  "parent": "f99edfdbd62b5a80714cce41deaabedc75ec5084",
+  "localAndRemoteExact": true,
+  "pr": {
+    "number": 253,
+    "state": "OPEN",
+    "draft": true,
+    "headSha": "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6",
+    "head": "codex/android-shared-sync",
+    "base": "codex/playtest-registration",
+    "url": "https://github.com/Zombieliu/mir2/pull/253"
+  },
+  "windowsRemote": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4",
+  "windowsNotPushed": true,
+  "normalNonForcePush": true,
+  "finished": "2026-10-02T20:07:19.066Z"
+}

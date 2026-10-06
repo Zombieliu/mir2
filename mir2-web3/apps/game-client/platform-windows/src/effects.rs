@@ -1246,14 +1246,7 @@ fn ground_talisman(spell: &str) -> Option<(&'static str, Option<(&'static str, &
 /// explicit without adding a second transport contract. Fractional tiles are
 /// intentional: projectile lights follow the same interpolated tile as the
 /// visible projectile, while impact/cast lights remain tile anchored.
-#[derive(Debug, Clone, PartialEq)]
-pub(crate) struct NativeEffectLightSnapshot {
-    pub generation: u64,
-    pub key: String,
-    pub tile_x: f32,
-    pub tile_y: f32,
-    pub light: i32,
-}
+pub(crate) use mir2_client_bevy::native_lighting_sources::NativeEffectLightSnapshot;
 
 static ACTIVE_EFFECT_LIGHTS: OnceLock<Mutex<Vec<NativeEffectLightSnapshot>>> = OnceLock::new();
 

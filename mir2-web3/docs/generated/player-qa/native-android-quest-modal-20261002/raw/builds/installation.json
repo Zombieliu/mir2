@@ -1,0 +1,193 @@
+{
+  "source": "2161a940ec7a59e966ed2638667f0c7b1a8e32b6",
+  "versionCode": 29,
+  "oldVersionCode": 28,
+  "dataPreserving": true,
+  "commands": [
+    {
+      "name": "install-devices.txt",
+      "args": [
+        "devices",
+        "-l"
+      ],
+      "started": "2026-10-02T10:23:59.089Z",
+      "finished": "2026-10-02T10:23:59.101Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-api.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.version.sdk"
+      ],
+      "started": "2026-10-02T10:23:59.101Z",
+      "finished": "2026-10-02T10:23:59.118Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-path-before.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:23:59.340Z",
+      "finished": "2026-10-02T10:23:59.371Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-sha-before.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~XMEVuCQsH1JUPysXaOX6zg==/com.mir2.web3-2cGgxCmfgev3w2YSEt15eQ==/base.apk"
+      ],
+      "started": "2026-10-02T10:23:59.371Z",
+      "finished": "2026-10-02T10:23:59.619Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:23:59.619Z",
+      "finished": "2026-10-02T10:23:59.645Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-result.txt",
+      "args": [
+        "install",
+        "-r",
+        "-t",
+        "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-modal-v29-20261002-odiiz2/final-apks/mir2-native-phone-quest-modal-debug-v29.apk"
+      ],
+      "started": "2026-10-02T10:23:59.645Z",
+      "finished": "2026-10-02T10:24:01.242Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-path-after.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:24:01.242Z",
+      "finished": "2026-10-02T10:24:01.278Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-sha-after.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~wrCZQffI2p4lfcsgNFAGlA==/com.mir2.web3-GHFvLMs_FFbiR-RWH4aO7Q==/base.apk"
+      ],
+      "started": "2026-10-02T10:24:01.278Z",
+      "finished": "2026-10-02T10:24:01.555Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-debug-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T10:24:01.555Z",
+      "finished": "2026-10-02T10:24:01.587Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-path-before.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:24:01.837Z",
+      "finished": "2026-10-02T10:24:01.860Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-sha-before.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~87ZFzacNvMAD3yYBbEFn8A==/com.mir2.web3.uipreview-dQwoPh-1NBw7IgfC8g82HA==/base.apk"
+      ],
+      "started": "2026-10-02T10:24:01.860Z",
+      "finished": "2026-10-02T10:24:02.119Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:24:02.119Z",
+      "finished": "2026-10-02T10:24:02.143Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-result.txt",
+      "args": [
+        "install",
+        "-r",
+        "-t",
+        "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-modal-v29-20261002-odiiz2/final-apks/mir2-native-phone-quest-modal-preview-v29.apk"
+      ],
+      "started": "2026-10-02T10:24:02.143Z",
+      "finished": "2026-10-02T10:24:03.675Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-path-after.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:24:03.675Z",
+      "finished": "2026-10-02T10:24:03.709Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-sha-after.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~Tk3cdhukNvmovswrAxFOyQ==/com.mir2.web3.uipreview--WucrCpJploXa4YfpM3SIw==/base.apk"
+      ],
+      "started": "2026-10-02T10:24:03.709Z",
+      "finished": "2026-10-02T10:24:03.986Z",
+      "exitCode": 0
+    },
+    {
+      "name": "install-preview-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T10:24:03.987Z",
+      "finished": "2026-10-02T10:24:04.008Z",
+      "exitCode": 0
+    }
+  ]
+}

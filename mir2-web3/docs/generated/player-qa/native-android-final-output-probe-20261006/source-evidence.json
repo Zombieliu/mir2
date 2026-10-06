@@ -1,0 +1,1395 @@
+{
+  "at": "2026-10-06T03:10:50.701Z",
+  "goalStatus": "ACTIVE",
+  "denominator": "AP-01 through AP-21 unchanged",
+  "NI17": "PARTIAL",
+  "stages": [
+    {
+      "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+      "parent": "43578a615551158faf7df9278547abbee6bcdb49",
+      "localRoot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC",
+      "inputs": 446,
+      "inputsSha256": "56f7c8838917ede452ba5958763547a1932a6f3a432c5cc96d26ed0395d708d0",
+      "scope": [
+        "mir2-web3/third_party/bevy_render/src/view/window/android_gpu_probe.rs",
+        "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+        "mir2-web3/third_party/bevy_render/src/renderer/render_context.rs"
+      ],
+      "productionBehaviorChange": false,
+      "gates": [
+        {
+          "label": "bound-gpu-pass-android-normal",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [
+            {
+              "passed": 529,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-android-normal-result.json",
+          "resultSha256": "14124c73b341c28d38bc058f5f250341bfc76b576c03bfeb9d14bc88b715ca40"
+        },
+        {
+          "label": "bound-gpu-pass-android-preview",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [
+            {
+              "passed": 577,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-android-preview-result.json",
+          "resultSha256": "76a0997451e8594feb5f3b5b429e726c52fea1218a683eb6eec199d70185802a"
+        },
+        {
+          "label": "bound-gpu-pass-api31-normal",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-api31-normal-result.json",
+          "resultSha256": "9fa17bba79f9db645e61d1a543cd67078568e2f44fd0b7e0b312a38c7716f1ed"
+        },
+        {
+          "label": "bound-gpu-pass-api31-preview",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-api31-preview-result.json",
+          "resultSha256": "d76782fead168f0268a9a7f41e7180a8cd4e9b4e2a1633ef3673f5408ddd3a86"
+        },
+        {
+          "label": "bound-gpu-pass-java-full",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [],
+          "java": [
+            {
+              "variant": "debug",
+              "classes": 8,
+              "tests": 103,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0
+            },
+            {
+              "variant": "uiPreview",
+              "classes": 8,
+              "tests": 103,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0
+            }
+          ],
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-java-full-result.json",
+          "resultSha256": "bcf46f7820eada94a0196cadf7fc8a4599f4da9a008769ef22457167bafb3505"
+        },
+        {
+          "label": "bound-gpu-pass-real-bichon-resource",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-real-bichon-resource-result.json",
+          "resultSha256": "8984c05f7f06e69e39300bec7b2dd44ebb56f0c5afe3688a1580eb7cc380acec"
+        },
+        {
+          "label": "bound-gpu-pass-runtime",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [
+            {
+              "passed": 309,
+              "failed": 0,
+              "ignored": 1
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-runtime-result.json",
+          "resultSha256": "44e04a113affe05024de2da8fecbe27105d1671ed9df925b8413dc7a10ca260d"
+        },
+        {
+          "label": "bound-gpu-pass-shared-player-ui",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [
+            {
+              "passed": 1324,
+              "failed": 0,
+              "ignored": 10
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-shared-player-ui-result.json",
+          "resultSha256": "4ef53af6ba821b249cec7aff08793bd1d9c642af106456bad5a8755e5a1e5d77"
+        },
+        {
+          "label": "bound-gpu-pass-windows-effects",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [
+            {
+              "passed": 2,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-windows-effects-result.json",
+          "resultSha256": "2f27511ceb837ba24fc1c9793768fbe6747d7adc7a0ea066d7acfded996b12ff"
+        },
+        {
+          "label": "bound-gpu-pass-windows-hero-fifo",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-windows-hero-fifo-result.json",
+          "resultSha256": "7bbd9822585f9755dd42ec95d9e76a5bc82815b92d30dca50afd4a21a34b2d4d"
+        },
+        {
+          "label": "bound-gpu-pass-windows-map",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [
+            {
+              "passed": 4,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-windows-map-result.json",
+          "resultSha256": "a54c5ec436375f72eb012db478b4f1da55b4ab8e214e82537176b420f026f598"
+        },
+        {
+          "label": "bound-gpu-pass-windows-original",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [
+            {
+              "passed": 14,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-windows-original-result.json",
+          "resultSha256": "947d7bdf53e7d0c9e60c9f2b09a13cdd1d94978a352f9207a1804b1e8553852d"
+        },
+        {
+          "label": "bound-gpu-pass-windows-protocol",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [
+            {
+              "passed": 21,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-windows-protocol-result.json",
+          "resultSha256": "e6d62857f9d85f7604f4482aa91e25b9fbd53c8b6ba4f56182f9761306720937"
+        },
+        {
+          "label": "bound-gpu-pass-windows-skill-fifo",
+          "code": 0,
+          "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+          "rust": [
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/bound-gpu-pass-windows-skill-fifo-result.json",
+          "resultSha256": "f08648aca37df64b1586c45a560fba36905b5469920ea971fc16d9b0ec59b954"
+        }
+      ],
+      "artifact": {
+        "variant": "preview",
+        "source": "58a92eb7b72391013e1a5a20195778e205e565d8",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/final-apks/mir2-native-render-pass-probe-preview-58a92eb7b.apk",
+        "bytes": 542088495,
+        "sha256": "8671c291f34d975af9c94455021ad6186630c2fdcd7ba4c4734c586d7237af74",
+        "nativeElfBytes": 150323816,
+        "nativeElfSha256": "fbc052a15cc41bafcf1b8ca3775e505807fa1cd6e5ed0151c687d81ec61c0e7b",
+        "nativeElfMatchesThisVariantStrippedOutput": true,
+        "package": "package: name='com.mir2.web3.uipreview' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+        "gatewayUrl": "",
+        "uiPreview": true,
+        "diagnosticOnly": true,
+        "acceptance": false,
+        "gpuSurfaceProbeBuildOption": "1",
+        "maximumDiagnosticRecordsPerProcess": 128,
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        }
+      },
+      "installedHashMatches": true,
+      "selectedResourceProof": [
+        {
+          "variant": "preview",
+          "apkSha256": "8671c291f34d975af9c94455021ad6186630c2fdcd7ba4c4734c586d7237af74",
+          "nativeElfSha256": "fbc052a15cc41bafcf1b8ca3775e505807fa1cd6e5ed0151c687d81ec61c0e7b",
+          "selectedUiPngCount": 6647,
+          "selectedMetadataCount": 3,
+          "libraries": [
+            {
+              "library": "Items",
+              "pngCount": 1003,
+              "allSelectedBytesMatch": true,
+              "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe",
+              "entryHashListSha256": "9b631445514b2f41c54d3607ce2e9cd529b6da5aba48412d8bc12aae680233a3"
+            },
+            {
+              "library": "StateItem",
+              "pngCount": 5192,
+              "allSelectedBytesMatch": true,
+              "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a",
+              "entryHashListSha256": "aa4f05c5d4ee057566a1ef8b34a97dc73302e77568115e1a0b306d6290651d13"
+            },
+            {
+              "library": "MagIcon",
+              "pngCount": 224,
+              "allSelectedBytesMatch": true,
+              "metadataSha256": null,
+              "entryHashListSha256": "f3a467b56e3ff3b88806208cbd531bc65616100c17eb81579daee8b1dd25cf43"
+            },
+            {
+              "library": "MagIcon2",
+              "pngCount": 224,
+              "allSelectedBytesMatch": true,
+              "metadataSha256": null,
+              "entryHashListSha256": "e31e0fd0b447d4579636bb15b1570219957a9475f42a70515aade5c41a786142"
+            },
+            {
+              "library": "UI_32bit",
+              "pngCount": 4,
+              "allSelectedBytesMatch": true,
+              "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9",
+              "entryHashListSha256": "fee27a48da6053e1a8a84cbe4db0b3bcb5e2c1002cc16b63ec9926bbb3138201"
+            }
+          ],
+          "lightingOriginalFrames": [
+            {
+              "range": 0,
+              "bytes": 24327,
+              "sha256": "8abb26b2c3568efef810e419b5c3322d90133d02c7e01a958eb1c1cd66521bc8"
+            },
+            {
+              "range": 1,
+              "bytes": 37751,
+              "sha256": "f317886b08b02f793a70cc8dd5b377acdfa78b596898524ad0963c5332fa57db"
+            },
+            {
+              "range": 2,
+              "bytes": 51065,
+              "sha256": "b1b7533de8b0e58e263b562d1af4a4cddbacc0ecca96033d3b9f011dccce132d"
+            },
+            {
+              "range": 3,
+              "bytes": 66669,
+              "sha256": "829d24301b9b989496ee0581c7a6096c6300afc15a62945a6b7700a1d56b9177"
+            },
+            {
+              "range": 4,
+              "bytes": 86918,
+              "sha256": "2d1f6370d6e9d83ab04c2ed08b13d7b2dd9ea480856710ed4ea9a35509a48edf"
+            },
+            {
+              "range": 5,
+              "bytes": 105484,
+              "sha256": "10757d7006798a497ccf7fe0284756d32905b4b4ac457d041efc0879ecd4c9db"
+            },
+            {
+              "range": 6,
+              "bytes": 127337,
+              "sha256": "1ba1a6aa32631a534cf98d7d59beed617f8d0bf9ac4ac4701ffb2d1743b258b2"
+            },
+            {
+              "range": 7,
+              "bytes": 148683,
+              "sha256": "b0e2fcd6b21d6e8c773b1312c6fdcb228446f2f0e1e595a95c9aa3b0f0168ae2"
+            },
+            {
+              "range": 8,
+              "bytes": 171964,
+              "sha256": "9ca401dce3a8c252e00ea156b5a619c16eca34fc8036d455f91c9f77bb0c2767"
+            },
+            {
+              "range": 9,
+              "bytes": 198508,
+              "sha256": "e52605b4e20f19563ec37bba8afd7aeb2ed8690fb1a25c974819e37278cb33e7"
+            }
+          ],
+          "lightingFramesByteMatchFrozenWindows": true,
+          "frozenWeightFramesByteMatch": true,
+          "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+          "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "entityPack": {
+            "schemaVersion": 1,
+            "kind": "mir2-android-entity-pack-lock",
+            "packId": "android-archer-mount-bow-proof-20260912",
+            "sourceMode": "override",
+            "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+            "manifestBytes": 2506377,
+            "atlasCount": 1,
+            "pageCount": 5,
+            "rectCount": 7848,
+            "pageBytes": 8779443
+          },
+          "approvedFullResourceReleaseAccepted": false
+        }
+      ],
+      "rows": [
+        {
+          "scene": "lighting-night-jni",
+          "pid": "15367",
+          "alive": true,
+          "targetForeground": true,
+          "fatal": 0,
+          "renderValidationError": false,
+          "nativeRenderExit": false,
+          "GL506": 0,
+          "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/current-lighting-night-jni-pid15367.png",
+          "pngSha256": "4dc2335c153f44e73adfe771a1573455238fe770f55e2df2d1e41dd075fb363e",
+          "width": 2340,
+          "height": 1080,
+          "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/lighting-night-jni-pid15367.log",
+          "logSha256": "d4eabb6bfb80b6f7c8232464cacff71b7d638f1a181f72dd0fb1f9fd45e75146",
+          "uniqueProbeSequences": 128,
+          "probeBudgetObserved": true,
+          "originalImageViewed": true,
+          "online": false,
+          "physical": false,
+          "fullPhoneUI": false,
+          "acceptance": false
+        },
+        {
+          "scene": "lighting-night-jni",
+          "pid": "15445",
+          "alive": true,
+          "targetForeground": true,
+          "fatal": 0,
+          "renderValidationError": false,
+          "nativeRenderExit": false,
+          "GL506": 4,
+          "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/current-lighting-night-jni-pid15445.png",
+          "pngSha256": "fa6de454d11cb581b27bfc0aca4fb392f3c3ceb3fdccde6b229d5bf52a6d0092",
+          "width": 2340,
+          "height": 1080,
+          "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/lighting-night-jni-pid15445.log",
+          "logSha256": "0c01844aa0ae7a66ac613121d5a77592fc6498cc918095e2c4d140f4c8158b39",
+          "uniqueProbeSequences": 128,
+          "probeBudgetObserved": true,
+          "originalImageViewed": true,
+          "online": false,
+          "physical": false,
+          "fullPhoneUI": false,
+          "acceptance": false
+        },
+        {
+          "scene": "lighting-night-jni",
+          "pid": "15523",
+          "alive": true,
+          "targetForeground": true,
+          "fatal": 0,
+          "renderValidationError": false,
+          "nativeRenderExit": false,
+          "GL506": 0,
+          "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/current-lighting-night-jni-pid15523.png",
+          "pngSha256": "3e5efa3c003886c43b9a5f374f1d3477143cc2a38bb4cbbfa49ea4fc2030eeb9",
+          "width": 2340,
+          "height": 1080,
+          "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/lighting-night-jni-pid15523.log",
+          "logSha256": "3a3f2152df6649d9afb71e6af899bd9f758296ee21cb93cb0ff0b39343e59636",
+          "uniqueProbeSequences": 128,
+          "probeBudgetObserved": true,
+          "originalImageViewed": true,
+          "online": false,
+          "physical": false,
+          "fullPhoneUI": false,
+          "acceptance": false
+        },
+        {
+          "scene": "lighting-dawn-jni",
+          "pid": "15602",
+          "alive": true,
+          "targetForeground": true,
+          "fatal": 0,
+          "renderValidationError": false,
+          "nativeRenderExit": false,
+          "GL506": 0,
+          "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/current-lighting-dawn-jni-pid15602.png",
+          "pngSha256": "57aa26baa371aa65c5af5386337181991511d2be1d3e0b411e554d0b2c1051bc",
+          "width": 2340,
+          "height": 1080,
+          "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/lighting-dawn-jni-pid15602.log",
+          "logSha256": "ad588e3bb5b7c0ad9f68cf34588f80ef051ad5e332ea8e76dded8904b54df1f8",
+          "uniqueProbeSequences": 128,
+          "probeBudgetObserved": true,
+          "originalImageViewed": true,
+          "online": false,
+          "physical": false,
+          "fullPhoneUI": false,
+          "acceptance": false
+        },
+        {
+          "scene": "lighting-day-jni",
+          "pid": "15680",
+          "alive": true,
+          "targetForeground": true,
+          "fatal": 0,
+          "renderValidationError": false,
+          "nativeRenderExit": false,
+          "GL506": 1,
+          "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/current-lighting-day-jni-pid15680.png",
+          "pngSha256": "0e5c61f7371eac1c40998a2dcc530aaa31f0b19a10f165f44bf8f8b64316ea8d",
+          "width": 2340,
+          "height": 1080,
+          "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-render-pass-20261006-dfsojC/lighting-day-jni-pid15680.log",
+          "logSha256": "423853aa3b5a1aefdae6b6fc4486f1bab40046ceafbd58a5fb8712c00fca5672",
+          "uniqueProbeSequences": 128,
+          "probeBudgetObserved": true,
+          "originalImageViewed": true,
+          "online": false,
+          "physical": false,
+          "fullPhoneUI": false,
+          "acceptance": false
+        }
+      ],
+      "totalGL506": 5,
+      "GPUZeroErrorGate": "FAIL"
+    },
+    {
+      "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+      "parent": "58a92eb7b72391013e1a5a20195778e205e565d8",
+      "localRoot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL",
+      "inputs": 446,
+      "inputsSha256": "9ff0b6f2f0333134d4ba61201dae2b996adece1e0624f00dd336a775740a3d94",
+      "scope": [
+        "mir2-web3/third_party/bevy_render/src/view/window/android_gpu_probe.rs",
+        "mir2-web3/third_party/bevy_render/src/texture/texture_attachment.rs"
+      ],
+      "productionBehaviorChange": false,
+      "gates": [
+        {
+          "label": "bound-gpu-output-android-normal",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [
+            {
+              "passed": 529,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-android-normal-result.json",
+          "resultSha256": "10ba8abf31ffa1bfc9c38d154a103cb8b5d0c06de2d2b166622d778bf38612b0"
+        },
+        {
+          "label": "bound-gpu-output-android-preview",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [
+            {
+              "passed": 577,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-android-preview-result.json",
+          "resultSha256": "61fea59cfafe3a4878cff240b53bed9f9b4dcd841de202bfcd93e8cdab6d129c"
+        },
+        {
+          "label": "bound-gpu-output-api31-normal",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-api31-normal-result.json",
+          "resultSha256": "cfae5cdf772ed3c8ef60ca9ec9340d007f2fbe21b21d7d489ae96be9d50590aa"
+        },
+        {
+          "label": "bound-gpu-output-api31-preview",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-api31-preview-result.json",
+          "resultSha256": "fc78de0f2b83bfa317726a12969fd0b8a1f9caf7a5ccdbe6f742baa95cc83cdb"
+        },
+        {
+          "label": "bound-gpu-output-java-full",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [],
+          "java": [
+            {
+              "variant": "debug",
+              "classes": 8,
+              "tests": 103,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0
+            },
+            {
+              "variant": "uiPreview",
+              "classes": 8,
+              "tests": 103,
+              "failures": 0,
+              "errors": 0,
+              "skipped": 0
+            }
+          ],
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-java-full-result.json",
+          "resultSha256": "1e0a704dc53f4efcfa547c36cdc36524020385b69eccbfc53d7efcfab4e5a6ff"
+        },
+        {
+          "label": "bound-gpu-output-real-bichon-resource",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-real-bichon-resource-result.json",
+          "resultSha256": "3d77d890d4e819ed4997aa06d9ee47e6a66c301accd715e6006b2d965fc76072"
+        },
+        {
+          "label": "bound-gpu-output-runtime",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [
+            {
+              "passed": 309,
+              "failed": 0,
+              "ignored": 1
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-runtime-result.json",
+          "resultSha256": "259eca4c10fa9434aedeba3908ff5c4e953d810d742c87b8498061dfc30bac14"
+        },
+        {
+          "label": "bound-gpu-output-shared-player-ui",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [
+            {
+              "passed": 1324,
+              "failed": 0,
+              "ignored": 10
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-shared-player-ui-result.json",
+          "resultSha256": "d5fcfc9c19dd7d6991edea74cee1835d4e7e43eafba323d8589e0559af9c7e1b"
+        },
+        {
+          "label": "bound-gpu-output-windows-effects",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [
+            {
+              "passed": 2,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-windows-effects-result.json",
+          "resultSha256": "80da1d82b86c5074d45b28b5a985cb3e9aa2c72f972c46fc765ec7d53881e586"
+        },
+        {
+          "label": "bound-gpu-output-windows-hero-fifo",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-windows-hero-fifo-result.json",
+          "resultSha256": "72c0aa7410b96ae3d578b7962a02d903ea3fd54b410d0c1b6021939524840fa8"
+        },
+        {
+          "label": "bound-gpu-output-windows-map",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [
+            {
+              "passed": 4,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-windows-map-result.json",
+          "resultSha256": "92965cd733afc2db1c3e6dfbbf502500b1771b514aad3a64c9bd2364db557841"
+        },
+        {
+          "label": "bound-gpu-output-windows-original",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [
+            {
+              "passed": 14,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-windows-original-result.json",
+          "resultSha256": "815f01f33da1b66d800817b80affc59c0c2b1e221e02b61930e4aef130d99948"
+        },
+        {
+          "label": "bound-gpu-output-windows-protocol",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [
+            {
+              "passed": 21,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-windows-protocol-result.json",
+          "resultSha256": "f340feccd1e150f3c645a169934827882cffbc48bc2ad3735d7b3d49c92c8c90"
+        },
+        {
+          "label": "bound-gpu-output-windows-skill-fifo",
+          "code": 0,
+          "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+          "rust": [
+            {
+              "passed": 1,
+              "failed": 0,
+              "ignored": 0
+            }
+          ],
+          "java": null,
+          "resultFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/bound-gpu-output-windows-skill-fifo-result.json",
+          "resultSha256": "c46fda1b5e5e7c38fe0e66172d6c487b3feebcb82381ee834cbbd18f834ab5e6"
+        }
+      ],
+      "artifact": {
+        "variant": "preview",
+        "source": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/final-apks/mir2-native-output-attachment-probe-preview-1fbc63f87.apk",
+        "bytes": 542087175,
+        "sha256": "600018c2bc2d2191cae1e64ee619df06c35bb39a603edbe9b9ede825bb67d6b6",
+        "nativeElfBytes": 150322496,
+        "nativeElfSha256": "136824a46db2475ab4eb4ae82153bc0f32b6b6f13a761d04bb65c3b8e382b0c2",
+        "nativeElfMatchesThisVariantStrippedOutput": true,
+        "package": "package: name='com.mir2.web3.uipreview' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+        "gatewayUrl": "",
+        "uiPreview": true,
+        "diagnosticOnly": true,
+        "acceptance": false,
+        "gpuSurfaceProbeBuildOption": "1",
+        "maximumDiagnosticRecordsPerProcess": 128,
+        "entityPack": {
+          "schemaVersion": 1,
+          "kind": "mir2-android-entity-pack-lock",
+          "packId": "android-archer-mount-bow-proof-20260912",
+          "sourceMode": "override",
+          "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "manifestBytes": 2506377,
+          "atlasCount": 1,
+          "pageCount": 5,
+          "rectCount": 7848,
+          "pageBytes": 8779443
+        }
+      },
+      "installedHashMatches": true,
+      "selectedResourceProof": [
+        {
+          "variant": "preview",
+          "apkSha256": "600018c2bc2d2191cae1e64ee619df06c35bb39a603edbe9b9ede825bb67d6b6",
+          "nativeElfSha256": "136824a46db2475ab4eb4ae82153bc0f32b6b6f13a761d04bb65c3b8e382b0c2",
+          "selectedUiPngCount": 6647,
+          "selectedMetadataCount": 3,
+          "libraries": [
+            {
+              "library": "Items",
+              "pngCount": 1003,
+              "allSelectedBytesMatch": true,
+              "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe",
+              "entryHashListSha256": "9b631445514b2f41c54d3607ce2e9cd529b6da5aba48412d8bc12aae680233a3"
+            },
+            {
+              "library": "StateItem",
+              "pngCount": 5192,
+              "allSelectedBytesMatch": true,
+              "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a",
+              "entryHashListSha256": "aa4f05c5d4ee057566a1ef8b34a97dc73302e77568115e1a0b306d6290651d13"
+            },
+            {
+              "library": "MagIcon",
+              "pngCount": 224,
+              "allSelectedBytesMatch": true,
+              "metadataSha256": null,
+              "entryHashListSha256": "f3a467b56e3ff3b88806208cbd531bc65616100c17eb81579daee8b1dd25cf43"
+            },
+            {
+              "library": "MagIcon2",
+              "pngCount": 224,
+              "allSelectedBytesMatch": true,
+              "metadataSha256": null,
+              "entryHashListSha256": "e31e0fd0b447d4579636bb15b1570219957a9475f42a70515aade5c41a786142"
+            },
+            {
+              "library": "UI_32bit",
+              "pngCount": 4,
+              "allSelectedBytesMatch": true,
+              "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9",
+              "entryHashListSha256": "fee27a48da6053e1a8a84cbe4db0b3bcb5e2c1002cc16b63ec9926bbb3138201"
+            }
+          ],
+          "lightingOriginalFrames": [
+            {
+              "range": 0,
+              "bytes": 24327,
+              "sha256": "8abb26b2c3568efef810e419b5c3322d90133d02c7e01a958eb1c1cd66521bc8"
+            },
+            {
+              "range": 1,
+              "bytes": 37751,
+              "sha256": "f317886b08b02f793a70cc8dd5b377acdfa78b596898524ad0963c5332fa57db"
+            },
+            {
+              "range": 2,
+              "bytes": 51065,
+              "sha256": "b1b7533de8b0e58e263b562d1af4a4cddbacc0ecca96033d3b9f011dccce132d"
+            },
+            {
+              "range": 3,
+              "bytes": 66669,
+              "sha256": "829d24301b9b989496ee0581c7a6096c6300afc15a62945a6b7700a1d56b9177"
+            },
+            {
+              "range": 4,
+              "bytes": 86918,
+              "sha256": "2d1f6370d6e9d83ab04c2ed08b13d7b2dd9ea480856710ed4ea9a35509a48edf"
+            },
+            {
+              "range": 5,
+              "bytes": 105484,
+              "sha256": "10757d7006798a497ccf7fe0284756d32905b4b4ac457d041efc0879ecd4c9db"
+            },
+            {
+              "range": 6,
+              "bytes": 127337,
+              "sha256": "1ba1a6aa32631a534cf98d7d59beed617f8d0bf9ac4ac4701ffb2d1743b258b2"
+            },
+            {
+              "range": 7,
+              "bytes": 148683,
+              "sha256": "b0e2fcd6b21d6e8c773b1312c6fdcb228446f2f0e1e595a95c9aa3b0f0168ae2"
+            },
+            {
+              "range": 8,
+              "bytes": 171964,
+              "sha256": "9ca401dce3a8c252e00ea156b5a619c16eca34fc8036d455f91c9f77bb0c2767"
+            },
+            {
+              "range": 9,
+              "bytes": 198508,
+              "sha256": "e52605b4e20f19563ec37bba8afd7aeb2ed8690fb1a25c974819e37278cb33e7"
+            }
+          ],
+          "lightingFramesByteMatchFrozenWindows": true,
+          "frozenWeightFramesByteMatch": true,
+          "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+          "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+          "entityPack": {
+            "schemaVersion": 1,
+            "kind": "mir2-android-entity-pack-lock",
+            "packId": "android-archer-mount-bow-proof-20260912",
+            "sourceMode": "override",
+            "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+            "manifestBytes": 2506377,
+            "atlasCount": 1,
+            "pageCount": 5,
+            "rectCount": 7848,
+            "pageBytes": 8779443
+          },
+          "approvedFullResourceReleaseAccepted": false
+        }
+      ],
+      "rows": [
+        {
+          "scene": "lighting-night-jni",
+          "pid": "15848",
+          "alive": true,
+          "targetForeground": true,
+          "fatal": 0,
+          "renderValidationError": false,
+          "nativeRenderExit": false,
+          "GL506": 0,
+          "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/current-lighting-night-jni-pid15848.png",
+          "pngSha256": "3e24c9b6449531ecbe7c8975d039a0125d848e42dfc1a89851baaeaa5b807bde",
+          "width": 2340,
+          "height": 1080,
+          "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/lighting-night-jni-pid15848.log",
+          "logSha256": "321cbd10b61a8e90477a59a0d4c4dd9ad0419c59c54329def699ba23d47adaf8",
+          "uniqueProbeSequences": 128,
+          "probeBudgetObserved": true,
+          "originalImageViewed": true,
+          "online": false,
+          "physical": false,
+          "fullPhoneUI": false,
+          "acceptance": false
+        },
+        {
+          "scene": "lighting-night-jni",
+          "pid": "15926",
+          "alive": true,
+          "targetForeground": true,
+          "fatal": 0,
+          "renderValidationError": false,
+          "nativeRenderExit": false,
+          "GL506": 4,
+          "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/current-lighting-night-jni-pid15926.png",
+          "pngSha256": "7630823dbcce473a37a9d802be569abbbba256e00db5055d0178dfac550a422b",
+          "width": 2340,
+          "height": 1080,
+          "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/lighting-night-jni-pid15926.log",
+          "logSha256": "6eba6a342423b358a35a7d938493047722cf35aae697ac394ad512064a06e587",
+          "uniqueProbeSequences": 128,
+          "probeBudgetObserved": true,
+          "originalImageViewed": true,
+          "online": false,
+          "physical": false,
+          "fullPhoneUI": false,
+          "acceptance": false
+        },
+        {
+          "scene": "lighting-night-jni",
+          "pid": "16005",
+          "alive": true,
+          "targetForeground": true,
+          "fatal": 0,
+          "renderValidationError": false,
+          "nativeRenderExit": false,
+          "GL506": 0,
+          "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/current-lighting-night-jni-pid16005.png",
+          "pngSha256": "a1c55d1322212f122450322d3904e1cc3079fad372116912eb7da409f4f61b7c",
+          "width": 2340,
+          "height": 1080,
+          "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/lighting-night-jni-pid16005.log",
+          "logSha256": "72c5a4499d657b1a127b668b65c0c98cfcb2e96fcd9a0954b6ec3f9d6c42b833",
+          "uniqueProbeSequences": 128,
+          "probeBudgetObserved": true,
+          "originalImageViewed": true,
+          "online": false,
+          "physical": false,
+          "fullPhoneUI": false,
+          "acceptance": false
+        },
+        {
+          "scene": "lighting-dawn-jni",
+          "pid": "16084",
+          "alive": true,
+          "targetForeground": true,
+          "fatal": 0,
+          "renderValidationError": false,
+          "nativeRenderExit": false,
+          "GL506": 5,
+          "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/current-lighting-dawn-jni-pid16084.png",
+          "pngSha256": "f8fec983f00c69945866a09ac1d5ba11511b4bd508eb6c4b079d82c7b08ba336",
+          "width": 2340,
+          "height": 1080,
+          "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/lighting-dawn-jni-pid16084.log",
+          "logSha256": "07b37f965dfd803e98c10b35c38cd54424122c7d90c77dd450c1ba46f1ec2bff",
+          "uniqueProbeSequences": 128,
+          "probeBudgetObserved": true,
+          "originalImageViewed": true,
+          "online": false,
+          "physical": false,
+          "fullPhoneUI": false,
+          "acceptance": false
+        },
+        {
+          "scene": "lighting-day-jni",
+          "pid": "16163",
+          "alive": true,
+          "targetForeground": true,
+          "fatal": 0,
+          "renderValidationError": false,
+          "nativeRenderExit": false,
+          "GL506": 0,
+          "png": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/current-lighting-day-jni-pid16163.png",
+          "pngSha256": "d968a8d4af0efc3788acbd672e6540659b179ac9b5da2f1b65724c86b14d02c3",
+          "width": 2340,
+          "height": 1080,
+          "log": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/lighting-day-jni-pid16163.log",
+          "logSha256": "afd5b6973e982fb26655b9e28c73fb227899205c65929b98276bc1a7e7f48122",
+          "uniqueProbeSequences": 128,
+          "probeBudgetObserved": true,
+          "originalImageViewed": true,
+          "online": false,
+          "physical": false,
+          "fullPhoneUI": false,
+          "acceptance": false
+        }
+      ],
+      "totalGL506": 9,
+      "GPUZeroErrorGate": "FAIL"
+    }
+  ],
+  "firstHypothesis": {
+    "name": "A stale final surface attachment survives first size transition.",
+    "verdict": "STALE_FINAL_OUTPUT_HANDLE_FALSIFIED_FOR_OBSERVED_FAILING_FRAMES",
+    "coveredFailingFrames": 2,
+    "staleOutputFrames": 0,
+    "limits": "Encoding-time HAL metadata only. Does not establish guest/host actual GL attachment binding, GPU completion, uncovered-surface clear coverage, or zero-error rendering acceptance. Opt-in observer may alter timing. Any unassigned/late errors remain failures."
+  },
+  "secondHypothesis": {
+    "name": "Android 12 emulator client-side FBO cache retains renderbuffer type when wgpu GLES switches reusable FBO to texture; deleted old surface RBO then yields format zero.",
+    "standaloneMechanism": "VERIFIED_ON_THIS_EMULATOR",
+    "sourceFile": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/gles-attachment-repro.c",
+    "binarySha256": "a55851e624e5f21e5117d866da94b326108bc3d040e9d1bbddc137bf325975d9",
+    "rows": [
+      {
+        "case": "keep_old",
+        "pid": 16283,
+        "oldRbo": 2,
+        "newRbo": 4,
+        "texture": 1,
+        "status": 36053,
+        "drawError": 0,
+        "pixelError": 0,
+        "pixel": [
+          51,
+          102,
+          204,
+          255
+        ],
+        "repeat": 0,
+        "started": "2026-10-06T03:06:07.770Z",
+        "ended": "2026-10-06T03:06:07.900Z",
+        "code": 0,
+        "signal": null,
+        "binarySha256": "a55851e624e5f21e5117d866da94b326108bc3d040e9d1bbddc137bf325975d9",
+        "driverGL506": 0
+      },
+      {
+        "case": "texture_only",
+        "pid": 16288,
+        "oldRbo": 2,
+        "newRbo": 4,
+        "texture": 1,
+        "status": 36054,
+        "drawError": 1286,
+        "pixelError": 0,
+        "pixel": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "repeat": 0,
+        "started": "2026-10-06T03:06:07.939Z",
+        "ended": "2026-10-06T03:06:08.014Z",
+        "code": 1,
+        "signal": null,
+        "binarySha256": "a55851e624e5f21e5117d866da94b326108bc3d040e9d1bbddc137bf325975d9",
+        "driverGL506": 1
+      },
+      {
+        "case": "dual_detach",
+        "pid": 16293,
+        "oldRbo": 2,
+        "newRbo": 4,
+        "texture": 1,
+        "status": 36053,
+        "drawError": 0,
+        "pixelError": 0,
+        "pixel": [
+          51,
+          102,
+          204,
+          255
+        ],
+        "repeat": 0,
+        "started": "2026-10-06T03:06:08.047Z",
+        "ended": "2026-10-06T03:06:08.122Z",
+        "code": 0,
+        "signal": null,
+        "binarySha256": "a55851e624e5f21e5117d866da94b326108bc3d040e9d1bbddc137bf325975d9",
+        "driverGL506": 0
+      },
+      {
+        "case": "keep_old",
+        "pid": 16298,
+        "oldRbo": 2,
+        "newRbo": 4,
+        "texture": 1,
+        "status": 36053,
+        "drawError": 0,
+        "pixelError": 0,
+        "pixel": [
+          51,
+          102,
+          204,
+          255
+        ],
+        "repeat": 1,
+        "started": "2026-10-06T03:06:08.154Z",
+        "ended": "2026-10-06T03:06:08.225Z",
+        "code": 0,
+        "signal": null,
+        "binarySha256": "a55851e624e5f21e5117d866da94b326108bc3d040e9d1bbddc137bf325975d9",
+        "driverGL506": 0
+      },
+      {
+        "case": "texture_only",
+        "pid": 16303,
+        "oldRbo": 2,
+        "newRbo": 4,
+        "texture": 1,
+        "status": 36054,
+        "drawError": 1286,
+        "pixelError": 0,
+        "pixel": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "repeat": 1,
+        "started": "2026-10-06T03:06:08.257Z",
+        "ended": "2026-10-06T03:06:08.333Z",
+        "code": 1,
+        "signal": null,
+        "binarySha256": "a55851e624e5f21e5117d866da94b326108bc3d040e9d1bbddc137bf325975d9",
+        "driverGL506": 1
+      },
+      {
+        "case": "dual_detach",
+        "pid": 16308,
+        "oldRbo": 2,
+        "newRbo": 4,
+        "texture": 1,
+        "status": 36053,
+        "drawError": 0,
+        "pixelError": 0,
+        "pixel": [
+          51,
+          102,
+          204,
+          255
+        ],
+        "repeat": 1,
+        "started": "2026-10-06T03:06:08.363Z",
+        "ended": "2026-10-06T03:06:08.438Z",
+        "code": 0,
+        "signal": null,
+        "binarySha256": "a55851e624e5f21e5117d866da94b326108bc3d040e9d1bbddc137bf325975d9",
+        "driverGL506": 0
+      },
+      {
+        "case": "keep_old",
+        "pid": 16313,
+        "oldRbo": 2,
+        "newRbo": 4,
+        "texture": 1,
+        "status": 36053,
+        "drawError": 0,
+        "pixelError": 0,
+        "pixel": [
+          51,
+          102,
+          204,
+          255
+        ],
+        "repeat": 2,
+        "started": "2026-10-06T03:06:08.472Z",
+        "ended": "2026-10-06T03:06:08.538Z",
+        "code": 0,
+        "signal": null,
+        "binarySha256": "a55851e624e5f21e5117d866da94b326108bc3d040e9d1bbddc137bf325975d9",
+        "driverGL506": 0
+      },
+      {
+        "case": "texture_only",
+        "pid": 16318,
+        "oldRbo": 2,
+        "newRbo": 4,
+        "texture": 1,
+        "status": 36054,
+        "drawError": 1286,
+        "pixelError": 0,
+        "pixel": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "repeat": 2,
+        "started": "2026-10-06T03:06:08.569Z",
+        "ended": "2026-10-06T03:06:08.647Z",
+        "code": 1,
+        "signal": null,
+        "binarySha256": "a55851e624e5f21e5117d866da94b326108bc3d040e9d1bbddc137bf325975d9",
+        "driverGL506": 1
+      },
+      {
+        "case": "dual_detach",
+        "pid": 16323,
+        "oldRbo": 2,
+        "newRbo": 4,
+        "texture": 1,
+        "status": 36053,
+        "drawError": 0,
+        "pixelError": 0,
+        "pixel": [
+          51,
+          102,
+          204,
+          255
+        ],
+        "repeat": 2,
+        "started": "2026-10-06T03:06:08.679Z",
+        "ended": "2026-10-06T03:06:08.749Z",
+        "code": 0,
+        "signal": null,
+        "binarySha256": "a55851e624e5f21e5117d866da94b326108bc3d040e9d1bbddc137bf325975d9",
+        "driverGL506": 0
+      }
+    ],
+    "firstAttemptCompile": {
+      "code": 1,
+      "compiled": false,
+      "kind": "Standalone diagnostic linked against GLES2 and lacks GLES3 symbols; not a compiled regression failure or game build failure."
+    },
+    "correctedCompile": {
+      "code": 0,
+      "compiled": true,
+      "linkLibrary": "GLESv3"
+    },
+    "gameProductFixImplemented": false,
+    "gameGPUAcceptance": false,
+    "exactEmulatorBinarySourceRevisionProven": false,
+    "sourceSha256": "2d5451965b55f2bcd0afd2e71fe7f45a1650c28f197dc03885c34c9a39ec8289"
+  },
+  "sourceComparison": {
+    "at": "2026-10-06T02:55:38.402Z",
+    "rows": [
+      {
+        "url": "https://android.googlesource.com/device/generic/goldfish-opengl/+/refs/tags/android-12.0.0_r1/shared/OpenglCodecCommon/GLClientState.cpp?format=TEXT",
+        "status": 0,
+        "error": "",
+        "sourceFile": "shared/OpenglCodecCommon/GLClientState.cpp",
+        "ref": "refs/tags/android-12.0.0_r1",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/upstream/GLClientState.cpp",
+        "bytes": 110077,
+        "sha256": "2e931853ae62e303b6255484f99dd6a8d7ac717e53dcfbbfdc6fa4917fe58808",
+        "readOnlyPrimarySource": true,
+        "exactDeviceSourceRevisionProven": false
+      },
+      {
+        "url": "https://android.googlesource.com/device/generic/goldfish-opengl/+/refs/tags/android-12.0.0_r1/system/GLESv2_enc/GL2Encoder.cpp?format=TEXT",
+        "status": 0,
+        "error": "",
+        "sourceFile": "system/GLESv2_enc/GL2Encoder.cpp",
+        "ref": "refs/tags/android-12.0.0_r1",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gpu-output-attachment-20261006-SfDfsL/upstream/GL2Encoder.cpp",
+        "bytes": 270307,
+        "sha256": "0193bef40085d7cb3b19772ec1af6be0221bfd099955865ebab3d96cb5858f59",
+        "readOnlyPrimarySource": true,
+        "exactDeviceSourceRevisionProven": false
+      }
+    ],
+    "limits": "Primary Android source comparison only; not proof of the emulator binary revision or the actual bug mechanism."
+  },
+  "proposedFix": {
+    "scopeFiles": 83,
+    "currentVersion": "wgpu-hal 29.0.4",
+    "onlyModifiedBackendFile": "src/gles/queue.rs",
+    "onlyDependentWorkspace": "platform-android",
+    "humanScopeApproval": "PENDING",
+    "implemented": false
+  },
+  "originals": [
+    {
+      "path": "/Users/henryliu/obelisk/numeron",
+      "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+      "branch": "codex/steam-main",
+      "status": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/"
+    },
+    {
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+      "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+      "branch": "codex/android-player-journey",
+      "status": ""
+    }
+  ],
+  "remaining": [
+    "zero-error uninstrumented game rendering after repair",
+    "full phone shared UI and touch/IME",
+    "world/object/action/interpolation/render-ready parity",
+    "real HTTPS/WSS/auth and online player loop",
+    "shared Zone authoritative move and saved reentry",
+    "NativeResumeV1/background/network/audio",
+    "full approved resources/audio/cache/update delivery",
+    "physical device and human acceptance"
+  ],
+  "productionDeployed": false,
+  "realSavesModified": false,
+  "authBypassed": false,
+  "WindowsWritten": false,
+  "windows": {
+    "documentationCommit": "43578a615551158faf7df9278547abbee6bcdb49",
+    "productSource": "1fbc63f8737cc8b9415bafd19fb068b4856b1253",
+    "at": "2026-10-06T03:11:06.559Z",
+    "frozenFunctionalBaseline": "3d735745f1117d42a7859e87604a106351dca935",
+    "refs": {
+      "refs/heads/codex/android-shared-sync": "43578a615551158faf7df9278547abbee6bcdb49",
+      "refs/heads/codex/playtest-registration": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+      "refs/heads/codex/windows-player-journey": "f72e36fb84c3574fff0aeb2abed856454b14289d"
+    },
+    "selectedWindowsSource": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+    "pathsSinceFrozen": [
+      "mir2-web3/docs/AGENT-ORCHESTRATION.md",
+      "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "mir2-web3/docs/BACKEND-1TO1-PROGRESS.md",
+      "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "mir2-web3/docs/CRYSTAL-SERVER-PARITY.md",
+      "mir2-web3/docs/NATIVE-WINDOWS-PLAYER-QA.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/README.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/.gitattributes",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/README.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/actual-native-update-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/actual-native-update.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/native-installed-update-r9.py",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/installed-check-attempt1/run-actual-native-update.ps1",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/WN-CANDIDATE-20261001-invited-09-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-attested-client.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-package-process-attempt5.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/build-package-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate-final-verification.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate-verification-reuse.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/BUILD-ATTESTATION.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/RELEASE-STATEMENT.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/candidate/VERSION.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-input-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-input.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/installer-template-copy.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/inventory.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/package-client.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt2.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt3.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/build-package-process-attempt4.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt2-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt3-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-attempt4-error.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt1.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt2.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt3.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/previous-attempts/package-client-attempt4.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/prepare-real-fixtures-final.py",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-fixture-preflight-attempt1.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-input-long-path-diagnostic.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-helper-attempt2.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-helper-attempt3.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt2.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/previous-attempts/real-integration-preflight-attempt3.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-helper-preflight-attempt1.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-manifest-delta-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-final-old-r8-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-integration-final-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-package-integration-final.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-r8-r9-final-fixtures.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-update-qa-evidence.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/real-update-qa-final.md",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/qa/report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/r9-release-receipt.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/release-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/short-worktree-input-preparation.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/short-worktree-staging-path-preflight.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/update-archive.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-build.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-bundle-verification.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-bundle-verification.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater-installer-input.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/BUILD-UPDATER.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/bundle/UPDATER-BUNDLE.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/engine-release/ENGINE.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/local-release/updater/feed/latest.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/apply.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/create-stage.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-apply.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-create-stage.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-plan.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/deploy-preflight.sh",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/preflight.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/deployment/upload.log",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/inventory.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/public-https-publication-report.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/publish-process.json",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/release-r9/publication/publish-r9.ps1",
+      "mir2-web3/docs/generated/player-qa/caster-journey-20261001/shop-lifecycle-20261001.md"
+    ],
+    "pathsCount": 83,
+    "functionalPathsCount": 0,
+    "commitsSinceFrozen": 1,
+    "pr": {
+      "baseRefName": "codex/playtest-registration",
+      "headRefName": "codex/android-shared-sync",
+      "headRefOid": "43578a615551158faf7df9278547abbee6bcdb49",
+      "isDraft": true,
+      "number": 253,
+      "state": "OPEN",
+      "url": "https://github.com/Zombieliu/mir2/pull/253"
+    },
+    "readOnly": true
+  }
+}

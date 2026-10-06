@@ -56,7 +56,9 @@ pub(super) fn use_creature_special_item(
     let applied = apply_or_stack_duration_buff(
         world,
         BuffState {
-            real_time_duration: Some(super::buffs::RealTimeBuffDuration::new(u64::from(template.durability).saturating_mul(60_000))),
+            real_time_duration: Some(super::buffs::RealTimeBuffDuration::new(
+                u64::from(template.durability).saturating_mul(60_000),
+            )),
             key: key.into(),
             name: name.into(),
             description: String::new(),

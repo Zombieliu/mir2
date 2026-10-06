@@ -1,0 +1,8 @@
+{
+  "parent": "340aea86bd533f4954ddd3b323c3fffe4de78516",
+  "file": "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+  "sha256": "ae9533d1350487e6b1012933f08455cd9bbf98169873a4b9d797d3c51884a467",
+  "reconstructedFromParentAndUnchangedNewTestBlock": true,
+  "capturedRedInputMatches": true,
+  "productRendererChange": false
+}

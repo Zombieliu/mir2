@@ -80,7 +80,10 @@ fn session_on_map(
 
     let mut session = SimulationSession::new(config.clone());
     login_and_start(&mut session);
-    assert_eq!(session.world_snapshot().map_file_name.as_deref(), Some(map_file_name));
+    assert_eq!(
+        session.world_snapshot().map_file_name.as_deref(),
+        Some(map_file_name)
+    );
     (config, session)
 }
 
@@ -192,30 +195,31 @@ fn town_teleport_uses_exact_bind_transform_and_preserves_direction() {
 
 #[test]
 fn visiting_bichon_city_safe_zone_rebinds_scroll_and_persists_after_logout() {
-    let (config, mut session) = session_on_map(
-        "TownTeleport",
-        "0",
-        Point { x: 205, y: 62 },
-        None,
-    );
+    let (config, mut session) = session_on_map("TownTeleport", "0", Point { x: 205, y: 62 }, None);
     let city_safe_tile = Point { x: 330, y: 265 };
     let city_bind = Point { x: 328, y: 264 };
 
     // Accepted shared-Zone movement is projected into the personal save.
     session.force_authoritative_player_transform(city_safe_tile, MirDirection::Right);
     session.force_authoritative_player_transform(Point { x: 205, y: 62 }, MirDirection::Left);
-    session.save_active_character().expect("persist new safe-zone bind");
+    session
+        .save_active_character()
+        .expect("persist new safe-zone bind");
     drop(session);
 
-    let saved = config
-        .account_store
-        .lock()
-        .expect("account store")
-        .accounts[ACCOUNT]
-        .saves[&0]
-        .clone();
-    assert_eq!(saved.bind_point.as_ref().map(|bind| bind.position.clone()), Some(city_bind.clone()));
-    assert_eq!(saved.bind_point.as_ref().map(|bind| bind.map_file_name.as_str()), Some("0"));
+    let saved =
+        config.account_store.lock().expect("account store").accounts[ACCOUNT].saves[&0].clone();
+    assert_eq!(
+        saved.bind_point.as_ref().map(|bind| bind.position.clone()),
+        Some(city_bind.clone())
+    );
+    assert_eq!(
+        saved
+            .bind_point
+            .as_ref()
+            .map(|bind| bind.map_file_name.as_str()),
+        Some("0")
+    );
 
     let mut reloaded = SimulationSession::new(config);
     login_and_start(&mut reloaded);
@@ -223,7 +227,10 @@ fn visiting_bichon_city_safe_zone_rebinds_scroll_and_persists_after_logout() {
         unique_id: ITEM_UID,
         grid: MirGridType::Inventory,
     });
-    assert_eq!(player_transform(&reloaded), (city_bind.clone(), MirDirection::Left));
+    assert_eq!(
+        player_transform(&reloaded),
+        (city_bind.clone(), MirDirection::Left)
+    );
     assert!(packets.iter().any(|packet| matches!(
         packet,
         ServerPacket::UserLocation { location }
@@ -277,18 +284,19 @@ fn dungeon_escape_samples_around_persisted_city_bind() {
     assert!((landed.x - city_bind.x).abs() <= 100);
     assert!((landed.y - city_bind.y).abs() <= 100);
     assert!(packets.iter().any(|packet| matches!(
-        packet, ServerPacket::UseItem { unique_id: ITEM_UID, success: true, .. }
+        packet,
+        ServerPacket::UseItem {
+            unique_id: ITEM_UID,
+            success: true,
+            ..
+        }
     )));
 }
 
 #[test]
 fn legacy_save_inside_city_safe_zone_recovers_its_bind_on_start() {
-    let (_config, mut session) = session_on_map(
-        "TownTeleport",
-        "0",
-        Point { x: 330, y: 265 },
-        None,
-    );
+    let (_config, mut session) =
+        session_on_map("TownTeleport", "0", Point { x: 330, y: 265 }, None);
     session.force_authoritative_player_transform(Point { x: 205, y: 62 }, MirDirection::Left);
     session.handle_packet(ClientPacket::UseItem {
         unique_id: ITEM_UID,

@@ -1,0 +1,11 @@
+97476eaad9f8bbbdf75801c0d07e92f1f58e1307
+## codex/android-player-journey...origin/codex/android-player-journey
+ M mir2-web3/apps/game-client/platform-android/README.md
+ M mir2-web3/apps/game-client/platform-android/src/entity_render.rs
+ M mir2-web3/docs/AGENT-TASK-QUEUE.md
+ M mir2-web3/docs/FRONTEND-1TO1-GAPS.md
+ .../apps/game-client/platform-android/README.md    |   9 +
+ .../platform-android/src/entity_render.rs          | 412 ++++++++++++++++-----
+ mir2-web3/docs/AGENT-TASK-QUEUE.md                 |  14 +
+ mir2-web3/docs/FRONTEND-1TO1-GAPS.md               |  15 +
+ 4 files changed, 365 insertions(+), 85 deletions(-)

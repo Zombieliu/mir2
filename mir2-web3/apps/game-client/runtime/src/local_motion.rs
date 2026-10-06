@@ -138,8 +138,7 @@ impl LocalMotionSegment {
         // their Crystal clocks; never extend travel when a display pulse is late.
         let duration = f64::from(self.phase_count.max(1)) * MOVE_PHASE_INTERVAL_MS;
         let progress = ((now_ms - self.started_ms) / duration).clamp(0.0, 1.0) as f32;
-        Vec2::new(self.from_x, self.from_y)
-            .lerp(Vec2::new(self.to_x, self.to_y), progress)
+        Vec2::new(self.from_x, self.from_y).lerp(Vec2::new(self.to_x, self.to_y), progress)
     }
 
     fn current_offset(&self, cell_width: f32, cell_height: f32) -> Vec2 {
@@ -321,10 +320,15 @@ impl LocalMotionPresentationShadow {
     fn set_presentation_enabled(&mut self, enabled: bool) {
         self.presentation_enabled = enabled;
         #[cfg(not(target_arch = "wasm32"))]
-        { self.smooth_display = std::env::var("MIR2_NATIVE_SMOOTH_MOVEMENT").as_deref() == Ok("1"); }
+        {
+            self.smooth_display =
+                std::env::var("MIR2_NATIVE_SMOOTH_MOVEMENT").as_deref() == Ok("1");
+        }
     }
 
-    pub(crate) fn smooth_display_enabled(&self) -> bool { self.smooth_display }
+    pub(crate) fn smooth_display_enabled(&self) -> bool {
+        self.smooth_display
+    }
 
     pub(crate) fn presentation_enabled(&self) -> bool {
         self.presentation_enabled
@@ -513,7 +517,11 @@ impl LocalMotionPresentationShadow {
                     handoff_center = Some((previous.command_from_x, previous.command_from_y));
                 }
                 presentation_committed = previous.presentation_committed;
-                let current = if self.smooth_display { previous.smooth_pose(self.now_ms) } else { previous.current_pose() };
+                let current = if self.smooth_display {
+                    previous.smooth_pose(self.now_ms)
+                } else {
+                    previous.current_pose()
+                };
                 if chebyshev_distance(current, target) <= MAX_SMOOTH_TILE_DISTANCE {
                     effective_from = current;
                 }
@@ -699,7 +707,8 @@ impl LocalMotionPresentationShadow {
             && center.x <= from.x.max(target.x).ceil()
             && center.y >= from.y.min(target.y).floor()
             && center.y <= from.y.max(target.y).ceil();
-        let normal_center = inside_path_bounds && chebyshev_distance(center, target) <= MAX_SMOOTH_TILE_DISTANCE;
+        let normal_center =
+            inside_path_bounds && chebyshev_distance(center, target) <= MAX_SMOOTH_TILE_DISTANCE;
         let confirmed_handoff = segment.handoff_center == Some((center_x, center_y));
         if !normal_center && !confirmed_handoff {
             self.target_mismatch_count = self.target_mismatch_count.saturating_add(1);
@@ -712,8 +721,13 @@ impl LocalMotionPresentationShadow {
         self.candidate_match_count = self.candidate_match_count.saturating_add(1);
         let target_relative = if self.smooth_display {
             let pose = segment.smooth_pose(now_ms);
-            Vec2::new((pose.x - segment.to_x) * cell_width, (pose.y - segment.to_y) * cell_height)
-        } else { segment.current_offset(cell_width, cell_height) };
+            Vec2::new(
+                (pose.x - segment.to_x) * cell_width,
+                (pose.y - segment.to_y) * cell_height,
+            )
+        } else {
+            segment.current_offset(cell_width, cell_height)
+        };
         Some(
             target_relative
                 + Vec2::new(
@@ -1031,7 +1045,9 @@ impl Plugin for LocalMotionPresentationShadowPlugin {
             .init_resource::<LocalMotionPresentationShadow>()
             .add_systems(
                 PreUpdate,
-                ingest_local_motion_system.after(motion::CrystalMoveClockSet).after(super::NativeMotionProducerSet),
+                ingest_local_motion_system
+                    .after(motion::CrystalMoveClockSet)
+                    .after(super::NativeMotionProducerSet),
             )
             .add_systems(PostUpdate, publish_local_motion_diagnostics_system);
     }
@@ -1523,7 +1539,10 @@ mod tests {
         shadow.smooth_display = true;
         shadow.apply_event(reset_event());
         shadow.apply_event(walk_command(0.0));
-        let at = |s: &mut LocalMotionPresentationShadow, t, center| s.candidate_offset_for_applied_center("self", center, 10, t, 48.0, 32.0).unwrap();
+        let at = |s: &mut LocalMotionPresentationShadow, t, center| {
+            s.candidate_offset_for_applied_center("self", center, 10, t, 48.0, 32.0)
+                .unwrap()
+        };
         let start = at(&mut shadow, 0.0, 10);
         let first = at(&mut shadow, 10.0, 10);
         let second = at(&mut shadow, 20.0, 10);
@@ -1533,16 +1552,32 @@ mod tests {
         assert!((second.x - (recentered.x + 48.0)).abs() < 0.001);
         assert_eq!(at(&mut shadow, 600.0, 11), Vec2::ZERO);
         assert_eq!(at(&mut shadow, 900.0, 11), Vec2::ZERO);
-        assert_eq!(shadow.segment.as_ref().unwrap().phase_index, 0, "display reads must not advance sprite phases");
+        assert_eq!(
+            shadow.segment.as_ref().unwrap().phase_index,
+            0,
+            "display reads must not advance sprite phases"
+        );
         shadow.now_ms = 300.0;
         let before_turn = at(&mut shadow, 300.0, 10);
         shadow.apply_event(MovementShadowEvent::CommandSent {
-            at_ms:300.0, direction:"Right".to_owned(), mode:"run".to_owned(),
-            from_x:11, from_y:10, to_x:13, to_y:10, phase_count:None,
+            at_ms: 300.0,
+            direction: "Right".to_owned(),
+            mode: "run".to_owned(),
+            from_x: 11,
+            from_y: 10,
+            to_x: 13,
+            to_y: 10,
+            phase_count: None,
         });
-        assert_eq!(at(&mut shadow, 300.0, 10), before_turn, "successor starts at the displayed pose");
+        assert_eq!(
+            at(&mut shadow, 300.0, 10),
+            before_turn,
+            "successor starts at the displayed pose"
+        );
         shadow.clear_state();
-        assert!(shadow.candidate_offset_for_applied_center("self", 10, 10, 301.0, 48.0, 32.0).is_none());
+        assert!(shadow
+            .candidate_offset_for_applied_center("self", 10, 10, 301.0, 48.0, 32.0)
+            .is_none());
     }
 
     #[test]
@@ -1603,22 +1638,42 @@ mod tests {
     #[test]
     fn confirmed_successor_rebases_once_against_the_previous_command_origin() {
         let run = |at_ms, from_x, to_x| MovementShadowEvent::CommandSent {
-            at_ms, direction:"Right".to_owned(), mode:"run".to_owned(),
-            from_x, from_y:10, to_x, to_y:10, phase_count:Some(6),
+            at_ms,
+            direction: "Right".to_owned(),
+            mode: "run".to_owned(),
+            from_x,
+            from_y: 10,
+            to_x,
+            to_y: 10,
+            phase_count: Some(6),
         };
         let mut shadow = LocalMotionPresentationShadow::default();
         shadow.smooth_display = true;
         shadow.apply_event(reset_event());
-        shadow.apply_event(run(0.0,10,12));
-        let previous = shadow.candidate_offset_for_applied_center("self",10,10,650.0,48.0,32.0).unwrap();
-        shadow.apply_event(ack(650.0,12,"confirmed"));
+        shadow.apply_event(run(0.0, 10, 12));
+        let previous = shadow
+            .candidate_offset_for_applied_center("self", 10, 10, 650.0, 48.0, 32.0)
+            .unwrap();
+        shadow.apply_event(ack(650.0, 12, "confirmed"));
         shadow.now_ms = 650.0;
-        shadow.apply_event(run(650.0,12,14));
-        let pending = shadow.candidate_offset_for_applied_center("self",10,10,650.0,48.0,32.0).unwrap();
-        assert_eq!(pending,previous, "late ACK + successor must not reset the old-center camera to zero");
-        let committed = shadow.candidate_offset_for_applied_center("self",12,10,650.0,48.0,32.0).unwrap();
+        shadow.apply_event(run(650.0, 12, 14));
+        let pending = shadow
+            .candidate_offset_for_applied_center("self", 10, 10, 650.0, 48.0, 32.0)
+            .unwrap();
+        assert_eq!(
+            pending, previous,
+            "late ACK + successor must not reset the old-center camera to zero"
+        );
+        let committed = shadow
+            .candidate_offset_for_applied_center("self", 12, 10, 650.0, 48.0, 32.0)
+            .unwrap();
         assert_eq!(10.0 * 48.0 + pending.x, 12.0 * 48.0 + committed.x);
-        assert!(shadow.candidate_offset_for_applied_center("self",10,10,651.0,48.0,32.0).is_none(), "old origin is retired after handoff");
+        assert!(
+            shadow
+                .candidate_offset_for_applied_center("self", 10, 10, 651.0, 48.0, 32.0)
+                .is_none(),
+            "old origin is retired after handoff"
+        );
     }
 
     #[test]
@@ -1645,11 +1700,17 @@ mod tests {
         shadow.apply_event(run(300.0, 12, 14));
 
         let inherited = shadow.segment.as_ref().expect("successor segment");
-        assert_ne!(inherited.from_x, 12.0, "fixture must inherit an old fractional pose");
+        assert_ne!(
+            inherited.from_x, 12.0,
+            "fixture must inherit an old fractional pose"
+        );
         assert!(inherited.presentation_committed);
         assert!(shadow.clear_stale_for_scene_reset());
 
-        let rebased = shadow.segment.as_ref().expect("same-frame command survives");
+        let rebased = shadow
+            .segment
+            .as_ref()
+            .expect("same-frame command survives");
         assert_eq!((rebased.from_x, rebased.from_y), (12.0, 10.0));
         assert!(!rebased.presentation_committed);
         assert!(!rebased.authoritative_confirmed);
@@ -1666,43 +1727,71 @@ mod tests {
     #[test]
     fn unconfirmed_corrected_or_reset_paths_never_grant_old_center_handoff() {
         let run = |at_ms, from_x, to_x| MovementShadowEvent::CommandSent {
-            at_ms, direction:"Right".to_owned(), mode:"run".to_owned(),
-            from_x, from_y:10, to_x, to_y:10, phase_count:Some(6),
+            at_ms,
+            direction: "Right".to_owned(),
+            mode: "run".to_owned(),
+            from_x,
+            from_y: 10,
+            to_x,
+            to_y: 10,
+            phase_count: Some(6),
         };
         for disposition in [None, Some("correction"), Some("degraded")] {
             let mut shadow = LocalMotionPresentationShadow::default();
             shadow.smooth_display = true;
             shadow.apply_event(reset_event());
-            shadow.apply_event(run(0.0,10,12));
-            if let Some(disposition) = disposition { shadow.apply_event(ack(650.0,12,disposition)); }
+            shadow.apply_event(run(0.0, 10, 12));
+            if let Some(disposition) = disposition {
+                shadow.apply_event(ack(650.0, 12, disposition));
+            }
             shadow.now_ms = 650.0;
-            shadow.apply_event(run(650.0,12,14));
-            assert!(shadow.candidate_offset_for_applied_center("self",10,10,650.0,48.0,32.0).is_none());
+            shadow.apply_event(run(650.0, 12, 14));
+            assert!(shadow
+                .candidate_offset_for_applied_center("self", 10, 10, 650.0, 48.0, 32.0)
+                .is_none());
         }
         let mut shadow = LocalMotionPresentationShadow::default();
         shadow.apply_event(reset_event());
-        shadow.apply_event(run(0.0,10,12));
-        shadow.apply_event(ack(650.0,12,"confirmed"));
+        shadow.apply_event(run(0.0, 10, 12));
+        shadow.apply_event(ack(650.0, 12, "confirmed"));
         shadow.apply_event(reset_event());
         shadow.now_ms = 650.0;
-        shadow.apply_event(run(650.0,12,14));
-        assert!(shadow.candidate_offset_for_applied_center("self",10,10,650.0,48.0,32.0).is_none());
+        shadow.apply_event(run(650.0, 12, 14));
+        assert!(shadow
+            .candidate_offset_for_applied_center("self", 10, 10, 650.0, 48.0, 32.0)
+            .is_none());
     }
 
     #[test]
     fn native_producer_and_motion_consumer_share_the_same_preupdate() {
-        let _guard = BRIDGE_TEST_LOCK.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let _guard = BRIDGE_TEST_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         reset_local_motion_bridge_for_test();
         let mut app = App::new();
-        app.add_plugins((motion::CrystalMoveClockPlugin, LocalMotionPresentationShadowPlugin));
+        app.add_plugins((
+            motion::CrystalMoveClockPlugin,
+            LocalMotionPresentationShadowPlugin,
+        ));
         // Deliberately register the producer after the consumer. Only explicit
         // system-set ordering, not registration order, makes this deterministic.
-        app.add_systems(PreUpdate, (|| {
-            enqueue_local_motion_event_json(serde_json::to_string(&reset_event()).unwrap());
-            enqueue_local_motion_event_json(serde_json::to_string(&walk_command(100.0)).unwrap());
-        }).in_set(super::super::NativeMotionProducerSet));
+        app.add_systems(
+            PreUpdate,
+            (|| {
+                enqueue_local_motion_event_json(serde_json::to_string(&reset_event()).unwrap());
+                enqueue_local_motion_event_json(
+                    serde_json::to_string(&walk_command(100.0)).unwrap(),
+                );
+            })
+            .in_set(super::super::NativeMotionProducerSet),
+        );
         app.world_mut().run_schedule(PreUpdate);
-        assert_eq!(app.world().resource::<LocalMotionPresentationShadow>().command_event_count,1);
+        assert_eq!(
+            app.world()
+                .resource::<LocalMotionPresentationShadow>()
+                .command_event_count,
+            1
+        );
         reset_local_motion_bridge_for_test();
     }
 

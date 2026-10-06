@@ -1,0 +1,124 @@
+{
+  "source": "76d51415b5ceed667898a720c698b3a062bf7790",
+  "versionCode": 34,
+  "scene": "normal-intent-isolation",
+  "actualDevice": "emulator-5554",
+  "offlineOnly": true,
+  "commands": [
+    {
+      "name": "0-cold-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T18:17:23.586Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T18:17:23.618Z"
+    },
+    {
+      "name": "0-cold-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~E5o7KoGpronFVrGav6M8rw==/com.mir2.web3-Q3jfkk4eq3sOci8Hc8cQCw==/base.apk"
+      ],
+      "started": "2026-10-02T18:17:23.618Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T18:17:23.860Z"
+    },
+    {
+      "name": "0-cold-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T18:17:23.860Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T18:17:23.883Z"
+    },
+    {
+      "name": "stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T18:17:23.883Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T18:17:23.906Z"
+    },
+    {
+      "name": "start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "gameshop-jni"
+      ],
+      "started": "2026-10-02T18:17:23.906Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T18:17:24.356Z"
+    },
+    {
+      "name": "pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T18:17:24.356Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T18:17:24.391Z"
+    },
+    {
+      "name": "0-cold.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T18:17:29.394Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T18:17:29.918Z"
+    },
+    {
+      "name": "0-cold-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25060",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T18:17:29.918Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T18:17:29.947Z"
+    }
+  ],
+  "realAuthenticationAccepted": false,
+  "realNetworkAccepted": false,
+  "physicalDeviceAccepted": false,
+  "pid": "25060",
+  "actualScreenshotSize": {
+    "width": 2340,
+    "height": 1080
+  },
+  "latestLog": "0-cold-pid.log",
+  "latestTotals": {
+    "gl506": 11,
+    "uninitializedColor": 11,
+    "fatalOrPanic": 0
+  },
+  "javaProducerSent": false,
+  "sharedConsumerObserved": false
+}

@@ -1,0 +1,2 @@
+    versionCode=11 minSdk=31 targetSdk=35
+    versionName=0.1.8-phone-panels

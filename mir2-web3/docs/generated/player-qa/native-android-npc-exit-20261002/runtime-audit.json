@@ -1,0 +1,80 @@
+{
+  "source": "545a34abb34415e61a6dd2f274f48914f0d0b698",
+  "versionCode": 21,
+  "distinctPids": 4,
+  "entries": [
+    {
+      "directory": "device",
+      "scene": "debug-login",
+      "pid": 12918,
+      "log": "raw/v21/device/debug-login-pid.log",
+      "gl506": 33,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": []
+    },
+    {
+      "directory": "device",
+      "scene": "npc-ingress",
+      "pid": 12994,
+      "log": "raw/v21/device/npc-ingress-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 10:41:22.853 12994 13016 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"npc-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = true;"
+      ]
+    },
+    {
+      "directory": "touch-device",
+      "scene": "npc-ingress",
+      "pid": 13102,
+      "log": "raw/v21/touch-device/npc-ingress-after-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 10:42:34.735 13102 13124 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"npc-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = true;"
+      ]
+    },
+    {
+      "directory": "menu-device",
+      "scene": "npc-ingress",
+      "pid": 13221,
+      "log": "raw/v21/menu-device/npc-ingress-menu-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "producer": [
+        "10-02 10:44:40.442 13221 13245 I event src/ui_preview.rs:1183: ANDROID_QUEST_PREVIEW_RECEIVED_MODELS_APPLIED_NOT_LIVEscene = \"npc-ingress\"; count = 1; quest_id = Some(2100004); dialog_open = true;"
+      ]
+    }
+  ],
+  "gl506": 33,
+  "logCounting": "One latest cumulative log per distinct PID; canonical event only; no before/after double count",
+  "originalFramesInspectedByPrimary": 7,
+  "screenshotObservations": {
+    "normalLogin": "Empty credentials; Test server not configured",
+    "receivedNpcDialogue": "PASS bounded title/body/Exit visible",
+    "actualNpcExitTap": "PASS dialogue disappears in two fresh processes",
+    "hudRestorationAfterNpcExit": "PASS bounded HP/MP, belt, joystick and phone actions actually visible in both after frames",
+    "restoredMenuButtonTap": "PASS actual Menu tap opens phone panel rail",
+    "questPhoneReadability": "NOT RERUN or repaired here; v20 narrow/small text FAIL preserved"
+  },
+  "cause": "Feature-only npc-ingress pinned a manual NpcDialog UiPanel; its closed model still blocked shared action/HUD guards",
+  "fix": "Only received-preview panel initialization releases pin. Open dialogue remains modal; legacy npc specimen unchanged",
+  "sourceRegression": "Compiled 0/1 red, then 1/1 green; included in 338 preview tests",
+  "zeroErrorRendererGate": "FAIL",
+  "rendererFixThisLeaf": false,
+  "olderV20Gl506": 73,
+  "olderV19Gl506": 135,
+  "olderEvidenceUnchanged": true,
+  "actualJavaJniAuthenticatedQuest": false,
+  "questOrRewardSuccess": false,
+  "realHttpsWss": false,
+  "zoneSave": false,
+  "fullPhoneUiAccepted": false,
+  "completeResourcesAccepted": false,
+  "physicalDeviceAccepted": false,
+  "wholeGoal": "Active"
+}

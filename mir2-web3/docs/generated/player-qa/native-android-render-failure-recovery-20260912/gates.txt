@@ -1,0 +1,7 @@
+cargo +1.95.0 fmt --check: PASS
+cargo +1.95.0 test --locked --offline --features ui-preview: PASS (154/154)
+MIR2_ANDROID_MODE=check build-android.sh: PASS (API 31, aarch64-linux-android)
+MIR2_ANDROID_MODE=package MIR2_ANDROID_VARIANT=uiPreview with absolute approved local UI/world/entity roots, pack ID local-player-shards-20260912 and exact local entity manifest: PASS
+Entity release alignment: PASS (35 atlases, 102 pages, 23,224 rects)
+adb install -r app-uiPreview.apk: PASS (streamed install)
+Emulator render capture: NOT ACCEPTED (preview-ready followed by DeviceLost)

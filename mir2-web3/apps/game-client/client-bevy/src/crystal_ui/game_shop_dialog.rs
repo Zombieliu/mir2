@@ -5,6 +5,9 @@ use crate::game_shop::GameShopEntry;
 use std::collections::BTreeMap;
 use unicode_segmentation::UnicodeSegmentation;
 
+#[path = "game_shop_phone.rs"]
+pub mod phone;
+
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum Section {
     #[default]
@@ -442,9 +445,11 @@ pub(super) fn process_pointer(
     mouse: Option<Res<ButtonInput<MouseButton>>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut wheel: MessageReader<MouseWheel>,
+    phone: Option<Res<phone::PhoneGameShopPresentation>>,
 ) {
     let scroll: f32 = wheel.read().map(|event| event.y).sum();
-    if !state.shop_open()
+    if phone.as_deref().is_some_and(|phone| phone.is_valid())
+        || !state.shop_open()
         || state.game_shop_dialog.confirmation.is_some()
         || state.leave_game.blocks()
         || state.friends.modal.is_some()
@@ -1477,6 +1482,7 @@ pub(super) fn render_confirmation_system(
     )>,
     mut state: ResMut<NativePlayerUiState>,
     assets: Option<Res<AssetServer>>,
+    phone: Option<Res<phone::PhoneGameShopPresentation>>,
 ) {
     for entity in &previous {
         commands.entity(entity).despawn();
@@ -1499,7 +1505,7 @@ pub(super) fn render_confirmation_system(
             );
         }
     }
-    if !state.shop_open() {
+    if !state.shop_open() || phone.as_deref().is_some_and(|phone| phone.is_valid()) {
         return;
     }
     let (Some(prompt), Ok(root)) = (&state.game_shop_dialog.confirmation, roots.single()) else {
@@ -1585,6 +1591,10 @@ fn format_number(value: u64) -> String {
     }
     result
 }
+
+#[cfg(test)]
+#[path = "game_shop_hit_tests.rs"]
+mod hit_tests;
 
 #[cfg(test)]
 mod tests {

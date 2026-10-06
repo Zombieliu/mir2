@@ -1,0 +1,9 @@
+{
+  "classification": "Publication setup failure, not product regression",
+  "originalToolOutputPreservedInHistory": true,
+  "cause": "The generated player-qa parent is Git-ignored; the first non-force add omitted the new raw proof directory while staging five tracked docs.",
+  "initialDocsOnlyCommit": "d47b6e2d21e9c6d0326254e39388ec9f3ef69be0",
+  "initialIndexAndHeadRawChecks": "FAILED missing raw Git blobs, not accepted as integrity pass",
+  "repair": "Force-add only this reviewed v21 proof directory, run all working/index checks before a normal follow-up commit; keep existing ignore rules unchanged.",
+  "laterPublication": "Verify remote and Draft PR contain both the source and complete proof; do not publish missing-proof checkpoint alone."
+}

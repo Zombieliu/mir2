@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.mir2.web3.GatewaySessionTest" tests="23" skipped="0" failures="0" errors="0" timestamp="2026-10-01T21:37:12" hostname="HenrydeMacBook-Pro-2.local" time="12.752">
+  <properties/>
+  <testcase name="rejectedLoginNeverEntersCharacterSelection" classname="com.mir2.web3.GatewaySessionTest" time="0.438"/>
+  <testcase name="personalSkillPacketsSurviveMapTransitionButNotInitialBootstrap" classname="com.mir2.web3.GatewaySessionTest" time="0.898"/>
+  <testcase name="gameplayWritesRequireAnAuthenticatedInGameSession" classname="com.mir2.web3.GatewaySessionTest" time="0.261"/>
+  <testcase name="inventoryReceiptsRequireOwnerBootstrapAndSurviveMapLoading" classname="com.mir2.web3.GatewaySessionTest" time="1.403"/>
+  <testcase name="rejectsCleartextAndCredentialBearingEndpoints" classname="com.mir2.web3.GatewaySessionTest" time="0.038"/>
+  <testcase name="untrustedTlsCertificateFailsClosed" classname="com.mir2.web3.GatewaySessionTest" time="0.062"/>
+  <testcase name="integerOwnerIdSupportsFullUnsignedRangeAcrossMapLoading" classname="com.mir2.web3.GatewaySessionTest" time="0.039"/>
+  <testcase name="tlsLoginStartAndAuthoritativePosition" classname="com.mir2.web3.GatewaySessionTest" time="0.038"/>
+  <testcase name="unsolicitedLocationDoesNotProduceWorld" classname="com.mir2.web3.GatewaySessionTest" time="0.247"/>
+  <testcase name="userInformationCannotMutatePublishedWorldBeforeOwnerValidation" classname="com.mir2.web3.GatewaySessionTest" time="2.908"/>
+  <testcase name="personalSkillPacketsForwardOnlyInsideAuthenticatedGameAndPreservePayload" classname="com.mir2.web3.GatewaySessionTest" time="0.693"/>
+  <testcase name="npcPacketsRequireAnAuthenticatedCurrentSceneAndKeepTheirPayload" classname="com.mir2.web3.GatewaySessionTest" time="1.229"/>
+  <testcase name="receivedChatRequiresOwnerBootstrapAndPreservesOrderedPeerAndSystemPayloads" classname="com.mir2.web3.GatewaySessionTest" time="1.515"/>
+  <testcase name="renderDeadlineRemainsArmedUntilAWorldSnapshotIsDelivered" classname="com.mir2.web3.GatewaySessionTest" time="0.059"/>
+  <testcase name="malformedPositionInvalidatesSession" classname="com.mir2.web3.GatewaySessionTest" time="0.038"/>
+  <testcase name="characterCreateAndDeleteUseDedicatedRosterPhaseCommands" classname="com.mir2.web3.GatewaySessionTest" time="0.249"/>
+  <testcase name="entityPacketsForwardOnlyAfterAuthoritativeWorldEntry" classname="com.mir2.web3.GatewaySessionTest" time="0.481"/>
+  <testcase name="oversizedNpcPacketFailsClosedAtTheJniBoundary" classname="com.mir2.web3.GatewaySessionTest" time="0.261"/>
+  <testcase name="characterOperationFailuresAreBoundedAndRetryable" classname="com.mir2.web3.GatewaySessionTest" time="0.261"/>
+  <testcase name="forwardsOnlyBoundedAuthoritativeTransactionReceipts" classname="com.mir2.web3.GatewaySessionTest" time="0.256"/>
+  <testcase name="snapshotMustWaitForStartAckAndMatchSelfObject" classname="com.mir2.web3.GatewaySessionTest" time="0.037"/>
+  <testcase name="startCannotBypassLoginOrSelectUnlistedCharacter" classname="com.mir2.web3.GatewaySessionTest" time="0.45"/>
+  <testcase name="playerWalletPacketsRequireOwnerBootstrapAndSurviveMapLoading" classname="com.mir2.web3.GatewaySessionTest" time="0.887"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

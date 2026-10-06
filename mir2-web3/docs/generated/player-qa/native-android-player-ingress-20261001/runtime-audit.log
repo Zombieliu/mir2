@@ -1,0 +1,66 @@
+{
+  "source": "f04a7439938579480b592b5d4e7381014a612dff",
+  "captureCount": 9,
+  "logs": [
+    {
+      "name": "debug-login-pid6221.log",
+      "capturedLines": 184,
+      "errorFatalPanicSignalLines": 0,
+      "missingWeightBarLines": 0
+    },
+    {
+      "name": "preview-character-final-pid6451.log",
+      "capturedLines": 814,
+      "errorFatalPanicSignalLines": 2,
+      "missingWeightBarLines": 4
+    },
+    {
+      "name": "preview-inventory-final-pid6653.log",
+      "capturedLines": 416,
+      "errorFatalPanicSignalLines": 3,
+      "missingWeightBarLines": 6
+    }
+  ],
+  "starts": [
+    {
+      "name": "start-debug.log",
+      "status": "timeout",
+      "waitTimeMs": 12812
+    },
+    {
+      "name": "start-preview-character.log",
+      "status": "timeout",
+      "waitTimeMs": 14099
+    },
+    {
+      "name": "start-preview-inventory.log",
+      "status": "ok",
+      "waitTimeMs": 4798
+    }
+  ],
+  "observed": {
+    "offlineStatsI": {
+      "hp": "80/200",
+      "mp": "20/100",
+      "ac": "2-7",
+      "dc": "12-24"
+    },
+    "offlineStatsII": {
+      "experience": "12.5%",
+      "bag": "66/100",
+      "wear": "25/50",
+      "hand": "9/25"
+    },
+    "offlineBagAndHudGold": 12352,
+    "offlineBagAvailableWeight": 34,
+    "statsTabsAndBothClosesRespond": true,
+    "ordinaryPanelsClearPhoneHudAndThumbs": true,
+    "sourceMarkerCredit503": true,
+    "renderedCreditValueAccepted": false,
+    "originalWeightBarsAccepted": false,
+    "fullPhoneUiAccepted": false,
+    "launchPerformanceAccepted": false,
+    "authenticatedGameplayAccepted": false,
+    "physicalDeviceAccepted": false
+  }
+}

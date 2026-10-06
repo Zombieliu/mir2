@@ -1,0 +1,116 @@
+node:internal/modules/run_main:104
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: shop_good_json changed frozen behavior
++ actual - expected
+... Skipped lines
+
+  'fn projection() {\n' +
+    '    let id = value_u64(\n' +
+    '        item.get("uniqueId")\n' +
+    '            .or_else(|| item.get("unique_id"))\n' +
+    '            .or_else(|| item.get("id"))\n' +
+...
+    '    });\n' +
++   '    let icon_geometry = icon.and_then(|index| geometry(NativeItemLibrary::Items, index));\n' +
+-   '    let icon_geometry = icon.and_then(item_frame_geometry);\n' +
+    '    Some(json!({\n' +
+    '        "unique_id": id,\n' +
+    '        "use_pearls": cursor.npc_shop_uses_pearls,\n' +
+    '        "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),\n' +
+    '        "price": value_u32(item.get("price")).unwrap_or_default(),\n' +
+...
+    '        "panel_type": value_u32(item.get("panelType").or_else(|| item.get("panel_type")))\n' +
++   '            .and_then(|value| u8::try_from(value).ok()).unwrap_or(u8::try_from(fallback).unwrap_or_default()),\n' +
+-   '            .and_then(|value| u8::try_from(value).ok())\n' +
+-   '            .unwrap_or(u8::try_from(fallback).unwrap_or_default()),\n' +
+    '        "icon": icon.unwrap_or_default(),\n' +
+    '        "icon_width": icon_geometry.map(|frame| frame.width).unwrap_or_default(),\n' +
+    '        "icon_height": icon_geometry.map(|frame| frame.height).unwrap_or_default(),\n' +
+    '        "description": value_string(item.get("description")).unwrap_or_default(),\n' +
+    '        "tooltip_source": tooltip_source,\n' +
+
+    at file:///Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/docs/generated/player-qa/native-android-npc-ingress-20261002/equivalence-audit.mjs:70:10
+    at Array.map (<anonymous>)
+    at file:///Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/docs/generated/player-qa/native-android-npc-ingress-20261002/equivalence-audit.mjs:67:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:98:5) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 'fn projection() {\n' +
+    '    let id = value_u64(\n' +
+    '        item.get("uniqueId")\n' +
+    '            .or_else(|| item.get("unique_id"))\n' +
+    '            .or_else(|| item.get("id"))\n' +
+    '            .or_else(|| item.get("itemIndex"))\n' +
+    '            .or_else(|| item.get("item_index")),\n' +
+    '    )?;\n' +
+    '    let tooltip_source = item\n' +
+    '        .get("tooltipSource")\n' +
+    '        .cloned()\n' +
+    '        .or_else(|| native_tooltip_source_for_user_item(item, cursor).map(|source| json!(source)));\n' +
+    '    let count = value_u32(item.get("count").or_else(|| item.get("quantity"))).unwrap_or(1);\n' +
+    '    let icon = native_user_item_icon(item, count).or_else(|| {\n' +
+    '        value_u32(item.get("icon"))\n' +
+    '            .and_then(|value| u16::try_from(value).ok())\n' +
+    '            .filter(|value| *value != 0)\n' +
+    '    });\n' +
+    '    let icon_geometry = icon.and_then(|index| geometry(NativeItemLibrary::Items, index));\n' +
+    '    Some(json!({\n' +
+    '        "unique_id": id,\n' +
+    '        "use_pearls": cursor.npc_shop_uses_pearls,\n' +
+    '        "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),\n' +
+    '        "price": value_u32(item.get("price")).unwrap_or_default(),\n' +
+    '        "count": u16::try_from(count).unwrap_or(1),\n' +
+    '        "stock": value_i32(item.get("stock")).unwrap_or(-1),\n' +
+    '        "panel_type": value_u32(item.get("panelType").or_else(|| item.get("panel_type")))\n' +
+    '            .and_then(|value| u8::try_from(value).ok()).unwrap_or(u8::try_from(fallback).unwrap_or_default()),\n' +
+    '        "icon": icon.unwrap_or_default(),\n' +
+    '        "icon_width": icon_geometry.map(|frame| frame.width).unwrap_or_default(),\n' +
+    '        "icon_height": icon_geometry.map(|frame| frame.height).unwrap_or_default(),\n' +
+    '        "description": value_string(item.get("description")).unwrap_or_default(),\n' +
+    '        "tooltip_source": tooltip_source,\n' +
+    '    }))\n' +
+    '}\n',
+  expected: 'fn projection() {\n' +
+    '    let id = value_u64(\n' +
+    '        item.get("uniqueId")\n' +
+    '            .or_else(|| item.get("unique_id"))\n' +
+    '            .or_else(|| item.get("id"))\n' +
+    '            .or_else(|| item.get("itemIndex"))\n' +
+    '            .or_else(|| item.get("item_index")),\n' +
+    '    )?;\n' +
+    '    let tooltip_source = item\n' +
+    '        .get("tooltipSource")\n' +
+    '        .cloned()\n' +
+    '        .or_else(|| native_tooltip_source_for_user_item(item, cursor).map(|source| json!(source)));\n' +
+    '    let count = value_u32(item.get("count").or_else(|| item.get("quantity"))).unwrap_or(1);\n' +
+    '    let icon = native_user_item_icon(item, count).or_else(|| {\n' +
+    '        value_u32(item.get("icon"))\n' +
+    '            .and_then(|value| u16::try_from(value).ok())\n' +
+    '            .filter(|value| *value != 0)\n' +
+    '    });\n' +
+    '    let icon_geometry = icon.and_then(item_frame_geometry);\n' +
+    '    Some(json!({\n' +
+    '        "unique_id": id,\n' +
+    '        "use_pearls": cursor.npc_shop_uses_pearls,\n' +
+    '        "name": value_string(item.get("name")).unwrap_or_else(|| format!("Item #{id}")),\n' +
+    '        "price": value_u32(item.get("price")).unwrap_or_default(),\n' +
+    '        "count": u16::try_from(count).unwrap_or(1),\n' +
+    '        "stock": value_i32(item.get("stock")).unwrap_or(-1),\n' +
+    '        "panel_type": value_u32(item.get("panelType").or_else(|| item.get("panel_type")))\n' +
+    '            .and_then(|value| u8::try_from(value).ok())\n' +
+    '            .unwrap_or(u8::try_from(fallback).unwrap_or_default()),\n' +
+    '        "icon": icon.unwrap_or_default(),\n' +
+    '        "icon_width": icon_geometry.map(|frame| frame.width).unwrap_or_default(),\n' +
+    '        "icon_height": icon_geometry.map(|frame| frame.height).unwrap_or_default(),\n' +
+    '        "description": value_string(item.get("description")).unwrap_or_default(),\n' +
+    '        "tooltip_source": tooltip_source,\n' +
+    '    }))\n' +
+    '}\n',
+  operator: 'strictEqual'
+}
+
+Node.js v23.11.0

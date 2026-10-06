@@ -1,0 +1,92 @@
+[
+  {
+    "variant": "Debug",
+    "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "6ead8db6c0aecd7858bb10253b1608b4b3b7f55c0f3a678b6a96143519dd8f91"
+  },
+  {
+    "variant": "Debug",
+    "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "d0185047695b60092b5f8c33c7fec85ab8b9ecd3283bb117dae8ebfae5486f94"
+  },
+  {
+    "variant": "Debug",
+    "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "e8b09413d530b772f69c02054451ae1320d186c022f6b489008cf306ac5aa124"
+  },
+  {
+    "variant": "Debug",
+    "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+    "tests": 25,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "11f5b152d2c25d059ff55477cf13774d2de030ec79043b7d6783582dfb997629"
+  },
+  {
+    "variant": "Debug",
+    "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "b6337272ac3751b29eab630615210d5f5c63477d951898d98a5a2b0c55f4caa8"
+  },
+  {
+    "variant": "UiPreview",
+    "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+    "tests": 5,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "3991c646806cde62fae2b1a730faf199a7e85603385411bf0cd0f33bdb11cd2f"
+  },
+  {
+    "variant": "UiPreview",
+    "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "bf3f54b9b8dbb34dc0e349b93c21a0b861a5c93317d0837dfbe019a5cc7bad33"
+  },
+  {
+    "variant": "UiPreview",
+    "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "6aac72488eb11968a8531ced5ed0b8d8c772a32ca1dacf4b847d1b391ddb97e5"
+  },
+  {
+    "variant": "UiPreview",
+    "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+    "tests": 25,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "d94c8c98c14ff8eec47e77ce947c96de4d411575ae79097cb8c5fd9531bd8a7c"
+  },
+  {
+    "variant": "UiPreview",
+    "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+    "tests": 3,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "sha256": "050d47d0ddd1d5768d645786e1b7649e3e307b0f3941506e70ba85e05b0338e3"
+  }
+]

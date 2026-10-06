@@ -1,0 +1,63 @@
+{
+  "source": "cfac6ecd4bb66ac7c4b0a2625ff178f1703335a0",
+  "captures": 3,
+  "logs": [
+    {
+      "name": "debug-login-recovered-pid4438.log",
+      "capturedLines": 219,
+      "errorFatalPanicSignalLines": 0,
+      "missingWeightBarLines": 0
+    },
+    {
+      "name": "preview-character-pid4748.log",
+      "capturedLines": 220,
+      "errorFatalPanicSignalLines": 0,
+      "missingWeightBarLines": 0
+    },
+    {
+      "name": "preview-inventory-pid4622.log",
+      "capturedLines": 375,
+      "errorFatalPanicSignalLines": 0,
+      "missingWeightBarLines": 0
+    }
+  ],
+  "starts": [
+    {
+      "name": "start-debug.log",
+      "status": "timeout",
+      "waitTimeMs": 13463
+    },
+    {
+      "name": "start-debug-recovered.log",
+      "status": "ok",
+      "waitTimeMs": 638
+    },
+    {
+      "name": "start-preview-inventory.log",
+      "status": "ok",
+      "waitTimeMs": 546
+    },
+    {
+      "name": "start-preview-character.log",
+      "status": "ok",
+      "waitTimeMs": 433
+    }
+  ],
+  "observed": {
+    "offlineBagOriginalWeightBarVisible": true,
+    "offlineBagAvailableWeight": 34,
+    "offlineBagAndPhoneHudGold": 12352,
+    "offlineCharacterOriginalBodyAndWeaponVisible": true,
+    "weightAssetErrorsAbsentInCapturedPids": true,
+    "allFourWeightAssetBytesAccepted": true,
+    "phoneHudWeightVisualAccepted": false,
+    "alternateWeightRatiosAccepted": false,
+    "newControlsInteractionAccepted": false,
+    "fullPhoneUiAccepted": false,
+    "fullResourceReleaseAccepted": false,
+    "startupOrEmulatorStabilityAccepted": false,
+    "authenticatedGameplayAccepted": false,
+    "physicalDeviceAccepted": false
+  },
+  "observedRemoteHead": "f04a7439938579480b592b5d4e7381014a612dff"
+}

@@ -1,0 +1,10 @@
+Environment:
+MIR2_ANDROID_ENTITY_ASSET_ROOT=target/entity-proof-assets-with-archer-bow-20260912
+MIR2_ANDROID_REQUIRE_EXTENDED_ENTITY_ATLAS=1
+
+Command:
+cargo +1.95.0 test --locked --offline --features ui-preview entity_render::tests::configured_extended_atlas_resolves_real_archer_and_mount_when_present -- --exact --nocapture
+
+Result:
+test entity_render::tests::configured_extended_atlas_resolves_real_archer_and_mount_when_present ... ok
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 148 filtered out

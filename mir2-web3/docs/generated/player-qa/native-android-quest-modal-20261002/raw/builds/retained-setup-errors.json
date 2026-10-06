@@ -1,0 +1,6 @@
+{
+  "messageGreen": "Initial window was not settled before injecting an old scroll; failed at expected previous offset, not a product regression proof",
+  "messageSettledRed": "Intended patch failed due reverse hunk ordering; actual source remained fixed and scenario remained unsettled; not accepted as product red",
+  "originalMessageRed": "Old behavior genuinely inherited 180px; original raw input/log retained",
+  "modalSafety1": "Existing session reset clears confirmation; corrected expectation, no behavior changed"
+}

@@ -1,0 +1,115 @@
+{
+  "source": "d009f240247261146c1053b5ec8cdd934724cad8",
+  "frozenWindows": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "rust": [
+    {
+      "name": "chat-after.log",
+      "passed": 6,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "normal-final.log",
+      "passed": 273,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "preview-final.log",
+      "passed": 287,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "java": [
+    {
+      "variant": "Debug",
+      "suites": 5,
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer"
+    },
+    {
+      "variant": "UiPreview",
+      "suites": 5,
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+      "sha256": "8500c2809f409e39ed28e81a5f1b4d36f66c3307ecef70cd5c3d12915bb91ee0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_chat_layout_tests.rs",
+      "sha256": "3c687a97d2bfff9432c497d0ebb06d2210d0ca30bfa35fdd635186de14d2c6d3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "sha256": "fc5ef29f8f565820aa260ad4a90d1d640cf50cd716c66139f2a76ce291463a93"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+      "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/chat_ingress.rs",
+      "sha256": "2f5b777cf15bb5669388d7b00553ef1b639fdee5c0ecb497e6eb468d054d67a7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "sha256": "e131bc64af1a14f0b0832d446f052102e5fe3b367811b498fc81ae369db5b5a3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "sha256": "4aba83a92c4b46a075cd80d275d40c041df76c03cbd6bf1fbcf5ac7077e89bdb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+      "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "sha256": "2de2c2c3e4366014b489f9cdbe56ee25e95d52a0417c9a4aba25a4ccdbf5fc2a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_chat_ingress.rs",
+      "sha256": "09b993fc22688e6342e2e2e904159f97f4412e2314aa6acd5592d72468527e31"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/chat.rs",
+      "sha256": "1a7c257feeda322e788e99a2c52947084822ed5a847db5f4190594b6b851c59c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "sha256": "8aacaf2c8605b55387b049d72dea03638d6cdeff90688d5a309525dabb61dcde"
+    }
+  ],
+  "failureFirst": {
+    "compiledBefore": true,
+    "passed": 2,
+    "failed": 4,
+    "fixturePrivateFieldSetupErrorRetainedSeparately": true
+  },
+  "arm64Api31": {
+    "normal": true,
+    "actualPreviewFeature": true
+  },
+  "newTests": {
+    "count": 6,
+    "densityScaleSourceSizeCombinations": 96,
+    "actualSharedChatChildNodes": true
+  },
+  "review": "Bounded read-only three-file review found no new P0/P1/P2; did not execute tests/build/device.",
+  "existingExtremeImeControlOverflowOpen": true,
+  "sharedRuntimeChatEvictionUnchangedAndOpen": true,
+  "fullPhoneUiAccepted": false,
+  "authenticatedGameplayAccepted": false,
+  "physicalDeviceAccepted": false
+}

@@ -2,7 +2,9 @@
 //! primitives as native friend/memo input.  Draft offsets stay UTF-8 byte
 //! boundaries while the user-facing limit follows Crystal/.NET UTF-16 units.
 use super::*;
-use friend_dialog::text_editor::{CaretStop, EditResult, FriendTextEditor, TextLayout as EditorTextLayout, VisualLine};
+use friend_dialog::text_editor::{
+    CaretStop, EditResult, FriendTextEditor, TextLayout as EditorTextLayout, VisualLine,
+};
 
 pub(super) const MAIL_LETTER_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 92.0, 202.0, 165.0);
 /// `MailComposeParcelDialog` uses the same 202×165 edit viewport six pixels
@@ -83,10 +85,41 @@ impl MailLetterEditor {
         let result = self
             .editor
             .as_mut()
-            .map(|editor| editor.insert_with_policy(
-                text,
-                friend_dialog::text_editor::InsertPolicy::FitPrefix,
-            ))
+            .map(|editor| {
+                editor.insert_with_policy(text, friend_dialog::text_editor::InsertPolicy::FitPrefix)
+            })
+            .unwrap_or(EditResult::Unchanged);
+        self.commit(draft, result);
+        self.sync_visual_line_for_caret();
+        self.keep_caret_visible();
+    }
+
+    /// Android's editor reports the whole field, not an incremental IME commit.
+    /// Replace the complete live draft through the same normalization and
+    /// grapheme-safe UTF-16 budget as paste, including an empty-field deletion.
+    /// The host must revalidate the active field before calling this adapter.
+    pub fn replace_document(
+        &mut self,
+        draft: &mut mir2_ui_core::state::MailComposeDraft,
+        text: &str,
+    ) {
+        self.sync(true, Some(&draft.message));
+        self.clear_composition();
+        self.selecting = false;
+        let result = self
+            .editor
+            .as_mut()
+            .map(|editor| {
+                editor.select_all();
+                let removed = editor.delete(false);
+                let inserted = editor
+                    .insert_with_policy(text, friend_dialog::text_editor::InsertPolicy::FitPrefix);
+                if removed == EditResult::Changed || inserted == EditResult::Changed {
+                    EditResult::Changed
+                } else {
+                    inserted
+                }
+            })
             .unwrap_or(EditResult::Unchanged);
         self.commit(draft, result);
         self.sync_visual_line_for_caret();
@@ -100,7 +133,9 @@ impl MailLetterEditor {
     }
 
     pub fn selected_text(&self) -> &str {
-        self.editor.as_ref().map_or("", FriendTextEditor::selected_text)
+        self.editor
+            .as_ref()
+            .map_or("", FriendTextEditor::selected_text)
     }
 
     pub fn cut_selection(&mut self, draft: &mut mir2_ui_core::state::MailComposeDraft) {
@@ -127,21 +162,27 @@ impl MailLetterEditor {
             // position instead of hiding the OS candidate window.
         }
         let authoritative = self.editor.as_ref()?;
-        (self.layout_text == authoritative.text()).then(|| {
-            self.layout
-                .lines
-                .get(self.visual_line)
-                .and_then(|line| line.stops.iter().find(|stop| stop.byte == authoritative.caret()).map(|stop| {
-                    Vec2::new(stop.x, line.y + line.height)
-                }))
-                .or_else(|| {
-                    self.layout.lines.iter().find_map(|line| {
-                        line.stops.iter().find(|stop| stop.byte == authoritative.caret()).map(|stop| {
-                            Vec2::new(stop.x, line.y + line.height)
+        (self.layout_text == authoritative.text())
+            .then(|| {
+                self.layout
+                    .lines
+                    .get(self.visual_line)
+                    .and_then(|line| {
+                        line.stops
+                            .iter()
+                            .find(|stop| stop.byte == authoritative.caret())
+                            .map(|stop| Vec2::new(stop.x, line.y + line.height))
+                    })
+                    .or_else(|| {
+                        self.layout.lines.iter().find_map(|line| {
+                            line.stops
+                                .iter()
+                                .find(|stop| stop.byte == authoritative.caret())
+                                .map(|stop| Vec2::new(stop.x, line.y + line.height))
                         })
                     })
-                })
-        }).flatten()
+            })
+            .flatten()
     }
 
     pub(super) fn sync(&mut self, active: bool, message: Option<&str>) {
@@ -149,7 +190,11 @@ impl MailLetterEditor {
             self.clear();
             return;
         };
-        if self.editor.as_ref().is_none_or(|editor| editor.text() != message) {
+        if self
+            .editor
+            .as_ref()
+            .is_none_or(|editor| editor.text() != message)
+        {
             static NEXT: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
             self.editor = Some(FriendTextEditor::new(
                 message.to_owned(),
@@ -251,9 +296,9 @@ impl MailLetterEditor {
                         .and_then(|line| line.stops.iter().find(|stop| stop.byte == editor.caret()))
                         .map_or(0.0, |stop| stop.x)
                 });
-                if let Some((line, byte)) = self
-                    .layout
-                    .vertical(self.visual_line, event.key_code == KeyCode::ArrowDown, x)
+                if let Some((line, byte)) =
+                    self.layout
+                        .vertical(self.visual_line, event.key_code == KeyCode::ArrowDown, x)
                 {
                     self.visual_line = line;
                     editor.set_caret(byte, shift);
@@ -403,15 +448,12 @@ impl MailLetterEditor {
                         .as_ref()
                         .and_then(|_| self.display_caret(&display))
                         .or_else(|| {
-                            self.layout
-                                .lines
-                                .get(self.visual_line)
-                                .and_then(|line| {
-                                    line.stops
-                                        .iter()
-                                        .find(|stop| stop.byte == editor.caret())
-                                        .map(|stop| (stop.x, line.y, line.height))
-                                })
+                            self.layout.lines.get(self.visual_line).and_then(|line| {
+                                line.stops
+                                    .iter()
+                                    .find(|stop| stop.byte == editor.caret())
+                                    .map(|stop| (stop.x, line.y, line.height))
+                            })
                         })
                         .or_else(|| editor.text().is_empty().then_some((0.0, 0.0, 14.0)));
                     if let Some((x, y, height)) = caret {
@@ -438,14 +480,18 @@ impl MailLetterEditor {
         if self.layout_text != editor.text() {
             return;
         }
-        let Some(line) = self.layout.lines.get(self.visual_line).filter(|line| {
-            line.stops.iter().any(|stop| stop.byte == editor.caret())
-        }).or_else(|| {
-            self.layout
-                .lines
-                .iter()
-                .find(|line| line.stops.iter().any(|stop| stop.byte == editor.caret()))
-        }) else {
+        let Some(line) = self
+            .layout
+            .lines
+            .get(self.visual_line)
+            .filter(|line| line.stops.iter().any(|stop| stop.byte == editor.caret()))
+            .or_else(|| {
+                self.layout
+                    .lines
+                    .iter()
+                    .find(|line| line.stops.iter().any(|stop| stop.byte == editor.caret()))
+            })
+        else {
             return;
         };
         if line.y < self.scroll.y {
@@ -511,7 +557,9 @@ impl MailLetterEditor {
         self.editor.as_ref().map(|editor| {
             self.composition
                 .as_ref()
-                .map(|composition| editor.composition_preview(&composition.value, composition.cursor))
+                .map(|composition| {
+                    editor.composition_preview(&composition.value, composition.cursor)
+                })
                 .unwrap_or_else(|| editor.clone())
         })
     }
@@ -532,14 +580,15 @@ impl MailLetterEditor {
                         continue;
                     };
                     let range = cluster.text_range();
-                    let mut bytes: Vec<_> = unicode_segmentation::UnicodeSegmentation::grapheme_indices(
-                        editor.text(),
-                        true,
-                    )
-                    .map(|(index, _)| index)
-                    .chain(std::iter::once(editor.text().len()))
-                    .filter(|byte| *byte >= range.start && *byte <= range.end)
-                    .collect();
+                    let mut bytes: Vec<_> =
+                        unicode_segmentation::UnicodeSegmentation::grapheme_indices(
+                            editor.text(),
+                            true,
+                        )
+                        .map(|(index, _)| index)
+                        .chain(std::iter::once(editor.text().len()))
+                        .filter(|byte| *byte >= range.start && *byte <= range.end)
+                        .collect();
                     if cluster.is_rtl() {
                         bytes.reverse();
                     }
@@ -624,12 +673,7 @@ impl MailLetterEditor {
         self.captured_caret = Some(caret);
     }
 
-    fn accept_display_layout(
-        &mut self,
-        layout: EditorTextLayout,
-        text: String,
-        caret: usize,
-    ) {
+    fn accept_display_layout(&mut self, layout: EditorTextLayout, text: String, caret: usize) {
         self.display_layout = layout;
         self.display_layout_text = text;
         let Some(line) = self
@@ -659,9 +703,7 @@ impl MailLetterEditor {
     }
 
     fn display_caret(&self, display: &FriendTextEditor) -> Option<(f32, f32, f32)> {
-        if self.display_layout_text != display.text()
-            || !self.display_layout.valid_for(display)
-        {
+        if self.display_layout_text != display.text() || !self.display_layout.valid_for(display) {
             return None;
         }
         self.display_layout.lines.iter().find_map(|line| {
@@ -680,7 +722,10 @@ impl MailLetterEditor {
 
     #[cfg(test)]
     pub(super) fn install_layout(&mut self, lines: Vec<VisualLine>) {
-        let text = self.editor.as_ref().map_or_else(String::new, |editor| editor.text().to_owned());
+        let text = self
+            .editor
+            .as_ref()
+            .map_or_else(String::new, |editor| editor.text().to_owned());
         // Test fixtures install already-shaped layout without reproducing the
         // renderer's initial caret-visibility transition.
         self.layout = EditorTextLayout { lines };

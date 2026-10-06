@@ -1,0 +1,552 @@
+{
+  "source": "78e7d2309f6a6b92cea1737c76c5eedfd863e46e",
+  "versionCode": 19,
+  "apkSha256": "6200ab1ef5bc3fd449d23129b28819adde95d9d8014b0e9cd1390b78da73c2dc",
+  "offlineOnly": true,
+  "physicalDeviceAccepted": false,
+  "noTransactionButtonTapped": true,
+  "stages": [
+    {
+      "name": "npcshop",
+      "pid": 11272,
+      "tap": {
+        "x": 778,
+        "y": 158
+      },
+      "source": "78e7d2309f6a6b92cea1737c76c5eedfd863e46e",
+      "screenshotBefore": "npcshop-before.png",
+      "screenshotAfter": "npcshop-after.png"
+    },
+    {
+      "name": "npcshop-sell",
+      "pid": 11360,
+      "tap": {
+        "x": 1278,
+        "y": 158
+      },
+      "source": "78e7d2309f6a6b92cea1737c76c5eedfd863e46e",
+      "screenshotBefore": "npcshop-sell-before.png",
+      "screenshotAfter": "npcshop-sell-after.png"
+    },
+    {
+      "name": "npcshop-repair",
+      "pid": 11445,
+      "tap": {
+        "x": 1278,
+        "y": 158
+      },
+      "source": "78e7d2309f6a6b92cea1737c76c5eedfd863e46e",
+      "screenshotBefore": "npcshop-repair-before.png",
+      "screenshotAfter": "npcshop-repair-after.png"
+    },
+    {
+      "name": "npcshop-srepair",
+      "pid": 11530,
+      "tap": {
+        "x": 1278,
+        "y": 158
+      },
+      "source": "78e7d2309f6a6b92cea1737c76c5eedfd863e46e",
+      "screenshotBefore": "npcshop-srepair-before.png",
+      "screenshotAfter": "npcshop-srepair-after.png"
+    }
+  ],
+  "commands": [
+    {
+      "name": "avd.txt",
+      "args": [
+        "emu",
+        "avd",
+        "name"
+      ]
+    },
+    {
+      "name": "api.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.version.sdk"
+      ]
+    },
+    {
+      "name": "display.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size"
+      ]
+    },
+    {
+      "name": "density.txt",
+      "args": [
+        "shell",
+        "wm",
+        "density"
+      ]
+    },
+    {
+      "name": "os.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.fingerprint"
+      ]
+    },
+    {
+      "name": "package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "package-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "installed-apk-sha256.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~gwF0iWT0TFU5fg1MzCihLQ==/com.mir2.web3.uipreview-0VAIzffs95wnOeeejwcEVw==/base.apk"
+      ]
+    },
+    {
+      "name": "npcshop-stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npcshop-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "npcshop"
+      ]
+    },
+    {
+      "name": "npcshop-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npcshop-before.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "npcshop-before-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=11272",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "npcshop-tap.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "778",
+        "158"
+      ]
+    },
+    {
+      "name": "npcshop-after.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "npcshop-after-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=11272",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "npcshop-ime.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "input_method"
+      ]
+    },
+    {
+      "name": "npcshop-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ]
+    },
+    {
+      "name": "npcshop-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npcshop-sell-stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npcshop-sell-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "npcshop-sell"
+      ]
+    },
+    {
+      "name": "npcshop-sell-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npcshop-sell-before.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "npcshop-sell-before-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=11360",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "npcshop-sell-tap.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1278",
+        "158"
+      ]
+    },
+    {
+      "name": "npcshop-sell-after.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "npcshop-sell-after-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=11360",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "npcshop-sell-ime.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "input_method"
+      ]
+    },
+    {
+      "name": "npcshop-sell-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ]
+    },
+    {
+      "name": "npcshop-sell-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npcshop-repair-stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npcshop-repair-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "npcshop-repair"
+      ]
+    },
+    {
+      "name": "npcshop-repair-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npcshop-repair-before.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "npcshop-repair-before-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=11445",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "npcshop-repair-tap.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1278",
+        "158"
+      ]
+    },
+    {
+      "name": "npcshop-repair-after.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "npcshop-repair-after-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=11445",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "npcshop-repair-ime.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "input_method"
+      ]
+    },
+    {
+      "name": "npcshop-repair-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ]
+    },
+    {
+      "name": "npcshop-repair-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npcshop-srepair-stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npcshop-srepair-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "npcshop-srepair"
+      ]
+    },
+    {
+      "name": "npcshop-srepair-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "npcshop-srepair-before.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "npcshop-srepair-before-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=11530",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "npcshop-srepair-tap.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1278",
+        "158"
+      ]
+    },
+    {
+      "name": "npcshop-srepair-after.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "npcshop-srepair-after-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=11530",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "npcshop-srepair-ime.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "input_method"
+      ]
+    },
+    {
+      "name": "npcshop-srepair-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ]
+    },
+    {
+      "name": "npcshop-srepair-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "preview-final-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "debug-final-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ]
+    }
+  ]
+}

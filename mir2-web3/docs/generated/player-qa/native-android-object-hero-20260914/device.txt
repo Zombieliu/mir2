@@ -1,0 +1,13 @@
+avd=Mir2_API_31_ARM64
+serial=emulator-5554
+model=sdk_gphone64_arm64
+api=31
+abi=arm64-v8a
+wm_size=Physical size: 1080x2340
+wm_density=Physical density: 440
+package=versionName=0.1.0-shared-ui
+version_code=3
+min_sdk=31
+target_sdk=35
+final_pid=7988
+Android emulator version 37.1.11.0 (build_id 15917651) (CL:N/A)

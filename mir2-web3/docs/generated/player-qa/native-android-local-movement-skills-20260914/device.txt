@@ -1,0 +1,8 @@
+captured_at_utc=2026-09-13T19:41:29Z
+avd=Mir2_API_31_ARM64
+api=31
+abi=arm64-v8a
+model=sdk_gphone64_arm64
+Physical size: 1080x2340
+Physical density: 440
+Android emulator version 37.1.11.0 (build_id 15917651) (CL:N/A)

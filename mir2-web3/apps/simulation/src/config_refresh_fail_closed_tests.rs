@@ -376,7 +376,15 @@ fn development_file_fixture_still_supplies_demo_account() {
         config.account_store_database_mode,
         AccountStoreDatabaseMode::Mirror
     );
-    assert_eq!(config.account_store_path.as_deref(), Some(std::fs::canonicalize(path.parent().unwrap()).unwrap().join(path.file_name().unwrap()).as_path()));
+    assert_eq!(
+        config.account_store_path.as_deref(),
+        Some(
+            std::fs::canonicalize(path.parent().unwrap())
+                .unwrap()
+                .join(path.file_name().unwrap())
+                .as_path()
+        )
+    );
 }
 fn source_of_truth_test_config(accounts: BTreeMap<String, AccountRecord>) -> SimulationConfig {
     source_of_truth_test_config_with_store(authoritative_test_store(accounts))

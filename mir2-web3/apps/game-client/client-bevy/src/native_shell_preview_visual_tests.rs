@@ -109,28 +109,28 @@ fn preflight_real_assets(root: &Path) {
 
 fn preview_offscreen_app(root: &Path) -> (App, Handle<Image>, Entity) {
     let mut app = App::new();
-    app.add_plugins(
-        DefaultPlugins
-            .set(AssetPlugin {
-                file_path: root.to_str().expect("asset root must be UTF-8").to_owned(),
-                meta_check: AssetMetaCheck::Never,
-                ..default()
-            })
-            .set(ImagePlugin::default_nearest())
-            .set(WindowPlugin {
-                primary_window: None,
-                exit_condition: ExitCondition::DontExit,
-                ..default()
-            })
-            .set(RenderPlugin {
-                synchronous_pipeline_compilation: true,
-                ..default()
-            })
-            .disable::<WinitPlugin>()
-            .disable::<PipelinedRenderingPlugin>()
-            .disable::<bevy::audio::AudioPlugin>()
-            .disable::<bevy::app::TerminalCtrlCHandlerPlugin>(),
-    );
+    let plugins = DefaultPlugins
+        .set(AssetPlugin {
+            file_path: root.to_str().expect("asset root must be UTF-8").to_owned(),
+            meta_check: AssetMetaCheck::Never,
+            ..default()
+        })
+        .set(ImagePlugin::default_nearest())
+        .set(WindowPlugin {
+            primary_window: None,
+            exit_condition: ExitCondition::DontExit,
+            ..default()
+        })
+        .set(RenderPlugin {
+            synchronous_pipeline_compilation: true,
+            ..default()
+        })
+        .disable::<WinitPlugin>()
+        .disable::<PipelinedRenderingPlugin>()
+        .disable::<bevy::app::TerminalCtrlCHandlerPlugin>();
+    #[cfg(feature = "native-ui")]
+    let plugins = plugins.disable::<bevy::audio::AudioPlugin>();
+    app.add_plugins(plugins);
     register_crystal_additive_ui(&mut app);
     app.insert_resource(TimeUpdateStrategy::ManualDuration(Duration::ZERO))
         .insert_resource(ClearColor(Color::srgb(0.06, 0.05, 0.03)))

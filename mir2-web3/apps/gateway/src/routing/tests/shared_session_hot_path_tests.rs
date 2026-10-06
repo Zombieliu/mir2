@@ -132,13 +132,10 @@ fn activating_live_registration_retries_a_location_queued_during_the_registratio
     );
 
     let (sender, mut receiver) = tokio::sync::mpsc::channel(1);
-    let registration_id = zone_state
-        .lock()
-        .unwrap()
-        .register_live_zone_outbound(
-            key.clone(),
-            crate::routing::SharedZoneLiveOutboundSender::single(sender),
-        );
+    let registration_id = zone_state.lock().unwrap().register_live_zone_outbound(
+        key.clone(),
+        crate::routing::SharedZoneLiveOutboundSender::single(sender),
+    );
     let registration = crate::routing::SharedZoneLiveOutboundRegistration {
         zone_state,
         key,
@@ -200,7 +197,10 @@ fn saturated_live_outbound_retries_latest_owner_location_before_observer_motion(
     );
 
     assert!(matches!(
-        receiver.try_recv().expect("fixture should fill the live channel").into_packet(),
+        receiver
+            .try_recv()
+            .expect("fixture should fill the live channel")
+            .into_packet(),
         ServerPacket::ObjectRemove { object_id: 9 }
     ));
 
@@ -254,23 +254,24 @@ fn pending_packet_overflow_never_discards_the_latest_owner_location() {
     for object_id in
         10_000..10_000 + crate::routing::MAX_PENDING_ZONE_PACKETS_PER_PLAYER as u32 + 32
     {
-        state.queue_zone_packets(
-            key.clone(),
-            vec![ServerPacket::ObjectRemove { object_id }],
-        );
+        state.queue_zone_packets(key.clone(), vec![ServerPacket::ObjectRemove { object_id }]);
     }
 
     assert_eq!(
         state.pending_zone_packets[&key].len(),
         crate::routing::MAX_PENDING_ZONE_PACKETS_PER_PLAYER,
     );
-    assert!(state.pending_zone_packets[&key].iter().any(|packet| matches!(
-        packet,
-        ServerPacket::UserLocation { location }
-            if location.position == Point { x: 21, y: 34 }
-    )));
+    assert!(state.pending_zone_packets[&key]
+        .iter()
+        .any(|packet| matches!(
+            packet,
+            ServerPacket::UserLocation { location }
+                if location.position == Point { x: 21, y: 34 }
+        )));
 
-    let _ = receiver.try_recv().expect("fixture should fill the live channel");
+    let _ = receiver
+        .try_recv()
+        .expect("fixture should fill the live channel");
     state.retry_pending_realtime_zone_outbounds();
     assert!(matches!(
         receiver

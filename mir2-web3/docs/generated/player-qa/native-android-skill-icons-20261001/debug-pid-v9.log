@@ -1,0 +1,122 @@
+--------- beginning of main
+10-01 15:36:23.349  3989  3989 I com.mir2.web3: Late-enabling -Xcheck:jni
+10-01 15:36:24.204  3989  3989 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10147; state: ENABLED
+10-01 15:36:26.931  3989  3989 I com.mir2.web3: Waiting for a blocking GC ClassLinker
+10-01 15:36:27.013  3989  3989 I com.mir2.web3: WaitForGcToComplete blocked ClassLinker on Background for 82.355ms
+10-01 15:36:27.110  3989  3989 V GraphicsEnvironment: ANGLE Developer option for 'com.mir2.web3' set to: 'default'
+10-01 15:36:27.110  3989  3989 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+10-01 15:36:27.114  3989  3989 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-01 15:36:27.115  3989  3989 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+10-01 15:36:27.450  3989  4027 D libEGL  : loaded /vendor/lib64/egl/libEGL_emulation.so
+10-01 15:36:27.469  3989  4027 D libEGL  : loaded /vendor/lib64/egl/libGLESv1_CM_emulation.so
+10-01 15:36:27.480  3989  4027 D libEGL  : loaded /vendor/lib64/egl/libGLESv2_emulation.so
+10-01 15:36:28.143  3989  3989 D AppCompatDelegate: Checking for metadata for AppLocalesMetadataHolderService : Service not found
+10-01 15:36:28.232  3989  3989 D gti.InputConnection: InputConnection created
+10-01 15:36:28.293  3989  3989 D gti.InputConnection: setEditorInfo
+10-01 15:36:28.381  3989  3989 W com.mir2.web3: Accessing hidden method Landroid/view/ViewGroup;->makeOptionalFitsSystemWindows()V (unsupported, reflection, allowed)
+10-01 15:36:28.406  3989  3989 I GameActivity: Looking for library libmir2_platform_android.so
+10-01 15:36:28.424  3989  3989 I GameActivity: Found library libmir2_platform_android.so. Loading...
+10-01 15:36:28.528  3989  3989 D GameActivity: GameActivity_register
+10-01 15:36:28.544  3989  3989 V GameActivity: Registering com/google/androidgamesdk/GameActivity's 24 native methods...
+10-01 15:36:28.544  3989  3989 D GameActivity: SDK version: 31
+10-01 15:36:28.545  3989  3989 I android-activity: Creating: Activity = 0x1696, saved state size = 0
+10-01 15:36:28.599  3989  3989 V threaded_app: Creating: 0xb400007380cdc7f0
+10-01 15:36:28.599  3989  3989 V threaded_app: Callbacks set: 0xb400007380cdc840
+10-01 15:36:28.599  3989  3989 V threaded_app: Launching android_app_entry in a thread
+10-01 15:36:28.600  3989  4039 V threaded_app: android_app_entry called
+10-01 15:36:28.600  3989  4039 V threaded_app: android_app = 0xb400007360cf1690
+10-01 15:36:28.600  3989  4039 V threaded_app: config = 0xb4000072d0cf49b0
+10-01 15:36:28.600  3989  4039 V threaded_app: activity = 0xb400007380cdc7f0
+10-01 15:36:28.600  3989  4039 V threaded_app: assetmanager = 0xb400007380ce5490
+10-01 15:36:28.600  3989  4039 V threaded_app: Config: mcc=310 mnc=260 lang=en cnt=US orien=2 touch=3 dens=440 keys=2 nav=2 keysHid=1 navHid=0 sdk=31 size=2 long=2 modetype=1 modenight=1
+10-01 15:36:28.720  3989  4039 D HostConnection: createUnique: call
+10-01 15:36:28.720  3989  4039 D HostConnection: HostConnection::get() New Host Connection established 0xb400007320cdc550, tid 4039
+10-01 15:36:28.734  3989  4039 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-01 15:36:28.841  3989  4039 D EGL_emulation: eglCreateContext: 0xb400007320cdba10: maj 3 min 0 rcv 3
+10-01 15:36:28.882  3989  4039 D EGL_emulation: eglMakeCurrent: 0xb400007320cdba10: ver 3 0 (tinfo 0x7539101080) (first time)
+10-01 15:36:30.346  3989  3989 V GameActivity: onStart_native
+10-01 15:36:30.347  3989  3989 V threaded_app: Start: 0xb400007380cdc7f0
+10-01 15:36:30.359  3989  4038 I RustStdoutStderr: [2m2026-10-01T07:36:30.359344Z[0m [32m INFO[0m [2mbevy_render::renderer[0m[2m:[0m AdapterInfo { name: "Android Emulator OpenGL ES Translator (Apple M1 Max)", vendor: 4203, device: 0, device_type: IntegratedGpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.0 (4.1 Metal - 89.4)", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+10-01 15:36:30.359  3989  4039 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyAdapterInfo { name: "Android Emulator OpenGL ES Translator (Apple M1 Max)", vendor: 4203, device: 0, device_type: IntegratedGpu, device_pci_bus_id: "", driver: "", driver_info: "OpenGL ES 3.0 (4.1 Metal - 89.4)", backend: Gl, subgroup_min_size: 4, subgroup_max_size: 128, transient_saves_memory: false }
+10-01 15:36:31.685  3989  4038 I RustStdoutStderr: [2m2026-10-01T07:36:31.685167Z[0m [32m INFO[0m [2mbevy_render::render_resource::sparse_buffer_vec[0m[2m:[0m Sparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+10-01 15:36:31.685  3989  4039 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevySparse buffer updates disabled. RenderDevice lacks support: max_storage_buffers_per_shader_stage (0) < 3.
+10-01 15:36:31.685  3989  4038 I RustStdoutStderr: [2m2026-10-01T07:36:31.685590Z[0m [33m WARN[0m [2mbevy_core_pipeline::oit::resolve[0m[2m:[0m OrderIndependentTransparencyPlugin not loaded. GPU lacks support: DownlevelFlags::FRAGMENT_WRITABLE_STORAGE.
+10-01 15:36:31.685  3989  4039 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-OrderIndependentTransparencyPlugin not loaded. GPU lacks support: DownlevelFlags::FRAGMENT_WRITABLE_STORAGE.
+10-01 15:36:31.685  3989  4038 I RustStdoutStderr: [2m2026-10-01T07:36:31.685652Z[0m [33m WARN[0m [2mbevy_core_pipeline::prepass::background_motion_vectors[0m[2m:[0m BackgroundMotionVectorsPlugin not loaded. GPU lacks support for required downlevel capability flags: DownlevelFlags(INDEPENDENT_BLEND).
+10-01 15:36:31.685  3989  4039 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_core_pipeline-BackgroundMotionVectorsPlugin not loaded. GPU lacks support for required downlevel capability flags: DownlevelFlags(INDEPENDENT_BLEND).
+10-01 15:36:32.451  3989  3989 E threaded_app: android_app_set_activity_state timed out waiting for cmd 11
+10-01 15:36:32.493  3989  3989 V threaded_app: Resume: 0xb400007380cdc7f0
+10-01 15:36:33.657  3989  4038 I RustStdoutStderr: [2m2026-10-01T07:36:33.656829Z[0m [32m INFO[0m [2mbevy_render::batching::gpu_preprocessing[0m[2m:[0m GPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+10-01 15:36:33.659  3989  4039 I event /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevyGPU preprocessing is not supported on this device. Falling back to CPU preprocessing.
+10-01 15:36:34.496  3989  3989 E threaded_app: android_app_set_activity_state timed out waiting for cmd 12
+10-01 15:36:35.421  3989  3989 I Choreographer: Skipped 488 frames!  The application may be doing too much work on its main thread.
+10-01 15:36:35.808  3989  3989 V GameActivity: onImeInsetsChanged from Text Listener
+10-01 15:36:35.809  3989  3989 V threaded_app: WindowInsetsChanged: 0xb400007380cdc7f0
+10-01 15:36:35.885  3989  3989 V GameActivity: onImeInsetsChanged from Text Listener
+10-01 15:36:35.911  3989  3989 V threaded_app: WindowInsetsChanged: 0xb400007380cdc7f0
+10-01 15:36:35.937  3989  4025 D HostConnection: createUnique: call
+10-01 15:36:35.967  3989  4025 D HostConnection: HostConnection::get() New Host Connection established 0xb400007320cf2a50, tid 4025
+10-01 15:36:36.003  3989  4025 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-01 15:36:36.011  3989  4025 W OpenGLRenderer: Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+10-01 15:36:36.013  3989  4025 W OpenGLRenderer: Failed to initialize 101010-2 format, error = EGL_SUCCESS
+10-01 15:36:36.017  3989  4025 D EGL_emulation: eglCreateContext: 0xb400007320cf0dd0: maj 3 min 0 rcv 3
+10-01 15:36:36.032  3989  3989 V threaded_app: ContentRectChanged: 0xb400007380cdc7f0 -- (0 0) (2340 1080)
+10-01 15:36:36.065  3989  4025 D EGL_emulation: eglMakeCurrent: 0xb400007320cf0dd0: ver 3 0 (tinfo 0x7539101100) (first time)
+10-01 15:36:36.086  3989  3989 V GameActivity: onSurfaceCreated_native
+10-01 15:36:36.086  3989  3989 V threaded_app: NativeWindowCreated: 0xb400007380cdc7f0 -- 0xb400007410e72c20
+10-01 15:36:36.088  3989  3989 V threaded_app: android_app_set_window called
+10-01 15:36:36.145  3989  4002 I com.mir2.web3: NativeAlloc concurrent copying GC freed 3628(391KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2661KB/5322KB, paused 17us,13us total 352.489ms
+10-01 15:36:36.175  3989  4039 V threaded_app: activityState=11
+10-01 15:36:36.175  3989  4038 I RustStdoutStderr: [2m2026-10-01T07:36:36.175830Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: forward onStart notification to application
+10-01 15:36:36.175  3989  4039 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: forward onStart notification to application
+10-01 15:36:36.175  3989  4039 V threaded_app: activityState=12
+10-01 15:36:36.175  3989  4038 I RustStdoutStderr: [2m2026-10-01T07:36:36.175918Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-01 15:36:36.175  3989  4039 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-01 15:36:36.175  3989  4038 I RustStdoutStderr: [2m2026-10-01T07:36:36.175951Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-01 15:36:36.175  3989  4039 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-01 15:36:36.176  3989  4038 I RustStdoutStderr: [2m2026-10-01T07:36:36.176011Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: find a way to notify application of content rect change
+10-01 15:36:36.176  3989  4039 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: find a way to notify application of content rect change
+10-01 15:36:36.176  3989  4039 V threaded_app: APP_CMD_INIT_WINDOW
+10-01 15:36:36.176  3989  4038 I RustStdoutStderr: [2m2026-10-01T07:36:36.176069Z[0m [32m INFO[0m [2mbevy_winit::system[0m[2m:[0m Creating new window mir2-web3 (android) (105v0)
+10-01 15:36:36.176  3989  4039 I event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/bevy_winit-0.19.0/sCreating new window mir2-web3 (android) (105v0)
+10-01 15:36:36.177  3989  3989 V threaded_app: NativeWindowResized: 0xb400007380cdc7f0 -- 0xb400007410e72c20 ( 2340 x 1080 )
+10-01 15:36:36.177  3989  3989 V threaded_app: NativeWindowRedrawNeeded: 0xb400007380cdc7f0 -- 0xb400007410e72c20
+10-01 15:36:36.255  3989  4025 I Gralloc4: mapper 4.x is not supported
+10-01 15:36:36.257  3989  4025 D HostConnection: createUnique: call
+10-01 15:36:36.257  3989  4025 D HostConnection: HostConnection::get() New Host Connection established 0xb400007320cf4610, tid 4025
+10-01 15:36:36.257  3989  4025 D goldfish-address-space: allocate: Ask for block of size 0x100
+10-01 15:36:36.257  3989  4025 D goldfish-address-space: allocate: ioctl allocate returned offset 0x1efff8000 size 0x8000
+10-01 15:36:36.260  3989  4025 W Gralloc4: allocator 4.x is not supported
+10-01 15:36:36.292  3989  4025 D HostConnection: HostComposition ext ANDROID_EMU_CHECKSUM_HELPER_v1 ANDROID_EMU_native_sync_v2 ANDROID_EMU_native_sync_v3 ANDROID_EMU_native_sync_v4 ANDROID_EMU_dma_v1 ANDROID_EMU_direct_mem ANDROID_EMU_host_composition_v1 ANDROID_EMU_host_composition_v2 ANDROID_EMU_vulkan ANDROID_EMU_deferred_vulkan_commands ANDROID_EMU_vulkan_null_optional_strings ANDROID_EMU_vulkan_create_resources_with_requirements ANDROID_EMU_YUV_Cache ANDROID_EMU_vulkan_ignored_handles ANDROID_EMU_has_shared_slots_host_memory_allocator ANDROID_EMU_vulkan_free_memory_sync ANDROID_EMU_vulkan_shader_float16_int8 ANDROID_EMU_vulkan_async_queue_submit ANDROID_EMU_vulkan_queue_submit_with_commands ANDROID_EMU_sync_buffer_data ANDROID_EMU_vulkan_async_qsri ANDROID_EMU_read_color_buffer_dma ANDROID_EMU_hwc_color_transform GL_OES_EGL_image_external_essl3 GL_OES_vertex_array_object ANDROID_EMU_host_side_tracing ANDROID_EMU_gles_max_version_3_0 
+10-01 15:36:38.355  3989  3989 I Choreographer: Skipped 157 frames!  The application may be doing too much work on its main thread.
+10-01 15:36:38.696  3989  3989 V threaded_app: WindowFocusChanged: 0xb400007380cdc7f0 -- 1
+10-01 15:36:38.861  3989  3989 V GameActivity: onImeInsetsChanged from Text Listener
+10-01 15:36:38.872  3989  3989 V threaded_app: WindowInsetsChanged: 0xb400007380cdc7f0
+10-01 15:36:41.069  3989  4002 W com.mir2.web3: Suspending all threads took: 333.422ms
+10-01 15:36:41.106  3989  4002 I com.mir2.web3: NativeAlloc concurrent copying GC freed 1372(190KB) AllocSpace objects, 0(0B) LOS objects, 49% free, 2823KB/5647KB, paused 24us,333.676ms total 2.166s
+10-01 15:36:41.112  3989  4069 D ProfileInstaller: Installing profile for com.mir2.web3
+10-01 15:36:41.404  3989  4038 I RustStdoutStderr: [2m2026-10-01T07:36:41.403920Z[0m [33m WARN[0m [2mwinit::platform_impl::android[0m[2m:[0m TODO: handle Android InsetsChanged notification
+10-01 15:36:41.405  3989  4039 W event /Users/henryliu/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/pTODO: handle Android InsetsChanged notification
+10-01 15:36:42.137  3989  4039 D eglCodecCommon: checkFramebufferAttachmentCompleteness: rbo not color renderable. format: 0x0
+10-01 15:36:42.137  3989  4039 D eglCodecCommon: checkFramebufferCompleteness: color attachment 0 not complete: 0x8cd6
+10-01 15:36:42.137  3989  4039 E emuglGLESv2_enc: device/generic/goldfish-opengl/system/GLESv2_enc/GL2Encoder.cpp:s_glDrawElementsInstanced:4585 GL error 0x506 condition [ctx->m_state->checkFramebufferCompleteness(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE]
+10-01 15:36:43.193  3989  4039 D EGL_emulation: app_time_stats: avg=430.09ms min=54.60ms max=2859.61ms count=9
+10-01 15:36:44.213  3989  4039 D EGL_emulation: app_time_stats: avg=72.83ms min=34.82ms max=131.26ms count=14
+10-01 15:36:45.317  3989  4039 D EGL_emulation: app_time_stats: avg=78.82ms min=36.78ms max=124.93ms count=14
+10-01 15:36:46.392  3989  4039 D EGL_emulation: app_time_stats: avg=107.44ms min=38.88ms max=367.65ms count=10
+10-01 15:36:47.562  3989  4039 D EGL_emulation: app_time_stats: avg=116.94ms min=44.44ms max=254.48ms count=10
+10-01 15:36:48.585  3989  4039 D EGL_emulation: app_time_stats: avg=60.19ms min=29.85ms max=127.34ms count=17
+10-01 15:36:49.620  3989  4039 D EGL_emulation: app_time_stats: avg=79.49ms min=33.34ms max=172.70ms count=13
+10-01 15:36:50.700  3989  4039 D EGL_emulation: app_time_stats: avg=83.08ms min=32.09ms max=172.42ms count=13
+10-01 15:36:55.361  3989  4039 D EGL_emulation: app_time_stats: avg=665.81ms min=37.56ms max=4150.81ms count=7
+10-01 15:37:18.557  3989  4039 D EGL_emulation: app_time_stats: avg=23195.95ms min=23195.95ms max=23195.95ms count=1
+10-01 15:37:19.650  3989  4039 D EGL_emulation: app_time_stats: avg=182.08ms min=57.01ms max=656.33ms count=6
+10-01 15:37:20.713  3989  4039 D EGL_emulation: app_time_stats: avg=81.76ms min=31.14ms max=197.20ms count=13
+10-01 15:37:21.716  3989  4039 D EGL_emulation: app_time_stats: avg=83.47ms min=54.82ms max=153.63ms count=12
+10-01 15:37:22.784  3989  4039 D EGL_emulation: app_time_stats: avg=106.74ms min=53.15ms max=226.96ms count=10
+10-01 15:37:25.542  3989  4039 D EGL_emulation: app_time_stats: avg=275.70ms min=36.35ms max=1969.54ms count=10
+10-01 15:37:38.060  3989  4039 D EGL_emulation: app_time_stats: avg=12517.72ms min=12517.72ms max=12517.72ms count=1
+10-01 15:37:43.679  3989  4039 D EGL_emulation: app_time_stats: avg=5618.31ms min=5618.31ms max=5618.31ms count=1
+10-01 15:37:46.208  3989  4039 D EGL_emulation: app_time_stats: avg=2529.57ms min=2529.57ms max=2529.57ms count=1
+10-01 15:38:06.292  3989  4039 D EGL_emulation: app_time_stats: avg=20083.73ms min=20083.73ms max=20083.73ms count=1
+10-01 15:38:08.123  3989  4039 D EGL_emulation: app_time_stats: avg=1830.54ms min=1830.54ms max=1830.54ms count=1

@@ -1,0 +1,4 @@
+> Task :app:prepareEntityAssets
+
+BUILD SUCCESSFUL in 2s
+1 actionable task: 1 executed

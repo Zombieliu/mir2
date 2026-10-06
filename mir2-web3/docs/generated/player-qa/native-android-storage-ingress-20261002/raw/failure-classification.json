@@ -1,0 +1,32 @@
+{
+  "productRed": {
+    "file": "java-red.xml",
+    "compiled": true,
+    "tests": 2,
+    "failures": 2,
+    "reason": "Missing public Storage forwarding also skipped its UTF-8 bound"
+  },
+  "preparationOnly": [
+    {
+      "step": "baseline first comparison",
+      "reason": "Formatting differs; no product code was executed"
+    },
+    {
+      "step": "baseline token comparison",
+      "reason": "Found frozen snapshot closure block and two existing shared inventory delegations; ported ten frozen bodies, delegated existing metadata/slot helpers without editing Windows"
+    },
+    {
+      "file": "java-green-full.log",
+      "reason": "Wrong variant task testUiPreviewDebugUnitTest does not exist; corrected to the actual testUiPreviewUnitTest"
+    },
+    {
+      "step": "NI-12 evidence verifier argument",
+      "reason": "Used --head instead of HEAD; corrected verifier passed; unrelated to product behavior"
+    }
+  ],
+  "newApkBuilt": false,
+  "onlineVerified": false,
+  "rendererFixed": false,
+  "wholeGoalComplete": false,
+  "postFixRecordedTestFailures": 0
+}

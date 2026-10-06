@@ -12,7 +12,7 @@
 )]
 
 use bevy::prelude::IntoScheduleConfigs;
-use mir2_bevy_runtime::{RuntimeWindowSpec, build_runtime_app};
+use mir2_bevy_runtime::{build_runtime_app, RuntimeWindowSpec};
 
 mod assets;
 mod atlas;

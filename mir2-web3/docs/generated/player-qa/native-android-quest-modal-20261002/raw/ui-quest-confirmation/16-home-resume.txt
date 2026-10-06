@@ -1,0 +1,8 @@
+Starting: Intent { cmp=com.mir2.web3.uipreview/com.mir2.web3.MainActivity (has extras) }
+Warning: Activity not started, its current task has been brought to the front
+Status: ok
+LaunchState: HOT
+Activity: com.mir2.web3.uipreview/com.mir2.web3.MainActivity
+TotalTime: 38
+WaitTime: 38
+Complete

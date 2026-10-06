@@ -434,7 +434,7 @@ mod tests {
 
     #[test]
     fn installed_faces_register_under_original_names_and_survive_source_pruning() {
-        use bevy::text::{FontCx, load_font_assets_into_font_collection};
+        use bevy::text::{load_font_assets_into_font_collection, FontCx};
         let mut app = App::new();
         app.init_resource::<Assets<Font>>()
             .init_resource::<FontCx>()

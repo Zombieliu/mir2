@@ -1,0 +1,450 @@
+{
+  "source": "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6",
+  "previousPublishedAndroid": "f99edfdbd62b5a80714cce41deaabedc75ec5084",
+  "version": 35,
+  "versionName": "0.1.32-gameshop-phone",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "goalStatus": "Active",
+  "fullNI12Status": "PARTIAL",
+  "fullNI13Status": "PARTIAL",
+  "scope": [
+    "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+    "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+    "mir2-web3/apps/game-client/platform-android/android/app/build.gradle"
+  ],
+  "inputCount": 50,
+  "gates": [
+    "bound-rust-normal-v35",
+    "bound-rust-preview-v35",
+    "bound-shared-native-player-v35",
+    "bound-runtime-v35",
+    "bound-api31-normal-v35-corrected",
+    "bound-api31-preview-v35-corrected",
+    "bound-java-full-v35"
+  ],
+  "artifacts": [
+    {
+      "variant": "debug",
+      "source": "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gameshop-phone-v35-20261003-C6YjqR/final-apks/mir2-native-gameshop-phone-debug-v35.apk",
+      "bytes": 387369921,
+      "sha256": "5d05f1c38dfa7afc7b95daeafd9a5a60acae2d4adc2033786ba90b849d373d0d",
+      "applicationId": "com.mir2.web3",
+      "installedSha256": "5d05f1c38dfa7afc7b95daeafd9a5a60acae2d4adc2033786ba90b849d373d0d",
+      "preservedFirstInstallTime": "2026-09-14 06:31:04",
+      "upgradePreservedDataFlag": true
+    },
+    {
+      "variant": "preview",
+      "source": "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/gameshop-phone-v35-20261003-C6YjqR/final-apks/mir2-native-gameshop-phone-preview-v35.apk",
+      "bytes": 391500869,
+      "sha256": "75ad4cd7766308b1fe4682eede323d1a97a41772a516cb7a08b0c0c354b32a1d",
+      "applicationId": "com.mir2.web3.uipreview",
+      "installedSha256": "75ad4cd7766308b1fe4682eede323d1a97a41772a516cb7a08b0c0c354b32a1d",
+      "preservedFirstInstallTime": "2026-09-12 17:13:30",
+      "upgradePreservedDataFlag": true
+    }
+  ],
+  "screenshots": [
+    {
+      "path": "raw/ui-gameshop-jni/0-cold.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Cold offline Java→JNI→host→shared catalog, 105 rows / page 1 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/8-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "First quantity + changes 1 to 2, shared total 200 Gold / 50 Credits."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/16-swipe.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Swipe starts on BUY; scrolls products without opening confirmation."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/24-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Products Up returns to first row; quantity 2 retained."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/32-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Release BUY opens original shared prompt for 2 items / 200 Gold; YES not touched."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/40-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Covered Filters tap does not pass through shared confirmation."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/48-home.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Same PID resume retains shared confirmation; producer not replayed."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/57-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "NO cancels prompt without local purchase; balance 777 / 33 retained."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/65-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Filters opens all shared classes/sections/categories in its own scrollable surface."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/73-swipe.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Independent filter swipe reveals lower catalog category; no underlying action."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/81-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Selecting source category returns to catalog; original category action resets quantity to 1."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/89-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 2 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/97-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 3 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/105-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 4 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/113-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 5 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/121-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 6 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/129-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 7 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/137-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 8 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/145-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 9 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/153-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 10 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/161-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 11 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/169-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 12 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/177-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 13 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/185-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Actual native Next tap selects page 14 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/193-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Next at final page leaves page 14 unchanged."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/201-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Previous selects page 13 of 14."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/209-home.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Same PID resume retains page 13."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/218-resize.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 1560,
+      "height": 720,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Temporary 1560×720 landscape selects one-column layout, page 13 retained; GL errors reproduced."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/228-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 1560,
+      "height": 720,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Compact Next selects page 14 / stock 3."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/236-tap.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 1560,
+      "height": 720,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Compact Products Down exposes full quantity/BUY controls via scrolling; no purchase submitted."
+    },
+    {
+      "path": "raw/ui-gameshop-jni/244-resize.png",
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Original 2340×1080 restored, page 14 retained; GL errors still present."
+    },
+    {
+      "path": "raw/ui-normal-intent-isolation/0-cold.png",
+      "scene": "normal-intent-isolation",
+      "pid": "26483",
+      "width": 2340,
+      "height": 1080,
+      "inspectedOriginal": true,
+      "imageEdited": false,
+      "observation": "Normal APK with ui_scene argument still shows Login / Test server not configured, no diagnostic producer."
+    }
+  ],
+  "scenes": [
+    {
+      "scene": "gameshop-jni",
+      "pid": "25388",
+      "totals": {
+        "gl506": 145,
+        "uninitializedColor": 146,
+        "fatalOrPanic": 0,
+        "javaStart": 1,
+        "javaSent": 1,
+        "sharedConsumer": 1
+      },
+      "screenshotCount": 31
+    },
+    {
+      "scene": "normal-intent-isolation",
+      "pid": "26483",
+      "totals": {
+        "gl506": 12,
+        "uninitializedColor": 12,
+        "fatalOrPanic": 0,
+        "javaStart": 0,
+        "javaSent": 0,
+        "sharedConsumer": 0
+      },
+      "screenshotCount": 1
+    }
+  ],
+  "totalDistinctPidGl506": 157,
+  "totalDistinctPidUninitializedColor": 158,
+  "observedFatalOrPanic": 0,
+  "newNativeApksBuilt": true,
+  "actualOfflineJavaJniVerified": true,
+  "phoneShop48dpTargetsAccepted": true,
+  "phoneShop14dpTextAccepted": true,
+  "actualShopPagingVerified": true,
+  "shopFinalPageBoundaryVerified": true,
+  "shopPreviousAndSamePidResumeVerified": true,
+  "shopQuantitySharedPromptCancelVerified": true,
+  "swipeDoesNotSubmitPurchaseVerified": true,
+  "coveredSharedPromptVerified": true,
+  "independentFiltersVerified": true,
+  "normalIntentIsolationVerified": true,
+  "compactPagingAndControlsReachableVerified": true,
+  "temporaryScreenOverrideRestored": true,
+  "wholePhoneUiAccepted": false,
+  "wholePhoneShopAccepted": false,
+  "allCompactLayoutsAccepted": false,
+  "shopPreviewActualDeviceAccepted": false,
+  "shopImeAccepted": false,
+  "nineLanguagesAccepted": false,
+  "multiTouchPhysicalAccepted": false,
+  "storageInventoryLayoutAccepted": false,
+  "storageThisVersionDeviceRegressionAccepted": false,
+  "realAuthenticationAccepted": false,
+  "realNetworkAccepted": false,
+  "purchaseAccepted": false,
+  "storageTransferAccepted": false,
+  "physicalDeviceAccepted": false,
+  "rendererFixAccepted": false,
+  "zeroRendererErrorAccepted": false,
+  "fullResourcePackAccepted": false,
+  "windowsHostBuildAccepted": false,
+  "appDataContentHashed": false,
+  "untrackedRecursivelyHashed": false,
+  "wholeGoalComplete": false,
+  "designReviewScope": "Native fallback uses actual ADB touch/screenshots, read-only computed 48dp controls and 14/16dp text; Legendary black/gold kept. No browser image stands in for native acceptance.",
+  "rawLogsLosslesslyCompressed": true,
+  "rawLogRingOverwriteHandled": true,
+  "errorsNotSummedAcrossCumulativeSnapshots": true,
+  "remaining": [
+    "Complete GameShop search Android IME, preview native visibility, narrow-footer/portrait/multitouch and nine languages.",
+    "Storage/Inventory non-overlap and locked-storage IME with FLAG_SECURE retained; no v35 storage device acceptance.",
+    "NI-12 real purchase/Credits/Mail; NI-13 online storage exact operations; NI-14–20 social/hero/mail/trade and all Windows denominator rows.",
+    "Approved HTTPS/WSS login/roster/StartGame, shared Zone movement/save/disconnect/reconnect; no demo/account_id fallback.",
+    "Zero renderer errors across required scenes, full resource/audio/update, physical device and final human acceptance."
+  ]
+}

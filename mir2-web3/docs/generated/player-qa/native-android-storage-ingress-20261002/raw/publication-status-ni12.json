@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-10-02T14:08:57.697Z",
+  "sourceCommit": "92033b910cc9ddd996c416ec4024af4625e78b31",
+  "evidenceCommit": "600d8374a22e712c3e4f56c96525dd323b8efba8",
+  "remoteHead": "600d8374a22e712c3e4f56c96525dd323b8efba8",
+  "pr": {
+    "baseRef": "codex/playtest-registration",
+    "draft": true,
+    "head": "600d8374a22e712c3e4f56c96525dd323b8efba8",
+    "headRef": "codex/android-shared-sync",
+    "number": 253,
+    "state": "open"
+  },
+  "sourcePublished": true,
+  "evidencePublished": true,
+  "normalFastForward": true,
+  "forcePush": false,
+  "firstAttemptTransport": "SSH (mislabeled HTTPS in original attempt record)",
+  "secondAttemptTransport": "explicit HTTPS",
+  "goalStatus": "Active",
+  "nextSourceLeaf": "NI-13 authoritative Storage projection and host ingress",
+  "newApk": false,
+  "actualJniVerified": false,
+  "onlineVerified": false,
+  "physicalDeviceVerified": false,
+  "originals": [
+    {
+      "cwd": "/Users/henryliu/obelisk/numeron",
+      "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+      "branch": "codex/steam-main",
+      "status": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/"
+    },
+    {
+      "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+      "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+      "branch": "codex/android-player-journey",
+      "status": ""
+    }
+  ],
+  "baselineFile": "baseline.json",
+  "originalsNotRecursivelyHashed": true
+}

@@ -1,0 +1,801 @@
+{
+  "schema": "mir2-native-android-lighting-sources-evidence-v1",
+  "recordedAt": "2026-10-06T01:01:48.540Z",
+  "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+  "parent": "c57a3cf06c8b8021617426b1d0e45137af56c25e",
+  "sourceStages": [
+    {
+      "source": "c57a3cf06c8b8021617426b1d0e45137af56c25e",
+      "parent": "564910ea5f3d160e48d6e325e502ac81cbec5539",
+      "scope": [
+        "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+        "mir2-web3/apps/game-client/client-bevy/src/native_lighting_sources.rs",
+        "mir2-web3/apps/game-client/client-bevy/src/native_lighting_sources_tests.rs",
+        "mir2-web3/apps/game-client/platform-windows/src/lighting.rs",
+        "mir2-web3/apps/game-client/platform-windows/src/map_parser.rs",
+        "mir2-web3/apps/game-client/platform-windows/src/effects.rs",
+        "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+        "mir2-web3/apps/game-client/platform-android/src/lighting_ingress.rs",
+        "mir2-web3/apps/game-client/platform-android/src/lighting_render.rs",
+        "mir2-web3/apps/game-client/platform-android/src/lighting_render_tests.rs",
+        "mir2-web3/apps/game-client/platform-android/src/map_render.rs",
+        "mir2-web3/apps/game-client/platform-android/src/lighting_map_tests.rs",
+        "mir2-web3/apps/game-client/platform-android/src/world_assets.rs",
+        "mir2-web3/apps/game-client/platform-android/src/scene_effects.rs",
+        "mir2-web3/apps/game-client/platform-android/src/lighting_effect_tests.rs",
+        "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+        "mir2-web3/apps/game-client/platform-android/src/lighting_frame_host_tests.rs",
+        "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+        "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+        "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/LightingScenePreviewTest.java",
+        "mir2-web3/apps/game-client/runtime/src/lib.rs",
+        "mir2-web3/apps/game-client/runtime/src/lighting_schedule_tests.rs",
+        "mir2-web3/apps/game-client/runtime/src/native_lighting_diagnostics.rs"
+      ],
+      "inputs": 444,
+      "inputHashListSha256": "b8c18e381ac453711a90a850b60f512c38a94ab4b3a0ff4b506438b7e9798142",
+      "protectedWholeFiles": 421,
+      "actualNightDawnForcedDarkGpu": "FAIL"
+    },
+    {
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "parent": "c57a3cf06c8b8021617426b1d0e45137af56c25e",
+      "scope": [
+        "mir2-web3/apps/game-client/runtime/src/lib.rs",
+        "mir2-web3/apps/game-client/runtime/src/native_lighting_target.rs"
+      ],
+      "inputs": 445,
+      "inputHashListSha256": "7701d8f968f342b280051a424bd82b03577f334c4c3d3840e427d6abc780a65c",
+      "protectedWholeFiles": 443,
+      "actualFiveColdForegroundSamples": "PASS_BOUNDED"
+    }
+  ],
+  "goal": "Active",
+  "NI17": "PARTIAL",
+  "AP01_21FullDenominatorUnchanged": true,
+  "preservation": {
+    "sharedProducerAndMapHookNormalizedOriginal": true,
+    "windowsThinDelegationsOnly": true,
+    "oldWindowsLighting14Map4Effects2TestsByteUnchanged": true,
+    "oldAndroidMapEffectsHostIngressTestsByteUnchanged": true,
+    "oldUiPreviewSceneCatalogueExactCount": {
+      "before": 61,
+      "after": 65,
+      "oldPrefixUnchanged": true,
+      "onlyFourAppendedJniScenes": true
+    },
+    "runtimeOutsideTargetAllocationHookByteUnchanged": true,
+    "shadersPalettesSourceMathJavaAuthAndWindowsUnchangedInGpuFix": true,
+    "originalWorktreesGitCheckpointsUnchanged": true,
+    "untrackedOriginalWorktreeContentsNotRecursivelyHashed": true
+  },
+  "implementation": {
+    "commonWindowsLightSourceProducer": true,
+    "mapScan": [
+      40,
+      41
+    ],
+    "sourceCap": 200,
+    "rangeAssets": 10,
+    "originalEntityEffectMapPriorityRetained": true,
+    "actualPackCellsAndOptionalEffectCatalogueMetadata": true,
+    "matchingWorldAssetRequestRenderReadyAndSameFramePresentationPoseRequired": true,
+    "generationBoundedBackpressureRetry": true,
+    "javaFourOfflineScenesUseOriginalNativeEventWithoutLoginPermission": true,
+    "producerMarkerNotEnqueueAck": true,
+    "consumerMarkerNotGpuFence": true,
+    "capabilityFix": {
+      "unsupported": "Rgba8UnormSrgb target without alternate view formats",
+      "supported": "Original Rgba8Unorm target with Rgba8UnormSrgb view",
+      "shadersColorsAndRulesUnchanged": true
+    }
+  },
+  "windows": {
+    "frozenFunctionalBaseline": "3d735745f1117d42a7859e87604a106351dca935",
+    "selectedBranch": "codex/playtest-registration",
+    "selectedSource": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+    "readOnlySnapshotAt": "2026-10-06T00:57:53.488Z",
+    "commitsAhead": 1,
+    "changedPaths": 83,
+    "functionalPaths": 0,
+    "fullWindowsOsGateNotRun": true
+  },
+  "verification": [
+    {
+      "label": "bound-lighting-target-android-normal",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 529,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-android-normal-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-android-normal.log"
+    },
+    {
+      "label": "bound-lighting-target-android-preview",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 577,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-android-preview-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-android-preview.log"
+    },
+    {
+      "label": "bound-lighting-target-api31-normal",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-api31-normal-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-api31-normal.log"
+    },
+    {
+      "label": "bound-lighting-target-api31-preview",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-api31-preview-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-api31-preview.log"
+    },
+    {
+      "label": "bound-lighting-target-java-full",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-java-full-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-java-full.log",
+      "freshJavaXml": [
+        {
+          "variant": "debug",
+          "classes": 8,
+          "tests": 103,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": "uiPreview",
+          "classes": 8,
+          "tests": 103,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "freshTasks": [
+        "testDebugUnitTest",
+        "testUiPreviewUnitTest"
+      ],
+      "noCachedTestResults": true
+    },
+    {
+      "label": "bound-lighting-target-real-bichon-resource",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-real-bichon-resource-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-real-bichon-resource.log"
+    },
+    {
+      "label": "bound-lighting-target-runtime",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 301,
+          "failed": 0,
+          "ignored": 1
+        }
+      ],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-runtime-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-runtime.log"
+    },
+    {
+      "label": "bound-lighting-target-shared-player-ui",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 1324,
+          "failed": 0,
+          "ignored": 10
+        }
+      ],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-shared-player-ui-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-shared-player-ui.log"
+    },
+    {
+      "label": "bound-lighting-target-windows-effects",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 2,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-effects-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-effects.log"
+    },
+    {
+      "label": "bound-lighting-target-windows-hero-fifo",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-hero-fifo-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-hero-fifo.log"
+    },
+    {
+      "label": "bound-lighting-target-windows-map",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-map-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-map.log"
+    },
+    {
+      "label": "bound-lighting-target-windows-original",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 14,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-original-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-original.log"
+    },
+    {
+      "label": "bound-lighting-target-windows-protocol",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-protocol-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-protocol.log"
+    },
+    {
+      "label": "bound-lighting-target-windows-skill-fifo",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "exitCode": 0,
+      "sourceInputs": 445,
+      "sourceUnchanged": true,
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-skill-fifo-result.json",
+      "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/bound-lighting-target-windows-skill-fifo.log"
+    }
+  ],
+  "overlappingFocusedCountsNotAdded": true,
+  "failuresRetained": {
+    "compiledProducerRed": {
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/red-compiled-android-lighting-render-result.json",
+      "exitCode": 101,
+      "rust": [
+        {
+          "passed": 7,
+          "failed": 6,
+          "ignored": 0
+        }
+      ],
+      "oldInputsCaptured": 434,
+      "newFileHashesNotCapturedInInitialRed": true
+    },
+    "newTestOracleFirstGreen": {
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/green-android-lighting-render-first-result.json",
+      "exitCode": 101,
+      "rust": [
+        {
+          "passed": 12,
+          "failed": 1,
+          "ignored": 0
+        }
+      ],
+      "newTestOnlyVisibilityResetCorrected": true
+    },
+    "actualOriginalGpu": {
+      "source": "c57a3cf06c8b8021617426b1d0e45137af56c25e",
+      "rootCause": "VIEW_FORMATS unsupported at Device::create_texture caused Validation RenderError AppExit while Android process remained alive.",
+      "pidOnlyAndFatalOnlyAcceptanceRejected": true,
+      "images": [
+        {
+          "scene": "normal-lighting-isolation",
+          "pid": "13042",
+          "png": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/normal-lighting-isolation-pid13042.png",
+          "pngSha256": "6f323797d1602445f93bd45b942ec35a6171b00d040e713930a355c49b8f064e",
+          "log": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/normal-lighting-isolation-pid13042.log",
+          "logSha256": "76a4343d3f5d4c86b7cca27d83f8eab81ad189c7cd3487bc36c066e7cfddb1f8",
+          "originalPngReviewed": true,
+          "observed": "Expected normal login, no preview."
+        },
+        {
+          "scene": "lighting-night-jni",
+          "pid": "13111",
+          "png": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/lighting-night-jni-pid13111.png",
+          "pngSha256": "6f323797d1602445f93bd45b942ec35a6171b00d040e713930a355c49b8f064e",
+          "log": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/lighting-night-jni-pid13111.log",
+          "logSha256": "86c6df228e80914021c24420e773cd7b509ed0748d8ec64e07338704830df499",
+          "originalPngReviewed": true,
+          "observed": "Preview renderer exited; capture is underlying normal login, not the scene."
+        },
+        {
+          "scene": "lighting-dawn-jni",
+          "pid": "13183",
+          "png": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/lighting-dawn-jni-pid13183.png",
+          "pngSha256": "6f323797d1602445f93bd45b942ec35a6171b00d040e713930a355c49b8f064e",
+          "log": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/lighting-dawn-jni-pid13183.log",
+          "logSha256": "265f72899f0a291a54f562f70ce3821bcac123f43c9ccbf4e722c000ad5668bc",
+          "originalPngReviewed": true,
+          "observed": "Preview renderer exited; capture is underlying normal login, not the scene."
+        },
+        {
+          "scene": "lighting-day-jni",
+          "pid": "13252",
+          "png": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/lighting-day-jni-pid13252.png",
+          "pngSha256": "80983970d7bd6505d2baa1a2ca92da4df5bed6c3e06c72a221e615f0cbce4425",
+          "log": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/lighting-day-jni-pid13252.log",
+          "logSha256": "c43db1d7c9f5b5648c5a123dddad29cff72dc2749cfc066ee3d62b70e525d97e",
+          "originalPngReviewed": true,
+          "observed": "Bounded offline daylight world visible."
+        },
+        {
+          "scene": "lighting-map-jni",
+          "pid": "13320",
+          "png": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/lighting-map-jni-pid13320.png",
+          "pngSha256": "422c00c025f0ce0edc263e8b7b1e3d610b6e4f68fdae59f46b2e04a0ff175fb7",
+          "log": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/lighting-map-jni-pid13320.log",
+          "logSha256": "0ed1c710509d2e6b9f52754d3c0ae719c2c276d8053aa21f415b9a21d9cef99f",
+          "originalPngReviewed": true,
+          "observed": "Preview renderer exited; capture is underlying normal login, not the scene."
+        },
+        {
+          "scene": "normal-lighting-isolation",
+          "pid": "13418",
+          "png": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/repeat-normal-lighting-isolation-pid13418.png",
+          "pngSha256": "6f323797d1602445f93bd45b942ec35a6171b00d040e713930a355c49b8f064e",
+          "log": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/normal-lighting-isolation-pid13418.log",
+          "logSha256": "50820533c3391769c8ee81daa58f0bef57def34a887e8a7815a4ae79cf795bed",
+          "originalPngReviewed": true,
+          "observed": "Expected normal login, no preview."
+        },
+        {
+          "scene": "lighting-night-jni",
+          "pid": "13496",
+          "png": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/repeat-lighting-night-jni-pid13496.png",
+          "pngSha256": "cb655bb41548b848d456c32cca251d2b38d9e457b06e9f94533dc7ab370dce20",
+          "log": "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp/lighting-night-jni-pid13496.log",
+          "logSha256": "8da59a0dd9d5dc65e5bc93baa348935601dcbc1f07c3b9a24dcc10a7e6dc0fe7",
+          "originalPngReviewed": true,
+          "observed": "NativeActivity left foreground; launcher visible after validation AppExit."
+        }
+      ]
+    },
+    "compiledGpuDescriptorRed": {
+      "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/red-compiled-lighting-target-view-formats-result.json",
+      "compiled": true,
+      "exitCode": 101,
+      "rust": [
+        {
+          "passed": 2,
+          "failed": 1,
+          "ignored": 0
+        }
+      ]
+    },
+    "stripNativeLibrariesWarningRetained": true,
+    "harnessFailuresNotCountedAsProductPass": [
+      "Initial audit inverse Java function boundary corrected without source changes",
+      "First sandbox ADB socket permission failure retried with scoped emulator access",
+      "Earlier wrong diagnostic path/JSON-output truncation parse error retained separately"
+    ]
+  },
+  "artifacts": [
+    {
+      "variant": "debug",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "path": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/final-apks/mir2-native-lighting-target-debug-1f01c1351.apk",
+      "bytes": 534025319,
+      "sha256": "d6961d31cd1063de438918321eaa2a6576acddd4c5d760d33e4a852942fab45f",
+      "nativeElfBytes": 146291104,
+      "nativeElfSha256": "fb526803ddb14a59deff801a8b290a6238a67555cc776394d016458196b1bf5b",
+      "nativeElfMatchesCurrentVariant": true,
+      "package": "package: name='com.mir2.web3' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+      "gatewayUrl": "",
+      "uiPreview": false,
+      "installedSha256": "d6961d31cd1063de438918321eaa2a6576acddd4c5d760d33e4a852942fab45f",
+      "preserveData": true,
+      "diagnosticDebugNotStoreRelease": true
+    },
+    {
+      "variant": "preview",
+      "source": "1f01c13519f369af1ff1f43a166c12053072e122",
+      "path": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/final-apks/mir2-native-lighting-target-preview-1f01c1351.apk",
+      "bytes": 542058471,
+      "sha256": "d5b83e2ce86007538f19fbce5e57b221579b40f00d235412a8cdef7839dc301f",
+      "nativeElfBytes": 150293792,
+      "nativeElfSha256": "7ea93f1ac0c0f9c8a86cf4aeba3a2ee14e790006185d0f583353f98f9ee1ddcd",
+      "nativeElfMatchesCurrentVariant": true,
+      "package": "package: name='com.mir2.web3.uipreview' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+      "gatewayUrl": "",
+      "uiPreview": true,
+      "installedSha256": "d5b83e2ce86007538f19fbce5e57b221579b40f00d235412a8cdef7839dc301f",
+      "preserveData": true,
+      "diagnosticDebugNotStoreRelease": true
+    }
+  ],
+  "resources": {
+    "selectedUiPngCountPerApk": 6647,
+    "selectedMetadataCountPerApk": 3,
+    "originalLightingPngPerApk": 10,
+    "selectedUiAndLightingBytesMatchBothApks": true,
+    "frozenLightingAndUi32bit470_473BytesMatch": true,
+    "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+    "localResourceGate": {
+      "mapTiles": 607,
+      "mapAtlases": 7,
+      "unresolvedDraws": 0,
+      "realApprovedResourceEnvironmentUsed": true
+    },
+    "wholeMapMissingReferences": 2969,
+    "fullAlignedApprovedResourceReleaseAccepted": false,
+    "raw": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/selected-apk-resources.json"
+  },
+  "device": {
+    "serial": "emulator-5554",
+    "avd": "Mir2_API_31_ARM64",
+    "sdk": 31,
+    "release": "12",
+    "model": "sdk_gphone64_arm64",
+    "abi": "arm64-v8a",
+    "connectedEmulators": 1,
+    "connectedPhysicalDevices": 0,
+    "renderer": "GLES ANGLE SwiftShader CPU",
+    "physicalPerformanceNotInferred": true
+  },
+  "runtime": {
+    "images": [
+      {
+        "scene": "normal-lighting-isolation",
+        "pid": "13707",
+        "apkSha256": "d6961d31cd1063de438918321eaa2a6576acddd4c5d760d33e4a852942fab45f",
+        "alive": true,
+        "targetForeground": true,
+        "foregroundActivity": "    mResumedActivity: ActivityRecord{60a3338 u0 com.mir2.web3/.MainActivity t462}",
+        "started": "2026-10-06T00:55:06.519Z",
+        "ended": "2026-10-06T00:55:16.918Z",
+        "sampleAfterLaunchMs": 8000,
+        "width": 2340,
+        "height": 1080,
+        "png": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/current-normal-lighting-isolation-pid13707.png",
+        "pngSha256": "6f323797d1602445f93bd45b942ec35a6171b00d040e713930a355c49b8f064e",
+        "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/normal-lighting-isolation-pid13707.log",
+        "logSha256": "f96c219c5cee30c505b4a0e9c66c842b79e1e61e5f4ac742c6706afb5ff609fe",
+        "fatal": 0,
+        "GL506": 1,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "renderValidationError": false,
+        "nativeRenderExit": false,
+        "normalPreviewIsolated": true,
+        "previewReady": null,
+        "lightingJNIObserved": false,
+        "consumer": null,
+        "originalPngReviewed": true,
+        "visualObservation": "Full original login with Test server not configured; no offline preview injection.",
+        "notAccepted": [
+          "exact Windows pixel equivalence",
+          "complete phone UI",
+          "online gameplay",
+          "zero-error GPU",
+          "physical device"
+        ]
+      },
+      {
+        "scene": "lighting-night-jni",
+        "pid": "13787",
+        "apkSha256": "d5b83e2ce86007538f19fbce5e57b221579b40f00d235412a8cdef7839dc301f",
+        "alive": true,
+        "targetForeground": true,
+        "foregroundActivity": "    mResumedActivity: ActivityRecord{90c3cb8 u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity t463}",
+        "started": "2026-10-06T00:55:17.700Z",
+        "ended": "2026-10-06T00:55:27.336Z",
+        "sampleAfterLaunchMs": 8000,
+        "width": 2340,
+        "height": 1080,
+        "png": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/current-lighting-night-jni-pid13787.png",
+        "pngSha256": "6e5c1b792a9389e619fda25e2abd579ddc339727941df9a714328ab6ece43e9c",
+        "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/lighting-night-jni-pid13787.log",
+        "logSha256": "1c868c50d9ef6753bbe59627f3abeb333f5b5d605d27d9ef5038eb1f526c0b16",
+        "fatal": 0,
+        "GL506": 5,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "renderValidationError": false,
+        "nativeRenderExit": false,
+        "normalPreviewIsolated": null,
+        "previewReady": true,
+        "lightingJNIObserved": true,
+        "consumer": {
+          "source_enabled": true,
+          "effective_setting": 4,
+          "map_dark_light": 0,
+          "material_enabled": true,
+          "map_sources": 6,
+          "entity_sources": 3,
+          "retained_light_layers": 9,
+          "original_textures_loaded": 10
+        },
+        "originalPngReviewed": true,
+        "visualObservation": "Visible Bichon map, self/torch monster/FireWall and local light pools against a darkened map; shared phone HUD remains visible.",
+        "notAccepted": [
+          "exact Windows pixel equivalence",
+          "complete phone UI",
+          "online gameplay",
+          "zero-error GPU",
+          "physical device"
+        ]
+      },
+      {
+        "scene": "lighting-dawn-jni",
+        "pid": "13865",
+        "apkSha256": "d5b83e2ce86007538f19fbce5e57b221579b40f00d235412a8cdef7839dc301f",
+        "alive": true,
+        "targetForeground": true,
+        "foregroundActivity": "    mResumedActivity: ActivityRecord{62ad487 u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity t464}",
+        "started": "2026-10-06T00:55:28.126Z",
+        "ended": "2026-10-06T00:55:37.491Z",
+        "sampleAfterLaunchMs": 8000,
+        "width": 2340,
+        "height": 1080,
+        "png": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/current-lighting-dawn-jni-pid13865.png",
+        "pngSha256": "2549d59c33e081983973d9be00a8619a4413c265c1847f774e4c481f4c21e7c3",
+        "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/lighting-dawn-jni-pid13865.log",
+        "logSha256": "47ac000be9e72a7056bb2746125141b937d3e7e4527b891543d9532f0c203472",
+        "fatal": 0,
+        "GL506": 2,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "renderValidationError": false,
+        "nativeRenderExit": false,
+        "normalPreviewIsolated": null,
+        "previewReady": true,
+        "lightingJNIObserved": true,
+        "consumer": {
+          "source_enabled": true,
+          "effective_setting": 1,
+          "map_dark_light": 0,
+          "material_enabled": true,
+          "map_sources": 6,
+          "entity_sources": 3,
+          "retained_light_layers": 9,
+          "original_textures_loaded": 10
+        },
+        "originalPngReviewed": true,
+        "visualObservation": "Visible Bichon map, self/torch monster/FireWall and local light pools against a darkened map; shared phone HUD remains visible.",
+        "notAccepted": [
+          "exact Windows pixel equivalence",
+          "complete phone UI",
+          "online gameplay",
+          "zero-error GPU",
+          "physical device"
+        ]
+      },
+      {
+        "scene": "lighting-day-jni",
+        "pid": "13954",
+        "apkSha256": "d5b83e2ce86007538f19fbce5e57b221579b40f00d235412a8cdef7839dc301f",
+        "alive": true,
+        "targetForeground": true,
+        "foregroundActivity": "    mResumedActivity: ActivityRecord{50d2e82 u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity t465}",
+        "started": "2026-10-06T00:55:38.157Z",
+        "ended": "2026-10-06T00:55:47.463Z",
+        "sampleAfterLaunchMs": 8000,
+        "width": 2340,
+        "height": 1080,
+        "png": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/current-lighting-day-jni-pid13954.png",
+        "pngSha256": "0e5c61f7371eac1c40998a2dcc530aaa31f0b19a10f165f44bf8f8b64316ea8d",
+        "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/lighting-day-jni-pid13954.log",
+        "logSha256": "9725abf95b81a7222ba6b407f2d86ba1c7cbf3d0db061f737c317b72ef03e8e1",
+        "fatal": 0,
+        "GL506": 0,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "renderValidationError": false,
+        "nativeRenderExit": false,
+        "normalPreviewIsolated": null,
+        "previewReady": true,
+        "lightingJNIObserved": true,
+        "consumer": {
+          "source_enabled": true,
+          "effective_setting": 2,
+          "map_dark_light": 0,
+          "material_enabled": false,
+          "map_sources": 6,
+          "entity_sources": 3,
+          "retained_light_layers": 0,
+          "original_textures_loaded": 0
+        },
+        "originalPngReviewed": true,
+        "visualObservation": "Visible Bichon map, self/torch monster/FireWall and shared phone HUD; no dark lighting material.",
+        "notAccepted": [
+          "exact Windows pixel equivalence",
+          "complete phone UI",
+          "online gameplay",
+          "zero-error GPU",
+          "physical device"
+        ]
+      },
+      {
+        "scene": "lighting-map-jni",
+        "pid": "14032",
+        "apkSha256": "d5b83e2ce86007538f19fbce5e57b221579b40f00d235412a8cdef7839dc301f",
+        "alive": true,
+        "targetForeground": true,
+        "foregroundActivity": "    mResumedActivity: ActivityRecord{d095e08 u0 com.mir2.web3.uipreview/com.mir2.web3.MainActivity t466}",
+        "started": "2026-10-06T00:55:48.202Z",
+        "ended": "2026-10-06T00:55:57.493Z",
+        "sampleAfterLaunchMs": 8000,
+        "width": 2340,
+        "height": 1080,
+        "png": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/current-lighting-map-jni-pid14032.png",
+        "pngSha256": "9197070924f23ba7e75a7fa3dbccb760345f238f19e41f917282aa3b89051ce6",
+        "log": "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q/lighting-map-jni-pid14032.log",
+        "logSha256": "a7bae8636b8acb996d89d557a518d56aae4efb07acb2a52f9aff4fca40bbb963",
+        "fatal": 0,
+        "GL506": 0,
+        "missingAsset": 0,
+        "cursorWarpErrors": 0,
+        "renderValidationError": false,
+        "nativeRenderExit": false,
+        "normalPreviewIsolated": null,
+        "previewReady": true,
+        "lightingJNIObserved": true,
+        "consumer": {
+          "source_enabled": true,
+          "effective_setting": 4,
+          "map_dark_light": 2,
+          "material_enabled": true,
+          "map_sources": 6,
+          "entity_sources": 3,
+          "retained_light_layers": 9,
+          "original_textures_loaded": 10
+        },
+        "originalPngReviewed": true,
+        "visualObservation": "Visible Bichon map, self/torch monster/FireWall and local light pools against a darkened map; shared phone HUD remains visible.",
+        "notAccepted": [
+          "exact Windows pixel equivalence",
+          "complete phone UI",
+          "online gameplay",
+          "zero-error GPU",
+          "physical device"
+        ]
+      }
+    ],
+    "imagesReviewedAtOriginalResolution": 5,
+    "priorOriginalImagesReviewed": 7,
+    "totalOriginalImagesReviewed": 12,
+    "distinctFinalColdPids": 5,
+    "allFinalTargetForeground": true,
+    "finalRenderValidationExits": 0,
+    "finalFatal": 0,
+    "GL506EntriesByIndependentColdPid": [
+      {
+        "pid": "13707",
+        "count": 1
+      },
+      {
+        "pid": "13787",
+        "count": 5
+      },
+      {
+        "pid": "13865",
+        "count": 2
+      },
+      {
+        "pid": "13954",
+        "count": 0
+      },
+      {
+        "pid": "14032",
+        "count": 0
+      }
+    ],
+    "GL506Total": 8,
+    "zeroErrorGpuGate": "FAIL",
+    "renderReadyReceiptFieldsNotIndependentlyParsedFromLogs": true,
+    "offlineOnly": true,
+    "worldAndLightingBoundedVisualAccepted": true,
+    "exactWindowsPixelEquivalenceAccepted": false
+  },
+  "rawEvidenceRoots": [
+    "mir2-web3/apps/game-client/platform-android/target/lighting-sources-20261006-vL6Lfp",
+    "mir2-web3/apps/game-client/platform-android/target/lighting-target-20261006-LSNH5q"
+  ],
+  "rawLogsApksCachesAndKeysNotCommitted": true,
+  "remoteDelivery": "Pre-documentation snapshot; final normal Android push and remote receipt recorded separately after docs commit.",
+  "draftPr": {
+    "baseRefName": "codex/playtest-registration",
+    "headRefName": "codex/android-shared-sync",
+    "headRefOid": "564910ea5f3d160e48d6e325e502ac81cbec5539",
+    "isDraft": true,
+    "number": 253,
+    "state": "OPEN",
+    "url": "https://github.com/Zombieliu/mir2/pull/253"
+  },
+  "remainingOpen": [
+    "zero-error GPU",
+    "complete map/object/effect and light action variants",
+    "full phone UI and mobile login layout",
+    "multitouch and IME edge cases",
+    "real authenticated HTTPS/WSS player loop and server ACK",
+    "shared Zone authoritative movement and saved re-entry",
+    "nativeResumeV1 and focus/background/network/audio recovery",
+    "full approved resource/audio/update delivery",
+    "physical Android and human frontend acceptance"
+  ]
+}

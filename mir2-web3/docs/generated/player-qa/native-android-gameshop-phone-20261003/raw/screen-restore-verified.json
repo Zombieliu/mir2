@@ -1,0 +1,31 @@
+{
+  "source": "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6",
+  "commands": [
+    {
+      "name": "device-size-after-v35.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "wm",
+        "size"
+      ],
+      "exitCode": 0
+    },
+    {
+      "name": "device-density-after-v35.txt",
+      "args": [
+        "-s",
+        "emulator-5554",
+        "shell",
+        "wm",
+        "density"
+      ],
+      "exitCode": 0
+    }
+  ],
+  "originalSizeRestored": true,
+  "originalDensityPreserved": true,
+  "device": "emulator-5554",
+  "noAvdWipe": true
+}

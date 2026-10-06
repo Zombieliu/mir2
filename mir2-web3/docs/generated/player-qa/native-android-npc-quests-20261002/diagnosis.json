@@ -1,0 +1,67 @@
+{
+  "source": "2c9ad6f96ebc47e07056abbf5a6117c278836083",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "latestObservedWindows": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4",
+  "sourceScope": [
+    "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+    "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+    "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+    "mir2-web3/apps/game-client/platform-android/android/app/build.gradle"
+  ],
+  "versionCode": 30,
+  "versionName": "0.1.27-phone-npc-quests",
+  "gates": {
+    "normal": 327,
+    "preview": 352,
+    "shared": 1254,
+    "sharedExistingIgnored": 10,
+    "phone": 24,
+    "javaEach": 41,
+    "actualApi31Both": true
+  },
+  "manualFrameCount": 26,
+  "canonicalProcesses": [
+    {
+      "pid": "20183",
+      "name": "login",
+      "gl506": 0,
+      "fatalOrPanic": 0
+    },
+    {
+      "pid": "20270",
+      "name": "world",
+      "gl506": 0,
+      "fatalOrPanic": 0
+    },
+    {
+      "pid": "20358",
+      "name": "quests",
+      "gl506": 28,
+      "fatalOrPanic": 0
+    },
+    {
+      "pid": "19449",
+      "name": "npc-quests",
+      "gl506": 10,
+      "uninitializedColor": 10,
+      "fatalOrPanic": 0
+    },
+    {
+      "pid": "20005",
+      "name": "quest-confirmation",
+      "gl506": 0,
+      "uninitializedColor": 0,
+      "fatalOrPanic": 0
+    }
+  ],
+  "canonicalGl506": 38,
+  "previewManualUIOnly": true,
+  "worldGameplayAccepted": false,
+  "realNetworkAccepted": false,
+  "fullResourcePackAccepted": false,
+  "zeroErrorRendererAccepted": false,
+  "physicalDeviceAccepted": false,
+  "wholeWindowsParityAccepted": false,
+  "goalStatus": "active"
+}

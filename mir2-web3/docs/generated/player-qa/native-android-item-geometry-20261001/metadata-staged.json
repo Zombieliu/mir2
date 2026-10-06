@@ -1,0 +1,20 @@
+{
+  "rows": [
+    {
+      "library": "Items",
+      "bytes": 459663,
+      "sha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe",
+      "frames": 1003,
+      "drawableFrames": 1003,
+      "stagedBytesMatch": true
+    },
+    {
+      "library": "StateItem",
+      "bytes": 1489898,
+      "sha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a",
+      "frames": 5192,
+      "drawableFrames": 2380,
+      "stagedBytesMatch": true
+    }
+  ]
+}

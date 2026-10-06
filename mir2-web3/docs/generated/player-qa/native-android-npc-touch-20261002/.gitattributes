@@ -1,0 +1,3 @@
+# Preserve original diagnostic bytes, including SDK CRLF and trailing spaces.
+v18-failed/** -text
+v19/** -text

@@ -1,0 +1,1958 @@
+{
+  "schemaVersion": 1,
+  "source": "f895302be399529df3163cbf3c44499772acd8c2",
+  "parent": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "sourceScope": [
+    "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/WireJson.java",
+    "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java"
+  ],
+  "inputCount": 57,
+  "inputs": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/big_map.rs",
+      "bytes": 46169,
+      "sha256": "0a1f91a1ef552b996445495cd19f16ebd33a72e4a306ff404b2fe419bca2ee97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74468,
+      "sha256": "86eced1102947319ad26c04e53ab8b845a659401c6254855312098a4ebbb3a2d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_hit_tests.rs",
+      "bytes": 10200,
+      "sha256": "d8c9024b39d89363dbe35ec67eda5cd7d8a91276e5ad785fef54cee6d6f08138"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+      "bytes": 69639,
+      "sha256": "59d5ebf8b3d2f5fd28a9f058ece77efd5e2171ac6afbe0cb7af84af9c6d614ab"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "bytes": 42293,
+      "sha256": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 946575,
+      "sha256": "0d75836616c14ca77b6038011fd65e2b5a4a4c53ceae90cb7b3489a266855f09"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "bytes": 67126,
+      "sha256": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "bytes": 60408,
+      "sha256": "c7f9f40be0caf3cfc37edd5a18ff24e76a795dc5d4183b33adf6501800de54cc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+      "bytes": 37415,
+      "sha256": "25becf5d258dba0c25f619ffecf818db997260a9439e295ddccd432df8bd9032"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 2900,
+      "sha256": "bbba2868c3049bd5d46a45d98703f7d8ba7d63b19d86ef722807d14c9c8c3fbe"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "bytes": 23201,
+      "sha256": "8b45f76f8974b21f0fe8729965e89d979955eca4f8da831c4aaebb205d2384ac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "bytes": 13160,
+      "sha256": "38ff1c5220d259b7e609090031219047524b80636e1450a40b28fd7898ba302f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_quest_ingress.rs",
+      "bytes": 22705,
+      "sha256": "ca0d25fd5ce014ab0e8cdaacdf8334001df1f491299d417d18fc0ab32612d5a0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+      "bytes": 76211,
+      "sha256": "62872e48f74dcfbdc746b56b65bee6aebf3dc2837be3d4fdfb85ca3d27988575"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "bytes": 368258,
+      "sha256": "ff3ed519f0087de4583e0891f24039ba16c612aee0d027886be85f9c98b67850"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+      "bytes": 9075,
+      "sha256": "25326f497aabe20bb7300b6e3cacdec21c5851b1eb957bb8fc6300279b429979"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+      "bytes": 15596,
+      "sha256": "71bdbf1637176190cb93703fc94a59af047cf8326f8f88a8093ae8e98f130495"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 33253,
+      "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+      "bytes": 123990,
+      "sha256": "470969816b029c95a8a222700510a423dcd7201e955aef27a655a6b434dc6f3d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28735,
+      "sha256": "25cb70ed959e853e2a27da09264b7362e5395c94149972b320daa00f5f12eff2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 39311,
+      "sha256": "a16625d66782c2ab96ac5d1d5d440a6e5a240f3c019efe6c8d703b2beaf89029"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+      "bytes": 21307,
+      "sha256": "023e2af8b86c2e08d4ddef767465e6c7c49c403242490b557c952d2b0292a5e6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+      "bytes": 4558,
+      "sha256": "366d70d5735eac0112748814653a905d7101ea2b4e666a0a4b5da7ae3a2f3726"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 87693,
+      "sha256": "616b4d84702233d1b213a036769d8ca2c5ff7f4b60819aa2af1d6ce1d1f28fac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+      "bytes": 5723,
+      "sha256": "de1596578856b4ffb94f29875af707258ccc52df2c35cbded479aedd8c282960"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+      "bytes": 5853,
+      "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+      "bytes": 22413,
+      "sha256": "031b9a406e0df4ac8bf588fb674a435d9cc4d8e4ad2505e3dc504cb354f18796"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/item_geometry.rs",
+      "bytes": 9207,
+      "sha256": "f30ff2524a5febc632a095b14cdb1bfaadf9f0cbb866bafc14340febd1898fce"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 75552,
+      "sha256": "f4afc72ab9b5a4afd2415f366a266caa55b13b58fbcde109b270107304b60d0d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mobile_ui.rs",
+      "bytes": 91921,
+      "sha256": "a09f30d587ace87d3cbbc3eaf1c445e73d76aacc2bc112a2026f0925d7dc8d7f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_host_tests.rs",
+      "bytes": 5208,
+      "sha256": "507be77c53a8e139c73b47a02414d01545a3598dcafbfae05907baa4287f31ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_ingress.rs",
+      "bytes": 20887,
+      "sha256": "1544b4dbe37e86dddcc90b04db6b09818c02a871978f4f237d2b3d8ebb501a75"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+      "bytes": 29603,
+      "sha256": "acf81d18dd9c1b3df062cf2dc8d268e680ac358d8ff9cdd665258bd23f1b9837"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+      "bytes": 4789,
+      "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+      "bytes": 20595,
+      "sha256": "7a8a6e6734446b9d7395700694aa4e17847cf36972b9adcc319de1e28fbd64bf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+      "bytes": 10548,
+      "sha256": "230f7b9746254e8598ca99ad846c4b96b3f29a6e1945913ddef89725618510fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_host_tests.rs",
+      "bytes": 8715,
+      "sha256": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_ingress.rs",
+      "bytes": 32437,
+      "sha256": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_preview.rs",
+      "bytes": 6222,
+      "sha256": "b9640e921983930e2fb757d33c886363630c4e109cb3fdcd06e548df664ed65a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 194710,
+      "sha256": "a94ee3bcd62c2f3b1a51e7ee15ed0937aa60de306f1816e3493f68ae55670e9d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+      "bytes": 23059,
+      "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/text_input.rs",
+      "bytes": 10918,
+      "sha256": "5305f310cb666e2ca608a957c47f8161a192008d265a13bc6e0efec3f63b848b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 87749,
+      "sha256": "dfc907f0f5030f3199c787dcb085241815de8e790efa665e26f1c408705c1fe4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/world_input.rs",
+      "bytes": 5009,
+      "sha256": "b45aadb88962376b40181026009ade36019d7dc26095a19295d8e892db7fd4a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 323202,
+      "sha256": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 449445,
+      "sha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 450375,
+      "sha256": "2f306d818fc809412a52e69312dddcc3ce30772ab1fd6174b0d19c79558651e0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 82471,
+      "sha256": "8702d0ccf872aa6a943c9ed40692ce5c233bfc6d4233b1854f4521142871ce95"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+      "bytes": 13568,
+      "sha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+      "bytes": 27032,
+      "sha256": "3d79af27b4809a3a063f39c4c95efc1b8d37ad6a8d46691b3bfbeb3d6b80086f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_ingress.rs",
+      "bytes": 13402,
+      "sha256": "fbed53a162e45cd93a65e2619a5a9debbd45d0e0f23bbffdddf4038a6f5a5a67"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_ingress.rs",
+      "bytes": 31534,
+      "sha256": "66a32131633cf425dfd2b84d682f7202f10834f9fa160bd88fecde4d883c41e8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_host_tests.rs",
+      "bytes": 12532,
+      "sha256": "4a2004c997198bdceec1a3f807a84d7ef707dab3e255509543931c5d11ba4810"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mail_egress_tests.rs",
+      "bytes": 22594,
+      "sha256": "94d76826ffee12d55c7d413681fac3b144c65ff0c4e455a45007ded81976ccd5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/gateway_bridge.rs",
+      "bytes": 126330,
+      "sha256": "466de4b827f00b5ee27b9d487ea3f24087436ef6f408d318bcf563671157710f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_egress.rs",
+      "bytes": 11698,
+      "sha256": "7f487f260692b1e983a01f1f7ec644de844efa9dfc7690c0b950569f16d0cf3c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/WireJson.java",
+      "bytes": 3855,
+      "sha256": "682026d344ad6bcb4f4046deb896cb13646e70fb5ca6d90e4871107eaf848c8a"
+    }
+  ],
+  "remoteBefore": {
+    "checked": "2026-10-03T02:34:05.284Z",
+    "refs": {
+      "refs/heads/codex/android-shared-sync": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a",
+      "refs/heads/codex/playtest-registration": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+      "refs/heads/codex/windows-player-journey": "6ae080711fc7b3aaf06dd9c6bcf63f121682dbe4"
+    },
+    "windowsDeltaCommitCount": 1,
+    "windowsDeltaFileCount": 83,
+    "windowsFunctionalSourceDelta": [],
+    "oldWindowsBranchIsAncestor": true,
+    "pr": {
+      "number": 253,
+      "state": "open",
+      "isDraft": true,
+      "headRefName": "codex/android-shared-sync",
+      "headRefOid": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a",
+      "baseRefName": "codex/playtest-registration",
+      "url": "https://github.com/Zombieliu/mir2/pull/253"
+    }
+  },
+  "rootCause": {
+    "platformRed": {
+      "sdk": 31,
+      "platformType": "java.lang.Double",
+      "platformValue": "1.8446744073709552E19",
+      "platformEncoded": "{\"command\":{\"type\":\"collectParcel\",\"mailId\":1.8446744073709552E19}}",
+      "platformPreservedExactId": false,
+      "probeSourceSha256": "732e4d68d7c47e34fa237ba223e58ced09e9ce4160f1d451c15abb74cabf65dd",
+      "probeDexSha256": "a7749e905c86fc21c5a3955a286971d51e5e885fb008a7700ed288e4059ee4d5",
+      "sourceParent": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a",
+      "label": "Actual API31 platform precision repro; not real Gateway, JNI, or account acceptance"
+    },
+    "productRedLabel": "red-java-unsigned-mail-write",
+    "productRedFailures": 1,
+    "candidateOnly": {
+      "sdk": 31,
+      "platformType": "java.lang.Double",
+      "platformValue": "1.8446744073709552E19",
+      "platformEncoded": "{\"command\":{\"type\":\"collectParcel\",\"mailId\":1.8446744073709552E19}}",
+      "platformPreservedExactId": false,
+      "installedApk": "/data/local/tmp/mir2-mail-wire-20261003-4JjAIe/wire-json-candidate.jar",
+      "wireChecks": 40,
+      "exactCases": [
+        {
+          "id": "1",
+          "type": "java.lang.Integer",
+          "encoded": "{\"a\":[{\"id\":1}],\"quoted\":\"1\"}"
+        },
+        {
+          "id": "9007199254740993",
+          "type": "java.lang.Long",
+          "encoded": "{\"a\":[{\"id\":9007199254740993}],\"quoted\":\"9007199254740993\"}"
+        },
+        {
+          "id": "9223372036854775807",
+          "type": "java.lang.Long",
+          "encoded": "{\"a\":[{\"id\":9223372036854775807}],\"quoted\":\"9223372036854775807\"}"
+        },
+        {
+          "id": "9223372036854775808",
+          "type": "java.math.BigInteger",
+          "encoded": "{\"a\":[{\"id\":9223372036854775808}],\"quoted\":\"9223372036854775808\"}"
+        },
+        {
+          "id": "18446744073709551614",
+          "type": "java.math.BigInteger",
+          "encoded": "{\"a\":[{\"id\":18446744073709551614}],\"quoted\":\"18446744073709551614\"}"
+        },
+        {
+          "id": "18446744073709551615",
+          "type": "java.math.BigInteger",
+          "encoded": "{\"a\":[{\"id\":18446744073709551615}],\"quoted\":\"18446744073709551615\"}"
+        }
+      ],
+      "passed": true,
+      "notAnInstalledApk": true,
+      "noJniAcceptance": true,
+      "wireSourceSha256": "682026d344ad6bcb4f4046deb896cb13646e70fb5ca6d90e4871107eaf848c8a"
+    },
+    "preparationFailures": [
+      {
+        "stage": "device probe build",
+        "classification": "preparation error, not product regression",
+        "detail": "d8 inherited Java 8 while javac was explicitly Java 17; UnsupportedClassVersionError before the device probe ran",
+        "evidence": "Original stderr is in task tool output, not a saved raw payload",
+        "resolution": "Explicit JAVA_HOME JDK17; same probe then ran successfully on API31"
+      },
+      {
+        "stage": "remote read-only audit",
+        "classification": "transient connection failure, not product regression",
+        "detail": "GitHub GraphQL connection reset after same-repository ls-remote/fetch succeeded",
+        "evidence": "Original stderr is in task tool output, not a saved raw payload",
+        "resolution": "Same repository REST read succeeded without network/model/Git configuration changes"
+      }
+    ]
+  },
+  "guard": {
+    "protectedWholeFiles": [
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+        "sha256": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/native_protocol.rs",
+        "sha256": "31982f0a315ce10e4c00cd66748f41a10aaaa09eb6fa213f2bc8079ab0a240ab",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+        "sha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+        "sha256": "2f306d818fc809412a52e69312dddcc3ce30772ab1fd6174b0d19c79558651e0",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/mail.rs",
+        "sha256": "4deff9868f1938d2c685755f98d674c9ec2699806fcdbc0f0019714e1628e63e",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/mail_service.rs",
+        "sha256": "4084f7a4f067ec27eaa9c4ef3536e3da4f8e24402da5a20134f0bdb8d79fffcf",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_parcel.rs",
+        "sha256": "54e0326f085deb0f9d0894e6d40f1e884d9ef405b53d0226abbafe0d4631c1da",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/pending_operations.rs",
+        "sha256": "2c605919440c4c26c53c6cc05116aa29a029d385b8eac421aa8a4013d1c31d3b",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/ui-core/src/effect.rs",
+        "sha256": "9ac4779907ebf8791f5680a7718cc7db49c121faf0033a6b3f8d0e4962db33d1",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/native_mail_ingress.rs",
+        "sha256": "fbed53a162e45cd93a65e2619a5a9debbd45d0e0f23bbffdddf4038a6f5a5a67",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+        "sha256": "0d75836616c14ca77b6038011fd65e2b5a4a4c53ceae90cb7b3489a266855f09",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      }
+    ],
+    "unchangedInputCount": 53,
+    "authMethods": [
+      {
+        "name": "endpoint",
+        "sha256": "98106ce3076de16911a26c11836ebcf66f81551fb07849cad85ffb02a9801daa",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "name": "login",
+        "sha256": "ecaa38e3506ca7f4a41fdd75ab1c9211f8553662f6ae72dd011c4a73e660fdfe",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "name": "start",
+        "sha256": "3d05f990e9d2a0f7d3ad060e063cb21ce41f8b3670103d6d8cbc35f0f014a71f",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "name": "createCharacter",
+        "sha256": "e1bf44d17037d382db5ef3b804599cf47dda136faa2e23831ff72c0a73c73f0c",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "name": "deleteCharacter",
+        "sha256": "4d5b5a555eaa48ccbba7a0683cc6dfbebd54fb2c17a4d3139be1fa1c889f600a",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "name": "worldPending",
+        "sha256": "8326d3c9f5f9d39e4cdf0933b90fd568eb1c86c9e63cf3667c60a01a4a4b6849",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      },
+      {
+        "name": "personalGameplayPhase",
+        "sha256": "4ec514735a2ce53ee1b5b0930b87e1bbdb663a685a65a903b5b86c4a3224738d",
+        "unchangedFrom": "2c0900fd4df99e5b6349099c69fa8a7aea39ef5a"
+      }
+    ],
+    "connectOnlyDecoderSubstitution": true,
+    "mainActivityOnlyTwoDecoderSubstitutions": true,
+    "existingJavaAssertionsUnchanged": true,
+    "originalRuntimeTestsCanonicalUnchanged": 34,
+    "frozenMailHelper": {
+      "name": "mail_attachment_indices",
+      "canonicalEqual": true,
+      "sha256": "bf727f35a18ceaf683b073eeae9c746a8ece66e5ea96933b47a32225cda08c08"
+    },
+    "frozenWireSchemas": [
+      {
+        "name": "ReadMail",
+        "serializationFieldsEqual": true,
+        "tokenSha256": "273e9ee50cd131c8cfa2c7ffa258e1832511c6102b549a852e44ad2bd2621f40"
+      },
+      {
+        "name": "LockMail",
+        "serializationFieldsEqual": true,
+        "tokenSha256": "a6e060b62e086a860cc366db04d3388da29b8be0438acb22a3dba54396362cba"
+      },
+      {
+        "name": "CollectParcel",
+        "serializationFieldsEqual": true,
+        "tokenSha256": "b2c285c96da4824ae8e5d085e4bc9ee0b190177796bc8b0f97ac4dfeb7dce352"
+      },
+      {
+        "name": "DeleteMail",
+        "serializationFieldsEqual": true,
+        "tokenSha256": "26d6c730e2f6078992a3fa67f947acbe0539daac22360539b7ab8d131fbbb1c6"
+      },
+      {
+        "name": "MailCost",
+        "serializationFieldsEqual": true,
+        "tokenSha256": "123c96d682dfc03ec4fe5873834316db0e5c769b4145879f06356e991b96e06f"
+      },
+      {
+        "name": "MailLockedItem",
+        "serializationFieldsEqual": true,
+        "tokenSha256": "50fce35671e964b763dbb46f46bef39f2ff4cfd46a1ebd9e9263a26f418dd280"
+      },
+      {
+        "name": "SendMail",
+        "serializationFieldsEqual": true,
+        "tokenSha256": "799e74f78d633aac747e6b15827abf687a46ca57b66512645cfef9b4d9529ce8"
+      }
+    ],
+    "originalWorkspaces": [
+      {
+        "path": "/Users/henryliu/obelisk/numeron",
+        "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+        "branch": "codex/steam-main",
+        "status": " M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/\n"
+      },
+      {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+        "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+        "branch": "codex/android-player-journey",
+        "status": ""
+      }
+    ],
+    "beforeAfterIdentical": true,
+    "untrackedContentRecursivelyHashed": false
+  },
+  "gates": [
+    {
+      "label": "bound-rust-normal-mail-wire",
+      "source": "f895302be399529df3163cbf3c44499772acd8c2",
+      "code": 0,
+      "sourceUnchanged": true,
+      "rust": {
+        "passed": 394,
+        "failed": 0,
+        "ignored": 0
+      },
+      "xml": []
+    },
+    {
+      "label": "bound-rust-preview-mail-wire",
+      "source": "f895302be399529df3163cbf3c44499772acd8c2",
+      "code": 0,
+      "sourceUnchanged": true,
+      "rust": {
+        "passed": 422,
+        "failed": 0,
+        "ignored": 0
+      },
+      "xml": []
+    },
+    {
+      "label": "bound-shared-native-player-mail-wire",
+      "source": "f895302be399529df3163cbf3c44499772acd8c2",
+      "code": 0,
+      "sourceUnchanged": true,
+      "rust": {
+        "passed": 1292,
+        "failed": 0,
+        "ignored": 10
+      },
+      "xml": []
+    },
+    {
+      "label": "bound-runtime-mail-wire",
+      "source": "f895302be399529df3163cbf3c44499772acd8c2",
+      "code": 0,
+      "sourceUnchanged": true,
+      "rust": {
+        "passed": 296,
+        "failed": 0,
+        "ignored": 1
+      },
+      "xml": []
+    },
+    {
+      "label": "bound-api31-normal-mail-wire",
+      "source": "f895302be399529df3163cbf3c44499772acd8c2",
+      "code": 0,
+      "sourceUnchanged": true,
+      "xml": []
+    },
+    {
+      "label": "bound-api31-preview-mail-wire",
+      "source": "f895302be399529df3163cbf3c44499772acd8c2",
+      "code": 0,
+      "sourceUnchanged": true,
+      "xml": []
+    },
+    {
+      "label": "bound-java-full-mail-wire",
+      "source": "f895302be399529df3163cbf3c44499772acd8c2",
+      "code": 0,
+      "sourceUnchanged": true,
+      "xml": [
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 53,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "tests": 53,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "file": "TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ]
+    }
+  ],
+  "javaTotals": [
+    {
+      "variant": 0,
+      "classes": 6,
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "variant": 1,
+      "classes": 6,
+      "tests": 74,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "packages": [
+    {
+      "variant": "debug",
+      "source": "f895302be399529df3163cbf3c44499772acd8c2",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/mail-wire-20261003-4JjAIe/final-apks/mir2-native-mail-wire-debug-f895302b.apk",
+      "bytes": 387797739,
+      "sha256": "5b6ea829b045833ec902369cd63e08a10e54954fb4668b671972fea3e9443344",
+      "nativeElfBytes": 145170000,
+      "nativeElfSha256": "a7fd3015ea256dd2611f271ffe41502fcb1eaff39b21aa4f4add2cc45d558bec",
+      "nativeElfMatchesThisVariantStrippedOutput": true,
+      "package": "package: name='com.mir2.web3' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+      "gatewayUrl": "",
+      "uiPreview": false,
+      "entityPack": {
+        "schemaVersion": 1,
+        "kind": "mir2-android-entity-pack-lock",
+        "packId": "android-archer-mount-bow-proof-20260912",
+        "sourceMode": "override",
+        "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+        "manifestBytes": 2506377,
+        "atlasCount": 1,
+        "pageCount": 5,
+        "rectCount": 7848,
+        "pageBytes": 8779443
+      }
+    },
+    {
+      "variant": "preview",
+      "source": "f895302be399529df3163cbf3c44499772acd8c2",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/mail-wire-20261003-4JjAIe/final-apks/mir2-native-mail-wire-preview-f895302b.apk",
+      "bytes": 391816211,
+      "sha256": "61a236e9f8dfa5562f83bbcd2cec8e8d0732c7d9e5195adba6b4db8076caccb0",
+      "nativeElfBytes": 149188360,
+      "nativeElfSha256": "106e9920be0eb768e49440f8d6f41817f96f630f79b23c3ab6e89d084e3486aa",
+      "nativeElfMatchesThisVariantStrippedOutput": true,
+      "package": "package: name='com.mir2.web3.uipreview' versionCode='35' versionName='0.1.32-gameshop-phone' platformBuildVersionName='15' platformBuildVersionCode='35' compileSdkVersion='35' compileSdkVersionCodename='15'",
+      "gatewayUrl": "",
+      "uiPreview": true,
+      "entityPack": {
+        "schemaVersion": 1,
+        "kind": "mir2-android-entity-pack-lock",
+        "packId": "android-archer-mount-bow-proof-20260912",
+        "sourceMode": "override",
+        "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+        "manifestBytes": 2506377,
+        "atlasCount": 1,
+        "pageCount": 5,
+        "rectCount": 7848,
+        "pageBytes": 8779443
+      }
+    }
+  ],
+  "resourceAudit": [
+    {
+      "variant": "debug",
+      "apkSha256": "5b6ea829b045833ec902369cd63e08a10e54954fb4668b671972fea3e9443344",
+      "nativeElfSha256": "a7fd3015ea256dd2611f271ffe41502fcb1eaff39b21aa4f4add2cc45d558bec",
+      "selectedUiPngCount": 6647,
+      "selectedMetadataCount": 3,
+      "libraries": [
+        {
+          "library": "Items",
+          "pngCount": 1003,
+          "allSelectedBytesMatch": true,
+          "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe",
+          "entryHashListSha256": "9b631445514b2f41c54d3607ce2e9cd529b6da5aba48412d8bc12aae680233a3"
+        },
+        {
+          "library": "StateItem",
+          "pngCount": 5192,
+          "allSelectedBytesMatch": true,
+          "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a",
+          "entryHashListSha256": "aa4f05c5d4ee057566a1ef8b34a97dc73302e77568115e1a0b306d6290651d13"
+        },
+        {
+          "library": "MagIcon",
+          "pngCount": 224,
+          "allSelectedBytesMatch": true,
+          "metadataSha256": null,
+          "entryHashListSha256": "f3a467b56e3ff3b88806208cbd531bc65616100c17eb81579daee8b1dd25cf43"
+        },
+        {
+          "library": "MagIcon2",
+          "pngCount": 224,
+          "allSelectedBytesMatch": true,
+          "metadataSha256": null,
+          "entryHashListSha256": "e31e0fd0b447d4579636bb15b1570219957a9475f42a70515aade5c41a786142"
+        },
+        {
+          "library": "UI_32bit",
+          "pngCount": 4,
+          "allSelectedBytesMatch": true,
+          "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9",
+          "entryHashListSha256": "fee27a48da6053e1a8a84cbe4db0b3bcb5e2c1002cc16b63ec9926bbb3138201"
+        }
+      ],
+      "frozenWeightFramesByteMatch": true,
+      "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+      "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+      "entityPack": {
+        "schemaVersion": 1,
+        "kind": "mir2-android-entity-pack-lock",
+        "packId": "android-archer-mount-bow-proof-20260912",
+        "sourceMode": "override",
+        "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+        "manifestBytes": 2506377,
+        "atlasCount": 1,
+        "pageCount": 5,
+        "rectCount": 7848,
+        "pageBytes": 8779443
+      },
+      "approvedFullResourceReleaseAccepted": false
+    },
+    {
+      "variant": "preview",
+      "apkSha256": "61a236e9f8dfa5562f83bbcd2cec8e8d0732c7d9e5195adba6b4db8076caccb0",
+      "nativeElfSha256": "106e9920be0eb768e49440f8d6f41817f96f630f79b23c3ab6e89d084e3486aa",
+      "selectedUiPngCount": 6647,
+      "selectedMetadataCount": 3,
+      "libraries": [
+        {
+          "library": "Items",
+          "pngCount": 1003,
+          "allSelectedBytesMatch": true,
+          "metadataSha256": "ec0eca414ac6c34e17a218f0ed4396f30607c2485482f8760af7706acddcedfe",
+          "entryHashListSha256": "9b631445514b2f41c54d3607ce2e9cd529b6da5aba48412d8bc12aae680233a3"
+        },
+        {
+          "library": "StateItem",
+          "pngCount": 5192,
+          "allSelectedBytesMatch": true,
+          "metadataSha256": "7d812a76e9a54b1d0535968a8c21ee2064577e7012572daf79b242221ca72e9a",
+          "entryHashListSha256": "aa4f05c5d4ee057566a1ef8b34a97dc73302e77568115e1a0b306d6290651d13"
+        },
+        {
+          "library": "MagIcon",
+          "pngCount": 224,
+          "allSelectedBytesMatch": true,
+          "metadataSha256": null,
+          "entryHashListSha256": "f3a467b56e3ff3b88806208cbd531bc65616100c17eb81579daee8b1dd25cf43"
+        },
+        {
+          "library": "MagIcon2",
+          "pngCount": 224,
+          "allSelectedBytesMatch": true,
+          "metadataSha256": null,
+          "entryHashListSha256": "e31e0fd0b447d4579636bb15b1570219957a9475f42a70515aade5c41a786142"
+        },
+        {
+          "library": "UI_32bit",
+          "pngCount": 4,
+          "allSelectedBytesMatch": true,
+          "metadataSha256": "9459d5a272a4a41ee0485a553ec3ce8f57996d5840cd99c8eae9b1dab5f14db9",
+          "entryHashListSha256": "fee27a48da6053e1a8a84cbe4db0b3bcb5e2c1002cc16b63ec9926bbb3138201"
+        }
+      ],
+      "frozenWeightFramesByteMatch": true,
+      "worldManifestSha256": "b2ec2e3a73125e781ac8aeead31294e88e6510b1dfd62b2b00c2c2407ad609ce",
+      "entityManifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+      "entityPack": {
+        "schemaVersion": 1,
+        "kind": "mir2-android-entity-pack-lock",
+        "packId": "android-archer-mount-bow-proof-20260912",
+        "sourceMode": "override",
+        "manifestSha256": "929d146535bde9b61c75c33af0e98852dcc3aef83320869aac9f06f4bdd530d9",
+        "manifestBytes": 2506377,
+        "atlasCount": 1,
+        "pageCount": 5,
+        "rectCount": 7848,
+        "pageBytes": 8779443
+      },
+      "approvedFullResourceReleaseAccepted": false
+    }
+  ],
+  "install": {
+    "artifacts": [
+      {
+        "variant": "debug",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/mail-wire-20261003-4JjAIe/final-apks/mir2-native-mail-wire-debug-f895302b.apk",
+        "apkSha256": "5b6ea829b045833ec902369cd63e08a10e54954fb4668b671972fea3e9443344",
+        "installedSha256": "5b6ea829b045833ec902369cd63e08a10e54954fb4668b671972fea3e9443344",
+        "oldVersionCode": 35,
+        "newVersionCode": 35,
+        "reinstallFlags": [
+          "-r"
+        ],
+        "firstInstallTimeUnchanged": true,
+        "dataCleared": false
+      },
+      {
+        "variant": "preview",
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/mail-wire-20261003-4JjAIe/final-apks/mir2-native-mail-wire-preview-f895302b.apk",
+        "apkSha256": "61a236e9f8dfa5562f83bbcd2cec8e8d0732c7d9e5195adba6b4db8076caccb0",
+        "installedSha256": "61a236e9f8dfa5562f83bbcd2cec8e8d0732c7d9e5195adba6b4db8076caccb0",
+        "oldVersionCode": 35,
+        "newVersionCode": 35,
+        "reinstallFlags": [
+          "-r"
+        ],
+        "firstInstallTimeUnchanged": true,
+        "dataCleared": false
+      }
+    ],
+    "physicalDeviceAccepted": false,
+    "realAuthenticationAccepted": false,
+    "realNetworkAccepted": false
+  },
+  "installedWireProbe": {
+    "source": "f895302be399529df3163cbf3c44499772acd8c2",
+    "actualApi31Platform": true,
+    "installedApkCount": 2,
+    "results": [
+      {
+        "sdk": 31,
+        "platformType": "java.lang.Double",
+        "platformValue": "1.8446744073709552E19",
+        "platformEncoded": "{\"command\":{\"type\":\"collectParcel\",\"mailId\":1.8446744073709552E19}}",
+        "platformPreservedExactId": false,
+        "installedApk": "/data/app/~~_P9XSDn2clY4-uAYaCSypw==/com.mir2.web3-_lK6-kPWBjSsjKlDB0rUiA==/base.apk",
+        "wireChecks": 40,
+        "exactCases": [
+          {
+            "id": "1",
+            "type": "java.lang.Integer",
+            "encoded": "{\"a\":[{\"id\":1}],\"quoted\":\"1\"}"
+          },
+          {
+            "id": "9007199254740993",
+            "type": "java.lang.Long",
+            "encoded": "{\"a\":[{\"id\":9007199254740993}],\"quoted\":\"9007199254740993\"}"
+          },
+          {
+            "id": "9223372036854775807",
+            "type": "java.lang.Long",
+            "encoded": "{\"a\":[{\"id\":9223372036854775807}],\"quoted\":\"9223372036854775807\"}"
+          },
+          {
+            "id": "9223372036854775808",
+            "type": "java.math.BigInteger",
+            "encoded": "{\"a\":[{\"id\":9223372036854775808}],\"quoted\":\"9223372036854775808\"}"
+          },
+          {
+            "id": "18446744073709551614",
+            "type": "java.math.BigInteger",
+            "encoded": "{\"a\":[{\"id\":18446744073709551614}],\"quoted\":\"18446744073709551614\"}"
+          },
+          {
+            "id": "18446744073709551615",
+            "type": "java.math.BigInteger",
+            "encoded": "{\"a\":[{\"id\":18446744073709551615}],\"quoted\":\"18446744073709551615\"}"
+          }
+        ],
+        "passed": true,
+        "variant": "debug",
+        "source": "f895302be399529df3163cbf3c44499772acd8c2",
+        "installedApkSha256": "5b6ea829b045833ec902369cd63e08a10e54954fb4668b671972fea3e9443344",
+        "probe": {
+          "harnessClasses": [
+            "LWireJsonDeviceProbe;"
+          ],
+          "harnessDoesNotBundleWireJson": true,
+          "probeJavaSha256": "732e4d68d7c47e34fa237ba223e58ced09e9ce4160f1d451c15abb74cabf65dd",
+          "probeDexSha256": "a7749e905c86fc21c5a3955a286971d51e5e885fb008a7700ed288e4059ee4d5",
+          "classpath": "/data/local/tmp/mir2-mail-wire-20261003-4JjAIe/wire-json-probe.jar"
+        },
+        "harnessDoesNotShadowProductCode": true,
+        "noJniOrActivityPumpAcceptance": true,
+        "noRealNetworkAcceptance": true
+      },
+      {
+        "sdk": 31,
+        "platformType": "java.lang.Double",
+        "platformValue": "1.8446744073709552E19",
+        "platformEncoded": "{\"command\":{\"type\":\"collectParcel\",\"mailId\":1.8446744073709552E19}}",
+        "platformPreservedExactId": false,
+        "installedApk": "/data/app/~~SO-U4o4gF1tqKn4jC4o3RQ==/com.mir2.web3.uipreview-LWm-0Y7OcFqjR1VUPXI83Q==/base.apk",
+        "wireChecks": 40,
+        "exactCases": [
+          {
+            "id": "1",
+            "type": "java.lang.Integer",
+            "encoded": "{\"a\":[{\"id\":1}],\"quoted\":\"1\"}"
+          },
+          {
+            "id": "9007199254740993",
+            "type": "java.lang.Long",
+            "encoded": "{\"a\":[{\"id\":9007199254740993}],\"quoted\":\"9007199254740993\"}"
+          },
+          {
+            "id": "9223372036854775807",
+            "type": "java.lang.Long",
+            "encoded": "{\"a\":[{\"id\":9223372036854775807}],\"quoted\":\"9223372036854775807\"}"
+          },
+          {
+            "id": "9223372036854775808",
+            "type": "java.math.BigInteger",
+            "encoded": "{\"a\":[{\"id\":9223372036854775808}],\"quoted\":\"9223372036854775808\"}"
+          },
+          {
+            "id": "18446744073709551614",
+            "type": "java.math.BigInteger",
+            "encoded": "{\"a\":[{\"id\":18446744073709551614}],\"quoted\":\"18446744073709551614\"}"
+          },
+          {
+            "id": "18446744073709551615",
+            "type": "java.math.BigInteger",
+            "encoded": "{\"a\":[{\"id\":18446744073709551615}],\"quoted\":\"18446744073709551615\"}"
+          }
+        ],
+        "passed": true,
+        "variant": "preview",
+        "source": "f895302be399529df3163cbf3c44499772acd8c2",
+        "installedApkSha256": "61a236e9f8dfa5562f83bbcd2cec8e8d0732c7d9e5195adba6b4db8076caccb0",
+        "probe": {
+          "harnessClasses": [
+            "LWireJsonDeviceProbe;"
+          ],
+          "harnessDoesNotBundleWireJson": true,
+          "probeJavaSha256": "732e4d68d7c47e34fa237ba223e58ced09e9ce4160f1d451c15abb74cabf65dd",
+          "probeDexSha256": "a7749e905c86fc21c5a3955a286971d51e5e885fb008a7700ed288e4059ee4d5",
+          "classpath": "/data/local/tmp/mir2-mail-wire-20261003-4JjAIe/wire-json-probe.jar"
+        },
+        "harnessDoesNotShadowProductCode": true,
+        "noJniOrActivityPumpAcceptance": true,
+        "noRealNetworkAcceptance": true
+      }
+    ]
+  },
+  "device": {
+    "serial": "emulator-5554",
+    "sdk": 31,
+    "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys",
+    "size": "Physical size: 1080x2340",
+    "density": "Physical density: 440",
+    "physicalDeviceCountObserved": 0
+  },
+  "emulator": {
+    "scenes": [
+      {
+        "scene": "mail",
+        "app": "com.mir2.web3.uipreview",
+        "pid": "29059",
+        "apkSha256": "61a236e9f8dfa5562f83bbcd2cec8e8d0732c7d9e5195adba6b4db8076caccb0",
+        "originalPng": "mail-cold.png",
+        "pngWidth": 2340,
+        "pngHeight": 1080,
+        "uiPreviewReady": true,
+        "javaPersonalDiagnosticSent": false,
+        "sharedPersonalConsumerObserved": false,
+        "gl506": 0,
+        "uninitializedColor": 0,
+        "fatalOrPanic": 0,
+        "mailResultActuallyJniReceived": false,
+        "resumeSamePid": true,
+        "resumePng": "mail-resume.png",
+        "resumePngWidth": 2340,
+        "resumePngHeight": 1080
+      },
+      {
+        "scene": "mail-compose",
+        "app": "com.mir2.web3.uipreview",
+        "pid": "29158",
+        "apkSha256": "61a236e9f8dfa5562f83bbcd2cec8e8d0732c7d9e5195adba6b4db8076caccb0",
+        "originalPng": "mail-compose-cold.png",
+        "pngWidth": 2340,
+        "pngHeight": 1080,
+        "uiPreviewReady": true,
+        "javaPersonalDiagnosticSent": false,
+        "sharedPersonalConsumerObserved": false,
+        "gl506": 0,
+        "uninitializedColor": 0,
+        "fatalOrPanic": 0,
+        "mailResultActuallyJniReceived": false
+      },
+      {
+        "scene": "gameshop-jni",
+        "app": "com.mir2.web3.uipreview",
+        "pid": "29233",
+        "apkSha256": "61a236e9f8dfa5562f83bbcd2cec8e8d0732c7d9e5195adba6b4db8076caccb0",
+        "originalPng": "gameshop-jni-cold.png",
+        "pngWidth": 2340,
+        "pngHeight": 1080,
+        "uiPreviewReady": true,
+        "javaPersonalDiagnosticSent": true,
+        "sharedPersonalConsumerObserved": true,
+        "gl506": 23,
+        "uninitializedColor": 23,
+        "fatalOrPanic": 0,
+        "mailResultActuallyJniReceived": false
+      },
+      {
+        "scene": "normal-intent-isolation",
+        "app": "com.mir2.web3",
+        "pid": "29306",
+        "apkSha256": "5b6ea829b045833ec902369cd63e08a10e54954fb4668b671972fea3e9443344",
+        "originalPng": "normal-intent-isolation-cold.png",
+        "pngWidth": 2340,
+        "pngHeight": 1080,
+        "uiPreviewReady": false,
+        "javaPersonalDiagnosticSent": false,
+        "sharedPersonalConsumerObserved": false,
+        "gl506": 0,
+        "uninitializedColor": 0,
+        "fatalOrPanic": 0,
+        "mailResultActuallyJniReceived": false
+      }
+    ],
+    "screenshots": [
+      {
+        "path": "emulator/mail-cold.png",
+        "width": 2340,
+        "height": 1080,
+        "bytes": 70674,
+        "sha256": "43e5a9e8de3a5b616504c05762ed9a3af9bfbef30dd98d57001317a1621864d2",
+        "originalViewed": true
+      },
+      {
+        "path": "emulator/mail-resume.png",
+        "width": 2340,
+        "height": 1080,
+        "bytes": 70674,
+        "sha256": "43e5a9e8de3a5b616504c05762ed9a3af9bfbef30dd98d57001317a1621864d2",
+        "originalViewed": true
+      },
+      {
+        "path": "emulator/mail-compose-cold.png",
+        "width": 2340,
+        "height": 1080,
+        "bytes": 115443,
+        "sha256": "366fd1c69d3c4fd1e8a128ae8cdabd26075e92b602dc22e19ebe7a8c2b813be8",
+        "originalViewed": true
+      },
+      {
+        "path": "emulator/gameshop-jni-cold.png",
+        "width": 2340,
+        "height": 1080,
+        "bytes": 279113,
+        "sha256": "93c0a184dcc7e19b1cf3de8ff7ed819c57e77cc3b2887b3acd388cf658efd564",
+        "originalViewed": true
+      },
+      {
+        "path": "emulator/normal-intent-isolation-cold.png",
+        "width": 2340,
+        "height": 1080,
+        "bytes": 3178607,
+        "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8",
+        "originalViewed": true
+      }
+    ],
+    "coldSnapshotsGl506": 23,
+    "coldSnapshotsUninitializedColor": 23,
+    "coldSnapshotsFatal": 0,
+    "duplicateResumeLogsAddedToColdTotals": false,
+    "mailResultActuallyJniAccepted": false
+  },
+  "status": {
+    "goalStatus": "Active",
+    "wholeWindowsParityComplete": false,
+    "ni14": "PARTIAL",
+    "fix": "DONE_WITH_CONCERNS",
+    "offlineInstalledWireBoundary": "PASS",
+    "realLogin": "OPEN",
+    "realMailSettlement": "OPEN",
+    "mailResultJavaToJni": "OPEN",
+    "phoneMailUi": "FAIL",
+    "gpuZeroError": "FAIL",
+    "physicalDevice": "OPEN",
+    "uiDesignRepairNeedsHumanConfirmation": true,
+    "ni15Through20AndFullParityRemainOpen": true,
+    "approvedFullResourcesAccepted": false,
+    "onlineWebVersionVerified": false
+  },
+  "rawRoot": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/mail-wire-20261003-4JjAIe",
+  "rawArtifactCount": 148,
+  "rawArtifacts": [
+    {
+      "path": "before.json",
+      "bytes": 12269,
+      "sha256": "441a3d52b7646ba4616bf7481e51352018567da99ee8156736c1fc9a35d328c7"
+    },
+    {
+      "path": "bound-api31-normal-mail-wire-result.json",
+      "bytes": 23761,
+      "sha256": "ba44490ae0a62a5f8f603b008de97596f4a33d6d4510414389a8d42f57164700"
+    },
+    {
+      "path": "bound-api31-normal-mail-wire.log",
+      "bytes": 32802,
+      "sha256": "3e494c7a1d20c98c2eb62d5d16710e3579d563f8c73100c11c5a9243210b05e0"
+    },
+    {
+      "path": "bound-api31-preview-mail-wire-result.json",
+      "bytes": 23798,
+      "sha256": "1e3ea4fbace5a7dc87560f04aad2b0da773dda155bf46589d9125722fcb603f5"
+    },
+    {
+      "path": "bound-api31-preview-mail-wire.log",
+      "bytes": 32802,
+      "sha256": "bc79290316378bef382d428516a167ddd7eef0edab1f4d94df345edd56f13502"
+    },
+    {
+      "path": "bound-apk-debug-mail-wire-result.json",
+      "bytes": 237,
+      "sha256": "180e384fc1983624a936129e1a47123430c9fb4478811c1f873e627bce65473c"
+    },
+    {
+      "path": "bound-apk-debug-mail-wire.log",
+      "bytes": 36134,
+      "sha256": "9e42d2bab681e586c8343972341086b82aecaeb3fe5b7d162d8d0bc30497f9ec"
+    },
+    {
+      "path": "bound-apk-preview-mail-wire-result.json",
+      "bytes": 239,
+      "sha256": "c11958a358a44a191e28d0ea73a804096a81c8e88805d2570b3e0209a52c777d"
+    },
+    {
+      "path": "bound-apk-preview-mail-wire.log",
+      "bytes": 36310,
+      "sha256": "6108f1d74946b62a2c13e56c95d679295b320620903b7f7acad71afd49ee8062"
+    },
+    {
+      "path": "bound-java-full-mail-wire-result.json",
+      "bytes": 26454,
+      "sha256": "c02bb59710fdcb38db7cd2ede1e455d2b5f6c76f52c5375ed18f8618667a9d08"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-0/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "fec441d4dfc5c2a76e8a4139f9f63af90d6428632137cc0444bfc31225a2d5b5"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-0/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "aecec7c6666c8bdb11acb753629c84899f26fcfaa4b12895560a07376652d560"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-0/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "29cc9c4da259311d5d46c42a0af107c61c89027ce845b19dea8fa120f8ddfaae"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-0/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 7489,
+      "sha256": "e73aae282e841add906de2de345163834c1dd53aeccc2fd5209d15bfe582d0ac"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-0/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "ecc9dcd8f8b05958c925f363e939032507606a963d14f0a09b45b3c22ba6e553"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-0/TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 1075,
+      "sha256": "5a39642c63f3644612954e668c17bb764bae051d360edc60e927143346577665"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-1/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "f2740e15043df5923668c80f0035d36f511f2db8df051c424463d8632dea847c"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-1/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "62f7cb85df9553410aa4aa67d4d9e7e89a0a7fe701b7e520f2a23e57de8e2a53"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-1/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "a369186ebb65d9d47e73a7ebb240cac52929b39359e29f0d4d123b4df6c05a60"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-1/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 7495,
+      "sha256": "77d55e17fb503e9e7df914437f6315ab7fbe687d78aac940399a56a8d11abd1a"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-1/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "74bce4639ca7e5d51ba9fbefbc9303dd0d4d7b2f9f044a4ad24f45d20ca591c5"
+    },
+    {
+      "path": "bound-java-full-mail-wire-xml-1/TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 1074,
+      "sha256": "4e79c6e0ed4c28fc9adba4db197b423b6b863f8f5f37255419f43253d103704a"
+    },
+    {
+      "path": "bound-java-full-mail-wire.log",
+      "bytes": 3149,
+      "sha256": "04b58c4c70006cba0e925939462c9a22c79c4ab0cb5f128bbe81214c3579576d"
+    },
+    {
+      "path": "bound-runtime-mail-wire-result.json",
+      "bytes": 23755,
+      "sha256": "83afab35ad2d34dbb52071e141ee7211f030e3b884798597db0bc932e045e6bc"
+    },
+    {
+      "path": "bound-runtime-mail-wire.log",
+      "bytes": 27538,
+      "sha256": "53365ed524ef10efb585afc8223c6119171ac0b197a02ab04cc7b33a6c408aa6"
+    },
+    {
+      "path": "bound-rust-normal-mail-wire-result.json",
+      "bytes": 23768,
+      "sha256": "c5b423bab479b19f3a902d66cbefa627db008f66bd9d5dbb8550f73cc73eb358"
+    },
+    {
+      "path": "bound-rust-normal-mail-wire.log",
+      "bytes": 79234,
+      "sha256": "750c406e55ef83923fac3627c7b54c73187fdae64a71f63e278be9929bf6212e"
+    },
+    {
+      "path": "bound-rust-preview-mail-wire-result.json",
+      "bytes": 23805,
+      "sha256": "3e7f72eb114522a6c0b5edc43b134249124bc05533ed165c062b8b3d14e902d3"
+    },
+    {
+      "path": "bound-rust-preview-mail-wire.log",
+      "bytes": 84848,
+      "sha256": "ca2ed579436e21c36dae18f67a43d0ce89e37fd21c5e7fe348f9cf27d813fc21"
+    },
+    {
+      "path": "bound-shared-native-player-mail-wire-result.json",
+      "bytes": 23814,
+      "sha256": "7191a5686a679f77adc24438eebd201b4965734e98c5305859ead58164f3e591"
+    },
+    {
+      "path": "bound-shared-native-player-mail-wire.log",
+      "bytes": 159883,
+      "sha256": "2d2eddefa21385ddbf2ade31342e43d6a201457df5b1f975d38539b0c801e13d"
+    },
+    {
+      "path": "candidate-classes/com/mir2/web3/WireJson.class",
+      "bytes": 2249,
+      "sha256": "efe8576218f53c85e08e641717c975ed57b32e904f5db2681d254d68b3baefda"
+    },
+    {
+      "path": "candidate-classes/com/mir2/web3/WireJson$LosslessTokener.class",
+      "bytes": 2166,
+      "sha256": "e5f0ec69606f84b768b1f8773ca74ddb4944709a6f047fe9377916e77932f60d"
+    },
+    {
+      "path": "candidate-dex/classes.dex",
+      "bytes": 4256,
+      "sha256": "40221d1911f9bfadcec98e37b3c388503971b1196242eee19f03d6e4685f9dc7"
+    },
+    {
+      "path": "debug-badging.txt",
+      "bytes": 4629,
+      "sha256": "e4738e19868ae2363b87b6128745f786460ab48f1a647b2e4d0d66cf8bd229b1"
+    },
+    {
+      "path": "debug-BuildConfig.java.txt",
+      "bytes": 578,
+      "sha256": "096415cfba628b2dca430f78c52487f8c94bb82885378f3539f50cf4cdcd59f6"
+    },
+    {
+      "path": "device-candidate-green.json",
+      "bytes": 1535,
+      "sha256": "25db77716eaa4355b4d4662c72d0c5e4a749c85fe0f1973c75bea7c72fc2b2ad"
+    },
+    {
+      "path": "device-candidate-green.txt",
+      "bytes": 1150,
+      "sha256": "6481cb5469c74f9553fb89aa985120c7e4863faa4e8a664a995aee8f48f7b8dd"
+    },
+    {
+      "path": "device-debug-wire-green.json",
+      "bytes": 2080,
+      "sha256": "cce4e1ff2811c30c17b542e27db9f8e4bc009330cdd721b60040db8375a5edb6"
+    },
+    {
+      "path": "device-debug-wire-green.txt",
+      "bytes": 1164,
+      "sha256": "ac212ad15e46862a31a0fc0da27884b223684a2a719469e94ad2623711b82e03"
+    },
+    {
+      "path": "device-platform-red.json",
+      "bytes": 574,
+      "sha256": "7cc641afa6e850e0808d075200161172b4ae0d3470aeff03bbc7cd4d640648b1"
+    },
+    {
+      "path": "device-platform-red.txt",
+      "bytes": 214,
+      "sha256": "bb40e0cf069522c9a25b9821dae3945e5ff45e81f61be1acda05d0bfc40db77f"
+    },
+    {
+      "path": "device-preview-wire-green.json",
+      "bytes": 2092,
+      "sha256": "a2f80826145dc594ff71b3de3033d0d4d11611733374b7cd1eb77725fe70f210"
+    },
+    {
+      "path": "device-preview-wire-green.txt",
+      "bytes": 1174,
+      "sha256": "750ab7b0beb7d4b0686820533a9696e51e981626f787a578882199f975e1dd90"
+    },
+    {
+      "path": "device/debug-install.txt",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "path": "device/debug-installed-path.txt",
+      "bytes": 93,
+      "sha256": "af8dd4ee0cdc730ebbd19572b9b8fc0826380b7dd328dbb025c1196fe7b005ed"
+    },
+    {
+      "path": "device/debug-installed-sha.txt",
+      "bytes": 151,
+      "sha256": "013523f59d1d922218f6fd02bded2e91756ecba8ef84a4f9af5cc483b4256235"
+    },
+    {
+      "path": "device/debug-package-after.txt",
+      "bytes": 9281,
+      "sha256": "587f68f848508ec20857fb8bd12a6a08229aad4a57577f0e11615156efcfb761"
+    },
+    {
+      "path": "device/debug-package-before.txt",
+      "bytes": 9726,
+      "sha256": "f3292090f769c39d7f9c77fc8062f986352c74de08afe45a83a18e86e0c9a052"
+    },
+    {
+      "path": "device/device-api.txt",
+      "bytes": 3,
+      "sha256": "32c2643e0dc65524c9f1f6f9f00937322fd68d59986bc381d9ff2285d23e353d"
+    },
+    {
+      "path": "device/device-density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "path": "device/device-fingerprint.txt",
+      "bytes": 89,
+      "sha256": "9e2f1f3d18da07932a4b18c12a1ec39c77234bf650bfd4f821ca991c4c0a90c8"
+    },
+    {
+      "path": "device/device-size.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "path": "device/preview-install.txt",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "path": "device/preview-installed-path.txt",
+      "bytes": 103,
+      "sha256": "08cb7fe91cf560777d6ed0e748c951d60da12f18966b78629b20b89a465aa2c0"
+    },
+    {
+      "path": "device/preview-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "f42afc5bdb45fbbff9814a5d38904ba6b83c8aee5904bd2a086bc2199b9776fb"
+    },
+    {
+      "path": "device/preview-package-after.txt",
+      "bytes": 9572,
+      "sha256": "b6f27ab58c1f1f9e82a7fba7fe56ce8bf7b60858f9234f55efdbf3785e9fc624"
+    },
+    {
+      "path": "device/preview-package-before.txt",
+      "bytes": 10051,
+      "sha256": "a1605a4fec5e854c85d8b45f259e5810c3385dc72ee543d27f66580a43a12225"
+    },
+    {
+      "path": "emulator-observation.json",
+      "bytes": 13023,
+      "sha256": "00f29cbd30869a9c9d4cd135949984a2b42acb2df8b01e7910ba4b87a7b091b0"
+    },
+    {
+      "path": "emulator/gameshop-jni-cold.log",
+      "bytes": 494672,
+      "sha256": "26f5f5e06490c3c167ced2855d411961d0c8f4867c5e51a3681de9af9192cc5c"
+    },
+    {
+      "path": "emulator/gameshop-jni-cold.png",
+      "bytes": 279113,
+      "sha256": "93c0a184dcc7e19b1cf3de8ff7ed819c57e77cc3b2887b3acd388cf658efd564"
+    },
+    {
+      "path": "emulator/gameshop-jni-installed-path.txt",
+      "bytes": 103,
+      "sha256": "08cb7fe91cf560777d6ed0e748c951d60da12f18966b78629b20b89a465aa2c0"
+    },
+    {
+      "path": "emulator/gameshop-jni-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "f42afc5bdb45fbbff9814a5d38904ba6b83c8aee5904bd2a086bc2199b9776fb"
+    },
+    {
+      "path": "emulator/gameshop-jni-launch.txt",
+      "bytes": 217,
+      "sha256": "fa15671d081764773b1b4d26c6cda77069519b0a40f28e2f85f9b7d67acb5df9"
+    },
+    {
+      "path": "emulator/gameshop-jni-pid.txt",
+      "bytes": 6,
+      "sha256": "8a6e342e86f935633df1a7e82fdfb7c2e25d010c43cf81baff5d5f643d6c23fb"
+    },
+    {
+      "path": "emulator/gameshop-jni-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "emulator/gameshop-jni-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "emulator/mail-cold.log",
+      "bytes": 34189,
+      "sha256": "5b9e9191891899939464263338b8bf1f3dbf9e77e4b00c886f0740941520111c"
+    },
+    {
+      "path": "emulator/mail-cold.png",
+      "bytes": 70674,
+      "sha256": "43e5a9e8de3a5b616504c05762ed9a3af9bfbef30dd98d57001317a1621864d2"
+    },
+    {
+      "path": "emulator/mail-compose-cold.log",
+      "bytes": 39343,
+      "sha256": "0fef360188c213c399a3b80c9ac28e9cf3c126c9e50552f013176cc473c5297c"
+    },
+    {
+      "path": "emulator/mail-compose-cold.png",
+      "bytes": 115443,
+      "sha256": "366fd1c69d3c4fd1e8a128ae8cdabd26075e92b602dc22e19ebe7a8c2b813be8"
+    },
+    {
+      "path": "emulator/mail-compose-installed-path.txt",
+      "bytes": 103,
+      "sha256": "08cb7fe91cf560777d6ed0e748c951d60da12f18966b78629b20b89a465aa2c0"
+    },
+    {
+      "path": "emulator/mail-compose-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "f42afc5bdb45fbbff9814a5d38904ba6b83c8aee5904bd2a086bc2199b9776fb"
+    },
+    {
+      "path": "emulator/mail-compose-launch.txt",
+      "bytes": 217,
+      "sha256": "95ff6926cd53668d86f9a91de3eb5de853f3261b24bc5891cf372a17a8465b0a"
+    },
+    {
+      "path": "emulator/mail-compose-pid.txt",
+      "bytes": 6,
+      "sha256": "d667ba6b67c2acefa00045f1838e971e8337a0d25d2034d6a859627cbfff9557"
+    },
+    {
+      "path": "emulator/mail-compose-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "emulator/mail-compose-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "emulator/mail-home.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "emulator/mail-installed-path.txt",
+      "bytes": 103,
+      "sha256": "08cb7fe91cf560777d6ed0e748c951d60da12f18966b78629b20b89a465aa2c0"
+    },
+    {
+      "path": "emulator/mail-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "f42afc5bdb45fbbff9814a5d38904ba6b83c8aee5904bd2a086bc2199b9776fb"
+    },
+    {
+      "path": "emulator/mail-launch.txt",
+      "bytes": 217,
+      "sha256": "16cf776f2d8e47cdeea0f7beeb1a9292ef4c87d6548bc1d16c4139cb96c9f70c"
+    },
+    {
+      "path": "emulator/mail-pid.txt",
+      "bytes": 6,
+      "sha256": "5a566ff44f809f6be6ac3a32c348e32b4ce6a63895cfeee41f7314e5571d2dde"
+    },
+    {
+      "path": "emulator/mail-resume-launch.txt",
+      "bytes": 292,
+      "sha256": "11997c5f1c66edbf8a21f24c10233b1d2770be5fb2fb9bebb16a6cc56e280e16"
+    },
+    {
+      "path": "emulator/mail-resume-pid.txt",
+      "bytes": 6,
+      "sha256": "5a566ff44f809f6be6ac3a32c348e32b4ce6a63895cfeee41f7314e5571d2dde"
+    },
+    {
+      "path": "emulator/mail-resume.log",
+      "bytes": 43847,
+      "sha256": "1ee959242b401c7e35f5961d1401e057e9ad869d4639c632a8792c5bb35749df"
+    },
+    {
+      "path": "emulator/mail-resume.png",
+      "bytes": 70674,
+      "sha256": "43e5a9e8de3a5b616504c05762ed9a3af9bfbef30dd98d57001317a1621864d2"
+    },
+    {
+      "path": "emulator/mail-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "emulator/mail-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "emulator/normal-intent-isolation-cold.log",
+      "bytes": 14621,
+      "sha256": "24127cce7ee992e247c61a70c16d462b8eb6a35a79815a2ed0c9f36ce60470c6"
+    },
+    {
+      "path": "emulator/normal-intent-isolation-cold.png",
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "path": "emulator/normal-intent-isolation-installed-path.txt",
+      "bytes": 93,
+      "sha256": "af8dd4ee0cdc730ebbd19572b9b8fc0826380b7dd328dbb025c1196fe7b005ed"
+    },
+    {
+      "path": "emulator/normal-intent-isolation-installed-sha.txt",
+      "bytes": 151,
+      "sha256": "013523f59d1d922218f6fd02bded2e91756ecba8ef84a4f9af5cc483b4256235"
+    },
+    {
+      "path": "emulator/normal-intent-isolation-launch.txt",
+      "bytes": 171,
+      "sha256": "30a1f49c0760d684e07c23af84e6a2e4d199f3bf7bf9def7298113f795397f17"
+    },
+    {
+      "path": "emulator/normal-intent-isolation-pid.txt",
+      "bytes": 6,
+      "sha256": "54f1855ae8b15a19ed82bca086b0233ea194b5977440cb90d011fea4de2796e8"
+    },
+    {
+      "path": "emulator/normal-intent-isolation-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "emulator/normal-intent-isolation-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "final-apks/mir2-native-mail-wire-debug-f895302b.apk",
+      "bytes": 387797739,
+      "sha256": "5b6ea829b045833ec902369cd63e08a10e54954fb4668b671972fea3e9443344"
+    },
+    {
+      "path": "final-apks/mir2-native-mail-wire-preview-f895302b.apk",
+      "bytes": 391816211,
+      "sha256": "61a236e9f8dfa5562f83bbcd2cec8e8d0732c7d9e5195adba6b4db8076caccb0"
+    },
+    {
+      "path": "frozen-mail-scope-guard.json",
+      "bytes": 4781,
+      "sha256": "175c2c7d7b0acac114b4a78a6a6581e1405d80c70d485c370273fd7c1732771d"
+    },
+    {
+      "path": "full-gates-summary.json",
+      "bytes": 4504,
+      "sha256": "98688e6c211985c151edae4a603706992dca4d0f41dff82201867849b99d6bde"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-result.json",
+      "bytes": 26461,
+      "sha256": "ccfe4cd96c6fde2167e0c0918696d23ff5e4b887c9fc3079cf1d0c5677c8c849"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-0/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 963,
+      "sha256": "7a064f71055366c11b07e420a3c6248358492f447628d7d05da7ed0c08395f21"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-0/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "69ee293a6be880d23bb553f2be8a7dbf50946d746f40923b2bbc58f6aa555a49"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-0/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 856,
+      "sha256": "de449acad183d7ce2e09cc31d8be306939488e95ebc6c7a524d4b7e4362ac0db"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-0/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 7498,
+      "sha256": "95a739f0325182c7d20b26fb6e514cc8142173473ea14ba8a207777e3fcc0864"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-0/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "8d3e4bcbc20f5f05113f64263381f209c1800ff557e7aec50f2e3c5ed2826dfb"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-0/TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 1075,
+      "sha256": "f5c7b48c5d09ddd09f6970d9ea7c4f93e8094d2b1140933f03259c45b6401412"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-1/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "57a5a8d3a1929faa022feaa6ef9dcd34a948d7c4c7fd240ae493ef7cd364929d"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-1/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 871,
+      "sha256": "c5b0ecb0a3bc906e527eaff74fe44dea58863b2cf9036bc9feeb44c286a0c65b"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-1/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 854,
+      "sha256": "c61247f9b7d0ed699b8ee1f78abe482739f8e787c3b27ca132eb947032023056"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-1/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 7494,
+      "sha256": "7965620f79ff471203ef44c38ff5386b83c5a97ab24799824fd68c4983ff2855"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-1/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "ccd455f2213e4f990f34b55e0a9d6bcdf1d362fa63659f2ad24771845326f863"
+    },
+    {
+      "path": "green-java-full-mail-wire-final-xml-1/TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 1074,
+      "sha256": "2846a47dcb5355a72f6c373f0324638e637e07686e4df88dd42ee5624e994adb"
+    },
+    {
+      "path": "green-java-full-mail-wire-final.log",
+      "bytes": 3149,
+      "sha256": "60673241d482f9f7f0c2500d293c4f65d76c154abd7d3378500a05db7402b3d2"
+    },
+    {
+      "path": "green-java-full-mail-wire-result.json",
+      "bytes": 26455,
+      "sha256": "03ff8f23a592cf69d110329ad3d39c8302344deec6ffe9b51fa8d76208401a48"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-0/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "9bea23561a4c0b585c74d2f7fc347ff34f3820898b481404bd4c3ed94f143360"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-0/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "7c9e917f100dcb742d5f7ed12956f155d9d97ae03b3c3584ecc2be4b052bef34"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-0/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "60f1e15a690a911837526348c167e529ddbf8cc14edc6d82ebcae4e2d77976b3"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-0/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 7349,
+      "sha256": "bd91567525dd6285e531e3343ead90e435b3664f1ab315b8aa3cb5ecc932cc76"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-0/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "4ee0802143a5c2979a0546fb21848ba46604c8b1d8d6816dfdcf083df50a7886"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-0/TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 1072,
+      "sha256": "91b71997bdeb0d13cb8e73204b89e0b990b002d3b0035675198f368b96588629"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-1/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "27192b410809d086644cec6aa3bcef99f1a236187861c46d600a9665130fd67a"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-1/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 871,
+      "sha256": "df52d65e4a0aa5f8c695462cb9ab7a97ae930c07b7289e7f1d42894cebb24388"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-1/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 854,
+      "sha256": "bf22da12731815eeebdf12fc16d12840ba56883658793337e7236d4c9b70b35e"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-1/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 7354,
+      "sha256": "090b77dda28cc85e606349aaba4178e5f9d3be202469e1c387e6ecb722305bfc"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-1/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 710,
+      "sha256": "b218f47a26d688e9fd1f1820e8d82bba357f87dcd41e5ca93de1ba9a0e69c6d9"
+    },
+    {
+      "path": "green-java-full-mail-wire-xml-1/TEST-com.mir2.web3.OfflinePersonalIngressPreviewTest.xml",
+      "bytes": 1074,
+      "sha256": "30d931d8490c9e13dc740557f0b08864546f7edcc35fb82566d1b94605536785"
+    },
+    {
+      "path": "green-java-full-mail-wire.log",
+      "bytes": 3149,
+      "sha256": "10b8c4fc5352962b23c4e5d1b9acf45d3b5468114aa03ec735dff1559d4f0cb4"
+    },
+    {
+      "path": "install-baseline.json",
+      "bytes": 5531,
+      "sha256": "330d1493dea7b15116e248e1dea2bea85c0f8a8a28d3d9aea97e54766f699f36"
+    },
+    {
+      "path": "installed-wire-probe-summary.json",
+      "bytes": 4765,
+      "sha256": "e9693de799877053262608bc50413e012037fab1dd467ca84ef69415f55676d4"
+    },
+    {
+      "path": "mail-wire-scope-guard.json",
+      "bytes": 18302,
+      "sha256": "a71ad2508b488eb83ffdb2620d6f01780498fd92ec74ae5d4cfc7574467ae4f9"
+    },
+    {
+      "path": "package-baseline.json",
+      "bytes": 15079,
+      "sha256": "59a7e38d7711f1a85543516a29a908b3d55e301a1bf3b63608183081b5371f4f"
+    },
+    {
+      "path": "preparation-failures.json",
+      "bytes": 825,
+      "sha256": "88efffb6c26a69768788310ce49451bee146967d35c4006ac215abab4fa568a0"
+    },
+    {
+      "path": "preview-badging.txt",
+      "bytes": 4649,
+      "sha256": "b87f0c23bc5530bd2ddb53b216d58d43ec4d83d0795f4aef28f1dbc6b15be3c1"
+    },
+    {
+      "path": "preview-BuildConfig.java.txt",
+      "bytes": 595,
+      "sha256": "d4cbc74a3e4d09cbd38dce8539fb331dbfb30a9ef0ddda583e96be45b873572c"
+    },
+    {
+      "path": "probe-classes/WireJsonDeviceProbe.class",
+      "bytes": 5330,
+      "sha256": "7920df5b4b67c6645d1e768abda348fbfec1aeff5427ebc05a838be405714ebb"
+    },
+    {
+      "path": "probe-dex-classes.txt",
+      "bytes": 4828,
+      "sha256": "3a4c1606b38678c2351049cb87885b9181d282a5957ee4fa4fe76db294ee25bb"
+    },
+    {
+      "path": "probe-dex/classes.dex",
+      "bytes": 5724,
+      "sha256": "a7749e905c86fc21c5a3955a286971d51e5e885fb008a7700ed288e4059ee4d5"
+    },
+    {
+      "path": "probe-harness-boundary.json",
+      "bytes": 360,
+      "sha256": "a5f296fccd63fd31d29a3f157f7097d43b78d0dcd83b787e9d9db9a4c47a4a80"
+    },
+    {
+      "path": "red-java-unsigned-mail-write-result.json",
+      "bytes": 23747,
+      "sha256": "7a37a2d5298e9ccd865bf36a10f5a9cee1c127025d309227e4715221294cc9f5"
+    },
+    {
+      "path": "red-java-unsigned-mail-write-xml-0/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 5005,
+      "sha256": "aab0adc8ddb0b2e88e82750e71e6a2a3b88f99679b09cb17a8434f42a754560c"
+    },
+    {
+      "path": "red-java-unsigned-mail-write.log",
+      "bytes": 2377,
+      "sha256": "112335de3c7de9ab9b9c9f4447b9670c13a7a28b5d1f9efdbff41e5fd9def8c2"
+    },
+    {
+      "path": "remote-before.json",
+      "bytes": 10802,
+      "sha256": "5eeb622d0f8a249ddfa3bc09167cf72626a91af700ca4da83e546bb1ab9abb4d"
+    },
+    {
+      "path": "selected-apk-resources.json",
+      "bytes": 5090,
+      "sha256": "36f18aabe9197e4982158fe10e9432eb51952c3f3690dc41ea4de33983a1ee7f"
+    },
+    {
+      "path": "source-commit-binding.json",
+      "bytes": 12438,
+      "sha256": "ab6bb925d9556cf4833d735bdc8474c4cb8adc09b81a3d06a7948330cc965b58"
+    },
+    {
+      "path": "wire-json-candidate.jar",
+      "bytes": 2804,
+      "sha256": "8a4a78eb17981e0cf950430260c1d0f1672a624cdf80e8b13de5de3f956616b5"
+    },
+    {
+      "path": "wire-json-probe.jar",
+      "bytes": 3503,
+      "sha256": "cb23f61e3ee495fff2e7b5f6674758e1db3b6407b7fdb3af1f8b6a0d3eeff490"
+    },
+    {
+      "path": "WireJsonDeviceProbe.java",
+      "bytes": 4304,
+      "sha256": "732e4d68d7c47e34fa237ba223e58ced09e9ce4160f1d451c15abb74cabf65dd"
+    }
+  ]
+}

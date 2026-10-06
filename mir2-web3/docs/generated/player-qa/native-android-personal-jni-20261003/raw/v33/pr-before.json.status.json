@@ -1,0 +1,11 @@
+{
+  "file": "gh",
+  "args": [
+    "api",
+    "repos/Zombieliu/mir2/pulls/253",
+    "--jq",
+    "{number,state,draft,headRef:.head.ref,headSha:.head.sha,baseRef:.base.ref,html_url}"
+  ],
+  "code": 0,
+  "signal": null
+}

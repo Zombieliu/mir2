@@ -362,7 +362,11 @@ pub(crate) fn valid_registration_email(value: &str) -> bool {
 }
 
 fn source_email_match_from(characters: &[char], start: usize) -> bool {
-    let local_ends = source_email_group_ends(characters, source_word_ends(characters, start), &['-', '+', '.']);
+    let local_ends = source_email_group_ends(
+        characters,
+        source_word_ends(characters, start),
+        &['-', '+', '.'],
+    );
     local_ends.into_iter().any(|local_end| {
         if characters.get(local_end) != Some(&'@') {
             return false;
@@ -1579,8 +1583,13 @@ impl NativeShellModel {
                 self.delete_command_sent = false;
                 self.screen = NativeShellScreen::CharacterSelect;
                 self.characters = characters;
-                self.selected_character_index = self.selected_character_index
-                    .filter(|index| self.characters.iter().any(|character| character.index == *index))
+                self.selected_character_index = self
+                    .selected_character_index
+                    .filter(|index| {
+                        self.characters
+                            .iter()
+                            .any(|character| character.index == *index)
+                    })
                     .or_else(|| self.characters.first().map(|character| character.index));
                 self.active_character = None;
                 self.notice = None;
@@ -1910,9 +1919,11 @@ mod tests {
             secret_answer: String::new(),
             email_address: String::new(),
         }));
-        assert!(model.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
-            message: "account already exists".to_owned(),
-        }));
+        assert!(
+            model.apply_gateway_event(NativeGatewayEvent::AccountCreationFailed {
+                message: "account already exists".to_owned(),
+            })
+        );
         assert_eq!(model.screen, NativeShellScreen::Registration);
         assert!(!model.register_request_in_flight);
         assert_eq!(model.registration.account_id, "newhero");
@@ -2214,7 +2225,10 @@ mod tests {
         }));
         assert_eq!(model.screen, NativeShellScreen::CharacterSelect);
         assert_eq!(model.characters, roster);
-        assert_eq!(model.selected_character_index, roster.first().map(|character| character.index));
+        assert_eq!(
+            model.selected_character_index,
+            roster.first().map(|character| character.index)
+        );
         assert!(model.active_character.is_none());
         assert!(model.login.password.is_empty());
         let debug = format!("{model:?}");
@@ -2245,9 +2259,11 @@ mod tests {
         model.characters = starter_characters();
         model.active_character = model.characters.first().cloned();
         assert!(model.apply_ui_intent(NativeUiIntent::Logout));
-        assert!(model.apply_gateway_event(NativeGatewayEvent::OperationFailure {
-            message: "log out failed".into(),
-        }));
+        assert!(
+            model.apply_gateway_event(NativeGatewayEvent::OperationFailure {
+                message: "log out failed".into(),
+            })
+        );
         assert_eq!(model.screen, NativeShellScreen::InGame);
         assert!(model.active_character.is_some());
         assert!(!model.logout_request_in_flight);

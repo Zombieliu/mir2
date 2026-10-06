@@ -6,7 +6,7 @@ use super::{
     widget::spawn_crystal_image_button,
 };
 use crate::native_i18n;
-use crate::native_shell::{ChangePasswordFocus, NativeShellModel, validate_change_password_fields};
+use crate::native_shell::{validate_change_password_fields, ChangePasswordFocus, NativeShellModel};
 use crate::native_shell_ui::{NativeShellButton, NativeShellField};
 use bevy::prelude::*;
 

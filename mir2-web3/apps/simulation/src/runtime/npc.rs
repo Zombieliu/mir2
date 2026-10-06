@@ -756,7 +756,9 @@ fn crystal_npc_profile_allows_item(world: &World, item: &UserItem) -> bool {
 
 pub(super) fn filter_crystal_npc_goods_for_profile(world: &World, packets: &mut [ServerPacket]) {
     for packet in packets {
-        if let ServerPacket::NPCGoods { list, .. } | ServerPacket::NPCPearlGoods { list, .. } = packet {
+        if let ServerPacket::NPCGoods { list, .. } | ServerPacket::NPCPearlGoods { list, .. } =
+            packet
+        {
             list.retain(|item| crystal_npc_profile_allows_item(world, item));
         }
     }
@@ -802,7 +804,9 @@ pub(super) fn crystal_npc_service_packets_for_label_with_markets(
             CRYSTAL_GOODS_HIDE_ADDED_STATS,
         )]),
         "PEARLBUY" => Some(vec![ServerPacket::NPCPearlGoods {
-            list: script.map(crystal_npc_trade_goods_for_script).unwrap_or_default(),
+            list: script
+                .map(crystal_npc_trade_goods_for_script)
+                .unwrap_or_default(),
             rate: crystal_npc_price_rate_for_script(script),
             panel_type: CRYSTAL_PANEL_BUY,
         }]),
@@ -981,8 +985,14 @@ pub(super) fn buy_item_impl(
     {
         let resources = world.resource::<InventoryResource>();
         let balance = if uses_pearls {
-            world.resource::<super::resources::Stage5SystemsResource>().stage5_systems.intelligent_creature_pearls.max(0) as u32
-        } else { world.resource::<PlayerRuntimeResource>().gold };
+            world
+                .resource::<super::resources::Stage5SystemsResource>()
+                .stage5_systems
+                .intelligent_creature_pearls
+                .max(0) as u32
+        } else {
+            world.resource::<PlayerRuntimeResource>().gold
+        };
         if balance < cost {
             return Vec::new();
         }
@@ -993,7 +1003,10 @@ pub(super) fn buy_item_impl(
 
     {
         if uses_pearls {
-            world.resource_mut::<super::resources::Stage5SystemsResource>().stage5_systems.intelligent_creature_pearls -= cost as i32;
+            world
+                .resource_mut::<super::resources::Stage5SystemsResource>()
+                .stage5_systems
+                .intelligent_creature_pearls -= cost as i32;
         } else {
             world.resource_mut::<PlayerRuntimeResource>().gold -= cost;
         }
@@ -1037,8 +1050,12 @@ pub(super) fn buy_item_impl(
     );
 
     let mut packets = Vec::new();
-    if !uses_pearls { packets.push(ServerPacket::LoseGold { gold: cost }); }
-    packets.push(ServerPacket::GainedItem { item: user_item_from_item_state(&gained) });
+    if !uses_pearls {
+        packets.push(ServerPacket::LoseGold { gold: cost });
+    }
+    packets.push(ServerPacket::GainedItem {
+        item: user_item_from_item_state(&gained),
+    });
     match purchase_item.source {
         CrystalNpcPurchaseSource::BuyBack => {
             packets.push(crystal_npc_goods_packet(

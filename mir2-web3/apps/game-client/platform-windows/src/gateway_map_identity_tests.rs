@@ -16,7 +16,8 @@ fn map_identity_stale_snapshot_receipts_do_not_project_actors() {
     assert!(receipt.entity_render_payload.is_none());
     assert!(receipt.zone_entity_tiles.is_empty());
     assert_eq!(
-        skills.snapshot_serial, 1,
+        skills.core.authority().snapshot_serial,
+        1,
         "player skill receipt passed through authority observation"
     );
     assert!(receiver.try_recv().is_err());

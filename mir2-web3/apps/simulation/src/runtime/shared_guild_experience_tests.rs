@@ -4,45 +4,99 @@ use std::time::{SystemTime, UNIX_EPOCH};
 #[test]
 fn prepared_kill_runtime_rejection_restores_complete_private_source() {
     let mut session = super::tests::session();
-    let config = session.app.world().resource::<RuntimeConfigResource>().config.clone()
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone()
         .with_account_store_database_url("postgresql://unused.invalid/prepared-test");
-    session.app.world_mut().resource_mut::<RuntimeConfigResource>().config = config.clone();
+    session
+        .app
+        .world_mut()
+        .resource_mut::<RuntimeConfigResource>()
+        .config = config.clone();
     let before = session.active_character_checkpoint().unwrap();
     let award = crate::runtime::zone::ZoneMonsterKillAward {
-        monster_object_id: 912300, killed_at_ms: 1, monster_name:"Scarecrow".into(),
-        experience: 5, drops:vec![],boss_audit:None,experience_selection:None,
-        source_receipt_key:Some("prepared/runtime/1".into()),
+        monster_object_id: 912300,
+        killed_at_ms: 1,
+        monster_name: "Scarecrow".into(),
+        experience: 5,
+        drops: vec![],
+        boss_audit: None,
+        experience_selection: None,
+        source_receipt_key: Some("prepared/runtime/1".into()),
     };
-    let result = session.commit_shared_monster_kill_via_postgres::<(),_>("prepared/runtime/1",&award,|source|{
-        assert_eq!(source.before().experience,before.experience);
-        assert!(source.checkpoint().experience > source.before().experience);
-        assert_eq!(source.checkpoint().revision,source.before().revision+1);
-        assert_eq!(source.checkpoint().guild_experience_journal.applied_kill_receipts.get(source.key()).map(String::as_str),Some(source.award_hash()));
-        Err(crate::PreparedKillPublicationFailure::Rejected("transaction preflight rejected".into()))
-    });
-    assert!(matches!(result,Err(crate::PreparedKillPublicationFailure::Rejected(_))));
+    let result = session.commit_shared_monster_kill_via_postgres::<(), _>(
+        "prepared/runtime/1",
+        &award,
+        |source| {
+            assert_eq!(source.before().experience, before.experience);
+            assert!(source.checkpoint().experience > source.before().experience);
+            assert_eq!(source.checkpoint().revision, source.before().revision + 1);
+            assert_eq!(
+                source
+                    .checkpoint()
+                    .guild_experience_journal
+                    .applied_kill_receipts
+                    .get(source.key())
+                    .map(String::as_str),
+                Some(source.award_hash())
+            );
+            Err(crate::PreparedKillPublicationFailure::Rejected(
+                "transaction preflight rejected".into(),
+            ))
+        },
+    );
+    assert!(matches!(
+        result,
+        Err(crate::PreparedKillPublicationFailure::Rejected(_))
+    ));
     let after = session.active_character_checkpoint().unwrap();
-    assert_eq!(after.experience,before.experience);
-    assert_eq!(after.revision,before.revision);
-    assert_eq!(after.inventory_items_json,before.inventory_items_json);
-    assert_eq!(after.quest_states_json,before.quest_states_json);
-    assert!(after.guild_experience_journal.applied_kill_receipts.is_empty());
+    assert_eq!(after.experience, before.experience);
+    assert_eq!(after.revision, before.revision);
+    assert_eq!(after.inventory_items_json, before.inventory_items_json);
+    assert_eq!(after.quest_states_json, before.quest_states_json);
+    assert!(after
+        .guild_experience_journal
+        .applied_kill_receipts
+        .is_empty());
     config.ensure_account_store_writable().unwrap();
 }
 
 #[test]
 fn prepared_kill_runtime_missing_commit_receipt_freezes_instead_of_false_success() {
     let mut session = super::tests::session();
-    let config = session.app.world().resource::<RuntimeConfigResource>().config.clone()
+    let config = session
+        .app
+        .world()
+        .resource::<RuntimeConfigResource>()
+        .config
+        .clone()
         .with_account_store_database_url("postgresql://unused.invalid/prepared-test");
-    session.app.world_mut().resource_mut::<RuntimeConfigResource>().config = config.clone();
+    session
+        .app
+        .world_mut()
+        .resource_mut::<RuntimeConfigResource>()
+        .config = config.clone();
     let award = crate::runtime::zone::ZoneMonsterKillAward {
-        monster_object_id: 912300, killed_at_ms: 1, monster_name:"Scarecrow".into(),
-        experience: 5, drops:vec![],boss_audit:None,experience_selection:None,
-        source_receipt_key:Some("prepared/runtime/2".into()),
+        monster_object_id: 912300,
+        killed_at_ms: 1,
+        monster_name: "Scarecrow".into(),
+        experience: 5,
+        drops: vec![],
+        boss_audit: None,
+        experience_selection: None,
+        source_receipt_key: Some("prepared/runtime/2".into()),
     };
-    let result = session.commit_shared_monster_kill_via_postgres("prepared/runtime/2",&award,|_|Ok(crate::PreparedKillPublication::Written(())));
-    assert!(matches!(result,Err(crate::PreparedKillPublicationFailure::OutcomeUnknown(_))));
+    let result =
+        session.commit_shared_monster_kill_via_postgres("prepared/runtime/2", &award, |_| {
+            Ok(crate::PreparedKillPublication::Written(()))
+        });
+    assert!(matches!(
+        result,
+        Err(crate::PreparedKillPublicationFailure::OutcomeUnknown(_))
+    ));
     assert!(config.ensure_account_store_writable().is_err());
 }
 

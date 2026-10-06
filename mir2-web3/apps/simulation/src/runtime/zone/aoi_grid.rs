@@ -117,12 +117,7 @@ impl<K: Ord + Clone> AoiGrid<K> {
     /// Candidate members in every cell intersecting the inclusive rectangle
     /// around `point`. This is a superset: callers retain responsibility for
     /// their exact distance/eligibility predicate.
-    pub(crate) fn candidates_in_rect(
-        &self,
-        point: &Point,
-        x_radius: i32,
-        y_radius: i32,
-    ) -> Vec<K> {
+    pub(crate) fn candidates_in_rect(&self, point: &Point, x_radius: i32, y_radius: i32) -> Vec<K> {
         if x_radius < 0 || y_radius < 0 {
             return Vec::new();
         }

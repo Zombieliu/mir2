@@ -1,0 +1,6 @@
+# Preserve raw SDK/command evidence bytes, including CRLF and ANSI logs.
+*.log -text
+*.txt -text
+*.xml -text
+*.json -text
+*.png binary

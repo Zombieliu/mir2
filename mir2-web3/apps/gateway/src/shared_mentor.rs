@@ -66,11 +66,18 @@ impl SharedMentorCoordinator {
 
 impl SharedInProcessZoneSessionRuntime {
     pub(super) fn refresh_shared_social_buff_packets(&mut self) -> Vec<ServerPacket> {
-        let Ok(presences) = self.mentor_presences() else { return Vec::new(); };
-        let online = presences.into_iter().map(|presence| (presence.key.account_id, presence.key.character_index)).collect();
+        let Ok(presences) = self.mentor_presences() else {
+            return Vec::new();
+        };
+        let online = presences
+            .into_iter()
+            .map(|presence| (presence.key.account_id, presence.key.character_index))
+            .collect();
         // A status refresh failure must not discard an already committed command
         // response. No new buff is created from unavailable relationship data.
-        self.inner.refresh_shared_social_buffs(&online).unwrap_or_default()
+        self.inner
+            .refresh_shared_social_buffs(&online)
+            .unwrap_or_default()
     }
     pub(super) fn refresh_shared_mentor_packets(&mut self, force: bool) -> Option<ServerPacket> {
         let online = self

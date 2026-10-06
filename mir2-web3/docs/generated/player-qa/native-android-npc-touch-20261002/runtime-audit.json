@@ -1,0 +1,141 @@
+{
+  "source": "78e7d2309f6a6b92cea1737c76c5eedfd863e46e",
+  "versionCode": 19,
+  "logCounting": "one latest cumulative log per distinct PID; no before/after double count; canonical event only for duplicated Rust markers",
+  "distinctPids": 9,
+  "entries": [
+    {
+      "directory": "v19/device",
+      "scene": "debug-login",
+      "pid": 10839,
+      "log": "v19/device/debug-login-pid.log",
+      "gl506": 33,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "npcConsumer": [],
+      "localClose": []
+    },
+    {
+      "directory": "v19/device",
+      "scene": "npcshop",
+      "pid": 10915,
+      "log": "v19/device/npcshop-pid.log",
+      "gl506": 6,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "npcConsumer": [
+        "10-02 07:40:11.091 10915 10942 I event src/ui_preview.rs:100: ANDROID_NPC_PREVIEW_SHARED_CONSUMER_OPEN_NOT_LIVEscene = \"npcshop\"; mode = Buy; goods = 1; first_id = 9007199254740993; icon_width = 36; icon_height = 26; map_epoch = 0;"
+      ],
+      "localClose": []
+    },
+    {
+      "directory": "v19/device",
+      "scene": "npcshop-sell",
+      "pid": 10987,
+      "log": "v19/device/npcshop-sell-pid.log",
+      "gl506": 48,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "npcConsumer": [
+        "10-02 07:40:14.818 10987 11013 I event src/ui_preview.rs:100: ANDROID_NPC_PREVIEW_SHARED_CONSUMER_OPEN_NOT_LIVEscene = \"npcshop-sell\"; mode = Sell; goods = 0; first_id = 0; icon_width = 0; icon_height = 0; map_epoch = 0;"
+      ],
+      "localClose": []
+    },
+    {
+      "directory": "v19/device",
+      "scene": "npcshop-repair",
+      "pid": 11059,
+      "log": "v19/device/npcshop-repair-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "npcConsumer": [
+        "10-02 07:40:18.578 11059 11085 I event src/ui_preview.rs:100: ANDROID_NPC_PREVIEW_SHARED_CONSUMER_OPEN_NOT_LIVEscene = \"npcshop-repair\"; mode = Repair; goods = 0; first_id = 0; icon_width = 0; icon_height = 0; map_epoch = 0;"
+      ],
+      "localClose": []
+    },
+    {
+      "directory": "v19/device",
+      "scene": "npcshop-srepair",
+      "pid": 11132,
+      "log": "v19/device/npcshop-srepair-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "npcConsumer": [
+        "10-02 07:40:22.290 11132 11158 I event src/ui_preview.rs:100: ANDROID_NPC_PREVIEW_SHARED_CONSUMER_OPEN_NOT_LIVEscene = \"npcshop-srepair\"; mode = SpecialRepair; goods = 0; first_id = 0; icon_width = 0; icon_height = 0; map_epoch = 0;"
+      ],
+      "localClose": []
+    },
+    {
+      "directory": "v19/touch-device-v3",
+      "scene": "npcshop",
+      "pid": 11272,
+      "log": "v19/touch-device-v3/npcshop-after-pid.log",
+      "gl506": 6,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "npcConsumer": [
+        "10-02 07:48:40.156 11272 11297 I event src/ui_preview.rs:100: ANDROID_NPC_PREVIEW_SHARED_CONSUMER_OPEN_NOT_LIVEscene = \"npcshop\"; mode = Buy; goods = 1; first_id = 9007199254740993; icon_width = 36; icon_height = 26; map_epoch = 0;"
+      ],
+      "localClose": [
+        "10-02 07:48:43.285 11272 11298 I event src/mobile_ui.rs:323: ANDROID_NPC_CLOSE_SHARED_LOCAL_UI_EXIT_REQUEST_NOT_LIVE"
+      ]
+    },
+    {
+      "directory": "v19/touch-device-v3",
+      "scene": "npcshop-sell",
+      "pid": 11360,
+      "log": "v19/touch-device-v3/npcshop-sell-after-pid.log",
+      "gl506": 20,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "npcConsumer": [
+        "10-02 07:48:46.088 11360 11386 I event src/ui_preview.rs:100: ANDROID_NPC_PREVIEW_SHARED_CONSUMER_OPEN_NOT_LIVEscene = \"npcshop-sell\"; mode = Sell; goods = 0; first_id = 0; icon_width = 0; icon_height = 0; map_epoch = 0;"
+      ],
+      "localClose": [
+        "10-02 07:48:49.218 11360 11386 I event src/mobile_ui.rs:323: ANDROID_NPC_CLOSE_SHARED_LOCAL_UI_EXIT_REQUEST_NOT_LIVE"
+      ]
+    },
+    {
+      "directory": "v19/touch-device-v3",
+      "scene": "npcshop-repair",
+      "pid": 11445,
+      "log": "v19/touch-device-v3/npcshop-repair-after-pid.log",
+      "gl506": 0,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "npcConsumer": [
+        "10-02 07:48:52.006 11445 11472 I event src/ui_preview.rs:100: ANDROID_NPC_PREVIEW_SHARED_CONSUMER_OPEN_NOT_LIVEscene = \"npcshop-repair\"; mode = Repair; goods = 0; first_id = 0; icon_width = 0; icon_height = 0; map_epoch = 0;"
+      ],
+      "localClose": [
+        "10-02 07:48:55.151 11445 11472 I event src/mobile_ui.rs:323: ANDROID_NPC_CLOSE_SHARED_LOCAL_UI_EXIT_REQUEST_NOT_LIVE"
+      ]
+    },
+    {
+      "directory": "v19/touch-device-v3",
+      "scene": "npcshop-srepair",
+      "pid": 11530,
+      "log": "v19/touch-device-v3/npcshop-srepair-after-pid.log",
+      "gl506": 22,
+      "missingPaths": 0,
+      "fatalOrPanic": [],
+      "npcConsumer": [
+        "10-02 07:48:57.973 11530 11557 I event src/ui_preview.rs:100: ANDROID_NPC_PREVIEW_SHARED_CONSUMER_OPEN_NOT_LIVEscene = \"npcshop-srepair\"; mode = SpecialRepair; goods = 0; first_id = 0; icon_width = 0; icon_height = 0; map_epoch = 0;"
+      ],
+      "localClose": [
+        "10-02 07:49:01.084 11530 11556 I event src/mobile_ui.rs:323: ANDROID_NPC_CLOSE_SHARED_LOCAL_UI_EXIT_REQUEST_NOT_LIVE"
+      ]
+    }
+  ],
+  "gl506": 135,
+  "selectedCaptureMissingPaths": 0,
+  "actualSharedNpcCloseTaps": 4,
+  "screenshotsInspectedSeparatelyByPrimary": true,
+  "zeroErrorRendererGate": "FAIL",
+  "fullPhoneUiAccepted": false,
+  "actualJniAuthenticatedNpcAccepted": false,
+  "onlineTransactionsAccepted": false,
+  "physicalDeviceAccepted": false,
+  "wholeGoal": "Active"
+}

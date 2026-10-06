@@ -70,16 +70,32 @@ fn newcomer_v2_healing_training_recognizes_the_real_starter_book_skill_key() {
     use super::super::super::zone::{ZoneJourneyEventKind, ZoneJourneyEventReceipt, ZoneKey};
     let mut session = session(MirClass::Taoist);
     learn(session.app.world_mut(), "Healing");
-    assert_eq!(session.app.world().resource::<SkillResource>().skills.last().unwrap().key, "minor-heal");
-    assert!(session.zone_magic_attack_profile(mir2_protocol::Spell::Healing).is_some(),
-        "the real starter-book alias must admit Healing through the shared Zone profile");
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<SkillResource>()
+            .skills
+            .last()
+            .unwrap()
+            .key,
+        "minor-heal"
+    );
+    assert!(
+        session
+            .zone_magic_attack_profile(mir2_protocol::Spell::Healing)
+            .is_some(),
+        "the real starter-book alias must admit Healing through the shared Zone profile"
+    );
     begin(&mut session, 2_110_004);
     let identity = session.active_identity().unwrap();
     let world = session.app.world_mut();
     let accepted_at = acceptance(world, 2_110_004);
     let flag = newcomer_v2::flag_objectives(world, 2_110_004)[0].number;
     let receipt = ZoneJourneyEventReceipt {
-        kind: ZoneJourneyEventKind::HealingAccepted { full_hp_exercise: true },
+        kind: ZoneJourneyEventKind::HealingAccepted {
+            full_hp_exercise: true,
+        },
         session_id: "healing-training".into(),
         account_id: identity.account_id,
         character_index: identity.character_index,
@@ -97,11 +113,21 @@ fn newcomer_v2_healing_training_recognizes_the_real_starter_book_skill_key() {
         material_consumed: false,
     };
     assert!(!record_zone_event(world, &receipt).is_empty());
-    let quest = world.resource::<QuestResource>().quests.iter()
-        .find(|quest| quest.quest_id == 2_110_004).unwrap();
-    assert_eq!(quest.task_progress.get(&crystal_flag_task_key(flag)), Some(&1));
+    let quest = world
+        .resource::<QuestResource>()
+        .quests
+        .iter()
+        .find(|quest| quest.quest_id == 2_110_004)
+        .unwrap();
+    assert_eq!(
+        quest.task_progress.get(&crystal_flag_task_key(flag)),
+        Some(&1)
+    );
     assert_eq!(quest.stage, QuestStage::InProgress);
-    assert_eq!(quest.current, 1, "the two required Oma kills remain independent");
+    assert_eq!(
+        quest.current, 1,
+        "the two required Oma kills remain independent"
+    );
 }
 
 #[test]
@@ -496,7 +522,12 @@ fn newcomer_v2_cave_patrol_public_finish_requires_board_session_and_range_and_re
     // Fixture only: combat receipts have already completed both authored objectives.
     // All NPC authorization and reward settlement below use ordinary public packets.
     let world = session.app.world_mut();
-    world.resource_mut::<SessionResource>().selected_character.as_mut().unwrap().level = 19;
+    world
+        .resource_mut::<SessionResource>()
+        .selected_character
+        .as_mut()
+        .unwrap()
+        .level = 19;
     // V2 rechecks authored dependencies during settlement, even for a Ready quest.
     // Model the ordinary journey history instead of constructing an orphan claim.
     for id in 2_110_001..QUEST_ID {
@@ -509,16 +540,31 @@ fn newcomer_v2_cave_patrol_public_finish_requires_board_session_and_range_and_re
     assert_eq!(info.finish_npc_index, 24);
     let mut quest = super::super::QuestState::from_crystal_info(&info, QuestStage::ReadyToTurnIn);
     quest.current = quest.required;
-    quest.task_progress.insert(super::super::crystal_kill_task_key(85), 1);
-    quest.task_progress.insert(crystal_flag_task_key(2_210_121), 1);
+    quest
+        .task_progress
+        .insert(super::super::crystal_kill_task_key(85), 1);
+    quest
+        .task_progress
+        .insert(crystal_flag_task_key(2_210_121), 1);
     world.resource_mut::<QuestResource>().quests.push(quest);
-    assert!(newcomer_v2::can_finish(world, QUEST_ID), "fixture must satisfy authored settlement prerequisites before testing NPC authorization");
+    assert!(
+        newcomer_v2::can_finish(world, QUEST_ID),
+        "fixture must satisfy authored settlement prerequisites before testing NPC authorization"
+    );
 
     let rewards = |session: &SimulationSession| {
         let world = session.app.world();
         let player = world.resource::<PlayerRuntimeResource>();
-        (player.gold, player.experience,
-            world.resource::<SessionResource>().selected_character.as_ref().unwrap().level)
+        (
+            player.gold,
+            player.experience,
+            world
+                .resource::<SessionResource>()
+                .selected_character
+                .as_ref()
+                .unwrap()
+                .level,
+        )
     };
     let before = rewards(&session);
     let reject_finish = |session: &mut SimulationSession| {
@@ -529,43 +575,112 @@ fn newcomer_v2_cave_patrol_public_finish_requires_board_session_and_range_and_re
         assert!(!packets.iter().any(|packet| matches!(packet,
             ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&QUEST_ID))),
             "unauthorized Finish must not emit quest completion");
-        assert_eq!(super::super::quest_stage(session.app.world(), QUEST_ID), Some(QuestStage::ReadyToTurnIn));
+        assert_eq!(
+            super::super::quest_stage(session.app.world(), QUEST_ID),
+            Some(QuestStage::ReadyToTurnIn)
+        );
         assert_eq!(rewards(session), before);
     };
 
-    session.force_authoritative_player_transform(Point { x: 334, y: 260 }, mir2_protocol::MirDirection::Up);
+    session.force_authoritative_player_transform(
+        Point { x: 334, y: 260 },
+        mir2_protocol::MirDirection::Up,
+    );
     reject_finish(&mut session); // Being beside Board alone is not an NPC session.
 
     // Static NPC index 24 is Kyle, but his wire object ID is 17; Board's is 24.
-    session.force_authoritative_player_transform(Point { x: 371, y: 315 }, mir2_protocol::MirDirection::Up);
-    session.handle_packet(ClientPacket::CallNpc { object_id: 17, key: "@main".into() });
-    assert_eq!(session.app.world().resource::<NpcStateResource>().active_npc_dialog.as_ref().unwrap().npc_object_id, 17);
+    session.force_authoritative_player_transform(
+        Point { x: 371, y: 315 },
+        mir2_protocol::MirDirection::Up,
+    );
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: 17,
+        key: "@main".into(),
+    });
+    assert_eq!(
+        session
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .active_npc_dialog
+            .as_ref()
+            .unwrap()
+            .npc_object_id,
+        17
+    );
     reject_finish(&mut session);
 
-    session.force_authoritative_player_transform(Point { x: 334, y: 260 }, mir2_protocol::MirDirection::Up);
-    session.handle_packet(ClientPacket::CallNpc { object_id: 24, key: "@main".into() });
-    let dialog = session.app.world().resource::<NpcStateResource>().active_npc_dialog.as_ref().unwrap();
+    session.force_authoritative_player_transform(
+        Point { x: 334, y: 260 },
+        mir2_protocol::MirDirection::Up,
+    );
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: 24,
+        key: "@main".into(),
+    });
+    let dialog = session
+        .app
+        .world()
+        .resource::<NpcStateResource>()
+        .active_npc_dialog
+        .as_ref()
+        .unwrap();
     assert_eq!(dialog.npc_object_id, 24);
-    assert!(dialog.links.iter().any(|link| link.target == format!("@quest:finish:{QUEST_ID}")));
-    session.force_authoritative_player_transform(Point { x: 334, y: 280 }, mir2_protocol::MirDirection::Up);
+    assert!(dialog
+        .links
+        .iter()
+        .any(|link| link.target == format!("@quest:finish:{QUEST_ID}")));
+    session.force_authoritative_player_transform(
+        Point { x: 334, y: 280 },
+        mir2_protocol::MirDirection::Up,
+    );
     reject_finish(&mut session); // A previously valid session cannot bypass current range.
 
-    session.force_authoritative_player_transform(Point { x: 334, y: 260 }, mir2_protocol::MirDirection::Up);
-    session.handle_packet(ClientPacket::CallNpc { object_id: 24, key: "@main".into() });
-    let finished = session.handle_packet(ClientPacket::FinishQuest { quest_index: QUEST_ID, selected_item_index: -1 });
-    assert_eq!(super::super::quest_stage(session.app.world(), QUEST_ID), Some(QuestStage::Completed));
+    session.force_authoritative_player_transform(
+        Point { x: 334, y: 260 },
+        mir2_protocol::MirDirection::Up,
+    );
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: 24,
+        key: "@main".into(),
+    });
+    let finished = session.handle_packet(ClientPacket::FinishQuest {
+        quest_index: QUEST_ID,
+        selected_item_index: -1,
+    });
+    assert_eq!(
+        super::super::quest_stage(session.app.world(), QUEST_ID),
+        Some(QuestStage::Completed)
+    );
     assert!(finished.iter().any(|packet| matches!(packet,
         ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&QUEST_ID))));
     let after = rewards(&session);
-    assert_eq!(after.0, before.0 + 500, "the authored patrol gold reward is awarded once");
-    assert_ne!((after.1, after.2), (before.1, before.2), "the authored XP reward must settle too");
+    assert_eq!(
+        after.0,
+        before.0 + 500,
+        "the authored patrol gold reward is awarded once"
+    );
+    assert_ne!(
+        (after.1, after.2),
+        (before.1, before.2),
+        "the authored XP reward must settle too"
+    );
     // Re-open the correct NPC as well: replay safety must not rely only on dialog dismissal.
-    session.handle_packet(ClientPacket::CallNpc { object_id: 24, key: "@main".into() });
-    let replay = session.handle_packet(ClientPacket::FinishQuest { quest_index: QUEST_ID, selected_item_index: -1 });
+    session.handle_packet(ClientPacket::CallNpc {
+        object_id: 24,
+        key: "@main".into(),
+    });
+    let replay = session.handle_packet(ClientPacket::FinishQuest {
+        quest_index: QUEST_ID,
+        selected_item_index: -1,
+    });
     assert!(!replay.iter().any(|packet| matches!(packet,
         ServerPacket::CompleteQuest { completed_quests } if completed_quests.contains(&QUEST_ID))));
     assert_eq!(rewards(&session), after);
-    assert_eq!(super::super::quest_stage(session.app.world(), QUEST_ID), Some(QuestStage::Completed));
+    assert_eq!(
+        super::super::quest_stage(session.app.world(), QUEST_ID),
+        Some(QuestStage::Completed)
+    );
 }
 
 #[test]

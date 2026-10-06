@@ -1,0 +1,37 @@
+{
+  "checked": "2026-10-02T19:05:27.348Z",
+  "source": "f99edfdbd62b5a80714cce41deaabedc75ec5084",
+  "branch": "codex/android-shared-sync",
+  "scope": [
+    "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_phone.rs",
+    "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+    "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+    "mir2-web3/apps/game-client/platform-android/android/app/build.gradle"
+  ],
+  "inputs": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/game_shop_dialog.rs",
+      "bytes": 74181,
+      "sha256": "ef8915bd989058c7151efaf0d6b6f0f86c52e2ee86f9e3e570c0b7a2eebce454"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 944150,
+      "sha256": "82d299e41715cecbc2a3cf7afa29e4cd9b9282ff1d4044d901700294b303be3c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 182051,
+      "sha256": "ffc257f1fef241d25d7487f1737aee2666ca20a3dfee01940cc89b594c0dd818"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28740,
+      "sha256": "4db7ab917ff424ebca5d89aa88e6c412bfc576be00c360199dd56bc5220a7395"
+    }
+  ],
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "wholeGoalComplete": false,
+  "priorTurn": "progress"
+}

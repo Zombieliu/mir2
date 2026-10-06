@@ -92,11 +92,20 @@ mod native {
         recreate_family_text(probe, ARIAL, SAMPLE, bold)
     }
 
-    fn recreate_family_text(probe: &mut Probe, family: &str, sample: &str, bold: bool) -> Result<usize, String> {
+    fn recreate_family_text(
+        probe: &mut Probe,
+        family: &str,
+        sample: &str,
+        bold: bool,
+    ) -> Result<usize, String> {
         let text_font = TextFont {
             font: FontSource::Family(family.into()),
             font_size: FontSize::Px(32.0),
-            weight: if bold { bevy::text::FontWeight::BOLD } else { bevy::text::FontWeight::NORMAL },
+            weight: if bold {
+                bevy::text::FontWeight::BOLD
+            } else {
+                bevy::text::FontWeight::NORMAL
+            },
             ..Default::default()
         };
         let mut computed = ComputedTextBlock::default();
@@ -254,7 +263,11 @@ mod native {
         let glyphs = recreate_arial_text(&mut probe)?;
         recreate_weighted_arial_text(&mut probe, true)?;
         let warm = snapshot(&probe);
-        let original_pixels: Vec<_> = probe.images.iter().map(|(_, image)| image.data.clone()).collect();
+        let original_pixels: Vec<_> = probe
+            .images
+            .iter()
+            .map(|(_, image)| image.data.clone())
+            .collect();
         if glyphs == 0 || warm.pages == 0 || warm.bytes == 0 {
             eprintln!(
                 "SKIP Arial resolved but did not populate a text atlas: glyphs={glyphs}, snapshot={warm:?}"
@@ -289,9 +302,7 @@ mod native {
         }
 
         println!("continuous_arial_recreation={continuous:?}");
-        println!(
-            "after_{INACTIVE_PRUNES}_inactive_prunes_before_recreate={before_recreate:?}"
-        );
+        println!("after_{INACTIVE_PRUNES}_inactive_prunes_before_recreate={before_recreate:?}");
         println!("after_recreate={after_recreate:?}");
         println!(
             "RESULT continuous recreation remained bounded; the second pair reports whether source-cache eviction creates a retained atlas key."
@@ -310,7 +321,10 @@ mod native {
             let bytes = std::fs::read(&path)
                 .map_err(|error| format!("reading installed Arial {}: {error}", path.display()))?;
             let font = Font::from_bytes(bytes);
-            let registered = pinned.font_cx.collection.register_fonts(font.data.clone(), None);
+            let registered = pinned
+                .font_cx
+                .collection
+                .register_fonts(font.data.clone(), None);
             if registered.is_empty() {
                 return Err("installed Arial bytes did not register any font family".into());
             }
@@ -319,10 +333,16 @@ mod native {
         let pinned_glyphs = recreate_arial_text(&mut pinned)?;
         recreate_weighted_arial_text(&mut pinned, true)?;
         if pinned_glyphs != glyphs {
-            return Err(format!("pinned Arial changed glyph count: {glyphs} -> {pinned_glyphs}"));
+            return Err(format!(
+                "pinned Arial changed glyph count: {glyphs} -> {pinned_glyphs}"
+            ));
         }
         let pinned_warm = snapshot(&pinned);
-        let pinned_pixels: Vec<_> = pinned.images.iter().map(|(_, image)| image.data.clone()).collect();
+        let pinned_pixels: Vec<_> = pinned
+            .images
+            .iter()
+            .map(|(_, image)| image.data.clone())
+            .collect();
         if pinned_pixels != original_pixels {
             return Err("pinned Arial changed the sample's raster atlas pixels".into());
         }
@@ -333,10 +353,15 @@ mod native {
             recreate_arial_text(&mut pinned)?;
             recreate_weighted_arial_text(&mut pinned, true)?;
             if snapshot(&pinned) != pinned_warm {
-                return Err(format!("pinned Arial atlas grew after absence cycle {cycle}"));
+                return Err(format!(
+                    "pinned Arial atlas grew after absence cycle {cycle}"
+                ));
             }
         }
-        println!("pinned_arial_after_{CYCLES}_absence_cycles={:?}", snapshot(&pinned));
+        println!(
+            "pinned_arial_after_{CYCLES}_absence_cycles={:?}",
+            snapshot(&pinned)
+        );
         println!("RESULT memory-backed Arial remained bounded with identical sample glyph count and raster atlas pixels; live attribution and whole-UI visual equivalence remain separate gates.");
 
         // Quest guidance uses YaHei rather than Arial; exercise its TTC faces
@@ -344,42 +369,70 @@ mod native {
         let family = "Microsoft YaHei";
         let sample = "任务目标：前往比奇安全区，击败钉耙猫。0123456789";
         let mut chinese_system = Probe::default();
-        if chinese_system.font_cx.collection.family_id(family).is_none() {
+        if chinese_system
+            .font_cx
+            .collection
+            .family_id(family)
+            .is_none()
+        {
             eprintln!("SKIP YaHei comparison: system family unavailable.");
             return Ok(());
         }
         let regular_glyphs = recreate_family_text(&mut chinese_system, family, sample, false)?;
         let bold_glyphs = recreate_family_text(&mut chinese_system, family, sample, true)?;
-        let chinese_pixels: Vec<_> = chinese_system.images.iter().map(|(_, image)| image.data.clone()).collect();
+        let chinese_pixels: Vec<_> = chinese_system
+            .images
+            .iter()
+            .map(|(_, image)| image.data.clone())
+            .collect();
         let mut chinese_pinned = Probe::default();
         let mut chinese_handles = Vec::new();
         for file in ["msyh.ttc", "msyhbd.ttc", "msyhl.ttc"] {
             let path = std::path::PathBuf::from(&windows).join("Fonts").join(file);
-            let font = Font::from_bytes(std::fs::read(&path).map_err(|error| format!("{}: {error}", path.display()))?);
-            if chinese_pinned.font_cx.collection.register_fonts(font.data.clone(), None).is_empty() {
+            let font = Font::from_bytes(
+                std::fs::read(&path).map_err(|error| format!("{}: {error}", path.display()))?,
+            );
+            if chinese_pinned
+                .font_cx
+                .collection
+                .register_fonts(font.data.clone(), None)
+                .is_empty()
+            {
                 return Err(format!("no families registered from {file}"));
             }
             chinese_handles.push(chinese_pinned.fonts.add(font));
         }
         if recreate_family_text(&mut chinese_pinned, family, sample, false)? != regular_glyphs
-            || recreate_family_text(&mut chinese_pinned, family, sample, true)? != bold_glyphs {
+            || recreate_family_text(&mut chinese_pinned, family, sample, true)? != bold_glyphs
+        {
             return Err("pinned YaHei changed sample glyph count".into());
         }
-        let pinned_chinese_pixels: Vec<_> = chinese_pinned.images.iter().map(|(_, image)| image.data.clone()).collect();
+        let pinned_chinese_pixels: Vec<_> = chinese_pinned
+            .images
+            .iter()
+            .map(|(_, image)| image.data.clone())
+            .collect();
         if chinese_pixels != pinned_chinese_pixels || regular_glyphs == 0 || bold_glyphs == 0 {
             return Err("pinned YaHei raster pixels differ or glyph sample is empty".into());
         }
         verify_cjk_word_or_character_wrap(&mut chinese_system, family, sample, regular_glyphs)?;
         let chinese_warm = snapshot(&chinese_pinned);
         for cycle in 0..CYCLES {
-            for _ in 0..INACTIVE_PRUNES { chinese_pinned.font_cx.source_cache.prune(2, false); }
+            for _ in 0..INACTIVE_PRUNES {
+                chinese_pinned.font_cx.source_cache.prune(2, false);
+            }
             recreate_family_text(&mut chinese_pinned, family, sample, false)?;
             recreate_family_text(&mut chinese_pinned, family, sample, true)?;
             if snapshot(&chinese_pinned) != chinese_warm {
-                return Err(format!("pinned YaHei atlas grew after absence cycle {cycle}"));
+                return Err(format!(
+                    "pinned YaHei atlas grew after absence cycle {cycle}"
+                ));
             }
         }
-        println!("pinned_yahei_after_{CYCLES}_absence_cycles={:?}", snapshot(&chinese_pinned));
+        println!(
+            "pinned_yahei_after_{CYCLES}_absence_cycles={:?}",
+            snapshot(&chinese_pinned)
+        );
         println!("RESULT Chinese regular/bold sample raster pixels match system YaHei and remain bounded.");
         Ok(())
     }

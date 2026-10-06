@@ -149,10 +149,8 @@ async fn handle_client_inner(
         mpsc::channel::<SharedZoneLiveOutbound>(LIVE_ZONE_OUTBOUND_CAPACITY);
     let (owner_location_outbound_tx, mut owner_location_outbound_rx) =
         mpsc::channel::<SharedZoneLiveOutbound>(OWNER_LOCATION_OUTBOUND_CAPACITY);
-    let zone_outbound_sender = SharedZoneLiveOutboundSender::new(
-        zone_outbound_tx,
-        owner_location_outbound_tx,
-    );
+    let zone_outbound_sender =
+        SharedZoneLiveOutboundSender::new(zone_outbound_tx, owner_location_outbound_tx);
     let mut active_zone_outbound_registration_id = 0;
     let mut _zone_live_outbound_registration: Option<Box<dyn ZoneLiveOutboundRegistration>> = None;
     let mut chat_presence: Option<ChatPresence> = None;
@@ -325,10 +323,7 @@ async fn handle_client_inner(
                 if active_identity.is_none() {
                     active_zone_outbound_registration_id = 0;
                     _zone_live_outbound_registration = None;
-                } else if _zone_live_outbound_registration.is_none()
-                    || starts_game
-                    || map_changed
-                {
+                } else if _zone_live_outbound_registration.is_none() || starts_game || map_changed {
                     let next_registration = gateway_blocking(|| {
                         session.register_zone_live_outbound(zone_outbound_sender.clone())
                     })

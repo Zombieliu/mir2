@@ -1,0 +1,194 @@
+{
+  "source": "aa1f2c4ada37ed880b71da5168d0b080583524a3",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "rust": [
+    {
+      "name": "android-normal-final.log",
+      "passed": 290,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "android-preview-final.log",
+      "passed": 309,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "java": [
+    {
+      "variant": "Debug",
+      "suites": [
+        {
+          "name": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "sha256": "de9dd51c452e6c3916b2c8031a152c0a399832958352ce43579edb86f5843a7b"
+        },
+        {
+          "name": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "sha256": "0f463dbc87199e8593cee2485bd2e469ce2da346f1e0e37de84394c4a8e13adb"
+        },
+        {
+          "name": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "sha256": "0b72cd0b5fbd894e0546108de2b4eefb669a2a8fb09b0ef07f4c7ab846c7a3d7"
+        },
+        {
+          "name": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "sha256": "9d53ac64bef4a0a19e30db1346bcac97e3a4e40ba2ae59b4b34c2b624d34fbb4"
+        },
+        {
+          "name": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "sha256": "de008c3f9318404d7aba7fe8818b72c2d4f9f9059b50c8133714288e2cd6ae21"
+        }
+      ],
+      "tests": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer, not live account"
+    },
+    {
+      "variant": "UiPreview",
+      "suites": [
+        {
+          "name": "TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+          "sha256": "5eb659b87466187a6b2c270e91933d8e9236654156a4a7db3d9409d9cc606a56"
+        },
+        {
+          "name": "TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+          "sha256": "1b7938413b63c920579d49cdbfcb376ca163bbf40909b014dca99d2be560f342"
+        },
+        {
+          "name": "TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+          "sha256": "241a67a9c93ac14426bcdd53c013ef04e0f2b1b8287c266eb8d3868fd81572eb"
+        },
+        {
+          "name": "TEST-com.mir2.web3.GatewaySessionTest.xml",
+          "sha256": "fa656a0cd4e72fbb38eae0012a42d30c37ad20565e3bca9b1b44110f7131e88f"
+        },
+        {
+          "name": "TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+          "sha256": "e5802631899534e8c63e890d9cf1bc1f47b7501c16185f28d016b49cd3c6f664"
+        }
+      ],
+      "tests": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer, not live account"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "sha256": "932b0918f441264748d8c774dad357d988bb05d5ad099e04c1462d653bb6d1b9"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_ingress.rs",
+      "sha256": "1544b4dbe37e86dddcc90b04db6b09818c02a871978f4f237d2b3d8ebb501a75"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_host_tests.rs",
+      "sha256": "507be77c53a8e139c73b47a02414d01545a3598dcafbfae05907baa4287f31ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+      "sha256": "230f7b9746254e8598ca99ad846c4b96b3f29a6e1945913ddef89725618510fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "sha256": "c17efe16df8c0b6dd914ed2a2be11ba59ae46f93354e847b7773de6589056289"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "sha256": "12c371211bf76044522f1deb8d992c1b19214b6efe6d618519ef6fe6dd3949c1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/item_geometry.rs",
+      "sha256": "f30ff2524a5febc632a095b14cdb1bfaadf9f0cbb866bafc14340febd1898fce"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+      "sha256": "5f56a3311a3685c62f8b71b0c41fd45d0e9a034675b8bb30fbeb465ccc926777"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+      "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/text_input.rs",
+      "sha256": "5305f310cb666e2ca608a957c47f8161a192008d265a13bc6e0efec3f63b848b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "sha256": "5035351c66ec1086dda4fdcb3fa147c0c92fbd88d2528df5c275492e1cf77403"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+      "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "sha256": "61945f8aeb35d5b6228f97ab381d8b04d19f6fdd4924cb14daabfc38eb530dae"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+      "sha256": "bf68446cf5ae91e42e0d061036726d2cf0e460479cff17dea2804696a71ce6cd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "sha256": "cbd62048af4c8f70345debb974f4b350e9feb94f0ce3691ea517e25dee7d5890"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "sha256": "38ff1c5220d259b7e609090031219047524b80636e1450a40b28fd7898ba302f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "sha256": "8b45f76f8974b21f0fe8729965e89d979955eca4f8da831c4aaebb205d2384ac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "sha256": "228883d8912ffc233eebb6acc9f103e215d56aef07c6e616308e51d12f6ba3b0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+      "sha256": "71bdbf1637176190cb93703fc94a59af047cf8326f8f88a8093ae8e98f130495"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+      "sha256": "25326f497aabe20bb7300b6e3cacdec21c5851b1eb957bb8fc6300279b429979"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/big_map.rs",
+      "sha256": "0a1f91a1ef552b996445495cd19f16ebd33a72e4a306ff404b2fe419bca2ee97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "sha256": "8aacaf2c8605b55387b049d72dea03638d6cdeff90688d5a309525dabb61dcde"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "sha256": "fa05c7d9a93254a063f845c37227cbcc32239614d8ca6072d6cbfc7a1d07a2da"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+      "sha256": "470969816b029c95a8a222700510a423dcd7201e955aef27a655a6b434dc6f3d"
+    }
+  ],
+  "arm64Api31": {
+    "normal": true,
+    "actualPreviewFeature": true
+  },
+  "failureFirst": {
+    "compiledOldFixture": true,
+    "passed": 0,
+    "failed": 1,
+    "unrelatedTestFieldSetupCompileErrorPreserved": true
+  },
+  "nativeNpcImplementation": "4e35d3a34041f47370ba7f1338d4b5e0f8d7c0f8",
+  "regressionBoundary": "Production Android NPC projector and exact synthetic FIFO; public shared reducer assertions, not actual JNI, window rendering, network or transactions.",
+  "sharedAndWindowsRegression": "Prior 4e35 exact code gates remain separate; wider Windows NPC filter retained 19 pass / 6 fail.",
+  "fullPhoneUiAccepted": false,
+  "authenticatedGameplayAccepted": false,
+  "physicalDeviceAccepted": false
+}

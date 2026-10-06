@@ -1,0 +1,18 @@
+{
+  "started": "2026-10-02T13:15:33.084Z",
+  "ended": "2026-10-02T13:16:12.077Z",
+  "bin": "cargo",
+  "args": [
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+    "--lib",
+    "game_shop",
+    "--",
+    "--test-threads=1"
+  ],
+  "code": 0,
+  "signal": null,
+  "copied": []
+}

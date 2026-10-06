@@ -1,0 +1,22 @@
+Auto-merging mir2-web3/apps/game-client/client-bevy/src/crystal_ui/native_i18n_game_visual_tests.rs
+Auto-merging mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs
+Auto-merging mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs
+Auto-merging mir2-web3/apps/game-client/platform-windows/src/entity_presentation.rs
+Auto-merging mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs
+Auto-merging mir2-web3/apps/game-client/platform-windows/src/gateway.rs
+Auto-merging mir2-web3/apps/game-client/platform-windows/src/input.rs
+Auto-merging mir2-web3/apps/game-client/runtime/src/lib.rs
+Auto-merging mir2-web3/apps/gateway/src/routing.rs
+CONFLICT (content): Merge conflict in mir2-web3/apps/gateway/src/routing.rs
+Auto-merging mir2-web3/apps/simulation/src/runtime/skills.rs
+Auto-merging mir2-web3/apps/simulation/src/runtime/tests.rs
+Auto-merging mir2-web3/apps/simulation/src/runtime/zone/manager.rs
+CONFLICT (content): Merge conflict in mir2-web3/apps/simulation/src/runtime/zone/manager.rs
+Auto-merging mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+CONFLICT (content): Merge conflict in mir2-web3/apps/simulation/src/runtime/zone/runtime.rs
+Auto-merging mir2-web3/docs/AGENT-TASK-QUEUE.md
+CONFLICT (content): Merge conflict in mir2-web3/docs/AGENT-TASK-QUEUE.md
+Auto-merging mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md
+CONFLICT (content): Merge conflict in mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md
+Auto-merging mir2-web3/docs/FRONTEND-1TO1-GAPS.md
+Automatic merge failed; fix conflicts and then commit the result.

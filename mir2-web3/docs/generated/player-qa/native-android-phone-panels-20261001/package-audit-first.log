@@ -1,0 +1,50 @@
+node:internal/modules/run_main:104
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The input did not match the regular expression /GATEWAY_WS_URL = ""/. Input:
+
+'/**\n' +
+  ' * Automatically generated file. DO NOT MODIFY\n' +
+  ' */\n' +
+  'package com.mir2.web3;\n' +
+  '\n' +
+  'public final class BuildConfig {\n' +
+  '  public static final boolean DEBUG = Boolean.parseBoolean("true");\n' +
+  '  public static final String APPLICATION_ID = "com.mir2.web3";\n' +
+  '  public static final String BUILD_TYPE = "debug";\n' +
+  '  public static final int VERSION_CODE = 11;\n' +
+  '  public static final String VERSION_NAME = "0.1.8-phone-panels";\n' +
+  '  // Field from default config.\n' +
+  '  public static final String MIR2_GATEWAY_URL = "";\n' +
+  '  // Field from build type: debug\n' +
+  '  public static final boolean UI_PREVIEW = false;\n' +
+  '}\n'
+
+    at file:///Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/docs/generated/player-qa/native-android-phone-panels-20261001/verify-package.mjs:21:10
+    at ModuleJob.run (node:internal/modules/esm/module_job:274:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:644:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:98:5) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: '/**\n' +
+    ' * Automatically generated file. DO NOT MODIFY\n' +
+    ' */\n' +
+    'package com.mir2.web3;\n' +
+    '\n' +
+    'public final class BuildConfig {\n' +
+    '  public static final boolean DEBUG = Boolean.parseBoolean("true");\n' +
+    '  public static final String APPLICATION_ID = "com.mir2.web3";\n' +
+    '  public static final String BUILD_TYPE = "debug";\n' +
+    '  public static final int VERSION_CODE = 11;\n' +
+    '  public static final String VERSION_NAME = "0.1.8-phone-panels";\n' +
+    '  // Field from default config.\n' +
+    '  public static final String MIR2_GATEWAY_URL = "";\n' +
+    '  // Field from build type: debug\n' +
+    '  public static final boolean UI_PREVIEW = false;\n' +
+    '}\n',
+  expected: /GATEWAY_WS_URL = ""/,
+  operator: 'match'
+}
+
+Node.js v23.11.0

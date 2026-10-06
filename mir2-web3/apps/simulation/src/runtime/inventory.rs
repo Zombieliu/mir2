@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::config::{
-    AccountRecord, CharacterRecord, EquipmentSlot, GroundDropItemPayload, ItemContainer, ItemGrade,
-    SimulationConfig, crystal_bag_slot_capacity,
+    crystal_bag_slot_capacity, AccountRecord, CharacterRecord, EquipmentSlot,
+    GroundDropItemPayload, ItemContainer, ItemGrade, SimulationConfig,
 };
 use bevy_ecs::prelude::World;
 use mir2_game_data::{crystal_item_by_index, crystal_item_manifest, localized_text_or_fallback};
@@ -18,14 +18,14 @@ use super::crystal_compat::{
     EXPANDED_STORAGE_SLOTS,
 };
 use super::items::{
-    ItemState, ItemStateUserItemMetadata, crystal_belt_slot_range_for_item_key,
-    crystal_equipment_slot_for_item_key, crystal_equipment_slot_for_template,
-    crystal_item_has_bind_flag, crystal_item_key_for_template, crystal_item_stat_value,
-    crystal_item_template_for_item_key, crystal_stack_size_for_item_key, default_item_unique_id,
-    embedded_item_state_from_template, item_has_rental_bind_flag, item_icon_for_key,
-    item_unique_id, try_item_state_from_user_item, try_user_item_from_item_state,
-    user_item_from_item_state, validate_committed_item_state_carrier,
-    validate_committed_user_item_carrier,
+    crystal_belt_slot_range_for_item_key, crystal_equipment_slot_for_item_key,
+    crystal_equipment_slot_for_template, crystal_item_has_bind_flag, crystal_item_key_for_template,
+    crystal_item_stat_value, crystal_item_template_for_item_key, crystal_stack_size_for_item_key,
+    default_item_unique_id, embedded_item_state_from_template, item_has_rental_bind_flag,
+    item_icon_for_key, item_unique_id, try_item_state_from_user_item,
+    try_user_item_from_item_state, user_item_from_item_state,
+    validate_committed_item_state_carrier, validate_committed_user_item_carrier, ItemState,
+    ItemStateUserItemMetadata,
 };
 use super::npc::active_crystal_storage_service;
 use super::resources::{
@@ -4201,14 +4201,12 @@ mod stack_identity_tests {
         resources.inventory_items = seed_inventory_items();
         resources.storage_items = seed_storage_items();
         resources.equipment_items = super::super::equipment::seed_equipment_items();
-        assert!(
-            resources
-                .belt_items
-                .iter()
-                .chain(resources.inventory_items.iter())
-                .chain(resources.storage_items.iter())
-                .all(|item| item.user_item_metadata.is_none())
-        );
+        assert!(resources
+            .belt_items
+            .iter()
+            .chain(resources.inventory_items.iter())
+            .chain(resources.storage_items.iter())
+            .all(|item| item.user_item_metadata.is_none()));
 
         let expected_belt = resources
             .belt_items

@@ -1,10 +1,10 @@
 use super::*;
 use std::sync::Barrier;
 
-#[path="config_guild_xp_pg_tests.rs"]
+#[path = "config_guild_xp_pg_tests.rs"]
 mod experience_compensation_tests;
 
-#[path="config_guild_clock_late_pg_tests.rs"]
+#[path = "config_guild_clock_late_pg_tests.rs"]
 mod late_owner_tests;
 
 struct Database {
@@ -220,7 +220,8 @@ fn guild_clock_postgres_guild_expiry_and_receipt_compensation_are_atomic() {
                 name: "Leader".into(),
                 options: 255,
             }],
-            members: vec![SharedGuildMember { membership_epoch: 0,
+            members: vec![SharedGuildMember {
+                membership_epoch: 0,
                 identity: Stage5FriendIdentity {
                     account_id: "demo".into(),
                     character_index: character.index,
@@ -239,7 +240,8 @@ fn guild_clock_postgres_guild_expiry_and_receipt_compensation_are_atomic() {
                 },
             )]),
             last_buff_tick_ms: 0,
-            experience_receipts: BTreeSet::new(), experience_receipt_payloads: Default::default(),
+            experience_receipts: BTreeSet::new(),
+            experience_receipt_payloads: Default::default(),
         },
     );
     let plan = build_account_store_mutation_plan(
@@ -407,67 +409,162 @@ fn guild_clock_postgres_full_restore_file_failure_persists_fenced_compensation()
 #[test]
 #[ignore = "requires dedicated MIR2_GUILD_TEST_DATABASE_URL; real Config source clock pump"]
 fn guild_clock_postgres_config_pump_advances_without_sessions_and_updates_authority() {
-    let db=Database::new();
-    let mut client=db.connect();
-    let url=format!("{}{}options=-csearch_path%3D{}",db.url,if db.url.contains('?'){"&"}else{"?"},db.schema);
-    let directory=std::env::temp_dir().join(format!("mir2-clock-config-pg-{}-{}",std::process::id(),SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));
+    let db = Database::new();
+    let mut client = db.connect();
+    let url = format!(
+        "{}{}options=-csearch_path%3D{}",
+        db.url,
+        if db.url.contains('?') { "&" } else { "?" },
+        db.schema
+    );
+    let directory = std::env::temp_dir().join(format!(
+        "mir2-clock-config-pg-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
     fs::create_dir_all(&directory).unwrap();
-    let backup_path=directory.join("backup.json");
-    let config=SimulationConfig::default().with_postgres_account_store(url).unwrap();
-    let mut backup=AccountStore::new(config.default_character.clone());
-    let mut guild=super::schema_tests::fixture_guild(&backup);
-    let buff=mir2_game_data::crystal_guild_buff_definitions().iter().find(|buff|buff.time_limit>0).unwrap();
-    guild.buffs.insert(buff.id,SharedGuildBuff{id:buff.id,active:true,remaining_minutes:0});
-    let id=guild.id.clone();
-    backup.shared_guilds.insert(id.clone(),guild);
+    let backup_path = directory.join("backup.json");
+    let config = SimulationConfig::default()
+        .with_postgres_account_store(url)
+        .unwrap();
+    let mut backup = AccountStore::new(config.default_character.clone());
+    let mut guild = super::schema_tests::fixture_guild(&backup);
+    let buff = mir2_game_data::crystal_guild_buff_definitions()
+        .iter()
+        .find(|buff| buff.time_limit > 0)
+        .unwrap();
+    guild.buffs.insert(
+        buff.id,
+        SharedGuildBuff {
+            id: buff.id,
+            active: true,
+            remaining_minutes: 0,
+        },
+    );
+    let id = guild.id.clone();
+    backup.shared_guilds.insert(id.clone(), guild);
     backup.save_to_path(&backup_path).unwrap();
-    config.restore_account_store_from_backup(&backup_path).unwrap();
+    config
+        .restore_account_store_from_backup(&backup_path)
+        .unwrap();
     assert!(config.tick_shared_guild_clock().unwrap().is_empty());
     // Advance only the test database clock anchor; no session is ever created.
-    client.execute("UPDATE shared_guild_clock SET minute_anchor_ms=minute_anchor_ms-60001 WHERE singleton",&[]).unwrap();
-    assert_eq!(config.tick_shared_guild_clock().unwrap(),vec![id.clone()]);
-    assert_eq!(config.shared_guild_clock_generation(),1);
+    client
+        .execute(
+            "UPDATE shared_guild_clock SET minute_anchor_ms=minute_anchor_ms-60001 WHERE singleton",
+            &[],
+        )
+        .unwrap();
+    assert_eq!(config.tick_shared_guild_clock().unwrap(), vec![id.clone()]);
+    assert_eq!(config.shared_guild_clock_generation(), 1);
     assert!(config.tick_shared_guild_clock().unwrap().is_empty());
-    assert_eq!(config.shared_guild_clock_generation(),1);
-    let store=config.account_store.lock().unwrap();
+    assert_eq!(config.shared_guild_clock_generation(), 1);
+    let store = config.account_store.lock().unwrap();
     assert!(!store.shared_guilds[&id].buffs[&buff.id].active);
-    let saved:SharedGuildRecord=serde_json::from_value(client.query_one("SELECT raw_json FROM shared_guilds WHERE guild_id=$1",&[&id]).unwrap().get(0)).unwrap();
-    assert_eq!(store.shared_guilds[&id],saved);
-    drop(store);drop(config);fs::remove_dir_all(directory).unwrap();
+    let saved: SharedGuildRecord = serde_json::from_value(
+        client
+            .query_one(
+                "SELECT raw_json FROM shared_guilds WHERE guild_id=$1",
+                &[&id],
+            )
+            .unwrap()
+            .get(0),
+    )
+    .unwrap();
+    assert_eq!(store.shared_guilds[&id], saved);
+    drop(store);
+    drop(config);
+    fs::remove_dir_all(directory).unwrap();
 }
 #[test]
 #[ignore = "requires dedicated MIR2_GUILD_TEST_DATABASE_URL; live mirror pump compensation"]
 fn guild_clock_postgres_mirror_pump_file_failure_reconciles_both_domains() {
-    let db=Database::new();let mut client=db.connect();
-    let url=format!("{}{}options=-csearch_path%3D{}",db.url,if db.url.contains('?'){"&"}else{"?"},db.schema);
-    let directory=std::env::temp_dir().join(format!("mir2-clock-mirror-pump-{}-{}",std::process::id(),SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos()));
-    let path=directory.join("accounts.json");let backup_path=directory.join("backup.json");
-    let config=SimulationConfig::default().with_account_store_path(&path).with_account_store_database_url(&url);
-    let mut backup=config.account_store.lock().unwrap().clone();
-    let mut guild=super::schema_tests::fixture_guild(&backup);
-    let buff=mir2_game_data::crystal_guild_buff_definitions().iter().find(|buff|buff.time_limit>0).unwrap();
-    guild.buffs.insert(buff.id,SharedGuildBuff{id:buff.id,active:true,remaining_minutes:0});
-    let id=guild.id.clone();backup.shared_guilds.insert(id.clone(),guild);
-    backup.save_to_path(&backup_path).unwrap();config.restore_account_store_from_backup(&backup_path).unwrap();
+    let db = Database::new();
+    let mut client = db.connect();
+    let url = format!(
+        "{}{}options=-csearch_path%3D{}",
+        db.url,
+        if db.url.contains('?') { "&" } else { "?" },
+        db.schema
+    );
+    let directory = std::env::temp_dir().join(format!(
+        "mir2-clock-mirror-pump-{}-{}",
+        std::process::id(),
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    let path = directory.join("accounts.json");
+    let backup_path = directory.join("backup.json");
+    let config = SimulationConfig::default()
+        .with_account_store_path(&path)
+        .with_account_store_database_url(&url);
+    let mut backup = config.account_store.lock().unwrap().clone();
+    let mut guild = super::schema_tests::fixture_guild(&backup);
+    let buff = mir2_game_data::crystal_guild_buff_definitions()
+        .iter()
+        .find(|buff| buff.time_limit > 0)
+        .unwrap();
+    guild.buffs.insert(
+        buff.id,
+        SharedGuildBuff {
+            id: buff.id,
+            active: true,
+            remaining_minutes: 0,
+        },
+    );
+    let id = guild.id.clone();
+    backup.shared_guilds.insert(id.clone(), guild);
+    backup.save_to_path(&backup_path).unwrap();
+    config
+        .restore_account_store_from_backup(&backup_path)
+        .unwrap();
     config.tick_shared_guild_clock().unwrap();
-    let old_generation=load_postgres(&mut client).unwrap().record.generation;
+    let old_generation = load_postgres(&mut client).unwrap().record.generation;
     // A controlled test clock shift updates both durable mirrors consistently.
-    client.execute("UPDATE shared_guild_clock SET minute_anchor_ms=minute_anchor_ms-60001 WHERE singleton",&[]).unwrap();
-    {let mut store=config.account_store.lock().unwrap();store.guild_clock=Some(load_postgres(&mut client).unwrap().record);FileAccountStoreRepository::new(&path).save(&store).unwrap();}
+    client
+        .execute(
+            "UPDATE shared_guild_clock SET minute_anchor_ms=minute_anchor_ms-60001 WHERE singleton",
+            &[],
+        )
+        .unwrap();
+    {
+        let mut store = config.account_store.lock().unwrap();
+        store.guild_clock = Some(load_postgres(&mut client).unwrap().record);
+        FileAccountStoreRepository::new(&path).save(&store).unwrap();
+    }
     config.inject_account_store_transaction_fault(AccountStoreTransactionFault::BeforeFileRename);
     assert!(config.tick_shared_guild_clock().is_err());
     config.ensure_account_store_writable().unwrap();
-    let file=FileAccountStoreRepository::new(&path).load(config.default_character.clone()).unwrap();
-    let clock=load_postgres(&mut client).unwrap();
-    assert_eq!(file.guild_clock,Some(clock.record.clone()));
-    assert!(clock.record.generation>old_generation);assert!(clock.record.owner_token.is_none());
-    assert!(file.shared_guilds[&id].buffs[&buff.id].active);assert_eq!(file.shared_guilds[&id].buffs[&buff.id].remaining_minutes,0);
-    assert_eq!(config.shared_guild_clock_generation(),0);
+    let file = FileAccountStoreRepository::new(&path)
+        .load(config.default_character.clone())
+        .unwrap();
+    let clock = load_postgres(&mut client).unwrap();
+    assert_eq!(file.guild_clock, Some(clock.record.clone()));
+    assert!(clock.record.generation > old_generation);
+    assert!(clock.record.owner_token.is_none());
+    assert!(file.shared_guilds[&id].buffs[&buff.id].active);
+    assert_eq!(file.shared_guilds[&id].buffs[&buff.id].remaining_minutes, 0);
+    assert_eq!(config.shared_guild_clock_generation(), 0);
     assert!(config.tick_shared_guild_clock().unwrap().is_empty());
     // An already divergent mirror must fail before advancing the PG anchor.
-    {let mut store=config.account_store.lock().unwrap();store.shared_guilds.get_mut(&id).unwrap().gold+=1;FileAccountStoreRepository::new(&path).save(&store).unwrap();}
-    let before=load_postgres(&mut client).unwrap();
-    assert!(config.tick_shared_guild_clock().unwrap_err().contains("authority mismatch"));
-    let after=load_postgres(&mut client).unwrap();assert_eq!(before.record,after.record);assert_eq!(before.version,after.version);
-    drop(config);fs::remove_dir_all(directory).unwrap();
+    {
+        let mut store = config.account_store.lock().unwrap();
+        store.shared_guilds.get_mut(&id).unwrap().gold += 1;
+        FileAccountStoreRepository::new(&path).save(&store).unwrap();
+    }
+    let before = load_postgres(&mut client).unwrap();
+    assert!(config
+        .tick_shared_guild_clock()
+        .unwrap_err()
+        .contains("authority mismatch"));
+    let after = load_postgres(&mut client).unwrap();
+    assert_eq!(before.record, after.record);
+    assert_eq!(before.version, after.version);
+    drop(config);
+    fs::remove_dir_all(directory).unwrap();
 }

@@ -115,6 +115,12 @@ pub(crate) enum NativeInboundMessage {
         height: u32,
         pixels: Vec<u8>,
     },
+    MapRenderAtlas {
+        key: String,
+        width: u32,
+        height: u32,
+        pixels: Vec<u8>,
+    },
 }
 
 #[derive(Default)]
@@ -257,6 +263,36 @@ impl NativeInboundBuffer {
                     return false;
                 }
             }
+        } else if is_replaceable_render_asset(&message) {
+            // Atlas pages are keyed cache entries, not state snapshots. They
+            // still replace an older upload for the same key, but must not
+            // consume the snapshot quota or evict the render state that names
+            // them. Reject an oversized batch explicitly so the host can
+            // reset/retry rather than silently publishing an incomplete scene.
+            let segment_start = self
+                .pending
+                .iter()
+                .rposition(|queued| {
+                    matches!(
+                        queued,
+                        NativeInboundMessage::DataReset
+                            | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
+                            | NativeInboundMessage::SceneReset
+                    )
+                })
+                .map_or(0, |index| index + 1);
+            if let Some(index) = self
+                .pending
+                .iter()
+                .skip(segment_start)
+                .position(|queued| same_coalescing_slot(queued, &message))
+                .map(|index| index + segment_start)
+            {
+                self.pending.remove(index);
+            }
+            if self.message_count() >= NON_CRITICAL_MESSAGE_LIMIT {
+                return false;
+            }
         } else if is_operation_ack(&message) {
             if self
                 .pending
@@ -291,8 +327,11 @@ impl NativeInboundBuffer {
         while self.pending_bytes().saturating_add(message_bytes) > max_buffer_bytes {
             let evicted = if is_critical_message(&message) {
                 self.evict_oldest_non_critical()
+            } else if is_replaceable_render_asset(&message) {
+                return false;
             } else {
                 self.evict_oldest_coalescible_snapshot()
+                    || self.evict_oldest_replaceable_render_asset()
             };
             if !evicted {
                 if let Some(cost) = mail_cost {
@@ -377,6 +416,14 @@ impl NativeInboundBuffer {
         true
     }
 
+    fn evict_oldest_replaceable_render_asset(&mut self) -> bool {
+        let Some(index) = self.pending.iter().position(is_replaceable_render_asset) else {
+            return false;
+        };
+        self.pending.remove(index);
+        true
+    }
+
     fn evict_oldest_non_critical(&mut self) -> bool {
         let Some(index) = self
             .pending
@@ -409,6 +456,7 @@ impl NativeInboundBuffer {
     fn evict_oldest_non_boundary(&mut self) -> bool {
         let Some(index) = self.pending.iter().position(|message| {
             !is_valid_mail_cost(message)
+                && !is_mail_operation_feedback(message)
                 && !matches!(
                     message,
                     NativeInboundMessage::DataReset
@@ -470,7 +518,30 @@ fn send_native(message: NativeInboundMessage) -> bool {
         .unwrap_or(false)
 }
 
+/// Current native queue residency for bounded host-side backpressure.
+///
+/// Large Android map/object/entity frames are uploaded as many independently
+/// replaceable images. A producer that outruns the render thread can otherwise
+/// make the queue evict an earlier atlas page while still reporting every
+/// individual enqueue as accepted. Hosts use this read-only value to pace a
+/// single frame without increasing the queue's hard memory limit.
+pub fn native_pending_buffer_bytes() -> Option<usize> {
+    let queue = NATIVE_QUEUE
+        .get_or_init(|| Mutex::new(None))
+        .lock()
+        .expect("native queue mutex should not be poisoned")
+        .clone()?;
+    let bytes = queue
+        .lock()
+        .expect("native inbound buffer mutex should not be poisoned")
+        .pending_bytes();
+    Some(bytes)
+}
+
 fn is_coalescible_snapshot(message: &NativeInboundMessage) -> bool {
+    if is_mail_operation_feedback(message) {
+        return false;
+    }
     matches!(
         message,
         NativeInboundMessage::WorldState(_)
@@ -488,11 +559,21 @@ fn is_coalescible_snapshot(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::StorageItems(_)
             | NativeInboundMessage::HeroModel(_)
             | NativeInboundMessage::SkillModel(_)
-            | NativeInboundMessage::EntityRenderAtlas { .. }
+    )
+}
+
+fn is_replaceable_render_asset(message: &NativeInboundMessage) -> bool {
+    matches!(
+        message,
+        NativeInboundMessage::EntityRenderAtlas { .. }
+            | NativeInboundMessage::MapRenderAtlas { .. }
     )
 }
 
 fn same_coalescing_slot(left: &NativeInboundMessage, right: &NativeInboundMessage) -> bool {
+    if is_mail_operation_feedback(left) || is_mail_operation_feedback(right) {
+        return false;
+    }
     match (left, right) {
         (NativeInboundMessage::WorldState(_), NativeInboundMessage::WorldState(_))
         | (
@@ -522,37 +603,53 @@ fn same_coalescing_slot(left: &NativeInboundMessage, right: &NativeInboundMessag
             NativeInboundMessage::EntityRenderAtlas { key: left, .. },
             NativeInboundMessage::EntityRenderAtlas { key: right, .. },
         ) => left == right,
+        (
+            NativeInboundMessage::MapRenderAtlas { key: left, .. },
+            NativeInboundMessage::MapRenderAtlas { key: right, .. },
+        ) => left == right,
         _ => false,
     }
 }
 
 fn is_critical_message(message: &NativeInboundMessage) -> bool {
-    matches!(
-        message,
-        NativeInboundMessage::InventoryOperationAck(_)
-            | NativeInboundMessage::DataReset
-            | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
-            | NativeInboundMessage::SceneReset
-            | NativeInboundMessage::WalletPatch(_)
-            | NativeInboundMessage::GameShopInfo(_)
-            | NativeInboundMessage::GameShopStock(_)
-            | NativeInboundMessage::GameShopReceipt(_)
-            | NativeInboundMessage::MailService(_)
-            | NativeInboundMessage::NpcShopService(_)
-            | NativeInboundMessage::StoragePatch(_)
-            | NativeInboundMessage::SocialModel(_)
-            | NativeInboundMessage::HeroModelReceipt(_)
-            | NativeInboundMessage::SkillModelReceipt(_)
-    )
+    is_mail_operation_feedback(message)
+        || matches!(
+            message,
+            NativeInboundMessage::InventoryOperationAck(_)
+                | NativeInboundMessage::DataReset
+                | NativeInboundMessage::DataResetPreservingExactGameShopReceipt(_)
+                | NativeInboundMessage::SceneReset
+                | NativeInboundMessage::WalletPatch(_)
+                | NativeInboundMessage::GameShopInfo(_)
+                | NativeInboundMessage::GameShopStock(_)
+                | NativeInboundMessage::GameShopReceipt(_)
+                | NativeInboundMessage::MailService(_)
+                | NativeInboundMessage::NpcShopService(_)
+                | NativeInboundMessage::StoragePatch(_)
+                | NativeInboundMessage::SocialModel(_)
+                | NativeInboundMessage::HeroModelReceipt(_)
+                | NativeInboundMessage::SkillModelReceipt(_)
+        )
 }
 
 fn is_operation_ack(message: &NativeInboundMessage) -> bool {
-    matches!(
-        message,
-        NativeInboundMessage::InventoryOperationAck(_)
-            | NativeInboundMessage::HeroModelReceipt(_)
-            | NativeInboundMessage::SkillModelReceipt(_)
-    )
+    is_mail_operation_feedback(message)
+        || matches!(
+            message,
+            NativeInboundMessage::InventoryOperationAck(_)
+                | NativeInboundMessage::HeroModelReceipt(_)
+                | NativeInboundMessage::SkillModelReceipt(_)
+        )
+}
+
+/// A mailbox carrying the shared typed operation feedback is an ACK, not a
+/// replaceable snapshot. Keep the existing mailbox consumer and reset policy.
+fn is_mail_operation_feedback(message: &NativeInboundMessage) -> bool {
+    let NativeInboundMessage::MailModel(raw) = message else {
+        return false;
+    };
+    serde_json::from_str::<mir2_client_bevy::mail::MailModel>(raw)
+        .is_ok_and(|model| model.operation_feedback().is_some())
 }
 
 fn native_message_bytes(message: &NativeInboundMessage) -> usize {
@@ -584,7 +681,8 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
         | NativeInboundMessage::HeroModelReceipt(json)
         | NativeInboundMessage::SkillModelReceipt(json)
         | NativeInboundMessage::SocialModel(json) => json.capacity(),
-        NativeInboundMessage::EntityRenderAtlas { key, pixels, .. } => {
+        NativeInboundMessage::EntityRenderAtlas { key, pixels, .. }
+        | NativeInboundMessage::MapRenderAtlas { key, pixels, .. } => {
             key.capacity().saturating_add(pixels.capacity())
         }
         NativeInboundMessage::DataResetPreservingExactGameShopReceipt(receipt) => {
@@ -592,6 +690,14 @@ fn native_message_bytes(message: &NativeInboundMessage) -> usize {
         }
         NativeInboundMessage::DataReset | NativeInboundMessage::SceneReset => 0,
     }
+}
+
+/// Install the existing native consumer without constructing a renderer/window.
+/// Headless host lifecycle tests use the same buffer as build_runtime_app.
+/// Like rebuilding a runtime app, this replaces the previous queue; callers
+/// must retain this app while publishing and must not install it mid-session.
+pub fn install_native_ingestion(app: &mut bevy::prelude::App) {
+    app.insert_resource(NativeInbound::new());
 }
 
 /// Native-host entry point: push a world-state snapshot JSON to the Bevy loop.
@@ -816,6 +922,25 @@ pub fn push_native_entity_render_atlas(
     })
 }
 
+/// Native-host entry point: push a raw RGBA map atlas image.
+///
+/// Mirrors the WASM `setMir2MapRenderAtlas(key, width, height, pixels)` path so
+/// Android can stage decoded map pages without routing them through JS/WASM.
+pub fn push_native_map_render_atlas(key: String, width: u32, height: u32, pixels: Vec<u8>) -> bool {
+    let expected_len = (width as usize)
+        .checked_mul(height as usize)
+        .and_then(|pixels| pixels.checked_mul(4));
+    if width == 0 || height == 0 || expected_len != Some(pixels.len()) {
+        return false;
+    }
+    send_native(NativeInboundMessage::MapRenderAtlas {
+        key,
+        width,
+        height,
+        pixels,
+    })
+}
+
 /// Bevy resource holding the consumer side of the native ingestion queue.
 /// The Bevy loop is single-threaded; the mutex is only contended against the
 /// background native producer.
@@ -867,8 +992,19 @@ impl NativeInbound {
                 }
             }
             let mut retained = VecDeque::new();
+            let mut mail_feedback_delivered = false;
             while let Some(message) = state.pending.pop_front() {
+                // The unchanged shared MailModel consumer assigns each model
+                // in turn, and its overlay observes the final one this frame.
+                // Leave later mailboxes queued until that overlay can consume
+                // the feedback; do not delay any other typed domain.
+                if mail_feedback_delivered && matches!(message, NativeInboundMessage::MailModel(_))
+                {
+                    retained.push_back(message);
+                    continue;
+                }
                 if matches(&message) {
+                    mail_feedback_delivered |= is_mail_operation_feedback(&message);
                     matched.push(message);
                 } else {
                     retained.push_back(message);
@@ -888,6 +1024,48 @@ impl NativeInbound {
                     state.mail_cost_reserve = Some(cost);
                 }
             }
+            matched
+        };
+
+        for message in matched {
+            on_message(message);
+        }
+    }
+
+    /// Drain matching bulk messages up to a per-frame byte budget.
+    ///
+    /// The first matching message is always accepted even when it is larger
+    /// than the budget, so an individual texture can never starve. This is
+    /// used by native image upload systems to avoid converting a whole map
+    /// scene into GPU assets in one frame on Android/low-end renderers.
+    pub(crate) fn drain_matching_bounded_bytes(
+        &self,
+        mut matches: impl FnMut(&NativeInboundMessage) -> bool,
+        max_bytes: usize,
+        mut on_message: impl FnMut(NativeInboundMessage),
+    ) {
+        let matched = {
+            let mut state = self
+                .buffer
+                .lock()
+                .expect("native inbound mutex should not be poisoned");
+            let mut retained = VecDeque::new();
+            let mut matched = Vec::new();
+            let mut drained_bytes = 0usize;
+
+            while let Some(message) = state.pending.pop_front() {
+                let message_bytes = native_message_bytes(&message);
+                let within_budget = drained_bytes
+                    .checked_add(message_bytes)
+                    .is_some_and(|total| total <= max_bytes);
+                if matches(&message) && (matched.is_empty() || within_budget) {
+                    drained_bytes = drained_bytes.saturating_add(message_bytes);
+                    matched.push(message);
+                } else {
+                    retained.push_back(message);
+                }
+            }
+            state.pending = retained;
             matched
         };
 
@@ -959,6 +1137,7 @@ fn is_scene_resettable_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::MapRenderState(_)
             | NativeInboundMessage::MapModel(_)
             | NativeInboundMessage::EntityModelSet(_)
+            | NativeInboundMessage::MapRenderAtlas { .. }
             | NativeInboundMessage::NpcShopService(_)
     )
 }
@@ -973,6 +1152,7 @@ fn is_resettable_data_message(message: &NativeInboundMessage) -> bool {
             | NativeInboundMessage::MapRenderState(_)
             | NativeInboundMessage::MapModel(_)
             | NativeInboundMessage::EntityModelSet(_)
+            | NativeInboundMessage::MapRenderAtlas { .. }
             | NativeInboundMessage::UiReadModel(_)
             | NativeInboundMessage::WalletPatch(_)
             | NativeInboundMessage::InventoryModel(_)
@@ -1024,6 +1204,85 @@ mod tests {
     }
 
     #[test]
+    fn mail_feedback_is_not_coalesced_by_later_mailbox_snapshots() {
+        let mut buffer = active_buffer();
+        let receipt = r#"{"mails":[{"id":18446744073709551615,"operation":{"kind":"collect","success":true,"mailId":9007199254740993}}]}"#;
+        assert!(buffer.enqueue(NativeInboundMessage::MailModel(receipt.into())));
+        assert!(buffer.enqueue(NativeInboundMessage::MailModel(r#"{"mails":[]}"#.into())));
+        assert_eq!(
+            buffer.pending.len(),
+            2,
+            "A later mailbox must not erase the earlier operation receipt"
+        );
+        assert!(
+            matches!(buffer.pending.front(), Some(NativeInboundMessage::MailModel(raw)) if raw == receipt)
+        );
+    }
+
+    #[test]
+    fn mail_feedback_is_last_mail_model_in_one_consumer_drain() {
+        let _guard = native_queue_test_guard();
+        let inbound = NativeInbound::new();
+        let receipt = r#"{"mails":[{"operation":{"kind":"send","success":true,"mailId":null}}]}"#;
+        assert!(push_native_mail_model(receipt.into()));
+        assert!(push_native_mail_model(r#"{"mails":[]}"#.into()));
+        let mut seen = Vec::new();
+        inbound.drain_matching(
+            |m| matches!(m, NativeInboundMessage::MailModel(_)),
+            |m| seen.push(m),
+        );
+        assert_eq!(
+            seen.len(),
+            1,
+            "The shared consumer needs a frame to observe this feedback before a later model"
+        );
+        assert!(is_mail_operation_feedback(&seen[0]));
+        assert_eq!(inbound.diagnostics().message_count, 1);
+        inbound.drain_matching(
+            |m| matches!(m, NativeInboundMessage::MailModel(_)),
+            |m| seen.push(m),
+        );
+        assert_eq!(seen.len(), 2);
+        assert!(!is_mail_operation_feedback(&seen[1]));
+    }
+
+    #[test]
+    fn mail_feedback_survives_pressure_scene_reset_and_game_shop_reserve() {
+        let mut buffer = active_buffer();
+        let receipt = r#"{"mails":[{"operation":{"kind":"send","success":false,"mailId":null}}]}"#;
+        assert!(buffer.enqueue(NativeInboundMessage::MailModel(receipt.into())));
+        for i in 0..MAX_NATIVE_MESSAGES - 1 {
+            assert!(buffer.enqueue(NativeInboundMessage::SocialModel(i.to_string())));
+        }
+        assert!(buffer.enqueue(NativeInboundMessage::SceneReset));
+        assert!(
+            buffer.enqueue(NativeInboundMessage::GameShopReceipt(valid_receipt(
+                "gs-own"
+            )))
+        );
+        assert!(buffer.pending.iter().any(
+            |message| matches!(message, NativeInboundMessage::MailModel(raw) if raw == receipt)
+        ));
+        assert!(buffer.game_shop_receipt.is_some());
+        assert!(buffer.pending_bytes() <= MAX_NATIVE_BUFFER_BYTES);
+        assert!(buffer.message_count() <= MAX_NATIVE_MESSAGES);
+        assert!(buffer.enqueue(NativeInboundMessage::DataReset));
+        assert!(!buffer.pending.iter().any(is_mail_operation_feedback));
+    }
+
+    #[test]
+    fn malformed_feedback_cannot_reserve_ack_capacity_and_plain_mail_still_coalesces() {
+        let mut buffer = active_buffer();
+        let bad = NativeInboundMessage::MailModel(
+            r#"{"mails":[{"operation":{"kind":"send","success":"yes"}}]}"#.into(),
+        );
+        assert!(!is_mail_operation_feedback(&bad));
+        assert!(buffer.enqueue(bad));
+        assert!(buffer.enqueue(NativeInboundMessage::MailModel(r#"{"mails":[]}"#.into())));
+        assert_eq!(buffer.pending.len(), 1);
+    }
+
+    #[test]
     fn mail_service_events_are_critical_ordered_and_removed_by_data_reset() {
         let mut buffer = active_buffer();
         for index in 0..NON_CRITICAL_MESSAGE_LIMIT {
@@ -1051,7 +1310,9 @@ mod tests {
         for index in 0..MAX_NATIVE_MESSAGES {
             assert!(push_native_social_model(index.to_string()));
         }
-        assert!(push_native_mail_service(r#"{"kind":"cost","cost":125}"#.to_owned()));
+        assert!(push_native_mail_service(
+            r#"{"kind":"cost","cost":125}"#.to_owned()
+        ));
 
         let mut costs = Vec::new();
         inbound.drain_matching(
@@ -1069,12 +1330,18 @@ mod tests {
     fn queued_mail_cost_survives_full_fifo_game_shop_receipt_and_keeps_its_position() {
         let _native_queue_guard = native_queue_test_guard();
         let inbound = NativeInbound::new();
-        assert!(push_native_mail_service(r#"{"kind":"cost","cost":125}"#.to_owned()));
-        assert!(!push_native_mail_service(r#"{"kind":"cost","cost":250}"#.to_owned()));
+        assert!(push_native_mail_service(
+            r#"{"kind":"cost","cost":125}"#.to_owned()
+        ));
+        assert!(!push_native_mail_service(
+            r#"{"kind":"cost","cost":250}"#.to_owned()
+        ));
         for index in 0..MAX_NATIVE_MESSAGES - 1 {
             assert!(push_native_social_model(index.to_string()));
         }
-        assert!(push_native_game_shop_receipt(valid_receipt("gs-queued-cost")));
+        assert!(push_native_game_shop_receipt(valid_receipt(
+            "gs-queued-cost"
+        )));
 
         let mut costs = Vec::new();
         inbound.drain_matching(
@@ -1102,11 +1369,15 @@ mod tests {
     fn queued_mail_cost_survives_full_fifo_operation_ack() {
         let _native_queue_guard = native_queue_test_guard();
         let inbound = NativeInbound::new();
-        assert!(push_native_mail_service(r#"{"kind":"cost","cost":125}"#.to_owned()));
+        assert!(push_native_mail_service(
+            r#"{"kind":"cost","cost":125}"#.to_owned()
+        ));
         for index in 0..MAX_NATIVE_MESSAGES - 1 {
             assert!(push_native_social_model(index.to_string()));
         }
-        assert!(push_native_inventory_operation_ack(r#"{"kind":"item","id":7}"#.to_owned()));
+        assert!(push_native_inventory_operation_ack(
+            r#"{"kind":"item","id":7}"#.to_owned()
+        ));
 
         let mut costs = Vec::new();
         inbound.drain_matching(
@@ -1136,7 +1407,11 @@ mod tests {
             r#"{"kind":"cost","cost":125}"#.to_owned(),
         )));
         assert_eq!(buffer.mail_cost_reserve, Some(125));
-        assert!(buffer.enqueue(NativeInboundMessage::GameShopReceipt(valid_receipt("gs-mail"))));
+        assert!(
+            buffer.enqueue(NativeInboundMessage::GameShopReceipt(valid_receipt(
+                "gs-mail"
+            )))
+        );
         assert!(buffer
             .game_shop_receipt
             .as_deref()
@@ -1151,7 +1426,9 @@ mod tests {
         for index in 0..MAX_NATIVE_MESSAGES {
             assert!(push_native_social_model(format!("old-{index}")));
         }
-        assert!(push_native_mail_service(r#"{"kind":"cost","cost":1}"#.to_owned()));
+        assert!(push_native_mail_service(
+            r#"{"kind":"cost","cost":1}"#.to_owned()
+        ));
         assert!(push_native_data_reset());
 
         // The barrier itself occupies one normal slot. Refill the new session
@@ -1160,7 +1437,9 @@ mod tests {
         for index in 0..MAX_NATIVE_MESSAGES - 1 {
             assert!(push_native_social_model(format!("new-{index}")));
         }
-        assert!(push_native_mail_service(r#"{"kind":"cost","cost":2}"#.to_owned()));
+        assert!(push_native_mail_service(
+            r#"{"kind":"cost","cost":2}"#.to_owned()
+        ));
         inbound.discard_stale_data_before_latest_reset();
 
         let mut resets = 0;
@@ -1389,6 +1668,35 @@ mod tests {
     }
 
     #[test]
+    fn reset_barriers_drop_scene_map_uploads_but_keep_immutable_entity_pages() {
+        for reset in [
+            NativeInboundMessage::SceneReset,
+            NativeInboundMessage::DataReset,
+        ] {
+            let mut buffer = active_buffer();
+            assert!(buffer.enqueue(NativeInboundMessage::EntityRenderAtlas {
+                key: "starter:p1".into(),
+                width: 1,
+                height: 1,
+                pixels: vec![0; 4],
+            }));
+            assert!(buffer.enqueue(NativeInboundMessage::MapRenderAtlas {
+                key: "old-map:p1".into(),
+                width: 1,
+                height: 1,
+                pixels: vec![0; 4],
+            }));
+            assert!(buffer.enqueue(reset));
+            assert_eq!(buffer.pending.len(), 2);
+            assert!(buffer.pending.iter().any(is_process_lifetime_asset_message));
+            assert!(!buffer
+                .pending
+                .iter()
+                .any(|message| { matches!(message, NativeInboundMessage::MapRenderAtlas { .. }) }));
+        }
+    }
+
+    #[test]
     fn preserving_data_reset_atomically_rehydrates_and_keeps_exact_receipt() {
         let mut buffer = active_buffer();
         let receipt = typed_receipt("gs-preserved");
@@ -1513,6 +1821,128 @@ mod tests {
             1,
             "old snapshot is evicted by byte pressure"
         );
+    }
+
+    #[test]
+    fn map_render_atlas_validates_and_coalesces_per_page() {
+        let _native_queue_guard = native_queue_test_guard();
+        let inbound = NativeInbound::new();
+
+        assert!(!push_native_map_render_atlas(
+            "map:bad".to_owned(),
+            2,
+            1,
+            vec![0; 7],
+        ));
+        assert!(push_native_map_render_atlas(
+            "map:page-0".to_owned(),
+            1,
+            1,
+            vec![1; 4],
+        ));
+        assert!(push_native_map_render_atlas(
+            "map:page-0".to_owned(),
+            1,
+            1,
+            vec![2; 4],
+        ));
+        assert!(push_native_map_render_atlas(
+            "map:page-1".to_owned(),
+            1,
+            1,
+            vec![3; 4],
+        ));
+
+        let state = inbound
+            .buffer
+            .lock()
+            .expect("native inbound mutex should not be poisoned");
+        assert_eq!(state.pending.len(), 2);
+        assert!(state.pending.iter().any(|message| matches!(
+            message,
+            NativeInboundMessage::MapRenderAtlas { key, pixels, .. }
+                if key == "map:page-0" && pixels == &[2; 4]
+        )));
+        assert!(state.pending.iter().any(|message| matches!(
+            message,
+            NativeInboundMessage::MapRenderAtlas { key, pixels, .. }
+                if key == "map:page-1" && pixels == &[3; 4]
+        )));
+    }
+
+    #[test]
+    fn bounded_image_drain_makes_progress_without_consuming_the_whole_batch() {
+        let _native_queue_guard = native_queue_test_guard();
+        let inbound = NativeInbound::new();
+        assert!(push_native_map_render_atlas(
+            "map:page-0".to_owned(),
+            1,
+            1,
+            vec![1; 4],
+        ));
+        assert!(push_native_map_render_atlas(
+            "map:page-1".to_owned(),
+            1,
+            1,
+            vec![2; 4],
+        ));
+
+        let mut drained = Vec::new();
+        inbound.drain_matching_bounded_bytes(
+            |message| matches!(message, NativeInboundMessage::MapRenderAtlas { .. }),
+            0,
+            |message| {
+                if let NativeInboundMessage::MapRenderAtlas { key, .. } = message {
+                    drained.push(key);
+                }
+            },
+        );
+        assert_eq!(drained, ["map:page-0"]);
+        assert_eq!(
+            inbound
+                .buffer
+                .lock()
+                .expect("native inbound mutex should not be poisoned")
+                .pending
+                .len(),
+            1,
+        );
+
+        inbound.drain_matching_bounded_bytes(
+            |message| matches!(message, NativeInboundMessage::MapRenderAtlas { .. }),
+            0,
+            |message| {
+                if let NativeInboundMessage::MapRenderAtlas { key, .. } = message {
+                    drained.push(key);
+                }
+            },
+        );
+        assert_eq!(drained, ["map:page-0", "map:page-1"]);
+    }
+
+    #[test]
+    fn bulk_render_assets_do_not_evict_the_state_that_references_them() {
+        let _native_queue_guard = native_queue_test_guard();
+        let inbound = NativeInbound::new();
+        assert!(push_native_world_state("authoritative-state".to_owned()));
+        for index in 0..MAX_COALESCED_SNAPSHOTS {
+            assert!(push_native_map_render_atlas(
+                format!("map:page-{index}"),
+                1,
+                1,
+                vec![index as u8; 4],
+            ));
+        }
+
+        let state = inbound
+            .buffer
+            .lock()
+            .expect("native inbound mutex should not be poisoned");
+        assert_eq!(state.pending.len(), MAX_COALESCED_SNAPSHOTS + 1);
+        assert!(state.pending.iter().any(|message| matches!(
+            message,
+            NativeInboundMessage::WorldState(json) if json == "authoritative-state"
+        )));
     }
 
     #[test]

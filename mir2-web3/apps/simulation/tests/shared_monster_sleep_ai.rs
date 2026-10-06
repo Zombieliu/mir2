@@ -187,15 +187,24 @@ fn sleeping_statue_ignores_stale_harvest_remove_and_ai_metadata() {
     let mut stale = spawn(0);
     stale.hp = 0;
     zone.handle(ZoneCommand::SpawnMonster {
-        session_id: SessionId::new("a"), monster: stale, now_ms: 2,
+        session_id: SessionId::new("a"),
+        monster: stale,
+        now_ms: 2,
     });
     let out = zone.handle(ZoneCommand::BroadcastPackets {
-        session_id: SessionId::new("a"), owner_local_object_id: 101, now_ms: 2,
-        packets: vec![ServerPacket::ObjectHarvested {
-            movement: mir2_protocol::ObjectMovement {
-                object_id: ID, position: Point { x: 99, y: 99 }, direction: MirDirection::Left,
+        session_id: SessionId::new("a"),
+        owner_local_object_id: 101,
+        now_ms: 2,
+        packets: vec![
+            ServerPacket::ObjectHarvested {
+                movement: mir2_protocol::ObjectMovement {
+                    object_id: ID,
+                    position: Point { x: 99, y: 99 },
+                    direction: MirDirection::Left,
+                },
             },
-        }, ServerPacket::ObjectRemove { object_id: ID }],
+            ServerPacket::ObjectRemove { object_id: ID },
+        ],
     });
     assert!(out.is_empty());
     assert_eq!(zone.checkpoint_bytes().unwrap(), before);
@@ -203,12 +212,22 @@ fn sleeping_statue_ignores_stale_harvest_remove_and_ai_metadata() {
 
 fn late_join(zone: &mut ZoneRuntime, id: u32) -> Vec<ZoneOutbound> {
     zone.handle(ZoneCommand::Join(ZoneJoin {
-        session_id: SessionId::new(format!("late{id}")), account_id: format!("late{id}"),
-        character_index: 1, object_id: id, name: format!("late{id}"),
-        class: MirClass::Warrior, gender: MirGender::Male, level: 50,
-        hp: 1000, max_hp: 1000, mp: 100, map_file_name: "sleep-fixture".into(),
-        position: p(12, 12), direction: MirDirection::Up,
-        chat_profile: Default::default(), combat_stats: Default::default(),
+        session_id: SessionId::new(format!("late{id}")),
+        account_id: format!("late{id}"),
+        character_index: 1,
+        object_id: id,
+        name: format!("late{id}"),
+        class: MirClass::Warrior,
+        gender: MirGender::Male,
+        level: 50,
+        hp: 1000,
+        max_hp: 1000,
+        mp: 100,
+        map_file_name: "sleep-fixture".into(),
+        position: p(12, 12),
+        direction: MirDirection::Up,
+        chat_profile: Default::default(),
+        combat_stats: Default::default(),
     }))
 }
 

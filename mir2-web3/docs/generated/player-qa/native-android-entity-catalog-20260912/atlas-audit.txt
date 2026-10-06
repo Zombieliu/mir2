@@ -1,0 +1,14 @@
+manifest: apps/web/public/bevy-entity-atlases/manifest.json
+schemaVersion: 2
+atlasCount: 1
+pageCount: 7
+rectCount: 10482
+libraryRoots:
+  AArmour
+  AHair
+  AWeapon
+  CArmour
+  CHair
+  CWeapon
+  Monster
+  NPC

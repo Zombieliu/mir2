@@ -358,12 +358,12 @@ impl FriendDialogUi {
     }
 }
 
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 #[path = "friend_dialog_host.rs"]
 pub mod host;
 #[cfg(test)]
 #[path = "friend_dialog_tests.rs"]
 mod tests;
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 #[path = "friend_dialog_render.rs"]
 pub mod view;

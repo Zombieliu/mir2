@@ -1,0 +1,122 @@
+{
+  "frozenWindows": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "rust": [
+    {
+      "name": "normal-final.log",
+      "passed": 267,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "preview-final.log",
+      "passed": 281,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "shared-final.log",
+      "passed": 1205,
+      "failed": 0,
+      "ignored": 8
+    },
+    {
+      "name": "windows-chat-mac.log",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "java": [
+    {
+      "variant": "Debug",
+      "suiteCount": 5,
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer"
+    },
+    {
+      "variant": "UiPreview",
+      "suiteCount": 5,
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer"
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_chat_ingress.rs",
+      "sha256": "09b993fc22688e6342e2e2e904159f97f4412e2314aa6acd5592d72468527e31"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "sha256": "7f437d25344c31ae69976a597efca18b06003790b1c0d1c1ab0e04b1fd72bbf7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "sha256": "fec439916a3b575fe8efd6ac790470d22b418a38be4d83c395ceb4a28b117e97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/chat_ingress.rs",
+      "sha256": "2f5b777cf15bb5669388d7b00553ef1b639fdee5c0ecb497e6eb468d054d67a7"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/chat_ingress_tests.rs",
+      "sha256": "64d0972bcd6a63b6bf3a8fa6aaaba7df5efe658b973bf834094f6ed8f78220e2"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "sha256": "346e9ecd0f57a26c81deacdbab66fe48e269527a4decc5cd457865407c4655a6"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+      "sha256": "159081a6b0e8d3038ccb9f3cadcc34ce020af82ab6928e227773b983a3e855a0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "sha256": "e131bc64af1a14f0b0832d446f052102e5fe3b367811b498fc81ae369db5b5a3"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "sha256": "4aba83a92c4b46a075cd80d275d40c041df76c03cbd6bf1fbcf5ac7077e89bdb"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "sha256": "453f44d10adefbf804d6a5be4069924f123c9930e7aadc7925a555b4fd3b2d0b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "sha256": "2de2c2c3e4366014b489f9cdbe56ee25e95d52a0417c9a4aba25a4ccdbf5fc2a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "sha256": "09039401f77cbd6b565f3cbf6f60ff926b45250211005eb7323214247e7b0136"
+    }
+  ],
+  "extraction": {
+    "frozenWindows": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+    "function": "transform_chat_line",
+    "bodyAndSignatureEquivalent": true,
+    "permittedDifferences": [
+      "public visibility",
+      "chat type namespace",
+      "formatting"
+    ],
+    "windowsHostUsesSharedImplementation": true,
+    "windowsDeviceAccepted": false,
+    "authenticatedAndroidAccepted": false
+  },
+  "arm64Api31": {
+    "normal": true,
+    "actualPreviewFeature": true
+  },
+  "hostRetryFifoOnly": true,
+  "sharedRuntimeChatEvictionUnchangedAndOpen": true,
+  "apkAccepted": false,
+  "fullPhoneUiAccepted": false,
+  "authenticatedGameplayAccepted": false,
+  "physicalDeviceAccepted": false
+}

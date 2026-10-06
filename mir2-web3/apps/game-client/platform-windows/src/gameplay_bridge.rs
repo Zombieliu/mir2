@@ -21,22 +21,26 @@ use mir2_client_bevy::game_shop::GameShopModel;
 use mir2_client_bevy::inventory::InventoryModel;
 use mir2_client_bevy::map::MapModel;
 use mir2_client_bevy::native_shell::{NativeShellModel, NativeShellScreen};
+use mir2_client_bevy::native_quest_ingress::{
+    completed_quest_ids, completed_quest_ids_from_snapshot, parse_quest_definition,
+    parse_quest_rewards, transform_nearby_npcs, transform_npc_dialog, transform_quest_tracker,
+    QuestDefinition,
+};
 use mir2_client_bevy::pending_operations::{
     apply_quest_operation_ack, mark_authoritative_refresh, reconcile_quest_refresh,
     AuthoritativeModelDomain, AuthoritativeModelRevisions, PendingOperationKey, PendingOperations,
     QuestOperationAck,
 };
 use mir2_client_bevy::quest_model::{
-    CombatTargetModel, CombatTargetUpdate, CompletedQuestTracker, GroundPickupModel, NearbyNpc,
-    NearbyNpcModel, NpcDialogModel, NpcDialogOption, NpcDialogUpdate, Quest, QuestDetailText,
-    QuestObjective, QuestReward, QuestStatus, QuestTracker, RecentPickup,
-};
-use mir2_client_bevy::quest_ui::{
-    pending_quest_turn_in_allows_interaction, quest_turn_in_ui_allows_interaction,
-    QuestUiIntent, QuestUiIntentQueue, QuestUiState,
+    CombatTargetModel, CombatTargetUpdate, CompletedQuestTracker, GroundPickupModel, NearbyNpcModel,
+    NpcDialogModel, Quest, QuestReward, QuestStatus, QuestTracker, RecentPickup,
 };
 #[cfg(test)]
 use mir2_client_bevy::quest_ui::begin_detail_quest_turn_in;
+use mir2_client_bevy::quest_ui::{
+    pending_quest_turn_in_allows_interaction, quest_turn_in_ui_allows_interaction, QuestUiIntent,
+    QuestUiIntentQueue, QuestUiState,
+};
 use mir2_client_bevy::read_model::UiReadModel;
 use mir2_client_bevy::social::{SocialModel, SocialPendingOperation};
 use serde_json::Value;
@@ -51,22 +55,8 @@ use mir2_client_bevy::crystal_ui::overlays::{
     NativePlayerUiIntent, NativePlayerUiIntentQueue, NativePlayerUiState,
 };
 
-const MAX_NEARBY_NPCS: usize = 8;
 const MAX_GROUND_DROPS: usize = 4;
-const MAX_NEARBY_DISTANCE: u32 = 18;
 
-#[derive(Debug, Clone, Default)]
-struct QuestDefinition {
-    title: String,
-    group: Option<String>,
-    min_level_needed: i32,
-    detail: QuestDetailText,
-    accept_npc_index: Option<u32>,
-    finish_npc_index: Option<u32>,
-    objectives: Vec<String>,
-    rewards: Vec<QuestReward>,
-    description: Option<String>,
-}
 
 /// Stateful protocol adapter. Static quest definitions arrive as packets and
 /// are intentionally retained across periodic world snapshots.
@@ -2336,7 +2326,9 @@ pub fn forward_quest_ui_intents(
     let dead = read_model
         .as_deref()
         .is_some_and(|model| model.player.max_hp > 0 && model.player.hp <= 0);
-    let quest_modal = quest_ui_state.as_deref().is_some_and(QuestUiState::blocks_world_input);
+    let quest_modal = quest_ui_state
+        .as_deref()
+        .is_some_and(QuestUiState::blocks_world_input);
     let world_actions_blocked = quest_modal
         || big_map_ui.as_deref().is_some_and(|map| map.search_focused)
         || notice.as_deref().is_some_and(NoticeDialogState::is_open)
@@ -2517,19 +2509,18 @@ pub fn forward_quest_ui_intents(
                 let ongoing_target = movement
                     .as_deref()
                     .is_some_and(|state| state.attack_target() == Some(object_id));
-                let attack_actions_blocked = notice
-                    .as_deref()
-                    .is_some_and(NoticeDialogState::is_open)
-                    || quest_modal
-                    || dialog_open
-                    || dead
-                    || player_ui_state.as_deref().is_some_and(|ui| {
-                        if ongoing_target {
-                            ui.blocks_route_navigation()
-                        } else {
-                            ui.blocks_world_action(false, false)
-                        }
-                    });
+                let attack_actions_blocked =
+                    notice.as_deref().is_some_and(NoticeDialogState::is_open)
+                        || quest_modal
+                        || dialog_open
+                        || dead
+                        || player_ui_state.as_deref().is_some_and(|ui| {
+                            if ongoing_target {
+                                ui.blocks_route_navigation()
+                            } else {
+                                ui.blocks_world_action(false, false)
+                            }
+                        });
                 if attack_actions_blocked {
                     crate::movement_trace::record(serde_json::json!({
                         "type": "attackForwardBlocked",
@@ -3543,393 +3534,11 @@ fn health_from_percent(max_hp: i32, percent: i32) -> i32 {
     (max_hp.saturating_mul(percent).saturating_add(99) / 100).clamp(1, max_hp)
 }
 
-fn parse_quest_definition(payload: &Value) -> QuestDefinition {
-    let info = payload.get("info");
-    let title = string_at(payload, "name")
-        .or_else(|| info.and_then(|value| string_at(value, "name")))
-        .unwrap_or_default();
-    let group = string_at(payload, "group")
-        .or_else(|| info.and_then(|value| string_at(value, "group")))
-        .filter(|value| !value.trim().is_empty());
-    let min_level_needed = payload
-        .get("minLevelNeeded")
-        .and_then(value_i32)
-        .or_else(|| {
-            info.and_then(|value| {
-                value
-                    .get("min_level_needed")
-                    .or_else(|| value.get("minLevelNeeded"))
-                    .and_then(value_i32)
-            })
-        })
-        .unwrap_or(0);
-    let accept_npc_index = info
-        .and_then(|value| value.get("npc_index").or_else(|| value.get("npcIndex")))
-        .and_then(value_u32);
-    let finish_npc_index = info
-        .and_then(|value| {
-            value
-                .get("finish_npc_index")
-                .or_else(|| value.get("finishNpcIndex"))
-        })
-        .and_then(value_u32)
-        .or(accept_npc_index);
-    let objectives: Vec<String> = payload
-        .get("objectives")
-        .and_then(Value::as_array)
-        .map(|items| {
-            items
-                .iter()
-                .filter_map(|item| string_at(item, "text"))
-                .map(|text| strip_crystal_markup(&text))
-                .filter(|text| !text.trim().is_empty())
-                .collect()
-        })
-        .unwrap_or_default();
-    let description_lines = payload
-        .get("descriptionLines")
-        .and_then(string_array)
-        .or_else(|| {
-            info.and_then(|value| value.get("description"))
-                .and_then(string_array)
-        })
-        .unwrap_or_default()
-        .into_iter()
-        .map(|line| strip_crystal_markup(&line))
-        .filter(|line| !line.trim().is_empty())
-        .collect::<Vec<_>>();
-    let task_description_lines = if objectives.is_empty() {
-        info.and_then(|value| value.get("task_description"))
-            .and_then(string_array)
-            .unwrap_or_default()
-            .into_iter()
-            .map(|line| strip_crystal_markup(&line))
-            .filter(|line| !line.trim().is_empty())
-            .collect()
-    } else {
-        objectives.clone()
-    };
-    let return_description_lines = payload
-        .get("returnDescriptionLines")
-        .and_then(string_array)
-        .or_else(|| {
-            info.and_then(|value| value.get("return_description"))
-                .and_then(string_array)
-        })
-        .unwrap_or_default()
-        .into_iter()
-        .map(|line| strip_crystal_markup(&line))
-        .filter(|line| !line.trim().is_empty())
-        .collect();
-    let completion_description_lines = payload
-        .get("completionDescriptionLines")
-        .and_then(string_array)
-        .or_else(|| {
-            info.and_then(|value| value.get("completion_description"))
-                .and_then(string_array)
-        })
-        .unwrap_or_default()
-        .into_iter()
-        .map(|line| strip_crystal_markup(&line))
-        .filter(|line| !line.trim().is_empty())
-        .collect();
-    let time_limit = string_at(payload, "timeLimit").filter(|value| !value.trim().is_empty());
-    let description = (!description_lines.is_empty()).then(|| description_lines.join("\n"));
-    let detail = QuestDetailText {
-        description_lines,
-        task_description_lines,
-        return_description_lines,
-        completion_description_lines,
-        time_limit,
-    };
 
-    QuestDefinition {
-        title: strip_crystal_markup(&title),
-        group,
-        min_level_needed,
-        detail,
-        accept_npc_index,
-        finish_npc_index,
-        objectives,
-        rewards: parse_quest_rewards(payload.get("rewards")),
-        description,
-    }
-}
 
-fn transform_quest_tracker(
-    payload: &Value,
-    definitions: &HashMap<i32, QuestDefinition>,
-) -> QuestTracker {
-    let entities = payload
-        .get("entities")
-        .and_then(Value::as_array)
-        .map(Vec::as_slice)
-        .unwrap_or(&[]);
-    let active_quests = payload
-        .get("questLog")
-        .and_then(Value::as_array)
-        .map(|quests| {
-            quests
-                .iter()
-                .filter_map(|quest| {
-                    let quest_index = quest.get("questId").and_then(value_i32)?;
-                    let definition = definitions.get(&quest_index).cloned().unwrap_or_default();
-                    let status = quest_status(quest.get("stage").and_then(Value::as_str));
-                    let npc_index = if status == QuestStatus::ReadyToTurnIn {
-                        definition.finish_npc_index
-                    } else {
-                        definition.accept_npc_index
-                    };
-                    let npc_name = npc_index.and_then(|npc_index| {
-                        entities
-                            .iter()
-                            .find(|entity| {
-                                entity.get("objectId").and_then(value_u32) == Some(npc_index)
-                            })
-                            .and_then(|entity| string_at(entity, "name"))
-                            .map(|name| display_npc_name(&name))
-                    });
-                    let objectives = transform_quest_objectives(quest, quest_index, &definition);
-                    let rewards = if definition.rewards.is_empty() {
-                        string_at(quest, "rewardPreview")
-                            .filter(|label| !label.trim().is_empty())
-                            .map(|label| vec![QuestReward::Unknown { label }])
-                            .unwrap_or_default()
-                    } else {
-                        definition.rewards.clone()
-                    };
-                    let title = string_at(quest, "title")
-                        .filter(|title| !title.trim().is_empty())
-                        .unwrap_or_else(|| {
-                            if definition.title.is_empty() {
-                                format!("Quest {quest_index}")
-                            } else {
-                                definition.title.clone()
-                            }
-                        });
-                    let unknown_text = definition.description.clone().or_else(|| {
-                        string_at(quest, "summary").filter(|text| !text.trim().is_empty())
-                    });
 
-                    Some(Quest {
-                        quest_index,
-                        accept_npc_index: definition.accept_npc_index,
-                        finish_npc_index: definition.finish_npc_index,
-                        title: strip_crystal_markup(&title),
-                        npc_name,
-                        group: definition.group.clone(),
-                        min_level_needed: definition.min_level_needed,
-                        detail: definition.detail.clone(),
-                        status,
-                        objectives,
-                        rewards,
-                        unknown_text,
-                    })
-                })
-                .collect()
-        })
-        .unwrap_or_default();
-    QuestTracker { active_quests }
-}
 
-fn transform_quest_objectives(
-    quest: &Value,
-    quest_index: i32,
-    definition: &QuestDefinition,
-) -> Vec<QuestObjective> {
-    let current_total = quest.get("current").and_then(value_u32).unwrap_or(0);
-    let required_total = quest.get("required").and_then(value_u32).unwrap_or(0);
-    let from_snapshot = quest
-        .get("objectives")
-        .and_then(Value::as_array)
-        .map(|objectives| {
-            objectives
-                .iter()
-                .enumerate()
-                .map(|(index, objective)| QuestObjective {
-                    objective_id: format!("{quest_index}:{index}"),
-                    text: string_at(objective, "label")
-                        .map(|text| strip_crystal_markup(&text))
-                        .or_else(|| definition.objectives.get(index).cloned())
-                        .unwrap_or_else(|| format!("Objective {}", index + 1)),
-                    current: objective
-                        .get("current")
-                        .and_then(value_u32)
-                        .unwrap_or(current_total),
-                    target: objective
-                        .get("required")
-                        .and_then(value_u32)
-                        .unwrap_or(required_total),
-                })
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default();
-    if !from_snapshot.is_empty() {
-        return from_snapshot;
-    }
 
-    let text = string_at(quest, "objective")
-        .map(|text| strip_crystal_markup(&text))
-        .or_else(|| definition.objectives.first().cloned())
-        .unwrap_or_default();
-    if text.trim().is_empty() && required_total == 0 {
-        Vec::new()
-    } else {
-        vec![QuestObjective {
-            objective_id: format!("{quest_index}:0"),
-            text,
-            current: current_total,
-            target: required_total,
-        }]
-    }
-}
-
-fn parse_quest_rewards(value: Option<&Value>) -> Vec<QuestReward> {
-    let Some(rewards) = value.and_then(Value::as_object) else {
-        return Vec::new();
-    };
-    let mut parsed = Vec::new();
-    if let Some(amount) = rewards
-        .get("gold")
-        .and_then(value_u32)
-        .filter(|amount| *amount > 0)
-    {
-        parsed.push(QuestReward::Gold { amount });
-    }
-    if let Some(amount) = rewards
-        .get("experience")
-        .and_then(value_u32)
-        .filter(|amount| *amount > 0)
-    {
-        parsed.push(QuestReward::Experience { amount });
-    }
-    if let Some(amount) = rewards
-        .get("credit")
-        .and_then(value_u32)
-        .filter(|amount| *amount > 0)
-    {
-        parsed.push(QuestReward::Unknown {
-            label: format!("{amount} Credit"),
-        });
-    }
-    for field in ["items", "selectItems"] {
-        if let Some(items) = rewards.get(field).and_then(Value::as_array) {
-            for item in items {
-                let item_id = item
-                    .get("itemIndex")
-                    .and_then(value_i32)
-                    .map(|value| value.to_string())
-                    .unwrap_or_default();
-                let name = string_at(item, "name").unwrap_or_else(|| "Item".to_owned());
-                // Zero is meaningful in Crystal quest data: it marks a listed
-                // fixed item that is not actually granted. Preserve it so the
-                // newcomer presentation can filter the row instead of
-                // fabricating an x1 reward.
-                let quantity = item.get("count").and_then(value_u32).unwrap_or(1);
-                parsed.push(QuestReward::Item {
-                    item_id,
-                    name: strip_crystal_markup(&name),
-                    quantity,
-                    icon: item.get("icon").and_then(value_u32),
-                    selection_index: (field == "selectItems")
-                        .then(|| item.get("selectionIndex").and_then(value_i32).unwrap_or(0)),
-                    tooltip_source: item
-                        .get("tooltipSource")
-                        .and_then(|source| serde_json::from_value(source.clone()).ok()),
-                });
-            }
-        }
-    }
-    parsed
-}
-
-fn transform_npc_dialog(payload: &Value) -> NpcDialogModel {
-    let Some(dialog) = payload
-        .get("activeNpcDialog")
-        .filter(|value| !value.is_null())
-    else {
-        return NpcDialogModel::default();
-    };
-    let Some(npc_object_id) = dialog.get("npcObjectId").and_then(value_u32) else {
-        return NpcDialogModel::default();
-    };
-    let mut lines = Vec::new();
-    if let Some(title) = string_at(dialog, "title").filter(|title| !title.trim().is_empty()) {
-        lines.push(strip_crystal_markup(&title));
-    }
-    if let Some(body) = dialog.get("body").and_then(string_array) {
-        lines.extend(body.into_iter().map(|line| strip_crystal_markup(&line)));
-    }
-    if let Some(footer) = string_at(dialog, "footer").filter(|footer| !footer.trim().is_empty()) {
-        lines.push(strip_crystal_markup(&footer));
-    }
-    let options = dialog
-        .get("links")
-        .and_then(Value::as_array)
-        .map(|links| {
-            links
-                .iter()
-                .filter_map(|link| {
-                    let target = string_at(link, "target")?;
-                    Some(NpcDialogOption {
-                        option_id: target,
-                        label: string_at(link, "text")
-                            .map(|text| strip_crystal_markup(&text))
-                            .unwrap_or_else(|| "Continue".to_owned()),
-                        enabled: true,
-                    })
-                })
-                .collect()
-        })
-        .unwrap_or_default();
-
-    let mut model = NpcDialogModel::default();
-    model.apply(NpcDialogUpdate {
-        npc_object_id,
-        npc_name: string_at(dialog, "npcName").map(|name| display_npc_name(&name)),
-        lines,
-        options,
-        open: true,
-        replace: true,
-    });
-    model
-}
-
-fn transform_nearby_npcs(payload: &Value, player_x: i32, player_y: i32) -> NearbyNpcModel {
-    let mut npcs = payload
-        .get("entities")
-        .and_then(Value::as_array)
-        .map(|entities| {
-            entities
-                .iter()
-                .filter(|entity| entity.get("kind").and_then(Value::as_str) == Some("npc"))
-                .filter_map(|entity| {
-                    let object_id = entity.get("objectId").and_then(value_u32)?;
-                    let x = entity.get("x").and_then(value_i32)?;
-                    let y = entity.get("y").and_then(value_i32)?;
-                    let distance = tile_distance(player_x, player_y, x, y);
-                    (distance <= MAX_NEARBY_DISTANCE).then(|| NearbyNpc {
-                        object_id,
-                        name: string_at(entity, "name")
-                            .map(|name| display_npc_name(&name))
-                            .unwrap_or_else(|| format!("NPC {object_id}")),
-                        x,
-                        y,
-                        quest_indexes: entity
-                            .get("questIds")
-                            .and_then(Value::as_array)
-                            .map(|ids| ids.iter().filter_map(value_i32).collect())
-                            .unwrap_or_default(),
-                        distance,
-                    })
-                })
-                .collect::<Vec<_>>()
-        })
-        .unwrap_or_default();
-    npcs.sort_by_key(|npc| (npc.distance, npc.object_id));
-    npcs.truncate(MAX_NEARBY_NPCS);
-    NearbyNpcModel { npcs }
-}
 
 fn transform_combat_target(payload: &Value, player_x: i32, player_y: i32) -> CombatTargetModel {
     let entities = payload
@@ -4139,43 +3748,8 @@ fn transform_from_payload(payload: &Value) -> Option<AuthoritativePlayerTransfor
     })
 }
 
-fn quest_status(stage: Option<&str>) -> QuestStatus {
-    match stage.unwrap_or_default().to_ascii_lowercase().as_str() {
-        "available" | "notstarted" | "not_started" => QuestStatus::NotStarted,
-        "inprogress" | "in_progress" | "active" => QuestStatus::InProgress,
-        "readytoturnin" | "ready_to_turn_in" => QuestStatus::ReadyToTurnIn,
-        "completed" => QuestStatus::Completed,
-        "failed" => QuestStatus::Failed,
-        "aborted" => QuestStatus::Aborted,
-        other => QuestStatus::Unknown(other.to_owned()),
-    }
-}
 
-fn completed_quest_ids(value: &Value) -> Option<Vec<i32>> {
-    let values = value.as_array()?;
-    Some(values.iter().filter_map(value_i32).collect())
-}
 
-fn completed_quest_ids_from_snapshot(payload: &Value) -> Option<Vec<i32>> {
-    if let Some(ids) = payload
-        .get("completedQuests")
-        .or_else(|| payload.get("completed_quests"))
-        .or_else(|| payload.get("completedQuestIds"))
-        .and_then(completed_quest_ids)
-    {
-        return Some(ids);
-    }
-    let quests = payload.get("questLog")?.as_array()?;
-    Some(
-        quests
-            .iter()
-            .filter(|quest| {
-                quest_status(quest.get("stage").and_then(Value::as_str)) == QuestStatus::Completed
-            })
-            .filter_map(|quest| quest.get("questId").and_then(value_i32))
-            .collect(),
-    )
-}
 
 fn value_u32(value: &Value) -> Option<u32> {
     value
@@ -4195,24 +3769,11 @@ fn string_at(value: &Value, field: &str) -> Option<String> {
     value.get(field).and_then(Value::as_str).map(str::to_owned)
 }
 
-fn string_array(value: &Value) -> Option<Vec<String>> {
-    Some(
-        value
-            .as_array()?
-            .iter()
-            .filter_map(Value::as_str)
-            .map(str::to_owned)
-            .collect(),
-    )
-}
 
 fn tile_distance(ax: i32, ay: i32, bx: i32, by: i32) -> u32 {
     ax.abs_diff(bx).max(ay.abs_diff(by))
 }
 
-fn display_npc_name(name: &str) -> String {
-    name.replace('_', " - ")
-}
 
 /// Crystal text markup is `{label/Colour}`. Native Bevy text currently uses a
 /// single colour, so preserve the label and discard only the colour directive.
@@ -4958,7 +4519,8 @@ mod tests {
     }
 
     fn ready_detail_turn_in_app() -> (App, std::sync::mpsc::Receiver<GatewayCommand>) {
-        let (mut app, receiver) = quest_gate_app(NativePlayerUiState::default(), NpcDialogModel::default());
+        let (mut app, receiver) =
+            quest_gate_app(NativePlayerUiState::default(), NpcDialogModel::default());
         let tracker = QuestTracker {
             active_quests: vec![Quest {
                 quest_index: 2110012,
@@ -5019,8 +4581,10 @@ mod tests {
             .insert_resource(state)
             .insert_resource(queue)
             .insert_resource(pending);
-        app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
-            mir2_ui_core::state::UiPanel::QuestLog;
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .core
+            .panel = mir2_ui_core::state::UiPanel::QuestLog;
         (app, receiver)
     }
 
@@ -5035,9 +4599,17 @@ mod tests {
         app.update();
         assert!(matches!(
             receiver.try_command(),
-            Ok(GatewayCommand::Wire(NativeOutboundCommand::Interact { object_id: 24 }))
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::Interact {
+                object_id: 24
+            }))
         ));
-        assert!(matches!(receiver.try_command(), Err(std::sync::mpsc::TryRecvError::Empty)), "ordinary world interaction stays blocked");
+        assert!(
+            matches!(
+                receiver.try_command(),
+                Err(std::sync::mpsc::TryRecvError::Empty)
+            ),
+            "ordinary world interaction stays blocked"
+        );
     }
 
     #[test]
@@ -5079,7 +4651,10 @@ mod tests {
             }
             app.update();
             assert!(
-                matches!(receiver.try_command(), Err(std::sync::mpsc::TryRecvError::Empty)),
+                matches!(
+                    receiver.try_command(),
+                    Err(std::sync::mpsc::TryRecvError::Empty)
+                ),
                 "{rejection} must not send an NPC interaction"
             );
         }
@@ -5820,40 +5395,60 @@ mod tests {
         let mut movement = WorldPointerMovementState::default();
         movement.pursue_attack_target(42);
         app.insert_resource(movement);
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         app.update();
         assert!(matches!(
             receiver.try_recv(),
-            Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 42 }))
+            Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack {
+                object_id: 42
+            }))
         ));
 
-        app.world_mut().resource_mut::<NativePlayerUiState>().toggle_options();
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .toggle_options();
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         app.update();
-        assert!(matches!(receiver.try_recv(), Ok(GatewayCommand::Wire(
-            NativeOutboundCommand::Attack { object_id: 42 }
-        ))), "the ordinary options view must preserve combat");
-        app.world_mut().resource_mut::<NativePlayerUiState>().skill_assign.open = true;
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        assert!(
+            matches!(
+                receiver.try_recv(),
+                Ok(GatewayCommand::Wire(NativeOutboundCommand::Attack {
+                    object_id: 42
+                }))
+            ),
+            "the ordinary options view must preserve combat"
+        );
+        app.world_mut()
+            .resource_mut::<NativePlayerUiState>()
+            .skill_assign
+            .open = true;
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         app.update();
-        assert!(receiver.try_recv().is_err(), "a real assignment prompt still blocks combat");
+        assert!(
+            receiver.try_recv().is_err(),
+            "a real assignment prompt still blocks combat"
+        );
     }
 
     #[test]
     fn combat_batch_keeps_latest_target_and_saturated_lane_never_replays_old_attack() {
         let (sender, mut receiver) = crate::gateway::command_channel(8);
-        let (mut app, _unused_receiver) = quest_gate_app(
-            NativePlayerUiState::default(), NpcDialogModel::default(),
-        );
+        let (mut app, _unused_receiver) =
+            quest_gate_app(NativePlayerUiState::default(), NpcDialogModel::default());
         app.insert_resource(GatewayCommands::new(sender.clone()));
         app.insert_resource(WorldPointerMovementState::default());
         for _ in 0..8 {
-            assert!(sender.send(GatewayCommand::Player(crate::gateway::PlayerIntent::Walk {
-                direction: "up".to_owned(),
-            })).is_ok());
+            assert!(sender
+                .send(GatewayCommand::Player(crate::gateway::PlayerIntent::Walk {
+                    direction: "up".to_owned(),
+                }))
+                .is_ok());
         }
         {
             let mut queue = app.world_mut().resource_mut::<QuestUiIntentQueue>();
@@ -5861,21 +5456,42 @@ mod tests {
             queue.push_intent(QuestUiIntent::AttackTarget { object_id: 42 });
         }
         app.update();
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target(), Some(42));
-        assert!(app.world().resource::<QuestUiIntentQueue>().is_empty(),
-            "failed attacks must not remain ahead of the next target");
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target(),
+            Some(42)
+        );
+        assert!(
+            app.world().resource::<QuestUiIntentQueue>().is_empty(),
+            "failed attacks must not remain ahead of the next target"
+        );
         assert_eq!(app.world().resource::<QuestUiIntentQueue>().retry_len(), 0);
 
         assert!(receiver.try_command().is_ok());
-        app.world_mut().resource_mut::<QuestUiIntentQueue>()
+        app.world_mut()
+            .resource_mut::<QuestUiIntentQueue>()
             .push_intent(QuestUiIntent::AttackTarget { object_id: 43 });
         app.update();
-        assert_eq!(app.world().resource::<WorldPointerMovementState>().attack_target(), Some(43));
+        assert_eq!(
+            app.world()
+                .resource::<WorldPointerMovementState>()
+                .attack_target(),
+            Some(43)
+        );
         let forwarded: Vec<_> = std::iter::from_fn(|| receiver.try_command().ok()).collect();
-        assert_eq!(forwarded.iter().filter(|command| matches!(command,
-            GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 43 })
-        )).count(), 1);
-        assert!(!forwarded.iter().any(|command| matches!(command,
+        assert_eq!(
+            forwarded
+                .iter()
+                .filter(|command| matches!(
+                    command,
+                    GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 43 })
+                ))
+                .count(),
+            1
+        );
+        assert!(!forwarded.iter().any(|command| matches!(
+            command,
             GatewayCommand::Wire(NativeOutboundCommand::Attack { object_id: 41 | 42 })
         )));
     }
@@ -7729,12 +7345,14 @@ mod tests {
         );
         assert_eq!(
             crate::atlas::native_frame_geometry("/original-ui/NPC/45", 0)
-                .expect("Board geometry").width,
+                .expect("Board geometry")
+                .width,
             140
         );
         assert_eq!(
             crate::atlas::native_frame_geometry("/original-ui/NPC/08", 0)
-                .expect("Peter geometry").width,
+                .expect("Peter geometry")
+                .width,
             60
         );
     }
@@ -7756,7 +7374,10 @@ mod tests {
             "sprite": {"bodyLibrary": "NPC/08"}
         }]});
         adapter.apply_authoritative_overlay(&mut snapshot);
-        assert_eq!(snapshot["entities"][0]["sprite"]["bodyLibrary"], json!("NPC/08"));
+        assert_eq!(
+            snapshot["entities"][0]["sprite"]["bodyLibrary"],
+            json!("NPC/08")
+        );
 
         assert!(adapter.observe_packet(&PacketEvent::Other {
             packet: "NewNpcInfo".to_owned(),

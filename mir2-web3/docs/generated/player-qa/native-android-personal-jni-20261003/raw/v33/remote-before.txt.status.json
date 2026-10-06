@@ -1,0 +1,13 @@
+{
+  "file": "git",
+  "args": [
+    "-c",
+    "http.version=HTTP/1.1",
+    "ls-remote",
+    "https://github.com/Zombieliu/mir2.git",
+    "refs/heads/codex/android-shared-sync",
+    "refs/heads/codex/windows-player-journey"
+  ],
+  "code": 0,
+  "signal": null
+}

@@ -16,8 +16,10 @@ fn packets(out: &[ZoneOutbound]) -> Vec<&ServerPacket> {
 fn state(z: &ZoneRuntime) -> serde_json::Value {
     serde_json::from_slice(&z.checkpoint_bytes().unwrap()).unwrap()
 }
-fn add_attacker(z: &mut ZoneRuntime, trap: u32) {add_attacker_at(z,trap,9001,1)}
-fn add_attacker_at(z: &mut ZoneRuntime, trap: u32, actor:u32, dx:i32) {
+fn add_attacker(z: &mut ZoneRuntime, trap: u32) {
+    add_attacker_at(z, trap, 9001, 1)
+}
+fn add_attacker_at(z: &mut ZoneRuntime, trap: u32, actor: u32, dx: i32) {
     let p = z
         .native_monster_snapshots()
         .into_iter()
@@ -40,7 +42,10 @@ fn add_attacker_at(z: &mut ZoneRuntime, trap: u32, actor:u32, dx:i32) {
             move_speed_ms: 300,
             attack_speed_ms: 300,
             friendly_guild: None,
-            position: Point { x: p.x + dx, y: p.y },
+            position: Point {
+                x: p.x + dx,
+                y: p.y,
+            },
             direction: MirDirection::Left,
             defense: Default::default(),
             respawn: None,
@@ -92,7 +97,7 @@ fn monster_decoy_swing_reduces_trap_hp_after_500ms_without_player_credit() {
 fn monsters_can_kill_a_stone_trap_without_awarding_its_owner_xp_or_loot() {
     let (mut z, id, due) = fixture();
     add_attacker(&mut z, id);
-    add_attacker_at(&mut z,id,9002,-1);
+    add_attacker_at(&mut z, id, 9002, -1);
     let mut died = false;
     for now in (2000..due).step_by(100) {
         let out = z.tick(now);

@@ -19,9 +19,11 @@ fn interactive(
 ) -> bool {
     state.mail_open()
         && state.core.mail_compose.is_some()
-        && matches!(compose.kind, MailComposeKind::Letter | MailComposeKind::Parcel)
-        && (compose.kind == MailComposeKind::Letter
-            || compose.focus == MailComposeFocus::Message)
+        && matches!(
+            compose.kind,
+            MailComposeKind::Letter | MailComposeKind::Parcel
+        )
+        && (compose.kind == MailComposeKind::Letter || compose.focus == MailComposeFocus::Message)
         && !state.amount_modal_open()
         && state.mail_feedback_prompt.is_none()
         && !state.mail_feedback_input_consumed

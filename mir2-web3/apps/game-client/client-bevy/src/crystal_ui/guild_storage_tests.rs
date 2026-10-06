@@ -978,7 +978,7 @@ fn guild_gold_enter_on_invalid_uint_closes_silently_like_source_invoke_click() {
             .is_empty());
         assert_eq!(
             app.world()
-                .resource::<crate::audio::NativeUiAudioQueue>()
+                .resource::<crate::ui_audio::NativeUiAudioQueue>()
                 .len(),
             0,
             "direct InvokeMouseClick does not play OnMouseClick's sound"
@@ -988,7 +988,7 @@ fn guild_gold_enter_on_invalid_uint_closes_silently_like_source_invoke_click() {
 
 #[test]
 fn guild_gold_mouse_buttons_keep_default_button_b_and_explicit_close_button_a() {
-    use crate::audio::{NativeUiAudioQueue, NativeUiSound};
+    use crate::ui_audio::{NativeUiAudioQueue, NativeUiSound};
     for (action, sound, needs_prompt) in [
         (
             OverlayButton::GuildGoldDeposit,

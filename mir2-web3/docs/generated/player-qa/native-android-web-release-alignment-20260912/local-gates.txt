@@ -1,0 +1,6 @@
+node --check verify-entity-release-alignment.mjs: PASS
+bash -n build-android.sh: PASS
+PowerShell parser: NOT RUN (pwsh unavailable on this Mac)
+cargo +1.95.0 fmt --check: PASS
+cargo +1.95.0 test --locked --offline --features ui-preview: 153 passed, 0 failed
+completed APK lock equals extracted verifier input: PASS

@@ -1,0 +1,33 @@
+{
+  "source": "47e8ea47f0975494478be88eb49be154b6199cbe",
+  "versionCode": 32,
+  "serial": "emulator-5554",
+  "api": 31,
+  "artifacts": [
+    {
+      "variant": "debug",
+      "source": "47e8ea47f0975494478be88eb49be154b6199cbe",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/personal-jni-v32-20261002-Li1Vuo/final-apks/mir2-native-personal-ingress-debug-v32.apk",
+      "bytes": 387331957,
+      "sha256": "bcc578f8eea997a441ac25c81fe7e715c44a20440f57bfeb6cd87bcd5cdb69ca",
+      "applicationId": "com.mir2.web3",
+      "installedSha256": "bcc578f8eea997a441ac25c81fe7e715c44a20440f57bfeb6cd87bcd5cdb69ca",
+      "preservedFirstInstallTime": "2026-09-14 06:31:04",
+      "upgradePreservedDataFlag": true
+    },
+    {
+      "variant": "preview",
+      "source": "47e8ea47f0975494478be88eb49be154b6199cbe",
+      "path": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/personal-jni-v32-20261002-Li1Vuo/final-apks/mir2-native-personal-ingress-preview-v32.apk",
+      "bytes": 391204785,
+      "sha256": "9dac48b7605e037a3c1823c82b6a4ff0fc6b92ed541ec91e48b3eae4d24d44f8",
+      "applicationId": "com.mir2.web3.uipreview",
+      "installedSha256": "9dac48b7605e037a3c1823c82b6a4ff0fc6b92ed541ec91e48b3eae4d24d44f8",
+      "preservedFirstInstallTime": "2026-09-12 17:13:30",
+      "upgradePreservedDataFlag": true
+    }
+  ],
+  "physicalDeviceAccepted": false,
+  "realNetworkAccepted": false,
+  "appDataContentHashed": false
+}

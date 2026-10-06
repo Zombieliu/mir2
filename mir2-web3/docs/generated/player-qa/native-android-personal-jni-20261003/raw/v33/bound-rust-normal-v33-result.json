@@ -1,0 +1,496 @@
+{
+  "label": "bound-rust-normal-v33",
+  "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+  "bin": "cargo",
+  "args": [
+    "+1.95.0",
+    "test",
+    "--manifest-path",
+    "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+    "--lib",
+    "--locked",
+    "--offline",
+    "--",
+    "--test-threads=1"
+  ],
+  "source": "0bfa1632c375a11dd54d6c70783edcff652af59e",
+  "started": "2026-10-02T16:18:58.084Z",
+  "ended": "2026-10-02T16:19:09.183Z",
+  "code": 0,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/big_map.rs",
+      "bytes": 46169,
+      "sha256": "0a1f91a1ef552b996445495cd19f16ebd33a72e4a306ff404b2fe419bca2ee97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "bytes": 42293,
+      "sha256": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 943864,
+      "sha256": "228883d8912ffc233eebb6acc9f103e215d56aef07c6e616308e51d12f6ba3b0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "bytes": 67126,
+      "sha256": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "bytes": 60408,
+      "sha256": "c7f9f40be0caf3cfc37edd5a18ff24e76a795dc5d4183b33adf6501800de54cc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+      "bytes": 37415,
+      "sha256": "25becf5d258dba0c25f619ffecf818db997260a9439e295ddccd432df8bd9032"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 2769,
+      "sha256": "487cb9876fa41f01f9bf125ff630bd4bbff76d0635b35e01b83b142fcc2490bd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "bytes": 23201,
+      "sha256": "8b45f76f8974b21f0fe8729965e89d979955eca4f8da831c4aaebb205d2384ac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "bytes": 13160,
+      "sha256": "38ff1c5220d259b7e609090031219047524b80636e1450a40b28fd7898ba302f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_quest_ingress.rs",
+      "bytes": 22705,
+      "sha256": "ca0d25fd5ce014ab0e8cdaacdf8334001df1f491299d417d18fc0ab32612d5a0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+      "bytes": 76211,
+      "sha256": "62872e48f74dcfbdc746b56b65bee6aebf3dc2837be3d4fdfb85ca3d27988575"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "bytes": 368258,
+      "sha256": "ff3ed519f0087de4583e0891f24039ba16c612aee0d027886be85f9c98b67850"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+      "bytes": 9075,
+      "sha256": "25326f497aabe20bb7300b6e3cacdec21c5851b1eb957bb8fc6300279b429979"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+      "bytes": 15596,
+      "sha256": "71bdbf1637176190cb93703fc94a59af047cf8326f8f88a8093ae8e98f130495"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 33253,
+      "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+      "bytes": 123990,
+      "sha256": "470969816b029c95a8a222700510a423dcd7201e955aef27a655a6b434dc6f3d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28740,
+      "sha256": "900d5ee86bd150bab475e2b1a9f3d13437604e51c5e925a3226aeee15cfeb04a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 33137,
+      "sha256": "f166a93d7d96caeece1cf72c6c709065d9247da9fcd87d20094d949d3aece18b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+      "bytes": 21305,
+      "sha256": "3954fc6119549ea91d5855f37ba469307f24625bcdc057d9fe567ca3fe9baa18"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+      "bytes": 4558,
+      "sha256": "366d70d5735eac0112748814653a905d7101ea2b4e666a0a4b5da7ae3a2f3726"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 60074,
+      "sha256": "9017649660b5e93b912b6fba872a79c506402dd4444a6b62c2a362858b88d4ad"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+      "bytes": 5723,
+      "sha256": "de1596578856b4ffb94f29875af707258ccc52df2c35cbded479aedd8c282960"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+      "bytes": 5853,
+      "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+      "bytes": 22413,
+      "sha256": "031b9a406e0df4ac8bf588fb674a435d9cc4d8e4ad2505e3dc504cb354f18796"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/item_geometry.rs",
+      "bytes": 9207,
+      "sha256": "f30ff2524a5febc632a095b14cdb1bfaadf9f0cbb866bafc14340febd1898fce"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 75493,
+      "sha256": "61ed32636953ee7b40413901598d79696025c5488cce282b033f4edf1d21d79c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mobile_ui.rs",
+      "bytes": 91921,
+      "sha256": "a09f30d587ace87d3cbbc3eaf1c445e73d76aacc2bc112a2026f0925d7dc8d7f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_host_tests.rs",
+      "bytes": 5208,
+      "sha256": "507be77c53a8e139c73b47a02414d01545a3598dcafbfae05907baa4287f31ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_ingress.rs",
+      "bytes": 20887,
+      "sha256": "1544b4dbe37e86dddcc90b04db6b09818c02a871978f4f237d2b3d8ebb501a75"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+      "bytes": 29603,
+      "sha256": "acf81d18dd9c1b3df062cf2dc8d268e680ac358d8ff9cdd665258bd23f1b9837"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+      "bytes": 4789,
+      "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+      "bytes": 20595,
+      "sha256": "7a8a6e6734446b9d7395700694aa4e17847cf36972b9adcc319de1e28fbd64bf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+      "bytes": 10548,
+      "sha256": "230f7b9746254e8598ca99ad846c4b96b3f29a6e1945913ddef89725618510fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_host_tests.rs",
+      "bytes": 8715,
+      "sha256": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_ingress.rs",
+      "bytes": 32437,
+      "sha256": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_preview.rs",
+      "bytes": 6222,
+      "sha256": "b9640e921983930e2fb757d33c886363630c4e109cb3fdcd06e548df664ed65a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 182051,
+      "sha256": "ffc257f1fef241d25d7487f1737aee2666ca20a3dfee01940cc89b594c0dd818"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+      "bytes": 23059,
+      "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/text_input.rs",
+      "bytes": 10918,
+      "sha256": "5305f310cb666e2ca608a957c47f8161a192008d265a13bc6e0efec3f63b848b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 87749,
+      "sha256": "dfc907f0f5030f3199c787dcb085241815de8e790efa665e26f1c408705c1fe4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/world_input.rs",
+      "bytes": 5009,
+      "sha256": "b45aadb88962376b40181026009ade36019d7dc26095a19295d8e892db7fd4a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 323202,
+      "sha256": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 449445,
+      "sha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 449755,
+      "sha256": "fa05c7d9a93254a063f845c37227cbcc32239614d8ca6072d6cbfc7a1d07a2da"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 77454,
+      "sha256": "300263e1ae723fe79dc75f9e0a566e57e59cc463e1b5ea43ca981d370a3b7033"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+      "bytes": 13568,
+      "sha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+      "bytes": 27032,
+      "sha256": "3d79af27b4809a3a063f39c4c95efc1b8d37ad6a8d46691b3bfbeb3d6b80086f"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/big_map.rs",
+      "bytes": 46169,
+      "sha256": "0a1f91a1ef552b996445495cd19f16ebd33a72e4a306ff404b2fe419bca2ee97"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_item_service.rs",
+      "bytes": 42293,
+      "sha256": "e34b95362a18b833e889c07bb0817794fd9bf28c0cb0a8e30590bc72a3f65d6e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "bytes": 943864,
+      "sha256": "228883d8912ffc233eebb6acc9f103e215d56aef07c6e616308e51d12f6ba3b0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/panel_layouts.rs",
+      "bytes": 67126,
+      "sha256": "d6436a807c81b42525aa7e74b6bb6288819ed8bf4db9cdda914e2ad58a264fd8"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/widget.rs",
+      "bytes": 60408,
+      "sha256": "c7f9f40be0caf3cfc37edd5a18ff24e76a795dc5d4183b33adf6501800de54cc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/game_shop.rs",
+      "bytes": 37415,
+      "sha256": "25becf5d258dba0c25f619ffecf818db997260a9439e295ddccd432df8bd9032"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "bytes": 2769,
+      "sha256": "487cb9876fa41f01f9bf125ff630bd4bbff76d0635b35e01b83b142fcc2490bd"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "bytes": 23201,
+      "sha256": "8b45f76f8974b21f0fe8729965e89d979955eca4f8da831c4aaebb205d2384ac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "bytes": 13160,
+      "sha256": "38ff1c5220d259b7e609090031219047524b80636e1450a40b28fd7898ba302f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_quest_ingress.rs",
+      "bytes": 22705,
+      "sha256": "ca0d25fd5ce014ab0e8cdaacdf8334001df1f491299d417d18fc0ab32612d5a0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_phone.rs",
+      "bytes": 76211,
+      "sha256": "62872e48f74dcfbdc746b56b65bee6aebf3dc2837be3d4fdfb85ca3d27988575"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+      "bytes": 368258,
+      "sha256": "ff3ed519f0087de4583e0891f24039ba16c612aee0d027886be85f9c98b67850"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+      "bytes": 9075,
+      "sha256": "25326f497aabe20bb7300b6e3cacdec21c5851b1eb957bb8fc6300279b429979"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/shop.rs",
+      "bytes": 15596,
+      "sha256": "71bdbf1637176190cb93703fc94a59af047cf8326f8f88a8093ae8e98f130495"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/storage.rs",
+      "bytes": 33253,
+      "sha256": "515e0f478ce7e4d982dc301a33c6d4acca7fb704dd435e82592535e784af9ecf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/Cargo.lock",
+      "bytes": 123990,
+      "sha256": "470969816b029c95a8a222700510a423dcd7201e955aef27a655a6b434dc6f3d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/build.gradle",
+      "bytes": 28740,
+      "sha256": "900d5ee86bd150bab475e2b1a9f3d13437604e51c5e925a3226aeee15cfeb04a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "bytes": 33137,
+      "sha256": "f166a93d7d96caeece1cf72c6c709065d9247da9fcd87d20094d949d3aece18b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java",
+      "bytes": 21305,
+      "sha256": "3954fc6119549ea91d5855f37ba469307f24625bcdc057d9fe567ca3fe9baa18"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java",
+      "bytes": 4558,
+      "sha256": "366d70d5735eac0112748814653a905d7101ea2b4e666a0a4b5da7ae3a2f3726"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "bytes": 60074,
+      "sha256": "9017649660b5e93b912b6fba872a79c506402dd4444a6b62c2a362858b88d4ad"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java",
+      "bytes": 5723,
+      "sha256": "de1596578856b4ffb94f29875af707258ccc52df2c35cbded479aedd8c282960"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/build-android.sh",
+      "bytes": 5853,
+      "sha256": "37dd7f68cc6c32741fb8c3c042e44651c976fdb1b58f380e10ef452719b5342e"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/game_shop_ingress.rs",
+      "bytes": 22413,
+      "sha256": "031b9a406e0df4ac8bf588fb674a435d9cc4d8e4ad2505e3dc504cb354f18796"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/item_geometry.rs",
+      "bytes": 9207,
+      "sha256": "f30ff2524a5febc632a095b14cdb1bfaadf9f0cbb866bafc14340febd1898fce"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "bytes": 75493,
+      "sha256": "61ed32636953ee7b40413901598d79696025c5488cce282b033f4edf1d21d79c"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/mobile_ui.rs",
+      "bytes": 91921,
+      "sha256": "a09f30d587ace87d3cbbc3eaf1c445e73d76aacc2bc112a2026f0925d7dc8d7f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_host_tests.rs",
+      "bytes": 5208,
+      "sha256": "507be77c53a8e139c73b47a02414d01545a3598dcafbfae05907baa4287f31ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_ingress.rs",
+      "bytes": 20887,
+      "sha256": "1544b4dbe37e86dddcc90b04db6b09818c02a871978f4f237d2b3d8ebb501a75"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_hud.rs",
+      "bytes": 29603,
+      "sha256": "acf81d18dd9c1b3df062cf2dc8d268e680ac358d8ff9cdd665258bd23f1b9837"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_panels.rs",
+      "bytes": 4789,
+      "sha256": "b89c76d490f58faeaf3f3430b8834ef28b68970665b8286292cff68216a50041"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/phone_quests.rs",
+      "bytes": 20595,
+      "sha256": "7a8a6e6734446b9d7395700694aa4e17847cf36972b9adcc319de1e28fbd64bf"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+      "bytes": 10548,
+      "sha256": "230f7b9746254e8598ca99ad846c4b96b3f29a6e1945913ddef89725618510fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_host_tests.rs",
+      "bytes": 8715,
+      "sha256": "655e1833a89eea1caba5260aeeb07bd1750fa855776d7901bd73b2238c6449df"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_ingress.rs",
+      "bytes": 32437,
+      "sha256": "e5c3bbb99f8146d2b36c66de4bb8b788d2139b0af8e41cd19d5c8eda1c24f5fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/quest_preview.rs",
+      "bytes": 6222,
+      "sha256": "b9640e921983930e2fb757d33c886363630c4e109cb3fdcd06e548df664ed65a"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "bytes": 182051,
+      "sha256": "ffc257f1fef241d25d7487f1737aee2666ca20a3dfee01940cc89b594c0dd818"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/storage_ingress.rs",
+      "bytes": 23059,
+      "sha256": "9ee0b352d15f4faa8d6318057ddccc825626c5f8ad4b655e705bac573db9938f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/text_input.rs",
+      "bytes": 10918,
+      "sha256": "5305f310cb666e2ca608a957c47f8161a192008d265a13bc6e0efec3f63b848b"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 87749,
+      "sha256": "dfc907f0f5030f3199c787dcb085241815de8e790efa665e26f1c408705c1fe4"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/world_input.rs",
+      "bytes": 5009,
+      "sha256": "b45aadb88962376b40181026009ade36019d7dc26095a19295d8e892db7fd4a5"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gameplay_bridge.rs",
+      "bytes": 323202,
+      "sha256": "f1b7e12b4b16c34ca10b6d8f0ec4cb92baa62a0706b3f5a69d4ca5daef6589b0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "bytes": 449445,
+      "sha256": "c8fe69dcd48786ad1f35638b67520fb6312860828f7e47b9fbb2c44e761e8705"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "bytes": 449755,
+      "sha256": "fa05c7d9a93254a063f845c37227cbcc32239614d8ca6072d6cbfc7a1d07a2da"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/native_ingest.rs",
+      "bytes": 77454,
+      "sha256": "300263e1ae723fe79dc75f9e0a566e57e59cc463e1b5ea43ca981d370a3b7033"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+      "bytes": 13568,
+      "sha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055"
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+      "bytes": 27032,
+      "sha256": "3d79af27b4809a3a063f39c4c95efc1b8d37ad6a8d46691b3bfbeb3d6b80086f"
+    }
+  ],
+  "sourceUnchanged": true
+}

@@ -3381,7 +3381,12 @@ impl SimulationSession {
     }
 
     pub fn select_npc_dialog_target(&mut self, target: &str) -> Vec<ServerPacket> {
-        let object_id = self.app.world().resource::<NpcStateResource>().active_npc_dialog.as_ref()
+        let object_id = self
+            .app
+            .world()
+            .resource::<NpcStateResource>()
+            .active_npc_dialog
+            .as_ref()
             .map(|dialog| dialog.npc_object_id);
         let packets = self.select_npc_dialog_target_impl(target);
         match object_id {
@@ -3390,9 +3395,18 @@ impl SimulationSession {
         }
     }
 
-    fn finalize_journey_npc_packets(&mut self, object_id: u32, mut packets: Vec<ServerPacket>) -> Vec<ServerPacket> {
-        packets.extend(super::quests::newcomer_v2_events::observe_committed_command(
-            self.app.world_mut(), super::quests::newcomer_v2_events::CommandContext::Npc(object_id), &packets));
+    fn finalize_journey_npc_packets(
+        &mut self,
+        object_id: u32,
+        mut packets: Vec<ServerPacket>,
+    ) -> Vec<ServerPacket> {
+        packets.extend(
+            super::quests::newcomer_v2_events::observe_committed_command(
+                self.app.world_mut(),
+                super::quests::newcomer_v2_events::CommandContext::Npc(object_id),
+                &packets,
+            ),
+        );
         self.finalize_packets(packets)
     }
 

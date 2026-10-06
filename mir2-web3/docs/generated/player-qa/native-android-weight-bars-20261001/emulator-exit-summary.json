@@ -1,0 +1,91 @@
+{
+  "report": "/Users/henryliu/Library/Logs/DiagnosticReports/qemu-system-aarch64-2026-10-01-213921.ips",
+  "app": "qemu-system-aarch64",
+  "timestamp": "2026-10-01 21:39:21.00 +0800",
+  "exception": {
+    "codes": "0x0000000000000000, 0x0000000000000000",
+    "rawCodes": [
+      0,
+      0
+    ],
+    "type": "EXC_CRASH",
+    "signal": "SIGABRT"
+  },
+  "termination": {
+    "flags": 0,
+    "code": 6,
+    "namespace": "SIGNAL",
+    "indicator": "Abort trap: 6",
+    "byProc": "qemu-system-aarch64",
+    "byPid": 51730
+  },
+  "applicationSpecificInformation": {
+    "libsystem_c.dylib": [
+      "abort() called"
+    ]
+  },
+  "faultingThread": 40,
+  "frames": [
+    {
+      "symbol": "__pthread_kill",
+      "image": "libsystem_kernel.dylib"
+    },
+    {
+      "symbol": "pthread_kill",
+      "image": "libsystem_pthread.dylib"
+    },
+    {
+      "symbol": "abort",
+      "image": "libsystem_c.dylib"
+    },
+    {
+      "symbol": "std::__1::__throw_bad_function_call[abi:v15006]()",
+      "image": "qemu-system-aarch64"
+    },
+    {
+      "symbol": "void absl::lts_20240116::functional_internal::InvokeObject<grpc::internal::CallbackWithSuccessTag::Proceed(bool)::'lambda'(), void>(absl::lts_20240116::functional_internal::VoidPtr)",
+      "image": "qemu-system-aarch64"
+    },
+    {
+      "symbol": "grpc::internal::CallbackWithSuccessTag::Proceed(bool)",
+      "image": "qemu-system-aarch64"
+    },
+    {
+      "symbol": "grpc::internal::CallbackWithSuccessTag::StaticRun(grpc_completion_queue_functor*, int)",
+      "image": "qemu-system-aarch64"
+    },
+    {
+      "symbol": "void absl::lts_20240116::internal_any_invocable::RemoteInvoker<false, void, cq_end_op_for_callback(grpc_completion_queue*, void*, absl::lts_20240116::Status, void (*)(void*, grpc_cq_completion*), void*, grpc_cq_completion*, bool)::$_0&>(absl::lts_20240116::internal_any_invocable::TypeErasedState*)",
+      "image": "qemu-system-aarch64"
+    },
+    {
+      "symbol": "grpc_event_engine::experimental::SelfDeletingClosure::Run()",
+      "image": "qemu-system-aarch64"
+    },
+    {
+      "symbol": "grpc_event_engine::experimental::WorkStealingThreadPool::ThreadState::Step()",
+      "image": "qemu-system-aarch64"
+    },
+    {
+      "symbol": "grpc_event_engine::experimental::WorkStealingThreadPool::ThreadState::ThreadBody()",
+      "image": "qemu-system-aarch64"
+    },
+    {
+      "symbol": "grpc_event_engine::experimental::WorkStealingThreadPool::WorkStealingThreadPoolImpl::StartThread()::$_0::__invoke(void*)",
+      "image": "qemu-system-aarch64"
+    },
+    {
+      "symbol": "grpc_core::(anonymous namespace)::ThreadInternalsPosix::ThreadInternalsPosix(char const*, void (*)(void*), void*, bool*, grpc_core::Thread::Options const&)::'lambda'(void*)::__invoke(void*)",
+      "image": "qemu-system-aarch64"
+    },
+    {
+      "symbol": "_pthread_start",
+      "image": "libsystem_pthread.dylib"
+    },
+    {
+      "symbol": "thread_start",
+      "image": "libsystem_pthread.dylib"
+    }
+  ],
+  "uptime": 250000
+}

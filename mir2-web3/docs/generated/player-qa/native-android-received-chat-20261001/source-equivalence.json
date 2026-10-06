@@ -1,0 +1,13 @@
+{
+  "frozenWindows": "3f5e61533235921369bc13a7760b4a56b0e467e5",
+  "function": "transform_chat_line",
+  "bodyAndSignatureEquivalent": true,
+  "permittedDifferences": [
+    "public visibility",
+    "chat type namespace",
+    "formatting"
+  ],
+  "windowsHostUsesSharedImplementation": true,
+  "windowsDeviceAccepted": false,
+  "authenticatedAndroidAccepted": false
+}

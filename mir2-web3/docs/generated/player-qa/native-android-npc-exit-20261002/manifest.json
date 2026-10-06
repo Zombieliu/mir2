@@ -1,0 +1,698 @@
+{
+  "source": "545a34abb34415e61a6dd2f274f48914f0d0b698",
+  "rawArtifacts": 138,
+  "originalUncroppedPng": 7,
+  "rawBytesUnmodified": true,
+  "files": [
+    {
+      "file": "raw/v21/audit.mjs",
+      "bytes": 8595,
+      "sha256": "9b5543eaa3f5ee97e310c895c9c0e606a550011193ab5c571da035ee30e1e4ad"
+    },
+    {
+      "file": "raw/v21/build-pair.mjs",
+      "bytes": 3463,
+      "sha256": "3af20bd1fe50c54b838f9d8f933b7968b5aa6aed9c1effac660042c4000c3af8"
+    },
+    {
+      "file": "raw/v21/debug-BuildConfig.java.txt",
+      "bytes": 572,
+      "sha256": "3db4fc9a98b3aeaaf4a3a3300b0342f12f8f0f6f4a6eeaa2533f7bdb148d697c"
+    },
+    {
+      "file": "raw/v21/debug-badging.txt",
+      "bytes": 4623,
+      "sha256": "528fb8d21a0125d1a8a8f79d31eb767eaf73852408b0a04552b679cb7fd58a3f"
+    },
+    {
+      "file": "raw/v21/debug-build-end.txt",
+      "bytes": 25,
+      "sha256": "30eb80ad7140722fe2d02493ff51bde28f139025ef15be1c9f8814fc2047a618"
+    },
+    {
+      "file": "raw/v21/debug-build-start.txt",
+      "bytes": 25,
+      "sha256": "0319a5a28f00969f8f3ae41f7666dc07d796dc4ffd029d225ee08537a261f8a6"
+    },
+    {
+      "file": "raw/v21/debug-build.log",
+      "bytes": 36355,
+      "sha256": "cc8c509d004b883f2eabe72474b53d2f088bfd753dc5b2cc1c8622fb9f3b8ccb"
+    },
+    {
+      "file": "raw/v21/debug-source-after.txt",
+      "bytes": 41,
+      "sha256": "4bdbc32a3543a110e14721dc7a7777084bf5580c776683f65a9e2dde55d322ac"
+    },
+    {
+      "file": "raw/v21/debug-source-before.txt",
+      "bytes": 41,
+      "sha256": "4bdbc32a3543a110e14721dc7a7777084bf5580c776683f65a9e2dde55d322ac"
+    },
+    {
+      "file": "raw/v21/debug-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/debug-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/device/api.txt",
+      "bytes": 3,
+      "sha256": "32c2643e0dc65524c9f1f6f9f00937322fd68d59986bc381d9ff2285d23e353d"
+    },
+    {
+      "file": "raw/v21/device/avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "file": "raw/v21/device/commands.json",
+      "bytes": 9253,
+      "sha256": "a17ca767f6d0799010d5e083b71105d9e27fdebb6da14d3c95b98743f675d726"
+    },
+    {
+      "file": "raw/v21/device/debug-final-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/device/debug-install.txt",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "file": "raw/v21/device/debug-installed-path.txt",
+      "bytes": 93,
+      "sha256": "8a1216e2f439814715f355a311d92c4021b645ab80c5deae39b7211a42e5513e"
+    },
+    {
+      "file": "raw/v21/device/debug-installed-sha.txt",
+      "bytes": 151,
+      "sha256": "980516280826b9bfdcfa13fa9602b5a1569fc5c51c2920f6b62d84f207d84230"
+    },
+    {
+      "file": "raw/v21/device/debug-login-ime.txt",
+      "bytes": 289319,
+      "sha256": "ae8670ce46d48e818cb76bb25494aa7adfee06ca7fb0799476864d058750a1e5"
+    },
+    {
+      "file": "raw/v21/device/debug-login-pid.log",
+      "bytes": 31144,
+      "sha256": "9e7101ae622c6269edc2b0a9dbb23f4028574e57163b169adfa76a1001000bfb"
+    },
+    {
+      "file": "raw/v21/device/debug-login-pid.txt",
+      "bytes": 6,
+      "sha256": "155ba104b9272915f94d0a453f99b3da63f0f47f42a767dfe383af7ee735cfa8"
+    },
+    {
+      "file": "raw/v21/device/debug-login-resumed.txt",
+      "bytes": 26794,
+      "sha256": "6add2dc0360581b902e71abe7c444ad45a486492e54079c60b8b3efb60291898"
+    },
+    {
+      "file": "raw/v21/device/debug-login-start.txt",
+      "bytes": 158,
+      "sha256": "e9d817eb9c5da909a442914bfb13a306c788a70b71764c6f5b26854953b07233"
+    },
+    {
+      "file": "raw/v21/device/debug-login-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/device/debug-login-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/device/debug-login.png",
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "file": "raw/v21/device/debug-package.txt",
+      "bytes": 9276,
+      "sha256": "27acaf86282a6a16b13134d4ee76d0376658a7318f43c228f7ff34b3c7044772"
+    },
+    {
+      "file": "raw/v21/device/debug-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/device/density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "file": "raw/v21/device/display.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "file": "raw/v21/device/npc-ingress-ime.txt",
+      "bytes": 288878,
+      "sha256": "824781a47eb5b87feeada0d535d6098d2e218b0576f9ee0866435b1d4166f561"
+    },
+    {
+      "file": "raw/v21/device/npc-ingress-pid.log",
+      "bytes": 30449,
+      "sha256": "243156654a67b755f4e54b5bd505b4367fdf5ef457ab0615ca2ff716a8cdf44d"
+    },
+    {
+      "file": "raw/v21/device/npc-ingress-pid.txt",
+      "bytes": 6,
+      "sha256": "96c46fdba683a5558eb608c78086b63e2e6dcdc287480ff254db84eb0e97eb5c"
+    },
+    {
+      "file": "raw/v21/device/npc-ingress-resumed.txt",
+      "bytes": 27352,
+      "sha256": "d0418a6cb93d35f2970384358f2f7412fc982ebe3379da5efbcbe69cfc8e39a7"
+    },
+    {
+      "file": "raw/v21/device/npc-ingress-start.txt",
+      "bytes": 217,
+      "sha256": "0805c691bac700da89efe48b4998e980d0081747c6b6756b950de79dbd311148"
+    },
+    {
+      "file": "raw/v21/device/npc-ingress-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/device/npc-ingress-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/device/npc-ingress.png",
+      "bytes": 102897,
+      "sha256": "daa6a1ed0820bb6b9d606c0e4468930647152ec961b3cb0fea671c320acc60a6"
+    },
+    {
+      "file": "raw/v21/device/os.txt",
+      "bytes": 89,
+      "sha256": "9e2f1f3d18da07932a4b18c12a1ec39c77234bf650bfd4f821ca991c4c0a90c8"
+    },
+    {
+      "file": "raw/v21/device/preview-final-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/device/preview-install.txt",
+      "bytes": 36,
+      "sha256": "781a31c82430c97897af612ece5e0ca2205e301cb5ff121ce2660541ea5182c7"
+    },
+    {
+      "file": "raw/v21/device/preview-installed-path.txt",
+      "bytes": 103,
+      "sha256": "39c00f931774ac6e4770dcfce0dda6cc776888d381153ccf4b3c140093131e11"
+    },
+    {
+      "file": "raw/v21/device/preview-installed-sha.txt",
+      "bytes": 161,
+      "sha256": "518779f28dc3637fa36e7e93657a15289b095f0fe5894fbca64609d227e50973"
+    },
+    {
+      "file": "raw/v21/device/preview-package.txt",
+      "bytes": 9566,
+      "sha256": "9581d0026df2cb2881844054167aa2760f4b48c059aa2ff8986d9331dc0f0680"
+    },
+    {
+      "file": "raw/v21/device/preview-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/final-source/Debug-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "fcc090027236ea0bec2d81d6538a89edf4608bb87de319811e461ccd192eaa57"
+    },
+    {
+      "file": "raw/v21/final-source/Debug-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "7cc8e098a6d2a81169433acf80f030ccc7544d4ad7cb460a2e16a5073fcb3db7"
+    },
+    {
+      "file": "raw/v21/final-source/Debug-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "90e4e2edc63da8df4a1898ac079bd5bcc76934576908bb0f3d07f1cd46e1ac00"
+    },
+    {
+      "file": "raw/v21/final-source/Debug-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3623,
+      "sha256": "b5fbb3818db61b0aeee72ee488f000e0d20b005fa47b075d3b5fb9b8f536df00"
+    },
+    {
+      "file": "raw/v21/final-source/Debug-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "d2f68a21fc2e2ca18b52561f160d25ad9fd04939ac51141d26b7d2afedae1a5a"
+    },
+    {
+      "file": "raw/v21/final-source/UiPreview-TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 967,
+      "sha256": "8abc8733361254d220dc7b501b5fc37dffe582209824227857cd3054f8b0acb6"
+    },
+    {
+      "file": "raw/v21/final-source/UiPreview-TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "3b345d34c2a609ce8153c291afa2f240d8bb6dcd936f945edc36d56764b20357"
+    },
+    {
+      "file": "raw/v21/final-source/UiPreview-TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 856,
+      "sha256": "95849a8a196935335235c739d866c87dc2006d128d8059fa44721dc0200277ac"
+    },
+    {
+      "file": "raw/v21/final-source/UiPreview-TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3622,
+      "sha256": "f0df352b1e1a29a02074c244b868fe20e0cce2432204fa0d8c80b455d3e75e9d"
+    },
+    {
+      "file": "raw/v21/final-source/UiPreview-TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "7eb9304925e8c70857e038b7039b8cb4355435fe6282ffea50be9888239eb9af"
+    },
+    {
+      "file": "raw/v21/final-source/android-normal-final.log",
+      "bytes": 71003,
+      "sha256": "8723e62c3e159b2392e520ecf9ef61b70ec0ba3fdc44a029b5f49cde2c21e221"
+    },
+    {
+      "file": "raw/v21/final-source/android-preview-final.log",
+      "bytes": 75601,
+      "sha256": "480795a0614cb30ae6125df9f1661030d8d5157acda49122ee8786660adafc10"
+    },
+    {
+      "file": "raw/v21/final-source/api31-debug.log",
+      "bytes": 33254,
+      "sha256": "4f486c9a963ca066492ca0aab4f4638675ede0c3bc3afca0f99d6b53c8ebdf0c"
+    },
+    {
+      "file": "raw/v21/final-source/api31-uiPreview.log",
+      "bytes": 33409,
+      "sha256": "d25d003b8e23940b3240f2b0d8443ad889accda9cf3a768e0c256986926b2b4a"
+    },
+    {
+      "file": "raw/v21/final-source/gate-commands.json",
+      "bytes": 52391,
+      "sha256": "8c6514049fb236808d2694fa933408a541e3cb90db5331f2fafc05197762b9c3"
+    },
+    {
+      "file": "raw/v21/final-source/java-fresh.log",
+      "bytes": 3149,
+      "sha256": "8b7b910e6a7a01b679f9fefa0549f32279d710260c89685d799182bf3621ec60"
+    },
+    {
+      "file": "raw/v21/final-source/java-results.json",
+      "bytes": 2479,
+      "sha256": "18be4e39bb782137274da6cb1992a80c909e20977c91a36d9a40e6750884ec63"
+    },
+    {
+      "file": "raw/v21/final-source/java-xml/Debug/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "fcc090027236ea0bec2d81d6538a89edf4608bb87de319811e461ccd192eaa57"
+    },
+    {
+      "file": "raw/v21/final-source/java-xml/Debug/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "7cc8e098a6d2a81169433acf80f030ccc7544d4ad7cb460a2e16a5073fcb3db7"
+    },
+    {
+      "file": "raw/v21/final-source/java-xml/Debug/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "90e4e2edc63da8df4a1898ac079bd5bcc76934576908bb0f3d07f1cd46e1ac00"
+    },
+    {
+      "file": "raw/v21/final-source/java-xml/Debug/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3623,
+      "sha256": "b5fbb3818db61b0aeee72ee488f000e0d20b005fa47b075d3b5fb9b8f536df00"
+    },
+    {
+      "file": "raw/v21/final-source/java-xml/Debug/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "d2f68a21fc2e2ca18b52561f160d25ad9fd04939ac51141d26b7d2afedae1a5a"
+    },
+    {
+      "file": "raw/v21/final-source/java-xml/UiPreview/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 967,
+      "sha256": "8abc8733361254d220dc7b501b5fc37dffe582209824227857cd3054f8b0acb6"
+    },
+    {
+      "file": "raw/v21/final-source/java-xml/UiPreview/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "3b345d34c2a609ce8153c291afa2f240d8bb6dcd936f945edc36d56764b20357"
+    },
+    {
+      "file": "raw/v21/final-source/java-xml/UiPreview/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 856,
+      "sha256": "95849a8a196935335235c739d866c87dc2006d128d8059fa44721dc0200277ac"
+    },
+    {
+      "file": "raw/v21/final-source/java-xml/UiPreview/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3622,
+      "sha256": "f0df352b1e1a29a02074c244b868fe20e0cce2432204fa0d8c80b455d3e75e9d"
+    },
+    {
+      "file": "raw/v21/final-source/java-xml/UiPreview/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "7eb9304925e8c70857e038b7039b8cb4355435fe6282ffea50be9888239eb9af"
+    },
+    {
+      "file": "raw/v21/focused.mjs",
+      "bytes": 948,
+      "sha256": "1652f78ede7dc96d9078568013097a78f52b6eca388d274a8e9bfa21f26467bf"
+    },
+    {
+      "file": "raw/v21/guard-green.log",
+      "bytes": 43087,
+      "sha256": "8d52ac3e55b02cc694a2287160e4b79d38d29ee33bd7276c7de478c009a511d2"
+    },
+    {
+      "file": "raw/v21/guard-red.log",
+      "bytes": 43705,
+      "sha256": "6d617d8b5211b314a2ecef327c10babf9c2142516d00e460764f26d58a3fb687"
+    },
+    {
+      "file": "raw/v21/install-capture.mjs",
+      "bytes": 4540,
+      "sha256": "8e0b3d002ebea59badb4182b902c99ee363708ee97d4fe1aceed797f9c0e4b74"
+    },
+    {
+      "file": "raw/v21/menu-capture.mjs",
+      "bytes": 4268,
+      "sha256": "bbf58a6e79ed1b7aead0e2802766e8b5e7f72bd786c89f95e8652632c63a118f"
+    },
+    {
+      "file": "raw/v21/menu-device/api.txt",
+      "bytes": 3,
+      "sha256": "32c2643e0dc65524c9f1f6f9f00937322fd68d59986bc381d9ff2285d23e353d"
+    },
+    {
+      "file": "raw/v21/menu-device/avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "file": "raw/v21/menu-device/commands.json",
+      "bytes": 4370,
+      "sha256": "3d46911318a47f87c6068d26e30efca7a0476878e639aab53073ae5f97e868ff"
+    },
+    {
+      "file": "raw/v21/menu-device/debug-final-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/menu-device/density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "file": "raw/v21/menu-device/display.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "file": "raw/v21/menu-device/installed-apk-sha256.txt",
+      "bytes": 161,
+      "sha256": "518779f28dc3637fa36e7e93657a15289b095f0fe5894fbca64609d227e50973"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-after-pid.log",
+      "bytes": 31952,
+      "sha256": "7912e9d9c6a0eda7fca3b4628ca062a89cc74c8f71d59f5cb1f471a568f4a8f4"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-after.png",
+      "bytes": 87716,
+      "sha256": "ef405ca05c6cfc2756ec1eb283b119cba51a5344977284489ecae178fdc9aea0"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-before-pid.log",
+      "bytes": 30340,
+      "sha256": "d05007ae8a484b8642fbd10c30d7a218df3535662ac8a273713388e779760ca2"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-before.png",
+      "bytes": 102897,
+      "sha256": "daa6a1ed0820bb6b9d606c0e4468930647152ec961b3cb0fea671c320acc60a6"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-ime.txt",
+      "bytes": 289281,
+      "sha256": "59f9c0ea76d609987f1b4014c162d3471ed5d4465fa91e227061c20f41334dc6"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-menu-pid.log",
+      "bytes": 32170,
+      "sha256": "9fcea4d5f3ca653beb1da1c4ca251b80a6f41ce3ac5320aa82cb3b9863c2e843"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-menu-tap.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-menu.png",
+      "bytes": 85352,
+      "sha256": "98b3ce20f13b0c51a3dcbc0d15335c563e14d9cafd48a1a73866921ffbaa7b07"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-pid.txt",
+      "bytes": 6,
+      "sha256": "e49bfa91d51a11f41122aa072e8e8630c47bca77d5505e5bedb8f8a6f11dd7a9"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-resumed.txt",
+      "bytes": 27354,
+      "sha256": "45bd7f104b890cd62e31fda85276570aa542f1c490644526d3bc92a22d9dfd1c"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-start.txt",
+      "bytes": 217,
+      "sha256": "d844005499dc56803689a3b65bc72c55900c729674ca00c69338437e979aec8d"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/menu-device/npc-ingress-tap.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/menu-device/os.txt",
+      "bytes": 89,
+      "sha256": "9e2f1f3d18da07932a4b18c12a1ec39c77234bf650bfd4f821ca991c4c0a90c8"
+    },
+    {
+      "file": "raw/v21/menu-device/package-path.txt",
+      "bytes": 103,
+      "sha256": "39c00f931774ac6e4770dcfce0dda6cc776888d381153ccf4b3c140093131e11"
+    },
+    {
+      "file": "raw/v21/menu-device/package.txt",
+      "bytes": 10038,
+      "sha256": "112a580d4e169d4e1a156ec03bc729ee0b72a0ccfae125c61a7a8387ecc4722d"
+    },
+    {
+      "file": "raw/v21/menu-device/preview-final-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/package-v21.json",
+      "bytes": 3849,
+      "sha256": "24a3c06063d4882b950822ee7840d6af02ba68a6de6ad81df99d63090eb6836a"
+    },
+    {
+      "file": "raw/v21/preview-BuildConfig.java.txt",
+      "bytes": 589,
+      "sha256": "e690766af27a14516b0a4077848ae46e1843f02f67c6c1ed1503197dc12bd5f2"
+    },
+    {
+      "file": "raw/v21/preview-badging.txt",
+      "bytes": 4643,
+      "sha256": "5b7d3aa21d04fe938d6814ea0d85d259a1d9ae0016ae1c4df8a33069aee73891"
+    },
+    {
+      "file": "raw/v21/preview-build-end.txt",
+      "bytes": 25,
+      "sha256": "a7fd906144c65cccc2939849a4694ecbbdc519147dbae76d90018bb1ecff7795"
+    },
+    {
+      "file": "raw/v21/preview-build-start.txt",
+      "bytes": 25,
+      "sha256": "f6783e908feca0cd96dc458e1f586c4429b941f2f72429c9294f9711fae0eb84"
+    },
+    {
+      "file": "raw/v21/preview-build.log",
+      "bytes": 36642,
+      "sha256": "5e4ca2b1b6c6e2213d0f13642f2df898d11fcb5a6be68fd93153ea19ef564eec"
+    },
+    {
+      "file": "raw/v21/preview-source-after.txt",
+      "bytes": 41,
+      "sha256": "4bdbc32a3543a110e14721dc7a7777084bf5580c776683f65a9e2dde55d322ac"
+    },
+    {
+      "file": "raw/v21/preview-source-before.txt",
+      "bytes": 41,
+      "sha256": "4bdbc32a3543a110e14721dc7a7777084bf5580c776683f65a9e2dde55d322ac"
+    },
+    {
+      "file": "raw/v21/preview-status-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/preview-status-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/run-gates.mjs",
+      "bytes": 4575,
+      "sha256": "4c5c992ef9cf4d3470549a61531591a61afe1078271b3158dfe841ed354f903b"
+    },
+    {
+      "file": "raw/v21/runner-setup.json",
+      "bytes": 386,
+      "sha256": "9bc1f7dda0dd56cffd819590bec566c14399f57597fa861fba65a72410293f52"
+    },
+    {
+      "file": "raw/v21/source-v21.json",
+      "bytes": 9381,
+      "sha256": "a95231c634a5ee6eefae06e8c4566459d812803060e403453309a22e9070f868"
+    },
+    {
+      "file": "raw/v21/tap-capture.mjs",
+      "bytes": 3962,
+      "sha256": "05f45e507fda0bb6d9309f5025bae30c7a661d5c557bd6c46825810c8829c7d1"
+    },
+    {
+      "file": "raw/v21/touch-device/api.txt",
+      "bytes": 3,
+      "sha256": "32c2643e0dc65524c9f1f6f9f00937322fd68d59986bc381d9ff2285d23e353d"
+    },
+    {
+      "file": "raw/v21/touch-device/avd.txt",
+      "bytes": 23,
+      "sha256": "d73e12062cbe798374974df50cc61aea3afbaf08d77178cf8261af6790e11a45"
+    },
+    {
+      "file": "raw/v21/touch-device/commands.json",
+      "bytes": 3807,
+      "sha256": "a7a32f973761024dc696f23214ffcabe744bb7058dac7a09a1ddb158ab0ca62e"
+    },
+    {
+      "file": "raw/v21/touch-device/debug-final-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/touch-device/density.txt",
+      "bytes": 22,
+      "sha256": "448625c98610cd07d5e2977bb109d644607a63f097e3c390e91c7542f4056a73"
+    },
+    {
+      "file": "raw/v21/touch-device/display.txt",
+      "bytes": 25,
+      "sha256": "6a0d024ac988d4a822eecf8a50b478c72d7cf549940628bab00f68ba14c5b4fe"
+    },
+    {
+      "file": "raw/v21/touch-device/installed-apk-sha256.txt",
+      "bytes": 161,
+      "sha256": "518779f28dc3637fa36e7e93657a15289b095f0fe5894fbca64609d227e50973"
+    },
+    {
+      "file": "raw/v21/touch-device/npc-ingress-after-pid.log",
+      "bytes": 32401,
+      "sha256": "afb775a8433eae036aba42511da5e5d250f5b0aafa75c5eee66a8d770da7adb9"
+    },
+    {
+      "file": "raw/v21/touch-device/npc-ingress-after.png",
+      "bytes": 87716,
+      "sha256": "ef405ca05c6cfc2756ec1eb283b119cba51a5344977284489ecae178fdc9aea0"
+    },
+    {
+      "file": "raw/v21/touch-device/npc-ingress-before-pid.log",
+      "bytes": 30884,
+      "sha256": "0921bea6eb30797080702bf6dadc1933dceacad860eed532a51c0ad34cc15ce2"
+    },
+    {
+      "file": "raw/v21/touch-device/npc-ingress-before.png",
+      "bytes": 102897,
+      "sha256": "daa6a1ed0820bb6b9d606c0e4468930647152ec961b3cb0fea671c320acc60a6"
+    },
+    {
+      "file": "raw/v21/touch-device/npc-ingress-ime.txt",
+      "bytes": 289357,
+      "sha256": "321781e5cd84946c76fe7816096d9d9542f0146bb11d4c12f9644f3a114aa70a"
+    },
+    {
+      "file": "raw/v21/touch-device/npc-ingress-pid.txt",
+      "bytes": 6,
+      "sha256": "78c8ae448e8a05fdd7862cf41373f2c70d51ce21823e3a77b9b29f7e0e47700a"
+    },
+    {
+      "file": "raw/v21/touch-device/npc-ingress-resumed.txt",
+      "bytes": 27355,
+      "sha256": "b31a81543353ded0b7d0c075438f164c2ffe90dd5856d5a89938ddd0a97cc8a1"
+    },
+    {
+      "file": "raw/v21/touch-device/npc-ingress-start.txt",
+      "bytes": 217,
+      "sha256": "7c027ff3eb870bbd2417f77ee3e0c3aed3576491e80d49238721db1f3cbfb9f8"
+    },
+    {
+      "file": "raw/v21/touch-device/npc-ingress-stop-after.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/touch-device/npc-ingress-stop-before.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/touch-device/npc-ingress-tap.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": "raw/v21/touch-device/os.txt",
+      "bytes": 89,
+      "sha256": "9e2f1f3d18da07932a4b18c12a1ec39c77234bf650bfd4f821ca991c4c0a90c8"
+    },
+    {
+      "file": "raw/v21/touch-device/package-path.txt",
+      "bytes": 103,
+      "sha256": "39c00f931774ac6e4770dcfce0dda6cc776888d381153ccf4b3c140093131e11"
+    },
+    {
+      "file": "raw/v21/touch-device/package.txt",
+      "bytes": 10039,
+      "sha256": "c892441ad6b3bc6b8f08f993187ed893227c00bb7ea972db79dee6087c9934a2"
+    },
+    {
+      "file": "raw/v21/touch-device/preview-final-stop.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ]
+}

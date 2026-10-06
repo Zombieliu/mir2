@@ -1,0 +1,22 @@
+{
+  "source": "92033b910cc9ddd996c416ec4024af4625e78b31",
+  "baseline": "277ab0a6566b5241c418844e5366865547cd03e0",
+  "files": [
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/view/window/mod.rs",
+      "sourceSha256": "3d79af27b4809a3a063f39c4c95efc1b8d37ad6a8d46691b3bfbeb3d6b80086f",
+      "publishedBaselineSha256": "3d79af27b4809a3a063f39c4c95efc1b8d37ad6a8d46691b3bfbeb3d6b80086f",
+      "sameBytes": true
+    },
+    {
+      "path": "mir2-web3/third_party/bevy_render/src/renderer/mod.rs",
+      "sourceSha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055",
+      "publishedBaselineSha256": "59a4dbad8f6d75a0bae4e59e681eefb4acc116926b0603511dd8beee230d8055",
+      "sameBytes": true
+    }
+  ],
+  "gameRenderFixImplemented": false,
+  "zeroErrorRendererAccepted": false,
+  "priorV30Gl506": 38,
+  "noNewRenderMeasurement": true
+}

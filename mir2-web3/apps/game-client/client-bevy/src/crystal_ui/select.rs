@@ -6,17 +6,17 @@
 
 use bevy::prelude::*;
 use bevy::text::LineBreak;
-use bevy::ui::{Node, PositionType, Val, widget::NodeImageMode};
+use bevy::ui::{widget::NodeImageMode, Node, PositionType, Val};
 use chrono::{DateTime, Local, Utc};
 
 use crate::native_i18n;
 use crate::native_shell::{CharacterSummary, NativeShellModel};
 
-use super::assets::{CrystalButtonAssetSet, frame_asset_path};
-use super::overlays::CrystalAdditiveUiMaterial;
-use super::preview_data::{PreviewFrame, preview_frames, preview_overlay_frames};
-use super::spec::{CrystalFrameSpec, CrystalRect, character_select as spec};
-use super::typography::{CRYSTAL_DEFAULT_FONT_SIZE_PX, crystal_text_font};
+use super::additive_ui::CrystalAdditiveUiMaterial;
+use super::assets::{frame_asset_path, CrystalButtonAssetSet};
+use super::preview_data::{preview_frames, preview_overlay_frames, PreviewFrame};
+use super::spec::{character_select as spec, CrystalFrameSpec, CrystalRect};
+use super::typography::{crystal_text_font, CRYSTAL_DEFAULT_FONT_SIZE_PX};
 use super::widget::spawn_crystal_image_button;
 
 const WHITE: Color = Color::WHITE;
@@ -603,7 +603,10 @@ pub(crate) fn preview_render_state_for_tests(world: &mut World) -> Vec<serde_jso
     )>();
     let asset_server = world.resource::<AssetServer>();
     let Some(materials) = world.get_resource::<CrystalPreviewMaterials>() else {
-        assert!(query.iter(world).next().is_none(), "preview entities require their material cache");
+        assert!(
+            query.iter(world).next().is_none(),
+            "preview entities require their material cache"
+        );
         return Vec::new();
     };
     let pixels = |value| match value {
@@ -645,6 +648,11 @@ fn frame_for_set(frame_set_base: u16, frame: usize) -> PreviewFrame {
         .expect("spawned Crystal preview frame set must have source metadata")[frame]
 }
 
+#[cfg(test)]
+fn preview_rect(frame: PreviewFrame) -> CrystalRect {
+    preview_rect_at(spec::PREVIEW_ANCHOR, frame)
+}
+
 fn preview_rect_at(anchor: (f32, f32), frame: PreviewFrame) -> CrystalRect {
     CrystalRect::new(
         anchor.0 + frame.x,
@@ -652,6 +660,21 @@ fn preview_rect_at(anchor: (f32, f32), frame: PreviewFrame) -> CrystalRect {
         frame.width,
         frame.height,
     )
+}
+
+#[cfg(test)]
+#[test]
+fn creation_preview_uses_source_offset_and_stays_above_buttons() {
+    for base in [20, 300, 40, 320, 60, 340] {
+        for frame in preview_frames(base).unwrap() {
+            let rect = preview_rect_at((338.0, 404.0), *frame);
+            assert!(
+                rect.top + rect.height <= 579.0,
+                "base {base} covers Create button"
+            );
+            assert_eq!(rect.left, 338.0 + frame.x);
+        }
+    }
 }
 
 fn format_last_access(binary_datetime: i64) -> String {
@@ -891,14 +914,12 @@ mod tests {
             redrawn.animation.as_ref().unwrap().elapsed().as_millis(),
             110
         );
-        assert!(
-            redrawn
-                .animation
-                .as_mut()
-                .unwrap()
-                .tick(std::time::Duration::from_millis(140))
-                .just_finished()
-        );
+        assert!(redrawn
+            .animation
+            .as_mut()
+            .unwrap()
+            .tick(std::time::Duration::from_millis(140))
+            .just_finished());
         for (base, anchor) in [
             (320, (338.0, 404.0)),
             (20, (338.0, 404.0)),

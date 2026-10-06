@@ -1,0 +1,12 @@
+09-12 04:48:13.774 20364 20394 I event src/ui_preview.rs:201: ANDROID_WORLD_RENDER_READYrequest_id = 18446744073709551615; center_x = 302; center_y = 634; map_tiles = 849; entities = 5; entity_layers = 8;
+09-12 04:48:13.774 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:13.773992Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_WORLD_RENDER_READY [3mrequest_id[0m[2m=[0m18446744073709551615 [3mcenter_x[0m[2m=[0m302 [3mcenter_y[0m[2m=[0m634 [3mmap_tiles[0m[2m=[0m849 [3mentities[0m[2m=[0m5 [3mentity_layers[0m[2m=[0m8
+09-12 04:48:14.104 20364 20393 I event src/shared_shell.rs:1089: ANDROID_EFFECT_RENDER_STATE_READYeffect_count = 2;
+09-12 04:48:14.104 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:14.104287Z[0m [32m INFO[0m [2mmir2_platform_android::shared_shell[0m[2m:[0m ANDROID_EFFECT_RENDER_STATE_READY [3meffect_count[0m[2m=[0m2
+09-12 04:48:15.485 20364 20393 I event src/ui_preview.rs:98: ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED
+09-12 04:48:15.485 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:15.485334Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_PRESENTATION_STARTED
+09-12 04:48:15.487 20364 20393 I event src/ui_preview.rs:113: ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED
+09-12 04:48:15.487 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:15.487329Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_ASSASSIN_ATTACK_PRESENTATION_STARTED
+09-12 04:48:16.144 20364 20390 I event src/ui_preview.rs:145: ANDROID_REMOTE_BACKSTEP_POSE_ACTIVEoffset_x = 84.0; offset_y = 0.0;
+09-12 04:48:16.145 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:16.144111Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_POSE_ACTIVE [3moffset_x[0m[2m=[0m84.0 [3moffset_y[0m[2m=[0m0.0
+09-12 04:48:17.631 20364 20390 I event src/ui_preview.rs:152: ANDROID_REMOTE_BACKSTEP_POSE_SETTLED
+09-12 04:48:17.635 20364 20389 I RustStdoutStderr: [2m2026-09-11T20:48:17.631594Z[0m [32m INFO[0m [2mmir2_platform_android::ui_preview[0m[2m:[0m ANDROID_REMOTE_BACKSTEP_POSE_SETTLED

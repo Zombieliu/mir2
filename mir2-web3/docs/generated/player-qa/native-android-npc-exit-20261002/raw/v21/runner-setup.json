@@ -1,0 +1,12 @@
+{
+  "kind": "Runner setup, not product/compiler gate",
+  "error": "SyntaxError: Unexpected token return",
+  "cause": "Accidental leading plus in an incomplete transient template generator",
+  "sourceChangesAlreadyApplied": [
+    "Android preview panel guard fix",
+    "v21 Gradle version"
+  ],
+  "gateStarted": false,
+  "templateFilesWritten": false,
+  "correctedBeforeAnyGate": true
+}

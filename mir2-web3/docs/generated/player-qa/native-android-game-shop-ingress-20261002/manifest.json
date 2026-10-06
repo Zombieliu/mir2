@@ -1,0 +1,420 @@
+{
+  "source": "92033b910cc9ddd996c416ec4024af4625e78b31",
+  "payloads": [
+    {
+      "path": "diagnosis.json",
+      "bytes": 1389,
+      "sha256": "50e125ad74f76b065f2c4c88b695a74b91e3bb90154f98af6c265717bb675a87"
+    },
+    {
+      "path": "raw/android-api31-normal-correct-cwd-result.json",
+      "bytes": 402,
+      "sha256": "e1ffad9c16d6cb310150e0aa69d3b83acd57a5df8831db29a9d9aa1b046376f4"
+    },
+    {
+      "path": "raw/android-api31-normal-correct-cwd.log",
+      "bytes": 34393,
+      "sha256": "005864f3b2a5e589987777016573d6cf0fcaf6a22f2e2ff2a1dd832921d44260"
+    },
+    {
+      "path": "raw/android-api31-normal-result.json",
+      "bytes": 375,
+      "sha256": "74b2ea7d9ff1d789e1e2d030ad4419662b8ee2ecb3acb3f6a55bb7a87de2f95e"
+    },
+    {
+      "path": "raw/android-api31-normal.log",
+      "bytes": 228,
+      "sha256": "238262ad902f8c635268cfbee780dd7e1c205cd460d3df64a1df91dfc896ddce"
+    },
+    {
+      "path": "raw/android-api31-preview-correct-cwd-result.json",
+      "bytes": 439,
+      "sha256": "e7a1b10bf7a72828d15d34ca7b2420103a0a489e3a6b54666fe95a46251dfbc9"
+    },
+    {
+      "path": "raw/android-api31-preview-correct-cwd.log",
+      "bytes": 34023,
+      "sha256": "09f6f0dcee4004193d769147d25adb8d614b54b798c56329cd91f3da72143da6"
+    },
+    {
+      "path": "raw/baseline.json",
+      "bytes": 3183,
+      "sha256": "73c69606d97be2a41b6a0aa1399372893a86dbf264b09b4bb8deca4c2068bf7b"
+    },
+    {
+      "path": "raw/bound-api31-normal-result.json",
+      "bytes": 3070,
+      "sha256": "ad171d31d37c9d72b00bb2f4d381971c63918363582687941c8d83a7ba089167"
+    },
+    {
+      "path": "raw/bound-api31-normal.log",
+      "bytes": 34393,
+      "sha256": "f839817a5c34bcadfd03e163d13bd666ac5f938e20a941a80aa5d4daebfba85e"
+    },
+    {
+      "path": "raw/bound-api31-preview-result.json",
+      "bytes": 3107,
+      "sha256": "7dd1bbead7a07bffa58d842c575e612ce2a0f0e69f8279eed1dae14dd2a45f04"
+    },
+    {
+      "path": "raw/bound-api31-preview.log",
+      "bytes": 34023,
+      "sha256": "f91dacf079b400f93ddaa8d4fb1d8b99b56e848868995c6003d6754d9c9e7fe6"
+    },
+    {
+      "path": "raw/bound-java-debug/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "ee968b8e53273e19e7ddb956a0a392db151891c47a9dbcb65d3be9042b98c1f1"
+    },
+    {
+      "path": "raw/bound-java-debug/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 871,
+      "sha256": "787c798d35a5a176dd016d4a411366e493337886c2e9af785f6d1fa00ee82bca"
+    },
+    {
+      "path": "raw/bound-java-debug/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 854,
+      "sha256": "47c33feeb6004559a31a61135ab1caa87df44cf41d2c6b0ea17033a9d3137842"
+    },
+    {
+      "path": "raw/bound-java-debug/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4043,
+      "sha256": "97d0d88b008f09fd23c03c040d12b6d4b396711d5612f6c6b9f28e8bce2ac082"
+    },
+    {
+      "path": "raw/bound-java-debug/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "baf7ee8874cb9314fae915f12cc2ccc3ad7b1e9e45133bf4ea82babdd026364f"
+    },
+    {
+      "path": "raw/bound-java-full-result.json",
+      "bytes": 3097,
+      "sha256": "9f3b5c4f011e7430b0e57b3f4d15f999456bc14f7f628320d70441d6dd3cb8a9"
+    },
+    {
+      "path": "raw/bound-java-full.log",
+      "bytes": 2867,
+      "sha256": "0967cd047bc4bed7e276e40370ffff50929382cc9f0285d31fbc22f7b2233643"
+    },
+    {
+      "path": "raw/bound-java-preview/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 963,
+      "sha256": "3e16b778351f94d8ce7ce6e28abf456b25c5235708cafc86b837df273c79aa5f"
+    },
+    {
+      "path": "raw/bound-java-preview/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 871,
+      "sha256": "6622df90a03526cac94a2d89150906a480e4cc20b547a86be0c8a7448194d79c"
+    },
+    {
+      "path": "raw/bound-java-preview/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "e24c02c5ddf454331fc051d6c9a9c07a927e69727848a5426a428769a573c390"
+    },
+    {
+      "path": "raw/bound-java-preview/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4040,
+      "sha256": "36eae97e4382ae5eae80586f60a089062e56403a4febe96f24bead2c588003b0"
+    },
+    {
+      "path": "raw/bound-java-preview/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "b8c028d6fd4ded524492629ce2a062fac80ac8df640c7c778a73825c9446b18b"
+    },
+    {
+      "path": "raw/bound-runtime-result.json",
+      "bytes": 3064,
+      "sha256": "b26cec76e4a1e69beea53efc10ac7505c882bc8e164a1a37d684830e861507db"
+    },
+    {
+      "path": "raw/bound-runtime.log",
+      "bytes": 27145,
+      "sha256": "023f96f995b9e14001c9178528091edb35599a62994310bad30de89758d44878"
+    },
+    {
+      "path": "raw/bound-rust-normal-result.json",
+      "bytes": 3077,
+      "sha256": "caf5ba31c3e8a7333b0e037031959e5c4ccbeafb2a8de0520722ae996eea0fed"
+    },
+    {
+      "path": "raw/bound-rust-normal.log",
+      "bytes": 73563,
+      "sha256": "6968da6eadc485c257dab4e9bfeb48b0609dd6f986a9750d36893da6e804dba0"
+    },
+    {
+      "path": "raw/bound-rust-preview-result.json",
+      "bytes": 3114,
+      "sha256": "9aa1a9ec7c6dacc31a02fec5b5dc204df2042bd8c59a508e14f4e857367ab7a8"
+    },
+    {
+      "path": "raw/bound-rust-preview.log",
+      "bytes": 78376,
+      "sha256": "06cf21fd73be6cbb6d5cf394f15468983bcd710bcebd2e5fd97829d2ebec78ae"
+    },
+    {
+      "path": "raw/bound-shared-native-player-result.json",
+      "bytes": 3123,
+      "sha256": "9f6399ba9b6425922299582b7a216adb9e76e3760480b6194cc6a7df118b3158"
+    },
+    {
+      "path": "raw/bound-shared-native-player.log",
+      "bytes": 155655,
+      "sha256": "b72e9f2c420034e441680ff8089c8e6b59c84b2116c250d84f2c20d6b24365ff"
+    },
+    {
+      "path": "raw/connected-devices.txt",
+      "bytes": 147,
+      "sha256": "e8fe6f96c101382176c616dba8f9ce8e63405777dd1e7e953e586371e2a0e9e6"
+    },
+    {
+      "path": "raw/failure-classification.json",
+      "bytes": 677,
+      "sha256": "93765ec144128c127f444484bbeb7b84d6949300fa1851056355081eb6c26734"
+    },
+    {
+      "path": "raw/final-source-boundary-audit.json",
+      "bytes": 2881,
+      "sha256": "5795335cefac1d08467bef1f500befc72b90288c8bf0a57611d27898719efe09"
+    },
+    {
+      "path": "raw/java-final-debug.xml",
+      "bytes": 4042,
+      "sha256": "4ae025b1541b920692bf3a8e3335f43e0d97c0491426678a2512d1a2403ced35"
+    },
+    {
+      "path": "raw/java-final-full-debug/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 963,
+      "sha256": "40ac84e7f4a90f072c2c1b461b8e3f4fe6199a0a92ca5e4c4ff1e765398e980c"
+    },
+    {
+      "path": "raw/java-final-full-debug/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 871,
+      "sha256": "cdb256277bd44a398c846d2c141892a7cdfe2feeea2c0f8b21c60b7e3794d3e8"
+    },
+    {
+      "path": "raw/java-final-full-debug/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "3de07162716678377a68336288802193ae09bcee587f47a9d5fb035f63cbf136"
+    },
+    {
+      "path": "raw/java-final-full-debug/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4042,
+      "sha256": "4ae025b1541b920692bf3a8e3335f43e0d97c0491426678a2512d1a2403ced35"
+    },
+    {
+      "path": "raw/java-final-full-debug/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "bdd60634bdae169dfcc721967bdc6f93d057b68d29f73b59feb24a980df2e55e"
+    },
+    {
+      "path": "raw/java-final-full-preview/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 967,
+      "sha256": "f254cbb088b9e0c547d76c8a67b87bc54763aeb5b1588e7bb66d14990c337c1a"
+    },
+    {
+      "path": "raw/java-final-full-preview/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 871,
+      "sha256": "504fe5cb54c258c5e6b314b4fe0c66bf926472b6342a0da02f330956094da0f5"
+    },
+    {
+      "path": "raw/java-final-full-preview/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 856,
+      "sha256": "45538c9439603ebcf8ec7c289b8197de35b2c7b3ad42a2c1c6f5ffcbe0117457"
+    },
+    {
+      "path": "raw/java-final-full-preview/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 4042,
+      "sha256": "0b039e602888b6d2be5dd6a6f9f74f670f0914fb64e78c64990d7cc3d02819e6"
+    },
+    {
+      "path": "raw/java-final-full-preview/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "e63fb76e83593ead200f9d93a2b05d43dd5a361c49e440b5de4d00c93b3e0fa8"
+    },
+    {
+      "path": "raw/java-final-preview.xml",
+      "bytes": 4042,
+      "sha256": "0b039e602888b6d2be5dd6a6f9f74f670f0914fb64e78c64990d7cc3d02819e6"
+    },
+    {
+      "path": "raw/java-green-debug.xml",
+      "bytes": 3896,
+      "sha256": "8571d6cfe352b7ce0e235ea27fd361f3c3e5dca6fbee310c91192df5080c8743"
+    },
+    {
+      "path": "raw/java-green-final-result.json",
+      "bytes": 353,
+      "sha256": "2216e20a9734c46264400acbf3ed70135772ca19921831226e7281e1d2f10722"
+    },
+    {
+      "path": "raw/java-green-final.log",
+      "bytes": 2867,
+      "sha256": "42146a68db53320561db70e5b19db9cf7d1c890f18c7d0358c79f039df32c442"
+    },
+    {
+      "path": "raw/java-green-first-debug/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 963,
+      "sha256": "bb61214bc7e7d90ab0ca6de2305550f46e3cfd74fe5b9407c39e61cb9e74c844"
+    },
+    {
+      "path": "raw/java-green-first-debug/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 873,
+      "sha256": "8bc5d9df21642638964e045c58d13fa080bc32c81ba855f5cac959717b958e62"
+    },
+    {
+      "path": "raw/java-green-first-debug/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 854,
+      "sha256": "d603249683bbd64ece8792110963d850bf936683ff8f728003439187c8551dc6"
+    },
+    {
+      "path": "raw/java-green-first-debug/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3896,
+      "sha256": "8571d6cfe352b7ce0e235ea27fd361f3c3e5dca6fbee310c91192df5080c8743"
+    },
+    {
+      "path": "raw/java-green-first-debug/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 708,
+      "sha256": "0cb4ff4c1cd3eea331083e97b1d436893c20a5942b8428fee745aceaa026fe1c"
+    },
+    {
+      "path": "raw/java-green-first-preview/TEST-com.mir2.web3.EditorBackPolicyTest.xml",
+      "bytes": 965,
+      "sha256": "af96f8be5c15d62544fd022cafa88355a8d99e17e40ec658020c6f504bb68550"
+    },
+    {
+      "path": "raw/java-green-first-preview/TEST-com.mir2.web3.ForegroundRecoveryPolicyTest.xml",
+      "bytes": 869,
+      "sha256": "36e59bf99c945a7ab3d450af22f70f161a6ed2c8519816d73f7f40b31dbfb6bd"
+    },
+    {
+      "path": "raw/java-green-first-preview/TEST-com.mir2.web3.GatewayHostPolicyTest.xml",
+      "bytes": 858,
+      "sha256": "2936fca04fc908f7259a86e7d517e9d8ea92ef14015760b8fe586087fcff762c"
+    },
+    {
+      "path": "raw/java-green-first-preview/TEST-com.mir2.web3.GatewaySessionTest.xml",
+      "bytes": 3894,
+      "sha256": "0945f0b311ffacc4a6b130ec7f87eafe1c5432b63135a11b80fc3a065c09581e"
+    },
+    {
+      "path": "raw/java-green-first-preview/TEST-com.mir2.web3.NetworkRecoveryPolicyTest.xml",
+      "bytes": 712,
+      "sha256": "b6face7fc9de755178c57372e8270099ffb4ea07b5f24eb205b13035a1ba7f83"
+    },
+    {
+      "path": "raw/java-green-full-result.json",
+      "bytes": 353,
+      "sha256": "ecf3894870013ad7771f45ee681947a31dfd95c9db3ce3b8c8aed1cc46b0bebe"
+    },
+    {
+      "path": "raw/java-green-full.log",
+      "bytes": 2867,
+      "sha256": "77e3b0a204a279e4572030bb613801268ee4bdbb580729992fefa7a220ee006e"
+    },
+    {
+      "path": "raw/java-green-preview.xml",
+      "bytes": 3894,
+      "sha256": "0945f0b311ffacc4a6b130ec7f87eafe1c5432b63135a11b80fc3a065c09581e"
+    },
+    {
+      "path": "raw/java-red-debug-result.json",
+      "bytes": 468,
+      "sha256": "69340cbfd3f441415508b43abdd0df8eaf1cf32e26b3fca993cda666eff64bcf"
+    },
+    {
+      "path": "raw/java-red-debug.log",
+      "bytes": 2334,
+      "sha256": "3608503d990765315d7acf46131360d58a0719a5ca564b108b67cba67ca3ad8a"
+    },
+    {
+      "path": "raw/java-red-debug.xml",
+      "bytes": 9655,
+      "sha256": "86cda5faba045fbde12170249af2cf597003fae24117fb6002168b53478c2c65"
+    },
+    {
+      "path": "raw/java-red-gateway-source.java.txt",
+      "bytes": 32177,
+      "sha256": "9f7055624e4be0a529798e9a4ab6a71e9a8914bb5ce9091a072441306c42a768"
+    },
+    {
+      "path": "raw/java-red-test-source.java.txt",
+      "bytes": 52521,
+      "sha256": "2c5e62238479a9d9086d9a4c1567917d157db2ec976a87a8e011b50e149e01ac"
+    },
+    {
+      "path": "raw/pr-before.txt",
+      "bytes": 222,
+      "sha256": "3b7aa7630adb54bb5b07b2d9fcdcf00c8a1572c3d1720117831ddc657576d8c7"
+    },
+    {
+      "path": "raw/remote-branches-before.txt",
+      "bytes": 159,
+      "sha256": "b88c0ab6cff6b283e9cd921f06e61c59541d0f686b0aa1750bcd94c9509697af"
+    },
+    {
+      "path": "raw/renderer-baseline-unchanged.json",
+      "bytes": 867,
+      "sha256": "787ebc18722cd21293031c4e54c5d55bb123f8cf0ba9f4fbcc137b79924c4696"
+    },
+    {
+      "path": "raw/runtime-full-result.json",
+      "bytes": 325,
+      "sha256": "d61f662ea46f6e6a55781fd014fc5d05ff94c829c7787cd9b937d7df61179545"
+    },
+    {
+      "path": "raw/runtime-full.log",
+      "bytes": 27827,
+      "sha256": "d39a75786acd38f3704aa600668fb67048ee2e079233ffa1497a701825b94728"
+    },
+    {
+      "path": "raw/rust-normal-full-result.json",
+      "bytes": 338,
+      "sha256": "a382c02971e49c66901e23d9b32c7aeba00919f9ca03b06f88804a902a839f25"
+    },
+    {
+      "path": "raw/rust-normal-full.log",
+      "bytes": 73276,
+      "sha256": "1c391b1f4dc1576f34b718479a1849fb3b3743fa38a864788598bdbb4206b887"
+    },
+    {
+      "path": "raw/rust-normal-targeted-result.json",
+      "bytes": 340,
+      "sha256": "bc84173499eab40689d1001ffa28a966849510f1e5fed46705044d7575fc2008"
+    },
+    {
+      "path": "raw/rust-normal-targeted.log",
+      "bytes": 42318,
+      "sha256": "a69709897a152577d39dada283e113668e592872d171c996db7e82da65b523fa"
+    },
+    {
+      "path": "raw/rust-preview-full-result.json",
+      "bytes": 375,
+      "sha256": "aa4646c79401eccabcd43fd863279d9e12ed79845d3b21168c198da4b7fbdd46"
+    },
+    {
+      "path": "raw/rust-preview-full.log",
+      "bytes": 78517,
+      "sha256": "66822365ff82705b0b9a41e08eefb6926b54ceb4b024f183f90b67038ebc4adb"
+    },
+    {
+      "path": "raw/shared-native-player-full-result.json",
+      "bytes": 384,
+      "sha256": "f9fa2a1b803d1ae9023b7344dbc370e9bca19d10a89aa5fc9da9048e37f4ceec"
+    },
+    {
+      "path": "raw/shared-native-player-full.log",
+      "bytes": 155796,
+      "sha256": "5b28f39090c7c15fbc8d3ed3db1d26cacd5358e584658cc6e4d6028b9e31abc2"
+    },
+    {
+      "path": "raw/source-and-projection-bindings.json",
+      "bytes": 5297,
+      "sha256": "3ea2121198cd8ae0675f917a58734c6b10afef1ed17cf4677eb9cf134c20cd28"
+    },
+    {
+      "path": "raw/source-commit-binding.json",
+      "bytes": 1575,
+      "sha256": "977ea5379968acfb2c81071cf4317ebe13318d6d0f4a56b41e58c3db7e2ae2b2"
+    }
+  ]
+}

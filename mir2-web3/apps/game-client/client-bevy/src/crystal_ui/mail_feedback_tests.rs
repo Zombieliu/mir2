@@ -13,7 +13,7 @@ fn feedback_test_app() -> App {
         .init_resource::<StorageModel>()
         .init_resource::<crate::social::SocialModel>()
         .init_resource::<ButtonInput<KeyCode>>()
-        .init_resource::<crate::audio::NativeUiAudioQueue>()
+        .init_resource::<crate::ui_audio::NativeUiAudioQueue>()
         .add_message::<KeyboardInput>()
         .insert_resource(NativeShellModel {
             screen: NativeShellScreen::InGame,
@@ -85,9 +85,10 @@ fn feedback_modal_renders_source_frame_message_and_ok_above_mail_layers() {
         .query::<&Text>()
         .iter(world)
         .any(|text| text.0 == "Recipient and message are required"));
-    assert!(world.query::<&OverlayButton>().iter(world).any(|button| {
-        matches!(button, OverlayButton::MailFeedbackAcknowledge)
-    }));
+    assert!(world
+        .query::<&OverlayButton>()
+        .iter(world)
+        .any(|button| { matches!(button, OverlayButton::MailFeedbackAcknowledge) }));
 }
 
 #[test]
@@ -123,19 +124,23 @@ fn result_receipts_close_only_successful_source_surfaces_and_keep_rejected_draft
         .mails
         .push(receipt(MailOperationKind::Send, true, None));
     app.update();
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .core
-        .mail_compose
-        .is_none(), "successful MailSent closes the compose surface without a success modal");
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .is_none(),
+        "successful MailSent closes the compose surface without a success modal"
+    );
     assert!(app
         .world()
         .resource::<NativePlayerUiState>()
         .mail_feedback_prompt
         .is_none());
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 44,
         kind: MailReaderKind::Parcel,
     });
@@ -144,13 +149,17 @@ fn result_receipts_close_only_successful_source_surfaces_and_keep_rejected_draft
         .mails
         .push(receipt(MailOperationKind::Collect, true, Some(44)));
     app.update();
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .mail_reader
-        .is_none(), "a successful parcel collection closes only its matching reader");
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_reader
+            .is_none(),
+        "a successful parcel collection closes only its matching reader"
+    );
 
-    app.world_mut().resource_mut::<NativePlayerUiState>().mail_reader = Some(MailReaderUi {
+    app.world_mut()
+        .resource_mut::<NativePlayerUiState>()
+        .mail_reader = Some(MailReaderUi {
         mail_id: 45,
         kind: MailReaderKind::Parcel,
     });
@@ -159,17 +168,21 @@ fn result_receipts_close_only_successful_source_surfaces_and_keep_rejected_draft
         .mails
         .push(receipt(MailOperationKind::Collect, false, Some(45)));
     app.update();
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .mail_reader
-        .is_some(), "a failed collection keeps its reader visible behind the error box");
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_reader
+            .is_some(),
+        "a failed collection keeps its reader visible behind the error box"
+    );
     press(&mut app, OverlayButton::MailFeedbackAcknowledge);
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .mail_feedback_prompt
-        .is_none(), "feedback OK remains reachable above an open reader");
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_feedback_prompt
+            .is_none(),
+        "feedback OK remains reachable above an open reader"
+    );
     assert!(app
         .world()
         .resource::<NativePlayerUiState>()
@@ -193,16 +206,22 @@ fn local_validation_and_feedback_close_consume_covered_mail_actions() {
             .as_deref(),
         Some("Recipient and message are required")
     );
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .core
-        .mail_compose
-        .is_some(), "local validation must retain an editable draft");
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .is_some(),
+        "local validation must retain an editable draft"
+    );
 
     let cancel = app
         .world_mut()
-        .spawn((Interaction::Pressed, OverlayButton::CancelMailCompose, Button))
+        .spawn((
+            Interaction::Pressed,
+            OverlayButton::CancelMailCompose,
+            Button,
+        ))
         .id();
     app.world_mut()
         .resource_mut::<ButtonInput<KeyCode>>()
@@ -214,16 +233,19 @@ fn local_validation_and_feedback_close_consume_covered_mail_actions() {
         .resource::<NativePlayerUiState>()
         .mail_feedback_prompt
         .is_none());
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .mail_feedback_input_consumed);
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .core
-        .mail_compose
-        .is_some(), "Enter closing a notice cannot also cancel the covered draft");
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_feedback_input_consumed
+    );
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .is_some(),
+        "Enter closing a notice cannot also cancel the covered draft"
+    );
 
     {
         let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
@@ -232,25 +254,36 @@ fn local_validation_and_feedback_close_consume_covered_mail_actions() {
     }
     let acknowledge = app
         .world_mut()
-        .spawn((Interaction::Pressed, OverlayButton::MailFeedbackAcknowledge, Button))
+        .spawn((
+            Interaction::Pressed,
+            OverlayButton::MailFeedbackAcknowledge,
+            Button,
+        ))
         .id();
     let covered = app
         .world_mut()
-        .spawn((Interaction::Pressed, OverlayButton::CancelMailCompose, Button))
+        .spawn((
+            Interaction::Pressed,
+            OverlayButton::CancelMailCompose,
+            Button,
+        ))
         .id();
     app.update();
     app.world_mut().despawn(acknowledge);
     app.world_mut().despawn(covered);
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .mail_feedback_input_consumed);
-    assert!(app
-        .world()
-        .resource::<NativePlayerUiState>()
-        .core
-        .mail_compose
-        .is_some(), "the OK close frame cannot reach a covered mail action");
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .mail_feedback_input_consumed
+    );
+    assert!(
+        app.world()
+            .resource::<NativePlayerUiState>()
+            .core
+            .mail_compose
+            .is_some(),
+        "the OK close frame cannot reach a covered mail action"
+    );
 
     let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
     state.mail_feedback_prompt = Some("Mail delete failed".to_owned());

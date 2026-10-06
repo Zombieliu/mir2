@@ -1,0 +1,24 @@
+[platform-android] check uiPreview aarch64-linux-android with Rust 1.95.0, NDK /Users/henryliu/Library/Android/sdk/ndk/26.1.10909125, API 31
+    Building arm64-v8a (aarch64-linux-android)
+    Checking bevy_render v0.19.0 (/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevy_render)
+error[E0425]: cannot find type `Msaa` in crate `bevy_camera`
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/third_party/bevy_render/src/view/window/mod.rs:51:30
+   |
+51 |         Option<&bevy_camera::Msaa>,
+   |                              ^^^^ not found in `bevy_camera`
+   |
+help: consider importing this enum through its public re-export
+   |
+ 1 + use crate::prelude::Msaa;
+   |
+help: if you import `Msaa`, refer to it directly
+   |
+51 -         Option<&bevy_camera::Msaa>,
+51 +         Option<&Msaa>,
+   |
+
+For more information about this error, try `rustc --explain E0425`.
+error: could not compile `bevy_render` (lib) due to 1 previous error
+note: If the build failed due to a missing target, you can run this command:
+note: 
+note:     rustup target install aarch64-linux-android

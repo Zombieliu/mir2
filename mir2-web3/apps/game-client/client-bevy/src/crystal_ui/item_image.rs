@@ -43,7 +43,14 @@ pub(super) fn spawn_original_item_image(
     cell_width: i32,
     cell_height: i32,
 ) {
-    spawn_original_item_image_tinted(parent, asset_server, index, cell_width, cell_height, Color::WHITE);
+    spawn_original_item_image_tinted(
+        parent,
+        asset_server,
+        index,
+        cell_width,
+        cell_height,
+        Color::WHITE,
+    );
 }
 
 /// Crystal applies locked-cell colour and opacity to the bitmap itself;
@@ -56,12 +63,8 @@ pub(super) fn spawn_original_item_image_tinted(
     cell_height: i32,
     color: Color,
 ) {
-    let (cell, node, mut image) = original_item_image_bundle(
-        asset_server,
-        Some(index),
-        cell_width,
-        cell_height,
-    );
+    let (cell, node, mut image) =
+        original_item_image_bundle(asset_server, Some(index), cell_width, cell_height);
     image.color = color;
     parent.spawn((cell, node, image));
 }

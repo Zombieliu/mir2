@@ -8,25 +8,25 @@ mod drops;
 mod equipment;
 mod experience_rates;
 pub use experience_rates::apply_crystal_experience_rates;
-mod social_experience;
 mod player_weights;
-pub use social_experience::{crystal_social_experience_peer_eligible, ExperienceCharacter, ExperiencePresence};
+mod social_experience;
+pub use social_experience::{
+    crystal_social_experience_peer_eligible, ExperienceCharacter, ExperiencePresence,
+};
 mod fishing;
 mod gm_commands;
 mod hazard;
 mod hero_ai;
 mod hero_inventory;
-mod hero_registry_validation;
 mod hero_registry_carriers;
 mod hero_registry_scan;
+mod hero_registry_validation;
 pub(crate) use hero_registry_scan::validate_shared_hero_physical_custody;
 pub(crate) use hero_registry_validation::validate_shared_hero_carriers;
-mod hero_stats;
-mod inventory;
-#[cfg(test)]
-mod storage_rental_tests;
 #[cfg(test)]
 mod equipment_storage_merge_tests;
+mod hero_stats;
+mod inventory;
 mod item_custody;
 mod item_sets;
 mod items;
@@ -49,6 +49,8 @@ mod resources;
 mod save;
 mod session;
 mod shared_guilds;
+#[cfg(test)]
+mod storage_rental_tests;
 pub(crate) use shared_guilds::buffs::advance_minutes as advance_shared_guild_minutes;
 mod shared_marriage;
 mod shared_relationships;
@@ -79,22 +81,23 @@ pub use packets::{ChatPacketPreparation, PreparedChatPacket};
 pub use save::{reset_account_password_after_recovery, validate_commercial_identity_credentials};
 pub use session::{
     ActiveSessionIdentity, LocalPlayerVitalsSnapshot, PasskeyRecoveryPreflight,
-    SharedItemRentalAgreement,
-    SharedItemRentalDelivery, SharedItemRentalFeeOffer, SharedItemRentalItemOffer,
-    SharedSkillItemConsumptionComponent, SharedTradeOffer, SharedTradeOfferItem, SimulationSession,
+    SharedItemRentalAgreement, SharedItemRentalDelivery, SharedItemRentalFeeOffer,
+    SharedItemRentalItemOffer, SharedSkillItemConsumptionComponent, SharedTradeOffer,
+    SharedTradeOfferItem, SimulationSession,
 };
 pub use stage5::{GameShopPurchaseExecution, GameShopPurchaseFailure, GameShopPurchaseOutcome};
 pub use zone::{
-    CreatureOperation, CreatureOwner, CreaturePickupIntent,
-    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, GroundDropClaimTicket,
-    PlayerId, SessionId, ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile,
-    ZoneCollision, ZoneCommand, ZoneInput, ZoneJoin, ZoneKey, ZoneManager, ZoneMapMetadata,
-    ZoneMonsterDefense, ZoneMonsterKillAward, ZoneMonsterRespawnPolicy, ZoneMonsterSpawn,
-    ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig, ZoneNpcTeleportDestination, ZoneOutbound,
-    ZoneOutput, ZonePlayerCombatStats, ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine,
-    ZoneReplayReport, ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
-    ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell, ZoneJourneyEventReceipt,
-    ZoneJourneyEventKind, ZoneJourneyPhysicalTechnique, ZoneVitalSettlement,
+    gate5_demo_scenario, run_zone_replay_scenario, zone_id_for_key, CreatureOperation,
+    CreatureOwner, CreaturePickupIntent, GroundDropClaimTicket, PlayerId, SessionId,
+    ZoneBossRewardAudit, ZoneBounds, ZoneChatItem, ZoneChatProfile, ZoneCollision, ZoneCommand,
+    ZoneInput, ZoneJoin, ZoneJourneyEventKind, ZoneJourneyEventReceipt,
+    ZoneJourneyPhysicalTechnique, ZoneKey, ZoneMagicPracticeReceipt, ZoneMagicPracticeSpell,
+    ZoneManager, ZoneMapMetadata, ZoneMonsterDefense, ZoneMonsterKillAward,
+    ZoneMonsterRespawnPolicy, ZoneMonsterSpawn, ZoneNativeMonsterSnapshot, ZoneNpcTeleportConfig,
+    ZoneNpcTeleportDestination, ZoneOutbound, ZoneOutput, ZonePlayerCombatStats,
+    ZoneReplayCombatStats, ZoneReplayCommand, ZoneReplayEngine, ZoneReplayReport,
+    ZoneReplayScenario, ZoneReplicaCheckpoint, ZoneRuntime, ZoneStandbyReplica,
+    ZoneVitalSettlement,
 };
 
 pub fn zone_ground_drop_snapshots_for_monster_at_tick(

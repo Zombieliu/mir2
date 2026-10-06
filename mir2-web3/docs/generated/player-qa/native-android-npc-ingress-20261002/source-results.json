@@ -1,0 +1,492 @@
+{
+  "scope": "NI-11 bounded NPC service/catalogue source ingress; NI-10 remains open",
+  "source": "4e35d3a34041f47370ba7f1338d4b5e0f8d7c0f8",
+  "sourceParent": "189e1714a92e3bba1102743659b03782f9e3bdb3",
+  "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+  "sourceFiles": [
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/lib.rs",
+      "sha256": "c04ab6e90c21f65aa41aa0188fe00be71385f895711b5d989c1acd8e642c7483"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+      "sha256": "8b45f76f8974b21f0fe8729965e89d979955eca4f8da831c4aaebb205d2384ac"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+      "sha256": "38ff1c5220d259b7e609090031219047524b80636e1450a40b28fd7898ba302f"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/read_model.rs",
+      "sha256": "25326f497aabe20bb7300b6e3cacdec21c5851b1eb957bb8fc6300279b429979"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "sha256": "228883d8912ffc233eebb6acc9f103e215d56aef07c6e616308e51d12f6ba3b0"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/npc_shop_layout_tests.rs",
+      "sha256": "35b997c6ca607d4888da0708903b8d8290a5d739a89e9b6bb59cdcfe5df1a851"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/runtime/src/lib.rs",
+      "sha256": "fa05c7d9a93254a063f845c37227cbcc32239614d8ca6072d6cbfc7a1d07a2da"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-windows/src/gateway.rs",
+      "sha256": "afd6b4439d99ecb92d1ed1d9330b2730c120e995a1b61b5f1c45bb9f750d972d"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "sha256": "12c371211bf76044522f1deb8d992c1b19214b6efe6d618519ef6fe6dd3949c1"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/player_ingress.rs",
+      "sha256": "230f7b9746254e8598ca99ad846c4b96b3f29a6e1945913ddef89725618510fc"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs",
+      "sha256": "c17efe16df8c0b6dd914ed2a2be11ba59ae46f93354e847b7773de6589056289"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_ingress.rs",
+      "sha256": "1544b4dbe37e86dddcc90b04db6b09818c02a871978f4f237d2b3d8ebb501a75"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/npc_host_tests.rs",
+      "sha256": "507be77c53a8e139c73b47a02414d01545a3598dcafbfae05907baa4287f31ea"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/GatewaySession.java",
+      "sha256": "61945f8aeb35d5b6228f97ab381d8b04d19f6fdd4924cb14daabfc38eb530dae"
+    },
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/GatewaySessionTest.java",
+      "sha256": "cbd62048af4c8f70345debb974f4b350e9feb94f0ce3691ea517e25dee7d5890"
+    }
+  ],
+  "originals": [
+    {
+      "name": "rust-failure-first.log",
+      "sha256": "f9a99e18d7d36036b93316b874309b6cb64499352c4505d6bb9743e3abeee800"
+    },
+    {
+      "name": "java-failure-first.log",
+      "sha256": "21ab97c2d964f843f8f817d7a4f7093d58dceb64d8aad282b3c72982065b828e"
+    },
+    {
+      "name": "Java-failure-first.xml",
+      "sha256": "d27683fb7e91f7ef859f8f62869be7f210c70bd5e4d6d738a5fd7a77fa47a41f"
+    },
+    {
+      "name": "rust-focused-first.log",
+      "sha256": "1e980904785f5b31aa420ba7eae7d7acd63ce4aecdd3782d626417175afa14a8"
+    },
+    {
+      "name": "rust-focused-final.log",
+      "sha256": "5a226b2a59be352a2fda7cf60786a32886e805823d26236ef05d1d1c00305472"
+    },
+    {
+      "name": "java-focused.log",
+      "sha256": "039722cbc4844c786d6278783ba14fdf4baa6caccc9fec8958b63097af16d553"
+    },
+    {
+      "name": "android-all.log",
+      "sha256": "a536078c05cdd9ab75a43251fbd958fe52f1e1718cc23969270e6a075db9de54"
+    },
+    {
+      "name": "android-preview-all.log",
+      "sha256": "a83bf0f149964fd7d36f6330f9c509b22047cd36dcb27f87b2123ef6addb1ee5"
+    },
+    {
+      "name": "shared-all.log",
+      "sha256": "5dbd1ac8cbaf4efb5f5397530e6afb3467efd84534a16e8a122b7c4b46e3fab4"
+    },
+    {
+      "name": "runtime-all.log",
+      "sha256": "a376e39eb70b1d05bc4521f7d7fcb139953b5579e16618cbba7320ced6860434"
+    },
+    {
+      "name": "java-all.log",
+      "sha256": "38ca0d5e570477a827fbd1f81e314d63ba4d5974736af75a99b31a6e00bfeefd"
+    },
+    {
+      "name": "shared-frame-failure-first.log",
+      "sha256": "2884c79e466beacb78a63a444dd4582f5451bd2e576320fc0cc72d2f00070284"
+    },
+    {
+      "name": "shared-frame-first-fix.log",
+      "sha256": "049dfd44365f1f4f54f6dcdf2f03326080969a2206b76bec3c9ae92449f2537b"
+    },
+    {
+      "name": "shared-final-all.log",
+      "sha256": "b7bed102a6808f5d9dcf484b9ca72875d96b3dd5d19c22ad517da26dc0ac3286"
+    },
+    {
+      "name": "shared-repaired-all.log",
+      "sha256": "858ccce23309e1433c351c3747fbd06f6570c2a6a4cab282c3765c8a3a2a2b65"
+    },
+    {
+      "name": "shared-close-pending-failure-first.log",
+      "sha256": "97e83b3db15bfdf18353f573034205e2c2c82f12f97ea54e4de8cd6c8c522b5d"
+    },
+    {
+      "name": "shared-close-pending-red.log",
+      "sha256": "329ffdda27a036d43540eece231749de06bf4daa9847de191d4f87d76ce2b4a6"
+    },
+    {
+      "name": "shared-final-fixed-all.log",
+      "sha256": "df682d49a8fd982363acbe3155f9a9e848e2351f83b1ba68a4d0cd171172cd17"
+    },
+    {
+      "name": "android-final-fixed-all.log",
+      "sha256": "c5fb2d1fa5bb84bafc1820836d9061a9a8fc3e24704834dd459ec339f46f7baa"
+    },
+    {
+      "name": "android-preview-final-fixed-all.log",
+      "sha256": "49fde603726eafc0561e8dcf13bc78b1ce3e6cadb4ae01f568f6eb40224e3b72"
+    },
+    {
+      "name": "runtime-final-all.log",
+      "sha256": "1b279d21058cdb7cfb37d11a1f4703b3d95feb340aeb6ffda03a1453ac055a25"
+    },
+    {
+      "name": "java-final-all.log",
+      "sha256": "6373b86d68cccc52fb107e8c1e1896c5037ac14c296998a45e3241b011fcaffc"
+    },
+    {
+      "name": "java-fresh-all.log",
+      "sha256": "ee7874da85e16dbe8710004b40899d822822a97aba15d1da071015a567a50a5b"
+    },
+    {
+      "name": "api31-debug-final.log",
+      "sha256": "e0f133e754b0adae22b5aee5bf8030e682c5efbb8bb0e077208e99c5929fc2cd"
+    },
+    {
+      "name": "api31-preview-final.log",
+      "sha256": "b4d40259916d359a79e859bf2e94ffa492804b2f7cac87d0a3e7392cc8cdab30"
+    },
+    {
+      "name": "windows-npc-mac-source.log",
+      "sha256": "fb8661ebf630adfc42e2e59becab5ae1f2b24a740f0bbacfea430614c29f6938"
+    },
+    {
+      "name": "equivalence-audit-first.log",
+      "sha256": "1c77632592047612e8372de62d20073d5b60d68ba6036c3f373b1a0fab138cbc"
+    },
+    {
+      "name": "equivalence-audit-final.log",
+      "sha256": "34882c297bec8d0c7ae71119958d47119c54cffa6552e662c13faa605df25420"
+    },
+    {
+      "name": "windows-gateway-tests-actual_npc_response_retires_service_children.log",
+      "sha256": "a6e8ac69aceac1c01f6c98936033b46b1dcfe1314b8c0791e0919c8e5109cef8"
+    },
+    {
+      "name": "windows-gateway-tests-pearl_goods_currency_survives_snapshot.log",
+      "sha256": "f242e2a38496d4441987293202606472f8bdec96f81ae4cf3df41720b404099b"
+    },
+    {
+      "name": "windows-gateway-tests-npc_goods_then_npc_sell.log",
+      "sha256": "c397ade24123b3a543f642aea2a23b4557689236d1b09093000c09142c59f053"
+    },
+    {
+      "name": "windows-gateway-tests-crystal_packet_tooltip_projection_preserves_instance.log",
+      "sha256": "cffdf4fb5bb47a571b430d454c041880947a67139a2ccd901b9f7887a8ad0b37"
+    },
+    {
+      "name": "windows-gameplay_bridge-tests-npc_service_.log",
+      "sha256": "222e04ca6ace91a7d9ff90b5191b36091887a7dae603825642e576d558648959"
+    }
+  ],
+  "failureFirst": [
+    {
+      "name": "rust-failure-first.log",
+      "passed": 1,
+      "failed": 2,
+      "ignored": 0
+    },
+    {
+      "name": "shared-frame-failure-first.log",
+      "passed": 1,
+      "failed": 1,
+      "ignored": 0
+    },
+    {
+      "name": "shared-close-pending-red.log",
+      "passed": 0,
+      "failed": 3,
+      "ignored": 0
+    }
+  ],
+  "javaFailureFirst": {
+    "tests": 2,
+    "failures": 2,
+    "environment": "local synthetic TLS"
+  },
+  "retainedSetupAndIntermediateFailures": [
+    "rust-focused-first.log",
+    "shared-final-all.log",
+    "shared-close-pending-failure-first.log",
+    "equivalence-audit-first.log"
+  ],
+  "rust": [
+    {
+      "name": "shared-final-fixed-all.log",
+      "passed": 1230,
+      "failed": 0,
+      "ignored": 10
+    },
+    {
+      "name": "android-final-fixed-all.log",
+      "passed": 290,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "android-preview-final-fixed-all.log",
+      "passed": 304,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "runtime-final-all.log",
+      "passed": 292,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "name": "windows-gateway-tests-actual_npc_response_retires_service_children.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "windows-gateway-tests-pearl_goods_currency_survives_snapshot.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "windows-gateway-tests-npc_goods_then_npc_sell.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "windows-gateway-tests-crystal_packet_tooltip_projection_preserves_instance.log",
+      "passed": 1,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "name": "windows-gameplay_bridge-tests-npc_service_.log",
+      "passed": 2,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "java": [
+    {
+      "variant": "Debug",
+      "tests": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer, not real login"
+    },
+    {
+      "variant": "UiPreview",
+      "tests": 39,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "environment": "local synthetic TLS/MockWebServer, not real login"
+    }
+  ],
+  "extraction": {
+    "scope": "12 frozen Windows pure projection bodies and thin host delegates only",
+    "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+    "selectedSource": "4e35d3a34041f47370ba7f1338d4b5e0f8d7c0f8",
+    "sourceParent": "189e1714a92e3bba1102743659b03782f9e3bdb3",
+    "permittedDifferences": [
+      "helper names",
+      "shop and game-data imported namespace",
+      "host geometry callback injection and forwarding",
+      "comments and Rustfmt formatting"
+    ],
+    "entries": [
+      {
+        "frozenFunction": "crystal_tooltip_viewer",
+        "sharedFunction": "native_tooltip_viewer",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+        "frozenHeader": "fn crystal_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClass)>",
+        "sharedHeader": "fn native_tooltip_viewer(cursor: &NativeUiPlayerCursor) -> Option<(u16, MirClass)>",
+        "frozenBodySha256": "1cafcfede0938b84c35df1ee7793331a5877edc83849c472aa6231ce7e1451eb",
+        "sharedBodySha256": "1cafcfede0938b84c35df1ee7793331a5877edc83849c472aa6231ce7e1451eb",
+        "normalizedSha256": "47b6bf68315899e7478375ddc54d3ada98ea4fd7a92a17d44728eefa2ae200b1",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      },
+      {
+        "frozenFunction": "unique_crystal_tooltip_info",
+        "sharedFunction": "native_tooltip_info",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+        "frozenHeader": "fn unique_crystal_tooltip_info(item_index: i32) -> Option<CrystalItemInfoModel>",
+        "sharedHeader": "fn native_tooltip_info(item_index: i32) -> Option<CrystalItemInfoModel>",
+        "frozenBodySha256": "4da53780655bdc817ded9b8cb20cb3d6de3b99e78355a8a8a35c088537133e2f",
+        "sharedBodySha256": "8f84570adac95a4848f8c6736cb93937f6b2a13b225446f10a825d895966f8a4",
+        "normalizedSha256": "3b96dc4332385d021d64a7767a44f01027a8370e83e13df4647dbd0f9d6dae2b",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      },
+      {
+        "frozenFunction": "crystal_real_tooltip_info",
+        "sharedFunction": "native_real_tooltip_info",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+        "frozenHeader": "fn crystal_real_tooltip_info(\n    info: &CrystalItemInfoModel,\n    viewer: Option<(u16, MirClass)>,\n) -> Option<CrystalItemInfoModel>",
+        "sharedHeader": "fn native_real_tooltip_info(\n    info: &CrystalItemInfoModel,\n    viewer: Option<(u16, MirClass)>,\n) -> Option<CrystalItemInfoModel>",
+        "frozenBodySha256": "7ecf66b432b8e87fc9e51c9bbc7be48184329622a65b7c8ce6f41dc1f0ae01fc",
+        "sharedBodySha256": "88b438fa69f47e817db663892f3ed5554d5d4ff7bb0ae790e75f3309968ee525",
+        "normalizedSha256": "a9770c266d72af03643526bbc9efc22100a716fb1720d9996f56f59030338957",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      },
+      {
+        "frozenFunction": "crystal_tooltip_source_for_user_item",
+        "sharedFunction": "native_tooltip_source_for_user_item",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_inventory_ingress.rs",
+        "frozenHeader": "fn crystal_tooltip_source_for_user_item(\n    value: &Value,\n    cursor: &NativeUiPlayerCursor,\n) -> Option<CrystalItemTooltipSourceModel>",
+        "sharedHeader": "fn native_tooltip_source_for_user_item(\n    value: &Value,\n    cursor: &NativeUiPlayerCursor,\n) -> Option<CrystalItemTooltipSourceModel>",
+        "frozenBodySha256": "a3b17a5233aef1665f5b5165e289a0b942e7d3ca6b71f5c4adff64a4ed7b70e7",
+        "sharedBodySha256": "232ea688f27c549545d2e3cfd80fe716672ec75a807cf797b7cc793e5dc9dfd7",
+        "normalizedSha256": "423e041ece0e74e52fcf61b2199d9f3e9d2597ecae2b84410412e456ac997bad",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      },
+      {
+        "frozenFunction": "npc_shop_service_from_packet",
+        "sharedFunction": "npc_shop_service_from_packet",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+        "frozenHeader": "fn npc_shop_service_from_packet(\n    packet: &str,\n    payload: &Value,\n) -> Option<mir2_client_bevy::shop::NpcShopServiceSignal>",
+        "sharedHeader": "fn npc_shop_service_from_packet(packet: &str, payload: &Value) -> Option<NpcShopServiceSignal>",
+        "frozenBodySha256": "83831ca40884f0e3a46131afeafa210eb6bc58ffca8cbbddc01f14f47ca7965b",
+        "sharedBodySha256": "e6a48281c148aa63370b856e20aadde19d4581028dba1900754d900986437153",
+        "normalizedSha256": "fd46abac27fade2e9350c597e7ec704d1952caa329825c892550cd8a50d69fd3",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      },
+      {
+        "frozenFunction": "transform_shop_model_from_packet",
+        "sharedFunction": "transform_shop_model_from_packet",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+        "frozenHeader": "fn transform_shop_model_from_packet(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value",
+        "sharedHeader": "fn transform_shop_model_from_packet(\n    payload: &Value,\n    cursor: &NativeUiPlayerCursor,\n    mut geometry: impl FnMut(NativeItemLibrary, u16) -> Option<NativeItemFrameGeometry>,\n) -> Value",
+        "frozenBodySha256": "9303e40ac9d958c8e0e4f36216f1455659f2bc22257f9cbd85ffa02a3fb847ee",
+        "sharedBodySha256": "d8949c8d231dc52d61517c04991155ff1f31c4273c9175e8b266726c8563807f",
+        "normalizedSha256": "cb9cf6b4fa2318ad986275f689408ab7759ecbde3442e7a27c3ee7f769a84327",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      },
+      {
+        "frozenFunction": "transform_shop_model_from_snapshot",
+        "sharedFunction": "transform_shop_model_from_snapshot",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+        "frozenHeader": "fn transform_shop_model_from_snapshot(payload: &Value, cursor: &NativeUiPlayerCursor) -> Value",
+        "sharedHeader": "fn transform_shop_model_from_snapshot(\n    payload: &Value,\n    cursor: &NativeUiPlayerCursor,\n    mut geometry: impl FnMut(NativeItemLibrary, u16) -> Option<NativeItemFrameGeometry>,\n) -> Value",
+        "frozenBodySha256": "4a4aaf178c4366fe1250d68af8009db8e375ed69440636f06200c43b273ede9e",
+        "sharedBodySha256": "98c2502ee0c2378f1cf48292bad2fef143e98b811bdaa3020de355047168ab2e",
+        "normalizedSha256": "d198d9f7b83852a9f7bd7aa71b7e80fdef48d7c020d20f22816ca54b5c2a4764",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      },
+      {
+        "frozenFunction": "shop_good_json",
+        "sharedFunction": "shop_good_json",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+        "frozenHeader": "fn shop_good_json(item: &Value, fallback: usize, cursor: &NativeUiPlayerCursor) -> Option<Value>",
+        "sharedHeader": "fn shop_good_json(\n    item: &Value,\n    fallback: usize,\n    cursor: &NativeUiPlayerCursor,\n    mut geometry: impl FnMut(NativeItemLibrary, u16) -> Option<NativeItemFrameGeometry>,\n) -> Option<Value>",
+        "frozenBodySha256": "0f1d0f5eafedd0e8070d642a3c701b28c7b8e61412f4697032275410e5da5464",
+        "sharedBodySha256": "b1565d612190e2b136b260f8e808a45fcf3820346f839d89dc661c2a06680fde",
+        "normalizedSha256": "332eaa254784108c6b66824b5a4461fc3008dee774bb7f179abb41bfaaf2373e",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      },
+      {
+        "frozenFunction": "shop_hide_added_stats",
+        "sharedFunction": "shop_hide_added_stats",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+        "frozenHeader": "fn shop_hide_added_stats(payload: &Value) -> bool",
+        "sharedHeader": "fn shop_hide_added_stats(payload: &Value) -> bool",
+        "frozenBodySha256": "3a10a8550528d2a059bb59a662daf36f660841f497714c1ad3f4bbc06195d588",
+        "sharedBodySha256": "3a10a8550528d2a059bb59a662daf36f660841f497714c1ad3f4bbc06195d588",
+        "normalizedSha256": "b52ec7424eeea17e96eee94e88edbf7e8884563014f93c0f95d075ad24cb9f40",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      },
+      {
+        "frozenFunction": "transform_npc_catalog_packet",
+        "sharedFunction": "transform_npc_catalog_packet",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+        "frozenHeader": "fn transform_npc_catalog_packet(\n    packet: &str,\n    payload: &Value,\n    cursor: &mut NativeUiPlayerCursor,\n) -> Option<Value>",
+        "sharedHeader": "fn transform_npc_catalog_packet(\n    packet: &str,\n    payload: &Value,\n    cursor: &mut NativeUiPlayerCursor,\n    geometry: impl FnMut(NativeItemLibrary, u16) -> Option<NativeItemFrameGeometry>,\n) -> Option<Value>",
+        "frozenBodySha256": "fec817892133168dcc021863911a85e766d0dd9ee532e592eebfec69f8b945cd",
+        "sharedBodySha256": "64be0fae249a9f27cd864ddf6be8a38796661ae8f1fa50af6c1c2119c37ffcde",
+        "normalizedSha256": "4a5ee429be9011a5ab37766609ccf72c25e4fa13b5857eb33ef2a9a09f0c6315",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      },
+      {
+        "frozenFunction": "try_transform_shop_model_from_packet",
+        "sharedFunction": "try_transform_shop_model_from_packet",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+        "frozenHeader": "fn try_transform_shop_model_from_packet(\n    payload: &Value,\n    cursor: &NativeUiPlayerCursor,\n) -> Option<Value>",
+        "sharedHeader": "fn try_transform_shop_model_from_packet(\n    payload: &Value,\n    cursor: &NativeUiPlayerCursor,\n    mut geometry: impl FnMut(NativeItemLibrary, u16) -> Option<NativeItemFrameGeometry>,\n) -> Option<Value>",
+        "frozenBodySha256": "b005c438ed2aca5151b6d510f80ede30726b203aa2ef6f4b5b36b6d723130848",
+        "sharedBodySha256": "3b11b35c9f76cdc518cc3154853b07cbce2bbcbf3be32f6eec52bc26cb927e1d",
+        "normalizedSha256": "baa4b7aeaeaabe971fa39316212b1adbbc7dbed599cbc80822aa7c50c37500b3",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      },
+      {
+        "frozenFunction": "payload_has_valid_shop_array",
+        "sharedFunction": "payload_has_valid_shop_array",
+        "sharedPath": "mir2-web3/apps/game-client/client-bevy/src/native_npc_ingress.rs",
+        "frozenHeader": "fn payload_has_valid_shop_array(payload: &Value) -> bool",
+        "sharedHeader": "fn payload_has_valid_shop_array(payload: &Value) -> bool",
+        "frozenBodySha256": "c18608d90ea281063539c73a007d2ca4d01d0f2e71337ccf87cd943dc00e15ce",
+        "sharedBodySha256": "c18608d90ea281063539c73a007d2ca4d01d0f2e71337ccf87cd943dc00e15ce",
+        "normalizedSha256": "1b8b745402ad72454b23314f5440d38d584175393297521d8f8a09ba887d7561",
+        "bodyEqual": true,
+        "thinWindowsDelegation": true
+      }
+    ],
+    "pass": true,
+    "windowsDeviceAccepted": false,
+    "authenticatedAndroidAccepted": false,
+    "completeNpcReceiptsAccepted": false
+  },
+  "windowsBroadFilter": {
+    "name": "windows-npc-mac-source.log",
+    "passed": 19,
+    "failed": 6,
+    "ignored": 0,
+    "scope": "Mac source run; six geometry/marker/map-fixture failures retained, no broad Windows gate pass"
+  },
+  "arm64Api31": {
+    "debug": true,
+    "uiPreview": true
+  },
+  "hostPairEnqueueAtomic": true,
+  "hostFailedPushRetriesOnlySuffix": true,
+  "sharedRuntimeEndToEndLosslessAccepted": false,
+  "completeNpcReceiptsAccepted": false,
+  "fullQuestDialogAccepted": false,
+  "newApkBuilt": false,
+  "emulatorNpcFlowAccepted": false,
+  "authenticatedGameplayAccepted": false,
+  "physicalDeviceAccepted": false,
+  "existingV16GlErrorsRetained": true,
+  "fullWindowsParityAccepted": false,
+  "goalStatus": "active"
+}

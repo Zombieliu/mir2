@@ -1,0 +1,3082 @@
+{
+  "source": "bc12249ae35c052d6b5c66aa01f4c04a0f95dee6",
+  "versionCode": 35,
+  "scene": "gameshop-jni",
+  "actualDevice": "emulator-5554",
+  "offlineOnly": true,
+  "commands": [
+    {
+      "name": "0-cold-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:47:45.596Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:47:45.618Z"
+    },
+    {
+      "name": "0-cold-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:47:45.618Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:47:45.866Z"
+    },
+    {
+      "name": "0-cold-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:47:45.866Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:47:45.885Z"
+    },
+    {
+      "name": "stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:47:45.886Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:47:45.907Z"
+    },
+    {
+      "name": "start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "gameshop-jni"
+      ],
+      "started": "2026-10-02T19:47:45.907Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:47:46.350Z"
+    },
+    {
+      "name": "pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:47:46.350Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:47:46.377Z"
+    },
+    {
+      "name": "0-cold.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:48:00.380Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:48:00.563Z"
+    },
+    {
+      "name": "0-cold-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:48:00.563Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:48:00.597Z"
+    },
+    {
+      "name": "8-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:49:04.552Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:04.581Z"
+    },
+    {
+      "name": "8-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:49:04.581Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:04.849Z"
+    },
+    {
+      "name": "8-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:49:04.849Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:04.871Z"
+    },
+    {
+      "name": "8-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:49:04.872Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:04.893Z"
+    },
+    {
+      "name": "8-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "600",
+        "567"
+      ],
+      "started": "2026-10-02T19:49:04.893Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:04.917Z"
+    },
+    {
+      "name": "8-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:49:06.419Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:06.442Z"
+    },
+    {
+      "name": "8-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:49:06.442Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:06.612Z"
+    },
+    {
+      "name": "8-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:49:06.612Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:06.704Z"
+    },
+    {
+      "name": "16-swipe-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:49:51.624Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:51.650Z"
+    },
+    {
+      "name": "16-swipe-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:49:51.650Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:51.930Z"
+    },
+    {
+      "name": "16-swipe-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:49:51.931Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:51.954Z"
+    },
+    {
+      "name": "16-swipe-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:49:51.954Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:51.974Z"
+    },
+    {
+      "name": "16-swipe-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "swipe",
+        "946",
+        "567",
+        "946",
+        "310",
+        "600"
+      ],
+      "started": "2026-10-02T19:49:51.974Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:52.603Z"
+    },
+    {
+      "name": "16-swipe-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:49:54.106Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:54.128Z"
+    },
+    {
+      "name": "16-swipe.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:49:54.128Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:54.301Z"
+    },
+    {
+      "name": "16-swipe-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:49:54.302Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:49:54.447Z"
+    },
+    {
+      "name": "24-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:50:19.389Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:19.413Z"
+    },
+    {
+      "name": "24-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:50:19.413Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:19.681Z"
+    },
+    {
+      "name": "24-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:50:19.681Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:19.707Z"
+    },
+    {
+      "name": "24-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:50:19.707Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:19.728Z"
+    },
+    {
+      "name": "24-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "2052",
+        "945"
+      ],
+      "started": "2026-10-02T19:50:19.728Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:19.754Z"
+    },
+    {
+      "name": "24-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:50:21.257Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:21.278Z"
+    },
+    {
+      "name": "24-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:50:21.278Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:21.463Z"
+    },
+    {
+      "name": "24-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:50:21.463Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:21.639Z"
+    },
+    {
+      "name": "32-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:50:41.625Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:41.654Z"
+    },
+    {
+      "name": "32-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:50:41.654Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:41.921Z"
+    },
+    {
+      "name": "32-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:50:41.921Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:41.946Z"
+    },
+    {
+      "name": "32-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:50:41.946Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:41.966Z"
+    },
+    {
+      "name": "32-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "946",
+        "567"
+      ],
+      "started": "2026-10-02T19:50:41.966Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:41.993Z"
+    },
+    {
+      "name": "32-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:50:43.496Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:43.515Z"
+    },
+    {
+      "name": "32-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:50:43.516Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:43.683Z"
+    },
+    {
+      "name": "32-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:50:43.683Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:50:43.903Z"
+    },
+    {
+      "name": "40-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:10.964Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:10.989Z"
+    },
+    {
+      "name": "40-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:51:10.989Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:11.254Z"
+    },
+    {
+      "name": "40-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:11.255Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:11.288Z"
+    },
+    {
+      "name": "40-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:11.288Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:11.308Z"
+    },
+    {
+      "name": "40-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "601",
+        "134"
+      ],
+      "started": "2026-10-02T19:51:11.308Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:11.333Z"
+    },
+    {
+      "name": "40-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:12.834Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:12.856Z"
+    },
+    {
+      "name": "40-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:51:12.857Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:13.061Z"
+    },
+    {
+      "name": "40-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:51:13.062Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:13.315Z"
+    },
+    {
+      "name": "48-home-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:49.680Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:49.706Z"
+    },
+    {
+      "name": "48-home-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:51:49.707Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:49.975Z"
+    },
+    {
+      "name": "48-home-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:49.976Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:49.997Z"
+    },
+    {
+      "name": "48-home-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:49.998Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:50.021Z"
+    },
+    {
+      "name": "48-home-home.txt",
+      "args": [
+        "shell",
+        "input",
+        "keyevent",
+        "KEYCODE_HOME"
+      ],
+      "started": "2026-10-02T19:51:50.022Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:50.051Z"
+    },
+    {
+      "name": "48-home-resume.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "gameshop-jni"
+      ],
+      "started": "2026-10-02T19:51:51.054Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:51.133Z"
+    },
+    {
+      "name": "48-home-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:55.136Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:55.157Z"
+    },
+    {
+      "name": "48-home.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:51:55.157Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:55.328Z"
+    },
+    {
+      "name": "48-home-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:51:55.329Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:55.600Z"
+    },
+    {
+      "name": "57-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:55.660Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:55.687Z"
+    },
+    {
+      "name": "57-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:51:55.687Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:55.953Z"
+    },
+    {
+      "name": "57-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:55.954Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:55.975Z"
+    },
+    {
+      "name": "57-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:55.976Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:55.995Z"
+    },
+    {
+      "name": "57-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1800",
+        "946"
+      ],
+      "started": "2026-10-02T19:51:55.995Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:56.020Z"
+    },
+    {
+      "name": "57-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:57.522Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:57.547Z"
+    },
+    {
+      "name": "57-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:51:57.547Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:57.742Z"
+    },
+    {
+      "name": "57-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:51:57.742Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:58.049Z"
+    },
+    {
+      "name": "65-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:58.105Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:58.130Z"
+    },
+    {
+      "name": "65-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:51:58.130Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:58.395Z"
+    },
+    {
+      "name": "65-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:58.396Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:58.417Z"
+    },
+    {
+      "name": "65-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:58.418Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:58.442Z"
+    },
+    {
+      "name": "65-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "601",
+        "134"
+      ],
+      "started": "2026-10-02T19:51:58.443Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:58.466Z"
+    },
+    {
+      "name": "65-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:51:59.968Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:51:59.988Z"
+    },
+    {
+      "name": "65-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:51:59.989Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:52:00.164Z"
+    },
+    {
+      "name": "65-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:52:00.164Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:52:00.436Z"
+    },
+    {
+      "name": "73-swipe-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:52:59.308Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:52:59.333Z"
+    },
+    {
+      "name": "73-swipe-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:52:59.333Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:52:59.623Z"
+    },
+    {
+      "name": "73-swipe-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:52:59.624Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:52:59.644Z"
+    },
+    {
+      "name": "73-swipe-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:52:59.645Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:52:59.664Z"
+    },
+    {
+      "name": "73-swipe-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "swipe",
+        "1100",
+        "760",
+        "1100",
+        "350",
+        "600"
+      ],
+      "started": "2026-10-02T19:52:59.664Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:00.290Z"
+    },
+    {
+      "name": "73-swipe-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:53:01.793Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:01.819Z"
+    },
+    {
+      "name": "73-swipe.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:53:01.819Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:01.989Z"
+    },
+    {
+      "name": "73-swipe-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:53:01.989Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:02.353Z"
+    },
+    {
+      "name": "81-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:53:47.212Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:47.235Z"
+    },
+    {
+      "name": "81-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:53:47.235Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:47.503Z"
+    },
+    {
+      "name": "81-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:53:47.503Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:47.526Z"
+    },
+    {
+      "name": "81-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:53:47.526Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:47.546Z"
+    },
+    {
+      "name": "81-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1242",
+        "640"
+      ],
+      "started": "2026-10-02T19:53:47.546Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:47.572Z"
+    },
+    {
+      "name": "81-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:53:49.073Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:49.094Z"
+    },
+    {
+      "name": "81-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:53:49.094Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:49.276Z"
+    },
+    {
+      "name": "81-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:53:49.276Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:53:49.661Z"
+    },
+    {
+      "name": "89-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:30.649Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:30.674Z"
+    },
+    {
+      "name": "89-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:30.675Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:30.957Z"
+    },
+    {
+      "name": "89-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:30.958Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:30.982Z"
+    },
+    {
+      "name": "89-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:30.983Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:31.002Z"
+    },
+    {
+      "name": "89-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:31.002Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:31.026Z"
+    },
+    {
+      "name": "89-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:32.528Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:32.547Z"
+    },
+    {
+      "name": "89-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:54:32.548Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:32.720Z"
+    },
+    {
+      "name": "89-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:54:32.720Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:33.221Z"
+    },
+    {
+      "name": "97-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:33.295Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:33.324Z"
+    },
+    {
+      "name": "97-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:33.324Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:33.593Z"
+    },
+    {
+      "name": "97-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:33.593Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:33.615Z"
+    },
+    {
+      "name": "97-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:33.616Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:33.635Z"
+    },
+    {
+      "name": "97-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:33.635Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:33.659Z"
+    },
+    {
+      "name": "97-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:35.162Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:35.181Z"
+    },
+    {
+      "name": "97-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:54:35.181Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:35.370Z"
+    },
+    {
+      "name": "97-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:54:35.370Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:35.819Z"
+    },
+    {
+      "name": "105-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:35.900Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:35.925Z"
+    },
+    {
+      "name": "105-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:35.926Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:36.191Z"
+    },
+    {
+      "name": "105-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:36.192Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:36.219Z"
+    },
+    {
+      "name": "105-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:36.220Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:36.240Z"
+    },
+    {
+      "name": "105-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:36.240Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:36.266Z"
+    },
+    {
+      "name": "105-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:37.769Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:37.792Z"
+    },
+    {
+      "name": "105-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:54:37.792Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:37.971Z"
+    },
+    {
+      "name": "105-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:54:37.971Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:38.473Z"
+    },
+    {
+      "name": "113-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:38.550Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:38.591Z"
+    },
+    {
+      "name": "113-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:38.591Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:38.858Z"
+    },
+    {
+      "name": "113-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:38.860Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:38.882Z"
+    },
+    {
+      "name": "113-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:38.882Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:38.902Z"
+    },
+    {
+      "name": "113-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:38.902Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:38.926Z"
+    },
+    {
+      "name": "113-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:40.429Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:40.449Z"
+    },
+    {
+      "name": "113-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:54:40.449Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:40.624Z"
+    },
+    {
+      "name": "113-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:54:40.624Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:41.072Z"
+    },
+    {
+      "name": "121-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:41.147Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:41.173Z"
+    },
+    {
+      "name": "121-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:41.173Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:41.466Z"
+    },
+    {
+      "name": "121-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:41.467Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:41.491Z"
+    },
+    {
+      "name": "121-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:41.491Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:41.515Z"
+    },
+    {
+      "name": "121-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:41.516Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:41.540Z"
+    },
+    {
+      "name": "121-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:43.041Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:43.061Z"
+    },
+    {
+      "name": "121-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:54:43.061Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:43.235Z"
+    },
+    {
+      "name": "121-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:54:43.235Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:43.693Z"
+    },
+    {
+      "name": "129-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:43.773Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:43.799Z"
+    },
+    {
+      "name": "129-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:43.799Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:44.067Z"
+    },
+    {
+      "name": "129-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:44.067Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:44.090Z"
+    },
+    {
+      "name": "129-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:44.091Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:44.110Z"
+    },
+    {
+      "name": "129-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:44.110Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:44.134Z"
+    },
+    {
+      "name": "129-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:45.636Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:45.655Z"
+    },
+    {
+      "name": "129-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:54:45.655Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:45.833Z"
+    },
+    {
+      "name": "129-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:54:45.833Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:46.363Z"
+    },
+    {
+      "name": "137-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:46.434Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:46.463Z"
+    },
+    {
+      "name": "137-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:46.463Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:46.729Z"
+    },
+    {
+      "name": "137-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:46.729Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:46.751Z"
+    },
+    {
+      "name": "137-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:46.752Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:46.771Z"
+    },
+    {
+      "name": "137-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:46.771Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:46.796Z"
+    },
+    {
+      "name": "137-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:48.298Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:48.317Z"
+    },
+    {
+      "name": "137-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:54:48.318Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:48.488Z"
+    },
+    {
+      "name": "137-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:54:48.489Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:48.976Z"
+    },
+    {
+      "name": "145-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:49.050Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:49.078Z"
+    },
+    {
+      "name": "145-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:49.078Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:49.358Z"
+    },
+    {
+      "name": "145-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:49.358Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:49.384Z"
+    },
+    {
+      "name": "145-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:49.384Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:49.409Z"
+    },
+    {
+      "name": "145-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:49.409Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:49.434Z"
+    },
+    {
+      "name": "145-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:50.936Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:50.955Z"
+    },
+    {
+      "name": "145-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:54:50.956Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:51.136Z"
+    },
+    {
+      "name": "145-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:54:51.136Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:51.588Z"
+    },
+    {
+      "name": "153-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:51.679Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:51.707Z"
+    },
+    {
+      "name": "153-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:51.707Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:51.982Z"
+    },
+    {
+      "name": "153-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:51.983Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:52.007Z"
+    },
+    {
+      "name": "153-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:52.007Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:52.027Z"
+    },
+    {
+      "name": "153-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:52.027Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:52.051Z"
+    },
+    {
+      "name": "153-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:53.552Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:53.572Z"
+    },
+    {
+      "name": "153-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:54:53.573Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:53.749Z"
+    },
+    {
+      "name": "153-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:54:53.750Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:54.216Z"
+    },
+    {
+      "name": "161-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:54.288Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:54.314Z"
+    },
+    {
+      "name": "161-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:54.314Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:54.579Z"
+    },
+    {
+      "name": "161-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:54.580Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:54.601Z"
+    },
+    {
+      "name": "161-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:54.601Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:54.621Z"
+    },
+    {
+      "name": "161-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:54.621Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:54.645Z"
+    },
+    {
+      "name": "161-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:56.148Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:56.167Z"
+    },
+    {
+      "name": "161-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:54:56.168Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:56.346Z"
+    },
+    {
+      "name": "161-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:54:56.346Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:56.826Z"
+    },
+    {
+      "name": "169-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:56.901Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:56.926Z"
+    },
+    {
+      "name": "169-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:56.926Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:57.193Z"
+    },
+    {
+      "name": "169-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:57.193Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:57.216Z"
+    },
+    {
+      "name": "169-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:57.217Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:57.237Z"
+    },
+    {
+      "name": "169-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:57.238Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:57.262Z"
+    },
+    {
+      "name": "169-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:58.765Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:58.784Z"
+    },
+    {
+      "name": "169-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:54:58.784Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:58.955Z"
+    },
+    {
+      "name": "169-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:54:58.955Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:59.462Z"
+    },
+    {
+      "name": "177-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:59.538Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:59.564Z"
+    },
+    {
+      "name": "177-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:54:59.564Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:59.830Z"
+    },
+    {
+      "name": "177-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:59.831Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:59.853Z"
+    },
+    {
+      "name": "177-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:54:59.853Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:59.872Z"
+    },
+    {
+      "name": "177-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:54:59.872Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:54:59.899Z"
+    },
+    {
+      "name": "177-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:55:01.402Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:55:01.422Z"
+    },
+    {
+      "name": "177-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:55:01.422Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:55:01.598Z"
+    },
+    {
+      "name": "177-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:55:01.599Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:55:02.121Z"
+    },
+    {
+      "name": "185-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:55:02.201Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:55:02.226Z"
+    },
+    {
+      "name": "185-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:55:02.227Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:55:02.490Z"
+    },
+    {
+      "name": "185-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:55:02.491Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:55:02.514Z"
+    },
+    {
+      "name": "185-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:55:02.514Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:55:02.533Z"
+    },
+    {
+      "name": "185-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:55:02.534Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:55:02.557Z"
+    },
+    {
+      "name": "185-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:55:04.059Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:55:04.080Z"
+    },
+    {
+      "name": "185-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:55:04.080Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:55:04.248Z"
+    },
+    {
+      "name": "185-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:55:04.249Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:55:04.782Z"
+    },
+    {
+      "name": "193-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:57:52.148Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:52.176Z"
+    },
+    {
+      "name": "193-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:57:52.176Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:52.476Z"
+    },
+    {
+      "name": "193-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:57:52.477Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:52.498Z"
+    },
+    {
+      "name": "193-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:57:52.499Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:52.519Z"
+    },
+    {
+      "name": "193-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1898",
+        "945"
+      ],
+      "started": "2026-10-02T19:57:52.520Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:52.545Z"
+    },
+    {
+      "name": "193-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:57:54.046Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:54.069Z"
+    },
+    {
+      "name": "193-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:57:54.069Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:54.236Z"
+    },
+    {
+      "name": "193-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:57:54.237Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:54.834Z"
+    },
+    {
+      "name": "201-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:57:54.918Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:54.942Z"
+    },
+    {
+      "name": "201-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:57:54.943Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:55.211Z"
+    },
+    {
+      "name": "201-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:57:55.212Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:55.234Z"
+    },
+    {
+      "name": "201-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:57:55.234Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:55.255Z"
+    },
+    {
+      "name": "201-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1546",
+        "945"
+      ],
+      "started": "2026-10-02T19:57:55.256Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:55.281Z"
+    },
+    {
+      "name": "201-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:57:56.782Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:56.801Z"
+    },
+    {
+      "name": "201-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:57:56.801Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:56.974Z"
+    },
+    {
+      "name": "201-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:57:56.974Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:57.517Z"
+    },
+    {
+      "name": "209-home-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:57:57.613Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:57.638Z"
+    },
+    {
+      "name": "209-home-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:57:57.638Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:57.908Z"
+    },
+    {
+      "name": "209-home-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:57:57.908Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:57.932Z"
+    },
+    {
+      "name": "209-home-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:57:57.933Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:57.953Z"
+    },
+    {
+      "name": "209-home-home.txt",
+      "args": [
+        "shell",
+        "input",
+        "keyevent",
+        "KEYCODE_HOME"
+      ],
+      "started": "2026-10-02T19:57:57.953Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:57.977Z"
+    },
+    {
+      "name": "209-home-resume.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "gameshop-jni"
+      ],
+      "started": "2026-10-02T19:57:58.980Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:57:59.060Z"
+    },
+    {
+      "name": "209-home-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:58:03.062Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:58:03.082Z"
+    },
+    {
+      "name": "209-home.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:58:03.082Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:58:03.254Z"
+    },
+    {
+      "name": "209-home-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:58:03.254Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:58:03.736Z"
+    },
+    {
+      "name": "218-resize-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:59:03.263Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:59:03.287Z"
+    },
+    {
+      "name": "218-resize-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T19:59:03.287Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:59:03.556Z"
+    },
+    {
+      "name": "218-resize-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:59:03.556Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:59:03.578Z"
+    },
+    {
+      "name": "218-resize-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:59:03.578Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:59:03.599Z"
+    },
+    {
+      "name": "218-resize-size-before.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size"
+      ],
+      "started": "2026-10-02T19:59:03.600Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:59:03.622Z"
+    },
+    {
+      "name": "218-resize-size-action.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size",
+        "720x1560"
+      ],
+      "started": "2026-10-02T19:59:03.622Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:59:03.684Z"
+    },
+    {
+      "name": "218-resize-size-after.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size"
+      ],
+      "started": "2026-10-02T19:59:06.187Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:59:06.211Z"
+    },
+    {
+      "name": "218-resize-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T19:59:06.211Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:59:06.233Z"
+    },
+    {
+      "name": "218-resize.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T19:59:06.233Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:59:06.360Z"
+    },
+    {
+      "name": "218-resize-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T19:59:06.361Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T19:59:06.949Z"
+    },
+    {
+      "name": "228-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:48.833Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:48.858Z"
+    },
+    {
+      "name": "228-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T20:03:48.859Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:49.140Z"
+    },
+    {
+      "name": "228-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:49.140Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:49.173Z"
+    },
+    {
+      "name": "228-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:49.174Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:49.196Z"
+    },
+    {
+      "name": "228-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1118",
+        "585"
+      ],
+      "started": "2026-10-02T20:03:49.197Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:49.220Z"
+    },
+    {
+      "name": "228-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:50.723Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:50.745Z"
+    },
+    {
+      "name": "228-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T20:03:50.745Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:50.864Z"
+    },
+    {
+      "name": "228-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T20:03:50.864Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:51.471Z"
+    },
+    {
+      "name": "236-tap-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:51.563Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:51.587Z"
+    },
+    {
+      "name": "236-tap-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T20:03:51.587Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:51.863Z"
+    },
+    {
+      "name": "236-tap-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:51.863Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:51.884Z"
+    },
+    {
+      "name": "236-tap-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:51.884Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:51.903Z"
+    },
+    {
+      "name": "236-tap-action.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1426",
+        "585"
+      ],
+      "started": "2026-10-02T20:03:51.904Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:51.926Z"
+    },
+    {
+      "name": "236-tap-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:53.427Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:53.448Z"
+    },
+    {
+      "name": "236-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T20:03:53.449Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:53.565Z"
+    },
+    {
+      "name": "236-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T20:03:53.565Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:54.194Z"
+    },
+    {
+      "name": "244-resize-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:54.298Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:54.323Z"
+    },
+    {
+      "name": "244-resize-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T20:03:54.324Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:54.600Z"
+    },
+    {
+      "name": "244-resize-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:54.600Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:54.626Z"
+    },
+    {
+      "name": "244-resize-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:54.626Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:54.646Z"
+    },
+    {
+      "name": "244-resize-size-before.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size"
+      ],
+      "started": "2026-10-02T20:03:54.646Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:54.668Z"
+    },
+    {
+      "name": "244-resize-size-action.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size",
+        "reset"
+      ],
+      "started": "2026-10-02T20:03:54.668Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:54.706Z"
+    },
+    {
+      "name": "244-resize-size-after.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size"
+      ],
+      "started": "2026-10-02T20:03:57.206Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:57.231Z"
+    },
+    {
+      "name": "244-resize-pid-after.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:03:57.231Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:57.251Z"
+    },
+    {
+      "name": "244-resize.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T20:03:57.251Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:57.419Z"
+    },
+    {
+      "name": "244-resize-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=25388",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T20:03:57.420Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:03:58.027Z"
+    },
+    {
+      "name": "254-stop-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:04:37.284Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:04:37.309Z"
+    },
+    {
+      "name": "254-stop-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~I9FIJabAGPmiYNL4I73WBA==/com.mir2.web3.uipreview-Hdtm1pL6_H3AXzIrCh6t5g==/base.apk"
+      ],
+      "started": "2026-10-02T20:04:37.310Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:04:37.577Z"
+    },
+    {
+      "name": "254-stop-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:04:37.577Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:04:37.601Z"
+    },
+    {
+      "name": "254-stop-pid-before.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:04:37.602Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:04:37.623Z"
+    },
+    {
+      "name": "254-stop-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T20:04:37.623Z",
+      "exitCode": 0,
+      "finished": "2026-10-02T20:04:37.666Z"
+    }
+  ],
+  "realAuthenticationAccepted": false,
+  "realNetworkAccepted": false,
+  "physicalDeviceAccepted": false,
+  "pid": "25388",
+  "actualScreenshotSize": {
+    "width": 2340,
+    "height": 1080
+  },
+  "latestLog": "244-resize-pid.log",
+  "latestTotals": {
+    "gl506": 145,
+    "uninitializedColor": 146,
+    "fatalOrPanic": 0
+  },
+  "javaProducerSent": false,
+  "sharedConsumerObserved": false
+}

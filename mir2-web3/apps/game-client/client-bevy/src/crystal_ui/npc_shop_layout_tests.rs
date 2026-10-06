@@ -452,6 +452,9 @@ fn escape_after_text_hide_drops_old_buy_capability_before_sell_only_service() {
     app.world_mut().resource_mut::<ButtonInput<KeyCode>>().clear();
     app.update();
     assert_eq!(app.world().resource::<ShopModel>().service_mode, NpcShopServiceMode::Closed);
+    // Both production hosts accept a new Interact before its text page. The
+    // page itself cannot undo an earlier Exit (it might be a delayed reply).
+    app.world_mut().resource_mut::<NativePlayerUiState>().begin_npc_service_request();
     // The next merchant opens a new text page before advertising Sell only.
     let mut dialog = app.world_mut().resource_mut::<NpcDialogModel>();
     dialog.is_open = true;
@@ -553,6 +556,186 @@ fn map_information_epoch_closes_an_old_service_without_a_scene_reset_packet() {
     app.update();
     assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open());
     assert_eq!(bag_position(&app), Vec2::new(445.0, 0.0));
+}
+
+#[test]
+fn accepted_request_survives_closed_only_frames_then_retires_on_real_service_open() {
+    let mut app = fixture_app();
+    request_medicine_shop(&mut app, true);
+    app.update();
+    app.world_mut().resource_mut::<NativePlayerUiState>().begin_npc_service_request();
+    assert!(app.world_mut().resource_mut::<ShopModel>().apply_service_signal(
+        NpcShopServiceSignal::default()));
+    for _ in 0..3 {
+        app.update();
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(!state.npc_shop_open());
+        assert!(state.accepts_npc_service_reply());
+        assert!(state.npc_service_request_pending);
+    }
+    request_medicine_shop(&mut app, true);
+    app.update();
+    let state = app.world().resource::<NativePlayerUiState>();
+    assert!(state.npc_shop_open());
+    assert!(state.accepts_npc_service_reply());
+    assert!(!state.npc_service_request_pending);
+    assert!(app.world_mut().resource_mut::<ShopModel>().apply_service_signal(
+        NpcShopServiceSignal::default()));
+    app.update();
+    assert!(!app.world().resource::<NativePlayerUiState>().accepts_npc_service_reply());
+    request_medicine_shop(&mut app, true);
+    app.update();
+    assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+}
+
+#[test]
+fn ordered_service_open_then_close_retires_request_even_if_no_child_was_open() {
+    for old_child_open in [false, true] {
+        for close_last in [false, true] {
+            let mut app = fixture_app();
+            if old_child_open {
+                request_medicine_shop(&mut app, true);
+            }
+            app.update();
+            app.world_mut().resource_mut::<NativePlayerUiState>().begin_npc_service_request();
+            let modes = if close_last {
+                [NpcShopServiceMode::Buy, NpcShopServiceMode::Closed]
+            } else {
+                [NpcShopServiceMode::Closed, NpcShopServiceMode::Buy]
+            };
+            for mode in modes {
+                assert!(app.world_mut().resource_mut::<ShopModel>().apply_service_signal(
+                    NpcShopServiceSignal { mode, repair_rate: None }));
+                let mut signals = app.world_mut().resource_mut::<UiSurfaceSignals>();
+                signals.npc_shop_open_requested = mode != NpcShopServiceMode::Closed;
+                signals.npc_service_opening_observed |= signals.npc_shop_open_requested;
+            }
+            app.update();
+            let state = app.world().resource::<NativePlayerUiState>();
+            assert_eq!(state.npc_shop_open(), !close_last);
+            assert_eq!(state.accepts_npc_service_reply(), !close_last);
+            assert!(!state.npc_service_request_pending);
+            assert!(!app.world().resource::<UiSurfaceSignals>().npc_service_opening_observed);
+            assert_eq!(app.world().resource::<ShopModel>().service_mode,
+                if close_last { NpcShopServiceMode::Closed } else { NpcShopServiceMode::Buy });
+        }
+    }
+}
+
+#[test]
+fn stale_parent_dialog_cannot_unlock_an_explicit_exit_on_later_frames() {
+    let mut app = fixture_app();
+    {
+        let mut dialog = app.world_mut().resource_mut::<NpcDialogModel>();
+        dialog.is_open = true;
+        dialog.npc_object_id = Some(21);
+    }
+    request_medicine_shop(&mut app, true);
+    app.update();
+    {
+        let mut state = app.world_mut().resource_mut::<NativePlayerUiState>();
+        state.begin_npc_service_request();
+        state.request_npc_service_exit();
+    }
+    for _ in 0..3 {
+        app.update();
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(!state.accepts_npc_service_reply());
+        assert!(!state.npc_service_request_pending);
+    }
+    request_medicine_shop(&mut app, true);
+    app.update();
+    assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+    assert_eq!(app.world().resource::<ShopModel>().service_mode, NpcShopServiceMode::Closed);
+}
+
+#[test]
+fn accepted_new_npc_request_survives_retiring_the_previous_npc_child() {
+    let mut app = fixture_app();
+    {
+        let mut dialog = app.world_mut().resource_mut::<NpcDialogModel>();
+        dialog.is_open = true;
+        dialog.npc_object_id = Some(21);
+    }
+    request_medicine_shop(&mut app, true);
+    app.update();
+    app.world_mut().resource_mut::<NativePlayerUiState>().begin_npc_service_request();
+    app.world_mut().resource_mut::<NpcDialogModel>().npc_object_id = Some(22);
+    app.update();
+    assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+    assert!(app.world().resource::<NativePlayerUiState>().accepts_npc_service_reply());
+    assert!(app.world().resource::<NativePlayerUiState>().npc_service_request_pending);
+    request_medicine_shop(&mut app, false);
+    app.update();
+    assert!(app.world().resource::<NativePlayerUiState>().npc_shop_open());
+    assert!(!app.world().resource::<NativePlayerUiState>().npc_service_request_pending);
+}
+
+#[test]
+fn close_button_and_map_change_cancel_an_accepted_pending_npc_request() {
+    for map_change in [false, true] {
+        let mut app = fixture_app();
+        app.insert_resource(BigMapModel::default());
+        request_medicine_shop(&mut app, true);
+        app.update();
+        app.world_mut().resource_mut::<NativePlayerUiState>().begin_npc_service_request();
+        if map_change {
+            app.world_mut().resource_mut::<BigMapModel>().reset_epoch += 1;
+            app.update();
+        } else {
+            press_real_button(&mut app, OverlayButton::CloseShop);
+        }
+        let state = app.world().resource::<NativePlayerUiState>();
+        assert!(!state.accepts_npc_service_reply());
+        assert!(!state.npc_service_request_pending);
+        request_medicine_shop(&mut app, true);
+        app.update();
+        assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+    }
+}
+
+fn cancel_request_after_closed_only(use_escape: bool, bag_visible: bool) {
+    let mut app = fixture_app();
+    request_medicine_shop(&mut app, true);
+    app.update();
+    app.world_mut().resource_mut::<NativePlayerUiState>().begin_npc_service_request();
+    app.world_mut().resource_mut::<ShopModel>().apply_service_signal(NpcShopServiceSignal::default());
+    app.update();
+    assert!(app.world().resource::<NativePlayerUiState>().npc_service_request_pending);
+    assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+    if !bag_visible {
+        app.world_mut().resource_mut::<NativePlayerUiState>().core.panel =
+            mir2_ui_core::state::UiPanel::None;
+        app.update();
+    }
+    if use_escape {
+        app.world_mut().resource_mut::<ButtonInput<KeyCode>>().press(KeyCode::Escape);
+        app.update();
+        app.world_mut().resource_mut::<ButtonInput<KeyCode>>().clear();
+    } else {
+        press_real_button(&mut app, OverlayButton::CloseWindows);
+    }
+    let state = app.world().resource::<NativePlayerUiState>();
+    assert!(!state.accepts_npc_service_reply(), "closing the pending service must reject delayed replies");
+    assert!(!state.npc_service_request_pending);
+    request_medicine_shop(&mut app, false);
+    app.update();
+    assert!(!app.world().resource::<NativePlayerUiState>().npc_shop_open());
+}
+
+#[test]
+fn close_pending_service_by_escape_after_closed_only_with_bag_open() {
+    cancel_request_after_closed_only(true, true);
+}
+
+#[test]
+fn close_pending_service_by_escape_after_closed_only_without_any_panel() {
+    cancel_request_after_closed_only(true, false);
+}
+
+#[test]
+fn close_pending_service_by_real_inventory_close_button() {
+    cancel_request_after_closed_only(false, true);
 }
 
 #[test]

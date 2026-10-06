@@ -1,0 +1,767 @@
+   Compiling mir2-client-bevy v0.1.0 (/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy)
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:210:21
+    |
+210 |                     (32. / 3.),
+    |                     ^        ^
+    |
+    = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+    |
+210 -                     (32. / 3.),
+210 +                     32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:414:29
+    |
+414 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+414 -                             (32. / 3.),
+414 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:421:29
+    |
+421 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+421 -                             (32. / 3.),
+421 +                             32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:476:25
+    |
+476 |                         (32. / 3.),
+    |                         ^        ^
+    |
+help: remove these parentheses
+    |
+476 -                         (32. / 3.),
+476 +                         32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:695:33
+    |
+695 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+695 -                                 (32. / 3.),
+695 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:702:33
+    |
+702 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+702 -                                 (32. / 3.),
+702 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:715:33
+    |
+715 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+715 -                                 (32. / 3.),
+715 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:727:33
+    |
+727 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+727 -                                 (32. / 3.),
+727 +                                 32. / 3. ,
+    |
+
+warning: unnecessary parentheses around function argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:831:29
+    |
+831 | ...                   (32. / 3.),
+    |                       ^        ^
+    |
+help: remove these parentheses
+    |
+831 -                             (32. / 3.),
+831 +                             32. / 3. ,
+    |
+
+warning: unused import: `shop_buy_enabled`
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:71:5
+   |
+71 |     shop_buy_enabled, shop_buy_enabled_with_pearls, shop_quantity_clamped, shop_quantity_dec,
+   |     ^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `persist_skill_bindings_if_changed`
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:76:5
+   |
+76 |     persist_skill_bindings_if_changed, SkillBindingPersistenceRuntime,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused imports: `storage_remove_password_enabled`, `storage_set_password_enabled`, and `storage_unlock_enabled`
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:82:5
+   |
+82 |     storage_remove_password_enabled, storage_set_password_enabled, storage_unlock_enabled,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `SKILL_ROW_SIZE`
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:127:41
+    |
+127 |     SKILL_PANEL_SIZE, SKILL_ROW_ORIGIN, SKILL_ROW_SIZE, SKILL_ROW_STEP_Y,
+    |                                         ^^^^^^^^^^^^^^
+
+warning: unnecessary parentheses around method argument
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/social_bond_dialog_render.rs:191:21
+    |
+191 |                     (Node {
+    |                     ^
+...
+200 |                     }),
+    |                      ^
+    |
+help: remove these parentheses
+    |
+191 ~                     Node {
+192 |                         position_type: PositionType::Absolute,
+...
+199 |                         ..default()
+200 ~                     } ,
+    |
+
+warning: unnecessary parentheses around `if` condition
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8064:8
+     |
+8064 |     if (keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+     |        ^
+8065 |         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2"))
+     |                                                                                  ^
+     |
+help: remove these parentheses
+     |
+8064 ~     if keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory")
+8065 ~         || keyboard_dialog::host::triggered(&state.keyboard, &keys, "Inventory2")
+     |
+
+warning: variable does not need to be mutable
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:1312:5
+     |
+1312 |     mut pending: ResMut<PendingOperations>,
+     |     ----^^^^^^^
+     |     |
+     |     help: remove this `mut`
+     |
+     = note: `#[warn(unused_mut)]` (part of `#[warn(unused)]`) on by default
+
+warning: variable does not need to be mutable
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7198:17
+     |
+7198 |         skills: mut skills,
+     |                 ----^^^^^^
+     |                 |
+     |                 help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7199:28
+     |
+7199 |         skill_persistence: mut skill_persistence,
+     |                            ----^^^^^^^^^^^^^^^^^
+     |                            |
+     |                            help: remove this `mut`
+
+warning: unused variable: `skill_persistence`
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7199:28
+     |
+7199 |         skill_persistence: mut skill_persistence,
+     |                            ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+     |
+     = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused variable: `social`
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7625:18
+     |
+7625 |         let Some(social) = social.as_deref_mut() else {
+     |                  ^^^^^^ help: if this is intentional, prefix it with an underscore: `_social`
+
+warning: variable does not need to be mutable
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8319:25
+     |
+8319 |                 skills: mut skills,
+     |                         ----^^^^^^
+     |                         |
+     |                         help: remove this `mut`
+
+warning: variable does not need to be mutable
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8320:36
+     |
+8320 |                 skill_persistence: mut skill_persistence,
+     |                                    ----^^^^^^^^^^^^^^^^^
+     |                                    |
+     |                                    help: remove this `mut`
+
+warning: unused variable: `combat_target`
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8304:5
+     |
+8304 |     combat_target: Option<Res<crate::quest_model::CombatTargetModel>>,
+     |     ^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_combat_target`
+
+warning: unused variable: `skill_persistence`
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8320:36
+     |
+8320 |                 skill_persistence: mut skill_persistence,
+     |                                    ^^^^^^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_skill_persistence`
+
+warning: unused variable: `skill_binding`
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:11789:9
+      |
+11789 |         skill_binding,
+      |         ^^^^^^^^^^^^^ help: try ignoring the field: `skill_binding: _`
+
+warning: unused variable: `skill_persistence`
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:11790:9
+      |
+11790 |         skill_persistence,
+      |         ^^^^^^^^^^^^^^^^^ help: try ignoring the field: `skill_persistence: _`
+
+warning: unused variable: `inventory`
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:16250:5
+      |
+16250 |     inventory: &InventoryModel,
+      |     ^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_inventory`
+
+warning: unused variable: `state`
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:16251:5
+      |
+16251 |     state: &NativePlayerUiState,
+      |     ^^^^^ help: if this is intentional, prefix it with an underscore: `_state`
+
+warning: unused variable: `compose_ui`
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:16252:5
+      |
+16252 |     compose_ui: &MailComposeUi,
+      |     ^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_compose_ui`
+
+warning: unused variable: `nearby`
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:1921:5
+     |
+1921 |     nearby: Option<Res<NearbyNpcModel>>,
+     |     ^^^^^^ help: if this is intentional, prefix it with an underscore: `_nearby`
+
+warning: type `overlays::CrystalCharacterWingMaterials` is more private than the item `hero_dialog::render::render`
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/hero_dialog_render.rs:234:1
+    |
+234 | / pub fn render(
+235 | |     mut commands: Commands,
+236 | |     roots: Query<Entity, With<OverlayRoot>>,
+237 | |     old: Query<Entity, With<HeroRoot>>,
+...   |
+242 | |     wings: Option<Res<CrystalCharacterWingMaterials>>,
+243 | | ) {
+    | |_^ function `hero_dialog::render::render` is reachable at visibility `pub`
+    |
+note: but type `overlays::CrystalCharacterWingMaterials` is only usable at visibility `pub(self)`
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:196:1
+    |
+196 | struct CrystalCharacterWingMaterials([Handle<CrystalAdditiveUiMaterial>; 4]);
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    = note: `#[warn(private_interfaces)]` on by default
+
+warning: constant `NPC_SHOP_BUY_PANEL_SIZE` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3294:7
+     |
+3294 | const NPC_SHOP_BUY_PANEL_SIZE: Vec2 = Vec2::new(
+     |       ^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: constant `NPC_SHOP_SERVICE_PANEL_SIZE` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3298:7
+     |
+3298 | const NPC_SHOP_SERVICE_PANEL_SIZE: Vec2 = Vec2::new(360.0, 360.0);
+     |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `NPC_SHOP_SERVICE_ACTION_TOP` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3299:7
+     |
+3299 | const NPC_SHOP_SERVICE_ACTION_TOP: f32 = 326.0;
+     |       ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: multiple variants are never constructed
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:3379:5
+     |
+3350 | enum OverlayButton {
+     |      ------------- variants in this enum
+...
+3379 |     OptionsMusicVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3380 |     OptionsMusicVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3381 |     OptionsSoundVolumeDown,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3382 |     OptionsSoundVolumeUp,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3383 |     ToggleInventory,
+     |     ^^^^^^^^^^^^^^^
+3384 |     ToggleEquipment,
+     |     ^^^^^^^^^^^^^^^
+3385 |     ToggleShop,
+     |     ^^^^^^^^^^
+3386 |     ToggleNpcShop,
+     |     ^^^^^^^^^^^^^
+3387 |     ToggleStorage,
+     |     ^^^^^^^^^^^^^
+...
+3390 |     ToggleTrade,
+     |     ^^^^^^^^^^^
+...
+3395 |     GroupLeave,
+     |     ^^^^^^^^^^
+...
+3414 |     GroupInviteNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^
+3415 |     GroupInviteNameSubmit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3418 |     GuildRequestInfo,
+     |     ^^^^^^^^^^^^^^^^
+...
+3422 |     GuildRecruitNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+...
+3426 |     GuildCancelNoticeEdit,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+3427 |     SelectGuildMember(u8),
+     |     ^^^^^^^^^^^^^^^^^
+3428 |     GuildKickMember(u8),
+3429 |     GuildKickSelected,
+     |     ^^^^^^^^^^^^^^^^^
+...
+3432 |     GuildAssignNextRank,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3441 |     GuildRankNameFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+...
+3489 |     ClaimMail(u64),
+     |     ^^^^^^^^^
+...
+3500 |     MailRecipientFocus,
+     |     ^^^^^^^^^^^^^^^^^^
+3501 |     MailAttachmentPagePrev,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3502 |     MailAttachmentPageNext,
+     |     ^^^^^^^^^^^^^^^^^^^^^^
+3503 |     MailMessageFocus,
+     |     ^^^^^^^^^^^^^^^^
+3504 |     MailGoldInc,
+     |     ^^^^^^^^^^^
+3505 |     MailGoldFocus,
+3506 |     MailGoldDec,
+     |     ^^^^^^^^^^^
+3507 |     AddMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^
+3508 |     RemoveMailAttachment(u64),
+     |     ^^^^^^^^^^^^^^^^^^^^
+...
+3536 |     ShopConfirm,
+     |     ^^^^^^^^^^^
+3537 |     ShopCancel,
+     |     ^^^^^^^^^^
+3538 |     SelectBagForSell(u32),
+     |     ^^^^^^^^^^^^^^^^
+3539 |     SelectBagForRepair(u32),
+     |     ^^^^^^^^^^^^^^^^^^
+3540 |     // Cash shop
+3541 |     SelectGameShopGood(i32),
+     |     ^^^^^^^^^^^^^^^^^^
+...
+3544 |     GameShopBuy,
+     |     ^^^^^^^^^^^
+3545 |     GameShopQuantityInc,
+     |     ^^^^^^^^^^^^^^^^^^^
+3546 |     GameShopQuantityDec,
+     |     ^^^^^^^^^^^^^^^^^^^
+...
+3551 |     SelectBagForStore(u32),
+     |     ^^^^^^^^^^^^^^^^^
+...
+3554 |     StorageDeposit,
+     |     ^^^^^^^^^^^^^^
+3555 |     StorageWithdraw,
+     |     ^^^^^^^^^^^^^^^
+...
+3558 |     StorageRemovePassword,
+     |     ^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `OverlayButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `fill_sized_panel` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:12382:4
+      |
+12382 | fn fill_sized_panel<C: Component>(
+      |    ^^^^^^^^^^^^^^^^
+
+warning: function `overlay_compact_item_button` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:13983:4
+      |
+13983 | fn overlay_compact_item_button(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `overlay_clickable_text_at` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:15667:4
+      |
+15667 | fn overlay_clickable_text_at(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_chat_draft` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:15904:4
+      |
+15904 | fn render_chat_draft(parent: &mut ChildSpawnerCommands, draft: &str) {
+      |    ^^^^^^^^^^^^^^^^^
+
+warning: function `render_mail_compose` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:16429:4
+      |
+16429 | fn render_mail_compose(
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `npc_shop_panel_size` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17523:4
+      |
+17523 | fn npc_shop_panel_size(shop: &ShopModel, state: &NativePlayerUiState) -> Vec2 {
+      |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `npc_shop_service_bag_rect` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17550:4
+      |
+17550 | fn npc_shop_service_bag_rect(index: usize, repair_mode: bool) -> CrystalRect {
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `npc_shop_service_equipment_rect` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17565:4
+      |
+17565 | fn npc_shop_service_equipment_rect(slot: u32) -> CrystalRect {
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `native_game_shop_page_entries` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17603:4
+      |
+17603 | fn native_game_shop_page_entries(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `render_game_shop` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17612:4
+      |
+17612 | fn render_game_shop(
+      |    ^^^^^^^^^^^^^^^^
+
+warning: function `spawn_game_shop_product` is never used
+     --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:17867:4
+      |
+17867 | fn spawn_game_shop_product(
+      |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: constant `MAIL_PARCEL_BODY_RECT` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/mail_editor.rs:13:18
+   |
+13 | pub(super) const MAIL_PARCEL_BODY_RECT: CrystalRect = CrystalRect::new(15.0, 98.0, 202.0, 165.0);
+   |                  ^^^^^^^^^^^^^^^^^^^^^
+
+warning: field `0` is never read
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/options_volume.rs:28:38
+   |
+28 | pub(super) struct OptionsVolumeTrack(pub(super) VolumeChannel);
+   |                   ------------------ ^^^^^^^^^^^^^^^^^^^^^^^^
+   |                   |
+   |                   field in this struct
+   |
+   = help: consider removing this field
+
+warning: field `0` is never read
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/options_volume.rs:31:38
+   |
+31 | pub(super) struct OptionsVolumeThumb(pub(super) VolumeChannel);
+   |                   ------------------ ^^^^^^^^^^^^^^^^^^^^^^^^
+   |                   |
+   |                   field in this struct
+   |
+   = help: consider removing this field
+
+warning: fields `side` and `slot` are never read
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs:368:9
+    |
+367 | pub(super) struct TradeCell {
+    |                   --------- fields in this struct
+368 |     pub side: TradeSide,
+    |         ^^^^
+369 |     pub slot: usize,
+    |         ^^^^
+
+warning: field `0` is never read
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs:372:29
+    |
+372 | pub(super) struct TradeName(pub TradeSide);
+    |                   --------- ^^^^^^^^^^^^^
+    |                   |
+    |                   field in this struct
+    |
+    = help: consider removing this field
+
+warning: field `0` is never read
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/trade_dialog.rs:374:29
+    |
+374 | pub(super) struct TradeGold(pub TradeSide);
+    |                   --------- ^^^^^^^^^^^^^
+    |                   |
+    |                   field in this struct
+    |
+    = help: consider removing this field
+
+warning: constant `BUTTON_DISABLED` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:40:7
+   |
+40 | const BUTTON_DISABLED: Color = Color::srgba(0.19, 0.14, 0.10, 0.50);
+   |       ^^^^^^^^^^^^^^^
+
+warning: constant `AUX_CHANGE_PASSWORD_PANEL` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:50:7
+   |
+50 | const AUX_CHANGE_PASSWORD_PANEL: spec::CrystalRect =
+   |       ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: variants `CycleClass`, `CycleGender`, `SafeKeyFocusAccount`, and `SafeKeyFocusPassword` are never constructed
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:380:5
+    |
+374 | pub(crate) enum NativeShellButton {
+    |                 ----------------- variants in this enum
+...
+380 |     CycleClass,
+    |     ^^^^^^^^^^
+381 |     CycleGender,
+    |     ^^^^^^^^^^^
+...
+389 |     SafeKeyFocusAccount,
+    |     ^^^^^^^^^^^^^^^^^^^
+390 |     SafeKeyFocusPassword,
+    |     ^^^^^^^^^^^^^^^^^^^^
+
+warning: function `spawn_aux_field` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:2187:4
+     |
+2187 | fn spawn_aux_field(
+     |    ^^^^^^^^^^^^^^^
+
+warning: function `input_line` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:2307:4
+     |
+2307 | fn input_line(parent: &mut ChildSpawnerCommands, label: &str, value: &str, focused: bool) {
+     |    ^^^^^^^^^^
+
+warning: function `action_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:2343:4
+     |
+2343 | fn action_button(
+     |    ^^^^^^^^^^^^^
+
+warning: function `safe_key_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/native_shell_ui.rs:2380:4
+     |
+2380 | fn safe_key_button(parent: &mut ChildSpawnerCommands, label: &str, action: NativeShellButton) {
+     |    ^^^^^^^^^^^^^^^
+
+warning: associated function `from_quest` is never used
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_journey.rs:679:8
+    |
+678 | impl JourneyStep {
+    | ---------------- associated function in this implementation
+679 |     fn from_quest(quest: &Quest, route: Option<&JourneyQuestOverride>) -> Self {
+    |        ^^^^^^^^^^
+
+warning: constant `QUEST_LOG_BG` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:72:7
+   |
+72 | const QUEST_LOG_BG: Color = Color::srgba(0.08, 0.06, 0.04, 0.96);
+   |       ^^^^^^^^^^^^
+
+warning: method `display_label` is never used
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:782:8
+    |
+763 | impl QuestStageFilter {
+    | --------------------- method in this implementation
+...
+782 |     fn display_label(self) -> String {
+    |        ^^^^^^^^^^^^^
+
+warning: variants `SelectQuestFilter`, `QuestHelp`, `QuestPagePrevious`, and `QuestPageNext` are never constructed
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:1192:5
+     |
+1144 | enum QuestUiButton {
+     |      ------------- variants in this enum
+...
+1192 |     SelectQuestFilter {
+     |     ^^^^^^^^^^^^^^^^^
+...
+1195 |     QuestHelp,
+     |     ^^^^^^^^^
+1196 |     QuestPagePrevious,
+     |     ^^^^^^^^^^^^^^^^^
+1197 |     QuestPageNext,
+     |     ^^^^^^^^^^^^^
+     |
+     = note: `QuestUiButton` has derived impls for the traits `Debug` and `Clone`, but these are intentionally ignored during dead code analysis
+
+warning: function `explicit_quest_dialog_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:3835:4
+     |
+3835 | fn explicit_quest_dialog_button(target: &str, npc_index: u32) -> Option<QuestUiButton> {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `wrap_guidance_hint` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:4755:4
+     |
+4755 | fn wrap_guidance_hint(hint: &str, max_chars: usize) -> Vec<String> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_quest_block` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:6534:4
+     |
+6534 | fn tracker_quest_block(parent: &mut ChildSpawnerCommands, quest: &Quest) {
+     |    ^^^^^^^^^^^^^^^^^^^
+
+warning: function `tracker_title_line` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:6774:4
+     |
+6774 | fn tracker_title_line(parent: &mut ChildSpawnerCommands, text: &str) {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: function `npc_dialog_close_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:6913:4
+     |
+6913 | fn npc_dialog_close_button(parent: &mut ChildSpawnerCommands) {
+     |    ^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: function `intent_from_button` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs:6946:4
+     |
+6946 | fn intent_from_button(action: &QuestUiButton) -> Option<QuestUiIntent> {
+     |    ^^^^^^^^^^^^^^^^^^
+
+warning: method `normalize_bindings` is never used
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/skill_binding_ui.rs:331:8
+    |
+133 | impl SkillBindingUi {
+    | ------------------- method in this implementation
+...
+331 |     fn normalize_bindings(&mut self) {
+    |        ^^^^^^^^^^^^^^^^^^
+
+warning: method `file_name` is never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/ui_audio.rs:26:19
+   |
+25 | impl NativeUiSound {
+   | ------------------ method in this implementation
+26 |     pub(crate) fn file_name(self) -> &'static str {
+   |                   ^^^^^^^^^
+
+warning: methods `drain_bounded` and `clear_pending` are never used
+  --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/ui_audio.rs:50:19
+   |
+42 | impl NativeUiAudioQueue {
+   | ----------------------- methods in this implementation
+...
+50 |     pub(crate) fn drain_bounded(&mut self, max: usize) -> Vec<NativeUiSound> {
+   |                   ^^^^^^^^^^^^^
+...
+55 |     pub(crate) fn clear_pending(&mut self) {
+   |                   ^^^^^^^^^^^^^
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7197:9
+     |
+7197 |         skill_binding: mut skill_binding,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+     |
+     = note: `#[warn(non_shorthand_field_patterns)]` on by default
+
+warning: the `skills:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7198:9
+     |
+7198 |         skills: mut skills,
+     |         ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:7199:9
+     |
+7199 |         skill_persistence: mut skill_persistence,
+     |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: the `skill_binding:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8318:17
+     |
+8318 |                 skill_binding: mut skill_binding,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_binding`
+
+warning: the `skills:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8319:17
+     |
+8319 |                 skills: mut skills,
+     |                 ^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skills`
+
+warning: the `skill_persistence:` in this pattern is redundant
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs:8320:17
+     |
+8320 |                 skill_persistence: mut skill_persistence,
+     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: use shorthand field pattern: `mut skill_persistence`
+
+warning: `mir2-client-bevy` (lib) generated 78 warnings (run `cargo fix --lib -p mir2-client-bevy` to apply 36 suggestions)
+   Compiling mir2-bevy-runtime v0.1.0 (/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/runtime)
+warning: function `self_camera_offset_for_applied_center` is never used
+    --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/runtime/src/lib.rs:6273:4
+     |
+6273 | fn self_camera_offset_for_applied_center(
+     |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     |
+     = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `mir2-bevy-runtime` (lib) generated 1 warning
+   Compiling mir2-platform-android v0.1.0 (/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android)
+error[E0369]: binary operation `==` cannot be applied to type `mir2_client_bevy::quest_model::NpcDialogModel`
+   --> src/quest_ingress.rs:826:9
+    |
+826 |         assert_eq!(*app.world().resource::<NpcDialogModel>(), existing);
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |         |
+    |         mir2_client_bevy::quest_model::NpcDialogModel
+    |         mir2_client_bevy::quest_model::NpcDialogModel
+    |
+note: `mir2_client_bevy::quest_model::NpcDialogModel` does not implement `PartialEq`
+   --> /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/client-bevy/src/quest_model.rs:463:1
+    |
+463 | pub struct NpcDialogModel {
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^ `mir2_client_bevy::quest_model::NpcDialogModel` is defined in another crate
+
+For more information about this error, try `rustc --explain E0369`.
+error: could not compile `mir2-platform-android` (lib test) due to 1 previous error

@@ -1,0 +1,3 @@
+entity_manifest_count=1
+entity_pack_lock_count=1
+entity_png_count=102

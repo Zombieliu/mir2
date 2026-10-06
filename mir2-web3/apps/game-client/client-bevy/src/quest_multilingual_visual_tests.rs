@@ -454,40 +454,81 @@ fn nine_locale_selected_supply_vendors_have_no_missing_glyphs_offscreen() {
                 ("Taoist", 28, 700)
             };
             let player = PlayerStats {
-                class_name: Some(class.into()), level, gold,
-                current_weight: 17, max_weight: 77, current_weight_known: true,
+                class_name: Some(class.into()),
+                level,
+                gold,
+                current_weight: 17,
+                max_weight: 77,
+                current_weight_known: true,
                 ..default()
             };
             let inventory = InventoryModel {
                 items: vec![crate::inventory::ItemModel {
-                    name: "(HP)DrugSmall".into(), quantity: 11, container: 0,
-                    slot: 0, unique_id: Some(1), ..default()
+                    name: "(HP)DrugSmall".into(),
+                    quantity: 11,
+                    container: 0,
+                    slot: 0,
+                    unique_id: Some(1),
+                    ..default()
                 }],
                 ..default()
             };
-            let supplies = crate::quest_supplies::plan(&player, &inventory, None,
-                (vendor != SupplyVendor::Potions).then_some(2_110_021));
+            let supplies = crate::quest_supplies::plan(
+                &player,
+                &inventory,
+                None,
+                (vendor != SupplyVendor::Potions).then_some(2_110_021),
+            );
             assert!(supplies.rows.iter().any(|row| row.vendor == vendor));
-            let state = QuestUiState { supply_open: true, supply_vendor: Some(vendor), ..default() };
-            spawn_panel(&mut app, camera, [0.0, 100.0, 320.0, 520.0], None, |parent, _| {
-                multi_guidance::render_supplies(parent, &state, Some(&fixture_map()), &supplies);
-            });
+            let state = QuestUiState {
+                supply_open: true,
+                supply_vendor: Some(vendor),
+                ..default()
+            };
+            spawn_panel(
+                &mut app,
+                camera,
+                [0.0, 100.0, 320.0, 520.0],
+                None,
+                |parent, _| {
+                    multi_guidance::render_supplies(
+                        parent,
+                        &state,
+                        Some(&fixture_map()),
+                        &supplies,
+                    );
+                },
+            );
             let (_, viewport, maximum) = tracker_viewport(&mut app);
             assert_eq!(maximum, 0.0, "selected vendor card must fit above the HUD");
             assert_tracker_bottom_control_visible(&mut app, &viewport);
             let name = format!("{}-supply-{}", locale.code(), vendor.npc_name());
-            evidence.push(capture_record(&mut app, &target, &output, &name,
-                json!({"class":class,"level":level,"vendor":vendor.npc_name(),"viewport":viewport}), false));
+            evidence.push(capture_record(
+                &mut app,
+                &target,
+                &output,
+                &name,
+                json!({"class":class,"level":level,"vendor":vendor.npc_name(),"viewport":viewport}),
+                false,
+            ));
         }
     }
     native_i18n::activate(previous_locale);
     let failures = &app.world().resource::<QuestI18nLayoutFailures>().0;
-    fs::write(output.join("supply-vendor-i18n-layouts.json"), serde_json::to_vec_pretty(&json!({
-        "kind":"offline_production_supply_vendor_widgets","liveAcceptance":false,
-        "passed":failures.is_empty(),"layoutFailures":failures,"viewport":[WIDTH,HEIGHT],
-        "systemFonts":false,"locales":Locale::ALL.map(Locale::code),"screenshots":evidence,
-    })).unwrap()).unwrap();
-    assert!(failures.is_empty(), "selected supply vendor layout failures: {failures:?}");
+    fs::write(
+        output.join("supply-vendor-i18n-layouts.json"),
+        serde_json::to_vec_pretty(&json!({
+            "kind":"offline_production_supply_vendor_widgets","liveAcceptance":false,
+            "passed":failures.is_empty(),"layoutFailures":failures,"viewport":[WIDTH,HEIGHT],
+            "systemFonts":false,"locales":Locale::ALL.map(Locale::code),"screenshots":evidence,
+        }))
+        .unwrap(),
+    )
+    .unwrap();
+    assert!(
+        failures.is_empty(),
+        "selected supply vendor layout failures: {failures:?}"
+    );
 }
 
 #[test]

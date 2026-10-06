@@ -1,0 +1,6 @@
+Starting: Intent { cmp=com.mir2.web3/.MainActivity }
+cycle=1 pid=8345 resumed=    mResumedActivity: ActivityRecord{deb92f6 u0 com.mir2.web3/.MainActivity t443}
+Starting: Intent { cmp=com.mir2.web3/.MainActivity }
+cycle=2 pid=8345 resumed=    mResumedActivity: ActivityRecord{deb92f6 u0 com.mir2.web3/.MainActivity t443}
+Starting: Intent { cmp=com.mir2.web3/.MainActivity }
+cycle=3 pid=8345 resumed=    mResumedActivity: ActivityRecord{deb92f6 u0 com.mir2.web3/.MainActivity t443}

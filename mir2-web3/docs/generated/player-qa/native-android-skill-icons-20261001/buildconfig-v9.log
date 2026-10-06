@@ -1,0 +1,4 @@
+mir2-web3/apps/game-client/platform-android/android/app/build/generated/source/buildConfig/debug/com/mir2/web3/BuildConfig.java:13:  public static final String MIR2_GATEWAY_URL = "";
+mir2-web3/apps/game-client/platform-android/android/app/build/generated/source/buildConfig/debug/com/mir2/web3/BuildConfig.java:15:  public static final boolean UI_PREVIEW = false;
+mir2-web3/apps/game-client/platform-android/android/app/build/generated/source/buildConfig/uiPreview/com/mir2/web3/BuildConfig.java:13:  public static final String MIR2_GATEWAY_URL = "";
+mir2-web3/apps/game-client/platform-android/android/app/build/generated/source/buildConfig/uiPreview/com/mir2/web3/BuildConfig.java:15:  public static final boolean UI_PREVIEW = true;

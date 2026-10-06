@@ -1,0 +1,142 @@
+{
+  "source": "f04a7439938579480b592b5d4e7381014a612dff",
+  "versionCode": 12,
+  "deviceApi": 31,
+  "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys",
+  "physicalSize": "Physical size: 1080x2340",
+  "density": 440,
+  "captures": [
+    {
+      "name": "debug-login.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "name": "preview-before-install-launcher-anr.png",
+      "width": 1080,
+      "height": 2340,
+      "bytes": 309978,
+      "sha256": "fb5ff6fa774a492b5bc5d56d02ceb53901bd7a8a2926122c992fa7ef19df23e2"
+    },
+    {
+      "name": "preview-after-start.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 133398,
+      "sha256": "a7859f349a3de36eedebf8197ce2882ba8ee4960efe52554229c27cbc08df899"
+    },
+    {
+      "name": "preview-character.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 166335,
+      "sha256": "11bb49e70a729595baac4a560ca9176a441753fd03c115f2e0fddc325a4b5a92"
+    },
+    {
+      "name": "preview-character-stats1.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 155401,
+      "sha256": "13474dba65bc9ca2ac86c80dc5da92534cb28bc10c12d3527bba05a102e53165"
+    },
+    {
+      "name": "preview-character-stats2.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 156604,
+      "sha256": "4fb3f9865b251a8939ec581a9d34188202a3e970d6741d7a0d79ca2b8040be77"
+    },
+    {
+      "name": "preview-character-closed.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 88200,
+      "sha256": "2710897d214ed003dd2af4bddafd9cfa3f31dcf81d1a164b04542ec62e260199"
+    },
+    {
+      "name": "preview-inventory.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 181795,
+      "sha256": "142a59600b15f82b96f8184e08c0dc136bc154b1f23a53f16ffc3bd858a79c23"
+    },
+    {
+      "name": "preview-inventory-closed.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 88551,
+      "sha256": "3043010ad9e3b589af5957e6d16cebb53891be12e99be9311e31ef9092769d0d"
+    }
+  ],
+  "logs": [
+    {
+      "name": "debug-login-pid6221.log",
+      "capturedLines": 184,
+      "errorFatalPanicSignalLines": 0,
+      "missingWeightBarLines": 0
+    },
+    {
+      "name": "preview-character-final-pid6451.log",
+      "capturedLines": 814,
+      "errorFatalPanicSignalLines": 2,
+      "missingWeightBarLines": 4
+    },
+    {
+      "name": "preview-inventory-final-pid6653.log",
+      "capturedLines": 416,
+      "errorFatalPanicSignalLines": 3,
+      "missingWeightBarLines": 6
+    }
+  ],
+  "starts": [
+    {
+      "name": "start-debug.log",
+      "status": "timeout",
+      "waitTimeMs": 12812
+    },
+    {
+      "name": "start-preview-character.log",
+      "status": "timeout",
+      "waitTimeMs": 14099
+    },
+    {
+      "name": "start-preview-inventory.log",
+      "status": "ok",
+      "waitTimeMs": 4798
+    }
+  ],
+  "observationMethod": "Manual original ADB frames and verified shared-tab/close taps; hashes certify bytes, not semantic acceptance.",
+  "observed": {
+    "offlineStatsI": {
+      "hp": "80/200",
+      "mp": "20/100",
+      "ac": "2-7",
+      "dc": "12-24"
+    },
+    "offlineStatsII": {
+      "experience": "12.5%",
+      "bag": "66/100",
+      "wear": "25/50",
+      "hand": "9/25"
+    },
+    "offlineBagAndHudGold": 12352,
+    "offlineBagAvailableWeight": 34,
+    "statsTabsAndBothClosesRespond": true,
+    "ordinaryPanelsClearPhoneHudAndThumbs": true,
+    "sourceMarkerCredit503": true,
+    "renderedCreditValueAccepted": false,
+    "originalWeightBarsAccepted": false,
+    "fullPhoneUiAccepted": false,
+    "launchPerformanceAccepted": false,
+    "authenticatedGameplayAccepted": false,
+    "physicalDeviceAccepted": false
+  },
+  "retainedFailures": [
+    "UI_32bit/471 and473 are missing from the installed v12 preview; all four Windows weight-bar frames470..473 are absent from both APKs.",
+    "Pixel Launcher ANR was retained before and after preview start; only its non-destructive Wait action was selected. A premature capture stopped at the no-preview-process guard, before a game-tab tap.",
+    "Normal and character launch waits timed out; later visible frames do not erase those failures.",
+    "All48dp, drag/compact/IME/login/services/live/physical and complete resource release remain open."
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "source": "253b6682f73715b896745ca85a6923be98d0b892",
+  "versionCode": 14,
+  "deviceApi": 31,
+  "density": 440,
+  "fingerprint": "google/sdk_gphone64_arm64/emulator64_arm64:12/SE1A.220630.001/8789670:userdebug/dev-keys",
+  "captures": [
+    {
+      "name": "debug-login.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 3178607,
+      "sha256": "8a1aaf4b56bcd0d3d5921308855df2ec02cc5be80c4a7e48c4784e43c9e93fa8"
+    },
+    {
+      "name": "preview-chat.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 106946,
+      "sha256": "5e50b9315593d76aabf484e3384502019e24d15d9b183ded48735ba62f091caa"
+    },
+    {
+      "name": "preview-chat-settings.png",
+      "width": 2340,
+      "height": 1080,
+      "bytes": 80489,
+      "sha256": "e89cd8e2b4a3e5f79abd6d9dd4ee82daf8c6db579e2612fdef4ecb0cec9dd7d7"
+    }
+  ],
+  "logs": [
+    {
+      "name": "debug-login-pid5356.log",
+      "capturedLineEntries": 205,
+      "errorFatalPanicSignalEntries": 0,
+      "warningsNotErased": true
+    },
+    {
+      "name": "preview-chat-pid5483.log",
+      "capturedLineEntries": 211,
+      "errorFatalPanicSignalEntries": 0,
+      "warningsNotErased": true
+    },
+    {
+      "name": "preview-chat-settings-pid5562.log",
+      "capturedLineEntries": 194,
+      "errorFatalPanicSignalEntries": 0,
+      "warningsNotErased": true
+    }
+  ],
+  "starts": [
+    {
+      "name": "start-debug.log",
+      "status": "ok",
+      "waitTimeMs": 448
+    },
+    {
+      "name": "start-preview-chat.log",
+      "status": "ok",
+      "waitTimeMs": 486
+    },
+    {
+      "name": "start-preview-chat-settings.log",
+      "status": "ok",
+      "waitTimeMs": 367
+    }
+  ],
+  "observationMethod": "Manually inspected original SDK pixel captures of diagnostic Intent scenes; no new taps/filter/settings/apply/typing/send/drag/soak claim.",
+  "observed": {
+    "ordinaryEmptyLoginFailClosed": true,
+    "offlineSystemChatVisible": true,
+    "offlinePeerChatVisible": false,
+    "actualSoftKeyboardVisible": true,
+    "offlineChatSettingsOriginalFrameVisible": true,
+    "fullReceivedChatVisualAccepted": false,
+    "fullPhoneUiAccepted": false,
+    "startupStabilityAccepted": false,
+    "authenticatedGameplayAccepted": false,
+    "physicalDeviceAccepted": false
+  },
+  "retainedFailure": "Actual focused chat shows OFFLINE system chat but clips OFFLINE neighbor: hello. Phone chat focused height includes rows+2*48+12, but row placement needs at least rows+2*48+16: newest row exceeds lines_bottom by4 logical pixels. This source geometry diagnosis still needs a failure-first phone regression and a new exact APK/screenshot before it is accepted as fixed.",
+  "sharedRuntimeChatEvictionUnchangedAndOpen": true,
+  "priorV13TimeoutAndEmulatorHostCrashNotErased": true
+}

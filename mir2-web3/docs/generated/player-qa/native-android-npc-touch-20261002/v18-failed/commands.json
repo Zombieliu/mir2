@@ -1,0 +1,188 @@
+{
+  "apkSource": "aa1f2c4ada37ed880b71da5168d0b080583524a3",
+  "installedVersion": 18,
+  "offlineOnly": true,
+  "closeTargetPhysicalPixels": [
+    1278,
+    158
+  ],
+  "commands": [
+    {
+      "name": "avd.txt",
+      "args": [
+        "emu",
+        "avd",
+        "name"
+      ]
+    },
+    {
+      "name": "package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "display.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size"
+      ]
+    },
+    {
+      "name": "density.txt",
+      "args": [
+        "shell",
+        "wm",
+        "density"
+      ]
+    },
+    {
+      "name": "stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "npcshop-srepair"
+      ]
+    },
+    {
+      "name": "pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ]
+    },
+    {
+      "name": "before.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "before-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=10552",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "before-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ]
+    },
+    {
+      "name": "tap.txt",
+      "args": [
+        "shell",
+        "input",
+        "tap",
+        "1278",
+        "158"
+      ]
+    },
+    {
+      "name": "after-short-tap.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "after-short-tap-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=10552",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "after-short-tap-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ]
+    },
+    {
+      "name": "hold.txt",
+      "args": [
+        "shell",
+        "input",
+        "swipe",
+        "1278",
+        "158",
+        "1278",
+        "158",
+        "600"
+      ]
+    },
+    {
+      "name": "after-600ms-hold.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ]
+    },
+    {
+      "name": "after-600ms-hold-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=10552",
+        "-v",
+        "threadtime"
+      ]
+    },
+    {
+      "name": "after-600ms-hold-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ]
+    },
+    {
+      "name": "stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ]
+    }
+  ]
+}

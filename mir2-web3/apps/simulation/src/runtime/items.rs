@@ -3050,7 +3050,9 @@ pub(super) fn use_item(
 
     if let Some(template) = item_template.as_ref().or(dynamic_item_template.as_ref()) {
         if let Some((success, creature_packets)) =
-            super::intelligent_creatures::use_creature_special_item(world, template, &item, location)
+            super::intelligent_creatures::use_creature_special_item(
+                world, template, &item, location,
+            )
         {
             return prepend_optional_packet(use_item_ack(packet_ack, success), creature_packets);
         }

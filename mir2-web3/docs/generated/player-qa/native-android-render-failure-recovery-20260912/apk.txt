@@ -1,0 +1,4 @@
+path=apps/game-client/platform-android/android/app/build/outputs/apk/uiPreview/app-uiPreview.apk
+bytes=375687300
+sha256=956eb27b73695a78061b3d4d17b5d63a0f6e4131072ca35994299c06dd7f70fd
+committed=false

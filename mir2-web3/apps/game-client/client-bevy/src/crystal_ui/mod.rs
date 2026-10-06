@@ -3,29 +3,43 @@
 //! These modules contain presentation data and coordinate transforms only.
 //! They do not own login, character, quest, inventory, or gameplay authority.
 
+pub(crate) mod additive_ui;
+#[cfg(feature = "native-player-ui")]
 pub mod amount_input;
 pub mod assets;
-pub mod chat;
 pub(crate) mod change_password;
+#[cfg(feature = "native-player-ui")]
+pub mod chat;
+#[cfg(feature = "native-player-ui")]
 pub mod guild_storage;
+#[cfg(feature = "native-player-ui")]
 pub mod hud;
+#[cfg(feature = "native-player-ui")]
 mod item_image;
 pub mod item_tooltip;
 pub mod login;
 pub mod metrics;
+#[cfg(feature = "native-player-ui")]
 pub mod minimap;
+#[cfg(feature = "native-player-ui")]
 pub mod notice;
+#[cfg(feature = "native-player-ui")]
 pub(crate) mod npc_item_quote;
+#[cfg(feature = "native-player-ui")]
 pub mod overlays;
+#[cfg(feature = "native-player-ui")]
 pub mod panel_layouts;
 pub mod preview_data;
+#[cfg(feature = "native-player-ui")]
 pub mod quest_targets;
 pub mod select;
 pub mod spec;
+#[cfg(feature = "native-player-ui")]
 pub(crate) mod storage_password;
 pub mod typography;
 pub mod widget;
 
 pub use metrics::CrystalStageTransform;
+#[cfg(feature = "native-player-ui")]
 pub use overlays::{NativePlayerUiSet, NativePlayerUiState};
 pub use spec::{CrystalButtonSpec, CrystalFrameSpec, CrystalRect};

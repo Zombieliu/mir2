@@ -1,0 +1,18 @@
+{
+  "head": "76d51415b5ceed667898a720c698b3a062bf7790",
+  "args": [
+    "-c",
+    "http.version=HTTP/1.1",
+    "-c",
+    "http.postBuffer=33554432",
+    "-c",
+    "http.lowSpeedTime=120",
+    "-c",
+    "http.lowSpeedLimit=1024",
+    "push",
+    "https://github.com/Zombieliu/mir2.git",
+    "76d51415b5ceed667898a720c698b3a062bf7790:refs/heads/codex/android-shared-sync"
+  ],
+  "started": "2026-10-02T18:08:48.959Z",
+  "force": false
+}

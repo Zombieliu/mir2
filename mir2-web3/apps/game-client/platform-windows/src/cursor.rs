@@ -57,7 +57,9 @@ fn cursor_kind_for_hover(kind: Option<EntityKind>, shift_pressed: bool) -> Cryst
         Some(EntityKind::Monster) => CrystalCursorKind::Attack,
         Some(EntityKind::Npc) => CrystalCursorKind::NpcTalk,
         Some(EntityKind::Player) if shift_pressed => CrystalCursorKind::AttackRed,
-        Some(EntityKind::Player | EntityKind::SelfPlayer) | None => CrystalCursorKind::Default,
+        Some(EntityKind::Player | EntityKind::Hero | EntityKind::SelfPlayer) | None => {
+            CrystalCursorKind::Default
+        }
     }
 }
 
@@ -108,14 +110,23 @@ pub(crate) fn sync_native_crystal_cursor(
         && !is_world_click_blocked(player_ui.as_deref(), dialog_open, dead)
         && window.cursor_position().is_some_and(|cursor| {
             let transform = mir2_client_bevy::crystal_ui::CrystalStageTransform::fit_native(
-                window.resolution.width(), window.resolution.height(),
+                window.resolution.width(),
+                window.resolution.height(),
             );
-            if !transform.contains_physical_point(cursor.x, cursor.y) { return false; }
+            if !transform.contains_physical_point(cursor.x, cursor.y) {
+                return false;
+            }
             let (x, y) = transform.physical_to_logical(cursor.x, cursor.y);
-            player_ui.as_deref().is_none_or(|ui| !ui.blocks_world_pointer_at(x, y))
-                && quest.as_deref().is_none_or(|quest| !quest.captures_world_pointer_at(
-                    x, y, player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
-                ))
+            player_ui
+                .as_deref()
+                .is_none_or(|ui| !ui.blocks_world_pointer_at(x, y))
+                && quest.as_deref().is_none_or(|quest| {
+                    !quest.captures_world_pointer_at(
+                        x,
+                        y,
+                        player_ui.as_deref().is_some_and(|ui| ui.quest_open()),
+                    )
+                })
         });
 
     let hovered_kind = world_cursor_enabled
@@ -153,6 +164,16 @@ pub(crate) fn sync_native_crystal_cursor(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn shared_hero_kind_does_not_invent_a_player_or_npc_cursor_action() {
+        for shift in [false, true] {
+            assert_eq!(
+                cursor_kind_for_hover(Some(EntityKind::Hero), shift),
+                CrystalCursorKind::Default
+            );
+        }
+    }
 
     #[test]
     fn crystal_hover_cursor_matrix_matches_client_source() {

@@ -597,10 +597,10 @@ impl RelationshipDialogUi {
 #[cfg(test)]
 #[path = "social_bond_dialog_tests.rs"]
 mod tests;
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 #[path = "social_bond_dialog_render.rs"]
 pub mod view;
 
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 #[path = "social_bond_dialog_host.rs"]
 pub mod host;

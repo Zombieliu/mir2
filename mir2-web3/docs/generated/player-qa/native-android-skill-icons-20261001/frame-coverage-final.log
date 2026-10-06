@@ -1,0 +1,8 @@
+complete: accepted as expected
+duplicate-MagIcon: rejected as expected
+missing54-MagIcon: rejected as expected
+wrongPath54-MagIcon: rejected as expected
+duplicate-MagIcon2: rejected as expected
+missing54-MagIcon2: rejected as expected
+wrongPath54-MagIcon2: rejected as expected
+{"passed":7,"total":7,"fixtureRoot":"/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/skill-frame-gate-0Q9A0q","sourceUnchanged":true,"sourceIdentity":"3d30d6e989413511cd1b8192729cbf4b6c1a69c5fdac242af542b50665402366","apkBuilt":false,"gradleOffline":true,"gameplayNetworkUsed":false,"networkTrafficObserved":false}

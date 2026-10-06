@@ -1,0 +1,38 @@
+{
+  "label": "red-jni-preview",
+  "bin": "cargo",
+  "args": [
+    "+1.95.0",
+    "test",
+    "--locked",
+    "--offline",
+    "--manifest-path",
+    "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+    "--features",
+    "ui-preview",
+    "java_jni_personal",
+    "--",
+    "--test-threads=1"
+  ],
+  "cwd": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync",
+  "source": "ecba88bd63e70fa9ec90b938a9779344cabca395",
+  "started": "2026-10-02T15:14:53.012Z",
+  "ended": "2026-10-02T15:15:01.750Z",
+  "code": 101,
+  "signal": null,
+  "sourceBefore": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 82263,
+      "sha256": "3250220317fe0098b2fbf8361879e2112a38dc043ab3faafe53b2314f338481d"
+    }
+  ],
+  "sourceAfter": [
+    {
+      "path": "mir2-web3/apps/game-client/platform-android/src/ui_preview.rs",
+      "bytes": 82263,
+      "sha256": "3250220317fe0098b2fbf8361879e2112a38dc043ab3faafe53b2314f338481d"
+    }
+  ],
+  "sourceUnchanged": true
+}

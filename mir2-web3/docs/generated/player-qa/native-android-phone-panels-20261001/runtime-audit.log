@@ -1,0 +1,53 @@
+{
+  "source": "6fe6a17ac229e9ebf0181a1ce02062ae00db71f4",
+  "captureCount": 13,
+  "logs": [
+    {
+      "name": "preview-inventory-final-pid5324.log",
+      "capturedLines": 647,
+      "errorFatalPanicSignalLines": 0
+    },
+    {
+      "name": "preview-character-final-pid5739.log",
+      "capturedLines": 336,
+      "errorFatalPanicSignalLines": 0
+    },
+    {
+      "name": "debug-login-pid5871.log",
+      "capturedLines": 498,
+      "errorFatalPanicSignalLines": 0
+    }
+  ],
+  "starts": [
+    {
+      "name": "start-preview-inventory.log",
+      "status": "timeout",
+      "waitTimeMs": 15844
+    },
+    {
+      "name": "start-preview-character.log",
+      "status": "ok",
+      "waitTimeMs": 8541
+    },
+    {
+      "name": "start-debug.log",
+      "status": "timeout",
+      "waitTimeMs": 13174
+    }
+  ],
+  "observed": {
+    "ordinaryBagAndCharacterClearStatusChatAndThumbs": true,
+    "sixBeltTargetsVisibleInSidebar": true,
+    "bagQuestTabAndReturnRespond": true,
+    "bagCloseRestoresNormalHud": true,
+    "allFourCharacterPagesAndCloseRespond": true,
+    "disabledSecondBagUnlockAccepted": false,
+    "characterStatsValuesAccepted": false,
+    "allMinimum48DpControlsAccepted": false,
+    "realItemDragUseEquipReceiptsAccepted": false,
+    "launchPerformanceAccepted": false,
+    "fullPhoneUiAccepted": false,
+    "authenticatedGameplayAccepted": false,
+    "physicalDeviceAccepted": false
+  }
+}

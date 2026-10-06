@@ -4,11 +4,11 @@
 //! renderer-neutral [`InventoryModel`] so every host shows the same bag. The
 //! panel is presentational: item grants/consumption stay server-authoritative.
 
-#[cfg(not(feature = "native-ui"))]
+#[cfg(not(feature = "native-player-ui"))]
 use bevy::prelude::Resource;
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 use bevy::prelude::*;
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 use bevy::ui::{
     AlignItems, BackgroundColor, Display, FlexDirection, JustifyContent, Node, PositionType,
     UiRect, Val,
@@ -411,27 +411,27 @@ impl InventoryModel {
 }
 
 /// Marker on the inventory panel root.
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 #[derive(Component)]
 pub struct InventoryPanelRoot;
 
 /// Marker on the gold label.
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 #[derive(Component)]
 pub struct GoldLabel;
 
 /// Text rendered inside one bag slot.
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 #[derive(Component)]
 struct InventorySlotLabel {
     slot: u32,
 }
 
 /// Build the shared Mir2 inventory panel.
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 pub struct Mir2InventoryPlugin;
 
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 impl Plugin for Mir2InventoryPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<InventoryModel>()
@@ -443,7 +443,7 @@ impl Plugin for Mir2InventoryPlugin {
     }
 }
 
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 fn spawn_inventory_panel(mut commands: Commands) {
     commands
         .spawn((
@@ -509,7 +509,7 @@ fn spawn_inventory_panel(mut commands: Commands) {
         });
 }
 
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 fn update_inventory_panel(
     model: Res<InventoryModel>,
     golds: Query<&mut Text, With<GoldLabel>>,
@@ -523,7 +523,7 @@ fn update_inventory_panel(
     }
 }
 
-#[cfg(feature = "native-ui")]
+#[cfg(feature = "native-player-ui")]
 fn bag_slot_label(model: &InventoryModel, slot: u32) -> String {
     model
         .items
@@ -713,7 +713,7 @@ mod tests {
         assert_eq!(item.unique_id, None);
     }
 
-    #[cfg(feature = "native-ui")]
+    #[cfg(feature = "native-player-ui")]
     #[test]
     fn panel_renders_bag_item_names_and_quantities() {
         let mut app = App::new();

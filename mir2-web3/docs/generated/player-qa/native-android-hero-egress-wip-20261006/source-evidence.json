@@ -1,0 +1,683 @@
+{
+  "at": "2026-10-05T18:01:09.286Z",
+  "goal": "Active",
+  "denominator": {
+    "windows": "3d735745f1117d42a7859e87604a106351dca935",
+    "requirements": "AP01-21 unchanged"
+  },
+  "source": {
+    "base": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+    "committed": false,
+    "pushed": false,
+    "inputCount": 427,
+    "inputHashListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+    "functionalScope": [
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs",
+      "mir2-web3/apps/game-client/platform-android/src/gateway_bridge.rs",
+      "mir2-web3/apps/game-client/platform-android/src/hero_egress.rs",
+      "mir2-web3/apps/game-client/platform-android/src/lib.rs",
+      "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs"
+    ],
+    "scopeCount": 5
+  },
+  "root": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-egress-20261006-ktzy2n/ffi-fences-1P0J8H",
+  "priorLeaf": "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/hero-egress-20261006-ktzy2n",
+  "results": [
+    {
+      "file": "focused-hero-fences-and-egress-final-result.json",
+      "label": "focused-hero-fences-and-egress-final",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--features",
+        "ui-preview",
+        "--lib",
+        "--locked",
+        "--offline",
+        "hero_egress",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "signal": null,
+      "started": "2026-10-05T17:51:35.562Z",
+      "ended": "2026-10-05T17:51:45.341Z",
+      "compiled": true,
+      "rust": [
+        {
+          "passed": 31,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "green-unpolled-hero-ffi-fences-first-result.json",
+      "label": "green-unpolled-hero-ffi-fences-first",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--features",
+        "ui-preview",
+        "--lib",
+        "--locked",
+        "--offline",
+        "hero_egress_ffi_",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "signal": null,
+      "started": "2026-10-05T17:47:24.403Z",
+      "ended": "2026-10-05T17:47:35.867Z",
+      "compiled": true,
+      "rust": [
+        {
+          "passed": 4,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceInputListSHA": "31309460d7fb03673b980ceaca726bb802e4d9fa3d4c9c4d1dfcb7c25738c60d",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "red-unpolled-hero-ffi-fences-result.json",
+      "label": "red-unpolled-hero-ffi-fences",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--features",
+        "ui-preview",
+        "--lib",
+        "--locked",
+        "--offline",
+        "hero_egress_ffi_",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 101,
+      "signal": null,
+      "started": "2026-10-05T17:44:07.287Z",
+      "ended": "2026-10-05T17:44:21.969Z",
+      "compiled": true,
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 3,
+          "ignored": 0
+        }
+      ],
+      "sourceInputListSHA": "a668e8085b45d1be5fda78fc6a8c4ef6f1609aee6f4ab39baee6d269f0d2db4f",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "wip-fences-java-full-hero-egress-result.json",
+      "label": "wip-fences-java-full-hero-egress",
+      "bin": "./gradlew",
+      "args": [
+        "--offline",
+        "--no-daemon",
+        "--no-build-cache",
+        "--rerun-tasks",
+        ":app:testDebugUnitTest",
+        ":app:testUiPreviewUnitTest",
+        "--console=plain"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "signal": null,
+      "started": "2026-10-05T17:54:43.747Z",
+      "ended": "2026-10-05T17:55:53.587Z",
+      "compiled": false,
+      "rust": [],
+      "java": [
+        {
+          "variant": 0,
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 0,
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 62,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        },
+        {
+          "variant": 1,
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0
+        }
+      ],
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "wip-fences-pending-approval-api31-normal-hero-egress-result.json",
+      "label": "wip-fences-pending-approval-api31-normal-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "--platform",
+        "31",
+        "check",
+        "--lib",
+        "--locked",
+        "--offline"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 101,
+      "signal": null,
+      "started": "2026-10-05T17:57:12.547Z",
+      "ended": "2026-10-05T17:57:16.767Z",
+      "compiled": false,
+      "rust": [],
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "wip-fences-pending-approval-api31-preview-hero-egress-result.json",
+      "label": "wip-fences-pending-approval-api31-preview-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "ndk",
+        "-t",
+        "arm64-v8a",
+        "--platform",
+        "31",
+        "check",
+        "--lib",
+        "--features",
+        "ui-preview",
+        "--locked",
+        "--offline"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 101,
+      "signal": null,
+      "started": "2026-10-05T17:57:16.794Z",
+      "ended": "2026-10-05T17:57:28.709Z",
+      "compiled": false,
+      "rust": [],
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "wip-fences-runtime-hero-egress-result.json",
+      "label": "wip-fences-runtime-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/runtime/Cargo.toml",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "signal": null,
+      "started": "2026-10-05T17:54:42.622Z",
+      "ended": "2026-10-05T17:54:43.727Z",
+      "compiled": true,
+      "rust": [
+        {
+          "passed": 296,
+          "failed": 0,
+          "ignored": 1
+        }
+      ],
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "wip-fences-rust-normal-hero-egress-result.json",
+      "label": "wip-fences-rust-normal-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "signal": null,
+      "started": "2026-10-05T17:53:59.378Z",
+      "ended": "2026-10-05T17:54:18.320Z",
+      "compiled": true,
+      "rust": [
+        {
+          "passed": 478,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "wip-fences-rust-preview-hero-egress-result.json",
+      "label": "wip-fences-rust-preview-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-android/Cargo.toml",
+        "--features",
+        "ui-preview",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "signal": null,
+      "started": "2026-10-05T17:54:18.342Z",
+      "ended": "2026-10-05T17:54:33.974Z",
+      "compiled": true,
+      "rust": [
+        {
+          "passed": 519,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "wip-fences-shared-native-player-hero-egress-result.json",
+      "label": "wip-fences-shared-native-player-hero-egress",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/client-bevy/Cargo.toml",
+        "--features",
+        "native-player-ui",
+        "--lib",
+        "--locked",
+        "--offline",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "signal": null,
+      "started": "2026-10-05T17:54:33.996Z",
+      "ended": "2026-10-05T17:54:42.602Z",
+      "compiled": true,
+      "rust": [
+        {
+          "passed": 1304,
+          "failed": 0,
+          "ignored": 10
+        }
+      ],
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "wip-fences-windows-hero-egress-fifo-result.json",
+      "label": "wip-fences-windows-hero-egress-fifo",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "hero_receipt_backpressure",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "signal": null,
+      "started": "2026-10-05T17:55:53.609Z",
+      "ended": "2026-10-05T17:56:05.132Z",
+      "compiled": true,
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "wip-fences-windows-hero-egress-protocol-result.json",
+      "label": "wip-fences-windows-hero-egress-protocol",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "native_protocol::tests",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "signal": null,
+      "started": "2026-10-05T17:56:05.759Z",
+      "ended": "2026-10-05T17:56:06.157Z",
+      "compiled": true,
+      "rust": [
+        {
+          "passed": 21,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "sourceUnchanged": true
+    },
+    {
+      "file": "wip-fences-windows-hero-egress-skill-fifo-result.json",
+      "label": "wip-fences-windows-hero-egress-skill-fifo",
+      "bin": "cargo",
+      "args": [
+        "+1.95.0",
+        "test",
+        "--manifest-path",
+        "mir2-web3/apps/game-client/platform-windows/Cargo.toml",
+        "--bin",
+        "mir2-platform-windows",
+        "--locked",
+        "--offline",
+        "skill_receipt_retry",
+        "--",
+        "--test-threads=1"
+      ],
+      "source": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "bound": false,
+      "code": 0,
+      "signal": null,
+      "started": "2026-10-05T17:56:05.157Z",
+      "ended": "2026-10-05T17:56:05.734Z",
+      "compiled": true,
+      "rust": [
+        {
+          "passed": 1,
+          "failed": 0,
+          "ignored": 0
+        }
+      ],
+      "sourceInputListSHA": "6f17e699cde7c5e1c87fe7e3f0812ab4622d922090bfa0bd1733a0f70a21c443",
+      "sourceUnchanged": true
+    }
+  ],
+  "fullPassingGates": 8,
+  "native": {
+    "normal": "FAIL E0599 test-only getter",
+    "preview": "FAIL E0599 test-only getter"
+  },
+  "guard": {
+    "passed": true,
+    "protectedWhole": 422,
+    "protectedOldFunctions": 858,
+    "modifiedOriginalFunctions": {
+      "mir2-web3/apps/game-client/platform-android/src/lib.rs": [
+        "build",
+        "drain_android_gateway_for_host",
+        "report_android_gateway_write_result",
+        "drive_android_gateway_host_transport",
+        "mir2_android_gateway_copy_next_outbound"
+      ],
+      "mir2-web3/apps/game-client/platform-android/src/shared_shell.rs": [
+        "build"
+      ],
+      "mir2-web3/apps/game-client/platform-android/src/gateway_bridge.rs": [],
+      "mir2-web3/apps/game-client/client-bevy/src/crystal_ui/overlays.rs": []
+    },
+    "frozenOracle": {
+      "command": true,
+      "variantCount": 12,
+      "variants": [
+        {
+          "name": "ChangeHero",
+          "equal": true
+        },
+        {
+          "name": "SetHeroBehaviour",
+          "equal": true
+        },
+        {
+          "name": "SetAutoPotValue",
+          "equal": true
+        },
+        {
+          "name": "SetAutoPotItem",
+          "equal": true
+        },
+        {
+          "name": "TransferHeroItem",
+          "equal": true
+        },
+        {
+          "name": "TakeBackHeroItem",
+          "equal": true
+        },
+        {
+          "name": "UseItem",
+          "equal": true
+        },
+        {
+          "name": "MoveItem",
+          "equal": true
+        },
+        {
+          "name": "EquipItem",
+          "equal": true
+        },
+        {
+          "name": "RemoveItem",
+          "equal": true
+        },
+        {
+          "name": "MergeItem",
+          "equal": true
+        },
+        {
+          "name": "MagicKey",
+          "equal": true
+        }
+      ],
+      "commandSourceSHA": "45d5332e2ea635d9b17148d44319f80380a045f46ddaf4efe21ef96dea8bb4fb",
+      "schemaSourceSHA": "3f4f57fb97dab1e527b01d31fcba6b190f12b9f01cb8214e50728c8eb172b638",
+      "adaptations": "function name and packet/grid aliases only; test-only wire enum is exact 12-variant subset"
+    },
+    "originals": [
+      {
+        "path": "/Users/henryliu/obelisk/numeron",
+        "head": "31b2b396057d82aa80567a33a668907d5d41a432",
+        "branch": "codex/steam-main",
+        "status": "M .gitignore\n M mir2-web3/apps/web/app/globals.css\n M mir2-web3/apps/web/app/page.tsx\n?? apps/\n?? docs/generated/\n?? mir2-web3/apps/web/node_modules\n?? mir2-web3/output/\n?? output/\n?? scripts/"
+      },
+      {
+        "path": "/Users/henryliu/obelisk/numeron-worktrees/android-player-journey",
+        "head": "5d417ca75a5fe845a7d6f6d9e16c720d55e19b36",
+        "branch": "codex/android-player-journey",
+        "status": ""
+      }
+    ],
+    "checkpointLimits": "Git HEAD/branch/status, not recursive untracked bytes"
+  },
+  "remote": {
+    "at": "2026-10-05T17:55:35.007Z",
+    "androidHead": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+    "windowsHead": "56ee063fb4f9d6b581ec548659066ef9c5e05e9b",
+    "frozenWindows": "3d735745f1117d42a7859e87604a106351dca935",
+    "windowsAheadBy": 1,
+    "windowsFiles": 83,
+    "windowsFunctional": 0,
+    "pr": {
+      "url": "https://github.com/Zombieliu/mir2/pull/253",
+      "state": "open",
+      "draft": true,
+      "head": "0ebd5c66a705cd4691b92287cb10b5d7ade9126f",
+      "base": "codex/playtest-registration"
+    }
+  },
+  "rawIndex": {
+    "path": "raw-evidence-index.json",
+    "sha256": "06f74215f88d0fbed6212bf09dfa5384bcd856a7783e28944e8be5949f2a2548",
+    "files": 41,
+    "bytes": 3354329,
+    "exclusions": "this index, subsequent collector/document/final-guard outputs; no APKs this leaf"
+  },
+  "acceptance": {
+    "newAPK": false,
+    "newInstall": false,
+    "actualAndroidJNI": false,
+    "newScreenshot": false,
+    "realLogin": false,
+    "onlinePlayerLoop": false,
+    "physicalDevice": false,
+    "phoneLayoutReapproval": false,
+    "sixthFileApproval": false,
+    "zeroErrorGPU": "historical FAIL not retested"
+  },
+  "next": "Explicitly approve production visibility of existing read-only Hero ingress getter, then re-run clean-source native gates and package; actual JNI/UI/network/device remain OPEN.",
+  "documentation": {
+    "state": "uncommitted WIP report; no product source commit",
+    "paths": [
+      "mir2-web3/docs/ANDROID-WINDOWS-PARITY-GOAL.md",
+      "mir2-web3/docs/ANDROID-UI-COVERAGE.md",
+      "mir2-web3/docs/FRONTEND-1TO1-GAPS.md",
+      "mir2-web3/docs/AGENT-TASK-QUEUE.md",
+      "mir2-web3/docs/ANDROID-NATIVE-HOST-GAPS.md",
+      "mir2-web3/docs/CRYSTAL-1TO1-ROADMAP.md",
+      "mir2-web3/docs/generated/player-qa/native-android-hero-egress-wip-20261006/README.md",
+      "mir2-web3/docs/generated/player-qa/native-android-hero-egress-wip-20261006/source-evidence.json"
+    ],
+    "reportGuard": "guard-fences-after-docs-final.json is local-only and generated after these report files",
+    "functionalScopeUnchanged": 5,
+    "apAndNiMatricesUnchanged": true,
+    "gitVisibleStatusDocs": 6,
+    "ignoredNewQAReports": 2,
+    "ignoreRule": "mir2-web3/.gitignore:10:docs/generated/player-qa/"
+  }
+}

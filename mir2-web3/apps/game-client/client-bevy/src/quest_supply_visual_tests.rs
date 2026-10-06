@@ -168,22 +168,22 @@ fn quest_fixture() -> (QuestTracker, JourneyView) {
 
 fn offscreen_app() -> (App, Handle<Image>, Entity) {
     let mut app = App::new();
-    app.add_plugins(
-        DefaultPlugins
-            .set(WindowPlugin {
-                primary_window: None,
-                exit_condition: ExitCondition::DontExit,
-                ..default()
-            })
-            .set(RenderPlugin {
-                synchronous_pipeline_compilation: true,
-                ..default()
-            })
-            .disable::<WinitPlugin>()
-            .disable::<PipelinedRenderingPlugin>()
-            .disable::<bevy::audio::AudioPlugin>()
-            .disable::<bevy::app::TerminalCtrlCHandlerPlugin>(),
-    );
+    let plugins = DefaultPlugins
+        .set(WindowPlugin {
+            primary_window: None,
+            exit_condition: ExitCondition::DontExit,
+            ..default()
+        })
+        .set(RenderPlugin {
+            synchronous_pipeline_compilation: true,
+            ..default()
+        })
+        .disable::<WinitPlugin>()
+        .disable::<PipelinedRenderingPlugin>()
+        .disable::<bevy::app::TerminalCtrlCHandlerPlugin>();
+    #[cfg(feature = "native-ui")]
+    let plugins = plugins.disable::<bevy::audio::AudioPlugin>();
+    app.add_plugins(plugins);
     app.insert_resource(ClearColor(Color::srgb(0.10, 0.12, 0.14)))
         .init_resource::<CapturedImage>();
     let initialization = Instant::now();

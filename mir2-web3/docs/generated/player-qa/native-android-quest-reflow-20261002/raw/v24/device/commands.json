@@ -1,0 +1,498 @@
+{
+  "source": "9a6bff0db9a7ff3eed003c72c90310ec632572d0",
+  "versionCode": 24,
+  "offlineOnly": true,
+  "actualJavaJniQuestAccepted": false,
+  "physicalDeviceAccepted": false,
+  "commands": [
+    {
+      "name": "avd.txt",
+      "args": [
+        "emu",
+        "avd",
+        "name"
+      ],
+      "started": "2026-10-02T05:59:20.753Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:20.766Z"
+    },
+    {
+      "name": "os.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.fingerprint"
+      ],
+      "started": "2026-10-02T05:59:20.766Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:20.783Z"
+    },
+    {
+      "name": "api.txt",
+      "args": [
+        "shell",
+        "getprop",
+        "ro.build.version.sdk"
+      ],
+      "started": "2026-10-02T05:59:20.783Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:20.797Z"
+    },
+    {
+      "name": "display.txt",
+      "args": [
+        "shell",
+        "wm",
+        "size"
+      ],
+      "started": "2026-10-02T05:59:20.798Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:20.817Z"
+    },
+    {
+      "name": "density.txt",
+      "args": [
+        "shell",
+        "wm",
+        "density"
+      ],
+      "started": "2026-10-02T05:59:20.817Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:20.837Z"
+    },
+    {
+      "name": "debug-stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T05:59:21.050Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:21.073Z"
+    },
+    {
+      "name": "debug-install.txt",
+      "args": [
+        "install",
+        "-r",
+        "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-reflow-v24-20261002/final-apks/mir2-native-quest-reflow-debug-v24.apk"
+      ],
+      "started": "2026-10-02T05:59:21.074Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:22.531Z"
+    },
+    {
+      "name": "debug-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T05:59:22.531Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:22.580Z"
+    },
+    {
+      "name": "debug-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T05:59:22.580Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:22.610Z"
+    },
+    {
+      "name": "debug-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~pKwVQKQXa_pT5kVELR3uvQ==/com.mir2.web3-iExFR0ts0LvWL0aI-zDqyg==/base.apk"
+      ],
+      "started": "2026-10-02T05:59:22.610Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:22.874Z"
+    },
+    {
+      "name": "preview-stop-before.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T05:59:23.104Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:23.126Z"
+    },
+    {
+      "name": "preview-install.txt",
+      "args": [
+        "install",
+        "-r",
+        "/Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/target/quest-reflow-v24-20261002/final-apks/mir2-native-quest-reflow-preview-v24.apk"
+      ],
+      "started": "2026-10-02T05:59:23.126Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:24.546Z"
+    },
+    {
+      "name": "preview-package.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "package",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T05:59:24.546Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:24.578Z"
+    },
+    {
+      "name": "preview-installed-path.txt",
+      "args": [
+        "shell",
+        "pm",
+        "path",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T05:59:24.578Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:24.604Z"
+    },
+    {
+      "name": "preview-installed-sha.txt",
+      "args": [
+        "shell",
+        "sha256sum",
+        "/data/app/~~6FKrofvmFjFRKQIkgLMseQ==/com.mir2.web3.uipreview-6N4VzLqAbWDTc-vee0KkXw==/base.apk"
+      ],
+      "started": "2026-10-02T05:59:24.604Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:24.858Z"
+    },
+    {
+      "name": "debug-login-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T05:59:24.858Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:24.881Z"
+    },
+    {
+      "name": "debug-login-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3/com.mir2.web3.MainActivity"
+      ],
+      "started": "2026-10-02T05:59:24.881Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:25.339Z"
+    },
+    {
+      "name": "debug-login-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T05:59:29.341Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:29.362Z"
+    },
+    {
+      "name": "debug-login.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T05:59:29.362Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:29.901Z"
+    },
+    {
+      "name": "debug-login-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=15290",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T05:59:29.901Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:29.928Z"
+    },
+    {
+      "name": "debug-login-ime.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "input_method"
+      ],
+      "started": "2026-10-02T05:59:29.929Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:30.001Z"
+    },
+    {
+      "name": "debug-login-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ],
+      "started": "2026-10-02T05:59:30.002Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:30.023Z"
+    },
+    {
+      "name": "debug-login-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T05:59:30.024Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:30.053Z"
+    },
+    {
+      "name": "quests-ingress-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T05:59:30.054Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:30.084Z"
+    },
+    {
+      "name": "quests-ingress-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "quests-ingress"
+      ],
+      "started": "2026-10-02T05:59:30.084Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:30.501Z"
+    },
+    {
+      "name": "quests-ingress-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T05:59:34.503Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:34.524Z"
+    },
+    {
+      "name": "quests-ingress.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T05:59:34.525Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:34.684Z"
+    },
+    {
+      "name": "quests-ingress-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=15365",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T05:59:34.687Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:34.715Z"
+    },
+    {
+      "name": "quests-ingress-ime.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "input_method"
+      ],
+      "started": "2026-10-02T05:59:34.715Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:34.782Z"
+    },
+    {
+      "name": "quests-ingress-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ],
+      "started": "2026-10-02T05:59:34.782Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:34.805Z"
+    },
+    {
+      "name": "quests-ingress-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T05:59:34.805Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:34.838Z"
+    },
+    {
+      "name": "npc-ingress-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T05:59:34.839Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:34.867Z"
+    },
+    {
+      "name": "npc-ingress-start.txt",
+      "args": [
+        "shell",
+        "am",
+        "start",
+        "-W",
+        "-n",
+        "com.mir2.web3.uipreview/com.mir2.web3.MainActivity",
+        "--es",
+        "ui_scene",
+        "npc-ingress"
+      ],
+      "started": "2026-10-02T05:59:34.868Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:35.258Z"
+    },
+    {
+      "name": "npc-ingress-pid.txt",
+      "args": [
+        "shell",
+        "pidof",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T05:59:39.260Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:39.290Z"
+    },
+    {
+      "name": "npc-ingress.png",
+      "args": [
+        "exec-out",
+        "screencap",
+        "-p"
+      ],
+      "started": "2026-10-02T05:59:39.291Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:39.445Z"
+    },
+    {
+      "name": "npc-ingress-pid.log",
+      "args": [
+        "logcat",
+        "-d",
+        "--pid=15438",
+        "-v",
+        "threadtime"
+      ],
+      "started": "2026-10-02T05:59:39.445Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:39.474Z"
+    },
+    {
+      "name": "npc-ingress-ime.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "input_method"
+      ],
+      "started": "2026-10-02T05:59:39.474Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:39.537Z"
+    },
+    {
+      "name": "npc-ingress-resumed.txt",
+      "args": [
+        "shell",
+        "dumpsys",
+        "activity",
+        "activities"
+      ],
+      "started": "2026-10-02T05:59:39.538Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:39.560Z"
+    },
+    {
+      "name": "npc-ingress-stop-after.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T05:59:39.560Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:39.599Z"
+    },
+    {
+      "name": "debug-final-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3"
+      ],
+      "started": "2026-10-02T05:59:39.600Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:39.630Z"
+    },
+    {
+      "name": "preview-final-stop.txt",
+      "args": [
+        "shell",
+        "am",
+        "force-stop",
+        "com.mir2.web3.uipreview"
+      ],
+      "started": "2026-10-02T05:59:39.630Z",
+      "status": 0,
+      "finished": "2026-10-02T05:59:39.657Z"
+    }
+  ]
+}

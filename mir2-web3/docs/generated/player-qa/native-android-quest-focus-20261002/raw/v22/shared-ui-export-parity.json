@@ -1,0 +1,9 @@
+{
+  "parent": "4d2e35330a947964160b8daf85273b451755d2bd",
+  "file": "mir2-web3/apps/game-client/client-bevy/src/quest_ui.rs",
+  "exactlyTwoVisibilityChanges": true,
+  "allOtherBytesIdentical": true,
+  "beforeSha256": "cbd7b051c2b6e65ba275e85c855c7ab16c43e409ab5a85b082b5456d74e9c067",
+  "afterSha256": "ca8052479fd2dd4ec017a2f34082e4fc642ea6a4a731f68afaebbf40661974c4",
+  "sharedRulesAndDefaultWindowsLayoutChanged": false
+}

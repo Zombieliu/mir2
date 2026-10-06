@@ -1,0 +1,4 @@
+--------- beginning of main
+09-08 18:38:00.993  5959  5959 I Mir2NativeSession: phase=DISCONNECTED
+09-08 18:38:00.993  5959  5959 I Mir2NativeSession: phase=CONNECTING
+09-08 18:38:01.187  5959  5959 I Mir2NativeSession: phase=DISCONNECTED

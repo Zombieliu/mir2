@@ -1,0 +1,6 @@
+{
+  "code": 0,
+  "stdout": "Success. Updated the following files:\nA /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/OfflinePersonalIngressPreview.java\nA /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/test/java/com/mir2/web3/OfflinePersonalIngressPreviewTest.java\nM /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/src/main/java/com/mir2/web3/MainActivity.java\nM /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/android/app/build.gradle\nM /Users/henryliu/obelisk/numeron-worktrees/android-shared-sync/mir2-web3/apps/game-client/platform-android/src/ui_preview.rs\n",
+  "stderr": "",
+  "classification": "patch preparation, not product acceptance"
+}
